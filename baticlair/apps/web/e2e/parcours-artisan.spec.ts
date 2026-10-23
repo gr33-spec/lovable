@@ -2373,13 +2373,13 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   await expect(ligne).toContainText("Ton négoce negoce-du-ponant.fr est dans la boucle : il recevra la commande d");
   const prevenir = bloc.getByRole("group", { name: "Prévenir negoce-du-ponant.fr" });
   // Le lien du message est l'invitation du négoce (espace négoce, 23 octobre) : `/negoce/rejoindre/<jeton>`, jamais le nom de l'artisan.
-  const message = await prevenir.getByText(/^Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres couvreurs\. Vous pouvez chiffrer tout le volume de la commande ici : /).textContent();
+  const message = await prevenir.getByText(/^Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres artisans de mon métier\. Vous pouvez chiffrer tout le volume de la commande ici : /).textContent();
   expect(message).toMatch(new RegExp(`ici : ${new URL(page.url()).origin}/negoce/rejoindre/[A-Za-z0-9_.-]+$`));
   expect(message).not.toContain("Toitures Martin");
   await expect(prevenir.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", `https://wa.me/?text=${encodeURIComponent(message!)}`);
   await expect(prevenir.getByRole("link", { name: "Envoyer par SMS" })).toHaveAttribute("href", `sms:?&body=${encodeURIComponent(message!)}`);
   // Le négoce a reçu son invitation, vouvoyée, sans le nom de l'artisan.
-  await expect.poll(async () => (await emailsVers(page, email.toLowerCase())).map((m) => m.subject)).toContainEqual("Un regroupement de couvreurs vous a ajouté à la Commande commune : créez votre accès");
+  await expect.poll(async () => (await emailsVers(page, email.toLowerCase())).map((m) => m.subject)).toContainEqual("Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès");
   expect((await emailsVers(page, email.toLowerCase())).map((m) => m.text).join("\n")).not.toContain("Toitures Martin");
   await expect(prevenir.getByRole("button", { name: "Copier le message" })).toBeVisible();
   // Rappuyer avec le même e-mail (autre casse) : toujours un seul négoce.
@@ -2431,28 +2431,24 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await page.getByRole("button", { name: "Passer" }).click();
   // Landing du 22 octobre (Greg) : ton fun et direct, visuel pro ; « enfumer » vise le prix ; le principe en une phrase ;
   // trois étapes ; gratuit pour l'artisan ; les autres métiers en une ligne ; une ligne pour les négoces. Rien d'extérieur.
-  await expect(page.getByText("Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Plus on est nombreux, plus on pèse face aux négoces." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Comment ça marche" })).toBeVisible();
-  await expect(page.getByText("Une commande toutes les deux semaines avec les couvreurs de ta région.")).toBeVisible();
+  await expect(page.getByText("Une commande toutes les deux semaines avec les artisans de ton métier, dans ta région.")).toBeVisible();
   for (const etape of ["1. Dépose ta liste avant la clôture", "2. On envoie tout le volume aux négoces", "3. Tu vois le meilleur prix et tu commandes si ça te plaît"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
-  for (const image of ["L'écran « Donne ta liste de matériaux » de BatiClair", /^Une ligne « Ardoise naturelle 32×22 » à préciser/, "Toute la commande du 1er novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux. Clôture dans 9 j."]) {
+  for (const image of ["L'écran « Nouvelle liste » de BatiClair", /^L'écran « Commande commune » de BatiClair/, /^L'écran des prix reçus dans BatiClair/]) {
     await expect(page.getByRole("region", { name: "Comment ça marche" }).getByRole("img", { name: image })).toBeVisible();
   }
-  await expect(page.getByRole("list", { name: "Exemple de liste de couverture" })).toContainText("Ardoise naturelle 32×22 Espagne 1er choix2 760 pièces");
   await expect(page.getByText(/tuile/i)).toHaveCount(0);
   await expect(page.locator("main svg")).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Les couvreurs de ton secteur, ensemble" })).toBeVisible();
-  await expect(page.getByText("Aussi pour la charpente, la maçonnerie, l'isolation…")).toBeVisible();
   await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
   await expect(page.getByText("Gratuit pour l'artisan. Sans engagement.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(2);
-  await expect(page.getByText("des commandes communes, des volumes sûrs. Répondez aux demandes, on vous apporte les clients.")).toBeVisible();
+  await expect(page.getByText("des volumes sûrs, des clients en plus. Répondez aux grilles.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
-  const partage = page.getByRole("region", { name: "L'union fait la force : fais venir tes collègues" });
+  const partage = page.getByRole("region", { name: "Fais venir tes collègues" });
   const message = /^Je me suis inscrit sur BatiClair, on regroupe nos commandes de matériaux pour payer moins cher\. Plus on est nombreux, plus on négocie\. Rejoins-nous : http/;
   await expect(partage.getByText(message)).toBeVisible();
   const whatsapp = decodeURIComponent((await partage.getByRole("link", { name: "Envoyer sur WhatsApp" }).getAttribute("href"))!.replace(/^https:\/\/wa\.me\/\?text=/, ""));
@@ -2460,9 +2456,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   expect(await partage.getByRole("link", { name: "Envoyer par SMS" }).getAttribute("href")).toMatch(/^sms:\?&body=Je%20me%20suis%20inscrit/);
   await expect(partage.getByRole("button", { name: "Copier le lien" })).toBeVisible();
   // Le compteur d'inscrits : le vrai chiffre de la base (test API), masqué sous 10 ; jamais un chiffre inventé.
-  const compteur = (await (await page.request.get("/v1/public/compteur")).json()) as { couvreurs: number | null };
-  if (compteur.couvreurs === null) await expect(page.getByText(/couvreurs déjà inscrits/)).toHaveCount(0);
-  else await expect(page.getByRole("status", { name: `${compteur.couvreurs} couvreurs déjà inscrits dans les Côtes-d'Armor` })).toBeVisible();
+  const compteur = (await (await page.request.get("/v1/public/compteur")).json()) as { artisans: number | null };
+  if (compteur.artisans === null) await expect(page.getByText(/artisans déjà inscrits/)).toHaveCount(0);
+  else await expect(page.getByRole("status", { name: `${compteur.artisans} artisans déjà inscrits dans les Côtes-d'Armor` })).toBeVisible();
   await expect(page.getByText(/BATI INVEST, SARL, SIRET 910 796 325 00017/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Confidentialité" })).toHaveAttribute("href", "/confidentialite");
   const externes = await page.evaluate(() => [...document.querySelectorAll("script[src], img, link[rel=stylesheet], iframe")].map((e) => (e as HTMLElement).getAttribute("src") ?? (e as HTMLElement).getAttribute("href") ?? "").filter((u) => /^https?:\/\//.test(u)));
@@ -2877,7 +2873,7 @@ async function listePrete(page: Page, adresse: string, lignes: { libelle: string
 async function ajouterAuMois(page: Page, projectId: string, nature: "Un chantier signé" | "Du stock"): Promise<void> {
   await page.goto(`/chantiers/${projectId}`);
   const bloc = page.getByRole("region", { name: /^Commande commune d/ });
-  await expect(bloc.getByText("Une commande toutes les deux semaines avec les couvreurs de ta région.")).toBeVisible();
+  await expect(bloc.getByText("Une commande toutes les deux semaines avec les artisans de ta région.")).toBeVisible();
   await expect(bloc.getByText(/^Clôture dans \d+ j/)).toBeVisible();
   await bloc.getByRole("button", { name: /^Ajouter à la commande d/ }).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -2905,7 +2901,7 @@ async function tacheDuMois(page: Page, maintenant: string): Promise<Record<strin
  */
 async function accesNegoceCree(browser: Browser, page: Page, email: string, enseigne: string, depot: string, livraison: [string, string]) {
   const mail = (await emailsVers(page, email)).filter((m) => /\/negoce\/rejoindre\//.test(m.text)).at(-1)!;
-  expect(mail.subject).toBe("Un regroupement de couvreurs vous a ajouté à la Commande commune : créez votre accès");
+  expect(mail.subject).toBe("Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès");
   expect(mail.text).toContain("Un artisan de votre secteur (22) vous a ajouté");
   expect(mail.text).not.toMatch(/Toitures [ABC]/);
   const lien = /https?:\/\/[^\s]+\/negoce\/rejoindre\/[A-Za-z0-9_.-]+/.exec(mail.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
