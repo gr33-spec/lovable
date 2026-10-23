@@ -10,9 +10,18 @@
  * Pour changer la teinte de la marque, ne modifier que les jetons accent.
  */
 @theme {
-  --color-ink: #0e1116;
-  --color-ground: #f4f5f7;
+  --color-ink: #0b0f1a;
+  /* Retour de Greg (23 octobre, 18 h 52 : « ça manque de couleur, de contraste ; quelque chose de tendance et moderne »)
+     : un fond très légèrement bleuté, de grands rayons, et des TEINTES PASTEL pour les tuiles (façon « bento » : lavande,
+     ciel, menthe, pêche), un halo pastel très doux sur la carte héros, une barre du bas flottante et translucide (verre).
+     Toujours une seule couleur de marque ; les teintes ne portent jamais un état (ok / warn / danger restent à part). */
+  --color-ground: #f4f5fa;
   --color-surface: #ffffff;
+  --color-accent-soft: #e6ecff;
+  --color-tint-lavender: #ebe8ff;
+  --color-tint-sky: #e1eeff;
+  --color-tint-mint: #dcf6ea;
+  --color-tint-peach: #ffe9de;
   --color-muted: #5f6774;
   /* Plus de quatrième gris : `subtle` vaut `muted`. */
   --color-subtle: #5f6774;
@@ -40,14 +49,15 @@
   --font-weight-bold: 600;
   --font-weight-extrabold: 800;
   --font-weight-black: 800;
-  /* Un seul rayon de carte, 12 px, quel que soit l'ancien nom de la classe ; les boutons sont `rounded-full`. */
-  --radius-xl: 12px;
-  --radius-2xl: 12px;
-  --radius-3xl: 12px;
-  --radius-4xl: 12px;
+  /* Les rayons (23 octobre, 18 h 52 : plus modernes) : 18 px pour les cartes et les champs (`rounded-xl`), 24 pour les
+     grandes cartes (`rounded-2xl` et au-delà) ; les boutons sont `rounded-full`. */
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius-3xl: 24px;
+  --radius-4xl: 24px;
   /* Une seule ombre, très légère. Les anciennes (`shadow-float`, `shadow-cta`) valent la même. */
-  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
-  --shadow-float: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 2px 8px rgba(16, 24, 40, 0.05);
+  --shadow-float: 0 8px 30px rgba(16, 24, 40, 0.12), 0 1px 2px rgba(16, 24, 40, 0.06);
   /* Apparition douce (landing, panneaux) : 200 ms au plus, coupée par prefers-reduced-motion. */
   --animate-rise: bc-rise 0.2s ease-out both;
   @keyframes bc-rise {
@@ -79,8 +89,10 @@
  * laisse vide en bas pour que son dernier contenu ne passe jamais dessous.
  */
 :root {
-  --nav-height: 72px;
-  --nav-space: calc(var(--nav-height) + env(safe-area-inset-bottom) + 16px);
+  /* La barre flottante (verre) : 66 px, posée à 12 px du bas (ou la zone du geste), 16 px de marge dessous. */
+  --nav-height: 66px;
+  --nav-gap: max(12px, env(safe-area-inset-bottom));
+  --nav-space: calc(var(--nav-height) + var(--nav-gap) + 16px);
   /* « Calculer ma liste », figé en bas de l'écran des questions : bouton (52 px), fondu au-dessus (24 px), zone du geste. */
   --calc-space: calc(52px + 24px + max(14px, env(safe-area-inset-bottom)) + 8px);
 }
@@ -115,9 +127,19 @@ html {
   background-size: 22px 22px;
   background-position: -1px -1px;
 }
-/* La carte héros d'hier : désormais une carte blanche comme les autres (passe UI/UX). */
+/* La carte héros (23 octobre, 18 h 52) : blanche, avec un halo pastel très doux dans un angle (ciel, puis lavande). Pas
+   une lueur portée : une teinte dans la carte. */
 @utility bg-hero {
   background-color: var(--color-surface);
+  background-image:
+    radial-gradient(120% 90% at 100% 0%, #dbe7ff 0%, rgba(219, 231, 255, 0) 55%),
+    radial-gradient(80% 70% at 0% 100%, #ebe8ff 0%, rgba(235, 232, 255, 0) 55%);
+}
+/* Le verre de la barre du bas : blanc translucide, flou derrière. */
+@utility bg-glass {
+  background-color: rgba(255, 255, 255, 0.78);
+  backdrop-filter: saturate(1.6) blur(18px);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
 }
 /* L'onglet actif du menu : plus de fond, la couleur d'accent sur l'icône et le mot. */
 @utility bg-nav-active {

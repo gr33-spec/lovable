@@ -20,8 +20,10 @@ interface NavItem {
  * Simplification (21 octobre, demande du fondateur) : TROIS entrées seulement, une icône et un mot chacune.
  * « Mes chantiers » (l'accueil), au centre le rond « + Nouvelle liste » (nouveau cap, 22 octobre), « Commande commune ».
  * Fournisseurs et Compte vivent dans le menu derrière l'initiale de l'artisan, en haut à droite (`MenuArtisan`).
- * Passe UI/UX (23 octobre) : une barre blanche pleine largeur bordée en haut, trois entrées égales, l'active en accent
- * (icône et mot, sans fond), le rond accent au centre ; plus de capsule flottante.
+ * Passe UI/UX (23 octobre) : trois entrées égales, l'active en accent, le rond accent au centre. Retour de Greg le soir
+ * (« tendance et moderne ») : la barre redevient une capsule flottante, en verre translucide (flou derrière), posée à
+ * 12 px du bas ; l'icône active sur une pastille d'accent pâle. Toujours `position: fixed; bottom: 0` sur le conteneur
+ * (jamais recalée en JavaScript) : la marge est à l'intérieur.
  */
 const chantiersItem: NavItem = {
   href: "/",
@@ -60,12 +62,14 @@ export function AppNav() {
         key={item.href}
         href={item.href}
         aria-current={active ? "page" : undefined}
-        className={`flex min-h-13 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-semibold transition-[color,background-color] duration-150 lg:min-h-12 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px] ${
-          active ? "text-accent-text lg:bg-ground" : "text-muted active:text-ink lg:hover:bg-ground"
+        className={`flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-semibold transition-[color,background-color] duration-150 lg:min-h-12 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px] ${
+          active ? "text-accent-text lg:bg-accent-soft" : "text-muted active:text-ink lg:hover:bg-ground"
         }`}
       >
-        <Icon size={24} aria-hidden="true" strokeWidth={active ? 2.4 : 2} />
-        <span className="text-center leading-tight">{item.label}</span>
+        <span className={`flex h-8 w-12 items-center justify-center rounded-full transition-[background-color] duration-150 lg:h-auto lg:w-auto lg:bg-transparent ${active ? "bg-accent-soft" : ""}`}>
+          <Icon size={22} aria-hidden="true" strokeWidth={active ? 2.4 : 2} />
+        </span>
+        <span className="text-center leading-tight whitespace-nowrap">{item.label}</span>
       </Link>
     );
   };
@@ -76,15 +80,15 @@ export function AppNav() {
       data-typing={typing || undefined}
       className={`${inChat ? "max-lg:hidden " : ""}${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}fixed z-30 transition-[translate,opacity] duration-200 max-lg:inset-x-0 max-lg:bottom-0 lg:top-4 lg:bottom-4 lg:left-4 lg:w-60`}
     >
-      {/* Téléphone : barre blanche pleine largeur, bordure gris 2 en haut, la zone du geste en marge intérieure ; ordinateur : colonne à gauche. */}
-      <div className="grid h-[calc(var(--nav-height)+env(safe-area-inset-bottom))] grid-cols-3 items-center border-t border-line bg-surface px-2 pb-[env(safe-area-inset-bottom)] lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-xl lg:border lg:p-3 lg:shadow-card">
+      {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise) ; ordinateur : colonne à gauche. */}
+      <div className="mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-cols-3 items-center rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-2xl lg:border lg:border-line lg:bg-surface lg:p-3 lg:shadow-card lg:ring-0">
         <span className="hidden px-3 pt-2 pb-4 text-[20px] font-extrabold tracking-[-0.02em] text-ink lg:block">BatiClair</span>
         {link(chantiersItem)}
         <Link
           href="/chantiers/nouveau"
           className="pressable flex min-h-13 flex-col items-center justify-center gap-1 text-[11px] font-semibold text-accent-text lg:order-first lg:mb-3 lg:min-h-13 lg:flex-row lg:gap-2 lg:rounded-full lg:bg-accent lg:text-[16px] lg:text-white"
         >
-          <span className="flex size-11 items-center justify-center rounded-full bg-accent text-white lg:size-auto lg:bg-transparent" aria-hidden="true">
+          <span className="flex size-11 items-center justify-center rounded-full bg-accent text-white shadow-[0_6px_16px_rgba(28,63,209,0.35)] lg:size-auto lg:bg-transparent lg:shadow-none" aria-hidden="true">
             <Plus size={24} strokeWidth={2.6} />
           </span>
           <span className="leading-tight">Nouvelle liste</span>

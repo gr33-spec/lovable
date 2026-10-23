@@ -75,10 +75,10 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
   };
 
   return (
-    <section aria-label="Mets ton négoce dans la boucle" className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-4">
+    <section aria-label="Mets ton négoce dans la boucle" className="flex flex-col gap-4 rounded-2xl bg-tint-lavender p-5">
       <div className="flex flex-col gap-2">
         <h2 className="text-[18px] font-extrabold tracking-[-0.01em]">Mets ton négoce dans la boucle</h2>
-        <p className="text-[14px] leading-relaxed text-muted">Ton négoce habituel n&apos;est pas encore dans la commande ? Ajoute-le : il recevra tout le volume de la commande et pourra faire son prix.</p>
+        <p className="text-[14px] leading-relaxed text-ink/70">Ton négoce habituel n&apos;est pas encore dans la commande ? Ajoute-le : il recevra tout le volume de la commande et pourra faire son prix.</p>
       </div>
 
       {dansLaBoucle.length > 0 ? (

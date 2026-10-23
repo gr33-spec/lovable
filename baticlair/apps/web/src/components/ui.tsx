@@ -160,7 +160,7 @@ export function ListRow({
 }) {
   const inner = (
     <>
-      {icon ? <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink">{icon}</span> : null}
+      {icon ? <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-text">{icon}</span> : null}
       <span className="flex min-w-0 grow flex-col gap-0.5">
         <span className="truncate text-[16px] font-semibold">{title}</span>
         {subtitle ? <span className="truncate text-[14px] text-muted">{subtitle}</span> : null}

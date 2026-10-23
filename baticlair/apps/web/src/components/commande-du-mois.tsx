@@ -127,10 +127,18 @@ export function useProchaineCommande(actif: boolean, projectId?: string): { proc
 }
 
 /** Le gros minuteur : « Clôture dans » puis le temps qui reste, en très grand. Le même partout. */
-export function GrosChrono({ clotureDans, className = "" }: { clotureDans: string; className?: string }) {
+export function GrosChrono({ clotureDans, className = "", heros = false }: { clotureDans: string; className?: string; heros?: boolean }) {
   return (
-    <p role="status" className={`flex flex-col gap-1 ${className}`}>
-      <span className="text-[14px] font-semibold text-muted">Clôture dans</span> <span className="text-[40px] leading-none font-extrabold tracking-[-0.03em] text-accent-text tabular-nums">{clotureDans}</span>
+    <p role="status" className={`flex flex-col ${heros ? "gap-2" : "gap-1"} ${className}`}>
+      {heros ? (
+        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-[13px] font-semibold text-accent-text">
+          <Clock size={14} aria-hidden="true" />
+          Clôture dans
+        </span>
+      ) : (
+        <span className="text-[14px] font-semibold text-muted">Clôture dans</span>
+      )}{" "}
+      <span className={`leading-none font-extrabold tracking-[-0.04em] tabular-nums ${heros ? "text-[56px] text-ink" : "text-[40px] text-accent-text"}`}>{clotureDans}</span>
     </p>
   );
 }
@@ -165,23 +173,37 @@ export function BandeauDuMois() {
  */
 export function BlocDuMois({ prochaine: p }: { prochaine: Prochaine }) {
   return (
-    <section aria-label={`Commande ${p.de}`} className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">
+    // LA carte de l'écran (retour de Greg, 23 octobre, 18 h 52 : « tendance et moderne ») : blanche avec un halo pastel,
+    // le chrono en très grand, les étapes en pastilles pastel, « Toi » et « Toute la commande » en tuiles teintées.
+    <section aria-label={`Commande ${p.de}`} className="flex flex-col gap-4 rounded-2xl bg-hero p-5 shadow-card">
       <div className="flex items-start justify-between gap-3">
         <p className="flex items-center gap-2 text-[16px] font-extrabold">
-          <Users size={18} aria-hidden="true" className="text-accent-text" />
+          <span className="flex size-8 items-center justify-center rounded-full bg-accent text-white" aria-hidden="true">
+            <Users size={16} />
+          </span>
           {`Commande ${p.de}`}
         </p>
         <Link href="/groupe" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
           Voir
         </Link>
       </div>
-      <GrosChrono clotureDans={p.clotureDans} />
+      <GrosChrono clotureDans={p.clotureDans} heros />
       <p className="text-[15px] leading-snug text-muted">Une commande toutes les deux semaines avec les couvreurs de ta région.</p>
       <EtapesDuMois compact />
       {p.toi || p.tout ? (
-        <div className="flex flex-col divide-y divide-line border-t border-line">
-          {p.toi ? <p className="py-3 text-[16px] font-semibold">{p.toi}</p> : null}
-          {p.tout ? <p className="py-3 text-[16px] font-semibold">{p.vide ? "Pour l'instant, la commande est vide. Ta liste peut la lancer." : p.tout}</p> : null}
+        <div className="flex flex-col gap-2">
+          {p.toi ? (
+            <p className="rounded-xl bg-tint-mint px-4 py-3 text-[15px] font-semibold">
+              <span className="mb-0.5 block text-[11px] font-semibold tracking-[0.08em] text-ok uppercase">Toi</span>
+              {p.toi.replace(/^Toi seul : /, "")}
+            </p>
+          ) : null}
+          {p.tout ? (
+            <p className="rounded-xl bg-tint-peach px-4 py-3 text-[15px] font-semibold">
+              <span className="mb-0.5 block text-[11px] font-semibold tracking-[0.08em] text-warn uppercase">Toute la commande</span>
+              {p.vide ? "Pour l'instant, la commande est vide. Ta liste peut la lancer." : p.tout.replace(/^Toute la commande [^:]+: /, "")}
+            </p>
+          ) : null}
         </div>
       ) : null}
       <ButtonLink href="/chantiers/nouveau">{`Dépose ta liste avant le ${jourMois(p.clotureLe)}`}</ButtonLink>
@@ -195,6 +217,9 @@ const unite = (u: string) => (u === "ml" ? "m" : u);
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 const quantite = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
 
+/** Les pastilles pastel des trois étapes (ciel, lavande, menthe) : une couleur par étape. */
+const TEINTES = ["bg-tint-sky text-accent-text", "bg-tint-lavender text-accent-text", "bg-tint-mint text-ok"];
+
 /** Les trois étapes, en mots d'enfant de 12 ans (Greg, 22 octobre). */
 export function EtapesDuMois({ compact = false }: { compact?: boolean }) {
   const taille = compact ? 16 : 20;
@@ -207,7 +232,7 @@ export function EtapesDuMois({ compact = false }: { compact?: boolean }) {
     <ol aria-label="Comment ça marche" className={`flex flex-col ${compact ? "gap-1.5" : "gap-2"}`}>
       {etapes.map((e, i) => (
         <li key={e.texte} className={`flex items-center gap-3 ${compact ? "text-[15px]" : "text-[16px]"}`}>
-          <span className={`flex shrink-0 items-center justify-center rounded-full bg-ground text-accent-text ${compact ? "size-8" : "size-10"}`}>{e.icone}</span>
+          <span className={`flex shrink-0 items-center justify-center rounded-full ${TEINTES[i] ?? TEINTES[0]} ${compact ? "size-8" : "size-10"}`}>{e.icone}</span>
           <span>
             <span className="font-semibold text-accent-text">{i + 1}.</span> {e.texte}
           </span>

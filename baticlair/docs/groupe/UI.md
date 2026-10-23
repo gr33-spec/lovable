@@ -14,9 +14,13 @@ Tout vit dans `apps/web/src/app/globals.css` (jetons `@theme`) et `apps/web/src/
 |---|---|---|
 | `--color-accent` | `#1c3fd1` | La seule couleur : bouton principal, lien, onglet actif, chrono, icône de marque. Contraste sur blanc 7,8:1. |
 | `--color-accent-text` | `#1838b4` | La même, un ton plus sombre, pour du texte accent sur fond clair (9,3:1). |
-| `--color-ink` | `#0e1116` | Le noir : titres, texte courant, bouton « ink » (secondaire plein) rare. |
-| `--color-surface` | `#ffffff` | Le blanc : cartes, champs, barre du bas, landing entière. |
-| `--color-ground` | `#f4f5f7` | Gris 1 : le fond de l'app, les lignes alternées, les puces de fond. |
+| `--color-ink` | `#0b0f1a` | Le noir (bleu-noir) : titres, texte courant, bouton « ink » (secondaire plein) rare. |
+| `--color-accent-soft` | `#e6ecff` | L'accent pâle : pastille de l'onglet actif, pastilles d'icône des listes, pilule « Clôture dans ». |
+| `--color-tint-sky` / `-lavender` / `-mint` / `-peach` | `#e1eeff` / `#ebe8ff` / `#dcf6ea` / `#ffe9de` | Les TEINTES PASTEL (retour de Greg, 23 octobre, 18 h 52 : « tendance et moderne ») : des fonds de tuiles et de pastilles, façon « bento ». Ciel, lavande, menthe pour les trois étapes ; menthe « Toi » et pêche « Toute la commande » sur la carte héros ; lavande pour « Mets ton négoce dans la boucle ». Jamais pour dire un état. |
+| `bg-hero` | blanc + halo | La carte héros de l'accueil : blanche, un halo pastel très doux dans deux angles (ciel en haut à droite, lavande en bas à gauche). Le seul « dégradé » de l'app, et il reste dans la carte. |
+| `bg-glass` | blanc à 78 % + flou | La barre du bas du téléphone : une capsule flottante (`rounded-full`, à 12 px des bords et du bas), translucide, le contenu flouté derrière, une ombre portée (`shadow-float`). |
+| `--color-surface` | `#ffffff` | Le blanc : cartes, champs, landing entière. |
+| `--color-ground` | `#f4f5fa` | Gris 1, très légèrement bleuté : le fond de l'app, les lignes alternées. |
 | `--color-line` | `#e4e7ec` | Gris 2 : bordures et séparateurs. |
 | `--color-muted` | `#5f6774` | Gris 3 : texte secondaire (AA sur blanc 5,9:1). `--color-subtle` devient un alias de `muted` : plus de quatrième gris. |
 
@@ -32,7 +36,7 @@ Titres : très grands et serrés (`PageTitle` 34 px / `tracking -0.03em` / `lead
 
 Les marges et écarts n'utilisent que `1, 2, 3, 4, 6, 8, 12` (soit 4 à 48 px). Marges d'écran : 16 px sur téléphone (`px-4`), 24 px sur tablette. Entre deux cartes : 12 px ; dans une carte : 16 px ; entre deux sections : 24 px ; avant un pied d'écran : 32 px. Les valeurs intermédiaires (`gap-2.5`, `px-4.5`, `pt-4.5`, `py-1.5`) sont retirées des écrans retouchés.
 
-### Rayons (12 pour les cartes, 999 pour les boutons)
+### Rayons (18 pour les cartes et les champs, 24 pour les grandes cartes, 999 pour les boutons ; 23 octobre au soir, avant : 12 partout)
 
 `--radius-xl`, `--radius-2xl`, `--radius-3xl` valent tous 12 px dans `@theme` (une carte est une carte, quel que soit l'ancien nom de sa classe) ; les rayons écrits en dur (`rounded-[20px]`, `[22px]`, `[28px]`…) sont ramenés à `rounded-xl`. Boutons, puces, filtres, pastilles : `rounded-full`. Cases à cocher : 6 px. Le cadre iPhone de la landing est la seule exception (le rayon d'un vrai écran).
 
