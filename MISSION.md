@@ -255,3 +255,19 @@ Routine horaire `trig_019b3LSmsdY43Aowni5jVARm` (prompt mis à jour). Rapport ve
 | 6 | Cas limites | fait : 9 cas joués (e2e « Cas limites »), 3 corrigés : session expirée, redépôt négoce, confirmations admin |
 | 7 | RECETTE.md : 20 tests iPhone | fait : « Les 20 tests iPhone » en tête de RECETTE.md, chacun avec son résultat attendu |
 | 8 | DETTE.md, performance | fait : DETTE n° 23 à 27 ajoutées (rien d'élevé), MISE-EN-PROD complété ; performance : landing 97, pages publiques ≥ 96 (bloc 5) |
+
+### Point du 23 octobre, 18 h (dernier point programmé)
+
+- Journée sur #284, reportée sur `claude/integration-groupe`, CI verte à chaque commit : bloc « Mets ton négoce dans la
+  boucle » (dc5fbef, 15a19a2), cycle raccourci (clôture le 1er et le 15 à 12 h, réponse sous 5 jours ouvrés, relance la
+  veille ; d91d7c9), espace négoce autonome (5f6502d : invitation par lien unique, inscription en une page avec dépôts et
+  paliers de livraison, abonnement à la zone, confidentialité avec confirmation avant « Commander », prix fermes et
+  « non garanti » par article, grille garantie 30 jours avec « Recommander à ce prix », conditions négoce, admin négoces,
+  trois alertes). Docs à jour : `parcours-complet.md` (0 ter), `DECISIONS.md`, `ARCHITECTURE.md`, `SECURITE.md`,
+  `TEST-COMPLET.md`, `LANCEMENT.md`, `A-FAIRE-RELIRE.md`.
+- Chiffres : 24 métiers couverts ; domaine 713 tests, API 442, e2e passe mois 109 (dont le cycle complet invitation →
+  inscription → clôture → réponse → résultats → commande → recommande), passe lots 16. Coût par devis mesuré : aucun
+  nouveau (crédit API à zéro, zéro appel).
+- Rien fusionné dans `main`. Prochaine étape : les retours de Greg sur la prévisualisation ; à son « crédit rechargé »,
+  la file des vraies lectures (§2 bis) puis la vraie lecture d'une grille de négoce de plusieurs lignes (DETTE n° 28).
+- Routine horaire désactivée ; le point de 18 h était programmé jusqu'au vendredi 23 octobre : il n'est pas reprogrammé.
