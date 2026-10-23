@@ -1,10 +1,14 @@
 "use client";
 
-import { Check, FileText, Store, Users } from "lucide-react";
-import { useCallback, useId, useState } from "react";
+import { Check, Clock, FileText, Store, Users } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useId, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useSession } from "@/lib/session";
+import { chrono, jourMois, prochaineClotureParDefaut } from "@/lib/cycle";
 import { InviterCollegue } from "@/components/inviter";
 import type { Groupe } from "@/components/groupe";
-import { Button, Chrono, ErrorNotice, Field, SectionTitle } from "@/components/ui";
+import { Button, ButtonLink, Chrono, ErrorNotice, Field, SectionTitle } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
@@ -57,6 +61,113 @@ export function useCommandeDuMois(actif: boolean, projectId?: string) {
   return useResource(fetchEtat);
 }
 
+/** La prochaine clôture telle que l'écran la montre : les dates de l'API quand elle répond, sinon la règle par défaut. */
+export interface Prochaine {
+  mois: string;
+  de: string;
+  clotureLe: string;
+  clotureDans: string;
+  /** « Toi seul : … » quand l'entreprise a déposé ; null sinon (ou quand l'API n'a pas répondu). */
+  toi: string | null;
+  /** « Toute la commande … » ; null quand l'API n'a pas répondu. */
+  tout: string | null;
+  vide: boolean;
+  /** `api` : les dates et quantités viennent de l'API ; `defaut` : règle par défaut (API muette). */
+  source: "api" | "defaut";
+}
+
+/** Le chrono se recalcule chaque minute dans le navigateur : un vrai minuteur, pas une phrase figée. */
+export function useChrono(clotureLe: string | null): string | null {
+  const [texte, setTexte] = useState<string | null>(() => (clotureLe ? chrono(new Date(), new Date(clotureLe)) : null));
+  useEffect(() => {
+    if (!clotureLe) return;
+    const calcule = () => setTexte(chrono(new Date(), new Date(clotureLe)));
+    calcule();
+    const t = setInterval(calcule, 30_000);
+    return () => clearInterval(t);
+  }, [clotureLe]);
+  return clotureLe ? texte : null;
+}
+
+/**
+ * LA PROCHAINE COMMANDE, TOUJOURS (Greg, 23 octobre : « je ne vois pas de minuteur »). L'API d'abord (dates réglées par
+ * l'admin, quantités) ; si elle ne répond pas, la règle par défaut : le minuteur est là quoi qu'il arrive.
+ */
+export function useProchaineCommande(actif: boolean, projectId?: string): { prochaine: Prochaine | null; etat: EtatDuMois | null; loading: boolean; reload: () => void; error: ReturnType<typeof useCommandeDuMois>["error"] } {
+  const { data, error, loading, reload } = useCommandeDuMois(actif, projectId);
+  const p = data?.prochaine ?? null;
+  const defaut = prochaineClotureParDefaut();
+  const clotureLe = p?.clotureLe ?? defaut.clotureLe;
+  const texte = useChrono(actif ? clotureLe : null);
+  if (!actif) return { prochaine: null, etat: data, loading: false, reload, error };
+  if (p) return { prochaine: { mois: p.mois, de: p.de, clotureLe: p.clotureLe, clotureDans: texte ?? p.clotureDans, toi: p.toi, tout: p.tout, vide: p.vide, source: "api" }, etat: data, loading, reload, error };
+  if (loading) return { prochaine: null, etat: data, loading: true, reload, error };
+  return { prochaine: { mois: defaut.mois, de: defaut.de, clotureLe: defaut.clotureLe, clotureDans: texte ?? chrono(new Date(), new Date(defaut.clotureLe)), toi: null, tout: null, vide: true, source: "defaut" }, etat: data, loading: false, reload, error };
+}
+
+/** Le gros minuteur : « Clôture dans » puis le temps qui reste, en très grand. Le même partout. */
+export function GrosChrono({ clotureDans, className = "" }: { clotureDans: string; className?: string }) {
+  return (
+    <p role="status" className={`flex flex-col gap-1 ${className}`}>
+      <span className="text-[14px] font-semibold text-muted">Clôture dans</span> <span className="text-[40px] leading-none font-extrabold tracking-[-0.03em] text-accent-text tabular-nums">{clotureDans}</span>
+    </p>
+  );
+}
+
+/**
+ * LE BANDEAU DU MOIS, sur chaque écran de l'app sauf l'accueil (qui a le bloc entier) : une ligne, « Commande d'octobre ·
+ * Clôture dans 2 j 4 h », qui mène à l'onglet. N'importe qui comprend en 10 secondes de quoi parle l'app.
+ */
+export function BandeauDuMois() {
+  const { features } = useSession();
+  const pathname = usePathname();
+  const actif = features.groupe === true && features.commandeCommune !== "lots" && pathname !== "/";
+  const { prochaine } = useProchaineCommande(actif);
+  if (!actif || !prochaine) return null;
+  return (
+    <Link
+      href="/groupe"
+      aria-label={`Commande ${prochaine.de}, clôture dans ${prochaine.clotureDans} : voir la commande commune`}
+      className="pressable -mt-1 flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[14px] font-semibold text-ink active:bg-ground"
+    >
+      <Clock size={16} aria-hidden="true" className="shrink-0 text-accent-text" />
+      <span className="truncate">{`Commande ${prochaine.de}`}</span>
+      <span className="ml-auto shrink-0 text-accent-text tabular-nums">{`Clôture dans ${prochaine.clotureDans}`}</span>
+    </Link>
+  );
+}
+
+/**
+ * LE BLOC DU MOIS, en haut de l'accueil (Greg, 23 octobre 2026) : la commande du mois, le gros minuteur, la règle en une
+ * phrase et trois étapes, les quantités (« Toi seul », « Toute la commande ») quand l'API les donne, et LE bouton :
+ * « Dépose ta liste avant le JJ/MM ». Façon Qonto : un chiffre, une action.
+ */
+export function BlocDuMois({ prochaine: p }: { prochaine: Prochaine }) {
+  return (
+    <section aria-label={`Commande ${p.de}`} className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">
+      <div className="flex items-start justify-between gap-3">
+        <p className="flex items-center gap-2 text-[16px] font-extrabold">
+          <Users size={18} aria-hidden="true" className="text-accent-text" />
+          {`Commande ${p.de}`}
+        </p>
+        <Link href="/groupe" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
+          Voir
+        </Link>
+      </div>
+      <GrosChrono clotureDans={p.clotureDans} />
+      <p className="text-[15px] leading-snug text-muted">Une commande par mois avec les couvreurs de ta région.</p>
+      <EtapesDuMois compact />
+      {p.toi || p.tout ? (
+        <div className="flex flex-col divide-y divide-line border-t border-line">
+          {p.toi ? <p className="py-3 text-[16px] font-semibold">{p.toi}</p> : null}
+          {p.tout ? <p className="py-3 text-[16px] font-semibold">{p.vide ? "Pour l'instant, la commande est vide. Ta liste peut la lancer." : p.tout}</p> : null}
+        </div>
+      ) : null}
+      <ButtonLink href="/chantiers/nouveau">{`Dépose ta liste avant le ${jourMois(p.clotureLe)}`}</ButtonLink>
+    </section>
+  );
+}
+
 /** Une carte (comme `Card`), mais une région nommée : « Commande d'octobre ». */
 const CARTE = "flex flex-col rounded-xl bg-surface p-4 shadow-card";
 const unite = (u: string) => (u === "ml" ? "m" : u);
@@ -64,17 +175,18 @@ const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigit
 const quantite = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
 
 /** Les trois étapes, en mots d'enfant de 12 ans (Greg, 22 octobre). */
-export function EtapesDuMois() {
+export function EtapesDuMois({ compact = false }: { compact?: boolean }) {
+  const taille = compact ? 16 : 20;
   const etapes = [
-    { icone: <FileText size={20} aria-hidden="true" />, texte: "Dépose ta liste avant la clôture." },
-    { icone: <Store size={20} aria-hidden="true" />, texte: "On envoie tout le volume aux négoces." },
-    { icone: <Check size={20} aria-hidden="true" />, texte: "Tu vois le meilleur prix et tu commandes si ça te plaît." },
+    { icone: <FileText size={taille} aria-hidden="true" />, texte: "Dépose ta liste avant la clôture." },
+    { icone: <Store size={taille} aria-hidden="true" />, texte: "On envoie tout le volume aux négoces." },
+    { icone: <Check size={taille} aria-hidden="true" />, texte: "Tu vois le meilleur prix et tu commandes si ça te plaît." },
   ];
   return (
-    <ol aria-label="Comment ça marche" className="flex flex-col gap-2">
+    <ol aria-label="Comment ça marche" className={`flex flex-col ${compact ? "gap-1.5" : "gap-2"}`}>
       {etapes.map((e, i) => (
-        <li key={e.texte} className="flex items-center gap-3 text-[16px]">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-accent-text">{e.icone}</span>
+        <li key={e.texte} className={`flex items-center gap-3 ${compact ? "text-[15px]" : "text-[16px]"}`}>
+          <span className={`flex shrink-0 items-center justify-center rounded-full bg-ground text-accent-text ${compact ? "size-8" : "size-10"}`}>{e.icone}</span>
           <span>
             <span className="font-semibold text-accent-text">{i + 1}.</span> {e.texte}
           </span>
@@ -170,8 +282,10 @@ export function CommandeDuMoisBloc({ etat, onAjouter, message }: { etat: EtatDuM
   // Greg (23 octobre) : la commande du département du CHANTIER (`prochaine`, lue avec son `projectId`), jamais celle de
   // l'entreprise quand le chantier est ailleurs.
   const p = etat?.prochaine ?? null;
-  const de = p?.de ?? null;
-  const chronoTexte = p ? `Clôture dans ${p.clotureDans}` : null;
+  const defaut = prochaineClotureParDefaut();
+  const de = p?.de ?? defaut.de;
+  const vivant = useChrono(p?.clotureLe ?? defaut.clotureLe);
+  const chronoTexte = `Clôture dans ${vivant ?? p?.clotureDans ?? chrono(new Date(), new Date(defaut.clotureLe))}`;
   const tout = p && !p.vide ? p.tout : null;
   return (
     <section aria-label={de ? `Commande commune ${de}` : "Commande commune"} className="mb-3 flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
@@ -180,7 +294,7 @@ export function CommandeDuMoisBloc({ etat, onAjouter, message }: { etat: EtatDuM
         {de ? `Commande commune ${de}` : "Commande commune"}
       </p>
       <p className="text-[14px] leading-snug text-muted">Une commande par mois avec les couvreurs de ta région.</p>
-      {chronoTexte ? <Chrono>{chronoTexte}</Chrono> : null}
+      <Chrono>{chronoTexte}</Chrono>
       {tout ? <p className="text-[15px] font-semibold">{tout}</p> : null}
       {message ? (
         <p role="status" className="rounded-xl bg-ground p-3 text-[14px] font-semibold">
@@ -257,9 +371,9 @@ export function CommandeDuMoisPanneau({ etat, onChange }: { etat: EtatDuMois; on
   return (
     <div className="flex flex-col gap-4">
       {!ouverte && etat.prochaine ? (
-        <section aria-label={`Commande ${etat.prochaine.de}`} className={`${CARTE} gap-2`}>
+        <section aria-label={`Commande ${etat.prochaine.de}`} className={`${CARTE} gap-3`}>
           <SectionTitle>{`Commande ${etat.prochaine.de}`}</SectionTitle>
-          <Chrono>{`Clôture dans ${etat.prochaine.clotureDans}`}</Chrono>
+          <GrosChrono clotureDans={etat.prochaine.clotureDans} />
           <p className="text-[16px] font-semibold">{etat.prochaine.vide ? "Pour l'instant, la commande est vide. Dépose ta liste pour la lancer." : etat.prochaine.tout}</p>
           <InviterCollegue texte="Plus on est nombreux dans la commande, plus les prix baissent." />
         </section>
@@ -295,7 +409,7 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
     <section aria-label={`Commande ${c.de}`} className={`${CARTE} gap-3`}>
       <div className="flex flex-col gap-1">
         <SectionTitle>{`Commande ${c.de}`}</SectionTitle>
-        {c.phase === "inscriptions" && c.cloture ? <Chrono>{c.cloture}</Chrono> : <p className="text-[15px] font-semibold text-accent-text">{c.phase === "negoces" ? `Commande close. Les négoces chiffrent : leurs prix dans ${c.reponseDans}.` : "Les prix sont là."}</p>}
+        {c.phase === "inscriptions" && c.clotureDans ? <GrosChrono clotureDans={c.clotureDans} /> : c.phase === "inscriptions" && c.cloture ? <Chrono>{c.cloture}</Chrono> : <p className="text-[15px] font-semibold text-accent-text">{c.phase === "negoces" ? `Commande close. Les négoces chiffrent : leurs prix dans ${c.reponseDans}.` : "Les prix sont là."}</p>}
       </div>
       <div className="flex flex-col divide-y divide-line">
         <p className="py-3 text-[16px] font-semibold">{c.toi}</p>

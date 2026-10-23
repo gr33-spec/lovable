@@ -11,7 +11,7 @@ import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { NOM, nom, noms } from "@/lib/nom";
 import { InviterCollegue } from "@/components/inviter";
-import { CommandeDuMoisPanneau, EtapesDuMois, useCommandeDuMois } from "@/components/commande-du-mois";
+import { BlocDuMois, CommandeDuMoisPanneau, EtapesDuMois, useProchaineCommande } from "@/components/commande-du-mois";
 
 interface EtatGroupe {
   eligible: boolean;
@@ -184,10 +184,18 @@ export default function GroupePage() {
 
 /** La commande commune du mois : en quantités, le chrono, le partage, puis les prix de chaque négoce (Greg, 22 octobre 2026). */
 function PanneauDuMois() {
-  const { data, error, reload } = useCommandeDuMois(true);
-  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
-  if (!data) return <Skeleton card="h-64" label="Chargement de la commande du mois…" />;
-  return <CommandeDuMoisPanneau etat={data} onChange={reload} />;
+  const { prochaine, etat, error, loading, reload } = useProchaineCommande(true);
+  if (loading) return <Skeleton card="h-64" label="Chargement de la commande du mois…" />;
+  if (!etat) {
+    // L'API ne répond pas : le minuteur quand même (règle par défaut), puis l'erreur et « Réessayer ».
+    return (
+      <>
+        {prochaine ? <BlocDuMois prochaine={prochaine} /> : null}
+        {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
+      </>
+    );
+  }
+  return <CommandeDuMoisPanneau etat={etat} onChange={reload} />;
 }
 
 function Etapes() {

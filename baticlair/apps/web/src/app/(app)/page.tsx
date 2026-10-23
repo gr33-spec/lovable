@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MailCheck, Search, Sparkles, Users, Warehouse } from "lucide-react";
+import { MailCheck, Search, Sparkles, Warehouse } from "lucide-react";
 import { useCallback } from "react";
 import { InstallHint } from "@/components/install-hint";
 import { useBilling } from "@/components/paywall";
 import { ProjectList } from "@/components/project-row";
-import { ButtonLink, Chrono, ErrorNotice, ListCard, ListRow, SectionTitle, Skeleton } from "@/components/ui";
+import { ButtonLink, ErrorNotice, ListCard, ListRow, SectionTitle, Skeleton } from "@/components/ui";
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { InviterCollegue } from "@/components/inviter";
-import { useCommandeDuMois, type EtatDuMois } from "@/components/commande-du-mois";
+import { BlocDuMois, useProchaineCommande } from "@/components/commande-du-mois";
 
 export default function AccueilPage() {
   const router = useRouter();
@@ -22,8 +22,10 @@ export default function AccueilPage() {
   const fetchNext = useCallback((signal: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal }), []);
   const { data: next, reload: reloadNext } = useResource(fetchNext);
   const { data: billing } = useBilling();
-  // Greg (23 octobre) : la commande du mois en haut de l'accueil (chrono, « Toi seul », « Toute la commande »).
-  const mois = useCommandeDuMois(features.groupe === true && features.commandeCommune !== "lots");
+  // Greg (23 octobre) : la commande du mois en haut de l'accueil, avec son minuteur, TOUJOURS (règle par défaut si l'API
+  // ne répond pas) : n'importe qui comprend en 10 secondes.
+  const moisActif = features.groupe === true && features.commandeCommune !== "lots";
+  const mois = useProchaineCommande(moisActif);
 
   const firstName = me.user.name.split(" ")[0] ?? me.user.name;
   const todo: { key: string; title: string; text: string; href: string; action: string; icon: React.ReactNode }[] = (next?.items ?? []).slice(0, 5).map((a) => ({
@@ -86,8 +88,8 @@ export default function AccueilPage() {
         </div>
       </form>
 
-      {/* Le squelette seulement pendant le chargement : si l'appel échoue (API sans la commande du mois), rien ne s'affiche, jamais une carte vide. */}
-      {mois.data?.prochaine ? <BlocDuMois prochaine={mois.data.prochaine} /> : mois.loading && features.groupe === true && features.commandeCommune !== "lots" ? <Skeleton card="h-48" label="Chargement de la commande du mois…" /> : null}
+      {/* Le squelette seulement pendant le chargement ; ensuite le bloc, avec les dates de l'API ou la règle par défaut. */}
+      {mois.prochaine ? <BlocDuMois prochaine={mois.prochaine} /> : mois.loading && moisActif ? <Skeleton card="h-64" label="Chargement de la commande du mois…" /> : null}
 
       {/* « À faire » : une liste blanche, chaque ligne est un lien (plus de bouton plein en concurrence avec celui du mois). */}
       <section aria-labelledby="todo-title" className="flex flex-col gap-3">
@@ -129,31 +131,5 @@ export default function AccueilPage() {
         ) : null}
       </section>
     </>
-  );
-}
-
-const jourMois = (iso: string) => new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit" }).format(new Date(iso));
-
-/**
- * Le bloc de la commande du mois, en haut de l'accueil (Greg, 23 octobre 2026) : le chrono de clôture, « Toi seul : … »
- * quand on a déjà déposé, « Toute la commande : … », et « Dépose ta liste avant le JJ/MM » (LE bouton principal de l'écran).
- * Façon Qonto : un chiffre, une action.
- */
-function BlocDuMois({ prochaine: p }: { prochaine: NonNullable<EtatDuMois["prochaine"]> }) {
-  return (
-    <section aria-label={`Commande ${p.de}`} className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">
-      <div className="flex flex-col gap-2">
-        <p className="flex items-center gap-2 text-[14px] font-semibold text-muted">
-          <Users size={16} aria-hidden="true" />
-          {`Commande ${p.de}`}
-        </p>
-        <Chrono>{`Clôture dans ${p.clotureDans}`}</Chrono>
-      </div>
-      <div className="flex flex-col divide-y divide-line">
-        {p.toi ? <p className="py-3 text-[16px] font-semibold">{p.toi}</p> : null}
-        <p className="py-3 text-[16px] font-semibold">{p.vide ? "Pour l'instant, la commande est vide. Ta liste peut la lancer." : p.tout}</p>
-      </div>
-      <ButtonLink href="/chantiers/nouveau">{`Dépose ta liste avant le ${jourMois(p.clotureLe)}`}</ButtonLink>
-    </section>
   );
 }
