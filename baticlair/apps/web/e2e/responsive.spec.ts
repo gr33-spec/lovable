@@ -92,14 +92,8 @@ for (const size of WIDTHS) {
     await expect(cards.first()).toBeVisible();
     await shoot(page, size.name, "07-apres-envoi");
 
-    for (const name of ["Tuilerie de l'Ouest", "Négoce Breizh", "Matériaux Atlantique"]) {
-      const card = cards.filter({ hasText: name });
-      await card.getByRole("button", { name: "Simuler sa réponse (démo)" }).click();
-      await expect(card.getByText("Devis reçu")).toBeVisible();
-    }
-    await page.getByRole("button", { name: "Comparer les offres" }).click();
-    await expect(page.locator("section#comparer").getByRole("button", { name: "Retenir cette offre" }).first()).toBeVisible();
-    await shoot(page, size.name, "08-comparaison");
+    // Greg (23 octobre) : plus de « Comparer les offres » par chantier en mode mois ; les prix viennent de la commande commune.
+    await expect(page.getByRole("button", { name: "Comparer les offres" })).toHaveCount(0);
 
     await page.goto("/chantiers");
     await expect(page.getByText("Démo – Toiture Martin").first()).toBeVisible();

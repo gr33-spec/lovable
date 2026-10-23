@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MailCheck, Search, Sparkles, Warehouse } from "lucide-react";
+import { MailCheck, Search, Sparkles, Users, Warehouse } from "lucide-react";
 import { useCallback } from "react";
 import { InstallHint } from "@/components/install-hint";
 import { useBilling } from "@/components/paywall";
@@ -12,6 +12,7 @@ import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { InviterCollegue } from "@/components/inviter";
+import { useCommandeDuMois, type EtatDuMois } from "@/components/commande-du-mois";
 
 export default function AccueilPage() {
   const router = useRouter();
@@ -21,6 +22,8 @@ export default function AccueilPage() {
   const fetchNext = useCallback((signal: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal }), []);
   const { data: next, reload: reloadNext } = useResource(fetchNext);
   const { data: billing } = useBilling();
+  // Greg (23 octobre) : la commande du mois en haut de l'accueil (chrono, « Toi seul », « Toute la commande »).
+  const mois = useCommandeDuMois(features.groupe === true && features.commandeCommune !== "lots");
 
   const firstName = me.user.name.split(" ")[0] ?? me.user.name;
   const todo: { key: string; title: string; text: string; href: string; action: string; icon: React.ReactNode }[] = (next?.items ?? []).slice(0, 5).map((a) => ({
@@ -79,11 +82,12 @@ export default function AccueilPage() {
           <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Chantier, client, adresse…" className="min-h-12 grow bg-transparent text-base outline-none placeholder:text-muted" />
         </div>
       </form>
-      <h1 className="mt-1.5 font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">
-        Bonjour {firstName}, <span className="font-serif text-[38px] font-normal tracking-normal italic">on avance&nbsp;?</span>
-      </h1>
+      {/* Greg (23 octobre) : une seule police, plus d'italique à empattement. */}
+      <h1 className="mt-1.5 font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
 
-      <section aria-labelledby="todo-title" className="flex flex-col gap-1 rounded-[28px] bg-hero px-4 pt-4.5 pb-2.5 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
+      {mois.data?.prochaine ? <BlocDuMois prochaine={mois.data.prochaine} /> : null}
+
+      <section aria-labelledby="todo-title" className="flex flex-col gap-1 rounded-[28px] bg-hero px-4 pt-4.5 pb-2.5 text-white shadow-card">
         <h2 id="todo-title" className="pb-1.5 font-display text-[22px] font-extrabold tracking-[-0.02em]">
           {(recent === null || next === null) && !error ? "À faire" : todo.length === 0 ? "Tout est à jour" : `${todo.length} action${todo.length > 1 ? "s" : ""} à faire`}
         </h2>
@@ -101,7 +105,7 @@ export default function AccueilPage() {
                   {t.text ? <span className="text-[13px] text-[#c9ced6]">{t.text}</span> : null}
                 </span>
               </span>
-              <Link href={t.href} className={`inline-flex min-h-12 items-center justify-center rounded-2xl px-3.5 text-[15px] font-extrabold ${i === 0 ? "bg-cta shadow-cta" : "bg-white/15"}`}>
+              <Link href={t.href} className={`inline-flex min-h-12 items-center justify-center rounded-2xl px-3.5 text-[15px] font-extrabold ${i === 0 ? "bg-accent" : "bg-white/15"}`}>
                 {t.action}
               </Link>
             </div>
@@ -134,5 +138,28 @@ export default function AccueilPage() {
       </section>
 
     </>
+  );
+}
+
+const jourMois = (iso: string) => new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit" }).format(new Date(iso));
+
+/**
+ * Le bloc de la commande du mois, en haut de l'accueil (Greg, 23 octobre 2026) : le chrono de clôture, « Toi seul : … »
+ * quand on a déjà déposé, « Toute la commande : … », et « Dépose ta liste avant le JJ/MM ».
+ */
+function BlocDuMois({ prochaine: p }: { prochaine: NonNullable<EtatDuMois["prochaine"]> }) {
+  return (
+    <section aria-label={`Commande ${p.de}`} className="flex flex-col gap-2 rounded-[28px] bg-surface p-4 shadow-card">
+      <p className="flex items-center gap-2 text-[15px] font-extrabold">
+        <Users size={18} aria-hidden="true" className="text-accent-text" />
+        {`Commande ${p.de}`}
+      </p>
+      <p className="text-[15px] font-extrabold text-accent-text">{`Clôture dans ${p.clotureDans}`}</p>
+      {p.toi ? <p className="text-[15px] font-bold">{p.toi}</p> : null}
+      <p className="text-[15px] font-bold">{p.vide ? "Pour l'instant, la commande est vide. Ta liste peut la lancer." : p.tout}</p>
+      <ButtonLink href="/chantiers/nouveau" className="min-h-13">
+        {`Dépose ta liste avant le ${jourMois(p.clotureLe)}`}
+      </ButtonLink>
+    </section>
   );
 }

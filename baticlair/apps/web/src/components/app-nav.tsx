@@ -60,7 +60,7 @@ export function AppNav() {
         href={item.href}
         aria-current={active ? "page" : undefined}
         className={`flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-3xl text-[11px] lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-[15px] ${
-          active ? "bg-nav-active font-bold text-white shadow-[0_6px_16px_-6px_rgba(91,69,255,0.7)]" : "font-semibold text-muted hover:text-ink"
+          active ? "bg-nav-active font-bold text-white" : "font-semibold text-muted hover:text-ink"
         }`}
       >
         <Icon size={21} aria-hidden="true" />
@@ -82,7 +82,7 @@ export function AppNav() {
         {link(chantiersItem)}
         <Link
           href="/chantiers/nouveau"
-          className="flex min-h-13 items-center justify-center gap-1.5 justify-self-center rounded-full bg-cta px-4 text-[14px] font-extrabold text-white shadow-cta ring-4 ring-white lg:order-first lg:mb-3 lg:w-full lg:rounded-2xl lg:text-[15px]"
+          className="flex min-h-13 items-center justify-center gap-1.5 justify-self-center rounded-full bg-accent px-4 text-[14px] font-extrabold text-white ring-4 ring-white lg:order-first lg:mb-3 lg:w-full lg:rounded-2xl lg:text-[15px]"
         >
           <Plus size={22} strokeWidth={2.8} aria-hidden="true" />
           <span>Nouvelle liste</span>

@@ -15,8 +15,8 @@ import { useBack } from "@/lib/history";
 type ButtonVariant = "primary" | "accent" | "secondary" | "ghost";
 
 const buttonClasses: Record<ButtonVariant, string> = {
-  // Action principale : le dégradé de la marque, avec son halo (touches 2026, maquette « radar »).
-  primary: "bg-cta text-white shadow-cta",
+  // Action principale : une couleur unie (Greg, 23 octobre : « plus aucun dégradé, dans l'app comme sur la landing »).
+  primary: "bg-accent text-white",
   accent: "bg-accent text-white",
   secondary: "bg-surface text-ink shadow-card",
   ghost: "bg-transparent text-accent-text",

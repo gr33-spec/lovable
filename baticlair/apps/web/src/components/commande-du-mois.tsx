@@ -45,7 +45,7 @@ export interface EtatDuMois {
   mode: "mois" | "lots";
   commandes: CommandeDuMois[];
   /** La commande ouverte du département du chantier (si `projectId` est donné), sinon de celui de l'entreprise. */
-  prochaine: { mois: string; de: string; zone?: string; clotureDans: string; tout: string; vide: boolean } | null;
+  prochaine: { mois: string; de: string; zone?: string; clotureLe: string; clotureDans: string; toi: string | null; tout: string; vide: boolean } | null;
   phrases: { sansEngagement: string };
 }
 

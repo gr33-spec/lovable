@@ -517,7 +517,8 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toBeVisible();
 });
 
-test("un couvreur demande les prix à ses fournisseurs et range leurs devis", async ({ page }) => {
+test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { tag: "@lots" }, async ({ page }) => {
+  passeLots();
   // Parcours long (aperçu avant envoi, deux devis, comparaison) : le temps de la machine, pas un défaut.
   test.slow();
   await signUp(page);
@@ -709,7 +710,8 @@ test("plusieurs articles ajoutés à la main, sans unité : gardés tels qu'écr
   await expect(list.getByRole("listitem").filter({ hasText: "Skimmer pour piscine liner" }).first()).toBeVisible();
 });
 
-test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs", async ({ page }) => {
+test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs", { tag: "@lots" }, async ({ page }) => {
+  passeLots();
   await signUp(page);
   await menuArtisan(page, "Essayer avec un chantier fictif");
   await expect(page.getByRole("heading", { name: "Démo – Toiture Martin" })).toBeVisible();
@@ -750,15 +752,23 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
 test("accueil : la prochaine action de chaque chantier, puis l'essai et les formules", async ({ page }) => {
   await signUp(page);
   const todo = page.getByRole("region", { name: /à faire|Tout est à jour/i });
-  await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
+  await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, 56000 Vannes");
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /^\d+ actions? à faire$/ })).toBeVisible();
-  await expect(todo.getByText("Toiture Garnier")).toBeVisible();
-  await todo.getByRole("link", { name: "Ajouter le devis client" }).click();
-  await expect(page.getByRole("heading", { name: "Toiture Garnier" })).toBeVisible();
+  // Greg (23 octobre) : commande du mois, plus d'« Ajouter le devis client » ; un chantier vide n'a rien à faire, et le
+  // bloc de la commande du mois est en haut avec « Dépose ta liste avant le JJ/MM ».
+  await expect(todo.getByRole("link", { name: "Ajouter le devis client" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /^Bonjour Jean$/ })).toBeVisible();
+  await expect(page.getByText(/Comparer les offres|offres reçues|on avance/)).toHaveCount(0);
+  const blocMois = page.getByRole("region", { name: /^Commande d/ });
+  await expect(blocMois.getByText(/^Clôture dans \d+ j/)).toBeVisible();
+  await expect(blocMois.getByRole("link", { name: /^Dépose ta liste avant le \d\d\/\d\d$/ })).toHaveAttribute("href", "/chantiers/nouveau");
 
   // Essai : 3 chantiers. Au 4e, l'écran des formules, sans jargon ni crédits.
   await createProject(page, "Chantier 2", "", "");
+  // « Client non renseigné » n'existe plus : un chantier sans client ni adresse n'a rien sous son nom.
+  await page.goto("/chantiers");
+  await expect(page.getByText("Chantier 2")).toBeVisible();
+  await expect(page.getByText("Client non renseigné")).toHaveCount(0);
   await createProject(page, "Chantier 3", "", "");
   await page.goto("/chantiers/nouveau");
   await expect(page.getByRole("heading", { name: "Ton essai est terminé" })).toBeVisible();

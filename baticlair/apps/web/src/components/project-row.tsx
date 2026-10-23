@@ -16,7 +16,8 @@ const ACTION_W = 104;
  * chantier passe dans « Terminés », et « Annuler » le remet. Au clavier, le bouton est atteint par Tab.
  */
 export function ProjectRow({ project, onToggle }: { project: Project; onToggle?: ((p: Project) => void) | undefined }) {
-  const subtitle = [project.clientName, project.address].filter(Boolean).join(" · ") || "Client non renseigné";
+  // Greg (23 octobre) : rien sous le nom quand ni client ni adresse ne sont renseignés (plus de « Client non renseigné »).
+  const subtitle = [project.clientName, project.address].filter(Boolean).join(" · ");
   const done = project.status === "archived";
   const [offset, setOffset] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -93,7 +94,7 @@ export function ProjectRow({ project, onToggle }: { project: Project; onToggle?:
         <Link href={`/chantiers/${project.id}`} draggable={false} className="flex min-h-16 items-center gap-3 px-4 py-2 hover:bg-ground/60">
           <span className="flex min-w-0 grow flex-col gap-0.5">
             <span className="truncate text-[15px] font-bold">{project.name}</span>
-            <span className="truncate text-[13px] text-muted">{subtitle}</span>
+            {subtitle ? <span className="truncate text-[13px] text-muted">{subtitle}</span> : null}
           </span>
           {done ? <Badge tone="ok">{fr.status.archived}</Badge> : null}
           <ChevronRight size={18} className="shrink-0 text-subtle" aria-hidden="true" />

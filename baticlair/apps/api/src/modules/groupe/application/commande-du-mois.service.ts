@@ -317,7 +317,7 @@ export class CommandeDuMoisService {
    * La commande ouverte d'un département (chrono, quantités) : celui du chantier quand il est donné (le bloc de « Ton
    * chantier », Greg, 23 octobre 2026), sinon celui de l'entreprise (l'onglet « Commande commune »).
    */
-  async prochaineCommande(tenant: TenantContext, maintenant = new Date(), projectId?: string): Promise<{ mois: Mois; de: string; zone: string; clotureDans: string; tout: string; vide: boolean } | null> {
+  async prochaineCommande(tenant: TenantContext, maintenant = new Date(), projectId?: string): Promise<{ mois: Mois; de: string; zone: string; clotureLe: string; clotureDans: string; toi: string | null; tout: string; vide: boolean } | null> {
     let adresse: string | null;
     if (projectId) {
       if (!isUuid(projectId)) throw notFound("Project");
@@ -326,13 +326,22 @@ export class CommandeDuMoisService {
       adresse = project.address;
     } else {
       adresse = (await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } }))?.address ?? null;
+      // Entreprise sans adresse (compte tout neuf) : le département du dernier chantier adressé, pour que l'accueil
+      // montre quand même la commande du mois (Greg, 23 octobre 2026).
+      if (!zoneDuCodePostal(adresse ?? "")) {
+        const projets = await this.prisma.project.findMany({ where: { companyId: tenant.companyId, address: { not: null } }, select: { address: true }, orderBy: { updatedAt: "desc" }, take: 20 });
+        adresse = projets.map((p) => p.address).find((a) => zoneDuCodePostal(a ?? "")) ?? null;
+      }
     }
     const zone = zoneDuCodePostal(adresse ?? "");
     if (!zone) return null;
     const { cycle } = await this.cycleOuvert("couverture", zone, maintenant);
     const c = await this.prisma.cycleCommande.findUniqueOrThrow({ where: { id: cycle.id } });
     const tout = await this.lignesDuCycle(c.id);
-    return { mois: c.mois, de: deMois(c.mois), zone, clotureDans: chrono(maintenant, c.clotureLe), tout: affichageDeLaCommande({ mois: c.mois, toi: [], tout, seul: false, clotureDans: null }).tout, vide: tout.length === 0 };
+    // Greg (23 octobre) : l'accueil montre « Toi seul : … » quand l'entreprise a déjà déposé dans cette commande.
+    const toi = await this.lignesDuCycle(c.id, tenant.companyId);
+    const affichage = affichageDeLaCommande({ mois: c.mois, toi, tout, seul: false, clotureDans: null });
+    return { mois: c.mois, de: deMois(c.mois), zone, clotureLe: c.clotureLe.toISOString(), clotureDans: chrono(maintenant, c.clotureLe), toi: toi.length ? affichage.toi : null, tout: affichage.tout, vide: tout.length === 0 };
   }
 
   private async lignesDuCycle(cycleId: string, companyId?: string): Promise<LigneDeGrille[]> {

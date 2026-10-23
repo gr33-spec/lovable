@@ -1,5 +1,3 @@
-import "@fontsource/instrument-serif/latin-400.css";
-import "@fontsource/instrument-serif/latin-400-italic.css";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";

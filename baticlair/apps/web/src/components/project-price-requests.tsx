@@ -14,6 +14,7 @@ import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, ty
 import { openDocument, openFile } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
+import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 
 
@@ -105,6 +106,10 @@ export function ProjectPriceRequests({
   }, [refreshSignal, reload]);
 
   const refreshProgress = useProgressRefresh();
+  // Commande du mois (Greg, 23 octobre) : plus de « X offres reçues / Comparer les offres » par chantier ; le prix vient de
+  // la commande commune, le chantier garde seulement l'envoi aux négoces.
+  const { features } = useSession();
+  const modeMois = features.groupe === true && features.commandeCommune !== "lots";
   // Des e-mails partent-ils du serveur (§43) ? Sinon, l'artisan envoie depuis sa messagerie.
   const fetchSettings = useCallback((signal: AbortSignal) => api<PriceRequestSettings & { deliversEmail: boolean }>("/v1/price-requests/settings", { signal }), []);
   const deliversEmail = useResource(fetchSettings).data?.deliversEmail ?? false;
@@ -224,7 +229,7 @@ export function ProjectPriceRequests({
           </Say>
         </AssistantMessage>
       )}
-      {!archived && unread > 0 && offers.data ? (
+      {!archived && !modeMois && unread > 0 && offers.data ? (
         <CompareQuotes
           requestId={request.id}
           received={received.length}
@@ -237,7 +242,7 @@ export function ProjectPriceRequests({
           }}
         />
       ) : null}
-      {hasOffers ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
+      {hasOffers && !modeMois ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
       <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">FOURNISSEURS</h2>
       <NotificationsPrompt trigger={sentCount} />
       <ul className="flex flex-col gap-2" aria-label="Tes fournisseurs">
