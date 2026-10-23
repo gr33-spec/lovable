@@ -61,6 +61,7 @@ interface ConfigCycle {
   heureCloture: number;
   joursReponse: number;
   heureReponse: number;
+  jourClotureDecembre: number;
 }
 
 /**
@@ -94,6 +95,7 @@ function DatesDuMois() {
     <Card aria-label="Dates de la commande du mois" className="flex flex-col gap-3 p-4">
       <h2 className="text-base font-extrabold">Dates de la commande du mois</h2>
       {champ("jourCloture", "Clôture le", "du mois")}
+      {champ("jourClotureDecembre", "En décembre, clôture le", "(avant Noël)")}
       {champ("heureCloture", "à", "h")}
       {champ("joursReponse", "Les négoces répondent en", "jours")}
       {champ("heureReponse", "avant", "h")}

@@ -25,9 +25,11 @@ export interface ConfigCycle {
   joursReponse: number;
   /** Heure limite de réponse des négoces, heure de Paris. */
   heureReponse: number;
+  /** Greg (23 octobre 2026) : en décembre, la clôture avance (jamais le jour de Noël) ; par défaut le 18. */
+  jourClotureDecembre: number;
 }
 
-export const CONFIG_CYCLE_DEFAUT: ConfigCycle = { jourCloture: 25, heureCloture: 12, joursReponse: 14, heureReponse: 18 };
+export const CONFIG_CYCLE_DEFAUT: ConfigCycle = { jourCloture: 25, heureCloture: 12, joursReponse: 14, heureReponse: 18, jourClotureDecembre: 18 };
 
 export const PHASES_CYCLE = ["inscriptions", "negoces", "resultats"] as const;
 export type PhaseCycle = (typeof PHASES_CYCLE)[number];
@@ -86,7 +88,8 @@ export interface DatesDuCycle {
 
 /** Les dates du cycle d'un mois, d'après les réglages. Le nom du cycle est le mois de sa clôture. */
 export function datesDuCycle(mois: Mois, config: ConfigCycle = CONFIG_CYCLE_DEFAUT): DatesDuCycle {
-  const clotureLe = heureDeParis(mois, config.jourCloture, config.heureCloture);
+  const jour = mois.endsWith("-12") ? (config.jourClotureDecembre ?? CONFIG_CYCLE_DEFAUT.jourClotureDecembre) : config.jourCloture;
+  const clotureLe = heureDeParis(mois, jour, config.heureCloture);
   // La limite des négoces : `joursReponse` jours plus tard, à `heureReponse` h (heure de Paris, ce jour-là).
   const jourLimite = new Date(clotureLe.getTime() + config.joursReponse * 86_400_000);
   const reponseAvant = heureDeParis(moisDe(jourLimite), Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", day: "numeric" }).format(jourLimite)), config.heureReponse);

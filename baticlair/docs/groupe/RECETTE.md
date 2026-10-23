@@ -186,7 +186,7 @@ A et B : N1 par défaut, et le moins cher pour eux. D : N1 proposé (premier sur
 
 A : N5 proposé, N2 moins cher pour lui (1 395 €) : il commande chez N2. C commande chez N5.
 
-**Décembre** : clôture le 25/12 à 12 h (11 h UTC, jour de Noël : voir « reste à risque »), réponses avant le 08/01/2027 à 18 h. F (Saint-Brieuc) : 200 m de liteaux, « Pour l'instant, tu es le premier ». Grille partie aux cinq négoces, aucun ne répond : pas de prix ; le suivi dit « Aucun négoce n'a chiffré la commande de décembre. Commande ta liste en direct chez ton négoce. »
+**Décembre** : clôture le 18/12 à 12 h (11 h UTC ; Greg, 23 octobre : jamais le jour de Noël), réponses avant le 01/01/2027 à 18 h (relance le 31/12). F (Saint-Brieuc) : 200 m de liteaux, « Pour l'instant, tu es le premier ». Grille partie aux cinq négoces, aucun ne répond : pas de prix ; le suivi dit « Aucun négoce n'a chiffré la commande de décembre. Commande ta liste en direct chez ton négoce. »
 
 ## 6. Données, sécurité, tenue
 

@@ -33,6 +33,13 @@ describe("le cycle : clôture le 25 à 12 h (heure de Paris), 14 jours aux négo
     expect(d.relanceLe.toISOString()).toBe("2026-11-07T17:00:00.000Z");
     // En été : 12 h à Paris = 10 h UTC.
     expect(datesDuCycle("2026-07").clotureLe.toISOString()).toBe("2026-07-25T10:00:00.000Z");
+    // Greg (23 octobre) : pas de clôture le jour de Noël ; en décembre, le 18 à 12 h (heure d'hiver : 11 h UTC).
+    // Les négoces ont leurs 14 jours : jusqu'au 1er janvier à 18 h, relance le 31 décembre.
+    const dec = datesDuCycle("2026-12");
+    expect(dec.clotureLe.toISOString()).toBe("2026-12-18T11:00:00.000Z");
+    expect(dec.reponseAvant.toISOString()).toBe("2027-01-01T17:00:00.000Z");
+    expect(datesDuCycle("2027-12").clotureLe.toISOString()).toBe("2027-12-18T11:00:00.000Z");
+    expect(datesDuCycle("2026-11").clotureLe.toISOString()).toBe("2026-11-25T11:00:00.000Z");
   });
 
   it("une liste déposée avant la clôture part ce mois-ci ; après, ou si l'admin a clos le mois, le mois suivant", () => {

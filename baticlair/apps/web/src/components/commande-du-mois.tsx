@@ -44,12 +44,16 @@ export interface CommandeDuMois {
 export interface EtatDuMois {
   mode: "mois" | "lots";
   commandes: CommandeDuMois[];
-  prochaine: { mois: string; de: string; clotureDans: string; tout: string; vide: boolean } | null;
+  /** La commande ouverte du département du chantier (si `projectId` est donné), sinon de celui de l'entreprise. */
+  prochaine: { mois: string; de: string; zone?: string; clotureDans: string; tout: string; vide: boolean } | null;
   phrases: { sansEngagement: string };
 }
 
-export function useCommandeDuMois(actif: boolean) {
-  const fetchEtat = useCallback((signal: AbortSignal) => (actif ? api<EtatDuMois>("/v1/commande-du-mois", { signal }) : Promise.resolve(null)), [actif]);
+export function useCommandeDuMois(actif: boolean, projectId?: string) {
+  const fetchEtat = useCallback(
+    (signal: AbortSignal) => (actif ? api<EtatDuMois>(`/v1/commande-du-mois${projectId ? `?projectId=${encodeURIComponent(projectId)}` : ""}`, { signal }) : Promise.resolve(null)),
+    [actif, projectId],
+  );
   return useResource(fetchEtat);
 }
 
@@ -163,10 +167,12 @@ export function CommandeDuMoisBar({
  * nombre d'entreprises), puis « Ajouter à la commande de novembre ». Après un dépôt tardif : « Trop tard pour octobre… ».
  */
 export function CommandeDuMoisBloc({ etat, onAjouter, message }: { etat: EtatDuMois | null; onAjouter: () => void; message: string | null }) {
-  const ouverte = etat?.commandes.find((c) => c.phase === "inscriptions");
-  const de = ouverte?.de ?? etat?.prochaine?.de ?? null;
-  const chronoTexte = ouverte?.cloture ?? (etat?.prochaine ? `Clôture dans ${etat.prochaine.clotureDans}` : null);
-  const tout = ouverte?.tout ?? (etat?.prochaine && !etat.prochaine.vide ? etat.prochaine.tout : null);
+  // Greg (23 octobre) : la commande du département du CHANTIER (`prochaine`, lue avec son `projectId`), jamais celle de
+  // l'entreprise quand le chantier est ailleurs.
+  const p = etat?.prochaine ?? null;
+  const de = p?.de ?? null;
+  const chronoTexte = p ? `Clôture dans ${p.clotureDans}` : null;
+  const tout = p && !p.vide ? p.tout : null;
   return (
     <section aria-label={de ? `Commande commune ${de}` : "Commande commune"} className="mb-3 flex flex-col gap-2 rounded-[20px] bg-surface p-4 shadow-card">
       <p className="flex items-center gap-2 text-[15px] font-extrabold">

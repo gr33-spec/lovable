@@ -93,7 +93,7 @@ export function useGroupe(projectId: string): Groupe | null {
   const etat = useResource(fetchEtat);
   const eligible = etat.data?.eligible === true;
   const mode = etat.data?.mode === "lots" ? "lots" : "mois";
-  const mois = useCommandeDuMois(eligible && mode === "mois");
+  const mois = useCommandeDuMois(eligible && mode === "mois", projectId);
   const fetchBesoins = useCallback(
     (signal: AbortSignal) => (eligible ? api<{ besoins: BesoinGroupe[] }>(`/v1/projects/${encodeURIComponent(projectId)}/groupe`, { signal }) : Promise.resolve({ besoins: [] as BesoinGroupe[] })),
     [projectId, eligible],

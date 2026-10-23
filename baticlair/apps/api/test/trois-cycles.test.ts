@@ -195,13 +195,14 @@ it("octobre, novembre, décembre : trois cycles complets, chaque total posé à 
   await commander(C, nC.cycleId, nC.id("Négoce N5"), "2026-12-10T08:00:00.000Z").expect(200);
 
   // ── DÉCEMBRE ────────────────────────────────────────────────────────────────────────────────────────────────────
-  // Clôture le 25 décembre à 12 h (11 h UTC) ; réponses avant le 8 janvier 2027, 18 h. Aucun négoce ne répond.
+  // Greg (23 octobre) : pas de clôture le jour de Noël, mais le 18 décembre à 12 h (11 h UTC) ; réponses avant le
+  // 1er janvier 2027, 18 h. Aucun négoce ne répond.
   const F = await couvreur("f@toitures.fr", "Toitures F", ADR.saintBrieuc);
   expect((await depose(F, ADR.saintBrieuc, [lit(200)], "chantier", "2026-12-01T09:00:00.000Z")).mois).toBe("2026-12");
   const vueF = (await F.agent.get("/v1/commande-du-mois?maintenant=2026-12-01T09:00:00.000Z").expect(200)).body.commandes[0];
-  expect([vueF.clotureLe, vueF.reponseAvant, vueF.premier]).toEqual(["2026-12-25T11:00:00.000Z", "2027-01-08T17:00:00.000Z", "Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande."]);
-  expect(await tache("2026-12-25T11:01:00.000Z")).toMatchObject({ clos: 1, grillesEnvoyees: 5 });
-  expect(await tache("2027-01-08T17:01:00.000Z")).toMatchObject({ resultats: 1 });
+  expect([vueF.clotureLe, vueF.reponseAvant, vueF.premier]).toEqual(["2026-12-18T11:00:00.000Z", "2027-01-01T17:00:00.000Z", "Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande."]);
+  expect(await tache("2026-12-18T11:01:00.000Z")).toMatchObject({ clos: 1, grillesEnvoyees: 5 });
+  expect(await tache("2027-01-01T17:01:00.000Z")).toMatchObject({ resultats: 1 });
   const dF = await resultats(F, "2026-12", "2027-01-09T08:00:00.000Z");
   expect(dF.lignes).toBeNull();
   expect((await F.agent.get("/v1/commande-du-mois?maintenant=2027-01-09T08:00:00.000Z").expect(200)).body.commandes.find((x: { mois: string }) => x.mois === "2026-12").suivi).toMatchObject({ etape: 2, phrase: "Aucun négoce n'a chiffré la commande de décembre.", aFaire: "Commande ta liste en direct chez ton négoce." });

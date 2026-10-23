@@ -90,7 +90,7 @@ const reasonMessages: Record<string, string> = {
   deux_devis_au_plus: "Deux PDF au plus.",
   pdf_seulement: "Seulement des fichiers PDF.",
   livraison_requise: "Indiquez vos conditions de livraison (gratuite jusqu'à combien de km, et le prix au-delà).",
-  reglages_invalides: "Ces dates ne vont pas : jour de clôture entre 1 et 28, heures entre 0 et 23, réponse en 1 à 28 jours.",
+  reglages_invalides: "Ces dates ne vont pas : jour de clôture entre 1 et 28, heures entre 0 et 23, réponse en 1 à 60 jours, décembre entre le 1er et le 28.",
   nothing_read: "Je n'ai rien lu dans ce devis. Réessaie, ou redépose le PDF.",
   empty_list: "La liste est vide : rien ne part au fournisseur.",
   faconnage_required: "Dis-moi d'abord, pour chaque pièce de zinc, si tu la façonnes ou si tu la commandes façonnée.",

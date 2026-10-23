@@ -20,7 +20,7 @@ const depotBody = z.object({
 });
 const commanderBody = z.object({ negoceId: z.uuid() });
 const grilleBody = z.object({ depart: z.string().max(300).optional(), francoKm: z.string().max(10).optional(), prixAuDela: z.string().max(20).optional() });
-const configBody = z.object({ jourCloture: z.number().int(), heureCloture: z.number().int(), joursReponse: z.number().int(), heureReponse: z.number().int() });
+const configBody = z.object({ jourCloture: z.number().int(), heureCloture: z.number().int(), joursReponse: z.number().int(), heureReponse: z.number().int(), jourClotureDecembre: z.number().int().optional() });
 const datesBody = z.object({ clotureLe: z.iso.datetime().optional(), reponseAvant: z.iso.datetime().optional() });
 
 /** L'instant de la requête ; `?maintenant=` seulement en test, pour rejouer une clôture ou une limite. */
@@ -50,13 +50,15 @@ export class CommandeDuMoisController {
   }
 
   @Get("commande-du-mois")
-  async vue(@Tenant() tenant: TenantContext, @Query("maintenant") m?: string) {
+  async vue(@Tenant() tenant: TenantContext, @Query("maintenant") m?: string, @Query("projectId") projectId?: string) {
     this.actif();
     const maintenant = instant(this.config, m);
+    // `projectId` : la commande ouverte du département de ce chantier (le bloc de « Ton chantier »).
+    const prochaine = await this.commande.prochaineCommande(tenant, maintenant, projectId);
     return {
       mode: this.config.groupe.mode,
       commandes: await this.commande.vues(tenant, maintenant),
-      prochaine: await this.commande.prochaineCommande(tenant, maintenant),
+      prochaine,
       phrases: { sansEngagement: PHRASE_SANS_ENGAGEMENT },
     };
   }
@@ -159,7 +161,7 @@ export class CommandeDuMoisAdminController {
   @Put("config")
   async changer(@Tenant() tenant: TenantContext, @Body(new ZodPipe(configBody)) body: z.infer<typeof configBody>) {
     await this.garde(tenant);
-    return this.commande.changerConfig(body);
+    return this.commande.changerConfig({ ...(await this.commande.config()), ...body });
   }
 
   @Post("cycles/:id/dates")

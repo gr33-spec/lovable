@@ -135,7 +135,7 @@ export class CommandeDuMoisService {
 
   /** L'admin change les dates : elles valent pour les cycles pas encore clos (leurs dates sont recalculées). */
   async changerConfig(c: ConfigCycle): Promise<ConfigCycle> {
-    if (!(c.jourCloture >= 1 && c.jourCloture <= 28 && c.heureCloture >= 0 && c.heureCloture <= 23 && c.joursReponse >= 1 && c.joursReponse <= 60 && c.heureReponse >= 0 && c.heureReponse <= 23)) {
+    if (!(c.jourCloture >= 1 && c.jourCloture <= 28 && c.heureCloture >= 0 && c.heureCloture <= 23 && c.joursReponse >= 1 && c.joursReponse <= 60 && c.heureReponse >= 0 && c.heureReponse <= 23 && c.jourClotureDecembre >= 1 && c.jourClotureDecembre <= 28)) {
       throw validationFailed("Invalid cycle settings", { reason: "reglages_invalides" });
     }
     await this.prisma.parametreGroupe.upsert({ where: { cle: CLE_CONFIG }, create: { cle: CLE_CONFIG, valeur: { ...c } }, update: { valeur: { ...c } } });
@@ -313,15 +313,26 @@ export class CommandeDuMoisService {
     return Promise.all(cycles.map((c) => this.vueDuCycle(tenant, c, maintenant)));
   }
 
-  /** Le cycle ouvert pour la page « Commande commune » quand l'entreprise n'a encore rien déposé (chrono, quantités). */
-  async prochaineCommande(tenant: TenantContext, maintenant = new Date()): Promise<{ mois: Mois; de: string; clotureDans: string; tout: string; vide: boolean } | null> {
-    const company = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } });
-    const zone = zoneDuCodePostal(company?.address ?? "");
+  /**
+   * La commande ouverte d'un département (chrono, quantités) : celui du chantier quand il est donné (le bloc de « Ton
+   * chantier », Greg, 23 octobre 2026), sinon celui de l'entreprise (l'onglet « Commande commune »).
+   */
+  async prochaineCommande(tenant: TenantContext, maintenant = new Date(), projectId?: string): Promise<{ mois: Mois; de: string; zone: string; clotureDans: string; tout: string; vide: boolean } | null> {
+    let adresse: string | null;
+    if (projectId) {
+      if (!isUuid(projectId)) throw notFound("Project");
+      const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { address: true } });
+      if (!project) throw notFound("Project");
+      adresse = project.address;
+    } else {
+      adresse = (await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } }))?.address ?? null;
+    }
+    const zone = zoneDuCodePostal(adresse ?? "");
     if (!zone) return null;
     const { cycle } = await this.cycleOuvert("couverture", zone, maintenant);
     const c = await this.prisma.cycleCommande.findUniqueOrThrow({ where: { id: cycle.id } });
     const tout = await this.lignesDuCycle(c.id);
-    return { mois: c.mois, de: deMois(c.mois), clotureDans: chrono(maintenant, c.clotureLe), tout: affichageDeLaCommande({ mois: c.mois, toi: [], tout, seul: false, clotureDans: null }).tout, vide: tout.length === 0 };
+    return { mois: c.mois, de: deMois(c.mois), zone, clotureDans: chrono(maintenant, c.clotureLe), tout: affichageDeLaCommande({ mois: c.mois, toi: [], tout, seul: false, clotureDans: null }).tout, vide: tout.length === 0 };
   }
 
   private async lignesDuCycle(cycleId: string, companyId?: string): Promise<LigneDeGrille[]> {

@@ -202,7 +202,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     const admin = await signUpWithCompany(ctx.app, "greg@example.fr", "Admin");
     const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2000", unite: "pièces" }]);
     await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
-    expect((await admin.agent.get("/v1/admin/commande-du-mois/config").expect(200)).body).toEqual({ jourCloture: 25, heureCloture: 12, joursReponse: 14, heureReponse: 18 });
+    expect((await admin.agent.get("/v1/admin/commande-du-mois/config").expect(200)).body).toEqual({ jourCloture: 25, heureCloture: 12, joursReponse: 14, heureReponse: 18, jourClotureDecembre: 18 });
     await A.agent.get("/v1/admin/commande-du-mois/config").expect(403);
     await A.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture: 20, heureCloture: 12, joursReponse: 14, heureReponse: 18 }).expect(403);
     expect((await admin.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture: 31, heureCloture: 12, joursReponse: 14, heureReponse: 18 }).expect(400)).body.error.details).toMatchObject({ reason: "reglages_invalides" });
@@ -211,6 +211,23 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     const vue = (await A.agent.get(`/v1/commande-du-mois?maintenant=${T0}`).expect(200)).body.commandes[0];
     expect(vue.clotureLe).toBe("2026-10-20T10:00:00.000Z");
     expect(vue.clotureDans).toBe("4 j 3 h");
+  });
+
+  it("le bloc de « Ton chantier » suit le département du chantier, pas celui de l'entreprise", async () => {
+    const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2000", unite: "pièces" }]);
+    await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
+    // B a son entreprise à Paimpol (22), mais ce chantier est à Brest (29).
+    const B = await couvreur("b@example.fr", "Toitures B", "12 rue du Port, 22500 Paimpol", [{ libelle: LITEAU, quantite: "300", unite: "m" }]);
+    await B.agent.patch(`/v1/projects/${B.projectId}`).send({ address: "2 rue de Siam, 29200 Brest" }).expect(200);
+    await B.agent.post(`/v1/projects/${B.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: B.articles, nature: "stock" }).expect(201);
+    const sansChantier = (await B.agent.get(`/v1/commande-du-mois?maintenant=${T0}`).expect(200)).body.prochaine;
+    expect(sansChantier.tout.replace(/\u202f/g, " ")).toContain("2 000 pièces d'ardoise");
+    const duChantier = (await B.agent.get(`/v1/commande-du-mois?maintenant=${T0}&projectId=${B.projectId}`).expect(200)).body.prochaine;
+    expect(duChantier).toMatchObject({ mois: "2026-10", zone: "29" });
+    expect(duChantier.tout).toContain("300 m de liteau");
+    expect(duChantier.tout).not.toContain("ardoise");
+    // Le chantier d'une autre entreprise : introuvable.
+    await B.agent.get(`/v1/commande-du-mois?maintenant=${T0}&projectId=${A.projectId}`).expect(404);
   });
 
   describe("revue à froid", () => {
