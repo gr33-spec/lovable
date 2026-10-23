@@ -51,3 +51,4 @@ export * from "./groupe/nom.js";
 export * from "./groupe/precision.js";
 export * from "./groupe/cap-22-octobre.js";
 export * from "./groupe/commande-du-mois.js";
+export * from "./groupe/espace-negoce.js";

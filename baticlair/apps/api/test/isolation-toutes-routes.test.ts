@@ -139,6 +139,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/commande-du-mois$/, ids.cycle],
         [/\/admin\/commande-du-mois\/cycles$/, ids.cycle],
         [/\/grille$/, "jeton-inconnu-de-b-0000000000000000"],
+        // L'espace négoce (23 octobre 2026) : invitation, connexion et désabonnement sont des jetons signés.
+        [/\/negoce\/(invitation|connexion|desabonner)$/, "jeton-inconnu-de-b.0000000000000000"],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);
@@ -233,7 +235,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
     }
     // Ce qui répond sans session : la santé du service, le compteur de la page publique (un nombre, rien d'une
     // entreprise), et les demandes d'accès elles-mêmes (inscription, connexion…).
-    expect(open.filter((o) => !/\/v1\/health|\/v1\/public\/compteur|\/api\/auth|\/v1\/auth/.test(o))).toEqual([]);
+    // Les conditions négoce et la déconnexion de l'espace négoce se lisent sans compte (23 octobre 2026) : aucune donnée.
+    expect(open.filter((o) => !/\/v1\/health|\/v1\/public\/compteur|\/api\/auth|\/v1\/auth|\/v1\/negoce\/(conditions|deconnexion)/.test(o))).toEqual([]);
   });
 });
 

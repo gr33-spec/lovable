@@ -19,6 +19,8 @@ interface Reponse {
   negoce: { id: string; nom: string; email: string; departement: string };
   dejaLa: boolean;
   mois: { mois: string; de: string; clotureLe: string } | null;
+  /** Le lien d'invitation du négoce (`/negoce/rejoindre/<jeton>`), le même pour tous les artisans qui l'ajoutent. */
+  lienInvitation?: string | null;
 }
 
 const bouton = "pressable inline-flex min-h-12 items-center justify-center rounded-full px-5 text-[15px] font-semibold";
@@ -93,7 +95,7 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
         </ul>
       ) : null}
 
-      {ajoute ? <Prevenir negoce={ajoute.negoce} /> : null}
+      {ajoute ? <Prevenir negoce={{ ...ajoute.negoce, lienInvitation: ajoute.lienInvitation }} /> : null}
 
       {ouvert || dansLaBoucle.length === 0 ? (
         <form
@@ -154,12 +156,14 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
 }
 
 /** Le négoce vient d'entrer : le prévenir tout de suite, avec le message vouvoyé (WhatsApp, SMS, copier). Rien ne part seul. */
-function Prevenir({ negoce }: { negoce: { nom: string; email: string } }) {
-  const lien = useSyncExternalStore(
+function Prevenir({ negoce }: { negoce: { nom: string; email: string; lienInvitation?: string | null } }) {
+  // Le lien d'invitation vient de l'API, déjà absolu ; sans lui (ancienne API), la racine du site.
+  const racine = useSyncExternalStore(
     () => () => undefined,
     () => `${window.location.origin}/`,
     () => "/",
   );
+  const lien = negoce.lienInvitation ?? racine;
   const [copie, setCopie] = useState(false);
   const message = messageAuNegoceEnBoucle(lien);
   async function copier() {
@@ -174,7 +178,7 @@ function Prevenir({ negoce }: { negoce: { nom: string; email: string } }) {
   return (
     <div aria-label={`Prévenir ${negoce.nom}`} role="group" className="flex flex-col gap-3">
       <p className="text-[14px] text-muted">Préviens-le toi-même, il te connaît :</p>
-      <p className="rounded-xl bg-ground px-4 py-3 text-[14px] leading-relaxed">{message}</p>
+      <p className="rounded-xl bg-ground px-4 py-3 text-[14px] leading-relaxed [overflow-wrap:anywhere]">{message}</p>
       <div className="flex flex-wrap gap-3">
         <a href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className={`${bouton} bg-accent text-white hover:bg-accent-text`}>
           Envoyer sur WhatsApp

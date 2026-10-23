@@ -168,17 +168,35 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
     await shoot(page, size.name, "mois-03-barre");
   }
 
-  // La clôture : la grille part au négoce ; sa page, sans compte.
+  // Espace négoce (23 octobre) : l'invitation, la page « Créez votre accès », puis le compte (dépôt, paliers) par l'API.
+  const invitations = (await appel<{ emails: { text: string }[] }>(page, "GET", `/v1/internal/test/emails?to=${encodeURIComponent(ponant)}`)).body.emails;
+  const lienInvitation = invitations.map((m) => /https?:\/\/[^\s]+(\/negoce\/rejoindre\/[A-Za-z0-9_.-]+)/.exec(m.text)?.[1]).filter(Boolean).at(-1)!;
+  const negoce = await (await browser.newContext()).newPage();
+  for (const size of WIDTHS) {
+    await negoce.setViewportSize({ width: size.width, height: size.height });
+    await negoce.goto(lienInvitation);
+    await expect(negoce.getByRole("form", { name: "Créer mon accès" })).toBeVisible();
+    await shoot(negoce, size.name, "mois-04-negoce-rejoindre");
+  }
+  const jetonInvitation = lienInvitation.split("/").at(-1)!;
+  expect((await appel(negoce, "POST", "/v1/negoce/inscription", { jeton: jetonInvitation, email: ponant, siret: null, enseigne: "Négoce du Ponant", telephone: null, depots: [{ adresse: "Zone de Kergaradec, 29490 Guipavas" }], livraison: { gratuiteJusquaKm: 30, paliers: [{ jusquaKm: 100, prixHt: 60 }], maxKm: 100 }, departements: ["29"], conditions: true })).status).toBe(201);
+  for (const size of WIDTHS) {
+    await negoce.setViewportSize({ width: size.width, height: size.height });
+    await negoce.goto("/negoce");
+    await expect(negoce.getByRole("region", { name: "Prochaine clôture" })).toBeVisible();
+    await shoot(negoce, size.name, "mois-05-negoce-compte");
+  }
+
+  // La clôture : la grille part au négoce inscrit ; sa page de grille.
   const cycle = (await appel<{ commandes: { clotureLe: string; phase: string }[] }>(page, "GET", "/v1/commande-du-mois")).body.commandes.find((c) => c.phase === "inscriptions")!;
   expect((await appel(page, "GET", `/v1/internal/commande-du-mois?maintenant=${encodeURIComponent(new Date(Date.parse(cycle.clotureLe) + 60_000).toISOString())}`)).status).toBe(200);
   const mails = (await appel<{ emails: { text: string }[] }>(page, "GET", `/v1/internal/test/emails?to=${encodeURIComponent(ponant)}`)).body.emails;
   const lien = mails.map((m) => /https?:\/\/[^\s]+(\/grille\/[A-Za-z0-9_-]+)/.exec(m.text)?.[1]).filter(Boolean).at(-1)!;
-  const negoce = await (await browser.newContext()).newPage();
   for (const size of WIDTHS) {
     await negoce.setViewportSize({ width: size.width, height: size.height });
     await negoce.goto(lien);
     await expect(negoce.getByRole("form", { name: "Déposer mon devis" })).toBeVisible();
-    await shoot(negoce, size.name, "mois-04-page-negoce");
+    await shoot(negoce, size.name, "mois-06-page-negoce-grille");
   }
 
   // L'admin des dates (le compte admin des parcours).
@@ -203,6 +221,6 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
     await admin.setViewportSize({ width: size.width, height: size.height });
     await admin.goto("/admin/groupe");
     await expect(admin.getByRole("button", { name: "Enregistrer les dates" })).toBeVisible();
-    await shoot(admin, size.name, "mois-05-admin-dates");
+    await shoot(admin, size.name, "mois-07-admin-dates");
   }
 });

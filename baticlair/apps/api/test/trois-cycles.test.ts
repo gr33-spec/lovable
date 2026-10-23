@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
+import { inscrireNegoce } from "./support/negoce.js";
 
 /**
  * TROIS COMMANDES COMPLÈTES (revue à froid du 23 octobre 2026 ; cycle raccourci le même jour) : le 15 octobre, le 1er
@@ -64,13 +65,12 @@ async function depose(c: Couvreur, adresse: string, lignes: Ligne[], nature: "ch
   return (await c.agent.post(`/v1/projects/${q.projetId}/commande-du-mois?maintenant=${encodeURIComponent(maintenant)}`).send({ articles, nature, ...(visee ? { mois: visee } : {}) }).expect(201)).body as { mois: string; message: string | null };
 }
 
-async function grille(email: string, rows: FixtureRow[], depart: string, francoKm: string, prixAuDela: string, maintenant: string) {
+/** La livraison vient du compte du négoce (espace négoce, 23 octobre) : les trois derniers paramètres ne servent plus qu'à la lecture. */
+async function grille(email: string, rows: FixtureRow[], _depart: string, _francoKm: string, _prixAuDela: string, maintenant: string) {
   const pdf = Buffer.from(await makePdf(["devis"], rows, "Total HT", "DEVIS"));
   return server()
     .post(`/v1/grille/${jetonDe(email)}?maintenant=${encodeURIComponent(maintenant)}`)
-    .field("depart", depart)
-    .field("francoKm", francoKm)
-    .field("prixAuDela", prixAuDela)
+    .field("fermes", "oui")
     .attach("file", pdf, { filename: "devis.pdf", contentType: "application/pdf" })
     .expect(201)
     .then((r) => r.body as { rang: string; depose: { manquantes: number } });
@@ -98,8 +98,16 @@ it("15 octobre, 1er novembre, 15 décembre : trois commandes complètes, chaque 
   const A = await couvreur("a@toitures.fr", "Toitures A", ADR.lannion);
   const B = await couvreur("b@toitures.fr", "Toitures B", ADR.saintBrieuc);
   const D = await couvreur("d@toitures.fr", "Toitures D", ADR.guingamp);
+  // N1 (Lannion, 25 km gratuits, 55 €), N2 (Saint-Brieuc, 40 km, 45 €), N3 (Paimpol, 10 km, 60 €), N4 (Guingamp, muet) : chacun crée son accès.
+  const DEPOTS = [
+    { depot: "ZA de Kerverzot, 22300 Lannion", francoKm: 25, prixAuDela: 55 },
+    { depot: "Rue de la Gare, 22000 Saint-Brieuc", francoKm: 40, prixAuDela: 45 },
+    { depot: "Quai Morand, 22500 Paimpol", francoKm: 10, prixAuDela: 60 },
+    { depot: "Rue de Lannion, 22200 Guingamp", francoKm: 20, prixAuDela: 50 },
+  ];
   for (const [i, email] of [1, 2, 3, 4].map((i) => [i, `n${i}@negoce.fr`] as const)) {
     await A.agent.post("/v1/groupe/negoces?maintenant=2026-10-10T08:00:00.000Z").send({ nom: `Négoce N${i}`, email, familles: ["couverture"] }).expect(201);
+    await inscrireNegoce(ctx, email, { ...DEPOTS[i - 1]!, enseigne: `Négoce N${i}`, maintenant: "2026-10-10T08:00:00.000Z" });
   }
 
   // ── 15 OCTOBRE ─────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -164,6 +172,7 @@ it("15 octobre, 1er novembre, 15 décembre : trois commandes complètes, chaque 
   // Le 1er novembre est un dimanche : clôture à 12 h quand même (heure d'hiver : 11 h UTC) ; 5 jours ouvrés du lundi 2 au
   // vendredi 6 : réponses avant le 6 novembre, 18 h. N5 arrive (dépôt à Paimpol).
   await C.agent.post("/v1/groupe/negoces?maintenant=2026-10-28T09:00:00.000Z").send({ nom: "Négoce N5", email: "n5@negoce.fr", familles: ["couverture"] }).expect(201);
+  await inscrireNegoce(ctx, "n5@negoce.fr", { depot: "Quai Morand, 22500 Paimpol", francoKm: 20, prixAuDela: 50, enseigne: "Négoce N5", maintenant: "2026-10-28T09:00:00.000Z" });
   const E = await couvreur("e@toitures.fr", "Toitures E", ADR.ploubazlanec);
   const nov = "2026-10-28T09:00:00.000Z";
   expect((await depose(A, ADR.lannion, [ard(1500)], "chantier", nov)).mois).toBe("2026-11-01");

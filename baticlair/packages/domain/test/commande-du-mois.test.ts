@@ -105,9 +105,9 @@ describe("les résultats : chaque grille appliquée à chaque artisan, livraison
   const A: CommandeDArtisan = { companyId: "A", chantiers: 1, distances: { N1: [0], N2: [40], N3: [0] }, lignes: [{ cle: ARDOISE, designation: "Ardoise", quantite: 2000, unite: "pièces" }, { cle: LITEAU, designation: "Liteau", quantite: 400, unite: "m" }] };
   const B: CommandeDArtisan = { companyId: "B", chantiers: 1, distances: { N1: [40], N2: [0], N3: [40] }, lignes: [{ cle: ARDOISE, designation: "Ardoise", quantite: 3000, unite: "pièces" }, { cle: CROCHET, designation: "Crochet", quantite: 10, unite: "boîtes" }] };
   const lignes = fusionnerLesListes([...A.lignes, ...B.lignes].map((l) => ({ ...l, cle: l.cle.split("#")[0]! })));
-  const N1: GrilleChiffree = { negoceId: "N1", prix: { [ARDOISE]: 0.9, [LITEAU]: 0.8, [CROCHET]: 30 }, livraison: { francoKm: 20, prixAuDela: 50 } };
-  const N2: GrilleChiffree = { negoceId: "N2", prix: { [ARDOISE]: 0.88, [LITEAU]: 0.85, [CROCHET]: 32 }, livraison: { francoKm: 30, prixAuDela: 40 } };
-  const N3: GrilleChiffree = { negoceId: "N3", prix: { [ARDOISE]: 0.8, [LITEAU]: 0.7 }, livraison: { francoKm: 10, prixAuDela: 60 } };
+  const N1: GrilleChiffree = { negoceId: "N1", prix: { [ARDOISE]: 0.9, [LITEAU]: 0.8, [CROCHET]: 30 }, livraison: { gratuiteJusquaKm: 20, paliers: [{ jusquaKm: 1000, prixHt: 50 }], maxKm: 1000 } };
+  const N2: GrilleChiffree = { negoceId: "N2", prix: { [ARDOISE]: 0.88, [LITEAU]: 0.85, [CROCHET]: 32 }, livraison: { gratuiteJusquaKm: 30, paliers: [{ jusquaKm: 1000, prixHt: 40 }], maxKm: 1000 } };
+  const N3: GrilleChiffree = { negoceId: "N3", prix: { [ARDOISE]: 0.8, [LITEAU]: 0.7 }, livraison: { gratuiteJusquaKm: 10, paliers: [{ jusquaKm: 1000, prixHt: 60 }], maxKm: 1000 } };
   const classement = classerLesGrilles([N1, N2, N3], lignes, [A, B]);
 
   it("A : chez N1 2 120 € (1 800 + 320, livré gratuit) ; chez N2 2 140 € (1 760 + 340 + 40) ; chez N3 1 880 € (1 600 + 280)", () => {

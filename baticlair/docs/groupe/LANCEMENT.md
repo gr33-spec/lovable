@@ -5,7 +5,7 @@ Ordre fixé par Greg le 23 octobre 2026 : le crédit, puis les appels (négoces,
 ## Maintenant
 
 1. **Recharger le crédit Anthropic**, puis écrire « crédit rechargé ». Claude lance alors la vraie lecture : les devis réels du dépôt, puis une vraie grille de négoce de plusieurs lignes (DETTE n° 28).
-2. **Appeler 5 à 10 négoces couverture des Côtes-d'Armor.** Leur dire : une commande toutes les deux semaines (clôture le 1er et le 15 à midi), une seule grille avec tout le volume, cinq jours ouvrés pour répondre, prix fermes pour la commande, aucun frais. Noter le bon e-mail de chacun.
+2. **Appeler 5 à 10 négoces couverture des Côtes-d'Armor.** Leur dire : une commande toutes les deux semaines (clôture le 1er et le 15 à midi), une seule grille avec tout le volume, cinq jours ouvrés pour répondre, prix fermes quel que soit le volume, grille garantie 30 jours pour le négoce retenu, aucun frais. Noter le bon e-mail de chacun : c'est à cet e-mail qu'arrive le lien « créez votre accès » (`/negoce/rejoindre/<jeton>`) dès qu'un couvreur l'ajoute, et tu n'as plus rien à faire ensuite : il s'inscrit seul (dépôts, paliers de livraison, départements) et reçoit chaque grille à la clôture. L'onglet Négoces de l'admin dit qui est inscrit, invité jamais venu, désabonné.
 3. **Appeler 10 à 20 couvreurs que tu connais.** Leur faire essayer la liste sur le lien de prévisualisation (SIRET, adresse du chantier, « Ajouter à la commande »), et noter ce qui coince.
 
 ## Après les premiers retours

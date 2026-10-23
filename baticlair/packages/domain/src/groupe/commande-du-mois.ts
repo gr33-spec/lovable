@@ -1,4 +1,4 @@
-import { fraisDeLivraison, type RegleDeLivraison } from "./cap-22-octobre.js";
+import { fraisDeLivraisonPaliers, type PaliersLivraison } from "./espace-negoce.js";
 
 /**
  * LA COMMANDE COMMUNE (décision de Greg, 22 octobre 2026, au soir ; cycle raccourci le 23 octobre) : elle remplace le
@@ -229,12 +229,16 @@ export function fusionnerLesListes(lignes: readonly LigneDeposee[]): LigneDeGril
   return [...parCle.values()];
 }
 
-/** La grille chiffrée d'un négoce : un prix unitaire HT par ligne (le MÊME pour tous), et ses deux chiffres de livraison. */
+/**
+ * La grille chiffrée d'un négoce : un prix unitaire HT par ligne (le MÊME pour tous), ses paliers de livraison (espace
+ * négoce, 23 octobre 2026) et les articles au prix « non garanti » (indicatifs : hors total, hors garantie).
+ */
 export interface GrilleChiffree {
   negoceId: string;
   /** Prix unitaire HT par clé de ligne ; une ligne absente n'est pas chiffrée. */
   prix: Readonly<Record<string, number>>;
-  livraison: Pick<RegleDeLivraison, "francoKm" | "prixAuDela">;
+  livraison: PaliersLivraison;
+  nonGarantis?: readonly string[];
 }
 
 /** Les lignes de la grille que ce négoce n'a pas chiffrées. */
@@ -266,22 +270,35 @@ export interface PrixChezUnNegoce {
   /** Lignes de l'artisan que ce négoce n'a pas chiffrées (elles ne sont pas dans le total). */
   manquantes: number;
   complet: boolean;
+  /** Le négoce livre chaque chantier de l'artisan (dans sa distance maximale) ; sinon « Ne livre pas ta zone ». */
+  livrable: boolean;
+  /** Les lignes au prix « non garanti » (matière cotée) : indicatives, affichées à part, hors total. */
+  indicatives: { cle: string; prixUnitaire: number }[];
 }
 
-/** La grille d'un négoce appliquée à la liste d'un artisan, livraison comprise (une livraison par chantier). */
+/**
+ * La grille d'un négoce appliquée à la liste d'un artisan, livraison comprise (une livraison par chantier, depuis le
+ * dépôt le plus proche : les distances sont déjà celles-là). Un chantier hors de la distance maximale du négoce : il ne
+ * livre pas cet artisan.
+ */
 export function prixChezUnNegoce(commande: CommandeDArtisan, grille: GrilleChiffree): PrixChezUnNegoce {
   let marchandise = 0;
   let manquantes = 0;
+  const indicatives: { cle: string; prixUnitaire: number }[] = [];
+  const nonGarantis = new Set(grille.nonGarantis ?? []);
   for (const l of commande.lignes) {
     const p = grille.prix[l.cle];
     if (p === undefined) manquantes++;
+    else if (nonGarantis.has(l.cle)) indicatives.push({ cle: l.cle, prixUnitaire: p });
     else marchandise += l.quantite * p;
   }
   const distances = commande.distances[grille.negoceId] ?? Array.from({ length: commande.chantiers }, () => null);
-  const livraison = distances.reduce<number>((s, d) => s + fraisDeLivraison(d, grille.livraison), 0);
+  const frais = distances.map((d) => fraisDeLivraisonPaliers(d, grille.livraison));
+  const livrable = frais.every((f) => f !== null);
+  const livraison = frais.reduce<number>((s, f) => s + (f ?? 0), 0);
   const marchandiseHt = arrondi2(marchandise);
   const livraisonHt = arrondi2(livraison);
-  return { negoceId: grille.negoceId, marchandiseHt, livraisonHt, totalHt: arrondi2(marchandiseHt + livraisonHt), manquantes, complet: manquantes === 0 };
+  return { negoceId: grille.negoceId, marchandiseHt, livraisonHt, totalHt: arrondi2(marchandiseHt + livraisonHt), manquantes, complet: manquantes === 0 && livrable, livrable, indicatives };
 }
 
 export interface GrilleClassee {
@@ -290,20 +307,24 @@ export interface GrilleClassee {
   totalHt: number;
   complete: boolean;
   manquantes: number;
+  /** Artisans de la commande que ce négoce ne livre pas (hors de sa distance maximale) : la grille passe derrière. */
+  nonLivres: number;
   rang: number;
 }
 
 /**
- * LE CLASSEMENT SUR LE TOTAL DE LA COMMANDE : les grilles complètes d'abord (une grille incomplète passe derrière, quel
- * que soit son prix), puis du moins cher au plus cher, livraisons comprises. À égalité, l'ordre d'arrivée (le premier
- * déposé gagne) : `grilles` est passé dans l'ordre de dépôt.
+ * LE CLASSEMENT SUR LE TOTAL DE LA COMMANDE : les grilles complètes d'abord (une grille incomplète, ou qui ne livre pas
+ * tous les artisans, passe derrière, quel que soit son prix), puis du moins cher au plus cher, livraisons comprises. À
+ * égalité, l'ordre d'arrivée (le premier déposé gagne) : `grilles` est passé dans l'ordre de dépôt.
  */
 export function classerLesGrilles(grilles: readonly GrilleChiffree[], lignes: readonly LigneDeGrille[], commandes: readonly CommandeDArtisan[]): GrilleClassee[] {
   const lignesParCle = new Map(lignes.map((l) => [l.cle, l]));
   const evalues = grilles.map((g, ordre) => {
-    const totalHt = arrondi2(commandes.reduce((s, c) => s + prixChezUnNegoce({ ...c, lignes: c.lignes.filter((l) => lignesParCle.has(l.cle)) }, g).totalHt, 0));
+    const prix = commandes.map((c) => prixChezUnNegoce({ ...c, lignes: c.lignes.filter((l) => lignesParCle.has(l.cle)) }, g));
+    const totalHt = arrondi2(prix.reduce((s, p) => s + p.totalHt, 0));
     const manquantes = lignesManquantes(g, lignes).length;
-    return { negoceId: g.negoceId, totalHt, complete: manquantes === 0, manquantes, ordre };
+    const nonLivres = prix.filter((p) => !p.livrable).length;
+    return { negoceId: g.negoceId, totalHt, complete: manquantes === 0 && nonLivres === 0, manquantes, nonLivres, ordre };
   });
   evalues.sort((a, b) => Number(b.complete) - Number(a.complete) || a.totalHt - b.totalHt || a.ordre - b.ordre);
   return evalues.map(({ ordre: _o, ...g }, i) => ({ ...g, rang: i + 1 }));
@@ -422,7 +443,7 @@ export function echeanceNegoce(reponseAvant: Date, maintenant: Date): string {
 export function mailGrilleAuNegoce(m: { negoce: string; mois: Mois; departement: string; lignes: readonly LigneDeGrille[]; reponseAvant: Date; maintenant: Date; lien: string; stop: string }): { objet: string; texte: string } {
   const lignes = m.lignes.map((l) => `- ${l.designation} : ${l.quantite.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ${l.unite}`);
   return {
-    objet: `Commande commune ${deMois(m.mois)} (${m.departement}) : demande de prix sur ${m.lignes.length} article${m.lignes.length > 1 ? "s" : ""}`,
+    objet: `La grille ${deMois(m.mois)} est prête (${m.departement}) : ${m.lignes.length} article${m.lignes.length > 1 ? "s" : ""} à chiffrer`,
     texte: [
       "Bonjour,",
       "",
@@ -430,7 +451,7 @@ export function mailGrilleAuNegoce(m: { negoce: string; mois: Mois; departement:
       "",
       ...lignes,
       "",
-      "Un prix unitaire HT par article, le même pour tous les artisans, et vos deux chiffres de livraison (gratuite jusqu'à X km de votre dépôt, Y € HT par livraison au-delà). Merci de chiffrer toutes les lignes : une grille incomplète passe derrière les grilles complètes.",
+      "Un prix unitaire HT par article, le même pour tous les artisans ; la livraison suit les paliers de votre compte. Merci de chiffrer toutes les lignes : une grille incomplète passe derrière les grilles complètes.",
       PHRASE_PRIX_FERMES,
       PHRASE_AU_NEGOCE,
       "",
@@ -438,7 +459,7 @@ export function mailGrilleAuNegoce(m: { negoce: string; mois: Mois; departement:
       `Déposez votre devis ici : ${m.lien}`,
       "",
       "Aucun nom d'artisan ne vous est communiqué avant sa commande. Aucun frais pour vous.",
-      `Pour ne plus rien recevoir : ${m.stop}`,
+      `Se désabonner : ${m.stop}`,
       "",
       "BatiClair, la commande commune des couvreurs",
     ].join("\n"),
@@ -470,7 +491,10 @@ export function mailResultatNegoce(m: { mois: Mois; departement: string; premier
   };
 }
 
-/** Le bon de commande d'un artisan pour la commande commune : c'est ici que le négoce voit son nom. */
+/**
+ * Le bon de commande d'un artisan pour la commande commune : c'est ici que le négoce voit son nom. `garantie` : une
+ * recommande sur la grille garantie 30 jours (Greg, 23 octobre 2026), avec sa mention.
+ */
 export function bonDuMois(b: {
   numero: number;
   mois: Mois;
@@ -480,10 +504,12 @@ export function bonDuMois(b: {
   chantiers: readonly string[];
   lignes: readonly { designation: string; quantite: number; unite: string; prixUnitaire: number }[];
   livraisonHt: number;
+  garantie?: boolean;
 }): { titre: string; blocs: { titre?: string; lignes: (string | string[])[] }[] } {
   const marchandise = Math.round(b.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire, 0) * 100) / 100;
+  const mention = b.garantie ? `Commande sur grille garantie ${deMois(b.mois)}.` : `Prix ferme de la Commande commune ${deMois(b.mois)}.`;
   return {
-    titre: `Bon de commande, commande commune ${deMois(b.mois)} n° ${b.numero}`,
+    titre: `Bon de commande, commande commune ${deMois(b.mois)} n° ${b.numero}${b.garantie ? " (grille garantie)" : ""}`,
     blocs: [
       { titre: "Client", lignes: [b.artisan.nom, ...(b.artisan.siret ? [`SIRET ${b.artisan.siret}`] : []), b.numeroCompte ? `Numéro de compte chez ${b.negoce} : ${b.numeroCompte}` : `Ouverture de compte demandée chez ${b.negoce}`, ...(b.artisan.telephone ? [`Téléphone : ${b.artisan.telephone}`] : []), ...(b.artisan.email ? [`E-mail : ${b.artisan.email}`] : [])] },
       { titre: "Livraison", lignes: [...b.chantiers.map((c) => `Chantier : ${c}`), `Livraison : ${b.livraisonHt > 0 ? `${eurosFr(b.livraisonHt)} HT` : "gratuite"}`] },
@@ -496,7 +522,7 @@ export function bonDuMois(b: {
           `Total HT livraison comprise : ${eurosFr(Math.round((marchandise + b.livraisonHt) * 100) / 100)}`,
         ],
       },
-      { lignes: [`Prix de votre grille de la commande commune ${deMois(b.mois)}. Facturation et paiement comme d'habitude, sur le compte du client.`] },
+      { lignes: [mention, `Prix de votre grille de la commande commune ${deMois(b.mois)}. Facturation et paiement comme d'habitude, sur le compte du client.`] },
     ],
   };
 }

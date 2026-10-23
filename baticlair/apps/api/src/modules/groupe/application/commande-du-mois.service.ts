@@ -13,8 +13,15 @@ import {
   distanceRouteKm,
   echeanceNegoce,
   fusionnerLesListes,
-  lireRegleDeLivraison,
+  finDeGarantie,
+  mailClotureSansCompte,
   mailGrilleAuNegoce,
+  mentionGarantie,
+  mentionPrixFerme,
+  PHRASE_PRIX_FERMES_VOLUME,
+  phrasePaliers,
+  fraisDeLivraisonPaliers,
+  titreGarantie,
   mailRelanceNegoce,
   mailResultatNegoce,
   messageAjout,
@@ -34,8 +41,10 @@ import {
   type MessageArtisan,
   type Mois,
   type Nature,
+  type PaliersLivraison,
   type PhaseCycle,
 } from "@baticlair/domain";
+import type { Alerter } from "../../../platform/alerts/alerter.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -43,9 +52,9 @@ import { isUuid } from "../../../platform/validation/ids.js";
 import type { PdfReader } from "../../documents/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import type { ReviewedTakeoff } from "../../takeoff/index.js";
+import type { EspaceNegoceService } from "./espace-negoce.service.js";
 import type { Geocodeur } from "./geocodeur.js";
 import { lignesProposables } from "./groupe.service.js";
-import { jetonDeLien } from "./lien-negoce.js";
 import { statutDeLecture, type NegoceExtractor, type ReponseLue } from "./negoce-extractor.js";
 import { pdfDeTexte } from "./pdf-texte.js";
 
@@ -95,12 +104,32 @@ export interface VueDuMois {
   resultats: null | {
     parDefaut: string | null;
     moinsCherPourToi: string | null;
-    negoces: { negoceId: string; nom: string; totalHt: number; marchandiseHt: number; livraisonHt: number; manquantes: number; complet: boolean; premierSurLeTotal: boolean }[];
+    negoces: { negoceId: string; nom: string; totalHt: number; marchandiseHt: number; livraisonHt: number; manquantes: number; complet: boolean; livrable: boolean; indicatives: { designation: string; prixUnitaire: number }[]; premierSurLeTotal: boolean }[];
     choix: { negoceId: string; totalHt: number; commandeLe: string | null } | null;
   };
 }
 
-type LivraisonEnregistree = { depart: string; francoKm: number; prixAuDela: number; distances: Record<string, (number | null)[]> };
+/** La grille garantie 30 jours d'une commande (Greg, 23 octobre 2026) : ce que tout artisan de la zone voit après les résultats. */
+export interface GarantieVue {
+  cycleId: string;
+  mois: Mois;
+  de: string;
+  zone: string;
+  titre: string;
+  jusquau: string;
+  negoce: { id: string; nom: string };
+  livraison: string;
+  lignes: { cle: string; designation: string; unite: string; prixUnitaire: number }[];
+  /** Les recommandes déjà passées par l'entreprise sur cette grille. */
+  commandes: { numero: number; totalHt: number; le: string; adresse: string }[];
+}
+
+/** La livraison figée au dépôt d'une grille : les dépôts du négoce, ses paliers, la distance du dépôt le plus proche à chaque chantier. */
+type LivraisonEnregistree = { depots: { adresse: string; lat: number | null; lon: number | null }[]; paliers: PaliersLivraison; distances: Record<string, (number | null)[]> };
+/** Le 30 % de lignes « non garanties » au-delà duquel Greg est prévenu (point 8). */
+const PART_NON_GARANTIE_ALERTE = 0.3;
+const CLE_RAPPELS = (cycleId: string) => `rappels-cloture:${cycleId}`;
+const CLE_ALERTE = (quoi: string, cycleId: string) => `alerte:${quoi}:${cycleId}`;
 
 /**
  * LA COMMANDE COMMUNE DU MOIS (décision de Greg, 22 octobre 2026, au soir), côté serveur. Elle remplace le regroupement
@@ -121,7 +150,15 @@ export class CommandeDuMoisService {
     private readonly reglages: ReglagesCommandeDuMois,
     /** L'ouverture de la commande commune pour l'entreprise (SIRET vérifié, département ouvert, pas d'exclusion). */
     private readonly ouverte: (tenant: TenantContext) => Promise<void>,
+    /** L'espace négoce (23 octobre 2026) : liens d'invitation et de désabonnement, comptes inscrits. */
+    private readonly espace: EspaceNegoceService,
+    private readonly alerter: Alerter,
   ) {}
+
+  /** Le lien d'une grille, pour l'espace du négoce. */
+  jetonDeGrille(grilleId: string): string {
+    return jetonDeGrille(this.reglages.authSecret, grilleId);
+  }
 
   // ---------------------------------------------------------------------------------------------------------------
   // Réglages (admin)
@@ -381,10 +418,11 @@ export class CommandeDuMoisService {
       if (moi && chiffrees.length > 0) {
         const comp = comparatifDeLArtisan(moi, chiffrees, classement);
         const nom = new Map(grilles.map((g) => [g.negoceId, g.negoce.nom]));
+        const designationDe = new Map((c.lignes as unknown as LigneDeGrille[]).map((l) => [l.cle, l.designation]));
         resultats = {
           parDefaut: comp.parDefaut,
           moinsCherPourToi: comp.moinsCherPourToi,
-          negoces: comp.lignes.map((l) => ({ negoceId: l.negoceId, nom: nom.get(l.negoceId) ?? "", totalHt: l.totalHt, marchandiseHt: l.marchandiseHt, livraisonHt: l.livraisonHt, manquantes: l.manquantes, complet: l.complet, premierSurLeTotal: l.negoceId === comp.parDefaut })),
+          negoces: comp.lignes.map((l) => ({ negoceId: l.negoceId, nom: nom.get(l.negoceId) ?? "", totalHt: l.totalHt, marchandiseHt: l.marchandiseHt, livraisonHt: l.livraisonHt, manquantes: l.manquantes, complet: l.complet, livrable: l.livrable, indicatives: l.indicatives.map((i) => ({ designation: designationDe.get(i.cle) ?? i.cle, prixUnitaire: i.prixUnitaire })), premierSurLeTotal: l.negoceId === comp.parDefaut })),
           choix: choix ? { negoceId: choix.negoceId, totalHt: Number(choix.totalHt), commandeLe: choix.commandeLe?.toISOString() ?? null } : null,
         };
       }
@@ -424,14 +462,14 @@ export class CommandeDuMoisService {
     const grilles = await this.prisma.grilleNegoce.findMany({ where: { cycleId, deposeLe: { not: null } }, orderBy: { deposeLe: "asc" } });
     const chiffrees: GrilleChiffree[] = grilles
       .filter((g) => g.livraison)
-      .map((g) => ({ negoceId: g.negoceId, prix: g.prix as Record<string, number>, livraison: g.livraison as LivraisonEnregistree }));
+      .map((g) => ({ negoceId: g.negoceId, prix: g.prix as Record<string, number>, livraison: (g.livraison as unknown as LivraisonEnregistree).paliers, nonGarantis: g.nonGarantis }));
     const besoins = await this.prisma.besoin.findMany({ where: { cycleId, statut: { in: [...DANS_LA_COMMANDE] } }, orderBy: { createdAt: "asc" }, select: { companyId: true, cle: true, designation: true, quantite: true, unite: true, adresseLivraison: true } });
     const parEntreprise = new Map<string, typeof besoins>();
     for (const b of besoins) parEntreprise.set(b.companyId, [...(parEntreprise.get(b.companyId) ?? []), b]);
     const commandes: CommandeDArtisan[] = [...parEntreprise.entries()].map(([companyId, bs]) => {
       const distances: Record<string, (number | null)[]> = {};
       for (const g of grilles) {
-        const l = g.livraison as LivraisonEnregistree | null;
+        const l = g.livraison as unknown as LivraisonEnregistree | null;
         // Une entreprise absente des distances (jamais attendu : la commande est figée) paie la livraison, jamais zéro.
         if (l?.distances[companyId]) distances[g.negoceId] = l.distances[companyId]!;
       }
@@ -452,6 +490,7 @@ export class CommandeDuMoisService {
     const vue = await this.vueDuCycle(tenant, c, maintenant);
     const ligne = vue.resultats?.negoces.find((n) => n.negoceId === negoceId);
     if (!ligne) throw notFound("Negoce");
+    if (!ligne.livrable) throw validationFailed("This négoce does not deliver your area", { reason: "ne_livre_pas" });
     if (!ligne.complet) throw validationFailed("This négoce did not price every line of your list", { reason: "grille_incomplete" });
     const grille = await this.prisma.grilleNegoce.findUniqueOrThrow({ where: { cycleId_negoceId: { cycleId, negoceId } }, include: { negoce: true } });
     const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, siret: true, phone: true, contactEmail: true } });
@@ -512,7 +551,32 @@ export class CommandeDuMoisService {
       }
     }
     const ajouts = await this.ajoutsEnAttente(maintenant);
+    await this.alertesDeSurveillance(maintenant).catch(() => undefined);
     return { clos, grillesEnvoyees, relances, resultats, ajouts };
+  }
+
+  /**
+   * Les alertes à Greg (espace négoce, point 8), une fois par commande chacune : aucun négoce inscrit dans un département
+   * où des artisans ont déposé ; aucune réponse 48 h avant la fin du délai des négoces. (La grille retenue trop « non
+   * garantie » est vérifiée à la publication des résultats.)
+   */
+  private async alertesDeSurveillance(maintenant: Date): Promise<void> {
+    const uneFois = async (quoi: string, cycleId: string, message: string) => {
+      const cle = CLE_ALERTE(quoi, cycleId);
+      if (await this.prisma.parametreGroupe.findUnique({ where: { cle } })) return;
+      await this.prisma.parametreGroupe.create({ data: { cle, valeur: { le: maintenant.toISOString() } } });
+      this.alerter.alert("commande_commune", message);
+    };
+    for (const c of await this.prisma.cycleCommande.findMany({ where: { phase: "inscriptions" } })) {
+      const depots = await this.prisma.besoin.count({ where: { cycleId: c.id, statut: { in: [...DANS_LA_COMMANDE] } } });
+      if (depots === 0) continue;
+      const inscrits = await this.prisma.negoce.count({ where: { departement: c.zone, stopLe: null, familles: { has: c.famille }, compte: { inscritLe: { not: null } } } });
+      if (inscrits === 0) await uneFois("sans-negoce", c.id, `aucun négoce inscrit dans le ${c.zone} alors que des artisans ont déposé pour la commande ${deMois(c.mois)}`);
+    }
+    for (const c of await this.prisma.cycleCommande.findMany({ where: { phase: "negoces", reponseAvant: { lte: new Date(maintenant.getTime() + 48 * 3600_000), gt: maintenant } } })) {
+      const deposees = await this.prisma.grilleNegoce.count({ where: { cycleId: c.id, deposeLe: { not: null } } });
+      if (deposees === 0) await uneFois("sans-reponse", c.id, `aucune réponse de négoce 48 h avant la fin du délai, commande ${deMois(c.mois)} (${c.zone})`);
+    }
   }
 
   /** À la clôture : tout est figé, les listes fusionnées en UNE grille, envoyée à chaque négoce du métier et du département. */
@@ -537,15 +601,21 @@ export class CommandeDuMoisService {
    */
   private async envoyerLesGrilles(c: { id: string; mois: string; famille: string; zone: string; clotureLe: Date; reponseAvant: Date; lignes: unknown }, maintenant: Date): Promise<number> {
     const lignes = c.lignes as LigneDeGrille[];
-    const negoces = await this.prisma.negoce.findMany({ where: { departement: c.zone, stopLe: null, familles: { has: c.famille }, createdAt: { lt: c.clotureLe } }, orderBy: { createdAt: "asc" }, take: NEGOCES_PAR_GRILLE });
+    // Les abonnés du département (espace négoce, 23 octobre 2026) : une ligne `negoce` par département desservi, reliée
+    // à un compte inscrit ; un négoce invité sans compte reçoit l'e-mail de clôture avec son lien (3 cycles au plus).
+    const negoces = await this.prisma.negoce.findMany({ where: { departement: c.zone, stopLe: null, familles: { has: c.famille }, createdAt: { lt: c.clotureLe } }, include: { compte: true }, orderBy: { createdAt: "asc" }, take: NEGOCES_PAR_GRILLE });
     let envoyees = 0;
     for (const n of negoces) {
+      if (!n.compte?.inscritLe) {
+        await this.rappelerSansCompte(c, n, maintenant);
+        continue;
+      }
       const deja = await this.prisma.grilleNegoce.findUnique({ where: { cycleId_negoceId: { cycleId: c.id, negoceId: n.id } } });
       if (deja) continue;
       const id = randomUUID();
       const jeton = jetonDeGrille(this.reglages.authSecret, id);
       const grille = await this.prisma.grilleNegoce.create({ data: { id, cycleId: c.id, negoceId: n.id, tokenHash: hash(jeton) } });
-      const mail = mailGrilleAuNegoce({ negoce: n.nom, mois: c.mois, departement: c.zone, lignes, reponseAvant: c.reponseAvant, maintenant, lien: `${this.reglages.webAppUrl}/grille/${jeton}`, stop: `${this.reglages.webAppUrl}/negoces/lien/${jetonDeLien(this.reglages.authSecret, { action: "stop", negoceId: n.id })}` });
+      const mail = mailGrilleAuNegoce({ negoce: n.nom, mois: c.mois, departement: c.zone, lignes, reponseAvant: c.reponseAvant, maintenant, lien: `${this.reglages.webAppUrl}/grille/${jeton}`, stop: this.espace.lienDesabonnement(n.compte.id, c.zone, maintenant) });
       const pdf = await pdfDeTexte(mail.objet, [{ titre: "Le volume à chiffrer", lignes: [["Désignation", "Quantité"], ...lignes.map((l) => [l.designation, `${l.quantite.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ${l.unite}`])] }, { lignes: [PHRASE_PRIX_FERMES, PHRASE_AU_NEGOCE] }]);
       try {
         await this.email.send({ to: n.email, subject: mail.objet, text: mail.texte, attachments: [{ filename: `commande-commune-${c.mois}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }], mustDeliver: true });
@@ -556,6 +626,22 @@ export class CommandeDuMoisService {
       }
     }
     return envoyees;
+  }
+
+  /** Un négoce invité, jamais inscrit : l'e-mail de clôture avec son lien d'inscription, une fois par cycle, trois cycles au plus. */
+  private async rappelerSansCompte(c: { id: string; mois: string; zone: string }, n: { id: string; email: string; siret: string | null; nom: string; compteId: string | null; compte: { id: string; rappels: number } | null }, maintenant: Date): Promise<void> {
+    const compteId = n.compte?.id ?? null;
+    const compte = n.compte ?? (await this.prisma.compteNegoce.findUnique({ where: { id: (await this.espace.inviter(n, maintenant), (await this.prisma.negoce.findUniqueOrThrow({ where: { id: n.id }, select: { compteId: true } })).compteId!) } }));
+    if (!compte || compte.rappels >= 3) return;
+    const cle = CLE_RAPPELS(c.id);
+    const p = await this.prisma.parametreGroupe.findUnique({ where: { cle } });
+    const faits = ((p?.valeur as string[] | null) ?? []).filter((x) => typeof x === "string");
+    if (faits.includes(compte.id)) return;
+    const mail = mailClotureSansCompte({ mois: c.mois, departement: c.zone, lien: this.espace.lienInvitation(compte.id, maintenant) });
+    await this.email.send({ to: n.email, subject: mail.objet, text: mail.texte }).catch(() => undefined);
+    await this.prisma.compteNegoce.update({ where: { id: compte.id }, data: { rappels: { increment: 1 }, invitationLe: maintenant } });
+    await this.prisma.parametreGroupe.upsert({ where: { cle }, create: { cle, valeur: [...faits, compte.id] }, update: { valeur: [...faits, compte.id] } });
+    void compteId;
   }
 
   /** La veille de la limite, une relance à qui n'a pas encore déposé (une seule fois), avec le même lien. */
@@ -573,9 +659,16 @@ export class CommandeDuMoisService {
 
   /** À la limite : figé ; chaque artisan est prévenu, chaque négoce reçoit son message (retenu ou neutre). */
   private async publierLesResultats(c: { id: string; mois: string; zone: string; lignes: unknown }, maintenant: Date): Promise<void> {
-    await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { phase: "resultats", resultatsLe: maintenant } });
-    const { classement } = await this.classement(c.id, c.lignes as unknown as LigneDeGrille[]);
+    const { classement, chiffrees } = await this.classement(c.id, c.lignes as unknown as LigneDeGrille[]);
     const premier = classement[0]?.negoceId ?? null;
+    // La grille garantie 30 jours (Greg, 23 octobre 2026) : le premier sur le total tient ses prix pour toute la zone.
+    const retenu = classement[0]?.complete ? premier : null;
+    await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { phase: "resultats", resultatsLe: maintenant, retenuId: retenu, garantieJusquau: retenu ? finDeGarantie(maintenant) : null } });
+    if (retenu) {
+      const g = chiffrees.find((x) => x.negoceId === retenu);
+      const lignes = (c.lignes as unknown as LigneDeGrille[]).length;
+      if (g && lignes > 0 && (g.nonGarantis?.length ?? 0) / lignes > PART_NON_GARANTIE_ALERTE) this.alerter.alert("commande_commune", `commande ${deMois(c.mois)} (${c.zone}) : la grille retenue a ${g.nonGarantis!.length} ligne(s) « non garantie(s) » sur ${lignes}`);
+    }
     for (const g of await this.prisma.grilleNegoce.findMany({ where: { cycleId: c.id, deposeLe: { not: null }, resultatLe: null }, include: { negoce: true } })) {
       const mail = mailResultatNegoce({ mois: c.mois, departement: c.zone, premier: g.negoceId === premier });
       await this.email.send({ to: g.negoce.email, subject: mail.objet, text: mail.texte }).catch(() => undefined);
@@ -605,7 +698,12 @@ export class CommandeDuMoisService {
     let rang: number | null = null;
     if (g.deposeLe) rang = (await this.classement(g.cycleId, lignes)).classement.find((x) => x.negoceId === g.negoceId)?.rang ?? null;
     const prix = g.prix as Record<string, number>;
-    const livraison = g.livraison as LivraisonEnregistree | null;
+    const livraison = g.livraison as unknown as LivraisonEnregistree | null;
+    const compte = g.negoce.compteId ? await this.prisma.compteNegoce.findUnique({ where: { id: g.negoce.compteId }, include: { depots: { select: { id: true } } } }) : null;
+    const inscrit = !!compte?.inscritLe && compte.depots.length > 0 && !!compte.livraison;
+    // Confidentialité (point 4) : les zones de livraison en communes, jamais une adresse exacte ni un nom.
+    const besoins = await this.prisma.besoin.findMany({ where: { cycleId: g.cycleId, statut: { in: [...DANS_LA_COMMANDE] } }, select: { adresseLivraison: true } });
+    const zones = [...new Set(besoins.map((b) => communeDe(b.adresseLivraison)).filter((z): z is string => !!z))].sort();
     return {
       negoce: g.negoce.nom,
       mois: g.cycle.mois,
@@ -613,33 +711,44 @@ export class CommandeDuMoisService {
       ouverte,
       echeance: ouverte ? echeanceNegoce(g.cycle.reponseAvant, maintenant) : null,
       reponseAvant: g.cycle.reponseAvant.toISOString(),
-      lignes: lignes.map((l) => ({ designation: l.designation, quantite: l.quantite, unite: l.unite, prixUnitaire: prix[l.cle] ?? null })),
-      depose: g.deposeLe ? { le: g.deposeLe.toISOString(), fichiers: g.fichiers.map((f) => f.nom), statut: g.statutExtraction, manquantes: lignes.filter((l) => prix[l.cle] === undefined).length, livraison: livraison ? { depart: livraison.depart, francoKm: livraison.francoKm, prixAuDela: livraison.prixAuDela } : null } : null,
+      zones,
+      lignes: lignes.map((l) => ({ cle: l.cle, designation: l.designation, quantite: l.quantite, unite: l.unite, prixUnitaire: prix[l.cle] ?? null, nonGaranti: g.nonGarantis.includes(l.cle) })),
+      depose: g.deposeLe ? { le: g.deposeLe.toISOString(), fichiers: g.fichiers.map((f) => f.nom), statut: g.statutExtraction, manquantes: lignes.filter((l) => prix[l.cle] === undefined).length, livraison: livraison ? phrasePaliers(livraison.paliers) : null } : null,
       rang: g.deposeLe ? phraseDeRang(rang) : null,
-      phrases: { regles: PHRASE_AU_NEGOCE, fermes: PHRASE_PRIX_FERMES },
+      // Le dépôt demande un compte inscrit (dépôts et paliers) : sans lui, le lien pour le créer.
+      inscription: inscrit ? null : { lien: g.negoce.compteId ? this.espace.lienInvitation(g.negoce.compteId, maintenant) : await this.espace.inviter(g.negoce, maintenant) },
+      livraison: inscrit ? phrasePaliers(compte!.livraison as unknown as PaliersLivraison) : null,
+      phrases: { regles: PHRASE_AU_NEGOCE, fermes: PHRASE_PRIX_FERMES, volume: PHRASE_PRIX_FERMES_VOLUME },
     };
   }
 
   /**
-   * Le négoce dépose son devis (un ou deux PDF) et ses deux chiffres de livraison, avant la limite. Le devis est lu UNE
-   * fois ; les prix lus sont rapprochés des lignes de la grille par le code ; un nouveau dépôt remplace le précédent.
+   * Le négoce dépose son devis (un ou deux PDF), coche « prix fermes quel que soit le volume » (obligatoire) et, par
+   * article, « prix non garanti » (matière cotée). La livraison vient de son compte : dépôts et paliers, figés avec la
+   * grille, la distance du dépôt le plus proche à chaque chantier. Le devis est lu UNE fois ; un nouveau dépôt remplace
+   * le précédent.
    */
-  async deposerGrille(jeton: string, depot: { fichiers: FichierGrille[]; livraison: { depart?: string | null; francoKm?: string | null; prixAuDela?: string | null } }, maintenant = new Date()) {
+  async deposerGrille(jeton: string, depot: { fichiers: FichierGrille[]; fermes: boolean; nonGarantis: readonly string[] }, maintenant = new Date()) {
     const g = await this.grilleDuJeton(jeton);
     if (g.cycle.phase !== "negoces" || maintenant >= g.cycle.reponseAvant) throw new DomainError("conflict", "Deadline passed", { reason: "delai_passe" });
+    const compte = g.negoce.compteId ? await this.prisma.compteNegoce.findUnique({ where: { id: g.negoce.compteId }, include: { depots: true } }) : null;
+    if (!compte?.inscritLe || compte.depots.length === 0 || !compte.livraison) throw new DomainError("conflict", "Account required", { reason: "inscription_requise" });
+    if (!depot.fermes) throw validationFailed("Firm prices required", { reason: "prix_fermes_requis" });
     if (depot.fichiers.length === 0) throw validationFailed("Quote required", { reason: "devis_requis" });
     if (depot.fichiers.length > 2) throw validationFailed("Two quotes at most", { reason: "deux_devis_au_plus" });
     for (const f of depot.fichiers) if (f.type !== "application/pdf" || !f.contenu.subarray(0, 5).toString().startsWith("%PDF")) throw validationFailed("PDF only", { reason: "pdf_seulement" });
-    const regle = lireRegleDeLivraison(depot.livraison);
-    if (!regle) throw validationFailed("Delivery terms required", { reason: "livraison_requise" });
     const lignes = g.cycle.lignes as unknown as LigneDeGrille[];
+    const cles = new Set(lignes.map((l) => l.cle));
+    const nonGarantis = [...new Set(depot.nonGarantis.filter((c) => cles.has(c)))];
     const lecture = await this.lire(g.cycle.numero, lignes, depot.fichiers);
-    const distances = await this.distances(g.cycleId, regle.depart);
+    const depots = compte.depots.map((d) => ({ adresse: d.adresse, lat: d.lat, lon: d.lon }));
+    const distances = await this.distances(g.cycleId, depots);
+    const livraison: LivraisonEnregistree = { depots, paliers: compte.livraison as unknown as PaliersLivraison, distances };
     await this.prisma.$transaction(async (tx) => {
       await tx.grilleNegoceFichier.deleteMany({ where: { grilleId: g.id } });
       await tx.grilleNegoce.update({
         where: { id: g.id },
-        data: { deposeLe: maintenant, prix: lecture.prix, statutExtraction: lecture.statut, livraison: { ...regle, distances }, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
+        data: { deposeLe: maintenant, prix: lecture.prix, statutExtraction: lecture.statut, livraison: livraison as object, nonGarantis, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
       });
     });
     return this.pageGrille(jeton, maintenant);
@@ -670,22 +779,132 @@ export class CommandeDuMoisService {
     return { statut, prix };
   }
 
-  /** La distance du dépôt à chaque chantier de chaque artisan de la commande (une liste par entreprise). */
-  private async distances(cycleId: string, depart: string): Promise<Record<string, (number | null)[]>> {
+  /** La distance du dépôt LE PLUS PROCHE à chaque chantier de chaque artisan de la commande (une liste par entreprise). */
+  private async distances(cycleId: string, depots: readonly { adresse: string; lat: number | null; lon: number | null }[]): Promise<Record<string, (number | null)[]>> {
     const besoins = await this.prisma.besoin.findMany({ where: { cycleId, statut: { in: [...DANS_LA_COMMANDE] } }, select: { companyId: true, adresseLivraison: true }, orderBy: { createdAt: "asc" } });
     const parEntreprise = new Map<string, Set<string>>();
     for (const b of besoins) parEntreprise.set(b.companyId, (parEntreprise.get(b.companyId) ?? new Set()).add(b.adresseLivraison));
-    const point = async (a: string) => (this.geocodeur ? await this.geocodeur.point(a).catch(() => null) : null);
-    const pDepot = await point(depart);
+    const points = await this.pointsDesDepots(depots);
     const out: Record<string, (number | null)[]> = {};
     for (const [companyId, adresses] of parEntreprise) {
-      out[companyId] = await Promise.all([...adresses].map(async (a) => {
-        const p = await point(a);
-        return pDepot && p ? distanceRouteKm(pDepot, p) : null;
-      }));
+      out[companyId] = await Promise.all([...adresses].map((a) => this.distanceDepuisLesDepots(points, a)));
     }
     return out;
   }
+
+  private async pointsDesDepots(depots: readonly { adresse: string; lat: number | null; lon: number | null }[]): Promise<{ lat: number; lon: number }[]> {
+    const points: { lat: number; lon: number }[] = [];
+    for (const d of depots) {
+      if (d.lat !== null && d.lon !== null) points.push({ lat: d.lat, lon: d.lon });
+      else {
+        const p = this.geocodeur ? await this.geocodeur.point(d.adresse).catch(() => null) : null;
+        if (p) points.push(p);
+      }
+    }
+    return points;
+  }
+
+  /** La distance du dépôt le plus proche à une adresse ; `null` quand l'adresse ou tous les dépôts sont introuvables. */
+  private async distanceDepuisLesDepots(points: readonly { lat: number; lon: number }[], adresse: string): Promise<number | null> {
+    const p = this.geocodeur ? await this.geocodeur.point(adresse).catch(() => null) : null;
+    if (!p || points.length === 0) return null;
+    return Math.min(...points.map((d) => distanceRouteKm(d, p)));
+  }
+
+  // ---------------------------------------------------------------------------------------------------------------
+  // La grille garantie 30 jours (Greg, 23 octobre 2026)
+  // ---------------------------------------------------------------------------------------------------------------
+
+  /** Les grilles garanties ouvertes dans la zone de l'entreprise (la plus récente en premier), même sans dépôt. */
+  async garanties(tenant: TenantContext, maintenant = new Date()): Promise<GarantieVue[]> {
+    const zone = await this.zoneDeLEntreprise(tenant);
+    if (!zone) return [];
+    const cycles = await this.prisma.cycleCommande.findMany({ where: { zone, phase: "resultats", retenuId: { not: null }, garantieJusquau: { gt: maintenant } }, orderBy: { resultatsLe: "desc" } });
+    const out: GarantieVue[] = [];
+    for (const c of cycles) {
+      const grille = await this.prisma.grilleNegoce.findUnique({ where: { cycleId_negoceId: { cycleId: c.id, negoceId: c.retenuId! } }, include: { negoce: { select: { nom: true } } } });
+      if (!grille?.livraison) continue;
+      const prix = grille.prix as Record<string, number>;
+      const lignes = (c.lignes as unknown as LigneDeGrille[]).filter((l) => prix[l.cle] !== undefined && !grille.nonGarantis.includes(l.cle)).map((l) => ({ cle: l.cle, designation: l.designation, unite: l.unite, prixUnitaire: prix[l.cle]! }));
+      if (lignes.length === 0) continue;
+      const commandes = await this.prisma.commandeGarantie.findMany({ where: { cycleId: c.id, companyId: tenant.companyId }, orderBy: { commandeLe: "desc" } });
+      out.push({
+        cycleId: c.id,
+        mois: c.mois,
+        de: deMois(c.mois),
+        zone: c.zone,
+        titre: titreGarantie(c.garantieJusquau!),
+        jusquau: c.garantieJusquau!.toISOString(),
+        negoce: { id: c.retenuId!, nom: grille.negoce.nom },
+        livraison: phrasePaliers((grille.livraison as unknown as LivraisonEnregistree).paliers),
+        lignes,
+        commandes: commandes.map((x) => ({ numero: x.numero, totalHt: Number(x.totalHt), le: x.commandeLe.toISOString(), adresse: x.adresseLivraison })),
+      });
+    }
+    return out;
+  }
+
+  private async zoneDeLEntreprise(tenant: TenantContext): Promise<string | null> {
+    const company = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } });
+    const zone = zoneDuCodePostal(company?.address ?? "");
+    if (zone) return zone;
+    const projets = await this.prisma.project.findMany({ where: { companyId: tenant.companyId, address: { not: null } }, select: { address: true }, orderBy: { updatedAt: "desc" }, take: 20 });
+    return projets.map((p) => zoneDuCodePostal(p.address ?? "")).find((z): z is string => !!z) ?? null;
+  }
+
+  /**
+   * « Recommander à ce prix » : une liste préremplie des articles garantis, les quantités voulues, une adresse de
+   * livraison ; le bon part au négoce retenu, au prix de sa grille, avec la mention « Commande sur grille garantie ».
+   */
+  async recommander(tenant: TenantContext, cycleId: string, r: { lignes: readonly { cle: string; quantite: number }[]; adresseLivraison: string }, maintenant = new Date()) {
+    assertCanWrite(tenant);
+    await this.ouverte(tenant);
+    if (!isUuid(cycleId)) throw notFound("Cycle");
+    const g = (await this.garanties(tenant, maintenant)).find((x) => x.cycleId === cycleId);
+    if (!g) throw notFound("Garantie");
+    const adresse = r.adresseLivraison.trim();
+    if (!zoneDuCodePostal(adresse)) throw validationFailed("Address with postcode required", { reason: "adresse_requise" });
+    const prixDe = new Map(g.lignes.map((l) => [l.cle, l]));
+    const lignes = r.lignes
+      .filter((l) => l.quantite > 0 && prixDe.has(l.cle))
+      .map((l) => ({ cle: l.cle, designation: prixDe.get(l.cle)!.designation, unite: prixDe.get(l.cle)!.unite, quantite: Math.round(l.quantite * 1000) / 1000, prixUnitaire: prixDe.get(l.cle)!.prixUnitaire }));
+    if (lignes.length === 0) throw validationFailed("Nothing to order", { reason: "rien_a_ajouter" });
+    const grille = await this.prisma.grilleNegoce.findUniqueOrThrow({ where: { cycleId_negoceId: { cycleId, negoceId: g.negoce.id } }, include: { negoce: true } });
+    const livraison = grille.livraison as unknown as LivraisonEnregistree;
+    const distance = await this.distanceDepuisLesDepots(await this.pointsDesDepots(livraison.depots), adresse);
+    const livraisonHt = fraisDeLivraisonPaliers(distance, livraison.paliers);
+    if (livraisonHt === null) throw validationFailed("This négoce does not deliver your area", { reason: "ne_livre_pas" });
+    const marchandiseHt = Math.round(lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire, 0) * 100) / 100;
+    const totalHt = Math.round((marchandiseHt + livraisonHt) * 100) / 100;
+    const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, siret: true, phone: true, contactEmail: true } });
+    const compte = await this.prisma.negoceArtisan.findUnique({ where: { companyId_negoceId: { companyId: tenant.companyId, negoceId: g.negoce.id } }, select: { numeroCompte: true } });
+    const cmd = await this.prisma.commandeGarantie.create({ data: { cycleId, companyId: tenant.companyId, negoceId: g.negoce.id, adresseLivraison: adresse, lignes: lignes as object[], marchandiseHt, livraisonHt, totalHt, commandeLe: maintenant } });
+    const doc = bonDuMois({ numero: cmd.numero, mois: g.mois, negoce: grille.negoce.nom, artisan: { nom: company.name, siret: company.siret, telephone: company.phone, email: company.contactEmail }, numeroCompte: compte?.numeroCompte ?? null, chantiers: [adresse], lignes, livraisonHt, garantie: true });
+    const pdf = await pdfDeTexte(doc.titre, doc.blocs);
+    try {
+      await this.email.send({
+        to: grille.negoce.email,
+        subject: doc.titre,
+        text: ["Bonjour,", "", `${company.name} commande au prix de votre grille garantie ${deMois(g.mois)} (${mentionGarantie(g.mois)}). Le bon de commande est joint ; vous n'avez rien à refaire.`, "", "BatiClair"].join("\n"),
+        attachments: [{ filename: `bon-de-commande-${g.mois}-garantie-${cmd.numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
+        ...(company.contactEmail ? { replyTo: company.contactEmail } : {}),
+        mustDeliver: true,
+      });
+    } catch (e) {
+      await this.prisma.commandeGarantie.delete({ where: { id: cmd.id } });
+      throw e;
+    }
+    void mentionPrixFerme;
+    return { numero: cmd.numero, totalHt, marchandiseHt, livraisonHt, negoce: grille.negoce.nom, mention: mentionGarantie(g.mois), suivi: suiviDansLeMois({ mois: g.mois, phase: "resultats", clotureDans: null, reponseDans: null, grilles: 1, negoces: 1, commande: true }) };
+  }
+}
+
+/** « 22300 Lannion » : la commune d'une adresse de livraison, jamais la rue (confidentialité, point 4). */
+export function communeDe(adresse: string): string | null {
+  const m = /\b(\d{5})\b\s*([^,\n]*)/.exec(adresse);
+  if (!m) return null;
+  const commune = (m[2] ?? "").trim().replace(/\s+/g, " ");
+  return commune ? `${m[1]} ${commune}` : m[1]!;
 }
 
 /** Le jour (Paris) d'un instant : « 2026-10-22 ». */

@@ -130,3 +130,16 @@ Chaque chiffre ci-dessous a été posé à la main, puis écrit dans le test per
 3. **Un devis au même prix que le meilleur déclenchait « légèrement plus haut : 1,00 € contre 1,00 € ».** Il dit maintenant « au même prix ».
 4. **Le bon de commande ne disait pas la livraison promise.** L'artisan voyait « livraison 45 € » dans son prix livré, le négoce ne recevait que les fournitures. Le bon porte maintenant la ligne de livraison (prix, distance, règle) et le total livraison comprise.
 5. **Le mail d'information au négoce lui demandait « votre prix de livraison par zone »**, règle remplacée le 22 octobre : il dit maintenant « vos conditions de livraison (gratuite jusqu'à une distance que vous fixez, un prix par livraison au-delà) ».
+
+## Rejoué le 23 octobre, avec l'espace négoce autonome
+
+Joué par l'e2e « Commande du mois : un cycle complet » (téléphone et ordinateur), sur le 1er novembre 2026 : invitation → inscription → clôture → réponse → résultats → commande → recommande sur grille garantie.
+
+1. A (Lannion) ajoute N1, N2, N3 : chacun reçoit « Un regroupement de couvreurs vous a ajouté à la Commande commune : créez votre accès », sans le nom d'A.
+2. Chaque négoce crée son accès depuis `/negoce/rejoindre/<jeton>` : enseigne, un dépôt (N1 et N3 à Lannion, N2 à Paimpol), paliers (gratuite jusqu'à 20 / 30 / 10 km, puis 50 / 40 / 60 € jusqu'à 1 000 km), le 22 coché d'office, conditions cochées → « Vous recevrez la prochaine grille de votre secteur à la clôture du 1er novembre à 12 h. » Son espace dit « Prochaine clôture dans N j », rien d'autre.
+3. A et B déposent (5 000 ardoises, 400 m de liteaux, 10 boîtes de crochets) ; clôture ; la grille part aux trois comptes.
+4. Chaque négoce ouvre sa grille : zones « 22300 Lannion, 22500 Paimpol », aucun nom ; coche « Prix fermes, quel que soit le volume final. » (sans elle, le bouton reste gris) et dépose son PDF. Premier ou non, jamais les prix des autres.
+5. Résultats : pour A, N1 2 120 € livré (gratuit), N2 2 140 € (2 100 + 40 de livraison depuis Paimpol), N3 1 880 € ; N2 coché d'office (le moins cher sur toute la commande). « Commander chez Négoce N2 » → « En commandant, tu transmets tes coordonnées et ton adresse de livraison à Négoce N2. » → « Confirmer la commande » → bon parti chez N2 (il contient « Toitures A ») ; N1 n'a rien reçu d'A.
+6. Grille garantie : « Prix garantis jusqu'au 1er décembre » chez N2 ; A recommande 100 ardoises à 0,88 € : 88 € de matériaux + 40 € de livraison = 128 € livré, « Commande sur grille garantie du 1er novembre », deuxième bon chez N2. B la voit sur son accueil sans avoir rien déposé pour elle.
+
+Rien de faux trouvé sur ce parcours. Les cas API couverts à part : négoce « ne livre pas ta zone » (au-delà de la distance maximale), prix non garanti hors total, rappel de clôture au négoce jamais inscrit (3 cycles), désabonnement par lien, suppression du compte, alertes à Greg.

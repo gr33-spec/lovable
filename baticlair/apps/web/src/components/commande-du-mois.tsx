@@ -26,7 +26,25 @@ export interface NegoceDuResultat {
   livraisonHt: number;
   manquantes: number;
   complet: boolean;
+  /** Faux quand un chantier de l'entreprise est au-delà de la distance maximale du négoce : « Ne livre pas ta zone ». */
+  livrable: boolean;
+  /** Les prix « non garantis » (matière cotée) : indicatifs, hors total, hors garantie. */
+  indicatives: { designation: string; prixUnitaire: number }[];
   premierSurLeTotal: boolean;
+}
+
+/** La grille garantie 30 jours (Greg, 23 octobre 2026) : le négoce retenu tient ses prix pour tout artisan de la zone. */
+export interface GarantieVue {
+  cycleId: string;
+  mois: string;
+  de: string;
+  zone: string;
+  titre: string;
+  jusquau: string;
+  negoce: { id: string; nom: string };
+  livraison: string;
+  lignes: { cle: string; designation: string; unite: string; prixUnitaire: number }[];
+  commandes: { numero: number; totalHt: number; le: string; adresse: string }[];
 }
 
 export interface CommandeDuMois {
@@ -51,6 +69,8 @@ export interface EtatDuMois {
   commandes: CommandeDuMois[];
   /** La commande ouverte du département du chantier (si `projectId` est donné), sinon de celui de l'entreprise. */
   prochaine: { mois: string; de: string; zone?: string; clotureLe: string; clotureDans: string; toi: string | null; tout: string; vide: boolean } | null;
+  /** Les grilles garanties encore ouvertes dans la zone, la plus récente d'abord (vide pour une ancienne API). */
+  garanties?: GarantieVue[];
   phrases: { sansEngagement: string };
 }
 
@@ -386,6 +406,9 @@ export function CommandeDuMoisPanneau({ etat, onChange }: { etat: EtatDuMois; on
       {commandes.map((c) => (
         <CarteDuMois key={c.cycleId} c={c} onChange={onChange} />
       ))}
+      {(etat.garanties ?? []).map((g) => (
+        <BlocGarantie key={g.cycleId} g={g} onChange={onChange} />
+      ))}
     </div>
   );
 }
@@ -394,6 +417,7 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [choisi, setChoisi] = useState<string | null>(null);
+  const [confirmer, setConfirmer] = useState(false);
   const run = async (cle: string, f: () => Promise<unknown>) => {
     setPending(cle);
     setError(null);
@@ -408,8 +432,9 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
   };
   const r = c.resultats;
   const commande = r?.choix?.commandeLe ? r.negoces.find((n) => n.negoceId === r.choix!.negoceId) : null;
-  const parDefaut = r ? (r.negoces.find((n) => n.negoceId === r.parDefaut && n.complet) ?? r.negoces.find((n) => n.negoceId === r.moinsCherPourToi) ?? null) : null;
-  const selection = r ? (r.negoces.find((n) => n.negoceId === choisi) ?? parDefaut) : null;
+  const choisissable = (n: NegoceDuResultat) => n.complet && n.livrable;
+  const parDefaut = r ? (r.negoces.find((n) => n.negoceId === r.parDefaut && choisissable(n)) ?? r.negoces.find((n) => n.negoceId === r.moinsCherPourToi && choisissable(n)) ?? null) : null;
+  const selection = r ? (r.negoces.find((n) => n.negoceId === choisi && choisissable(n)) ?? parDefaut) : null;
   return (
     <section aria-label={`Commande ${c.de}`} className={`${CARTE} gap-3`}>
       <div className="flex flex-col gap-1">
@@ -458,14 +483,16 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
           <ul className="flex flex-col gap-2">
             {r.negoces.map((n) => (
               <li key={n.negoceId}>
-                <label className={`flex items-start gap-3 rounded-xl border-2 p-4 transition-[border-color] duration-150 ${n.complet ? "bg-surface" : "bg-surface opacity-70"} ${selection?.negoceId === n.negoceId && !commande ? "border-accent" : "border-line"}`}>
-                  {commande ? null : <input type="radio" name={`negoce-${c.cycleId}`} disabled={!n.complet} checked={selection?.negoceId === n.negoceId} onChange={() => setChoisi(n.negoceId)} className="mt-1 size-5 shrink-0 accent-accent" />}
+                <label className={`flex items-start gap-3 rounded-xl border-2 p-4 transition-[border-color] duration-150 ${choisissable(n) ? "bg-surface" : "bg-surface opacity-70"} ${selection?.negoceId === n.negoceId && !commande ? "border-accent" : "border-line"}`}>
+                  {commande ? null : <input type="radio" name={`negoce-${c.cycleId}`} disabled={!choisissable(n)} checked={selection?.negoceId === n.negoceId} onChange={() => setChoisi(n.negoceId)} className="mt-1 size-5 shrink-0 accent-accent" />}
                   <span className="flex min-w-0 flex-col gap-0.5">
                     <span className="text-[16px] font-extrabold">{`Chez ${n.nom} : ${euros(n.totalHt)} HT livré`}</span>
                     <span className="text-[13px] font-semibold text-muted">{`${euros(n.marchandiseHt)} de matériaux, livraison ${n.livraisonHt > 0 ? euros(n.livraisonHt) : "gratuite"}`}</span>
                     {n.premierSurLeTotal ? <span className="text-[13px] font-bold text-accent-text">Le moins cher sur toute la commande</span> : null}
                     {r.moinsCherPourToi === n.negoceId && !n.premierSurLeTotal ? <span className="text-[13px] font-bold text-ok">Le moins cher pour toi</span> : null}
                     {!n.complet ? <span className="text-[13px] font-bold text-warn">{`Il n'a pas chiffré ${n.manquantes} article${n.manquantes > 1 ? "s" : ""} de ta liste`}</span> : null}
+                    {!n.livrable ? <span className="text-[13px] font-bold text-warn">Ne livre pas ta zone</span> : null}
+                    {n.indicatives.length > 0 ? <span className="text-[13px] text-muted">{`Prix indicatifs, hors total et hors garantie : ${n.indicatives.map((i) => `${i.designation} ${euros(i.prixUnitaire)}`).join(" · ")}`}</span> : null}
                   </span>
                 </label>
               </li>
@@ -476,10 +503,11 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
               Aucun négoce n&apos;a chiffré toute ta liste : commande-la en direct chez ton négoce.
             </p>
           ) : null}
-          {!commande && selection ? (
-            <Button pending={pending === "commander"} onClick={() => run("commander", () => api(`/v1/commande-du-mois/${encodeURIComponent(c.cycleId)}/commander`, { method: "POST", body: { negoceId: selection.negoceId } }))}>
-              {`Commander chez ${selection.nom}`}
-            </Button>
+          {!commande && selection && !confirmer ? (
+            <Button onClick={() => setConfirmer(true)}>{`Commander chez ${selection.nom}`}</Button>
+          ) : null}
+          {!commande && selection && confirmer ? (
+            <ConfirmationCommande negoce={selection.nom} pending={pending === "commander"} onAnnuler={() => setConfirmer(false)} onConfirmer={() => run("commander", () => api(`/v1/commande-du-mois/${encodeURIComponent(c.cycleId)}/commander`, { method: "POST", body: { negoceId: selection.negoceId } }))} />
           ) : null}
           <p className="text-[14px] text-muted">Sans engagement : tu commandes seulement si le prix te plaît. Le bon part au négoce, avec ton nom ; tu paies sur ton compte, comme d&apos;habitude.</p>
         </section>
@@ -487,6 +515,133 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
         <p className="text-[14px] font-semibold text-muted">Aucun négoce n&apos;a chiffré ta liste cette fois-ci.</p>
       ) : null}
       {error ? <ErrorNotice error={error} /> : null}
+    </section>
+  );
+}
+
+/**
+ * CONFIDENTIALITÉ (point 4) : avant « Commander », le négoce ne voit que la grille et des communes ; au clic, tes coordonnées
+ * et ton adresse partent au négoce choisi, et à lui seul. L'écran le dit, et attend ta confirmation.
+ */
+function ConfirmationCommande({ negoce, pending, onAnnuler, onConfirmer }: { negoce: string; pending: boolean; onAnnuler: () => void; onConfirmer: () => void }) {
+  return (
+    <div role="group" aria-label="Confirmer la commande" className="flex flex-col gap-3 rounded-xl bg-ground p-4">
+      <p className="text-[15px] font-semibold">{`En commandant, tu transmets tes coordonnées et ton adresse de livraison à ${negoce}.`}</p>
+      <div className="flex flex-wrap gap-3">
+        <Button pending={pending} onClick={onConfirmer}>
+          Confirmer la commande
+        </Button>
+        <Button variant="secondary" onClick={onAnnuler}>
+          Annuler
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * LA GRILLE GARANTIE 30 JOURS (Greg, 23 octobre 2026, point 6) : après les résultats, le négoce retenu tient ses prix
+ * pour tout artisan de la zone, nouvel inscrit compris. « Prix garantis jusqu'au <date> », la liste des articles au prix
+ * garanti, « Recommander à ce prix » : des quantités, une adresse, la confirmation, et le bon part au négoce. Deux
+ * fenêtres ouvertes = deux blocs, la plus récente d'abord ; fin de fenêtre = le bloc disparaît.
+ */
+export function BlocGarantie({ g, onChange }: { g: GarantieVue; onChange: () => void }) {
+  const [ouvert, setOuvert] = useState(false);
+  const [quantites, setQuantites] = useState<Record<string, string>>({});
+  const [adresse, setAdresse] = useState("");
+  const [confirmer, setConfirmer] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  const [fait, setFait] = useState<{ numero: number; totalHt: number } | null>(null);
+  const lignes = g.lignes.map((l) => ({ ...l, quantite: Number((quantites[l.cle] ?? "").replace(",", ".")) || 0 })).filter((l) => l.quantite > 0);
+  const marchandise = lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire, 0);
+  const pret = lignes.length > 0 && /\b\d{5}\b/.test(adresse);
+  async function commander() {
+    setPending(true);
+    setError(null);
+    try {
+      const r = await api<{ numero: number; totalHt: number }>(`/v1/commande-du-mois/${encodeURIComponent(g.cycleId)}/recommander`, { method: "POST", body: { lignes: lignes.map((l) => ({ cle: l.cle, quantite: l.quantite })), adresseLivraison: adresse.trim() }, idempotencyKey: newActionKey() });
+      setFait(r);
+      setOuvert(false);
+      setConfirmer(false);
+      setQuantites({});
+      onChange();
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+      setConfirmer(false);
+    } finally {
+      setPending(false);
+    }
+  }
+  return (
+    <section aria-label={g.titre} className={`${CARTE} gap-3`}>
+      <div className="flex flex-col gap-1">
+        <SectionTitle>{g.titre}</SectionTitle>
+        <p className="text-[15px] font-semibold text-accent-text">{`Chez ${g.negoce.nom}, sur la grille garantie ${g.de}.`}</p>
+        <p className="text-[14px] text-muted">{`Les prix de la commande ${g.de}, tenus pour tout couvreur du ${g.zone} jusqu'au ${jourMois(g.jusquau)}. Livraison : ${g.livraison}`}</p>
+      </div>
+      {fait ? <p role="status" className="rounded-xl bg-ok-bg p-4 text-[15px] font-semibold text-ok">{`C'est commandé : bon n° ${fait.numero}, ${euros(fait.totalHt)} HT livré, parti chez ${g.negoce.nom}. Commande sur grille garantie ${g.de}.`}</p> : null}
+      {g.commandes.length > 0 ? (
+        <ul aria-label="Mes commandes sur cette grille" className="flex flex-col gap-1 text-[13px] font-semibold text-muted">
+          {g.commandes.map((c) => (
+            <li key={c.numero}>{`Bon n° ${c.numero} · ${euros(c.totalHt)} HT · ${jourMois(c.le)}`}</li>
+          ))}
+        </ul>
+      ) : null}
+      {!ouvert ? (
+        <>
+          <ul className="flex flex-col divide-y divide-line text-[15px]">
+            {g.lignes.map((l) => (
+              <li key={l.cle} className="flex items-baseline justify-between gap-3 py-2">
+                <span className="min-w-0">{l.designation}</span>
+                <span className="shrink-0 font-semibold tabular-nums">{`${euros(l.prixUnitaire)} HT / ${unite(l.unite)}`}</span>
+              </li>
+            ))}
+          </ul>
+          <Button onClick={() => setOuvert(true)}>Recommander à ce prix</Button>
+        </>
+      ) : (
+        <form
+          aria-label="Recommander à ce prix"
+          className="flex flex-col gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setConfirmer(true);
+          }}
+          noValidate
+        >
+          <ul className="flex flex-col divide-y divide-line text-[15px]">
+            {g.lignes.map((l) => (
+              <li key={l.cle} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <label htmlFor={`garantie-${g.cycleId}-${l.cle}`} className="min-w-0 grow">
+                  {l.designation}
+                  <span className="block text-[13px] font-semibold text-muted">{`${euros(l.prixUnitaire)} HT / ${unite(l.unite)}`}</span>
+                </label>
+                <span className="flex items-center gap-2">
+                  <input id={`garantie-${g.cycleId}-${l.cle}`} inputMode="decimal" value={quantites[l.cle] ?? ""} onChange={(e) => setQuantites({ ...quantites, [l.cle]: e.currentTarget.value })} className="min-h-11 w-24 rounded-xl border border-line bg-surface px-3 text-right text-[16px] font-bold outline-none focus-visible:border-accent" />
+                  <span className="text-[13px] font-semibold text-muted">{unite(l.unite)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Field id={`garantie-${g.cycleId}-adresse`} label="Adresse de livraison (avec le code postal)" autoComplete="street-address" value={adresse} onChange={(e) => setAdresse(e.target.value)} />
+          {lignes.length > 0 ? <p className="text-[15px] font-semibold">{`${euros(marchandise)} HT de matériaux, livraison selon les paliers du négoce.`}</p> : null}
+          {error ? <ErrorNotice error={error} /> : null}
+          {confirmer ? (
+            <ConfirmationCommande negoce={g.negoce.nom} pending={pending} onAnnuler={() => setConfirmer(false)} onConfirmer={commander} />
+          ) : (
+            <div className="flex flex-wrap gap-3">
+              <Button type="submit" disabled={!pret}>
+                {`Commander chez ${g.negoce.nom}`}
+              </Button>
+              <Button variant="secondary" onClick={() => setOuvert(false)}>
+                Annuler
+              </Button>
+            </div>
+          )}
+          <p className="text-[13px] text-muted">{`Commande sur grille garantie ${g.de} : le bon part au négoce avec tes coordonnées et cette adresse. Tu paies sur ton compte, comme d'habitude.`}</p>
+        </form>
+      )}
     </section>
   );
 }

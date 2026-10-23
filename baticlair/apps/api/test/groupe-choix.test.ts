@@ -45,7 +45,7 @@ const proposer = (c: Awaited<ReturnType<typeof carreleur>>, statut: "signe" | "e
 const negoce = (agent: Agent, nom: string, email: string, familles: string[]) => agent.post("/v1/groupe/negoces").send({ nom, email, familles }).expect(201);
 // Le premier mail au négoce peut être celui qui l'informe du regroupement (nouveau cap) : on prend celui de la demande.
 const jetonPour = (email: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(ctx.emails.sent.find((m) => m.to === email && /\/reponse\//.test(m.text))!.text)![1]!;
-const lienPasConcerne = (email: string) => /\/negoces\/lien\/([A-Za-z0-9_.-]+)/.exec(ctx.emails.sent.find((m) => m.to === email)!.text)![1]!;
+const lienPasConcerne = (email: string) => /\/negoces\/lien\/([A-Za-z0-9_.-]+)/.exec(ctx.emails.sent.find((m) => m.to === email && /\/negoces\/lien\//.test(m.text))!.text)![1]!;
 
 async function deposer(jeton: string, rows: FixtureRow[], titre: string) {
   const devis = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00   TVA 20 % 200,00   Total TTC 1 200,00", titre));

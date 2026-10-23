@@ -4,6 +4,7 @@ import type { CapturingPushSender } from "../src/platform/push/web-push.sender.j
 import { PUSH_SENDER } from "../src/platform/tokens.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
+import { inscrireNegoce } from "./support/negoce.js";
 
 /**
  * LA COMMANDE COMMUNE DU MOIS (Greg, 22 octobre 2026, au soir), de bout en bout par l'API. Le cas est celui posé à la
@@ -59,15 +60,20 @@ const pushVers = (email: string) => push.sent.filter((p) => p.target.endpoint.en
 const mailsVers = (email: string) => ctx.emails.sent.filter((m) => m.to === email);
 const jetonDe = (email: string) => /\/grille\/([A-Za-z0-9_-]+)/.exec(mailsVers(email).filter((m) => /\/grille\//.test(m.text)).at(-1)!.text)![1]!;
 const tache = (maintenant: string) => request(ctx.app.getHttpServer()).get(`/v1/internal/commande-du-mois?maintenant=${encodeURIComponent(maintenant)}`).set("authorization", `Bearer ${process.env.CRON_SECRET}`).expect(200);
-async function deposerGrille(jeton: string, rows: FixtureRow[], livraison: { depart: string; francoKm: string; prixAuDela: string }, maintenant: string) {
+/** Le dépôt d'une grille : le PDF et « prix fermes » ; la livraison vient du compte du négoce (espace négoce, 23 octobre). */
+async function deposerGrille(jeton: string, rows: FixtureRow[], _livraison: { depart: string; francoKm: string; prixAuDela: string }, maintenant: string, options: { nonGarantis?: string[]; fermes?: boolean } = {}) {
   const pdf = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00", "DEVIS"));
-  return request(ctx.app.getHttpServer())
-    .post(`/v1/grille/${jeton}?maintenant=${encodeURIComponent(maintenant)}`)
-    .field("depart", livraison.depart)
-    .field("francoKm", livraison.francoKm)
-    .field("prixAuDela", livraison.prixAuDela)
-    .attach("file", pdf, { filename: "devis.pdf", contentType: "application/pdf" });
+  let req = request(ctx.app.getHttpServer()).post(`/v1/grille/${jeton}?maintenant=${encodeURIComponent(maintenant)}`).field("fermes", options.fermes === false ? "non" : "oui");
+  for (const c of options.nonGarantis ?? []) req = req.field("nonGarantis", c);
+  return req.attach("file", pdf, { filename: "devis.pdf", contentType: "application/pdf" });
 }
+/** Les négoces de la recette : N1 et N3 à Lannion, N2 à Paimpol, chacun inscrit depuis son invitation. */
+const DEPOTS: Record<string, { depot: string; francoKm: number; prixAuDela: number }> = {
+  "n1@example.com": { depot: "Zone de Kerampont, 22300 Lannion", francoKm: 20, prixAuDela: 50 },
+  "n2@example.com": { depot: "ZA de Kerfolic, 22500 Paimpol", francoKm: 30, prixAuDela: 40 },
+  "n3@example.com": { depot: "Zone de Kerampont, 22300 Lannion", francoKm: 10, prixAuDela: 60 },
+};
+const inscrire = (email: string, maintenant = T0) => inscrireNegoce(ctx, email, { ...DEPOTS[email]!, enseigne: `Négoce ${email.slice(0, 2).toUpperCase()}`, maintenant });
 
 describe("la commande commune du mois : inscriptions, clôture, grille aux négoces, résultats, commande", { timeout: 120_000 }, () => {
   it("un cycle complet, avec les totaux posés à la main", async () => {
@@ -82,6 +88,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     // Les négoces couverture du 22, ajoutés par les artisans.
     for (const [nom, email] of [["Négoce N1", "n1@example.com"], ["Négoce N2", "n2@example.com"], ["Négoce N3", "n3@example.com"]] as const) {
       await A.agent.post(`/v1/groupe/negoces?maintenant=${T0}`).send({ nom, email, familles: ["couverture"] }).expect(201);
+      await inscrire(email);
     }
 
     // A dépose : il est le premier, la commande du 15 octobre ; en quantités, jamais en nombre d'entreprises.
@@ -101,7 +108,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     // La clôture : tout est figé, la grille fusionnée part aux trois négoces.
     expect((await tache(APRES_CLOTURE)).body).toMatchObject({ clos: 1, grillesEnvoyees: 3 });
     const demande = mailsVers("n1@example.com").at(-1)!;
-    expect(demande.subject).toBe("Commande commune du 15 octobre (22) : demande de prix sur 3 articles");
+    expect(demande.subject).toBe("La grille du 15 octobre est prête (22) : 3 articles à chiffrer");
     expect(demande.text.replace(/\u202f/g, " ")).toContain(`- ${ARDOISE} : 5 000 pièces`);
     expect(demande.text).toContain("Réponse avant le 22/10 à 18 h, il reste 7 j 6 h");
     expect(demande.text).toContain("Chaque artisan choisit le négoce le moins cher pour lui.");
@@ -238,6 +245,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
       const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2000", unite: "pièces" }]);
       for (const [nom, email] of [["Négoce N1", "n1@example.com"], ["Négoce N2", "n2@example.com"]] as const) {
         await A.agent.post(`/v1/groupe/negoces?maintenant=${T0}`).send({ nom, email, familles: ["couverture"] }).expect(201);
+        await inscrire(email);
       }
       await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
       ctx.emails.failNext = echecs;

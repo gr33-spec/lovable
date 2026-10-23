@@ -4,6 +4,7 @@ import { DomainError, notFound, validationFailed } from "../../../platform/error
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
+import type { EspaceNegoceService } from "./espace-negoce.service.js";
 import { jetonDeLien, lienDuJeton } from "./lien-negoce.js";
 
 export interface NegoceVue {
@@ -57,6 +58,8 @@ export class NegocesService {
     /** Nouveau cap (22 octobre) : le mail qui prévient un négoce nouveau qu'un regroupement de couvreurs existe. */
     private readonly email: TransactionalEmailSender | null = null,
     private readonly webAppUrl = "",
+    /** Espace négoce (23 octobre 2026) : chaque ajout crée ou relie le compte du négoce et lui envoie son lien d'invitation. */
+    private readonly espace: EspaceNegoceService | null = null,
   ) {}
 
   async mesNegoces(tenant: TenantContext): Promise<NegoceVue[]> {
@@ -108,8 +111,20 @@ export class NegocesService {
       if (favori) for (const l of liens) await tx.negoceArtisan.update({ where: { companyId_negoceId: { companyId: tenant.companyId, negoceId: l.negoceId } }, data: { rang: l.rang + 1 } });
       await tx.negoceArtisan.create({ data: { companyId: tenant.companyId, negoceId: negoce.id, rang: favori ? 1 : (liens.at(-1)?.rang ?? 0) + 1, numeroCompte: n.numeroCompte?.trim() || null } });
     });
-    if (nouveau) await this.prevenirDuRegroupement(tenant, nouveau, email, departement);
+    // L'invitation à créer son accès (espace négoce) remplace l'ancien mail « un regroupement existe » ; le lien, régénéré
+    // à chaque ajout, est le même pour tous les artisans qui ajoutent ce négoce.
+    const negoce = await this.prisma.negoce.findFirst({ where: { email, departement }, select: { id: true, email: true, siret: true, nom: true, compteId: true } });
+    if (this.espace && negoce) await this.espace.inviter(negoce, maintenant);
+    else if (nouveau) await this.prevenirDuRegroupement(tenant, nouveau, email, departement);
     return this.mesNegoces(tenant);
+  }
+
+  /** Le lien d'invitation d'un négoce de ma liste (le message WhatsApp / SMS le porte), ou null sans espace. */
+  async lienInvitation(negoceId: string, maintenant = new Date()): Promise<string | null> {
+    if (!this.espace) return null;
+    const n = await this.prisma.negoce.findUnique({ where: { id: negoceId }, select: { id: true, email: true, siret: true, nom: true, compteId: true } });
+    if (!n) return null;
+    return n.compteId ? this.espace.lienInvitation(n.compteId, maintenant) : this.espace.inviter(n, maintenant);
   }
 
   /**
@@ -118,7 +133,7 @@ export class NegocesService {
    * ma liste, rien ne change et la réponse le dit quand même. Le nom vient de Sirene (par le SIRET), sinon de la saisie,
    * sinon de l'e-mail.
    */
-  async mettreDansLaBoucle(tenant: TenantContext, b: NegoceEnBoucle, maintenant = new Date()): Promise<{ negoce: Pick<NegoceVue, "id" | "nom" | "email" | "departement">; dejaLa: boolean }> {
+  async mettreDansLaBoucle(tenant: TenantContext, b: NegoceEnBoucle, maintenant = new Date()): Promise<{ negoce: Pick<NegoceVue, "id" | "nom" | "email" | "departement">; dejaLa: boolean; lienInvitation: string | null }> {
     const email = b.email.trim().toLowerCase();
     const siret = b.siret?.replace(/\s+/g, "") || null;
     const sirene = siret ? await this.prisma.negoceSirene.findUnique({ where: { siret } }) : null;
@@ -132,7 +147,7 @@ export class NegocesService {
     }
     const negoce = (await this.negoceParSiret(tenant, siret)) ?? (await this.mesNegoces(tenant)).find((n) => n.email === email) ?? null;
     if (!negoce) throw notFound("Negoce");
-    return { negoce: { id: negoce.id, nom: negoce.nom, email: negoce.email, departement: negoce.departement }, dejaLa };
+    return { negoce: { id: negoce.id, nom: negoce.nom, email: negoce.email, departement: negoce.departement }, dejaLa, lienInvitation: await this.lienInvitation(negoce.id, maintenant) };
   }
 
   private async negoceParSiret(tenant: TenantContext, siret: string | null): Promise<NegoceVue | null> {

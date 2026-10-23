@@ -13,6 +13,7 @@ import { CONFIG } from "../../../platform/tokens.js";
 import { Public } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { CommandeDuMoisService } from "../application/commande-du-mois.service.js";
+import { EspaceNegoceService } from "../application/espace-negoce.service.js";
 
 const depotBody = z.object({
   articles: z.array(z.string().min(1).max(300)).min(1).max(500),
@@ -21,7 +22,9 @@ const depotBody = z.object({
   mois: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
 });
 const commanderBody = z.object({ negoceId: z.uuid() });
-const grilleBody = z.object({ depart: z.string().max(300).optional(), francoKm: z.string().max(10).optional(), prixAuDela: z.string().max(20).optional() });
+/** « Prix fermes » (obligatoire) et, par article, « non garanti » : des champs du formulaire multipart. */
+const grilleBody = z.object({ fermes: z.string().max(10).optional(), nonGarantis: z.union([z.string().max(300), z.array(z.string().max(300))]).optional() });
+const recommanderBody = z.object({ lignes: z.array(z.object({ cle: z.string().min(1).max(300), quantite: z.number().positive().max(1_000_000) })).min(1).max(200), adresseLivraison: z.string().trim().min(5).max(300) });
 const configBody = z.object({ jourCloture1: z.number().int(), jourCloture2: z.number().int(), heureCloture: z.number().int(), joursOuvresReponse: z.number().int(), heureReponse: z.number().int() });
 const datesBody = z.object({ clotureLe: z.iso.datetime().optional(), reponseAvant: z.iso.datetime().optional() });
 
@@ -61,8 +64,18 @@ export class CommandeDuMoisController {
       mode: this.config.groupe.mode,
       commandes: await this.commande.vues(tenant, maintenant),
       prochaine,
+      // La grille garantie 30 jours (Greg, 23 octobre 2026) : visible par tout artisan de la zone, même nouveau.
+      garanties: await this.commande.garanties(tenant, maintenant),
       phrases: { sansEngagement: PHRASE_SANS_ENGAGEMENT },
     };
+  }
+
+  /** « Recommander à ce prix » sur une grille garantie : le bon part au négoce retenu. */
+  @Post("commande-du-mois/:cycleId/recommander")
+  @HttpCode(201)
+  async recommander(@Tenant() tenant: TenantContext, @Param("cycleId") cycleId: string, @Body(new ZodPipe(recommanderBody)) body: z.infer<typeof recommanderBody>, @Query("maintenant") m?: string) {
+    this.ecriture();
+    return this.commande.recommander(tenant, cycleId, body, instant(this.config, m));
   }
 
   @Post("projects/:projectId/commande-du-mois")
@@ -115,7 +128,8 @@ export class GrilleNegoceController {
   @UseInterceptors(FilesInterceptor("file", 2, { storage: memoryStorage(), limits: { fileSize: 15 * 1024 * 1024, files: 2 } }))
   async deposer(@Param("jeton") jeton: string, @Body(new ZodPipe(grilleBody)) body: z.infer<typeof grilleBody>, @UploadedFiles() files: { originalname: string; mimetype: string; buffer: Buffer }[] | undefined, @Query("maintenant") m?: string) {
     if (!this.config.groupe.enabled || this.config.groupe.mode !== "mois") throw notFound("Route");
-    return this.commande.deposerGrille(jeton, { fichiers: (files ?? []).map((f) => ({ nom: f.originalname, type: f.mimetype, contenu: f.buffer })), livraison: { depart: body.depart ?? null, francoKm: body.francoKm ?? null, prixAuDela: body.prixAuDela ?? null } }, instant(this.config, m));
+    const nonGarantis = body.nonGarantis === undefined ? [] : Array.isArray(body.nonGarantis) ? body.nonGarantis : [body.nonGarantis];
+    return this.commande.deposerGrille(jeton, { fichiers: (files ?? []).map((f) => ({ nom: f.originalname, type: f.mimetype, contenu: f.buffer })), fermes: body.fermes === "oui" || body.fermes === "true" || body.fermes === "on", nonGarantis }, instant(this.config, m));
   }
 }
 
@@ -144,6 +158,7 @@ export class CommandeDuMoisTacheController {
 export class CommandeDuMoisAdminController {
   constructor(
     @Inject(CommandeDuMoisService) private readonly commande: CommandeDuMoisService,
+    @Inject(EspaceNegoceService) private readonly espace: EspaceNegoceService,
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
@@ -164,6 +179,13 @@ export class CommandeDuMoisAdminController {
   async changer(@Tenant() tenant: TenantContext, @Body(new ZodPipe(configBody)) body: z.infer<typeof configBody>) {
     await this.garde(tenant);
     return this.commande.changerConfig({ ...(await this.commande.config()), ...body });
+  }
+
+  /** Le tableau des négoces (espace négoce, point 8) : inscrits, invités jamais venus, désabonnés, taux de réponse et de commande. */
+  @Get("negoces")
+  async negoces(@Tenant() tenant: TenantContext) {
+    await this.garde(tenant);
+    return this.espace.tableau();
   }
 
   @Post("cycles/:id/dates")

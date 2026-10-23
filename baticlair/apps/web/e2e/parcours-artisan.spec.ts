@@ -2372,10 +2372,15 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   await expect(ligne).toHaveCount(1);
   await expect(ligne).toContainText("Ton négoce negoce-du-ponant.fr est dans la boucle : il recevra la commande d");
   const prevenir = bloc.getByRole("group", { name: "Prévenir negoce-du-ponant.fr" });
-  const message = `Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres couvreurs. Vous pouvez chiffrer tout le volume de la commande ici : ${new URL(page.url()).origin}/`;
-  await expect(prevenir.getByText(message, { exact: true })).toBeVisible();
-  await expect(prevenir.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", `https://wa.me/?text=${encodeURIComponent(message)}`);
-  await expect(prevenir.getByRole("link", { name: "Envoyer par SMS" })).toHaveAttribute("href", `sms:?&body=${encodeURIComponent(message)}`);
+  // Le lien du message est l'invitation du négoce (espace négoce, 23 octobre) : `/negoce/rejoindre/<jeton>`, jamais le nom de l'artisan.
+  const message = await prevenir.getByText(/^Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres couvreurs\. Vous pouvez chiffrer tout le volume de la commande ici : /).textContent();
+  expect(message).toMatch(new RegExp(`ici : ${new URL(page.url()).origin}/negoce/rejoindre/[A-Za-z0-9_.-]+$`));
+  expect(message).not.toContain("Toitures Martin");
+  await expect(prevenir.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", `https://wa.me/?text=${encodeURIComponent(message!)}`);
+  await expect(prevenir.getByRole("link", { name: "Envoyer par SMS" })).toHaveAttribute("href", `sms:?&body=${encodeURIComponent(message!)}`);
+  // Le négoce a reçu son invitation, vouvoyée, sans le nom de l'artisan.
+  await expect.poll(async () => (await emailsVers(page, email.toLowerCase())).map((m) => m.subject)).toContainEqual("Un regroupement de couvreurs vous a ajouté à la Commande commune : créez votre accès");
+  expect((await emailsVers(page, email.toLowerCase())).map((m) => m.text).join("\n")).not.toContain("Toitures Martin");
   await expect(prevenir.getByRole("button", { name: "Copier le message" })).toBeVisible();
   // Rappuyer avec le même e-mail (autre casse) : toujours un seul négoce.
   await bloc.getByRole("button", { name: "Ajouter un autre négoce" }).click();
@@ -2893,8 +2898,44 @@ async function tacheDuMois(page: Page, maintenant: string): Promise<Record<strin
   }, maintenant);
 }
 
-/** Le négoce ouvre son lien (dans le dernier e-mail qu'il a reçu), sans compte, dépose son PDF et sa livraison. */
-async function grilleDeposee(browser: Browser, page: Page, email: string, rows: [string, string, string, string, string][], livraison: [string, string, string]) {
+/**
+ * ESPACE NÉGOCE (Greg, 23 octobre 2026) : le négoce crée son accès depuis le lien d'invitation reçu par e-mail
+ * (`/negoce/rejoindre/<jeton>`) : e-mail prérempli, enseigne, un dépôt, ses paliers (gratuite jusqu'à X km, Y € jusqu'à
+ * 1 000 km), le 22 coché d'office, les conditions. Puis son espace : « Prochaine clôture dans », jamais un nom d'artisan.
+ */
+async function accesNegoceCree(browser: Browser, page: Page, email: string, enseigne: string, depot: string, livraison: [string, string]) {
+  const mail = (await emailsVers(page, email)).filter((m) => /\/negoce\/rejoindre\//.test(m.text)).at(-1)!;
+  expect(mail.subject).toBe("Un regroupement de couvreurs vous a ajouté à la Commande commune : créez votre accès");
+  expect(mail.text).toContain("Un artisan de votre secteur (22) vous a ajouté");
+  expect(mail.text).not.toMatch(/Toitures [ABC]/);
+  const lien = /https?:\/\/[^\s]+\/negoce\/rejoindre\/[A-Za-z0-9_.-]+/.exec(mail.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
+  const contexte = await browser.newContext({ ...(test.info().project.use as object) });
+  const pageN = await contexte.newPage();
+  await pageN.goto(lien);
+  const form = pageN.getByRole("form", { name: "Créer mon accès" });
+  await expect(form.getByLabel("E-mail")).toHaveValue(email);
+  await form.getByLabel("Nom de l'enseigne").fill(enseigne);
+  await form.getByLabel("Adresse du dépôt 1").fill(depot);
+  await form.getByLabel("Livraison gratuite jusqu'à, en km").fill(livraison[0]);
+  await form.getByLabel("Prix du palier 1, en euros HT").fill(livraison[1]);
+  await form.getByLabel("Distance du palier 1, en km").fill("1000");
+  await form.getByLabel("Distance maximale de livraison, en km").fill("1000");
+  await expect(form.getByRole("button", { name: "Retirer le département 22" })).toBeVisible();
+  await expect(form.getByRole("button", { name: "Créer mon accès" })).toBeDisabled();
+  await form.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
+  await form.getByRole("button", { name: "Créer mon accès" }).click();
+  await expect(pageN.getByRole("status")).toContainText(/^Vous recevrez la prochaine grille de votre secteur à la clôture du (1er|\d{1,2}) \S+ à 12 h\.$/);
+  // Son espace, pendant les dépôts des artisans : le chrono, rien d'autre ; aucun nom d'artisan.
+  await pageN.goto("/negoce");
+  await expect(pageN.getByRole("heading", { name: enseigne })).toBeVisible();
+  await expect(pageN.getByRole("region", { name: "Prochaine clôture" })).toContainText(/Prochaine clôture dans\s*\d+ j/);
+  await expect(pageN.getByText(/Toitures [ABC]|rue des Ajoncs|rue du Port/)).toHaveCount(0);
+  expect(await pageN.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  await contexte.close();
+}
+
+/** Le négoce ouvre son lien (dans le dernier e-mail qu'il a reçu), coche « prix fermes quel que soit le volume » et dépose son PDF. */
+async function grilleDeposee(browser: Browser, page: Page, email: string, rows: [string, string, string, string, string][]) {
   const mail = (await emailsVers(page, email)).filter((m) => /\/grille\//.test(m.text)).at(-1)!;
   const lien = /https?:\/\/[^\s]+\/grille\/[A-Za-z0-9_-]+/.exec(mail.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
   const contexte = await browser.newContext({ ...(test.info().project.use as object) });
@@ -2904,15 +2945,16 @@ async function grilleDeposee(browser: Browser, page: Page, email: string, rows: 
   await expect(pageN.getByText(/^Réponse avant le \d\d\/\d\d à 18 h, il reste \d+ j/)).toBeVisible();
   await expect(pageN.getByText("Chaque artisan choisit le négoce le moins cher pour lui.", { exact: false })).toBeVisible();
   await expect(pageN.getByRole("region", { name: "La grille" }).getByRole("listitem")).toHaveCount(3);
-  await expect(pageN.getByText(/Toitures [ABC]|Lannion \(|Paimpol \(/)).toHaveCount(0);
+  await expect(pageN.getByText(/Toitures [ABC]|Lannion \(|Paimpol \(|rue des Ajoncs|rue du Port/)).toHaveCount(0);
+  // Les zones de livraison en communes seulement (confidentialité, point 4).
+  await expect(pageN.getByText(/^Livraisons à : 22300 Lannion, 22500 Paimpol\./)).toBeVisible();
   const { makePdf } = await import("../../api/test/support/pdf-fixtures");
   const pdf = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00", "DEVIS"));
   const form = pageN.getByRole("form", { name: "Déposer mon devis" });
   await form.locator('input[type="file"]').setInputFiles({ name: "devis.pdf", mimeType: "application/pdf", buffer: pdf });
+  // Sans la case « Prix fermes, quel que soit le volume final », rien ne part (point 5).
   await expect(form.getByRole("button", { name: "Déposer mon devis" })).toBeDisabled();
-  await form.getByLabel("Adresse d'où partent vos livraisons").fill(livraison[0]);
-  await form.getByLabel("Livraison gratuite jusqu'à, en km").fill(livraison[1]);
-  await form.getByLabel("Prix d'une livraison au-delà, en euros HT").fill(livraison[2]);
+  await form.getByRole("checkbox", { name: "Prix fermes, quel que soit le volume final." }).check();
   await form.getByRole("button", { name: "Déposer mon devis" }).click();
   const statut = pageN.getByRole("status", { name: "Votre dépôt" });
   await expect(statut).toContainText("Devis reçu");
@@ -2927,6 +2969,10 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   // A, à Lannion : il ajoute les trois négoces couverture du 22.
   await compteAuGroupe(page, "Toitures A", "3 rue des Ajoncs, 22300 Lannion");
   for (const i of [1, 2, 3]) expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: `Négoce N${i}`, email: n(i), familles: ["couverture"] })).toBe(201);
+  // Invitation → inscription : chaque négoce crée son accès (dépôt, paliers) depuis son lien ; N1 et N3 à Lannion, N2 à Paimpol.
+  await accesNegoceCree(browser, page, n(1), "Négoce N1", "Zone de Kerampont, 22300 Lannion", ["20", "50"]);
+  await accesNegoceCree(browser, page, n(2), "Négoce N2", "ZA de Kerfolic, 22500 Paimpol", ["30", "40"]);
+  await accesNegoceCree(browser, page, n(3), "Négoce N3", "Zone de Kerampont, 22300 Lannion", ["10", "60"]);
   const projetA = await listePrete(page, "3 rue des Ajoncs, 22300 Lannion", [
     { libelle: ARDOISE_MOIS, quantite: "2000", unite: "pièces" },
     { libelle: LITEAU_MOIS, quantite: "400", unite: "m" },
@@ -2988,11 +3034,11 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   await contexteC.close();
 
   // Les négoces chiffrent la MÊME grille. Pendant le chrono : premier ou pas, jamais les prix des autres.
-  const n1 = await grilleDeposee(browser, page, n(1), [["A", ARDOISE_MOIS, "5000 pièces", "0,90", "4 500,00"], ["L", LITEAU_MOIS, "400 m", "0,80", "320,00"], ["C", CROCHET_MOIS, "10 boîtes", "30,00", "300,00"]], ["Zone de Kerampont, 22300 Lannion", "20", "50"]);
+  const n1 = await grilleDeposee(browser, page, n(1), [["A", ARDOISE_MOIS, "5000 pièces", "0,90", "4 500,00"], ["L", LITEAU_MOIS, "400 m", "0,80", "320,00"], ["C", CROCHET_MOIS, "10 boîtes", "30,00", "300,00"]]);
   await expect(n1.statut).toContainText("Vous êtes premier sur le total de la commande.");
-  const n2 = await grilleDeposee(browser, page, n(2), [["A", ARDOISE_MOIS, "5000 pièces", "0,88", "4 400,00"], ["L", LITEAU_MOIS, "400 m", "0,85", "340,00"], ["C", CROCHET_MOIS, "10 boîtes", "32,00", "320,00"]], ["ZA de Kerfolic, 22500 Paimpol", "30", "40"]);
+  const n2 = await grilleDeposee(browser, page, n(2), [["A", ARDOISE_MOIS, "5000 pièces", "0,88", "4 400,00"], ["L", LITEAU_MOIS, "400 m", "0,85", "340,00"], ["C", CROCHET_MOIS, "10 boîtes", "32,00", "320,00"]]);
   await expect(n2.statut).toContainText("Vous êtes premier sur le total de la commande.");
-  const n3 = await grilleDeposee(browser, page, n(3), [["A", ARDOISE_MOIS, "5000 pièces", "0,80", "4 000,00"], ["L", LITEAU_MOIS, "400 m", "0,70", "280,00"]], ["Zone de Kerampont, 22300 Lannion", "10", "60"]);
+  const n3 = await grilleDeposee(browser, page, n(3), [["A", ARDOISE_MOIS, "5000 pièces", "0,80", "4 000,00"], ["L", LITEAU_MOIS, "400 m", "0,70", "280,00"]]);
   // N3 est le moins cher sur ce qu'il chiffre, mais incomplet : il passe derrière.
   await expect(n3.statut).toContainText("Vous n'êtes pas premier sur le total de la commande.");
   await expect(n3.statut).toContainText("1 article sans prix");
@@ -3013,11 +3059,39 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   await expect(prixA.getByText(/^2\s100,00 € de matériaux, livraison 40,00 €$/)).toBeVisible();
   await expect(prixA.getByText("Le moins cher sur toute la commande")).toBeVisible();
   await expect(prixA.getByText("Le moins cher pour toi")).toBeVisible();
+  // Confidentialité (point 4) : avant la commande, l'écran dit ce qui part, et attend la confirmation.
   await prixA.getByRole("button", { name: "Commander chez Négoce N2" }).click();
+  const confirmation = prixA.getByRole("group", { name: "Confirmer la commande" });
+  await expect(confirmation).toContainText("En commandant, tu transmets tes coordonnées et ton adresse de livraison à Négoce N2.");
+  await confirmation.getByRole("button", { name: "Confirmer la commande" }).click();
   await expect(prixA.getByRole("status")).toContainText(/Commandé chez Négoce N2 : 2\s140,00 € HT livré/);
   await expect.poll(async () => (await emailsVers(page, n(2))).some((m) => /bon de commande/i.test(m.subject))).toBe(true);
+  // Le bon porte « Prix ferme de la Commande commune du … » ; N1 et N3 n'ont rien reçu d'A.
+  expect((await emailsVers(page, n(2))).filter((m) => /bon de commande/i.test(m.subject)).at(-1)!.text).toContain("Toitures A");
+  expect((await emailsVers(page, n(1))).map((m) => m.text).join("\n")).not.toContain("Toitures A");
   await page.goto(`/chantiers/${projetA}`);
   await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("C'est commandé.");
+
+  // GRILLE GARANTIE 30 JOURS (point 6) : « Prix garantis jusqu'au … », et A recommande 100 ardoises au prix garanti.
+  await page.goto("/groupe");
+  // Deux fenêtres ouvertes (la série « ordinateur » après « téléphone », même zone) = deux blocs, le plus récent d'abord.
+  const garantie = page.getByRole("region", { name: /^Prix garantis jusqu'au (1er|\d{1,2}) \S+$/ }).first();
+  await expect(garantie).toContainText("Chez Négoce N2, sur la grille garantie du");
+  await expect(garantie.getByText(/0,88 € HT \/ pièces/)).toBeVisible();
+  await garantie.getByRole("button", { name: "Recommander à ce prix" }).click();
+  const recommande = garantie.getByRole("form", { name: "Recommander à ce prix" });
+  await recommande.getByLabel(new RegExp(`^${ARDOISE_MOIS}`)).fill("100");
+  await recommande.getByLabel("Adresse de livraison (avec le code postal)").fill("3 rue des Ajoncs, 22300 Lannion");
+  await expect(recommande.getByText("88,00 € HT de matériaux", { exact: false })).toBeVisible();
+  // Livré à Lannion depuis le dépôt de Paimpol : 40 € de livraison, les paliers de N2 ; 128 € livré.
+  await recommande.getByRole("button", { name: "Commander chez Négoce N2" }).click();
+  await recommande.getByRole("group", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
+  await expect(garantie.getByRole("status")).toContainText(/^C'est commandé : bon n° \d+, 128,00 € HT livré, parti chez Négoce N2\. Commande sur grille garantie du/);
+  await expect.poll(async () => (await emailsVers(page, n(2))).filter((m) => /bon de commande/i.test(m.subject)).length).toBe(2);
+  expect((await emailsVers(page, n(2))).at(-1)!.text).toContain("grille garantie");
+  // Un autre artisan de la zone la voit dès l'accueil, sans avoir rien déposé pour elle.
+  await pageB.goto("/");
+  await expect(pageB.getByRole("region", { name: /^Prix garantis jusqu'au/ }).first().getByRole("button", { name: "Recommander à ce prix" })).toBeVisible();
 
   // B : N3 n'a pas chiffré ses crochets, il ne peut pas être choisi ; N2 en avant à 2 960 €.
   await pageB.goto("/groupe");

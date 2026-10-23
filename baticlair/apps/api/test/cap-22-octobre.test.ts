@@ -69,13 +69,14 @@ async function deposer(jeton: string, rows: FixtureRow[], titre: string, livrais
 }
 
 describe("nouveau cap du 22 octobre : regroupement, alertes, livraison au kilomètre, suivi", { timeout: 120_000 }, () => {
-  it("un négoce ajouté est prévenu qu'un regroupement existe, une seule fois, avec son lien « stop »", async () => {
+  it("un négoce ajouté est invité à créer son accès, une seule fois, sans le nom de l'artisan (espace négoce, 23 octobre)", async () => {
     const a = await carreleur("a@example.fr", "Carrelages A", "3 rue des Ajoncs, 22300 Lannion");
     await negoce(a.agent, "Négoce Carrelage", "carrelage@example.com", ["second_oeuvre"]);
     const [info] = mailsVers("carrelage@example.com");
-    expect(info!.subject).toBe("Un regroupement d'artisans existe dans votre secteur");
-    expect(info!.text).toContain("Carrelages A vous a indiqué comme son négoce sur BatiClair");
-    expect(info!.text).toMatch(/Pour ne plus rien recevoir : http.*\/negoces\/lien\//);
+    expect(info!.subject).toBe("Un regroupement de couvreurs vous a ajouté à la Commande commune : créez votre accès");
+    expect(info!.text).toContain("Un artisan de votre secteur (22) vous a ajouté");
+    expect(info!.text).not.toContain("Carrelages A");
+    expect(info!.text).toMatch(/http.*\/negoce\/rejoindre\//);
     // Le même négoce ajouté par un autre artisan : déjà dans la base, pas de second mail.
     const b = await carreleur("b@example.fr", "Carrelages B", "12 rue de Kerampont, 22300 Lannion");
     await negoce(b.agent, "Négoce Carrelage", "carrelage@example.com", ["second_oeuvre"]);

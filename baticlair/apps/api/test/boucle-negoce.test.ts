@@ -1,6 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
+import { inscrireNegoce } from "./support/negoce.js";
 
 /**
  * « METS TON NÉGOCE DANS LA BOUCLE » (Greg, 23 octobre 2026) : sur l'accueil et dans l'onglet Commande commune, un champ
@@ -51,8 +52,11 @@ describe("mets ton négoce dans la boucle", { timeout: 60_000 }, () => {
     const liste = (await agent.get("/v1/groupe/negoces").expect(200)).body.negoces;
     expect(liste).toHaveLength(1);
     expect(liste[0]).toMatchObject({ email: "agence.lannion@negoce-ardoises.fr", familles: ["couverture"], favori: true });
-    // Le mail « un regroupement de couvreurs existe » part au négoce.
+    // L'invitation à créer son accès part au négoce (espace négoce, 23 octobre) ; la réponse porte le même lien.
     expect(mailsVers("agence.lannion@negoce-ardoises.fr")).toHaveLength(1);
+    expect(mailsVers("agence.lannion@negoce-ardoises.fr")[0]!.text).toContain("Créez votre accès en une minute");
+    expect(r.body.lienInvitation).toMatch(/\/negoce\/rejoindre\//);
+    expect(mailsVers("agence.lannion@negoce-ardoises.fr")[0]!.text).toContain(r.body.lienInvitation);
     // Rappuyer : rien ne change, la réponse le dit quand même.
     const r2 = await boucle(agent, { email: "agence.lannion@negoce-ardoises.fr" }).expect(200);
     expect(r2.body).toMatchObject({ negoce: { email: "agence.lannion@negoce-ardoises.fr" }, dejaLa: true });
@@ -98,12 +102,14 @@ describe("mets ton négoce dans la boucle", { timeout: 60_000 }, () => {
     await agent.post(`/v1/projects/${q.projetId}/commande-du-mois?maintenant=${T0}`).send({ articles, nature: "chantier" }).expect(201);
     // Avant la clôture : « avant ».
     await boucle(agent, { email: "avant@example.com" }, "2026-10-12T09:00:00.000Z").expect(200);
+    await inscrireNegoce(ctx, "avant@example.com", { depot: "Zone de Kerampont, 22300 Lannion", maintenant: "2026-10-12T10:00:00.000Z" });
     // La clôture : la grille part au seul négoce connu.
     expect((await tache(APRES_CLOTURE)).body).toMatchObject({ clos: 1, grillesEnvoyees: 1 });
     expect(mailsVers("avant@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(1);
     // Après la clôture, pendant les jours des négoces : « après » est ajouté ; la réponse annonce le 1er novembre.
     const r = await boucle(agent, { email: "apres@example.com" }, "2026-10-18T09:00:00.000Z").expect(200);
     expect(r.body.mois).toMatchObject({ mois: "2026-11-01", de: "du 1er novembre" });
+    await inscrireNegoce(ctx, "apres@example.com", { depot: "ZA de Kerfolic, 22500 Paimpol", maintenant: "2026-10-18T09:30:00.000Z" });
     expect((await tache("2026-10-18T10:00:00.000Z")).body).toMatchObject({ grillesEnvoyees: 0 });
     expect(mailsVers("apres@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(0);
     expect(await ctx.prisma.grilleNegoce.count()).toBe(1);

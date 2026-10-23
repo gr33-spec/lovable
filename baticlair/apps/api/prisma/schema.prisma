@@ -170,6 +170,7 @@ model Company {
   ruleConfirmations RuleConfirmation[]
   besoins           Besoin[]
   choixDuMois       ChoixArtisan[]
+  commandesGaranties CommandeGarantie[]
   negocesAjoutes    Negoce[]            @relation("NegoceAjoutePar")
   negoces           NegoceArtisan[]
   desistements      Desistement[]
@@ -993,6 +994,8 @@ model Negoce {
   ajouteParId String?   @db.Uuid
   /// « Mets ton négoce dans la boucle » (Greg, 23 octobre 2026) : le SIRET quand l'artisan l'a choisi dans Sirene ; dédoublonnage.
   siret       String?
+  /// Espace négoce (23 octobre 2026) : le compte du négoce (un par SIRET ou e-mail) ; cette ligne est son abonnement au département.
+  compteId    String?   @db.Uuid
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -1005,11 +1008,89 @@ model Negoce {
   factureNegoces FactureNegoce[]
   grilles        GrilleNegoce[]
   choisiPar      ChoixArtisan[]
+  compte         CompteNegoce?   @relation(fields: [compteId], references: [id], onDelete: SetNull)
+  commandesGaranties CommandeGarantie[]
 
   @@unique([email, departement])
   @@index([departement])
   @@index([siret])
+  @@index([compteId])
   @@map("negoce")
+}
+
+/// ESPACE NÉGOCE AUTONOME (Greg, 23 octobre 2026) : un compte par négoce (SIRET, sinon e-mail), créé par le négoce
+/// lui-même depuis son lien d'invitation, sans mot de passe (lien magique). Ses dépôts, ses paliers de livraison, les
+/// départements qu'il dessert (ses abonnements : une ligne `negoce` par département), ses conditions acceptées.
+model CompteNegoce {
+  id                     String    @id @default(uuid(7)) @db.Uuid
+  email                  String    @unique
+  siret                  String?   @unique
+  enseigne               String
+  telephone              String?
+  /// { gratuiteJusquaKm, paliers: [{ jusquaKm, prixHt }], maxKm } (`PaliersLivraison`).
+  livraison              Json?
+  /// Départements desservis (abonnés).
+  departements           String[]  @default([])
+  /// Le dernier lien d'invitation envoyé (valable 90 jours, régénéré à chaque ajout par un artisan).
+  invitationLe           DateTime?
+  /// E-mails de clôture envoyés sans compte créé (3 au plus).
+  rappels                Int       @default(0)
+  inscritLe              DateTime?
+  conditionsAccepteesLe  DateTime?
+  conditionsVersion      String?
+  derniereConnexionLe    DateTime?
+  desabonneLe            DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  depots      DepotNegoce[]
+  abonnements Negoce[]
+
+  @@map("compte_negoce")
+}
+
+/// Un dépôt (une boutique) du négoce : le prix livré se calcule depuis le dépôt le plus proche du chantier.
+model DepotNegoce {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  compteId    String   @db.Uuid
+  adresse     String
+  codePostal  String?
+  commune     String?
+  departement String?
+  lat         Float?
+  lon         Float?
+  createdAt   DateTime @default(now())
+
+  compte CompteNegoce @relation(fields: [compteId], references: [id], onDelete: Cascade)
+
+  @@index([compteId])
+  @@map("depot_negoce")
+}
+
+/// Une commande passée sur la GRILLE GARANTIE 30 jours (Greg, 23 octobre 2026) : l'artisan recommande au prix du
+/// négoce retenu, après les résultats, même s'il n'avait rien déposé.
+model CommandeGarantie {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  numero           Int      @unique @default(autoincrement())
+  cycleId          String   @db.Uuid
+  companyId        String   @db.Uuid
+  negoceId         String   @db.Uuid
+  adresseLivraison String
+  /// [{ cle, designation, quantite, unite, prixUnitaire }].
+  lignes           Json
+  marchandiseHt    Decimal  @db.Decimal(14, 2)
+  livraisonHt      Decimal  @db.Decimal(14, 2)
+  totalHt          Decimal  @db.Decimal(14, 2)
+  commandeLe       DateTime
+  createdAt        DateTime @default(now())
+
+  cycle   CycleCommande @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  negoce  Negoce        @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+
+  @@index([cycleId])
+  @@index([companyId])
+  @@map("commande_garantie")
 }
 
 /// Le lien d'un artisan à un négoce : son rang (le favori en premier, « favori de ») et son numéro de compte chez lui,
@@ -1295,6 +1376,10 @@ model CycleCommande {
   phase        String    @default("inscriptions")
   closLe       DateTime?
   resultatsLe  DateTime?
+  /// Le négoce premier sur le total à la publication (grille garantie 30 jours, Greg, 23 octobre 2026).
+  retenuId     String?   @db.Uuid
+  /// Fin de la garantie : résultats + 30 jours.
+  garantieJusquau DateTime?
   /// La grille fusionnée à la clôture : [{ cle, designation, quantite, unite }].
   lignes       Json      @default("[]")
   createdAt    DateTime  @default(now())
@@ -1303,6 +1388,7 @@ model CycleCommande {
   besoins Besoin[]
   grilles GrilleNegoce[]
   choix   ChoixArtisan[]
+  commandesGaranties CommandeGarantie[]
 
   @@unique([mois, famille, zone])
   @@index([phase])
@@ -1318,8 +1404,10 @@ model GrilleNegoce {
   tokenHash        String    @unique
   /// { <clé de ligne> : prix unitaire HT }.
   prix             Json      @default("{}")
-  /// { depart, francoKm, prixAuDela, distances: { <companyId>: (km | null)[] } }.
+  /// { depots: [{ adresse, lat, lon }], paliers: PaliersLivraison, distances: { <companyId>: (km | null)[] } } (dépôt le plus proche de chaque chantier).
   livraison        Json?
+  /// Les clés des articles au prix « non garanti » (matière cotée) : indicatifs, hors total et hors garantie.
+  nonGarantis      String[]  @default([])
   /// en_attente | lue | a_verifier | echec
   statutExtraction String    @default("en_attente")
   deposeLe         DateTime?

@@ -90,6 +90,11 @@ const reasonMessages: Record<string, string> = {
   deux_devis_au_plus: "Deux PDF au plus.",
   pdf_seulement: "Seulement des fichiers PDF.",
   livraison_requise: "Indiquez vos conditions de livraison (gratuite jusqu'à combien de km, et le prix au-delà).",
+  // L'espace négoce (Greg, 23 octobre 2026) : prix fermes, compte inscrit, zone non livrée, grille garantie.
+  prix_fermes_requis: "Cochez « Prix fermes, quel que soit le volume final » pour déposer votre devis.",
+  inscription_requise: "Créez d'abord votre accès (dépôts et paliers de livraison) : le lien est sur cette page.",
+  ne_livre_pas: "Ce négoce ne livre pas ta zone : choisis-en un autre.",
+  pas_de_garantie: "Cette grille garantie n'est plus ouverte.",
   reglages_invalides: "Ces réglages ne vont pas : deux jours de clôture différents entre 1 et 28, heures entre 0 et 23, réponse en 1 à 40 jours ouvrés.",
   nothing_read: "Je n'ai rien lu dans ce devis. Réessaie, ou redépose le PDF.",
   empty_list: "La liste est vide : rien ne part au fournisseur.",

@@ -127,6 +127,46 @@ function DatesDuMois() {
   );
 }
 
+/** L'espace négoce (Greg, 23 octobre 2026, point 8) : inscrits, invités jamais venus, désabonnés ; taux de réponse par cycle, commandes par négoce retenu. */
+interface ComptesNegoceVue {
+  negoces: { id: string; enseigne: string; email: string; siret: string | null; etat: "inscrit" | "invite" | "desabonne"; inviteLe: string | null; inscritLe: string | null; rappels: number; departements: string[]; grillesRetenues: number; commandesRecues: number }[];
+  cycles: { mois: string; de: string; zone: string; phase: string; attendues: number; deposees: number; tauxReponse: number | null; retenuId: string | null }[];
+}
+const ETATS: Record<ComptesNegoceVue["negoces"][number]["etat"], string> = { inscrit: "Inscrit", invite: "Invité, jamais venu", desabonne: "Désabonné" };
+
+function ComptesNegoce() {
+  const fetchComptes = useCallback((signal: AbortSignal) => api<ComptesNegoceVue>("/v1/admin/commande-du-mois/negoces", { signal }), []);
+  const { data, error } = useResource(fetchComptes);
+  if (error) return <ErrorNotice error={error} />;
+  if (!data) return <Spinner label="Chargement des comptes négoce…" />;
+  const parEtat = (etat: ComptesNegoceVue["negoces"][number]["etat"]) => data.negoces.filter((n) => n.etat === etat);
+  return (
+    <section aria-label="Espace négoce" className="flex flex-col gap-3">
+      <h2 className="text-[16px] font-extrabold">Espace négoce</h2>
+      <p className="text-[13px] text-muted">{`${parEtat("inscrit").length} inscrit${parEtat("inscrit").length > 1 ? "s" : ""} · ${parEtat("invite").length} invité${parEtat("invite").length > 1 ? "s" : ""} jamais venu${parEtat("invite").length > 1 ? "s" : ""} · ${parEtat("desabonne").length} désabonné${parEtat("desabonne").length > 1 ? "s" : ""}`}</p>
+      {data.negoces.length > 0 ? (
+        <ul aria-label="Comptes négoce" className="flex flex-col gap-2">
+          {data.negoces.map((n) => (
+            <li key={n.id} className="rounded-2xl bg-surface p-3 text-[14px] shadow-card">
+              <span className="font-extrabold">{n.enseigne}</span> · {ETATS[n.etat]} · {n.email}
+              {n.siret ? ` · SIRET ${n.siret}` : ""} · {n.departements.length ? n.departements.join(", ") : "aucun département"}
+              {n.inscritLe ? ` · inscrit le ${quand(n.inscritLe)}` : n.inviteLe ? ` · invité le ${quand(n.inviteLe)}, ${n.rappels} rappel${n.rappels > 1 ? "s" : ""}` : ""}
+              {` · ${n.grillesRetenues} grille${n.grillesRetenues > 1 ? "s" : ""} retenue${n.grillesRetenues > 1 ? "s" : ""}, ${n.commandesRecues} commande${n.commandesRecues > 1 ? "s" : ""} reçue${n.commandesRecues > 1 ? "s" : ""}`}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {data.cycles.length > 0 ? (
+        <ul aria-label="Taux de réponse par cycle" className="flex flex-col gap-1 text-[13px]">
+          {data.cycles.map((c) => (
+            <li key={`${c.mois}-${c.zone}`}>{`Commande ${c.de} (${c.zone}) : ${c.deposees} grille${c.deposees > 1 ? "s" : ""} sur ${c.attendues} attendue${c.attendues > 1 ? "s" : ""}${c.tauxReponse === null ? "" : ` (${c.tauxReponse} %)`}${c.retenuId ? " · négoce retenu" : ""}`}</li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
 export default function AdminGroupePage() {
   const fetchTableau = useCallback((signal: AbortSignal) => api<Tableau>("/v1/admin/groupe", { signal }), []);
   const { data, error, reload } = useResource(fetchTableau);
@@ -279,6 +319,7 @@ export default function AdminGroupePage() {
         </ul>
       ) : null}
 
+      {onglet === "negoces" ? <ComptesNegoce /> : null}
       {onglet === "negoces" ? (
         <ul aria-label="Négoces" className="flex flex-col gap-2">
           {data.negoces.map((n) => (

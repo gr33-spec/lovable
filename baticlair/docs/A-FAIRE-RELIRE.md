@@ -25,6 +25,7 @@ Pages : `apps/web/src/app/(auth)/{mentions-legales,cgu,conditions-negoce,confide
 11. **Statut d'apporteur d'affaires** : qualification du contrat, facturation de la commission, absence de mandat d'achat, risque de requalification en intermédiaire de commerce.
 12. **Choix automatique du négoce** (moins cher livraison comprise, distance calculée × 1,3) : vérifier la transparence due au négoce (critères de classement, plateforme en ligne, règlement P2B 2019/1150).
 13. **Acceptation par case cochée** avec date, e-mail et IP : valeur probante suffisante ?
+13 bis. **Conditions de la Commande commune pour les négoces** (`/negoce/conditions`, dix points, version 2026-10-23, texte dans `packages/domain/src/groupe/espace-negoce.ts`, acceptées par case cochée à l'inscription, version enregistrée sur le compte) : prix fermes quel que soit le volume, un prix pour tous, garantie 30 jours si retenu, livraison selon paliers déclarés, confidentialité des artisans, aucun classement public, « aucun coût pour l'instant, BATI INVEST se réserve d'introduire une commission ultérieurement avec un préavis écrit », désabonnement libre, liberté de ne pas répondre, données. À relire : la portée de l'engagement « prix fermes » et de la garantie 30 jours (offre ferme au sens du Code civil ?), la clause de commission future (préavis, forme de l'accord), et l'articulation avec les anciennes conditions négoce du lot (page `/conditions-negoce`, contrat 2 %).
 
 ## Confidentialité (RGPD)
 
