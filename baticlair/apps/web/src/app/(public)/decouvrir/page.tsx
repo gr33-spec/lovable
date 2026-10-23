@@ -4,7 +4,7 @@ import { CLE_DEMO_VUE, DemoGuidee } from "@/components/demo-guidee";
 import { EXEMPLE } from "@/lib/exemple";
 import { ButtonLink } from "@/components/ui";
 import { LiensLegaux } from "@/components/legal";
-import { Visuel, type EmplacementPhoto } from "@/components/landing-illustrations";
+import { PHOTOS_LANDING, Visuel, type EmplacementPhoto } from "@/components/landing-illustrations";
 import { NOM } from "@/lib/nom";
 import { CompteurInscrits, InviterCollegue } from "@/components/inviter";
 
@@ -72,14 +72,19 @@ function Telephone({ src, alt, priorite = false, className = "" }: { src: string
   );
 }
 
-/** Un emplacement de photo de chantier : un aplat neutre tant que la photo n'est pas fournie (`PHOTOS_LANDING`). */
+/**
+ * Un emplacement de photo de chantier : rien tant que la photo n'est pas fournie (Greg, 23 octobre : « pas normal
+ * d'avoir des zones blanches »), la photo recadrée dès qu'elle est dans `PHOTOS_LANDING`.
+ */
 function Photo({ emplacement, className }: { emplacement: EmplacementPhoto; className: string }) {
+  if (!PHOTOS_LANDING[emplacement]) return null;
   return (
     <Visuel emplacement={emplacement} className={`${className} rounded-xl`}>
-      <div aria-hidden="true" data-photo={emplacement} className={`${className} rounded-xl bg-ground`} />
+      <span aria-hidden="true" data-photo={emplacement} />
     </Visuel>
   );
 }
+const avecPhoto = (emplacement: EmplacementPhoto) => Boolean(PHOTOS_LANDING[emplacement]);
 
 /** Le compteur de la commande commune, tel que l'artisan le voit (données de la démo) : façon Qonto, un chiffre, une phrase. */
 function Compteur() {
@@ -173,7 +178,7 @@ export default function BienvenuePage() {
 
       {/* Ce que commande un couvreur : la liste de l'exemple, telle qu'elle part au négoce. */}
       <section aria-labelledby="fournitures" data-reveal className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
-        <div className="flex flex-col gap-8 lg:col-span-7">
+        <div className={`flex flex-col gap-8 ${avecPhoto("ardoise") ? "lg:col-span-7" : "lg:col-span-8"}`}>
           <div className="flex flex-col gap-4">
             <h2 id="fournitures" className={h2}>
               Ardoise, zinc, liteaux, écran
@@ -189,9 +194,11 @@ export default function BienvenuePage() {
             ))}
           </ul>
         </div>
-        <div className="lg:col-span-5">
-          <Photo emplacement="ardoise" className="aspect-[4/3] w-full lg:aspect-auto lg:h-full" />
-        </div>
+        {avecPhoto("ardoise") ? (
+          <div className="lg:col-span-5">
+            <Photo emplacement="ardoise" className="aspect-[4/3] w-full lg:aspect-auto lg:h-full" />
+          </div>
+        ) : null}
       </section>
 
       {/* La commande commune : texte et compteur, sur le fond gris 1 (le seul aplat de la page avec la section noire). */}

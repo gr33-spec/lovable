@@ -142,8 +142,8 @@ Les mêmes écrans sur iPhone SE : `captures/ui-23-10/avant/se/` et `captures/ui
 - Accroche : 44 px sur téléphone, 64 px sur ordinateur, serrée ; le même bouton rond ; le téléphone de droite est un cadre iPhone (bordure, îlot) avec la liste « Ton chantier » de l'app d'après la passe (`public/landing/capture-liste.jpg`, régénérée).
 - Compteur « Plus on est nombreux » : chiffre 72 à 96 px en accent.
 - Comment ça marche : trois cadres iPhone avec un écran entier chacun (nouvelle liste, ligne à préciser) et le compteur de la commande ; plus de cadre coupé ni vide ; apparition douce au défilement (200 ms, opacité et 12 px, coupée sous « réduire les animations », aucun décalage).
-- Ardoise, zinc, liteaux, écran : lignes séparées gris 2 ; l'emplacement photo reste un aplat gris neutre pour la photo de Greg.
-- Les couvreurs de ton secteur : fond gris 1, compteur façon Qonto, emplacement photo neutre.
+- Ardoise, zinc, liteaux, écran : lignes séparées gris 2 ; l'emplacement photo n'apparaît qu'avec une photo (`PHOTOS_LANDING`).
+- Les couvreurs de ton secteur : fond gris 1, compteur façon Qonto ; emplacement photo seulement avec une photo.
 - L'union fait la force : une vraie section, noire, pleine largeur, titre 56 px sur ordinateur, WhatsApp en accent, SMS et lien en contour blanc.
 - Rejoins les couvreurs du secteur : titre 56 px, bouton, ligne « Aussi pour… ».
 - Négoces, pied de page : gris 3.
@@ -173,5 +173,12 @@ Gain principal sur la landing : la deuxième police (Bricolage Grotesque, 41 Ko)
 5. **Admin, formules (paywall), pages légales, aperçu PDF, chat** : mêmes jetons, pas de redessin ; le paywall est en pause, l'admin n'est vu que par Greg.
 6. **Le retour haptique** : Safari iOS ne l'expose pas à une web app (`navigator.vibrate` absent) ; rien d'ajouté plutôt qu'un faux.
 7. **Les paquets de polices** `@fontsource-variable/bricolage-grotesque` et `@fontsource/instrument-serif` restent dans `package.json` (plus chargés) : à retirer à la prochaine montée de dépendances, pour ne pas toucher au lockfile dans cette passe.
-8. **Les emplacements photo** de la landing restent des aplats gris, comme demandé, prêts pour les photos de Greg (`PHOTOS_LANDING`).
+8. **Les emplacements photo** de la landing : plus d'aplat gris vide (retour de Greg sur l'iPhone, 23 octobre : « pas normal d'avoir des zones blanches ») ; l'emplacement n'apparaît que lorsqu'une photo est donnée dans `PHOTOS_LANDING`, et la mise en page se referme sans elle.
 9. **Les textes** : aucun mot changé, y compris les libellés des boutons et des étapes.
+
+### Retour de Greg sur la prévisualisation (23 octobre, 9 h 28)
+
+Deux zones vides sur l'iPhone : la carte de la commande du mois sur l'accueil, et l'emplacement photo de la landing.
+
+- La carte : c'était le squelette de chargement, resté affiché parce que l'appel `/v1/commande-du-mois` échoue sur la prévisualisation. Cause : le site de prévisualisation relaie `/v1/*` vers l'API de production (`API_URL`, projet Vercel `baticlair-api`, code de `main`), qui n'a pas la commande du mois ; c'est aussi pour cela que « 3 offres reçues · Comparer les offres » réapparaît (le filtre des actions est dans l'API de la branche). Corrigé côté écran : le squelette ne s'affiche que pendant le chargement, jamais sur une erreur. Pour voir la commande du mois en vrai sur la prévisualisation, il faut une API déployée depuis la branche et `API_URL` du site de prévisualisation pointé dessus (LANCEMENT, point 5).
+- L'emplacement photo : retiré tant qu'il n'y a pas de photo.

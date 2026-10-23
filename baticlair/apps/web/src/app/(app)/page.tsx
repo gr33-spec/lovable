@@ -86,7 +86,8 @@ export default function AccueilPage() {
         </div>
       </form>
 
-      {mois.data?.prochaine ? <BlocDuMois prochaine={mois.data.prochaine} /> : mois.data === null && features.groupe ? <Skeleton card="h-48" label="Chargement de la commande du mois…" /> : null}
+      {/* Le squelette seulement pendant le chargement : si l'appel échoue (API sans la commande du mois), rien ne s'affiche, jamais une carte vide. */}
+      {mois.data?.prochaine ? <BlocDuMois prochaine={mois.data.prochaine} /> : mois.loading && features.groupe === true && features.commandeCommune !== "lots" ? <Skeleton card="h-48" label="Chargement de la commande du mois…" /> : null}
 
       {/* « À faire » : une liste blanche, chaque ligne est un lien (plus de bouton plein en concurrence avec celui du mois). */}
       <section aria-labelledby="todo-title" className="flex flex-col gap-3">
