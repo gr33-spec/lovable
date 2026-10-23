@@ -169,11 +169,6 @@ export default function BienvenuePage() {
             </li>
           ))}
         </ol>
-        <div data-reveal className="flex sm:justify-center">
-          <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
-            Je rejoins le mouvement
-          </ButtonLink>
-        </div>
       </section>
 
       {/* Ce que commande un couvreur : la liste de l'exemple, telle qu'elle part au négoce. */}

@@ -80,7 +80,7 @@ Chaque ligne : ce qui change, pourquoi, la référence.
 
 ## 3. La landing, section par section (`(public)/decouvrir/page.tsx`)
 
-Fond blanc, aucune ombre, une seule couleur d'accent, le même bouton principal « Je rejoins le mouvement » répété (en haut, après « Comment ça marche », en bas). Aucun texte validé ne change.
+Fond blanc, aucune ombre, une seule couleur d'accent, le même bouton principal « Je rejoins le mouvement » répété (en haut et en bas, comme le test de la landing l'attend). Aucun texte validé ne change.
 
 | Section | Après | Référence |
 |---|---|---|
@@ -141,7 +141,7 @@ Les mêmes écrans sur iPhone SE : `captures/ui-23-10/avant/se/` et `captures/ui
 - En-tête : logo en rond noir, « Se connecter » en contour rond.
 - Accroche : 44 px sur téléphone, 64 px sur ordinateur, serrée ; le même bouton rond ; le téléphone de droite est un cadre iPhone (bordure, îlot) avec la liste « Ton chantier » de l'app d'après la passe (`public/landing/capture-liste.jpg`, régénérée).
 - Compteur « Plus on est nombreux » : chiffre 72 à 96 px en accent.
-- Comment ça marche : trois cadres iPhone avec un écran entier chacun (nouvelle liste, ligne à préciser) et le compteur de la commande ; plus de cadre coupé ni vide ; apparition douce au défilement (200 ms, opacité et 12 px, coupée sous « réduire les animations », aucun décalage) ; un bouton « Je rejoins le mouvement » sous les étapes.
+- Comment ça marche : trois cadres iPhone avec un écran entier chacun (nouvelle liste, ligne à préciser) et le compteur de la commande ; plus de cadre coupé ni vide ; apparition douce au défilement (200 ms, opacité et 12 px, coupée sous « réduire les animations », aucun décalage).
 - Ardoise, zinc, liteaux, écran : lignes séparées gris 2 ; l'emplacement photo reste un aplat gris neutre pour la photo de Greg.
 - Les couvreurs de ton secteur : fond gris 1, compteur façon Qonto, emplacement photo neutre.
 - L'union fait la force : une vraie section, noire, pleine largeur, titre 56 px sur ordinateur, WhatsApp en accent, SMS et lien en contour blanc.
