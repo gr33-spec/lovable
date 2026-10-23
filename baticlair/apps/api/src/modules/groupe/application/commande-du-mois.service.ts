@@ -335,13 +335,31 @@ export class CommandeDuMoisService {
     }
     const zone = zoneDuCodePostal(adresse ?? "");
     if (!zone) return null;
-    const { cycle } = await this.cycleOuvert("couverture", zone, maintenant);
-    const c = await this.prisma.cycleCommande.findUniqueOrThrow({ where: { id: cycle.id } });
-    const tout = await this.lignesDuCycle(c.id);
+    // Lecture seule : afficher la commande ne crée pas de cycle en base (il naît au premier dépôt).
+    const c = await this.cycleAffiche("couverture", zone, maintenant);
+    if (!c) return null;
+    const tout = c.id ? await this.lignesDuCycle(c.id) : [];
     // Greg (23 octobre) : l'accueil montre « Toi seul : … » quand l'entreprise a déjà déposé dans cette commande.
-    const toi = await this.lignesDuCycle(c.id, tenant.companyId);
+    const toi = c.id ? await this.lignesDuCycle(c.id, tenant.companyId) : [];
     const affichage = affichageDeLaCommande({ mois: c.mois, toi, tout, seul: false, clotureDans: null });
     return { mois: c.mois, de: deMois(c.mois), zone, clotureLe: c.clotureLe.toISOString(), clotureDans: chrono(maintenant, c.clotureLe), toi: toi.length ? affichage.toi : null, tout: affichage.tout, vide: tout.length === 0 };
+  }
+
+  /** La commande ouverte d'un département, sans rien créer : le cycle en base s'il existe, sinon ses dates seules. */
+  private async cycleAffiche(famille: string, zone: string, maintenant: Date): Promise<{ id: string | null; mois: Mois; clotureLe: Date } | null> {
+    const config = await this.config();
+    let mois = moisDe(maintenant);
+    for (let i = 0; i < 24; i++) {
+      const existant = await this.prisma.cycleCommande.findUnique({ where: { mois_famille_zone: { mois, famille, zone } } });
+      if (existant) {
+        if (existant.phase === "inscriptions" && maintenant < existant.clotureLe) return { id: existant.id, mois: existant.mois, clotureLe: existant.clotureLe };
+      } else {
+        const d = datesDuCycle(mois, config);
+        if (maintenant < d.clotureLe) return { id: null, mois, clotureLe: d.clotureLe };
+      }
+      mois = moisSuivant(mois);
+    }
+    return null;
   }
 
   private async lignesDuCycle(cycleId: string, companyId?: string): Promise<LigneDeGrille[]> {

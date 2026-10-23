@@ -36,4 +36,6 @@ it("l'accueil montre la commande du mois d'une entreprise sans adresse d'après 
   const prochaine = (await agent.get("/v1/commande-du-mois").expect(200)).body.prochaine as { zone: string; clotureLe: string; toi: string | null; vide: boolean };
   expect(prochaine).toMatchObject({ zone: "56", toi: null, vide: true });
   expect(prochaine.clotureLe).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  // Afficher la commande ne crée rien en base : le cycle naît au premier dépôt.
+  expect(await ctx.prisma.cycleCommande.count({ where: { zone: "56" } })).toBe(0);
 });
