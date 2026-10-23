@@ -104,7 +104,7 @@ export default function ReponseNegocePage() {
       <p className="text-sm text-muted">
         {NOM}, département {lot.departement}. Pour {page.negoce.nom}.
       </p>
-      <section aria-label="Le lot" className="flex flex-col gap-2 rounded-[20px] border border-line bg-surface p-4">
+      <section aria-label="Le lot" className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-4">
         <h2 className="text-base font-extrabold">{lot.designation}</h2>
         <p className="text-sm">
           <span className="font-bold">Volume ferme : {lisible(lot.volumeFerme)}</span> · volume probable : {lisible(lot.volumeProbable)}
@@ -152,7 +152,7 @@ export default function ReponseNegocePage() {
             </label>
             {fichiers.length > 0 ? <p className="text-sm font-semibold">{fichiers.map((f) => f.name).join(", ")}</p> : null}
           </div>
-          <fieldset className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-4">
+          <fieldset className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
             <legend className="px-1 text-sm font-bold">Votre livraison (obligatoire)</legend>
             <label className="flex flex-col gap-1 text-sm font-semibold">
               Adresse d&apos;où partent vos livraisons
@@ -174,7 +174,7 @@ export default function ReponseNegocePage() {
             Un mot pour nous (facultatif)
             <textarea value={message} onChange={(e) => setMessage(e.currentTarget.value)} maxLength={2000} rows={3} className="rounded-2xl border border-line bg-surface px-3 py-2 text-sm font-normal" />
           </label>
-          <div className="flex flex-col gap-2 rounded-[20px] border border-line bg-surface p-4">
+          <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-4">
             <label className="flex cursor-pointer items-start gap-3 text-sm">
               <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.currentTarget.checked)} aria-label="J'accepte la commission" className="mt-0.5 size-5 shrink-0 accent-accent" />
               <strong>{page.commission.phraseAccord}</strong>

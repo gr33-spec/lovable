@@ -5,7 +5,7 @@ import { quantiteFr } from "@/components/groupe";
 import Link from "next/link";
 import { Check, FileText, Store, Tag, Truck, Users } from "lucide-react";
 import { useCallback, useState } from "react";
-import { Button, ButtonLink, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
+import { Button, ButtonLink, Card, ErrorNotice, PageTitle, SectionTitle, Skeleton, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
@@ -80,7 +80,7 @@ export default function GroupePage() {
   const [siretErreur, setSiretErreur] = useState<string | null>(null);
 
   if (etat.error && !etat.data) return <ErrorNotice error={etat.error} onRetry={etat.reload} />;
-  if (!etat.data) return <Spinner />;
+  if (!etat.data) return <Skeleton card="h-56" lines={3} label="Chargement de la commande commune…" />;
   const { etapes, siret } = etat.data;
   const tout = etapes.siret && etapes.devis && etapes.negoces;
   const mois = etat.data.mode !== "lots";
@@ -106,7 +106,7 @@ export default function GroupePage() {
         <AideBouton sujet="groupe" />
       </div>
       {etat.data.admin ? (
-        <Link href="/admin/groupe" className="min-h-10 self-start py-2 text-sm font-bold text-accent-text underline decoration-dotted underline-offset-4">
+        <Link href="/admin/groupe" className="min-h-11 self-start py-2 text-[14px] font-semibold text-accent-text underline decoration-dotted underline-offset-4">
           {`Admin ${nom}`}
         </Link>
       ) : null}
@@ -121,11 +121,11 @@ export default function GroupePage() {
         </p>
       ) : null}
       <Card className="flex flex-col gap-4 p-4">
-        <p className="text-[17px] leading-snug font-extrabold">{mois ? "Une commande par mois avec les couvreurs de ta région." : accroche(company?.trades[0])}</p>
+        <p className="text-[20px] leading-snug font-extrabold tracking-[-0.02em]">{mois ? "Une commande par mois avec les couvreurs de ta région." : accroche(company?.trades[0])}</p>
         {/* Revue à froid (21 octobre) : une fois les trois étapes faites, « Comment ça marche » se replie derrière un lien. */}
         {tout ? (
           <details className="group">
-            <summary className="min-h-10 cursor-pointer list-none text-[14px] font-bold text-accent-text">
+            <summary className="min-h-11 cursor-pointer list-none text-[14px] font-semibold text-accent-text">
               <span className="group-open:hidden">Comment ça marche</span>
               <span className="hidden group-open:inline">Replier</span>
             </summary>
@@ -136,7 +136,7 @@ export default function GroupePage() {
         ) : (
           <Etapes />
         )}
-        <p className="text-[13px] text-muted">Gratuit pour toi. Personne ne voit ton nom ni tes chantiers.</p>
+        <p className="text-[14px] text-muted">Gratuit pour toi. Personne ne voit ton nom ni tes chantiers.</p>
       </Card>
       {/* Landing du 22 octobre : plus on est nombreux, plus on négocie ; le même bloc que la page publique. */}
       {/* En mode mois, le partage vit dans la carte de la commande (sous les quantités) ; sans elle (pas encore ouvert à
@@ -147,29 +147,29 @@ export default function GroupePage() {
 
       {tout ? null : (
         <Card className="flex flex-col gap-3 p-4">
-          <h2 className="font-display text-xl font-extrabold">Pour en profiter</h2>
-          <ul aria-label="Ce qui manque" className="flex flex-col gap-2">
+          <SectionTitle>Pour en profiter</SectionTitle>
+          <ul aria-label="Ce qui manque" className="flex flex-col divide-y divide-line">
             <Etape fait={etapes.siret} titre="Renseigne ton SIRET">
               {siret.renseigne ? (
                 <div className="flex flex-col gap-1">
-                  <Button variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]" pending={pending} onClick={verifierSiret}>
+                  <Button variant="secondary" className="min-h-11 self-start px-4 text-[14px]" pending={pending} onClick={verifierSiret}>
                     Vérifier mon SIRET
                   </Button>
                   {siretErreur ? <p className="text-[13px] font-semibold text-warn">{siretErreur}</p> : null}
                 </div>
               ) : (
-                <ButtonLink href="/compte" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
+                <ButtonLink href="/compte" variant="secondary" className="min-h-11 self-start px-4 text-[14px]">
                   Renseigner mon SIRET
                 </ButtonLink>
               )}
             </Etape>
             <Etape fait={etapes.devis} titre="Donne ta liste">
-              <ButtonLink href="/chantiers/nouveau" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
+              <ButtonLink href="/chantiers/nouveau" variant="secondary" className="min-h-11 self-start px-4 text-[14px]">
                 Donner ma liste
               </ButtonLink>
             </Etape>
             <Etape fait={etapes.negoces} titre="Ajoute tes négoces">
-              <ButtonLink href="/fournisseurs?negoce" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
+              <ButtonLink href="/fournisseurs?negoce" variant="secondary" className="min-h-11 self-start px-4 text-[14px]">
                 Ajouter un négoce
               </ButtonLink>
             </Etape>
@@ -186,7 +186,7 @@ export default function GroupePage() {
 function PanneauDuMois() {
   const { data, error, reload } = useCommandeDuMois(true);
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
-  if (!data) return <Spinner />;
+  if (!data) return <Skeleton card="h-64" label="Chargement de la commande du mois…" />;
   return <CommandeDuMoisPanneau etat={data} onChange={reload} />;
 }
 
@@ -210,7 +210,7 @@ function Etapes() {
 
 function Etape({ fait, titre, children }: { fait: boolean; titre: string; children: React.ReactNode }) {
   return (
-    <li className="flex items-start gap-3 rounded-2xl bg-ground p-3">
+    <li className="flex items-start gap-3 py-3">
       <span
         aria-label={fait ? "Fait" : "À faire"}
         className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full ${fait ? "bg-mark-ok text-white" : "border-2 border-mark-warn bg-surface"}`}
@@ -218,7 +218,7 @@ function Etape({ fait, titre, children }: { fait: boolean; titre: string; childr
         {fait ? <Check size={14} strokeWidth={3} aria-hidden="true" /> : null}
       </span>
       <div className="flex min-w-0 grow flex-col gap-2">
-        <span className={`text-[15px] font-bold ${fait ? "text-muted line-through" : ""}`}>{titre}</span>
+        <span className={`text-[16px] font-semibold ${fait ? "text-muted line-through" : ""}`}>{titre}</span>
         {fait ? null : children}
       </div>
     </li>
@@ -306,7 +306,7 @@ function MesLots() {
   if (!data) return <Spinner />;
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="font-display text-xl font-extrabold">{`Mes ${noms}`}</h2>
+      <SectionTitle>{`Mes ${noms}`}</SectionTitle>
       {data.besoins.length === 0 ? (
         <p className="text-[15px] font-semibold text-muted">Rien pour l&apos;instant : ajoute un chantier à la {nom}.</p>
       ) : (

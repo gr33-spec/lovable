@@ -4,7 +4,7 @@ import { Check, FileText, Store, Users } from "lucide-react";
 import { useCallback, useId, useState } from "react";
 import { InviterCollegue } from "@/components/inviter";
 import type { Groupe } from "@/components/groupe";
-import { Button, ErrorNotice, Field } from "@/components/ui";
+import { Button, Chrono, ErrorNotice, Field, SectionTitle } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
@@ -58,7 +58,7 @@ export function useCommandeDuMois(actif: boolean, projectId?: string) {
 }
 
 /** Une carte (comme `Card`), mais une région nommée : « Commande d'octobre ». */
-const CARTE = "flex flex-col rounded-3xl bg-surface p-4 shadow-card";
+const CARTE = "flex flex-col rounded-xl bg-surface p-4 shadow-card";
 const unite = (u: string) => (u === "ml" ? "m" : u);
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 const quantite = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
@@ -73,10 +73,10 @@ export function EtapesDuMois() {
   return (
     <ol aria-label="Comment ça marche" className="flex flex-col gap-2">
       {etapes.map((e, i) => (
-        <li key={e.texte} className="flex items-center gap-3 text-[15px] font-semibold">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ground text-accent-text">{e.icone}</span>
+        <li key={e.texte} className="flex items-center gap-3 text-[16px]">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-accent-text">{e.icone}</span>
           <span>
-            {i + 1}. {e.texte}
+            <span className="font-semibold text-accent-text">{i + 1}.</span> {e.texte}
           </span>
         </li>
       ))}
@@ -108,13 +108,13 @@ export function CommandeDuMoisBar({
   const [nature, setNature] = useState<"chantier" | "stock" | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
-  const choix = "inline-flex min-h-12 grow items-center justify-center rounded-2xl px-3 text-[15px] font-extrabold";
+  const choix = "pressable inline-flex min-h-12 grow items-center justify-center rounded-full border px-3 text-[15px] font-semibold";
   const adresseManque = error?.reason === "adresse_requise" && Boolean(onAdresse);
   return (
-    <section aria-label={`Ajouter à la commande ${de}`} className="flex flex-col gap-2 rounded-[22px] bg-surface p-3 shadow-card">
-      <p className="text-[14px] font-extrabold">{count === 0 ? `Coche les lignes à ajouter à la commande ${de}` : `${count} ligne${count > 1 ? "s" : ""} pour la commande ${de}`}</p>
-      <p className="text-[13px] leading-snug text-muted">{phrase}</p>
-      <p className="text-[13px] font-bold text-muted">C&apos;est pour quoi ?</p>
+    <section aria-label={`Ajouter à la commande ${de}`} className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
+      <p className="text-[16px] font-semibold">{count === 0 ? `Coche les lignes à ajouter à la commande ${de}` : `${count} ligne${count > 1 ? "s" : ""} pour la commande ${de}`}</p>
+      <p className="text-[14px] leading-snug text-muted">{phrase}</p>
+      <p className="text-[14px] font-semibold">C&apos;est pour quoi ?</p>
       <div role="radiogroup" aria-label="C'est pour quoi ?" className="flex gap-2">
         {(
           [
@@ -122,7 +122,7 @@ export function CommandeDuMoisBar({
             ["stock", "Du stock"],
           ] as const
         ).map(([v, label]) => (
-          <button key={v} type="button" role="radio" aria-checked={nature === v} onClick={() => setNature(v)} className={`${choix} ${nature === v ? "bg-accent text-white" : "bg-ground text-ink"}`}>
+          <button key={v} type="button" role="radio" aria-checked={nature === v} onClick={() => setNature(v)} className={`${choix} ${nature === v ? "border-ink bg-ink text-white" : "border-line bg-surface text-ink"}`}>
             {label}
           </button>
         ))}
@@ -174,16 +174,16 @@ export function CommandeDuMoisBloc({ etat, onAjouter, message }: { etat: EtatDuM
   const chronoTexte = p ? `Clôture dans ${p.clotureDans}` : null;
   const tout = p && !p.vide ? p.tout : null;
   return (
-    <section aria-label={de ? `Commande commune ${de}` : "Commande commune"} className="mb-3 flex flex-col gap-2 rounded-[20px] bg-surface p-4 shadow-card">
-      <p className="flex items-center gap-2 text-[15px] font-extrabold">
+    <section aria-label={de ? `Commande commune ${de}` : "Commande commune"} className="mb-3 flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
+      <p className="flex items-center gap-2 text-[16px] font-extrabold">
         <Users size={18} aria-hidden="true" className="text-accent-text" />
         {de ? `Commande commune ${de}` : "Commande commune"}
       </p>
       <p className="text-[14px] leading-snug text-muted">Une commande par mois avec les couvreurs de ta région.</p>
-      {chronoTexte ? <p className="text-[15px] font-extrabold text-accent-text">{chronoTexte}</p> : null}
-      {tout ? <p className="text-[14px] font-bold">{tout}</p> : null}
+      {chronoTexte ? <Chrono>{chronoTexte}</Chrono> : null}
+      {tout ? <p className="text-[15px] font-semibold">{tout}</p> : null}
       {message ? (
-        <p role="status" className="rounded-2xl bg-ground p-3 text-[14px] font-bold">
+        <p role="status" className="rounded-xl bg-ground p-3 text-[14px] font-semibold">
           {message}
         </p>
       ) : null}
@@ -204,20 +204,20 @@ export function MesLignesDuMois({ groupe }: { groupe: Groupe }) {
   return (
     <>
       {commandes.map(({ c, lignes }) => (
-        <section key={c.cycleId} aria-label={`Dans la commande ${c.de}`} className="mt-3 flex flex-col gap-2 rounded-[20px] bg-surface p-3 shadow-card">
-          <h3 className="text-[13px] font-extrabold text-muted">{`Dans la commande ${c.de}`}</h3>
-          <p className="text-[13px] font-bold text-accent-text">{c.suivi.phrase}</p>
+        <section key={c.cycleId} aria-label={`Dans la commande ${c.de}`} className="mt-3 flex flex-col gap-2 rounded-xl bg-surface p-4 shadow-card">
+          <h3 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">{`Dans la commande ${c.de}`}</h3>
+          <p className="text-[14px] font-semibold text-accent-text">{c.suivi.phrase}</p>
           <ul className="flex flex-col gap-1.5">
             {lignes.map((l) => (
-              <li key={l.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-ground px-3 py-2">
-                <span className="min-w-0 text-[14px] font-bold">
+              <li key={l.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-ground px-3 py-3">
+                <span className="min-w-0 text-[15px] font-semibold">
                   {l.designation} <span className="font-extrabold">{`· ${quantite(l.quantite)} ${unite(l.unite)}`}</span>
                   <span className="block text-[12px] font-semibold text-muted">{l.nature === "stock" ? "Stock" : "Chantier signé"}</span>
                 </span>
                 {c.phase === "inscriptions" ? (
                   <Button
                     variant="secondary"
-                    className="min-h-10 px-3 text-[13px]"
+                    className="min-h-11 px-4 text-[14px]"
                     pending={pending === l.id}
                     onClick={async () => {
                       setPending(l.id);
@@ -258,9 +258,9 @@ export function CommandeDuMoisPanneau({ etat, onChange }: { etat: EtatDuMois; on
     <div className="flex flex-col gap-4">
       {!ouverte && etat.prochaine ? (
         <section aria-label={`Commande ${etat.prochaine.de}`} className={`${CARTE} gap-2`}>
-          <h2 className="font-display text-xl font-extrabold">{`Commande ${etat.prochaine.de}`}</h2>
-          <p className="text-[15px] font-extrabold text-accent-text">{`Clôture dans ${etat.prochaine.clotureDans}`}</p>
-          <p className="text-[15px] font-semibold">{etat.prochaine.vide ? "Pour l'instant, la commande est vide. Dépose ta liste pour la lancer." : etat.prochaine.tout}</p>
+          <SectionTitle>{`Commande ${etat.prochaine.de}`}</SectionTitle>
+          <Chrono>{`Clôture dans ${etat.prochaine.clotureDans}`}</Chrono>
+          <p className="text-[16px] font-semibold">{etat.prochaine.vide ? "Pour l'instant, la commande est vide. Dépose ta liste pour la lancer." : etat.prochaine.tout}</p>
           <InviterCollegue texte="Plus on est nombreux dans la commande, plus les prix baissent." />
         </section>
       ) : null}
@@ -294,26 +294,28 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
   return (
     <section aria-label={`Commande ${c.de}`} className={`${CARTE} gap-3`}>
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-xl font-extrabold">{`Commande ${c.de}`}</h2>
-        <p className="text-[15px] font-extrabold text-accent-text">{c.phase === "inscriptions" ? c.cloture : c.phase === "negoces" ? `Commande close. Les négoces chiffrent : leurs prix dans ${c.reponseDans}.` : "Les prix sont là."}</p>
+        <SectionTitle>{`Commande ${c.de}`}</SectionTitle>
+        {c.phase === "inscriptions" && c.cloture ? <Chrono>{c.cloture}</Chrono> : <p className="text-[15px] font-semibold text-accent-text">{c.phase === "negoces" ? `Commande close. Les négoces chiffrent : leurs prix dans ${c.reponseDans}.` : "Les prix sont là."}</p>}
       </div>
-      <p className="text-[16px] font-bold">{c.toi}</p>
-      <p className="text-[16px] font-bold">{c.tout}</p>
-      {c.premier ? <p className="rounded-2xl bg-ground p-3 text-[14px] font-semibold">{c.premier}</p> : null}
+      <div className="flex flex-col divide-y divide-line">
+        <p className="py-3 text-[16px] font-semibold">{c.toi}</p>
+        <p className="py-3 text-[16px] font-semibold">{c.tout}</p>
+      </div>
+      {c.premier ? <p className="rounded-xl bg-ground p-3 text-[14px]">{c.premier}</p> : null}
       {c.phase === "inscriptions" ? <InviterCollegue texte="Plus on est nombreux dans la commande, plus les prix baissent." /> : null}
 
       {c.mesLignes.length > 0 ? (
         <section aria-label="Mes lignes" className="flex flex-col gap-1.5">
-          <h3 className="text-[13px] font-extrabold text-muted">Mes lignes</h3>
+          <h3 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">Mes lignes</h3>
           <ul className="flex flex-col gap-1.5">
             {c.mesLignes.map((l) => (
-              <li key={l.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-ground px-3 py-2">
-                <span className="min-w-0 text-[14px] font-bold">
+              <li key={l.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-ground px-3 py-3">
+                <span className="min-w-0 text-[15px] font-semibold">
                   {l.designation} <span className="font-extrabold">{`· ${quantite(l.quantite)} ${unite(l.unite)}`}</span>
                   <span className="block text-[12px] font-semibold text-muted">{`${l.nature === "stock" ? "Stock" : "Chantier signé"} · ${l.chantier}`}</span>
                 </span>
                 {c.phase === "inscriptions" ? (
-                  <Button variant="secondary" className="min-h-10 px-3 text-[13px]" pending={pending === l.id} onClick={() => run(l.id, () => api(`/v1/commande-du-mois/lignes/${encodeURIComponent(l.id)}`, { method: "DELETE" }))}>
+                  <Button variant="secondary" className="min-h-11 px-4 text-[14px]" pending={pending === l.id} onClick={() => run(l.id, () => api(`/v1/commande-du-mois/lignes/${encodeURIComponent(l.id)}`, { method: "DELETE" }))}>
                     Retirer
                   </Button>
                 ) : null}
@@ -325,17 +327,17 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
 
       {r ? (
         <section aria-label="Tes prix" className="flex flex-col gap-2">
-          <h3 className="text-[15px] font-extrabold">Ton prix livré chez chaque négoce</h3>
+          <h3 className="text-[16px] font-extrabold">Ton prix livré chez chaque négoce</h3>
           {commande ? (
-            <p role="status" className="rounded-2xl bg-ok/10 p-3 text-[15px] font-extrabold text-ok">{`Commandé chez ${commande.nom} : ${euros(commande.totalHt)} HT livré. Le bon de commande est parti.`}</p>
+            <p role="status" className="rounded-xl bg-ok-bg p-4 text-[15px] font-semibold text-ok">{`Commandé chez ${commande.nom} : ${euros(commande.totalHt)} HT livré. Le bon de commande est parti.`}</p>
           ) : null}
           <ul className="flex flex-col gap-2">
             {r.negoces.map((n) => (
               <li key={n.negoceId}>
-                <label className={`flex items-start gap-3 rounded-2xl p-3 ${n.complet ? "bg-ground" : "bg-ground opacity-70"} ${selection?.negoceId === n.negoceId && !commande ? "ring-2 ring-accent" : ""}`}>
+                <label className={`flex items-start gap-3 rounded-xl border-2 p-4 transition-[border-color] duration-150 ${n.complet ? "bg-surface" : "bg-surface opacity-70"} ${selection?.negoceId === n.negoceId && !commande ? "border-accent" : "border-line"}`}>
                   {commande ? null : <input type="radio" name={`negoce-${c.cycleId}`} disabled={!n.complet} checked={selection?.negoceId === n.negoceId} onChange={() => setChoisi(n.negoceId)} className="mt-1 size-5 shrink-0 accent-accent" />}
                   <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="text-[15px] font-extrabold">{`Chez ${n.nom} : ${euros(n.totalHt)} HT livré`}</span>
+                    <span className="text-[16px] font-extrabold">{`Chez ${n.nom} : ${euros(n.totalHt)} HT livré`}</span>
                     <span className="text-[13px] font-semibold text-muted">{`${euros(n.marchandiseHt)} de matériaux, livraison ${n.livraisonHt > 0 ? euros(n.livraisonHt) : "gratuite"}`}</span>
                     {n.premierSurLeTotal ? <span className="text-[13px] font-bold text-accent-text">Le moins cher sur toute la commande</span> : null}
                     {r.moinsCherPourToi === n.negoceId && !n.premierSurLeTotal ? <span className="text-[13px] font-bold text-ok">Le moins cher pour toi</span> : null}
@@ -346,7 +348,7 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
             ))}
           </ul>
           {!commande && !selection ? (
-            <p role="status" className="rounded-2xl bg-warn-bg p-3 text-[14px] font-bold text-warn">
+            <p role="status" className="rounded-xl bg-warn-bg p-4 text-[14px] font-semibold text-warn">
               Aucun négoce n&apos;a chiffré toute ta liste : commande-la en direct chez ton négoce.
             </p>
           ) : null}
@@ -355,7 +357,7 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
               {`Commander chez ${selection.nom}`}
             </Button>
           ) : null}
-          <p className="text-[13px] text-muted">Sans engagement : tu commandes seulement si le prix te plaît. Le bon part au négoce, avec ton nom ; tu paies sur ton compte, comme d&apos;habitude.</p>
+          <p className="text-[14px] text-muted">Sans engagement : tu commandes seulement si le prix te plaît. Le bon part au négoce, avec ton nom ; tu paies sur ton compte, comme d&apos;habitude.</p>
         </section>
       ) : c.phase === "resultats" ? (
         <p className="text-[14px] font-semibold text-muted">Aucun négoce n&apos;a chiffré ta liste cette fois-ci.</p>

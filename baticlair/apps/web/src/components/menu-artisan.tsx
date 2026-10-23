@@ -53,22 +53,22 @@ export function MenuArtisan() {
     }
   }
 
-  const item = "flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-[15px] font-bold hover:bg-ground";
+  const item = "flex min-h-13 w-full items-center gap-3 px-4 text-left text-[16px] font-semibold transition-[background-color] duration-150 hover:bg-ground active:bg-ground";
   return (
     <div ref={box} className="relative flex items-center justify-between">
-      <span className="truncate text-[15px] font-extrabold">{company?.name}</span>
+      <span className="truncate text-[16px] font-extrabold">{company?.name}</span>
       <button
         type="button"
         aria-label="Mon menu"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface text-sm font-extrabold shadow-card"
+        className="pressable flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-[14px] font-extrabold active:bg-ground"
       >
         {initials(me.user.name)}
       </button>
       {open ? (
-        <div role="menu" aria-label="Mon menu" className="absolute top-12 right-0 z-40 flex w-64 flex-col rounded-2xl border border-line bg-surface p-1.5 shadow-[0_16px_40px_-12px_rgba(20,24,60,0.35)]">
+        <div role="menu" aria-label="Mon menu" className="animate-rise absolute top-13 right-0 z-40 flex w-64 flex-col divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-card">
           <Link role="menuitem" href="/fournisseurs" onClick={() => setOpen(false)} className={item}>
             <Truck size={20} aria-hidden="true" className="text-muted" />
             Mes fournisseurs
@@ -81,7 +81,7 @@ export function MenuArtisan() {
             <FlaskConical size={20} aria-hidden="true" className="text-muted" />
             {pending ? "Préparation…" : "Essayer avec un chantier fictif"}
           </button>
-          {error ? <p className="px-3 py-2 text-[13px] font-semibold text-warn">Ça n&apos;a pas marché, réessaie.</p> : null}
+          {error ? <p className="px-4 py-3 text-[14px] font-semibold text-warn">Ça n&apos;a pas marché, réessaie.</p> : null}
         </div>
       ) : null}
     </div>

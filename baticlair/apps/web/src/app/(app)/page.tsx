@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { InstallHint } from "@/components/install-hint";
 import { useBilling } from "@/components/paywall";
 import { ProjectList } from "@/components/project-row";
-import { ButtonLink, ErrorNotice, Spinner } from "@/components/ui";
+import { ButtonLink, Chrono, ErrorNotice, ListCard, ListRow, SectionTitle, Skeleton } from "@/components/ui";
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
@@ -51,9 +51,9 @@ export default function AccueilPage() {
   // Simplification (21 octobre) : accueil vide = une phrase et un bouton, rien d'autre. Nouveau cap (22 octobre) : la promesse.
   if (recent && recent.items.length === 0 && !error) {
     return (
-      <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-6 text-center">
-        <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Paie tes matériaux moins cher. Donne ta liste, je fais jouer les négoces.</h1>
-        <ButtonLink href="/chantiers/nouveau" className="min-h-14 w-full max-w-sm text-[17px]">
+      <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-8 text-center">
+        <h1 className="max-w-[18ch] text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Paie tes matériaux moins cher. Donne ta liste, je fais jouer les négoces.</h1>
+        <ButtonLink href="/chantiers/nouveau" className="w-full max-w-sm">
           Donner ma liste
         </ButtonLink>
         {/* Landing du 22 octobre : « Inviter un collègue » aussi dans l'app, juste après l'inscription. */}
@@ -64,8 +64,11 @@ export default function AccueilPage() {
     );
   }
 
+  const chargement = (recent === null || next === null) && !error;
   return (
     <>
+      {/* Passe UI/UX : le prénom d'abord, en très grand ; la recherche dessous. */}
+      <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
       <form
         role="search"
         onSubmit={(e) => {
@@ -77,53 +80,41 @@ export default function AccueilPage() {
         <label htmlFor="home-search" className="sr-only">
           Chercher un chantier, un client ou une adresse
         </label>
-        <div className="flex min-h-13 items-center gap-2.5 rounded-2xl bg-surface px-4 shadow-card">
+        <div className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 transition-[border-color] duration-150 focus-within:border-accent">
           <Search size={20} className="text-muted" aria-hidden="true" />
-          <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Chantier, client, adresse…" className="min-h-12 grow bg-transparent text-base outline-none placeholder:text-muted" />
+          <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Chantier, client, adresse…" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" />
         </div>
       </form>
-      {/* Greg (23 octobre) : une seule police, plus d'italique à empattement. */}
-      <h1 className="mt-1.5 font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
 
-      {mois.data?.prochaine ? <BlocDuMois prochaine={mois.data.prochaine} /> : null}
+      {mois.data?.prochaine ? <BlocDuMois prochaine={mois.data.prochaine} /> : mois.data === null && features.groupe ? <Skeleton card="h-48" label="Chargement de la commande du mois…" /> : null}
 
-      <section aria-labelledby="todo-title" className="flex flex-col gap-1 rounded-[28px] bg-hero px-4 pt-4.5 pb-2.5 text-white shadow-card">
-        <h2 id="todo-title" className="pb-1.5 font-display text-[22px] font-extrabold tracking-[-0.02em]">
-          {(recent === null || next === null) && !error ? "À faire" : todo.length === 0 ? "Tout est à jour" : `${todo.length} action${todo.length > 1 ? "s" : ""} à faire`}
-        </h2>
-        {(recent === null || next === null) && !error ? (
-          <p className="border-t border-white/10 py-3 text-sm text-[#c9ced6]">Chargement…</p>
+      {/* « À faire » : une liste blanche, chaque ligne est un lien (plus de bouton plein en concurrence avec celui du mois). */}
+      <section aria-labelledby="todo-title" className="flex flex-col gap-3">
+        <SectionTitle id="todo-title">{chargement ? "À faire" : todo.length === 0 ? "Tout est à jour" : `${todo.length} action${todo.length > 1 ? "s" : ""} à faire`}</SectionTitle>
+        {chargement ? (
+          <Skeleton lines={2} label="Chargement de ce qu'il y a à faire…" />
         ) : todo.length === 0 ? (
-          <p className="border-t border-white/10 py-3 text-[15px] text-[#c9ced6]">Rien à faire pour l&apos;instant.</p>
+          <p className="rounded-xl bg-surface px-4 py-4 text-[15px] text-muted shadow-card">Rien à faire pour l&apos;instant.</p>
         ) : (
-          todo.map((t, i) => (
-            <div key={t.key} className="flex flex-col gap-2 border-t border-white/10 py-3">
-              <span className="flex items-center gap-3">
-                <span className="text-accent-on-dark">{t.icon}</span>
-                <span className="flex min-w-0 grow flex-col gap-0.5">
-                  <span className="truncate text-[15px] font-bold">{t.title}</span>
-                  {t.text ? <span className="text-[13px] text-[#c9ced6]">{t.text}</span> : null}
-                </span>
-              </span>
-              <Link href={t.href} className={`inline-flex min-h-12 items-center justify-center rounded-2xl px-3.5 text-[15px] font-extrabold ${i === 0 ? "bg-accent" : "bg-white/15"}`}>
-                {t.action}
-              </Link>
-            </div>
-          ))
+          <ListCard>
+            {todo.map((t) => (
+              <ListRow key={t.key} href={t.href} icon={t.icon} title={t.title} subtitle={t.text ? `${t.text} · ${t.action}` : t.action} />
+            ))}
+          </ListCard>
         )}
       </section>
       {/* Revue à froid (21 octobre) : le conseil « écran d'accueil » vient après ce qu'il y a à faire, jamais avant. */}
       <InstallHint />
 
-      <section className="flex flex-col gap-2.5">
+      <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-xl font-bold tracking-[-0.01em]">Chantiers récents</h2>
-          <Link href="/chantiers" className="inline-flex min-h-9 items-center text-sm font-bold text-accent-text">
+          <SectionTitle>Chantiers récents</SectionTitle>
+          <Link href="/chantiers" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
             Tous
           </Link>
         </div>
         {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
-        {recent === null && !error ? <Spinner /> : null}
+        {recent === null && !error ? <Skeleton lines={3} label="Chargement des chantiers…" /> : null}
         {/* Toujours montée : le bandeau « Annuler » survit au dernier chantier rangé. */}
         {recent ? (
           <ProjectList
@@ -136,7 +127,6 @@ export default function AccueilPage() {
           />
         ) : null}
       </section>
-
     </>
   );
 }
@@ -145,21 +135,24 @@ const jourMois = (iso: string) => new Intl.DateTimeFormat("fr-FR", { timeZone: "
 
 /**
  * Le bloc de la commande du mois, en haut de l'accueil (Greg, 23 octobre 2026) : le chrono de clôture, « Toi seul : … »
- * quand on a déjà déposé, « Toute la commande : … », et « Dépose ta liste avant le JJ/MM ».
+ * quand on a déjà déposé, « Toute la commande : … », et « Dépose ta liste avant le JJ/MM » (LE bouton principal de l'écran).
+ * Façon Qonto : un chiffre, une action.
  */
 function BlocDuMois({ prochaine: p }: { prochaine: NonNullable<EtatDuMois["prochaine"]> }) {
   return (
-    <section aria-label={`Commande ${p.de}`} className="flex flex-col gap-2 rounded-[28px] bg-surface p-4 shadow-card">
-      <p className="flex items-center gap-2 text-[15px] font-extrabold">
-        <Users size={18} aria-hidden="true" className="text-accent-text" />
-        {`Commande ${p.de}`}
-      </p>
-      <p className="text-[15px] font-extrabold text-accent-text">{`Clôture dans ${p.clotureDans}`}</p>
-      {p.toi ? <p className="text-[15px] font-bold">{p.toi}</p> : null}
-      <p className="text-[15px] font-bold">{p.vide ? "Pour l'instant, la commande est vide. Ta liste peut la lancer." : p.tout}</p>
-      <ButtonLink href="/chantiers/nouveau" className="min-h-13">
-        {`Dépose ta liste avant le ${jourMois(p.clotureLe)}`}
-      </ButtonLink>
+    <section aria-label={`Commande ${p.de}`} className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card">
+      <div className="flex flex-col gap-2">
+        <p className="flex items-center gap-2 text-[14px] font-semibold text-muted">
+          <Users size={16} aria-hidden="true" />
+          {`Commande ${p.de}`}
+        </p>
+        <Chrono>{`Clôture dans ${p.clotureDans}`}</Chrono>
+      </div>
+      <div className="flex flex-col divide-y divide-line">
+        {p.toi ? <p className="py-3 text-[16px] font-semibold">{p.toi}</p> : null}
+        <p className="py-3 text-[16px] font-semibold">{p.vide ? "Pour l'instant, la commande est vide. Ta liste peut la lancer." : p.tout}</p>
+      </div>
+      <ButtonLink href="/chantiers/nouveau">{`Dépose ta liste avant le ${jourMois(p.clotureLe)}`}</ButtonLink>
     </section>
   );
 }

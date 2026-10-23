@@ -105,7 +105,7 @@ export function SupplierForm({
           placeholder="ex. Tuiles, zinc, livraison le mardi"
           value={values.notes}
           onChange={set("notes")}
-          className="rounded-2xl bg-surface p-4 text-base shadow-card outline-none placeholder:text-subtle focus-visible:ring-2 focus-visible:ring-ink"
+          className="rounded-2xl border border-line bg-surface p-4 text-[16px] outline-none placeholder:text-muted focus-visible:border-accent"
         />
       </div>
       <div className="grid grid-cols-2 gap-3">

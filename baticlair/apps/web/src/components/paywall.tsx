@@ -112,7 +112,7 @@ export function Paywall({ status, onChange }: { status: BillingStatus; onChange:
               value={code}
               onChange={(e) => setCode(e.target.value)}
               autoComplete="off"
-              className="min-h-12 rounded-2xl bg-surface px-3 text-base shadow-card outline-none focus-visible:ring-2 focus-visible:ring-ink"
+              className="min-h-12 rounded-2xl border border-line bg-surface px-3 text-[16px] outline-none focus-visible:border-accent"
             />
             <Button type="submit" variant="secondary" pending={pending === "code"}>
               Activer
@@ -153,10 +153,10 @@ export function PlanSummary() {
     // Lighthouse (CLS) : la carte prend sa place avant la réponse, le reste de l'écran ne descend pas d'un coup.
     return (
       <Card className="flex flex-col gap-1.5 p-4" aria-busy="true">
-        <span className="text-xs font-extrabold tracking-[0.04em] text-muted">FORMULE</span>
+        <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">FORMULE</span>
         <span className="text-[17px] font-extrabold">&nbsp;</span>
         <span className="text-sm text-muted">&nbsp;</span>
-        <span className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text">Voir les formules</span>
+        <span className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">Voir les formules</span>
       </Card>
     );
   }
@@ -165,7 +165,7 @@ export function PlanSummary() {
   if (data.payant === false) {
     return (
       <Card className="flex flex-col gap-1.5 p-4">
-        <span className="text-xs font-extrabold tracking-[0.04em] text-muted">FORMULE</span>
+        <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">FORMULE</span>
         <span className="text-[17px] font-extrabold">Gratuit pour l&apos;artisan</span>
         <span className="text-sm text-muted">Aucune limite de chantiers, rien à payer.</span>
       </Card>
@@ -173,7 +173,7 @@ export function PlanSummary() {
   }
   return (
     <Card className="flex flex-col gap-1.5 p-4">
-      <span className="text-xs font-extrabold tracking-[0.04em] text-muted">FORMULE</span>
+      <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">FORMULE</span>
       <span className="text-[17px] font-extrabold">{plan.label}</span>
       {usage.limit !== null ? (
         <span className={`text-sm ${data.limitReached ? "font-semibold text-warn" : "text-muted"}`}>
@@ -181,7 +181,7 @@ export function PlanSummary() {
           {plan.period === "month" ? " ce mois-ci" : ""}
         </span>
       ) : null}
-      <Link href="/formules" className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text">
+      <Link href="/formules" className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">
         Voir les formules
       </Link>
     </Card>

@@ -73,9 +73,9 @@ export default function NouveauChantierPage() {
   return (
     <>
       <BackButton fallback="/chantiers" />
-      <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Nouvelle liste</h1>
+      <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Nouvelle liste</h1>
       {erreurListe ? (
-        <p role="alert" className="rounded-2xl bg-warn-bg p-4 text-[15px] font-semibold text-warn">
+        <p role="alert" className="rounded-xl bg-warn-bg p-4 text-[15px] font-semibold text-warn">
           {erreurListe}
         </p>
       ) : null}

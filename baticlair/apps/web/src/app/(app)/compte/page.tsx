@@ -93,7 +93,7 @@ export default function ComptePage() {
       </Card>
       <PlanSummary />
       <Card className="flex flex-col gap-2 p-4">
-        <span className="text-xs font-extrabold tracking-[0.04em] text-muted">
+        <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">
           ENTREPRISE
         </span>
         {me.companies.length > 1 ? (
@@ -193,7 +193,7 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
 
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
+      <h2 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">
         MES DONNÉES
       </h2>
       {error ? <ErrorNotice error={error} /> : null}
@@ -206,7 +206,7 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
       </Button>
       <a
         href="/confidentialite"
-        className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text"
+        className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text"
       >
         Ce que BatiClair garde, et combien de temps
       </a>
@@ -228,7 +228,7 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
               value={word}
               onChange={(e) => setWord(e.target.value)}
               autoComplete="off"
-              className="min-h-12 rounded-2xl bg-surface px-3 text-base"
+              className="min-h-12 rounded-xl border border-line bg-surface px-3 text-[16px] outline-none focus-visible:border-accent"
             />
           </label>
           <div className="flex gap-2">
@@ -236,7 +236,7 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
               type="button"
               disabled={deleting || word.trim().toUpperCase() !== "SUPPRIMER"}
               onClick={() => void remove()}
-              className="inline-flex min-h-11 items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white disabled:opacity-50"
+              className="pressable inline-flex min-h-11 items-center rounded-full bg-danger px-4 text-[14px] font-semibold text-white disabled:opacity-50"
             >
               {deleting ? "Suppression…" : "Supprimer définitivement"}
             </button>
@@ -253,7 +253,7 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
         <button
           type="button"
           onClick={() => setConfirming(true)}
-          className="inline-flex min-h-11 items-center self-start text-sm font-bold text-danger"
+          className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-danger"
         >
           Supprimer mon compte
         </button>
@@ -291,7 +291,7 @@ function MetiersCard() {
   }, []);
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
+      <h2 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">
         MÉTIERS COUVERTS
       </h2>
       <p className="text-sm text-muted">
@@ -345,7 +345,7 @@ function MemoryCard() {
 
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
+      <h2 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">
         CE QUE BATICLAIR A APPRIS
       </h2>
       <p className="text-sm text-muted">
@@ -386,7 +386,7 @@ function MemoryCard() {
             setDone(false);
             setConfirming(true);
           }}
-          className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text"
+          className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text"
         >
           Effacer ce que BatiClair a appris
         </button>
@@ -588,7 +588,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
     .join(" · ");
   return (
     <Card className="flex flex-col gap-3 p-4" aria-busy={!charge}>
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
+      <h2 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">
         TES DEMANDES DE DEVIS
       </h2>
       <p className="text-sm text-muted">

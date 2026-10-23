@@ -440,7 +440,7 @@ export function ProjectTakeoff({
                 setOverview(false);
                 setPage(true);
               }}
-              className="flex min-h-14 w-full items-center gap-3 rounded-[20px] bg-surface px-4 py-3 text-left shadow-card active:bg-ground"
+              className="flex min-h-14 w-full items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground"
             >
               {sent || checkCount === 0 ? (
                 <CircleCheck size={22} className="shrink-0 text-ok" aria-hidden="true" />
@@ -522,7 +522,7 @@ function LineForm({
   const [unit, setUnit] = useState(initial?.unit ?? "");
   const [reference, setReference] = useState(initial?.reference ?? "");
   const input =
-    "min-h-12 w-full rounded-2xl bg-ground px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ink";
+    "min-h-12 w-full rounded-2xl bg-ground px-3 text-base outline-none focus-visible:border-accent";
 
   return (
     <form
@@ -571,7 +571,7 @@ function LineForm({
 /** §50.1 : un échec de lecture se dit en une phrase, avec « Réessayer ». Rien d'autre. */
 function ReadFailure({ sentence, onRetry, disabled }: { sentence: string; onRetry?: () => void; disabled: boolean }) {
   return (
-    <section id="materiaux" aria-label="Lecture du devis" className="flex scroll-mt-4 flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
+    <section id="materiaux" aria-label="Lecture du devis" className="flex scroll-mt-4 flex-col gap-3 rounded-xl bg-surface p-5 shadow-card">
       <p role="alert" className="text-[17px] leading-snug font-bold">
         {sentence}
       </p>

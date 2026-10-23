@@ -67,7 +67,7 @@ export function ProjectRow({ project, onToggle }: { project: Project; onToggle?:
           onFocus={() => setOffset(-ACTION_W)}
           onBlur={() => setOffset(0)}
           aria-label={`${done ? "Reprendre" : "Marquer terminé"} : ${project.name}`}
-          className="absolute inset-y-0 right-0 flex flex-col items-center justify-center gap-1 text-[13px] font-extrabold text-white"
+          className="absolute inset-y-0 right-0 flex flex-col items-center justify-center gap-1 text-[13px] font-semibold text-white"
           style={{ width: ACTION_W }}
         >
           {done ? <RotateCcw size={20} aria-hidden="true" /> : <Archive size={20} aria-hidden="true" />}
@@ -91,13 +91,13 @@ export function ProjectRow({ project, onToggle }: { project: Project; onToggle?:
         className={`relative bg-surface ${dragging ? "" : "transition-transform duration-200"}`}
         style={{ transform: `translateX(${offset}px)`, touchAction: "pan-y" }}
       >
-        <Link href={`/chantiers/${project.id}`} draggable={false} className="flex min-h-16 items-center gap-3 px-4 py-2 hover:bg-ground/60">
+        <Link href={`/chantiers/${project.id}`} draggable={false} className="flex min-h-16 items-center gap-3 px-4 py-3 transition-[background-color] duration-150 hover:bg-ground/60 active:bg-ground">
           <span className="flex min-w-0 grow flex-col gap-0.5">
-            <span className="truncate text-[15px] font-bold">{project.name}</span>
-            {subtitle ? <span className="truncate text-[13px] text-muted">{subtitle}</span> : null}
+            <span className="truncate text-[16px] font-semibold">{project.name}</span>
+            {subtitle ? <span className="truncate text-[14px] text-muted">{subtitle}</span> : null}
           </span>
           {done ? <Badge tone="ok">{fr.status.archived}</Badge> : null}
-          <ChevronRight size={18} className="shrink-0 text-subtle" aria-hidden="true" />
+          <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden="true" />
         </Link>
       </div>
     </li>
@@ -152,7 +152,7 @@ export function ProjectList({ projects, show, onChanged }: { projects: Project[]
   return (
     <>
       {rows.length > 0 ? (
-        <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-3xl bg-surface py-1 shadow-card">
+        <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-xl bg-surface shadow-card">
           {rows.map((p) => (
             <ProjectRow key={`${p.id}-${p.status}`} project={p} onToggle={show ? (x) => void toggle(x) : undefined} />
           ))}
@@ -164,11 +164,11 @@ export function ProjectList({ projects, show, onChanged }: { projects: Project[]
         </p>
       ) : null}
       {toast ? (
-        <div role="status" className="fixed inset-x-4 bottom-24 z-50 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-white shadow-[0_18px_40px_rgba(14,17,22,0.3)]">
+        <div role="status" className="animate-rise fixed inset-x-4 bottom-24 z-50 mx-auto flex max-w-md items-center gap-3 rounded-xl bg-ink px-4 py-3 text-white shadow-card">
           <span className="min-w-0 grow truncate text-[15px] font-bold">
             {toast.to === "archived" ? "Rangé dans Terminés" : "Remis dans En cours"}
           </span>
-          <button type="button" onClick={undo} className="min-h-11 shrink-0 rounded-xl px-3 text-[15px] font-extrabold text-accent-on-dark">
+          <button type="button" onClick={undo} className="min-h-11 shrink-0 rounded-full px-3 text-[15px] font-semibold text-accent-on-dark">
             Annuler
           </button>
         </div>

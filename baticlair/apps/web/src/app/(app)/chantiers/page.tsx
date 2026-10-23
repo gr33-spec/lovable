@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, Warehouse } from "lucide-react";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ProjectList } from "@/components/project-row";
-import { Button, ButtonLink, EmptyState, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
+import { Button, ButtonLink, EmptyState, ErrorNotice, PageTitle, Skeleton, Spinner } from "@/components/ui";
 import { api, ApiError, type Project, type ProjectPage } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
@@ -101,11 +101,11 @@ function ChantiersList() {
         <PageTitle>Chantiers</PageTitle>
         <AideBouton sujet="chantiers" />
       </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="search" className="text-xs font-bold text-muted">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="search" className="text-[14px] font-semibold">
           Chercher un chantier, un client ou une adresse
         </label>
-        <div className="flex min-h-13 items-center gap-2.5 rounded-2xl bg-surface px-4 shadow-card focus-within:ring-2 focus-within:ring-ink">
+        <div className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 transition-[border-color] duration-150 focus-within:border-accent">
           <Search size={20} className="text-muted" aria-hidden="true" />
           <input
             id="search"
@@ -114,7 +114,7 @@ function ChantiersList() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="ex. Dupont, Vannes…"
-            className="min-h-12 grow bg-transparent text-base outline-none placeholder:text-subtle"
+            className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted"
           />
         </div>
       </div>
@@ -125,7 +125,7 @@ function ChantiersList() {
             type="button"
             aria-pressed={filter === f.value}
             onClick={() => updateUrl({ statut: f.value })}
-            className={`min-h-10 rounded-full px-3.5 text-sm font-bold ${filter === f.value ? "bg-ink text-white" : "bg-surface text-[#3a414b] shadow-card"}`}
+            className={`pressable min-h-11 rounded-full px-4 text-[14px] font-semibold ${filter === f.value ? "bg-ink text-white" : "border border-line bg-surface text-ink active:bg-ground"}`}
           >
             {f.label}
           </button>
@@ -133,10 +133,10 @@ function ChantiersList() {
       </div>
 
       {error ? <ErrorNotice error={error} onRetry={() => { setMoreError(null); reload(); }} /> : null}
-      {items === null && !error ? <Spinner /> : null}
+      {items === null && !error ? <Skeleton lines={4} label="Chargement des chantiers…" /> : null}
       {items && items.length > 0 ? (
         <>
-          <p className="text-[13px] text-muted" aria-live="polite">
+          <p className="text-[14px] text-muted" aria-live="polite">
             {searching ? `Résultats pour « ${q} »${filter === "tous" ? " (en cours et terminés)" : ""}` : "Le dernier travaillé en premier"}
           </p>
           <ProjectList projects={items} show={API_STATUS[filter] as "active" | "archived" | "all"} />
@@ -150,7 +150,7 @@ function ChantiersList() {
       {items && items.length === 0 ? (
         searching ? (
           <EmptyState icon={<Search size={40} />} title="Aucun chantier trouvé">
-            <p className="max-w-xs text-[15px] text-muted">Essaie le nom du client, une ville ou une partie de l&apos;adresse.</p>
+            <p className="max-w-xs text-[16px] text-muted">Essaie le nom du client, une ville ou une partie de l&apos;adresse.</p>
           </EmptyState>
         ) : (
           <EmptyState icon={<Warehouse size={40} />} title={filter === "termines" ? "Aucun chantier terminé" : "Aucun chantier en cours"}>

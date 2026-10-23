@@ -65,13 +65,13 @@ export function DropZone({
         <label
           htmlFor={id}
           aria-disabled={pending}
-          className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl bg-surface px-4 py-3 shadow-card transition focus-within:ring-2 ${pending ? "pointer-events-none opacity-80" : "active:scale-[0.99]"}`}
+          className={`pressable flex min-h-16 cursor-pointer items-center gap-3 rounded-xl bg-surface px-4 py-3 shadow-card focus-within:outline-3 focus-within:outline-accent ${pending ? "pointer-events-none opacity-80" : "active:bg-ground"}`}
         >
           <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink">
             {pending ? <Loader2 size={20} className="animate-spin" aria-hidden="true" /> : <FileUp size={20} aria-hidden="true" />}
           </span>
           <span className="flex flex-col">
-            <span className="text-[16px] font-extrabold">Je n&apos;ai qu&apos;un devis</span>
+            <span className="text-[16px] font-semibold">Je n&apos;ai qu&apos;un devis</span>
             <span className="text-[14px] leading-snug text-muted">On t&apos;avance la liste, sans garantie, tu la peaufines.</span>
           </span>
         </label>
@@ -89,15 +89,15 @@ export function DropZone({
           setOver(false);
           take(e.dataTransfer.files?.[0]);
         }}
-        className={`flex min-h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-[20px] border-[2.5px] border-dashed px-6 py-6 text-center transition focus-within:ring-2 ${
-          over ? "border-accent bg-accent/5" : "border-accent/30 bg-surface"
-        } ${pending ? "pointer-events-none opacity-80" : "active:scale-[0.99]"}`}
+        className={`pressable flex min-h-56 cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed px-6 py-8 text-center focus-within:outline-3 focus-within:outline-accent ${
+          over ? "border-accent bg-accent/5" : "border-line bg-surface"
+        } ${pending ? "pointer-events-none opacity-80" : ""}`}
       >
-        <span className={`flex size-16 items-center justify-center rounded-full text-white shadow-card ${liste ? "bg-ink" : "bg-cta"}`}>
+        <span className={`flex size-16 items-center justify-center rounded-full text-white ${liste ? "bg-ink" : "bg-accent"}`}>
           {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : liste ? <ListChecks size={28} aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
         </span>
-        <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">{pending && liste ? "Je lis ta liste…" : liste ? "Donne ta liste de matériaux" : "J'ai un devis"}</span>
-        {liste && !pending ? <span className="text-[14px] leading-snug text-muted">Une photo, un PDF ou une capture : je la remets au propre.</span> : null}
+        <span className="text-[22px] leading-tight font-extrabold tracking-[-0.02em]">{pending && liste ? "Je lis ta liste…" : liste ? "Donne ta liste de matériaux" : "J'ai un devis"}</span>
+        {liste && !pending ? <span className="text-[15px] leading-snug text-muted">Une photo, un PDF ou une capture : je la remets au propre.</span> : null}
       </label>
       )}
     </section>
@@ -186,7 +186,7 @@ export function notifyReady(title: string, body: string, tag: string): void {
 /** Après « Calculer ma liste » : une seule phrase, le temps du calcul ; les lignes du devis se posent une à une dans la liste (`ListScene`), pour tous les métiers. */
 export function CalculScreen() {
   return (
-    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-5 rounded-[20px] bg-chantier px-5 pt-8 pb-8 text-white shadow-card">
+    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-5 rounded-xl bg-chantier px-5 pt-8 pb-8 text-white shadow-card">
       <ListScene />
       <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
         Je prépare ta liste
@@ -487,7 +487,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
         role="group"
         aria-label="Calculer ma liste"
         data-typing={typing || undefined}
-        className={`${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}z-30 bg-gradient-to-t from-ground from-70% to-transparent pt-6 transition-[translate,opacity] duration-200 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:px-4.5 max-lg:pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:bottom-0 lg:pb-4`}
+        className={`${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}z-30 fade-ground pt-6 transition-[translate,opacity] duration-200 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:px-4.5 max-lg:pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:bottom-0 lg:pb-4`}
       >
         <div className="mx-auto max-w-2xl">
           <Button
@@ -516,7 +516,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
 /** Une question retirée : sa phrase en une ligne, et « Remettre ». */
 function RetiredCard({ question: q, onRestore }: { question: CounterQuestion; onRestore: () => void }) {
   return (
-    <li className="flex items-center gap-3 rounded-[20px] bg-surface px-4 py-3 shadow-card">
+    <li className="flex items-center gap-3 rounded-xl bg-surface px-4 py-3 shadow-card">
       <span className="min-w-0 grow text-[14px] leading-snug text-muted">
         Question retirée : <span className="font-bold">{q.text}</span>
       </span>
@@ -546,7 +546,7 @@ function QuestionCard({
 }) {
   const id = useId();
   return (
-    <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-[20px] bg-surface p-4 shadow-card transition ${problem ? "ring-2 ring-danger" : given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
+    <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-xl bg-surface p-4 shadow-card transition ${problem ? "ring-2 ring-danger" : given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
       <div className="flex items-start gap-2">
         <span id={`${id}-q`} className="grow text-[16px] leading-snug font-extrabold">
           {q.text}
@@ -727,7 +727,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
   return (
     <section aria-label="Parties du devis" className="flex flex-col gap-3">
       {error ? <ErrorNotice error={error} /> : null}
-      <div className="flex flex-col gap-3 rounded-[20px] bg-surface p-4 shadow-card">
+      <div className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
         <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">Parties du devis : {lots.map((l) => l.libelle).join(" · ")}</h3>
         <p className="text-[14px] leading-snug text-muted">Une liste par partie du devis. Retire une partie en trop, ajoute celle qui manque.</p>
         <ul className="flex flex-wrap gap-2">

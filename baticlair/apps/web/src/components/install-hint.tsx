@@ -47,7 +47,7 @@ export function InstallHint() {
     setAppareil(null);
   };
   return (
-    <section aria-label="Ajouter à l'écran d'accueil" className="flex flex-col gap-3 rounded-[20px] bg-ink p-4 text-white shadow-card">
+    <section aria-label="Ajouter à l'écran d'accueil" className="flex flex-col gap-3 rounded-xl bg-ink p-4 text-white shadow-card">
       <div className="flex items-start justify-between gap-3">
         <p className="flex items-center gap-2 text-[16px] font-extrabold">
           <Smartphone size={18} aria-hidden="true" className="text-accent-on-dark" />

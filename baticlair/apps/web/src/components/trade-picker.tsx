@@ -23,7 +23,7 @@ export function TradePicker({ value, onChange, label = "Ton métier" }: { value:
   const caches = TRADES.length - montres.length;
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-1.5 text-sm font-bold">
+      <legend className="mb-2 text-[14px] font-semibold">
         {label} <span className="font-normal text-muted">(un ou plusieurs)</span>
       </legend>
       <div className="flex flex-wrap gap-2">
@@ -35,8 +35,8 @@ export function TradePicker({ value, onChange, label = "Ton métier" }: { value:
               type="button"
               aria-pressed={on}
               onClick={() => toggle(t.id)}
-              className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-bold transition ${
-                on ? "bg-ink text-white" : "bg-surface text-ink shadow-card"
+              className={`pressable inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-[14px] font-semibold ${
+                on ? "border-ink bg-ink text-white" : "border-line bg-surface text-ink active:bg-ground"
               }`}
             >
               {on ? <Check size={15} strokeWidth={3} aria-hidden="true" /> : null}
@@ -45,7 +45,7 @@ export function TradePicker({ value, onChange, label = "Ton métier" }: { value:
           );
         })}
         {caches > 0 ? (
-          <button type="button" onClick={() => setTous(true)} className="inline-flex min-h-11 items-center rounded-full border border-dashed border-subtle px-4 text-sm font-bold text-accent-text">
+          <button type="button" onClick={() => setTous(true)} className="pressable inline-flex min-h-11 items-center rounded-full border border-dashed border-line px-4 text-[14px] font-semibold text-accent-text">
             Voir les {caches} autres métiers
           </button>
         ) : null}

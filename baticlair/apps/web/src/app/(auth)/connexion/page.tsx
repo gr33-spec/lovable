@@ -34,7 +34,7 @@ function LoginForm() {
   return (
     <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
       {params.get("compte") === "supprime" ? (
-        <p role="status" className="rounded-2xl bg-surface p-3 text-sm font-semibold shadow-card">
+        <p role="status" className="rounded-xl bg-ok-bg p-4 text-[15px] font-semibold text-ok">
           Ton compte et toutes ses données ont été supprimés.
         </p>
       ) : null}
@@ -44,7 +44,7 @@ function LoginForm() {
       <Button type="submit" pending={pending} className="mt-2">
         Se connecter
       </Button>
-      <Link href="/mot-de-passe-oublie" className="min-h-11 self-center py-2 text-sm font-bold text-accent-text">
+      <Link href="/mot-de-passe-oublie" className="min-h-11 self-center py-2 text-[15px] font-semibold text-accent-text">
         Mot de passe oublié ?
       </Link>
     </form>
@@ -60,7 +60,7 @@ export default function ConnexionPage() {
       </Suspense>
       <p className="text-center text-[15px]">
         Pas encore de compte ?{" "}
-        <Link href="/inscription" className="font-extrabold text-accent-text">
+        <Link href="/inscription" className="font-semibold text-accent-text">
           Créer un compte
         </Link>
       </p>

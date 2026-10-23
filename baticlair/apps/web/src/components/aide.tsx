@@ -17,12 +17,12 @@ export function AideBouton({ sujet, className = "" }: { sujet: SujetAide; classN
         aria-expanded={ouverte}
         aria-controls={id}
         onClick={() => setOuverte(!ouverte)}
-        className={`flex size-10 items-center justify-center rounded-full text-[17px] font-extrabold shadow-card ${ouverte ? "bg-ink text-white" : "bg-surface text-accent-text"}`}
+        className={`pressable flex size-11 items-center justify-center rounded-full border text-[17px] font-extrabold ${ouverte ? "border-ink bg-ink text-white" : "border-line bg-surface text-accent-text active:bg-ground"}`}
       >
         {ouverte ? <X size={18} aria-hidden="true" /> : "?"}
       </button>
       {ouverte ? (
-        <div id={id} role="dialog" aria-label={`Aide : ${aide.titre}`} className="absolute top-12 right-0 z-20 flex w-[min(20rem,calc(100vw-2rem))] flex-col gap-2 rounded-[20px] bg-ink p-4 text-white shadow-float">
+        <div id={id} role="dialog" aria-label={`Aide : ${aide.titre}`} className="animate-rise absolute top-13 right-0 z-20 flex w-[min(20rem,calc(100vw-2rem))] flex-col gap-2 rounded-xl bg-ink p-4 text-white shadow-card">
           <p className="text-[13px] font-extrabold text-accent-on-dark">{aide.titre}</p>
           <ol className="flex flex-col gap-1.5 text-[14px] leading-snug">
             {aide.lignes.filter((l): l is string => !!l).map((l) => (

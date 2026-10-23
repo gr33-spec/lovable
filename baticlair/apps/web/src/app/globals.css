@@ -1,31 +1,25 @@
 @import "tailwindcss";
 
 /*
- * Jetons du design system : une seule source pour les couleurs, rayons et
- * ombres. Rôles des couleurs (PD-040) :
- * - accent (bleu profond) : marque et actions principales, et rien d'autre ;
- * - ok (vert) : succès, validé, terminé ;
- * - warn (ambre) : attention, à vérifier ;
- * - danger (rouge) : erreur ;
- * - blanc et gris clair : fonds.
- * Pour changer la teinte de la marque, ne modifier que les 4 jetons accent.
- * Touches 2026 (retour du fondateur, maquette « radar ») : l'action principale porte le dégradé
- * une seule couleur d'accent, unie (`bg-cta` = `bg-accent`) ; la carte héros en encre de nuit (`bg-hero`). Une seule
- * famille de police (Greg, 23 octobre 2026 : plus d'italique à empattement).
- * Contrastes : accent / blanc 7,8:1 ; accent-text / blanc 9,3:1 ;
- * accent-on-dark / ink 10,6:1.
+ * LE SYSTÈME (passe UI/UX, 23 octobre 2026, `docs/groupe/UI.md`) : une seule source pour les couleurs, la police, les
+ * rayons et l'ombre. Une couleur d'accent, du blanc, du noir, trois gris ; une police en trois graisses ; 12 px pour les
+ * cartes, 999 pour les boutons ; une seule ombre, très légère ; zéro dégradé.
+ * - accent (bleu profond) : marque et action principale, et rien d'autre (contraste sur blanc 7,8:1 ; accent-text 9,3:1) ;
+ * - ok (vert) : validé ; warn (ambre) : à régler ; danger (rouge) : erreur. Des couleurs d'état, jamais de décoration ;
+ * - ground (gris 1) : le fond ; line (gris 2) : bordures ; muted (gris 3) : texte secondaire (AA, 5,9:1).
+ * Pour changer la teinte de la marque, ne modifier que les jetons accent.
  */
 @theme {
   --color-ink: #0e1116;
-  --color-ground: #f3f4f6;
+  --color-ground: #f4f5f7;
   --color-surface: #ffffff;
-  --color-muted: #5b6470;
-  --color-subtle: #9ba3af;
-  --color-line: #eef0f3;
+  --color-muted: #5f6774;
+  /* Plus de quatrième gris : `subtle` vaut `muted`. */
+  --color-subtle: #5f6774;
+  --color-line: #e4e7ec;
   --color-accent: #1c3fd1;
   --color-accent-text: #1838b4;
   --color-accent-on-dark: #a9c1ff;
-  --color-accent-glow: rgba(28, 63, 209, 0.5);
   --color-ok-bg: #ddf5ec;
   --color-ok: #0b7a53;
   --color-warn-bg: #fff1d6;
@@ -36,22 +30,45 @@
   --color-mark-warn: #f97316;
   --color-danger-bg: #ffe4da;
   --color-danger: #b3360f;
+  /* Une seule famille (Plus Jakarta Sans) : `font-display` vaut la même. */
   --font-sans: var(--font-jakarta), system-ui, sans-serif;
-  --font-display: var(--font-bricolage), var(--font-jakarta), system-ui, sans-serif;
-  --color-violet: #6b46ff;
-  --color-pink: #ff3d8b;
-  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 24px rgba(16, 24, 40, 0.06);
-  --shadow-float: 0 14px 30px rgba(14, 17, 22, 0.28);
-  /* La page d'accueil publique : l'accroche et le téléphone montent en douceur au chargement (coupé par prefers-reduced-motion). */
-  --animate-rise: bc-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --font-display: var(--font-jakarta), system-ui, sans-serif;
+  /* Trois graisses : 400 (texte), 600 (libellés, boutons), 800 (titres). Les utilitaires y sont ramenés : aucun écran
+     ne peut en sortir. */
+  --font-weight-medium: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 800;
+  /* Un seul rayon de carte, 12 px, quel que soit l'ancien nom de la classe ; les boutons sont `rounded-full`. */
+  --radius-xl: 12px;
+  --radius-2xl: 12px;
+  --radius-3xl: 12px;
+  --radius-4xl: 12px;
+  /* Une seule ombre, très légère. Les anciennes (`shadow-float`, `shadow-cta`) valent la même. */
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --shadow-float: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  /* Apparition douce (landing, panneaux) : 200 ms au plus, coupée par prefers-reduced-motion. */
+  --animate-rise: bc-rise 0.2s ease-out both;
   @keyframes bc-rise {
     from {
       opacity: 0;
-      transform: translateY(14px);
+      transform: translateY(12px);
     }
     to {
       opacity: 1;
       transform: none;
+    }
+  }
+  /* Les squelettes de chargement respirent. */
+  --animate-pulse-soft: bc-pulse 1.2s ease-in-out infinite;
+  @keyframes bc-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
     }
   }
 }
@@ -62,9 +79,9 @@
  * laisse vide en bas pour que son dernier contenu ne passe jamais dessous.
  */
 :root {
-  --nav-height: 64px;
-  --nav-space: calc(var(--nav-height) + max(12px, env(safe-area-inset-bottom)) + 16px);
-  /* « Calculer ma liste », figé en bas de l'écran des questions : bouton (52 px), dégradé au-dessus (24 px), zone du geste. */
+  --nav-height: 72px;
+  --nav-space: calc(var(--nav-height) + env(safe-area-inset-bottom) + 16px);
+  /* « Calculer ma liste », figé en bas de l'écran des questions : bouton (52 px), fondu au-dessus (24 px), zone du geste. */
   --calc-space: calc(52px + 24px + max(14px, env(safe-area-inset-bottom)) + 8px);
 }
 
@@ -82,30 +99,42 @@ html {
 }
 
 /* L'action principale : la couleur d'accent, unie (Greg, 23 octobre 2026 : plus aucun dégradé). `bg-cta` et `shadow-cta`
-   restent pour les quelques endroits qui les nomment encore ; ils valent la couleur unie et une ombre neutre. */
+   restent pour les quelques endroits qui les nomment encore. */
 @utility bg-cta {
   background-color: var(--color-accent);
 }
 @utility shadow-cta {
-  box-shadow: 0 8px 20px -10px rgba(20, 24, 60, 0.35);
+  box-shadow: none;
 }
 /* Les scènes de chantier (lecture, calcul) : encre de nuit et papier calque, sans lueur ; retour du fondateur (2026-10-10). */
 @utility bg-chantier {
   background-color: #111827;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(180deg, #151d30 0%, #0f1522 100%);
-  background-size: 22px 22px, 22px 22px, auto;
-  background-position: -1px -1px, -1px -1px, 0 0;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: -1px -1px;
 }
-/* La carte héros : encre de nuit, unie (plus de lueur ni de dégradé, Greg, 23 octobre 2026). */
+/* La carte héros d'hier : désormais une carte blanche comme les autres (passe UI/UX). */
 @utility bg-hero {
-  background-color: #111633;
+  background-color: var(--color-surface);
 }
-/* L'onglet actif du menu : la couleur d'accent, unie. */
+/* L'onglet actif du menu : plus de fond, la couleur d'accent sur l'icône et le mot. */
 @utility bg-nav-active {
-  background-color: var(--color-accent);
+  background-color: transparent;
+}
+/* Le fondu sous une barre figée : du transparent vers le fond de l'app (pas une couleur, un fondu). */
+@utility fade-ground {
+  background: linear-gradient(to top, var(--color-ground) 70%, transparent);
+}
+/* Appui qui s'enfonce : la même micro-interaction sur tout ce qui se touche. */
+@utility pressable {
+  transition-property: background-color, border-color, color, transform, opacity, box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+  &:active {
+    transform: scale(0.98);
+  }
 }
 
 body {
@@ -131,6 +160,18 @@ body {
   }
 }
 
+/* La landing : les sections sous la ligne de flottaison apparaissent en douceur au défilement (`data-reveal`), 200 ms,
+   opacité et 12 px seulement (aucun décalage de mise en page). Sans JavaScript, tout est visible. */
+html[data-reveal-pret] [data-reveal]:not([data-vu]) {
+  opacity: 0;
+  transform: translateY(12px);
+}
+html[data-reveal-pret] [data-reveal] {
+  transition:
+    opacity 0.2s ease-out,
+    transform 0.2s ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -138,6 +179,8 @@ body {
     animation: none !important;
     transition: none !important;
   }
+  html[data-reveal-pret] [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
 }
-
-

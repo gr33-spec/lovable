@@ -161,7 +161,7 @@ export function GroupeBar({ count, onCancel, onPropose, onAdresse }: { count: nu
   const adresseManque = error?.reason === "adresse_requise" && Boolean(onAdresse);
   const choix = "inline-flex min-h-12 grow items-center justify-center rounded-2xl px-3 text-[15px] font-extrabold";
   return (
-    <section aria-label={`Ajouter à la ${nom}`} className="flex flex-col gap-2 rounded-[22px] bg-surface p-3 shadow-card">
+    <section aria-label={`Ajouter à la ${nom}`} className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
       <p className="text-[14px] font-extrabold">{count === 0 ? `Coche les lignes à ajouter à la ${nom}` : `${count} ligne${count > 1 ? "s" : ""} pour la ${nom}`}</p>
       <fieldset className="flex gap-2">
         <legend className="mb-1 text-[13px] font-bold text-muted">Tu veux être livré entre quelles dates ?</legend>
@@ -346,7 +346,7 @@ export function GroupeSection({ groupe }: { groupe: Groupe }) {
     }
   };
   return (
-    <section aria-label={`Dans la ${nom}`} className="mt-3 flex flex-col gap-2 rounded-[20px] bg-surface p-3 shadow-card">
+    <section aria-label={`Dans la ${nom}`} className="mt-3 flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
       <h3 className="text-[13px] font-extrabold text-muted">{`Dans la ${nom}`}</h3>
       {negoces === 0 ? (
         <p className="text-[14px] leading-snug font-bold">

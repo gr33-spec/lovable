@@ -47,22 +47,22 @@ export function SuiviChantier({ projectId }: { projectId: string }) {
   }, [reload]);
   if (!data) return null;
   return (
-    <section aria-label="Suivi du chantier" className="flex flex-col gap-2.5 rounded-[20px] bg-surface p-3.5 shadow-card">
+    <section aria-label="Suivi du chantier" className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
       <ol aria-label="Étapes" className={`grid gap-1 ${data.etapes.length === 5 ? "grid-cols-5" : "grid-cols-4"}`}>
         {data.etapes.map((e, i) => (
           <li key={e.nom} aria-current={i === data.etape ? "step" : undefined} className="flex flex-col items-center gap-1 text-center">
             <span className="flex w-full items-center">
-              <span className={`h-[3px] grow rounded-full ${i === 0 ? "opacity-0" : e.fait ? "bg-mark-ok" : "bg-line"}`} />
+              <span className={`h-0.5 grow rounded-full ${i === 0 ? "opacity-0" : e.fait ? "bg-mark-ok" : "bg-line"}`} />
               <span className={`flex size-6 shrink-0 items-center justify-center rounded-full ${e.fait ? "bg-mark-ok text-white" : "border-2 border-line bg-surface"}`}>
                 {e.fait ? <Check size={14} strokeWidth={3.5} aria-hidden="true" /> : null}
               </span>
-              <span className={`h-[3px] grow rounded-full ${i === data.etapes.length - 1 ? "opacity-0" : data.etapes[i + 1]?.fait ? "bg-mark-ok" : "bg-line"}`} />
+              <span className={`h-0.5 grow rounded-full ${i === data.etapes.length - 1 ? "opacity-0" : data.etapes[i + 1]?.fait ? "bg-mark-ok" : "bg-line"}`} />
             </span>
-            <span className={`text-[12px] leading-tight ${i === data.etape ? "font-extrabold text-ink" : e.fait ? "font-bold text-muted" : "font-semibold text-muted"}`}>{e.nom}</span>
+            <span className={`text-[12px] leading-tight ${i === data.etape ? "font-semibold text-ink" : "text-muted"}`}>{e.nom}</span>
           </li>
         ))}
       </ol>
-      <p className="text-[15px] leading-snug font-bold">{data.phrase}</p>
+      <p className="text-[16px] leading-snug font-semibold">{data.phrase}</p>
       {data.aFaire ? <p className="text-[14px] leading-snug text-muted">{data.aFaire}</p> : null}
     </section>
   );

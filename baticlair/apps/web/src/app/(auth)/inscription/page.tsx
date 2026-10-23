@@ -64,7 +64,7 @@ export default function InscriptionPage() {
     <>
       <div className="flex flex-col gap-2">
         <PageTitle>Créer un compte</PageTitle>
-        <p className="text-[16px] leading-relaxed text-muted">Gratuit pour l&apos;artisan. Ta liste remise au propre en deux minutes.</p>
+        <p className="text-[17px] leading-relaxed text-muted">Gratuit pour l&apos;artisan. Ta liste remise au propre en deux minutes.</p>
       </div>
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         {error ? <ErrorNotice error={error} /> : null}
@@ -81,15 +81,15 @@ export default function InscriptionPage() {
           autoComplete="new-password"
           required
         />
-        <label className="flex cursor-pointer items-start gap-3 text-[15px] leading-snug font-semibold">
-          <input type="checkbox" name="cgu" checked={cgu} onChange={(e) => setCgu(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-accent" />
+        <label className="flex cursor-pointer items-start gap-3 text-[15px] leading-snug">
+          <input type="checkbox" name="cgu" checked={cgu} onChange={(e) => setCgu(e.target.checked)} className="mt-0.5 size-5 shrink-0 rounded accent-accent" />
           <span>
             J&apos;accepte les{" "}
-            <Link href="/cgu" className="font-extrabold text-accent-text underline">
+            <Link href="/cgu" className="font-semibold text-accent-text underline">
               conditions générales d&apos;utilisation
             </Link>{" "}
             et la{" "}
-            <Link href="/confidentialite" className="font-extrabold text-accent-text underline">
+            <Link href="/confidentialite" className="font-semibold text-accent-text underline">
               politique de confidentialité
             </Link>
             .
@@ -101,7 +101,7 @@ export default function InscriptionPage() {
       </form>
       <p className="text-center text-[15px]">
         Déjà un compte ?{" "}
-        <Link href="/connexion" className="font-extrabold text-accent-text">
+        <Link href="/connexion" className="font-semibold text-accent-text">
           Se connecter
         </Link>
       </p>

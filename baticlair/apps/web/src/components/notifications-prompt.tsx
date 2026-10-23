@@ -57,7 +57,7 @@ export function NotificationsPrompt({ trigger }: { trigger: number }) {
     }
   };
   return (
-    <section role="dialog" aria-label="Activer les notifications" className="flex flex-col gap-3 rounded-[20px] bg-surface p-4 shadow-card">
+    <section role="dialog" aria-label="Activer les notifications" className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
       <div className="flex items-start gap-3">
         <Bell size={22} aria-hidden="true" className="mt-0.5 shrink-0 text-accent-text" />
         <p className="text-[15px] leading-snug">Active tes notifications pour être prévenu dès que ton fournisseur te répond ou te pose une question.</p>

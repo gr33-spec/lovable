@@ -431,7 +431,7 @@ function NewRequest({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="ex. Livraison sur chantier possible ?"
-            className="rounded-2xl bg-surface p-3 text-base text-ink outline-none placeholder:text-subtle"
+            className="rounded-2xl bg-surface p-3 text-base text-ink outline-none placeholder:text-muted"
           />
           <label htmlFor={`${id}-due`} className="font-bold">
             Réponse souhaitée avant le
@@ -854,7 +854,7 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
       <div className="min-h-0 grow overflow-y-auto px-3 pb-4">
         <div className="mx-auto flex max-w-2xl flex-col gap-3">{children}</div>
       </div>
-      <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_16px_-12px_rgba(16,24,40,0.25)]">
+      <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] border-t border-line">
         <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!canSend} onClick={onSend}>
           <Send size={18} aria-hidden="true" />
           {canSend ? "Envoyer" : "Choisis un fournisseur"}

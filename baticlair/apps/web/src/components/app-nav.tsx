@@ -18,8 +18,10 @@ interface NavItem {
 
 /**
  * Simplification (21 octobre, demande du fondateur) : TROIS entrées seulement, une icône et un mot chacune.
- * « Mes chantiers » (l'accueil), au centre le gros bouton « + Nouvelle liste » (nouveau cap, 22 octobre ; avant « + Nouveau devis »), « Groupé ». Fournisseurs et Compte
- * vivent dans le menu derrière l'initiale de l'artisan, en haut à droite (`MenuArtisan`).
+ * « Mes chantiers » (l'accueil), au centre le rond « + Nouvelle liste » (nouveau cap, 22 octobre), « Commande commune ».
+ * Fournisseurs et Compte vivent dans le menu derrière l'initiale de l'artisan, en haut à droite (`MenuArtisan`).
+ * Passe UI/UX (23 octobre) : une barre blanche pleine largeur bordée en haut, trois entrées égales, l'active en accent
+ * (icône et mot, sans fond), le rond accent au centre ; plus de capsule flottante.
  */
 const chantiersItem: NavItem = {
   href: "/",
@@ -37,9 +39,8 @@ export function useGroupeActif(): boolean {
 }
 
 /**
- * Navigation principale : barre flottante en bas sur téléphone (pouce),
- * colonne à gauche sur ordinateur. Le gros bouton central ouvre un nouveau devis :
- * un appui, aucune question.
+ * Navigation principale : barre figée en bas sur téléphone (pouce), colonne à gauche sur ordinateur. Le rond central
+ * ouvre une nouvelle liste : un appui, aucune question.
  */
 export function AppNav() {
   const pathname = usePathname();
@@ -59,37 +60,37 @@ export function AppNav() {
         key={item.href}
         href={item.href}
         aria-current={active ? "page" : undefined}
-        className={`flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-3xl text-[11px] lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-[15px] ${
-          active ? "bg-nav-active font-bold text-white" : "font-semibold text-muted hover:text-ink"
+        className={`flex min-h-13 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-semibold transition-[color,background-color] duration-150 lg:min-h-12 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px] ${
+          active ? "text-accent-text lg:bg-ground" : "text-muted active:text-ink lg:hover:bg-ground"
         }`}
       >
-        <Icon size={21} aria-hidden="true" />
+        <Icon size={24} aria-hidden="true" strokeWidth={active ? 2.4 : 2} />
         <span className="text-center leading-tight">{item.label}</span>
       </Link>
     );
   };
 
   return (
-    <>
-      {/* Téléphone : figée en bas de l'écran (bottom: 0), la zone du geste de l'iPhone en marge intérieure ; ordinateur : colonne à gauche. */}
-      <nav
-        aria-label="Navigation principale"
-        data-typing={typing || undefined}
-        className={`${inChat ? "max-lg:hidden " : ""}${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}pointer-events-none fixed z-30 transition-[translate,opacity] duration-200 max-lg:inset-x-0 max-lg:bottom-0 max-lg:px-2 max-lg:pb-[max(12px,env(safe-area-inset-bottom))] lg:top-4 lg:bottom-4 lg:left-4 lg:w-60`}
-      >
-        <div className="pointer-events-auto grid h-(--nav-height) grid-cols-[1fr_auto_1fr] items-center rounded-[28px] border border-white/70 bg-surface/95 p-1 shadow-[0_12px_32px_-8px_rgba(20,24,60,0.25)] backdrop-blur-xl lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:p-3">
-        <span className="hidden px-3 pt-2 pb-4 font-display text-xl font-extrabold text-ink lg:block">BatiClair</span>
+    <nav
+      aria-label="Navigation principale"
+      data-typing={typing || undefined}
+      className={`${inChat ? "max-lg:hidden " : ""}${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}fixed z-30 transition-[translate,opacity] duration-200 max-lg:inset-x-0 max-lg:bottom-0 lg:top-4 lg:bottom-4 lg:left-4 lg:w-60`}
+    >
+      {/* Téléphone : barre blanche pleine largeur, bordure gris 2 en haut, la zone du geste en marge intérieure ; ordinateur : colonne à gauche. */}
+      <div className="grid h-[calc(var(--nav-height)+env(safe-area-inset-bottom))] grid-cols-3 items-center border-t border-line bg-surface px-2 pb-[env(safe-area-inset-bottom)] lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-xl lg:border lg:p-3 lg:shadow-card">
+        <span className="hidden px-3 pt-2 pb-4 text-[20px] font-extrabold tracking-[-0.02em] text-ink lg:block">BatiClair</span>
         {link(chantiersItem)}
         <Link
           href="/chantiers/nouveau"
-          className="flex min-h-13 items-center justify-center gap-1.5 justify-self-center rounded-full bg-accent px-4 text-[14px] font-extrabold text-white ring-4 ring-white lg:order-first lg:mb-3 lg:w-full lg:rounded-2xl lg:text-[15px]"
+          className="pressable flex min-h-13 flex-col items-center justify-center gap-1 text-[11px] font-semibold text-accent-text lg:order-first lg:mb-3 lg:min-h-13 lg:flex-row lg:gap-2 lg:rounded-full lg:bg-accent lg:text-[16px] lg:text-white"
         >
-          <Plus size={22} strokeWidth={2.8} aria-hidden="true" />
-          <span>Nouvelle liste</span>
+          <span className="flex size-11 items-center justify-center rounded-full bg-accent text-white lg:size-auto lg:bg-transparent" aria-hidden="true">
+            <Plus size={24} strokeWidth={2.6} />
+          </span>
+          <span className="leading-tight">Nouvelle liste</span>
         </Link>
         {groupe ? link(groupeItem) : <span aria-hidden="true" />}
-        </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 }
