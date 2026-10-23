@@ -107,7 +107,7 @@ export function useGroupe(projectId: string): Groupe | null {
     mois: mois.data ?? null,
     rechargerMois: () => (mois.reload(), liste.reload()),
     deposer: async (articles, nature) => {
-      const r = await deposerDansLeMois(projectId, articles, nature);
+      const r = await deposerDansLeMois(projectId, articles, nature, mois.data?.prochaine?.mois ?? null);
       liste.reload();
       mois.reload();
       return r.message;

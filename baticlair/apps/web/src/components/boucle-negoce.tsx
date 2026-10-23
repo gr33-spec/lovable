@@ -12,7 +12,7 @@ import { useSuggestions, type NegoceVue, type SuggestionNegoce } from "@/compone
  * « METS TON NÉGOCE DANS LA BOUCLE » (Greg, 23 octobre 2026). Sur l'accueil (sous le bloc du mois) et dans l'onglet
  * Commande commune, à côté d'« Inviter un collègue » : un champ e-mail (le nom, facultatif, se cherche dans Sirene et
  * apporte le SIRET), un seul bouton « Ajouter mon négoce ». Le négoce entre dans la base couverture du département,
- * jamais en double (SIRET ou e-mail) ; ajouté avant la clôture, il reçoit la commande du mois en cours, sinon la suivante.
+ * jamais en double (SIRET ou e-mail) ; ajouté avant la clôture, il reçoit la commande en cours, sinon la suivante.
  * Une fois ajouté : « Ton négoce X est dans la boucle », et de quoi le prévenir tout de suite (WhatsApp, SMS, copier).
  */
 interface Reponse {
@@ -76,7 +76,7 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
     <section aria-label="Mets ton négoce dans la boucle" className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-4">
       <div className="flex flex-col gap-2">
         <h2 className="text-[18px] font-extrabold tracking-[-0.01em]">Mets ton négoce dans la boucle</h2>
-        <p className="text-[14px] leading-relaxed text-muted">Ton négoce habituel n&apos;est pas encore dans la commande ? Ajoute-le : il recevra tout le volume du mois et pourra faire son prix.</p>
+        <p className="text-[14px] leading-relaxed text-muted">Ton négoce habituel n&apos;est pas encore dans la commande ? Ajoute-le : il recevra tout le volume de la commande et pourra faire son prix.</p>
       </div>
 
       {dansLaBoucle.length > 0 ? (

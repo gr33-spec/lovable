@@ -19,8 +19,7 @@ import {
   mailResultatNegoce,
   messageAjout,
   messageTropTard,
-  moisDe,
-  moisSuivant,
+  clesDeCommande,
   NATURES,
   normalizeText,
   phraseDeRang,
@@ -133,9 +132,15 @@ export class CommandeDuMoisService {
     return { ...CONFIG_CYCLE_DEFAUT, ...((p?.valeur as Partial<ConfigCycle> | null) ?? {}) };
   }
 
-  /** L'admin change les dates : elles valent pour les cycles pas encore clos (leurs dates sont recalculées). */
+  /**
+   * L'admin change les réglages : les heures et le délai de réponse valent pour les commandes pas encore closes (leurs
+   * dates sont recalculées) ; les deux jours de clôture valent pour les commandes pas encore ouvertes (le jour d'une
+   * commande ouverte est dans sa clé : il se change par ses propres dates, `datesDuCycleAdmin`).
+   */
   async changerConfig(c: ConfigCycle): Promise<ConfigCycle> {
-    if (!(c.jourCloture >= 1 && c.jourCloture <= 28 && c.heureCloture >= 0 && c.heureCloture <= 23 && c.joursReponse >= 1 && c.joursReponse <= 60 && c.heureReponse >= 0 && c.heureReponse <= 23 && c.jourClotureDecembre >= 1 && c.jourClotureDecembre <= 28)) {
+    const jour = (j: number) => Number.isInteger(j) && j >= 1 && j <= 28;
+    const heure = (h: number) => Number.isInteger(h) && h >= 0 && h <= 23;
+    if (!(jour(c.jourCloture1) && jour(c.jourCloture2) && c.jourCloture1 !== c.jourCloture2 && heure(c.heureCloture) && Number.isInteger(c.joursOuvresReponse) && c.joursOuvresReponse >= 1 && c.joursOuvresReponse <= 40 && heure(c.heureReponse))) {
       throw validationFailed("Invalid cycle settings", { reason: "reglages_invalides" });
     }
     await this.prisma.parametreGroupe.upsert({ where: { cle: CLE_CONFIG }, create: { cle: CLE_CONFIG, valeur: { ...c } }, update: { valeur: { ...c } } });
@@ -160,29 +165,23 @@ export class CommandeDuMoisService {
   // ---------------------------------------------------------------------------------------------------------------
 
   /**
-   * Le cycle ouvert pour (famille, zone) à `maintenant` : celui du mois si sa clôture n'est pas passée, sinon le suivant
-   * (créé au besoin). `tardPour` : le mois manqué, pour « Trop tard pour octobre… ».
+   * La commande ouverte pour (famille, zone) à `maintenant` : celle déjà en base dont la clôture n'est pas passée, sinon
+   * la première clé des réglages pas encore close (créée au besoin). `visee` : la commande que l'artisan avait sous les
+   * yeux ; si elle n'est plus celle qui s'ouvre, `tardPour` la nomme (« Trop tard pour le 15 octobre… »).
    */
-  private async cycleOuvert(famille: string, zone: string, maintenant: Date): Promise<{ cycle: { id: string; mois: string; numero: number }; tardPour: Mois | null }> {
+  private async cycleOuvert(famille: string, zone: string, maintenant: Date, visee: Mois | null = null): Promise<{ cycle: { id: string; mois: string; numero: number }; tardPour: Mois | null }> {
+    const tard = (mois: Mois) => (visee && visee !== mois ? visee : null);
+    const ouvert = await this.prisma.cycleCommande.findFirst({ where: { famille, zone, phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" } });
+    if (ouvert) return { cycle: ouvert, tardPour: tard(ouvert.mois) };
     const config = await this.config();
-    const premier = moisDe(maintenant);
-    let mois = premier;
-    for (let i = 0; i < 24; i++) {
+    for (const mois of clesDeCommande(maintenant, config)) {
+      const d = datesDuCycle(mois, config);
+      if (maintenant >= d.clotureLe) continue;
       const existant = await this.prisma.cycleCommande.findUnique({ where: { mois_famille_zone: { mois, famille, zone } } });
-      if (existant) {
-        if (existant.phase === "inscriptions" && maintenant < existant.clotureLe) return { cycle: existant, tardPour: mois === premier ? null : premier };
-      } else {
-        const d = datesDuCycle(mois, config);
-        if (maintenant < d.clotureLe) {
-          const cycle = await this.prisma.cycleCommande.upsert({
-            where: { mois_famille_zone: { mois, famille, zone } },
-            create: { mois, famille, zone, clotureLe: d.clotureLe, reponseAvant: d.reponseAvant, relanceLe: d.relanceLe },
-            update: {},
-          });
-          return { cycle, tardPour: mois === premier ? null : premier };
-        }
-      }
-      mois = moisSuivant(mois);
+      // Une commande déjà close par l'admin (clôture avancée) ne se rouvre pas : la suivante.
+      if (existant) continue;
+      const cycle = await this.prisma.cycleCommande.create({ data: { mois, famille, zone, clotureLe: d.clotureLe, reponseAvant: d.reponseAvant, relanceLe: d.relanceLe } });
+      return { cycle, tardPour: tard(mois) };
     }
     throw new DomainError("conflict", "No open cycle", { reason: "pas_de_cycle" });
   }
@@ -191,7 +190,7 @@ export class CommandeDuMoisService {
    * Déposer des lignes de sa liste dans la commande du mois : seulement du matériel sûr (chantier signé ou stock), des
    * lignes précises. Sans engagement : l'artisan commandera seulement si le prix lui plaît.
    */
-  async deposer(tenant: TenantContext, projectId: string, d: { articles: readonly string[]; nature: Nature }, maintenant = new Date()): Promise<{ mois: Mois; message: string | null; vue: VueDuMois }> {
+  async deposer(tenant: TenantContext, projectId: string, d: { articles: readonly string[]; nature: Nature; mois?: Mois | null }, maintenant = new Date()): Promise<{ mois: Mois; message: string | null; vue: VueDuMois }> {
     assertCanWrite(tenant);
     await this.ouverte(tenant);
     if (!NATURES.includes(d.nature)) throw validationFailed("Unknown nature", { reason: "nature_inconnue" });
@@ -209,7 +208,7 @@ export class CommandeDuMoisService {
     let moisDeLaListe: Mois | null = null;
     let tardPour: Mois | null = null;
     for (const famille of familles) {
-      const { cycle, tardPour: tard } = await this.cycleOuvert(famille, zone, maintenant);
+      const { cycle, tardPour: tard } = await this.cycleOuvert(famille, zone, maintenant, d.mois ?? null);
       moisDeLaListe ??= cycle.mois;
       tardPour ??= tard;
       await this.prisma.$transaction(async (tx) => {
@@ -347,17 +346,14 @@ export class CommandeDuMoisService {
 
   /** La commande ouverte d'un département, sans rien créer : le cycle en base s'il existe, sinon ses dates seules. */
   private async cycleAffiche(famille: string, zone: string, maintenant: Date): Promise<{ id: string | null; mois: Mois; clotureLe: Date } | null> {
+    const ouvert = await this.prisma.cycleCommande.findFirst({ where: { famille, zone, phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" } });
+    if (ouvert) return { id: ouvert.id, mois: ouvert.mois, clotureLe: ouvert.clotureLe };
     const config = await this.config();
-    let mois = moisDe(maintenant);
-    for (let i = 0; i < 24; i++) {
-      const existant = await this.prisma.cycleCommande.findUnique({ where: { mois_famille_zone: { mois, famille, zone } } });
-      if (existant) {
-        if (existant.phase === "inscriptions" && maintenant < existant.clotureLe) return { id: existant.id, mois: existant.mois, clotureLe: existant.clotureLe };
-      } else {
-        const d = datesDuCycle(mois, config);
-        if (maintenant < d.clotureLe) return { id: null, mois, clotureLe: d.clotureLe };
-      }
-      mois = moisSuivant(mois);
+    for (const mois of clesDeCommande(maintenant, config)) {
+      const d = datesDuCycle(mois, config);
+      if (maintenant >= d.clotureLe) continue;
+      if (await this.prisma.cycleCommande.findUnique({ where: { mois_famille_zone: { mois, famille, zone } }, select: { id: true } })) continue;
+      return { id: null, mois, clotureLe: d.clotureLe };
     }
     return null;
   }

@@ -79,7 +79,7 @@ const reasonMessages: Record<string, string> = {
   siret_invalide: "Ce SIRET n'a pas 14 chiffres valides : corrige-le dans Compte.",
   // La commande commune du mois (Greg, 22 octobre 2026).
   commande_close: "La commande est close : on ne peut plus rien retirer.",
-  deja_commande: "Tu as déjà commandé pour ce mois-ci.",
+  deja_commande: "Tu as déjà commandé pour cette commande.",
   grille_incomplete: "Ce négoce n'a pas chiffré toute ta liste : choisis-en un qui a tout chiffré.",
   pas_de_resultats: "Les prix ne sont pas encore là.",
   pas_de_liste: "Ce chantier n'a pas encore de liste.",
@@ -90,7 +90,7 @@ const reasonMessages: Record<string, string> = {
   deux_devis_au_plus: "Deux PDF au plus.",
   pdf_seulement: "Seulement des fichiers PDF.",
   livraison_requise: "Indiquez vos conditions de livraison (gratuite jusqu'à combien de km, et le prix au-delà).",
-  reglages_invalides: "Ces dates ne vont pas : jour de clôture entre 1 et 28, heures entre 0 et 23, réponse en 1 à 60 jours, décembre entre le 1er et le 28.",
+  reglages_invalides: "Ces réglages ne vont pas : deux jours de clôture différents entre 1 et 28, heures entre 0 et 23, réponse en 1 à 40 jours ouvrés.",
   nothing_read: "Je n'ai rien lu dans ce devis. Réessaie, ou redépose le PDF.",
   empty_list: "La liste est vide : rien ne part au fournisseur.",
   faconnage_required: "Dis-moi d'abord, pour chaque pièce de zinc, si tu la façonnes ou si tu la commandes façonnée.",

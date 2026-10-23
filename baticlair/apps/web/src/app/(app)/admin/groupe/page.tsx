@@ -57,16 +57,17 @@ const quand = (iso: string | null) => (iso ? new Date(iso).toLocaleString("fr-FR
  * forcer, changer le négoce, facture payée). Réservé aux admins (GROUPE_ADMINS).
  */
 interface ConfigCycle {
-  jourCloture: number;
+  jourCloture1: number;
+  jourCloture2: number;
   heureCloture: number;
-  joursReponse: number;
+  joursOuvresReponse: number;
   heureReponse: number;
-  jourClotureDecembre: number;
 }
 
 /**
- * La commande commune du mois (Greg, 22 octobre 2026) : toutes les dates dans une seule config, modifiable ici. Elles valent
- * pour les commandes pas encore closes. Heures de Paris.
+ * La commande commune (Greg, 22 octobre 2026 ; cycle raccourci le 23 : le 1er et le 15, 5 jours ouvrés) : tous les réglages
+ * dans une seule config, modifiable ici. Les heures et le délai valent pour les commandes pas encore closes ; les deux
+ * jours de clôture pour les commandes pas encore ouvertes. Heures de Paris.
  */
 function DatesDuMois() {
   const fetchConfig = useCallback((signal: AbortSignal) => api<ConfigCycle>("/v1/admin/commande-du-mois/config", { signal }), []);
@@ -92,12 +93,12 @@ function DatesDuMois() {
     </label>
   );
   return (
-    <Card aria-label="Dates de la commande du mois" className="flex flex-col gap-3 p-4">
-      <h2 className="text-base font-extrabold">Dates de la commande du mois</h2>
-      {champ("jourCloture", "Clôture le", "du mois")}
-      {champ("jourClotureDecembre", "En décembre, clôture le", "(avant Noël)")}
+    <Card aria-label="Dates de la commande commune" className="flex flex-col gap-3 p-4">
+      <h2 className="text-base font-extrabold">Dates de la commande commune</h2>
+      {champ("jourCloture1", "Première clôture le", "du mois")}
+      {champ("jourCloture2", "Deuxième clôture le", "du mois")}
       {champ("heureCloture", "à", "h")}
-      {champ("joursReponse", "Les négoces répondent en", "jours")}
+      {champ("joursOuvresReponse", "Les négoces répondent en", "jours ouvrés")}
       {champ("heureReponse", "avant", "h")}
       {erreur ? <ErrorNotice error={erreur} /> : null}
       {fait ? <p role="status" className="text-sm font-bold text-ok">Enregistré.</p> : null}

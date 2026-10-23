@@ -2363,7 +2363,7 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   await page.goto("/");
   // Sur l'accueil, sous le bloc du mois : le texte de Greg, un champ e-mail, un seul bouton.
   const bloc = page.getByRole("region", { name: "Mets ton négoce dans la boucle" });
-  await expect(bloc.getByText("Ton négoce habituel n'est pas encore dans la commande ? Ajoute-le : il recevra tout le volume du mois et pourra faire son prix.")).toBeVisible();
+  await expect(bloc.getByText("Ton négoce habituel n'est pas encore dans la commande ? Ajoute-le : il recevra tout le volume de la commande et pourra faire son prix.")).toBeVisible();
   await expect(bloc.getByRole("button")).toHaveText(["Ajouter mon négoce"]);
   await bloc.getByLabel("E-mail de ton négoce").fill(email);
   await bloc.getByRole("button", { name: "Ajouter mon négoce" }).click();
@@ -2372,7 +2372,7 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   await expect(ligne).toHaveCount(1);
   await expect(ligne).toContainText("Ton négoce negoce-du-ponant.fr est dans la boucle : il recevra la commande d");
   const prevenir = bloc.getByRole("group", { name: "Prévenir negoce-du-ponant.fr" });
-  const message = `Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres couvreurs. Vous pouvez chiffrer tout le volume du mois ici : ${new URL(page.url()).origin}/`;
+  const message = `Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres couvreurs. Vous pouvez chiffrer tout le volume de la commande ici : ${new URL(page.url()).origin}/`;
   await expect(prevenir.getByText(message, { exact: true })).toBeVisible();
   await expect(prevenir.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", `https://wa.me/?text=${encodeURIComponent(message)}`);
   await expect(prevenir.getByRole("link", { name: "Envoyer par SMS" })).toHaveAttribute("href", `sms:?&body=${encodeURIComponent(message)}`);
@@ -2405,9 +2405,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(demo.getByText("Exemple").first()).toBeVisible();
   await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple)" }).getByRole("listitem")).toHaveCount(5);
   await demo.getByRole("button", { name: "Suivant" }).click();
-  await expect(page.getByRole("heading", { name: "La commande du mois, tous ensemble" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "La commande commune, tous ensemble" })).toBeVisible();
   // Commande du mois (Greg, 22 octobre 2026) : en quantités, jamais en nombre d'entreprises.
-  await expect(page.getByRole("region", { name: /^La commande du mois/ }).getByText("Toute la commande de novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux")).toBeVisible();
+  await expect(page.getByRole("region", { name: /^La commande commune/ }).getByText("Toute la commande du 1er novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux")).toBeVisible();
   await expect(page.getByText(/couvreurs, \d+ demandes/)).toHaveCount(0);
   await page.getByRole("button", { name: "Suivant" }).click();
   await expect(page.getByRole("heading", { name: "Ton prix, livré chez toi" })).toBeVisible();
@@ -2429,12 +2429,12 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText("Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Plus on est nombreux, plus on pèse face aux négoces." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Comment ça marche" })).toBeVisible();
-  await expect(page.getByText("Une commande par mois avec les couvreurs de ta région.")).toBeVisible();
+  await expect(page.getByText("Une commande toutes les deux semaines avec les couvreurs de ta région.")).toBeVisible();
   for (const etape of ["1. Dépose ta liste avant la clôture", "2. On envoie tout le volume aux négoces", "3. Tu vois le meilleur prix et tu commandes si ça te plaît"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
-  for (const image of ["L'écran « Donne ta liste de matériaux » de BatiClair", /^Une ligne « Ardoise naturelle 32×22 » à préciser/, "Toute la commande de novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux. Clôture dans 9 j."]) {
+  for (const image of ["L'écran « Donne ta liste de matériaux » de BatiClair", /^Une ligne « Ardoise naturelle 32×22 » à préciser/, "Toute la commande du 1er novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux. Clôture dans 9 j."]) {
     await expect(page.getByRole("region", { name: "Comment ça marche" }).getByRole("img", { name: image })).toBeVisible();
   }
   await expect(page.getByRole("list", { name: "Exemple de liste de couverture" })).toContainText("Ardoise naturelle 32×22 Espagne 1er choix2 760 pièces");
@@ -2872,7 +2872,7 @@ async function listePrete(page: Page, adresse: string, lignes: { libelle: string
 async function ajouterAuMois(page: Page, projectId: string, nature: "Un chantier signé" | "Du stock"): Promise<void> {
   await page.goto(`/chantiers/${projectId}`);
   const bloc = page.getByRole("region", { name: /^Commande commune d/ });
-  await expect(bloc.getByText("Une commande par mois avec les couvreurs de ta région.")).toBeVisible();
+  await expect(bloc.getByText("Une commande toutes les deux semaines avec les couvreurs de ta région.")).toBeVisible();
   await expect(bloc.getByText(/^Clôture dans \d+ j/)).toBeVisible();
   await bloc.getByRole("button", { name: /^Ajouter à la commande d/ }).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -2900,7 +2900,7 @@ async function grilleDeposee(browser: Browser, page: Page, email: string, rows: 
   const contexte = await browser.newContext({ ...(test.info().project.use as object) });
   const pageN = await contexte.newPage();
   await pageN.goto(lien);
-  await expect(pageN.getByRole("heading", { name: /^Commande commune d(e |')\S+ \d{4}$/ })).toBeVisible();
+  await expect(pageN.getByRole("heading", { name: /^Commande commune du (1er|\d{1,2}) \S+ \d{4}$/ })).toBeVisible();
   await expect(pageN.getByText(/^Réponse avant le \d\d\/\d\d à 18 h, il reste \d+ j/)).toBeVisible();
   await expect(pageN.getByText("Chaque artisan choisit le négoce le moins cher pour lui.", { exact: false })).toBeVisible();
   await expect(pageN.getByRole("region", { name: "La grille" }).getByRole("listitem")).toHaveCount(3);
@@ -2954,7 +2954,7 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   ]);
   await ajouterAuMois(pageB, projetB, "Du stock");
   await page.goto("/groupe");
-  await expect(page.getByText(/^Toute la commande d\S* \S*\s?: 5\s000 pièces d'ardoise naturelle 32×22 Espagne 1er choix, 400 m de liteau sapin traité 27×38, 10 boîtes de crochet inox 100 mm$/)).toBeVisible();
+  await expect(page.getByText(/^Toute la commande du (1er|\d{1,2}) \S+ : 5\s000 pièces d'ardoise naturelle 32×22 Espagne 1er choix, 400 m de liteau sapin traité 27×38, 10 boîtes de crochet inox 100 mm$/)).toBeVisible();
   await expect(page.getByText("Pour l'instant, tu es le premier.", { exact: false })).toHaveCount(0);
   await expect(page.getByText("Toitures B")).toHaveCount(0);
 
@@ -2969,16 +2969,17 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   await page.goto("/groupe");
   await expect(page.getByRole("button", { name: "Retirer" })).toHaveCount(0);
 
-  // C, à Lannion, après la clôture : sa liste part le mois suivant, en clair ; il la retire tant que celui-ci est ouvert.
+  // C, à Lannion, après la clôture, l'écran encore sur la commande close : sa liste part avec la suivante, en clair ; il la
+  // retire tant que celle-ci est ouverte.
   const contexteC = await browser.newContext({ ...(test.info().project.use as object) });
   const pageC = await contexteC.newPage();
   await compteAuGroupe(pageC, "Toitures C", "5 rue de Kerampont, 22300 Lannion");
   const projetC = await listePrete(pageC, "5 rue de Kerampont, 22300 Lannion", [{ libelle: ARDOISE_MOIS, quantite: "1000", unite: "pièces" }]);
   const articlesC = (await apiJson<{ takeoff: { purchase: { toBuy: { key: string }[] } } }>(pageC, "GET", `/v1/projects/${projetC}/takeoff`)).body.takeoff.purchase.toBuy.map((b) => b.key);
-  const depotC = await apiJson<{ mois: string; message: string }>(pageC, "POST", `/v1/projects/${projetC}/commande-du-mois?maintenant=${encodeURIComponent(apresCloture)}`, { articles: articlesC, nature: "chantier" });
+  const depotC = await apiJson<{ mois: string; message: string }>(pageC, "POST", `/v1/projects/${projetC}/commande-du-mois?maintenant=${encodeURIComponent(apresCloture)}`, { articles: articlesC, nature: "chantier", mois: cycle.mois });
   expect(depotC.status).toBe(201);
   expect(depotC.body.mois).not.toBe(cycle.mois);
-  expect(depotC.body.message).toMatch(/^Trop tard pour \S+, ta liste part avec la commande d(e |')\S+\.$/);
+  expect(depotC.body.message).toMatch(/^Trop tard pour le (1er|\d{1,2}) \S+, ta liste part avec la commande du (1er|\d{1,2}) \S+\.$/);
   await pageC.goto("/groupe");
   const carteC = pageC.getByRole("region", { name: /^Commande d/ }).first();
   await expect(carteC.getByText(/^Toi seul : 1\s000 pièces/)).toBeVisible();

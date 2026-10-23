@@ -40,10 +40,10 @@ const LITEAU = "Liteau sapin traité 27×38";
 const CROCHET = "Crochet inox 100 mm";
 /** La désignation telle que la phrase l'écrit : première lettre en minuscule. */
 const min = (d: string) => d.charAt(0).toLowerCase() + d.slice(1);
-// Le 16 octobre 2026 à 9 h (Paris) : inscriptions ouvertes, clôture le 25 à 12 h.
-const T0 = "2026-10-16T07:00:00.000Z";
-const APRES_CLOTURE = "2026-10-25T11:00:00.000Z";
-const LIMITE = "2026-11-08T17:00:00.000Z";
+// Le 10 octobre 2026 à 9 h (Paris) : inscriptions ouvertes, clôture le jeudi 15 à 12 h ; réponses avant le jeudi 22 à 18 h (5 jours ouvrés).
+const T0 = "2026-10-10T07:00:00.000Z";
+const APRES_CLOTURE = "2026-10-15T10:00:00.000Z";
+const LIMITE = "2026-10-22T16:00:00.000Z";
 
 async function couvreur(email: string, nom: string, adresse: string, lignes: { libelle: string; quantite: string; unite: string }[]) {
   const { agent, companyId } = await signUpWithCompany(ctx.app, email, nom, ["roofing"]);
@@ -84,10 +84,10 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
       await A.agent.post(`/v1/groupe/negoces?maintenant=${T0}`).send({ nom, email, familles: ["couverture"] }).expect(201);
     }
 
-    // A dépose : il est le premier, la commande d'octobre ; en quantités, jamais en nombre d'entreprises.
+    // A dépose : il est le premier, la commande du 15 octobre ; en quantités, jamais en nombre d'entreprises.
     const a1 = (await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201)).body;
-    expect(a1).toMatchObject({ mois: "2026-10", message: null });
-    expect(a1.vue).toMatchObject({ phase: "inscriptions", clotureDans: "9 j 4 h", premier: "Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande." });
+    expect(a1).toMatchObject({ mois: "2026-10-15", message: null });
+    expect(a1.vue).toMatchObject({ phase: "inscriptions", clotureDans: "5 j 3 h", premier: "Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande." });
     expect(a1.vue.toi.replace(/\u202f/g, " ")).toBe(`Toi seul : 2 000 pièces d'${min(ARDOISE)}, 400 m de ${min(LITEAU)}`);
 
     // B dépose (du stock) : A est prévenu, en quantités ; la commande grossit.
@@ -95,30 +95,30 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     expect(pushVers("a@example.fr").map((m) => m.body.replace(/\u202f/g, " "))).toContain(`+3 000 pièces d'${min(ARDOISE)} et 10 boîtes de ${min(CROCHET)} viennent d'être ajoutées. L'union fait la force !`);
     const vueA = (await A.agent.get(`/v1/commande-du-mois?maintenant=${T0}`).expect(200)).body.commandes[0];
     expect(vueA.premier).toBeNull();
-    expect(vueA.tout.replace(/\u202f/g, " ")).toBe(`Toute la commande d'octobre : 5 000 pièces d'${min(ARDOISE)}, 400 m de ${min(LITEAU)}, 10 boîtes de ${min(CROCHET)}`);
+    expect(vueA.tout.replace(/\u202f/g, " ")).toBe(`Toute la commande du 15 octobre : 5 000 pièces d'${min(ARDOISE)}, 400 m de ${min(LITEAU)}, 10 boîtes de ${min(CROCHET)}`);
     expect(JSON.stringify(vueA)).not.toMatch(/Toitures B|entreprises/);
 
     // La clôture : tout est figé, la grille fusionnée part aux trois négoces.
     expect((await tache(APRES_CLOTURE)).body).toMatchObject({ clos: 1, grillesEnvoyees: 3 });
     const demande = mailsVers("n1@example.com").at(-1)!;
-    expect(demande.subject).toBe("Commande commune d'octobre (22) : demande de prix sur 3 articles");
+    expect(demande.subject).toBe("Commande commune du 15 octobre (22) : demande de prix sur 3 articles");
     expect(demande.text.replace(/\u202f/g, " ")).toContain(`- ${ARDOISE} : 5 000 pièces`);
-    expect(demande.text).toContain("Réponse avant le 08/11 à 18 h, il reste 14 j 6 h");
+    expect(demande.text).toContain("Réponse avant le 22/10 à 18 h, il reste 7 j 6 h");
     expect(demande.text).toContain("Chaque artisan choisit le négoce le moins cher pour lui.");
     expect(demande.text).not.toMatch(/Toitures|Lannion|Paimpol/);
 
-    // C arrive après la clôture : sa liste part avec novembre, en clair.
+    // C arrive après la clôture, l'écran lui montrait encore le 15 octobre : sa liste part avec le 1er novembre, en clair.
     const C = await couvreur("c@example.fr", "Toitures C", "5 rue de Kerampont, 22300 Lannion", [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
-    const c1 = (await C.agent.post(`/v1/projects/${C.projectId}/commande-du-mois?maintenant=${APRES_CLOTURE}`).send({ articles: C.articles, nature: "chantier" }).expect(201)).body;
-    expect(c1).toMatchObject({ mois: "2026-11", message: "Trop tard pour octobre, ta liste part avec la commande de novembre." });
+    const c1 = (await C.agent.post(`/v1/projects/${C.projectId}/commande-du-mois?maintenant=${APRES_CLOTURE}`).send({ articles: C.articles, nature: "chantier", mois: "2026-10-15" }).expect(201)).body;
+    expect(c1).toMatchObject({ mois: "2026-11-01", message: "Trop tard pour le 15 octobre, ta liste part avec la commande du 1er novembre." });
 
     // Les négoces chiffrent la MÊME grille ; N3 ne chiffre pas les crochets. Pendant le chrono : premier ou pas, sans prix des autres.
     const j1 = jetonDe("n1@example.com");
     const j2 = jetonDe("n2@example.com");
     const j3 = jetonDe("n3@example.com");
-    const pendant = "2026-10-30T09:00:00.000Z";
+    const pendant = "2026-10-19T09:00:00.000Z";
     const page1 = (await request(ctx.app.getHttpServer()).get(`/v1/grille/${j1}?maintenant=${pendant}`).expect(200)).body;
-    expect(page1).toMatchObject({ ouverte: true, mois: "2026-10", departement: "22", depose: null });
+    expect(page1).toMatchObject({ ouverte: true, mois: "2026-10-15", departement: "22", depose: null });
     expect(page1.lignes).toHaveLength(3);
     expect((await deposerGrille(j1, [["A", ARDOISE, "5000 pièces", "0,90", "4 500,00"], ["L", LITEAU, "400 m", "0,80", "320,00"], ["C", CROCHET, "10 boîtes", "30,00", "300,00"]], { depart: "Zone de Kerampont, 22300 Lannion", francoKm: "20", prixAuDela: "50" }, pendant)).status).toBe(201);
     expect((await deposerGrille(j2, [["A", ARDOISE, "5000 pièces", "0,88", "4 400,00"], ["L", LITEAU, "400 m", "0,85", "340,00"], ["C", CROCHET, "10 boîtes", "32,00", "320,00"]], { depart: "ZA de Kerfolic, 22500 Paimpol", francoKm: "30", prixAuDela: "40" }, pendant)).status).toBe(201);
@@ -136,14 +136,14 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     expect(pageN1).toMatch(/0\.9\b/);
 
     // La veille : personne à relancer (tous ont déposé). À la limite : les résultats.
-    expect((await tache("2026-11-07T18:00:00.000Z")).body).toMatchObject({ relances: 0 });
+    expect((await tache("2026-10-21T17:00:00.000Z")).body).toMatchObject({ relances: 0 });
     expect((await tache(LIMITE)).body).toMatchObject({ resultats: 1 });
     expect(mailsVers("n2@example.com").at(-1)!.text).toContain("Votre grille est la moins chère sur le total");
     expect(mailsVers("n1@example.com").at(-1)!.text).toContain("Elle n'est pas la moins chère sur le total");
     expect(mailsVers("n1@example.com").at(-1)!.text).not.toMatch(/0,88|N2|Négoce N2/);
 
     // A : N2 mis en avant (premier sur le total), mais N3 moins cher pour lui. Les totaux posés à la main.
-    const rA = (await A.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((c: { mois: string }) => c.mois === "2026-10").resultats;
+    const rA = (await A.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((c: { mois: string }) => c.mois === "2026-10-15").resultats;
     const nomDe = (id: string) => rA.negoces.find((n: { negoceId: string }) => n.negoceId === id).nom;
     expect(nomDe(rA.parDefaut)).toBe("Négoce N2");
     expect(nomDe(rA.moinsCherPourToi)).toBe("Négoce N3");
@@ -152,7 +152,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
       ["Négoce N1", 2120, 0, true],
       ["Négoce N2", 2140, 40, true],
     ]);
-    const rB = (await B.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((c: { mois: string }) => c.mois === "2026-10").resultats;
+    const rB = (await B.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((c: { mois: string }) => c.mois === "2026-10-15").resultats;
     expect(rB.negoces.map((n: { nom: string; totalHt: number; complet: boolean }) => [n.nom, n.totalHt, n.complet])).toEqual([
       ["Négoce N2", 2960, true],
       ["Négoce N1", 3050, true],
@@ -163,12 +163,12 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     // B ne peut pas commander chez N3 (il manque ses crochets) ; il commande chez N2 : le bon part, avec son nom.
     const n3 = rB.negoces.find((n: { nom: string }) => n.nom === "Négoce N3").negoceId;
     const n2 = rB.parDefaut;
-    const cycleId = (await B.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`)).body.commandes.find((c: { mois: string }) => c.mois === "2026-10").cycleId;
+    const cycleId = (await B.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`)).body.commandes.find((c: { mois: string }) => c.mois === "2026-10-15").cycleId;
     expect((await B.agent.post(`/v1/commande-du-mois/${cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: n3 }).expect(400)).body.error.details).toMatchObject({ reason: "grille_incomplete" });
     const apres = (await B.agent.post(`/v1/commande-du-mois/${cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: n2 }).expect(200)).body;
     expect(apres.suivi).toMatchObject({ etape: 4, phrase: "C'est commandé." });
     const bon = mailsVers("n2@example.com").at(-1)!;
-    expect(bon.subject).toBe(`Bon de commande, commande commune d'octobre n° ${apres.numero}`);
+    expect(bon.subject).toBe(`Bon de commande, commande commune du 15 octobre n° ${apres.numero}`);
     expect(bon.attachments?.[0]?.filename).toMatch(/^bon-de-commande-2026-10-/);
     await B.agent.post(`/v1/commande-du-mois/${cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: n2 }).expect(409);
   });
@@ -176,13 +176,13 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
   it("le suivi d'un chantier dans la commande : Liste déposée, puis Commande close", async () => {
     const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2000", unite: "pièces" }]);
     await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
-    expect((await A.agent.get(`/v1/projects/${A.projectId}/commande-du-mois/suivi?maintenant=${T0}`).expect(200)).body.suivi).toMatchObject({ etape: 0, phrase: "Ta liste est dans la commande d'octobre." });
+    expect((await A.agent.get(`/v1/projects/${A.projectId}/commande-du-mois/suivi?maintenant=${T0}`).expect(200)).body.suivi).toMatchObject({ etape: 0, phrase: "Ta liste est dans la commande du 15 octobre." });
     // Une ligne se retire avant la clôture, plus après.
     const ligne = (await A.agent.get(`/v1/commande-du-mois?maintenant=${T0}`)).body.commandes[0].mesLignes[0].id;
     await tache(APRES_CLOTURE);
     await A.agent.delete(`/v1/commande-du-mois/lignes/${ligne}?maintenant=${APRES_CLOTURE}`).expect(409);
     // Aucun négoce couverture dans le 22 : la commande est close, aucune grille ne part.
-    expect((await A.agent.get(`/v1/projects/${A.projectId}/commande-du-mois/suivi?maintenant=${APRES_CLOTURE}`).expect(200)).body.suivi).toMatchObject({ etape: 1, phrase: "La commande d'octobre est close." });
+    expect((await A.agent.get(`/v1/projects/${A.projectId}/commande-du-mois/suivi?maintenant=${APRES_CLOTURE}`).expect(200)).body.suivi).toMatchObject({ etape: 1, phrase: "La commande du 15 octobre est close." });
   });
 
   it("la notification d'ajout : au plus une par jour, les suivantes regroupées le lendemain", async () => {
@@ -193,24 +193,26 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     await B.agent.post(`/v1/projects/${B.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: [B.articles[1]!], nature: "chantier" }).expect(201);
     const ajouts = () => pushVers("a@example.fr").filter((m) => m.title === "La commande commune grossit");
     expect(ajouts()).toHaveLength(1);
-    await tache("2026-10-17T07:00:00.000Z");
+    await tache("2026-10-11T07:00:00.000Z");
     expect(ajouts()).toHaveLength(2);
     expect(ajouts()[1]!.body).toBe(`+400 m de ${min(LITEAU)} viennent d'être ajoutés. L'union fait la force !`);
   });
 
-  it("l'admin règle les dates : elles valent pour la commande en cours ; un artisan ne peut pas", async () => {
+  it("l'admin règle le cycle (deux clôtures, heures, jours ouvrés) : heures et délai valent pour la commande en cours ; un artisan ne peut pas", async () => {
     const admin = await signUpWithCompany(ctx.app, "greg@example.fr", "Admin");
     const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2000", unite: "pièces" }]);
     await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
-    expect((await admin.agent.get("/v1/admin/commande-du-mois/config").expect(200)).body).toEqual({ jourCloture: 25, heureCloture: 12, joursReponse: 14, heureReponse: 18, jourClotureDecembre: 18 });
+    expect((await admin.agent.get("/v1/admin/commande-du-mois/config").expect(200)).body).toEqual({ jourCloture1: 1, jourCloture2: 15, heureCloture: 12, joursOuvresReponse: 5, heureReponse: 18 });
     await A.agent.get("/v1/admin/commande-du-mois/config").expect(403);
-    await A.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture: 20, heureCloture: 12, joursReponse: 14, heureReponse: 18 }).expect(403);
-    expect((await admin.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture: 31, heureCloture: 12, joursReponse: 14, heureReponse: 18 }).expect(400)).body.error.details).toMatchObject({ reason: "reglages_invalides" });
-    await admin.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture: 20, heureCloture: 12, joursReponse: 14, heureReponse: 18 }).expect(200);
-    // Le 20 octobre à 12 h (Paris, heure d'été) : 10 h UTC ; le chrono de A suit.
+    await A.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture1: 1, jourCloture2: 15, heureCloture: 12, joursOuvresReponse: 5, heureReponse: 18 }).expect(403);
+    expect((await admin.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture1: 1, jourCloture2: 31, heureCloture: 12, joursOuvresReponse: 5, heureReponse: 18 }).expect(400)).body.error.details).toMatchObject({ reason: "reglages_invalides" });
+    await admin.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture1: 1, jourCloture2: 15, heureCloture: 10, joursOuvresReponse: 3, heureReponse: 18 }).expect(200);
+    // Le 15 octobre à 10 h (Paris, heure d'été) : 8 h UTC ; 3 jours ouvrés : le mardi 20 à 18 h (16 h UTC). Le chrono de A suit.
     const vue = (await A.agent.get(`/v1/commande-du-mois?maintenant=${T0}`).expect(200)).body.commandes[0];
-    expect(vue.clotureLe).toBe("2026-10-20T10:00:00.000Z");
-    expect(vue.clotureDans).toBe("4 j 3 h");
+    expect([vue.clotureLe, vue.reponseAvant, vue.clotureDans]).toEqual(["2026-10-15T08:00:00.000Z", "2026-10-20T16:00:00.000Z", "5 j 1 h"]);
+    // Les jours de clôture valent pour les commandes suivantes : après le 15 octobre, le 1er novembre, puis le 10.
+    await admin.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture1: 1, jourCloture2: 10, heureCloture: 12, joursOuvresReponse: 5, heureReponse: 18 }).expect(200);
+    expect((await A.agent.get(`/v1/commande-du-mois?maintenant=2026-11-01T12:00:00.000Z`).expect(200)).body.prochaine).toMatchObject({ mois: "2026-11-10", de: "du 10 novembre" });
   });
 
   it("le bloc de « Ton chantier » suit le département du chantier, pas celui de l'entreprise", async () => {
@@ -223,7 +225,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     const sansChantier = (await B.agent.get(`/v1/commande-du-mois?maintenant=${T0}`).expect(200)).body.prochaine;
     expect(sansChantier.tout.replace(/\u202f/g, " ")).toContain("2 000 pièces d'ardoise");
     const duChantier = (await B.agent.get(`/v1/commande-du-mois?maintenant=${T0}&projectId=${B.projectId}`).expect(200)).body.prochaine;
-    expect(duChantier).toMatchObject({ mois: "2026-10", zone: "29" });
+    expect(duChantier).toMatchObject({ mois: "2026-10-15", zone: "29" });
     expect(duChantier.tout).toContain("300 m de liteau");
     expect(duChantier.tout).not.toContain("ardoise");
     // Le chantier d'une autre entreprise : introuvable.
@@ -247,29 +249,29 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     it("la relance de la veille garde le lien du premier e-mail", async () => {
       await commandeClose();
       const premier = jetonDe("n1@example.com");
-      expect((await tache("2026-11-07T18:00:00.000Z")).body).toMatchObject({ relances: 2 });
+      expect((await tache("2026-10-21T17:00:00.000Z")).body).toMatchObject({ relances: 2 });
       expect(mailsVers("n1@example.com").at(-1)!.subject).toMatch(/rappel|relance|demain/i);
       expect(jetonDe("n1@example.com")).toBe(premier);
-      await request(ctx.app.getHttpServer()).get(`/v1/grille/${premier}?maintenant=2026-11-07T19:00:00.000Z`).expect(200);
+      await request(ctx.app.getHttpServer()).get(`/v1/grille/${premier}?maintenant=2026-10-21T18:00:00.000Z`).expect(200);
     });
 
     it("une grille qui n'est pas partie (prestataire en panne) repart au passage suivant", async () => {
       // Trois refus de suite : les deux envois de la clôture, puis le premier nouvel essai du même passage.
       const { cloture } = await commandeClose(3);
       expect(cloture).toMatchObject({ clos: 1, grillesEnvoyees: 1 });
-      expect((await tache("2026-10-25T12:00:00.000Z")).body).toMatchObject({ grillesEnvoyees: 1 });
+      expect((await tache("2026-10-15T11:00:00.000Z")).body).toMatchObject({ grillesEnvoyees: 1 });
       expect(mailsVers("n1@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(1);
       expect(mailsVers("n2@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(1);
       // Rejouable : plus rien à envoyer.
-      expect((await tache("2026-10-25T13:00:00.000Z")).body).toMatchObject({ grillesEnvoyees: 0 });
+      expect((await tache("2026-10-15T12:00:00.000Z")).body).toMatchObject({ grillesEnvoyees: 0 });
     });
 
     it("deux « Commander » en même temps (double appui) : un seul bon de commande", async () => {
       const { A } = await commandeClose();
-      const pendant = "2026-10-30T09:00:00.000Z";
+      const pendant = "2026-10-19T09:00:00.000Z";
       expect((await deposerGrille(jetonDe("n1@example.com"), [["A", ARDOISE, "2000 pièces", "0,90", "1 800,00"]], { depart: "Zone de Kerampont, 22300 Lannion", francoKm: "20", prixAuDela: "50" }, pendant)).status).toBe(201);
       await tache(LIMITE);
-      const c = (await A.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((x: { mois: string }) => x.mois === "2026-10");
+      const c = (await A.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((x: { mois: string }) => x.mois === "2026-10-15");
       const statuts = (await Promise.all([1, 2].map(() => A.agent.post(`/v1/commande-du-mois/${c.cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: c.resultats.parDefaut })))).map((r) => r.status).sort();
       expect(statuts).toEqual([200, 409]);
       expect(mailsVers("n1@example.com").filter((m) => m.subject.startsWith("Bon de commande"))).toHaveLength(1);
@@ -277,9 +279,9 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
 
     it("un bon de commande qui ne part pas laisse la commande à refaire", async () => {
       const { A } = await commandeClose();
-      expect((await deposerGrille(jetonDe("n1@example.com"), [["A", ARDOISE, "2000 pièces", "0,90", "1 800,00"]], { depart: "Zone de Kerampont, 22300 Lannion", francoKm: "20", prixAuDela: "50" }, "2026-10-30T09:00:00.000Z")).status).toBe(201);
+      expect((await deposerGrille(jetonDe("n1@example.com"), [["A", ARDOISE, "2000 pièces", "0,90", "1 800,00"]], { depart: "Zone de Kerampont, 22300 Lannion", francoKm: "20", prixAuDela: "50" }, "2026-10-19T09:00:00.000Z")).status).toBe(201);
       await tache(LIMITE);
-      const c = (await A.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((x: { mois: string }) => x.mois === "2026-10");
+      const c = (await A.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((x: { mois: string }) => x.mois === "2026-10-15");
       ctx.emails.failNext = 1;
       await A.agent.post(`/v1/commande-du-mois/${c.cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: c.resultats.parDefaut }).expect(502);
       await A.agent.post(`/v1/commande-du-mois/${c.cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: c.resultats.parDefaut }).expect(200);

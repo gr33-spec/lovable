@@ -122,7 +122,7 @@ export default function GroupePage() {
         </p>
       ) : null}
       <Card className="flex flex-col gap-4 p-4">
-        <p className="text-[20px] leading-snug font-extrabold tracking-[-0.02em]">{mois ? "Une commande par mois avec les couvreurs de ta région." : accroche(company?.trades[0])}</p>
+        <p className="text-[20px] leading-snug font-extrabold tracking-[-0.02em]">{mois ? "Une commande toutes les deux semaines avec les couvreurs de ta région." : accroche(company?.trades[0])}</p>
         {/* Revue à froid (21 octobre) : une fois les trois étapes faites, « Comment ça marche » se replie derrière un lien. */}
         {tout ? (
           <details className="group">

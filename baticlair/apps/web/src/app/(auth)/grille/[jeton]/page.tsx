@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { LiensLegaux } from "@/components/legal";
 import { Button, Chrono, ErrorNotice, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
+import { deMois } from "@/lib/cycle";
 
 /** L'espace fine de fr-FR (U+202F) ne se voit pas dans la police ; une espace insécable, si. */
 const lisible = (texte: string) => texte.replace(/ /g, " ");
@@ -32,12 +33,8 @@ interface PageGrille {
   phrases: { regles: string; fermes: string };
 }
 
-const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
-/** « d'octobre 2026 », « de novembre 2026 » : l'élision devant une voyelle. */
-const deMoisEnLettres = (m: string) => {
-  const nomDuMois = MOIS[Number(m.slice(5, 7)) - 1] ?? m;
-  return `${/^[aeiouâ]/i.test(nomDuMois) ? "d'" : "de "}${nomDuMois} ${m.slice(0, 4)}`;
-};
+/** « du 15 octobre 2026 », « du 1er novembre 2026 » : la clé d'une commande est le jour de sa clôture. */
+const deMoisEnLettres = (m: string) => `${deMois(m)} ${m.slice(0, 4)}`;
 
 /**
  * LA COMMANDE COMMUNE DU MOIS, CÔTÉ NÉGOCE (Greg, 22 octobre 2026) : par son lien unique, sans compte. UNE grille (toutes

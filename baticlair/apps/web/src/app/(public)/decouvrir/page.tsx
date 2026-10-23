@@ -41,15 +41,15 @@ const ETAPES = [
   },
   {
     titre: "2. On envoie tout le volume aux négoces",
-    texte: "Les listes du mois sont additionnées : une seule grille pour tous les négoces de la région.",
+    texte: "Les listes de la quinzaine sont additionnées : une seule grille pour tous les négoces de la région.",
     image: { src: "/landing/capture-preciser.jpg", alt: "Une ligne « Ardoise naturelle 32×22 » à préciser : origine et choix en boutons" },
   },
   { titre: "3. Tu vois le meilleur prix et tu commandes si ça te plaît", texte: "Ton prix livré chez chaque négoce, le moins cher en avant. Sans engagement.", image: null },
 ] as const;
 
 const GROUPE = [
-  { titre: "Une commande par mois", texte: "Tu déposes ta liste jusqu'à la clôture, le 25. Personne ne voit ton nom ni tes chantiers." },
-  { titre: "Les négoces chiffrent tout le volume", texte: "Un prix par article, le même pour tous, ferme pour le mois. Ils ont deux semaines." },
+  { titre: "Une commande toutes les deux semaines", texte: "Tu déposes ta liste jusqu'à la clôture, le 1er et le 15 à midi. Personne ne voit ton nom ni tes chantiers." },
+  { titre: "Les négoces chiffrent tout le volume", texte: "Un prix par article, le même pour tous, ferme pour la commande. Ils ont cinq jours ouvrés." },
   { titre: "Le moins cher pour toi, livraison comprise", texte: "Chaque grille est appliquée à ta liste. Tu choisis, ou tu ne commandes pas." },
 ];
 
@@ -127,7 +127,7 @@ export default function BienvenuePage() {
           </h1>
           <div className="flex flex-col gap-4">
             <p className="max-w-[44ch] text-[18px] leading-relaxed text-muted sm:text-[20px]">Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.</p>
-            <p className="max-w-[44ch] text-[18px] leading-relaxed font-semibold sm:text-[20px]">Une commande par mois avec les couvreurs de ta région.</p>
+            <p className="max-w-[44ch] text-[18px] leading-relaxed font-semibold sm:text-[20px]">Une commande toutes les deux semaines avec les couvreurs de ta région.</p>
           </div>
           <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
             <ButtonLink href="/inscription" variant="accent" className={BOUTON}>

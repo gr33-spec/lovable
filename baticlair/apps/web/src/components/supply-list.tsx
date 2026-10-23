@@ -386,7 +386,7 @@ export function SupplyList({
         <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <CommandeDuMoisBar
             count={checked.size}
-            de={groupe.mois?.prochaine?.de ?? "du mois"}
+            de={groupe.mois?.prochaine?.de ?? "en cours"}
             phrase={groupe.mois?.phrases.sansEngagement ?? ""}
             onCancel={stopSelecting}
             onAdresse={groupe.adresse}

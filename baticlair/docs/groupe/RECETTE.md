@@ -109,23 +109,23 @@ La vraie lecture du devis attend le crédit. D'ici là, la prévisualisation ser
 | 5.11 | Le 1er du mois | Un e-mail « ce mois : X chantiers lus, Y € économisés grâce à la commande commune, Z lots ». Rien n'est envoyé à qui n'a rien fait. | « Rapport mensuel… » | ✅ auto, 🏭 le vrai envoi |
 | 5.12 | Ton SIRET réel, une vraie adresse de dépôt | SIRET vérifié auprès de l'INSEE ; la distance calculée par l'API Adresse (vol d'oiseau × 1,3). | API `groupe-sirene` (INSEE simulé), domaine `cap-22-octobre` (table de codes postaux) | 🏭 prod |
 
-## 5 bis. La commande commune du mois (22 octobre 2026, au soir)
+## 5 bis. La commande commune (22 octobre 2026, au soir ; cycle raccourci le 23 octobre)
 
-Le nouveau fonctionnement remplace le regroupement par lot au fil de l'eau (`COMMANDE_COMMUNE=mois`, la valeur par défaut). Une commande par mois : inscriptions jusqu'au 25 à 12 h, puis deux semaines pour les négoces, puis les résultats.
+Le nouveau fonctionnement remplace le regroupement par lot au fil de l'eau (`COMMANDE_COMMUNE=mois`, la valeur par défaut). Une commande toutes les deux semaines : inscriptions jusqu'au 1er et au 15 de chaque mois à 12 h (en décembre, le 15 puis le 1er janvier), puis 5 jours ouvrés pour les négoces (relance la veille), puis les résultats. Les deux jours de clôture et le délai restent réglables dans l'admin.
 
 | # | Tu fais | Tu dois voir | Test | État |
 |---|---|---|---|---|
-| 5b.1 | « Ton chantier », en haut | « Commande commune de novembre », « Une commande par mois avec les couvreurs de ta région. », le chrono « Clôture dans 9 j 4 h », les quantités de toute la commande, le bouton « Ajouter à la commande de novembre ». | e2e « Commande du mois : un cycle complet… » | ✅ auto |
+| 5b.1 | « Ton chantier », en haut | « Commande commune du 1er novembre », « Une commande toutes les deux semaines avec les couvreurs de ta région. », le chrono « Clôture dans 9 j 4 h », les quantités de toute la commande, le bouton « Ajouter à la commande du 1er novembre ». | e2e « Commande du mois : un cycle complet… » | ✅ auto |
 | 5b.2 | « Ajouter à la commande… », tu coches, « Un chantier signé » ou « Du stock », « Ajouter » | « Mets seulement ce que tu es sûr de commander. Sans engagement : tu commandes seulement si le prix te plaît. » Les lignes vagues ne se cochent pas. Ensuite « Dans la commande de … » avec « Retirer ». | même e2e ; API `commande-du-mois` | ✅ auto |
-| 5b.3 | L'onglet « Commande commune » | « Toi seul : 3 palettes… », « Toute la commande de novembre : … », le chrono, « Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande. » au début, le partage dessous. Jamais un nombre d'entreprises. | même e2e | ✅ auto |
+| 5b.3 | L'onglet « Commande commune » | « Toi seul : 3 palettes… », « Toute la commande du 1er novembre : … », le chrono, « Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande. » au début, le partage dessous. Jamais un nombre d'entreprises. | même e2e | ✅ auto |
 | 5b.4 | Un collègue ajoute des lignes | Une notification au plus par jour : « +6 palettes d'ardoises 32×22 viennent d'être ajoutées. L'union fait la force ! » | API `commande-du-mois` (« au plus une par jour ») | ✅ auto, 🏭 la notification sur ton iPhone |
-| 5b.5 | Après la clôture | Tout est figé (plus de « Retirer »). Une liste déposée après : « Trop tard pour octobre, ta liste part avec la commande de novembre. » | même e2e | ✅ auto |
-| 5b.6 | Le négoce ouvre son lien | Une seule grille, toutes les lignes additionnées, « Réponse avant le 08/11 à 18 h, il reste … », la règle du jeu (vouvoiement), « prix fermes pour tout le cycle ». Il dépose un ou deux PDF et sa livraison. Il voit seulement s'il est premier, jamais les prix des autres. Aucun frais. | même e2e | ✅ auto |
+| 5b.5 | Après la clôture | Tout est figé (plus de « Retirer »). Une liste déposée après, l'écran encore sur la commande close : « Trop tard pour le 15 octobre, ta liste part avec la commande du 1er novembre. » | même e2e | ✅ auto |
+| 5b.6 | Le négoce ouvre son lien | Une seule grille, toutes les lignes additionnées, « Réponse avant le 22/10 à 18 h, il reste … », la règle du jeu (vouvoiement), « prix fermes pour tout le cycle ». Il dépose un ou deux PDF et sa livraison. Il voit seulement s'il est premier, jamais les prix des autres. Aucun frais. | même e2e | ✅ auto |
 | 5b.7 | Les résultats | Pour chaque négoce : « Chez X : … € HT livré », le moins cher sur toute la commande coché d'office, « Le moins cher pour toi » s'il diffère, un négoce qui n'a pas tout chiffré ne se choisit pas. « Commander chez X » envoie le bon. | même e2e | ✅ auto |
 | 5b.8 | Le suivi du chantier | Cinq étapes : Liste déposée → Commande close → Prix demandés → Prix reçus → Commandé. | même e2e | ✅ auto |
-| 5b.9 | L'admin | « Dates de la commande du mois » : jour et heure de clôture, jours et heure de réponse. | API `commande-du-mois` (config admin) | ✅ auto, 🏭 à régler une fois |
+| 5b.9 | L'admin | « Dates de la commande commune » : les deux jours de clôture (1 et 15), l'heure, les jours ouvrés et l'heure de réponse. | API `commande-du-mois` (config admin) | ✅ auto, 🏭 à régler une fois |
 
-### Commande du mois : les totaux à la main
+### Commande commune : les totaux à la main
 
 Le cas joué par le domaine, l'API et l'e2e. Distance Lannion ↔ Paimpol : 40 km (table des communes de test) ; un chantier dans la ville du dépôt est à 0 km.
 
@@ -151,16 +151,16 @@ Le cas joué par le domaine, l'API et l'e2e. Distance Lannion ↔ Paimpol : 40 k
 
 **Ce que voit chacun** : A, N2 coché d'office (le moins cher sur toute la commande), N3 « Le moins cher pour toi », il peut le choisir. B, N2 coché d'office ; N3 grisé, « Il n'a pas chiffré 1 article de ta liste ».
 
-**C, Lannion**, 1 000 ardoises déposées après la clôture : « Trop tard pour octobre, ta liste part avec la commande de novembre. »
+**C, Lannion**, 1 000 ardoises déposées après la clôture : « Trop tard pour le 15 octobre, ta liste part avec la commande du 1er novembre. »
 
-### Trois cycles à la main (octobre, novembre, décembre 2026)
+### Trois commandes à la main (15 octobre, 1er novembre, 15 décembre 2026)
 
 Joué par `apps/api/test/trois-cycles.test.ts` ; chaque chiffre ci-dessous est d'abord calculé ici. Distances de test (vol d'oiseau × 1,3, arrondi au km) : Lannion–Ploubazlanec 42, Lannion–Saint-Brieuc 74, Lannion–Guingamp 38, Saint-Brieuc–Ploubazlanec 49, Saint-Brieuc–Guingamp 38, Saint-Brieuc–Paimpol 48, Paimpol–Ploubazlanec 3, Paimpol–Guingamp 33, Paimpol–Lannion 40. Une livraison par chantier.
 
-**Octobre** : clôture le 25/10 à 12 h (jour du passage à l'heure d'hiver, 11 h UTC), réponses avant le 08/11 à 18 h.
+**15 octobre** : clôture le jeudi 15/10 à 12 h (heure d'été, 10 h UTC), 5 jours ouvrés : réponses avant le jeudi 22/10 à 18 h (16 h UTC), relance le 21.
 
 - A (Lannion) : chantier Lannion 2 400 ardoises + 520 m de liteaux ; chantier Ploubazlanec 1 800 ardoises + 8 boîtes de crochets. B (Saint-Brieuc, stock) : 3 000 ardoises, 12 boîtes, 300 m. D (Guingamp) : 800 m.
-- Grille : 7 200 ardoises, 1 620 m de liteaux, 20 boîtes. C dépose le 26/10 : « Trop tard pour octobre, ta liste part avec la commande de novembre. »
+- Grille : 7 200 ardoises, 1 620 m de liteaux, 20 boîtes. C dépose le 16/10, l'écran encore sur le 15 : « Trop tard pour le 15 octobre, ta liste part avec la commande du 1er novembre. »
 - N1 (Lannion, 25 km gratuits, 55 €) 0,92 / 0,78 / 29,50. N2 (Saint-Brieuc, 40 km, 45 €) 0,95 / 0,74 / 28,00. N3 (Paimpol, 10 km, 60 €) 0,89 / 0,81 / pas de crochets. N4 ne répond pas : une relance la veille, une seule.
 
 | | N1 | N2 | N3 (incomplet) |
@@ -172,10 +172,10 @@ Joué par `apps/api/test/trois-cycles.test.ts` ; chaque chiffre ci-dessous est d
 
 A et B : N1 par défaut, et le moins cher pour eux. D : N1 proposé (premier sur le total), N2 moins cher pour lui (592 €) : il commande chez N2. N1 reçoit deux bons, N2 un.
 
-**Novembre** : clôture le 25/11 à 12 h (11 h UTC), réponses avant le 09/12 à 18 h. N5 (Paimpol, 20 km, 50 €) arrive.
+**1er novembre** : un dimanche, clôture quand même à 12 h (heure d'hiver, 11 h UTC) ; 5 jours ouvrés du lundi 2 au vendredi 6 : réponses avant le 06/11 à 18 h. N5 (Paimpol, 20 km, 50 €) arrive.
 
 - A (nouveau chantier Lannion) : 1 500 ardoises. C (Paimpol) : 2 000 ardoises, 400 m. E (Ploubazlanec, stock) : 5 boîtes. Grille : 3 500 ardoises, 400 m, 5 boîtes ; partie à N1…N5.
-- N5 (déposé le 28/11) 0,92 / 0,75 / 33,00. N2 (déposé le 30/11) 0,90 / 0,75 / 30,00. N1, N3, N4 muets : trois relances.
+- N5 (déposé le 03/11) 0,92 / 0,75 / 33,00. N2 (déposé le 04/11) 0,90 / 0,75 / 30,00. N1, N3, N4 muets : trois relances.
 
 | | N2 | N5 |
 |---|---|---|
@@ -186,7 +186,7 @@ A et B : N1 par défaut, et le moins cher pour eux. D : N1 proposé (premier sur
 
 A : N5 proposé, N2 moins cher pour lui (1 395 €) : il commande chez N2. C commande chez N5.
 
-**Décembre** : clôture le 18/12 à 12 h (11 h UTC ; Greg, 23 octobre : jamais le jour de Noël), réponses avant le 01/01/2027 à 18 h (relance le 31/12). F (Saint-Brieuc) : 200 m de liteaux, « Pour l'instant, tu es le premier ». Grille partie aux cinq négoces, aucun ne répond : pas de prix ; le suivi dit « Aucun négoce n'a chiffré la commande de décembre. Commande ta liste en direct chez ton négoce. »
+**15 décembre** : clôture le mardi 15/12 à 12 h (11 h UTC), réponses avant le mardi 22/12 à 18 h (relance le 21/12) ; la suivante est le 1er janvier 2027 (réponses avant le vendredi 08/01). Greg, 23 octobre : en décembre, le 15 puis le 1er janvier, plus de clôture avancée avant Noël. F (Saint-Brieuc) dépose le 02/12 : 200 m de liteaux, « Pour l'instant, tu es le premier ». Grille partie aux cinq négoces, aucun ne répond : pas de prix ; le suivi dit « Aucun négoce n'a chiffré la commande du 15 décembre. Commande ta liste en direct chez ton négoce. »
 
 ## 6. Données, sécurité, tenue
 

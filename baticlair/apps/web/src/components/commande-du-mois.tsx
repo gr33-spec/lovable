@@ -14,7 +14,7 @@ import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
 /**
- * LA COMMANDE COMMUNE DU MOIS (Greg, 22 octobre 2026, au soir) côté écran : une commande par mois avec les couvreurs de
+ * LA COMMANDE COMMUNE (Greg, 22 octobre 2026, au soir ; cycle raccourci le 23 : le 1er et le 15) côté écran : une commande toutes les deux semaines avec les couvreurs de
  * la région. On parle en QUANTITÉS, jamais en nombre d'entreprises ; le chrono est partout ; « Sans engagement : tu
  * commandes seulement si le prix te plaît ». Toutes les phrases viennent de l'API (calculées par le domaine).
  */
@@ -156,7 +156,7 @@ export function BlocDuMois({ prochaine: p }: { prochaine: Prochaine }) {
         </Link>
       </div>
       <GrosChrono clotureDans={p.clotureDans} />
-      <p className="text-[15px] leading-snug text-muted">Une commande par mois avec les couvreurs de ta région.</p>
+      <p className="text-[15px] leading-snug text-muted">Une commande toutes les deux semaines avec les couvreurs de ta région.</p>
       <EtapesDuMois compact />
       {p.toi || p.tout ? (
         <div className="flex flex-col divide-y divide-line border-t border-line">
@@ -277,7 +277,7 @@ export function CommandeDuMoisBar({
 
 /**
  * En haut de « Ton chantier » : « Commande commune de novembre », le chrono, les quantités de toute la commande (jamais un
- * nombre d'entreprises), puis « Ajouter à la commande de novembre ». Après un dépôt tardif : « Trop tard pour octobre… ».
+ * nombre d'entreprises), puis « Ajouter à la commande du 1er novembre ». Après un dépôt tardif : « Trop tard pour le 15 octobre… ».
  */
 export function CommandeDuMoisBloc({ etat, onAjouter, message }: { etat: EtatDuMois | null; onAjouter: () => void; message: string | null }) {
   // Greg (23 octobre) : la commande du département du CHANTIER (`prochaine`, lue avec son `projectId`), jamais celle de
@@ -294,7 +294,7 @@ export function CommandeDuMoisBloc({ etat, onAjouter, message }: { etat: EtatDuM
         <Users size={18} aria-hidden="true" className="text-accent-text" />
         {de ? `Commande commune ${de}` : "Commande commune"}
       </p>
-      <p className="text-[14px] leading-snug text-muted">Une commande par mois avec les couvreurs de ta région.</p>
+      <p className="text-[14px] leading-snug text-muted">Une commande toutes les deux semaines avec les couvreurs de ta région.</p>
       <Chrono>{chronoTexte}</Chrono>
       {tout ? <p className="text-[15px] font-semibold">{tout}</p> : null}
       {message ? (
@@ -360,9 +360,12 @@ export function MesLignesDuMois({ groupe }: { groupe: Groupe }) {
   );
 }
 
-/** Le dépôt d'une liste dans la commande du mois (« Trop tard pour octobre… » renvoyé tel quel). */
-export async function deposerDansLeMois(projectId: string, articles: string[], nature: "chantier" | "stock"): Promise<{ mois: string; message: string | null }> {
-  return api(`/v1/projects/${encodeURIComponent(projectId)}/commande-du-mois`, { method: "POST", body: { articles, nature }, idempotencyKey: newActionKey() });
+/**
+ * Le dépôt d'une liste dans la commande commune (« Trop tard pour le 15 octobre… » renvoyé tel quel). `mois` : la commande
+ * que l'écran montrait ; close entre-temps, l'API le dit.
+ */
+export async function deposerDansLeMois(projectId: string, articles: string[], nature: "chantier" | "stock", mois: string | null = null): Promise<{ mois: string; message: string | null }> {
+  return api(`/v1/projects/${encodeURIComponent(projectId)}/commande-du-mois`, { method: "POST", body: { articles, nature, mois }, idempotencyKey: newActionKey() });
 }
 
 /** L'onglet « Commande commune » : chaque commande du mois, ses chiffres en quantités, le partage, puis les résultats. */

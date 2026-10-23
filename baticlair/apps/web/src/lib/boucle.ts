@@ -4,4 +4,4 @@
  * négoce la recevra par e-mail à la clôture.
  */
 export const messageAuNegoceEnBoucle = (lien: string) =>
-  `Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres couvreurs. Vous pouvez chiffrer tout le volume du mois ici : ${lien}`;
+  `Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres couvreurs. Vous pouvez chiffrer tout le volume de la commande ici : ${lien}`;

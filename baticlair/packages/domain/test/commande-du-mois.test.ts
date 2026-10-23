@@ -3,12 +3,16 @@ import {
   affichageDeLaCommande,
   chrono,
   classerLesGrilles,
+  clesDeCommande,
   comparatifDeLArtisan,
   datesDuCycle,
+  deMois,
   fusionnerLesListes,
   messageAjout,
   messageTropTard,
   moisDeDepot,
+  moisEnLettres,
+  moisSuivant,
   phraseDeRang,
   prixChezUnNegoce,
   suiviDansLeMois,
@@ -25,31 +29,46 @@ const ARDOISE = "ardoise#pièces";
 const LITEAU = "liteau#m";
 const CROCHET = "crochet#boîtes";
 
-describe("le cycle : clôture le 25 à 12 h (heure de Paris), 14 jours aux négoces jusqu'à 18 h, relance la veille", () => {
-  it("octobre 2026 : clôture le dimanche 25 à 12 h (le jour du passage à l'heure d'hiver, 11 h UTC), réponse avant le 8 novembre à 18 h (17 h UTC)", () => {
-    const d = datesDuCycle("2026-10");
-    expect(d.clotureLe.toISOString()).toBe("2026-10-25T11:00:00.000Z");
-    expect(d.reponseAvant.toISOString()).toBe("2026-11-08T17:00:00.000Z");
-    expect(d.relanceLe.toISOString()).toBe("2026-11-07T17:00:00.000Z");
-    // En été : 12 h à Paris = 10 h UTC.
-    expect(datesDuCycle("2026-07").clotureLe.toISOString()).toBe("2026-07-25T10:00:00.000Z");
-    // Greg (23 octobre) : pas de clôture le jour de Noël ; en décembre, le 18 à 12 h (heure d'hiver : 11 h UTC).
-    // Les négoces ont leurs 14 jours : jusqu'au 1er janvier à 18 h, relance le 31 décembre.
-    const dec = datesDuCycle("2026-12");
-    expect(dec.clotureLe.toISOString()).toBe("2026-12-18T11:00:00.000Z");
-    expect(dec.reponseAvant.toISOString()).toBe("2027-01-01T17:00:00.000Z");
-    expect(datesDuCycle("2027-12").clotureLe.toISOString()).toBe("2027-12-18T11:00:00.000Z");
-    expect(datesDuCycle("2026-11").clotureLe.toISOString()).toBe("2026-11-25T11:00:00.000Z");
+describe("le cycle raccourci (Greg, 23 octobre) : clôture le 1er et le 15 à 12 h (heure de Paris), 5 jours ouvrés aux négoces jusqu'à 18 h, relance la veille", () => {
+  it("la commande du 15 octobre 2026 : clôture le jeudi 15 à 12 h (10 h UTC, heure d'été), réponse avant le jeudi 22 à 18 h (16 h UTC), relance le 21", () => {
+    const d = datesDuCycle("2026-10-15");
+    expect(d.clotureLe.toISOString()).toBe("2026-10-15T10:00:00.000Z");
+    expect(d.reponseAvant.toISOString()).toBe("2026-10-22T16:00:00.000Z");
+    expect(d.relanceLe.toISOString()).toBe("2026-10-21T16:00:00.000Z");
+    // Le 1er novembre est un dimanche : clôture quand même à 12 h (heure d'hiver : 11 h UTC) ; les 5 jours ouvrés
+    // courent du lundi 2 au vendredi 6.
+    const nov = datesDuCycle("2026-11-01");
+    expect(nov.clotureLe.toISOString()).toBe("2026-11-01T11:00:00.000Z");
+    expect(nov.reponseAvant.toISOString()).toBe("2026-11-06T17:00:00.000Z");
+    // Un week-end au milieu : du mardi 1er décembre, 5 jours ouvrés mènent au mardi 8.
+    expect(datesDuCycle("2026-12-01").reponseAvant.toISOString()).toBe("2026-12-08T17:00:00.000Z");
+    // Greg : en décembre, le 15 puis le 1er janvier (plus de clôture avancée avant Noël).
+    expect(datesDuCycle("2026-12-15").clotureLe.toISOString()).toBe("2026-12-15T11:00:00.000Z");
+    expect(datesDuCycle("2026-12-15").reponseAvant.toISOString()).toBe("2026-12-22T17:00:00.000Z");
+    expect(moisSuivant("2026-12-15")).toBe("2027-01-01");
+    expect(datesDuCycle("2027-01-01").reponseAvant.toISOString()).toBe("2027-01-08T17:00:00.000Z");
+    // Les réglages : une clôture le 10 à 10 h, 3 jours ouvrés avant 17 h.
+    const r = datesDuCycle("2026-10-10", { jourCloture1: 1, jourCloture2: 10, heureCloture: 10, joursOuvresReponse: 3, heureReponse: 17 });
+    expect([r.clotureLe.toISOString(), r.reponseAvant.toISOString()]).toEqual(["2026-10-10T08:00:00.000Z", "2026-10-14T15:00:00.000Z"]);
   });
 
-  it("une liste déposée avant la clôture part ce mois-ci ; après, ou si l'admin a clos le mois, le mois suivant", () => {
-    expect(moisDeDepot(new Date("2026-10-22T09:00:00Z"))).toBe("2026-10");
-    expect(moisDeDepot(new Date("2026-10-25T10:59:00Z"))).toBe("2026-10");
-    expect(moisDeDepot(new Date("2026-10-25T11:00:00Z"))).toBe("2026-11");
-    expect(moisDeDepot(new Date("2026-10-22T09:00:00Z"), undefined, ["2026-10"])).toBe("2026-11");
-    expect(moisDeDepot(new Date("2026-12-28T09:00:00Z"))).toBe("2027-01");
-    expect(messageTropTard("2026-10", "2026-11")).toBe("Trop tard pour octobre, ta liste part avec la commande de novembre.");
-    expect(messageTropTard("2026-07", "2026-08")).toBe("Trop tard pour juillet, ta liste part avec la commande d'août.");
+  it("les commandes se suivent : 1er, 15, 1er du mois suivant ; « du 15 octobre », « du 1er novembre »", () => {
+    expect(clesDeCommande(new Date("2026-10-20T09:00:00Z"), undefined, 4)).toEqual(["2026-10-01", "2026-10-15", "2026-11-01", "2026-11-15"]);
+    expect(moisSuivant("2026-10-01")).toBe("2026-10-15");
+    expect(moisSuivant("2026-10-15")).toBe("2026-11-01");
+    expect(deMois("2026-10-15")).toBe("du 15 octobre");
+    expect(deMois("2026-11-01")).toBe("du 1er novembre");
+    expect(moisEnLettres("2026-08-01")).toBe("1er août");
+  });
+
+  it("une liste déposée avant la clôture part avec cette commande ; après, ou si l'admin l'a close, la suivante", () => {
+    expect(moisDeDepot(new Date("2026-10-10T09:00:00Z"))).toBe("2026-10-15");
+    expect(moisDeDepot(new Date("2026-10-15T09:59:00Z"))).toBe("2026-10-15");
+    expect(moisDeDepot(new Date("2026-10-15T10:00:00Z"))).toBe("2026-11-01");
+    expect(moisDeDepot(new Date("2026-10-10T09:00:00Z"), undefined, ["2026-10-15"])).toBe("2026-11-01");
+    expect(moisDeDepot(new Date("2026-12-20T09:00:00Z"))).toBe("2027-01-01");
+    expect(messageTropTard("2026-10-15", "2026-11-01")).toBe("Trop tard pour le 15 octobre, ta liste part avec la commande du 1er novembre.");
+    expect(messageTropTard("2026-07-01", "2026-07-15")).toBe("Trop tard pour le 1er juillet, ta liste part avec la commande du 15 juillet.");
   });
 
   it("le chrono : « 9 j 4 h », « 4 h 12 min », « 12 min », jamais négatif", () => {
@@ -140,17 +159,17 @@ describe("les résultats : chaque grille appliquée à chaque artisan, livraison
 });
 
 describe("l'affichage en quantités, jamais en nombre d'entreprises", () => {
-  it("« Toi seul : … », « Toute la commande de novembre : … », « Clôture dans 9 j », et le premier arrivé", () => {
+  it("« Toi seul : … », « Toute la commande du 1er novembre : … », « Clôture dans 9 j », et le premier arrivé", () => {
     const toi = [{ cle: "a", designation: "Palettes d'ardoises", quantite: 3, unite: "" }];
     const a = affichageDeLaCommande({
-      mois: "2026-11",
+      mois: "2026-11-01",
       toi: [{ cle: "a", designation: "Ardoises 32×22", quantite: 3, unite: "palettes" }, { cle: "l", designation: "Liteaux", quantite: 400, unite: "m" }],
       tout: [{ cle: "a", designation: "Ardoises 32×22", quantite: 52, unite: "palettes" }, { cle: "l", designation: "Liteaux", quantite: 6000, unite: "m" }],
       seul: false,
       clotureDans: "9 j",
     });
-    expect(JSON.parse(JSON.stringify(a).replace(/[\u202f\u00a0]/g, " "))).toEqual({ toi: "Toi seul : 3 palettes d'ardoises 32×22, 400 m de liteaux", tout: "Toute la commande de novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux", cloture: "Clôture dans 9 j", premier: null });
-    expect(affichageDeLaCommande({ mois: "2026-10", toi, tout: toi, seul: true, clotureDans: null }).premier).toBe("Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande.");
+    expect(JSON.parse(JSON.stringify(a).replace(/[\u202f\u00a0]/g, " "))).toEqual({ toi: "Toi seul : 3 palettes d'ardoises 32×22, 400 m de liteaux", tout: "Toute la commande du 1er novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux", cloture: "Clôture dans 9 j", premier: null });
+    expect(affichageDeLaCommande({ mois: "2026-10-15", toi, tout: toi, seul: true, clotureDans: null }).premier).toBe("Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande.");
   });
 
   it("la notification d'ajout : « +6 palettes d'ardoises 32×22 viennent d'être ajoutées. L'union fait la force ! »", () => {
@@ -160,12 +179,12 @@ describe("l'affichage en quantités, jamais en nombre d'entreprises", () => {
 });
 
 describe("le suivi façon colis : Liste déposée → Commande close → Prix demandés → Prix reçus → Commandé", () => {
-  const base = { mois: "2026-10", clotureDans: "2 j", reponseDans: null, grilles: 0, negoces: 0, commande: false } as const;
+  const base = { mois: "2026-10-15", clotureDans: "2 j", reponseDans: null, grilles: 0, negoces: 0, commande: false } as const;
   it("chaque phase a sa phrase", () => {
-    expect(suiviDansLeMois({ ...base, phase: "inscriptions" })).toMatchObject({ etape: 0, phrase: "Ta liste est dans la commande d'octobre.", aFaire: "Clôture dans 2 j. Partage le lien pour faire grossir la commande." });
-    expect(suiviDansLeMois({ ...base, phase: "negoces", negoces: 3, reponseDans: "13 j" })).toMatchObject({ etape: 2, phrase: "La commande d'octobre est chez 3 négoces.", aFaire: "Leurs prix arrivent dans 13 j." });
+    expect(suiviDansLeMois({ ...base, phase: "inscriptions" })).toMatchObject({ etape: 0, phrase: "Ta liste est dans la commande du 15 octobre.", aFaire: "Clôture dans 2 j. Partage le lien pour faire grossir la commande." });
+    expect(suiviDansLeMois({ ...base, phase: "negoces", negoces: 3, reponseDans: "13 j" })).toMatchObject({ etape: 2, phrase: "La commande du 15 octobre est chez 3 négoces.", aFaire: "Leurs prix arrivent dans 13 j." });
     // Revue à froid (23 octobre) : la limite passée sans aucune grille déposée.
-    expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 5, grilles: 0 })).toMatchObject({ etape: 2, phrase: "Aucun négoce n'a chiffré la commande d'octobre.", aFaire: "Commande ta liste en direct chez ton négoce." });
+    expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 5, grilles: 0 })).toMatchObject({ etape: 2, phrase: "Aucun négoce n'a chiffré la commande du 15 octobre.", aFaire: "Commande ta liste en direct chez ton négoce." });
     expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 3, grilles: 2 })).toMatchObject({ etape: 3, phrase: "Les prix sont là." });
     expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 3, grilles: 2, commande: true }).etapes.map((e) => e.fait)).toEqual([true, true, true, true, true]);
   });

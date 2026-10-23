@@ -11,9 +11,9 @@ export const EXEMPLE = {
    * le compteur « 30 couvreurs, 15 demandes… ».
    */
   commande: {
-    de: "de novembre",
+    de: "du 1er novembre",
     toi: "Toi seul : 3 palettes d'ardoises 32×22, 400 m de liteaux",
-    tout: "Toute la commande de novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux",
+    tout: "Toute la commande du 1er novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux",
     cloture: "Clôture dans 9 j",
   },
   liste: [

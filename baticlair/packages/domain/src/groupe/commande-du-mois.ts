@@ -1,14 +1,14 @@
 import { fraisDeLivraison, type RegleDeLivraison } from "./cap-22-octobre.js";
 
 /**
- * LA COMMANDE COMMUNE DU MOIS (décision de Greg, 22 octobre 2026, au soir) : elle remplace le regroupement par lot au fil
- * de l'eau. Une seule commande par mois et par métier (la couverture d'abord) et par département, pour accumuler un gros
- * volume et négocier fort.
+ * LA COMMANDE COMMUNE (décision de Greg, 22 octobre 2026, au soir ; cycle raccourci le 23 octobre) : elle remplace le
+ * regroupement par lot au fil de l'eau. Une commande toutes les deux semaines, par métier (la couverture d'abord) et par
+ * département, pour accumuler un gros volume et négocier fort.
  *
- * 1. Inscriptions : les artisans déposent leur liste jusqu'à la clôture (par défaut le 25 à 12 h, heure de Paris). Ce qui
- *    arrive après part avec le mois suivant.
+ * 1. Inscriptions : les artisans déposent leur liste jusqu'à la clôture (le 1er et le 15 de chaque mois à 12 h, heure
+ *    de Paris). Ce qui arrive après part avec la commande suivante.
  * 2. Négoces : à la clôture, les listes sont fusionnées en UNE grille (produits identiques additionnés), envoyée à tous
- *    les négoces du métier et du département ; ils ont 14 jours (jusqu'à 18 h) pour la chiffrer, relance la veille.
+ *    les négoces du métier et du département ; ils ont 5 jours ouvrés (jusqu'à 18 h) pour la chiffrer, relance la veille.
  * 3. Résultats : chaque grille est appliquée à la liste de chaque artisan, livraison comprise ; le moins cher sur le
  *    total de la commande est mis en avant, chacun peut prendre un autre négoce moins cher pour lui.
  *
@@ -17,42 +17,42 @@ import { fraisDeLivraison, type RegleDeLivraison } from "./cap-22-octobre.js";
 
 /** Les réglages du cycle, modifiables par l'admin (`parametre_groupe`, clé `cycle:config`). Un seul jeu pour l'instant. */
 export interface ConfigCycle {
-  /** Jour de clôture des inscriptions dans le mois (1 à 28). */
-  jourCloture: number;
+  /** Première clôture du mois (1 à 28) ; Greg, 23 octobre 2026 : le 1er. */
+  jourCloture1: number;
+  /** Deuxième clôture du mois (1 à 28) ; le 15. */
+  jourCloture2: number;
   /** Heure de clôture, heure de Paris. */
   heureCloture: number;
-  /** Jours laissés aux négoces après la clôture. */
-  joursReponse: number;
+  /** Jours OUVRÉS (lundi à vendredi) laissés aux négoces après la clôture. */
+  joursOuvresReponse: number;
   /** Heure limite de réponse des négoces, heure de Paris. */
   heureReponse: number;
-  /** Greg (23 octobre 2026) : en décembre, la clôture avance (jamais le jour de Noël) ; par défaut le 18. */
-  jourClotureDecembre: number;
 }
 
-export const CONFIG_CYCLE_DEFAUT: ConfigCycle = { jourCloture: 25, heureCloture: 12, joursReponse: 14, heureReponse: 18, jourClotureDecembre: 18 };
+export const CONFIG_CYCLE_DEFAUT: ConfigCycle = { jourCloture1: 1, jourCloture2: 15, heureCloture: 12, joursOuvresReponse: 5, heureReponse: 18 };
 
 export const PHASES_CYCLE = ["inscriptions", "negoces", "resultats"] as const;
 export type PhaseCycle = (typeof PHASES_CYCLE)[number];
 
-/** Un mois, « AAAA-MM ». */
+/**
+ * La clé d'une commande : LE JOUR DE SA CLÔTURE, « AAAA-MM-JJ » (« 2026-10-15 » : la commande du 15 octobre). Le nom
+ * `Mois` reste celui du code écrit quand il n'y avait qu'une commande par mois (22 octobre).
+ */
 export type Mois = string;
 
 const MOIS_NOMS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"] as const;
 
-/** « octobre » pour « 2026-10 ». */
-export function moisEnLettres(mois: Mois): string {
-  return MOIS_NOMS[Number(mois.slice(5, 7)) - 1] ?? mois;
+/** « 15 octobre », « 1er novembre » pour « 2026-10-15 », « 2026-11-01 ». */
+export function moisEnLettres(cle: Mois): string {
+  const nom = MOIS_NOMS[Number(cle.slice(5, 7)) - 1] ?? cle;
+  const jour = Number(cle.slice(8, 10));
+  if (!jour) return nom;
+  return `${jour === 1 ? "1er" : jour} ${nom}`;
 }
 
-/** « d'octobre », « de novembre » : l'élision devant une voyelle. */
-export function deMois(mois: Mois): string {
-  const nom = moisEnLettres(mois);
-  return /^[aeiouyéèêàâî]/i.test(nom) ? `d'${nom}` : `de ${nom}`;
-}
-
-export function moisSuivant(mois: Mois): Mois {
-  const [a, m] = [Number(mois.slice(0, 4)), Number(mois.slice(5, 7))];
-  return m === 12 ? `${a + 1}-01` : `${a}-${String(m + 1).padStart(2, "0")}`;
+/** « du 15 octobre », « du 1er novembre » : le complément de « Commande ». */
+export function deMois(cle: Mois): string {
+  return `du ${moisEnLettres(cle)}`;
 }
 
 /** Le décalage de Paris (en minutes) à un instant donné : +60 l'hiver, +120 l'été. */
@@ -63,17 +63,67 @@ function decalageParis(instant: Date): number {
   return Math.round((local - instant.getTime()) / 60_000);
 }
 
-/** L'instant du jour `jour` du mois, à `heure` h, heure de Paris (changement d'heure compris). */
-export function heureDeParis(mois: Mois, jour: number, heure: number): Date {
+/** L'instant du jour `jour` du mois (« AAAA-MM », ou une clé « AAAA-MM-JJ » dont on garde le mois), à `heure` h, heure de Paris. */
+export function heureDeParis(mois: string, jour: number, heure: number): Date {
   const [a, m] = [Number(mois.slice(0, 4)), Number(mois.slice(5, 7))];
   const naif = Date.UTC(a, m - 1, jour, heure, 0);
   return new Date(naif - decalageParis(new Date(naif)) * 60_000);
 }
 
-/** Le mois d'un instant, à Paris. */
-export function moisDe(instant: Date): Mois {
+/** Le mois d'un instant, à Paris (« AAAA-MM »). */
+export function moisDe(instant: Date): string {
   const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit" }).formatToParts(instant);
   return `${parts.find((p) => p.type === "year")?.value}-${parts.find((p) => p.type === "month")?.value}`;
+}
+
+function moisApres(mois: string): string {
+  const [a, m] = [Number(mois.slice(0, 4)), Number(mois.slice(5, 7))];
+  return m === 12 ? `${a + 1}-01` : `${a}-${String(m + 1).padStart(2, "0")}`;
+}
+
+const cle = (mois: string, jour: number): Mois => `${mois}-${String(jour).padStart(2, "0")}`;
+
+/** Les jours de clôture d'un mois, dans l'ordre (les deux réglages, dédoublonnés). */
+function joursDeCloture(config: ConfigCycle): number[] {
+  return [...new Set([config.jourCloture1, config.jourCloture2])].sort((a, b) => a - b);
+}
+
+/**
+ * Les clés des commandes à partir du mois d'un instant, dans l'ordre : « 2026-10-01 », « 2026-10-15 », « 2026-11-01 »…
+ * (`n` clés). Les clôtures déjà passées du mois en cours sont dedans : chacun filtre avec ses dates.
+ */
+export function clesDeCommande(depuis: Date, config: ConfigCycle = CONFIG_CYCLE_DEFAUT, n = 48): Mois[] {
+  const cles: Mois[] = [];
+  let mois = moisDe(depuis);
+  while (cles.length < n) {
+    for (const jour of joursDeCloture(config)) cles.push(cle(mois, jour));
+    mois = moisApres(mois);
+  }
+  return cles.slice(0, n);
+}
+
+/** La commande qui suit une clé : « 2026-10-15 » → « 2026-11-01 » (d'après les jours réglés). */
+export function moisSuivant(c: Mois, config: ConfigCycle = CONFIG_CYCLE_DEFAUT): Mois {
+  const mois = c.slice(0, 7);
+  const jour = Number(c.slice(8, 10));
+  const apres = joursDeCloture(config).find((j) => j > jour);
+  return apres ? cle(mois, apres) : cle(moisApres(mois), joursDeCloture(config)[0]!);
+}
+
+const JOUR_MS = 86_400_000;
+const jourAParis = (instant: Date) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", weekday: "short" }).format(instant);
+
+/** `n` jours ouvrés (lundi à vendredi, les jours fériés ne sont pas comptés) après `depuis`, à `heure` h de Paris. */
+export function plusJoursOuvres(depuis: Date, n: number, heure: number): Date {
+  let d = depuis;
+  let restants = n;
+  while (restants > 0) {
+    d = new Date(d.getTime() + JOUR_MS);
+    if (!/^(Sat|Sun)/.test(jourAParis(d))) restants--;
+  }
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "numeric" }).formatToParts(d);
+  const v = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return heureDeParis(`${v("year")}-${v("month")}`, Number(v("day")), heure);
 }
 
 export interface DatesDuCycle {
@@ -86,27 +136,24 @@ export interface DatesDuCycle {
   relanceLe: Date;
 }
 
-/** Les dates du cycle d'un mois, d'après les réglages. Le nom du cycle est le mois de sa clôture. */
-export function datesDuCycle(mois: Mois, config: ConfigCycle = CONFIG_CYCLE_DEFAUT): DatesDuCycle {
-  const jour = mois.endsWith("-12") ? (config.jourClotureDecembre ?? CONFIG_CYCLE_DEFAUT.jourClotureDecembre) : config.jourCloture;
-  const clotureLe = heureDeParis(mois, jour, config.heureCloture);
-  // La limite des négoces : `joursReponse` jours plus tard, à `heureReponse` h (heure de Paris, ce jour-là).
-  const jourLimite = new Date(clotureLe.getTime() + config.joursReponse * 86_400_000);
-  const reponseAvant = heureDeParis(moisDe(jourLimite), Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", day: "numeric" }).format(jourLimite)), config.heureReponse);
-  return { mois, clotureLe, reponseAvant, relanceLe: new Date(reponseAvant.getTime() - 86_400_000) };
+/**
+ * Les dates d'une commande d'après sa clé (le jour de la clôture est dans la clé) et les réglages (heures, jours ouvrés
+ * de réponse). Greg, 23 octobre 2026 : clôture le 1er et le 15 à 12 h ; réponse des négoces sous 5 jours ouvrés avant
+ * 18 h ; relance la veille. En décembre : le 15, puis le 1er janvier.
+ */
+export function datesDuCycle(c: Mois, config: ConfigCycle = CONFIG_CYCLE_DEFAUT): DatesDuCycle {
+  const clotureLe = heureDeParis(c.slice(0, 7), Number(c.slice(8, 10)), config.heureCloture);
+  const reponseAvant = plusJoursOuvres(clotureLe, config.joursOuvresReponse, config.heureReponse);
+  return { mois: c, clotureLe, reponseAvant, relanceLe: new Date(reponseAvant.getTime() - JOUR_MS) };
 }
 
 /**
- * Le mois où part une liste déposée à `maintenant` : celui du mois en cours si sa clôture n'est pas passée, sinon le
- * suivant. `fermes` : les mois déjà clos par l'admin ou la tâche (une clôture avancée à la main compte aussi).
+ * La commande où part une liste déposée à `maintenant` : la première dont la clôture n'est pas passée. `fermes` : les
+ * commandes déjà closes par l'admin ou la tâche (une clôture avancée à la main compte aussi).
  */
 export function moisDeDepot(maintenant: Date, config: ConfigCycle = CONFIG_CYCLE_DEFAUT, fermes: readonly Mois[] = []): Mois {
-  let mois = moisDe(maintenant);
-  for (let i = 0; i < 24; i++) {
-    if (!fermes.includes(mois) && maintenant < datesDuCycle(mois, config).clotureLe) return mois;
-    mois = moisSuivant(mois);
-  }
-  return mois;
+  const cles = clesDeCommande(maintenant, config);
+  return cles.find((c) => !fermes.includes(c) && maintenant < datesDuCycle(c, config).clotureLe) ?? cles.at(-1)!;
 }
 
 /** « Clôture dans 9 j 4 h » : le temps qui reste, en mots courts (jamais négatif). */
@@ -121,9 +168,9 @@ export function chrono(maintenant: Date, echeance: Date): string {
   return `${min} min`;
 }
 
-/** « Trop tard pour octobre, ta liste part avec la commande de novembre. » */
+/** « Trop tard pour le 15 octobre, ta liste part avec la commande du 1er novembre. » */
 export function messageTropTard(moisFerme: Mois, moisDeLaListe: Mois): string {
-  return `Trop tard pour ${moisEnLettres(moisFerme)}, ta liste part avec la commande ${deMois(moisDeLaListe)}.`;
+  return `Trop tard pour le ${moisEnLettres(moisFerme)}, ta liste part avec la commande ${deMois(moisDeLaListe)}.`;
 }
 
 /** Ce que l'artisan lit avant de déposer (Greg, 22 octobre). */
@@ -334,7 +381,7 @@ export function messageAjout(ajouts: readonly { quantite: number; unite: string;
   return `+${liste}${suite} ${pluriel ? "viennent" : "vient"} d'être ${participe}. L'union fait la force !`;
 }
 
-/** Le suivi façon colis d'un chantier inscrit à la commande du mois (Greg, 22 octobre). */
+/** Le suivi façon colis d'un chantier inscrit à la commande commune (Greg, 22 octobre). */
 export const ETAPES_SUIVI_MOIS = ["Liste déposée", "Commande close", "Prix demandés", "Prix reçus", "Commandé"] as const;
 
 export interface EtatDansLeMois {
@@ -423,7 +470,7 @@ export function mailResultatNegoce(m: { mois: Mois; departement: string; premier
   };
 }
 
-/** Le bon de commande d'un artisan pour la commande du mois : c'est ici que le négoce voit son nom. */
+/** Le bon de commande d'un artisan pour la commande commune : c'est ici que le négoce voit son nom. */
 export function bonDuMois(b: {
   numero: number;
   mois: Mois;

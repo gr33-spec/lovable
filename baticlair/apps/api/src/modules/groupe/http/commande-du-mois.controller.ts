@@ -17,10 +17,12 @@ import { CommandeDuMoisService } from "../application/commande-du-mois.service.j
 const depotBody = z.object({
   articles: z.array(z.string().min(1).max(300)).min(1).max(500),
   nature: z.enum(["chantier", "stock"]),
+  /** La commande que l'écran montrait (« 2026-10-15 ») : close entre-temps, la réponse dit « Trop tard pour le 15 octobre… ». */
+  mois: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
 });
 const commanderBody = z.object({ negoceId: z.uuid() });
 const grilleBody = z.object({ depart: z.string().max(300).optional(), francoKm: z.string().max(10).optional(), prixAuDela: z.string().max(20).optional() });
-const configBody = z.object({ jourCloture: z.number().int(), heureCloture: z.number().int(), joursReponse: z.number().int(), heureReponse: z.number().int(), jourClotureDecembre: z.number().int().optional() });
+const configBody = z.object({ jourCloture1: z.number().int(), jourCloture2: z.number().int(), heureCloture: z.number().int(), joursOuvresReponse: z.number().int(), heureReponse: z.number().int() });
 const datesBody = z.object({ clotureLe: z.iso.datetime().optional(), reponseAvant: z.iso.datetime().optional() });
 
 /** L'instant de la requête ; `?maintenant=` seulement en test, pour rejouer une clôture ou une limite. */

@@ -28,9 +28,9 @@ beforeEach(async () => {
   ctx.emails.sent.length = 0;
 });
 
-// Le 16 octobre 2026 à 9 h (Paris) : inscriptions ouvertes, clôture le 25 à 12 h ; la limite des négoces le 8 novembre.
-const T0 = "2026-10-16T07:00:00.000Z";
-const APRES_CLOTURE = "2026-10-25T11:00:00.000Z";
+// Le 10 octobre 2026 à 9 h (Paris) : inscriptions ouvertes, clôture le 15 à 12 h ; la limite des négoces le 22 octobre.
+const T0 = "2026-10-10T07:00:00.000Z";
+const APRES_CLOTURE = "2026-10-15T10:00:00.000Z";
 const SIRET = "73282932000074";
 
 async function couvreur(email: string, nom: string, adresse: string | null = "3 rue des Ajoncs, 22300 Lannion") {
@@ -47,7 +47,7 @@ describe("mets ton négoce dans la boucle", { timeout: 60_000 }, () => {
   it("un e-mail, un bouton : le négoce entre dans la base couverture du département et dans ma liste, la réponse dit la commande qu'il recevra", async () => {
     const { agent } = await couvreur("a@example.fr", "Toitures A");
     const r = await boucle(agent, { email: "Agence.Lannion@Negoce-Ardoises.fr" }).expect(200);
-    expect(r.body).toMatchObject({ negoce: { nom: "negoce-ardoises.fr", email: "agence.lannion@negoce-ardoises.fr", departement: "22" }, dejaLa: false, mois: { mois: "2026-10", de: "d'octobre" } });
+    expect(r.body).toMatchObject({ negoce: { nom: "negoce-ardoises.fr", email: "agence.lannion@negoce-ardoises.fr", departement: "22" }, dejaLa: false, mois: { mois: "2026-10-15", de: "du 15 octobre" } });
     const liste = (await agent.get("/v1/groupe/negoces").expect(200)).body.negoces;
     expect(liste).toHaveLength(1);
     expect(liste[0]).toMatchObject({ email: "agence.lannion@negoce-ardoises.fr", familles: ["couverture"], favori: true });
@@ -97,22 +97,22 @@ describe("mets ton négoce dans la boucle", { timeout: 60_000 }, () => {
     const articles = ((await agent.get(`/v1/projects/${q.projetId}/takeoff`).expect(200)).body.takeoff.purchase.toBuy as { key: string }[]).map((b) => b.key);
     await agent.post(`/v1/projects/${q.projetId}/commande-du-mois?maintenant=${T0}`).send({ articles, nature: "chantier" }).expect(201);
     // Avant la clôture : « avant ».
-    await boucle(agent, { email: "avant@example.com" }, "2026-10-20T09:00:00.000Z").expect(200);
+    await boucle(agent, { email: "avant@example.com" }, "2026-10-12T09:00:00.000Z").expect(200);
     // La clôture : la grille part au seul négoce connu.
     expect((await tache(APRES_CLOTURE)).body).toMatchObject({ clos: 1, grillesEnvoyees: 1 });
     expect(mailsVers("avant@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(1);
-    // Après la clôture, pendant les deux semaines des négoces : « après » est ajouté ; la réponse annonce novembre.
-    const r = await boucle(agent, { email: "apres@example.com" }, "2026-10-28T09:00:00.000Z").expect(200);
-    expect(r.body.mois).toMatchObject({ mois: "2026-11", de: "de novembre" });
-    expect((await tache("2026-10-28T10:00:00.000Z")).body).toMatchObject({ grillesEnvoyees: 0 });
+    // Après la clôture, pendant les jours des négoces : « après » est ajouté ; la réponse annonce le 1er novembre.
+    const r = await boucle(agent, { email: "apres@example.com" }, "2026-10-18T09:00:00.000Z").expect(200);
+    expect(r.body.mois).toMatchObject({ mois: "2026-11-01", de: "du 1er novembre" });
+    expect((await tache("2026-10-18T10:00:00.000Z")).body).toMatchObject({ grillesEnvoyees: 0 });
     expect(mailsVers("apres@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(0);
     expect(await ctx.prisma.grilleNegoce.count()).toBe(1);
-    // La commande de novembre, elle, part aux deux.
+    // La commande du 1er novembre, elle, part aux deux.
     const q2 = (await agent.post("/v1/quantitatifs").send({ lignes: [{ libelle: "Liteau sapin traité 27×38", quantite: "400", unite: "m" }] }).expect(201)).body as { projetId: string };
     await agent.patch(`/v1/projects/${q2.projetId}`).send({ address: "3 rue des Ajoncs, 22300 Lannion" }).expect(200);
     const articles2 = ((await agent.get(`/v1/projects/${q2.projetId}/takeoff`).expect(200)).body.takeoff.purchase.toBuy as { key: string }[]).map((b) => b.key);
-    await agent.post(`/v1/projects/${q2.projetId}/commande-du-mois?maintenant=2026-10-28T11:00:00.000Z`).send({ articles: articles2, nature: "chantier" }).expect(201);
-    const novembre = (await tache("2026-11-25T11:30:00.000Z")).body;
+    await agent.post(`/v1/projects/${q2.projetId}/commande-du-mois?maintenant=2026-10-18T11:00:00.000Z`).send({ articles: articles2, nature: "chantier" }).expect(201);
+    const novembre = (await tache("2026-11-01T11:30:00.000Z")).body;
     expect(novembre.clos).toBe(1);
     expect(mailsVers("apres@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(1);
     expect(mailsVers("avant@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(2);

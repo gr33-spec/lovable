@@ -47,7 +47,7 @@ export function DemoGuidee() {
   }
 
   if (!visible) return null;
-  const titres = ["Ta liste, remise au propre", "La commande du mois, tous ensemble", "Ton prix, livré chez toi"];
+  const titres = ["Ta liste, remise au propre", "La commande commune, tous ensemble", "Ton prix, livré chez toi"];
   return (
     <section data-demo aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-xl border border-line bg-surface p-4 text-ink sm:min-h-0 sm:p-6">
       <div className="flex items-start justify-between gap-3">
