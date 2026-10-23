@@ -11,6 +11,7 @@ import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { NOM, nom, noms } from "@/lib/nom";
 import { InviterCollegue } from "@/components/inviter";
+import { BoucleNegoce } from "@/components/boucle-negoce";
 import { BlocDuMois, CommandeDuMoisPanneau, EtapesDuMois, useProchaineCommande } from "@/components/commande-du-mois";
 
 interface EtatGroupe {
@@ -142,7 +143,10 @@ export default function GroupePage() {
       {/* En mode mois, le partage vit dans la carte de la commande (sous les quantités) ; sans elle (pas encore ouvert à
           l'entreprise), il reste ici (revue à froid, 23 octobre). */}
       {mois && (etat.data.eligible || etat.data.raisons.includes("exclu_du_groupe")) ? null : (
-        <InviterCollegue texte={mois ? "Plus on est nombreux dans la commande, plus les prix baissent." : "Plus on est nombreux sur la même ligne, plus les négoces baissent leurs prix."} />
+        <>
+          <InviterCollegue texte={mois ? "Plus on est nombreux dans la commande, plus les prix baissent." : "Plus on est nombreux sur la même ligne, plus les négoces baissent leurs prix."} />
+          {mois ? <BoucleNegoce /> : null}
+        </>
       )}
 
       {tout ? null : (

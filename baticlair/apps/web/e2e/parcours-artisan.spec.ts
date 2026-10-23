@@ -2356,6 +2356,44 @@ test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap
   await expect(page.getByRole("dialog", { name: "Aide : Ton chantier" })).toBeVisible();
 });
 
+test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton, « Ton négoce X est dans la boucle », et de quoi le prévenir", async ({ page }) => {
+  const projet = test.info().project.name;
+  const email = `agence-${projet}-${unique()}@negoce-du-ponant.fr`;
+  await compteAuGroupe(page, "Toitures Martin", "3 rue des Ajoncs, 22300 Lannion");
+  await page.goto("/");
+  // Sur l'accueil, sous le bloc du mois : le texte de Greg, un champ e-mail, un seul bouton.
+  const bloc = page.getByRole("region", { name: "Mets ton négoce dans la boucle" });
+  await expect(bloc.getByText("Ton négoce habituel n'est pas encore dans la commande ? Ajoute-le : il recevra tout le volume du mois et pourra faire son prix.")).toBeVisible();
+  await expect(bloc.getByRole("button")).toHaveText(["Ajouter mon négoce"]);
+  await bloc.getByLabel("E-mail de ton négoce").fill(email);
+  await bloc.getByRole("button", { name: "Ajouter mon négoce" }).click();
+  // Ajouté : « Ton négoce X est dans la boucle », la commande qu'il recevra, et le message vouvoyé à lui envoyer.
+  const ligne = bloc.getByRole("list", { name: "Négoces dans la boucle" }).getByRole("listitem");
+  await expect(ligne).toHaveCount(1);
+  await expect(ligne).toContainText("Ton négoce negoce-du-ponant.fr est dans la boucle : il recevra la commande d");
+  const prevenir = bloc.getByRole("group", { name: "Prévenir negoce-du-ponant.fr" });
+  const message = `Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres couvreurs. Vous pouvez chiffrer tout le volume du mois ici : ${new URL(page.url()).origin}/`;
+  await expect(prevenir.getByText(message, { exact: true })).toBeVisible();
+  await expect(prevenir.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", `https://wa.me/?text=${encodeURIComponent(message)}`);
+  await expect(prevenir.getByRole("link", { name: "Envoyer par SMS" })).toHaveAttribute("href", `sms:?&body=${encodeURIComponent(message)}`);
+  await expect(prevenir.getByRole("button", { name: "Copier le message" })).toBeVisible();
+  // Rappuyer avec le même e-mail (autre casse) : toujours un seul négoce.
+  await bloc.getByRole("button", { name: "Ajouter un autre négoce" }).click();
+  await bloc.getByLabel("E-mail de ton négoce").fill(email.toUpperCase());
+  await bloc.getByRole("button", { name: "Ajouter mon négoce" }).click();
+  await expect(bloc.getByRole("list", { name: "Négoces dans la boucle" }).getByRole("listitem")).toHaveCount(1);
+  // Il est dans « Mes négoces » (couverture, favori) et le bloc de l'onglet Commande commune le dit aussi.
+  const negoces = (await apiJson<{ negoces: { email: string; familles: string[]; favori: boolean }[] }>(page, "GET", "/v1/groupe/negoces")).body.negoces;
+  expect(negoces).toEqual([expect.objectContaining({ email: email.toLowerCase(), familles: ["couverture"], favori: true })]);
+  await page.goto("/groupe");
+  const blocOnglet = page.getByRole("region", { name: "Mets ton négoce dans la boucle" });
+  await expect(blocOnglet.getByRole("list", { name: "Négoces dans la boucle" }).getByRole("listitem")).toContainText("Ton négoce negoce-du-ponant.fr est dans la boucle");
+  // Dans l'onglet, le nom se cherche aussi dans Sirene ; l'accueil n'a que l'e-mail.
+  await blocOnglet.getByRole("button", { name: "Ajouter un autre négoce" }).click();
+  await expect(blocOnglet.getByLabel("Nom du négoce (facultatif)")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
 test("La page d'accueil publique : un visiteur la voit à la racine, un artisan connecté garde l'app", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);

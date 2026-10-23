@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { FAMILLES_GROUPE } from "@baticlair/domain";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import { ZodPipe } from "../../../platform/http/zod.js";
 import { CONFIG } from "../../../platform/tokens.js";
 import { Public } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import { CommandeDuMoisService } from "../application/commande-du-mois.service.js";
 import { NegocesService } from "../application/negoces.service.js";
 
 const famille = z.enum(FAMILLES_GROUPE);
@@ -19,7 +20,20 @@ const ajoutBody = z.object({
   familles: z.array(famille).min(1).max(FAMILLES_GROUPE.length),
   favori: z.boolean().optional(),
   numeroCompte: z.string().trim().max(60).nullish(),
+  siret: z.string().trim().regex(/^\d{14}$/).nullish(),
 });
+/** « Mets ton négoce dans la boucle » : l'e-mail suffit ; nom, SIRET (choisi dans Sirene) et département sont facultatifs. */
+const boucleBody = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email()),
+  nom: z.string().trim().max(120).nullish(),
+  siret: z.string().trim().regex(/^\d{14}$/).nullish(),
+  departement: z.string().trim().regex(/^(\d{2}|2A|2B|97\d|98\d)$/).nullish(),
+});
+
+/** L'instant de la requête ; `?maintenant=` seulement en test, pour ajouter un négoce avant ou après une clôture rejouée. */
+function instant(config: AppConfig, demande?: string): Date {
+  return config.env === "test" && demande && !Number.isNaN(Date.parse(demande)) ? new Date(demande) : new Date();
+}
 const modifBody = z.object({ familles: z.array(famille).max(FAMILLES_GROUPE.length).optional(), numeroCompte: z.string().trim().max(60).nullish(), favori: z.boolean().optional() }).strict();
 const lienBody = z.object({ jeton: z.string().min(10).max(1000) });
 
@@ -28,6 +42,7 @@ const lienBody = z.object({ jeton: z.string().min(10).max(1000) });
 export class NegocesController {
   constructor(
     @Inject(NegocesService) private readonly negoces: NegocesService,
+    @Inject(CommandeDuMoisService) private readonly commande: CommandeDuMoisService,
     @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
@@ -53,9 +68,25 @@ export class NegocesController {
   @Post("groupe/negoces")
   @UseGuards(TenantGuard)
   @HttpCode(201)
-  async ajouter(@Tenant() tenant: TenantContext, @Body(new ZodPipe(ajoutBody)) body: z.infer<typeof ajoutBody>) {
+  async ajouter(@Tenant() tenant: TenantContext, @Body(new ZodPipe(ajoutBody)) body: z.infer<typeof ajoutBody>, @Query("maintenant") m?: string) {
     this.actif();
-    return { negoces: await this.negoces.ajouter(tenant, { ...body, email: body.email ?? "" }) };
+    return { negoces: await this.negoces.ajouter(tenant, { ...body, email: body.email ?? "" }, instant(this.config, m)) };
+  }
+
+  /**
+   * « METS TON NÉGOCE DANS LA BOUCLE » (Greg, 23 octobre 2026) : un e-mail, un bouton. Le négoce rejoint la base couverture
+   * du département (dédoublonné par SIRET ou e-mail) et ma liste ; la réponse dit la commande qu'il recevra : celle du mois
+   * en cours s'il est ajouté avant la clôture, sinon la suivante (c'est toujours la prochaine clôture affichée).
+   */
+  @Post("groupe/negoces/boucle")
+  @UseGuards(TenantGuard)
+  @HttpCode(200)
+  async boucle(@Tenant() tenant: TenantContext, @Body(new ZodPipe(boucleBody)) body: z.infer<typeof boucleBody>, @Query("maintenant") m?: string) {
+    this.actif();
+    const maintenant = instant(this.config, m);
+    const r = await this.negoces.mettreDansLaBoucle(tenant, { ...body, email: body.email ?? "" }, maintenant);
+    const prochaine = await this.commande.prochaineCommande(tenant, maintenant).catch(() => null);
+    return { ...r, mois: prochaine ? { mois: prochaine.mois, de: prochaine.de, clotureLe: prochaine.clotureLe } : null };
   }
 
   @Patch("groupe/negoces/:negoceId")

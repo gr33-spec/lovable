@@ -991,6 +991,8 @@ model Negoce {
   stopLe      DateTime?
   /// L'entreprise qui l'a ajouté à la base.
   ajouteParId String?   @db.Uuid
+  /// « Mets ton négoce dans la boucle » (Greg, 23 octobre 2026) : le SIRET quand l'artisan l'a choisi dans Sirene ; dédoublonnage.
+  siret       String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -1006,6 +1008,7 @@ model Negoce {
 
   @@unique([email, departement])
   @@index([departement])
+  @@index([siret])
   @@map("negoce")
 }
 

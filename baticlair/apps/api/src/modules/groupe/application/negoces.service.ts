@@ -30,6 +30,16 @@ export interface NegoceSaisi {
   familles: readonly FamilleGroupe[];
   favori?: boolean;
   numeroCompte?: string | null;
+  /** Le SIRET choisi dans Sirene (« Mets ton négoce dans la boucle ») : dédoublonnage par SIRET avant l'e-mail. */
+  siret?: string | null;
+}
+
+/** Ce que l'artisan saisit dans « Mets ton négoce dans la boucle » : l'e-mail suffit ; le nom et le SIRET viennent de Sirene. */
+export interface NegoceEnBoucle {
+  email: string;
+  nom?: string | null;
+  siret?: string | null;
+  departement?: string | null;
 }
 
 const familles = (f: readonly string[]) => FAMILLES_GROUPE.filter((x) => f.includes(x));
@@ -69,21 +79,28 @@ export class NegocesService {
     return { message: messageAuNegoce({ entreprise: c.name, prenom: u?.name?.split(/\s+/)[0] ?? null }) };
   }
 
-  async ajouter(tenant: TenantContext, n: NegoceSaisi): Promise<NegoceVue[]> {
+  /**
+   * `maintenant` : l'instant de l'ajout (en test, rejoué), gardé en `createdAt` : un négoce ajouté avant la clôture de la
+   * commande du mois reçoit sa grille, un négoce ajouté après attend la commande suivante (Greg, 23 octobre 2026).
+   */
+  async ajouter(tenant: TenantContext, n: NegoceSaisi, maintenant = new Date()): Promise<NegoceVue[]> {
     assertCanWrite(tenant);
     if (n.familles.length === 0) throw validationFailed("At least one family", { reason: "familles_requises" });
     const departement = n.departement?.trim() || (await this.departementDeLEntreprise(tenant));
     if (!departement) throw validationFailed("Department required", { reason: "departement_requis" });
     const email = n.email.trim().toLowerCase();
+    const siret = n.siret?.replace(/\s+/g, "") || null;
     let nouveau: { id: string; nom: string; familles: string[] } | null = null;
     await this.prisma.$transaction(async (tx) => {
-      const existant = await tx.negoce.findUnique({ where: { email_departement: { email, departement } } });
+      // Dédoublonnage par SIRET (le même comptoir choisi dans Sirene, même avec un autre e-mail), puis par e-mail.
+      const parSiret = siret ? await tx.negoce.findFirst({ where: { siret, departement }, orderBy: { createdAt: "asc" } }) : null;
+      const existant = parSiret ?? (await tx.negoce.findUnique({ where: { email_departement: { email, departement } } }));
       // Bloc 5 (21 octobre) : le même e-mail dans un autre département, c'est une autre agence du même négoce : une ligne
       // par département, qui garde le « stop » déjà demandé par cet e-mail.
       const autreAgence = existant ? null : await tx.negoce.findFirst({ where: { email, stopLe: { not: null } }, select: { stopLe: true } });
       const negoce = existant
-        ? await tx.negoce.update({ where: { id: existant.id }, data: { familles: familles([...existant.familles, ...n.familles]) } })
-        : await tx.negoce.create({ data: { nom: n.nom.trim(), email, departement, familles: familles(n.familles), ajouteParId: tenant.companyId, stopLe: autreAgence?.stopLe ?? null } });
+        ? await tx.negoce.update({ where: { id: existant.id }, data: { familles: familles([...existant.familles, ...n.familles]), ...(siret && !existant.siret ? { siret } : {}) } })
+        : await tx.negoce.create({ data: { nom: n.nom.trim(), email, departement, siret, familles: familles(n.familles), ajouteParId: tenant.companyId, stopLe: autreAgence?.stopLe ?? null, createdAt: maintenant } });
       if (!existant && !autreAgence) nouveau = { id: negoce.id, nom: negoce.nom, familles: negoce.familles };
       const liens = await tx.negoceArtisan.findMany({ where: { companyId: tenant.companyId }, orderBy: { rang: "asc" } });
       if (liens.some((l) => l.negoceId === negoce.id)) throw new DomainError("conflict", "Already in your list", { reason: "deja_ajoute" });
@@ -93,6 +110,35 @@ export class NegocesService {
     });
     if (nouveau) await this.prevenirDuRegroupement(tenant, nouveau, email, departement);
     return this.mesNegoces(tenant);
+  }
+
+  /**
+   * « METS TON NÉGOCE DANS LA BOUCLE » (Greg, 23 octobre 2026) : un champ e-mail, un bouton. Le négoce entre dans la base
+   * couverture du département (ou y est retrouvé par SIRET ou par e-mail, jamais en double) et dans ma liste ; déjà dans
+   * ma liste, rien ne change et la réponse le dit quand même. Le nom vient de Sirene (par le SIRET), sinon de la saisie,
+   * sinon de l'e-mail.
+   */
+  async mettreDansLaBoucle(tenant: TenantContext, b: NegoceEnBoucle, maintenant = new Date()): Promise<{ negoce: Pick<NegoceVue, "id" | "nom" | "email" | "departement">; dejaLa: boolean }> {
+    const email = b.email.trim().toLowerCase();
+    const siret = b.siret?.replace(/\s+/g, "") || null;
+    const sirene = siret ? await this.prisma.negoceSirene.findUnique({ where: { siret } }) : null;
+    const nom = b.nom?.trim() || sirene?.nom || nomDepuisLEmail(email);
+    let dejaLa = false;
+    try {
+      await this.ajouter(tenant, { nom, email, siret, departement: b.departement ?? sirene?.departement ?? null, familles: ["couverture"] }, maintenant);
+    } catch (e) {
+      if (!(e instanceof DomainError && (e.details as { reason?: string } | undefined)?.reason === "deja_ajoute")) throw e;
+      dejaLa = true;
+    }
+    const negoce = (await this.negoceParSiret(tenant, siret)) ?? (await this.mesNegoces(tenant)).find((n) => n.email === email) ?? null;
+    if (!negoce) throw notFound("Negoce");
+    return { negoce: { id: negoce.id, nom: negoce.nom, email: negoce.email, departement: negoce.departement }, dejaLa };
+  }
+
+  private async negoceParSiret(tenant: TenantContext, siret: string | null): Promise<NegoceVue | null> {
+    if (!siret) return null;
+    const ids = new Set((await this.prisma.negoce.findMany({ where: { siret }, select: { id: true } })).map((n) => n.id));
+    return (await this.mesNegoces(tenant)).find((n) => ids.has(n.id)) ?? null;
   }
 
   /** Le négoce entre dans la base : un mail lui dit qu'un regroupement existe (un échec n'empêche pas l'ajout). */
@@ -172,6 +218,12 @@ export class NegocesService {
     const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { address: true } });
     return zoneDuCodePostal(c.address);
   }
+}
+
+/** « ardoises@pointp.fr » → « pointp.fr » : un nom lisible quand l'artisan n'en a pas donné. */
+function nomDepuisLEmail(email: string): string {
+  const domaine = email.split("@")[1] ?? email;
+  return /^(gmail|hotmail|outlook|orange|free|wanadoo|sfr|laposte|yahoo|live|icloud)\./i.test(domaine) ? email : domaine;
 }
 
 function vue(n: { id: string; nom: string; email: string; departement: string; familles: string[]; stopLe: Date | null }, favori: boolean, numeroCompte: string | null, departements: string[]): NegoceVue {

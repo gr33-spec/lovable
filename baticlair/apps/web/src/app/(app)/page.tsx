@@ -13,6 +13,7 @@ import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { InviterCollegue } from "@/components/inviter";
 import { BlocDuMois, useProchaineCommande } from "@/components/commande-du-mois";
+import { BoucleNegoce } from "@/components/boucle-negoce";
 
 export default function AccueilPage() {
   const router = useRouter();
@@ -59,8 +60,9 @@ export default function AccueilPage() {
           Donner ma liste
         </ButtonLink>
         {/* Landing du 22 octobre : « Inviter un collègue » aussi dans l'app, juste après l'inscription. */}
-        <div className="w-full max-w-xl text-left">
+        <div className="flex w-full max-w-xl flex-col gap-4 text-left">
           <InviterCollegue texte="Plus on est nombreux dans le secteur, plus on pèse face aux négoces." />
+          {moisActif ? <BoucleNegoce compact /> : null}
         </div>
       </div>
     );
@@ -90,6 +92,8 @@ export default function AccueilPage() {
 
       {/* Le squelette seulement pendant le chargement ; ensuite le bloc, avec les dates de l'API ou la règle par défaut. */}
       {mois.prochaine ? <BlocDuMois prochaine={mois.prochaine} /> : mois.loading && moisActif ? <Skeleton card="h-64" label="Chargement de la commande du mois…" /> : null}
+      {/* Greg (23 octobre) : « Mets ton négoce dans la boucle », sous le bloc du mois. */}
+      {moisActif ? <BoucleNegoce compact /> : null}
 
       {/* « À faire » : une liste blanche, chaque ligne est un lien (plus de bouton plein en concurrence avec celui du mois). */}
       <section aria-labelledby="todo-title" className="flex flex-col gap-3">

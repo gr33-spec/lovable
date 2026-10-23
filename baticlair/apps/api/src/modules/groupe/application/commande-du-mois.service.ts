@@ -520,7 +520,7 @@ export class CommandeDuMoisService {
   }
 
   /** À la clôture : tout est figé, les listes fusionnées en UNE grille, envoyée à chaque négoce du métier et du département. */
-  private async clore(c: { id: string; mois: string; famille: string; zone: string; reponseAvant: Date }, maintenant: Date): Promise<number> {
+  private async clore(c: { id: string; mois: string; famille: string; zone: string; clotureLe: Date; reponseAvant: Date }, maintenant: Date): Promise<number> {
     // Verrou sur la commande : un dépôt en cours (même verrou) finit avant que la grille ne soit figée, ou voit la clôture.
     const lignes = await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM cycle_commande WHERE id = ${c.id}::uuid FOR UPDATE`;
@@ -535,11 +535,13 @@ export class CommandeDuMoisService {
 
   /**
    * La grille à chaque négoce du métier et du département qui ne l'a pas encore : rejouée à chaque passage tant que la
-   * limite n'est pas atteinte (un e-mail refusé par le prestataire repart ; un négoce ajouté entre-temps la reçoit).
+   * limite n'est pas atteinte (un e-mail refusé par le prestataire repart). Greg, 23 octobre 2026 (« Mets ton négoce dans
+   * la boucle ») : seuls les négoces ajoutés AVANT la clôture reçoivent cette grille ; un négoce ajouté après attend la
+   * commande suivante (règle changée : avant, un négoce ajouté pendant les deux semaines la recevait aussi).
    */
-  private async envoyerLesGrilles(c: { id: string; mois: string; famille: string; zone: string; reponseAvant: Date; lignes: unknown }, maintenant: Date): Promise<number> {
+  private async envoyerLesGrilles(c: { id: string; mois: string; famille: string; zone: string; clotureLe: Date; reponseAvant: Date; lignes: unknown }, maintenant: Date): Promise<number> {
     const lignes = c.lignes as LigneDeGrille[];
-    const negoces = await this.prisma.negoce.findMany({ where: { departement: c.zone, stopLe: null, familles: { has: c.famille } }, orderBy: { createdAt: "asc" }, take: NEGOCES_PAR_GRILLE });
+    const negoces = await this.prisma.negoce.findMany({ where: { departement: c.zone, stopLe: null, familles: { has: c.famille }, createdAt: { lt: c.clotureLe } }, orderBy: { createdAt: "asc" }, take: NEGOCES_PAR_GRILLE });
     let envoyees = 0;
     for (const n of negoces) {
       const deja = await this.prisma.grilleNegoce.findUnique({ where: { cycleId_negoceId: { cycleId: c.id, negoceId: n.id } } });

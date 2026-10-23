@@ -81,7 +81,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     ]);
     // Les négoces couverture du 22, ajoutés par les artisans.
     for (const [nom, email] of [["Négoce N1", "n1@example.com"], ["Négoce N2", "n2@example.com"], ["Négoce N3", "n3@example.com"]] as const) {
-      await A.agent.post("/v1/groupe/negoces").send({ nom, email, familles: ["couverture"] }).expect(201);
+      await A.agent.post(`/v1/groupe/negoces?maintenant=${T0}`).send({ nom, email, familles: ["couverture"] }).expect(201);
     }
 
     // A dépose : il est le premier, la commande d'octobre ; en quantités, jamais en nombre d'entreprises.
@@ -235,7 +235,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     async function commandeClose(echecs = 0) {
       const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2000", unite: "pièces" }]);
       for (const [nom, email] of [["Négoce N1", "n1@example.com"], ["Négoce N2", "n2@example.com"]] as const) {
-        await A.agent.post("/v1/groupe/negoces").send({ nom, email, familles: ["couverture"] }).expect(201);
+        await A.agent.post(`/v1/groupe/negoces?maintenant=${T0}`).send({ nom, email, familles: ["couverture"] }).expect(201);
       }
       await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
       ctx.emails.failNext = echecs;

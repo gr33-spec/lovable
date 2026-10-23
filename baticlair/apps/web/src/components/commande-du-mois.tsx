@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "@/lib/session";
 import { chrono, jourMois, prochaineClotureParDefaut } from "@/lib/cycle";
 import { InviterCollegue } from "@/components/inviter";
+import { BoucleNegoce } from "@/components/boucle-negoce";
 import type { Groupe } from "@/components/groupe";
 import { Button, ButtonLink, Chrono, ErrorNotice, Field, SectionTitle } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
@@ -376,6 +377,7 @@ export function CommandeDuMoisPanneau({ etat, onChange }: { etat: EtatDuMois; on
           <GrosChrono clotureDans={etat.prochaine.clotureDans} />
           <p className="text-[16px] font-semibold">{etat.prochaine.vide ? "Pour l'instant, la commande est vide. Dépose ta liste pour la lancer." : etat.prochaine.tout}</p>
           <InviterCollegue texte="Plus on est nombreux dans la commande, plus les prix baissent." />
+          <BoucleNegoce />
         </section>
       ) : null}
       {commandes.map((c) => (
@@ -416,7 +418,12 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
         <p className="py-3 text-[16px] font-semibold">{c.tout}</p>
       </div>
       {c.premier ? <p className="rounded-xl bg-ground p-3 text-[14px]">{c.premier}</p> : null}
-      {c.phase === "inscriptions" ? <InviterCollegue texte="Plus on est nombreux dans la commande, plus les prix baissent." /> : null}
+      {c.phase === "inscriptions" ? (
+        <>
+          <InviterCollegue texte="Plus on est nombreux dans la commande, plus les prix baissent." />
+          <BoucleNegoce />
+        </>
+      ) : null}
 
       {c.mesLignes.length > 0 ? (
         <section aria-label="Mes lignes" className="flex flex-col gap-1.5">

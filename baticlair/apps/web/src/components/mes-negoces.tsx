@@ -168,7 +168,7 @@ export function MesNegocesCard() {
   );
 }
 
-interface SuggestionNegoce {
+export interface SuggestionNegoce {
   siret: string;
   nom: string;
   adresse: string;
@@ -185,7 +185,7 @@ const jourFr = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString(
  * Bloc 3 du plan du 20 octobre : dès trois lettres, la base Sirene (négoces de matériaux des départements ouverts)
  * suggère le nom ; un tap le reprend, avec le département. L'e-mail reste à saisir : Sirene n'en a pas.
  */
-function useSuggestions(nom: string, actives: boolean): SuggestionNegoce[] {
+export function useSuggestions(nom: string, actives: boolean): SuggestionNegoce[] {
   const [resultat, setResultat] = useState<{ q: string; liste: SuggestionNegoce[] }>({ q: "", liste: [] });
   const q = actives ? nom.trim() : "";
   useEffect(() => {
