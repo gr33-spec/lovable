@@ -51,9 +51,14 @@ jobs:
       - run: pnpm turbo run lint typecheck test build
 
   e2e:
-    name: Parcours de bout en bout (téléphone + ordinateur)
+    name: Parcours de bout en bout (téléphone + ordinateur, passe ${{ matrix.passe }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Les deux passes (mois, puis lots) frôlaient 20 minutes depuis la passe UI/UX ; la passe lots a son propre travail.
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        passe: [mois, lots]
     services:
       postgres:
         image: postgres:16
@@ -82,9 +87,11 @@ jobs:
       - run: pnpm --filter @baticlair/web exec playwright install --with-deps chromium
       # L'API tourne depuis ses sources (tsx) : ses paquets internes doivent être compilés.
       - run: pnpm turbo run build --filter=@baticlair/web --filter='@baticlair/api^...'
-      - run: pnpm --filter @baticlair/web e2e
+      - if: matrix.passe == 'mois'
+        run: pnpm --filter @baticlair/web e2e
       # Commande commune du mois (Greg, 22 octobre 2026) : l'ancien regroupement par lot (`COMMANDE_COMMUNE=lots`) garde
       # ses parcours, dans une passe à lui ; la passe par défaut les saute en le disant.
-      - run: pnpm --filter @baticlair/web e2e --grep @lots
+      - if: matrix.passe == 'lots'
+        run: pnpm --filter @baticlair/web e2e --grep @lots
         env:
           E2E_COMMANDE_COMMUNE: lots
