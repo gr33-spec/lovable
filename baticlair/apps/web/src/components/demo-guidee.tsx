@@ -49,15 +49,15 @@ export function DemoGuidee() {
   if (!visible) return null;
   const titres = ["Ta liste, remise au propre", "La commande du mois, tous ensemble", "Ton prix, livré chez toi"];
   return (
-    <section data-demo aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-2xl sm:min-h-0 border border-[#e3e6ea] bg-surface p-4 text-ink sm:p-6">
+    <section data-demo aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-xl border border-line bg-surface p-4 text-ink sm:min-h-0 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <span className="text-[12px] font-bold tracking-[0.04em] text-muted">Démo · écran {ecran + 1} sur 3 · données fictives</span>
-          <h2 id="demo-titre" className="font-display text-[26px] leading-tight font-extrabold tracking-[-0.02em]">
+          <h2 id="demo-titre" className="text-[26px] leading-tight font-extrabold tracking-[-0.03em]">
             {titres[ecran]}
           </h2>
         </div>
-        <button type="button" onClick={fermer} className="inline-flex min-h-11 shrink-0 items-center rounded-xl border border-[#d9dde3] px-4 text-[15px] font-bold">
+        <button type="button" onClick={fermer} className="pressable inline-flex min-h-11 shrink-0 items-center rounded-full border border-line px-4 text-[15px] font-semibold">
           Passer
         </button>
       </div>
@@ -67,15 +67,15 @@ export function DemoGuidee() {
       <div className="mt-auto flex items-center justify-between gap-3 pt-2">
         <ol aria-label="Écrans de la démo" className="flex gap-1.5">
           {[0, 1, 2].map((i) => (
-            <li key={i} aria-current={i === ecran ? "step" : undefined} className={`size-2.5 rounded-full ${i === ecran ? "bg-ink" : "bg-[#d9dde3]"}`} />
+            <li key={i} aria-current={i === ecran ? "step" : undefined} className={`size-2.5 rounded-full ${i === ecran ? "bg-ink" : "bg-line"}`} />
           ))}
         </ol>
         {ecran < 2 ? (
-          <button type="button" onClick={() => setEcran((ecran + 1) as Ecran)} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-5 text-[15px] font-bold text-white transition hover:bg-accent-text">
+          <button type="button" onClick={() => setEcran((ecran + 1) as Ecran)} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-white hover:bg-accent-text">
             Suivant
           </button>
         ) : (
-          <Link href="/inscription" onClick={fermer} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-5 text-[15px] font-bold text-white transition hover:bg-accent-text">
+          <Link href="/inscription" onClick={fermer} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-white hover:bg-accent-text">
             Je rejoins le mouvement
           </Link>
         )}
@@ -85,7 +85,7 @@ export function DemoGuidee() {
 }
 
 function Exemple() {
-  return <span className="rounded-full border border-[#d9dde3] px-2 py-0.5 text-[11px] font-bold text-muted">Exemple</span>;
+  return <span className="rounded-full border border-line px-2 py-0.5 text-[11px] font-bold text-muted">Exemple</span>;
 }
 
 /** Écran 1 : la liste donnée en photo et ce qui en sort, dans les mots du comptoir. */

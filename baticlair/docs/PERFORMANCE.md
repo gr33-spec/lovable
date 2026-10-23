@@ -113,3 +113,16 @@ Lighthouse 12.8.2, mobile, slow 4G simulé, site construit (Next.js 16.4.2), API
 | `/` (landing) | 96 | 100 | 96 | 2,7 s | 0 |
 | `/connexion` | 99 | 100 | 100 | 1,5 s | 0,06 |
 | `/grille/…` (page du négoce) | 95 | 100 | 96 | 2,7 s | 0 |
+
+## Passe UI/UX (23 octobre 2026)
+
+Lighthouse 12.8.2, site construit (Next.js 16.4.2), API locale, mobile slow 4G simulé sauf mention.
+
+| Page | Performance | Accessibilité | LCP | CLS |
+|---|---|---|---|---|
+| Landing (mobile) | 96 | 100 | 2,7 s | 0 |
+| Landing (ordinateur) | 100 | 100 | 0,6 s | 0 |
+| Connexion | 99 | 100 | 1,7 s | 0 |
+| Inscription | 100 | 100 | 1,7 s | 0 |
+
+Ce qui a bougé : une seule police chargée (Bricolage Grotesque retirée, −41 Ko), captures de la landing régénérées en JPEG 70 (−20 à −40 %), la place du formulaire de connexion réservée pendant l'hydratation (décalage 0,06 → 0).

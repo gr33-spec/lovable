@@ -55,7 +55,8 @@ export default function ConnexionPage() {
   return (
     <>
       <PageTitle>Connexion</PageTitle>
-      <Suspense>
+      {/* Passe UI/UX : la place du formulaire est réservée pendant l'hydratation (décalage 0 au chargement). */}
+      <Suspense fallback={<div className="min-h-[312px]" aria-hidden="true" />}>
         <LoginForm />
       </Suspense>
       <p className="text-center text-[15px]">

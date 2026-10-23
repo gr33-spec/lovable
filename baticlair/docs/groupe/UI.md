@@ -105,6 +105,73 @@ Lighthouse (mobile, slow 4G simulé) visé : performance ≥ 95, accessibilité 
 4. La landing, section par section, puis Lighthouse.
 5. Captures « après », rapport (section 5), liste de ce qui n'a pas été touché.
 
-## 5. Rapport
+## 5. Rapport (23 octobre 2026, fin de passe)
 
-(Rempli à la fin de la passe.)
+Commits sur la PR #284, reportés sur `claude/integration-groupe`. Rien dans `main`. Aucun fichier du domaine, de l'API (hors un `import type` que la CI réclamait) ni des tests métier n'est touché ; aucun texte validé ne change.
+
+### Avant / après, écran par écran
+
+Les captures sont dans `captures/ui-23-10/avant/` et `captures/ui-23-10/apres/`, même parcours, même compte, mêmes données ; `se` = iPhone SE, `15` = iPhone 15, `ordinateur` pour la landing. (`04b` et `06b` sont l'écran tel qu'il se voit sans défiler.)
+
+| Écran | Avant (iPhone 15) | Après (iPhone 15) |
+|---|---|---|
+| Landing | ![](captures/ui-23-10/avant/15/01-landing.png) | ![](captures/ui-23-10/apres/15/01-landing.png) |
+| Inscription | ![](captures/ui-23-10/avant/15/02-inscription.png) | ![](captures/ui-23-10/apres/15/02-inscription.png) |
+| Accueil vide | ![](captures/ui-23-10/avant/15/03-accueil-vide.png) | ![](captures/ui-23-10/apres/15/03-accueil-vide.png) |
+| Accueil | ![](captures/ui-23-10/avant/15/04b-accueil-ecran.png) | ![](captures/ui-23-10/apres/15/04b-accueil-ecran.png) |
+| Nouvelle liste | ![](captures/ui-23-10/avant/15/05-nouvelle-liste.png) | ![](captures/ui-23-10/apres/15/05-nouvelle-liste.png) |
+| Liste en cartes (Ton chantier) | ![](captures/ui-23-10/avant/15/06b-ton-chantier-ecran.png) | ![](captures/ui-23-10/apres/15/06b-ton-chantier-ecran.png) |
+| Suivi façon colis (après clôture) | ![](captures/ui-23-10/avant/15/13-suivi-apres-cloture.png) | ![](captures/ui-23-10/apres/15/13-suivi-apres-cloture.png) |
+| Chantiers | ![](captures/ui-23-10/avant/15/07-chantiers.png) | ![](captures/ui-23-10/apres/15/07-chantiers.png) |
+| Commande commune | ![](captures/ui-23-10/avant/15/08-commande-commune.png) | ![](captures/ui-23-10/apres/15/08-commande-commune.png) |
+| Page négoce | ![](captures/ui-23-10/avant/15/12-page-negoce.png) | ![](captures/ui-23-10/apres/15/12-page-negoce.png) |
+| Menu compte | ![](captures/ui-23-10/avant/15/09-menu.png) | ![](captures/ui-23-10/apres/15/09-menu.png) |
+| Mon compte | ![](captures/ui-23-10/avant/15/10-compte.png) | ![](captures/ui-23-10/apres/15/10-compte.png) |
+| Fournisseurs | ![](captures/ui-23-10/avant/15/11-fournisseurs.png) | ![](captures/ui-23-10/apres/15/11-fournisseurs.png) |
+
+Les mêmes écrans sur iPhone SE : `captures/ui-23-10/avant/se/` et `captures/ui-23-10/apres/se/`.
+
+### La landing, section par section
+
+| Section | Avant | Après |
+|---|---|---|
+| Ordinateur, page entière | ![](captures/ui-23-10/avant/ordinateur/01-landing.png) | ![](captures/ui-23-10/apres/ordinateur/01-landing.png) |
+| iPhone SE, page entière | ![](captures/ui-23-10/avant/se/01-landing.png) | ![](captures/ui-23-10/apres/se/01-landing.png) |
+
+- En-tête : logo en rond noir, « Se connecter » en contour rond.
+- Accroche : 44 px sur téléphone, 64 px sur ordinateur, serrée ; le même bouton rond ; le téléphone de droite est un cadre iPhone (bordure, îlot) avec la liste « Ton chantier » de l'app d'après la passe (`public/landing/capture-liste.jpg`, régénérée).
+- Compteur « Plus on est nombreux » : chiffre 72 à 96 px en accent.
+- Comment ça marche : trois cadres iPhone avec un écran entier chacun (nouvelle liste, ligne à préciser) et le compteur de la commande ; plus de cadre coupé ni vide ; apparition douce au défilement (200 ms, opacité et 12 px, coupée sous « réduire les animations », aucun décalage) ; un bouton « Je rejoins le mouvement » sous les étapes.
+- Ardoise, zinc, liteaux, écran : lignes séparées gris 2 ; l'emplacement photo reste un aplat gris neutre pour la photo de Greg.
+- Les couvreurs de ton secteur : fond gris 1, compteur façon Qonto, emplacement photo neutre.
+- L'union fait la force : une vraie section, noire, pleine largeur, titre 56 px sur ordinateur, WhatsApp en accent, SMS et lien en contour blanc.
+- Rejoins les couvreurs du secteur : titre 56 px, bouton, ligne « Aussi pour… ».
+- Négoces, pied de page : gris 3.
+
+Lighthouse (12.8.2, site construit, API locale) :
+
+| Page | Appareil | Performance | Accessibilité | LCP | Décalage |
+|---|---|---|---|---|---|
+| Landing | mobile (slow 4G simulé) | 96 | 100 | 2,7 s | 0 |
+| Landing | ordinateur | 100 | 100 | 0,6 s | 0 |
+| Connexion | mobile | 99 | 100 | 1,7 s | 0 (la place du formulaire est réservée) |
+| Inscription | mobile | 100 | 100 | 1,7 s | 0 |
+
+Gain principal sur la landing : la deuxième police (Bricolage Grotesque, 41 Ko) n'est plus chargée, les captures sont plus légères (JPEG 70).
+
+### Tests
+
+- Responsive (5 largeurs, écrans du mois, négoce, admin) : verts. e2e passe par défaut et passe `@lots` : lancés sur la version finale (résultat dans le message de fin de passe). Typecheck et lint verts (web et API).
+- Aucun test n'a été modifié : là où un test tenait à une image ou un rôle (« Comment ça marche » : les trois images, le compteur en `role="img"`, zéro `svg` dans `main`), c'est le style qui s'est adapté.
+
+### Ce que je n'ai pas osé toucher, et pourquoi
+
+1. **Les couleurs d'état** (vert franc de la coche, orange vif du point, rouge d'erreur, fonds pâles) : règles produit §50 et §51.6, validées par Greg ; ce ne sont pas des couleurs de décoration.
+2. **La ligne ouverte de « Ton chantier »** garde une ombre forte : c'est une carte au premier plan sur un fond flouté (retour de Greg, 11 octobre) ; sans ombre, on ne voit plus qu'elle est devant.
+3. **Les scènes de lecture et de calcul** (`chantier-scenes.tsx` : le devis scanné, la liste qui se remplit) : animations validées (10 et 11 octobre), sur fond d'encre ; leurs ombres et leurs petits rayons servent le dessin, pas l'interface.
+4. **Les écrans de l'ancien regroupement par lot** (mode `lots`, « Mes lots », barre de proposition) : ils prennent les nouveaux jetons (rayons, boutons, champs) mais n'ont pas été redessinés un par un ; Greg a choisi la commande du mois.
+5. **Admin, formules (paywall), pages légales, aperçu PDF, chat** : mêmes jetons, pas de redessin ; le paywall est en pause, l'admin n'est vu que par Greg.
+6. **Le retour haptique** : Safari iOS ne l'expose pas à une web app (`navigator.vibrate` absent) ; rien d'ajouté plutôt qu'un faux.
+7. **Les paquets de polices** `@fontsource-variable/bricolage-grotesque` et `@fontsource/instrument-serif` restent dans `package.json` (plus chargés) : à retirer à la prochaine montée de dépendances, pour ne pas toucher au lockfile dans cette passe.
+8. **Les emplacements photo** de la landing restent des aplats gris, comme demandé, prêts pour les photos de Greg (`PHOTOS_LANDING`).
+9. **Les textes** : aucun mot changé, y compris les libellés des boutons et des étapes.
