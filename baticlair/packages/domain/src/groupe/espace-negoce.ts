@@ -108,11 +108,11 @@ export const mentionPrixFerme = (mois: Mois) => `Prix ferme de la ${NOM_COMMANDE
 export function mailInvitationNegoce(m: { lien: string; departement: string | null; conditions: string }): { objet: string; texte: string } {
   const secteur = m.departement ? ` (${m.departement})` : "";
   return {
-    objet: `Un regroupement de couvreurs vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : créez votre accès`,
+    objet: `Un regroupement d'artisans vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : créez votre accès`,
     texte: [
       "Bonjour,",
       "",
-      `Un artisan de votre secteur${secteur} vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : les couvreurs d'un même département regroupent leurs commandes de matériaux, une grille unique vous est envoyée toutes les deux semaines et vous faites votre prix.`,
+      `Un artisan de votre secteur${secteur} vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : les artisans d'un même département regroupent leurs commandes de matériaux, une grille unique vous est envoyée toutes les deux semaines et vous faites votre prix.`,
       "Créez votre accès en une minute (votre e-mail, vos dépôts, vos conditions de livraison) :",
       m.lien,
       "",
@@ -139,7 +139,7 @@ export function mailClotureSansCompte(m: { mois: Mois; departement: string; lien
     texte: [
       "Bonjour,",
       "",
-      `Les couvreurs du département ${m.departement} ont regroupé leurs commandes ${deMois(m.mois)}. Pour voir la grille et faire votre prix, créez votre accès (une minute) :`,
+      `Les artisans du département ${m.departement} ont regroupé leurs commandes ${deMois(m.mois)}. Pour voir la grille et faire votre prix, créez votre accès (une minute) :`,
       m.lien,
       "",
       "Vous recevrez ensuite chaque grille de votre secteur à sa clôture. Aucun frais pour vous.",

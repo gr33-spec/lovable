@@ -40,7 +40,7 @@ interface BesoinLot {
   compteur?: { phrase: string };
 }
 
-/** L'accroche selon le métier du compte (décision du fondateur, 2026-10-20) ; couvreur par défaut si le métier est inconnu. */
+/** L'accroche selon le métier du compte (décision du fondateur, 2026-10-20) ; neutre (« artisans ») si le métier est inconnu (multimétier, 23 octobre au soir). */
 const ACCROCHES: Record<string, { matiere: string; metiers: string }> = {
   roofing: { matiere: "d'ardoise", metiers: "couvreurs" },
   carpentry: { matiere: "de bois de charpente", metiers: "charpentiers" },
@@ -55,7 +55,8 @@ const ACCROCHES: Record<string, { matiere: string; metiers: string }> = {
   joinery: { matiere: "de menuiseries", metiers: "menuisiers" },
 };
 export function accroche(metier: string | undefined): string {
-  const a = (metier && ACCROCHES[metier]) || ACCROCHES.roofing!;
+  const a = metier ? ACCROCHES[metier] : undefined;
+  if (!a) return "Tes commandes regroupées avec les autres artisans du département, un seul négoce, un seul prix.";
   return `Tes commandes ${a.matiere} regroupées avec les autres ${a.metiers} du département, un seul négoce, un seul prix.`;
 }
 
@@ -122,7 +123,7 @@ export default function GroupePage() {
         </p>
       ) : null}
       <Card className="flex flex-col gap-4 p-4">
-        <p className="text-[20px] leading-snug font-extrabold tracking-[-0.02em]">{mois ? "Une commande toutes les deux semaines avec les couvreurs de ta région." : accroche(company?.trades[0])}</p>
+        <p className="text-[20px] leading-snug font-extrabold tracking-[-0.02em]">{mois ? "Une commande toutes les deux semaines avec les artisans de ta région." : accroche(company?.trades[0])}</p>
         {/* Revue à froid (21 octobre) : une fois les trois étapes faites, « Comment ça marche » se replie derrière un lien. */}
         {tout ? (
           <details className="group">

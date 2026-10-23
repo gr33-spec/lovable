@@ -43,6 +43,7 @@ import {
   type Nature,
   type PaliersLivraison,
   type PhaseCycle,
+  familleDuMetier,
 } from "@baticlair/domain";
 import type { Alerter } from "../../../platform/alerts/alerter.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -126,6 +127,15 @@ export interface GarantieVue {
 
 /** La livraison figée au dépôt d'une grille : les dépôts du négoce, ses paliers, la distance du dépôt le plus proche à chaque chantier. */
 type LivraisonEnregistree = { depots: { adresse: string; lat: number | null; lon: number | null }[]; paliers: PaliersLivraison; distances: Record<string, (number | null)[]> };
+/**
+ * MULTIMÉTIER (Greg, 23 octobre au soir : « on va faire en multimétier ») : la commande commune d'une entreprise est celle
+ * de la famille de son métier (couverture pour un couvreur, électricité pour un électricien…), dans son département.
+ * Sans métier connu, la couverture (le premier métier de BatiClair).
+ */
+export function familleDeLEntreprise(trades: readonly string[] | null | undefined): string {
+  return familleDuMetier(trades?.[0]) ?? "couverture";
+}
+
 /** Le 30 % de lignes « non garanties » au-delà duquel Greg est prévenu (point 8). */
 const PART_NON_GARANTIE_ALERTE = 0.3;
 const CLE_RAPPELS = (cycleId: string) => `rappels-cloture:${cycleId}`;
@@ -342,7 +352,7 @@ export class CommandeDuMoisService {
     const company = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true, trades: true } });
     const zone = zoneDuCodePostal(company?.address ?? "");
     if (zone) {
-      const ouvert = await this.prisma.cycleCommande.findFirst({ where: { zone, famille: "couverture", phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" }, select: { id: true } });
+      const ouvert = await this.prisma.cycleCommande.findFirst({ where: { zone, famille: familleDeLEntreprise(company?.trades), phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" }, select: { id: true } });
       if (ouvert) ids.add(ouvert.id);
     }
     const cycles = await this.prisma.cycleCommande.findMany({ where: { id: { in: [...ids] } }, orderBy: { clotureLe: "desc" } });
@@ -371,8 +381,9 @@ export class CommandeDuMoisService {
     }
     const zone = zoneDuCodePostal(adresse ?? "");
     if (!zone) return null;
+    const entreprise = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { trades: true } });
     // Lecture seule : afficher la commande ne crée pas de cycle en base (il naît au premier dépôt).
-    const c = await this.cycleAffiche("couverture", zone, maintenant);
+    const c = await this.cycleAffiche(familleDeLEntreprise(entreprise?.trades), zone, maintenant);
     if (!c) return null;
     const tout = c.id ? await this.lignesDuCycle(c.id) : [];
     // Greg (23 octobre) : l'accueil montre « Toi seul : … » quand l'entreprise a déjà déposé dans cette commande.

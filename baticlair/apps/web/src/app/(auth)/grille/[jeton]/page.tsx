@@ -98,7 +98,7 @@ export default function GrilleNegocePage() {
     <>
       <PageTitle>{`Commande commune ${deMoisEnLettres(page.mois)}`}</PageTitle>
       <p className="text-[16px] text-muted">
-        Couvreurs du département {page.departement}. Pour {page.negoce}.
+        Artisans du département {page.departement}. Pour {page.negoce}.
       </p>
       {page.echeance ? <Chrono>{lisible(page.echeance)}</Chrono> : null}
       <p className="text-[16px] leading-relaxed">{page.phrases.regles}</p>

@@ -188,7 +188,7 @@ export function BlocDuMois({ prochaine: p }: { prochaine: Prochaine }) {
         </Link>
       </div>
       <GrosChrono clotureDans={p.clotureDans} heros />
-      <p className="text-[15px] leading-snug text-muted">Une commande toutes les deux semaines avec les couvreurs de ta région.</p>
+      <p className="text-[15px] leading-snug text-muted">Une commande toutes les deux semaines avec les artisans de ta région.</p>
       <EtapesDuMois compact />
       {p.toi || p.tout ? (
         <div className="flex flex-col gap-2">
@@ -286,7 +286,7 @@ export function CommandeDuMoisBar({
         ))}
       </div>
       {adresseManque ? (
-        <Field id={`${id}-adresse`} label="Adresse du chantier, avec le code postal" hint="La commande se fait avec les couvreurs de ton département : il faut l'adresse de livraison." value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="4 rue du Port, 22500 Paimpol" autoComplete="street-address" />
+        <Field id={`${id}-adresse`} label="Adresse du chantier, avec le code postal" hint="La commande se fait avec les artisans de ton département : il faut l'adresse de livraison." value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="4 rue du Port, 22500 Paimpol" autoComplete="street-address" />
       ) : error ? (
         <ErrorNotice error={error} />
       ) : null}
@@ -339,7 +339,7 @@ export function CommandeDuMoisBloc({ etat, onAjouter, message }: { etat: EtatDuM
         <Users size={18} aria-hidden="true" className="text-accent-text" />
         {de ? `Commande commune ${de}` : "Commande commune"}
       </p>
-      <p className="text-[14px] leading-snug text-muted">Une commande toutes les deux semaines avec les couvreurs de ta région.</p>
+      <p className="text-[14px] leading-snug text-muted">Une commande toutes les deux semaines avec les artisans de ta région.</p>
       <Chrono>{chronoTexte}</Chrono>
       {tout ? <p className="text-[15px] font-semibold">{tout}</p> : null}
       {message ? (
@@ -603,7 +603,7 @@ export function BlocGarantie({ g, onChange }: { g: GarantieVue; onChange: () => 
       <div className="flex flex-col gap-1">
         <SectionTitle>{g.titre}</SectionTitle>
         <p className="text-[15px] font-semibold text-accent-text">{`Chez ${g.negoce.nom}, sur la grille garantie ${g.de}.`}</p>
-        <p className="text-[14px] text-muted">{`Les prix de la commande ${g.de}, tenus pour tout couvreur du ${g.zone} jusqu'au ${jourMois(g.jusquau)}. Livraison : ${g.livraison}`}</p>
+        <p className="text-[14px] text-muted">{`Les prix de la commande ${g.de}, tenus pour tout artisan du ${g.zone} jusqu'au ${jourMois(g.jusquau)}. Livraison : ${g.livraison}`}</p>
       </div>
       {fait ? <p role="status" className="rounded-xl bg-ok-bg p-4 text-[15px] font-semibold text-ok">{`C'est commandé : bon n° ${fait.numero}, ${euros(fait.totalHt)} HT livré, parti chez ${g.negoce.nom}. Commande sur grille garantie ${g.de}.`}</p> : null}
       {g.commandes.length > 0 ? (

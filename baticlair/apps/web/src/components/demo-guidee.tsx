@@ -117,7 +117,7 @@ function EcranDevis() {
           </li>
         ))}
       </ul>
-      <p className="text-[13px] text-muted">Chaque ligne précise rejoint celles des couvreurs de ton secteur.</p>
+      <p className="text-[13px] text-muted">Chaque ligne précise rejoint celles des artisans de ton secteur.</p>
     </div>
   );
 }

@@ -29,9 +29,9 @@ export interface CompteurDuGroupe {
   meilleurPrix: number | null;
 }
 
-/** Le métier dit qui est compté : « couvreurs » au lancement, « artisans » ailleurs. */
+/** Le métier dit qui est compté : « couvreurs » pour un couvreur, « artisans » sinon (multimétier, Greg, 23 octobre au soir). */
 export function qui(metier: string | null | undefined, n: number): string {
-  return metier === "roofing" || metier === "couverture" || !metier ? pluriel(n, "couvreur", "couvreurs") : pluriel(n, "artisan", "artisans");
+  return metier === "roofing" || metier === "couverture" ? pluriel(n, "couvreur", "couvreurs") : pluriel(n, "artisan", "artisans");
 }
 
 export function phraseCompteur(c: CompteurDuGroupe, metier?: string | null): string {

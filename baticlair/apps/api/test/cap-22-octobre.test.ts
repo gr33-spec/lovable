@@ -73,7 +73,7 @@ describe("nouveau cap du 22 octobre : regroupement, alertes, livraison au kilom�
     const a = await carreleur("a@example.fr", "Carrelages A", "3 rue des Ajoncs, 22300 Lannion");
     await negoce(a.agent, "Négoce Carrelage", "carrelage@example.com", ["second_oeuvre"]);
     const [info] = mailsVers("carrelage@example.com");
-    expect(info!.subject).toBe("Un regroupement de couvreurs vous a ajouté à la Commande commune : créez votre accès");
+    expect(info!.subject).toBe("Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès");
     expect(info!.text).toContain("Un artisan de votre secteur (22) vous a ajouté");
     expect(info!.text).not.toContain("Carrelages A");
     expect(info!.text).toMatch(/http.*\/negoce\/rejoindre\//);

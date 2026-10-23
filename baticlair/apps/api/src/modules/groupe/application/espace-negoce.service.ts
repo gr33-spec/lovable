@@ -192,16 +192,17 @@ export class EspaceNegoceService {
     return valides([...depots.map((d) => d.departement).filter((d): d is string => !!d), ...abonnes]);
   }
 
-  /** Une ligne `negoce` (couverture) par département desservi, reliée au compte ; les autres départements sont arrêtés. */
+  /** Une ligne `negoce` par département desservi, reliée au compte (familles : celles des lignes déjà connues, sinon couverture) ; les autres départements sont arrêtés. */
   private async alignerAbonnements(tx: Parameters<Parameters<PrismaService["$transaction"]>[0]>[0], compteId: string, c: { email: string; siret: string | null; enseigne: string }, departements: readonly string[], maintenant: Date): Promise<void> {
     const existants = await tx.negoce.findMany({ where: { OR: [{ compteId }, { email: c.email }, ...(c.siret ? [{ siret: c.siret }] : [])] } });
     for (const n of existants) {
       const garde = departements.includes(n.departement);
-      await tx.negoce.update({ where: { id: n.id }, data: { compteId, nom: c.enseigne, email: c.email, siret: c.siret ?? n.siret, familles: garde && !n.familles.includes("couverture") ? [...n.familles, "couverture"] : n.familles, stopLe: garde ? null : (n.stopLe ?? maintenant) } });
+      await tx.negoce.update({ where: { id: n.id }, data: { compteId, nom: c.enseigne, email: c.email, siret: c.siret ?? n.siret, familles: n.familles, stopLe: garde ? null : (n.stopLe ?? maintenant) } });
     }
+    const familles = [...new Set(existants.flatMap((n) => n.familles))];
     for (const d of departements) {
       if (existants.some((n) => n.departement === d)) continue;
-      await tx.negoce.create({ data: { nom: c.enseigne, email: c.email, siret: c.siret, departement: d, familles: ["couverture"], compteId, createdAt: maintenant } });
+      await tx.negoce.create({ data: { nom: c.enseigne, email: c.email, siret: c.siret, departement: d, familles: familles.length ? familles : ["couverture"], compteId, createdAt: maintenant } });
     }
   }
 

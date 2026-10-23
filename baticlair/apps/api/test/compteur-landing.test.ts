@@ -22,16 +22,16 @@ async function couvreur(email: string, address: string, trades = ["roofing"]) {
 }
 
 describe("GET /v1/public/compteur", () => {
-  it("masqué sous 10 couvreurs du 22, puis le vrai nombre ; sans session, sans rien d'une entreprise", async () => {
+  it("masqué sous 10 artisans du 22 (tous métiers, multimétier du 23 octobre au soir), puis le vrai nombre ; sans session, sans rien d'une entreprise", async () => {
     const { default: request } = await import("supertest");
     const anon = () => request(ctx.app.getHttpServer()).get("/v1/public/compteur");
-    for (let i = 0; i < 9; i++) await couvreur(`c${i}@example.fr`, `${i} rue du Port, 22500 Paimpol`);
-    // Hors compte : un autre département, un autre métier, un compte de démonstration.
-    await couvreur("brest@example.fr", "5 rue de Siam, 29200 Brest");
+    for (let i = 0; i < 8; i++) await couvreur(`c${i}@example.fr`, `${i} rue du Port, 22500 Paimpol`);
+    // Un carreleur du 22 compte aussi (multimétier) ; hors compte : un autre département, un compte de démonstration.
     await couvreur("carreleur@example.fr", "3 rue des Ajoncs, 22300 Lannion", ["tiling"]);
+    await couvreur("brest@example.fr", "5 rue de Siam, 29200 Brest");
     await couvreur("demo-1@demo.baticlair.fr", "1 rue du Quai, 22000 Saint-Brieuc");
-    expect((await anon().expect(200)).body).toEqual({ departement: "22", couvreurs: null });
+    expect((await anon().expect(200)).body).toEqual({ departement: "22", artisans: null });
     await couvreur("c9@example.fr", "Le Bourg 22620 Ploubazlanec");
-    expect((await anon().expect(200)).body).toEqual({ departement: "22", couvreurs: 10 });
+    expect((await anon().expect(200)).body).toEqual({ departement: "22", artisans: 10 });
   });
 });

@@ -109,7 +109,7 @@ describe("la grille garantie 30 jours (point 6) et les mentions des bons", () =>
 describe("les textes côté négoce : vouvoiement, jamais un nom d'artisan", () => {
   it("l'invitation nomme le secteur, jamais l'artisan ; le lien magique ; la clôture sans compte ; la grille prête", () => {
     const inv = mailInvitationNegoce({ lien: "https://b/negoce/rejoindre/x", departement: "22", conditions: "https://b/negoce/conditions" });
-    expect(inv.objet).toBe("Un regroupement de couvreurs vous a ajouté à la Commande commune : créez votre accès");
+    expect(inv.objet).toBe("Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès");
     expect(inv.texte).toContain("Un artisan de votre secteur (22) vous a ajouté");
     expect(inv.texte).toContain("Créez votre accès en une minute");
     expect(inv.texte).toContain("valable 90 jours");

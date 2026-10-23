@@ -1,4 +1,4 @@
-import { FAMILLES_GROUPE, LIBELLES_FAMILLES, mailRegroupementAuNegoce, messageAuNegoce, zoneDuCodePostal, type FamilleGroupe } from "@baticlair/domain";
+import { FAMILLES_GROUPE, LIBELLES_FAMILLES, mailRegroupementAuNegoce, messageAuNegoce, zoneDuCodePostal, type FamilleGroupe , famillesDuMetier } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -140,7 +140,10 @@ export class NegocesService {
     const nom = b.nom?.trim() || sirene?.nom || nomDepuisLEmail(email);
     let dejaLa = false;
     try {
-      await this.ajouter(tenant, { nom, email, siret, departement: b.departement ?? sirene?.departement ?? null, familles: ["couverture"] }, maintenant);
+      // Multimétier (23 octobre au soir) : le négoce entre dans les familles du métier de l'entreprise (couverture pour un couvreur…).
+      const company = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { trades: true } });
+      const familles = famillesDuMetier(company?.trades[0]);
+      await this.ajouter(tenant, { nom, email, siret, departement: b.departement ?? sirene?.departement ?? null, familles: familles.length ? [...familles] : ["couverture"] }, maintenant);
     } catch (e) {
       if (!(e instanceof DomainError && (e.details as { reason?: string } | undefined)?.reason === "deja_ajoute")) throw e;
       dejaLa = true;

@@ -81,7 +81,7 @@ export default function CompteNegocePage() {
           <>
             <p className="text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">Prochaine clôture dans</p>
             <p className="text-[32px] leading-none font-extrabold tracking-[-0.02em] tabular-nums">{clotureDans.replace(/ /g, " ")}</p>
-            <p className="text-[15px] text-muted">{`Les couvreurs déposent leurs listes. À la clôture, vous recevez la grille ${compte.prochaine.de} de vos départements (${compte.departements.join(", ")}) par e-mail.`}</p>
+            <p className="text-[15px] text-muted">{`Les artisans déposent leurs listes. À la clôture, vous recevez la grille ${compte.prochaine.de} de vos départements (${compte.departements.join(", ")}) par e-mail.`}</p>
           </>
         ) : (
           <p className="text-[15px] font-semibold">Vous n&apos;êtes abonné à aucun département : vous ne recevez plus de grille.</p>

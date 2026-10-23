@@ -447,7 +447,7 @@ export function mailGrilleAuNegoce(m: { negoce: string; mois: Mois; departement:
     texte: [
       "Bonjour,",
       "",
-      `Les couvreurs du département ${m.departement} ont regroupé leurs commandes ${deMois(m.mois)}. Voici le volume total à chiffrer :`,
+      `Les artisans du département ${m.departement} ont regroupé leurs commandes ${deMois(m.mois)}. Voici le volume total à chiffrer :`,
       "",
       ...lignes,
       "",
@@ -461,7 +461,7 @@ export function mailGrilleAuNegoce(m: { negoce: string; mois: Mois; departement:
       "Aucun nom d'artisan ne vous est communiqué avant sa commande. Aucun frais pour vous.",
       `Se désabonner : ${m.stop}`,
       "",
-      "BatiClair, la commande commune des couvreurs",
+      "BatiClair, la commande commune des artisans du bâtiment",
     ].join("\n"),
   };
 }

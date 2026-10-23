@@ -64,8 +64,8 @@ export function CompteurInscrits() {
     let vivant = true;
     fetch("/v1/public/compteur", { headers: { accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : null))
-      .then((b: { couvreurs: number | null } | null) => {
-        if (vivant && b && typeof b.couvreurs === "number") setN(b.couvreurs);
+      .then((b: { artisans: number | null } | null) => {
+        if (vivant && b && typeof b.artisans === "number") setN(b.artisans);
       })
       .catch(() => undefined);
     return () => {
@@ -74,9 +74,9 @@ export function CompteurInscrits() {
   }, []);
   if (n === null) return null;
   return (
-    <p role="status" aria-label={`${n} couvreurs déjà inscrits dans les Côtes-d'Armor`} className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+    <p role="status" aria-label={`${n} artisans déjà inscrits dans les Côtes-d'Armor`} className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
       <span className="text-[72px] leading-none font-extrabold tracking-[-0.05em] text-accent-text tabular-nums sm:text-[96px]">{n.toLocaleString("fr-FR")}</span>
-      <span className="text-[18px] font-semibold text-muted">couvreurs déjà inscrits dans les Côtes-d&apos;Armor</span>
+      <span className="text-[18px] font-semibold text-muted">artisans déjà inscrits dans les Côtes-d&apos;Armor</span>
     </p>
   );
 }

@@ -5,4 +5,4 @@
  * d'invitation (ancienne API), la racine du site.
  */
 export const messageAuNegoceEnBoucle = (lien: string) =>
-  `Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres couvreurs. Vous pouvez chiffrer tout le volume de la commande ici : ${lien}`;
+  `Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres artisans de mon métier. Vous pouvez chiffrer tout le volume de la commande ici : ${lien}`;

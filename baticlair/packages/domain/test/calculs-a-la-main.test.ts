@@ -106,8 +106,8 @@ describe("cas 3 : Paimpol → Lannion (palier insuffisant, franco, alertes, comp
   });
 
   it("compteur, suivi façon colis, désistement (avertissement puis six mois)", () => {
-    expect(phraseCompteur({ artisans: 3, demandes: 2, devis: 1, meilleurPrix: 1.02 })).toBe("3 couvreurs, 2 demandes envoyées, 1 devis reçu, meilleur prix 1,02 €");
-    expect(phraseCompteur({ artisans: 1, demandes: 0, devis: 0, meilleurPrix: null })).toBe("1 couvreur, demande commune pas encore partie");
+    expect(phraseCompteur({ artisans: 3, demandes: 2, devis: 1, meilleurPrix: 1.02 })).toBe("3 artisans, 2 demandes envoyées, 1 devis reçu, meilleur prix 1,02 €");
+    expect(phraseCompteur({ artisans: 1, demandes: 0, devis: 0, meilleurPrix: null })).toBe("1 artisan, demande commune pas encore partie");
     const etat = { liste: true, lignesARegler: 0, demandes: 2, devis: 1, commande: false, meilleur: "1,02 €" };
     expect(suiviDuChantier(etat)).toMatchObject({ etape: 2, phrase: "1 devis reçu sur 2 demandes. Meilleur prix : 1,02 €." });
     expect(suiviDuChantier({ ...etat, commande: true })).toMatchObject({ etape: 3, phrase: "C'est commandé." });

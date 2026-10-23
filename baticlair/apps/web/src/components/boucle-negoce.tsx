@@ -41,7 +41,8 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
   // Le groupé n'existe pas pour cette entreprise (drapeau éteint, 404) : rien ; et rien non plus avant de savoir (pas de
   // formulaire qui saute quand la liste arrive).
   if (liste.error || !liste.data) return null;
-  const dansLaBoucle = (liste.data?.negoces ?? []).filter((n) => n.familles.includes("couverture") && !n.stop);
+  // Multimétier (23 octobre au soir) : tous les négoces de l'entreprise, quelle que soit leur famille.
+  const dansLaBoucle = (liste.data?.negoces ?? []).filter((n) => !n.stop);
 
   const submit = async () => {
     setPending(true);
