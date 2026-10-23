@@ -183,7 +183,7 @@ export function GroupeBar({ count, onCancel, onPropose, onAdresse }: { count: nu
             ["en_attente", "Devis en attente"],
           ] as const
         ).map(([v, label]) => (
-          <button key={v} type="button" role="radio" aria-checked={statut === v} onClick={() => setStatut(v)} className={`${choix} ${statut === v ? "bg-accent text-white" : "bg-ground text-ink"}`}>
+          <button key={v} type="button" role="radio" aria-checked={statut === v} onClick={() => setStatut(v)} className={`${choix} ${statut === v ? "bg-accent text-on-accent" : "bg-ground text-ink"}`}>
             {label}
           </button>
         ))}

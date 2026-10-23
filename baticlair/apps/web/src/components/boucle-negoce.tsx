@@ -76,7 +76,7 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
   };
 
   return (
-    <section aria-label="Mets ton négoce dans la boucle" className="flex flex-col gap-4 rounded-2xl bg-tint-lavender p-5">
+    <section aria-label="Mets ton négoce dans la boucle" className="flex flex-col gap-4 rounded-2xl bg-accent-soft p-5">
       <div className="flex flex-col gap-2">
         <h2 className="text-[18px] font-extrabold tracking-[-0.01em]">Mets ton négoce dans la boucle</h2>
         <p className="text-[14px] leading-relaxed text-ink/70">Ton négoce habituel n&apos;est pas encore dans la commande ? Ajoute-le : il recevra tout le volume de la commande et pourra faire son prix.</p>
@@ -181,7 +181,7 @@ function Prevenir({ negoce }: { negoce: { nom: string; email: string; lienInvita
       <p className="text-[14px] text-muted">Préviens-le toi-même, il te connaît :</p>
       <p className="rounded-xl bg-ground px-4 py-3 text-[14px] leading-relaxed [overflow-wrap:anywhere]">{message}</p>
       <div className="flex flex-wrap gap-3">
-        <a href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className={`${bouton} bg-accent text-white hover:bg-accent-text`}>
+        <a href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className={`${bouton} bg-accent text-on-accent hover:bg-accent-hover`}>
           Envoyer sur WhatsApp
         </a>
         <a href={`sms:?&body=${encodeURIComponent(message)}`} className={`${bouton} border border-line bg-surface text-ink hover:border-ink`}>

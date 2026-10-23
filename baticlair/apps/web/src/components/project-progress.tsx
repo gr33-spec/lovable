@@ -134,7 +134,7 @@ function ProgressBar({ projectId, tick }: { projectId: string; tick: number }) {
             <li key={step.key} aria-current={isCurrent ? "step" : undefined} className="flex flex-col items-center gap-1 text-center">
               <span
                 className={`flex size-7 items-center justify-center rounded-full text-xs font-extrabold ${
-                  isDone ? "bg-ok text-white" : isCurrent ? "bg-accent text-white" : "bg-line text-muted"
+                  isDone ? "bg-ok text-white" : isCurrent ? "bg-accent text-on-accent" : "bg-line text-muted"
                 }`}
               >
                 {isDone ? <Check size={15} strokeWidth={3} aria-label="fait" /> : STEPS.indexOf(step) + 1}
@@ -150,7 +150,7 @@ function ProgressBar({ projectId, tick }: { projectId: string; tick: number }) {
       {next.target ? (
         <a
           href={`#${next.target}`}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-accent px-4 text-[15px] font-extrabold text-white"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-accent px-4 text-[15px] font-extrabold text-on-accent"
         >
           {next.label}
           <ArrowDown size={18} aria-hidden="true" />

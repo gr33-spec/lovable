@@ -29,6 +29,9 @@ export const metadata: Metadata = {
  * MOINS DE TEXTE (Greg, 23 octobre au soir : « trop de texte, laisse le nécessaire ») : l'accroche et une phrase, le
  * principe et le compteur, trois étapes en une ligne chacune, le partage, un titre et un bouton, une ligne pour les
  * négoces. L'exemple de liste et la section « ensemble » sont retirés (redondants avec les étapes).
+ * HAUTE VISIBILITÉ (Greg, 23 octobre au soir : « ça ne donne pas envie, je veux un truc qui déchire ») : la page est
+ * sombre d'un bloc (noir profond), un seul jaune signal pour le mot clé du titre, les boutons, l'aplat du téléphone et le
+ * bloc du compteur ; titres en Bricolage Grotesque, très grands. Toujours aucun dessin : de vraies captures.
  * TON FUN ET DIRECT (Greg, 22 octobre) : « fun dans les mots, pro dans le visuel ». « Enfumer » vise le prix, jamais une
  * personne : les négoces lisent aussi la page, et ce sont eux qui répondent. Le compteur d'inscrits est le vrai chiffre de la
  * base (masqué sous 10), le partage passe par WhatsApp, SMS ou le lien copié (`InviterCollegue`). Gratuit pour l'artisan.
@@ -57,7 +60,7 @@ function Telephone({ src, alt, priorite = false, className = "" }: { src: string
   return (
     <div className={`relative rounded-[44px] border-[10px] border-ink bg-ink ${className}`}>
       <span aria-hidden="true" className="absolute top-2 left-1/2 z-10 h-6 w-24 -translate-x-1/2 rounded-full bg-ink" />
-      <div className="overflow-hidden rounded-[34px] bg-ground">
+      <div className="overflow-hidden rounded-[34px] bg-night-2">
         {/* eslint-disable-next-line @next/next/no-img-element -- fichier local, taille fixe, sans optimiseur */}
         <img src={src} alt={alt} width={780} height={1688} className="block h-auto w-full" loading={priorite ? "eager" : "lazy"} fetchPriority={priorite ? "high" : "auto"} decoding="async" />
       </div>
@@ -73,9 +76,9 @@ const BOUTON = "min-h-13 px-8 text-[16px]";
 const REVEAL_SCRIPT = `(function(){try{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var els=[].slice.call(document.querySelectorAll("[data-reveal]"));var h=innerHeight;els.forEach(function(e){if(e.getBoundingClientRect().top<h)e.setAttribute("data-vu","")});document.documentElement.setAttribute("data-reveal-pret","");var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.setAttribute("data-vu","");io.unobserve(x.target)}})},{rootMargin:"0px 0px -10% 0px"});els.forEach(function(e){if(!e.hasAttribute("data-vu"))io.observe(e)})}catch(e){}})();`;
 
 export default function BienvenuePage() {
-  const h2 = "text-[34px] leading-[1.04] font-extrabold tracking-[-0.035em] sm:text-[48px]";
+  const h2 = "font-display text-[36px] leading-[1.0] font-extrabold tracking-[-0.03em] sm:text-[56px]";
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-4 pt-6 pb-16 sm:gap-32 sm:px-6 sm:pt-12 lg:gap-40">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-20 px-4 pt-6 pb-16 sm:gap-28 sm:px-6 sm:pt-12 lg:gap-32">
       {/* Plan 2, bloc 3 : au premier lancement, la démo guidée (trois écrans, « Passer ») vient avant l'accroche. Plan
           « finition », bloc 5 (Lighthouse 66, décalage 0,88) : elle est rendue par le serveur, et ce script, lu avant
           l'affichage, la cache déjà vue (sauf `?demo`) : la page ne saute plus quand le navigateur relit la clé locale. */}
@@ -86,68 +89,76 @@ export default function BienvenuePage() {
       />
       <DemoGuidee />
 
-      {/* L'accroche (façon Stripe) : la promesse à gauche, en très grand ; l'app dans un iPhone à droite. */}
-      <section aria-labelledby="accroche" className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
+      {/* L'accroche : la promesse en très grand, le mot « enfumer » en jaune signal ; l'app dans un iPhone posé sur un
+          grand aplat jaune, comme une affiche de chantier. */}
+      <section aria-labelledby="accroche" className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
         <div className="flex flex-col gap-8 lg:col-span-7">
-          <p className="text-[14px] font-semibold text-accent-text">Pour les artisans du bâtiment, Côtes-d&apos;Armor d&apos;abord</p>
-          <h1 id="accroche" className="max-w-[16ch] text-[44px] leading-[1.0] font-extrabold tracking-[-0.045em] sm:text-[64px]">
-            Marre de te faire enfumer sur le prix de tes matériaux ?
+          <p className="inline-flex w-fit items-center rounded-full bg-white/10 px-3.5 py-1.5 text-[13px] font-semibold tracking-[0.02em] text-white/85 uppercase">
+            Artisans du bâtiment, Côtes-d&apos;Armor d&apos;abord
+          </p>
+          <h1 id="accroche" className="max-w-[14ch] text-[52px] leading-[0.94] font-extrabold tracking-[-0.03em] sm:text-[84px]">
+            Marre de te faire <span className="text-accent">enfumer</span> sur le prix de tes matériaux&nbsp;?
           </h1>
-          <p className="max-w-[40ch] text-[18px] leading-relaxed text-muted sm:text-[20px]">Une commande toutes les deux semaines avec les artisans de ton métier, dans ta région.</p>
+          <p className="max-w-[38ch] text-[18px] leading-relaxed text-white/70 sm:text-[21px]">Une commande toutes les deux semaines avec les artisans de ton métier, dans ta région.</p>
           <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
             <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
               Je rejoins le mouvement
             </ButtonLink>
-            <a href="#comment" className="inline-flex min-h-13 items-center gap-2 text-[16px] font-semibold text-ink transition-[color] duration-150 hover:text-accent-text">
+            <a href="#comment" className="inline-flex min-h-13 items-center gap-2 text-[16px] font-semibold text-white transition-[color] duration-150 hover:text-accent">
               Voir comment ça marche <span aria-hidden="true">→</span>
             </a>
           </div>
-          <p className="text-[15px] font-semibold text-muted">Gratuit pour l&apos;artisan. Sans engagement.</p>
+          <p className="text-[15px] font-semibold text-white/60">Gratuit pour l&apos;artisan. Sans engagement.</p>
         </div>
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
-          <Telephone src="/landing/capture-accueil.jpg" alt="L'accueil de BatiClair : la commande commune en cours et le temps qui reste avant la clôture" priorite className="w-[280px] sm:w-[320px]" />
+          <div className="flex w-full max-w-[420px] justify-center overflow-hidden rounded-2xl bg-accent px-8 pt-10 sm:px-12 sm:pt-14">
+            <Telephone src="/landing/capture-accueil.jpg" alt="L'accueil de BatiClair : la commande commune en cours et le temps qui reste avant la clôture" priorite className="w-[260px] translate-y-3 sm:w-[300px]" />
+          </div>
         </div>
       </section>
 
-      {/* Le principe en une phrase, et le vrai compteur d'inscrits (rien sous 10). Chiffres façon Qonto. */}
-      <section aria-labelledby="principe" data-reveal className="flex flex-col gap-8 border-y border-line py-16 sm:py-24">
-        <h2 id="principe" className={`${h2} max-w-[22ch]`}>
+      {/* Le principe en une phrase, et le vrai compteur d'inscrits (rien sous 10), sur un bloc jaune : le chiffre en noir. */}
+      <section aria-labelledby="principe" data-reveal className="flex flex-col gap-8 rounded-2xl bg-accent p-6 text-ink sm:p-12 lg:p-16">
+        <h2 id="principe" className={`${h2} max-w-[20ch]`}>
           Plus on est nombreux, plus on pèse face aux négoces.
         </h2>
-        <CompteurInscrits />
+        <CompteurInscrits surAccent />
       </section>
 
-      {/* Les trois étapes (façon Linear), chacune avec un écran ENTIER de l'app. Sur le téléphone, elles défilent de côté. */}
+      {/* Les trois étapes, chacune avec un écran ENTIER de l'app sur une carte de nuit, le numéro en jaune et en grand.
+          Sur le téléphone, elles défilent de côté. */}
       <section aria-labelledby="comment-titre" className="flex scroll-mt-24 flex-col gap-12" id="comment">
         <div className="flex flex-col gap-4" data-reveal>
           <h2 id="comment-titre" className={h2}>
             Comment ça marche
           </h2>
         </div>
-        <ol className="-mx-4 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible sm:px-0">
+        <ol className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:px-0">
           {ETAPES.map((e, i) => (
-            <li key={e.titre} data-reveal className="flex w-[80vw] max-w-[340px] shrink-0 snap-center flex-col gap-6 sm:w-auto sm:max-w-none">
-              <div className="flex min-h-[560px] items-center justify-center rounded-xl bg-ground px-8 py-8">
-                <Telephone src={e.image.src} alt={e.image.alt} className="w-full max-w-[240px]" />
-              </div>
+            <li key={e.titre} data-reveal className="flex w-[80vw] max-w-[340px] shrink-0 snap-center flex-col gap-6 rounded-2xl bg-night-2 p-5 ring-1 ring-white/10 sm:w-auto sm:max-w-none sm:p-6">
+              <p className="font-display text-[64px] leading-none font-extrabold tracking-[-0.04em] text-accent tabular-nums" aria-hidden="true">
+                0{i + 1}
+              </p>
               <div className="flex flex-col gap-2">
-                <p className="text-[13px] font-semibold text-accent-text tabular-nums">0{i + 1}</p>
-                <h3 className="text-[20px] leading-snug font-extrabold tracking-[-0.02em]">{e.titre}</h3>
-                <p className="text-[16px] leading-relaxed text-muted">{e.texte}</p>
+                <h3 className="font-display text-[22px] leading-snug font-extrabold tracking-[-0.02em]">{e.titre}</h3>
+                <p className="text-[16px] leading-relaxed text-white/65">{e.texte}</p>
+              </div>
+              <div className="flex items-end justify-center overflow-hidden rounded-xl bg-white/5 px-8 pt-8">
+                <Telephone src={e.image.src} alt={e.image.alt} className="w-full max-w-[220px] translate-y-10" />
               </div>
             </li>
           ))}
         </ol>
       </section>
 
-      {/* Le partage : une vraie section, pleine et sombre (façon Revolut). Le même bloc vit dans l'app. */}
+      {/* Le partage : une vraie section, pleine. Le même bloc vit dans l'app. */}
       <div data-reveal>
         <InviterCollegue grand titre="Fais venir tes collègues" texte="Plus on est nombreux, plus les prix baissent." />
       </div>
 
-      <section aria-labelledby="commencer" data-reveal className="flex flex-col items-start gap-8 border-t border-line pt-16 sm:items-center sm:pt-24 sm:text-center">
-        <h2 id="commencer" className="max-w-[18ch] text-[40px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[56px]">
-          Rejoins les artisans du secteur
+      <section aria-labelledby="commencer" data-reveal className="flex flex-col items-start gap-8 border-t border-white/10 pt-16 sm:items-center sm:pt-24 sm:text-center">
+        <h2 id="commencer" className="font-display max-w-[16ch] text-[44px] leading-[0.96] font-extrabold tracking-[-0.03em] sm:text-[72px]">
+          Rejoins les artisans <span className="text-accent">du secteur</span>
         </h2>
         <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
           Je rejoins le mouvement
@@ -155,22 +166,22 @@ export default function BienvenuePage() {
       </section>
 
       {/* Rassurant pour les négoces : ils lisent aussi la page, et ce sont eux qui répondent. */}
-      <p className="text-center text-[15px] leading-relaxed text-muted">
-        <span className="font-semibold text-ink">Négoces :</span> des volumes sûrs, des clients en plus. Répondez aux grilles.
+      <p className="text-center text-[15px] leading-relaxed text-white/60">
+        <span className="font-semibold text-white">Négoces :</span> des volumes sûrs, des clients en plus. Répondez aux grilles.
       </p>
 
-      <footer className="flex flex-col gap-6 border-t border-line pt-10 text-[13px] leading-relaxed text-muted">
+      <footer className="flex flex-col gap-6 border-t border-white/10 pt-10 text-[13px] leading-relaxed text-white/50">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <span className="text-[16px] font-extrabold text-ink">BatiClair</span>
+          <span className="font-display text-[18px] font-extrabold text-white">BatiClair</span>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <LiensLegaux />
-            <Link href="/connexion" className="text-[14px] font-semibold text-muted underline">
+            <LiensLegaux clair />
+            <Link href="/connexion" className="text-[14px] font-semibold text-white/70 underline">
               Se connecter
             </Link>
             {/* Un vrai chargement : la démo relit l'adresse au démarrage (plus de lecture par le routeur, qui l'empêchait d'être
                 rendue par le serveur). */}
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- rechargement voulu */}
-            <a href="/?demo" className="text-[14px] font-semibold text-muted underline">
+            <a href="/?demo" className="text-[14px] font-semibold text-white/70 underline">
               Revoir la démo
             </a>
           </div>

@@ -12,6 +12,14 @@ const jakarta = localFont({
   display: "swap",
   variable: "--font-jakarta",
 });
+// Direction « chantier haute visibilité » (Greg, 23 octobre au soir : « un truc qui déchire ») : Bricolage Grotesque,
+// déjà dans les dépendances, pour les titres et les grands chiffres ; Plus Jakarta Sans reste le texte.
+const bricolage = localFont({
+  src: "../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2",
+  weight: "200 800",
+  display: "swap",
+  variable: "--font-bricolage",
+});
 
 export const metadata: Metadata = {
   title: { default: "BatiClair", template: "%s · BatiClair" },
@@ -27,12 +35,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Plein écran sur iPhone : la barre du bas et le bouton principal respectent la zone du geste (safe-area).
   viewportFit: "cover",
-  themeColor: "#f3f4f6",
+  themeColor: "#0d0f14",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={jakarta.variable}>
+    <html lang="fr" className={`${jakarta.variable} ${bricolage.variable}`}>
       <body className="min-h-dvh antialiased">{children}</body>
     </html>
   );

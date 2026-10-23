@@ -4,31 +4,36 @@
  * LE SYSTÈME (passe UI/UX, 23 octobre 2026, `docs/groupe/UI.md`) : une seule source pour les couleurs, la police, les
  * rayons et l'ombre. Une couleur d'accent, du blanc, du noir, trois gris ; une police en trois graisses ; 12 px pour les
  * cartes, 999 pour les boutons ; une seule ombre, très légère ; zéro dégradé.
- * - accent (bleu profond) : marque et action principale, et rien d'autre (contraste sur blanc 7,8:1 ; accent-text 9,3:1) ;
+ * - accent (jaune signal) : marque et action principale, texte noir dessus ; jamais un texte sur fond clair (accent-text = encre) ;
  * - ok (vert) : validé ; warn (ambre) : à régler ; danger (rouge) : erreur. Des couleurs d'état, jamais de décoration ;
  * - ground (gris 1) : le fond ; line (gris 2) : bordures ; muted (gris 3) : texte secondaire (AA, 5,9:1).
  * Pour changer la teinte de la marque, ne modifier que les jetons accent.
  */
 @theme {
-  --color-ink: #0b0f1a;
-  /* Retour de Greg (23 octobre, 18 h 52 : « ça manque de couleur, de contraste ; quelque chose de tendance et moderne »)
-     : un fond très légèrement bleuté, de grands rayons, et des TEINTES PASTEL pour les tuiles (façon « bento » : lavande,
-     ciel, menthe, pêche), un halo pastel très doux sur la carte héros, une barre du bas flottante et translucide (verre).
-     Toujours une seule couleur de marque ; les teintes ne portent jamais un état (ok / warn / danger restent à part). */
-  --color-ground: #f4f5fa;
+  --color-ink: #0d0f14;
+  /* DIRECTION « CHANTIER HAUTE VISIBILITÉ » (Greg, 23 octobre au soir : « ça ne donne pas envie, je veux un truc qui
+     déchire ») : du noir profond et UN jaune signal, comme un gilet de chantier. La landing est sombre d'un bloc ; l'app
+     reste claire mais porte la même identité (boutons jaunes à texte noir, carte du mois noire au chrono jaune, pastille
+     jaune pâle pour l'onglet actif). Une seule couleur de marque ; ok / warn / danger restent des couleurs d'état. */
+  --color-ground: #f4f4f1;
   --color-surface: #ffffff;
-  --color-accent-soft: #e6ecff;
-  --color-tint-lavender: #ebe8ff;
-  --color-tint-sky: #e1eeff;
-  --color-tint-mint: #dcf6ea;
-  --color-tint-peach: #ffe9de;
+  --color-accent-soft: #fff3b8;
+  --color-on-accent: #0d0f14;
+  --color-accent-hover: #ebbd00;
+  --color-night: #0d0f14;
+  --color-night-2: #171a21;
+  --color-tint-lavender: #f0f0ec;
+  --color-tint-sky: #fff3b8;
+  --color-tint-mint: #e6f6ec;
+  --color-tint-peach: #fff3b8;
   --color-muted: #5f6774;
   /* Plus de quatrième gris : `subtle` vaut `muted`. */
   --color-subtle: #5f6774;
   --color-line: #e4e7ec;
-  --color-accent: #1c3fd1;
-  --color-accent-text: #1838b4;
-  --color-accent-on-dark: #a9c1ff;
+  --color-accent: #ffcc00;
+  /* Le jaune n'est jamais un texte sur fond clair : « accent-text » (liens, chrono, libellés accent) est l'encre. */
+  --color-accent-text: #0d0f14;
+  --color-accent-on-dark: #ffcc00;
   --color-ok-bg: #ddf5ec;
   --color-ok: #0b7a53;
   --color-warn-bg: #fff1d6;
@@ -41,7 +46,7 @@
   --color-danger: #b3360f;
   /* Une seule famille (Plus Jakarta Sans) : `font-display` vaut la même. */
   --font-sans: var(--font-jakarta), system-ui, sans-serif;
-  --font-display: var(--font-jakarta), system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-jakarta), system-ui, sans-serif;
   /* Trois graisses : 400 (texte), 600 (libellés, boutons), 800 (titres). Les utilitaires y sont ramenés : aucun écran
      ne peut en sortir. */
   --font-weight-medium: 400;
@@ -130,10 +135,8 @@ html {
 /* La carte héros (23 octobre, 18 h 52) : blanche, avec un halo pastel très doux dans un angle (ciel, puis lavande). Pas
    une lueur portée : une teinte dans la carte. */
 @utility bg-hero {
-  background-color: var(--color-surface);
-  background-image:
-    radial-gradient(120% 90% at 100% 0%, #dbe7ff 0%, rgba(219, 231, 255, 0) 55%),
-    radial-gradient(80% 70% at 0% 100%, #ebe8ff 0%, rgba(235, 232, 255, 0) 55%);
+  background-color: var(--color-night);
+  background-image: radial-gradient(90% 70% at 100% 0%, rgba(255, 204, 0, 0.16) 0%, rgba(255, 204, 0, 0) 60%);
 }
 /* Le verre de la barre du bas : blanc translucide, flou derrière. */
 @utility bg-glass {
@@ -168,6 +171,12 @@ body {
 :focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 2px;
+}
+/* Les titres et les grands chiffres en Bricolage Grotesque. */
+h1,
+h2,
+.font-display {
+  font-family: var(--font-display);
 }
 
 /* Chat : chaque étape du raisonnement apparaît en douceur. */

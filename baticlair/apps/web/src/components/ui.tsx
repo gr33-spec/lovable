@@ -16,8 +16,8 @@ type ButtonVariant = "primary" | "accent" | "secondary" | "ghost" | "ink";
 
 const buttonClasses: Record<ButtonVariant, string> = {
   // L'action principale : la couleur d'accent, unie, un seul par écran.
-  primary: "bg-accent text-white active:bg-accent-text",
-  accent: "bg-accent text-white active:bg-accent-text",
+  primary: "bg-accent text-on-accent active:bg-accent-hover",
+  accent: "bg-accent text-on-accent active:bg-accent-hover",
   // Les actions secondaires : un contour.
   secondary: "border border-line bg-surface text-ink active:bg-ground",
   ghost: "bg-transparent text-accent-text active:bg-accent/10",
@@ -118,7 +118,7 @@ export function Badge({ tone = "neutral", children }: { tone?: Tone; children: R
 }
 
 export function PageTitle({ children }: { children: React.ReactNode }) {
-  return <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">{children}</h1>;
+  return <h1 className="font-display text-[36px] leading-[1.0] font-extrabold tracking-[-0.03em]">{children}</h1>;
 }
 
 /** Le titre d'une section d'écran (« Chantiers récents », « Mes lignes »). */

@@ -147,7 +147,7 @@ export default function GrilleNegocePage() {
         <section aria-label="Créez votre accès" className="flex flex-col gap-3 rounded-xl bg-ground p-4">
           <p className="text-[16px] font-extrabold">Créez votre accès pour chiffrer cette grille</p>
           <p className="text-[14px] text-muted">Une minute : vos dépôts et vos paliers de livraison, pour que chaque artisan voie son prix livré. Ensuite, vous recevez chaque grille de votre secteur.</p>
-          <Link href={page.inscription.lien} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-semibold text-white">
+          <Link href={page.inscription.lien} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-semibold text-on-accent">
             Créer mon accès
           </Link>
         </section>

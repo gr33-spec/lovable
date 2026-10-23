@@ -71,11 +71,11 @@ export function DemoGuidee() {
           ))}
         </ol>
         {ecran < 2 ? (
-          <button type="button" onClick={() => setEcran((ecran + 1) as Ecran)} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-white hover:bg-accent-text">
+          <button type="button" onClick={() => setEcran((ecran + 1) as Ecran)} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-on-accent hover:bg-accent-hover">
             Suivant
           </button>
         ) : (
-          <Link href="/inscription" onClick={fermer} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-white hover:bg-accent-text">
+          <Link href="/inscription" onClick={fermer} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-on-accent hover:bg-accent-hover">
             Je rejoins le mouvement
           </Link>
         )}

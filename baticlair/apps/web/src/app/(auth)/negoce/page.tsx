@@ -98,7 +98,7 @@ export default function CompteNegocePage() {
                   <span className="text-[16px] font-extrabold">{`Grille ${g.de} (${g.departement})`}</span>
                   <span className="text-[13px] font-semibold text-muted">{g.deposee ? "Devis déposé." : `Réponse attendue dans ${g.reponseDans}.`}</span>
                 </span>
-                <Link href={g.lien} className="pressable inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-semibold text-white">
+                <Link href={g.lien} className="pressable inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-semibold text-on-accent">
                   {g.deposee ? "Voir ma grille" : "Chiffrer"}
                 </Link>
               </li>

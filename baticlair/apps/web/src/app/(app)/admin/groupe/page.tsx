@@ -213,7 +213,7 @@ export default function AdminGroupePage() {
       <DatesDuMois />
       <nav aria-label="Rubriques de l'admin" className="flex flex-wrap gap-1.5">
         {(["lots", "negoces", "accords", "factures", "exclusions"] as const).map((o) => (
-          <button key={o} type="button" onClick={() => setOnglet(o)} aria-current={onglet === o ? "page" : undefined} className={`min-h-10 rounded-full px-3.5 text-[13px] font-extrabold ${onglet === o ? "bg-accent text-white" : "bg-surface text-ink"}`}>
+          <button key={o} type="button" onClick={() => setOnglet(o)} aria-current={onglet === o ? "page" : undefined} className={`min-h-10 rounded-full px-3.5 text-[13px] font-extrabold ${onglet === o ? "bg-accent text-on-accent" : "bg-surface text-ink"}`}>
             {o === "lots" ? "Lots" : o === "negoces" ? "Négoces" : o === "accords" ? "Accords" : o === "factures" ? "Factures" : "Exclusions"}
           </button>
         ))}

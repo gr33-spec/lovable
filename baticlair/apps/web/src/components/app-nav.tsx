@@ -88,7 +88,7 @@ export function AppNav() {
           href="/chantiers/nouveau"
           className="pressable flex min-h-13 flex-col items-center justify-center gap-1 text-[11px] font-semibold text-accent-text lg:order-first lg:mb-3 lg:min-h-13 lg:flex-row lg:gap-2 lg:rounded-full lg:bg-accent lg:text-[16px] lg:text-white"
         >
-          <span className="flex size-11 items-center justify-center rounded-full bg-accent text-white shadow-[0_6px_16px_rgba(28,63,209,0.35)] lg:size-auto lg:bg-transparent lg:shadow-none" aria-hidden="true">
+          <span className="flex size-11 items-center justify-center rounded-full bg-accent text-on-accent shadow-[0_6px_16px_rgba(13,15,20,0.25)] lg:size-auto lg:bg-transparent lg:shadow-none" aria-hidden="true">
             <Plus size={24} strokeWidth={2.6} />
           </span>
           <span className="leading-tight">Nouvelle liste</span>

@@ -8,25 +8,28 @@ Captures avant / après : `captures/ui-23-10/avant/` et `captures/ui-23-10/apres
 
 Tout vit dans `apps/web/src/app/globals.css` (jetons `@theme`) et `apps/web/src/components/ui.tsx` (composants). Les écrans n'inventent rien : ils composent.
 
-### Couleurs (une accent, du blanc, du noir, trois gris)
+### Couleurs : « chantier haute visibilité » (23 octobre au soir)
+
+Greg, après le pastel : « ça ne donne vraiment pas envie, je veux un truc qui déchire ». La direction : du noir profond et UN jaune signal, comme un gilet de chantier. La landing est sombre d'un bloc ; l'app reste claire (fond gris chaud, cartes blanches) mais porte la même identité : boutons jaunes à texte noir, carte du mois noire au chrono jaune, pastille jaune pâle pour l'onglet actif.
 
 | Jeton | Valeur | Rôle |
 |---|---|---|
-| `--color-accent` | `#1c3fd1` | La seule couleur : bouton principal, lien, onglet actif, chrono, icône de marque. Contraste sur blanc 7,8:1. |
-| `--color-accent-text` | `#1838b4` | La même, un ton plus sombre, pour du texte accent sur fond clair (9,3:1). |
-| `--color-ink` | `#0b0f1a` | Le noir (bleu-noir) : titres, texte courant, bouton « ink » (secondaire plein) rare. |
-| `--color-accent-soft` | `#e6ecff` | L'accent pâle : pastille de l'onglet actif, pastilles d'icône des listes, pilule « Clôture dans ». |
-| `--color-tint-sky` / `-lavender` / `-mint` / `-peach` | `#e1eeff` / `#ebe8ff` / `#dcf6ea` / `#ffe9de` | Les TEINTES PASTEL (retour de Greg, 23 octobre, 18 h 52 : « tendance et moderne ») : des fonds de tuiles et de pastilles, façon « bento ». Ciel, lavande, menthe pour les trois étapes ; menthe « Toi » et pêche « Toute la commande » sur la carte héros ; lavande pour « Mets ton négoce dans la boucle ». Jamais pour dire un état. |
-| `bg-hero` | blanc + halo | La carte héros de l'accueil : blanche, un halo pastel très doux dans deux angles (ciel en haut à droite, lavande en bas à gauche). Le seul « dégradé » de l'app, et il reste dans la carte. |
-| `bg-glass` | blanc à 78 % + flou | La barre du bas du téléphone : une capsule flottante (`rounded-full`, à 12 px des bords et du bas), translucide, le contenu flouté derrière, une ombre portée (`shadow-float`). |
-| `--color-surface` | `#ffffff` | Le blanc : cartes, champs, landing entière. |
-| `--color-ground` | `#f4f5fa` | Gris 1, très légèrement bleuté : le fond de l'app, les lignes alternées. |
-| `--color-line` | `#e4e7ec` | Gris 2 : bordures et séparateurs. |
-| `--color-muted` | `#5f6774` | Gris 3 : texte secondaire (AA sur blanc 5,9:1). `--color-subtle` devient un alias de `muted` : plus de quatrième gris. |
+| `--color-accent` | `#ffcc00` | Le jaune signal : bouton principal (texte noir dessus, `--color-on-accent`), chrono et mot clé sur fond de nuit, aplat du téléphone et bloc du compteur sur la landing, bordure de l'offre choisie. JAMAIS un texte sur fond clair (contraste 1,4:1). |
+| `--color-accent-text` | `#0d0f14` | Ce qu'un lien ou un libellé « accent » devient sur fond clair : l'encre. |
+| `--color-accent-hover` | `#ebbd00` | Le jaune pressé. |
+| `--color-accent-soft` | `#fff3b8` | Le jaune pâle : pastille de l'onglet actif, pastilles d'icône, carte « Mets ton négoce dans la boucle », teintes des étapes. |
+| `--color-ink` / `--color-night` | `#0d0f14` | Le noir profond : titres et texte de l'app, fond de la landing, carte du mois (`bg-hero` : noir plus un halo jaune à 16 % dans un angle). |
+| `--color-night-2` | `#171a21` | Le noir un ton plus clair : cartes sur fond de nuit (étapes, partage). Sur la nuit, les textes secondaires sont `white/70`, les bordures `white/10`. |
+| `--color-surface` / `--color-ground` | `#ffffff` / `#f4f4f1` | Cartes blanches sur un gris très légèrement chaud. |
+| `--color-line` / `--color-muted` | `#e4e7ec` / `#5f6774` | Bordures ; texte secondaire (AA 5,9:1). |
 
-Les couleurs d'état restent (règles produit §50, §51.6 : le vert franc d'une coche, le point orange d'une ligne à régler, le rouge d'une erreur) : `ok`, `warn`, `danger` et leurs fonds pâles. Ce ne sont pas des couleurs de décoration : elles ne servent qu'à dire un état. `--color-violet`, `--color-pink`, `--color-accent-glow` sont retirés du système.
+Les teintes pastel (`tint-*`) valent désormais le jaune pâle ou un gris chaud : plus de ciel, lavande, menthe, pêche. Les couleurs d'état restent (`ok`, `warn`, `danger`) et ne disent qu'un état. `bg-glass` (capsule du bas) reste.
 
-### Police (une seule, trois graisses)
+### Police (titres en Bricolage Grotesque)
+
+Bricolage Grotesque (variable, auto-hébergée par `next/font/local` depuis `@fontsource-variable/bricolage-grotesque`, déjà dans `package.json`) pour `h1`, `h2` et `.font-display` : titres d'écran (`PageTitle` 36 px), chrono (64 px sur la carte du mois), accroche de la landing (52 px sur téléphone, 84 sur ordinateur), compteur (88 / 128 px). Plus Jakarta Sans pour tout le reste.
+
+### Texte courant (une police, trois graisses)
 
 Plus Jakarta Sans (variable, déjà chargée par `next/font`) partout ; Bricolage Grotesque (les titres) n'est plus chargée : `--font-display` vaut la même famille. Trois graisses : **400** (texte), **600** (libellés, boutons, texte mis en avant), **800** (titres). Les utilitaires Tailwind sont ramenés à ces trois valeurs dans `@theme` (`font-medium` → 400, `font-semibold` et `font-bold` → 600, `font-extrabold` → 800) : aucun écran n'a eu à changer ses classes, et aucun ne peut en sortir.
 

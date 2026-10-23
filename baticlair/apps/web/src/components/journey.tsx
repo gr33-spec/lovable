@@ -93,7 +93,7 @@ export function DropZone({
           over ? "border-accent bg-accent/5" : "border-line bg-surface"
         } ${pending ? "pointer-events-none opacity-80" : ""}`}
       >
-        <span className={`flex size-16 items-center justify-center rounded-full text-white ${liste ? "bg-ink" : "bg-accent"}`}>
+        <span className={`flex size-16 items-center justify-center rounded-full ${liste ? "bg-ink text-white" : "bg-accent text-on-accent"}`}>
           {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : liste ? <ListChecks size={28} aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
         </span>
         <span className="text-[22px] leading-tight font-extrabold tracking-[-0.02em]">{pending && liste ? "Je lis ta liste…" : liste ? "Donne ta liste de matériaux" : "J'ai un devis"}</span>
@@ -578,7 +578,7 @@ function QuestionCard({
                 aria-pressed={on}
                 onClick={() => onChange(on ? null : { value: o.value, label: o.label })}
                 className={`inline-flex min-h-12 flex-col items-center justify-center rounded-2xl border-2 px-3 py-1.5 text-center text-[15px] leading-tight font-extrabold transition active:scale-[0.98] ${
-                  on ? "border-accent bg-accent text-white" : usual ? "border-accent/50 bg-[#eef2ff] text-ink" : "border-line bg-surface text-ink"
+                  on ? "border-accent bg-accent text-on-accent" : usual ? "border-accent/50 bg-[#eef2ff] text-ink" : "border-line bg-surface text-ink"
                 }`}
               >
                 {o.label}
