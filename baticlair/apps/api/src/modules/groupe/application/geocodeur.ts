@@ -12,8 +12,14 @@ export interface Geocodeur {
 
 export const GEOCODEUR = Symbol("GEOCODEUR");
 
+/**
+ * Le strict nécessaire de `fetch`, typé ici : le compilateur de Vercel ne voit pas toujours les types web de Node
+ * (`Response.ok` absent), comme pour Sirene et Resend.
+ */
+type HttpGet = (url: string, init: { signal: AbortSignal }) => Promise<{ ok: boolean; json(): Promise<unknown> }>;
+
 export class BanGeocodeur implements Geocodeur {
-  constructor(private readonly fetchImpl: typeof fetch = fetch) {}
+  constructor(private readonly fetchImpl: HttpGet = fetch as unknown as HttpGet) {}
 
   async point(adresse: string): Promise<Point | null> {
     const q = adresse.trim();
