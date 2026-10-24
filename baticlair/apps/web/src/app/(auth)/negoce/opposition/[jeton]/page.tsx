@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, PageTitle } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
-import { NOM } from "@/lib/nom";
+import { NOM, NOM_APP } from "@/lib/nom";
 
 /**
  * « Ne plus jamais être contacté » (RGPD, 24 octobre 2026) : le lien de chaque e-mail d'invitation. Rien ne change au
@@ -42,7 +42,7 @@ export default function OppositionPage() {
         </p>
       ) : fait || page?.deja ? (
         <p role="status" className="rounded-xl bg-ok-bg p-4 font-semibold text-ok">
-          C&apos;est fait : vous ne serez plus jamais contacté par BatiClair. Vos coordonnées sont effacées ; seule une empreinte reste, pour que personne ne puisse
+          C&apos;est fait : vous ne serez plus jamais contacté par {NOM_APP}. Vos coordonnées sont effacées ; seule une empreinte reste, pour que personne ne puisse
           vous réinviter.
         </p>
       ) : page ? (

@@ -3,6 +3,7 @@
 import { Share, Smartphone, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
+import { NOM_APP } from "@/lib/nom";
 
 const CLE = "baticlair.ecranAccueil";
 
@@ -51,7 +52,7 @@ export function InstallHint() {
       <div className="flex items-start justify-between gap-3">
         <p className="flex items-center gap-2 text-[16px] font-extrabold">
           <Smartphone size={18} aria-hidden="true" className="text-accent-on-dark" />
-          Mets BatiClair sur ton écran d&apos;accueil
+          Mets {NOM_APP} sur ton écran d&apos;accueil
         </p>
         <button type="button" onClick={fermer} aria-label="Fermer" className="-mt-1 -mr-1 flex size-9 shrink-0 items-center justify-center rounded-full text-white/70">
           <X size={18} aria-hidden="true" />

@@ -1,3 +1,4 @@
+import { NOM_APP } from "@/lib/nom";
 /**
  * « METS TON NÉGOCE DANS LA BOUCLE » (Greg, 23 octobre 2026) : le message que l'artisan envoie à son négoce (WhatsApp, SMS
  * ou copié), vouvoyé, mot pour mot. Le lien est l'invitation du négoce (`/negoce/rejoindre/<jeton>`, le même pour tous
@@ -5,4 +6,4 @@
  * d'invitation (ancienne API), la racine du site.
  */
 export const messageAuNegoceEnBoucle = (lien: string) =>
-  `Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres artisans de mon métier. Vous pouvez chiffrer tout le volume de la commande ici : ${lien}`;
+  `Bonjour, je passe par ${NOM_APP} pour commander mes matériaux groupés avec d'autres artisans de mon métier. Vous pouvez chiffrer tout le volume de la commande ici : ${lien}`;

@@ -3,8 +3,9 @@ import Link from "next/link";
 import { ConditionsNegoceListe } from "@/components/conditions-negoce";
 import { styleLegal as s } from "@/components/legal-style";
 import { PageTitle } from "@/components/ui";
+import { NOM_APP } from "@/lib/nom";
 
-export const metadata: Metadata = { title: "Conditions négoces — BatiClair" };
+export const metadata: Metadata = { title: `Conditions négoces — ${NOM_APP}` };
 
 /**
  * Les conditions pour les négoces (mise en conformité du 24 octobre 2026) : le même texte que l'espace négoce, une seule

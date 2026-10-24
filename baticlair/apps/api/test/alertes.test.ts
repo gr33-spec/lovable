@@ -32,7 +32,7 @@ describe("alertes de production", () => {
     const { a, posts, mails } = alerter({ webhookUrl: "https://hooks.example/x", email: "alerte@example.fr" });
     a.alert("ai_reading_failed", "raison : timeout.");
     await flush();
-    expect(posts).toEqual([{ url: "https://hooks.example/x", body: { text: "BatiClair (production) — Lecture de devis échouée : raison : timeout.", content: "BatiClair (production) — Lecture de devis échouée : raison : timeout." } }]);
+    expect(posts).toEqual([{ url: "https://hooks.example/x", body: { text: "Mobiiz (production) — Lecture de devis échouée : raison : timeout.", content: "Mobiiz (production) — Lecture de devis échouée : raison : timeout." } }]);
     expect(mails[0]).toMatchObject({ to: "alerte@example.fr" });
   });
 

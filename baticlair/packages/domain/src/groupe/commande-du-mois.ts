@@ -1,5 +1,6 @@
 import { fraisDeLivraisonPaliers, type PaliersLivraison } from "./espace-negoce.js";
 import { compteurDeReponses } from "./suivi-des-demandes.js";
+import { NOM_APP } from "./marque.js";
 
 /**
  * LA COMMANDE COMMUNE (décision de Greg, 22 octobre 2026, au soir ; cycle raccourci le 23 octobre) : elle remplace le
@@ -470,7 +471,7 @@ export function mailGrilleAuNegoce(m: { negoce: string; mois: Mois; departement:
       "Aucun nom d'artisan ne vous est communiqué avant sa commande. Aucun frais pour vous.",
       `Se désabonner : ${m.stop}`,
       "",
-      "BatiClair, la commande commune des artisans du bâtiment",
+      `${NOM_APP}, la commande commune des artisans du bâtiment`,
     ].join("\n"),
   };
 }
@@ -479,7 +480,7 @@ export function mailGrilleAuNegoce(m: { negoce: string; mois: Mois; departement:
 export function mailRelanceNegoce(m: { mois: Mois; departement: string; reponseAvant: Date; maintenant: Date; lien: string }): { objet: string; texte: string } {
   return {
     objet: `Rappel : commande commune ${deMois(m.mois)} (${m.departement}), réponse avant demain ${heureFr(m.reponseAvant)} h`,
-    texte: ["Bonjour,", "", `Nous n'avons pas encore votre grille pour la commande commune ${deMois(m.mois)}.`, `${echeanceNegoce(m.reponseAvant, m.maintenant)}.`, `Déposez votre devis ici : ${m.lien}`, "", "BatiClair"].join("\n"),
+    texte: ["Bonjour,", "", `Nous n'avons pas encore votre grille pour la commande commune ${deMois(m.mois)}.`, `${echeanceNegoce(m.reponseAvant, m.maintenant)}.`, `Déposez votre devis ici : ${m.lien}`, "", NOM_APP].join("\n"),
   };
 }
 
@@ -495,7 +496,7 @@ export function mailResultatNegoce(m: { mois: Mois; departement: string; premier
         : `Merci pour votre grille. Elle n'est pas la moins chère sur le total de la commande ${deMois(m.mois)}. Chaque artisan reste libre de choisir le négoce le moins cher pour lui : vous recevrez un bon de commande de ceux qui vous choisissent.`,
       PHRASE_PRIX_FERMES,
       "",
-      "BatiClair",
+      NOM_APP,
     ].join("\n"),
   };
 }

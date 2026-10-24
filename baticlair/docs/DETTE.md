@@ -40,6 +40,14 @@ Plan du 20 octobre 2026, bloc 12. Par ordre de risque ; chaque ligne dit le risq
 | ~~33~~ | ~~Moyen~~ | ~~Une erreur 500 vue une fois sur `/v1/price-requests/settings` (e2e « zéro bouton mort », ordinateur), non reproduite.~~ Réglée le 23 octobre : revue sur `/v1/partner-keys` avec sa cause (`ECONNRESET` du proxy de Next : l'API fermait une connexion gardée ouverte au moment où le proxy la réutilisait, 5 s par défaut). | `keepAliveTimeout` de l'API à 65 s, au-dessus du client (`main.ts`). | — | Faite. |
 | 34 | Faible | `deepmerge-ts` 7 et `vite` 8.3.1 signalés par `pnpm audit` (outils de migration et de test). | Rien de cela ne tourne en production. | Monter Prisma et Vitest quand leurs versions corrigées sortent. | Mise à jour des outils. |
 
+| 28 | Faible | Le nom Mobiiz (24 octobre) ne touche que le visible : dépôt `gr33-spec/lovable`, dossier `baticlair/`, paquets `@baticlair/*`, projets Vercel `baticlair` et `baticlair-api`, base Neon, variable `BATICLAIR_ANTHROPIC_KEY`, clés du navigateur (`baticlair.*`), domaine des faux comptes (`demo.baticlair.fr`) et `verifiedBy` des référentiels gardent l'ancien nom. | Test `apps/web/scripts/nom-app.test.mjs` : l'ancien nom ne revient pas dans le visible. | Renommer dépôt, projets Vercel et base en une fois, avec une fenêtre de maintenance (les variables et les secrets suivent). | Sur décision de Greg, après la mise en production. |
+| 29 | Faible | Les logos Mobiiz sont des PNG tirés de l'image envoyée par Greg (fond retiré au code) : bords légèrement crénelés en très grand, pas de vectoriel. Le logo des PDF est un PNG de 16 couleurs embarqué (`apps/api/src/platform/pdf/logo-mono.ts`). | Tailles prévues pour chaque usage (en-tête, pied, PWA, favicon, partage). | Des SVG du logo (clair, sombre, monochrome, icône) par un graphiste, puis remplacer les PNG. | Avant l'impression ou un grand affichage. |
+| 30 | Faible | `apps/web/scripts/icones-pwa.mjs` fabriquait les icônes depuis l'ancien `icon.svg` (retiré) : il ne sert plus (les icônes Mobiiz sont posées à la main). | Le script n'est appelé nulle part. | Le refaire depuis le futur SVG (dette 29), ou le retirer quand Greg l'autorise. | Avec la dette 29. |
+
+## État au 24 octobre 2026 (Mobiiz)
+
+Nouvelles, laissées avec leur parade : 28 à 30.
+
 ## État au 23 octobre 2026 (plan « finition », bloc 8)
 
 Rien de nouveau n'est **élevé**. Faites pendant la finition (hors tableau) : confirmations de l'admin, alerte en double au redépôt d'un négoce, suivi qui ne suivait pas la liste, démo et polices qui faisaient sauter la landing (Lighthouse 66 → 97). Nouvelles, laissées avec leur parade : 23 à 27. À décider par Greg : 23 (rémunération, avec l'avocat), 25 (« Fournisseurs » ou « négoces »).

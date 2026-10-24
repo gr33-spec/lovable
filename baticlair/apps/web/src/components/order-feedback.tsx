@@ -7,6 +7,7 @@ import { api, ApiError, MAX_DOCUMENT_BYTES, type OrderGap, type PriceRequest } f
 import { shortName } from "@/lib/labels";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { attachFile } from "@/lib/upload";
+import { NOM_APP } from "@/lib/nom";
 
 function toError(e: unknown): ApiError {
   return e instanceof ApiError ? e : new ApiError("internal_error", 500);
@@ -92,7 +93,7 @@ export function OrderFeedbackBox({ request, supplierId, supplierName, onRequestC
             ))}
           </ul>
         ) : null}
-        <span className="text-xs text-muted">Noté pour améliorer les calculs de BatiClair.</span>
+        <span className="text-xs text-muted">Noté pour améliorer les calculs de {NOM_APP}.</span>
       </div>
     );
   }

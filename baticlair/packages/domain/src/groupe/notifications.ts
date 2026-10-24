@@ -1,5 +1,6 @@
 import { DELAI_REPONSE_JOURS } from "./demande.js";
 import { NOM_COMMANDE_COMMUNE, nomCommun } from "./nom.js";
+import { NOM_APP } from "./marque.js";
 
 /**
  * LES NOTIFICATIONS DE L'ARTISAN (parcours groupé, étape 8 ; section 3 du document), en code pur : quatre messages par
@@ -69,13 +70,13 @@ export function messageDesistement(d: { sanction: "avertissement" | "exclusion";
   if (d.sanction === "avertissement") {
     return {
       objet: `${NOM_COMMANDE_COMMUNE} : désistement enregistré, avertissement`,
-      texte: `Bonjour,\n\nTu t'étais engagé à commander ces quantités au prix de la ${nomCommun()} et tu ne donnes pas suite : c'est un avertissement, sans frais. Un deuxième désistement dans les 12 mois fermerait la ${nomCommun()} 6 mois (tu garderais BatiClair). Le négoce est prévenu et peut annuler ta ligne.\n\nBatiClair`,
+      texte: `Bonjour,\n\nTu t'étais engagé à commander ces quantités au prix de la ${nomCommun()} et tu ne donnes pas suite : c'est un avertissement, sans frais. Un deuxième désistement dans les 12 mois fermerait la ${nomCommun()} 6 mois (tu garderais ${NOM_APP}). Le négoce est prévenu et peut annuler ta ligne.\n\n${NOM_APP}`,
     };
   }
   const jusquau = d.excluJusquau ? d.excluJusquau.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : "";
   return {
     objet: `${NOM_COMMANDE_COMMUNE} : deuxième désistement, fermée 6 mois`,
-    texte: `Bonjour,\n\nDeuxième désistement en 12 mois : la ${nomCommun()} se ferme pour toi jusqu'au ${jusquau}. Tu gardes BatiClair et tes chantiers. Le négoce est prévenu et peut annuler ta ligne.\n\nBatiClair`,
+    texte: `Bonjour,\n\nDeuxième désistement en 12 mois : la ${nomCommun()} se ferme pour toi jusqu'au ${jusquau}. Tu gardes ${NOM_APP} et tes chantiers. Le négoce est prévenu et peut annuler ta ligne.\n\n${NOM_APP}`,
   };
 }
 

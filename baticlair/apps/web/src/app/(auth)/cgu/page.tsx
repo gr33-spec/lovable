@@ -3,9 +3,9 @@ import Link from "next/link";
 import { styleLegal as s } from "@/components/legal-style";
 import { PageTitle } from "@/components/ui";
 import { EDITEUR, TRIBUNAL, VERSION_CGU } from "@/lib/legal";
-import { NOM, nom } from "@/lib/nom";
+import { nom, NOM, NOM_APP } from "@/lib/nom";
 
-export const metadata: Metadata = { title: "Conditions générales d'utilisation — BatiClair" };
+export const metadata: Metadata = { title: `Conditions générales d'utilisation — ${NOM_APP}` };
 
 /**
  * LES CGU ARTISAN (mise en conformité du 24 octobre 2026), en mots simples : un service entre professionnels, la commande
@@ -18,14 +18,14 @@ export default function CguPage() {
     <article className="flex flex-col gap-5">
       <PageTitle>Conditions générales d&apos;utilisation</PageTitle>
       <p className="text-sm text-muted">
-        Version du {VERSION_CGU.split("-").reverse().join("/")}. Elles s&apos;appliquent à tout compte artisan créé sur BatiClair. Une nouvelle version majeure vous est
+        Version du {VERSION_CGU.split("-").reverse().join("/")}. Elles s&apos;appliquent à tout compte artisan créé sur {NOM_APP}. Une nouvelle version majeure vous est
         présentée dans l&apos;application et doit être acceptée pour continuer ; la date et la version acceptées sont enregistrées.
       </p>
 
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>1. Un service réservé aux professionnels</h2>
         <p className={s.p}>
-          BatiClair est édité par {EDITEUR.nom} (voir les{" "}
+          {NOM_APP} est édité par {EDITEUR.nom} (voir les{" "}
           <Link href="/mentions-legales" className="font-semibold underline">
             mentions légales
           </Link>
@@ -35,10 +35,10 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>2. Ce que fait BatiClair</h2>
+        <h2 className={s.h2}>2. Ce que fait {NOM_APP}</h2>
         <ul className={s.ul}>
           <li>
-            BatiClair lit les listes de matériaux et les devis que vous déposez et en sort la liste des fournitures. Une liste est reprise telle que vous l&apos;avez
+            {NOM_APP} lit les listes de matériaux et les devis que vous déposez et en sort la liste des fournitures. Une liste est reprise telle que vous l&apos;avez
             écrite ; d&apos;un devis, les quantités sont calculées à partir du devis et de référentiels métier. C&apos;est une aide : vous restez responsable de ce que
             vous commandez.
           </li>
@@ -84,7 +84,7 @@ export default function CguPage() {
         <h2 className={s.h2}>5. Les documents que vous déposez</h2>
         <ul className={s.ul}>
           <li>
-            Vous garantissez avoir le droit de transmettre chaque liste ou devis que vous déposez. Un devis peut contenir les coordonnées de votre client : BatiClair
+            Vous garantissez avoir le droit de transmettre chaque liste ou devis que vous déposez. Un devis peut contenir les coordonnées de votre client : {NOM_APP}
             les retire du texte avant de l&apos;enregistrer et avant toute lecture automatique, et ne garde que la commune du chantier (voir la{" "}
             <Link href="/confidentialite" className="font-semibold underline">
               politique de confidentialité
@@ -92,8 +92,8 @@ export default function CguPage() {
             ).
           </li>
           <li>
-            Quand vous invitez un collègue, le message part de votre téléphone (WhatsApp, SMS ou lien copié) : BatiClair n&apos;envoie rien et ne garde pas son numéro.
-            Quand vous ajoutez votre négoce, BatiClair lui écrit une seule fois pour l&apos;inviter, en disant qu&apos;un artisan de son secteur l&apos;a ajouté, sans votre
+            Quand vous invitez un collègue, le message part de votre téléphone (WhatsApp, SMS ou lien copié) : {NOM_APP} n&apos;envoie rien et ne garde pas son numéro.
+            Quand vous ajoutez votre négoce, {NOM_APP} lui écrit une seule fois pour l&apos;inviter, en disant qu&apos;un artisan de son secteur l&apos;a ajouté, sans votre
             nom.
           </li>
         </ul>
@@ -102,7 +102,7 @@ export default function CguPage() {
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>6. Responsabilité</h2>
         <p className={s.p}>
-          BatiClair est fourni avec le soin d&apos;un service en construction. La responsabilité de {EDITEUR.nom} est limitée aux dommages directs causés par une faute
+          {NOM_APP} est fourni avec le soin d&apos;un service en construction. La responsabilité de {EDITEUR.nom} est limitée aux dommages directs causés par une faute
           prouvée de sa part ; elle ne couvre ni une commande passée sur une quantité que vous n&apos;avez pas vérifiée, ni le fait d&apos;un négoce (prix, retard,
           défaut). Le service peut être interrompu pour maintenance ; vos données restent récupérables depuis Compte → Mes données.
         </p>

@@ -1,6 +1,7 @@
 import { PHRASE_REMUNERATION_NEGOCE } from "./demande.js";
 import { NOM_COMMANDE_COMMUNE } from "./nom.js";
 import { deMois, type Mois } from "./commande-du-mois.js";
+import { NOM_APP } from "./marque.js";
 
 /**
  * L'ESPACE NÉGOCE AUTONOME (Greg, 23 octobre 2026) : « que Greg n'intervienne jamais entre un artisan et un négoce ».
@@ -114,7 +115,7 @@ export function mailInvitationNegoce(m: { lien: string; departement: string | nu
       "Bonjour,",
       "",
       // RGPD (24 octobre 2026) : qui écrit, pourquoi, et comment ne plus jamais être contacté.
-      `Ce message vous est envoyé par BATI INVEST (BatiClair) pour la ${NOM_COMMANDE_COMMUNE}.`,
+      `Ce message vous est envoyé par BATI INVEST (${NOM_APP}) pour la ${NOM_COMMANDE_COMMUNE}.`,
       `Pourquoi ce message ? Un artisan de votre secteur${secteur} vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : les artisans d'un même département regroupent leurs commandes de matériaux, une grille unique vous est envoyée toutes les deux semaines et vous faites votre prix.`,
       "Créez votre accès en une minute (votre e-mail, vos dépôts, vos conditions de livraison) :",
       m.lien,
@@ -123,7 +124,7 @@ export function mailInvitationNegoce(m: { lien: string; departement: string | nu
       "Aucun frais pour vous. Sans accès créé, vous recevez au plus trois rappels, puis vos coordonnées sont effacées.",
       `Ne plus jamais être contacté : ${m.opposition}`,
       "",
-      "BatiClair",
+      NOM_APP,
     ].join("\n"),
   };
 }
@@ -131,8 +132,8 @@ export function mailInvitationNegoce(m: { lien: string; departement: string | nu
 /** Le lien magique de connexion (point 1) : pas de mot de passe. */
 export function mailLienDeConnexion(m: { lien: string }): { objet: string; texte: string } {
   return {
-    objet: "Votre lien de connexion BatiClair",
-    texte: ["Bonjour,", "", "Voici votre lien de connexion à votre espace négoce (valable 30 minutes) :", m.lien, "", "Si vous n'avez rien demandé, ignorez cet e-mail.", "", "BatiClair"].join("\n"),
+    objet: `Votre lien de connexion ${NOM_APP}`,
+    texte: ["Bonjour,", "", "Voici votre lien de connexion à votre espace négoce (valable 30 minutes) :", m.lien, "", "Si vous n'avez rien demandé, ignorez cet e-mail.", "", NOM_APP].join("\n"),
   };
 }
 
@@ -143,14 +144,14 @@ export function mailClotureSansCompte(m: { mois: Mois; departement: string; lien
     texte: [
       "Bonjour,",
       "",
-      `Ce message vous est envoyé par BATI INVEST (BatiClair) pour la ${NOM_COMMANDE_COMMUNE}, parce qu'un artisan de votre secteur vous y a ajouté.`,
+      `Ce message vous est envoyé par BATI INVEST (${NOM_APP}) pour la ${NOM_COMMANDE_COMMUNE}, parce qu'un artisan de votre secteur vous y a ajouté.`,
       `Les artisans du département ${m.departement} ont regroupé leurs commandes ${deMois(m.mois)}. Pour voir la grille et faire votre prix, créez votre accès (une minute) :`,
       m.lien,
       "",
       "Vous recevrez ensuite chaque grille de votre secteur à sa clôture. Aucun frais pour vous.",
       `Ne plus jamais être contacté : ${m.opposition}`,
       "",
-      "BatiClair",
+      NOM_APP,
     ].join("\n"),
   };
 }
@@ -181,7 +182,7 @@ export const CONDITIONS_NEGOCE: readonly { titre: string; texte: string }[] = [
   { titre: "Livraison selon vos paliers", texte: "Vous déclarez vos dépôts et vos paliers : gratuite jusqu'à une distance, un ou deux paliers payants, une distance maximale. Le prix livré de chaque artisan se calcule depuis votre dépôt le plus proche de son chantier ; au-delà de votre distance maximale, vous n'apparaissez pas dans son comparatif." },
   { titre: "Confidentialité des artisans", texte: "Jusqu'à sa commande, vous ne voyez d'un artisan ni son nom, ni son entreprise, ni son téléphone, ni son adresse exacte : seulement la grille (articles, quantités cumulées) et les communes de livraison. Ses coordonnées vous parviennent avec son bon de commande, et à vous seul." },
   { titre: "Concurrence : vos prix restent les vôtres", texte: "Les prix d'un négoce ne sont jamais communiqués à un autre négoce, ni pendant ni après la consultation. Pendant le délai, vous savez seulement combien de négoces sont consultés (jamais lesquels) et si vous êtes premier sur le total. Il n'existe aucun classement public." },
-  { titre: "Ni vendeur ni acheteur", texte: "BATI INVEST (BatiClair) met en relation, sans rien vendre ni acheter. Le contrat de vente est conclu directement entre l'artisan et vous : il commande sur son compte chez vous, vous le livrez et le facturez comme d'habitude. BatiClair n'encaisse aucun paiement et ne porte aucun risque d'impayé." },
+  { titre: "Ni vendeur ni acheteur", texte: `BATI INVEST (${NOM_APP}) met en relation, sans rien vendre ni acheter. Le contrat de vente est conclu directement entre l'artisan et vous : il commande sur son compte chez vous, vous le livrez et le facturez comme d'habitude. ${NOM_APP} n'encaisse aucun paiement et ne porte aucun risque d'impayé.` },
   { titre: "Aucun coût pour l'instant", texte: PHRASE_REMUNERATION_NEGOCE },
   { titre: "Désabonnement libre", texte: "Vous pouvez vous désabonner d'un département ou de tout, ou supprimer votre compte, à tout moment, depuis votre espace ou le lien présent dans chaque e-mail." },
   { titre: "Liberté de ne pas répondre", texte: "Vous répondez aux cycles que vous voulez. Ne pas répondre à une grille n'a aucune conséquence." },

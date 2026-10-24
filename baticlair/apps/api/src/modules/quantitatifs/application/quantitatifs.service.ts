@@ -8,6 +8,7 @@ import type { ProjectsService } from "../../projects/index.js";
 import { takeoffDto, type ReviewedTakeoff, type TakeoffService } from "../../takeoff/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { quantitatifView } from "./quantitatif-view.js";
+import { NOM_APP } from "@baticlair/domain";
 
 export interface LigneEntree {
   libelle: string;
@@ -98,7 +99,7 @@ export class QuantitatifsService {
       throw new DomainError("no_referential", `No referential for trade « ${ctx.metier ?? trade} »`, {
         metier: METIER_NAMES[trade] ?? ctx.metier ?? trade,
         disponibles,
-        message: `BatiClair ne calcule pas encore les matériaux de ce métier. Métiers disponibles : ${disponibles.join(", ")}.`,
+        message: `${NOM_APP} ne calcule pas encore les matériaux de ce métier. Métiers disponibles : ${disponibles.join(", ")}.`,
       });
     }
     return trade;

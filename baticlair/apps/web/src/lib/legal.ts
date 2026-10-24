@@ -1,3 +1,4 @@
+import { NOM_APP } from "@/lib/nom";
 /**
  * Les pages légales (plan du 20 octobre 2026, bloc 6 ; mise en conformité du 24 octobre) : l'éditeur, les hébergeurs, la
  * version des CGU acceptée à l'inscription.
@@ -25,7 +26,7 @@ export const EDITEUR = {
   siret: "910 796 325 00017",
   adresse: "6 impasse du Ouipoure, 22620 Ploubazlanec",
   tva: "FR61910796325",
-  produit: "BatiClair",
+  produit: NOM_APP,
   /** Le directeur de la publication (LCEN, art. 6-III). */
   directeurPublication: A_COMPLETER,
   /** L'adresse e-mail de contact (LCEN) et des demandes RGPD. */

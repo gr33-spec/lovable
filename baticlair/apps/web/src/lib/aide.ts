@@ -1,4 +1,4 @@
-import { NOM, nom } from "@/lib/nom";
+import { nom, NOM, NOM_APP } from "@/lib/nom";
 /**
  * L'AIDE DANS L'APP (plan du 20 octobre 2026, bloc 10) : un « ? » sur chaque écran, trois lignes au plus, tutoiement,
  * les mots de l'artisan. Pas de page d'aide : ce qui tient en trois lignes se dit ici, le reste se lit sur l'écran.
@@ -40,6 +40,6 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
   },
   chantiers: {
     titre: "Tes chantiers",
-    lignes: ["Un chantier = un devis déposé. Dépose ton PDF ou ta photo, BatiClair sort la liste des fournitures.", `Tape un chantier pour reprendre où tu en étais : questions, liste, envoi, ${nom}.`],
+    lignes: [`Un chantier = un devis déposé. Dépose ton PDF ou ta photo, ${NOM_APP} sort la liste des fournitures.`, `Tape un chantier pour reprendre où tu en étais : questions, liste, envoi, ${nom}.`],
   },
 };

@@ -1,8 +1,10 @@
 import { PDFDocument, StandardFonts, type PDFFont } from "pdf-lib";
+import { LOGO_MONO_PNG_BASE64, LOGO_MONO_TAILLE } from "./logo-mono.js";
 
 /**
  * Un PDF de texte simple (la demande aux négoces, le contrat de commission) : un titre, des blocs faits de lignes ou de
- * tableaux. Les caractères que la police standard ne sait pas écrire sont remplacés, jamais une erreur.
+ * tableaux. Les caractères que la police standard ne sait pas écrire sont remplacés, jamais une erreur. En tête de la
+ * première page, le logo Mobiiz monochrome (24 octobre 2026).
  */
 export interface BlocPdf {
   titre?: string;
@@ -34,6 +36,10 @@ export async function pdfDeTexte(titre: string, blocs: readonly BlocPdf[]): Prom
   const gras = await pdf.embedFont(StandardFonts.HelveticaBold);
   let page = pdf.addPage([PAGE.w, PAGE.h]);
   let y = PAGE.h - PAGE.marge;
+  const logo = await pdf.embedPng(Buffer.from(LOGO_MONO_PNG_BASE64, "base64"));
+  const hauteurLogo = 22;
+  page.drawImage(logo, { x: PAGE.marge, y: y - hauteurLogo, height: hauteurLogo, width: (LOGO_MONO_TAILLE.largeur * hauteurLogo) / LOGO_MONO_TAILLE.hauteur });
+  y -= hauteurLogo + 18;
   const largeur = PAGE.w - 2 * PAGE.marge;
   const ecrire = (texte: string, taille: number, f: PDFFont) => {
     for (const l of couper(f, texte, taille, largeur)) {

@@ -22,6 +22,7 @@ import type { TenantContext } from "../../tenancy/index.js";
 import { assertCanWrite } from "../../tenancy/index.js";
 import { livraisonDe, type LivraisonEnregistree } from "./demande.service.js";
 import { pdfDeTexte } from "../../../platform/pdf/pdf-texte.js";
+import { NOM_APP } from "@baticlair/domain";
 
 /** La livraison promise à l'artisan (son prix livré), à écrire sur son bon ; rien pour un lot sans règle de livraison. */
 function livraisonPromise(regle: LivraisonEnregistree | null, besoinId: string): BonDeCommande["livraison"] {
@@ -112,9 +113,9 @@ export class CommandeService {
           "Bonjour,",
           `Votre offre a été retenue pour le lot n° ${lot.numero}. Vous trouverez ci-joint le bon de commande de chaque artisan (nom, numéro de compte ou ouverture de compte demandée, adresse du chantier, quantités, fenêtre de livraison) et le récapitulatif de vos livraisons.`,
           this.facture.active
-            ? "Chaque chantier se livre comme une commande normale, sur le compte du client ; facturation et paiement comme d'habitude. La facture de commission de BatiClair suit dans un e-mail à part."
-            : "Chaque chantier se livre comme une commande normale, sur le compte du client ; facturation et paiement comme d'habitude. BatiClair ne vous facture rien.",
-          `${NOM_COMMANDE_COMMUNE}, par BatiClair`,
+            ? `Chaque chantier se livre comme une commande normale, sur le compte du client ; facturation et paiement comme d'habitude. La facture de commission de ${NOM_APP} suit dans un e-mail à part.`
+            : `Chaque chantier se livre comme une commande normale, sur le compte du client ; facturation et paiement comme d'habitude. ${NOM_APP} ne vous facture rien.`,
+          `${NOM_COMMANDE_COMMUNE}, par ${NOM_APP}`,
         ].join("\n\n"),
         attachments: [pdfJoint(`recapitulatif-lot-${lot.numero}.pdf`, recapPdf), ...docs.map((d, i) => pdfJoint(`bon-de-commande-lot-${lot.numero}-${i + 1}.pdf`, d.pdf))],
         mustDeliver: true,
@@ -145,7 +146,7 @@ export class CommandeService {
         });
         await this.notifications.prevenir(offre.besoin.companyId, message, {
           objet: `Ton bon de commande, ${NOM_COMMANDE_COMMUNE.toLowerCase()} n° ${lot.numero}`,
-          texte: `Bonjour,\n\n${message.corps}\n\nTu commandes sur ton compte, tu es livré sur ton chantier, tu paies comme d'habitude. Le jour prévu, dis-nous d'un tap si tout est arrivé.\n\nBatiClair`,
+          texte: `Bonjour,\n\n${message.corps}\n\nTu commandes sur ton compte, tu es livré sur ton chantier, tu paies comme d'habitude. Le jour prévu, dis-nous d'un tap si tout est arrivé.\n\n${NOM_APP}`,
           piecesJointes: [pdfJoint(`bon-de-commande-lot-${lot.numero}.pdf`, d.pdf)],
         });
       }
@@ -175,7 +176,7 @@ export class CommandeService {
       await this.email.send({
         to: negoce.email,
         subject: `Facture n° ${creee.numero}, commission d'apporteur d'affaires, lot n° ${lot.numero}`,
-        text: `Bonjour,\n\nConformément à l'accord accepté lors de votre réponse (version ${accord.versionContrat}), vous trouverez ci-joint la facture de commission de ${montantHt.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT, soit ${montantTtc.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € TTC (${Number(accord.tauxPourcent)} % de ${totalLotHt.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT, TVA ${this.facture.tvaPourcent} %), payable à 30 jours, soit le ${jour(echeanceLe)}.\n\nBatiClair`,
+        text: `Bonjour,\n\nConformément à l'accord accepté lors de votre réponse (version ${accord.versionContrat}), vous trouverez ci-joint la facture de commission de ${montantHt.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT, soit ${montantTtc.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € TTC (${Number(accord.tauxPourcent)} % de ${totalLotHt.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT, TVA ${this.facture.tvaPourcent} %), payable à 30 jours, soit le ${jour(echeanceLe)}.\n\n${NOM_APP}`,
         attachments: [pdfJoint(`facture-${creee.numero}.pdf`, pdf)],
         mustDeliver: true,
       });
@@ -199,7 +200,7 @@ export class CommandeService {
         await this.email.send({
           to: f.negoce.email,
           subject: `Relance : facture n° ${f.numero}, lot n° ${f.lot.numero}`,
-          text: `Bonjour,\n\nSauf erreur de notre part, la facture n° ${f.numero} (${Number(f.montantHt).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT, échue le ${jour(f.echeanceLe)}) reste à régler. Merci de la régulariser.\n\nBatiClair`,
+          text: `Bonjour,\n\nSauf erreur de notre part, la facture n° ${f.numero} (${Number(f.montantHt).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT, échue le ${jour(f.echeanceLe)}) reste à régler. Merci de la régulariser.\n\n${NOM_APP}`,
           ...(f.pdf ? { attachments: [pdfJoint(`facture-${f.numero}.pdf`, f.pdf)] } : {}),
           mustDeliver: true,
         });
@@ -240,7 +241,7 @@ export class CommandeService {
       const to = c.contactEmail ?? emailDu.get(c.id);
       if (to) {
         try {
-          await this.email.send({ to, subject: `Lot n° ${l.bon.offre.lot.numero} : tout est arrivé ?`, text: `Bonjour,\n\nTa livraison (${l.bon.offre.besoin.designation}) était prévue le ${jour(l.datePrevue!)}. Tout est arrivé ? Dis-le d'un tap dans BatiClair, onglet Groupé : « Livré » ou « Problème ».\n\nBatiClair` });
+          await this.email.send({ to, subject: `Lot n° ${l.bon.offre.lot.numero} : tout est arrivé ?`, text: `Bonjour,\n\nTa livraison (${l.bon.offre.besoin.designation}) était prévue le ${jour(l.datePrevue!)}. Tout est arrivé ? Dis-le d'un tap dans ${NOM_APP}, onglet Groupé : « Livré » ou « Problème ».\n\n${NOM_APP}` });
         } catch {
           continue;
         }
@@ -272,7 +273,7 @@ export class CommandeService {
       await this.email.send({
         to: bon.negoce.email,
         subject: `${NOM_COMMANDE_COMMUNE} n° ${bon.offre.lot.numero} : une commande annulée`,
-        text: `Bonjour,\n\nLe client ${bon.offre.besoin.company.name} ne donne pas suite à son bon de commande du lot n° ${bon.offre.lot.numero} (${Number(bon.offre.besoin.quantite).toLocaleString("fr-FR", { maximumFractionDigits: 3 })} ${bon.offre.besoin.unite} de ${bon.offre.besoin.designation}, ${bon.offre.besoin.adresseLivraison}). Vous pouvez annuler cette ligne ; les autres bons du lot sont inchangés.\n\n${NOM_COMMANDE_COMMUNE}, par BatiClair`,
+        text: `Bonjour,\n\nLe client ${bon.offre.besoin.company.name} ne donne pas suite à son bon de commande du lot n° ${bon.offre.lot.numero} (${Number(bon.offre.besoin.quantite).toLocaleString("fr-FR", { maximumFractionDigits: 3 })} ${bon.offre.besoin.unite} de ${bon.offre.besoin.designation}, ${bon.offre.besoin.adresseLivraison}). Vous pouvez annuler cette ligne ; les autres bons du lot sont inchangés.\n\n${NOM_COMMANDE_COMMUNE}, par ${NOM_APP}`,
       });
     } catch {
       // Journalisé ; Greg le voit.

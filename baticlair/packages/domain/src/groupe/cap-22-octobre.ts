@@ -1,5 +1,6 @@
 import type { MessageArtisan } from "./notifications.js";
 import { nomCommun } from "./nom.js";
+import { NOM_APP } from "./marque.js";
 
 /**
  * NOUVEAU CAP DU 22 OCTOBRE 2026 (décidé avec Greg, section 0 du doc « BatiClair Groupé », prioritaire sur les sections
@@ -195,13 +196,13 @@ export function mailRegroupementAuNegoce(m: { negoce: string; departement: strin
     texte: [
       "Bonjour,",
       "",
-      `${m.artisan} vous a indiqué comme son négoce sur BatiClair. Des ${qui} ${secteur} y regroupent leurs listes de matériaux pour obtenir un meilleur prix.`,
+      `${m.artisan} vous a indiqué comme son négoce sur ${NOM_APP}. Des ${qui} ${secteur} y regroupent leurs listes de matériaux pour obtenir un meilleur prix.`,
       "",
       "Quand plusieurs d'entre eux ont besoin des mêmes articles, vous recevez une demande de prix commune par e-mail : un lien, vous déposez votre devis avec vos conditions de livraison (gratuite jusqu'à une distance que vous fixez, un prix par livraison au-delà). Rien à installer, aucun compte à créer.",
       "",
       `Pour ne plus rien recevoir : ${m.stop}`,
       "",
-      "BatiClair",
+      NOM_APP,
     ].join("\n"),
   };
 }

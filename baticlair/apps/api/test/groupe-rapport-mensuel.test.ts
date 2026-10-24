@@ -84,7 +84,7 @@ describe("le rapport mensuel de l'artisan", { timeout: 90_000 }, () => {
     expect(r.body).toEqual({ mois, envoyes: 2, sansRien: 1, dejaFaits: 0 });
     const mailA = mailsVers("a@example.fr");
     expect(mailA).toHaveLength(1);
-    expect(mailA[0]!.subject).toBe(`Ton mois ${/^[aeiouy]/i.test(nomDuMois(mois)) ? "d'" : "de "}${nomDuMois(mois)} avec BatiClair : 1 chantier lu, 58 € économisés, 1 lot`);
+    expect(mailA[0]!.subject).toBe(`Ton mois ${/^[aeiouy]/i.test(nomDuMois(mois)) ? "d'" : "de "}${nomDuMois(mois)} avec Mobiiz : 1 chantier lu, 58 € économisés, 1 lot`);
     expect(mailA[0]!.text).toContain("Ce mois : 1 chantier lu, 58 € économisés grâce à la commande commune, 1 lot.");
     expect(mailA[0]!.text).toContain("Bonjour Artisan,");
     expect(mailA[0]!.html).toContain("<strong>Ce mois : 1 chantier lu, 58 € économisés grâce à la commande commune, 1 lot.</strong>");

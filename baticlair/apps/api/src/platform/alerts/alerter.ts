@@ -1,5 +1,6 @@
 import type { TransactionalEmailSender } from "../email/email.port.js";
 import type { AppLogger } from "../logging/logger.js";
+import { NOM_APP } from "@baticlair/domain";
 
 /**
  * ALERTES (audit de lancement, B5) : quand la production casse, quelqu'un le sait sans attendre
@@ -51,7 +52,7 @@ export class ChannelAlerter implements Alerter {
     const silenced = this.skipped.get(kind) ?? 0;
     this.last.set(kind, at);
     this.skipped.set(kind, 0);
-    const text = `BatiClair (${this.channels.env}) — ${TITLES[kind]} : ${message}${silenced > 0 ? ` (+${silenced} autres depuis la dernière alerte)` : ""}`;
+    const text = `${NOM_APP} (${this.channels.env}) — ${TITLES[kind]} : ${message}${silenced > 0 ? ` (+${silenced} autres depuis la dernière alerte)` : ""}`;
     // Une alerte qui échoue ne fait jamais tomber la requête : elle est seulement journalisée.
     void this.send(text).catch((err: unknown) => this.logger.warn({ err }, "alerte non envoyée"));
   }

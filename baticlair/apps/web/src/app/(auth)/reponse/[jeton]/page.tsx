@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
-import { NOM } from "@/lib/nom";
+import { NOM, NOM_APP } from "@/lib/nom";
 
 /** Test complet (21 octobre) : l'espace fine de fr-FR (U+202F) ne se voit pas dans la police ; une espace insécable, si. */
 const lisible = (texte: string) => texte.replace(/\u202f/g, "\u00a0");
@@ -190,7 +190,7 @@ export default function ReponseNegocePage() {
         </form>
       )}
       <footer className="mt-4 flex flex-col gap-2 text-sm text-muted">
-        <p>BatiClair est édité par BATI INVEST SARL. Une question : répondez simplement à l&apos;e-mail reçu.</p>
+        <p>{NOM_APP} est édité par BATI INVEST SARL. Une question : répondez simplement à l&apos;e-mail reçu.</p>
       </footer>
     </>
   );

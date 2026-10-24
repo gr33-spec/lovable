@@ -1,4 +1,4 @@
-import { NOM, nom } from "@/lib/nom";
+import { nom, NOM, NOM_APP } from "@/lib/nom";
 /**
  * Textes d'interface partagés (français). Les textes propres à un seul
  * écran restent dans cet écran ; tout ce qui se répète (navigation,
@@ -29,7 +29,7 @@ const errorMessages: Record<string, string> = {
   request_in_progress: "C'est en cours d'enregistrement, patiente une seconde.",
   payload_too_large: "C'est trop volumineux pour être envoyé.",
   unreadable_document: "Ce fichier ne peut pas être lu.",
-  no_referential: "BatiClair ne calcule pas encore les matériaux de ce métier.",
+  no_referential: `${NOM_APP} ne calcule pas encore les matériaux de ce métier.`,
   analysis_quota_reached: "Tu as atteint la limite de ta formule ce mois-ci. Tes chantiers en cours restent consultables.",
   ai_unavailable: "Cette fonction n'est pas encore activée sur ton compte.",
   analysis_failed: "Ce devis n'a pas pu être lu. Réessaie dans un instant.",

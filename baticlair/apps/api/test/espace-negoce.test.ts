@@ -122,7 +122,7 @@ describe("1 bis. la connexion par lien magique, la session de 30 jours", { timeo
     expect(ctx.emails.sent).toHaveLength(0);
     await srv().post(`/v1/negoce/connexion?maintenant=${T0}`).send({ email: "Contact@Negoce-Ponant.fr" }).expect(200);
     const mail = mailsVers(ctx, "contact@negoce-ponant.fr").at(-1)!;
-    expect(mail.subject).toBe("Votre lien de connexion BatiClair");
+    expect(mail.subject).toBe("Votre lien de connexion Mobiiz");
     const jeton = /\/negoce\/connexion\/([A-Za-z0-9_.-]+)/.exec(mail.text)![1]!;
     await srv().post(`/v1/negoce/connexion/${jeton}?maintenant=2026-10-10T07:31:00.000Z`).expect(404);
     const r = await srv().post(`/v1/negoce/connexion/${jeton}?maintenant=2026-10-10T07:20:00.000Z`).expect(200);

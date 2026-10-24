@@ -13,6 +13,7 @@ import { CommandeDuMoisService } from "../application/commande-du-mois.service.j
 import { EspaceNegoceService } from "../application/espace-negoce.service.js";
 import { cookieNegoce, enTeteCookieNegoce } from "../application/jetons-negoce.js";
 import { pdfDesDonnees } from "../../privacy/index.js";
+import { NOM_APP } from "@baticlair/domain";
 
 const departement = z.string().trim().regex(/^(\d{2}|2A|2B|97\d|98\d)$/);
 const paliers = z.object({ gratuiteJusquaKm: z.union([z.number(), z.string()]), paliers: z.array(z.object({ jusquaKm: z.union([z.number(), z.string()]), prixHt: z.union([z.number(), z.string()]) })).max(2), maxKm: z.union([z.number(), z.string()]) });
@@ -189,7 +190,7 @@ export class EspaceNegoceController {
   @Get("export")
   async export(@Headers("cookie") cookie: string | undefined, @Res({ passthrough: true }) res: Response, @Query("maintenant") m?: string) {
     const compteId = await this.compteConnecte(cookie, m);
-    res.setHeader("Content-Disposition", `attachment; filename="baticlair-negoce-mes-donnees-${new Date().toISOString().slice(0, 10)}.json"`);
+    res.setHeader("Content-Disposition", `attachment; filename="mobiiz-negoce-mes-donnees-${new Date().toISOString().slice(0, 10)}.json"`);
     return this.espace.export(compteId);
   }
 
@@ -198,9 +199,9 @@ export class EspaceNegoceController {
   @Get("export.pdf")
   async exportPdf(@Headers("cookie") cookie: string | undefined, @Res() res: Response, @Query("maintenant") m?: string) {
     const compteId = await this.compteConnecte(cookie, m);
-    const pdf = await pdfDesDonnees("Mes données BatiClair (négoce)", await this.espace.export(compteId));
+    const pdf = await pdfDesDonnees(`Mes données ${NOM_APP} (négoce)`, await this.espace.export(compteId));
     res.setHeader("content-type", "application/pdf");
-    res.setHeader("content-disposition", `attachment; filename="baticlair-negoce-mes-donnees-${new Date().toISOString().slice(0, 10)}.pdf"`);
+    res.setHeader("content-disposition", `attachment; filename="mobiiz-negoce-mes-donnees-${new Date().toISOString().slice(0, 10)}.pdf"`);
     res.send(Buffer.from(pdf));
   }
 

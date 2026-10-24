@@ -1,4 +1,5 @@
 import { nomCommun } from "./nom.js";
+import { NOM_APP } from "./marque.js";
 /**
  * LE RAPPORT MENSUEL DE L'ARTISAN (plan 2 du 21 octobre 2026, bloc 4) : le 1er du mois, un e-mail court sur le mois
  * écoulé, « ce mois : X chantiers lus, Y € économisés grâce à la ${nomCommun()}, Z lots ». Tutoiement, aucun nom d'autre artisan, rien
@@ -53,16 +54,16 @@ export function rapportMensuel(b: BilanMensuel, prenom: string | null = null): {
       : b.chantiersLus > 0
         ? `Pas de lot ce mois-ci : ajoute une ligne de ta liste à la ${nomCommun()} dès que le chantier est signé, le prix se fait avec les autres artisans du département.`
         : "";
-  const texte = [bonjour, "", `Ton mois ${deOuD(mois)}${mois} avec BatiClair.`, "", resume, ...(suite ? ["", suite] : []), "", "Rien à faire : c'est juste pour savoir où tu en es.", "", "BatiClair"].join("\n");
+  const texte = [bonjour, "", `Ton mois ${deOuD(mois)}${mois} avec ${NOM_APP}.`, "", resume, ...(suite ? ["", suite] : []), "", "Rien à faire : c'est juste pour savoir où tu en es.", "", NOM_APP].join("\n");
   const html = [
     `<p>${bonjour}</p>`,
-    `<p>Ton mois ${deOuD(mois)}${mois} avec BatiClair.</p>`,
+    `<p>Ton mois ${deOuD(mois)}${mois} avec ${NOM_APP}.</p>`,
     `<p><strong>${resume}</strong></p>`,
     ...(suite ? [`<p>${suite}</p>`] : []),
     "<p>Rien à faire : c'est juste pour savoir où tu en es.</p>",
-    "<p>BatiClair</p>",
+    `<p>${NOM_APP}</p>`,
   ].join("\n");
-  return { objet: `Ton mois ${deOuD(mois)}${mois} avec BatiClair : ${chantiers}, ${euros(b.economies)} économisés, ${lots}`, texte, html };
+  return { objet: `Ton mois ${deOuD(mois)}${mois} avec ${NOM_APP} : ${chantiers}, ${euros(b.economies)} économisés, ${lots}`, texte, html };
 }
 
 /** « d'octobre », « de novembre ». */

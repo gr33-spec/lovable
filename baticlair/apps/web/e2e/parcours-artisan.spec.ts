@@ -700,7 +700,7 @@ test("plusieurs articles ajoutés à la main, sans unité : gardés tels qu'écr
   for (const designation of ["Skimmer pour piscine liner", "Buse de refoulement", "Prise balai"]) {
     await expect(list.getByRole("listitem").filter({ hasText: designation }).first()).toBeVisible();
   }
-  await expect(page.getByText("Articles que BatiClair ne connaît pas encore")).toHaveCount(0);
+  await expect(page.getByText("Articles que Mobiiz ne connaît pas encore")).toHaveCount(0);
   await confirmDoubts(page);
   // Gardés tels qu'écrits, à la pièce : la ligne est verte, prête à partir.
   const skimmer = list.getByRole("listitem").filter({ hasText: "Skimmer pour piscine liner" }).first();
@@ -772,7 +772,7 @@ test("accueil : la prochaine action de chaque chantier, puis l'essai et les form
   await createProject(page, "Chantier 3", "", "");
   await page.goto("/chantiers/nouveau");
   await expect(page.getByRole("heading", { name: "Ton essai est terminé" })).toBeVisible();
-  await expect(page.getByText("Continue à utiliser BatiClair pour lire tes devis et comparer tes fournisseurs.")).toBeVisible();
+  await expect(page.getByText("Continue à utiliser Mobiiz pour lire tes devis et comparer tes fournisseurs.")).toBeVisible();
   const plans = page.getByRole("list", { name: "Formules" }).getByRole("listitem");
   await expect(plans).toHaveCount(2);
   await expect(plans.first()).toContainText("chantiers / mois");
@@ -796,7 +796,7 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   await page.goto("/compte");
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Télécharger mes données" }).click();
-  expect((await download).suggestedFilename()).toMatch(/^baticlair-mes-donnees-\d{4}-\d{2}-\d{2}\.json$/);
+  expect((await download).suggestedFilename()).toMatch(/^mobiiz-mes-donnees-\d{4}-\d{2}-\d{2}\.json$/);
   // Le même contenu en PDF, et le réglage des e-mails (RGPD, 24 octobre 2026).
   await expect(page.getByRole("link", { name: "En PDF" })).toHaveAttribute("href", "/v1/me/export.pdf");
   const pdf = await page.request.get("/v1/me/export.pdf");
@@ -814,7 +814,7 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   await page.goto("/compte");
 
   // Des essais au hasard ne restent pas des habitudes : on efface ce que BatiClair a appris, les chantiers restent.
-  await page.getByRole("button", { name: "Effacer ce que BatiClair a appris" }).click();
+  await page.getByRole("button", { name: "Effacer ce que Mobiiz a appris" }).click();
   await page.getByRole("button", { name: "Oui, tout effacer" }).click();
   await expect(page.getByText("C'est effacé. Les prochains chantiers reposeront les questions.")).toBeVisible();
 
@@ -2393,7 +2393,7 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   await expect(ligne).toContainText("Ton négoce negoce-du-ponant.fr est dans la boucle : il recevra la commande d");
   const prevenir = bloc.getByRole("group", { name: "Prévenir negoce-du-ponant.fr" });
   // Le lien du message est l'invitation du négoce (espace négoce, 23 octobre) : `/negoce/rejoindre/<jeton>`, jamais le nom de l'artisan.
-  const message = await prevenir.getByText(/^Bonjour, je passe par BatiClair pour commander mes matériaux groupés avec d'autres artisans de mon métier\. Vous pouvez chiffrer tout le volume de la commande ici : /).textContent();
+  const message = await prevenir.getByText(/^Bonjour, je passe par Mobiiz pour commander mes matériaux groupés avec d'autres artisans de mon métier\. Vous pouvez chiffrer tout le volume de la commande ici : /).textContent();
   expect(message).toMatch(new RegExp(`ici : ${new URL(page.url()).origin}/negoce/rejoindre/[A-Za-z0-9_.-]+$`));
   expect(message).not.toContain("Toitures Martin");
   await expect(prevenir.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", `https://wa.me/?text=${encodeURIComponent(message!)}`);
@@ -2458,7 +2458,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
-  for (const image of ["L'écran « Nouvelle liste » de BatiClair", /^L'écran « Commande commune » de BatiClair/, /^L'écran des prix reçus dans BatiClair/]) {
+  for (const image of ["L'écran « Nouvelle liste » de Mobiiz", /^L'écran « Commande commune » de Mobiiz/, /^L'écran des prix reçus dans Mobiiz/]) {
     await expect(page.getByRole("region", { name: "Comment ça marche" }).getByRole("img", { name: image })).toBeVisible();
   }
   await expect(page.getByText(/tuile/i)).toHaveCount(0);
@@ -2469,7 +2469,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText("des volumes sûrs, des clients en plus. Répondez aux grilles.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
   const partage = page.getByRole("region", { name: "Fais venir tes collègues" });
-  const message = /^Je me suis inscrit sur BatiClair, on regroupe nos commandes de matériaux pour payer moins cher\. Plus on est nombreux, plus on négocie\. Rejoins-nous : http/;
+  const message = /^Je me suis inscrit sur Mobiiz, on regroupe nos commandes de matériaux pour payer moins cher\. Plus on est nombreux, plus on négocie\. Rejoins-nous : http/;
   await expect(partage.getByText(message)).toBeVisible();
   const whatsapp = decodeURIComponent((await partage.getByRole("link", { name: "Envoyer sur WhatsApp" }).getAttribute("href"))!.replace(/^https:\/\/wa\.me\/\?text=/, ""));
   expect(whatsapp).toMatch(message);
@@ -2540,7 +2540,7 @@ test("Rapport mensuel : le 1er du mois, l'artisan reçoit « ce mois : X chantie
   expect(r.body.envoyes).toBeGreaterThanOrEqual(1);
   await expect.poll(async () => (await emailsVers(page, email)).length).toBeGreaterThan(dejaRecus);
   const rapport = (await emailsVers(page, email)).at(-1)!;
-  expect(rapport.subject).toMatch(/^Ton mois d[e'’ ]+[a-zû]+ \d{4} avec BatiClair : 1 chantier lu, 0 € économisés, 0 lot$/);
+  expect(rapport.subject).toMatch(/^Ton mois d[e'’ ]+[a-zû]+ \d{4} avec Mobiiz : 1 chantier lu, 0 € économisés, 0 lot$/);
   expect(rapport.text).toContain("Ce mois : 1 chantier lu, 0 € économisés grâce à la commande commune, 0 lot.");
   expect(rapport.text).toContain("Pas de lot ce mois-ci");
   expect(rapport.text).not.toMatch(/\bvous\b|\bvotre\b/i);

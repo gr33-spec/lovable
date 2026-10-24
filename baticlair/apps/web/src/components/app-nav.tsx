@@ -8,6 +8,7 @@ import { api, type Health } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { useTyping } from "@/lib/typing";
 import { useResource } from "@/lib/use-resource";
+import { Logo } from "@/components/logo";
 
 interface NavItem {
   href: string;
@@ -82,7 +83,9 @@ export function AppNav() {
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise) ; ordinateur : colonne à gauche. */}
       <div className="mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-cols-3 items-center rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-2xl lg:border lg:border-line lg:bg-surface lg:p-3 lg:shadow-card lg:ring-0">
-        <span className="hidden px-3 pt-2 pb-4 text-[20px] font-extrabold tracking-[-0.02em] text-ink lg:block">BatiClair</span>
+        <span className="hidden px-3 pt-2 pb-4 lg:block">
+          <Logo hauteur={28} />
+        </span>
         {link(chantiersItem)}
         <Link
           href="/chantiers/nouveau"

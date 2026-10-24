@@ -1,4 +1,4 @@
-// BatiClair : seulement pour prévenir l'artisan quand sa liste est prête (parcours §48). Aucun cache, aucune requête.
+// Mobiiz : seulement pour prévenir l'artisan quand sa liste est prête (parcours §48). Aucun cache, aucune requête.
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
@@ -11,13 +11,13 @@ self.addEventListener("push", (event) => {
   } catch {
     m = {};
   }
-  const title = m.title || "BatiClair";
+  const title = m.title || "Mobiiz";
   event.waitUntil(
     self.registration.showNotification(title, {
       body: m.body || "C'est prêt.",
       tag: m.tag || "baticlair",
       renotify: true,
-      icon: "/icon.svg",
+      icon: "/icon-192.png",
       data: { url: new URL(m.url || "/", self.location.origin).href },
     }),
   );

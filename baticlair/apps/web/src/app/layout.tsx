@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { ACCROCHE_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
 
 // Plan « finition », bloc 5 (Lighthouse, décalage 0,21 sur les pages légales) : la police passe par next/font,
 // qui les précharge et dessine d'abord une police de secours aux mêmes mesures ; le texte ne bouge plus à leur arrivée.
@@ -22,12 +23,15 @@ const bricolage = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: "BatiClair", template: "%s · BatiClair" },
+  title: { default: NOM_APP, template: `%s · ${NOM_APP}` },
   description: "L'assistant d'achat de matériaux des artisans.",
-  applicationName: "BatiClair",
-  appleWebApp: { capable: true, title: "BatiClair", statusBarStyle: "default" },
+  applicationName: NOM_APP,
+  appleWebApp: { capable: true, title: NOM_APP, statusBarStyle: "default" },
   // L'icône de l'écran d'accueil iPhone (180 px, sans transparence) et celle des onglets.
-  icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }], apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }] },
+  icons: { icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }], apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }] },
+  // L'image de partage (lien collé dans un message) : le logo sur fond noir, 1200 × 630.
+  openGraph: { siteName: NOM_APP, title: NOM_APP, description: `${ACCROCHE_APP} ${SLOGAN_APP}`, locale: "fr_FR", type: "website", images: [{ url: "/marque/og.png", width: 1200, height: 630, alt: NOM_APP }] },
+  twitter: { card: "summary_large_image", title: NOM_APP, images: ["/marque/og.png"] },
 };
 
 export const viewport: Viewport = {

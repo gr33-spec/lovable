@@ -3,9 +3,9 @@ import Link from "next/link";
 import { styleLegal as s } from "@/components/legal-style";
 import { PageTitle } from "@/components/ui";
 import { EDITEUR, HEBERGEUR_BASE } from "@/lib/legal";
-import { nom } from "@/lib/nom";
+import { NOM_APP, nom } from "@/lib/nom";
 
-export const metadata: Metadata = { title: "Confidentialité — BatiClair" };
+export const metadata: Metadata = { title: `Confidentialité — ${NOM_APP}` };
 
 /** La version de cette page (une date, comme les CGU). */
 const VERSION = "24/10/2026";
@@ -91,7 +91,7 @@ export default function ConfidentialitePage() {
       <PageTitle>Confidentialité</PageTitle>
       <p className="text-sm text-muted">Version du {VERSION}.</p>
       <p className={s.p}>
-        BatiClair lit tes listes de matériaux et tes devis pour en sortir la liste des fournitures à chiffrer, et regroupe les besoins de plusieurs artisans pour
+        {NOM_APP} lit tes listes de matériaux et tes devis pour en sortir la liste des fournitures à chiffrer, et regroupe les besoins de plusieurs artisans pour
         obtenir un meilleur prix auprès des négoces. Voici ce que nous gardons, pourquoi, combien de temps, chez qui, et comment le récupérer ou l&apos;effacer.
         Pas de publicité, pas de revente, pas de pistage d&apos;un site à l&apos;autre.
       </p>

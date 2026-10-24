@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { NOM_APP } from "@/lib/nom";
 
 /**
  * « INVITER UN COLLÈGUE » (Greg, 22 octobre : « L'union fait la force : fais venir tes collègues »). Le même bloc sur la
@@ -8,7 +9,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
  * le message prérempli. Rien ne part tout seul : chaque bouton ouvre l'appli du téléphone, l'artisan choisit à qui.
  */
 export const messageInvitation = (lien: string) =>
-  `Je me suis inscrit sur BatiClair, on regroupe nos commandes de matériaux pour payer moins cher. Plus on est nombreux, plus on négocie. Rejoins-nous : ${lien}`;
+  `Je me suis inscrit sur ${NOM_APP}, on regroupe nos commandes de matériaux pour payer moins cher. Plus on est nombreux, plus on négocie. Rejoins-nous : ${lien}`;
 
 const bouton = "pressable inline-flex min-h-12 items-center justify-center rounded-full px-5 text-[15px] font-semibold";
 

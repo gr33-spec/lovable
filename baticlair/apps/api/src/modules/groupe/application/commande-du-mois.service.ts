@@ -69,6 +69,7 @@ import type { Geocodeur } from "./geocodeur.js";
 import { lignesProposables } from "./groupe.service.js";
 import { statutDeLecture, type NegoceExtractor, type ReponseLue } from "./negoce-extractor.js";
 import { pdfDeTexte } from "../../../platform/pdf/pdf-texte.js";
+import { NOM_APP } from "@baticlair/domain";
 
 /** Les lignes qui comptent dans une commande du mois : déposées, puis commandées (jamais les retirées). */
 const DANS_LA_COMMANDE = ["signe", "commande"] as const;
@@ -562,7 +563,7 @@ export class CommandeDuMoisService {
       await this.email.send({
         to: grille.negoce.email,
         subject: doc.titre,
-        text: ["Bonjour,", "", `${company.name} commande au prix de votre grille de la commande commune. Le bon de commande est joint.`, "", "BatiClair"].join("\n"),
+        text: ["Bonjour,", "", `${company.name} commande au prix de votre grille de la commande commune. Le bon de commande est joint.`, "", NOM_APP].join("\n"),
         attachments: [{ filename: `bon-de-commande-${c.mois}-${c.numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
         ...(company.contactEmail ? { replyTo: company.contactEmail } : {}),
         mustDeliver: true,
@@ -1013,7 +1014,7 @@ export class CommandeDuMoisService {
       await this.email.send({
         to: grille.negoce.email,
         subject: doc.titre,
-        text: ["Bonjour,", "", `${company.name} commande au prix de votre grille garantie ${deMois(g.mois)} (${mentionGarantie(g.mois)}). Le bon de commande est joint ; vous n'avez rien à refaire.`, "", "BatiClair"].join("\n"),
+        text: ["Bonjour,", "", `${company.name} commande au prix de votre grille garantie ${deMois(g.mois)} (${mentionGarantie(g.mois)}). Le bon de commande est joint ; vous n'avez rien à refaire.`, "", NOM_APP].join("\n"),
         attachments: [{ filename: `bon-de-commande-${g.mois}-garantie-${cmd.numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
         ...(company.contactEmail ? { replyTo: company.contactEmail } : {}),
         mustDeliver: true,

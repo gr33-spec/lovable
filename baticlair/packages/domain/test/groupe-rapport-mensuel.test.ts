@@ -12,7 +12,7 @@ describe("rapport mensuel de l'artisan", () => {
 
   it("« ce mois : X chantiers lus, Y € économisés au groupé, Z lots », tutoiement, objet parlant", () => {
     const r = rapportMensuel({ mois: "2026-10", chantiersLus: 3, economies: 315.4, lots: 2 }, "Jean");
-    expect(r.objet).toBe("Ton mois d'octobre 2026 avec BatiClair : 3 chantiers lus, 315 € économisés, 2 lots");
+    expect(r.objet).toBe("Ton mois d'octobre 2026 avec Mobiiz : 3 chantiers lus, 315 € économisés, 2 lots");
     expect(r.texte).toContain("Bonjour Jean,");
     expect(r.texte).toContain("Ce mois : 3 chantiers lus, 315 € économisés grâce à la commande commune, 2 lots.");
     expect(r.texte).toContain("Tes 2 lots de la commande commune");
@@ -22,7 +22,7 @@ describe("rapport mensuel de l'artisan", () => {
 
   it("un chantier, aucun lot : singulier, et l'invitation au groupé ; de novembre, d'avril", () => {
     const r = rapportMensuel({ mois: "2026-11", chantiersLus: 1, economies: 0, lots: 0 });
-    expect(r.objet).toBe("Ton mois de novembre 2026 avec BatiClair : 1 chantier lu, 0 € économisés, 0 lot");
+    expect(r.objet).toBe("Ton mois de novembre 2026 avec Mobiiz : 1 chantier lu, 0 € économisés, 0 lot");
     expect(r.texte).toContain("Bonjour,");
     expect(r.texte).toContain("Pas de lot ce mois-ci");
     expect(rapportMensuel({ mois: "2027-04", chantiersLus: 1, economies: 0, lots: 0 }).objet).toContain("Ton mois d'avril 2027");

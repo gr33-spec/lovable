@@ -18,7 +18,7 @@ import {
   PageTitle,
 } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
-import { NOM } from "@/lib/nom";
+import { NOM, NOM_APP } from "@/lib/nom";
 import { useSession } from "@/lib/session";
 
 export default function ComptePage() {
@@ -167,7 +167,7 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
       );
       const link = document.createElement("a");
       link.href = url;
-      link.download = `baticlair-mes-donnees-${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = `mobiiz-mes-donnees-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(url);
     } catch (e) {
@@ -217,7 +217,7 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
         href="/confidentialite"
         className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text"
       >
-        Ce que BatiClair garde, et combien de temps
+        Ce que {NOM_APP} garde, et combien de temps
       </a>
       {confirming ? (
         <div
@@ -304,7 +304,7 @@ function MetiersCard() {
         MÉTIERS COUVERTS
       </h2>
       <p className="text-sm text-muted">
-        Les métiers dont BatiClair sait lire le devis et calculer la liste.
+        Les métiers dont {NOM_APP} sait lire le devis et calculer la liste.
       </p>
       {error ? <ErrorNotice error={error} /> : null}
       {/* Revue à froid (21 octobre) : vingt-cinq lignes « ratios en cours de validation » noyaient le compte ; la liste se replie. */}
@@ -355,7 +355,7 @@ function MemoryCard() {
   return (
     <Card className="flex flex-col gap-3 p-4">
       <h2 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">
-        CE QUE BATICLAIR A APPRIS
+        {`Ce que ${NOM_APP} a appris`}
       </h2>
       <p className="text-sm text-muted">
         Tes habitudes (« je façonne », la qualité d&apos;ardoise…), les ajouts
@@ -397,7 +397,7 @@ function MemoryCard() {
           }}
           className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text"
         >
-          Effacer ce que BatiClair a appris
+          Effacer ce que {NOM_APP} a appris
         </button>
       )}
     </Card>
@@ -442,7 +442,7 @@ function TradesCard({ initial }: { initial: string[] }) {
         }}
       />
       <p className="text-sm text-muted">
-        BatiClair s&apos;en sert pour mieux lire tes devis. S&apos;applique aux
+        {NOM_APP} s&apos;en sert pour mieux lire tes devis. S&apos;applique aux
         prochains devis déposés.
       </p>
       {error ? <ErrorNotice error={error} /> : null}

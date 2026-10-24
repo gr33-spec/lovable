@@ -4,6 +4,8 @@ import { CLE_DEMO_VUE, DemoGuidee } from "@/components/demo-guidee";
 import { ButtonLink } from "@/components/ui";
 import { LiensLegaux } from "@/components/legal";
 import { CompteurInscrits, InviterCollegue } from "@/components/inviter";
+import { Logo } from "@/components/logo";
+import { ACCROCHE_APP, EDITEUR_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
 
 /**
  * Servie à la place de « / » pour un visiteur (voir `proxy.ts`) : rendue à chaque demande, jamais gardée dans le cache du
@@ -12,7 +14,7 @@ import { CompteurInscrits, InviterCollegue } from "@/components/inviter";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "BatiClair, la commande commune des artisans du bâtiment",
+  title: `${NOM_APP}, la commande commune des artisans du bâtiment`,
   description: "Marre de te faire enfumer sur le prix de tes matériaux ? Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.",
 };
 
@@ -40,14 +42,14 @@ const ETAPES = [
   {
     titre: "1. Dépose ta liste avant la clôture",
     texte: "Une photo, un bon ou un PDF.",
-    image: { src: "/landing/capture-entree.jpg", alt: "L'écran « Nouvelle liste » de BatiClair" },
+    image: { src: "/landing/capture-entree.jpg", alt: `L'écran « Nouvelle liste » de ${NOM_APP}` },
   },
   {
     titre: "2. On envoie tout le volume aux négoces",
     texte: "Une seule grille pour tous les négoces de ta région.",
-    image: { src: "/landing/capture-commande.jpg", alt: "L'écran « Commande commune » de BatiClair : la clôture dans quelques jours, ta liste dans la commande" },
+    image: { src: "/landing/capture-commande.jpg", alt: `L'écran « Commande commune » de ${NOM_APP} : la clôture dans quelques jours, ta liste dans la commande` },
   },
-  { titre: "3. Tu vois le meilleur prix et tu commandes si ça te plaît", texte: "Ton prix livré chez chaque négoce. Sans engagement.", image: { src: "/landing/capture-prix.jpg", alt: "L'écran des prix reçus dans BatiClair : ton prix livré chez chaque négoce, le moins cher coché" } },
+  { titre: "3. Tu vois le meilleur prix et tu commandes si ça te plaît", texte: "Ton prix livré chez chaque négoce. Sans engagement.", image: { src: "/landing/capture-prix.jpg", alt: `L'écran des prix reçus dans ${NOM_APP} : ton prix livré chez chaque négoce, le moins cher coché` } },
 ] as const;
 
 
@@ -94,7 +96,7 @@ export default function BienvenuePage() {
       <section aria-labelledby="accroche" className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
         <div className="flex flex-col gap-8 lg:col-span-7">
           <p className="inline-flex w-fit items-center rounded-full bg-white/10 px-3.5 py-1.5 text-[13px] font-semibold tracking-[0.02em] text-white/85 uppercase">
-            Artisans du bâtiment, Côtes-d&apos;Armor d&apos;abord
+            {ACCROCHE_APP}
           </p>
           <h1 id="accroche" className="max-w-[14ch] text-[52px] leading-[0.94] font-extrabold tracking-[-0.03em] sm:text-[84px]">
             Marre de te faire <span className="text-accent">enfumer</span> sur le prix de tes matériaux&nbsp;?
@@ -112,13 +114,14 @@ export default function BienvenuePage() {
         </div>
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
           <div className="flex w-full max-w-[420px] justify-center overflow-hidden rounded-2xl bg-accent px-8 pt-10 sm:px-12 sm:pt-14">
-            <Telephone src="/landing/capture-accueil.jpg" alt="L'accueil de BatiClair : la commande commune en cours et le temps qui reste avant la clôture" priorite className="w-[260px] translate-y-3 sm:w-[300px]" />
+            <Telephone src="/landing/capture-accueil.jpg" alt={`L'accueil de ${NOM_APP} : la commande commune en cours et le temps qui reste avant la clôture`} priorite className="w-[260px] translate-y-3 sm:w-[300px]" />
           </div>
         </div>
       </section>
 
       {/* Le principe en une phrase, et le vrai compteur d'inscrits (rien sous 10), sur un bloc jaune : le chiffre en noir. */}
       <section aria-labelledby="principe" data-reveal className="flex flex-col gap-8 rounded-2xl bg-accent p-6 text-ink sm:p-12 lg:p-16">
+        <p className="text-[15px] font-bold tracking-[0.02em] uppercase">{SLOGAN_APP}</p>
         <h2 id="principe" className={`${h2} max-w-[20ch]`}>
           Plus on est nombreux, plus on pèse face aux négoces.
         </h2>
@@ -172,7 +175,10 @@ export default function BienvenuePage() {
 
       <footer className="flex flex-col gap-6 border-t border-white/10 pt-10 text-[13px] leading-relaxed text-white/50">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <span className="font-display text-[18px] font-extrabold text-white">BatiClair</span>
+          <div className="flex flex-col gap-2">
+            <Logo fond="sombre" hauteur={28} />
+            <p className="text-[14px] font-semibold text-white/70">{SLOGAN_APP}</p>
+          </div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <LiensLegaux clair />
             <Link href="/connexion" className="text-[14px] font-semibold text-white/70 underline">
@@ -187,7 +193,7 @@ export default function BienvenuePage() {
           </div>
         </div>
         <p className="max-w-[90ch]">
-          BatiClair est édité par BATI INVEST, SARL, SIRET 910 796 325 00017, 6 impasse du Ouipoure, 22620 Ploubazlanec, TVA intracommunautaire FR61910796325. Hébergeur : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.
+          Service édité par {EDITEUR_APP}, SARL, SIRET 910 796 325 00017, 6 impasse du Ouipoure, 22620 Ploubazlanec, TVA intracommunautaire FR61910796325. Hébergeur : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.
         </p>
       </footer>
       <script dangerouslySetInnerHTML={{ __html: REVEAL_SCRIPT }} />

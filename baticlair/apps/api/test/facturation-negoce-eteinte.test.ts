@@ -87,5 +87,5 @@ it("drapeau éteint : bons de commande partis, aucune facture, aucune relance, a
   const tout = ctx.emails.sent.map((m) => `${m.subject}\n${m.text}\n${m.html ?? ""}`).join("\n");
   expect(tout).not.toMatch(/\b2 ?%|reverser|facture de commission/i);
   expect(tout).toContain("Aucun frais pour l'instant. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce.");
-  expect(ctx.emails.sent.find((m) => /bons? de commande/.test(m.subject) && m.to === "carrelage@example.com")!.text).toContain("BatiClair ne vous facture rien.");
+  expect(ctx.emails.sent.find((m) => /bons? de commande/.test(m.subject) && m.to === "carrelage@example.com")!.text).toContain("Mobiiz ne vous facture rien.");
 });

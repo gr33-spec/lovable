@@ -7,6 +7,7 @@ import { ZodPipe } from "../../../platform/http/zod.js";
 import { CurrentUser, type AuthenticatedUser } from "../../identity/index.js";
 import { AccountData } from "../infrastructure/account-data.js";
 import { pdfDesDonnees } from "../application/pdf-donnees.js";
+import { NOM_APP } from "@baticlair/domain";
 
 /** Suppression : l'artisan tape SUPPRIMER (pas d'effacement par un appui distrait). */
 const deleteBody = z.object({ confirm: z.literal("SUPPRIMER") });
@@ -19,7 +20,7 @@ export class PrivacyController {
   @Get("export")
   async export(@CurrentUser() user: AuthenticatedUser, @Res({ passthrough: true }) res: Response) {
     const day = new Date().toISOString().slice(0, 10);
-    res.setHeader("Content-Disposition", `attachment; filename="baticlair-mes-donnees-${day}.json"`);
+    res.setHeader("Content-Disposition", `attachment; filename="mobiiz-mes-donnees-${day}.json"`);
     return this.data.export(user.userId);
   }
 
@@ -28,9 +29,9 @@ export class PrivacyController {
   @Get("export.pdf")
   async exportPdf(@CurrentUser() user: AuthenticatedUser, @Res() res: Response) {
     const day = new Date().toISOString().slice(0, 10);
-    const pdf = await pdfDesDonnees("Mes données BatiClair", await this.data.export(user.userId));
+    const pdf = await pdfDesDonnees(`Mes données ${NOM_APP}`, await this.data.export(user.userId));
     res.setHeader("content-type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="baticlair-mes-donnees-${day}.pdf"`);
+    res.setHeader("Content-Disposition", `attachment; filename="mobiiz-mes-donnees-${day}.pdf"`);
     res.send(Buffer.from(pdf));
   }
 

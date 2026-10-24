@@ -6,6 +6,7 @@ import { useCallback, useId, useState } from "react";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type BillingPlan, type BillingStatus } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { NOM_APP } from "@/lib/nom";
 
 const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("internal_error", 500));
 
@@ -51,7 +52,7 @@ export function Paywall({ status, onChange }: { status: BillingStatus; onChange:
         <h1 id="paywall-title" className="font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">
           {blocked ? (status.plan.key === "trial" ? "Ton essai est terminé" : "Limite de ta formule atteinte") : "Nos formules"}
         </h1>
-        <p className="text-[15px] text-muted">Continue à utiliser BatiClair pour lire tes devis et comparer tes fournisseurs.</p>
+        <p className="text-[15px] text-muted">Continue à utiliser {NOM_APP} pour lire tes devis et comparer tes fournisseurs.</p>
         {blocked ? <p className="text-sm text-muted">Tes chantiers en cours restent accessibles.</p> : null}
       </div>
 
@@ -138,7 +139,7 @@ export function PlansScreen() {
       <section className="flex flex-col gap-3">
         <h1 className="font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Gratuit pour l&apos;artisan</h1>
         <p className="text-[15px] leading-relaxed text-muted">
-          Aujourd&apos;hui, BatiClair est gratuit pour l&apos;artisan : aucune limite de chantiers, rien à payer.
+          Aujourd&apos;hui, {NOM_APP} est gratuit pour l&apos;artisan : aucune limite de chantiers, rien à payer.
         </p>
       </section>
     );

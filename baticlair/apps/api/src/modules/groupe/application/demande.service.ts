@@ -33,6 +33,7 @@ import { jetonDeLien } from "./lien-negoce.js";
 import { prixDesPaliers, statutDeLecture, type NegoceExtractor } from "./negoce-extractor.js";
 import { pdfDeTexte } from "../../../platform/pdf/pdf-texte.js";
 import type { Geocodeur } from "./geocodeur.js";
+import { NOM_APP } from "@baticlair/domain";
 
 /** Adresses géocodées en même temps au dépôt d'un devis négoce (l'API Adresse accepte 50 requêtes par seconde). */
 const GEOCODAGE_PAR_PAQUET = 10;
@@ -233,9 +234,9 @@ export class DemandeService {
         `Merci pour votre réponse au lot n° ${lot.numero}. Pour qu'elle soit prise en compte, déposez votre devis sur votre page et cochez l'accord de commission :`,
         lien,
         `${PHRASE_COMMISSION}`,
-        `${NOM_DEMANDE}, par BatiClair`,
+        `${NOM_DEMANDE}, par ${NOM_APP}`,
       ].join("\n\n"),
-      html: `<p>Bonjour,</p><p>Merci pour votre réponse au lot n° ${lot.numero}. Pour qu'elle soit prise en compte, déposez votre devis sur votre page et cochez l'accord de commission :</p><p><a href="${lien}">${lien}</a></p><p><strong>${PHRASE_COMMISSION}</strong></p><p>${NOM_DEMANDE}, par BatiClair</p>`,
+      html: `<p>Bonjour,</p><p>Merci pour votre réponse au lot n° ${lot.numero}. Pour qu'elle soit prise en compte, déposez votre devis sur votre page et cochez l'accord de commission :</p><p><a href="${lien}">${lien}</a></p><p><strong>${PHRASE_COMMISSION}</strong></p><p>${NOM_DEMANDE}, par ${NOM_APP}</p>`,
     });
     return { traite: true };
   }

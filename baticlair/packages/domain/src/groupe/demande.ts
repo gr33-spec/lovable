@@ -1,5 +1,6 @@
 import { LIBELLES_FAMILLES, type FamilleGroupe, type FenetreLivraison } from "./groupe.js";
 import { NOM_COMMANDE_COMMUNE, nomCommun } from "./nom.js";
+import { NOM_APP } from "./marque.js";
 
 /**
  * LA DEMANDE AUX NÉGOCES (parcours groupé, étape 5), en code pur : l'e-mail part au nom de la « Commande commune »
@@ -89,7 +90,7 @@ function paragraphesDemande(lots: readonly LotADemander[]): { intro: string[]; p
   });
   const fin = [
     `Réponse attendue sous ${DELAI_REPONSE_JOURS} jours. Un seul négoce est retenu par lot, pour tout le volume. Si le lot ne vous concerne pas, un clic sur « pas concerné » suffit ; « stop » pour ne plus rien recevoir.`,
-    `${NOM_DEMANDE}, par BatiClair`,
+    `${NOM_DEMANDE}, par ${NOM_APP}`,
   ];
   return { intro, parLot, fin };
 }
@@ -146,9 +147,9 @@ export function texteContrat(version = VERSION_CONTRAT): string[] {
   if (version !== VERSION_CONTRAT) return texteContratCommission(version);
   return [
     `Conditions de la ${nomCommun()} pour les négoces, version ${version}`,
-    `1. Objet. BATI INVEST (BatiClair) met en relation des artisans réunis dans la « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix de la ${nomCommun()}.`,
+    `1. Objet. BATI INVEST (${NOM_APP}) met en relation des artisans réunis dans la « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix de la ${nomCommun()}.`,
     `2. Rémunération. ${PHRASE_REMUNERATION_NEGOCE}`,
-    "3. Aucun autre frais. Répondre est gratuit ; un devis retenu ou non ne donne lieu à aucune facturation. BatiClair n'encaisse aucun paiement de commande, n'est ni acheteur ni revendeur, et ne porte aucun risque d'impayé des artisans. Le contrat de vente est conclu directement entre l'artisan et le négoce.",
+    `3. Aucun autre frais. Répondre est gratuit ; un devis retenu ou non ne donne lieu à aucune facturation. ${NOM_APP} n'encaisse aucun paiement de commande, n'est ni acheteur ni revendeur, et ne porte aucun risque d'impayé des artisans. Le contrat de vente est conclu directement entre l'artisan et le négoce.`,
     "4. Concurrence. Les prix d'un négoce ne sont jamais communiqués à un autre négoce, ni pendant ni après la consultation.",
     "5. Acceptation. L'acceptation se fait en cochant la case sur la page de dépôt du devis ; la date, l'adresse e-mail et l'adresse IP de l'acceptation sont enregistrées. Sans acceptation, le devis n'est pas pris en compte.",
     "6. Retrait. Le négoce peut à tout moment cesser de recevoir des demandes (lien « stop »).",
@@ -162,10 +163,10 @@ export function texteContrat(version = VERSION_CONTRAT): string[] {
 export function texteContratCommission(version = "2026-10-22"): string[] {
   return [
     `Conditions de commission d'apporteur d'affaires, version ${version}`,
-    `1. Objet. BatiClair met en relation des artisans réunis dans la « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix de la ${nomCommun()}.`,
-    `2. Commission. Si le devis du négoce est retenu pour un lot, le négoce verse à BatiClair une commission d'apporteur d'affaires de ${TAUX_COMMISSION_POURCENT} % du montant hors taxes du lot, c'est-à-dire de la somme des bons de commande des artisans du lot passés chez lui au tarif de la ${nomCommun()}.`,
-    "3. Facturation. La commission est facturée par BatiClair au négoce au moment de la transmission des bons de commande, payable à 30 jours. Une relance automatique est envoyée après l'échéance.",
-    "4. Aucun autre frais. Répondre est gratuit ; un devis non retenu ne donne lieu à aucune facturation. BatiClair n'encaisse aucun paiement de commande, n'est ni acheteur ni revendeur, et ne porte aucun risque d'impayé des artisans.",
+    `1. Objet. ${NOM_APP} met en relation des artisans réunis dans la « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix de la ${nomCommun()}.`,
+    `2. Commission. Si le devis du négoce est retenu pour un lot, le négoce verse à ${NOM_APP} une commission d'apporteur d'affaires de ${TAUX_COMMISSION_POURCENT} % du montant hors taxes du lot, c'est-à-dire de la somme des bons de commande des artisans du lot passés chez lui au tarif de la ${nomCommun()}.`,
+    `3. Facturation. La commission est facturée par ${NOM_APP} au négoce au moment de la transmission des bons de commande, payable à 30 jours. Une relance automatique est envoyée après l'échéance.`,
+    `4. Aucun autre frais. Répondre est gratuit ; un devis non retenu ne donne lieu à aucune facturation. ${NOM_APP} n'encaisse aucun paiement de commande, n'est ni acheteur ni revendeur, et ne porte aucun risque d'impayé des artisans.`,
     "5. Acceptation. L'acceptation se fait en cochant la case sur la page de dépôt du devis ; la date, l'adresse e-mail et l'adresse IP de l'acceptation sont enregistrées. Sans acceptation, le devis n'est pas pris en compte.",
     "6. Retrait. Le négoce peut à tout moment cesser de recevoir des demandes (lien « stop ») ; les commissions dues sur les lots déjà retenus restent dues.",
   ];

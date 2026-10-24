@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
 import { RULE_51_2 } from "./fiche-relecture.js";
 import { RULE_51_1 } from "./prompt.js";
+import { NOM_APP } from "@baticlair/domain";
 
 /**
  * §51.5 (décision du fondateur, 2026-10-11) : LA LECTURE EST FAITE PAR L'IA, PAS PAR DES RÈGLES DE MOTS. Un seul appel au
@@ -92,7 +93,7 @@ const FORMAT = `CE QUE TU RENVOIES : un seul objet JSON, rien d'autre.
 /** Le système du lecteur : les règles du référentiel mot pour mot, l'export du tiroir du métier, le format. */
 export function lectureSystemPrompt(input: { trade?: string; tradeLabel: string; referentiel: string }): string {
   const metier = (REGLES_DU_METIER[input.trade ?? ""] ?? []).map((r) => `\n\n${r}`).join("");
-  return `Tu es le lecteur de devis de BatiClair. Tu lis le devis entier d'un artisan du bâtiment (métier : ${input.tradeLabel}) et tu rends la fiche de chantier, le bref, les questions et, pour chaque ligne, la fourniture nommée ou « sans fourniture ». Tu ne comptes rien : les quantités calculées viennent du code, d'après le référentiel ci-dessous. Tu lis TOUT : l'en-tête, chaque ligne, le descriptif sous le titre, les lignes de pose, les notes, toutes les pages. Une information écrite n'importe où vaut pour l'ouvrage concerné.
+  return `Tu es le lecteur de devis de ${NOM_APP}. Tu lis le devis entier d'un artisan du bâtiment (métier : ${input.tradeLabel}) et tu rends la fiche de chantier, le bref, les questions et, pour chaque ligne, la fourniture nommée ou « sans fourniture ». Tu ne comptes rien : les quantités calculées viennent du code, d'après le référentiel ci-dessous. Tu lis TOUT : l'en-tête, chaque ligne, le descriptif sous le titre, les lignes de pose, les notes, toutes les pages. Une information écrite n'importe où vaut pour l'ouvrage concerné.
 
 ${RULE_51_5}
 

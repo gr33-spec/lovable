@@ -7,6 +7,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
 import { useTyping } from "@/lib/typing";
+import { NOM_APP } from "@/lib/nom";
 
 /*
  * §50 « Ce que voit l'artisan » (fondateur, 2026-10-09) : TROIS ÉCRANS, rien d'autre.
@@ -168,12 +169,12 @@ export function notifyReady(title: string, body: string, tag: string): void {
   if (!document.hidden) return;
   document.title = `✓ ${title}`;
   const restore = () => {
-    document.title = "BatiClair";
+    document.title = NOM_APP;
     document.removeEventListener("visibilitychange", restore);
   };
   document.addEventListener("visibilitychange", restore);
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
-  const options = { body, tag, icon: "/icon.svg", data: { url: window.location.href } };
+  const options = { body, tag, icon: "/icon-192.png", data: { url: window.location.href } };
   // Sur téléphone, une notification passe par le service worker ; sur ordinateur, directement.
   const sw = "serviceWorker" in navigator ? navigator.serviceWorker.getRegistration("/sw.js") : Promise.resolve(undefined);
   void sw

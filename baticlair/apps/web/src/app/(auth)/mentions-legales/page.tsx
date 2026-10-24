@@ -3,8 +3,9 @@ import Link from "next/link";
 import { styleLegal as s } from "@/components/legal-style";
 import { PageTitle } from "@/components/ui";
 import { EDITEUR, HEBERGEUR, HEBERGEUR_BASE } from "@/lib/legal";
+import { NOM_APP } from "@/lib/nom";
 
-export const metadata: Metadata = { title: "Mentions légales — BatiClair" };
+export const metadata: Metadata = { title: `Mentions légales — ${NOM_APP}` };
 
 /**
  * Les mentions légales (LCEN, article 6-III ; Greg, 24 octobre 2026). Les informations du Kbis que seul Greg peut donner
@@ -17,6 +18,7 @@ export default function MentionsLegalesPage() {
       <p className="text-sm text-muted">Version du 24/10/2026.</p>
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>Éditeur</h2>
+        <p className={s.p}>Service édité par {EDITEUR.nom}.</p>
         <p className={s.p}>
           {EDITEUR.produit} est édité par {EDITEUR.nom}, {EDITEUR.forme} au capital de {EDITEUR.capital} €, immatriculée au RCS de {EDITEUR.rcs} sous le numéro {EDITEUR.siren}, SIRET{" "}
           {EDITEUR.siret}, dont le siège est situé {EDITEUR.adresse}. TVA intracommunautaire {EDITEUR.tva}.
@@ -42,8 +44,8 @@ export default function MentionsLegalesPage() {
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>Propriété</h2>
         <p className={s.p}>
-          Le nom BatiClair, l&apos;application et ses référentiels métier appartiennent à {EDITEUR.nom}. Les listes et les devis que vous déposez restent les vôtres :
-          BatiClair les lit pour vous rendre le service, rien d&apos;autre.
+          Le nom {NOM_APP}, l&apos;application et ses référentiels métier appartiennent à {EDITEUR.nom}. Les listes et les devis que vous déposez restent les vôtres :
+          {NOM_APP} les lit pour vous rendre le service, rien d&apos;autre.
         </p>
       </section>
       <Link href="/" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text">
