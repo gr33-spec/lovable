@@ -11,6 +11,15 @@ import { useProchaineCommande } from "./commande-du-mois";
 /** Le menu (« Revoir le guide ») rouvre le guide par cet événement, sans rien changer au compte. */
 export const EVENEMENT_REVOIR_GUIDE = "mobiiz:revoir-guide";
 export const revoirLeGuide = () => window.dispatchEvent(new Event(EVENEMENT_REVOIR_GUIDE));
+/** Le guide fermé sur ce navigateur (en plus de la note du compte, qui fait foi sur les autres appareils). */
+const cleGuideVu = (userId: string) => `mobiiz.guideVu.${userId}`;
+const dejaVuIci = (userId: string) => {
+  try {
+    return localStorage.getItem(cleGuideVu(userId)) === "1";
+  } catch {
+    return false;
+  }
+};
 
 const ETAPES = [
   { titre: "Dépose ta liste ou ton devis", texte: "Une photo, un bon ou un PDF : je remets chaque ligne au propre.", Icone: FileUp },
@@ -33,7 +42,8 @@ export function dateDeCloture(iso: string): string {
  * menu, le rouvre. Rien d'autre ne s'ouvre par-dessus tant qu'il est là.
  */
 export function GuidePremierLancement() {
-  const { features } = useSession();
+  const { me, features } = useSession();
+  const userId = me.user.id;
   const [ouvert, setOuvert] = useState(false);
   const [etape, setEtape] = useState(0);
   const moisActif = features.groupe === true && features.commandeCommune !== "lots";
@@ -41,11 +51,15 @@ export function GuidePremierLancement() {
 
   useEffect(() => {
     const controle = new AbortController();
-    api<{ aMontrer: boolean }>("/v1/me/guide", { signal: controle.signal })
-      .then((r) => {
-        if (r.aMontrer) setOuvert(true);
-      })
-      .catch(() => undefined);
+    // Fermé sur ce navigateur juste avant un rechargement : la note du serveur n'est peut-être pas encore arrivée ; on
+    // la renvoie, et le guide ne se rouvre pas.
+    if (dejaVuIci(userId)) void api("/v1/me/guide/vu", { method: "POST" }).catch(() => undefined);
+    else
+      api<{ aMontrer: boolean }>("/v1/me/guide", { signal: controle.signal })
+        .then((r) => {
+          if (r.aMontrer && !dejaVuIci(userId)) setOuvert(true);
+        })
+        .catch(() => undefined);
     const revoir = () => {
       setEtape(0);
       setOuvert(true);
@@ -55,12 +69,17 @@ export function GuidePremierLancement() {
       controle.abort();
       window.removeEventListener(EVENEMENT_REVOIR_GUIDE, revoir);
     };
-  }, []);
+  }, [userId]);
 
   const fermer = useCallback(() => {
     setOuvert(false);
+    try {
+      localStorage.setItem(cleGuideVu(userId), "1");
+    } catch {
+      // Sans stockage local, le serveur suffit.
+    }
     void api("/v1/me/guide/vu", { method: "POST" }).catch(() => undefined);
-  }, []);
+  }, [userId]);
 
   if (!ouvert) return null;
   return <Fenetre etape={etape} setEtape={setEtape} fermer={fermer} cloture={prochaine?.clotureLe ?? null} />;

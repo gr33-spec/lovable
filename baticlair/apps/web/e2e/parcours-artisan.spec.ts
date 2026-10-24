@@ -50,7 +50,8 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await expect(page.getByRole("button", { name: "Créer mon compte" })).toBeDisabled();
   await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
   await page.getByRole("button", { name: "Créer mon compte" }).click();
-  await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ })).toBeVisible();
+  // L'accueil, ou d'abord le guide du premier lancement (qui rend la page derrière inerte).
+  await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ }).or(page.getByRole("dialog", { name: "Guide" })).first()).toBeVisible();
   return email;
 }
 
