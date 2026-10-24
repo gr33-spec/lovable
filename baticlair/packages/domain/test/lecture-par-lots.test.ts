@@ -84,5 +84,7 @@ describe("les tranches d'un gros lot", () => {
     expect(f.lots).toEqual([{ metier: "electrical", libelle: "electrical", lignes: ["1:001", "1:070"] }]);
     expect(f.lotsNonLus).toEqual([{ metier: "plumbing", libelle: "Plomberie" }]);
     expect(consigneDeTranche({ metier: "electrical", libelle: "Électricité" }, [{ metier: "electrical", libelle: "Électricité" }], 2, 3, "[1:001] DEVIS")).toMatch(/tranche 2 sur 3 du lot « Électricité »/);
+    // Vraie lecture du 24 octobre 2026 : la désignation est recopiée, jamais reformulée.
+    expect(consigneDeTranche({ metier: "electrical", libelle: "Électricité" }, [{ metier: "electrical", libelle: "Électricité" }], 1, 3, "")).toMatch(/« designation » : le texte de la ligne recopié tel quel.*jamais reformulé/);
   });
 });

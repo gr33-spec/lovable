@@ -153,6 +153,9 @@ export function consigneDeTranche(lot: { metier: string; libelle: string }, tous
   return [
     `LECTURE PAR LOT ET PAR TRANCHE : ce devis a plusieurs lots (${tous.map((l) => l.libelle).join(", ")}), lus chacun à part. Le texte ci-dessus est la tranche ${rang} sur ${total} du lot « ${lot.libelle} » (${lot.metier}), avec le référentiel ci-dessus.`,
     "- « lignes » : TOUTES les lignes de cette tranche, dans l'ordre, avec leur repère d'origine (une ligne d'un autre métier se rend ici aussi, avec ses fournitures).",
+    // Vraie lecture du 24 octobre 2026 (7954) : dans des tranches, « LAMPE SIMPLE 1 POINT LUMINEUX » revenait réécrit ; la
+    // désignation est le texte de la ligne, jamais une reformulation (§49.1 : la liste suit le devis).
+    "- « designation » : le texte de la ligne recopié tel quel, majuscules, abréviations et fautes comprises (prix retirés), jamais reformulé ni résumé ; le nom du comptoir va dans « fournitures ».",
     `- « metier » : ${lot.metier} ; « lots » : un seul lot (${lot.metier}), avec les repères de ces lignes.`,
     "- « fiche », « bref » et « questions » : seulement ce que disent ces lignes (et l'en-tête) ; les autres tranches sont lues à part.",
     ...(entete.trim() ? [`EN-TÊTE DU DEVIS (pour le contexte : client, chantier, titres) :\n${entete}`] : []),
