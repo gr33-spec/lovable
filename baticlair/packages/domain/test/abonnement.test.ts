@@ -27,7 +27,7 @@ import {
   revenuMensuelRecurrent,
 } from "../src/index.js";
 
-/** L'abonnement artisan (Greg, 24 octobre 2026) : 49 € HT par mois ou 349 € HT par an, essai jusqu'à 30 jours après les premiers résultats, 60 jours sans dépôt. */
+/** L'abonnement artisan (Greg, 24 octobre 2026) : 49 € HT par mois ou 348 € HT par an, essai jusqu'à 30 jours après les premiers résultats, 60 jours sans dépôt. */
 const d = (s: string) => new Date(`${s}T10:00:00Z`);
 const inscrit = d("2026-11-01");
 
@@ -106,24 +106,24 @@ describe("les factures et les rappels", () => {
     const m = emailRappelEssai("j7", { ecart: 340, lien: "https://exemple.fr/abonnement", nomApp: "Mobiiz" });
     expect(m.objet).toBe("Ton essai Mobiiz se termine dans 7 jours");
     expect(m.texte).toContain("Sur ton premier cycle : 340 € d'écart avec le prix le plus cher reçu.");
-    expect(m.texte).toContain("dès 29 € HT par mois avec l'annuel (349 € HT par an), ou 49 € HT par mois sans engagement.");
+    expect(m.texte).toContain("dès 29 € HT par mois avec l'annuel (348 € HT par an), ou 49 € HT par mois sans engagement.");
   });
 });
 
-/** LES DEUX FORMULES (Greg, 24 octobre 2026) : mensuel 49 € HT sans engagement, annuel 349 € HT payé en une fois. */
+/** LES DEUX FORMULES (Greg, 24 octobre 2026) : mensuel 49 € HT sans engagement, annuel 348 € HT payé en une fois. */
 describe("mensuel ou annuel", () => {
-  it("les prix par défaut : 49 € par mois, 349 € par an, 239 € économisés, -40 %, 29 € par mois", () => {
-    expect(REGLAGES_ABONNEMENT_DEFAUT).toMatchObject({ prixHtCentimes: 4900, prixAnnuelHtCentimes: 34900, joursRappelAnnuel: 30 });
+  it("les prix par défaut : 49 € par mois, 348 € par an, 240 € économisés, -40 %, 29 € par mois", () => {
+    expect(REGLAGES_ABONNEMENT_DEFAUT).toMatchObject({ prixHtCentimes: 4900, prixAnnuelHtCentimes: 34800, joursRappelAnnuel: 30 });
     expect(prixDeFormule("mensuel")).toBe(4900);
-    expect(prixDeFormule("annuel")).toBe(34900);
-    expect(economieAnnuelle()).toBe(23900);
-    // 239 / 588 = 40,6 % : arrondi au-dessous, jamais plus que la vraie remise.
+    expect(prixDeFormule("annuel")).toBe(34800);
+    expect(economieAnnuelle()).toBe(24000);
+    // 240 / 588 = 40,8 % : arrondi au-dessous, jamais plus que la vraie remise.
     expect(remiseAnnuelle()).toBe(40);
     expect(prixParMoisAnnuel()).toBe("29 €");
   });
   it("le paywall et /tarifs : l'annuel d'abord, mis en avant, puis le mensuel", () => {
     const [annuel, mensuel] = offresAbonnement();
-    expect(annuel).toEqual({ formule: "annuel", titre: "Annuel", badge: "-40 %", prix: "29 € HT par mois, payé à l'année", details: ["349 € HT par an, en une fois", "239 € économisés par an", "Renouvelé chaque année, rappel 30 jours avant"], enAvant: true });
+    expect(annuel).toEqual({ formule: "annuel", titre: "Annuel", badge: "-40 %", prix: "29 € HT par mois, payé à l'année", details: ["348 € HT par an, en une fois", "240 € économisés par an", "Renouvelé chaque année, rappel 30 jours avant"], enAvant: true });
     expect(mensuel).toMatchObject({ formule: "mensuel", badge: null, prix: "49 € HT par mois", details: ["Sans engagement", "Résiliable quand tu veux"], enAvant: false });
   });
   it("les prix se règlent : l'économie et le badge suivent", () => {
@@ -142,7 +142,7 @@ describe("mensuel ou annuel", () => {
   it("la bascule au prorata : ce qui reste du mois est déduit, l'année commence le jour même", () => {
     // Mois du 1er au 31 janvier (30 jours), bascule le 16 : 15 jours sur 30 restent, 24,50 € déduits.
     const p = prorataVersAnnuel({ debut: d("2027-01-01"), fin: d("2027-01-31") }, d("2027-01-16"));
-    expect(p).toMatchObject({ creditCentimes: 2450, aPayerHtCentimes: 34900 - 2450 });
+    expect(p).toMatchObject({ creditCentimes: 2450, aPayerHtCentimes: 34800 - 2450 });
     expect(p.debut).toEqual(d("2027-01-16"));
     expect(p.fin.toISOString().slice(0, 10)).toBe("2028-01-16");
     // Le dernier jour, presque rien n'est déduit ; après l'échéance, rien.
@@ -156,11 +156,11 @@ describe("mensuel ou annuel", () => {
     expect(rappelRenouvellementDu({ ...base, formule: "mensuel" }, d("2027-12-20"))).toBe(false);
     const m = emailRenouvellementAnnuel({ echeance: d("2028-01-16"), lien: "https://exemple.fr/abonnement", nomApp: "Mobiiz" });
     expect(m.objet).toBe("Ton abonnement annuel Mobiiz se renouvelle le 16 janvier 2028");
-    expect(m.texte).toContain("349 € HT (418,80 € TTC) pour un an");
+    expect(m.texte).toContain("348 € HT (417,60 € TTC) pour un an");
     expect(m.texte).toContain("Une année commencée n'est pas remboursée au prorata.");
   });
   it("le revenu mensuel récurrent : l'annuel divisé par 12 ; la part d'abonnés annuels", () => {
-    expect(revenuMensuelRecurrent([{ formule: "mensuel", htCentimes: 4900 }, { formule: "annuel", htCentimes: 34900 }, { formule: "annuel", htCentimes: 34900 }])).toEqual({ centimes: 4900 + 5817, mensuels: 1, annuels: 2, partAnnuels: 67 });
+    expect(revenuMensuelRecurrent([{ formule: "mensuel", htCentimes: 4900 }, { formule: "annuel", htCentimes: 34800 }, { formule: "annuel", htCentimes: 34800 }])).toEqual({ centimes: 4900 + 5800, mensuels: 1, annuels: 2, partAnnuels: 67 });
     expect(revenuMensuelRecurrent([])).toEqual({ centimes: 0, mensuels: 0, annuels: 0, partAnnuels: null });
   });
 });

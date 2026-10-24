@@ -10,14 +10,14 @@ import { nom, NOM, NOM_APP } from "@/lib/nom";
  * jours de préavis).
  */
 const PRIX_MENSUEL = "49 €";
-const PRIX_ANNUEL = "349 €";
+const PRIX_ANNUEL = "348 €";
 
 export const metadata: Metadata = { title: `Conditions générales d'utilisation — ${NOM_APP}` };
 
 /**
  * LES CGU ARTISAN (mise en conformité du 24 octobre 2026), en mots simples : un service entre professionnels, la commande
  * commune toutes les deux semaines, sans engagement d'achat ; BATI INVEST n'est ni vendeur ni acheteur ; la concurrence ;
- * l'abonnement (24 octobre 2026 : mensuel 49 € HT, annuel 349 € HT, passage du mois à l'année, renouvellement, essai, résiliation, échec de paiement) ; les documents déposés ; la responsabilité ; la suspension ; le droit applicable. Versionnées : une version majeure est
+ * l'abonnement (24 octobre 2026 : mensuel 49 € HT, annuel 348 € HT, passage du mois à l'année, renouvellement, essai, résiliation, échec de paiement) ; les documents déposés ; la responsabilité ; la suspension ; le droit applicable. Versionnées : une version majeure est
  * redemandée à chaque compte (`VERSION_CGU_MAJEURE`), l'acceptation est horodatée. À relire par l'avocat.
  */
 export default function CguPage() {

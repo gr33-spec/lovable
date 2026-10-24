@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /**
  * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026) : les négoces sont gratuits ; l'artisan choisit entre DEUX FORMULES
- * (Greg, 24 octobre 2026, changement de prix) : le MENSUEL, 49 € HT par mois sans engagement, et l'ANNUEL, 349 € HT par
+ * (Greg, 24 octobre 2026, changement de prix) : le MENSUEL, 49 € HT par mois sans engagement, et l'ANNUEL, 348 € HT par
  * an payé en une fois (29 € par mois, -40 %), renouvelé chaque année avec un rappel 30 jours avant ; les deux se
  * résilient avec effet en fin de période payée, sans remboursement au prorata. Du mensuel, l'artisan passe à l'annuel à
  * tout moment, au prorata (`prorataVersAnnuel`). Essai gratuit de l'inscription jusqu'à 30 jours après les
@@ -14,7 +14,7 @@ import { z } from "zod";
 export const reglagesAbonnementSchema = z.object({
   /** Le prix du MENSUEL HT, en centimes par mois (4 900 = 49 €). */
   prixHtCentimes: z.number().int().min(100).max(100_000),
-  /** Le prix de l'ANNUEL HT, en centimes par an, payé en une fois (34 900 = 349 €). */
+  /** Le prix de l'ANNUEL HT, en centimes par an, payé en une fois (34 800 = 348 €). */
   prixAnnuelHtCentimes: z.number().int().min(100).max(1_000_000),
   /** Le taux de TVA en pour cent (20). */
   tauxTva: z.number().min(0).max(30),
@@ -29,7 +29,7 @@ export const reglagesAbonnementSchema = z.object({
 });
 export type ReglagesAbonnement = z.infer<typeof reglagesAbonnementSchema>;
 
-export const REGLAGES_ABONNEMENT_DEFAUT: ReglagesAbonnement = { prixHtCentimes: 4900, prixAnnuelHtCentimes: 34900, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 60, joursGrace: 7, joursRappelAnnuel: 30 };
+export const REGLAGES_ABONNEMENT_DEFAUT: ReglagesAbonnement = { prixHtCentimes: 4900, prixAnnuelHtCentimes: 34800, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 60, joursGrace: 7, joursRappelAnnuel: 30 };
 
 const JOUR = 86_400_000;
 const plusJours = (d: Date, n: number) => new Date(d.getTime() + n * JOUR);
@@ -50,13 +50,13 @@ export function finDePeriode(debut: Date, f: Formule): Date {
   return n;
 }
 
-/** Ce que l'annuel fait gagner sur un an de mensuel, en centimes (12 × 49 − 349 = 239 €) ; 0 s'il ne fait rien gagner. */
+/** Ce que l'annuel fait gagner sur un an de mensuel, en centimes (12 × 49 − 348 = 240 €) ; 0 s'il ne fait rien gagner. */
 export const economieAnnuelle = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => Math.max(0, 12 * r.prixHtCentimes - r.prixAnnuelHtCentimes);
 
-/** La remise de l'annuel sur le mensuel, en pour cent ARRONDIE AU-DESSOUS (349 sur 588 : 40,6 % → « -40 % »), jamais plus que la vraie. */
+/** La remise de l'annuel sur le mensuel, en pour cent ARRONDIE AU-DESSOUS (240 sur 588 : 40,8 % → « -40 % »), jamais plus que la vraie. */
 export const remiseAnnuelle = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => Math.max(0, Math.floor((economieAnnuelle(r) / (12 * r.prixHtCentimes)) * 100));
 
-/** Le prix par mois de l'annuel, en centimes (349 € / 12 = 29,08 €). */
+/** Le prix par mois de l'annuel, en centimes (348 € / 12 = 29 €). */
 export const mensualiteAnnuelle = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => Math.round(r.prixAnnuelHtCentimes / 12);
 
 /** Ce que l'API sait du paiement de l'entreprise (tenu par les événements, simulés ou Stripe). */
@@ -143,7 +143,7 @@ export function eurosDeCentimes(c: number): string {
   return `${e.toLocaleString("fr-FR", { minimumFractionDigits: Number.isInteger(e) ? 0 : 2, maximumFractionDigits: 2 })} €`;
 }
 
-/** « 29 € » : le prix par mois de l'annuel, arrondi à l'euro (29,08 €), comme Greg l'annonce. */
+/** « 29 € » : le prix par mois de l'annuel, arrondi à l'euro (348 € / 12 = 29 € tout rond depuis le 24 octobre 2026). */
 export const prixParMoisAnnuel = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => eurosDeCentimes(Math.round(mensualiteAnnuelle(r) / 100) * 100);
 
 /** L'écran du paywall, mot pour mot. */
@@ -165,7 +165,7 @@ export interface OffreAbonnement {
 
 /**
  * LES DEUX FORMULES (Greg, 24 octobre 2026) : l'annuel d'abord, mis en avant, son badge « -40 % », « 29 € par mois, payé
- * à l'année » et « 239 € économisés par an » ; le mensuel juste à côté.
+ * à l'année » et « 240 € économisés par an » ; le mensuel juste à côté.
  */
 export function offresAbonnement(r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): OffreAbonnement[] {
   const remise = remiseAnnuelle(r);
@@ -261,7 +261,7 @@ export function emailRappelEssai(rappel: RappelEssai, c: { ecart: number | null;
   return { objet, texte };
 }
 
-/** « dès 29 € HT par mois avec l'annuel (349 € HT par an), ou 49 € HT par mois sans engagement. » */
+/** « dès 29 € HT par mois avec l'annuel (348 € HT par an), ou 49 € HT par mois sans engagement. » */
 export const phraseDeuxFormules = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) =>
   `dès ${prixParMoisAnnuel(r)} HT par mois avec l'annuel (${eurosDeCentimes(r.prixAnnuelHtCentimes)} HT par an), ou ${eurosDeCentimes(r.prixHtCentimes)} HT par mois sans engagement.`;
 

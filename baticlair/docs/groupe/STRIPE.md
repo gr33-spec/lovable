@@ -2,7 +2,7 @@
 
 Aujourd'hui, le paiement est **simulé** (`PAIEMENT=simule`) : la page « Paiement (simulation) » remplace Stripe, les factures portent le préfixe `TEST`, aucun argent ne bouge. Tout est prêt pour Stripe : il n'y a rien à reprogrammer, seulement des réglages chez Stripe et dans Vercel.
 
-**Deux formules** (Greg, 24 octobre 2026) : **mensuel** 49 € HT par mois, sans engagement ; **annuel** 349 € HT par an, payé en une fois. Il faut donc **deux prix** chez Stripe.
+**Deux formules** (Greg, 24 octobre 2026) : **mensuel** 49 € HT par mois, sans engagement ; **annuel** 348 € HT par an, payé en une fois. Il faut donc **deux prix** chez Stripe.
 
 Compte environ 30 minutes. Fais-le d'abord en **mode test** de Stripe (les clés commencent par `sk_test_`), puis refais-le en **mode réel** (`sk_live_`) le jour du lancement.
 
@@ -19,7 +19,7 @@ Compte environ 30 minutes. Fais-le d'abord en **mode test** de Stripe (les clés
 
    Il refuse une clé réelle (`sk_live_`) sans `--reel`. À la main, c'est **Catalogue de produits → Ajouter un produit**, nom « Abonnement Mobiiz », puis deux prix sur ce produit :
    - **49,00 € HT**, récurrent, **mensuel**, « Taxes : non incluses » ;
-   - **349,00 € HT**, récurrent, **annuel**, « Taxes : non incluses ».
+   - **348,00 € HT**, récurrent, **annuel**, « Taxes : non incluses ».
 
    Note les deux identifiants (`price_…`).
 4. **Réglages → Portail client** : active le portail (changer de carte, voir les factures Stripe, **résilier en fin de période**). Coche « Les clients peuvent résilier » avec « À la fin de la période de facturation ». Laisse **décoché** « Les clients peuvent changer de formule » : le passage du mois à l'année se fait dans Mobiiz (« Mon abonnement » → « Passer à l'annuel »), au prorata.
@@ -47,7 +47,7 @@ Compte environ 30 minutes. Fais-le d'abord en **mode test** de Stripe (les clés
 | `STRIPE_SECRET_KEY` | la clé secrète (`sk_…`) |
 | `STRIPE_WEBHOOK_SECRET` | le secret du webhook (`whsec_…`) |
 | `STRIPE_PRICE_ID_MENSUEL` | le prix mensuel, 49 € (`price_…`) |
-| `STRIPE_PRICE_ID_ANNUEL` | le prix annuel, 349 € (`price_…`) |
+| `STRIPE_PRICE_ID_ANNUEL` | le prix annuel, 348 € (`price_…`) |
 | `STRIPE_TAX_RATE_ID` | le taux de TVA 20 % (`txr_…`) |
 | `ABONNEMENT` | `on` (déjà la valeur par défaut) |
 
@@ -63,7 +63,7 @@ Puis **Redeploy**. Sans la clé, le secret du webhook et les deux prix, l'API re
 4. Dans Stripe → Webhooks, chaque événement doit être en **200**. Un 403 = mauvais `STRIPE_WEBHOOK_SECRET`.
 5. Échec : carte `4000 0000 0000 0341` (refusée au renouvellement) ou, dans Stripe, « Envoyer un événement de test » `invoice.payment_failed` : bandeau rouge et e-mail « Ton paiement Mobiiz n'est pas passé ».
 6. Résiliation : « Résilier » puis « Oui, résilier » : e-mail de confirmation, l'accès reste jusqu'à la fin de la période payée (l'échéance de l'année pour l'annuel), sans remboursement.
-7. Un autre compte, l'**annuel** directement : 349 € HT, « Abonné à l'année », renouvellement dans un an.
+7. Un autre compte, l'**annuel** directement : 348 € HT, « Abonné à l'année », renouvellement dans un an.
 
 ## Ce que fait le code
 

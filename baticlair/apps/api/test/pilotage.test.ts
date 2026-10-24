@@ -54,7 +54,7 @@ describe("le tableau de bord admin", () => {
     // A paie le mensuel (simulé) : 49 € HT de revenu mensuel récurrent.
     const { url } = (await a.agent.post("/v1/abonnement/payer").expect(200)).body;
     await a.agent.post(`/v1/abonnement/simulation/${new URL(url).searchParams.get("session")}`).send({ issue: "payer" }).expect(200);
-    // B paie l'annuel : 349 € ÷ 12 = 29,08 € par mois ; le revenu récurrent fait 78 €, la moitié des abonnés en annuel.
+    // B paie l'annuel : 348 € ÷ 12 = 29 € par mois ; le revenu récurrent fait 78 €, la moitié des abonnés en annuel.
     const b = await signUpWithCompany(ctx.app, "b@toitures.fr", "Toitures B", ["roofing"]);
     const annuel = (await b.agent.post("/v1/abonnement/payer").send({ formule: "annuel" }).expect(200)).body.url;
     await b.agent.post(`/v1/abonnement/simulation/${new URL(annuel).searchParams.get("session")}`).send({ issue: "payer" }).expect(200);
@@ -66,9 +66,9 @@ describe("le tableau de bord admin", () => {
     expect(t.chiffres.map((c: { titre: string }) => c.titre)).toEqual(["Utilisateurs actifs", "Abonnés payants", "Revenu mensuel récurrent", "Coût IA du mois"]);
     expect(t.chiffres[1]).toMatchObject({ valeur: "2", fleche: { couleur: "vert", texte: "nouveau" } });
     expect(t.chiffres[2]).toMatchObject({ valeur: "78 €", detail: "HT, annuel ÷ 12 · 50 % en annuel" });
-    expect(t.abonnes).toEqual({ mensuels: 1, annuels: 1, partAnnuels: 50, revenuMensuelRecurrent: 78.08, encaisseCeMois: 398 });
+    expect(t.abonnes).toEqual({ mensuels: 1, annuels: 1, partAnnuels: 50, revenuMensuelRecurrent: 78, encaisseCeMois: 397 });
     expect(t.croissance).toMatchObject({ visites: 3, installations: 1, inscriptions: 3 });
-    expect(t.rentabilite).toMatchObject({ revenu: 78.08 });
+    expect(t.rentabilite).toMatchObject({ revenu: 78 });
     expect(t.mode).toBe("test");
     // Agrégé : aucun nom d'entreprise dans le tableau.
     expect(JSON.stringify(t)).not.toMatch(/Toitures A|Toitures B|Faux artisan/);

@@ -56,10 +56,10 @@ Les pages ont été réécrites (versions du 24/10/2026) ; les points 1 à 4, 9,
 29. **Factures** : émises par BATI INVEST, numérotation continue « F-000001 », mentions (raison sociale, SIRET, adresse, TVA, HT/TVA/TTC, « facture acquittée ») ; manque-t-il une mention obligatoire (pénalités de retard, indemnité forfaitaire de 40 €, sans objet pour une facture déjà payée) ?
 30. **Version des CGU** : l'article 3 est ajouté sous la même version du 24/10/2026 (aucun compte réel ne l'avait encore acceptée). À la mise en production, toute modification suivante passe par une nouvelle version majeure.
 
-## Deux formules : mensuel 49 €, annuel 349 € (24 octobre 2026)
+## Deux formules : mensuel 49 €, annuel 348 € (24 octobre 2026)
 
-31. **« 29 € par mois » pour l'annuel** : 349 € / 12 = **29,08 €**. La landing, /tarifs et le paywall écrivent « dès 29 € par mois » et « 29 € HT par mois, payé à l'année » (arrondi à l'euro, demande de Greg). Un prix annoncé arrondi au-dessous est-il acceptable, ou faut-il écrire « 29,08 € » ? Autre option : l'annuel à **348 €** (exactement 29 € par mois).
-32. **« -40 % »** : la vraie remise est de 40,6 % (239 € sur 588 €). Le badge l'arrondit au-dessous (jamais plus que la vraie). « 239 € économisés par an » compare à douze mois de mensuel au prix du jour.
+31. **« 29 € par mois » pour l'annuel** : réglé par Greg le 24 octobre 2026, l'annuel passe à **348 € HT**, soit exactement 29 € par mois (avant : 349 €, 29,08 €).
+32. **« -40 % »** : la vraie remise est de 40,8 % (240 € sur 588 €). Le badge l'arrondit au-dessous (jamais plus que la vraie, choix confirmé par Greg). « 240 € économisés par an » compare à douze mois de mensuel au prix du jour.
 33. **CGU, article 3** (version du 24/10/2026, toujours aucun compte réel) : deux formules ; l'annuel se renouvelle **par tacite reconduction** pour un an, au prix alors en vigueur, avec un e-mail **30 jours avant**. Entre professionnels, la loi Chatel (L215-1 du code de la consommation) ne s'applique pas en principe, sauf à un artisan qui serait traité comme un consommateur (L215-3, non-professionnel) : le rappel à 30 jours couvre-t-il le risque ?
 34. **Résiliation de l'annuel** : effet à l'échéance, **aucun remboursement au prorata** de l'année commencée. Clause acceptable entre professionnels ? Faut-il un délai de résiliation avant l'échéance (aujourd'hui : jusqu'à la veille) ?
 35. **Passage du mois à l'année** : la part non utilisée du mois est déduite, au jour près (comme Stripe). Le passage de l'année au mois n'est pas proposé en cours d'année (résilier, puis reprendre au mois à l'échéance). À dire autrement ?

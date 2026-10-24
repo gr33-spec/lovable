@@ -2145,7 +2145,7 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   // L'abonnement (24 octobre 2026) : l'article 3 des CGU ; gratuit pour les négoces ; aucun « 2 % » sur les pages légales.
   await expect(page.getByRole("heading", { name: "3. L'abonnement" })).toBeVisible();
   await expect(page.getByText(/49 € HT par mois, sans engagement de durée/)).toBeVisible();
-  await expect(page.getByText(/349 € HT par an, payés en une fois pour douze mois/)).toBeVisible();
+  await expect(page.getByText(/348 € HT par an, payés en une fois pour douze mois/)).toBeVisible();
   await expect(page.getByText(/un e-mail vous rappelle la date et le montant 30\s+jours avant le renouvellement/)).toBeVisible();
   await expect(page.getByText(/sans remboursement au prorata de la période commencée/)).toBeVisible();
   await expect(page.getByText(/Pas de droit de rétractation/)).toBeVisible();
@@ -3221,7 +3221,7 @@ test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formul
   const formules = page.getByRole("region", { name: "Les formules" });
   await expect(formules.getByText("-40 %")).toBeVisible();
   await expect(formules.getByText("29 € HT par mois, payé à l'année")).toBeVisible();
-  await expect(formules.getByText("239 € économisés par an")).toBeVisible();
+  await expect(formules.getByText("240 € économisés par an")).toBeVisible();
   await expect(formules.getByText("49 € HT par mois", { exact: true })).toBeVisible();
   const [annuelBox, mensuelBox] = [await formules.getByText("Annuel", { exact: true }).boundingBox(), await formules.getByText("Mensuel", { exact: true }).boundingBox()];
   expect(annuelBox!.y + annuelBox!.x).toBeLessThan(mensuelBox!.y + mensuelBox!.x);
@@ -3258,14 +3258,14 @@ test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formul
   await page.getByRole("button", { name: "Passer à l'annuel" }).click();
   await page.getByRole("button", { name: /^Oui, payer [\d\s\u202f,]+ € TTC$/ }).click();
   await expect(page.getByText("Abonné à l'année", { exact: true })).toBeVisible();
-  await expect(page.getByText("349 € HT par an (418,80 € TTC), payé en une fois, renouvelé chaque année.")).toBeVisible();
+  await expect(page.getByText("348 € HT par an (417,60 € TTC), payé en une fois, renouvelé chaque année.")).toBeVisible();
   await expect(page.getByText(/Je te préviens par e-mail 30 jours avant\./)).toBeVisible();
 
   // « Mes factures » : les deux factures TEST (le mois, puis le passage à l'annuel), téléchargeables.
   await page.getByRole("tab", { name: "Mes factures" }).click();
   const factures = page.getByRole("list", { name: "Mes factures" });
   await expect(factures.getByText(/^TEST-\d{6}/)).toHaveCount(2);
-  await expect(factures.getByText(/58,80 € TTC/)).toBeVisible();
+  await expect(factures.getByText(/ 58,80 € TTC/)).toBeVisible();
   const download = page.waitForEvent("download");
   await factures.getByRole("link", { name: "Télécharger" }).first().click();
   expect((await download).suggestedFilename()).toMatch(/^TEST-\d{6}\.pdf$/);

@@ -8,7 +8,7 @@ import { NOM_APP } from "@/lib/nom";
 
 export const metadata: Metadata = {
   title: `Tarifs — ${NOM_APP}`,
-  description: "Gratuit pour rejoindre et tester sur un cycle complet. Ensuite dès 29 € HT par mois à l'année (349 € HT par an), ou 49 € HT par mois sans engagement. Gratuit pour les négoces.",
+  description: "Gratuit pour rejoindre et tester sur un cycle complet. Ensuite dès 29 € HT par mois à l'année (348 € HT par an), ou 49 € HT par mois sans engagement. Gratuit pour les négoces.",
 };
 
 /**
@@ -22,7 +22,7 @@ const ETAPES = [
 ] as const;
 
 const FAQ = [
-  { q: "Annuel ou mensuel ?", r: "L'annuel : 349 € HT payés en une fois, soit 29 € par mois, 239 € de moins qu'au mois. Le mensuel : 49 € HT par mois, sans engagement. Tu passes du mois à l'année quand tu veux, ce qui reste de ton mois est déduit." },
+  { q: "Annuel ou mensuel ?", r: "L'annuel : 348 € HT payés en une fois, soit 29 € par mois, 240 € de moins qu'au mois. Le mensuel : 49 € HT par mois, sans engagement. Tu passes du mois à l'année quand tu veux, ce qui reste de ton mois est déduit." },
   { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin de la période payée (le mois, ou l'année), puis rien n'est plus prélevé. Une année commencée n'est pas remboursée au prorata." },
   { q: "L'annuel se renouvelle tout seul ?", r: "Oui, chaque année. Je te préviens par e-mail 30 jours avant : tu as le temps de résilier si tu veux arrêter." },
   { q: "Est-ce que j'ai des factures ?", r: "Oui, une à chaque paiement (chaque mois, ou chaque année), émise par BATI INVEST, avec la TVA. Elles sont toutes dans « Mes factures »." },

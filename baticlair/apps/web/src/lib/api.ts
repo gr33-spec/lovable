@@ -689,7 +689,7 @@ export interface Abonnement {
   paywall: { phrase: string; economie: string | null };
 }
 
-/** Les deux formules de l'abonnement (Greg, 24 octobre 2026) : mensuel 49 € HT, annuel 349 € HT. */
+/** Les deux formules de l'abonnement (Greg, 24 octobre 2026) : mensuel 49 € HT, annuel 348 € HT. */
 export type Formule = "mensuel" | "annuel";
 export interface OffreAbonnement {
   formule: Formule;

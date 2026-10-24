@@ -147,13 +147,12 @@ export class PilotageService {
     const coutIa = async (de: Date, a: Date) => this.eurDeMicroUsd((await this.prisma.aiExecution.aggregate({ where: { createdAt: { gte: de, lt: a } }, _sum: { costMicroUsd: true } }))._sum.costMicroUsd);
     const trenteJours = new Date(maintenant.getTime() - 30 * JOUR);
     const soixanteJours = new Date(maintenant.getTime() - 60 * JOUR);
-    const [act, actP, pay, payP, rev, revP, ia, iaP] = await Promise.all([
+    const [act, actP, pay, payP, rev, ia, iaP] = await Promise.all([
       actifs(trenteJours, maintenant),
       actifs(soixanteJours, trenteJours),
       payants(trenteJours, maintenant),
       payants(soixanteJours, trenteJours),
       revenu(mois, maintenant),
-      revenu(moisPrec, mois),
       coutIa(mois, maintenant),
       coutIa(moisPrec, mois),
     ]);

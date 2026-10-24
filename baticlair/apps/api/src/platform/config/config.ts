@@ -115,7 +115,7 @@ const envSchema = z
      */
     PAYWALL: z.enum(["on", "off"]).default("off"),
     /**
-     * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 349 € HT par an, essai, paywall sur déposer, voir les résultats,
+     * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 348 € HT par an, essai, paywall sur déposer, voir les résultats,
      * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
      */
     ABONNEMENT: z.enum(["on", "off"]).default("on"),
@@ -128,7 +128,7 @@ const envSchema = z
     STRIPE_WEBHOOK_SECRET: z.string().min(8).optional(),
     /** Le prix MENSUEL créé chez Stripe (« price_… »), 49 € HT, récurrent tous les mois. */
     STRIPE_PRICE_ID_MENSUEL: z.string().min(4).optional(),
-    /** Le prix ANNUEL créé chez Stripe (« price_… »), 349 € HT, récurrent tous les ans. */
+    /** Le prix ANNUEL créé chez Stripe (« price_… »), 348 € HT, récurrent tous les ans. */
     STRIPE_PRICE_ID_ANNUEL: z.string().min(4).optional(),
     /** Ancien nom du prix mensuel (une seule formule à 29 €) : lu seulement si `STRIPE_PRICE_ID_MENSUEL` manque. */
     STRIPE_PRICE_ID: z.string().min(4).optional(),

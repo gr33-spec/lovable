@@ -72,7 +72,7 @@ const dateFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe
  * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026). Tient l'état du paiement (table `abonnement`) à partir des événements, simulés
  * ou Stripe ; dit l'état de l'essai et du paywall (`etatAbonnement` du domaine) ; émet les factures (BATI INVEST, numéros
  * continus, série TEST en simulé) ; envoie les e-mails (échec, résiliation, rappels de fin d'essai avec l'économie réelle).
- * DEUX FORMULES (Greg, 24 octobre 2026) : mensuel (49 € HT) ou annuel (349 € HT, payé en une fois) ; du mensuel à
+ * DEUX FORMULES (Greg, 24 octobre 2026) : mensuel (49 € HT) ou annuel (348 € HT, payé en une fois) ; du mensuel à
  * l'annuel à tout moment, au prorata ; l'annuel se renouvelle seul, avec un rappel 30 jours avant ; une résiliation
  * prend effet à l'échéance, sans remboursement au prorata.
  */

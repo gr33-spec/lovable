@@ -5,11 +5,11 @@ import type { Formule, OffreAbonnement } from "@/lib/api";
 
 /**
  * LES DEUX FORMULES (Greg, 24 octobre 2026) : l'annuel mis en avant, son badge « -40 % », « 29 € par mois, payé à
- * l'année » et « 239 € économisés par an » ; le mensuel juste à côté. Les textes viennent de l'API (les prix se règlent
+ * l'année » et « 240 € économisés par an » ; le mensuel juste à côté. Les textes viennent de l'API (les prix se règlent
  * dans l'admin) ; ceux-ci servent seulement en attendant la réponse.
  */
 export const OFFRES_PAR_DEFAUT: OffreAbonnement[] = [
-  { formule: "annuel", titre: "Annuel", badge: "-40 %", prix: "29 € HT par mois, payé à l'année", details: ["349 € HT par an, en une fois", "239 € économisés par an", "Renouvelé chaque année, rappel 30 jours avant"], enAvant: true },
+  { formule: "annuel", titre: "Annuel", badge: "-40 %", prix: "29 € HT par mois, payé à l'année", details: ["348 € HT par an, en une fois", "240 € économisés par an", "Renouvelé chaque année, rappel 30 jours avant"], enAvant: true },
   { formule: "mensuel", titre: "Mensuel", badge: null, prix: "49 € HT par mois", details: ["Sans engagement", "Résiliable quand tu veux"], enAvant: false },
 ];
 
