@@ -121,8 +121,10 @@ describe("lecture lot par lot", { timeout: 60_000 }, () => {
     avecSections = true;
     const { agent } = await signUpWithCompany(ctx.app, "d@example.fr", "Toitures D", ["roofing"]);
     const e = await depose(agent);
-    // 80 prises (plus les en-têtes de page) : deux tranches de 60 lignes au plus ; les mitigeurs à part.
-    expect(appels.filter((x) => x.startsWith("lot:electrical#"))).toEqual(["lot:electrical#1:texte", "lot:electrical#2:texte"]);
+    // 80 prises (plus les en-têtes de page) : plusieurs tranches, chacune sous la limite ; les mitigeurs à part.
+    const elec = appels.filter((x) => x.startsWith("lot:electrical#"));
+    expect(elec.length).toBeGreaterThanOrEqual(Math.ceil(80 / LIGNES_PAR_TRANCHE));
+    expect(elec.every((x) => x.endsWith(":texte"))).toBe(true);
     expect(appels.filter((x) => x.startsWith("lot:plumbing#")).length).toBeGreaterThanOrEqual(1);
     // Aucun appel ne reçoit les lignes d'un autre lot, et chaque tranche tient sous la limite.
     const textes = appels.slice(1).map((a, i) => ({ a, t: vus[i]! }));

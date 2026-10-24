@@ -106,7 +106,7 @@ export function fusionnerLectures(parts: readonly PartLue[], echecs: readonly { 
  * du texte va au métier de sa section (une ligne hors section suit la précédente : aucune ne se perd), et un lot de plus
  * de `LIGNES_PAR_TRANCHE` lignes est lu en plusieurs appels. Chaque appel ne reçoit que ses lignes.
  */
-export const LIGNES_PAR_TRANCHE = 60;
+export const LIGNES_PAR_TRANCHE = 30;
 
 export interface SectionDuDevis {
   metier: string;
