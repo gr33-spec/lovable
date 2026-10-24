@@ -2448,7 +2448,9 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
 });
 
 test("Liste donnée en photo, chantier sans adresse : la barre de la commande demande l'adresse d'emblée, sans refus du serveur (recette en ligne, 25 octobre 2026)", async ({ page }) => {
-  await compteAuGroupe(page, "Toitures Photo", "3 rue des Ajoncs, 22300 Lannion");
+  // Un département à lui (35 ou 53) : sa commande ne se mêle pas à celles des autres parcours.
+  const [ville, rue] = test.info().project.name === "ordinateur" ? ["53000 Laval", "8 rue du Pont, 53000 Laval"] : ["35000 Rennes", "8 rue du Pont, 35000 Rennes"];
+  await compteAuGroupe(page, "Toitures Photo", `2 place de la Mairie, ${ville}`);
   const refus: string[] = [];
   page.on("response", (r) => {
     if (r.status() === 400 && /\/commande-du-mois/.test(r.url())) refus.push(r.url());
@@ -2466,10 +2468,14 @@ test("Liste donnée en photo, chantier sans adresse : la barre de la commande de
   // L'adresse est demandée tout de suite ; « Ajouter » attend un code postal.
   await expect(bar.getByLabel(/Adresse du chantier, avec le code postal/)).toBeVisible();
   await expect(bar.getByRole("button", { name: "Ajouter" })).toBeDisabled();
-  await bar.getByLabel(/Adresse du chantier, avec le code postal/).fill("5 rue de Kerampont, 22300 Lannion");
+  await bar.getByLabel(/Adresse du chantier, avec le code postal/).fill(rue);
   await bar.getByRole("button", { name: "Ajouter" }).click();
   await expect(page.getByRole("region", { name: /^Dans la commande/ })).toBeVisible();
   expect(refus).toEqual([]);
+  // Rien ne reste ouvert pour les parcours suivants : la liste est retirée de la commande.
+  await page.goto("/groupe");
+  await page.getByRole("region", { name: /^Commande d/ }).first().getByRole("button", { name: "Retirer" }).click();
+  await expect(page.getByRole("region", { name: /^Commande d/ }).first().getByRole("button", { name: "Retirer" })).toHaveCount(0);
 });
 
 test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une fois inscrit, sautable, la prochaine clôture, « Déposer ma première liste », une seule fois, « Revoir le guide » dans le menu", async ({ page }) => {
@@ -3133,7 +3139,8 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   const apresCloture = new Date(Date.parse(cycle.clotureLe) + 60_000).toISOString();
   // Trois négoces de plus quand la série « ordinateur » passe après « téléphone » (même département, même base).
   const cloture = await tacheDuMois(page, apresCloture);
-  expect(cloture.clos).toBe(1);
+  // Une commande ouverte par un autre parcours (autre département, même date) peut se clore au même instant.
+  expect(cloture.clos).toBeGreaterThanOrEqual(1);
   expect(cloture.grillesEnvoyees).toBeGreaterThanOrEqual(3);
   await page.goto(`/chantiers/${projetA}`);
   await expect(page.getByRole("region", { name: "Suivi du chantier" }).getByRole("list", { name: "Étapes" }).getByRole("listitem")).toHaveCount(5);
