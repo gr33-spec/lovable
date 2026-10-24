@@ -16,6 +16,8 @@ interface Fleche {
 }
 interface Tableau {
   mode: "test" | "reel";
+  modeTexte?: string | null;
+  demo?: boolean;
   chiffres: { cle: string; titre: string; valeur: string; detail: string; fleche: Fleche }[];
   croissance: { visites: number; inscriptions: number; inscriptionsAvant: number; installations: number; essais: number; conversion: number | null };
   abonnes: { mensuels: number; annuels: number; partAnnuels: number | null; revenuMensuelRecurrent: number; encaisseCeMois: number };
@@ -143,7 +145,7 @@ function Contenu() {
   const maxEuros = Math.max(1, ...t.ia.parJour.map((j) => j.euros));
   return (
     <div className="flex flex-col gap-5">
-      {t.mode === "test" ? <p className="rounded-xl bg-danger px-4 py-2 text-[14px] font-bold text-white">Mode test : les paiements sont simulés</p> : null}
+      {t.mode === "test" ? <p className="rounded-xl bg-danger px-4 py-2 text-[14px] font-bold text-white">{t.modeTexte ?? "Mode test : les paiements sont simulés"}</p> : null}
       <div className="grid grid-cols-2 gap-3">
         {t.chiffres.map((c) => (
           <Card key={c.cle} className="flex flex-col gap-1 p-4">
@@ -231,7 +233,7 @@ function Contenu() {
 
       <Apprentissage taux={t.apprentissage.tauxDeCorrection} />
       <ReglagesCarte />
-      {t.mode === "test" ? <DemoCarte /> : null}
+      {t.demo ?? t.mode === "test" ? <DemoCarte /> : null}
 
       <Section titre="Derniers accès au tableau de bord">
         {t.acces.map((a, i) => (

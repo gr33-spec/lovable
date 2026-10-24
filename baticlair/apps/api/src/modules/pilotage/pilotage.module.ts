@@ -27,6 +27,8 @@ import { PilotageController, PilotagePublicController } from "./http/pilotage.co
             return { mensuel: r.prixHtCentimes, annuel: r.prixAnnuelHtCentimes };
           },
           paiementSimule: c.abonnement.paiement === "simule",
+          stripeDeTest: c.abonnement.paiement === "stripe" && !!c.abonnement.stripe?.secretKey.startsWith("sk_test_"),
+          demoPermise: !(c.env === "production" && !c.previewOriginPattern),
         }),
       inject: [PrismaService, CONFIG, EMAIL_SENDER, AbonnementService, HabitudesService, CommandeDuMoisService],
     },

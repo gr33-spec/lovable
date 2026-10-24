@@ -545,6 +545,11 @@ export class AbonnementService {
   /** Mode démo (admin) : le prochain renouvellement simulé échoue ; ou, sans abonnement, l'échec tout de suite. */
   async simulerEchec(companyId: string, maintenant = this.now()) {
     const a = await this.prisma.abonnement.findUnique({ where: { companyId } });
+    // Stripe de test (prévisualisation) : le renouvellement est chez Stripe ; la démo applique le refus tout de suite.
+    if (a?.statut === "actif" && a.fournisseur === "stripe") {
+      await this.appliquer(companyId, { type: "echec", source: "admin", ref: null }, maintenant);
+      return;
+    }
     if (a?.statut === "actif") {
       // Le calendrier : la période se termine maintenant et son renouvellement échoue (comme une carte refusée).
       await this.prisma.abonnement.update({ where: { companyId }, data: { periodeFin: maintenant } });

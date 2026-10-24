@@ -21,6 +21,10 @@ export interface SourcesPilotage {
   /** Les prix réglés des deux formules, HT en centimes (repli quand un abonné n'a pas encore de facture de sa formule). */
   prixFormules(): Promise<Record<Formule, number>>;
   paiementSimule: boolean;
+  /** Stripe en clé de TEST (prévisualisation) : aucune carte réellement débitée. */
+  stripeDeTest?: boolean;
+  /** La démo admin est permise (jamais en production : prévisualisation ou développement). */
+  demoPermise?: boolean;
 }
 
 const debutDuMois = (d: Date, decalage = 0) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + decalage, 1));
@@ -210,7 +214,11 @@ export class PilotageService {
     const acces = await this.prisma.journalAdmin.findMany({ orderBy: { createdAt: "desc" }, take: 10, select: { email: true, action: true, createdAt: true } });
 
     return {
-      mode: this.sources.paiementSimule ? "test" : "reel",
+      mode: this.sources.paiementSimule || this.sources.stripeDeTest ? "test" : "reel",
+      /** La phrase du bandeau rouge du mode test, selon le paiement. */
+      modeTexte: this.sources.paiementSimule ? "Mode test : les paiements sont simulés" : this.sources.stripeDeTest ? "Mode test : Stripe en mode test, aucune carte n'est débitée" : null,
+      /** La carte « Démo » : en prévisualisation, même avec Stripe de test ; jamais en production. */
+      demo: !!this.sources.demoPermise && (this.sources.paiementSimule || !!this.sources.stripeDeTest),
       chiffres: [
         { cle: "actifs", titre: "Utilisateurs actifs", valeur: String(act), detail: "sur 30 jours", fleche: flecheDe(act, actP) },
         { cle: "payants", titre: "Abonnés payants", valeur: String(pay), detail: this.sources.paiementSimule ? "paiements de test" : "sur 30 jours", fleche: flecheDe(pay, payP) },

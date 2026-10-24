@@ -135,6 +135,11 @@ const envSchema = z
     /** Le taux de TVA créé chez Stripe (« txr_… », 20 %, non inclus) appliqué à l'abonnement. */
     STRIPE_TAX_RATE_ID: z.string().min(4).optional(),
     /**
+     * L'identifiant du point d'accès Neon de la base de PRODUCTION (« ep-… »), donné aux seules prévisualisations : une
+     * prévisualisation dont la base le contient refuse de démarrer (et de migrer, `scripts/garde-base-preview.mjs`).
+     */
+    BASE_PRODUCTION_HOTE: z.string().min(4).optional(),
+    /**
      * BatiClair Groupé (document du fondateur, 2026-10-19) : DÉSACTIVÉ par défaut, « rien en prod sans mon accord
      * explicite » ; `on` l'ouvre (écrans, regroupement, envois aux négoces).
      */
@@ -330,6 +335,10 @@ export function loadConfig(source: Record<string, string | undefined> = process.
   const prixMensuel = e.STRIPE_PRICE_ID_MENSUEL ?? e.STRIPE_PRICE_ID;
   if (e.PAIEMENT === "stripe" && !(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && prixMensuel && e.STRIPE_PRICE_ID_ANNUEL)) {
     problemes.push("PAIEMENT : « stripe » demande STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID_MENSUEL et STRIPE_PRICE_ID_ANNUEL");
+  }
+  // La prévisualisation ne touche jamais la base de production (Greg, 24 octobre 2026).
+  if (e.VERCEL_ENV === "preview" && e.BASE_PRODUCTION_HOTE && e.DATABASE_URL.includes(e.BASE_PRODUCTION_HOTE)) {
+    problemes.push("DATABASE_URL : cette prévisualisation pointe sur la base de production (BASE_PRODUCTION_HOTE)");
   }
   // Un paiement simulé en production donnerait l'accès sans payer.
   if (e.PAIEMENT === "simule" && e.ABONNEMENT === "on" && e.VERCEL_ENV === "production") {

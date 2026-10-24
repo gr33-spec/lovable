@@ -17,15 +17,15 @@
     },
     {
       "path": "/v1/internal/commande-du-mois",
-      "schedule": "5 * * * *"
+      "schedule": "5 11 * * *"
     },
     {
       "path": "/v1/internal/pilotage",
-      "schedule": "17 * * * *"
+      "schedule": "17 20 * * *"
     },
     {
       "path": "/v1/internal/abonnement",
-      "schedule": "11 * * * *"
+      "schedule": "11 7 * * *"
     },
     {
       "path": "/v1/internal/rapport-mensuel",
