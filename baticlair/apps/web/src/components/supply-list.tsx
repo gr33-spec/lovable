@@ -178,6 +178,12 @@ export function SupplyList({
         {takeoff.ratiosEnValidation ? (
           <p className="mt-2 self-start rounded-full bg-warn-bg px-3 py-1 text-[12px] font-semibold text-warn">Ratios en cours de validation</p>
         ) : null}
+        {/* Lecture lot par lot (décision du fondateur, 24 octobre 2026) : une partie non lue est dite, les autres restent. */}
+        {(takeoff.lotsNonLus ?? []).map((phrase) => (
+          <p key={phrase} role="status" className="mt-2 rounded-2xl bg-warn-bg px-3 py-2 text-[14px] font-semibold text-warn">
+            {phrase}
+          </p>
+        ))}
       </header>
       {takeoff.bref && takeoff.bref.length > 0 ? (
         <Brief takeoff={takeoff} editable={editable && Boolean(onBrief)} pending={pending} onBrief={onBrief} />

@@ -730,6 +730,11 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
       <div className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
         <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">Parties du devis : {lots.map((l) => l.libelle).join(" · ")}</h3>
         <p className="text-[14px] leading-snug text-muted">Une liste par partie du devis. Retire une partie en trop, ajoute celle qui manque.</p>
+        {(takeoff.lotsNonLus ?? []).map((phrase) => (
+          <p key={phrase} role="status" className="rounded-2xl bg-warn-bg px-3 py-2 text-[14px] font-semibold text-warn">
+            {phrase}
+          </p>
+        ))}
         <ul className="flex flex-wrap gap-2">
           {lots.map((l) => (
             <li key={l.metier}>

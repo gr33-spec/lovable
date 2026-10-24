@@ -11,7 +11,7 @@ import { RULE_51_1 } from "./prompt.js";
  * bref, les questions (une par donnée manquante, aucune sur une donnée lue), et pour chaque ligne du devis la fourniture
  * nommée ou « sans fourniture ». Le code calcule ensuite (ratios, conversions) : jamais une règle de mots.
  */
-export const LECTURE_PROMPT = { id: "lecture_devis", version: 4 } as const;
+export const LECTURE_PROMPT = { id: "lecture_devis", version: 5 } as const;
 
 /** §49.1 du référentiel (6 octobre 2026), mot pour mot : d'où vient chaque ligne de la liste. */
 export const RULE_49_1 = `RÈGLE §49.1 DU RÉFÉRENTIEL : d'où vient chaque ligne de la liste.
@@ -85,6 +85,7 @@ const FORMAT = `CE QUE TU RENVOIES : un seul objet JSON, rien d'autre.
 - lignes : une entrée par ligne du devis, dans l'ordre, toutes les lignes (en-tête et totaux exclus) : {"ref", "designation", "quantite", "unite", "role", "fournitures"}. ref : son repère (« 1 », « 2 »…) ; designation : le texte de la ligne, prix retirés ; quantite et unite : exactement comme écrites, "" si rien ; role : "fourniture", "pose", "fourniture_et_pose" ou "hors_quantitatif" ; fournitures : les fournitures que la ligne nomme, [] pour une ligne SANS fourniture (main-d'œuvre, dépose, trémies, accès, nettoyage : rien à acheter).
   Chaque fourniture : {"nom", "quantite", "unite", "ouvrage", "emplacement", "donnees", "attend", "a_preciser", "precision"}. nom : le nom du comptoir, complet, tel que le vendeur le lirait (marque, modèle, taille, finition : « Velux GGL SK06 114×118 white finish »), sans mention de pose ; quantite et unite : la quantité à commander de CETTE fourniture et son unité (« u », « ml », « m² »), ou la mesure écrite quand c'est une mesure d'ouvrage (17,40 ml de gouttière), "" si rien n'est écrit (le code la calcule) ; ouvrage et emplacement : l'identifiant de l'OUVRAGE du référentiel et de l'EMPLACEMENT qui la calculent (« gouttiere » / « profil », « gouttiere » / « crochet », « fenetre-de-toit » / « raccord »), ou "" quand aucune règle du référentiel ne s'applique (la fourniture part telle qu'écrite) ; donnees : les données de l'ouvrage écrites sur la ligne, par clé du référentiel : [{"cle", "valeur"}] (« taille_fenetre » : « 114x118 ») ; attend : les clés des questions dont cette fourniture attend la réponse (elle reste orange en attendant) ; a_preciser : ce que le fournisseur précisera lui-même (« profil », « teinte »), sinon [] ; precision : une précision pour le comptoir, sinon "".
   Un article écrit au devis donne une fourniture, deux articles sur une ligne donnent deux fournitures ; un accessoire que le référentiel ajoute d'office (la naissance) n'est pas à nommer, le code le sort. Jamais un article absent du devis.
+  UNE PRÉCISION TECHNIQUE NE SAUTE JAMAIS : le support, la matière, la dimension et l'usage d'un article, écrits sur sa ligne ou sur la ligne de pose qui le concerne (« sur bac acier isolé » sur la pose d'un Velux vaut pour son raccord), vont dans le nom de la fourniture ou dans sa precision (« Raccord SK06 pour bac acier »), et le bref les redit pour cet article (« raccords pour bac acier », jamais seulement « avec raccord »).
 - contexte : ce que l'en-tête et les notes disent du chantier : [{"cle", "valeur"}] (« client », « adresse », « ville », « code postal », « numéro du devis », « date », « neuf ou rénovation »…), [] si rien.
 - notes : en phrases courtes pour l'artisan, ce qui concerne tout le devis et compte pour ses achats (page illisible, fourniture apportée par le client) ; [] sinon.`;
 
@@ -185,6 +186,8 @@ export interface LectureRequest {
   /** L'export du référentiel du métier (`exportPourLecture`). */
   referentiel: string;
   siteNotes?: string | null;
+  /** Lecture lot par lot (24 octobre 2026) : la consigne du lot que cet appel lit seul (`consigneDuLot`). */
+  consigne?: string;
 }
 
 /**

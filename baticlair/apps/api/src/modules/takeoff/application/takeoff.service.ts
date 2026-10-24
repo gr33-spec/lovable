@@ -1,5 +1,8 @@
 import {
   baseOf,
+  consigneDuLot,
+  fusionnerLectures,
+  lectureParLots,
   AI_ADDITION,
   MISSING_INFO,
   CONSUMABLES_KEY,
@@ -484,6 +487,9 @@ export class TakeoffService {
     if (vus.length > 0 && !vus.includes(donne)) trade = vus[0]!;
     const principal = referentialFor(trade)?.trade ?? trade;
     const dejaLus = vus.length > 1 ? [principal, ...vus.filter((m) => m !== principal)] : [principal];
+    // Décision du fondateur (24 octobre 2026, « option 1 ») : un GROS devis de plusieurs métiers est lu en UN APPEL PAR
+    // MÉTIER, en parallèle, chacun avec son référentiel ; un appel unique avec tous les référentiels était coupé (7954).
+    if (lectureParLots(dejaLus, document.numberedText)) return this.lireParLots(lecteur, document, dejaLus, siteNotes, compter);
     let result = await lire(trade, dejaLus);
     if (result === null) return null;
     await compter(1, result, LECTURE_PROMPT);
@@ -507,6 +513,43 @@ export class TakeoffService {
       }
     }
     return { result, trade };
+  }
+
+  /**
+   * La lecture lot par lot (décision du fondateur, 24 octobre 2026) : un appel par métier, en parallèle, chacun avec son
+   * seul référentiel et la consigne de ne rendre que ses lignes (le principal rend aussi les lignes sans lot) ; les
+   * lectures sont fusionnées (`fusionnerLectures`). Un lot en échec n'empêche pas les autres : il est gardé dans
+   * `lotsNonLus` et l'écran le dit (« Je n'ai pas pu lire la partie … ») ; tous en échec, la lecture échoue comme avant.
+   */
+  private async lireParLots(
+    lecteur: LectureReader,
+    document: DocumentInput,
+    metiers: readonly string[],
+    siteNotes: string | null,
+    compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>,
+  ): Promise<{ result: ReadAttempt<LectureDevis>; trade: string } | null> {
+    const lots = metiers.map((m) => ({ metier: m, libelle: tradeProfile(m).label }));
+    const essais = await Promise.all(
+      lots.map((lot, i) => {
+        const r = referentialFor(lot.metier);
+        return lecteur.lire({ document, trade: lot.metier, tradeLabel: lot.libelle, referentiel: r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.", siteNotes, consigne: consigneDuLot(lot, lots, i === 0) });
+      }),
+    );
+    if (essais.every((e) => e === null)) return null;
+    for (const [i, e] of essais.entries()) if (e) await compter(i + 1, e, LECTURE_PROMPT);
+    const parts = lots.flatMap((lot, i) => (essais[i]?.status === "success" && essais[i]!.output ? [{ ...lot, lecture: essais[i]!.output! }] : []));
+    const echecs = lots.filter((_, i) => !(essais[i]?.status === "success" && essais[i]!.output));
+    const lus = essais.filter((e): e is ReadAttempt<LectureDevis> => e !== null);
+    const premier = lus.find((e) => e.status === "success" && e.output) ?? lus[0]!;
+    const fusion = fusionnerLectures(parts, echecs);
+    const usage = {
+      inputTokens: lus.reduce((t, e) => t + e.usage.inputTokens, 0),
+      outputTokens: lus.reduce((t, e) => t + e.usage.outputTokens, 0),
+      cacheReadTokens: lus.reduce((t, e) => t + (e.usage.cacheReadTokens ?? 0), 0),
+    };
+    const durationMs = Math.max(...lus.map((e) => e.durationMs));
+    const result: ReadAttempt<LectureDevis> = fusion ? { ...premier, usage, durationMs, status: "success", output: fusion, errorCode: null } : { ...premier, usage, durationMs, output: null };
+    return { result, trade: parts[0]?.metier ?? metiers[0]! };
   }
 
   /** Le repérage des métiers (texte seul, modèle rapide) : jamais bloquant, un échec ou un silence laisse le métier donné. */

@@ -1,4 +1,4 @@
-import { briefResume, briefTexte, libelleDuMetier, LOTS_KEY, lotsRetenus, phrasePrecision, precisionDeLigne, ratiosEnValidationDuDevis, REFERENTIALS, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
+import { briefResume, briefTexte, libelleDuMetier, LOTS_KEY, lotsRetenus, phraseLotNonLu, phrasePrecision, precisionDeLigne, ratiosEnValidationDuDevis, REFERENTIALS, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
 import type { ArtisanView, PurchaseView } from "@baticlair/domain";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 import type { ReviewedTakeoff } from "../application/takeoff.service.js";
@@ -141,6 +141,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // l'artisan a gardés ou ajoutés (null tant qu'il n'a pas dit « C'est bon »), et les métiers qu'il peut ajouter.
     lots: (takeoff.lecture?.lots ?? []).filter((l) => l.lignes.length > 0).map((l) => ({ metier: l.metier, libelle: l.libelle, lignes: l.lignes.length })),
     lotsConfirmes: typeof takeoff.answers[LOTS_KEY] === "string" ? (takeoff.answers[LOTS_KEY] as string).split(",").filter(Boolean) : null,
+    // Lecture lot par lot (décision du fondateur, 24 octobre 2026) : un lot dont la lecture a échoué, dit en une phrase.
+    lotsNonLus: (takeoff.lecture?.lotsNonLus ?? []).map((l) => phraseLotNonLu(l.libelle)),
     metiersAjoutables: REFERENTIALS.filter((r) => r.trade !== "general").map((r) => ({ metier: r.trade, libelle: libelleDuMetier(r.trade) })),
     // §51 : la fiche de chantier, chaque donnée avec son origine (lue, déduite, ta réponse, manquante).
     fiche: (fiche?.donnees ?? []).map((d) => ({ cle: d.cle, libelle: d.libelle, valeur: d.valeur, origine: d.origine, regle: d.regle ?? null, preuve: d.preuve ?? null })),

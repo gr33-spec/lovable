@@ -250,6 +250,8 @@ export interface Takeoff {
   lots?: { metier: string; libelle: string; lignes: number }[];
   lotsConfirmes?: string[] | null;
   metiersAjoutables?: { metier: string; libelle: string }[];
+  /** Lecture lot par lot : « Je n'ai pas pu lire la partie …, ajoute-la à la main ou renvoie-la. » (un lot en échec). */
+  lotsNonLus?: string[];
   sansFourniture?: { lineId: string; label: string; measure: string | null }[];
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
   aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];

@@ -33,7 +33,7 @@ export class AnthropicLectureReader implements LectureReader {
   }
 
   async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis>> {
-    const extra = siteNotesInstruction(request.siteNotes);
+    const extra = [siteNotesInstruction(request.siteNotes), request.consigne ?? null].filter(Boolean).join("\n\n") || null;
     const attempt = await this.reader.read({
       system: lectureSystemPrompt({ trade: request.trade, tradeLabel: request.tradeLabel, referentiel: request.referentiel }),
       schema: lectureWireSchema,
