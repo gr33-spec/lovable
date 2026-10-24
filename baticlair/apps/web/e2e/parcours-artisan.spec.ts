@@ -3,6 +3,21 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 
+/**
+ * LE GUIDE DU PREMIER LANCEMENT (Greg, 24 octobre 2026) s'ouvre par-dessus l'app une fois par compte : chaque parcours le
+ * passe dès qu'il paraît (« Passer le guide »), sauf le test du guide, qui retire ce réflexe.
+ */
+async function passeGuide(page: Page): Promise<Page> {
+  await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
+    await page.getByRole("button", { name: "Passer le guide" }).click();
+  });
+  return page;
+}
+
+test.beforeEach(async ({ page }) => {
+  await passeGuide(page);
+});
+
 /** Adresse unique par exécution : les tests ne dépendent pas de l'état de la base. */
 /** Photo minimale (1 px, PNG valide). */
 const PNG_1PX = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
@@ -1959,7 +1974,7 @@ async function negoceDepose(page: Page, browser: Browser, negoce: string, replyT
   expect(relance.subject).toContain("n'est pas encore prise en compte");
   const lien = /https?:\/\/[^\s]+\/reponse\/[A-Za-z0-9_-]+/.exec(relance.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
   const contexteN = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageN = await contexteN.newPage();
+  const pageN = await passeGuide(await contexteN.newPage());
   await pageN.goto(lien);
   await expect(pageN.getByRole("heading", { name: /^Demande de prix, lot n° \d+/ })).toBeVisible();
   const form = pageN.getByRole("form", { name: "Déposer mon devis" });
@@ -1998,7 +2013,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   await chantierAuGroupe(page, "Toiture Toitures Martin", adresseA);
   await expect(page.getByRole("region", { name: "Dans la commande commune", exact: true }).getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toBeVisible();
   const contexteB = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageB = await contexteB.newPage();
+  const pageB = await passeGuide(await contexteB.newPage());
   await artisanAuGroupe(pageB, "Toitures Le Bihan", adresseB);
   // La demande est partie aux deux négoces, avec l'adresse de réponse du lot.
   const demande = await derniereDemande(page, "ardoises@example.com", dejaRecus);
@@ -2015,7 +2030,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
     const lien = /https?:\/\/[^\s]+\/reponse\/[A-Za-z0-9_-]+/.exec(relance.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
     // Le négoce ouvre son lien, sans compte : le lot, la case obligatoire, le contrat à côté.
     const contexteN = await browser.newContext({ ...(test.info().project.use as object) });
-    const pageN = await contexteN.newPage();
+    const pageN = await passeGuide(await contexteN.newPage());
     await pageN.goto(lien);
     await expect(pageN.getByRole("heading", { name: /^Demande de prix, lot n° \d+/ })).toBeVisible();
     await expect(pageN.getByRole("list", { name: "Chantiers à livrer" }).getByRole("listitem")).toHaveCount(2);
@@ -2190,7 +2205,7 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   const adresseB = telephone ? "12 rue de Kerampont, 35400 Saint-Malo" : "2 rue Thiers, 56000 Vannes";
   await artisanAuGroupe(page, "Toitures Trégor", adresseA);
   const contexteB = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageB = await contexteB.newPage();
+  const pageB = await passeGuide(await contexteB.newPage());
   await artisanAuGroupe(pageB, "Toitures Malouines", adresseB);
   type Lot = { designation: string; statut: string; lot: { numero: number; statut: string } | null };
   const lotsA = (await apiJson<{ besoins: Lot[] }>(page, "GET", "/v1/groupe/lots")).body.besoins;
@@ -2225,7 +2240,7 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
 
   // Un SIRET mal formé (clé de Luhn fausse) : « Vérifier mon SIRET » le dit, le groupé reste fermé.
   const contexteS = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageS = await contexteS.newPage();
+  const pageS = await passeGuide(await contexteS.newPage());
   await signUp(pageS);
   expect(await apiCall(pageS, "PATCH", "/v1/company/profile", { name: "Toitures Siret", address: "1 rue du Port, 22500 Paimpol", siret: "12345678901234", phone: null, email: null })).toBe(200);
   await pageS.goto("/groupe");
@@ -2237,7 +2252,7 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   // Le plafond (section 5) : A et B proposent 480 m de liteau chacun (la tuile, vague, n'entre pas dans la commande commune) ;
   // C en met 5 000 (plus de 3 × la médiane) : refusé, dit en clair.
   const contexteC = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageC = await contexteC.newPage();
+  const pageC = await passeGuide(await contexteC.newPage());
   await compteAuGroupe(pageC, "Toitures Plafond", adresseA);
   const projetC = await createProject(pageC, "Toiture Plafond", "M. Client", adresseA);
   await pageC.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
@@ -2271,7 +2286,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Ardoises", email: N1, familles: ["couverture"] })).toBe(201);
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Généraliste", email: N2, familles: ["couverture", "second_oeuvre"] })).toBe(201);
   const contexteB = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageB = await contexteB.newPage();
+  const pageB = await passeGuide(await contexteB.newPage());
   await compteAuGroupe(pageB, "Toitures Sud", "12 rue de Kerampont, 35400 Saint-Malo");
 
   // 1) Lot sans offre : la demande part, personne ne répond ; huit jours plus tard, la tâche clôt le lot (décision du 20 octobre).
@@ -2295,7 +2310,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await derniereDemande(page, N2, avant.n2);
   const lienPasConcerne = /Pas concerné : (\S+)/.exec(demande2.text)![1]!.replace(/^https?:\/\/[^/]+/, "");
   const contexteN = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageN = await contexteN.newPage();
+  const pageN = await passeGuide(await contexteN.newPage());
   await pageN.goto(lienPasConcerne);
   await expect(pageN.getByText(/Négoce Ardoises : ne plus recevoir les demandes « Couverture » \?/)).toBeVisible();
   await pageN.getByRole("button", { name: "Confirmer" }).click();
@@ -2429,6 +2444,39 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   await blocOnglet.getByRole("button", { name: "Ajouter un autre négoce" }).click();
   await expect(blocOnglet.getByLabel("Nom du négoce (facultatif)")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
+test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une fois inscrit, sautable, la prochaine clôture, « Déposer ma première liste », une seule fois, « Revoir le guide » dans le menu", async ({ page }) => {
+  await page.removeLocatorHandler(page.getByRole("dialog", { name: "Guide" }));
+  await signUp(page);
+  const guide = page.getByRole("dialog", { name: "Guide" });
+  await expect(guide).toBeVisible();
+  await expect(guide.getByRole("heading", { name: "Dépose ta liste ou ton devis" })).toBeVisible();
+  await expect(guide.getByText(/^Prochaine clôture : \w+ \d{1,2} \w+ à \d{1,2} h/)).toBeVisible();
+  await expect(guide.getByRole("button", { name: "Passer le guide" })).toBeVisible();
+  // La page derrière est inerte.
+  await expect(page.getByRole("button", { name: "Mon menu" })).toHaveCount(0);
+  await guide.getByRole("button", { name: "Suivant" }).click();
+  await expect(guide.getByRole("heading", { name: "On la regroupe avec celles des autres artisans du secteur" })).toBeVisible();
+  await guide.getByRole("button", { name: "Suivant" }).click();
+  await expect(guide.getByRole("heading", { name: "Tu reçois les prix le jour J et tu commandes si ça te va" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  await guide.getByRole("link", { name: "Déposer ma première liste" }).click();
+  await expect(page).toHaveURL(/\/chantiers\/nouveau/);
+  await expect(guide).toHaveCount(0);
+  // Une seule fois : ni au rechargement, ni ailleurs.
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ })).toBeVisible();
+  await expect(guide).toHaveCount(0);
+  // « Revoir le guide » dans le menu le rouvre ; « Passer le guide » le referme.
+  await page.getByRole("button", { name: "Mon menu" }).click();
+  await page.getByRole("menuitem", { name: "Revoir le guide" }).click();
+  await expect(guide.getByRole("heading", { name: "Dépose ta liste ou ton devis" })).toBeVisible();
+  await guide.getByRole("button", { name: "Passer le guide" }).click();
+  await expect(guide).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Mon menu" })).toBeVisible();
+  await expect(guide).toHaveCount(0);
 });
 
 test("La page d'accueil publique : un visiteur la voit à la racine, un artisan connecté garde l'app", async ({ page }) => {
@@ -2961,7 +3009,7 @@ async function accesNegoceCree(browser: Browser, page: Page, email: string, ense
   expect(mail.text).not.toMatch(/Toitures [ABC]/);
   const lien = /https?:\/\/[^\s]+\/negoce\/rejoindre\/[A-Za-z0-9_.-]+/.exec(mail.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
   const contexte = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageN = await contexte.newPage();
+  const pageN = await passeGuide(await contexte.newPage());
   await pageN.goto(lien);
   const form = pageN.getByRole("form", { name: "Créer mon accès" });
   await expect(form.getByLabel("E-mail")).toHaveValue(email);
@@ -2990,7 +3038,7 @@ async function grilleDeposee(browser: Browser, page: Page, email: string, rows: 
   const mail = (await emailsVers(page, email)).filter((m) => /\/grille\//.test(m.text)).at(-1)!;
   const lien = /https?:\/\/[^\s]+\/grille\/[A-Za-z0-9_-]+/.exec(mail.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
   const contexte = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageN = await contexte.newPage();
+  const pageN = await passeGuide(await contexte.newPage());
   await pageN.goto(lien);
   await expect(pageN.getByRole("heading", { name: /^Commande commune du (1er|\d{1,2}) \S+ \d{4}$/ })).toBeVisible();
   await expect(pageN.getByText(/^Réponse avant le \d\d\/\d\d à 18 h, il reste \d+ j/)).toBeVisible();
@@ -3043,7 +3091,7 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
 
   // B, à Paimpol, du stock, dans un autre navigateur.
   const contexteB = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageB = await contexteB.newPage();
+  const pageB = await passeGuide(await contexteB.newPage());
   await compteAuGroupe(pageB, "Toitures B", "12 rue du Port, 22500 Paimpol");
   const projetB = await listePrete(pageB, "12 rue du Port, 22500 Paimpol", [
     { libelle: ARDOISE_MOIS, quantite: "3000", unite: "pièces" },
@@ -3069,7 +3117,7 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   // C, à Lannion, après la clôture, l'écran encore sur la commande close : sa liste part avec la suivante, en clair ; il la
   // retire tant que celle-ci est ouverte.
   const contexteC = await browser.newContext({ ...(test.info().project.use as object) });
-  const pageC = await contexteC.newPage();
+  const pageC = await passeGuide(await contexteC.newPage());
   await compteAuGroupe(pageC, "Toitures C", "5 rue de Kerampont, 22300 Lannion");
   const projetC = await listePrete(pageC, "5 rue de Kerampont, 22300 Lannion", [{ libelle: ARDOISE_MOIS, quantite: "1000", unite: "pièces" }]);
   const articlesC = (await apiJson<{ takeoff: { purchase: { toBuy: { key: string }[] } } }>(pageC, "GET", `/v1/projects/${projetC}/takeoff`)).body.takeoff.purchase.toBuy.map((b) => b.key);

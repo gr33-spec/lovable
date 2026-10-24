@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CreditCard, FlaskConical, Truck, UserRound } from "lucide-react";
+import { CircleHelp, CreditCard, FlaskConical, Truck, UserRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { revoirLeGuide } from "./guide-premier-lancement";
 
 /** « Jean Martin » → « JM » ; « Jean » → « JE ». */
 export function initials(name: string): string {
@@ -84,6 +85,18 @@ export function MenuArtisan() {
           <button type="button" role="menuitem" onClick={() => void demo()} disabled={pending} className={`${item} disabled:opacity-60`}>
             <FlaskConical size={20} aria-hidden="true" className="text-muted" />
             {pending ? "Préparation…" : "Essayer avec un chantier fictif"}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              revoirLeGuide();
+            }}
+            className={item}
+          >
+            <CircleHelp size={20} aria-hidden="true" className="text-muted" />
+            Revoir le guide
           </button>
           {error ? <p className="px-4 py-3 text-[14px] font-semibold text-warn">Ça n&apos;a pas marché, réessaie.</p> : null}
         </div>

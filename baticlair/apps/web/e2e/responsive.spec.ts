@@ -1,6 +1,21 @@
 import { expect, test, type Page } from "@playwright/test";
 
 /**
+ * LE GUIDE DU PREMIER LANCEMENT (Greg, 24 octobre 2026) s'ouvre par-dessus l'app une fois par compte : chaque parcours le
+ * passe dès qu'il paraît (« Passer le guide »), sauf le test du guide, qui retire ce réflexe.
+ */
+async function passeGuide(page: Page): Promise<Page> {
+  await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
+    await page.getByRole("button", { name: "Passer le guide" }).click();
+  });
+  return page;
+}
+
+test.beforeEach(async ({ page }) => {
+  await passeGuide(page);
+});
+
+/**
  * PASSE RESPONSIVE (lot B) : chaque écran du parcours tient sur un téléphone, une tablette (portrait et paysage) et un
  * ordinateur, sans défilement horizontal ni bouton coupé. Les captures (test-results/responsive) servent à relire la
  * mise en page ; le test casse si une page déborde en largeur.
@@ -171,7 +186,7 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
   // Espace négoce (23 octobre) : l'invitation, la page « Créez votre accès », puis le compte (dépôt, paliers) par l'API.
   const invitations = (await appel<{ emails: { text: string }[] }>(page, "GET", `/v1/internal/test/emails?to=${encodeURIComponent(ponant)}`)).body.emails;
   const lienInvitation = invitations.map((m) => /https?:\/\/[^\s]+(\/negoce\/rejoindre\/[A-Za-z0-9_.-]+)/.exec(m.text)?.[1]).filter(Boolean).at(-1)!;
-  const negoce = await (await browser.newContext()).newPage();
+  const negoce = await passeGuide(await (await browser.newContext()).newPage());
   for (const size of WIDTHS) {
     await negoce.setViewportSize({ width: size.width, height: size.height });
     await negoce.goto(lienInvitation);
@@ -200,7 +215,7 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
   }
 
   // L'admin des dates (le compte admin des parcours).
-  const admin = await (await browser.newContext()).newPage();
+  const admin = await passeGuide(await (await browser.newContext()).newPage());
   await admin.goto("/connexion");
   await admin.getByLabel("E-mail").fill("admin-groupe@example.fr");
   await admin.getByLabel("Mot de passe").fill("motdepasse-solide");

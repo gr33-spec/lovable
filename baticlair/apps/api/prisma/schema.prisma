@@ -36,6 +36,9 @@ model User {
   /// Bloc 6 du plan du 20 octobre : la case « J'accepte les CGU » à la création du compte (date et version acceptée).
   cguAccepteLe             DateTime?
   cguVersion               String?
+  /// Le guide en trois écrans du premier lancement (Greg, 24 octobre 2026) : vu ou passé une fois, il ne revient plus
+  /// d'office, sur aucun appareil ; « Revoir le guide » dans le menu le rouvre.
+  guideVuLe                DateTime?
 
   sessions          Session[]
   accounts          Account[]
