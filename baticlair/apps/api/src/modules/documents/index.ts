@@ -5,3 +5,6 @@ export { DocumentAiInput, type PdfPageTools, type PreparedDocument } from "./app
 export { extractPdfPages, pdfPageCount } from "./infrastructure/pdf-pages.js";
 export { assembleQuote, type UploadedPart } from "./infrastructure/photos-to-pdf.js";
 export { chunkedFields, UploadParts } from "./infrastructure/upload-parts.js";
+export { imageMimeType, looksLikePdf } from "./domain/document.js";
+export { PDF_READER, type PdfReader } from "./application/pdf-reader.js";
+export { PdfJsPdfReader } from "./infrastructure/pdfjs-pdf-reader.js";

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import {
+  anonymiserLigne,
   DEFAULT_EXTRACTION_POLICY,
   estimateDocumentCost,
   numberLines,
@@ -155,7 +156,9 @@ export class DocumentsService {
         heightPt: page.heightPt,
         chars: routing.metrics.chars,
         metrics: { ...routing.metrics },
-        lines: lines.map((l) => ({ ref: l.ref, text: l.text })),
+        // RGPD (Greg, 24 octobre 2026) : le nom, le téléphone, l'e-mail et la rue d'un particulier sont retirés AVANT
+        // l'enregistrement du texte, donc avant toute lecture par l'IA ; la commune reste (`anonymiserLigne`).
+        lines: lines.map((l) => ({ ref: l.ref, text: anonymiserLigne(l.text).texte })),
       };
     });
 

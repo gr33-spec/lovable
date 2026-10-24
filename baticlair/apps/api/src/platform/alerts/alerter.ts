@@ -1,5 +1,6 @@
 import type { TransactionalEmailSender } from "../email/email.port.js";
 import type { AppLogger } from "../logging/logger.js";
+import { NOM_APP } from "@baticlair/domain";
 
 /**
  * ALERTES (audit de lancement, B5) : quand la production casse, quelqu'un le sait sans attendre
@@ -7,7 +8,7 @@ import type { AppLogger } from "../logging/logger.js";
  * Au plus une alerte par sorte toutes les 10 minutes (une panne ne noie pas la messagerie) ;
  * jamais de donnée de client dans le message (pas de devis, pas de nom de chantier).
  */
-export type AlertKind = "server_error" | "ai_reading_failed" | "client_error";
+export type AlertKind = "server_error" | "ai_reading_failed" | "client_error" | "commande_commune";
 
 export interface Alerter {
   readonly enabled: boolean;
@@ -18,6 +19,8 @@ const TITLES: Record<AlertKind, string> = {
   server_error: "Erreur serveur",
   ai_reading_failed: "Lecture de devis échouée",
   client_error: "Écran en erreur chez un artisan",
+  /** Espace négoce (23 octobre 2026) : aucun négoce inscrit, aucune réponse à 48 h, grille retenue trop « non garantie ». */
+  commande_commune: "Commande commune à surveiller",
 };
 
 export const ALERT_QUIET_MS = 10 * 60 * 1000;
@@ -49,7 +52,7 @@ export class ChannelAlerter implements Alerter {
     const silenced = this.skipped.get(kind) ?? 0;
     this.last.set(kind, at);
     this.skipped.set(kind, 0);
-    const text = `BatiClair (${this.channels.env}) — ${TITLES[kind]} : ${message}${silenced > 0 ? ` (+${silenced} autres depuis la dernière alerte)` : ""}`;
+    const text = `${NOM_APP} (${this.channels.env}) — ${TITLES[kind]} : ${message}${silenced > 0 ? ` (+${silenced} autres depuis la dernière alerte)` : ""}`;
     // Une alerte qui échoue ne fait jamais tomber la requête : elle est seulement journalisée.
     void this.send(text).catch((err: unknown) => this.logger.warn({ err }, "alerte non envoyée"));
   }

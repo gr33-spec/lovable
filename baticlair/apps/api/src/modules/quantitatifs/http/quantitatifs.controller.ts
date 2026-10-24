@@ -230,6 +230,33 @@ const croquisBody = z.object({
  * INFOS CHANTIER FACULTATIVES (docs/infos-chantier-facultatives.md) : la note de l'artisan et ses croquis vivent sur le
  * CHANTIER, pas sur un quantitatif ; chaque calcul les relit. Rien n'est obligatoire : le devis suffit.
  */
+/**
+ * « J'AI DÉJÀ MA LISTE » : `POST /v1/projects/:projetId/liste`, photo ou PDF en multipart (champ `file`, ou envoi en
+ * morceaux comme un devis). Les lignes sont lues telles qu'écrites : aucun calcul, aucune question.
+ */
+@Controller("v1/projects/:projetId/liste")
+@UseGuards(TenantGuard)
+export class ListeExistanteController {
+  constructor(
+    @Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService,
+    @Inject(UploadParts) private readonly uploads: UploadParts,
+  ) {}
+
+  @Throttle({ default: HOURLY(30) })
+  @Post()
+  @UseInterceptors(FileInterceptor("file", { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: 1 } }))
+  async create(
+    @Tenant() tenant: TenantContext,
+    @Param("projetId") projetId: string,
+    @UploadedFile() file: (UploadedPdf & { size: number }) | undefined,
+    @Body(new ZodPipe(z.object({ ...chunkedFields }))) body: z.infer<z.ZodObject<typeof chunkedFields>>,
+    @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>,
+  ) {
+    const received = await this.uploads.fileOf(tenant, file, body);
+    return this.quantitatifs.fromListe(tenant, projetId, { name: received.name, bytes: received.bytes }, { ecran: query.ecran === "1" });
+  }
+}
+
 @Controller("v1/projects/:projetId/infos")
 @UseGuards(TenantGuard)
 export class InfosChantierController {

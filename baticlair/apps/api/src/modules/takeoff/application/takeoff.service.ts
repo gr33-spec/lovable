@@ -1,5 +1,11 @@
 import {
   baseOf,
+  consigneDeTranche,
+  consigneDuLot,
+  fusionnerLectures,
+  tranchesDuDevis,
+  type SectionDuDevis,
+  lectureParLots,
   AI_ADDITION,
   MISSING_INFO,
   CONSUMABLES_KEY,
@@ -57,11 +63,12 @@ import {
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
-import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
+import { imageMimeType, looksLikePdf, type DocumentAiInput, type DocumentRepository, type DocumentWithProcessing, type PreparedDocument } from "../../documents/index.js";
 import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
 import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader } from "./lecture-reader.js";
+import { LISTE_PROMPT, type ListeReader } from "./liste-reader.js";
 import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
 /**
@@ -96,6 +103,8 @@ export interface ReadingOptions {
    * ligne. Absent, ou lecteur simulé sans lecture enregistrée pour ce devis : l'ancienne lecture (prompt A) sert encore.
    */
   lecteur?: LectureReader;
+  /** « J'ai déjà ma liste » : la lecture d'image ou de PDF d'une liste déjà comptée (lignes telles qu'écrites, aucun calcul). */
+  listeur?: ListeReader;
   /** Le nom de l'entreprise, injecté dans le prompt B ({nom_entreprise}). */
   companyName?: (tenant: TenantContext) => Promise<string | null>;
   /**
@@ -476,11 +485,15 @@ export class TakeoffService {
       return lecteur.lire({ document, trade: t, tradeLabel: tradeProfile(t).label, referentiel, siteNotes });
     };
     const donne = referentialFor(trade)?.trade ?? tradeIdOf(trade.split(",")[0] ?? "");
-    const vus = donne === "general" ? [] : await this.reperer(lecteur, document.numberedText, compter);
+    const reperage = donne === "general" ? { metiers: [], sections: [] } : await this.reperer(lecteur, document.numberedText, compter);
+    const vus = reperage.metiers;
     // Un devis d'un autre métier que le compte : ce métier ; un devis à plusieurs lots sans le métier du compte : le principal.
     if (vus.length > 0 && !vus.includes(donne)) trade = vus[0]!;
     const principal = referentialFor(trade)?.trade ?? trade;
     const dejaLus = vus.length > 1 ? [principal, ...vus.filter((m) => m !== principal)] : [principal];
+    // Décision du fondateur (24 octobre 2026, « option 1 ») : un GROS devis de plusieurs métiers est lu en UN APPEL PAR
+    // MÉTIER, en parallèle, chacun avec son référentiel ; un appel unique avec tous les référentiels était coupé (7954).
+    if (lectureParLots(dejaLus, document.numberedText)) return this.lireParLots(lecteur, document, dejaLus, reperage.sections, siteNotes, compter);
     let result = await lire(trade, dejaLus);
     if (result === null) return null;
     await compter(1, result, LECTURE_PROMPT);
@@ -506,18 +519,70 @@ export class TakeoffService {
     return { result, trade };
   }
 
+  /**
+   * La lecture lot par lot (décision du fondateur, 24 octobre 2026) : un appel par métier, en parallèle, chacun avec son
+   * seul référentiel et la consigne de ne rendre que ses lignes (le principal rend aussi les lignes sans lot) ; les
+   * lectures sont fusionnées (`fusionnerLectures`). Un lot en échec n'empêche pas les autres : il est gardé dans
+   * `lotsNonLus` et l'écran le dit (« Je n'ai pas pu lire la partie … ») ; tous en échec, la lecture échoue comme avant.
+   */
+  private async lireParLots(
+    lecteur: LectureReader,
+    document: DocumentInput,
+    metiers: readonly string[],
+    sections: readonly SectionDuDevis[],
+    siteNotes: string | null,
+    compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>,
+  ): Promise<{ result: ReadAttempt<LectureDevis>; trade: string } | null> {
+    const lots = metiers.map((m) => ({ metier: m, libelle: tradeProfile(m).label }));
+    const exportDe = (m: string) => {
+      const r = referentialFor(m);
+      return r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.";
+    };
+    // Avec les sections du repérage, chaque appel ne reçoit que les lignes de son lot, par tranches ; sans elles, le devis
+    // entier avec la consigne de ne rendre que ce lot.
+    const tranches = tranchesDuDevis(document.numberedText, metiers, sections);
+    const entete = document.numberedText.split("\n").slice(0, 12).join("\n");
+    const appels = tranches
+      ? tranches.map((t) => {
+          const lot = lots.find((l) => l.metier === t.metier)!;
+          const siennes = tranches.filter((x) => x.metier === t.metier);
+          return { lot, request: { document: { ...document, numberedText: t.texte }, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), siteNotes, consigne: consigneDeTranche(lot, lots, siennes.indexOf(t) + 1, siennes.length, entete) } };
+        })
+      : lots.map((lot, i) => ({ lot, request: { document, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), siteNotes, consigne: consigneDuLot(lot, lots, i === 0) } }));
+    const essais = await Promise.all(appels.map((a) => lecteur.lire(a.request)));
+    if (essais.every((e) => e === null)) return null;
+    for (const [i, e] of essais.entries()) if (e) await compter(i + 1, e, LECTURE_PROMPT);
+    const parts = appels.flatMap((a, i) => (essais[i]?.status === "success" && essais[i]!.output ? [{ ...a.lot, lecture: essais[i]!.output! }] : []));
+    const echecs = appels.filter((_, i) => !(essais[i]?.status === "success" && essais[i]!.output)).map((a) => a.lot);
+    const lus = essais.filter((e): e is ReadAttempt<LectureDevis> => e !== null);
+    const premier = lus.find((e) => e.status === "success" && e.output) ?? lus[0]!;
+    const fusion = fusionnerLectures(parts, echecs);
+    const usage = {
+      inputTokens: lus.reduce((t, e) => t + e.usage.inputTokens, 0),
+      outputTokens: lus.reduce((t, e) => t + e.usage.outputTokens, 0),
+      cacheReadTokens: lus.reduce((t, e) => t + (e.usage.cacheReadTokens ?? 0), 0),
+    };
+    const durationMs = Math.max(...lus.map((e) => e.durationMs));
+    const result: ReadAttempt<LectureDevis> = fusion ? { ...premier, usage, durationMs, status: "success", output: fusion, errorCode: null } : { ...premier, usage, durationMs, output: null };
+    return { result, trade: parts[0]?.metier ?? metiers[0]! };
+  }
+
   /** Le repérage des métiers (texte seul, modèle rapide) : jamais bloquant, un échec ou un silence laisse le métier donné. */
-  private async reperer(lecteur: LectureReader, numberedText: string, compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>): Promise<string[]> {
-    if (!lecteur.reperer) return [];
+  private async reperer(lecteur: LectureReader, numberedText: string, compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>): Promise<{ metiers: string[]; sections: SectionDuDevis[] }> {
+    const rien = { metiers: [], sections: [] };
+    if (!lecteur.reperer) return rien;
     try {
       // 25 s au plus : un repérage lent ne retarde jamais la lecture plus que la relecture qu'il évite.
       let timer: ReturnType<typeof setTimeout> | undefined;
       const r = await Promise.race([lecteur.reperer(numberedText), new Promise<null>((resolve) => (timer = setTimeout(() => resolve(null), REPERAGE_MAX_MS)))]).finally(() => clearTimeout(timer));
-      if (!r) return [];
+      if (!r) return rien;
       await compter(0, r, REPERAGE_PROMPT);
-      return r.status === "success" && r.output ? r.output.filter((m) => referentialFor(m)?.trade === m) : [];
+      if (r.status !== "success" || !r.output) return rien;
+      const lu = Array.isArray(r.output) ? { metiers: r.output, sections: [] } : r.output;
+      const metiers = lu.metiers.filter((m) => referentialFor(m)?.trade === m);
+      return { metiers, sections: lu.sections.filter((x) => metiers.includes(x.metier)) };
     } catch {
-      return [];
+      return rien;
     }
   }
 
@@ -533,10 +598,11 @@ export class TakeoffService {
     let trade = doc.trade;
     let ref = referentialFor(trade);
     const siteNotes = doc.projectId ? ((await this.reading.projectNotes?.(tenant, doc.projectId)) ?? null) : null;
-    // Le devis complet : son texte numéroté (pour citer les lignes) et le PDF entier, toutes pages.
-    const content = await this.documents.readContent(tenant, doc.id);
-    const pages = prepared.pages.map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
-    const document = { numberedText: prepared.input.numberedText, imagePdf: content?.bytes ?? prepared.input.imagePdf, imagePages: pages };
+    // RGPD (Greg, 24 octobre 2026 ; RÈGLE CHANGÉE §51.5, avant : « le PDF entier ») : le texte numéroté, déjà débarrassé
+    // des coordonnées du client, et seulement l'image des pages sans texte (un scan ne se nettoie pas sans le lire). Le
+    // PDF d'origine n'est plus joint quand toutes ses pages ont du texte.
+    const pages = prepared.pages.filter((p) => p.route === "vision").map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
+    const document = { numberedText: prepared.input.numberedText, imagePdf: prepared.input.imagePdf, imagePages: pages };
     const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
     let cost = 0;
     const lu = await this.lireLeDevis(lecteur, document, trade, siteNotes, async (n, r, prompt) => {
@@ -668,6 +734,90 @@ export class TakeoffService {
         aiDoubt: null,
         priceRaw: l.price?.trim() || null,
         origin: "partner",
+      })),
+    });
+    return this.review(tenant, takeoff);
+  }
+
+  /** Une liste déjà comptée peut-elle être lue ? (le lecteur d'image est configuré) */
+  get listeAvailable(): boolean {
+    return this.reading.listeur !== undefined;
+  }
+
+  /**
+   * « J'AI DÉJÀ MA LISTE » : une photo (JPEG, PNG, WebP) ou un PDF d'une liste écrite à la main, d'un bon ou d'un devis de
+   * négoce. L'IA lit les lignes TELLES QU'ÉCRITES (article, quantité, unité) ; aucun calcul de quantitatif, aucune question :
+   * l'artisan a déjà compté. La liste arrive sur le même écran que celle d'un devis (modifier, supprimer, ajouter une ligne) ;
+   * rien ne part sans sa validation. L'appel est enregistré (coût mesuré) mais ne compte pas comme une analyse de devis.
+   */
+  async fromListe(tenant: TenantContext, projectId: string, trade: string, file: { name: string; bytes: Uint8Array }): Promise<ReviewedTakeoff> {
+    assertCanWrite(tenant);
+    const listeur = this.reading.listeur;
+    if (!listeur) throw new DomainError("ai_unavailable", "AI reading is not configured");
+    if (file.bytes.byteLength === 0) throw new DomainError("unreadable_document", "Empty file", { reason: "empty" });
+    const mediaType = imageMimeType(file.bytes);
+    if (!mediaType && !looksLikePdf(file.bytes)) throw new DomainError("unreadable_document", "Not an image or a PDF", { reason: "not_pdf" });
+    const attempt = await listeur.lire({
+      fileName: file.name,
+      trade,
+      document: mediaType ? { numberedText: "", imagePdf: null, imagePages: [], images: [{ mediaType, bytes: file.bytes }] } : { numberedText: "", imagePdf: file.bytes, imagePages: [] },
+    });
+    if (attempt) {
+      try {
+        await this.recorder.record({
+          companyId: tenant.companyId,
+          projectId,
+          documentId: null,
+          userId: tenant.userId,
+          task: LISTE_PROMPT.id,
+          route: "vision",
+          provider: attempt.provider,
+          model: attempt.model,
+          promptId: LISTE_PROMPT.id,
+          promptVersion: LISTE_PROMPT.version,
+          attempt: 1,
+          pagesText: 0,
+          pagesVision: 1,
+          usage: attempt.usage,
+          status: attempt.status,
+          errorCode: attempt.errorCode,
+          durationMs: attempt.durationMs,
+        });
+      } catch (error) {
+        this.onRecordFailure(error);
+      }
+    }
+    if (!attempt || attempt.status !== "success" || !attempt.output) {
+      this.reading.onReadingFailed?.(attempt?.status ?? "no_reader");
+      throw new DomainError("analysis_failed", "The AI could not read this list", { reason: attempt?.status ?? "no_reader" });
+    }
+    const lignes = attempt.output.lignes;
+    if (lignes.length === 0) throw new DomainError("analysis_failed", "Nothing was read in this list", { reason: "nothing_read" });
+    const ref = referentialFor(trade);
+    if (ref) await this.reading.referentials?.ensure(ref);
+    const takeoff = await this.takeoffs.create(tenant, {
+      projectId,
+      documentId: null,
+      source: "lignes",
+      referentialVersion: ref?.version ?? null,
+      analysisId: null,
+      trade,
+      calculated: true,
+      promptId: LISTE_PROMPT.id,
+      promptVersion: LISTE_PROMPT.version,
+      model: attempt.model,
+      notes: [],
+      lines: lignes.map((l) => ({
+        designation: l.designation,
+        quantityRaw: l.quantite,
+        unitRaw: l.unite,
+        reference: null,
+        sourceRefs: [],
+        sourcePages: [],
+        section: [],
+        aiDoubt: null,
+        priceRaw: null,
+        origin: "liste",
       })),
     });
     return this.review(tenant, takeoff);

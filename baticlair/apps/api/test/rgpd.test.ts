@@ -38,7 +38,7 @@ describe("RGPD : mes données", () => {
     const { agent } = await fullCompany("a@example.fr");
     const res = await agent.get("/v1/me/export");
     expect(res.status).toBe(200);
-    expect(res.headers["content-disposition"]).toMatch(/^attachment; filename="baticlair-mes-donnees-\d{4}-\d{2}-\d{2}\.json"$/);
+    expect(res.headers["content-disposition"]).toMatch(/^attachment; filename="mobiiz-mes-donnees-\d{4}-\d{2}-\d{2}\.json"$/);
     expect(res.body.user).toMatchObject({ email: "a@example.fr" });
     const company = res.body.companies[0];
     expect(company).toMatchObject({ name: "Toitures Martin", role: "owner" });

@@ -38,6 +38,6 @@ describe("paywall en pause (fondateur, 2026-10-11)", () => {
   it("au-delà de la limite, le chantier se crée quand même, et l'écran de limite ne s'affiche pas", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     for (const name of ["A", "B", "C", "D"]) await agent.post("/v1/projects").send({ name }).expect(201);
-    expect((await agent.get("/v1/billing")).body).toMatchObject({ usage: { projects: 4, limit: 2 }, limitReached: false });
+    expect((await agent.get("/v1/billing")).body).toMatchObject({ usage: { projects: 4, limit: 2 }, limitReached: false, payant: false });
   });
 });

@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import type { AppConfig } from "../../../platform/config/config.js";
+import { PREVIEW_ORIGIN_JOKER, type AppConfig } from "../../../platform/config/config.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { resetPasswordEmail, verificationEmail } from "./emails.js";
+import { NOM_APP } from "@baticlair/domain";
 
 export const AUTH_BASE_PATH = "/v1/auth";
 
@@ -18,12 +19,12 @@ export const AUTH_BASE_PATH = "/v1/auth";
 export function createAuth(config: AppConfig, prisma: PrismaService, email: TransactionalEmailSender) {
   const { google, microsoft } = config.oauth;
   return betterAuth({
-    appName: "BatiClair",
+    appName: NOM_APP,
     baseURL: config.apiPublicUrl,
     basePath: AUTH_BASE_PATH,
     secret: config.authSecret,
     database: prismaAdapter(prisma, { provider: "postgresql" }),
-    trustedOrigins: [config.webAppUrl],
+    trustedOrigins: [...config.webAppOrigins, ...(config.previewOriginPattern ? [PREVIEW_ORIGIN_JOKER] : [])],
     telemetry: { enabled: false },
     session: {
       // Session longue et glissante : l'artisan ne ressaisit pas son mot de passe sans cesse.

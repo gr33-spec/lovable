@@ -30,6 +30,9 @@ describe("accueil : prochaine action de chaque chantier", () => {
     const doc = (await agent.get(`/v1/projects/${projectId}/documents`)).body.items[0];
     const takeoff = (await agent.post(`/v1/documents/${doc.id}/takeoff`).expect(201)).body;
     expect(await demo()).toMatchObject({ kind: "validate_list", label: "Valider la liste" });
+    // Plan « finition », bloc 5 : devis lu, liste pas encore calculée : le suivi ne coche pas « Liste prête ».
+    const suivi = (await agent.get(`/v1/projects/${projectId}/suivi`).expect(200)).body;
+    expect(suivi).toMatchObject({ etape: -1, aFaire: "Réponds aux questions, puis « Calculer ma liste »." });
     for (const line of takeoff.lines.filter((l: { status: string }) => l.status === "to_verify")) {
       await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
     }

@@ -1,12 +1,13 @@
 "use client";
 
-import { Check, ChevronLeft, FileUp, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, ChevronLeft, FileUp, ListChecks, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListScene, ReadingStage } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
 import { useTyping } from "@/lib/typing";
+import { NOM_APP } from "@/lib/nom";
 
 /*
  * §50 « Ce que voit l'artisan » (fondateur, 2026-10-09) : TROIS ÉCRANS, rien d'autre.
@@ -21,7 +22,22 @@ import { useTyping } from "@/lib/typing";
  * LA SEULE ACTION D'UN NOUVEAU CHANTIER : déposer le PDF. Une grande zone (toucher pour choisir, ou glisser le fichier
  * sur ordinateur), l'animation, une phrase. Le nom, l'adresse et le client viennent du devis.
  */
-export function DropZone({ onFile, pending, error }: { onFile: (file: File) => void; pending: boolean; error: ApiError | null }) {
+export function DropZone({
+  onFile,
+  pending,
+  error,
+  kind = "devis",
+  small = false,
+}: {
+  onFile: (file: File) => void;
+  pending: boolean;
+  error: ApiError | null;
+  /** « liste » : « Donne ta liste de matériaux », une photo, un PDF ou une capture de ce que l'artisan a déjà compté. */
+  kind?: "devis" | "liste";
+  /** Nouveau cap (22 octobre) : le devis passe en petit bouton sous la liste, « Je n'ai qu'un devis ». */
+  small?: boolean;
+}) {
+  const liste = kind === "liste";
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
@@ -32,9 +48,35 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
   };
   // §50.1 : un bouton, « Déposer mon devis » (toucher pour choisir, ou glisser le fichier sur ordinateur). Rien d'autre.
   return (
-    <section aria-label="Dépôt du devis" className="flex flex-col gap-4">
+    <section aria-label={liste ? "Dépôt de la liste" : "Dépôt du devis"} className="flex flex-col gap-4">
       {error ? <ErrorNotice error={error} /> : null}
-      <input ref={input} id={id} type="file" accept="application/pdf,.pdf" className="sr-only" disabled={pending} onChange={(e) => take(e.target.files?.[0])} />
+      {/* La liste : une photo (JPEG, PNG, WebP : l'iPhone convertit tout seul) ou un PDF ; le devis : un PDF. */}
+      <input
+        ref={input}
+        id={id}
+        type="file"
+        aria-label={liste ? "Déposer ma liste" : "Déposer mon devis"}
+        accept={liste ? "image/jpeg,image/png,image/webp,application/pdf,.pdf" : "application/pdf,.pdf"}
+        className="sr-only"
+        disabled={pending}
+        onChange={(e) => take(e.target.files?.[0])}
+      />
+      {small ? (
+        // Le petit bouton « Je n'ai qu'un devis » (nouveau cap, 22 octobre) : le parcours du devis reste, en second.
+        <label
+          htmlFor={id}
+          aria-disabled={pending}
+          className={`pressable flex min-h-16 cursor-pointer items-center gap-3 rounded-xl bg-surface px-4 py-3 shadow-card focus-within:outline-3 focus-within:outline-accent ${pending ? "pointer-events-none opacity-80" : "active:bg-ground"}`}
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink">
+            {pending ? <Loader2 size={20} className="animate-spin" aria-hidden="true" /> : <FileUp size={20} aria-hidden="true" />}
+          </span>
+          <span className="flex flex-col">
+            <span className="text-[16px] font-semibold">Je n&apos;ai qu&apos;un devis</span>
+            <span className="text-[14px] leading-snug text-muted">On t&apos;avance la liste, sans garantie, tu la peaufines.</span>
+          </span>
+        </label>
+      ) : (
       <label
         htmlFor={id}
         aria-disabled={pending}
@@ -48,15 +90,17 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
           setOver(false);
           take(e.dataTransfer.files?.[0]);
         }}
-        className={`flex min-h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-[20px] border-[2.5px] border-dashed px-6 py-6 text-center transition focus-within:ring-2 ${
-          over ? "border-accent bg-accent/5" : "border-accent/30 bg-surface"
-        } ${pending ? "pointer-events-none opacity-80" : "active:scale-[0.99]"}`}
+        className={`pressable flex min-h-56 cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed px-6 py-8 text-center focus-within:outline-3 focus-within:outline-accent ${
+          over ? "border-accent bg-accent/5" : "border-line bg-surface"
+        } ${pending ? "pointer-events-none opacity-80" : ""}`}
       >
-        <span className="flex size-16 items-center justify-center rounded-full bg-cta text-white shadow-card">
-          {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
+        <span className={`flex size-16 items-center justify-center rounded-full ${liste ? "bg-ink text-white" : "bg-accent text-on-accent"}`}>
+          {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : liste ? <ListChecks size={28} aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
         </span>
-        <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">Déposer mon devis</span>
+        <span className="text-[22px] leading-tight font-extrabold tracking-[-0.02em]">{pending && liste ? "Je lis ta liste…" : liste ? "Donne ta liste de matériaux" : "J'ai un devis"}</span>
+        {liste && !pending ? <span className="text-[15px] leading-snug text-muted">Une photo, un PDF ou une capture : je la remets au propre.</span> : null}
       </label>
+      )}
     </section>
   );
 }
@@ -125,12 +169,12 @@ export function notifyReady(title: string, body: string, tag: string): void {
   if (!document.hidden) return;
   document.title = `✓ ${title}`;
   const restore = () => {
-    document.title = "BatiClair";
+    document.title = NOM_APP;
     document.removeEventListener("visibilitychange", restore);
   };
   document.addEventListener("visibilitychange", restore);
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
-  const options = { body, tag, icon: "/icon.svg", data: { url: window.location.href } };
+  const options = { body, tag, icon: "/icon-192.png", data: { url: window.location.href } };
   // Sur téléphone, une notification passe par le service worker ; sur ordinateur, directement.
   const sw = "serviceWorker" in navigator ? navigator.serviceWorker.getRegistration("/sw.js") : Promise.resolve(undefined);
   void sw
@@ -143,7 +187,7 @@ export function notifyReady(title: string, body: string, tag: string): void {
 /** Après « Calculer ma liste » : une seule phrase, le temps du calcul ; les lignes du devis se posent une à une dans la liste (`ListScene`), pour tous les métiers. */
 export function CalculScreen() {
   return (
-    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-5 rounded-[20px] bg-chantier px-5 pt-8 pb-8 text-white shadow-card">
+    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-5 rounded-xl bg-chantier px-5 pt-8 pb-8 text-white shadow-card">
       <ListScene />
       <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
         Je prépare ta liste
@@ -444,7 +488,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
         role="group"
         aria-label="Calculer ma liste"
         data-typing={typing || undefined}
-        className={`${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}z-30 bg-gradient-to-t from-ground from-70% to-transparent pt-6 transition-[translate,opacity] duration-200 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:px-4.5 max-lg:pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:bottom-0 lg:pb-4`}
+        className={`${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}z-30 fade-ground pt-6 transition-[translate,opacity] duration-200 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:px-4.5 max-lg:pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:bottom-0 lg:pb-4`}
       >
         <div className="mx-auto max-w-2xl">
           <Button
@@ -473,7 +517,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
 /** Une question retirée : sa phrase en une ligne, et « Remettre ». */
 function RetiredCard({ question: q, onRestore }: { question: CounterQuestion; onRestore: () => void }) {
   return (
-    <li className="flex items-center gap-3 rounded-[20px] bg-surface px-4 py-3 shadow-card">
+    <li className="flex items-center gap-3 rounded-xl bg-surface px-4 py-3 shadow-card">
       <span className="min-w-0 grow text-[14px] leading-snug text-muted">
         Question retirée : <span className="font-bold">{q.text}</span>
       </span>
@@ -503,7 +547,7 @@ function QuestionCard({
 }) {
   const id = useId();
   return (
-    <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-[20px] bg-surface p-4 shadow-card transition ${problem ? "ring-2 ring-danger" : given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
+    <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-xl bg-surface p-4 shadow-card transition ${problem ? "ring-2 ring-danger" : given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
       <div className="flex items-start gap-2">
         <span id={`${id}-q`} className="grow text-[16px] leading-snug font-extrabold">
           {q.text}
@@ -535,7 +579,7 @@ function QuestionCard({
                 aria-pressed={on}
                 onClick={() => onChange(on ? null : { value: o.value, label: o.label })}
                 className={`inline-flex min-h-12 flex-col items-center justify-center rounded-2xl border-2 px-3 py-1.5 text-center text-[15px] leading-tight font-extrabold transition active:scale-[0.98] ${
-                  on ? "border-accent bg-accent text-white" : usual ? "border-accent/50 bg-[#eef2ff] text-ink" : "border-line bg-surface text-ink"
+                  on ? "border-accent bg-accent text-on-accent" : usual ? "border-accent/50 bg-[#eef2ff] text-ink" : "border-line bg-surface text-ink"
                 }`}
               >
                 {o.label}
@@ -682,11 +726,16 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
   const [adding, setAdding] = useState(false);
   const ajoutables = (takeoff.metiersAjoutables ?? []).filter((m) => !lots.some((l) => l.metier === m.metier));
   return (
-    <section aria-label="Lots repérés" className="flex flex-col gap-3">
+    <section aria-label="Parties du devis" className="flex flex-col gap-3">
       {error ? <ErrorNotice error={error} /> : null}
-      <div className="flex flex-col gap-3 rounded-[20px] bg-surface p-4 shadow-card">
-        <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">Lots repérés : {lots.map((l) => l.libelle).join(" · ")}</h3>
-        <p className="text-[14px] leading-snug text-muted">Une liste par lot. Retire un lot qui n&apos;en est pas un, ajoute celui qui manque.</p>
+      <div className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
+        <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">Parties du devis : {lots.map((l) => l.libelle).join(" · ")}</h3>
+        <p className="text-[14px] leading-snug text-muted">Une liste par partie du devis. Retire une partie en trop, ajoute celle qui manque.</p>
+        {(takeoff.lotsNonLus ?? []).map((phrase) => (
+          <p key={phrase} role="status" className="rounded-2xl bg-warn-bg px-3 py-2 text-[14px] font-semibold text-warn">
+            {phrase}
+          </p>
+        ))}
         <ul className="flex flex-wrap gap-2">
           {lots.map((l) => (
             <li key={l.metier}>
@@ -694,7 +743,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
                 type="button"
                 disabled={lots.length < 2 || pending}
                 onClick={() => setLots((prev) => prev.filter((x) => x.metier !== l.metier))}
-                aria-label={`Retirer le lot ${l.libelle}`}
+                aria-label={`Retirer la partie ${l.libelle}`}
                 className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-ground px-4 text-[15px] font-bold disabled:opacity-60"
               >
                 {l.libelle}
@@ -704,7 +753,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
           ))}
         </ul>
         {adding ? (
-          <div role="group" aria-label="Ajouter un lot" className="flex flex-wrap gap-2">
+          <div role="group" aria-label="Ajouter une partie" className="flex flex-wrap gap-2">
             {ajoutables.map((m) => (
               <button
                 key={m.metier}
@@ -722,7 +771,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
         ) : ajoutables.length > 0 ? (
           <Button variant="ghost" className="self-start px-0" disabled={pending} onClick={() => setAdding(true)}>
             <Plus size={18} aria-hidden="true" />
-            Ajouter un lot
+            Ajouter une partie
           </Button>
         ) : null}
         <Button variant="secondary" pending={pending} onClick={() => onConfirm(lots.map((l) => l.metier))}>

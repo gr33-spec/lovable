@@ -23,7 +23,7 @@ export interface SketchHandlers {
 /** La fiche qui s'ouvre sous une ligne : un panneau blanc bordé, des champs au contour net (mêmes pour toutes les lignes). */
 export const EDIT_PANEL = "flex scroll-mb-52 flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card ring-1 ring-accent/25";
 export const EDIT_FIELD =
-  "min-h-12 w-full rounded-xl border border-[#d5d9e0] bg-surface px-3 text-base font-normal outline-none transition-colors placeholder:text-subtle focus:border-accent focus:ring-2 focus:ring-accent/20";
+  "min-h-12 w-full rounded-xl border border-[#d5d9e0] bg-surface px-3 text-base font-normal outline-none transition-colors placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/20";
 
 /** Le texte et la quantité d'une ligne, tels que l'artisan veut les voir partir chez le fournisseur. */
 export function ItemForm({

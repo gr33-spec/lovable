@@ -27,7 +27,7 @@ export function NotificationsCard() {
   };
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">NOTIFICATIONS</h2>
+      <h2 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">NOTIFICATIONS</h2>
       <p className="text-sm text-muted">Être prévenu quand un fournisseur répond ou pose une question, et quand la lecture d&apos;un devis se termine.</p>
       {error ? <ErrorNotice error={error} /> : null}
       <Button variant={enabled ? "secondary" : "primary"} pending={pending} disabled={!data} onClick={() => void set(!enabled)} aria-pressed={enabled}>

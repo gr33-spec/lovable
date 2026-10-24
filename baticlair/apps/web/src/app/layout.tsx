@@ -1,15 +1,37 @@
-import "@fontsource-variable/plus-jakarta-sans";
-import "@fontsource-variable/bricolage-grotesque";
-import "@fontsource/instrument-serif/latin-400.css";
-import "@fontsource/instrument-serif/latin-400-italic.css";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
+import { ACCROCHE_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
+
+// Plan « finition », bloc 5 (Lighthouse, décalage 0,21 sur les pages légales) : la police passe par next/font,
+// qui les précharge et dessine d'abord une police de secours aux mêmes mesures ; le texte ne bouge plus à leur arrivée.
+// Même fichier qu'avant (paquet @fontsource), sous-ensemble latin (français compris). Passe UI/UX (23 octobre) : une
+// seule famille, Plus Jakarta Sans ; Bricolage Grotesque n'est plus chargée.
+const jakarta = localFont({
+  src: "../../node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2",
+  weight: "200 800",
+  display: "swap",
+  variable: "--font-jakarta",
+});
+// Direction « chantier haute visibilité » (Greg, 23 octobre au soir : « un truc qui déchire ») : Bricolage Grotesque,
+// déjà dans les dépendances, pour les titres et les grands chiffres ; Plus Jakarta Sans reste le texte.
+const bricolage = localFont({
+  src: "../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2",
+  weight: "200 800",
+  display: "swap",
+  variable: "--font-bricolage",
+});
 
 export const metadata: Metadata = {
-  title: { default: "BatiClair", template: "%s · BatiClair" },
+  title: { default: NOM_APP, template: `%s · ${NOM_APP}` },
   description: "L'assistant d'achat de matériaux des artisans.",
-  applicationName: "BatiClair",
-  appleWebApp: { capable: true, title: "BatiClair", statusBarStyle: "default" },
+  applicationName: NOM_APP,
+  appleWebApp: { capable: true, title: NOM_APP, statusBarStyle: "default" },
+  // L'icône de l'écran d'accueil iPhone (180 px, sans transparence) et celle des onglets.
+  icons: { icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }], apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }] },
+  // L'image de partage (lien collé dans un message) : le logo sur fond noir, 1200 × 630.
+  openGraph: { siteName: NOM_APP, title: NOM_APP, description: `${ACCROCHE_APP} ${SLOGAN_APP}`, locale: "fr_FR", type: "website", images: [{ url: "/marque/og.png", width: 1200, height: 630, alt: NOM_APP }] },
+  twitter: { card: "summary_large_image", title: NOM_APP, images: ["/marque/og.png"] },
 };
 
 export const viewport: Viewport = {
@@ -17,12 +39,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Plein écran sur iPhone : la barre du bas et le bouton principal respectent la zone du geste (safe-area).
   viewportFit: "cover",
-  themeColor: "#f3f4f6",
+  themeColor: "#0d0f14",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={`${jakarta.variable} ${bricolage.variable}`}>
       <body className="min-h-dvh antialiased">{children}</body>
     </html>
   );

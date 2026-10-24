@@ -51,6 +51,7 @@ export class ResendEmailSender implements TransactionalEmailSender, EmailCapabil
         to: [email.to],
         subject: email.subject,
         text: email.text,
+        ...(email.html ? { html: email.html } : {}),
         ...(email.replyTo ? { reply_to: email.replyTo } : {}),
         ...(email.attachments?.length ? { attachments: email.attachments.map((a) => ({ filename: a.filename, content: a.contentBase64, content_type: a.contentType })) } : {}),
       }),

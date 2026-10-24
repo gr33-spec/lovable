@@ -1,5 +1,5 @@
 import { AnthropicDocumentReader } from "../../../platform/ai/anthropic-document-reader.js";
-import { decodeLecture, decodeReperage, LECTURE_PROMPT, lectureSystemPrompt, lectureWireSchema, REPERAGE_PROMPT, reperageSystemPrompt, reperageWireSchema, type LectureReader, type LectureRequest } from "../application/lecture-reader.js";
+import { decodeLecture, decodeReperage, LECTURE_PROMPT, lectureSystemPrompt, lectureWireSchema, REPERAGE_PROMPT, type Reperage, reperageSystemPrompt, reperageWireSchema, type LectureReader, type LectureRequest } from "../application/lecture-reader.js";
 import { siteNotesInstruction } from "../application/prompt.js";
 import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { LectureDevis } from "@baticlair/domain";
@@ -19,7 +19,7 @@ export class AnthropicLectureReader implements LectureReader {
     this.rapide = fastModel ? new AnthropicDocumentReader(apiKey, fastModel, "low", fetchImpl) : null;
   }
 
-  async reperer(numberedText: string): Promise<ReadAttempt<string[]> | null> {
+  async reperer(numberedText: string): Promise<ReadAttempt<Reperage> | null> {
     if (!this.rapide) return null;
     const attempt = await this.rapide.read({
       system: reperageSystemPrompt(),
@@ -33,7 +33,7 @@ export class AnthropicLectureReader implements LectureReader {
   }
 
   async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis>> {
-    const extra = siteNotesInstruction(request.siteNotes);
+    const extra = [siteNotesInstruction(request.siteNotes), request.consigne ?? null].filter(Boolean).join("\n\n") || null;
     const attempt = await this.reader.read({
       system: lectureSystemPrompt({ trade: request.trade, tradeLabel: request.tradeLabel, referentiel: request.referentiel }),
       schema: lectureWireSchema,

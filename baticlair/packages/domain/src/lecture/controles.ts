@@ -132,7 +132,8 @@ export function controleLectureDe00000071(lecture: LectureDevis, devis: readonly
     ...brefManquant(lecture, [
       ["bac acier isolé", /bac acier isole/],
       ["pas de couverture neuve", /pas de couverture neuve/],
-      ["gouttière demi-ronde zinc naturel 17,40 m", /gouttiere demi.ronde zinc naturel 17,40 m/],
+      // Les mêmes faits dans la même phrase, l'ordre libre (vraie lecture du 24 octobre : « Gouttière 17,40 m demi-ronde… »).
+      ["gouttière demi-ronde zinc naturel 17,40 m", [/gouttiere/, /demi.ronde/, /zinc naturel/, /17,40 m/]],
       ["crochets Négrafix", /negrafix/],
       ["chéneau 11,70 m", [/cheneau/, /11,70 m\b/]],
       ["membrane", /membrane/],
@@ -143,6 +144,11 @@ export function controleLectureDe00000071(lecture: LectureDevis, devis: readonly
     ]),
   );
   out.push(...fournitures(lecture, /^(depose|realisation des tremies|pose de vel)/, null));
+  // Une précision technique ne saute jamais (décision du fondateur, 24 octobre 2026) : le raccord d'un Velux posé « sur bac
+  // acier isolé » se commande « pour bac acier », dans son nom ou sa précision.
+  const raccords = lecture.lignes.flatMap((l) => l.fournitures).filter((f) => /raccord/.test(n(f.nom)));
+  if (raccords.length === 0) out.push("Fourniture absente : raccords des Velux");
+  for (const f of raccords) if (!/bac acier/.test(n(`${f.nom} ${f.precision ?? ""}`))) out.push(`Précision perdue : « ${f.nom} » sans « pour bac acier »`);
   const textes = lecture.questions.map((q) => n(q.texte));
   if (lecture.questions.length !== QUESTIONS_DE00000071.length) out.push(`Questions : ${lecture.questions.length} au lieu de ${QUESTIONS_DE00000071.length}`);
   for (const [label, test] of QUESTIONS_DE00000071) if (!textes.some(test)) out.push(`Question absente : ${label}`);

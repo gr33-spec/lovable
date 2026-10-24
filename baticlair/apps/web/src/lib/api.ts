@@ -170,8 +170,8 @@ export const MAX_DOCUMENT_BYTES = 20_000_000;
 export const MAX_REQUEST_BYTES = 4_000_000;
 
 export interface Health {
-  status: "ok";
-  features: { email: boolean; ai: boolean; alerts?: boolean };
+  status: "ok" | "degrade";
+  features: { email: boolean; ai: boolean; alerts?: boolean; groupe?: boolean; commandeCommune?: "mois" | "lots" };
 }
 
 export interface TakeoffIssue {
@@ -233,6 +233,8 @@ export interface Quantitatif {
 }
 
 export interface Takeoff {
+  /** Nouveau cap (22 octobre) : la phrase de la pastille orange d'une ligne vague. */
+  phrasePrecision?: string;
   /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
   habits?: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation), repliées sous la liste. */
@@ -248,6 +250,8 @@ export interface Takeoff {
   lots?: { metier: string; libelle: string; lignes: number }[];
   lotsConfirmes?: string[] | null;
   metiersAjoutables?: { metier: string; libelle: string }[];
+  /** Lecture lot par lot : « Je n'ai pas pu lire la partie …, ajoute-la à la main ou renvoie-la. » (un lot en échec). */
+  lotsNonLus?: string[];
   sansFourniture?: { lineId: string; label: string; measure: string | null }[];
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
   aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
@@ -306,6 +310,8 @@ export interface PurchaseItem {
   asks?: { key: string; text: string; unit: string | null; options: { label: string; value: string }[] }[];
   /** §49.8 : un écart devis / calcul, « Garder 20 » / « Mettre 21 ». */
   gap?: { written: string; computed: string; unit: string } | null;
+  /** Nouveau cap (22 octobre) : ce qui manque pour se grouper (format, origine, choix, marque), en boutons ; vide : précise. */
+  aPreciserPourGroupe?: { cle: string; question: string; options: string[] }[];
 }
 
 export interface PurchaseAssumption {
@@ -643,4 +649,6 @@ export interface BillingStatus {
   offers: BillingPlan[];
   requestedPlan: string | null;
   activationEnabled: boolean;
+  /** Paywall allumé ; éteint, Compte et Formules disent « Gratuit pour l'artisan ». */
+  payant?: boolean;
 }

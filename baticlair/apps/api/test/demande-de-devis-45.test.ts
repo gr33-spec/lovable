@@ -70,8 +70,9 @@ async function pdfText(bytes: Uint8Array): Promise<string> {
   return content.pages.map((p) => p.lines.join("\n")).join("\n");
 }
 
-describe("§45.7 — la demande de devis du chantier Test", () => {
-  it("1. le mail sort avec la structure du 45.2 ; ni « commande », ni « référentiel », ni « BatiClair » dans le corps", async () => {
+// Chaque cas crée un compte, un chantier et une lecture complète (≈ 3 s, plus de 5 s quand la machine est chargée).
+describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 }, () => {
+  it("1. le mail sort avec la structure du 45.2 ; ni « commande », ni « référentiel », ni « BatiClair » ni « Mobiiz » dans le corps", async () => {
     const agent = await compteBatiInvest();
     const { projectId, supplierId } = await chantierTest(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
@@ -86,7 +87,7 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
         "Greg Bati invest · 06 12 34 56 78 · greg@batiinvest.fr",
       ].join("\n\n"),
     );
-    expect(email.body).not.toMatch(/command|référentiel|BatiClair/i);
+    expect(email.body).not.toMatch(/command|référentiel|BatiClair|Mobiiz/i);
     expect(forbiddenWord(`${email.subject}\n${email.body}`)).toBeNull();
     expect(priceLeak(email.body)).toBeNull();
     // Le mail qui part est celui-là, avec le PDF joint.
@@ -109,7 +110,7 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     // Rien à préciser sur ce chantier : le bloc « À préciser avec vous » est absent, les suivants se renumérotent.
     expect(text).not.toMatch(/À préciser avec vous/);
     // Coordonnées du compte, en-tête et pied.
-    for (const t of ["Bati invest", "4 rue de Siam, 29200 Brest", "SIRET 12345678900012", "06 12 34 56 78 · greg@batiinvest.fr", "chantier Test", "Brest", "Une question sur ce chantier ? 06 12 34 56 78 · greg@batiinvest.fr", "Page 1 / ", "Généré avec BatiClair"])
+    for (const t of ["Bati invest", "4 rue de Siam, 29200 Brest", "SIRET 12345678900012", "06 12 34 56 78 · greg@batiinvest.fr", "chantier Test", "Brest", "Une question sur ce chantier ? 06 12 34 56 78 · greg@batiinvest.fr", "Page 1 / ", "Généré avec Mobiiz"])
       expect(text).toContain(t);
     expect(text).toMatch(/Réf\. CH-[0-9A-F]{6}/);
     // Le logo est une image dans le PDF.
@@ -147,7 +148,7 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     const bloc = avec.document.blocs.find((b: { titre: string }) => b.titre === "À préciser avec vous");
     // Une mesure (m²) sans règle de calcul n'est jamais une quantité à commander (§40) : le fournisseur propose.
     expect(bloc.lignes).toEqual(["Jouées de lucarnes en zinc · 2 m² : merci de proposer ce que vous avez"]);
-    expect(JSON.stringify(avec.document)).not.toMatch(/Pas encore de règle|BatiClair ne sait|référentiel/);
+    expect(JSON.stringify(avec.document)).not.toMatch(/Pas encore de règle|BatiClair ne sait|Mobiiz ne sait|référentiel/);
   });
 
   it("4. case du 42 décochée : pas de bloc 4, pas de PS dans le mail", async () => {

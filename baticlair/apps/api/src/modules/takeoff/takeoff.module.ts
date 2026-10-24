@@ -21,6 +21,9 @@ import { FakeFicheRelecteur } from "./infrastructure/fake-fiche-relecteur.js";
 import { LECTURE_READER, type LectureReader } from "./application/lecture-reader.js";
 import { AnthropicLectureReader } from "./infrastructure/anthropic-lecture-reader.js";
 import { FakeLectureReader } from "./infrastructure/fake-lecture-reader.js";
+import { LISTE_READER, type ListeReader } from "./application/liste-reader.js";
+import { AnthropicListeReader } from "./infrastructure/anthropic-liste-reader.js";
+import { FakeListeReader } from "./infrastructure/fake-liste-reader.js";
 import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.repository.js";
 
 @Module({
@@ -33,6 +36,13 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
       provide: LECTURE_READER,
       useFactory: (config: AppConfig): LectureReader | null =>
         config.ai.provider === "anthropic" ? new AnthropicLectureReader(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort, undefined, config.ai.quantitatifModel) : config.ai.provider === "fake" ? new FakeLectureReader() : null,
+      inject: [CONFIG],
+    },
+    {
+      // « J'ai déjà ma liste » : la lecture d'image ou de PDF d'une liste déjà comptée, sans calcul ; même client que les devis.
+      provide: LISTE_READER,
+      useFactory: (config: AppConfig): ListeReader | null =>
+        config.ai.provider === "anthropic" ? new AnthropicListeReader(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort) : config.ai.provider === "fake" ? new FakeListeReader() : null,
       inject: [CONFIG],
     },
     {
@@ -59,6 +69,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         push: PushSender,
         relecteur: FicheRelecteur | null,
         lecteur: LectureReader | null,
+        listeur: ListeReader | null,
       ) =>
         new TakeoffService(
           repo,
@@ -75,6 +86,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             policy: { ...DEFAULT_EXTRACTION_POLICY, textModel: config.ai.extractionModel, visionModel: config.ai.extractionModel },
             ...(relecteur ? { relecteur } : {}),
             ...(lecteur ? { lecteur } : {}),
+            ...(listeur ? { listeur } : {}),
             companyName: async (tenant) => (await prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } }))?.name ?? null,
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
             // §48 : « je te préviens quand c'est prêt » : une notification sur chaque appareil abonné de la personne qui
@@ -103,12 +115,15 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             nameProject: async (tenant, projectId, read) => {
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { name: true, address: true, clientName: true } });
               if (!project) return;
-              const address = project.address ?? read.address?.slice(0, 300) ?? null;
-              const name = project.name === NEW_PROJECT_NAME ? siteNameFromQuote({ client: read.client, commune: communeOf(address) }) : null;
+              // Le texte lu est déjà anonymisé : d'une adresse lue, il ne reste que la commune.
+              const lue = read.address ? read.address.replace(/\[(?:adresse retirée|client)\],?\s*/g, "").trim() || null : null;
+              const address = project.address ?? lue?.slice(0, 300) ?? null;
+              // RGPD (Greg, 24 octobre 2026 ; RÈGLE CHANGÉE §48, avant : « Chantier Dupont ») : le chantier prend le nom de sa
+              // commune, jamais celui du client lu dans le devis, et le nom du client n'est plus recopié.
+              const name = project.name === NEW_PROJECT_NAME ? siteNameFromQuote({ client: null, commune: communeOf(address) }) : null;
               const data = {
                 ...(name ? { name } : {}),
-                ...(!project.address && read.address ? { address: read.address.slice(0, 300) } : {}),
-                ...(!project.clientName && read.client ? { clientName: read.client.slice(0, 120) } : {}),
+                ...(!project.address && lue ? { address: lue.slice(0, 300) } : {}),
               };
               if (Object.keys(data).length > 0) await prisma.project.updateMany({ where: { id: projectId, companyId: tenant.companyId }, data });
             },
@@ -193,7 +208,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER, LISTE_READER],
     },
   ],
   exports: [TakeoffService],

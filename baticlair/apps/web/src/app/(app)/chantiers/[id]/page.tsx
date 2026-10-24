@@ -5,7 +5,8 @@ import { MapPin, MoreHorizontal } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { ProjectDocuments } from "@/components/project-documents";
 import { ProjectProgressProvider } from "@/components/project-progress";
-import { Badge, BackButton, Button, ErrorNotice, Field, Spinner } from "@/components/ui";
+import { SuiviChantier } from "@/components/suivi-chantier";
+import { Badge, BackButton, Button, ErrorNotice, Field, Skeleton } from "@/components/ui";
 import { api, ApiError, type Project, type ProjectDocument } from "@/lib/api";
 import { openDocument } from "@/lib/open-document";
 import { fr } from "@/lib/fr";
@@ -29,7 +30,7 @@ export default function ChantierPage() {
       </>
     );
   }
-  if (!project) return <Spinner />;
+  if (!project) return <Skeleton card="h-12" lines={3} label="Chargement du chantier…" />;
 
   return (
     <>
@@ -48,6 +49,8 @@ export default function ChantierPage() {
         />
       )}
       <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"} bar={false}>
+        {/* Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier ; relu à chaque changement signalé. */}
+        <SuiviChantier projectId={project.id} />
         {/* La lecture donne son nom au chantier (« Chantier Dupont ») : l'en-tête se relit quand elle finit. */}
         <ProjectDocuments key={docsKey} projectId={project.id} archived={project.status === "archived"} onProjectChanged={reload} onQuote={setQuote} />
       </ProjectProgressProvider>
@@ -111,14 +114,14 @@ function Header({
     }
   }
 
-  const item = "flex min-h-11 w-full items-center text-left text-sm font-bold";
+  const item = "flex min-h-13 w-full items-center text-left text-[16px] font-semibold";
   return (
     // En-tête d'une conversation : retour, nom du chantier, menu ; le client et l'adresse en petit dessous.
     <header className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
         <BackButton fallback="/chantiers" compact />
         {/* Le nom lu dans le devis ; un tap rouvre le devis (§50.4). Il se renomme par « Modifier le chantier ». */}
-        <h1 className="flex min-w-0 grow font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
+        <h1 className="flex min-w-0 grow text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
           {quote ? (
             <button type="button" onClick={() => void openDocument(quote.id, quote.name, quote.name)} aria-label={`Ouvrir le devis : ${project.name}`} className="min-h-11 min-w-0 truncate text-left">
               {project.name}
@@ -133,13 +136,13 @@ function Header({
           aria-expanded={menu}
           aria-label="Plus d'actions sur le chantier"
           disabled={pending}
-          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface shadow-card disabled:opacity-60"
+          className="pressable flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface active:bg-ground disabled:opacity-60"
         >
           <MoreHorizontal size={20} aria-hidden="true" />
         </button>
       </div>
       {menu ? (
-        <ul role="menu" aria-label="Actions sur le chantier" className="flex flex-col divide-y divide-line rounded-2xl bg-surface px-4 shadow-card">
+        <ul role="menu" aria-label="Actions sur le chantier" className="animate-rise flex flex-col divide-y divide-line rounded-xl border border-line bg-surface px-4 shadow-card">
           <li role="none">
             <button type="button" role="menuitem" className={item} onClick={() => { setMenu(false); onEdit(); }}>
               Modifier le chantier
@@ -174,7 +177,7 @@ function Header({
         </ul>
       ) : null}
       {error ? <ErrorNotice error={error} /> : null}
-      <div className="flex flex-wrap items-center gap-x-3 pl-13 text-sm text-muted">
+      <div className="flex flex-wrap items-center gap-x-3 pl-13 text-[14px] text-muted">
         {done ? <Badge tone="ok">{fr.status.archived}</Badge> : null}
         {project.clientName ? <span>{project.clientName}</span> : null}
         {mapsUrl ? (

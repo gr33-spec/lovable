@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronRight, CircleCheck, Plus } from "lucide-react";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
+import { useGroupe, useGroupeFerme } from "@/components/groupe";
 import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
@@ -32,7 +33,7 @@ export function canPrepareTakeoff(doc: ProjectDocument): boolean {
  *  2. il dit ce qu'il a compris (ouvrages, mesures, hypothèses : pente 45°, zone 3) ;
  *  3. UNE question à la fois, seulement si elle change la commande, toujours à boutons ;
  *  4. la carte du quantitatif, rangée par ouvrage, hypothèses modifiables ;
- *  5. « Envoyer au fournisseur ».
+ *  5. « Envoyer aux négoces ».
  * Jamais de quantité demandée à l'artisan. Le devis lu reste à un appui pour corriger une ligne.
  */
 export function ProjectTakeoff({
@@ -42,7 +43,10 @@ export function ProjectTakeoff({
   autoStart,
   onProjectChanged,
   onRedeposit,
+  onHasList,
 }: {
+  /** « J'ai déjà ma liste » : une liste sans devis existe ; le chantier ne propose plus de déposer un devis. */
+  onHasList?: (has: boolean) => void;
   projectId: string;
   clientQuote: ProjectDocument | null;
   archived: boolean;
@@ -75,6 +79,9 @@ export function ProjectTakeoff({
   // §48.5 : « Envoyer une sélection à un autre fournisseur » ; une sélection partie fait relire les demandes.
   const [requestsSignal, setRequestsSignal] = useState(0);
   const selection = useSelectionSend(projectId, () => setRequestsSignal((n) => n + 1));
+  // BatiClair Groupé : null tant que le drapeau est éteint ou que l'entreprise n'y a pas accès (l'écran 3 ne change pas).
+  const groupe = useGroupe(projectId);
+  const groupeFerme = useGroupeFerme();
   const [sent, setSent] = useState(false);
   // « Aperçu » : le mail et le PDF du fournisseur, par-dessus la liste.
   const [previewing, setPreviewing] = useState(false);
@@ -83,7 +90,7 @@ export function ProjectTakeoff({
   const [page, setPage] = useListPage();
   // Un chantier de plusieurs logements s'ouvre « par logement » ; le total à commander est à l'onglet d'à côté.
   const [unitsView, setUnitsView] = useState(true);
-  // Après « Envoyer au fournisseur » : l'aperçu d'envoi et les demandes passent devant la liste.
+  // Après « Envoyer aux négoces » : l'aperçu d'envoi et les demandes passent devant la liste.
   const [overview, setOverview] = useState(false);
   const started = useRef(false);
   const refreshProgress = useProgressRefresh();
@@ -148,6 +155,11 @@ export function ProjectTakeoff({
     }
     if (before === "calcul" && step === "resultat") notifyReady("Ta liste est prête", "Les matériaux sont calculés : il te reste à vérifier les lignes orange.", `chantier-${projectId}`);
   }, [step, onProjectChanged, projectId]);
+
+  const hasList = Boolean(data?.takeoff);
+  useEffect(() => {
+    onHasList?.(hasList);
+  }, [hasList, onHasList]);
 
   // Devis tout juste déposé : on lit sans attendre un appui de plus.
   useEffect(() => {
@@ -274,7 +286,7 @@ export function ProjectTakeoff({
   };
   const detachSketch = (sketchId: string) =>
     run(() => api<null>(`/v1/documents/${encodeURIComponent(sketchId)}`, { method: "DELETE" }), () => reload());
-  // « Envoyer au fournisseur » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
+  // « Envoyer aux négoces » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
   const send = () => {
     setShowList(false);
     setPage(false);
@@ -339,9 +351,11 @@ export function ProjectTakeoff({
         error={actionError}
         docked={false}
         sent={sent}
+        groupeFerme={groupeFerme}
         sketches={quantitatif?.infos?.croquis ?? []}
         sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
         {...(!archived ? { selection } : {})}
+        {...(!archived && groupe ? { groupe } : {})}
         {...(editable
           ? {
               onAdd: () => setShowList("ajouter"),
@@ -426,7 +440,7 @@ export function ProjectTakeoff({
                 setOverview(false);
                 setPage(true);
               }}
-              className="flex min-h-14 w-full items-center gap-3 rounded-[20px] bg-surface px-4 py-3 text-left shadow-card active:bg-ground"
+              className="flex min-h-14 w-full items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground"
             >
               {sent || checkCount === 0 ? (
                 <CircleCheck size={22} className="shrink-0 text-ok" aria-hidden="true" />
@@ -508,7 +522,7 @@ function LineForm({
   const [unit, setUnit] = useState(initial?.unit ?? "");
   const [reference, setReference] = useState(initial?.reference ?? "");
   const input =
-    "min-h-12 w-full rounded-2xl bg-ground px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ink";
+    "min-h-12 w-full rounded-2xl bg-ground px-3 text-base outline-none focus-visible:border-accent";
 
   return (
     <form
@@ -557,7 +571,7 @@ function LineForm({
 /** §50.1 : un échec de lecture se dit en une phrase, avec « Réessayer ». Rien d'autre. */
 function ReadFailure({ sentence, onRetry, disabled }: { sentence: string; onRetry?: () => void; disabled: boolean }) {
   return (
-    <section id="materiaux" aria-label="Lecture du devis" className="flex scroll-mt-4 flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
+    <section id="materiaux" aria-label="Lecture du devis" className="flex scroll-mt-4 flex-col gap-3 rounded-xl bg-surface p-5 shadow-card">
       <p role="alert" className="text-[17px] leading-snug font-bold">
         {sentence}
       </p>

@@ -4,29 +4,29 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MailCheck, Search, Sparkles, Warehouse } from "lucide-react";
 import { useCallback } from "react";
-import { DemoCard } from "@/components/demo";
+import { InstallHint } from "@/components/install-hint";
 import { useBilling } from "@/components/paywall";
 import { ProjectList } from "@/components/project-row";
-import { ErrorNotice, Spinner } from "@/components/ui";
+import { ButtonLink, ErrorNotice, ListCard, ListRow, SectionTitle, Skeleton } from "@/components/ui";
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
-
-/** « Jean Martin » → « JM » ; « Jean » → « JE ». */
-function initials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  const letters = words.length > 1 ? words[0]!.charAt(0) + words[words.length - 1]!.charAt(0) : name.trim().slice(0, 2);
-  return letters.toUpperCase();
-}
+import { InviterCollegue } from "@/components/inviter";
+import { BlocDuMois, BlocGarantie, DemandesEnCours, useProchaineCommande } from "@/components/commande-du-mois";
+import { BoucleNegoce } from "@/components/boucle-negoce";
 
 export default function AccueilPage() {
   const router = useRouter();
-  const { me, company, features } = useSession();
+  const { me, features } = useSession();
   const fetchRecent = useCallback((signal: AbortSignal) => api<ProjectPage>("/v1/projects?limit=3", { signal }), []);
   const { data: recent, error, reload } = useResource(fetchRecent);
   const fetchNext = useCallback((signal: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal }), []);
   const { data: next, reload: reloadNext } = useResource(fetchNext);
   const { data: billing } = useBilling();
+  // Greg (23 octobre) : la commande du mois en haut de l'accueil, avec son minuteur, TOUJOURS (règle par défaut si l'API
+  // ne répond pas) : n'importe qui comprend en 10 secondes.
+  const moisActif = features.groupe === true && features.commandeCommune !== "lots";
+  const mois = useProchaineCommande(moisActif);
 
   const firstName = me.user.name.split(" ")[0] ?? me.user.name;
   const todo: { key: string; title: string; text: string; href: string; action: string; icon: React.ReactNode }[] = (next?.items ?? []).slice(0, 5).map((a) => ({
@@ -47,21 +47,32 @@ export default function AccueilPage() {
       icon: <Sparkles size={20} aria-hidden="true" />,
     });
   }
-  if (recent && recent.items.length === 0) {
-    todo.push({ key: "first", title: "Crée ton premier chantier", text: "Dépose ton devis : le chantier se crée tout seul.", href: "/chantiers/nouveau", action: "Déposer", icon: <Warehouse size={20} aria-hidden="true" /> });
-  }
   if (!me.user.emailVerified && features.email) {
-    todo.push({ key: "email", title: "Confirme ton adresse e-mail", text: "Nécessaire avant d'écrire à tes fournisseurs.", href: "/compte", action: "Voir", icon: <MailCheck size={20} aria-hidden="true" /> });
+    todo.push({ key: "email", title: "Confirme ton adresse e-mail", text: "Nécessaire avant d'écrire à tes négoces.", href: "/compte", action: "Voir", icon: <MailCheck size={20} aria-hidden="true" /> });
   }
 
+  // Simplification (21 octobre) : accueil vide = une phrase et un bouton, rien d'autre. Nouveau cap (22 octobre) : la promesse.
+  if (recent && recent.items.length === 0 && !error) {
+    return (
+      <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-8 text-center">
+        <h1 className="max-w-[18ch] text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Paie tes matériaux moins cher. Donne ta liste, je fais jouer les négoces.</h1>
+        <ButtonLink href="/chantiers/nouveau" className="w-full max-w-sm">
+          Donner ma liste
+        </ButtonLink>
+        {/* Landing du 22 octobre : « Inviter un collègue » aussi dans l'app, juste après l'inscription. */}
+        <div className="flex w-full max-w-xl flex-col gap-4 text-left">
+          <InviterCollegue texte="Plus on est nombreux dans le secteur, plus on pèse face aux négoces." />
+          {moisActif ? <BoucleNegoce compact /> : null}
+        </div>
+      </div>
+    );
+  }
+
+  const chargement = (recent === null || next === null) && !error;
   return (
     <>
-      <div className="flex items-center justify-between">
-        <span className="text-[15px] font-extrabold">{company?.name}</span>
-        <Link href="/compte" aria-label="Mon compte" className="flex size-11 items-center justify-center rounded-full bg-surface text-sm font-extrabold shadow-card">
-          {initials(me.user.name)}
-        </Link>
-      </div>
+      {/* Passe UI/UX : le prénom d'abord, en très grand ; la recherche dessous. */}
+      <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
       <form
         role="search"
         onSubmit={(e) => {
@@ -73,50 +84,47 @@ export default function AccueilPage() {
         <label htmlFor="home-search" className="sr-only">
           Chercher un chantier, un client ou une adresse
         </label>
-        <div className="flex min-h-13 items-center gap-2.5 rounded-2xl bg-surface px-4 shadow-card">
+        <div className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 transition-[border-color] duration-150 focus-within:border-accent">
           <Search size={20} className="text-muted" aria-hidden="true" />
-          <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Chantier, client, adresse…" className="min-h-12 grow bg-transparent text-base outline-none placeholder:text-muted" />
+          <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Chantier, client, adresse…" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" />
         </div>
       </form>
-      <h1 className="mt-1.5 font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">
-        Bonjour {firstName}, <span className="font-serif text-[38px] font-normal tracking-normal italic">on avance&nbsp;?</span>
-      </h1>
 
-      <section aria-labelledby="todo-title" className="flex flex-col gap-1 rounded-[28px] bg-hero px-4 pt-4.5 pb-2.5 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
-        <h2 id="todo-title" className="pb-1.5 font-display text-[22px] font-extrabold tracking-[-0.02em]">
-          {(recent === null || next === null) && !error ? "À faire" : todo.length === 0 ? "Tout est à jour" : `${todo.length} action${todo.length > 1 ? "s" : ""} à faire`}
-        </h2>
-        {(recent === null || next === null) && !error ? (
-          <p className="border-t border-white/10 py-3 text-sm text-[#c9ced6]">Chargement…</p>
+      {/* Le squelette seulement pendant le chargement ; ensuite le bloc, avec les dates de l'API ou la règle par défaut. */}
+      {mois.prochaine ? <BlocDuMois prochaine={mois.prochaine} /> : mois.loading && moisActif ? <Skeleton card="h-64" label="Chargement de la commande du mois…" /> : null}
+      {/* Greg (23 octobre) : « Mets ton négoce dans la boucle », sous le bloc du mois. */}
+      {moisActif ? <BoucleNegoce compact /> : null}
+      {/* La grille garantie 30 jours : visible dès l'accueil, nouvel inscrit compris (point 6). */}
+      {moisActif ? <DemandesEnCours etat={mois.etat} /> : null}
+      {moisActif ? (mois.etat?.garanties ?? []).map((g) => <BlocGarantie key={g.cycleId} g={g} onChange={mois.reload} />) : null}
+
+      {/* « À faire » : une liste blanche, chaque ligne est un lien (plus de bouton plein en concurrence avec celui du mois). */}
+      <section aria-labelledby="todo-title" className="flex flex-col gap-3">
+        <SectionTitle id="todo-title">{chargement ? "À faire" : todo.length === 0 ? "Tout est à jour" : `${todo.length} action${todo.length > 1 ? "s" : ""} à faire`}</SectionTitle>
+        {chargement ? (
+          <Skeleton lines={2} label="Chargement de ce qu'il y a à faire…" />
         ) : todo.length === 0 ? (
-          <p className="border-t border-white/10 py-3 text-[15px] text-[#c9ced6]">Rien à faire pour l&apos;instant.</p>
+          <p className="rounded-xl bg-surface px-4 py-4 text-[15px] text-muted shadow-card">Rien à faire pour l&apos;instant.</p>
         ) : (
-          todo.map((t) => (
-            <div key={t.key} className="flex flex-col gap-2 border-t border-white/10 py-3">
-              <span className="flex items-center gap-3">
-                <span className="text-accent-on-dark">{t.icon}</span>
-                <span className="flex min-w-0 grow flex-col gap-0.5">
-                  <span className="truncate text-[15px] font-bold">{t.title}</span>
-                  {t.text ? <span className="text-[13px] text-[#c9ced6]">{t.text}</span> : null}
-                </span>
-              </span>
-              <Link href={t.href} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cta px-3.5 text-[15px] font-extrabold shadow-cta">
-                {t.action}
-              </Link>
-            </div>
-          ))
+          <ListCard>
+            {todo.map((t) => (
+              <ListRow key={t.key} href={t.href} icon={t.icon} title={t.title} subtitle={t.text ? `${t.text} · ${t.action}` : t.action} />
+            ))}
+          </ListCard>
         )}
       </section>
+      {/* Revue à froid (21 octobre) : le conseil « écran d'accueil » vient après ce qu'il y a à faire, jamais avant. */}
+      <InstallHint />
 
-      <section className="flex flex-col gap-2.5">
+      <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-xl font-bold tracking-[-0.01em]">Chantiers récents</h2>
-          <Link href="/chantiers" className="inline-flex min-h-9 items-center text-sm font-bold text-accent-text">
+          <SectionTitle>Chantiers récents</SectionTitle>
+          <Link href="/chantiers" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
             Tous
           </Link>
         </div>
         {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
-        {recent === null && !error ? <Spinner /> : null}
+        {recent === null && !error ? <Skeleton lines={3} label="Chargement des chantiers…" /> : null}
         {/* Toujours montée : le bandeau « Annuler » survit au dernier chantier rangé. */}
         {recent ? (
           <ProjectList
@@ -128,13 +136,7 @@ export default function AccueilPage() {
             }}
           />
         ) : null}
-        {recent && recent.items.length === 0 ? (
-          <p className="rounded-3xl bg-surface p-4 text-[15px] text-muted shadow-card">Aucun chantier pour l&apos;instant. Touche « + » pour en créer un.</p>
-        ) : null}
       </section>
-
-      {/* La démo se lance une fois : son chantier est déjà là, la carte n'a plus rien à proposer. */}
-      {recent && !recent.items.some((p) => p.name.startsWith("Démo")) ? <DemoCard /> : null}
     </>
   );
 }

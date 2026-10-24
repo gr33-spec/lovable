@@ -95,6 +95,8 @@ export interface LectureDevis {
   lignes: LectureLigne[];
   contexte: Record<string, string> | null;
   notes: string[];
+  /** Lecture lot par lot (24 octobre 2026) : les lots dont la lecture a échoué, dits à l'artisan (`phraseLotNonLu`). */
+  lotsNonLus?: { metier: string; libelle: string }[];
 }
 
 const str = (v: unknown, max = 300): string | null => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null);
@@ -179,6 +181,14 @@ export function parseLecture(raw: unknown): LectureDevis | null {
     lignes,
     contexte: Object.keys(contexte).length > 0 ? contexte : null,
     notes: list(o.notes).flatMap((n) => str(n, 300) ?? []),
+    ...(() => {
+      const nonLus = list(o.lotsNonLus).flatMap((x) => {
+        const l = x && typeof x === "object" ? (x as Record<string, unknown>) : {};
+        const metier = str(l.metier, 40);
+        return metier ? [{ metier, libelle: str(l.libelle, 80) ?? metier }] : [];
+      });
+      return nonLus.length > 0 ? { lotsNonLus: nonLus } : {};
+    })(),
   };
 }
 

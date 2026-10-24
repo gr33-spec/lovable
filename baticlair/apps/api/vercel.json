@@ -6,12 +6,29 @@
     {
       "path": "/v1/internal/purge-inactive",
       "schedule": "17 3 * * *"
+    },
+    {
+      "path": "/v1/internal/groupe/regrouper",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/v1/internal/groupe/sirene",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/v1/internal/commande-du-mois",
+      "schedule": "5 * * * *"
+    },
+    {
+      "path": "/v1/internal/rapport-mensuel",
+      "schedule": "0 7 1 * *"
     }
   ],
   "git": {
     "deploymentEnabled": {
+      "claude/saas-achat-artisans-prompt-1lyihx": true,
       "claude/**": false
     }
   },
-  "ignoreCommand": "case \"$VERCEL_URL\" in *-greg-2412.vercel.app) echo \"Compte greg-2412 : pas de mise en ligne (seul gr33-spec sert BatiClair)\"; exit 0;; *) exit 1;; esac"
+  "ignoreCommand": "case \"$VERCEL_ENV:$VERCEL_URL\" in production:*-greg-2412.vercel.app) echo \"Compte greg-2412 : pas de mise en ligne (seul gr33-spec sert BatiClair)\"; exit 0;; *) exit 1;; esac"
 }
