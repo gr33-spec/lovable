@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DepartementsForm, DepotsForm, PaliersForm, depuisPaliers, versPaliers, type PaliersSaisis } from "@/components/negoce/paliers-form";
 import { Button, Field, PageTitle, Skeleton } from "@/components/ui";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, messageErreur } from "@/lib/api";
 import { NOM } from "@/lib/nom";
 import type { Invitation } from "@/lib/negoce";
 
@@ -71,8 +71,7 @@ export default function RejoindrePage() {
       });
       setFait(r.phrase);
     } catch (err) {
-      const a = err instanceof ApiError ? err : new ApiError("internal_error", 500);
-      setErreur((a.reason && ERREURS[a.reason]) ?? (a.status === 400 ? "Un champ n'est pas correctement rempli (e-mail, SIRET, dépôt, paliers)." : "Ça n'a pas marché. Réessayez dans un instant."));
+      setErreur(messageErreur(err, ERREURS, { vous: true }));
     } finally {
       setPending(false);
     }
@@ -83,7 +82,7 @@ export default function RejoindrePage() {
       <>
         <PageTitle>{NOM}</PageTitle>
         <p role="status" className="rounded-xl bg-warn-bg p-4 font-semibold text-warn">
-          {erreurLien.status === 404 || erreurLien.status === 400 ? "Ce lien n'est plus valable. Demandez à un artisan de vous ajouter à nouveau, ou connectez-vous si votre accès existe déjà." : "Cette page n'a pas pu se charger. Réessayez dans un instant."}
+          {erreurLien.status === 404 || erreurLien.status === 400 ? "Ce lien n'est plus valable. Demandez à un artisan de vous ajouter à nouveau, ou connectez-vous si votre accès existe déjà." : messageErreur(erreurLien, {}, { vous: true })}
         </p>
         <Link href="/negoce/connexion" className="font-semibold text-accent-text underline">
           Me connecter

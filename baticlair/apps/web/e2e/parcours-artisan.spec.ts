@@ -2392,6 +2392,12 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   await expect(bloc.getByText("Ton négoce habituel n'est pas encore dans la commande ? Ajoute-le : il recevra tout le volume de la commande et pourra faire son prix.")).toBeVisible();
   await expect(bloc.getByRole("button")).toHaveText(["Ajouter mon négoce"]);
   await bloc.getByLabel("E-mail de ton négoce").fill(email);
+  // Une panne du serveur dit sa raison et son code support, jamais « Ça n'a pas marché » seul (retour de Greg, 24 octobre 2026).
+  await page.route("**/v1/groupe/negoces/boucle", (r) => r.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ error: { code: "internal_error", supportId: "sup-12345" } }) }));
+  await bloc.getByRole("button", { name: "Ajouter mon négoce" }).click();
+  await expect(bloc.getByText("Un problème est survenu de notre côté. Tes données sont conservées ; réessaie dans un instant. Code support : sup-12345.")).toBeVisible();
+  await expect(bloc.getByText(/Ça n'a pas marché/)).toHaveCount(0);
+  await page.unroute("**/v1/groupe/negoces/boucle");
   await bloc.getByRole("button", { name: "Ajouter mon négoce" }).click();
   // Ajouté : « Ton négoce X est dans la boucle », la commande qu'il recevra, et le message vouvoyé à lui envoyer.
   const ligne = bloc.getByRole("list", { name: "Négoces dans la boucle" }).getByRole("listitem");

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { OffresAbonnement } from "@/components/offres-abonnement";
 import { Button, Card } from "@/components/ui";
-import { api, ApiError, EVENEMENT_ABONNEMENT_REQUIS, type Abonnement, type Formule } from "@/lib/api";
+import { api, messageErreur, EVENEMENT_ABONNEMENT_REQUIS, type Abonnement, type Formule } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -52,7 +52,7 @@ export function ContenuPaywall({ abonnement, onFermer }: { abonnement: Abonnemen
     try {
       await continuerAbonnement(formule);
     } catch (e) {
-      setErreur(e instanceof ApiError ? e.message : "Le paiement n'a pas pu s'ouvrir. Réessaie.");
+      setErreur(messageErreur(e));
       setPending(false);
     }
   }

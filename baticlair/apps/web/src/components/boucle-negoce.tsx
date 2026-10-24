@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useId, useState, useSyncExternalStore } from "react";
 import { Button, Field } from "@/components/ui";
-import { api, ApiError, newActionKey } from "@/lib/api";
+import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
 import { messageAuNegoceEnBoucle } from "@/lib/boucle";
 import { useResource } from "@/lib/use-resource";
 import { useSuggestions, type NegoceVue, type SuggestionNegoce } from "@/components/mes-negoces";
@@ -21,6 +21,8 @@ interface Reponse {
   mois: { mois: string; de: string; clotureLe: string } | null;
   /** Le lien d'invitation du négoce (`/negoce/rejoindre/<jeton>`), le même pour tous les artisans qui l'ajoutent. */
   lienInvitation?: string | null;
+  /** Ce négoce a demandé à ne plus recevoir de messages : il est dans la liste, arrêté, rien ne lui part. */
+  exclu?: boolean;
 }
 
 const bouton = "pressable inline-flex min-h-12 items-center justify-center rounded-full px-5 text-[15px] font-semibold";
@@ -61,15 +63,8 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
       liste.reload();
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
-      setErreur(
-        err.reason === "departement_requis"
-          ? "departement"
-          : err.status === 400
-            ? "Vérifie l'e-mail du négoce."
-            : err.status === 0
-              ? "Pas de connexion internet. Rien n'est perdu : réessaie dans un instant."
-              : "Ça n'a pas marché. Réessaie dans un instant.",
-      );
+      // Jamais « Ça n'a pas marché » sans raison (retour de Greg, 24 octobre 2026) : le motif, ou le code support.
+      setErreur(err.reason === "departement_requis" ? "departement" : err.details?.some((d) => d.path === "email") ? "Vérifie l'e-mail du négoce." : messageErreur(err));
     } finally {
       setPending(false);
     }
@@ -96,7 +91,13 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
         </ul>
       ) : null}
 
-      {ajoute ? <Prevenir negoce={{ ...ajoute.negoce, lienInvitation: ajoute.lienInvitation }} /> : null}
+      {ajoute?.exclu ? (
+        <p role="status" className="rounded-xl bg-warn-bg px-4 py-3 text-[15px] font-semibold text-warn">
+          {ajoute.negoce.nom} a demandé à ne plus recevoir de messages de notre part : il ne recevra pas la commande. Vois avec lui en direct.
+        </p>
+      ) : ajoute ? (
+        <Prevenir negoce={{ ...ajoute.negoce, lienInvitation: ajoute.lienInvitation }} />
+      ) : null}
 
       {ouvert || dansLaBoucle.length === 0 ? (
         <form

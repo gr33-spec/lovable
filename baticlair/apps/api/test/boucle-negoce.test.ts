@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 import { inscrireNegoce } from "./support/negoce.js";
+import { exclure } from "../src/modules/privacy/application/exclusion.js";
 
 /**
  * « METS TON NÉGOCE DANS LA BOUCLE » (Greg, 23 octobre 2026) : sur l'accueil et dans l'onglet Commande commune, un champ
@@ -45,6 +46,15 @@ const tache = (maintenant: string) => request(ctx.app.getHttpServer()).get(`/v1/
 const mailsVers = (email: string) => ctx.emails.sent.filter((m) => m.to === email);
 
 describe("mets ton négoce dans la boucle", { timeout: 60_000 }, () => {
+  it("un négoce qui a demandé à ne plus être contacté : la réponse le dit, rien ne lui part (retour de Greg, 24 octobre 2026)", async () => {
+    const { agent } = await couvreur("a@example.fr", "Toitures A");
+    await exclure(ctx.prisma as never, { email: "stop@negoce.fr" }, "opposition");
+    const r = await boucle(agent, { email: "stop@negoce.fr", nom: "Calipro" }).expect(200);
+    expect(r.body).toMatchObject({ negoce: { nom: "Calipro", email: "stop@negoce.fr" }, exclu: true, lienInvitation: null });
+    expect(mailsVers("stop@negoce.fr")).toHaveLength(0);
+    expect((await boucle(agent, { email: "ouvert@negoce.fr" }).expect(200)).body.exclu).toBe(false);
+  });
+
   it("un e-mail, un bouton : le négoce entre dans la base couverture du département et dans ma liste, la réponse dit la commande qu'il recevra", async () => {
     const { agent } = await couvreur("a@example.fr", "Toitures A");
     const r = await boucle(agent, { email: "Agence.Lannion@Negoce-Ardoises.fr" }).expect(200);

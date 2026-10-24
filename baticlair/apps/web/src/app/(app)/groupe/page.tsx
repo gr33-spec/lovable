@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Check, FileText, Store, Tag, Truck, Users } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button, ButtonLink, Card, ErrorNotice, PageTitle, SectionTitle, Skeleton, Spinner } from "@/components/ui";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, messageErreur } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { NOM, nom, noms } from "@/lib/nom";
@@ -95,7 +95,7 @@ export default function GroupePage() {
       if (!r.verifie) setSiretErreur(r.statut === "ferme" ? "Ce SIRET est fermé à l'INSEE." : r.statut === "inconnu" ? "Ce SIRET est inconnu à l'INSEE : vérifie-le dans Compte." : "La vérification est indisponible pour l'instant, réessaie plus tard.");
       etat.reload();
     } catch (e) {
-      setSiretErreur(e instanceof ApiError && e.reason === "siret_invalide" ? "Ce SIRET n'a pas 14 chiffres valides : corrige-le dans Compte." : "La vérification n'a pas abouti, réessaie dans un instant.");
+      setSiretErreur(messageErreur(e, { siret_invalide: "Ce SIRET n'a pas 14 chiffres valides : corrige-le dans Compte." }));
     } finally {
       setPending(false);
     }

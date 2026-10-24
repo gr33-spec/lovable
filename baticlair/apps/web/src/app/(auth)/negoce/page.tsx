@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { DepartementsForm, DepotsForm, PaliersForm, depuisPaliers, versPaliers, type PaliersSaisis } from "@/components/negoce/paliers-form";
 import { Button, ErrorNotice, Field, PageTitle, SectionTitle, Skeleton } from "@/components/ui";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, messageErreur } from "@/lib/api";
 import { chrono } from "@/lib/cycle";
 import { NOM } from "@/lib/nom";
 import { dateFr, euros, type CompteNegoce } from "@/lib/negoce";
@@ -184,8 +184,7 @@ function Reglages({ compte, onChange }: { compte: CompteNegoce; onChange: () => 
       setFait(true);
       onChange();
     } catch (err) {
-      const a = err instanceof ApiError ? err : new ApiError("internal_error", 500);
-      setErreur((a.reason && ERREURS[a.reason]) ?? (a.status === 400 ? "Un champ n'est pas correctement rempli (dépôt, paliers, départements)." : "Ça n'a pas marché. Réessayez dans un instant."));
+      setErreur(messageErreur(err, ERREURS, { vous: true }));
     } finally {
       setPending(false);
     }

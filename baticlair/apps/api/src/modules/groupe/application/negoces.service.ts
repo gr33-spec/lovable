@@ -139,7 +139,7 @@ export class NegocesService {
    * ma liste, rien ne change et la réponse le dit quand même. Le nom vient de Sirene (par le SIRET), sinon de la saisie,
    * sinon de l'e-mail.
    */
-  async mettreDansLaBoucle(tenant: TenantContext, b: NegoceEnBoucle, maintenant = new Date()): Promise<{ negoce: Pick<NegoceVue, "id" | "nom" | "email" | "departement">; dejaLa: boolean; lienInvitation: string | null }> {
+  async mettreDansLaBoucle(tenant: TenantContext, b: NegoceEnBoucle, maintenant = new Date()): Promise<{ negoce: Pick<NegoceVue, "id" | "nom" | "email" | "departement">; dejaLa: boolean; lienInvitation: string | null; exclu: boolean }> {
     const email = b.email.trim().toLowerCase();
     const siret = b.siret?.replace(/\s+/g, "") || null;
     const sirene = siret ? await this.prisma.negoceSirene.findUnique({ where: { siret } }) : null;
@@ -156,7 +156,10 @@ export class NegocesService {
     }
     const negoce = (await this.negoceParSiret(tenant, siret)) ?? (await this.mesNegoces(tenant)).find((n) => n.email === email) ?? null;
     if (!negoce) throw notFound("Negoce");
-    return { negoce: { id: negoce.id, nom: negoce.nom, email: negoce.email, departement: negoce.departement }, dejaLa, lienInvitation: await this.lienInvitation(negoce.id, maintenant) };
+    // Un négoce qui a demandé à ne plus être contacté (opposition, compte supprimé) entre arrêté : l'écran le dit, jamais
+    // « dans la boucle » en silence (retour de Greg, 24 octobre 2026).
+    const exclu = await estExclu(this.prisma, { email, siret });
+    return { negoce: { id: negoce.id, nom: negoce.nom, email: negoce.email, departement: negoce.departement }, dejaLa, lienInvitation: await this.lienInvitation(negoce.id, maintenant), exclu };
   }
 
   private async negoceParSiret(tenant: TenantContext, siret: string | null): Promise<NegoceVue | null> {

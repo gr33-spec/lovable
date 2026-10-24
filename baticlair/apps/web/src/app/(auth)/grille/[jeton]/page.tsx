@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Chrono, ErrorNotice, PageTitle, Skeleton } from "@/components/ui";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, messageErreur } from "@/lib/api";
 import { deMois } from "@/lib/cycle";
 
 /** L'espace fine de fr-FR (U+202F) ne se voit pas dans la police ; une espace insécable, si. */
@@ -91,7 +91,7 @@ export default function GrilleNegocePage() {
       <>
         <PageTitle>Commande commune</PageTitle>
         <p role="status" className="rounded-xl bg-warn-bg p-4 font-semibold text-warn">
-          {error.status === 404 ? "Ce lien n'est plus valable." : "Cette page n'a pas pu se charger. Réessayez dans un instant."}
+          {error.status === 404 ? "Ce lien n'est plus valable." : messageErreur(error, {}, { vous: true })}
         </p>
       </>
     );

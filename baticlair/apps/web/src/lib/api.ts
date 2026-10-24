@@ -92,6 +92,31 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   throw new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason);
 }
 
+/**
+ * LE MESSAGE D'UNE ERREUR À L'ÉCRAN, JAMAIS UNE PHRASE VAGUE (retour de Greg, 24 octobre 2026 : « Ça n'a pas marché.
+ * Réessaie dans un instant. » en ajoutant son négoce, sans dire pourquoi). Dans l'ordre : la phrase propre à l'écran pour
+ * ce motif (`precis`), sinon le motif précis de l'API ou le message de son code (`lib/fr.ts`), et toujours de quoi retrouver
+ * la panne : le code support, ou le numéro d'erreur quand le serveur n'a rien répondu de lisible. `vous` : les pages des
+ * négoces (vouvoiement) ne disent que leur propre texte et le code.
+ */
+export function messageErreur(e: unknown, precis: Record<string, string> = {}, o: { vous?: boolean } = {}): string {
+  const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
+  if (err.reason && precis[err.reason]) return precis[err.reason]!;
+  if (precis[err.code]) return precis[err.code]!;
+  const trace = err.supportId ? ` Code support : ${err.supportId}.` : err.status >= 500 ? ` Erreur ${err.status}.` : "";
+  if (o.vous) {
+    if (err.status === 0) return "Pas de connexion internet : réessayez dès que le réseau revient.";
+    if (err.status === 429) return "Trop d'essais en peu de temps : attendez quelques minutes, puis réessayez.";
+    if (err.status >= 500) return `Un problème est survenu de notre côté ; vos saisies sont gardées, réessayez dans un instant.${trace}`;
+    const champ = err.details?.[0]?.path;
+    return `Cette demande n'est pas acceptée${err.reason ? ` (motif : ${err.reason})` : champ ? ` (champ à vérifier : ${champ})` : ""}.${trace}`;
+  }
+  // Un refus sans motif connu de l'écran : le message du code, et le motif brut ou le champ fautif pour savoir quoi faire.
+  const generique = ["validation_failed", "conflict", "forbidden", "not_found"].includes(err.code) && !(err.reason && err.message !== errorMessage(err.code));
+  const detail = generique ? (err.reason ? ` (motif : ${err.reason})` : err.details?.[0]?.path ? ` (champ à vérifier : ${err.details[0].path})` : "") : "";
+  return `${err.message.replace(/\.$/, "")}${detail}.${trace}`;
+}
+
 function safeJson(text: string): unknown {
   try {
     return JSON.parse(text);

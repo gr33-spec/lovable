@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, messageErreur } from "@/lib/api";
 import { NOM, NOM_APP } from "@/lib/nom";
 
 /** Test complet (21 octobre) : l'espace fine de fr-FR (U+202F) ne se voit pas dans la police ; une espace insécable, si. */
@@ -87,7 +87,7 @@ export default function ReponseNegocePage() {
       <>
         <PageTitle>Demande de prix</PageTitle>
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
-          {error.status === 404 ? "Ce lien n'est plus valable." : "Cette page n'a pas pu se charger. Réessayez dans un instant."}
+          {error.status === 404 ? "Ce lien n'est plus valable." : messageErreur(error, {}, { vous: true })}
         </p>
       </>
     );
