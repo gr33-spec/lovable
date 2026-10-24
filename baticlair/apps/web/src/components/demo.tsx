@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { api, ApiError, type PriceRequest } from "@/lib/api";
+import { NOM_APP } from "@/lib/nom";
 
 /**
  * Mode démo : tester tout le parcours seul, avec un chantier et des
@@ -40,7 +41,7 @@ export function DemoCard() {
     <section aria-labelledby="demo-title" className="flex flex-col gap-2.5 rounded-3xl border border-dashed border-line bg-surface p-4">
       <h2 id="demo-title" className="flex items-center gap-2 text-[17px] font-extrabold">
         <FlaskConical size={18} aria-hidden="true" />
-        Essaie BatiClair avec un chantier fictif
+        Essaie {NOM_APP} avec un chantier fictif
       </h2>
       <p className="text-sm text-muted">Découvre tout le parcours : devis client, matériaux, consultation de fournisseurs et comparaison des offres.</p>
       {error ? <ErrorNotice error={error} /> : null}

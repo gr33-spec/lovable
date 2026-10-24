@@ -1,12 +1,13 @@
 "use client";
 
 import type { Origin, ProofCriterion, TakeoffDecision, TakeoffViewItem } from "@/lib/api";
+import { NOM_APP } from "@/lib/nom";
 
 /** « Voir le calcul » d'une ligne de la liste, et les gestes de l'artisan sur la liste (DecisionHandlers). */
 
 const ORIGIN_LABEL: Record<Origin, string> = {
   devis: "lu dans le devis",
-  referential: "donnée vérifiée BatiClair",
+  referential: `donnée vérifiée ${NOM_APP}`,
   company: "habitude de ton entreprise",
   project: "choisi pour ce chantier",
   assumption: "hypothèse, modifiable",

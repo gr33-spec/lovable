@@ -1,6 +1,7 @@
 import { normalizeText, type FicheChantier, type FicheRelecture } from "@baticlair/domain";
 import { z } from "zod";
 import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
+import { NOM_APP } from "@baticlair/domain";
 
 /**
  * §51.2 (fondateur, 2026-10-10) : « Quand l'artisan répond par « Autre » avec un texte libre, l'IA réanalyse : elle met
@@ -49,7 +50,7 @@ export interface FicheRelecteur {
 export const FICHE_RELECTEUR = Symbol("FICHE_RELECTEUR");
 
 export function relectureSystem(input: Pick<RelectureInput, "tradeLabel">): string {
-  return `Tu es le lecteur de devis de BatiClair (métier de l'artisan : ${input.tradeLabel}). L'artisan vient de répondre à une question en écrivant sous « Autre ».
+  return `Tu es le lecteur de devis de ${NOM_APP} (métier de l'artisan : ${input.tradeLabel}). L'artisan vient de répondre à une question en écrivant sous « Autre ».
 
 ${RULE_51_2}
 

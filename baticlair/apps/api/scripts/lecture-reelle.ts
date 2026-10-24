@@ -15,7 +15,7 @@
  * Le PDF reste hors du dépôt. La sortie JSON (lecture complète) est écrite là où on le demande, jamais commitée.
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { controleLecture7954, controleLectureD2026105, controleLectureDe00000071, controleLectureFiche, exportPourLecture, FICHES, numberLines, referentialFor, routePage, tradeProfile, type LectureDevis, type LigneDuDevis } from "@baticlair/domain";
+import { anonymiserLigne, computeAiCost, consigneDeTranche, consigneDuLot, controleLecture7954, controleLectureD2026105, controleLectureDe00000071, controleLectureFiche, exportPourLecture, FICHES, fusionnerLectures, lectureParLots, numberLines, priceTableAt, referentialFor, routePage, tradeProfile, tranchesDuDevis, type AiUsage, type LectureDevis, type LigneDuDevis } from "@baticlair/domain";
 import { D2026_105_LINES } from "../../../packages/domain/test/devis-reels/d2026-105.js";
 import { DE00000071_LINES } from "../../../packages/domain/test/devis-reels/de00000071.js";
 import { DEVIS_7954 } from "../../../packages/domain/test/devis-reels/devis-7954.js";
@@ -66,42 +66,75 @@ async function main(): Promise<number> {
   const vision: number[] = [];
   for (const page of content.pages) {
     const route = routePage(page, profile).route;
-    if (route === "text") text.push(numberLines(page).map((l) => `[${l.ref}] ${l.text}`).join("\n"));
+    // Comme au dépôt (RGPD, 24 octobre 2026) : chaque ligne anonymisée avant d'être lue par l'IA.
+    if (route === "text") text.push(numberLines(page).map((l) => `[${l.ref}] ${anonymiserLigne(l.text).texte}`).join("\n"));
     else if (route === "vision") vision.push(page.pageNumber);
   }
-  const pages = content.pages.map((p) => p.pageNumber);
   const ref = referentialFor(devis.trade);
   const rapide = process.env.AI_QUANTITATIF_MODEL || "claude-sonnet-5-5";
   const reader = new AnthropicLectureReader(apiKey, model, effort, undefined, rapide);
   // Le repérage des métiers avant la lecture (modèle rapide, texte seul) : il doit dire le métier du devis, vite.
   const debutReperage = Date.now();
   const reperage = await reader.reperer(text.join("\n"));
-  const metiersReperes = reperage?.output ?? [];
+  const metiersReperes = reperage?.output?.metiers ?? [];
+  const sections = reperage?.output?.sections ?? [];
   console.log(`Repérage ${rapide} — ${reperage?.status ?? "absent"} en ${Math.round((Date.now() - debutReperage) / 1000)} s : ${metiersReperes.join(", ") || "(rien)"}`);
+  // Le coût de chaque appel, à la grille de prix du jour (le même calcul que le journal des appels de l'app).
+  const grille = priceTableAt(new Date());
+  let cout = 0;
+  const compter = (m: string, usage: AiUsage) => (cout += computeAiCost(grille.models[m] ? m : model, usage, grille).totalMicroUsd);
+  if (reperage) compter(rapide, reperage.usage);
+  // Comme en production (`lireLeDevis`, RGPD) : le texte anonymisé, et l'image des seules pages scannées (plus le PDF entier).
+  const document = { numberedText: text.join("\n"), imagePdf: vision.length > 0 ? await extractPdfPages(bytes, vision) : null, imagePages: vision };
   const started = Date.now();
-  const attempt = await reader.lire({
-    document: { numberedText: text.join("\n"), imagePdf: vision.length > 0 ? await extractPdfPages(bytes, pages) : bytes, imagePages: pages },
-    trade: devis.trade,
-    tradeLabel: profile.label,
-    // Comme en production (`lireLeDevis`) : plusieurs métiers repérés, la lecture reçoit le référentiel de chacun.
-    referentiel:
-      metiersReperes.length > 1
-        ? metiersReperes
-            .map((m) => referentialFor(m))
-            .filter((r): r is NonNullable<typeof r> => r !== null && r !== undefined)
-            .map((r) => `=== Référentiel ${tradeProfile(r.trade).label} (${r.trade}) ===\n${exportPourLecture(r)}`)
-            .join("\n\n")
-        : ref
-          ? exportPourLecture(ref)
-          : "Aucun référentiel pour ce métier.",
-  });
+  const exportDe = (m: string) => {
+    const r = referentialFor(m);
+    return r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.";
+  };
+  let lecture: LectureDevis | null = null;
+  let echec = "";
+  if (lectureParLots(metiersReperes, document.numberedText)) {
+    // Décision du fondateur (24 octobre 2026, option 1) : un gros devis de plusieurs métiers, un appel par métier, en parallèle.
+    const lots = metiersReperes.map((m) => ({ metier: m, libelle: tradeProfile(m).label }));
+    // Comme en production : avec les sections du repérage, chaque appel ne reçoit que les lignes de son lot, par tranches.
+    const tranches = tranchesDuDevis(document.numberedText, metiersReperes, sections);
+    const entete = document.numberedText.split("\n").slice(0, 12).join("\n");
+    const appels = tranches
+      ? tranches.map((t) => {
+          const lot = lots.find((l) => l.metier === t.metier)!;
+          const siennes = tranches.filter((x) => x.metier === t.metier);
+          return { lot, nom: `${t.metier} ${siennes.indexOf(t) + 1}/${siennes.length} (${t.refs.length} lignes)`, request: { document: { ...document, numberedText: t.texte }, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), consigne: consigneDeTranche(lot, lots, siennes.indexOf(t) + 1, siennes.length, entete) } };
+        })
+      : lots.map((lot, i) => ({ lot, nom: lot.metier, request: { document, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), consigne: consigneDuLot(lot, lots, i === 0) } }));
+    console.log(`Sections repérées : ${sections.length} ; appels : ${appels.length}`);
+    const essais = await Promise.all(appels.map((a) => reader.lire(a.request)));
+    for (const [i, e] of essais.entries()) {
+      compter(model, e.usage);
+      console.log(`Lot ${appels[i]!.nom} — ${e.status}${e.errorCode ? ` (${e.errorCode})` : ""} en ${Math.round(e.durationMs / 1000)} s, ${e.usage.outputTokens} jetons rendus`);
+    }
+    const parts = appels.flatMap((a, i) => (essais[i]!.status === "success" && essais[i]!.output ? [{ ...a.lot, lecture: essais[i]!.output! }] : []));
+    lecture = fusionnerLectures(parts, appels.filter((_, i) => !(essais[i]!.status === "success" && essais[i]!.output)).map((a) => a.lot));
+    if (!lecture) echec = essais.map((e) => `${e.status} ${e.errorCode ?? ""}`).join(" ; ");
+  } else {
+    const attempt = await reader.lire({
+      document,
+      trade: devis.trade,
+      tradeLabel: profile.label,
+      // Comme en production : plusieurs métiers repérés (petit devis), la lecture reçoit le référentiel de chacun.
+      referentiel: metiersReperes.length > 1 ? metiersReperes.map((m) => `=== Référentiel ${tradeProfile(m).label} (${m}) ===\n${exportDe(m)}`).join("\n\n") : ref ? exportPourLecture(ref) : "Aucun référentiel pour ce métier.",
+    });
+    compter(model, attempt.usage);
+    lecture = attempt.output;
+    if (!lecture) echec = `${attempt.status} ${attempt.errorCode ?? ""}`;
+  }
   const secondes = Math.round((Date.now() - started) / 1000);
-  console.log(`Modèle ${model} (effort ${effort}) — ${attempt.status} en ${secondes} s — pages texte ${text.length}, image ${vision.length}`);
-  const lecture = attempt.output;
+  console.log(`Modèle ${model} (effort ${effort}) — ${lecture ? "success" : "échec"} en ${secondes} s — pages texte ${text.length}, image ${vision.length}`);
+  console.log(`COÛT : ${(cout / 1_000_000).toFixed(2)} $ (grille ${grille.version}, repérage compris)`);
   if (!lecture) {
-    console.error(`Lecture en échec : ${attempt.status} ${attempt.errorCode ?? ""}`);
+    console.error(`Lecture en échec : ${echec}`);
     return 1;
   }
+  for (const l of lecture.lotsNonLus ?? []) console.log(`LOT NON LU : ${l.libelle}`);
   if (sortie) writeFileSync(sortie, JSON.stringify(lecture, null, 2));
 
   console.log(`\nMétier : ${lecture.metier ?? "(non dit)"}`);

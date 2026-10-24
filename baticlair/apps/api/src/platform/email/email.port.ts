@@ -7,6 +7,8 @@ export interface TransactionalEmail {
   to: string;
   subject: string;
   text: string;
+  /** Le même corps en HTML quand une mise en forme compte (la phrase de commission en gras, parcours groupé) ; le texte reste la référence. */
+  html?: string;
   /** Pièces jointes (le PDF de commande fournisseur, §43) : contenu en base64. */
   attachments?: { filename: string; contentType: string; contentBase64: string }[];
   /** Adresse de réponse : « Répondre » écrit à l'artisan, pas à l'adresse d'envoi de BatiClair. */

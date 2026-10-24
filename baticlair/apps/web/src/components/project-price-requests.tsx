@@ -14,6 +14,7 @@ import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, ty
 import { openDocument, openFile } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
+import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 
 
@@ -86,7 +87,7 @@ export function ProjectPriceRequests({
   archived: boolean;
   canCreate: boolean;
   quantitatifId?: string | null;
-  /** « Envoyer au fournisseur » du document : ouvre « À qui j'envoie ? » (ou montre les fournisseurs si la demande est partie). */
+  /** « Envoyer aux négoces » du document : ouvre « À qui j'envoie ? » (ou montre les fournisseurs si la demande est partie). */
   openSignal?: number;
   /** §48.5 : une sélection vient de partir depuis la liste : on relit les demandes. */
   refreshSignal?: number;
@@ -105,6 +106,10 @@ export function ProjectPriceRequests({
   }, [refreshSignal, reload]);
 
   const refreshProgress = useProgressRefresh();
+  // Commande du mois (Greg, 23 octobre) : plus de « X offres reçues / Comparer les offres » par chantier ; le prix vient de
+  // la commande commune, le chantier garde seulement l'envoi aux négoces.
+  const { features } = useSession();
+  const modeMois = features.groupe === true && features.commandeCommune !== "lots";
   // Des e-mails partent-ils du serveur (§43) ? Sinon, l'artisan envoie depuis sa messagerie.
   const fetchSettings = useCallback((signal: AbortSignal) => api<PriceRequestSettings & { deliversEmail: boolean }>("/v1/price-requests/settings", { signal }), []);
   const deliversEmail = useResource(fetchSettings).data?.deliversEmail ?? false;
@@ -224,7 +229,7 @@ export function ProjectPriceRequests({
           </Say>
         </AssistantMessage>
       )}
-      {!archived && unread > 0 && offers.data ? (
+      {!archived && !modeMois && unread > 0 && offers.data ? (
         <CompareQuotes
           requestId={request.id}
           received={received.length}
@@ -237,7 +242,7 @@ export function ProjectPriceRequests({
           }}
         />
       ) : null}
-      {hasOffers ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
+      {hasOffers && !modeMois ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
       <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">FOURNISSEURS</h2>
       <NotificationsPrompt trigger={sentCount} />
       <ul className="flex flex-col gap-2" aria-label="Tes fournisseurs">
@@ -426,7 +431,7 @@ function NewRequest({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="ex. Livraison sur chantier possible ?"
-            className="rounded-2xl bg-surface p-3 text-base text-ink outline-none placeholder:text-subtle"
+            className="rounded-2xl bg-surface p-3 text-base text-ink outline-none placeholder:text-muted"
           />
           <label htmlFor={`${id}-due`} className="font-bold">
             Réponse souhaitée avant le
@@ -827,7 +832,7 @@ function EmailPreview({ to, email }: { to: string; email: { subject: string; bod
 }
 
 /**
- * §50.7 : après « Envoyer au fournisseur », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
+ * §50.7 : après « Envoyer aux négoces », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
  * qu'on vient de quitter (plus d'écran « Ce que le fournisseur va recevoir »).
  */
 function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: boolean; sending: boolean; onSend: () => void; onClose: () => void; children: React.ReactNode }) {
@@ -849,7 +854,7 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
       <div className="min-h-0 grow overflow-y-auto px-3 pb-4">
         <div className="mx-auto flex max-w-2xl flex-col gap-3">{children}</div>
       </div>
-      <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_16px_-12px_rgba(16,24,40,0.25)]">
+      <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] border-t border-line">
         <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!canSend} onClick={onSend}>
           <Send size={18} aria-hidden="true" />
           {canSend ? "Envoyer" : "Choisis un fournisseur"}

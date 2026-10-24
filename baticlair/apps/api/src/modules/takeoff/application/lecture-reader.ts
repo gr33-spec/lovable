@@ -1,8 +1,9 @@
-import { METIER_NAMES, parseLecture, type LectureDevis } from "@baticlair/domain";
+import { METIER_NAMES, parseLecture, type LectureDevis, type SectionDuDevis } from "@baticlair/domain";
 import { z } from "zod";
 import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
 import { RULE_51_2 } from "./fiche-relecture.js";
 import { RULE_51_1 } from "./prompt.js";
+import { NOM_APP } from "@baticlair/domain";
 
 /**
  * §51.5 (décision du fondateur, 2026-10-11) : LA LECTURE EST FAITE PAR L'IA, PAS PAR DES RÈGLES DE MOTS. Un seul appel au
@@ -11,7 +12,7 @@ import { RULE_51_1 } from "./prompt.js";
  * bref, les questions (une par donnée manquante, aucune sur une donnée lue), et pour chaque ligne du devis la fourniture
  * nommée ou « sans fourniture ». Le code calcule ensuite (ratios, conversions) : jamais une règle de mots.
  */
-export const LECTURE_PROMPT = { id: "lecture_devis", version: 4 } as const;
+export const LECTURE_PROMPT = { id: "lecture_devis", version: 5 } as const;
 
 /** §49.1 du référentiel (6 octobre 2026), mot pour mot : d'où vient chaque ligne de la liste. */
 export const RULE_49_1 = `RÈGLE §49.1 DU RÉFÉRENTIEL : d'où vient chaque ligne de la liste.
@@ -85,13 +86,14 @@ const FORMAT = `CE QUE TU RENVOIES : un seul objet JSON, rien d'autre.
 - lignes : une entrée par ligne du devis, dans l'ordre, toutes les lignes (en-tête et totaux exclus) : {"ref", "designation", "quantite", "unite", "role", "fournitures"}. ref : son repère (« 1 », « 2 »…) ; designation : le texte de la ligne, prix retirés ; quantite et unite : exactement comme écrites, "" si rien ; role : "fourniture", "pose", "fourniture_et_pose" ou "hors_quantitatif" ; fournitures : les fournitures que la ligne nomme, [] pour une ligne SANS fourniture (main-d'œuvre, dépose, trémies, accès, nettoyage : rien à acheter).
   Chaque fourniture : {"nom", "quantite", "unite", "ouvrage", "emplacement", "donnees", "attend", "a_preciser", "precision"}. nom : le nom du comptoir, complet, tel que le vendeur le lirait (marque, modèle, taille, finition : « Velux GGL SK06 114×118 white finish »), sans mention de pose ; quantite et unite : la quantité à commander de CETTE fourniture et son unité (« u », « ml », « m² »), ou la mesure écrite quand c'est une mesure d'ouvrage (17,40 ml de gouttière), "" si rien n'est écrit (le code la calcule) ; ouvrage et emplacement : l'identifiant de l'OUVRAGE du référentiel et de l'EMPLACEMENT qui la calculent (« gouttiere » / « profil », « gouttiere » / « crochet », « fenetre-de-toit » / « raccord »), ou "" quand aucune règle du référentiel ne s'applique (la fourniture part telle qu'écrite) ; donnees : les données de l'ouvrage écrites sur la ligne, par clé du référentiel : [{"cle", "valeur"}] (« taille_fenetre » : « 114x118 ») ; attend : les clés des questions dont cette fourniture attend la réponse (elle reste orange en attendant) ; a_preciser : ce que le fournisseur précisera lui-même (« profil », « teinte »), sinon [] ; precision : une précision pour le comptoir, sinon "".
   Un article écrit au devis donne une fourniture, deux articles sur une ligne donnent deux fournitures ; un accessoire que le référentiel ajoute d'office (la naissance) n'est pas à nommer, le code le sort. Jamais un article absent du devis.
+  UNE PRÉCISION TECHNIQUE NE SAUTE JAMAIS : le support, la matière, la dimension et l'usage d'un article, écrits sur sa ligne ou sur la ligne de pose qui le concerne (« sur bac acier isolé » sur la pose d'un Velux vaut pour son raccord), vont dans le nom de la fourniture ou dans sa precision (« Raccord SK06 pour bac acier »), et le bref les redit pour cet article (« raccords pour bac acier », jamais seulement « avec raccord »).
 - contexte : ce que l'en-tête et les notes disent du chantier : [{"cle", "valeur"}] (« client », « adresse », « ville », « code postal », « numéro du devis », « date », « neuf ou rénovation »…), [] si rien.
 - notes : en phrases courtes pour l'artisan, ce qui concerne tout le devis et compte pour ses achats (page illisible, fourniture apportée par le client) ; [] sinon.`;
 
 /** Le système du lecteur : les règles du référentiel mot pour mot, l'export du tiroir du métier, le format. */
 export function lectureSystemPrompt(input: { trade?: string; tradeLabel: string; referentiel: string }): string {
   const metier = (REGLES_DU_METIER[input.trade ?? ""] ?? []).map((r) => `\n\n${r}`).join("");
-  return `Tu es le lecteur de devis de BatiClair. Tu lis le devis entier d'un artisan du bâtiment (métier : ${input.tradeLabel}) et tu rends la fiche de chantier, le bref, les questions et, pour chaque ligne, la fourniture nommée ou « sans fourniture ». Tu ne comptes rien : les quantités calculées viennent du code, d'après le référentiel ci-dessous. Tu lis TOUT : l'en-tête, chaque ligne, le descriptif sous le titre, les lignes de pose, les notes, toutes les pages. Une information écrite n'importe où vaut pour l'ouvrage concerné.
+  return `Tu es le lecteur de devis de ${NOM_APP}. Tu lis le devis entier d'un artisan du bâtiment (métier : ${input.tradeLabel}) et tu rends la fiche de chantier, le bref, les questions et, pour chaque ligne, la fourniture nommée ou « sans fourniture ». Tu ne comptes rien : les quantités calculées viennent du code, d'après le référentiel ci-dessous. Tu lis TOUT : l'en-tête, chaque ligne, le descriptif sous le titre, les lignes de pose, les notes, toutes les pages. Une information écrite n'importe où vaut pour l'ouvrage concerné.
 
 ${RULE_51_5}
 
@@ -185,6 +187,8 @@ export interface LectureRequest {
   /** L'export du référentiel du métier (`exportPourLecture`). */
   referentiel: string;
   siteNotes?: string | null;
+  /** Lecture lot par lot (24 octobre 2026) : la consigne du lot que cet appel lit seul (`consigneDuLot`). */
+  consigne?: string;
 }
 
 /**
@@ -193,8 +197,8 @@ export interface LectureRequest {
  * devis a des lots de métiers différents. La lecture part alors UNE fois, avec le ou les bons référentiels, au lieu d'être
  * relue après coup. Le repérage ne lit rien d'autre : la fiche, les questions et les fournitures restent à la lecture.
  */
-export const REPERAGE_PROMPT = { id: "reperage_metiers", version: 1 } as const;
-export const reperageWireSchema = z.object({ metiers: z.array(z.string()) });
+export const REPERAGE_PROMPT = { id: "reperage_metiers", version: 2 } as const;
+export const reperageWireSchema = z.object({ metiers: z.array(z.string()), sections: z.array(z.object({ metier: z.string(), de: z.string(), a: z.string() })) });
 export type ReperageWire = z.infer<typeof reperageWireSchema>;
 
 export function reperageSystemPrompt(): string {
@@ -204,13 +208,26 @@ export function reperageSystemPrompt(): string {
     .join("\n");
   return `Tu repères les métiers d'un devis du bâtiment, rien d'autre. Rends dans « metiers » les identifiants ci-dessous, le métier principal d'abord (celui de la plus grande part du devis). Un seul métier si le devis est d'un seul corps d'état, même avec quelques lignes annexes (une couverture avec ses gouttières et sa zinguerie reste « roofing »). Plusieurs seulement quand le devis a de vrais lots de métiers différents (électricité, plomberie, VMC…). La VMC, le chauffage et la climatisation sont « hvac ». Le sanitaire est « plumbing ».
 
+Quand le devis a plusieurs métiers, rends aussi « sections » : chaque bloc de lignes consécutives d'un même métier, dans l'ordre du devis, avec son métier et les repères de sa première et de sa dernière ligne (« de » : « 1:001 », « a » : « 3:042 »), tels qu'écrits entre crochets ; un même métier peut revenir dans plusieurs blocs (un logement après l'autre). Un seul métier : « sections » vide.
+
 Identifiants :
 ${liste}`;
 }
 
-/** Les métiers repérés : identifiants connus seulement, sans doublon, dans l'ordre rendu. */
-export function decodeReperage(wire: ReperageWire | null | undefined): string[] {
-  return [...new Set((wire?.metiers ?? []).map((m) => m.trim()).filter((m) => m in METIER_NAMES && m !== "general"))];
+/** Le repérage : les métiers (le principal d'abord) et, pour un devis de plusieurs métiers, ses sections. */
+export interface Reperage {
+  metiers: string[];
+  sections: SectionDuDevis[];
+}
+
+/** Les métiers repérés : identifiants connus seulement, sans doublon, dans l'ordre rendu ; les sections de ces métiers. */
+export function decodeReperage(wire: ReperageWire | null | undefined): Reperage {
+  const metiers = [...new Set((wire?.metiers ?? []).map((m) => m.trim()).filter((m) => m in METIER_NAMES && m !== "general"))];
+  const repere = /^\d+:\d+$/;
+  const sections = (wire?.sections ?? [])
+    .map((x) => ({ metier: x.metier.trim(), de: x.de.trim().replace(/^\[|\]$/g, ""), a: x.a.trim().replace(/^\[|\]$/g, "") }))
+    .filter((x) => metiers.includes(x.metier) && repere.test(x.de) && repere.test(x.a));
+  return { metiers, sections };
 }
 
 /** Port : la lecture d'un devis par le modèle. Un appel = une tentative, toujours rapportée. */
@@ -219,7 +236,7 @@ export interface LectureReader {
   /** `null` : ce lecteur ne lit pas ce devis (lecteur simulé sans lecture enregistrée) ; l'appelant se rabat sur l'ancienne lecture. */
   lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null>;
   /** Le repérage des métiers du devis, sur son texte, avant la lecture (absent : la lecture part avec le métier donné). */
-  reperer?(numberedText: string): Promise<ReadAttempt<string[]> | null>;
+  reperer?(numberedText: string): Promise<ReadAttempt<string[] | Reperage> | null>;
 }
 
 export const LECTURE_READER = Symbol("LECTURE_READER");

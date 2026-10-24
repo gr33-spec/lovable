@@ -21,7 +21,12 @@ const envSchema = z
      */
     API_PUBLIC_URL: z.url().default("http://localhost:4000"),
     /** URL de l'application web (CORS, redirections après vérification). */
-    WEB_APP_URL: z.url().default("http://localhost:3000"),
+    /** L'adresse du web ; plusieurs, séparées par des virgules, quand une prévisualisation en a une autre (la première sert aux liens). */
+    WEB_APP_URL: z
+      .string()
+      .default("http://localhost:3000")
+      .transform((v) => v.split(",").map((x) => x.trim().replace(/\/$/, "")).filter(Boolean))
+      .pipe(z.array(z.url()).min(1)),
     /**
      * Envoi des e-mails transactionnels (vérification, mot de passe oublié) :
      * - `resend`   : envoi réel via Resend (RESEND_API_KEY, EMAIL_FROM) ;
@@ -96,6 +101,49 @@ const envSchema = z
      */
     PAYWALL: z.enum(["on", "off"]).default("off"),
     /**
+     * BatiClair Groupé (document du fondateur, 2026-10-19) : DÉSACTIVÉ par défaut, « rien en prod sans mon accord
+     * explicite » ; `on` l'ouvre (écrans, regroupement, envois aux négoces).
+     */
+    GROUPE: z.enum(["on", "off"]).default("off"),
+    /** La commande commune du mois (Greg, 22 octobre 2026) par défaut ; `lots` rallume l'ancien regroupement au fil de l'eau. */
+    COMMANDE_COMMUNE: z.enum(["mois", "lots"]).default("mois"),
+    /** Clé d'intégration de l'API Sirene de l'INSEE (vérification du SIRET avant le groupé). Vide : vérification indisponible. */
+    INSEE_API_KEY: z.string().min(1).optional(),
+    /**
+     * Vérification du SIRET : `insee` (l'API Sirene, la seule admise en production) ou `forme` (un SIRET bien formé vaut
+     * vérifié : prévisualisation seulement, décision du fondateur, 2026-10-20). Refusé en production Vercel.
+     */
+    SIRET_VERIFICATION: z.enum(["insee", "forme"]).default("insee"),
+    /**
+     * L'émetteur de la facture de commission du groupé (décision du fondateur, 2026-10-20) : en variables, jamais en dur.
+     * Les cinq vont ensemble ; sans elles, la facture dit « émetteur non configuré » et Greg est prévenu par le journal.
+     */
+    FACTURE_EMETTEUR_NOM: z.string().min(1).optional(),
+    FACTURE_EMETTEUR_FORME: z.string().min(1).optional(),
+    FACTURE_EMETTEUR_SIRET: z.string().min(9).optional(),
+    FACTURE_EMETTEUR_ADRESSE: z.string().min(5).optional(),
+    FACTURE_EMETTEUR_TVA: z.string().min(4).optional(),
+    /** La TVA sur la commission, en pour cent (assujettie : 20). */
+    FACTURE_TVA_POURCENT: z.coerce.number().min(0).max(100).default(20),
+    /**
+     * La facturation automatique des négoces (Greg, 24 octobre 2026 : plus de commission de 2 %). Éteinte par défaut : aucune
+     * facture n'est émise ni relancée, aucun accord ne porte de taux. Le code reste, prêt pour une commission future
+     * (« avec un préavis de 60 jours et l'accord du négoce »).
+     */
+    FACTURATION_NEGOCE: z.enum(["on", "off"]).default("off"),
+    /** Le domaine des adresses de réponse des lots (`lot-<n°>@<domaine>`, webhook Resend entrant). Vide : pas d'adresse de réponse. */
+    REPONSES_DOMAINE: z.string().min(3).optional(),
+    /** Le secret de signature du webhook Resend (Svix, « whsec_… »). Vide : webhook fermé. */
+    RESEND_WEBHOOK_SECRET: z.string().min(8).optional(),
+    /** Les e-mails qui voient l'admin du groupé (étape 9) ; vides : les validateurs du référentiel (Greg). */
+    GROUPE_ADMINS: z.string().optional(),
+    /** Les départements où le groupé est ouvert (« 22,29 »), ou « * » pour tous (défaut). Décision du 2026-10-20 : le 22 d'abord en prod. */
+    GROUPE_DEPARTEMENTS: z.string().default("*"),
+    /** La base négoces Sirene (bloc 3 du plan) : départements importés et codes NAF du négoce de matériaux. */
+    SIRENE_DEPARTEMENTS: z.string().default("22,29,35,56"),
+    SIRENE_NAF: z.string().default("46.73A,46.73B,47.52A,47.52B"),
+    VERCEL_ENV: z.string().optional(),
+    /**
      * Limitation de débit (connexion, inscription, dépôts de devis, lecture IA) : `on` partout,
      * `off` uniquement pour les tests automatisés qui enchaînent des centaines de requêtes.
      */
@@ -156,6 +204,13 @@ export interface AppConfig {
   authSecret: string;
   apiPublicUrl: string;
   webAppUrl: string;
+  /** Toutes les origines web acceptées (CORS, origines de confiance de l'authentification). */
+  webAppOrigins: string[];
+  /**
+   * En prévisualisation Vercel, les adresses de prévisualisation du web (`https://<…>-gr33-spec.vercel.app`) sont
+   * acceptées d'office : le fondateur teste une branche depuis son téléphone sans poser l'adresse à la main.
+   */
+  previewOriginPattern: RegExp | null;
   emailProvider: "resend" | "disabled" | "console" | "capture";
   resend?: { apiKey: string; from: string };
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
@@ -164,6 +219,21 @@ export interface AppConfig {
   /** E-mails (en minuscules) des validateurs du référentiel. */
   referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
+  /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
+  groupe: {
+    enabled: boolean;
+    inseeApiKey: string | null;
+    siretVerification: "insee" | "forme";
+    facture: { emetteur: { nom: string; forme: string | null; siret: string; adresse: string; tvaIntracom: string } | null; tvaPourcent: number; active: boolean };
+    reponsesDomaine: string | null;
+    resendWebhookSecret: string | null;
+    admins: string[];
+    /** `null` = tous les départements ; sinon la liste des départements ouverts. */
+    departements: string[] | null;
+    /** mois : une commande commune par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
+    mode: "mois" | "lots";
+    sirene: { departements: string[]; naf: string[] };
+  };
   rateLimit: { enabled: boolean };
   alerts: { webhookUrl?: string; email?: string };
   cronSecret?: string;
@@ -188,6 +258,16 @@ export class ConfigError extends Error {
   }
 }
 
+/** Les adresses de prévisualisation Vercel du compte gr33-spec (jamais un autre compte). */
+export const PREVIEW_ORIGIN = /^https:\/\/[a-z0-9-]+-gr33-spec\.vercel\.app$/;
+/** La même règle, écrite pour les origines de confiance de l'authentification (jokers sur l'hôte). */
+export const PREVIEW_ORIGIN_JOKER = "https://*-gr33-spec.vercel.app";
+
+export function originesAcceptees(config: Pick<AppConfig, "webAppOrigins" | "previewOriginPattern">, origin: string | undefined): boolean | null {
+  if (!origin) return null;
+  return config.webAppOrigins.includes(origin) || (config.previewOriginPattern?.test(origin) ?? false);
+}
+
 export function loadConfig(source: Record<string, string | undefined> = process.env): AppConfig {
   const parsed = envSchema.safeParse(source);
   if (!parsed.success) {
@@ -204,6 +284,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     throw new ConfigError([`BILLING_PLANS : ${err instanceof Error ? err.message : String(err)}`]);
   }
   const isDeployed = e.NODE_ENV === "production" || e.NODE_ENV === "staging";
+  if (e.SIRET_VERIFICATION === "forme" && e.VERCEL_ENV === "production") {
+    throw new ConfigError(["SIRET_VERIFICATION : « forme » est réservé à la prévisualisation, jamais en production"]);
+  }
   const emailProvider = e.EMAIL_PROVIDER ?? (e.RESEND_API_KEY ? "resend" : isDeployed ? "disabled" : "console");
   const oauth = (id?: string, secret?: string) => (id && secret ? { clientId: id, clientSecret: secret } : undefined);
   const google = oauth(e.GOOGLE_CLIENT_ID, e.GOOGLE_CLIENT_SECRET);
@@ -215,7 +298,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     databaseUrl: e.DATABASE_URL,
     authSecret: e.AUTH_SECRET,
     apiPublicUrl: e.API_PUBLIC_URL,
-    webAppUrl: e.WEB_APP_URL,
+    webAppUrl: e.WEB_APP_URL[0]!,
+    webAppOrigins: e.WEB_APP_URL,
+    previewOriginPattern: e.VERCEL_ENV === "preview" ? PREVIEW_ORIGIN : null,
     emailProvider,
     ...(emailProvider === "resend" && e.RESEND_API_KEY && e.EMAIL_FROM
       ? { resend: { apiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM } }
@@ -228,6 +313,25 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
+    groupe: {
+      enabled: e.GROUPE === "on",
+      inseeApiKey: e.INSEE_API_KEY ?? null,
+      siretVerification: e.SIRET_VERIFICATION,
+      facture: {
+        emetteur:
+          e.FACTURE_EMETTEUR_NOM && e.FACTURE_EMETTEUR_SIRET && e.FACTURE_EMETTEUR_ADRESSE && e.FACTURE_EMETTEUR_TVA
+            ? { nom: e.FACTURE_EMETTEUR_NOM, forme: e.FACTURE_EMETTEUR_FORME ?? null, siret: e.FACTURE_EMETTEUR_SIRET, adresse: e.FACTURE_EMETTEUR_ADRESSE, tvaIntracom: e.FACTURE_EMETTEUR_TVA }
+            : null,
+        tvaPourcent: e.FACTURE_TVA_POURCENT,
+        active: e.FACTURATION_NEGOCE === "on",
+      },
+      reponsesDomaine: e.REPONSES_DOMAINE ?? null,
+      resendWebhookSecret: e.RESEND_WEBHOOK_SECRET ?? null,
+      admins: (e.GROUPE_ADMINS ?? e.REFERENTIAL_VALIDATORS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
+      departements: e.GROUPE_DEPARTEMENTS.trim() === "*" ? null : e.GROUPE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean),
+      mode: e.COMMANDE_COMMUNE,
+      sirene: { departements: e.SIRENE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean), naf: e.SIRENE_NAF.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) },
+    },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },

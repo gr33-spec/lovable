@@ -1,4 +1,5 @@
-import { MENTION_RATIOS, priceLeak } from "@baticlair/domain";
+import { MENTION_RATIOS, priceLeak, NEW_PROJECT_NAME } from "@baticlair/domain";
+import { NOM_APP } from "@baticlair/domain";
 // Le test du prix (§42.2, §43.5) vit dans le domaine, à côté du bref (§50.7) qui s'en sert aussi.
 export { priceLeak };
 import { PDFDocument, rgb, StandardFonts, type PDFFont, type PDFImage, type PDFPage } from "pdf-lib";
@@ -79,12 +80,16 @@ const dateFr = (iso: string) => {
   return new Date(Date.UTC(y!, m! - 1, d!)).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 };
 
-/** « Test » → « chantier Test » ; un nom qui le dit déjà reste tel quel. */
-export const chantierLabel = (name: string) => (/^chantier\b/i.test(name.trim()) ? name.trim() : `chantier ${name.trim()}`);
+/**
+ * « Test » → « chantier Test » ; un nom qui le dit déjà reste tel quel. Un chantier encore sans nom (créé depuis le « + »,
+ * devis sans client ni ville : test complet du 21 octobre, « chantier Nouveau chantier » dans l'objet) devient « chantier ».
+ */
+export const chantierLabel = (name: string) => (name.trim() === NEW_PROJECT_NAME ? "chantier" : /^chantier\b/i.test(name.trim()) ? name.trim() : `chantier ${name.trim()}`);
 
 /** §45.2 : « Demande de devis · [entreprise] · [nom du chantier] ([ville]) ». */
 export function packetSubject(p: SupplierPacket): string {
-  return `Demande de devis · ${p.entreprise} · ${chantierLabel(p.chantier)}${p.commune ? ` (${p.commune})` : ""}`;
+  const chantier = p.chantier.trim() === NEW_PROJECT_NAME ? (p.commune ? `chantier à ${p.commune}` : "") : `${chantierLabel(p.chantier)}${p.commune ? ` (${p.commune})` : ""}`;
+  return [`Demande de devis`, p.entreprise, chantier].filter(Boolean).join(" · ");
 }
 
 /** La signature : prénom ou nom, entreprise, téléphone, mail (§45.2). Rien de vide. */
@@ -163,7 +168,7 @@ export function packetDocument(p: SupplierPacket, options: { destinataire?: stri
     destinataire: options.destinataire ?? null,
     blocs,
     croquis: (p.croquis ?? []).map((c) => ({ article: c.article, nom: c.nom, commentaire: c.commentaire })),
-    pied: { question: contact ? `Une question sur ce chantier ? ${contact}` : p.question_lien ? `Une question sur ce chantier ? ${p.question_lien}` : null, mention: "Généré avec BatiClair" },
+    pied: { question: contact ? `Une question sur ce chantier ? ${contact}` : p.question_lien ? `Une question sur ce chantier ? ${p.question_lien}` : null, mention: `Généré avec ${NOM_APP}` },
   };
 }
 
@@ -183,7 +188,8 @@ export function packetDocumentLines(d: PacketDocument): string[] {
 
 /** Le vocabulaire du §45.4 : rien de la cuisine interne ne sort, jamais « commande ». */
 export function forbiddenWord(text: string): string | null {
-  const m = /\b(?:commandes?|commander|command[ée]e?s?|bon de commande|r[ée]f[ée]rentiel|moteur|BatiClair|zone climatique|poids pos[ée]|marge comprise|r[èe]gle de calcul)\b/i.exec(text);
+  // Le nom de l'application, l'ancien comme le nouveau (24 octobre 2026), n'apparaît jamais chez le fournisseur.
+  const m = new RegExp(`\\b(?:commandes?|commander|command[ée]e?s?|bon de commande|r[ée]f[ée]rentiel|moteur|BatiClair|${NOM_APP}|zone climatique|poids pos[ée]|marge comprise|r[èe]gle de calcul)\\b`, "i").exec(text);
   return m ? m[0] : null;
 }
 
@@ -214,7 +220,7 @@ export async function packetPdf(
   const d = packetDocument(p, { destinataire: options.destinataire ?? null });
   const doc = await PDFDocument.create();
   doc.setTitle(packetSubject(p));
-  doc.setProducer("BatiClair");
+  doc.setProducer(NOM_APP);
   const regular = await doc.embedFont(StandardFonts.Helvetica);
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
   let logo: PDFImage | null = null;

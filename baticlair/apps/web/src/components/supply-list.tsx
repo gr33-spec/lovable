@@ -1,15 +1,19 @@
 "use client";
 
-import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { AideBouton } from "@/components/aide";
+import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Plus, Send, Trash2, Users, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
-import { Button, ErrorNotice } from "@/components/ui";
+import { GroupeBar, GroupeSection, type Groupe } from "@/components/groupe";
+import { CommandeDuMoisBar, CommandeDuMoisBloc, MesLignesDuMois } from "@/components/commande-du-mois";
+import { Button, ButtonLink, ErrorNotice } from "@/components/ui";
 import type { ApiError, ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
 import { enMetres, parseQuantity, shortName } from "@/lib/labels";
+import { NOM, nom } from "@/lib/nom";
 
 /**
  * §50.7 L'ÉCRAN 3 EST LE DOCUMENT (fondateur, 2026-10-10) : « Ton chantier », ce que le fournisseur recevra.
@@ -18,7 +22,7 @@ import { enMetres, parseQuantity, shortName } from "@/lib/labels";
  *    cinq mots, sans carte dépliée ;
  *  - sur le document même : un tap ouvre la ligne (moins / plus, boutons de choix, « C'est bon », corbeille), un tap sur
  *    le nom le corrige, un glissement vers la gauche la retire ; aucun écran intermédiaire, plus de voix ;
- *  - en bas, figés, deux boutons : « Aperçu » (le mail et le PDF du fournisseur) et « Envoyer au fournisseur » ; en petit
+ *  - en bas, figés, deux boutons : « Aperçu » (le mail et le PDF du fournisseur) et « Envoyer aux négoces » ; en petit
  *    dessous, « Ajouter un article » ; à côté du titre « Fournitures », « Envoyer une partie » (une partie chez un
  *    fournisseur, le reste chez un autre).
  */
@@ -36,6 +40,8 @@ export function SupplyList({
   sent = false,
   docked = true,
   selection,
+  groupe,
+  groupeFerme = false,
   onAdd,
   onBrief,
   error = null,
@@ -48,6 +54,10 @@ export function SupplyList({
   onBrief?: (cle: string, texte: string) => Promise<void>;
   /** §48.5 : « Envoyer une sélection à un autre fournisseur » (absent : la fonction n'existe pas ici). */
   selection?: SelectionSend;
+  /** BatiClair Groupé (étape 2) : présent seulement quand l'entreprise y a accès ; absent, l'écran ne change pas. */
+  groupe?: Groupe;
+  /** Le groupé existe mais l'entreprise n'y a pas encore accès (SIRET) : un bloc grisé renvoie à l'onglet Groupé. */
+  groupeFerme?: boolean;
   /** Une barre de chat est en bas de l'écran : le gros bouton se pose au-dessus d'elle. Sur la page des fournitures, non. */
   docked?: boolean;
   /** La demande est déjà partie : le gros bouton mène aux fournisseurs, il ne propose plus un premier envoi. */
@@ -75,6 +85,9 @@ export function SupplyList({
   const [removing, setRemoving] = useState<string[]>([]);
   // §48.5 : cases à cocher seulement après le petit bouton ; par défaut l'écran ne change pas.
   const [selecting, setSelecting] = useState(false);
+  // BatiClair Groupé : les mêmes cases servent à proposer des lignes au groupé (par ligne, ou « Cocher cette partie »).
+  const [pourGroupe, setPourGroupe] = useState(false);
+  const [messageMois, setMessageMois] = useState<string | null>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   // « Envoyer » touché avec des lignes orange : la phrase dit pourquoi rien ne part.
   const [blocked, setBlocked] = useState(false);
@@ -108,8 +121,19 @@ export function SupplyList({
   // §48.5 : entrer en sélection coche chaque ligne prête et pas encore envoyée à part (« je dois tout avoir de coché ») ;
   // l'artisan décoche ce qui ne part pas.
   const startSelecting = () => {
+    setPourGroupe(false);
     setChecked(new Set(selectable));
     setSelecting(true);
+  };
+  // Proposer au groupé : rien de coché d'office (un engagement ferme se choisit ligne par ligne ou lot par lot).
+  const startGroupe = () => {
+    setPourGroupe(true);
+    setChecked(new Set());
+    setSelecting(true);
+  };
+  const stopSelecting = () => {
+    setSelecting(false);
+    setPourGroupe(false);
   };
   // La commande répartie : ce qui n'est encore parti chez aucun fournisseur, dont les lignes orange à vérifier d'abord.
   const unsent = rows.filter((r) => articleOf(r) && !selection?.sent.has(articleOf(r)!));
@@ -124,29 +148,42 @@ export function SupplyList({
         return { key: g.key, label: g.label as string | null, rows: [...own.filter((r) => r.status === "check"), ...own.filter((r) => r.status !== "check")] };
       }).filter((x) => x.rows.length > 0)
     : [{ key: "liste", label: null as string | null, rows: ordered }];
-  // Les lignes qu'on peut cocher : prêtes (pas orange), avec un article, pas encore parties à part.
-  const selectable = rows.filter((r) => r.status !== "check" && articleOf(r) && !selection?.sent.has(articleOf(r)!)).map((r) => articleOf(r)!);
+  // Les lignes qu'on peut cocher : prêtes (pas orange), avec un article, pas encore parties à part ; au groupé, un article
+  // calculé ou repris (jamais une ligne « à faire chiffrer ») qui n'y est pas déjà.
+  // Décision de Greg (22 octobre) : une ligne vague ne se propose pas à la commande commune (elle part chez ton négoce).
+  const vagueRow = (r: ScreenRow) => Boolean(r.itemKey && (items.get(r.itemKey)?.aPreciserPourGroupe?.length ?? 0) > 0);
+  const cochable = (r: ScreenRow) =>
+    r.status !== "check" && Boolean(articleOf(r)) && (pourGroupe ? Boolean(r.itemKey) && !groupe?.besoins.has(r.itemKey!) && !vagueRow(r) : !selection?.sent.has(articleOf(r)!));
+  const selectable = rows.filter(cochable).map((r) => articleOf(r)!);
   const allChecked = selectable.length > 0 && selectable.every((k) => checked.has(k));
-  const link = "inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-muted underline decoration-dotted underline-offset-4";
 
   return (
     <section aria-label="Liste des fournitures" className="flex flex-col">
       {editable && !selecting && toCheck.length > 0 ? (
         // §50.3 : une barre fixe discrète en haut, qui disparaît à zéro. Rien d'autre.
-        <div role="status" className="sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-10 items-center gap-2 rounded-[20px] border border-warn/25 bg-surface/95 px-3 py-1.5 shadow-[0_2px_10px_rgba(16,24,40,0.08)] backdrop-blur">
+        <div role="status" className="sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface/95 px-4 shadow-card backdrop-blur">
           <span className="size-2.5 shrink-0 rounded-full bg-mark-warn" aria-hidden="true" />
-          <span className="text-[13px] leading-tight font-extrabold text-warn">
+          <span className="text-[14px] leading-tight font-semibold text-warn">
             {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} à régler
           </span>
         </div>
       ) : null}
       <header className="mb-3 flex flex-col gap-0.5">
-        <h2 className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.01em]">Ton chantier</h2>
-        <p className="text-[13px] text-muted">C&apos;est ce que reçoit le fournisseur.</p>
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="text-[24px] leading-tight font-extrabold tracking-[-0.02em]">Ton chantier</h2>
+          <AideBouton sujet="quantitatif" />
+        </div>
+        <p className="text-[14px] text-muted">C&apos;est ce que reçoit le négoce.</p>
         {/* §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan le dit, ici et dans le PDF. */}
         {takeoff.ratiosEnValidation ? (
-          <p className="mt-1 self-start rounded-full bg-warn/10 px-2.5 py-1 text-[12px] font-extrabold text-warn">Ratios en cours de validation</p>
+          <p className="mt-2 self-start rounded-full bg-warn-bg px-3 py-1 text-[12px] font-semibold text-warn">Ratios en cours de validation</p>
         ) : null}
+        {/* Lecture lot par lot (décision du fondateur, 24 octobre 2026) : une partie non lue est dite, les autres restent. */}
+        {(takeoff.lotsNonLus ?? []).map((phrase) => (
+          <p key={phrase} role="status" className="mt-2 rounded-2xl bg-warn-bg px-3 py-2 text-[14px] font-semibold text-warn">
+            {phrase}
+          </p>
+        ))}
       </header>
       {takeoff.bref && takeoff.bref.length > 0 ? (
         <Brief takeoff={takeoff} editable={editable && Boolean(onBrief)} pending={pending} onBrief={onBrief} />
@@ -155,7 +192,7 @@ export function SupplyList({
           négoce, puis une autre partie à un autre ». Un vrai bouton à côté du titre, visible sans descendre ; en sélection,
           une phrase dit quoi faire et « Tout cocher » / « Tout décocher » règle la liste d'un geste. */}
       <div className="mb-1 flex min-h-10 items-center justify-between gap-2">
-        <h3 className="text-[13px] font-extrabold text-muted">Fournitures</h3>
+        <h3 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">Fournitures</h3>
         {selecting ? (
           <button
             type="button"
@@ -165,29 +202,66 @@ export function SupplyList({
             {allChecked ? "Tout décocher" : "Tout cocher"}
           </button>
         ) : editable && selection && rows.length > 1 ? (
-          <button
-            type="button"
-            onClick={startSelecting}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-accent/10 px-3.5 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
-          >
-            <ListChecks size={16} aria-hidden="true" />
-            Envoyer une partie
-          </button>
+          <span className="flex flex-wrap justify-end gap-1.5">
+            {selection && rows.length > 1 ? (
+              <button
+                type="button"
+                onClick={startSelecting}
+                className="pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[14px] font-semibold text-ink active:bg-ground"
+              >
+                <ListChecks size={16} aria-hidden="true" />
+                Envoyer une partie
+              </button>
+            ) : null}
+          </span>
         ) : null}
       </div>
+      {/* BatiClair Groupé (demande du fondateur, 2026-10-20) : « Proposer au groupé » mis en avant, un bloc visible en haut, pas
+          une ligne discrète. Seulement quand le groupé est ouvert à l'entreprise, et hors sélection. */}
+      {!groupe && groupeFerme && editable && !selecting ? (
+        <section aria-label={`${NOM} fermée`} className="mb-3 flex flex-col gap-2 rounded-xl border border-dashed border-line bg-ground p-4 opacity-80">
+          <p className="flex items-center gap-2 text-[15px] font-extrabold text-muted">
+            <Users size={18} aria-hidden="true" />
+            {`Renseigne ton SIRET pour rejoindre la ${nom}`}
+          </p>
+          <p className="text-[14px] leading-snug text-muted">Un seul négoce, un seul prix, avec les autres artisans du département.</p>
+          <ButtonLink href="/groupe" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
+            {NOM}
+          </ButtonLink>
+        </section>
+      ) : null}
+      {/* La commande commune du mois (Greg, 22 octobre 2026) : un bloc, le chrono, et « Ajouter à la commande d'octobre ». */}
+      {groupe && groupe.mode === "mois" && editable && !selecting ? (
+        <CommandeDuMoisBloc etat={groupe.mois} onAjouter={startGroupe} message={messageMois} />
+      ) : null}
+      {groupe && groupe.mode === "lots" && editable && !selecting ? (
+        <section aria-label={`Ajouter à la ${nom}`} className="mb-3 flex flex-col gap-2 rounded-xl bg-surface p-4 shadow-card">
+          <p className="flex items-center gap-2 text-[15px] font-extrabold">
+            <Users size={18} aria-hidden="true" className="text-accent-text" />
+            {`${NOM} : un seul négoce, un seul prix`}
+          </p>
+          <p className="text-[14px] leading-snug text-muted">Tes commandes regroupées avec les autres artisans du département. Tu commandes sur ton compte, tu es livré sur ton chantier.</p>
+          <Button variant="secondary" className="self-start" onClick={startGroupe}>
+            {`Ajouter à la ${nom}`}
+          </Button>
+        </section>
+      ) : null}
       {/* §49, §50 (retour du fondateur, 2026-10-12) : la légende des repères, sous le titre. */}
       {/* Retour du fondateur (2026-10-12) : « mets des cases à cocher à chaque ligne pour pouvoir valider ». La case cochée
           verte : prête à commander ; la case vide orange : à valider (un tap la coche, ou ouvre la question qui reste). */}
-      <p className="mb-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] font-semibold text-muted">
+      <p className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted">
         <span className="inline-flex items-center gap-1.5">
           <Box checked /> Prêt à commander
         </span>
-        <span aria-hidden="true">·</span>
         <span className="inline-flex items-center gap-1.5">
           <Box checked={false} /> À préciser : coche pour valider
         </span>
       </p>
-      {selecting ? <p className="mb-2 text-[14px] leading-snug font-bold text-ink">Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre.</p> : null}
+      {selecting ? (
+        <p className="mb-2 text-[14px] leading-snug font-bold text-ink">
+          {pourGroupe && groupe?.mode === "mois" ? "Coche ce que tu ajoutes à la commande. Mets seulement ce que tu es sûr de commander." : pourGroupe ? `Coche ce que tu ajoutes à la ${nom}. Ton nom ne part pas avec.` : "Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre."}
+        </p>
+      ) : null}
       {sections.map((section) => (
       <div key={section.key} className={section.label ? "mt-3 first:mt-0" : ""}>
       {section.label ? (
@@ -197,10 +271,10 @@ export function SupplyList({
           {selecting ? (
             <button
               type="button"
-              onClick={() => setChecked(new Set(section.rows.filter((r) => r.status !== "check" && articleOf(r) && !selection?.sent.has(articleOf(r)!)).map((r) => articleOf(r)!)))}
-              className="inline-flex min-h-10 items-center rounded-full bg-accent/10 px-3 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
+              onClick={() => setChecked(new Set(section.rows.filter(cochable).map((r) => articleOf(r)!)))}
+              className="pressable inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-3 text-[13px] font-semibold text-ink active:bg-ground"
             >
-              Cocher ce lot
+              Cocher cette partie
             </button>
           ) : (
             <span className="text-[13px] font-bold text-muted">
@@ -209,7 +283,7 @@ export function SupplyList({
           )}
         </h4>
       ) : null}
-      <ul aria-label={section.label ? `Fournitures · ${section.label}` : "Fournitures"} className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface">
+      <ul aria-label={section.label ? `Fournitures · ${section.label}` : "Fournitures"} className="flex flex-col gap-2">
         {section.rows.map((r) => (
           <Row
             key={r.key}
@@ -218,8 +292,11 @@ export function SupplyList({
               ? {
                   selectMode: {
                     checked: checked.has(articleOf(r) ?? ""),
-                    // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas.
-                    disabled: !articleOf(r) || r.status === "check",
+                    // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas ; au groupé, une
+                    // ligne déjà proposée non plus (une ligne déjà envoyée à part reste décochée, pas grisée).
+                    disabled: !articleOf(r) || r.status === "check" || (pourGroupe && !cochable(r)),
+                    ...(pourGroupe && vagueRow(r) ? { note: takeoff.phrasePrecision ?? "à préciser d'abord" } : {}),
+                    ...(pourGroupe ? { label: groupe?.mode === "mois" ? "Ajouter à la commande" : `Ajouter à la ${nom}` } : {}),
                     onToggle: () =>
                       setChecked((prev) => {
                         const next = new Set(prev);
@@ -248,6 +325,18 @@ export function SupplyList({
       </ul>
       </div>
       ))}
+      {/* Nouveau cap (22 octobre) : un gros « + Ajouter » sous les cartes (avant : un petit lien sous l'envoi). */}
+      {editable && onAdd && !selecting ? (
+        <button
+          type="button"
+          onClick={onAdd}
+          aria-label="Ajouter un article"
+          className="pressable mt-2 flex min-h-13 w-full items-center justify-center gap-2 rounded-full border border-line bg-surface text-[16px] font-semibold text-ink active:bg-ground"
+        >
+          <Plus size={22} strokeWidth={2.6} aria-hidden="true" />
+          Ajouter
+        </button>
+      ) : null}
       {/* §49.9 : les lignes du devis sans fourniture (heures, forfait, évacuation) ne sont pas dans la liste et ne partent
           jamais ; repliées, fermées par défaut, pour que l'artisan voie qu'elles ont été lues. */}
       {takeoff.sansFourniture && takeoff.sansFourniture.length > 0 ? (
@@ -270,7 +359,7 @@ export function SupplyList({
       {/* Retour du fondateur (2026-10-10) : « il pourra envoyer le reste de la fourniture vers un autre fournisseur ». Dès
           qu'une part est partie, la liste dit la répartition et propose le reste, déjà coché, à un autre fournisseur. */}
       {selection && selection.parts.length > 0 && !selecting ? (
-        <section aria-label="Commande répartie" className="mt-3 flex flex-col gap-2 rounded-[20px] bg-surface p-3 shadow-card">
+        <section aria-label="Commande répartie" className="mt-3 flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
           <h3 className="text-[13px] font-extrabold text-muted">Commande répartie</h3>
           <ul className="flex flex-col gap-1">
             {selection.parts.map((p) => (
@@ -298,12 +387,41 @@ export function SupplyList({
 
       {/* §50.3 : en bas, l'aperçu et l'envoi ; dessous, en petit, les autres gestes. Seuls les deux boutons restent collés en
           bas ; les liens suivent la liste, jamais par-dessus. */}
-      {selecting && selection ? (
-        <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
+      {groupe && !selecting ? groupe.mode === "mois" ? <MesLignesDuMois groupe={groupe} /> : <GroupeSection groupe={groupe} /> : null}
+      {selecting && pourGroupe && groupe && groupe.mode === "mois" ? (
+        <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
+          <CommandeDuMoisBar
+            count={checked.size}
+            de={groupe.mois?.prochaine?.de ?? "en cours"}
+            phrase={groupe.mois?.phrases.sansEngagement ?? ""}
+            onCancel={stopSelecting}
+            onAdresse={groupe.adresse}
+            onDeposer={async (nature) => {
+              setMessageMois(await groupe.deposer([...checked], nature));
+              stopSelecting();
+              setChecked(new Set());
+            }}
+          />
+        </div>
+      ) : selecting && pourGroupe && groupe ? (
+        <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
+          <GroupeBar
+            count={checked.size}
+            onCancel={stopSelecting}
+            onAdresse={groupe.adresse}
+            onPropose={async (fenetre, statut, engagement) => {
+              await groupe.proposer([...checked], fenetre, statut, engagement);
+              stopSelecting();
+              setChecked(new Set());
+            }}
+          />
+        </div>
+      ) : selecting && selection ? (
+        <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <SelectionBar
             count={checked.size}
             alreadyServed={selection.parts.map((p) => p.supplierId)}
-            onCancel={() => setSelecting(false)}
+            onCancel={stopSelecting}
             onSend={async (supplierIds) => {
               await selection.send([...checked], supplierIds);
               setSelecting(false);
@@ -321,7 +439,7 @@ export function SupplyList({
             <div
               role="group"
               aria-label="Envoyer la liste"
-              className={`sticky z-10 mt-2 flex flex-wrap gap-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}
+              className={`sticky z-10 mt-2 flex flex-wrap gap-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}
             >
               {onPreview ? (
                 <Button variant="secondary" className="shrink-0 px-3.5 text-[15px]" onClick={onPreview}>
@@ -346,7 +464,7 @@ export function SupplyList({
                 >
                   {/* Sur un iPhone étroit, l'icône cède sa place pour que le texte tienne sur une ligne. */}
                   <Send size={18} aria-hidden="true" className="hidden min-[400px]:block" />
-                  Envoyer au fournisseur
+                  Envoyer aux négoces
                 </Button>
               )}
               {blocked && toCheck.length > 0 && !sent ? (
@@ -356,15 +474,7 @@ export function SupplyList({
               ) : null}
             </div>
           ) : null}
-          {editable ? (
-            <nav aria-label="Autres gestes sur la liste" className="mt-1 flex flex-wrap justify-center gap-x-4 pb-2">
-              {onAdd ? (
-                <button type="button" onClick={onAdd} className={link}>
-                  Ajouter un article
-                </button>
-              ) : null}
-            </nav>
-          ) : null}
+
         </>
       )}
     </section>
@@ -495,7 +605,7 @@ function Brief({ takeoff, editable, pending, onBrief }: { takeoff: Takeoff; edit
           </button>
         ) : null}
       </div>
-      <div className="rounded-[20px] border border-[#dde1e8] bg-surface px-4 py-3.5">
+      <div className="rounded-xl border border-line bg-surface px-4 py-4">
         <p className="text-[15px] leading-relaxed text-ink">{texte}</p>
         {editing ? (
           <div className="mt-3 flex flex-col gap-2 border-t border-line pt-2">
@@ -570,7 +680,7 @@ function Row({
 }: {
   error?: ApiError | null;
   /** §48.5 : mode sélection, une case à cocher à la place du point ; toucher la ligne la coche. */
-  selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void };
+  selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void; /** Ce que la case fait (« Proposer au groupé »), « Envoyer à part » sinon. */ label?: string; /** Pourquoi la case est grisée. */ note?: string };
   /** §48.5 : déjà envoyée à part (« Envoyé · fournisseur »), toujours visible dans la liste. */
   sentTo?: string;
   row: ScreenRow;
@@ -608,8 +718,11 @@ function Row({
   const lines = row.lineIds.map((id) => takeoff.lines.find((l) => l.id === id)).filter((l): l is Takeoff["lines"][number] => Boolean(l));
   const raw = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
   const quantity = raw ? enMetres(raw) : null;
-  const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : null;
-  const dot = sentTo ? DOT.supplier : DOT[row.status];
+  // Nouveau cap (22 octobre) : une ligne prête mais vague (sans format, origine, choix ou marque) a sa pastille orange et
+  // « Précise pour trouver d'autres couvreurs » ; ses questions en boutons. Elle part quand même chez le négoce.
+  const vague = !sentTo && editable && row.status !== "check" && (item?.aPreciserPourGroupe?.length ?? 0) > 0;
+  const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : vague ? (takeoff.phrasePrecision ?? "Précise pour trouver d'autres couvreurs") : null;
+  const dot = sentTo ? DOT.supplier : vague ? { ok: false, label: "à préciser" } : DOT[row.status];
   const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
   const stepper = editable && !sentTo && item && parsed && Number.isFinite(toNumber(parsed.quantity)) ? { value: toNumber(parsed.quantity), unit: parsed.unit } : null;
   const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
@@ -637,6 +750,13 @@ function Row({
     if (dx < -90) onSetAside();
     setDx(0);
   };
+  // La réponse à une question de précision s'écrit dans la désignation (« Ardoise naturelle » → « … 32×22 »).
+  const preciser = async (cle: string, valeur: string) => {
+    const v = valeur.trim();
+    if (!item || !v) return;
+    const dit = cle === "developpe" && /^\d+$/.test(v) ? `dév. ${v}` : v;
+    await onEdit(item, { libelle: `${item.label.trim()} ${dit}`, quantite: parsed?.quantity ?? null, unite: parsed?.unit ?? null });
+  };
   const rename = async (name: string) => {
     if (item) await onEdit(item, { libelle: name, quantite: parsed?.quantity ?? null, unite: parsed?.unit ?? null });
     else if (nameLine) await handlers.onSaveLine(nameLine.id, { designation: name, quantity: nameLine.quantity, unit: nameLine.unit, reference: nameLine.reference });
@@ -662,21 +782,21 @@ function Row({
   // §48.5 : en mode sélection, la ligne entière coche sa case ; rien d'autre ne s'ouvre.
   if (selectMode) {
     return (
-      <li id={`ligne-${row.key}`} className={`px-3 py-2 ${selectMode.checked ? "bg-accent/5" : ""} ${selectMode.disabled ? "opacity-60" : ""}`}>
+      <li id={`ligne-${row.key}`} className={`rounded-xl border border-[#dde1e8] px-3 py-2 ${selectMode.checked ? "bg-accent/5" : "bg-surface"} ${selectMode.disabled ? "opacity-60" : ""}`}>
         <label className={`flex min-h-11 items-start gap-2.5 ${selectMode.disabled ? "" : "cursor-pointer"}`}>
           <input
             type="checkbox"
             checked={selectMode.checked}
             disabled={selectMode.disabled}
             onChange={selectMode.onToggle}
-            aria-label={`Envoyer à part : ${label}`}
+            aria-label={`${selectMode.label ?? "Envoyer à part"} : ${label}`}
             className="mt-0.5 size-5 shrink-0 accent-accent"
           />
           <span className="flex min-w-0 grow flex-col">
             <span className="text-[14px] leading-snug font-semibold">{label}</span>
             <span className="text-[13px] leading-snug text-muted">
               {quantity ? <span className="font-extrabold text-ink tabular-nums">{quantity}</span> : null}
-              {row.status === "check" ? `${quantity ? " · " : ""}à vérifier d'abord` : sentTo ? `${quantity ? " · " : ""}Envoyé · ${sentTo}` : ""}
+              {row.status === "check" ? `${quantity ? " · " : ""}à vérifier d'abord` : selectMode.note ? `${quantity ? " · " : ""}${selectMode.note}` : sentTo ? `${quantity ? " · " : ""}Envoyé · ${sentTo}` : ""}
             </span>
           </span>
         </label>
@@ -686,8 +806,8 @@ function Row({
   return (
     <li
       id={`ligne-${row.key}`}
-      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden px-3 py-1.5 transition-[background-color,box-shadow,border-radius] duration-200 ${
-        open ? "z-[51] rounded-[20px] bg-surface shadow-[0_24px_60px_-12px_rgba(16,24,40,0.45)] ring-1 ring-black/5" : ""
+      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-xl border border-line bg-surface px-3 py-2 transition-[background-color,box-shadow] duration-200 ${
+        open ? "z-[51] shadow-[0_24px_60px_-12px_rgba(16,24,40,0.45)]" : ""
       }`}
     >
       {/* Retour du fondateur (2026-10-11) : la ligne ouverte passe au premier plan, le reste est flouté derrière ; un tap sur le
@@ -766,7 +886,7 @@ function Row({
                 setOpen(!open);
               }}
               aria-label={`${open ? "Fermer la ligne" : "Modifier la ligne"} : ${label}`}
-              className={`flex size-11 shrink-0 items-center justify-center rounded-full active:bg-ground ${open ? "bg-surface text-ink shadow-card" : "text-muted"}`}
+              className={`pressable flex size-11 shrink-0 items-center justify-center rounded-full active:bg-ground ${open ? "border border-line bg-surface text-ink" : "text-muted"}`}
             >
               {open ? <X size={20} aria-hidden="true" /> : <Pencil size={18} aria-hidden="true" />}
             </button>
@@ -781,6 +901,7 @@ function Row({
           {error ? <ErrorNotice error={error} /> : null}
           {/* §51.6 (retour du fondateur, 2026-10-12) : une ligne orange se règle là où on l'ouvre : sa question d'abord. */}
           {row.status === "check" ? <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} /> : null}
+          {vague && item ? <PrecisionActions label={label} questions={item.aPreciserPourGroupe ?? []} pending={pending} onAnswer={preciser} /> : null}
           {renamable ? (
             naming ? (
               <InlineText label={`Nom : ${label}`} value={item?.label ?? nameLine?.article ?? nameLine?.designation ?? label} pending={pending} onCancel={() => setNaming(false)} onSave={rename} />
@@ -869,7 +990,7 @@ const AI_ADDITION = "ia-ajout:";
 
 /** Une quantité tapée par l'artisan, au format du serveur (« 1 234,5 » → « 1234.5 »). */
 const plainNumber = (q: string) => q.replace(/[\s  ]/g, "").replace(",", ".");
-const OPTION = "inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-line bg-surface px-3 text-[14px] font-extrabold transition active:scale-[0.97] active:border-accent active:bg-accent/10 disabled:opacity-60";
+const OPTION = "pressable inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-surface px-4 text-[14px] font-semibold active:border-accent active:bg-accent/10 disabled:opacity-60";
 
 /**
  * §49.8 : CE QUI RÈGLE UNE LIGNE ORANGE, DANS SA CARTE. Un geste, jamais un autre écran : les choix en boutons (un tap,
@@ -941,7 +1062,7 @@ function CardActions({
                 onChange={(e) => setOther(e.target.value)}
                 placeholder="Écris ta réponse"
                 {...(a.unit ? { inputMode: "decimal" as const } : {})}
-                className="min-h-11 w-full min-w-0 rounded-xl border-2 border-line bg-surface px-3 text-[15px] outline-none focus:border-accent"
+                className="min-h-12 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-[16px] outline-none focus:border-accent"
               />
               <Button type="submit" className="shrink-0" pending={pending}>
                 OK
@@ -962,7 +1083,7 @@ function CardActions({
           <label htmlFor={id} className="sr-only">
             {d.text}
           </label>
-          <span className="flex min-w-0 grow items-center gap-1 rounded-xl border-2 border-line bg-surface px-3 focus-within:border-accent">
+          <span className="flex min-w-0 grow items-center gap-1 rounded-xl border border-line bg-surface px-3 focus-within:border-accent">
             <input id={id} inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} className="min-h-10 w-full min-w-0 bg-transparent text-[15px] font-extrabold outline-none" />
             {q.unit && q.unit !== "u" ? <span className="text-[13px] font-bold text-muted">{q.unit === "m2" ? "m²" : q.unit}</span> : null}
           </span>
@@ -1020,6 +1141,61 @@ function CardActions({
         {/* §49.8 : les choix en boutons dans la carte, puis « C'est bon » ; plus de gros bouton « Corriger » : la ligne se
             réécrit d'un tap sur son nom. */}
       </div>
+    </div>
+  );
+}
+
+/**
+ * NOUVEAU CAP (22 octobre 2026) : « Ligne vague → question en boutons (format, origine, choix, marque). » Chaque donnée qui
+ * manque, ses boutons et « Autre » ; la réponse s'écrit dans la désignation, la question suivante vient ensuite.
+ */
+function PrecisionActions({ label, questions, pending, onAnswer }: { label: string; questions: readonly { cle: string; question: string; options: string[] }[]; pending: boolean; onAnswer: (cle: string, valeur: string) => Promise<void> }) {
+  const [written, setWritten] = useState<string | null>(null);
+  const [other, setOther] = useState("");
+  return (
+    <div role="group" aria-label={`Préciser : ${label}`} aria-busy={pending || undefined} className="flex flex-col gap-3">
+      {questions.map((q) => (
+        <div key={q.cle} role="group" aria-label={q.question} className="flex flex-col gap-1.5">
+          <p className="text-[15px] leading-snug font-extrabold">{q.question}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {q.options.map((o) => (
+              <button key={o} type="button" disabled={pending} onClick={() => void onAnswer(q.cle, o)} className={`${OPTION} grow`}>
+                {o}
+              </button>
+            ))}
+            {written === q.cle ? null : (
+              <button type="button" disabled={pending} onClick={() => setWritten(q.cle)} className={`${OPTION} grow border-dashed`}>
+                Autre
+              </button>
+            )}
+          </div>
+          {written === q.cle ? (
+            <form
+              className="flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (other.trim()) void onAnswer(q.cle, other).then(() => {
+                  setWritten(null);
+                  setOther("");
+                });
+              }}
+            >
+              <input
+                aria-label={`Autre : ${q.question}`}
+                autoFocus
+                value={other}
+                maxLength={120}
+                onChange={(e) => setOther(e.target.value)}
+                placeholder="Écris ta réponse"
+                className="min-h-12 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-[16px] outline-none focus:border-accent"
+              />
+              <Button type="submit" className="shrink-0" pending={pending}>
+                OK
+              </Button>
+            </form>
+          ) : null}
+        </div>
+      ))}
     </div>
   );
 }

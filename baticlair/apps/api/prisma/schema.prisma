@@ -33,6 +33,9 @@ model User {
   /// §43.4 : nombre de fois où l'activation des notifications a été proposée (1er envoi, puis 3e), et activation.
   notificationsPromptCount Int       @default(0)
   notificationsEnabledAt   DateTime?
+  /// Bloc 6 du plan du 20 octobre : la case « J'accepte les CGU » à la création du compte (date et version acceptée).
+  cguAccepteLe             DateTime?
+  cguVersion               String?
 
   sessions          Session[]
   accounts          Account[]
@@ -139,8 +142,13 @@ model Company {
   /// §45.3 : coordonnées de l'en-tête de la demande de devis et de la signature du mail (§45.2). Jamais saisies à l'envoi.
   address              String?
   siret                String?
+  /// BatiClair Groupé (section 5) : le SIRET vérifié auprès de l'INSEE ; sans lui, pas d'accès au groupé.
+  siretVerifieLe       DateTime?
   phone                String?
   contactEmail         String?
+  /// RGPD (24 octobre 2026) : l'artisan a coupé les e-mails de notification (lien « Ne plus recevoir ces e-mails ») ; les
+  /// e-mails indispensables (compte, bons de commande) partent toujours.
+  emailsCoupesLe       DateTime?
   /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
   logo                 Bytes?
   logoType             String?
@@ -163,6 +171,12 @@ model Company {
   uploadParts       UploadPart[]
   quantitatifs      Quantitatif[]
   ruleConfirmations RuleConfirmation[]
+  besoins           Besoin[]
+  choixDuMois       ChoixArtisan[]
+  commandesGaranties CommandeGarantie[]
+  negocesAjoutes    Negoce[]            @relation("NegoceAjoutePar")
+  negoces           NegoceArtisan[]
+  desistements      Desistement[]
 
   @@map("company")
 }
@@ -218,6 +232,7 @@ model Project {
   priceRequests PriceRequest[]
 
   quantitatifs Quantitatif[]
+  besoins      Besoin[]
 
   @@index([companyId, status, lastActivityAt(sort: Desc), id(sort: Desc)])
   // Index de recherche plein texte sans accents (pg_trgm + unaccent) :
@@ -907,4 +922,593 @@ model UploadPart {
   @@id([uploadId, index])
   @@index([createdAt])
   @@map("upload_part")
+}
+
+// ---------------------------------------------------------------------------
+// BatiClair Groupé (document du fondateur, 2026-10-19, §1 à §6) : les besoins FERMES de plusieurs artisans d'une même
+// zone regroupés pour un prix de volume chez UN négoce par lot ; chacun commande sur son propre compte. BatiClair
+// n'encaisse rien et ne prend aucune commission. Tout est derrière le drapeau `GROUPE` (désactivé par défaut).
+// Règles des statuts, de la clé de référence et de la zone : `packages/domain/src/groupe/groupe.ts`.
+// ---------------------------------------------------------------------------
+
+/// Un besoin proposé au groupé (§2 étape 2) : UNE ligne de la liste d'achats d'un devis lu par l'app, jamais une
+/// saisie libre (§5). Il part sans le nom de l'artisan.
+model Besoin {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  companyId        String    @db.Uuid
+  projectId        String    @db.Uuid
+  takeoffId        String    @db.Uuid
+  /// La clé de la ligne dans la liste d'achats (`purchase.toBuy[].key`).
+  articleKey       String
+  /// La désignation de la ligne, telle que la liste l'a donnée.
+  designation      String
+  /// Clé de référence normalisée (`cleDeReference`) : deux besoins ne se groupent que sur une clé identique.
+  cle              String
+  /// couverture | charpente | maconnerie | electricite | plomberie | amenagement_exterieur
+  famille          String
+  quantite         Decimal   @db.Decimal(14, 3)
+  unite            String
+  /// Le département du chantier (`zoneDuCodePostal`).
+  zone             String
+  /// Adresse de livraison (le chantier), donnée au négoce sans nom de client (§5).
+  adresseLivraison String
+  fenetreTot       DateTime  @db.Date
+  fenetreTard      DateTime  @db.Date
+  /// en_attente | signe | retire | engage | commande | livre (`transitionBesoin`).
+  statut           String
+  lotId            String?   @db.Uuid
+  /// La commande commune du mois (Greg, 22 octobre 2026) : le cycle où ce besoin est déposé ; null pour l'ancien lot.
+  cycleId          String?   @db.Uuid
+  /// chantier (devis signé) | stock ; null pour l'ancien lot.
+  nature           String?
+  /// En cochant « Chantier signé », l'artisan s'engage à commander ces quantités au prix groupé (§2 étape 2).
+  signeLe          DateTime?
+  engageLe         DateTime?
+  retireLe         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  lot     LotGroupe?    @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  cycle   CycleCommande? @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  offre   OffreArtisan?
+
+  @@unique([takeoffId, articleKey])
+  @@index([cle, zone, statut])
+  @@index([companyId, createdAt])
+  @@index([cycleId])
+  @@map("besoin")
+}
+
+/// Un négoce de la base commune d'un département (§2 étape 3), alimentée par les artisans ; il n'a ni compte ni
+/// application. « Pas concerné » décoche une famille, « stop » le désinscrit (§5).
+model Negoce {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  nom         String
+  email       String
+  /// Le département servi.
+  departement String
+  /// Familles vendues (couverture, charpente, maconnerie, electricite, plomberie, amenagement_exterieur).
+  familles    String[]  @default([])
+  /// « Stop » : plus aucune demande.
+  stopLe      DateTime?
+  /// L'entreprise qui l'a ajouté à la base.
+  ajouteParId String?   @db.Uuid
+  /// « Mets ton négoce dans la boucle » (Greg, 23 octobre 2026) : le SIRET quand l'artisan l'a choisi dans Sirene ; dédoublonnage.
+  siret       String?
+  /// Espace négoce (23 octobre 2026) : le compte du négoce (un par SIRET ou e-mail) ; cette ligne est son abonnement au département.
+  compteId    String?   @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  ajoutePar      Company?        @relation("NegoceAjoutePar", fields: [ajouteParId], references: [id], onDelete: SetNull)
+  artisans       NegoceArtisan[]
+  reponses       ReponseNegoce[]
+  bons           BonCommande[]
+  lotsRetenus    LotGroupe[]     @relation("LotNegoceRetenu")
+  accordNegoces  AccordNegoce[]
+  factureNegoces FactureNegoce[]
+  grilles        GrilleNegoce[]
+  choisiPar      ChoixArtisan[]
+  compte         CompteNegoce?   @relation(fields: [compteId], references: [id], onDelete: SetNull)
+  commandesGaranties CommandeGarantie[]
+
+  @@unique([email, departement])
+  @@index([departement])
+  @@index([siret])
+  @@index([compteId])
+  @@map("negoce")
+}
+
+/// ESPACE NÉGOCE AUTONOME (Greg, 23 octobre 2026) : un compte par négoce (SIRET, sinon e-mail), créé par le négoce
+/// lui-même depuis son lien d'invitation, sans mot de passe (lien magique). Ses dépôts, ses paliers de livraison, les
+/// départements qu'il dessert (ses abonnements : une ligne `negoce` par département), ses conditions acceptées.
+model CompteNegoce {
+  id                     String    @id @default(uuid(7)) @db.Uuid
+  email                  String    @unique
+  siret                  String?   @unique
+  enseigne               String
+  telephone              String?
+  /// { gratuiteJusquaKm, paliers: [{ jusquaKm, prixHt }], maxKm } (`PaliersLivraison`).
+  livraison              Json?
+  /// Départements desservis (abonnés).
+  departements           String[]  @default([])
+  /// Le dernier lien d'invitation envoyé (valable 90 jours, régénéré à chaque ajout par un artisan).
+  invitationLe           DateTime?
+  /// E-mails de clôture envoyés sans compte créé (3 au plus).
+  rappels                Int       @default(0)
+  inscritLe              DateTime?
+  conditionsAccepteesLe  DateTime?
+  conditionsVersion      String?
+  derniereConnexionLe    DateTime?
+  desabonneLe            DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  depots      DepotNegoce[]
+  abonnements Negoce[]
+
+  @@map("compte_negoce")
+}
+
+/// Un dépôt (une boutique) du négoce : le prix livré se calcule depuis le dépôt le plus proche du chantier.
+model DepotNegoce {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  compteId    String   @db.Uuid
+  adresse     String
+  codePostal  String?
+  commune     String?
+  departement String?
+  lat         Float?
+  lon         Float?
+  createdAt   DateTime @default(now())
+
+  compte CompteNegoce @relation(fields: [compteId], references: [id], onDelete: Cascade)
+
+  @@index([compteId])
+  @@map("depot_negoce")
+}
+
+/// Une commande passée sur la GRILLE GARANTIE 30 jours (Greg, 23 octobre 2026) : l'artisan recommande au prix du
+/// négoce retenu, après les résultats, même s'il n'avait rien déposé.
+model CommandeGarantie {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  numero           Int      @unique @default(autoincrement())
+  cycleId          String   @db.Uuid
+  companyId        String   @db.Uuid
+  negoceId         String   @db.Uuid
+  adresseLivraison String
+  /// [{ cle, designation, quantite, unite, prixUnitaire }].
+  lignes           Json
+  marchandiseHt    Decimal  @db.Decimal(14, 2)
+  livraisonHt      Decimal  @db.Decimal(14, 2)
+  totalHt          Decimal  @db.Decimal(14, 2)
+  commandeLe       DateTime
+  createdAt        DateTime @default(now())
+
+  cycle   CycleCommande @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  negoce  Negoce        @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+
+  @@index([cycleId])
+  @@index([companyId])
+  @@map("commande_garantie")
+}
+
+/// Le lien d'un artisan à un négoce : son rang (le favori en premier, « favori de ») et son numéro de compte chez lui,
+/// repris au bon de commande (§2 étape 8 ; vide = « ouverture de compte demandée »).
+model NegoceArtisan {
+  companyId    String   @db.Uuid
+  negoceId     String   @db.Uuid
+  /// 1 = favori.
+  rang         Int      @default(1)
+  numeroCompte String?
+  createdAt    DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  negoce  Negoce  @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, negoceId])
+  @@map("negoce_artisan")
+}
+
+/// La base négoces préremplie (plan du 20 octobre, bloc 3) : les établissements actifs de l'API Sirene en négoce de
+/// matériaux (NAF 46.73A/B, 47.52A/B) dans les départements ouverts ; suggérés à la saisie dans « Mes négoces ».
+/// Jamais d'e-mail ici : l'artisan le donne, et le négoce ne reçoit rien sans lui.
+model NegoceSirene {
+  siret       String   @id
+  siren       String
+  nom         String
+  adresse     String
+  codePostal  String
+  commune     String
+  departement String
+  naf         String
+  importeLe   DateTime @default(now())
+
+  @@index([departement])
+  @@map("negoce_sirene")
+}
+
+/// Un réglage ou un état de travail du groupé (dette n° 1, 20 octobre 2026) : par exemple l'avancement de l'import Sirene,
+/// couple (département, NAF) par couple, pour reprendre page par page d'une tâche à l'autre.
+model ParametreGroupe {
+  cle        String   @id
+  valeur     Json
+  misAJourLe DateTime @updatedAt
+
+  @@map("parametre_groupe")
+}
+
+/// Un lot du groupé (§2 étape 4) : une référence, une famille, une zone, une fenêtre. Un seul lot ouvert par référence
+/// et par zone (§5).
+model LotGroupe {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  /// « tarif groupé lot n° … » (§2 étape 8).
+  numero         Int       @unique @default(autoincrement())
+  cle            String
+  famille        String
+  zone           String
+  fenetreTot     DateTime  @db.Date
+  fenetreTard    DateTime  @db.Date
+  /// ouvert | envoye | choisi | clos | annule
+  statut         String    @default("ouvert")
+  envoyeLe       DateTime?
+  clotureLe      DateTime?
+  negoceRetenuId String?   @db.Uuid
+  /// Prix unitaire retenu (HT), au volume ferme.
+  prixRetenu     Decimal?  @db.Decimal(14, 4)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  negoceRetenu Negoce?         @relation("LotNegoceRetenu", fields: [negoceRetenuId], references: [id], onDelete: SetNull)
+  besoins      Besoin[]
+  reponses     ReponseNegoce[]
+  offres       OffreArtisan[]
+  journal      JournalGroupe[]
+  accords      AccordNegoce[]
+  facture      FactureNegoce?
+  desistements Desistement[]
+
+  @@index([cle, zone, statut])
+  @@map("lot_groupe")
+}
+
+/// La réponse d'un négoce à un lot (§2 étapes 5 et 6) : un lien unique sans compte, un ou deux devis déposés (paliers de
+/// quantité), une phrase libre ; la lecture en tire les prix par référence et par palier et le délai.
+model ReponseNegoce {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  lotId            String    @db.Uuid
+  negoceId         String    @db.Uuid
+  /// Le jeton du lien `reponse/<jeton>` (haché, comme les clés API).
+  tokenHash        String    @unique
+  message          String?
+  /// [{ cle, palier, prixUnitaire }] tels que lus (HT).
+  prix             Json      @default("[]")
+  delaiJours       Int?
+  /// Nouveau cap (22 octobre) : [{ zone, prixHt }], un prix de livraison HT par zone du lot (commune d'un chantier), obligatoire au dépôt.
+  livraison        Json      @default("[]")
+  /// en_attente | lue | a_verifier | echec
+  statutExtraction String    @default("en_attente")
+  /// « Pas concerné » cliqué : la famille du lot est décochée chez ce négoce.
+  pasConcerneLe    DateTime?
+  deposeLe         DateTime?
+  createdAt        DateTime  @default(now())
+
+  lot      LotGroupe              @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  negoce   Negoce                 @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+  fichiers ReponseNegoceFichier[]
+
+  @@unique([lotId, negoceId])
+  @@map("reponse_negoce")
+}
+
+/// Un devis PDF déposé par un négoce (deux au plus par réponse).
+model ReponseNegoceFichier {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  reponseId String   @db.Uuid
+  nom       String
+  type      String
+  contenu   Bytes
+  createdAt DateTime @default(now())
+
+  reponse ReponseNegoce @relation(fields: [reponseId], references: [id], onDelete: Cascade)
+
+  @@map("reponse_negoce_fichier")
+}
+
+/// L'offre personnelle d'un artisan (§2 étape 7) : une information, pas une question ; jamais le nombre ni le nom des
+/// autres artisans.
+model OffreArtisan {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  lotId         String    @db.Uuid
+  besoinId      String    @unique @db.Uuid
+  prixUnitaire  Decimal   @db.Decimal(14, 4)
+  /// Prix de référence (catalogue du négoce ou dernier prix payé seul déclaré), pour le compteur, jamais facturé (§6).
+  prixReference Decimal?  @db.Decimal(14, 4)
+  economie      Decimal?  @db.Decimal(14, 2)
+  dateLivraison DateTime? @db.Date
+  envoyeeLe     DateTime?
+  problemeLe    DateTime?
+  probleme      String?
+  createdAt     DateTime  @default(now())
+
+  lot    LotGroupe    @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  besoin Besoin       @relation(fields: [besoinId], references: [id], onDelete: Cascade)
+  bon    BonCommande?
+
+  @@map("offre_artisan")
+}
+
+/// Le bon de commande d'un artisan, envoyé automatiquement au négoce retenu (§2 étape 8).
+model BonCommande {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  offreId   String    @unique @db.Uuid
+  negoceId  String    @db.Uuid
+  pdf       Bytes?
+  envoyeLe  DateTime?
+  createdAt DateTime  @default(now())
+
+  offre     OffreArtisan @relation(fields: [offreId], references: [id], onDelete: Cascade)
+  negoce    Negoce       @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+  livraison Livraison?
+
+  @@map("bon_commande")
+}
+
+/// La livraison d'un bon : « Livré » ou « Problème » d'un tap, relance à J+15 (§2 étape 8).
+model Livraison {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  bonId      String    @unique @db.Uuid
+  datePrevue DateTime? @db.Date
+  /// prevue | livre | probleme
+  statut     String    @default("prevue")
+  confirmeLe DateTime?
+  relanceLe  DateTime?
+  /// Étape 8 : « Livraison aujourd'hui. Tout est arrivé ? » envoyé le jour prévu, une fois.
+  prevenuLe  DateTime?
+  createdAt  DateTime  @default(now())
+
+  bon BonCommande @relation(fields: [bonId], references: [id], onDelete: Cascade)
+
+  @@map("livraison")
+}
+
+/// Le journal d'un lot (§5) : qui a proposé, engagé, choisi, confirmé, avec l'heure ; visible par Greg seul.
+model JournalGroupe {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  lotId     String   @db.Uuid
+  evenement String
+  details   Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  lot LotGroupe @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@index([lotId, createdAt])
+  @@map("journal_groupe")
+}
+
+/// L'accord du négoce (décision du fondateur, 2026-10-20) : avant de répondre à un lot, il accepte une commission de
+/// 2 % du montant HT du lot s'il est retenu (phrase en gras dans l'e-mail, case obligatoire sur la page de dépôt, contrat
+/// PDF à côté). Date, e-mail et adresse IP enregistrés ; sans accord, aucune réponse n'est prise en compte.
+model AccordNegoce {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  lotId          String   @db.Uuid
+  negoceId       String   @db.Uuid
+  /// La version du contrat acceptée (« 2026-10-20 »).
+  versionContrat String
+  /// Le taux accepté, en pour cent (2.00).
+  tauxPourcent   Decimal  @db.Decimal(5, 2)
+  email          String
+  adresseIp      String
+  accepteLe      DateTime @default(now())
+
+  lot    LotGroupe @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  negoce Negoce    @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+
+  facture FactureNegoce?
+
+  @@unique([lotId, negoceId])
+  @@map("accord_negoce")
+}
+
+/// Un désistement après bon de commande (section 4 c ; table à part, décision du fondateur, 2026-10-20) : l'artisan qui ne
+/// commande pas ou refuse la livraison. Premier sur 12 mois : avertissement ; deuxième : exclu du groupé 6 mois ; le
+/// négoce est prévenu et peut annuler la ligne.
+model Desistement {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  companyId    String    @db.Uuid
+  lotId        String    @db.Uuid
+  bonId        String    @db.Uuid
+  raison       String?
+  /// avertissement | exclusion
+  sanction     String
+  excluJusquau DateTime? @db.Date
+  createdAt    DateTime  @default(now())
+
+  company Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lot     LotGroupe @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt])
+  @@map("desistement")
+}
+
+/// La facture au négoce retenu (décision du fondateur, 2026-10-20) : émise automatiquement au bon de commande, 2 % du
+/// total HT du lot, à 30 jours, relance automatique.
+model FactureNegoce {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  lotId      String    @unique @db.Uuid
+  negoceId   String    @db.Uuid
+  accordId   String    @unique @db.Uuid
+  numero     Int       @unique @default(autoincrement())
+  /// Le total HT du lot (somme des bons de commande) et la commission qui en découle.
+  totalLotHt Decimal   @db.Decimal(14, 2)
+  montantHt  Decimal   @db.Decimal(14, 2)
+  pdf        Bytes?
+  emiseLe    DateTime  @default(now())
+  echeanceLe DateTime  @db.Date
+  envoyeeLe  DateTime?
+  relanceeLe DateTime?
+  payeeLe    DateTime?
+  /// emise | envoyee | relancee | payee | annulee
+  statut     String    @default("emise")
+
+  lot    LotGroupe    @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  negoce Negoce       @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+  accord AccordNegoce @relation(fields: [accordId], references: [id])
+
+  @@index([negoceId, statut])
+  @@map("facture_negoce")
+}
+
+/// LA COMMANDE COMMUNE DU MOIS (décision de Greg, 22 octobre 2026, au soir) : une par mois, par famille et par
+/// département. Inscriptions jusqu'à la clôture, puis la grille fusionnée part aux négoces, puis les résultats.
+/// Calculs : `packages/domain/src/groupe/commande-du-mois.ts`.
+model CycleCommande {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  numero       Int       @unique @default(autoincrement())
+  /// AAAA-MM : le mois de la clôture.
+  mois         String
+  famille      String
+  zone         String
+  clotureLe    DateTime
+  reponseAvant DateTime
+  relanceLe    DateTime
+  /// inscriptions | negoces | resultats
+  phase        String    @default("inscriptions")
+  closLe       DateTime?
+  resultatsLe  DateTime?
+  /// Le négoce premier sur le total à la publication (grille garantie 30 jours, Greg, 23 octobre 2026).
+  retenuId     String?   @db.Uuid
+  /// Fin de la garantie : résultats + 30 jours.
+  garantieJusquau DateTime?
+  /// La grille fusionnée à la clôture : [{ cle, designation, quantite, unite }].
+  lignes       Json      @default("[]")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  besoins Besoin[]
+  grilles GrilleNegoce[]
+  choix   ChoixArtisan[]
+  commandesGaranties CommandeGarantie[]
+
+  @@unique([mois, famille, zone])
+  @@index([phase])
+  @@map("cycle_commande")
+}
+
+/// La grille d'un négoce pour une commande du mois : un lien unique sans compte, un devis déposé (lu une fois), un prix
+/// unitaire HT par ligne (le même pour tous les artisans) et ses deux chiffres de livraison.
+model GrilleNegoce {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  cycleId          String    @db.Uuid
+  negoceId         String    @db.Uuid
+  tokenHash        String    @unique
+  /// { <clé de ligne> : prix unitaire HT }.
+  prix             Json      @default("{}")
+  /// { depots: [{ adresse, lat, lon }], paliers: PaliersLivraison, distances: { <companyId>: (km | null)[] } } (dépôt le plus proche de chaque chantier).
+  livraison        Json?
+  /// Les clés des articles au prix « non garanti » (matière cotée) : indicatifs, hors total et hors garantie.
+  nonGarantis      String[]  @default([])
+  /// en_attente | lue | a_verifier | echec
+  statutExtraction String    @default("en_attente")
+  deposeLe         DateTime?
+  relanceLe        DateTime?
+  /// Le message de fin (retenu ou neutre) envoyé.
+  resultatLe       DateTime?
+  createdAt        DateTime  @default(now())
+
+  cycle    CycleCommande        @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  negoce   Negoce               @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+  fichiers GrilleNegoceFichier[]
+
+  @@unique([cycleId, negoceId])
+  @@map("grille_negoce")
+}
+
+/// Un devis PDF déposé par un négoce pour sa grille (deux au plus).
+model GrilleNegoceFichier {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  grilleId  String   @db.Uuid
+  nom       String
+  type      String
+  contenu   Bytes
+  createdAt DateTime @default(now())
+
+  grille GrilleNegoce @relation(fields: [grilleId], references: [id], onDelete: Cascade)
+
+  @@map("grille_negoce_fichier")
+}
+
+/// Le choix d'un artisan dans les résultats du mois : le négoce (par défaut le premier sur le total), son prix livré, et
+/// « Commander » (le bon part au négoce). Sans engagement avant : il commande seulement si le prix lui plaît.
+model ChoixArtisan {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  cycleId     String    @db.Uuid
+  companyId   String    @db.Uuid
+  negoceId    String    @db.Uuid
+  totalHt     Decimal   @db.Decimal(14, 2)
+  livraisonHt Decimal   @db.Decimal(14, 2)
+  commandeLe  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  cycle   CycleCommande @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  negoce  Negoce        @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+
+  @@unique([cycleId, companyId])
+  @@map("choix_artisan")
+}
+
+/// RGPD, DROIT D'OPPOSITION (Greg, 24 octobre 2026) : un négoce (ou toute personne) qui demande à ne plus jamais être
+/// contacté. Gardé haché (SHA-256 de l'e-mail en minuscules, du SIRET sans espaces) : assez pour reconnaître le négoce
+/// quand un artisan le rajoute, rien de lisible. Toutes les invitations futures le respectent.
+model ExclusionContact {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  /// « email » | « siret »
+  sorte     String
+  empreinte String
+  /// opposition | suppression_compte
+  source    String
+  createdAt DateTime @default(now())
+
+  @@unique([sorte, empreinte])
+  @@map("exclusion_contact")
+}
+
+/// RGPD (24 octobre 2026) : une commande passée par un artisan, gardée 10 ans sans son nom quand son compte est supprimé
+/// (accès restreint, admin seulement). Le bon lui-même est parti au négoce, qui le garde dans sa comptabilité.
+model ArchiveCommande {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  /// cycle | garantie
+  sorte       String
+  mois        String
+  negoceNom   String
+  totalHt     Decimal  @db.Decimal(14, 2)
+  commandeLe  DateTime
+  /// L'empreinte de l'entreprise supprimée (SHA-256 de son identifiant) : relier deux commandes sans savoir qui.
+  artisan     String
+  archiveLe   DateTime @default(now())
+
+  @@index([archiveLe])
+  @@map("archive_commande")
+}
+
+/// RGPD (24 octobre 2026) : la preuve d'une acceptation (CGU artisan, conditions négoce), gardée 5 ans après la fin du
+/// compte : la version, la date, l'e-mail haché. Rien d'autre.
+model PreuveAcceptation {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  /// cgu | conditions_negoce
+  sorte       String
+  version     String
+  accepteLe   DateTime
+  /// SHA-256 de l'e-mail en minuscules.
+  email       String
+  finCompteLe DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([finCompteLe])
+  @@map("preuve_acceptation")
 }
