@@ -97,6 +97,11 @@ export interface LectureDevis {
   notes: string[];
   /** Lecture lot par lot (24 octobre 2026) : les lots dont la lecture a échoué, dits à l'artisan (`phraseLotNonLu`). */
   lotsNonLus?: { metier: string; libelle: string }[];
+  /**
+   * Lecture par tranches : les repères que le CODE a écartés exprès (un titre vide, une suite recollée à sa ligne). Tout
+   * autre repère d'une tranche absent des lignes rendues est une ligne oubliée par le modèle (§49.1).
+   */
+  ecartees?: string[];
 }
 
 const str = (v: unknown, max = 300): string | null => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null);

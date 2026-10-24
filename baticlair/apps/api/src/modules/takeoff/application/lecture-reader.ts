@@ -160,18 +160,22 @@ export const lignesWireSchema = z.object({
 type LigneTranche = z.infer<typeof lignesWireSchema>["lignes"][number];
 
 /** Les titres de section écartés, chaque suite recollée à la ligne qu'elle continue (sa quantité, ses fournitures s'il en manque). */
-export function titresEtSuites(lignes: readonly LigneTranche[]): LectureWire["lignes"] {
+export function titresEtSuites(lignes: readonly LigneTranche[], ecartees: string[] = []): LectureWire["lignes"] {
   const out: LectureWire["lignes"] = [];
   for (const l of lignes) {
     // Garde-fou (§49.1, un article écrit ne disparaît jamais ; vraie lecture du 24 octobre 2026 : 315 lignes pour 324) :
     // seul un titre SANS quantité NI fourniture est écarté, une suite avec sa propre quantité reste une ligne.
     const vide = !l.quantite.trim() && l.fournitures.length === 0;
-    if (l.role === "titre" && vide) continue;
+    if (l.role === "titre" && vide) {
+      ecartees.push(l.ref);
+      continue;
+    }
     const avant = out.at(-1);
     if (l.role === "suite" && avant && (!l.quantite.trim() || !avant.quantite.trim())) {
       avant.designation = `${avant.designation} ${l.designation}`.trim();
       if (!avant.quantite.trim() && l.quantite.trim()) Object.assign(avant, { quantite: l.quantite, unite: l.unite });
       if (avant.fournitures.length === 0) avant.fournitures = l.fournitures;
+      ecartees.push(l.ref);
       continue;
     }
     // Un titre ou une suite gardés (quantité ou fourniture) redeviennent une ligne ordinaire.
@@ -182,7 +186,11 @@ export function titresEtSuites(lignes: readonly LigneTranche[]): LectureWire["li
 /** La sortie de la synthèse : tout sauf les lignes. */
 export const syntheseWireSchema = lectureWireSchema.omit({ lignes: true });
 const VIDE = { metier: "", lots: [], fiche: [], bref: [], questions: [], lignes: [], contexte: [], notes: [] } satisfies LectureWire;
-export const decodeLignes = (wire: z.infer<typeof lignesWireSchema>): LectureDevis | null => decodeLecture({ ...VIDE, lignes: titresEtSuites(wire.lignes) });
+export const decodeLignes = (wire: z.infer<typeof lignesWireSchema>): LectureDevis | null => {
+  const ecartees: string[] = [];
+  const d = decodeLecture({ ...VIDE, lignes: titresEtSuites(wire.lignes, ecartees) });
+  return d ? { ...d, ecartees } : null;
+};
 export const decodeSynthese = (wire: z.infer<typeof syntheseWireSchema>): LectureDevis | null => decodeLecture({ ...wire, lignes: [] });
 
 const record = (list: { cle: string; valeur: string }[]) => Object.fromEntries(list.filter((x) => x.cle.trim() && x.valeur.trim()).map((x) => [x.cle.trim(), x.valeur.trim()]));

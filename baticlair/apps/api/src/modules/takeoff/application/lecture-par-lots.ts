@@ -6,6 +6,7 @@ import {
   donneesAttendues,
   exportPourLecture,
   fusionnerLectures,
+  ordreDesReperes,
   referentialFor,
   tradeProfile,
   tranchesDuDevis,
@@ -101,6 +102,7 @@ export async function lireLotParLot(
   await lancer(premieres);
   await lancer(requetes.flatMap((r, i) => (r.rang === 1 ? [] : [i])));
   requetes.forEach((r, i) => appels.push({ nom: r.nom, attempt: essais[i] ?? null }));
+  await rattraperLesOublis(lecteur, tranches, requetes, essais, appels);
   const lu = (i: number) => essais[i]?.status === "success" && essais[i]!.output;
   const lignes = fusionnerLectures(
     requetes.flatMap((r, i) => (lu(i) ? [{ ...r.lot, lecture: essais[i]!.output! }] : [])),
@@ -121,4 +123,63 @@ export async function lireLotParLot(
   appels.push({ nom: "synthèse", attempt: synthese });
   const lecture = synthese?.status === "success" && synthese.output ? avecSynthese(lignes, synthese.output) : lignes;
   return { lecture, appels, metier: lignes.lots[0]?.metier ?? metiers[0]!, dureeMs: Date.now() - debut };
+}
+
+/** Une ligne numérotée du devis (« [5:040] MANCHON … 25,000 U 4,50 112,50 ») par son repère. */
+const ligneDuTexte = (texte: string, ref: string) => texte.split("\n").find((l) => l.startsWith(`[${ref}]`)) ?? null;
+
+/**
+ * La désignation d'une ligne du devis telle qu'écrite, sans son repère ni les colonnes de chiffres de la fin (quantité,
+ * unité, prix) : jamais un prix dans la liste ni chez le négoce.
+ */
+export function designationTelleQuEcrite(ligne: string): string {
+  return ligne
+    .replace(/^\[\d+:\d+\]\s*/, "")
+    .replace(/^L\d+\s+/, "")
+    .replace(/(\s+(?:[\d\s]*\d[\d\s.,]*\s*(?:€|EUR|HT|TTC)?|u|U|ml|ML|m²|M2|m2|m|ens|ENS|ft|FT|fft|FFT|h|H|kg|KG|forfait|%))+\s*$/, "")
+    .trim();
+}
+
+/**
+ * AUCUNE LIGNE OUBLIÉE (§49.1 : un article écrit ne disparaît jamais ; 4e vraie lecture du 24 octobre 2026 : « MANCHON
+ * REGLABE LG 100MM HYGRO », ligne 281 de 7954, rendu par aucune tranche). Chaque repère d'une tranche lue doit revenir,
+ * sauf ceux que le code a écartés exprès (titre vide, suite recollée). Les oubliés repartent UNE fois au modèle, seuls
+ * (une petite tranche) ; ce qui manque encore entre tel qu'écrit, sans quantité inventée : la ligne reste à régler.
+ */
+async function rattraperLesOublis(
+  lecteur: LectureReader,
+  tranches: readonly { metier: string; refs: string[]; texte: string }[],
+  requetes: readonly { lot: { metier: string; libelle: string }; rang: number; request: LectureRequest }[],
+  essais: (ReadAttempt<LectureDevis> | null)[],
+  appels: AppelDeLecture[],
+): Promise<void> {
+  const oublis = (i: number, lecture: LectureDevis) => tranches[i]!.refs.filter((ref) => !lecture.lignes.some((l) => l.ref === ref) && !(lecture.ecartees ?? []).includes(ref));
+  const relances = essais.flatMap((e, i) => {
+    if (e?.status !== "success" || !e.output) return [];
+    const refs = oublis(i, e.output);
+    return refs.length > 0 ? [{ i, refs }] : [];
+  });
+  if (relances.length === 0) return;
+  const reponses = await Promise.all(
+    relances.map(({ i, refs }) => {
+      const texte = refs.map((ref) => ligneDuTexte(tranches[i]!.texte, ref)).filter((l): l is string => !!l).join("\n");
+      const r = requetes[i]!.request;
+      return lecteur.lire({ ...r, document: { numberedText: texte, imagePdf: null, imagePages: [] }, consigne: `${r.consigne ?? ""}\n- RATTRAPAGE : ces lignes ont été oubliées à la première lecture de la tranche ; rends-les TOUTES, une par repère.` });
+    }),
+  );
+  relances.forEach(({ i, refs }, k) => {
+    const r = reponses[k] ?? null;
+    appels.push({ nom: `${tranches[i]!.metier} : ${refs.length} ligne(s) oubliée(s), relues`, attempt: r });
+    const lecture = essais[i]!.output!;
+    const rendues = r?.status === "success" && r.output ? r.output.lignes.filter((l) => refs.includes(l.ref)) : [];
+    const ecartees = r?.status === "success" && r.output ? (r.output.ecartees ?? []).filter((x) => refs.includes(x)) : [];
+    const encore = refs.filter((ref) => !rendues.some((l) => l.ref === ref) && !ecartees.includes(ref));
+    const telles = encore.flatMap((ref) => {
+      const ligne = ligneDuTexte(tranches[i]!.texte, ref);
+      const designation = ligne ? designationTelleQuEcrite(ligne) : "";
+      if (!designation) return [];
+      return [{ ref, designation, quantite: null, unite: null, role: "fourniture" as const, fournitures: [{ nom: designation, quantite: null, unite: null, ouvrage: null, emplacement: null, donnees: {}, attend: [], aPreciser: [], precision: null }] }];
+    });
+    essais[i] = { ...essais[i]!, output: { ...lecture, lignes: [...lecture.lignes, ...rendues, ...telles].sort((a, b) => ordreDesReperes(a.ref, b.ref)), ecartees: [...(lecture.ecartees ?? []), ...ecartees] } };
+  });
 }

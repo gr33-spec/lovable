@@ -54,3 +54,18 @@ Sur le 7954 :
 - **Questions** : 13 au lieu de 8. La teinte est posée deux fois. **Corrigé** : une seule question par donnée, et les lignes sont rattachées à celle qui reste (`uneQuestionParDonnee`). Le reste est en plus : rangées des tableaux, type des différentiels, distance des appareils à la nourrice, appareils livrés avec siphon et flexibles.
 - **Bref** : complet, sauf deux formulations (« 10 coffrets » au lieu de « un coffret par logement », « évacuation PVC Ø100 »).
 - Ces deux corrections ne sont pas encore vérifiées par une vraie lecture.
+
+## Quatrième passage : titres gardés quand ils ont une quantité, une question par donnée (exécution 40117674843)
+
+| Devis | Temps | Coût | Contrôle |
+|---|---|---|---|
+| DE00000071 | 76 s | 0,36 $ | aucun écart (les 5 questions, « pour bac acier isolé » gardé) |
+| D.2026.105 | 24 s | 0,06 $ | aucun écart |
+| 7954 | 163 s (17 appels) | **1,25 $** | 9 écarts (au lieu de 18) |
+
+Sur le 7954 :
+- **Lignes** : 326 rendues, 21 sans fourniture. Les deux corrections du troisième passage tiennent : plus aucune vraie ligne écartée comme titre, et la teinte n'est plus posée qu'une fois. **Une seule ligne manque** : « MANCHON REGLABE LG 100MM HYGRO » (ligne 281, 25 u), que le modèle a fondue dans les entrées d'air (« 25 entrées d'air hygro 6/45 avec manchons »). **Corrigé après ce passage** : tout repère d'une tranche que le modèle ne rend pas (hors titres vides et suites recollées par le code) repart une fois, seul, au modèle ; s'il manque encore, la ligne entre telle qu'écrite, sans prix et sans quantité inventée (test `aucune-ligne-oubliee.test.ts`, qui échoue sans la correction).
+- **Les 3 questions ajoutées au résultat attendu sont posées** : la teinte de l'appareillage (une fois), la pose encastrée ou en saillie, les 10 alimentations de radiateur en trop.
+- **Questions** : 11 au lieu de 8. En plus, toutes sur la plomberie : répartition du PER 10×12 / 13×16, distance des appareils à la nourrice, appareils livrés avec bonde et flexibles, modèle de la paroi de douche. La gaine VMC est demandée en mètres au total sur les 10 logements (le résultat attendu dit « par logement ») et le bloc chambre / dégagement est bien demandé, avec d'autres mots : ce sont deux écarts de formulation du contrôle, pas des questions manquantes.
+- **Bref** : complet. Trois écarts de formulation seulement (« 10 coffrets de communication » au lieu de « un coffret par logement », « 4 receveurs + 6 receveurs » au lieu de « 10 douches », « évacuation PVC Ø100 »).
+- **Tableaux** : la composition des tableaux est posée en question (« C'est bon / Modifier ») ; le contrôle attend aussi une ligne de fourniture « disjoncteurs… » pour les deux lignes de tableau, que la lecture laisse à la question.
