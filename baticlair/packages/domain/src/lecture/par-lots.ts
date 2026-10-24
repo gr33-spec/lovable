@@ -160,6 +160,7 @@ export function consigneDeTranche(lot: { metier: string; libelle: string }, tous
     // Vraie lecture du 24 octobre 2026 (7954) : dans des tranches, « LAMPE SIMPLE 1 POINT LUMINEUX » revenait réécrit ; la
     // désignation est le texte de la ligne, jamais une reformulation (§49.1 : la liste suit le devis).
     "- « designation » : le texte de la ligne recopié tel quel, majuscules, abréviations et fautes comprises (prix retirés), jamais reformulé ni résumé ; le nom du comptoir va dans « fournitures ».",
+    "- Une ligne de texte qui n'est qu'un TITRE de section (un niveau, un logement, une pièce, un chapitre : ni quantité ni article, « R+1 », « N°4 TYPE T3 », « CUISINE ») : rends-la avec le rôle « titre ». Une ligne qui CONTINUE la désignation de la ligne précédente (description coupée sur deux lignes) : rôle « suite ». Le code écarte les titres et recolle les suites ; toute autre ligne garde son rôle habituel.",
     "- « attend » d'une fourniture : la clé de la donnée qui lui manque (clé du référentiel, sinon un nom court en minuscules), la même clé pour la même donnée d'une ligne à l'autre.",
     ...(entete.trim() ? [`EN-TÊTE DU DEVIS (pour le contexte : client, chantier, titres) :\n${entete}`] : []),
   ].join("\n");

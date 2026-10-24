@@ -147,11 +147,38 @@ export const lectureWireSchema = z.object({
 });
 export type LectureWire = z.infer<typeof lectureWireSchema>;
 /** La sortie d'une tranche : ses lignes seulement (rien d'autre à écrire, donc rien d'autre à payer). */
-export const lignesWireSchema = lectureWireSchema.pick({ lignes: true });
+const ligneWire = lectureWireSchema.shape.lignes.element;
+/**
+ * La sortie d'une tranche : ses lignes seulement. Décision du fondateur (24 octobre 2026, vraie lecture du 7954 : « R+1 »,
+ * « N°4 TYPE T3 », « DEGAGEMENT » rendus comme des lignes, la désignation du tableau coupée en morceaux) : le modèle dit
+ * d'une ligne de texte qu'elle est un TITRE de section (rôle « titre ») ou la SUITE de la désignation précédente (rôle
+ * « suite ») ; le code écarte les titres et recolle les suites (`titresEtSuites`), jamais un mot cherché dans la ligne.
+ */
+export const lignesWireSchema = z.object({
+  lignes: z.array(ligneWire.extend({ role: z.enum(["fourniture", "pose", "fourniture_et_pose", "hors_quantitatif", "titre", "suite"]) })),
+});
+type LigneTranche = z.infer<typeof lignesWireSchema>["lignes"][number];
+
+/** Les titres de section écartés, chaque suite recollée à la ligne qu'elle continue (sa quantité, ses fournitures s'il en manque). */
+export function titresEtSuites(lignes: readonly LigneTranche[]): LectureWire["lignes"] {
+  const out: LectureWire["lignes"] = [];
+  for (const l of lignes) {
+    if (l.role === "titre") continue;
+    const avant = out.at(-1);
+    if (l.role === "suite" && avant) {
+      avant.designation = `${avant.designation} ${l.designation}`.trim();
+      if (!avant.quantite.trim() && l.quantite.trim()) Object.assign(avant, { quantite: l.quantite, unite: l.unite });
+      if (avant.fournitures.length === 0) avant.fournitures = l.fournitures;
+      continue;
+    }
+    out.push({ ...l, role: l.role === "suite" ? "hors_quantitatif" : l.role });
+  }
+  return out;
+}
 /** La sortie de la synthèse : tout sauf les lignes. */
 export const syntheseWireSchema = lectureWireSchema.omit({ lignes: true });
 const VIDE = { metier: "", lots: [], fiche: [], bref: [], questions: [], lignes: [], contexte: [], notes: [] } satisfies LectureWire;
-export const decodeLignes = (wire: z.infer<typeof lignesWireSchema>): LectureDevis | null => decodeLecture({ ...VIDE, lignes: wire.lignes });
+export const decodeLignes = (wire: z.infer<typeof lignesWireSchema>): LectureDevis | null => decodeLecture({ ...VIDE, lignes: titresEtSuites(wire.lignes) });
 export const decodeSynthese = (wire: z.infer<typeof syntheseWireSchema>): LectureDevis | null => decodeLecture({ ...wire, lignes: [] });
 
 const record = (list: { cle: string; valeur: string }[]) => Object.fromEntries(list.filter((x) => x.cle.trim() && x.valeur.trim()).map((x) => [x.cle.trim(), x.valeur.trim()]));

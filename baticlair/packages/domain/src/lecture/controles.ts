@@ -60,12 +60,14 @@ const QUESTIONS_7954: readonly [string, (t: string) => boolean][] = [
   ["modèle des parois de douche « à définir »", (t) => /paroi/.test(t)],
   ["usage des 10 alimentations radiateur en plus des 49 appareils", (t) => /alimentation|radiateur/.test(t) && /59|49|10/.test(t)],
   ["logement de rattachement du bloc chambre / dégagement de la page 12", (t) => /(page 12|chambre|degagement)/.test(t) && /logement|rattach/.test(t)],
+  // Décision du fondateur (24 octobre 2026, vraie lecture) : la pose, encastrée ou en saillie, est une question utile.
+  ["pose encastrée ou en saillie", (t) => /encastre/.test(t) && /saillie/.test(t)],
 ];
 
 /**
  * §6 du référentiel électricité : « Aucune question sur une marque, un modèle ou une contenance écrits au devis. » La
  * composition des tableaux, elle, est une question (correction du fondateur, 2026-10-12 : §4, composition déduite,
- * ligne orange avec « C'est bon / Modifier » ; §51.6, tout orange a sa question) : sept questions.
+ * ligne orange avec « C'est bon / Modifier » ; §51.6, tout orange a sa question) ; plus la pose, encastrée ou en saillie (décision du fondateur, 24 octobre 2026) : huit questions.
  */
 const ECRIT_7954 = /\b(marque|hager|essensya|atoll|aldes|bahia|malicio|litres?|contenance|porcelanosa|ancoflash|rondo|grade|coffret|connecteur)\b/;
 
@@ -109,7 +111,9 @@ export function controleLecture7954(lecture: LectureDevis, devis: readonly Ligne
   for (const [label, test] of QUESTIONS_7954) if (!textes.some(test)) out.push(`Question absente : ${label}`);
   for (const [i, t] of textes.entries()) {
     const texte = lecture.questions[i]!.texte;
-    if (ECRIT_7954.test(t) && !QUESTIONS_7954[0]![1](t) && !QUESTIONS_7954[1]![1](t)) out.push(`Question sur une donnée écrite : ${texte}`);
+    // La teinte, la composition des tableaux et les alimentations en trop peuvent citer une marque écrite (« Essensya »,
+    // « Atoll ») : la question porte sur une donnée qui manque, pas sur la marque.
+    if (ECRIT_7954.test(t) && ![0, 1, 5].some((k) => QUESTIONS_7954[k]![1](t))) out.push(`Question sur une donnée écrite : ${texte}`);
   }
   return out;
 }

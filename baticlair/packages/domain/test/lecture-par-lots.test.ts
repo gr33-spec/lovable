@@ -98,6 +98,9 @@ describe("les tranches d'un gros lot", () => {
     const tranche = consigneDeTranche(lots[0]!, lots, 1, 2, "");
     expect(tranche).toMatch(/Rends SEULEMENT « lignes »/);
     expect(tranche).toMatch(/Ni fiche, ni bref, ni questions/);
+    // Vraie lecture du 24 octobre 2026 : les titres et les suites sont marqués par le modèle, écartés ou recollés par le code.
+    expect(tranche).toMatch(/rôle « titre »/);
+    expect(tranche).toMatch(/rôle « suite »/);
 
     const prise = (ref: string) => ({ ...ligne(ref, "PRISE DE COURANT 16A+T"), fournitures: [{ nom: "Prise 16 A", quantite: "1", unite: "u", ouvrage: "prise-16a", emplacement: null, donnees: {}, attend: ["teinte_appareillage"], aPreciser: [], precision: null }] });
     const lignes = lecture("electrical", [], { lignes: [prise("1:001"), prise("2:004")] });

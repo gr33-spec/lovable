@@ -12,14 +12,14 @@ export class AnthropicLectureReader implements LectureReader {
   readonly provider = "anthropic";
   private readonly reader: AnthropicDocumentReader;
   private readonly rapide: AnthropicDocumentReader | null;
-  /** Les tranches d'un gros devis (lignes seulement) : le modèle rapide, réflexion courte (décision du 24 octobre 2026). */
+  /** Les tranches d'un gros devis (lignes seulement) : le modèle rapide, réflexion moyenne (décisions du 24 octobre 2026). */
   private readonly tranches: AnthropicDocumentReader | null;
 
   /** `fastModel` : le modèle rapide du repérage des métiers (texte seul, quelques secondes). */
   constructor(apiKey: string, model: string, effort: "low" | "medium" | "high" | "xhigh" | "max", fetchImpl?: typeof fetch, fastModel?: string) {
     this.reader = new AnthropicDocumentReader(apiKey, model, effort, fetchImpl);
     this.rapide = fastModel ? new AnthropicDocumentReader(apiKey, fastModel, "low", fetchImpl) : null;
-    this.tranches = fastModel ? new AnthropicDocumentReader(apiKey, fastModel, "low", fetchImpl) : null;
+    this.tranches = fastModel ? new AnthropicDocumentReader(apiKey, fastModel, "medium", fetchImpl) : null;
   }
 
   async reperer(numberedText: string): Promise<ReadAttempt<Reperage> | null> {
