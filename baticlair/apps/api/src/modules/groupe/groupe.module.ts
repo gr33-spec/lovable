@@ -11,6 +11,7 @@ import { AdminGroupeService } from "./application/admin-groupe.service.js";
 import { ChoixService } from "./application/choix.service.js";
 import { CommandeService } from "./application/commande.service.js";
 import { NotificationsGroupeService } from "./application/notifications-groupe.service.js";
+import { lienEmailsCoupes } from "../privacy/index.js";
 import { DemandeService } from "./application/demande.service.js";
 import { GroupeService } from "./application/groupe.service.js";
 import { JeuDemonstrationService } from "./application/jeu-demonstration.service.js";
@@ -64,7 +65,7 @@ import { ALERTER } from "../../platform/tokens.js";
     { provide: JeuDemonstrationService, useFactory: (p: PrismaService) => new JeuDemonstrationService(p), inject: [PrismaService] },
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
     { provide: AdminGroupeService, useFactory: (p: PrismaService, c: AppConfig) => new AdminGroupeService(p, c.groupe.departements), inject: [PrismaService, CONFIG] },
-    { provide: NotificationsGroupeService, useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender) => new NotificationsGroupeService(p, push, e), inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER] },
+    { provide: NotificationsGroupeService, useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender, c: AppConfig) => new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId)), inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER, CONFIG] },
     { provide: RapportMensuelService, useFactory: (p: PrismaService, e: TransactionalEmailSender) => new RapportMensuelService(p, e), inject: [PrismaService, EMAIL_SENDER] },
     { provide: CommandeService, useFactory: (p: PrismaService, e: TransactionalEmailSender, c: AppConfig, n: NotificationsGroupeService) => new CommandeService(p, e, c.groupe.facture, n), inject: [PrismaService, EMAIL_SENDER, CONFIG, NotificationsGroupeService] },
     { provide: ChoixService, useFactory: (p: PrismaService, c: CommandeService) => new ChoixService(p, c), inject: [PrismaService, CommandeService] },
@@ -87,7 +88,7 @@ import { ALERTER } from "../../platform/tokens.js";
     {
       provide: DemandeService,
       useFactory: (p: PrismaService, e: TransactionalEmailSender, pdf: PdfReader, x: NegoceExtractor | null, c: AppConfig, choix: ChoixService, n: NotificationsGroupeService, g: Geocodeur) =>
-        new DemandeService(p, e, pdf, x, { webAppUrl: c.webAppUrl, authSecret: c.authSecret, reponsesDomaine: c.groupe.reponsesDomaine }, choix, n, g),
+        new DemandeService(p, e, pdf, x, { webAppUrl: c.webAppUrl, authSecret: c.authSecret, reponsesDomaine: c.groupe.reponsesDomaine, facturationNegoce: c.groupe.facture.active }, choix, n, g),
       inject: [PrismaService, EMAIL_SENDER, PDF_READER, NEGOCE_EXTRACTOR, CONFIG, ChoixService, NotificationsGroupeService, GEOCODEUR],
     },
     {

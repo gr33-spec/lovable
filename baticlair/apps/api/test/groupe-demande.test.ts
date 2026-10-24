@@ -83,6 +83,7 @@ describe("groupé, étape 5 : la demande aux négoces", { timeout: 60_000 }, () 
     expect(m.subject).toMatch(/^Commande commune : demande de prix, Carreau de sol 60×60/);
     expect(m.text).toContain(`** ${PHRASE_COMMISSION.toUpperCase()} **`);
     expect(m.html).toContain(`<strong>${PHRASE_COMMISSION}</strong>`);
+    expect(`${m.text}\n${m.html}`).not.toMatch(/2 ?%|reverser/);
     expect(m.text).toMatch(/Volume ferme : .* \(2 chantiers\) ; volume probable : /);
     expect(m.text).toContain("/reponse/");
     expect(m.text).toContain("/negoces/lien/");
@@ -127,7 +128,9 @@ describe("groupé, étape 5 : la demande aux négoces", { timeout: 60_000 }, () 
     expect(page.lot.chantiers.map((c: { adresse: string }) => c.adresse)).toContain("8 rue du Port, 22500 Paimpol");
     expect(JSON.stringify(page)).not.toContain("Carrelages");
     expect(page.negoce).toEqual({ nom: "Négoce Carrelage", email: "carrelage@example.com" });
-    expect(page.commission).toMatchObject({ phrase: PHRASE_COMMISSION, tauxPourcent: 2, versionContrat: VERSION_CONTRAT });
+    // Greg (24 octobre 2026) : plus de 2 %, la formulation unique ; le taux de l'accord vaut 0 tant que la facturation dort.
+    expect(page.commission).toMatchObject({ phrase: "Aucun frais pour l'instant. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce.", tauxPourcent: 0, versionContrat: VERSION_CONTRAT });
+    expect(JSON.stringify(page)).not.toMatch(/2 ?%/);
     expect(page.commission.contrat.length).toBeGreaterThanOrEqual(6);
     expect(page.accord).toBeNull();
     expect(page.reponse).toBeNull();
@@ -173,7 +176,7 @@ describe("groupé, étape 5 : la demande aux négoces", { timeout: 60_000 }, () 
     expect(avec.body.reponse).toMatchObject({ fichiers: ["devis-77.pdf", "devis-77-bis.pdf"], message: "Prix valables 30 jours", statutExtraction: "lue" });
     const accord = await ctx.prisma.accordNegoce.findFirstOrThrow();
     expect(accord).toMatchObject({ email: "carrelage@example.com", versionContrat: VERSION_CONTRAT });
-    expect(Number(accord.tauxPourcent)).toBe(2);
+    expect(Number(accord.tauxPourcent)).toBe(0);
     expect(accord.adresseIp.length).toBeGreaterThan(0);
     const reponse = await ctx.prisma.reponseNegoce.findFirstOrThrow({ where: { negoce: { email: "carrelage@example.com" } }, include: { fichiers: true } });
     // La distance du dépôt à chaque chantier est calculée au dépôt : Lannion 0 km, Paimpol 40 km (par la route).

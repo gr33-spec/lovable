@@ -24,7 +24,7 @@ export interface CompteNegoce {
   livraison: Paliers;
   departements: string[];
   prochaine: { mois: string; de: string; clotureLe: string; clotureDans: string } | null;
-  grilles: { mois: string; de: string; departement: string; reponseAvant: string; reponseDans: string; deposee: boolean; lien: string }[];
+  grilles: { mois: string; de: string; departement: string; reponseAvant: string; reponseDans: string; deposee: boolean; lien: string; consultation?: string }[];
   commandes: { type: "cycle" | "garantie"; mois: string; de: string; artisan: string; totalHt: number; le: string }[];
   conditionsVersion: string | null;
 }

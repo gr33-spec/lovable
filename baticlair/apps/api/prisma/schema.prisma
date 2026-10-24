@@ -146,6 +146,9 @@ model Company {
   siretVerifieLe       DateTime?
   phone                String?
   contactEmail         String?
+  /// RGPD (24 octobre 2026) : l'artisan a coupé les e-mails de notification (lien « Ne plus recevoir ces e-mails ») ; les
+  /// e-mails indispensables (compte, bons de commande) partent toujours.
+  emailsCoupesLe       DateTime?
   /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
   logo                 Bytes?
   logoType             String?
@@ -1457,4 +1460,55 @@ model ChoixArtisan {
 
   @@unique([cycleId, companyId])
   @@map("choix_artisan")
+}
+
+/// RGPD, DROIT D'OPPOSITION (Greg, 24 octobre 2026) : un négoce (ou toute personne) qui demande à ne plus jamais être
+/// contacté. Gardé haché (SHA-256 de l'e-mail en minuscules, du SIRET sans espaces) : assez pour reconnaître le négoce
+/// quand un artisan le rajoute, rien de lisible. Toutes les invitations futures le respectent.
+model ExclusionContact {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  /// « email » | « siret »
+  sorte     String
+  empreinte String
+  /// opposition | suppression_compte
+  source    String
+  createdAt DateTime @default(now())
+
+  @@unique([sorte, empreinte])
+  @@map("exclusion_contact")
+}
+
+/// RGPD (24 octobre 2026) : une commande passée par un artisan, gardée 10 ans sans son nom quand son compte est supprimé
+/// (accès restreint, admin seulement). Le bon lui-même est parti au négoce, qui le garde dans sa comptabilité.
+model ArchiveCommande {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  /// cycle | garantie
+  sorte       String
+  mois        String
+  negoceNom   String
+  totalHt     Decimal  @db.Decimal(14, 2)
+  commandeLe  DateTime
+  /// L'empreinte de l'entreprise supprimée (SHA-256 de son identifiant) : relier deux commandes sans savoir qui.
+  artisan     String
+  archiveLe   DateTime @default(now())
+
+  @@index([archiveLe])
+  @@map("archive_commande")
+}
+
+/// RGPD (24 octobre 2026) : la preuve d'une acceptation (CGU artisan, conditions négoce), gardée 5 ans après la fin du
+/// compte : la version, la date, l'e-mail haché. Rien d'autre.
+model PreuveAcceptation {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  /// cgu | conditions_negoce
+  sorte       String
+  version     String
+  accepteLe   DateTime
+  /// SHA-256 de l'e-mail en minuscules.
+  email       String
+  finCompteLe DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([finCompteLe])
+  @@map("preuve_acceptation")
 }

@@ -52,3 +52,5 @@ export * from "./groupe/precision.js";
 export * from "./groupe/cap-22-octobre.js";
 export * from "./groupe/commande-du-mois.js";
 export * from "./groupe/espace-negoce.js";
+export * from "./groupe/suivi-des-demandes.js";
+export * from "./rgpd/anonymisation.js";

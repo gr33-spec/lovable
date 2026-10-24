@@ -12,7 +12,7 @@ import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { InviterCollegue } from "@/components/inviter";
-import { BlocDuMois, BlocGarantie, useProchaineCommande } from "@/components/commande-du-mois";
+import { BlocDuMois, BlocGarantie, DemandesEnCours, useProchaineCommande } from "@/components/commande-du-mois";
 import { BoucleNegoce } from "@/components/boucle-negoce";
 
 export default function AccueilPage() {
@@ -95,6 +95,7 @@ export default function AccueilPage() {
       {/* Greg (23 octobre) : « Mets ton négoce dans la boucle », sous le bloc du mois. */}
       {moisActif ? <BoucleNegoce compact /> : null}
       {/* La grille garantie 30 jours : visible dès l'accueil, nouvel inscrit compris (point 6). */}
+      {moisActif ? <DemandesEnCours etat={mois.etat} /> : null}
       {moisActif ? (mois.etat?.garanties ?? []).map((g) => <BlocGarantie key={g.cycleId} g={g} onChange={mois.reload} />) : null}
 
       {/* « À faire » : une liste blanche, chaque ligne est un lien (plus de bouton plein en concurrence avec celui du mois). */}

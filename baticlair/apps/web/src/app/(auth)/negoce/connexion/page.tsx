@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { LiensLegaux } from "@/components/legal";
 import { Button, Field, PageTitle } from "@/components/ui";
 import { api } from "@/lib/api";
 import { NOM } from "@/lib/nom";
@@ -48,7 +47,6 @@ export default function ConnexionNegocePage() {
       )}
       <footer className="mt-4 flex flex-col gap-2 text-[14px] text-muted">
         <p>Pas encore d&apos;accès ? Il se crée depuis le lien d&apos;invitation reçu par e-mail quand un artisan vous ajoute.</p>
-        <LiensLegaux />
       </footer>
     </>
   );

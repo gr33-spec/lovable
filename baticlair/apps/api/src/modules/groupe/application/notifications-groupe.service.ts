@@ -13,6 +13,8 @@ export class NotificationsGroupeService {
     private readonly prisma: PrismaService,
     private readonly push: PushSender,
     private readonly email: TransactionalEmailSender,
+    /** Le lien « Ne plus recevoir ces e-mails » (RGPD, 24 octobre 2026) ; absent en test unitaire. */
+    private readonly lienStop: ((companyId: string) => string) | null = null,
   ) {}
 
   /** L'e-mail de l'entreprise, sinon celui de son propriétaire. */
@@ -33,10 +35,14 @@ export class NotificationsGroupeService {
       if (r === "sent") envoyes++;
     }
     let email = false;
-    const to = await this.emailDe(companyId);
+    // Opposition en un clic (24 octobre 2026) : une entreprise qui a coupé ces e-mails ne reçoit plus que le push ; un
+    // e-mail qui porte un bon de commande part quand même (il est indispensable à la commande).
+    const coupe = (await this.prisma.company.findUnique({ where: { id: companyId }, select: { emailsCoupesLe: true } }))?.emailsCoupesLe;
+    const to = coupe && !courriel?.piecesJointes?.length ? null : await this.emailDe(companyId);
     if (to) {
+      const pied = this.lienStop ? `\n\nNe plus recevoir ces e-mails : ${this.lienStop(companyId)}` : "";
       try {
-        await this.email.send({ to, subject: courriel?.objet ?? `${message.titre} : ${message.corps}`, text: courriel?.texte ?? `${message.corps}\n\nBatiClair`, ...(courriel?.piecesJointes?.length ? { attachments: courriel.piecesJointes } : {}) });
+        await this.email.send({ to, subject: courriel?.objet ?? `${message.titre} : ${message.corps}`, text: `${courriel?.texte ?? `${message.corps}\n\nBatiClair`}${pied}`, ...(courriel?.piecesJointes?.length ? { attachments: courriel.piecesJointes } : {}) });
         email = true;
       } catch {
         email = false;

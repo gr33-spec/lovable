@@ -1,4 +1,5 @@
 import { fraisDeLivraisonPaliers, type PaliersLivraison } from "./espace-negoce.js";
+import { compteurDeReponses } from "./suivi-des-demandes.js";
 
 /**
  * LA COMMANDE COMMUNE (décision de Greg, 22 octobre 2026, au soir ; cycle raccourci le 23 octobre) : elle remplace le
@@ -415,18 +416,26 @@ export interface EtatDansLeMois {
   /** Négoces à qui la grille est partie. */
   negoces: number;
   commande: boolean;
+  /** « Résultats le 08/11 à 18 h » (`phraseResultatsLe`), pendant la phase des négoces. */
+  resultatsLe?: string | null;
 }
 
 export function suiviDansLeMois(e: EtatDansLeMois): { etape: number; etapes: { nom: (typeof ETAPES_SUIVI_MOIS)[number]; fait: boolean }[]; phrase: string; aFaire: string | null } {
   const etape = e.commande ? 4 : e.phase === "resultats" && e.grilles > 0 ? 3 : e.phase !== "inscriptions" && e.negoces > 0 ? 2 : e.phase !== "inscriptions" ? 1 : 0;
   const etapes = ETAPES_SUIVI_MOIS.map((nom, i) => ({ nom, fait: i <= etape }));
   const de = deMois(e.mois);
+  // Le suivi des demandes (Greg, 24 octobre 2026) : des comptes, jamais un nom ni un prix avant les résultats.
+  const reponses = e.negoces > 0 ? compteurDeReponses(e.grilles, e.negoces) : null;
   if (etape === 0) return { etape, etapes, phrase: `Ta liste est dans la commande ${de}.`, aFaire: e.clotureDans ? `Clôture dans ${e.clotureDans}. Partage le lien pour faire grossir la commande.` : null };
+  if (etape === 1 && e.phase === "negoces") return { etape, etapes, phrase: `La commande ${de} est close.`, aFaire: "Aucun négoce de ton secteur n'a encore son accès. Mets ton négoce dans la boucle." };
   if (etape === 1) return { etape, etapes, phrase: `La commande ${de} est close.`, aFaire: null };
-  // Revue à froid (23 octobre) : la limite passée sans aucune grille, le suivi ne dit plus « chez N négoces » pour toujours.
-  if (etape === 2 && e.phase === "resultats") return { etape, etapes, phrase: `Aucun négoce n'a chiffré la commande ${de}.`, aFaire: "Commande ta liste en direct chez ton négoce." };
-  if (etape === 2) return { etape, etapes, phrase: `La commande ${de} est chez ${e.negoces} négoce${e.negoces > 1 ? "s" : ""}.`, aFaire: e.reponseDans ? `Leurs prix arrivent dans ${e.reponseDans}.` : null };
-  if (etape === 3) return { etape, etapes, phrase: "Les prix sont là.", aFaire: "Regarde ton prix livré et commande si ça te plaît." };
+  // La limite passée sans aucune grille : la liste part avec la commande suivante (report, Greg, 24 octobre 2026).
+  if (etape === 2 && e.phase === "resultats") return { etape, etapes, phrase: `Aucun négoce n'a répondu à la commande ${de}.`, aFaire: "Ta liste passe automatiquement à la commande suivante." };
+  if (etape === 2) return { etape, etapes, phrase: `Demandes envoyées à ${e.negoces} négoce${e.negoces > 1 ? "s" : ""} de ton secteur.`, aFaire: [`${reponses}.`, e.resultatsLe ? `${e.resultatsLe}.` : e.reponseDans ? `Résultats dans ${e.reponseDans}.` : null].filter(Boolean).join(" ") };
+  if (etape === 3) {
+    const sur = `Sur ${e.negoces} demande${e.negoces > 1 ? "s" : ""}, ${e.grilles} négoce${e.grilles > 1 ? "s ont" : " a"} répondu.`;
+    return { etape, etapes, phrase: "Les prix sont là.", aFaire: e.grilles === 1 ? `${sur} Compare son prix à ta dernière facture.` : `${sur} Voici le meilleur prix livré pour toi.` };
+  }
   return { etape, etapes, phrase: "C'est commandé.", aFaire: null };
 }
 

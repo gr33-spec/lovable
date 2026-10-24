@@ -536,10 +536,11 @@ export class TakeoffService {
     let trade = doc.trade;
     let ref = referentialFor(trade);
     const siteNotes = doc.projectId ? ((await this.reading.projectNotes?.(tenant, doc.projectId)) ?? null) : null;
-    // Le devis complet : son texte numéroté (pour citer les lignes) et le PDF entier, toutes pages.
-    const content = await this.documents.readContent(tenant, doc.id);
-    const pages = prepared.pages.map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
-    const document = { numberedText: prepared.input.numberedText, imagePdf: content?.bytes ?? prepared.input.imagePdf, imagePages: pages };
+    // RGPD (Greg, 24 octobre 2026 ; RÈGLE CHANGÉE §51.5, avant : « le PDF entier ») : le texte numéroté, déjà débarrassé
+    // des coordonnées du client, et seulement l'image des pages sans texte (un scan ne se nettoie pas sans le lire). Le
+    // PDF d'origine n'est plus joint quand toutes ses pages ont du texte.
+    const pages = prepared.pages.filter((p) => p.route === "vision").map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
+    const document = { numberedText: prepared.input.numberedText, imagePdf: prepared.input.imagePdf, imagePages: pages };
     const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
     let cost = 0;
     const lu = await this.lireLeDevis(lecteur, document, trade, siteNotes, async (n, r, prompt) => {

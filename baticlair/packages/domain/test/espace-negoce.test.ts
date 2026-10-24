@@ -108,14 +108,18 @@ describe("la grille garantie 30 jours (point 6) et les mentions des bons", () =>
 
 describe("les textes côté négoce : vouvoiement, jamais un nom d'artisan", () => {
   it("l'invitation nomme le secteur, jamais l'artisan ; le lien magique ; la clôture sans compte ; la grille prête", () => {
-    const inv = mailInvitationNegoce({ lien: "https://b/negoce/rejoindre/x", departement: "22", conditions: "https://b/negoce/conditions" });
+    const inv = mailInvitationNegoce({ lien: "https://b/negoce/rejoindre/x", departement: "22", conditions: "https://b/negoce/conditions", opposition: "https://b/negoce/opposition/o" });
+    // RGPD (24 octobre 2026) : qui écrit, pourquoi, et le lien d'opposition.
+    expect(inv.texte).toContain("Ce message vous est envoyé par BATI INVEST (BatiClair) pour la Commande commune.");
+    expect(inv.texte).toContain("Ne plus jamais être contacté : https://b/negoce/opposition/o");
     expect(inv.objet).toBe("Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès");
     expect(inv.texte).toContain("Un artisan de votre secteur (22) vous a ajouté");
     expect(inv.texte).toContain("Créez votre accès en une minute");
     expect(inv.texte).toContain("valable 90 jours");
     expect(inv.texte).not.toMatch(/Toitures|tu |ton /);
     expect(mailLienDeConnexion({ lien: "https://b/negoce/connexion/y" }).texte).toContain("valable 30 minutes");
-    const cl = mailClotureSansCompte({ mois: "2026-10-15", departement: "22", lien: "https://b/negoce/rejoindre/x" });
+    const cl = mailClotureSansCompte({ mois: "2026-10-15", departement: "22", lien: "https://b/negoce/rejoindre/x", opposition: "https://b/negoce/opposition/o" });
+    expect(cl.texte).toContain("Ne plus jamais être contacté : https://b/negoce/opposition/o");
     expect(cl.objet).toBe("La grille du 15 octobre (22) est prête : créez votre accès pour la chiffrer");
     const g = mailGrilleAuNegoce({ negoce: "N1", mois: "2026-10-15", departement: "22", lignes: [{ cle: "a", designation: "Ardoise", quantite: 10, unite: "pièces" }], reponseAvant: new Date("2026-10-22T16:00:00Z"), maintenant: new Date("2026-10-15T10:00:00Z"), lien: "https://b/grille/j", stop: "https://b/negoce/desabonner/s" });
     expect(g.objet).toBe("La grille du 15 octobre est prête (22) : 1 article à chiffrer");
@@ -123,12 +127,15 @@ describe("les textes côté négoce : vouvoiement, jamais un nom d'artisan", () 
     expect(g.texte).not.toContain("deux chiffres de livraison");
   });
 
-  it("les conditions : dix points, versionnées, dont prix fermes, garantie 30 jours, confidentialité, aucun coût pour l'instant, désabonnement libre", () => {
-    expect(CONDITIONS_NEGOCE).toHaveLength(10);
-    expect(CONDITIONS_NEGOCE_VERSION).toBe("2026-10-23");
+  // Mise en conformité (Greg, 24 octobre 2026) : treize points, dont la grille unique, la concurrence, « ni vendeur ni
+  // acheteur » et le versionnement ; la gratuité dans la formulation unique.
+  it("les conditions : versionnées, dont grille unique, prix fermes, garantie 30 jours, paliers, confidentialité, concurrence, gratuité, désabonnement", () => {
+    expect(CONDITIONS_NEGOCE).toHaveLength(13);
+    expect(CONDITIONS_NEGOCE_VERSION).toBe("2026-10-24");
     const titres = CONDITIONS_NEGOCE.map((c) => c.titre);
-    expect(titres).toEqual(expect.arrayContaining(["Prix fermes, quel que soit le volume", "Garantie 30 jours si vous êtes retenu", "Confidentialité des artisans", "Aucun classement public", "Aucun coût pour l'instant", "Désabonnement libre", "Liberté de ne pas répondre"]));
-    expect(CONDITIONS_NEGOCE.find((c) => c.titre === "Aucun coût pour l'instant")!.texte).toContain("BATI INVEST");
+    expect(titres).toEqual(expect.arrayContaining(["Une seule grille, la même pour tous", "Prix fermes, quel que soit le volume", "Garantie 30 jours si vous êtes retenu", "Livraison selon vos paliers", "Confidentialité des artisans", "Concurrence : vos prix restent les vôtres", "Ni vendeur ni acheteur", "Aucun coût pour l'instant", "Désabonnement libre", "Liberté de ne pas répondre", "Versions et droit applicable"]));
+    expect(CONDITIONS_NEGOCE.find((c) => c.titre === "Aucun coût pour l'instant")!.texte).toBe("Aucun frais pour l'instant. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce.");
+    expect(CONDITIONS_NEGOCE.find((c) => c.titre === "Concurrence : vos prix restent les vôtres")!.texte).toContain("ni pendant ni après la consultation");
     for (const c of CONDITIONS_NEGOCE) expect(c.texte).not.toMatch(/\btu\b|\bton\b/);
   });
 });

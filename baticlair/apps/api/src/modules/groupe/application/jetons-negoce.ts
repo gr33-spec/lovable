@@ -6,13 +6,15 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  * donc au SIRET ou à l'e-mail : le même négoce ajouté par trente artisans a un seul jeton), le lien magique de connexion
  * (30 minutes), la session (30 jours, dans un cookie HttpOnly) et le désabonnement (180 jours, dans chaque e-mail).
  */
-export type SorteDeJeton = "invitation" | "connexion" | "session" | "desabonnement";
+export type SorteDeJeton = "invitation" | "connexion" | "session" | "desabonnement" | "opposition";
 
 export const DUREES_JETON_S: Record<SorteDeJeton, number> = {
   invitation: 90 * 24 * 3600,
   connexion: 30 * 60,
   session: 30 * 24 * 3600,
   desabonnement: 180 * 24 * 3600,
+  /** « Ne plus jamais être contacté » (RGPD, 24 octobre 2026) : un an. */
+  opposition: 365 * 24 * 3600,
 };
 
 export interface JetonNegoce {

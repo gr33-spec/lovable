@@ -130,7 +130,7 @@ function DatesDuMois() {
 /** L'espace négoce (Greg, 23 octobre 2026, point 8) : inscrits, invités jamais venus, désabonnés ; taux de réponse par cycle, commandes par négoce retenu. */
 interface ComptesNegoceVue {
   negoces: { id: string; enseigne: string; email: string; siret: string | null; etat: "inscrit" | "invite" | "desabonne"; inviteLe: string | null; inscritLe: string | null; rappels: number; departements: string[]; grillesRetenues: number; commandesRecues: number }[];
-  cycles: { mois: string; de: string; zone: string; phase: string; attendues: number; deposees: number; tauxReponse: number | null; retenuId: string | null }[];
+  cycles: { mois: string; de: string; zone: string; phase: string; attendues: number; deposees: number; tauxReponse: number | null; retenuId: string | null; compteur?: string }[];
 }
 const ETATS: Record<ComptesNegoceVue["negoces"][number]["etat"], string> = { inscrit: "Inscrit", invite: "Invité, jamais venu", desabonne: "Désabonné" };
 
@@ -159,7 +159,7 @@ function ComptesNegoce() {
       {data.cycles.length > 0 ? (
         <ul aria-label="Taux de réponse par cycle" className="flex flex-col gap-1 text-[13px]">
           {data.cycles.map((c) => (
-            <li key={`${c.mois}-${c.zone}`}>{`Commande ${c.de} (${c.zone}) : ${c.deposees} grille${c.deposees > 1 ? "s" : ""} sur ${c.attendues} attendue${c.attendues > 1 ? "s" : ""}${c.tauxReponse === null ? "" : ` (${c.tauxReponse} %)`}${c.retenuId ? " · négoce retenu" : ""}`}</li>
+            <li key={`${c.mois}-${c.zone}`}>{c.compteur ? `${c.compteur}${c.retenuId ? " · négoce retenu" : ""}` : `Commande ${c.de} (${c.zone}) : ${c.deposees} grille${c.deposees > 1 ? "s" : ""} sur ${c.attendues} attendue${c.attendues > 1 ? "s" : ""}${c.tauxReponse === null ? "" : ` (${c.tauxReponse} %)`}${c.retenuId ? " · négoce retenu" : ""}`}</li>
           ))}
         </ul>
       ) : null}

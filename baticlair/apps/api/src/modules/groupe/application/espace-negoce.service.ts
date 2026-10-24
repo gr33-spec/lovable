@@ -1,3 +1,5 @@
+import { estExclu } from "../../privacy/index.js";
+import { supprimerCompteNegoce } from "../../privacy/index.js";
 import {
   chrono,
   clesDeCommande,
@@ -11,8 +13,7 @@ import {
   phraseApresInscription,
   zoneDuCodePostal,
   type ConfigCycle,
-  type PaliersLivraison,
-} from "@baticlair/domain";
+  type PaliersLivraison, compteurAdmin, consultationPourLeNegoce } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -74,6 +75,11 @@ export class EspaceNegoceService {
     return `${this.reglages.webAppUrl}/negoce/conditions`;
   }
 
+  /** « Ne plus jamais être contacté » (RGPD, 24 octobre 2026) : dans chaque e-mail d'invitation et de clôture. */
+  lienOpposition(compteId: string, maintenant = new Date()): string {
+    return `${this.reglages.webAppUrl}/negoce/opposition/${signerJetonNegoce(this.reglages.authSecret, { sorte: "opposition", compteId }, maintenant)}`;
+  }
+
   lienDesabonnement(compteId: string, departement: string | null, maintenant = new Date()): string {
     return `${this.reglages.webAppUrl}/negoce/desabonner/${signerJetonNegoce(this.reglages.authSecret, { sorte: "desabonnement", compteId, departement }, maintenant)}`;
   }
@@ -83,6 +89,12 @@ export class EspaceNegoceService {
    * lien d'invitation est régénéré et envoyé (au plus une fois par semaine tant que l'accès n'est pas créé). Rend le lien.
    */
   async inviter(negoce: { id: string; email: string; siret: string | null; nom: string; compteId: string | null }, maintenant = new Date()): Promise<string> {
+    // DROIT D'OPPOSITION (24 octobre 2026) : un négoce qui a demandé à ne plus jamais être contacté n'est jamais réinvité,
+    // même quand un artisan le rajoute ; la ligne reste dans la liste de l'artisan, arrêtée.
+    if (await estExclu(this.prisma, { email: negoce.email, siret: negoce.siret })) {
+      await this.prisma.negoce.update({ where: { id: negoce.id }, data: { stopLe: maintenant } });
+      return "";
+    }
     const compte = negoce.compteId
       ? await this.prisma.compteNegoce.findUnique({ where: { id: negoce.compteId } })
       : ((negoce.siret ? await this.prisma.compteNegoce.findUnique({ where: { siret: negoce.siret } }) : null) ?? (await this.prisma.compteNegoce.findUnique({ where: { email: negoce.email } })));
@@ -100,7 +112,7 @@ export class EspaceNegoceService {
     await this.prisma.compteNegoce.update({ where: { id: c.id }, data: { invitationLe: maintenant } });
     if (!deja && this.email) {
       const departement = (await this.prisma.negoce.findUnique({ where: { id: negoce.id }, select: { departement: true } }))?.departement ?? null;
-      const mail = mailInvitationNegoce({ lien, departement, conditions: this.lienConditions() });
+      const mail = mailInvitationNegoce({ lien, departement, conditions: this.lienConditions(), opposition: this.lienOpposition(c.id, maintenant) });
       await this.email.send({ to: c.email, subject: mail.objet, text: mail.texte }).catch(() => undefined);
     }
     return lien;
@@ -262,7 +274,7 @@ export class EspaceNegoceService {
     const negoceIds = c.abonnements.map((a) => a.id);
     const prochaine = departements.length ? await this.prochaineCloture(departements, maintenant) : null;
     // Les grilles en cours : phase « négoces », avant la limite ; pendant les inscriptions, rien que le chrono.
-    const grilles = await this.prisma.grilleNegoce.findMany({ where: { negoceId: { in: negoceIds }, cycle: { phase: "negoces", reponseAvant: { gt: maintenant } } }, include: { cycle: { select: { mois: true, zone: true, reponseAvant: true } } }, orderBy: { createdAt: "desc" } });
+    const grilles = await this.prisma.grilleNegoce.findMany({ where: { negoceId: { in: negoceIds }, cycle: { phase: "negoces", reponseAvant: { gt: maintenant } } }, include: { cycle: { select: { mois: true, zone: true, reponseAvant: true, _count: { select: { grilles: true } } } } }, orderBy: { createdAt: "desc" } });
     // Les commandes passées chez lui : là, et seulement là, il voit l'artisan (point 4).
     const choix = await this.prisma.choixArtisan.findMany({ where: { negoceId: { in: negoceIds }, commandeLe: { not: null } }, include: { company: { select: { name: true } }, cycle: { select: { mois: true } } }, orderBy: { commandeLe: "desc" } });
     const garanties = await this.prisma.commandeGarantie.findMany({ where: { negoceId: { in: negoceIds } }, include: { company: { select: { name: true } }, cycle: { select: { mois: true } } }, orderBy: { commandeLe: "desc" } });
@@ -275,7 +287,7 @@ export class EspaceNegoceService {
       livraison: (c.livraison as unknown as PaliersLivraison | null) ?? PALIERS_DEFAUT,
       departements,
       prochaine: prochaine ? { mois: prochaine.mois, de: prochaine.de, clotureLe: prochaine.clotureLe.toISOString(), clotureDans: prochaine.clotureDans } : null,
-      grilles: grilles.map((g) => ({ mois: g.cycle.mois, de: deMois(g.cycle.mois), departement: g.cycle.zone, reponseAvant: g.cycle.reponseAvant.toISOString(), reponseDans: chrono(maintenant, g.cycle.reponseAvant), deposee: !!g.deposeLe, lien: `/grille/${jetonDeGrille(g.id)}` })),
+      grilles: grilles.map((g) => ({ mois: g.cycle.mois, de: deMois(g.cycle.mois), departement: g.cycle.zone, reponseAvant: g.cycle.reponseAvant.toISOString(), reponseDans: chrono(maintenant, g.cycle.reponseAvant), deposee: !!g.deposeLe, lien: `/grille/${jetonDeGrille(g.id)}`, consultation: consultationPourLeNegoce(g.cycle._count.grilles, g.cycle.reponseAvant) })),
       commandes: [
         ...choix.map((x) => ({ type: "cycle" as const, mois: x.cycle.mois, de: deMois(x.cycle.mois), artisan: x.company.name, totalHt: Number(x.totalHt), le: x.commandeLe!.toISOString() })),
         ...garanties.map((x) => ({ type: "garantie" as const, mois: x.cycle.mois, de: deMois(x.cycle.mois), artisan: x.company.name, totalHt: Number(x.totalHt), le: x.commandeLe.toISOString() })),
@@ -321,14 +333,62 @@ export class EspaceNegoceService {
     return { ...(await this.desabonner(j.compteId, j.departement ?? null, maintenant)), departement: j.departement ?? null };
   }
 
-  /** Supprimer son compte : dépôts et paliers effacés, abonnements arrêtés ; les grilles et commandes passées restent (comptabilité). */
-  async supprimer(compteId: string, maintenant = new Date()): Promise<void> {
-    const c = await this.prisma.compteNegoce.findUnique({ where: { id: compteId } });
+  /**
+   * Supprimer son compte (RGPD, 24 octobre 2026) : dépôts et paliers effacés, abonnements arrêtés, e-mail des lignes
+   * effacé, le négoce mis sur la liste d'exclusion (plus jamais réinvité) ; la preuve d'acceptation des conditions est
+   * gardée 5 ans (version, date, e-mail haché). Les grilles déposées et les commandes passées restent, sous l'enseigne.
+   */
+  async supprimer(compteId: string, maintenant = new Date(), source: "suppression_compte" | "opposition" = "suppression_compte"): Promise<void> {
+    if (!(await supprimerCompteNegoce(this.prisma, compteId, maintenant, source))) throw notFound("Compte");
+  }
+
+  /**
+   * « Ne plus jamais être contacté » (RGPD, 24 octobre 2026) : depuis le lien de chaque e-mail d'invitation ou de clôture.
+   * Même effet qu'une suppression de compte, la source en plus : l'opposition.
+   */
+  async opposer(jeton: string, maintenant = new Date()): Promise<{ fait: true }> {
+    const j = lireJetonNegoce(this.reglages.authSecret, "opposition", jeton, maintenant);
+    if (!j || !isUuid(j.compteId)) throw notFound("Lien");
+    const c = await this.prisma.compteNegoce.findUnique({ where: { id: j.compteId }, select: { id: true } });
+    // Déjà fait (lien rouvert) : rien à refaire, la liste d'exclusion est là.
+    if (c) await this.supprimer(c.id, maintenant, "opposition");
+    return { fait: true };
+  }
+
+  /** Ce que la page d'opposition montre avant de confirmer : l'enseigne, jamais un nom d'artisan. */
+  async pageOpposition(jeton: string, maintenant = new Date()): Promise<{ enseigne: string | null; deja: boolean }> {
+    const j = lireJetonNegoce(this.reglages.authSecret, "opposition", jeton, maintenant);
+    if (!j || !isUuid(j.compteId)) throw notFound("Lien");
+    const c = await this.prisma.compteNegoce.findUnique({ where: { id: j.compteId }, select: { enseigne: true } });
+    return { enseigne: c?.enseigne ?? null, deja: !c };
+  }
+
+  /**
+   * MES DONNÉES (RGPD, accès et portabilité, 24 octobre 2026) : tout ce que BatiClair garde du négoce, lisible. Ses propres
+   * grilles et ses propres prix ; les commandes reçues (le nom de l'artisan qui lui a commandé) ; jamais une donnée d'un
+   * autre négoce.
+   */
+  async export(compteId: string) {
+    const c = await this.prisma.compteNegoce.findUnique({ where: { id: compteId }, include: { depots: true, abonnements: true } });
     if (!c) throw notFound("Compte");
-    await this.prisma.$transaction(async (tx) => {
-      await tx.negoce.updateMany({ where: { compteId }, data: { stopLe: maintenant, compteId: null } });
-      await tx.compteNegoce.delete({ where: { id: compteId } });
-    });
+    const ids = c.abonnements.map((a) => a.id);
+    const grilles = await this.prisma.grilleNegoce.findMany({ where: { negoceId: { in: ids } }, include: { cycle: { select: { mois: true, zone: true, lignes: true } } }, orderBy: { createdAt: "asc" } });
+    const choix = await this.prisma.choixArtisan.findMany({ where: { negoceId: { in: ids }, commandeLe: { not: null } }, include: { company: { select: { name: true } }, cycle: { select: { mois: true } } } });
+    const garanties = await this.prisma.commandeGarantie.findMany({ where: { negoceId: { in: ids } }, include: { company: { select: { name: true } }, cycle: { select: { mois: true } } } });
+    return {
+      exporteLe: new Date().toISOString(),
+      compte: { email: c.email, siret: c.siret, enseigne: c.enseigne, telephone: c.telephone, livraison: c.livraison, departements: c.departements, inscritLe: c.inscritLe, conditionsAccepteesLe: c.conditionsAccepteesLe, conditionsVersion: c.conditionsVersion, derniereConnexionLe: c.derniereConnexionLe, desabonneLe: c.desabonneLe, createdAt: c.createdAt },
+      depots: c.depots.map((d) => ({ adresse: d.adresse, codePostal: d.codePostal, commune: d.commune, departement: d.departement })),
+      abonnements: c.abonnements.map((a) => ({ departement: a.departement, familles: a.familles, stopLe: a.stopLe, createdAt: a.createdAt })),
+      grilles: grilles.map((g) => {
+        const designations = new Map(((g.cycle.lignes as { cle: string; designation: string }[] | null) ?? []).map((l) => [l.cle, l.designation]));
+        return { commande: g.cycle.mois, departement: g.cycle.zone, deposeLe: g.deposeLe, prix: Object.entries((g.prix as Record<string, number> | null) ?? {}).map(([cle, prixUnitaireHt]) => ({ article: designations.get(cle) ?? cle, prixUnitaireHt })), nonGarantis: g.nonGarantis };
+      }),
+      commandesRecues: [
+        ...choix.map((x) => ({ commande: x.cycle.mois, artisan: x.company.name, totalHt: Number(x.totalHt), le: x.commandeLe })),
+        ...garanties.map((x) => ({ commande: x.cycle.mois, artisan: x.company.name, totalHt: Number(x.totalHt), le: x.commandeLe, grilleGarantie: true })),
+      ],
+    };
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -338,7 +398,7 @@ export class EspaceNegoceService {
   async tableau() {
     const comptes = await this.prisma.compteNegoce.findMany({ include: { abonnements: { select: { id: true, departement: true, stopLe: true } } }, orderBy: { createdAt: "desc" } });
     const cycles = await this.prisma.cycleCommande.findMany({ where: { phase: { in: ["negoces", "resultats"] } }, include: { grilles: { select: { negoceId: true, deposeLe: true } }, choix: { select: { negoceId: true, commandeLe: true } }, commandesGaranties: { select: { negoceId: true } } }, orderBy: { clotureLe: "desc" }, take: 24 });
-    const parCycle = cycles.map((c) => ({ mois: c.mois, de: deMois(c.mois), zone: c.zone, phase: c.phase, attendues: c.grilles.length, deposees: c.grilles.filter((g) => g.deposeLe).length, tauxReponse: c.grilles.length ? Math.round((100 * c.grilles.filter((g) => g.deposeLe).length) / c.grilles.length) : null, retenuId: c.retenuId }));
+    const parCycle = cycles.map((c) => ({ mois: c.mois, de: deMois(c.mois), zone: c.zone, phase: c.phase, attendues: c.grilles.length, deposees: c.grilles.filter((g) => g.deposeLe).length, tauxReponse: c.grilles.length ? Math.round((100 * c.grilles.filter((g) => g.deposeLe).length) / c.grilles.length) : null, retenuId: c.retenuId, compteur: compteurAdmin({ zone: c.zone, mois: c.mois, consultes: c.grilles.length, repondus: c.grilles.filter((g) => g.deposeLe).length }) }));
     const parRetenu = new Map<string, { retenu: number; commandes: number }>();
     for (const c of cycles) {
       if (!c.retenuId) continue;

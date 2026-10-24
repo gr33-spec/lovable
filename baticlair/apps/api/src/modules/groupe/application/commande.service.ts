@@ -21,7 +21,7 @@ import { DomainError, notFound } from "../../../platform/errors/domain-error.js"
 import type { TenantContext } from "../../tenancy/index.js";
 import { assertCanWrite } from "../../tenancy/index.js";
 import { livraisonDe, type LivraisonEnregistree } from "./demande.service.js";
-import { pdfDeTexte } from "./pdf-texte.js";
+import { pdfDeTexte } from "../../../platform/pdf/pdf-texte.js";
 
 /** La livraison promise à l'artisan (son prix livré), à écrire sur son bon ; rien pour un lot sans règle de livraison. */
 function livraisonPromise(regle: LivraisonEnregistree | null, besoinId: string): BonDeCommande["livraison"] {
@@ -44,6 +44,8 @@ const pdfJoint = (nom: string, pdf: Uint8Array) => ({ filename: nom, contentType
 export interface ReglagesFacture {
   emetteur: EmetteurFacture | null;
   tvaPourcent: number;
+  /** `FACTURATION_NEGOCE=on` seulement (Greg, 24 octobre 2026 : plus de commission) ; absent = éteinte. */
+  active?: boolean;
 }
 
 export class CommandeService {
@@ -109,7 +111,9 @@ export class CommandeService {
         text: [
           "Bonjour,",
           `Votre offre a été retenue pour le lot n° ${lot.numero}. Vous trouverez ci-joint le bon de commande de chaque artisan (nom, numéro de compte ou ouverture de compte demandée, adresse du chantier, quantités, fenêtre de livraison) et le récapitulatif de vos livraisons.`,
-          "Chaque chantier se livre comme une commande normale, sur le compte du client ; facturation et paiement comme d'habitude. La facture de commission de BatiClair suit dans un e-mail à part.",
+          this.facture.active
+            ? "Chaque chantier se livre comme une commande normale, sur le compte du client ; facturation et paiement comme d'habitude. La facture de commission de BatiClair suit dans un e-mail à part."
+            : "Chaque chantier se livre comme une commande normale, sur le compte du client ; facturation et paiement comme d'habitude. BatiClair ne vous facture rien.",
           `${NOM_COMMANDE_COMMUNE}, par BatiClair`,
         ].join("\n\n"),
         attachments: [pdfJoint(`recapitulatif-lot-${lot.numero}.pdf`, recapPdf), ...docs.map((d, i) => pdfJoint(`bon-de-commande-lot-${lot.numero}-${i + 1}.pdf`, d.pdf))],
@@ -150,8 +154,10 @@ export class CommandeService {
     return { lotsCommandes: lots.length, bons };
   }
 
-  /** Section 6 : la facture automatique au bon de commande, 2 % × total HT des bons du lot, à 30 jours. */
+  /** Section 6 (dormante depuis le 24 octobre 2026) : la facture au bon de commande, au taux de l'accord, à 30 jours. */
   private async emettreLaFacture(lotId: string, negoce: { id: string; nom: string; email: string }, totalLotHt: number, maintenant: Date): Promise<void> {
+    // Greg (24 octobre 2026) : plus de commission ; la facturation dort derrière `FACTURATION_NEGOCE`.
+    if (!this.facture.active) return;
     const lot = await this.prisma.lotGroupe.findUniqueOrThrow({ where: { id: lotId }, include: { facture: true } });
     if (lot.facture) return;
     const accord = await this.prisma.accordNegoce.findUnique({ where: { lotId_negoceId: { lotId, negoceId: negoce.id } } });
@@ -183,6 +189,7 @@ export class CommandeService {
 
   /** La relance automatique des factures échues (une fois). */
   async relancerLesFactures(maintenant = new Date(), jusqua?: number): Promise<{ relancees: number }> {
+    if (!this.facture.active) return { relancees: 0 };
     const dues = await this.prisma.factureNegoce.findMany({ where: { statut: "envoyee", relanceeLe: null, payeeLe: null, echeanceLe: { lt: maintenant } }, include: { negoce: true, lot: true } });
     let relancees = 0;
     for (const f of dues) {

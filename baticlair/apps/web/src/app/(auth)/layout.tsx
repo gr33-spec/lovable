@@ -1,3 +1,4 @@
+import { PiedLegal } from "@/components/legal";
 import Link from "next/link";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -13,6 +14,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <span className="text-base font-extrabold">BatiClair</span>
       </Link>
       {children}
+      <PiedLegal />
     </main>
   );
 }

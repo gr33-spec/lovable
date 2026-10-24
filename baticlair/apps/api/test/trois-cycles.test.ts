@@ -214,9 +214,11 @@ it("15 octobre, 1er novembre, 15 décembre : trois commandes complètes, chaque 
   expect([vueF.clotureLe, vueF.reponseAvant, vueF.premier]).toEqual(["2026-12-15T11:00:00.000Z", "2026-12-22T17:00:00.000Z", "Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande."]);
   expect(await tache("2026-12-15T11:01:00.000Z")).toMatchObject({ clos: 1, grillesEnvoyees: 5 });
   expect(await tache("2026-12-22T17:01:00.000Z")).toMatchObject({ resultats: 1 });
-  const dF = await resultats(F, "2026-12-15", "2026-12-23T08:00:00.000Z");
-  expect(dF.lignes).toBeNull();
-  expect((await F.agent.get("/v1/commande-du-mois?maintenant=2026-12-23T08:00:00.000Z").expect(200)).body.commandes.find((x: { mois: string }) => x.mois === "2026-12-15").suivi).toMatchObject({ etape: 2, phrase: "Aucun négoce n'a chiffré la commande du 15 décembre.", aFaire: "Commande ta liste en direct chez ton négoce." });
+  // Greg (24 octobre 2026) : aucune réponse, la liste de F passe toute seule à la commande du 1er janvier.
+  const vuesF = (await F.agent.get("/v1/commande-du-mois?maintenant=2026-12-23T08:00:00.000Z").expect(200)).body.commandes as { mois: string; report: string | null; toi: string }[];
+  expect(vuesF.find((x) => x.mois === "2026-12-15")).toBeUndefined();
+  expect(vuesF.find((x) => x.mois === "2027-01-01")).toMatchObject({ report: "Aucun négoce n'a répondu à la commande du 15 décembre. Ta liste passe automatiquement à la commande du 1er janvier." });
+  expect(vuesF.find((x) => x.mois === "2027-01-01")!.toi).toMatch(/200 m de liteau/);
   // Après le 15 décembre, la suivante est le 1er janvier (un vendredi) : réponses avant le vendredi 8, 18 h.
   expect((await F.agent.get("/v1/commande-du-mois?maintenant=2026-12-23T08:00:00.000Z").expect(200)).body.prochaine).toMatchObject({ mois: "2027-01-01", de: "du 1er janvier", clotureLe: "2027-01-01T11:00:00.000Z" });
 });

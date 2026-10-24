@@ -115,12 +115,15 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             nameProject: async (tenant, projectId, read) => {
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { name: true, address: true, clientName: true } });
               if (!project) return;
-              const address = project.address ?? read.address?.slice(0, 300) ?? null;
-              const name = project.name === NEW_PROJECT_NAME ? siteNameFromQuote({ client: read.client, commune: communeOf(address) }) : null;
+              // Le texte lu est déjà anonymisé : d'une adresse lue, il ne reste que la commune.
+              const lue = read.address ? read.address.replace(/\[(?:adresse retirée|client)\],?\s*/g, "").trim() || null : null;
+              const address = project.address ?? lue?.slice(0, 300) ?? null;
+              // RGPD (Greg, 24 octobre 2026 ; RÈGLE CHANGÉE §48, avant : « Chantier Dupont ») : le chantier prend le nom de sa
+              // commune, jamais celui du client lu dans le devis, et le nom du client n'est plus recopié.
+              const name = project.name === NEW_PROJECT_NAME ? siteNameFromQuote({ client: null, commune: communeOf(address) }) : null;
               const data = {
                 ...(name ? { name } : {}),
-                ...(!project.address && read.address ? { address: read.address.slice(0, 300) } : {}),
-                ...(!project.clientName && read.client ? { clientName: read.client.slice(0, 120) } : {}),
+                ...(!project.address && lue ? { address: lue.slice(0, 300) } : {}),
               };
               if (Object.keys(data).length > 0) await prisma.project.updateMany({ where: { id: projectId, companyId: tenant.companyId }, data });
             },

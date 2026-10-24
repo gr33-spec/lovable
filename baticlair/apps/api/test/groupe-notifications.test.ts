@@ -18,6 +18,7 @@ const avant = { GROUPE: process.env.GROUPE, RESEND_WEBHOOK_SECRET: process.env.R
 const SECRET = "whsec_" + Buffer.from("secret-du-webhook-de-test-0000").toString("base64");
 beforeAll(async () => {
   process.env.GROUPE = "on";
+  process.env.FACTURATION_NEGOCE = "on";
   process.env.RESEND_WEBHOOK_SECRET = SECRET;
   process.env.REPONSES_DOMAINE = "reponses.example.com";
   process.env.FACTURE_EMETTEUR_NOM = "Société Émettrice";
@@ -29,6 +30,7 @@ beforeAll(async () => {
   push = ctx.app.get(PUSH_SENDER);
 });
 afterAll(async () => {
+  delete process.env.FACTURATION_NEGOCE;
   await ctx.app.close();
   for (const [k, v] of Object.entries(avant)) if (v === undefined) delete process.env[k];
   else process.env[k] = v;

@@ -44,8 +44,19 @@ import {
   type PaliersLivraison,
   type PhaseCycle,
   familleDuMetier,
+  consultationPourLeNegoce,
+  messageDeReport,
+  messageNouvellesReponses,
+  phraseDeMonNegoce,
+  phraseDeReport,
+  phraseResultatsLe,
+  suiviDesDemandes,
+  CONDITIONS_NEGOCE_VERSION,
+  conditionsNegoceAJour,
+  type SuiviDesDemandes,
 } from "@baticlair/domain";
 import type { Alerter } from "../../../platform/alerts/alerter.js";
+import { estExclu } from "../../privacy/index.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -57,7 +68,7 @@ import type { EspaceNegoceService } from "./espace-negoce.service.js";
 import type { Geocodeur } from "./geocodeur.js";
 import { lignesProposables } from "./groupe.service.js";
 import { statutDeLecture, type NegoceExtractor, type ReponseLue } from "./negoce-extractor.js";
-import { pdfDeTexte } from "./pdf-texte.js";
+import { pdfDeTexte } from "../../../platform/pdf/pdf-texte.js";
 
 /** Les lignes qui comptent dans une commande du mois : déposées, puis commandées (jamais les retirées). */
 const DANS_LA_COMMANDE = ["signe", "commande"] as const;
@@ -102,6 +113,12 @@ export interface VueDuMois {
   premier: string | null;
   mesLignes: { id: string; designation: string; quantite: number; unite: string; nature: string | null; chantier: string; projectId: string }[];
   suivi: ReturnType<typeof suiviDansLeMois>;
+  /** Le suivi des demandes de prix (Greg, 24 octobre 2026) : des comptes, jamais un nom ni un prix avant les résultats. */
+  demandes: SuiviDesDemandes | null;
+  /** Les négoces que l'artisan a mis dans la boucle : répondu ou pas (phase des négoces seulement). */
+  mesNegoces: string[];
+  /** La liste reportée d'une commande sans réponse : « Aucun négoce n'a répondu à la commande du 1er novembre… ». */
+  report: string | null;
   resultats: null | {
     parDefaut: string | null;
     moinsCherPourToi: string | null;
@@ -140,6 +157,10 @@ export function familleDeLEntreprise(trades: readonly string[] | null | undefine
 const PART_NON_GARANTIE_ALERTE = 0.3;
 const CLE_RAPPELS = (cycleId: string) => `rappels-cloture:${cycleId}`;
 const CLE_ALERTE = (quoi: string, cycleId: string) => `alerte:${quoi}:${cycleId}`;
+/** Les listes reportées dans une commande (une entrée par commande sans réponse) : `[{ de, entreprises }]`. */
+const CLE_REPORT = (cycleId: string) => `report:${cycleId}`;
+/** Les réponses de négoces pas encore annoncées à un artisan (une notification par jour au plus). */
+const CLE_REPONSES = (cycleId: string, companyId: string) => `reponses:${cycleId}:${companyId}`;
 
 /**
  * LA COMMANDE COMMUNE DU MOIS (décision de Greg, 22 octobre 2026, au soir), côté serveur. Elle remplace le regroupement
@@ -411,7 +432,7 @@ export class CommandeDuMoisService {
     return fusionnerLesListes(besoins.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite })));
   }
 
-  private async vueDuCycle(tenant: TenantContext, c: { id: string; numero: number; mois: string; phase: string; zone: string; clotureLe: Date; reponseAvant: Date; lignes: unknown }, maintenant: Date): Promise<VueDuMois> {
+  private async vueDuCycle(tenant: TenantContext, c: { id: string; numero: number; mois: string; phase: string; zone: string; clotureLe: Date; reponseAvant: Date; relanceLe: Date; lignes: unknown }, maintenant: Date): Promise<VueDuMois> {
     const phase = c.phase as PhaseCycle;
     const mes = await this.prisma.besoin.findMany({ where: { cycleId: c.id, companyId: tenant.companyId, statut: { in: [...DANS_LA_COMMANDE] } }, orderBy: { createdAt: "asc" }, include: { project: { select: { name: true } } } });
     const toi = fusionnerLesListes(mes.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite })));
@@ -439,6 +460,19 @@ export class CommandeDuMoisService {
       }
     }
     const deposees = grilles.filter((g) => g.deposeLe).length;
+    const demandes = suiviDesDemandes({ mois: c.mois, phase, consultes: grilles.length, repondus: deposees, reponseAvant: c.reponseAvant, relanceLe: c.relanceLe, maintenant });
+    // Les négoces de l'artisan dans ce département : a répondu ou pas, jamais leur prix avant les résultats.
+    let mesNegoces: string[] = [];
+    if (phase === "negoces") {
+      const liens = await this.prisma.negoceArtisan.findMany({ where: { companyId: tenant.companyId, negoce: { departement: c.zone, stopLe: null } }, include: { negoce: { select: { id: true, nom: true } } }, orderBy: { rang: "asc" } });
+      const grilleDe = new Map(grilles.map((g) => [g.negoceId, g]));
+      mesNegoces = liens.map((l) => {
+        const g = grilleDe.get(l.negoce.id);
+        return phraseDeMonNegoce(l.negoce.nom, !g ? "pas_consulte" : g.deposeLe ? "repondu" : "attente");
+      });
+    }
+    const reports = ((await this.prisma.parametreGroupe.findUnique({ where: { cle: CLE_REPORT(c.id) } }))?.valeur as { de: string; entreprises: string[] }[] | null) ?? [];
+    const report = reports.find((r) => r.entreprises.includes(tenant.companyId));
     return {
       cycleId: c.id,
       numero: c.numero,
@@ -452,7 +486,10 @@ export class CommandeDuMoisService {
       reponseDans,
       ...affichage,
       mesLignes: mes.map((b) => ({ id: b.id, designation: b.designation, quantite: Number(b.quantite), unite: b.unite, nature: b.nature, chantier: b.project.name, projectId: b.projectId })),
-      suivi: suiviDansLeMois({ mois: c.mois, phase, clotureDans, reponseDans, grilles: deposees, negoces: grilles.length, commande: !!choix?.commandeLe }),
+      suivi: suiviDansLeMois({ mois: c.mois, phase, clotureDans, reponseDans, grilles: deposees, negoces: grilles.length, commande: !!choix?.commandeLe, resultatsLe: phase === "negoces" ? phraseResultatsLe(c.reponseAvant) : null }),
+      demandes,
+      mesNegoces,
+      report: report ? phraseDeReport(report.de, c.mois) : null,
       resultats,
     };
   }
@@ -562,6 +599,7 @@ export class CommandeDuMoisService {
       }
     }
     const ajouts = await this.ajoutsEnAttente(maintenant);
+    await this.reponsesEnAttente(maintenant);
     await this.alertesDeSurveillance(maintenant).catch(() => undefined);
     return { clos, grillesEnvoyees, relances, resultats, ajouts };
   }
@@ -648,7 +686,9 @@ export class CommandeDuMoisService {
     const p = await this.prisma.parametreGroupe.findUnique({ where: { cle } });
     const faits = ((p?.valeur as string[] | null) ?? []).filter((x) => typeof x === "string");
     if (faits.includes(compte.id)) return;
-    const mail = mailClotureSansCompte({ mois: c.mois, departement: c.zone, lien: this.espace.lienInvitation(compte.id, maintenant) });
+    // Droit d'opposition (24 octobre 2026) : jamais un rappel à qui a demandé à ne plus être contacté.
+    if (await estExclu(this.prisma, { email: n.email, siret: n.siret })) return;
+    const mail = mailClotureSansCompte({ mois: c.mois, departement: c.zone, lien: this.espace.lienInvitation(compte.id, maintenant), opposition: this.espace.lienOpposition(compte.id, maintenant) });
     await this.email.send({ to: n.email, subject: mail.objet, text: mail.texte }).catch(() => undefined);
     await this.prisma.compteNegoce.update({ where: { id: compte.id }, data: { rappels: { increment: 1 }, invitationLe: maintenant } });
     await this.prisma.parametreGroupe.upsert({ where: { cle }, create: { cle, valeur: [...faits, compte.id] }, update: { valeur: [...faits, compte.id] } });
@@ -669,8 +709,12 @@ export class CommandeDuMoisService {
   }
 
   /** À la limite : figé ; chaque artisan est prévenu, chaque négoce reçoit son message (retenu ou neutre). */
-  private async publierLesResultats(c: { id: string; mois: string; zone: string; lignes: unknown }, maintenant: Date): Promise<void> {
+  private async publierLesResultats(c: { id: string; mois: string; famille: string; zone: string; lignes: unknown }, maintenant: Date): Promise<void> {
     const { classement, chiffrees } = await this.classement(c.id, c.lignes as unknown as LigneDeGrille[]);
+    if (chiffrees.length === 0) {
+      await this.reporter(c, maintenant);
+      return;
+    }
     const premier = classement[0]?.negoceId ?? null;
     // La grille garantie 30 jours (Greg, 23 octobre 2026) : le premier sur le total tient ses prix pour toute la zone.
     const retenu = classement[0]?.complete ? premier : null;
@@ -689,6 +733,68 @@ export class CommandeDuMoisService {
     for (const { companyId } of entreprises) {
       await this.notifications.prevenir(companyId, { titre: "Les prix sont là", corps: "Regarde ton prix livré chez chaque négoce et commande si ça te plaît.", url: "/groupe", etiquette: `resultats-${c.id}` }).catch(() => undefined);
     }
+  }
+
+  /**
+   * AUCUNE RÉPONSE À L'ÉCHÉANCE (Greg, 24 octobre 2026) : la liste de chaque artisan passe toute seule à la commande
+   * suivante du même métier et du même département (« Ta liste passe automatiquement à la commande du 15 novembre »).
+   * Les lignes ne sont pas recopiées : elles changent de commande. Chaque artisan est prévenu une fois.
+   */
+  private async reporter(c: { id: string; mois: string; famille: string; zone: string }, maintenant: Date): Promise<void> {
+    await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { phase: "resultats", resultatsLe: maintenant, retenuId: null, garantieJusquau: null } });
+    const besoins = await this.prisma.besoin.findMany({ where: { cycleId: c.id, statut: "signe" }, select: { id: true, companyId: true } });
+    if (besoins.length === 0) return;
+    const { cycle: suivant } = await this.cycleOuvert(c.famille, c.zone, maintenant);
+    const entreprises = [...new Set(besoins.map((b) => b.companyId))];
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM cycle_commande WHERE id = ${suivant.id}::uuid FOR UPDATE`;
+      await tx.besoin.updateMany({ where: { id: { in: besoins.map((b) => b.id) } }, data: { cycleId: suivant.id } });
+      const p = await tx.parametreGroupe.findUnique({ where: { cle: CLE_REPORT(suivant.id) } });
+      const reports = [...(((p?.valeur as { de: string; entreprises: string[] }[] | null) ?? []).filter((r) => r.de !== c.mois)), { de: c.mois, entreprises }];
+      await tx.parametreGroupe.upsert({ where: { cle: CLE_REPORT(suivant.id) }, create: { cle: CLE_REPORT(suivant.id), valeur: reports }, update: { valeur: reports } });
+    });
+    const message = messageDeReport(c.mois, suivant.mois);
+    for (const companyId of entreprises) {
+      await this.notifications.prevenir(companyId, { ...message, url: "/groupe", etiquette: `report-${c.id}` }).catch(() => undefined);
+    }
+  }
+
+  /**
+   * « 2 nouvelles réponses. » : chaque artisan de la commande est prévenu d'une grille déposée, au plus une fois par jour
+   * (les suivantes attendent le passage d'un autre jour, regroupées). Jamais le nom du négoce ni son prix.
+   */
+  private async annoncerReponse(cycle: { id: string; reponseAvant: Date }, maintenant: Date): Promise<void> {
+    const entreprises = await this.prisma.besoin.findMany({ where: { cycleId: cycle.id, statut: { in: [...DANS_LA_COMMANDE] } }, select: { companyId: true }, distinct: ["companyId"] });
+    for (const { companyId } of entreprises) {
+      const cle = CLE_REPONSES(cycle.id, companyId);
+      const p = await this.prisma.parametreGroupe.findUnique({ where: { cle } });
+      const etat = (p?.valeur as { enAttente?: number; dernierEnvoi?: string } | null) ?? {};
+      const enAttente = (etat.enAttente ?? 0) + 1;
+      if (etat.dernierEnvoi && moisJour(new Date(etat.dernierEnvoi)) === moisJour(maintenant)) {
+        await this.prisma.parametreGroupe.upsert({ where: { cle }, create: { cle, valeur: { enAttente, dernierEnvoi: etat.dernierEnvoi } }, update: { valeur: { enAttente, dernierEnvoi: etat.dernierEnvoi } } });
+        continue;
+      }
+      await this.notifications.prevenir(companyId, { ...messageNouvellesReponses(enAttente, cycle.reponseAvant), url: "/groupe", etiquette: `reponses-${cycle.id}` }).catch(() => undefined);
+      await this.prisma.parametreGroupe.upsert({ where: { cle }, create: { cle, valeur: { enAttente: 0, dernierEnvoi: maintenant.toISOString() } }, update: { valeur: { enAttente: 0, dernierEnvoi: maintenant.toISOString() } } });
+    }
+  }
+
+  /** Les réponses restées en attente partent au premier passage d'un autre jour, tant que les résultats ne sont pas là. */
+  private async reponsesEnAttente(maintenant: Date): Promise<number> {
+    let envoyes = 0;
+    for (const p of await this.prisma.parametreGroupe.findMany({ where: { cle: { startsWith: "reponses:" } } })) {
+      const etat = p.valeur as { enAttente?: number; dernierEnvoi?: string };
+      if (!etat.enAttente || (etat.dernierEnvoi && moisJour(new Date(etat.dernierEnvoi)) === moisJour(maintenant))) continue;
+      const [, cycleId, companyId] = p.cle.split(":");
+      const cycle = await this.prisma.cycleCommande.findUnique({ where: { id: cycleId! }, select: { phase: true, reponseAvant: true } });
+      // Les résultats publiés ont leur propre notification : les réponses en attente n'ont plus lieu d'être.
+      if (cycle?.phase === "negoces") {
+        await this.notifications.prevenir(companyId!, { ...messageNouvellesReponses(etat.enAttente, cycle.reponseAvant), url: "/groupe", etiquette: `reponses-${cycleId}` }).catch(() => undefined);
+        envoyes++;
+      }
+      await this.prisma.parametreGroupe.update({ where: { cle: p.cle }, data: { valeur: { enAttente: 0, dernierEnvoi: maintenant.toISOString() } } });
+    }
+    return envoyes;
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -721,6 +827,8 @@ export class CommandeDuMoisService {
       departement: g.cycle.zone,
       ouverte,
       echeance: ouverte ? echeanceNegoce(g.cycle.reponseAvant, maintenant) : null,
+      // Combien de négoces sont consultés, jamais lesquels (Greg, 24 octobre 2026).
+      consultation: consultationPourLeNegoce(await this.prisma.grilleNegoce.count({ where: { cycleId: g.cycleId } }), g.cycle.reponseAvant),
       reponseAvant: g.cycle.reponseAvant.toISOString(),
       zones,
       lignes: lignes.map((l) => ({ cle: l.cle, designation: l.designation, quantite: l.quantite, unite: l.unite, prixUnitaire: prix[l.cle] ?? null, nonGaranti: g.nonGarantis.includes(l.cle) })),
@@ -729,6 +837,8 @@ export class CommandeDuMoisService {
       // Le dépôt demande un compte inscrit (dépôts et paliers) : sans lui, le lien pour le créer.
       inscription: inscrit ? null : { lien: g.negoce.compteId ? this.espace.lienInvitation(g.negoce.compteId, maintenant) : await this.espace.inviter(g.negoce, maintenant) },
       livraison: inscrit ? phrasePaliers(compte!.livraison as unknown as PaliersLivraison) : null,
+      // Une version majeure des conditions (24 octobre 2026) se redemande avant le prochain dépôt : sa date, ou null.
+      conditionsAAccepter: inscrit && !conditionsNegoceAJour(compte!.conditionsVersion) ? CONDITIONS_NEGOCE_VERSION : null,
       phrases: { regles: PHRASE_AU_NEGOCE, fermes: PHRASE_PRIX_FERMES, volume: PHRASE_PRIX_FERMES_VOLUME },
     };
   }
@@ -739,12 +849,17 @@ export class CommandeDuMoisService {
    * grille, la distance du dépôt le plus proche à chaque chantier. Le devis est lu UNE fois ; un nouveau dépôt remplace
    * le précédent.
    */
-  async deposerGrille(jeton: string, depot: { fichiers: FichierGrille[]; fermes: boolean; nonGarantis: readonly string[] }, maintenant = new Date()) {
+  async deposerGrille(jeton: string, depot: { fichiers: FichierGrille[]; fermes: boolean; conditions?: boolean; nonGarantis: readonly string[] }, maintenant = new Date()) {
     const g = await this.grilleDuJeton(jeton);
     if (g.cycle.phase !== "negoces" || maintenant >= g.cycle.reponseAvant) throw new DomainError("conflict", "Deadline passed", { reason: "delai_passe" });
     const compte = g.negoce.compteId ? await this.prisma.compteNegoce.findUnique({ where: { id: g.negoce.compteId }, include: { depots: true } }) : null;
     if (!compte?.inscritLe || compte.depots.length === 0 || !compte.livraison) throw new DomainError("conflict", "Account required", { reason: "inscription_requise" });
     if (!depot.fermes) throw validationFailed("Firm prices required", { reason: "prix_fermes_requis" });
+    // Les conditions en vigueur (version majeure) : acceptées une fois, horodatées sur le compte.
+    if (!conditionsNegoceAJour(compte.conditionsVersion)) {
+      if (!depot.conditions) throw validationFailed("Current terms must be accepted", { reason: "conditions_requises", version: CONDITIONS_NEGOCE_VERSION });
+      await this.prisma.compteNegoce.update({ where: { id: compte.id }, data: { conditionsAccepteesLe: maintenant, conditionsVersion: CONDITIONS_NEGOCE_VERSION } });
+    }
     if (depot.fichiers.length === 0) throw validationFailed("Quote required", { reason: "devis_requis" });
     if (depot.fichiers.length > 2) throw validationFailed("Two quotes at most", { reason: "deux_devis_au_plus" });
     for (const f of depot.fichiers) if (f.type !== "application/pdf" || !f.contenu.subarray(0, 5).toString().startsWith("%PDF")) throw validationFailed("PDF only", { reason: "pdf_seulement" });
@@ -755,6 +870,7 @@ export class CommandeDuMoisService {
     const depots = compte.depots.map((d) => ({ adresse: d.adresse, lat: d.lat, lon: d.lon }));
     const distances = await this.distances(g.cycleId, depots);
     const livraison: LivraisonEnregistree = { depots, paliers: compte.livraison as unknown as PaliersLivraison, distances };
+    const premierDepot = !g.deposeLe;
     await this.prisma.$transaction(async (tx) => {
       await tx.grilleNegoceFichier.deleteMany({ where: { grilleId: g.id } });
       await tx.grilleNegoce.update({
@@ -762,6 +878,7 @@ export class CommandeDuMoisService {
         data: { deposeLe: maintenant, prix: lecture.prix, statutExtraction: lecture.statut, livraison: livraison as object, nonGarantis, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
       });
     });
+    if (premierDepot) await this.annoncerReponse(g.cycle, maintenant).catch(() => undefined);
     return this.pageGrille(jeton, maintenant);
   }
 

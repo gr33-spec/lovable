@@ -4,7 +4,7 @@
  * (la phrase en gras), le PDF en deux parties sans nom de client, le contrat.
  */
 import { describe, expect, it } from "vitest";
-import { DELAI_REPONSE_JOURS, documentDemande, htmlDemande, negoceConcerne, objetDemande, PHRASE_ACCORD, PHRASE_COMMISSION, TAUX_COMMISSION_POURCENT, texteContrat, texteDemande, VERSION_CONTRAT, volumesDuLot, type LotADemander } from "../src/index.js";
+import { DELAI_REPONSE_JOURS, documentDemande, htmlDemande, negoceConcerne, objetDemande, PHRASE_ACCORD, PHRASE_COMMISSION, TAUX_COMMISSION_POURCENT, texteContrat, texteContratCommission, texteDemande, VERSION_CONTRAT, volumesDuLot, type LotADemander } from "../src/index.js";
 
 const d = (s: string) => new Date(`${s}T00:00:00Z`);
 const lot: LotADemander = {
@@ -49,8 +49,10 @@ describe("groupé, étape 5 : la demande aux négoces", () => {
     expect(html).toContain(`<strong>${PHRASE_COMMISSION}</strong>`);
     expect(html).toContain(`<a href="${lot.lienReponse}">`);
     // Section 6, mot pour mot.
-    expect(PHRASE_COMMISSION).toBe(`En répondant, vous acceptez de reverser ${TAUX_COMMISSION_POURCENT} % du montant HT du lot à BatiClair si votre offre est retenue. Intégrez-les à votre prix.`);
-    expect(PHRASE_ACCORD).toBe(`J'accepte de reverser ${TAUX_COMMISSION_POURCENT} % du montant HT du lot à BatiClair si mon offre est retenue`);
+    // Greg, 24 octobre 2026 : plus de 2 %, la formule unique.
+    expect(PHRASE_COMMISSION).toBe("Aucun frais pour l'instant. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce.");
+    expect(PHRASE_COMMISSION).not.toContain(`${TAUX_COMMISSION_POURCENT} %`);
+    expect(PHRASE_ACCORD).toBe("J'accepte les conditions de la Commande commune");
   });
 
   it("le PDF en deux parties : les lots (ferme / probable), puis chaque chantier (adresse, quantité, fenêtre, engagement), la phrase en pied", () => {
@@ -70,12 +72,15 @@ describe("groupé, étape 5 : la demande aux négoces", () => {
     expect(doc.pied).toBe(PHRASE_COMMISSION);
   });
 
-  it("le contrat de commission : la version, 2 % du HT du lot, à 30 jours, l'acceptation par la case, projet à valider par le fondateur", () => {
+  it("le contrat : la version, aucun coût, l'acceptation par la case ; l'ancien contrat de commission reste lisible pour sa version", () => {
     const c = texteContrat();
     expect(c[0]).toContain(VERSION_CONTRAT);
     expect(c[0]).not.toContain("projet");
-    expect(c.join("\n")).toContain("2 % du montant hors taxes du lot");
-    expect(c.join("\n")).toContain("payable à 30 jours");
-    expect(c.join("\n")).toContain("en cochant la case");
+    expect(c.join("\n")).not.toMatch(/\d+ % du montant/);
+    expect(c.join("\n")).toContain("Aucun frais pour l'instant");
+    const ancien = texteContratCommission("2026-10-22");
+    expect(ancien.join("\n")).toContain("2 % du montant hors taxes du lot");
+    expect(ancien.join("\n")).toContain("payable à 30 jours");
+    expect(ancien.join("\n")).toContain("en cochant la case");
   });
 });

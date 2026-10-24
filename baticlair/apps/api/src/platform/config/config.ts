@@ -125,6 +125,12 @@ const envSchema = z
     FACTURE_EMETTEUR_TVA: z.string().min(4).optional(),
     /** La TVA sur la commission, en pour cent (assujettie : 20). */
     FACTURE_TVA_POURCENT: z.coerce.number().min(0).max(100).default(20),
+    /**
+     * La facturation automatique des négoces (Greg, 24 octobre 2026 : plus de commission de 2 %). Éteinte par défaut : aucune
+     * facture n'est émise ni relancée, aucun accord ne porte de taux. Le code reste, prêt pour une commission future
+     * (« avec un préavis de 60 jours et l'accord du négoce »).
+     */
+    FACTURATION_NEGOCE: z.enum(["on", "off"]).default("off"),
     /** Le domaine des adresses de réponse des lots (`lot-<n°>@<domaine>`, webhook Resend entrant). Vide : pas d'adresse de réponse. */
     REPONSES_DOMAINE: z.string().min(3).optional(),
     /** Le secret de signature du webhook Resend (Svix, « whsec_… »). Vide : webhook fermé. */
@@ -218,7 +224,7 @@ export interface AppConfig {
     enabled: boolean;
     inseeApiKey: string | null;
     siretVerification: "insee" | "forme";
-    facture: { emetteur: { nom: string; forme: string | null; siret: string; adresse: string; tvaIntracom: string } | null; tvaPourcent: number };
+    facture: { emetteur: { nom: string; forme: string | null; siret: string; adresse: string; tvaIntracom: string } | null; tvaPourcent: number; active: boolean };
     reponsesDomaine: string | null;
     resendWebhookSecret: string | null;
     admins: string[];
@@ -317,6 +323,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
             ? { nom: e.FACTURE_EMETTEUR_NOM, forme: e.FACTURE_EMETTEUR_FORME ?? null, siret: e.FACTURE_EMETTEUR_SIRET, adresse: e.FACTURE_EMETTEUR_ADRESSE, tvaIntracom: e.FACTURE_EMETTEUR_TVA }
             : null,
         tvaPourcent: e.FACTURE_TVA_POURCENT,
+        active: e.FACTURATION_NEGOCE === "on",
       },
       reponsesDomaine: e.REPONSES_DOMAINE ?? null,
       resendWebhookSecret: e.RESEND_WEBHOOK_SECRET ?? null,

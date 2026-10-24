@@ -61,7 +61,23 @@ export interface CommandeDuMois {
   premier: string | null;
   mesLignes: { id: string; designation: string; quantite: number; unite: string; nature: string | null; chantier: string; projectId: string }[];
   suivi: { etape: number; phrase: string; aFaire: string | null };
+  /** Le suivi des demandes de prix (Greg, 24 octobre 2026) ; absent d'une ancienne API. */
+  demandes?: SuiviDesDemandes | null;
+  /** « Ton négoce X a répondu » : les négoces que l'artisan a mis dans la boucle (phase des négoces). */
+  mesNegoces?: string[];
+  /** La liste reportée d'une commande sans réponse. */
+  report?: string | null;
   resultats: null | { parDefaut: string | null; moinsCherPourToi: string | null; negoces: NegoceDuResultat[]; choix: { negoceId: string; totalHt: number; commandeLe: string | null } | null };
+}
+
+/** Des comptes, jamais un nom ni un prix avant les résultats : phrases calculées par le domaine (`suiviDesDemandes`). */
+export interface SuiviDesDemandes {
+  titre: string;
+  resultatsLe: string | null;
+  compteur: string | null;
+  progression: number | null;
+  phrase: string | null;
+  boucle: boolean;
 }
 
 export interface EtatDuMois {
@@ -151,8 +167,26 @@ export function BandeauDuMois() {
   const { features } = useSession();
   const pathname = usePathname();
   const actif = features.groupe === true && features.commandeCommune !== "lots" && pathname !== "/";
-  const { prochaine } = useProchaineCommande(actif);
+  const { prochaine, etat } = useProchaineCommande(actif);
   if (!actif || !prochaine) return null;
+  // Les prix demandés (Greg, 24 octobre 2026) : tant que les négoces chiffrent une commande de l'artisan, le bandeau dit
+  // où ils en sont (« 4/10 réponses · Résultats le 08/11 à 18 h ») ; sinon, la prochaine clôture.
+  const demandes = (etat?.commandes ?? []).find((c) => c.phase === "negoces" && c.demandes);
+  if (demandes?.demandes) {
+    const d = demandes.demandes;
+    const court = d.compteur ? d.compteur.replace(/^(\d+) négoces? sur (\d+) (?:ont|a) répondu$/, "$1/$2 réponses").replace(/^Aucun négoce sur (\d+) n'a encore répondu$/, "0/$1 réponse").replace(/^Les (\d+) négoces ont répondu$/, "$1/$1 réponses") : "Prix demandés";
+    return (
+      <Link
+        href="/groupe"
+        aria-label={`Commande ${demandes.de} : ${d.compteur ?? d.titre}. ${d.resultatsLe ?? ""}`}
+        className="pressable -mt-1 flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[14px] font-semibold text-ink active:bg-ground"
+      >
+        <Store size={16} aria-hidden="true" className="shrink-0 text-accent-text" />
+        <span className="truncate">{court}</span>
+        {d.resultatsLe ? <span className="ml-auto shrink-0 text-accent-text tabular-nums">{d.resultatsLe}</span> : null}
+      </Link>
+    );
+  }
   return (
     <Link
       href="/groupe"
@@ -440,6 +474,63 @@ export function CommandeDuMoisPanneau({ etat, onChange }: { etat: EtatDuMois; on
   );
 }
 
+/**
+ * LE SUIVI DES DEMANDES DE PRIX (Greg, 24 octobre 2026) : « Demandes envoyées à 10 négoces de ton secteur », le chrono
+ * des résultats, « 4 négoces sur 10 ont répondu » et sa barre, la relance ou le bilan ; ses négoces à lui (répondu ou
+ * pas) ; et quand personne ne peut répondre, « Mets ton négoce dans la boucle ». Jamais un nom de concurrent ni un prix.
+ */
+export function SuiviDesDemandesBloc({ d, mesNegoces = [] }: { d: SuiviDesDemandes; mesNegoces?: string[] }) {
+  const pourcent = d.progression === null ? null : Math.round(d.progression * 100);
+  return (
+    <section aria-label="Prix demandés" className="flex flex-col gap-2 rounded-xl bg-ground p-4">
+      <p className="text-[16px] font-extrabold">{d.titre}</p>
+      {d.resultatsLe ? <Chrono className="text-[15px]">{d.resultatsLe}</Chrono> : null}
+      {d.compteur && pourcent !== null ? (
+        <>
+          <p role="status" className="text-[15px] font-semibold">
+            {d.compteur}
+          </p>
+          <div role="progressbar" aria-label="Réponses des négoces" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pourcent} className="h-2.5 overflow-hidden rounded-full bg-line">
+            <div className="h-full rounded-full bg-ink transition-[width] duration-300" style={{ width: `${pourcent}%` }} />
+          </div>
+        </>
+      ) : null}
+      {d.phrase ? <p className="text-[15px] font-semibold">{d.phrase}</p> : null}
+      {mesNegoces.length > 0 ? (
+        <ul aria-label="Tes négoces" className="flex flex-col gap-1">
+          {mesNegoces.map((m) => (
+            <li key={m} className="text-[14px] text-muted">
+              {m}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {d.boucle ? <BoucleNegoce /> : null}
+    </section>
+  );
+}
+
+/** Sur l'accueil : chaque commande de l'artisan dont les prix sont demandés ou viennent d'arriver, en une carte. */
+export function DemandesEnCours({ etat }: { etat: EtatDuMois | null }) {
+  const enCours = (etat?.commandes ?? []).filter((c) => c.demandes && (c.phase === "negoces" || (c.phase === "resultats" && !c.resultats?.choix?.commandeLe)));
+  if (enCours.length === 0) return null;
+  return (
+    <>
+      {enCours.map((c) => (
+        <section key={c.cycleId} aria-label={`Prix demandés, commande ${c.de}`} className={`${CARTE} gap-3`}>
+          <div className="flex items-start justify-between gap-3">
+            <SectionTitle>{`Commande ${c.de}`}</SectionTitle>
+            <Link href="/groupe" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text underline">
+              Voir
+            </Link>
+          </div>
+          <SuiviDesDemandesBloc d={c.demandes!} mesNegoces={c.mesNegoces} />
+        </section>
+      ))}
+    </>
+  );
+}
+
 function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void }) {
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
@@ -473,9 +564,15 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
       ) : (
         <div className="flex flex-col gap-1">
           <SectionTitle>{`Commande ${c.de}`}</SectionTitle>
-          {c.phase === "inscriptions" && c.cloture ? <Chrono>{c.cloture}</Chrono> : <p className="text-[15px] font-semibold text-accent-text">{c.phase === "negoces" ? `Commande close. Les négoces chiffrent : leurs prix dans ${c.reponseDans}.` : "Les prix sont là."}</p>}
+          {c.phase === "inscriptions" && c.cloture ? <Chrono>{c.cloture}</Chrono> : c.demandes ? null : <p className="text-[15px] font-semibold text-accent-text">{c.phase === "negoces" ? `Commande close. Les négoces chiffrent : leurs prix dans ${c.reponseDans}.` : "Les prix sont là."}</p>}
         </div>
       )}
+      {c.report ? (
+        <p role="status" className="rounded-xl bg-warn-bg p-3 text-[14px] font-semibold text-warn">
+          {c.report}
+        </p>
+      ) : null}
+      {c.demandes ? <SuiviDesDemandesBloc d={c.demandes} mesNegoces={c.mesNegoces} /> : null}
       <div className="flex flex-col divide-y divide-line">
         <p className="py-3 text-[16px] font-semibold">{c.toi}</p>
         <p className="py-3 text-[16px] font-semibold">{c.tout}</p>

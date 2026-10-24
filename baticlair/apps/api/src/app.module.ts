@@ -9,7 +9,7 @@ import { IdentityModule } from "./modules/identity/index.js";
 import { OffersModule } from "./modules/offers/index.js";
 import { PartnersModule } from "./modules/partners/partners.module.js";
 import { PriceRequestsModule } from "./modules/price-requests/index.js";
-import { PrivacyModule } from "./modules/privacy/privacy.module.js";
+import { PrivacyModule } from "./modules/privacy/index.js";
 import { ProjectsModule } from "./modules/projects/index.js";
 import { QuantitatifsModule } from "./modules/quantitatifs/quantitatifs.module.js";
 import { SuppliersModule } from "./modules/suppliers/index.js";

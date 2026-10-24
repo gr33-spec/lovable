@@ -49,3 +49,37 @@ Aucune de ces failles n'est atteignable depuis l'application en ligne : toutes v
 3. **Rejeu d'un jeton de réponse de négoce** : le lien reste valable tant que le lot est « envoyé » (7 jours au plus) ; une expiration propre par lien (au-delà du lot) serait plus stricte.
 4. **Deux secrets sur le même poste de Greg** (`CRON_SECRET`, `RESEND_WEBHOOK_SECRET`) : les faire tourner à la mise en production, les noter dans `docs/groupe/MISE-EN-PROD.md`.
 5. **Alerte sur erreur 5xx** : `ALERT_*` existe ; vérifier en production qu'un webhook ou un e-mail d'alerte est bien configuré.
+
+## Procédure en cas de violation de données (RGPD, articles 33 et 34)
+
+Mise en place le 24 octobre 2026. Référent : Greg.
+
+1. **Constater et contenir** (heure 0) : couper l'accès en cause (faire tourner `AUTH_SECRET`, `CRON_SECRET`, la clé Neon, la clé Resend ou `BATICLAIR_ANTHROPIC_KEY` selon le cas ; révoquer les clés partenaires) ; garder les journaux (Vercel, Neon, Resend) sans les effacer.
+2. **Évaluer** : quelles données (comptes, listes, prix des négoces, coordonnées), combien de personnes, quel risque (usurpation, prix d'un négoce révélé à un concurrent, hameçonnage).
+3. **Notifier la CNIL sous 72 heures** après en avoir eu connaissance, sauf risque improbable : téléservice https://notifications.cnil.fr/notifications/index. Si tout n'est pas connu, notifier quand même et compléter ensuite.
+4. **Prévenir les personnes** sans délai si le risque est élevé (mots de passe, coordonnées, prix), par e-mail, avec le modèle ci-dessous.
+5. **Consigner** chaque violation, même non notifiée : date, faits, effets, mesures, dans le tableau ci-dessous.
+
+### Modèle de message aux personnes
+
+> Objet : Incident de sécurité sur BatiClair
+>
+> Bonjour,
+>
+> Le [date], nous avons constaté [ce qui s'est passé, en une phrase]. Les données concernées sont : [liste]. Elles ont pu être [consultées / copiées / modifiées] par [qui, si connu].
+>
+> Ce que nous avons fait : [mesures]. Ce que nous vous conseillons : [changer votre mot de passe BatiClair et partout où vous utilisiez le même ; vous méfier des e-mails qui demandent un paiement ou un mot de passe].
+>
+> Nous avons prévenu la CNIL le [date]. Pour toute question : [contact].
+>
+> Greg, BATI INVEST (BatiClair)
+
+### Journal des violations
+
+| Date | Faits | Données, personnes | Notifiée CNIL | Personnes prévenues | Mesures |
+|---|---|---|---|---|---|
+| — | Aucune à ce jour | — | — | — | — |
+
+### Ce qui limite l'effet d'une violation
+
+Mots de passe hachés (better-auth) ; devis anonymisés avant stockage ; fichier d'origine effacé après 30 jours ; liste d'exclusion en empreintes ; preuves d'acceptation en empreintes ; jetons des e-mails signés et à durée bornée ; isolation par entreprise testée route par route.

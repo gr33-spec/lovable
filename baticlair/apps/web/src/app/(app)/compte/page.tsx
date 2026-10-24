@@ -18,6 +18,7 @@ import {
   PageTitle,
 } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
+import { NOM } from "@/lib/nom";
 import { useSession } from "@/lib/session";
 
 export default function ComptePage() {
@@ -204,6 +205,14 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
       >
         Télécharger mes données
       </Button>
+      <a
+        href="/v1/me/export.pdf"
+        download
+        className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text"
+      >
+        En PDF
+      </a>
+      <EmailsActifs />
       <a
         href="/confidentialite"
         className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text"
@@ -699,5 +708,34 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
         </Button>
       ) : null}
     </Card>
+  );
+}
+
+/**
+ * « Ne plus recevoir ces e-mails » (RGPD, 24 octobre 2026) : le même réglage que le lien en bas de chaque e-mail. Coupés,
+ * seuls les bons de commande partent encore.
+ */
+function EmailsActifs() {
+  const [actifs, setActifs] = useState<boolean | null>(null);
+  const [pending, setPending] = useState(false);
+  useEffect(() => {
+    api<{ actifs: boolean }>("/v1/me/emails")
+      .then((r) => setActifs(r.actifs))
+      .catch(() => setActifs(null));
+  }, []);
+  if (actifs === null) return null;
+  async function changer(v: boolean) {
+    setPending(true);
+    try {
+      setActifs((await api<{ actifs: boolean }>("/v1/me/emails", { method: "PUT", body: { actifs: v } })).actifs);
+    } finally {
+      setPending(false);
+    }
+  }
+  return (
+    <label className="flex min-h-11 items-center gap-3 text-[15px]">
+      <input type="checkbox" checked={actifs} disabled={pending} onChange={(e) => void changer(e.target.checked)} className="size-5 accent-[var(--color-accent)]" />
+      Recevoir les e-mails de la {NOM}
+    </label>
   );
 }

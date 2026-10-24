@@ -6,6 +6,7 @@ import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { CurrentUser, type AuthenticatedUser } from "../../identity/index.js";
 import { AccountData } from "../infrastructure/account-data.js";
+import { pdfDesDonnees } from "../application/pdf-donnees.js";
 
 /** Suppression : l'artisan tape SUPPRIMER (pas d'effacement par un appui distrait). */
 const deleteBody = z.object({ confirm: z.literal("SUPPRIMER") });
@@ -20,6 +21,17 @@ export class PrivacyController {
     const day = new Date().toISOString().slice(0, 10);
     res.setHeader("Content-Disposition", `attachment; filename="baticlair-mes-donnees-${day}.json"`);
     return this.data.export(user.userId);
+  }
+
+  /** Mes données en PDF lisible (RGPD, accès) : le même contenu que le fichier JSON. */
+  @Throttle({ default: HOURLY(10) })
+  @Get("export.pdf")
+  async exportPdf(@CurrentUser() user: AuthenticatedUser, @Res() res: Response) {
+    const day = new Date().toISOString().slice(0, 10);
+    const pdf = await pdfDesDonnees("Mes données BatiClair", await this.data.export(user.userId));
+    res.setHeader("content-type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="baticlair-mes-donnees-${day}.pdf"`);
+    res.send(Buffer.from(pdf));
   }
 
   /** Supprimer mon compte (RGPD, article 17) : définitif. */

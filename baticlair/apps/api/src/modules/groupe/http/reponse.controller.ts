@@ -26,7 +26,7 @@ const depotBody = z.object({
 
 /**
  * LA PAGE DE RÉPONSE DU NÉGOCE (parcours groupé, étape 5) : par son lien unique, sans compte ni mot de passe, il voit le
- * lot (volumes, chantiers, fenêtre), le contrat de commission, coche l'accord (obligatoire) et dépose un ou deux devis.
+ * lot (volumes, chantiers, fenêtre), les conditions (sans commission depuis le 24 octobre 2026), coche l'accord (obligatoire) et dépose un ou deux devis.
  * Publique, limitée en débit ; 404 drapeau éteint, lien inconnu ou mal formé.
  */
 @Controller("v1/reponse")
@@ -51,7 +51,7 @@ export class ReponseController {
     this.ouvert();
     const pdf = await this.demande.contratPdf(jeton);
     res.setHeader("content-type", "application/pdf");
-    res.setHeader("content-disposition", 'inline; filename="contrat-commission.pdf"');
+    res.setHeader("content-disposition", 'inline; filename="conditions-commande-commune.pdf"');
     res.send(Buffer.from(pdf));
   }
 

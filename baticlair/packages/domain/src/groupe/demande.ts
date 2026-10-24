@@ -6,22 +6,25 @@ import { NOM_COMMANDE_COMMUNE, nomCommun } from "./nom.js";
  * (`NOM_COMMANDE_COMMUNE`), depuis l'adresse BatiClair, à tous les négoces du département qui vendent la
  * famille du lot ; un généraliste reçoit toutes ses familles dans un seul e-mail. Le PDF a deux parties : le total ferme
  * et le volume probable par référence, puis une ligne par chantier (adresse, quantité, fenêtre) sans nom de client.
- * Décision du fondateur (2026-10-20) : le négoce accepte AVANT de répondre une commission de 2 % du montant HT du lot s'il
- * est retenu (phrase en gras dans l'e-mail, case obligatoire sur la page de dépôt, contrat à côté).
+ * RÉMUNÉRATION (Greg, 24 octobre 2026) : plus aucune commission de 2 %. Une formulation unique partout (e-mail, page
+ * de dépôt, contrat, conditions) : `PHRASE_REMUNERATION_NEGOCE`. La facturation automatique des négoces dort derrière le
+ * drapeau `FACTURATION_NEGOCE` (éteint) ; son code reste, ainsi que l'ancien contrat (`texteContratCommission`).
  */
 export const NOM_DEMANDE = NOM_COMMANDE_COMMUNE;
 /**
- * Le nom tel qu'il figure au contrat de commission. Texte juridique : il ne change qu'avec la version du contrat
- * (`VERSION_CONTRAT`) ; « Regroupement artisans » → « Commande commune » le 22 octobre (décision de Greg), version 2026-10-22.
+ * Le nom tel qu'il figure au contrat. Texte juridique : il ne change qu'avec la version du contrat (`VERSION_CONTRAT`).
  */
 const NOM_AU_CONTRAT = NOM_COMMANDE_COMMUNE;
+/** Le taux de l'ancien contrat (2026-10-20 et 2026-10-22), gardé pour la facturation qui dort derrière `FACTURATION_NEGOCE`. */
 export const TAUX_COMMISSION_POURCENT = 2;
-/** La version du contrat de commission acceptée par le négoce (gardée dans l'accord). */
-export const VERSION_CONTRAT = "2026-10-22";
-/** Section 6, mot pour mot : dans l'e-mail, en gras. */
-export const PHRASE_COMMISSION = `En répondant, vous acceptez de reverser ${TAUX_COMMISSION_POURCENT} % du montant HT du lot à BatiClair si votre offre est retenue. Intégrez-les à votre prix.`;
-/** Section 7, étape 5, mot pour mot : la case obligatoire de la page de dépôt. */
-export const PHRASE_ACCORD = `J'accepte de reverser ${TAUX_COMMISSION_POURCENT} % du montant HT du lot à BatiClair si mon offre est retenue`;
+/** La formulation unique de la rémunération (Greg, 24 octobre 2026), mot pour mot, partout où un négoce la lit. */
+export const PHRASE_REMUNERATION_NEGOCE = "Aucun frais pour l'instant. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce.";
+/** La version du contrat acceptée par le négoce (gardée dans l'accord) : 2026-10-24, sans commission. */
+export const VERSION_CONTRAT = "2026-10-24";
+/** Dans l'e-mail, en gras : la formulation unique (plus de 2 %). */
+export const PHRASE_COMMISSION = PHRASE_REMUNERATION_NEGOCE;
+/** La case obligatoire de la page de dépôt : les conditions, sans taux. */
+export const PHRASE_ACCORD = "J'accepte les conditions de la Commande commune";
 /** Les réponses sont attendues sous sept jours (section 3 : « Réponses attendues sous 7 jours »). */
 export const DELAI_REPONSE_JOURS = 7;
 
@@ -91,7 +94,7 @@ function paragraphesDemande(lots: readonly LotADemander[]): { intro: string[]; p
   return { intro, parLot, fin };
 }
 
-/** Le corps en texte : la phrase de commission entourée d'astérisques et en capitales, faute de gras. */
+/** Le corps en texte : la phrase de rémunération entourée d'astérisques et en capitales, faute de gras. */
 export function texteDemande(lots: readonly LotADemander[], liens: { pasConcerne: string; stop: string }): string {
   const p = paragraphesDemande(lots);
   return [
@@ -109,7 +112,7 @@ export function texteDemande(lots: readonly LotADemander[], liens: { pasConcerne
 
 const html = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/** Le même corps en HTML : la phrase de commission EN GRAS (décision du fondateur, 2026-10-20). */
+/** Le même corps en HTML : la phrase de rémunération EN GRAS. */
 export function htmlDemande(lots: readonly LotADemander[], liens: { pasConcerne: string; stop: string }): string {
   const p = paragraphesDemande(lots);
   const par = (t: string) => `<p>${html(t)}</p>`;
@@ -137,10 +140,26 @@ export function documentDemande(lots: readonly LotADemander[], departement: stri
 }
 
 /**
- * LE CONTRAT DE COMMISSION (décision du fondateur, 2026-10-20), version ${VERSION_CONTRAT}. PROJET À VALIDER PAR LE
- * FONDATEUR avant toute ouverture : le texte ci-dessous est une rédaction de travail, pas un texte juridique relu.
+ * LES CONDITIONS DU LOT (version 2026-10-24, sans commission). PROJET À FAIRE RELIRE PAR L'AVOCAT avant toute ouverture.
  */
 export function texteContrat(version = VERSION_CONTRAT): string[] {
+  if (version !== VERSION_CONTRAT) return texteContratCommission(version);
+  return [
+    `Conditions de la ${nomCommun()} pour les négoces, version ${version}`,
+    `1. Objet. BATI INVEST (BatiClair) met en relation des artisans réunis dans la « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix de la ${nomCommun()}.`,
+    `2. Rémunération. ${PHRASE_REMUNERATION_NEGOCE}`,
+    "3. Aucun autre frais. Répondre est gratuit ; un devis retenu ou non ne donne lieu à aucune facturation. BatiClair n'encaisse aucun paiement de commande, n'est ni acheteur ni revendeur, et ne porte aucun risque d'impayé des artisans. Le contrat de vente est conclu directement entre l'artisan et le négoce.",
+    "4. Concurrence. Les prix d'un négoce ne sont jamais communiqués à un autre négoce, ni pendant ni après la consultation.",
+    "5. Acceptation. L'acceptation se fait en cochant la case sur la page de dépôt du devis ; la date, l'adresse e-mail et l'adresse IP de l'acceptation sont enregistrées. Sans acceptation, le devis n'est pas pris en compte.",
+    "6. Retrait. Le négoce peut à tout moment cesser de recevoir des demandes (lien « stop »).",
+  ];
+}
+
+/**
+ * L'ANCIEN CONTRAT DE COMMISSION (versions 2026-10-20 et 2026-10-22), gardé pour les accords déjà enregistrés et pour la
+ * facturation qui dort derrière `FACTURATION_NEGOCE`. Il n'est plus proposé à aucun négoce.
+ */
+export function texteContratCommission(version = "2026-10-22"): string[] {
   return [
     `Conditions de commission d'apporteur d'affaires, version ${version}`,
     `1. Objet. BatiClair met en relation des artisans réunis dans la « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix de la ${nomCommun()}.`,

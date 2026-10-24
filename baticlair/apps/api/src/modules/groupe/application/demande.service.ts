@@ -31,7 +31,7 @@ import { DomainError, notFound, validationFailed } from "../../../platform/error
 import type { PdfReader } from "../../documents/index.js";
 import { jetonDeLien } from "./lien-negoce.js";
 import { prixDesPaliers, statutDeLecture, type NegoceExtractor } from "./negoce-extractor.js";
-import { pdfDeTexte } from "./pdf-texte.js";
+import { pdfDeTexte } from "../../../platform/pdf/pdf-texte.js";
 import type { Geocodeur } from "./geocodeur.js";
 
 /** Adresses géocodées en même temps au dépôt d'un devis négoce (l'API Adresse accepte 50 requêtes par seconde). */
@@ -47,6 +47,8 @@ export interface ReglagesDemande {
   authSecret: string;
   /** Le domaine des adresses de réponse des lots (`lot-<n°>@<domaine>`), ou null. */
   reponsesDomaine: string | null;
+  /** `FACTURATION_NEGOCE=on` : l'accord porte l'ancien taux ; éteint (défaut), 0. */
+  facturationNegoce?: boolean;
 }
 
 export interface FichierDepose {
@@ -121,6 +123,11 @@ export class DemandeService {
     /** Décision de Greg (22 octobre) : la distance du dépôt du négoce à chaque chantier, pour le prix livré. */
     private readonly geocodeur: Geocodeur | null = null,
   ) {}
+
+  /** Le taux gardé dans l'accord : 0 tant que la facturation des négoces est éteinte (Greg, 24 octobre 2026). */
+  private tauxAccord(): number {
+    return this.reglages.facturationNegoce ? TAUX_COMMISSION_POURCENT : 0;
+  }
 
   /** Envoie chaque lot formé aux négoces concernés. Un lot sans négoce concerné reste formé (Greg le voit, étape 9). */
   async envoyerLesLotsFormes(maintenant = new Date(), jusqua?: number): Promise<{ lotsEnvoyes: number; negocesPrevenus: number }> {
@@ -253,13 +260,13 @@ export class DemandeService {
         reponseAttendueLe: r.lot.envoyeLe ? jour(new Date(r.lot.envoyeLe.getTime() + DELAI_REPONSE_JOURS * JOUR)) : null,
       },
       negoce: { nom: r.negoce.nom, email: r.negoce.email },
-      commission: { phrase: PHRASE_COMMISSION, phraseAccord: PHRASE_ACCORD, tauxPourcent: TAUX_COMMISSION_POURCENT, versionContrat: VERSION_CONTRAT, contrat: texteContrat() },
+      commission: { phrase: PHRASE_COMMISSION, phraseAccord: PHRASE_ACCORD, tauxPourcent: this.tauxAccord(), versionContrat: VERSION_CONTRAT, contrat: texteContrat() },
       accord: r.accord ? { accepteLe: r.accord.accepteLe.toISOString() } : null,
       reponse: r.deposeLe ? { deposeLe: r.deposeLe.toISOString(), fichiers: r.fichiers.map((f) => f.nom), message: r.message, statutExtraction: r.statutExtraction, livraison: livraisonDe(r.livraison) } : null,
     };
   }
 
-  /** Le contrat de commission, en PDF, à côté de la case (décision du fondateur, 2026-10-20). */
+  /** Les conditions du lot, en PDF, à côté de la case (sans commission depuis le 24 octobre 2026). */
   async contratPdf(jeton: string): Promise<Uint8Array> {
     await this.reponse(jeton);
     const [titre, ...articles] = texteContrat();
@@ -286,7 +293,7 @@ export class DemandeService {
     await this.prisma.$transaction(async (tx) => {
       await tx.accordNegoce.upsert({
         where: { lotId_negoceId: { lotId: r.lotId, negoceId: r.negoceId } },
-        create: { lotId: r.lotId, negoceId: r.negoceId, versionContrat: VERSION_CONTRAT, tauxPourcent: TAUX_COMMISSION_POURCENT, email: r.negoce.email, adresseIp, accepteLe: maintenant },
+        create: { lotId: r.lotId, negoceId: r.negoceId, versionContrat: VERSION_CONTRAT, tauxPourcent: this.tauxAccord(), email: r.negoce.email, adresseIp, accepteLe: maintenant },
         update: {},
       });
       await tx.reponseNegoceFichier.deleteMany({ where: { reponseId: r.id } });

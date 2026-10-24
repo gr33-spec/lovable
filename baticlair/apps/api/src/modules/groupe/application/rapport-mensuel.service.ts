@@ -56,7 +56,7 @@ export class RapportMensuelService {
     const mois = moisEcoule(maintenant);
     const cle = `rapport:${mois}`;
     const deja = new Set<string>(((await this.prisma.parametreGroupe.findUnique({ where: { cle } }))?.valeur as { envoyes?: string[] } | null)?.envoyes ?? []);
-    const entreprises = await this.prisma.company.findMany({ select: { id: true, contactEmail: true, memberships: { where: { role: "owner" }, select: { user: { select: { name: true, email: true } } }, take: 1 } } });
+    const entreprises = await this.prisma.company.findMany({ select: { id: true, contactEmail: true, emailsCoupesLe: true, memberships: { where: { role: "owner" }, select: { user: { select: { name: true, email: true } } }, take: 1 } } });
     // Tests de charge (21 octobre) : les bilans de toutes les entreprises en deux requêtes groupées, pas quatre par entreprise.
     const bilans = await this.bilans(mois);
     let envoyes = 0;
@@ -72,6 +72,8 @@ export class RapportMensuelService {
         sansRien++;
         continue;
       }
+      // Opposition en un clic (24 octobre 2026) : une entreprise qui a coupé ses e-mails ne reçoit pas le rapport.
+      if (e.emailsCoupesLe) continue;
       const to = e.contactEmail ?? e.memberships[0]?.user.email ?? null;
       if (!to) continue;
       const prenom = e.memberships[0]?.user.name?.split(/\s+/)[0] ?? null;

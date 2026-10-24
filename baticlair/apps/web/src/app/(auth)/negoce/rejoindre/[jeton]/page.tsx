@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LiensLegaux } from "@/components/legal";
 import { DepartementsForm, DepotsForm, PaliersForm, depuisPaliers, versPaliers, type PaliersSaisis } from "@/components/negoce/paliers-form";
 import { Button, Field, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -144,7 +143,6 @@ export default function RejoindrePage() {
       </form>
       <footer className="mt-4 flex flex-col gap-2 text-[14px] text-muted">
         <p>Aucun frais pour vous. Déjà un accès ? <Link href="/negoce/connexion" className="font-semibold text-accent-text underline">Me connecter</Link></p>
-        <LiensLegaux />
       </footer>
     </>
   );

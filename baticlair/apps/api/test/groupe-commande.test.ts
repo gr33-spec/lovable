@@ -16,10 +16,13 @@ let ctx: TestContext;
 const avant = process.env.GROUPE;
 beforeAll(async () => {
   process.env.GROUPE = "on";
+  // La facturation des négoces dort derrière ce drapeau depuis le 24 octobre 2026 : ce test garde son code en état.
+  process.env.FACTURATION_NEGOCE = "on";
   ctx = await createTestApp();
 });
 afterAll(async () => {
   await ctx.app.close();
+  delete process.env.FACTURATION_NEGOCE;
   if (avant === undefined) delete process.env.GROUPE;
   else process.env.GROUPE = avant;
 });

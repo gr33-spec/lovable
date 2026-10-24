@@ -91,7 +91,7 @@ describe("2. l'inscription en une page", { timeout: 60_000 }, () => {
     const cookie = (r.headers["set-cookie"] as unknown as string[])[0]!;
     expect(cookie).toMatch(/^bc_negoce=.+; Path=\/; HttpOnly; SameSite=Lax; Max-Age=2592000$/);
     const compte = await ctx.prisma.compteNegoce.findFirstOrThrow({ include: { depots: true, abonnements: true } });
-    expect(compte).toMatchObject({ inscritLe: new Date(T0), conditionsVersion: "2026-10-23", departements: ["22", "29"] });
+    expect(compte).toMatchObject({ inscritLe: new Date(T0), conditionsVersion: "2026-10-24", departements: ["22", "29"] });
     expect(compte.depots.map((d) => [d.codePostal, d.departement, d.lat !== null])).toEqual([
       ["22500", "22", true],
       ["29200", "29", true],
@@ -190,8 +190,8 @@ describe("3. l'abonnement à la zone", { timeout: 90_000 }, () => {
 
   it("les conditions, versionnées, se lisent sans compte", async () => {
     const r = (await srv().get("/v1/negoce/conditions").expect(200)).body;
-    expect(r.version).toBe("2026-10-23");
-    expect(r.points).toHaveLength(10);
+    expect(r.version).toBe("2026-10-24");
+    expect(r.points).toHaveLength(13);
   });
 });
 

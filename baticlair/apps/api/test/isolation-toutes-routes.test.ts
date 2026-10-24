@@ -140,7 +140,9 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/admin\/commande-du-mois\/cycles$/, ids.cycle],
         [/\/grille$/, "jeton-inconnu-de-b-0000000000000000"],
         // L'espace négoce (23 octobre 2026) : invitation, connexion et désabonnement sont des jetons signés.
-        [/\/negoce\/(invitation|connexion|desabonner)$/, "jeton-inconnu-de-b.0000000000000000"],
+        [/\/negoce\/(invitation|connexion|desabonner|opposition)$/, "jeton-inconnu-de-b.0000000000000000"],
+        // RGPD (24 octobre 2026) : « Ne plus recevoir ces e-mails » est un jeton signé, comme l'opposition du négoce.
+        [/\/emails\/stop$/, "jeton-inconnu-de-b.0000000000000000"],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

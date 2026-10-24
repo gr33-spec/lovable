@@ -182,10 +182,13 @@ describe("le suivi façon colis : Liste déposée → Commande close → Prix de
   const base = { mois: "2026-10-15", clotureDans: "2 j", reponseDans: null, grilles: 0, negoces: 0, commande: false } as const;
   it("chaque phase a sa phrase", () => {
     expect(suiviDansLeMois({ ...base, phase: "inscriptions" })).toMatchObject({ etape: 0, phrase: "Ta liste est dans la commande du 15 octobre.", aFaire: "Clôture dans 2 j. Partage le lien pour faire grossir la commande." });
-    expect(suiviDansLeMois({ ...base, phase: "negoces", negoces: 3, reponseDans: "13 j" })).toMatchObject({ etape: 2, phrase: "La commande du 15 octobre est chez 3 négoces.", aFaire: "Leurs prix arrivent dans 13 j." });
-    // Revue à froid (23 octobre) : la limite passée sans aucune grille déposée.
-    expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 5, grilles: 0 })).toMatchObject({ etape: 2, phrase: "Aucun négoce n'a chiffré la commande du 15 octobre.", aFaire: "Commande ta liste en direct chez ton négoce." });
-    expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 3, grilles: 2 })).toMatchObject({ etape: 3, phrase: "Les prix sont là." });
+    // Suivi des demandes (Greg, 24 octobre 2026) : des comptes, jamais un nom ni un prix.
+    expect(suiviDansLeMois({ ...base, phase: "negoces", negoces: 10, grilles: 4, reponseDans: "3 j", resultatsLe: "Résultats le 22/10 à 18 h" })).toMatchObject({ etape: 2, phrase: "Demandes envoyées à 10 négoces de ton secteur.", aFaire: "4 négoces sur 10 ont répondu. Résultats le 22/10 à 18 h." });
+    expect(suiviDansLeMois({ ...base, phase: "negoces", negoces: 0 })).toMatchObject({ etape: 1, aFaire: "Aucun négoce de ton secteur n'a encore son accès. Mets ton négoce dans la boucle." });
+    // La limite passée sans aucune grille : la liste part avec la commande suivante.
+    expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 5, grilles: 0 })).toMatchObject({ etape: 2, phrase: "Aucun négoce n'a répondu à la commande du 15 octobre.", aFaire: "Ta liste passe automatiquement à la commande suivante." });
+    expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 3, grilles: 2 })).toMatchObject({ etape: 3, phrase: "Les prix sont là.", aFaire: "Sur 3 demandes, 2 négoces ont répondu. Voici le meilleur prix livré pour toi." });
+    expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 3, grilles: 1 }).aFaire).toBe("Sur 3 demandes, 1 négoce a répondu. Compare son prix à ta dernière facture.");
     expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 3, grilles: 2, commande: true }).etapes.map((e) => e.fait)).toEqual([true, true, true, true, true]);
   });
 });

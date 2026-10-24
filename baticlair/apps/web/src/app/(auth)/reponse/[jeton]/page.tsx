@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LiensLegaux } from "@/components/legal";
 import { Button, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { NOM } from "@/lib/nom";
@@ -176,11 +175,11 @@ export default function ReponseNegocePage() {
           </label>
           <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-4">
             <label className="flex cursor-pointer items-start gap-3 text-sm">
-              <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.currentTarget.checked)} aria-label="J'accepte la commission" className="mt-0.5 size-5 shrink-0 accent-accent" />
+              <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.currentTarget.checked)} aria-label="J'accepte les conditions" className="mt-0.5 size-5 shrink-0 accent-accent" />
               <strong>{page.commission.phraseAccord}</strong>
             </label>
             <a href={`/v1/reponse/${encodeURIComponent(jeton)}/contrat.pdf`} target="_blank" rel="noreferrer" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text underline decoration-dotted underline-offset-4">
-              Lire le contrat (PDF, version {page.commission.versionContrat})
+              Lire les conditions (PDF, version {page.commission.versionContrat})
             </a>
           </div>
           <Button type="submit" pending={pending} disabled={!pret}>
@@ -192,7 +191,6 @@ export default function ReponseNegocePage() {
       )}
       <footer className="mt-4 flex flex-col gap-2 text-sm text-muted">
         <p>BatiClair est édité par BATI INVEST SARL. Une question : répondez simplement à l&apos;e-mail reçu.</p>
-        <LiensLegaux />
       </footer>
     </>
   );

@@ -35,3 +35,16 @@ Pages : `apps/web/src/app/(auth)/{mentions-legales,cgu,conditions-negoce,confide
 17. **Durées de conservation** : compte et documents 3 ans après la dernière connexion (purge quotidienne en place) ; pièces comptables 10 ans. Non fixées : données des négoces (aucune purge aujourd'hui), journaux techniques (Vercel, Resend), adresses de notification. À fixer.
 18. **Délégué à la protection des données** : pas obligatoire à cette taille, à confirmer ; registre des traitements à tenir.
 19. **Cookies** : un cookie de session et quelques réglages dans le navigateur, tous indispensables, donc pas de bandeau. À confirmer.
+
+
+## Mise en conformité du 24 octobre 2026 (à relire en priorité)
+
+Les pages ont été réécrites (versions du 24/10/2026) ; les points 1 à 4, 9, 10, 13 bis, 14 à 19 ci-dessus sont traités dans le code, mais restent à valider :
+
+20. **CGU artisan** (`apps/web/src/app/(auth)/cgu/page.tsx`) : professionnels à SIRET actif seulement ; « ni vendeur ni acheteur » ; aucune garantie de prix ni de livraison ; responsabilité limitée (quantités lues par une IA, la facture du négoce fait foi) — opposable à un professionnel ? ; suspension d'un compte ; droit français, tribunal de commerce de Saint-Brieuc ; versions datées, réacceptation à chaque version majeure.
+21. **Conditions négoces** (13 points, `CONDITIONS_NEGOCE`, version 2026-10-24) : « prix fermes quel que soit le volume » et « garantie 30 jours » (offre ferme ?) ; formule « Aucun frais pour l'instant. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce. » ; règlement P2B 2019/1150 (critères de classement : moins cher livré, distance × 1,3).
+22. **Clause concurrence** : un négoce ne voit jamais les prix d'un autre ; il sait combien de négoces sont consultés et **s'il est premier sur le total** pendant le délai. Ce dernier signal peut-il être vu comme un échange d'information entre concurrents (droit de la concurrence, art. L420-1) ? À trancher : le garder ou le retirer.
+23. **Confidentialité** (`/confidentialite`, en tableau) : bases légales retenues (contrat ; intérêt légitime pour les invités, les preuves, les journaux ; obligation légale pour les bons et l'exclusion), transferts (CCT, DPF).
+24. **Bons de commande 10 ans** : BATI INVEST n'est pas partie à la vente ; garder une archive sans nom 10 ans est-il justifié, ou 5 ans suffisent-ils ?
+25. **Invités non inscrits** (intérêt légitime B2B) : 3 relances puis effacement, 12 mois au plus ; mention de l'artisan qui l'a ajouté (jamais son nom) et lien d'opposition dans chaque e-mail : suffisant ?
+26. **Anonymisation des devis** : l'artisan garantit dans les CGU qu'il a le droit de transmettre le document ; les pages scannées partent encore en image à l'IA (non anonymisables) : à dire dans la confidentialité ?

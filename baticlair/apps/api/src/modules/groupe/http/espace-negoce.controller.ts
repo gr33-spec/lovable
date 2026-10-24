@@ -12,6 +12,7 @@ import { Public } from "../../identity/index.js";
 import { CommandeDuMoisService } from "../application/commande-du-mois.service.js";
 import { EspaceNegoceService } from "../application/espace-negoce.service.js";
 import { cookieNegoce, enTeteCookieNegoce } from "../application/jetons-negoce.js";
+import { pdfDesDonnees } from "../../privacy/index.js";
 
 const departement = z.string().trim().regex(/^(\d{2}|2A|2B|97\d|98\d)$/);
 const paliers = z.object({ gratuiteJusquaKm: z.union([z.number(), z.string()]), paliers: z.array(z.object({ jusquaKm: z.union([z.number(), z.string()]), prixHt: z.union([z.number(), z.string()]) })).max(2), maxKm: z.union([z.number(), z.string()]) });
@@ -162,6 +163,45 @@ export class EspaceNegoceController {
     await this.espace.supprimer(compteId, instant(this.config, m));
     res.setHeader("set-cookie", enTeteCookieNegoce(null, this.secure));
     return { supprime: true };
+  }
+
+  /** « Ne plus jamais être contacté » (RGPD, 24 octobre 2026) : la page lit l'enseigne, puis le négoce confirme. */
+  @Public()
+  @Throttle({ default: HOURLY(60) })
+  @Get("opposition/:jeton")
+  async opposition(@Param("jeton") jeton: string, @Query("maintenant") m?: string) {
+    return this.espace.pageOpposition(jeton, instant(this.config, m));
+  }
+
+  @Public()
+  @Throttle({ default: HOURLY(30) })
+  @Post("opposition/:jeton")
+  @HttpCode(200)
+  async opposer(@Param("jeton") jeton: string, @Res({ passthrough: true }) res: Response, @Query("maintenant") m?: string) {
+    const r = await this.espace.opposer(jeton, instant(this.config, m));
+    res.setHeader("set-cookie", enTeteCookieNegoce(null, this.secure));
+    return r;
+  }
+
+  /** Mes données (RGPD, accès et portabilité) : un fichier JSON, puis le même contenu en PDF lisible. */
+  @Public()
+  @Throttle({ default: HOURLY(10) })
+  @Get("export")
+  async export(@Headers("cookie") cookie: string | undefined, @Res({ passthrough: true }) res: Response, @Query("maintenant") m?: string) {
+    const compteId = await this.compteConnecte(cookie, m);
+    res.setHeader("Content-Disposition", `attachment; filename="baticlair-negoce-mes-donnees-${new Date().toISOString().slice(0, 10)}.json"`);
+    return this.espace.export(compteId);
+  }
+
+  @Public()
+  @Throttle({ default: HOURLY(10) })
+  @Get("export.pdf")
+  async exportPdf(@Headers("cookie") cookie: string | undefined, @Res() res: Response, @Query("maintenant") m?: string) {
+    const compteId = await this.compteConnecte(cookie, m);
+    const pdf = await pdfDesDonnees("Mes données BatiClair (négoce)", await this.espace.export(compteId));
+    res.setHeader("content-type", "application/pdf");
+    res.setHeader("content-disposition", `attachment; filename="baticlair-negoce-mes-donnees-${new Date().toISOString().slice(0, 10)}.pdf"`);
+    res.send(Buffer.from(pdf));
   }
 
   /** Les conditions, versionnées : la page les lit ici (le texte vit dans le domaine). */

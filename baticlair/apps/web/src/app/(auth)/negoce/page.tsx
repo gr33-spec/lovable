@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { LiensLegaux } from "@/components/legal";
 import { DepartementsForm, DepotsForm, PaliersForm, depuisPaliers, versPaliers, type PaliersSaisis } from "@/components/negoce/paliers-form";
 import { Button, ErrorNotice, Field, PageTitle, SectionTitle, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -97,6 +96,7 @@ export default function CompteNegocePage() {
                 <span className="flex min-w-0 flex-col">
                   <span className="text-[16px] font-extrabold">{`Grille ${g.de} (${g.departement})`}</span>
                   <span className="text-[13px] font-semibold text-muted">{g.deposee ? "Devis déposé." : `Réponse attendue dans ${g.reponseDans}.`}</span>
+                  {g.consultation ? <span className="text-[13px] text-muted">{g.consultation}</span> : null}
                 </span>
                 <Link href={g.lien} className="pressable inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-semibold text-on-accent">
                   {g.deposee ? "Voir ma grille" : "Chiffrer"}
@@ -129,6 +129,20 @@ export default function CompteNegocePage() {
       <Reglages compte={compte} onChange={charger} />
       <Abonnements compte={compte} onChange={charger} />
 
+      {/* Mes données (RGPD, 24 octobre 2026) : tout ce que BatiClair garde du négoce, en JSON ou en PDF lisible. */}
+      <section aria-label="Mes données" className="flex flex-col gap-2">
+        <h2 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">Mes données</h2>
+        <div className="flex flex-wrap gap-x-5 gap-y-1">
+          <a href="/v1/negoce/export" download className="inline-flex min-h-11 items-center text-[15px] font-semibold text-accent-text">
+            Télécharger mes données
+          </a>
+          <a href="/v1/negoce/export.pdf" download className="inline-flex min-h-11 items-center text-[15px] font-semibold text-accent-text">
+            En PDF
+          </a>
+        </div>
+        <p className="text-[14px] text-muted">Chaque information se corrige ci-dessus. Pour le reste, la page Confidentialité dit tout.</p>
+      </section>
+
       <section aria-label="Mon accès" className="flex flex-col gap-3">
         <Button variant="secondary" onClick={deconnecter}>
           Me déconnecter
@@ -142,7 +156,6 @@ export default function CompteNegocePage() {
           </Link>
           {compte.conditionsVersion ? ` · acceptées (version ${compte.conditionsVersion})` : ""}
         </p>
-        <LiensLegaux />
       </footer>
     </>
   );

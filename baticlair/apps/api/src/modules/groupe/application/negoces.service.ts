@@ -1,3 +1,4 @@
+import { estExclu } from "../../privacy/index.js";
 import { FAMILLES_GROUPE, LIBELLES_FAMILLES, mailRegroupementAuNegoce, messageAuNegoce, zoneDuCodePostal, type FamilleGroupe , famillesDuMetier } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -94,6 +95,9 @@ export class NegocesService {
     const email = n.email.trim().toLowerCase();
     const siret = n.siret?.replace(/\s+/g, "") || null;
     let nouveau: { id: string; nom: string; familles: string[] } | null = null;
+    // Droit d'opposition (24 octobre 2026) : un négoce qui a demandé à ne plus être contacté entre dans la liste de
+    // l'artisan, arrêté : aucune invitation, aucune demande ne lui part.
+    const exclu = await estExclu(this.prisma, { email, siret });
     await this.prisma.$transaction(async (tx) => {
       // Dédoublonnage par SIRET (le même comptoir choisi dans Sirene, même avec un autre e-mail), puis par e-mail.
       const parSiret = siret ? await tx.negoce.findFirst({ where: { siret, departement }, orderBy: { createdAt: "asc" } }) : null;
@@ -103,8 +107,8 @@ export class NegocesService {
       const autreAgence = existant ? null : await tx.negoce.findFirst({ where: { email, stopLe: { not: null } }, select: { stopLe: true } });
       const negoce = existant
         ? await tx.negoce.update({ where: { id: existant.id }, data: { familles: familles([...existant.familles, ...n.familles]), ...(siret && !existant.siret ? { siret } : {}) } })
-        : await tx.negoce.create({ data: { nom: n.nom.trim(), email, departement, siret, familles: familles(n.familles), ajouteParId: tenant.companyId, stopLe: autreAgence?.stopLe ?? null, createdAt: maintenant } });
-      if (!existant && !autreAgence) nouveau = { id: negoce.id, nom: negoce.nom, familles: negoce.familles };
+        : await tx.negoce.create({ data: { nom: n.nom.trim(), email, departement, siret, familles: familles(n.familles), ajouteParId: tenant.companyId, stopLe: exclu ? maintenant : (autreAgence?.stopLe ?? null), createdAt: maintenant } });
+      if (!existant && !autreAgence && !exclu) nouveau = { id: negoce.id, nom: negoce.nom, familles: negoce.familles };
       const liens = await tx.negoceArtisan.findMany({ where: { companyId: tenant.companyId }, orderBy: { rang: "asc" } });
       if (liens.some((l) => l.negoceId === negoce.id)) throw new DomainError("conflict", "Already in your list", { reason: "deja_ajoute" });
       const favori = n.favori === true || liens.length === 0;
@@ -114,6 +118,7 @@ export class NegocesService {
     // L'invitation à créer son accès (espace négoce) remplace l'ancien mail « un regroupement existe » ; le lien, régénéré
     // à chaque ajout, est le même pour tous les artisans qui ajoutent ce négoce.
     const negoce = await this.prisma.negoce.findFirst({ where: { email, departement }, select: { id: true, email: true, siret: true, nom: true, compteId: true } });
+    if (exclu) return this.mesNegoces(tenant);
     if (this.espace && negoce) await this.espace.inviter(negoce, maintenant);
     else if (nouveau) await this.prevenirDuRegroupement(tenant, nouveau, email, departement);
     return this.mesNegoces(tenant);
@@ -124,7 +129,8 @@ export class NegocesService {
     if (!this.espace) return null;
     const n = await this.prisma.negoce.findUnique({ where: { id: negoceId }, select: { id: true, email: true, siret: true, nom: true, compteId: true } });
     if (!n) return null;
-    return n.compteId ? this.espace.lienInvitation(n.compteId, maintenant) : this.espace.inviter(n, maintenant);
+    // Un négoce exclu (opposition) n'a pas de lien : `inviter` rend une chaîne vide.
+    return (n.compteId ? this.espace.lienInvitation(n.compteId, maintenant) : await this.espace.inviter(n, maintenant)) || null;
   }
 
   /**

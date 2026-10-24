@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LiensLegaux } from "@/components/legal";
 import { Button, Chrono, ErrorNotice, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { deMois } from "@/lib/cycle";
@@ -21,6 +20,8 @@ interface PageGrille {
   departement: string;
   ouverte: boolean;
   echeance: string | null;
+  /** « 10 négoces consultés, résultats le 08/11 à 18 h » : combien, jamais lesquels (absent d'une ancienne API). */
+  consultation?: string;
   reponseAvant: string;
   /** Les zones de livraison en communes, jamais une adresse ni un nom (confidentialité, point 4). */
   zones: string[];
@@ -31,6 +32,8 @@ interface PageGrille {
   inscription: { lien: string } | null;
   /** Les paliers du compte, en une phrase. */
   livraison: string | null;
+  /** Une nouvelle version majeure des conditions à accepter avant ce dépôt (sa date), ou null. */
+  conditionsAAccepter?: string | null;
   phrases: { regles: string; fermes: string; volume: string };
 }
 
@@ -52,6 +55,7 @@ export default function GrilleNegocePage() {
   const [fichiers, setFichiers] = useState<File[]>([]);
   const [pending, setPending] = useState(false);
   const [fermes, setFermes] = useState(false);
+  const [conditions, setConditions] = useState(false);
   const [nonGarantis, setNonGarantis] = useState<string[]>([]);
 
   useEffect(() => {
@@ -67,6 +71,7 @@ export default function GrilleNegocePage() {
     event.preventDefault();
     const form = new FormData();
     form.set("fermes", fermes ? "oui" : "non");
+    if (page?.conditionsAAccepter) form.set("conditions", conditions ? "oui" : "non");
     for (const cle of nonGarantis) form.append("nonGarantis", cle);
     for (const f of fichiers) form.append("file", f, f.name);
     setPending(true);
@@ -92,7 +97,7 @@ export default function GrilleNegocePage() {
     );
   }
   if (!page) return <Skeleton card="h-40" lines={3} label="Chargement de la commande…" />;
-  const pret = fichiers.length >= 1 && fichiers.length <= 2 && fermes;
+  const pret = fichiers.length >= 1 && fichiers.length <= 2 && fermes && (!page?.conditionsAAccepter || conditions);
   const basculer = (cle: string, coche: boolean) => setNonGarantis((prev) => (coche ? [...new Set([...prev, cle])] : prev.filter((c) => c !== cle)));
   return (
     <>
@@ -101,6 +106,7 @@ export default function GrilleNegocePage() {
         Artisans du département {page.departement}. Pour {page.negoce}.
       </p>
       {page.echeance ? <Chrono>{lisible(page.echeance)}</Chrono> : null}
+      {page.consultation ? <p className="text-[15px] font-semibold text-muted">{page.consultation}</p> : null}
       <p className="text-[16px] leading-relaxed">{page.phrases.regles}</p>
       <p className="text-[15px] font-semibold">{page.phrases.fermes}</p>
       {page.zones.length > 0 ? <p className="text-[14px] text-muted">{`Livraisons à : ${page.zones.join(", ")}. L'adresse exacte et les coordonnées de l'artisan vous parviennent avec sa commande, pas avant.`}</p> : null}
@@ -169,6 +175,18 @@ export default function GrilleNegocePage() {
             <input type="checkbox" required checked={fermes} onChange={(e) => setFermes(e.currentTarget.checked)} className="mt-0.5 size-5 shrink-0 accent-accent" />
             <span>{page.phrases.volume}</span>
           </label>
+          {page.conditionsAAccepter ? (
+            <label className="flex items-start gap-3 rounded-xl border border-line bg-surface p-4 text-[15px] font-semibold">
+              <input type="checkbox" checked={conditions} onChange={(e) => setConditions(e.currentTarget.checked)} className="mt-0.5 size-5 shrink-0 accent-accent" />
+              <span>
+                {`Nos conditions ont changé (version du ${page.conditionsAAccepter.split("-").reverse().join("/")}). J'accepte les `}
+                <a href="/negoce/conditions" target="_blank" rel="noreferrer" className="underline">
+                  conditions de la Commande commune
+                </a>
+                .
+              </span>
+            </label>
+          ) : null}
           <p className="text-[13px] text-muted">Les quantités de la grille peuvent bouger (un artisan ajoute, un autre commande ailleurs) ; vos prix unitaires, non.</p>
           <Button type="submit" pending={pending} disabled={!pret}>
             {page.depose ? "Déposer un nouveau devis" : "Déposer mon devis"}
@@ -187,7 +205,6 @@ export default function GrilleNegocePage() {
             Les conditions
           </Link>
         </p>
-        <LiensLegaux />
       </footer>
     </>
   );

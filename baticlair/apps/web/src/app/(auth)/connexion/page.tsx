@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { LiensLegaux } from "@/components/legal";
 import { Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { safeReturnPath } from "@/lib/safe-return";
@@ -66,7 +65,6 @@ export default function ConnexionPage() {
         </Link>
       </p>
       <div className="flex justify-center">
-        <LiensLegaux />
       </div>
     </>
   );

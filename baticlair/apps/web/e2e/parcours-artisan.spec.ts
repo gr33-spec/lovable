@@ -797,6 +797,21 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Télécharger mes données" }).click();
   expect((await download).suggestedFilename()).toMatch(/^baticlair-mes-donnees-\d{4}-\d{2}-\d{2}\.json$/);
+  // Le même contenu en PDF, et le réglage des e-mails (RGPD, 24 octobre 2026).
+  await expect(page.getByRole("link", { name: "En PDF" })).toHaveAttribute("href", "/v1/me/export.pdf");
+  const pdf = await page.request.get("/v1/me/export.pdf");
+  expect(pdf.headers()["content-type"]).toMatch(/application\/pdf/);
+  const recevoir = page.getByRole("checkbox", { name: /Recevoir les e-mails/ });
+  await expect(recevoir).toBeChecked();
+  await recevoir.uncheck();
+  await expect(recevoir).not.toBeChecked();
+  expect(((await page.request.get("/v1/me/emails")).ok())).toBe(true);
+  // Un lien « Ne plus recevoir » ou « Ne plus être contacté » faux ne coupe rien.
+  await page.goto("/emails/stop/faux");
+  await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
+  await page.goto("/negoce/opposition/faux");
+  await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
+  await page.goto("/compte");
 
   // Des essais au hasard ne restent pas des habitudes : on efface ce que BatiClair a appris, les chantiers restent.
   await page.getByRole("button", { name: "Effacer ce que BatiClair a appris" }).click();
@@ -1948,7 +1963,7 @@ async function negoceDepose(page: Page, browser: Browser, negoce: string, replyT
   await expect(pageN.getByRole("heading", { name: /^Demande de prix, lot n° \d+/ })).toBeVisible();
   const form = pageN.getByRole("form", { name: "Déposer mon devis" });
   await form.locator('input[type="file"]').setInputFiles(path.join(__dirname, "fixtures", fixture));
-  await form.getByRole("checkbox", { name: "J'accepte la commission" }).check();
+  await form.getByRole("checkbox", { name: "J'accepte les conditions" }).check();
   await prixDeLivraison(form, "60");
   await form.getByRole("button", { name: "Déposer mon devis" }).click();
   await expect(pageN.getByRole("status")).toContainText("Devis reçu, merci.");
@@ -1965,7 +1980,7 @@ async function tachePlanifiee(page: Page, maintenant: string): Promise<unknown> 
 
 const dansJours = (n: number) => new Date(Date.now() + n * 24 * 3600 * 1000).toISOString();
 
-test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux négoces qui répondent par e-mail, dépôt avec la case 2 %, choix, bon de commande, « Livré »", { tag: "@lots" }, async ({ page, browser }) => {
+test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux négoces qui répondent par e-mail, dépôt avec la case des conditions, choix, bon de commande, « Livré »", { tag: "@lots" }, async ({ page, browser }) => {
   passeLots();
   test.setTimeout(180_000);
   // Artisan A (deux négoces de couverture dans sa liste), puis artisan B dans un autre navigateur : le lot se forme au deuxième signé.
@@ -2010,10 +2025,10 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
       await pageN.waitForLoadState("networkidle");
     })).toEqual([]);
     const form = pageN.getByRole("form", { name: "Déposer mon devis" });
-    await expect(form.getByRole("link", { name: /Lire le contrat/ })).toHaveAttribute("href", /contrat\.pdf$/);
+    await expect(form.getByRole("link", { name: /Lire les conditions/ })).toHaveAttribute("href", /contrat\.pdf$/);
     await form.locator('input[type="file"]').setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
     await expect(form.getByRole("button", { name: "Déposer mon devis" })).toBeDisabled();
-    await form.getByRole("checkbox", { name: "J'accepte la commission" }).check();
+    await form.getByRole("checkbox", { name: "J'accepte les conditions" }).check();
     // Décision de Greg (22 octobre) : la livraison (dépôt, gratuite jusqu'à X km, Y € au-delà) est obligatoire.
     await expect(form.getByRole("button", { name: "Déposer mon devis" })).toBeDisabled();
     await prixDeLivraison(form);
@@ -2127,17 +2142,22 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "CGU" }).click();
   await expect(page.getByRole("heading", { name: "Conditions générales d'utilisation" })).toBeVisible();
   // Plan « finition » (22 octobre) : gratuit pour l'artisan, rémunération en suspens : aucun « 2 % » sur les pages légales.
-  await expect(page.getByText(/Aujourd'hui, BatiClair est gratuit pour l'artisan/)).toBeVisible();
+  await expect(page.getByText(/Le service est gratuit pour l'artisan/)).toBeVisible();
+  await expect(page.getByText(/tribunal de commerce de Saint-Brieuc/)).toBeVisible();
   await expect(page.getByText(/2 %/)).toHaveCount(0);
   await expect(page.getByText(/avocat/)).toHaveCount(0);
-  await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Conditions négoce" }).click();
-  await expect(page.getByRole("heading", { name: "Conditions négoce" })).toBeVisible();
-  await expect(page.getByText(/celles du contrat présenté à côté de la case/)).toBeVisible();
-  await expect(page.getByText(/compare les devis livraison comprise/)).toBeVisible();
+  await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Conditions négoces" }).click();
+  await expect(page.getByRole("heading", { name: "Conditions négoces" })).toBeVisible();
+  // RGPD et concurrence (24 octobre 2026) : la formule unique, et les prix d'un négoce jamais montrés à un autre.
+  await expect(page.getByText("Aucun frais pour l'instant. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce.")).toBeVisible();
+  await expect(page.getByText(/Les prix d'un négoce ne sont jamais communiqués à un autre négoce/)).toBeVisible();
   await expect(page.getByText(/2 %/)).toHaveCount(0);
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Confidentialité" }).click();
   await expect(page.getByRole("heading", { name: "Confidentialité" })).toBeVisible();
-  await expect(page.getByText(/Neon, à Francfort/)).toBeVisible();
+  // En tableau (24 octobre 2026) : chaque traitement, sa base légale, sa durée ; chaque sous-traitant, son pays, sa garantie.
+  await expect(page.getByRole("table", { name: /base légale/ })).toBeVisible();
+  await expect(page.getByRole("rowheader", { name: "Neon Inc." })).toBeVisible();
+  await expect(page.getByText(/Ne plus recevoir ces e-mails/)).toBeVisible();
   await expect(page.getByText(/Resend/).first()).toBeVisible();
   await expect(page.getByText(/API Sirene de l'INSEE/)).toBeVisible();
   await expect(page.getByText(/API Adresse de l'État/)).toBeVisible();
@@ -3099,4 +3119,80 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   await expect(prixB.getByText("Toitures A")).toHaveCount(0);
   expect(await pageB.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await contexteB.close();
+});
+
+/**
+ * LE SUIVI DES DEMANDES DE PRIX (Greg, 24 octobre 2026) : 0, 1, plusieurs, puis toutes les réponses, à l'écran. Un
+ * département par série (29 au téléphone, 56 sur ordinateur) : rien ne se mêle à la commande du 22. Jamais un nom de
+ * concurrent ni un prix avant les résultats ; le négoce sait combien sont consultés, jamais lesquels.
+ */
+test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le bilan à l'échéance", async ({ page }) => {
+  test.setTimeout(240_000);
+  const projet = test.info().project.name;
+  const [dep, ville] = projet === "ordinateur" ? ["56", "56000 Vannes"] : ["29", "29600 Morlaix"];
+  const adresse = `8 rue du Port, ${ville}`;
+  const n = (i: number) => `suivi${i}-${projet}@example.com`;
+  await compteAuGroupe(page, "Toitures S", adresse);
+  for (const i of [1, 2, 3]) {
+    expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: `Négoce S${i}`, email: n(i), familles: ["couverture"] })).toBe(201);
+    const mail = (await emailsVers(page, n(i))).filter((m) => /\/negoce\/rejoindre\//.test(m.text)).at(-1)!;
+    const jeton = /\/negoce\/rejoindre\/([A-Za-z0-9_.-]+)/.exec(mail.text)![1]!;
+    const r = await page.request.post("/v1/negoce/inscription", {
+      data: { jeton, email: n(i), siret: null, enseigne: `Négoce S${i}`, telephone: "02 98 00 00 00", depots: [{ adresse: `ZA du Port, ${ville}` }], livraison: { gratuiteJusquaKm: 30, paliers: [{ jusquaKm: 1000, prixHt: 50 }], maxKm: 1000 }, departements: [dep], conditions: true },
+    });
+    expect(r.status()).toBe(201);
+  }
+  const projetS = await listePrete(page, adresse, [{ libelle: ARDOISE_MOIS, quantite: "1200", unite: "pièces" }]);
+  const articles = (await apiJson<{ takeoff: { purchase: { toBuy: { key: string }[] } } }>(page, "GET", `/v1/projects/${projetS}/takeoff`)).body.takeoff.purchase.toBuy.map((b) => b.key);
+  expect((await apiJson(page, "POST", `/v1/projects/${projetS}/commande-du-mois`, { articles, nature: "chantier" })).status).toBe(201);
+  const cycle = (await apiJson<{ commandes: CommandeMoisApi[] }>(page, "GET", "/v1/commande-du-mois")).body.commandes.find((c) => c.phase === "inscriptions")!;
+  expect(await tacheDuMois(page, new Date(Date.parse(cycle.clotureLe) + 60_000).toISOString())).toMatchObject({ clos: 1, grillesEnvoyees: 3 });
+
+  // 0 réponse : « Demandes envoyées à 3 négoces de ton secteur », le chrono des résultats, la barre à zéro.
+  await page.goto("/groupe");
+  const suivi = page.getByRole("region", { name: "Prix demandés" }).first();
+  await expect(suivi.getByText("Demandes envoyées à 3 négoces de ton secteur")).toBeVisible();
+  await expect(suivi.getByText(/^Résultats le \d\d\/\d\d à 18 h$/)).toBeVisible();
+  await expect(suivi.getByText("Aucun négoce sur 3 n'a encore répondu")).toBeVisible();
+  await expect(suivi.getByRole("progressbar", { name: "Réponses des négoces" })).toHaveAttribute("aria-valuenow", "0");
+  await expect(suivi.getByText("Ton négoce Négoce S1 n'a pas encore répondu.")).toBeVisible();
+
+  const { makePdf } = await import("../../api/test/support/pdf-fixtures");
+  const repond = async (i: number) => {
+    const mail = (await emailsVers(page, n(i))).filter((m) => /\/grille\//.test(m.text)).at(-1)!;
+    const jeton = /\/grille\/([A-Za-z0-9_-]+)/.exec(mail.text)![1]!;
+    const pdf = Buffer.from(await makePdf(["devis"], [["A", ARDOISE_MOIS, "1200 pièces", `0,9${i}`, ""]], "Total HT 1 000,00", "DEVIS"));
+    const r = await page.request.post(`/v1/grille/${jeton}`, { multipart: { fermes: "oui", file: { name: "devis.pdf", mimeType: "application/pdf", buffer: pdf } } });
+    expect(r.status()).toBe(201);
+    return jeton;
+  };
+  // 1 réponse : le compteur bouge, son négoce « a répondu », jamais son prix.
+  const jeton1 = await repond(1);
+  await page.reload();
+  await expect(suivi.getByText("1 négoce sur 3 a répondu")).toBeVisible();
+  await expect(suivi.getByText("Ton négoce Négoce S1 a répondu.")).toBeVisible();
+  await expect(page.getByText(/0,91/)).toHaveCount(0);
+  // Plusieurs : 2 sur 3 ; sur l'accueil, la même carte ; le bandeau des autres écrans aussi.
+  await repond(2);
+  await page.goto("/");
+  await expect(page.getByRole("region", { name: /^Prix demandés, commande d/ }).getByText("2 négoces sur 3 ont répondu")).toBeVisible();
+  await page.goto(`/chantiers/${projetS}`);
+  await expect(page.getByRole("link", { name: /2 négoces sur 3 ont répondu/ })).toContainText("2/3 réponses");
+  await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("Demandes envoyées à 3 négoces de ton secteur.");
+  // Toutes : « Les 3 négoces ont répondu ».
+  await repond(3);
+  await page.goto("/groupe");
+  await expect(page.getByRole("region", { name: "Prix demandés" }).first().getByText("Les 3 négoces ont répondu")).toBeVisible();
+  // Le négoce sait combien sont consultés, jamais lesquels.
+  const vueNegoce = await page.request.get(`/v1/grille/${jeton1}`);
+  const corps = (await vueNegoce.json()) as { consultation: string };
+  expect(corps.consultation.replace(/[\u202f\u00a0]/g, " ")).toMatch(/^3 négoces consultés, résultats le \d\d\/\d\d à 18 h\.$/);
+  expect(JSON.stringify(corps)).not.toMatch(/Négoce S2|Négoce S3|0,92|0,93/);
+
+  // À l'échéance : le bilan, puis les prix.
+  expect(await tacheDuMois(page, new Date(Date.parse(cycle.reponseAvant) + 60_000).toISOString())).toMatchObject({ resultats: 1 });
+  await page.goto("/groupe");
+  await expect(page.getByText("Sur 3 demandes, 3 négoces ont répondu. Voici le meilleur prix livré pour toi.").first()).toBeVisible();
+  await expect(page.getByRole("region", { name: "Tes prix" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });

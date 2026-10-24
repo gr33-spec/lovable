@@ -1,3 +1,4 @@
+import { PHRASE_REMUNERATION_NEGOCE } from "./demande.js";
 import { NOM_COMMANDE_COMMUNE } from "./nom.js";
 import { deMois, type Mois } from "./commande-du-mois.js";
 
@@ -105,19 +106,22 @@ export const mentionPrixFerme = (mois: Mois) => `Prix ferme de la ${NOM_COMMANDE
 // ——— Les textes côté négoce (vouvoiement, jamais un nom d'artisan) ———
 
 /** L'invitation (point 1) : « Un artisan de votre secteur vous a ajouté… », sans le nommer. */
-export function mailInvitationNegoce(m: { lien: string; departement: string | null; conditions: string }): { objet: string; texte: string } {
+export function mailInvitationNegoce(m: { lien: string; departement: string | null; conditions: string; opposition: string }): { objet: string; texte: string } {
   const secteur = m.departement ? ` (${m.departement})` : "";
   return {
     objet: `Un regroupement d'artisans vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : créez votre accès`,
     texte: [
       "Bonjour,",
       "",
-      `Un artisan de votre secteur${secteur} vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : les artisans d'un même département regroupent leurs commandes de matériaux, une grille unique vous est envoyée toutes les deux semaines et vous faites votre prix.`,
+      // RGPD (24 octobre 2026) : qui écrit, pourquoi, et comment ne plus jamais être contacté.
+      `Ce message vous est envoyé par BATI INVEST (BatiClair) pour la ${NOM_COMMANDE_COMMUNE}.`,
+      `Pourquoi ce message ? Un artisan de votre secteur${secteur} vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : les artisans d'un même département regroupent leurs commandes de matériaux, une grille unique vous est envoyée toutes les deux semaines et vous faites votre prix.`,
       "Créez votre accès en une minute (votre e-mail, vos dépôts, vos conditions de livraison) :",
       m.lien,
       "",
       `Ce lien est valable 90 jours. Les conditions de la ${NOM_COMMANDE_COMMUNE} : ${m.conditions}`,
-      "Aucun frais pour vous. Si vous ne souhaitez rien recevoir, ignorez simplement cet e-mail.",
+      "Aucun frais pour vous. Sans accès créé, vous recevez au plus trois rappels, puis vos coordonnées sont effacées.",
+      `Ne plus jamais être contacté : ${m.opposition}`,
       "",
       "BatiClair",
     ].join("\n"),
@@ -133,16 +137,18 @@ export function mailLienDeConnexion(m: { lien: string }): { objet: string; texte
 }
 
 /** À la clôture, à un négoce invité qui n'a pas encore créé son accès (3 fois au plus). */
-export function mailClotureSansCompte(m: { mois: Mois; departement: string; lien: string }): { objet: string; texte: string } {
+export function mailClotureSansCompte(m: { mois: Mois; departement: string; lien: string; opposition: string }): { objet: string; texte: string } {
   return {
     objet: `La grille ${deMois(m.mois)} (${m.departement}) est prête : créez votre accès pour la chiffrer`,
     texte: [
       "Bonjour,",
       "",
+      `Ce message vous est envoyé par BATI INVEST (BatiClair) pour la ${NOM_COMMANDE_COMMUNE}, parce qu'un artisan de votre secteur vous y a ajouté.`,
       `Les artisans du département ${m.departement} ont regroupé leurs commandes ${deMois(m.mois)}. Pour voir la grille et faire votre prix, créez votre accès (une minute) :`,
       m.lien,
       "",
       "Vous recevrez ensuite chaque grille de votre secteur à sa clôture. Aucun frais pour vous.",
+      `Ne plus jamais être contacté : ${m.opposition}`,
       "",
       "BatiClair",
     ].join("\n"),
@@ -158,17 +164,27 @@ export const PHRASE_PRIX_FERMES_VOLUME = "Prix fermes, quel que soit le volume f
 
 // ——— Les conditions (point 7), 10 points, vouvoiement ———
 
-export const CONDITIONS_NEGOCE_VERSION = "2026-10-23";
+/**
+ * La version des conditions (mise en conformité du 24 octobre 2026). Une version MAJEURE (`CONDITIONS_NEGOCE_MAJEURE`)
+ * est redemandée au négoce avant son prochain dépôt ; la date et la version acceptées sont gardées sur son compte.
+ */
+export const CONDITIONS_NEGOCE_VERSION = "2026-10-24";
+export const CONDITIONS_NEGOCE_MAJEURE = "2026-10-24";
+/** Une version acceptée est-elle à jour ? Les versions sont des dates : l'ordre alphabétique suffit. */
+export const conditionsNegoceAJour = (acceptee: string | null | undefined) => !!acceptee && acceptee >= CONDITIONS_NEGOCE_MAJEURE;
 
 export const CONDITIONS_NEGOCE: readonly { titre: string; texte: string }[] = [
+  { titre: "Une seule grille, la même pour tous", texte: "À chaque commande, une seule grille par métier et par département : les besoins des artisans additionnés, les mêmes articles et les mêmes quantités pour chaque négoce consulté." },
   { titre: "Prix fermes, quel que soit le volume", texte: "En répondant à une grille, vous vous engagez sur un prix unitaire HT par article, valable pour tout le cycle, quelle que soit la quantité finalement commandée par les artisans." },
   { titre: "Un seul prix par article, pour tous", texte: "Chaque artisan de la commande achète au même prix unitaire. Vous pouvez marquer un article « prix non garanti » (matière cotée, par exemple le zinc) : il est alors indicatif, à part du comparatif." },
   { titre: "Garantie 30 jours si vous êtes retenu", texte: "Si votre grille est la moins chère sur le total de la commande, vous tenez ces prix 30 jours après la publication des résultats, pour tout artisan de votre zone, y compris ceux qui n'avaient rien déposé." },
   { titre: "Livraison selon vos paliers", texte: "Vous déclarez vos dépôts et vos paliers : gratuite jusqu'à une distance, un ou deux paliers payants, une distance maximale. Le prix livré de chaque artisan se calcule depuis votre dépôt le plus proche de son chantier ; au-delà de votre distance maximale, vous n'apparaissez pas dans son comparatif." },
   { titre: "Confidentialité des artisans", texte: "Jusqu'à sa commande, vous ne voyez d'un artisan ni son nom, ni son entreprise, ni son téléphone, ni son adresse exacte : seulement la grille (articles, quantités cumulées) et les communes de livraison. Ses coordonnées vous parviennent avec son bon de commande, et à vous seul." },
-  { titre: "Aucun classement public", texte: "Pendant le délai de réponse, vous savez seulement si vous êtes premier sur le total. Les prix des autres négoces ne vous sont jamais communiqués, ni le nombre d'artisans qui ont choisi un autre négoce." },
-  { titre: "Aucun coût pour l'instant", texte: "BatiClair ne vous facture rien aujourd'hui. BATI INVEST se réserve d'introduire une commission ultérieurement, avec un préavis écrit ; rien ne vous sera facturé sans votre accord exprès." },
+  { titre: "Concurrence : vos prix restent les vôtres", texte: "Les prix d'un négoce ne sont jamais communiqués à un autre négoce, ni pendant ni après la consultation. Pendant le délai, vous savez seulement combien de négoces sont consultés (jamais lesquels) et si vous êtes premier sur le total. Il n'existe aucun classement public." },
+  { titre: "Ni vendeur ni acheteur", texte: "BATI INVEST (BatiClair) met en relation, sans rien vendre ni acheter. Le contrat de vente est conclu directement entre l'artisan et vous : il commande sur son compte chez vous, vous le livrez et le facturez comme d'habitude. BatiClair n'encaisse aucun paiement et ne porte aucun risque d'impayé." },
+  { titre: "Aucun coût pour l'instant", texte: PHRASE_REMUNERATION_NEGOCE },
   { titre: "Désabonnement libre", texte: "Vous pouvez vous désabonner d'un département ou de tout, ou supprimer votre compte, à tout moment, depuis votre espace ou le lien présent dans chaque e-mail." },
   { titre: "Liberté de ne pas répondre", texte: "Vous répondez aux cycles que vous voulez. Ne pas répondre à une grille n'a aucune conséquence." },
-  { titre: "Vos données", texte: "Votre e-mail, votre SIRET, vos dépôts et vos paliers servent uniquement à vous envoyer les grilles de votre secteur et à calculer les prix livrés. Voir la page Confidentialité." },
+  { titre: "Vos données", texte: "Votre e-mail, votre SIRET, vos dépôts et vos paliers servent uniquement à vous envoyer les grilles de votre secteur et à calculer les prix livrés. Vous pouvez les télécharger ou supprimer votre compte depuis votre espace. Voir la page Confidentialité." },
+  { titre: "Versions et droit applicable", texte: "Une nouvelle version majeure de ces conditions vous est présentée avant votre prochain dépôt ; la date et la version acceptées sont enregistrées. Ces conditions sont soumises au droit français ; en cas de litige, après recherche d'une solution amiable, le tribunal de commerce de Saint-Brieuc est seul compétent." },
 ];

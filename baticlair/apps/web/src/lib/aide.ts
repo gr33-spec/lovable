@@ -19,7 +19,7 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
     lignes: [
       "Tes commandes se regroupent avec celles des artisans de ton département : un seul négoce, un seul prix.",
       "« Chantier signé » t'engage à commander au prix obtenu ; « Devis en attente » ne t'engage pas.",
-      "Gratuit pour toi : c'est le négoce retenu qui verse 2 % à BatiClair.",
+      "Gratuit pour toi, et aucun frais pour le négoce pour l'instant.",
     ],
   },
   negoces: {
