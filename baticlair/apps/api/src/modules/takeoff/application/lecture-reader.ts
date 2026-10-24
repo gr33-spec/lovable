@@ -163,15 +163,19 @@ type LigneTranche = z.infer<typeof lignesWireSchema>["lignes"][number];
 export function titresEtSuites(lignes: readonly LigneTranche[]): LectureWire["lignes"] {
   const out: LectureWire["lignes"] = [];
   for (const l of lignes) {
-    if (l.role === "titre") continue;
+    // Garde-fou (§49.1, un article écrit ne disparaît jamais ; vraie lecture du 24 octobre 2026 : 315 lignes pour 324) :
+    // seul un titre SANS quantité NI fourniture est écarté, une suite avec sa propre quantité reste une ligne.
+    const vide = !l.quantite.trim() && l.fournitures.length === 0;
+    if (l.role === "titre" && vide) continue;
     const avant = out.at(-1);
-    if (l.role === "suite" && avant) {
+    if (l.role === "suite" && avant && (!l.quantite.trim() || !avant.quantite.trim())) {
       avant.designation = `${avant.designation} ${l.designation}`.trim();
       if (!avant.quantite.trim() && l.quantite.trim()) Object.assign(avant, { quantite: l.quantite, unite: l.unite });
       if (avant.fournitures.length === 0) avant.fournitures = l.fournitures;
       continue;
     }
-    out.push({ ...l, role: l.role === "suite" ? "hors_quantitatif" : l.role });
+    // Un titre ou une suite gardés (quantité ou fourniture) redeviennent une ligne ordinaire.
+    out.push({ ...l, role: l.role === "titre" || l.role === "suite" ? (l.fournitures.length > 0 ? "fourniture" : "hors_quantitatif") : l.role });
   }
   return out;
 }

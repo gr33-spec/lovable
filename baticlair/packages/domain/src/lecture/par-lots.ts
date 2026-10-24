@@ -1,3 +1,4 @@
+import { normalizeText } from "../trades/trade-profile.js";
 import type { FicheDonnee } from "../referential/fiche.js";
 import type { LectureDevis, LectureLigne, LectureQuestion } from "./lecture.js";
 
@@ -199,10 +200,33 @@ export function consigneDeSynthese(tous: readonly { metier: string; libelle: str
   ].join("\n");
 }
 
+/**
+ * Une question par donnée (§49.4 : jamais en double ; vraie lecture du 24 octobre 2026 : la teinte de l'appareillage posée
+ * deux fois). Deux questions qui nomment la même donnée n'en font qu'une, la première ; les fournitures qui attendaient
+ * la clé écartée attendent celle qui reste.
+ */
+export function uneQuestionParDonnee(lecture: LectureDevis): LectureDevis {
+  const garde = new Map<string, string>();
+  const renomme = new Map<string, string>();
+  const questions = lecture.questions.filter((q) => {
+    const donnee = normalizeText(q.donnee).replace(/\s+/g, " ").trim();
+    const deja = garde.get(donnee);
+    if (deja === undefined) {
+      garde.set(donnee, q.cle);
+      return true;
+    }
+    if (deja !== q.cle) renomme.set(q.cle, deja);
+    return false;
+  });
+  if (questions.length === lecture.questions.length) return lecture;
+  const lignes = lecture.lignes.map((l) => ({ ...l, fournitures: l.fournitures.map((f) => ({ ...f, attend: [...new Set(f.attend.map((c) => renomme.get(c) ?? c))] })) }));
+  return { ...lecture, questions, lignes };
+}
+
 /** La lecture fusionnée des tranches, complétée par la synthèse : ses lignes à elle, la fiche, le bref et les questions de la synthèse. */
 export function avecSynthese(lignes: LectureDevis, synthese: LectureDevis): LectureDevis {
   const libelles = new Map(synthese.lots.map((l) => [l.metier, l.libelle]));
-  return {
+  return uneQuestionParDonnee({
     ...lignes,
     metier: synthese.metier ?? lignes.metier,
     lots: lignes.lots.map((l) => ({ ...l, libelle: libelles.get(l.metier) ?? l.libelle })),
@@ -211,5 +235,5 @@ export function avecSynthese(lignes: LectureDevis, synthese: LectureDevis): Lect
     questions: synthese.questions,
     contexte: synthese.contexte ?? lignes.contexte,
     notes: [...new Set([...lignes.notes, ...synthese.notes])],
-  };
+  });
 }

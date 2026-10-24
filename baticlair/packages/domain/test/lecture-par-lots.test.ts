@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { avecSynthese, consigneDeSynthese, consigneDeTranche, consigneDuLot, donneesAttendues, fusionnerLectures, tranchesDuDevis, lectureParLots, LIGNES_LECTURE_PAR_LOTS, ordreDesReperes, parseLecture, phraseLotNonLu, type LectureDevis } from "../src/index.js";
+import { avecSynthese, uneQuestionParDonnee, consigneDeSynthese, consigneDeTranche, consigneDuLot, donneesAttendues, fusionnerLectures, tranchesDuDevis, lectureParLots, LIGNES_LECTURE_PAR_LOTS, ordreDesReperes, parseLecture, phraseLotNonLu, type LectureDevis } from "../src/index.js";
 
 /**
  * LA LECTURE LOT PAR LOT (décision du fondateur, 24 octobre 2026, « option 1 ») : un gros devis de plusieurs métiers est lu
@@ -115,5 +115,14 @@ describe("les tranches d'un gros lot", () => {
     expect(fin.bref).toEqual(["10 logements à Paimpol."]);
     expect(fin.questions.map((q) => q.cle)).toEqual(["teinte_appareillage"]);
     expect(fin.lots[0]!.libelle).toBe("Électricité générale");
+  });
+
+  // Vraie lecture du 24 octobre 2026 : la teinte de l'appareillage posée deux fois par la synthèse (§49.4 : jamais en double).
+  it("une question par donnée : la seconde est écartée, ses lignes attendent la première", () => {
+    const q = (cle: string, donnee: string) => ({ cle, texte: `${donnee} ?`, boutons: [], unite: null, donnee, ligne: null });
+    const prise = { ...ligne("1:001", "PRISE"), fournitures: [{ nom: "Prise", quantite: "1", unite: "u", ouvrage: null, emplacement: null, donnees: {}, attend: ["teinte_prises"], aPreciser: [], precision: null }] };
+    const l = uneQuestionParDonnee(lecture("electrical", [], { lignes: [prise], questions: [q("teinte_appareillage", "Teinte de l'appareillage"), q("teinte_prises", "teinte de l’appareillage "), q("mode_pose", "Mode de pose")] }));
+    expect(l.questions.map((x) => x.cle)).toEqual(["teinte_appareillage", "mode_pose"]);
+    expect(l.lignes[0]!.fournitures[0]!.attend).toEqual(["teinte_appareillage"]);
   });
 });

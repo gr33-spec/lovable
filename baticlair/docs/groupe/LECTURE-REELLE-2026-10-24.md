@@ -40,3 +40,17 @@ Sur le 7954 :
   - En plus : la teinte, la pose (encastré ou saillie), et les parois posées en deux questions (une par niveau).
   - Le contrôle refuse la question des 59 alimentations pour 49 radiateurs : pour lui, c'est une donnée écrite.
 - **Lignes** : 333 rendues pour 324 au devis. Sonnet rend aussi des titres (« R+1 », « N°4 TYPE T3 », « DEGAGEMENT ») comme des lignes, et 22 désignations ne sont pas reconnues par le contrôle (45 au premier passage). La lecture rendue est gardée dans l'artefact « lectures » de l'exécution, pour le diagnostic.
+
+## Troisième passage : titres écartés, réflexion moyenne (exécution 40109990078)
+
+| Devis | Temps | Coût | Contrôle |
+|---|---|---|---|
+| DE00000071 | 72 s | 0,36 $ | 2 écarts de formulation du bref (« 4 fenêtres de toit Velux GGL SK06 » au lieu de « 4 Velux SK06 »). Les 5 questions sont justes, et « pour bac acier isolé » est gardé. Ce chemin n'a pas changé : c'est une variation du modèle. |
+| D.2026.105 | 23 s | 0,05 $ | aucun écart |
+| 7954 | 134 s | **1,18 $** | 18 écarts (au lieu de 37) |
+
+Sur le 7954 :
+- **Lignes** : 13 non reconnues (au lieu de 22), et les titres de section ont disparu. Mais il en rend **315 pour 324** : le modèle a marqué de vraies lignes comme « titre » (la mise à la terre et les prises du bloc lignes 249 à 264), et le code les a écartées. **Corrigé après ce passage** : seul un titre sans quantité ni fourniture est écarté, et une « suite » qui a sa propre quantité reste une ligne (test `titres-et-suites.test.ts`).
+- **Questions** : 13 au lieu de 8. La teinte est posée deux fois. **Corrigé** : une seule question par donnée, et les lignes sont rattachées à celle qui reste (`uneQuestionParDonnee`). Le reste est en plus : rangées des tableaux, type des différentiels, distance des appareils à la nourrice, appareils livrés avec siphon et flexibles.
+- **Bref** : complet, sauf deux formulations (« 10 coffrets » au lieu de « un coffret par logement », « évacuation PVC Ø100 »).
+- Ces deux corrections ne sont pas encore vérifiées par une vraie lecture.
