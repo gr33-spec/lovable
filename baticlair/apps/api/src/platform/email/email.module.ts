@@ -7,6 +7,7 @@ import type { TransactionalEmailSender } from "./email.port.js";
 import { CapturingEmailSender } from "./capturing-email.sender.js";
 import { ConsoleEmailSender } from "./console-email.sender.js";
 import { DisabledEmailSender } from "./disabled-email.sender.js";
+import { EmailSortantSender } from "./email-sortant.sender.js";
 import { ResendEmailSender } from "./resend-email.sender.js";
 
 @Global()
@@ -17,13 +18,13 @@ import { ResendEmailSender } from "./resend-email.sender.js";
       useFactory: (config: AppConfig, logger: AppLogger) => {
         switch (config.emailProvider) {
           case "resend":
-            return new ResendEmailSender(config.resend!.apiKey, config.resend!.from, logger);
+            return new EmailSortantSender(new ResendEmailSender(config.resend!.apiKey, config.resend!.from, logger), config.webAppUrl, config.emailGarde, logger);
           case "disabled":
             return new DisabledEmailSender(logger);
           case "capture":
             return new CapturingEmailSender();
           case "console":
-            return new ConsoleEmailSender(logger);
+            return new EmailSortantSender(new ConsoleEmailSender(logger), config.webAppUrl, config.emailGarde, logger);
         }
       },
       inject: [CONFIG, LOGGER],

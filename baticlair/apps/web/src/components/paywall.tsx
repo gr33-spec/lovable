@@ -134,6 +134,8 @@ export function PlansScreen() {
   const { data, setData, error, reload } = useBilling();
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
+  // L'abonnement (24 octobre 2026) a sa propre carte (`ResumeAbonnement`) : « Gratuit pour l'artisan » n'est plus vrai.
+  if (data.payant === false && !CARTE_GRATUITE) return null;
   if (data.payant === false) {
     return (
       <section className="flex flex-col gap-3">
@@ -147,7 +149,10 @@ export function PlansScreen() {
   return <Paywall status={data} onChange={setData} />;
 }
 
-/** Compte : la formule en une ligne, et le lien vers les formules. */
+/** L'ancienne carte « Gratuit pour l'artisan » (paywall éteint), gardée mais plus montrée depuis l'abonnement. */
+const CARTE_GRATUITE = false;
+
+/** Compte : la formule en une ligne, et le lien vers les formules (seulement quand l'ancien paywall `PAYWALL=on` est allumé). */
 export function PlanSummary() {
   const { data } = useBilling();
   if (!data) {

@@ -69,7 +69,7 @@ import type { Geocodeur } from "./geocodeur.js";
 import { lignesProposables } from "./groupe.service.js";
 import { statutDeLecture, type NegoceExtractor, type ReponseLue } from "./negoce-extractor.js";
 import { pdfDeTexte } from "../../../platform/pdf/pdf-texte.js";
-import { NOM_APP } from "@baticlair/domain";
+import { NOM_APP, ecartDuCycle, type ActionPayante } from "@baticlair/domain";
 
 /** Les lignes qui comptent dans une commande du mois : déposées, puis commandées (jamais les retirées). */
 const DANS_LA_COMMANDE = ["signe", "commande"] as const;
@@ -120,6 +120,8 @@ export interface VueDuMois {
   mesNegoces: string[];
   /** La liste reportée d'une commande sans réponse : « Aucun négoce n'a répondu à la commande du 1er novembre… ». */
   report: string | null;
+  /** Les résultats existent mais le paywall les cache (essai fini, liste déposée après l'accès). */
+  resultatsBloques: boolean;
   resultats: null | {
     parDefaut: string | null;
     moinsCherPourToi: string | null;
@@ -185,6 +187,8 @@ export class CommandeDuMoisService {
     /** L'espace négoce (23 octobre 2026) : liens d'invitation et de désabonnement, comptes inscrits. */
     private readonly espace: EspaceNegoceService,
     private readonly alerter: Alerter,
+    /** L'abonnement artisan (24 octobre 2026) : le paywall sur déposer, voir les résultats, commander, recommander. */
+    private readonly abonnement: { exiger(companyId: string, action: ActionPayante, maintenant?: Date, deposeeLe?: Date | null): Promise<void>; permis(companyId: string, action: ActionPayante, maintenant?: Date, deposeeLe?: Date | null): Promise<boolean> } | null = null,
   ) {}
 
   /** Le lien d'une grille, pour l'espace du négoce. */
@@ -262,6 +266,7 @@ export class CommandeDuMoisService {
   async deposer(tenant: TenantContext, projectId: string, d: { articles: readonly string[]; nature: Nature; mois?: Mois | null }, maintenant = new Date()): Promise<{ mois: Mois; message: string | null; vue: VueDuMois }> {
     assertCanWrite(tenant);
     await this.ouverte(tenant);
+    await this.abonnement?.exiger(tenant.companyId, "deposer", maintenant);
     if (!NATURES.includes(d.nature)) throw validationFailed("Unknown nature", { reason: "nature_inconnue" });
     if (!isUuid(projectId)) throw notFound("Project");
     const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { id: true, address: true } });
@@ -445,7 +450,10 @@ export class CommandeDuMoisService {
     const grilles = await this.prisma.grilleNegoce.findMany({ where: { cycleId: c.id }, include: { negoce: { select: { nom: true } } }, orderBy: { deposeLe: "asc" } });
     const choix = await this.prisma.choixArtisan.findUnique({ where: { cycleId_companyId: { cycleId: c.id, companyId: tenant.companyId } } });
     let resultats: VueDuMois["resultats"] = null;
-    if (phase === "resultats" && toi.length > 0) {
+    // Le paywall (24 octobre 2026) : sans abonnement, les résultats d'une liste déposée APRÈS la fin de l'accès sont cachés ;
+    // ceux d'une liste déposée pendant l'essai restent visibles.
+    const resultatsBloques = phase === "resultats" && toi.length > 0 && !!this.abonnement && !(await this.abonnement.permis(tenant.companyId, "voir_resultats", maintenant, mes[0]?.createdAt ?? null));
+    if (phase === "resultats" && toi.length > 0 && !resultatsBloques) {
       const { chiffrees, classement, commandes } = await this.classement(c.id, c.lignes as unknown as LigneDeGrille[]);
       const moi = commandes.find((x) => x.companyId === tenant.companyId);
       if (moi && chiffrees.length > 0) {
@@ -492,7 +500,52 @@ export class CommandeDuMoisService {
       mesNegoces,
       report: report ? phraseDeReport(report.de, c.mois) : null,
       resultats,
+      resultatsBloques,
     };
+  }
+
+  /**
+   * L'économie réelle du premier cycle de l'entreprise (le paywall et les rappels de fin d'essai, 24 octobre 2026) : l'écart
+   * entre le prix le plus cher reçu et le prix choisi (sinon le moins cher), sur les négoces qui ont tout chiffré. Null tant
+   * qu'aucun cycle de l'entreprise n'a de résultats.
+   */
+  async ecartPremierCycle(companyId: string): Promise<number | null> {
+    const premier = await this.prisma.besoin.findFirst({ where: { companyId, cycleId: { not: null }, cycle: { phase: "resultats" } }, orderBy: { createdAt: "asc" }, select: { cycleId: true } });
+    if (!premier?.cycleId) return null;
+    const c = await this.prisma.cycleCommande.findUniqueOrThrow({ where: { id: premier.cycleId } });
+    const { chiffrees, classement, commandes } = await this.classement(c.id, c.lignes as unknown as LigneDeGrille[]);
+    const moi = commandes.find((x) => x.companyId === companyId);
+    if (!moi || chiffrees.length === 0) return null;
+    const comp = comparatifDeLArtisan(moi, chiffrees, classement);
+    const complets = comp.lignes.filter((l) => l.complet && l.livrable);
+    const choix = await this.prisma.choixArtisan.findUnique({ where: { cycleId_companyId: { cycleId: c.id, companyId } }, select: { totalHt: true } });
+    return ecartDuCycle(complets.map((l) => l.totalHt), choix ? Number(choix.totalHt) : null);
+  }
+
+  /**
+   * L'économie moyenne réelle (l'argument des tarifs, 24 octobre 2026) : sur les cycles publiés (les 24 derniers), l'écart
+   * moyen par artisan et par commande entre le prix le plus cher reçu et le prix choisi (ou le moins cher). Les comptes de
+   * démonstration ne comptent pas.
+   */
+  async economieMoyenne(): Promise<{ cycles: number; parCommande: number | null; total: number }> {
+    const cycles = await this.prisma.cycleCommande.findMany({ where: { phase: "resultats" }, orderBy: { resultatsLe: "desc" }, take: 24 });
+    const ecarts: number[] = [];
+    let publies = 0;
+    for (const c of cycles) {
+      const { chiffrees, classement, commandes } = await this.classement(c.id, c.lignes as unknown as LigneDeGrille[]);
+      if (chiffrees.length === 0) continue;
+      publies++;
+      const choix = new Map((await this.prisma.choixArtisan.findMany({ where: { cycleId: c.id }, select: { companyId: true, totalHt: true } })).map((x) => [x.companyId, Number(x.totalHt)]));
+      const demo = new Set((await this.prisma.membership.findMany({ where: { companyId: { in: commandes.map((x) => x.companyId) }, user: { email: { endsWith: "@demo.baticlair.fr" } } }, select: { companyId: true } })).map((m) => m.companyId));
+      for (const moi of commandes) {
+        if (demo.has(moi.companyId)) continue;
+        const comp = comparatifDeLArtisan(moi, chiffrees, classement);
+        const e = ecartDuCycle(comp.lignes.filter((l) => l.complet && l.livrable).map((l) => l.totalHt), choix.get(moi.companyId) ?? null);
+        if (e) ecarts.push(e);
+      }
+    }
+    const total = ecarts.reduce((s, x) => s + x, 0);
+    return { cycles: publies, parCommande: ecarts.length ? Math.round(total / ecarts.length) : null, total: Math.round(total) };
   }
 
   /** Le suivi façon colis d'un chantier inscrit à une commande du mois (le plus récent), ou null. */
@@ -530,6 +583,7 @@ export class CommandeDuMoisService {
   /** Choisir un négoce (par défaut le premier sur le total), puis « Commander » : le bon part au négoce. */
   async commander(tenant: TenantContext, cycleId: string, negoceId: string, maintenant = new Date()): Promise<VueDuMois> {
     assertCanWrite(tenant);
+    await this.abonnement?.exiger(tenant.companyId, "commander", maintenant);
     if (!isUuid(cycleId) || !isUuid(negoceId)) throw notFound("Cycle");
     const c = await this.prisma.cycleCommande.findUnique({ where: { id: cycleId } });
     if (!c) throw notFound("Cycle");
@@ -581,6 +635,58 @@ export class CommandeDuMoisService {
   // ---------------------------------------------------------------------------------------------------------------
 
   /** Clôture, envoi de la grille, relance de la veille, résultats ; puis les ajouts en attente. Rejouable sans doublon. */
+  // ---------------------------------------------------------------------------------------------------------------
+  // La démo admin (Greg, 24 octobre 2026) : jouer un cycle complet sans attendre le calendrier. Jamais en production
+  // (la garde est dans le contrôleur) ; seuls les faux comptes `@demo.baticlair.fr` y sont touchés.
+  // ---------------------------------------------------------------------------------------------------------------
+
+  /** Un faux artisan dépose ses lignes dans la commande ouverte de son département, sans passer par une vraie liste. */
+  async deposerPourLaDemo(d: { companyId: string; projectId: string; takeoffId: string; adresse: string; lignes: readonly { designation: string; quantite: number; unite: string; famille: string }[] }, maintenant = new Date()): Promise<number> {
+    const zone = zoneDuCodePostal(d.adresse);
+    if (!zone) throw validationFailed("The site needs an address with a postcode", { reason: "adresse_requise" });
+    let n = 0;
+    for (const [i, l] of d.lignes.entries()) {
+      const { cycle } = await this.cycleOuvert(l.famille, zone, maintenant);
+      await this.prisma.besoin.create({
+        data: { companyId: d.companyId, projectId: d.projectId, takeoffId: d.takeoffId, articleKey: `demo-${i + 1}`, designation: l.designation, cle: cleDeReference({ libelle: l.designation }), famille: l.famille, quantite: l.quantite, unite: l.unite, zone, adresseLivraison: d.adresse, fenetreTot: maintenant, fenetreTard: new Date(maintenant.getTime() + 60 * JOUR_MS), statut: "signe", signeLe: maintenant, cycleId: cycle.id, nature: "chantier" },
+      });
+      n++;
+    }
+    return n;
+  }
+
+  /** « Clôturer maintenant » ou « Publier les résultats » : la date passe à maintenant, puis la tâche du cycle tourne. */
+  async avancerPourLaDemo(quoi: "cloturer" | "publier", zone: string, maintenant = new Date()) {
+    if (quoi === "cloturer") {
+      await this.prisma.cycleCommande.updateMany({ where: { zone, phase: "inscriptions", clotureLe: { gt: maintenant } }, data: { clotureLe: maintenant } });
+    } else {
+      await this.prisma.cycleCommande.updateMany({ where: { zone, phase: "negoces", reponseAvant: { gt: maintenant } }, data: { reponseAvant: maintenant } });
+    }
+    return this.tache(maintenant);
+  }
+
+  /**
+   * « Faire répondre les négoces » : chaque faux négoce dépose sa grille, prix fictifs tirés de la désignation (un prix de
+   * base par article, puis un écart propre à chaque négoce), prix fermes, livraison de son compte. Aucun PDF, aucune IA.
+   */
+  async repondrePourLaDemo(domaine: string, maintenant = new Date()): Promise<number> {
+    const grilles = await this.prisma.grilleNegoce.findMany({ where: { deposeLe: null, cycle: { phase: "negoces", reponseAvant: { gt: maintenant } }, negoce: { email: { endsWith: `@${domaine}` } } }, include: { cycle: true, negoce: { include: { compte: { include: { depots: true } } } } }, orderBy: { createdAt: "asc" } });
+    let n = 0;
+    for (const [k, g] of grilles.entries()) {
+      const compte = g.negoce.compte;
+      if (!compte?.livraison) continue;
+      const ecart = [0.94, 1, 1.07][k % 3]!;
+      const prix: Record<string, number> = {};
+      for (const l of g.cycle.lignes as unknown as LigneDeGrille[]) prix[l.cle] = Math.round(prixDeBaseDemo(l.cle) * ecart * 100) / 100;
+      const depots = compte.depots.map((x) => ({ adresse: x.adresse, lat: x.lat, lon: x.lon }));
+      const livraison: LivraisonEnregistree = { depots, paliers: compte.livraison as unknown as PaliersLivraison, distances: await this.distances(g.cycleId, depots) };
+      await this.prisma.grilleNegoce.update({ where: { id: g.id }, data: { deposeLe: maintenant, prix, statutExtraction: "lue", livraison: livraison as object } });
+      await this.annoncerReponse(g.cycle, maintenant).catch(() => undefined);
+      n++;
+    }
+    return n;
+  }
+
   async tache(maintenant = new Date()): Promise<{ clos: number; grillesEnvoyees: number; relances: number; resultats: number; ajouts: number }> {
     let clos = 0;
     let grillesEnvoyees = 0;
@@ -988,6 +1094,7 @@ export class CommandeDuMoisService {
   async recommander(tenant: TenantContext, cycleId: string, r: { lignes: readonly { cle: string; quantite: number }[]; adresseLivraison: string }, maintenant = new Date()) {
     assertCanWrite(tenant);
     await this.ouverte(tenant);
+    await this.abonnement?.exiger(tenant.companyId, "recommander", maintenant);
     if (!isUuid(cycleId)) throw notFound("Cycle");
     const g = (await this.garanties(tenant, maintenant)).find((x) => x.cycleId === cycleId);
     if (!g) throw notFound("Garantie");
@@ -1075,3 +1182,10 @@ export function rapprocher(lue: ReponseLue, lignes: readonly LigneDeGrille[]): R
 }
 
 export { cleDeLigne };
+
+/** Un prix de base fictif et stable par article (démo seulement) : de 0,80 € à 40 € HT l'unité. */
+function prixDeBaseDemo(cle: string): number {
+  let h = 0;
+  for (const c of cle) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return 0.8 + (h % 3920) / 100;
+}

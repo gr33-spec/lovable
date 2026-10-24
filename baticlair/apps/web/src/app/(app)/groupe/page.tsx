@@ -112,6 +112,11 @@ export default function GroupePage() {
           {`Admin ${nom}`}
         </Link>
       ) : null}
+      {etat.data.admin ? (
+        <Link href="/admin/pilotage" className="min-h-11 self-start py-2 text-[14px] font-semibold text-accent-text underline decoration-dotted underline-offset-4">
+          Tableau de bord
+        </Link>
+      ) : null}
       {etat.data.raisons.includes("exclu_du_groupe") ? (
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
           {`La ${nom} t'est fermée`}{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux commandes annulées en 12 mois. Tes commandes en cours restent visibles ci-dessous.

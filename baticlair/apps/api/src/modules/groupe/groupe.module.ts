@@ -36,8 +36,9 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
 import { SuiviController } from "./http/suivi.controller.js";
 import { SuiviService } from "./application/suivi.service.js";
 import { BanGeocodeur, GEOCODEUR, TableGeocodeur, type Geocodeur } from "./application/geocodeur.js";
+import { AbonnementModule, AbonnementService } from "../abonnement/index.js";
 import { CommandeDuMoisService } from "./application/commande-du-mois.service.js";
-import { CommandeDuMoisAdminController, CommandeDuMoisController, CommandeDuMoisTacheController, GrilleNegoceController } from "./http/commande-du-mois.controller.js";
+import { CommandeDuMoisAdminController, CommandeDuMoisController, CommandeDuMoisTacheController, EconomiePubliqueController, GrilleNegoceController } from "./http/commande-du-mois.controller.js";
 import { CONFIG_CYCLE_DEFAUT } from "@baticlair/domain";
 import { EspaceNegoceService } from "./application/espace-negoce.service.js";
 import { EspaceNegoceController } from "./http/espace-negoce.controller.js";
@@ -45,8 +46,8 @@ import type { Alerter } from "../../platform/alerts/alerter.js";
 import { ALERTER } from "../../platform/tokens.js";
 
 @Module({
-  imports: [TenancyModule, TakeoffModule],
-  controllers: [SuiviController, GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController, JeuDemonstrationController, CommandeDuMoisController, GrilleNegoceController, CommandeDuMoisTacheController, CommandeDuMoisAdminController, EspaceNegoceController],
+  imports: [TenancyModule, TakeoffModule, AbonnementModule],
+  controllers: [SuiviController, GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController, JeuDemonstrationController, CommandeDuMoisController, GrilleNegoceController, CommandeDuMoisTacheController, CommandeDuMoisAdminController, EconomiePubliqueController, EspaceNegoceController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -100,9 +101,13 @@ import { ALERTER } from "../../platform/tokens.js";
     {
       // La commande commune du mois (Greg, 22 octobre 2026).
       provide: CommandeDuMoisService,
-      useFactory: (p: PrismaService, t: TakeoffService, e: TransactionalEmailSender, n: NotificationsGroupeService, g: Geocodeur, x: NegoceExtractor | null, pdf: PdfReader, c: AppConfig, groupe: GroupeService, espace: EspaceNegoceService, a: Alerter) =>
-        new CommandeDuMoisService(p, (tenant, id) => t.reviewed(tenant, id), e, n, g, x, pdf, { webAppUrl: c.webAppUrl, authSecret: c.authSecret }, (tenant) => groupe.ouvert(tenant), espace, a),
-      inject: [PrismaService, TakeoffService, EMAIL_SENDER, NotificationsGroupeService, GEOCODEUR, NEGOCE_EXTRACTOR, PDF_READER, CONFIG, GroupeService, EspaceNegoceService, ALERTER],
+      useFactory: (p: PrismaService, t: TakeoffService, e: TransactionalEmailSender, n: NotificationsGroupeService, g: Geocodeur, x: NegoceExtractor | null, pdf: PdfReader, c: AppConfig, groupe: GroupeService, espace: EspaceNegoceService, a: Alerter, abo: AbonnementService) => {
+        const s = new CommandeDuMoisService(p, (tenant, id) => t.reviewed(tenant, id), e, n, g, x, pdf, { webAppUrl: c.webAppUrl, authSecret: c.authSecret }, (tenant) => groupe.ouvert(tenant), espace, a, abo);
+        // L'économie réelle du premier cycle, pour le paywall et les rappels de fin d'essai.
+        abo.brancherEcart((companyId) => s.ecartPremierCycle(companyId));
+        return s;
+      },
+      inject: [PrismaService, TakeoffService, EMAIL_SENDER, NotificationsGroupeService, GEOCODEUR, NEGOCE_EXTRACTOR, PDF_READER, CONFIG, GroupeService, EspaceNegoceService, ALERTER, AbonnementService],
     },
     {
       // L'espace négoce autonome (Greg, 23 octobre 2026).
@@ -115,6 +120,6 @@ import { ALERTER } from "../../platform/tokens.js";
     { provide: SIRENE_HTTP, useValue: fetch as unknown as SireneHttp },
     { provide: SireneService, useFactory: (p: PrismaService, h: SireneHttp, c: AppConfig) => new SireneService(p, h, { apiKey: c.groupe.inseeApiKey, ...c.groupe.sirene }), inject: [PrismaService, SIRENE_HTTP, CONFIG] },
   ],
-  exports: [CommandeDuMoisService, EspaceNegoceService, GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService, CommandeService, NotificationsGroupeService],
+  exports: [CommandeDuMoisService, JeuDemonstrationService, EspaceNegoceService, GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService, CommandeService, NotificationsGroupeService],
 })
 export class GroupeModule {}

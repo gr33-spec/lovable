@@ -53,6 +53,12 @@ const TRAITEMENTS: readonly { finalite: string; donnees: string; base: string; d
     duree: "10 ans",
   },
   {
+    finalite: "L'abonnement et ses factures",
+    donnees: "Raison sociale, SIRET, adresse, n° de TVA, montants, dates de paiement ; jamais le numéro de carte (gardé par Stripe seul)",
+    base: "Contrat (les CGU) et obligation légale (comptabilité)",
+    duree: "Factures : 10 ans, même après la suppression du compte",
+  },
+  {
     finalite: "La preuve de ton accord aux CGU ou aux conditions négoces",
     donnees: "Version, date, e-mail chiffré (empreinte)",
     base: "Intérêt légitime (prouver l'accord)",
@@ -76,6 +82,7 @@ const SOUS_TRAITANTS: readonly { nom: string; role: string; pays: string; garant
   { nom: "Vercel Inc.", role: "Hébergement du site et de l'application", pays: "Serveurs à Francfort (UE) ; société aux États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
   { nom: HEBERGEUR_BASE.nom, role: "Base de données", pays: "Serveurs à Francfort (UE) ; société aux États-Unis", garantie: "Clauses contractuelles types" },
   { nom: "Anthropic", role: "Lecture des listes et des devis par l'IA (texte anonymisé)", pays: "États-Unis", garantie: "Clauses contractuelles types ; API commerciale : aucune donnée utilisée pour entraîner les modèles" },
+  { nom: "Stripe", role: "Paiement de l'abonnement (carte bancaire, prélèvements, portail client)", pays: "Irlande (UE) ; société mère aux États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
   { nom: "Resend", role: "Envoi des e-mails", pays: "États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
   { nom: "API Sirene de l'INSEE", role: "Vérification du SIRET (le numéro seul)", pays: "France", garantie: "Service public, aucun transfert" },
   { nom: "API Adresse de l'État", role: "Distance de livraison (adresses du chantier et du dépôt)", pays: "France", garantie: "Service public, aucun transfert" },

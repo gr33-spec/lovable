@@ -123,7 +123,7 @@ Chaque étape est rejouable : elle ne regarde que des statuts (`forme`, `envoye`
 | OAuth | `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET` | Facultatifs. |
 | IA | `AI_PROVIDER` (anthropic | fake), `ANTHROPIC_API_KEY` ou `BATICLAIR_ANTHROPIC_KEY`, `AI_EXTRACTION_MODEL`, `AI_EXTRACTION_EFFORT`, `AI_QUANTITATIF` (on/off), `AI_QUANTITATIF_MODEL`, `AI_MONTHLY_BUDGET_EUR`, `AI_ANALYSIS_MAX_EUR`, `AI_USD_TO_EUR`, `READING_ANSWER_WITHIN_MS` | `fake` en test et en e2e : aucun appel. |
 | Documents | `DOCUMENT_MAX_BYTES` (20 Mo), `DOCUMENT_MAX_PAGES` (60) | |
-| E-mail | `EMAIL_PROVIDER` (resend | console | capture | disabled), `RESEND_API_KEY`, `EMAIL_FROM`, `REPONSES_DOMAINE`, `RESEND_WEBHOOK_SECRET` | `REPONSES_DOMAINE` donne l'adresse `lot-<n°>@…` en `Reply-To` ; le webhook reçoit `email.received`. |
+| E-mail | `EMAIL_PROVIDER` (resend | console | capture | disabled), `RESEND_API_KEY`, `EMAIL_DOMAINE`, `EMAIL_EXPEDITEUR` (ou `EMAIL_FROM`), `EMAILS_AUTORISES` et `EMAIL_REDIRECTION` (liste blanche de la prévisualisation, `docs/groupe/EMAILS.md`), `REPONSES_DOMAINE`, `RESEND_WEBHOOK_SECRET` | `REPONSES_DOMAINE` donne l'adresse `lot-<n°>@…` en `Reply-To` ; le webhook reçoit `email.received`. |
 | Alertes | `ALERT_EMAIL`, `ALERT_WEBHOOK_URL` | Erreurs serveur et dépassements de budget IA. |
 | Formules | `PAYWALL`, `BILLING_PLANS`, `PLAN_ACTIVATION_CODES`, `REFERENTIAL_VALIDATORS` | |
 | Tâches | `CRON_SECRET` | Vercel l'envoie en `Bearer`. |

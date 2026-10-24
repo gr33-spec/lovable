@@ -42,8 +42,8 @@ export default function AccueilPage() {
       key: "plan",
       title: billing.plan.key === "trial" ? "Ton essai est terminé" : "Limite de ta formule atteinte",
       text: "Choisis une formule pour créer de nouveaux chantiers.",
-      href: "/formules",
-      action: "Voir les formules",
+      href: "/abonnement",
+      action: "Voir",
       icon: <Sparkles size={20} aria-hidden="true" />,
     });
   }

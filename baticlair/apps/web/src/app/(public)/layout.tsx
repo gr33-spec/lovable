@@ -14,9 +14,14 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         <Link href="/" className="flex items-center gap-2.5" aria-label={`${NOM_APP}, accueil`}>
           <Logo fond="sombre" hauteur={30} />
         </Link>
-        <Link href="/connexion" className="pressable inline-flex min-h-11 items-center rounded-full border border-white/25 px-5 text-[15px] font-semibold text-white hover:border-white">
-          Se connecter
-        </Link>
+        <nav aria-label="Menu" className="flex items-center gap-4 sm:gap-6">
+          <Link href="/tarifs" className="inline-flex min-h-11 items-center text-[15px] font-semibold text-white/85 hover:text-white">
+            Tarifs
+          </Link>
+          <Link href="/connexion" className="pressable inline-flex min-h-11 items-center rounded-full border border-white/25 px-5 text-[15px] font-semibold text-white hover:border-white">
+            Se connecter
+          </Link>
+        </nav>
       </header>
       {children}
     </div>

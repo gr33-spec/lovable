@@ -59,12 +59,13 @@ import {
   piecewiseParams,
   scopedKey,
   type LectureDevis,
+  valeurApprise,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
 import { imageMimeType, looksLikePdf, type DocumentAiInput, type DocumentRepository, type DocumentWithProcessing, type PreparedDocument } from "../../documents/index.js";
-import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
+import type { CompanyMemory, CorrectionJournal, HabitudesService } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
 import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader } from "./lecture-reader.js";
@@ -82,6 +83,11 @@ import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.rep
  *   avant tout appel, et le nombre d'appels est plafonné.
  */
 export interface ReadingOptions {
+  /**
+   * L'apprentissage des corrections (Greg, 24 octobre 2026) : une correction répétée sur 2 chantiers (ou validée par l'admin
+   * après 3 artisans) s'applique d'elle-même à la liste, « Ajusté selon tes habitudes », annulable en un clic.
+   */
+  habitudes?: Pick<HabitudesService, "apprendre" | "ajustements" | "annuler">;
   /** Compte autorisé à voir les calculs des règles en brouillon (marqués « provisoire »), pour les valider. */
   isValidator?: (tenant: TenantContext) => Promise<boolean>;
   /** Adresse du chantier (code postal → zone climatique), sans rien demander à l'artisan. */
@@ -297,6 +303,8 @@ export interface ReviewedTakeoff {
   siteNotes?: string | null;
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché, hors de la liste. */
   aiSuggestions: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
+  /** Les lignes ajustées d'elles-mêmes par une règle apprise (24 octobre 2026) : « Ajusté selon tes habitudes », « Annuler ». */
+  ajustements?: { itemKey: string; regleId: string; texte: string }[];
 }
 
 
@@ -1050,7 +1058,7 @@ export class TakeoffService {
 
   async answer(tenant: TenantContext, takeoffId: string, key: string, value: EngineAnswer): Promise<ReviewedTakeoff> {
     // Une correction d'article (§41.4, §45.8, §45.9 : depuis l'aperçu avant envoi) ne lève aucun doute : la liste validée le reste.
-    const itemOnly = /^(quantite|libelle|precision|retire|ajout|bref):/.test(key);
+    const itemOnly = /^(quantite|libelle|precision|retire|ajout|bref|habitude):/.test(key);
     const takeoff = itemOnly ? await this.itemEditable(tenant, await this.takeoffs.findById(tenant, takeoffId)) : await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const previous = takeoff.answers[key];
     // §45.8 : « On ajoute ? » — Oui / Non d'un tap, mémorisé pour l'entreprise.
@@ -1075,7 +1083,8 @@ export class TakeoffService {
       if (corrected[1] === "retire" && value !== "oui" && value !== null) throw validationFailed("Answer oui", { reason: "invalid_answer" });
       const answers = { ...takeoff.answers };
       for (const k of ["quantite", "libelle", "precision", "retire"]) delete answers[`${k}:${itemKey}`];
-      const engine = (await this.review(tenant, { ...takeoff, answers })).purchase.toBuy.find((b) => b.key === itemKey);
+      // La proposition d'avant toute correction : celle du moteur, sans les habitudes apprises (on apprend de l'écart à l'IA).
+      const engine = (await this.reviewBrut(tenant, { ...takeoff, answers })).purchase.toBuy.find((b) => b.key === itemKey);
       await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
       const after = await this.reload(tenant, takeoff.id);
       const now = after.purchase.toBuy.find((b) => b.key === itemKey);
@@ -1100,8 +1109,22 @@ export class TakeoffService {
             })),
           },
         });
+        // L'apprentissage (24 octobre 2026) : la même correction sur 2 chantiers deviendra une habitude de l'artisan.
+        const champ = corrected[1] as "quantite" | "libelle" | "precision" | "retire";
+        if (champ !== "retire" && this.reading.habitudes) {
+          const valeur = valeurApprise(champ, { label: engine.label, count: engine.order?.count ?? null }, value as string | { value: string; unit: string } | null);
+          if (valeur) await this.reading.habitudes.apprendre(tenant, { metier: takeoff.trade, propose: engine.label, champ, valeur, projectId: takeoff.projectId }).catch(() => undefined);
+        }
       }
       return after;
+    }
+    // « Annuler » sur une ligne ajustée par une habitude : la ligne revient à la proposition, la règle de l'artisan s'arrête.
+    if (key.startsWith("habitude:")) {
+      if (value !== "non") throw validationFailed("Answer non", { reason: "invalid_answer" });
+      const ajustement = (await this.review(tenant, takeoff)).ajustements?.find((a) => a.itemKey === key.slice("habitude:".length));
+      await this.takeoffs.setAnswer(tenant, takeoff.id, key, "non");
+      if (ajustement) await this.reading.habitudes?.annuler(tenant, ajustement.regleId);
+      return this.reload(tenant, takeoff.id);
     }
     // §47.3 / §47.4 : « C'est bon » sur une quantité calculée avec une règle « à vérifier » : la ligne passe au vert,
     // chaque règle est confirmée pour l'entreprise (trois entreprises différentes la valident), et tout va au journal.
@@ -1341,8 +1364,25 @@ export class TakeoffService {
    * L'écran, recalculé à chaque lecture avec les règles de sa version (§51.5) : la lecture du modèle, ou, sans lecture
    * (lignes d'un partenaire, ancien quantitatif), chaque ligne telle qu'écrite.
    */
-  private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
+  /** L'écran sans les habitudes apprises : ce que proposent la lecture et le moteur. */
+  private async reviewBrut(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
     return this.reviewLecture(tenant, record, record.lecture ?? lectureDepuisLignes(record.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw }))));
+  }
+
+  private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
+    const lecture = record.lecture ?? lectureDepuisLignes(record.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw })));
+    const brut = await this.reviewLecture(tenant, record, lecture);
+    // L'apprentissage (24 octobre 2026) : les règles apprises posent leur réponse sur la ligne, comme une correction à la
+    // main, sauf là où l'artisan a déjà répondu ou a annulé l'ajustement (« habitude:<ligne> »).
+    const h = this.reading.habitudes;
+    if (!h) return brut;
+    const lignes = brut.purchase.toBuy.map((b) => ({ key: b.key, label: b.label, count: b.order?.count ?? null, unit: b.order?.unit ?? null }));
+    const ajustements = await h.ajustements(tenant, record.trade, lignes, (cle) => cle in record.answers).catch(() => []);
+    if (ajustements.length === 0) return brut;
+    const appris = Object.fromEntries(ajustements.map((a) => [`${a.champ}:${a.itemKey}`, a.reponse]));
+    const ajuste = await this.reviewLecture(tenant, { ...record, answers: { ...appris, ...record.answers } }, lecture);
+    const vus = new Set<string>();
+    return { ...ajuste, ajustements: ajustements.filter((a) => !vus.has(a.itemKey) && vus.add(a.itemKey)).map((a) => ({ itemKey: a.itemKey, regleId: a.regleId, texte: a.texte })) };
   }
 
   /**

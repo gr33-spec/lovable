@@ -18,6 +18,8 @@ export interface TransactionalEmail {
    * d'être seulement journalisé comme pour un mail de compte (inscription, mot de passe), qu'on peut redemander.
    */
   mustDeliver?: boolean;
+  /** En-têtes ajoutés par la mise en page (List-Unsubscribe). */
+  headers?: Record<string, string>;
 }
 
 export interface TransactionalEmailSender {

@@ -35,6 +35,7 @@ const errorMessages: Record<string, string> = {
   analysis_failed: "Ce devis n'a pas pu être lu. Réessaie dans un instant.",
   email_not_sent: "Le mail n'est pas parti chez le fournisseur. Rien n'est envoyé : réessaie dans un instant.",
   plan_limit_reached: "Tu as atteint le nombre de chantiers de ta formule.",
+  abonnement_requis: "Ton essai est terminé : continue avec l'abonnement pour faire ça.",
   onboarding_required: "Indique d'abord le nom de ton entreprise.",
   company_selection_required: "Choisis l'entreprise avec laquelle travailler.",
   too_many_requests: "Trop d'essais en peu de temps. Attends quelques minutes, puis réessaie.",

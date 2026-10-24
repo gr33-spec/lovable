@@ -5,12 +5,15 @@ import { PageTitle } from "@/components/ui";
 import { EDITEUR, TRIBUNAL, VERSION_CGU } from "@/lib/legal";
 import { nom, NOM, NOM_APP } from "@/lib/nom";
 
+/** Le prix de l'abonnement artisan (réglable dans l'admin : un changement se fait ici aussi, avec 30 jours de préavis). */
+const PRIX = "29 €";
+
 export const metadata: Metadata = { title: `Conditions générales d'utilisation — ${NOM_APP}` };
 
 /**
  * LES CGU ARTISAN (mise en conformité du 24 octobre 2026), en mots simples : un service entre professionnels, la commande
  * commune toutes les deux semaines, sans engagement d'achat ; BATI INVEST n'est ni vendeur ni acheteur ; la concurrence ;
- * les documents déposés ; la responsabilité ; la suspension ; le droit applicable. Versionnées : une version majeure est
+ * l'abonnement (24 octobre 2026 : 29 € HT par mois, essai, résiliation, échec de paiement) ; les documents déposés ; la responsabilité ; la suspension ; le droit applicable. Versionnées : une version majeure est
  * redemandée à chaque compte (`VERSION_CGU_MAJEURE`), l'acceptation est horodatée. À relire par l'avocat.
  */
 export default function CguPage() {
@@ -51,15 +54,52 @@ export default function CguPage() {
             <strong>Sans engagement d&apos;achat</strong> : déposer une liste ne vous oblige à rien. Vous commandez seulement si le prix vous plaît, en confirmant
             la commande dans l&apos;application.
           </li>
+          <li>Le service est payant pour l&apos;artisan après un essai gratuit, selon l&apos;article 3. Il est gratuit pour les négoces.</li>
+        </ul>
+      </section>
+
+      <section id="abonnement" className="flex scroll-mt-24 flex-col gap-2">
+        <h2 className={s.h2}>3. L&apos;abonnement</h2>
+        <ul className={s.ul}>
           <li>
-            Le service est gratuit pour l&apos;artisan. Si des formules payantes sont proposées plus tard, elles seront annoncées dans l&apos;application et dans
-            ces conditions avant tout paiement ; rien ne vous sera facturé sans votre accord.
+            <strong>Prix</strong> : {PRIX} HT par mois (TVA en sus au taux en vigueur, 20 % aujourd&apos;hui), payé d&apos;avance par carte bancaire. Une facture émise
+            par {EDITEUR.nom} est disponible chaque mois dans « Mes factures ».
           </li>
+          <li>
+            <strong>Essai gratuit</strong> : de l&apos;inscription jusqu&apos;à 30 jours après les résultats de votre première {nom} ; si vous ne déposez aucune liste,
+            l&apos;essai s&apos;arrête 60 jours après l&apos;inscription. Aucune carte n&apos;est demandée pendant l&apos;essai et rien n&apos;est prélevé à sa fin sans
+            votre accord.
+          </li>
+          <li>
+            <strong>Après l&apos;essai, sans abonnement</strong> : déposer une liste, voir les prix reçus et commander ne sont plus possibles. Restent accessibles
+            votre historique, vos bons de commande, vos factures, vos données, votre compte. Une liste déposée pendant l&apos;essai reste dans sa commande et ses
+            résultats restent visibles.
+          </li>
+          <li>
+            <strong>Renouvellement</strong> : l&apos;abonnement se renouvelle chaque mois à la date anniversaire, sans engagement de durée.
+          </li>
+          <li>
+            <strong>Résiliation</strong> : à tout moment, en deux clics dans « Mon abonnement ». Elle prend effet à la fin de la période déjà payée, sans
+            remboursement du mois en cours ; une confirmation vous est envoyée par e-mail.
+          </li>
+          <li>
+            <strong>Échec de paiement</strong> : si le paiement mensuel est refusé, vous êtes prévenu par e-mail et gardez l&apos;accès 7 jours pour mettre votre
+            carte à jour ; passé ce délai, l&apos;accès est limité comme après l&apos;essai, jusqu&apos;au paiement.
+          </li>
+          <li>
+            <strong>Pas de droit de rétractation</strong> : le service est conclu entre professionnels, pour les besoins de votre activité ; le droit de
+            rétractation du code de la consommation ne s&apos;applique pas.
+          </li>
+          <li>
+            <strong>Changement de prix</strong> : tout changement vous est annoncé par e-mail au moins 30 jours avant de s&apos;appliquer ; vous pouvez résilier
+            avant cette date.
+          </li>
+          <li>Le paiement est traité par Stripe ; {EDITEUR.nom} ne voit ni ne garde jamais votre numéro de carte.</li>
         </ul>
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>3. BATI INVEST n&apos;est ni vendeur ni acheteur</h2>
+        <h2 className={s.h2}>4. BATI INVEST n&apos;est ni vendeur ni acheteur</h2>
         <p className={s.p}>
           Quand vous commandez, le contrat de vente est conclu directement entre vous et le négoce : vous commandez sur votre compte chez lui, il vous livre et vous
           facture, vous le payez comme d&apos;habitude. {EDITEUR.nom} ne vend rien, n&apos;achète rien, n&apos;encaisse aucun paiement et ne porte pas la commande. En
@@ -72,7 +112,7 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>4. Concurrence</h2>
+        <h2 className={s.h2}>5. Concurrence</h2>
         <p className={s.p}>
           Les prix d&apos;un négoce ne sont jamais communiqués à un autre négoce, ni pendant ni après la consultation. Les artisans ne se voient pas : ni nom, ni
           chantier, ni prix obtenu. La {nom} additionne des volumes, elle ne sert pas à vous coordonner avec d&apos;autres artisans : vous restez seul maître de vos
@@ -81,7 +121,7 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>5. Les documents que vous déposez</h2>
+        <h2 className={s.h2}>6. Les documents que vous déposez</h2>
         <ul className={s.ul}>
           <li>
             Vous garantissez avoir le droit de transmettre chaque liste ou devis que vous déposez. Un devis peut contenir les coordonnées de votre client : {NOM_APP}
@@ -100,7 +140,7 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>6. Responsabilité</h2>
+        <h2 className={s.h2}>7. Responsabilité</h2>
         <p className={s.p}>
           {NOM_APP} est fourni avec le soin d&apos;un service en construction. La responsabilité de {EDITEUR.nom} est limitée aux dommages directs causés par une faute
           prouvée de sa part ; elle ne couvre ni une commande passée sur une quantité que vous n&apos;avez pas vérifiée, ni le fait d&apos;un négoce (prix, retard,
@@ -109,7 +149,7 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>7. Votre compte, sa suspension et sa suppression</h2>
+        <h2 className={s.h2}>8. Votre compte, sa suspension et sa suppression</h2>
         <ul className={s.ul}>
           <li>Un compte par personne, rattaché à une entreprise du bâtiment. Vous gardez votre mot de passe pour vous.</li>
           <li>
@@ -121,7 +161,7 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>8. Données et droit applicable</h2>
+        <h2 className={s.h2}>9. Données et droit applicable</h2>
         <p className={s.p}>
           Le traitement de vos données est décrit dans la{" "}
           <Link href="/confidentialite" className="font-semibold underline">

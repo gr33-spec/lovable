@@ -8,6 +8,7 @@ import { MenuArtisan } from "./menu-artisan";
 import { BandeauDuMois } from "./commande-du-mois";
 import { CguAJour } from "./cgu-a-jour";
 import { PiedLegal } from "./legal";
+import { BandeauAbonnement, CompterInstallation, PaywallAbonnement } from "./abonnement";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   useTrackNavigation();
@@ -19,6 +20,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 pt-4 pb-(--nav-space) lg:max-w-[66rem] lg:pt-10 lg:pb-12 lg:pl-72 xl:max-w-[74rem]">
         <MenuArtisan />
         <CguAJour />
+        {/* L'abonnement (24 octobre 2026) : « Essai gratuit : encore N jours », ou le paiement refusé, en rouge. */}
+        <BandeauAbonnement />
+        <PaywallAbonnement />
+        <CompterInstallation />
         {/* Greg (23 octobre) : le minuteur de la commande du mois sur chaque écran. */}
         <BandeauDuMois />
         {children}

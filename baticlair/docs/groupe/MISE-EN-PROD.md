@@ -21,7 +21,7 @@ Plan du 20 octobre 2026, bloc 11. À dérouler dans l'ordre, le jour J, par Greg
 | `GROUPE_ADMINS` | l'e-mail de Greg | L'admin du groupé (`/admin/groupe`). À défaut : `REFERENTIAL_VALIDATORS`. |
 | `SIRET_VERIFICATION` | `insee` (ou absent) | Seule valeur admise en production ; `forme` est refusé au démarrage. |
 | `INSEE_API_KEY` | la clé d'intégration Sirene | Vérification du SIRET avant tout accès, et base négoces (`SIRENE_DEPARTEMENTS`, `SIRENE_NAF` par défaut : 22/29/35/56, 46.73A/B 47.52A/B). |
-| `EMAIL_PROVIDER` / `RESEND_API_KEY` / `EMAIL_FROM` | Resend | Demandes aux négoces, bons de commande, factures, relances. |
+| `EMAIL_PROVIDER` / `RESEND_API_KEY` / `EMAIL_DOMAINE` / `EMAIL_EXPEDITEUR` (prévisualisation : `EMAILS_AUTORISES`, `EMAIL_REDIRECTION`) | Resend, voir `EMAILS.md` | Demandes aux négoces, bons de commande, factures, relances. |
 | `REPONSES_DOMAINE` | le domaine de réception (`reponses.baticlair.fr`) | Adresse `Reply-To` `lot-<n°>@…` ; à configurer chez Resend en réception (« Receiving »), MX posés. |
 | `RESEND_WEBHOOK_SECRET` | `whsec_…` du webhook `email.received` → `POST /v1/webhooks/resend` | Sans lui, le webhook est fermé (une réponse par e-mail n'est pas traitée, le négoce garde son lien). |
 | `FACTURE_EMETTEUR_NOM` | `BATI INVEST` | Facture de commission. |

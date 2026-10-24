@@ -39,6 +39,10 @@ describe("loadConfig", () => {
     // Groupé : le repli « SIRET bien formé = vérifié » est réservé à la prévisualisation (décision du fondateur, 2026-10-20).
     expect(() => loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "production" })).toThrow(/SIRET_VERIFICATION/);
     expect(loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "preview" }).groupe.siretVerification).toBe("forme");
+    // L'abonnement (24 octobre 2026) : le paiement simulé est refusé en production ; Stripe demande ses trois clés.
+    expect(() => loadConfig({ ...base, VERCEL_ENV: "production" })).toThrow(/PAIEMENT : « simule »/);
+    expect(loadConfig({ ...base, VERCEL_ENV: "production", ABONNEMENT: "off" }).abonnement.actif).toBe(false);
+    expect(() => loadConfig({ ...base, PAIEMENT: "stripe", STRIPE_SECRET_KEY: "sk_test_x" })).toThrow(/STRIPE_WEBHOOK_SECRET/);
   });
 
   it("choisit le service d'e-mail selon l'environnement", () => {

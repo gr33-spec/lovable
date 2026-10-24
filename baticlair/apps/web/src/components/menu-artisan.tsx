@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FlaskConical, Truck, UserRound } from "lucide-react";
+import { CreditCard, FlaskConical, Truck, UserRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -72,6 +72,10 @@ export function MenuArtisan() {
           <Link role="menuitem" href="/fournisseurs" onClick={() => setOpen(false)} className={item}>
             <Truck size={20} aria-hidden="true" className="text-muted" />
             Mes fournisseurs
+          </Link>
+          <Link role="menuitem" href="/abonnement" onClick={() => setOpen(false)} className={item}>
+            <CreditCard size={20} aria-hidden="true" className="text-muted" />
+            Mon abonnement
           </Link>
           <Link role="menuitem" href="/compte" onClick={() => setOpen(false)} className={item}>
             <UserRound size={20} aria-hidden="true" className="text-muted" />

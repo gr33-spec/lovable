@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NOM_APP } from "@baticlair/domain";
 import { parseActivationCodes, parsePlans, type Plan } from "./plans.js";
 
 /**
@@ -40,6 +41,19 @@ const envSchema = z
     RESEND_API_KEY: z.string().min(1).optional(),
     /** Expéditeur, ex. « BatiClair <bonjour@mondomaine.fr> » (domaine vérifié chez Resend). */
     EMAIL_FROM: z.string().min(3).optional(),
+    /**
+     * LES E-MAILS RÉELS (Greg, 24 octobre 2026) : le domaine vérifié chez Resend (« mobiiz.fr ») et l'adresse d'envoi
+     * (« bonjour ») ; l'expéditeur devient « Mobiiz <bonjour@mobiiz.fr> ». EMAIL_FROM, s'il est donné, l'emporte.
+     */
+    EMAIL_DOMAINE: z.string().regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i).optional(),
+    EMAIL_EXPEDITEUR: z.string().regex(/^[a-z0-9._-]+$/i).default("bonjour"),
+    /**
+     * La liste blanche de la PRÉVISUALISATION : adresses ou domaines (« @exemple.fr »), séparés par des virgules. Les
+     * autres destinataires sont redirigés vers EMAIL_REDIRECTION (objet « [TEST → destinataire réel] … »). Obligatoire
+     * pour envoyer de vrais e-mails depuis une prévisualisation ; ignorée en production.
+     */
+    EMAILS_AUTORISES: z.string().optional(),
+    EMAIL_REDIRECTION: z.email().optional(),
     /**
      * Taille maximale d'un document déposé : 20 Mo par défaut (un devis scanné).
      * Au-delà de 4 Mo, le navigateur l'envoie en morceaux (`UploadParts`) :
@@ -100,6 +114,22 @@ const envSchema = z
      * puisse utiliser pour l'instant, on mettra le paywall actif plus tard ») ; `on` le rallume.
      */
     PAYWALL: z.enum(["on", "off"]).default("off"),
+    /**
+     * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 29 € HT par mois, essai, paywall sur déposer, voir les résultats,
+     * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
+     */
+    ABONNEMENT: z.enum(["on", "off"]).default("on"),
+    /**
+     * Le paiement : `simule` (page « Paiement (simulation) », factures « TEST », aucun argent) ou `stripe` (Checkout,
+     * portail, webhooks signés ; `docs/groupe/STRIPE.md`). Les deux envoient les mêmes événements.
+     */
+    PAIEMENT: z.enum(["simule", "stripe"]).default("simule"),
+    STRIPE_SECRET_KEY: z.string().min(8).optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().min(8).optional(),
+    /** Le prix mensuel créé chez Stripe (« price_… »), 29 € HT, récurrent. */
+    STRIPE_PRICE_ID: z.string().min(4).optional(),
+    /** Le taux de TVA créé chez Stripe (« txr_… », 20 %, non inclus) appliqué à l'abonnement. */
+    STRIPE_TAX_RATE_ID: z.string().min(4).optional(),
     /**
      * BatiClair Groupé (document du fondateur, 2026-10-19) : DÉSACTIVÉ par défaut, « rien en prod sans mon accord
      * explicite » ; `on` l'ouvre (écrans, regroupement, envois aux négoces).
@@ -177,8 +207,8 @@ const envSchema = z
     if (env.EMAIL_PROVIDER === "resend" && !env.RESEND_API_KEY) {
       ctx.addIssue({ code: "custom", path: ["RESEND_API_KEY"], message: "obligatoire avec EMAIL_PROVIDER=resend" });
     }
-    if ((env.EMAIL_PROVIDER === "resend" || (!env.EMAIL_PROVIDER && env.RESEND_API_KEY)) && !env.EMAIL_FROM) {
-      ctx.addIssue({ code: "custom", path: ["EMAIL_FROM"], message: "obligatoire pour envoyer des e-mails" });
+    if ((env.EMAIL_PROVIDER === "resend" || (!env.EMAIL_PROVIDER && env.RESEND_API_KEY)) && !env.EMAIL_FROM && !env.EMAIL_DOMAINE) {
+      ctx.addIssue({ code: "custom", path: ["EMAIL_DOMAINE"], message: "obligatoire pour envoyer des e-mails (ou EMAIL_FROM)" });
     }
     for (const provider of ["GOOGLE", "MICROSOFT"] as const) {
       if (Boolean(env[`${provider}_CLIENT_ID`]) !== Boolean(env[`${provider}_CLIENT_SECRET`])) {
@@ -213,12 +243,20 @@ export interface AppConfig {
   previewOriginPattern: RegExp | null;
   emailProvider: "resend" | "disabled" | "console" | "capture";
   resend?: { apiKey: string; from: string };
+  /** La liste blanche de la prévisualisation (null en production et en local). */
+  emailGarde: { autorises: string[]; redirigerVers: string | null } | null;
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
   documents: { maxBytes: number; maxPages: number };
   aiCost: { usdToEur: string; monthlyBudgetEur: string; analysisMaxEur: string };
   /** E-mails (en minuscules) des validateurs du référentiel. */
   referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
+  /** L'abonnement artisan (`ABONNEMENT`, `PAIEMENT`). */
+  abonnement: {
+    actif: boolean;
+    paiement: "simule" | "stripe";
+    stripe: { secretKey: string; webhookSecret: string; priceId: string; taxRateId: string | null } | null;
+  };
   /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
   groupe: {
     enabled: boolean;
@@ -284,9 +322,24 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     throw new ConfigError([`BILLING_PLANS : ${err instanceof Error ? err.message : String(err)}`]);
   }
   const isDeployed = e.NODE_ENV === "production" || e.NODE_ENV === "staging";
-  if (e.SIRET_VERIFICATION === "forme" && e.VERCEL_ENV === "production") {
-    throw new ConfigError(["SIRET_VERIFICATION : « forme » est réservé à la prévisualisation, jamais en production"]);
+  const problemes: string[] = [];
+  if (e.PAIEMENT === "stripe" && !(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID)) {
+    problemes.push("PAIEMENT : « stripe » demande STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET et STRIPE_PRICE_ID");
   }
+  // Un paiement simulé en production donnerait l'accès sans payer.
+  if (e.PAIEMENT === "simule" && e.ABONNEMENT === "on" && e.VERCEL_ENV === "production") {
+    problemes.push("PAIEMENT : « simule » est réservé à la prévisualisation ; en production, PAIEMENT=stripe (ou ABONNEMENT=off)");
+  }
+  if (e.SIRET_VERIFICATION === "forme" && e.VERCEL_ENV === "production") {
+    problemes.push("SIRET_VERIFICATION : « forme » est réservé à la prévisualisation, jamais en production");
+  }
+  const autorises = (e.EMAILS_AUTORISES ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean);
+  const envoiReel = e.EMAIL_PROVIDER === "resend" || (!e.EMAIL_PROVIDER && !!e.RESEND_API_KEY);
+  if (e.VERCEL_ENV === "preview" && envoiReel && autorises.length === 0) {
+    problemes.push("EMAILS_AUTORISES : obligatoire pour envoyer de vrais e-mails depuis une prévisualisation (la liste blanche)");
+  }
+  const emailFrom = e.EMAIL_FROM ?? (e.EMAIL_DOMAINE ? `${NOM_APP} <${e.EMAIL_EXPEDITEUR}@${e.EMAIL_DOMAINE}>` : undefined);
+  if (problemes.length) throw new ConfigError(problemes);
   const emailProvider = e.EMAIL_PROVIDER ?? (e.RESEND_API_KEY ? "resend" : isDeployed ? "disabled" : "console");
   const oauth = (id?: string, secret?: string) => (id && secret ? { clientId: id, clientSecret: secret } : undefined);
   const google = oauth(e.GOOGLE_CLIENT_ID, e.GOOGLE_CLIENT_SECRET);
@@ -302,9 +355,10 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     webAppOrigins: e.WEB_APP_URL,
     previewOriginPattern: e.VERCEL_ENV === "preview" ? PREVIEW_ORIGIN : null,
     emailProvider,
-    ...(emailProvider === "resend" && e.RESEND_API_KEY && e.EMAIL_FROM
-      ? { resend: { apiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM } }
+    ...(emailProvider === "resend" && e.RESEND_API_KEY && emailFrom
+      ? { resend: { apiKey: e.RESEND_API_KEY, from: emailFrom } }
       : {}),
+    emailGarde: e.VERCEL_ENV !== "production" && autorises.length > 0 ? { autorises, redirigerVers: e.EMAIL_REDIRECTION?.toLowerCase() ?? autorises.find((x) => !x.startsWith("@")) ?? null } : null,
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
     documents: { maxBytes: e.DOCUMENT_MAX_BYTES, maxPages: e.DOCUMENT_MAX_PAGES },
     aiCost: { usdToEur: e.AI_USD_TO_EUR, monthlyBudgetEur: e.AI_MONTHLY_BUDGET_EUR, analysisMaxEur: e.AI_ANALYSIS_MAX_EUR },
@@ -313,6 +367,11 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
+    abonnement: {
+      actif: e.ABONNEMENT === "on",
+      paiement: e.PAIEMENT,
+      stripe: e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, priceId: e.STRIPE_PRICE_ID, taxRateId: e.STRIPE_TAX_RATE_ID ?? null } : null,
+    },
     groupe: {
       enabled: e.GROUPE === "on",
       inseeApiKey: e.INSEE_API_KEY ?? null,

@@ -396,7 +396,8 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
 
   // Compte : la formule en mots simples (essai, chantiers utilisés), jamais de coûts techniques.
   await page.goto("/compte");
-  await expect(page.getByText("Essai gratuit")).toBeVisible();
+  // L'abonnement (24 octobre 2026) et, l'ancien paywall allumé en e2e, la formule par chantiers.
+  await expect(page.getByText("Essai gratuit", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("1 chantier sur 3")).toBeVisible();
   await expect(page.getByText(/Consommation IA|analyse|tokens/i)).toHaveCount(0);
 
@@ -2141,8 +2142,10 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   await expect(page.getByText(/Vercel Inc\./)).toBeVisible();
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "CGU" }).click();
   await expect(page.getByRole("heading", { name: "Conditions générales d'utilisation" })).toBeVisible();
-  // Plan « finition » (22 octobre) : gratuit pour l'artisan, rémunération en suspens : aucun « 2 % » sur les pages légales.
-  await expect(page.getByText(/Le service est gratuit pour l'artisan/)).toBeVisible();
+  // L'abonnement (24 octobre 2026) : l'article 3 des CGU ; gratuit pour les négoces ; aucun « 2 % » sur les pages légales.
+  await expect(page.getByRole("heading", { name: "3. L'abonnement" })).toBeVisible();
+  await expect(page.getByText(/29 € HT par mois/).first()).toBeVisible();
+  await expect(page.getByText(/Pas de droit de rétractation/)).toBeVisible();
   await expect(page.getByText(/tribunal de commerce de Saint-Brieuc/)).toBeVisible();
   await expect(page.getByText(/2 %/)).toHaveCount(0);
   await expect(page.getByText(/avocat/)).toHaveCount(0);
@@ -2464,7 +2467,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText(/tuile/i)).toHaveCount(0);
   await expect(page.locator("main svg")).toHaveCount(0);
   await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
-  await expect(page.getByText("Gratuit pour l'artisan. Sans engagement.")).toBeVisible();
+  // L'abonnement (24 octobre 2026) : l'argument phare (une possibilité tant qu'il n'y a pas 3 cycles) et l'offre.
+  await expect(page.getByText(/^Pour 29 € par mois(, économise des centaines, voire des milliers d'euros chaque année\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par commande commune\.)$/)).toBeVisible();
+  await expect(page.getByText(/^Essai gratuit sur un cycle complet, puis 29 € HT par mois, sans engagement\./)).toBeVisible();
   await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(2);
   await expect(page.getByText("des volumes sûrs, des clients en plus. Répondez aux grilles.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
@@ -2849,6 +2854,8 @@ test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau co
   expect(page.url()).toBe(chantier);
   // Session expirée en pleine action : la phrase, et un bouton pour se reconnecter qui ramène ici.
   await page.goto("/chantiers/nouveau");
+  // Les lectures de l'écran (le bandeau de l'abonnement) finissent avant que la session expire.
+  await page.waitForLoadState("networkidle");
   await page.context().clearCookies();
   await depot.setInputFiles({ name: "liste-manuscrite.png", mimeType: "image/png", buffer: photo });
   await expect(page.getByText("Ta session a expiré. Reconnecte-toi.")).toBeVisible();
@@ -3195,4 +3202,116 @@ test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le
   await expect(page.getByText("Sur 3 demandes, 3 négoces ont répondu. Voici le meilleur prix livré pour toi.").first()).toBeVisible();
   await expect(page.getByRole("region", { name: "Tes prix" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
+test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, bandeau d'essai, paiement simulé, facture TEST, résiliation en deux clics", async ({ page }) => {
+  // La landing mène aux tarifs : trois étapes, l'argument (une possibilité), gratuit pour les négoces, la FAQ.
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu" }).getByRole("link", { name: "Tarifs" }).click();
+  await expect(page).toHaveURL(/\/tarifs$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
+  await expect(page.getByText(/^Pour 29 € par mois(, économise des centaines, voire des milliers d'euros chaque année\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par commande commune\.)$/)).toBeVisible();
+  for (const etape of ["Rejoins la communauté, c'est gratuit", "Teste sur un cycle complet", "Continue seulement si tu as vraiment économisé : 29 € HT par mois, sans engagement"]) {
+    await expect(page.getByRole("heading", { name: etape })).toBeVisible();
+  }
+  await expect(page.getByRole("heading", { name: "Gratuit pour les négoces" })).toBeVisible();
+  await expect(page.getByText("Comment je résilie ?")).toBeVisible();
+
+  // L'essai : le bandeau compte les jours.
+  await signUp(page);
+  await expect(page.getByRole("link", { name: /Essai gratuit : encore 60 jours/ })).toBeVisible();
+  await page.getByRole("link", { name: /Essai gratuit : encore 60 jours/ }).click();
+  await expect(page).toHaveURL(/\/abonnement$/);
+  await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
+  await expect(page.getByText("Essai gratuit", { exact: true })).toBeVisible();
+
+  // « M'abonner » : la page de paiement simulée, puis « Payer ».
+  await page.getByRole("button", { name: "M'abonner dès maintenant" }).click();
+  await expect(page).toHaveURL(/\/paiement-simule\?session=sim_/);
+  await expect(page.getByRole("heading", { name: "Paiement (simulation)" })).toBeVisible();
+  await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
+  await page.getByRole("button", { name: "Payer", exact: true }).click();
+  await expect(page).toHaveURL(/\/abonnement$/);
+  await expect(page.getByText("Abonné", { exact: true })).toBeVisible();
+  await expect(page.getByText("29 € HT par mois (34,80 € TTC), sans engagement.")).toBeVisible();
+
+  // « Mes factures » : la facture TEST, téléchargeable.
+  await page.getByRole("tab", { name: "Mes factures" }).click();
+  const factures = page.getByRole("list", { name: "Mes factures" });
+  await expect(factures.getByText(/^TEST-\d{6}/)).toBeVisible();
+  await expect(factures.getByText(/34,80 € TTC/)).toBeVisible();
+  const download = page.waitForEvent("download");
+  await factures.getByRole("link", { name: "Télécharger" }).first().click();
+  expect((await download).suggestedFilename()).toMatch(/^TEST-\d{6}\.pdf$/);
+
+  // Résilier en deux clics : effet en fin de période.
+  await page.getByRole("tab", { name: "Mon abonnement" }).click();
+  await page.getByRole("button", { name: "Résilier" }).click();
+  await page.getByRole("button", { name: "Oui, résilier" }).click();
+  await expect(page.getByText(/^Résilié : ton accès reste jusqu'au/)).toBeVisible();
+});
+
+test("Abonnement : un paiement refusé met le bandeau rouge, avec la date limite", async ({ page }) => {
+  await signUp(page);
+  await menuArtisan(page, "Mon abonnement");
+  await page.getByRole("button", { name: "M'abonner dès maintenant" }).click();
+  await page.getByRole("button", { name: "Échec du paiement" }).click();
+  await expect(page).toHaveURL(/\/abonnement$/);
+  await expect(page.getByText("Paiement refusé")).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /^Ton paiement n'est pas passé\. Mets à jour ta carte avant le \d{2}\/\d{2} pour garder l'accès\./ })).toBeVisible();
+});
+
+test("Apprentissage (24 octobre 2026) : la même correction sur 2 chantiers s'applique d'elle-même, « Ajusté selon tes habitudes », annulable d'un clic", async ({ page }) => {
+  await signUp(page);
+  const ardoise = "Ardoise naturelle 32×22 Espagne 1er choix";
+  const liste = async () => {
+    const q = await apiJson<{ projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: ardoise, quantite: "2400", unite: "pièces" }] });
+    const t = await apiJson<{ takeoff: { id: string; purchase: { toBuy: { key: string }[] } } }>(page, "GET", `/v1/projects/${q.body.projetId}/takeoff`);
+    return { projetId: q.body.projetId, id: t.body.takeoff.id, key: t.body.takeoff.purchase.toBuy[0]!.key };
+  };
+  for (let i = 0; i < 2; i++) {
+    const l = await liste();
+    expect((await apiJson(page, "POST", `/v1/takeoffs/${l.id}/answers`, { key: `libelle:${l.key}`, value: "Ardoise Cupa Heavy 32×22" })).status).toBe(200);
+  }
+  const l3 = await liste();
+  await page.goto(`/chantiers/${l3.projetId}`);
+  const fournitures = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(fournitures.getByText("Ardoise Cupa Heavy 32×22")).toBeVisible();
+  await expect(fournitures.getByText("Ajusté selon tes habitudes")).toBeVisible();
+  await fournitures.getByRole("button", { name: /^Annuler l'ajustement/ }).click();
+  await expect(fournitures.getByText("Ajusté selon tes habitudes")).toHaveCount(0);
+  await expect(fournitures.getByText(ardoise, { exact: true })).toBeVisible();
+});
+
+test("Tableau de bord (24 octobre 2026) : refusé à un artisan ; l'admin entre avec un code reçu par e-mail ; 4 chiffres, sections, détail tracé", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/admin/pilotage");
+  await expect(page.getByText("Cette page est réservée à l'équipe.")).toBeVisible();
+  expect(await page.evaluate(async () => (await fetch("/v1/admin/pilotage")).status)).toBe(403);
+  await page.context().clearCookies();
+  await page.goto("/connexion");
+  await page.getByLabel("E-mail").fill("admin-groupe@example.fr");
+  await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+  await page.getByRole("button", { name: "Se connecter" }).click();
+  await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
+  if (await page.getByRole("alert").filter({ hasText: "incorrect" }).count()) await signUp(page, "admin-groupe@example.fr");
+  await page.goto("/admin/pilotage");
+  // Sans le code, rien : la double authentification d'abord.
+  expect(await page.evaluate(async () => (await fetch("/v1/admin/pilotage")).status)).toBe(403);
+  await page.getByRole("button", { name: "Recevoir mon code" }).click();
+  await expect(page.getByLabel("Code reçu par e-mail")).toBeVisible();
+  const mail = (await emailsVers(page, "admin-groupe@example.fr")).filter((m) => /code d'accès au pilotage/.test(m.subject)).at(-1)!;
+  await page.getByLabel("Code reçu par e-mail").fill(/(\d{6})/.exec(mail.text)![1]!);
+  await page.getByRole("button", { name: "Ouvrir le tableau de bord" }).click();
+  for (const titre of ["Utilisateurs actifs", "Abonnés payants", "Revenu du mois", "Coût IA du mois"]) await expect(page.getByText(titre, { exact: true })).toBeVisible();
+  for (const section of ["Croissance (ce mois)", "Fidélité", "Activité (ce mois)", "IA, 14 derniers jours", "Rentabilité (ce mois)", "Apprentissage", "Réglages"]) await expect(page.getByRole("heading", { name: section })).toBeVisible();
+  await page.getByRole("button", { name: /Essais qui finissent cette semaine/ }).click();
+  await expect(page.getByText("Détail ouvert et noté au journal. Rien ne s'exporte.")).toBeVisible();
+  // La démo (mode test) : un jeu de test d'un bouton, effacé d'un autre.
+  const demo = page.getByRole("region", { name: "Démo" });
+  await demo.getByRole("button", { name: "Créer un jeu de test" }).click();
+  await expect(demo.getByRole("status")).toHaveText("5 faux artisans et 3 faux négoces dans le 22, 20 lignes déposées.");
+  await demo.getByRole("button", { name: "Tout effacer" }).click();
+  await expect(demo.getByRole("status")).toContainText("Effacé : 5 faux artisans");
 });

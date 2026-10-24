@@ -10,7 +10,7 @@ import { CONFIG, LOGGER, ALERTER, PUSH_SENDER } from "../../platform/tokens.js";
 import type { PushSender } from "../../platform/push/push.port.js";
 import { AiUsageModule, AiUsageRecorder, AnalysisMeter } from "../ai-usage/index.js";
 import { DOCUMENT_REPOSITORY, DocumentAiInput, DocumentsModule, type DocumentRepository } from "../documents/index.js";
-import { CompanyMemory, CorrectionJournal, LearningModule } from "../learning/index.js";
+import { CompanyMemory, CorrectionJournal, HabitudesService, LearningModule } from "../learning/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { TAKEOFF_REPOSITORY, type TakeoffRepository } from "./application/takeoff.repository.js";
 import { manualKey, TakeoffService } from "./application/takeoff.service.js";
@@ -70,6 +70,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         relecteur: FicheRelecteur | null,
         lecteur: LectureReader | null,
         listeur: ListeReader | null,
+        habitudes: HabitudesService,
       ) =>
         new TakeoffService(
           repo,
@@ -87,6 +88,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             ...(relecteur ? { relecteur } : {}),
             ...(lecteur ? { lecteur } : {}),
             ...(listeur ? { listeur } : {}),
+            habitudes,
             companyName: async (tenant) => (await prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } }))?.name ?? null,
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
             // §48 : « je te préviens quand c'est prêt » : une notification sur chaque appareil abonné de la personne qui
@@ -208,7 +210,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER, LISTE_READER],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER, LISTE_READER, HabitudesService],
     },
   ],
   exports: [TakeoffService],

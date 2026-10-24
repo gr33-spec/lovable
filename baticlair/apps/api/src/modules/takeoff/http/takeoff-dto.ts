@@ -111,7 +111,7 @@ function viewDto(view: ArtisanView) {
   };
 }
 
-export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, aiSuggestions, withoutSupply, brief, siteNotes, fiche }: ReviewedTakeoff) {
+export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, aiSuggestions, withoutSupply, brief, siteNotes, fiche, ajustements }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
@@ -148,6 +148,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     fiche: (fiche?.donnees ?? []).map((d) => ({ cle: d.cle, libelle: d.libelle, valeur: d.valeur, origine: d.origine, regle: d.regle ?? null, preuve: d.preuve ?? null })),
     // §48.4 : les ajouts proposés par l'IA, décochés, hors de la liste.
     aiSuggestions: aiSuggestions ?? [],
+    // L'apprentissage (24 octobre 2026) : les lignes ajustées par une habitude, « Annuler » d'un tap (`habitude:<ligne>`).
+    ajustements: ajustements ?? [],
     model: takeoff.model,
     promptVersion: takeoff.promptVersion,
     // §44.2 : la ligne retirée par une phrase de la note est dite à l'artisan, avec sa phrase.

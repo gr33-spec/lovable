@@ -177,6 +177,9 @@ model Company {
   negocesAjoutes    Negoce[]            @relation("NegoceAjoutePar")
   negoces           NegoceArtisan[]
   desistements      Desistement[]
+  abonnement        Abonnement?
+  reglesApprises    RegleApprise[]
+  facturesAbonnement FactureAbonnement[]
 
   @@map("company")
 }
@@ -1512,3 +1515,163 @@ model PreuveAcceptation {
   @@index([finCompteLe])
   @@map("preuve_acceptation")
 }
+
+/// L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026) : 29 € HT par mois, sans engagement, résiliable en fin de période payée.
+/// Une ligne par entreprise, tenue par les événements du paiement : simulé ou Stripe, les mêmes (actif, renouvelé,
+/// échec, résilié). Sans ligne : l'essai (calculé par `etatAbonnement`).
+model Abonnement {
+  companyId             String    @id @db.Uuid
+  /// aucun | actif | echec | resilie
+  statut                String    @default("aucun")
+  /// simule | stripe
+  fournisseur           String
+  periodeDebut          DateTime?
+  periodeFin            DateTime?
+  echecLe               DateTime?
+  resiliationDemandeeLe DateTime?
+  resilieLe             DateTime?
+  stripeCustomerId      String?   @unique
+  stripeSubscriptionId  String?   @unique
+  /// Le n° de TVA intracommunautaire de l'artisan (facultatif), écrit sur ses factures.
+  tvaIntra              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([statut, periodeFin])
+  @@map("abonnement")
+}
+
+/// Le journal de l'abonnement : chaque événement de paiement (simulé ou Stripe, une seule fois par `refExterne`) et
+/// chaque e-mail de rappel envoyé (une seule fois par type).
+model EvenementAbonnement {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  companyId  String?  @db.Uuid
+  /// actif | renouvele | echec | resilie | resiliation_demandee | rappel_j7 | rappel_j1 | rappel_j0 | …
+  type       String
+  /// simule | stripe | tache | artisan | admin
+  source     String
+  /// L'identifiant de l'événement chez Stripe (ou de la session simulée) : un même événement n'est jamais appliqué deux fois.
+  refExterne String?  @unique
+  donnees    Json     @default("{}")
+  createdAt  DateTime @default(now())
+
+  @@index([companyId, type])
+  @@index([type, createdAt])
+  @@map("evenement_abonnement")
+}
+
+/// Une facture d'abonnement émise par BATI INVEST. Numérotation continue sans trou par série (`CompteurFacture`, dans la
+/// même transaction) ; série « TEST » à part en paiement simulé. Gardée 10 ans, même après la suppression du compte (le
+/// client y est écrit en clair : raison sociale, SIRET, adresse).
+model FactureAbonnement {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  numero            String    @unique
+  /// F | TEST
+  serie             String
+  rang              Int
+  companyId         String?   @db.Uuid
+  raisonSociale     String
+  siret             String?
+  adresse           String?
+  tvaIntra          String?
+  periodeDebut      DateTime
+  periodeFin        DateTime
+  montantHtCentimes Int
+  tvaCentimes       Int
+  ttcCentimes       Int
+  tauxTva           Decimal   @db.Decimal(5, 2)
+  emiseLe           DateTime
+  /// L'identifiant de la facture chez Stripe (ou de l'événement simulé) : une seule facture par paiement.
+  refExterne        String?   @unique
+  createdAt         DateTime  @default(now())
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@unique([serie, rang])
+  @@index([companyId, emiseLe])
+  @@map("facture_abonnement")
+}
+
+/// Le dernier numéro émis par série de factures : incrémenté dans la transaction qui crée la facture (aucun trou).
+model CompteurFacture {
+  serie   String @id
+  dernier Int
+
+  @@map("compteur_facture")
+}
+
+/// L'APPRENTISSAGE DES CORRECTIONS (Greg, 24 octobre 2026). Une règle apprise des corrections d'une ligne : ce que l'IA
+/// proposait (`cle`, son nom normalisé), le champ corrigé et la valeur. Portée « artisan » : la même correction sur 2
+/// chantiers de l'entreprise la rend active (appliquée d'elle-même, annulable). Portée « global » : 3 artisans différents
+/// la proposent à l'admin, qui la valide ou la refuse ; jamais appliquée sans validation. Seulement des données de chantier.
+model RegleApprise {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  /// artisan | global
+  portee       String
+  /// L'entreprise d'une règle « artisan » ; « global » sinon (sert à l'unicité).
+  proprietaire String
+  companyId    String?   @db.Uuid
+  /// Le métier de la liste (roofing, electrical…).
+  metier       String
+  cle          String
+  /// libelle | precision | quantite
+  champ        String
+  valeur       String
+  /// artisan : en_cours | active | annulee ; global : proposee | validee | refusee
+  statut       String
+  /// [{ companyId, projectId, at }]
+  occurrences  Json      @default("[]")
+  decideLe     DateTime?
+  decidePar    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([portee, proprietaire, metier, cle, champ, valeur])
+  @@index([portee, statut])
+  @@index([companyId, statut])
+  @@map("regle_apprise")
+}
+
+/// LE PILOTAGE ADMIN (Greg, 24 octobre 2026) : chaque accès au tableau de bord et chaque ouverture d'un détail nominatif
+/// (artisans à risque, essais qui finissent…) est journalisé. Aucun export nominatif.
+model JournalAdmin {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String
+  email     String
+  /// acces | detail:<quoi> | regle:<décision> | reglages | demo:<geste> | code_envoye | code_valide | code_refuse
+  action    String
+  cible     String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("journal_admin")
+}
+
+/// La double authentification de l'admin : un code à 6 chiffres envoyé par e-mail (haché ici), valable 10 minutes, qui
+/// ouvre le pilotage pour CETTE session pendant 12 heures. 5 essais au plus par code.
+model CodeAdmin {
+  sessionId  String    @id
+  userId     String
+  codeHash   String
+  expireLe   DateTime
+  tentatives Int       @default(0)
+  valideLe   DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@map("code_admin")
+}
+
+/// Des compteurs du jour, sans cookie ni adresse : les visites de la page publique, les installations sur l'écran d'accueil.
+model CompteurJour {
+  jour String
+  cle  String
+  n    Int    @default(0)
+
+  @@id([jour, cle])
+  @@map("compteur_jour")
+}
+

@@ -10,5 +10,7 @@ export const ACCROCHE_APP = "Par un artisan, pour les artisans.";
 export const SLOGAN_APP = "L'union fait la force.";
 /** La société qui édite le service (mentions, factures, e-mails). */
 export const EDITEUR_APP = "BATI INVEST";
+/** L'émetteur des factures d'abonnement (les mentions légales du site) ; les variables FACTURE_EMETTEUR_* le remplacent. */
+export const EMETTEUR_FACTURES = { nom: "BATI INVEST", forme: "SARL", siret: "910 796 325 00017", adresse: "6 impasse du Ouipoure, 22620 Ploubazlanec", tvaIntracom: "FR61910796325" } as const;
 /** Les couleurs de la marque. */
 export const COULEURS_APP = { jaune: "#FFC800", noir: "#0E0E0E" } as const;

@@ -48,3 +48,11 @@ Les pages ont été réécrites (versions du 24/10/2026) ; les points 1 à 4, 9,
 24. **Bons de commande 10 ans** : BATI INVEST n'est pas partie à la vente ; garder une archive sans nom 10 ans est-il justifié, ou 5 ans suffisent-ils ?
 25. **Invités non inscrits** (intérêt légitime B2B) : 3 relances puis effacement, 12 mois au plus ; mention de l'artisan qui l'a ajouté (jamais son nom) et lien d'opposition dans chaque e-mail : suffisant ?
 26. **Anonymisation des devis** : l'artisan garantit dans les CGU qu'il a le droit de transmettre le document ; les pages scannées partent encore en image à l'IA (non anonymisables) : à dire dans la confidentialité ?
+
+## Abonnement artisan (24 octobre 2026, Mobiiz)
+
+27. **Argument « Pour 29 € par mois, économise des centaines, voire des milliers d'euros chaque année. »** (landing, /tarifs) : formulé comme une possibilité, pas une moyenne garantie ; remplacé automatiquement par la vraie économie moyenne par commande dès 3 cycles publiés (`argumentTarif`). Risque de **publicité trompeuse** (art. L121-1 et suivants du code de la consommation, applicables aussi entre professionnels via L121-4 ?) : la phrase est-elle acceptable avant d'avoir des chiffres ? Faut-il une mention « exemple, sans garantie » ?
+28. **CGU, article 3 « L'abonnement »** : prix HT, essai (30 jours après les premiers résultats, 60 jours sans dépôt), renouvellement mensuel, résiliation en fin de période sans remboursement, échec de paiement (7 jours de grâce), **pas de droit de rétractation entre professionnels** (un artisan seul, sans salarié, peut-il invoquer L221-3 du code de la consommation ?), changement de prix avec 30 jours de préavis.
+29. **Factures** : émises par BATI INVEST, numérotation continue « F-000001 », mentions (raison sociale, SIRET, adresse, TVA, HT/TVA/TTC, « facture acquittée ») ; manque-t-il une mention obligatoire (pénalités de retard, indemnité forfaitaire de 40 €, sans objet pour une facture déjà payée) ?
+30. **Version des CGU** : l'article 3 est ajouté sous la même version du 24/10/2026 (aucun compte réel ne l'avait encore acceptée). À la mise en production, toute modification suivante passe par une nouvelle version majeure.
+

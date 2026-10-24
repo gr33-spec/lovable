@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { AbonnementModule } from "./modules/abonnement/index.js";
 import { AiUsageModule } from "./modules/ai-usage/index.js";
 import { BillingModule } from "./modules/billing/index.js";
 import { DemoModule } from "./modules/demo/index.js";
@@ -8,6 +9,7 @@ import { HealthModule } from "./modules/health/health.module.js";
 import { IdentityModule } from "./modules/identity/index.js";
 import { OffersModule } from "./modules/offers/index.js";
 import { PartnersModule } from "./modules/partners/partners.module.js";
+import { PilotageModule } from "./modules/pilotage/pilotage.module.js";
 import { PriceRequestsModule } from "./modules/price-requests/index.js";
 import { PrivacyModule } from "./modules/privacy/index.js";
 import { ProjectsModule } from "./modules/projects/index.js";
@@ -41,11 +43,13 @@ import { PushModule } from "./platform/push/push.module.js";
     OffersModule,
     DemoModule,
     BillingModule,
+    AbonnementModule,
     HealthModule,
     PrivacyModule,
     QuantitatifsModule,
     PartnersModule,
     GroupeModule,
+    PilotageModule,
   ],
 })
 export class AppModule {}

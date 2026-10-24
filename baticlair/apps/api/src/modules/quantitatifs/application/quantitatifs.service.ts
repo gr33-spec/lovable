@@ -260,6 +260,13 @@ export class QuantitatifsService {
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, preciserKey, text);
         continue;
       }
+      // L'apprentissage (Greg, 24 octobre 2026) : « Annuler » sur une ligne « Ajusté selon tes habitudes ».
+      const habitudeKey = r.question.replace(/^engine:/, "");
+      if (/^habitude:.{1,200}$/.test(habitudeKey)) {
+        if (r.valeur !== "non") throw validationFailed("This question takes « non »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, habitudeKey, "non");
+        continue;
+      }
       // Temps deux (§51.6) : l'unité d'une ligne qui n'en a pas (un bouton, ou l'unité écrite sous « Autre »).
       const uniteKey = r.question.replace(/^engine:/, "");
       if (uniteKey.startsWith(UNITE_KEY)) {

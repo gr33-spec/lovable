@@ -715,6 +715,7 @@ function Row({
   const file = useRef<HTMLInputElement>(null);
   const item = row.itemKey ? takeoff.purchase.toBuy.find((b) => b.key === row.itemKey) : undefined;
   const quote = row.quoteKey ? takeoff.purchase.toQuote.find((q) => q.key === row.quoteKey) : undefined;
+  const ajuste = item ? takeoff.ajustements?.find((a) => a.itemKey === item.key) : undefined;
   const lines = row.lineIds.map((id) => takeoff.lines.find((l) => l.id === id)).filter((l): l is Takeoff["lines"][number] => Boolean(l));
   const raw = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
   const quantity = raw ? enMetres(raw) : null;
@@ -979,6 +980,15 @@ function Row({
             <ChevronUp size={18} aria-hidden="true" />
             Fermer
           </Button>
+        </div>
+      ) : null}
+      {/* L'apprentissage (24 octobre 2026) : une ligne ajustée par une habitude le dit, et s'annule d'un clic. */}
+      {ajuste && editable && !sentTo && !open ? (
+        <div className="flex flex-wrap items-center gap-x-3 pl-12 text-[13px] leading-snug">
+          <span className="font-semibold text-muted">{ajuste.texte}</span>
+          <button type="button" disabled={pending} onClick={() => void handlers.onAnswer(`habitude:${ajuste.itemKey}`, "non")} className="min-h-11 font-bold underline disabled:opacity-50" aria-label={`Annuler l'ajustement : ${label}`}>
+            Annuler
+          </button>
         </div>
       ) : null}
     </li>

@@ -20,6 +20,14 @@
       "schedule": "5 * * * *"
     },
     {
+      "path": "/v1/internal/pilotage",
+      "schedule": "17 * * * *"
+    },
+    {
+      "path": "/v1/internal/abonnement",
+      "schedule": "11 * * * *"
+    },
+    {
       "path": "/v1/internal/rapport-mensuel",
       "schedule": "0 7 1 * *"
     }

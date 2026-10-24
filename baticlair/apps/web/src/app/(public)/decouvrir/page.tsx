@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CLE_DEMO_VUE, DemoGuidee } from "@/components/demo-guidee";
 import { ButtonLink } from "@/components/ui";
+import { ArgumentTarif } from "@/components/argument-tarif";
 import { LiensLegaux } from "@/components/legal";
 import { CompteurInscrits, InviterCollegue } from "@/components/inviter";
 import { Logo } from "@/components/logo";
@@ -77,7 +78,17 @@ const BOUTON = "min-h-13 px-8 text-[16px]";
 /** Les sections sous la ligne de flottaison apparaissent en douceur au défilement : 200 ms, opacité et 12 px, aucun décalage. */
 const REVEAL_SCRIPT = `(function(){try{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var els=[].slice.call(document.querySelectorAll("[data-reveal]"));var h=innerHeight;els.forEach(function(e){if(e.getBoundingClientRect().top<h)e.setAttribute("data-vu","")});document.documentElement.setAttribute("data-reveal-pret","");var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.setAttribute("data-vu","");io.unobserve(x.target)}})},{rootMargin:"0px 0px -10% 0px"});els.forEach(function(e){if(!e.hasAttribute("data-vu"))io.observe(e)})}catch(e){}})();`;
 
+/**
+ * Une visite comptée par le serveur du site (tableau de bord, 24 octobre 2026) : ni cookie, ni adresse, ni rien sur la
+ * personne ; un nombre par jour. Sans réponse de l'API, la page s'affiche quand même.
+ */
+function compterLaVisite() {
+  const api = (process.env.API_URL ?? "http://localhost:4000").replace(/\/$/, "");
+  void fetch(`${api}/v1/public/visite`, { method: "POST", signal: AbortSignal.timeout(1500) }).catch(() => undefined);
+}
+
 export default function BienvenuePage() {
+  compterLaVisite();
   const h2 = "font-display text-[36px] leading-[1.0] font-extrabold tracking-[-0.03em] sm:text-[56px]";
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-20 px-4 pt-6 pb-16 sm:gap-28 sm:px-6 sm:pt-12 lg:gap-32">
@@ -110,7 +121,14 @@ export default function BienvenuePage() {
               Voir comment ça marche <span aria-hidden="true">→</span>
             </a>
           </div>
-          <p className="text-[15px] font-semibold text-white/60">Gratuit pour l&apos;artisan. Sans engagement.</p>
+          {/* L'argument phare (24 octobre 2026) : une possibilité, la vraie moyenne dès 3 cycles publiés ; puis l'offre. */}
+          <ArgumentTarif className="max-w-[40ch] text-[17px] font-bold text-accent" />
+          <p className="text-[15px] font-semibold text-white/60">
+            Essai gratuit sur un cycle complet, puis 29 € HT par mois, sans engagement.{" "}
+            <Link href="/tarifs" className="underline">
+              Voir les tarifs
+            </Link>
+          </p>
         </div>
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
           <div className="flex w-full max-w-[420px] justify-center overflow-hidden rounded-2xl bg-accent px-8 pt-10 sm:px-12 sm:pt-14">
@@ -181,6 +199,9 @@ export default function BienvenuePage() {
           </div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <LiensLegaux clair />
+            <Link href="/tarifs" className="text-[14px] font-semibold text-white/70 underline">
+              Tarifs
+            </Link>
             <Link href="/connexion" className="text-[14px] font-semibold text-white/70 underline">
               Se connecter
             </Link>

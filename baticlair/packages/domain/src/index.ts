@@ -56,3 +56,6 @@ export * from "./groupe/commande-du-mois.js";
 export * from "./groupe/espace-negoce.js";
 export * from "./groupe/suivi-des-demandes.js";
 export * from "./rgpd/anonymisation.js";
+export * from "./abonnement/abonnement.js";
+export * from "./apprentissage/habitudes.js";
+export * from "./pilotage/tableau.js";

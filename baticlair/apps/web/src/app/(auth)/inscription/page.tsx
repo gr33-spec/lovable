@@ -64,7 +64,7 @@ export default function InscriptionPage() {
     <>
       <div className="flex flex-col gap-2">
         <PageTitle>Créer un compte</PageTitle>
-        <p className="text-[17px] leading-relaxed text-muted">Gratuit pour l&apos;artisan. Ta liste remise au propre en deux minutes.</p>
+        <p className="text-[17px] leading-relaxed text-muted">Essai gratuit, sans carte bancaire. Ta liste remise au propre en deux minutes.</p>
       </div>
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         {error ? <ErrorNotice error={error} /> : null}

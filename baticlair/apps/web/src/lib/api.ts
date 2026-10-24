@@ -23,6 +23,8 @@ export class ApiError extends Error {
 }
 
 const COMPANY_KEY = "baticlair.companyId";
+/** L'événement du navigateur lancé quand l'API répond `abonnement_requis` (le paywall l'écoute). */
+export const EVENEMENT_ABONNEMENT_REQUIS = "mobiiz:abonnement-requis";
 
 export function getActiveCompanyId(): string | null {
   try {
@@ -85,6 +87,8 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const details = body.error?.details;
   const fieldErrors = Array.isArray(details) ? (details as { path: string; message: string }[]) : undefined;
   const reason = details && typeof details === "object" && "reason" in details ? String(details.reason) : undefined;
+  // Le paywall de l'abonnement (24 octobre 2026) : une action payante refusée ouvre l'écran « Ton essai est terminé ».
+  if (code === "abonnement_requis" && typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVENEMENT_ABONNEMENT_REQUIS));
   throw new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason);
 }
 
@@ -255,6 +259,8 @@ export interface Takeoff {
   sansFourniture?: { lineId: string; label: string; measure: string | null }[];
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
   aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
+  /** Les lignes ajustées par une habitude apprise (24 octobre 2026), annulables d'un clic (`habitude:<ligne>`). */
+  ajustements?: { itemKey: string; regleId: string; texte: string }[];
   id: string;
   projectId: string;
   documentId: string | null;
@@ -652,3 +658,34 @@ export interface BillingStatus {
   /** Paywall allumé ; éteint, Compte et Formules disent « Gratuit pour l'artisan ». */
   payant?: boolean;
 }
+
+/** L'abonnement artisan (24 octobre 2026) : `GET /v1/abonnement`. */
+export interface Abonnement {
+  actif: boolean;
+  paiement: "simule" | "stripe";
+  modeTest: string | null;
+  acces: "essai" | "abonne" | "grace" | "bloque";
+  prixHt: string;
+  prixTtc: string;
+  essaiFinLe: string | null;
+  joursEssai: number | null;
+  graceFinLe: string | null;
+  periodeFin: string | null;
+  resiliationProgrammee: boolean;
+  statut: "aucun" | "actif" | "echec" | "resilie";
+  tvaIntra: string | null;
+  bandeau: string | null;
+  bandeauRouge: boolean;
+  paywall: { phrase: string; economie: string | null };
+}
+
+export interface FactureAbonnement {
+  id: string;
+  numero: string;
+  test: boolean;
+  emiseLe: string;
+  periode: string;
+  ttc: string;
+  ht: string;
+}
+

@@ -90,8 +90,12 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
   const j1 = await prisma.journalGroupe.deleteMany({ where: { createdAt: { lt: limiteJournaux } } });
   const j2 = await prisma.idempotencyRecord.deleteMany({ where: { createdAt: { lt: limiteJournaux } } });
   const j3 = await prisma.aiExecution.updateMany({ where: { createdAt: { lt: limiteJournaux }, userId: { not: null } }, data: { userId: null } });
+  // Le journal du pilotage admin (24 octobre 2026) : 12 mois, comme les autres journaux.
+  const j5 = await prisma.journalAdmin.deleteMany({ where: { createdAt: { lt: limiteJournaux } } });
   const j4 = await prisma.parametreGroupe.deleteMany({ where: { misAJourLe: { lt: limiteJournaux }, OR: ["ajouts:", "reponses:", "rappels-cloture:", "alerte:", "report:"].map((p) => ({ cle: { startsWith: p } })) } });
 
+  // Les factures d'abonnement (obligation comptable) : 10 ans après leur émission.
+  const factures = await prisma.factureAbonnement.deleteMany({ where: { emiseLe: { lt: ilYa(maintenant, { ans: DUREES.archivesAns }) } } });
   const archives = await prisma.archiveCommande.deleteMany({ where: { archiveLe: { lt: ilYa(maintenant, { ans: DUREES.archivesAns }) } } });
   const preuves = await prisma.preuveAcceptation.deleteMany({ where: { finCompteLe: { lt: ilYa(maintenant, { ans: DUREES.preuvesAns }) } } });
 
@@ -100,8 +104,8 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
     invitesEffaces: invites.length,
     fichiersDevis: fichiers.count,
     documentsAnciens: blobs.count + pages.count,
-    journaux: j1.count + j2.count + j3.count + j4.count,
-    archives: archives.count,
+    journaux: j1.count + j2.count + j3.count + j4.count + j5.count,
+    archives: archives.count + factures.count,
     preuves: preuves.count,
   };
 }

@@ -83,3 +83,14 @@ Mise en place le 24 octobre 2026. Référent : Greg.
 ### Ce qui limite l'effet d'une violation
 
 Mots de passe hachés (better-auth) ; devis anonymisés avant stockage ; fichier d'origine effacé après 30 jours ; liste d'exclusion en empreintes ; preuves d'acceptation en empreintes ; jetons des e-mails signés et à durée bornée ; isolation par entreprise testée route par route.
+
+## Le tableau de bord admin (24 octobre 2026)
+
+- **Qui** : les seuls e-mails de `GROUPE_ADMINS` (Vercel, projet `baticlair-api`). Un autre compte reçoit 403 sur toutes les routes `/v1/admin/pilotage/*`.
+- **Double authentification** : après le mot de passe, un code à 6 chiffres envoyé par e-mail (`POST /v1/admin/pilotage/code`), valable 10 minutes, 5 essais, haché en base (`code_admin`, empreinte SHA-256 avec `AUTH_SECRET`) ; il ouvre le pilotage pour **cette session seulement**, 12 heures. Une autre connexion (autre appareil) redemande un code. Limité à 20 envois et 30 vérifications par heure.
+- **Journal** : chaque envoi, code juste ou faux, ouverture du tableau, ouverture d'un détail nominatif, réglage et décision est écrit dans `journal_admin` (qui, quoi, quand), visible en bas du tableau.
+- **Agrégé par défaut** : le tableau ne contient aucun nom d'entreprise ni e-mail (test `apps/api/test/pilotage.test.ts`). Le détail (artisans à risque, essais qui finissent, paiements refusés) s'ouvre sur un clic, il est journalisé, montré à l'écran seulement : **aucun export nominatif**.
+- **Comptages sans cookie** : les visites de la page publique sont comptées par le serveur du site (un nombre par jour, `compteur_jour`) ; les installations sur l'écran d'accueil, une fois par appareil. Aucune adresse IP, aucun identifiant.
+- **Faux comptes** : les comptes `@demo.baticlair.fr` (démonstration et jeu de test) sont exclus de tous les chiffres.
+- À venir si un second admin arrive : un code par application d'authentification (TOTP) au lieu de l'e-mail (DETTE 31).
+

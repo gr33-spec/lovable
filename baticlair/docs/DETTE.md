@@ -44,9 +44,12 @@ Plan du 20 octobre 2026, bloc 12. Par ordre de risque ; chaque ligne dit le risq
 | 29 | Faible | Les logos Mobiiz sont des PNG tirés de l'image envoyée par Greg (fond retiré au code) : bords légèrement crénelés en très grand, pas de vectoriel. Le logo des PDF est un PNG de 16 couleurs embarqué (`apps/api/src/platform/pdf/logo-mono.ts`). | Tailles prévues pour chaque usage (en-tête, pied, PWA, favicon, partage). | Des SVG du logo (clair, sombre, monochrome, icône) par un graphiste, puis remplacer les PNG. | Avant l'impression ou un grand affichage. |
 | 30 | Faible | `apps/web/scripts/icones-pwa.mjs` fabriquait les icônes depuis l'ancien `icon.svg` (retiré) : il ne sert plus (les icônes Mobiiz sont posées à la main). | Le script n'est appelé nulle part. | Le refaire depuis le futur SVG (dette 29), ou le retirer quand Greg l'autorise. | Avec la dette 29. |
 
+| 31 | Faible | La double authentification de l'admin passe par un code e-mail : si la boîte de Greg est compromise, le pilotage l'est aussi. | Code lié à la session, 10 min, 5 essais, journalisé ; un seul admin. | Un code TOTP (application d'authentification) par le plugin `two-factor` de Better Auth, déjà dans la dépendance. | Avant un second admin. |
+| 32 | Faible | Le tableau de bord recalcule l'état d'abonnement de chaque entreprise à chaque ouverture (une requête par entreprise). | Quelques dizaines d'artisans : moins d'une seconde. | Un état d'abonnement mis en cache par la tâche horaire. | Au-delà de 500 artisans. |
+
 ## État au 24 octobre 2026 (Mobiiz)
 
-Nouvelles, laissées avec leur parade : 28 à 30.
+Nouvelles, laissées avec leur parade : 28 à 32.
 
 ## État au 23 octobre 2026 (plan « finition », bloc 8)
 

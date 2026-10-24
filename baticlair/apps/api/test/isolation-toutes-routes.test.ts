@@ -109,6 +109,10 @@ describe("isolation entre entreprises, toutes les routes", () => {
     const cycleA = await ctx.prisma.cycleCommande.create({ data: { mois: "2026-10", famille: "couverture", zone: "29", clotureLe: new Date("2026-10-25T11:00:00Z"), reponseAvant: new Date("2026-11-08T17:00:00Z"), relanceLe: new Date("2026-11-07T17:00:00Z"), phase: "resultats" } });
     await ctx.prisma.besoin.update({ where: { id: ids.besoin }, data: { cycleId: cycleA.id } });
     ids.cycle = cycleA.id;
+    // L'abonnement (24 octobre 2026) : une session de paiement simulé et une facture de A.
+    await ctx.prisma.evenementAbonnement.create({ data: { companyId, type: "session", source: "simule", refExterne: "sim_session_de_a_000000" } });
+    const factureA = await ctx.prisma.factureAbonnement.create({ data: { numero: "TEST-000001", serie: "TEST", rang: 1, companyId, raisonSociale: "Toitures A", periodeDebut: new Date(), periodeFin: new Date(), montantHtCentimes: 2900, tvaCentimes: 580, ttcCentimes: 3480, tauxTva: 20, emiseLe: new Date() } });
+    const abonnementDeA = { session: "sim_session_de_a_000000", facture: factureA.id };
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -143,6 +147,14 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/negoce\/(invitation|connexion|desabonner|opposition)$/, "jeton-inconnu-de-b.0000000000000000"],
         // RGPD (24 octobre 2026) : « Ne plus recevoir ces e-mails » est un jeton signé, comme l'opposition du négoce.
         [/\/emails\/stop$/, "jeton-inconnu-de-b.0000000000000000"],
+        // L'abonnement : la session de paiement simulé et la facture de A.
+        [/\/abonnement\/simulation$/, abonnementDeA.session],
+        [/\/abonnement\/factures$/, abonnementDeA.facture],
+        // Le pilotage admin : B n'est pas admin (403), quel que soit le détail demandé.
+        [/\/admin\/pilotage\/detail$/, "a_risque"],
+        [/\/admin\/pilotage\/apprentissage$/, abonnementDeA.facture],
+        // La démo admin : B n'est pas admin (403), quel que soit le geste.
+        [/\/admin\/pilotage\/demo$/, "jeu"],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);
@@ -235,10 +247,10 @@ describe("isolation entre entreprises, toutes les routes", () => {
         open.push(`${r.method.toUpperCase()} ${r.path} → ${(e as Error).message}`);
       }
     }
-    // Ce qui répond sans session : la santé du service, le compteur de la page publique (un nombre, rien d'une
+    // Ce qui répond sans session : la santé du service, le compteur et l'argument des tarifs de la page publique (un nombre, rien d'une
     // entreprise), et les demandes d'accès elles-mêmes (inscription, connexion…).
     // Les conditions négoce et la déconnexion de l'espace négoce se lisent sans compte (23 octobre 2026) : aucune donnée.
-    expect(open.filter((o) => !/\/v1\/health|\/v1\/public\/compteur|\/api\/auth|\/v1\/auth|\/v1\/negoce\/(conditions|deconnexion)/.test(o))).toEqual([]);
+    expect(open.filter((o) => !/\/v1\/health|\/v1\/public\/(compteur|tarif|visite)|\/api\/auth|\/v1\/auth|\/v1\/negoce\/(conditions|deconnexion)/.test(o))).toEqual([]);
   });
 });
 

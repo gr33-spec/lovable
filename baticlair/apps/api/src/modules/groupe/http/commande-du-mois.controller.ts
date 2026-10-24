@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, Inject, Param, Post, Put, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, Headers, HttpCode, Inject, Param, Post, Put, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { Throttle } from "@nestjs/throttler";
 import { memoryStorage } from "multer";
-import { PHRASE_SANS_ENGAGEMENT } from "@baticlair/domain";
+import { PHRASE_SANS_ENGAGEMENT, SEUIL_CYCLES_ECONOMIE, argumentTarif, eurosDeCentimes } from "@baticlair/domain";
 import { z } from "zod";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -12,6 +12,7 @@ import { ZodPipe } from "../../../platform/http/zod.js";
 import { CONFIG } from "../../../platform/tokens.js";
 import { Public } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import { AbonnementService } from "../../abonnement/index.js";
 import { CommandeDuMoisService } from "../application/commande-du-mois.service.js";
 import { EspaceNegoceService } from "../application/espace-negoce.service.js";
 
@@ -193,5 +194,23 @@ export class CommandeDuMoisAdminController {
   async dates(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(datesBody)) body: z.infer<typeof datesBody>) {
     await this.garde(tenant);
     await this.commande.datesDuCycleAdmin(id, { ...(body.clotureLe ? { clotureLe: new Date(body.clotureLe) } : {}), ...(body.reponseAvant ? { reponseAvant: new Date(body.reponseAvant) } : {}) });
+  }
+}
+
+/** L'argument des tarifs (landing, /tarifs) : la vraie économie moyenne dès 3 cycles publiés, sinon la phrase de possibilité. */
+@Controller("v1/public")
+export class EconomiePubliqueController {
+  constructor(
+    @Inject(CommandeDuMoisService) private readonly commande: CommandeDuMoisService,
+    @Inject(AbonnementService) private readonly abonnement: AbonnementService,
+  ) {}
+
+  @Public()
+  @Throttle({ default: { ttl: 3_600_000, limit: 600 } })
+  @Header("Cache-Control", "public, max-age=3600")
+  @Get("tarif")
+  async tarif() {
+    const [moyenne, reglages] = await Promise.all([this.commande.economieMoyenne().catch(() => ({ cycles: 0, parCommande: null, total: 0 })), this.abonnement.reglages()]);
+    return { argument: argumentTarif(moyenne, reglages), prixHt: eurosDeCentimes(reglages.prixHtCentimes), moyenneReelle: moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && !!moyenne.parCommande };
   }
 }
