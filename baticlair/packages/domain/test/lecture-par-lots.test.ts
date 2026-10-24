@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { consigneDeTranche, consigneDuLot, fusionnerLectures, tranchesDuDevis, lectureParLots, LIGNES_LECTURE_PAR_LOTS, ordreDesReperes, parseLecture, phraseLotNonLu, type LectureDevis } from "../src/index.js";
+import { avecSynthese, consigneDeSynthese, consigneDeTranche, consigneDuLot, donneesAttendues, fusionnerLectures, tranchesDuDevis, lectureParLots, LIGNES_LECTURE_PAR_LOTS, ordreDesReperes, parseLecture, phraseLotNonLu, type LectureDevis } from "../src/index.js";
 
 /**
  * LA LECTURE LOT PAR LOT (décision du fondateur, 24 octobre 2026, « option 1 ») : un gros devis de plusieurs métiers est lu
@@ -86,5 +86,31 @@ describe("les tranches d'un gros lot", () => {
     expect(consigneDeTranche({ metier: "electrical", libelle: "Électricité" }, [{ metier: "electrical", libelle: "Électricité" }], 2, 3, "[1:001] DEVIS")).toMatch(/tranche 2 sur 3 du lot « Électricité »/);
     // Vraie lecture du 24 octobre 2026 : la désignation est recopiée, jamais reformulée.
     expect(consigneDeTranche({ metier: "electrical", libelle: "Électricité" }, [{ metier: "electrical", libelle: "Électricité" }], 1, 3, "")).toMatch(/« designation » : le texte de la ligne recopié tel quel.*jamais reformulé/);
+  });
+
+  // Décision du fondateur (24 octobre 2026) : 4,49 $ pour 7954, chaque tranche réécrivait sa fiche et son bref. Les tranches
+  // ne rendent que les lignes ; UN appel de synthèse écrit la fiche, le bref et les questions du devis entier.
+  it("tranches : les lignes seulement ; synthèse : fiche, bref et questions du devis entier, une question par donnée attendue", () => {
+    const lots = [
+      { metier: "electrical", libelle: "Électricité" },
+      { metier: "plumbing", libelle: "Plomberie" },
+    ];
+    const tranche = consigneDeTranche(lots[0]!, lots, 1, 2, "");
+    expect(tranche).toMatch(/Rends SEULEMENT « lignes »/);
+    expect(tranche).toMatch(/Ni fiche, ni bref, ni questions/);
+
+    const prise = (ref: string) => ({ ...ligne(ref, "PRISE DE COURANT 16A+T"), fournitures: [{ nom: "Prise 16 A", quantite: "1", unite: "u", ouvrage: "prise-16a", emplacement: null, donnees: {}, attend: ["teinte_appareillage"], aPreciser: [], precision: null }] });
+    const lignes = lecture("electrical", [], { lignes: [prise("1:001"), prise("2:004")] });
+    expect(donneesAttendues(lignes)).toEqual([{ cle: "teinte_appareillage", refs: ["1:001", "2:004"] }]);
+    const synthese = consigneDeSynthese(lots, donneesAttendues(lignes));
+    expect(synthese).toMatch(/« lignes » : \[\]/);
+    expect(synthese).toMatch(/nombre de logements/);
+    expect(synthese).toMatch(/teinte_appareillage \(lignes 1:001, 2:004\)/);
+
+    const fin = avecSynthese(lignes, lecture("electrical", [], { lots: [{ metier: "electrical", libelle: "Électricité générale", lignes: [] }], bref: ["10 logements à Paimpol."], questions: [{ cle: "teinte_appareillage", texte: "Quelle teinte ?", boutons: [], unite: null, donnee: "teinte", ligne: null }] }));
+    expect(fin.lignes).toHaveLength(2);
+    expect(fin.bref).toEqual(["10 logements à Paimpol."]);
+    expect(fin.questions.map((q) => q.cle)).toEqual(["teinte_appareillage"]);
+    expect(fin.lots[0]!.libelle).toBe("Électricité générale");
   });
 });

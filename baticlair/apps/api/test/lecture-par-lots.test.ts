@@ -17,6 +17,7 @@ const appels: string[] = [];
 let reperes: string[] = [];
 let avecSections = false;
 const vus: string[] = [];
+const etapes: (string | undefined)[] = [];
 let enPanne: string | null = null;
 const PRISE = /prise/i;
 
@@ -25,6 +26,12 @@ class LecteurParLots extends FakeLectureReader {
   override async lire(request: LectureRequest) {
     const lot = /lot « [^»]+ » \(([a-z_]+)\)/.exec(request.consigne ?? "")?.[1] ?? null;
     const tranche = /tranche (\d+) sur/.exec(request.consigne ?? "")?.[1];
+    etapes.push(request.etape);
+    if (request.etape === "synthese") {
+      appels.push("synthese");
+      vus.push(request.document.numberedText);
+      return super.lire(request);
+    }
     appels.push(lot ? `lot:${lot}${tranche ? `#${tranche}` : ""}:${request.document.numberedText.split("\n").filter((x) => /^\[\d+:\d+\]/.test(x)).length > 0 ? "texte" : "vide"}` : request.referentiel.includes("=== Référentiel") ? "tous" : (request.trade ?? ""));
     vus.push(request.document.numberedText);
     const r = await super.lire(request);
@@ -59,6 +66,7 @@ beforeEach(async () => {
   enPanne = null;
   avecSections = false;
   vus.length = 0;
+  etapes.length = 0;
   await resetDatabase(ctx.prisma);
 });
 
@@ -126,8 +134,14 @@ describe("lecture lot par lot", { timeout: 60_000 }, () => {
     expect(elec.length).toBeGreaterThanOrEqual(Math.ceil(80 / LIGNES_PAR_TRANCHE));
     expect(elec.every((x) => x.endsWith(":texte"))).toBe(true);
     expect(appels.filter((x) => x.startsWith("lot:plumbing#")).length).toBeGreaterThanOrEqual(1);
-    // Aucun appel ne reçoit les lignes d'un autre lot, et chaque tranche tient sous la limite.
-    const textes = appels.slice(1).map((a, i) => ({ a, t: vus[i]! }));
+    // Décision du fondateur (24 octobre 2026, coût du 7954) : les tranches ne rendent que leurs lignes, puis UN appel de
+    // synthèse, le dernier, relit le devis entier pour la fiche, le bref et les questions.
+    expect(appels.at(-1)).toBe("synthese");
+    expect(appels.filter((a) => a === "synthese")).toHaveLength(1);
+    expect(etapes.slice(0, -1).every((x) => x === "lignes")).toBe(true);
+    expect(/Prise/.test(vus.at(-1)!) && /Mitigeur/.test(vus.at(-1)!)).toBe(true);
+    // Aucune tranche ne reçoit les lignes d'un autre lot, et chacune tient sous la limite.
+    const textes = appels.slice(1, -1).map((a, i) => ({ a, t: vus[i]! }));
     for (const { a, t } of textes) {
       expect(a.startsWith("lot:electrical") ? /Mitigeur/.test(t) : /Prise/.test(t)).toBe(false);
       expect(t.split("\n").length).toBeLessThanOrEqual(LIGNES_PAR_TRANCHE);

@@ -1,9 +1,5 @@
 import {
   baseOf,
-  consigneDeTranche,
-  consigneDuLot,
-  fusionnerLectures,
-  tranchesDuDevis,
   type SectionDuDevis,
   lectureParLots,
   AI_ADDITION,
@@ -69,6 +65,7 @@ import type { CompanyMemory, CorrectionJournal, HabitudesService } from "../../l
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
 import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader } from "./lecture-reader.js";
+import { lireLotParLot } from "./lecture-par-lots.js";
 import { LISTE_PROMPT, type ListeReader } from "./liste-reader.js";
 import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
@@ -541,38 +538,19 @@ export class TakeoffService {
     siteNotes: string | null,
     compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>,
   ): Promise<{ result: ReadAttempt<LectureDevis>; trade: string } | null> {
-    const lots = metiers.map((m) => ({ metier: m, libelle: tradeProfile(m).label }));
-    const exportDe = (m: string) => {
-      const r = referentialFor(m);
-      return r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.";
-    };
-    // Avec les sections du repérage, chaque appel ne reçoit que les lignes de son lot, par tranches ; sans elles, le devis
-    // entier avec la consigne de ne rendre que ce lot.
-    const tranches = tranchesDuDevis(document.numberedText, metiers, sections);
-    const entete = document.numberedText.split("\n").slice(0, 12).join("\n");
-    const appels = tranches
-      ? tranches.map((t) => {
-          const lot = lots.find((l) => l.metier === t.metier)!;
-          const siennes = tranches.filter((x) => x.metier === t.metier);
-          return { lot, request: { document: { ...document, numberedText: t.texte }, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), siteNotes, consigne: consigneDeTranche(lot, lots, siennes.indexOf(t) + 1, siennes.length, entete) } };
-        })
-      : lots.map((lot, i) => ({ lot, request: { document, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), siteNotes, consigne: consigneDuLot(lot, lots, i === 0) } }));
-    const essais = await Promise.all(appels.map((a) => lecteur.lire(a.request)));
-    if (essais.every((e) => e === null)) return null;
-    for (const [i, e] of essais.entries()) if (e) await compter(i + 1, e, LECTURE_PROMPT);
-    const parts = appels.flatMap((a, i) => (essais[i]?.status === "success" && essais[i]!.output ? [{ ...a.lot, lecture: essais[i]!.output! }] : []));
-    const echecs = appels.filter((_, i) => !(essais[i]?.status === "success" && essais[i]!.output)).map((a) => a.lot);
-    const lus = essais.filter((e): e is ReadAttempt<LectureDevis> => e !== null);
+    const { lecture, appels, metier, dureeMs } = await lireLotParLot(lecteur, document, metiers, sections, siteNotes);
+    const lus = appels.flatMap((a) => (a.attempt ? [a.attempt] : []));
+    if (lus.length === 0) return null;
+    for (const [i, e] of lus.entries()) await compter(i + 1, e, LECTURE_PROMPT);
     const premier = lus.find((e) => e.status === "success" && e.output) ?? lus[0]!;
-    const fusion = fusionnerLectures(parts, echecs);
     const usage = {
       inputTokens: lus.reduce((t, e) => t + e.usage.inputTokens, 0),
       outputTokens: lus.reduce((t, e) => t + e.usage.outputTokens, 0),
       cacheReadTokens: lus.reduce((t, e) => t + (e.usage.cacheReadTokens ?? 0), 0),
     };
-    const durationMs = Math.max(...lus.map((e) => e.durationMs));
-    const result: ReadAttempt<LectureDevis> = fusion ? { ...premier, usage, durationMs, status: "success", output: fusion, errorCode: null } : { ...premier, usage, durationMs, output: null };
-    return { result, trade: parts[0]?.metier ?? metiers[0]! };
+    const durationMs = dureeMs;
+    const result: ReadAttempt<LectureDevis> = lecture ? { ...premier, usage, durationMs, status: "success", output: lecture, errorCode: null } : { ...premier, usage, durationMs, output: null };
+    return { result, trade: metier };
   }
 
   /** Le repérage des métiers (texte seul, modèle rapide) : jamais bloquant, un échec ou un silence laisse le métier donné. */

@@ -148,16 +148,67 @@ export function tranchesDuDevis(numberedText: string, metiers: readonly string[]
   return tranches;
 }
 
-/** La consigne d'une tranche : son lot, ses lignes toutes rendues, l'en-tête du devis pour le contexte seulement. */
+/**
+ * La consigne d'une tranche : LES LIGNES SEULEMENT (décision du fondateur, 24 octobre 2026 : 4,49 $ pour 7954, « chacun
+ * des 16 morceaux réécrit sa fiche et son bref »). Une tranche recopie ses lignes et nomme leurs fournitures ; la fiche,
+ * le bref et les questions du devis entier viennent d'UN appel de synthèse (`consigneDeSynthese`).
+ */
 export function consigneDeTranche(lot: { metier: string; libelle: string }, tous: readonly { metier: string; libelle: string }[], rang: number, total: number, entete: string): string {
   return [
     `LECTURE PAR LOT ET PAR TRANCHE : ce devis a plusieurs lots (${tous.map((l) => l.libelle).join(", ")}), lus chacun à part. Le texte ci-dessus est la tranche ${rang} sur ${total} du lot « ${lot.libelle} » (${lot.metier}), avec le référentiel ci-dessus.`,
-    "- « lignes » : TOUTES les lignes de cette tranche, dans l'ordre, avec leur repère d'origine (une ligne d'un autre métier se rend ici aussi, avec ses fournitures).",
+    "- Rends SEULEMENT « lignes » : TOUTES les lignes de cette tranche, dans l'ordre, avec leur repère d'origine (une ligne d'un autre métier se rend ici aussi, avec ses fournitures). Ni fiche, ni bref, ni questions : un autre appel les écrit pour tout le devis.",
     // Vraie lecture du 24 octobre 2026 (7954) : dans des tranches, « LAMPE SIMPLE 1 POINT LUMINEUX » revenait réécrit ; la
     // désignation est le texte de la ligne, jamais une reformulation (§49.1 : la liste suit le devis).
     "- « designation » : le texte de la ligne recopié tel quel, majuscules, abréviations et fautes comprises (prix retirés), jamais reformulé ni résumé ; le nom du comptoir va dans « fournitures ».",
-    `- « metier » : ${lot.metier} ; « lots » : un seul lot (${lot.metier}), avec les repères de ces lignes.`,
-    "- « fiche », « bref » et « questions » : seulement ce que disent ces lignes (et l'en-tête) ; les autres tranches sont lues à part.",
+    "- « attend » d'une fourniture : la clé de la donnée qui lui manque (clé du référentiel, sinon un nom court en minuscules), la même clé pour la même donnée d'une ligne à l'autre.",
     ...(entete.trim() ? [`EN-TÊTE DU DEVIS (pour le contexte : client, chantier, titres) :\n${entete}`] : []),
   ].join("\n");
+}
+
+/** Une donnée attendue par les lignes lues : sa clé et les repères des lignes qui l'attendent. */
+export interface DonneeAttendue {
+  cle: string;
+  refs: string[];
+}
+
+/** Les données que les fournitures attendent, par clé, dans l'ordre du devis : ce que la synthèse doit demander. */
+export function donneesAttendues(lecture: Pick<LectureDevis, "lignes">): DonneeAttendue[] {
+  const out = new Map<string, string[]>();
+  for (const l of lecture.lignes) for (const f of l.fournitures) for (const cle of f.attend) out.set(cle, [...new Set([...(out.get(cle) ?? []), l.ref])]);
+  return [...out].map(([cle, refs]) => ({ cle, refs }));
+}
+
+/**
+ * La consigne de l'appel de SYNTHÈSE (décision du fondateur, 24 octobre 2026) : une fois les lignes lues par tranches,
+ * UN appel relit le devis entier et écrit la fiche, le bref (nombre de logements, commune, ce que contient chaque
+ * logement) et les questions, dédoublonnées sur tout le devis ; il ne rend aucune ligne.
+ */
+export function consigneDeSynthese(tous: readonly { metier: string; libelle: string }[], attendues: readonly DonneeAttendue[]): string {
+  const liste = attendues.map((a) => `${a.cle} (lignes ${a.refs.slice(0, 12).join(", ")}${a.refs.length > 12 ? "…" : ""})`);
+  return [
+    `SYNTHÈSE DU DEVIS ENTIER : ses lignes (${tous.map((l) => l.libelle).join(", ")}) sont déjà lues, par lot. Cet appel écrit ce qui vaut pour TOUT le devis, avec les référentiels ci-dessus.`,
+    "- « lignes » : [] (aucune ligne : elles sont déjà lues).",
+    `- « metier » : le métier principal ; « lots » : ${tous.map((l) => `${l.metier} (« ${l.libelle} »)`).join(", ")}, chacun avec la liste vide de lignes.`,
+    "- « bref » : le chantier en quelques phrases pour tout le devis, une par fait : l'ouvrage, la commune, le nombre de logements (ou de pièces), ce que contient un logement type ou chaque logement quand ils diffèrent, puis un fait par lot ; jamais une phrase par ligne ni par pièce.",
+    "- « fiche » : les données du chantier entier (lues, déduites, manquantes).",
+    "- « questions » : une par donnée manquante sur tout le devis, jamais deux pour la même donnée (deux lignes qui attendent la même chose : UNE question), aucune sur une donnée écrite.",
+    ...(liste.length > 0
+      ? [`DONNÉES ATTENDUES PAR LES LIGNES (clé, puis les lignes) : une question pour chacune que le devis ne règle pas, avec CETTE clé exactement :\n${liste.join("\n")}`]
+      : []),
+  ].join("\n");
+}
+
+/** La lecture fusionnée des tranches, complétée par la synthèse : ses lignes à elle, la fiche, le bref et les questions de la synthèse. */
+export function avecSynthese(lignes: LectureDevis, synthese: LectureDevis): LectureDevis {
+  const libelles = new Map(synthese.lots.map((l) => [l.metier, l.libelle]));
+  return {
+    ...lignes,
+    metier: synthese.metier ?? lignes.metier,
+    lots: lignes.lots.map((l) => ({ ...l, libelle: libelles.get(l.metier) ?? l.libelle })),
+    fiche: synthese.fiche,
+    bref: synthese.bref,
+    questions: synthese.questions,
+    contexte: synthese.contexte ?? lignes.contexte,
+    notes: [...new Set([...lignes.notes, ...synthese.notes])],
+  };
 }

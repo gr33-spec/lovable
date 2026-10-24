@@ -146,6 +146,13 @@ export const lectureWireSchema = z.object({
   notes: z.array(z.string()),
 });
 export type LectureWire = z.infer<typeof lectureWireSchema>;
+/** La sortie d'une tranche : ses lignes seulement (rien d'autre à écrire, donc rien d'autre à payer). */
+export const lignesWireSchema = lectureWireSchema.pick({ lignes: true });
+/** La sortie de la synthèse : tout sauf les lignes. */
+export const syntheseWireSchema = lectureWireSchema.omit({ lignes: true });
+const VIDE = { metier: "", lots: [], fiche: [], bref: [], questions: [], lignes: [], contexte: [], notes: [] } satisfies LectureWire;
+export const decodeLignes = (wire: z.infer<typeof lignesWireSchema>): LectureDevis | null => decodeLecture({ ...VIDE, lignes: wire.lignes });
+export const decodeSynthese = (wire: z.infer<typeof syntheseWireSchema>): LectureDevis | null => decodeLecture({ ...wire, lignes: [] });
 
 const record = (list: { cle: string; valeur: string }[]) => Object.fromEntries(list.filter((x) => x.cle.trim() && x.valeur.trim()).map((x) => [x.cle.trim(), x.valeur.trim()]));
 
@@ -189,6 +196,12 @@ export interface LectureRequest {
   siteNotes?: string | null;
   /** Lecture lot par lot (24 octobre 2026) : la consigne du lot que cet appel lit seul (`consigneDuLot`). */
   consigne?: string;
+  /**
+   * Décision du fondateur (24 octobre 2026, coût du 7954) : « lignes » = une tranche qui ne rend que ses lignes (modèle
+   * moins cher, sortie réduite aux lignes) ; « synthese » = l'appel unique qui écrit fiche, bref et questions du devis
+   * entier, sans ligne. Absent : la lecture complète d'un appel.
+   */
+  etape?: "lignes" | "synthese";
 }
 
 /**
