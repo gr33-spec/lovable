@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Header, Headers, HttpCode, Inject, Param
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { Throttle } from "@nestjs/throttler";
 import { memoryStorage } from "multer";
-import { PHRASE_SANS_ENGAGEMENT, SEUIL_CYCLES_ECONOMIE, argumentTarif, eurosDeCentimes } from "@baticlair/domain";
+import { PHRASE_SANS_ENGAGEMENT, SEUIL_CYCLES_ECONOMIE, argumentTarif, eurosDeCentimes, offresAbonnement, prixParMoisAnnuel } from "@baticlair/domain";
 import { z } from "zod";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -211,6 +211,7 @@ export class EconomiePubliqueController {
   @Get("tarif")
   async tarif() {
     const [moyenne, reglages] = await Promise.all([this.commande.economieMoyenne().catch(() => ({ cycles: 0, parCommande: null, total: 0 })), this.abonnement.reglages()]);
-    return { argument: argumentTarif(moyenne, reglages), prixHt: eurosDeCentimes(reglages.prixHtCentimes), moyenneReelle: moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && !!moyenne.parCommande };
+    // Les deux formules (Greg, 24 octobre 2026) : l'annuel d'abord, mis en avant ; « dès 29 € » pour la landing.
+    return { argument: argumentTarif(moyenne, reglages), prixHt: eurosDeCentimes(reglages.prixHtCentimes), prixAnnuelHt: eurosDeCentimes(reglages.prixAnnuelHtCentimes), prixDes: prixParMoisAnnuel(reglages), offres: offresAbonnement(reglages), moyenneReelle: moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && !!moyenne.parCommande };
   }
 }

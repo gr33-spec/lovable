@@ -124,7 +124,7 @@ export default function BienvenuePage() {
           {/* L'argument phare (24 octobre 2026) : une possibilité, la vraie moyenne dès 3 cycles publiés ; puis l'offre. */}
           <ArgumentTarif className="max-w-[40ch] text-[17px] font-bold text-accent" />
           <p className="text-[15px] font-semibold text-white/60">
-            Essai gratuit sur un cycle complet, puis 29 € HT par mois, sans engagement.{" "}
+            Essai gratuit sur un cycle complet, puis dès 29 € HT par mois à l&apos;année, ou 49 € HT au mois sans engagement.{" "}
             <Link href="/tarifs" className="underline">
               Voir les tarifs
             </Link>

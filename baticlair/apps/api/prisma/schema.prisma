@@ -1516,7 +1516,7 @@ model PreuveAcceptation {
   @@map("preuve_acceptation")
 }
 
-/// L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026) : 29 € HT par mois, sans engagement, résiliable en fin de période payée.
+/// L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026) : 49 € HT par mois sans engagement, ou 349 € HT par an payé en une fois ; résiliable en fin de période payée.
 /// Une ligne par entreprise, tenue par les événements du paiement : simulé ou Stripe, les mêmes (actif, renouvelé,
 /// échec, résilié). Sans ligne : l'essai (calculé par `etatAbonnement`).
 model Abonnement {
@@ -1525,6 +1525,8 @@ model Abonnement {
   statut                String    @default("aucun")
   /// simule | stripe
   fournisseur           String
+  /// mensuel | annuel (Greg, 24 octobre 2026 : 49 € HT par mois ou 349 € HT par an)
+  formule               String    @default("mensuel")
   periodeDebut          DateTime?
   periodeFin            DateTime?
   echecLe               DateTime?
@@ -1578,6 +1580,8 @@ model FactureAbonnement {
   tvaIntra          String?
   periodeDebut      DateTime
   periodeFin        DateTime
+  /// mensuel | annuel | bascule (passage du mensuel à l'annuel, au prorata)
+  formule           String    @default("mensuel")
   montantHtCentimes Int
   tvaCentimes       Int
   ttcCentimes       Int

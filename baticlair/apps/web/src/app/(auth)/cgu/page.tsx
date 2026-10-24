@@ -5,15 +5,19 @@ import { PageTitle } from "@/components/ui";
 import { EDITEUR, TRIBUNAL, VERSION_CGU } from "@/lib/legal";
 import { nom, NOM, NOM_APP } from "@/lib/nom";
 
-/** Le prix de l'abonnement artisan (réglable dans l'admin : un changement se fait ici aussi, avec 30 jours de préavis). */
-const PRIX = "29 €";
+/**
+ * Les prix des deux formules (Greg, 24 octobre 2026 ; réglables dans l'admin : un changement se fait ici aussi, avec 30
+ * jours de préavis).
+ */
+const PRIX_MENSUEL = "49 €";
+const PRIX_ANNUEL = "349 €";
 
 export const metadata: Metadata = { title: `Conditions générales d'utilisation — ${NOM_APP}` };
 
 /**
  * LES CGU ARTISAN (mise en conformité du 24 octobre 2026), en mots simples : un service entre professionnels, la commande
  * commune toutes les deux semaines, sans engagement d'achat ; BATI INVEST n'est ni vendeur ni acheteur ; la concurrence ;
- * l'abonnement (24 octobre 2026 : 29 € HT par mois, essai, résiliation, échec de paiement) ; les documents déposés ; la responsabilité ; la suspension ; le droit applicable. Versionnées : une version majeure est
+ * l'abonnement (24 octobre 2026 : mensuel 49 € HT, annuel 349 € HT, passage du mois à l'année, renouvellement, essai, résiliation, échec de paiement) ; les documents déposés ; la responsabilité ; la suspension ; le droit applicable. Versionnées : une version majeure est
  * redemandée à chaque compte (`VERSION_CGU_MAJEURE`), l'acceptation est horodatée. À relire par l'avocat.
  */
 export default function CguPage() {
@@ -62,8 +66,16 @@ export default function CguPage() {
         <h2 className={s.h2}>3. L&apos;abonnement</h2>
         <ul className={s.ul}>
           <li>
-            <strong>Prix</strong> : {PRIX} HT par mois (TVA en sus au taux en vigueur, 20 % aujourd&apos;hui), payé d&apos;avance par carte bancaire. Une facture émise
-            par {EDITEUR.nom} est disponible chaque mois dans « Mes factures ».
+            <strong>Deux formules</strong>, au choix, payées d&apos;avance par carte bancaire (TVA en sus au taux en vigueur, 20 % aujourd&apos;hui) :
+            <ul className="mt-1 list-disc pl-5">
+              <li>
+                <strong>Mensuelle</strong> : {PRIX_MENSUEL} HT par mois, sans engagement de durée.
+              </li>
+              <li>
+                <strong>Annuelle</strong> : {PRIX_ANNUEL} HT par an, payés en une fois pour douze mois.
+              </li>
+            </ul>
+            Une facture émise par {EDITEUR.nom} est disponible à chaque paiement dans « Mes factures ».
           </li>
           <li>
             <strong>Essai gratuit</strong> : de l&apos;inscription jusqu&apos;à 30 jours après les résultats de votre première {nom} ; si vous ne déposez aucune liste,
@@ -76,14 +88,22 @@ export default function CguPage() {
             résultats restent visibles.
           </li>
           <li>
-            <strong>Renouvellement</strong> : l&apos;abonnement se renouvelle chaque mois à la date anniversaire, sans engagement de durée.
+            <strong>Renouvellement</strong> : la formule mensuelle se renouvelle chaque mois à la date anniversaire, sans engagement de durée. La formule
+            annuelle se renouvelle automatiquement pour un an à sa date anniversaire, au prix alors en vigueur ; un e-mail vous rappelle la date et le montant 30
+            jours avant le renouvellement.
           </li>
           <li>
-            <strong>Résiliation</strong> : à tout moment, en deux clics dans « Mon abonnement ». Elle prend effet à la fin de la période déjà payée, sans
-            remboursement du mois en cours ; une confirmation vous est envoyée par e-mail.
+            <strong>Passer du mois à l&apos;année</strong> : à tout moment, depuis « Mon abonnement ». La période annuelle commence le jour du passage ; la part non
+            utilisée du mois en cours est déduite du premier paiement annuel, au prorata. Le passage de l&apos;année au mois n&apos;est pas proposé en cours
+            d&apos;année : il suffit de résilier l&apos;annuel puis de choisir le mensuel à son échéance.
           </li>
           <li>
-            <strong>Échec de paiement</strong> : si le paiement mensuel est refusé, vous êtes prévenu par e-mail et gardez l&apos;accès 7 jours pour mettre votre
+            <strong>Résiliation</strong> : à tout moment, en deux clics dans « Mon abonnement ». Elle prend effet à la fin de la période déjà payée (le mois en
+            cours, ou l&apos;échéance de l&apos;année pour la formule annuelle), sans remboursement au prorata de la période commencée ; vous gardez l&apos;accès
+            jusqu&apos;à cette date et une confirmation vous est envoyée par e-mail.
+          </li>
+          <li>
+            <strong>Échec de paiement</strong> : si un paiement est refusé, vous êtes prévenu par e-mail et gardez l&apos;accès 7 jours pour mettre votre
             carte à jour ; passé ce délai, l&apos;accès est limité comme après l&apos;essai, jusqu&apos;au paiement.
           </li>
           <li>

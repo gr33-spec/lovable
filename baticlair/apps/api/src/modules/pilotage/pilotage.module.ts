@@ -22,6 +22,10 @@ import { PilotageController, PilotagePublicController } from "./http/pilotage.co
           etatAbonnement: (companyId, maintenant) => abo.etat(companyId, maintenant),
           apprentissage: () => h.admin(),
           economies: () => cmd.economieMoyenne(),
+          prixFormules: async () => {
+            const r = await abo.reglages();
+            return { mensuel: r.prixHtCentimes, annuel: r.prixAnnuelHtCentimes };
+          },
           paiementSimule: c.abonnement.paiement === "simule",
         }),
       inject: [PrismaService, CONFIG, EMAIL_SENDER, AbonnementService, HabitudesService, CommandeDuMoisService],

@@ -51,22 +51,27 @@ describe("le tableau de bord admin", () => {
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     const a = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
     await signUpWithCompany(ctx.app, "faux@demo.baticlair.fr", "Faux artisan", ["roofing"]);
-    // A paie (simulé) : un abonné payant, 29 € HT de revenu.
+    // A paie le mensuel (simulé) : 49 € HT de revenu mensuel récurrent.
     const { url } = (await a.agent.post("/v1/abonnement/payer").expect(200)).body;
     await a.agent.post(`/v1/abonnement/simulation/${new URL(url).searchParams.get("session")}`).send({ issue: "payer" }).expect(200);
+    // B paie l'annuel : 349 € ÷ 12 = 29,08 € par mois ; le revenu récurrent fait 78 €, la moitié des abonnés en annuel.
+    const b = await signUpWithCompany(ctx.app, "b@toitures.fr", "Toitures B", ["roofing"]);
+    const annuel = (await b.agent.post("/v1/abonnement/payer").send({ formule: "annuel" }).expect(200)).body.url;
+    await b.agent.post(`/v1/abonnement/simulation/${new URL(annuel).searchParams.get("session")}`).send({ issue: "payer" }).expect(200);
     // Des visites comptées sans cookie, une installation.
     for (let i = 0; i < 3; i++) await request(ctx.app.getHttpServer()).post("/v1/public/visite").expect(204);
     await a.agent.post("/v1/me/installation").expect(204);
 
     const t = (await greg.agent.get("/v1/admin/pilotage").expect(200)).body;
-    expect(t.chiffres.map((c: { titre: string }) => c.titre)).toEqual(["Utilisateurs actifs", "Abonnés payants", "Revenu du mois", "Coût IA du mois"]);
-    expect(t.chiffres[1]).toMatchObject({ valeur: "1", fleche: { couleur: "vert", texte: "nouveau" } });
-    expect(t.chiffres[2]).toMatchObject({ valeur: "29 €" });
-    expect(t.croissance).toMatchObject({ visites: 3, installations: 1, inscriptions: 2 });
-    expect(t.rentabilite).toMatchObject({ revenu: 29 });
+    expect(t.chiffres.map((c: { titre: string }) => c.titre)).toEqual(["Utilisateurs actifs", "Abonnés payants", "Revenu mensuel récurrent", "Coût IA du mois"]);
+    expect(t.chiffres[1]).toMatchObject({ valeur: "2", fleche: { couleur: "vert", texte: "nouveau" } });
+    expect(t.chiffres[2]).toMatchObject({ valeur: "78 €", detail: "HT, annuel ÷ 12 · 50 % en annuel" });
+    expect(t.abonnes).toEqual({ mensuels: 1, annuels: 1, partAnnuels: 50, revenuMensuelRecurrent: 78.08, encaisseCeMois: 398 });
+    expect(t.croissance).toMatchObject({ visites: 3, installations: 1, inscriptions: 3 });
+    expect(t.rentabilite).toMatchObject({ revenu: 78.08 });
     expect(t.mode).toBe("test");
     // Agrégé : aucun nom d'entreprise dans le tableau.
-    expect(JSON.stringify(t)).not.toMatch(/Toitures A|Faux artisan/);
+    expect(JSON.stringify(t)).not.toMatch(/Toitures A|Toitures B|Faux artisan/);
     // Le détail nominatif, sur un clic, journalisé.
     await greg.agent.get("/v1/admin/pilotage/detail/essais_semaine").expect(200);
     const journal = await ctx.prisma.journalAdmin.findMany({ orderBy: { createdAt: "asc" }, select: { action: true } });
@@ -76,10 +81,11 @@ describe("le tableau de bord admin", () => {
   it("les réglages (seuil IA, services, prix de l'abonnement) et l'alerte de coût IA une fois par jour", async () => {
     const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "Bati Invest", ["roofing"]);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
-    const r = (await greg.agent.put("/v1/admin/pilotage/reglages").send({ seuilIaJourEur: 0, coutServicesMensuelEur: 40, abonnement: { prixHtCentimes: 3500, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 45, joursGrace: 7 } }).expect(200)).body;
-    expect(r).toMatchObject({ seuilIaJourEur: 0, coutServicesMensuelEur: 40, abonnement: { prixHtCentimes: 3500, joursEssaiSansDepot: 45 } });
+    const r = (await greg.agent.put("/v1/admin/pilotage/reglages").send({ seuilIaJourEur: 0, coutServicesMensuelEur: 40, abonnement: { prixHtCentimes: 3500, prixAnnuelHtCentimes: 29900, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 45, joursGrace: 7, joursRappelAnnuel: 30 } }).expect(200)).body;
+    expect(r).toMatchObject({ seuilIaJourEur: 0, coutServicesMensuelEur: 40, abonnement: { prixHtCentimes: 3500, prixAnnuelHtCentimes: 29900, joursEssaiSansDepot: 45 } });
     const a = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
     expect((await a.agent.get("/v1/abonnement").expect(200)).body).toMatchObject({ prixHt: "35 €", joursEssai: 45 });
+    expect((await a.agent.get("/v1/abonnement").expect(200)).body.offres.map((o: { prix: string }) => o.prix)).toEqual(["25 € HT par mois, payé à l'année", "35 € HT par mois"]);
     // Un coût IA aujourd'hui au-dessus du seuil : un e-mail, une seule fois.
     await ctx.prisma.aiExecution.create({ data: { companyId: a.companyId, task: "lecture_devis", route: "text", provider: "anthropic", model: "m", promptId: "p", promptVersion: 1, costMicroUsd: 2_000_000n, priceTableVersion: "v", status: "success", durationMs: 1 } });
     const tache = () => request(ctx.app.getHttpServer()).get("/v1/internal/pilotage").set("authorization", "Bearer secret-de-la-tache").expect(200);

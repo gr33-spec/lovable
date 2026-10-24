@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { OffresAbonnement } from "@/components/offres-abonnement";
 import { Button, Card } from "@/components/ui";
-import { api, ApiError, EVENEMENT_ABONNEMENT_REQUIS, type Abonnement } from "@/lib/api";
+import { api, ApiError, EVENEMENT_ABONNEMENT_REQUIS, type Abonnement, type Formule } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -16,9 +17,9 @@ export function useAbonnement() {
   return useResource(charger);
 }
 
-/** « Je continue » : la page de paiement (simulée, ou Stripe Checkout). */
-export async function continuerAbonnement(): Promise<void> {
-  const { url } = await api<{ url: string }>("/v1/abonnement/payer", { method: "POST" });
+/** « Je continue » : la page de paiement (simulée, ou Stripe Checkout) de la formule choisie. */
+export async function continuerAbonnement(formule: Formule = "annuel"): Promise<void> {
+  const { url } = await api<{ url: string }>("/v1/abonnement/payer", { method: "POST", body: { formule } });
   window.location.assign(url);
 }
 
@@ -37,15 +38,19 @@ export function BandeauAbonnement() {
   );
 }
 
-/** Le contenu du paywall, mot pour mot : la phrase, l'économie réelle du premier cycle, « Je continue », « Pas maintenant ». */
+/**
+ * Le contenu du paywall, mot pour mot : la phrase, l'économie réelle du premier cycle, les deux formules (l'annuel coché
+ * d'office, Greg, 24 octobre 2026), « Je continue », « Pas maintenant ».
+ */
 export function ContenuPaywall({ abonnement, onFermer }: { abonnement: Abonnement; onFermer: () => void }) {
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [formule, setFormule] = useState<Formule>("annuel");
   async function continuer() {
     setPending(true);
     setErreur(null);
     try {
-      await continuerAbonnement();
+      await continuerAbonnement(formule);
     } catch (e) {
       setErreur(e instanceof ApiError ? e.message : "Le paiement n'a pas pu s'ouvrir. Réessaie.");
       setPending(false);
@@ -57,6 +62,7 @@ export function ContenuPaywall({ abonnement, onFermer }: { abonnement: Abonnemen
         {abonnement.paywall.phrase}
       </h2>
       {abonnement.paywall.economie ? <p className="rounded-xl bg-ok-bg p-4 text-[17px] font-bold text-ok">{abonnement.paywall.economie}</p> : null}
+      <OffresAbonnement offres={abonnement.offres} choisie={formule} onChoisir={setFormule} />
       {erreur ? (
         <p role="alert" className="text-[15px] font-semibold text-danger">
           {erreur}
@@ -94,7 +100,7 @@ export function PaywallAbonnement() {
 /** Compte : l'abonnement en une ligne, et le lien vers « Mon abonnement » et « Mes factures ». */
 export function ResumeAbonnement() {
   const { data } = useAbonnement();
-  const ligne = !data ? "\u00a0" : !data.actif ? "Tout est ouvert" : data.acces === "abonne" ? `Abonné, ${data.prixHt} HT par mois` : data.acces === "grace" ? "Paiement refusé" : data.acces === "bloque" ? "Essai terminé" : "Essai gratuit";
+  const ligne = !data ? "\u00a0" : !data.actif ? "Tout est ouvert" : data.acces === "abonne" ? `Abonné, ${data.prixHt} HT ${data.periode}` : data.acces === "grace" ? "Paiement refusé" : data.acces === "bloque" ? "Essai terminé" : "Essai gratuit";
   return (
     <Card className="flex flex-col gap-1.5 p-4">
       <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">ABONNEMENT</span>

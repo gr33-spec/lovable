@@ -2144,7 +2144,10 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   await expect(page.getByRole("heading", { name: "Conditions générales d'utilisation" })).toBeVisible();
   // L'abonnement (24 octobre 2026) : l'article 3 des CGU ; gratuit pour les négoces ; aucun « 2 % » sur les pages légales.
   await expect(page.getByRole("heading", { name: "3. L'abonnement" })).toBeVisible();
-  await expect(page.getByText(/29 € HT par mois/).first()).toBeVisible();
+  await expect(page.getByText(/49 € HT par mois, sans engagement de durée/)).toBeVisible();
+  await expect(page.getByText(/349 € HT par an, payés en une fois pour douze mois/)).toBeVisible();
+  await expect(page.getByText(/un e-mail vous rappelle la date et le montant 30\s+jours avant le renouvellement/)).toBeVisible();
+  await expect(page.getByText(/sans remboursement au prorata de la période commencée/)).toBeVisible();
   await expect(page.getByText(/Pas de droit de rétractation/)).toBeVisible();
   await expect(page.getByText(/tribunal de commerce de Saint-Brieuc/)).toBeVisible();
   await expect(page.getByText(/2 %/)).toHaveCount(0);
@@ -2468,8 +2471,8 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.locator("main svg")).toHaveCount(0);
   await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
   // L'abonnement (24 octobre 2026) : l'argument phare (une possibilité tant qu'il n'y a pas 3 cycles) et l'offre.
-  await expect(page.getByText(/^Pour 29 € par mois(, économise des centaines, voire des milliers d'euros chaque année\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par commande commune\.)$/)).toBeVisible();
-  await expect(page.getByText(/^Essai gratuit sur un cycle complet, puis 29 € HT par mois, sans engagement\./)).toBeVisible();
+  await expect(page.getByText(/^Dès 29 € par mois(, économise des centaines, voire des milliers d'euros chaque année\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par commande commune\.)$/)).toBeVisible();
+  await expect(page.getByText(/^Essai gratuit sur un cycle complet, puis dès 29 € HT par mois à l'année, ou 49 € HT au mois sans engagement\./)).toBeVisible();
   await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(2);
   await expect(page.getByText("des volumes sûrs, des clients en plus. Répondez aux grilles.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
@@ -3204,16 +3207,25 @@ test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
-test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, bandeau d'essai, paiement simulé, facture TEST, résiliation en deux clics", async ({ page }) => {
+test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formules, bandeau d'essai, paiement simulé du mensuel, passage à l'annuel au prorata, factures TEST, résiliation en deux clics", async ({ page }) => {
   // La landing mène aux tarifs : trois étapes, l'argument (une possibilité), gratuit pour les négoces, la FAQ.
   await page.goto("/");
   await page.getByRole("navigation", { name: "Menu" }).getByRole("link", { name: "Tarifs" }).click();
   await expect(page).toHaveURL(/\/tarifs$/);
   await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
-  await expect(page.getByText(/^Pour 29 € par mois(, économise des centaines, voire des milliers d'euros chaque année\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par commande commune\.)$/)).toBeVisible();
-  for (const etape of ["Rejoins la communauté, c'est gratuit", "Teste sur un cycle complet", "Continue seulement si tu as vraiment économisé : 29 € HT par mois, sans engagement"]) {
+  await expect(page.getByText(/^Dès 29 € par mois(, économise des centaines, voire des milliers d'euros chaque année\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par commande commune\.)$/)).toBeVisible();
+  for (const etape of ["Rejoins la communauté, c'est gratuit", "Teste sur un cycle complet", "Continue seulement si tu as vraiment économisé : dès 29 € HT par mois"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
+  // Les deux formules (Greg, 24 octobre 2026) : l'annuel d'abord, mis en avant, puis le mensuel.
+  const formules = page.getByRole("region", { name: "Les formules" });
+  await expect(formules.getByText("-40 %")).toBeVisible();
+  await expect(formules.getByText("29 € HT par mois, payé à l'année")).toBeVisible();
+  await expect(formules.getByText("239 € économisés par an")).toBeVisible();
+  await expect(formules.getByText("49 € HT par mois", { exact: true })).toBeVisible();
+  const [annuelBox, mensuelBox] = [await formules.getByText("Annuel", { exact: true }).boundingBox(), await formules.getByText("Mensuel", { exact: true }).boundingBox()];
+  expect(annuelBox!.y + annuelBox!.x).toBeLessThan(mensuelBox!.y + mensuelBox!.x);
+  await expect(page.getByText("L'annuel se renouvelle tout seul ?")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Gratuit pour les négoces" })).toBeVisible();
   await expect(page.getByText("Comment je résilie ?")).toBeVisible();
 
@@ -3225,21 +3237,35 @@ test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, bandeau d'e
   await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
   await expect(page.getByText("Essai gratuit", { exact: true })).toBeVisible();
 
-  // « M'abonner » : la page de paiement simulée, puis « Payer ».
+  // Les deux formules, l'annuel coché d'office ; l'artisan prend le mensuel.
+  await expect(page.getByRole("radio", { name: /Annuel/ })).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("radio", { name: /Mensuel/ }).click();
+  await expect(page.getByRole("radio", { name: /Mensuel/ })).toHaveAttribute("aria-checked", "true");
+  // « M'abonner » : la page de paiement simulée, au prix du mensuel, puis « Payer ».
   await page.getByRole("button", { name: "M'abonner dès maintenant" }).click();
   await expect(page).toHaveURL(/\/paiement-simule\?session=sim_/);
   await expect(page.getByRole("heading", { name: "Paiement (simulation)" })).toBeVisible();
   await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
+  await expect(page.getByText("Abonnement mensuel : 49 € HT par mois (58,80 € TTC), sans engagement.")).toBeVisible();
   await page.getByRole("button", { name: "Payer", exact: true }).click();
   await expect(page).toHaveURL(/\/abonnement$/);
-  await expect(page.getByText("Abonné", { exact: true })).toBeVisible();
-  await expect(page.getByText("29 € HT par mois (34,80 € TTC), sans engagement.")).toBeVisible();
+  await expect(page.getByText("Abonné au mois", { exact: true })).toBeVisible();
+  await expect(page.getByText("49 € HT par mois (58,80 € TTC), sans engagement.")).toBeVisible();
 
-  // « Mes factures » : la facture TEST, téléchargeable.
+  // Du mois à l'année, au prorata : ce qui reste du mois est déduit, l'année est payée tout de suite.
+  await expect(page.getByText("Passe à l'annuel : -40 %")).toBeVisible();
+  await expect(page.getByText(/^29 € HT par mois, payé à l'année\. Ce qui reste de ton mois \([\d,]+ €\) est déduit : tu paies [\d\s\u202f,]+ € HT/)).toBeVisible();
+  await page.getByRole("button", { name: "Passer à l'annuel" }).click();
+  await page.getByRole("button", { name: /^Oui, payer [\d\s\u202f,]+ € TTC$/ }).click();
+  await expect(page.getByText("Abonné à l'année", { exact: true })).toBeVisible();
+  await expect(page.getByText("349 € HT par an (418,80 € TTC), payé en une fois, renouvelé chaque année.")).toBeVisible();
+  await expect(page.getByText(/Je te préviens par e-mail 30 jours avant\./)).toBeVisible();
+
+  // « Mes factures » : les deux factures TEST (le mois, puis le passage à l'annuel), téléchargeables.
   await page.getByRole("tab", { name: "Mes factures" }).click();
   const factures = page.getByRole("list", { name: "Mes factures" });
-  await expect(factures.getByText(/^TEST-\d{6}/)).toBeVisible();
-  await expect(factures.getByText(/34,80 € TTC/)).toBeVisible();
+  await expect(factures.getByText(/^TEST-\d{6}/)).toHaveCount(2);
+  await expect(factures.getByText(/58,80 € TTC/)).toBeVisible();
   const download = page.waitForEvent("download");
   await factures.getByRole("link", { name: "Télécharger" }).first().click();
   expect((await download).suggestedFilename()).toMatch(/^TEST-\d{6}\.pdf$/);
@@ -3247,6 +3273,7 @@ test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, bandeau d'e
   // Résilier en deux clics : effet en fin de période.
   await page.getByRole("tab", { name: "Mon abonnement" }).click();
   await page.getByRole("button", { name: "Résilier" }).click();
+  await expect(page.getByText(/Une année commencée n'est pas remboursée au prorata\./)).toBeVisible();
   await page.getByRole("button", { name: "Oui, résilier" }).click();
   await expect(page.getByText(/^Résilié : ton accès reste jusqu'au/)).toBeVisible();
 });
@@ -3304,8 +3331,8 @@ test("Tableau de bord (24 octobre 2026) : refusé à un artisan ; l'admin entre 
   const mail = (await emailsVers(page, "admin-groupe@example.fr")).filter((m) => /code d'accès au pilotage/.test(m.subject)).at(-1)!;
   await page.getByLabel("Code reçu par e-mail").fill(/(\d{6})/.exec(mail.text)![1]!);
   await page.getByRole("button", { name: "Ouvrir le tableau de bord" }).click();
-  for (const titre of ["Utilisateurs actifs", "Abonnés payants", "Revenu du mois", "Coût IA du mois"]) await expect(page.getByText(titre, { exact: true })).toBeVisible();
-  for (const section of ["Croissance (ce mois)", "Fidélité", "Activité (ce mois)", "IA, 14 derniers jours", "Rentabilité (ce mois)", "Apprentissage", "Réglages"]) await expect(page.getByRole("heading", { name: section })).toBeVisible();
+  for (const titre of ["Utilisateurs actifs", "Abonnés payants", "Revenu mensuel récurrent", "Coût IA du mois"]) await expect(page.getByText(titre, { exact: true })).toBeVisible();
+  for (const section of ["Croissance (ce mois)", "Abonnés", "Fidélité", "Activité (ce mois)", "IA, 14 derniers jours", "Rentabilité (ce mois)", "Apprentissage", "Réglages"]) await expect(page.getByRole("heading", { name: section })).toBeVisible();
   await page.getByRole("button", { name: /Essais qui finissent cette semaine/ }).click();
   await expect(page.getByText("Détail ouvert et noté au journal. Rien ne s'exporte.")).toBeVisible();
   // La démo (mode test) : un jeu de test d'un bouton, effacé d'un autre.

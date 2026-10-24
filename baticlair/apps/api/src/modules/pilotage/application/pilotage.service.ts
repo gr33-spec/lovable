@@ -1,5 +1,5 @@
 import { createHash, randomInt } from "node:crypto";
-import { NOM_APP, REGLAGES_PILOTAGE_DEFAUT, eurosEntiers, flecheDe, rentabilite, taux, type ReglagesPilotage } from "@baticlair/domain";
+import { NOM_APP, REGLAGES_PILOTAGE_DEFAUT, eurosEntiers, flecheDe, rentabilite, revenuMensuelRecurrent, taux, type Formule, type ReglagesPilotage } from "@baticlair/domain";
 import type { AppConfig } from "../../../platform/config/config.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
@@ -18,6 +18,8 @@ export interface SourcesPilotage {
   etatAbonnement(companyId: string, maintenant: Date): Promise<{ acces: string; essaiFinLe: Date | null }>;
   apprentissage(): Promise<{ aValider: unknown[]; tauxParMois: { mois: string; taux: number | null }[] }>;
   economies(): Promise<{ total: number; parCommande: number | null; cycles: number }>;
+  /** Les prix réglés des deux formules, HT en centimes (repli quand un abonné n'a pas encore de facture de sa formule). */
+  prixFormules(): Promise<Record<Formule, number>>;
   paiementSimule: boolean;
 }
 
@@ -156,6 +158,22 @@ export class PilotageService {
       coutIa(moisPrec, mois),
     ]);
 
+    // Le revenu mensuel récurrent (annuel ÷ 12) et la part d'abonnés annuels, à une date : les factures dont la période la
+    // couvre, une par entreprise (la dernière), chacune à son prix ; un passage au prorata compte au prix de l'annuel.
+    const prix = await this.sources.prixFormules();
+    const mrrAu = async (d: Date) => {
+      const f = await this.prisma.factureAbonnement.findMany({ where: { serie, companyId: pasFactice, periodeDebut: { lte: d }, periodeFin: { gt: d } }, orderBy: { rang: "desc" }, select: { companyId: true, formule: true, montantHtCentimes: true } });
+      const vues = new Set<string>();
+      const abonnes = f.flatMap((x) => {
+        if (!x.companyId || vues.has(x.companyId)) return [];
+        vues.add(x.companyId);
+        const formule: Formule = x.formule === "mensuel" ? "mensuel" : "annuel";
+        return [{ formule, htCentimes: x.formule === "bascule" ? prix.annuel : x.montantHtCentimes }];
+      });
+      return revenuMensuelRecurrent(abonnes);
+    };
+    const [mrr, mrrAvant] = await Promise.all([mrrAu(maintenant), mrrAu(new Date(mois.getTime() - 1))]);
+
     // Croissance.
     const inscriptions = async (de: Date, a: Date) => this.prisma.company.count({ where: { createdAt: { gte: de, lt: a }, id: pasFactice } });
     const entreprises = await this.prisma.company.findMany({ where: { id: pasFactice }, select: { id: true, name: true, abonnement: { select: { statut: true } }, memberships: { select: { user: { select: { lastSeenAt: true } } } } } });
@@ -197,14 +215,16 @@ export class PilotageService {
       chiffres: [
         { cle: "actifs", titre: "Utilisateurs actifs", valeur: String(act), detail: "sur 30 jours", fleche: flecheDe(act, actP) },
         { cle: "payants", titre: "Abonnés payants", valeur: String(pay), detail: this.sources.paiementSimule ? "paiements de test" : "sur 30 jours", fleche: flecheDe(pay, payP) },
-        { cle: "revenu", titre: "Revenu du mois", valeur: eurosEntiers(rev), detail: "HT", fleche: flecheDe(rev, revP) },
+        { cle: "revenu", titre: "Revenu mensuel récurrent", valeur: eurosEntiers(mrr.centimes / 100), detail: mrr.partAnnuels === null ? "HT, annuel ÷ 12" : `HT, annuel ÷ 12 · ${mrr.partAnnuels} % en annuel`, fleche: flecheDe(mrr.centimes, mrrAvant.centimes) },
         { cle: "ia", titre: "Coût IA du mois", valeur: eurosEntiers(ia), detail: "", fleche: flecheDe(Math.round(ia), Math.round(iaP), "bas") },
       ],
       croissance: { visites: await this.compteur("visite", mois, new Date(maintenant.getTime() + JOUR)), inscriptions: await inscriptions(mois, maintenant), inscriptionsAvant: await inscriptions(moisPrec, mois), installations: await this.compteur("installation", mois, new Date(maintenant.getTime() + JOUR)), essais: enEssai, conversion: taux(dejaPaye.size, essaiFini) },
+      abonnes: { mensuels: mrr.mensuels, annuels: mrr.annuels, partAnnuels: mrr.partAnnuels, revenuMensuelRecurrent: mrr.centimes / 100, encaisseCeMois: rev },
       fidelite: { desabonnements: resilies, tauxDesabonnement: taux(resilies, payP || pay), aRisque: aRisque.length, essaisCetteSemaine: essaisSemaine.length, paiementsEchoues: echecs },
       activite: { listes, negoces, tauxReponse: taux(grilles.filter((g) => g.deposeLe).length, grilles.length), commandes, economiesTotales: eurosEntiers(economies.total) },
       ia: { parJour, coutMoyenParDevis: devisDuMois ? Math.round((ia / devisDuMois) * 100) / 100 : null, seuilJour: reglages.seuilIaJourEur },
-      rentabilite: { revenu: rev, coutIa: Math.round(ia * 100) / 100, services: reglages.coutServicesMensuelEur, resultat: rentabilite(rev, ia, reglages.coutServicesMensuelEur) },
+      // La rentabilité du mois sur le revenu récurrent : un annuel encaissé d'un coup ne gonfle pas un seul mois.
+      rentabilite: { revenu: mrr.centimes / 100, coutIa: Math.round(ia * 100) / 100, services: reglages.coutServicesMensuelEur, resultat: rentabilite(mrr.centimes / 100, ia, reglages.coutServicesMensuelEur) },
       apprentissage: { aValider: apprentissage.aValider.length, tauxDeCorrection: apprentissage.tauxParMois.at(-1)?.taux ?? null },
       reglages,
       acces: acces.map((a) => ({ qui: a.email, quoi: a.action, le: a.createdAt.toISOString() })),

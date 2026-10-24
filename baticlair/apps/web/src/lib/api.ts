@@ -665,8 +665,18 @@ export interface Abonnement {
   paiement: "simule" | "stripe";
   modeTest: string | null;
   acces: "essai" | "abonne" | "grace" | "bloque";
+  /** La formule payée (mensuel tant qu'il n'y en a pas). */
+  formule: Formule;
+  /** Le prix HT de la formule et sa période (« par mois », « par an »). */
   prixHt: string;
   prixTtc: string;
+  periode: string;
+  /** Les deux formules, l'annuel d'abord. */
+  offres: OffreAbonnement[];
+  /** « 29 € » : le prix par mois de l'annuel. */
+  prixDes: string;
+  /** Le passage du mensuel à l'annuel, au prorata ; null quand il n'est pas possible. */
+  bascule: { credit: string; aPayerHt: string; aPayerTtc: string; jusquau: string } | null;
   essaiFinLe: string | null;
   joursEssai: number | null;
   graceFinLe: string | null;
@@ -679,10 +689,23 @@ export interface Abonnement {
   paywall: { phrase: string; economie: string | null };
 }
 
+/** Les deux formules de l'abonnement (Greg, 24 octobre 2026) : mensuel 49 € HT, annuel 349 € HT. */
+export type Formule = "mensuel" | "annuel";
+export interface OffreAbonnement {
+  formule: Formule;
+  titre: string;
+  badge: string | null;
+  prix: string;
+  details: string[];
+  enAvant: boolean;
+  ttc?: string;
+}
+
 export interface FactureAbonnement {
   id: string;
   numero: string;
   test: boolean;
+  formule: Formule | "bascule";
   emiseLe: string;
   periode: string;
   ttc: string;

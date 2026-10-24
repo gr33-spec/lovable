@@ -115,7 +115,7 @@ const envSchema = z
      */
     PAYWALL: z.enum(["on", "off"]).default("off"),
     /**
-     * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 29 € HT par mois, essai, paywall sur déposer, voir les résultats,
+     * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 349 € HT par an, essai, paywall sur déposer, voir les résultats,
      * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
      */
     ABONNEMENT: z.enum(["on", "off"]).default("on"),
@@ -126,7 +126,11 @@ const envSchema = z
     PAIEMENT: z.enum(["simule", "stripe"]).default("simule"),
     STRIPE_SECRET_KEY: z.string().min(8).optional(),
     STRIPE_WEBHOOK_SECRET: z.string().min(8).optional(),
-    /** Le prix mensuel créé chez Stripe (« price_… »), 29 € HT, récurrent. */
+    /** Le prix MENSUEL créé chez Stripe (« price_… »), 49 € HT, récurrent tous les mois. */
+    STRIPE_PRICE_ID_MENSUEL: z.string().min(4).optional(),
+    /** Le prix ANNUEL créé chez Stripe (« price_… »), 349 € HT, récurrent tous les ans. */
+    STRIPE_PRICE_ID_ANNUEL: z.string().min(4).optional(),
+    /** Ancien nom du prix mensuel (une seule formule à 29 €) : lu seulement si `STRIPE_PRICE_ID_MENSUEL` manque. */
     STRIPE_PRICE_ID: z.string().min(4).optional(),
     /** Le taux de TVA créé chez Stripe (« txr_… », 20 %, non inclus) appliqué à l'abonnement. */
     STRIPE_TAX_RATE_ID: z.string().min(4).optional(),
@@ -255,7 +259,7 @@ export interface AppConfig {
   abonnement: {
     actif: boolean;
     paiement: "simule" | "stripe";
-    stripe: { secretKey: string; webhookSecret: string; priceId: string; taxRateId: string | null } | null;
+    stripe: { secretKey: string; webhookSecret: string; prix: { mensuel: string; annuel: string }; taxRateId: string | null } | null;
   };
   /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
   groupe: {
@@ -323,8 +327,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
   }
   const isDeployed = e.NODE_ENV === "production" || e.NODE_ENV === "staging";
   const problemes: string[] = [];
-  if (e.PAIEMENT === "stripe" && !(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID)) {
-    problemes.push("PAIEMENT : « stripe » demande STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET et STRIPE_PRICE_ID");
+  const prixMensuel = e.STRIPE_PRICE_ID_MENSUEL ?? e.STRIPE_PRICE_ID;
+  if (e.PAIEMENT === "stripe" && !(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && prixMensuel && e.STRIPE_PRICE_ID_ANNUEL)) {
+    problemes.push("PAIEMENT : « stripe » demande STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID_MENSUEL et STRIPE_PRICE_ID_ANNUEL");
   }
   // Un paiement simulé en production donnerait l'accès sans payer.
   if (e.PAIEMENT === "simule" && e.ABONNEMENT === "on" && e.VERCEL_ENV === "production") {
@@ -370,7 +375,10 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     abonnement: {
       actif: e.ABONNEMENT === "on",
       paiement: e.PAIEMENT,
-      stripe: e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, priceId: e.STRIPE_PRICE_ID, taxRateId: e.STRIPE_TAX_RATE_ID ?? null } : null,
+      stripe:
+        e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && prixMensuel && e.STRIPE_PRICE_ID_ANNUEL
+          ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, prix: { mensuel: prixMensuel, annuel: e.STRIPE_PRICE_ID_ANNUEL }, taxRateId: e.STRIPE_TAX_RATE_ID ?? null }
+          : null,
     },
     groupe: {
       enabled: e.GROUPE === "on",

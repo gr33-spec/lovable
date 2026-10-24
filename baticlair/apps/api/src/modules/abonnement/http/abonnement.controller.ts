@@ -13,6 +13,8 @@ import { AbonnementService } from "../application/abonnement.service.js";
 import { signatureStripeValide } from "../infrastructure/stripe.js";
 
 const simulationBody = z.object({ issue: z.enum(["payer", "echec"]) });
+/** La formule choisie ; sans corps (anciens écrans), le mensuel. */
+const payerBody = z.object({ formule: z.enum(["mensuel", "annuel"]).optional() }).optional();
 const tvaBody = z.object({ tvaIntra: z.string().trim().max(20).nullable() });
 
 /** L'instant de la requête ; `?maintenant=` seulement en test. */
@@ -34,8 +36,21 @@ export class AbonnementController {
 
   @Post("payer")
   @HttpCode(200)
-  payer(@Tenant() tenant: TenantContext) {
-    return this.abonnement.commencerPaiement(tenant);
+  payer(@Tenant() tenant: TenantContext, @Body(new ZodPipe(payerBody)) body: z.infer<typeof payerBody>) {
+    return this.abonnement.commencerPaiement(tenant, body?.formule ?? "mensuel");
+  }
+
+  /** Du mensuel à l'annuel, au prorata. */
+  @Post("annuel")
+  @HttpCode(200)
+  annuel(@Tenant() tenant: TenantContext, @Query("maintenant") m?: string) {
+    return this.abonnement.basculerAnnuel(tenant, instant(this.config, m));
+  }
+
+  /** La formule d'une session simulée : la page « Paiement (simulation) » dit le bon prix. */
+  @Get("simulation/:session")
+  async session(@Tenant() tenant: TenantContext, @Param("session") session: string) {
+    return { formule: await this.abonnement.formuleDeSession(tenant, session) };
   }
 
   @Post("simulation/:session")

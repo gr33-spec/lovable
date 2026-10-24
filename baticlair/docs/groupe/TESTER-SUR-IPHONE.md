@@ -22,7 +22,7 @@ But (Greg, 24 octobre 2026) : vivre tout un cycle Mobiiz depuis ton iPhone, avec
 
 | # | Où | Ce que tu fais | Ce que tu dois voir |
 |---|---|---|---|
-| 1 | Landing | Ouvre la page d'accueil, puis « Tarifs ». | « Pour 29 € par mois, économise des centaines, voire des milliers d'euros chaque année. » ; les 3 étapes ; « Gratuit pour les négoces ». |
+| 1 | Landing | Ouvre la page d'accueil, puis « Tarifs ». | « Dès 29 € par mois, économise des centaines, voire des milliers d'euros chaque année. » ; les deux formules, l'annuel en avant (« -40 % », « 29 € HT par mois, payé à l'année », « 239 € économisés par an ») et le mensuel à côté (« 49 € HT par mois ») ; les 3 étapes ; « Gratuit pour les négoces ». |
 | 2 | Inscription | Crée ton compte artisan avec ton e-mail. | L'e-mail de code arrive : logo Mobiiz, pied légal BATI INVEST, lien « Gérer tes e-mails ». En haut de l'app : « Essai gratuit : encore 60 jours ». |
 | 3 | Ta liste | « + », dépose un devis (ou « J'ai déjà ma liste »), réponds aux questions, puis ajoute la liste à la commande du mois (chantier dans le 22). | La liste est dans la commande ; le bandeau d'essai est toujours là. |
 | 4 | Tableau de bord | Menu → Commande commune → « Tableau de bord » → « Recevoir mon code ». Saisis le code reçu par e-mail. | Les 4 gros chiffres et les sections. Plus bas, la carte « Démo (mode test) ». |
@@ -31,10 +31,11 @@ But (Greg, 24 octobre 2026) : vivre tout un cycle Mobiiz depuis ton iPhone, avec
 | 7 | Démo | « Faire répondre les négoces ». | « 3 négoces ont répondu (prix fictifs). » |
 | 8 | Démo | « Publier les résultats ». | Un e-mail et une notification : les résultats sont là. Dans l'app, l'onglet de la commande montre les 3 négoces classés et l'économie du cycle. |
 | 9 | App | Choisis un négoce, puis « Commander ». | Le bon de commande part (e-mail redirigé vers toi). |
-| 10 | Démo | « Finir l'essai ». Reviens dans l'app et essaie de déposer une liste. | L'écran « Ton essai est terminé. Continue pour 29 € HT par mois, sans engagement. », avec l'économie de ton premier cycle, « Je continue » et « Pas maintenant ». Les résultats déjà publiés restent visibles. |
-| 11 | Paiement | « Je continue ». | La page « Paiement (simulation) », avec le bandeau rouge « Mode test : aucun paiement réel ». « Payer » : l'abonnement est actif ; l'e-mail « Ton abonnement Mobiiz est actif » arrive ; la facture TEST-000001 est dans « Mon abonnement » → « Mes factures ». |
+| 10 | Démo | « Finir l'essai ». Reviens dans l'app et essaie de déposer une liste. | L'écran « Ton essai est terminé. Continue dès 29 € HT par mois. », avec l'économie de ton premier cycle, les deux formules (l'annuel coché), « Je continue » et « Pas maintenant ». Les résultats déjà publiés restent visibles. |
+| 11 | Paiement | Touche « Mensuel », puis « Je continue ». | La page « Paiement (simulation) » à 49 € HT, avec le bandeau rouge « Mode test : aucun paiement réel ». « Payer » : « Abonné au mois » ; l'e-mail « Ton abonnement Mobiiz est actif » arrive ; la facture TEST-000001 est dans « Mon abonnement » → « Mes factures ». |
+| 11 bis | Abonnement | « Passer à l'annuel », puis « Oui, payer … ». | Ce qui reste de ton mois est déduit ; « Abonné à l'année », 349 € HT par an ; l'e-mail « Tu es passé à l'abonnement annuel Mobiiz » ; une deuxième facture TEST (« Passage à l'abonnement annuel »). |
 | 12 | Démo | « Simuler un échec de paiement ». | Au prochain renouvellement simulé : l'e-mail « Ton paiement Mobiiz n'est pas passé » et 7 jours de grâce (bandeau). |
-| 13 | Abonnement | « Mon abonnement » → « Résilier », puis confirmer. | Deux clics ; l'e-mail « Ta résiliation Mobiiz est enregistrée » ; l'accès est gardé jusqu'à la fin de la période. |
+| 13 | Abonnement | « Mon abonnement » → « Résilier », puis confirmer. | Deux clics ; « Une année commencée n'est pas remboursée au prorata. » ; l'e-mail « Ta résiliation Mobiiz est enregistrée » ; l'accès est gardé jusqu'à l'échéance de l'année. |
 | 14 | Démo | « Tout effacer ». | Les faux comptes disparaissent. Ton compte, ta liste et tes factures restent. |
 
 ## 2. Si quelque chose ne va pas

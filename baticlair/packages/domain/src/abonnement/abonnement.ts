@@ -1,16 +1,21 @@
 import { z } from "zod";
 
 /**
- * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026) : les négoces sont gratuits ; l'artisan paie 29 € HT par mois, sans
- * engagement, résiliable avec effet en fin de période payée. Essai gratuit de l'inscription jusqu'à 30 jours après les
+ * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026) : les négoces sont gratuits ; l'artisan choisit entre DEUX FORMULES
+ * (Greg, 24 octobre 2026, changement de prix) : le MENSUEL, 49 € HT par mois sans engagement, et l'ANNUEL, 349 € HT par
+ * an payé en une fois (29 € par mois, -40 %), renouvelé chaque année avec un rappel 30 jours avant ; les deux se
+ * résilient avec effet en fin de période payée, sans remboursement au prorata. Du mensuel, l'artisan passe à l'annuel à
+ * tout moment, au prorata (`prorataVersAnnuel`). Essai gratuit de l'inscription jusqu'à 30 jours après les
  * résultats de son premier cycle ; s'il ne dépose rien, 60 jours au plus après l'inscription. Prix et durées se règlent
  * dans l'admin (`ReglagesAbonnement`, gardés en base). Ce fichier ne fait que des calculs : aucune date « maintenant »
  * cachée, aucun appel extérieur. Le paiement (simulé ou Stripe) envoie ses événements à l'API, qui tient l'`EtatPaiement`.
  */
 
 export const reglagesAbonnementSchema = z.object({
-  /** Le prix mensuel HT, en centimes (2 900 = 29 €). */
+  /** Le prix du MENSUEL HT, en centimes par mois (4 900 = 49 €). */
   prixHtCentimes: z.number().int().min(100).max(100_000),
+  /** Le prix de l'ANNUEL HT, en centimes par an, payé en une fois (34 900 = 349 €). */
+  prixAnnuelHtCentimes: z.number().int().min(100).max(1_000_000),
   /** Le taux de TVA en pour cent (20). */
   tauxTva: z.number().min(0).max(30),
   /** L'essai court jusqu'à N jours après les résultats du premier cycle de l'artisan (30). */
@@ -19,13 +24,40 @@ export const reglagesAbonnementSchema = z.object({
   joursEssaiSansDepot: z.number().int().min(1).max(365),
   /** Après un paiement refusé, l'accès reste N jours avec un bandeau (7), puis le paywall. */
   joursGrace: z.number().int().min(0).max(60),
+  /** Le rappel de renouvellement de l'annuel part N jours avant l'échéance (30). */
+  joursRappelAnnuel: z.number().int().min(1).max(90),
 });
 export type ReglagesAbonnement = z.infer<typeof reglagesAbonnementSchema>;
 
-export const REGLAGES_ABONNEMENT_DEFAUT: ReglagesAbonnement = { prixHtCentimes: 2900, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 60, joursGrace: 7 };
+export const REGLAGES_ABONNEMENT_DEFAUT: ReglagesAbonnement = { prixHtCentimes: 4900, prixAnnuelHtCentimes: 34900, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 60, joursGrace: 7, joursRappelAnnuel: 30 };
 
 const JOUR = 86_400_000;
 const plusJours = (d: Date, n: number) => new Date(d.getTime() + n * JOUR);
+
+/** Les deux formules. */
+export const FORMULES = ["mensuel", "annuel"] as const;
+export type Formule = (typeof FORMULES)[number];
+export const estFormule = (v: unknown): v is Formule => v === "mensuel" || v === "annuel";
+
+/** Le prix HT d'une période de la formule, en centimes (un mois, ou un an). */
+export const prixDeFormule = (f: Formule, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => (f === "annuel" ? r.prixAnnuelHtCentimes : r.prixHtCentimes);
+
+/** La fin d'une période qui commence le `debut` : un mois, ou un an, plus tard. */
+export function finDePeriode(debut: Date, f: Formule): Date {
+  const n = new Date(debut);
+  if (f === "annuel") n.setUTCFullYear(n.getUTCFullYear() + 1);
+  else n.setUTCMonth(n.getUTCMonth() + 1);
+  return n;
+}
+
+/** Ce que l'annuel fait gagner sur un an de mensuel, en centimes (12 × 49 − 349 = 239 €) ; 0 s'il ne fait rien gagner. */
+export const economieAnnuelle = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => Math.max(0, 12 * r.prixHtCentimes - r.prixAnnuelHtCentimes);
+
+/** La remise de l'annuel sur le mensuel, en pour cent ARRONDIE AU-DESSOUS (349 sur 588 : 40,6 % → « -40 % »), jamais plus que la vraie. */
+export const remiseAnnuelle = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => Math.max(0, Math.floor((economieAnnuelle(r) / (12 * r.prixHtCentimes)) * 100));
+
+/** Le prix par mois de l'annuel, en centimes (349 € / 12 = 29,08 €). */
+export const mensualiteAnnuelle = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => Math.round(r.prixAnnuelHtCentimes / 12);
 
 /** Ce que l'API sait du paiement de l'entreprise (tenu par les événements, simulés ou Stripe). */
 export type StatutPaiement = "aucun" | "actif" | "echec" | "resilie";
@@ -37,8 +69,10 @@ export interface EtatPaiement {
   echecLe: Date | null;
   /** La résiliation demandée : l'accès reste jusqu'à `periodeFin`, rien n'est plus prélevé. */
   resiliationDemandeeLe: Date | null;
+  /** La formule payée (mensuel par défaut). */
+  formule?: Formule;
 }
-export const PAIEMENT_AUCUN: EtatPaiement = { statut: "aucun", periodeFin: null, echecLe: null, resiliationDemandeeLe: null };
+export const PAIEMENT_AUCUN: EtatPaiement = { statut: "aucun", periodeFin: null, echecLe: null, resiliationDemandeeLe: null, formule: "mensuel" };
 
 /** Les dates qui font l'essai : l'inscription, le premier dépôt dans une commande commune, les résultats de ce cycle. */
 export interface DatesEssai {
@@ -109,8 +143,45 @@ export function eurosDeCentimes(c: number): string {
   return `${e.toLocaleString("fr-FR", { minimumFractionDigits: Number.isInteger(e) ? 0 : 2, maximumFractionDigits: 2 })} €`;
 }
 
+/** « 29 € » : le prix par mois de l'annuel, arrondi à l'euro (29,08 €), comme Greg l'annonce. */
+export const prixParMoisAnnuel = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => eurosDeCentimes(Math.round(mensualiteAnnuelle(r) / 100) * 100);
+
 /** L'écran du paywall, mot pour mot. */
-export const phrasePaywall = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => `Ton essai est terminé. Continue pour ${eurosDeCentimes(r.prixHtCentimes)} HT par mois, sans engagement.`;
+export const phrasePaywall = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => `Ton essai est terminé. Continue dès ${prixParMoisAnnuel(r)} HT par mois.`;
+
+/** Une formule telle que le paywall et /tarifs la montrent. */
+export interface OffreAbonnement {
+  formule: Formule;
+  titre: string;
+  /** « -40 % » sur l'annuel ; null sur le mensuel. */
+  badge: string | null;
+  /** La ligne du prix, en gros. */
+  prix: string;
+  /** Ce qui suit, en petit. */
+  details: string[];
+  /** L'annuel est mis en avant. */
+  enAvant: boolean;
+}
+
+/**
+ * LES DEUX FORMULES (Greg, 24 octobre 2026) : l'annuel d'abord, mis en avant, son badge « -40 % », « 29 € par mois, payé
+ * à l'année » et « 239 € économisés par an » ; le mensuel juste à côté.
+ */
+export function offresAbonnement(r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): OffreAbonnement[] {
+  const remise = remiseAnnuelle(r);
+  const economie = economieAnnuelle(r);
+  return [
+    {
+      formule: "annuel",
+      titre: "Annuel",
+      badge: remise > 0 ? `-${remise} %` : null,
+      prix: `${prixParMoisAnnuel(r)} HT par mois, payé à l'année`,
+      details: [`${eurosDeCentimes(r.prixAnnuelHtCentimes)} HT par an, en une fois`, ...(economie > 0 ? [`${eurosDeCentimes(economie)} économisés par an`] : []), "Renouvelé chaque année, rappel 30 jours avant"],
+      enAvant: true,
+    },
+    { formule: "mensuel", titre: "Mensuel", badge: null, prix: `${eurosDeCentimes(r.prixHtCentimes)} HT par mois`, details: ["Sans engagement", "Résiliable quand tu veux"], enAvant: false },
+  ];
+}
 export const BOUTON_CONTINUER = "Je continue";
 export const LIEN_PAS_MAINTENANT = "Pas maintenant";
 
@@ -148,7 +219,7 @@ export function bandeauGrace(etat: EtatAbonnement): string | null {
 /** Le bandeau du paiement simulé, mot pour mot. */
 export const BANDEAU_MODE_TEST = "Mode test : aucun paiement réel";
 
-/** Les montants d'une facture mensuelle, en centimes : la TVA arrondie au centime, TTC = HT + TVA. */
+/** Les montants d'une facture, en centimes : la TVA arrondie au centime, TTC = HT + TVA. */
 export function montantsFacture(prixHtCentimes: number, tauxTva: number): { ht: number; tva: number; ttc: number } {
   const tva = Math.round((prixHtCentimes * tauxTva) / 100);
   return { ht: prixHtCentimes, tva, ttc: prixHtCentimes + tva };
@@ -174,7 +245,7 @@ export function rappelEssaiDu(essaiFinLe: Date | null, maintenant: Date): Rappel
 
 /** L'e-mail de rappel, avec l'économie réelle du premier cycle quand il y en a une. */
 export function emailRappelEssai(rappel: RappelEssai, c: { ecart: number | null; lien: string; reglages?: ReglagesAbonnement; nomApp: string }): { objet: string; texte: string } {
-  const prix = `${eurosDeCentimes((c.reglages ?? REGLAGES_ABONNEMENT_DEFAUT).prixHtCentimes)} HT par mois`;
+  const r = c.reglages ?? REGLAGES_ABONNEMENT_DEFAUT;
   const quand = rappel === "j7" ? "dans 7 jours" : rappel === "j1" ? "demain" : "aujourd'hui";
   const objet = rappel === "j0" ? `Ton essai ${c.nomApp} se termine aujourd'hui` : `Ton essai ${c.nomApp} se termine ${quand}`;
   const economie = phraseEconomiePremierCycle(c.ecart);
@@ -183,11 +254,55 @@ export function emailRappelEssai(rappel: RappelEssai, c: { ecart: number | null;
     "",
     `Ton essai gratuit se termine ${quand}.`,
     ...(economie ? [`${economie}.`] : []),
-    `Pour continuer à déposer tes listes et voir les prix : ${prix}, sans engagement, résiliable quand tu veux.`,
+    `Pour continuer à déposer tes listes et voir les prix : ${phraseDeuxFormules(r)}`,
     "",
     `Continuer : ${c.lien}`,
   ].join("\n");
   return { objet, texte };
+}
+
+/** « dès 29 € HT par mois avec l'annuel (349 € HT par an), ou 49 € HT par mois sans engagement. » */
+export const phraseDeuxFormules = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) =>
+  `dès ${prixParMoisAnnuel(r)} HT par mois avec l'annuel (${eurosDeCentimes(r.prixAnnuelHtCentimes)} HT par an), ou ${eurosDeCentimes(r.prixHtCentimes)} HT par mois sans engagement.`;
+
+/**
+ * LE PASSAGE DU MENSUEL À L'ANNUEL, À TOUT MOMENT, AU PRORATA (Greg, 24 octobre 2026) : comme Stripe le fait, l'année
+ * commence le jour du passage ; ce qui reste de la période mensuelle déjà payée est déduit (au jour près, arrondi au
+ * centime), et l'artisan paie la différence tout de suite.
+ */
+export function prorataVersAnnuel(periode: { debut: Date; fin: Date }, maintenant: Date, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT, mensuelPayeCentimes = r.prixHtCentimes): { creditCentimes: number; aPayerHtCentimes: number; debut: Date; fin: Date } {
+  const total = periode.fin.getTime() - periode.debut.getTime();
+  const reste = Math.min(total, Math.max(0, periode.fin.getTime() - maintenant.getTime()));
+  const creditCentimes = total > 0 ? Math.round((mensuelPayeCentimes * reste) / total) : 0;
+  return { creditCentimes, aPayerHtCentimes: Math.max(0, r.prixAnnuelHtCentimes - creditCentimes), debut: maintenant, fin: finDePeriode(maintenant, "annuel") };
+}
+
+/**
+ * LE RAPPEL DE RENOUVELLEMENT DE L'ANNUEL (Greg, 24 octobre 2026) : 30 jours avant l'échéance, une fois par année ; jamais
+ * pour un abonnement dont la résiliation est demandée.
+ */
+export function rappelRenouvellementDu(p: { formule: Formule; statut: StatutPaiement; periodeFin: Date | null; resiliationDemandeeLe: Date | null }, maintenant: Date, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): boolean {
+  if (p.formule !== "annuel" || p.statut !== "actif" || !p.periodeFin || p.resiliationDemandeeLe) return false;
+  const reste = p.periodeFin.getTime() - maintenant.getTime();
+  return reste > 0 && reste <= r.joursRappelAnnuel * JOUR;
+}
+
+/** L'e-mail du rappel de renouvellement : la date, le montant, comment arrêter, sans remboursement au prorata. */
+export function emailRenouvellementAnnuel(c: { echeance: Date; reglages?: ReglagesAbonnement; lien: string; nomApp: string }): { objet: string; texte: string } {
+  const r = c.reglages ?? REGLAGES_ABONNEMENT_DEFAUT;
+  const le = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "long", year: "numeric" }).format(c.echeance);
+  const m = montantsFacture(r.prixAnnuelHtCentimes, r.tauxTva);
+  return {
+    objet: `Ton abonnement annuel ${c.nomApp} se renouvelle le ${le}`,
+    texte: [
+      "Bonjour,",
+      "",
+      `Ton abonnement annuel ${c.nomApp} se renouvelle automatiquement le ${le} : ${eurosDeCentimes(m.ht)} HT (${eurosDeCentimes(m.ttc)} TTC) pour un an, prélevés sur ta carte.`,
+      `Pour l'arrêter, résilie avant cette date dans « Mon abonnement » : tu gardes l'accès jusqu'au ${le}, rien ne sera plus prélevé. Une année commencée n'est pas remboursée au prorata.`,
+      "",
+      `Mon abonnement : ${c.lien}`,
+    ].join("\n"),
+  };
 }
 
 /**
@@ -196,10 +311,20 @@ export function emailRappelEssai(rappel: RappelEssai, c: { ecart: number | null;
  */
 export const SEUIL_CYCLES_ECONOMIE = 3;
 export function argumentTarif(moyenne: { cycles: number; parCommande: number | null }, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): string {
-  const prix = eurosDeCentimes(r.prixHtCentimes);
+  const prix = prixParMoisAnnuel(r);
   if (moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && moyenne.parCommande && moyenne.parCommande > 0) {
-    return `Pour ${prix} par mois : en moyenne, nos artisans ont économisé ${eurosRonds(moyenne.parCommande)} par commande commune.`;
+    return `Dès ${prix} par mois : en moyenne, nos artisans ont économisé ${eurosRonds(moyenne.parCommande)} par commande commune.`;
   }
-  return `Pour ${prix} par mois, économise des centaines, voire des milliers d'euros chaque année.`;
+  return `Dès ${prix} par mois, économise des centaines, voire des milliers d'euros chaque année.`;
 }
 
+
+/**
+ * LE REVENU MENSUEL RÉCURRENT (Greg, 24 octobre 2026, tableau de bord) : la somme, sur les abonnés en cours, du prix
+ * mensuel du mensuel et du prix annuel DIVISÉ PAR 12 de l'annuel (en centimes, HT) ; et la part d'abonnés annuels.
+ */
+export function revenuMensuelRecurrent(abonnes: readonly { formule: Formule; htCentimes: number }[]): { centimes: number; mensuels: number; annuels: number; partAnnuels: number | null } {
+  const centimes = Math.round(abonnes.reduce((t, a) => t + (a.formule === "annuel" ? a.htCentimes / 12 : a.htCentimes), 0));
+  const annuels = abonnes.filter((a) => a.formule === "annuel").length;
+  return { centimes, mensuels: abonnes.length - annuels, annuels, partAnnuels: abonnes.length ? Math.round((annuels / abonnes.length) * 100) : null };
+}

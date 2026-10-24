@@ -1,14 +1,16 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import type { Formule } from "@baticlair/domain";
 import type { StripeClient } from "../application/stripe.port.js";
 
 /**
- * STRIPE, PRÊT MAIS ÉTEINT (Greg, 24 octobre 2026 : « Stripe branché à la fin sans rien refaire ») : quatre appels de
- * l'API REST (Checkout en abonnement, portail client, résiliation en fin de période) et la vérification de la signature
+ * STRIPE, PRÊT MAIS ÉTEINT (Greg, 24 octobre 2026 : « Stripe branché à la fin sans rien refaire ») : les appels de
+ * l'API REST (Checkout en abonnement, mensuel ou annuel ; portail client ; passage à l'annuel au prorata ; résiliation en
+ * fin de période) et la vérification de la signature
  * des webhooks, sans dépendance (aucune nouvelle bibliothèque sans l'accord du fondateur). Allumé par `PAIEMENT=stripe`
  * et les variables de `docs/groupe/STRIPE.md`.
  */
 
-type Fetch = (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
+type Fetch = (url: string, init: { method: string; headers: Record<string, string>; body?: string }) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
 
 /** Les paramètres de formulaire de Stripe (`a[b][0][c]=…`). */
 function formulaire(params: Record<string, string | number | boolean | null | undefined>): string {
@@ -20,30 +22,38 @@ function formulaire(params: Record<string, string | number | boolean | null | un
 
 export class HttpStripeClient implements StripeClient {
   constructor(
-    private readonly cfg: { secretKey: string; priceId: string; taxRateId: string | null },
+    private readonly cfg: { secretKey: string; prix: { mensuel: string; annuel: string }; taxRateId: string | null },
     private readonly fetcher: Fetch = fetch as unknown as Fetch,
   ) {}
 
-  private async appel<T>(chemin: string, params: Record<string, string | number | boolean | null | undefined>): Promise<T> {
-    const res = await this.fetcher(`https://api.stripe.com/v1/${chemin}`, {
-      method: "POST",
+  private async appel<T>(chemin: string, params: Record<string, string | number | boolean | null | undefined>, method: "POST" | "GET" = "POST"): Promise<T> {
+    const corpsForm = formulaire(params);
+    const res = await this.fetcher(`https://api.stripe.com/v1/${chemin}${method === "GET" && corpsForm ? `?${corpsForm}` : ""}`, {
+      method,
       headers: { Authorization: `Bearer ${this.cfg.secretKey}`, "Content-Type": "application/x-www-form-urlencoded" },
-      body: formulaire(params),
+      ...(method === "GET" ? {} : { body: corpsForm }),
     });
     const corps = (await res.json()) as T & { error?: { message?: string } };
     if (!res.ok) throw new Error(`Stripe ${chemin} : ${res.status} ${corps.error?.message ?? ""}`.trim());
     return corps;
   }
 
-  async checkout(c: { companyId: string; customerId: string | null; email: string | null; succes: string; annulation: string }) {
+  formuleDuPrix(priceId: string | null): Formule | null {
+    if (!priceId) return null;
+    return priceId === this.cfg.prix.annuel ? "annuel" : priceId === this.cfg.prix.mensuel ? "mensuel" : null;
+  }
+
+  async checkout(c: { companyId: string; customerId: string | null; email: string | null; formule: Formule; succes: string; annulation: string }) {
     const s = await this.appel<{ id: string; url: string }>("checkout/sessions", {
       mode: "subscription",
-      "line_items[0][price]": this.cfg.priceId,
+      "line_items[0][price]": this.cfg.prix[c.formule],
       "line_items[0][quantity]": 1,
       ...(this.cfg.taxRateId ? { "line_items[0][tax_rates][0]": this.cfg.taxRateId } : {}),
       client_reference_id: c.companyId,
       "metadata[companyId]": c.companyId,
       "subscription_data[metadata][companyId]": c.companyId,
+      "metadata[formule]": c.formule,
+      "subscription_data[metadata][formule]": c.formule,
       ...(c.customerId ? { customer: c.customerId, "customer_update[name]": "auto", "customer_update[address]": "auto" } : { customer_email: c.email }),
       // Le n° de TVA de l'artisan (facultatif) et son adresse, écrits sur la facture.
       "tax_id_collection[enabled]": true,
@@ -58,6 +68,20 @@ export class HttpStripeClient implements StripeClient {
   async portail(customerId: string, retour: string) {
     const s = await this.appel<{ url: string }>("billing_portal/sessions", { customer: customerId, return_url: retour, locale: "fr" });
     return { url: s.url };
+  }
+
+  async basculerAnnuel(subscriptionId: string) {
+    const abo = await this.appel<{ items?: { data?: { id: string }[] } }>(`subscriptions/${encodeURIComponent(subscriptionId)}`, {}, "GET");
+    const item = abo.items?.data?.[0]?.id;
+    if (!item) throw new Error("Stripe : abonnement sans ligne de prix");
+    // Du mois à l'année : Stripe recommence la période le jour même, déduit ce qui reste du mois et facture tout de suite.
+    await this.appel(`subscriptions/${encodeURIComponent(subscriptionId)}`, {
+      "items[0][id]": item,
+      "items[0][price]": this.cfg.prix.annuel,
+      proration_behavior: "always_invoice",
+      payment_behavior: "error_if_incomplete",
+      "metadata[formule]": "annuel",
+    });
   }
 
   async resilierEnFinDePeriode(subscriptionId: string) {

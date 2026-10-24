@@ -18,6 +18,7 @@ interface Tableau {
   mode: "test" | "reel";
   chiffres: { cle: string; titre: string; valeur: string; detail: string; fleche: Fleche }[];
   croissance: { visites: number; inscriptions: number; inscriptionsAvant: number; installations: number; essais: number; conversion: number | null };
+  abonnes: { mensuels: number; annuels: number; partAnnuels: number | null; revenuMensuelRecurrent: number; encaisseCeMois: number };
   fidelite: { desabonnements: number; tauxDesabonnement: number | null; aRisque: number; essaisCetteSemaine: number; paiementsEchoues: number };
   activite: { listes: number; negoces: number; tauxReponse: number | null; commandes: number; economiesTotales: string };
   ia: { parJour: { jour: string; jetons: number; euros: number }[]; coutMoyenParDevis: number | null; seuilJour: number };
@@ -29,7 +30,7 @@ interface Tableau {
 interface Reglages {
   seuilIaJourEur: number;
   coutServicesMensuelEur: number;
-  abonnement: { prixHtCentimes: number; tauxTva: number; joursEssaiApresResultats: number; joursEssaiSansDepot: number; joursGrace: number };
+  abonnement: { prixHtCentimes: number; prixAnnuelHtCentimes: number; tauxTva: number; joursEssaiApresResultats: number; joursEssaiSansDepot: number; joursGrace: number; joursRappelAnnuel: number };
 }
 type Detail = "a_risque" | "essais_semaine" | "paiements_echoues";
 
@@ -164,6 +165,13 @@ function Contenu() {
         <Ligne titre="Essais devenus payants" valeur={pct(t.croissance.conversion)} />
       </Section>
 
+      <Section titre="Abonnés">
+        <Ligne titre="Au mois" valeur={String(t.abonnes.mensuels)} />
+        <Ligne titre="À l'année" valeur={`${t.abonnes.annuels} (${pct(t.abonnes.partAnnuels)})`} />
+        <Ligne titre="Revenu mensuel récurrent (annuel ÷ 12)" valeur={euros(t.abonnes.revenuMensuelRecurrent)} />
+        <Ligne titre="Encaissé ce mois" valeur={euros(t.abonnes.encaisseCeMois)} />
+      </Section>
+
       <Section titre="Fidélité">
         <Ligne titre="Désabonnements ce mois" valeur={`${t.fidelite.desabonnements} (${pct(t.fidelite.tauxDesabonnement)})`} />
         <Ligne titre="Artisans à risque (30 jours sans venir)" valeur={String(t.fidelite.aRisque)} onDetail={() => void ouvrir("a_risque")} />
@@ -215,7 +223,7 @@ function Contenu() {
       </section>
 
       <Section titre="Rentabilité (ce mois)">
-        <Ligne titre="Revenu HT" valeur={euros(t.rentabilite.revenu)} />
+        <Ligne titre="Revenu mensuel récurrent HT" valeur={euros(t.rentabilite.revenu)} />
         <Ligne titre="Coût IA" valeur={`− ${euros(t.rentabilite.coutIa)}`} />
         <Ligne titre="Services (hébergement, base, e-mails)" valeur={`− ${euros(t.rentabilite.services)}`} />
         <Ligne titre="Reste" valeur={euros(t.rentabilite.resultat)} />
@@ -282,7 +290,9 @@ function ReglagesCarte() {
     <section aria-label="Réglages" className="flex flex-col gap-1">
       <h2 className="text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">Réglages</h2>
       <Card className="flex flex-col gap-3 p-4">
-        {champ("Prix de l'abonnement (€ HT / mois)", a.prixHtCentimes / 100, (n) => majA({ prixHtCentimes: Math.round(n * 100) }), 0.5)}
+        {champ("Prix du mensuel (€ HT / mois)", a.prixHtCentimes / 100, (n) => majA({ prixHtCentimes: Math.round(n * 100) }), 0.5)}
+        {champ("Prix de l'annuel (€ HT / an)", a.prixAnnuelHtCentimes / 100, (n) => majA({ prixAnnuelHtCentimes: Math.round(n * 100) }), 1)}
+        {champ("Rappel avant le renouvellement de l'annuel (jours)", a.joursRappelAnnuel, (n) => majA({ joursRappelAnnuel: n }))}
         {champ("Essai après les premiers résultats (jours)", a.joursEssaiApresResultats, (n) => majA({ joursEssaiApresResultats: n }))}
         {champ("Essai sans dépôt, au plus (jours)", a.joursEssaiSansDepot, (n) => majA({ joursEssaiSansDepot: n }))}
         {champ("Grâce après un paiement refusé (jours)", a.joursGrace, (n) => majA({ joursGrace: n }))}
