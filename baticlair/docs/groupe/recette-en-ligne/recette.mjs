@@ -67,7 +67,8 @@ function surveiller(page, qui) {
   page.on("pageerror", (e) => anomalies.push({ qui, url: page.url(), type: "exception", texte: String(e.message).slice(0, 300) }));
   page.on("response", (r) => {
     const u = r.url();
-    if (r.status() >= 500 || (r.status() >= 400 && /\/_next\/|\.js$|\.css$|\.png$|\.jpg$|\.svg$|\.woff2?$/.test(u))) anomalies.push({ qui, url: page.url(), type: `http ${r.status()}`, texte: u.slice(0, 200) });
+    const apiInattendue = r.status() >= 400 && r.status() !== 401 && u.startsWith(BASE) && /\/v1\//.test(u);
+    if (r.status() >= 500 || apiInattendue || (r.status() >= 400 && /\/_next\/|\.js$|\.css$|\.png$|\.jpg$|\.svg$|\.woff2?$/.test(u))) anomalies.push({ qui, url: page.url(), type: `http ${r.status()}`, texte: `${r.request().method()} ${u.replace(BASE, "").slice(0, 160)}` });
   });
   return page;
 }
@@ -297,6 +298,8 @@ await etape("Liste : ajouter à la commande commune", page, async () => {
   for (const box of await boxes.all()) await box.check();
   const bar = page.getByRole("region", { name: /^Ajouter à la commande/ }).last();
   await bar.getByRole("radio", { name: "Un chantier signé" }).click();
+  const adresse = bar.getByLabel(/Adresse du chantier/);
+  if (await adresse.count()) await adresse.fill("3 rue des Ajoncs, 22300 Lannion");
   await bar.getByRole("button", { name: "Ajouter" }).click();
   await voir(page.getByRole("region", { name: /^Dans la commande d/ }));
   await zeroReste(page, "dans la commande");
@@ -378,6 +381,11 @@ await ctxN.close();
 // 8. L'abonnement, en vrai Stripe (mode test) : refusé, payé, factures, annuel, résiliation.
 async function payerStripe(carte) {
   await page.waitForURL(/checkout\.stripe\.com/, { timeout: 60000 });
+  // La page de Stripe range les moyens de paiement en liste : « Carte » d'abord, puis le numéro.
+  const carteChoix = page.locator('[data-testid="card-accordion-item-button"], #payment-method-accordion-item-title-card').first();
+  await t(2000);
+  if (!(await page.locator("#cardNumber").isVisible()) && (await carteChoix.count())) await carteChoix.click();
+  if (!(await page.locator("#cardNumber").isVisible())) await page.getByText("Carte", { exact: true }).first().click();
   await voir(page.locator("#cardNumber"), 60000);
   await page.locator("#cardNumber").fill(carte);
   await page.locator("#cardExpiry").fill("12 / 34");

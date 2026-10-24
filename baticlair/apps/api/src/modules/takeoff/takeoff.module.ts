@@ -187,6 +187,11 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
                 });
               },
             },
+            // Le chantier fictif du mode démo : la lecture simulée déterministe, jamais un appel au modèle.
+            lecteurDemo: async (tenant, projectId) => {
+              const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { demo: true } });
+              return project?.demo === true ? new FakeLectureReader() : null;
+            },
             projectNotes: async (tenant, projectId) => {
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { siteNotes: true } });
               return project?.siteNotes ?? null;

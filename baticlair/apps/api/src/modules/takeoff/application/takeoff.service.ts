@@ -92,6 +92,12 @@ export interface ReadingOptions {
   /** Infos chantier facultatives : la note de l'artisan (texte libre, commentaires de croquis), lue à chaque calcul. */
   projectNotes?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
   /**
+   * Le chantier fictif du mode démo (« Essayer avec un chantier fictif ») : son devis, inventé, est lu par la lecture
+   * simulée déterministe (celle des tests), sans appel au modèle : immédiat et gratuit (recette en ligne du 25 octobre
+   * 2026 : plus d'une minute de vraie lecture payante à chaque essai). Un vrai devis n'y passe jamais.
+   */
+  lecteurDemo?: (tenant: TenantContext, projectId: string) => Promise<LectureReader | null>;
+  /**
    * Version figée par chantier (plan v3 §3) : le référentiel est enregistré à sa version quand le quantitatif naît,
    * et chaque recalcul relit CETTE version. Sans ce port, le référentiel du jour sert (tests unitaires).
    */
@@ -579,7 +585,8 @@ export class TakeoffService {
    * lit pas ce devis (lecteur simulé sans lecture enregistrée) ; une lecture en échec est une lecture échouée.
    */
   private async readLecture(tenant: TenantContext, doc: DocumentWithProcessing, prepared: Prepared, analysisId: string): Promise<ReviewedTakeoff | null> {
-    const lecteur = this.reading.lecteur!;
+    const demo = doc.projectId ? ((await this.reading.lecteurDemo?.(tenant, doc.projectId)) ?? null) : null;
+    const lecteur = demo ?? this.reading.lecteur!;
     const started = Date.now();
     let trade = doc.trade;
     let ref = referentialFor(trade);
@@ -592,7 +599,8 @@ export class TakeoffService {
     const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
     let cost = 0;
     const lu = await this.lireLeDevis(lecteur, document, trade, siteNotes, async (n, r, prompt) => {
-      cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, n, r, prompt);
+      // La lecture simulée du chantier fictif ne coûte rien : rien n'est compté comme un appel au modèle.
+      if (!demo) cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, n, r, prompt);
     });
     if (lu === null) return null;
     const result = lu.result;

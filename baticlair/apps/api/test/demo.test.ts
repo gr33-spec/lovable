@@ -31,6 +31,9 @@ describe("mode démo", () => {
     // Liste de matériaux (IA simulée), validée.
     const takeoff = (await agent.post(`/v1/documents/${docs[0].id}/takeoff`).expect(201)).body;
     expect(takeoff.lines.length).toBeGreaterThan(3);
+    // Recette en ligne du 25 octobre 2026 : le devis fictif est lu par la lecture simulée, jamais par le modèle ; aucun
+    // appel n'est compté (ni coût, ni quota).
+    expect(await ctx.prisma.aiExecution.count({ where: { documentId: docs[0].id } })).toBe(0);
     for (const line of takeoff.lines.filter((l: { status: string }) => l.status === "to_verify")) {
       await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
     }
