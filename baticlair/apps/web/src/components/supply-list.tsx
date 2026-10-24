@@ -396,6 +396,7 @@ export function SupplyList({
             phrase={groupe.mois?.phrases.sansEngagement ?? ""}
             onCancel={stopSelecting}
             onAdresse={groupe.adresse}
+            adresseConnue={groupe.adresseConnue}
             onDeposer={async (nature) => {
               setMessageMois(await groupe.deposer([...checked], nature));
               stopSelecting();

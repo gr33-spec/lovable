@@ -43,6 +43,11 @@ export interface OffreGroupe {
 }
 
 export interface Groupe {
+  /**
+   * Le chantier a une adresse avec un code postal (la commande se fait par département). Sans elle, la barre « Ajouter à
+   * la commande » demande l'adresse d'emblée (recette en ligne du 25 octobre 2026 : un refus du serveur d'abord).
+   */
+  adresseConnue: boolean;
   /** Clé de l'article → son besoin au groupé (retirés exclus). */
   besoins: ReadonlyMap<string, BesoinGroupe>;
   proposer: (articles: string[], fenetre: { tot: string; tard: string }, statut: "signe" | "en_attente", engagement: boolean) => Promise<void>;
@@ -103,6 +108,8 @@ export function useGroupe(projectId: string): Groupe | null {
   if (!eligible) return null;
   return {
     besoins,
+    // La vue du mois pour CE chantier est vide quand il n'a pas d'adresse avec code postal ; avant la réponse, on suppose.
+    adresseConnue: mode !== "mois" || mois.data === null || mois.data === undefined || mois.data.prochaine !== null,
     mode,
     mois: mois.data ?? null,
     rechargerMois: () => (mois.reload(), liste.reload()),

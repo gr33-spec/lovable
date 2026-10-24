@@ -287,7 +287,9 @@ export function CommandeDuMoisBar({
   onCancel,
   onDeposer,
   onAdresse,
+  adresseConnue = true,
 }: {
+  adresseConnue?: boolean;
   count: number;
   de: string;
   phrase: string;
@@ -301,7 +303,7 @@ export function CommandeDuMoisBar({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const choix = "pressable inline-flex min-h-12 grow items-center justify-center rounded-full border px-3 text-[15px] font-semibold";
-  const adresseManque = error?.reason === "adresse_requise" && Boolean(onAdresse);
+  const adresseManque = (error?.reason === "adresse_requise" || !adresseConnue) && Boolean(onAdresse);
   return (
     <section aria-label={`Ajouter à la commande ${de}`} className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
       <p className="text-[16px] font-semibold">{count === 0 ? `Coche les lignes à ajouter à la commande ${de}` : `${count} ligne${count > 1 ? "s" : ""} pour la commande ${de}`}</p>

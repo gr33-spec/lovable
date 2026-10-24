@@ -382,10 +382,12 @@ await ctxN.close();
 async function payerStripe(carte) {
   await page.waitForURL(/checkout\.stripe\.com/, { timeout: 60000 });
   // La page de Stripe range les moyens de paiement en liste : « Carte » d'abord, puis le numéro.
-  const carteChoix = page.locator('[data-testid="card-accordion-item-button"], #payment-method-accordion-item-title-card').first();
-  await t(2000);
-  if (!(await page.locator("#cardNumber").isVisible()) && (await carteChoix.count())) await carteChoix.click();
-  if (!(await page.locator("#cardNumber").isVisible())) await page.getByText("Carte", { exact: true }).first().click();
+  await t(3000);
+  if (!(await page.locator("#cardNumber").isVisible())) {
+    const radio = page.getByRole("radio", { name: /^Carte/ });
+    if (await radio.count()) await radio.first().check({ force: true }).catch(() => undefined);
+  }
+  if (!(await page.locator("#cardNumber").isVisible())) await page.getByText("Carte", { exact: true }).first().click({ force: true }).catch(() => undefined);
   await voir(page.locator("#cardNumber"), 60000);
   await page.locator("#cardNumber").fill(carte);
   await page.locator("#cardExpiry").fill("12 / 34");

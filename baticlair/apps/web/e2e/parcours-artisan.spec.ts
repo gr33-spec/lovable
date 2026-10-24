@@ -2447,6 +2447,31 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
+test("Liste donnée en photo, chantier sans adresse : la barre de la commande demande l'adresse d'emblée, sans refus du serveur (recette en ligne, 25 octobre 2026)", async ({ page }) => {
+  await compteAuGroupe(page, "Toitures Photo", "3 rue des Ajoncs, 22300 Lannion");
+  const refus: string[] = [];
+  page.on("response", (r) => {
+    if (r.status() === 400 && /\/commande-du-mois/.test(r.url())) refus.push(r.url());
+  });
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list).toBeVisible({ timeout: 60_000 });
+  await page.getByRole("region", { name: /^Commande commune/ }).getByRole("button", { name: /^Ajouter à la commande/ }).click();
+  const boxes = list.getByRole("checkbox", { name: /^Ajouter à la commande : / }).and(page.locator(":enabled"));
+  await boxes.first().check();
+  const bar = page.getByRole("region", { name: /^Ajouter à la commande/ }).last();
+  await bar.getByRole("radio", { name: "Un chantier signé" }).click();
+  // L'adresse est demandée tout de suite ; « Ajouter » attend un code postal.
+  await expect(bar.getByLabel(/Adresse du chantier, avec le code postal/)).toBeVisible();
+  await expect(bar.getByRole("button", { name: "Ajouter" })).toBeDisabled();
+  await bar.getByLabel(/Adresse du chantier, avec le code postal/).fill("5 rue de Kerampont, 22300 Lannion");
+  await bar.getByRole("button", { name: "Ajouter" }).click();
+  await expect(page.getByRole("region", { name: /^Dans la commande/ })).toBeVisible();
+  expect(refus).toEqual([]);
+});
+
 test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une fois inscrit, sautable, la prochaine clôture, « Déposer ma première liste », une seule fois, « Revoir le guide » dans le menu", async ({ page }) => {
   await page.removeLocatorHandler(page.getByRole("dialog", { name: "Guide" }));
   await signUp(page);
