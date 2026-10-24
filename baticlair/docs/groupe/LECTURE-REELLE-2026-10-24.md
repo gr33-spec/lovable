@@ -69,3 +69,18 @@ Sur le 7954 :
 - **Questions** : 11 au lieu de 8. En plus, toutes sur la plomberie : répartition du PER 10×12 / 13×16, distance des appareils à la nourrice, appareils livrés avec bonde et flexibles, modèle de la paroi de douche. La gaine VMC est demandée en mètres au total sur les 10 logements (le résultat attendu dit « par logement ») et le bloc chambre / dégagement est bien demandé, avec d'autres mots : ce sont deux écarts de formulation du contrôle, pas des questions manquantes.
 - **Bref** : complet. Trois écarts de formulation seulement (« 10 coffrets de communication » au lieu de « un coffret par logement », « 4 receveurs + 6 receveurs » au lieu de « 10 douches », « évacuation PVC Ø100 »).
 - **Tableaux** : la composition des tableaux est posée en question (« C'est bon / Modifier ») ; le contrôle attend aussi une ligne de fourniture « disjoncteurs… » pour les deux lignes de tableau, que la lecture laisse à la question.
+
+## Cinquième passage : rattrapage des lignes oubliées (exécution 40120646576, commit 3debebe)
+
+| Devis | Temps | Coût | Contrôle |
+|---|---|---|---|
+| DE00000071 | appel unique | — | aucun écart |
+| D.2026.105 | 22 s | 0,06 $ | aucun écart (la question « modèle et teinte » posée) |
+| 7954 | 166 s (33 appels) | **1,91 $** | 5 écarts (au lieu de 9) |
+
+Sur le 7954 :
+- **Le rattrapage s'est déclenché sur presque toutes les tranches** (« 30 ligne(s) oubliée(s), relues » 16 fois sur 16) : 16 appels de plus, + 0,66 $, et les lots annoncent 754 lignes au lieu d'environ 330. **Cause** : le modèle écrit le repère autrement que le texte (« [5:040] », « 5:40 » ou « 40 » pour « 5:040 »), le code ne le reconnaissait pas et prenait toute la tranche pour oubliée. **Corrigé après ce passage** : le repère rendu est ramené à celui de sa tranche (mêmes nombres, ou le seul repère qui finit par ce numéro, `repereDeTranche`), et la consigne de tranche dit d'écrire le repère comme entre les crochets du texte. Test `aucune-ligne-oubliee.test.ts` (trois formes de repère : aucun appel de plus, aucune ligne en double), qui échoue sans la correction.
+- **Questions** : 12 au lieu de 8, les 3 ajoutées au résultat attendu comprises (pose, teinte une fois, alimentations en trop). En plus : rangées du tableau, type des différentiels, logement du bloc chambre / dégagement, et les quatre de plomberie déjà vues.
+- **Bref** : complet ; deux écarts de formulation (« 10 coffrets de communication », « évacuation PVC Ø100 100 ml »).
+- **Tableaux** : toujours posés en question, la ligne « disjoncteurs… » attendue par le contrôle reste à la question.
+- À relancer après cette correction (≈ 1,25 $ attendus, 17 appels).

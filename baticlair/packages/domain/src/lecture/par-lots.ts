@@ -38,6 +38,23 @@ export function consigneDuLot(lot: { metier: string; libelle: string }, tous: re
   ].join("\n");
 }
 
+/**
+ * Le repère d'une ligne rendue par le modèle, ramené à celui de sa tranche (5e vraie lecture du 24 octobre 2026, 7954 :
+ * « [5:040] », « 5:40 » ou « 40 » pour « 5:040 », toutes les lignes prises pour des oublis et relues). Mêmes nombres, ou
+ * le seul repère de la tranche qui finit par ce numéro ; sinon le repère tel quel.
+ */
+export function repereDeTranche(ref: string, refs: readonly string[]): string {
+  if (refs.includes(ref)) return ref;
+  const n = ref.match(/\d+/g)?.map(Number) ?? [];
+  const nombres = (r: string) => r.match(/\d+/g)?.map(Number) ?? [];
+  if (n.length >= 2) return refs.find((r) => nombres(r).join(":") === n.join(":")) ?? ref;
+  if (n.length === 1) {
+    const memes = refs.filter((r) => nombres(r).at(-1) === n[0]);
+    if (memes.length === 1) return memes[0]!;
+  }
+  return ref;
+}
+
 /** « 1:003 » < « 1:010 » < « 2:001 » ; « 3 » < « 12 » : l'ordre du devis, nombre par nombre. */
 export function ordreDesReperes(a: string, b: string): number {
   const na = a.match(/\d+/g)?.map(Number) ?? [];
@@ -157,7 +174,7 @@ export function tranchesDuDevis(numberedText: string, metiers: readonly string[]
 export function consigneDeTranche(lot: { metier: string; libelle: string }, tous: readonly { metier: string; libelle: string }[], rang: number, total: number, entete: string): string {
   return [
     `LECTURE PAR LOT ET PAR TRANCHE : ce devis a plusieurs lots (${tous.map((l) => l.libelle).join(", ")}), lus chacun à part. Le texte ci-dessus est la tranche ${rang} sur ${total} du lot « ${lot.libelle} » (${lot.metier}), avec le référentiel ci-dessus.`,
-    "- Rends SEULEMENT « lignes » : TOUTES les lignes de cette tranche, dans l'ordre, avec leur repère d'origine (une ligne d'un autre métier se rend ici aussi, avec ses fournitures). Ni fiche, ni bref, ni questions : un autre appel les écrit pour tout le devis.",
+    "- Rends SEULEMENT « lignes » : TOUTES les lignes de cette tranche, dans l'ordre, avec leur repère d'origine, écrit comme entre les crochets du texte (« [5:040] » : « 5:040 ») (une ligne d'un autre métier se rend ici aussi, avec ses fournitures). Ni fiche, ni bref, ni questions : un autre appel les écrit pour tout le devis.",
     // Vraie lecture du 24 octobre 2026 (7954) : dans des tranches, « LAMPE SIMPLE 1 POINT LUMINEUX » revenait réécrit ; la
     // désignation est le texte de la ligne, jamais une reformulation (§49.1 : la liste suit le devis).
     "- « designation » : le texte de la ligne recopié tel quel, majuscules, abréviations et fautes comprises (prix retirés), jamais reformulé ni résumé ; le nom du comptoir va dans « fournitures ».",

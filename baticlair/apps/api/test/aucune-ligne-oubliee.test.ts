@@ -22,7 +22,7 @@ const lecture = (lignes: LectureLigne[], ecartees: string[] = []): LectureDevis 
 const succes = (output: LectureDevis): ReadAttempt<LectureDevis> => ({ status: "success", output, provider: "fake", model: "fake", usage: { inputTokens: 1, outputTokens: 1 }, errorCode: null, durationMs: 1 }) as ReadAttempt<LectureDevis>;
 
 /** Un modèle qui oublie certains repères (`oublis`), à la première lecture seulement ou toujours. */
-function lecteur(oublis: string[], toujours: boolean, titres: string[] = []) {
+function lecteur(oublis: string[], toujours: boolean, titres: string[] = [], forme: (ref: string) => string = (r) => r) {
   const vus: string[] = [];
   const l: Pick<LectureReader, "lire"> = {
     async lire(r: LectureRequest) {
@@ -30,7 +30,7 @@ function lecteur(oublis: string[], toujours: boolean, titres: string[] = []) {
       const rattrapage = /RATTRAPAGE/.test(r.consigne ?? "");
       vus.push(rattrapage ? `rattrapage:${lignesDuTexte(r.document.numberedText).map((x) => x.ref).join(",")}` : "tranche");
       const rendues = lignesDuTexte(r.document.numberedText).filter((x) => !titres.includes(x.ref) && (!oublis.includes(x.ref) || (rattrapage && !toujours)));
-      return succes(lecture(rendues.map((x) => ligne(x.ref, x.texte.replace(/\s+25,000.*$/, ""))), titres.filter((t) => r.document.numberedText.includes(`[${t}]`))));
+      return succes(lecture(rendues.map((x) => ligne(forme(x.ref), x.texte.replace(/\s+25,000.*$/, ""))), titres.filter((t) => r.document.numberedText.includes(`[${t}]`)).map(forme)));
     },
   };
   return { lecteur: l as LectureReader, vus };
@@ -69,6 +69,22 @@ describe("aucune ligne oubliée", () => {
     await lire(l);
     expect(vus).toEqual(["tranche"]);
   });
+
+  // 5e vraie lecture du 24 octobre 2026 (7954) : « 30 ligne(s) oubliée(s), relues » sur presque chaque tranche, 754 lignes
+  // au lieu de 324 : le modèle écrivait le repère autrement (« [5:040] », « 5:40 », « 40 »). Le repère se relit, jamais une
+  // ligne relue pour rien.
+  for (const [nom, forme] of [
+    ["« [5:040] »", (r: string) => `[${r}]`],
+    ["« 5:40 »", (r: string) => r.replace(/:0+(?=\d)/, ":")],
+    ["« 40 »", (r: string) => String(Number(r.split(":")[1]))],
+  ] as const) {
+    it(`un repère écrit autrement (${nom}) n'est pas un oubli : aucun appel de plus, aucune ligne en double`, async () => {
+      const { lecteur: l, vus } = lecteur([], false, ["5:037"], forme);
+      const r = await lire(l);
+      expect(vus).toEqual(["tranche"]);
+      expect(r.lecture!.lignes.map((x) => x.ref)).toEqual(["5:038", "5:039", "5:040"]);
+    });
+  }
 
   it("la désignation telle qu'écrite perd les colonnes de chiffres (quantité, unité, prix)", () => {
     expect(designationTelleQuEcrite("[5:040] MANCHON REGLABE LG 100MM HYGRO 25,000 U 4,50 112,50")).toBe("MANCHON REGLABE LG 100MM HYGRO");

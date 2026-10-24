@@ -7,6 +7,7 @@ import {
   exportPourLecture,
   fusionnerLectures,
   ordreDesReperes,
+  repereDeTranche,
   referentialFor,
   tradeProfile,
   tranchesDuDevis,
@@ -153,6 +154,12 @@ async function rattraperLesOublis(
   essais: (ReadAttempt<LectureDevis> | null)[],
   appels: AppelDeLecture[],
 ): Promise<void> {
+  // Les repères écrits autrement par le modèle reprennent d'abord la forme de leur tranche : ce ne sont pas des oublis.
+  essais.forEach((e, i) => {
+    if (e?.status !== "success" || !e.output) return;
+    const refs = tranches[i]!.refs;
+    essais[i] = { ...e, output: { ...e.output, lignes: e.output.lignes.map((l) => ({ ...l, ref: repereDeTranche(l.ref, refs) })), ecartees: (e.output.ecartees ?? []).map((x) => repereDeTranche(x, refs)) } };
+  });
   const oublis = (i: number, lecture: LectureDevis) => tranches[i]!.refs.filter((ref) => !lecture.lignes.some((l) => l.ref === ref) && !(lecture.ecartees ?? []).includes(ref));
   const relances = essais.flatMap((e, i) => {
     if (e?.status !== "success" || !e.output) return [];
@@ -171,8 +178,8 @@ async function rattraperLesOublis(
     const r = reponses[k] ?? null;
     appels.push({ nom: `${tranches[i]!.metier} : ${refs.length} ligne(s) oubliée(s), relues`, attempt: r });
     const lecture = essais[i]!.output!;
-    const rendues = r?.status === "success" && r.output ? r.output.lignes.filter((l) => refs.includes(l.ref)) : [];
-    const ecartees = r?.status === "success" && r.output ? (r.output.ecartees ?? []).filter((x) => refs.includes(x)) : [];
+    const rendues = r?.status === "success" && r.output ? r.output.lignes.map((l) => ({ ...l, ref: repereDeTranche(l.ref, refs) })).filter((l) => refs.includes(l.ref)) : [];
+    const ecartees = r?.status === "success" && r.output ? (r.output.ecartees ?? []).map((x) => repereDeTranche(x, refs)).filter((x) => refs.includes(x)) : [];
     const encore = refs.filter((ref) => !rendues.some((l) => l.ref === ref) && !ecartees.includes(ref));
     const telles = encore.flatMap((ref) => {
       const ligne = ligneDuTexte(tranches[i]!.texte, ref);
