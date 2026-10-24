@@ -3230,7 +3230,10 @@ test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le
   const articles = (await apiJson<{ takeoff: { purchase: { toBuy: { key: string }[] } } }>(page, "GET", `/v1/projects/${projetS}/takeoff`)).body.takeoff.purchase.toBuy.map((b) => b.key);
   expect((await apiJson(page, "POST", `/v1/projects/${projetS}/commande-du-mois`, { articles, nature: "chantier" })).status).toBe(201);
   const cycle = (await apiJson<{ commandes: CommandeMoisApi[] }>(page, "GET", "/v1/commande-du-mois")).body.commandes.find((c) => c.phase === "inscriptions")!;
-  expect(await tacheDuMois(page, new Date(Date.parse(cycle.clotureLe) + 60_000).toISOString())).toMatchObject({ clos: 1, grillesEnvoyees: 3 });
+  // Une autre commande ouverte par un parcours précédent (autre département, même date) peut se clore avec celle-ci.
+  const cloture = await tacheDuMois(page, new Date(Date.parse(cycle.clotureLe) + 60_000).toISOString());
+  expect(cloture.clos).toBeGreaterThanOrEqual(1);
+  expect(cloture.grillesEnvoyees).toBeGreaterThanOrEqual(3);
 
   // 0 réponse : « Demandes envoyées à 3 négoces de ton secteur », le chrono des résultats, la barre à zéro.
   await page.goto("/groupe");
