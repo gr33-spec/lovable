@@ -102,11 +102,6 @@
   --calc-space: calc(52px + 24px + max(14px, env(safe-area-inset-bottom)) + 8px);
 }
 
-/* La démo guidée déjà vue, cachée avant l'affichage par le script de la landing (plan « finition », bloc 5). */
-html[data-demo-vue] [data-demo] {
-  display: none;
-}
-
 html {
   -webkit-text-size-adjust: 100%;
   height: 100%;

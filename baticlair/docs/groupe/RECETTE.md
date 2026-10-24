@@ -12,7 +12,7 @@ Demande de Greg du 22 octobre 2026, mise à jour le soir même pour le nouveau c
 
 | # | Tu fais | Résultat attendu |
 |---|---|---|
-| 1 | Ouvrir l'adresse en navigation privée | La démo guidée en haut, d'un coup, sans que la page saute : « Ta liste, remise au propre », la carte « Photo de ta liste », « Suivant », « Passer ». |
+| 1 | Ouvrir l'adresse en navigation privée | L'accroche d'abord (« Par un artisan, pour les artisans », la question, « Je rejoins le mouvement », « Dès 29 € par mois »), aucune démo d'office. « Voir comment ça marche (30 s) » ouvre la démo en plein écran : « Ta liste, remise au propre », Couverture / Plomberie / Placo, « Suivant », « Passer ». |
 | 2 | « Passer », puis recharger la page | La démo ne revient pas. L'accroche « Marre de te faire enfumer sur le prix de tes matériaux ? » est en haut. « Revoir la démo », en bas, la rouvre. |
 | 3 | Lire la landing jusqu'en bas | « Gratuit pour l'artisan. Sans engagement. », les trois étapes, « Un geste par ligne pour la préciser », la liste d'exemple (2 760 pièces, 0,92 €). Rien sur l'abonnement ni sur les 2 %. |
 | 4 | « Envoyer sur WhatsApp », puis « Copier le lien » | WhatsApp s'ouvre avec le message prérempli et le lien ; « Lien copié » s'affiche. |
@@ -50,7 +50,7 @@ Demande de Greg du 22 octobre 2026, mise à jour le soir même pour le nouveau c
 
 | # | Tu fais | Tu dois voir | Test | État |
 |---|---|---|---|---|
-| 1.1 | Ouvrir l'adresse, sans compte | La démo guidée : trois écrans « Exemple » (ta liste, les couvreurs regroupés, ton prix livré), « Suivant », « Passer », « Je rejoins le mouvement » au dernier. Une fois passée, elle ne revient pas au rechargement ; « Revoir la démo » la rouvre. | « La page d'accueil publique… » | ✅ auto |
+| 1.1 | Ouvrir l'adresse, sans compte | La landing, jamais la démo d'office. « Voir comment ça marche (30 s) », sous l'accroche, ouvre la démo en plein écran : trois écrans « Exemple » (ta liste en couverture, plomberie ou placo, la commande commune, ton prix livré), « Suivant », « Passer » ou Échap, « Je rejoins le mouvement » au dernier. « Revoir la démo » (`/?demo`) l'ouvre aussi. | « La page d'accueil publique… » | ✅ auto |
 | 1.2 | Faire défiler la landing | Fond blanc, une seule couleur d'accent, aucun dessin. « Marre de te faire enfumer sur le prix de tes matériaux ? », le sous-titre, « Je rejoins le mouvement » (deux fois), « Gratuit pour l'artisan. Sans engagement. ». Puis « Plus on est nombreux, plus on pèse face aux négoces. », « Comment ça marche » en trois étapes avec les vraies captures, la liste d'exemple (ardoise 2 760 pièces, mêmes chiffres partout, 0,92 €), « Commande commune », le partage, la ligne « Négoces : … ». Rien sur l'abonnement ni sur les 2 %. Aucune tuile. | même test, plus « responsive » | ✅ auto, 👀 le rendu et le ton |
 | 1.3 | Le compteur « X couvreurs déjà inscrits dans les Côtes-d'Armor » | Le vrai chiffre de la base (couvreurs avec une adresse en 22, démo exclue). Sous 10, il ne s'affiche pas. | API `compteur-landing` ; e2e « page d'accueil publique » | ✅ auto, 🏭 le vrai chiffre |
 | 1.4 | Le bloc « L'union fait la force : fais venir tes collègues » | Le message prérempli avec le lien du site ; « Envoyer sur WhatsApp » ouvre WhatsApp, « Envoyer par SMS » ouvre les messages, « Copier le lien » dit « Lien copié ». | même test | ✅ auto, 👀 sur ton iPhone (WhatsApp, SMS) |

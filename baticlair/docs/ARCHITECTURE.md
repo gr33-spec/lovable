@@ -148,7 +148,7 @@ Tout e-mail sort par le port `TransactionalEmailSender` (`src/platform/email/`) 
 
 ## 8. Le web (`apps/web/src`)
 
-- `app/(public)/decouvrir` : la page publique, servie à la place de `/` quand il n'y a pas de cookie de session (`proxy.ts`) ; la démo guidée au premier lancement.
+- `app/(public)/decouvrir` : la page publique, servie à la place de `/` quand il n'y a pas de cookie de session (`proxy.ts`) ; la démo guidée derrière « Voir comment ça marche (30 s) », jamais ouverte d'office (`DemoSurBouton`, fenêtre plein écran, `/?demo` l'ouvre aussi).
 - `app/(auth)/…` : connexion, inscription (case CGU), pages légales, page de dépôt du négoce (`/reponse/[jeton]`), liens des négoces (`/negoces/lien/[jeton]`).
 - Espace négoce (`app/(auth)/negoce/…`, vouvoiement) : `rejoindre/[jeton]` (inscription en une page : dépôts, paliers, départements, conditions), `connexion` et `connexion/[jeton]` (lien magique), la page `/negoce` (prochaine clôture, grilles à chiffrer, commandes reçues, réglages, abonnements, suppression), `conditions`, `desabonner/[jeton]` ; la grille `grille/[jeton]` (case « Prix fermes, quel que soit le volume final », « Prix non garanti » par article, zones en communes). Côté artisan (`components/commande-du-mois.tsx`) : confirmation avant « Commander », « Ne livre pas ta zone », prix indicatifs à part, bloc « Prix garantis jusqu'au … » avec « Recommander à ce prix ».
 - `app/(app)/…` : l'app connectée derrière `SessionGate` (`/v1/me` + `/v1/health` au chargement) : accueil, chantiers (dépôt → questions → « Ton chantier » → envoi), fournisseurs (carnet + « Mes négoces »), groupé (« Mes lots »), compte, formules, admin du groupé.

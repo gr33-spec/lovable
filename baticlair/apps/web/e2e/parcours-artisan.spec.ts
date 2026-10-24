@@ -2435,12 +2435,28 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Marre de te faire enfumer sur le prix de tes matériaux");
-  // Plan 2, bloc 3 : au premier lancement, la démo guidée, trois écrans sans compte, données marquées « Exemple », « Passer ».
+  // Greg, 24 octobre 2026 (capture iPhone : « la démo s'ouvre en plein écran dès l'arrivée, avant même la promesse ») : le
+  // visiteur arrive sur l'accroche, « Par un artisan, pour les artisans », « Dès 29 € », l'inscription ; aucune démo d'office.
+  await expect(page.getByText("Démo · écran")).toHaveCount(0);
+  await expect(page.getByText("Par un artisan, pour les artisans.")).toBeVisible();
+  await expect(page.getByText(/^Dès 29 € par mois/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Je rejoins le mouvement" }).first()).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("Démo · écran")).toHaveCount(0);
+  // La démo passe derrière « Voir comment ça marche (30 s) », juste sous l'accroche ; elle s'ouvre en plein écran.
+  await page.getByRole("button", { name: "Voir comment ça marche (30 s)" }).click();
+  const dialogue = page.getByRole("dialog", { name: "Démo" });
+  await expect(dialogue).toBeVisible();
   const demo = page.getByRole("region", { name: /^Ta liste, remise au propre/ });
-  await expect(demo).toBeVisible();
   await expect(demo.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
   await expect(demo.getByText("Exemple").first()).toBeVisible();
-  await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple)" }).getByRole("listitem")).toHaveCount(5);
+  // Multimétier : couverture, puis plomberie, puis placo.
+  await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple couverture)" }).getByRole("listitem")).toHaveCount(5);
+  await demo.getByRole("tab", { name: "Plomberie" }).click();
+  await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple plomberie)" })).toContainText("Tube multicouche 16×2");
+  await demo.getByRole("tab", { name: "Placo" }).click();
+  await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple placo)" })).toContainText("Plaque BA13");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await demo.getByRole("button", { name: "Suivant" }).click();
   await expect(page.getByRole("heading", { name: "La commande commune, tous ensemble" })).toBeVisible();
   // Commande du mois (Greg, 22 octobre 2026) : en quantités, jamais en nombre d'entreprises.
@@ -2450,17 +2466,20 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByRole("heading", { name: "Ton prix, livré chez toi" })).toBeVisible();
   await expect(page.getByText(/2 760 pièces à 0,92 € HT l'unité/)).toBeVisible();
   await expect(page.getByText(/Ton prix habituel : 1,04 €/)).toBeVisible();
-  // Trois liens « Créer un compte » tant que la démo est là ; « Passer » la ferme, et elle ne revient pas au rechargement.
-  await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(3);
+  await expect(dialogue.getByRole("link", { name: "Je rejoins le mouvement" })).toBeVisible();
+  // « Passer » la referme ; Échap aussi.
   await page.getByRole("button", { name: "Passer" }).click();
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
-  await page.reload();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Marre de te faire enfumer sur le prix de tes matériaux");
+  await page.getByRole("button", { name: "Voir comment ça marche (30 s)" }).click();
+  await page.keyboard.press("Escape");
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
-  // « Revoir la démo » (?demo) la rouvre.
+  // « Revoir la démo » (?demo) l'ouvre : une demande explicite.
   await page.getByRole("link", { name: "Revoir la démo" }).click();
   await expect(page.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
+  // La page derrière est inerte tant que la démo est ouverte.
+  await expect(page.getByRole("button", { name: "Voir comment ça marche (30 s)" })).toHaveCount(0);
   await page.getByRole("button", { name: "Passer" }).click();
+  await expect(page.getByRole("button", { name: "Voir comment ça marche (30 s)" })).toBeFocused();
   // Landing du 22 octobre (Greg) : ton fun et direct, visuel pro ; « enfumer » vise le prix ; le principe en une phrase ;
   // trois étapes ; gratuit pour l'artisan ; les autres métiers en une ligne ; une ligne pour les négoces. Rien d'extérieur.
   await expect(page.getByRole("heading", { name: "Plus on est nombreux, plus on pèse face aux négoces." })).toBeVisible();

@@ -2,54 +2,92 @@
 
 import { Check, FileText, Tag, Users } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { EXEMPLE } from "@/lib/exemple";
 
 /**
- * LA DÉMO GUIDÉE (plan 2 du 21 octobre 2026, bloc 3) : au premier lancement, trois écrans qui montrent l'app avec un
- * faux chantier (devis exemple ardoise, lot exemple, offre exemple), sans compte ni API. Un bouton « Passer » sur chaque
- * écran ; une fois vue (ou passée), elle ne revient plus (clé locale), sauf par `?demo` dans l'adresse. Les données sont
- * fictives et marquées comme telles sur chaque écran. Nouveau cap (22 octobre) : ta liste → les couvreurs du secteur
- * regroupés (le compteur) → ton prix livré chez toi ; rien sur la rémunération, en suspens.
+ * LA DÉMO GUIDÉE (plan 2 du 21 octobre 2026, bloc 3) : trois écrans qui montrent l'app avec un faux chantier, sans compte
+ * ni API, données fictives marquées comme telles. Nouveau cap (22 octobre) : ta liste → la commande commune → ton prix
+ * livré chez toi.
+ *
+ * DERRIÈRE UN BOUTON (Greg, 24 octobre 2026, capture iPhone : « la démo s'ouvre en plein écran dès l'arrivée, avant même
+ * la promesse : c'est déroutant ») : la landing s'ouvre sur l'accroche ; la démo ne s'ouvre jamais d'elle-même, seulement
+ * par « Voir comment ça marche (30 s) » sous l'accroche, ou par le lien « Revoir la démo » (`/?demo`). Elle s'ouvre alors
+ * en plein écran (`top: 0; height: 100dvh`, page derrière figée), « Passer » ou Échap la referment.
+ * MULTIMÉTIER (même jour) : l'écran 1 montre la remise au propre sur une liste de couverture, puis de plomberie, puis de
+ * placo (`EXEMPLE.metiers`), qui défilent seules tant qu'on ne touche pas un métier.
  */
-export const CLE_DEMO_VUE = "baticlair.demoVue";
+export function DemoSurBouton({ className = "" }: { className?: string }) {
+  const [ouverte, setOuverte] = useState(false);
+  const bouton = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    // « Revoir la démo » (`/?demo`) : une demande explicite, la démo s'ouvre.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (new URLSearchParams(window.location.search).has("demo")) setOuverte(true);
+  }, []);
+
+  // Refermée, le doigt (ou le clavier) revient au bouton, une fois la page rendue de nouveau active.
+  const etaitOuverte = useRef(false);
+  useEffect(() => {
+    if (etaitOuverte.current && !ouverte) bouton.current?.focus();
+    etaitOuverte.current = ouverte;
+  }, [ouverte]);
+  const fermer = useCallback(() => setOuverte(false), []);
+
+  return (
+    <>
+      <button ref={bouton} type="button" onClick={() => setOuverte(true)} aria-haspopup="dialog" className={className}>
+        Voir comment ça marche (30&nbsp;s)
+      </button>
+      {ouverte ? <DemoPleinEcran onFermer={fermer} /> : null}
+    </>
+  );
+}
+
+function DemoPleinEcran({ onFermer }: { onFermer: () => void }) {
+  const cadre = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Une vraie fenêtre : la page derrière est figée et inerte (ni touchée, ni lue par un lecteur d'écran).
+    const avant = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const derriere = [...document.body.children].filter((el): el is HTMLElement => el instanceof HTMLElement && el !== cadre.current && !el.inert);
+    for (const el of derriere) {
+      el.inert = true;
+      el.setAttribute("aria-hidden", "true");
+    }
+    cadre.current?.focus();
+    const touche = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onFermer();
+    };
+    window.addEventListener("keydown", touche);
+    return () => {
+      document.body.style.overflow = avant;
+      for (const el of derriere) {
+        el.inert = false;
+        el.removeAttribute("aria-hidden");
+      }
+      window.removeEventListener("keydown", touche);
+    };
+  }, [onFermer]);
+  return createPortal(
+    <div ref={cadre} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Démo" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full justify-center overflow-y-auto overscroll-contain bg-night px-4 py-4 outline-none sm:items-center sm:py-8">
+      <div className="w-full max-w-xl">
+        <DemoGuidee onFermer={onFermer} />
+      </div>
+    </div>,
+    document.body,
+  );
+}
 
 type Ecran = 0 | 1 | 2;
 
-export function DemoGuidee() {
-  // Rendue par le serveur (premier lancement : le cas par défaut) ; déjà vue, le script de la page l'a cachée avant
-  // l'affichage (`html[data-demo-vue]`), puis elle sort ici sans rien décaler.
-  const [visible, setVisible] = useState(true);
+export function DemoGuidee({ onFermer }: { onFermer: () => void }) {
   const [ecran, setEcran] = useState<Ecran>(0);
-
-  useEffect(() => {
-    // « Revoir la démo » (`/?demo`) recharge la page : l'adresse se lit ici.
-    const forcee = new URLSearchParams(window.location.search).has("demo");
-    if (forcee) delete document.documentElement.dataset.demoVue;
-    let vue = false;
-    try {
-      vue = localStorage.getItem(CLE_DEMO_VUE) !== null;
-    } catch {
-      vue = false;
-    }
-    // Lu après le rendu : le serveur ne connaît pas le réglage local.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setVisible(forcee || !vue);
-  }, []);
-
-  function fermer() {
-    try {
-      localStorage.setItem(CLE_DEMO_VUE, new Date().toISOString());
-    } catch {
-      // Sans stockage local, la démo reviendra : rien de grave.
-    }
-    setVisible(false);
-  }
-
-  if (!visible) return null;
   const titres = ["Ta liste, remise au propre", "La commande commune, tous ensemble", "Ton prix, livré chez toi"];
   return (
-    <section data-demo aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-xl border border-line bg-surface p-4 text-ink sm:min-h-0 sm:p-6">
+    <section data-demo aria-labelledby="demo-titre" className="flex min-h-[calc(100dvh-2rem)] flex-col gap-4 rounded-xl border border-line bg-surface p-4 text-ink sm:min-h-0 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <span className="text-[12px] font-bold tracking-[0.04em] text-muted">Démo · écran {ecran + 1} sur 3 · données fictives</span>
@@ -57,7 +95,7 @@ export function DemoGuidee() {
             {titres[ecran]}
           </h2>
         </div>
-        <button type="button" onClick={fermer} className="pressable inline-flex min-h-11 shrink-0 items-center rounded-full border border-line px-4 text-[15px] font-semibold">
+        <button type="button" onClick={onFermer} className="pressable inline-flex min-h-11 shrink-0 items-center rounded-full border border-line px-4 text-[15px] font-semibold">
           Passer
         </button>
       </div>
@@ -75,7 +113,7 @@ export function DemoGuidee() {
             Suivant
           </button>
         ) : (
-          <Link href="/inscription" onClick={fermer} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-on-accent hover:bg-accent-hover">
+          <Link href="/inscription" className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-on-accent hover:bg-accent-hover">
             Je rejoins le mouvement
           </Link>
         )}
@@ -88,11 +126,38 @@ function Exemple() {
   return <span className="rounded-full border border-line px-2 py-0.5 text-[11px] font-bold text-muted">Exemple</span>;
 }
 
-/** Écran 1 : la liste donnée en photo et ce qui en sort, dans les mots du comptoir. */
+/** Le temps de lire une liste avant la suivante (3 listes en ≈ 12 s : la démo entière tient en 30 s). */
+const DEFILEMENT_MS = 4000;
+
+/** Écran 1 : la liste donnée en photo et ce qui en sort, dans les mots du comptoir, métier par métier. */
 function EcranDevis() {
-  const d = EXEMPLE.devis;
+  const [rang, setRang] = useState(0);
+  const [touche, setTouche] = useState(false);
+  useEffect(() => {
+    if (touche || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = window.setInterval(() => setRang((r) => (r + 1) % EXEMPLE.metiers.length), DEFILEMENT_MS);
+    return () => window.clearInterval(t);
+  }, [touche]);
+  const m = EXEMPLE.metiers[rang]!;
   return (
     <div className="flex flex-col gap-3 text-ink">
+      <div role="tablist" aria-label="Métier de l'exemple" className="grid grid-cols-3 gap-1.5">
+        {EXEMPLE.metiers.map((x, i) => (
+          <button
+            key={x.metier}
+            type="button"
+            role="tab"
+            aria-selected={i === rang}
+            onClick={() => {
+              setTouche(true);
+              setRang(i);
+            }}
+            className={`pressable inline-flex min-h-11 items-center justify-center rounded-full px-1 text-[13px] font-bold min-[400px]:text-[14px] ${i === rang ? "bg-ink text-white" : "border border-line text-ink"}`}
+          >
+            {x.metier}
+          </button>
+        ))}
+      </div>
       <div className="flex items-center gap-3 rounded-xl bg-ground p-3">
         <FileText size={22} aria-hidden="true" className="shrink-0 text-accent-text" />
         <div className="flex min-w-0 flex-col">
@@ -100,24 +165,22 @@ function EcranDevis() {
             {/* Plan « finition », bloc 4 : l'écran dit « ta liste, donnée en photo », la carte ne parle plus d'un devis. */}
             Photo de ta liste <Exemple />
           </span>
-          <span className="truncate text-[13px] text-muted">
-            {d.client} · {d.adresse} · {d.objet}
-          </span>
+          <span className="truncate text-[13px] text-muted">{m.photo}</span>
         </div>
       </div>
       <p className="text-[14px] font-bold text-muted">Donnée en photo, remise au propre, ligne par ligne :</p>
-      <ul aria-label="Liste de fournitures (exemple)" className="flex flex-col divide-y divide-line rounded-xl bg-ground">
-        {EXEMPLE.liste.map((l) => (
+      <ul aria-label={`Liste de fournitures (exemple ${m.metier.toLowerCase()})`} className="flex flex-col divide-y divide-line rounded-xl bg-ground">
+        {m.liste.map((l) => (
           <li key={l.designation} className="flex items-center gap-3 px-3 py-2.5">
             <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-mark-ok text-white" aria-hidden="true">
               <Check size={14} strokeWidth={3} />
             </span>
             <span className="min-w-0 grow text-[14px] font-bold">{l.designation}</span>
-            <span className="shrink-0 text-[14px] font-extrabold">{l.quantite}</span>
+            <span className="shrink-0 text-right text-[14px] font-extrabold">{l.quantite}</span>
           </li>
         ))}
       </ul>
-      <p className="text-[13px] text-muted">Chaque ligne précise rejoint celles des artisans de ton secteur.</p>
+      <p className="text-[13px] text-muted">Couverture, plomberie, placo… : chaque ligne précise rejoint celles des artisans de ton métier et de ton secteur.</p>
     </div>
   );
 }

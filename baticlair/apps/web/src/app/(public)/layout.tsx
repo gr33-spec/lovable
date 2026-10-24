@@ -10,15 +10,15 @@ import { NOM_APP } from "@/lib/nom";
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-night text-white">
-      <header className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+      <header className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5" aria-label={`${NOM_APP}, accueil`}>
           <Logo fond="sombre" hauteur={30} />
         </Link>
-        <nav aria-label="Menu" className="flex items-center gap-4 sm:gap-6">
-          <Link href="/tarifs" className="inline-flex min-h-11 items-center text-[15px] font-semibold text-white/85 hover:text-white">
+        <nav aria-label="Menu" className="flex items-center gap-3 sm:gap-6">
+          <Link href="/tarifs" className="inline-flex min-h-11 items-center text-[15px] max-[359px]:hidden font-semibold text-white/85 hover:text-white">
             Tarifs
           </Link>
-          <Link href="/connexion" className="pressable inline-flex min-h-11 items-center rounded-full border border-white/25 px-5 text-[15px] font-semibold text-white hover:border-white">
+          <Link href="/connexion" className="pressable inline-flex min-h-11 items-center rounded-full border border-white/25 px-4 text-[15px] font-semibold whitespace-nowrap text-white hover:border-white sm:px-5">
             Se connecter
           </Link>
         </nav>

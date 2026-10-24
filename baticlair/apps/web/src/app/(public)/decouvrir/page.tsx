@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CLE_DEMO_VUE, DemoGuidee } from "@/components/demo-guidee";
+import { DemoSurBouton } from "@/components/demo-guidee";
 import { ButtonLink } from "@/components/ui";
 import { ArgumentTarif } from "@/components/argument-tarif";
 import { LiensLegaux } from "@/components/legal";
@@ -92,34 +92,25 @@ export default function BienvenuePage() {
   const h2 = "font-display text-[36px] leading-[1.0] font-extrabold tracking-[-0.03em] sm:text-[56px]";
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-20 px-4 pt-6 pb-16 sm:gap-28 sm:px-6 sm:pt-12 lg:gap-32">
-      {/* Plan 2, bloc 3 : au premier lancement, la démo guidée (trois écrans, « Passer ») vient avant l'accroche. Plan
-          « finition », bloc 5 (Lighthouse 66, décalage 0,88) : elle est rendue par le serveur, et ce script, lu avant
-          l'affichage, la cache déjà vue (sauf `?demo`) : la page ne saute plus quand le navigateur relit la clé locale. */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `try{if(localStorage.getItem(${JSON.stringify(CLE_DEMO_VUE)})!==null&&!/[?&]demo\b/.test(location.search))document.documentElement.dataset.demoVue="1"}catch(e){}`,
-        }}
-      />
-      <DemoGuidee />
+      {/* Greg, 24 octobre 2026 : le visiteur arrive sur l'accroche ; la démo ne s'ouvre jamais d'elle-même, seulement par
+          « Voir comment ça marche (30 s) », juste sous l'accroche (`DemoSurBouton`). */}
 
       {/* L'accroche : la promesse en très grand, le mot « enfumer » en jaune signal ; l'app dans un iPhone posé sur un
           grand aplat jaune, comme une affiche de chantier. */}
       <section aria-labelledby="accroche" className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
-        <div className="flex flex-col gap-8 lg:col-span-7">
+        <div className="flex flex-col gap-5 min-[400px]:gap-8 lg:col-span-7">
           <p className="inline-flex w-fit items-center rounded-full bg-white/10 px-3.5 py-1.5 text-[13px] font-semibold tracking-[0.02em] text-white/85 uppercase">
             {ACCROCHE_APP}
           </p>
-          <h1 id="accroche" className="max-w-[14ch] text-[52px] leading-[0.94] font-extrabold tracking-[-0.03em] sm:text-[84px]">
+          <h1 id="accroche" className="max-w-[14ch] text-[40px] leading-[0.94] font-extrabold tracking-[-0.03em] min-[400px]:text-[52px] sm:text-[84px]">
             Marre de te faire <span className="text-accent">enfumer</span> sur le prix de tes matériaux&nbsp;?
           </h1>
-          <p className="max-w-[38ch] text-[18px] leading-relaxed text-white/70 sm:text-[21px]">Une commande toutes les deux semaines avec les artisans de ton métier, dans ta région.</p>
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+          <p className="max-w-[38ch] text-[16px] leading-relaxed text-white/70 min-[400px]:text-[18px] sm:text-[21px]">Une commande toutes les deux semaines avec les artisans de ton métier, dans ta région.</p>
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
             <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
               Je rejoins le mouvement
             </ButtonLink>
-            <a href="#comment" className="inline-flex min-h-13 items-center gap-2 text-[16px] font-semibold text-white transition-[color] duration-150 hover:text-accent">
-              Voir comment ça marche <span aria-hidden="true">→</span>
-            </a>
+            <DemoSurBouton className="pressable inline-flex min-h-13 items-center gap-2 rounded-full border border-white/25 px-5 text-[15px] font-semibold whitespace-nowrap text-white min-[400px]:px-6 min-[400px]:text-[16px] transition-[color,border-color] duration-150 hover:border-accent hover:text-accent" />
           </div>
           {/* L'argument phare (24 octobre 2026) : une possibilité, la vraie moyenne dès 3 cycles publiés ; puis l'offre. */}
           <ArgumentTarif className="max-w-[40ch] text-[17px] font-bold text-accent" />
