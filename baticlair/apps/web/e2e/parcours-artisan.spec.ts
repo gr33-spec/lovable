@@ -2049,10 +2049,10 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   await expect(lots.getByText("Toitures Le Bihan")).toHaveCount(0);
   await lots.getByRole("button", { name: "Livré" }).click();
   await expect(lots.getByText("Livré, merci.")).toBeVisible();
-  // Le bon de commande et la facture sont partis chez le négoce retenu.
+  // Le bon de commande est parti chez le négoce retenu ; aucune facture (Greg, 24 octobre 2026 : `FACTURATION_NEGOCE=off`).
   const auNegoce = [...(await emailsVers(page, "ardoises@example.com")), ...(await emailsVers(page, "general@example.com"))];
   expect(auNegoce.some((m) => /bons? de commande/.test(m.subject))).toBe(true);
-  expect(auNegoce.some((m) => /^Facture n°/.test(m.subject))).toBe(true);
+  expect(auNegoce.some((m) => /^Facture n°/.test(m.subject))).toBe(false);
   // B voit aussi son offre, sans le nom de A.
   await pageB.goto("/groupe");
   const lotsB = pageB.getByRole("list", { name: "Mes commandes communes" });
@@ -2136,7 +2136,7 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
 test("Pages légales : mentions légales, CGU, conditions négoce et confidentialité, lisibles sans compte ; l'acceptation des CGU est gardée", async ({ page }) => {
   await page.goto("/mentions-legales");
   await expect(page.getByRole("heading", { name: "Mentions légales" })).toBeVisible();
-  await expect(page.getByText(/BATI INVEST, SARL, SIRET 910 796 325 00017, 6 impasse du Ouipoure, 22620 Ploubazlanec/)).toBeVisible();
+  await expect(page.getByText(/édité par BATI INVEST, SARL au capital de .* SIRET 910 796 325 00017, dont le siège est situé 6 impasse du Ouipoure, 22620 Ploubazlanec/)).toBeVisible();
   await expect(page.getByText(/TVA intracommunautaire FR61910796325/)).toBeVisible();
   await expect(page.getByText(/Vercel Inc\./)).toBeVisible();
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "CGU" }).click();
@@ -2170,7 +2170,7 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   // Le compte créé (case cochée) garde la date et la version des CGU.
   await signUp(page);
   const cgu = await page.evaluate(async () => (await (await fetch("/v1/me/cgu")).json()) as { accepteLe: string | null; version: string | null });
-  expect(cgu.version).toBe("2026-10-22");
+  expect(cgu.version).toBe("2026-10-24");
   expect(cgu.accepteLe).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 });
 

@@ -726,8 +726,11 @@ function EmailsActifs() {
   if (actifs === null) return null;
   async function changer(v: boolean) {
     setPending(true);
+    setActifs(v);
     try {
       setActifs((await api<{ actifs: boolean }>("/v1/me/emails", { method: "PUT", body: { actifs: v } })).actifs);
+    } catch {
+      setActifs(!v);
     } finally {
       setPending(false);
     }
