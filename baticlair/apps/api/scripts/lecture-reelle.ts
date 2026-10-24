@@ -15,7 +15,7 @@
  * Le PDF reste hors du dépôt. La sortie JSON (lecture complète) est écrite là où on le demande, jamais commitée.
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { anonymiserLigne, computeAiCost, consigneDuLot, controleLecture7954, controleLectureD2026105, controleLectureDe00000071, controleLectureFiche, exportPourLecture, FICHES, fusionnerLectures, lectureParLots, numberLines, priceTableAt, referentialFor, routePage, tradeProfile, type AiUsage, type LectureDevis, type LigneDuDevis } from "@baticlair/domain";
+import { anonymiserLigne, computeAiCost, consigneDeTranche, consigneDuLot, controleLecture7954, controleLectureD2026105, controleLectureDe00000071, controleLectureFiche, exportPourLecture, FICHES, fusionnerLectures, lectureParLots, numberLines, priceTableAt, referentialFor, routePage, tradeProfile, tranchesDuDevis, type AiUsage, type LectureDevis, type LigneDuDevis } from "@baticlair/domain";
 import { D2026_105_LINES } from "../../../packages/domain/test/devis-reels/d2026-105.js";
 import { DE00000071_LINES } from "../../../packages/domain/test/devis-reels/de00000071.js";
 import { DEVIS_7954 } from "../../../packages/domain/test/devis-reels/devis-7954.js";
@@ -76,7 +76,8 @@ async function main(): Promise<number> {
   // Le repérage des métiers avant la lecture (modèle rapide, texte seul) : il doit dire le métier du devis, vite.
   const debutReperage = Date.now();
   const reperage = await reader.reperer(text.join("\n"));
-  const metiersReperes = reperage?.output ?? [];
+  const metiersReperes = reperage?.output?.metiers ?? [];
+  const sections = reperage?.output?.sections ?? [];
   console.log(`Repérage ${rapide} — ${reperage?.status ?? "absent"} en ${Math.round((Date.now() - debutReperage) / 1000)} s : ${metiersReperes.join(", ") || "(rien)"}`);
   // Le coût de chaque appel, à la grille de prix du jour (le même calcul que le journal des appels de l'app).
   const grille = priceTableAt(new Date());
@@ -95,13 +96,24 @@ async function main(): Promise<number> {
   if (lectureParLots(metiersReperes, document.numberedText)) {
     // Décision du fondateur (24 octobre 2026, option 1) : un gros devis de plusieurs métiers, un appel par métier, en parallèle.
     const lots = metiersReperes.map((m) => ({ metier: m, libelle: tradeProfile(m).label }));
-    const essais = await Promise.all(lots.map((lot, i) => reader.lire({ document, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), consigne: consigneDuLot(lot, lots, i === 0) })));
+    // Comme en production : avec les sections du repérage, chaque appel ne reçoit que les lignes de son lot, par tranches.
+    const tranches = tranchesDuDevis(document.numberedText, metiersReperes, sections);
+    const entete = document.numberedText.split("\n").slice(0, 12).join("\n");
+    const appels = tranches
+      ? tranches.map((t) => {
+          const lot = lots.find((l) => l.metier === t.metier)!;
+          const siennes = tranches.filter((x) => x.metier === t.metier);
+          return { lot, nom: `${t.metier} ${siennes.indexOf(t) + 1}/${siennes.length} (${t.refs.length} lignes)`, request: { document: { ...document, numberedText: t.texte }, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), consigne: consigneDeTranche(lot, lots, siennes.indexOf(t) + 1, siennes.length, entete) } };
+        })
+      : lots.map((lot, i) => ({ lot, nom: lot.metier, request: { document, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), consigne: consigneDuLot(lot, lots, i === 0) } }));
+    console.log(`Sections repérées : ${sections.length} ; appels : ${appels.length}`);
+    const essais = await Promise.all(appels.map((a) => reader.lire(a.request)));
     for (const [i, e] of essais.entries()) {
       compter(model, e.usage);
-      console.log(`Lot ${lots[i]!.metier} — ${e.status}${e.errorCode ? ` (${e.errorCode})` : ""} en ${Math.round(e.durationMs / 1000)} s, ${e.usage.outputTokens} jetons rendus`);
+      console.log(`Lot ${appels[i]!.nom} — ${e.status}${e.errorCode ? ` (${e.errorCode})` : ""} en ${Math.round(e.durationMs / 1000)} s, ${e.usage.outputTokens} jetons rendus`);
     }
-    const parts = lots.flatMap((lot, i) => (essais[i]!.status === "success" && essais[i]!.output ? [{ ...lot, lecture: essais[i]!.output! }] : []));
-    lecture = fusionnerLectures(parts, lots.filter((_, i) => !(essais[i]!.status === "success" && essais[i]!.output)));
+    const parts = appels.flatMap((a, i) => (essais[i]!.status === "success" && essais[i]!.output ? [{ ...a.lot, lecture: essais[i]!.output! }] : []));
+    lecture = fusionnerLectures(parts, appels.filter((_, i) => !(essais[i]!.status === "success" && essais[i]!.output)).map((a) => a.lot));
     if (!lecture) echec = essais.map((e) => `${e.status} ${e.errorCode ?? ""}`).join(" ; ");
   } else {
     const attempt = await reader.lire({

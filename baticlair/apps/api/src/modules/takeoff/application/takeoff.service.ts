@@ -1,7 +1,10 @@
 import {
   baseOf,
+  consigneDeTranche,
   consigneDuLot,
   fusionnerLectures,
+  tranchesDuDevis,
+  type SectionDuDevis,
   lectureParLots,
   AI_ADDITION,
   MISSING_INFO,
@@ -482,14 +485,15 @@ export class TakeoffService {
       return lecteur.lire({ document, trade: t, tradeLabel: tradeProfile(t).label, referentiel, siteNotes });
     };
     const donne = referentialFor(trade)?.trade ?? tradeIdOf(trade.split(",")[0] ?? "");
-    const vus = donne === "general" ? [] : await this.reperer(lecteur, document.numberedText, compter);
+    const reperage = donne === "general" ? { metiers: [], sections: [] } : await this.reperer(lecteur, document.numberedText, compter);
+    const vus = reperage.metiers;
     // Un devis d'un autre métier que le compte : ce métier ; un devis à plusieurs lots sans le métier du compte : le principal.
     if (vus.length > 0 && !vus.includes(donne)) trade = vus[0]!;
     const principal = referentialFor(trade)?.trade ?? trade;
     const dejaLus = vus.length > 1 ? [principal, ...vus.filter((m) => m !== principal)] : [principal];
     // Décision du fondateur (24 octobre 2026, « option 1 ») : un GROS devis de plusieurs métiers est lu en UN APPEL PAR
     // MÉTIER, en parallèle, chacun avec son référentiel ; un appel unique avec tous les référentiels était coupé (7954).
-    if (lectureParLots(dejaLus, document.numberedText)) return this.lireParLots(lecteur, document, dejaLus, siteNotes, compter);
+    if (lectureParLots(dejaLus, document.numberedText)) return this.lireParLots(lecteur, document, dejaLus, reperage.sections, siteNotes, compter);
     let result = await lire(trade, dejaLus);
     if (result === null) return null;
     await compter(1, result, LECTURE_PROMPT);
@@ -525,20 +529,31 @@ export class TakeoffService {
     lecteur: LectureReader,
     document: DocumentInput,
     metiers: readonly string[],
+    sections: readonly SectionDuDevis[],
     siteNotes: string | null,
     compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>,
   ): Promise<{ result: ReadAttempt<LectureDevis>; trade: string } | null> {
     const lots = metiers.map((m) => ({ metier: m, libelle: tradeProfile(m).label }));
-    const essais = await Promise.all(
-      lots.map((lot, i) => {
-        const r = referentialFor(lot.metier);
-        return lecteur.lire({ document, trade: lot.metier, tradeLabel: lot.libelle, referentiel: r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.", siteNotes, consigne: consigneDuLot(lot, lots, i === 0) });
-      }),
-    );
+    const exportDe = (m: string) => {
+      const r = referentialFor(m);
+      return r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.";
+    };
+    // Avec les sections du repérage, chaque appel ne reçoit que les lignes de son lot, par tranches ; sans elles, le devis
+    // entier avec la consigne de ne rendre que ce lot.
+    const tranches = tranchesDuDevis(document.numberedText, metiers, sections);
+    const entete = document.numberedText.split("\n").slice(0, 12).join("\n");
+    const appels = tranches
+      ? tranches.map((t) => {
+          const lot = lots.find((l) => l.metier === t.metier)!;
+          const siennes = tranches.filter((x) => x.metier === t.metier);
+          return { lot, request: { document: { ...document, numberedText: t.texte }, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), siteNotes, consigne: consigneDeTranche(lot, lots, siennes.indexOf(t) + 1, siennes.length, entete) } };
+        })
+      : lots.map((lot, i) => ({ lot, request: { document, trade: lot.metier, tradeLabel: lot.libelle, referentiel: exportDe(lot.metier), siteNotes, consigne: consigneDuLot(lot, lots, i === 0) } }));
+    const essais = await Promise.all(appels.map((a) => lecteur.lire(a.request)));
     if (essais.every((e) => e === null)) return null;
     for (const [i, e] of essais.entries()) if (e) await compter(i + 1, e, LECTURE_PROMPT);
-    const parts = lots.flatMap((lot, i) => (essais[i]?.status === "success" && essais[i]!.output ? [{ ...lot, lecture: essais[i]!.output! }] : []));
-    const echecs = lots.filter((_, i) => !(essais[i]?.status === "success" && essais[i]!.output));
+    const parts = appels.flatMap((a, i) => (essais[i]?.status === "success" && essais[i]!.output ? [{ ...a.lot, lecture: essais[i]!.output! }] : []));
+    const echecs = appels.filter((_, i) => !(essais[i]?.status === "success" && essais[i]!.output)).map((a) => a.lot);
     const lus = essais.filter((e): e is ReadAttempt<LectureDevis> => e !== null);
     const premier = lus.find((e) => e.status === "success" && e.output) ?? lus[0]!;
     const fusion = fusionnerLectures(parts, echecs);
@@ -553,17 +568,21 @@ export class TakeoffService {
   }
 
   /** Le repérage des métiers (texte seul, modèle rapide) : jamais bloquant, un échec ou un silence laisse le métier donné. */
-  private async reperer(lecteur: LectureReader, numberedText: string, compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>): Promise<string[]> {
-    if (!lecteur.reperer) return [];
+  private async reperer(lecteur: LectureReader, numberedText: string, compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>): Promise<{ metiers: string[]; sections: SectionDuDevis[] }> {
+    const rien = { metiers: [], sections: [] };
+    if (!lecteur.reperer) return rien;
     try {
       // 25 s au plus : un repérage lent ne retarde jamais la lecture plus que la relecture qu'il évite.
       let timer: ReturnType<typeof setTimeout> | undefined;
       const r = await Promise.race([lecteur.reperer(numberedText), new Promise<null>((resolve) => (timer = setTimeout(() => resolve(null), REPERAGE_MAX_MS)))]).finally(() => clearTimeout(timer));
-      if (!r) return [];
+      if (!r) return rien;
       await compter(0, r, REPERAGE_PROMPT);
-      return r.status === "success" && r.output ? r.output.filter((m) => referentialFor(m)?.trade === m) : [];
+      if (r.status !== "success" || !r.output) return rien;
+      const lu = Array.isArray(r.output) ? { metiers: r.output, sections: [] } : r.output;
+      const metiers = lu.metiers.filter((m) => referentialFor(m)?.trade === m);
+      return { metiers, sections: lu.sections.filter((x) => metiers.includes(x.metier)) };
     } catch {
-      return [];
+      return rien;
     }
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { consigneDuLot, fusionnerLectures, lectureParLots, LIGNES_LECTURE_PAR_LOTS, ordreDesReperes, parseLecture, phraseLotNonLu, type LectureDevis } from "../src/index.js";
+import { consigneDeTranche, consigneDuLot, fusionnerLectures, tranchesDuDevis, lectureParLots, LIGNES_LECTURE_PAR_LOTS, ordreDesReperes, parseLecture, phraseLotNonLu, type LectureDevis } from "../src/index.js";
 
 /**
  * LA LECTURE LOT PAR LOT (décision du fondateur, 24 octobre 2026, « option 1 ») : un gros devis de plusieurs métiers est lu
@@ -58,5 +58,31 @@ describe("lecture lot par lot", () => {
     expect(consigneDuLot(lots[1]!, lots, false)).not.toMatch(/aucun lot \(/);
     expect(ordreDesReperes("1:010", "2:001")).toBeLessThan(0);
     expect(ordreDesReperes("12", "3")).toBeGreaterThan(0);
+  });
+});
+
+describe("les tranches d'un gros lot", () => {
+  const texte = Array.from({ length: 150 }, (_, i) => `[1:${String(i + 1).padStart(3, "0")}] ligne ${i + 1}`).join("\n");
+  it("chaque ligne va au métier de sa section, une ligne hors section suit la précédente, un lot long se coupe", () => {
+    const t = tranchesDuDevis(texte, ["electrical", "plumbing"], [
+      { metier: "electrical", de: "1:003", a: "1:130" },
+      { metier: "plumbing", de: "1:136", a: "1:150" },
+    ], 60)!;
+    // 1:001-1:002 (avant toute section) au principal ; 1:131-1:135 (hors section) suivent l'électricité.
+    expect(t.map((x) => [x.metier, x.refs.length])).toEqual([["electrical", 60], ["electrical", 60], ["electrical", 15], ["plumbing", 15]]);
+    expect(t.flatMap((x) => x.refs)).toHaveLength(150);
+    expect(t[3]!.texte.split("\n")[0]).toBe("[1:136] ligne 136");
+  });
+  it("sans section utilisable : null (le devis entier part à chaque lot)", () => {
+    expect(tranchesDuDevis(texte, ["electrical", "plumbing"], [])).toBeNull();
+    expect(tranchesDuDevis(texte, ["electrical", "plumbing"], [{ metier: "hvac", de: "1:001", a: "1:002" }])).toBeNull();
+  });
+  it("les tranches d'un même lot font un seul lot ; un lot non lu se dit une fois", () => {
+    const a = lecture("electrical", [["1:001", "Prise"]]);
+    const b = lecture("electrical", [["1:070", "Prise"]]);
+    const f = fusionnerLectures([{ metier: "electrical", libelle: "Électricité", lecture: a }, { metier: "electrical", libelle: "Électricité", lecture: b }], [{ metier: "plumbing", libelle: "Plomberie" }, { metier: "plumbing", libelle: "Plomberie" }])!;
+    expect(f.lots).toEqual([{ metier: "electrical", libelle: "electrical", lignes: ["1:001", "1:070"] }]);
+    expect(f.lotsNonLus).toEqual([{ metier: "plumbing", libelle: "Plomberie" }]);
+    expect(consigneDeTranche({ metier: "electrical", libelle: "Électricité" }, [{ metier: "electrical", libelle: "Électricité" }], 2, 3, "[1:001] DEVIS")).toMatch(/tranche 2 sur 3 du lot « Électricité »/);
   });
 });

@@ -70,8 +70,13 @@ export function fusionnerLectures(parts: readonly PartLue[], echecs: readonly { 
       lignes.set(l.ref, l);
       siennes.push(l.ref);
     }
-    if (siennes.length > 0) lots.push({ metier: p.metier, libelle: p.lecture.lots.find((x) => x.metier === p.metier)?.libelle ?? p.libelle, lignes: siennes.sort(ordreDesReperes) });
+    if (siennes.length === 0) continue;
+    // Les tranches d'un même lot font un seul lot.
+    const deja = lots.find((x) => x.metier === p.metier);
+    if (deja) deja.lignes = [...deja.lignes, ...siennes].sort(ordreDesReperes);
+    else lots.push({ metier: p.metier, libelle: p.lecture.lots.find((x) => x.metier === p.metier)?.libelle ?? p.libelle, lignes: siennes.sort(ordreDesReperes) });
   }
+  const nonLus = echecs.filter((e, i) => echecs.findIndex((x) => x.metier === e.metier) === i);
   const donnees: FicheDonnee[] = [];
   for (const d of parts.flatMap((p) => p.lecture.fiche.donnees)) {
     const deja = donnees.findIndex((x) => x.cle === d.cle);
@@ -91,6 +96,65 @@ export function fusionnerLectures(parts: readonly PartLue[], echecs: readonly { 
     lignes: [...lignes.values()].sort((a, b) => ordreDesReperes(a.ref, b.ref)),
     contexte: Object.keys(contexte).length > 0 ? contexte : null,
     notes: [...new Set(parts.flatMap((p) => p.lecture.notes))],
-    ...(echecs.length > 0 ? { lotsNonLus: echecs.map((e) => ({ metier: e.metier, libelle: e.libelle })) } : {}),
+    ...(nonLus.length > 0 ? { lotsNonLus: nonLus.map((e) => ({ metier: e.metier, libelle: e.libelle })) } : {}),
   };
+}
+
+/**
+ * LES TRANCHES (vraie lecture de 7954, 24 octobre 2026 : lu lot par lot, le lot électricité seul, 274 lignes, dépassait
+ * encore 16 000 jetons) : le repérage dit aussi les SECTIONS du devis (le métier de chaque bloc de lignes) ; chaque ligne
+ * du texte va au métier de sa section (une ligne hors section suit la précédente : aucune ne se perd), et un lot de plus
+ * de `LIGNES_PAR_TRANCHE` lignes est lu en plusieurs appels. Chaque appel ne reçoit que ses lignes.
+ */
+export const LIGNES_PAR_TRANCHE = 60;
+
+export interface SectionDuDevis {
+  metier: string;
+  /** Les repères de la première et de la dernière ligne du bloc (« 1:001 », « 5:040 »). */
+  de: string;
+  a: string;
+}
+
+export interface TrancheDuDevis {
+  metier: string;
+  refs: string[];
+  /** Les lignes numérotées de la tranche, telles quelles. */
+  texte: string;
+}
+
+const REPERE = /^\[(\d+:\d+)\]/;
+
+/** Les tranches du devis, lot par lot, dans l'ordre du devis ; `null` sans section utilisable (l'appel par lot suit). */
+export function tranchesDuDevis(numberedText: string, metiers: readonly string[], sections: readonly SectionDuDevis[], max = LIGNES_PAR_TRANCHE): TrancheDuDevis[] | null {
+  const valides = sections.filter((x) => metiers.includes(x.metier) && REPERE.test(`[${x.de}]`) && REPERE.test(`[${x.a}]`));
+  if (valides.length === 0) return null;
+  const parMetier = new Map<string, { ref: string; ligne: string }[]>(metiers.map((m) => [m, []]));
+  let courant = metiers[0]!;
+  for (const ligne of numberedText.split("\n")) {
+    const ref = REPERE.exec(ligne.trim())?.[1];
+    if (!ref) continue;
+    const section = valides.find((x) => ordreDesReperes(x.de, ref) <= 0 && ordreDesReperes(ref, x.a) <= 0);
+    if (section) courant = section.metier;
+    parMetier.get(courant)!.push({ ref, ligne: ligne.trim() });
+  }
+  const tranches: TrancheDuDevis[] = [];
+  for (const m of metiers) {
+    const lignes = parMetier.get(m)!;
+    for (let i = 0; i < lignes.length; i += max) {
+      const morceau = lignes.slice(i, i + max);
+      tranches.push({ metier: m, refs: morceau.map((l) => l.ref), texte: morceau.map((l) => l.ligne).join("\n") });
+    }
+  }
+  return tranches;
+}
+
+/** La consigne d'une tranche : son lot, ses lignes toutes rendues, l'en-tête du devis pour le contexte seulement. */
+export function consigneDeTranche(lot: { metier: string; libelle: string }, tous: readonly { metier: string; libelle: string }[], rang: number, total: number, entete: string): string {
+  return [
+    `LECTURE PAR LOT ET PAR TRANCHE : ce devis a plusieurs lots (${tous.map((l) => l.libelle).join(", ")}), lus chacun à part. Le texte ci-dessus est la tranche ${rang} sur ${total} du lot « ${lot.libelle} » (${lot.metier}), avec le référentiel ci-dessus.`,
+    "- « lignes » : TOUTES les lignes de cette tranche, dans l'ordre, avec leur repère d'origine (une ligne d'un autre métier se rend ici aussi, avec ses fournitures).",
+    `- « metier » : ${lot.metier} ; « lots » : un seul lot (${lot.metier}), avec les repères de ces lignes.`,
+    "- « fiche », « bref » et « questions » : seulement ce que disent ces lignes (et l'en-tête) ; les autres tranches sont lues à part.",
+    ...(entete.trim() ? [`EN-TÊTE DU DEVIS (pour le contexte : client, chantier, titres) :\n${entete}`] : []),
+  ].join("\n");
 }
