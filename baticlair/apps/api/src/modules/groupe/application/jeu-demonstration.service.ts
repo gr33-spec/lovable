@@ -1,3 +1,4 @@
+import { DOMAINE_DEMO, emailsDemo } from "../../../platform/demo-domaine.js";
 import { randomUUID } from "node:crypto";
 import { economieEstimee } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -5,11 +6,11 @@ import type { PrismaService } from "../../../platform/database/prisma.service.js
 /**
  * LE JEU DE DONNÉES DE DÉMONSTRATION (plan 2 du 21 octobre 2026, bloc 6) : remplit une base de prévisualisation avec
  * 12 artisans des Côtes-d'Armor, 8 négoces et 3 lots à des étapes différentes (en cours, décidé, livré), pour voir
- * l'admin et « Mes lots » remplis. Tout est marqué : e-mails `@demo.baticlair.fr`, noms « (démo) », clés de lot `demo-…`
+ * l'admin et « Mes lots » remplis. Tout est marqué : e-mails `@demo.mobiiz.fr`, noms « (démo) », clés de lot `demo-…`
  * (elles ne se regroupent jamais avec un vrai besoin). Rejouable : l'ancien jeu est effacé d'abord. Jamais en production.
  * Si une entreprise est nommée (celle de Greg), elle entre dans les trois lots : « Mes lots » se remplit chez elle.
  */
-export const DOMAINE_DEMO = "demo.baticlair.fr";
+export { DOMAINE_DEMO } from "../../../platform/demo-domaine.js";
 
 const VILLES = [
   ["3 rue des Ajoncs, 22300 Lannion", "Lannion"],
@@ -142,8 +143,8 @@ export class JeuDemonstrationService {
   async effacer(): Promise<{ lots: number; negoces: number; artisans: number }> {
     const p = this.prisma;
     const lots = await p.lotGroupe.deleteMany({ where: { cle: { startsWith: "demo-" } } });
-    const negoces = await p.negoce.deleteMany({ where: { email: { endsWith: `@${DOMAINE_DEMO}` } } });
-    const users = await p.user.findMany({ where: { email: { endsWith: `@${DOMAINE_DEMO}` } }, select: { id: true } });
+    const negoces = await p.negoce.deleteMany({ where: { OR: emailsDemo() } });
+    const users = await p.user.findMany({ where: { OR: emailsDemo() }, select: { id: true } });
     const entreprises = await p.membership.findMany({ where: { userId: { in: users.map((u) => u.id) } }, select: { companyId: true } });
     await p.company.deleteMany({ where: { id: { in: entreprises.map((e) => e.companyId) } } });
     const artisans = await p.user.deleteMany({ where: { id: { in: users.map((u) => u.id) } } });

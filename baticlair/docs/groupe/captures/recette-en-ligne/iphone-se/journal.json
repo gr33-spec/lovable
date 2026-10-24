@@ -1,0 +1,563 @@
+{
+  "appareil": "se",
+  "base": "https://test.mobiiz.fr",
+  "date": "2026-10-24T21:03:16.919Z",
+  "etapes": [
+    {
+      "n": 1,
+      "etape": "Visiteur : landing",
+      "statut": "ok",
+      "detail": "",
+      "capture": "01-visiteur-landing.jpg",
+      "ms": 5835
+    },
+    {
+      "n": 2,
+      "etape": "Visiteur : tarifs",
+      "statut": "ok",
+      "detail": "",
+      "capture": "02-visiteur-tarifs.jpg",
+      "ms": 1628
+    },
+    {
+      "n": 3,
+      "etape": "Visiteur : inscription",
+      "statut": "ok",
+      "detail": "",
+      "capture": "03-visiteur-inscription.jpg",
+      "ms": 1665
+    },
+    {
+      "n": 4,
+      "etape": "Visiteur : connexion",
+      "statut": "ok",
+      "detail": "",
+      "capture": "04-visiteur-connexion.jpg",
+      "ms": 2484
+    },
+    {
+      "n": 5,
+      "etape": "Visiteur : mot de passe oublié",
+      "statut": "ok",
+      "detail": "",
+      "capture": "05-visiteur-mot-de-passe-oublie.jpg",
+      "ms": 1717
+    },
+    {
+      "n": 6,
+      "etape": "Visiteur : CGU",
+      "statut": "ok",
+      "detail": "",
+      "capture": "06-visiteur-cgu.jpg",
+      "ms": 1599
+    },
+    {
+      "n": 7,
+      "etape": "Visiteur : mentions légales",
+      "statut": "ok",
+      "detail": "",
+      "capture": "07-visiteur-mentions-legales.jpg",
+      "ms": 1586
+    },
+    {
+      "n": 8,
+      "etape": "Visiteur : confidentialité",
+      "statut": "ok",
+      "detail": "",
+      "capture": "08-visiteur-confidentialite.jpg",
+      "ms": 1624
+    },
+    {
+      "n": 9,
+      "etape": "Visiteur : conditions négoce",
+      "statut": "ok",
+      "detail": "",
+      "capture": "09-visiteur-conditions-negoce.jpg",
+      "ms": 1740
+    },
+    {
+      "n": 10,
+      "etape": "Visiteur : connexion négoce",
+      "statut": "ok",
+      "detail": "",
+      "capture": "10-visiteur-connexion-negoce.jpg",
+      "ms": 1719
+    },
+    {
+      "n": 11,
+      "etape": "Visiteur : adresse inconnue",
+      "statut": "ok",
+      "detail": "« Page introuvable »",
+      "capture": "11-visiteur-adresse-inconnue.jpg",
+      "ms": 1445
+    },
+    {
+      "n": 12,
+      "etape": "Landing : accroche, prix, inscription, aucune démo d'office",
+      "statut": "ok",
+      "detail": "",
+      "capture": "12-landing-accroche-prix-inscription-aucune-demo-d-.jpg",
+      "ms": 1620
+    },
+    {
+      "n": 13,
+      "etape": "Landing : « Voir comment ça marche (30 s) », trois métiers, Passer",
+      "statut": "ok",
+      "detail": "",
+      "capture": "13-landing-voir-comment-ca-marche-30-s-trois-metier.jpg",
+      "ms": 334
+    },
+    {
+      "n": 14,
+      "etape": "Inscription artisan",
+      "statut": "ok",
+      "detail": "delivered+artisan-se-mvmvmpf7@resend.dev",
+      "capture": "14-inscription-artisan.jpg",
+      "ms": 3582
+    },
+    {
+      "n": 15,
+      "etape": "Guide : trois écrans, prochaine clôture, « Déposer ma première liste »",
+      "statut": "ok",
+      "detail": "Prochaine clôture : dimanche 1 novembre à 12 h",
+      "capture": "15-guide-trois-ecrans-prochaine-cloture-deposer-ma-.jpg",
+      "ms": 870
+    },
+    {
+      "n": 16,
+      "etape": "Guide : ne revient pas ; « Revoir le guide » dans le menu",
+      "statut": "ok",
+      "detail": "",
+      "capture": "16-guide-ne-revient-pas-revoir-le-guide-dans-le-men.jpg",
+      "ms": 7459
+    },
+    {
+      "n": 17,
+      "etape": "E-mail réel : confirmer l'adresse",
+      "statut": "bug",
+      "detail": "page.goto: Protocol error (Page.navigate): Cannot navigate to invalid URL Call log: \u001b[2m  - navigating to \"confirm\", waiting until \"networkidle\"\u001b[22m ",
+      "capture": "17-e-mail-reel-confirmer-l-adresse-bug.jpg",
+      "ms": 451
+    },
+    {
+      "n": 18,
+      "etape": "Commande commune : SIRET et adresse",
+      "statut": "ok",
+      "detail": "",
+      "capture": "18-commande-commune-siret-et-adresse.jpg",
+      "ms": 5231
+    },
+    {
+      "n": 19,
+      "etape": "Dépôt d'une liste (photo manuscrite), vraie lecture",
+      "statut": "ok",
+      "detail": "5 lignes",
+      "capture": "19-depot-d-une-liste-photo-manuscrite-vraie-lecture.jpg",
+      "ms": 10367
+    },
+    {
+      "n": 20,
+      "etape": "Liste : ajouter à la commande commune",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /^Ajouter à la commande d/ }).getByRole('radio', { name: 'Un chantier signé' })\u001b[22m ",
+      "capture": "20-liste-ajouter-a-la-commande-commune-bug.jpg",
+      "ms": 30350
+    },
+    {
+      "n": 21,
+      "etape": "Dépôt d'un devis (PDF), vraie lecture, questions, liste",
+      "statut": "ok",
+      "detail": "7 lignes",
+      "capture": "21-depot-d-un-devis-pdf-vraie-lecture-questions-lis.jpg",
+      "ms": 61484
+    },
+    {
+      "n": 22,
+      "etape": "Ton chantier : aperçu du PDF fournisseur",
+      "statut": "ok",
+      "detail": "",
+      "capture": "22-ton-chantier-apercu-du-pdf-fournisseur.jpg",
+      "ms": 1595
+    },
+    {
+      "n": 23,
+      "etape": "Accueil : mettre son négoce dans la boucle",
+      "statut": "ok",
+      "detail": "",
+      "capture": "23-accueil-mettre-son-negoce-dans-la-boucle.jpg",
+      "ms": 4735
+    },
+    {
+      "n": 24,
+      "etape": "E-mail réel : invitation du négoce",
+      "statut": "ok",
+      "detail": "« Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès »",
+      "capture": "24-e-mail-reel-invitation-du-negoce.jpg",
+      "ms": 451
+    },
+    {
+      "n": 25,
+      "etape": "Négoce : créer son accès depuis l'invitation",
+      "statut": "ok",
+      "detail": "Vous recevrez la prochaine grille de votre secteur à la clôture du 1er novembre à 12 h.",
+      "capture": "25-negoce-creer-son-acces-depuis-l-invitation.jpg",
+      "ms": 3223
+    },
+    {
+      "n": 26,
+      "etape": "Négoce : son espace (prochaine clôture, aucun nom d'artisan)",
+      "statut": "ok",
+      "detail": "",
+      "capture": "26-negoce-son-espace-prochaine-cloture-aucun-nom-d-.jpg",
+      "ms": 3485
+    },
+    {
+      "n": 27,
+      "etape": "Abonnement : essai et deux formules",
+      "statut": "ok",
+      "detail": "",
+      "capture": "27-abonnement-essai-et-deux-formules.jpg",
+      "ms": 2074
+    },
+    {
+      "n": 28,
+      "etape": "Stripe : carte refusée (4000 0000 0000 0002)",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 60000ms exceeded. Call log: \u001b[2m  - waiting for getByText(/refusée|declined/i).first() to be visible\u001b[22m ",
+      "capture": "28-stripe-carte-refusee-4000-0000-0000-0002-bug.jpg",
+      "ms": 64421
+    },
+    {
+      "n": 29,
+      "etape": "Stripe : carte acceptée (4242), retour « Abonné au mois »",
+      "statut": "bug",
+      "detail": "page.waitForURL: Timeout 90000ms exceeded. =========================== logs =========================== waiting for navigation until \"load\" ============================================================",
+      "capture": "29-stripe-carte-acceptee-4242-retour-abonne-au-mois.jpg",
+      "ms": 91209
+    },
+    {
+      "n": 30,
+      "etape": "Factures : la facture du mois, téléchargeable",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('tab', { name: 'Mes factures' })\u001b[22m ",
+      "capture": "30-factures-la-facture-du-mois-telechargeable-bug.jpg",
+      "ms": 30049
+    },
+    {
+      "n": 31,
+      "etape": "Passage à l'annuel au prorata",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('tab', { name: 'Mon abonnement' })\u001b[22m ",
+      "capture": "31-passage-a-l-annuel-au-prorata-bug.jpg",
+      "ms": 30056
+    },
+    {
+      "n": 32,
+      "etape": "Résiliation en deux clics",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Résilier' })\u001b[22m ",
+      "capture": "32-resiliation-en-deux-clics-bug.jpg",
+      "ms": 30063
+    },
+    {
+      "n": 33,
+      "etape": "E-mails réels de l'abonnement",
+      "statut": "ok",
+      "detail": "« Confirme ton adresse e-mail »",
+      "capture": "33-e-mails-reels-de-l-abonnement.jpg",
+      "ms": 63913
+    },
+    {
+      "n": 34,
+      "etape": "Menu : « Essayer avec un chantier fictif »",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 60000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Liste des fournitures' }).first() to be visible\u001b[22m ",
+      "capture": "34-menu-essayer-avec-un-chantier-fictif-bug.jpg",
+      "ms": 65023
+    },
+    {
+      "n": 35,
+      "etape": "Écran : mes chantiers",
+      "statut": "ok",
+      "detail": "",
+      "capture": "35-ecran-mes-chantiers.jpg",
+      "ms": 3053
+    },
+    {
+      "n": 36,
+      "etape": "Écran : fournisseurs",
+      "statut": "ok",
+      "detail": "",
+      "capture": "36-ecran-fournisseurs.jpg",
+      "ms": 2131
+    },
+    {
+      "n": 37,
+      "etape": "Écran : formules",
+      "statut": "ok",
+      "detail": "",
+      "capture": "37-ecran-formules.jpg",
+      "ms": 2433
+    },
+    {
+      "n": 38,
+      "etape": "Écran : compte",
+      "statut": "ok",
+      "detail": "",
+      "capture": "38-ecran-compte.jpg",
+      "ms": 2285
+    },
+    {
+      "n": 39,
+      "etape": "Compte : export JSON et PDF",
+      "statut": "ok",
+      "detail": "mobiiz-mes-donnees-2026-10-24.json",
+      "capture": "39-compte-export-json-et-pdf.jpg",
+      "ms": 3266
+    },
+    {
+      "n": 40,
+      "etape": "Compte : suppression (en tapant SUPPRIMER)",
+      "statut": "bug",
+      "detail": "toujours connecté",
+      "capture": "40-compte-suppression-en-tapant-supprimer-bug.jpg",
+      "ms": 2646
+    }
+  ],
+  "anomalies": [
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/tarifs",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/inscription",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/connexion",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/mot-de-passe-oublie",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/cgu",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/mentions-legales",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "visiteur mentions légales",
+      "url": "https://test.mobiiz.fr/mentions-legales",
+      "type": "reste",
+      "texte": "information légale à compléter : « ité par BATI INVEST, SARL au capital de [A COMPLETER] €, immatriculée au RCS de  »"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/confidentialite",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "visiteur confidentialité",
+      "url": "https://test.mobiiz.fr/confidentialite",
+      "type": "reste",
+      "texte": "information légale à compléter : « ubazlanec, SIREN 910 796 325. Contact : [A COMPLETER]. BATI INVEST n'a pas de dé »"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/conditions-negoce",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/negoce/connexion",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/nulle-part",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/nulle-part",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/groupe",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/groupe",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "negoce-se",
+      "url": "https://test.mobiiz.fr/negoce/rejoindre/eyJzIjoiaW52aXRhdGlvbiIsImMiOiIwMWExNmZiMy03YjYyLTc3N2EtODEwZi1lOWFhYWFiNDkwZTAiLCJlIjoxODAwNjUxMzk1fQ.IClkBfU7g9saEfd3jePH30Ix3SglcvYgPWl03BmiKQU",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "negoce-se",
+      "url": "https://test.mobiiz.fr/negoce",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "negoce-se",
+      "url": "https://test.mobiiz.fr/negoce/conditions",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/abonnement",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1C1KN20PWcEzfDBMb0PHtNYNDk311BTaBL5D1DN1gQTLjfXji7HHlVSSZ#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Access to fetch at 'https://payments-eu.amazon.com/amazonpayMerchantId?ledgerCurrency=EUR&externalPartnerId=A2LYRA14DQME2H&externalMerchantDomain=checkout.stripe.com&isSandbox=true' from origin 'https://b.stripecdn.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is pres"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1C1KN20PWcEzfDBMb0PHtNYNDk311BTaBL5D1DN1gQTLjfXji7HHlVSSZ#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1C1KN20PWcEzfDBMb0PHtNYNDk311BTaBL5D1DN1gQTLjfXji7HHlVSSZ#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Access to fetch at 'https://payments-eu.amazon.com/alaMessage?merchantId=undefined&ledgerCurrency=EUR&affirmEnabled=false&amount=68.51&pageType=banner&useBestTerms=true&isSandbox=true&partnerId=A2LYRA14DQME2H&merchantDomain=checkout.stripe.com' from origin 'https://b.stripecdn.com' has been blocked "
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1C1KN20PWcEzfDBMb0PHtNYNDk311BTaBL5D1DN1gQTLjfXji7HHlVSSZ#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1C1KN20PWcEzfDBMb0PHtNYNDk311BTaBL5D1DN1gQTLjfXji7HHlVSSZ#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/fournisseurs",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "fournisseurs",
+      "url": "https://test.mobiiz.fr/fournisseurs",
+      "type": "reste",
+      "texte": "« BatiClair » visible : « Atlantique (démo) Sophie materiaux@demo.baticlair.fr Fournisseur fictif : il ré »"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/formules",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/compte",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/compte",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/",
+      "type": "console",
+      "texte": "Refused to load the script 'https://vercel.live/_next-live/feedback/feedback.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    }
+  ]
+}

@@ -9,7 +9,7 @@ import type { CommandeDuMoisService, JeuDemonstrationService } from "../../group
  * LA DÉMO ADMIN (Greg, 24 octobre 2026) : jouer un cycle complet sur iPhone sans attendre le calendrier. « Créer un jeu
  * de test » met 5 faux artisans dans le 22, chacun sa liste déposée dans la commande ouverte, et 3 faux négoces inscrits ;
  * les boutons font avancer le cycle (clôture, réponses, résultats) et l'abonnement de l'admin (fin d'essai, échec de
- * paiement). Tout ce qui est faux porte `@demo.baticlair.fr` : exclu des statistiques, effacé d'un bouton.
+ * paiement). Tout ce qui est faux porte `@demo.mobiiz.fr` : exclu des statistiques, effacé d'un bouton.
  */
 export const ZONE_DEMO = "22";
 

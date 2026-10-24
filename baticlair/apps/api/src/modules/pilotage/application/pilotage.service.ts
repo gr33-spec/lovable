@@ -1,3 +1,4 @@
+import { DOMAINE_DEMO, emailsDemo } from "../../../platform/demo-domaine.js";
 import { createHash, randomInt } from "node:crypto";
 import { NOM_APP, REGLAGES_PILOTAGE_DEFAUT, eurosEntiers, flecheDe, rentabilite, revenuMensuelRecurrent, taux, type Formule, type ReglagesPilotage } from "@baticlair/domain";
 import type { AppConfig } from "../../../platform/config/config.js";
@@ -9,7 +10,7 @@ import type { AuthenticatedUser } from "../../identity/index.js";
 const JOUR = 86_400_000;
 const CLE_REGLAGES = "pilotage:reglages";
 /** Le domaine des comptes de démonstration et des faux comptes du jeu de test : jamais comptés. */
-export const DOMAINE_FACTICE = "@demo.baticlair.fr";
+export const DOMAINE_FACTICE = `@${DOMAINE_DEMO}`;
 const VALIDITE_CODE_MS = 10 * 60_000;
 const VALIDITE_SESSION_MS = 12 * 3_600_000;
 
@@ -123,7 +124,7 @@ export class PilotageService {
 
   /** Les entreprises des comptes de démonstration et du jeu de test : exclues de tous les chiffres. */
   private async factices(): Promise<string[]> {
-    const m = await this.prisma.membership.findMany({ where: { user: { email: { endsWith: DOMAINE_FACTICE } } }, select: { companyId: true } });
+    const m = await this.prisma.membership.findMany({ where: { user: { OR: emailsDemo() } }, select: { companyId: true } });
     return [...new Set(m.map((x) => x.companyId))];
   }
 

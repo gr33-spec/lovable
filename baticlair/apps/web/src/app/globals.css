@@ -167,6 +167,12 @@ body {
   outline: 3px solid var(--color-accent);
   outline-offset: 2px;
 }
+/* Un champ posé dans un cadre qui s'allume lui-même (focus-within) : pas de second cadre carré par-dessus (recette en
+   ligne du 25 octobre 2026, la case « Ta valeur » des questions). */
+input.outline-none:focus-visible,
+textarea.outline-none:focus-visible {
+  outline: none;
+}
 /* Les titres et les grands chiffres en Bricolage Grotesque. */
 h1,
 h2,

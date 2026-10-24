@@ -321,7 +321,7 @@ function ReglagesCarte() {
 
 /**
  * LA DÉMO (Greg, 24 octobre 2026) : jouer un cycle complet sans attendre le calendrier, en mode test seulement. Les faux
- * comptes (`@demo.baticlair.fr`) sont exclus des chiffres ; chaque geste est journalisé ; « Tout effacer » les retire.
+ * comptes (`@demo.mobiiz.fr`) sont exclus des chiffres ; chaque geste est journalisé ; « Tout effacer » les retire.
  */
 const GESTES = [
   { geste: "jeu", label: "Créer un jeu de test", fait: (r: Record<string, number>) => `${r.artisans} faux artisans et ${r.negoces} faux négoces dans le 22, ${r.lignes} lignes déposées.` },

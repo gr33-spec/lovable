@@ -156,7 +156,7 @@ async function emailsVers(adresse, attendre = null, timeout = 90000) {
 }
 const lienDans = (mail, motif) => {
   const s = `${mail.text ?? ""}\n${mail.html ?? ""}`;
-  const m = new RegExp(`https://[^\\s"'<>]*${motif}[^\\s"'<>]*`).exec(s);
+  const m = new RegExp(`https://[^\\s"'<>]*(?:${motif})[^\\s"'<>]*`).exec(s);
   return m ? m[0].replace(/&amp;/g, "&") : null;
 };
 
@@ -295,7 +295,7 @@ await etape("Liste : ajouter à la commande commune", page, async () => {
   const boxes = list.getByRole("checkbox", { name: /^Ajouter à la commande : / }).and(page.locator(":enabled"));
   verif((await boxes.count()) > 0, "aucune ligne à cocher (lignes vagues ?)");
   for (const box of await boxes.all()) await box.check();
-  const bar = page.getByRole("region", { name: /^Ajouter à la commande d/ });
+  const bar = page.getByRole("region", { name: /^Ajouter à la commande/ }).last();
   await bar.getByRole("radio", { name: "Un chantier signé" }).click();
   await bar.getByRole("button", { name: "Ajouter" }).click();
   await voir(page.getByRole("region", { name: /^Dans la commande d/ }));
@@ -386,6 +386,10 @@ async function payerStripe(carte) {
   if (await nom.count()) await nom.fill("Jean Recette");
   const pays = page.locator("#billingCountry");
   if (await pays.count()) await pays.selectOption("FR").catch(() => undefined);
+  for (const [id, v] of [["#billingAddressLine1", "3 rue des Ajoncs"], ["#billingLocality", "Lannion"]]) {
+    const champ = page.locator(id);
+    if ((await champ.count()) && (await champ.isVisible())) await champ.fill(v);
+  }
   const cp = page.locator("#billingPostalCode");
   if ((await cp.count()) && (await cp.isVisible())) await cp.fill("22300");
   await page.locator('[data-testid="hosted-payment-submit-button"]').click();
@@ -452,7 +456,8 @@ await etape("Menu : « Essayer avec un chantier fictif »", page, async () => {
   await page.getByRole("button", { name: "Mon menu" }).click();
   await page.getByRole("menuitem", { name: "Essayer avec un chantier fictif" }).click();
   await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60000 });
-  await voir(page.getByRole("region", { name: "Liste des fournitures" }), 60000);
+  await voir(page.getByRole("region", { name: /^(Liste des fournitures|Les questions)$/ }), 60000);
+  await zeroReste(page, "chantier fictif");
 });
 for (const [nom, chemin] of [["mes chantiers", "/chantiers"], ["fournisseurs", "/fournisseurs"], ["formules", "/formules"], ["compte", "/compte"]]) {
   await etape(`Écran : ${nom}`, page, async () => ouvrir(page, chemin, nom));
@@ -473,7 +478,8 @@ await etape("Compte : suppression (en tapant SUPPRIMER)", page, async () => {
   await page.getByRole("button", { name: "Supprimer définitivement" }).click();
   await voir(page.getByText("Ton compte et toutes ses données ont été supprimés."), 30000);
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
-  verif(await page.getByRole("link", { name: "Je rejoins le mouvement" }).count(), "toujours connecté");
+  verif((await page.getByRole("link", { name: "Je rejoins le mouvement" }).count()) || /\/connexion/.test(page.url()), "toujours connecté");
+  verif(!(await page.getByRole("button", { name: "Mon menu" }).count()), "l'app s'ouvre encore");
 });
 
 await browser.close();

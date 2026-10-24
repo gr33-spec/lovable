@@ -26,7 +26,7 @@ describe("mode démo", () => {
     // Les 3 fournisseurs fictifs sont dans le carnet, une seule fois même après un second chantier démo.
     await agent.post("/v1/demo/project").expect(201);
     const suppliers = (await agent.get("/v1/suppliers")).body.items as { id: string; email: string }[];
-    expect(suppliers.filter((s) => s.email.endsWith("@demo.baticlair.fr"))).toHaveLength(3);
+    expect(suppliers.filter((s) => s.email.endsWith("@demo.mobiiz.fr"))).toHaveLength(3);
 
     // Liste de matériaux (IA simulée), validée.
     const takeoff = (await agent.post(`/v1/documents/${docs[0].id}/takeoff`).expect(201)).body;

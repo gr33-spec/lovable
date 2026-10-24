@@ -1,3 +1,4 @@
+import { emailsDemo } from "../../../platform/demo-domaine.js";
 import { createHash, createHmac, randomUUID } from "node:crypto";
 import {
   affichageDeLaCommande,
@@ -536,7 +537,7 @@ export class CommandeDuMoisService {
       if (chiffrees.length === 0) continue;
       publies++;
       const choix = new Map((await this.prisma.choixArtisan.findMany({ where: { cycleId: c.id }, select: { companyId: true, totalHt: true } })).map((x) => [x.companyId, Number(x.totalHt)]));
-      const demo = new Set((await this.prisma.membership.findMany({ where: { companyId: { in: commandes.map((x) => x.companyId) }, user: { email: { endsWith: "@demo.baticlair.fr" } } }, select: { companyId: true } })).map((m) => m.companyId));
+      const demo = new Set((await this.prisma.membership.findMany({ where: { companyId: { in: commandes.map((x) => x.companyId) }, user: { OR: emailsDemo() } }, select: { companyId: true } })).map((m) => m.companyId));
       for (const moi of commandes) {
         if (demo.has(moi.companyId)) continue;
         const comp = comparatifDeLArtisan(moi, chiffrees, classement);
@@ -637,7 +638,7 @@ export class CommandeDuMoisService {
   /** Clôture, envoi de la grille, relance de la veille, résultats ; puis les ajouts en attente. Rejouable sans doublon. */
   // ---------------------------------------------------------------------------------------------------------------
   // La démo admin (Greg, 24 octobre 2026) : jouer un cycle complet sans attendre le calendrier. Jamais en production
-  // (la garde est dans le contrôleur) ; seuls les faux comptes `@demo.baticlair.fr` y sont touchés.
+  // (la garde est dans le contrôleur) ; seuls les faux comptes `@demo.mobiiz.fr` y sont touchés.
   // ---------------------------------------------------------------------------------------------------------------
 
   /** Un faux artisan dépose ses lignes dans la commande ouverte de son département, sans passer par une vraie liste. */

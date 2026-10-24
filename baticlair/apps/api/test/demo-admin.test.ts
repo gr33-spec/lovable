@@ -53,7 +53,7 @@ describe("la démo admin", () => {
 
     const clos = (await greg.agent.post("/v1/admin/pilotage/demo/cloturer").expect(200)).body;
     expect(clos).toMatchObject({ clos: 1, grillesEnvoyees: 3 });
-    expect(ctx.emails.sent.filter((m) => /^negoce-test-\d@demo\.baticlair\.fr$/.test(m.to))).toHaveLength(3);
+    expect(ctx.emails.sent.filter((m) => /^negoce-test-\d@demo\.mobiiz\.fr$/.test(m.to))).toHaveLength(3);
     expect((await greg.agent.post("/v1/admin/pilotage/demo/repondre").expect(200)).body).toEqual({ reponses: 3 });
     expect((await greg.agent.post("/v1/admin/pilotage/demo/publier").expect(200)).body).toMatchObject({ resultats: 1 });
     const vue = (await greg.agent.get("/v1/commande-du-mois").expect(200)).body;
@@ -68,7 +68,7 @@ describe("la démo admin", () => {
 
     const efface = (await greg.agent.delete("/v1/admin/pilotage/demo").expect(200)).body;
     expect(efface).toMatchObject({ artisans: 5, negoces: 3, comptesNegoce: 3 });
-    expect(await ctx.prisma.user.count({ where: { email: { endsWith: "@demo.baticlair.fr" } } })).toBe(0);
+    expect(await ctx.prisma.user.count({ where: { email: { endsWith: "@demo.mobiiz.fr" } } })).toBe(0);
     // Greg et sa liste restent.
     expect(await ctx.prisma.besoin.count({ where: { companyId: greg.companyId } })).toBeGreaterThan(0);
   });

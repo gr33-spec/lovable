@@ -11,10 +11,12 @@ import { NOM_APP } from "@/lib/nom";
  * Mode démo : tester tout le parcours seul, avec un chantier et des
  * fournisseurs fictifs. Les fournisseurs fictifs se reconnaissent à leur adresse.
  */
-export const DEMO_EMAIL_DOMAIN = "demo.baticlair.fr";
+export const DEMO_EMAIL_DOMAIN = "demo.mobiiz.fr";
+/** L'ancien domaine des fournisseurs fictifs (avant Mobiiz) reste reconnu sur les chantiers de démonstration déjà créés. */
+const DOMAINES_DEMO = [DEMO_EMAIL_DOMAIN, "demo.baticlair.fr"];
 
 export function isDemoSupplier(email: string): boolean {
-  return email.toLowerCase().endsWith(`@${DEMO_EMAIL_DOMAIN}`);
+  return DOMAINES_DEMO.some((d) => email.toLowerCase().endsWith(`@${d}`));
 }
 
 const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("internal_error", 500));

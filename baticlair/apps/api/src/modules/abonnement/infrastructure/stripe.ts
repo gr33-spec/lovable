@@ -58,6 +58,9 @@ export class HttpStripeClient implements StripeClient {
       // Le n° de TVA de l'artisan (facultatif) et son adresse, écrits sur la facture.
       "tax_id_collection[enabled]": true,
       billing_address_collection: "required",
+      // Toujours en euros, le prix des CGU (recette en ligne du 25 octobre 2026 : la conversion automatique de Stripe
+      // affichait des dollars à un navigateur situé hors de France).
+      "adaptive_pricing[enabled]": false,
       locale: "fr",
       success_url: c.succes,
       cancel_url: c.annulation,
