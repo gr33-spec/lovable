@@ -5,6 +5,11 @@
 //
 //   RESEND_API_KEY=… node docs/groupe/recette-en-ligne/recette.mjs <se|ordi> <dossier-captures>
 //
+// RECETTE_ADMIN=1 : le compte est l'admin de test de la prévisualisation (`delivered+admin-recette@resend.dev`, dans
+// GROUPE_ADMINS de la branche seulement, à retirer avant la production : MISE-EN-PROD.md, section 0) et le cycle complet
+// se joue en ligne : tableau de bord (code par e-mail), jeu de test, clôture, réponses, résultats, commande, recommande,
+// fin d'essai, paywall, paiement, échec de paiement, puis tout est effacé.
+//
 // Le navigateur doit faire confiance au certificat du proxy de la session s'il y en a un (magasin NSS), jamais
 // `ignoreHTTPSErrors`.
 import { chromium, devices } from "/opt/node22/lib/node_modules/playwright/index.mjs";
@@ -166,7 +171,8 @@ const lienDans = (mail, motif) => {
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 const contexte = await browser.newContext({ ...options, locale: "fr-FR", timezoneId: "Europe/Paris", acceptDownloads: true });
 const page = surveiller(await contexte.newPage(), `artisan-${APPAREIL}`);
-const EMAIL = `delivered+artisan-${APPAREIL}-${ts}@resend.dev`;
+const ADMIN = process.env.RECETTE_ADMIN === "1";
+const EMAIL = ADMIN ? "delivered+admin-recette@resend.dev" : `delivered+artisan-${APPAREIL}-${ts}@resend.dev`;
 const NEGOCE = `delivered+negoce-${APPAREIL}-${ts}@resend.dev`;
 const ENTREPRISE = `Toitures Recette ${APPAREIL === "se" ? "SE" : "Ordi"}`;
 
@@ -380,6 +386,80 @@ await etape("Négoce : son espace (prochaine clôture, aucun nom d'artisan)", pa
 });
 await ctxN.close();
 
+// 7 bis. L'admin de test : le cycle complet en ligne (Greg, 25 octobre 2026 : « autorisé en prévisualisation seulement »).
+const demo = () => page.getByRole("region", { name: "Démo" });
+async function geste(label, attendu) {
+  await demo().getByRole("button", { name: label }).click();
+  await voir(demo().getByRole("status").filter({ hasText: attendu }), 90000);
+  return (await demo().getByRole("status").innerText()).replace(/\s+/g, " ");
+}
+if (ADMIN) {
+  await etape("Admin : tableau de bord, code reçu par e-mail", page, async () => {
+    await ouvrir(page, "/admin/pilotage", "pilotage");
+    const depuis = Date.now();
+    await page.getByRole("button", { name: "Recevoir mon code" }).click();
+    await voir(page.getByLabel("Code reçu par e-mail"));
+    const mails = await emailsVers(EMAIL, (m) => /code d'accès au pilotage/.test(m.subject) && Date.parse(m.created_at) >= depuis - 5000);
+    const mail = mails.filter((m) => /code d'accès au pilotage/.test(m.subject)).at(-1);
+    verif(mail, "pas de code reçu");
+    await page.getByLabel("Code reçu par e-mail").fill(/(\d{6})/.exec(mail.text)[1]);
+    await page.getByRole("button", { name: "Ouvrir le tableau de bord" }).click();
+    for (const titre of ["Utilisateurs actifs", "Abonnés payants", "Revenu mensuel récurrent", "Coût IA du mois"]) await voir(page.getByText(titre, { exact: true }));
+    await voir(demo());
+    await zeroReste(page, "tableau de bord");
+  });
+  await etape("Admin : jeu de test (5 faux artisans, 3 faux négoces)", page, async () => {
+    await demo().getByRole("button", { name: "Tout effacer" }).click();
+    await voir(demo().getByRole("status").filter({ hasText: "Effacé" }), 60000);
+    return geste("Créer un jeu de test", "faux artisans");
+  });
+  await etape("Admin : clôturer maintenant (grilles envoyées aux négoces)", page, async () => geste("Clôturer maintenant", "grilles envoyées"));
+  await etape("Admin : faire répondre les négoces", page, async () => geste("Faire répondre les négoces", "ont répondu"));
+  await etape("Admin : publier les résultats", page, async () => geste("Publier les résultats", "publié"));
+  await etape("Résultats : e-mail réel et prix classés dans l'app", page, async () => {
+    const mails = await emailsVers(EMAIL, (m) => /résultat|prix/i.test(m.subject) && !/code/.test(m.subject), 90000);
+    const mail = mails.filter((m) => /résultat|prix/i.test(m.subject) && !/code/.test(m.subject)).at(-1);
+    verif(mail, `pas d'e-mail de résultats (reçus : ${mails.map((m) => m.subject).join(" / ")})`);
+    await ouvrir(page, "/groupe", "résultats");
+    const prix = page.getByRole("region", { name: "Tes prix" });
+    await voir(prix.getByRole("radio"), 30000);
+    await zeroReste(page, "tes prix");
+    return `« ${mail.subject} » ; ${await prix.getByRole("radio").count()} négoces classés`;
+  });
+  await etape("Commande : le bon part au négoce choisi", page, async () => {
+    const prix = page.getByRole("region", { name: "Tes prix" });
+    await prix.getByRole("button", { name: /^Commander chez / }).first().click();
+    const confirmation = prix.getByRole("group", { name: "Confirmer la commande" });
+    await voir(confirmation.getByText(/tu transmets tes coordonnées/));
+    await confirmation.getByRole("button", { name: "Confirmer la commande" }).click();
+    await voir(prix.getByRole("status").filter({ hasText: /^Commandé chez / }), 60000);
+    return (await prix.getByRole("status").innerText()).replace(/\s+/g, " ");
+  });
+  await etape("Recommande : au prix garanti 30 jours", page, async () => {
+    await ouvrir(page, "/groupe", "garantie");
+    const garantie = page.getByRole("region", { name: /^Prix garantis jusqu'au/ }).first();
+    await voir(garantie, 30000);
+    await garantie.getByRole("button", { name: "Recommander à ce prix" }).click();
+    const form = garantie.getByRole("form", { name: "Recommander à ce prix" });
+    await form.getByRole("spinbutton").or(form.getByRole("textbox", { name: /^(?!Adresse)/ })).first().fill("10");
+    await form.getByLabel("Adresse de livraison (avec le code postal)").fill("3 rue des Ajoncs, 22300 Lannion");
+    await form.getByRole("button", { name: /^Commander chez / }).click();
+    await form.getByRole("group", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
+    await voir(garantie.getByRole("status").filter({ hasText: /^C'est commandé : bon n° / }), 60000);
+    return (await garantie.getByRole("status").innerText()).replace(/\s+/g, " ");
+  });
+  await etape("Admin : finir l'essai, puis le paywall au dépôt", page, async () => {
+    await ouvrir(page, "/admin/pilotage", "pilotage");
+    await geste("Finir l'essai", "essai est terminé");
+    await ouvrir(page, "/chantiers/nouveau", "paywall");
+    await voir(page.getByText(/Ton essai est terminé/), 30000);
+    await zeroReste(page, "paywall");
+    await ouvrir(page, "/groupe", "résultats après l'essai");
+    await voir(page.getByRole("region", { name: "Tes prix" }));
+    return "paywall au dépôt, résultats publiés toujours visibles";
+  });
+}
+
 // 8. L'abonnement, en vrai Stripe (mode test) : refusé, payé, factures, annuel, résiliation.
 async function payerStripe(carte) {
   await page.waitForURL(/checkout\.stripe\.com/, { timeout: 60000 });
@@ -408,12 +488,12 @@ async function payerStripe(carte) {
 }
 await etape("Abonnement : essai et deux formules", page, async () => {
   await ouvrir(page, "/abonnement", "abonnement");
-  await voir(page.getByText("Essai gratuit", { exact: true }));
+  await voir(page.getByText("Essai gratuit", { exact: true }).or(page.getByText(/essai est terminé/i)));
   await voir(page.getByRole("radio", { name: /Annuel/ }));
   await page.getByRole("radio", { name: /Mensuel/ }).click();
 });
 await etape("Stripe : carte refusée (4000 0000 0000 0002)", page, async () => {
-  await page.getByRole("button", { name: "M'abonner dès maintenant" }).click();
+  await page.getByRole("button", { name: /^(M'abonner dès maintenant|Je continue)$/ }).first().click();
   await payerStripe("4000000000000002");
   await voir(page.getByText(/refusée|declined/i), 60000);
   return "Stripe dit le refus ; rien n'est payé";
@@ -452,6 +532,16 @@ await etape("Passage à l'annuel au prorata", page, async () => {
   await voir(page.getByText("Abonné à l'année", { exact: true }), 5000);
   await voir(page.getByText(/348 € HT par an/));
 });
+if (ADMIN) {
+  await etape("Admin : simuler un échec de paiement (grâce de 7 jours)", page, async () => {
+    await ouvrir(page, "/admin/pilotage", "pilotage");
+    await geste("Simuler un échec de paiement", "7 jours de grâce");
+    const mails = await emailsVers(EMAIL, (m) => /n'est pas passé/.test(m.subject), 60000);
+    verif(mails.some((m) => /n'est pas passé/.test(m.subject)), "pas d'e-mail d'échec");
+    await ouvrir(page, "/abonnement", "abonnement en grâce");
+    return (await page.getByRole("main").innerText()).replace(/\s+/g, " ").slice(0, 160);
+  });
+}
 await etape("Résiliation en deux clics", page, async () => {
   await page.getByRole("button", { name: "Résilier" }).click();
   await page.getByRole("button", { name: "Oui, résilier" }).click();
@@ -484,6 +574,14 @@ await etape("Compte : export JSON et PDF", page, async () => {
   verif(/pdf/.test(pdf.headers()["content-type"] ?? ""), `export PDF ${pdf.status()}`);
   return nom;
 });
+if (ADMIN) {
+  await etape("Admin : tout effacer (faux comptes)", page, async () => {
+    await ouvrir(page, "/admin/pilotage", "pilotage");
+    await demo().getByRole("button", { name: "Tout effacer" }).click();
+    await voir(demo().getByRole("status").filter({ hasText: "Effacé" }), 60000);
+    return (await demo().getByRole("status").innerText()).replace(/\s+/g, " ");
+  });
+}
 await etape("Compte : suppression (en tapant SUPPRIMER)", page, async () => {
   await page.getByRole("button", { name: "Supprimer mon compte" }).click();
   await page.getByLabel("Tapez SUPPRIMER pour confirmer").fill("SUPPRIMER");

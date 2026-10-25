@@ -115,10 +115,22 @@ export class AnthropicDocumentReader {
         return { ...base, usage: NO_USAGE, status: "timeout", output: null, errorCode: "timeout", durationMs };
       }
       if (error instanceof APIError) {
-        const code = error.status ? `http_${error.status}` : "connection";
+        // Recette du 25 octobre 2026 : « http_400 » seul ne disait pas la cause (crédit épuisé ? requête refusée ?). Le motif
+        // d'Anthropic (type et message, jamais la clé) suit le code, en clair dans le journal des appels.
+        const code = error.status ? `http_${error.status}${motifAnthropic(error)}` : "connection";
         return { ...base, usage: NO_USAGE, status: "provider_error", output: null, errorCode: code, durationMs };
       }
       throw error;
     }
   }
+}
+
+/** « : invalid_request_error, Your credit balance is too low… » : le type et le message d'une erreur d'Anthropic, 160 caractères au plus. */
+export function motifAnthropic(error: { error?: unknown }): string {
+  const corps = error.error as { error?: { type?: unknown; message?: unknown }; type?: unknown; message?: unknown } | undefined;
+  const e = corps?.error ?? corps;
+  const type = typeof e?.type === "string" ? e.type : "";
+  const message = typeof e?.message === "string" ? e.message.replace(/\s+/g, " ").trim() : "";
+  const motif = [type, message].filter(Boolean).join(", ");
+  return motif ? `: ${motif}`.slice(0, 162) : "";
 }
