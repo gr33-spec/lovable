@@ -1,7 +1,7 @@
 {
   "appareil": "se",
   "base": "https://test.mobiiz.fr",
-  "date": "2026-10-25T05:59:46.779Z",
+  "date": "2026-10-25T07:15:35.621Z",
   "etapes": [
     {
       "n": 1,
@@ -9,7 +9,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "01-visiteur-landing.jpg",
-      "ms": 7135
+      "ms": 3659
     },
     {
       "n": 2,
@@ -17,7 +17,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "02-visiteur-tarifs.jpg",
-      "ms": 1627
+      "ms": 1531
     },
     {
       "n": 3,
@@ -25,7 +25,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "03-visiteur-inscription.jpg",
-      "ms": 1688
+      "ms": 1502
     },
     {
       "n": 4,
@@ -33,7 +33,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "04-visiteur-connexion.jpg",
-      "ms": 2627
+      "ms": 1636
     },
     {
       "n": 5,
@@ -41,7 +41,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "05-visiteur-mot-de-passe-oublie.jpg",
-      "ms": 1733
+      "ms": 1531
     },
     {
       "n": 6,
@@ -49,7 +49,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "06-visiteur-cgu.jpg",
-      "ms": 1735
+      "ms": 1496
     },
     {
       "n": 7,
@@ -57,7 +57,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "07-visiteur-mentions-legales.jpg",
-      "ms": 1615
+      "ms": 1500
     },
     {
       "n": 8,
@@ -65,7 +65,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "08-visiteur-confidentialite.jpg",
-      "ms": 1700
+      "ms": 1482
     },
     {
       "n": 9,
@@ -73,7 +73,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "09-visiteur-conditions-negoce.jpg",
-      "ms": 1852
+      "ms": 1516
     },
     {
       "n": 10,
@@ -81,7 +81,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "10-visiteur-connexion-negoce.jpg",
-      "ms": 1682
+      "ms": 1516
     },
     {
       "n": 11,
@@ -89,7 +89,7 @@
       "statut": "ok",
       "detail": "« Page introuvable »",
       "capture": "11-visiteur-adresse-inconnue.jpg",
-      "ms": 1481
+      "ms": 1495
     },
     {
       "n": 12,
@@ -97,7 +97,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "12-landing-accroche-prix-inscription-aucune-demo-d-.jpg",
-      "ms": 1467
+      "ms": 1469
     },
     {
       "n": 13,
@@ -105,7 +105,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "13-landing-voir-comment-ca-marche-30-s-trois-metier.jpg",
-      "ms": 404
+      "ms": 416
     },
     {
       "n": 14,
@@ -113,7 +113,7 @@
       "statut": "ok",
       "detail": "delivered+admin-recette@resend.dev",
       "capture": "14-inscription-artisan.jpg",
-      "ms": 3158
+      "ms": 3181
     },
     {
       "n": 15,
@@ -121,7 +121,7 @@
       "statut": "ok",
       "detail": "Prochaine clôture : dimanche 1 novembre à 12 h",
       "capture": "15-guide-trois-ecrans-prochaine-cloture-deposer-ma-.jpg",
-      "ms": 1059
+      "ms": 640
     },
     {
       "n": 16,
@@ -129,15 +129,15 @@
       "statut": "ok",
       "detail": "",
       "capture": "16-guide-ne-revient-pas-revoir-le-guide-dans-le-men.jpg",
-      "ms": 5548
+      "ms": 6133
     },
     {
       "n": 17,
       "etape": "E-mail réel : confirmer l'adresse",
       "statut": "ok",
-      "detail": "1 e-mail(s) : « Confirme ton adresse e-mail »",
+      "detail": "7 e-mail(s) : « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Ton abonnement Mobiiz est actif », « Ton abonnement Mobiiz est actif », « Tu es passé à l'abonnement annuel Mobiiz », « Ton paiement Mobiiz n'est pas passé », « Confirme ton adresse e-mail »",
       "capture": "17-e-mail-reel-confirmer-l-adresse.jpg",
-      "ms": 2940
+      "ms": 4880
     },
     {
       "n": 18,
@@ -145,7 +145,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "18-commande-commune-siret-et-adresse.jpg",
-      "ms": 5956
+      "ms": 5617
     },
     {
       "n": 19,
@@ -153,7 +153,7 @@
       "statut": "bug",
       "detail": "page.waitForURL: Timeout 120000ms exceeded. =========================== logs =========================== waiting for navigation until \"load\" ============================================================",
       "capture": "19-depot-d-une-liste-photo-manuscrite-vraie-lecture.jpg",
-      "ms": 122296
+      "ms": 121866
     },
     {
       "n": 20,
@@ -161,7 +161,7 @@
       "statut": "bug",
       "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /^Commande commune d/ }).first() to be visible\u001b[22m ",
       "capture": "20-liste-ajouter-a-la-commande-commune-bug.jpg",
-      "ms": 20051
+      "ms": 20043
     },
     {
       "n": 21,
@@ -169,7 +169,7 @@
       "statut": "bug",
       "detail": "locator.waitFor: Timeout 240000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /Page des fournitures|Liste des fournitures/ }).or(getByRole('region', { name: 'Les questions' })).first() to be visible\u001b[22m ",
       "capture": "21-depot-d-un-devis-pdf-vraie-lecture-questions-lis.jpg",
-      "ms": 245473
+      "ms": 244044
     },
     {
       "n": 22,
@@ -177,7 +177,7 @@
       "statut": "ok",
       "detail": "pas d'aperçu sur cet écran",
       "capture": "22-ton-chantier-apercu-du-pdf-fournisseur.jpg",
-      "ms": 48
+      "ms": 47
     },
     {
       "n": 23,
@@ -185,7 +185,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "23-accueil-mettre-son-negoce-dans-la-boucle.jpg",
-      "ms": 8734
+      "ms": 4020
     },
     {
       "n": 24,
@@ -193,7 +193,7 @@
       "statut": "ok",
       "detail": "« Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès »",
       "capture": "24-e-mail-reel-invitation-du-negoce.jpg",
-      "ms": 450
+      "ms": 448
     },
     {
       "n": 25,
@@ -201,7 +201,7 @@
       "statut": "ok",
       "detail": "Vous recevrez la prochaine grille de votre secteur à la clôture du 1er novembre à 12 h.",
       "capture": "25-negoce-creer-son-acces-depuis-l-invitation.jpg",
-      "ms": 3288
+      "ms": 3316
     },
     {
       "n": 26,
@@ -209,7 +209,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "26-negoce-son-espace-prochaine-cloture-aucun-nom-d-.jpg",
-      "ms": 3581
+      "ms": 3383
     },
     {
       "n": 27,
@@ -217,23 +217,23 @@
       "statut": "ok",
       "detail": "",
       "capture": "27-admin-tableau-de-bord-code-recu-par-e-mail.jpg",
-      "ms": 4925
+      "ms": 4058
     },
     {
       "n": 28,
       "etape": "Admin : jeu de test (5 faux artisans, 3 faux négoces)",
       "statut": "ok",
-      "detail": "5 faux artisans et 3 faux négoces dans le 22, 20 lignes déposées.",
+      "detail": "5 faux artisans et 3 faux négoces dans le 22 (un généraliste, deux spécialistes), 26 lignes déposées. Ta liste de démonstration (couverture et placo) est dans la commande.",
       "capture": "28-admin-jeu-de-test-5-faux-artisans-3-faux-negoces.jpg",
-      "ms": 1264
+      "ms": 1780
     },
     {
       "n": 29,
       "etape": "Admin : clôturer maintenant (grilles envoyées aux négoces)",
       "statut": "ok",
-      "detail": "1 commande close, 9 grilles envoyées aux négoces.",
+      "detail": "1 commande close, 10 grilles envoyées aux négoces.",
       "capture": "29-admin-cloturer-maintenant-grilles-envoyees-aux-n.jpg",
-      "ms": 2919
+      "ms": 2935
     },
     {
       "n": 30,
@@ -241,7 +241,7 @@
       "statut": "ok",
       "detail": "3 négoces ont répondu (prix fictifs).",
       "capture": "30-admin-faire-repondre-les-negoces.jpg",
-      "ms": 2924
+      "ms": 3431
     },
     {
       "n": 31,
@@ -249,39 +249,39 @@
       "statut": "ok",
       "detail": "1 résultat publié : les artisans sont prévenus.",
       "capture": "31-admin-publier-les-resultats.jpg",
-      "ms": 1923
+      "ms": 2417
     },
     {
       "n": 32,
       "etape": "Résultats : e-mail réel et prix classés dans l'app",
-      "statut": "bug",
-      "detail": "pas d'e-mail de résultats (reçus : Confirme ton adresse e-mail / Ton code d'accès au pilotage Mobiiz)",
+      "statut": "ok",
+      "detail": "« Les prix sont là : Regarde ton prix livré chez chaque négoce et commande si ça te plaît. » ; 3 négoces classés",
       "capture": "32-resultats-e-mail-reel-et-prix-classes-dans-l-app.jpg",
-      "ms": 92776
+      "ms": 3266
     },
     {
       "n": 33,
-      "etape": "Commande : le bon part au négoce choisi",
-      "statut": "bug",
-      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Tes prix' }).getByRole('button', { name: /^Commander chez / }).first()\u001b[22m ",
-      "capture": "33-commande-le-bon-part-au-negoce-choisi-bug.jpg",
-      "ms": 30056
+      "etape": "Commande : la meilleure combinaison, chaque négoce reçoit sa part",
+      "statut": "ok",
+      "detail": "Commandé : Tout chez Comptoir Breton du Bâtiment (démo), 103 069,00 € HT livré. Chaque négoce a reçu sa part du bon de commande.",
+      "capture": "33-commande-la-meilleure-combinaison-chaque-negoce-.jpg",
+      "ms": 1468
     },
     {
       "n": 34,
       "etape": "Recommande : au prix garanti 30 jours",
       "statut": "ok",
-      "detail": "C'est commandé : bon n° 1, 238,90 € HT livré, parti chez Ardoisière du Trégor (démo). Commande sur grille garantie du 1er novembre.",
+      "detail": "C'est commandé : bon n° 2, 318,90 € HT livré, parti chez Comptoir Breton du Bâtiment (démo). Commande sur grille garantie du 15 novembre.",
       "capture": "34-recommande-au-prix-garanti-30-jours.jpg",
-      "ms": 7077
+      "ms": 3584
     },
     {
       "n": 35,
       "etape": "Admin : finir l'essai, puis le paywall au dépôt",
       "statut": "bug",
-      "detail": "locator.waitFor: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByText(/Ton essai est terminé/).first() to be visible\u001b[22m ",
+      "detail": "locator.waitFor: Timeout 60000ms exceeded. Call log: \u001b[2m  - waiting for getByText(/Ton essai est terminé/).first() to be visible\u001b[22m ",
       "capture": "35-admin-finir-l-essai-puis-le-paywall-au-depot-bug.jpg",
-      "ms": 34516
+      "ms": 64468
     },
     {
       "n": 36,
@@ -289,7 +289,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "36-abonnement-essai-et-deux-formules.jpg",
-      "ms": 2650
+      "ms": 2540
     },
     {
       "n": 37,
@@ -297,7 +297,7 @@
       "statut": "ok",
       "detail": "Stripe dit le refus ; rien n'est payé",
       "capture": "37-stripe-carte-refusee-4000-0000-0000-0002.jpg",
-      "ms": 9678
+      "ms": 12031
     },
     {
       "n": 38,
@@ -305,15 +305,15 @@
       "statut": "ok",
       "detail": "",
       "capture": "38-stripe-carte-acceptee-4242-retour-abonne-au-mois.jpg",
-      "ms": 15006
+      "ms": 15461
     },
     {
       "n": 39,
       "etape": "Factures : la facture du mois, téléchargeable",
       "statut": "ok",
-      "detail": "F-000005 du 25/10/2026 au 25/11/2026 · 58,80 € TTC Télécharger",
+      "detail": "F-000007 du 25/10/2026 au 25/11/2026 · 58,80 € TTC Télécharger",
       "capture": "39-factures-la-facture-du-mois-telechargeable.jpg",
-      "ms": 885
+      "ms": 898
     },
     {
       "n": 40,
@@ -321,15 +321,15 @@
       "statut": "ok",
       "detail": "",
       "capture": "40-passage-a-l-annuel-au-prorata.jpg",
-      "ms": 7061
+      "ms": 7026
     },
     {
       "n": 41,
       "etape": "Admin : simuler un échec de paiement (grâce de 7 jours)",
       "statut": "ok",
-      "detail": "Toitures Recette SE JR Ton paiement n'est pas passé. Mets à jour ta carte avant le 01/11 pour garder l'accès. → Commande du 15 novembre Clôture dans 21 j 5 h Re",
+      "detail": "Toitures Recette SE JR Ton paiement n'est pas passé. Mets à jour ta carte avant le 01/11 pour garder l'accès. → Commande du 1er décembre Clôture dans 37 j 3 h R",
       "capture": "41-admin-simuler-un-echec-de-paiement-grace-de-7-jo.jpg",
-      "ms": 5922
+      "ms": 5820
     },
     {
       "n": 42,
@@ -337,15 +337,15 @@
       "statut": "bug",
       "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Résilier' })\u001b[22m ",
       "capture": "42-resiliation-en-deux-clics-bug.jpg",
-      "ms": 30045
+      "ms": 30074
     },
     {
       "n": 43,
       "etape": "E-mails réels de l'abonnement",
       "statut": "ok",
-      "detail": "« Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Ton abonnement Mobiiz est actif », « Ton abonnement Mobiiz est actif », « Tu es passé à l'abonnement annuel Mobiiz », « Ton paiement Mobiiz n'est pas passé »",
+      "detail": "« Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Ton abonnement Mobiiz est actif », « Ton abonnement Mobiiz est actif », « Tu es passé à l'abonnement annuel Mobiiz », « Ton paiement Mobiiz n'est pas passé », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Commande commune : 1 nouvelle réponse. Résultats le 20/11 à 18 h. », « Les prix sont là : Regarde ton prix livré chez chaque négoce et commande si ça te plaît. », « Ton abonnement Mobiiz est actif », « Ton abonnement Mobiiz est actif », « Tu es passé à l'abonnement annuel Mobiiz », « Ton paiement Mobiiz n'est pas passé »",
       "capture": "43-e-mails-reels-de-l-abonnement.jpg",
-      "ms": 63553
+      "ms": 65008
     },
     {
       "n": 44,
@@ -353,7 +353,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "44-menu-essayer-avec-un-chantier-fictif.jpg",
-      "ms": 5717
+      "ms": 6793
     },
     {
       "n": 45,
@@ -361,7 +361,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "45-ecran-mes-chantiers.jpg",
-      "ms": 2544
+      "ms": 3026
     },
     {
       "n": 46,
@@ -369,7 +369,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "46-ecran-fournisseurs.jpg",
-      "ms": 2053
+      "ms": 2097
     },
     {
       "n": 47,
@@ -377,7 +377,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "47-ecran-formules.jpg",
-      "ms": 2206
+      "ms": 2238
     },
     {
       "n": 48,
@@ -385,7 +385,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "48-ecran-compte.jpg",
-      "ms": 2113
+      "ms": 2340
     },
     {
       "n": 49,
@@ -393,7 +393,7 @@
       "statut": "ok",
       "detail": "mobiiz-mes-donnees-2026-10-25.json",
       "capture": "49-compte-export-json-et-pdf.jpg",
-      "ms": 2728
+      "ms": 3235
     },
     {
       "n": 50,
@@ -401,15 +401,15 @@
       "statut": "ok",
       "detail": "Effacé : 5 faux artisans, 3 faux négoces.",
       "capture": "50-admin-tout-effacer-faux-comptes.jpg",
-      "ms": 3079
+      "ms": 3115
     },
     {
       "n": 51,
       "etape": "Compte : suppression (en tapant SUPPRIMER)",
-      "statut": "bug",
-      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Supprimer mon compte' })\u001b[22m ",
-      "capture": "51-compte-suppression-en-tapant-supprimer-bug.jpg",
-      "ms": 30056
+      "statut": "ok",
+      "detail": "",
+      "capture": "51-compte-suppression-en-tapant-supprimer.jpg",
+      "ms": 4918
     }
   ],
   "anomalies": [
@@ -435,7 +435,7 @@
       "qui": "artisan-se",
       "url": "https://test.mobiiz.fr/chantiers/nouveau",
       "type": "http 502",
-      "texte": "POST /v1/projects/01a17199-1a00-756b-8250-b92c7ef3f3d4/liste?ecran=1"
+      "texte": "POST /v1/projects/01a171e0-47a1-73ed-a695-0e3484fad998/liste?ecran=1"
     },
     {
       "qui": "artisan-se",
@@ -447,25 +447,49 @@
       "qui": "artisan-se",
       "url": "https://test.mobiiz.fr/chantiers/nouveau",
       "type": "corps 502",
-      "texte": "{\"error\":{\"code\":\"analysis_failed\",\"message\":\"The AI could not read this list\",\"supportId\":\"07BC-FEDD\",\"retryable\":false,\"details\":{\"reason\":\"provider_error\"}}}"
+      "texte": "{\"error\":{\"code\":\"analysis_failed\",\"message\":\"The AI could not read this list\",\"supportId\":\"33D5-2FDB\",\"retryable\":false,\"details\":{\"reason\":\"provider_error\"}}}"
     },
     {
       "qui": "artisan-se",
-      "url": "https://test.mobiiz.fr/chantiers/01a1719b-4bcf-7488-ae44-7e6594f07798",
+      "url": "https://test.mobiiz.fr/chantiers/01a171e2-7499-740e-8576-d536982bd359",
       "type": "http 502",
       "texte": "POST /v1/quantitatifs?ecran=1"
     },
     {
       "qui": "artisan-se",
-      "url": "https://test.mobiiz.fr/chantiers/01a1719b-4bcf-7488-ae44-7e6594f07798",
+      "url": "https://test.mobiiz.fr/chantiers/01a171e2-7499-740e-8576-d536982bd359",
       "type": "console",
       "texte": "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
     },
     {
       "qui": "artisan-se",
-      "url": "https://test.mobiiz.fr/chantiers/01a1719b-4bcf-7488-ae44-7e6594f07798",
+      "url": "https://test.mobiiz.fr/chantiers/01a171e2-7499-740e-8576-d536982bd359",
       "type": "corps 502",
-      "texte": "{\"error\":{\"code\":\"analysis_failed\",\"message\":\"The AI could not read this quote\",\"supportId\":\"6B3D-B3B3\",\"retryable\":false,\"details\":{\"reason\":\"provider_error\"}}}"
+      "texte": "{\"error\":{\"code\":\"analysis_failed\",\"message\":\"The AI could not read this quote\",\"supportId\":\"D9DE-AABE\",\"retryable\":false,\"details\":{\"reason\":\"provider_error\"}}}"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "http 502",
+      "texte": "POST /v1/projects/01a171e6-baf0-7349-ae0a-64971f3bd58d/liste?ecran=1"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "corps 502",
+      "texte": "{\"error\":{\"code\":\"analysis_failed\",\"message\":\"The AI could not read this list\",\"supportId\":\"69B8-5991\",\"retryable\":false,\"details\":{\"reason\":\"provider_error\"}}}"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
     }
   ]
 }

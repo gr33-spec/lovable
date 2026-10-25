@@ -29,7 +29,7 @@ const TRAITEMENTS: readonly { finalite: string; donnees: string; base: string; d
     duree: "30 jours ; seul le texte anonymisé reste ensuite",
   },
   {
-    finalite: `Les listes et les devis de la ${nom}`,
+    finalite: `Les listes et les devis du ${nom}`,
     donnees: "Lignes de matériaux, quantités, commune de livraison, grilles de prix des négoces",
     base: "Contrat",
     duree: "3 ans",
@@ -145,7 +145,7 @@ export default function ConfidentialitePage() {
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>Qui reçoit les données</h2>
         <p className={s.p}>
-          Toi, et les négoces de la {nom} pour ce qu&apos;il faut chiffrer et livrer (lignes, quantités, commune ; ton nom seulement quand tu passes commande).
+          Toi, et les négoces de le {nom} pour ce qu&apos;il faut chiffrer et livrer (lignes, quantités, commune ; ton nom seulement quand tu passes commande).
           Un négoce ne voit jamais les prix d&apos;un autre. Et nos sous-traitants, chacun pour sa seule tâche :
         </p>
         <div className="overflow-x-auto">

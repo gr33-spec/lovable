@@ -74,7 +74,7 @@ export interface EtatPaiement {
 }
 export const PAIEMENT_AUCUN: EtatPaiement = { statut: "aucun", periodeFin: null, echecLe: null, resiliationDemandeeLe: null, formule: "mensuel" };
 
-/** Les dates qui font l'essai : l'inscription, le premier dépôt dans une commande commune, les résultats de ce cycle. */
+/** Les dates qui font l'essai : l'inscription, le premier dépôt dans un regroupement, les résultats de ce cycle. */
 export interface DatesEssai {
   inscritLe: Date;
   premierDepotLe: Date | null;
@@ -313,7 +313,7 @@ export const SEUIL_CYCLES_ECONOMIE = 3;
 export function argumentTarif(moyenne: { cycles: number; parCommande: number | null }, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): string {
   const prix = prixParMoisAnnuel(r);
   if (moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && moyenne.parCommande && moyenne.parCommande > 0) {
-    return `Dès ${prix} par mois : en moyenne, nos artisans ont économisé ${eurosRonds(moyenne.parCommande)} par commande commune.`;
+    return `Dès ${prix} par mois : en moyenne, nos artisans ont économisé ${eurosRonds(moyenne.parCommande)} par regroupement.`;
   }
   return `Dès ${prix} par mois, économise des centaines, voire des milliers d'euros chaque année.`;
 }

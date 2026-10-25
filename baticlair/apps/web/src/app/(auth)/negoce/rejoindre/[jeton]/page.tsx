@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { DepartementsForm, DepotsForm, OffreForm, PaliersForm, depuisPaliers, offreValide, versPaliers, type OffreSaisie, type PaliersSaisis } from "@/components/negoce/paliers-form";
 import { Button, Field, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur } from "@/lib/api";
-import { NOM } from "@/lib/nom";
+import { NOM, nom } from "@/lib/nom";
 import type { Invitation } from "@/lib/negoce";
 
 /**
@@ -110,7 +110,7 @@ export default function RejoindrePage() {
     <>
       <PageTitle>Créez votre accès</PageTitle>
       <p className="text-[16px] leading-relaxed text-muted">
-        Un artisan de votre secteur vous a ajouté à la {NOM}. Une minute suffit : vos coordonnées, vos dépôts, vos conditions de livraison. Vous recevrez ensuite chaque grille de votre secteur à sa clôture.
+        Un artisan de votre secteur vous a ajouté au {nom}. Une minute suffit : vos coordonnées, vos dépôts, vos conditions de livraison. Vous recevrez ensuite chaque grille de votre secteur à sa clôture.
       </p>
       <form onSubmit={creer} aria-label="Créer mon accès" className="flex flex-col gap-5" noValidate>
         <Field id="negoce-email" label="E-mail" type="email" inputMode="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -129,7 +129,7 @@ export default function RejoindrePage() {
           <span>
             J&apos;accepte les{" "}
             <Link href="/negoce/conditions" target="_blank" className="text-accent-text underline">
-              conditions de la {NOM}
+              conditions du {nom}
             </Link>
             .
           </span>

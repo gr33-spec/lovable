@@ -14,7 +14,7 @@ export const DOMAINE_FACTICE = `@${DOMAINE_DEMO}`;
 const VALIDITE_CODE_MS = 10 * 60_000;
 const VALIDITE_SESSION_MS = 12 * 3_600_000;
 
-/** Ce que le pilotage demande aux autres modules (abonnement, apprentissage, commande commune), sans en dépendre. */
+/** Ce que le pilotage demande aux autres modules (abonnement, apprentissage, regroupement), sans en dépendre. */
 export interface SourcesPilotage {
   etatAbonnement(companyId: string, maintenant: Date): Promise<{ acces: string; essaiFinLe: Date | null }>;
   apprentissage(): Promise<{ aValider: unknown[]; tauxParMois: { mois: string; taux: number | null }[] }>;

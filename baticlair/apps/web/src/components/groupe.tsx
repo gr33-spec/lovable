@@ -57,7 +57,7 @@ export interface Groupe {
   reference: (offreId: string, prix: number | null) => Promise<void>;
   /** Test complet (21 octobre) : un chantier créé depuis le « + » n'a pas d'adresse ; elle se renseigne dans la barre, sans quitter la liste. */
   adresse: (adresse: string) => Promise<void>;
-  /** La commande commune du mois (Greg, 22 octobre 2026) : « mois » remplace le regroupement par lot ; « lots » le garde. */
+  /** Le regroupement du mois (Greg, 22 octobre 2026) : « mois » remplace le regroupement par lot ; « lots » le garde. */
   mode: "mois" | "lots";
   /** En mode mois : la commande du mois (chrono, quantités, mes lignes), et le dépôt d'une partie de la liste. */
   mois: EtatDuMois | null;
@@ -73,7 +73,7 @@ function useMesNegocesCount(): number | null {
 }
 
 /** La phrase d'engagement, mot pour mot (section 7, étape 2 du document). */
-export const PHRASE_ENGAGEMENT = `En cochant Chantier signé, je m'engage à commander ces quantités au prix obtenu par la ${nom}, chez le négoce retenu.`;
+export const PHRASE_ENGAGEMENT = `En cochant Chantier signé, je m'engage à commander ces quantités au prix obtenu par le ${nom}, chez le négoce retenu.`;
 
 /** Le groupé pour ce chantier, ou null quand il n'existe pas pour l'entreprise (drapeau éteint, SIRET non vérifié). */
 /**
@@ -168,8 +168,8 @@ export function GroupeBar({ count, onCancel, onPropose, onAdresse }: { count: nu
   const adresseManque = error?.reason === "adresse_requise" && Boolean(onAdresse);
   const choix = "inline-flex min-h-12 grow items-center justify-center rounded-2xl px-3 text-[15px] font-extrabold";
   return (
-    <section aria-label={`Ajouter à la ${nom}`} className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
-      <p className="text-[14px] font-extrabold">{count === 0 ? `Coche les lignes à ajouter à la ${nom}` : `${count} ligne${count > 1 ? "s" : ""} pour la ${nom}`}</p>
+    <section aria-label={`Ajouter au ${nom}`} className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
+      <p className="text-[14px] font-extrabold">{count === 0 ? `Coche les lignes à ajouter au ${nom}` : `${count} ligne${count > 1 ? "s" : ""} pour le ${nom}`}</p>
       <fieldset className="flex gap-2">
         <legend className="mb-1 text-[13px] font-bold text-muted">Tu veux être livré entre quelles dates ?</legend>
         <label htmlFor={`${id}-tot`} className="flex grow flex-col gap-1 text-[13px] font-bold text-muted">
@@ -353,15 +353,15 @@ export function GroupeSection({ groupe }: { groupe: Groupe }) {
     }
   };
   return (
-    <section aria-label={`Dans la ${nom}`} className="mt-3 flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
-      <h3 className="text-[13px] font-extrabold text-muted">{`Dans la ${nom}`}</h3>
+    <section aria-label={`Dans le ${nom}`} className="mt-3 flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
+      <h3 className="text-[13px] font-extrabold text-muted">{`Dans le ${nom}`}</h3>
       {negoces === 0 ? (
         <p className="text-[14px] leading-snug font-bold">
           Ajoute d&apos;abord tes négoces (e-mail et ce qu&apos;ils vendent) :{" "}
           <Link href="/fournisseurs" className="text-accent-text underline decoration-dotted underline-offset-4">
             Fournisseurs
           </Link>
-          . Sans eux, la {nom} ne sait pas à qui demander.
+          . Sans eux, le {nom} ne sait pas à qui demander.
         </p>
       ) : null}
       <ul className="flex flex-col gap-2">
@@ -397,7 +397,7 @@ export function GroupeSection({ groupe }: { groupe: Groupe }) {
                 ) : null}
                 {(b.statut === "en_attente" || b.statut === "signe") && !b.lotParti ? (
                   <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === b.id} onClick={() => run(b.id, () => groupe.retirer(b.id))}>
-                    {`Retirer de la ${nom}`}
+                    {`Retirer du ${nom}`}
                   </Button>
                 ) : null}
               </div>

@@ -99,7 +99,7 @@ import { ALERTER } from "../../platform/tokens.js";
       inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService, DemandeService, CommandeService, NotificationsGroupeService, CONFIG],
     },
     {
-      // La commande commune du mois (Greg, 22 octobre 2026).
+      // Le regroupement du mois (Greg, 22 octobre 2026).
       provide: CommandeDuMoisService,
       useFactory: (p: PrismaService, t: TakeoffService, e: TransactionalEmailSender, n: NotificationsGroupeService, g: Geocodeur, x: NegoceExtractor | null, pdf: PdfReader, c: AppConfig, groupe: GroupeService, espace: EspaceNegoceService, a: Alerter, abo: AbonnementService) => {
         const s = new CommandeDuMoisService(p, (tenant, id) => t.reviewed(tenant, id), e, n, g, x, pdf, { webAppUrl: c.webAppUrl, authSecret: c.authSecret }, (tenant) => groupe.ouvert(tenant), espace, a, abo);

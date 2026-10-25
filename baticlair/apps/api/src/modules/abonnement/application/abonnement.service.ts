@@ -77,7 +77,7 @@ const dateFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe
  * prend effet à l'échéance, sans remboursement au prorata.
  */
 export class AbonnementService {
-  /** L'écart du premier cycle de l'entreprise (prix le plus cher reçu − prix choisi), branché par la commande commune. */
+  /** L'écart du premier cycle de l'entreprise (prix le plus cher reçu − prix choisi), branché par le regroupement. */
   private ecart: (companyId: string) => Promise<number | null> = async () => null;
 
   constructor(
@@ -114,7 +114,7 @@ export class AbonnementService {
     return lu.data;
   }
 
-  /** Les dates de l'essai : l'inscription, le premier dépôt dans une commande commune et les résultats de ce cycle. */
+  /** Les dates de l'essai : l'inscription, le premier dépôt dans un regroupement et les résultats de ce cycle. */
   async datesEssai(companyId: string): Promise<DatesEssai> {
     const c = await this.prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { createdAt: true } });
     const premier = await this.prisma.besoin.findFirst({ where: { companyId, cycleId: { not: null } }, orderBy: { createdAt: "asc" }, select: { createdAt: true, cycle: { select: { resultatsLe: true } } } });

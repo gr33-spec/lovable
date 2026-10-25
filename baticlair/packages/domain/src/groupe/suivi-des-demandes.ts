@@ -100,7 +100,7 @@ export function messageDeReport(de: Mois, vers: Mois): { titre: string; corps: s
 /** « 2 nouvelles réponses. », « 1 nouvelle réponse. » : la notification du jour, sans nom ni prix. */
 export function messageNouvellesReponses(n: number, reponseAvant: Date | null): { titre: string; corps: string } {
   const quoi = n > 1 ? `${n} nouvelles réponses.` : "1 nouvelle réponse.";
-  return { titre: "Commande commune", corps: reponseAvant ? `${quoi} ${phraseResultatsLe(reponseAvant)}.` : quoi };
+  return { titre: "Regroupement", corps: reponseAvant ? `${quoi} ${phraseResultatsLe(reponseAvant)}.` : quoi };
 }
 
 /**

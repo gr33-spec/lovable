@@ -64,7 +64,7 @@ export default function TarifsPage() {
         <h2 id="negoces" className={h2}>
           Gratuit pour les négoces
         </h2>
-        <p className="text-[17px] leading-relaxed">Les négoces répondent aux commandes communes sans abonnement ni commission.</p>
+        <p className="text-[17px] leading-relaxed">Les négoces répondent aux regroupements sans abonnement ni commission.</p>
       </section>
 
       <section aria-labelledby="faq" className="flex flex-col gap-6">

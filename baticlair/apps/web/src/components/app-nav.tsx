@@ -19,7 +19,7 @@ interface NavItem {
 
 /**
  * Simplification (21 octobre, demande du fondateur) : TROIS entrées seulement, une icône et un mot chacune.
- * « Mes chantiers » (l'accueil), au centre le rond « + Nouvelle liste » (nouveau cap, 22 octobre), « Commande commune ».
+ * « Mes chantiers » (l'accueil), au centre le rond « + Nouvelle liste » (nouveau cap, 22 octobre), « Regroupement ».
  * Fournisseurs et Compte vivent dans le menu derrière l'initiale de l'artisan, en haut à droite (`MenuArtisan`).
  * Passe UI/UX (23 octobre) : trois entrées égales, l'active en accent, le rond accent au centre. Retour de Greg le soir
  * (« tendance et moderne ») : la barre redevient une capsule flottante, en verre translucide (flou derrière), posée à

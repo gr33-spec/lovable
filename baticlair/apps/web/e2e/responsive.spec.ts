@@ -107,7 +107,7 @@ for (const size of WIDTHS) {
     await expect(cards.first()).toBeVisible();
     await shoot(page, size.name, "07-apres-envoi");
 
-    // Greg (23 octobre) : plus de « Comparer les offres » par chantier en mode mois ; les prix viennent de la commande commune.
+    // Greg (23 octobre) : plus de « Comparer les offres » par chantier en mode mois ; les prix viennent du regroupement.
     await expect(page.getByRole("button", { name: "Comparer les offres" })).toHaveCount(0);
 
     await page.goto("/chantiers");
@@ -151,7 +151,7 @@ async function inscription(page: Page, email: string) {
 }
 
 /**
- * Revue à froid (23 octobre 2026) : les écrans de la commande commune du mois, à chaque largeur (iPhone SE compris) :
+ * Revue à froid (23 octobre 2026) : les écrans du regroupement du mois, à chaque largeur (iPhone SE compris) :
  * l'onglet, « Ton chantier » avec son bloc et sa barre, la page du négoce, l'admin des dates. Dans le Finistère (29),
  * pour ne rien mêler aux parcours du 22.
  */
@@ -176,9 +176,9 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
     await expect(page.getByRole("region", { name: /^Commande d/ }).first()).toBeVisible();
     await shoot(page, size.name, "mois-01-onglet");
     await page.goto(`/chantiers/${projet}`);
-    await expect(page.getByRole("region", { name: /^Commande commune d/ })).toBeVisible();
+    await expect(page.getByRole("region", { name: /^Regroupement d/ })).toBeVisible();
     await shoot(page, size.name, "mois-02-ton-chantier");
-    await page.getByRole("region", { name: /^Commande commune d/ }).getByRole("button", { name: /^Ajouter à la commande d/ }).click();
+    await page.getByRole("region", { name: /^Regroupement d/ }).getByRole("button", { name: /^Ajouter à la commande d/ }).click();
     await expect(page.getByRole("region", { name: /^Ajouter à la commande d/ })).toBeVisible();
     await shoot(page, size.name, "mois-03-barre");
   }

@@ -80,7 +80,7 @@ describe("groupé, étape 5 : la demande aux négoces", { timeout: 60_000 }, () 
     const mails = mailsNegoces();
     expect(mails.map((m) => m.to).sort()).toEqual(["carrelage@example.com", "general@example.com"]);
     const m = mails.find((x) => x.to === "carrelage@example.com")!;
-    expect(m.subject).toMatch(/^Commande commune : demande de prix, Carreau de sol 60×60/);
+    expect(m.subject).toMatch(/^Regroupement : demande de prix, Carreau de sol 60×60/);
     expect(m.text).toContain(`** ${PHRASE_COMMISSION.toUpperCase()} **`);
     expect(m.html).toContain(`<strong>${PHRASE_COMMISSION}</strong>`);
     expect(`${m.text}\n${m.html}`).not.toMatch(/2 ?%|reverser/);

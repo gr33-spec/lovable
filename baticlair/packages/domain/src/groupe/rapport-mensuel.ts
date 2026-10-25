@@ -1,8 +1,8 @@
-import { nomCommun } from "./nom.js";
+import { auNom, duNom } from "./nom.js";
 import { NOM_APP } from "./marque.js";
 /**
  * LE RAPPORT MENSUEL DE L'ARTISAN (plan 2 du 21 octobre 2026, bloc 4) : le 1er du mois, un e-mail court sur le mois
- * écoulé, « ce mois : X chantiers lus, Y € économisés grâce à la ${nomCommun()}, Z lots ». Tutoiement, aucun nom d'autre artisan, rien
+ * écoulé, « ce mois : X chantiers lus, Y € économisés grâce ${auNom()}, Z lots ». Tutoiement, aucun nom d'autre artisan, rien
  * à faire. Le texte est la référence ; le HTML le répète en gras.
  */
 export interface BilanMensuel {
@@ -46,13 +46,13 @@ export function rapportMensuel(b: BilanMensuel, prenom: string | null = null): {
   const mois = nomDuMois(b.mois);
   const chantiers = pluriel(b.chantiersLus, "chantier lu", "chantiers lus");
   const lots = pluriel(b.lots, "lot", "lots");
-  const resume = `Ce mois : ${chantiers}, ${euros(b.economies)} économisés grâce à la ${nomCommun()}, ${lots}.`;
+  const resume = `Ce mois : ${chantiers}, ${euros(b.economies)} économisés grâce ${auNom()}, ${lots}.`;
   const bonjour = prenom ? `Bonjour ${prenom},` : "Bonjour,";
   const suite =
     b.lots > 0
-      ? `${b.lots === 1 ? "Ton lot" : `Tes ${lots}`} de la ${nomCommun()} : bon de commande parti chez le négoce retenu, livraison sur ton chantier, sur ton compte chez lui.`
+      ? `${b.lots === 1 ? "Ton lot" : `Tes ${lots}`} ${duNom()} : bon de commande parti chez le négoce retenu, livraison sur ton chantier, sur ton compte chez lui.`
       : b.chantiersLus > 0
-        ? `Pas de lot ce mois-ci : ajoute une ligne de ta liste à la ${nomCommun()} dès que le chantier est signé, le prix se fait avec les autres artisans du département.`
+        ? `Pas de lot ce mois-ci : ajoute une ligne de ta liste ${auNom()} dès que le chantier est signé, le prix se fait avec les autres artisans du département.`
         : "";
   const texte = [bonjour, "", `Ton mois ${deOuD(mois)}${mois} avec ${NOM_APP}.`, "", resume, ...(suite ? ["", suite] : []), "", "Rien à faire : c'est juste pour savoir où tu en es.", "", NOM_APP].join("\n");
   const html = [

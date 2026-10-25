@@ -65,7 +65,7 @@ interface ConfigCycle {
 }
 
 /**
- * La commande commune (Greg, 22 octobre 2026 ; cycle raccourci le 23 : le 1er et le 15, 5 jours ouvrés) : tous les réglages
+ * Le regroupement (Greg, 22 octobre 2026 ; cycle raccourci le 23 : le 1er et le 15, 5 jours ouvrés) : tous les réglages
  * dans une seule config, modifiable ici. Les heures et le délai valent pour les commandes pas encore closes ; les deux
  * jours de clôture pour les commandes pas encore ouvertes. Heures de Paris.
  */
@@ -93,8 +93,8 @@ function DatesDuMois() {
     </label>
   );
   return (
-    <Card aria-label="Dates de la commande commune" className="flex flex-col gap-3 p-4">
-      <h2 className="text-base font-extrabold">Dates de la commande commune</h2>
+    <Card aria-label="Dates du regroupement" className="flex flex-col gap-3 p-4">
+      <h2 className="text-base font-extrabold">Dates du regroupement</h2>
       {champ("jourCloture1", "Première clôture le", "du mois")}
       {champ("jourCloture2", "Deuxième clôture le", "du mois")}
       {champ("heureCloture", "à", "h")}

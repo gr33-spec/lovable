@@ -133,7 +133,7 @@ describe("mensuel ou annuel", () => {
   });
   it("l'argument de la landing : « Dès 29 € par mois »", () => {
     expect(argumentTarif({ cycles: 0, parCommande: null })).toBe("Dès 29 € par mois, économise des centaines, voire des milliers d'euros chaque année.");
-    expect(argumentTarif({ cycles: 3, parCommande: 412 })).toBe("Dès 29 € par mois : en moyenne, nos artisans ont économisé 412 € par commande commune.");
+    expect(argumentTarif({ cycles: 3, parCommande: 412 })).toBe("Dès 29 € par mois : en moyenne, nos artisans ont économisé 412 € par regroupement.");
   });
   it("une période : un mois, ou un an", () => {
     expect(finDePeriode(d("2027-01-31"), "annuel").toISOString().slice(0, 10)).toBe("2028-01-31");

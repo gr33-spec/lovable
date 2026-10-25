@@ -92,16 +92,16 @@ describe("la grille garantie 30 jours (point 6) et les mentions des bons", () =>
     expect(fin.toISOString()).toBe("2026-11-21T16:00:00.000Z");
     expect(titreGarantie(fin)).toBe("Prix garantis jusqu'au 21 novembre");
     expect(mentionGarantie("2026-10-15")).toBe("Commande sur grille garantie du 15 octobre");
-    expect(mentionPrixFerme("2026-10-15")).toBe("Prix ferme de la Commande commune du 15 octobre");
+    expect(mentionPrixFerme("2026-10-15")).toBe("Prix ferme du regroupement du 15 octobre");
   });
 
   it("le bon de commande porte le prix ferme du cycle, ou la mention « grille garantie » pour une recommande", () => {
     const base = { numero: 7, mois: "2026-10-15", negoce: "Négoce N1", artisan: { nom: "Toitures A", siret: null, telephone: null, email: null }, numeroCompte: null, chantiers: ["Lannion"], lignes: [{ designation: "Ardoise", quantite: 100, unite: "pièces", prixUnitaire: 1 }], livraisonHt: 0 };
     const texte = (b: ReturnType<typeof bonDuMois>) => JSON.stringify(b);
-    expect(texte(bonDuMois(base))).toContain("Prix ferme de la Commande commune du 15 octobre.");
+    expect(texte(bonDuMois(base))).toContain("Prix ferme du regroupement du 15 octobre.");
     expect(texte(bonDuMois(base))).not.toContain("grille garantie");
     const g = bonDuMois({ ...base, garantie: true });
-    expect(g.titre).toBe("Bon de commande, commande commune du 15 octobre n° 7 (grille garantie)");
+    expect(g.titre).toBe("Bon de commande, regroupement du 15 octobre n° 7 (grille garantie)");
     expect(texte(g)).toContain("Commande sur grille garantie du 15 octobre.");
   });
 });
@@ -110,9 +110,9 @@ describe("les textes côté négoce : vouvoiement, jamais un nom d'artisan", () 
   it("l'invitation nomme le secteur, jamais l'artisan ; le lien magique ; la clôture sans compte ; la grille prête", () => {
     const inv = mailInvitationNegoce({ lien: "https://b/negoce/rejoindre/x", departement: "22", conditions: "https://b/negoce/conditions", opposition: "https://b/negoce/opposition/o" });
     // RGPD (24 octobre 2026) : qui écrit, pourquoi, et le lien d'opposition.
-    expect(inv.texte).toContain("Ce message vous est envoyé par BATI INVEST (Mobiiz) pour la Commande commune.");
+    expect(inv.texte).toContain("Ce message vous est envoyé par BATI INVEST (Mobiiz) pour le regroupement.");
     expect(inv.texte).toContain("Ne plus jamais être contacté : https://b/negoce/opposition/o");
-    expect(inv.objet).toBe("Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès");
+    expect(inv.objet).toBe("Des artisans de votre secteur vous ont ajouté au regroupement : créez votre accès");
     expect(inv.texte).toContain("Un artisan de votre secteur (22) vous a ajouté");
     expect(inv.texte).toContain("Créez votre accès en une minute");
     expect(inv.texte).toContain("valable 90 jours");

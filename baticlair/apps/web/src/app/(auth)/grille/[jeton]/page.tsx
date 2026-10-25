@@ -89,7 +89,7 @@ export default function GrilleNegocePage() {
   if (error) {
     return (
       <>
-        <PageTitle>Commande commune</PageTitle>
+        <PageTitle>Regroupement</PageTitle>
         <p role="status" className="rounded-xl bg-warn-bg p-4 font-semibold text-warn">
           {error.status === 404 ? "Ce lien n'est plus valable." : messageErreur(error, {}, { vous: true })}
         </p>
@@ -101,7 +101,7 @@ export default function GrilleNegocePage() {
   const basculer = (cle: string, coche: boolean) => setNonGarantis((prev) => (coche ? [...new Set([...prev, cle])] : prev.filter((c) => c !== cle)));
   return (
     <>
-      <PageTitle>{`Commande commune ${deMoisEnLettres(page.mois)}`}</PageTitle>
+      <PageTitle>{`Regroupement ${deMoisEnLettres(page.mois)}`}</PageTitle>
       <p className="text-[16px] text-muted">
         Artisans du département {page.departement}. Pour {page.negoce}.
       </p>
@@ -181,7 +181,7 @@ export default function GrilleNegocePage() {
               <span>
                 {`Nos conditions ont changé (version du ${page.conditionsAAccepter.split("-").reverse().join("/")}). J'accepte les `}
                 <a href="/negoce/conditions" target="_blank" rel="noreferrer" className="underline">
-                  conditions de la Commande commune
+                  conditions du regroupement
                 </a>
                 .
               </span>

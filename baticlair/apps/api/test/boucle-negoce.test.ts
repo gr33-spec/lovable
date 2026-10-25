@@ -5,7 +5,7 @@ import { inscrireNegoce } from "./support/negoce.js";
 import { exclure } from "../src/modules/privacy/application/exclusion.js";
 
 /**
- * « METS TON NÉGOCE DANS LA BOUCLE » (Greg, 23 octobre 2026) : sur l'accueil et dans l'onglet Commande commune, un champ
+ * « METS TON NÉGOCE DANS LA BOUCLE » (Greg, 23 octobre 2026) : sur l'accueil et dans l'onglet Regroupement, un champ
  * e-mail (ou le nom choisi dans Sirene) et un bouton « Ajouter mon négoce ». Le négoce entre dans la base couverture du
  * département, dédoublonné par SIRET ou par e-mail ; ajouté avant la clôture, il reçoit la commande du mois en cours ;
  * ajouté après, la suivante. L'artisan lit « Ton négoce X est dans la boucle ».

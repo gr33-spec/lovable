@@ -19,13 +19,13 @@ export function EconomiesGroupeCard() {
   const { data } = useResource(fetchEconomies);
   if (!data) return null;
   return (
-    <section aria-label={`Économisé grâce à la ${nom}`}>
+    <section aria-label={`Économisé grâce au ${nom}`}>
       <Card className="flex items-center gap-3 p-4">
         <Users size={22} aria-hidden="true" className="shrink-0 text-accent-text" />
         <div className="flex flex-col">
-          <span className="text-[13px] font-extrabold text-muted">{`Économisé grâce à la ${nom}`}</span>
+          <span className="text-[13px] font-extrabold text-muted">{`Économisé grâce au ${nom}`}</span>
           <span className="text-xl font-extrabold">{Number(data.total).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €</span>
-          <span className="text-[12px] text-muted">{data.lots === 0 ? `Aucune ${nom} pour l'instant.` : `${data.lots} ${data.lots > 1 ? noms : nom}`}</span>
+          <span className="text-[12px] text-muted">{data.lots === 0 ? `Aucun ${nom} pour l'instant.` : `${data.lots} ${data.lots > 1 ? noms : nom}`}</span>
         </div>
       </Card>
     </section>

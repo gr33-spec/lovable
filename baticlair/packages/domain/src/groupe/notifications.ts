@@ -1,5 +1,5 @@
 import { DELAI_REPONSE_JOURS } from "./demande.js";
-import { NOM_COMMANDE_COMMUNE, nomCommun } from "./nom.js";
+import { NOM_COMMANDE_COMMUNE, duNom, leNom, nomCommun } from "./nom.js";
 import { NOM_APP } from "./marque.js";
 
 /**
@@ -44,12 +44,12 @@ const jourCourt = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", m
  */
 export const quantiteDite = (q: { quantite: string; unite: string; designation: string }): string => `${nombre(q.quantite)} ${q.unite} de ${q.designation.charAt(0).toLowerCase()}${q.designation.slice(1)}`;
 export function messageBesoinAccepte(b: { quantite: string; unite: string; designation: string; zone: string; projectId: string }): MessageArtisan {
-  return { titre: NOM_COMMANDE_COMMUNE, corps: `Tes ${quantiteDite(b)} sont dans la ${nomCommun()} (${nomDuDepartement(b.zone)}). Prochain départ lundi.`, url: "/groupe", etiquette: `groupe-besoin-${b.projectId}` };
+  return { titre: NOM_COMMANDE_COMMUNE, corps: `Tes ${quantiteDite(b)} sont dans ${leNom()} (${nomDuDepartement(b.zone)}). Prochain départ lundi.`, url: "/groupe", etiquette: `groupe-besoin-${b.projectId}` };
 }
 
 /** 2. « Le groupé est parti chez 4 négoces. Réponses attendues sous 7 jours. » */
 export function messageDemandeEnvoyee(lot: { numero: number; negoces: number }): MessageArtisan {
-  return { titre: NOM_COMMANDE_COMMUNE, corps: `La ${nomCommun()} est partie chez ${lot.negoces} négoce${lot.negoces > 1 ? "s" : ""}. Réponses attendues sous ${DELAI_REPONSE_JOURS} jours.`, url: "/groupe", etiquette: `groupe-lot-${lot.numero}` };
+  return { titre: NOM_COMMANDE_COMMUNE, corps: `Le ${nomCommun()} est partie chez ${lot.negoces} négoce${lot.negoces > 1 ? "s" : ""}. Réponses attendues sous ${DELAI_REPONSE_JOURS} jours.`, url: "/groupe", etiquette: `groupe-lot-${lot.numero}` };
 }
 
 /** 3. « Vos 31 bacs : X € chez A (−Y %). Bon de commande transmis, livraison le 3 nov. » (−Y % seulement avec un prix de référence). */
@@ -70,13 +70,13 @@ export function messageDesistement(d: { sanction: "avertissement" | "exclusion";
   if (d.sanction === "avertissement") {
     return {
       objet: `${NOM_COMMANDE_COMMUNE} : désistement enregistré, avertissement`,
-      texte: `Bonjour,\n\nTu t'étais engagé à commander ces quantités au prix de la ${nomCommun()} et tu ne donnes pas suite : c'est un avertissement, sans frais. Un deuxième désistement dans les 12 mois fermerait la ${nomCommun()} 6 mois (tu garderais ${NOM_APP}). Le négoce est prévenu et peut annuler ta ligne.\n\n${NOM_APP}`,
+      texte: `Bonjour,\n\nTu t'étais engagé à commander ces quantités au prix ${duNom()} et tu ne donnes pas suite : c'est un avertissement, sans frais. Un deuxième désistement dans les 12 mois fermerait ${leNom()} 6 mois (tu garderais ${NOM_APP}). Le négoce est prévenu et peut annuler ta ligne.\n\n${NOM_APP}`,
     };
   }
   const jusquau = d.excluJusquau ? d.excluJusquau.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : "";
   return {
     objet: `${NOM_COMMANDE_COMMUNE} : deuxième désistement, fermée 6 mois`,
-    texte: `Bonjour,\n\nDeuxième désistement en 12 mois : la ${nomCommun()} se ferme pour toi jusqu'au ${jusquau}. Tu gardes ${NOM_APP} et tes chantiers. Le négoce est prévenu et peut annuler ta ligne.\n\n${NOM_APP}`,
+    texte: `Bonjour,\n\nDeuxième désistement en 12 mois : ${leNom()} se ferme pour toi jusqu'au ${jusquau}. Tu gardes ${NOM_APP} et tes chantiers. Le négoce est prévenu et peut annuler ta ligne.\n\n${NOM_APP}`,
   };
 }
 

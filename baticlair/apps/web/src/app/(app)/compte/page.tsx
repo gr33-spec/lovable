@@ -19,7 +19,7 @@ import {
   PageTitle,
 } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
-import { NOM, NOM_APP } from "@/lib/nom";
+import { NOM, nom, NOM_APP } from "@/lib/nom";
 import { useSession } from "@/lib/session";
 
 export default function ComptePage() {
@@ -741,7 +741,7 @@ function EmailsActifs() {
   return (
     <label className="flex min-h-11 items-center gap-3 text-[15px]">
       <input type="checkbox" checked={actifs} disabled={pending} onChange={(e) => void changer(e.target.checked)} className="size-5 accent-[var(--color-accent)]" />
-      Recevoir les e-mails de la {NOM}
+      Recevoir les e-mails du {nom}
     </label>
   );
 }

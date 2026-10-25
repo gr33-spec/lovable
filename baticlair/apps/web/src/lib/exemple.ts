@@ -15,7 +15,7 @@ const LISTE_COUVERTURE = [
 export const EXEMPLE = {
   devis: { numero: "D-2026-042", client: "Maison Le Goff", adresse: "Ploubazlanec (22)", objet: "Couverture ardoise 32×22, 118 m²" },
   /**
-   * La commande commune du mois (Greg, 22 octobre 2026, au soir) : en QUANTITÉS, jamais en nombre d'entreprises ; remplace
+   * Le regroupement du mois (Greg, 22 octobre 2026, au soir) : en QUANTITÉS, jamais en nombre d'entreprises ; remplace
    * le compteur « 30 couvreurs, 15 demandes… ».
    */
   commande: {

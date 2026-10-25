@@ -174,7 +174,7 @@ type PartChoisie = { negoceId: string; familles: string[]; cles: string[]; total
 /** La livraison figée au dépôt d'une grille : les dépôts du négoce, ses paliers, la distance du dépôt le plus proche à chaque chantier. */
 type LivraisonEnregistree = { depots: { adresse: string; lat: number | null; lon: number | null }[]; paliers: PaliersLivraison; distances: Record<string, (number | null)[]> };
 /**
- * MULTIMÉTIER (Greg, 23 octobre au soir : « on va faire en multimétier ») : la commande commune d'une entreprise est celle
+ * MULTIMÉTIER (Greg, 23 octobre au soir : « on va faire en multimétier ») : le regroupement d'une entreprise est celle
  * de la famille de son métier (couverture pour un couvreur, électricité pour un électricien…), dans son département.
  * Sans métier connu, la couverture (le premier métier de BatiClair).
  */
@@ -208,7 +208,7 @@ export class CommandeDuMoisService {
     private readonly extracteur: NegoceExtractor | null,
     private readonly pdf: PdfReader,
     private readonly reglages: ReglagesCommandeDuMois,
-    /** L'ouverture de la commande commune pour l'entreprise (SIRET vérifié, département ouvert, pas d'exclusion). */
+    /** L'ouverture du regroupement pour l'entreprise (SIRET vérifié, département ouvert, pas d'exclusion). */
     private readonly ouverte: (tenant: TenantContext) => Promise<void>,
     /** L'espace négoce (23 octobre 2026) : liens d'invitation et de désabonnement, comptes inscrits. */
     private readonly espace: EspaceNegoceService,
@@ -414,7 +414,7 @@ export class CommandeDuMoisService {
 
   /**
    * La commande ouverte d'un département (chrono, quantités) : celui du chantier quand il est donné (le bloc de « Ton
-   * chantier », Greg, 23 octobre 2026), sinon celui de l'entreprise (l'onglet « Commande commune »).
+   * chantier », Greg, 23 octobre 2026), sinon celui de l'entreprise (l'onglet « Regroupement »).
    */
   async prochaineCommande(tenant: TenantContext, maintenant = new Date(), projectId?: string): Promise<{ mois: Mois; de: string; zone: string; clotureLe: string; clotureDans: string; toi: string | null; tout: string; vide: boolean } | null> {
     let adresse: string | null;
@@ -677,7 +677,7 @@ export class CommandeDuMoisService {
         await this.email.send({
           to: grille.negoce.email,
           subject: doc.titre,
-          text: ["Bonjour,", "", `${company.name} commande au prix de votre grille de la commande commune. Le bon de commande est joint.`, "", NOM_APP].join("\n"),
+          text: ["Bonjour,", "", `${company.name} commande au prix de votre grille du regroupement. Le bon de commande est joint.`, "", NOM_APP].join("\n"),
           attachments: [{ filename: `bon-de-commande-${c.mois}-${c.numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
           ...(company.contactEmail ? { replyTo: company.contactEmail } : {}),
           mustDeliver: true,
@@ -1235,7 +1235,7 @@ function moisJour(d: Date): string {
 }
 
 function messageDAjout(lignes: readonly { quantite: number; unite: string; designation: string }[]): MessageArtisan {
-  return { titre: "La commande commune grossit", corps: messageAjout(lignes), url: "/groupe", etiquette: "ajouts-commande-du-mois" };
+  return { titre: "Le regroupement grossit", corps: messageAjout(lignes), url: "/groupe", etiquette: "ajouts-commande-du-mois" };
 }
 
 const lireNombre = (s: string | null | undefined): number | null => {

@@ -165,7 +165,7 @@ it("15 octobre, 1er novembre, 15 décembre : trois commandes complètes, chaque 
   expect(mails("n1@negoce.fr").filter((m) => m.subject.startsWith("Bon de commande"))).toHaveLength(2);
   expect(mails("n2@negoce.fr").filter((m) => m.subject.startsWith("Bon de commande"))).toHaveLength(1);
   // Le négoce non retenu reçoit un message neutre, jamais les prix des autres.
-  const neutre = mails("n2@negoce.fr").find((m) => /résultat|commande commune du 15 octobre/i.test(m.subject) && !m.subject.startsWith("Bon"))!;
+  const neutre = mails("n2@negoce.fr").find((m) => /résultat|regroupement du 15 octobre/i.test(m.subject) && !m.subject.startsWith("Bon"))!;
   expect(neutre.text).not.toMatch(/0,92|29,50|N1|8 642/);
 
   // ── 1ER NOVEMBRE ────────────────────────────────────────────────────────────────────────────────────────────────────

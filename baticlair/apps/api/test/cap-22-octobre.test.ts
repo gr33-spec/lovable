@@ -73,7 +73,7 @@ describe("nouveau cap du 22 octobre : regroupement, alertes, livraison au kilom�
     const a = await carreleur("a@example.fr", "Carrelages A", "3 rue des Ajoncs, 22300 Lannion");
     await negoce(a.agent, "Négoce Carrelage", "carrelage@example.com", ["second_oeuvre"]);
     const [info] = mailsVers("carrelage@example.com");
-    expect(info!.subject).toBe("Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès");
+    expect(info!.subject).toBe("Des artisans de votre secteur vous ont ajouté au regroupement : créez votre accès");
     expect(info!.text).toContain("Un artisan de votre secteur (22) vous a ajouté");
     expect(info!.text).not.toContain("Carrelages A");
     expect(info!.text).toMatch(/http.*\/negoce\/rejoindre\//);
@@ -150,14 +150,14 @@ describe("nouveau cap du 22 octobre : regroupement, alertes, livraison au kilom�
     expect((await a.agent.get(`/v1/projects/${a.projectId}/suivi`).expect(200)).body).toMatchObject({ etape: 3, phrase: "C'est commandé." });
   });
 
-  it("une ligne vague n'entre pas dans la commande commune : elle part seulement chez le négoce de l'artisan", async () => {
+  it("une ligne vague n'entre pas dans le regroupement : elle part seulement chez le négoce de l'artisan", async () => {
     const a = await carreleur("a@example.fr", "Carrelages A", "3 rue des Ajoncs, 22300 Lannion");
     const q = (await a.agent.post("/v1/quantitatifs").send({ metier: "roofing", lignes: [{ libelle: "Tuile romane", quantite: "200", unite: "pièces" }] }).expect(201)).body as { projetId: string };
     await a.agent.patch(`/v1/projects/${q.projetId}`).send({ address: "3 rue des Ajoncs, 22300 Lannion" }).expect(200);
     const takeoff = (await a.agent.get(`/v1/projects/${q.projetId}/takeoff`).expect(200)).body.takeoff;
     const tuile = (takeoff.purchase.toBuy as { key: string; label: string; aPreciserPourGroupe: { cle: string }[] }[]).find((b) => /^Tuile romane/.test(b.label))!;
     expect(tuile.aPreciserPourGroupe.map((x) => x.cle)).toEqual(["marque", "teinte"]);
-    expect(takeoff.phrasePrecision).toBe("Précise pour l'ajouter à la commande commune");
+    expect(takeoff.phrasePrecision).toBe("Précise pour l'ajouter au regroupement");
     const refus = await a.agent.post(`/v1/projects/${q.projetId}/groupe`).send({ articles: [tuile.key], fenetre: FENETRE, statut: "signe", engagement: true });
     expect(refus.status).toBe(400);
     expect(refus.body.error.details).toMatchObject({ reason: "ligne_vague" });

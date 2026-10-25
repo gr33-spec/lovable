@@ -67,18 +67,18 @@ const unreadableReasons: Record<string, string> = {
 /** Motifs précis renvoyés par l'API, quel que soit le code. */
 const reasonMessages: Record<string, string> = {
   // BatiClair Groupé : les refus de l'API, dits avec les mots de l'artisan.
-  quantite_plafonnee: `Cette quantité dépasse trois fois ce que les autres artisans proposent pour cette référence : la ${nom} la refuse. Vérifie-la, ou passe par ton négoce en direct.`,
+  quantite_plafonnee: `Cette quantité dépasse trois fois ce que les autres artisans proposent pour cette référence : le ${nom} la refuse. Vérifie-la, ou passe par ton négoce en direct.`,
   ligne_a_regler: "Règle d'abord cette ligne (quantité ou question en attente) : un engagement ferme porte sur une quantité ferme.",
   adresse_requise: "Renseigne l'adresse du chantier (avec le code postal) : le lot se forme par département.",
-  ligne_vague: `Cette ligne est trop vague pour la ${nom} : précise-la (format, origine, choix, marque), ou envoie-la à ton négoce.`,
-  deja_propose: `Cette ligne est déjà dans la ${nom}.`,
+  ligne_vague: `Cette ligne est trop vague pour le ${nom} : précise-la (format, origine, choix, marque), ou envoie-la à ton négoce.`,
+  deja_propose: `Cette ligne est déjà dans le ${nom}.`,
   engagement_requis: "Coche la phrase d'engagement pour proposer en « Chantier signé ».",
   fenetre_invalide: "La fenêtre de livraison n'est pas bonne : au plus tôt avant au plus tard, dans les 6 mois.",
-  groupe_ferme: `La ${nom} n'est pas ouverte à ton entreprise pour l'instant : regarde l'onglet ${NOM}.`,
+  groupe_ferme: `Le ${nom} n'est pas ouvert à ton entreprise pour l'instant : regarde l'onglet ${NOM}.`,
   sans_quantite: "Cette ligne n'a pas de quantité : indique-la d'abord.",
-  sans_famille: `Ce métier n'a pas encore de famille dans la ${nom}.`,
+  sans_famille: `Ce métier n'a pas encore de famille dans le ${nom}.`,
   siret_invalide: "Ce SIRET n'a pas 14 chiffres valides : corrige-le dans Compte.",
-  // La commande commune du mois (Greg, 22 octobre 2026).
+  // Le regroupement du mois (Greg, 22 octobre 2026).
   commande_close: "La commande est close : on ne peut plus rien retirer.",
   deja_commande: "Tu as déjà commandé pour cette commande.",
   grille_incomplete: "Ce négoce n'a pas chiffré toute ta liste : choisis-en un qui a tout chiffré.",

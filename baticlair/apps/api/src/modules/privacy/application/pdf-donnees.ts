@@ -14,7 +14,7 @@ const LIBELLES: Record<string, string> = {
   abonnements: "Vos abonnements",
   grilles: "Vos grilles",
   commandesRecues: "Commandes reçues",
-  commandeCommune: "Commande commune",
+  commandeCommune: "Regroupement",
 };
 
 function valeur(v: unknown): string {

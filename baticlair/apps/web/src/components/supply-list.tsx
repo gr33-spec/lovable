@@ -150,7 +150,7 @@ export function SupplyList({
     : [{ key: "liste", label: null as string | null, rows: ordered }];
   // Les lignes qu'on peut cocher : prêtes (pas orange), avec un article, pas encore parties à part ; au groupé, un article
   // calculé ou repris (jamais une ligne « à faire chiffrer ») qui n'y est pas déjà.
-  // Décision de Greg (22 octobre) : une ligne vague ne se propose pas à la commande commune (elle part chez ton négoce).
+  // Décision de Greg (22 octobre) : une ligne vague ne se propose pas au regroupement (elle part chez ton négoce).
   const vagueRow = (r: ScreenRow) => Boolean(r.itemKey && (items.get(r.itemKey)?.aPreciserPourGroupe?.length ?? 0) > 0);
   const cochable = (r: ScreenRow) =>
     r.status !== "check" && Boolean(articleOf(r)) && (pourGroupe ? Boolean(r.itemKey) && !groupe?.besoins.has(r.itemKey!) && !vagueRow(r) : !selection?.sent.has(articleOf(r)!));
@@ -219,10 +219,10 @@ export function SupplyList({
       {/* BatiClair Groupé (demande du fondateur, 2026-10-20) : « Proposer au groupé » mis en avant, un bloc visible en haut, pas
           une ligne discrète. Seulement quand le groupé est ouvert à l'entreprise, et hors sélection. */}
       {!groupe && groupeFerme && editable && !selecting ? (
-        <section aria-label={`${NOM} fermée`} className="mb-3 flex flex-col gap-2 rounded-xl border border-dashed border-line bg-ground p-4 opacity-80">
+        <section aria-label={`${NOM} fermé`} className="mb-3 flex flex-col gap-2 rounded-xl border border-dashed border-line bg-ground p-4 opacity-80">
           <p className="flex items-center gap-2 text-[15px] font-extrabold text-muted">
             <Users size={18} aria-hidden="true" />
-            {`Renseigne ton SIRET pour rejoindre la ${nom}`}
+            {`Renseigne ton SIRET pour rejoindre le ${nom}`}
           </p>
           <p className="text-[14px] leading-snug text-muted">Un seul négoce, un seul prix, avec les autres artisans du département.</p>
           <ButtonLink href="/groupe" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
@@ -230,19 +230,19 @@ export function SupplyList({
           </ButtonLink>
         </section>
       ) : null}
-      {/* La commande commune du mois (Greg, 22 octobre 2026) : un bloc, le chrono, et « Ajouter à la commande d'octobre ». */}
+      {/* Le regroupement du mois (Greg, 22 octobre 2026) : un bloc, le chrono, et « Ajouter à la commande d'octobre ». */}
       {groupe && groupe.mode === "mois" && editable && !selecting ? (
         <CommandeDuMoisBloc etat={groupe.mois} onAjouter={startGroupe} message={messageMois} />
       ) : null}
       {groupe && groupe.mode === "lots" && editable && !selecting ? (
-        <section aria-label={`Ajouter à la ${nom}`} className="mb-3 flex flex-col gap-2 rounded-xl bg-surface p-4 shadow-card">
+        <section aria-label={`Ajouter au ${nom}`} className="mb-3 flex flex-col gap-2 rounded-xl bg-surface p-4 shadow-card">
           <p className="flex items-center gap-2 text-[15px] font-extrabold">
             <Users size={18} aria-hidden="true" className="text-accent-text" />
             {`${NOM} : un seul négoce, un seul prix`}
           </p>
           <p className="text-[14px] leading-snug text-muted">Tes commandes regroupées avec les autres artisans du département. Tu commandes sur ton compte, tu es livré sur ton chantier.</p>
           <Button variant="secondary" className="self-start" onClick={startGroupe}>
-            {`Ajouter à la ${nom}`}
+            {`Ajouter au ${nom}`}
           </Button>
         </section>
       ) : null}
@@ -259,7 +259,7 @@ export function SupplyList({
       </p>
       {selecting ? (
         <p className="mb-2 text-[14px] leading-snug font-bold text-ink">
-          {pourGroupe && groupe?.mode === "mois" ? "Coche ce que tu ajoutes à la commande. Mets seulement ce que tu es sûr de commander." : pourGroupe ? `Coche ce que tu ajoutes à la ${nom}. Ton nom ne part pas avec.` : "Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre."}
+          {pourGroupe && groupe?.mode === "mois" ? "Coche ce que tu ajoutes à la commande. Mets seulement ce que tu es sûr de commander." : pourGroupe ? `Coche ce que tu ajoutes au ${nom}. Ton nom ne part pas avec.` : "Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre."}
         </p>
       ) : null}
       {sections.map((section) => (
@@ -296,7 +296,7 @@ export function SupplyList({
                     // ligne déjà proposée non plus (une ligne déjà envoyée à part reste décochée, pas grisée).
                     disabled: !articleOf(r) || r.status === "check" || (pourGroupe && !cochable(r)),
                     ...(pourGroupe && vagueRow(r) ? { note: takeoff.phrasePrecision ?? "à préciser d'abord" } : {}),
-                    ...(pourGroupe ? { label: groupe?.mode === "mois" ? "Ajouter à la commande" : `Ajouter à la ${nom}` } : {}),
+                    ...(pourGroupe ? { label: groupe?.mode === "mois" ? "Ajouter à la commande" : `Ajouter au ${nom}` } : {}),
                     onToggle: () =>
                       setChecked((prev) => {
                         const next = new Set(prev);

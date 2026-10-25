@@ -8,7 +8,7 @@ import { EXEMPLE } from "@/lib/exemple";
 
 /**
  * LA DÉMO GUIDÉE (plan 2 du 21 octobre 2026, bloc 3) : trois écrans qui montrent l'app avec un faux chantier, sans compte
- * ni API, données fictives marquées comme telles. Nouveau cap (22 octobre) : ta liste → la commande commune → ton prix
+ * ni API, données fictives marquées comme telles. Nouveau cap (22 octobre) : ta liste → le regroupement → ton prix
  * livré chez toi.
  *
  * DERRIÈRE UN BOUTON (Greg, 24 octobre 2026, capture iPhone : « la démo s'ouvre en plein écran dès l'arrivée, avant même
@@ -85,7 +85,7 @@ type Ecran = 0 | 1 | 2;
 
 export function DemoGuidee({ onFermer }: { onFermer: () => void }) {
   const [ecran, setEcran] = useState<Ecran>(0);
-  const titres = ["Ta liste, remise au propre", "La commande commune, tous ensemble", "Ton prix, livré chez toi"];
+  const titres = ["Ta liste, remise au propre", "Le regroupement, tous ensemble", "Ton prix, livré chez toi"];
   return (
     <section data-demo aria-labelledby="demo-titre" className="flex min-h-[calc(100dvh-2rem)] flex-col gap-4 rounded-xl border border-line bg-surface p-4 text-ink sm:min-h-0 sm:p-6">
       <div className="flex items-start justify-between gap-3">
@@ -185,7 +185,7 @@ function EcranDevis() {
   );
 }
 
-/** Écran 2 : la commande commune du mois (Greg, 22 octobre 2026) : en quantités, le chrono ; jamais un nombre d'entreprises. */
+/** Écran 2 : le regroupement du mois (Greg, 22 octobre 2026) : en quantités, le chrono ; jamais un nombre d'entreprises. */
 function EcranLot() {
   const c = EXEMPLE.commande;
   return (

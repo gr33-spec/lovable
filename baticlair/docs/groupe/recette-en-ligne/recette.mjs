@@ -275,14 +275,14 @@ await etape("E-mail réel : confirmer l'adresse", page, async () => {
   return `${mails.length} e-mail(s) : ${mails.map((m) => `« ${m.subject} »`).join(", ")}`;
 });
 
-// 4. L'entreprise au groupe (SIRET, adresse), comme dans « Commande commune ».
-await etape("Commande commune : SIRET et adresse", page, async () => {
-  await ouvrir(page, "/groupe", "commande commune");
+// 4. L'entreprise au groupe (SIRET, adresse), comme dans « Regroupement ».
+await etape("Regroupement : SIRET et adresse", page, async () => {
+  await ouvrir(page, "/groupe", "regroupement");
   const p = await api(page, "PATCH", "/v1/company/profile", { name: ENTREPRISE, address: "3 rue des Ajoncs, 22300 Lannion", siret: "73282932000074", phone: null, email: null });
   verif(p.status === 200, `profil ${p.status}`);
   const s = await api(page, "POST", "/v1/groupe/siret");
   verif(s.status === 200, `SIRET ${s.status} ${JSON.stringify(s.body)}`);
-  await ouvrir(page, "/groupe", "commande commune");
+  await ouvrir(page, "/groupe", "regroupement");
 });
 
 // 5. Dépôt d'une liste (photo), vraie lecture.
@@ -296,8 +296,8 @@ await etape("Dépôt d'une liste (photo manuscrite), vraie lecture", page, async
   await zeroReste(page, "liste lue");
   return `${await page.getByRole("region", { name: "Liste des fournitures" }).getByRole("listitem").count()} lignes`;
 });
-await etape("Liste : ajouter à la commande commune", page, async () => {
-  const bloc = page.getByRole("region", { name: /^Commande commune d/ });
+await etape("Liste : ajouter au regroupement", page, async () => {
+  const bloc = page.getByRole("region", { name: /^Regroupement d/ });
   await voir(bloc);
   await bloc.getByRole("button", { name: /^Ajouter à la commande d/ }).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });

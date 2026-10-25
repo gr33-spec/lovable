@@ -106,7 +106,7 @@ export function lotADecider(lot: { envoyeLe: Date | null }, reponses: readonly P
 const DELAI_RESPONSE_MS = () => DELAI_REPONSE_JOURS * JOUR;
 
 /**
- * Section 6 : économie affichée = (prix de référence − prix de la commande commune) × quantité, MOINS la livraison du
+ * Section 6 : économie affichée = (prix de référence − prix du regroupement) × quantité, MOINS la livraison du
  * chantier (plan « finition », 22 octobre : la carte montrait un prix livré, livraison comprise, et une économie qui
  * l'oubliait ; l'économie est désormais « prix habituel − prix livré », jamais plus que ce que l'artisan gagne vraiment).
  * Sans prix de référence, rien.

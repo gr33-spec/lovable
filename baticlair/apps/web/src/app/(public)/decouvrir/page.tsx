@@ -15,7 +15,7 @@ import { ACCROCHE_APP, EDITEUR_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: `${NOM_APP}, la commande commune des artisans du bâtiment`,
+  title: `${NOM_APP}, le regroupement des artisans du bâtiment`,
   description: "Marre de te faire enfumer sur le prix de tes matériaux ? Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.",
 };
 
@@ -48,7 +48,7 @@ const ETAPES = [
   {
     titre: "2. On envoie tout le volume aux négoces",
     texte: "Une seule grille pour tous les négoces de ta région.",
-    image: { src: "/landing/capture-commande.jpg", alt: `L'écran « Commande commune » de ${NOM_APP} : la clôture dans quelques jours, ta liste dans la commande` },
+    image: { src: "/landing/capture-commande.jpg", alt: `L'écran « Regroupement » de ${NOM_APP} : la clôture dans quelques jours, ta liste dans la commande` },
   },
   { titre: "3. Tu vois le meilleur prix et tu commandes si ça te plaît", texte: "Ton prix livré chez chaque négoce. Sans engagement.", image: { src: "/landing/capture-prix.jpg", alt: `L'écran des prix reçus dans ${NOM_APP} : ton prix livré chez chaque négoce, le moins cher coché` } },
 ] as const;
@@ -123,7 +123,7 @@ export default function BienvenuePage() {
         </div>
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
           <div className="flex w-full max-w-[420px] justify-center overflow-hidden rounded-2xl bg-accent px-8 pt-10 sm:px-12 sm:pt-14">
-            <Telephone src="/landing/capture-accueil.jpg" alt={`L'accueil de ${NOM_APP} : la commande commune en cours et le temps qui reste avant la clôture`} priorite className="w-[260px] translate-y-3 sm:w-[300px]" />
+            <Telephone src="/landing/capture-accueil.jpg" alt={`L'accueil de ${NOM_APP} : le regroupement en cours et le temps qui reste avant la clôture`} priorite className="w-[260px] translate-y-3 sm:w-[300px]" />
           </div>
         </div>
       </section>

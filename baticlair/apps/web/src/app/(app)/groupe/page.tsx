@@ -22,7 +22,7 @@ interface EtatGroupe {
   admin: boolean;
   /** Exclu du groupé (deux désistements en 12 mois) jusqu'à cette date, AAAA-MM-JJ. */
   excluJusquau: string | null;
-  /** « mois » : la commande commune du mois (Greg, 22 octobre 2026) ; « lots » : l'ancien regroupement au fil de l'eau. */
+  /** « mois » : le regroupement du mois (Greg, 22 octobre 2026) ; « lots » : l'ancien regroupement au fil de l'eau. */
   mode?: "mois" | "lots";
 }
 interface BesoinLot {
@@ -82,7 +82,7 @@ export default function GroupePage() {
   const [siretErreur, setSiretErreur] = useState<string | null>(null);
 
   if (etat.error && !etat.data) return <ErrorNotice error={etat.error} onRetry={etat.reload} />;
-  if (!etat.data) return <Skeleton card="h-56" lines={3} label="Chargement de la commande commune…" />;
+  if (!etat.data) return <Skeleton card="h-56" lines={3} label="Chargement du regroupement…" />;
   const { etapes, siret } = etat.data;
   const tout = etapes.siret && etapes.devis && etapes.negoces;
   const mois = etat.data.mode !== "lots";
@@ -119,12 +119,12 @@ export default function GroupePage() {
       ) : null}
       {etat.data.raisons.includes("exclu_du_groupe") ? (
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
-          {`La ${nom} t'est fermée`}{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux commandes annulées en 12 mois. Tes commandes en cours restent visibles ci-dessous.
+          {`Le ${nom} t'est fermé`}{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux commandes annulées en 12 mois. Tes commandes en cours restent visibles ci-dessous.
         </p>
       ) : null}
       {etat.data.raisons.includes("departement_ferme") ? (
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
-          {`La ${nom} n'est pas encore ouverte dans ton département.`} On te prévient dès que c&apos;est le cas.
+          {`Le ${nom} n'est pas encore ouvert dans ton département.`} On te prévient dès que c&apos;est le cas.
         </p>
       ) : null}
       <Card className="flex flex-col gap-4 p-4">
@@ -192,7 +192,7 @@ export default function GroupePage() {
   );
 }
 
-/** La commande commune du mois : en quantités, le chrono, le partage, puis les prix de chaque négoce (Greg, 22 octobre 2026). */
+/** Le regroupement du mois : en quantités, le chrono, le partage, puis les prix de chaque négoce (Greg, 22 octobre 2026). */
 function PanneauDuMois() {
   const { prochaine, etat, error, loading, reload } = useProchaineCommande(true);
   if (loading) return <Skeleton card="h-64" label="Chargement de la commande du mois…" />;
@@ -214,7 +214,7 @@ function Etapes() {
       {[
         { icon: FileText, titre: "1. Tu proposes", texte: "Une ligne de ta liste, la date de livraison voulue, « chantier signé »." },
         { icon: Users, titre: "2. On regroupe", texte: "Même produit, même département : une seule commande, un seul négoce." },
-        { icon: Tag, titre: "3. Tu commandes", texte: `Au prix de la ${nom}, sur ton compte, livré sur ton chantier.` },
+        { icon: Tag, titre: "3. Tu commandes", texte: `Au prix du ${nom}, sur ton compte, livré sur ton chantier.` },
       ].map((e) => (
         <li key={e.titre} className="flex flex-col gap-1.5 rounded-2xl bg-ground p-3">
           <e.icon size={22} aria-hidden="true" className="text-accent-text" />
@@ -300,7 +300,7 @@ function Livraison({ b, onDone }: { b: BesoinLot; onDone: () => void }) {
         </div>
       ) : (
         <div className="flex flex-col gap-2 rounded-2xl bg-warn-bg p-3">
-          <p className="text-[13px] font-bold text-warn">Tu t&apos;étais engagé à commander ces quantités. Première fois : un avertissement ; deuxième fois sur 12 mois : la {nom} se ferme 6 mois. Le négoce sera prévenu.</p>
+          <p className="text-[13px] font-bold text-warn">Tu t&apos;étais engagé à commander ces quantités. Première fois : un avertissement ; deuxième fois sur 12 mois : le {nom} se ferme 6 mois. Le négoce sera prévenu.</p>
           <textarea value={desistement ?? ""} onChange={(e) => setDesistement(e.target.value)} maxLength={1000} rows={2} aria-label="Pourquoi tu ne commandes pas" placeholder="Pourquoi ? (facultatif)" className="rounded-xl border border-line bg-surface px-3 py-2 text-[14px]" />
           <div className="flex gap-2">
             <Button variant="secondary" className="grow" onClick={() => setDesistement(null)} disabled={pending}>
@@ -326,7 +326,7 @@ function MesLots() {
     <Card className="flex flex-col gap-3 p-4">
       <SectionTitle>{`Mes ${noms}`}</SectionTitle>
       {data.besoins.length === 0 ? (
-        <p className="text-[15px] font-semibold text-muted">Rien pour l&apos;instant : ajoute un chantier à la {nom}.</p>
+        <p className="text-[15px] font-semibold text-muted">Rien pour l&apos;instant : ajoute un chantier à le {nom}.</p>
       ) : (
         <ul aria-label={`Mes ${noms}`} className="flex flex-col gap-2">
           {data.besoins.map((b) => (

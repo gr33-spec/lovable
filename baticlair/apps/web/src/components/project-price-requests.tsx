@@ -107,7 +107,7 @@ export function ProjectPriceRequests({
 
   const refreshProgress = useProgressRefresh();
   // Commande du mois (Greg, 23 octobre) : plus de « X offres reçues / Comparer les offres » par chantier ; le prix vient de
-  // la commande commune, le chantier garde seulement l'envoi aux négoces.
+  // le regroupement, le chantier garde seulement l'envoi aux négoces.
   const { features } = useSession();
   const modeMois = features.groupe === true && features.commandeCommune !== "lots";
   // Des e-mails partent-ils du serveur (§43) ? Sinon, l'artisan envoie depuis sa messagerie.

@@ -2,7 +2,7 @@ import request, { type Response as SupertestResponse } from "supertest";
 import { makePdf, type FixtureRow } from "./pdf-fixtures.js";
 import { signUpWithCompany, type TestContext } from "./test-app.js";
 
-/** Les briques d'un cycle de commande commune en test : un couvreur avec sa liste, la tâche, le dépôt d'une grille. */
+/** Les briques d'un cycle de regroupement en test : un couvreur avec sa liste, la tâche, le dépôt d'une grille. */
 export const ARDOISE = "Ardoise naturelle 32×22 Espagne 1er choix";
 export const LITEAU = "Liteau sapin traité 27×38";
 export const CROCHET = "Crochet inox 100 mm";

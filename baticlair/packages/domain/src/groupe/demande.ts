@@ -1,9 +1,9 @@
 import { LIBELLES_FAMILLES, type FamilleGroupe, type FenetreLivraison } from "./groupe.js";
-import { NOM_COMMANDE_COMMUNE, nomCommun } from "./nom.js";
+import { NOM_COMMANDE_COMMUNE, duNom } from "./nom.js";
 import { NOM_APP } from "./marque.js";
 
 /**
- * LA DEMANDE AUX NÉGOCES (parcours groupé, étape 5), en code pur : l'e-mail part au nom de la « Commande commune »
+ * LA DEMANDE AUX NÉGOCES (parcours groupé, étape 5), en code pur : l'e-mail part au nom de la « Regroupement »
  * (`NOM_COMMANDE_COMMUNE`), depuis l'adresse BatiClair, à tous les négoces du département qui vendent la
  * famille du lot ; un généraliste reçoit toutes ses familles dans un seul e-mail. Le PDF a deux parties : le total ferme
  * et le volume probable par référence, puis une ligne par chantier (adresse, quantité, fenêtre) sans nom de client.
@@ -25,7 +25,7 @@ export const VERSION_CONTRAT = "2026-10-24";
 /** Dans l'e-mail, en gras : la formulation unique (plus de 2 %). */
 export const PHRASE_COMMISSION = PHRASE_REMUNERATION_NEGOCE;
 /** La case obligatoire de la page de dépôt : les conditions, sans taux. */
-export const PHRASE_ACCORD = "J'accepte les conditions de la Commande commune";
+export const PHRASE_ACCORD = "J'accepte les conditions du regroupement";
 /** Les réponses sont attendues sous sept jours (section 3 : « Réponses attendues sous 7 jours »). */
 export const DELAI_REPONSE_JOURS = 7;
 
@@ -146,8 +146,8 @@ export function documentDemande(lots: readonly LotADemander[], departement: stri
 export function texteContrat(version = VERSION_CONTRAT): string[] {
   if (version !== VERSION_CONTRAT) return texteContratCommission(version);
   return [
-    `Conditions de la ${nomCommun()} pour les négoces, version ${version}`,
-    `1. Objet. BATI INVEST (${NOM_APP}) met en relation des artisans réunis dans la « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix de la ${nomCommun()}.`,
+    `Conditions ${duNom()} pour les négoces, version ${version}`,
+    `1. Objet. BATI INVEST (${NOM_APP}) met en relation des artisans réunis dans le « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix ${duNom()}.`,
     `2. Rémunération. ${PHRASE_REMUNERATION_NEGOCE}`,
     `3. Aucun autre frais. Répondre est gratuit ; un devis retenu ou non ne donne lieu à aucune facturation. ${NOM_APP} n'encaisse aucun paiement de commande, n'est ni acheteur ni revendeur, et ne porte aucun risque d'impayé des artisans. Le contrat de vente est conclu directement entre l'artisan et le négoce.`,
     "4. Concurrence. Les prix d'un négoce ne sont jamais communiqués à un autre négoce, ni pendant ni après la consultation.",
@@ -163,8 +163,8 @@ export function texteContrat(version = VERSION_CONTRAT): string[] {
 export function texteContratCommission(version = "2026-10-22"): string[] {
   return [
     `Conditions de commission d'apporteur d'affaires, version ${version}`,
-    `1. Objet. ${NOM_APP} met en relation des artisans réunis dans la « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix de la ${nomCommun()}.`,
-    `2. Commission. Si le devis du négoce est retenu pour un lot, le négoce verse à ${NOM_APP} une commission d'apporteur d'affaires de ${TAUX_COMMISSION_POURCENT} % du montant hors taxes du lot, c'est-à-dire de la somme des bons de commande des artisans du lot passés chez lui au tarif de la ${nomCommun()}.`,
+    `1. Objet. ${NOM_APP} met en relation des artisans réunis dans le « ${NOM_AU_CONTRAT} » et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix ${duNom()}.`,
+    `2. Commission. Si le devis du négoce est retenu pour un lot, le négoce verse à ${NOM_APP} une commission d'apporteur d'affaires de ${TAUX_COMMISSION_POURCENT} % du montant hors taxes du lot, c'est-à-dire de la somme des bons de commande des artisans du lot passés chez lui au tarif ${duNom()}.`,
     `3. Facturation. La commission est facturée par ${NOM_APP} au négoce au moment de la transmission des bons de commande, payable à 30 jours. Une relance automatique est envoyée après l'échéance.`,
     `4. Aucun autre frais. Répondre est gratuit ; un devis non retenu ne donne lieu à aucune facturation. ${NOM_APP} n'encaisse aucun paiement de commande, n'est ni acheteur ni revendeur, et ne porte aucun risque d'impayé des artisans.`,
     "5. Acceptation. L'acceptation se fait en cochant la case sur la page de dépôt du devis ; la date, l'adresse e-mail et l'adresse IP de l'acceptation sont enregistrées. Sans acceptation, le devis n'est pas pris en compte.",

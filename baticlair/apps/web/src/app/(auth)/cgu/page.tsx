@@ -37,7 +37,7 @@ export default function CguPage() {
             mentions légales
           </Link>
           ). C&apos;est un service entre professionnels : il est réservé aux entreprises du bâtiment dont le SIRET est actif. Le SIRET est vérifié auprès de
-          l&apos;INSEE avant l&apos;accès à la {nom}. Les informations de l&apos;entreprise (nom, adresse, SIRET) doivent être exactes.
+          l&apos;INSEE avant l&apos;accès à le {nom}. Les informations de l&apos;entreprise (nom, adresse, SIRET) doivent être exactes.
         </p>
       </section>
 
@@ -50,7 +50,7 @@ export default function CguPage() {
             vous commandez.
           </li>
           <li>
-            La « {NOM} » : toutes les deux semaines, le 1er et le 15 du mois à 12 h, les listes déposées par les artisans d&apos;un même métier et d&apos;un même
+            Le « {NOM} » : toutes les deux semaines, le 1er et le 15 du mois à 12 h, les listes déposées par les artisans d&apos;un même métier et d&apos;un même
             département sont réunies en une seule grille, envoyée aux négoces de ce secteur. Les négoces ont cinq jours ouvrés pour répondre. Vous voyez ensuite votre
             prix livré chez chaque négoce qui a répondu.
           </li>
@@ -78,7 +78,7 @@ export default function CguPage() {
             Une facture émise par {EDITEUR.nom} est disponible à chaque paiement dans « Mes factures ».
           </li>
           <li>
-            <strong>Essai gratuit</strong> : de l&apos;inscription jusqu&apos;à 30 jours après les résultats de votre première {nom} ; si vous ne déposez aucune liste,
+            <strong>Essai gratuit</strong> : de l&apos;inscription jusqu&apos;à 30 jours après les résultats de votre premier {nom} ; si vous ne déposez aucune liste,
             l&apos;essai s&apos;arrête 60 jours après l&apos;inscription. Aucune carte n&apos;est demandée pendant l&apos;essai et rien n&apos;est prélevé à sa fin sans
             votre accord.
           </li>
@@ -135,7 +135,7 @@ export default function CguPage() {
         <h2 className={s.h2}>5. Concurrence</h2>
         <p className={s.p}>
           Les prix d&apos;un négoce ne sont jamais communiqués à un autre négoce, ni pendant ni après la consultation. Les artisans ne se voient pas : ni nom, ni
-          chantier, ni prix obtenu. La {nom} additionne des volumes, elle ne sert pas à vous coordonner avec d&apos;autres artisans : vous restez seul maître de vos
+          chantier, ni prix obtenu. Le {nom} additionne des volumes, elle ne sert pas à vous coordonner avec d&apos;autres artisans : vous restez seul maître de vos
           achats, de vos prix de vente et de vos clients, et vous vous engagez à ne pas utiliser le service pour vous entendre avec d&apos;autres entreprises.
         </p>
       </section>

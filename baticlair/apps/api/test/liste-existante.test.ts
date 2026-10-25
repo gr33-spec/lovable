@@ -108,7 +108,7 @@ describe("la suite d'un devis : envoi et groupé", () => {
     const { projectId } = await deposer(agent, { nom: "liste-manuscrite.png", octets: PNG, type: "image/png" });
     await agent.patch(`/v1/projects/${projectId}`).send({ address: adresse }).expect(200);
     const takeoff = (await agent.get(`/v1/projects/${projectId}/takeoff`).expect(200)).body.takeoff as { id: string; purchase: { toBuy: { key: string; label: string }[] } };
-    // Une ligne vague n'entre pas dans la commande commune (décision de Greg, 22 octobre) : la marque se précise d'abord.
+    // Une ligne vague n'entre pas dans le regroupement (décision de Greg, 22 octobre) : la marque se précise d'abord.
     const vague = takeoff.purchase.toBuy.find((x) => /^Tuile romane canal rouge/.test(x.label))!;
     const ligne = (takeoff as unknown as { lines: { id: string; designation: string; quantity: string | null; unit: string | null }[] }).lines.find((l) => `line:${l.id}` === vague.key)!;
     await agent.patch(`/v1/takeoff-lines/${ligne.id}`).send({ designation: `${ligne.designation} Edilians`, quantity: ligne.quantity, unit: ligne.unit }).expect(200);

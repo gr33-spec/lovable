@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, PageTitle } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
-import { NOM } from "@/lib/nom";
+import { NOM, nom } from "@/lib/nom";
 
 /**
  * « Ne plus recevoir ces e-mails » (RGPD, 24 octobre 2026) : le lien en bas de chaque e-mail de notification. Rien ne
@@ -47,7 +47,7 @@ export default function EmailsStopPage() {
       ) : page ? (
         <>
           <p className="text-[16px] leading-relaxed">
-            Ne plus recevoir les e-mails de la {NOM} pour {page.entreprise} ? Tu verras toujours tout dans l&apos;application.
+            Ne plus recevoir les e-mails du {nom} pour {page.entreprise} ? Tu verras toujours tout dans l&apos;application.
           </p>
           <Button pending={pending} onClick={confirmer}>
             Ne plus recevoir ces e-mails

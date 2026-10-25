@@ -211,7 +211,7 @@ export function BandeauDuMois() {
   return (
     <Link
       href="/groupe"
-      aria-label={`Commande ${prochaine.de}, clôture dans ${prochaine.clotureDans} : voir la commande commune`}
+      aria-label={`Commande ${prochaine.de}, clôture dans ${prochaine.clotureDans} : voir le regroupement`}
       className="pressable -mt-1 flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[14px] font-semibold text-ink active:bg-ground"
     >
       <Clock size={16} aria-hidden="true" className="shrink-0 text-accent-text" />
@@ -378,7 +378,7 @@ export function CommandeDuMoisBar({
 }
 
 /**
- * En haut de « Ton chantier » : « Commande commune de novembre », le chrono, les quantités de toute la commande (jamais un
+ * En haut de « Ton chantier » : « Regroupement de novembre », le chrono, les quantités de toute la commande (jamais un
  * nombre d'entreprises), puis « Ajouter à la commande du 1er novembre ». Après un dépôt tardif : « Trop tard pour le 15 octobre… ».
  */
 export function CommandeDuMoisBloc({ etat, onAjouter, message }: { etat: EtatDuMois | null; onAjouter: () => void; message: string | null }) {
@@ -391,10 +391,10 @@ export function CommandeDuMoisBloc({ etat, onAjouter, message }: { etat: EtatDuM
   const chronoTexte = `Clôture dans ${vivant ?? p?.clotureDans ?? chrono(new Date(), new Date(defaut.clotureLe))}`;
   const tout = p && !p.vide ? p.tout : null;
   return (
-    <section aria-label={de ? `Commande commune ${de}` : "Commande commune"} className="mb-3 flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
+    <section aria-label={de ? `Regroupement ${de}` : "Regroupement"} className="mb-3 flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
       <p className="flex items-center gap-2 text-[16px] font-extrabold">
         <Users size={18} aria-hidden="true" className="text-accent-text" />
-        {de ? `Commande commune ${de}` : "Commande commune"}
+        {de ? `Regroupement ${de}` : "Regroupement"}
       </p>
       <p className="text-[14px] leading-snug text-muted">Une commande toutes les deux semaines avec les artisans de ta région.</p>
       <Chrono>{chronoTexte}</Chrono>
@@ -463,14 +463,14 @@ export function MesLignesDuMois({ groupe }: { groupe: Groupe }) {
 }
 
 /**
- * Le dépôt d'une liste dans la commande commune (« Trop tard pour le 15 octobre… » renvoyé tel quel). `mois` : la commande
+ * Le dépôt d'une liste dans le regroupement (« Trop tard pour le 15 octobre… » renvoyé tel quel). `mois` : la commande
  * que l'écran montrait ; close entre-temps, l'API le dit.
  */
 export async function deposerDansLeMois(projectId: string, articles: string[], nature: "chantier" | "stock", mois: string | null = null): Promise<{ mois: string; message: string | null }> {
   return api(`/v1/projects/${encodeURIComponent(projectId)}/commande-du-mois`, { method: "POST", body: { articles, nature, mois }, idempotencyKey: newActionKey() });
 }
 
-/** L'onglet « Commande commune » : chaque commande du mois, ses chiffres en quantités, le partage, puis les résultats. */
+/** L'onglet « Regroupement » : chaque commande du mois, ses chiffres en quantités, le partage, puis les résultats. */
 export function CommandeDuMoisPanneau({ etat, onChange }: { etat: EtatDuMois; onChange: () => void }) {
   const commandes = etat.commandes;
   const ouverte = commandes.find((c) => c.phase === "inscriptions");

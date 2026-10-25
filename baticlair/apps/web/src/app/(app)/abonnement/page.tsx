@@ -85,7 +85,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
           <>
             <p className="text-[20px] font-extrabold">Essai gratuit</p>
             <p className="text-[16px]">
-              {a.essaiFinLe ? `Jusqu'au ${date(a.essaiFinLe)}.` : "Jusqu'à 30 jours après les résultats de ta première commande commune."} Ensuite, dès {a.prixDes} HT par mois.
+              {a.essaiFinLe ? `Jusqu'au ${date(a.essaiFinLe)}.` : "Jusqu'à 30 jours après les résultats de ton premier regroupement."} Ensuite, dès {a.prixDes} HT par mois.
             </p>
             <OffresAbonnement offres={a.offres} choisie={formule} onChoisir={setFormule} />
             <Button variant="secondary" onClick={() => void run("payer", () => continuerAbonnement(formule))} pending={pending === "payer"} className="self-start">

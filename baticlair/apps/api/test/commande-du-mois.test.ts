@@ -75,7 +75,7 @@ const DEPOTS: Record<string, { depot: string; francoKm: number; prixAuDela: numb
 };
 const inscrire = (email: string, maintenant = T0) => inscrireNegoce(ctx, email, { ...DEPOTS[email]!, enseigne: `Négoce ${email.slice(0, 2).toUpperCase()}`, maintenant });
 
-describe("la commande commune du mois : inscriptions, clôture, grille aux négoces, résultats, commande", { timeout: 120_000 }, () => {
+describe("le regroupement du mois : inscriptions, clôture, grille aux négoces, résultats, commande", { timeout: 120_000 }, () => {
   it("un cycle complet, avec les totaux posés à la main", async () => {
     const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [
       { libelle: ARDOISE, quantite: "2000", unite: "pièces" },
@@ -175,7 +175,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     const apres = (await B.agent.post(`/v1/commande-du-mois/${cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: n2 }).expect(200)).body;
     expect(apres.suivi).toMatchObject({ etape: 4, phrase: "C'est commandé." });
     const bon = mailsVers("n2@example.com").at(-1)!;
-    expect(bon.subject).toBe(`Bon de commande, commande commune du 15 octobre n° ${apres.numero}`);
+    expect(bon.subject).toBe(`Bon de commande, regroupement du 15 octobre n° ${apres.numero}`);
     expect(bon.attachments?.[0]?.filename).toMatch(/^bon-de-commande-2026-10-/);
     await B.agent.post(`/v1/commande-du-mois/${cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: n2 }).expect(409);
   });
@@ -198,7 +198,7 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
     await B.agent.post(`/v1/projects/${B.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: [B.articles[0]!], nature: "chantier" }).expect(201);
     await B.agent.post(`/v1/projects/${B.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: [B.articles[1]!], nature: "chantier" }).expect(201);
-    const ajouts = () => pushVers("a@example.fr").filter((m) => m.title === "La commande commune grossit");
+    const ajouts = () => pushVers("a@example.fr").filter((m) => m.title === "Le regroupement grossit");
     expect(ajouts()).toHaveLength(1);
     await tache("2026-10-11T07:00:00.000Z");
     expect(ajouts()).toHaveLength(2);

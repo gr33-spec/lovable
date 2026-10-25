@@ -20,7 +20,7 @@ const TITLES: Record<AlertKind, string> = {
   ai_reading_failed: "Lecture de devis échouée",
   client_error: "Écran en erreur chez un artisan",
   /** Espace négoce (23 octobre 2026) : aucun négoce inscrit, aucune réponse à 48 h, grille retenue trop « non garantie ». */
-  commande_commune: "Commande commune à surveiller",
+  commande_commune: "Regroupement à surveiller",
 };
 
 export const ALERT_QUIET_MS = 10 * 60 * 1000;

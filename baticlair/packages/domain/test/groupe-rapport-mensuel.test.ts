@@ -14,10 +14,10 @@ describe("rapport mensuel de l'artisan", () => {
     const r = rapportMensuel({ mois: "2026-10", chantiersLus: 3, economies: 315.4, lots: 2 }, "Jean");
     expect(r.objet).toBe("Ton mois d'octobre 2026 avec Mobiiz : 3 chantiers lus, 315 € économisés, 2 lots");
     expect(r.texte).toContain("Bonjour Jean,");
-    expect(r.texte).toContain("Ce mois : 3 chantiers lus, 315 € économisés grâce à la commande commune, 2 lots.");
-    expect(r.texte).toContain("Tes 2 lots de la commande commune");
+    expect(r.texte).toContain("Ce mois : 3 chantiers lus, 315 € économisés grâce au regroupement, 2 lots.");
+    expect(r.texte).toContain("Tes 2 lots du regroupement");
     expect(r.texte).not.toMatch(/\bvous\b|\bvotre\b/i);
-    expect(r.html).toContain("<strong>Ce mois : 3 chantiers lus, 315 € économisés grâce à la commande commune, 2 lots.</strong>");
+    expect(r.html).toContain("<strong>Ce mois : 3 chantiers lus, 315 € économisés grâce au regroupement, 2 lots.</strong>");
   });
 
   it("un chantier, aucun lot : singulier, et l'invitation au groupé ; de novembre, d'avril", () => {

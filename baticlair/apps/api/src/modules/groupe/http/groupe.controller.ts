@@ -43,7 +43,7 @@ export class GroupeController {
   @Get("groupe")
   async etat(@Tenant() tenant: TenantContext) {
     this.actif();
-    // Le mode (Greg, 22 octobre 2026) : « mois » = la commande commune du mois ; « lots » = l'ancien regroupement.
+    // Le mode (Greg, 22 octobre 2026) : « mois » = le regroupement du mois ; « lots » = l'ancien regroupement.
     return { ...(await this.groupe.etat(tenant)), mode: this.config.groupe.mode };
   }
 

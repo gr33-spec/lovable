@@ -59,7 +59,7 @@ export class AccountData {
         }),
         preferences: await this.prisma.companyPreference.findMany({ where: { companyId }, select: { kind: true, key: true, value: true, status: true, createdAt: true } }),
         corrections: await this.prisma.correctionEvent.findMany({ where: { companyId }, select: { action: true, cause: true, reason: true, before: true, after: true, createdAt: true } }),
-        // La commande commune (RGPD, 24 octobre 2026) : tes lignes déposées, tes négoces, tes commandes.
+        // Le regroupement (RGPD, 24 octobre 2026) : tes lignes déposées, tes négoces, tes commandes.
         commandeCommune: {
           lignes: await this.prisma.besoin.findMany({ where: { companyId }, select: { designation: true, quantite: true, unite: true, statut: true, nature: true, adresseLivraison: true, createdAt: true, cycle: { select: { mois: true, zone: true } } }, orderBy: { createdAt: "asc" } }),
           negoces: (await this.prisma.negoceArtisan.findMany({ where: { companyId }, include: { negoce: { select: { nom: true, email: true, departement: true, familles: true } } }, orderBy: { rang: "asc" } })).map((l) => ({ ...l.negoce, rang: l.rang, numeroCompte: l.numeroCompte })),

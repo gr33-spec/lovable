@@ -105,7 +105,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
     // Étape 7 : le bon de commande de A, et sa livraison.
     const bonA = await ctx.prisma.bonCommande.create({ data: { offreId: offreA.id, negoceId: ids.negoce, livraison: { create: {} } } });
     ids.bon = bonA.id;
-    // La commande commune du mois (Greg, 22 octobre 2026) : une commande de A, son besoin dedans.
+    // Le regroupement du mois (Greg, 22 octobre 2026) : une commande de A, son besoin dedans.
     const cycleA = await ctx.prisma.cycleCommande.create({ data: { mois: "2026-10", famille: "couverture", zone: "29", clotureLe: new Date("2026-10-25T11:00:00Z"), reponseAvant: new Date("2026-11-08T17:00:00Z"), relanceLe: new Date("2026-11-07T17:00:00Z"), phase: "resultats" } });
     await ctx.prisma.besoin.update({ where: { id: ids.besoin }, data: { cycleId: cycleA.id } });
     ids.cycle = cycleA.id;

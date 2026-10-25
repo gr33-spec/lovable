@@ -11,7 +11,7 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
     lignes: [
       "Cette liste, c'est ce que reçoit ton fournisseur : une ligne par fourniture, dans tes mots.",
       "Une ligne orange attend un geste de toi : tape dessus, réponds ou corrige, elle passe au vert.",
-      `Tout vert ? Envoie à tes fournisseurs en bas, ou ajoute des lignes à la ${nom}.`,
+      `Tout vert ? Envoie à tes fournisseurs en bas, ou ajoute des lignes au ${nom}.`,
     ],
   },
   groupe: {
@@ -25,7 +25,7 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
   negoces: {
     titre: "Tes négoces",
     lignes: [
-      `Ajoute l'e-mail de chaque négoce et ce qu'il vend : il recevra tes demandes de la ${nom}.`,
+      `Ajoute l'e-mail de chaque négoce et ce qu'il vend : il recevra tes demandes du ${nom}.`,
       "Ton favori reçoit en premier ; ton numéro de compte chez lui est repris sur tes bons de commande.",
       "Dès trois lettres, la base Sirene te propose les négoces de ton département.",
     ],
@@ -33,7 +33,7 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
   compte: {
     titre: "Ton compte",
     lignes: [
-      `Ton entreprise, ton adresse et ton SIRET servent aux demandes de prix et à la ${nom} (SIRET vérifié à l'INSEE).`,
+      `Ton entreprise, ton adresse et ton SIRET servent aux demandes de prix et au ${nom} (SIRET vérifié à l'INSEE).`,
       "Tes données se téléchargent ou s'effacent ici, tout de suite, sans rien demander à personne.",
       `Les notifications te préviennent quand une liste est prête ou que ta ${nom} avance.`,
     ],

@@ -71,11 +71,11 @@ export class DemoService {
     }
     // L'admin lui-même (multimétier, 25 octobre 2026) : une liste de démonstration couverture et placo dans le 22, pour voir
     // ses options (« Tout chez … », une famille chez l'un et l'autre chez l'autre) et commander, sans lecture IA. Le chantier
-    // « Démo commande commune » disparaît avec « Tout effacer ».
+    // « Démo regroupement » disparaît avec « Tout effacer ».
     let pourToi = 0;
     if (adminUserId) {
       const companyId = await this.entrepriseDe(adminUserId);
-      const project = await p.project.create({ data: { companyId, name: "Démo commande commune (couverture et placo)", address: ADRESSE_ADMIN, demo: true, createdById: adminUserId } });
+      const project = await p.project.create({ data: { companyId, name: "Démo regroupement (couverture et placo)", address: ADRESSE_ADMIN, demo: true, createdById: adminUserId } });
       const takeoff = await p.takeoff.create({ data: { companyId, projectId: project.id, source: "lignes", trade: "roofing", status: "validated", promptId: "demo", promptVersion: 1, model: "demo", calculatedAt: maintenant, validatedAt: maintenant } });
       pourToi = await this.commande.deposerPourLaDemo({ companyId, projectId: project.id, takeoffId: takeoff.id, adresse: ADRESSE_ADMIN, lignes: LIGNES.map((l) => ({ designation: l.designation, unite: l.unite, famille: l.famille, quantite: l.base })) }, maintenant);
     }

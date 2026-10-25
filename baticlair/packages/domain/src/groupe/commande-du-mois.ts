@@ -408,7 +408,7 @@ export function messageAjout(ajouts: readonly { quantite: number; unite: string;
   return `+${liste}${suite} ${pluriel ? "viennent" : "vient"} d'être ${participe}. L'union fait la force !`;
 }
 
-/** Le suivi façon colis d'un chantier inscrit à la commande commune (Greg, 22 octobre). */
+/** Le suivi façon colis d'un chantier inscrit au regroupement (Greg, 22 octobre). */
 export const ETAPES_SUIVI_MOIS = ["Liste déposée", "Commande close", "Prix demandés", "Prix reçus", "Commandé"] as const;
 
 export interface EtatDansLeMois {
@@ -475,7 +475,7 @@ export function mailGrilleAuNegoce(m: { negoce: string; mois: Mois; departement:
       "Aucun nom d'artisan ne vous est communiqué avant sa commande. Aucun frais pour vous.",
       `Se désabonner : ${m.stop}`,
       "",
-      `${NOM_APP}, la commande commune des artisans du bâtiment`,
+      `${NOM_APP}, le regroupement des artisans du bâtiment`,
     ].join("\n"),
   };
 }
@@ -483,15 +483,15 @@ export function mailGrilleAuNegoce(m: { negoce: string; mois: Mois; departement:
 /** La relance de la veille, à qui n'a pas encore déposé. */
 export function mailRelanceNegoce(m: { mois: Mois; departement: string; reponseAvant: Date; maintenant: Date; lien: string }): { objet: string; texte: string } {
   return {
-    objet: `Rappel : commande commune ${deMois(m.mois)} (${m.departement}), réponse avant demain ${heureFr(m.reponseAvant)} h`,
-    texte: ["Bonjour,", "", `Nous n'avons pas encore votre grille pour la commande commune ${deMois(m.mois)}.`, `${echeanceNegoce(m.reponseAvant, m.maintenant)}.`, `Déposez votre devis ici : ${m.lien}`, "", NOM_APP].join("\n"),
+    objet: `Rappel : regroupement ${deMois(m.mois)} (${m.departement}), réponse avant demain ${heureFr(m.reponseAvant)} h`,
+    texte: ["Bonjour,", "", `Nous n'avons pas encore votre grille pour le regroupement ${deMois(m.mois)}.`, `${echeanceNegoce(m.reponseAvant, m.maintenant)}.`, `Déposez votre devis ici : ${m.lien}`, "", NOM_APP].join("\n"),
   };
 }
 
 /** Le message de fin : le premier sur le total le sait ; les autres reçoivent un message neutre, sans les prix des autres. */
 export function mailResultatNegoce(m: { mois: Mois; departement: string; premier: boolean }): { objet: string; texte: string } {
   return {
-    objet: `Commande commune ${deMois(m.mois)} (${m.departement}) : les résultats`,
+    objet: `Regroupement ${deMois(m.mois)} (${m.departement}) : les résultats`,
     texte: [
       "Bonjour,",
       "",
@@ -506,7 +506,7 @@ export function mailResultatNegoce(m: { mois: Mois; departement: string; premier
 }
 
 /**
- * Le bon de commande d'un artisan pour la commande commune : c'est ici que le négoce voit son nom. `garantie` : une
+ * Le bon de commande d'un artisan pour le regroupement : c'est ici que le négoce voit son nom. `garantie` : une
  * recommande sur la grille garantie 30 jours (Greg, 23 octobre 2026), avec sa mention.
  */
 export function bonDuMois(b: {
@@ -521,9 +521,9 @@ export function bonDuMois(b: {
   garantie?: boolean;
 }): { titre: string; blocs: { titre?: string; lignes: (string | string[])[] }[] } {
   const marchandise = Math.round(b.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire, 0) * 100) / 100;
-  const mention = b.garantie ? `Commande sur grille garantie ${deMois(b.mois)}.` : `Prix ferme de la Commande commune ${deMois(b.mois)}.`;
+  const mention = b.garantie ? `Commande sur grille garantie ${deMois(b.mois)}.` : `Prix ferme du regroupement ${deMois(b.mois)}.`;
   return {
-    titre: `Bon de commande, commande commune ${deMois(b.mois)} n° ${b.numero}${b.garantie ? " (grille garantie)" : ""}`,
+    titre: `Bon de commande, regroupement ${deMois(b.mois)} n° ${b.numero}${b.garantie ? " (grille garantie)" : ""}`,
     blocs: [
       { titre: "Client", lignes: [b.artisan.nom, ...(b.artisan.siret ? [`SIRET ${b.artisan.siret}`] : []), b.numeroCompte ? `Numéro de compte chez ${b.negoce} : ${b.numeroCompte}` : `Ouverture de compte demandée chez ${b.negoce}`, ...(b.artisan.telephone ? [`Téléphone : ${b.artisan.telephone}`] : []), ...(b.artisan.email ? [`E-mail : ${b.artisan.email}`] : [])] },
       { titre: "Livraison", lignes: [...b.chantiers.map((c) => `Chantier : ${c}`), `Livraison : ${b.livraisonHt > 0 ? `${eurosFr(b.livraisonHt)} HT` : "gratuite"}`] },
@@ -536,7 +536,7 @@ export function bonDuMois(b: {
           `Total HT livraison comprise : ${eurosFr(Math.round((marchandise + b.livraisonHt) * 100) / 100)}`,
         ],
       },
-      { lignes: [mention, `Prix de votre grille de la commande commune ${deMois(b.mois)}. Facturation et paiement comme d'habitude, sur le compte du client.`] },
+      { lignes: [mention, `Prix de votre grille du regroupement ${deMois(b.mois)}. Facturation et paiement comme d'habitude, sur le compte du client.`] },
     ],
   };
 }

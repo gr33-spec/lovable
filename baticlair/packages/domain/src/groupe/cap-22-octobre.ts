@@ -1,5 +1,5 @@
 import type { MessageArtisan } from "./notifications.js";
-import { nomCommun } from "./nom.js";
+import { auNom } from "./nom.js";
 import { NOM_APP } from "./marque.js";
 
 /**
@@ -172,7 +172,7 @@ export function suiviDuChantier(e: EtatDuChantier): Suivi {
   if (etape === 0) {
     return e.lignesARegler > 0
       ? { etape, etapes, phrase: "Ta liste est là.", aFaire: `Règle ${pluriel(e.lignesARegler, "ligne orange", "lignes orange")}, puis envoie-la à tes négoces.` }
-      : { etape, etapes, phrase: "Ta liste est prête.", aFaire: `Envoie-la à tes négoces, ou ajoute-la à la ${nomCommun()}.` };
+      : { etape, etapes, phrase: "Ta liste est prête.", aFaire: `Envoie-la à tes négoces, ou ajoute-la ${auNom()}.` };
   }
   if (etape === 1) return { etape, etapes, phrase: `Demande partie chez ${pluriel(e.demandes, "négoce", "négoces")}. On attend leurs prix.`, aFaire: null };
   if (etape === 2) {

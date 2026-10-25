@@ -60,8 +60,8 @@ describe("une ligne précise ou vague", () => {
     expect(designationPrecisee("Gouttière zinc", dev, "33")).toBe("Gouttière zinc dév. 33");
   });
 
-  it("la pastille dit pourquoi préciser (décision de Greg, 22 octobre) : pour entrer dans la commande commune", () => {
-    expect(phrasePrecision("roofing")).toBe("Précise pour l'ajouter à la commande commune");
-    expect(phrasePrecision("masonry")).toBe("Précise pour l'ajouter à la commande commune");
+  it("la pastille dit pourquoi préciser (décision de Greg, 22 octobre) : pour entrer dans le regroupement", () => {
+    expect(phrasePrecision("roofing")).toBe("Précise pour l'ajouter au regroupement");
+    expect(phrasePrecision("masonry")).toBe("Précise pour l'ajouter au regroupement");
   });
 });

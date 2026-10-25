@@ -150,7 +150,7 @@ const envSchema = z
      * explicite » ; `on` l'ouvre (écrans, regroupement, envois aux négoces).
      */
     GROUPE: z.enum(["on", "off"]).default("off"),
-    /** La commande commune du mois (Greg, 22 octobre 2026) par défaut ; `lots` rallume l'ancien regroupement au fil de l'eau. */
+    /** Le regroupement du mois (Greg, 22 octobre 2026) par défaut ; `lots` rallume l'ancien regroupement au fil de l'eau. */
     COMMANDE_COMMUNE: z.enum(["mois", "lots"]).default("mois"),
     /** Clé d'intégration de l'API Sirene de l'INSEE (vérification du SIRET avant le groupé). Vide : vérification indisponible. */
     INSEE_API_KEY: z.string().min(1).optional(),
@@ -283,7 +283,7 @@ export interface AppConfig {
     admins: string[];
     /** `null` = tous les départements ; sinon la liste des départements ouverts. */
     departements: string[] | null;
-    /** mois : une commande commune par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
+    /** mois : un regroupement par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
     mode: "mois" | "lots";
     sirene: { departements: string[]; naf: string[] };
   };

@@ -7,7 +7,7 @@ import { SuiviService } from "../application/suivi.service.js";
 
 /**
  * Le suivi façon colis d'un chantier (nouveau cap du 22 octobre) : ouvert même groupé éteint (l'envoi seul se suit aussi).
- * Un chantier inscrit à la commande commune du mois suit ses cinq étapes (Greg, 22 octobre au soir) : Liste déposée →
+ * Un chantier inscrit au regroupement du mois suit ses cinq étapes (Greg, 22 octobre au soir) : Liste déposée →
  * Commande close → Prix demandés → Prix reçus → Commandé ; sinon les quatre de l'envoi seul.
  */
 @Controller("v1")

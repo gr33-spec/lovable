@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Button, PageTitle } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
-import { NOM } from "@/lib/nom";
+import { NOM, nom } from "@/lib/nom";
 
 /** Le lien « Se désabonner » d'un e-mail (point 3) : rien ne change au chargement, tout se confirme d'un bouton. */
 export default function DesabonnerPage() {
@@ -36,7 +36,7 @@ export default function DesabonnerPage() {
         </p>
       ) : (
         <>
-          <p className="text-[16px] leading-relaxed">Ne plus recevoir les grilles de la {NOM} ? Vos commandes passées restent valables. Vous pourrez vous réabonner depuis votre espace.</p>
+          <p className="text-[16px] leading-relaxed">Ne plus recevoir les grilles du {nom} ? Vos commandes passées restent valables. Vous pourrez vous réabonner depuis votre espace.</p>
           <Button pending={pending} onClick={confirmer}>
             Confirmer le désabonnement
           </Button>

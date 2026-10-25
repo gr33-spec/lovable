@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button, Field, PageTitle } from "@/components/ui";
 import { api } from "@/lib/api";
-import { NOM } from "@/lib/nom";
+import { NOM, nom } from "@/lib/nom";
 
 /** LA CONNEXION DU NÉGOCE (point 1) : un e-mail, un lien magique, pas de mot de passe. La réponse est la même, adresse connue ou non. */
 export default function ConnexionNegocePage() {
@@ -27,7 +27,7 @@ export default function ConnexionNegocePage() {
   return (
     <>
       <PageTitle>Espace négoce</PageTitle>
-      <p className="text-[16px] leading-relaxed text-muted">Votre accès à la {NOM} : indiquez votre e-mail, vous recevez un lien de connexion. Pas de mot de passe.</p>
+      <p className="text-[16px] leading-relaxed text-muted">Votre accès au {nom} : indiquez votre e-mail, vous recevez un lien de connexion. Pas de mot de passe.</p>
       {envoye ? (
         <p role="status" className="rounded-xl bg-ok-bg p-4 text-[16px] font-semibold text-ok">
           Si un accès existe pour cette adresse, un lien de connexion vient de partir. Il est valable 30 minutes.

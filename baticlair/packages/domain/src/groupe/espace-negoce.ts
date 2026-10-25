@@ -1,5 +1,5 @@
 import { PHRASE_REMUNERATION_NEGOCE } from "./demande.js";
-import { NOM_COMMANDE_COMMUNE } from "./nom.js";
+import { auNom, duNom, leNom } from "./nom.js";
 import { deMois, type Mois } from "./commande-du-mois.js";
 import { NOM_APP } from "./marque.js";
 
@@ -101,8 +101,8 @@ export const titreGarantie = (jusquau: Date) => `Prix garantis jusqu'au ${dateFr
 /** La mention du bon de commande d'une recommande : « Commande sur grille garantie du 15 octobre ». */
 export const mentionGarantie = (mois: Mois) => `Commande sur grille garantie ${deMois(mois)}`;
 
-/** La mention du bon de commande d'un cycle : « Prix ferme de la Commande commune du 15 octobre ». */
-export const mentionPrixFerme = (mois: Mois) => `Prix ferme de la ${NOM_COMMANDE_COMMUNE} ${deMois(mois)}`;
+/** La mention du bon de commande d'un cycle : « Prix ferme du regroupement du 15 octobre ». */
+export const mentionPrixFerme = (mois: Mois) => `Prix ferme ${duNom()} ${deMois(mois)}`;
 
 // ——— Les textes côté négoce (vouvoiement, jamais un nom d'artisan) ———
 
@@ -110,17 +110,17 @@ export const mentionPrixFerme = (mois: Mois) => `Prix ferme de la ${NOM_COMMANDE
 export function mailInvitationNegoce(m: { lien: string; departement: string | null; conditions: string; opposition: string }): { objet: string; texte: string } {
   const secteur = m.departement ? ` (${m.departement})` : "";
   return {
-    objet: `Un regroupement d'artisans vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : créez votre accès`,
+    objet: `Des artisans de votre secteur vous ont ajouté ${auNom()} : créez votre accès`,
     texte: [
       "Bonjour,",
       "",
       // RGPD (24 octobre 2026) : qui écrit, pourquoi, et comment ne plus jamais être contacté.
-      `Ce message vous est envoyé par BATI INVEST (${NOM_APP}) pour la ${NOM_COMMANDE_COMMUNE}.`,
-      `Pourquoi ce message ? Un artisan de votre secteur${secteur} vous a ajouté à la ${NOM_COMMANDE_COMMUNE} : les artisans d'un même département regroupent leurs commandes de matériaux, une grille unique vous est envoyée toutes les deux semaines et vous faites votre prix.`,
+      `Ce message vous est envoyé par BATI INVEST (${NOM_APP}) pour ${leNom()}.`,
+      `Pourquoi ce message ? Un artisan de votre secteur${secteur} vous a ajouté ${auNom()} : les artisans d'un même département regroupent leurs commandes de matériaux, une grille unique vous est envoyée toutes les deux semaines et vous faites votre prix.`,
       "Créez votre accès en une minute (votre e-mail, vos dépôts, vos conditions de livraison) :",
       m.lien,
       "",
-      `Ce lien est valable 90 jours. Les conditions de la ${NOM_COMMANDE_COMMUNE} : ${m.conditions}`,
+      `Ce lien est valable 90 jours. Les conditions ${duNom()} : ${m.conditions}`,
       "Aucun frais pour vous. Sans accès créé, vous recevez au plus trois rappels, puis vos coordonnées sont effacées.",
       `Ne plus jamais être contacté : ${m.opposition}`,
       "",
@@ -144,7 +144,7 @@ export function mailClotureSansCompte(m: { mois: Mois; departement: string; lien
     texte: [
       "Bonjour,",
       "",
-      `Ce message vous est envoyé par BATI INVEST (${NOM_APP}) pour la ${NOM_COMMANDE_COMMUNE}, parce qu'un artisan de votre secteur vous y a ajouté.`,
+      `Ce message vous est envoyé par BATI INVEST (${NOM_APP}) pour ${leNom()}, parce qu'un artisan de votre secteur vous y a ajouté.`,
       `Les artisans du département ${m.departement} ont regroupé leurs commandes ${deMois(m.mois)}. Pour voir la grille et faire votre prix, créez votre accès (une minute) :`,
       m.lien,
       "",

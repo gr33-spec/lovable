@@ -57,9 +57,9 @@ export interface Proposition {
 const jour = (d: Date) => d.toISOString().slice(0, 10);
 
 /**
- * Les lignes d'une liste qui peuvent entrer dans la commande commune : prêtes (aucune question, aucun ratio à vérifier),
+ * Les lignes d'une liste qui peuvent entrer dans le regroupement : prêtes (aucune question, aucun ratio à vérifier),
  * PRÉCISES (une ligne vague part seulement chez le négoce de l'artisan, décision de Greg du 22 octobre), avec une
- * quantité et un métier de la commande commune. Partagée par le lot (ancien) et la commande du mois.
+ * quantité et un métier du regroupement. Partagée par le lot (ancien) et la commande du mois.
  */
 export function lignesProposables(r: ReviewedTakeoff, articles: readonly string[]) {
   // Le métier de chaque ligne : celui de son lot (« lot:<n>:<métier> »), sinon celui du quantitatif.

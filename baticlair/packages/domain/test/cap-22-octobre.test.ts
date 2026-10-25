@@ -57,7 +57,7 @@ describe("le suivi façon colis", () => {
   const vide = { liste: false, lignesARegler: 0, demandes: 0, devis: 0, commande: false };
   it("Liste prête → Prix demandés → Prix reçus → Commandé, avec une phrase et ce qu'il faut faire", () => {
     expect(suiviDuChantier({ ...vide, liste: true, lignesARegler: 2 })).toMatchObject({ etape: 0, phrase: "Ta liste est là.", aFaire: "Règle 2 lignes orange, puis envoie-la à tes négoces." });
-    expect(suiviDuChantier({ ...vide, liste: true })).toMatchObject({ etape: 0, aFaire: "Envoie-la à tes négoces, ou ajoute-la à la commande commune." });
+    expect(suiviDuChantier({ ...vide, liste: true })).toMatchObject({ etape: 0, aFaire: "Envoie-la à tes négoces, ou ajoute-la au regroupement." });
     // Plan « finition », bloc 5 : devis lu, questions en attente : rien n'est coché, et on dit quoi faire.
     expect(suiviDuChantier({ ...vide, questions: true })).toMatchObject({ etape: -1, phrase: "Ta liste se prépare.", aFaire: "Réponds aux questions, puis « Calculer ma liste »." });
     expect(suiviDuChantier({ ...vide, liste: true, demandes: 2 })).toMatchObject({ etape: 1, phrase: "Demande partie chez 2 négoces. On attend leurs prix.", aFaire: null });

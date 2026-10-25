@@ -7,7 +7,7 @@ import { DepartementsForm, DepotsForm, OffreForm, PaliersForm, depuisPaliers, of
 import { Button, ErrorNotice, Field, PageTitle, SectionTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur } from "@/lib/api";
 import { chrono } from "@/lib/cycle";
-import { NOM } from "@/lib/nom";
+import { NOM, nom } from "@/lib/nom";
 import { dateFr, euros, type CompteNegoce } from "@/lib/negoce";
 
 /**
@@ -152,7 +152,7 @@ export default function CompteNegocePage() {
       <footer className="mt-4 flex flex-col gap-2 text-[14px] text-muted">
         <p>
           <Link href="/negoce/conditions" className="font-semibold text-accent-text underline">
-            Les conditions de la {NOM}
+            Les conditions du {nom}
           </Link>
           {compte.conditionsVersion ? ` · acceptées (version ${compte.conditionsVersion})` : ""}
         </p>

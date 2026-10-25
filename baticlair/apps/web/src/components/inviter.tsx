@@ -5,7 +5,7 @@ import { NOM_APP } from "@/lib/nom";
 
 /**
  * « INVITER UN COLLÈGUE » (Greg, 22 octobre : « L'union fait la force : fais venir tes collègues »). Le même bloc sur la
- * page publique, sur l'accueil après l'inscription et sur l'écran Commande commune : WhatsApp, SMS et copier le lien, avec
+ * page publique, sur l'accueil après l'inscription et sur l'écran Regroupement : WhatsApp, SMS et copier le lien, avec
  * le message prérempli. Rien ne part tout seul : chaque bouton ouvre l'appli du téléphone, l'artisan choisit à qui.
  */
 export const messageInvitation = (lien: string) =>

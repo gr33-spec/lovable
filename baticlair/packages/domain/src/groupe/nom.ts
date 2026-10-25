@@ -1,12 +1,15 @@
 /**
- * LE NOM DE LA COMMANDE COMMUNE (décision de Greg, 22 octobre 2026 : « Groupé » devient « Commande commune » partout :
- * onglet, landing, e-mails, PDF, aide). UNE SEULE CONSTANTE, lue par l'API (e-mails, PDF, notifications) et par le site
+ * LE NOM DU GROUPE D'ACHAT : « Regroupement » (Greg, 25 octobre 2026, recentrage ; avant : « Regroupement », 22 octobre
+ * 2026, et « Groupé »). UNE SEULE CONSTANTE, lue par l'API (e-mails, PDF, notifications) et par le site
  * (`apps/web/src/lib/nom.ts` la réexporte) : changer le nom = changer cette ligne. Le code interne garde ses noms
- * (`groupe`, `besoin`, `lot`).
+ * (`groupe`, `besoin`, `lot`, `NOM_COMMANDE_COMMUNE`).
  */
-export const NOM_COMMANDE_COMMUNE = "Commande commune";
-/** Le même nom au pluriel (« Mes commandes communes »), à changer avec lui. */
-export const NOM_COMMANDE_COMMUNE_PLURIEL = "Commandes communes";
+export const NOM_COMMANDE_COMMUNE = "Regroupement";
+/** Le même nom au pluriel (« Mes regroupements »), à changer avec lui. */
+export const NOM_COMMANDE_COMMUNE_PLURIEL = "Regroupements";
 
-/** Le nom dans une phrase (« la commande commune »). Le nom choisi est féminin ; s'il change de genre, revoir « la ». */
+/** Le nom dans une phrase (« le regroupement »). Le nom choisi est MASCULIN : « le », « au », « du » ; s'il change de genre, revoir ces lignes. */
 export const nomCommun = (): string => NOM_COMMANDE_COMMUNE.toLowerCase();
+export const leNom = (): string => `le ${nomCommun()}`;
+export const auNom = (): string => `au ${nomCommun()}`;
+export const duNom = (): string => `du ${nomCommun()}`;

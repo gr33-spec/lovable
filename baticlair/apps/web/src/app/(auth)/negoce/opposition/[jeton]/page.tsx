@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, PageTitle } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
-import { NOM, NOM_APP } from "@/lib/nom";
+import { NOM, nom, NOM_APP } from "@/lib/nom";
 
 /**
  * « Ne plus jamais être contacté » (RGPD, 24 octobre 2026) : le lien de chaque e-mail d'invitation. Rien ne change au
@@ -49,7 +49,7 @@ export default function OppositionPage() {
         <>
           <p className="text-[16px] leading-relaxed">
             Ne plus jamais être contacté{page.enseigne ? ` (${page.enseigne})` : ""} ? Votre accès et vos coordonnées sont effacés, et aucun artisan ne pourra plus
-            vous faire inviter à la {NOM}.
+            vous faire inviter au {nom}.
           </p>
           <Button pending={pending} onClick={confirmer}>
             Ne plus jamais être contacté

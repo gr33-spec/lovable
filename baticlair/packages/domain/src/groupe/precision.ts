@@ -1,5 +1,5 @@
 import { normalizeText } from "../trades/trade-profile.js";
-import { NOM_COMMANDE_COMMUNE } from "./nom.js";
+import { auNom } from "./nom.js";
 
 /**
  * LA LIGNE PRÉCISE OU VAGUE (nouveau cap du 22 octobre 2026, décidé avec Greg) : « Liste ultra simple : une carte par
@@ -13,7 +13,7 @@ import { NOM_COMMANDE_COMMUNE } from "./nom.js";
  * défaut) : on ne demande jamais ce qu'on ne sait pas proposer.
  *
  * Être vague ne bloque pas l'envoi seul : la ligne part chez le négoce de l'artisan. Mais elle N'ENTRE PAS dans la
- * commande commune (décision de Greg, 22 octobre) : seules les lignes précises sont regroupées.
+ * regroupement (décision de Greg, 22 octobre) : seules les lignes précises sont regroupées.
  */
 
 export interface QuestionDePrecision {
@@ -34,11 +34,11 @@ export interface PrecisionDeLigne {
 }
 
 /**
- * La phrase de la pastille orange (décision de Greg, 22 octobre) : « Précise pour l'ajouter à la commande commune ». Le
+ * La phrase de la pastille orange (décision de Greg, 22 octobre) : « Précise pour l'ajouter au regroupement ». Le
  * nom suit la constante unique ; le métier ne change plus la phrase (gardé pour l'appel).
  */
 export function phrasePrecision(_metier?: string | null): string {
-  return `Précise pour l'ajouter à la ${NOM_COMMANDE_COMMUNE.toLowerCase()}`;
+  return `Précise pour l'ajouter ${auNom()}`;
 }
 
 interface Donnee {
