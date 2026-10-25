@@ -64,6 +64,10 @@ const dansTroisSemaines = () => new Date(Date.now() + 21 * 86_400_000).toISOStri
 
 test.describe("Business model final : le regroupement négocié par un humain", () => {
   test.setTimeout(180_000);
+  // Le mode par défaut ; remis ici au cas où une série interrompue l'aurait laissé en « automatique ».
+  test.beforeAll(async ({ request }) => {
+    expect((await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: SECRET }, data: { mode: "humain" } })).status()).toBe(200);
+  });
 
   test("l'artisan déclare, le chasseur négocie et envoie l'offre, l'artisan accepte, le lot part au négoce", async ({ page, browser }, info) => {
     const zone = zoneDe(info.project.name);
