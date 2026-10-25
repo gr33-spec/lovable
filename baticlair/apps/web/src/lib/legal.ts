@@ -10,7 +10,7 @@ import { NOM_APP } from "@/lib/nom";
 export const A_COMPLETER = "[A COMPLETER]";
 
 /** La version des CGU artisan. Une version MAJEURE (`VERSION_CGU_MAJEURE`) est redemandée à chaque compte. */
-export const VERSION_CGU = "2026-10-24";
+export const VERSION_CGU = "2026-10-25";
 /** La dernière version qui demande une nouvelle acceptation : un compte qui a accepté avant la voit et l'accepte. */
 export const VERSION_CGU_MAJEURE = "2026-10-24";
 

@@ -115,6 +115,8 @@ Toutes exigent une session et un `x-company-id` sauf celles marquées « public 
 
 Chaque étape est rejouable : elle ne regarde que des statuts (`forme`, `envoye`, `choisi`, `relanceLe` nul…), jamais l'heure du dernier passage. Les mêmes services s'appellent aussi depuis l'app : un lot formé par le seuil part aux négoces dès la proposition, un lot dont tous les négoces ont répondu se décide dès le dernier dépôt.
 
+Recentrage (25 octobre 2026) : `/v1/internal/demandes-perso` à 9 h 35 UTC (relances de la demande perso à 48 h ouvrées).
+
 ## 6. Les variables d'environnement (validées au démarrage, `src/platform/config/config.ts`)
 
 | Groupe | Variables | Notes |
@@ -130,6 +132,8 @@ Chaque étape est rejouable : elle ne regarde que des statuts (`forme`, `envoye`
 | Groupé | `GROUPE` (on/off), `GROUPE_DEPARTEMENTS` (`22,29` ou `*`), `GROUPE_ADMINS`, `SIRET_VERIFICATION` (insee | forme, `forme` refusé en production), `INSEE_API_KEY`, `SIRENE_DEPARTEMENTS`, `SIRENE_NAF`, `FACTURE_EMETTEUR_{NOM,FORME,SIRET,ADRESSE,TVA}`, `FACTURE_TVA_POURCENT` | Détail et valeurs de production dans `docs/groupe/MISE-EN-PROD.md`. |
 
 Côté web : `API_URL` (cible du relais `/v1/*`), rien d'autre.
+
+Recentrage (25 octobre 2026) : `ZONES_ACTIVES` (« 22 » ; « * » = partout), `SEUIL_LIGNE_GROUPABLE` (1 000), `SEUIL_ANONYMAT` (5), `SEUIL_VOLUME_MIN` (JSON par famille), `PRIX_REPERES` (JSON famille → unité → € HT), `FAMILLES_GROUPABLES`, `LECTURES_GRATUITES_MOIS` (2), `SEUIL_ZONE_ACTIVE` (10). Module `apps/api/src/modules/recentrage` (droits, demande perso, regroupements, hypothèses).
 
 ## 7. Les flux e-mail
 

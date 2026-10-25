@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { api } from "@/lib/api";
+import { NOM_APP } from "@/lib/nom";
 import { useSession } from "@/lib/session";
 import { useProchaineCommande } from "./commande-du-mois";
 
@@ -21,10 +22,11 @@ const dejaVuIci = (userId: string) => {
   }
 };
 
+// Recentrage (Greg, 25 octobre 2026) : les trois étapes de la landing ; le groupe vient en plus.
 const ETAPES = [
-  { titre: "Dépose ta liste ou ton devis", texte: "Une photo, un bon ou un PDF : je remets chaque ligne au propre.", Icone: FileUp },
-  { titre: "On la regroupe avec celles des autres artisans du secteur", texte: "Personne ne voit ton nom ni tes chantiers. Plus on est nombreux, plus on pèse.", Icone: Users },
-  { titre: "Tu reçois les prix le jour J et tu commandes si ça te va", texte: "Ton prix livré chez chaque négoce, le moins cher en premier. Sans engagement.", Icone: Truck },
+  { titre: "Dépose ton devis", texte: "Le PDF de ton devis client, tel quel : je remets chaque ligne au propre.", Icone: FileUp },
+  { titre: `${NOM_APP} prépare ton quantitatif`, texte: "Une ligne par fourniture, prête à commander. Tu corriges d'un tap si besoin.", Icone: Users },
+  { titre: "Envoie à tes négoces et compare", texte: "Leurs prix livraison comprise, côte à côte. Pour les gros matériaux, tente aussi un prix de groupe. Sans engagement.", Icone: Truck },
 ] as const;
 
 /** « jeudi 31 octobre à 18 h », heure de Paris. */
@@ -149,7 +151,7 @@ function Fenetre({ etape, setEtape, fermer, cloture }: { etape: number; setEtape
           </ol>
           {derniere ? (
             <Link href="/chantiers/nouveau" onClick={fermer} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-[16px] font-semibold text-on-accent active:bg-accent-hover">
-              Déposer ma première liste
+              Déposer mon premier devis
             </Link>
           ) : (
             <button type="button" onClick={() => setEtape(etape + 1)} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-[16px] font-semibold text-on-accent active:bg-accent-hover">

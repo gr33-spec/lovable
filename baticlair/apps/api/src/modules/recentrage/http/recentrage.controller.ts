@@ -3,7 +3,7 @@ import { Throttle } from "@nestjs/throttler";
 import { BUTS_DEMANDE } from "@baticlair/domain";
 import { z } from "zod";
 import type { AppConfig } from "../../../platform/config/config.js";
-import { DomainError, forbidden } from "../../../platform/errors/domain-error.js";
+import { DomainError, forbidden, notFound } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { CONFIG } from "../../../platform/tokens.js";
@@ -31,6 +31,8 @@ const envoiBody = z.object({
   articles: z.array(z.string().min(1).max(200)).max(500).optional(),
 });
 const destinataireBody = z.object({ recipientId: z.uuid() });
+const finEssaiBody = z.object({ email: z.email().max(254) });
+const zoneTestBody = z.object({ zone: z.string().regex(/^\d[\dAB]$/), franchiLe: z.iso.datetime().nullable() });
 const chiffrageBody = z.object({
   prix: z.record(z.string().max(10), z.number().min(0).max(1_000_000)),
   livraisonHt: z.number().min(0).max(100_000),
@@ -145,6 +147,7 @@ export class RecentrageNegoceController {
     @Inject(DemandePersoService) private readonly demandes: DemandePersoService,
     @Inject(EspaceNegoceService) private readonly espace: EspaceNegoceService,
     @Inject(CONFIG) private readonly config: AppConfig,
+    @Inject(DroitsService) private readonly droits: DroitsService,
   ) {}
 
   @Public()
@@ -154,6 +157,32 @@ export class RecentrageNegoceController {
     const s = await this.espace.session(cookieNegoce(cookie));
     if (!s) throw new DomainError("unauthenticated", "Négoce session required");
     return this.demandes.resultatsNegoce(s.compteId);
+  }
+
+  /**
+   * Parcours e2e seulement (`NODE_ENV=test`, secret de la tâche) : la date de franchissement du seuil d'une zone, pour
+   * jouer le gratuit (seuil franchi depuis longtemps) ou le préavis de 30 jours. En ligne, la route n'existe pas (404).
+   */
+  @Public()
+  @Post("internal/test/zone")
+  @HttpCode(200)
+  async zoneDeTest(@Headers("authorization") authorization: string | undefined, @Body(new ZodPipe(zoneTestBody)) body: z.infer<typeof zoneTestBody>) {
+    if (this.config.env !== "test") throw notFound("Route");
+    const secret = this.config.cronSecret;
+    if (!secret || authorization !== `Bearer ${secret}`) throw forbidden("Test only");
+    await this.droits.fixerSeuilFranchi(body.zone, body.franchiLe ? new Date(body.franchiLe) : null);
+    return { fait: true };
+  }
+
+  /** Parcours e2e seulement : l'essai de ce compte s'arrête, pour jouer le gratuit. */
+  @Public()
+  @Post("internal/test/fin-essai")
+  @HttpCode(200)
+  async finEssaiDeTest(@Headers("authorization") authorization: string | undefined, @Body(new ZodPipe(finEssaiBody)) body: z.infer<typeof finEssaiBody>) {
+    if (this.config.env !== "test") throw notFound("Route");
+    const secret = this.config.cronSecret;
+    if (!secret || authorization !== `Bearer ${secret}`) throw forbidden("Test only");
+    return { fait: await this.droits.finirEssaiDe(body.email) };
   }
 
   @Public()

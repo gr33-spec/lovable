@@ -22,6 +22,15 @@ Branche `claude/saas-achat-artisans-prompt-1lyihx` (PR #284), puis `claude/integ
 - [x] **Procédure de violation** dans `docs/SECURITE.md` (CNIL 72 h, modèle de message, journal).
 - [x] **Garde `[A COMPLETER]`** : la construction de production échoue tant qu'un repère reste (`apps/web/scripts/garde-a-completer.mjs`, test `garde-a-completer.test.mjs`).
 
+### Recentrage du 25 octobre 2026
+
+- [x] Regroupements anonymes : aucun nom d'artisan ni de négoce entre eux ; sous `SEUIL_ANONYMAT` (5) entreprises, seulement « Regroupement en cours » ; au-dessus, « 5+ entreprises » et le département, jamais une commune (`phraseParticipants`, test `apps/api/test/regroupements-recentrage.test.ts`).
+- [x] Aucune messagerie entre artisans.
+- [x] Un négoce consulté voit le volume et la zone, jamais un nom ; il peut refuser une consultation (« Je ne chiffre pas ») ; ses prix ne sont jamais vus d'un autre négoce, ni alignés automatiquement.
+- [x] Demande perso : l'identité de l'artisan n'est transmise qu'avec son accord, daté (`accordIdentiteLe`) ; le lien de chiffrage est un jeton aléatoire stocké haché (`tokenHash`).
+- [x] « Mes prix » : seulement les prix de l'artisan lui-même (test « Mes prix ne montre que ses propres prix »).
+- [x] Aucune promesse d'économie chiffrée sur la landing, /tarifs ni la démo.
+
 ## Reste à faire par Greg
 
 ### 1. Les infos du Kbis (5 repères `[A COMPLETER]`, dans `apps/web/src/lib/legal.ts`)

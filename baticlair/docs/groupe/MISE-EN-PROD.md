@@ -44,6 +44,12 @@ Plan du 20 octobre 2026, bloc 11. À dérouler dans l'ordre, le jour J, par Greg
 
 Projet web : rien de nouveau (`API_URL` déjà posé).
 
+## 2 ter. Recentrage du 25 octobre 2026
+
+- Migration `20261025180000_recentrage_demande_perso_regroupements` (colonnes ajoutées seulement, rien de supprimé).
+- Variables à poser en production : `ZONES_ACTIVES=22`, `PRIX_REPERES` et `SEUIL_VOLUME_MIN` validés par Greg (vides = aucune ligne groupable sans historique), `LECTURES_GRATUITES_MOIS=2`, `SEUIL_ZONE_ACTIVE=10`.
+- Nouveau cron `/v1/internal/demandes-perso` (déjà dans `apps/api/vercel.json`).
+
 ## 3. Migrations
 
 `vercel-build` lance `prisma migrate deploy` : les migrations du groupé s'appliquent au premier déploiement de production :

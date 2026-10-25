@@ -169,16 +169,18 @@ export const PHRASE_PRIX_FERMES_VOLUME = "Prix fermes, quel que soit le volume f
  * La version des conditions (mise en conformité du 24 octobre 2026). Une version MAJEURE (`CONDITIONS_NEGOCE_MAJEURE`)
  * est redemandée au négoce avant son prochain dépôt ; la date et la version acceptées sont gardées sur son compte.
  */
-export const CONDITIONS_NEGOCE_VERSION = "2026-10-24";
+export const CONDITIONS_NEGOCE_VERSION = "2026-10-25";
 export const CONDITIONS_NEGOCE_MAJEURE = "2026-10-24";
 /** Une version acceptée est-elle à jour ? Les versions sont des dates : l'ordre alphabétique suffit. */
 export const conditionsNegoceAJour = (acceptee: string | null | undefined) => !!acceptee && acceptee >= CONDITIONS_NEGOCE_MAJEURE;
 
 export const CONDITIONS_NEGOCE: readonly { titre: string; texte: string }[] = [
-  { titre: "Une seule grille, la même pour tous", texte: "À chaque commande, une seule grille par métier et par département : les besoins des artisans additionnés, les mêmes articles et les mêmes quantités pour chaque négoce consulté." },
-  { titre: "Prix fermes, quel que soit le volume", texte: "En répondant à une grille, vous vous engagez sur un prix unitaire HT par article, valable pour tout le cycle, quelle que soit la quantité finalement commandée par les artisans." },
+  { titre: "Demandes perso", texte: "Un artisan peut vous envoyer sa liste à son nom, avec son accord. Vous chiffrez en ligne, sans compte : prix par ligne, livraison, délai et validité (7 jours au moins). Une grille partielle est acceptée ; vous pouvez aussi indiquer que vous ne chiffrez pas. Une relance part après 48 heures ouvrées sans réponse." },
+  { titre: "Une seule grille, la même pour tous", texte: "Pour un regroupement, une seule consultation par famille et par cycle, adressée aux négoces spécialistes de la famille et aux généralistes de la zone : les volumes des entreprises additionnés, les mêmes articles et les mêmes quantités pour chaque négoce consulté. Vous voyez le volume et la zone, jamais les noms. Vous pouvez refuser une consultation ou désactiver une famille." },
+  { titre: "Prix fermes, quel que soit le volume", texte: "En répondant à une grille, vous vous engagez sur un prix unitaire HT par article, quelle que soit la quantité finalement commandée par les artisans, pendant la validité que vous fixez (7 jours au moins)." },
+  { titre: "Pas d'alignement automatique", texte: "Vos prix ne sont jamais alignés automatiquement sur ceux d'un autre négoce : chaque prix comparé est celui que vous avez donné." },
   { titre: "Un seul prix par article, pour tous", texte: "Chaque artisan de la commande achète au même prix unitaire. Vous pouvez marquer un article « prix non garanti » (matière cotée, par exemple le zinc) : il est alors indicatif, à part du comparatif." },
-  { titre: "Garantie 30 jours si vous êtes retenu", texte: "Si votre grille est la moins chère sur le total de la commande, vous tenez ces prix 30 jours après la publication des résultats, pour tout artisan de votre zone, y compris ceux qui n'avaient rien déposé." },
+  { titre: "Garantie 30 jours si vous êtes retenu", texte: "Si votre grille est la moins chère sur le total de la commande, vous tenez ces prix pendant la validité que vous avez fixée (30 jours si vous n'en avez pas fixé) après la publication des résultats, pour tout artisan de votre zone, y compris ceux qui n'avaient rien déposé." },
   { titre: "Livraison selon vos paliers", texte: "Vous déclarez vos dépôts et vos paliers : gratuite jusqu'à une distance, un ou deux paliers payants, une distance maximale. Le prix livré de chaque artisan se calcule depuis votre dépôt le plus proche de son chantier ; au-delà de votre distance maximale, vous n'apparaissez pas dans son comparatif." },
   { titre: "Confidentialité des artisans", texte: "Jusqu'à sa commande, vous ne voyez d'un artisan ni son nom, ni son entreprise, ni son téléphone, ni son adresse exacte : seulement la grille (articles, quantités cumulées) et les communes de livraison. Ses coordonnées vous parviennent avec son bon de commande, et à vous seul." },
   { titre: "Concurrence : vos prix restent les vôtres", texte: "Les prix d'un négoce ne sont jamais communiqués à un autre négoce, ni pendant ni après la consultation. Pendant le délai, vous savez seulement combien de négoces sont consultés (jamais lesquels) et si vous êtes premier sur le total. Il n'existe aucun classement public." },

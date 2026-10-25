@@ -8,17 +8,27 @@ import { NOM_APP } from "@/lib/nom";
 
 export const metadata: Metadata = {
   title: `Tarifs — ${NOM_APP}`,
-  description: "Gratuit pour rejoindre et tester sur un cycle complet. Ensuite dès 29 € HT par mois à l'année (348 € HT par an), ou 49 € HT par mois sans engagement. Gratuit pour les négoces.",
+  description: "Gratuit pour commencer. Dès 29 € HT par mois à l'année (348 € HT par an), ou 49 € HT par mois sans engagement, pour comparer et acheter en groupe. Gratuit pour les négoces.",
 };
 
 /**
  * LA PAGE TARIFS (Greg, 24 octobre 2026) : les deux formules (l'annuel mis en avant, le mensuel à côté), trois étapes, « Gratuit pour les négoces », une FAQ courte (résiliation,
  * factures, après l'essai), le bouton d'inscription. Même registre que la landing : nuit, un jaune signal.
  */
+/**
+ * GRATUIT / PAYANT (Greg, 25 octobre 2026, recentrage) : ce que donne chaque formule. Les chiffres viennent des réglages de
+ * l'API (`LECTURES_GRATUITES_MOIS`, 5 négoces, 3 mois d'historique) ; l'essai reste ; le payant est offert dans une zone qui
+ * démarre (moins de 10 artisans actifs), puis 30 jours de préavis.
+ */
+const FORMULES = [
+  { titre: "Gratuit", sous: "pour commencer", points: ["2 devis lus par mois", "1 négoce par demande", "Mes prix : tes 3 derniers mois"] },
+  { titre: "Payant", sous: "dès 29 € HT par mois", points: ["Devis lus sans limite", "Jusqu'à 5 négoces par demande, réponses comparées livraison comprise", "Les regroupements", "Mes prix : tout ton historique"] },
+] as const;
+
 const ETAPES = [
-  { titre: "Rejoins la communauté, c'est gratuit", texte: "Inscription en deux minutes, sans carte bancaire." },
-  { titre: "Teste sur un cycle complet", texte: "Dépose ta liste, les négoces répondent, tu vois les prix. L'essai court jusqu'à 30 jours après tes premiers résultats." },
-  { titre: "Continue seulement si tu as vraiment économisé : dès 29 € HT par mois", texte: "Tu vois ce que tu as gagné sur ton premier cycle avant de décider. À l'année ou au mois, tu choisis." },
+  { titre: "Commence gratuitement", texte: "Inscription en deux minutes, sans carte bancaire." },
+  { titre: "Teste le payant", texte: "L'essai te donne tout, regroupements compris. Dans une zone qui démarre, le payant est offert : on te prévient 30 jours avant la fin." },
+  { titre: "Continue si ça te sert : dès 29 € HT par mois", texte: "À l'année ou au mois, tu choisis. Sinon, tu restes en gratuit." },
 ] as const;
 
 const FAQ = [
@@ -26,7 +36,8 @@ const FAQ = [
   { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin de la période payée (le mois, ou l'année), puis rien n'est plus prélevé. Une année commencée n'est pas remboursée au prorata." },
   { q: "L'annuel se renouvelle tout seul ?", r: "Oui, chaque année. Je te préviens par e-mail 30 jours avant : tu as le temps de résilier si tu veux arrêter." },
   { q: "Est-ce que j'ai des factures ?", r: "Oui, une à chaque paiement (chaque mois, ou chaque année), émise par BATI INVEST, avec la TVA. Elles sont toutes dans « Mes factures »." },
-  { q: "Que se passe-t-il après l'essai ?", r: "Rien n'est prélevé tout seul. Tu continues si tu veux, à l'année ou au mois. Sinon, tes listes, tes bons et ton historique restent consultables." },
+  { q: "Que se passe-t-il après l'essai ?", r: "Rien n'est prélevé tout seul. Tu continues si tu veux, à l'année ou au mois. Sinon, tu passes en gratuit : tes chantiers et tes bons restent consultables." },
+  { q: "Les regroupements, ça fait baisser les prix ?", r: "On réunit les volumes des gros matériaux identiques pour tenter un meilleur prix. Rien n'est garanti : tu compares et tu commandes seulement si le prix te plaît." },
 ] as const;
 
 export default function TarifsPage() {
@@ -38,6 +49,21 @@ export default function TarifsPage() {
           Tarifs
         </h1>
         <ArgumentTarif className="max-w-[30ch] text-[22px] leading-snug font-bold text-accent sm:text-[28px]" />
+      </section>
+
+      <section aria-label="Gratuit ou payant" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {FORMULES.map((f) => (
+          <div key={f.titre} className="flex flex-col gap-3 rounded-2xl bg-night-2 p-5 ring-1 ring-white/10 sm:p-7">
+            <h2 className="text-[24px] font-extrabold">
+              {f.titre} <span className="text-[16px] font-semibold text-white/60">{f.sous}</span>
+            </h2>
+            <ul className="flex flex-col gap-2 text-[16px] leading-relaxed text-white/80">
+              {f.points.map((p) => (
+                <li key={p}>· {p}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </section>
 
       <section aria-label="Les formules">
@@ -64,7 +90,7 @@ export default function TarifsPage() {
         <h2 id="negoces" className={h2}>
           Gratuit pour les négoces
         </h2>
-        <p className="text-[17px] leading-relaxed">Les négoces répondent aux regroupements sans abonnement ni commission.</p>
+        <p className="text-[17px] leading-relaxed">Des demandes structurées, prêtes à chiffrer, et des volumes groupés sur lesquels vous positionner. Sans abonnement ni commission.</p>
       </section>
 
       <section aria-labelledby="faq" className="flex flex-col gap-6">
@@ -83,7 +109,7 @@ export default function TarifsPage() {
 
       <section className="flex flex-col items-start gap-4">
         <ButtonLink href="/inscription" variant="accent" className="min-h-13 px-8 text-[16px]">
-          Je rejoins la communauté
+          Commencer gratuitement
         </ButtonLink>
         <Link href="/" className="min-h-11 content-center text-[15px] font-semibold text-white/70 underline">
           Retour à l&apos;accueil

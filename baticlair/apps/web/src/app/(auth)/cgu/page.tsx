@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+
 import Link from "next/link";
 import { styleLegal as s } from "@/components/legal-style";
 import { PageTitle } from "@/components/ui";
 import { EDITEUR, TRIBUNAL, VERSION_CGU } from "@/lib/legal";
-import { nom, NOM, NOM_APP } from "@/lib/nom";
+import { nom, NOM_APP } from "@/lib/nom";
 
 /**
  * Les prix des deux formules (Greg, 24 octobre 2026 ; réglables dans l'admin : un changement se fait ici aussi, avec 30
@@ -11,6 +12,9 @@ import { nom, NOM, NOM_APP } from "@/lib/nom";
  */
 const PRIX_MENSUEL = "49 €";
 const PRIX_ANNUEL = "348 €";
+
+/** Le plafond du gratuit (Greg, 25 octobre 2026), réglé côté API par `LECTURES_GRATUITES_MOIS`. */
+const LECTURES_GRATUITES = 2;
 
 export const metadata: Metadata = { title: `Conditions générales d'utilisation — ${NOM_APP}` };
 
@@ -50,15 +54,32 @@ export default function CguPage() {
             vous commandez.
           </li>
           <li>
-            Le « {NOM} » : toutes les deux semaines, le 1er et le 15 du mois à 12 h, les listes déposées par les artisans d&apos;un même métier et d&apos;un même
-            département sont réunies en une seule grille, envoyée aux négoces de ce secteur. Les négoces ont cinq jours ouvrés pour répondre. Vous voyez ensuite votre
-            prix livré chez chaque négoce qui a répondu.
+            <strong>La demande perso</strong> : vous envoyez votre liste aux négoces de votre choix (vos habituels, ceux de votre zone, ou un nouveau par
+            e-mail). Avec votre accord, l&apos;e-mail part à votre nom ; le négoce chiffre en ligne, sans compte : prix par ligne, livraison, délai et validité.
+            Les réponses sont comparées livraison comprise. Une relance part au négoce après 48 heures ouvrées sans réponse ; la demande se clôt à votre date de
+            besoin. Quand vous commandez, un bon de commande part au négoce choisi ; sa commande suit les statuts Reçue, Confirmée, Livrée.
           </li>
           <li>
-            <strong>Sans engagement d&apos;achat</strong> : déposer une liste ne vous oblige à rien. Vous commandez seulement si le prix vous plaît, en confirmant
-            la commande dans l&apos;application.
+            <strong>« Mes prix »</strong> : l&apos;historique des prix que vous avez reçus et payés, article par article. Ce sont vos prix : personne d&apos;autre ne les
+            voit, et vous ne voyez jamais ceux d&apos;un autre artisan.
           </li>
-          <li>Le service est payant pour l&apos;artisan après un essai gratuit, selon l&apos;article 3. Il est gratuit pour les négoces.</li>
+          <li>
+            <strong>Les regroupements</strong> : pour les gros articles identiques seulement (même référence ; dans le doute, pas de regroupement), le 1er et le
+            15 du mois à 12 h, les volumes des entreprises d&apos;un même département sont réunis et proposés aux négoces de la famille et aux négoces
+            généralistes de la zone. Sous un volume minimum, aucun négoce n&apos;est consulté et vous choisissez la suite (cycle suivant ou demande perso). Le
+            statut de votre participation évolue : intention, quantité confirmée, commande. Les négoces voient le volume et la zone, jamais votre nom ; sous 5
+            entreprises, aucun nombre ni aucune ville n&apos;est affiché. Aucun meilleur prix n&apos;est garanti.
+          </li>
+          <li>
+            <strong>Sans engagement d&apos;achat</strong> : envoyer une demande ou rejoindre un regroupement ne vous oblige à rien. Vous commandez seulement si le prix
+            vous plaît, en confirmant la commande dans l&apos;application.
+          </li>
+          <li>
+            <strong>Gratuit et payant</strong> (article 3) : en gratuit, {LECTURES_GRATUITES} devis lus par mois, un négoce par demande, « Mes prix » sur les 3 derniers
+            mois, pas de regroupement. Le payant ouvre les lectures sans limite, jusqu&apos;à 5 négoces par demande, les regroupements et tout l&apos;historique de
+            « Mes prix ». Dans une zone qui démarre (moins de 10 artisans actifs), le payant est offert ; quand la zone franchit ce seuil, vous êtes prévenu 30 jours
+            avant la fin de l&apos;offre. Le service est gratuit pour les négoces.
+          </li>
         </ul>
       </section>
 
@@ -83,9 +104,9 @@ export default function CguPage() {
             votre accord.
           </li>
           <li>
-            <strong>Après l&apos;essai, sans abonnement</strong> : déposer une liste, voir les prix reçus et commander ne sont plus possibles. Restent accessibles
-            votre historique, vos bons de commande, vos factures, vos données, votre compte. Une liste déposée pendant l&apos;essai reste dans sa commande et ses
-            résultats restent visibles.
+            <strong>Après l&apos;essai, sans abonnement</strong> : votre compte passe en gratuit, avec ses plafonds (article 2). Restent accessibles votre historique,
+            vos bons de commande, vos factures, vos données, votre compte. Une liste déposée pendant l&apos;essai reste dans son regroupement et ses résultats restent
+            visibles.
           </li>
           <li>
             <strong>Renouvellement</strong> : la formule mensuelle se renouvelle chaque mois à la date anniversaire, sans engagement de durée. La formule

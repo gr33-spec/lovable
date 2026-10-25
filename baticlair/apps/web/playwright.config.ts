@@ -42,6 +42,13 @@ const apiEnv = {
   COMMANDE_COMMUNE: process.env.E2E_COMMANDE_COMMUNE ?? "mois",
   // Étape 9 : l'admin du groupé (journal, lots, factures) pour ce seul compte des parcours.
   GROUPE_ADMINS: "admin-groupe@example.fr",
+  // Recentrage (25 octobre 2026) : les regroupements ouverts dans toute la métropole sauf Paris (75), qui sert au parcours
+  // « hors zone active » ; des prix repères de TEST (pas des prix réels) et le volume minimum de la couverture.
+  ZONES_ACTIVES: Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, "0"))
+    .filter((z) => z !== "75" && z !== "20")
+    .join(","),
+  PRIX_REPERES: "ardoise:pieces=1.2,liteau:m=0.5",
+  SEUIL_VOLUME_MIN: "couverture=3000",
 };
 
 export default defineConfig({

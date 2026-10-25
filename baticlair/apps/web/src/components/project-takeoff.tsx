@@ -466,9 +466,10 @@ export function ProjectTakeoff({
           <div className={sent ? "order-first" : undefined}>
             <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} openSignal={sendSignal} refreshSignal={requestsSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
           </div>
-          {quantitatif && !draft ? (
+          {/* Recentrage (Greg, 25 octobre 2026) : la demande perso part sur les lignes de la liste, sans attendre la validation. */}
+          {quantitatif ? (
             <div className="flex flex-col gap-4">
-              <DemandesPerso projectId={projectId} articles={[]} canCreate={!draft} archived={archived} />
+              <DemandesPerso projectId={projectId} articles={takeoff.purchase.toBuy.map((i) => i.key)} canCreate archived={archived} />
               <TenterPrixDeGroupe projectId={projectId} />
             </div>
           ) : null}

@@ -37,8 +37,8 @@ const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.goto("/");
   // Sans session : la page publique, puis « Créer un compte » mène à l'inscription.
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Marre de te faire enfumer sur le prix de tes matériaux");
-  await page.getByRole("link", { name: "Je rejoins le mouvement" }).first().click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tes quantitatifs au propre. Tes demandes de prix en quelques clics. La force du groupe en plus.");
+  await page.getByRole("link", { name: "Commencer gratuitement" }).first().click();
   await expect(page).toHaveURL(/\/inscription/);
   await page.getByLabel("Prénom et nom").fill("Jean Martin");
   await page.getByLabel("Nom de ton entreprise").fill("Toitures Martin");
@@ -174,10 +174,12 @@ async function passQuestions(page: Page) {
 test("un artisan crée son compte et son premier chantier depuis le +", async ({ page }) => {
   await signUp(page);
   await expect(page.getByText("Toitures Martin")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Donner ma liste" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Nouveau chantier" })).toBeVisible();
 
   // Le « + » : un nouveau chantier = déposer un fichier, rien d'autre à remplir (§48).
-  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Nouvelle liste" }).click();
+  // Recentrage (25 octobre 2026) : plus de « + » au centre de la barre ; le gros bouton « Nouveau chantier » de l'accueil.
+  await page.goto("/");
+  await page.getByRole("link", { name: "Nouveau chantier" }).first().click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   // Nouveau cap (22 octobre) : le devis est le petit bouton « Je n'ai qu'un devis », sous « Donne ta liste de matériaux ».
   await expect(page.getByText("Je n'ai qu'un devis", { exact: true })).toBeVisible();
@@ -363,11 +365,11 @@ test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaq
   }
 });
 
-test("le menu ne propose que trois entrées ; fournisseurs et compte sont derrière l'initiale", async ({ page }) => {
+test("le menu : cinq onglets (recentrage du 25 octobre 2026) ; fournisseurs et compte sont derrière l'initiale", async ({ page }) => {
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  // Quatre rubriques (cinq avec le groupé, allumé dans les parcours), et au centre le « + » : un nouveau chantier, directement.
-  await expect(nav.getByRole("link")).toHaveText(["Mes chantiers", "Nouvelle liste", "Regroupement"]);
+  // Recentrage (Greg, 25 octobre 2026, maquette) : Accueil, Chantiers, Regroupements, Mes prix, Profil.
+  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Chantiers", "Regroupements", "Mes prix", "Profil"]);
   await menuArtisan(page, "Mon compte");
   await expect(page.getByRole("heading", { name: "Mon compte" })).toBeVisible();
 
@@ -776,9 +778,10 @@ test("accueil : la prochaine action de chaque chantier, puis l'essai et les form
   await expect(todo.getByRole("link", { name: "Ajouter le devis client" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /^Bonjour Jean$/ })).toBeVisible();
   await expect(page.getByText(/Comparer les offres|offres reçues|on avance/)).toHaveCount(0);
-  const blocMois = page.getByRole("region", { name: /^Commande d/ });
-  await expect(blocMois.getByText(/^Clôture dans \d+ j/)).toBeVisible();
-  await expect(blocMois.getByRole("link", { name: /^Dépose ta liste avant le \d\d\/\d\d$/ })).toHaveAttribute("href", "/chantiers/nouveau");
+  // Recentrage (Greg, 25 octobre 2026, maquette) : l'accueil dit « Bonjour », le gros « Nouveau chantier », puis les
+  // chantiers ; plus de bloc de la commande du mois (il vit dans l'onglet Regroupements).
+  await expect(page.getByRole("link", { name: "Nouveau chantier" })).toHaveAttribute("href", "/chantiers/nouveau");
+  await expect(page.getByRole("region", { name: /^Commande d/ })).toHaveCount(0);
 
   // Essai : 3 chantiers. Au 4e, l'écran des formules, sans jargon ni crédits.
   await createProject(page, "Chantier 2", "", "");
@@ -2192,7 +2195,7 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   // Le compte créé (case cochée) garde la date et la version des CGU.
   await signUp(page);
   const cgu = await page.evaluate(async () => (await (await fetch("/v1/me/cgu")).json()) as { accepteLe: string | null; version: string | null });
-  expect(cgu.version).toBe("2026-10-24");
+  expect(cgu.version).toBe("2026-10-25");
   expect(cgu.accepteLe).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 });
 
@@ -2483,17 +2486,17 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
   await signUp(page);
   const guide = page.getByRole("dialog", { name: "Guide" });
   await expect(guide).toBeVisible();
-  await expect(guide.getByRole("heading", { name: "Dépose ta liste ou ton devis" })).toBeVisible();
+  await expect(guide.getByRole("heading", { name: "Dépose ton devis" })).toBeVisible();
   await expect(guide.getByText(/^Prochaine clôture : \w+ \d{1,2} \w+ à \d{1,2} h/)).toBeVisible();
   await expect(guide.getByRole("button", { name: "Passer le guide" })).toBeVisible();
   // La page derrière est inerte.
   await expect(page.getByRole("button", { name: "Mon menu" })).toHaveCount(0);
   await guide.getByRole("button", { name: "Suivant" }).click();
-  await expect(guide.getByRole("heading", { name: "On la regroupe avec celles des autres artisans du secteur" })).toBeVisible();
+  await expect(guide.getByRole("heading", { name: "Mobiiz prépare ton quantitatif" })).toBeVisible();
   await guide.getByRole("button", { name: "Suivant" }).click();
-  await expect(guide.getByRole("heading", { name: "Tu reçois les prix le jour J et tu commandes si ça te va" })).toBeVisible();
+  await expect(guide.getByRole("heading", { name: "Envoie à tes négoces et compare" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
-  await guide.getByRole("link", { name: "Déposer ma première liste" }).click();
+  await guide.getByRole("link", { name: "Déposer mon premier devis" }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau/);
   await expect(guide).toHaveCount(0);
   // Une seule fois : ni au rechargement, ni ailleurs.
@@ -2503,7 +2506,7 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
   // « Revoir le guide » dans le menu le rouvre ; « Passer le guide » le referme.
   await page.getByRole("button", { name: "Mon menu" }).click();
   await page.getByRole("menuitem", { name: "Revoir le guide" }).click();
-  await expect(guide.getByRole("heading", { name: "Dépose ta liste ou ton devis" })).toBeVisible();
+  await expect(guide.getByRole("heading", { name: "Dépose ton devis" })).toBeVisible();
   await guide.getByRole("button", { name: "Passer le guide" }).click();
   await expect(guide).toHaveCount(0);
   await page.reload();
@@ -2514,20 +2517,20 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
 test("La page d'accueil publique : un visiteur la voit à la racine, un artisan connecté garde l'app", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Marre de te faire enfumer sur le prix de tes matériaux");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tes quantitatifs au propre. Tes demandes de prix en quelques clics. La force du groupe en plus.");
   // Greg, 24 octobre 2026 (capture iPhone : « la démo s'ouvre en plein écran dès l'arrivée, avant même la promesse ») : le
   // visiteur arrive sur l'accroche, « Par un artisan, pour les artisans », « Dès 29 € », l'inscription ; aucune démo d'office.
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
   await expect(page.getByText("Par un artisan, pour les artisans.")).toBeVisible();
-  await expect(page.getByText(/^Dès 29 € par mois/)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Je rejoins le mouvement" }).first()).toBeVisible();
+  await expect(page.getByText(/^Gratuit pour commencer\. Dès 29 € HT par mois/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Commencer gratuitement" }).first()).toBeVisible();
   await page.reload();
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
   // La démo passe derrière « Voir comment ça marche (30 s) », juste sous l'accroche ; elle s'ouvre en plein écran.
   await page.getByRole("button", { name: "Voir comment ça marche (30 s)" }).click();
   const dialogue = page.getByRole("dialog", { name: "Démo" });
   await expect(dialogue).toBeVisible();
-  const demo = page.getByRole("region", { name: /^Ta liste, remise au propre/ });
+  const demo = page.getByRole("region", { name: /^Ton quantitatif, au propre/ });
   await expect(demo.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
   await expect(demo.getByText("Exemple").first()).toBeVisible();
   // Multimétier : couverture, puis plomberie, puis placo.
@@ -2538,15 +2541,16 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple placo)" })).toContainText("Plaque BA13");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await demo.getByRole("button", { name: "Suivant" }).click();
-  await expect(page.getByRole("heading", { name: "Le regroupement, tous ensemble" })).toBeVisible();
-  // Commande du mois (Greg, 22 octobre 2026) : en quantités, jamais en nombre d'entreprises.
-  await expect(page.getByRole("region", { name: /^Le regroupement/ }).getByText("Toute la commande du 1er novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux")).toBeVisible();
-  await expect(page.getByText(/couvreurs, \d+ demandes/)).toHaveCount(0);
+  // Recentrage (Greg, 25 octobre 2026) : envoie à tes négoces et compare, livraison comprise.
+  await expect(page.getByRole("heading", { name: "Envoie à tes négoces et compare" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Offres reçues (exemple)" }).getByRole("listitem")).toHaveCount(3);
+  await expect(page.getByText("Il manque le faîtage zinc · 2 jours")).toBeVisible();
   await page.getByRole("button", { name: "Suivant" }).click();
-  await expect(page.getByRole("heading", { name: "Ton prix, livré chez toi" })).toBeVisible();
-  await expect(page.getByText(/2 760 pièces à 0,92 € HT l'unité/)).toBeVisible();
-  await expect(page.getByText(/Ton prix habituel : 1,04 €/)).toBeVisible();
-  await expect(dialogue.getByRole("link", { name: "Je rejoins le mouvement" })).toBeVisible();
+  // La force du groupe : sous le seuil, ni nombre ni ville ; aucune promesse chiffrée.
+  await expect(page.getByRole("heading", { name: "La force du groupe en plus" })).toBeVisible();
+  await expect(page.getByText("Regroupement en cours · Département 22")).toBeVisible();
+  await expect(dialogue.getByText(/économi/i)).toHaveCount(0);
+  await expect(dialogue.getByRole("link", { name: "Commencer gratuitement" })).toBeVisible();
   // « Passer » la referme ; Échap aussi.
   await page.getByRole("button", { name: "Passer" }).click();
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
@@ -2562,14 +2566,17 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByRole("button", { name: "Voir comment ça marche (30 s)" })).toBeFocused();
   // Landing du 22 octobre (Greg) : ton fun et direct, visuel pro ; « enfumer » vise le prix ; le principe en une phrase ;
   // trois étapes ; gratuit pour l'artisan ; les autres métiers en une ligne ; une ligne pour les négoces. Rien d'extérieur.
-  await expect(page.getByRole("heading", { name: "Plus on est nombreux, plus on pèse face aux négoces." })).toBeVisible();
+  // Recentrage (Greg, 25 octobre 2026) : le titre, trois étapes, le bloc groupe et le bloc négoce mot pour mot ; aucune
+  // promesse d'économie chiffrée.
+  await expect(page.getByRole("heading", { name: "L'union fait la force." })).toBeVisible();
+  await expect(page.getByText("Quand d'autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes pour tenter un meilleur prix.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Comment ça marche" })).toBeVisible();
-  await expect(page.getByText("Une commande toutes les deux semaines avec les artisans de ton métier, dans ta région.")).toBeVisible();
-  for (const etape of ["1. Dépose ta liste avant la clôture", "2. On envoie tout le volume aux négoces", "3. Tu vois le meilleur prix et tu commandes si ça te plaît"]) {
+  await expect(page.getByText(/centaines|milliers d'euros/)).toHaveCount(0);
+  for (const etape of ["1. Dépose ton devis", "2. Mobiiz prépare ton quantitatif", "3. Envoie à tes négoces et compare"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
-  for (const image of ["L'écran « Nouvelle liste » de Mobiiz", /^L'écran « Regroupement » de Mobiiz/, /^L'écran des prix reçus dans Mobiiz/]) {
+  for (const image of ["L'écran « Nouveau chantier » de Mobiiz", "Le quantitatif préparé par Mobiiz", /^Les prix reçus dans Mobiiz/]) {
     await expect(page.getByRole("region", { name: "Comment ça marche" }).getByRole("img", { name: image })).toBeVisible();
   }
   await expect(page.getByText(/tuile/i)).toHaveCount(0);
@@ -2577,9 +2584,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
   // L'abonnement (24 octobre 2026) : l'argument phare (une possibilité tant qu'il n'y a pas 3 cycles) et l'offre.
   await expect(page.getByText(/^Gratuit pour commencer\. Dès 29 € HT par mois( pour comparer et acheter en groupe\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par regroupement\.)$/)).toBeVisible();
-  await expect(page.getByText(/^Essai gratuit sur un cycle complet, puis dès 29 € HT par mois à l'année, ou 49 € HT au mois sans engagement\./)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(2);
-  await expect(page.getByText("des volumes sûrs, des clients en plus. Répondez aux grilles.")).toBeVisible();
+  await expect(page.getByText(/^29 € HT par mois payé à l'année \(348 €\), ou 49 € HT au mois sans engagement\./)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Commencer gratuitement" })).toHaveCount(2);
+  await expect(page.getByText("des demandes structurées, prêtes à chiffrer, et des volumes groupés sur lesquels vous positionner.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
   const partage = page.getByRole("region", { name: "Fais venir tes collègues" });
   const message = /^Je me suis inscrit sur Mobiiz, on regroupe nos commandes de matériaux pour payer moins cher\. Plus on est nombreux, plus on négocie\. Rejoins-nous : http/;
@@ -2601,7 +2608,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await signUp(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Commencer gratuitement" })).toHaveCount(0);
   // « Inviter un collègue » aussi dans l'app, après l'inscription (accueil) et sur l'écran Regroupement.
   await expect(page.getByRole("region", { name: "Inviter un collègue" }).getByRole("link", { name: "Envoyer sur WhatsApp" })).toBeVisible();
   await page.goto("/groupe");
@@ -2677,7 +2684,9 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await expect(page.getByText(negoce)).toBeVisible();
 
   // 1. Les deux gros boutons.
-  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Nouvelle liste" }).click();
+  // Recentrage (25 octobre 2026) : plus de « + » au centre de la barre ; le gros bouton « Nouveau chantier » de l'accueil.
+  await page.goto("/");
+  await page.getByRole("link", { name: "Nouveau chantier" }).first().click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   // Nouveau cap (22 octobre) : un gros bouton pour la liste, un petit pour le devis.
   await expect(page.getByText("Donne ta liste de matériaux", { exact: true })).toBeVisible();
@@ -3234,8 +3243,9 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   await expect(garantie.getByRole("status")).toContainText(/^C'est commandé : bon n° \d+, 128,00 € HT livré, parti chez Négoce N2\. Commande sur grille garantie du/);
   await expect.poll(async () => (await emailsVers(page, n(2))).filter((m) => /bon de commande/i.test(m.subject)).length).toBe(2);
   expect((await emailsVers(page, n(2))).at(-1)!.text).toContain("grille garantie");
-  // Un autre artisan de la zone la voit dès l'accueil, sans avoir rien déposé pour elle.
-  await pageB.goto("/");
+  // Un autre artisan de la zone la voit aussi, sans avoir rien déposé pour elle (recentrage : sur l'écran du regroupement,
+  // plus sur l'accueil).
+  await pageB.goto("/groupe");
   await expect(pageB.getByRole("region", { name: /^Prix garantis jusqu'au/ }).first().getByRole("button", { name: "Recommander à ce prix" })).toBeVisible();
 
   // B : N3 n'a pas chiffré ses crochets, il n'entre dans aucune option ; N2 en tête à 2 960 €.
@@ -3305,8 +3315,6 @@ test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le
   await expect(page.getByText(/0,91/)).toHaveCount(0);
   // Plusieurs : 2 sur 3 ; sur l'accueil, la même carte ; le bandeau des autres écrans aussi.
   await repond(2);
-  await page.goto("/");
-  await expect(page.getByRole("region", { name: /^Prix demandés, commande d/ }).getByText("2 négoces sur 3 ont répondu")).toBeVisible();
   await page.goto(`/chantiers/${projetS}`);
   await expect(page.getByRole("link", { name: /2 négoces sur 3 ont répondu/ })).toContainText("2/3 réponses");
   await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("Demandes envoyées à 3 négoces de ton secteur.");
@@ -3335,9 +3343,13 @@ test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formul
   await expect(page).toHaveURL(/\/tarifs$/);
   await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
   await expect(page.getByText(/^Gratuit pour commencer\. Dès 29 € HT par mois( pour comparer et acheter en groupe\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par regroupement\.)$/)).toBeVisible();
-  for (const etape of ["Rejoins la communauté, c'est gratuit", "Teste sur un cycle complet", "Continue seulement si tu as vraiment économisé : dès 29 € HT par mois"]) {
+  for (const etape of ["Commence gratuitement", "Teste le payant", "Continue si ça te sert : dès 29 € HT par mois"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
+  // Recentrage (25 octobre 2026) : ce que donne le gratuit, ce que donne le payant.
+  const gp = page.getByRole("region", { name: "Gratuit ou payant" });
+  await expect(gp.getByText("· 1 négoce par demande")).toBeVisible();
+  await expect(gp.getByText("· Les regroupements")).toBeVisible();
   // Les deux formules (Greg, 24 octobre 2026) : l'annuel d'abord, mis en avant, puis le mensuel.
   const formules = page.getByRole("region", { name: "Les formules" });
   await expect(formules.getByText("-40 %")).toBeVisible();
@@ -3459,7 +3471,7 @@ test("Tableau de bord (24 octobre 2026) : refusé à un artisan ; l'admin entre 
   // La démo (mode test) : un jeu de test d'un bouton, effacé d'un autre.
   const demo = page.getByRole("region", { name: "Démo" });
   await demo.getByRole("button", { name: "Créer un jeu de test" }).click();
-  await expect(demo.getByRole("status")).toHaveText("5 faux artisans et 3 faux négoces dans le 22 (un généraliste, deux spécialistes), 26 lignes déposées. Ta liste de démonstration (couverture et placo) est dans la commande.");
+  await expect(demo.getByRole("status")).toHaveText("5 faux artisans et 3 faux négoces dans le 22 (un généraliste, deux spécialistes), 18 lignes déposées. Ta liste de démonstration (couverture et placo) est dans la commande.");
   await demo.getByRole("button", { name: "Tout effacer" }).click();
   await expect(demo.getByRole("status")).toContainText("Effacé : 5 faux artisans");
 });

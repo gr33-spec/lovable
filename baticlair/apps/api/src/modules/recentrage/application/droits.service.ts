@@ -60,6 +60,22 @@ export class DroitsService {
     return payantOffertDansLaZone({ artisansActifs: this.reglages.seuilZoneActive, seuilFranchiLe: franchiLe }, maintenant, this.reglages.seuilZoneActive);
   }
 
+  /** Parcours e2e seulement (route de test) : l'essai du compte de cet e-mail s'arrête maintenant (comme « Finir l'essai » de la démo). */
+  async finirEssaiDe(email: string, maintenant = this.now()): Promise<boolean> {
+    const m = await this.prisma.membership.findFirst({ where: { role: "owner", user: { email: email.toLowerCase() } }, select: { companyId: true } });
+    if (!m) return false;
+    const cle = `abonnement:essai-fini:${m.companyId}`;
+    await this.prisma.parametreGroupe.upsert({ where: { cle }, create: { cle, valeur: { le: maintenant.toISOString() } }, update: { valeur: { le: maintenant.toISOString() } } });
+    return true;
+  }
+
+  /** Parcours e2e seulement (route de test) : la date à laquelle la zone a franchi le seuil, ou rien. */
+  async fixerSeuilFranchi(zone: string, le: Date | null): Promise<void> {
+    const cle = `zone:${zone}:seuil_franchi`;
+    if (le === null) await this.prisma.parametreGroupe.deleteMany({ where: { cle } });
+    else await this.prisma.parametreGroupe.upsert({ where: { cle }, create: { cle, valeur: le.toISOString() }, update: { valeur: le.toISOString() } });
+  }
+
   /** Les droits de l'entreprise, avec ce qu'il faut pour l'écran (zone, préavis, lectures du mois). */
   async droits(companyId: string, maintenant = this.now()): Promise<Droits & { zone: string | null; zoneActive: boolean; preavis: string | null; lecturesCeMois: number }> {
     const zone = await this.zoneDe(companyId);

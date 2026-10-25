@@ -65,3 +65,10 @@ Les pages ont été réécrites (versions du 24/10/2026) ; les points 1 à 4, 9,
 35. **Passage du mois à l'année** : la part non utilisée du mois est déduite, au jour près (comme Stripe). Le passage de l'année au mois n'est pas proposé en cours d'année (résilier, puis reprendre au mois à l'échéance). À dire autrement ?
 36. **Factures** : une facture « Passage à l'abonnement annuel, du … au …, moins la part non utilisée du mois en cours », au montant réellement payé ; faut-il y écrire le détail (349 € − 25,29 €) ? Mention de bas de facture propre à chaque formule.
 
+## Recentrage du 25 octobre 2026 (demande perso, regroupements, gratuit et payant)
+
+37. **CGU, article 2 (demande perso, Mes prix, regroupements, gratuit et payant)** : version du 25 octobre marquée mineure (pas de réacceptation). Est-ce suffisant, vu que le gratuit ajoute des plafonds ?
+38. **E-mail « au nom de l'artisan »** : il part de notre domaine avec le nom de l'artisan, après son accord explicite (case « J'accepte que mon nom et mon entreprise soient transmis… »). L'accord est daté (`accordIdentiteLe`). Suffit-il ?
+39. **Conditions négoces, points « Demandes perso » et « Pas d'alignement automatique »** : la validité est fixée par le négoce (7 jours au moins) ; l'ancienne garantie de 30 jours ne vaut plus que par défaut.
+40. **Payant offert dans une zone qui démarre, puis préavis de 30 jours** : la formulation dans les CGU est-elle assez claire pour un abonné qui passe en gratuit ?
+41. **Aucune promesse d'économie** : la phrase « des centaines, voire des milliers d'euros » est retirée. Garder la vraie moyenne mesurée dès 3 cycles ?

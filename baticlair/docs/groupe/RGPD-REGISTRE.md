@@ -22,6 +22,9 @@ Chaque durée ci-dessous est appliquée chaque nuit par le code (`apps/api/src/m
 | 13 | Pilotage admin : journal des accès et double authentification | Admins (Greg) | E-mail de l'admin, action, date ; code d'accès haché | Sécurité du tableau de bord (qui a vu quoi) | Intérêt légitime (sécurité) | Journal : 12 mois ; code : remplacé à chaque envoi | BatiClair |
 | 14 | Comptages anonymes | Visiteurs, artisans | Un nombre par jour (visites de la page publique, installations) ; aucune donnée personnelle | Mesurer la croissance | Intérêt légitime ; aucune donnée personnelle | Illimitée (agrégat) | BatiClair |
 | 10 | Notifications sur téléphone | Artisans qui les activent | Adresse technique du navigateur | Prévenir qu'une liste est prête | Consentement (bouton « Activer ») | Jusqu'au retrait ou à l'expiration de l'abonnement | Apple, Google (transport) |
+| 15 | Demande perso et chiffrage en ligne | Artisans, négoces destinataires | Liste, nom de l'entreprise de l'artisan (avec son accord), e-mail du négoce, prix par ligne, livraison, délai, validité, statuts de commande | Obtenir et comparer des prix, commander | Contrat (CGU) ; accord de l'artisan pour son identité | Comme les chantiers (3 ans) ; le lien de chiffrage meurt à la clôture | L'artisan et le négoce destinataire, seulement |
+| 16 | Regroupements | Artisans participants, négoces consultés | Lignes groupables, quantités, statut (intention, quantité confirmée, commande), département | Réunir les volumes | Contrat | Comme la commande commune (n° 3) | Négoces : volume et zone seulement ; artisans : « Regroupement en cours » sous 5 entreprises |
+| 17 | « Mes prix » | Artisans | Prix reçus et payés par article, négoce, date | Historique personnel | Contrat | Durée du compte | L'artisan seul |
 
 ## Anonymisation des devis
 

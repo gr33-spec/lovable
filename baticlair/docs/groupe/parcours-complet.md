@@ -2,6 +2,18 @@
 
 Oct 19, 2026 · @Greg
 
+## 0 quinquies. Recentrage : demande perso, regroupements, gratuit et payant — 25 octobre 2026
+
+**Prioritaire sur toutes les sections suivantes.** Rapport : `docs/groupe/RECENTRAGE-2026-10-25.md` ; choix : `docs/DECISIONS.md`.
+
+1. **Le cœur est la demande perso**, immédiate : depuis un chantier, « Envoyer à mes négoces » (habituels, ceux de la zone, ou un nouveau par e-mail), but « Chiffrer un chantier » ou « Commander », accord explicite pour transmettre son identité. Le négoce chiffre en ligne sans compte (`/chiffrer/<jeton>` : prix par ligne, livraison, délai, validité ≥ 7 jours, « Je ne chiffre pas »), puis il est invité à créer son compte. Réponses comparées livraison comprise ; relance à 48 h ouvrées ; clôture à la date de besoin ; « Commander » envoie un bon, suivi Reçue → Confirmée → Livrée. L'artisan ne choisit jamais la catégorie d'un négoce.
+2. **Mes prix** : par article, dernier prix, meilleur prix, négoce, date ; les siens seulement ; « Ton dernier prix pour cet article : X € » sur une nouvelle demande.
+3. **Regroupements** : gros articles identiques seulement (familles groupables, `SEUIL_LIGNE_GROUPABLE` 1 000 € HT, référence stricte : 30×20 ne rejoint jamais 32×22), cycles du 1er et du 15 à midi, « ce cycle » ou « le suivant », un seul bouton « Rejoindre » (ligne de chantier, devis importé ou quantité tapée). Sous `SEUIL_VOLUME_MIN`, pas de consultation, bascule d'un clic. Une consultation par famille et par cycle, aux spécialistes de la famille et aux généralistes de la zone ; volume et zones, jamais de nom ; statut intention → quantité confirmée → commande ; aucun alignement de prix.
+4. **Confidentialité** : pas de messagerie ; sous 5 entreprises, « Regroupement en cours » ; au-dessus, « 5+ entreprises » et le département.
+5. **Gratuit / payant** : gratuit = 2 lectures par mois, 1 négoce par demande, Mes prix sur 3 mois ; payant (49 € HT/mois ou 348 € HT/an) = lectures illimitées, jusqu'à 5 négoces, regroupements, Mes prix complet. Essai gardé. Payant offert sous 10 artisans actifs dans la zone, puis 30 jours de préavis. Hors zone active : tout sauf les regroupements.
+6. **Admin** : « Hypothèses de lancement » par zone et par mois, coût IA par compte gratuit (alerte au-dessus de 3 $), interrupteur des inscriptions gratuites.
+7. **Écrans** : jaune #FFC800 et noir ; 5 onglets (Accueil, Chantiers, Regroupements, Mes prix, Profil) ; l'accueil dit « Bonjour [prénom] », un gros « Nouveau chantier », la carte regroupements seulement si utile, « Mes chantiers ».
+
 ## 0 quater. Listes multimétiers, négoces généralistes ou spécialistes — 25 octobre 2026
 
 **Prioritaire sur les sections 0 ter et 0 bis là où elles parlent d'une commande « par métier », de grilles complètes obligatoires ou d'un seul négoce par artisan.** Détails et choix dans `docs/DECISIONS.md` ; tests `packages/domain/test/multimetier-negoces.test.ts` et `apps/api/test/multimetier-negoces.test.ts`.
