@@ -45,6 +45,10 @@ export class FakeListeReader implements ListeReader {
     if (nom.includes("floue")) {
       return { provider: this.provider, model: "claude-opus-5-5", usage: { inputTokens: 1800, outputTokens: 20 }, status: "success", output: { ...structuredClone(LISTES_ENREGISTREES.manuscrite), lignes: [] }, errorCode: null, durationMs: 1 };
     }
+    // Recette en ligne du 24 octobre 2026 : le service de lecture refuse la demande (clé sans crédit, HTTP 400).
+    if (nom.includes("panne")) {
+      return { provider: this.provider, model: "claude-opus-5-5", usage: { inputTokens: 0, outputTokens: 0 }, status: "provider_error", output: null, errorCode: "http_400", durationMs: 1 };
+    }
     const cle = nom.includes("tableau") ? "tableau" : nom.includes("bon") ? "bon" : "manuscrite";
     return {
       provider: this.provider,

@@ -1,7 +1,7 @@
 {
   "appareil": "se",
   "base": "https://test.mobiiz.fr",
-  "date": "2026-10-24T22:41:06.535Z",
+  "date": "2026-10-24T23:42:24.767Z",
   "etapes": [
     {
       "n": 1,
@@ -9,7 +9,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "01-visiteur-landing.jpg",
-      "ms": 5950
+      "ms": 5717
     },
     {
       "n": 2,
@@ -17,7 +17,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "02-visiteur-tarifs.jpg",
-      "ms": 1710
+      "ms": 1629
     },
     {
       "n": 3,
@@ -25,7 +25,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "03-visiteur-inscription.jpg",
-      "ms": 1566
+      "ms": 1599
     },
     {
       "n": 4,
@@ -33,7 +33,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "04-visiteur-connexion.jpg",
-      "ms": 2218
+      "ms": 2399
     },
     {
       "n": 5,
@@ -41,7 +41,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "05-visiteur-mot-de-passe-oublie.jpg",
-      "ms": 1582
+      "ms": 1683
     },
     {
       "n": 6,
@@ -49,7 +49,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "06-visiteur-cgu.jpg",
-      "ms": 1607
+      "ms": 1671
     },
     {
       "n": 7,
@@ -57,7 +57,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "07-visiteur-mentions-legales.jpg",
-      "ms": 1526
+      "ms": 1581
     },
     {
       "n": 8,
@@ -65,7 +65,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "08-visiteur-confidentialite.jpg",
-      "ms": 1750
+      "ms": 1564
     },
     {
       "n": 9,
@@ -73,7 +73,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "09-visiteur-conditions-negoce.jpg",
-      "ms": 1951
+      "ms": 1738
     },
     {
       "n": 10,
@@ -81,7 +81,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "10-visiteur-connexion-negoce.jpg",
-      "ms": 1682
+      "ms": 1630
     },
     {
       "n": 11,
@@ -89,7 +89,7 @@
       "statut": "ok",
       "detail": "« Page introuvable »",
       "capture": "11-visiteur-adresse-inconnue.jpg",
-      "ms": 1463
+      "ms": 1466
     },
     {
       "n": 12,
@@ -97,7 +97,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "12-landing-accroche-prix-inscription-aucune-demo-d-.jpg",
-      "ms": 1537
+      "ms": 1487
     },
     {
       "n": 13,
@@ -105,15 +105,15 @@
       "statut": "ok",
       "detail": "",
       "capture": "13-landing-voir-comment-ca-marche-30-s-trois-metier.jpg",
-      "ms": 367
+      "ms": 387
     },
     {
       "n": 14,
       "etape": "Inscription artisan",
       "statut": "ok",
-      "detail": "delivered+artisan-se-mvmz83pj@resend.dev",
+      "detail": "delivered+artisan-se-mvn1cen9@resend.dev",
       "capture": "14-inscription-artisan.jpg",
-      "ms": 3081
+      "ms": 7160
     },
     {
       "n": 15,
@@ -121,7 +121,7 @@
       "statut": "ok",
       "detail": "Prochaine clôture : dimanche 1 novembre à 12 h",
       "capture": "15-guide-trois-ecrans-prochaine-cloture-deposer-ma-.jpg",
-      "ms": 1009
+      "ms": 204
     },
     {
       "n": 16,
@@ -129,7 +129,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "16-guide-ne-revient-pas-revoir-le-guide-dans-le-men.jpg",
-      "ms": 4791
+      "ms": 5062
     },
     {
       "n": 17,
@@ -137,7 +137,7 @@
       "statut": "ok",
       "detail": "1 e-mail(s) : « Confirme ton adresse e-mail »",
       "capture": "17-e-mail-reel-confirmer-l-adresse.jpg",
-      "ms": 3402
+      "ms": 2773
     },
     {
       "n": 18,
@@ -145,39 +145,39 @@
       "statut": "ok",
       "detail": "",
       "capture": "18-commande-commune-siret-et-adresse.jpg",
-      "ms": 4799
+      "ms": 5277
     },
     {
       "n": 19,
       "etape": "Dépôt d'une liste (photo manuscrite), vraie lecture",
-      "statut": "ok",
-      "detail": "5 lignes",
+      "statut": "bug",
+      "detail": "page.waitForURL: Timeout 120000ms exceeded. =========================== logs =========================== waiting for navigation until \"load\" ============================================================",
       "capture": "19-depot-d-une-liste-photo-manuscrite-vraie-lecture.jpg",
-      "ms": 8756
+      "ms": 122048
     },
     {
       "n": 20,
       "etape": "Liste : ajouter à la commande commune",
       "statut": "bug",
-      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /^Dans la commande d/ }).first() to be visible\u001b[22m ",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /^Commande commune d/ }).first() to be visible\u001b[22m ",
       "capture": "20-liste-ajouter-a-la-commande-commune-bug.jpg",
-      "ms": 20425
+      "ms": 20066
     },
     {
       "n": 21,
       "etape": "Dépôt d'un devis (PDF), vraie lecture, questions, liste",
-      "statut": "ok",
-      "detail": "7 lignes",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 240000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /Page des fournitures|Liste des fournitures/ }).or(getByRole('region', { name: 'Les questions' })).first() to be visible\u001b[22m ",
       "capture": "21-depot-d-un-devis-pdf-vraie-lecture-questions-lis.jpg",
-      "ms": 55032
+      "ms": 244291
     },
     {
       "n": 22,
       "etape": "Ton chantier : aperçu du PDF fournisseur",
       "statut": "ok",
-      "detail": "",
+      "detail": "pas d'aperçu sur cet écran",
       "capture": "22-ton-chantier-apercu-du-pdf-fournisseur.jpg",
-      "ms": 1601
+      "ms": 46
     },
     {
       "n": 23,
@@ -185,7 +185,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "23-accueil-mettre-son-negoce-dans-la-boucle.jpg",
-      "ms": 4350
+      "ms": 4487
     },
     {
       "n": 24,
@@ -193,7 +193,7 @@
       "statut": "ok",
       "detail": "« Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès »",
       "capture": "24-e-mail-reel-invitation-du-negoce.jpg",
-      "ms": 447
+      "ms": 479
     },
     {
       "n": 25,
@@ -201,7 +201,7 @@
       "statut": "ok",
       "detail": "Vous recevrez la prochaine grille de votre secteur à la clôture du 1er novembre à 12 h.",
       "capture": "25-negoce-creer-son-acces-depuis-l-invitation.jpg",
-      "ms": 3061
+      "ms": 3114
     },
     {
       "n": 26,
@@ -209,7 +209,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "26-negoce-son-espace-prochaine-cloture-aucun-nom-d-.jpg",
-      "ms": 3416
+      "ms": 3370
     },
     {
       "n": 27,
@@ -217,55 +217,55 @@
       "statut": "ok",
       "detail": "",
       "capture": "27-abonnement-essai-et-deux-formules.jpg",
-      "ms": 2046
+      "ms": 2335
     },
     {
       "n": 28,
       "etape": "Stripe : carte refusée (4000 0000 0000 0002)",
-      "statut": "bug",
-      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for locator('[data-testid=\"card-accordion-item-button\"], #payment-method-accordion-item-title-card').first()\u001b[22m \u001b[2m    - locator resolved to <span aria-hidden=\"true\" id=\"payment-method-accordion-item-title-card\" class=\"RadioButton PaymentMethodFormAccordionItemTitle-radio RadioButton--decorative\"></span>\u001b[22m",
-      "capture": "28-stripe-carte-refusee-4000-0000-0000-0002-bug.jpg",
-      "ms": 34026
+      "statut": "ok",
+      "detail": "Stripe dit le refus ; rien n'est payé",
+      "capture": "28-stripe-carte-refusee-4000-0000-0000-0002.jpg",
+      "ms": 10254
     },
     {
       "n": 29,
       "etape": "Stripe : carte acceptée (4242), retour « Abonné au mois »",
-      "statut": "bug",
-      "detail": "locator.fill: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for locator('#cardNumber')\u001b[22m ",
+      "statut": "ok",
+      "detail": "",
       "capture": "29-stripe-carte-acceptee-4242-retour-abonne-au-mois.jpg",
-      "ms": 30060
+      "ms": 14741
     },
     {
       "n": 30,
       "etape": "Factures : la facture du mois, téléchargeable",
-      "statut": "bug",
-      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('tab', { name: 'Mes factures' })\u001b[22m ",
-      "capture": "30-factures-la-facture-du-mois-telechargeable-bug.jpg",
-      "ms": 30045
+      "statut": "ok",
+      "detail": "F-000001 du 25/10/2026 au 25/11/2026 · 58,80 € TTC Télécharger",
+      "capture": "30-factures-la-facture-du-mois-telechargeable.jpg",
+      "ms": 903
     },
     {
       "n": 31,
       "etape": "Passage à l'annuel au prorata",
-      "statut": "bug",
-      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('tab', { name: 'Mon abonnement' })\u001b[22m ",
-      "capture": "31-passage-a-l-annuel-au-prorata-bug.jpg",
-      "ms": 30047
+      "statut": "ok",
+      "detail": "",
+      "capture": "31-passage-a-l-annuel-au-prorata.jpg",
+      "ms": 6948
     },
     {
       "n": 32,
       "etape": "Résiliation en deux clics",
-      "statut": "bug",
-      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Résilier' })\u001b[22m ",
-      "capture": "32-resiliation-en-deux-clics-bug.jpg",
-      "ms": 30050
+      "statut": "ok",
+      "detail": "",
+      "capture": "32-resiliation-en-deux-clics.jpg",
+      "ms": 1431
     },
     {
       "n": 33,
       "etape": "E-mails réels de l'abonnement",
       "statut": "ok",
-      "detail": "« Confirme ton adresse e-mail »",
+      "detail": "« Confirme ton adresse e-mail », « Ton abonnement Mobiiz est actif », « Ton abonnement Mobiiz est actif », « Tu es passé à l'abonnement annuel Mobiiz », « Ta résiliation Mobiiz est enregistrée »",
       "capture": "33-e-mails-reels-de-l-abonnement.jpg",
-      "ms": 63701
+      "ms": 1117
     },
     {
       "n": 34,
@@ -273,7 +273,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "34-menu-essayer-avec-un-chantier-fictif.jpg",
-      "ms": 9360
+      "ms": 5837
     },
     {
       "n": 35,
@@ -281,7 +281,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "35-ecran-mes-chantiers.jpg",
-      "ms": 2747
+      "ms": 2544
     },
     {
       "n": 36,
@@ -289,7 +289,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "36-ecran-fournisseurs.jpg",
-      "ms": 1935
+      "ms": 2484
     },
     {
       "n": 37,
@@ -297,7 +297,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "37-ecran-formules.jpg",
-      "ms": 2064
+      "ms": 2019
     },
     {
       "n": 38,
@@ -305,7 +305,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "38-ecran-compte.jpg",
-      "ms": 2068
+      "ms": 2214
     },
     {
       "n": 39,
@@ -313,7 +313,7 @@
       "statut": "ok",
       "detail": "mobiiz-mes-donnees-2026-10-24.json",
       "capture": "39-compte-export-json-et-pdf.jpg",
-      "ms": 2952
+      "ms": 2924
     },
     {
       "n": 40,
@@ -321,7 +321,7 @@
       "statut": "ok",
       "detail": "",
       "capture": "40-compte-suppression-en-tapant-supprimer.jpg",
-      "ms": 3197
+      "ms": 2740
     }
   ],
   "anomalies": [
@@ -345,21 +345,99 @@
     },
     {
       "qui": "artisan-se",
-      "url": "https://test.mobiiz.fr/chantiers/01a1700d-fc9c-75f4-880a-32322d58babf",
-      "type": "http 400",
-      "texte": "POST /v1/projects/01a1700d-fc9c-75f4-880a-32322d58babf/commande-du-mois"
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "http 502",
+      "texte": "POST /v1/projects/01a17044-5b1d-727d-9456-f4a63bc741aa/liste?ecran=1"
     },
     {
       "qui": "artisan-se",
-      "url": "https://test.mobiiz.fr/chantiers/01a1700d-fc9c-75f4-880a-32322d58babf",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
       "type": "console",
-      "texte": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+      "texte": "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
     },
     {
       "qui": "artisan-se",
-      "url": "https://checkout.stripe.com/c/pay/cs_test_a1af7Fu2HZ8vMDClUbRzpkcJwTUtR3PcWJj6dqocz6Q7Pn0YBb33eyXzDI#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "url": "https://test.mobiiz.fr/chantiers/01a17046-885f-73e9-8626-27f518040c61",
+      "type": "http 502",
+      "texte": "POST /v1/quantitatifs?ecran=1"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/01a17046-885f-73e9-8626-27f518040c61",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
       "type": "console",
       "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 402 (Payment Required)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Access to fetch at 'https://payments-eu.amazon.com/alaMessage?merchantId=undefined&ledgerCurrency=EUR&affirmEnabled=false&amount=58.8&pageType=banner&useBestTerms=true&isSandbox=true&partnerId=A2LYRA14DQME2H&merchantDomain=checkout.stripe.com' from origin 'https://b.stripecdn.com' has been blocked b"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Access to fetch at 'https://payments-eu.amazon.com/amazonpayMerchantId?ledgerCurrency=EUR&externalPartnerId=A2LYRA14DQME2H&externalMerchantDomain=checkout.stripe.com&isSandbox=true' from origin 'https://b.stripecdn.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is pres"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Access to fetch at 'https://payments-eu.amazon.com/alaMessage?merchantId=undefined&ledgerCurrency=EUR&affirmEnabled=false&amount=58.8&pageType=banner&useBestTerms=true&isSandbox=true&partnerId=A2LYRA14DQME2H&merchantDomain=checkout.stripe.com' from origin 'https://b.stripecdn.com' has been blocked b"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Access to fetch at 'https://payments-eu.amazon.com/amazonpayMerchantId?ledgerCurrency=EUR&externalPartnerId=A2LYRA14DQME2H&externalMerchantDomain=checkout.stripe.com&isSandbox=true' from origin 'https://b.stripecdn.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is pres"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_a1bmASc7eHh01BgIRmUlAdxMptk0LPNZDpHL0hbNkfGkRe954OM1SBj0Nm#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdpamZkaWAnPydjdycpJ2JzJz81KSdkdWxOYHwnPyd1blpxYHZxWjA0UFAzdWRGZmZNX0lcdUFUZF1kNTdnR2hiY3JKTzNnPVJtUn9Ea3BwMm5GTkQ8STV3U2xobUFAb1JtVUc3TzNHaWBCNFNVcFwyMzZ%2Fd0JKREhockk1cm9TNTVEaHM3ZDZVdycpJ2N3amhWYHdzYHcnP3F3cGApJ2dkZm5id2pwa2FGamlqdyc%2FJyZjY2NjY2MnKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSdga2RnaWBVaWRmYG1qaWFgd3YnP3F3cGB4JSUl",
+      "type": "console",
+      "texte": "Failed to load resource: net::ERR_FAILED"
     },
     {
       "qui": "artisan-se",

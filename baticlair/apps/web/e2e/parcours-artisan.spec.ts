@@ -2946,6 +2946,11 @@ test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau co
   // Photo floue : le modèle ne lit aucune ligne ; on dit comment refaire la photo, jamais « devis » ni « PDF » abîmé.
   await depot.setInputFiles({ name: "photo-floue.png", mimeType: "image/png", buffer: photo });
   await expect(page.getByText("Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF.")).toBeVisible();
+  // Le service de lecture en panne (recette en ligne, 24 octobre 2026) : la panne et son code support, jamais « reprends la photo ».
+  await depot.setInputFiles({ name: "liste-panne.png", mimeType: "image/png", buffer: photo });
+  await expect(page.getByText("Le service de lecture n'a pas répondu.", { exact: false })).toBeVisible();
+  await expect(page.getByText(/^Code support : /)).toBeVisible();
+  await expect(page.getByText("Je n'ai rien lu sur ce fichier.", { exact: false })).toHaveCount(0);
   // Puis la bonne photo : la liste arrive, et tous ces essais n'ont créé qu'un chantier.
   await depot.setInputFiles({ name: "liste-manuscrite.png", mimeType: "image/png", buffer: photo });
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });

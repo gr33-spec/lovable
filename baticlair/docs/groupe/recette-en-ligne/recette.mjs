@@ -62,13 +62,15 @@ const voir = (loc, timeout = 20000) => loc.first().waitFor({ state: "visible", t
 /** Chaque page suivie : erreurs de la console, exceptions, réponses en erreur de l'API (5xx toujours ; 4xx inattendues). */
 function surveiller(page, qui) {
   page.on("console", (m) => {
-    if (m.type() === "error") anomalies.push({ qui, url: page.url(), type: "console", texte: m.text().slice(0, 300) });
+    // La page de paiement hébergée par Stripe a ses propres erreurs (Amazon Pay, carte refusée) : hors de l'app.
+    if (m.type() === "error" && !page.url().startsWith("https://checkout.stripe.com")) anomalies.push({ qui, url: page.url(), type: "console", texte: m.text().slice(0, 300) });
   });
   page.on("pageerror", (e) => anomalies.push({ qui, url: page.url(), type: "exception", texte: String(e.message).slice(0, 300) }));
   page.on("response", (r) => {
     const u = r.url();
     const apiInattendue = r.status() >= 400 && r.status() !== 401 && u.startsWith(BASE) && /\/v1\//.test(u);
     if (r.status() >= 500 || apiInattendue || (r.status() >= 400 && /\/_next\/|\.js$|\.css$|\.png$|\.jpg$|\.svg$|\.woff2?$/.test(u))) anomalies.push({ qui, url: page.url(), type: `http ${r.status()}`, texte: `${r.request().method()} ${u.replace(BASE, "").slice(0, 160)}` });
+    if (r.status() >= 500 && u.startsWith(BASE)) void r.text().then((t) => anomalies.push({ qui, url: page.url(), type: `corps ${r.status()}`, texte: t.slice(0, 300) })).catch(() => {});
   });
   return page;
 }

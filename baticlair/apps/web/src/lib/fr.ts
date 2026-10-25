@@ -101,10 +101,10 @@ const reasonMessages: Record<string, string> = {
   empty_list: "La liste est vide : rien ne part au fournisseur.",
   faconnage_required: "Dis-moi d'abord, pour chaque pièce de zinc, si tu la façonnes ou si tu la commandes façonnée.",
   // Lecture IA d'un devis échouée (analysis_failed) : le motif, en clair, pour savoir quoi faire.
-  provider_error: "Le service de lecture a refusé la demande. Réessaie dans un instant ; si ça recommence, envoie-nous le code support.",
-  invalid_output: "La lecture a rendu une réponse incomplète. Réessaie ; si ça recommence, envoie-nous le code support.",
+  provider_error: "Le service de lecture n'a pas répondu. Réessaie dans un instant ; si ça recommence, écris-nous par « Contact » en bas de page.",
+  invalid_output: "La lecture a rendu une réponse incomplète. Réessaie ; si ça recommence, écris-nous par « Contact » en bas de page.",
   timeout: "La lecture a pris trop de temps. Réessaie dans un instant.",
-  refused: "Le service de lecture a refusé ce document. Envoie-nous le code support.",
+  refused: "Le service de lecture a refusé ce document. Écris-nous par « Contact » en bas de page.",
   email_taken: "Ce fournisseur est déjà dans ton carnet (même adresse e-mail).",
   takeoff_not_validated: "Valide d'abord la liste de matériaux.",
   lines_to_check: "Des lignes sont encore à vérifier : pour chacune, « C'est bon » ou « Corriger ».",

@@ -54,8 +54,9 @@ export default function NouveauChantierPage() {
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
       if (err.code === "plan_limit_reached") billing.reload();
-      else if (kind === "liste" && (err.code === "analysis_failed" || err.code === "unreadable_document")) {
-        setErreurListe(err.reason === "nothing_read" || err.code === "analysis_failed" ? "Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF." : "Ce fichier n'est ni une photo ni un PDF.");
+      // Seul « rien lu » parle de la photo ; une panne du service de lecture dit la panne, avec son code support.
+      else if (kind === "liste" && (err.reason === "nothing_read" || err.code === "unreadable_document")) {
+        setErreurListe(err.reason === "nothing_read" ? "Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF." : "Ce fichier n'est ni une photo ni un PDF.");
       } else setError(err);
       setPending(null);
     }
