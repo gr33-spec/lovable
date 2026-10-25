@@ -49,7 +49,12 @@ describe("la démo admin", () => {
     const jeu = (await greg.agent.post("/v1/admin/pilotage/demo/jeu").expect(200)).body;
     // Recentrage (25 octobre 2026) : seuls les gros articles à référence stricte entrent dans les regroupements (ardoise,
     // liteau, écran ; BA13 chez 3 d'entre eux) ; le crochet et le rail restent en demande perso. L'admin y a 4 lignes.
-    expect(jeu).toEqual({ artisans: 5, negoces: 3, lignes: 18, zone: "22", pourToi: 4 });
+    expect(jeu).toEqual({ artisans: 5, negoces: 3, lignes: 18, zone: "22", pourToi: 4, negocies: 2 });
+    // Business model final : l'admin voit l'offre négociée de l'ardoise (négoce masqué, commission incluse) et le zinc en collecte.
+    const negocie = (await greg.agent.get("/v1/negocie").expect(200)).body;
+    const ardoise = negocie.besoins.find((b: { designation: string }) => b.designation.startsWith("Ardoise"));
+    expect(ardoise.offre).toMatchObject({ negoce: "Négoce vérifié dans le 22", prixHt: 1.12, valide: true });
+    expect(negocie.besoins.find((b: { designation: string }) => b.designation.startsWith("Bobine")).regroupement.statut).toBe("en_collecte");
     // Les faux comptes n'entrent pas dans les statistiques.
     expect((await greg.agent.get("/v1/admin/pilotage").expect(200)).body.chiffres).toEqual(sans.chiffres);
 
@@ -92,6 +97,7 @@ describe("la démo admin", () => {
     const efface = (await greg.agent.delete("/v1/admin/pilotage/demo").expect(200)).body;
     expect(efface).toMatchObject({ artisans: 5, negoces: 3, comptesNegoce: 3 });
     expect(await ctx.prisma.user.count({ where: { email: { endsWith: "@demo.mobiiz.fr" } } })).toBe(0);
+    expect(await ctx.prisma.regroupementNegocie.count()).toBe(0);
     // Greg et sa liste restent.
     expect(await ctx.prisma.besoin.count({ where: { companyId: greg.companyId } })).toBeGreaterThan(0);
   });

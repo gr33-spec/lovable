@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Headers, HttpCode, Inject, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
-import { BUTS_DEMANDE } from "@baticlair/domain";
+import { BUTS_DEMANDE, MODES_REGROUPEMENT } from "@baticlair/domain";
 import { z } from "zod";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { DomainError, forbidden, notFound } from "../../../platform/errors/domain-error.js";
@@ -13,6 +13,7 @@ import { DemandePersoService } from "../application/demande-perso.service.js";
 import { DroitsService } from "../application/droits.service.js";
 import { RegroupementsService } from "../application/regroupements.service.js";
 import { HypothesesService } from "../application/hypotheses.service.js";
+import { NegocieService } from "../application/negocie.service.js";
 import { PilotageService } from "../../pilotage/index.js";
 import { CurrentUser, Public, type AuthenticatedUser } from "../../identity/index.js";
 
@@ -32,6 +33,7 @@ const envoiBody = z.object({
 });
 const destinataireBody = z.object({ recipientId: z.uuid() });
 const finEssaiBody = z.object({ email: z.email().max(254) });
+const modeTestBody = z.object({ mode: z.enum(MODES_REGROUPEMENT) });
 const zoneTestBody = z.object({ zone: z.string().regex(/^\d[\dAB]$/), franchiLe: z.iso.datetime().nullable() });
 const chiffrageBody = z.object({
   prix: z.record(z.string().max(10), z.number().min(0).max(1_000_000)),
@@ -148,6 +150,7 @@ export class RecentrageNegoceController {
     @Inject(EspaceNegoceService) private readonly espace: EspaceNegoceService,
     @Inject(CONFIG) private readonly config: AppConfig,
     @Inject(DroitsService) private readonly droits: DroitsService,
+    @Inject(NegocieService) private readonly negocie: NegocieService,
   ) {}
 
   @Public()
@@ -172,6 +175,17 @@ export class RecentrageNegoceController {
     if (!secret || authorization !== `Bearer ${secret}`) throw forbidden("Test only");
     await this.droits.fixerSeuilFranchi(body.zone, body.franchiLe ? new Date(body.franchiLe) : null);
     return { fait: true };
+  }
+
+  /** Parcours e2e seulement : le mode des regroupements (les cas automatiques le passent en « automatique », puis le rendent). */
+  @Public()
+  @Post("internal/test/mode-regroupement")
+  @HttpCode(200)
+  async modeDeTest(@Headers("authorization") authorization: string | undefined, @Body(new ZodPipe(modeTestBody)) body: z.infer<typeof modeTestBody>) {
+    if (this.config.env !== "test") throw notFound("Route");
+    const secret = this.config.cronSecret;
+    if (!secret || authorization !== `Bearer ${secret}`) throw forbidden("Test only");
+    return this.negocie.changerMode(body.mode);
   }
 
   /** Parcours e2e seulement : l'essai de ce compte s'arrête, pour jouer le gratuit. */
@@ -255,12 +269,14 @@ export class HypothesesController {
   constructor(
     @Inject(PilotageService) private readonly pilotage: PilotageService,
     @Inject(HypothesesService) private readonly hypotheses: HypothesesService,
+    @Inject(NegocieService) private readonly negocie: NegocieService,
   ) {}
 
   @Get("hypotheses")
   async lesHypotheses(@CurrentUser() user: AuthenticatedUser) {
     await this.pilotage.exiger(user);
-    return this.hypotheses.hypotheses();
+    const debut = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1));
+    return { ...(await this.hypotheses.hypotheses()), negocie: await this.negocie.indicateurs(debut) };
   }
 
   @Get("cout-ia-gratuits")

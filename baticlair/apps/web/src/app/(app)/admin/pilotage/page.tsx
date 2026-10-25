@@ -1,6 +1,7 @@
 "use client";
 
-import { CoutIaGratuitsCarte, HypothesesCarte, InscriptionsCarte } from "@/components/admin-hypotheses";
+import { CodeAdmin } from "@/components/code-admin";
+import { CoutIaGratuitsCarte, HypothesesCarte, InscriptionsCarte, ModeRegroupementCarte, NegocesAVerifierCarte } from "@/components/admin-hypotheses";
 import { useCallback, useEffect, useState } from "react";
 import { BackButton, Button, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -58,50 +59,9 @@ export default function PilotagePage() {
       {erreur ? <ErrorNotice error={erreur} /> : null}
       {!statut && !erreur ? <Spinner /> : null}
       {statut && !statut.admin ? <Card className="p-5 text-[16px]">Cette page est réservée à l&apos;équipe.</Card> : null}
-      {statut?.admin && !statut.deuxFacteurs ? <Code onOk={() => setStatut({ admin: true, deuxFacteurs: true })} /> : null}
+      {statut?.admin && !statut.deuxFacteurs ? <CodeAdmin quoi="le tableau de bord" onOk={() => setStatut({ admin: true, deuxFacteurs: true })} /> : null}
       {statut?.deuxFacteurs ? <Contenu /> : null}
     </div>
-  );
-}
-
-/** La double authentification : un code à 6 chiffres reçu par e-mail. */
-function Code({ onOk }: { onOk: () => void }) {
-  const [envoye, setEnvoye] = useState(false);
-  const [code, setCode] = useState("");
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
-  async function run(f: () => Promise<unknown>, apres: () => void) {
-    setPending(true);
-    setError(null);
-    try {
-      await f();
-      apres();
-    } catch (e) {
-      setError(asError(e));
-    } finally {
-      setPending(false);
-    }
-  }
-  return (
-    <Card className="flex flex-col gap-4 p-5">
-      <p className="text-[16px]">Pour ouvrir le tableau de bord, je t&apos;envoie un code à 6 chiffres par e-mail.</p>
-      {error ? <ErrorNotice error={error} /> : null}
-      {!envoye ? (
-        <Button onClick={() => void run(() => api("/v1/admin/pilotage/code", { method: "POST" }), () => setEnvoye(true))} pending={pending} className="self-start">
-          Recevoir mon code
-        </Button>
-      ) : (
-        <>
-          <label htmlFor="code" className="text-[15px] font-semibold">
-            Code reçu par e-mail
-          </label>
-          <input id="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} className="min-h-12 w-40 rounded-xl border border-line bg-surface px-4 text-[20px] tracking-[0.3em] tabular-nums" />
-          <Button onClick={() => void run(() => api("/v1/admin/pilotage/code/verifier", { method: "POST", body: { code } }), onOk)} pending={pending} disabled={code.length !== 6} className="self-start">
-            Ouvrir le tableau de bord
-          </Button>
-        </>
-      )}
-    </Card>
   );
 }
 
@@ -232,6 +192,8 @@ function Contenu() {
         <Ligne titre="Reste" valeur={euros(t.rentabilite.resultat)} />
       </Section>
 
+      <ModeRegroupementCarte />
+      <NegocesAVerifierCarte />
       <HypothesesCarte />
       <CoutIaGratuitsCarte />
       <InscriptionsCarte />
@@ -328,7 +290,7 @@ function ReglagesCarte() {
  * comptes (`@demo.mobiiz.fr`) sont exclus des chiffres ; chaque geste est journalisé ; « Tout effacer » les retire.
  */
 const GESTES = [
-  { geste: "jeu", label: "Créer un jeu de test", fait: (r: Record<string, number>) => `${r.artisans} faux artisans et ${r.negoces} faux négoces dans le 22 (un généraliste, deux spécialistes), ${r.lignes} lignes déposées.${r.pourToi ? " Ta liste de démonstration (couverture et placo) est dans la commande." : ""}` },
+  { geste: "jeu", label: "Créer un jeu de test", fait: (r: Record<string, number>) => `${r.artisans} faux artisans et ${r.negoces} faux négoces dans le 22 (un généraliste, deux spécialistes), ${r.lignes} lignes déposées.${r.pourToi ? " Ta liste de démonstration (couverture et placo) est dans la commande." : ""}${r.negocies ? " Deux regroupements négociés (ardoise avec offre, zinc en collecte) sont dans Regroupements et sur l'écran du chasseur." : ""}` },
   { geste: "cloturer", label: "Clôturer maintenant", fait: (r: Record<string, number>) => `${r.clos} commande close, ${r.grillesEnvoyees} grilles envoyées aux négoces.` },
   { geste: "repondre", label: "Faire répondre les négoces", fait: (r: Record<string, number>) => `${r.reponses} négoces ont répondu (prix fictifs).` },
   { geste: "publier", label: "Publier les résultats", fait: (r: Record<string, number>) => `${r.resultats} résultat publié : les artisans sont prévenus.` },

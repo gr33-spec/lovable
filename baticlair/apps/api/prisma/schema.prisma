@@ -183,6 +183,7 @@ model Company {
   abonnement         Abonnement?
   reglesApprises     RegleApprise[]
   facturesAbonnement FactureAbonnement[]
+  besoinsNegocies    BesoinNegocie[]
 
   @@map("company")
 }
@@ -601,7 +602,9 @@ model Supplier {
   updatedAt   DateTime  @updatedAt
 
   /// Recentrage (25 octobre 2026) : le négoce inscrit de la zone que l'artisan a ajouté à son carnet.
-  negoceId String? @db.Uuid
+  negoceId  String?   @db.Uuid
+  /// « Préviens ton négoce » : l'artisan dit l'avoir déjà prévenu (l'écran ne revient plus).
+  prevenuLe DateTime?
 
   company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
   recipients PriceRequestRecipient[]
@@ -1087,6 +1090,13 @@ model CompteNegoce {
   conditionsVersion     String?
   derniereConnexionLe   DateTime?
   desabonneLe           DateTime?
+  /// Vérification (business model final, 25 octobre 2026) : valide | a_verifier | bloque ; null = compte d'avant la règle.
+  verification          String?
+  /// Code NAF lu dans l'API Recherche d'entreprises, et la raison sociale du registre.
+  naf                   String?
+  raisonSociale         String?
+  emailConfirmeLe       DateTime?
+  valideParAdminLe      DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
@@ -1729,4 +1739,130 @@ model CompteurJour {
 
   @@id([jour, cle])
   @@map("compteur_jour")
+}
+
+/// LE REGROUPEMENT NÉGOCIÉ PAR UN HUMAIN (Greg, 25 octobre 2026, « business model final ») : des besoins d'une même
+/// référence, d'un même département, à dates compatibles ; un chasseur de Mobiiz négocie et saisit l'offre.
+model RegroupementNegocie {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  numero         Int       @unique @default(autoincrement())
+  /// Clé de référence stricte (`referenceStricte`) : 30×20 et 32×22 n'ont jamais la même.
+  cle            String
+  libelle        String
+  famille        String
+  departement    String
+  /// en_collecte | en_negociation | offre_recue | commande | abandonne
+  statut         String    @default("en_collecte")
+  dateBesoinMin  DateTime? @db.Date
+  chasseurEmail  String?
+  prisEnChargeLe DateTime?
+  offreEnvoyeeLe DateTime?
+  commandeLe     DateTime?
+  abandonneLe    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  besoins BesoinNegocie[]
+  offre   OffreNegociee?
+  appels  AppelChasseur[]
+
+  @@index([departement, cle, statut])
+  @@map("regroupement_negocie")
+}
+
+/// Un besoin d'artisan pour un regroupement négocié : déclaré, ou en veille (une ligne d'une demande perso).
+model BesoinNegocie {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  companyId      String    @db.Uuid
+  projectId      String?   @db.Uuid
+  articleKey     String?
+  /// La demande perso d'où vient une ligne en veille.
+  priceRequestId String?   @db.Uuid
+  designation    String
+  cle            String
+  famille        String
+  quantite       Decimal   @db.Decimal(14, 3)
+  unite          String
+  departement    String
+  /// L'adresse ou la commune de livraison : stockée, jamais montrée aux autres artisans.
+  livraison      String
+  dateBesoin     DateTime  @db.Date
+  /// veille | declare | accepte | refuse | non_merci | retire
+  statut         String
+  regroupementId String?   @db.Uuid
+  notifieLe      DateTime?
+  accepteLe      DateTime?
+  refuseLe       DateTime?
+  bonNumero      Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  company      Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  regroupement RegroupementNegocie? @relation(fields: [regroupementId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, statut])
+  @@index([departement, cle, statut])
+  @@index([regroupementId])
+  @@map("besoin_negocie")
+}
+
+/// L'offre négociée par le chasseur : une par regroupement. Le prix affiché inclut la commission Mobiiz.
+model OffreNegociee {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  regroupementId  String    @unique @db.Uuid
+  negoceNom       String
+  negoceEmail     String
+  negoceTelephone String?
+  prixNegocieHt   Decimal   @db.Decimal(14, 4)
+  commissionPct   Decimal   @db.Decimal(5, 2)
+  prixAfficheHt   Decimal   @db.Decimal(14, 4)
+  livraisonHt     Decimal   @db.Decimal(14, 2)
+  conditions      String?
+  valideJusquau   DateTime  @db.Date
+  saisieParEmail  String
+  envoyeeLe       DateTime?
+  /// La commande totale (quantités acceptées) transmise au négoce.
+  transmiseLe     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  regroupement RegroupementNegocie @relation(fields: [regroupementId], references: [id], onDelete: Cascade)
+
+  @@map("offre_negociee")
+}
+
+/// Le journal des appels du chasseur : date, négoce, une note courte.
+model AppelChasseur {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  regroupementId String   @db.Uuid
+  negoce         String
+  note           String
+  parEmail       String
+  le             DateTime @default(now())
+
+  regroupement RegroupementNegocie @relation(fields: [regroupementId], references: [id], onDelete: Cascade)
+
+  @@index([regroupementId, le])
+  @@map("appel_chasseur")
+}
+
+/// L'OBSERVATOIRE DES PRIX : chaque prix reçu d'un négoce, SANS identifiant de négoce ni d'artisan (usage statistique
+/// anonymisé, CGU et conditions négoces). `source` est une empreinte de la réponse, pour compter les sources distinctes.
+model ObservationPrix {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  article        String
+  libelle        String
+  prixUnitaireHt Decimal  @db.Decimal(14, 4)
+  quantite       Decimal? @db.Decimal(14, 3)
+  unite          String
+  palier         String?
+  departement    String
+  le             DateTime @db.Date
+  /// perso | groupe
+  type           String
+  source         String
+
+  @@unique([source, article])
+  @@index([article, departement, le])
+  @@map("observations_prix")
 }

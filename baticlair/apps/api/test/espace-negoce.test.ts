@@ -191,7 +191,7 @@ describe("3. l'abonnement à la zone", { timeout: 90_000 }, () => {
   it("les conditions, versionnées, se lisent sans compte", async () => {
     const r = (await srv().get("/v1/negoce/conditions").expect(200)).body;
     expect(r.version).toBe("2026-10-25");
-    expect(r.points).toHaveLength(15);
+    expect(r.points).toHaveLength(17);
   });
 });
 

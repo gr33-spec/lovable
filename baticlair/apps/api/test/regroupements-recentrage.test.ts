@@ -12,7 +12,7 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
  * consultation par famille et par cycle, validité fixée par le négoce, anonymat sous 5 participants, zones actives.
  */
 let ctx: TestContext;
-const avant = { GROUPE: process.env.GROUPE, CRON_SECRET: process.env.CRON_SECRET, ZONES_ACTIVES: process.env.ZONES_ACTIVES, PRIX_REPERES: process.env.PRIX_REPERES, SEUIL_VOLUME_MIN: process.env.SEUIL_VOLUME_MIN };
+const avant = { MODE_REGROUPEMENT: process.env.MODE_REGROUPEMENT, GROUPE: process.env.GROUPE, CRON_SECRET: process.env.CRON_SECRET, ZONES_ACTIVES: process.env.ZONES_ACTIVES, PRIX_REPERES: process.env.PRIX_REPERES, SEUIL_VOLUME_MIN: process.env.SEUIL_VOLUME_MIN };
 beforeAll(async () => {
   process.env.GROUPE = "on";
   process.env.CRON_SECRET = "secret-de-la-tache";
@@ -20,6 +20,8 @@ beforeAll(async () => {
   // Des repères de TEST (pas des prix réels) : l'ardoise 1,20 € HT la pièce, le liteau 0,50 € HT le mètre.
   process.env.PRIX_REPERES = "ardoise:pieces=1.2,liteau:m=0.5";
   process.env.SEUIL_VOLUME_MIN = "couverture=3000";
+  // Business model final (25 octobre 2026) : la consultation automatique, derrière l'interrupteur.
+  process.env.MODE_REGROUPEMENT = "automatique";
   ctx = await createTestApp();
 });
 afterAll(async () => {

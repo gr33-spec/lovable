@@ -2,7 +2,8 @@ import { Inject, Module, type OnModuleInit } from "@nestjs/common";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
-import { CONFIG, EMAIL_SENDER } from "../../platform/tokens.js";
+import { CONFIG, EMAIL_SENDER, PUSH_SENDER } from "../../platform/tokens.js";
+import type { PushSender } from "../../platform/push/push.port.js";
 import { AbonnementModule, AbonnementService } from "../abonnement/index.js";
 import { AiUsageModule, AnalysisMeter } from "../ai-usage/index.js";
 import { CommandeDuMoisService, EspaceNegoceService, GroupeModule } from "../groupe/index.js";
@@ -13,6 +14,10 @@ import { DemandePersoService } from "./application/demande-perso.service.js";
 import { DroitsService } from "./application/droits.service.js";
 import { RegroupementsService } from "./application/regroupements.service.js";
 import { HypothesesService } from "./application/hypotheses.service.js";
+import { NegocieService } from "./application/negocie.service.js";
+import { ObservatoireService } from "./application/observatoire.service.js";
+import { ApiRechercheEntreprises, FakeRechercheEntreprises, VerificationNegoceService } from "./application/verification-negoce.service.js";
+import { ChasseurController, NegocieAdminController, NegocieController } from "./http/negocie.controller.js";
 import { ChiffrageController, RecentrageController, RecentrageNegoceController, RegroupementsController, HypothesesController } from "./http/recentrage.controller.js";
 
 /**
@@ -21,7 +26,7 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
  */
 @Module({
   imports: [TenancyModule, AbonnementModule, PriceRequestsModule, GroupeModule, AiUsageModule, PilotageModule],
-  controllers: [RecentrageController, ChiffrageController, RecentrageNegoceController, RegroupementsController, HypothesesController],
+  controllers: [RecentrageController, ChiffrageController, RecentrageNegoceController, RegroupementsController, HypothesesController, NegocieController, ChasseurController, NegocieAdminController],
   providers: [
     {
       provide: DroitsService,
@@ -44,8 +49,27 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
       useFactory: (p: PrismaService, d: DroitsService, dp: DemandePersoService, c: AppConfig) => new HypothesesService(p, d, dp, () => (c.abonnement.paiement === "stripe" ? "F" : "TEST")),
       inject: [PrismaService, DroitsService, DemandePersoService, CONFIG],
     },
+    {
+      provide: ObservatoireService,
+      useFactory: (p: PrismaService) => new ObservatoireService(p),
+      inject: [PrismaService],
+    },
+    {
+      provide: NegocieService,
+      useFactory: (p: PrismaService, d: DroitsService, cmd: CommandeDuMoisService, o: ObservatoireService, e: TransactionalEmailSender, push: PushSender, c: AppConfig) =>
+        new NegocieService(p, d, cmd, o, e, push, { webAppUrl: c.webAppUrl, mode: c.groupe.negocie.mode, chasseurs: c.groupe.negocie.chasseurs, admins: c.groupe.admins, commissionDefaut: c.groupe.negocie.commissionDefaut, seuilAnonymat: c.groupe.recentrage.seuilAnonymat }),
+      inject: [PrismaService, DroitsService, CommandeDuMoisService, ObservatoireService, EMAIL_SENDER, PUSH_SENDER, CONFIG],
+    },
+    {
+      provide: VerificationNegoceService,
+      useFactory: (c: AppConfig) => {
+        const r = c.groupe.negocie.rechercheEntreprises;
+        return new VerificationNegoceService(r === "off" ? null : r === "fake" ? new FakeRechercheEntreprises() : new ApiRechercheEntreprises(), { naf: c.groupe.negocie.naf, fake: r === "fake" });
+      },
+      inject: [CONFIG],
+    },
   ],
-  exports: [DroitsService, DemandePersoService, RegroupementsService],
+  exports: [DroitsService, DemandePersoService, RegroupementsService, NegocieService],
 })
 export class RecentrageModule implements OnModuleInit {
   constructor(
@@ -56,6 +80,10 @@ export class RecentrageModule implements OnModuleInit {
     @Inject(DemandePersoService) private readonly demandes: DemandePersoService,
     @Inject(CommandeDuMoisService) private readonly commande: CommandeDuMoisService,
     @Inject(RegroupementsService) private readonly regroupements: RegroupementsService,
+    @Inject(NegocieService) private readonly negocie: NegocieService,
+    @Inject(ObservatoireService) private readonly observatoire: ObservatoireService,
+    @Inject(VerificationNegoceService) private readonly verification: VerificationNegoceService,
+    @Inject(EspaceNegoceService) private readonly espace: EspaceNegoceService,
   ) {}
 
   onModuleInit(): void {
@@ -63,5 +91,10 @@ export class RecentrageModule implements OnModuleInit {
     this.abonnement.brancherOffert((companyId) => this.droits.offertPour(companyId));
     this.meter.brancherLimiteGratuite((companyId) => this.droits.limiteGratuite(companyId));
     this.commande.brancherVolume((c) => this.regroupements.volume(c));
+    // Business model final (25 octobre 2026) : veille, observatoire, vérification des négoces, mode des regroupements.
+    this.demandes.brancherApresEnvoi((companyId, requestId) => this.negocie.mettreEnVeille(companyId, requestId));
+    this.demandes.brancherObservatoire(this.observatoire);
+    this.espace.brancherVerification((i) => this.verification.verifier(i));
+    this.regroupements.brancherMode(() => this.negocie.mode());
   }
 }

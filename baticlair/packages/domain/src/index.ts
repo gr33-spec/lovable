@@ -61,6 +61,7 @@ export * from "./groupe/regroupements.js";
 export * from "./groupe/offre-artisan.js";
 export * from "./groupe/demande-perso.js";
 export * from "./groupe/hypotheses.js";
+export * from "./groupe/negocie.js";
 export * from "./rgpd/anonymisation.js";
 export * from "./abonnement/abonnement.js";
 export * from "./apprentissage/habitudes.js";

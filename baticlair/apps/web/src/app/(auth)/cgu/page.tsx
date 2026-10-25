@@ -71,6 +71,17 @@ export default function CguPage() {
             entreprises, aucun nombre ni aucune ville n&apos;est affiché. Aucun meilleur prix n&apos;est garanti.
           </li>
           <li>
+            <strong>Les regroupements négociés</strong> : vous déclarez un gros besoin (ardoise, zinc, bois, isolant, à la référence exacte) ; il rejoint ceux
+            d&apos;autres entreprises du même département aux dates compatibles. Un chasseur d&apos;opportunités {NOM_APP} négocie par téléphone avec les négoces de
+            la zone et vous propose une offre, le nom du négoce masqué jusqu&apos;à votre acceptation. Le prix affiché inclut la commission {NOM_APP}. « J&apos;accepte »
+            vaut commande ferme sur votre quantité et vous recevez un bon de commande ; vous pouvez refuser sans motif. Sur ces commandes groupées, {NOM_APP} peut
+            percevoir une commission du négoce.
+          </li>
+          <li>
+            <strong>Statistiques anonymes</strong> : les prix reçus servent, anonymisés et agrégés (moyennes arrondies sur 3 mois, par département, à partir de 2
+            regroupements ou 5 réponses), à afficher des « prix observés dans ton secteur ». Jamais votre nom, ni celui d&apos;un négoce, ni un prix isolé.
+          </li>
+          <li>
             <strong>Sans engagement d&apos;achat</strong> : envoyer une demande ou rejoindre un regroupement ne vous oblige à rien. Vous commandez seulement si le prix
             vous plaît, en confirmant la commande dans l&apos;application.
           </li>

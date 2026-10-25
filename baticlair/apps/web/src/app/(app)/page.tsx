@@ -13,6 +13,7 @@ import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { InviterCollegue } from "@/components/inviter";
 import { BoucleNegoce } from "@/components/boucle-negoce";
+import type { MesBesoins } from "@/lib/negocie";
 import type { Droits, ListeRegroupements } from "@/lib/recentrage";
 
 export default function AccueilPage() {
@@ -28,6 +29,11 @@ export default function AccueilPage() {
   const moisActif = features.groupe === true && features.commandeCommune !== "lots";
   const fetchRegroupements = useCallback((signal: AbortSignal) => (moisActif ? api<ListeRegroupements>("/v1/regroupements", { signal }) : Promise.resolve(null)), [moisActif]);
   const { data: regroupements } = useResource(fetchRegroupements);
+  // Business model final (même jour) : en mode humain, l'encart compte les besoins négociés et les veilles à trancher.
+  const fetchNegocie = useCallback((signal: AbortSignal) => api<MesBesoins>("/v1/negocie", { signal }).catch(() => null), []);
+  const { data: negocie } = useResource(fetchNegocie);
+  const enCours = negocie?.mode === "humain" ? negocie.besoins.filter((b) => b.statut === "declare").length + negocie.veille.filter((v) => v.regroupementDisponible).length : (regroupements?.regroupements.length ?? 0);
+  const offreAAccepter = negocie?.mode === "humain" && negocie.besoins.some((b) => b.statut === "declare" && b.offre?.valide);
   const fetchDroits = useCallback((signal: AbortSignal) => api<Droits>("/v1/droits", { signal }), []);
   const { data: droits } = useResource(fetchDroits);
 
@@ -87,17 +93,17 @@ export default function AccueilPage() {
           {droits.preavis}
         </p>
       ) : null}
-      {regroupements && regroupements.regroupements.length > 0 ? (
-        <Link href="/regroupements" aria-label={`Regroupements en cours : ${regroupements.regroupements.length}`} className="pressable flex items-center gap-4 rounded-2xl bg-accent-soft p-4 shadow-card">
+      {enCours > 0 ? (
+        <Link href="/regroupements" aria-label={`Regroupements en cours : ${enCours}`} className="pressable flex items-center gap-4 rounded-2xl bg-accent-soft p-4 shadow-card">
           <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-surface text-ink" aria-hidden="true">
             <Users size={24} />
           </span>
           <span className="flex min-w-0 grow flex-col gap-0.5">
             <span className="flex items-center gap-2 text-[16px] font-extrabold">
               Regroupements en cours
-              <span className="flex size-6 items-center justify-center rounded-full bg-accent text-[13px] font-extrabold text-on-accent">{regroupements.regroupements.length}</span>
+              <span className="flex size-6 items-center justify-center rounded-full bg-accent text-[13px] font-extrabold text-on-accent">{enCours}</span>
             </span>
-            <span className="text-[14px] text-muted">D&apos;autres artisans du secteur ont besoin des mêmes gros matériaux que toi.</span>
+            <span className="text-[14px] text-muted">{offreAAccepter ? "Une offre négociée t'attend : accepte ou refuse." : "D'autres artisans du secteur ont besoin des mêmes gros matériaux que toi."}</span>
           </span>
           <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
         </Link>

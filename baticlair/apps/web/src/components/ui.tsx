@@ -100,8 +100,12 @@ export function Field({
   );
 }
 
-export function Card({ className = "", children }: { className?: string; children: React.ReactNode }) {
-  return <div className={`rounded-xl bg-surface shadow-card ${className}`}>{children}</div>;
+export function Card({ className = "", children, ...props }: { className?: string; children: React.ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div {...props} className={`rounded-xl bg-surface shadow-card ${className}`}>
+      {children}
+    </div>
+  );
 }
 
 type Tone = "ok" | "warn" | "danger" | "neutral";

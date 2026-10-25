@@ -94,8 +94,21 @@ export class RegroupementsService {
    * « Tenter un prix de groupe » sur des lignes d'un chantier : chaque ligne groupable rejoint (ou lance) le regroupement
    * de sa famille au cycle choisi ; une ligne non groupable est refusée, avec sa raison. Le reste du chantier ne bouge pas.
    */
+  /**
+   * Business model final (25 octobre 2026) : la consultation automatique ne joue qu'en `MODE_REGROUPEMENT=automatique` ;
+   * en mode humain (défaut), ces routes répondent 409 `mode_humain` et le regroupement négocié prend le relais.
+   */
+  private mode: (() => Promise<"humain" | "automatique">) | null = null;
+  brancherMode(fn: () => Promise<"humain" | "automatique">): void {
+    this.mode = fn;
+  }
+  private async exigerAutomatique(): Promise<void> {
+    if (this.mode && (await this.mode()) !== "automatique") throw new DomainError("conflict", "Human mode: use /v1/negocie", { reason: "mode_humain" });
+  }
+
   async tenter(tenant: TenantContext, projectId: string, input: { articles: string[]; mois: Mois }, maintenant = this.now()) {
     assertCanWrite(tenant);
+    await this.exigerAutomatique();
     await this.droits.exiger(tenant.companyId, { type: "regroupement" });
     const { lignes, adresse, takeoffId } = await this.commande.lignesDuChantier(tenant, projectId);
     const zone = zoneDuCodePostal(adresse);
@@ -167,6 +180,7 @@ export class RegroupementsService {
    * est rangé dans le chantier « Stock (regroupements) » de l'entreprise, créé une fois.
    */
   async rejoindre(tenant: TenantContext, regroupementId: string, input: { cle: string; quantite: number }, maintenant = this.now()) {
+    await this.exigerAutomatique();
     assertCanWrite(tenant);
     await this.droits.exiger(tenant.companyId, { type: "regroupement" });
     const c = await this.prisma.cycleCommande.findUnique({ where: { id: regroupementId } });
@@ -199,6 +213,7 @@ export class RegroupementsService {
    * « Demande perso » (elles quittent le regroupement ; l'écran ouvre la demande perso de leurs chantiers).
    */
   async basculer(tenant: TenantContext, regroupementId: string, vers: "suivant" | "perso", maintenant = this.now()) {
+    await this.exigerAutomatique();
     assertCanWrite(tenant);
     const c = await this.prisma.cycleCommande.findUnique({ where: { id: regroupementId } });
     if (!c || c.statutVolume !== "non_consulte") throw notFound("Regroupement");

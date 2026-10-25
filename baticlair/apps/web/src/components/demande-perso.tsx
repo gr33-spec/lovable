@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { Button, Card, Field, SectionTitle } from "@/components/ui";
 import { api, messageErreur } from "@/lib/api";
 import { euros, jourFr, type DemandePerso, type LignesGroupables, type NegocesProposes } from "@/lib/recentrage";
+import { DeclarerBesoins, PrevenirNegoce, useModeRegroupement } from "@/components/negocie";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -20,15 +21,17 @@ export function DemandesPerso({ projectId, articles, canCreate, archived }: { pr
   const { data: proposes } = useResource(fetchNegoces);
   const { data: demandes, reload } = useResource(fetchDemandes);
   const [ouvert, setOuvert] = useState(false);
+  const [aPrevenir, setAPrevenir] = useState<string | null>(null);
 
   return (
     <section aria-label="Mes demandes de prix" className="flex flex-col gap-3">
+      {aPrevenir ? <PrevenirNegoce demandeId={aPrevenir} onFini={() => setAPrevenir(null)} /> : null}
       {(demandes ?? []).map((d) => (
         <Demande key={d.id} d={d} onChange={reload} />
       ))}
       {!archived && canCreate && proposes ? (
         ouvert ? (
-          <EnvoiDemande projectId={projectId} articles={articles} proposes={proposes} onEnvoye={() => (setOuvert(false), reload())} onFermer={() => setOuvert(false)} />
+          <EnvoiDemande projectId={projectId} articles={articles} proposes={proposes} onEnvoye={(id) => (setOuvert(false), setAPrevenir(id), reload())} onFermer={() => setOuvert(false)} />
         ) : (
           <Button onClick={() => setOuvert(true)} className="w-full">
             <Send size={18} aria-hidden="true" /> Envoyer à mes négoces
@@ -41,14 +44,15 @@ export function DemandesPerso({ projectId, articles, canCreate, archived }: { pr
 
 type Choix = { cle: string; libelle: string; corps: { supplierId: string } | { negoceId: string } | { nom: string; email: string } };
 
-function EnvoiDemande({ projectId, articles, proposes, onEnvoye, onFermer }: { projectId: string; articles: string[]; proposes: NegocesProposes; onEnvoye: () => void; onFermer: () => void }) {
+function EnvoiDemande({ projectId, articles, proposes, onEnvoye, onFermer }: { projectId: string; articles: string[]; proposes: NegocesProposes; onEnvoye: (demandeId: string) => void; onFermer: () => void }) {
   const [but, setBut] = useState<"chiffrer" | "commander">("chiffrer");
   const [choisis, setChoisis] = useState<string[]>([]);
   const [nouveaux, setNouveaux] = useState<Choix[]>([]);
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [dateBesoin, setDateBesoin] = useState("");
-  const [accord, setAccord] = useState(false);
+  // Business model final (Greg, 25 octobre 2026) : la case d'accord est cochée d'office (à relire par l'avocat, A-FAIRE-RELIRE).
+  const [accord, setAccord] = useState(true);
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -63,11 +67,11 @@ function EnvoiDemande({ projectId, articles, proposes, onEnvoye, onFermer }: { p
     setPending(true);
     setErreur(null);
     try {
-      await api(`/v1/projects/${projectId}/demandes-perso`, {
+      const envoyee = await api<{ id: string }>(`/v1/projects/${projectId}/demandes-perso`, {
         method: "POST",
         body: { but, accord: true, articles, dateBesoin: dateBesoin || null, negoces: options.filter((o) => choisis.includes(o.cle)).map((o) => o.corps) },
       });
-      onEnvoye();
+      onEnvoye(envoyee.id);
     } catch (e) {
       setErreur(messageErreur(e, { negoces: "En gratuit, ta demande part chez un seul négoce.", accord_requis: "Coche l'accord pour transmettre ton identité." }));
     } finally {
@@ -234,6 +238,13 @@ function Demande({ d, onChange }: { d: DemandePerso; onChange: () => void }) {
  * 1 000 € HT estimés), pour « ce cycle » ou « le suivant ». Le reste reste en demande perso, sans fractionner par obligation.
  */
 export function TenterPrixDeGroupe({ projectId }: { projectId: string }) {
+  const mode = useModeRegroupement();
+  if (mode === null) return null;
+  return mode === "humain" ? <DeclarerBesoins projectId={projectId} /> : <TenterAutomatique projectId={projectId} />;
+}
+
+/** Le regroupement automatique (consultation des négoces par cycle), derrière `MODE_REGROUPEMENT=automatique`. */
+function TenterAutomatique({ projectId }: { projectId: string }) {
   const fetcher = useCallback((signal: AbortSignal) => api<LignesGroupables>(`/v1/projects/${projectId}/regroupements/lignes`, { signal }), [projectId]);
   const { data, reload } = useResource(fetcher);
   const [ouvert, setOuvert] = useState(false);

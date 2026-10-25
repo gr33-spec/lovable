@@ -14,6 +14,12 @@ import {
   cleDeMesPrix,
   offreValide,
   phraseDernierPrix,
+  phrasePrixRepere,
+  afficherPreviens,
+  lienSms,
+  lienTel,
+  PREVIENS_SMS,
+  PREVIENS_TITRE,
   relanceDue,
   resultatsNegoce,
   validiteAcceptee,
@@ -30,6 +36,8 @@ import type { TransactionalEmailSender } from "../../../platform/email/email.por
 import type { PriceRequestsService } from "../../price-requests/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import type { DroitsService } from "./droits.service.js";
+import type { ObservatoireService } from "./observatoire.service.js";
+import { bonDeCommandePdf } from "../../../platform/pdf/bon-de-commande.js";
 
 /**
  * LA DEMANDE PERSO (Greg, 25 octobre 2026, recentrage : « le cœur, immédiat, sans cycle »), côté serveur. Elle s'appuie
@@ -82,6 +90,19 @@ export class DemandePersoService {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
+  /* ------------------------------------------------------------------- branchements (business model final, 25 octobre 2026) */
+
+  /** Après l'envoi : les lignes groupables partent en veille (regroupement négocié, `NegocieService`). */
+  private apresEnvoi: ((companyId: string, requestId: string) => Promise<unknown>) | null = null;
+  brancherApresEnvoi(fn: (companyId: string, requestId: string) => Promise<unknown>): void {
+    this.apresEnvoi = fn;
+  }
+  /** L'observatoire des prix : chaque réponse est notée sans identifiant ; la moyenne du secteur s'affiche en repère. */
+  private obs: Pick<ObservatoireService, "enregistrer" | "observe"> | null = null;
+  brancherObservatoire(o: Pick<ObservatoireService, "enregistrer" | "observe">): void {
+    this.obs = o;
+  }
+
   /* ------------------------------------------------------------------------------------------------- l'envoi (artisan) */
 
   /** Les négoces qu'on lui propose : ses habituels (carnet) et les négoces inscrits de la zone du chantier. */
@@ -119,6 +140,7 @@ export class DemandePersoService {
     const vue = await this.demandes.create(tenant, projectId, { supplierIds, message: input.message, dueDate: input.dateBesoin, ...(input.articles?.length ? { articles: input.articles } : {}) });
     await this.prisma.priceRequest.update({ where: { id: vue.id }, data: { but: input.but, accordIdentiteLe: maintenant, closLe: clotureDeLaDemande(maintenant, input.dateBesoin) } });
     if (this.demandes.deliversEmail) for (const r of vue.recipients) await this.demandes.send(tenant, r.id);
+    await this.apresEnvoi?.(tenant.companyId, vue.id).catch(() => undefined);
     return this.vue(tenant, vue.id);
   }
 
@@ -159,7 +181,7 @@ export class DemandePersoService {
   private async demandeDe(tenant: TenantContext, requestId: string) {
     const d = await this.prisma.priceRequest.findFirst({
       where: { id: requestId, companyId: tenant.companyId },
-      include: { recipients: { include: { supplier: { select: { name: true, email: true } } }, orderBy: { createdAt: "asc" } }, project: { select: { name: true } } },
+      include: { recipients: { include: { supplier: { select: { id: true, name: true, email: true, phone: true, prevenuLe: true } } }, orderBy: { createdAt: "asc" } }, project: { select: { name: true, address: true } } },
     });
     if (!d) throw notFound("PriceRequest");
     return d;
@@ -176,6 +198,14 @@ export class DemandePersoService {
     const comparees = comparerLesReponses(lignes.filter((l) => l.quantite > 0), reponses, maintenant);
     const reperes = await this.reperesDeMesPrix(tenant.companyId);
     const commande = d.recipients.find((r) => r.commandeLe);
+    const departement = zoneDuCodePostal(d.project.address);
+    const observes = new Map<string, number | null>();
+    if (this.obs) for (const l of lignes) observes.set(l.cle, await this.obs.observe(l.designation, l.unite, departement).catch(() => null));
+    const repereDe = (l: LigneDemandee) => {
+      const observe = phrasePrixRepere(null, observes.get(l.cle) ?? null, departement);
+      const mien = reperes.get(cleDeMesPrix(l.designation, l.unite)) ?? null;
+      return [mien, observe].filter(Boolean).join(" ") || null;
+    };
     return {
       id: d.id,
       chantier: d.project.name,
@@ -183,7 +213,7 @@ export class DemandePersoService {
       dateBesoin: d.dueDate,
       closLe: d.closLe,
       close: !!d.closLe && maintenant >= d.closLe,
-      lignes: lignes.map((l) => ({ ...l, repere: reperes.get(cleDeMesPrix(l.designation, l.unite)) ?? null })),
+      lignes: lignes.map((l) => ({ ...l, repere: repereDe(l) })),
       destinataires: d.recipients.map((r) => ({
         id: r.id,
         nom: r.supplier.name,
@@ -199,6 +229,34 @@ export class DemandePersoService {
   async duChantier(tenant: TenantContext, projectId: string) {
     const ids = await this.prisma.priceRequest.findMany({ where: { companyId: tenant.companyId, projectId, but: { not: null } }, select: { id: true }, orderBy: { createdAt: "desc" } });
     return Promise.all(ids.map((i) => this.vue(tenant, i.id)));
+  }
+
+  /* ----------------------------------------------------------------------------------- « Préviens ton négoce » */
+
+  /**
+   * Les négoces de cette demande qui n'ont jamais répondu sur Mobiiz et que l'artisan n'a pas déjà prévenus : l'écran
+   * « Préviens ton négoce » (appeler, SMS prérempli, « Je l'ai déjà prévenu »). Il disparaît dès que le négoce a répondu.
+   */
+  async aPrevenir(tenant: TenantContext, requestId: string) {
+    const d = await this.demandeDe(tenant, requestId);
+    const sortie = [];
+    for (const r of d.recipients) {
+      const email = r.supplier.email.toLowerCase();
+      const dejaRepondu =
+        !!(await this.prisma.priceRequestRecipient.findFirst({ where: { reponduLe: { not: null }, supplier: { email: { equals: email, mode: "insensitive" } } }, select: { id: true } })) ||
+        !!(await this.prisma.compteNegoce.findFirst({ where: { email, inscritLe: { not: null } }, select: { id: true } }));
+      if (afficherPreviens({ aDejaReponduSurMobiiz: dejaRepondu, prevenuLe: r.supplier.prevenuLe })) sortie.push({ supplierId: r.supplier.id, nom: r.supplier.name, telephone: r.supplier.phone, tel: r.supplier.phone ? lienTel(r.supplier.phone) : null, sms: lienSms(r.supplier.phone) });
+    }
+    return { titre: PREVIENS_TITRE, sms: PREVIENS_SMS, negoces: sortie };
+  }
+
+  /** « Je l'ai déjà prévenu » : l'écran ne revient plus pour ce négoce. */
+  async marquerPrevenu(tenant: TenantContext, supplierId: string) {
+    assertCanWrite(tenant);
+    const s = await this.prisma.supplier.findFirst({ where: { id: supplierId, companyId: tenant.companyId }, select: { id: true } });
+    if (!s) throw notFound("Supplier");
+    await this.prisma.supplier.update({ where: { id: s.id }, data: { prevenuLe: this.now() } });
+    return { fait: true };
   }
 
   /* ---------------------------------------------------------------------------------------------- la commande (artisan) */
@@ -222,7 +280,20 @@ export class DemandePersoService {
     // Le bon de commande part au négoce (vouvoiement), avec le lien pour confirmer ; « Répondre » écrit à l'artisan.
     const jeton = randomBytes(24).toString("base64url");
     await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { tokenHash: hacher(jeton) } });
+    // Le bon de commande en PDF : le seul document où des champs restent remplissables (compte client, date, contact).
+    const pdf = await bonDeCommandePdf({
+      numero: d.id.slice(0, 8).toUpperCase(),
+      date: jourFr(maintenant),
+      acheteur: { nom: company?.name ?? "", adresse: company?.address ?? null, telephone: company?.phone ?? null, email: company?.email ?? null },
+      vendeur: { nom: r.supplier.name, email: r.supplier.email },
+      livraison: project?.address ?? null,
+      lignes: lignes.map((l) => ({ designation: l.designation, quantite: String(l.quantite).replace(".", ","), unite: l.unite, prixHt: euros(prix[l.cle]!), totalHt: euros(prix[l.cle]! * l.quantite) })),
+      livraisonHt: livraison > 0 ? euros(livraison) : "offerte",
+      totalHt: euros(totalLignes + livraison),
+      mentions: [`Sur votre offre du ${jourFr(r.reponduLe)}. Facturation et paiement comme d'habitude, sur le compte du client chez vous.`],
+    });
     await this.mailer.send({
+      attachments: [{ filename: `bon-de-commande-${d.id.slice(0, 8).toUpperCase()}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
       to: r.supplier.email,
       subject: `Bon de commande de ${company?.name ?? "votre client"} (${euros(totalLignes + livraison)} HT livré)`,
       text: [
@@ -309,6 +380,17 @@ export class DemandePersoService {
       where: { id: r.id },
       data: { prix, livraisonHt: body.livraisonHt, delaiJours: body.delaiJours, validiteJours: body.validiteJours, reponduLe: maintenant, refuseLe: null, status: "received" },
     });
+    // L'observatoire : le prix de chaque ligne chiffrée, sans le négoce ni l'artisan.
+    await this.obs
+      ?.enregistrer({
+        type: "perso",
+        sourceId: r.id,
+        departement: zoneDuCodePostal(d.project.address) ?? zoneDuCodePostal(d.company.address),
+        lignes: this.lignes(d.lines)
+          .filter((l) => prix[l.cle] !== undefined)
+          .map((l) => ({ designation: l.designation, unite: l.unite, quantite: l.quantite || null, prixHt: prix[l.cle]! })),
+      })
+      .catch(() => undefined);
     // L'artisan est prévenu (tutoiement) ; un e-mail, jamais le prix d'un autre négoce.
     const emailArtisan = await this.emailDe(d.company.id);
     if (emailArtisan)

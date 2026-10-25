@@ -42,6 +42,8 @@ const apiEnv = {
   COMMANDE_COMMUNE: process.env.E2E_COMMANDE_COMMUNE ?? "mois",
   // Étape 9 : l'admin du groupé (journal, lots, factures) pour ce seul compte des parcours.
   GROUPE_ADMINS: "admin-groupe@example.fr",
+  // Business model final (25 octobre 2026) : un chasseur d'opportunités par appareil des parcours (téléphone, ordinateur).
+  CHASSEURS: "chasseur-telephone@example.fr,chasseur-ordinateur@example.fr",
   // Recentrage (25 octobre 2026) : les regroupements ouverts dans toute la métropole sauf Paris (75), qui sert au parcours
   // « hors zone active » ; des prix repères de TEST (pas des prix réels) et le volume minimum de la couverture.
   ZONES_ACTIVES: Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, "0"))

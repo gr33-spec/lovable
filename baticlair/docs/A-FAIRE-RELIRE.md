@@ -72,3 +72,11 @@ Les pages ont été réécrites (versions du 24/10/2026) ; les points 1 à 4, 9,
 39. **Conditions négoces, points « Demandes perso » et « Pas d'alignement automatique »** : la validité est fixée par le négoce (7 jours au moins) ; l'ancienne garantie de 30 jours ne vaut plus que par défaut.
 40. **Payant offert dans une zone qui démarre, puis préavis de 30 jours** : la formulation dans les CGU est-elle assez claire pour un abonné qui passe en gratuit ?
 41. **Aucune promesse d'économie** : la phrase « des centaines, voire des milliers d'euros » est retirée. Garder la vraie moyenne mesurée dès 3 cycles ?
+
+## Business model final du 25 octobre 2026 (regroupement négocié par un humain)
+
+42. **Commission sur les commandes groupées** : intégrée au prix affiché à l'artisan, « Commission Mobiiz incluse dans le prix ». Les conditions négoces disaient « aucun coût, 60 jours de préavis » : le point « Regroupements négociés par Mobiiz » dit qu'une commission n'existe que si le négoce l'a acceptée par écrit au moment de l'offre. Qui facture qui (le négoce à Mobiiz, ou Mobiiz rien du tout et le négoce reverse) ? Faut-il une réacceptation (version majeure) ?
+43. **Case d'accord d'identité cochée d'office** : est-ce un consentement valable, ou doit-elle rester décochée ? Base retenue : exécution du contrat (l'artisan envoie sa propre demande).
+44. **Négoce masqué jusqu'à l'acceptation** : « J'accepte » vaut commande ferme sur la quantité de l'artisan, avant de connaître le nom du négoce. Formulation suffisante dans les CGU ?
+45. **Usage statistique anonymisé des prix** : clause ajoutée aux CGU et aux conditions négoces (moyennes arrondies, 2 regroupements ou 5 réponses, 3 mois, par département). Faut-il une ligne au registre RGPD (pas de donnée personnelle stockée) ?
+46. **Vérification des négoces par l'API Recherche d'entreprises** : refus automatique d'un SIRET fermé ou hors NAF matériaux. Faut-il un recours (validation manuelle) avant tout refus ?

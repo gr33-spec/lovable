@@ -2,6 +2,7 @@
 
 import { Users } from "lucide-react";
 import { useCallback } from "react";
+import { RegroupementsNegocies, useModeRegroupement } from "@/components/negocie";
 import { CarteRegroupement } from "@/components/regroupements";
 import { ButtonLink, EmptyState, ErrorNotice, PageTitle, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -13,6 +14,24 @@ import { useResource } from "@/lib/use-resource";
  * l'artisan, une carte chacun. Hors zone active, la phrase « Les regroupements arrivent bientôt… ».
  */
 export default function RegroupementsPage() {
+  const mode = useModeRegroupement();
+  if (mode === null) return <Skeleton card="h-56" lines={2} label="Chargement des regroupements…" />;
+  if (mode === "humain") {
+    return (
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <PageTitle>Regroupements</PageTitle>
+          <p className="text-[16px] leading-relaxed text-muted">Tes gros besoins (ardoise, zinc, bois, isolant) rejoignent ceux d&apos;autres entreprises du secteur. Un chasseur d&apos;opportunités Mobiiz négocie pour toi, et tu choisis.</p>
+        </div>
+        <RegroupementsNegocies />
+      </div>
+    );
+  }
+  return <RegroupementsAutomatiques />;
+}
+
+/** Le mode automatique (consultation des négoces par la machine), derrière l'interrupteur admin. */
+function RegroupementsAutomatiques() {
   const fetcher = useCallback((signal: AbortSignal) => api<ListeRegroupements>("/v1/regroupements", { signal }), []);
   const { data, error, reload } = useResource(fetcher);
   return (

@@ -51,6 +51,18 @@ export class PilotageService {
     return !!user.email && this.config.groupe.admins.includes(user.email.toLowerCase());
   }
 
+  /** Business model final (25 octobre 2026) : le chasseur d'opportunités, un rôle à part (CHASSEURS), ou un admin. */
+  estChasseur(user: AuthenticatedUser): boolean {
+    return this.estAdmin(user) || (!!user.email && this.config.groupe.negocie.chasseurs.includes(user.email.toLowerCase()));
+  }
+
+  /** Les routes du chasseur : chasseur ou admin, et double authentification faite (même code que le pilotage). */
+  async exigerChasseur(user: AuthenticatedUser): Promise<string> {
+    if (!this.estChasseur(user)) throw forbidden("Reserved to opportunity hunters");
+    if (!(await this.deuxFacteurs(user))) throw new DomainError("forbidden", "Two-factor authentication required", { reason: "deux_facteurs_requis" });
+    return user.email.toLowerCase();
+  }
+
   private empreinte(code: string, sessionId: string): string {
     return createHash("sha256").update(`${code}:${sessionId}:${this.config.authSecret}`).digest("hex");
   }
@@ -74,7 +86,7 @@ export class PilotageService {
 
   /** Le code à 6 chiffres, par e-mail, pour cette session. */
   async envoyerCode(user: AuthenticatedUser): Promise<{ envoye: true }> {
-    if (!this.estAdmin(user) || !user.sessionId) throw forbidden("Reserved to admins");
+    if (!this.estChasseur(user) || !user.sessionId) throw forbidden("Reserved to admins");
     const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
     const data = { userId: user.userId, codeHash: this.empreinte(code, user.sessionId), expireLe: new Date(this.now().getTime() + VALIDITE_CODE_MS), tentatives: 0, valideLe: null };
     await this.prisma.codeAdmin.upsert({ where: { sessionId: user.sessionId }, create: { sessionId: user.sessionId, ...data }, update: data });
@@ -84,7 +96,7 @@ export class PilotageService {
   }
 
   async verifierCode(user: AuthenticatedUser, code: string): Promise<{ ok: true }> {
-    if (!this.estAdmin(user) || !user.sessionId) throw forbidden("Reserved to admins");
+    if (!this.estChasseur(user) || !user.sessionId) throw forbidden("Reserved to admins");
     const c = await this.prisma.codeAdmin.findUnique({ where: { sessionId: user.sessionId } });
     const bon = !!c && c.userId === user.userId && c.tentatives < 5 && c.expireLe > this.now() && c.codeHash === this.empreinte(code.trim(), user.sessionId);
     if (!bon) {

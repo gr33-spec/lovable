@@ -138,6 +138,15 @@ async function tenter(page: Page, projectId: string, designations: string[], cyc
 }
 
 test.describe("Recentrage du 25 octobre 2026", () => {
+  // Business model final (même jour) : ces cas jouent la consultation AUTOMATIQUE, derrière l'interrupteur admin ; le mode
+  // par défaut (humain) revient après eux (`negocie-humain.spec.ts`).
+  test.beforeAll(async ({ request }) => {
+    expect((await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: SECRET }, data: { mode: "automatique" } })).status()).toBe(200);
+  });
+  test.afterAll(async ({ request }) => {
+    await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: SECRET }, data: { mode: "humain" } });
+  });
+
   test.setTimeout(180_000);
 
   test("1. gratuit : la demande part chez un seul négoce ; au deuxième, le paywall", async ({ page }, info) => {

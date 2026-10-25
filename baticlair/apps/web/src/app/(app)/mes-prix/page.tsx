@@ -2,6 +2,7 @@
 
 import { Tags } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { PrixObservesSecteur } from "@/components/negocie";
 import { ButtonLink, Card, EmptyState, ErrorNotice, PageTitle, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { euros, jourFr, type MesPrix } from "@/lib/recentrage";
@@ -73,6 +74,7 @@ export default function MesPrixPage() {
           </ul>
         </>
       ) : null}
+      {data ? <PrixObservesSecteur /> : null}
     </div>
   );
 }

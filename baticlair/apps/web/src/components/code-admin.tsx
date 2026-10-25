@@ -1,0 +1,48 @@
+"use client";
+
+import { useState } from "react";
+import { Button, Card, ErrorNotice } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+
+const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("internal_error", 500));
+
+/** La double authentification : un code à 6 chiffres reçu par e-mail. */
+export function CodeAdmin({ quoi, onOk }: { quoi: string; onOk: () => void }) {
+  const [envoye, setEnvoye] = useState(false);
+  const [code, setCode] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  async function run(f: () => Promise<unknown>, apres: () => void) {
+    setPending(true);
+    setError(null);
+    try {
+      await f();
+      apres();
+    } catch (e) {
+      setError(asError(e));
+    } finally {
+      setPending(false);
+    }
+  }
+  return (
+    <Card className="flex flex-col gap-4 p-5">
+      <p className="text-[16px]">Pour ouvrir {quoi}, je t&apos;envoie un code à 6 chiffres par e-mail.</p>
+      {error ? <ErrorNotice error={error} /> : null}
+      {!envoye ? (
+        <Button onClick={() => void run(() => api("/v1/admin/pilotage/code", { method: "POST" }), () => setEnvoye(true))} pending={pending} className="self-start">
+          Recevoir mon code
+        </Button>
+      ) : (
+        <>
+          <label htmlFor="code" className="text-[15px] font-semibold">
+            Code reçu par e-mail
+          </label>
+          <input id="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} className="min-h-12 w-40 rounded-xl border border-line bg-surface px-4 text-[20px] tracking-[0.3em] tabular-nums" />
+          <Button onClick={() => void run(() => api("/v1/admin/pilotage/code/verifier", { method: "POST", body: { code } }), onOk)} pending={pending} disabled={code.length !== 6} className="self-start">
+            Ouvrir {quoi}
+          </Button>
+        </>
+      )}
+    </Card>
+  );
+}

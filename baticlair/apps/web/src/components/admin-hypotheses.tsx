@@ -25,6 +25,16 @@ interface Indicateurs {
   ecartMoyenPrixGroupe: number | null;
 }
 
+/** Business model final (25 octobre 2026) : les regroupements négociés par un chasseur, le mois en cours. */
+interface IndicateursNegocie {
+  formes: number;
+  prisEnCharge: number;
+  avecOffre: number;
+  commandes: number;
+  tauxAcceptation: number | null;
+  commissionHt: number;
+}
+
 const pc = (t: number | null) => (t == null ? "—" : `${Math.round(t * 100)} %`);
 const h = (n: number | null) => (n == null ? "—" : `${n.toLocaleString("fr-FR")} h`);
 const ecart = (t: number | null) => (t == null ? "—" : `${t > 0 ? "+" : ""}${(t * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`);
@@ -35,12 +45,32 @@ function Titre({ children }: { children: React.ReactNode }) {
 }
 
 export function HypothesesCarte() {
-  const charger = useCallback((signal: AbortSignal) => api<{ mois: Indicateurs[] }>("/v1/admin/pilotage/hypotheses", { signal }), []);
+  const charger = useCallback((signal: AbortSignal) => api<{ mois: Indicateurs[]; negocie?: IndicateursNegocie }>("/v1/admin/pilotage/hypotheses", { signal }), []);
   const { data } = useResource(charger);
   if (!data) return null;
+  const n = data.negocie;
   return (
     <section aria-label="Hypothèses de lancement" className="flex flex-col gap-1">
       <Titre>Hypothèses de lancement</Titre>
+      {n ? (
+        <Card className="flex flex-col gap-2 p-4">
+          <p className="text-[16px] font-extrabold">Regroupements négociés · ce mois</p>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[14px]">
+            <dt className="text-muted">Formés / pris en charge</dt>
+            <dd className="text-right font-semibold tabular-nums">
+              {n.formes} / {n.prisEnCharge}
+            </dd>
+            <dt className="text-muted">Avec offre / commandés</dt>
+            <dd className="text-right font-semibold tabular-nums">
+              {n.avecOffre} / {n.commandes}
+            </dd>
+            <dt className="text-muted">Offres acceptées</dt>
+            <dd className="text-right font-semibold tabular-nums">{pc(n.tauxAcceptation)}</dd>
+            <dt className="text-muted">Commission du mois</dt>
+            <dd className="text-right font-semibold tabular-nums">{n.commissionHt.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € HT</dd>
+          </dl>
+        </Card>
+      ) : null}
       {data.mois.length === 0 ? (
         <Card className="p-4">
           <p className="text-[15px] text-muted">Pas encore de chiffres.</p>
@@ -127,6 +157,116 @@ export function InscriptionsCarte() {
           {data.gratuitesOuvertes ? "Couper les inscriptions" : "Rouvrir les inscriptions"}
         </Button>
       </Card>
+    </section>
+  );
+}
+
+/** L'interrupteur du mode des regroupements : « humain » (défaut, un chasseur négocie) ou « automatique » (consultation par cycle). */
+export function ModeRegroupementCarte() {
+  const charger = useCallback((signal: AbortSignal) => api<{ mode: "humain" | "automatique" }>("/v1/admin/pilotage/mode-regroupement", { signal }), []);
+  const { data, reload } = useResource(charger);
+  const [pending, setPending] = useState(false);
+  if (!data) return null;
+  async function changer(mode: "humain" | "automatique") {
+    setPending(true);
+    try {
+      await api("/v1/admin/pilotage/mode-regroupement", { method: "PUT", body: { mode } });
+      reload();
+    } finally {
+      setPending(false);
+    }
+  }
+  return (
+    <section aria-label="Mode des regroupements" className="flex flex-col gap-1">
+      <Titre>Mode des regroupements</Titre>
+      <Card className="flex flex-col gap-3 p-4">
+        <div role="radiogroup" aria-label="Mode des regroupements" className="grid grid-cols-2 gap-2">
+          {(
+            [
+              ["humain", "Humain (chasseur)"],
+              ["automatique", "Automatique"],
+            ] as const
+          ).map(([v, l]) => (
+            <button key={v} type="button" role="radio" aria-checked={data.mode === v} disabled={pending} onClick={() => void changer(v)} className={`min-h-12 rounded-xl border-2 px-3 text-[15px] font-semibold ${data.mode === v ? "border-ink bg-accent-soft" : "border-line bg-surface text-muted"}`}>
+              {l}
+            </button>
+          ))}
+        </div>
+        <p className="text-[14px] text-muted">Humain : les artisans déclarent leurs besoins, un chasseur d&apos;opportunités négocie au téléphone. Automatique : la consultation des négoces par cycle.</p>
+        <a href="/admin/chasseur" className="min-h-11 self-start py-2 text-[14px] font-semibold text-accent-text underline">
+          Ouvrir l&apos;écran du chasseur
+        </a>
+      </Card>
+    </section>
+  );
+}
+
+interface NegoceAVerifier {
+  id: string;
+  enseigne: string;
+  raisonSociale: string | null;
+  email: string;
+  siret: string | null;
+  naf: string | null;
+  verification: "valide" | "a_verifier" | "bloque";
+  telephone: string | null;
+  departements: string[];
+  nouveau: boolean;
+}
+
+/** Les négoces inscrits : « à vérifier » (e-mail hors domaine, API en panne), le badge « Nouveau négoce », valider ou bloquer d'un clic. */
+export function NegocesAVerifierCarte() {
+  const charger = useCallback((signal: AbortSignal) => api<{ negoces: NegoceAVerifier[] }>("/v1/admin/pilotage/negoces-a-verifier", { signal }), []);
+  const { data, reload } = useResource(charger);
+  const [pending, setPending] = useState<string | null>(null);
+  if (!data) return null;
+  const visibles = data.negoces.filter((n) => n.verification !== "valide" || n.nouveau);
+  async function decider(id: string, geste: "valider" | "bloquer") {
+    setPending(`${id}:${geste}`);
+    try {
+      await api(`/v1/admin/pilotage/negoces/${id}/${geste}`, { method: "POST" });
+      reload();
+    } finally {
+      setPending(null);
+    }
+  }
+  return (
+    <section aria-label="Négoces à vérifier" className="flex flex-col gap-1">
+      <Titre>Négoces à vérifier</Titre>
+      {visibles.length === 0 ? (
+        <Card className="p-4">
+          <p className="text-[15px] text-muted">Rien à vérifier.</p>
+        </Card>
+      ) : (
+        visibles.map((n) => (
+          <Card key={n.id} className="flex flex-col gap-2 p-4">
+            <p className="flex flex-wrap items-center gap-2 text-[16px] font-extrabold">
+              {n.enseigne}
+              {n.nouveau ? <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[12px] font-bold">Nouveau négoce</span> : null}
+              {n.verification === "a_verifier" ? <span className="rounded-full bg-warn-bg px-2 py-0.5 text-[12px] font-bold text-warn">À vérifier</span> : null}
+              {n.verification === "bloque" ? <span className="rounded-full bg-danger-bg px-2 py-0.5 text-[12px] font-bold text-danger">Bloqué</span> : null}
+            </p>
+            <p className="text-[14px] text-muted">
+              {n.raisonSociale ?? "Raison sociale inconnue"} · SIRET {n.siret ?? "—"} · NAF {n.naf ?? "—"} · {n.email} · {n.departements.join(", ")}
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {n.verification !== "valide" ? (
+                <Button variant="secondary" pending={pending === `${n.id}:valider`} disabled={pending !== null} onClick={() => void decider(n.id, "valider")}>
+                  Valider
+                </Button>
+              ) : null}
+              {n.verification !== "bloque" ? (
+                <Button variant="secondary" pending={pending === `${n.id}:bloquer`} disabled={pending !== null} onClick={() => void decider(n.id, "bloquer")}>
+                  Bloquer
+                </Button>
+              ) : null}
+            </div>
+          </Card>
+        ))
+      )}
+      <a href="/v1/admin/pilotage/observatoire.csv" download="observatoire-prix.csv" className="min-h-11 self-start py-2 text-[14px] font-semibold text-accent-text underline">
+        Exporter l&apos;observatoire des prix (CSV, sans identifiant)
+      </a>
     </section>
   );
 }

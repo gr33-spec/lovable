@@ -158,6 +158,15 @@ export class EspaceNegoceService {
   // L'inscription (point 2)
   // ---------------------------------------------------------------------------------------------------------------
 
+  /**
+   * Business model final (Greg, 25 octobre 2026) : la vérification du négoce (SIRET par l'API Recherche d'entreprises, NAF,
+   * domaine de l'e-mail), branchée par le module recentrage. Elle refuse (exception) ou rend le statut à enregistrer.
+   */
+  private verification: ((i: { siret: string | null; email: string; enseigne: string }) => Promise<{ verification: "valide" | "a_verifier"; naf: string | null; raisonSociale: string | null }>) | null = null;
+  brancherVerification(fn: NonNullable<EspaceNegoceService["verification"]>): void {
+    this.verification = fn;
+  }
+
   async inscrire(i: InscriptionNegoce, maintenant = new Date()): Promise<{ compteId: string; phrase: string; departements: string[] }> {
     const j = lireJetonNegoce(this.reglages.authSecret, "invitation", i.jeton, maintenant);
     if (!j || !isUuid(j.compteId)) throw notFound("Lien");
@@ -178,10 +187,15 @@ export class EspaceNegoceService {
     const profil = profilChoisi(i.offre, i.familles);
     const autre = await this.prisma.compteNegoce.findFirst({ where: { OR: [{ email }, ...(siret ? [{ siret }] : [])], NOT: { id: compte.id } }, select: { id: true } });
     if (autre) throw new DomainError("conflict", "Email or SIRET already used", { reason: "compte_existant" });
+    // L'e-mail de l'invitation est confirmé (le lien y a été reçu) ; un autre e-mail laisse le compte « à vérifier ».
+    const emailConfirme = email === compte.email.toLowerCase();
+    const verif = this.verification ? await this.verification({ siret, email, enseigne }) : null;
+    const verification = verif ? (emailConfirme ? verif.verification : "a_verifier") : null;
     await this.prisma.$transaction(async (tx) => {
       await tx.compteNegoce.update({
         where: { id: compte.id },
-        data: { email, siret, enseigne, telephone: i.telephone?.trim() || null, livraison: livraison as unknown as object, departements, ...(profil ?? {}), inscritLe: maintenant, conditionsAccepteesLe: maintenant, conditionsVersion: CONDITIONS_NEGOCE_VERSION, derniereConnexionLe: maintenant, desabonneLe: null },
+        data: { email, siret, enseigne, telephone: i.telephone?.trim() || null, livraison: livraison as unknown as object, departements, ...(profil ?? {}), inscritLe: maintenant, conditionsAccepteesLe: maintenant, conditionsVersion: CONDITIONS_NEGOCE_VERSION, derniereConnexionLe: maintenant, desabonneLe: null,
+          ...(verif ? { verification, naf: verif.naf, raisonSociale: verif.raisonSociale, emailConfirmeLe: emailConfirme ? maintenant : null } : {}) },
       });
       await tx.depotNegoce.deleteMany({ where: { compteId: compte.id } });
       await tx.depotNegoce.createMany({ data: depots.map((d) => ({ compteId: compte.id, ...d })) });

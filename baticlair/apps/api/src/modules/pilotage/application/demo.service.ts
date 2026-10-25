@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { CONDITIONS_NEGOCE_VERSION, PALIERS_DEFAUT } from "@baticlair/domain";
+import { articleNegociable, COMMISSION_DEFAUT, CONDITIONS_NEGOCE_VERSION, PALIERS_DEFAUT, prixAffiche } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { notFound } from "../../../platform/errors/domain-error.js";
 import type { AbonnementService } from "../../abonnement/index.js";
@@ -63,12 +63,14 @@ export class DemoService {
       await p.negoce.create({ data: { nom: enseigne, email, departement: ZONE_DEMO, familles: [...familles], generaliste, compteId: compte.id, createdAt: new Date(maintenant.getTime() - 60_000) } });
     }
     let lignes = 0;
+    const artisans: { companyId: string; projectId: string; adresse: string }[] = [];
     for (const [i, [nom, entreprise, adresse]] of ARTISANS.entries()) {
       const user = await p.user.create({ data: { id: randomUUID(), name: nom, email: `artisan-test-${i + 1}@${this.domaine}`, emailVerified: true } });
       const company = await p.company.create({ data: { name: entreprise, trades: ["roofing"], address: adresse, siret: "73282932000074", siretVerifieLe: maintenant } });
       await p.membership.create({ data: { companyId: company.id, userId: user.id, role: "owner" } });
       const project = await p.project.create({ data: { companyId: company.id, name: `Chantier ${adresse.split(" ").at(-1)} (démo)`, address: adresse, demo: true, createdById: user.id } });
       const takeoff = await p.takeoff.create({ data: { companyId: company.id, projectId: project.id, source: "lignes", trade: "roofing", status: "validated", promptId: "demo", promptVersion: 1, model: "demo", calculatedAt: maintenant, validatedAt: maintenant } });
+      artisans.push({ companyId: company.id, projectId: project.id, adresse });
       const facteur = [1, 0.6, 1.4, 0.8, 1.2][i]!;
       lignes += await this.commande.deposerPourLaDemo({ companyId: company.id, projectId: project.id, takeoffId: takeoff.id, adresse, lignes: LIGNES.filter((l) => l.famille === "couverture" || i % 2 === 0).map((l) => ({ designation: l.designation, unite: l.unite, famille: l.famille, quantite: Math.max(1, Math.round(l.base * facteur)) })) }, maintenant);
     }
@@ -82,8 +84,10 @@ export class DemoService {
       const takeoff = await p.takeoff.create({ data: { companyId, projectId: project.id, source: "lignes", trade: "roofing", status: "validated", promptId: "demo", promptVersion: 1, model: "demo", calculatedAt: maintenant, validatedAt: maintenant } });
       pourToi = await this.commande.deposerPourLaDemo({ companyId, projectId: project.id, takeoffId: takeoff.id, adresse: ADRESSE_ADMIN, lignes: LIGNES.map((l) => ({ designation: l.designation, unite: l.unite, famille: l.famille, quantite: l.base })) }, maintenant);
       await this.demandePersoDemo(companyId, project.id, takeoff.id, maintenant);
+      artisans.push({ companyId, projectId: project.id, adresse: ADRESSE_ADMIN });
     }
-    return { artisans: ARTISANS.length, negoces: NEGOCES.length, lignes, zone: ZONE_DEMO, pourToi };
+    const negocies = await this.regroupementsNegociesDemo(artisans, maintenant);
+    return { artisans: ARTISANS.length, negoces: NEGOCES.length, lignes, zone: ZONE_DEMO, pourToi, negocies };
   }
 
   /**
@@ -112,6 +116,40 @@ export class DemoService {
     });
   }
 
+  /**
+   * Business model final (25 octobre 2026) : deux REGROUPEMENTS NÉGOCIÉS de démonstration dans le 22. L'ardoise a déjà
+   * son offre (négoce masqué, prix fictif, commission par défaut incluse) : chaque artisan, l'admin compris, peut accepter
+   * ou refuser. Le zinc est « en collecte » : l'écran du chasseur le prend en charge. Tout disparaît avec « Tout effacer ».
+   */
+  private async regroupementsNegociesDemo(artisans: { companyId: string; projectId: string; adresse: string }[], maintenant: Date): Promise<number> {
+    const dateBesoin = new Date(maintenant.getTime() + 21 * 86_400_000);
+    const lots = [
+      { designation: "Ardoise naturelle 32×22 Espagne 1er choix", unite: "pièces", base: 1800, offre: { prix: 1.1, livraison: 0 } },
+      { designation: "Bobine zinc naturel 0,65 mm, largeur 650 mm", unite: "m", base: 60, offre: null },
+    ];
+    let n = 0;
+    for (const lot of lots) {
+      const a = articleNegociable(lot.designation);
+      if (!a.ok) continue;
+      const r = await this.prisma.regroupementNegocie.create({
+        data: { cle: a.reference.cle, libelle: a.reference.libelle, famille: a.reference.famille, departement: ZONE_DEMO, statut: lot.offre ? "offre_recue" : "en_collecte", dateBesoinMin: dateBesoin, ...(lot.offre ? { prisEnChargeLe: maintenant, offreEnvoyeeLe: maintenant, chasseurEmail: `chasseur@${this.domaine}` } : {}) },
+      });
+      for (const [i, x] of artisans.entries()) {
+        await this.prisma.besoinNegocie.create({
+          data: { companyId: x.companyId, projectId: x.projectId, designation: lot.designation, cle: a.reference.cle, famille: a.reference.famille, quantite: Math.round(lot.base * [1, 0.6, 1.4, 0.8, 1.2, 1][i % 6]!), unite: lot.unite, departement: ZONE_DEMO, livraison: x.adresse, dateBesoin, statut: "declare", regroupementId: r.id },
+        });
+      }
+      if (lot.offre) {
+        const [enseigne] = NEGOCES[1]!;
+        await this.prisma.offreNegociee.create({
+          data: { regroupementId: r.id, negoceNom: enseigne, negoceEmail: `negoce-test-2@${this.domaine}`, negoceTelephone: "02 96 00 00 00", prixNegocieHt: lot.offre.prix, commissionPct: COMMISSION_DEFAUT, prixAfficheHt: prixAffiche(lot.offre.prix, COMMISSION_DEFAUT), livraisonHt: lot.offre.livraison, conditions: "Prix ferme, livraison sous 5 jours ouvrés (démo)", valideJusquau: new Date(maintenant.getTime() + 10 * 86_400_000), saisieParEmail: `chasseur@${this.domaine}`, envoyeeLe: maintenant },
+        });
+      }
+      n++;
+    }
+    return n;
+  }
+
   cloturer(maintenant = new Date()) {
     return this.commande.avancerPourLaDemo("cloturer", ZONE_DEMO, maintenant);
   }
@@ -137,6 +175,11 @@ export class DemoService {
 
   /** Tout ce qui est faux disparaît : comptes, entreprises, chantiers, besoins, négoces et leurs comptes. */
   async effacer() {
+    // Les regroupements négociés de démonstration : ceux qui ont un besoin sur un chantier de démo.
+    const projets = (await this.prisma.project.findMany({ where: { demo: true }, select: { id: true } })).map((x) => x.id);
+    const regroupements = [...new Set((await this.prisma.besoinNegocie.findMany({ where: { projectId: { in: projets } }, select: { regroupementId: true } })).map((b) => b.regroupementId).filter((x): x is string => !!x))];
+    await this.prisma.besoinNegocie.deleteMany({ where: { projectId: { in: projets } } });
+    await this.prisma.regroupementNegocie.deleteMany({ where: { id: { in: regroupements } } });
     const avant = await this.jeu.effacer();
     // Les faux négoces ajoutés au carnet de l'admin (demande perso de démonstration), après leurs demandes.
     await this.prisma.supplier.deleteMany({ where: { email: { endsWith: `@${this.domaine}` } } });

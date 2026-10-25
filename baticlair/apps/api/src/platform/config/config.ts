@@ -203,6 +203,18 @@ const envSchema = z
     LECTURES_GRATUITES_MOIS: z.coerce.number().int().min(0).default(2),
     /** Sous ce nombre d'artisans actifs dans une zone, le payant y est offert. */
     SEUIL_ZONE_ACTIVE: z.coerce.number().int().min(1).default(10),
+    /**
+     * Business model final (Greg, 25 octobre 2026) : `humain` (défaut, un chasseur de Mobiiz négocie) ou `automatique`
+     * (la consultation des négoces par cycles, gardée telle quelle). L'admin peut basculer sans redéployer.
+     */
+    MODE_REGROUPEMENT: z.enum(["humain", "automatique"]).default("humain"),
+    /** Les chasseurs d'opportunités (e-mails) : un rôle à part, distinct de l'admin complet (GROUPE_ADMINS). */
+    CHASSEURS: z.string().optional(),
+    COMMISSION_DEFAUT: z.coerce.number().min(0).max(20).default(2),
+    /** Codes NAF du commerce de matériaux acceptés à l'inscription d'un négoce (séparés par des virgules). */
+    NAF_MATERIAUX: z.string().optional(),
+    /** Vérification du SIRET des négoces par l'API Recherche d'entreprises : `on` en ligne, `fake` dans les tests. */
+    RECHERCHE_ENTREPRISES: z.enum(["on", "off", "fake"]).optional(),
     /** La base négoces Sirene (bloc 3 du plan) : départements importés et codes NAF du négoce de matériaux. */
     SIRENE_DEPARTEMENTS: z.string().default("22,29,35,56"),
     SIRENE_NAF: z.string().default("46.73A,46.73B,47.52A,47.52B"),
@@ -304,6 +316,8 @@ export interface AppConfig {
     departements: string[] | null;
     /** Recentrage (25 octobre 2026) : seuils et réglages des regroupements, du gratuit et du payant. */
     recentrage: { seuilLigneHt: number; seuilAnonymat: number; seuilVolumeMin: Record<string, number> | null; prixReperes: Record<string, number>; familles: string[]; lecturesGratuites: number; seuilZoneActive: number };
+    /** Le regroupement négocié par un humain (business model final, 25 octobre 2026). */
+    negocie: { mode: "humain" | "automatique"; chasseurs: string[]; commissionDefaut: number; naf: string[] | null; rechercheEntreprises: "on" | "off" | "fake" };
     /** mois : un regroupement par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
     mode: "mois" | "lots";
     sirene: { departements: string[]; naf: string[] };
@@ -446,6 +460,13 @@ export function loadConfig(source: Record<string, string | undefined> = process.
         familles: e.FAMILLES_GROUPABLES.split(",").map((x) => x.trim()).filter(Boolean),
         lecturesGratuites: e.LECTURES_GRATUITES_MOIS,
         seuilZoneActive: e.SEUIL_ZONE_ACTIVE,
+      },
+      negocie: {
+        mode: e.MODE_REGROUPEMENT,
+        chasseurs: (e.CHASSEURS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
+        commissionDefaut: e.COMMISSION_DEFAUT,
+        naf: e.NAF_MATERIAUX ? e.NAF_MATERIAUX.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) : null,
+        rechercheEntreprises: e.RECHERCHE_ENTREPRISES ?? (e.NODE_ENV === "test" ? "fake" : "on"),
       },
       mode: e.COMMANDE_COMMUNE,
       sirene: { departements: e.SIRENE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean), naf: e.SIRENE_NAF.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) },
