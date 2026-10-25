@@ -130,6 +130,11 @@ async function finEssai(page: Page, email: string) {
 }
 const ilYaLongtemps = () => new Date(Date.now() - 120 * 86_400_000);
 
+/** Les clés des lignes du chantier (comme l'écran les envoie avec la demande perso). */
+async function articlesDe(page: Page, projectId: string): Promise<string[]> {
+  return (await apiJson<{ lignes: { key: string }[] }>(page, "GET", `/v1/projects/${projectId}/negocie/lignes`)).body.lignes.map((l) => l.key);
+}
+
 type Lignes = { cycles: { cle: string; clotureLe: string }[]; lignes: { key: string; designation: string; groupable: boolean; raison: string | null }[] };
 async function tenter(page: Page, projectId: string, designations: string[], cycle = 0) {
   const l = (await apiJson<Lignes>(page, "GET", `/v1/projects/${projectId}/regroupements/lignes`)).body;
@@ -258,7 +263,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const zone = zoneDuCas("relance", info.project.name);
     const a = await couvreur(page, zone, [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
     const email = `relance-${unique()}@negoce.example.com`;
-    const envoi = await apiJson<{ id: string }>(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, { but: "chiffrer", accord: true, negoces: [{ nom: "Négoce Lent", email }] });
+    const envoi = await apiJson<{ id: string }>(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, { but: "chiffrer", accord: true, articles: await articlesDe(page, a.projectId), negoces: [{ nom: "Négoce Lent", email }] });
     expect(envoi.status).toBe(201);
     const tache = async (dans: number) => (await apiJson<{ relances: number }>(page, "GET", `/v1/internal/demandes-perso?maintenant=${encodeURIComponent(new Date(Date.now() + dans).toISOString())}`, undefined, SECRET)).body.relances;
     expect(await tache(3_600_000)).toBe(0);
@@ -273,7 +278,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const zone = zoneDuCas("mesPrix", info.project.name);
     const a = await couvreur(page, zone, [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
     const email = `prix-${unique()}@negoce.example.com`;
-    expect((await apiJson(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, { but: "chiffrer", accord: true, negoces: [{ nom: "Négoce Prix", email }] })).status).toBe(201);
+    expect((await apiJson(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, { but: "chiffrer", accord: true, articles: await articlesDe(page, a.projectId), negoces: [{ nom: "Négoce Prix", email }] })).status).toBe(201);
     const jeton = jetonDe((await emailsVers(page, email)).at(-1)!.text);
     const cle = (await apiJson<{ lignes: { cle: string }[] }>(page, "GET", `/v1/public/chiffrer/${jeton}`)).body.lignes[0]!.cle;
     expect((await apiJson(page, "POST", `/v1/public/chiffrer/${jeton}`, { prix: { [cle]: 1.07 }, livraisonHt: 0, delaiJours: 2, validiteJours: 10 })).status).toBe(200);
@@ -313,9 +318,9 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const zone = zoneDuCas("references", info.project.name);
     const a = await couvreur(page, zone, [{ libelle: ARDOISE, quantite: "1800", unite: "pièces" }]);
     const ra = await tenter(page, a.projectId, [ARDOISE]);
-    expect(ra.status).toBe(200);
+    expect(ra.status).toBe(201);
     const b = await autreArtisan(browser, zone, [{ libelle: ARDOISE_3020, quantite: "1800", unite: "pièces" }]);
-    expect((await tenter(b.page, b.projectId, [ARDOISE_3020])).status).toBe(200);
+    expect((await tenter(b.page, b.projectId, [ARDOISE_3020])).status).toBe(201);
     await page.goto(`/regroupements/${ra.body.ajoutees[0]!.regroupementId}`);
     const materiaux = page.getByRole("region", { name: "Matériaux concernés" });
     await expect(materiaux.getByText(/32×22/)).toBeVisible();
@@ -369,7 +374,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     // 1 000 ardoises à 1,20 € HT (repère de test) : 1 200 € HT, groupable, sous les 3 000 € du volume minimum.
     const a = await couvreur(page, zone, [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
     const r = await tenter(page, a.projectId, [ARDOISE]);
-    expect(r.status).toBe(200);
+    expect(r.status).toBe(201);
     const l = (await apiJson<Lignes>(page, "GET", `/v1/projects/${a.projectId}/regroupements/lignes`)).body;
     const apres = new Date(Date.parse(l.cycles[0]!.clotureLe) + 60_000).toISOString();
     expect((await apiJson(page, "GET", `/v1/internal/commande-du-mois?maintenant=${encodeURIComponent(apres)}`, undefined, SECRET)).status).toBe(200);
@@ -403,7 +408,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const zone = zoneDuCas("validite", info.project.name);
     const a = await couvreur(page, zone, [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
     const email = `validite-${unique()}@negoce.example.com`;
-    expect((await apiJson(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, { but: "chiffrer", accord: true, negoces: [{ nom: "Négoce Validité", email }] })).status).toBe(201);
+    expect((await apiJson(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, { but: "chiffrer", accord: true, articles: await articlesDe(page, a.projectId), negoces: [{ nom: "Négoce Validité", email }] })).status).toBe(201);
     const nctx = await browser.newContext();
     const npage = await nctx.newPage();
     await npage.goto(`/chiffrer/${jetonDe((await emailsVers(page, email)).at(-1)!.text)}`);
@@ -454,7 +459,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const r = await tenter(page, a.projectId, [ARDOISE]);
     expect(r.status).toBe(403);
     // La demande perso, elle, marche partout.
-    expect((await apiJson(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, { but: "chiffrer", accord: true, negoces: [{ nom: "Négoce Paris", email: `paris-${unique()}@negoce.example.com` }] })).status).toBe(201);
+    expect((await apiJson(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, { but: "chiffrer", accord: true, articles: await articlesDe(page, a.projectId), negoces: [{ nom: "Négoce Paris", email: `paris-${unique()}@negoce.example.com` }] })).status).toBe(201);
   });
 
   test("15. le payant offert dans une zone qui démarre, puis 30 jours de préavis", async ({ page }, info) => {

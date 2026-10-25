@@ -85,7 +85,10 @@ function CarteBesoin({ b, onChange }: { b: BesoinNegocie; onChange: () => void }
       {b.regroupement ? (
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone={b.statut === "accepte" ? "ok" : "neutral"}>{b.statut === "accepte" ? "Commandé" : b.statut === "refuse" ? "Offre refusée" : b.regroupement.libelle}</Badge>
-          <span className="text-[13px] text-muted">{b.regroupement.participants}</span>
+          <span className="text-[13px] text-muted">
+            {b.regroupement.participants.titre}
+            {b.regroupement.participants.detail ? ` · ${b.regroupement.participants.detail}` : ""}
+          </span>
         </div>
       ) : null}
       {o && b.statut === "declare" ? (

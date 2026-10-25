@@ -24,7 +24,7 @@ export interface BesoinNegocie {
   unite: string;
   dateBesoin: string;
   statut: "declare" | "accepte" | "refuse";
-  regroupement: { id: string; statut: StatutRegroupement; libelle: string; participants: string; departement: string } | null;
+  regroupement: { id: string; statut: StatutRegroupement; libelle: string; participants: { titre: string; detail: string | null }; departement: string } | null;
   offre: OffreNegociee | null;
   perso: { prixHt: number; negoce: string } | null;
   bonNumero: number | null;
