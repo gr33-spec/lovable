@@ -324,7 +324,7 @@ function ReglagesCarte() {
  * comptes (`@demo.mobiiz.fr`) sont exclus des chiffres ; chaque geste est journalisé ; « Tout effacer » les retire.
  */
 const GESTES = [
-  { geste: "jeu", label: "Créer un jeu de test", fait: (r: Record<string, number>) => `${r.artisans} faux artisans et ${r.negoces} faux négoces dans le 22, ${r.lignes} lignes déposées.` },
+  { geste: "jeu", label: "Créer un jeu de test", fait: (r: Record<string, number>) => `${r.artisans} faux artisans et ${r.negoces} faux négoces dans le 22 (un généraliste, deux spécialistes), ${r.lignes} lignes déposées.${r.pourToi ? " Ta liste de démonstration (couverture et placo) est dans la commande." : ""}` },
   { geste: "cloturer", label: "Clôturer maintenant", fait: (r: Record<string, number>) => `${r.clos} commande close, ${r.grillesEnvoyees} grilles envoyées aux négoces.` },
   { geste: "repondre", label: "Faire répondre les négoces", fait: (r: Record<string, number>) => `${r.reponses} négoces ont répondu (prix fictifs).` },
   { geste: "publier", label: "Publier les résultats", fait: (r: Record<string, number>) => `${r.resultats} résultat publié : les artisans sont prévenus.` },

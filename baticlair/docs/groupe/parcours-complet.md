@@ -2,6 +2,17 @@
 
 Oct 19, 2026 · @Greg
 
+## 0 quater. Listes multimétiers, négoces généralistes ou spécialistes — 25 octobre 2026
+
+**Prioritaire sur les sections 0 ter et 0 bis là où elles parlent d'une commande « par métier », de grilles complètes obligatoires ou d'un seul négoce par artisan.** Détails et choix dans `docs/DECISIONS.md` ; tests `packages/domain/test/multimetier-negoces.test.ts` et `apps/api/test/multimetier-negoces.test.ts`.
+
+1. **L'artisan ne choisit jamais de catégorie.** Il dépose sa liste telle quelle ; chaque ligne prend sa famille (couverture, second œuvre…) : celle de son lot quand la lecture en a trouvé plusieurs, sinon celle que ses mots désignent (« plaque de plâtre BA13 » → second œuvre), sinon celle du métier de la liste (`familleDeLaLigne`). **Une seule commande du mois par département**, toutes familles ensemble.
+2. **Le négoce choisit, à l'inscription et dans son espace** : « Généraliste : je chiffre toute la liste » ou « Spécialiste : je chiffre seulement mes familles » (familles à cocher). Une grille partielle d'un spécialiste est acceptée : il ne chiffre que ses lignes.
+3. **Un spécialiste ne reçoit que ses familles** : sa grille, son e-mail et son PDF ne portent que ses lignes ; une commande sans aucune ligne de ses familles ne lui envoie rien (ni e-mail, ni grille, ni relance). Le généraliste reçoit tout.
+4. **Résultats, livraison comprise**, pour chaque artisan, avec ses distances et les paliers de chaque négoce : chaque famille chez le négoce qui la chiffre, et « Tout chez X » pour chaque négoce qui a tout chiffré ; une livraison par négoce retenu et par chantier. L'écran montre les deux ou trois meilleures options, la moins chère d'abord (cochée d'office), avec l'écart en euros et le nombre de livraisons : « Tout chez X : 4 200 € HT livré, 1 livraison », « Couverture chez Z, second œuvre chez Y : 3 950 € HT livré, 2 livraisons ». L'artisan choisit ; **chaque négoce retenu reçoit uniquement sa partie du bon de commande** ; une part déjà partie ne repart jamais.
+5. **Confidentialité inchangée** : aucun négoce ne voit les prix des autres, ni s'il a en face un spécialiste ou un généraliste ; « premier » ou non se calcule sur ses seules lignes.
+6. **Démo admin** : un généraliste et deux spécialistes (couverture, second œuvre) ; des listes couverture et placo.
+
 ## 0 ter. Espace négoce autonome — 23 octobre 2026
 
 **Prioritaire sur le point 4 de la section 0 bis (livraison, prix fermes) et sur tout ce qui parle d'un négoce sans compte.** Objectif de Greg : il n'intervient jamais entre un artisan et un négoce. Détails et choix dans `docs/DECISIONS.md` ; cycle complet joué dans l'e2e « Commande du mois : un cycle complet » (invitation → inscription → clôture → réponse → résultats → commande → recommande sur grille garantie).

@@ -21,6 +21,9 @@ export interface InscriptionTest {
   enseigne?: string;
   siret?: string | null;
   maintenant?: string;
+  /** Multimétier (25 octobre 2026) : généraliste, ou spécialiste de ses familles. */
+  offre?: "generaliste" | "specialiste";
+  familles?: string[];
 }
 
 /** Inscrit le négoce depuis son invitation ; rend son cookie de session et la réponse. */
@@ -38,6 +41,7 @@ export async function inscrireNegoce(ctx: TestContext, email: string, i: Inscrip
       livraison: { gratuiteJusquaKm: i.francoKm ?? 30, paliers: [{ jusquaKm: i.maxKm ?? 1000, prixHt: i.prixAuDela ?? 80 }], maxKm: i.maxKm ?? 1000 },
       departements: i.departements ?? null,
       conditions: true,
+      ...(i.offre ? { offre: i.offre, familles: i.familles ?? [] } : {}),
     });
   if (res.status !== 201) throw new Error(`inscription négoce ${email} : ${res.status} ${res.text}`);
   const cookie = (res.headers["set-cookie"] as unknown as string[] | string | undefined) ?? [];

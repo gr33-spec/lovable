@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { DepartementsForm, DepotsForm, PaliersForm, depuisPaliers, versPaliers, type PaliersSaisis } from "@/components/negoce/paliers-form";
+import { DepartementsForm, DepotsForm, OffreForm, PaliersForm, depuisPaliers, offreValide, versPaliers, type OffreSaisie, type PaliersSaisis } from "@/components/negoce/paliers-form";
 import { Button, Field, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur } from "@/lib/api";
 import { NOM } from "@/lib/nom";
@@ -23,6 +23,7 @@ const ERREURS: Record<string, string> = {
   siret_invalide: "Ce SIRET n'est pas valide (14 chiffres, entreprise active).",
   enseigne_requise: "Indiquez le nom de votre enseigne.",
   compte_existant: "Un accès existe déjà avec cet e-mail ou ce SIRET : connectez-vous.",
+  familles_requises: "Cochez au moins une famille, ou choisissez « Généraliste ».",
   deja_inscrit: "Votre accès existe déjà : connectez-vous.",
 };
 
@@ -40,6 +41,7 @@ export default function RejoindrePage() {
   // Les départements : ceux des dépôts (code postal) plus ceux de l'invitation, tant que le négoce n'y a pas touché.
   const [departementsChoisis, setDepartementsChoisis] = useState<string[] | null>(null);
   const [conditions, setConditions] = useState(false);
+  const [offre, setOffre] = useState<OffreSaisie>({ offre: null, familles: [] });
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export default function RejoindrePage() {
     try {
       const r = await api<{ phrase: string; departements: string[] }>("/v1/negoce/inscription", {
         method: "POST",
-        body: { jeton, email: email.trim(), siret: siret.replace(/\s+/g, "") || null, enseigne: enseigne.trim(), telephone: telephone.trim() || null, depots: depots.filter((d) => d.trim()).map((adresse) => ({ adresse })), livraison: versPaliers(paliers), departements, conditions },
+        body: { jeton, email: email.trim(), siret: siret.replace(/\s+/g, "") || null, enseigne: enseigne.trim(), telephone: telephone.trim() || null, depots: depots.filter((d) => d.trim()).map((adresse) => ({ adresse })), livraison: versPaliers(paliers), departements, conditions, offre: offre.offre, familles: offre.offre === "specialiste" ? offre.familles : [] },
       });
       setFait(r.phrase);
     } catch (err) {
@@ -115,6 +117,7 @@ export default function RejoindrePage() {
         <Field id="negoce-siret" label="SIRET" inputMode="numeric" maxLength={17} value={siret} hint="Prérempli quand il est connu ; vérifié dans la base Sirene." onChange={(e) => setSiret(e.target.value)} />
         <Field id="negoce-enseigne" label="Nom de l'enseigne" required maxLength={120} value={enseigne} onChange={(e) => setEnseigne(e.target.value)} />
         <Field id="negoce-telephone" label="Téléphone" type="tel" inputMode="tel" maxLength={30} value={telephone} onChange={(e) => setTelephone(e.target.value)} />
+        <OffreForm valeur={offre} onChange={setOffre} />
         <DepotsForm valeur={depots} onChange={setDepots} />
         <PaliersForm valeur={paliers} onChange={setPaliers} />
         <DepartementsForm
@@ -136,7 +139,7 @@ export default function RejoindrePage() {
             {erreur}
           </p>
         ) : null}
-        <Button type="submit" pending={pending} disabled={!conditions || !email.trim() || !enseigne.trim() || !depots.some((d) => d.trim())}>
+        <Button type="submit" pending={pending} disabled={!conditions || !offreValide(offre) || !email.trim() || !enseigne.trim() || !depots.some((d) => d.trim())}>
           Créer mon accès
         </Button>
       </form>

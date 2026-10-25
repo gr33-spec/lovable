@@ -195,6 +195,8 @@ export interface LigneDeposee {
   designation: string;
   quantite: number;
   unite: string;
+  /** La famille de la ligne (couverture, second œuvre…), rangée par l'app (multimétier, Greg, 25 octobre 2026). */
+  famille?: string;
 }
 
 /** Une ligne de la grille du mois : produits identiques fusionnés, quantités additionnées. */
@@ -204,6 +206,8 @@ export interface LigneDeGrille {
   designation: string;
   quantite: number;
   unite: string;
+  /** La famille de la ligne ; absente sur une commande d'avant le multimétier (une seule famille, celle du cycle). */
+  famille?: string;
 }
 
 export const cleDeLigne = (l: { cle: string; unite: string }) => `${l.cle}#${normaliserUnite(l.unite)}`;
@@ -226,7 +230,7 @@ export function fusionnerLesListes(lignes: readonly LigneDeposee[]): LigneDeGril
     const cle = cleDeLigne(l);
     const deja = parCle.get(cle);
     if (deja) deja.quantite = arrondi3(deja.quantite + l.quantite);
-    else parCle.set(cle, { cle, designation: l.designation, quantite: arrondi3(l.quantite), unite: l.unite });
+    else parCle.set(cle, { cle, designation: l.designation, quantite: arrondi3(l.quantite), unite: l.unite, ...(l.famille ? { famille: l.famille } : {}) });
   }
   return [...parCle.values()];
 }

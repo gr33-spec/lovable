@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { DepartementsForm, DepotsForm, PaliersForm, depuisPaliers, versPaliers, type PaliersSaisis } from "@/components/negoce/paliers-form";
+import { DepartementsForm, DepotsForm, OffreForm, PaliersForm, depuisPaliers, offreValide, versPaliers, type OffreSaisie, type PaliersSaisis } from "@/components/negoce/paliers-form";
 import { Button, ErrorNotice, Field, PageTitle, SectionTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur } from "@/lib/api";
 import { chrono } from "@/lib/cycle";
@@ -168,6 +168,7 @@ function Reglages({ compte, onChange }: { compte: CompteNegoce; onChange: () => 
   const [depots, setDepots] = useState<string[]>(compte.depots.length ? compte.depots.map((d) => d.adresse) : [""]);
   const [paliers, setPaliers] = useState<PaliersSaisis>(depuisPaliers(compte.livraison));
   const [departements, setDepartements] = useState<string[]>(compte.departements);
+  const [offre, setOffre] = useState<OffreSaisie>({ offre: compte.offre ?? null, familles: compte.familles ?? [] });
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState(false);
@@ -179,7 +180,7 @@ function Reglages({ compte, onChange }: { compte: CompteNegoce; onChange: () => 
     try {
       await api("/v1/negoce/compte", {
         method: "PUT",
-        body: { enseigne: enseigne.trim(), telephone: telephone.trim() || null, depots: depots.filter((d) => d.trim()).map((adresse) => ({ adresse })), livraison: versPaliers(paliers), departements },
+        body: { enseigne: enseigne.trim(), telephone: telephone.trim() || null, depots: depots.filter((d) => d.trim()).map((adresse) => ({ adresse })), livraison: versPaliers(paliers), departements, ...(offre.offre ? { offre: offre.offre, familles: offre.offre === "specialiste" ? offre.familles : [] } : {}) },
       });
       setFait(true);
       onChange();
@@ -194,6 +195,7 @@ function Reglages({ compte, onChange }: { compte: CompteNegoce; onChange: () => 
       <SectionTitle>Mes dépôts et ma livraison</SectionTitle>
       <Field id="compte-enseigne" label="Nom de l'enseigne" required maxLength={120} value={enseigne} onChange={(e) => setEnseigne(e.target.value)} />
       <Field id="compte-telephone" label="Téléphone" type="tel" inputMode="tel" maxLength={30} value={telephone} onChange={(e) => setTelephone(e.target.value)} />
+      <OffreForm valeur={offre} onChange={setOffre} />
       <DepotsForm valeur={depots} onChange={setDepots} />
       {compte.depots.some((d) => !d.geocode) ? <p className="text-[13px] font-semibold text-warn">Un dépôt n&apos;a pas pu être situé sur la carte : vérifiez son adresse (rue, code postal, ville).</p> : null}
       <PaliersForm valeur={paliers} onChange={setPaliers} />
@@ -208,7 +210,7 @@ function Reglages({ compte, onChange }: { compte: CompteNegoce; onChange: () => 
           C&apos;est enregistré. Vos prochaines grilles en tiennent compte.
         </p>
       ) : null}
-      <Button type="submit" pending={pending} disabled={!enseigne.trim() || !depots.some((d) => d.trim())}>
+      <Button type="submit" pending={pending} disabled={!enseigne.trim() || !depots.some((d) => d.trim()) || (offre.offre !== null && !offreValide(offre))}>
         Enregistrer
       </Button>
     </form>

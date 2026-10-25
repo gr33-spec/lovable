@@ -374,6 +374,13 @@ await etape("Négoce : créer son accès depuis l'invitation", pageN, async () =
   await form.getByLabel("Distance du palier 1, en km").fill("1000");
   await form.getByLabel("Distance maximale de livraison, en km").fill("1000");
   await form.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
+  // Multimétier (25 octobre 2026) : le négoce dit ce qu'il chiffre ; ici un spécialiste couverture et second œuvre.
+  verif(await form.getByRole("button", { name: "Créer mon accès" }).isDisabled(), "l'accès se crée sans choix généraliste / spécialiste");
+  await form.getByRole("radio", { name: "Spécialiste : je chiffre seulement mes familles" }).check();
+  const familles = form.getByRole("group", { name: "Mes familles" });
+  await familles.getByRole("checkbox", { name: "Couverture" }).check();
+  await familles.getByRole("checkbox", { name: /^Second œuvre/ }).check();
+  await zeroReste(pageN, "négoce : ce que vous chiffrez");
   await form.getByRole("button", { name: "Créer mon accès" }).click();
   await voir(pageN.getByRole("status"));
   return (await pageN.getByRole("status").first().innerText()).replace(/\s+/g, " ");
@@ -426,13 +433,18 @@ if (ADMIN) {
     await zeroReste(page, "tes prix");
     return `« ${mail.subject} » ; ${await prix.getByRole("radio").count()} négoces classés`;
   });
-  await etape("Commande : le bon part au négoce choisi", page, async () => {
+  await etape("Commande : la meilleure combinaison, chaque négoce reçoit sa part", page, async () => {
+    // Multimétier (25 octobre 2026) : les 2 ou 3 meilleures options livrées, « Tout chez … » parmi elles.
     const prix = page.getByRole("region", { name: "Tes prix" });
-    await prix.getByRole("button", { name: /^Commander chez / }).first().click();
+    await voir(prix.getByRole("radio", { name: /^Tout chez / }).first(), 30000);
+    await voir(prix.getByText("La moins chère"));
+    const options = (await prix.getByRole("radio").evaluateAll((els) => els.map((e) => e.getAttribute("aria-label") ?? e.closest("label")?.textContent ?? ""))).map((t) => t.replace(/\s+/g, " ").trim());
+    await prix.getByRole("button", { name: /^Commander : / }).first().click();
     const confirmation = prix.getByRole("group", { name: "Confirmer la commande" });
     await voir(confirmation.getByText(/tu transmets tes coordonnées/));
     await confirmation.getByRole("button", { name: "Confirmer la commande" }).click();
-    await voir(prix.getByRole("status").filter({ hasText: /^Commandé chez / }), 60000);
+    await voir(prix.getByRole("status").filter({ hasText: /^Commandé : / }), 60000);
+    console.log(`   options : ${options.join(" | ")}`);
     return (await prix.getByRole("status").innerText()).replace(/\s+/g, " ");
   });
   await etape("Recommande : au prix garanti 30 jours", page, async () => {
@@ -451,8 +463,10 @@ if (ADMIN) {
   await etape("Admin : finir l'essai, puis le paywall au dépôt", page, async () => {
     await ouvrir(page, "/admin/pilotage", "pilotage");
     await geste("Finir l'essai", "essai est terminé");
-    await ouvrir(page, "/chantiers/nouveau", "paywall");
-    await voir(page.getByText(/Ton essai est terminé/), 30000);
+    // Le paywall s'ouvre au geste payant : déposer une liste.
+    await ouvrir(page, "/chantiers/nouveau", "nouvelle liste");
+    await page.getByLabel("Déposer ma liste").setInputFiles(path.join(FIX, "liste-manuscrite.png"));
+    await voir(page.getByText(/Ton essai est terminé/), 60000);
     await zeroReste(page, "paywall");
     await ouvrir(page, "/groupe", "résultats après l'essai");
     await voir(page.getByRole("region", { name: "Tes prix" }));
@@ -583,6 +597,7 @@ if (ADMIN) {
   });
 }
 await etape("Compte : suppression (en tapant SUPPRIMER)", page, async () => {
+  if (!/\/compte$/.test(new URL(page.url()).pathname)) await ouvrir(page, "/compte", "compte");
   await page.getByRole("button", { name: "Supprimer mon compte" }).click();
   await page.getByLabel("Tapez SUPPRIMER pour confirmer").fill("SUPPRIMER");
   await page.getByRole("button", { name: "Supprimer définitivement" }).click();

@@ -997,6 +997,8 @@ model Negoce {
   departement String
   /// Familles vendues (couverture, charpente, maconnerie, electricite, plomberie, amenagement_exterieur).
   familles    String[]  @default([])
+  /// Multimétier (Greg, 25 octobre 2026) : « Généraliste : je chiffre toute la liste » ; sinon spécialiste de ses familles.
+  generaliste Boolean   @default(false)
   /// « Stop » : plus aucune demande.
   stopLe      DateTime?
   /// L'entreprise qui l'a ajouté à la base.
@@ -1040,6 +1042,10 @@ model CompteNegoce {
   livraison              Json?
   /// Départements desservis (abonnés).
   departements           String[]  @default([])
+  /// Multimétier (Greg, 25 octobre 2026) : son choix à l'inscription, modifiable dans son espace ; recopié sur chaque abonnement.
+  generaliste            Boolean   @default(false)
+  /// Les familles du spécialiste (vide pour un généraliste ou un compte d'avant le choix).
+  familles               String[]  @default([])
   /// Le dernier lien d'invitation envoyé (valable 90 jours, régénéré à chaque ajout par un artisan).
   invitationLe           DateTime?
   /// E-mails de clôture envoyés sans compte créé (3 au plus).
@@ -1456,6 +1462,9 @@ model ChoixArtisan {
   negoceId    String    @db.Uuid
   totalHt     Decimal   @db.Decimal(14, 2)
   livraisonHt Decimal   @db.Decimal(14, 2)
+  /// Multimétier (Greg, 25 octobre 2026) : la combinaison commandée, une part par négoce retenu
+  /// ([{ negoceId, familles, cles, totalHt, livraisonHt, envoyeLe }]) ; chaque négoce ne reçoit que sa part.
+  parts       Json?
   commandeLe  DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

@@ -3059,6 +3059,10 @@ async function accesNegoceCree(browser: Browser, page: Page, email: string, ense
   await expect(form.getByRole("button", { name: "Retirer le département 22" })).toBeVisible();
   await expect(form.getByRole("button", { name: "Créer mon accès" })).toBeDisabled();
   await form.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
+  // Multimétier (25 octobre 2026) : sans choix généraliste / spécialiste, l'accès ne se crée pas.
+  await expect(form.getByRole("button", { name: "Créer mon accès" })).toBeDisabled();
+  await form.getByRole("radio", { name: "Spécialiste : je chiffre seulement mes familles" }).check();
+  await form.getByRole("group", { name: "Mes familles" }).getByRole("checkbox", { name: "Couverture" }).check();
   await form.getByRole("button", { name: "Créer mon accès" }).click();
   await expect(pageN.getByRole("status")).toContainText(/^Vous recevrez la prochaine grille de votre secteur à la clôture du (1er|\d{1,2}) \S+ à 12 h\.$/);
   // Son espace, pendant les dépôts des artisans : le chrono, rien d'autre ; aucun nom d'artisan.
@@ -3190,18 +3194,22 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   expect((await emailsVers(page, n(1))).at(-1)!.text).not.toMatch(/0,88|Négoce N2/);
   await page.goto("/groupe");
   const prixA = page.getByRole("region", { name: "Tes prix" });
-  await expect(prixA.getByRole("radio", { name: /^Chez Négoce N1 : 2\s120,00 € HT livré/ })).not.toBeChecked();
-  await expect(prixA.getByRole("radio", { name: /^Chez Négoce N2 : 2\s140,00 € HT livré/ })).toBeChecked();
-  await expect(prixA.getByRole("radio", { name: /^Chez Négoce N3 : 1\s880,00 € HT livré/ })).toBeEnabled();
-  await expect(prixA.getByText(/^2\s100,00 € de matériaux, livraison 40,00 €$/)).toBeVisible();
-  await expect(prixA.getByText("Le moins cher sur toute la commande")).toBeVisible();
-  await expect(prixA.getByText("Le moins cher pour toi")).toBeVisible();
+  // Multimétier (25 octobre 2026) : les meilleures options livrées, la moins chère d'abord et cochée d'office ; l'écart
+  // en euros et le nombre de livraisons. Une liste toute en couverture : « Tout chez … » pour chaque négoce complet.
+  await expect(prixA.getByRole("radio", { name: /^Tout chez Négoce N3 : 1\s880,00 € HT livré, 1 livraison/ })).toBeChecked();
+  await expect(prixA.getByRole("radio", { name: /^Tout chez Négoce N1 : 2\s120,00 € HT livré, 1 livraison/ })).not.toBeChecked();
+  const chezN2 = prixA.getByRole("radio", { name: /^Tout chez Négoce N2 : 2\s140,00 € HT livré, 1 livraison/ });
+  await expect(prixA.getByText("La moins chère", { exact: true })).toBeVisible();
+  await expect(prixA.getByText(/^260,00 € de plus$/)).toBeVisible();
+  await expect(prixA.getByText("Livraison 40,00 €", { exact: true })).toBeVisible();
+  // L'artisan choisit : ici N2, plus cher pour lui.
+  await chezN2.check();
   // Confidentialité (point 4) : avant la commande, l'écran dit ce qui part, et attend la confirmation.
-  await prixA.getByRole("button", { name: "Commander chez Négoce N2" }).click();
+  await prixA.getByRole("button", { name: "Commander : Tout chez Négoce N2" }).click();
   const confirmation = prixA.getByRole("group", { name: "Confirmer la commande" });
   await expect(confirmation).toContainText("En commandant, tu transmets tes coordonnées et ton adresse de livraison à Négoce N2.");
   await confirmation.getByRole("button", { name: "Confirmer la commande" }).click();
-  await expect(prixA.getByRole("status")).toContainText(/Commandé chez Négoce N2 : 2\s140,00 € HT livré/);
+  await expect(prixA.getByRole("status")).toContainText(/Commandé : Tout chez Négoce N2, 2\s140,00 € HT livré/);
   await expect.poll(async () => (await emailsVers(page, n(2))).some((m) => /bon de commande/i.test(m.subject))).toBe(true);
   // Le bon porte « Prix ferme de la Commande commune du … » ; N1 et N3 n'ont rien reçu d'A.
   expect((await emailsVers(page, n(2))).filter((m) => /bon de commande/i.test(m.subject)).at(-1)!.text).toContain("Toitures A");
@@ -3230,13 +3238,12 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   await pageB.goto("/");
   await expect(pageB.getByRole("region", { name: /^Prix garantis jusqu'au/ }).first().getByRole("button", { name: "Recommander à ce prix" })).toBeVisible();
 
-  // B : N3 n'a pas chiffré ses crochets, il ne peut pas être choisi ; N2 en avant à 2 960 €.
+  // B : N3 n'a pas chiffré ses crochets, il n'entre dans aucune option ; N2 en tête à 2 960 €.
   await pageB.goto("/groupe");
   const prixB = pageB.getByRole("region", { name: "Tes prix" });
-  await expect(prixB.getByRole("radio", { name: /^Chez Négoce N2 : 2\s960,00 € HT livré/ })).toBeChecked();
-  await expect(prixB.getByRole("radio", { name: /^Chez Négoce N1 : 3\s050,00 € HT livré/ })).toBeVisible();
-  await expect(prixB.getByRole("radio", { name: /^Chez Négoce N3 : 2\s460,00 € HT livré/ })).toBeDisabled();
-  await expect(prixB.getByText("Il n'a pas chiffré 1 article de ta liste")).toBeVisible();
+  await expect(prixB.getByRole("radio", { name: /^Tout chez Négoce N2 : 2\s960,00 € HT livré/ })).toBeChecked();
+  await expect(prixB.getByRole("radio", { name: /^Tout chez Négoce N1 : 3\s050,00 € HT livré/ })).toBeVisible();
+  await expect(prixB.getByRole("radio", { name: /Négoce N3/ })).toHaveCount(0);
   await expect(prixB.getByText("Toitures A")).toHaveCount(0);
   expect(await pageB.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await contexteB.close();
@@ -3452,7 +3459,7 @@ test("Tableau de bord (24 octobre 2026) : refusé à un artisan ; l'admin entre 
   // La démo (mode test) : un jeu de test d'un bouton, effacé d'un autre.
   const demo = page.getByRole("region", { name: "Démo" });
   await demo.getByRole("button", { name: "Créer un jeu de test" }).click();
-  await expect(demo.getByRole("status")).toHaveText("5 faux artisans et 3 faux négoces dans le 22, 20 lignes déposées.");
+  await expect(demo.getByRole("status")).toHaveText("5 faux artisans et 3 faux négoces dans le 22 (un généraliste, deux spécialistes), 26 lignes déposées. Ta liste de démonstration (couverture et placo) est dans la commande.");
   await demo.getByRole("button", { name: "Tout effacer" }).click();
   await expect(demo.getByRole("status")).toContainText("Effacé : 5 faux artisans");
 });

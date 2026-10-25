@@ -18,6 +18,63 @@ export const versPaliers = (s: PaliersSaisis) => ({ gratuiteJusquaKm: s.gratuite
 
 const champ = `${INPUT} w-24 text-right font-bold`;
 
+/** Multimétier (Greg, 25 octobre 2026) : ce que le négoce chiffre. Rien n'est choisi d'office : il coche lui-même. */
+export type Offre = "generaliste" | "specialiste";
+export interface OffreSaisie {
+  offre: Offre | null;
+  familles: string[];
+}
+
+const FAMILLES_NEGOCE: readonly { id: string; label: string }[] = [
+  { id: "couverture", label: "Couverture" },
+  { id: "charpente", label: "Charpente" },
+  { id: "maconnerie", label: "Maçonnerie" },
+  { id: "electricite", label: "Électricité" },
+  { id: "plomberie", label: "Plomberie" },
+  { id: "amenagement_exterieur", label: "Aménagement extérieur" },
+  { id: "menuiseries_fermetures", label: "Menuiseries et fermetures" },
+  { id: "second_oeuvre", label: "Second œuvre (plâtrerie, peinture, carrelage, sols)" },
+  { id: "serrurerie_metallerie", label: "Serrurerie et métallerie" },
+];
+
+/** Le choix est complet : généraliste, ou spécialiste d'au moins une famille. */
+export const offreValide = (o: OffreSaisie) => o.offre === "generaliste" || (o.offre === "specialiste" && o.familles.length > 0);
+
+export function OffreForm({ valeur, onChange }: { valeur: OffreSaisie; onChange: (v: OffreSaisie) => void }) {
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="text-[14px] font-semibold">Ce que vous chiffrez</legend>
+      {(
+        [
+          ["generaliste", "Généraliste : je chiffre toute la liste"],
+          ["specialiste", "Spécialiste : je chiffre seulement mes familles"],
+        ] as const
+      ).map(([id, label]) => (
+        <label key={id} className={`flex min-h-12 items-center gap-3 rounded-xl border-2 bg-surface px-4 text-[15px] font-semibold ${valeur.offre === id ? "border-accent" : "border-line"}`}>
+          <input type="radio" name="offre-negoce" checked={valeur.offre === id} onChange={() => onChange({ ...valeur, offre: id })} className="size-5 shrink-0 accent-accent" />
+          {label}
+        </label>
+      ))}
+      {valeur.offre === "specialiste" ? (
+        <div role="group" aria-label="Mes familles" className="flex flex-col gap-1.5 pl-2">
+          {FAMILLES_NEGOCE.map((f) => (
+            <label key={f.id} className="flex min-h-11 items-center gap-3 text-[15px]">
+              <input
+                type="checkbox"
+                checked={valeur.familles.includes(f.id)}
+                onChange={(e) => onChange({ ...valeur, familles: e.currentTarget.checked ? [...valeur.familles, f.id] : valeur.familles.filter((x) => x !== f.id) })}
+                className="size-5 shrink-0 accent-accent"
+              />
+              {f.label}
+            </label>
+          ))}
+          <p className="text-[13px] text-muted">Vous ne recevez que les lignes de ces familles ; une commande sans aucune ne vous envoie rien.</p>
+        </div>
+      ) : null}
+    </fieldset>
+  );
+}
+
 export function PaliersForm({ valeur, onChange }: { valeur: PaliersSaisis; onChange: (v: PaliersSaisis) => void }) {
   const palier = (i: number, cle: "jusquaKm" | "prixHt", v: string) => {
     const paliers = valeur.paliers.map((p, j) => (j === i ? { ...p, [cle]: v } : p));

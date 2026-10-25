@@ -103,7 +103,7 @@ export class PilotageController {
     await this.gardeDemo(user, geste);
     switch (geste) {
       case "jeu":
-        return this.demo.creer();
+        return this.demo.creer(new Date(), user.userId);
       case "cloturer":
         return this.demo.cloturer();
       case "repondre":

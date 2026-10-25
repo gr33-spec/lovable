@@ -55,6 +55,15 @@ import {
   CONDITIONS_NEGOCE_VERSION,
   conditionsNegoceAJour,
   type SuiviDesDemandes,
+  combinaisonsDeLArtisan,
+  libelleDeCombinaison,
+  phraseDeLivraisons,
+  lignesDuNegoce,
+  concerne,
+  rangSurSonPerimetre,
+  type ProfilNegoce,
+  prixChezUnNegoce,
+  LIBELLES_COURTS_FAMILLES,
 } from "@baticlair/domain";
 import type { Alerter } from "../../../platform/alerts/alerter.js";
 import { estExclu } from "../../privacy/index.js";
@@ -127,9 +136,22 @@ export interface VueDuMois {
     parDefaut: string | null;
     moinsCherPourToi: string | null;
     negoces: { negoceId: string; nom: string; totalHt: number; marchandiseHt: number; livraisonHt: number; manquantes: number; complet: boolean; livrable: boolean; indicatives: { designation: string; prixUnitaire: number }[]; premierSurLeTotal: boolean }[];
-    choix: { negoceId: string; totalHt: number; commandeLe: string | null } | null;
+    choix: { negoceId: string; totalHt: number; commandeLe: string | null; libelle: string | null } | null;
+    /** Multimétier (Greg, 25 octobre 2026) : les 2 ou 3 meilleures combinaisons livrées, la moins chère d'abord. */
+    combinaisons: { cle: string; libelle: string; totalHt: number; livraisons: number; phraseLivraisons: string; ecartHt: number; toutChez: string | null; parts: { negoceId: string; nom: string; familles: string[]; lignes: number; totalHt: number; livraisonHt: number }[] }[];
+    /** Les familles de sa liste qu'aucun négoce n'a entièrement chiffrées, en toutes lettres (« second œuvre »). */
+    sansPrix: string[];
   };
 }
+
+/**
+ * MULTIMÉTIER (Greg, 25 octobre 2026) : une seule commande du mois par département, toutes familles ensemble ; chaque
+ * ligne porte sa famille. Les commandes d'avant gardent leur famille (une seule) et restent servies telles quelles.
+ */
+export const FAMILLE_TOUTES = "toutes";
+const profilDe = (n: { id: string; generaliste: boolean; familles: readonly string[] }): ProfilNegoce => ({ negoceId: n.id, generaliste: n.generaliste, familles: n.familles });
+/** La famille d'une commande d'avant le multimétier (sinon null : chaque ligne porte la sienne). */
+const familleHeritee = (c: { famille: string }) => (c.famille === FAMILLE_TOUTES ? null : c.famille);
 
 /** La grille garantie 30 jours d'une commande (Greg, 23 octobre 2026) : ce que tout artisan de la zone voit après les résultats. */
 export interface GarantieVue {
@@ -145,6 +167,9 @@ export interface GarantieVue {
   /** Les recommandes déjà passées par l'entreprise sur cette grille. */
   commandes: { numero: number; totalHt: number; le: string; adresse: string }[];
 }
+
+/** Une part de la combinaison commandée : ce qui part chez ce négoce, et quand son bon est parti. */
+type PartChoisie = { negoceId: string; familles: string[]; cles: string[]; totalHt: number; livraisonHt: number; envoyeLe: string | null };
 
 /** La livraison figée au dépôt d'une grille : les dépôts du négoce, ses paliers, la distance du dépôt le plus proche à chaque chantier. */
 type LivraisonEnregistree = { depots: { adresse: string; lat: number | null; lon: number | null }[]; paliers: PaliersLivraison; distances: Record<string, (number | null)[]> };
@@ -243,18 +268,19 @@ export class CommandeDuMoisService {
    * la première clé des réglages pas encore close (créée au besoin). `visee` : la commande que l'artisan avait sous les
    * yeux ; si elle n'est plus celle qui s'ouvre, `tardPour` la nomme (« Trop tard pour le 15 octobre… »).
    */
-  private async cycleOuvert(famille: string, zone: string, maintenant: Date, visee: Mois | null = null): Promise<{ cycle: { id: string; mois: string; numero: number }; tardPour: Mois | null }> {
+  private async cycleOuvert(zone: string, maintenant: Date, visee: Mois | null = null): Promise<{ cycle: { id: string; mois: string; numero: number }; tardPour: Mois | null }> {
     const tard = (mois: Mois) => (visee && visee !== mois ? visee : null);
-    const ouvert = await this.prisma.cycleCommande.findFirst({ where: { famille, zone, phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" } });
+    // Une seule commande ouverte par département, toutes familles ensemble (une commande d'avant, d'une famille, sert jusqu'à sa clôture).
+    const ouvert = await this.prisma.cycleCommande.findFirst({ where: { zone, phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" } });
     if (ouvert) return { cycle: ouvert, tardPour: tard(ouvert.mois) };
     const config = await this.config();
     for (const mois of clesDeCommande(maintenant, config)) {
       const d = datesDuCycle(mois, config);
       if (maintenant >= d.clotureLe) continue;
-      const existant = await this.prisma.cycleCommande.findUnique({ where: { mois_famille_zone: { mois, famille, zone } } });
+      const existant = await this.prisma.cycleCommande.findFirst({ where: { mois, zone }, select: { id: true } });
       // Une commande déjà close par l'admin (clôture avancée) ne se rouvre pas : la suivante.
       if (existant) continue;
-      const cycle = await this.prisma.cycleCommande.create({ data: { mois, famille, zone, clotureLe: d.clotureLe, reponseAvant: d.reponseAvant, relanceLe: d.relanceLe } });
+      const cycle = await this.prisma.cycleCommande.create({ data: { mois, famille: FAMILLE_TOUTES, zone, clotureLe: d.clotureLe, reponseAvant: d.reponseAvant, relanceLe: d.relanceLe } });
       return { cycle, tardPour: tard(mois) };
     }
     throw new DomainError("conflict", "No open cycle", { reason: "pas_de_cycle" });
@@ -277,20 +303,19 @@ export class CommandeDuMoisService {
     const takeoff = await this.prisma.takeoff.findFirst({ where: { projectId, companyId: tenant.companyId }, orderBy: { createdAt: "desc" }, select: { id: true } });
     if (!takeoff) throw validationFailed("No materials list", { reason: "pas_de_liste" });
     const lignes = lignesProposables(await this.reviewed(tenant, takeoff.id), d.articles);
-    const familles = [...new Set(lignes.map((l) => l.famille))];
-    if (familles.length === 0) throw validationFailed("Nothing to add", { reason: "rien_a_ajouter" });
+    if (lignes.length === 0) throw validationFailed("Nothing to add", { reason: "rien_a_ajouter" });
     const ajoutes: { quantite: number; unite: string; designation: string; cycleId: string }[] = [];
     let moisDeLaListe: Mois | null = null;
     let tardPour: Mois | null = null;
-    for (const famille of familles) {
-      const { cycle, tardPour: tard } = await this.cycleOuvert(famille, zone, maintenant, d.mois ?? null);
+    {
+      const { cycle, tardPour: tard } = await this.cycleOuvert(zone, maintenant, d.mois ?? null);
       moisDeLaListe ??= cycle.mois;
       tardPour ??= tard;
       await this.prisma.$transaction(async (tx) => {
         // Même verrou que la clôture : la ligne entre dans la grille, ou la commande est déjà close et l'artisan réessaie.
         const [etat] = await tx.$queryRaw<{ phase: string; clotureLe: Date }[]>`SELECT phase, "clotureLe" FROM cycle_commande WHERE id = ${cycle.id}::uuid FOR UPDATE`;
         if (!etat || etat.phase !== "inscriptions" || maintenant >= etat.clotureLe) throw new DomainError("conflict", "Order closed", { reason: "commande_close" });
-        for (const { item, q } of lignes.filter((l) => l.famille === famille)) {
+        for (const { item, q, famille } of lignes) {
           const data = {
             designation: item.label,
             cle: cleDeReference({ libelle: item.label }),
@@ -380,7 +405,7 @@ export class CommandeDuMoisService {
     const company = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true, trades: true } });
     const zone = zoneDuCodePostal(company?.address ?? "");
     if (zone) {
-      const ouvert = await this.prisma.cycleCommande.findFirst({ where: { zone, famille: familleDeLEntreprise(company?.trades), phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" }, select: { id: true } });
+      const ouvert = await this.prisma.cycleCommande.findFirst({ where: { zone, phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" }, select: { id: true } });
       if (ouvert) ids.add(ouvert.id);
     }
     const cycles = await this.prisma.cycleCommande.findMany({ where: { id: { in: [...ids] } }, orderBy: { clotureLe: "desc" } });
@@ -409,9 +434,8 @@ export class CommandeDuMoisService {
     }
     const zone = zoneDuCodePostal(adresse ?? "");
     if (!zone) return null;
-    const entreprise = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { trades: true } });
     // Lecture seule : afficher la commande ne crée pas de cycle en base (il naît au premier dépôt).
-    const c = await this.cycleAffiche(familleDeLEntreprise(entreprise?.trades), zone, maintenant);
+    const c = await this.cycleAffiche(zone, maintenant);
     if (!c) return null;
     const tout = c.id ? await this.lignesDuCycle(c.id) : [];
     // Greg (23 octobre) : l'accueil montre « Toi seul : … » quand l'entreprise a déjà déposé dans cette commande.
@@ -421,14 +445,14 @@ export class CommandeDuMoisService {
   }
 
   /** La commande ouverte d'un département, sans rien créer : le cycle en base s'il existe, sinon ses dates seules. */
-  private async cycleAffiche(famille: string, zone: string, maintenant: Date): Promise<{ id: string | null; mois: Mois; clotureLe: Date } | null> {
-    const ouvert = await this.prisma.cycleCommande.findFirst({ where: { famille, zone, phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" } });
+  private async cycleAffiche(zone: string, maintenant: Date): Promise<{ id: string | null; mois: Mois; clotureLe: Date } | null> {
+    const ouvert = await this.prisma.cycleCommande.findFirst({ where: { zone, phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" } });
     if (ouvert) return { id: ouvert.id, mois: ouvert.mois, clotureLe: ouvert.clotureLe };
     const config = await this.config();
     for (const mois of clesDeCommande(maintenant, config)) {
       const d = datesDuCycle(mois, config);
       if (maintenant >= d.clotureLe) continue;
-      if (await this.prisma.cycleCommande.findUnique({ where: { mois_famille_zone: { mois, famille, zone } }, select: { id: true } })) continue;
+      if (await this.prisma.cycleCommande.findFirst({ where: { mois, zone }, select: { id: true } })) continue;
       return { id: null, mois, clotureLe: d.clotureLe };
     }
     return null;
@@ -439,7 +463,7 @@ export class CommandeDuMoisService {
     return fusionnerLesListes(besoins.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite })));
   }
 
-  private async vueDuCycle(tenant: TenantContext, c: { id: string; numero: number; mois: string; phase: string; zone: string; clotureLe: Date; reponseAvant: Date; relanceLe: Date; lignes: unknown }, maintenant: Date): Promise<VueDuMois> {
+  private async vueDuCycle(tenant: TenantContext, c: { id: string; numero: number; mois: string; famille: string; phase: string; zone: string; clotureLe: Date; reponseAvant: Date; relanceLe: Date; lignes: unknown }, maintenant: Date): Promise<VueDuMois> {
     const phase = c.phase as PhaseCycle;
     const mes = await this.prisma.besoin.findMany({ where: { cycleId: c.id, companyId: tenant.companyId, statut: { in: [...DANS_LA_COMMANDE] } }, orderBy: { createdAt: "asc" }, include: { project: { select: { name: true } } } });
     const toi = fusionnerLesListes(mes.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite })));
@@ -461,11 +485,25 @@ export class CommandeDuMoisService {
         const comp = comparatifDeLArtisan(moi, chiffrees, classement);
         const nom = new Map(grilles.map((g) => [g.negoceId, g.negoce.nom]));
         const designationDe = new Map((c.lignes as unknown as LigneDeGrille[]).map((l) => [l.cle, l.designation]));
+        const multi = combinaisonsDeLArtisan(moi, chiffrees, { familleDuCycle: familleHeritee(c) });
+        const nomDe = (id: string) => nom.get(id) ?? "";
+        const partsChoisies = (choix?.parts as PartChoisie[] | null) ?? null;
         resultats = {
+          combinaisons: multi.combinaisons.map((x) => ({
+            cle: x.cle,
+            libelle: libelleDeCombinaison(x, nomDe),
+            totalHt: x.totalHt,
+            livraisons: x.livraisons,
+            phraseLivraisons: phraseDeLivraisons(x.livraisons),
+            ecartHt: x.ecartHt,
+            toutChez: x.toutChez,
+            parts: x.parts.map((p) => ({ negoceId: p.negoceId, nom: nomDe(p.negoceId), familles: p.familles, lignes: p.cles.length, totalHt: p.totalHt, livraisonHt: p.livraisonHt })),
+          })),
+          sansPrix: multi.sansPrix.map((f) => LIBELLES_COURTS_FAMILLES[f as keyof typeof LIBELLES_COURTS_FAMILLES] ?? f),
           parDefaut: comp.parDefaut,
           moinsCherPourToi: comp.moinsCherPourToi,
           negoces: comp.lignes.map((l) => ({ negoceId: l.negoceId, nom: nom.get(l.negoceId) ?? "", totalHt: l.totalHt, marchandiseHt: l.marchandiseHt, livraisonHt: l.livraisonHt, manquantes: l.manquantes, complet: l.complet, livrable: l.livrable, indicatives: l.indicatives.map((i) => ({ designation: designationDe.get(i.cle) ?? i.cle, prixUnitaire: i.prixUnitaire })), premierSurLeTotal: l.negoceId === comp.parDefaut })),
-          choix: choix ? { negoceId: choix.negoceId, totalHt: Number(choix.totalHt), commandeLe: choix.commandeLe?.toISOString() ?? null } : null,
+          choix: choix ? { negoceId: choix.negoceId, totalHt: Number(choix.totalHt), commandeLe: choix.commandeLe?.toISOString() ?? null, libelle: partsChoisies ? libelleDeCombinaison({ parts: partsChoisies, toutChez: partsChoisies.length === 1 && multi.sansPrix.length === 0 ? partsChoisies[0]!.negoceId : null }, nomDe) : null } : null,
         };
       }
     }
@@ -562,11 +600,12 @@ export class CommandeDuMoisService {
   // ---------------------------------------------------------------------------------------------------------------
 
   private async classement(cycleId: string, lignes: readonly LigneDeGrille[]) {
-    const grilles = await this.prisma.grilleNegoce.findMany({ where: { cycleId, deposeLe: { not: null } }, orderBy: { deposeLe: "asc" } });
+    const grilles = await this.prisma.grilleNegoce.findMany({ where: { cycleId, deposeLe: { not: null } }, orderBy: { deposeLe: "asc" }, include: { negoce: { select: { id: true, generaliste: true, familles: true } } } });
+    const profils = new Map(grilles.map((g) => [g.negoceId, profilDe(g.negoce)]));
     const chiffrees: GrilleChiffree[] = grilles
       .filter((g) => g.livraison)
       .map((g) => ({ negoceId: g.negoceId, prix: g.prix as Record<string, number>, livraison: (g.livraison as unknown as LivraisonEnregistree).paliers, nonGarantis: g.nonGarantis }));
-    const besoins = await this.prisma.besoin.findMany({ where: { cycleId, statut: { in: [...DANS_LA_COMMANDE] } }, orderBy: { createdAt: "asc" }, select: { companyId: true, cle: true, designation: true, quantite: true, unite: true, adresseLivraison: true } });
+    const besoins = await this.prisma.besoin.findMany({ where: { cycleId, statut: { in: [...DANS_LA_COMMANDE] } }, orderBy: { createdAt: "asc" }, select: { companyId: true, cle: true, designation: true, quantite: true, unite: true, adresseLivraison: true, famille: true } });
     const parEntreprise = new Map<string, typeof besoins>();
     for (const b of besoins) parEntreprise.set(b.companyId, [...(parEntreprise.get(b.companyId) ?? []), b]);
     const commandes: CommandeDArtisan[] = [...parEntreprise.entries()].map(([companyId, bs]) => {
@@ -576,37 +615,47 @@ export class CommandeDuMoisService {
         // Une entreprise absente des distances (jamais attendu : la commande est figée) paie la livraison, jamais zéro.
         if (l?.distances[companyId]) distances[g.negoceId] = l.distances[companyId]!;
       }
-      return { companyId, chantiers: new Set(bs.map((b) => b.adresseLivraison)).size, distances, lignes: fusionnerLesListes(bs.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite }))) };
+      return { companyId, chantiers: new Set(bs.map((b) => b.adresseLivraison)).size, distances, lignes: fusionnerLesListes(bs.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite, famille: b.famille }))) };
     });
-    return { chiffrees, classement: classerLesGrilles(chiffrees, lignes, commandes), commandes };
+    return { chiffrees, classement: classerLesGrilles(chiffrees, lignes, commandes), commandes, profils };
   }
 
-  /** Choisir un négoce (par défaut le premier sur le total), puis « Commander » : le bon part au négoce. */
-  async commander(tenant: TenantContext, cycleId: string, negoceId: string, maintenant = new Date()): Promise<VueDuMois> {
+  /**
+   * « Commander » une combinaison (multimétier, Greg, 25 octobre 2026) : « Tout chez X », ou une famille chez l'un et une
+   * autre chez l'autre. Le serveur recalcule la combinaison ; chaque négoce retenu reçoit UNIQUEMENT sa part du bon de
+   * commande (ses lignes, sa livraison). L'ancien appel par négoce vaut « Tout chez ce négoce ».
+   */
+  async commander(tenant: TenantContext, cycleId: string, demande: { negoceId?: string | null; combinaison?: string | null }, maintenant = new Date()): Promise<VueDuMois> {
     assertCanWrite(tenant);
     await this.abonnement?.exiger(tenant.companyId, "commander", maintenant);
-    if (!isUuid(cycleId) || !isUuid(negoceId)) throw notFound("Cycle");
+    if (!isUuid(cycleId) || (demande.negoceId && !isUuid(demande.negoceId)) || (!demande.negoceId && !demande.combinaison)) throw notFound("Cycle");
     const c = await this.prisma.cycleCommande.findUnique({ where: { id: cycleId } });
     if (!c) throw notFound("Cycle");
     if (c.phase !== "resultats") throw new DomainError("conflict", "No results yet", { reason: "pas_de_resultats" });
     const deja = await this.prisma.choixArtisan.findUnique({ where: { cycleId_companyId: { cycleId, companyId: tenant.companyId } } });
     if (deja?.commandeLe) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
-    const vue = await this.vueDuCycle(tenant, c, maintenant);
-    const ligne = vue.resultats?.negoces.find((n) => n.negoceId === negoceId);
-    if (!ligne) throw notFound("Negoce");
-    if (!ligne.livrable) throw validationFailed("This négoce does not deliver your area", { reason: "ne_livre_pas" });
-    if (!ligne.complet) throw validationFailed("This négoce did not price every line of your list", { reason: "grille_incomplete" });
-    const grille = await this.prisma.grilleNegoce.findUniqueOrThrow({ where: { cycleId_negoceId: { cycleId, negoceId } }, include: { negoce: true } });
+    const { chiffrees, commandes } = await this.classement(c.id, c.lignes as unknown as LigneDeGrille[]);
+    const moi = commandes.find((x) => x.companyId === tenant.companyId);
+    if (!moi || chiffrees.length === 0) throw notFound("Negoce");
+    const toutes = combinaisonsDeLArtisan(moi, chiffrees, { familleDuCycle: familleHeritee(c), max: Number.MAX_SAFE_INTEGER }).combinaisons;
+    const combo = demande.combinaison ? toutes.find((x) => x.cle === demande.combinaison) : toutes.find((x) => x.toutChez === demande.negoceId);
+    if (!combo) {
+      const g = demande.negoceId ? chiffrees.find((x) => x.negoceId === demande.negoceId) : null;
+      if (g) {
+        const p = prixChezUnNegoce(moi, g);
+        if (!p.livrable) throw validationFailed("This négoce does not deliver your area", { reason: "ne_livre_pas" });
+        if (!p.complet) throw validationFailed("This négoce did not price every line of your list", { reason: "grille_incomplete" });
+      }
+      throw notFound("Negoce");
+    }
     const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, siret: true, phone: true, contactEmail: true } });
-    const compte = await this.prisma.negoceArtisan.findUnique({ where: { companyId_negoceId: { companyId: tenant.companyId, negoceId } }, select: { numeroCompte: true } });
     const besoins = await this.prisma.besoin.findMany({ where: { cycleId, companyId: tenant.companyId, statut: { in: [...DANS_LA_COMMANDE] } }, orderBy: { createdAt: "asc" } });
-    const prix = grille.prix as Record<string, number>;
-    const lignes = fusionnerLesListes(besoins.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite }))).map((l) => ({ designation: l.designation, quantite: l.quantite, unite: l.unite, prixUnitaire: prix[l.cle]! }));
-    const doc = bonDuMois({ numero: c.numero, mois: c.mois, negoce: grille.negoce.nom, artisan: { nom: company.name, siret: company.siret, telephone: company.phone, email: company.contactEmail }, numeroCompte: compte?.numeroCompte ?? null, chantiers: [...new Set(besoins.map((b) => b.adresseLivraison))], lignes, livraisonHt: ligne.livraisonHt });
-    const pdf = await pdfDeTexte(doc.titre, doc.blocs);
-    // La commande est d'abord réservée (une seule passe, double appui compris), puis le bon part ; s'il ne part pas, rien
-    // n'est commandé et l'artisan peut recommencer (revue à froid, 23 octobre : deux appuis envoyaient deux bons).
-    const choix = { negoceId, totalHt: ligne.totalHt, livraisonHt: ligne.livraisonHt, commandeLe: maintenant };
+    // Une commande d'abord réservée (une seule passe, double appui compris) ; une part déjà partie lors d'un essai
+    // précédent de la MÊME combinaison ne repart pas (un négoce ne reçoit jamais deux fois son bon).
+    const anciennes = (deja?.parts as PartChoisie[] | null) ?? [];
+    const memePart = (p: { negoceId: string; cles: readonly string[] }) => anciennes.find((a) => a.negoceId === p.negoceId && a.cles.join("|") === p.cles.join("|") && a.envoyeLe);
+    const parts: PartChoisie[] = combo.parts.map((p) => ({ negoceId: p.negoceId, familles: p.familles, cles: p.cles, totalHt: p.totalHt, livraisonHt: p.livraisonHt, envoyeLe: memePart(p)?.envoyeLe ?? null }));
+    const choix = { negoceId: parts[0]!.negoceId, totalHt: combo.totalHt, livraisonHt: Math.round(parts.reduce((s, p) => s + p.livraisonHt, 0) * 100) / 100, parts: parts as unknown as object, commandeLe: maintenant };
     const reserve = deja
       ? (await this.prisma.choixArtisan.updateMany({ where: { id: deja.id, commandeLe: null }, data: choix })).count === 1
       : await this.prisma.choixArtisan.create({ data: { cycleId, companyId: tenant.companyId, ...choix } }).then(
@@ -614,18 +663,32 @@ export class CommandeDuMoisService {
           (e: unknown) => (isUniqueViolation(e) ? false : Promise.reject(e)),
         );
     if (!reserve) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
-    try {
-      await this.email.send({
-        to: grille.negoce.email,
-        subject: doc.titre,
-        text: ["Bonjour,", "", `${company.name} commande au prix de votre grille de la commande commune. Le bon de commande est joint.`, "", NOM_APP].join("\n"),
-        attachments: [{ filename: `bon-de-commande-${c.mois}-${c.numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
-        ...(company.contactEmail ? { replyTo: company.contactEmail } : {}),
-        mustDeliver: true,
-      });
-    } catch (e) {
-      await this.prisma.choixArtisan.updateMany({ where: { cycleId, companyId: tenant.companyId }, data: { commandeLe: null } });
-      throw e;
+    for (const part of parts) {
+      if (part.envoyeLe) continue;
+      const grille = await this.prisma.grilleNegoce.findUniqueOrThrow({ where: { cycleId_negoceId: { cycleId, negoceId: part.negoceId } }, include: { negoce: true } });
+      const compte = await this.prisma.negoceArtisan.findUnique({ where: { companyId_negoceId: { companyId: tenant.companyId, negoceId: part.negoceId } }, select: { numeroCompte: true } });
+      const prix = grille.prix as Record<string, number>;
+      const cles = new Set(part.cles);
+      const siens = besoins.filter((b) => cles.has(cleDeLigne(b)));
+      const lignes = fusionnerLesListes(siens.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite }))).map((l) => ({ designation: l.designation, quantite: l.quantite, unite: l.unite, prixUnitaire: prix[l.cle]! }));
+      const doc = bonDuMois({ numero: c.numero, mois: c.mois, negoce: grille.negoce.nom, artisan: { nom: company.name, siret: company.siret, telephone: company.phone, email: company.contactEmail }, numeroCompte: compte?.numeroCompte ?? null, chantiers: [...new Set(siens.map((b) => b.adresseLivraison))], lignes, livraisonHt: part.livraisonHt });
+      const pdf = await pdfDeTexte(doc.titre, doc.blocs);
+      try {
+        await this.email.send({
+          to: grille.negoce.email,
+          subject: doc.titre,
+          text: ["Bonjour,", "", `${company.name} commande au prix de votre grille de la commande commune. Le bon de commande est joint.`, "", NOM_APP].join("\n"),
+          attachments: [{ filename: `bon-de-commande-${c.mois}-${c.numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
+          ...(company.contactEmail ? { replyTo: company.contactEmail } : {}),
+          mustDeliver: true,
+        });
+      } catch (e) {
+        // Rien n'est commandé tant que toutes les parts ne sont pas parties ; celles déjà parties sont gardées.
+        await this.prisma.choixArtisan.updateMany({ where: { cycleId, companyId: tenant.companyId }, data: { commandeLe: null, parts: parts as unknown as object } });
+        throw e;
+      }
+      part.envoyeLe = maintenant.toISOString();
+      await this.prisma.choixArtisan.updateMany({ where: { cycleId, companyId: tenant.companyId }, data: { parts: parts as unknown as object } });
     }
     await this.prisma.besoin.updateMany({ where: { cycleId, companyId: tenant.companyId, statut: "signe" }, data: { statut: "commande" } });
     return this.vueDuCycle(tenant, c, maintenant);
@@ -647,7 +710,7 @@ export class CommandeDuMoisService {
     if (!zone) throw validationFailed("The site needs an address with a postcode", { reason: "adresse_requise" });
     let n = 0;
     for (const [i, l] of d.lignes.entries()) {
-      const { cycle } = await this.cycleOuvert(l.famille, zone, maintenant);
+      const { cycle } = await this.cycleOuvert(zone, maintenant);
       await this.prisma.besoin.create({
         data: { companyId: d.companyId, projectId: d.projectId, takeoffId: d.takeoffId, articleKey: `demo-${i + 1}`, designation: l.designation, cle: cleDeReference({ libelle: l.designation }), famille: l.famille, quantite: l.quantite, unite: l.unite, zone, adresseLivraison: d.adresse, fenetreTot: maintenant, fenetreTard: new Date(maintenant.getTime() + 60 * JOUR_MS), statut: "signe", signeLe: maintenant, cycleId: cycle.id, nature: "chantier" },
       });
@@ -678,7 +741,8 @@ export class CommandeDuMoisService {
       if (!compte?.livraison) continue;
       const ecart = [0.94, 1, 1.07][k % 3]!;
       const prix: Record<string, number> = {};
-      for (const l of g.cycle.lignes as unknown as LigneDeGrille[]) prix[l.cle] = Math.round(prixDeBaseDemo(l.cle) * ecart * 100) / 100;
+      // Chaque faux négoce ne chiffre que ce qu'il vend : le spécialiste, ses familles ; le généraliste, tout.
+      for (const l of lignesDuNegoce(g.cycle.lignes as unknown as LigneDeGrille[], profilDe(g.negoce), familleHeritee(g.cycle))) prix[l.cle] = Math.round(prixDeBaseDemo(l.cle) * ecart * 100) / 100;
       const depots = compte.depots.map((x) => ({ adresse: x.adresse, lat: x.lat, lon: x.lon }));
       const livraison: LivraisonEnregistree = { depots, paliers: compte.livraison as unknown as PaliersLivraison, distances: await this.distances(g.cycleId, depots) };
       await this.prisma.grilleNegoce.update({ where: { id: g.id }, data: { deposeLe: maintenant, prix, statutExtraction: "lue", livraison: livraison as object } });
@@ -727,7 +791,7 @@ export class CommandeDuMoisService {
     for (const c of await this.prisma.cycleCommande.findMany({ where: { phase: "inscriptions" } })) {
       const depots = await this.prisma.besoin.count({ where: { cycleId: c.id, statut: { in: [...DANS_LA_COMMANDE] } } });
       if (depots === 0) continue;
-      const inscrits = await this.prisma.negoce.count({ where: { departement: c.zone, stopLe: null, familles: { has: c.famille }, compte: { inscritLe: { not: null } } } });
+      const inscrits = await this.prisma.negoce.count({ where: { departement: c.zone, stopLe: null, compte: { inscritLe: { not: null } } } });
       if (inscrits === 0) await uneFois("sans-negoce", c.id, `aucun négoce inscrit dans le ${c.zone} alors que des artisans ont déposé pour la commande ${deMois(c.mois)}`);
     }
     for (const c of await this.prisma.cycleCommande.findMany({ where: { phase: "negoces", reponseAvant: { lte: new Date(maintenant.getTime() + 48 * 3600_000), gt: maintenant } } })) {
@@ -741,8 +805,8 @@ export class CommandeDuMoisService {
     // Verrou sur la commande : un dépôt en cours (même verrou) finit avant que la grille ne soit figée, ou voit la clôture.
     const lignes = await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM cycle_commande WHERE id = ${c.id}::uuid FOR UPDATE`;
-      const besoins = await tx.besoin.findMany({ where: { cycleId: c.id, statut: { in: [...DANS_LA_COMMANDE] } }, orderBy: { createdAt: "asc" }, select: { cle: true, designation: true, quantite: true, unite: true } });
-      const l = fusionnerLesListes(besoins.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite })));
+      const besoins = await tx.besoin.findMany({ where: { cycleId: c.id, statut: { in: [...DANS_LA_COMMANDE] } }, orderBy: { createdAt: "asc" }, select: { cle: true, designation: true, quantite: true, unite: true, famille: true } });
+      const l = fusionnerLesListes(besoins.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite, famille: b.famille })));
       await tx.cycleCommande.update({ where: { id: c.id }, data: { phase: l.length ? "negoces" : "resultats", closLe: maintenant, lignes: l.map((x) => ({ ...x })), ...(l.length ? {} : { resultatsLe: maintenant }) } });
       return l;
     });
@@ -760,9 +824,14 @@ export class CommandeDuMoisService {
     const lignes = c.lignes as LigneDeGrille[];
     // Les abonnés du département (espace négoce, 23 octobre 2026) : une ligne `negoce` par département desservi, reliée
     // à un compte inscrit ; un négoce invité sans compte reçoit l'e-mail de clôture avec son lien (3 cycles au plus).
-    const negoces = await this.prisma.negoce.findMany({ where: { departement: c.zone, stopLe: null, familles: { has: c.famille }, createdAt: { lt: c.clotureLe } }, include: { compte: true }, orderBy: { createdAt: "asc" }, take: NEGOCES_PAR_GRILLE });
+    // Multimétier (Greg, 25 octobre 2026) : le généraliste reçoit tout ; un spécialiste seulement ses familles, et rien du
+    // tout (ni grille, ni e-mail, ni relance) quand la commande n'en a aucune ligne.
+    const negoces = (await this.prisma.negoce.findMany({ where: { departement: c.zone, stopLe: null, createdAt: { lt: c.clotureLe } }, include: { compte: true }, orderBy: { createdAt: "asc" } }))
+      .filter((n) => concerne(lignes, profilDe(n), familleHeritee(c)))
+      .slice(0, NEGOCES_PAR_GRILLE);
     let envoyees = 0;
     for (const n of negoces) {
+      const siennes = lignesDuNegoce(lignes, profilDe(n), familleHeritee(c));
       if (!n.compte?.inscritLe) {
         await this.rappelerSansCompte(c, n, maintenant);
         continue;
@@ -772,8 +841,8 @@ export class CommandeDuMoisService {
       const id = randomUUID();
       const jeton = jetonDeGrille(this.reglages.authSecret, id);
       const grille = await this.prisma.grilleNegoce.create({ data: { id, cycleId: c.id, negoceId: n.id, tokenHash: hash(jeton) } });
-      const mail = mailGrilleAuNegoce({ negoce: n.nom, mois: c.mois, departement: c.zone, lignes, reponseAvant: c.reponseAvant, maintenant, lien: `${this.reglages.webAppUrl}/grille/${jeton}`, stop: this.espace.lienDesabonnement(n.compte.id, c.zone, maintenant) });
-      const pdf = await pdfDeTexte(mail.objet, [{ titre: "Le volume à chiffrer", lignes: [["Désignation", "Quantité"], ...lignes.map((l) => [l.designation, `${l.quantite.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ${l.unite}`])] }, { lignes: [PHRASE_PRIX_FERMES, PHRASE_AU_NEGOCE] }]);
+      const mail = mailGrilleAuNegoce({ negoce: n.nom, mois: c.mois, departement: c.zone, lignes: siennes, reponseAvant: c.reponseAvant, maintenant, lien: `${this.reglages.webAppUrl}/grille/${jeton}`, stop: this.espace.lienDesabonnement(n.compte.id, c.zone, maintenant) });
+      const pdf = await pdfDeTexte(mail.objet, [{ titre: "Le volume à chiffrer", lignes: [["Désignation", "Quantité"], ...siennes.map((l) => [l.designation, `${l.quantite.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ${l.unite}`])] }, { lignes: [PHRASE_PRIX_FERMES, PHRASE_AU_NEGOCE] }]);
       try {
         await this.email.send({ to: n.email, subject: mail.objet, text: mail.texte, attachments: [{ filename: `commande-commune-${c.mois}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }], mustDeliver: true });
         envoyees++;
@@ -818,7 +887,7 @@ export class CommandeDuMoisService {
 
   /** À la limite : figé ; chaque artisan est prévenu, chaque négoce reçoit son message (retenu ou neutre). */
   private async publierLesResultats(c: { id: string; mois: string; famille: string; zone: string; lignes: unknown }, maintenant: Date): Promise<void> {
-    const { classement, chiffrees } = await this.classement(c.id, c.lignes as unknown as LigneDeGrille[]);
+    const { classement, chiffrees, commandes, profils } = await this.classement(c.id, c.lignes as unknown as LigneDeGrille[]);
     if (chiffrees.length === 0) {
       await this.reporter(c, maintenant);
       return;
@@ -833,7 +902,11 @@ export class CommandeDuMoisService {
       if (g && lignes > 0 && (g.nonGarantis?.length ?? 0) / lignes > PART_NON_GARANTIE_ALERTE) this.alerter.alert("commande_commune", `commande ${deMois(c.mois)} (${c.zone}) : la grille retenue a ${g.nonGarantis!.length} ligne(s) « non garantie(s) » sur ${lignes}`);
     }
     for (const g of await this.prisma.grilleNegoce.findMany({ where: { cycleId: c.id, deposeLe: { not: null }, resultatLe: null }, include: { negoce: true } })) {
-      const mail = mailResultatNegoce({ mois: c.mois, departement: c.zone, premier: g.negoceId === premier });
+      // Multimétier : « premier » sur son périmètre (ses lignes), comme pendant le chrono.
+      const sienne = chiffrees.find((x) => x.negoceId === g.negoceId);
+      const profil = profils.get(g.negoceId);
+      const estPremier = sienne && profil ? rangSurSonPerimetre(sienne, profil, chiffrees, c.lignes as unknown as LigneDeGrille[], commandes, familleHeritee(c)) === 1 : g.negoceId === premier;
+      const mail = mailResultatNegoce({ mois: c.mois, departement: c.zone, premier: estPremier });
       await this.email.send({ to: g.negoce.email, subject: mail.objet, text: mail.texte }).catch(() => undefined);
       await this.prisma.grilleNegoce.update({ where: { id: g.id }, data: { resultatLe: maintenant } });
     }
@@ -852,7 +925,7 @@ export class CommandeDuMoisService {
     await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { phase: "resultats", resultatsLe: maintenant, retenuId: null, garantieJusquau: null } });
     const besoins = await this.prisma.besoin.findMany({ where: { cycleId: c.id, statut: "signe" }, select: { id: true, companyId: true } });
     if (besoins.length === 0) return;
-    const { cycle: suivant } = await this.cycleOuvert(c.famille, c.zone, maintenant);
+    const { cycle: suivant } = await this.cycleOuvert(c.zone, maintenant);
     const entreprises = [...new Set(besoins.map((b) => b.companyId))];
     await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM cycle_commande WHERE id = ${suivant.id}::uuid FOR UPDATE`;
@@ -918,10 +991,17 @@ export class CommandeDuMoisService {
 
   async pageGrille(jeton: string, maintenant = new Date()) {
     const g = await this.grilleDuJeton(jeton);
-    const lignes = g.cycle.lignes as unknown as LigneDeGrille[];
+    // Un spécialiste ne voit que les lignes de ses familles (Greg, 25 octobre 2026) ; le généraliste toute la liste.
+    const toutes = g.cycle.lignes as unknown as LigneDeGrille[];
+    const lignes = lignesDuNegoce(toutes, profilDe(g.negoce), familleHeritee(g.cycle));
     const ouverte = g.cycle.phase === "negoces" && maintenant < g.cycle.reponseAvant;
     let rang: number | null = null;
-    if (g.deposeLe) rang = (await this.classement(g.cycleId, lignes)).classement.find((x) => x.negoceId === g.negoceId)?.rang ?? null;
+    if (g.deposeLe) {
+      // Le rang sur SON périmètre : rien ne dit s'il a en face un généraliste ou un spécialiste.
+      const { chiffrees, commandes } = await this.classement(g.cycleId, toutes);
+      const sienne = chiffrees.find((x) => x.negoceId === g.negoceId);
+      rang = sienne ? rangSurSonPerimetre(sienne, profilDe(g.negoce), chiffrees, toutes, commandes, familleHeritee(g.cycle)) : null;
+    }
     const prix = g.prix as Record<string, number>;
     const livraison = g.livraison as unknown as LivraisonEnregistree | null;
     const compte = g.negoce.compteId ? await this.prisma.compteNegoce.findUnique({ where: { id: g.negoce.compteId }, include: { depots: { select: { id: true } } } }) : null;
@@ -971,7 +1051,8 @@ export class CommandeDuMoisService {
     if (depot.fichiers.length === 0) throw validationFailed("Quote required", { reason: "devis_requis" });
     if (depot.fichiers.length > 2) throw validationFailed("Two quotes at most", { reason: "deux_devis_au_plus" });
     for (const f of depot.fichiers) if (f.type !== "application/pdf" || !f.contenu.subarray(0, 5).toString().startsWith("%PDF")) throw validationFailed("PDF only", { reason: "pdf_seulement" });
-    const lignes = g.cycle.lignes as unknown as LigneDeGrille[];
+    // Une grille partielle d'un spécialiste est acceptée : il ne chiffre que ses lignes (Greg, 25 octobre 2026).
+    const lignes = lignesDuNegoce(g.cycle.lignes as unknown as LigneDeGrille[], profilDe(g.negoce), familleHeritee(g.cycle));
     const cles = new Set(lignes.map((l) => l.cle));
     const nonGarantis = [...new Set(depot.nonGarantis.filter((c) => cles.has(c)))];
     const lecture = await this.lire(g.cycle.numero, lignes, depot.fichiers);

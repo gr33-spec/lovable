@@ -20,17 +20,25 @@ const ARTISANS = [
   ["Loïc Tanguy", "Tanguy Zinguerie (démo)", "6 place du Centre, 22200 Guingamp"],
   ["Ronan Morvan", "Morvan Ardoise (démo)", "11 rue du Général Leclerc, 22620 Ploubazlanec"],
 ] as const;
+/**
+ * Multimétier (Greg, 25 octobre 2026) : un généraliste (il chiffre toute la liste) et deux spécialistes (la couverture
+ * seule, le second œuvre seul) : les résultats montrent « Tout chez … » et les combinaisons par famille.
+ */
 const NEGOCES = [
-  ["Ardoisière du Trégor (démo)", "ZA de Kerverzot, 22300 Lannion", 48.7326, -3.4566],
-  ["Matériaux de l'Argoat (démo)", "Rue de la Gare, 22200 Guingamp", 48.5615, -3.1497],
-  ["Comptoir Breton du Bâtiment (démo)", "ZI des Châtelets, 22440 Ploufragan", 48.4893, -2.7942],
+  ["Comptoir Breton du Bâtiment (démo)", "ZI des Châtelets, 22440 Ploufragan", 48.4893, -2.7942, true, []],
+  ["Ardoisière du Trégor (démo)", "ZA de Kerverzot, 22300 Lannion", 48.7326, -3.4566, false, ["couverture"]],
+  ["Placo de l'Argoat (démo)", "Rue de la Gare, 22200 Guingamp", 48.5615, -3.1497, false, ["second_oeuvre"]],
 ] as const;
+/** Le chantier de démonstration de l'admin : dans le 22, à Lannion. */
+const ADRESSE_ADMIN = "2 rue de Kerampont, 22300 Lannion";
 /** Les mêmes articles chez chacun, à des quantités différentes : ils se regroupent dans la grille. */
 const LIGNES = [
-  { designation: "Ardoise naturelle 32×22 Espagne 1er choix", unite: "pièces", base: 1800 },
-  { designation: "Crochet inox 100 mm", unite: "pièces", base: 1900 },
-  { designation: "Liteau sapin traité 27×38", unite: "m", base: 420 },
-  { designation: "Écran de sous-toiture HPV, rouleau de 75 m²", unite: "rouleaux", base: 2 },
+  { designation: "Ardoise naturelle 32×22 Espagne 1er choix", unite: "pièces", base: 1800, famille: "couverture" },
+  { designation: "Crochet inox 100 mm", unite: "pièces", base: 1900, famille: "couverture" },
+  { designation: "Liteau sapin traité 27×38", unite: "m", base: 420, famille: "couverture" },
+  { designation: "Écran de sous-toiture HPV, rouleau de 75 m²", unite: "rouleaux", base: 2, famille: "couverture" },
+  { designation: "Plaque de plâtre BA13 2,50 × 1,20 m", unite: "plaques", base: 40, famille: "second_oeuvre" },
+  { designation: "Rail R48 3 m", unite: "pièces", base: 30, famille: "second_oeuvre" },
 ] as const;
 
 export class DemoService {
@@ -43,13 +51,13 @@ export class DemoService {
   ) {}
 
   /** Efface l'ancien jeu, puis crée 3 faux négoces inscrits et 5 faux artisans qui ont déposé leur liste. */
-  async creer(maintenant = new Date()) {
+  async creer(maintenant = new Date(), adminUserId: string | null = null) {
     await this.effacer();
     const p = this.prisma;
-    for (const [i, [enseigne, adresse, lat, lon]] of NEGOCES.entries()) {
+    for (const [i, [enseigne, adresse, lat, lon, generaliste, familles]] of NEGOCES.entries()) {
       const email = `negoce-test-${i + 1}@${this.domaine}`;
-      const compte = await p.compteNegoce.create({ data: { email, enseigne, telephone: "02 96 00 00 00", livraison: { ...PALIERS_DEFAUT } as object, departements: [ZONE_DEMO], inscritLe: maintenant, conditionsAccepteesLe: maintenant, conditionsVersion: CONDITIONS_NEGOCE_VERSION, depots: { create: [{ adresse, departement: ZONE_DEMO, lat, lon }] } } });
-      await p.negoce.create({ data: { nom: enseigne, email, departement: ZONE_DEMO, familles: ["couverture"], compteId: compte.id, createdAt: new Date(maintenant.getTime() - 60_000) } });
+      const compte = await p.compteNegoce.create({ data: { email, enseigne, telephone: "02 96 00 00 00", livraison: { ...PALIERS_DEFAUT } as object, departements: [ZONE_DEMO], generaliste, familles: [...familles], inscritLe: maintenant, conditionsAccepteesLe: maintenant, conditionsVersion: CONDITIONS_NEGOCE_VERSION, depots: { create: [{ adresse, departement: ZONE_DEMO, lat, lon }] } } });
+      await p.negoce.create({ data: { nom: enseigne, email, departement: ZONE_DEMO, familles: [...familles], generaliste, compteId: compte.id, createdAt: new Date(maintenant.getTime() - 60_000) } });
     }
     let lignes = 0;
     for (const [i, [nom, entreprise, adresse]] of ARTISANS.entries()) {
@@ -59,9 +67,19 @@ export class DemoService {
       const project = await p.project.create({ data: { companyId: company.id, name: `Chantier ${adresse.split(" ").at(-1)} (démo)`, address: adresse, demo: true, createdById: user.id } });
       const takeoff = await p.takeoff.create({ data: { companyId: company.id, projectId: project.id, source: "lignes", trade: "roofing", status: "validated", promptId: "demo", promptVersion: 1, model: "demo", calculatedAt: maintenant, validatedAt: maintenant } });
       const facteur = [1, 0.6, 1.4, 0.8, 1.2][i]!;
-      lignes += await this.commande.deposerPourLaDemo({ companyId: company.id, projectId: project.id, takeoffId: takeoff.id, adresse, lignes: LIGNES.map((l) => ({ designation: l.designation, unite: l.unite, famille: "couverture", quantite: Math.max(1, Math.round(l.base * facteur)) })) }, maintenant);
+      lignes += await this.commande.deposerPourLaDemo({ companyId: company.id, projectId: project.id, takeoffId: takeoff.id, adresse, lignes: LIGNES.filter((l) => l.famille === "couverture" || i % 2 === 0).map((l) => ({ designation: l.designation, unite: l.unite, famille: l.famille, quantite: Math.max(1, Math.round(l.base * facteur)) })) }, maintenant);
     }
-    return { artisans: ARTISANS.length, negoces: NEGOCES.length, lignes, zone: ZONE_DEMO };
+    // L'admin lui-même (multimétier, 25 octobre 2026) : une liste de démonstration couverture et placo dans le 22, pour voir
+    // ses options (« Tout chez … », une famille chez l'un et l'autre chez l'autre) et commander, sans lecture IA. Le chantier
+    // « Démo commande commune » disparaît avec « Tout effacer ».
+    let pourToi = 0;
+    if (adminUserId) {
+      const companyId = await this.entrepriseDe(adminUserId);
+      const project = await p.project.create({ data: { companyId, name: "Démo commande commune (couverture et placo)", address: ADRESSE_ADMIN, demo: true, createdById: adminUserId } });
+      const takeoff = await p.takeoff.create({ data: { companyId, projectId: project.id, source: "lignes", trade: "roofing", status: "validated", promptId: "demo", promptVersion: 1, model: "demo", calculatedAt: maintenant, validatedAt: maintenant } });
+      pourToi = await this.commande.deposerPourLaDemo({ companyId, projectId: project.id, takeoffId: takeoff.id, adresse: ADRESSE_ADMIN, lignes: LIGNES.map((l) => ({ designation: l.designation, unite: l.unite, famille: l.famille, quantite: l.base })) }, maintenant);
+    }
+    return { artisans: ARTISANS.length, negoces: NEGOCES.length, lignes, zone: ZONE_DEMO, pourToi };
   }
 
   cloturer(maintenant = new Date()) {

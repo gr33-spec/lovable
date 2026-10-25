@@ -1,3 +1,4 @@
+import { FAMILLES_GROUPE } from "@baticlair/domain";
 import { Body, Controller, Delete, Get, Headers, HttpCode, Inject, Param, Post, Put, Query, Res } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
@@ -28,8 +29,11 @@ const inscriptionBody = z.object({
   livraison: paliers,
   departements: z.array(departement).max(20).nullish(),
   conditions: z.boolean(),
+  // Multimétier (Greg, 25 octobre 2026) : « Généraliste : je chiffre toute la liste » ou « Spécialiste : mes familles ».
+  offre: z.enum(["generaliste", "specialiste"]).optional(),
+  familles: z.array(z.enum(FAMILLES_GROUPE)).max(FAMILLES_GROUPE.length).optional(),
 });
-const modifBody = z.object({ enseigne: z.string().trim().min(1).max(120).optional(), telephone: z.string().trim().max(30).nullish(), depots: depots.optional(), livraison: paliers.optional(), departements: z.array(departement).max(20).optional() }).strict();
+const modifBody = z.object({ enseigne: z.string().trim().min(1).max(120).optional(), telephone: z.string().trim().max(30).nullish(), depots: depots.optional(), livraison: paliers.optional(), departements: z.array(departement).max(20).optional(), offre: z.enum(["generaliste", "specialiste"]).optional(), familles: z.array(z.enum(FAMILLES_GROUPE)).max(FAMILLES_GROUPE.length).optional() }).strict();
 const connexionBody = z.object({ email: z.string().trim().toLowerCase().pipe(z.email()) });
 const desabonnerBody = z.object({ departement: departement.nullish() });
 

@@ -1,4 +1,4 @@
-import { cleDeReference, economieEstimee, familleDuMetier, fenetreValide, lotParti, fraisDeLivraison, messageBesoinAccepte, phraseCompteur, precisionDeLigne, prixAuVolume, prixLivre, quantiteDuBesoin, transitionBesoin, zoneDeLivraison, zoneDuCodePostal, type CompteurDuGroupe, type MessageArtisan, type StatutBesoin } from "@baticlair/domain";
+import { cleDeReference, economieEstimee, familleDuMetier, familleDeLaLigne, fenetreValide, lotParti, fraisDeLivraison, messageBesoinAccepte, phraseCompteur, precisionDeLigne, prixAuVolume, prixLivre, quantiteDuBesoin, transitionBesoin, zoneDeLivraison, zoneDuCodePostal, type CompteurDuGroupe, type MessageArtisan, type StatutBesoin } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
@@ -68,6 +68,7 @@ export function lignesProposables(r: ReviewedTakeoff, articles: readonly string[
     const m = /^lot:\d+:(.+)$/.exec(g.key);
     if (m) for (const row of g.rows) if (row.itemKey) metierDe.set(row.itemKey, m[1]!);
   }
+  const plusieursLots = new Set(metierDe.values()).size > 1;
   return [...new Set(articles)].map((key) => {
     const item = r.purchase.toBuy.find((b) => b.key === key);
     if (!item) throw validationFailed("Unknown list line", { reason: "ligne_inconnue", article: key });
@@ -76,7 +77,11 @@ export function lignesProposables(r: ReviewedTakeoff, articles: readonly string[
     if (!precisionDeLigne(item.label).precise) throw validationFailed("Vague line", { reason: "ligne_vague", article: key });
     const q = quantiteDuBesoin(item.order, item.quantity);
     if (!q) throw validationFailed("Line without quantity", { reason: "sans_quantite", article: key });
-    const famille = familleDuMetier(metierDe.get(key) ?? r.takeoff.trade);
+    // Multimétier (Greg, 25 octobre 2026) : l'artisan ne choisit jamais de catégorie ; la ligne prend la famille de son lot
+    // (quand la lecture en a rendu plusieurs), sinon celle que ses mots désignent, sinon celle du métier de la liste.
+    const defaut = familleDuMetier(r.takeoff.trade);
+    const lot = plusieursLots ? familleDuMetier(metierDe.get(key)) : null;
+    const famille = familleDeLaLigne(item.label, { familleDuLot: lot, defaut: defaut ?? "" }) || null;
     if (!famille) throw validationFailed("Trade outside the groupé", { reason: "sans_famille", article: key });
     return { item, q, famille };
   });

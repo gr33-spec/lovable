@@ -13,7 +13,7 @@ import {
   phraseApresInscription,
   zoneDuCodePostal,
   type ConfigCycle,
-  type PaliersLivraison, compteurAdmin, consultationPourLeNegoce } from "@baticlair/domain";
+  type PaliersLivraison, compteurAdmin, consultationPourLeNegoce, FAMILLES_GROUPE } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -32,7 +32,12 @@ export interface InscriptionNegoce {
   livraison: unknown;
   departements?: string[] | null;
   conditions: boolean;
+  offre?: OffreNegoce;
+  familles?: readonly string[];
 }
+
+/** Multimétier (Greg, 25 octobre 2026) : ce que le négoce chiffre. */
+export type OffreNegoce = "generaliste" | "specialiste";
 
 export interface ModificationCompte {
   enseigne?: string;
@@ -40,9 +45,23 @@ export interface ModificationCompte {
   depots?: { adresse: string }[];
   livraison?: unknown;
   departements?: string[];
+  offre?: OffreNegoce;
+  familles?: readonly string[];
 }
 
 const JOUR_MS = 86_400_000;
+
+/**
+ * Le profil choisi par le négoce : généraliste (toute la liste), ou spécialiste de ses familles cochées (au moins une).
+ * Sans choix (ancien formulaire), rien ne change : il garde les familles que les artisans lui ont données.
+ */
+function profilChoisi(offre: OffreNegoce | undefined, familles: readonly string[] | undefined): { generaliste: boolean; familles: string[] } | null {
+  if (!offre) return null;
+  if (offre === "generaliste") return { generaliste: true, familles: [] };
+  const f = FAMILLES_GROUPE.filter((x) => (familles ?? []).includes(x));
+  if (f.length === 0) throw validationFailed("At least one family", { reason: "familles_requises" });
+  return { generaliste: false, familles: f };
+}
 /** L'e-mail d'invitation ne repart pas à chaque ajout par un artisan : au plus un par semaine tant que l'accès n'est pas créé. */
 const INVITATION_RELANCE_MS = 7 * JOUR_MS;
 
@@ -156,16 +175,17 @@ export class EspaceNegoceService {
     if (depots.length === 0) throw validationFailed("Depot required", { reason: "depot_requis" });
     const departements = this.departementsChoisis(i.departements, depots, compte.abonnements.map((a) => a.departement));
     if (departements.length === 0) throw validationFailed("Department required", { reason: "departement_requis" });
+    const profil = profilChoisi(i.offre, i.familles);
     const autre = await this.prisma.compteNegoce.findFirst({ where: { OR: [{ email }, ...(siret ? [{ siret }] : [])], NOT: { id: compte.id } }, select: { id: true } });
     if (autre) throw new DomainError("conflict", "Email or SIRET already used", { reason: "compte_existant" });
     await this.prisma.$transaction(async (tx) => {
       await tx.compteNegoce.update({
         where: { id: compte.id },
-        data: { email, siret, enseigne, telephone: i.telephone?.trim() || null, livraison: livraison as unknown as object, departements, inscritLe: maintenant, conditionsAccepteesLe: maintenant, conditionsVersion: CONDITIONS_NEGOCE_VERSION, derniereConnexionLe: maintenant, desabonneLe: null },
+        data: { email, siret, enseigne, telephone: i.telephone?.trim() || null, livraison: livraison as unknown as object, departements, ...(profil ?? {}), inscritLe: maintenant, conditionsAccepteesLe: maintenant, conditionsVersion: CONDITIONS_NEGOCE_VERSION, derniereConnexionLe: maintenant, desabonneLe: null },
       });
       await tx.depotNegoce.deleteMany({ where: { compteId: compte.id } });
       await tx.depotNegoce.createMany({ data: depots.map((d) => ({ compteId: compte.id, ...d })) });
-      await this.alignerAbonnements(tx, compte.id, { email, siret, enseigne }, departements, maintenant);
+      await this.alignerAbonnements(tx, compte.id, { email, siret, enseigne }, departements, maintenant, profil);
     });
     const prochaine = await this.prochaineCloture(departements, maintenant);
     return { compteId: compte.id, phrase: phraseApresInscription(prochaine.clotureLe), departements };
@@ -205,16 +225,18 @@ export class EspaceNegoceService {
   }
 
   /** Une ligne `negoce` par département desservi, reliée au compte (familles : celles des lignes déjà connues, sinon couverture) ; les autres départements sont arrêtés. */
-  private async alignerAbonnements(tx: Parameters<Parameters<PrismaService["$transaction"]>[0]>[0], compteId: string, c: { email: string; siret: string | null; enseigne: string }, departements: readonly string[], maintenant: Date): Promise<void> {
+  private async alignerAbonnements(tx: Parameters<Parameters<PrismaService["$transaction"]>[0]>[0], compteId: string, c: { email: string; siret: string | null; enseigne: string }, departements: readonly string[], maintenant: Date, profil: { generaliste: boolean; familles: string[] } | null = null): Promise<void> {
     const existants = await tx.negoce.findMany({ where: { OR: [{ compteId }, { email: c.email }, ...(c.siret ? [{ siret: c.siret }] : [])] } });
+    // Le choix du négoce (généraliste ou ses familles) vaut pour chacun de ses départements ; sans choix, ses familles connues.
     for (const n of existants) {
       const garde = departements.includes(n.departement);
-      await tx.negoce.update({ where: { id: n.id }, data: { compteId, nom: c.enseigne, email: c.email, siret: c.siret ?? n.siret, familles: n.familles, stopLe: garde ? null : (n.stopLe ?? maintenant) } });
+      await tx.negoce.update({ where: { id: n.id }, data: { compteId, nom: c.enseigne, email: c.email, siret: c.siret ?? n.siret, familles: profil?.familles ?? n.familles, generaliste: profil?.generaliste ?? n.generaliste, stopLe: garde ? null : (n.stopLe ?? maintenant) } });
     }
-    const familles = [...new Set(existants.flatMap((n) => n.familles))];
+    const familles = profil ? profil.familles : [...new Set(existants.flatMap((n) => n.familles))];
+    const generaliste = profil?.generaliste ?? existants.some((n) => n.generaliste);
     for (const d of departements) {
       if (existants.some((n) => n.departement === d)) continue;
-      await tx.negoce.create({ data: { nom: c.enseigne, email: c.email, siret: c.siret, departement: d, familles: familles.length ? familles : ["couverture"], compteId, createdAt: maintenant } });
+      await tx.negoce.create({ data: { nom: c.enseigne, email: c.email, siret: c.siret, departement: d, familles: familles.length || generaliste ? familles : ["couverture"], generaliste, compteId, createdAt: maintenant } });
     }
   }
 
@@ -276,7 +298,15 @@ export class EspaceNegoceService {
     // Les grilles en cours : phase « négoces », avant la limite ; pendant les inscriptions, rien que le chrono.
     const grilles = await this.prisma.grilleNegoce.findMany({ where: { negoceId: { in: negoceIds }, cycle: { phase: "negoces", reponseAvant: { gt: maintenant } } }, include: { cycle: { select: { mois: true, zone: true, reponseAvant: true, _count: { select: { grilles: true } } } } }, orderBy: { createdAt: "desc" } });
     // Les commandes passées chez lui : là, et seulement là, il voit l'artisan (point 4).
-    const choix = await this.prisma.choixArtisan.findMany({ where: { negoceId: { in: negoceIds }, commandeLe: { not: null } }, include: { company: { select: { name: true } }, cycle: { select: { mois: true } } }, orderBy: { commandeLe: "desc" } });
+    // Multimétier (25 octobre 2026) : une commande en plusieurs parts compte chez chaque négoce retenu, pour SA part seulement.
+    type Part = { negoceId: string; totalHt: number };
+    const choix = (await this.prisma.choixArtisan.findMany({ where: { commandeLe: { not: null }, OR: [{ negoceId: { in: negoceIds } }, { cycle: { zone: { in: departements } } }] }, include: { company: { select: { name: true } }, cycle: { select: { mois: true } } }, orderBy: { commandeLe: "desc" } }))
+      .map((x) => {
+        const parts = (x.parts as Part[] | null) ?? null;
+        const sienne = parts ? parts.find((p) => negoceIds.includes(p.negoceId)) : negoceIds.includes(x.negoceId) ? { negoceId: x.negoceId, totalHt: Number(x.totalHt) } : null;
+        return sienne ? { ...x, totalHt: sienne.totalHt } : null;
+      })
+      .filter((x): x is NonNullable<typeof x> => !!x);
     const garanties = await this.prisma.commandeGarantie.findMany({ where: { negoceId: { in: negoceIds } }, include: { company: { select: { name: true } }, cycle: { select: { mois: true } } }, orderBy: { commandeLe: "desc" } });
     return {
       email: c.email,
@@ -286,6 +316,8 @@ export class EspaceNegoceService {
       depots: c.depots.map((d) => ({ id: d.id, adresse: d.adresse, geocode: d.lat !== null })),
       livraison: (c.livraison as unknown as PaliersLivraison | null) ?? PALIERS_DEFAUT,
       departements,
+      offre: c.generaliste ? ("generaliste" as const) : c.familles.length ? ("specialiste" as const) : null,
+      familles: c.familles,
       prochaine: prochaine ? { mois: prochaine.mois, de: prochaine.de, clotureLe: prochaine.clotureLe.toISOString(), clotureDans: prochaine.clotureDans } : null,
       grilles: grilles.map((g) => ({ mois: g.cycle.mois, de: deMois(g.cycle.mois), departement: g.cycle.zone, reponseAvant: g.cycle.reponseAvant.toISOString(), reponseDans: chrono(maintenant, g.cycle.reponseAvant), deposee: !!g.deposeLe, lien: `/grille/${jetonDeGrille(g.id)}`, consultation: consultationPourLeNegoce(g.cycle._count.grilles, g.cycle.reponseAvant) })),
       commandes: [
@@ -306,14 +338,18 @@ export class EspaceNegoceService {
     const enseigne = m.enseigne?.trim() || c.enseigne;
     const departements = m.departements ? this.departementsChoisis(m.departements, [], []) : null;
     if (departements && departements.length === 0) throw validationFailed("Department required", { reason: "departement_requis" });
+    const profil = profilChoisi(m.offre, m.familles);
     await this.prisma.$transaction(async (tx) => {
-      await tx.compteNegoce.update({ where: { id: compteId }, data: { enseigne, ...(m.telephone !== undefined ? { telephone: m.telephone?.trim() || null } : {}), ...(livraison ? { livraison: livraison as unknown as object } : {}), ...(departements ? { departements } : {}) } });
+      await tx.compteNegoce.update({ where: { id: compteId }, data: { enseigne, ...(m.telephone !== undefined ? { telephone: m.telephone?.trim() || null } : {}), ...(livraison ? { livraison: livraison as unknown as object } : {}), ...(departements ? { departements } : {}), ...(profil ?? {}) } });
       if (depots) {
         await tx.depotNegoce.deleteMany({ where: { compteId } });
         await tx.depotNegoce.createMany({ data: depots.map((d) => ({ compteId, ...d })) });
       }
-      if (departements) await this.alignerAbonnements(tx, compteId, { email: c.email, siret: c.siret, enseigne }, departements, maintenant);
-      else if (m.enseigne) await tx.negoce.updateMany({ where: { compteId }, data: { nom: enseigne } });
+      if (departements) await this.alignerAbonnements(tx, compteId, { email: c.email, siret: c.siret, enseigne }, departements, maintenant, profil);
+      else {
+        if (m.enseigne) await tx.negoce.updateMany({ where: { compteId }, data: { nom: enseigne } });
+        if (profil) await tx.negoce.updateMany({ where: { compteId }, data: profil });
+      }
     });
   }
 

@@ -1,0 +1,471 @@
+{
+  "appareil": "se",
+  "base": "https://test.mobiiz.fr",
+  "date": "2026-10-25T05:59:46.779Z",
+  "etapes": [
+    {
+      "n": 1,
+      "etape": "Visiteur : landing",
+      "statut": "ok",
+      "detail": "",
+      "capture": "01-visiteur-landing.jpg",
+      "ms": 7135
+    },
+    {
+      "n": 2,
+      "etape": "Visiteur : tarifs",
+      "statut": "ok",
+      "detail": "",
+      "capture": "02-visiteur-tarifs.jpg",
+      "ms": 1627
+    },
+    {
+      "n": 3,
+      "etape": "Visiteur : inscription",
+      "statut": "ok",
+      "detail": "",
+      "capture": "03-visiteur-inscription.jpg",
+      "ms": 1688
+    },
+    {
+      "n": 4,
+      "etape": "Visiteur : connexion",
+      "statut": "ok",
+      "detail": "",
+      "capture": "04-visiteur-connexion.jpg",
+      "ms": 2627
+    },
+    {
+      "n": 5,
+      "etape": "Visiteur : mot de passe oublié",
+      "statut": "ok",
+      "detail": "",
+      "capture": "05-visiteur-mot-de-passe-oublie.jpg",
+      "ms": 1733
+    },
+    {
+      "n": 6,
+      "etape": "Visiteur : CGU",
+      "statut": "ok",
+      "detail": "",
+      "capture": "06-visiteur-cgu.jpg",
+      "ms": 1735
+    },
+    {
+      "n": 7,
+      "etape": "Visiteur : mentions légales",
+      "statut": "ok",
+      "detail": "",
+      "capture": "07-visiteur-mentions-legales.jpg",
+      "ms": 1615
+    },
+    {
+      "n": 8,
+      "etape": "Visiteur : confidentialité",
+      "statut": "ok",
+      "detail": "",
+      "capture": "08-visiteur-confidentialite.jpg",
+      "ms": 1700
+    },
+    {
+      "n": 9,
+      "etape": "Visiteur : conditions négoce",
+      "statut": "ok",
+      "detail": "",
+      "capture": "09-visiteur-conditions-negoce.jpg",
+      "ms": 1852
+    },
+    {
+      "n": 10,
+      "etape": "Visiteur : connexion négoce",
+      "statut": "ok",
+      "detail": "",
+      "capture": "10-visiteur-connexion-negoce.jpg",
+      "ms": 1682
+    },
+    {
+      "n": 11,
+      "etape": "Visiteur : adresse inconnue",
+      "statut": "ok",
+      "detail": "« Page introuvable »",
+      "capture": "11-visiteur-adresse-inconnue.jpg",
+      "ms": 1481
+    },
+    {
+      "n": 12,
+      "etape": "Landing : accroche, prix, inscription, aucune démo d'office",
+      "statut": "ok",
+      "detail": "",
+      "capture": "12-landing-accroche-prix-inscription-aucune-demo-d-.jpg",
+      "ms": 1467
+    },
+    {
+      "n": 13,
+      "etape": "Landing : « Voir comment ça marche (30 s) », trois métiers, Passer",
+      "statut": "ok",
+      "detail": "",
+      "capture": "13-landing-voir-comment-ca-marche-30-s-trois-metier.jpg",
+      "ms": 404
+    },
+    {
+      "n": 14,
+      "etape": "Inscription artisan",
+      "statut": "ok",
+      "detail": "delivered+admin-recette@resend.dev",
+      "capture": "14-inscription-artisan.jpg",
+      "ms": 3158
+    },
+    {
+      "n": 15,
+      "etape": "Guide : trois écrans, prochaine clôture, « Déposer ma première liste »",
+      "statut": "ok",
+      "detail": "Prochaine clôture : dimanche 1 novembre à 12 h",
+      "capture": "15-guide-trois-ecrans-prochaine-cloture-deposer-ma-.jpg",
+      "ms": 1059
+    },
+    {
+      "n": 16,
+      "etape": "Guide : ne revient pas ; « Revoir le guide » dans le menu",
+      "statut": "ok",
+      "detail": "",
+      "capture": "16-guide-ne-revient-pas-revoir-le-guide-dans-le-men.jpg",
+      "ms": 5548
+    },
+    {
+      "n": 17,
+      "etape": "E-mail réel : confirmer l'adresse",
+      "statut": "ok",
+      "detail": "1 e-mail(s) : « Confirme ton adresse e-mail »",
+      "capture": "17-e-mail-reel-confirmer-l-adresse.jpg",
+      "ms": 2940
+    },
+    {
+      "n": 18,
+      "etape": "Commande commune : SIRET et adresse",
+      "statut": "ok",
+      "detail": "",
+      "capture": "18-commande-commune-siret-et-adresse.jpg",
+      "ms": 5956
+    },
+    {
+      "n": 19,
+      "etape": "Dépôt d'une liste (photo manuscrite), vraie lecture",
+      "statut": "bug",
+      "detail": "page.waitForURL: Timeout 120000ms exceeded. =========================== logs =========================== waiting for navigation until \"load\" ============================================================",
+      "capture": "19-depot-d-une-liste-photo-manuscrite-vraie-lecture.jpg",
+      "ms": 122296
+    },
+    {
+      "n": 20,
+      "etape": "Liste : ajouter à la commande commune",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /^Commande commune d/ }).first() to be visible\u001b[22m ",
+      "capture": "20-liste-ajouter-a-la-commande-commune-bug.jpg",
+      "ms": 20051
+    },
+    {
+      "n": 21,
+      "etape": "Dépôt d'un devis (PDF), vraie lecture, questions, liste",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 240000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /Page des fournitures|Liste des fournitures/ }).or(getByRole('region', { name: 'Les questions' })).first() to be visible\u001b[22m ",
+      "capture": "21-depot-d-un-devis-pdf-vraie-lecture-questions-lis.jpg",
+      "ms": 245473
+    },
+    {
+      "n": 22,
+      "etape": "Ton chantier : aperçu du PDF fournisseur",
+      "statut": "ok",
+      "detail": "pas d'aperçu sur cet écran",
+      "capture": "22-ton-chantier-apercu-du-pdf-fournisseur.jpg",
+      "ms": 48
+    },
+    {
+      "n": 23,
+      "etape": "Accueil : mettre son négoce dans la boucle",
+      "statut": "ok",
+      "detail": "",
+      "capture": "23-accueil-mettre-son-negoce-dans-la-boucle.jpg",
+      "ms": 8734
+    },
+    {
+      "n": 24,
+      "etape": "E-mail réel : invitation du négoce",
+      "statut": "ok",
+      "detail": "« Un regroupement d'artisans vous a ajouté à la Commande commune : créez votre accès »",
+      "capture": "24-e-mail-reel-invitation-du-negoce.jpg",
+      "ms": 450
+    },
+    {
+      "n": 25,
+      "etape": "Négoce : créer son accès depuis l'invitation",
+      "statut": "ok",
+      "detail": "Vous recevrez la prochaine grille de votre secteur à la clôture du 1er novembre à 12 h.",
+      "capture": "25-negoce-creer-son-acces-depuis-l-invitation.jpg",
+      "ms": 3288
+    },
+    {
+      "n": 26,
+      "etape": "Négoce : son espace (prochaine clôture, aucun nom d'artisan)",
+      "statut": "ok",
+      "detail": "",
+      "capture": "26-negoce-son-espace-prochaine-cloture-aucun-nom-d-.jpg",
+      "ms": 3581
+    },
+    {
+      "n": 27,
+      "etape": "Admin : tableau de bord, code reçu par e-mail",
+      "statut": "ok",
+      "detail": "",
+      "capture": "27-admin-tableau-de-bord-code-recu-par-e-mail.jpg",
+      "ms": 4925
+    },
+    {
+      "n": 28,
+      "etape": "Admin : jeu de test (5 faux artisans, 3 faux négoces)",
+      "statut": "ok",
+      "detail": "5 faux artisans et 3 faux négoces dans le 22, 20 lignes déposées.",
+      "capture": "28-admin-jeu-de-test-5-faux-artisans-3-faux-negoces.jpg",
+      "ms": 1264
+    },
+    {
+      "n": 29,
+      "etape": "Admin : clôturer maintenant (grilles envoyées aux négoces)",
+      "statut": "ok",
+      "detail": "1 commande close, 9 grilles envoyées aux négoces.",
+      "capture": "29-admin-cloturer-maintenant-grilles-envoyees-aux-n.jpg",
+      "ms": 2919
+    },
+    {
+      "n": 30,
+      "etape": "Admin : faire répondre les négoces",
+      "statut": "ok",
+      "detail": "3 négoces ont répondu (prix fictifs).",
+      "capture": "30-admin-faire-repondre-les-negoces.jpg",
+      "ms": 2924
+    },
+    {
+      "n": 31,
+      "etape": "Admin : publier les résultats",
+      "statut": "ok",
+      "detail": "1 résultat publié : les artisans sont prévenus.",
+      "capture": "31-admin-publier-les-resultats.jpg",
+      "ms": 1923
+    },
+    {
+      "n": 32,
+      "etape": "Résultats : e-mail réel et prix classés dans l'app",
+      "statut": "bug",
+      "detail": "pas d'e-mail de résultats (reçus : Confirme ton adresse e-mail / Ton code d'accès au pilotage Mobiiz)",
+      "capture": "32-resultats-e-mail-reel-et-prix-classes-dans-l-app.jpg",
+      "ms": 92776
+    },
+    {
+      "n": 33,
+      "etape": "Commande : le bon part au négoce choisi",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Tes prix' }).getByRole('button', { name: /^Commander chez / }).first()\u001b[22m ",
+      "capture": "33-commande-le-bon-part-au-negoce-choisi-bug.jpg",
+      "ms": 30056
+    },
+    {
+      "n": 34,
+      "etape": "Recommande : au prix garanti 30 jours",
+      "statut": "ok",
+      "detail": "C'est commandé : bon n° 1, 238,90 € HT livré, parti chez Ardoisière du Trégor (démo). Commande sur grille garantie du 1er novembre.",
+      "capture": "34-recommande-au-prix-garanti-30-jours.jpg",
+      "ms": 7077
+    },
+    {
+      "n": 35,
+      "etape": "Admin : finir l'essai, puis le paywall au dépôt",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByText(/Ton essai est terminé/).first() to be visible\u001b[22m ",
+      "capture": "35-admin-finir-l-essai-puis-le-paywall-au-depot-bug.jpg",
+      "ms": 34516
+    },
+    {
+      "n": 36,
+      "etape": "Abonnement : essai et deux formules",
+      "statut": "ok",
+      "detail": "",
+      "capture": "36-abonnement-essai-et-deux-formules.jpg",
+      "ms": 2650
+    },
+    {
+      "n": 37,
+      "etape": "Stripe : carte refusée (4000 0000 0000 0002)",
+      "statut": "ok",
+      "detail": "Stripe dit le refus ; rien n'est payé",
+      "capture": "37-stripe-carte-refusee-4000-0000-0000-0002.jpg",
+      "ms": 9678
+    },
+    {
+      "n": 38,
+      "etape": "Stripe : carte acceptée (4242), retour « Abonné au mois »",
+      "statut": "ok",
+      "detail": "",
+      "capture": "38-stripe-carte-acceptee-4242-retour-abonne-au-mois.jpg",
+      "ms": 15006
+    },
+    {
+      "n": 39,
+      "etape": "Factures : la facture du mois, téléchargeable",
+      "statut": "ok",
+      "detail": "F-000005 du 25/10/2026 au 25/11/2026 · 58,80 € TTC Télécharger",
+      "capture": "39-factures-la-facture-du-mois-telechargeable.jpg",
+      "ms": 885
+    },
+    {
+      "n": 40,
+      "etape": "Passage à l'annuel au prorata",
+      "statut": "ok",
+      "detail": "",
+      "capture": "40-passage-a-l-annuel-au-prorata.jpg",
+      "ms": 7061
+    },
+    {
+      "n": 41,
+      "etape": "Admin : simuler un échec de paiement (grâce de 7 jours)",
+      "statut": "ok",
+      "detail": "Toitures Recette SE JR Ton paiement n'est pas passé. Mets à jour ta carte avant le 01/11 pour garder l'accès. → Commande du 15 novembre Clôture dans 21 j 5 h Re",
+      "capture": "41-admin-simuler-un-echec-de-paiement-grace-de-7-jo.jpg",
+      "ms": 5922
+    },
+    {
+      "n": 42,
+      "etape": "Résiliation en deux clics",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Résilier' })\u001b[22m ",
+      "capture": "42-resiliation-en-deux-clics-bug.jpg",
+      "ms": 30045
+    },
+    {
+      "n": 43,
+      "etape": "E-mails réels de l'abonnement",
+      "statut": "ok",
+      "detail": "« Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Ton abonnement Mobiiz est actif », « Ton abonnement Mobiiz est actif », « Tu es passé à l'abonnement annuel Mobiiz », « Ton paiement Mobiiz n'est pas passé »",
+      "capture": "43-e-mails-reels-de-l-abonnement.jpg",
+      "ms": 63553
+    },
+    {
+      "n": 44,
+      "etape": "Menu : « Essayer avec un chantier fictif »",
+      "statut": "ok",
+      "detail": "",
+      "capture": "44-menu-essayer-avec-un-chantier-fictif.jpg",
+      "ms": 5717
+    },
+    {
+      "n": 45,
+      "etape": "Écran : mes chantiers",
+      "statut": "ok",
+      "detail": "",
+      "capture": "45-ecran-mes-chantiers.jpg",
+      "ms": 2544
+    },
+    {
+      "n": 46,
+      "etape": "Écran : fournisseurs",
+      "statut": "ok",
+      "detail": "",
+      "capture": "46-ecran-fournisseurs.jpg",
+      "ms": 2053
+    },
+    {
+      "n": 47,
+      "etape": "Écran : formules",
+      "statut": "ok",
+      "detail": "",
+      "capture": "47-ecran-formules.jpg",
+      "ms": 2206
+    },
+    {
+      "n": 48,
+      "etape": "Écran : compte",
+      "statut": "ok",
+      "detail": "",
+      "capture": "48-ecran-compte.jpg",
+      "ms": 2113
+    },
+    {
+      "n": 49,
+      "etape": "Compte : export JSON et PDF",
+      "statut": "ok",
+      "detail": "mobiiz-mes-donnees-2026-10-25.json",
+      "capture": "49-compte-export-json-et-pdf.jpg",
+      "ms": 2728
+    },
+    {
+      "n": 50,
+      "etape": "Admin : tout effacer (faux comptes)",
+      "statut": "ok",
+      "detail": "Effacé : 5 faux artisans, 3 faux négoces.",
+      "capture": "50-admin-tout-effacer-faux-comptes.jpg",
+      "ms": 3079
+    },
+    {
+      "n": 51,
+      "etape": "Compte : suppression (en tapant SUPPRIMER)",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Supprimer mon compte' })\u001b[22m ",
+      "capture": "51-compte-suppression-en-tapant-supprimer-bug.jpg",
+      "ms": 30056
+    }
+  ],
+  "anomalies": [
+    {
+      "qui": "visiteur mentions légales",
+      "url": "https://test.mobiiz.fr/mentions-legales",
+      "type": "reste",
+      "texte": "information légale à compléter : « ité par BATI INVEST, SARL au capital de [A COMPLETER] €, immatriculée au RCS de  »"
+    },
+    {
+      "qui": "visiteur confidentialité",
+      "url": "https://test.mobiiz.fr/confidentialite",
+      "type": "reste",
+      "texte": "information légale à compléter : « ubazlanec, SIREN 910 796 325. Contact : [A COMPLETER]. BATI INVEST n'a pas de dé »"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/nulle-part",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "http 502",
+      "texte": "POST /v1/projects/01a17199-1a00-756b-8250-b92c7ef3f3d4/liste?ecran=1"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "corps 502",
+      "texte": "{\"error\":{\"code\":\"analysis_failed\",\"message\":\"The AI could not read this list\",\"supportId\":\"07BC-FEDD\",\"retryable\":false,\"details\":{\"reason\":\"provider_error\"}}}"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/01a1719b-4bcf-7488-ae44-7e6594f07798",
+      "type": "http 502",
+      "texte": "POST /v1/quantitatifs?ecran=1"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/01a1719b-4bcf-7488-ae44-7e6594f07798",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/01a1719b-4bcf-7488-ae44-7e6594f07798",
+      "type": "corps 502",
+      "texte": "{\"error\":{\"code\":\"analysis_failed\",\"message\":\"The AI could not read this quote\",\"supportId\":\"6B3D-B3B3\",\"retryable\":false,\"details\":{\"reason\":\"provider_error\"}}}"
+    }
+  ]
+}

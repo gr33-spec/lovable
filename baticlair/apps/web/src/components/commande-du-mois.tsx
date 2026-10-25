@@ -67,7 +67,28 @@ export interface CommandeDuMois {
   mesNegoces?: string[];
   /** La liste reportée d'une commande sans réponse. */
   report?: string | null;
-  resultats: null | { parDefaut: string | null; moinsCherPourToi: string | null; negoces: NegoceDuResultat[]; choix: { negoceId: string; totalHt: number; commandeLe: string | null } | null };
+  resultats: null | {
+    parDefaut: string | null;
+    moinsCherPourToi: string | null;
+    negoces: NegoceDuResultat[];
+    choix: { negoceId: string; totalHt: number; commandeLe: string | null; libelle?: string | null } | null;
+    /** Multimétier (Greg, 25 octobre 2026) : les 2 ou 3 meilleures combinaisons livrées, la moins chère d'abord. */
+    combinaisons?: Combinaison[];
+    /** Les familles de sa liste qu'aucun négoce n'a entièrement chiffrées (« second œuvre »). */
+    sansPrix?: string[];
+  };
+}
+
+/** « Tout chez X : 4 200 €, 1 livraison » ou « Placo chez Y, tuiles chez Z : 3 950 €, 2 livraisons ». */
+export interface Combinaison {
+  cle: string;
+  libelle: string;
+  totalHt: number;
+  livraisons: number;
+  phraseLivraisons: string;
+  ecartHt: number;
+  toutChez: string | null;
+  parts: { negoceId: string; nom: string; familles: string[]; lignes: number; totalHt: number; livraisonHt: number }[];
 }
 
 /** Des comptes, jamais un nom ni un prix avant les résultats : phrases calculées par le domaine (`suiviDesDemandes`). */
@@ -551,10 +572,11 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
     }
   };
   const r = c.resultats;
-  const commande = r?.choix?.commandeLe ? r.negoces.find((n) => n.negoceId === r.choix!.negoceId) : null;
-  const choisissable = (n: NegoceDuResultat) => n.complet && n.livrable;
-  const parDefaut = r ? (r.negoces.find((n) => n.negoceId === r.parDefaut && choisissable(n)) ?? r.negoces.find((n) => n.negoceId === r.moinsCherPourToi && choisissable(n)) ?? null) : null;
-  const selection = r ? (r.negoces.find((n) => n.negoceId === choisi && choisissable(n)) ?? parDefaut) : null;
+  // Multimétier : la moins chère d'abord, cochée d'office ; l'artisan choisit.
+  const combinaisons = r?.combinaisons ?? [];
+  const commandee = r?.choix?.commandeLe ? r.choix : null;
+  const selection = combinaisons.find((x) => x.cle === choisi) ?? combinaisons[0] ?? null;
+  const nomsDe = (x: Combinaison) => x.parts.map((p) => p.nom).join(" et ");
   return (
     <section aria-label={`Commande ${c.de}`} className={`${CARTE} gap-3`}>
       {/* Haute visibilité : tant que la commande est ouverte, son en-tête est de nuit, le chrono en jaune (comme l'accueil). */}
@@ -610,40 +632,43 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
 
       {r ? (
         <section aria-label="Tes prix" className="flex flex-col gap-2">
-          <h3 className="text-[16px] font-extrabold">Ton prix livré chez chaque négoce</h3>
-          {commande ? (
-            <p role="status" className="rounded-xl bg-ok-bg p-4 text-[15px] font-semibold text-ok">{`Commandé chez ${commande.nom} : ${euros(commande.totalHt)} HT livré. Le bon de commande est parti.`}</p>
+          <h3 className="text-[16px] font-extrabold">Tes meilleures options, livraison comprise</h3>
+          {commandee ? (
+            <p role="status" className="rounded-xl bg-ok-bg p-4 text-[15px] font-semibold text-ok">{`Commandé${commandee.libelle ? ` : ${commandee.libelle}` : ""}, ${euros(commandee.totalHt)} HT livré. Chaque négoce a reçu sa part du bon de commande.`}</p>
           ) : null}
-          <ul className="flex flex-col gap-2">
-            {r.negoces.map((n) => (
-              <li key={n.negoceId}>
-                <label className={`flex items-start gap-3 rounded-xl border-2 p-4 transition-[border-color] duration-150 ${choisissable(n) ? "bg-surface" : "bg-surface opacity-70"} ${selection?.negoceId === n.negoceId && !commande ? "border-accent" : "border-line"}`}>
-                  {commande ? null : <input type="radio" name={`negoce-${c.cycleId}`} disabled={!choisissable(n)} checked={selection?.negoceId === n.negoceId} onChange={() => setChoisi(n.negoceId)} className="mt-1 size-5 shrink-0 accent-accent" />}
-                  <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="text-[16px] font-extrabold">{`Chez ${n.nom} : ${euros(n.totalHt)} HT livré`}</span>
-                    <span className="text-[13px] font-semibold text-muted">{`${euros(n.marchandiseHt)} de matériaux, livraison ${n.livraisonHt > 0 ? euros(n.livraisonHt) : "gratuite"}`}</span>
-                    {n.premierSurLeTotal ? <span className="text-[13px] font-bold text-accent-text">Le moins cher sur toute la commande</span> : null}
-                    {r.moinsCherPourToi === n.negoceId && !n.premierSurLeTotal ? <span className="text-[13px] font-bold text-ok">Le moins cher pour toi</span> : null}
-                    {!n.complet ? <span className="text-[13px] font-bold text-warn">{`Il n'a pas chiffré ${n.manquantes} article${n.manquantes > 1 ? "s" : ""} de ta liste`}</span> : null}
-                    {!n.livrable ? <span className="text-[13px] font-bold text-warn">Ne livre pas ta zone</span> : null}
-                    {n.indicatives.length > 0 ? <span className="text-[13px] text-muted">{`Prix indicatifs, hors total et hors garantie : ${n.indicatives.map((i) => `${i.designation} ${euros(i.prixUnitaire)}`).join(" · ")}`}</span> : null}
-                  </span>
-                </label>
-              </li>
-            ))}
-          </ul>
-          {!commande && !selection ? (
+          {!commandee && combinaisons.length > 0 ? (
+            <ul className="flex flex-col gap-2">
+              {combinaisons.map((x, i) => (
+                <li key={x.cle}>
+                  <label className={`flex items-start gap-3 rounded-xl border-2 bg-surface p-4 transition-[border-color] duration-150 ${selection?.cle === x.cle ? "border-accent" : "border-line"}`}>
+                    <input type="radio" name={`combinaison-${c.cycleId}`} checked={selection?.cle === x.cle} onChange={() => setChoisi(x.cle)} className="mt-1 size-5 shrink-0 accent-accent" />
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-[16px] font-extrabold">{`${x.libelle} : ${euros(x.totalHt)} HT livré, ${x.phraseLivraisons}`}</span>
+                      {i === 0 ? <span className="text-[13px] font-bold text-ok">La moins chère</span> : <span className="text-[13px] font-bold text-muted">{`${euros(x.ecartHt)} de plus`}</span>}
+                      {x.parts.length > 1 ? (
+                        <span className="text-[13px] font-semibold text-muted">{x.parts.map((p) => `${p.nom} : ${euros(p.totalHt)} (${p.lignes} article${p.lignes > 1 ? "s" : ""}, livraison ${p.livraisonHt > 0 ? euros(p.livraisonHt) : "gratuite"})`).join(" · ")}</span>
+                      ) : (
+                        <span className="text-[13px] font-semibold text-muted">{`Livraison ${x.parts[0]!.livraisonHt > 0 ? euros(x.parts[0]!.livraisonHt) : "gratuite"}`}</span>
+                      )}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {r.sansPrix && r.sansPrix.length > 0 ? (
+            <p role="status" className="rounded-xl bg-warn-bg p-4 text-[14px] font-semibold text-warn">{`Aucun négoce n'a chiffré : ${r.sansPrix.join(", ")}. Commande ces lignes en direct chez ton négoce.`}</p>
+          ) : null}
+          {!commandee && !selection ? (
             <p role="status" className="rounded-xl bg-warn-bg p-4 text-[14px] font-semibold text-warn">
               Aucun négoce n&apos;a chiffré toute ta liste : commande-la en direct chez ton négoce.
             </p>
           ) : null}
-          {!commande && selection && !confirmer ? (
-            <Button onClick={() => setConfirmer(true)}>{`Commander chez ${selection.nom}`}</Button>
+          {!commandee && selection && !confirmer ? <Button onClick={() => setConfirmer(true)}>{`Commander : ${selection.libelle}`}</Button> : null}
+          {!commandee && selection && confirmer ? (
+            <ConfirmationCommande negoce={nomsDe(selection)} pending={pending === "commander"} onAnnuler={() => setConfirmer(false)} onConfirmer={() => run("commander", () => api(`/v1/commande-du-mois/${encodeURIComponent(c.cycleId)}/commander`, { method: "POST", body: { combinaison: selection.cle } }))} />
           ) : null}
-          {!commande && selection && confirmer ? (
-            <ConfirmationCommande negoce={selection.nom} pending={pending === "commander"} onAnnuler={() => setConfirmer(false)} onConfirmer={() => run("commander", () => api(`/v1/commande-du-mois/${encodeURIComponent(c.cycleId)}/commander`, { method: "POST", body: { negoceId: selection.negoceId } }))} />
-          ) : null}
-          <p className="text-[14px] text-muted">Sans engagement : tu commandes seulement si le prix te plaît. Le bon part au négoce, avec ton nom ; tu paies sur ton compte, comme d&apos;habitude.</p>
+          <p className="text-[14px] text-muted">Sans engagement : tu commandes seulement si le prix te plaît. Chaque négoce retenu reçoit seulement sa part du bon, avec ton nom ; tu paies sur ton compte, comme d&apos;habitude.</p>
         </section>
       ) : c.phase === "resultats" ? (
         <p className="text-[14px] font-semibold text-muted">Aucun négoce n&apos;a chiffré ta liste cette fois-ci.</p>

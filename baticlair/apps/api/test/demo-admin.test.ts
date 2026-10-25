@@ -47,13 +47,23 @@ describe("la démo admin", () => {
     const sans = (await greg.agent.get("/v1/admin/pilotage").expect(200)).body;
 
     const jeu = (await greg.agent.post("/v1/admin/pilotage/demo/jeu").expect(200)).body;
-    expect(jeu).toEqual({ artisans: 5, negoces: 3, lignes: 20, zone: "22" });
+    // Multimétier (25 octobre 2026) : 5 × 4 lignes de couverture, plus 2 lignes de placo chez 3 d'entre eux.
+    // Et l'admin reçoit sa propre liste de démonstration (couverture et placo, 6 lignes) pour voir ses options.
+    expect(jeu).toEqual({ artisans: 5, negoces: 3, lignes: 26, zone: "22", pourToi: 6 });
     // Les faux comptes n'entrent pas dans les statistiques.
     expect((await greg.agent.get("/v1/admin/pilotage").expect(200)).body.chiffres).toEqual(sans.chiffres);
 
     const clos = (await greg.agent.post("/v1/admin/pilotage/demo/cloturer").expect(200)).body;
     expect(clos).toMatchObject({ clos: 1, grillesEnvoyees: 3 });
-    expect(ctx.emails.sent.filter((m) => /^negoce-test-\d@demo\.mobiiz\.fr$/.test(m.to))).toHaveLength(3);
+    const grilles = ctx.emails.sent.filter((m) => /^negoce-test-\d@demo\.mobiiz\.fr$/.test(m.to));
+    expect(grilles).toHaveLength(3);
+    // Un généraliste et deux spécialistes : le spécialiste du second œuvre ne voit que le placo, celui de la couverture que la couverture.
+    const grilleDe = (n: number) => grilles.find((m) => m.to === `negoce-test-${n}@demo.mobiiz.fr`)!.text;
+    expect(grilleDe(1)).toMatch(/Ardoise[\s\S]*BA13/);
+    expect(grilleDe(2)).toContain("Ardoise");
+    expect(grilleDe(2)).not.toContain("BA13");
+    expect(grilleDe(3)).toContain("BA13");
+    expect(grilleDe(3)).not.toContain("Ardoise");
     expect((await greg.agent.post("/v1/admin/pilotage/demo/repondre").expect(200)).body).toEqual({ reponses: 3 });
     expect((await greg.agent.post("/v1/admin/pilotage/demo/publier").expect(200)).body).toMatchObject({ resultats: 1 });
     const vue = (await greg.agent.get("/v1/commande-du-mois").expect(200)).body;

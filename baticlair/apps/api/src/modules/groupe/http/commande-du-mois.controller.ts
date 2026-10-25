@@ -22,7 +22,7 @@ const depotBody = z.object({
   /** La commande que l'écran montrait (« 2026-10-15 ») : close entre-temps, la réponse dit « Trop tard pour le 15 octobre… ». */
   mois: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
 });
-const commanderBody = z.object({ negoceId: z.uuid() });
+const commanderBody = z.object({ negoceId: z.uuid().optional(), combinaison: z.string().min(1).max(4000).optional() }).refine((b) => !!b.negoceId || !!b.combinaison);
 /** « Prix fermes » (obligatoire) et, par article, « non garanti » : des champs du formulaire multipart. */
 const grilleBody = z.object({ fermes: z.string().max(10).optional(), conditions: z.string().max(10).optional(), nonGarantis: z.union([z.string().max(300), z.array(z.string().max(300))]).optional() });
 const recommanderBody = z.object({ lignes: z.array(z.object({ cle: z.string().min(1).max(300), quantite: z.number().positive().max(1_000_000) })).min(1).max(200), adresseLivraison: z.string().trim().min(5).max(300) });
@@ -97,7 +97,7 @@ export class CommandeDuMoisController {
   @HttpCode(200)
   async commander(@Tenant() tenant: TenantContext, @Param("cycleId") cycleId: string, @Body(new ZodPipe(commanderBody)) body: z.infer<typeof commanderBody>, @Query("maintenant") m?: string) {
     this.ecriture();
-    return this.commande.commander(tenant, cycleId, body.negoceId, instant(this.config, m));
+    return this.commande.commander(tenant, cycleId, body, instant(this.config, m));
   }
 
   @Get("projects/:projectId/commande-du-mois/suivi")
