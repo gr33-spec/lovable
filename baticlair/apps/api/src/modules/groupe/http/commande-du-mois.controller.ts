@@ -24,7 +24,13 @@ const depotBody = z.object({
 });
 const commanderBody = z.object({ negoceId: z.uuid().optional(), combinaison: z.string().min(1).max(4000).optional() }).refine((b) => !!b.negoceId || !!b.combinaison);
 /** « Prix fermes » (obligatoire) et, par article, « non garanti » : des champs du formulaire multipart. */
-const grilleBody = z.object({ fermes: z.string().max(10).optional(), conditions: z.string().max(10).optional(), nonGarantis: z.union([z.string().max(300), z.array(z.string().max(300))]).optional() });
+const grilleBody = z.object({
+  fermes: z.string().max(10).optional(),
+  conditions: z.string().max(10).optional(),
+  nonGarantis: z.union([z.string().max(300), z.array(z.string().max(300))]).optional(),
+  /** Recentrage (25 octobre 2026) : la validité de l'offre, fixée par le négoce (7 jours au moins). */
+  validiteJours: z.coerce.number().int().min(1).max(365).optional(),
+});
 const recommanderBody = z.object({ lignes: z.array(z.object({ cle: z.string().min(1).max(300), quantite: z.number().positive().max(1_000_000) })).min(1).max(200), adresseLivraison: z.string().trim().min(5).max(300) });
 const configBody = z.object({ jourCloture1: z.number().int(), jourCloture2: z.number().int(), heureCloture: z.number().int(), joursOuvresReponse: z.number().int(), heureReponse: z.number().int() });
 const datesBody = z.object({ clotureLe: z.iso.datetime().optional(), reponseAvant: z.iso.datetime().optional() });
@@ -130,7 +136,17 @@ export class GrilleNegoceController {
   async deposer(@Param("jeton") jeton: string, @Body(new ZodPipe(grilleBody)) body: z.infer<typeof grilleBody>, @UploadedFiles() files: { originalname: string; mimetype: string; buffer: Buffer }[] | undefined, @Query("maintenant") m?: string) {
     if (!this.config.groupe.enabled || this.config.groupe.mode !== "mois") throw notFound("Route");
     const nonGarantis = body.nonGarantis === undefined ? [] : Array.isArray(body.nonGarantis) ? body.nonGarantis : [body.nonGarantis];
-    return this.commande.deposerGrille(jeton, { fichiers: (files ?? []).map((f) => ({ nom: f.originalname, type: f.mimetype, contenu: f.buffer })), fermes: body.fermes === "oui" || body.fermes === "true" || body.fermes === "on", conditions: body.conditions === "oui" || body.conditions === "true" || body.conditions === "on", nonGarantis }, instant(this.config, m));
+    return this.commande.deposerGrille(jeton, { fichiers: (files ?? []).map((f) => ({ nom: f.originalname, type: f.mimetype, contenu: f.buffer })), fermes: body.fermes === "oui" || body.fermes === "true" || body.fermes === "on", conditions: body.conditions === "oui" || body.conditions === "true" || body.conditions === "on", nonGarantis, validiteJours: body.validiteJours ?? null }, instant(this.config, m));
+  }
+
+  /** « Je ne chiffre pas » : le négoce refuse la consultation, sans relance. */
+  @Public()
+  @Throttle({ default: HOURLY(30) })
+  @Post(":jeton/refuser")
+  @HttpCode(200)
+  async refuser(@Param("jeton") jeton: string, @Query("maintenant") m?: string) {
+    if (!this.config.groupe.enabled) throw notFound("Route");
+    return this.commande.refuserGrille(jeton, instant(this.config, m));
   }
 }
 

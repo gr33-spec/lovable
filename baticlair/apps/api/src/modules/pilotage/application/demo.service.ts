@@ -41,6 +41,9 @@ const LIGNES = [
   { designation: "Rail R48 3 m", unite: "pièces", base: 30, famille: "second_oeuvre" },
 ] as const;
 
+/** Les prix unitaires HT FICTIFS de la démo, ligne par ligne (dans l'ordre de `LIGNES`). Jamais des prix réels. */
+const PRIX_DEMO = [1.18, 0.21, 0.62, 96, 7.9, 3.4] as const;
+
 export class DemoService {
   constructor(
     private readonly prisma: PrismaService,
@@ -78,8 +81,35 @@ export class DemoService {
       const project = await p.project.create({ data: { companyId, name: "Démo regroupement (couverture et placo)", address: ADRESSE_ADMIN, demo: true, createdById: adminUserId } });
       const takeoff = await p.takeoff.create({ data: { companyId, projectId: project.id, source: "lignes", trade: "roofing", status: "validated", promptId: "demo", promptVersion: 1, model: "demo", calculatedAt: maintenant, validatedAt: maintenant } });
       pourToi = await this.commande.deposerPourLaDemo({ companyId, projectId: project.id, takeoffId: takeoff.id, adresse: ADRESSE_ADMIN, lignes: LIGNES.map((l) => ({ designation: l.designation, unite: l.unite, famille: l.famille, quantite: l.base })) }, maintenant);
+      await this.demandePersoDemo(companyId, project.id, takeoff.id, maintenant);
     }
     return { artisans: ARTISANS.length, negoces: NEGOCES.length, lignes, zone: ZONE_DEMO, pourToi };
+  }
+
+  /**
+   * Recentrage (25 octobre 2026) : une DEMANDE PERSO de démonstration sur le chantier de l'admin, déjà chiffrée par les
+   * trois faux négoces (prix fictifs, livraison, validité) : la comparaison livrée, « Commander » et « Mes prix » se voient
+   * sans lecture IA. Tout disparaît avec « Tout effacer ».
+   */
+  private async demandePersoDemo(companyId: string, projectId: string, takeoffId: string, maintenant: Date): Promise<void> {
+    const lines = LIGNES.map((l) => ({ designation: l.designation, quantity: String(l.base), unit: l.unite, reference: null }));
+    const envoyeLe = new Date(maintenant.getTime() - 26 * 3_600_000);
+    const recipients = [];
+    for (const [i, [enseigne]] of NEGOCES.entries()) {
+      const email = `negoce-test-${i + 1}@${this.domaine}`;
+      const supplier = await this.prisma.supplier.create({ data: { companyId, name: enseigne, email } });
+      // Le généraliste chiffre tout ; chaque spécialiste ses seules familles ; un écart propre à chacun.
+      const ecart = [1, 0.93, 0.96][i]!;
+      const prix: Record<string, number> = {};
+      LIGNES.forEach((l, k) => {
+        const chiffre = i === 0 || (i === 1 && l.famille === "couverture") || (i === 2 && l.famille === "second_oeuvre");
+        if (chiffre) prix[String(k)] = Math.round(PRIX_DEMO[k]! * ecart * 100) / 100;
+      });
+      recipients.push({ supplierId: supplier.id, status: "received" as const, sentAt: envoyeLe, prix, livraisonHt: [0, 45, 35][i]!, delaiJours: [3, 2, 4][i]!, validiteJours: [14, 7, 10][i]!, reponduLe: new Date(envoyeLe.getTime() + (i + 2) * 3_600_000) });
+    }
+    await this.prisma.priceRequest.create({
+      data: { companyId, projectId, takeoffId, lines, but: "chiffrer", accordIdentiteLe: envoyeLe, closLe: new Date(maintenant.getTime() + 21 * 86_400_000), createdAt: envoyeLe, recipients: { create: recipients } },
+    });
   }
 
   cloturer(maintenant = new Date()) {
@@ -108,6 +138,8 @@ export class DemoService {
   /** Tout ce qui est faux disparaît : comptes, entreprises, chantiers, besoins, négoces et leurs comptes. */
   async effacer() {
     const avant = await this.jeu.effacer();
+    // Les faux négoces ajoutés au carnet de l'admin (demande perso de démonstration), après leurs demandes.
+    await this.prisma.supplier.deleteMany({ where: { email: { endsWith: `@${this.domaine}` } } });
     const comptes = await this.prisma.compteNegoce.deleteMany({ where: { email: { endsWith: `@${this.domaine}` } } });
     return { ...avant, comptesNegoce: comptes.count };
   }

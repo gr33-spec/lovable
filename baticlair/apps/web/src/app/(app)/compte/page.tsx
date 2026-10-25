@@ -19,7 +19,7 @@ import {
   PageTitle,
 } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
-import { NOM, nom, NOM_APP } from "@/lib/nom";
+import { nom, NOM_APP } from "@/lib/nom";
 import { useSession } from "@/lib/session";
 
 export default function ComptePage() {

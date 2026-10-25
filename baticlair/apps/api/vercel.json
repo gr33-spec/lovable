@@ -28,6 +28,10 @@
       "schedule": "11 7 * * *"
     },
     {
+      "path": "/v1/internal/demandes-perso",
+      "schedule": "35 9 * * *"
+    },
+    {
       "path": "/v1/internal/rapport-mensuel",
       "schedule": "0 7 1 * *"
     }

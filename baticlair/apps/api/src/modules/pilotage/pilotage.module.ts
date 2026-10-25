@@ -38,5 +38,6 @@ import { PilotageController, PilotagePublicController } from "./http/pilotage.co
       inject: [PrismaService, JeuDemonstrationService, CommandeDuMoisService, AbonnementService],
     },
   ],
+  exports: [PilotageService],
 })
 export class PilotageModule {}

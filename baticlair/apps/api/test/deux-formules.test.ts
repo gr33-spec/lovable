@@ -53,7 +53,7 @@ describe("mensuel ou annuel", () => {
     expect(await payer(A.agent, undefined, T)).toMatchObject({ acces: "abonne", formule: "mensuel" });
     // La page publique (landing, /tarifs) dit les mêmes formules, sans session.
     const pub = (await srv().get("/v1/public/tarif").expect(200)).body;
-    expect(pub).toMatchObject({ argument: "Dès 29 € par mois, économise des centaines, voire des milliers d'euros chaque année.", prixHt: "49 €", prixAnnuelHt: "348 €", prixDes: "29 €" });
+    expect(pub).toMatchObject({ argument: "Gratuit pour commencer. Dès 29 € HT par mois pour comparer et acheter en groupe.", prixHt: "49 €", prixAnnuelHt: "348 €", prixDes: "29 €" });
     expect(pub.offres.map((o: { formule: string }) => o.formule)).toEqual(["annuel", "mensuel"]);
   });
 

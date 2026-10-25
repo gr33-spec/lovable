@@ -1,4 +1,4 @@
-import { nom, NOM, NOM_APP } from "@/lib/nom";
+import { nom, NOM, NOM_APP, NOM_PLURIEL } from "@/lib/nom";
 /**
  * Textes d'interface partagés (français). Les textes propres à un seul
  * écran restent dans cet écran ; tout ce qui se répète (navigation,
@@ -6,7 +6,7 @@ import { nom, NOM, NOM_APP } from "@/lib/nom";
  * pour le lexique.
  */
 export const fr = {
-  nav: { home: "Accueil", projects: "Mes chantiers", groupe: NOM, suppliers: "Fournisseurs", account: "Compte" },
+  nav: { home: "Accueil", projects: "Mes chantiers", chantiers: "Chantiers", groupe: NOM_PLURIEL, prix: "Mes prix", profil: "Profil", suppliers: "Fournisseurs", account: "Compte" },
   status: { active: "En cours", archived: "Terminé" },
   actions: {
     retry: "Réessayer",

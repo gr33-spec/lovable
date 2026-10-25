@@ -92,6 +92,12 @@ export class AbonnementService {
     this.ecart = f;
   }
 
+  /** Recentrage (25 octobre 2026) : le payant offert dans la zone de l'entreprise (moins de 10 artisans actifs, ou préavis). */
+  private offert: (companyId: string) => Promise<boolean> = async () => false;
+  brancherOffert(f: (companyId: string) => Promise<boolean>): void {
+    this.offert = f;
+  }
+
   get actif(): boolean {
     return this.config.abonnement.actif;
   }
@@ -148,6 +154,7 @@ export class AbonnementService {
 
   async permis(companyId: string, action: ActionPayante, maintenant = this.now(), deposeeLe?: Date | null): Promise<boolean> {
     if (!this.actif) return true;
+    if (await this.offert(companyId)) return true;
     return actionPermise(await this.etat(companyId, maintenant), action, deposeeLe);
   }
 

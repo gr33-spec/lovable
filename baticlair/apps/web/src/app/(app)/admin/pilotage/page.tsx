@@ -1,5 +1,6 @@
 "use client";
 
+import { CoutIaGratuitsCarte, HypothesesCarte, InscriptionsCarte } from "@/components/admin-hypotheses";
 import { useCallback, useEffect, useState } from "react";
 import { BackButton, Button, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -231,6 +232,9 @@ function Contenu() {
         <Ligne titre="Reste" valeur={euros(t.rentabilite.resultat)} />
       </Section>
 
+      <HypothesesCarte />
+      <CoutIaGratuitsCarte />
+      <InscriptionsCarte />
       <Apprentissage taux={t.apprentissage.tauxDeCorrection} />
       <ReglagesCarte />
       {t.demo ?? t.mode === "test" ? <DemoCarte /> : null}

@@ -132,8 +132,8 @@ describe("mensuel ou annuel", () => {
     expect(offresAbonnement(r)[0]).toMatchObject({ badge: null, details: ["360 € HT par an, en une fois", "Renouvelé chaque année, rappel 30 jours avant"] });
   });
   it("l'argument de la landing : « Dès 29 € par mois »", () => {
-    expect(argumentTarif({ cycles: 0, parCommande: null })).toBe("Dès 29 € par mois, économise des centaines, voire des milliers d'euros chaque année.");
-    expect(argumentTarif({ cycles: 3, parCommande: 412 })).toBe("Dès 29 € par mois : en moyenne, nos artisans ont économisé 412 € par regroupement.");
+    expect(argumentTarif({ cycles: 0, parCommande: null })).toBe("Gratuit pour commencer. Dès 29 € HT par mois pour comparer et acheter en groupe.");
+    expect(argumentTarif({ cycles: 3, parCommande: 412 })).toBe("Gratuit pour commencer. Dès 29 € HT par mois : en moyenne, nos artisans ont économisé 412 € par regroupement.");
   });
   it("une période : un mois, ou un an", () => {
     expect(finDePeriode(d("2027-01-31"), "annuel").toISOString().slice(0, 10)).toBe("2028-01-31");

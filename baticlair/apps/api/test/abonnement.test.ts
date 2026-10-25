@@ -27,6 +27,9 @@ afterAll(async () => {
 beforeEach(async () => {
   await resetDatabase(ctx.prisma);
   ctx.emails.sent.length = 0;
+  // Recentrage (25 octobre 2026) : sous 10 artisans actifs, le payant est offert dans la zone ; ici, le 22 a franchi le
+  // seuil depuis longtemps, pour tester l'essai et le paywall.
+  await ctx.prisma.parametreGroupe.create({ data: { cle: "zone:22:seuil_franchi", valeur: "2026-01-01T00:00:00.000Z" } });
 });
 
 const srv = () => request(ctx.app.getHttpServer());

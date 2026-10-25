@@ -54,6 +54,12 @@ export const EXEMPLE = {
       ],
     },
   ],
+  /** Recentrage (Greg, 25 octobre 2026) : la demande perso de la démo, trois négoces fictifs comparés livraison comprise. */
+  comparaison: [
+    { negoce: "Négoce Exemple A", livre: "3 412 € HT livré", detail: "Toutes les lignes · livraison 45 € · 3 jours", meilleur: true },
+    { negoce: "Négoce Exemple B", livre: "3 520 € HT livré", detail: "Toutes les lignes · franco · 5 jours", meilleur: false },
+    { negoce: "Négoce Exemple C", livre: "3 290 € HT livré", detail: "Il manque le faîtage zinc · 2 jours", meilleur: false },
+  ],
   lot: { numero: 12, departement: "Côtes-d'Armor", reference: "Ardoise naturelle 32×22 Espagne 1er choix", artisans: 3, volume: "8 200 pièces", negoces: 4 },
   offre: { quantite: "2 760 pièces", prix: "0,92 € HT l'unité", negoce: "Négoce Exemple, Guingamp", baisse: "−12 %", livraison: "3 novembre", economie: "286 €", livre: "2 584 € HT livré à Ploubazlanec", fraisLivraison: "45 €", habituel: "1,04 €" },
 } as const;

@@ -57,6 +57,8 @@ export default function GrilleNegocePage() {
   const [fermes, setFermes] = useState(false);
   const [conditions, setConditions] = useState(false);
   const [nonGarantis, setNonGarantis] = useState<string[]>([]);
+  const [validite, setValidite] = useState("30");
+  const [refuse, setRefuse] = useState(false);
 
   useEffect(() => {
     api<PageGrille>(`/v1/grille/${encodeURIComponent(jeton)}`)
@@ -73,12 +75,27 @@ export default function GrilleNegocePage() {
     form.set("fermes", fermes ? "oui" : "non");
     if (page?.conditionsAAccepter) form.set("conditions", conditions ? "oui" : "non");
     for (const cle of nonGarantis) form.append("nonGarantis", cle);
+    form.set("validiteJours", validite.trim());
     for (const f of fichiers) form.append("file", f, f.name);
     setPending(true);
     setEnvoi(null);
     try {
       setPage(await api<PageGrille>(`/v1/grille/${encodeURIComponent(jeton)}`, { method: "POST", body: form }));
       setFichiers([]);
+    } catch (e) {
+      setEnvoi(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  /** « Je ne chiffre pas » (Greg, 25 octobre 2026) : le négoce refuse cette consultation, sans relance. */
+  async function refuser() {
+    setPending(true);
+    setEnvoi(null);
+    try {
+      await api(`/v1/grille/${encodeURIComponent(jeton)}/refuser`, { method: "POST" });
+      setRefuse(true);
     } catch (e) {
       setEnvoi(e instanceof ApiError ? e : new ApiError("internal_error", 500));
     } finally {
@@ -97,7 +114,8 @@ export default function GrilleNegocePage() {
     );
   }
   if (!page) return <Skeleton card="h-40" lines={3} label="Chargement de la commande…" />;
-  const pret = fichiers.length >= 1 && fichiers.length <= 2 && fermes && (!page?.conditionsAAccepter || conditions);
+  const validiteOk = Number(validite) >= 7;
+  const pret = fichiers.length >= 1 && fichiers.length <= 2 && fermes && validiteOk && (!page?.conditionsAAccepter || conditions);
   const basculer = (cle: string, coche: boolean) => setNonGarantis((prev) => (coche ? [...new Set([...prev, cle])] : prev.filter((c) => c !== cle)));
   return (
     <>
@@ -187,11 +205,29 @@ export default function GrilleNegocePage() {
               </span>
             </label>
           ) : null}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="grille-validite" className="text-[14px] font-semibold">
+              Validité de vos prix (jours, 7 au moins)
+            </label>
+            <input id="grille-validite" inputMode="numeric" value={validite} onChange={(e) => setValidite(e.currentTarget.value)} className="min-h-12 w-32 rounded-xl border border-line bg-surface px-4 text-[16px] outline-none focus-visible:border-accent" />
+            {!validiteOk ? <p className="text-[13px] font-semibold text-danger">7 jours au moins.</p> : null}
+          </div>
           <p className="text-[13px] text-muted">Les quantités de la grille peuvent bouger (un artisan ajoute, un autre commande ailleurs) ; vos prix unitaires, non.</p>
           <Button type="submit" pending={pending} disabled={!pret}>
             {page.depose ? "Déposer un nouveau devis" : "Déposer mon devis"}
           </Button>
           {!fermes ? <p className="text-center text-[13px] text-muted">Cochez « Prix fermes, quel que soit le volume final » pour déposer.</p> : null}
+          {!page.depose ? (
+            refuse ? (
+              <p role="status" className="text-center text-[14px] font-semibold text-muted">
+                C&apos;est noté : vous ne chiffrez pas ce regroupement. Aucune relance.
+              </p>
+            ) : (
+              <Button type="button" variant="secondary" onClick={() => void refuser()} disabled={pending}>
+                Je ne chiffre pas
+              </Button>
+            )
+          ) : null}
         </form>
       )}
       <footer className="mt-8 flex flex-col gap-2 text-[14px] text-muted">

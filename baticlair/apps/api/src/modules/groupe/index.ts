@@ -15,3 +15,5 @@ export { SireneService, SIRENE_HTTP, type SireneHttp, type SuggestionNegoce } fr
 export { RapportMensuelService } from "./application/rapport-mensuel.service.js";
 export { JeuDemonstrationService, DOMAINE_DEMO } from "./application/jeu-demonstration.service.js";
 export { CommandeDuMoisService } from "./application/commande-du-mois.service.js";
+export { EspaceNegoceService } from "./application/espace-negoce.service.js";
+export { cookieNegoce } from "./application/jetons-negoce.js";

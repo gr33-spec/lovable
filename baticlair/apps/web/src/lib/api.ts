@@ -88,7 +88,9 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const fieldErrors = Array.isArray(details) ? (details as { path: string; message: string }[]) : undefined;
   const reason = details && typeof details === "object" && "reason" in details ? String(details.reason) : undefined;
   // Le paywall de l'abonnement (24 octobre 2026) : une action payante refusée ouvre l'écran « Ton essai est terminé ».
-  if (code === "abonnement_requis" && typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVENEMENT_ABONNEMENT_REQUIS));
+  // Recentrage (25 octobre 2026) : la phrase du geste refusé (« En gratuit, ta demande part chez un seul négoce… ») suit.
+  const phrase = details && typeof details === "object" && "phrase" in details ? String(details.phrase) : null;
+  if (code === "abonnement_requis" && typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVENEMENT_ABONNEMENT_REQUIS, { detail: { phrase } }));
   throw new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason);
 }
 

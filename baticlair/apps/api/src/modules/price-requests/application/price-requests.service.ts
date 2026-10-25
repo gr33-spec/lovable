@@ -153,6 +153,15 @@ export class PriceRequestsService {
     private readonly journalOrder: (tenant: TenantContext, takeoffId: string, order: SupplierOrder) => Promise<number> = async () => 0,
   ) {}
 
+  /**
+   * Recentrage (25 octobre 2026) : la DEMANDE PERSO ajoute au mail son but et le lien de chiffrage en ligne, propre à
+   * chaque destinataire (branché par le module des demandes perso ; rien pour une demande sans but).
+   */
+  private complement: (requestId: string, recipientId: string) => Promise<string | null> = async () => null;
+  brancherComplement(f: (requestId: string, recipientId: string) => Promise<string | null>): void {
+    this.complement = f;
+  }
+
   /** Des e-mails partent-ils vraiment du serveur (sinon : messagerie de l'artisan + PDF à télécharger) ? */
   get deliversEmail(): boolean {
     return this.mailer.deliversEmail;
@@ -203,10 +212,11 @@ export class PriceRequestsService {
     if (recipient.status !== "to_send") return this.reload(tenant, request.id);
     if (!request.packet) throw new DomainError("conflict", "This request predates the supplier packet", { reason: "no_packet" });
     const pdf = await this.pdf(tenant, request.id, recipientId);
+    const complement = await this.complement(request.id, recipientId);
     await this.mailer.send({
       to: recipient.supplier.email,
       subject: packetSubject(request.packet),
-      text: packetMail(request.packet),
+      text: complement ? `${packetMail(request.packet)}\n\n${complement}` : packetMail(request.packet),
       // La réponse du fournisseur va à l'artisan ; et le mail doit partir, sinon la demande ne passe pas « envoyée ».
       ...(request.packet.expediteur?.email ? { replyTo: request.packet.expediteur.email } : {}),
       mustDeliver: true,

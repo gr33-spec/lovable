@@ -21,7 +21,7 @@ import {
   validiteAcceptee,
   verifierDroit,
   volumeAtteint,
-  mailDemandePerso,
+  blocLienChiffrage,
 } from "../src/index.js";
 
 /**
@@ -180,12 +180,11 @@ describe("demande perso : relance, comparaison livrée, e-mail", () => {
       ["Z", 500, null, false],
     ]);
   });
-  it("l'e-mail au négoce : vouvoiement, au nom de l'artisan, lien de chiffrage", () => {
-    const m = mailDemandePerso({ artisan: "Yann Le Gall", entreprise: "Toitures Le Gall", but: "chiffrer", lignes: [{ cle: "a", designation: "Ardoise 32x22", quantite: 1800, unite: "pièces" }], ville: "Lannion", dateBesoin: null, lien: "https://test.mobiiz.fr/negoce/chiffrer/abc", nomApp: "Mobiiz" });
-    expect(m.objet).toBe("Toitures Le Gall : demande de prix pour un chantier (1 article)");
-    expect(m.texte).toContain("Chiffrez en ligne, sans compte");
-    expect(m.texte).toContain("- Ardoise 32x22 : 1800 pièces");
-    expect(m.texte).not.toMatch(/\btu\b|\bton\b|\bta\b/);
+  it("le bloc ajouté au mail du négoce : vouvoiement, but, lien de chiffrage", () => {
+    const b = blocLienChiffrage({ but: "commander", lien: "https://test.mobiiz.fr/chiffrer/abc", nomApp: "Mobiiz" });
+    expect(b).toContain("Je compte commander");
+    expect(b).toContain("https://test.mobiiz.fr/chiffrer/abc");
+    expect(b).not.toMatch(/\btu\b|\bton\b|\bta\b/);
   });
 });
 

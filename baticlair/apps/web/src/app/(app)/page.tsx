@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MailCheck, Search, Sparkles, Warehouse } from "lucide-react";
+import { ChevronRight, MailCheck, Plus, Search, Sparkles, Users, Warehouse } from "lucide-react";
 import { useCallback } from "react";
 import { InstallHint } from "@/components/install-hint";
 import { useBilling } from "@/components/paywall";
@@ -12,8 +12,8 @@ import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { InviterCollegue } from "@/components/inviter";
-import { BlocDuMois, BlocGarantie, DemandesEnCours, useProchaineCommande } from "@/components/commande-du-mois";
 import { BoucleNegoce } from "@/components/boucle-negoce";
+import type { Droits, ListeRegroupements } from "@/lib/recentrage";
 
 export default function AccueilPage() {
   const router = useRouter();
@@ -23,10 +23,13 @@ export default function AccueilPage() {
   const fetchNext = useCallback((signal: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal }), []);
   const { data: next, reload: reloadNext } = useResource(fetchNext);
   const { data: billing } = useBilling();
-  // Greg (23 octobre) : la commande du mois en haut de l'accueil, avec son minuteur, TOUJOURS (règle par défaut si l'API
-  // ne répond pas) : n'importe qui comprend en 10 secondes.
+  // Recentrage (Greg, 25 octobre 2026) : l'encart « Regroupements en cours » n'apparaît que s'il existe un regroupement
+  // pertinent pour cet artisan ; jamais de liste vide. Le préavis de fin de payant offert, s'il court.
   const moisActif = features.groupe === true && features.commandeCommune !== "lots";
-  const mois = useProchaineCommande(moisActif);
+  const fetchRegroupements = useCallback((signal: AbortSignal) => (moisActif ? api<ListeRegroupements>("/v1/regroupements", { signal }) : Promise.resolve(null)), [moisActif]);
+  const { data: regroupements } = useResource(fetchRegroupements);
+  const fetchDroits = useCallback((signal: AbortSignal) => api<Droits>("/v1/droits", { signal }), []);
+  const { data: droits } = useResource(fetchDroits);
 
   const firstName = me.user.name.split(" ")[0] ?? me.user.name;
   const todo: { key: string; title: string; text: string; href: string; action: string; icon: React.ReactNode }[] = (next?.items ?? []).slice(0, 5).map((a) => ({
@@ -55,9 +58,9 @@ export default function AccueilPage() {
   if (recent && recent.items.length === 0 && !error) {
     return (
       <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-8 text-center">
-        <h1 className="max-w-[18ch] text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Paie tes matériaux moins cher. Donne ta liste, je fais jouer les négoces.</h1>
+        <h1 className="max-w-[18ch] text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Bonjour {firstName}. Dépose ton devis, ton quantitatif est prêt en quelques minutes.</h1>
         <ButtonLink href="/chantiers/nouveau" className="w-full max-w-sm">
-          Donner ma liste
+          <Plus size={20} aria-hidden="true" /> Nouveau chantier
         </ButtonLink>
         {/* Landing du 22 octobre : « Inviter un collègue » aussi dans l'app, juste après l'inscription. */}
         <div className="flex w-full max-w-xl flex-col gap-4 text-left">
@@ -71,8 +74,34 @@ export default function AccueilPage() {
   const chargement = (recent === null || next === null) && !error;
   return (
     <>
-      {/* Passe UI/UX : le prénom d'abord, en très grand ; la recherche dessous. */}
-      <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
+      {/* Maquette du 25 octobre : le prénom, le gros bouton « Nouveau chantier » d'abord. */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
+        <p className="text-[16px] text-muted">Ton devis, ton quantitatif, tes prix : tout part d&apos;ici.</p>
+      </div>
+      <ButtonLink href="/chantiers/nouveau" className="w-full">
+        <Plus size={20} aria-hidden="true" /> Nouveau chantier
+      </ButtonLink>
+      {droits?.preavis ? (
+        <p role="status" className="rounded-xl bg-accent-soft p-4 text-[15px] font-semibold text-ink">
+          {droits.preavis}
+        </p>
+      ) : null}
+      {regroupements && regroupements.regroupements.length > 0 ? (
+        <Link href="/regroupements" aria-label={`Regroupements en cours : ${regroupements.regroupements.length}`} className="pressable flex items-center gap-4 rounded-2xl bg-accent-soft p-4 shadow-card">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-surface text-ink" aria-hidden="true">
+            <Users size={24} />
+          </span>
+          <span className="flex min-w-0 grow flex-col gap-0.5">
+            <span className="flex items-center gap-2 text-[16px] font-extrabold">
+              Regroupements en cours
+              <span className="flex size-6 items-center justify-center rounded-full bg-accent text-[13px] font-extrabold text-on-accent">{regroupements.regroupements.length}</span>
+            </span>
+            <span className="text-[14px] text-muted">D&apos;autres artisans du secteur ont besoin des mêmes gros matériaux que toi.</span>
+          </span>
+          <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+        </Link>
+      ) : null}
       <form
         role="search"
         onSubmit={(e) => {
@@ -89,14 +118,6 @@ export default function AccueilPage() {
           <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Chantier, client, adresse…" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" />
         </div>
       </form>
-
-      {/* Le squelette seulement pendant le chargement ; ensuite le bloc, avec les dates de l'API ou la règle par défaut. */}
-      {mois.prochaine ? <BlocDuMois prochaine={mois.prochaine} /> : mois.loading && moisActif ? <Skeleton card="h-64" label="Chargement de la commande du mois…" /> : null}
-      {/* Greg (23 octobre) : « Mets ton négoce dans la boucle », sous le bloc du mois. */}
-      {moisActif ? <BoucleNegoce compact /> : null}
-      {/* La grille garantie 30 jours : visible dès l'accueil, nouvel inscrit compris (point 6). */}
-      {moisActif ? <DemandesEnCours etat={mois.etat} /> : null}
-      {moisActif ? (mois.etat?.garanties ?? []).map((g) => <BlocGarantie key={g.cycleId} g={g} onChange={mois.reload} />) : null}
 
       {/* « À faire » : une liste blanche, chaque ligne est un lien (plus de bouton plein en concurrence avec celui du mois). */}
       <section aria-labelledby="todo-title" className="flex flex-col gap-3">
@@ -118,9 +139,9 @@ export default function AccueilPage() {
 
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
-          <SectionTitle>Chantiers récents</SectionTitle>
+          <SectionTitle>Mes chantiers</SectionTitle>
           <Link href="/chantiers" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
-            Tous
+            Voir tout
           </Link>
         </div>
         {error ? <ErrorNotice error={error} onRetry={reload} /> : null}

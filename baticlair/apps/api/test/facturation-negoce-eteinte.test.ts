@@ -43,7 +43,7 @@ const proposer = (c: Awaited<ReturnType<typeof carreleur>>, statut: "signe" | "e
 const negoce = (agent: Agent, nom: string, email: string, familles: string[], numeroCompte?: string) => agent.post("/v1/groupe/negoces").send({ nom, email, familles, ...(numeroCompte ? { numeroCompte } : {}) }).expect(201);
 // Nouveau cap (22 octobre) : le mail d'information au négoce ajouté et les alertes de devis ont leurs propres tests
 // (`cap-22-octobre.test.ts`) ; ici, on suit les messages du parcours d'origine.
-const nouveauCap = (m: { subject: string }) => /^(Un regroupement d|Nouveau meilleur prix|Nouveau devis)/.test(m.subject);
+const nouveauCap = (m: { subject: string }) => /^(Un regroupement d|Des artisans de votre secteur vous ont ajouté|Nouveau meilleur prix|Nouveau devis)/.test(m.subject);
 const mailsVers = (email: string) => ctx.emails.sent.filter((m) => m.to === email && !nouveauCap(m));
 const jetonPour = (email: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(mailsVers(email)[0]!.text)![1]!;
 const CARREAU = "Carreau de sol 60x60 grès cérame";

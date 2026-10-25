@@ -15,8 +15,8 @@ import { ACCROCHE_APP, EDITEUR_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: `${NOM_APP}, le regroupement des artisans du bâtiment`,
-  description: "Marre de te faire enfumer sur le prix de tes matériaux ? Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.",
+  title: `${NOM_APP}, tes quantitatifs et tes demandes de prix`,
+  description: "Tes quantitatifs au propre. Tes demandes de prix en quelques clics. La force du groupe en plus.",
 };
 
 /**
@@ -39,18 +39,22 @@ export const metadata: Metadata = {
  * personne : les négoces lisent aussi la page, et ce sont eux qui répondent. Le compteur d'inscrits est le vrai chiffre de la
  * base (masqué sous 10), le partage passe par WhatsApp, SMS ou le lien copié (`InviterCollegue`). Gratuit pour l'artisan.
  */
+/**
+ * RECENTRAGE (Greg, 25 octobre 2026) : le titre, les trois étapes, le bloc groupe et le bloc négoce mot pour mot ; aucune
+ * promesse d'économie chiffrée. Les captures restent celles de l'app (à reprendre après la recette en ligne).
+ */
 const ETAPES = [
   {
-    titre: "1. Dépose ta liste avant la clôture",
-    texte: "Une photo, un bon ou un PDF.",
-    image: { src: "/landing/capture-entree.jpg", alt: `L'écran « Nouvelle liste » de ${NOM_APP}` },
+    titre: "1. Dépose ton devis",
+    texte: "Le PDF de ton devis client, tel quel.",
+    image: { src: "/landing/capture-entree.jpg", alt: `L'écran « Nouveau chantier » de ${NOM_APP}` },
   },
   {
-    titre: "2. On envoie tout le volume aux négoces",
-    texte: "Une seule grille pour tous les négoces de ta région.",
-    image: { src: "/landing/capture-commande.jpg", alt: `L'écran « Regroupement » de ${NOM_APP} : la clôture dans quelques jours, ta liste dans la commande` },
+    titre: `2. ${NOM_APP} prépare ton quantitatif`,
+    texte: "Une ligne par fourniture, prête à commander.",
+    image: { src: "/landing/capture-commande.jpg", alt: `Le quantitatif préparé par ${NOM_APP}` },
   },
-  { titre: "3. Tu vois le meilleur prix et tu commandes si ça te plaît", texte: "Ton prix livré chez chaque négoce. Sans engagement.", image: { src: "/landing/capture-prix.jpg", alt: `L'écran des prix reçus dans ${NOM_APP} : ton prix livré chez chaque négoce, le moins cher coché` } },
+  { titre: "3. Envoie à tes négoces et compare", texte: "Leurs prix livraison comprise, côte à côte.", image: { src: "/landing/capture-prix.jpg", alt: `Les prix reçus dans ${NOM_APP} : chaque négoce livraison comprise` } },
 ] as const;
 
 
@@ -102,20 +106,19 @@ export default function BienvenuePage() {
           <p className="inline-flex w-fit items-center rounded-full bg-white/10 px-3.5 py-1.5 text-[13px] font-semibold tracking-[0.02em] text-white/85 uppercase">
             {ACCROCHE_APP}
           </p>
-          <h1 id="accroche" className="max-w-[14ch] text-[40px] leading-[0.94] font-extrabold tracking-[-0.03em] min-[400px]:text-[52px] sm:text-[84px]">
-            Marre de te faire <span className="text-accent">enfumer</span> sur le prix de tes matériaux&nbsp;?
+          <h1 id="accroche" className="max-w-[18ch] text-[36px] leading-[0.98] font-extrabold tracking-[-0.03em] min-[400px]:text-[42px] sm:text-[64px]">
+            Tes quantitatifs au propre. Tes demandes de prix en quelques clics. <span className="text-accent">La force du groupe en plus.</span>
           </h1>
-          <p className="max-w-[38ch] text-[16px] leading-relaxed text-white/70 min-[400px]:text-[18px] sm:text-[21px]">Une commande toutes les deux semaines avec les artisans de ton métier, dans ta région.</p>
           <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
             <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
-              Je rejoins le mouvement
+              Commencer gratuitement
             </ButtonLink>
             <DemoSurBouton className="pressable inline-flex min-h-13 items-center gap-2 rounded-full border border-white/25 px-5 text-[15px] font-semibold whitespace-nowrap text-white min-[400px]:px-6 min-[400px]:text-[16px] transition-[color,border-color] duration-150 hover:border-accent hover:text-accent" />
           </div>
-          {/* L'argument phare (24 octobre 2026) : une possibilité, la vraie moyenne dès 3 cycles publiés ; puis l'offre. */}
+          {/* Les tarifs en une phrase (Greg, 25 octobre 2026), puis le détail des deux formules. */}
           <ArgumentTarif className="max-w-[40ch] text-[17px] font-bold text-accent" />
           <p className="text-[15px] font-semibold text-white/60">
-            Essai gratuit sur un cycle complet, puis dès 29 € HT par mois à l&apos;année, ou 49 € HT au mois sans engagement.{" "}
+            29 € HT par mois payé à l&apos;année (348 €), ou 49 € HT au mois sans engagement.{" "}
             <Link href="/tarifs" className="underline">
               Voir les tarifs
             </Link>
@@ -132,8 +135,9 @@ export default function BienvenuePage() {
       <section aria-labelledby="principe" data-reveal className="flex flex-col gap-8 rounded-2xl bg-accent p-6 text-ink sm:p-12 lg:p-16">
         <p className="text-[15px] font-bold tracking-[0.02em] uppercase">{SLOGAN_APP}</p>
         <h2 id="principe" className={`${h2} max-w-[20ch]`}>
-          Plus on est nombreux, plus on pèse face aux négoces.
+          L&apos;union fait la force.
         </h2>
+        <p className="max-w-[52ch] text-[18px] leading-relaxed font-semibold sm:text-[21px]">Quand d&apos;autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes pour tenter un meilleur prix.</p>
         <CompteurInscrits surAccent />
       </section>
 
@@ -165,21 +169,21 @@ export default function BienvenuePage() {
 
       {/* Le partage : une vraie section, pleine. Le même bloc vit dans l'app. */}
       <div data-reveal>
-        <InviterCollegue grand titre="Fais venir tes collègues" texte="Plus on est nombreux, plus les prix baissent." />
+        <InviterCollegue grand titre="Fais venir tes collègues" texte="Plus on est nombreux, plus les regroupements se forment." />
       </div>
 
       <section aria-labelledby="commencer" data-reveal className="flex flex-col items-start gap-8 border-t border-white/10 pt-16 sm:items-center sm:pt-24 sm:text-center">
         <h2 id="commencer" className="font-display max-w-[16ch] text-[44px] leading-[0.96] font-extrabold tracking-[-0.03em] sm:text-[72px]">
-          Rejoins les artisans <span className="text-accent">du secteur</span>
+          Ton prochain chantier, <span className="text-accent">au propre</span>
         </h2>
         <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
-          Je rejoins le mouvement
+          Commencer gratuitement
         </ButtonLink>
       </section>
 
       {/* Rassurant pour les négoces : ils lisent aussi la page, et ce sont eux qui répondent. */}
       <p className="text-center text-[15px] leading-relaxed text-white/60">
-        <span className="font-semibold text-white">Négoces :</span> des volumes sûrs, des clients en plus. Répondez aux grilles.
+        <span className="font-semibold text-white">Négoces :</span> des demandes structurées, prêtes à chiffrer, et des volumes groupés sur lesquels vous positionner.
       </p>
 
       <footer className="flex flex-col gap-6 border-t border-white/10 pt-10 text-[13px] leading-relaxed text-white/50">

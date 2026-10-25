@@ -313,9 +313,10 @@ export const SEUIL_CYCLES_ECONOMIE = 3;
 export function argumentTarif(moyenne: { cycles: number; parCommande: number | null }, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): string {
   const prix = prixParMoisAnnuel(r);
   if (moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && moyenne.parCommande && moyenne.parCommande > 0) {
-    return `Dès ${prix} par mois : en moyenne, nos artisans ont économisé ${eurosRonds(moyenne.parCommande)} par regroupement.`;
+    return `Gratuit pour commencer. Dès ${prix} HT par mois : en moyenne, nos artisans ont économisé ${eurosRonds(moyenne.parCommande)} par regroupement.`;
   }
-  return `Dès ${prix} par mois, économise des centaines, voire des milliers d'euros chaque année.`;
+  // Recentrage (Greg, 25 octobre 2026) : aucune promesse d'économie chiffrée ; « HT » ajouté (DECISIONS.md).
+  return `Gratuit pour commencer. Dès ${prix} HT par mois pour comparer et acheter en groupe.`;
 }
 
 

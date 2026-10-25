@@ -42,7 +42,7 @@ export function BandeauAbonnement() {
  * Le contenu du paywall, mot pour mot : la phrase, l'économie réelle du premier cycle, les deux formules (l'annuel coché
  * d'office, Greg, 24 octobre 2026), « Je continue », « Pas maintenant ».
  */
-export function ContenuPaywall({ abonnement, onFermer }: { abonnement: Abonnement; onFermer: () => void }) {
+export function ContenuPaywall({ abonnement, onFermer, phrase = null }: { abonnement: Abonnement; onFermer: () => void; phrase?: string | null }) {
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [formule, setFormule] = useState<Formule>("annuel");
@@ -59,7 +59,7 @@ export function ContenuPaywall({ abonnement, onFermer }: { abonnement: Abonnemen
   return (
     <div className="flex flex-col gap-5">
       <h2 id="paywall-titre" className="font-display text-[28px] leading-[1.08] font-extrabold tracking-[-0.03em]">
-        {abonnement.paywall.phrase}
+        {phrase ?? abonnement.paywall.phrase}
       </h2>
       {abonnement.paywall.economie ? <p className="rounded-xl bg-ok-bg p-4 text-[17px] font-bold text-ok">{abonnement.paywall.economie}</p> : null}
       <OffresAbonnement offres={abonnement.offres} choisie={formule} onChoisir={setFormule} />
@@ -82,8 +82,12 @@ export function ContenuPaywall({ abonnement, onFermer }: { abonnement: Abonnemen
 export function PaywallAbonnement() {
   // Rien n'est chargé tant qu'aucune action n'a été refusée : l'écran ne lit l'abonnement qu'à l'ouverture.
   const [data, setData] = useState<Abonnement | null>(null);
+  const [phrase, setPhrase] = useState<string | null>(null);
   useEffect(() => {
-    const ouvrir = () => void api<Abonnement>("/v1/abonnement").then(setData, () => undefined);
+    const ouvrir = (e: Event) => {
+      setPhrase((e as CustomEvent<{ phrase: string | null } | null>).detail?.phrase ?? null);
+      void api<Abonnement>("/v1/abonnement").then(setData, () => undefined);
+    };
     window.addEventListener(EVENEMENT_ABONNEMENT_REQUIS, ouvrir);
     return () => window.removeEventListener(EVENEMENT_ABONNEMENT_REQUIS, ouvrir);
   }, []);
@@ -91,7 +95,7 @@ export function PaywallAbonnement() {
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="paywall-titre" className="fixed top-0 right-0 left-0 z-50 flex h-dvh items-end justify-center bg-ink/50 p-4 sm:items-center">
       <Card className="w-full max-w-md p-6">
-        <ContenuPaywall abonnement={data} onFermer={() => setData(null)} />
+        <ContenuPaywall abonnement={data} phrase={phrase} onFermer={() => setData(null)} />
       </Card>
     </div>
   );

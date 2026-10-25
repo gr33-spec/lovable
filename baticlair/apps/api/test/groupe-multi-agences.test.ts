@@ -44,7 +44,7 @@ const proposer = (c: Awaited<ReturnType<typeof carreleur>>) => c.agent.post(`/v1
 const negoce = (agent: Agent, nom: string, email: string, familles: string[]) => (agent.post("/v1/groupe/negoces").send({ nom, email, familles }).expect(201) as Promise<{ body: { negoces: { id: string; departement: string; agences: string[]; stop: boolean }[] } }>);
 // Nouveau cap (22 octobre) : le mail d'information au négoce ajouté et les alertes de devis ont leurs propres tests
 // (`cap-22-octobre.test.ts`) ; ici, on suit les messages du parcours d'origine.
-const nouveauCap = (m: { subject: string }) => /^(Un regroupement d|Nouveau meilleur prix|Nouveau devis)/.test(m.subject);
+const nouveauCap = (m: { subject: string }) => /^(Un regroupement d|Des artisans de votre secteur vous ont ajouté|Nouveau meilleur prix|Nouveau devis)/.test(m.subject);
 const mailsVers = (email: string) => ctx.emails.sent.filter((m) => m.to === email && !nouveauCap(m));
 const CARREAU = "Carreau de sol 60x60 grès cérame";
 async function deposer(jeton: string, rows: FixtureRow[], titre: string) {

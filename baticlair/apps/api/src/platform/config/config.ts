@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NOM_APP } from "@baticlair/domain";
+import { NOM_APP, lireTableNombres, lireZonesActives } from "@baticlair/domain";
 import { parseActivationCodes, parsePlans, type Plan } from "./plans.js";
 
 /**
@@ -184,6 +184,25 @@ const envSchema = z
     GROUPE_ADMINS: z.string().optional(),
     /** Les départements où le groupé est ouvert (« 22,29 »), ou « * » pour tous (défaut). Décision du 2026-10-20 : le 22 d'abord en prod. */
     GROUPE_DEPARTEMENTS: z.string().default("*"),
+    /**
+     * Recentrage (Greg, 25 octobre 2026) : les départements où les regroupements existent (« 22 » au départ ; « * » :
+     * tous). Hors zone active, l'artisan a tout sauf les regroupements. `GROUPE_DEPARTEMENTS` (s'il n'est pas « * ») prime.
+     */
+    ZONES_ACTIVES: z.string().default("22"),
+    /** Le montant HT estimé (euros) sous lequel une ligne ne se regroupe pas. */
+    SEUIL_LIGNE_GROUPABLE: z.coerce.number().min(0).default(1000),
+    /** Sous ce nombre de participants, seulement « Regroupement en cours ». */
+    SEUIL_ANONYMAT: z.coerce.number().int().min(2).default(5),
+    /** Volume minimum par famille à la clôture, en euros HT estimés (« couverture=5000,charpente=4000 ») ; vide : défauts du domaine. */
+    SEUIL_VOLUME_MIN: z.string().optional(),
+    /** Les prix repères HT par type et unité, pour estimer une ligne (« ardoise:pieces=1.2,zinc:m=18 ») ; vide : aucun. */
+    PRIX_REPERES: z.string().optional(),
+    /** Les familles dont les gros articles se regroupent (« couverture,charpente,second_oeuvre »). */
+    FAMILLES_GROUPABLES: z.string().default("couverture,charpente,second_oeuvre"),
+    /** Gratuit : lectures de devis par mois. */
+    LECTURES_GRATUITES_MOIS: z.coerce.number().int().min(0).default(2),
+    /** Sous ce nombre d'artisans actifs dans une zone, le payant y est offert. */
+    SEUIL_ZONE_ACTIVE: z.coerce.number().int().min(1).default(10),
     /** La base négoces Sirene (bloc 3 du plan) : départements importés et codes NAF du négoce de matériaux. */
     SIRENE_DEPARTEMENTS: z.string().default("22,29,35,56"),
     SIRENE_NAF: z.string().default("46.73A,46.73B,47.52A,47.52B"),
@@ -283,6 +302,8 @@ export interface AppConfig {
     admins: string[];
     /** `null` = tous les départements ; sinon la liste des départements ouverts. */
     departements: string[] | null;
+    /** Recentrage (25 octobre 2026) : seuils et réglages des regroupements, du gratuit et du payant. */
+    recentrage: { seuilLigneHt: number; seuilAnonymat: number; seuilVolumeMin: Record<string, number> | null; prixReperes: Record<string, number>; familles: string[]; lecturesGratuites: number; seuilZoneActive: number };
     /** mois : un regroupement par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
     mode: "mois" | "lots";
     sirene: { departements: string[]; naf: string[] };
@@ -411,7 +432,21 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       reponsesDomaine: e.REPONSES_DOMAINE ?? null,
       resendWebhookSecret: e.RESEND_WEBHOOK_SECRET ?? null,
       admins: (e.GROUPE_ADMINS ?? e.REFERENTIAL_VALIDATORS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
-      departements: e.GROUPE_DEPARTEMENTS.trim() === "*" ? null : e.GROUPE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean),
+      departements:
+        e.GROUPE_DEPARTEMENTS.trim() !== "*"
+          ? e.GROUPE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean)
+          : e.ZONES_ACTIVES.trim() === "*"
+            ? null
+            : lireZonesActives(e.ZONES_ACTIVES),
+      recentrage: {
+        seuilLigneHt: e.SEUIL_LIGNE_GROUPABLE,
+        seuilAnonymat: e.SEUIL_ANONYMAT,
+        seuilVolumeMin: e.SEUIL_VOLUME_MIN ? lireTableNombres(e.SEUIL_VOLUME_MIN) : null,
+        prixReperes: lireTableNombres(e.PRIX_REPERES),
+        familles: e.FAMILLES_GROUPABLES.split(",").map((x) => x.trim()).filter(Boolean),
+        lecturesGratuites: e.LECTURES_GRATUITES_MOIS,
+        seuilZoneActive: e.SEUIL_ZONE_ACTIVE,
+      },
       mode: e.COMMANDE_COMMUNE,
       sirene: { departements: e.SIRENE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean), naf: e.SIRENE_NAF.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) },
     },

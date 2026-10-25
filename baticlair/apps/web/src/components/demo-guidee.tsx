@@ -85,7 +85,8 @@ type Ecran = 0 | 1 | 2;
 
 export function DemoGuidee({ onFermer }: { onFermer: () => void }) {
   const [ecran, setEcran] = useState<Ecran>(0);
-  const titres = ["Ta liste, remise au propre", "Le regroupement, tous ensemble", "Ton prix, livré chez toi"];
+  // Recentrage (Greg, 25 octobre 2026) : les trois étapes de la landing, puis la force du groupe.
+  const titres = ["Ton quantitatif, au propre", "Envoie à tes négoces et compare", "La force du groupe en plus"];
   return (
     <section data-demo aria-labelledby="demo-titre" className="flex min-h-[calc(100dvh-2rem)] flex-col gap-4 rounded-xl border border-line bg-surface p-4 text-ink sm:min-h-0 sm:p-6">
       <div className="flex items-start justify-between gap-3">
@@ -100,7 +101,7 @@ export function DemoGuidee({ onFermer }: { onFermer: () => void }) {
         </button>
       </div>
 
-      {ecran === 0 ? <EcranDevis /> : ecran === 1 ? <EcranLot /> : <EcranOffre />}
+      {ecran === 0 ? <EcranDevis /> : ecran === 1 ? <EcranComparaison /> : <EcranRegroupement />}
 
       <div className="mt-auto flex items-center justify-between gap-3 pt-2">
         <ol aria-label="Écrans de la démo" className="flex gap-1.5">
@@ -114,7 +115,7 @@ export function DemoGuidee({ onFermer }: { onFermer: () => void }) {
           </button>
         ) : (
           <Link href="/inscription" className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-on-accent hover:bg-accent-hover">
-            Je rejoins le mouvement
+            Commencer gratuitement
           </Link>
         )}
       </div>
@@ -185,49 +186,47 @@ function EcranDevis() {
   );
 }
 
-/** Écran 2 : le regroupement du mois (Greg, 22 octobre 2026) : en quantités, le chrono ; jamais un nombre d'entreprises. */
-function EcranLot() {
-  const c = EXEMPLE.commande;
+/** Écran 2 (recentrage) : la demande perso, les offres comparées livraison comprise ; une offre incomplète le dit. */
+function EcranComparaison() {
+  return (
+    <div className="flex flex-col gap-3 text-ink">
+      <p className="text-[14px] font-bold text-muted">Ta liste part à tes négoces, à ton nom. Leurs prix arrivent ici, livraison comprise :</p>
+      <ul aria-label="Offres reçues (exemple)" className="flex flex-col gap-2">
+        {EXEMPLE.comparaison.map((o) => (
+          <li key={o.negoce} className={`flex flex-col gap-0.5 rounded-xl p-3 ${o.meilleur ? "bg-accent-soft" : "bg-ground"}`}>
+            <span className="flex items-center justify-between gap-2 text-[15px] font-extrabold">
+              <span className="flex items-center gap-2">
+                <Tag size={16} aria-hidden="true" className="text-accent-text" />
+                {o.negoce} <Exemple />
+              </span>
+              <span className="tabular-nums">{o.livre}</span>
+            </span>
+            <span className="text-[13px] text-muted">{o.detail}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-[14px] font-bold text-muted">Un tap sur « Commander » : le bon part chez le négoce, tu suis Reçue, Confirmée, Livrée.</p>
+    </div>
+  );
+}
+
+/** Écran 3 (recentrage) : un regroupement, sans nombre ni ville sous le seuil, sans prix ni promesse chiffrée. */
+function EcranRegroupement() {
   return (
     <div className="flex flex-col gap-3 text-ink">
       <div className="flex flex-col gap-2 rounded-xl bg-ground p-3">
         <span className="flex items-center gap-2 text-[14px] font-extrabold">
           <Users size={18} aria-hidden="true" className="text-accent-text" />
-          {`Commande ${c.de}`} <Exemple />
+          Ardoise naturelle 32×22 <Exemple />
         </span>
-        <p className="text-[15px] font-extrabold text-accent-text">{c.cloture}</p>
-        <p className="text-[15px] font-bold">{c.toi}</p>
-        <p className="text-[15px] font-bold">{c.tout}</p>
+        <p className="text-[15px] font-bold">Regroupement en cours · Département 22</p>
+        <p className="text-[15px] font-extrabold text-accent-text">Consultation dans 9 jours</p>
         <ul className="flex flex-col gap-1 text-[14px]">
-          <li>À la clôture, tout le volume part aux négoces de la région.</li>
-          <li>Tu vois le meilleur prix et tu commandes si ça te plaît.</li>
+          <li>Quand d&apos;autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes pour tenter un meilleur prix.</li>
+          <li>Tu commandes seulement si le prix te plaît.</li>
         </ul>
       </div>
       <p className="text-[14px] font-bold text-muted">Personne ne voit ton nom ni tes chantiers.</p>
-    </div>
-  );
-}
-
-/** Écran 3 : l'offre personnelle, une information, pas une question. */
-function EcranOffre() {
-  const o = EXEMPLE.offre;
-  return (
-    <div className="flex flex-col gap-3 text-ink">
-      <div className="flex flex-col gap-2 rounded-xl bg-ground p-3">
-        <span className="flex items-center gap-2 text-[14px] font-extrabold">
-          <Tag size={18} aria-hidden="true" className="text-accent-text" />
-          Ton prix · {EXEMPLE.lot.reference} <Exemple />
-        </span>
-        <span className="text-[17px] leading-snug font-extrabold">
-          {o.quantite} à {o.prix} chez {o.negoce} ({o.baisse})
-        </span>
-        <span className="text-[15px] font-bold">
-          Ton prix : {o.livre} (livraison {o.fraisLivraison}). Ton prix habituel : {o.habituel} l&apos;unité.
-        </span>
-        <span className="text-[14px] text-muted">Livraison le {o.livraison}, sur ton chantier, sur ton compte chez lui.</span>
-        <span className="text-[15px] font-extrabold text-ok">Économie estimée : {o.economie}</span>
-      </div>
-      <p className="text-[14px] font-bold text-muted">Tu dis « Livré » quand c&apos;est arrivé.</p>
     </div>
   );
 }

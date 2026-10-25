@@ -107,6 +107,8 @@ export default function CompteNegocePage() {
         </section>
       ) : null}
 
+      <VosResultats />
+
       <section aria-label="Commandes reçues" className={CARTE}>
         <SectionTitle>Commandes reçues</SectionTitle>
         {compte.commandes.length === 0 ? (
@@ -291,5 +293,46 @@ function SupprimerCompte() {
       </div>
       {erreur ? <ErrorNotice error={erreur} /> : null}
     </div>
+  );
+}
+
+interface Resultats {
+  demandesRecues: number;
+  reponses: number;
+  tauxReponse: number | null;
+  commandesGagnees: number;
+  caHt: number;
+}
+
+/**
+ * « VOS RÉSULTATS » (Greg, 25 octobre 2026) : demandes reçues (perso et regroupements), réponses, commandes gagnées et
+ * chiffre d'affaires HT passé par l'application. Les siens seulement ; jamais un chiffre d'un autre négoce.
+ */
+function VosResultats() {
+  const [r, setR] = useState<Resultats | null>(null);
+  useEffect(() => {
+    api<Resultats>("/v1/negoce/resultats")
+      .then(setR)
+      .catch(() => setR(null));
+  }, []);
+  if (!r) return null;
+  const tuiles: [string, string][] = [
+    ["Demandes reçues", String(r.demandesRecues)],
+    ["Taux de réponse", r.tauxReponse == null ? "—" : `${Math.round(r.tauxReponse * 100)} %`],
+    ["Commandes gagnées", String(r.commandesGagnees)],
+    ["Chiffre d'affaires", `${euros(r.caHt)} HT`],
+  ];
+  return (
+    <section aria-label="Vos résultats" className={CARTE}>
+      <SectionTitle>Vos résultats</SectionTitle>
+      <dl className="grid grid-cols-2 gap-3">
+        {tuiles.map(([t, v]) => (
+          <div key={t} className="flex flex-col rounded-xl bg-ground p-3">
+            <dt className="text-[13px] font-semibold text-muted">{t}</dt>
+            <dd className="text-[20px] font-extrabold tabular-nums">{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

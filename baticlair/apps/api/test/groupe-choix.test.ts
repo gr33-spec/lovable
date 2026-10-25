@@ -66,7 +66,7 @@ async function scenario() {
   const b = await carreleur("b@example.fr", "12 rue de Kerampont, 22300 Lannion");
   await proposer(b, "signe");
   // Les demandes aux négoces (le mail d'information du nouveau cap a son propre test).
-  expect(ctx.emails.sent.filter((m) => m.to.endsWith("@example.com") && !/^Un regroupement d/.test(m.subject))).toHaveLength(3);
+  expect(ctx.emails.sent.filter((m) => m.to.endsWith("@example.com") && !/^(Un regroupement d|Des artisans de votre secteur vous ont ajouté)/.test(m.subject))).toHaveLength(3);
   return { a, b, d };
 }
 const CARREAU = "Carreau de sol 60x60 grès cérame";

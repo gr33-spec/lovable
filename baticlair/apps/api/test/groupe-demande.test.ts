@@ -54,7 +54,7 @@ const jetonDe = (texte: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(texte)![1]
 /** Les e-mails partis aux négoces (ceux d'inscription des artisans vont aux @example.fr). */
 // Nouveau cap (22 octobre) : le mail d'information au négoce ajouté et les alertes de devis ont leurs propres tests
 // (`cap-22-octobre.test.ts`) ; ici, on suit les messages du parcours d'origine.
-const nouveauCap = (m: { subject: string }) => /^(Un regroupement d|Nouveau meilleur prix|Nouveau devis)/.test(m.subject);
+const nouveauCap = (m: { subject: string }) => /^(Un regroupement d|Des artisans de votre secteur vous ont ajouté|Nouveau meilleur prix|Nouveau devis)/.test(m.subject);
 const mailsNegoces = () => ctx.emails.sent.filter((m) => m.to.endsWith("@example.com") && !nouveauCap(m));
 
 /** Quatre artisans (trois signés, un en attente), trois négoces du 22 (un généraliste, un plombier « pas concerné ») et un de Brest. */

@@ -6,6 +6,7 @@ import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
 import { useGroupe, useGroupeFerme } from "@/components/groupe";
 import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
+import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
 import { SiteUnitsView } from "@/components/site-units-view";
@@ -465,6 +466,12 @@ export function ProjectTakeoff({
           <div className={sent ? "order-first" : undefined}>
             <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} openSignal={sendSignal} refreshSignal={requestsSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
           </div>
+          {quantitatif && !draft ? (
+            <div className="flex flex-col gap-4">
+              <DemandesPerso projectId={projectId} articles={[]} canCreate={!draft} archived={archived} />
+              <TenterPrixDeGroupe projectId={projectId} />
+            </div>
+          ) : null}
         </div>
       </div>
     </>

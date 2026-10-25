@@ -158,30 +158,30 @@ model Company {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
-  memberships       Membership[]
-  partnerKeys       PartnerApiKey[]
-  projects          Project[]
-  documents         Document[]
-  aiExecutions      AiExecution[]
-  takeoffs          Takeoff[]
-  aiAnalyses        AiAnalysis[]
-  suppliers         Supplier[]
-  priceRequests     PriceRequest[]
-  offers            SupplierOffer[]
-  preferences       CompanyPreference[]
-  corrections       CorrectionEvent[]
-  consumableHabits  ConsumableHabit[]
-  uploadParts       UploadPart[]
-  quantitatifs      Quantitatif[]
-  ruleConfirmations RuleConfirmation[]
-  besoins           Besoin[]
-  choixDuMois       ChoixArtisan[]
+  memberships        Membership[]
+  partnerKeys        PartnerApiKey[]
+  projects           Project[]
+  documents          Document[]
+  aiExecutions       AiExecution[]
+  takeoffs           Takeoff[]
+  aiAnalyses         AiAnalysis[]
+  suppliers          Supplier[]
+  priceRequests      PriceRequest[]
+  offers             SupplierOffer[]
+  preferences        CompanyPreference[]
+  corrections        CorrectionEvent[]
+  consumableHabits   ConsumableHabit[]
+  uploadParts        UploadPart[]
+  quantitatifs       Quantitatif[]
+  ruleConfirmations  RuleConfirmation[]
+  besoins            Besoin[]
+  choixDuMois        ChoixArtisan[]
   commandesGaranties CommandeGarantie[]
-  negocesAjoutes    Negoce[]            @relation("NegoceAjoutePar")
-  negoces           NegoceArtisan[]
-  desistements      Desistement[]
-  abonnement        Abonnement?
-  reglesApprises    RegleApprise[]
+  negocesAjoutes     Negoce[]            @relation("NegoceAjoutePar")
+  negoces            NegoceArtisan[]
+  desistements       Desistement[]
+  abonnement         Abonnement?
+  reglesApprises     RegleApprise[]
   facturesAbonnement FactureAbonnement[]
 
   @@map("company")
@@ -600,6 +600,9 @@ model Supplier {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  /// Recentrage (25 octobre 2026) : le négoce inscrit de la zone que l'artisan a ajouté à son carnet.
+  negoceId String? @db.Uuid
+
   company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
   recipients PriceRequestRecipient[]
 
@@ -631,6 +634,12 @@ model PriceRequest {
   /// écarts avec la liste envoyée ; ils sont aussi au journal des corrections, marqués « bon de commande ».
   orderFeedback       Json?
 
+  /// Recentrage (Greg, 25 octobre 2026) : la DEMANDE PERSO. Le but (« chiffrer » un chantier ou « commander »), l'accord
+  /// de l'artisan pour transmettre son identité, la clôture (date de besoin), et la commande passée sur une réponse.
+  but              String?
+  accordIdentiteLe DateTime?
+  closLe           DateTime?
+
   company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
   project    Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
   recipients PriceRequestRecipient[]
@@ -656,6 +665,23 @@ model PriceRequestRecipient {
   documentId     String?         @unique @db.Uuid
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  /// Demande perso (25 octobre 2026) : le lien de chiffrage en ligne sans compte (haché), la réponse du négoce (prix par
+  /// ligne, livraison, délai, validité qu'il fixe), la relance à 48 h ouvrées, puis la commande et son suivi
+  /// (recue → confirmee → livree). `negoceId` : le négoce de la zone quand l'artisan l'a choisi là (ses résultats).
+  tokenHash     String?   @unique
+  prix          Json?
+  livraisonHt   Decimal?  @db.Decimal(14, 2)
+  delaiJours    Int?
+  validiteJours Int?
+  reponduLe     DateTime?
+  refuseLe      DateTime?
+  relanceLe     DateTime?
+  commandeLe    DateTime?
+  suivi         String?
+  confirmeLe    DateTime?
+  livreLe       DateTime?
+  negoceId      String?   @db.Uuid
 
   priceRequest PriceRequest @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
   supplier     Supplier     @relation(fields: [supplierId], references: [id], onDelete: Restrict)
@@ -974,9 +1000,15 @@ model Besoin {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  project Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  lot     LotGroupe?    @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  /// Regroupements (25 octobre 2026) : intention → quantite_confirmee → commande (jamais une commande avant le clic),
+  /// ou bascule (volume minimum non atteint) / retire ; le montant HT estimé ; le besoin qui a lancé le regroupement.
+  participation String?
+  estimeHt      Decimal? @db.Decimal(14, 2)
+  lanceur       Boolean  @default(false)
+
+  company Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  lot     LotGroupe?     @relation(fields: [lotId], references: [id], onDelete: SetNull)
   cycle   CycleCommande? @relation(fields: [cycleId], references: [id], onDelete: SetNull)
   offre   OffreArtisan?
 
@@ -1010,16 +1042,16 @@ model Negoce {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  ajoutePar      Company?        @relation("NegoceAjoutePar", fields: [ajouteParId], references: [id], onDelete: SetNull)
-  artisans       NegoceArtisan[]
-  reponses       ReponseNegoce[]
-  bons           BonCommande[]
-  lotsRetenus    LotGroupe[]     @relation("LotNegoceRetenu")
-  accordNegoces  AccordNegoce[]
-  factureNegoces FactureNegoce[]
-  grilles        GrilleNegoce[]
-  choisiPar      ChoixArtisan[]
-  compte         CompteNegoce?   @relation(fields: [compteId], references: [id], onDelete: SetNull)
+  ajoutePar          Company?           @relation("NegoceAjoutePar", fields: [ajouteParId], references: [id], onDelete: SetNull)
+  artisans           NegoceArtisan[]
+  reponses           ReponseNegoce[]
+  bons               BonCommande[]
+  lotsRetenus        LotGroupe[]        @relation("LotNegoceRetenu")
+  accordNegoces      AccordNegoce[]
+  factureNegoces     FactureNegoce[]
+  grilles            GrilleNegoce[]
+  choisiPar          ChoixArtisan[]
+  compte             CompteNegoce?      @relation(fields: [compteId], references: [id], onDelete: SetNull)
   commandesGaranties CommandeGarantie[]
 
   @@unique([email, departement])
@@ -1033,30 +1065,30 @@ model Negoce {
 /// lui-même depuis son lien d'invitation, sans mot de passe (lien magique). Ses dépôts, ses paliers de livraison, les
 /// départements qu'il dessert (ses abonnements : une ligne `negoce` par département), ses conditions acceptées.
 model CompteNegoce {
-  id                     String    @id @default(uuid(7)) @db.Uuid
-  email                  String    @unique
-  siret                  String?   @unique
-  enseigne               String
-  telephone              String?
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  email                 String    @unique
+  siret                 String?   @unique
+  enseigne              String
+  telephone             String?
   /// { gratuiteJusquaKm, paliers: [{ jusquaKm, prixHt }], maxKm } (`PaliersLivraison`).
-  livraison              Json?
+  livraison             Json?
   /// Départements desservis (abonnés).
-  departements           String[]  @default([])
+  departements          String[]  @default([])
   /// Multimétier (Greg, 25 octobre 2026) : son choix à l'inscription, modifiable dans son espace ; recopié sur chaque abonnement.
-  generaliste            Boolean   @default(false)
+  generaliste           Boolean   @default(false)
   /// Les familles du spécialiste (vide pour un généraliste ou un compte d'avant le choix).
-  familles               String[]  @default([])
+  familles              String[]  @default([])
   /// Le dernier lien d'invitation envoyé (valable 90 jours, régénéré à chaque ajout par un artisan).
-  invitationLe           DateTime?
+  invitationLe          DateTime?
   /// E-mails de clôture envoyés sans compte créé (3 au plus).
-  rappels                Int       @default(0)
-  inscritLe              DateTime?
-  conditionsAccepteesLe  DateTime?
-  conditionsVersion      String?
-  derniereConnexionLe    DateTime?
-  desabonneLe            DateTime?
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
+  rappels               Int       @default(0)
+  inscritLe             DateTime?
+  conditionsAccepteesLe DateTime?
+  conditionsVersion     String?
+  derniereConnexionLe   DateTime?
+  desabonneLe           DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   depots      DepotNegoce[]
   abonnements Negoce[]
@@ -1378,31 +1410,35 @@ model FactureNegoce {
 /// département. Inscriptions jusqu'à la clôture, puis la grille fusionnée part aux négoces, puis les résultats.
 /// Calculs : `packages/domain/src/groupe/commande-du-mois.ts`.
 model CycleCommande {
-  id           String    @id @default(uuid(7)) @db.Uuid
-  numero       Int       @unique @default(autoincrement())
+  id              String    @id @default(uuid(7)) @db.Uuid
+  numero          Int       @unique @default(autoincrement())
   /// AAAA-MM : le mois de la clôture.
-  mois         String
-  famille      String
-  zone         String
-  clotureLe    DateTime
-  reponseAvant DateTime
-  relanceLe    DateTime
+  mois            String
+  famille         String
+  zone            String
+  clotureLe       DateTime
+  reponseAvant    DateTime
+  relanceLe       DateTime
   /// inscriptions | negoces | resultats
-  phase        String    @default("inscriptions")
-  closLe       DateTime?
-  resultatsLe  DateTime?
+  phase           String    @default("inscriptions")
+  closLe          DateTime?
+  resultatsLe     DateTime?
   /// Le négoce premier sur le total à la publication (grille garantie 30 jours, Greg, 23 octobre 2026).
-  retenuId     String?   @db.Uuid
+  retenuId        String?   @db.Uuid
   /// Fin de la garantie : résultats + 30 jours.
   garantieJusquau DateTime?
   /// La grille fusionnée à la clôture : [{ cle, designation, quantite, unite }].
-  lignes       Json      @default("[]")
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  lignes          Json      @default("[]")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  besoins Besoin[]
-  grilles GrilleNegoce[]
-  choix   ChoixArtisan[]
+  /// Recentrage (25 octobre 2026) : volume estimé à la clôture et « non_consulte » quand il n'atteint pas le minimum.
+  estimeHt     Decimal? @db.Decimal(14, 2)
+  statutVolume String?
+
+  besoins            Besoin[]
+  grilles            GrilleNegoce[]
+  choix              ChoixArtisan[]
   commandesGaranties CommandeGarantie[]
 
   @@unique([mois, famille, zone])
@@ -1431,8 +1467,12 @@ model GrilleNegoce {
   resultatLe       DateTime?
   createdAt        DateTime  @default(now())
 
-  cycle    CycleCommande        @relation(fields: [cycleId], references: [id], onDelete: Cascade)
-  negoce   Negoce               @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+  /// Recentrage (25 octobre 2026) : la validité de l'offre, fixée par le négoce (7 jours au moins) ; « Je ne chiffre pas ».
+  validiteJours Int?
+  refuseLe      DateTime?
+
+  cycle    CycleCommande         @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  negoce   Negoce                @relation(fields: [negoceId], references: [id], onDelete: Cascade)
   fichiers GrilleNegoceFichier[]
 
   @@unique([cycleId, negoceId])
@@ -1496,16 +1536,16 @@ model ExclusionContact {
 /// RGPD (24 octobre 2026) : une commande passée par un artisan, gardée 10 ans sans son nom quand son compte est supprimé
 /// (accès restreint, admin seulement). Le bon lui-même est parti au négoce, qui le garde dans sa comptabilité.
 model ArchiveCommande {
-  id          String   @id @default(uuid(7)) @db.Uuid
+  id         String   @id @default(uuid(7)) @db.Uuid
   /// cycle | garantie
-  sorte       String
-  mois        String
-  negoceNom   String
-  totalHt     Decimal  @db.Decimal(14, 2)
-  commandeLe  DateTime
+  sorte      String
+  mois       String
+  negoceNom  String
+  totalHt    Decimal  @db.Decimal(14, 2)
+  commandeLe DateTime
   /// L'empreinte de l'entreprise supprimée (SHA-256 de son identifiant) : relier deux commandes sans savoir qui.
-  artisan     String
-  archiveLe   DateTime @default(now())
+  artisan    String
+  archiveLe  DateTime @default(now())
 
   @@index([archiveLe])
   @@map("archive_commande")
@@ -1580,12 +1620,12 @@ model EvenementAbonnement {
 /// même transaction) ; série « TEST » à part en paiement simulé. Gardée 10 ans, même après la suppression du compte (le
 /// client y est écrit en clair : raison sociale, SIRET, adresse).
 model FactureAbonnement {
-  id                String    @id @default(uuid(7)) @db.Uuid
-  numero            String    @unique
+  id                String   @id @default(uuid(7)) @db.Uuid
+  numero            String   @unique
   /// F | TEST
   serie             String
   rang              Int
-  companyId         String?   @db.Uuid
+  companyId         String?  @db.Uuid
   raisonSociale     String
   siret             String?
   adresse           String?
@@ -1593,15 +1633,15 @@ model FactureAbonnement {
   periodeDebut      DateTime
   periodeFin        DateTime
   /// mensuel | annuel | bascule (passage du mensuel à l'annuel, au prorata)
-  formule           String    @default("mensuel")
+  formule           String   @default("mensuel")
   montantHtCentimes Int
   tvaCentimes       Int
   ttcCentimes       Int
-  tauxTva           Decimal   @db.Decimal(5, 2)
+  tauxTva           Decimal  @db.Decimal(5, 2)
   emiseLe           DateTime
   /// L'identifiant de la facture chez Stripe (ou de l'événement simulé) : une seule facture par paiement.
-  refExterne        String?   @unique
-  createdAt         DateTime  @default(now())
+  refExterne        String?  @unique
+  createdAt         DateTime @default(now())
 
   company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
@@ -1690,4 +1730,3 @@ model CompteurJour {
   @@id([jour, cle])
   @@map("compteur_jour")
 }
-

@@ -15,6 +15,11 @@ import {
   echeanceNegoce,
   fusionnerLesListes,
   finDeGarantie,
+  finDeValidite,
+  referenceStricte,
+  phraseVolumeNonAtteint,
+  validiteAcceptee,
+  VALIDITE_MIN_JOURS,
   mailClotureSansCompte,
   mailGrilleAuNegoce,
   mentionGarantie,
@@ -217,6 +222,15 @@ export class CommandeDuMoisService {
     private readonly abonnement: { exiger(companyId: string, action: ActionPayante, maintenant?: Date, deposeeLe?: Date | null): Promise<void>; permis(companyId: string, action: ActionPayante, maintenant?: Date, deposeeLe?: Date | null): Promise<boolean> } | null = null,
   ) {}
 
+  /**
+   * Recentrage (Greg, 25 octobre 2026) : à la clôture d'un REGROUPEMENT (une famille), le volume minimum ; branché par le
+   * module des regroupements. Null : pas de contrôle (la commande toutes familles d'avant).
+   */
+  private volume: (c: { id: string; famille: string }) => Promise<{ atteint: boolean; estimeHt: number } | null> = async () => null;
+  brancherVolume(f: (c: { id: string; famille: string }) => Promise<{ atteint: boolean; estimeHt: number } | null>): void {
+    this.volume = f;
+  }
+
   /** Le lien d'une grille, pour l'espace du négoce. */
   jetonDeGrille(grilleId: string): string {
     return jetonDeGrille(this.reglages.authSecret, grilleId);
@@ -268,22 +282,56 @@ export class CommandeDuMoisService {
    * la première clé des réglages pas encore close (créée au besoin). `visee` : la commande que l'artisan avait sous les
    * yeux ; si elle n'est plus celle qui s'ouvre, `tardPour` la nomme (« Trop tard pour le 15 octobre… »).
    */
-  private async cycleOuvert(zone: string, maintenant: Date, visee: Mois | null = null): Promise<{ cycle: { id: string; mois: string; numero: number }; tardPour: Mois | null }> {
+  private async cycleOuvert(zone: string, maintenant: Date, visee: Mois | null = null, famille: string = FAMILLE_TOUTES): Promise<{ cycle: { id: string; mois: string; numero: number }; tardPour: Mois | null }> {
     const tard = (mois: Mois) => (visee && visee !== mois ? visee : null);
-    // Une seule commande ouverte par département, toutes familles ensemble (une commande d'avant, d'une famille, sert jusqu'à sa clôture).
-    const ouvert = await this.prisma.cycleCommande.findFirst({ where: { zone, phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" } });
+    // Une seule commande ouverte par département et par famille (« toutes » : la commande commune d'avant ; une famille :
+    // un regroupement, recentrage du 25 octobre 2026).
+    const ouvert = await this.prisma.cycleCommande.findFirst({ where: { zone, famille, phase: "inscriptions", clotureLe: { gt: maintenant } }, orderBy: { clotureLe: "asc" } });
     if (ouvert) return { cycle: ouvert, tardPour: tard(ouvert.mois) };
     const config = await this.config();
     for (const mois of clesDeCommande(maintenant, config)) {
       const d = datesDuCycle(mois, config);
       if (maintenant >= d.clotureLe) continue;
-      const existant = await this.prisma.cycleCommande.findFirst({ where: { mois, zone }, select: { id: true } });
+      const existant = await this.prisma.cycleCommande.findFirst({ where: { mois, zone, famille }, select: { id: true } });
       // Une commande déjà close par l'admin (clôture avancée) ne se rouvre pas : la suivante.
       if (existant) continue;
-      const cycle = await this.prisma.cycleCommande.create({ data: { mois, famille: FAMILLE_TOUTES, zone, clotureLe: d.clotureLe, reponseAvant: d.reponseAvant, relanceLe: d.relanceLe } });
+      const cycle = await this.prisma.cycleCommande.create({ data: { mois, famille, zone, clotureLe: d.clotureLe, reponseAvant: d.reponseAvant, relanceLe: d.relanceLe } });
       return { cycle, tardPour: tard(mois) };
     }
     throw new DomainError("conflict", "No open cycle", { reason: "pas_de_cycle" });
+  }
+
+  /**
+   * Recentrage (25 octobre 2026) : le regroupement d'une famille pour le cycle choisi (« ce cycle » ou « le suivant »),
+   * créé au besoin ; refusé s'il est déjà clos (une référence n'est jamais reconsultée dans le même cycle).
+   */
+  async regroupementPour(zone: string, famille: string, mois: Mois, maintenant = new Date()): Promise<{ id: string; mois: string; numero: number; clotureLe: Date }> {
+    const config = await this.config();
+    const d = datesDuCycle(mois, config);
+    if (maintenant >= d.clotureLe) throw new DomainError("conflict", "Order closed", { reason: "commande_close" });
+    const existant = await this.prisma.cycleCommande.findUnique({ where: { mois_famille_zone: { mois, famille, zone } } });
+    if (existant) {
+      if (existant.phase !== "inscriptions" || maintenant >= existant.clotureLe) throw new DomainError("conflict", "Order closed", { reason: "commande_close" });
+      return existant;
+    }
+    return this.prisma.cycleCommande
+      .create({ data: { mois, famille, zone, clotureLe: d.clotureLe, reponseAvant: d.reponseAvant, relanceLe: d.relanceLe } })
+      .catch(async (e: unknown) => {
+        if (!isUniqueViolation(e)) throw e;
+        return this.prisma.cycleCommande.findUniqueOrThrow({ where: { mois_famille_zone: { mois, famille, zone } } });
+      });
+  }
+
+  /** Les lignes d'une liste qu'on peut proposer (quantité établie, famille), pour les regroupements. */
+  async lignesDuChantier(tenant: TenantContext, projectId: string): Promise<{ takeoffId: string; adresse: string | null; lignes: { key: string; designation: string; quantite: number; unite: string; famille: string }[] }> {
+    if (!isUuid(projectId)) throw notFound("Project");
+    const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { address: true } });
+    if (!project) throw notFound("Project");
+    const takeoff = await this.prisma.takeoff.findFirst({ where: { projectId, companyId: tenant.companyId }, orderBy: { createdAt: "desc" }, select: { id: true } });
+    if (!takeoff) return { takeoffId: "", adresse: project.address, lignes: [] };
+    const reviewed = await this.reviewed(tenant, takeoff.id);
+    const lignes = lignesProposables(reviewed, reviewed.purchase.toBuy.map((b) => b.key));
+    return { takeoffId: takeoff.id, adresse: project.address, lignes: lignes.map(({ item, q, famille }) => ({ key: item.key, designation: item.label, quantite: Number(q.quantite), unite: q.unite, famille })) };
   }
 
   /**
@@ -690,7 +738,7 @@ export class CommandeDuMoisService {
       part.envoyeLe = maintenant.toISOString();
       await this.prisma.choixArtisan.updateMany({ where: { cycleId, companyId: tenant.companyId }, data: { parts: parts as unknown as object } });
     }
-    await this.prisma.besoin.updateMany({ where: { cycleId, companyId: tenant.companyId, statut: "signe" }, data: { statut: "commande" } });
+    await this.prisma.besoin.updateMany({ where: { cycleId, companyId: tenant.companyId, statut: "signe" }, data: { statut: "commande", participation: "commande" } });
     return this.vueDuCycle(tenant, c, maintenant);
   }
 
@@ -710,9 +758,36 @@ export class CommandeDuMoisService {
     if (!zone) throw validationFailed("The site needs an address with a postcode", { reason: "adresse_requise" });
     let n = 0;
     for (const [i, l] of d.lignes.entries()) {
-      const { cycle } = await this.cycleOuvert(zone, maintenant);
+      // Recentrage (25 octobre 2026) : la démo joue les REGROUPEMENTS, une famille chacun ; seuls les gros articles à
+      // référence stricte y entrent (les petits accessoires restent en demande perso). Le montant estimé reprend le prix
+      // de base fictif des faux négoces.
+      const r = referenceStricte(l.designation);
+      if (!r.ok) continue;
+      const { cycle } = await this.cycleOuvert(zone, maintenant, null, r.reference.famille);
+      const lanceur = (await this.prisma.besoin.count({ where: { cycleId: cycle.id, statut: { in: [...DANS_LA_COMMANDE] } } })) === 0;
       await this.prisma.besoin.create({
-        data: { companyId: d.companyId, projectId: d.projectId, takeoffId: d.takeoffId, articleKey: `demo-${i + 1}`, designation: l.designation, cle: cleDeReference({ libelle: l.designation }), famille: l.famille, quantite: l.quantite, unite: l.unite, zone, adresseLivraison: d.adresse, fenetreTot: maintenant, fenetreTard: new Date(maintenant.getTime() + 60 * JOUR_MS), statut: "signe", signeLe: maintenant, cycleId: cycle.id, nature: "chantier" },
+        data: {
+          companyId: d.companyId,
+          projectId: d.projectId,
+          takeoffId: d.takeoffId,
+          articleKey: `demo-${i + 1}`,
+          designation: l.designation,
+          cle: r.reference.cle,
+          famille: r.reference.famille,
+          quantite: l.quantite,
+          unite: l.unite,
+          zone,
+          adresseLivraison: d.adresse,
+          fenetreTot: maintenant,
+          fenetreTard: new Date(maintenant.getTime() + 60 * JOUR_MS),
+          statut: "signe",
+          signeLe: maintenant,
+          cycleId: cycle.id,
+          nature: "chantier",
+          participation: "intention",
+          estimeHt: Math.round(l.quantite * prixDeBaseDemo(`${r.reference.cle}#${l.unite.trim().toLowerCase()}`) * 100) / 100,
+          lanceur,
+        },
       });
       n++;
     }
@@ -811,6 +886,20 @@ export class CommandeDuMoisService {
       return l;
     });
     if (!lignes.length) return 0;
+    // Recentrage : un regroupement sous son volume minimum n'est pas consulté ; ses participants sont prévenus et basculent
+    // d'un clic (cycle suivant ou demande perso). Au-dessus, les intentions deviennent des quantités confirmées.
+    const v = c.famille === FAMILLE_TOUTES ? null : await this.volume(c);
+    if (v && !v.atteint) {
+      await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { phase: "resultats", resultatsLe: maintenant, statutVolume: "non_consulte", estimeHt: v.estimeHt } });
+      const entreprises = await this.prisma.besoin.findMany({ where: { cycleId: c.id, statut: { in: [...DANS_LA_COMMANDE] } }, select: { companyId: true }, distinct: ["companyId"] });
+      for (const { companyId } of entreprises)
+        await this.notifications.prevenir(companyId, { titre: "Regroupement non consulté", corps: phraseVolumeNonAtteint(lignes[0]?.designation ?? "ce regroupement"), url: `/regroupements/${c.id}`, etiquette: `volume-${c.id}` }).catch(() => undefined);
+      return 0;
+    }
+    if (v) {
+      await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { estimeHt: v.estimeHt } });
+      await this.prisma.besoin.updateMany({ where: { cycleId: c.id, participation: "intention", statut: { in: [...DANS_LA_COMMANDE] } }, data: { participation: "quantite_confirmee" } });
+    }
     return this.envoyerLesGrilles({ ...c, lignes }, maintenant);
   }
 
@@ -895,7 +984,9 @@ export class CommandeDuMoisService {
     const premier = classement[0]?.negoceId ?? null;
     // La grille garantie 30 jours (Greg, 23 octobre 2026) : le premier sur le total tient ses prix pour toute la zone.
     const retenu = classement[0]?.complete ? premier : null;
-    await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { phase: "resultats", resultatsLe: maintenant, retenuId: retenu, garantieJusquau: retenu ? finDeGarantie(maintenant) : null } });
+    // Recentrage (25 octobre 2026) : la garantie est la VALIDITÉ que le retenu a fixée (7 jours au moins) ; 30 jours sans elle.
+    const validite = retenu ? (await this.prisma.grilleNegoce.findUnique({ where: { cycleId_negoceId: { cycleId: c.id, negoceId: retenu } }, select: { validiteJours: true } }))?.validiteJours : null;
+    await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { phase: "resultats", resultatsLe: maintenant, retenuId: retenu, garantieJusquau: retenu ? (validite ? finDeValidite(maintenant, validite) : finDeGarantie(maintenant)) : null } });
     if (retenu) {
       const g = chiffrees.find((x) => x.negoceId === retenu);
       const lignes = (c.lignes as unknown as LigneDeGrille[]).length;
@@ -925,7 +1016,7 @@ export class CommandeDuMoisService {
     await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { phase: "resultats", resultatsLe: maintenant, retenuId: null, garantieJusquau: null } });
     const besoins = await this.prisma.besoin.findMany({ where: { cycleId: c.id, statut: "signe" }, select: { id: true, companyId: true } });
     if (besoins.length === 0) return;
-    const { cycle: suivant } = await this.cycleOuvert(c.zone, maintenant);
+    const { cycle: suivant } = await this.cycleOuvert(c.zone, maintenant, null, c.famille);
     const entreprises = [...new Set(besoins.map((b) => b.companyId))];
     await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM cycle_commande WHERE id = ${suivant.id}::uuid FOR UPDATE`;
@@ -1037,8 +1128,9 @@ export class CommandeDuMoisService {
    * grille, la distance du dépôt le plus proche à chaque chantier. Le devis est lu UNE fois ; un nouveau dépôt remplace
    * le précédent.
    */
-  async deposerGrille(jeton: string, depot: { fichiers: FichierGrille[]; fermes: boolean; conditions?: boolean; nonGarantis: readonly string[] }, maintenant = new Date()) {
+  async deposerGrille(jeton: string, depot: { fichiers: FichierGrille[]; fermes: boolean; conditions?: boolean; nonGarantis: readonly string[]; validiteJours?: number | null }, maintenant = new Date()) {
     const g = await this.grilleDuJeton(jeton);
+    if (depot.validiteJours !== undefined && depot.validiteJours !== null && !validiteAcceptee(depot.validiteJours)) throw validationFailed("Validity of at least 7 days", { reason: "validite_trop_courte", min: VALIDITE_MIN_JOURS });
     if (g.cycle.phase !== "negoces" || maintenant >= g.cycle.reponseAvant) throw new DomainError("conflict", "Deadline passed", { reason: "delai_passe" });
     const compte = g.negoce.compteId ? await this.prisma.compteNegoce.findUnique({ where: { id: g.negoce.compteId }, include: { depots: true } }) : null;
     if (!compte?.inscritLe || compte.depots.length === 0 || !compte.livraison) throw new DomainError("conflict", "Account required", { reason: "inscription_requise" });
@@ -1064,11 +1156,19 @@ export class CommandeDuMoisService {
       await tx.grilleNegoceFichier.deleteMany({ where: { grilleId: g.id } });
       await tx.grilleNegoce.update({
         where: { id: g.id },
-        data: { deposeLe: maintenant, prix: lecture.prix, statutExtraction: lecture.statut, livraison: livraison as object, nonGarantis, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
+        data: { deposeLe: maintenant, prix: lecture.prix, statutExtraction: lecture.statut, livraison: livraison as object, nonGarantis, refuseLe: null, ...(depot.validiteJours ? { validiteJours: depot.validiteJours } : {}), fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
       });
     });
     if (premierDepot) await this.annoncerReponse(g.cycle, maintenant).catch(() => undefined);
     return this.pageGrille(jeton, maintenant);
+  }
+
+  /** Recentrage : « Je ne chiffre pas » (le négoce peut refuser une consultation). */
+  async refuserGrille(jeton: string, maintenant = new Date()) {
+    const g = await this.grilleDuJeton(jeton);
+    if (g.deposeLe) throw new DomainError("conflict", "Already answered", { reason: "deja_repondu" });
+    await this.prisma.grilleNegoce.update({ where: { id: g.id }, data: { refuseLe: maintenant, relanceLe: maintenant } });
+    return { fait: true };
   }
 
   /** Lit le devis (une fois) et rapproche chaque prix lu d'une ligne de la grille : même clé de référence, sinon même texte. */

@@ -36,11 +36,25 @@ export class AnalysisMeter {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
+  /**
+   * Recentrage (25 octobre 2026) : en GRATUIT, 2 lectures par mois (`LECTURES_GRATUITES_MOIS`) ; branché par le module des
+   * droits. Rend la limite et la phrase du paywall, ou null (payant, essai, zone offerte : illimité).
+   */
+  private limiteGratuite: (companyId: string) => Promise<{ limite: number; phrase: (n: number) => string } | null> = async () => null;
+  brancherLimiteGratuite(f: (companyId: string) => Promise<{ limite: number; phrase: (n: number) => string } | null>): void {
+    this.limiteGratuite = f;
+  }
+
   async begin(input: BeginAnalysis): Promise<BeginResult> {
     const existing = await this.analyses.findByDocument(input.companyId, input.documentId);
     if (existing?.status === "completed") return { status: "already_done", analysis: existing };
 
     const month = currentMonth(this.now());
+    const gratuit = await this.limiteGratuite(input.companyId);
+    if (gratuit) {
+      const used = await this.analyses.countBillable(input.companyId, month);
+      if (used >= gratuit.limite) throw new DomainError("abonnement_requis", "Free plan reading limit reached", { action: "lecture", refus: "lectures", phrase: gratuit.phrase(gratuit.limite) });
+    }
     const limit = await this.analyses.monthlyLimit(input.companyId);
     if (limit !== null) {
       const used = await this.analyses.countBillable(input.companyId, month);

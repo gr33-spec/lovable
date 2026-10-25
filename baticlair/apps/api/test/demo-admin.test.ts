@@ -47,25 +47,38 @@ describe("la démo admin", () => {
     const sans = (await greg.agent.get("/v1/admin/pilotage").expect(200)).body;
 
     const jeu = (await greg.agent.post("/v1/admin/pilotage/demo/jeu").expect(200)).body;
-    // Multimétier (25 octobre 2026) : 5 × 4 lignes de couverture, plus 2 lignes de placo chez 3 d'entre eux.
-    // Et l'admin reçoit sa propre liste de démonstration (couverture et placo, 6 lignes) pour voir ses options.
-    expect(jeu).toEqual({ artisans: 5, negoces: 3, lignes: 26, zone: "22", pourToi: 6 });
+    // Recentrage (25 octobre 2026) : seuls les gros articles à référence stricte entrent dans les regroupements (ardoise,
+    // liteau, écran ; BA13 chez 3 d'entre eux) ; le crochet et le rail restent en demande perso. L'admin y a 4 lignes.
+    expect(jeu).toEqual({ artisans: 5, negoces: 3, lignes: 18, zone: "22", pourToi: 4 });
     // Les faux comptes n'entrent pas dans les statistiques.
     expect((await greg.agent.get("/v1/admin/pilotage").expect(200)).body.chiffres).toEqual(sans.chiffres);
 
     const clos = (await greg.agent.post("/v1/admin/pilotage/demo/cloturer").expect(200)).body;
-    expect(clos).toMatchObject({ clos: 1, grillesEnvoyees: 3 });
+    // Trois clôtures : la liste de Greg (commande d'avant), le regroupement couverture et le regroupement second œuvre ;
+    // une consultation par famille, chacune à ses négoces (le généraliste et le spécialiste de la famille).
+    expect(clos).toMatchObject({ clos: 3, grillesEnvoyees: 6 });
     const grilles = ctx.emails.sent.filter((m) => /^negoce-test-\d@demo\.mobiiz\.fr$/.test(m.to));
-    expect(grilles).toHaveLength(3);
+    expect(grilles).toHaveLength(6);
     // Un généraliste et deux spécialistes : le spécialiste du second œuvre ne voit que le placo, celui de la couverture que la couverture.
-    const grilleDe = (n: number) => grilles.find((m) => m.to === `negoce-test-${n}@demo.mobiiz.fr`)!.text;
+    const grilleDe = (n: number) => grilles.filter((m) => m.to === `negoce-test-${n}@demo.mobiiz.fr`).map((m) => m.text).join("\n");
     expect(grilleDe(1)).toMatch(/Ardoise[\s\S]*BA13/);
     expect(grilleDe(2)).toContain("Ardoise");
     expect(grilleDe(2)).not.toContain("BA13");
     expect(grilleDe(3)).toContain("BA13");
     expect(grilleDe(3)).not.toContain("Ardoise");
-    expect((await greg.agent.post("/v1/admin/pilotage/demo/repondre").expect(200)).body).toEqual({ reponses: 3 });
-    expect((await greg.agent.post("/v1/admin/pilotage/demo/publier").expect(200)).body).toMatchObject({ resultats: 1 });
+    expect((await greg.agent.post("/v1/admin/pilotage/demo/repondre").expect(200)).body).toEqual({ reponses: 6 });
+    expect((await greg.agent.post("/v1/admin/pilotage/demo/publier").expect(200)).body).toMatchObject({ resultats: 3 });
+    // La demande perso de démonstration : trois offres comparées livraison comprise, et « Mes prix » rempli.
+    const demo = (await greg.agent.get("/v1/projects").expect(200)).body.items?.find?.((p: { name: string }) => p.name.startsWith("Démo regroupement")) ?? null;
+    const projetDemo = demo?.id ?? (await ctx.prisma.project.findFirstOrThrow({ where: { name: { startsWith: "Démo regroupement" } } })).id;
+    const [perso] = (await greg.agent.get(`/v1/projects/${projetDemo}/demandes-perso`).expect(200)).body;
+    expect(perso.offres.map((o: { nom: string; complete: boolean }) => [o.nom, o.complete])).toEqual([
+      ["Comptoir Breton du Bâtiment (démo)", true],
+      // Les partielles ensuite, de la moins chère à la plus chère (le placo pèse moins que l'ardoise).
+      ["Placo de l'Argoat (démo)", false],
+      ["Ardoisière du Trégor (démo)", false],
+    ]);
+    expect((await greg.agent.get("/v1/mes-prix").expect(200)).body.articles.length).toBe(6);
     const vue = (await greg.agent.get("/v1/commande-du-mois").expect(200)).body;
     expect(JSON.stringify(vue)).toContain("Ardoisière du Trégor (démo)");
 

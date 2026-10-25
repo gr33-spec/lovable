@@ -155,6 +155,10 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/admin\/pilotage\/apprentissage$/, abonnementDeA.facture],
         // La démo admin : B n'est pas admin (403), quel que soit le geste.
         [/\/admin\/pilotage\/demo$/, "jeu"],
+        // Recentrage (25 octobre 2026) : la demande perso de A, le regroupement (cycle) de A ; le chiffrage en ligne est un jeton.
+        [/\/demandes-perso$/, ids.priceRequest],
+        [/\/regroupements$/, ids.cycle],
+        [/\/public\/chiffrer$/, "jeton-inconnu-de-b-0000000000000000"],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

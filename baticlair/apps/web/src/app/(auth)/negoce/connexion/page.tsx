@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button, Field, PageTitle } from "@/components/ui";
 import { api } from "@/lib/api";
-import { NOM, nom } from "@/lib/nom";
+import { nom } from "@/lib/nom";
 
 /** LA CONNEXION DU NÉGOCE (point 1) : un e-mail, un lien magique, pas de mot de passe. La réponse est la même, adresse connue ou non. */
 export default function ConnexionNegocePage() {

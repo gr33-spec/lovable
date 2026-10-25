@@ -63,30 +63,17 @@ export interface LigneDemandee {
   unite: string;
 }
 
-/** Le mail au négoce (vouvoiement), au nom de l'artisan. */
-export function mailDemandePerso(m: { artisan: string; entreprise: string; but: ButDemande; lignes: readonly LigneDemandee[]; ville: string | null; dateBesoin: Date | null; lien: string; nomApp: string }): { objet: string; texte: string } {
-  const date = m.dateBesoin ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(m.dateBesoin) : null;
-  const objet = m.but === "commander" ? `${m.entreprise} : demande de prix avant commande (${m.lignes.length} article${m.lignes.length > 1 ? "s" : ""})` : `${m.entreprise} : demande de prix pour un chantier (${m.lignes.length} article${m.lignes.length > 1 ? "s" : ""})`;
-  const texte = [
-    "Bonjour,",
-    "",
-    m.but === "commander"
-      ? `${m.artisan} (${m.entreprise}) souhaite commander les articles ci-dessous et vous demande votre meilleur prix livré.`
-      : `${m.artisan} (${m.entreprise}) prépare un chantier et vous demande votre prix pour les articles ci-dessous.`,
-    m.ville ? `Livraison : ${m.ville}${date ? `, pour le ${date}` : ""}.` : date ? `Besoin pour le ${date}.` : "",
-    "",
-    ...m.lignes.map((l) => `- ${l.designation} : ${String(l.quantite).replace(".", ",")} ${l.unite}`),
-    "",
-    `Chiffrez en ligne, sans compte, en deux minutes : prix par ligne, livraison, délai et validité de votre offre.`,
+/**
+ * Le bloc ajouté au mail de demande de devis (§45, inchangé : il est déjà au nom de l'artisan et signé par lui) : le but
+ * de la demande et le lien de chiffrage en ligne, sans compte. Vouvoiement.
+ */
+export function blocLienChiffrage(m: { but: ButDemande; lien: string; nomApp: string }): string {
+  return [
+    m.but === "commander" ? "Je compte commander : merci de m'indiquer votre meilleur prix livré." : "C'est pour chiffrer un chantier.",
+    `Vous pouvez chiffrer en ligne, sans compte, en deux minutes (prix par ligne, livraison, délai et validité de votre offre) :`,
     m.lien,
-    "",
-    `Vous pouvez aussi répondre directement à cet e-mail : la réponse va à ${m.artisan}.`,
-    "",
-    `Envoyé avec ${m.nomApp} pour ${m.entreprise}. Vos prix ne sont vus que par cet artisan.`,
-  ]
-    .filter((l, i, t) => !(l === "" && t[i - 1] === ""))
-    .join("\n");
-  return { objet, texte };
+    `Lien envoyé par ${m.nomApp} pour mon entreprise. Vos prix ne sont vus que par moi.`,
+  ].join("\n");
 }
 
 /** La relance à 48 h ouvrées (vouvoiement). */

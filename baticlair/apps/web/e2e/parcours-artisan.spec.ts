@@ -2576,7 +2576,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.locator("main svg")).toHaveCount(0);
   await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
   // L'abonnement (24 octobre 2026) : l'argument phare (une possibilité tant qu'il n'y a pas 3 cycles) et l'offre.
-  await expect(page.getByText(/^Dès 29 € par mois(, économise des centaines, voire des milliers d'euros chaque année\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par regroupement\.)$/)).toBeVisible();
+  await expect(page.getByText(/^Gratuit pour commencer\. Dès 29 € HT par mois( pour comparer et acheter en groupe\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par regroupement\.)$/)).toBeVisible();
   await expect(page.getByText(/^Essai gratuit sur un cycle complet, puis dès 29 € HT par mois à l'année, ou 49 € HT au mois sans engagement\./)).toBeVisible();
   await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(2);
   await expect(page.getByText("des volumes sûrs, des clients en plus. Répondez aux grilles.")).toBeVisible();
@@ -3334,7 +3334,7 @@ test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formul
   await page.getByRole("navigation", { name: "Menu" }).getByRole("link", { name: "Tarifs" }).click();
   await expect(page).toHaveURL(/\/tarifs$/);
   await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
-  await expect(page.getByText(/^Dès 29 € par mois(, économise des centaines, voire des milliers d'euros chaque année\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par regroupement\.)$/)).toBeVisible();
+  await expect(page.getByText(/^Gratuit pour commencer\. Dès 29 € HT par mois( pour comparer et acheter en groupe\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par regroupement\.)$/)).toBeVisible();
   for (const etape of ["Rejoins la communauté, c'est gratuit", "Teste sur un cycle complet", "Continue seulement si tu as vraiment économisé : dès 29 € HT par mois"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }

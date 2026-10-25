@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Users, Warehouse, type LucideIcon } from "lucide-react";
+import { House, Tags, UserRound, Users, Warehouse, type LucideIcon } from "lucide-react";
 import { useCallback } from "react";
 import { api, type Health } from "@/lib/api";
 import { fr } from "@/lib/fr";
@@ -18,21 +18,21 @@ interface NavItem {
 }
 
 /**
- * Simplification (21 octobre, demande du fondateur) : TROIS entrées seulement, une icône et un mot chacune.
- * « Mes chantiers » (l'accueil), au centre le rond « + Nouvelle liste » (nouveau cap, 22 octobre), « Regroupement ».
- * Fournisseurs et Compte vivent dans le menu derrière l'initiale de l'artisan, en haut à droite (`MenuArtisan`).
- * Passe UI/UX (23 octobre) : trois entrées égales, l'active en accent, le rond accent au centre. Retour de Greg le soir
- * (« tendance et moderne ») : la barre redevient une capsule flottante, en verre translucide (flou derrière), posée à
- * 12 px du bas ; l'icône active sur une pastille d'accent pâle. Toujours `position: fixed; bottom: 0` sur le conteneur
- * (jamais recalée en JavaScript) : la marge est à l'intérieur.
+ * RECENTRAGE (Greg, 25 octobre 2026, maquette des trois iPhone) : CINQ onglets, une icône et un mot chacun : Accueil,
+ * Chantiers, Regroupements, Mes prix, Profil. Le gros bouton « Nouveau chantier » est en tête de l'accueil (plus de rond
+ * central). Barre en verre flottante sur téléphone, toujours `position: fixed; bottom: 0` (jamais recalée en JavaScript) ;
+ * colonne à gauche sur ordinateur. Avant : trois entrées (21 octobre) et le rond « Nouvelle liste » (22 octobre).
  */
+const accueilItem: NavItem = { href: "/", label: fr.nav.home, icon: House, match: (p: string) => p === "/" };
 const chantiersItem: NavItem = {
-  href: "/",
-  label: fr.nav.projects,
+  href: "/chantiers",
+  label: fr.nav.chantiers,
   icon: Warehouse,
-  match: (p: string) => p === "/" || (p.startsWith("/chantiers") && p !== "/chantiers/nouveau"),
+  match: (p: string) => p.startsWith("/chantiers"),
 };
-const groupeItem: NavItem = { href: "/groupe", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/groupe") };
+const groupeItem: NavItem = { href: "/regroupements", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/regroupements") || p.startsWith("/groupe") };
+const prixItem: NavItem = { href: "/mes-prix", label: fr.nav.prix, icon: Tags, match: (p: string) => p.startsWith("/mes-prix") };
+const profilItem: NavItem = { href: "/compte", label: fr.nav.profil, icon: UserRound, match: (p: string) => p.startsWith("/compte") || p.startsWith("/abonnement") || p.startsWith("/fournisseurs") };
 
 /** Le drapeau `groupe` de l'API (route de santé, publique) : éteint, l'onglet n'existe pas. */
 export function useGroupeActif(): boolean {
@@ -63,11 +63,11 @@ export function AppNav() {
         key={item.href}
         href={item.href}
         aria-current={active ? "page" : undefined}
-        className={`flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-semibold transition-[color,background-color] duration-150 lg:min-h-12 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px] ${
+        className={`flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] font-semibold transition-[color,background-color] duration-150 lg:min-h-12 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px] ${
           active ? "text-accent-text lg:bg-accent-soft" : "text-muted active:text-ink lg:hover:bg-ground"
         }`}
       >
-        <span className={`flex h-8 w-12 items-center justify-center rounded-full transition-[background-color] duration-150 lg:h-auto lg:w-auto lg:bg-transparent ${active ? "bg-accent-soft" : ""}`}>
+        <span className={`flex h-8 w-11 items-center justify-center rounded-full transition-[background-color] duration-150 lg:h-auto lg:w-auto lg:bg-transparent ${active ? "bg-accent-soft" : ""}`}>
           <Icon size={22} aria-hidden="true" strokeWidth={active ? 2.4 : 2} />
         </span>
         <span className="text-center leading-tight whitespace-nowrap">{item.label}</span>
@@ -82,21 +82,15 @@ export function AppNav() {
       className={`${inChat ? "max-lg:hidden " : ""}${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}fixed z-30 transition-[translate,opacity] duration-200 max-lg:inset-x-0 max-lg:bottom-0 lg:top-4 lg:bottom-4 lg:left-4 lg:w-60`}
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise) ; ordinateur : colonne à gauche. */}
-      <div className="mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-cols-3 items-center rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-2xl lg:border lg:border-line lg:bg-surface lg:p-3 lg:shadow-card lg:ring-0">
+      <div className="mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] auto-cols-fr grid-flow-col items-center rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-2xl lg:border lg:border-line lg:bg-surface lg:p-3 lg:shadow-card lg:ring-0">
         <span className="hidden px-3 pt-2 pb-4 lg:block">
           <Logo hauteur={28} />
         </span>
+        {link(accueilItem)}
         {link(chantiersItem)}
-        <Link
-          href="/chantiers/nouveau"
-          className="pressable flex min-h-13 flex-col items-center justify-center gap-1 text-[11px] font-semibold text-accent-text lg:order-first lg:mb-3 lg:min-h-13 lg:flex-row lg:gap-2 lg:rounded-full lg:bg-accent lg:text-[16px] lg:text-white"
-        >
-          <span className="flex size-11 items-center justify-center rounded-full bg-accent text-on-accent shadow-[0_6px_16px_rgba(13,15,20,0.25)] lg:size-auto lg:bg-transparent lg:shadow-none" aria-hidden="true">
-            <Plus size={24} strokeWidth={2.6} />
-          </span>
-          <span className="leading-tight">Nouvelle liste</span>
-        </Link>
-        {groupe ? link(groupeItem) : <span aria-hidden="true" />}
+        {groupe ? link(groupeItem) : null}
+        {link(prixItem)}
+        {link(profilItem)}
       </div>
     </nav>
   );
