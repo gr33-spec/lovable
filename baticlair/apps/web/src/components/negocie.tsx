@@ -126,7 +126,7 @@ function CarteBesoin({ b, onChange }: { b: BesoinNegocie; onChange: () => void }
                 <Check size={18} aria-hidden="true" /> J&apos;accepte
               </Button>
               <Button variant="secondary" onClick={() => void faire("refuser")} pending={pending === "refuser"} disabled={pending !== null}>
-                Non merci
+                Refuser
               </Button>
             </div>
           ) : null}
