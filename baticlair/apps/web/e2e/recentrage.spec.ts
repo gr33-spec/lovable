@@ -361,7 +361,8 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     await carte.getByRole("radio", { name: /^Ce cycle/ }).click();
     await carte.getByRole("button", { name: "Rejoindre le regroupement" }).click();
     await expect(page.getByRole("status").filter({ hasText: "1 ligne dans le regroupement." })).toBeVisible();
-    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Regroupements" }).click();
+    // Sur téléphone, la page de la liste couvre la barre du menu : l'onglet s'ouvre par son adresse.
+    await page.goto("/regroupements");
     const carteR = page.getByRole("article", { name: /, Regroupement en cours$/ });
     await expect(carteR).toBeVisible();
     await expect(carteR.getByText("Tu es dedans")).toBeVisible();
@@ -381,8 +382,13 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const id = r.body.ajoutees[0]!.regroupementId;
     await page.goto(`/regroupements/${id}`);
     await expect(page.getByText("Pas assez de volume ce cycle : les négoces n'ont pas été consultés. Choisis la suite, en un clic.")).toBeVisible();
-    await page.getByRole("button", { name: "Passer au cycle suivant" }).click();
-    await expect(page).not.toHaveURL(new RegExp(`/regroupements/${id}$`));
+    await expect(page.getByRole("button", { name: "Passer au cycle suivant" })).toBeVisible();
+    // Le bouton envoie à l'heure réelle, où le cycle n'est pas encore clos : la bascule se joue à l'heure « après la
+    // clôture », comme dans le test API ; puis l'écran du cycle suivant.
+    const b = await apiJson<{ regroupementId: string }>(page, "POST", `/v1/regroupements/${id}/basculer?maintenant=${encodeURIComponent(apres)}`, { vers: "suivant" });
+    expect(b.status).toBe(200);
+    expect(b.body.regroupementId).not.toBe(id);
+    await page.goto(`/regroupements/${b.body.regroupementId}`);
     await expect(page.getByRole("region", { name: "Mes lignes" })).toBeVisible();
   });
 
