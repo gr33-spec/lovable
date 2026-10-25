@@ -3473,7 +3473,7 @@ test("Tableau de bord (24 octobre 2026) : refusé à un artisan ; l'admin entre 
   // La démo (mode test) : un jeu de test d'un bouton, effacé d'un autre.
   const demo = page.getByRole("region", { name: "Démo" });
   await demo.getByRole("button", { name: "Créer un jeu de test" }).click();
-  await expect(demo.getByRole("status")).toHaveText("5 faux artisans et 3 faux négoces dans le 22 (un généraliste, deux spécialistes), 18 lignes déposées. Ta liste de démonstration (couverture et placo) est dans la commande.");
+  await expect(demo.getByRole("status")).toHaveText("5 faux artisans et 3 faux négoces dans le 22 (un généraliste, deux spécialistes), 18 lignes déposées. Ta liste de démonstration (couverture et placo) est dans la commande. Deux regroupements négociés (ardoise avec offre, zinc en collecte) sont dans Regroupements et sur l'écran du chasseur.");
   await demo.getByRole("button", { name: "Tout effacer" }).click();
   await expect(demo.getByRole("status")).toContainText("Effacé : 5 faux artisans");
 });
