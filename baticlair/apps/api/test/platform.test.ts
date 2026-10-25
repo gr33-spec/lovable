@@ -97,6 +97,21 @@ describe("ResendEmailSender", () => {
     expect(logs).toHaveLength(0);
   });
 
+  it("« Répondre » va à bonjour@ par défaut ; un e-mail qui a sa propre adresse de réponse la garde (Greg, 25 octobre 2026)", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const fakeFetch = (async (_url: string, init: RequestInit) => {
+      bodies.push(JSON.parse(String(init.body)) as Record<string, unknown>);
+      return new Response("{}", { status: 200 });
+    }) as unknown as typeof fetch;
+    const sender = new ResendEmailSender("re_secret", "Mobiiz <bonjour@mobiiz.fr>", { error: () => undefined } as never, fakeFetch, "bonjour@mobiiz.fr");
+    await sender.send({ to: "jean@example.fr", subject: "S", text: "T" });
+    await sender.send({ to: "negoce@example.fr", subject: "Bon de commande", text: "T", replyTo: "artisan@example.fr" });
+    expect(bodies.map((b) => b.reply_to)).toEqual(["bonjour@mobiiz.fr", "artisan@example.fr"]);
+    const c = loadConfig({ ...base, EMAIL_PROVIDER: "resend", RESEND_API_KEY: "re_x", EMAIL_DOMAINE: "mobiiz.fr" });
+    expect(c.resend).toEqual({ apiKey: "re_x", from: "Mobiiz <bonjour@mobiiz.fr>", replyTo: "bonjour@mobiiz.fr" });
+    expect(loadConfig({ ...base, EMAIL_PROVIDER: "resend", RESEND_API_KEY: "re_x", EMAIL_DOMAINE: "mobiiz.fr", EMAIL_REPONDRE_A: "contact@mobiiz.fr" }).resend?.replyTo).toBe("contact@mobiiz.fr");
+  });
+
   it("journalise un échec sans interrompre l'inscription", async () => {
     const fakeFetch = (async () => new Response("quota", { status: 429 })) as unknown as typeof fetch;
     const logs: unknown[] = [];

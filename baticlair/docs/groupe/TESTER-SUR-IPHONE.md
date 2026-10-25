@@ -18,7 +18,7 @@ But (Greg, 24 octobre 2026) : vivre tout un cycle Mobiiz depuis ton iPhone, avec
 | 3 | Ta liste | « + », dépose un devis (ou « J'ai déjà ma liste »), réponds aux questions, puis ajoute la liste à la commande du mois (chantier dans le 22). | La liste est dans la commande ; le bandeau d'essai est toujours là. |
 | 4 | Tableau de bord | Menu → Commande commune → « Tableau de bord » → « Recevoir mon code ». Saisis le code reçu par e-mail. | Les 4 gros chiffres et les sections. Plus bas, la carte « Démo (mode test) ». |
 | 5 | Démo | « Créer un jeu de test ». | « 5 faux artisans et 3 faux négoces dans le 22, 20 lignes déposées. » |
-| 6 | Démo | « Clôturer maintenant ». | « 1 commande close, 3 grilles envoyées aux négoces. » Les 3 e-mails des faux négoces arrivent **chez toi**, objet « [TEST → negoce-test-1@demo.baticlair.fr] … ». Tu peux ouvrir la grille depuis l'e-mail, comme un négoce. |
+| 6 | Démo | « Clôturer maintenant ». | « 1 commande close, 3 grilles envoyées aux négoces. » Les 3 e-mails des faux négoces arrivent **chez toi**, objet « [TEST → negoce-test-1@demo.mobiiz.fr] … ». Tu peux ouvrir la grille depuis l'e-mail, comme un négoce. |
 | 7 | Démo | « Faire répondre les négoces ». | « 3 négoces ont répondu (prix fictifs). » |
 | 8 | Démo | « Publier les résultats ». | Un e-mail et une notification : les résultats sont là. Dans l'app, l'onglet de la commande montre les 3 négoces classés et l'économie du cycle. |
 | 9 | App | Choisis un négoce, puis « Commander ». | Le bon de commande part (e-mail redirigé vers toi). |

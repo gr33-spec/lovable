@@ -45,3 +45,8 @@ En production (`VERCEL_ENV=production`), la liste blanche est éteinte : chacun 
 - Les faux comptes de démo (`@demo.baticlair.fr`, domaine qui ne reçoit rien) ne sont pas sur la liste : leurs e-mails arrivent chez toi, objet « [TEST → artisan1@demo.baticlair.fr] … ». Tu vois ainsi ce que reçoit chaque faux artisan et chaque faux négoce.
 - Tous les autres e-mails (un vrai négoce, un vrai artisan) arrivent chez toi, avec le vrai destinataire dans l'objet. Rien ne part chez quelqu'un qui n'a rien demandé.
 - Sans `EMAIL_REDIRECTION` ni adresse complète dans la liste, un e-mail hors liste ne part pas du tout (il est seulement noté dans les journaux).
+
+## « Répondre » et renvoi de bonjour@mobiiz.fr (25 octobre 2026)
+
+- Chaque e-mail porte `Reply-To: bonjour@mobiiz.fr` (`EMAIL_REPONDRE_A`, par défaut l'adresse de l'expéditeur). Gardent leur propre adresse : le bon de commande au négoce (l'artisan qui commande), la demande de devis au fournisseur (l'artisan) et la demande de prix d'un lot quand `REPONSES_DOMAINE` est posé.
+- bonjour@mobiiz.fr est renvoyée vers la boîte de Greg par Forward Email (gratuit, sans compte) : MX `mx1.forwardemail.net` et `mx2.forwardemail.net` (priorité 10) et un TXT `forward-email=…` chiffré sur mobiiz.fr, dans la zone Vercel. Pour changer l'adresse de destination : chiffrer `bonjour:<adresse>` sur forwardemail.net (outil « Encrypt TXT ») et remplacer le TXT.

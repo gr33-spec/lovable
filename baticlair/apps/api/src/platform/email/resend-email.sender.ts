@@ -24,6 +24,8 @@ export class ResendEmailSender implements TransactionalEmailSender, EmailCapabil
     private readonly from: string,
     private readonly logger: AppLogger,
     private readonly fetchImpl: HttpPost = fetch as unknown as HttpPost,
+    /** « Répondre » par défaut (bonjour@mobiiz.fr, renvoyée chez Greg) ; un e-mail qui en donne une autre la garde. */
+    private readonly replyTo?: string,
   ) {}
 
   async send(email: TransactionalEmail): Promise<void> {
@@ -52,7 +54,7 @@ export class ResendEmailSender implements TransactionalEmailSender, EmailCapabil
         subject: email.subject,
         text: email.text,
         ...(email.html ? { html: email.html } : {}),
-        ...(email.replyTo ? { reply_to: email.replyTo } : {}),
+        ...((email.replyTo ?? this.replyTo) ? { reply_to: email.replyTo ?? this.replyTo } : {}),
         ...(email.headers ? { headers: email.headers } : {}),
         ...(email.attachments?.length ? { attachments: email.attachments.map((a) => ({ filename: a.filename, content: a.contentBase64, content_type: a.contentType })) } : {}),
       }),

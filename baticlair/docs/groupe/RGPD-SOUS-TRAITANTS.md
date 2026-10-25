@@ -9,6 +9,7 @@ Version du 24 octobre 2026. Les liens de DPA sont ceux publiés par chaque soci�
 | Anthropic PBC | Lecture des listes et des devis par l'IA | Texte numéroté **anonymisé** ; images des seules pages scannées | États-Unis | CCT (intégrées aux conditions commerciales) | https://www.anthropic.com/legal/commercial-terms (DPA inclus) | Vérifier que le compte est sous les conditions commerciales de l'API : **aucune donnée utilisée pour entraîner les modèles** ; rétention par défaut de l'API |
 | Stripe Payments Europe Ltd | Paiement de l'abonnement artisan (`PAIEMENT=stripe`) : Checkout, prélèvements, portail client | Raison sociale, e-mail, adresse de facturation, n° de TVA, carte bancaire (saisie chez Stripe, jamais chez nous) | Irlande (UE) / États-Unis (société mère) | CCT ; DPF | https://stripe.com/legal/dpa | Accepter le DPA à l'ouverture du compte Stripe ; rien tant que le paiement est simulé |
 | Resend | Envoi des e-mails | Adresse, objet, contenu des e-mails, pièces jointes (bons) | États-Unis | CCT ; DPF | https://resend.com/legal/dpa | Accepter le DPA ; régler la rétention des journaux |
+| Forward Email | Renvoi des e-mails reçus à bonjour@mobiiz.fr vers la boîte de Greg (25 octobre 2026) | E-mails reçus (expéditeur, objet, contenu), transmis sans être stockés | États-Unis | CCT | https://forwardemail.net/en/privacy | Vérifier le DPA ; ou passer à une vraie boîte au lancement |
 | INSEE (API Sirene) | Vérification du SIRET | Le numéro seul | France | Aucun transfert | Service public | — |
 | API Adresse (data.gouv.fr) | Distance de livraison | Adresses du chantier et du dépôt | France | Aucun transfert | Service public | — |
 | Apple, Google (Web Push) | Transport des notifications | Titre et texte court, adresse technique | UE / États-Unis | Transport seulement, rien gardé | — | — |
@@ -18,6 +19,7 @@ Version du 24 octobre 2026. Les liens de DPA sont ceux publiés par chaque soci�
 - [ ] Vercel
 - [ ] Neon
 - [ ] Resend
+- [ ] Forward Email
 - [ ] Anthropic (conditions commerciales de l'API, sans entraînement)
 
 ## Règle

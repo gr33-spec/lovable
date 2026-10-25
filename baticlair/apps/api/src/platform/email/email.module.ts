@@ -18,7 +18,7 @@ import { ResendEmailSender } from "./resend-email.sender.js";
       useFactory: (config: AppConfig, logger: AppLogger) => {
         switch (config.emailProvider) {
           case "resend":
-            return new EmailSortantSender(new ResendEmailSender(config.resend!.apiKey, config.resend!.from, logger), config.webAppUrl, config.emailGarde, logger);
+            return new EmailSortantSender(new ResendEmailSender(config.resend!.apiKey, config.resend!.from, logger, undefined, config.resend!.replyTo), config.webAppUrl, config.emailGarde, logger);
           case "disabled":
             return new DisabledEmailSender(logger);
           case "capture":

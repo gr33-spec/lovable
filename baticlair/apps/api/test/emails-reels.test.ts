@@ -20,7 +20,7 @@ const base = { DATABASE_URL: "postgresql://x@localhost/db", AUTH_SECRET: "a".rep
 
 describe("la configuration des e-mails", () => {
   it("l'expéditeur est « Mobiiz <bonjour@domaine> » ; EMAIL_FROM l'emporte", () => {
-    expect(loadConfig({ ...base, RESEND_API_KEY: "re_test", EMAIL_DOMAINE: "mobiiz.fr" }).resend).toEqual({ apiKey: "re_test", from: "Mobiiz <bonjour@mobiiz.fr>" });
+    expect(loadConfig({ ...base, RESEND_API_KEY: "re_test", EMAIL_DOMAINE: "mobiiz.fr" }).resend).toEqual({ apiKey: "re_test", from: "Mobiiz <bonjour@mobiiz.fr>", replyTo: "bonjour@mobiiz.fr" });
     expect(loadConfig({ ...base, RESEND_API_KEY: "re_test", EMAIL_DOMAINE: "mobiiz.fr", EMAIL_EXPEDITEUR: "commande" }).resend?.from).toBe("Mobiiz <commande@mobiiz.fr>");
     expect(loadConfig({ ...base, RESEND_API_KEY: "re_test", EMAIL_DOMAINE: "mobiiz.fr", EMAIL_FROM: "X <x@y.fr>" }).resend?.from).toBe("X <x@y.fr>");
     expect(() => loadConfig({ ...base, RESEND_API_KEY: "re_test" })).toThrow(/EMAIL_DOMAINE/);

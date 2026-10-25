@@ -48,6 +48,12 @@ const envSchema = z
     EMAIL_DOMAINE: z.string().regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i).optional(),
     EMAIL_EXPEDITEUR: z.string().regex(/^[a-z0-9._-]+$/i).default("bonjour"),
     /**
+     * L'adresse de « Répondre » de chaque e-mail (Greg, 25 octobre 2026 : les réponses arrivent dans sa boîte par le
+     * renvoi de bonjour@mobiiz.fr). Par défaut, l'adresse de l'expéditeur. Un e-mail qui doit répondre ailleurs
+     * (l'artisan qui commande, l'adresse d'un lot) garde la sienne.
+     */
+    EMAIL_REPONDRE_A: z.string().email().optional(),
+    /**
      * La liste blanche de la PRÉVISUALISATION : adresses ou domaines (« @exemple.fr »), séparés par des virgules. Les
      * autres destinataires sont redirigés vers EMAIL_REDIRECTION (objet « [TEST → destinataire réel] … »). Obligatoire
      * pour envoyer de vrais e-mails depuis une prévisualisation ; ignorée en production.
@@ -251,7 +257,7 @@ export interface AppConfig {
    */
   previewOriginPattern: RegExp | null;
   emailProvider: "resend" | "disabled" | "console" | "capture";
-  resend?: { apiKey: string; from: string };
+  resend?: { apiKey: string; from: string; replyTo?: string };
   /** La liste blanche de la prévisualisation (null en production et en local). */
   emailGarde: { autorises: string[]; redirigerVers: string | null } | null;
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
@@ -353,6 +359,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     problemes.push("EMAILS_AUTORISES : obligatoire pour envoyer de vrais e-mails depuis une prévisualisation (la liste blanche)");
   }
   const emailFrom = e.EMAIL_FROM ?? (e.EMAIL_DOMAINE ? `${NOM_APP} <${e.EMAIL_EXPEDITEUR}@${e.EMAIL_DOMAINE}>` : undefined);
+  const emailReponse = e.EMAIL_REPONDRE_A ?? (e.EMAIL_DOMAINE ? `${e.EMAIL_EXPEDITEUR}@${e.EMAIL_DOMAINE}` : undefined);
   if (problemes.length) throw new ConfigError(problemes);
   const emailProvider = e.EMAIL_PROVIDER ?? (e.RESEND_API_KEY ? "resend" : isDeployed ? "disabled" : "console");
   const oauth = (id?: string, secret?: string) => (id && secret ? { clientId: id, clientSecret: secret } : undefined);
@@ -370,7 +377,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     previewOriginPattern: e.VERCEL_ENV === "preview" ? PREVIEW_ORIGIN : null,
     emailProvider,
     ...(emailProvider === "resend" && e.RESEND_API_KEY && emailFrom
-      ? { resend: { apiKey: e.RESEND_API_KEY, from: emailFrom } }
+      ? { resend: { apiKey: e.RESEND_API_KEY, from: emailFrom, ...(emailReponse ? { replyTo: emailReponse } : {}) } }
       : {}),
     emailGarde: e.VERCEL_ENV !== "production" && autorises.length > 0 ? { autorises, redirigerVers: e.EMAIL_REDIRECTION?.toLowerCase() ?? autorises.find((x) => !x.startsWith("@")) ?? null } : null,
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },

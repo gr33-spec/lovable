@@ -2,6 +2,14 @@
 
 Plan du 20 octobre 2026, bloc 11. À dérouler dans l'ordre, le jour J, par Greg. Rien de tout cela n'est fait sans son accord.
 
+## 0. Go prod : à faire AVANT toute mise en production (Greg, 25 octobre 2026)
+
+- [ ] **Vercel Pro** sur l'équipe gr33-spec : obligatoire pour un usage commercial. Remettre alors la clôture de la commande du mois à l'heure (tâches planifiées horaires au lieu d'une fois par jour, `vercel.json` de l'API ; en test la clôture se fait vers 11 h UTC).
+- [ ] **Supprimer l'admin de test** `delivered+admin-recette@resend.dev` de `GROUPE_ADMINS` (projet baticlair-api, Preview, branche `claude/saas-achat-artisans-prompt-1lyihx`) : il n'a été ajouté que pour la recette en ligne du cycle complet. Il n'est pas, et ne doit jamais être, dans la variable de Production : vérifier que celle-ci ne contient que l'adresse de Greg.
+- [ ] Clés Stripe **live** (accord de Greg) et prix live créés par `apps/api/scripts/stripe-creer-prix.mjs --reel`.
+- [ ] `BATICLAIR_ANTHROPIC_KEY` : cochée Production et Preview depuis le 25 octobre ; l'ancienne `ANTHROPIC_API_KEY` (refusée par Anthropic) peut être supprimée.
+- [ ] Renvoi de bonjour@mobiiz.fr vers la boîte de Greg (Forward Email, gratuit, DNS seulement) : vérifier qu'il marche encore, et passer au besoin à une vraie boîte.
+
 ## 1. Avant de fusionner
 
 - [ ] PR #284 relue, verte (CI), Claude Approvals passée.
