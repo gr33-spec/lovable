@@ -2569,7 +2569,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Recentrage (Greg, 25 octobre 2026) : le titre, trois étapes, le bloc groupe et le bloc négoce mot pour mot ; aucune
   // promesse d'économie chiffrée.
   await expect(page.getByRole("heading", { name: "L'union fait la force." })).toBeVisible();
-  await expect(page.getByText("Quand d'autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes pour tenter un meilleur prix.")).toBeVisible();
+  await expect(page.getByText("Quand d'autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes.")).toBeVisible();
+  // Business model final (Greg, 25 octobre 2026) : l'argument des chasseurs d'opportunités.
+  await expect(page.getByText("Des chasseurs d'opportunités négocient pour toi.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Comment ça marche" })).toBeVisible();
   await expect(page.getByText(/centaines|milliers d'euros/)).toHaveCount(0);
   for (const etape of ["1. Dépose ton devis", "2. Mobiiz prépare ton quantitatif", "3. Envoie à tes négoces et compare"]) {
@@ -2586,7 +2588,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText(/^Gratuit pour commencer\. Dès 29 € HT par mois( pour comparer et acheter en groupe\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par regroupement\.)$/)).toBeVisible();
   await expect(page.getByText(/^29 € HT par mois payé à l'année \(348 €\), ou 49 € HT au mois sans engagement\./)).toBeVisible();
   await expect(page.getByRole("link", { name: "Commencer gratuitement" })).toHaveCount(2);
-  await expect(page.getByText("des demandes structurées, prêtes à chiffrer, et des volumes groupés sur lesquels vous positionner.")).toBeVisible();
+  await expect(page.getByText("des demandes structurées, prêtes à chiffrer, et des volumes groupés. Vos clients artisans paient le juste prix, et vous vendez plus.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
   const partage = page.getByRole("region", { name: "Fais venir tes collègues" });
   const message = /^Je me suis inscrit sur Mobiiz, on regroupe nos commandes de matériaux pour payer moins cher\. Plus on est nombreux, plus on négocie\. Rejoins-nous : http/;
