@@ -388,6 +388,14 @@ export function ProjectTakeoff({
   // §48 ÉTAPE 5 : la liste EST l'écran du chantier tant qu'elle n'est pas partie ; ensuite, les réponses des fournisseurs
   // passent devant et la liste tient en une ligne.
   const listShown = page || (!sent && !overview);
+  // La demande perso et le prix de groupe : sous la liste quand elle est l'écran du chantier, sinon sur le chantier ; montés
+  // une seule fois (business model final, 25 octobre 2026 : l'e2e ne les trouvait pas sous la liste).
+  const persoEtGroupe = quantitatif ? (
+    <div className="flex flex-col gap-4">
+      <DemandesPerso projectId={projectId} articles={takeoff.purchase.toBuy.map((i) => i.key)} canCreate archived={archived} />
+      <TenterPrixDeGroupe projectId={projectId} />
+    </div>
+  ) : null;
   return (
     <>
       {listShown ? (
@@ -429,6 +437,7 @@ export function ProjectTakeoff({
             </div>
           ) : null}
           {body}
+          {persoEtGroupe}
         </section>
       ) : null}
       {/* Le chantier après l'envoi : reste monté sous la liste (l'aperçu d'envoi s'y ouvre), il est seulement caché. */}
@@ -467,12 +476,7 @@ export function ProjectTakeoff({
             <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} openSignal={sendSignal} refreshSignal={requestsSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
           </div>
           {/* Recentrage (Greg, 25 octobre 2026) : la demande perso part sur les lignes de la liste, sans attendre la validation. */}
-          {quantitatif ? (
-            <div className="flex flex-col gap-4">
-              <DemandesPerso projectId={projectId} articles={takeoff.purchase.toBuy.map((i) => i.key)} canCreate archived={archived} />
-              <TenterPrixDeGroupe projectId={projectId} />
-            </div>
-          ) : null}
+          {!listShown ? persoEtGroupe : null}
         </div>
       </div>
     </>
