@@ -1,5 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Aucun parcours n'appelle l'API Anthropic réelle (Greg, 25 octobre 2026) : les clés du shell ne passent jamais aux serveurs.
+delete process.env.BATICLAIR_ANTHROPIC_KEY;
+delete process.env.ANTHROPIC_API_KEY;
+
 /**
  * Parcours de bout en bout, dans un vrai navigateur, contre la vraie API
  * et une vraie base PostgreSQL. Démarre l'API (port 4000) et le site

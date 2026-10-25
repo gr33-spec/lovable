@@ -4,15 +4,15 @@ name: Vraie lecture (Opus)
 # de lecture, la vraie lecture tourne sur DE00000071 et 7954 ; le bref et les questions sont imprimés mot pour mot dans le
 # journal, puis contrôlés contre le résultat attendu.
 #
-# Lancée seulement à la demande (un appel au modèle coûte) : en posant l'étiquette « lecture-reelle » sur la PR.
-# Pour relancer : retirer l'étiquette, la remettre.
+# DÉCISION DE GREG (25 octobre 2026, 20 $ partis en CI le 24) : aucun test automatique n'appelle l'API réelle. Ce workflow
+# ne part QUE si Greg le lance lui-même, à la main (onglet Actions, « Run workflow »), jamais sur une étiquette, un push
+# ou une PR. Coût d'un passage complet : environ 2,30 $ (DE00000071 0,35 $, 7954 1,91 $, D.2026.105 0,06 $).
 #
 # Les PDF réels ne sont jamais dans le dépôt :
 # - DE00000071, D.2026.105 et 7954 : les devis anonymisés de test/support, régénérés à la volée (désignations,
 #   quantités et unités du devis réel ; ni nom, ni adresse, ni prix).
 on:
-  pull_request:
-    types: [labeled]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,7 +23,6 @@ defaults:
 
 jobs:
   lecture:
-    if: github.event.label.name == 'lecture-reelle'
     name: Vraie lecture DE00000071, 7954 et D.2026.105
     runs-on: ubuntu-latest
     timeout-minutes: 20
