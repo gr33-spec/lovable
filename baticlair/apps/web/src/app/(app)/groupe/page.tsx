@@ -114,7 +114,7 @@ export default function GroupePage() {
       ) : null}
       {etat.data.admin ? (
         <Link href="/admin/pilotage" className="min-h-11 self-start py-2 text-[14px] font-semibold text-accent-text underline decoration-dotted underline-offset-4">
-          Tableau de bord
+          Espace admin
         </Link>
       ) : null}
       {etat.data.raisons.includes("exclu_du_groupe") ? (

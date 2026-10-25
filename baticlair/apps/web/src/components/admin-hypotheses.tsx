@@ -40,8 +40,14 @@ const h = (n: number | null) => (n == null ? "—" : `${n.toLocaleString("fr-FR"
 const ecart = (t: number | null) => (t == null ? "—" : `${t > 0 ? "+" : ""}${(t * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`);
 const moisFr = (m: string) => new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${m.slice(0, 7)}-01T00:00:00Z`));
 
-function Titre({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">{children}</h2>;
+/** Le titre d'un bloc de l'espace admin et la phrase qui dit à quoi il sert (Greg, 25 octobre 2026 : « ultra intuitif »). */
+function Titre({ children, aide }: { children: React.ReactNode; aide?: string }) {
+  return (
+    <>
+      <h2 className="text-[18px] font-extrabold tracking-[-0.01em]">{children}</h2>
+      {aide ? <p className="text-[14px] leading-snug text-muted">{aide}</p> : null}
+    </>
+  );
 }
 
 export function HypothesesCarte() {
@@ -50,30 +56,30 @@ export function HypothesesCarte() {
   if (!data) return null;
   const n = data.negocie;
   return (
-    <section aria-label="Hypothèses de lancement" className="flex flex-col gap-1">
-      <Titre>Hypothèses de lancement</Titre>
+    <section aria-label="Hypothèses de lancement" className="flex flex-col gap-1.5">
+      <Titre aide="Pour savoir si l'idée marche : les négoces répondent-ils, les artisans commandent-ils, le prix de groupe est-il moins cher ?">Est-ce que ça marche ? (par zone)</Titre>
       {n ? (
         <Card className="flex flex-col gap-2 p-4">
-          <p className="text-[16px] font-extrabold">Regroupements négociés · ce mois</p>
+          <p className="text-[16px] font-extrabold">Regroupements négociés au téléphone · ce mois</p>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[14px]">
-            <dt className="text-muted">Formés / pris en charge</dt>
+            <dt className="text-muted">Formés / qu&apos;on a pris en main</dt>
             <dd className="text-right font-semibold tabular-nums">
               {n.formes} / {n.prisEnCharge}
             </dd>
-            <dt className="text-muted">Avec offre / commandés</dt>
+            <dt className="text-muted">Avec un prix / commandés</dt>
             <dd className="text-right font-semibold tabular-nums">
               {n.avecOffre} / {n.commandes}
             </dd>
-            <dt className="text-muted">Offres acceptées</dt>
+            <dt className="text-muted">Prix acceptés par les artisans</dt>
             <dd className="text-right font-semibold tabular-nums">{pc(n.tauxAcceptation)}</dd>
-            <dt className="text-muted">Commission du mois</dt>
+            <dt className="text-muted">Ce que Mobiiz gagne (commission)</dt>
             <dd className="text-right font-semibold tabular-nums">{n.commissionHt.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € HT</dd>
           </dl>
         </Card>
       ) : null}
       {data.mois.length === 0 ? (
         <Card className="p-4">
-          <p className="text-[15px] text-muted">Pas encore de chiffres.</p>
+          <p className="text-[15px] text-muted">Pas encore de chiffres : il faut d&apos;abord des demandes de prix.</p>
         </Card>
       ) : (
         data.mois.map((i) => (
@@ -82,25 +88,25 @@ export function HypothesesCarte() {
               Zone {i.zone} · {moisFr(i.mois)}
             </p>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[14px]">
-              <dt className="text-muted">Réponse perso</dt>
+              <dt className="text-muted">Négoces qui répondent à un artisan seul · en combien de temps</dt>
               <dd className="text-right font-semibold tabular-nums">
                 {pc(i.tauxReponsePerso)} · {h(i.delaiMoyenPersoHeures)}
               </dd>
-              <dt className="text-muted">Réponse groupe</dt>
+              <dt className="text-muted">Négoces qui répondent à un groupe · en combien de temps</dt>
               <dd className="text-right font-semibold tabular-nums">
                 {pc(i.tauxReponseGroupe)} · {h(i.delaiMoyenGroupeHeures)}
               </dd>
-              <dt className="text-muted">Demandes commandées</dt>
+              <dt className="text-muted">Demandes de prix qui finissent en commande</dt>
               <dd className="text-right font-semibold tabular-nums">{pc(i.tauxCommande)}</dd>
-              <dt className="text-muted">Gratuit → payant</dt>
+              <dt className="text-muted">Gratuits devenus payants</dt>
               <dd className="text-right font-semibold tabular-nums">{pc(i.tauxPassagePayant)}</dd>
-              <dt className="text-muted">Résiliations</dt>
+              <dt className="text-muted">Abonnés qui ont arrêté</dt>
               <dd className="text-right font-semibold tabular-nums">{pc(i.tauxResiliation)}</dd>
               <dt className="text-muted">Regroupements formés / consultés / commandés</dt>
               <dd className="text-right font-semibold tabular-nums">
                 {i.regroupements.formes} / {i.regroupements.consultes} / {i.regroupements.commandes}
               </dd>
-              <dt className="text-muted">Prix de groupe vs dernier prix perso</dt>
+              <dt className="text-muted">Prix de groupe comparé au dernier prix seul (moins = mieux)</dt>
               <dd className="text-right font-semibold tabular-nums">{ecart(i.ecartMoyenPrixGroupe)}</dd>
             </dl>
           </Card>
@@ -115,8 +121,8 @@ export function CoutIaGratuitsCarte() {
   const { data } = useResource(charger);
   if (!data) return null;
   return (
-    <section aria-label="Coût IA des comptes gratuits" className="flex flex-col gap-1">
-      <Titre>Coût IA des comptes gratuits (ce mois)</Titre>
+    <section aria-label="Coût IA des comptes gratuits" className="flex flex-col gap-1.5">
+      <Titre aide="Les comptes gratuits qui coûtent le plus en IA. En rouge : trop cher, à surveiller.">Ce que coûtent les comptes gratuits (ce mois)</Titre>
       <Card className="flex flex-col gap-1 px-4 py-2">
         {data.comptes.length === 0 ? <p className="py-2 text-[15px] text-muted">Aucun appel IA d&apos;un compte gratuit ce mois.</p> : null}
         <ul className="divide-y divide-line">
@@ -149,8 +155,8 @@ export function InscriptionsCarte() {
     }
   }
   return (
-    <section aria-label="Inscriptions gratuites" className="flex flex-col gap-1">
-      <Titre>Inscriptions gratuites</Titre>
+    <section aria-label="Inscriptions gratuites" className="flex flex-col gap-1.5">
+      <Titre aide="Le bouton d'urgence : si ça coûte trop cher ou s'il y a un problème, tu fermes les nouvelles inscriptions.">Qui peut s&apos;inscrire ?</Titre>
       <Card className="flex flex-col gap-3 p-4">
         <p className="text-[15px] font-semibold">{data.gratuitesOuvertes ? "Ouvertes : tout le monde peut créer un compte." : "Fermées : aucune nouvelle inscription."}</p>
         <Button variant="secondary" onClick={() => void basculer()} pending={pending} className="self-start">
@@ -177,14 +183,14 @@ export function ModeRegroupementCarte() {
     }
   }
   return (
-    <section aria-label="Mode des regroupements" className="flex flex-col gap-1">
-      <Titre>Mode des regroupements</Titre>
+    <section aria-label="Mode des regroupements" className="flex flex-col gap-1.5">
+      <Titre aide="Quand plusieurs artisans veulent la même chose, qui va chercher le prix de groupe ?">Qui négocie les regroupements ?</Titre>
       <Card className="flex flex-col gap-3 p-4">
         <div role="radiogroup" aria-label="Mode des regroupements" className="grid grid-cols-2 gap-2">
           {(
             [
-              ["humain", "Humain (chasseur)"],
-              ["automatique", "Automatique"],
+              ["humain", "Une personne (au téléphone)"],
+              ["automatique", "L'app, toute seule"],
             ] as const
           ).map(([v, l]) => (
             <button key={v} type="button" role="radio" aria-checked={data.mode === v} disabled={pending} onClick={() => void changer(v)} className={`min-h-12 rounded-xl border-2 px-3 text-[15px] font-semibold ${data.mode === v ? "border-ink bg-accent-soft" : "border-line bg-surface text-muted"}`}>
@@ -192,7 +198,7 @@ export function ModeRegroupementCarte() {
             </button>
           ))}
         </div>
-        <p className="text-[14px] text-muted">Humain : les artisans déclarent leurs besoins, un chasseur d&apos;opportunités négocie au téléphone. Automatique : la consultation des négoces par cycle.</p>
+        <p className="text-[14px] text-muted">Une personne : un chasseur d&apos;opportunités appelle les négoces. L&apos;app : elle envoie la demande à tous les négoces de la zone à chaque cycle.</p>
         <a href="/admin/chasseur" className="min-h-11 self-start py-2 text-[14px] font-semibold text-accent-text underline">
           Ouvrir l&apos;écran du chasseur
         </a>
@@ -231,11 +237,11 @@ export function NegocesAVerifierCarte() {
     }
   }
   return (
-    <section aria-label="Négoces à vérifier" className="flex flex-col gap-1">
-      <Titre>Négoces à vérifier</Titre>
+    <section aria-label="Négoces à vérifier" className="flex flex-col gap-1.5">
+      <Titre aide="Des négoces se sont inscrits. Vérifie que ce sont de vrais négoces avant qu'ils voient les demandes : Valider s'il est vrai, Bloquer sinon.">{`Négoces à vérifier${visibles.length > 0 ? ` (${visibles.length})` : ""}`}</Titre>
       {visibles.length === 0 ? (
         <Card className="p-4">
-          <p className="text-[15px] text-muted">Rien à vérifier.</p>
+          <p className="text-[15px] text-muted">Rien à vérifier. Tout est à jour.</p>
         </Card>
       ) : (
         visibles.map((n) => (
@@ -265,7 +271,7 @@ export function NegocesAVerifierCarte() {
         ))
       )}
       <a href="/v1/admin/pilotage/observatoire.csv" download="observatoire-prix.csv" className="min-h-11 self-start py-2 text-[14px] font-semibold text-accent-text underline">
-        Exporter l&apos;observatoire des prix (CSV, sans identifiant)
+        Télécharger les prix observés (tableur, sans nom ni adresse)
       </a>
     </section>
   );

@@ -3463,11 +3463,16 @@ test("Apprentissage (24 octobre 2026) : la même correction sur 2 chantiers s'ap
   await expect(fournitures.getByText(ardoise, { exact: true })).toBeVisible();
 });
 
-test("Tableau de bord (24 octobre 2026) : refusé à un artisan ; l'admin entre avec un code reçu par e-mail ; 4 chiffres, sections, détail tracé", async ({ page }) => {
+test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un enfant de 15 ans ») : refusé à un artisan ; l'admin entre par le menu avec un code reçu par e-mail ; 4 chiffres en mots simples, 4 onglets, chaque bloc dit à quoi il sert", async ({ page }) => {
   await signUp(page);
   await page.goto("/admin/pilotage");
   await expect(page.getByText("Cette page est réservée à l'équipe.")).toBeVisible();
   expect(await page.evaluate(async () => (await fetch("/v1/admin/pilotage")).status)).toBe(403);
+  // Un artisan n'a pas « Espace admin » dans son menu.
+  await page.goto("/");
+  await page.getByRole("button", { name: "Mon menu" }).click();
+  await expect(page.getByRole("menu", { name: "Mon menu" }).getByRole("menuitem").first()).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "Espace admin" })).toHaveCount(0);
   await page.context().clearCookies();
   await page.goto("/connexion");
   await page.getByLabel("E-mail").fill("admin-groupe@example.fr");
@@ -3475,21 +3480,40 @@ test("Tableau de bord (24 octobre 2026) : refusé à un artisan ; l'admin entre 
   await page.getByRole("button", { name: "Se connecter" }).click();
   await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
   if (await page.getByRole("alert").filter({ hasText: "incorrect" }).count()) await signUp(page, "admin-groupe@example.fr");
-  await page.goto("/admin/pilotage");
+  // L'admin le trouve dans son menu.
+  await page.goto("/");
+  await page.getByRole("button", { name: "Mon menu" }).click();
+  await page.getByRole("menuitem", { name: "Espace admin" }).click();
+  await expect(page.getByRole("heading", { name: "Espace admin" })).toBeVisible();
   // Sans le code, rien : la double authentification d'abord.
   expect(await page.evaluate(async () => (await fetch("/v1/admin/pilotage")).status)).toBe(403);
   await page.getByRole("button", { name: "Recevoir mon code" }).click();
   await expect(page.getByLabel("Code reçu par e-mail")).toBeVisible();
+  await expect(page.getByText(/Regarde dans les indésirables/)).toBeVisible();
   const mail = (await emailsVers(page, "admin-groupe@example.fr")).filter((m) => /code d'accès au pilotage/.test(m.subject)).at(-1)!;
   await page.getByLabel("Code reçu par e-mail").fill(/(\d{6})/.exec(mail.text)![1]!);
-  await page.getByRole("button", { name: "Ouvrir le tableau de bord" }).click();
-  for (const titre of ["Utilisateurs actifs", "Abonnés payants", "Revenu mensuel récurrent", "Coût IA du mois"]) await expect(page.getByText(titre, { exact: true })).toBeVisible();
-  for (const section of ["Croissance (ce mois)", "Abonnés", "Fidélité", "Activité (ce mois)", "IA, 14 derniers jours", "Rentabilité (ce mois)", "Apprentissage", "Réglages"]) await expect(page.getByRole("heading", { name: section })).toBeVisible();
+  await page.getByRole("button", { name: "Ouvrir l'espace admin" }).click();
+  const bref = page.getByRole("region", { name: "En bref" });
+  for (const titre of ["Artisans actifs", "Artisans qui paient", "Argent par mois", "Coût de l'IA ce mois"]) await expect(bref.getByText(titre, { exact: true })).toBeVisible();
+  const onglets = page.getByRole("tablist", { name: "Parties de l'espace admin" });
+  await expect(onglets.getByRole("tab")).toHaveText(["À faire", "Chiffres", "Réglages", "Test"]);
+  // À faire : ce qui attend un geste, chaque bloc avec sa phrase.
+  for (const bloc of ["Regroupements à négocier", "Artisans à relancer", "Les autres écrans"]) await expect(page.getByRole("heading", { name: bloc })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Négoces à vérifier/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Corrections proposées par les artisans/ })).toBeVisible();
   await page.getByRole("button", { name: /Essais qui finissent cette semaine/ }).click();
   await expect(page.getByText("Détail ouvert et noté au journal. Rien ne s'exporte.")).toBeVisible();
-  // La démo (mode test) : un jeu de test d'un bouton, effacé d'un autre.
+  // Chiffres : des titres de tous les jours.
+  await onglets.getByRole("tab", { name: "Chiffres" }).click();
+  for (const bloc of ["Nouveaux venus (ce mois)", "Qui paie", "Qui part", "Ce qui se passe dans l'app (ce mois)", "Coût de l'IA (14 derniers jours)", "Est-ce qu'on gagne de l'argent ? (ce mois)"]) await expect(page.getByRole("heading", { name: bloc })).toBeVisible();
+  await expect(page.getByText(/jetons/)).toHaveCount(0);
+  // Réglages.
+  await onglets.getByRole("tab", { name: "Réglages" }).click();
+  for (const bloc of ["Qui négocie les regroupements ?", "Qui peut s'inscrire ?", "Prix et durées", "Qui est venu ici"]) await expect(page.getByRole("heading", { name: bloc })).toBeVisible();
+  // Test : la démo, étape par étape, un jeu de test d'un bouton, effacé d'un autre.
+  await onglets.getByRole("tab", { name: "Test" }).click();
   const demo = page.getByRole("region", { name: "Démo" });
-  await demo.getByRole("button", { name: "Créer un jeu de test" }).click();
+  await demo.getByRole("button", { name: "1. Créer un jeu de test" }).click();
   await expect(demo.getByRole("status")).toHaveText("5 faux artisans et 3 faux négoces dans le 22 (un généraliste, deux spécialistes), 18 lignes déposées. Ta liste de démonstration (couverture et placo) est dans la commande. Deux regroupements négociés (ardoise avec offre, zinc en collecte) sont dans Regroupements et sur l'écran du chasseur.");
   await demo.getByRole("button", { name: "Tout effacer" }).click();
   await expect(demo.getByRole("status")).toContainText("Effacé : 5 faux artisans");

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CircleHelp, CreditCard, FlaskConical, Phone, Truck, UserRound } from "lucide-react";
+import { CircleHelp, CreditCard, FlaskConical, LayoutDashboard, Phone, Truck, UserRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -28,11 +28,16 @@ export function MenuArtisan() {
   const box = useRef<HTMLDivElement>(null);
   // Point 4 bis : pour un chasseur d'opportunités, l'entrée de son écran et le compteur « à traiter ».
   const [chasseur, setChasseur] = useState<{ aTraiter: number } | null>(null);
+  // Greg (25 octobre 2026) : l'espace admin se trouve dans le menu, plus seulement par un lien de l'onglet Regroupement.
+  const [admin, setAdmin] = useState(false);
   useEffect(() => {
     if (!open) return;
     let vivant = true;
     api<{ chasseur: boolean; aTraiter: number }>("/v1/chasseur/statut")
       .then((s) => vivant && setChasseur(s.chasseur ? { aTraiter: s.aTraiter } : null))
+      .catch(() => undefined);
+    api<{ admin: boolean }>("/v1/admin/pilotage/statut")
+      .then((s) => vivant && setAdmin(s.admin))
       .catch(() => undefined);
     return () => {
       vivant = false;
@@ -82,6 +87,12 @@ export function MenuArtisan() {
       </button>
       {open ? (
         <div role="menu" aria-label="Mon menu" className="animate-rise absolute top-13 right-0 z-40 flex w-64 flex-col divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-card">
+          {admin ? (
+            <Link role="menuitem" href="/admin/pilotage" onClick={() => setOpen(false)} className={item}>
+              <LayoutDashboard size={20} aria-hidden="true" className="text-muted" />
+              Espace admin
+            </Link>
+          ) : null}
           {chasseur ? (
             <Link role="menuitem" href="/admin/chasseur" onClick={() => setOpen(false)} className={item}>
               <Phone size={20} aria-hidden="true" className="text-muted" />
