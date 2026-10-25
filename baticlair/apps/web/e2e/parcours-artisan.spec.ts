@@ -2401,6 +2401,23 @@ test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap
   await expect(page.getByRole("dialog", { name: "Aide : Ton chantier" })).toBeVisible();
 });
 
+test("Mets ton négoce dans la boucle sans adresse d'entreprise (Greg, 25 octobre 2026) : la case adresse s'ouvre dans le bloc, plus de détour par Compte", async ({ page }) => {
+  await compteAuGroupe(page, "Bati Test", "3 rue des Ajoncs, 22300 Lannion");
+  expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Bati Test", address: null, siret: "73282932000074", phone: null, email: null })).toBe(200);
+  await page.goto("/");
+  const bloc = page.getByRole("region", { name: "Mets ton négoce dans la boucle" });
+  await bloc.getByLabel("E-mail de ton négoce").fill(`agence-${unique()}@negoce-du-ponant.fr`);
+  await bloc.getByRole("button", { name: "Ajouter mon négoce" }).click();
+  const adresse = bloc.getByLabel("Adresse de ton entreprise");
+  await expect(adresse).toBeVisible();
+  await adresse.fill("3 rue des Ajoncs, Lannion");
+  await expect(bloc.getByText("Ajoute le code postal (5 chiffres).")).toBeVisible();
+  await adresse.fill("3 rue des Ajoncs, 22300 Lannion");
+  await bloc.getByRole("button", { name: "Ajouter mon négoce" }).click();
+  await expect(bloc.getByRole("list", { name: "Négoces dans la boucle" }).getByRole("listitem")).toHaveCount(1);
+  expect((await apiJson<{ address: string }>(page, "GET", "/v1/company/profile")).body.address).toBe("3 rue des Ajoncs, 22300 Lannion");
+});
+
 test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton, « Ton négoce X est dans la boucle », et de quoi le prévenir", async ({ page }) => {
   const projet = test.info().project.name;
   const email = `agence-${projet}-${unique()}@negoce-du-ponant.fr`;

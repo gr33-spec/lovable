@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useId, useState, useSyncExternalStore } from "react";
 import { Button, Field } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
@@ -38,6 +37,8 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [ajoute, setAjoute] = useState<Reponse | null>(null);
+  // Retour de Greg (25 octobre 2026) : sans adresse d'entreprise, la case se remplit ici, plus de détour par Compte.
+  const [adresse, setAdresse] = useState("");
   const suggestions = useSuggestions(nom, choisi === null);
 
   // Le groupé n'existe pas pour cette entreprise (drapeau éteint, 404) : rien ; et rien non plus avant de savoir (pas de
@@ -47,9 +48,15 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
   const dansLaBoucle = (liste.data?.negoces ?? []).filter((n) => !n.stop);
 
   const submit = async () => {
+    if (erreur === "departement" && !/\b\d{5}\b/.test(adresse)) return setErreur("departement");
     setPending(true);
     setErreur(null);
     try {
+      if (adresse.trim()) {
+        const p = await api<{ name: string | null; address: string | null; siret: string | null; phone: string | null; email: string | null }>("/v1/company/profile");
+        await api("/v1/company/profile", { method: "PATCH", body: { name: p.name, address: adresse.trim(), siret: p.siret, phone: p.phone, email: p.email } });
+        setAdresse("");
+      }
       const r = await api<Reponse>("/v1/groupe/negoces/boucle", {
         method: "POST",
         body: { email: email.trim(), nom: nom.trim() || null, siret: choisi?.siret ?? null, departement: choisi?.departement ?? null },
@@ -136,13 +143,17 @@ export function BoucleNegoce({ compact = false }: { compact?: boolean }) {
           )}
           <Field id={`${id}-email`} label="E-mail de ton négoce" type="email" inputMode="email" required maxLength={200} value={email} placeholder="agence@negoce.fr" onChange={(e) => setEmail(e.target.value)} error={erreur && erreur !== "departement" ? erreur : undefined} />
           {erreur === "departement" ? (
-            <p className="text-[14px] font-semibold text-danger">
-              Il manque l&apos;adresse de ton entreprise pour savoir dans quel département il travaille.{" "}
-              <Link href="/compte" className="underline">
-                Renseigne-la dans Compte
-              </Link>
-              .
-            </p>
+            <Field
+              id={`${id}-adresse`}
+              label="Adresse de ton entreprise"
+              hint="Avec le code postal : elle dit dans quel département ton négoce travaille."
+              autoComplete="street-address"
+              maxLength={200}
+              value={adresse}
+              placeholder="3 rue des Ajoncs, 22300 Lannion"
+              onChange={(e) => setAdresse(e.target.value)}
+              error={adresse && !/\b\d{5}\b/.test(adresse) ? "Ajoute le code postal (5 chiffres)." : undefined}
+            />
           ) : null}
           <Button type="submit" pending={pending} className="self-start">
             Ajouter mon négoce
