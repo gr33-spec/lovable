@@ -144,7 +144,8 @@ export class ChasseurController {
   @Get("statut")
   async statut(@CurrentUser() user: AuthenticatedUser) {
     const etat = (await this.pilotage.exigerChasseur(user).then(() => "ok").catch((e: { details?: { reason?: string } }) => e.details?.reason ?? "non")) as string;
-    return { chasseur: etat !== "non", deuxFacteurs: etat === "ok" };
+    // Le compteur « à traiter » du menu (point 4 bis), seulement pour un chasseur.
+    return { chasseur: etat !== "non", deuxFacteurs: etat === "ok", aTraiter: etat === "non" ? 0 : await this.negocie.aTraiter() };
   }
 
   @Get("regroupements")

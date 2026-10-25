@@ -55,6 +55,11 @@ describe("la démo admin", () => {
     const ardoise = negocie.besoins.find((b: { designation: string }) => b.designation.startsWith("Ardoise"));
     expect(ardoise.offre).toMatchObject({ negoce: "Négoce vérifié dans le 22", prixHt: 1.12, valide: true });
     expect(negocie.besoins.find((b: { designation: string }) => b.designation.startsWith("Bobine")).regroupement.statut).toBe("en_collecte");
+    // « Purger les recettes » : les faux négoces des recettes (`@resend.dev`) partent, ceux de la démo restent.
+    await ctx.prisma.negoce.create({ data: { nom: "Négoce Recette", email: "delivered+negoce-se-x@resend.dev", departement: "22", familles: ["couverture"] } });
+    await ctx.prisma.compteNegoce.create({ data: { email: "delivered+negoce-se-x@resend.dev", enseigne: "Négoce Recette" } });
+    expect((await greg.agent.post("/v1/admin/pilotage/demo/purger-recettes").expect(200)).body).toEqual({ negoces: 1, comptesNegoce: 1 });
+    expect(await ctx.prisma.negoce.count({ where: { email: { endsWith: "@demo.mobiiz.fr" } } })).toBe(3);
     // Les faux comptes n'entrent pas dans les statistiques.
     expect((await greg.agent.get("/v1/admin/pilotage").expect(200)).body.chiffres).toEqual(sans.chiffres);
 
@@ -92,7 +97,7 @@ describe("la démo admin", () => {
     await greg.agent.post("/v1/admin/pilotage/demo/echec-paiement").expect(200);
 
     const journal = await ctx.prisma.journalAdmin.findMany({ where: { action: "demo" }, select: { cible: true } });
-    expect(journal.map((j) => j.cible)).toEqual(["jeu", "cloturer", "repondre", "publier", "finir-essai", "echec-paiement"]);
+    expect(journal.map((j) => j.cible)).toEqual(["jeu", "purger-recettes", "cloturer", "repondre", "publier", "finir-essai", "echec-paiement"]);
 
     const efface = (await greg.agent.delete("/v1/admin/pilotage/demo").expect(200)).body;
     expect(efface).toMatchObject({ artisans: 5, negoces: 3, comptesNegoce: 3 });

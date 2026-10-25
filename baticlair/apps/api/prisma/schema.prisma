@@ -1744,23 +1744,28 @@ model CompteurJour {
 /// LE REGROUPEMENT NÉGOCIÉ PAR UN HUMAIN (Greg, 25 octobre 2026, « business model final ») : des besoins d'une même
 /// référence, d'un même département, à dates compatibles ; un chasseur de Mobiiz négocie et saisit l'offre.
 model RegroupementNegocie {
-  id             String    @id @default(uuid(7)) @db.Uuid
-  numero         Int       @unique @default(autoincrement())
+  id                String    @id @default(uuid(7)) @db.Uuid
+  numero            Int       @unique @default(autoincrement())
   /// Clé de référence stricte (`referenceStricte`) : 30×20 et 32×22 n'ont jamais la même.
-  cle            String
-  libelle        String
-  famille        String
-  departement    String
+  cle               String
+  libelle           String
+  famille           String
+  departement       String
   /// en_collecte | en_negociation | offre_recue | commande | abandonne
-  statut         String    @default("en_collecte")
-  dateBesoinMin  DateTime? @db.Date
-  chasseurEmail  String?
-  prisEnChargeLe DateTime?
-  offreEnvoyeeLe DateTime?
-  commandeLe     DateTime?
-  abandonneLe    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  statut            String    @default("en_collecte")
+  dateBesoinMin     DateTime? @db.Date
+  chasseurEmail     String?
+  prisEnChargeLe    DateTime?
+  offreEnvoyeeLe    DateTime?
+  commandeLe        DateTime?
+  abandonneLe       DateTime?
+  /// Alertes du chasseur (point 4 bis) : formation (2e besoin), dernier ajout signalé tout de suite, rappels J-5 et J-2.
+  formationAlerteLe DateTime?
+  ajoutAlerteLe     DateTime?
+  rappelJ5Le        DateTime?
+  rappelJ2Le        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   besoins BesoinNegocie[]
   offre   OffreNegociee?
@@ -1794,6 +1799,9 @@ model BesoinNegocie {
   accepteLe      DateTime?
   refuseLe       DateTime?
   bonNumero      Int?
+  /// L'ajout signalé au chasseur (tout de suite ou au digest de 18 h) ; le rappel à l'artisan 48 h avant la fin de l'offre.
+  signaleLe      DateTime?
+  rappelOffreLe  DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

@@ -296,6 +296,7 @@ const GESTES = [
   { geste: "publier", label: "Publier les résultats", fait: (r: Record<string, number>) => `${r.resultats} résultat publié : les artisans sont prévenus.` },
   { geste: "finir-essai", label: "Finir l'essai", fait: () => "Ton essai est terminé : l'écran de fin d'essai s'affiche." },
   { geste: "echec-paiement", label: "Simuler un échec de paiement", fait: () => "Le prochain paiement de ton compte échoue : 7 jours de grâce." },
+  { geste: "purger-recettes", label: "Purger les recettes", fait: (r: Record<string, number>) => `${r.negoces} faux négoces des recettes retirés (ceux de la démo restent).` },
 ] as const;
 
 function DemoCarte() {

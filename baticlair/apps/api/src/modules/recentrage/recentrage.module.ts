@@ -57,7 +57,7 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
     {
       provide: NegocieService,
       useFactory: (p: PrismaService, d: DroitsService, cmd: CommandeDuMoisService, o: ObservatoireService, e: TransactionalEmailSender, push: PushSender, c: AppConfig) =>
-        new NegocieService(p, d, cmd, o, e, push, { webAppUrl: c.webAppUrl, mode: c.groupe.negocie.mode, chasseurs: c.groupe.negocie.chasseurs, admins: c.groupe.admins, commissionDefaut: c.groupe.negocie.commissionDefaut, seuilAnonymat: c.groupe.recentrage.seuilAnonymat }),
+        new NegocieService(p, d, cmd, o, e, push, { webAppUrl: c.webAppUrl, mode: c.groupe.negocie.mode, chasseurs: c.groupe.negocie.chasseurs, admins: c.groupe.admins, commissionDefaut: c.groupe.negocie.commissionDefaut, seuilAnonymat: c.groupe.recentrage.seuilAnonymat, emailChasseur: c.groupe.negocie.emailChasseur, delaiLivraisonJours: c.groupe.negocie.delaiLivraisonJours }),
       inject: [PrismaService, DroitsService, CommandeDuMoisService, ObservatoireService, EMAIL_SENDER, PUSH_SENDER, CONFIG],
     },
     {

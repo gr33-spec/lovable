@@ -1,4 +1,5 @@
 export { Decimal, toDecimal, median, type DecimalInput } from "./shared/decimal.js";
+export { de } from "./shared/elision.js";
 export { Money, CurrencyMismatchError, type CurrencyCode } from "./money/money.js";
 export { parseUnit, isUnitCode, dimensionOf, UNIT_DEFINITIONS, type UnitCode, type Dimension } from "./quantity/unit.js";
 export { Quantity, type PackagingSpec } from "./quantity/quantity.js";
@@ -62,6 +63,7 @@ export * from "./groupe/offre-artisan.js";
 export * from "./groupe/demande-perso.js";
 export * from "./groupe/hypotheses.js";
 export * from "./groupe/negocie.js";
+export * from "./groupe/alertes-chasseur.js";
 export * from "./rgpd/anonymisation.js";
 export * from "./abonnement/abonnement.js";
 export * from "./apprentissage/habitudes.js";

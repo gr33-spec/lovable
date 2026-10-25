@@ -1,6 +1,7 @@
 import { DELAI_REPONSE_JOURS } from "./demande.js";
 import { NOM_COMMANDE_COMMUNE, duNom, leNom, nomCommun } from "./nom.js";
 import { NOM_APP } from "./marque.js";
+import { de } from "../shared/elision.js";
 
 /**
  * LES NOTIFICATIONS DE L'ARTISAN (parcours groupé, étape 8 ; section 3 du document), en code pur : quatre messages par
@@ -42,7 +43,7 @@ const jourCourt = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", m
  * tutoie partout, et « 1 250 pièces » sans dire de quoi ne se comprend pas ; le message dit donc « Tes 1 250 pièces de
  * tuile romane… ».
  */
-export const quantiteDite = (q: { quantite: string; unite: string; designation: string }): string => `${nombre(q.quantite)} ${q.unite} de ${q.designation.charAt(0).toLowerCase()}${q.designation.slice(1)}`;
+export const quantiteDite = (q: { quantite: string; unite: string; designation: string }): string => `${nombre(q.quantite)} ${q.unite} ${de(q.designation)}`;
 export function messageBesoinAccepte(b: { quantite: string; unite: string; designation: string; zone: string; projectId: string }): MessageArtisan {
   return { titre: NOM_COMMANDE_COMMUNE, corps: `Tes ${quantiteDite(b)} sont dans ${leNom()} (${nomDuDepartement(b.zone)}). Prochain départ lundi.`, url: "/groupe", etiquette: `groupe-besoin-${b.projectId}` };
 }

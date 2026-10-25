@@ -199,6 +199,16 @@ export class RecentrageNegoceController {
     return { fait: await this.droits.finirEssaiDe(body.email) };
   }
 
+  /** La tâche du soir des alertes du chasseur (18 h, Paris) : digest des ajouts, rappels J-5 et J-2, rappel 48 h à l'artisan. */
+  @Public()
+  @Throttle({ default: HOURLY(120) })
+  @Get("internal/negocie")
+  tacheNegocie(@Headers("authorization") authorization: string | undefined, @Query("maintenant") m?: string) {
+    const secret = this.config.cronSecret;
+    if (!secret || authorization !== `Bearer ${secret}`) throw forbidden("Scheduled task only");
+    return this.negocie.tacheDuSoir(instant(this.config, m));
+  }
+
   @Public()
   @Throttle({ default: HOURLY(120) })
   @Get("internal/demandes-perso")

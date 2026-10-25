@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CircleHelp, CreditCard, FlaskConical, Truck, UserRound } from "lucide-react";
+import { CircleHelp, CreditCard, FlaskConical, Phone, Truck, UserRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -26,6 +26,18 @@ export function MenuArtisan() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
   const box = useRef<HTMLDivElement>(null);
+  // Point 4 bis : pour un chasseur d'opportunités, l'entrée de son écran et le compteur « à traiter ».
+  const [chasseur, setChasseur] = useState<{ aTraiter: number } | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    let vivant = true;
+    api<{ chasseur: boolean; aTraiter: number }>("/v1/chasseur/statut")
+      .then((s) => vivant && setChasseur(s.chasseur ? { aTraiter: s.aTraiter } : null))
+      .catch(() => undefined);
+    return () => {
+      vivant = false;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -70,6 +82,17 @@ export function MenuArtisan() {
       </button>
       {open ? (
         <div role="menu" aria-label="Mon menu" className="animate-rise absolute top-13 right-0 z-40 flex w-64 flex-col divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-card">
+          {chasseur ? (
+            <Link role="menuitem" href="/admin/chasseur" onClick={() => setOpen(false)} className={item}>
+              <Phone size={20} aria-hidden="true" className="text-muted" />
+              Chasseur d&apos;opportunités
+              {chasseur.aTraiter > 0 ? (
+                <span aria-label={`${chasseur.aTraiter} à traiter`} className="ml-auto flex h-6 min-w-6 items-center justify-center rounded-full bg-accent px-2 text-[13px] font-extrabold text-on-accent">
+                  {chasseur.aTraiter}
+                </span>
+              ) : null}
+            </Link>
+          ) : null}
           <Link role="menuitem" href="/fournisseurs" onClick={() => setOpen(false)} className={item}>
             <Truck size={20} aria-hidden="true" className="text-muted" />
             Mes fournisseurs

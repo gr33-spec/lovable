@@ -126,7 +126,9 @@ async function supprimer(page) {
 const ARDOISE = "Ardoise naturelle 32×22 Espagne 1er choix";
 const ARTISAN = `delivered+neg-artisan-${APPAREIL}-${ts}@resend.dev`;
 const NEGOCE = `delivered+neg-negoce-${APPAREIL}-${ts}@resend.dev`;
+const ARTISAN2 = `delivered+neg-artisan2-${APPAREIL}-${ts}@resend.dev`;
 const CHASSEUR = "delivered+admin-recette@resend.dev";
+const debut = Date.now();
 const dans3semaines = new Date(Date.now() + 21 * 86_400_000).toISOString().slice(0, 10);
 
 const ctxA = await browser.newContext({ ...options, locale: "fr-FR", timezoneId: "Europe/Paris" });
@@ -190,6 +192,40 @@ await etape("Regroupements : en cours", page, async () => {
   await voir(page.getByRole("region", { name: "Tes besoins" }).getByText("Regroupement en cours"));
 });
 
+// Point 4 bis : un deuxième artisan de la zone rejoint, le regroupement se forme, le chasseur reçoit l'e-mail de formation.
+const ctxB = await browser.newContext({ ...options, locale: "fr-FR", timezoneId: "Europe/Paris" });
+const page2 = surveiller(await ctxB.newPage(), `artisan2-${APPAREIL}`);
+await etape("Artisan 2 : même ardoise, même zone, besoin déclaré", page2, async () => {
+  await inscrire(page2, ARTISAN2, `Couverture Recette 2 ${APPAREIL === "se" ? "SE" : "Ordi"}`);
+  const q = await api(page2, "POST", "/v1/quantitatifs", { lignes: [{ libelle: ARDOISE, quantite: "600", unite: "pièces" }] });
+  verif(q.status === 201, `liste ${q.status}`);
+  const a = await api(page2, "PATCH", `/v1/projects/${q.body.projetId}`, { address: "2 place du Centre, 22300 Lannion" });
+  verif(a.status === 200, `adresse ${a.status}`);
+  await page2.goto(`${BASE}/chantiers/${q.body.projetId}`, { waitUntil: "networkidle" });
+  await page2.getByRole("button", { name: /Tenter un prix de groupe/ }).click();
+  const carte = page2.getByRole("region", { name: "Tenter un prix de groupe" });
+  await carte.getByLabel("Pour quand ?").fill(dans3semaines);
+  await carte.getByRole("button", { name: "Déclarer mes besoins" }).click();
+  await voir(page2.getByRole("status").filter({ hasText: "besoin déclaré" }), 30000);
+  return ARTISAN2;
+});
+await etape("E-mail de formation au chasseur", page2, async () => {
+  const fin = Date.now() + 90000;
+  let mail = null;
+  while (!mail && Date.now() < fin) {
+    const e = (resend("/emails?limit=100").data ?? []).find((x) => /^Nouveau regroupement : Ardoise 32×22/.test(x.subject ?? "") && Date.parse(x.created_at) >= debut);
+    if (e) mail = resend(`/emails/${e.id}`);
+    else await t(4000);
+  }
+  verif(mail, "pas d'e-mail de formation");
+  verif(/2 entreprises, 2[\u00a0\u202f ]?400 pièces/.test(mail.subject), `objet : ${mail.subject}`);
+  const vue = await ctxB.newPage();
+  await vue.setContent(mail.html ?? `<pre>${mail.text}</pre>`);
+  const fichier = await capture(vue, "E-mail de formation (contenu)");
+  await vue.close();
+  return `« ${mail.subject} » (${fichier})`;
+});
+
 const ctxC = await browser.newContext({ ...options, locale: "fr-FR", timezoneId: "Europe/Paris" });
 const ch = surveiller(await ctxC.newPage(), `chasseur-${APPAREIL}`);
 const lot = () => ch.getByRole("listitem").filter({ hasText: "Ardoise 32×22" }).filter({ hasText: "dans le 22" }).first();
@@ -208,11 +244,41 @@ await etape("Chasseur : code par e-mail", ch, async () => {
 });
 await etape("Chasseur : tableau des regroupements", ch, async () => {
   await lot().scrollIntoViewIfNeeded();
-  return (await lot().innerText()).split("\n").slice(0, 3).join(" · ");
+  await voir(lot().getByText(/^Date butoir : .+ · J-1[01]$/));
+  await voir(lot().getByText(/2 entreprises/));
+  return (await lot().innerText()).split("\n").slice(0, 4).join(" · ");
+});
+await etape("Chasseur : menu, compteur à traiter", ch, async () => {
+  await ch.getByRole("button", { name: "Mon menu" }).click();
+  const item = ch.getByRole("menu", { name: "Mon menu" }).getByText("Chasseur d'opportunités");
+  await voir(item);
+  const badge = await ch.getByRole("menu", { name: "Mon menu" }).getByLabel(/à traiter$/).getAttribute("aria-label").catch(() => null);
+  verif(badge, "pas de compteur à traiter");
+  const fichier = await capture(ch, "Chasseur : menu ouvert");
+  await ch.keyboard.press("Escape");
+  await ch.goto(`${BASE}/admin/chasseur`, { waitUntil: "networkidle" });
+  await voir(lot());
+  return `${badge} (${fichier})`;
+});
+await etape("Chasseur : fiche, négoces à appeler", ch, async () => {
+  const titre = lot().getByRole("heading", { name: "Négoces à appeler" });
+  await titre.scrollIntoViewIfNeeded();
+  const appel = lot().getByRole("button", { name: "Appel passé" }).first();
+  if (await appel.count()) {
+    await appel.click();
+    await lot().getByLabel("Ce qu'il a dit (court)").fill("Rappelle demain avec un prix (recette)");
+    await lot().getByRole("button", { name: "Noter l'appel" }).click();
+    await t(1500);
+    return "appel noté";
+  }
+  return "aucun négoce listé dans le 22";
 });
 await etape("Chasseur : je prends en charge", ch, async () => {
   await lot().getByRole("button", { name: "Je prends en charge" }).click();
   await voir(lot().getByText("En négociation"));
+  const mails = await emailsVers(ARTISAN, (m) => /négocie pour toi/.test(m.subject));
+  verif(mails.some((m) => /négocie pour toi/.test(m.subject)), "pas d'e-mail « Mobiiz négocie pour toi »");
+  return mails.filter((m) => /négocie pour toi/.test(m.subject)).map((m) => `« ${m.subject} » : ${(m.text ?? "").split("\n").find((l) => /négocie/.test(l))}`).join("");
 });
 await etape("Chasseur : offre saisie (commission incluse)", ch, async () => {
   await lot().getByLabel("Négoce", { exact: true }).fill("Ardoisière de l'Ouest (recette)");
@@ -225,7 +291,7 @@ await etape("Chasseur : offre saisie (commission incluse)", ch, async () => {
 await etape("Chasseur : offre envoyée à tous", ch, async () => {
   await lot().getByRole("button", { name: "Enregistrer l'offre" }).click();
   await lot().getByRole("button", { name: "Envoyer l'offre à tous" }).click();
-  await voir(lot().getByText(/0 acceptation sur 1/));
+  await voir(lot().getByText(/0 acceptation sur 2/));
 });
 await etape("Artisan : offre reçue (négoce masqué)", page, async () => {
   await page.reload({ waitUntil: "networkidle" });
@@ -240,16 +306,32 @@ await etape("Artisan : j'accepte, bon de commande", page, async () => {
   const mails = await emailsVers(ARTISAN, (m) => /bon de commande|commande/i.test(m.subject));
   return mails.map((m) => `« ${m.subject} »`).slice(-1).join("");
 });
-await etape("Chasseur : acceptation vue, lot transmis au négoce", ch, async () => {
+await etape("Artisan 2 : j'accepte aussi", page2, async () => {
+  await page2.goto(`${BASE}/regroupements`, { waitUntil: "networkidle" });
+  await page2.getByLabel("Offre négociée").getByRole("button", { name: "J'accepte" }).click();
+  await voir(page2.getByRole("button", { name: "Mon bon de commande" }));
+});
+await etape("Chasseur : acceptations vues, lot transmis au négoce", ch, async () => {
   await ch.reload({ waitUntil: "networkidle" });
-  await voir(lot().getByText(/1 acceptation sur 1/));
+  await voir(lot().getByText(/2 acceptations sur 2/));
   await lot().getByRole("button", { name: "Transmettre la commande au négoce" }).click();
   const mails = await emailsVers(NEGOCE, (m) => /Commande groupée/.test(m.subject));
   verif(mails.some((m) => /Commande groupée/.test(m.subject)), "pas d'e-mail de lot au négoce");
   return mails.filter((m) => /Commande groupée/.test(m.subject)).map((m) => `« ${m.subject} »`).join("");
 });
+await etape("Base de test : purge des faux négoces des recettes (la démo reste)", ch, async () => {
+  await ch.goto(`${BASE}/admin/pilotage`, { waitUntil: "networkidle" });
+  const bouton = ch.getByRole("button", { name: "Purger les recettes" });
+  await voir(bouton, 30000);
+  await bouton.scrollIntoViewIfNeeded();
+  await bouton.click();
+  const statut = ch.getByRole("region", { name: "Démo" }).getByRole("status");
+  await voir(statut, 30000);
+  return await statut.innerText();
+});
 await etape("Nettoyage : comptes supprimés", page, async () => {
   await supprimer(page);
+  await supprimer(page2);
   await supprimer(ch);
 });
 

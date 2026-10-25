@@ -53,7 +53,7 @@ function Liste() {
   return (
     <ul aria-label="Regroupements à négocier" className="flex flex-col gap-4">
       {data.regroupements.map((r) => (
-        <li key={r.id}>
+        <li key={r.id} id={`r-${r.id}`} className="scroll-mt-24">
           <CarteChasseur r={r} commissionDefaut={data.commissionDefaut} onChange={reload} />
         </li>
       ))}
@@ -81,6 +81,7 @@ function CarteChasseur({ r, commissionDefaut, onChange }: { r: RegroupementChass
     <Card className="flex flex-col gap-4 p-4" aria-label={`Regroupement n° ${r.numero}`}>
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
+          <Pastille couleur={r.pastille} />
           <span className="text-[13px] font-semibold text-muted">N° {r.numero}</span>
           <Badge tone={r.statut === "commande" ? "ok" : r.statut === "offre_recue" ? "warn" : "neutral"}>{STATUTS_CHASSEUR[r.statut]}</Badge>
         </div>
@@ -89,6 +90,11 @@ function CarteChasseur({ r, commissionDefaut, onChange }: { r: RegroupementChass
           {r.volume.toLocaleString("fr-FR")} {r.unite} · {r.entreprises} entreprise{r.entreprises > 1 ? "s" : ""} · dans le {r.departement}
           {r.dateBesoinMin ? ` · au plus tôt le ${jourFr(r.dateBesoinMin)}` : ""}
         </span>
+        {r.dateLimite ? (
+          <span className={`text-[15px] font-semibold ${r.pastille === "rouge" ? "text-danger" : ""}`}>
+            Date butoir : {jourFr(r.dateLimite)} · {compteARebours(r.joursRestants)}
+          </span>
+        ) : null}
         {r.chasseur ? <span className="text-[13px] text-muted">Pris en charge par {r.chasseur}</span> : null}
       </div>
       <details>
@@ -96,32 +102,12 @@ function CarteChasseur({ r, commissionDefaut, onChange }: { r: RegroupementChass
         <ul className="mt-2 flex flex-col gap-1 text-[14px]">
           {r.participants.map((p) => (
             <li key={p.besoinId}>
-              {p.entreprise} · {p.quantite.toLocaleString("fr-FR")} {r.unite} · {p.livraison} · {p.statut === "accepte" ? "a accepté" : p.statut === "refuse" ? "a refusé" : "en attente"}
+              {p.entreprise} · {p.commune} · {p.quantite.toLocaleString("fr-FR")} {r.unite} · pour le {jourFr(p.dateBesoin)} · {p.statut === "accepte" ? "a accepté" : p.statut === "refuse" ? "a refusé" : "en attente"}
             </li>
           ))}
         </ul>
       </details>
-      <div className="flex flex-col gap-2">
-        <SectionTitle>Négoces de la zone</SectionTitle>
-        {r.negoces.length === 0 ? <p className="text-[14px] text-muted">Aucun négoce connu dans le {r.departement} pour cette famille.</p> : null}
-        <ul className="flex flex-col gap-1">
-          {r.negoces.map((n) => (
-            <li key={n.email} className="flex items-center justify-between gap-2 text-[14px]">
-              <span>
-                {n.nom}
-                {n.verification === "a_verifier" ? " · à vérifier" : ""}
-              </span>
-              {n.telephone ? (
-                <a href={`tel:${n.telephone.replace(/[^\d+]/g, "")}`} className="inline-flex min-h-11 items-center gap-1 font-semibold underline">
-                  <Phone size={16} aria-hidden="true" /> {n.telephone}
-                </a>
-              ) : (
-                <span className="text-muted">{n.email}</span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <NegocesAAppeler r={r} onAppel={(negoce, note) => faire("appel", () => post("appels", { negoce, note }))} pending={pending === "appel"} />
       {erreur ? (
         <p role="alert" className="text-[15px] font-semibold text-danger">
           {erreur}
@@ -253,6 +239,63 @@ function FormulaireOffre({ r, commissionDefaut, onSaisie, pending }: { r: Regrou
       >
         Enregistrer l&apos;offre
       </Button>
+    </div>
+  );
+}
+
+function Pastille({ couleur }: { couleur: RegroupementChasseur["pastille"] }) {
+  const classe = couleur === "rouge" ? "bg-danger" : couleur === "verte" ? "bg-ok" : "bg-line";
+  const label = couleur === "rouge" ? "Moins de 5 jours avant la date butoir" : couleur === "verte" ? "Offre saisie" : "Dans les temps";
+  return <span role="img" aria-label={label} title={label} className={`inline-block size-3 rounded-full ${classe}`} />;
+}
+
+function compteARebours(j: number | null): string {
+  if (j === null) return "";
+  if (j < 0) return `dépassée de ${-j} jour${j < -1 ? "s" : ""}`;
+  if (j === 0) return "aujourd'hui";
+  return `J-${j}`;
+}
+
+/** « Négoces à appeler » : déjà répondu sur Mobiiz, puis utilisés en perso par ces artisans, puis les autres vérifiés. */
+function NegocesAAppeler({ r, onAppel, pending }: { r: RegroupementChasseur; onAppel: (negoce: string, note: string) => Promise<void>; pending: boolean }) {
+  const [enCours, setEnCours] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+  return (
+    <div className="flex flex-col gap-2">
+      <SectionTitle>Négoces à appeler</SectionTitle>
+      {r.negoces.length === 0 ? <p className="text-[14px] text-muted">Aucun négoce connu dans le {r.departement} pour cette famille.</p> : null}
+      <ul className="flex flex-col gap-2">
+        {r.negoces.map((n) => (
+          <li key={n.email} className="flex flex-col gap-1 rounded-xl bg-ground p-3 text-[14px]">
+            <span className="flex flex-wrap items-center gap-2 font-semibold">
+              {n.nom}
+              {n.aRepondu ? <Badge tone="ok">A déjà répondu</Badge> : null}
+              {n.utiliseEnPerso ? <Badge tone="neutral">Utilisé en perso</Badge> : null}
+              {n.verification === "a_verifier" ? <Badge tone="warn">À vérifier</Badge> : null}
+            </span>
+            <span className="flex flex-wrap items-center gap-3">
+              {n.telephone ? (
+                <a href={`tel:${n.telephone.replace(/[^\d+]/g, "")}`} className="inline-flex min-h-11 items-center gap-1 font-semibold underline">
+                  <Phone size={16} aria-hidden="true" /> {n.telephone}
+                </a>
+              ) : (
+                <span className="text-muted">{n.email}</span>
+              )}
+              <button type="button" onClick={() => (setEnCours(n.nom), setNote(""))} className="min-h-11 font-semibold text-accent-text underline">
+                Appel passé
+              </button>
+            </span>
+            {enCours === n.nom ? (
+              <div className="flex flex-col gap-2">
+                <Field id={`note-${r.id}-${n.email}`} label="Ce qu'il a dit (court)" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} />
+                <Button variant="secondary" pending={pending} onClick={() => void onAppel(n.nom, note.trim()).then(() => setEnCours(null))}>
+                  Noter l&apos;appel
+                </Button>
+              </div>
+            ) : null}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

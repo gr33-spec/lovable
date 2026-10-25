@@ -108,6 +108,9 @@ test.describe("Business model final : le regroupement négocié par un humain", 
     await ch.getByRole("button", { name: "Ouvrir tes regroupements" }).click();
     const lot = ch.getByRole("listitem").filter({ hasText: `dans le ${zone}` }).filter({ hasText: "Ardoise 32×22" });
     await expect(lot.getByText("1 800 pièces · 1 entreprise")).toBeVisible();
+    // Point 4 bis : la date butoir (besoin dans 3 semaines moins 10 jours), le compte à rebours et les négoces à appeler.
+    await expect(lot.getByText(/^Date butoir : .+ · J-11$/)).toBeVisible();
+    await expect(lot.getByRole("heading", { name: "Négoces à appeler" })).toBeVisible();
     await lot.getByRole("button", { name: "Je prends en charge" }).click();
     await expect(lot.getByText("En négociation")).toBeVisible();
     await lot.getByLabel("Négoce", { exact: true }).fill("Ardoisière de l'Ouest");

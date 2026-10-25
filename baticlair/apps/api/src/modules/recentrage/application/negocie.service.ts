@@ -1,4 +1,14 @@
 import {
+  de,
+  communeDe,
+  dateLimiteNegociation,
+  joursAvant,
+  memeJourParis,
+  negocesAAppeler,
+  pastilleRegroupement,
+  phraseFormation,
+  phraseNouveauTotal,
+  rappelDu,
   articleNegociable,
   commissionDe,
   lireModeRegroupement,
@@ -81,7 +91,7 @@ export class NegocieService {
     private readonly observatoire: Pick<ObservatoireService, "enregistrer">,
     private readonly mailer: TransactionalEmailSender,
     private readonly push: PushSender | null,
-    private readonly cfg: { webAppUrl: string; mode: ModeRegroupement; chasseurs: string[]; admins: string[]; commissionDefaut: number; seuilAnonymat: number },
+    private readonly cfg: { webAppUrl: string; mode: ModeRegroupement; chasseurs: string[]; admins: string[]; commissionDefaut: number; seuilAnonymat: number; emailChasseur?: string | null; delaiLivraisonJours?: number },
     private readonly now: () => Date = () => new Date(),
   ) {}
 
@@ -178,6 +188,7 @@ export class NegocieService {
       r = await this.prisma.regroupementNegocie.update({ where: { id: r.id }, data: { dateBesoinMin: b.dateBesoin } });
     }
     await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { regroupementId: r.id } });
+    await this.alerterChasseur(r.id);
     await this.notifierLesVeilles(r);
     return r;
   }
@@ -375,7 +386,7 @@ export class NegocieService {
       await this.mailer.send({
         to: email,
         subject: `Ta commande groupée n° ${bonNumero} : ${b.designation}`,
-        text: ["Bonjour,", "", `C'est commandé : ${qte(quantite)} ${b.unite} de ${b.designation} chez ${o.negoceNom}, ${euros(total)} HT livré.`, "Ton bon de commande est joint (tu peux y remplir ton numéro de compte client et ta date de livraison).", "", `${this.cfg.webAppUrl}/regroupements`, "", NOM_APP].join("\n"),
+        text: ["Bonjour,", "", `C'est commandé : ${qte(quantite)} ${b.unite} ${de(b.designation)} chez ${o.negoceNom}, ${euros(total)} HT livré.`, "Ton bon de commande est joint (tu peux y remplir ton numéro de compte client et ta date de livraison).", "", `${this.cfg.webAppUrl}/regroupements`, "", NOM_APP].join("\n"),
         attachments: [{ filename: `bon-de-commande-${bonNumero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
       });
     await this.observatoire.enregistrer({ type: "groupe", sourceId: r.id, departement: r.departement, lignes: [{ designation: b.designation, unite: b.unite, quantite, prixHt: prix }] });
@@ -425,14 +436,27 @@ export class NegocieService {
       include: { besoins: { where: { statut: { in: DANS } }, include: { company: { select: { name: true } } } }, offre: true, appels: { orderBy: { le: "desc" }, take: 20 } },
       orderBy: [{ dateBesoinMin: "asc" }, { createdAt: "asc" }],
     });
+    const maintenant = this.now();
     const sortie = [];
     for (const r of regroupements) {
-      const negoces = await this.prisma.negoce.findMany({
+      const companies = [...new Set(r.besoins.map((b) => b.companyId))];
+      const zone = await this.prisma.negoce.findMany({
         where: { departement: r.departement, stopLe: null, OR: [{ generaliste: true }, { familles: { has: r.famille } }] },
-        select: { nom: true, email: true, compte: { select: { telephone: true, verification: true } } },
-        orderBy: { nom: "asc" },
-        take: 30,
+        select: { nom: true, email: true, compte: { select: { telephone: true, verification: true, inscritLe: true } } },
+        take: 50,
       });
+      // Les négoces que ces artisans utilisent en demande perso (même hors de la base de la zone).
+      const perso = companies.length
+        ? await this.prisma.supplier.findMany({ where: { companyId: { in: companies }, archivedAt: null, recipients: { some: { priceRequest: { but: { not: null } } } } }, select: { name: true, email: true, phone: true } })
+        : [];
+      const emailsPerso = new Set(perso.map((x) => x.email.toLowerCase()));
+      const candidats = new Map<string, { nom: string; email: string; telephone: string | null; verification: string | null; aRepondu: boolean; utiliseEnPerso: boolean }>();
+      for (const n of zone) candidats.set(n.email.toLowerCase(), { nom: n.nom, email: n.email, telephone: n.compte?.telephone ?? null, verification: n.compte?.verification ?? null, aRepondu: !!n.compte?.inscritLe, utiliseEnPerso: emailsPerso.has(n.email.toLowerCase()) });
+      for (const x of perso) if (!candidats.has(x.email.toLowerCase())) candidats.set(x.email.toLowerCase(), { nom: x.name, email: x.email, telephone: x.phone, verification: null, aRepondu: false, utiliseEnPerso: true });
+      for (const c of candidats.values())
+        if (!c.aRepondu) c.aRepondu = !!(await this.prisma.priceRequestRecipient.findFirst({ where: { reponduLe: { not: null }, supplier: { email: { equals: c.email, mode: "insensitive" } } }, select: { id: true } }));
+      const dateLimite = r.dateBesoinMin ? dateLimiteNegociation(r.dateBesoinMin, this.delai()) : null;
+      const joursRestants = dateLimite ? joursAvant(dateLimite, maintenant) : null;
       sortie.push({
         id: r.id,
         numero: r.numero,
@@ -442,19 +466,24 @@ export class NegocieService {
         statut: r.statut,
         chasseur: r.chasseurEmail,
         dateBesoinMin: r.dateBesoinMin ? jourIso(r.dateBesoinMin) : null,
+        dateLimite: dateLimite ? jourIso(dateLimite) : null,
+        joursRestants,
+        pastille: pastilleRegroupement({ offreSaisie: !!r.offre, joursRestants }),
         volume: r.besoins.reduce((s, b) => s + Number(b.quantite), 0),
         unite: r.besoins[0]?.unite ?? "",
-        entreprises: new Set(r.besoins.map((b) => b.companyId)).size,
-        participants: r.besoins.map((b) => ({ besoinId: b.id, entreprise: b.company.name, quantite: Number(b.quantite), statut: b.statut, livraison: b.livraison })),
+        entreprises: companies.length,
+        participants: r.besoins.map((b) => ({ besoinId: b.id, entreprise: b.company.name, quantite: Number(b.quantite), statut: b.statut, commune: communeDe(b.livraison) ?? b.departement, dateBesoin: jourIso(b.dateBesoin) })),
         acceptes: r.besoins.filter((b) => b.statut === "accepte").length,
-        negoces: negoces.map((n) => ({ nom: n.nom, email: n.email, telephone: n.compte?.telephone ?? null, verification: n.compte?.verification ?? null })),
+        negoces: negocesAAppeler([...candidats.values()]),
         offre: r.offre
           ? { negoceNom: r.offre.negoceNom, prixNegocieHt: Number(r.offre.prixNegocieHt), commissionPct: Number(r.offre.commissionPct), prixAfficheHt: Number(r.offre.prixAfficheHt), livraisonHt: Number(r.offre.livraisonHt), valideJusquau: jourIso(r.offre.valideJusquau), envoyee: !!r.offreEnvoyeeLe, transmise: !!r.offre.transmiseLe }
           : null,
         appels: r.appels.map((a) => ({ negoce: a.negoce, note: a.note, le: a.le.toISOString(), par: a.parEmail })),
       });
     }
-    return { regroupements: sortie, commissionDefaut: this.cfg.commissionDefaut };
+    // Triés par date butoir (la plus proche d'abord ; sans date à la fin).
+    sortie.sort((a, b) => (a.dateLimite ?? "9999").localeCompare(b.dateLimite ?? "9999"));
+    return { regroupements: sortie, commissionDefaut: this.cfg.commissionDefaut, aTraiter: await this.aTraiter() };
   }
 
   private async regroupement(id: string) {
@@ -471,6 +500,12 @@ export class NegocieService {
   async prendreEnCharge(chasseur: string, id: string) {
     const r = await this.regroupement(id);
     await this.passer(r.id, r.statut as StatutRegroupementNegocie, "en_negociation", { chasseurEmail: chasseur, prisEnChargeLe: this.now() });
+    // Point 4 bis : l'artisan apprend que Mobiiz négocie pour lui (une fois par entreprise).
+    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId: r.id, statut: "declare" } });
+    for (const companyId of new Set(besoins.map((b) => b.companyId))) {
+      const q = besoins.filter((b) => b.companyId === companyId).reduce((t, b) => t + Number(b.quantite), 0);
+      await this.prevenir(companyId, { titre: "Mobiiz négocie pour toi", phrase: `Un chasseur d'opportunités Mobiiz négocie ${qte(q)} ${besoins[0]!.unite} ${de(r.libelle)} pour toi. Tu reçois l'offre ici, et tu choisis.`, url: "/regroupements" });
+    }
     return { fait: true };
   }
 
@@ -527,7 +562,7 @@ export class NegocieService {
     const prixArtisan = Number(r.offre.prixAfficheHt);
     await this.mailer.send({
       to: r.offre.negoceEmail,
-      subject: `Commande groupée n° ${r.numero} : ${qte(total)} ${acceptes[0]!.unite} de ${r.libelle}`,
+      subject: `Commande groupée n° ${r.numero} : ${qte(total)} ${acceptes[0]!.unite} ${de(r.libelle)}`,
       text: [
         "Bonjour,",
         "",
@@ -572,6 +607,103 @@ export class NegocieService {
         if (r === "gone") await this.prisma.pushSubscription.deleteMany({ where: { endpoint: a.endpoint } });
       }
     }
+  }
+
+  /* ---------------------------------------------------------------------------------- les alertes du chasseur (4 bis) */
+
+  private delai() {
+    return this.cfg.delaiLivraisonJours ?? 10;
+  }
+
+  /** L'e-mail au chasseur (`EMAIL_CHASSEUR`, défaut : l'admin) et la notification sur ses appareils. */
+  private async alerteChasseur(sujet: string, lignes: string[], url: string) {
+    const to = this.cfg.emailChasseur;
+    if (!to) return;
+    await this.mailer.send({ to, subject: sujet, text: ["Bonjour,", "", ...lignes, "", `${this.cfg.webAppUrl}${url}`, "", NOM_APP].join("\n") }).catch(() => undefined);
+    if (!this.push) return;
+    const user = await this.prisma.user.findFirst({ where: { email: { equals: to, mode: "insensitive" } }, select: { id: true } });
+    if (!user) return;
+    for (const a of await this.prisma.pushSubscription.findMany({ where: { userId: user.id } })) {
+      const r = await this.push.send({ endpoint: a.endpoint, p256dh: a.p256dh, auth: a.auth }, { title: sujet, body: lignes[0] ?? sujet, url, tag: `chasseur:${url}` }).catch(() => "failed" as const);
+      if (r === "gone") await this.prisma.pushSubscription.deleteMany({ where: { endpoint: a.endpoint } });
+    }
+  }
+
+  private async etatRegroupement(id: string) {
+    const r = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id }, include: { besoins: { where: { statut: { in: DANS } } }, offre: true } });
+    const entreprises = new Set(r.besoins.map((b) => b.companyId)).size;
+    const volume = r.besoins.reduce((t, b) => t + Number(b.quantite), 0);
+    const dateLimite = r.dateBesoinMin ? dateLimiteNegociation(r.dateBesoinMin, this.delai()) : null;
+    return { r, entreprises, volume, unite: r.besoins[0]?.unite ?? "", dateLimite };
+  }
+
+  /**
+   * À chaque besoin rattaché : dès la 2e entreprise, l'alerte « Nouveau regroupement » part tout de suite ; ensuite, le
+   * premier ajout du jour part tout de suite (« nouveau total »), les suivants attendent le digest de 18 h.
+   */
+  private async alerterChasseur(regroupementId: string) {
+    const { r, entreprises, volume, unite, dateLimite } = await this.etatRegroupement(regroupementId);
+    if (entreprises < 2) return;
+    const maintenant = this.now();
+    const url = `/admin/chasseur#r-${r.id}`;
+    if (!r.formationAlerteLe) {
+      const butoir = dateLimite ? `Date butoir de la négociation : ${jourFr(dateLimite)}.` : "";
+      await this.alerteChasseur(phraseFormation({ libelle: r.libelle, entreprises, volume, unite, dateBesoinMin: r.dateBesoinMin }), [`${phraseFormation({ libelle: r.libelle, entreprises, volume, unite, dateBesoinMin: r.dateBesoinMin })}.`, butoir].filter(Boolean), url);
+      await this.prisma.regroupementNegocie.update({ where: { id: r.id }, data: { formationAlerteLe: maintenant, ajoutAlerteLe: maintenant } });
+      await this.prisma.besoinNegocie.updateMany({ where: { regroupementId: r.id, signaleLe: null }, data: { signaleLe: maintenant } });
+      return;
+    }
+    if (r.ajoutAlerteLe && memeJourParis(r.ajoutAlerteLe, maintenant)) return;
+    await this.alerteChasseur(`${r.libelle} : nouveau total`, [phraseNouveauTotal({ libelle: r.libelle, entreprises, volume, unite })], url);
+    await this.prisma.regroupementNegocie.update({ where: { id: r.id }, data: { ajoutAlerteLe: maintenant } });
+    await this.prisma.besoinNegocie.updateMany({ where: { regroupementId: r.id, signaleLe: null }, data: { signaleLe: maintenant } });
+  }
+
+  /**
+   * La tâche du soir (18 h, Paris) : le digest des ajouts du jour, les rappels J-5 et J-2 au chasseur tant qu'aucune offre
+   * n'est saisie, et le rappel à l'artisan qui n'a pas répondu 48 h avant la fin de validité de l'offre.
+   */
+  async tacheDuSoir(maintenant = this.now()) {
+    const ouverts = ["en_collecte", "en_negociation", "offre_recue"];
+    const aDigerer = await this.prisma.regroupementNegocie.findMany({ where: { statut: { in: ouverts }, formationAlerteLe: { not: null }, besoins: { some: { signaleLe: null, statut: { in: DANS } } } }, select: { id: true } });
+    const lignes: string[] = [];
+    for (const { id } of aDigerer) {
+      const { r, entreprises, volume, unite } = await this.etatRegroupement(id);
+      lignes.push(`- ${phraseNouveauTotal({ libelle: r.libelle, entreprises, volume, unite })}`);
+      await this.prisma.besoinNegocie.updateMany({ where: { regroupementId: id, signaleLe: null }, data: { signaleLe: maintenant } });
+    }
+    if (lignes.length) await this.alerteChasseur(`Les ajouts du jour (${lignes.length} regroupement${lignes.length > 1 ? "s" : ""})`, lignes, "/admin/chasseur");
+
+    let rappels = 0;
+    for (const x of await this.prisma.regroupementNegocie.findMany({ where: { statut: { in: ["en_collecte", "en_negociation"] }, dateBesoinMin: { not: null } }, select: { id: true } })) {
+      const { r, entreprises, volume, unite, dateLimite } = await this.etatRegroupement(x.id);
+      if (!dateLimite || entreprises === 0) continue;
+      const joursRestants = joursAvant(dateLimite, maintenant);
+      const rap = rappelDu({ offreSaisie: !!r.offre, joursRestants, rappelJ5Le: r.rappelJ5Le, rappelJ2Le: r.rappelJ2Le });
+      if (!rap) continue;
+      await this.alerteChasseur(`${rap} : ${r.libelle}, aucune offre saisie`, [`${r.libelle} : ${qte(volume)} ${unite}, ${entreprises} entreprise${entreprises > 1 ? "s" : ""}.`, `Date butoir de la négociation : ${jourFr(dateLimite)} (${rap}).`], `/admin/chasseur#r-${r.id}`);
+      await this.prisma.regroupementNegocie.update({ where: { id: r.id }, data: rap === "J-2" ? { rappelJ2Le: maintenant, rappelJ5Le: r.rappelJ5Le ?? maintenant } : { rappelJ5Le: maintenant } });
+      rappels++;
+    }
+
+    let rappelsArtisans = 0;
+    const enAttente = await this.prisma.besoinNegocie.findMany({ where: { statut: "declare", rappelOffreLe: null, regroupement: { statut: "offre_recue", offreEnvoyeeLe: { not: null } } }, include: { regroupement: { include: { offre: true } } } });
+    for (const b of enAttente) {
+      const o = b.regroupement?.offre;
+      if (!o) continue;
+      const fin = o.valideJusquau.getTime() + JOUR;
+      if (fin <= maintenant.getTime() || fin - maintenant.getTime() > 2 * JOUR) continue;
+      await this.prevenir(b.companyId, { titre: "Ton offre groupée se termine bientôt", phrase: `L'offre négociée par Mobiiz sur ${b.designation} est valable jusqu'au ${jourFr(o.valideJusquau)}. Tu acceptes ou tu refuses ?`, url: "/regroupements" });
+      await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { rappelOffreLe: maintenant } });
+      rappelsArtisans++;
+    }
+    return { digest: lignes.length, rappels, rappelsArtisans };
+  }
+
+  /** Le compteur « à traiter » du menu : les regroupements formés (2 entreprises ou plus) sans offre saisie. */
+  async aTraiter(): Promise<number> {
+    const rs = await this.prisma.regroupementNegocie.findMany({ where: { statut: { in: ["en_collecte", "en_negociation"] }, offre: null }, include: { besoins: { where: { statut: { in: DANS } }, select: { companyId: true } } } });
+    return rs.filter((r) => new Set(r.besoins.map((b) => b.companyId)).size >= 2).length;
   }
 
   /** Les chiffres du mois pour « Hypothèses de lancement ». */

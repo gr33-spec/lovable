@@ -167,7 +167,7 @@ describe("business model final : le regroupement négocié par un humain", { tim
     const t = (await ch.agent.post(`/v1/chasseur/regroupements/${r.id}/transmettre`).expect(200)).body;
     expect(t).toMatchObject({ quantite: 2400, entreprises: 2, commissionHt: 43.2 });
     const lot = mailsVers(ctx, "n@negoce.fr").at(-1)!;
-    expect(lot.subject).toMatch(new RegExp(`^Commande groupée n° ${apres.numero} : 2.400 pièces de Ardoise 32×22 Espagne 1er choix$`));
+    expect(lot.subject).toMatch(new RegExp(`^Commande groupée n° ${apres.numero} : 2.400 pièces d'ardoise 32×22 Espagne 1er choix$`));
     expect(lot.text).toContain("Toitures 1");
     expect(lot.text).toContain("Toitures 3");
     expect(lot.text).not.toContain("Toitures 2");
@@ -253,5 +253,63 @@ describe("business model final : le regroupement négocié par un humain", { tim
     expect(l.lignes[0].groupable === true || l.lignes[0].groupable === false).toBe(true);
     await greg.agent.put("/v1/admin/pilotage/mode-regroupement").send({ mode: "humain" }).expect(200);
     await a.agent.post("/v1/negocie/besoins").send({ projectId: a.projectId, articleKey: a.articles[0], dateBesoin: dans(20) }).expect(201);
+  });
+
+  it("point 4 bis : alertes du chasseur (formation, digest de 18 h, date butoir, rappels J-5 et J-2, négoces à appeler, rappel 48 h à l'artisan)", async () => {
+    const CH = "greg@example.fr"; // EMAIL_CHASSEUR absent : le premier admin.
+    const cron = (maintenant?: string) => publique().get(`/v1/internal/negocie${maintenant ? `?maintenant=${encodeURIComponent(maintenant)}` : ""}`).set("authorization", "Bearer secret-de-la-tache");
+    const a = await artisan(1);
+    await a.agent.post("/v1/negocie/besoins").send({ projectId: a.projectId, articleKey: a.articles[0], dateBesoin: dans(20) }).expect(201);
+    expect(mailsVers(ctx, CH)).toHaveLength(0); // une seule entreprise : pas encore un regroupement
+    const b = await artisan(2, [{ libelle: A3222, quantite: "900", unite: "pièces" }], "8 rue du Port, 22500 Paimpol");
+    await b.agent.post("/v1/negocie/besoins").send({ projectId: b.projectId, articleKey: b.articles[0], dateBesoin: dans(25) }).expect(201);
+    const formation = mailsVers(ctx, CH);
+    expect(formation).toHaveLength(1);
+    expect(formation[0]!.subject).toMatch(/^Nouveau regroupement : Ardoise 32×22 Espagne 1er choix, 2 entreprises, 2.700 pièces, besoin au plus tôt le \d+ \S+$/);
+    expect(formation[0]!.text).toContain("/admin/chasseur#r-");
+    // Un 3e ajout le même jour : pas d'e-mail tout de suite, il part au digest de 18 h ; le digest ne repart pas deux fois.
+    const c = await artisan(3, [{ libelle: A3222, quantite: "600", unite: "pièces" }], "1 place du Centre, 22200 Guingamp");
+    await c.agent.post("/v1/negocie/besoins").send({ projectId: c.projectId, articleKey: c.articles[0], dateBesoin: dans(30) }).expect(201);
+    expect(mailsVers(ctx, CH)).toHaveLength(1);
+    expect((await cron().expect(200)).body).toMatchObject({ digest: 1 });
+    const digest = mailsVers(ctx, CH).at(-1)!;
+    expect(digest.subject).toBe("Les ajouts du jour (1 regroupement)");
+    expect(digest.text).toContain("nouveau total 3\u00a0300 pièces d'ardoise 32×22 Espagne 1er choix, 3 entreprises.");
+    expect((await cron().expect(200)).body).toMatchObject({ digest: 0 });
+
+    // Le tableau du chasseur : date butoir = besoin le plus proche (J+20) moins 10 jours ; communes, jamais les rues.
+    const ch = await chasseur();
+    const statut = (await ch.agent.get("/v1/chasseur/statut").expect(200)).body;
+    expect(statut).toMatchObject({ chasseur: true, aTraiter: 1 });
+    const r = (await ch.agent.get("/v1/chasseur/regroupements").expect(200)).body.regroupements.find((x: { entreprises: number }) => x.entreprises === 3);
+    expect(r).toMatchObject({ dateLimite: dans(10), joursRestants: 10, pastille: "neutre" });
+    expect(r.participants.map((p: { commune: string }) => p.commune).sort()).toEqual(["Guingamp", "Lannion", "Paimpol"]);
+    expect(JSON.stringify(r.participants)).not.toMatch(/rue|place/);
+
+    // Rappels : J-5 puis J-2, une fois chacun, rien après la saisie d'une offre.
+    const jour = (n: number) => new Date(Date.parse(`${dans(10)}T17:00:00Z`) - n * 86_400_000).toISOString();
+    expect((await cron(jour(6)).expect(200)).body.rappels).toBe(0);
+    expect((await cron(jour(5)).expect(200)).body.rappels).toBe(1);
+    expect(mailsVers(ctx, CH).at(-1)!.subject).toBe("J-5 : Ardoise 32×22 Espagne 1er choix, aucune offre saisie");
+    expect((await cron(jour(4)).expect(200)).body.rappels).toBe(0);
+    expect((await cron(jour(2)).expect(200)).body.rappels).toBe(1);
+    expect(mailsVers(ctx, CH).at(-1)!.subject).toBe("J-2 : Ardoise 32×22 Espagne 1er choix, aucune offre saisie");
+    const rouge = (await ch.agent.get(`/v1/chasseur/regroupements`).expect(200)).body.regroupements.find((x: { id: string }) => x.id === r.id);
+    expect(rouge.pastille).toBe("neutre"); // à l'heure réelle, J-10
+
+    // Prise en charge : chaque artisan apprend que Mobiiz négocie pour lui.
+    await ch.agent.post(`/v1/chasseur/regroupements/${r.id}/prendre`).expect(200);
+    expect(mailsVers(ctx, "artisan1@toitures.fr").map((m) => m.subject)).toContain("Mobiiz négocie pour toi");
+    expect(mailsVers(ctx, "artisan1@toitures.fr").find((m) => m.subject === "Mobiiz négocie pour toi")!.text).toContain("1\u00a0800 pièces d'ardoise 32×22");
+    await ch.agent.put(`/v1/chasseur/regroupements/${r.id}/offre`).send({ negoceNom: "Négoce N", negoceEmail: "n@negoce.fr", prixNegocieHt: 1, livraisonHt: 0, valideJusquau: dans(1) }).expect(200);
+    expect((await ch.agent.get("/v1/chasseur/regroupements").expect(200)).body.regroupements.find((x: { id: string }) => x.id === r.id).pastille).toBe("verte");
+    expect((await ch.agent.get("/v1/chasseur/statut").expect(200)).body.aTraiter).toBe(0);
+    await ch.agent.post(`/v1/chasseur/regroupements/${r.id}/envoyer`).expect(200);
+    // Rappel 48 h avant la fin de validité, une fois, à qui n'a pas répondu.
+    const avantA = mailsVers(ctx, "artisan1@toitures.fr").length;
+    expect((await cron().expect(200)).body.rappelsArtisans).toBe(3);
+    expect(mailsVers(ctx, "artisan1@toitures.fr").at(-1)!.subject).toBe("Ton offre groupée se termine bientôt");
+    expect(mailsVers(ctx, "artisan1@toitures.fr")).toHaveLength(avantA + 1);
+    expect((await cron().expect(200)).body.rappelsArtisans).toBe(0);
   });
 });

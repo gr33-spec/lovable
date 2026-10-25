@@ -114,6 +114,8 @@ export class PilotageController {
         return this.demo.finirEssai(user.userId);
       case "echec-paiement":
         return this.demo.simulerEchec(user.userId);
+      case "purger-recettes":
+        return this.demo.purgerRecettes();
     }
     throw forbidden("Unknown demo action");
   }
@@ -126,7 +128,7 @@ export class PilotageController {
 
   private async gardeDemo(user: AuthenticatedUser, geste: string) {
     if (this.config.env === "production" && !this.config.previewOriginPattern) throw forbidden("Never in production");
-    if (!["jeu", "cloturer", "repondre", "publier", "finir-essai", "echec-paiement", "effacer"].includes(geste)) throw forbidden("Unknown demo action");
+    if (!["jeu", "cloturer", "repondre", "publier", "finir-essai", "echec-paiement", "effacer", "purger-recettes"].includes(geste)) throw forbidden("Unknown demo action");
     await this.pilotage.exiger(user);
     await this.pilotage.journal(user, "demo", geste);
   }

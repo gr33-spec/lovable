@@ -47,6 +47,13 @@ Plan du 20 octobre 2026, bloc 12. Par ordre de risque ; chaque ligne dit le risq
 | 31 | Faible | La double authentification de l'admin passe par un code e-mail : si la boîte de Greg est compromise, le pilotage l'est aussi. | Code lié à la session, 10 min, 5 essais, journalisé ; un seul admin. | Un code TOTP (application d'authentification) par le plugin `two-factor` de Better Auth, déjà dans la dépendance. | Avant un second admin. |
 | 32 | Faible | Le tableau de bord recalcule l'état d'abonnement de chaque entreprise à chaque ouverture (une requête par entreprise). | Quelques dizaines d'artisans : moins d'une seconde. | Un état d'abonnement mis en cache par la tâche horaire. | Au-delà de 500 artisans. |
 
+## État au 25 octobre 2026 (business model final)
+
+- **Mode automatique conservé** derrière `MODE_REGROUPEMENT=automatique` (cycles, consultation des spécialistes et généralistes, réponses par lien, paliers) : code et tests gardés et verts (`regroupements-recentrage.test.ts`, e2e `recentrage.spec.ts` forcés en automatique). À supprimer seulement si Greg tranche que le mode humain suffit.
+- Deux modèles de regroupement coexistent (`regroupement` automatique, `regroupement_negocie` humain) ; une ligne peut finir dans les deux si l'admin bascule le mode en cours de route.
+- Le digest de 18 h dépend d'une tâche planifiée quotidienne (9 tâches Vercel au total).
+- L'adresse de livraison donne le département (pas le SIRET) : à revoir si un artisan travaille hors de son département.
+
 ## État au 24 octobre 2026 (Mobiiz)
 
 Nouvelles, laissées avec leur parade : 28 à 32.

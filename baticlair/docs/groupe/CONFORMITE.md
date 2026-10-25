@@ -31,6 +31,13 @@ Branche `claude/saas-achat-artisans-prompt-1lyihx` (PR #284), puis `claude/integ
 - [x] « Mes prix » : seulement les prix de l'artisan lui-même (test « Mes prix ne montre que ses propres prix »).
 - [x] Aucune promesse d'économie chiffrée sur la landing, /tarifs ni la démo.
 
+### Business model final du 25 octobre 2026
+
+- **Commission** : sur un regroupement négocié, la commission (2 % par défaut, `COMMISSION_DEFAUT`) est intégrée au prix affiché à l'artisan, avec la mention « Commission Mobiiz incluse dans le prix » ; CGU (article 2) : « Mobiiz peut percevoir une commission du négoce sur les commandes groupées » ; conditions négoces, point « Regroupements négociés par Mobiiz » : commission convenue au moment de l'offre, jamais sans accord écrit. Aucune facturation automatique (`FACTURATION_NEGOCE=off`).
+- **Apporteur d'affaires** : Mobiiz négocie et transmet la commande ; le contrat de vente reste entre l'artisan et le négoce (CGU article 4, conditions négoces « Ni vendeur ni acheteur »). Le statut d'apporteur d'affaires (contrat avec chaque négoce, facturation de la commission, TVA) est à valider par l'avocat avant la première commande groupée réelle (A-FAIRE-RELIRE 42).
+- **Usage statistique anonymisé** des prix (observatoire) : clause dans les CGU et les conditions négoces ; table sans identifiant.
+- Points à faire relire : A-FAIRE-RELIRE 42 à 46.
+
 ## Reste à faire par Greg
 
 ### 1. Les infos du Kbis (5 repères `[A COMPLETER]`, dans `apps/web/src/lib/legal.ts`)

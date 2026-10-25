@@ -211,6 +211,9 @@ const envSchema = z
     /** Les chasseurs d'opportunités (e-mails) : un rôle à part, distinct de l'admin complet (GROUPE_ADMINS). */
     CHASSEURS: z.string().optional(),
     COMMISSION_DEFAUT: z.coerce.number().min(0).max(20).default(2),
+    /** Point 4 bis : l'adresse des alertes du chasseur (défaut : le premier admin) et le délai de livraison avant la date de besoin. */
+    EMAIL_CHASSEUR: z.string().email().optional(),
+    DELAI_LIVRAISON_JOURS: z.coerce.number().int().min(0).max(60).default(10),
     /** Codes NAF du commerce de matériaux acceptés à l'inscription d'un négoce (séparés par des virgules). */
     NAF_MATERIAUX: z.string().optional(),
     /** Vérification du SIRET des négoces par l'API Recherche d'entreprises : `on` en ligne, `fake` dans les tests. */
@@ -317,7 +320,7 @@ export interface AppConfig {
     /** Recentrage (25 octobre 2026) : seuils et réglages des regroupements, du gratuit et du payant. */
     recentrage: { seuilLigneHt: number; seuilAnonymat: number; seuilVolumeMin: Record<string, number> | null; prixReperes: Record<string, number>; familles: string[]; lecturesGratuites: number; seuilZoneActive: number };
     /** Le regroupement négocié par un humain (business model final, 25 octobre 2026). */
-    negocie: { mode: "humain" | "automatique"; chasseurs: string[]; commissionDefaut: number; naf: string[] | null; rechercheEntreprises: "on" | "off" | "fake" };
+    negocie: { mode: "humain" | "automatique"; chasseurs: string[]; commissionDefaut: number; emailChasseur: string | null; delaiLivraisonJours: number; naf: string[] | null; rechercheEntreprises: "on" | "off" | "fake" };
     /** mois : un regroupement par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
     mode: "mois" | "lots";
     sirene: { departements: string[]; naf: string[] };
@@ -465,6 +468,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
         mode: e.MODE_REGROUPEMENT,
         chasseurs: (e.CHASSEURS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
         commissionDefaut: e.COMMISSION_DEFAUT,
+        emailChasseur: (e.EMAIL_CHASSEUR ?? (e.GROUPE_ADMINS ?? e.REFERENTIAL_VALIDATORS ?? "").split(",")[0] ?? "").trim().toLowerCase() || null,
+        delaiLivraisonJours: e.DELAI_LIVRAISON_JOURS,
         naf: e.NAF_MATERIAUX ? e.NAF_MATERIAUX.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) : null,
         rechercheEntreprises: e.RECHERCHE_ENTREPRISES ?? (e.NODE_ENV === "test" ? "fake" : "on"),
       },

@@ -2,6 +2,20 @@
 
 Oct 19, 2026 · @Greg
 
+## 0 sexies. Business model final : le regroupement négocié par un humain — 25 octobre 2026, soir
+
+**Prioritaire sur toutes les sections suivantes** (le 0 quinquies reste valable pour la demande perso, Mes prix, le gratuit et le payant). Mode par défaut `MODE_REGROUPEMENT=humain` ; la consultation automatique (0 quinquies, point 3) reste entière derrière l'interrupteur admin « Mode des regroupements ».
+
+1. **Demande perso** (porte d'entrée, immédiate) : après le quantitatif, 1 à 5 négoces (gratuit : 1), accord d'identité coché d'office ; le négoce chiffre par un lien sans compte (validité ≥ 7 jours), une relance à 48 h, comparaison livraison comprise, « Commander » = bon de commande (seul document à champs remplissables). À la première demande vers un négoce qui n'a jamais répondu : **« Préviens ton négoce »** (L'appeler, SMS prérempli, « Je l'ai déjà prévenu »).
+2. **Besoin** : depuis le chantier (« Tenter un prix de groupe ») ou l'onglet Regroupements ; gros articles seulement (ardoise, zinc, bois, isolant ; jamais crochets, liteaux, visserie), référence stricte (30×20 ≠ 32×22), quantité, date de besoin, commune de livraison (jamais montrée aux autres). Même référence, même département, dates compatibles (30 jours) = même **regroupement** : `en_collecte` → `en_negociation` → `offre_recue` → `commande` / `abandonne`.
+3. **L'artisan voit** son besoin, « Mobiiz négocie pour toi » (e-mail et notification à la prise en charge), puis **l'offre** : « Négoce vérifié dans le 22 » (le nom après l'acceptation), « Négocié pour vous par Mobiiz », « Commission Mobiiz incluse dans le prix », comparée à sa meilleure demande perso sur la même référence. « J'accepte » = commande ferme sur sa quantité, bon de commande PDF ; « Refuser » sans motif. Rappel 48 h avant la fin de validité s'il n'a pas répondu.
+4. **Le chasseur** (rôle `CHASSEURS`, code par e-mail, `/admin/chasseur`, entrée « Chasseur d'opportunités » et compteur « à traiter » dans le menu) : regroupements triés par **date butoir** (date de besoin la plus proche − `DELAI_LIVRAISON_JOURS`, 10), pastille rouge sous J-5, verte dès qu'une offre est saisie ; fiche : total, entreprises (nom, commune, quantité, date), **négoces à appeler** (déjà répondu sur Mobiiz, puis utilisés en perso par ces artisans, puis les autres de la zone ; téléphone cliquable, « Appel passé » horodaté avec une note) ; « Je prends en charge », offre (négoce, prix HT, livraison, conditions, validité, commission 2 % par défaut intégrée au prix affiché), « Envoyer l'offre à tous », acceptations en direct, « Transmettre la commande au négoce » (lot total, quantités acceptées, entreprises et communes).
+5. **Alertes du chasseur** (`EMAIL_CHASSEUR`, défaut : l'admin) : « Nouveau regroupement : Ardoise 32×22, 2 entreprises, 2 700 pièces, besoin au plus tôt le 15 nov. » dès la 2e entreprise, avec le lien de la fiche ; le premier ajout du jour suivant part tout de suite (« nouveau total »), les suivants en **digest à 18 h** ; rappels **J-5 et J-2** tant qu'aucune offre n'est saisie (tâche `/v1/internal/negocie`, 17 h 03 UTC).
+6. **Veille** : chaque ligne groupable d'une demande perso reste en veille jusqu'à sa date de besoin ; si un regroupement se forme sur la même référence dans la zone : « Un regroupement se forme sur … tu les ajoutes ? », « Oui, j'ajoute » / « Non merci » ; rien si la ligne est déjà commandée en perso.
+7. **Négoces vérifiés** : SIRET par l'API Recherche d'entreprises (NAF matériaux), e-mail au domaine de l'entreprise ; sinon « à vérifier », validé ou bloqué d'un clic par l'admin, badge « Nouveau négoce ».
+8. **Observatoire** : « Prix observés dans ton secteur » (moyenne arrondie sur 3 mois, ≥ 2 regroupements ou 5 réponses), table `observations_prix` sans identifiant, export CSV admin.
+9. **Textes** : élision générale de « de » devant une voyelle (« pièces d'ardoise », `de()` du domaine).
+
 ## 0 quinquies. Recentrage : demande perso, regroupements, gratuit et payant — 25 octobre 2026
 
 **Prioritaire sur toutes les sections suivantes.** Rapport : `docs/groupe/RECENTRAGE-2026-10-25.md` ; choix : `docs/DECISIONS.md`.

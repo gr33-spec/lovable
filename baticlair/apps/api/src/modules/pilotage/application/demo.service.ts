@@ -173,6 +173,18 @@ export class DemoService {
     return { fait: true };
   }
 
+  /**
+   * Les faux négoces des recettes en ligne (adresses de test Resend `…@resend.dev`, Greg, 25 octobre 2026 : « purge les
+   * faux négoces des recettes précédentes en gardant seulement ceux du mode démo »). Ceux de la démo (`@demo.mobiiz.fr`)
+   * restent ; un vrai négoce n'a jamais une adresse `@resend.dev`.
+   */
+  async purgerRecettes() {
+    const recette = { endsWith: "@resend.dev", mode: "insensitive" as const };
+    const negoces = await this.prisma.negoce.deleteMany({ where: { email: recette } });
+    const comptes = await this.prisma.compteNegoce.deleteMany({ where: { email: recette } });
+    return { negoces: negoces.count, comptesNegoce: comptes.count };
+  }
+
   /** Tout ce qui est faux disparaît : comptes, entreprises, chantiers, besoins, négoces et leurs comptes. */
   async effacer() {
     // Les regroupements négociés de démonstration : ceux qui ont un besoin sur un chantier de démo.

@@ -32,6 +32,10 @@
       "schedule": "35 9 * * *"
     },
     {
+      "path": "/v1/internal/negocie",
+      "schedule": "3 17 * * *"
+    },
+    {
       "path": "/v1/internal/rapport-mensuel",
       "schedule": "0 7 1 * *"
     }

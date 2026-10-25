@@ -76,12 +76,16 @@ export interface RegroupementChasseur {
   statut: StatutRegroupement;
   chasseur: string | null;
   dateBesoinMin: string | null;
+  /** Point 4 bis : la date butoir (besoin le plus proche moins le délai de livraison), les jours qui restent, la pastille. */
+  dateLimite: string | null;
+  joursRestants: number | null;
+  pastille: "verte" | "rouge" | "neutre";
   volume: number;
   unite: string;
   entreprises: number;
-  participants: { besoinId: string; entreprise: string; quantite: number; statut: string; livraison: string }[];
+  participants: { besoinId: string; entreprise: string; quantite: number; statut: string; commune: string; dateBesoin: string }[];
   acceptes: number;
-  negoces: { nom: string; email: string; telephone: string | null; verification: string | null }[];
+  negoces: { nom: string; email: string; telephone: string | null; verification: string | null; aRepondu: boolean; utiliseEnPerso: boolean }[];
   offre: { negoceNom: string; prixNegocieHt: number; commissionPct: number; prixAfficheHt: number; livraisonHt: number; valideJusquau: string; envoyee: boolean; transmise: boolean } | null;
   appels: { negoce: string; note: string; le: string; par: string }[];
 }
