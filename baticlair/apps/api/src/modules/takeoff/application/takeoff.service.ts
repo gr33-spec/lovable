@@ -783,7 +783,8 @@ export class TakeoffService {
     }
     if (!attempt || attempt.status !== "success" || !attempt.output) {
       this.reading.onReadingFailed?.(attempt?.status ?? "no_reader");
-      throw new DomainError("analysis_failed", "The AI could not read this list", { reason: attempt?.status ?? "no_reader" });
+      // Le motif du prestataire (« http_400: invalid_request_error, … », jamais la clé) suit, pour le journal du serveur.
+      throw new DomainError("analysis_failed", "The AI could not read this list", { reason: attempt?.status ?? "no_reader", ...(attempt?.errorCode ? { motif: attempt.errorCode } : {}) });
     }
     const lignes = attempt.output.lignes;
     if (lignes.length === 0) throw new DomainError("analysis_failed", "Nothing was read in this list", { reason: "nothing_read" });
