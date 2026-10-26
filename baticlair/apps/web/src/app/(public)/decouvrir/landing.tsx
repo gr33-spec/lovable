@@ -4,14 +4,15 @@ import { DemoSurBouton } from "@/components/demo-guidee";
 import { CompteurInscrits } from "@/components/inviter";
 import { Apparition, CompteurVingt, PartageVitrine } from "@/components/landing-mouvement";
 import { EnteteVitrine, PiedVitrine } from "@/components/vitrine";
-import { DEVIS_EXEMPLE, ECART_PEINTURE, ECRANS, REGROUPEMENT_EXEMPLE } from "@/lib/landing";
+import { ECART_PEINTURE, ECRANS, REGROUPEMENT_EXEMPLE } from "@/lib/landing";
+import { LectureAnimee } from "@/components/landing-lecture";
 import { ACCROCHE_APP, NOM_APP } from "@/lib/nom";
 
 /**
  * LA PAGE D'ACCUEIL PUBLIQUE, « NIVEAU STUDIO » (Greg, 26 octobre 2026, direction artistique validée) : une page qui parle
  * comme un couvreur à un couvreur, la preuve plutôt que la promesse. Fond clair, jaune #FFC800 et noir, titres en Bricolage
  * Grotesque étroite, colonne décalée (`landing.css`). Trois mouvements seulement : le vrai devis DE00000071 lu ligne par ligne
- * en haut (CSS seul), le compteur 1 → 20 sur la phrase clé, les sections et leurs lignes de cote au défilement ; tout s'arrête
+ * en haut, ses fournitures qui sortent dans « Ta liste » (`LectureAnimee`, rejouée tant qu'elle est à l'écran), le compteur 1 → 20 sur la phrase clé, les sections et leurs lignes de cote au défilement ; tout s'arrête
  * sous « réduire les animations ». Rien d'extérieur, aucune photo tant que Greg n'en fournit pas une à lui.
  *
  * Gardé mot pour mot (Greg) : « Par un artisan, pour les artisans. », « Seul, tu es un client parmi d'autres. À vingt, vous
@@ -97,48 +98,7 @@ export function Landing({ couvreurs = false, origine }: { couvreurs?: boolean; o
               </p>
             </div>
 
-            <figure className="mz-lecture" data-apparait="" aria-label={`Un vrai devis de couvreur lu par ${NOM_APP}`}>
-              <div className="mz-devis">
-                <p className="mz-devis-tete">
-                  <strong>Devis {DEVIS_EXEMPLE.reference}</strong>
-                  <span className="mz-gris">{DEVIS_EXEMPLE.sujet}</span>
-                </p>
-                {DEVIS_EXEMPLE.lignes.map((l, i) => (
-                  <p key={l.n} className="mz-ligne-devis" style={{ "--i": i } as React.CSSProperties}>
-                    <span className="mz-gris mz-num">{l.n}</span>
-                    <span>{l.texte}</span>
-                    <span className="mz-num">{l.quantite}</span>
-                  </p>
-                ))}
-              </div>
-              <div className="mz-liste">
-                <p className="mz-liste-tete">
-                  <span className="mz-etiq" style={{ color: "var(--mz-jaune)" }}>
-                    Ta liste
-                  </span>
-                  <span className="mz-compte" style={{ color: "rgba(255,255,255,.62)" }}>
-                    3 fournitures, 1 ligne sans fourniture
-                  </span>
-                </p>
-                <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-                  {DEVIS_EXEMPLE.lignes.flatMap((l, i) =>
-                    l.fournitures.map((f, j) => (
-                        <li key={`${l.n}-${j}`} className="mz-fourniture" style={{ "--i": i, "--j": j } as React.CSSProperties}>
-                          <span className="mz-point" data-orange={f.aPreciser ? "" : undefined} aria-hidden="true" />
-                          <span>
-                            {f.nom}
-                            <small>{f.aPreciser ? "Modèle à préciser" : `Ligne ${l.n} du devis`}</small>
-                          </span>
-                          <b className="mz-num">{f.quantite}</b>
-                        </li>
-                    )),
-                  )}
-                </ul>
-              </div>
-              <figcaption className="mz-source">
-                Extrait d&apos;un vrai devis de couvreur, lu par {NOM_APP}. La ligne 2 est de la main-d&apos;œuvre : elle ne donne aucune fourniture.
-              </figcaption>
-            </figure>
+            <LectureAnimee />
           </section>
 
           {/* La phrase clé et le compteur 1 → 20. */}

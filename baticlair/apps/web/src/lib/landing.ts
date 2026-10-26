@@ -6,7 +6,8 @@
 /**
  * L'extrait du vrai devis lu en haut de page : DE00000071, devis de couvreur anonymisé et relu par Greg
  * (`packages/domain/src/lecture/exemples/de00000071.ts`). Chaque ligne du devis dit ce qu'elle donne dans la liste ; la ligne
- * de main-d'œuvre ne donne rien (règle numéro un : jamais un article absent du devis).
+ * de main-d'œuvre ne donne rien (règle numéro un : jamais un article absent du devis). Les six premières lignes, telles qu'écrites ;
+ * chaque fourniture porte ce que la lecture laisse « à préciser » (la question posée à l'artisan), comme dans l'app.
  */
 export const DEVIS_EXEMPLE = {
   reference: "DE00000071",
@@ -16,18 +17,21 @@ export const DEVIS_EXEMPLE = {
       n: "1",
       texte: "Fourniture et pose de gouttière demi-ronde en zinc naturel sur bac acier avec crochets galva Négrafix",
       quantite: "17,40",
-      fournitures: [{ nom: "Gouttière demi-ronde zinc naturel", quantite: "17,40 m", aPreciser: false }],
+      fournitures: [{ nom: "Gouttière demi-ronde zinc naturel", quantite: "17,40 m", aPreciser: "Développé à préciser" }],
     },
     { n: "2", texte: "Dépose et repose des tôles pour accès chéneau", quantite: "1,00", fournitures: [] },
+    { n: "3", texte: "Réfection de chéneau en membrane EPDM ou PVC", quantite: "11,70", fournitures: [{ nom: "Membrane de chéneau", quantite: "11,70 m", aPreciser: "EPDM ou PVC à préciser" }] },
+    { n: "4", texte: "Réalisation des trémies de charpente pour velux SK06", quantite: "4,00", fournitures: [] },
     {
       n: "5",
       texte: "Fourniture velux SK06 114x118 GGL à rotation, vitrage confort, finition white finish avec raccord ZWC",
       quantite: "4,00",
       fournitures: [
-        { nom: "Velux GGL SK06 114×118 white finish", quantite: "4 u", aPreciser: false },
-        { nom: "Raccords SK06 pour bac acier", quantite: "4 u", aPreciser: true },
+        { nom: "Velux GGL SK06 114×118 white finish", quantite: "4 u", aPreciser: null },
+        { nom: "Raccords SK06 pour bac acier", quantite: "4 u", aPreciser: "Modèle à préciser" },
       ],
     },
+    { n: "6", texte: "Pose de velux sk06 114x118 sur bac acier isolé avec raccord pratikal", quantite: "4,00", fournitures: [] },
   ],
 } as const;
 

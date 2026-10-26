@@ -40,9 +40,12 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ton devis\.\s*Ta liste de matériaux\.\s*Tes prix\.$/);
   const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });
-  await expect(lu.getByText("Devis DE00000071")).toBeVisible();
-  await expect(lu.getByRole("listitem")).toHaveCount(3);
-  await expect(lu.getByText("La ligne 2 est de la main-d'œuvre : elle ne donne aucune fourniture.", { exact: false })).toBeVisible();
+  await expect(lu.getByText("N° DE00000071")).toBeVisible();
+  // Greg, 26 octobre 2026 (capture iPhone) : le vrai devis, puis les fournitures qui en sortent une à une dans « Ta liste ».
+  await expect(lu.getByRole("listitem")).toHaveCount(4);
+  await expect(lu.getByRole("listitem").last()).toBeVisible({ timeout: 15_000 });
+  await expect(lu.getByText("4 fournitures, 3 lignes sans fourniture")).toBeVisible({ timeout: 15_000 });
+  await expect(lu.getByText("Les lignes 2, 4 et 6 sont de la main-d'œuvre", { exact: false })).toBeVisible();
   // Le partage et l'aperçu WhatsApp : écrits dès le serveur avec l'adresse du site, jamais « Rejoins-nous : / » ni vercel.app.
   const html = await (await page.request.get("/")).text();
   expect(html).toContain("Rejoins-nous : http://localhost:3000/");
@@ -2566,9 +2569,12 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ton devis\.\s*Ta liste de matériaux\.\s*Tes prix\.$/);
   const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });
-  await expect(lu.getByText("Devis DE00000071")).toBeVisible();
-  await expect(lu.getByRole("listitem")).toHaveCount(3);
-  await expect(lu.getByText("La ligne 2 est de la main-d'œuvre : elle ne donne aucune fourniture.", { exact: false })).toBeVisible();
+  await expect(lu.getByText("N° DE00000071")).toBeVisible();
+  // Greg, 26 octobre 2026 (capture iPhone) : le vrai devis, puis les fournitures qui en sortent une à une dans « Ta liste ».
+  await expect(lu.getByRole("listitem")).toHaveCount(4);
+  await expect(lu.getByRole("listitem").last()).toBeVisible({ timeout: 15_000 });
+  await expect(lu.getByText("4 fournitures, 3 lignes sans fourniture")).toBeVisible({ timeout: 15_000 });
+  await expect(lu.getByText("Les lignes 2, 4 et 6 sont de la main-d'œuvre", { exact: false })).toBeVisible();
   // Le partage et l'aperçu WhatsApp : écrits dès le serveur avec l'adresse du site, jamais « Rejoins-nous : / » ni vercel.app.
   const html = await (await page.request.get("/")).text();
   expect(html).toContain("Rejoins-nous : http://localhost:3000/");
