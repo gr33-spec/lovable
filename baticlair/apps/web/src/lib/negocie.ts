@@ -106,3 +106,48 @@ export function prixAvecCommission(prix: number, pct: number): number {
 }
 
 export const prixFr = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: n < 1 ? 4 : 2 })} €`;
+
+/** Un exemple cliquable de l'onglet Regroupements : la phrase montrée, et ce qu'elle préremplit dans « Déclarer un besoin ». */
+export interface ExempleBesoin {
+  phrase: string;
+  designation: string;
+  quantite: number;
+  unite: string;
+  /** Le jour voulu : [mois (1-12), jour]. */
+  pour: readonly [number, number];
+}
+
+/**
+ * LES EXEMPLES SELON LE MÉTIER (Greg, 26 octobre 2026, mot pour mot pour le couvreur : « 4 palettes d'ardoise 32×22 pour le
+ * 15 novembre », « 300 ml de liteaux 27×38 pour fin novembre »). Chaque désignation est une référence stricte qui se
+ * regroupe (format, épaisseur) ; un métier sans exemple à lui prend ceux du couvreur, le premier métier ouvert.
+ */
+const EXEMPLES_COUVREUR: readonly ExempleBesoin[] = [
+  { phrase: "4 palettes d'ardoise 32×22 pour le 15 novembre", designation: "Ardoise naturelle 32×22", quantite: 4, unite: "palettes", pour: [11, 15] },
+  { phrase: "300 ml de liteaux 27×38 pour fin novembre", designation: "Liteaux 27×38", quantite: 300, unite: "m", pour: [11, 30] },
+];
+const EXEMPLES: Record<string, readonly ExempleBesoin[]> = {
+  roofing: EXEMPLES_COUVREUR,
+  carpentry: [
+    { phrase: "60 chevrons 63×75 pour le 20 novembre", designation: "Chevrons 63×75", quantite: 60, unite: "pièces", pour: [11, 20] },
+    { phrase: "40 plaques d'OSB 18 mm 2500×675 pour fin novembre", designation: "OSB 18 mm 2500×675", quantite: 40, unite: "pièces", pour: [11, 30] },
+  ],
+  drywall: [
+    { phrase: "120 m² de laine de verre 200 mm pour le 20 novembre", designation: "Laine de verre 200 mm", quantite: 120, unite: "m²", pour: [11, 20] },
+    { phrase: "80 m² de laine de roche 100 mm pour fin novembre", designation: "Laine de roche 100 mm", quantite: 80, unite: "m²", pour: [11, 30] },
+  ],
+};
+
+export function exemplesDuMetier(metiers: readonly string[] | undefined): readonly ExempleBesoin[] {
+  for (const m of metiers ?? []) if (EXEMPLES[m]) return EXEMPLES[m];
+  return EXEMPLES_COUVREUR;
+}
+
+/** Le prochain [mois, jour] à venir, en AAAA-MM-JJ (l'an prochain s'il est passé). */
+export function prochainJour([mois, jour]: readonly [number, number], maintenant = new Date()): string {
+  const an = maintenant.getFullYear();
+  const cible = new Date(an, mois - 1, jour);
+  const aujourdhui = new Date(an, maintenant.getMonth(), maintenant.getDate());
+  const annee = cible < aujourdhui ? an + 1 : an;
+  return `${annee}-${String(mois).padStart(2, "0")}-${String(jour).padStart(2, "0")}`;
+}

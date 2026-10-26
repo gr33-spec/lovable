@@ -16,6 +16,7 @@ import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
+import { useAncienMode } from "@/components/negocie";
 
 
 function toError(e: unknown): ApiError {
@@ -109,7 +110,7 @@ export function ProjectPriceRequests({
   // Commande du mois (Greg, 23 octobre) : plus de « X offres reçues / Comparer les offres » par chantier ; le prix vient de
   // le regroupement, le chantier garde seulement l'envoi aux négoces.
   const { features } = useSession();
-  const modeMois = features.groupe === true && features.commandeCommune !== "lots";
+  const modeMois = useAncienMode() && features.commandeCommune !== "lots";
   // Des e-mails partent-ils du serveur (§43) ? Sinon, l'artisan envoie depuis sa messagerie.
   const fetchSettings = useCallback((signal: AbortSignal) => api<PriceRequestSettings & { deliversEmail: boolean }>("/v1/price-requests/settings", { signal }), []);
   const deliversEmail = useResource(fetchSettings).data?.deliversEmail ?? false;

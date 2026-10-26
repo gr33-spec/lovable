@@ -161,6 +161,52 @@ test.describe("Business model final : le regroupement négocié par un humain", 
     await expect(page.getByRole("status").filter({ hasText: "Ta demande est partie" })).toBeVisible();
   });
 
+  test("Onglet Regroupements (Greg, 26 octobre 2026) : « Déclarer un besoin » toujours en haut, deux exemples du couvreur qui préremplissent, « Invite tes négoces »", async ({ page }, info) => {
+    await inscrire(page, `artisan-${unique()}@example.fr`, zoneDe(info.project.name));
+    await page.goto("/regroupements");
+    await expect(page.getByRole("button", { name: "Déclarer un besoin" })).toBeVisible();
+    const vide = page.getByRole("region", { name: "Pas encore de besoin" });
+    await expect(vide.getByText("Dis-nous ce que tu vas commander, on regroupe et on négocie")).toBeVisible();
+    await expect(vide.getByRole("link", { name: "Invite tes négoces" })).toHaveAttribute("href", "/fournisseurs");
+    await expect(page.getByText("Bientôt chez toi")).toHaveCount(0);
+
+    // L'exemple du couvreur préremplit le formulaire, mot pour mot ; la date est le prochain 15 novembre.
+    await vide.getByRole("button", { name: "« 4 palettes d'ardoise 32×22 pour le 15 novembre »" }).click();
+    const form = page.getByRole("form", { name: "Déclarer un besoin" });
+    await expect(form.getByLabel("Ce que tu vas commander")).toHaveValue("Ardoise naturelle 32×22");
+    await expect(form.getByLabel("Quantité")).toHaveValue("4");
+    await expect(form.getByLabel("Unité")).toHaveValue("palettes");
+    await expect(form.getByLabel("Pour quand ?")).toHaveValue(/^\d{4}-11-15$/);
+    await form.getByRole("button", { name: "Déclarer ce besoin" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Besoin déclaré" })).toBeVisible();
+    const besoin = page.getByRole("region", { name: "Tes besoins" }).getByLabel("Ardoise naturelle 32×22");
+    await expect(besoin.getByText(/^4 palettes · pour le 15/)).toBeVisible();
+
+    // Le bouton reste en haut ; le second exemple (liteaux) se déclare aussi, sans chantier.
+    await page.getByRole("button", { name: "Déclarer un besoin" }).click();
+    await form.getByLabel("Ce que tu vas commander").fill("Liteaux 27×38");
+    await form.getByLabel("Quantité").fill("300");
+    await form.getByLabel("Unité").selectOption("m");
+    await form.getByLabel("Pour quand ?").fill(dansTroisSemaines());
+    await form.getByRole("button", { name: "Déclarer ce besoin" }).click();
+    await expect(page.getByRole("region", { name: "Tes besoins" }).getByLabel("Liteaux 27×38").getByText(/^300 m · pour le/)).toBeVisible();
+  });
+
+  test("Mode humain : plus rien de l'ancien mode côté artisan (ni « Commande du … », ni « Clôture dans », ni commande commune), sur chaque écran", async ({ page }, info) => {
+    const projectId = await inscrire(page, `artisan-${unique()}@example.fr`, zoneDe(info.project.name), [{ libelle: ARDOISE, quantite: "1800", unite: "pièces" }]);
+    const ANCIEN = /Clôture dans|clôture dans|Commande d[eu'’] ?(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|\d)|Commande commune|commande du mois|Prochaine clôture/;
+    for (const chemin of ["/", "/chantiers", `/chantiers/${projectId}`, "/regroupements", "/fournisseurs", "/compte"]) {
+      await page.goto(chemin);
+      await page.waitForLoadState("networkidle");
+      await expect(page.locator("main").first()).toBeVisible();
+      expect(await page.locator("body").innerText(), `ancien mode visible sur ${chemin}`).not.toMatch(ANCIEN);
+    }
+    // L'ancien onglet mène aux Regroupements.
+    await page.goto("/groupe");
+    await expect(page).toHaveURL(/\/regroupements$/);
+    await expect(page.getByRole("button", { name: "Déclarer un besoin" })).toBeVisible();
+  });
+
   test("/couvreurs : la même page, la couverture d'abord, et les chasseurs d'opportunités", async ({ page }) => {
     await page.goto("/couvreurs");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Ton devis.");
@@ -170,5 +216,18 @@ test.describe("Business model final : le regroupement négocié par un humain", 
     await expect(page.getByText(/paient le juste prix/)).toBeVisible();
     // L'exemple de la peinture reste sur l'accueil : il ne parle pas au couvreur.
     await expect(page.getByRole("region", { name: "Le même pot, deux fois moins cher." })).toHaveCount(0);
+  });
+
+  test("/peintres (Greg, 26 octobre 2026) : le bloc peinture en pleine place, juste sous l'accroche ; pas d'ardoise", async ({ page }) => {
+    await page.goto("/peintres");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ton devis.");
+    await expect(page.getByText("Pour les peintres")).toBeVisible();
+    const peinture = page.getByRole("region", { name: "Le même pot, deux fois moins cher." });
+    await expect(peinture.getByText("6 à 7 €")).toBeVisible();
+    await expect(peinture.getByText("moins de 3 €")).toBeVisible();
+    // La première section après l'accroche.
+    const ordre = await page.locator("main > section").evaluateAll((s) => s.map((x) => x.getAttribute("aria-labelledby")));
+    expect(ordre.slice(0, 2)).toEqual(["accroche", "ecart"]);
+    await expect(page.getByRole("region", { name: "Les mêmes ardoises, dans le même département." })).toHaveCount(0);
   });
 });

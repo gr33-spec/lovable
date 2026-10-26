@@ -31,10 +31,12 @@ describe("mode humain", () => {
     expect(lireModeRegroupement("n'importe quoi")).toBe("humain");
   });
 
-  it("gros articles seulement : ardoise, zinc, bois, isolant ; jamais crochets, liteaux ni visserie", () => {
+  it("gros articles seulement : ardoise, zinc, bois, liteaux, isolant ; jamais crochets ni visserie (liteaux admis le 26 octobre 2026)", () => {
     expect(articleNegociable("Ardoise naturelle 32×22 Espagne 1er choix").ok).toBe(true);
     expect(articleNegociable("Zinc naturel 0,65 mm bobine 500 mm").ok).toBe(true);
-    expect(articleNegociable("Liteau sapin traité 27×38")).toEqual({ ok: false, raison: "non_negociable" });
+    expect(articleNegociable("Liteau sapin traité 27×38").ok).toBe(true);
+    expect(articleNegociable("Liteaux 27×38").ok).toBe(true);
+    expect(articleNegociable("Plaque de plâtre BA13 2500×1200")).toEqual({ ok: false, raison: "non_negociable" });
     expect(articleNegociable("Crochet inox 100 mm").ok).toBe(false);
     expect(articleNegociable("Vis inox 4,5×35 boîte de 200").ok).toBe(false);
   });

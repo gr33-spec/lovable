@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { NOM_APP } from "@/lib/nom";
 import { useSession } from "@/lib/session";
 import { useProchaineCommande } from "./commande-du-mois";
+import { useAncienMode } from "@/components/negocie";
 
 /** Le menu (« Revoir le guide ») rouvre le guide par cet événement, sans rien changer au compte. */
 export const EVENEMENT_REVOIR_GUIDE = "mobiiz:revoir-guide";
@@ -48,7 +49,7 @@ export function GuidePremierLancement() {
   const userId = me.user.id;
   const [ouvert, setOuvert] = useState(false);
   const [etape, setEtape] = useState(0);
-  const moisActif = features.groupe === true && features.commandeCommune !== "lots";
+  const moisActif = useAncienMode() && features.commandeCommune !== "lots";
   const { prochaine } = useProchaineCommande(moisActif && ouvert);
 
   useEffect(() => {

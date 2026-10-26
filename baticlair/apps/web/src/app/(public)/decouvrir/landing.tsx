@@ -62,8 +62,54 @@ const ETAPES = [
   { titre: "Envoie à tes négoces et compare", texte: "Leurs prix côte à côte, livraison comprise. Tu commandes où tu veux.", ecran: ECRANS.prix },
 ] as const;
 
-export function Landing({ couvreurs = false, origine }: { couvreurs?: boolean; origine: string }) {
+/** L'écart pot seul / palette négociée (Greg, 26 octobre 2026) : la peinture, sans marque ni enseigne, marqué « Exemple ». */
+function BlocPeinture() {
+  return (
+    <section aria-labelledby="ecart" className="mz-section mz-deux" data-apparait="">
+      <div>
+        <Cote gauche="Seul ou en palette" />
+        <h2 id="ecart" className="mz-titre mz-h2">
+          {ECART_PEINTURE.titre}
+        </h2>
+        <p className="mz-gris" style={{ marginTop: 16, maxWidth: "38ch" }}>
+          Le prix palette, un artisan seul l&apos;a rarement. En regroupant les besoins du secteur, on va le chercher.
+        </p>
+      </div>
+      <div>
+        <p style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 12 }}>
+          <span style={{ fontWeight: 700 }}>{ECART_PEINTURE.article}</span>
+          <span className="mz-badge">{ECART_PEINTURE.mention}</span>
+        </p>
+        <div className="mz-carte mz-duo">
+          <div>
+            <p className="mz-etiq">Acheté seul</p>
+            <p className="mz-titre mz-num">{ECART_PEINTURE.seul.prix}</p>
+            <p className="mz-gris" style={{ fontSize: 13 }}>
+              {ECART_PEINTURE.seul.unite}
+            </p>
+          </div>
+          <div>
+            <p className="mz-etiq">En palette négociée</p>
+            <p className="mz-titre mz-num">{ECART_PEINTURE.palette.prix}</p>
+            <p style={{ fontSize: 13 }}>{ECART_PEINTURE.palette.unite}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Les trois lignes du haut de page, mot pour mot (Greg, 26 octobre 2026). */
+const TROIS_LIGNES = ["Tu dis ce que tu vas commander (ton devis suffit).", "On l'additionne avec les artisans du coin.", "On négocie, tu achètes au prix des gros."] as const;
+
+/**
+ * `cible` : /couvreurs (la couverture d'abord, sans le bloc peinture) ou /peintres (le bloc peinture en pleine place, juste
+ * sous l'accroche, sans l'exemple d'ardoise ; Greg, 26 octobre 2026). Sans cible : l'accueil.
+ */
+export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; origine: string }) {
   compterLaVisite();
+  const couvreurs = cible === "couvreurs";
+  const peintres = cible === "peintres";
   return (
     <div className="mz">
       <Apparition />
@@ -82,9 +128,25 @@ export function Landing({ couvreurs = false, origine }: { couvreurs?: boolean; o
                 <br />
                 <span className="mz-surligne">Tes prix.</span>
               </h1>
+              {/* Le concept, juste sous le titre et avant tout le reste (Greg, 26 octobre 2026 : « le concept n'est pas compris
+                  en haut de page ») : la phrase en gros, puis trois lignes numérotées, visibles sans défiler sur un iPhone SE. */}
+              <p className="mz-concept">
+                {NOM_APP} additionne les commandes de matériaux des artisans d&apos;un même secteur et négocie le prix de gros pour chacun.
+              </p>
+              <ol className="mz-trois" aria-label="En trois étapes">
+                {TROIS_LIGNES.map((l, i) => (
+                  <li key={l}>
+                    <span className="mz-trois-n mz-num" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    {l}
+                  </li>
+                ))}
+              </ol>
               {couvreurs ? <p style={{ fontWeight: 700, marginBottom: 10 }}>Pour les couvreurs : ardoise, zinc, bois de charpente, isolation de toiture.</p> : null}
+              {peintres ? <p style={{ fontWeight: 700, marginBottom: 10 }}>Pour les peintres : peinture, sous-couche, enduit, toile de verre.</p> : null}
               <p className="mz-chapo">
-                Tu déposes le devis client. {NOM_APP} sort chaque fourniture au nom du comptoir, tu l&apos;envoies à tes négoces et tu compares leurs prix, livraison comprise.
+                Le devis que tu as fait à ton client suffit : {NOM_APP} en sort ta liste de matériaux. Tu peux aussi l&apos;envoyer à tes propres négoces et comparer leurs prix.
               </p>
               <div className="mz-actions">
                 <Link href="/inscription" className="mz-bouton">
@@ -100,6 +162,8 @@ export function Landing({ couvreurs = false, origine }: { couvreurs?: boolean; o
 
             <LectureAnimee />
           </section>
+
+          {peintres ? <BlocPeinture /> : null}
 
           {/* La phrase clé et le compteur 1 → 20. */}
           <section aria-labelledby="vingt" className="mz-section mz-vingt" data-apparait="">
@@ -117,73 +181,42 @@ export function Landing({ couvreurs = false, origine }: { couvreurs?: boolean; o
             </div>
           </section>
 
-          {/* L'écart pot seul / palette négociée (Greg, 26 octobre 2026) : la peinture, sans marque ni enseigne, marqué « Exemple ».
-              Pas sur /couvreurs, où il ne parlerait pas au métier. */}
-          {couvreurs ? null : (
-            <section aria-labelledby="ecart" className="mz-section mz-deux" data-apparait="">
+          {/* L'écart pot seul / palette négociée, à sa place sur l'accueil ; pas sur /couvreurs, où il ne parlerait pas au métier. */}
+          {cible === undefined ? <BlocPeinture /> : null}
+
+          {/* Un regroupement, marqué « exemple » jusqu'au premier vrai (d'ardoise : pas sur /peintres). */}
+          {peintres ? null : (
+            <section aria-labelledby="regroupement" className="mz-section mz-deux" data-apparait="">
               <div>
-                <Cote gauche="Seul ou en palette" />
-                <h2 id="ecart" className="mz-titre mz-h2">
-                  {ECART_PEINTURE.titre}
+                <Cote gauche="Un regroupement" />
+                <h2 id="regroupement" className="mz-titre mz-h2">
+                  Les mêmes ardoises, dans le même département.
                 </h2>
-                <p className="mz-gris" style={{ marginTop: 16, maxWidth: "38ch" }}>
-                  Le prix palette, un artisan seul l&apos;a rarement. En regroupant les besoins du secteur, on va le chercher.
+                <p className="mz-gris" style={{ marginTop: 16, maxWidth: "40ch" }}>
+                  Quand d&apos;autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes. Un chasseur d&apos;opportunités appelle les négoces et revient avec une offre. Tu acceptes ou pas.
                 </p>
               </div>
-              <div>
-                <p style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 12 }}>
-                  <span style={{ fontWeight: 700 }}>{ECART_PEINTURE.article}</span>
-                  <span className="mz-badge">{ECART_PEINTURE.mention}</span>
+              <div className="mz-carte mz-ticket">
+                <p style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                  <span className="mz-etiq">Regroupement</span>
+                  <span className="mz-badge">Exemple</span>
                 </p>
-                <div className="mz-carte mz-duo">
-                  <div>
-                    <p className="mz-etiq">Acheté seul</p>
-                    <p className="mz-titre mz-num">{ECART_PEINTURE.seul.prix}</p>
-                    <p className="mz-gris" style={{ fontSize: 13 }}>
-                      {ECART_PEINTURE.seul.unite}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="mz-etiq">En palette négociée</p>
-                    <p className="mz-titre mz-num">{ECART_PEINTURE.palette.prix}</p>
-                    <p style={{ fontSize: 13 }}>{ECART_PEINTURE.palette.unite}</p>
-                  </div>
-                </div>
+                <p className="mz-titre" style={{ fontSize: 34, marginTop: 14 }}>
+                  {REGROUPEMENT_EXEMPLE.article}
+                </p>
+                <dl className="mz-num">
+                  <dt>Département</dt>
+                  <dd>{REGROUPEMENT_EXEMPLE.departement}</dd>
+                  <dt>Entreprises</dt>
+                  <dd>{REGROUPEMENT_EXEMPLE.entreprises}</dd>
+                  <dt>Quantité réunie</dt>
+                  <dd>{REGROUPEMENT_EXEMPLE.quantite}</dd>
+                  <dt>Besoin</dt>
+                  <dd>{REGROUPEMENT_EXEMPLE.besoin}</dd>
+                </dl>
               </div>
             </section>
           )}
-
-          {/* Un regroupement, marqué « exemple » jusqu'au premier vrai. */}
-          <section aria-labelledby="regroupement" className="mz-section mz-deux" data-apparait="">
-            <div>
-              <Cote gauche="Un regroupement" />
-              <h2 id="regroupement" className="mz-titre mz-h2">
-                Les mêmes ardoises, dans le même département.
-              </h2>
-              <p className="mz-gris" style={{ marginTop: 16, maxWidth: "40ch" }}>
-                Quand d&apos;autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes. Un chasseur d&apos;opportunités appelle les négoces et revient avec une offre. Tu acceptes ou pas.
-              </p>
-            </div>
-            <div className="mz-carte mz-ticket">
-              <p style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                <span className="mz-etiq">Regroupement</span>
-                <span className="mz-badge">Exemple</span>
-              </p>
-              <p className="mz-titre" style={{ fontSize: 34, marginTop: 14 }}>
-                {REGROUPEMENT_EXEMPLE.article}
-              </p>
-              <dl className="mz-num">
-                <dt>Département</dt>
-                <dd>{REGROUPEMENT_EXEMPLE.departement}</dd>
-                <dt>Entreprises</dt>
-                <dd>{REGROUPEMENT_EXEMPLE.entreprises}</dd>
-                <dt>Quantité réunie</dt>
-                <dd>{REGROUPEMENT_EXEMPLE.quantite}</dd>
-                <dt>Besoin</dt>
-                <dd>{REGROUPEMENT_EXEMPLE.besoin}</dd>
-              </dl>
-            </div>
-          </section>
 
           {/* Les trois étapes, avec les vrais écrans de l'app, entiers. */}
           <section aria-labelledby="comment" id="comment" className="mz-section" style={{ scrollMarginTop: 24 }}>

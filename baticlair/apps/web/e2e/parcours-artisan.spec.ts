@@ -18,6 +18,16 @@ test.beforeEach(async ({ page }) => {
   await passeGuide(page);
 });
 
+/**
+ * L'ANCIEN MODE (commande du mois, commande commune par lots) ne se voit qu'en mode automatique (Greg, 26 octobre 2026) :
+ * ses parcours (`@ancien`, `@lots`) le rallument, tous les autres repartent en mode humain, le mode par défaut.
+ */
+test.beforeEach(async ({ request }, info) => {
+  const ancien = info.tags.includes("@ancien") || info.tags.includes("@lots");
+  const r = await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: ancien ? "automatique" : "humain" } });
+  expect(r.status()).toBe(200);
+});
+
 /** Adresse unique par exécution : les tests ne dépendent pas de l'état de la base. */
 /** Photo minimale (1 px, PNG valide). */
 const PNG_1PX = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
@@ -1755,7 +1765,7 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
-test("BatiClair Groupé, étape 3 : « Mes négoces », e-mail, familles, favori, message type", async ({ page }) => {
+test("BatiClair Groupé, étape 3 : « Mes négoces », e-mail, familles, favori, message type", { tag: "@ancien" }, async ({ page }) => {
   await signUp(page);
   await page.goto("/fournisseurs");
   // Sans SIRET vérifié, pas de carte « Mes négoces » : la page des fournisseurs ne change pas.
@@ -1813,7 +1823,7 @@ function jetonDeLienE2e(lien: { a: "stop" } | { a: "pas_concerne"; f: string }, 
   return `${corps}.${createHmac("sha256", "e2e-secret-e2e-secret-e2e-secret-0000").update(`lien-negoce:${corps}`).digest("base64url")}`;
 }
 
-test("BatiClair Groupé, étape 5 : la page du lien « pas concerné » (confirmée d'un bouton) et la page de réponse d'un lien inconnu", async ({ page }) => {
+test("BatiClair Groupé, étape 5 : la page du lien « pas concerné » (confirmée d'un bouton) et la page de réponse d'un lien inconnu", { tag: "@ancien" }, async ({ page }) => {
   await signUp(page);
   expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Toitures Martin", address: "3 quai Duguay-Trouin, 35400 Saint-Malo", siret: "73282932000074", phone: null, email: null })).toBe(200);
   expect(await apiCall(page, "POST", "/v1/groupe/siret")).toBe(200);
@@ -2401,7 +2411,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await contexteB.close();
 });
 
-test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap ouvre, un tap ferme", async ({ page }) => {
+test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap ouvre, un tap ferme", { tag: "@ancien" }, async ({ page }) => {
   await signUp(page);
   for (const [chemin, titre] of [
     ["/groupe", "Aide : Regroupement"],
@@ -2433,7 +2443,7 @@ test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap
   await expect(page.getByRole("dialog", { name: "Aide : Ton chantier" })).toBeVisible();
 });
 
-test("Mets ton négoce dans la boucle sans adresse d'entreprise (Greg, 25 octobre 2026) : la case adresse s'ouvre dans le bloc, plus de détour par Compte", async ({ page }) => {
+test("Mets ton négoce dans la boucle sans adresse d'entreprise (Greg, 25 octobre 2026) : la case adresse s'ouvre dans le bloc, plus de détour par Compte", { tag: "@ancien" }, async ({ page }) => {
   await compteAuGroupe(page, "Bati Test", "3 rue des Ajoncs, 22300 Lannion");
   expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Bati Test", address: null, siret: "73282932000074", phone: null, email: null })).toBe(200);
   await page.goto("/");
@@ -2450,7 +2460,7 @@ test("Mets ton négoce dans la boucle sans adresse d'entreprise (Greg, 25 octobr
   expect((await apiJson<{ address: string }>(page, "GET", "/v1/company/profile")).body.address).toBe("3 rue des Ajoncs, 22300 Lannion");
 });
 
-test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton, « Ton négoce X est dans la boucle », et de quoi le prévenir", async ({ page }) => {
+test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton, « Ton négoce X est dans la boucle », et de quoi le prévenir", { tag: "@ancien" }, async ({ page }) => {
   const projet = test.info().project.name;
   const email = `agence-${projet}-${unique()}@negoce-du-ponant.fr`;
   await compteAuGroupe(page, "Toitures Martin", "3 rue des Ajoncs, 22300 Lannion");
@@ -2499,7 +2509,7 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
-test("Liste donnée en photo, chantier sans adresse : la barre de la commande demande l'adresse d'emblée, sans refus du serveur (recette en ligne, 25 octobre 2026)", async ({ page }) => {
+test("Liste donnée en photo, chantier sans adresse : la barre de la commande demande l'adresse d'emblée, sans refus du serveur (recette en ligne, 25 octobre 2026)", { tag: "@ancien" }, async ({ page }) => {
   // Un département à lui (35 ou 53) : sa commande ne se mêle pas à celles des autres parcours.
   const [ville, rue] = test.info().project.name === "ordinateur" ? ["53000 Laval", "8 rue du Pont, 53000 Laval"] : ["35000 Rennes", "8 rue du Pont, 35000 Rennes"];
   await compteAuGroupe(page, "Toitures Photo", `2 place de la Mairie, ${ville}`);
@@ -2530,7 +2540,7 @@ test("Liste donnée en photo, chantier sans adresse : la barre de la commande de
   await expect(page.getByRole("region", { name: /^Commande d/ }).first().getByRole("button", { name: "Retirer" })).toHaveCount(0);
 });
 
-test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une fois inscrit, sautable, la prochaine clôture, « Déposer ma première liste », une seule fois, « Revoir le guide » dans le menu", async ({ page }) => {
+test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une fois inscrit, sautable, la prochaine clôture, « Déposer ma première liste », une seule fois, « Revoir le guide » dans le menu", { tag: "@ancien" }, async ({ page }) => {
   await page.removeLocatorHandler(page.getByRole("dialog", { name: "Guide" }));
   await signUp(page);
   const guide = page.getByRole("dialog", { name: "Guide" });
@@ -2568,6 +2578,15 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page).toHaveURL(/\/$/);
   // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ton devis\.\s*Ta liste de matériaux\.\s*Tes prix\.$/);
+  // Le concept sous le titre, avant tout le reste, et les trois lignes visibles sans défiler sur un iPhone SE (Greg, même jour).
+  const concept = page.getByText("Mobiiz additionne les commandes de matériaux des artisans d'un même secteur et négocie le prix de gros pour chacun.");
+  const trois = page.getByRole("list", { name: "En trois étapes" }).getByRole("listitem");
+  await expect(trois).toHaveText(["1Tu dis ce que tu vas commander (ton devis suffit).", "2On l'additionne avec les artisans du coin.", "3On négocie, tu achètes au prix des gros."]);
+  const taille = page.viewportSize();
+  await page.setViewportSize({ width: 375, height: 667 });
+  await expect(concept).toBeInViewport({ ratio: 1 });
+  await expect(trois.last()).toBeInViewport({ ratio: 1 });
+  if (taille) await page.setViewportSize(taille);
   const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });
   await expect(lu.getByText("N° DE00000071")).toBeVisible();
   // Greg, 26 octobre 2026 (capture iPhone) : le vrai devis, puis les fournitures qui en sortent une à une dans « Ta liste ».
@@ -2682,7 +2701,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByRole("link", { name: "Commencer gratuitement" })).toHaveCount(0);
   // « Inviter un collègue » aussi dans l'app, après l'inscription (accueil) et sur l'écran Regroupement.
   await expect(page.getByRole("region", { name: "Inviter un collègue" }).getByRole("link", { name: "Envoyer sur WhatsApp" })).toBeVisible();
-  await page.goto("/groupe");
+  await page.goto("/regroupements");
   await expect(page.getByRole("region", { name: "Inviter un collègue" }).getByRole("button", { name: "Copier le lien" })).toBeVisible();
 });
 
@@ -3010,7 +3029,7 @@ test("Zéro bouton mort (artisan) : accueil, chantiers, nouvelle liste, Ton chan
   expect(defauts).toEqual([]);
 });
 
-test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau coupé, photo floue, un seul chantier malgré les essais, retour arrière, session expirée, liens expirés", async ({ page }) => {
+test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau coupé, photo floue, un seul chantier malgré les essais, retour arrière, session expirée, liens expirés", { tag: "@ancien" }, async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
   const depot = page.getByLabel("Déposer ma liste");
@@ -3182,7 +3201,7 @@ async function grilleDeposee(browser: Browser, page: Page, email: string, rows: 
   return { pageN, contexte, statut, lien };
 }
 
-test("Commande du mois : un cycle complet, trois artisans (C après la clôture), trois négoces (N3 sans les crochets), les totaux posés à la main", async ({ page, browser }) => {
+test("Commande du mois : un cycle complet, trois artisans (C après la clôture), trois négoces (N3 sans les crochets), les totaux posés à la main", { tag: "@ancien" }, async ({ page, browser }) => {
   test.setTimeout(300_000);
   const projet = test.info().project.name;
   const n = (i: number) => `n${i}-${projet}@example.com`;
@@ -3337,7 +3356,7 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
  * département par série (29 au téléphone, 56 sur ordinateur) : rien ne se mêle à la commande du 22. Jamais un nom de
  * concurrent ni un prix avant les résultats ; le négoce sait combien sont consultés, jamais lesquels.
  */
-test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le bilan à l'échéance", async ({ page }) => {
+test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le bilan à l'échéance", { tag: "@ancien" }, async ({ page }) => {
   test.setTimeout(240_000);
   const projet = test.info().project.name;
   const [dep, ville] = projet === "ordinateur" ? ["56", "56000 Vannes"] : ["29", "29600 Morlaix"];

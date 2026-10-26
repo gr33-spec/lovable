@@ -3,6 +3,7 @@
 import { Users } from "lucide-react";
 import { useCallback } from "react";
 import { RegroupementsNegocies, useModeRegroupement } from "@/components/negocie";
+import { InviterCollegue } from "@/components/inviter";
 import { CarteRegroupement } from "@/components/regroupements";
 import { ButtonLink, EmptyState, ErrorNotice, PageTitle, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -21,9 +22,10 @@ export default function RegroupementsPage() {
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <PageTitle>Regroupements</PageTitle>
-          <p className="text-[16px] leading-relaxed text-muted">Tes gros besoins (ardoise, zinc, bois, isolant) rejoignent ceux d&apos;autres entreprises du secteur. Un chasseur d&apos;opportunités Mobiiz négocie pour toi, et tu choisis.</p>
+          <p className="text-[16px] leading-relaxed text-muted">Tes gros besoins rejoignent ceux du secteur. Un chasseur d&apos;opportunités Mobiiz négocie, tu choisis.</p>
         </div>
         <RegroupementsNegocies />
+        <InviterCollegue texte="Plus on est nombreux dans le secteur, plus on pèse face aux négoces." />
       </div>
     );
   }
@@ -43,7 +45,7 @@ function RegroupementsAutomatiques() {
       {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
       {!data && !error ? <Skeleton card="h-56" lines={2} label="Chargement des regroupements…" /> : null}
       {data && !data.zoneActive ? (
-        <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Bientôt chez toi">
+        <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Pas encore de regroupement dans ton département">
           <p className="text-[15px] text-muted">{data.message}</p>
           <ButtonLink href="/fournisseurs" variant="secondary" className="mt-3">
             Inviter mes négoces

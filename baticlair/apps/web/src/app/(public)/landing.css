@@ -202,8 +202,55 @@
   background: var(--mz-encre);
 }
 .mz-h1 {
-  margin: 18px 0 22px;
-  font-size: clamp(52px, 14.5vw, 112px);
+  margin: 12px 0 14px;
+  font-size: clamp(44px, 12vw, 112px);
+}
+@media (min-width: 768px) {
+  .mz-h1 {
+    margin: 18px 0 22px;
+  }
+}
+/* Le concept en une phrase, puis trois lignes numérotées : sous le titre, avant tout le reste. */
+.mz-concept {
+  max-width: 30ch;
+  margin: 0 0 14px;
+  font-size: clamp(20px, 5.4vw, 28px);
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+}
+.mz-trois {
+  display: grid;
+  gap: 8px;
+  max-width: 44ch;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.38;
+}
+.mz-trois li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+.mz-trois-n {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--mz-jaune);
+  font-size: 14px;
+  font-weight: 800;
+}
+@media (min-width: 768px) {
+  .mz-trois {
+    font-size: 18px;
+  }
 }
 .mz-surligne {
   background: linear-gradient(transparent 62%, var(--mz-jaune) 62%, var(--mz-jaune) 92%, transparent 92%);

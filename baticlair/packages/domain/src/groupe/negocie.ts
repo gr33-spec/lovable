@@ -17,10 +17,11 @@ export const lireModeRegroupement = (v: unknown): ModeRegroupement => (v === "au
 export const COMMISSION_DEFAUT = 2;
 
 /**
- * Les gros articles qui se négocient en groupe (Greg : ardoise, zinc, bois, isolation de toiture ; jamais crochets,
- * liteaux ni visserie). Les types de `referenceStricte` retenus ; les autres métiers suivront.
+ * Les gros articles qui se négocient en groupe (Greg : ardoise, zinc, bois, isolation de toiture ; jamais crochets ni
+ * visserie). Les liteaux y entrent le 26 octobre 2026 (Greg, exemple de l'onglet Regroupements : « 300 ml de liteaux 27×38
+ * pour fin novembre »), à la section exacte. Les types de `referenceStricte` retenus ; les autres métiers suivront.
  */
-export const TYPES_NEGOCIABLES: readonly string[] = ["ardoise", "ardoise-fibres-ciment", "zinc", "bois-charpente", "volige", "osb", "isolant"];
+export const TYPES_NEGOCIABLES: readonly string[] = ["ardoise", "ardoise-fibres-ciment", "zinc", "bois-charpente", "liteau", "volige", "osb", "isolant"];
 
 /** Deux dates de besoin se groupent si elles sont à moins de 30 jours l'une de l'autre (choix de Claude, DECISIONS.md). */
 export const FENETRE_COMPATIBLE_JOURS = 30;

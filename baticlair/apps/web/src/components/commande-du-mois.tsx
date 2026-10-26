@@ -12,6 +12,7 @@ import type { Groupe } from "@/components/groupe";
 import { Button, ButtonLink, Chrono, ErrorNotice, Field, SectionTitle } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { useAncienMode } from "@/components/negocie";
 
 /**
  * LA COMMANDE COMMUNE (Greg, 22 octobre 2026, au soir ; cycle raccourci le 23 : le 1er et le 15) côté écran : une commande toutes les deux semaines avec les couvreurs de
@@ -187,7 +188,8 @@ export function GrosChrono({ clotureDans, className = "", heros = false }: { clo
 export function BandeauDuMois() {
   const { features } = useSession();
   const pathname = usePathname();
-  const actif = features.groupe === true && features.commandeCommune !== "lots" && pathname !== "/";
+  const ancien = useAncienMode();
+  const actif = ancien && features.commandeCommune !== "lots" && pathname !== "/";
   const { prochaine, etat } = useProchaineCommande(actif);
   if (!actif || !prochaine) return null;
   // Les prix demandés (Greg, 24 octobre 2026) : tant que les négoces chiffrent une commande de l'artisan, le bandeau dit

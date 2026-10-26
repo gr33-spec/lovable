@@ -8,6 +8,7 @@ import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 import { nom } from "@/lib/nom";
 import { deposerDansLeMois, useCommandeDuMois, type EtatDuMois } from "@/components/commande-du-mois";
+import { useAncienMode } from "@/components/negocie";
 
 /**
  * BATICLAIR GROUPÉ, ÉTAPE 2 (document du fondateur, 2026-10-19, section 2 étape 2) : sur « Ton chantier », proposer des
@@ -86,7 +87,8 @@ export function useGroupeFerme(): boolean {
     [],
   );
   const etat = useResource(fetchEtat);
-  return etat.data !== null && etat.data !== undefined && etat.data.eligible === false;
+  const ancien = useAncienMode();
+  return ancien && etat.data !== null && etat.data !== undefined && etat.data.eligible === false;
 }
 
 export function useGroupe(projectId: string): Groupe | null {
@@ -96,7 +98,8 @@ export function useGroupe(projectId: string): Groupe | null {
     [],
   );
   const etat = useResource(fetchEtat);
-  const eligible = etat.data?.eligible === true;
+  // En mode humain, « Ton chantier » n'a plus rien de l'ancien mode (ni commande du mois, ni commande commune).
+  const eligible = useAncienMode() && etat.data?.eligible === true;
   const mode = etat.data?.mode === "lots" ? "lots" : "mois";
   const mois = useCommandeDuMois(eligible && mode === "mois", projectId);
   const fetchBesoins = useCallback(

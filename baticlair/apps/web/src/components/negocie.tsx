@@ -1,11 +1,12 @@
 "use client";
 
-import { BellRing, Check, FileText, MessageSquare, Phone, Users, X } from "lucide-react";
+import { BellRing, Check, FileText, MessageSquare, Phone, Plus, Users, X } from "lucide-react";
 import { useCallback, useState } from "react";
-import { Badge, Button, ButtonLink, Card, EmptyState, ErrorNotice, Field, SectionTitle, Skeleton } from "@/components/ui";
+import { Badge, Button, ButtonLink, Card, ErrorNotice, Field, INPUT, SectionTitle, Skeleton } from "@/components/ui";
 import { api, messageErreur } from "@/lib/api";
 import type { APrevenir, BesoinNegocie, LignesNegociables, MesBesoins, ModeRegroupement, PrixDuSecteur } from "@/lib/negocie";
-import { prixFr } from "@/lib/negocie";
+import { exemplesDuMetier, prixFr, prochainJour, type ExempleBesoin } from "@/lib/negocie";
+import { useSession } from "@/lib/session";
 import { jourFr } from "@/lib/recentrage";
 import { openFile } from "@/lib/open-document";
 import { useResource } from "@/lib/use-resource";
@@ -24,27 +25,87 @@ export function useModeRegroupement(): ModeRegroupement | null {
   return data?.mode ?? null;
 }
 
+/**
+ * L'ONGLET REGROUPEMENTS, MODE HUMAIN (Greg, 26 octobre 2026 : « l'onglet Regroupements est mort ») : « Déclarer un besoin »
+ * toujours en haut, même sans regroupement ; à vide, « Dis-nous ce que tu vas commander, on regroupe et on négocie » avec
+ * deux exemples du métier qui préremplissent le formulaire, puis « Invite tes négoces ». Plus de « Bientôt chez toi » :
+ * hors zone ouverte, le refus du serveur se dit dans le formulaire.
+ */
+/**
+ * L'ANCIEN MODE NE SE MONTRE QU'EN MODE AUTOMATIQUE (Greg, 26 octobre 2026 : « le bandeau « Commande du 1er nov… Clôture
+ * dans » est toujours là en mode humain : retire-le, ainsi que tout reste de l'ancien mode visible côté artisan ») : la
+ * commande du mois, la commande commune par lots, leur bandeau, leurs blocs et leur onglet. En mode humain (par défaut),
+ * ou tant que le mode n'est pas lu, rien.
+ */
+export function useAncienMode(): boolean {
+  const { features } = useSession();
+  const groupe = features.groupe === true;
+  const fetcher = useCallback((signal: AbortSignal) => (groupe ? api<{ mode: ModeRegroupement }>("/v1/regroupement/mode", { signal }).catch(() => null) : Promise.resolve(null)), [groupe]);
+  const { data } = useResource(fetcher);
+  return groupe && data?.mode === "automatique";
+}
+
 export function RegroupementsNegocies() {
+  const { company } = useSession();
+  const exemples = exemplesDuMetier(company?.trades);
   const fetcher = useCallback((signal: AbortSignal) => api<MesBesoins>("/v1/negocie", { signal }), []);
   const { data, error, reload } = useResource(fetcher);
+  // `n` remonte le formulaire à chaque exemple choisi : il repart de ce que l'exemple préremplit.
+  const [formulaire, setFormulaire] = useState<{ n: number; exemple: ExempleBesoin | null } | null>(null);
+  const [declare, setDeclare] = useState<string | null>(null);
+  const ouvrir = (exemple: ExempleBesoin | null) => {
+    setDeclare(null);
+    setFormulaire((f) => ({ n: (f?.n ?? 0) + 1, exemple }));
+  };
+  const vide = data && data.besoins.length === 0 && data.veille.length === 0;
   return (
     <div className="flex flex-col gap-5">
+      {declare ? (
+        <p role="status" className="rounded-xl bg-ok-bg p-4 text-[15px] font-semibold text-ok">
+          {declare}
+        </p>
+      ) : null}
+      {formulaire ? (
+        <DeclarerUnBesoin
+          key={formulaire.n}
+          exemple={formulaire.exemple}
+          onAnnuler={() => setFormulaire(null)}
+          onDeclare={(phrase) => {
+            setFormulaire(null);
+            setDeclare(phrase);
+            reload();
+          }}
+        />
+      ) : (
+        <Button onClick={() => ouvrir(null)} className="w-full">
+          <Plus size={18} aria-hidden="true" /> Déclarer un besoin
+        </Button>
+      )}
       {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
       {!data && !error ? <Skeleton card="h-40" lines={2} label="Chargement de tes besoins…" /> : null}
-      {data && !data.zoneActive ? (
-        <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Bientôt chez toi">
-          <p className="text-[15px] text-muted">{data.message}</p>
-        </EmptyState>
+      {vide && !formulaire ? (
+        <section aria-label="Pas encore de besoin" className="flex flex-col gap-3">
+          <p className="text-[20px] leading-tight font-extrabold tracking-[-0.02em]">Dis-nous ce que tu vas commander, on regroupe et on négocie</p>
+          <p className="text-[14px] font-semibold text-muted">Par exemple :</p>
+          <ul className="flex flex-col gap-2">
+            {exemples.map((e) => (
+              <li key={e.phrase}>
+                <button
+                  type="button"
+                  onClick={() => ouvrir(e)}
+                  className="pressable flex min-h-13 w-full items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-left text-[16px] font-semibold shadow-card active:bg-ground"
+                >
+                  <Plus size={18} aria-hidden="true" className="shrink-0 text-muted" />« {e.phrase} »
+                </button>
+              </li>
+            ))}
+          </ul>
+          <ButtonLink href="/fournisseurs" variant="secondary" className="mt-2">
+            Invite tes négoces
+          </ButtonLink>
+        </section>
       ) : null}
       {data && data.veille.length > 0 ? <Veille lignes={data.veille} onChange={reload} /> : null}
-      {data && data.zoneActive && data.besoins.length === 0 ? (
-        <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Pas encore de besoin déclaré">
-          <p className="text-[15px] text-muted">Sur un chantier, « Tenter un prix de groupe » sur tes gros articles (ardoise, zinc, bois, isolant). Un chasseur d&apos;opportunités Mobiiz négocie pour toi.</p>
-          <ButtonLink href="/chantiers" variant="secondary" className="mt-3">
-            Mes chantiers
-          </ButtonLink>
-        </EmptyState>
-      ) : null}
       {data && data.besoins.length > 0 ? (
         <section aria-label="Tes besoins" className="flex flex-col gap-3">
           <SectionTitle>Tes besoins</SectionTitle>
@@ -54,6 +115,78 @@ export function RegroupementsNegocies() {
         </section>
       ) : null}
     </div>
+  );
+}
+
+const UNITES_BESOIN = ["pièces", "palettes", "m", "m²", "m³", "kg"] as const;
+
+/** Le formulaire « Déclarer un besoin », sans chantier : article, quantité, unité, date ; livraison à l'adresse de l'entreprise par défaut. */
+function DeclarerUnBesoin({ exemple, onAnnuler, onDeclare }: { exemple: ExempleBesoin | null; onAnnuler: () => void; onDeclare: (phrase: string) => void }) {
+  const [designation, setDesignation] = useState(exemple?.designation ?? "");
+  const [quantite, setQuantite] = useState(exemple ? String(exemple.quantite) : "");
+  const [unite, setUnite] = useState<string>(exemple?.unite ?? "pièces");
+  const [dateBesoin, setDateBesoin] = useState(exemple ? prochainJour(exemple.pour) : "");
+  const [livraison, setLivraison] = useState("");
+  const [pending, setPending] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const q = Number(quantite.replace(/\s/g, "").replace(",", "."));
+  const complet = designation.trim() !== "" && q > 0 && dateBesoin !== "";
+  async function envoyer(e: React.FormEvent) {
+    e.preventDefault();
+    if (!complet) return;
+    setPending(true);
+    setErreur(null);
+    try {
+      await api("/v1/negocie/besoins", { method: "POST", body: { designation: designation.trim(), quantite: q, unite, dateBesoin, ...(livraison.trim() ? { livraison: livraison.trim() } : {}) } });
+      onDeclare("Besoin déclaré. Un chasseur d'opportunités Mobiiz l'additionne avec ceux du secteur et négocie : tu reçois l'offre ici, et tu choisis.");
+    } catch (err) {
+      setErreur(
+        messageErreur(err, {
+          livraison_requise: "Il me faut une ville de livraison avec son code postal (ici, ou l'adresse de ton entreprise dans Compte).",
+          abonnement_requis: "Les besoins groupés sont dans la formule payante.",
+          besoin_incomplet: "Dis-moi l'article, la quantité et l'unité.",
+        }),
+      );
+    } finally {
+      setPending(false);
+    }
+  }
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <form onSubmit={(e) => void envoyer(e)} aria-label="Déclarer un besoin" className="flex flex-col gap-3">
+        <SectionTitle>Déclarer un besoin</SectionTitle>
+        <p className="text-[14px] text-muted">La référence exacte (format, épaisseur) : seuls les articles identiques se regroupent. Ton devis suffit.</p>
+        <Field id="besoin-article" label="Ce que tu vas commander" placeholder="Ardoise naturelle 32×22" value={designation} onChange={(e) => setDesignation(e.target.value)} autoComplete="off" />
+        <div className="grid grid-cols-2 gap-3">
+          <Field id="besoin-quantite" label="Quantité" inputMode="decimal" value={quantite} onChange={(e) => setQuantite(e.target.value)} />
+          <div className="flex flex-col gap-2">
+            <label htmlFor="besoin-unite" className="text-[14px] font-semibold">
+              Unité
+            </label>
+            <select id="besoin-unite" value={unite} onChange={(e) => setUnite(e.target.value)} className={INPUT}>
+              {UNITES_BESOIN.map((u) => (
+                <option key={u} value={u}>
+                  {u}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <Field id="besoin-pour-quand" label="Pour quand ?" type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} />
+        <Field id="besoin-livraison" label="Ville de livraison (facultatif)" hint="Vide : l'adresse de ton entreprise." placeholder="22300 Lannion" value={livraison} onChange={(e) => setLivraison(e.target.value)} />
+        {erreur ? (
+          <p role="alert" className="text-[15px] font-semibold text-danger">
+            {erreur}
+          </p>
+        ) : null}
+        <Button type="submit" pending={pending} disabled={!complet}>
+          Déclarer ce besoin
+        </Button>
+        <button type="button" onClick={onAnnuler} className="min-h-11 self-center text-[15px] font-semibold text-muted underline">
+          Annuler
+        </button>
+      </form>
+    </Card>
   );
 }
 

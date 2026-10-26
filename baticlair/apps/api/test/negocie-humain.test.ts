@@ -38,7 +38,7 @@ beforeEach(async () => {
 
 const A3222 = "Ardoise naturelle 32×22 Espagne 1er choix";
 const A3020 = "Ardoise naturelle 30×20 Espagne 1er choix";
-const LITEAU = "Liteau sapin traité 27×38";
+const CROCHET = "Crochet inox 100 mm";
 const publique = () => request(ctx.app.getHttpServer());
 const dans = (jours: number) => new Date(Date.now() + jours * 86_400_000).toISOString().slice(0, 10);
 const artisan = (n: number, lignes = [{ libelle: A3222, quantite: "1800", unite: "pièces" }], adresse = "3 rue des Ajoncs, 22300 Lannion") => couvreurAvecListe(ctx, `artisan${n}@toitures.fr`, `Toitures ${n}`, adresse, lignes);
@@ -52,13 +52,13 @@ async function chasseur() {
 
 describe("business model final : le regroupement négocié par un humain", { timeout: 120_000 }, () => {
   it("déclarer : gros article seulement, 30×20 ≠ 32×22, même référence + même département + dates compatibles = même regroupement ; hors zone non", async () => {
-    const a = await artisan(1, [{ libelle: A3222, quantite: "1800", unite: "pièces" }, { libelle: LITEAU, quantite: "800", unite: "m" }]);
+    const a = await artisan(1, [{ libelle: A3222, quantite: "1800", unite: "pièces" }, { libelle: CROCHET, quantite: "1900", unite: "pièces" }]);
     expect((await a.agent.get("/v1/regroupement/mode").expect(200)).body).toEqual({ mode: "humain" });
     const lignes = (await a.agent.get(`/v1/projects/${a.projectId}/negocie/lignes`).expect(200)).body;
     expect(lignes.lignes.map((l: { negociable: boolean }) => l.negociable)).toEqual([true, false]);
-    const [ardoise, liteau] = a.articles;
+    const [ardoise, crochet] = a.articles;
     const ra = (await a.agent.post("/v1/negocie/besoins").send({ projectId: a.projectId, articleKey: ardoise, dateBesoin: dans(20) }).expect(201)).body;
-    const refus = await a.agent.post("/v1/negocie/besoins").send({ projectId: a.projectId, articleKey: liteau, dateBesoin: dans(20) }).expect(400);
+    const refus = await a.agent.post("/v1/negocie/besoins").send({ projectId: a.projectId, articleKey: crochet, dateBesoin: dans(20) }).expect(400);
     expect(refus.body.error.details.reason).toBe("non_negociable");
 
     const b = await artisan(2, [{ libelle: A3222, quantite: "900", unite: "pièces" }], "8 rue du Port, 22500 Paimpol");

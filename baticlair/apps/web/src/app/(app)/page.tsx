@@ -16,6 +16,7 @@ import { InviterCollegue } from "@/components/inviter";
 import { BoucleNegoce } from "@/components/boucle-negoce";
 import type { MesBesoins } from "@/lib/negocie";
 import type { Droits, ListeRegroupements } from "@/lib/recentrage";
+import { useAncienMode } from "@/components/negocie";
 
 export default function AccueilPage() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function AccueilPage() {
   const { data: billing } = useBilling();
   // Recentrage (Greg, 25 octobre 2026) : l'encart « Regroupements en cours » n'apparaît que s'il existe un regroupement
   // pertinent pour cet artisan ; jamais de liste vide. Le préavis de fin de payant offert, s'il court.
-  const moisActif = features.groupe === true && features.commandeCommune !== "lots";
+  const moisActif = useAncienMode() && features.commandeCommune !== "lots";
   const fetchRegroupements = useCallback((signal: AbortSignal) => (moisActif ? api<ListeRegroupements>("/v1/regroupements", { signal }) : Promise.resolve(null)), [moisActif]);
   const { data: regroupements } = useResource(fetchRegroupements);
   // Business model final (même jour) : en mode humain, l'encart compte les besoins négociés et les veilles à trancher.

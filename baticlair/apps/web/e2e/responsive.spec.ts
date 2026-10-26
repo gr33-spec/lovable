@@ -16,6 +16,16 @@ test.beforeEach(async ({ page }) => {
 });
 
 /**
+ * L'ANCIEN MODE (commande du mois, commande commune par lots) ne se voit qu'en mode automatique (Greg, 26 octobre 2026) :
+ * ses parcours (`@ancien`, `@lots`) le rallument, tous les autres repartent en mode humain, le mode par défaut.
+ */
+test.beforeEach(async ({ request }, info) => {
+  const ancien = info.tags.includes("@ancien") || info.tags.includes("@lots");
+  const r = await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: ancien ? "automatique" : "humain" } });
+  expect(r.status()).toBe(200);
+});
+
+/**
  * PASSE RESPONSIVE (lot B) : chaque écran du parcours tient sur un téléphone, une tablette (portrait et paysage) et un
  * ordinateur, sans défilement horizontal ni bouton coupé. Les captures (test-results/responsive) servent à relire la
  * mise en page ; le test casse si une page déborde en largeur.
@@ -155,7 +165,7 @@ async function inscription(page: Page, email: string) {
  * l'onglet, « Ton chantier » avec son bloc et sa barre, la page du négoce, l'admin des dates. Dans le Finistère (29),
  * pour ne rien mêler aux parcours du 22.
  */
-test("responsive : la commande du mois (artisan, négoce, admin), rien ne déborde", async ({ page, browser }, info) => {
+test("responsive : la commande du mois (artisan, négoce, admin), rien ne déborde", { tag: "@ancien" }, async ({ page, browser }, info) => {
   test.skip(info.project.name !== "ordinateur", "Une passe par largeur suffit (les largeurs sont fixées ici).");
   test.setTimeout(240_000);
   await inscription(page, `responsive-mois-${unique()}@example.fr`);

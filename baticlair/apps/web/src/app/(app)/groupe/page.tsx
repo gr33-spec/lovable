@@ -4,7 +4,9 @@ import { AideBouton } from "@/components/aide";
 import { quantiteFr } from "@/components/groupe";
 import Link from "next/link";
 import { Check, FileText, Store, Tag, Truck, Users } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAncienMode, useModeRegroupement } from "@/components/negocie";
 import { Button, ButtonLink, Card, ErrorNotice, PageTitle, SectionTitle, Skeleton, Spinner } from "@/components/ui";
 import { api, ApiError, messageErreur } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -74,7 +76,22 @@ const STATUT_LOT: Record<string, string> = {
  * illustrées disent ce que ça fait (section 2 du parcours groupé) ; puis ce qui manque pour en profiter, coché au fur et
  * à mesure ; « Mes lots » dès que le groupé est ouvert à l'entreprise (SIRET vérifié), la liste des manques au-dessus tant qu'il en reste.
  */
+/**
+ * L'onglet de l'ancien mode (commande du mois, commande commune) n'existe qu'en mode automatique (Greg, 26 octobre 2026) ;
+ * en mode humain, l'adresse mène aux Regroupements.
+ */
 export default function GroupePage() {
+  const ancien = useAncienMode();
+  const mode = useModeRegroupement();
+  const router = useRouter();
+  useEffect(() => {
+    if (mode === "humain") router.replace("/regroupements");
+  }, [mode, router]);
+  if (!ancien) return <Skeleton card="h-56" lines={2} label="Chargement des regroupements…" />;
+  return <GroupeAncienMode />;
+}
+
+function GroupeAncienMode() {
   const fetchEtat = useCallback((signal: AbortSignal) => api<EtatGroupe>("/v1/groupe", { signal }), []);
   const etat = useResource(fetchEtat);
   const { company } = useSession();
