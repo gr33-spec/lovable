@@ -207,8 +207,8 @@ await etape("Landing : accroche, prix, inscription, aucune démo d'office", page
   verif(!(await page.getByText("Démo · écran").count()), "la démo s'ouvre d'office");
   await voir(page.getByText("Par un artisan, pour les artisans."));
   await voir(page.getByRole("heading", { level: 1 }));
-  await voir(page.getByRole("link", { name: "Je rejoins le mouvement" }));
-  await voir(page.getByText(/^Dès 29 € par mois/));
+  await voir(page.getByRole("link", { name: "Commencer gratuitement" }));
+  await voir(page.getByText(/Dès 29 € HT par mois/).first());
 });
 await etape("Landing : « Voir comment ça marche (30 s) », trois métiers, Passer", page, async () => {
   await page.getByRole("button", { name: "Voir comment ça marche (30 s)" }).click();
@@ -220,14 +220,14 @@ await etape("Landing : « Voir comment ça marche (30 s) », trois métiers, Pas
   }
   await demo.getByRole("button", { name: "Suivant" }).click();
   await demo.getByRole("button", { name: "Suivant" }).click();
-  await voir(demo.getByRole("link", { name: "Je rejoins le mouvement" }));
+  await voir(demo.getByRole("link", { name: "Commencer gratuitement" }));
   await zeroReste(page, "démo");
   await demo.getByRole("button", { name: "Passer" }).click();
 });
 
 // 2. L'inscription artisan, le guide.
 await etape("Inscription artisan", page, async () => {
-  await page.getByRole("link", { name: "Je rejoins le mouvement" }).first().click();
+  await page.getByRole("link", { name: "Commencer gratuitement" }).first().click();
   await page.waitForURL(/\/inscription/);
   await page.getByLabel("Prénom et nom").fill("Jean Recette");
   await page.getByLabel("Nom de ton entreprise").fill(ENTREPRISE);
@@ -239,16 +239,16 @@ await etape("Inscription artisan", page, async () => {
   await voir(page.getByRole("dialog", { name: "Guide" }), 30000);
   return EMAIL;
 });
-await etape("Guide : trois écrans, prochaine clôture, « Déposer ma première liste »", page, async () => {
+await etape("Guide : trois écrans, prochaine clôture, « Déposer mon premier devis »", page, async () => {
   const guide = page.getByRole("dialog", { name: "Guide" });
-  await voir(guide.getByRole("heading", { name: "Dépose ta liste ou ton devis" }));
+  await voir(guide.getByRole("heading", { name: "Dépose ton devis" }));
   const cloture = await guide.getByText(/^Prochaine clôture :/).innerText();
   await zeroReste(page, "guide 1");
   await guide.getByRole("button", { name: "Suivant" }).click();
-  await voir(guide.getByRole("heading", { name: "On la regroupe avec celles des autres artisans du secteur" }));
+  await voir(guide.getByRole("heading", { name: /prépare ton quantitatif$/ }));
   await guide.getByRole("button", { name: "Suivant" }).click();
-  await voir(guide.getByRole("heading", { name: "Tu reçois les prix le jour J et tu commandes si ça te va" }));
-  await guide.getByRole("link", { name: "Déposer ma première liste" }).click();
+  await voir(guide.getByRole("heading", { name: "Envoie à tes négoces et compare" }));
+  await guide.getByRole("link", { name: "Déposer mon premier devis" }).click();
   await page.waitForURL(/\/chantiers\/nouveau/);
   return cloture.replace(/\s+/g, " ");
 });
@@ -603,7 +603,7 @@ await etape("Compte : suppression (en tapant SUPPRIMER)", page, async () => {
   await page.getByRole("button", { name: "Supprimer définitivement" }).click();
   await voir(page.getByText("Ton compte et toutes ses données ont été supprimés."), 30000);
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
-  verif((await page.getByRole("link", { name: "Je rejoins le mouvement" }).count()) || /\/connexion/.test(page.url()), "toujours connecté");
+  verif((await page.getByRole("link", { name: "Commencer gratuitement" }).count()) || /\/connexion/.test(page.url()), "toujours connecté");
   verif(!(await page.getByRole("button", { name: "Mon menu" }).count()), "l'app s'ouvre encore");
 });
 
