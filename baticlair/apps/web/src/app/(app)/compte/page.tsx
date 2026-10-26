@@ -1,6 +1,7 @@
 "use client";
 
 import { AideBouton } from "@/components/aide";
+import { viderCacheAppareil } from "@/components/service-worker";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { EconomiesGroupeCard } from "@/components/economies-groupe";
@@ -51,6 +52,7 @@ export default function ComptePage() {
     try {
       await api("/v1/auth/sign-out", { method: "POST", body: {} });
     } finally {
+      await viderCacheAppareil();
       router.replace("/connexion");
     }
   }
@@ -188,6 +190,7 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
         method: "DELETE",
         body: { confirm: word.trim().toUpperCase() },
       });
+      await viderCacheAppareil();
       onDeleted();
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));

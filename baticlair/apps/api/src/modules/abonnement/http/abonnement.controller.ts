@@ -7,6 +7,8 @@ import { forbidden, notFound } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { CONFIG } from "../../../platform/tokens.js";
+import { PrismaService } from "../../../platform/database/prisma.service.js";
+import { unSeulTraitement } from "../../../platform/reprise/evenements.js";
 import { Public } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { AbonnementService } from "../application/abonnement.service.js";
@@ -96,6 +98,7 @@ export class AbonnementPublicController {
   constructor(
     @Inject(AbonnementService) private readonly abonnement: AbonnementService,
     @Inject(CONFIG) private readonly config: AppConfig,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
   ) {}
 
   @Public()
@@ -107,7 +110,8 @@ export class AbonnementPublicController {
     if (!stripe || this.config.abonnement.paiement !== "stripe") throw notFound("Route");
     if (!req.rawBody || !signatureStripeValide(stripe.webhookSecret, signature, req.rawBody)) throw forbidden("Webhook signature");
     const evt = req.body as { id: string; type: string; data: { object: Record<string, unknown> } };
-    return this.abonnement.webhookStripe(evt);
+    // Revue du 26 octobre 2026 : un événement renvoyé par Stripe n'est jamais traité deux fois.
+    return unSeulTraitement(this.prisma, "stripe", evt.id, () => this.abonnement.webhookStripe(evt));
   }
 
   @Public()

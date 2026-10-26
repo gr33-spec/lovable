@@ -1878,3 +1878,42 @@ model ObservationPrix {
   @@index([article, departement, le])
   @@map("observations_prix")
 }
+
+/// LA FILE DE REPRISE (revue du 26 octobre 2026) : une action qui a échoué (e-mail, lecture IA) est retentée
+/// automatiquement (5 min, 30 min, 2 h) ; au 3e échec, elle est abandonnée et Greg est alerté. La clé empêche de
+/// planifier deux fois la même action. Purgée 30 jours après sa fin (registre).
+model Reprise {
+  id             String    @id @default(uuid()) @db.Uuid
+  /// « email », « lecture_ia »…
+  sorte          String
+  /// Unique par action (« email:<empreinte> », « lecture_ia:<document> »).
+  cle            String    @unique
+  charge         Json
+  /// en_attente | reussie | abandonnee
+  etat           String    @default("en_attente")
+  tentatives     Int       @default(0)
+  prochaineLe    DateTime  @map("prochaine_le") @db.Timestamptz(3)
+  derniereErreur String?   @map("derniere_erreur")
+  companyId      String?   @map("company_id") @db.Uuid
+  finiLe         DateTime? @map("fini_le") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([etat, prochaineLe])
+  @@index([companyId])
+  @@map("reprise")
+}
+
+/// LES ÉVÉNEMENTS DÉJÀ TRAITÉS (revue du 26 octobre 2026) : un webhook rejoué (Stripe, Resend) n'est jamais traité
+/// deux fois. Gardés 90 jours.
+model EvenementTraite {
+  /// « stripe », « resend »
+  source    String
+  /// L'identifiant de l'événement chez le prestataire (evt_…, svix-id).
+  id        String
+  recuLe    DateTime @default(now()) @map("recu_le") @db.Timestamptz(3)
+
+  @@id([source, id])
+  @@index([recuLe])
+  @@map("evenement_traite")
+}

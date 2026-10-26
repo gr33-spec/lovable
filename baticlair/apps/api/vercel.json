@@ -1,6 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "buildCommand": "pnpm run vercel-build",
   "crons": [
     {
@@ -38,6 +40,10 @@
     {
       "path": "/v1/internal/rapport-mensuel",
       "schedule": "0 7 1 * *"
+    },
+    {
+      "path": "/v1/internal/reprises",
+      "schedule": "23 4 * * *"
     }
   ],
   "git": {

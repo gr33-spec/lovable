@@ -98,7 +98,11 @@ const envSchema = z
      * - `fake`      : extraction simulée, déterministe (développement et tests uniquement).
      * Par défaut : `anthropic` si une clé est fournie, sinon `disabled`.
      */
-    AI_PROVIDER: z.enum(["anthropic", "disabled", "fake"]).optional(),
+    AI_PROVIDER: z.enum(["anthropic", "openai", "enregistre", "disabled", "fake"]).optional(),
+    /** Le second fournisseur (squelette, revue du 26 octobre 2026) : sa clé, lue seulement avec AI_PROVIDER=openai. */
+    OPENAI_API_KEY: z.string().min(1).optional(),
+    /** Délai maximal d'une lecture IA (ms) : au-delà, la tentative est arrêtée et notée « timeout ». */
+    AI_TIMEOUT_MS: z.coerce.number().int().min(5_000).max(300_000).default(170_000),
     /** La clé de l'app (Vercel, décision du fondateur 2026-10-12), lue avant ANTHROPIC_API_KEY. */
     BATICLAIR_ANTHROPIC_KEY: z.string().min(1).optional(),
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
@@ -270,6 +274,12 @@ const envSchema = z
     if (isDeployed && env.AI_PROVIDER === "fake") {
       ctx.addIssue({ code: "custom", path: ["AI_PROVIDER"], message: "« fake » est réservé au développement et aux tests" });
     }
+    if (env.AI_PROVIDER === "openai" && !env.OPENAI_API_KEY) {
+      ctx.addIssue({ code: "custom", path: ["OPENAI_API_KEY"], message: "obligatoire avec AI_PROVIDER=openai" });
+    }
+    if (isDeployed && env.AI_PROVIDER === "enregistre") {
+      ctx.addIssue({ code: "custom", path: ["AI_PROVIDER"], message: "« enregistre » est réservé au développement et aux tests" });
+    }
     if (env.AI_PROVIDER === "anthropic" && !env.BATICLAIR_ANTHROPIC_KEY && !env.ANTHROPIC_API_KEY) {
       ctx.addIssue({ code: "custom", path: ["BATICLAIR_ANTHROPIC_KEY"], message: "obligatoire avec AI_PROVIDER=anthropic" });
     }
@@ -355,10 +365,12 @@ export interface AppConfig {
   alerts: { webhookUrl?: string; email?: string };
   cronSecret?: string;
   ai: {
-    provider: "anthropic" | "disabled" | "fake";
+    provider: "anthropic" | "openai" | "enregistre" | "disabled" | "fake";
     apiKey?: string;
     /** Le nom de la variable d'où vient la clé (jamais sa valeur), dit par la route de santé. */
-    keySource: "BATICLAIR_ANTHROPIC_KEY" | "ANTHROPIC_API_KEY" | null;
+    keySource: "BATICLAIR_ANTHROPIC_KEY" | "ANTHROPIC_API_KEY" | "OPENAI_API_KEY" | null;
+    /** Délai maximal d'une lecture (ms). */
+    timeoutMs: number;
     extractionModel: string;
     quantitatif: boolean;
     quantitatifModel: string;
@@ -511,8 +523,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
     ai: {
       provider: e.AI_PROVIDER ?? (apiKey ? "anthropic" : "disabled"),
-      ...(apiKey ? { apiKey } : {}),
-      keySource: e.BATICLAIR_ANTHROPIC_KEY ? "BATICLAIR_ANTHROPIC_KEY" : e.ANTHROPIC_API_KEY ? "ANTHROPIC_API_KEY" : null,
+      ...(e.AI_PROVIDER === "openai" ? { apiKey: e.OPENAI_API_KEY! } : apiKey ? { apiKey } : {}),
+      keySource: e.AI_PROVIDER === "openai" ? "OPENAI_API_KEY" : e.BATICLAIR_ANTHROPIC_KEY ? "BATICLAIR_ANTHROPIC_KEY" : e.ANTHROPIC_API_KEY ? "ANTHROPIC_API_KEY" : null,
+      timeoutMs: e.AI_TIMEOUT_MS,
       extractionModel: e.AI_EXTRACTION_MODEL,
       quantitatif: e.AI_QUANTITATIF === "on",
       quantitatifModel: e.AI_QUANTITATIF_MODEL,

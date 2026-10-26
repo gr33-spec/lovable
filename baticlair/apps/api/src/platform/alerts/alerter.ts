@@ -8,7 +8,7 @@ import { NOM_APP } from "@baticlair/domain";
  * Au plus une alerte par sorte toutes les 10 minutes (une panne ne noie pas la messagerie) ;
  * jamais de donnée de client dans le message (pas de devis, pas de nom de chantier).
  */
-export type AlertKind = "server_error" | "ai_reading_failed" | "client_error" | "commande_commune";
+export type AlertKind = "server_error" | "ai_reading_failed" | "client_error" | "commande_commune" | "reprise_echouee" | "stockage";
 
 export interface Alerter {
   readonly enabled: boolean;
@@ -21,6 +21,10 @@ const TITLES: Record<AlertKind, string> = {
   client_error: "Écran en erreur chez un artisan",
   /** Espace négoce (23 octobre 2026) : aucun négoce inscrit, aucune réponse à 48 h, grille retenue trop « non garantie ». */
   commande_commune: "Regroupement à surveiller",
+  /** Revue du 26 octobre 2026 : une action rejouée trois fois sans succès (e-mail, lecture IA). */
+  reprise_echouee: "Action abandonnée après 3 essais",
+  /** Revue du 26 octobre 2026 : la base approche de la limite du plan Neon. */
+  stockage: "Espace de la base",
 };
 
 export const ALERT_QUIET_MS = 10 * 60 * 1000;

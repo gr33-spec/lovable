@@ -1,25 +1,26 @@
-import { AnthropicDocumentReader } from "../../../platform/ai/anthropic-document-reader.js";
+import type { FabriqueIa, LecteurIa } from "../../../platform/ai/lecteur-ia.js";
 import { decodeLecture, decodeLignes, decodeReperage, decodeSynthese, lignesWireSchema, syntheseWireSchema, LECTURE_PROMPT, lectureSystemPrompt, lectureWireSchema, REPERAGE_PROMPT, type Reperage, reperageSystemPrompt, reperageWireSchema, type LectureReader, type LectureRequest } from "../application/lecture-reader.js";
 import { siteNotesInstruction } from "../application/prompt.js";
 import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { LectureDevis } from "@baticlair/domain";
 
 /**
- * §51.5 : la lecture du devis par Claude (le modèle de lecture, le plus capable), en un appel : le devis complet en PDF,
+ * §51.5 : la lecture du devis par l'IA (le modèle de lecture, le plus capable, fournisseur choisi par la configuration), en un appel : le devis complet en PDF,
  * son texte, le référentiel exporté ; la réponse structurée est relue par le code (`decodeLecture`).
  */
-export class AnthropicLectureReader implements LectureReader {
-  readonly provider = "anthropic";
-  private readonly reader: AnthropicDocumentReader;
-  private readonly rapide: AnthropicDocumentReader | null;
+export class IaLectureReader implements LectureReader {
+  readonly provider: string;
+  private readonly reader: LecteurIa;
+  private readonly rapide: LecteurIa | null;
   /** Les tranches d'un gros devis (lignes seulement) : le modèle rapide, réflexion moyenne (décisions du 24 octobre 2026). */
-  private readonly tranches: AnthropicDocumentReader | null;
+  private readonly tranches: LecteurIa | null;
 
   /** `fastModel` : le modèle rapide du repérage des métiers (texte seul, quelques secondes). */
-  constructor(apiKey: string, model: string, effort: "low" | "medium" | "high" | "xhigh" | "max", fetchImpl?: typeof fetch, fastModel?: string) {
-    this.reader = new AnthropicDocumentReader(apiKey, model, effort, fetchImpl);
-    this.rapide = fastModel ? new AnthropicDocumentReader(apiKey, fastModel, "low", fetchImpl) : null;
-    this.tranches = fastModel ? new AnthropicDocumentReader(apiKey, fastModel, "medium", fetchImpl) : null;
+  constructor(ia: FabriqueIa, model: string, effort: "low" | "medium" | "high" | "xhigh" | "max", fastModel?: string) {
+    this.reader = ia({ model, effort });
+    this.provider = this.reader.provider;
+    this.rapide = fastModel ? ia({ model: fastModel, effort: "low" }) : null;
+    this.tranches = fastModel ? ia({ model: fastModel, effort: "medium" }) : null;
   }
 
   async reperer(numberedText: string): Promise<ReadAttempt<Reperage> | null> {

@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { connection } from "next/server";
+import { EnregistrementServiceWorker } from "@/components/service-worker";
 import { ACCROCHE_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
 
 // Plan « finition », bloc 5 (Lighthouse, décalage 0,21 sur les pages légales) : la police passe par next/font,
@@ -27,7 +28,18 @@ export const metadata: Metadata = {
   title: { default: NOM_APP, template: `%s · ${NOM_APP}` },
   description: "L'assistant d'achat de matériaux des artisans.",
   applicationName: NOM_APP,
-  appleWebApp: { capable: true, title: NOM_APP, statusBarStyle: "default" },
+  // L'écran de démarrage iPhone et iPad (revue du 26 octobre 2026) : le logo sur le jaune, une image par taille d'écran.
+  appleWebApp: {
+    capable: true,
+    title: NOM_APP,
+    statusBarStyle: "default",
+    startupImage: [
+      { url: "/demarrage/iphone-se.png", media: "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" },
+      { url: "/demarrage/iphone-15.png", media: "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" },
+      { url: "/demarrage/iphone-15-plus.png", media: "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" },
+      { url: "/demarrage/ipad.png", media: "(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2)" },
+    ],
+  },
   // L'icône de l'écran d'accueil iPhone (180 px, sans transparence) et celle des onglets.
   icons: { icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }], apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }] },
   // L'image de partage (lien collé dans un message) : le logo sur fond noir, 1200 × 630.
@@ -48,7 +60,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   await connection();
   return (
     <html lang="fr" className={`${jakarta.variable} ${bricolage.variable}`}>
-      <body className="min-h-dvh antialiased">{children}</body>
+      <body className="min-h-dvh antialiased">
+        {children}
+        <EnregistrementServiceWorker />
+      </body>
     </html>
   );
 }

@@ -132,6 +132,12 @@ export interface ReadingOptions {
   /** Lecture échouée (IA en panne, réponse inutilisable, erreur imprévue) : prévenir l'équipe (B5). */
   onReadingFailed?: (reason: string) => void;
   /**
+   * Revue du 26 octobre 2026 : une panne PASSAGÈRE du fournisseur d'IA (indisponible, trop lent) part dans la file de
+   * reprise (deux nouveaux essais, puis alerte). Une réponse illisible ou refusée ne se retente pas seule (elle coûterait
+   * pour rien) : l'artisan garde « Réessayer ».
+   */
+  onEchecPassager?: (tenant: TenantContext, documentId: string, reason: string) => void;
+  /**
    * §48 : « Va boire un café, je te préviens quand c'est prêt. » Une lecture ou un calcul trop long pour une réponse
    * (passé en arrière-plan) prévient l'artisan qui l'a lancé quand il finit : questions prêtes, ou liste prête.
    */
@@ -466,7 +472,10 @@ export class TakeoffService {
     } catch (error) {
       const known = error instanceof DomainError && error.code === "analysis_failed";
       if (!known) await this.meter.fail(analysisId).catch(() => undefined);
-      this.reading.onReadingFailed?.(known ? String((error.details as { reason?: string } | undefined)?.reason ?? "analysis_failed") : "unexpected_error");
+      const reason = known ? String((error.details as { reason?: string } | undefined)?.reason ?? "analysis_failed") : "unexpected_error";
+      this.reading.onReadingFailed?.(reason);
+      const essaiAuto = known && (error.details as { essaiAuto?: boolean } | undefined)?.essaiAuto === true;
+      if (essaiAuto) this.reading.onEchecPassager?.(tenant, documentId, reason);
       throw error;
     }
   }
@@ -631,7 +640,10 @@ export class TakeoffService {
     if (result.status !== "success" || !result.output) {
       await this.saveStats(analysisId, stats("failed", result.status));
       await this.meter.fail(analysisId);
-      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: result.status });
+      // Une panne passagère (fournisseur indisponible, trop lent, 429) repart seule ; un refus (crédit épuisé, requête
+      // refusée) ou une réponse illisible attend l'artisan. `essaiAuto` le dit à l'écran.
+      const essaiAuto = result.status === "timeout" || (result.status === "provider_error" && !/^http_4(?!29)/.test(result.errorCode ?? ""));
+      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: result.status, essaiAuto });
     }
     const lecture = result.output;
     const lignes = lignesDeLecture(lecture);

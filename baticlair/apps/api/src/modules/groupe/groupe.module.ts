@@ -16,7 +16,8 @@ import { DemandeService } from "./application/demande.service.js";
 import { GroupeService } from "./application/groupe.service.js";
 import { JeuDemonstrationService } from "./application/jeu-demonstration.service.js";
 import { NEGOCE_EXTRACTOR, type NegoceExtractor } from "./application/negoce-extractor.js";
-import { AnthropicNegoceExtractor } from "./infrastructure/anthropic-negoce-extractor.js";
+import { IaNegoceExtractor } from "./infrastructure/ia-negoce-extractor.js";
+import { fabriqueIa } from "../../platform/ai/fabrique-ia.js";
 import { FakeNegoceExtractor } from "./infrastructure/fake-negoce-extractor.js";
 import { InseeSiretVerifier, SIRET_VERIFIER, siretBienForme, type SiretVerifier } from "./application/siret-verifier.js";
 import { NegocesService } from "./application/negoces.service.js";
@@ -75,14 +76,9 @@ import { ALERTER } from "../../platform/tokens.js";
       // Nouveau cap (22 octobre) : le devis du négoce est lu UNE fois à son arrivée par le modèle le plus capable (Opus,
       // `AI_EXTRACTION_MODEL`), puis comparé par le code ; en test, le faux lecteur ; sans clé, Greg relit.
       useFactory: (c: AppConfig): NegoceExtractor | null => {
-        switch (c.ai.provider) {
-          case "anthropic":
-            return new AnthropicNegoceExtractor(c.ai.apiKey!, c.ai.extractionModel);
-          case "fake":
-            return new FakeNegoceExtractor();
-          case "disabled":
-            return null;
-        }
+        const ia = fabriqueIa(c);
+        if (ia) return new IaNegoceExtractor(ia, c.ai.extractionModel);
+        return c.ai.provider === "fake" ? new FakeNegoceExtractor() : null;
       },
       inject: [CONFIG],
     },

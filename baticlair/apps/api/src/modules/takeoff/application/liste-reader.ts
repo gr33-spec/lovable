@@ -5,7 +5,7 @@ import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-r
  * « J'AI DÉJÀ MA LISTE » (demande du fondateur, 21 octobre 2026) : l'artisan a déjà compté. Une photo d'une liste écrite
  * à la main, un bon ou un devis de négoce, un tableau en PDF ou en capture : la lecture d'image sort les lignes (article,
  * quantité, unité) TELLES QU'ÉCRITES. Aucun calcul de quantitatif, aucune question : la règle numéro un du référentiel
- * (rien d'absent du document) vaut ici plus que partout. Même client que les devis (`AnthropicDocumentReader`).
+ * (rien d'absent du document) vaut ici plus que partout. Même lecteur IA que les devis (`LecteurIa`).
  */
 export const LISTE_PROMPT = { id: "lecture_liste", version: 1 } as const;
 

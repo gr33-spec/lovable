@@ -1,14 +1,15 @@
-import { AnthropicDocumentReader } from "../../../platform/ai/anthropic-document-reader.js";
+import type { FabriqueIa, LecteurIa } from "../../../platform/ai/lecteur-ia.js";
 import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
 import { decodeListe, LISTE_PROMPT, listeSystemPrompt, listeWireSchema, type ListeLue, type ListeReader, type ListeRequest } from "../application/liste-reader.js";
 
-/** La lecture d'une liste déjà comptée par Claude : même client que les devis, une image ou un PDF, aucune règle de calcul. */
-export class AnthropicListeReader implements ListeReader {
-  readonly provider = "anthropic";
-  private readonly reader: AnthropicDocumentReader;
+/** La lecture d'une liste déjà comptée par l'IA : même client que les devis, une image ou un PDF, aucune règle de calcul. */
+export class IaListeReader implements ListeReader {
+  readonly provider: string;
+  private readonly reader: LecteurIa;
 
-  constructor(apiKey: string, model: string, effort: "low" | "medium" | "high" | "xhigh" | "max", fetchImpl?: typeof fetch) {
-    this.reader = new AnthropicDocumentReader(apiKey, model, effort, fetchImpl);
+  constructor(ia: FabriqueIa, model: string, effort: "low" | "medium" | "high" | "xhigh" | "max") {
+    this.reader = ia({ model, effort });
+    this.provider = this.reader.provider;
   }
 
   async lire(request: ListeRequest): Promise<ReadAttempt<ListeLue>> {

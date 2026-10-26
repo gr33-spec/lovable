@@ -117,6 +117,8 @@ Chaque étape est rejouable : elle ne regarde que des statuts (`forme`, `envoye`
 
 Recentrage (25 octobre 2026) : `/v1/internal/demandes-perso` à 9 h 35 UTC (relances de la demande perso à 48 h ouvrées).
 
+Revue lot A (26 octobre 2026) : `/v1/internal/reprises` à 4 h 23 UTC passe la file de reprise (`platform/reprise/`) ; comme le plan Hobby n'autorise qu'une tâche par jour, la file est aussi passée au fil des requêtes (au plus toutes les 5 min, bail de 10 min en base, `waitUntil`). Les webhooks Stripe et Resend notent chaque événement traité (`evenement_traite`) et ignorent un rejeu. L'IA passe par un seul contrat (`platform/ai/lecteur-ia.ts`, fabrique `fabriqueIa`, `AI_PROVIDER` = anthropic, openai ou enregistre).
+
 ## 6. Les variables d'environnement (validées au démarrage, `src/platform/config/config.ts`)
 
 | Groupe | Variables | Notes |

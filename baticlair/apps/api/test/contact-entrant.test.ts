@@ -34,8 +34,9 @@ const lecteur: LecteurEmailRecu = {
 
 function signe(corps: string) {
   const ts = Math.floor(Date.now() / 1000);
-  const sig = createHmac("sha256", Buffer.from(SECRET.replace(/^whsec_/, ""), "base64")).update(`msg_contact.${ts}.${corps}`).digest("base64");
-  return { "svix-id": "msg_contact", "svix-timestamp": String(ts), "svix-signature": `v1,${sig}`, "content-type": "application/json" };
+  const id = `msg_${Math.random().toString(36).slice(2)}`;
+  const sig = createHmac("sha256", Buffer.from(SECRET.replace(/^whsec_/, ""), "base64")).update(`${id}.${ts}.${corps}`).digest("base64");
+  return { "svix-id": id, "svix-timestamp": String(ts), "svix-signature": `v1,${sig}`, "content-type": "application/json" };
 }
 const recu = (to: string, from = "Jean Client <jean@example.org>") => JSON.stringify({ type: "email.received", data: { email_id: "em_1", from, to: [to], subject: "Une question sur l'abonnement" } });
 

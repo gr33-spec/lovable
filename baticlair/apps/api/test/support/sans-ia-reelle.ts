@@ -5,10 +5,11 @@
  */
 delete process.env.BATICLAIR_ANTHROPIC_KEY;
 delete process.env.ANTHROPIC_API_KEY;
+delete process.env.OPENAI_API_KEY;
 
 const fetchReel = globalThis.fetch;
 globalThis.fetch = (async (entree: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
   const url = typeof entree === "string" ? entree : entree instanceof URL ? entree.href : entree.url;
-  if (/anthropic\.com/i.test(url)) throw new Error(`Appel réel à Anthropic refusé en test : ${url}`);
+  if (/anthropic\.com|openai\.com/i.test(url)) throw new Error(`Appel réel à un fournisseur d'IA refusé en test : ${url}`);
   return fetchReel(entree, init);
 }) as typeof fetch;

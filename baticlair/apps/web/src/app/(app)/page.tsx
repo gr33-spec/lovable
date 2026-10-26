@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronRight, MailCheck, Plus, Search, Sparkles, Users, Warehouse } from "lucide-react";
 import { useCallback } from "react";
 import { InstallHint } from "@/components/install-hint";
+import { BandeauReprises } from "@/components/reprises";
 import { useBilling } from "@/components/paywall";
 import { ProjectList } from "@/components/project-row";
 import { ButtonLink, ErrorNotice, ListCard, ListRow, SectionTitle, Skeleton } from "@/components/ui";
@@ -70,6 +71,7 @@ export default function AccueilPage() {
         </ButtonLink>
         {/* Landing du 22 octobre : « Inviter un collègue » aussi dans l'app, juste après l'inscription. */}
         <div className="flex w-full max-w-xl flex-col gap-4 text-left">
+          <BandeauReprises />
           <InviterCollegue texte="Plus on est nombreux dans le secteur, plus on pèse face aux négoces." />
           {moisActif ? <BoucleNegoce compact /> : null}
         </div>
@@ -88,6 +90,7 @@ export default function AccueilPage() {
       <ButtonLink href="/chantiers/nouveau" className="w-full">
         <Plus size={20} aria-hidden="true" /> Nouveau chantier
       </ButtonLink>
+      <BandeauReprises />
       {droits?.preavis ? (
         <p role="status" className="rounded-xl bg-accent-soft p-4 text-[15px] font-semibold text-ink">
           {droits.preavis}

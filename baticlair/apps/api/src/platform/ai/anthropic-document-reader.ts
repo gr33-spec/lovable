@@ -4,7 +4,10 @@ import { Anthropic, APIConnectionTimeoutError, APIError } from "@anthropic-ai/sd
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { AiUsage } from "@baticlair/domain";
 import type { z } from "zod";
-import type { DocumentInput, ReadAttempt } from "./document-reader.js";
+import type { ReadAttempt } from "./document-reader.js";
+import type { EffortIa, LecteurIa, ReadRequest } from "./lecteur-ia.js";
+
+export type { ReadRequest } from "./lecteur-ia.js";
 
 const NO_USAGE: AiUsage = { inputTokens: 0, outputTokens: 0 };
 
@@ -18,43 +21,27 @@ function toUsage(usage: Anthropic.Usage): AiUsage {
   };
 }
 
-export interface ReadRequest<S extends z.ZodType> {
-  /** Consignes (mises en cache côté fournisseur). */
-  system: string;
-  schema: S;
-  /**
-   * Schéma ENVOYÉ à l'API, quand il diffère de celui qui relit la réponse : l'API plafonne les champs « valeur ou
-   * vide » (16 unions, 24 optionnels au total) ; au-delà, elle refuse la demande. Absent : `schema`.
-   */
-  format?: z.ZodType;
-  document: DocumentInput;
-  /** Nom du document pour l'IA (« devis », « devis du fournisseur »). */
-  documentName: string;
-  /** Texte ajouté après le document (liste demandée, contexte…). */
-  extra?: string;
-  /** Étiquette « prompt-vN » transmise au fournisseur (suivi). */
-  tag: string;
-}
-
 /**
  * Lecture structurée d'un document par Claude (API Anthropic), commune à
  * toutes les lectures (devis client, devis fournisseur). Sortie imposée par
  * un schéma ; le code vérifie ensuite. Aucune donnée n'est conservée ici.
  */
-export class AnthropicDocumentReader {
+export class AnthropicDocumentReader implements LecteurIa {
   readonly provider = "anthropic";
   private readonly client: Anthropic;
 
   constructor(
     apiKey: string,
-    private readonly model: string,
-    private readonly effort: "low" | "medium" | "high" | "xhigh" | "max",
+    readonly model: string,
+    private readonly effort: EffortIa,
     /** Tests uniquement : remplace l'accès réseau. */
     fetchImpl?: typeof fetch,
+    /** Délai maximal d'une lecture (`AI_TIMEOUT_MS`). */
+    timeoutMs = 170_000,
   ) {
     // Une lecture de devis dure de quelques secondes à une minute ; au-delà de 170 s, on arrête. Aucune relance cachée
     // du SDK (elle doublerait l'attente) : la lecture relance elle-même, dans son échéance (READING_BUDGET_MS).
-    this.client = new Anthropic({ apiKey, timeout: 170_000, maxRetries: 0, ...(fetchImpl ? { fetch: fetchImpl } : {}) });
+    this.client = new Anthropic({ apiKey, timeout: timeoutMs, maxRetries: 0, ...(fetchImpl ? { fetch: fetchImpl } : {}) });
   }
 
   async read<S extends z.ZodType>(request: ReadRequest<S>): Promise<ReadAttempt<z.infer<S>>> {

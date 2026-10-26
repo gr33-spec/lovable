@@ -57,6 +57,8 @@ export interface BilanPurge {
   journaux: number;
   archives: number;
   preuves: number;
+  reprises: number;
+  evenementsWebhook: number;
 }
 
 export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = new Date()): Promise<BilanPurge> {
@@ -93,6 +95,9 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
   // Les factures d'abonnement (obligation comptable) : 10 ans après leur émission.
   const factures = await prisma.factureAbonnement.deleteMany({ where: { emiseLe: { lt: ilYa(maintenant, { ans: DUREES.archivesAns }) } } });
   const archives = await prisma.archiveCommande.deleteMany({ where: { archiveLe: { lt: ilYa(maintenant, { ans: DUREES.archivesAns }) } } });
+  // La file de reprise (30 jours après sa fin) et les événements de webhook déjà traités (90 jours), revue du 26 octobre.
+  const reprises = await prisma.reprise.deleteMany({ where: { finiLe: { lt: ilYa(maintenant, { jours: 30 }) } } });
+  const evenements = await prisma.evenementTraite.deleteMany({ where: { recuLe: { lt: ilYa(maintenant, { jours: 90 }) } } });
   const preuves = await prisma.preuveAcceptation.deleteMany({ where: { finCompteLe: { lt: ilYa(maintenant, { ans: DUREES.preuvesAns }) } } });
 
   return {
@@ -100,6 +105,8 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
     invitesEffaces: invites.length,
     fichiersDevis: fichiers.count,
     documentsAnciens: 0,
+    reprises: reprises.count,
+    evenementsWebhook: evenements.count,
     journaux: j1.count + j2.count + j3.count + j4.count + j5.count,
     archives: archives.count + factures.count,
     preuves: preuves.count,

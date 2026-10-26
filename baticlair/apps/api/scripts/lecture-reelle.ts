@@ -4,7 +4,7 @@
  * questions produits mot pour mot. »
  *
  * La vraie lecture d'un devis, hors base : le PDF lu comme au dépôt (texte par page, routage texte / image), un appel
- * au modèle de lecture (AnthropicLectureReader, le même qu'en production), puis le bref et les questions imprimés mot
+ * au modèle de lecture (IaLectureReader sur l'adaptateur Anthropic, le même qu'en production), puis le bref et les questions imprimés mot
  * pour mot et le contrôle du résultat attendu (§6 du référentiel électricité pour 7954, §51.5 pour DE00000071).
  *
  *   BATICLAIR_ANTHROPIC_KEY=… pnpm exec tsx scripts/lecture-reelle.ts <devis.pdf | fixture:DE00000071 | fixture:D.2026.105 | fixture:7954 | fixture:fiche:<code>> <7954|DE00000071|fiche:<code>> [sortie.json]
@@ -21,7 +21,8 @@ import { DE00000071_LINES } from "../../../packages/domain/test/devis-reels/de00
 import { DEVIS_7954 } from "../../../packages/domain/test/devis-reels/devis-7954.js";
 import { extractPdfPages } from "../src/modules/documents/infrastructure/pdf-pages.js";
 import { PdfJsPdfReader } from "../src/modules/documents/infrastructure/pdfjs-pdf-reader.js";
-import { AnthropicLectureReader } from "../src/modules/takeoff/infrastructure/anthropic-lecture-reader.js";
+import { IaLectureReader } from "../src/modules/takeoff/infrastructure/ia-lecture-reader.js";
+import { AnthropicDocumentReader } from "../src/platform/ai/anthropic-document-reader.js";
 import { D2026_105_PDF } from "../test/support/d2026105-pdf.js";
 import { DEVIS_7954_PDF } from "../test/support/devis7954-pdf.js";
 import { FICHE_PDF } from "../test/support/fiche-pdf.js";
@@ -73,7 +74,7 @@ async function main(): Promise<number> {
   }
   const ref = referentialFor(devis.trade);
   const rapide = process.env.AI_QUANTITATIF_MODEL || "claude-sonnet-5-5";
-  const reader = new AnthropicLectureReader(apiKey, model, effort, undefined, rapide);
+  const reader = new IaLectureReader((choix) => new AnthropicDocumentReader(apiKey, choix.model, choix.effort), model, effort, rapide);
   // Le repérage des métiers avant la lecture (modèle rapide, texte seul) : il doit dire le métier du devis, vite.
   const debutReperage = Date.now();
   const reperage = await reader.reperer(text.join("\n"));

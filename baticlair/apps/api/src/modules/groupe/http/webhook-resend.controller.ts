@@ -11,6 +11,8 @@ import type { TransactionalEmailSender } from "../../../platform/email/email.por
 import type { AppLogger } from "../../../platform/logging/logger.js";
 import { Public } from "../../identity/index.js";
 import { DemandeService } from "../application/demande.service.js";
+import { PrismaService } from "../../../platform/database/prisma.service.js";
+import { unSeulTraitement } from "../../../platform/reprise/evenements.js";
 
 /** Le webhook entrant de Resend (`email.received`), signé façon Svix : `svix-id`, `svix-timestamp`, `svix-signature`. */
 export function signatureValide(secret: string, id: string | undefined, timestamp: string | undefined, signature: string | undefined, corps: Buffer): boolean {
@@ -41,6 +43,7 @@ export class WebhookResendController {
     @Inject(EMAIL_RECU) private readonly lecteur: LecteurEmailRecu,
     @Inject(EMAIL_SENDER) private readonly envoi: TransactionalEmailSender,
     @Inject(LOGGER) private readonly logger: AppLogger,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
   ) {}
 
   @Public()
@@ -57,6 +60,11 @@ export class WebhookResendController {
     // La boîte de contact vit même sans le groupé ; sans elle ni le groupé, la route n'existe pas.
     if (!this.config.groupe.enabled && !this.config.contact) throw notFound("Route");
     if (!secret || !req.rawBody || !signatureValide(secret, id, timestamp, signature, req.rawBody)) throw forbidden("Webhook signature");
+    // Revue du 26 octobre 2026 : un envoi rejoué par Resend (même svix-id) n'est jamais traité deux fois.
+    return unSeulTraitement(this.prisma, "resend", id, () => this.traiter(req));
+  }
+
+  private async traiter(req: { body?: unknown }) {
     const evenement = (req.body ?? {}) as { type?: string; data?: { email_id?: string; from?: string; to?: string[] | string; subject?: string; created_at?: string } };
     if (evenement.type !== "email.received" || !evenement.data?.from) return { traite: false, raison: "ignore" };
     const contact = await renvoyerContact(this.config.contact, evenement.data, this.lecteur, this.envoi, this.logger);
