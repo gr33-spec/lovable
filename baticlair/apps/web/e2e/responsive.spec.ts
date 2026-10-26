@@ -242,6 +242,8 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
   });
   await admin.getByLabel("Code reçu par e-mail").fill(code);
   await admin.getByRole("button", { name: "Ouvrir les commandes communes" }).click();
+  // Attendre la page ouverte : naviguer avant la fin de la vérification du code coupait la requête (ordinateur).
+  await expect(admin.getByRole("button", { name: "Enregistrer les dates" })).toBeVisible();
   for (const size of WIDTHS) {
     await admin.setViewportSize({ width: size.width, height: size.height });
     await admin.goto("/admin/groupe");

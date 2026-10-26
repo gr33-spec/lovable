@@ -2191,9 +2191,12 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Conditions négoces" }).click();
   await expect(page.getByRole("heading", { name: "Conditions négoces" })).toBeVisible();
   // RGPD et concurrence (24 octobre 2026) : la formule unique, et les prix d'un négoce jamais montrés à un autre.
-  await expect(page.getByText("Aucun frais pour l'instant. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce.")).toBeVisible();
+  await expect(page.getByText(/^Aucun frais pour l'instant\. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce\./)).toBeVisible();
   await expect(page.getByText(/Les prix d'un négoce ne sont jamais communiqués à un autre négoce/)).toBeVisible();
-  await expect(page.getByText(/2 %/)).toHaveCount(0);
+  // Greg, 26 octobre 2026 (point D) : une commission de 1 à 2 % sur les seuls regroupements négociés, et la non-sollicitation.
+  await expect(page.getByText(/commission de 1 à 2 % du montant HT/)).toBeVisible();
+  await expect(page.getByText(/(?<!à )2 %/)).toHaveCount(0);
+  await expect(page.getByText("Non-sollicitation")).toBeVisible();
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Confidentialité" }).click();
   await expect(page.getByRole("heading", { name: "Confidentialité" })).toBeVisible();
   // En tableau (24 octobre 2026) : chaque traitement, sa base légale, sa durée ; chaque sous-traitant, son pays, sa garantie.
@@ -3234,7 +3237,9 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   for (const x of [n1, n2, n3]) await x.contexte.close();
 
   // À la limite : figé, résultats. A : N2 en avant (le moins cher sur toute la commande), N3 le moins cher pour lui.
-  expect(await tacheDuMois(page, new Date(Date.parse(cycle.reponseAvant) + 60_000).toISOString())).toMatchObject({ resultats: 1 });
+  // Les projets téléphone et ordinateur partagent la base e2e : la tâche publie aussi un cycle laissé par l'autre passe
+  // (même famille, même zone). Ce cycle-ci est publié : les e-mails de ses négoces, juste dessous, le prouvent.
+  expect((await tacheDuMois(page, new Date(Date.parse(cycle.reponseAvant) + 60_000).toISOString())).resultats).toBeGreaterThanOrEqual(1);
   expect((await emailsVers(page, n(2))).at(-1)!.text).toContain("Votre grille est la moins chère sur le total");
   expect((await emailsVers(page, n(1))).at(-1)!.text).not.toMatch(/0,88|Négoce N2/);
   await page.goto("/groupe");
@@ -3365,7 +3370,9 @@ test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le
   expect(JSON.stringify(corps)).not.toMatch(/Négoce S2|Négoce S3|0,92|0,93/);
 
   // À l'échéance : le bilan, puis les prix.
-  expect(await tacheDuMois(page, new Date(Date.parse(cycle.reponseAvant) + 60_000).toISOString())).toMatchObject({ resultats: 1 });
+  // Les projets téléphone et ordinateur partagent la base e2e : la tâche publie aussi un cycle laissé par l'autre passe
+  // (même famille, même zone). Ce cycle-ci est publié : les e-mails de ses négoces, juste dessous, le prouvent.
+  expect((await tacheDuMois(page, new Date(Date.parse(cycle.reponseAvant) + 60_000).toISOString())).resultats).toBeGreaterThanOrEqual(1);
   await page.goto("/groupe");
   await expect(page.getByText("Sur 3 demandes, 3 négoces ont répondu. Voici le meilleur prix livré pour toi.").first()).toBeVisible();
   await expect(page.getByRole("region", { name: "Tes prix" })).toBeVisible();
