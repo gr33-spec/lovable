@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { connection } from "next/server";
 import { ACCROCHE_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
 
 // Plan « finition », bloc 5 (Lighthouse, décalage 0,21 sur les pages légales) : la police passe par next/font,
@@ -42,7 +43,9 @@ export const viewport: Viewport = {
   themeColor: "#0d0f14",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Rendu à la demande : le nonce de la Content-Security-Policy change à chaque requête (`src/proxy.ts`).
+  await connection();
   return (
     <html lang="fr" className={`${jakarta.variable} ${bricolage.variable}`}>
       <body className="min-h-dvh antialiased">{children}</body>

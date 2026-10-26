@@ -10,9 +10,9 @@ import { NOM_APP } from "@/lib/nom";
 export const A_COMPLETER = "[A COMPLETER]";
 
 /** La version des CGU artisan. Une version MAJEURE (`VERSION_CGU_MAJEURE`) est redemandée à chaque compte. */
-export const VERSION_CGU = "2026-10-25";
+export const VERSION_CGU = "2026-10-26";
 /** La dernière version qui demande une nouvelle acceptation : un compte qui a accepté avant la voit et l'accepte. */
-export const VERSION_CGU_MAJEURE = "2026-10-24";
+export const VERSION_CGU_MAJEURE = "2026-10-26";
 
 /** Une version acceptée (« 2026-10-22 ») est-elle à jour ? Les versions sont des dates : l'ordre alphabétique suffit. */
 export const cguAJour = (acceptee: string | null | undefined) => !!acceptee && acceptee >= VERSION_CGU_MAJEURE;
@@ -20,23 +20,27 @@ export const cguAJour = (acceptee: string | null | undefined) => !!acceptee && a
 export const EDITEUR = {
   nom: "BATI INVEST",
   forme: "SARL",
-  capital: A_COMPLETER,
-  rcs: A_COMPLETER,
+  capital: "1 000",
+  rcs: "Saint-Brieuc",
   siren: "910 796 325",
   siret: "910 796 325 00017",
   adresse: "6 impasse du Ouipoure, 22620 Ploubazlanec",
   tva: "FR61910796325",
   produit: NOM_APP,
   /** Le directeur de la publication (LCEN, art. 6-III). */
-  directeurPublication: A_COMPLETER,
+  directeurPublication: "Grégory Roy, gérant",
   /** L'adresse e-mail de contact (LCEN) et des demandes RGPD. */
-  contact: A_COMPLETER,
+  contact: "contact@mobiiz.fr",
 };
 
 /** L'hébergeur du site et de l'API (code : `vercel.json`, région `fra1`). */
 export const HEBERGEUR = { nom: "Vercel Inc.", adresse: "440 N Barranca Ave #4133, Covina, CA 91723, États-Unis", site: "vercel.com", serveurs: "Francfort (Allemagne, Union européenne)" };
-/** L'hébergeur de la base de données (code : PostgreSQL chez Neon, `docs/ARCHITECTURE.md`). Adresse à recopier depuis son DPA. */
-export const HEBERGEUR_BASE = { nom: "Neon Inc.", adresse: A_COMPLETER, site: "neon.tech", serveurs: "Francfort (Allemagne, Union européenne)" };
+/**
+ * L'hébergeur de la base de données (code : PostgreSQL chez Neon, `docs/ARCHITECTURE.md`). Neon appartient à Databricks
+ * depuis 2025 : le contrat est signé avec Databricks, Inc., maison mère de Neon, LLC (neon.com/platform-terms, vu le
+ * 26 octobre 2026), adresse de sa notice de confidentialité (neon.com/privacy-policy).
+ */
+export const HEBERGEUR_BASE = { nom: "Neon, LLC (groupe Databricks, Inc.)", adresse: "160 Spear Street, Suite 1300, San Francisco, CA 94105, États-Unis", site: "neon.com", serveurs: "Francfort (Allemagne, Union européenne)" };
 
 /** Le tribunal compétent (CGU et conditions négoces, Greg, 24 octobre 2026). */
 export const TRIBUNAL = "tribunal de commerce de Saint-Brieuc";

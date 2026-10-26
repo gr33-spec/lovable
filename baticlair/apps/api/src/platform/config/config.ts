@@ -39,17 +39,25 @@ const envSchema = z
      */
     EMAIL_PROVIDER: z.enum(["resend", "disabled", "console", "capture"]).optional(),
     RESEND_API_KEY: z.string().min(1).optional(),
-    /** Expéditeur, ex. « BatiClair <bonjour@mondomaine.fr> » (domaine vérifié chez Resend). */
+    /** Expéditeur, ex. « Mobiiz <contact@mondomaine.fr> » (domaine vérifié chez Resend). */
     EMAIL_FROM: z.string().min(3).optional(),
     /**
      * LES E-MAILS RÉELS (Greg, 24 octobre 2026) : le domaine vérifié chez Resend (« mobiiz.fr ») et l'adresse d'envoi
-     * (« bonjour ») ; l'expéditeur devient « Mobiiz <bonjour@mobiiz.fr> ». EMAIL_FROM, s'il est donné, l'emporte.
+     * (« contact », Greg, 26 octobre 2026 ; avant « bonjour ») ; l'expéditeur devient « Mobiiz <contact@mobiiz.fr> ».
+     * EMAIL_FROM, s'il est donné, l'emporte.
      */
     EMAIL_DOMAINE: z.string().regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i).optional(),
-    EMAIL_EXPEDITEUR: z.string().regex(/^[a-z0-9._-]+$/i).default("bonjour"),
+    EMAIL_EXPEDITEUR: z.string().regex(/^[a-z0-9._-]+$/i).default("contact"),
+    /**
+     * LA BOÎTE DE CONTACT (Greg, 26 octobre 2026 : « MX sur mobiiz.fr directement, chez Resend ») : les adresses du
+     * domaine renvoyées chez Greg (« contact,bonjour » : contact@mobiiz.fr, et l'ancienne bonjour@ pour les e-mails déjà
+     * partis), et l'adresse qui les reçoit (par défaut, la première de GROUPE_ADMINS).
+     */
+    CONTACT_ADRESSES: z.string().default("contact,bonjour"),
+    CONTACT_RENVOI_VERS: z.email().optional(),
     /**
      * L'adresse de « Répondre » de chaque e-mail (Greg, 25 octobre 2026 : les réponses arrivent dans sa boîte par le
-     * renvoi de bonjour@mobiiz.fr). Par défaut, l'adresse de l'expéditeur. Un e-mail qui doit répondre ailleurs
+     * renvoi de contact@mobiiz.fr). Par défaut, l'adresse de l'expéditeur. Un e-mail qui doit répondre ailleurs
      * (l'artisan qui commande, l'adresse d'un lot) garde la sienne.
      */
     EMAIL_REPONDRE_A: z.string().email().optional(),
@@ -227,6 +235,18 @@ const envSchema = z
      * `off` uniquement pour les tests automatisés qui enchaînent des centaines de requêtes.
      */
     RATE_LIMIT: z.enum(["on", "off"]).default("on"),
+    /**
+     * LES MOTS DE PASSE FUITÉS (Greg, 26 octobre 2026, feu vert sécurité) : à l'inscription et au changement de mot de
+     * passe, les 5 premiers caractères de l'empreinte SHA-1 partent à Have I Been Pwned (k-anonymat : jamais le mot de
+     * passe) ; un mot de passe déjà fuité est refusé. Par défaut : en ligne oui, en local et en test non (pas de réseau).
+     */
+    MOTS_DE_PASSE_FUITES: z.enum(["on", "off"]).optional(),
+    /**
+     * TURNSTILE (Cloudflare, gratuit ; Greg, 26 octobre 2026, feu vert sécurité) : la clé secrète. Posée, l'inscription,
+     * le mot de passe oublié et les pages négoce (inscription, lien de connexion) demandent le jeton du défi
+     * (`x-captcha-response`). Vide : rien n'est demandé (local, tests, tant que Greg n'a pas créé le site Turnstile).
+     */
+    TURNSTILE_SECRET_KEY: z.string().min(10).optional(),
     /** Délai de réponse d'une lecture de devis : au-delà, « lecture en cours » et elle continue en arrière-plan. */
     /** Alertes de production (B5) : webhook (Slack, Discord, ntfy…) et/ou e-mail. Vide : pas d'alerte. */
     ALERT_WEBHOOK_URL: z.url().optional(),
@@ -294,6 +314,8 @@ export interface AppConfig {
   resend?: { apiKey: string; from: string; replyTo?: string };
   /** La liste blanche de la prévisualisation (null en production et en local). */
   emailGarde: { autorises: string[]; redirigerVers: string | null } | null;
+  /** Les adresses de contact du domaine (« contact@mobiiz.fr ») renvoyées vers `vers` ; null sans domaine ni destinataire. */
+  contact: { adresses: string[]; vers: string } | null;
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
   documents: { maxBytes: number; maxPages: number };
   aiCost: { usdToEur: string; monthlyBudgetEur: string; analysisMaxEur: string };
@@ -326,6 +348,10 @@ export interface AppConfig {
     sirene: { departements: string[]; naf: string[] };
   };
   rateLimit: { enabled: boolean };
+  /** Refuser un mot de passe présent dans Have I Been Pwned. */
+  motsDePasseFuites: boolean;
+  /** La clé secrète Turnstile ; null : pas de défi. */
+  turnstileSecret: string | null;
   alerts: { webhookUrl?: string; email?: string };
   cronSecret?: string;
   ai: {
@@ -418,6 +444,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       ? { resend: { apiKey: e.RESEND_API_KEY, from: emailFrom, ...(emailReponse ? { replyTo: emailReponse } : {}) } }
       : {}),
     emailGarde: e.VERCEL_ENV !== "production" && autorises.length > 0 ? { autorises, redirigerVers: e.EMAIL_REDIRECTION?.toLowerCase() ?? autorises.find((x) => !x.startsWith("@")) ?? null } : null,
+    contact: contactDe(e),
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
     documents: { maxBytes: e.DOCUMENT_MAX_BYTES, maxPages: e.DOCUMENT_MAX_PAGES },
     aiCost: { usdToEur: e.AI_USD_TO_EUR, monthlyBudgetEur: e.AI_MONTHLY_BUDGET_EUR, analysisMaxEur: e.AI_ANALYSIS_MAX_EUR },
@@ -478,6 +505,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       sirene: { departements: e.SIRENE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean), naf: e.SIRENE_NAF.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) },
     },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
+    motsDePasseFuites: (e.MOTS_DE_PASSE_FUITES ?? (isDeployed ? "on" : "off")) === "on",
+    turnstileSecret: e.TURNSTILE_SECRET_KEY ?? null,
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
     ai: {
@@ -491,4 +520,14 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },
   };
+}
+
+/** La boîte de contact : `contact@<EMAIL_DOMAINE>` (et les autres noms donnés) renvoyée chez l'admin. */
+function contactDe(e: { EMAIL_DOMAINE?: string | undefined; CONTACT_ADRESSES: string; CONTACT_RENVOI_VERS?: string | undefined; GROUPE_ADMINS?: string | undefined }): { adresses: string[]; vers: string } | null {
+  const vers = (e.CONTACT_RENVOI_VERS ?? (e.GROUPE_ADMINS ?? "").split(",")[0] ?? "").trim().toLowerCase();
+  if (!e.EMAIL_DOMAINE || !vers) return null;
+  const domaine = e.EMAIL_DOMAINE.toLowerCase();
+  const adresses = e.CONTACT_ADRESSES.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean).map((x) => `${x}@${domaine}`);
+  // Jamais de boucle : l'adresse qui reçoit le renvoi n'est pas une adresse de contact.
+  return adresses.includes(vers) ? null : { adresses, vers };
 }

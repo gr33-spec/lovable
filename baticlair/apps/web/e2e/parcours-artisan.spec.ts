@@ -2170,6 +2170,12 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   await expect(page.getByText(/édité par BATI INVEST, SARL au capital de .* SIRET 910 796 325 00017, dont le siège est situé 6 impasse du Ouipoure, 22620 Ploubazlanec/)).toBeVisible();
   await expect(page.getByText(/TVA intracommunautaire FR61910796325/)).toBeVisible();
   await expect(page.getByText(/Vercel Inc\./)).toBeVisible();
+  // Greg, 26 octobre 2026 : le Kbis complet, le directeur de la publication, contact@mobiiz.fr, Neon ; plus aucun repère.
+  await expect(page.getByText(/au capital de 1 000 €, immatriculée au RCS de Saint-Brieuc sous le numéro 910 796 325/)).toBeVisible();
+  await expect(page.getByText("Directeur de la publication : Grégory Roy, gérant.")).toBeVisible();
+  await expect(page.getByText(/Par e-mail : contact@mobiiz\.fr/)).toBeVisible();
+  await expect(page.getByText(/Neon, LLC \(groupe Databricks, Inc\.\), 160 Spear Street/)).toBeVisible();
+  await expect(page.getByText(/A COMPLETER/)).toHaveCount(0);
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "CGU" }).click();
   await expect(page.getByRole("heading", { name: "Conditions générales d'utilisation" })).toBeVisible();
   // L'abonnement (24 octobre 2026) : l'article 3 des CGU ; gratuit pour les négoces ; aucun « 2 % » sur les pages légales.
@@ -2192,7 +2198,7 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   await expect(page.getByRole("heading", { name: "Confidentialité" })).toBeVisible();
   // En tableau (24 octobre 2026) : chaque traitement, sa base légale, sa durée ; chaque sous-traitant, son pays, sa garantie.
   await expect(page.getByRole("table", { name: /base légale/ })).toBeVisible();
-  await expect(page.getByRole("rowheader", { name: "Neon Inc." })).toBeVisible();
+  await expect(page.getByRole("rowheader", { name: "Neon, LLC (groupe Databricks, Inc.)" })).toBeVisible();
   await expect(page.getByText(/Ne plus recevoir ces e-mails/)).toBeVisible();
   await expect(page.getByText(/Resend/).first()).toBeVisible();
   await expect(page.getByText(/API Sirene de l'INSEE/)).toBeVisible();
@@ -2206,7 +2212,7 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   // Le compte créé (case cochée) garde la date et la version des CGU.
   await signUp(page);
   const cgu = await page.evaluate(async () => (await (await fetch("/v1/me/cgu")).json()) as { accepteLe: string | null; version: string | null });
-  expect(cgu.version).toBe("2026-10-25");
+  expect(cgu.version).toBe("2026-10-26");
   expect(cgu.accepteLe).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 });
 
@@ -2629,7 +2635,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   const compteur = (await (await page.request.get("/v1/public/compteur")).json()) as { artisans: number | null };
   if (compteur.artisans === null) await expect(page.getByText(/artisans déjà inscrits/)).toHaveCount(0);
   else await expect(page.getByRole("status", { name: `${compteur.artisans} artisans déjà inscrits dans les Côtes-d'Armor` })).toBeVisible();
-  await expect(page.getByText(/BATI INVEST, SARL, SIRET 910 796 325 00017/)).toBeVisible();
+  await expect(page.getByText(/BATI INVEST, SARL au capital de 1 000 €, RCS Saint-Brieuc 910 796 325, SIRET 910 796 325 00017/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Confidentialité" })).toHaveAttribute("href", "/confidentialite");
   const externes = await page.evaluate(() => [...document.querySelectorAll("script[src], img, link[rel=stylesheet], iframe")].map((e) => (e as HTMLElement).getAttribute("src") ?? (e as HTMLElement).getAttribute("href") ?? "").filter((u) => /^https?:\/\//.test(u)));
   expect(externes).toEqual([]);

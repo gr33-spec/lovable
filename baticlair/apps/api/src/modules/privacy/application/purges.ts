@@ -13,8 +13,6 @@ export const DUREES = {
   inviteMois: 12,
   /** Le fichier d'origine d'un devis client (le texte, anonymisé, reste) : 30 jours, le temps de le relire. */
   fichierDevisJours: 30,
-  /** Les fichiers et le texte extrait des documents : 3 ans. */
-  documentsAns: 3,
   /** Les journaux techniques en base : 12 mois. */
   journauxMois: 12,
   /** Les commandes archivées sans nom : 10 ans. */
@@ -80,10 +78,8 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
   // Le fichier d'origine d'un devis client, après 30 jours : seul le texte anonymisé reste (RGPD, point 3).
   const fichiers = await prisma.documentBlob.deleteMany({ where: { document: { purpose: "client_quote", createdAt: { lt: ilYa(maintenant, { jours: DUREES.fichierDevisJours }) } } } });
 
-  // Fichiers et texte extrait de tout document de plus de 3 ans.
-  const anciens = ilYa(maintenant, { ans: DUREES.documentsAns });
-  const blobs = await prisma.documentBlob.deleteMany({ where: { document: { createdAt: { lt: anciens } } } });
-  const pages = await prisma.documentPage.updateMany({ where: { processing: { document: { createdAt: { lt: anciens } } }, NOT: { lines: { equals: [] } } }, data: { lines: [] } });
+  // Le texte anonymisé des devis et les e-mails reçus vivent autant que le compte (Greg, 26 octobre 2026 : « e-mails et
+  // devis : durée du compte ») ; ils partent avec lui (suppression demandée, ou 3 ans sans connexion). Avant : 3 ans.
 
   // Journaux techniques en base : 12 mois.
   const limiteJournaux = ilYa(maintenant, { mois: DUREES.journauxMois });
@@ -103,7 +99,7 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
     negocesInactifs: inactifs.length,
     invitesEffaces: invites.length,
     fichiersDevis: fichiers.count,
-    documentsAnciens: blobs.count + pages.count,
+    documentsAnciens: 0,
     journaux: j1.count + j2.count + j3.count + j4.count + j5.count,
     archives: archives.count + factures.count,
     preuves: preuves.count,

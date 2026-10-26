@@ -7,7 +7,9 @@ import { z } from "zod";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { DomainError, notFound } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
+import { exigerTurnstile } from "../../../platform/http/turnstile.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
+import { currentRequestContext } from "../../../platform/logging/request-context.js";
 import { CONFIG } from "../../../platform/tokens.js";
 import { Public } from "../../identity/index.js";
 import { CommandeDuMoisService } from "../application/commande-du-mois.service.js";
@@ -81,8 +83,14 @@ export class EspaceNegoceController {
   @Throttle({ default: HOURLY(30) })
   @Post("inscription")
   @HttpCode(201)
-  async inscrire(@Body(new ZodPipe(inscriptionBody)) body: z.infer<typeof inscriptionBody>, @Res({ passthrough: true }) res: Response, @Query("maintenant") m?: string) {
+  async inscrire(
+    @Body(new ZodPipe(inscriptionBody)) body: z.infer<typeof inscriptionBody>,
+    @Res({ passthrough: true }) res: Response,
+    @Headers("x-captcha-response") captcha: string | undefined,
+    @Query("maintenant") m?: string,
+  ) {
     this.actif();
+    await exigerTurnstile(this.config.turnstileSecret, captcha, currentRequestContext()?.ip);
     const maintenant = instant(this.config, m);
     const r = await this.espace.inscrire({ ...body, email: body.email ?? "" }, maintenant);
     res.setHeader("set-cookie", enTeteCookieNegoce(this.espace.jetonDeSession(r.compteId, maintenant), this.secure));
@@ -93,8 +101,9 @@ export class EspaceNegoceController {
   @Throttle({ default: HOURLY(20) })
   @Post("connexion")
   @HttpCode(200)
-  async demanderConnexion(@Body(new ZodPipe(connexionBody)) body: z.infer<typeof connexionBody>, @Query("maintenant") m?: string) {
+  async demanderConnexion(@Body(new ZodPipe(connexionBody)) body: z.infer<typeof connexionBody>, @Headers("x-captcha-response") captcha: string | undefined, @Query("maintenant") m?: string) {
     this.actif();
+    await exigerTurnstile(this.config.turnstileSecret, captcha, currentRequestContext()?.ip);
     await this.espace.demanderConnexion(body.email ?? "", instant(this.config, m));
     return { envoye: true };
   }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { NOM_APP } from "@/lib/nom";
 import { Landing } from "../decouvrir/landing";
 
@@ -10,6 +11,6 @@ export const metadata: Metadata = {
   description: "Ardoise, zinc, bois de charpente : tes quantitatifs au propre, tes demandes de prix en quelques clics, la force du groupe en plus.",
 };
 
-export default function CouvreursPage() {
-  return <Landing couvreurs />;
+export default async function CouvreursPage() {
+  return <Landing couvreurs nonce={(await headers()).get("x-nonce") ?? undefined} />;
 }

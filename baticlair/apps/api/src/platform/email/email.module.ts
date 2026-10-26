@@ -2,7 +2,8 @@ import { Global, Module } from "@nestjs/common";
 import type { AppConfig } from "../config/config.js";
 import type { AppLogger } from "../logging/logger.js";
 import { ChannelAlerter } from "../alerts/alerter.js";
-import { ALERTER, CONFIG, EMAIL_SENDER, LOGGER } from "../tokens.js";
+import { ALERTER, CONFIG, EMAIL_RECU, EMAIL_SENDER, LOGGER } from "../tokens.js";
+import { EnveloppeSeule, ResendLecteurEmailRecu } from "./contact-entrant.js";
 import type { TransactionalEmailSender } from "./email.port.js";
 import { CapturingEmailSender } from "./capturing-email.sender.js";
 import { ConsoleEmailSender } from "./console-email.sender.js";
@@ -30,12 +31,18 @@ import { ResendEmailSender } from "./resend-email.sender.js";
       inject: [CONFIG, LOGGER],
     },
     {
+      // La boîte de contact (contact@mobiiz.fr) : le corps et les pièces jointes relus chez Resend.
+      provide: EMAIL_RECU,
+      useFactory: (config: AppConfig, logger: AppLogger) => (config.resend ? new ResendLecteurEmailRecu(config.resend.apiKey, logger) : new EnveloppeSeule()),
+      inject: [CONFIG, LOGGER],
+    },
+    {
       // Alertes de production (B5) : à côté des e-mails, qu'elles peuvent emprunter.
       provide: ALERTER,
       useFactory: (config: AppConfig, email: TransactionalEmailSender, logger: AppLogger) => new ChannelAlerter({ ...config.alerts, env: config.env }, email, logger),
       inject: [CONFIG, EMAIL_SENDER, LOGGER],
     },
   ],
-  exports: [EMAIL_SENDER, ALERTER],
+  exports: [EMAIL_SENDER, ALERTER, EMAIL_RECU],
 })
 export class EmailModule {}

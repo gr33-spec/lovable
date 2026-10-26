@@ -15,26 +15,8 @@ const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
   // L'appareil photo sert au croquis d'une ligne ; plus de micro depuis le retrait de la voix (§50.7).
   { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
-  // Audit sécurité (2026-10-20) : rien ne se charge d'ailleurs. Scripts et styles en ligne : ceux de Next (pas de nonce
-  // avec le rendu statique) ; blob: pour les PDF ouverts dans la page et les photos avant envoi ; aucun cadre tiers.
-  {
-    key: "Content-Security-Policy",
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
-      "font-src 'self' data:",
-      "connect-src 'self' blob:",
-      "worker-src 'self' blob:",
-      "frame-src 'self' blob:",
-      "object-src 'self' blob:",
-      "media-src 'self' blob:",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-    ].join("; "),
-  },
+  // La Content-Security-Policy est posée page par page par `src/proxy.ts`, avec un nonce neuf à chaque requête
+  // (Greg, 26 octobre 2026 : plus de scripts en ligne sans nonce) : `cspDe` dans `src/lib/csp.ts`.
 ];
 
 const nextConfig: NextConfig = {

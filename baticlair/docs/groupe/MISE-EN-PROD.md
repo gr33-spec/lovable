@@ -8,7 +8,7 @@ Plan du 20 octobre 2026, bloc 11. À dérouler dans l'ordre, le jour J, par Greg
 - [ ] **Supprimer l'admin de test** `delivered+admin-recette@resend.dev` de `GROUPE_ADMINS` (projet baticlair-api, Preview, branche `claude/saas-achat-artisans-prompt-1lyihx`) : il n'a été ajouté que pour la recette en ligne du cycle complet. Il n'est pas, et ne doit jamais être, dans la variable de Production : vérifier que celle-ci ne contient que l'adresse de Greg.
 - [ ] Clés Stripe **live** (accord de Greg) et prix live créés par `apps/api/scripts/stripe-creer-prix.mjs --reel`.
 - [ ] `BATICLAIR_ANTHROPIC_KEY` : cochée Production et Preview depuis le 25 octobre ; l'ancienne `ANTHROPIC_API_KEY` (refusée par Anthropic) peut être supprimée.
-- [ ] Renvoi de bonjour@mobiiz.fr vers la boîte de Greg (Forward Email, gratuit, DNS seulement) : vérifier qu'il marche encore, et passer au besoin à une vraie boîte.
+- [x] Renvoi de bonjour@mobiiz.fr vers la boîte de Greg (Forward Email, gratuit, DNS seulement) : vérifier qu'il marche encore, et passer au besoin à une vraie boîte. **Remplacé le 26 octobre 2026** : MX chez Resend, contact@ (et bonjour@) renvoyées à l'admin par l'API (`EMAILS.md`). En production : créer le webhook Resend vers l'API de production et poser `RESEND_WEBHOOK_SECRET`, `CONTACT_RENVOI_VERS`, `EMAIL_EXPEDITEUR=contact`.
 
 ## 1. Avant de fusionner
 

@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../src/platform/config/config.js";
 import { EmailSortantSender } from "../src/platform/email/email-sortant.sender.js";
 import { CapturingEmailSender } from "../src/platform/email/capturing-email.sender.js";
-import { garder, lienDesabonnement, miseEnPage, PIED_LEGAL } from "../src/platform/email/mise-en-page.js";
+import { garder, lienDesabonnement, miseEnPage, PHRASE_REPONSES, PIED_LEGAL } from "../src/platform/email/mise-en-page.js";
 import type { AppLogger } from "../src/platform/logging/logger.js";
 import { ARDOISE, couvreurAvecListe, tacheDuMois } from "./support/cycle.js";
 import { inscrireNegoce } from "./support/negoce.js";
@@ -19,8 +19,8 @@ const silencieux = { warn: () => undefined, error: () => undefined, info: () => 
 const base = { DATABASE_URL: "postgresql://x@localhost/db", AUTH_SECRET: "a".repeat(32), NODE_ENV: "test" };
 
 describe("la configuration des e-mails", () => {
-  it("l'expéditeur est « Mobiiz <bonjour@domaine> » ; EMAIL_FROM l'emporte", () => {
-    expect(loadConfig({ ...base, RESEND_API_KEY: "re_test", EMAIL_DOMAINE: "mobiiz.fr" }).resend).toEqual({ apiKey: "re_test", from: "Mobiiz <bonjour@mobiiz.fr>", replyTo: "bonjour@mobiiz.fr" });
+  it("l'expéditeur est « Mobiiz <contact@domaine> » ; EMAIL_FROM l'emporte", () => {
+    expect(loadConfig({ ...base, RESEND_API_KEY: "re_test", EMAIL_DOMAINE: "mobiiz.fr" }).resend).toEqual({ apiKey: "re_test", from: "Mobiiz <contact@mobiiz.fr>", replyTo: "contact@mobiiz.fr" });
     expect(loadConfig({ ...base, RESEND_API_KEY: "re_test", EMAIL_DOMAINE: "mobiiz.fr", EMAIL_EXPEDITEUR: "commande" }).resend?.from).toBe("Mobiiz <commande@mobiiz.fr>");
     expect(loadConfig({ ...base, RESEND_API_KEY: "re_test", EMAIL_DOMAINE: "mobiiz.fr", EMAIL_FROM: "X <x@y.fr>" }).resend?.from).toBe("X <x@y.fr>");
     expect(() => loadConfig({ ...base, RESEND_API_KEY: "re_test" })).toThrow(/EMAIL_DOMAINE/);
@@ -67,6 +67,10 @@ describe("la mise en page", () => {
     expect(m.html).toContain("Ne plus recevoir ces e-mails");
     expect(m.text.match(/https:\/\/x\.fr\/stop\/9/g)).toHaveLength(1);
     expect(m.text).toContain(PIED_LEGAL);
+    // Greg, 26 octobre 2026 : le bloc légal complet (capital, RCS, contact) et l'information sur les réponses reçues.
+    expect(m.text).toContain("BATI INVEST, SARL au capital de 1 000 €, RCS Saint-Brieuc 910 796 325, SIRET 910 796 325 00017, TVA FR61910796325, 6 impasse du Ouipoure, 22620 Ploubazlanec. Contact : contact@mobiiz.fr.");
+    expect(m.text).toContain(PHRASE_REPONSES);
+    expect(m.html).toContain("peut être reçue par Mobiiz (BATI INVEST)");
     expect(m.headers["List-Unsubscribe"]).toBe("<https://x.fr/stop/9>");
   });
   it("sans lien propre (un e-mail de compte), « Gérer tes e-mails » mène aux réglages ; le texte est échappé", () => {

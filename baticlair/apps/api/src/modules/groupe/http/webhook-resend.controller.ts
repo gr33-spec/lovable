@@ -5,7 +5,10 @@ import { numeroDuLotDansAdresse } from "@baticlair/domain";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { forbidden, notFound } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
-import { CONFIG } from "../../../platform/tokens.js";
+import { CONFIG, EMAIL_RECU, EMAIL_SENDER, LOGGER } from "../../../platform/tokens.js";
+import { renvoyerContact, type LecteurEmailRecu } from "../../../platform/email/contact-entrant.js";
+import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
+import type { AppLogger } from "../../../platform/logging/logger.js";
 import { Public } from "../../identity/index.js";
 import { DemandeService } from "../application/demande.service.js";
 
@@ -27,13 +30,17 @@ export function signatureValide(secret: string, id: string | undefined, timestam
 /**
  * ÉTAPE 8 : la réponse d'un négoce par e-mail à `lot-<n°>@reponses.<domaine>` (section 7, étape 5). Le webhook ne prend
  * aucun devis par e-mail (sans la case d'accord, rien n'est pris en compte, section 6) : il renvoie au négoce son lien de
- * dépôt et journalise. Fermé sans secret ; signature obligatoire ; 404 drapeau éteint.
+ * dépôt et journalise. Fermé sans secret ; signature obligatoire ; 404 drapeau éteint (sauf la boîte de contact).
+ * Un e-mail à contact@mobiiz.fr part chez l'admin (`renvoyerContact`, Greg, 26 octobre 2026).
  */
 @Controller("v1/webhooks")
 export class WebhookResendController {
   constructor(
     @Inject(DemandeService) private readonly demande: DemandeService,
     @Inject(CONFIG) private readonly config: AppConfig,
+    @Inject(EMAIL_RECU) private readonly lecteur: LecteurEmailRecu,
+    @Inject(EMAIL_SENDER) private readonly envoi: TransactionalEmailSender,
+    @Inject(LOGGER) private readonly logger: AppLogger,
   ) {}
 
   @Public()
@@ -46,11 +53,15 @@ export class WebhookResendController {
     @Headers("svix-timestamp") timestamp: string | undefined,
     @Headers("svix-signature") signature: string | undefined,
   ) {
-    if (!this.config.groupe.enabled) throw notFound("Route");
     const secret = this.config.groupe.resendWebhookSecret;
+    // La boîte de contact vit même sans le groupé ; sans elle ni le groupé, la route n'existe pas.
+    if (!this.config.groupe.enabled && !this.config.contact) throw notFound("Route");
     if (!secret || !req.rawBody || !signatureValide(secret, id, timestamp, signature, req.rawBody)) throw forbidden("Webhook signature");
-    const evenement = (req.body ?? {}) as { type?: string; data?: { from?: string; to?: string[] | string } };
+    const evenement = (req.body ?? {}) as { type?: string; data?: { email_id?: string; from?: string; to?: string[] | string; subject?: string; created_at?: string } };
     if (evenement.type !== "email.received" || !evenement.data?.from) return { traite: false, raison: "ignore" };
+    const contact = await renvoyerContact(this.config.contact, evenement.data, this.lecteur, this.envoi, this.logger);
+    if (contact) return contact;
+    if (!this.config.groupe.enabled) return { traite: false, raison: "adresse_inconnue" };
     const domaine = this.config.groupe.reponsesDomaine;
     if (!domaine) return { traite: false, raison: "domaine_absent" };
     const to = Array.isArray(evenement.data.to) ? evenement.data.to : evenement.data.to ? [evenement.data.to] : [];

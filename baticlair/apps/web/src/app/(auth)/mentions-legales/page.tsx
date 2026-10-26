@@ -15,7 +15,7 @@ export default function MentionsLegalesPage() {
   return (
     <article className="flex flex-col gap-5">
       <PageTitle>Mentions légales</PageTitle>
-      <p className="text-sm text-muted">Version du 24/10/2026.</p>
+      <p className="text-sm text-muted">Version du 26/10/2026.</p>
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>Éditeur</h2>
         <p className={s.p}>Service édité par {EDITEUR.nom}.</p>

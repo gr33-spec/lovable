@@ -5,7 +5,8 @@ import { ArgumentTarif } from "@/components/argument-tarif";
 import { LiensLegaux } from "@/components/legal";
 import { CompteurInscrits, InviterCollegue } from "@/components/inviter";
 import { Logo } from "@/components/logo";
-import { ACCROCHE_APP, EDITEUR_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
+import { HEBERGEUR } from "@/lib/legal";
+import { ACCROCHE_APP, BLOC_LEGAL, NOM_APP, SLOGAN_APP } from "@/lib/nom";
 
 /**
  * LA PAGE D'ACCUEIL PUBLIQUE. NOUVEAU CAP (22 octobre 2026, section 0 de `docs/groupe/parcours-complet.md`) : une seule
@@ -79,7 +80,7 @@ function compterLaVisite() {
   void fetch(`${api}/v1/public/visite`, { method: "POST", signal: AbortSignal.timeout(1500) }).catch(() => undefined);
 }
 
-export function Landing({ couvreurs = false }: { couvreurs?: boolean }) {
+export function Landing({ couvreurs = false, nonce }: { couvreurs?: boolean; nonce?: string }) {
   compterLaVisite();
   const h2 = "font-display text-[36px] leading-[1.0] font-extrabold tracking-[-0.03em] sm:text-[56px]";
   return (
@@ -201,10 +202,10 @@ export function Landing({ couvreurs = false }: { couvreurs?: boolean }) {
           </div>
         </div>
         <p className="max-w-[90ch]">
-          Service édité par {EDITEUR_APP}, SARL, SIRET 910 796 325 00017, 6 impasse du Ouipoure, 22620 Ploubazlanec, TVA intracommunautaire FR61910796325. Hébergeur : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.
+          Service édité par {BLOC_LEGAL} Hébergeur : {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
         </p>
       </footer>
-      <script dangerouslySetInnerHTML={{ __html: REVEAL_SCRIPT }} />
+      <script nonce={nonce} dangerouslySetInnerHTML={{ __html: REVEAL_SCRIPT }} />
     </main>
   );
 }

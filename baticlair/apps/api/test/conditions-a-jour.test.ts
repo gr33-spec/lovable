@@ -36,7 +36,7 @@ it("un négoce sous l'ancienne version accepte la nouvelle avant de déposer, un
   await tacheDuMois(ctx, "2026-10-15T10:01:00.000Z");
   const jeton = jetonDeGrille(ctx, "n1@negoce.fr");
   const srv = () => request(ctx.app.getHttpServer());
-  expect((await srv().get(`/v1/grille/${jeton}?maintenant=2026-10-16T09:00:00.000Z`).expect(200)).body.conditionsAAccepter).toBe("2026-10-25");
+  expect((await srv().get(`/v1/grille/${jeton}?maintenant=2026-10-16T09:00:00.000Z`).expect(200)).body.conditionsAAccepter).toBe("2026-10-26");
   const pdf = Buffer.from(await makePdf(["devis"], [["A", ARDOISE, "2400 pièces", "0,90", ""]], "Total HT", "DEVIS"));
   const deposer = (conditions: boolean) =>
     srv()
@@ -49,7 +49,7 @@ it("un négoce sous l'ancienne version accepte la nouvelle avant de déposer, un
   expect(JSON.stringify(refus.body)).toContain("conditions_requises");
   expect((await deposer(true)).status).toBe(201);
   const compte = await ctx.prisma.compteNegoce.findFirstOrThrow({ where: { email: "n1@negoce.fr" } });
-  expect(compte.conditionsVersion).toBe("2026-10-25");
+  expect(compte.conditionsVersion).toBe("2026-10-26");
   expect(compte.conditionsAccepteesLe?.toISOString()).toBe("2026-10-16T09:00:00.000Z");
   expect((await srv().get(`/v1/grille/${jeton}?maintenant=2026-10-16T10:00:00.000Z`).expect(200)).body.conditionsAAccepter).toBeNull();
 });

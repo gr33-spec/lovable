@@ -23,6 +23,8 @@ export const metadata: Metadata = { title: `Conditions générales d'utilisation
  * commune toutes les deux semaines, sans engagement d'achat ; BATI INVEST n'est ni vendeur ni acheteur ; la concurrence ;
  * l'abonnement (24 octobre 2026 : mensuel 49 € HT, annuel 348 € HT, passage du mois à l'année, renouvellement, essai, résiliation, échec de paiement) ; les documents déposés ; la responsabilité ; la suspension ; le droit applicable. Versionnées : une version majeure est
  * redemandée à chaque compte (`VERSION_CGU_MAJEURE`), l'acceptation est horodatée. À relire par l'avocat.
+ * Version du 26 octobre 2026 (points D de Greg) : rôle d'intermédiaire, commission dans le prix, adresse Mobiiz, limites de
+ * l'IA ; passages à faire relire marqués dans `docs/groupe/CONFORMITE.md`.
  */
 export default function CguPage() {
   return (
@@ -76,6 +78,13 @@ export default function CguPage() {
             la zone et vous propose une offre, le nom du négoce masqué jusqu&apos;à votre acceptation. Le prix affiché inclut la commission {NOM_APP}. « J&apos;accepte »
             vaut commande ferme sur votre quantité et vous recevez un bon de commande ; vous pouvez refuser sans motif. Sur ces commandes groupées, {NOM_APP} peut
             percevoir une commission du négoce.
+          </li>
+          <li>
+            <strong>L&apos;adresse {NOM_APP}</strong> : quand elle est ouverte sur votre compte, votre entreprise reçoit une adresse à son nom sur le domaine
+            mobiiz.fr (par exemple bati-invest@mobiiz.fr), modifiable une fois, l&apos;ancienne restant redirigée 90 jours. Vos demandes aux négoces partent sous
+            la forme « Votre entreprise via {NOM_APP} », et les réponses des négoces (e-mails et pièces jointes) arrivent à cette adresse : {NOM_APP} les range dans
+            le chantier concerné et vous prévient. Ces e-mails sont traités comme vos autres données (politique de confidentialité) et ne sont lus par personne
+            d&apos;autre que vous, sauf demande de votre part au support.
           </li>
           <li>
             <strong>Statistiques anonymes</strong> : les prix reçus servent, anonymisés et agrégés (moyennes arrondies sur 3 mois, par département, à partir de 2
@@ -151,7 +160,12 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>4. BATI INVEST n&apos;est ni vendeur ni acheteur</h2>
+        <h2 className={s.h2}>4. BATI INVEST est un intermédiaire : ni vendeur ni acheteur</h2>
+        <p className={s.p}>
+          {EDITEUR.nom} met en relation des entreprises du bâtiment et des négoces, et peut négocier pour leur compte un prix sur des volumes regroupés. Ce rôle
+          d&apos;intermédiaire est rémunéré par l&apos;abonnement des artisans et, sur les seuls regroupements négociés, par une commission versée par le négoce et
+          déjà comprise dans le prix affiché (« Commission {NOM_APP} incluse dans le prix ») : vous ne payez jamais de commission en plus.
+        </p>
         <p className={s.p}>
           Quand vous commandez, le contrat de vente est conclu directement entre vous et le négoce : vous commandez sur votre compte chez lui, il vous livre et vous
           facture, vous le payez comme d&apos;habitude. {EDITEUR.nom} ne vend rien, n&apos;achète rien, n&apos;encaisse aucun paiement et ne porte pas la commande. En
@@ -164,7 +178,18 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>5. Concurrence</h2>
+        <h2 className={s.h2}>5. Les limites de la lecture automatique</h2>
+        <p className={s.p}>
+          Les listes et les devis sont lus par une intelligence artificielle, puis les quantités sont calculées par des règles écrites. L&apos;IA peut se tromper :
+          mal lire une ligne, oublier un article, se tromper d&apos;unité. Chaque ligne reste modifiable et une ligne douteuse est signalée en orange, mais la
+          liste qui part au négoce est celle que vous validez : relisez-la avant d&apos;envoyer et avant de commander. Les ratios des métiers que l&apos;application
+          signale « en cours de validation » n&apos;ont pas encore été relus par un professionnel du métier. Le texte de vos documents est anonymisé avant
+          d&apos;être lu ; il ne sert pas à entraîner les modèles du prestataire d&apos;IA.
+        </p>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className={s.h2}>6. Concurrence</h2>
         <p className={s.p}>
           Les prix d&apos;un négoce ne sont jamais communiqués à un autre négoce, ni pendant ni après la consultation. Les artisans ne se voient pas : ni nom, ni
           chantier, ni prix obtenu. Le {nom} additionne des volumes, elle ne sert pas à vous coordonner avec d&apos;autres artisans : vous restez seul maître de vos
@@ -173,7 +198,7 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>6. Les documents que vous déposez</h2>
+        <h2 className={s.h2}>7. Les documents que vous déposez</h2>
         <ul className={s.ul}>
           <li>
             Vous garantissez avoir le droit de transmettre chaque liste ou devis que vous déposez. Un devis peut contenir les coordonnées de votre client : {NOM_APP}
@@ -192,7 +217,7 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>7. Responsabilité</h2>
+        <h2 className={s.h2}>8. Responsabilité</h2>
         <p className={s.p}>
           {NOM_APP} est fourni avec le soin d&apos;un service en construction. La responsabilité de {EDITEUR.nom} est limitée aux dommages directs causés par une faute
           prouvée de sa part ; elle ne couvre ni une commande passée sur une quantité que vous n&apos;avez pas vérifiée, ni le fait d&apos;un négoce (prix, retard,
@@ -201,7 +226,7 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>8. Votre compte, sa suspension et sa suppression</h2>
+        <h2 className={s.h2}>9. Votre compte, sa suspension et sa suppression</h2>
         <ul className={s.ul}>
           <li>Un compte par personne, rattaché à une entreprise du bâtiment. Vous gardez votre mot de passe pour vous.</li>
           <li>
@@ -213,13 +238,13 @@ export default function CguPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>9. Données et droit applicable</h2>
+        <h2 className={s.h2}>10. Données, contact et droit applicable</h2>
         <p className={s.p}>
           Le traitement de vos données est décrit dans la{" "}
           <Link href="/confidentialite" className="font-semibold underline">
             politique de confidentialité
           </Link>
-          . Ces conditions sont soumises au droit français. En cas de litige, et après recherche d&apos;une solution amiable, le {TRIBUNAL} est seul compétent.
+          . Pour toute question : {EDITEUR.contact}. Ces conditions sont soumises au droit français. En cas de litige, et après recherche d&apos;une solution amiable, le {TRIBUNAL} est seul compétent.
         </p>
       </section>
       <Link href="/" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text">

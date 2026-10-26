@@ -24,7 +24,7 @@ export class ResendEmailSender implements TransactionalEmailSender, EmailCapabil
     private readonly from: string,
     private readonly logger: AppLogger,
     private readonly fetchImpl: HttpPost = fetch as unknown as HttpPost,
-    /** « Répondre » par défaut (bonjour@mobiiz.fr, renvoyée chez Greg) ; un e-mail qui en donne une autre la garde. */
+    /** « Répondre » par défaut (contact@mobiiz.fr, renvoyée chez Greg) ; un e-mail qui en donne une autre la garde. */
     private readonly replyTo?: string,
   ) {}
 

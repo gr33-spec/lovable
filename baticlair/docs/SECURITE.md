@@ -113,9 +113,19 @@ Test permanent : `apps/api/test/admin-securite.test.ts` (routes, liste blanche, 
 
 - Le rôle admin n'est jamais donné depuis l'interface : il vient de la variable `GROUPE_ADMINS` sur Vercel, que seul le titulaire du compte Vercel peut changer. Le code par e-mail prouve en plus que la personne a la boîte.
 
-### En attente de l'accord de Greg (important)
+### En attente de l'accord de Greg (important) — feu vert le 26 octobre 2026, voir plus bas
 
 - Vérification des mots de passe fuités (Have I Been Pwned, k-anonymat, gratuit) ; limite par compte en plus de la limite par IP.
 - Antivirus des fichiers reçus et anti-robot sur l'inscription (service externe, ex. Cloudflare Turnstile gratuit).
 - Sauvegarde quotidienne de la base avec test de restauration (plan Neon à vérifier).
 - CSP sans `unsafe-inline` (nonce), failles « haute » restantes dans les outils de développement seulement (`vite`, `deepmerge-ts`, `zod` via la CLI Vercel).
+
+## Suite sécurité du 26 octobre 2026 (feu vert de Greg)
+
+- **Mots de passe fuités** : à l'inscription, au changement et à la réinitialisation, un mot de passe présent dans Have I Been Pwned est refusé (« Ce mot de passe a déjà fuité sur Internet. Choisis-en un autre. »). Seuls les 5 premiers caractères de l'empreinte SHA-1 partent (k-anonymat). Module `haveIBeenPwned` de better-auth (déjà installé, aucune dépendance ajoutée), `MOTS_DE_PASSE_FUITES` (en ligne : oui par défaut). Test `apps/api/test/mots-de-passe-fuites.test.ts`.
+- **Turnstile (Cloudflare, gratuit)** : défi anti-robots sur l'inscription, le mot de passe oublié, l'inscription négoce et la demande de lien de connexion négoce ; jeton vérifié côté API (`x-captcha-response`, module `captcha` de better-auth et `platform/http/turnstile.ts`), refus si Cloudflare ne répond pas. **Inactif tant que Greg n'a pas créé le site Turnstile** et posé `TURNSTILE_SECRET_KEY` (API) et `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (site) dans Vercel. Le script de Cloudflare est le seul script extérieur, chargé seulement sur ces pages et seulement avec la clé (test `sans-tiers.test.mjs`). Test `apps/api/test/turnstile.test.ts`.
+- **CSP par nonce** : chaque page reçoit un nonce neuf (`src/proxy.ts`, `src/lib/csp.ts`) ; `script-src 'self' 'nonce-…' 'strict-dynamic'`, plus de `'unsafe-inline'` pour les scripts. Les pages sont rendues à la demande (`connection()` dans `app/layout.tsx`). Les styles en ligne restent permis (attributs `style` de React). Vérifié dans Chromium : 0 erreur CSP sur /, /connexion, /inscription, /mentions-legales, /tarifs.
+- **Sauvegardes** : le projet Neon `baticlair-db` (Francfort) est sur le **plan gratuit : 6 heures d'historique seulement, aucune sauvegarde quotidienne**. Ajouté sans frais : `.github/workflows/sauvegarde-base.yml`, export complet chaque nuit (pg_dump), chiffré AES-256, gardé 30 jours. Il ne tourne qu'après (1) la fusion dans `main` (un horaire GitHub ne part que de la branche par défaut) et (2) les secrets `SAUVEGARDE_DATABASE_URL` (rôle en lecture seule) et `SAUVEGARDE_CLE` posés par Greg. Autre voie, payante (accord de Greg) : plan Neon Launch, 7 jours d'historique.
+- **Restauration** : télécharger l'artefact, `openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in base-AAAA-MM-JJ.dump.enc -out base.dump -pass pass:<clé>`, puis `pg_restore --no-owner -d <base vide> base.dump`. À tester une fois par trimestre sur une branche Neon.
+- **Boîte de contact** : MX de mobiiz.fr chez Resend ; le webhook est signé (Svix) et vérifié ; le renvoi à l'admin garde « Répondre » vers l'expéditeur, jamais de boucle (`contact-entrant.ts`).
+

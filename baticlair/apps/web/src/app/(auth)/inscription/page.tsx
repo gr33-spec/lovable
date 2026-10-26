@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { TradePicker } from "@/components/trade-picker";
+import { Turnstile, TURNSTILE_ACTIF } from "@/components/turnstile";
 import { Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
 import { VERSION_CGU } from "@/lib/legal";
 import { api, ApiError, newActionKey } from "@/lib/api";
@@ -18,6 +19,7 @@ export default function InscriptionPage() {
   const [error, setError] = useState<ApiError | null>(null);
   const [trades, setTrades] = useState<string[]>([]);
   const [cgu, setCgu] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
   const companyKey = useRef(newActionKey());
   // Si le compte est créé mais que l'entreprise échoue (réseau), « réessayer »
   // ne doit pas recréer le compte : on reprend à l'étape suivante.
@@ -43,6 +45,7 @@ export default function InscriptionPage() {
             password,
             callbackURL: "/",
           },
+          captcha,
         });
         accountCreated.current = true;
       }
@@ -95,7 +98,8 @@ export default function InscriptionPage() {
             .
           </span>
         </label>
-        <Button type="submit" pending={pending} disabled={!cgu} className="mt-2">
+        <Turnstile onToken={setCaptcha} />
+        <Button type="submit" pending={pending} disabled={!cgu || (TURNSTILE_ACTIF && !captcha)} className="mt-2">
           Créer mon compte
         </Button>
       </form>

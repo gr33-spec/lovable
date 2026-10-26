@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import {
   BANDEAU_MODE_TEST,
   EMETTEUR_FACTURES,
+  MENTIONS_EDITEUR,
   NOM_APP,
   PAIEMENT_AUCUN,
   REGLAGES_ABONNEMENT_DEFAUT,
@@ -381,7 +382,7 @@ export class AbonnementService {
     const em = this.config.groupe?.facture.emetteur ?? EMETTEUR_FACTURES;
     const test = f.serie === "TEST";
     const pdf = await pdfDeTexte(`${test ? "FACTURE DE TEST (aucun paiement réel) " : "Facture "}n° ${f.numero}`, [
-      { titre: "Émise par", lignes: [`${em.nom}${"forme" in em && em.forme ? `, ${em.forme}` : ""}`, em.adresse, `SIRET ${em.siret}`, `TVA intracommunautaire ${em.tvaIntracom}`] },
+      { titre: "Émise par", lignes: [`${em.nom}${"forme" in em && em.forme ? `, ${em.forme}` : ""}${em.siret === MENTIONS_EDITEUR.siret ? ` au capital de ${MENTIONS_EDITEUR.capital}, ${MENTIONS_EDITEUR.rcs}` : ""}`, em.adresse, `SIRET ${em.siret}`, `TVA intracommunautaire ${em.tvaIntracom}`, ...(em.siret === MENTIONS_EDITEUR.siret ? [`Contact : ${MENTIONS_EDITEUR.contact}`] : [])] },
       { titre: "Client", lignes: [f.raisonSociale, ...(f.siret ? [`SIRET ${f.siret}`] : []), ...(f.adresse ? [f.adresse] : []), ...(f.tvaIntra ? [`TVA intracommunautaire ${f.tvaIntra}`] : [])] },
       { titre: "Détail", lignes: [`Date d'émission : ${dateFr(f.emiseLe)}`, ["Désignation", "Montant HT"], [designationFacture(f), eurosDeCentimes(f.montantHtCentimes)]] },
       { titre: "Total", lignes: [["Total HT", eurosDeCentimes(f.montantHtCentimes)], [`TVA ${Number(f.tauxTva).toLocaleString("fr-FR")} %`, eurosDeCentimes(f.tvaCentimes)], ["Total TTC", eurosDeCentimes(f.ttcCentimes)]] },

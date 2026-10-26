@@ -1,4 +1,4 @@
-# Conformité légale et RGPD — état au 24 octobre 2026
+# Conformité légale et RGPD — état au 26 octobre 2026
 
 Branche `claude/saas-achat-artisans-prompt-1lyihx` (PR #284), puis `claude/integration-groupe`. Rien dans `main`.
 
@@ -40,17 +40,9 @@ Branche `claude/saas-achat-artisans-prompt-1lyihx` (PR #284), puis `claude/integ
 
 ## Reste à faire par Greg
 
-### 1. Les infos du Kbis (5 repères `[A COMPLETER]`, dans `apps/web/src/lib/legal.ts`)
+### 1. Les infos du Kbis — fait le 26 octobre 2026
 
-| Repère | Où | Quoi |
-|---|---|---|
-| `EDITEUR.capital` | mentions légales | Capital social de BATI INVEST (€) |
-| `EDITEUR.rcs` | mentions légales | Ville du RCS (Saint-Brieuc ?) |
-| `EDITEUR.directeurPublication` | mentions légales | Nom du directeur de la publication |
-| `EDITEUR.contact` | mentions, confidentialité, registre | Adresse e-mail de contact et des demandes RGPD |
-| `HEBERGEUR_BASE.adresse` | mentions légales | Adresse légale de Neon Inc. (dans son DPA) |
-
-Tant qu'un repère reste, `VERCEL_ENV=production` refuse la construction : rien ne part en production avec un repère.
+Capital 1 000 €, RCS Saint-Brieuc 910 796 325, directeur de la publication Grégory Roy (gérant), contact contact@mobiiz.fr, base de données Neon, LLC (groupe Databricks, Inc.), 160 Spear Street, Suite 1300, San Francisco, CA 94105. Plus aucun repère `[A COMPLETER]` : la garde de production passe (`GARDE_A_COMPLETER=stricte`). Le même bloc partout : mentions, confidentialité, pied des e-mails, landing, factures (`MENTIONS_EDITEUR`, `BLOC_LEGAL`).
 
 ### 2. Les contrats de sous-traitance (DPA)
 
@@ -59,3 +51,19 @@ Tant qu'un repère reste, `VERCEL_ENV=production` refuse la construction : rien 
 ### 3. L'avocat
 
 Relire `docs/A-FAIRE-RELIRE.md` : CGU, conditions négoces, confidentialité, clause concurrence, responsabilité, bons de commande 10 ans.
+
+#### Passages à faire relire par l'avocat (version du 26 octobre 2026, points D de Greg)
+
+| # | Où | Passage | Pourquoi le faire relire |
+|---|---|---|---|
+| AV1 | CGU, article 4 | « BATI INVEST est un intermédiaire : ni vendeur ni acheteur » ; commission du négoce comprise dans le prix affiché | Qualification (courtage, apporteur d'affaires, agent commercial ?) ; obligation d'information de l'artisan sur la commission (transparence, art. L. 441-1 et suivants du code de commerce) |
+| AV2 | CGU, article 2, « L'adresse Mobiiz » | Adresse au nom de l'entreprise, envois « X via Mobiiz », réponses reçues par Mobiiz | Mandat d'envoi au nom de l'artisan ; secret des correspondances ; responsabilité en cas d'e-mail perdu |
+| AV3 | CGU, article 5, « Les limites de la lecture automatique » | L'IA peut se tromper ; l'artisan valide la liste | Validité de la limitation de responsabilité entre professionnels ; règlement européen sur l'IA (transparence) |
+| AV4 | CGU, article 3 | 49 € HT / mois, 348 € HT / an, essai, renouvellement annuel tacite avec rappel 30 jours, pas de rétractation | Reconduction tacite entre professionnels ; mentions obligatoires |
+| AV5 | Conditions négoces, « Regroupements négociés par Mobiiz » | Commission de 1 à 2 % du HT livré, facturée par BATI INVEST après livraison, payable à 30 jours | Forme du contrat avec chaque négoce, facturation et TVA, pénalités de retard et indemnité de 40 € (mentions obligatoires sur facture) |
+| AV6 | Conditions négoces, « Non-sollicitation » | 12 mois, limité au contournement d'une offre négociée | Proportionnalité ; compatibilité avec le droit de la concurrence (pas d'exclusivité déguisée) |
+| AV7 | Confidentialité et registre | Durées : compte 3 ans après la dernière connexion, devis et e-mails durée du compte, journaux 1 an ; e-mails reçus (n° 18) | Base légale des e-mails reçus de tiers (négoces non clients) ; information des expéditeurs (phrase en pied d'e-mail) |
+| AV8 | Observatoire (registre n° 19, CGU article 2, conditions négoces) | Statistiques publiées au-delà de `SEUIL_ANONYMAT` (5 entreprises ou 2 regroupements) | Anonymisation réelle au sens du RGPD (risque de réidentification dans un petit département) ; secret des affaires des négoces |
+| AV9 | Pied de chaque e-mail | « Une réponse à cet e-mail peut être reçue par Mobiiz… » ; lien « Ne plus recevoir ces e-mails » | Suffisance de l'information ; e-mails non transactionnels (prospection B2B des négoces invités) |
+| AV10 | Turnstile (Cloudflare) | Défi anti-robots, sans cookie publicitaire | Besoin ou non de consentement (traceur strictement nécessaire à la sécurité ?) |
+

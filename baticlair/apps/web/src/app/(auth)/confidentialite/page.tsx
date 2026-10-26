@@ -8,7 +8,7 @@ import { NOM_APP, nom } from "@/lib/nom";
 export const metadata: Metadata = { title: `Confidentialité — ${NOM_APP}` };
 
 /** La version de cette page (une date, comme les CGU). */
-const VERSION = "24/10/2026";
+const VERSION = "26/10/2026";
 
 /**
  * La politique de confidentialité (RGPD, Greg, 24 octobre 2026) : en tableau, chaque traitement avec ses données, sa base
@@ -32,7 +32,19 @@ const TRAITEMENTS: readonly { finalite: string; donnees: string; base: string; d
     finalite: `Les listes et les devis du ${nom}`,
     donnees: "Lignes de matériaux, quantités, commune de livraison, grilles de prix des négoces",
     base: "Contrat",
-    duree: "3 ans",
+    duree: "Tant que le compte vit (Greg, 26 octobre 2026 : devis et e-mails, durée du compte)",
+  },
+  {
+    finalite: "Les e-mails reçus sur contact@mobiiz.fr et sur l'adresse Mobiiz de ton entreprise (réponses des négoces, pièces jointes)",
+    donnees: "Expéditeur, destinataire, objet, texte, pièces jointes",
+    base: "Contrat (les CGU) ; intérêt légitime pour contact@ (te répondre)",
+    duree: "Tant que le compte vit ; contact@ : renvoyé à l'équipe, pas gardé dans l'application",
+  },
+  {
+    finalite: "Les statistiques anonymes de prix (« prix observés dans ton secteur »)",
+    donnees: "Moyennes arrondies par article et par département, sans nom ni identifiant ; publiées seulement au-delà de 5 entreprises ou 2 regroupements",
+    base: "Intérêt légitime (informer le secteur), données anonymes",
+    duree: "Sans limite : ce ne sont plus des données personnelles",
   },
   {
     finalite: "Les comptes des négoces inscrits",
@@ -66,9 +78,9 @@ const TRAITEMENTS: readonly { finalite: string; donnees: string; base: string; d
   },
   {
     finalite: "Les e-mails envoyés et les journaux techniques",
-    donnees: "Destinataire, objet, date, erreurs",
+    donnees: "Destinataire, objet, date, erreurs, adresse IP des connexions à l'admin",
     base: "Intérêt légitime (sécurité, preuve d'envoi)",
-    duree: "12 mois",
+    duree: "1 an",
   },
   {
     finalite: "La liste d'exclusion (« ne plus jamais être contacté »)",
@@ -83,7 +95,8 @@ const SOUS_TRAITANTS: readonly { nom: string; role: string; pays: string; garant
   { nom: HEBERGEUR_BASE.nom, role: "Base de données", pays: "Serveurs à Francfort (UE) ; société aux États-Unis", garantie: "Clauses contractuelles types" },
   { nom: "Anthropic", role: "Lecture des listes et des devis par l'IA (texte anonymisé)", pays: "États-Unis", garantie: "Clauses contractuelles types ; API commerciale : aucune donnée utilisée pour entraîner les modèles" },
   { nom: "Stripe", role: "Paiement de l'abonnement (carte bancaire, prélèvements, portail client)", pays: "Irlande (UE) ; société mère aux États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
-  { nom: "Resend", role: "Envoi des e-mails", pays: "États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
+  { nom: "Resend", role: "Envoi des e-mails, et réception des e-mails écrits à contact@mobiiz.fr", pays: "Serveurs en Irlande (UE) ; société aux États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
+  { nom: "Cloudflare (Turnstile)", role: "Vérification anti-robots à l'inscription et sur les pages négoce, quand elle est activée (adresse IP et signaux du navigateur, sans cookie publicitaire)", pays: "UE et États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
   { nom: "API Sirene de l'INSEE", role: "Vérification du SIRET (le numéro seul)", pays: "France", garantie: "Service public, aucun transfert" },
   { nom: "API Adresse de l'État", role: "Distance de livraison (adresses du chantier et du dépôt)", pays: "France", garantie: "Service public, aucun transfert" },
   { nom: "Apple, Google", role: "Notifications sur ton téléphone, si tu les actives", pays: "UE et États-Unis", garantie: "Message transmis, jamais gardé" },
@@ -181,8 +194,9 @@ export default function ConfidentialitePage() {
         <h2 className={s.h2}>Cookies</h2>
         <p className={s.p}>
           Seulement ceux qui sont nécessaires : le cookie qui te garde connecté (artisan ou négoce), et quelques réglages gardés dans ton navigateur
-          (l&apos;entreprise choisie, une aide déjà vue). Aucun cookie de publicité ni de mesure d&apos;audience, aucun script d&apos;un autre site : rien à
-          accepter. Tu peux les effacer depuis les réglages de ton navigateur ; il faudra alors te reconnecter.
+          (l&apos;entreprise choisie, une aide déjà vue). Aucun cookie de publicité ni de mesure d&apos;audience, rien à accepter. Seule exception, quand elle
+          est activée : la vérification anti-robots de Cloudflare (Turnstile) à l&apos;inscription et sur les pages négoce, qui ne dépose pas de cookie
+          publicitaire. Tu peux les effacer depuis les réglages de ton navigateur ; il faudra alors te reconnecter.
         </p>
       </section>
 

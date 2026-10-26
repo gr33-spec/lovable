@@ -43,6 +43,7 @@ const errorMessages: Record<string, string> = {
   INVALID_EMAIL_OR_PASSWORD: "E-mail ou mot de passe incorrect.",
   INVALID_EMAIL: "Cette adresse e-mail n'est pas valide.",
   PASSWORD_TOO_SHORT: "Le mot de passe doit faire au moins 10 caractères.",
+  PASSWORD_COMPROMISED: "Ce mot de passe a déjà fuité sur Internet. Choisis-en un autre.",
   PASSWORD_TOO_LONG: "Le mot de passe est trop long.",
   USER_ALREADY_EXISTS: "Un compte existe déjà avec cette adresse. Connecte-toi.",
   USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "Un compte existe déjà avec cette adresse. Connecte-toi.",

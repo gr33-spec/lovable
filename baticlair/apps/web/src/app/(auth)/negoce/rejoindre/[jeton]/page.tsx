@@ -1,5 +1,6 @@
 "use client";
 
+import { Turnstile, TURNSTILE_ACTIF } from "@/components/turnstile";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -45,6 +46,7 @@ export default function RejoindrePage() {
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
+  const [captcha, setCaptcha] = useState<string | null>(null);
 
   useEffect(() => {
     api<Invitation>(`/v1/negoce/invitation/${encodeURIComponent(jeton)}`)
@@ -70,6 +72,7 @@ export default function RejoindrePage() {
       const r = await api<{ phrase: string; departements: string[] }>("/v1/negoce/inscription", {
         method: "POST",
         body: { jeton, email: email.trim(), siret: siret.replace(/\s+/g, "") || null, enseigne: enseigne.trim(), telephone: telephone.trim() || null, depots: depots.filter((d) => d.trim()).map((adresse) => ({ adresse })), livraison: versPaliers(paliers), departements, conditions, offre: offre.offre, familles: offre.offre === "specialiste" ? offre.familles : [] },
+        captcha,
       });
       setFait(r.phrase);
     } catch (err) {
@@ -139,7 +142,8 @@ export default function RejoindrePage() {
             {erreur}
           </p>
         ) : null}
-        <Button type="submit" pending={pending} disabled={!conditions || !offreValide(offre) || !email.trim() || !enseigne.trim() || !depots.some((d) => d.trim())}>
+        <Turnstile onToken={setCaptcha} />
+        <Button type="submit" pending={pending} disabled={!conditions || !offreValide(offre) || !email.trim() || !enseigne.trim() || !depots.some((d) => d.trim()) || (TURNSTILE_ACTIF && !captcha)}>
           Créer mon accès
         </Button>
       </form>

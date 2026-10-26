@@ -1,6 +1,9 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError } from "better-auth/api";
+import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
+import { captcha } from "better-auth/plugins";
+import { ENDPOINTS_TURNSTILE } from "../../../platform/http/turnstile.js";
 import { PREVIEW_ORIGIN_JOKER, type AppConfig } from "../../../platform/config/config.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
@@ -30,6 +33,12 @@ export function createAuth(config: AppConfig, prisma: PrismaService, email: Tran
     database: prismaAdapter(prisma, { provider: "postgresql" }),
     trustedOrigins: [...config.webAppOrigins, ...(config.previewOriginPattern ? [PREVIEW_ORIGIN_JOKER] : [])],
     telemetry: { enabled: false },
+    // Un mot de passe déjà fuité est refusé (inscription, changement, réinitialisation) : k-anonymat, rien d'autre ne part.
+    // Turnstile (Cloudflare) sur l'inscription et le mot de passe oublié, dès que la clé secrète est posée.
+    plugins: [
+      ...(config.motsDePasseFuites ? [haveIBeenPwned({ customPasswordCompromisedMessage: "Ce mot de passe a déjà fuité sur Internet. Choisis-en un autre." })] : []),
+      ...(config.turnstileSecret ? [captcha({ provider: "cloudflare-turnstile", secretKey: config.turnstileSecret, endpoints: [...ENDPOINTS_TURNSTILE] })] : []),
+    ],
     // Recentrage (Greg, 25 octobre 2026) : l'admin peut couper temporairement les inscriptions gratuites (coût IA) ;
     // un nouveau compte est alors refusé avec une phrase claire. Les comptes existants ne changent pas.
     databaseHooks: {

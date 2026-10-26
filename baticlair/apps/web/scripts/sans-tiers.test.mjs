@@ -24,6 +24,15 @@ const INTERDITS = [
   /fonts\.googleapis|fonts\.gstatic/i,
 ];
 
+test("Turnstile (Greg, 26 octobre 2026) est le seul site extérieur, dans son seul composant", () => {
+  const externes = [];
+  for (const f of fichiers(join(racine, "src"))) {
+    const t = readFileSync(f, "utf8");
+    for (const m of t.matchAll(/["'`] ?https:\/\/challenges\.cloudflare\.com[^"'`]*/g)) externes.push(`${f.slice(racine.length + 1)} ${m[0]}`);
+  }
+  assert.deepEqual(externes.map((e) => e.split(" ")[0]).sort(), ["src/components/turnstile.tsx", "src/lib/csp.ts"]);
+});
+
 test("aucun script ni traceur tiers dans le site", () => {
   const fautes = [];
   for (const f of fichiers(join(racine, "src"))) {
@@ -33,10 +42,14 @@ test("aucun script ni traceur tiers dans le site", () => {
   assert.deepEqual(fautes, []);
 });
 
-test("la politique de sécurité ne laisse rien venir d'ailleurs", () => {
-  const config = readFileSync(join(racine, "next.config.ts"), "utf8");
-  assert.match(config, /"default-src 'self'"/);
-  assert.match(config, /"script-src 'self' 'unsafe-inline'"/);
-  assert.match(config, /"connect-src 'self' blob:"/);
-  assert.doesNotMatch(config, /-src[^"]*https?:/);
+test("la politique de sécurité ne laisse rien venir d'ailleurs ; un script ne passe qu'avec le nonce (26 octobre 2026)", () => {
+  const csp = readFileSync(join(racine, "src", "lib", "csp.ts"), "utf8");
+  assert.match(csp, /"default-src 'self'"/);
+  assert.match(csp, /`script-src 'self' 'nonce-\$\{nonce\}' 'strict-dynamic'/);
+  assert.doesNotMatch(csp, /script-src[^`"]*unsafe-inline/);
+  assert.match(csp, /"connect-src 'self' blob:"/);
+  assert.doesNotMatch(csp, /-src[^"`]*https?:/);
+  // Le proxy pose la politique sur chaque page ; next.config n'en pose plus une seconde, plus large.
+  assert.match(readFileSync(join(racine, "src", "proxy.ts"), "utf8"), /Content-Security-Policy/);
+  assert.doesNotMatch(readFileSync(join(racine, "next.config.ts"), "utf8"), /unsafe-inline/);
 });

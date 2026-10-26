@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { NOM_APP } from "@/lib/nom";
 import { Landing } from "./landing";
 
@@ -13,6 +14,6 @@ export const metadata: Metadata = {
   description: "Tes quantitatifs au propre. Tes demandes de prix en quelques clics. La force du groupe en plus.",
 };
 
-export default function BienvenuePage() {
-  return <Landing />;
+export default async function BienvenuePage() {
+  return <Landing nonce={(await headers()).get("x-nonce") ?? undefined} />;
 }

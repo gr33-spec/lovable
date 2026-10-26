@@ -53,6 +53,8 @@ export interface RequestOptions {
    */
   idempotencyKey?: string;
   signal?: AbortSignal;
+  /** Le jeton du défi Turnstile (`components/turnstile.tsx`), envoyé en `x-captcha-response`. */
+  captcha?: string | null;
 }
 
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -60,6 +62,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
   if (options.body !== undefined && !isForm) headers["content-type"] = "application/json";
   if (options.idempotencyKey) headers["idempotency-key"] = options.idempotencyKey;
+  if (options.captcha) headers["x-captcha-response"] = options.captcha;
   const companyId = getActiveCompanyId();
   if (companyId && !path.startsWith("/v1/auth")) headers["x-company-id"] = companyId;
 

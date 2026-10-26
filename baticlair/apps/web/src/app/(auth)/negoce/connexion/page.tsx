@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Turnstile, TURNSTILE_ACTIF } from "@/components/turnstile";
 import { Button, Field, PageTitle } from "@/components/ui";
 import { api } from "@/lib/api";
 import { nom } from "@/lib/nom";
@@ -11,12 +12,13 @@ export default function ConnexionNegocePage() {
   const [pending, setPending] = useState(false);
   const [envoye, setEnvoye] = useState(false);
   const [erreur, setErreur] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
   async function envoyer(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
     setErreur(false);
     try {
-      await api("/v1/negoce/connexion", { method: "POST", body: { email: email.trim() } });
+      await api("/v1/negoce/connexion", { method: "POST", body: { email: email.trim() }, captcha });
       setEnvoye(true);
     } catch {
       setErreur(true);
@@ -40,7 +42,8 @@ export default function ConnexionNegocePage() {
               Ça n&apos;a pas marché. Réessayez dans un instant.
             </p>
           ) : null}
-          <Button type="submit" pending={pending} disabled={!email.trim()}>
+          <Turnstile onToken={setCaptcha} />
+          <Button type="submit" pending={pending} disabled={!email.trim() || (TURNSTILE_ACTIF && !captcha)}>
             Recevoir mon lien
           </Button>
         </form>

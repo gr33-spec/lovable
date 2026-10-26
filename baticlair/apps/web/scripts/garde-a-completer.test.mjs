@@ -9,11 +9,10 @@ import { reperesRestants, verifier } from "./garde-a-completer.mjs";
 /** Aucune page publique ne part en production avec « [A COMPLETER] » (Greg, 24 octobre 2026). */
 const src = join(fileURLToPath(new URL(".", import.meta.url)), "..", "src");
 
-test("le code d'aujourd'hui porte des repères : la production est refusée, la prévisualisation passe", () => {
-  assert.ok(reperesRestants(src).length > 0, "les informations du Kbis ne sont pas encore données");
-  assert.equal(verifier({ VERCEL_ENV: "production" }, src).ok, false);
-  assert.equal(verifier({ VERCEL_ENV: "preview" }, src).ok, true);
-  assert.equal(verifier({ GARDE_A_COMPLETER: "stricte" }, src).ok, false);
+test("le code d'aujourd'hui ne porte plus aucun repère (Kbis donné par Greg, 26 octobre 2026) : la production passe", () => {
+  assert.deepEqual(reperesRestants(src), []);
+  assert.equal(verifier({ VERCEL_ENV: "production" }, src).ok, true);
+  assert.equal(verifier({ GARDE_A_COMPLETER: "stricte" }, src).ok, true);
 });
 
 test("une fois tout complété, la production passe ; la déclaration de la constante ne compte pas", () => {

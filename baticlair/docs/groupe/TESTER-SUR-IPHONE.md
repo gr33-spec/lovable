@@ -5,7 +5,7 @@ But (Greg, 24 octobre 2026) : vivre tout un cycle Mobiiz depuis ton iPhone, avec
 ## 0. Avant (une fois)
 
 1. **Le lien** : **https://test.mobiiz.fr**, public (sans compte Vercel), non indexé par Google. C'est la prévisualisation de la branche `claude/saas-achat-artisans-prompt-1lyihx`, avec sa propre base (copie Neon) ; l'API est sur `https://api-test.mobiiz.fr`. Rien ne touche la production.
-2. **Déjà réglé** (variables de la branche, 24 octobre 2026) : commande commune ouverte, toi admin (`GROUPE_ADMINS`), e-mails réels depuis `bonjour@mobiiz.fr` avec la liste blanche = ton e-mail, Stripe en mode test (49 € par mois, 348 € par an).
+2. **Déjà réglé** (variables de la branche, 24 octobre 2026) : commande commune ouverte, toi admin (`GROUPE_ADMINS`), e-mails réels depuis `contact@mobiiz.fr` (avant le 26 octobre : bonjour@) avec la liste blanche = ton e-mail, Stripe en mode test (49 € par mois, 348 € par an).
 3. Sur l'iPhone : ouvrir le lien dans Safari, puis Partager → « Sur l'écran d'accueil » (sans cela, pas de notifications).
 4. **Carte de test Stripe** : `4242 4242 4242 4242`, une date future, n'importe quel code à 3 chiffres. Aucune carte n'est débitée.
 
