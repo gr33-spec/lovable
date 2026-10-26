@@ -4,7 +4,7 @@ import { DemoSurBouton } from "@/components/demo-guidee";
 import { CompteurInscrits } from "@/components/inviter";
 import { Apparition, CompteurVingt, PartageVitrine } from "@/components/landing-mouvement";
 import { EnteteVitrine, PiedVitrine } from "@/components/vitrine";
-import { DEVIS_EXEMPLE, ECART_ARDOISE, ECRANS, REGROUPEMENT_EXEMPLE, ecartPourcent } from "@/lib/landing";
+import { DEVIS_EXEMPLE, ECART_PEINTURE, ECRANS, REGROUPEMENT_EXEMPLE } from "@/lib/landing";
 import { ACCROCHE_APP, NOM_APP } from "@/lib/nom";
 
 /**
@@ -63,8 +63,6 @@ const ETAPES = [
 
 export function Landing({ couvreurs = false, origine }: { couvreurs?: boolean; origine: string }) {
   compterLaVisite();
-  const ecart = ecartPourcent(ECART_ARDOISE.unite, ECART_ARDOISE.palette);
-  const euros = (n: number) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return (
     <div className="mz">
       <Apparition />
@@ -159,42 +157,41 @@ export function Landing({ couvreurs = false, origine }: { couvreurs?: boolean; o
             </div>
           </section>
 
-          {/* L'écart unité / palette : seulement avec les vrais prix de Greg (ECART_ARDOISE). */}
-          {ecart !== null && ECART_ARDOISE.unite !== null && ECART_ARDOISE.palette !== null ? (
+          {/* L'écart pot seul / palette négociée (Greg, 26 octobre 2026) : la peinture, sans marque ni enseigne, marqué « Exemple ».
+              Pas sur /couvreurs, où il ne parlerait pas au métier. */}
+          {couvreurs ? null : (
             <section aria-labelledby="ecart" className="mz-section mz-deux" data-apparait="">
               <div>
-                <Cote gauche="Même ardoise, même négoce" />
+                <Cote gauche="Seul ou en palette" />
                 <h2 id="ecart" className="mz-titre mz-h2">
-                  À l&apos;unité ou à la palette, ce n&apos;est pas le même prix.
+                  {ECART_PEINTURE.titre}
                 </h2>
                 <p className="mz-gris" style={{ marginTop: 16, maxWidth: "38ch" }}>
                   Le prix palette, un artisan seul l&apos;a rarement. En regroupant les besoins du secteur, on va le chercher.
                 </p>
               </div>
               <div>
+                <p style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                  <span style={{ fontWeight: 700 }}>{ECART_PEINTURE.article}</span>
+                  <span className="mz-badge">{ECART_PEINTURE.mention}</span>
+                </p>
                 <div className="mz-carte mz-duo">
                   <div>
-                    <p className="mz-etiq">À l&apos;unité</p>
-                    <p className="mz-titre mz-num">{euros(ECART_ARDOISE.unite)} €</p>
+                    <p className="mz-etiq">Acheté seul</p>
+                    <p className="mz-titre mz-num">{ECART_PEINTURE.seul.prix}</p>
                     <p className="mz-gris" style={{ fontSize: 13 }}>
-                      HT la pièce
+                      {ECART_PEINTURE.seul.unite}
                     </p>
                   </div>
                   <div>
-                    <p className="mz-etiq">En palette</p>
-                    <p className="mz-titre mz-num">{euros(ECART_ARDOISE.palette)} €</p>
-                    <p style={{ fontSize: 13 }}>HT la pièce</p>
+                    <p className="mz-etiq">En palette négociée</p>
+                    <p className="mz-titre mz-num">{ECART_PEINTURE.palette.prix}</p>
+                    <p style={{ fontSize: 13 }}>{ECART_PEINTURE.palette.unite}</p>
                   </div>
                 </div>
-                <p className="mz-ecart">
-                  <span className="mz-titre mz-num">−{ecart} %</span>
-                  <span className="mz-gris" style={{ fontSize: 14 }}>
-                    {ECART_ARDOISE.article}. {ECART_ARDOISE.source}.
-                  </span>
-                </p>
               </div>
             </section>
-          ) : null}
+          )}
 
           {/* Un regroupement, marqué « exemple » jusqu'au premier vrai. */}
           <section aria-labelledby="regroupement" className="mz-section mz-deux" data-apparait="">

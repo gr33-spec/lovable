@@ -168,5 +168,7 @@ test.describe("Business model final : le regroupement négocié par un humain", 
     await expect(page.getByText(/ardoise, zinc, bois de charpente/i).first()).toBeVisible();
     await expect(page.getByText("Des chasseurs d'opportunités négocient pour toi.")).toBeVisible();
     await expect(page.getByText(/paient le juste prix/)).toBeVisible();
+    // L'exemple de la peinture reste sur l'accueil : il ne parle pas au couvreur.
+    await expect(page.getByRole("region", { name: "Le même pot, deux fois moins cher." })).toHaveCount(0);
   });
 });

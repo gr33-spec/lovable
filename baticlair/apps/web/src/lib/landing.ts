@@ -32,22 +32,18 @@ export const DEVIS_EXEMPLE = {
 } as const;
 
 /**
- * L'écart entre le prix à l'unité et le prix palette, sur la même ardoise chez le même négoce (Greg, 26 octobre 2026 :
- * « ardoise 32×22, [X] € la pièce, [Y] € la pièce en palette, négoce du 22, octobre 2026 »). Les deux prix sont à remplir
- * par Greg ; tant qu'il en manque un, le bloc n'apparaît pas.
+ * L'écart entre un pot acheté seul et le même pot en palette négociée (Greg, 26 octobre 2026, mot pour mot : « Blanc mat
+ * professionnel 15 L : seul, 6 à 7 € HT le litre ; en palette négociée, moins de 3 € HT le litre. Affiche « Le même pot, deux
+ * fois moins cher ». Mention en petit : « Exemple ». Sans nommer de marque ni d'enseigne. ») Remplace l'ardoise du 26 au
+ * matin, dont les prix n'avaient pas été donnés.
  */
-export const ECART_ARDOISE: { article: string; unite: number | null; palette: number | null; source: string } = {
-  article: "Ardoise naturelle 32×22",
-  unite: null,
-  palette: null,
-  source: "Négoce du 22, octobre 2026",
-};
-
-/** L'écart en pour cent, arrondi à l'unité : (unité − palette) / unité. `null` s'il manque un prix ou s'il n'y a pas d'écart. */
-export function ecartPourcent(unite: number | null, palette: number | null): number | null {
-  if (unite === null || palette === null || unite <= 0 || palette >= unite) return null;
-  return Math.round(((unite - palette) / unite) * 100);
-}
+export const ECART_PEINTURE = {
+  titre: "Le même pot, deux fois moins cher.",
+  article: "Blanc mat professionnel, pot de 15 L",
+  seul: { prix: "6 à 7 €", unite: "HT le litre" },
+  palette: { prix: "moins de 3 €", unite: "HT le litre" },
+  mention: "Exemple",
+} as const;
 
 /**
  * Un regroupement, marqué « exemple » (Greg, 26 octobre 2026 : « celui de la recette, on le remplacera par le premier vrai ») :

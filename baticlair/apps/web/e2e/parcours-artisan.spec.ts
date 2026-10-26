@@ -2625,7 +2625,12 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // promesse d'économie chiffrée.
   await expect(page.getByRole("heading", { name: "Seul, tu es un client parmi d'autres. À vingt, vous êtes le plus gros client du département." })).toBeVisible();
   await expect(page.getByRole("img", { name: "De 1 à 20 artisans du secteur" })).toBeVisible();
-  // Le regroupement montré est marqué « Exemple » jusqu'au premier vrai ; l'écart unité / palette attend les prix de Greg.
+  // L'écart pot seul / palette négociée (Greg, 26 octobre 2026) : la peinture, marqué « Exemple », sans marque ni enseigne.
+  const ecart = page.getByRole("region", { name: "Le même pot, deux fois moins cher." });
+  await expect(ecart.getByText("6 à 7 €", { exact: true })).toBeVisible();
+  await expect(ecart.getByText("moins de 3 €", { exact: true })).toBeVisible();
+  await expect(ecart.getByText("Exemple", { exact: true })).toBeVisible();
+  // Le regroupement montré est marqué « Exemple » jusqu'au premier vrai.
   await expect(page.getByRole("region", { name: "Les mêmes ardoises, dans le même département." }).getByText("Exemple", { exact: true })).toBeVisible();
   await expect(page.getByText("Quand d'autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes.")).toBeVisible();
   // Business model final (Greg, 25 octobre 2026) : l'argument des chasseurs d'opportunités.
