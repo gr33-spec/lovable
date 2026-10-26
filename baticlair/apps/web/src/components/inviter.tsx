@@ -13,13 +13,20 @@ export const messageInvitation = (lien: string) =>
 
 const bouton = "pressable inline-flex min-h-12 items-center justify-center rounded-full px-5 text-[15px] font-semibold";
 
-export function InviterCollegue({ titre = "Inviter un collègue", texte, grand = false }: { titre?: string; texte?: string; grand?: boolean }) {
-  // L'adresse du site se lit dans le navigateur (production, prévisualisation ou local) ; avant, un lien relatif.
-  const lien = useSyncExternalStore(
+/**
+ * Le lien à partager : l'adresse du site lue dans le navigateur ; côté serveur, celle de la requête quand la page la donne
+ * (`origine`). Avant (26 octobre 2026), le serveur écrivait « Rejoins-nous : / » dans la page.
+ */
+export function useLienInvitation(origine?: string): string {
+  return useSyncExternalStore(
     () => () => undefined,
     () => `${window.location.origin}/`,
-    () => "/",
+    () => (origine ? `${origine}/` : ""),
   );
+}
+
+export function InviterCollegue({ titre = "Inviter un collègue", texte, grand = false }: { titre?: string; texte?: string; grand?: boolean }) {
+  const lien = useLienInvitation();
   const [copie, setCopie] = useState(false);
   const message = messageInvitation(lien);
 

@@ -1,75 +1,50 @@
 import Link from "next/link";
-import { DemoSurBouton } from "@/components/demo-guidee";
-import { ButtonLink } from "@/components/ui";
 import { ArgumentTarif } from "@/components/argument-tarif";
-import { LiensLegaux } from "@/components/legal";
-import { CompteurInscrits, InviterCollegue } from "@/components/inviter";
-import { Logo } from "@/components/logo";
-import { HEBERGEUR } from "@/lib/legal";
-import { ACCROCHE_APP, BLOC_LEGAL, NOM_APP, SLOGAN_APP } from "@/lib/nom";
+import { DemoSurBouton } from "@/components/demo-guidee";
+import { CompteurInscrits } from "@/components/inviter";
+import { Apparition, CompteurVingt, PartageVitrine } from "@/components/landing-mouvement";
+import { EnteteVitrine, PiedVitrine } from "@/components/vitrine";
+import { DEVIS_EXEMPLE, ECART_ARDOISE, ECRANS, REGROUPEMENT_EXEMPLE, ecartPourcent } from "@/lib/landing";
+import { ACCROCHE_APP, NOM_APP } from "@/lib/nom";
 
 /**
- * LA PAGE D'ACCUEIL PUBLIQUE. NOUVEAU CAP (22 octobre 2026, section 0 de `docs/groupe/parcours-complet.md`) : une seule
- * idée, « Paie tes matériaux moins cher », pour les couvreurs d'abord ; les autres métiers en une ligne, en bas. Rien sur la
- * rémunération (en suspens).
+ * LA PAGE D'ACCUEIL PUBLIQUE, « NIVEAU STUDIO » (Greg, 26 octobre 2026, direction artistique validée) : une page qui parle
+ * comme un couvreur à un couvreur, la preuve plutôt que la promesse. Fond clair, jaune #FFC800 et noir, titres en Bricolage
+ * Grotesque étroite, colonne décalée (`landing.css`). Trois mouvements seulement : le vrai devis DE00000071 lu ligne par ligne
+ * en haut (CSS seul), le compteur 1 → 20 sur la phrase clé, les sections et leurs lignes de cote au défilement ; tout s'arrête
+ * sous « réduire les animations ». Rien d'extérieur, aucune photo tant que Greg n'en fournit pas une à lui.
  *
- * REGISTRE PRO ET SOBRE (Greg, 22 octobre : « elle fait enfantin ») : fond blanc, texte noir, une seule couleur d'accent,
- * bouton uni, beaucoup d'espace. Aucun dessin : de vraies captures de l'app dans un cadre de téléphone, et des emplacements
- * neutres pour les photos de chantier de Greg (`PHOTOS_LANDING`, une ligne par photo). Une seule liste fictive sur toute
- * la page, celle de la démo (`EXEMPLE`) : mêmes articles, mêmes chiffres. Aucune ressource extérieure, aucun script.
+ * Gardé mot pour mot (Greg) : « Par un artisan, pour les artisans. », « Seul, tu es un client parmi d'autres. À vingt, vous
+ * êtes le plus gros client du département. », « Des chasseurs d'opportunités négocient pour toi. » ; « Dès 29 € HT par mois »
+ * avec le détail annuel et mensuel dessous. Chaque chiffre vient de `lib/landing.ts`, avec sa source.
  *
- * MOINS DE TEXTE (Greg, 23 octobre au soir : « trop de texte, laisse le nécessaire ») : l'accroche et une phrase, le
- * principe et le compteur, trois étapes en une ligne chacune, le partage, un titre et un bouton, une ligne pour les
- * négoces. L'exemple de liste et la section « ensemble » sont retirés (redondants avec les étapes).
- * HAUTE VISIBILITÉ (Greg, 23 octobre au soir : « ça ne donne pas envie, je veux un truc qui déchire ») : la page est
- * sombre d'un bloc (noir profond), un seul jaune signal pour le mot clé du titre, les boutons, l'aplat du téléphone et le
- * bloc du compteur ; titres en Bricolage Grotesque, très grands. Toujours aucun dessin : de vraies captures.
- * TON FUN ET DIRECT (Greg, 22 octobre) : « fun dans les mots, pro dans le visuel ». « Enfumer » vise le prix, jamais une
- * personne : les négoces lisent aussi la page, et ce sont eux qui répondent. Le compteur d'inscrits est le vrai chiffre de la
- * base (masqué sous 10), le partage passe par WhatsApp, SMS ou le lien copié (`InviterCollegue`). Gratuit pour l'artisan.
+ * Avant (23 au 25 octobre) : page sombre « haute visibilité », un iPhone sur un aplat jaune dont la capture était coupée.
  */
-/**
- * RECENTRAGE (Greg, 25 octobre 2026) : le titre, les trois étapes, le bloc groupe et le bloc négoce mot pour mot ; aucune
- * promesse d'économie chiffrée. Les captures restent celles de l'app (à reprendre après la recette en ligne).
- */
-const ETAPES = [
-  {
-    titre: "1. Dépose ton devis",
-    texte: "Le PDF de ton devis client, tel quel.",
-    image: { src: "/landing/capture-entree.jpg", alt: `L'écran « Nouveau chantier » de ${NOM_APP}` },
-  },
-  {
-    titre: `2. ${NOM_APP} prépare ton quantitatif`,
-    texte: "Une ligne par fourniture, prête à commander.",
-    image: { src: "/landing/capture-commande.jpg", alt: `Le quantitatif préparé par ${NOM_APP}` },
-  },
-  { titre: "3. Envoie à tes négoces et compare", texte: "Leurs prix livraison comprise, côte à côte.", image: { src: "/landing/capture-prix.jpg", alt: `Les prix reçus dans ${NOM_APP} : chaque négoce livraison comprise` } },
-] as const;
 
-
-
-/**
- * Le cadre d'un iPhone propre autour d'une VRAIE capture de l'app (780 × 1688, prise sur iPhone après la passe UI/UX) :
- * bordure noire, rayon d'écran, l'îlot en haut. Toujours l'écran entier : jamais un cadre coupé ni vide (Greg, 23 octobre).
- */
-function Telephone({ src, alt, priorite = false, className = "" }: { src: string; alt: string; priorite?: boolean; className?: string }) {
+/** Une vraie capture de l'app, entière (jamais coupée), en AVIF et WebP à deux largeurs. */
+function Ecran({ nom, alt }: { nom: string; alt: string }) {
+  const srcset = (ext: string) => `/landing/${nom}-390.${ext} 390w, /landing/${nom}-786.${ext} 786w`;
+  const sizes = "(min-width: 1024px) 286px, (min-width: 768px) 246px, 72vw";
   return (
-    <div className={`relative rounded-[44px] border-[10px] border-ink bg-ink ${className}`}>
-      <span aria-hidden="true" className="absolute top-2 left-1/2 z-10 h-6 w-24 -translate-x-1/2 rounded-full bg-ink" />
-      <div className="overflow-hidden rounded-[34px] bg-night-2">
-        {/* eslint-disable-next-line @next/next/no-img-element -- fichier local, taille fixe, sans optimiseur */}
-        <img src={src} alt={alt} width={780} height={1688} className="block h-auto w-full" loading={priorite ? "eager" : "lazy"} fetchPriority={priorite ? "high" : "auto"} decoding="async" />
-      </div>
+    <div className="mz-ecran">
+      <picture>
+        <source type="image/avif" srcSet={srcset("avif")} sizes={sizes} />
+        <source type="image/webp" srcSet={srcset("webp")} sizes={sizes} />
+        <img src={`/landing/${nom}-390.webp`} alt={alt} width={786} height={1704} loading="lazy" decoding="async" />
+      </picture>
     </div>
   );
 }
 
-
-
-const BOUTON = "min-h-13 px-8 text-[16px]";
-
-/** Les sections sous la ligne de flottaison apparaissent en douceur au défilement : 200 ms, opacité et 12 px, aucun décalage. */
-const REVEAL_SCRIPT = `(function(){try{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var els=[].slice.call(document.querySelectorAll("[data-reveal]"));var h=innerHeight;els.forEach(function(e){if(e.getBoundingClientRect().top<h)e.setAttribute("data-vu","")});document.documentElement.setAttribute("data-reveal-pret","");var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.setAttribute("data-vu","");io.unobserve(x.target)}})},{rootMargin:"0px 0px -10% 0px"});els.forEach(function(e){if(!e.hasAttribute("data-vu"))io.observe(e)})}catch(e){}})();`;
+function Cote({ gauche, droite }: { gauche?: string; droite?: string }) {
+  return (
+    <p className="mz-cote mz-etiq" style={{ marginBottom: 26 }}>
+      {gauche ? <span>{gauche}</span> : null}
+      <i aria-hidden="true" />
+      {droite ? <span>{droite}</span> : null}
+    </p>
+  );
+}
 
 /**
  * Une visite comptée par le serveur du site (tableau de bord, 24 octobre 2026) : ni cookie, ni adresse, ni rien sur la
@@ -80,132 +55,248 @@ function compterLaVisite() {
   void fetch(`${api}/v1/public/visite`, { method: "POST", signal: AbortSignal.timeout(1500) }).catch(() => undefined);
 }
 
-export function Landing({ couvreurs = false, nonce }: { couvreurs?: boolean; nonce?: string }) {
+const ETAPES = [
+  { titre: "Dépose ton devis", texte: "Le PDF du devis client, tel quel, ou ta liste en photo. Rien à recopier.", ecran: ECRANS.depot },
+  { titre: `${NOM_APP} prépare ton quantitatif`, texte: "Une ligne par fourniture, au nom du comptoir. Tu corriges d'un tap.", ecran: ECRANS.liste },
+  { titre: "Envoie à tes négoces et compare", texte: "Leurs prix côte à côte, livraison comprise. Tu commandes où tu veux.", ecran: ECRANS.prix },
+] as const;
+
+export function Landing({ couvreurs = false, origine }: { couvreurs?: boolean; origine: string }) {
   compterLaVisite();
-  const h2 = "font-display text-[36px] leading-[1.0] font-extrabold tracking-[-0.03em] sm:text-[56px]";
+  const ecart = ecartPourcent(ECART_ARDOISE.unite, ECART_ARDOISE.palette);
+  const euros = (n: number) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-20 px-4 pt-6 pb-16 sm:gap-28 sm:px-6 sm:pt-12 lg:gap-32">
-      {/* Greg, 24 octobre 2026 : le visiteur arrive sur l'accroche ; la démo ne s'ouvre jamais d'elle-même, seulement par
-          « Voir comment ça marche (30 s) », juste sous l'accroche (`DemoSurBouton`). */}
+    <div className="mz">
+      <Apparition />
+      <div className="mz-page">
+        <EnteteVitrine />
 
-      {/* L'accroche : la promesse en très grand, le mot « enfumer » en jaune signal ; l'app dans un iPhone posé sur un
-          grand aplat jaune, comme une affiche de chantier. */}
-      <section aria-labelledby="accroche" className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
-        <div className="flex flex-col gap-5 min-[400px]:gap-8 lg:col-span-7">
-          <p className="inline-flex w-fit items-center rounded-full bg-white/10 px-3.5 py-1.5 text-[13px] font-semibold tracking-[0.02em] text-white/85 uppercase">
-            {couvreurs ? "Pour les couvreurs" : ACCROCHE_APP}
-          </p>
-          <h1 id="accroche" className="max-w-[18ch] text-[36px] leading-[0.98] font-extrabold tracking-[-0.03em] min-[400px]:text-[42px] sm:text-[64px]">
-            Tes quantitatifs au propre. Tes demandes de prix en quelques clics. <span className="text-accent">La force du groupe en plus.</span>
-          </h1>
-          {couvreurs ? <p className="max-w-[44ch] text-[18px] leading-relaxed font-semibold text-white/80">Ardoise, zinc, bois de charpente, isolation de toiture : ton quantitatif au propre, tes prix en quelques clics, et un prix de groupe sur les gros volumes.</p> : null}
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-            <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
-              Commencer gratuitement
-            </ButtonLink>
-            <DemoSurBouton className="pressable inline-flex min-h-13 items-center gap-2 rounded-full border border-white/25 px-5 text-[15px] font-semibold whitespace-nowrap text-white min-[400px]:px-6 min-[400px]:text-[16px] transition-[color,border-color] duration-150 hover:border-accent hover:text-accent" />
-          </div>
-          {/* Les tarifs en une phrase (Greg, 25 octobre 2026), puis le détail des deux formules. */}
-          <ArgumentTarif className="max-w-[40ch] text-[17px] font-bold text-accent" />
-          <p className="text-[15px] font-semibold text-white/60">
-            29 € HT par mois payé à l&apos;année (348 €), ou 49 € HT au mois sans engagement.{" "}
-            <Link href="/tarifs" className="underline">
-              Voir les tarifs
-            </Link>
-          </p>
-        </div>
-        <div className="flex justify-center lg:col-span-5 lg:justify-end">
-          <div className="flex w-full max-w-[420px] justify-center overflow-hidden rounded-2xl bg-accent px-8 pt-10 sm:px-12 sm:pt-14">
-            <Telephone src="/landing/capture-accueil.jpg" alt={`L'accueil de ${NOM_APP} : le regroupement en cours et le temps qui reste avant la clôture`} priorite className="w-[260px] translate-y-3 sm:w-[300px]" />
-          </div>
-        </div>
-      </section>
-
-      {/* Le principe en une phrase, et le vrai compteur d'inscrits (rien sous 10), sur un bloc jaune : le chiffre en noir. */}
-      <section aria-labelledby="principe" data-reveal className="flex flex-col gap-8 rounded-2xl bg-accent p-6 text-ink sm:p-12 lg:p-16">
-        <p className="text-[15px] font-bold tracking-[0.02em] uppercase">{SLOGAN_APP}</p>
-        <h2 id="principe" className={`${h2} max-w-[20ch]`}>
-          L&apos;union fait la force.
-        </h2>
-        <p className="max-w-[52ch] text-[18px] leading-relaxed font-semibold sm:text-[21px]">
-          Quand d&apos;autres artisans du secteur ont besoin des mêmes gros matériaux{couvreurs ? " (ardoise, zinc, bois de charpente)" : ""}, on réunit les volumes.
-        </p>
-        <p className="max-w-[52ch] text-[22px] leading-snug font-extrabold sm:text-[28px]">Des chasseurs d&apos;opportunités négocient pour toi.</p>
-        <CompteurInscrits surAccent />
-      </section>
-
-      {/* Les trois étapes, chacune avec un écran ENTIER de l'app sur une carte de nuit, le numéro en jaune et en grand.
-          Sur le téléphone, elles défilent de côté. */}
-      <section aria-labelledby="comment-titre" className="flex scroll-mt-24 flex-col gap-12" id="comment">
-        <div className="flex flex-col gap-4" data-reveal>
-          <h2 id="comment-titre" className={h2}>
-            Comment ça marche
-          </h2>
-        </div>
-        <ol className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:px-0">
-          {ETAPES.map((e, i) => (
-            <li key={e.titre} data-reveal className="flex w-[80vw] max-w-[340px] shrink-0 snap-center flex-col gap-6 rounded-2xl bg-night-2 p-5 ring-1 ring-white/10 sm:w-auto sm:max-w-none sm:p-6">
-              <p className="font-display text-[64px] leading-none font-extrabold tracking-[-0.04em] text-accent tabular-nums" aria-hidden="true">
-                0{i + 1}
+        <main>
+          {/* L'accroche, à gauche ; à droite, un vrai devis lu sous les yeux du visiteur. */}
+          <section aria-labelledby="accroche" className="mz-accroche">
+            <div>
+              <p className="mz-kicker mz-etiq">{ACCROCHE_APP}</p>
+              <h1 id="accroche" className="mz-titre mz-h1">
+                Ton devis.
+                <br />
+                Ta liste de matériaux.
+                <br />
+                <span className="mz-surligne">Tes prix.</span>
+              </h1>
+              {couvreurs ? <p style={{ fontWeight: 700, marginBottom: 10 }}>Pour les couvreurs : ardoise, zinc, bois de charpente, isolation de toiture.</p> : null}
+              <p className="mz-chapo">
+                Tu déposes le devis client. {NOM_APP} sort chaque fourniture au nom du comptoir, tu l&apos;envoies à tes négoces et tu compares leurs prix, livraison comprise.
               </p>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-display text-[22px] leading-snug font-extrabold tracking-[-0.02em]">{e.titre}</h3>
-                <p className="text-[16px] leading-relaxed text-white/65">{e.texte}</p>
+              <div className="mz-actions">
+                <Link href="/inscription" className="mz-bouton">
+                  Commencer gratuitement
+                </Link>
+                <DemoSurBouton className="mz-lien" />
               </div>
-              <div className="flex items-end justify-center overflow-hidden rounded-xl bg-white/5 px-8 pt-8">
-                <Telephone src={e.image.src} alt={e.image.alt} className="w-full max-w-[220px] translate-y-10" />
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
+              <ArgumentTarif className="mz-prix" />
+              <p className="mz-prix-detail mz-num">
+                29 € HT par mois payé à l&apos;année (348 €), ou 49 € HT au mois sans engagement. <Link href="/tarifs">Voir les tarifs</Link>
+              </p>
+            </div>
 
-      {/* Le partage : une vraie section, pleine. Le même bloc vit dans l'app. */}
-      <div data-reveal>
-        <InviterCollegue grand titre="Fais venir tes collègues" texte="Plus on est nombreux, plus les regroupements se forment." />
+            <figure className="mz-lecture" data-apparait="" aria-label={`Un vrai devis de couvreur lu par ${NOM_APP}`}>
+              <div className="mz-devis">
+                <p className="mz-devis-tete">
+                  <strong>Devis {DEVIS_EXEMPLE.reference}</strong>
+                  <span className="mz-gris">{DEVIS_EXEMPLE.sujet}</span>
+                </p>
+                {DEVIS_EXEMPLE.lignes.map((l, i) => (
+                  <p key={l.n} className="mz-ligne-devis" style={{ "--i": i } as React.CSSProperties}>
+                    <span className="mz-gris mz-num">{l.n}</span>
+                    <span>{l.texte}</span>
+                    <span className="mz-num">{l.quantite}</span>
+                  </p>
+                ))}
+              </div>
+              <div className="mz-liste">
+                <p className="mz-liste-tete">
+                  <span className="mz-etiq" style={{ color: "var(--mz-jaune)" }}>
+                    Ta liste
+                  </span>
+                  <span className="mz-compte" style={{ color: "rgba(255,255,255,.62)" }}>
+                    3 fournitures, 1 ligne sans fourniture
+                  </span>
+                </p>
+                <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                  {DEVIS_EXEMPLE.lignes.flatMap((l, i) =>
+                    l.fournitures.map((f, j) => (
+                        <li key={`${l.n}-${j}`} className="mz-fourniture" style={{ "--i": i, "--j": j } as React.CSSProperties}>
+                          <span className="mz-point" data-orange={f.aPreciser ? "" : undefined} aria-hidden="true" />
+                          <span>
+                            {f.nom}
+                            <small>{f.aPreciser ? "Modèle à préciser" : `Ligne ${l.n} du devis`}</small>
+                          </span>
+                          <b className="mz-num">{f.quantite}</b>
+                        </li>
+                    )),
+                  )}
+                </ul>
+              </div>
+              <figcaption className="mz-source">
+                Extrait d&apos;un vrai devis de couvreur, lu par {NOM_APP}. La ligne 2 est de la main-d&apos;œuvre : elle ne donne aucune fourniture.
+              </figcaption>
+            </figure>
+          </section>
+
+          {/* La phrase clé et le compteur 1 → 20. */}
+          <section aria-labelledby="vingt" className="mz-section mz-vingt" data-apparait="">
+            <span className="mz-trame" aria-hidden="true" />
+            <div className="mz-colonne">
+              <Cote gauche="1" droite="20 artisans" />
+              <CompteurVingt />
+              <h2 id="vingt" className="mz-titre mz-h2 mz-phrase">
+                <span>Seul, tu es un client parmi d&apos;autres.</span> À vingt, vous êtes le plus gros client du département.
+              </h2>
+              <p className="mz-chasse">Des chasseurs d&apos;opportunités négocient pour toi.</p>
+              <div className="mz-inscrits">
+                <CompteurInscrits />
+              </div>
+            </div>
+          </section>
+
+          {/* L'écart unité / palette : seulement avec les vrais prix de Greg (ECART_ARDOISE). */}
+          {ecart !== null && ECART_ARDOISE.unite !== null && ECART_ARDOISE.palette !== null ? (
+            <section aria-labelledby="ecart" className="mz-section mz-deux" data-apparait="">
+              <div>
+                <Cote gauche="Même ardoise, même négoce" />
+                <h2 id="ecart" className="mz-titre mz-h2">
+                  À l&apos;unité ou à la palette, ce n&apos;est pas le même prix.
+                </h2>
+                <p className="mz-gris" style={{ marginTop: 16, maxWidth: "38ch" }}>
+                  Le prix palette, un artisan seul l&apos;a rarement. En regroupant les besoins du secteur, on va le chercher.
+                </p>
+              </div>
+              <div>
+                <div className="mz-carte mz-duo">
+                  <div>
+                    <p className="mz-etiq">À l&apos;unité</p>
+                    <p className="mz-titre mz-num">{euros(ECART_ARDOISE.unite)} €</p>
+                    <p className="mz-gris" style={{ fontSize: 13 }}>
+                      HT la pièce
+                    </p>
+                  </div>
+                  <div>
+                    <p className="mz-etiq">En palette</p>
+                    <p className="mz-titre mz-num">{euros(ECART_ARDOISE.palette)} €</p>
+                    <p style={{ fontSize: 13 }}>HT la pièce</p>
+                  </div>
+                </div>
+                <p className="mz-ecart">
+                  <span className="mz-titre mz-num">−{ecart} %</span>
+                  <span className="mz-gris" style={{ fontSize: 14 }}>
+                    {ECART_ARDOISE.article}. {ECART_ARDOISE.source}.
+                  </span>
+                </p>
+              </div>
+            </section>
+          ) : null}
+
+          {/* Un regroupement, marqué « exemple » jusqu'au premier vrai. */}
+          <section aria-labelledby="regroupement" className="mz-section mz-deux" data-apparait="">
+            <div>
+              <Cote gauche="Un regroupement" />
+              <h2 id="regroupement" className="mz-titre mz-h2">
+                Les mêmes ardoises, dans le même département.
+              </h2>
+              <p className="mz-gris" style={{ marginTop: 16, maxWidth: "40ch" }}>
+                Quand d&apos;autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes. Un chasseur d&apos;opportunités appelle les négoces et revient avec une offre. Tu acceptes ou pas.
+              </p>
+            </div>
+            <div className="mz-carte mz-ticket">
+              <p style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                <span className="mz-etiq">Regroupement</span>
+                <span className="mz-badge">Exemple</span>
+              </p>
+              <p className="mz-titre" style={{ fontSize: 34, marginTop: 14 }}>
+                {REGROUPEMENT_EXEMPLE.article}
+              </p>
+              <dl className="mz-num">
+                <dt>Département</dt>
+                <dd>{REGROUPEMENT_EXEMPLE.departement}</dd>
+                <dt>Entreprises</dt>
+                <dd>{REGROUPEMENT_EXEMPLE.entreprises}</dd>
+                <dt>Quantité réunie</dt>
+                <dd>{REGROUPEMENT_EXEMPLE.quantite}</dd>
+                <dt>Besoin</dt>
+                <dd>{REGROUPEMENT_EXEMPLE.besoin}</dd>
+              </dl>
+            </div>
+          </section>
+
+          {/* Les trois étapes, avec les vrais écrans de l'app, entiers. */}
+          <section aria-labelledby="comment" id="comment" className="mz-section" style={{ scrollMarginTop: 24 }}>
+            <div data-apparait="">
+              <Cote gauche="Trois étapes, les vrais écrans" />
+              <h2 id="comment" className="mz-titre mz-h2" style={{ marginBottom: 24 }}>
+                Comment ça marche
+              </h2>
+            </div>
+            <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
+              {ETAPES.map((e, i) => (
+                <li key={e.titre} className="mz-etape" data-inverse={i === 1 ? "" : undefined} data-apparait="">
+                  <span className="mz-titre mz-etape-no mz-num" aria-hidden="true">
+                    0{i + 1}
+                  </span>
+                  <div className="mz-etape-texte">
+                    <h3 className="mz-titre">
+                      <span className="sr-only">{i + 1}. </span>
+                      {e.titre}
+                    </h3>
+                    <p>{e.texte}</p>
+                  </div>
+                  <Ecran nom={e.ecran.nom} alt={e.ecran.alt} />
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* Le partage, comme les artisans se passent la page : WhatsApp et SMS. */}
+          <section aria-labelledby="partage" className="mz-section mz-deux" data-apparait="">
+            <div>
+              <Cote gauche="Fais venir tes collègues" />
+              <h2 id="partage" className="mz-titre mz-h2">
+                Plus on est nombreux, plus on pèse.
+              </h2>
+            </div>
+            <PartageVitrine origine={origine} />
+          </section>
+
+          <section aria-labelledby="commencer" className="mz-section" data-apparait="">
+            <h2 id="commencer" className="mz-titre mz-h2" style={{ maxWidth: "14ch" }}>
+              Ton prochain chantier, <span className="mz-surligne">au propre.</span>
+            </h2>
+            <div className="mz-actions">
+              <Link href="/inscription" className="mz-bouton">
+                Commencer gratuitement
+              </Link>
+            </div>
+          </section>
+
+          <section aria-labelledby="negoces" className="mz-negoce" data-apparait="">
+            <div>
+              <p className="mz-etiq" style={{ color: "var(--mz-jaune)", marginBottom: 10 }}>
+                Vous êtes négoce ?
+              </p>
+              <h2 id="negoces" className="mz-titre mz-h2">
+                Gratuit pour vous.
+              </h2>
+              <p style={{ marginTop: 12, maxWidth: "52ch" }}>
+                <span style={{ color: "#fff", fontWeight: 700 }}>Négoces :</span> des demandes structurées, prêtes à chiffrer, et des volumes groupés. Vos clients artisans paient le juste prix, et vous vendez plus.
+              </p>
+            </div>
+            <Link href="/negoce/connexion" className="mz-lien">
+              Accès négoce
+            </Link>
+          </section>
+        </main>
+
+        <PiedVitrine />
       </div>
-
-      <section aria-labelledby="commencer" data-reveal className="flex flex-col items-start gap-8 border-t border-white/10 pt-16 sm:items-center sm:pt-24 sm:text-center">
-        <h2 id="commencer" className="font-display max-w-[16ch] text-[44px] leading-[0.96] font-extrabold tracking-[-0.03em] sm:text-[72px]">
-          Ton prochain chantier, <span className="text-accent">au propre</span>
-        </h2>
-        <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
-          Commencer gratuitement
-        </ButtonLink>
-      </section>
-
-      {/* Rassurant pour les négoces : ils lisent aussi la page, et ce sont eux qui répondent. */}
-      <p className="text-center text-[15px] leading-relaxed text-white/60">
-        <span className="font-semibold text-white">Négoces :</span> des demandes structurées, prêtes à chiffrer, et des volumes groupés. Vos clients artisans paient le juste prix, et vous vendez plus.
-      </p>
-
-      <footer className="flex flex-col gap-6 border-t border-white/10 pt-10 text-[13px] leading-relaxed text-white/50">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex flex-col gap-2">
-            <Logo fond="sombre" hauteur={28} />
-            <p className="text-[14px] font-semibold text-white/70">{SLOGAN_APP}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <LiensLegaux clair />
-            <Link href="/tarifs" className="text-[14px] font-semibold text-white/70 underline">
-              Tarifs
-            </Link>
-            <Link href="/connexion" className="text-[14px] font-semibold text-white/70 underline">
-              Se connecter
-            </Link>
-            {/* Un vrai chargement : la démo relit l'adresse au démarrage (plus de lecture par le routeur, qui l'empêchait d'être
-                rendue par le serveur). */}
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- rechargement voulu */}
-            <a href="/?demo" className="text-[14px] font-semibold text-white/70 underline">
-              Revoir la démo
-            </a>
-          </div>
-        </div>
-        <p className="max-w-[90ch]">
-          Service édité par {BLOC_LEGAL} Hébergeur : {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
-        </p>
-      </footer>
-      <script nonce={nonce} dangerouslySetInnerHTML={{ __html: REVEAL_SCRIPT }} />
-    </main>
+    </div>
   );
 }

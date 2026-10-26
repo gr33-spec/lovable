@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { connection } from "next/server";
 import { EnregistrementServiceWorker } from "@/components/service-worker";
 import { ACCROCHE_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
+import { origineDuSite } from "@/lib/origine";
 
 // Plan « finition », bloc 5 (Lighthouse, décalage 0,21 sur les pages légales) : la police passe par next/font,
 // qui les précharge et dessine d'abord une police de secours aux mêmes mesures ; le texte ne bouge plus à leur arrivée.
@@ -24,7 +25,7 @@ const bricolage = localFont({
   variable: "--font-bricolage",
 });
 
-export const metadata: Metadata = {
+const METADONNEES: Metadata = {
   title: { default: NOM_APP, template: `%s · ${NOM_APP}` },
   description: "L'assistant d'achat de matériaux des artisans.",
   applicationName: NOM_APP,
@@ -42,10 +43,19 @@ export const metadata: Metadata = {
   },
   // L'icône de l'écran d'accueil iPhone (180 px, sans transparence) et celle des onglets.
   icons: { icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }], apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }] },
-  // L'image de partage (lien collé dans un message) : le logo sur fond noir, 1200 × 630.
-  openGraph: { siteName: NOM_APP, title: NOM_APP, description: `${ACCROCHE_APP} ${SLOGAN_APP}`, locale: "fr_FR", type: "website", images: [{ url: "/marque/og.png", width: 1200, height: 630, alt: NOM_APP }] },
-  twitter: { card: "summary_large_image", title: NOM_APP, images: ["/marque/og.png"] },
+  // L'image de partage (lien collé dans WhatsApp ou un SMS), 1200 × 630, dans l'identité de la landing (26 octobre 2026) ;
+  // avant, le logo sur fond noir (`/marque/og.png`, gardé).
+  openGraph: { siteName: NOM_APP, title: NOM_APP, description: `${ACCROCHE_APP} ${SLOGAN_APP}`, locale: "fr_FR", type: "website", images: [{ url: "/marque/partage.png", width: 1200, height: 630, alt: `${NOM_APP} : ton devis, ta liste de matériaux, tes prix` }] },
+  twitter: { card: "summary_large_image", title: NOM_APP, images: ["/marque/partage.png"] },
 };
+
+/**
+ * L'adresse de base des liens de partage : celle que le visiteur a tapée (Greg, 26 octobre 2026 : « l'image de partage pointe
+ * vers vercel.app au lieu du domaine courant ») ; sans elle, Next prenait l'adresse technique du déploiement.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  return { ...METADONNEES, metadataBase: new URL(await origineDuSite()) };
+}
 
 export const viewport: Viewport = {
   width: "device-width",

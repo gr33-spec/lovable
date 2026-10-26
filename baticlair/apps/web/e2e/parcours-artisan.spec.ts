@@ -37,7 +37,16 @@ const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.goto("/");
   // Sans session : la page publique, puis « Créer un compte » mène à l'inscription.
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tes quantitatifs au propre. Tes demandes de prix en quelques clics. La force du groupe en plus.");
+  // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ton devis\.\s*Ta liste de matériaux\.\s*Tes prix\.$/);
+  const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });
+  await expect(lu.getByText("Devis DE00000071")).toBeVisible();
+  await expect(lu.getByRole("listitem")).toHaveCount(3);
+  await expect(lu.getByText("La ligne 2 est de la main-d'œuvre : elle ne donne aucune fourniture.", { exact: false })).toBeVisible();
+  // Le partage et l'aperçu WhatsApp : écrits dès le serveur avec l'adresse du site, jamais « Rejoins-nous : / » ni vercel.app.
+  const html = await (await page.request.get("/")).text();
+  expect(html).toContain("Rejoins-nous : http://localhost:3000/");
+  expect(html).toMatch(/<meta property="og:image" content="http:\/\/localhost:3000\/marque\/partage\.png"/);
   await page.getByRole("link", { name: "Commencer gratuitement" }).first().click();
   await expect(page).toHaveURL(/\/inscription/);
   await page.getByLabel("Prénom et nom").fill("Jean Martin");
@@ -2554,7 +2563,16 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
 test("La page d'accueil publique : un visiteur la voit à la racine, un artisan connecté garde l'app", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tes quantitatifs au propre. Tes demandes de prix en quelques clics. La force du groupe en plus.");
+  // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ton devis\.\s*Ta liste de matériaux\.\s*Tes prix\.$/);
+  const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });
+  await expect(lu.getByText("Devis DE00000071")).toBeVisible();
+  await expect(lu.getByRole("listitem")).toHaveCount(3);
+  await expect(lu.getByText("La ligne 2 est de la main-d'œuvre : elle ne donne aucune fourniture.", { exact: false })).toBeVisible();
+  // Le partage et l'aperçu WhatsApp : écrits dès le serveur avec l'adresse du site, jamais « Rejoins-nous : / » ni vercel.app.
+  const html = await (await page.request.get("/")).text();
+  expect(html).toContain("Rejoins-nous : http://localhost:3000/");
+  expect(html).toMatch(/<meta property="og:image" content="http:\/\/localhost:3000\/marque\/partage\.png"/);
   // Greg, 24 octobre 2026 (capture iPhone : « la démo s'ouvre en plein écran dès l'arrivée, avant même la promesse ») : le
   // visiteur arrive sur l'accroche, « Par un artisan, pour les artisans », « Dès 29 € », l'inscription ; aucune démo d'office.
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
@@ -2605,7 +2623,10 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // trois étapes ; gratuit pour l'artisan ; les autres métiers en une ligne ; une ligne pour les négoces. Rien d'extérieur.
   // Recentrage (Greg, 25 octobre 2026) : le titre, trois étapes, le bloc groupe et le bloc négoce mot pour mot ; aucune
   // promesse d'économie chiffrée.
-  await expect(page.getByRole("heading", { name: "L'union fait la force." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Seul, tu es un client parmi d'autres. À vingt, vous êtes le plus gros client du département." })).toBeVisible();
+  await expect(page.getByRole("img", { name: "De 1 à 20 artisans du secteur" })).toBeVisible();
+  // Le regroupement montré est marqué « Exemple » jusqu'au premier vrai ; l'écart unité / palette attend les prix de Greg.
+  await expect(page.getByRole("region", { name: "Les mêmes ardoises, dans le même département." }).getByText("Exemple", { exact: true })).toBeVisible();
   await expect(page.getByText("Quand d'autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes.")).toBeVisible();
   // Business model final (Greg, 25 octobre 2026) : l'argument des chasseurs d'opportunités.
   await expect(page.getByText("Des chasseurs d'opportunités négocient pour toi.")).toBeVisible();
@@ -2615,7 +2636,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
-  for (const image of ["L'écran « Nouveau chantier » de Mobiiz", "Le quantitatif préparé par Mobiiz", /^Les prix reçus dans Mobiiz/]) {
+  for (const image of [/^L'écran « Nouvelle liste » de Mobiiz/, /^La liste de fournitures préparée par Mobiiz/, /^Les prix reçus de trois négoces/]) {
     await expect(page.getByRole("region", { name: "Comment ça marche" }).getByRole("img", { name: image })).toBeVisible();
   }
   await expect(page.getByText(/tuile/i)).toHaveCount(0);

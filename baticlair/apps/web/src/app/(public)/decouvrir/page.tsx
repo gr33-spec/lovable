@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { NOM_APP } from "@/lib/nom";
+import { origineDuSite } from "@/lib/origine";
+import { metadonneesPubliques } from "@/lib/partage";
 import { Landing } from "./landing";
 
 /**
@@ -9,11 +10,8 @@ import { Landing } from "./landing";
  */
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: `${NOM_APP}, tes quantitatifs et tes demandes de prix`,
-  description: "Tes quantitatifs au propre. Tes demandes de prix en quelques clics. La force du groupe en plus.",
-};
+export const metadata: Metadata = metadonneesPubliques(`${NOM_APP} · ton devis, ta liste de matériaux, tes prix`, "Par un artisan, pour les artisans. Tu déposes ton devis : ta liste de matériaux au propre, envoyée à tes négoces, leurs prix comparés livraison comprise.");
 
 export default async function BienvenuePage() {
-  return <Landing nonce={(await headers()).get("x-nonce") ?? undefined} />;
+  return <Landing origine={await origineDuSite()} />;
 }

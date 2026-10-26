@@ -163,9 +163,9 @@ test.describe("Business model final : le regroupement négocié par un humain", 
 
   test("/couvreurs : la même page, la couverture d'abord, et les chasseurs d'opportunités", async ({ page }) => {
     await page.goto("/couvreurs");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Tes quantitatifs au propre.");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ton devis.");
     await expect(page.getByText("Pour les couvreurs")).toBeVisible();
-    await expect(page.getByText(/Ardoise, zinc, bois de charpente/).first()).toBeVisible();
+    await expect(page.getByText(/ardoise, zinc, bois de charpente/i).first()).toBeVisible();
     await expect(page.getByText("Des chasseurs d'opportunités négocient pour toi.")).toBeVisible();
     await expect(page.getByText(/paient le juste prix/)).toBeVisible();
   });
