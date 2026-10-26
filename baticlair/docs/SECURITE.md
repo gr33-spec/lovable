@@ -129,3 +129,30 @@ Test permanent : `apps/api/test/admin-securite.test.ts` (routes, liste blanche, 
 - **Restauration** : télécharger l'artefact, `openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in base-AAAA-MM-JJ.dump.enc -out base.dump -pass pass:<clé>`, puis `pg_restore --no-owner -d <base vide> base.dump`. À tester une fois par trimestre sur une branche Neon.
 - **Boîte de contact** : MX de mobiiz.fr chez Resend ; le webhook est signé (Svix) et vérifié ; le renvoi à l'admin garde « Répondre » vers l'expéditeur, jamais de boucle (`contact-entrant.ts`).
 
+
+## Revue, lot B (26 octobre 2026) : garde-fou et retour arrière
+
+### Avant le lot : la copie complète de la base de test
+
+- Copie prise le 26 octobre 2026 à 22 h 15 (UTC), avant tout changement du lot B : branche Neon
+  `sauvegarde-test-2026-10-26-avant-lot-b` (`br-snowy-dew-b28tvroy`), copie entière de la branche de test
+  `preview/claude/saas-achat-artisans-prompt-1lyihx` (point LSN `0/4A6A988`). Projet Neon gratuit, aucune dépense.
+- La copie ne bouge plus : aucune application n'y écrit, elle n'a pas de point d'accès ouvert.
+- La production (branche `main`) n'est pas touchée par le lot B. Elle a sa propre copie, `sauvegarde-prod-2026-10-24`.
+
+### Retour arrière, dans cet ordre
+
+1. **Fichiers chiffrés d'abord.** Si `CHIFFREMENT_CLE` a déjà servi, les fichiers déposés depuis portent l'en-tête `MZC1`
+   et l'ancien code ne sait pas les lire. On les remet en clair avec la clé encore posée :
+   `pnpm --filter @baticlair/api exec tsx scripts/fichiers-chiffrement.ts dechiffrer` (base de la branche visée dans
+   `DATABASE_URL`). Le script dit combien de fichiers il a remis en clair et s'arrête s'il en reste un illisible.
+2. **Le code.** `git revert <commit du lot B>` sur la branche `claude/saas-achat-artisans-prompt-1lyihx`, puis push :
+   Vercel redéploie test.mobiiz.fr seul. Rien à faire côté production, qui n'a pas reçu le lot.
+3. **La clé.** Retirer `CHIFFREMENT_CLE` de Vercel (projet baticlair-api, Preview) seulement après l'étape 1, et la garder
+   en lieu sûr : un fichier chiffré resté quelque part ne se relit qu'avec elle.
+4. **Les données, en dernier recours** (seulement si l'étape 1 échoue ou si des données sont abîmées) : dans la console Neon,
+   Branches, `preview/claude/saas-achat-artisans-prompt-1lyihx`, « Restore », source `sauvegarde-test-2026-10-26-avant-lot-b`.
+   Neon garde l'état d'avant la restauration dans une branche à part : la restauration se défait elle aussi. Tout ce qui a été
+   saisi sur test.mobiiz.fr depuis le 26 octobre 22 h 15 est alors perdu (base de test, pas de client réel).
+5. **Vérifier** : la recette en ligne artisan + négoce + chasseur (`docs/groupe/recette-en-ligne/recette.mjs`) passe, et un
+   devis déposé avant le lot s'ouvre toujours.
