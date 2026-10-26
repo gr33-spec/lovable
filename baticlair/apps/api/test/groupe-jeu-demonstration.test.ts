@@ -1,5 +1,6 @@
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { doubleAuthentification } from "./support/admin.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -27,6 +28,7 @@ const jeu = (entreprise?: string, secret = "secret-de-la-tache") => request(ctx.
 describe("le jeu de données de démonstration", { timeout: 60_000 }, () => {
   it("12 artisans, 8 négoces, 3 lots à trois étapes ; Greg dans chaque lot ; admin et « Mes lots » remplis ; rejouable", async () => {
     const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "BATI INVEST", ["roofing"]);
+    await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     expect((await jeu("greg@example.fr", "mauvais")).status).toBe(403);
     const r = await jeu("greg@example.fr").expect(201);
     expect(r.body).toMatchObject({ artisans: 12, negoces: 8, entreprise: "greg@example.fr" });

@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { CapturingPushSender } from "../src/platform/push/web-push.sender.js";
 import { PUSH_SENDER } from "../src/platform/tokens.js";
+import { doubleAuthentification } from "./support/admin.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
 import { inscrireNegoce } from "./support/negoce.js";
@@ -207,6 +208,7 @@ describe("le regroupement du mois : inscriptions, clôture, grille aux négoces,
 
   it("l'admin règle le cycle (deux clôtures, heures, jours ouvrés) : heures et délai valent pour la commande en cours ; un artisan ne peut pas", async () => {
     const admin = await signUpWithCompany(ctx.app, "greg@example.fr", "Admin");
+    await doubleAuthentification(ctx, admin.agent, "greg@example.fr");
     const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2000", unite: "pièces" }]);
     await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
     expect((await admin.agent.get("/v1/admin/commande-du-mois/config").expect(200)).body).toEqual({ jourCloture1: 1, jourCloture2: 15, heureCloture: 12, joursOuvresReponse: 5, heureReponse: 18 });

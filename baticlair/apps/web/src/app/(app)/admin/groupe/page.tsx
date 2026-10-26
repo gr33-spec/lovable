@@ -5,6 +5,7 @@ import { Button, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 import { nom } from "@/lib/nom";
+import { CodeAdmin } from "@/components/code-admin";
 
 /** Les statuts bruts de l'API, lisibles par Greg (test complet du 21 octobre : « livre », « retire », « envoyee » s'affichaient tels quels). */
 const LIBELLES: Record<string, string> = {
@@ -179,6 +180,8 @@ export default function AdminGroupePage() {
   // téléphone fermait un lot pour tous ses artisans) ; la carte demande « Oui » ou « Non ».
   const [aConfirmer, setAConfirmer] = useState<{ cle: string; question: string; oui: string; f: () => Promise<unknown> } | null>(null);
 
+  // Sécurité (Greg, 26 octobre 2026) : cet écran demande le même code à 6 chiffres que l'espace admin.
+  if (error && !data && error.reason === "deux_facteurs_requis") return <CodeAdmin quoi="les commandes communes" onOk={reload} />;
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
 

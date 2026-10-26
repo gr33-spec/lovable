@@ -3,6 +3,7 @@ import { performance } from "node:perf_hooks";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ChoixService, CommandeService, DemandeService, RapportMensuelService, RegroupementService } from "../src/modules/groupe/index.js";
+import { doubleAuthentification } from "./support/admin.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -78,6 +79,7 @@ describe.skipIf(!ACTIF)("charge : 200 artisans, 50 lots, 1 000 besoins", { timeo
     expect(besoins).toBe(1000);
     // Greg : un vrai compte (admin), dans le 22, avec un besoin dans chaque référence du 22.
     const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "BATI INVEST", ["roofing"]);
+    await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     await p.company.update({ where: { id: greg.companyId }, data: { address: "6 impasse du Ouipoure, 22620 Ploubazlanec", siret: "73282932000074", siretVerifieLe: new Date() } });
     await greg.agent.post("/v1/groupe/negoces").send({ nom: "Mon négoce", email: "negoce-22-0@example.com", familles: ["couverture"] }).expect(201);
     const projet = await p.project.create({ data: { companyId: greg.companyId, name: "Chantier Greg", address: "6 impasse du Ouipoure, 22620 Ploubazlanec" } });

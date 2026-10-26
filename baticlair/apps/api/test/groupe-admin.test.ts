@@ -1,6 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ChoixService } from "../src/modules/groupe/index.js";
+import { doubleAuthentification } from "./support/admin.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
 
@@ -58,6 +59,7 @@ async function deposer(jeton: string, rows: FixtureRow[], titre: string) {
 describe("groupé, étape 9 : l'admin de Greg", { timeout: 90_000 }, () => {
   it("réservé aux admins ; le tableau (lots par département, négoces, accords, factures, exclusions), le journal d'un lot, l'export CSV", async () => {
     const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "BatiClair", ["roofing"]);
+    await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     const a = await carreleur("a@example.fr", "Carrelages A", "3 rue des Ajoncs, 22300 Lannion");
     expect((await a.agent.get("/v1/admin/groupe")).status).toBe(403);
     expect((await greg.agent.get("/v1/admin/groupe").expect(200)).body.lots).toEqual([]);
@@ -104,6 +106,7 @@ describe("groupé, étape 9 : l'admin de Greg", { timeout: 90_000 }, () => {
 
   it("forcer un lot ouvert, changer le négoce retenu avant les bons, annuler un lot (besoins libérés) ; un département fermé ferme le groupé", async () => {
     const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "BatiClair", ["roofing"]);
+    await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     const a = await carreleur("a@example.fr", "Carrelages A", "3 rue des Ajoncs, 22300 Lannion");
     await negoce(a.agent, "Négoce Carrelage", "carrelage@example.com", ["second_oeuvre"]);
     await negoce(a.agent, "Négoce Généraliste", "general@example.com", ["second_oeuvre"]);

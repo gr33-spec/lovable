@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { inscrireNegoce, lienInvitation } from "./support/negoce.js";
 import { ARDOISE, couvreurAvecListe, mailsVers, tacheDuMois } from "./support/cycle.js";
+import { doubleAuthentification } from "./support/admin.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -198,6 +199,7 @@ describe("3. l'abonnement à la zone", { timeout: 90_000 }, () => {
 describe("8. l'admin", { timeout: 60_000 }, () => {
   it("la liste des négoces (inscrits, invités jamais venus, désabonnés), réservée aux admins", async () => {
     const admin = await signUpWithCompany(ctx.app, "greg@example.fr", "Admin");
+    await doubleAuthentification(ctx, admin.agent, "greg@example.fr");
     const a = await artisan("a@example.fr", "Toitures A");
     await ajouter(a.agent, "inscrit@negoce.fr", "Inscrit");
     await ajouter(a.agent, "invite@negoce.fr", "Invité");

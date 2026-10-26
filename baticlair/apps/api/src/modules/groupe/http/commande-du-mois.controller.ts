@@ -15,6 +15,7 @@ import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js"
 import { AbonnementService } from "../../abonnement/index.js";
 import { CommandeDuMoisService } from "../application/commande-du-mois.service.js";
 import { EspaceNegoceService } from "../application/espace-negoce.service.js";
+import { exigerDeuxFacteurs } from "../../../platform/http/deux-facteurs.js";
 
 const depotBody = z.object({
   articles: z.array(z.string().min(1).max(300)).min(1).max(500),
@@ -184,6 +185,8 @@ export class CommandeDuMoisAdminController {
     if (!this.config.groupe.enabled) throw notFound("Route");
     const user = await this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });
     if (!user || !this.config.groupe.admins.includes(user.email.toLowerCase())) throw forbidden("Reserved to groupé admins");
+    // Le code à 6 chiffres de la session, comme le pilotage (Greg, 26 octobre 2026).
+    await exigerDeuxFacteurs(this.prisma, tenant.userId);
   }
 
   @Get("config")

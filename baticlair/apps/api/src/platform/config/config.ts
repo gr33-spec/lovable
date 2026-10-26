@@ -448,7 +448,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       },
       reponsesDomaine: e.REPONSES_DOMAINE ?? null,
       resendWebhookSecret: e.RESEND_WEBHOOK_SECRET ?? null,
-      admins: (e.GROUPE_ADMINS ?? e.REFERENTIAL_VALIDATORS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
+      // La liste blanche de l'admin : GROUPE_ADMINS seule, jamais élargie en douce (Greg, 26 octobre 2026).
+      admins: (e.GROUPE_ADMINS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
       departements:
         e.GROUPE_DEPARTEMENTS.trim() !== "*"
           ? e.GROUPE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean)
@@ -468,7 +469,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
         mode: e.MODE_REGROUPEMENT,
         chasseurs: (e.CHASSEURS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
         commissionDefaut: e.COMMISSION_DEFAUT,
-        emailChasseur: (e.EMAIL_CHASSEUR ?? (e.GROUPE_ADMINS ?? e.REFERENTIAL_VALIDATORS ?? "").split(",")[0] ?? "").trim().toLowerCase() || null,
+        emailChasseur: (e.EMAIL_CHASSEUR ?? (e.GROUPE_ADMINS ?? "").split(",")[0] ?? "").trim().toLowerCase() || null,
         delaiLivraisonJours: e.DELAI_LIVRAISON_JOURS,
         naf: e.NAF_MATERIAUX ? e.NAF_MATERIAUX.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) : null,
         rechercheEntreprises: e.RECHERCHE_ENTREPRISES ?? (e.NODE_ENV === "test" ? "fake" : "on"),

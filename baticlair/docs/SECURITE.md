@@ -94,3 +94,28 @@ Mots de passe hachés (better-auth) ; devis anonymisés avant stockage ; fichier
 - **Faux comptes** : les comptes `@demo.baticlair.fr` (démonstration et jeu de test) sont exclus de tous les chiffres.
 - À venir si un second admin arrive : un code par application d'authentification (TOTP) au lieu de l'e-mail (DETTE 31).
 
+
+## Audit du 26 octobre 2026 : « je dois être le seul à pouvoir entrer dans l'admin »
+
+### Corrigé (critique)
+
+- **Toutes les routes d'admin demandent le code à 6 chiffres de la session**, pas seulement le pilotage : `/v1/admin/groupe/*` et `/v1/admin/commande-du-mois/*` passent par `exigerDeuxFacteurs` (`apps/api/src/platform/http/deux-facteurs.ts`). Avant, la liste blanche suffisait.
+- **Session admin : 2 heures au plus, fermée après 30 minutes sans action** (`VALIDITE_SESSION_ADMIN_MS`, `INACTIVITE_ADMIN_MS`, colonne `code_admin.derniereActiviteLe`). Avant : 12 heures, sans inactivité.
+- **5 codes faux en 30 minutes : bloqué 30 minutes**, même en redemandant un code, avec un e-mail d'alerte à l'admin (`code_bloque`, `bloque_30_minutes` au journal). Avant, un nouveau code remettait le compteur à zéro.
+- **Un e-mail à chaque entrée réussie** dans l'espace admin (date, heure, adresse IP).
+- **Le journal note l'adresse IP** de chaque action admin (`journal_admin.ip`).
+- **La liste blanche est `GROUPE_ADMINS` seule** : elle ne reprend plus `REFERENTIAL_VALIDATORS` quand elle est vide.
+- **Dépendances** : `multer` 2.5.0 et `body-parser` 2.4.0 (failles « haute » corrigées, aucune nouvelle dépendance).
+
+Test permanent : `apps/api/test/admin-securite.test.ts` (routes, liste blanche, e-mail d'entrée, IP, blocage, session de 2 h et 30 min).
+
+### Choix gardé
+
+- Le rôle admin n'est jamais donné depuis l'interface : il vient de la variable `GROUPE_ADMINS` sur Vercel, que seul le titulaire du compte Vercel peut changer. Le code par e-mail prouve en plus que la personne a la boîte.
+
+### En attente de l'accord de Greg (important)
+
+- Vérification des mots de passe fuités (Have I Been Pwned, k-anonymat, gratuit) ; limite par compte en plus de la limite par IP.
+- Antivirus des fichiers reçus et anti-robot sur l'inscription (service externe, ex. Cloudflare Turnstile gratuit).
+- Sauvegarde quotidienne de la base avec test de restauration (plan Neon à vérifier).
+- CSP sans `unsafe-inline` (nonce), failles « haute » restantes dans les outils de développement seulement (`vite`, `deepmerge-ts`, `zod` via la CLI Vercel).

@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ARDOISE, couvreurAvecListe, deposerGrille, jetonDeGrille, mailsVers, tacheDuMois } from "./support/cycle.js";
 import { inscrireNegoce } from "./support/negoce.js";
+import { doubleAuthentification } from "./support/admin.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -151,6 +152,7 @@ describe("côté négoce et côté admin", { timeout: 120_000 }, () => {
     expect(nbsp(page.consultation)).toBe("3 négoces consultés, résultats le 22/10 à 18 h.");
     expect(JSON.stringify(page)).not.toMatch(/Négoce 44-1|n1-44/);
     const admin = await signUpWithCompany(ctx.app, "greg@example.fr", "Admin");
+    await doubleAuthentification(ctx, admin.agent, "greg@example.fr");
     const t = (await admin.agent.get("/v1/admin/commande-du-mois/negoces").expect(200)).body as { cycles: { zone: string; compteur: string }[] };
     expect(t.cycles.find((c) => c.zone === "44")!.compteur).toBe("44 · commande du 15 octobre : 1 négoce sur 3 a répondu");
   });

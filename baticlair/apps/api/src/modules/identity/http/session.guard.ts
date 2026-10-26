@@ -83,7 +83,7 @@ export class SessionGuard implements CanActivate {
       emailVerified: session.user.emailVerified,
       sessionId: session.session.id,
     };
-    enrichRequestContext({ userId: session.user.id });
+    enrichRequestContext({ userId: session.user.id, sessionId: session.session.id });
     this.noteVisit(session.user.id);
     return true;
   }

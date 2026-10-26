@@ -5,6 +5,8 @@ import type { AppConfig } from "../../../platform/config/config.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, forbidden, validationFailed } from "../../../platform/errors/domain-error.js";
+import { currentRequestContext } from "../../../platform/logging/request-context.js";
+import { deuxFacteursValides } from "../../../platform/http/deux-facteurs.js";
 import type { AuthenticatedUser } from "../../identity/index.js";
 
 const JOUR = 86_400_000;
@@ -12,7 +14,9 @@ const CLE_REGLAGES = "pilotage:reglages";
 /** Le domaine des comptes de démonstration et des faux comptes du jeu de test : jamais comptés. */
 export const DOMAINE_FACTICE = `@${DOMAINE_DEMO}`;
 const VALIDITE_CODE_MS = 10 * 60_000;
-const VALIDITE_SESSION_MS = 12 * 3_600_000;
+/** 5 codes faux en 30 minutes : plus de code pendant 30 minutes, et un e-mail d'alerte (Greg, 26 octobre 2026). */
+const ECHECS_MAX = 5;
+const BLOCAGE_MS = 30 * 60_000;
 
 /** Ce que le pilotage demande aux autres modules (abonnement, apprentissage, regroupement), sans en dépendre. */
 export interface SourcesPilotage {
@@ -68,14 +72,24 @@ export class PilotageService {
   }
 
   journal(user: AuthenticatedUser, action: string, cible: string | null = null) {
-    return this.prisma.journalAdmin.create({ data: { userId: user.userId, email: user.email, action, cible } });
+    const ip = currentRequestContext()?.ip ?? null;
+    return this.prisma.journalAdmin.create({ data: { userId: user.userId, email: user.email, action, cible, ip } });
+  }
+
+  /** Les codes faux de cet utilisateur dans les 30 dernières minutes : à 5, il est bloqué 30 minutes. */
+  private async echecsRecents(user: AuthenticatedUser): Promise<number> {
+    return this.prisma.journalAdmin.count({ where: { userId: user.userId, action: "code_refuse", createdAt: { gte: new Date(this.now().getTime() - BLOCAGE_MS) } } });
+  }
+
+  private quandIp(): string {
+    const quand = this.now().toLocaleString("fr-FR", { timeZone: "Europe/Paris", dateStyle: "long", timeStyle: "short" });
+    const ip = currentRequestContext()?.ip;
+    return `${quand}${ip ? ` (adresse IP ${ip})` : ""}`;
   }
 
   /** L'admin est-il passé par la double authentification sur cette session ? */
   async deuxFacteurs(user: AuthenticatedUser): Promise<boolean> {
-    if (!user.sessionId) return false;
-    const c = await this.prisma.codeAdmin.findUnique({ where: { sessionId: user.sessionId } });
-    return !!c?.valideLe && c.userId === user.userId && this.now().getTime() - c.valideLe.getTime() < VALIDITE_SESSION_MS;
+    return deuxFacteursValides(this.prisma, user.userId, user.sessionId, this.now());
   }
 
   /** Toute route du pilotage : admin, et double authentification faite. */
@@ -87,6 +101,7 @@ export class PilotageService {
   /** Le code à 6 chiffres, par e-mail, pour cette session. */
   async envoyerCode(user: AuthenticatedUser): Promise<{ envoye: true }> {
     if (!this.estChasseur(user) || !user.sessionId) throw forbidden("Reserved to admins");
+    if ((await this.echecsRecents(user)) >= ECHECS_MAX) throw validationFailed("Too many wrong codes, locked for 30 minutes", { reason: "code_bloque" });
     const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
     const data = { userId: user.userId, codeHash: this.empreinte(code, user.sessionId), expireLe: new Date(this.now().getTime() + VALIDITE_CODE_MS), tentatives: 0, valideLe: null };
     await this.prisma.codeAdmin.upsert({ where: { sessionId: user.sessionId }, create: { sessionId: user.sessionId, ...data }, update: data });
@@ -97,15 +112,26 @@ export class PilotageService {
 
   async verifierCode(user: AuthenticatedUser, code: string): Promise<{ ok: true }> {
     if (!this.estChasseur(user) || !user.sessionId) throw forbidden("Reserved to admins");
+    if ((await this.echecsRecents(user)) >= ECHECS_MAX) throw validationFailed("Too many wrong codes, locked for 30 minutes", { reason: "code_bloque" });
     const c = await this.prisma.codeAdmin.findUnique({ where: { sessionId: user.sessionId } });
     const bon = !!c && c.userId === user.userId && c.tentatives < 5 && c.expireLe > this.now() && c.codeHash === this.empreinte(code.trim(), user.sessionId);
     if (!bon) {
       if (c) await this.prisma.codeAdmin.update({ where: { sessionId: user.sessionId }, data: { tentatives: { increment: 1 } } });
       await this.journal(user, "code_refuse");
+      if ((await this.echecsRecents(user)) >= ECHECS_MAX) {
+        await this.journal(user, "bloque_30_minutes");
+        await this.email
+          .send({ to: user.email, subject: `Alerte : accès à l'espace admin ${NOM_APP} bloqué`, text: [`5 codes faux ont été saisis pour ton espace admin, le ${this.quandIp()}.`, "L'accès est bloqué 30 minutes.", "Si ce n'est pas toi, change ton mot de passe tout de suite."].join("\n") })
+          .catch(() => undefined);
+      }
       throw validationFailed("Wrong or expired code", { reason: "code_invalide" });
     }
-    await this.prisma.codeAdmin.update({ where: { sessionId: user.sessionId }, data: { valideLe: this.now() } });
+    await this.prisma.codeAdmin.update({ where: { sessionId: user.sessionId }, data: { valideLe: this.now(), derniereActiviteLe: this.now() } });
     await this.journal(user, "code_valide");
+    // Un e-mail à chaque entrée réussie : une entrée qui n'est pas la tienne se voit tout de suite.
+    await this.email
+      .send({ to: user.email, subject: `Connexion à ton espace admin ${NOM_APP}`, text: [`Quelqu'un vient d'entrer dans l'espace admin avec ton compte, le ${this.quandIp()}.`, "Si c'est toi, rien à faire.", "Sinon, change ton mot de passe tout de suite."].join("\n") })
+      .catch(() => undefined);
     return { ok: true };
   }
 

@@ -8,6 +8,7 @@ import { ZodPipe } from "../../../platform/http/zod.js";
 import { CONFIG } from "../../../platform/tokens.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { AdminGroupeService } from "../application/admin-groupe.service.js";
+import { exigerDeuxFacteurs } from "../../../platform/http/deux-facteurs.js";
 
 const negoceBody = z.object({ negoceId: z.string().uuid() });
 
@@ -25,6 +26,8 @@ export class AdminGroupeController {
     if (!this.config.groupe.enabled) throw notFound("Route");
     const user = await this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });
     if (!user || !this.config.groupe.admins.includes(user.email.toLowerCase())) throw forbidden("Reserved to groupé admins");
+    // Le code à 6 chiffres de la session, comme le pilotage (Greg, 26 octobre 2026).
+    await exigerDeuxFacteurs(this.prisma, tenant.userId);
     return user.email;
   }
 

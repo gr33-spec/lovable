@@ -1916,6 +1916,15 @@ async function apiJson<T = unknown>(page: Page, method: string, url: string, bod
 }
 
 /** Un compte au groupé : entreprise, adresse, SIRET vérifié. */
+/** Le code à 6 chiffres de l'admin : demandé, lu dans la boîte de test, saisi (Greg, 26 octobre 2026). */
+async function codeAdminRecu(page: Page, email: string, bouton: string): Promise<void> {
+  await page.getByRole("button", { name: "Recevoir mon code" }).click();
+  await expect(page.getByLabel("Code reçu par e-mail")).toBeVisible();
+  const mail = (await emailsVers(page, email)).filter((m) => /code d'accès au pilotage/.test(m.subject)).at(-1)!;
+  await page.getByLabel("Code reçu par e-mail").fill(/(\d{6})/.exec(mail.text)![1]!);
+  await page.getByRole("button", { name: bouton }).click();
+}
+
 async function compteAuGroupe(page: Page, entreprise: string, adresse: string, siret = "73282932000074"): Promise<void> {
   await signUp(page);
   expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: entreprise, address: adresse, siret, phone: null, email: null })).toBe(200);
@@ -2105,6 +2114,8 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
   if (await page.getByRole("alert").filter({ hasText: "incorrect" }).count()) await signUp(page, "admin-groupe@example.fr");
   await page.goto("/groupe");
   await page.getByRole("link", { name: "Admin regroupement" }).click();
+  // Sécurité (Greg, 26 octobre 2026) : l'admin des commandes communes demande aussi le code à 6 chiffres de la session.
+  await codeAdminRecu(page, "admin-groupe@example.fr", "Ouvrir les commandes communes");
   await expect(page.getByRole("heading", { name: "Admin regroupement" })).toBeVisible();
   const rubriques = page.getByRole("navigation", { name: "Rubriques de l'admin" });
   // Les lots des parcours précédents (même base) : chacun avec son journal ; sinon « Aucun lot ».

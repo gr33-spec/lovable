@@ -232,6 +232,16 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
     await admin.getByRole("button", { name: "Créer mon compte" }).click();
     await expect(admin.getByRole("heading", { name: /^(Bonjour Greg|Paie tes matériaux moins cher)/ })).toBeVisible();
   }
+  // Sécurité (Greg, 26 octobre 2026) : le code à 6 chiffres de la session d'abord.
+  await admin.goto("/admin/groupe");
+  await admin.getByRole("button", { name: "Recevoir mon code" }).click();
+  const code = await admin.evaluate(async () => {
+    const r = await fetch("/v1/internal/test/emails?to=admin-groupe%40example.fr", { headers: { authorization: "Bearer e2e-secret-de-la-tache" } });
+    const { emails } = (await r.json()) as { emails: { subject: string; text: string }[] };
+    return /(\d{6})/.exec(emails.filter((m) => /code d'accès au pilotage/.test(m.subject)).at(-1)!.text)![1]!;
+  });
+  await admin.getByLabel("Code reçu par e-mail").fill(code);
+  await admin.getByRole("button", { name: "Ouvrir les commandes communes" }).click();
   for (const size of WIDTHS) {
     await admin.setViewportSize({ width: size.width, height: size.height });
     await admin.goto("/admin/groupe");

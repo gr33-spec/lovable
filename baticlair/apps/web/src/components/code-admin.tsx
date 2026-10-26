@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Card, ErrorNotice } from "@/components/ui";
-import { api, ApiError } from "@/lib/api";
+import { Button, Card } from "@/components/ui";
+import { api, ApiError, messageErreur } from "@/lib/api";
 
 const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("internal_error", 500));
 
@@ -27,7 +27,14 @@ export function CodeAdmin({ quoi, onOk }: { quoi: string; onOk: () => void }) {
   return (
     <Card className="flex flex-col gap-4 p-5">
       <p className="text-[16px]">Pour ouvrir {quoi}, je t&apos;envoie un code à 6 chiffres par e-mail. C&apos;est pour être sûr que c&apos;est bien toi.</p>
-      {error ? <ErrorNotice error={error} /> : null}
+      {error ? (
+        <p role="alert" className="rounded-xl bg-danger-bg p-3 text-[15px] font-semibold text-danger">
+          {messageErreur(error, {
+            code_invalide: "Ce code n'est pas bon, ou il a plus de 10 minutes. Vérifie-le, ou demande un nouveau code.",
+            code_bloque: "Trop de codes faux : l'accès est bloqué 30 minutes. Un e-mail d'alerte t'a été envoyé.",
+          })}
+        </p>
+      ) : null}
       {!envoye ? (
         <Button onClick={() => void run(() => api("/v1/admin/pilotage/code", { method: "POST" }), () => setEnvoye(true))} pending={pending} className="self-start">
           Recevoir mon code

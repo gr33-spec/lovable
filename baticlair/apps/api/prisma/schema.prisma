@@ -1711,6 +1711,8 @@ model JournalAdmin {
   /// acces | detail:<quoi> | regle:<décision> | reglages | demo:<geste> | code_envoye | code_valide | code_refuse
   action    String
   cible     String?
+  /// L'adresse IP de la requête (Greg, 26 octobre 2026 : qui, quand, quoi, IP).
+  ip        String?
   createdAt DateTime @default(now())
 
   @@index([createdAt])
@@ -1726,6 +1728,8 @@ model CodeAdmin {
   expireLe   DateTime
   tentatives Int       @default(0)
   valideLe   DateTime?
+  /// La dernière action admin de la session : fermée après 30 minutes sans action (Greg, 26 octobre 2026).
+  derniereActiviteLe DateTime?
   createdAt  DateTime  @default(now())
 
   @@map("code_admin")
