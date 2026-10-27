@@ -220,8 +220,12 @@ await etape("Cas 2 : « Mettre en achat groupé », « Tout cocher », engagemen
   await a.getByRole("button", { name: /^(Mettre en achat groupé|Acheter en groupe)$/ }).first().click();
   const groupe = a.getByLabel("Acheter en groupe");
   await groupe.getByRole("button", { name: "Tout cocher" }).click();
+  // Ultra intuitif (27 octobre) : une question par écran, « Continuer » entre chaque.
+  await groupe.getByRole("button", { name: "Continuer" }).click();
   await groupe.getByLabel("Livraison avant le").fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
+  await groupe.getByRole("button", { name: "Continuer" }).click();
   await ajouterNegoce(a, X);
+  await groupe.getByRole("button", { name: "Continuer" }).click();
   await voir(groupe.getByText("Ton premier achat groupé est offert."));
   await groupe.getByRole("checkbox", { name: /^Je commande ces quantités/ }).check();
   await groupe.getByRole("button", { name: /^Je m'engage et j'ajoute ces \d+ lignes$/ }).scrollIntoViewIfNeeded();
@@ -256,8 +260,11 @@ await etape("Cas 3 : il ajoute sa liste avec la case d'engagement", b, async () 
   await b.getByLabel("Ajoute tes matériaux").fill("ardoise 32");
   await b.getByRole("button", { name: /Ardoise naturelle 32×22 Espagne 1er choix/ }).first().click();
   await b.getByLabel("Quantité de Ardoise naturelle 32×22 Espagne 1er choix").fill("900");
+  await b.getByRole("button", { name: "Continuer" }).click();
   await b.getByLabel("Commune de livraison").fill(LIEU.b);
+  await b.getByRole("button", { name: "Continuer" }).click();
   await ajouterNegoce(b, Y);
+  await b.getByRole("button", { name: "Continuer" }).click();
   const engagement = b.getByRole("region", { name: "Mon engagement" });
   await engagement.getByRole("checkbox", { name: /^Je commande ces quantités, chez le moins cher/ }).check();
   await engagement.scrollIntoViewIfNeeded();
@@ -289,6 +296,7 @@ await etape("Cas 4 : X chiffre ligne par ligne, « je ne fournis pas » les lite
   await voir(negoce.getByText(/Ardoise 32×22 Espagne 1er choix · 2 700 pièces/));
   await negoce.getByLabel("Prix de Ardoise 32×22 Espagne 1er choix").fill("1,10");
   await negoce.getByRole("listitem").filter({ hasText: "Liteaux 27×38" }).getByRole("checkbox", { name: "Je ne fournis pas" }).check();
+  await negoce.getByText("Pour ouvrir un compte chez vous").click();
   await negoce.getByRole("checkbox", { name: "Kbis de moins de 3 mois" }).check();
   await negoce.getByRole("checkbox", { name: "RIB" }).check();
   await negoce.getByRole("radio", { name: "Paiement comptant au départ" }).check();
@@ -306,7 +314,10 @@ await etape(SANS_IA ? "Cas 4 : Y répond ligne par ligne (sans IA)" : "Cas 4 : Y
     const prix = negoce.getByLabel(/^Prix de /);
     for (let i = 0; i < (await prix.count()); i++) await prix.nth(i).fill(i === 0 ? "1,25" : "0,62");
   }
-  else await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(FIX, "devis-fournisseur-couvreur.pdf"));
+  else {
+    await negoce.getByText("Plutôt votre devis PDF ?").click();
+    await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(FIX, "devis-fournisseur-couvreur.pdf"));
+  }
   await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
   await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
   await voir(negoce.getByText(/Votre offre est enregistrée/), 240000);
@@ -361,6 +372,7 @@ await etape("Cas 5 : « transmettre mes coordonnées » (e-mail réel au négoce
 });
 await etape("Cas 6 : A sort, « Mon client a annulé le chantier »", a, async () => {
   await a.goto(`${BASE}/achats-groupes/${besoinA}`, { waitUntil: "networkidle" });
+  await a.getByRole("button", { name: "Sortir de l'achat groupé" }).click();
   await a.getByRole("button", { name: "Mon client a annulé le chantier" }).click();
   await voir(a.getByRole("alertdialog", { name: "Sortir de l'achat groupé" }));
 });

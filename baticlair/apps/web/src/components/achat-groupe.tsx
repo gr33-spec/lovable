@@ -2,26 +2,29 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Check, ChevronRight, ClipboardList, MessageSquare, Phone, Plus, Search, ShoppingCart, Users, X } from "lucide-react";
+import { Bell, Check, ChevronLeft, ChevronRight, ClipboardList, MessageSquare, Phone, Plus, Search, ShoppingCart, Users, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useLienInvitation } from "@/components/inviter";
-import { Button, ButtonLink, Card, Field, INPUT, SectionTitle } from "@/components/ui";
+import { Button, ButtonLink, Card, Field, INPUT } from "@/components/ui";
 import { api, messageErreur, type NextAction } from "@/lib/api";
 import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
 import { useResource } from "@/lib/use-resource";
 
 /**
- * L'ACHAT GROUPÉ PAR MÉTIER, CÔTÉ ÉCRAN (Greg, 27 octobre 2026, 2e message) : les deux portes, la liste au catalogue,
- * l'engagement (règles en clair et case obligatoire), « Préviens ton négoce », la carte et son état, le détail (frise, sa
- * liste, Modifier, Retirer, les deux sorties), les résultats sur SES lignes, commander ou ouvrir un compte, Livré /
- * Problème, le plan B, les cases à cocher d'une liste et la suggestion. Un seul bouton jaune par écran.
+ * L'ACHAT GROUPÉ PAR MÉTIER, CÔTÉ ÉCRAN (Greg, 27 octobre 2026, 2e message), REFAIT « ULTRA INTUITIF » (Greg, même jour :
+ * « j'ai du mal à comprendre tellement y a d'info ») : UNE QUESTION PAR ÉCRAN. Ajouter sa liste se fait en quatre étapes
+ * (les matériaux, où et pour quand, les négoces, l'engagement), chacune avec un seul bouton « Continuer ». Le détail
+ * montre l'état et la prochaine action ; sa liste, ses négoces et les sorties sont derrière un tap. Les offres : la
+ * meilleure en grand, les autres repliées. Les textes de Greg (phrase d'engagement, règles, titres) sont inchangés.
  */
 
 const LIEN_SECONDAIRE = "pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-line bg-surface px-4 text-[15px] font-semibold text-ink active:bg-ground";
+const LIEN_TEXTE = "min-h-11 self-start text-[15px] font-semibold text-accent-text underline";
+const ALERTE = "rounded-xl bg-danger-bg p-4 text-[15px] font-semibold text-danger";
 
 /* ------------------------------------------------------------------------------------------- les deux portes */
 
-/** Les deux portes : sur l'accueil (en grand) et dans la feuille du « + » central. */
+/** Les deux portes : sur l'accueil (en grand) et dans la feuille du « + » central. Un titre, une ligne. */
 export function DeuxPortes({ grand = false, onChoix }: { grand?: boolean; onChoix?: () => void }) {
   const porte = `pressable flex items-center gap-4 rounded-2xl p-4 text-left shadow-card ${grand ? "min-h-24" : "min-h-20"}`;
   return (
@@ -30,19 +33,21 @@ export function DeuxPortes({ grand = false, onChoix }: { grand?: boolean; onChoi
         <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-surface/70 text-ink" aria-hidden="true">
           <Users size={24} />
         </span>
-        <span className="flex flex-col gap-0.5">
+        <span className="flex min-w-0 flex-col gap-0.5">
           <span className="text-[18px] font-extrabold">Achat groupé de ton métier</span>
-          <span className="text-[14px] opacity-80">Ta liste rejoint celles des artisans du secteur : les négoces font leur meilleur prix.</span>
+          <span className="text-[14px] opacity-80">Plus nombreux, moins cher.</span>
         </span>
+        <ChevronRight size={20} className="ml-auto shrink-0 opacity-70" aria-hidden="true" />
       </Link>
       <Link href="/chantiers/nouveau" onClick={onChoix} className={`${porte} border border-line bg-surface text-ink`}>
         <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-ground" aria-hidden="true">
           <ClipboardList size={24} />
         </span>
-        <span className="flex flex-col gap-0.5">
+        <span className="flex min-w-0 flex-col gap-0.5">
           <span className="text-[18px] font-extrabold">Ma liste de matériaux</span>
-          <span className="text-[14px] text-muted">Depuis ton devis, une photo, ou notée toi-même : à envoyer à tes négoces ou à mettre en achat groupé.</span>
+          <span className="text-[14px] text-muted">Devis, photo, ou à la main.</span>
         </span>
+        <ChevronRight size={20} className="ml-auto shrink-0 text-muted" aria-hidden="true" />
       </Link>
     </div>
   );
@@ -88,7 +93,7 @@ export function JaugeVolume({ j }: { j: Jauge | null }) {
 
 const TON: Record<string, string> = { offre: "bg-accent-soft", pas_assez: "bg-warn-bg", commande: "bg-ok-bg" };
 
-/** Une participation : l'état en une phrase, la date clé, la jauge. Tout le reste est dans le détail. */
+/** Une participation : l'état en une phrase, la jauge. Tout le reste est dans le détail. */
 export function CarteAchatGroupe({ c }: { c: CarteAchat }) {
   return (
     <Link href={`/achats-groupes/${c.id}`} aria-label={`${c.titreAchat} : ${c.titre}`} className={`pressable flex flex-col gap-3 rounded-2xl p-4 shadow-card ${TON[c.etat] ?? "bg-surface"}`}>
@@ -101,28 +106,64 @@ export function CarteAchatGroupe({ c }: { c: CarteAchat }) {
         </span>
         <ChevronRight size={20} className="mt-1 shrink-0 text-muted" aria-hidden="true" />
       </span>
-      <span className="flex flex-col gap-0.5">
-        <span className="text-[15px] font-bold">{c.titre}</span>
-        {c.sousTitre ? <span className="text-[14px] text-muted">{c.sousTitre}</span> : null}
-      </span>
+      <span className="text-[15px] font-bold">{c.titre}</span>
       <JaugeVolume j={c.jauge} />
     </Link>
   );
 }
 
-/** « Achats groupés de ton métier près de chez toi » : la phrase de l'alerte (point 21), les entreprises au-delà du seuil. */
+/** Un achat groupé ouvert du secteur : le titre, la date limite, un bouton. */
 export function CarteAchatOuvert({ a }: { a: AchatOuvert }) {
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card">
-      <span className="text-[16px] font-extrabold">{a.titre}</span>
-      <span className="text-[15px]">{a.phrase}</span>
-      {a.entreprises ? <span className="text-[14px] text-muted">{a.entreprises} entreprises</span> : null}
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[16px] font-extrabold">{a.titre}</span>
+        <span className="text-[15px]">
+          Ajoute ta liste avant le {dateFr(a.clotureLe)}.{a.dateBesoin ? ` Livraison avant le ${dateFr(a.dateBesoin)}.` : ""}
+        </span>
+        {a.entreprises ? <span className="text-[14px] text-muted">{a.entreprises} entreprises déjà dedans</span> : null}
+      </div>
       <JaugeVolume j={a.jauge} />
       <ButtonLink href={`/achats-groupes/lancer?rejoindre=${a.id}&titre=${encodeURIComponent(a.titre)}`} variant="secondary">
         Ajouter ma liste
       </ButtonLink>
     </div>
   );
+}
+
+/* ------------------------------------------------------------------------------------------------- les étapes */
+
+/** Une étape du parcours : la barre de progression, une question en titre, le contenu, un seul bouton. */
+function Etape({ n, total, titre, aide, onRetour, children }: { n: number; total: number; titre: string; aide?: string; onRetour?: () => void; children: React.ReactNode }) {
+  return (
+    <section aria-label={titre} className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          {onRetour ? (
+            <button type="button" onClick={onRetour} aria-label="Étape précédente" className="pressable grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface">
+              <ChevronLeft size={20} aria-hidden="true" />
+            </button>
+          ) : null}
+          <ol aria-label={`Étape ${n} sur ${total}`} className="flex grow gap-1.5">
+            {Array.from({ length: total }, (_, i) => (
+              <li key={i} aria-current={i + 1 === n ? "step" : undefined} className={`h-1.5 grow rounded-full ${i < n ? "bg-accent" : "bg-line"}`} />
+            ))}
+          </ol>
+          <span className="shrink-0 text-[13px] font-semibold text-muted">
+            {n}/{total}
+          </span>
+        </div>
+        <h2 className="text-[24px] leading-[1.1] font-extrabold tracking-[-0.02em]">{titre}</h2>
+        {aide ? <p className="text-[15px] text-muted">{aide}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** Le rappel d'une étape passée, en une ligne. */
+function Rappel({ children }: { children: React.ReactNode }) {
+  return <p className="rounded-xl bg-ground px-4 py-3 text-[14px] text-muted">{children}</p>;
 }
 
 /* ----------------------------------------------------------------------------------------- choisir ses négoces */
@@ -143,13 +184,24 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
   const propositions: NegoceChoisi[] = [...(data?.habituels ?? []).map((h) => ({ supplierId: h.supplierId, nom: h.nom })), ...(data?.inscrits ?? []).map((i) => ({ negoceId: i.negoceId, nom: i.nom }))].filter((n) => !deja.has(cle(n)));
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-[14px] font-semibold">À quels négoces envoyer la demande ?</legend>
+      <legend className="sr-only">À quels négoces envoyer la demande ?</legend>
       {choisis.length ? (
         <ul aria-label="Négoces choisis" className="flex flex-wrap gap-2">
           {choisis.map((n) => (
             <li key={cle(n)}>
               <button type="button" onClick={() => onChange(choisis.filter((x) => cle(x) !== cle(n)))} aria-label={`Retirer ${n.nom}`} className="pressable inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-4 text-[15px] font-semibold text-white">
                 <Check size={16} aria-hidden="true" /> {n.nom} <X size={16} aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {propositions.length ? (
+        <ul aria-label="Négoces proposés" className="flex flex-wrap gap-2">
+          {propositions.slice(0, 8).map((n) => (
+            <li key={cle(n)}>
+              <button type="button" onClick={() => ajouter(n)} className="pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[15px] font-semibold">
+                <Plus size={16} aria-hidden="true" /> {n.nom}
               </button>
             </li>
           ))}
@@ -167,19 +219,8 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
         <label htmlFor="cherche-negoce" className="sr-only">
           Chercher un négoce par nom ou SIRET
         </label>
-        <input id="cherche-negoce" value={q} onChange={(e) => setQ(e.target.value)} onBlur={() => setCherche(q.trim())} placeholder="Nom ou SIRET du négoce" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" />
+        <input id="cherche-negoce" value={q} onChange={(e) => setQ(e.target.value)} onBlur={() => setCherche(q.trim())} placeholder="Chercher un négoce (nom ou SIRET)" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" />
       </form>
-      {propositions.length ? (
-        <ul aria-label="Négoces proposés" className="flex flex-wrap gap-2">
-          {propositions.slice(0, 8).map((n) => (
-            <li key={cle(n)}>
-              <button type="button" onClick={() => ajouter(n)} className="pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[15px] font-semibold">
-                <Plus size={16} aria-hidden="true" /> {n.nom}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
       {nouveau ? (
         <div className="flex flex-col gap-3 rounded-xl bg-ground p-3">
           <Field id="negoce-nom" label="Nom du négoce" value={nom} onChange={(e) => setNom(e.target.value)} />
@@ -200,7 +241,7 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
           </Button>
         </div>
       ) : (
-        <button type="button" onClick={() => setNouveau(true)} className="min-h-11 self-start text-[15px] font-semibold text-accent-text underline">
+        <button type="button" onClick={() => setNouveau(true)} className={LIEN_TEXTE}>
           Ajouter un autre négoce
         </button>
       )}
@@ -210,10 +251,7 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
 
 /* ------------------------------------------------------------------------------------- l'engagement (B6 à B9) */
 
-/**
- * Point 9 : les règles en clair, puis la case obligatoire « Je commande ces quantités… » ; le premier achat groupé est
- * offert, ensuite l'abonnement (point 25).
- */
+/** Point 9 : les règles en clair (quatre lignes), puis la case obligatoire ; le premier achat groupé est offert. */
 export function Engagement({ droit, texte, coche, onCoche }: { droit: Droit; texte: EngagementTexte; coche: boolean; onCoche: (v: boolean) => void }) {
   if (!droit.ok)
     return (
@@ -225,14 +263,16 @@ export function Engagement({ droit, texte, coche, onCoche }: { droit: Droit; tex
       </div>
     );
   return (
-    <section aria-label="Mon engagement" className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
-      <p className="text-[16px] font-extrabold">En rejoignant, tu t&apos;engages</p>
-      <ul className="flex list-disc flex-col gap-1.5 pl-5 text-[15px] leading-snug">
+    <section aria-label="Mon engagement" className="flex flex-col gap-4">
+      <ul className="flex flex-col gap-2 text-[15px] leading-snug">
         {texte.regles.map((r) => (
-          <li key={r}>{r}</li>
+          <li key={r} className="flex items-start gap-3">
+            <Check size={18} className="mt-0.5 shrink-0 text-ok" aria-hidden="true" />
+            <span>{r}</span>
+          </li>
         ))}
       </ul>
-      <label className="flex items-start gap-3 rounded-xl bg-ground p-3 text-[15px] font-semibold">
+      <label className={`flex items-start gap-3 rounded-xl border-2 p-4 text-[16px] font-semibold ${coche ? "border-ink bg-surface" : "border-line bg-surface"}`}>
         <input type="checkbox" checked={coche} onChange={(e) => onCoche(e.target.checked)} className="mt-0.5 size-6 shrink-0 accent-accent" />
         <span>{texte.phrase}</span>
       </label>
@@ -244,12 +284,17 @@ export function Engagement({ droit, texte, coche, onCoche }: { droit: Droit; tex
 /* ---------------------------------------------------------------------------------------- ajouter sa liste */
 
 const dansJours = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+const nombre = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
+
+/** Le résumé des lignes choisies, pour les étapes suivantes. */
+const resumeLignes = (n: number) => `${n} ligne${n > 1 ? "s" : ""}`;
 
 /**
- * Sans liste enregistrée : le panier se compose au catalogue (une référence, sa quantité, autant de lignes que voulu), la
- * commune, la date (sauf quand on rejoint un achat : c'est la sienne), ses négoces, puis l'engagement.
+ * Sans liste enregistrée : quatre étapes. 1) Les matériaux au catalogue et leurs quantités ; 2) la commune et la date (sauf
+ * quand on rejoint un achat : c'est la sienne) ; 3) ses négoces ; 4) l'engagement et le bouton.
  */
 export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; titre: string } | null }) {
+  const [etape, setEtape] = useState(1);
   const [q, setQ] = useState("");
   const fetchCat = useCallback((signal: AbortSignal) => api<{ references: { designation: string; unite: string }[] }>(`/v1/achats-groupes/catalogue?q=${encodeURIComponent(q)}`, { signal }), [q]);
   const fetchMes = useCallback((signal: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal }), []);
@@ -273,14 +318,22 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [lance, setLance] = useState<Lance | null>(null);
-  const nombre = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
   const pretes = lignes.filter((l) => nombre(l.qte) > 0);
+  const total = 4;
+  const suivant = () => {
+    setErreur(null);
+    setEtape((e) => Math.min(total, e + 1));
+    window.scrollTo({ top: 0 });
+  };
+  const precedent = () => {
+    setErreur(null);
+    setEtape((e) => Math.max(1, e - 1));
+  };
 
   async function envoyer(e: React.FormEvent) {
     e.preventDefault();
     setErreur(null);
-    if (negoces.length === 0) return setErreur("Ajoute au moins un négoce à qui envoyer la demande.");
-    if (!engage) return setErreur("Coche la case d'engagement pour rejoindre l'achat groupé.");
+    if (!engage) return setErreur("Coche la case pour t'engager.");
     setPending(true);
     try {
       setLance(
@@ -298,72 +351,100 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
 
   if (lance) return <EcranPrevenir p={lance.prevenir} besoinId={lance.besoinId} message={lance.ajoute ? "Tes lignes s'ajoutent à ta liste dans cet achat groupé." : `Ta liste est dans l'achat groupé : ${lance.titre}.${lance.offert ? " Ton premier achat groupé est offert." : ""}`} />;
 
+  const bloque = !!mes?.exclusion;
   return (
     <form onSubmit={(e) => void envoyer(e)} aria-label={rejoindre ? "Rejoindre l'achat groupé" : "Ajouter ma liste à un achat groupé"} className="flex flex-col gap-5">
-      {rejoindre ? (
-        <Card className="p-4">
-          <p className="text-[14px] text-muted">Achat groupé</p>
-          <p className="text-[18px] font-extrabold">{rejoindre.titre}</p>
-        </Card>
-      ) : null}
+      {rejoindre ? <Rappel>Achat groupé : {rejoindre.titre}</Rappel> : null}
       {mes?.exclusion ? (
-        <p role="alert" className="rounded-xl bg-danger-bg p-4 text-[15px] font-semibold text-danger">
+        <p role="alert" className={ALERTE}>
           {mes.exclusion}
         </p>
       ) : null}
-      <div className="flex flex-col gap-3">
-        <label htmlFor="cherche-materiau" className="text-[14px] font-semibold">
-          Ajoute tes matériaux
-        </label>
-        <div className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 focus-within:border-accent">
-          <Search size={18} className="text-muted" aria-hidden="true" />
-          <input id="cherche-materiau" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ardoise 32×22, liteaux, zinc 0,65…" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" autoComplete="off" />
-        </div>
-        <ul aria-label="Catalogue" className="flex flex-wrap gap-2">
-          {(data?.references ?? [])
-            .filter((r) => !lignes.some((l) => l.designation === r.designation))
-            .slice(0, 8)
-            .map((r) => (
-              <li key={r.designation}>
-                <button type="button" onClick={() => setLignes((ls) => [...ls, { designation: r.designation, unite: r.unite, qte: "" }])} className="pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-left text-[15px] font-semibold">
-                  <Plus size={16} aria-hidden="true" /> {r.designation}
-                </button>
-              </li>
-            ))}
-        </ul>
-        {lignes.length ? (
-          <ul aria-label="Ma liste" className="flex flex-col gap-2">
-            {lignes.map((l, i) => (
-              <li key={l.designation} className="flex items-end gap-2 rounded-xl border border-line bg-surface p-3">
-                <div className="flex min-w-0 grow flex-col gap-1">
-                  <span className="text-[15px] font-semibold">{l.designation}</span>
-                  <label className="flex items-center gap-2 text-[14px] text-muted">
-                    <span className="sr-only">Quantité de {l.designation}</span>
-                    <input inputMode="decimal" value={l.qte} placeholder="Quantité" onChange={(e) => setLignes((ls) => ls.map((x, j) => (j === i ? { ...x, qte: e.target.value } : x)))} className={`${INPUT} max-w-36`} />
-                    {l.unite}
-                  </label>
-                </div>
-                <button type="button" aria-label={`Retirer ${l.designation}`} onClick={() => setLignes((ls) => ls.filter((_, j) => j !== i))} className="grid size-11 shrink-0 place-items-center rounded-full text-muted">
-                  <X size={20} aria-hidden="true" />
-                </button>
-              </li>
-            ))}
+      {etape === 1 ? (
+        <Etape n={1} total={total} titre="Qu'est-ce que tu commandes ?" aide="Cherche dans le catalogue, puis mets la quantité.">
+          <div className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 focus-within:border-accent">
+            <Search size={18} className="text-muted" aria-hidden="true" />
+            <label htmlFor="cherche-materiau" className="sr-only">
+              Ajoute tes matériaux
+            </label>
+            <input id="cherche-materiau" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ardoise 32×22, liteaux, zinc 0,65…" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" autoComplete="off" />
+          </div>
+          <ul aria-label="Catalogue" className="flex flex-wrap gap-2">
+            {(data?.references ?? [])
+              .filter((r) => !lignes.some((l) => l.designation === r.designation))
+              .slice(0, 8)
+              .map((r) => (
+                <li key={r.designation}>
+                  <button type="button" onClick={() => setLignes((ls) => [...ls, { designation: r.designation, unite: r.unite, qte: "" }])} className="pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-left text-[15px] font-semibold">
+                    <Plus size={16} aria-hidden="true" /> {r.designation}
+                  </button>
+                </li>
+              ))}
           </ul>
-        ) : null}
-      </div>
-      <Field id="commune" label="Commune de livraison" placeholder="22300 Lannion" value={livraison} onChange={(e) => setLivraison(e.target.value)} />
-      {rejoindre ? null : <Field id="date-besoin" label="Livraison avant le" type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} />}
-      <ChoixNegoces choisis={negoces} onChange={setNegoces} />
-      {mes ? <Engagement droit={mes.droit} texte={mes.engagement} coche={engage} onCoche={setEngage} /> : null}
-      {erreur ? (
-        <p role="alert" className="rounded-xl bg-danger-bg p-4 text-[15px] font-semibold text-danger">
-          {erreur}
-        </p>
+          {lignes.length ? <LignesPanier lignes={lignes} onChange={setLignes} /> : null}
+          <Button disabled={pretes.length === 0 || bloque} onClick={suivant}>
+            Continuer
+          </Button>
+        </Etape>
       ) : null}
-      <Button type="submit" pending={pending} disabled={pretes.length === 0 || !livraison.trim() || (!rejoindre && !dateBesoin) || !mes?.droit.ok || !!mes?.exclusion}>
-        Je m&apos;engage et j&apos;ajoute ma liste
-      </Button>
+      {etape === 2 ? (
+        <Etape n={2} total={total} titre="Où et pour quand ?" onRetour={precedent}>
+          <Rappel>{resumeLignes(pretes.length)}</Rappel>
+          <Field id="commune" label="Commune de livraison" placeholder="22300 Lannion" value={livraison} onChange={(e) => setLivraison(e.target.value)} />
+          {rejoindre ? null : <Field id="date-besoin" label="Livraison avant le" type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} />}
+          <Button disabled={!livraison.trim() || (!rejoindre && !dateBesoin)} onClick={suivant}>
+            Continuer
+          </Button>
+        </Etape>
+      ) : null}
+      {etape === 3 ? (
+        <Etape n={3} total={total} titre="À quels négoces envoyer la demande ?" aide="Tes négoces habituels, ou un autre." onRetour={precedent}>
+          <ChoixNegoces choisis={negoces} onChange={setNegoces} />
+          <Button disabled={negoces.length === 0} onClick={suivant}>
+            Continuer
+          </Button>
+        </Etape>
+      ) : null}
+      {etape === 4 ? (
+        <Etape n={4} total={total} titre="Ton engagement" onRetour={precedent}>
+          <Rappel>
+            {resumeLignes(pretes.length)} · {livraison.trim()} · {negoces.length} négoce{negoces.length > 1 ? "s" : ""}
+          </Rappel>
+          {mes ? <Engagement droit={mes.droit} texte={mes.engagement} coche={engage} onCoche={setEngage} /> : null}
+          {erreur ? (
+            <p role="alert" className={ALERTE}>
+              {erreur}
+            </p>
+          ) : null}
+          <Button type="submit" pending={pending} disabled={!mes?.droit.ok || bloque}>
+            Je m&apos;engage et j&apos;ajoute ma liste
+          </Button>
+        </Etape>
+      ) : null}
     </form>
+  );
+}
+
+/** Les lignes du panier : la référence, sa quantité, une croix. */
+function LignesPanier({ lignes, onChange }: { lignes: { designation: string; unite: string; qte: string }[]; onChange: (l: { designation: string; unite: string; qte: string }[]) => void }) {
+  return (
+    <ul aria-label="Ma liste" className="flex flex-col gap-2">
+      {lignes.map((l, i) => (
+        <li key={l.designation} className="flex items-end gap-2 rounded-xl border border-line bg-surface p-3">
+          <div className="flex min-w-0 grow flex-col gap-1">
+            <span className="text-[15px] font-semibold">{l.designation}</span>
+            <label className="flex items-center gap-2 text-[14px] text-muted">
+              <span className="sr-only">Quantité de {l.designation}</span>
+              <input inputMode="decimal" value={l.qte} placeholder="Quantité" onChange={(e) => onChange(lignes.map((x, j) => (j === i ? { ...x, qte: e.target.value } : x)))} className={`${INPUT} max-w-36`} />
+              {l.unite}
+            </label>
+          </div>
+          <button type="button" aria-label={`Retirer ${l.designation}`} onClick={() => onChange(lignes.filter((_, j) => j !== i))} className="grid size-11 shrink-0 place-items-center rounded-full text-muted">
+            <X size={20} aria-hidden="true" />
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -384,7 +465,7 @@ export function EcranPrevenir({ p, besoinId, message }: { p: Prevenir; besoinId:
         </p>
       ) : null}
       <h1 className="text-[28px] leading-[1.05] font-extrabold tracking-[-0.03em]">{p.titre}</h1>
-      <p className="text-[17px] leading-relaxed">{p.texte}</p>
+      <p className="text-[16px] leading-relaxed">{p.texte}</p>
       {p.negoces.map((n) => (
         <Card key={n.id} className="flex flex-col gap-3 p-4">
           <span className="text-[17px] font-extrabold">{n.nom}</span>
@@ -409,7 +490,10 @@ export function EcranPrevenir({ p, besoinId, message }: { p: Prevenir; besoinId:
           )}
         </Card>
       ))}
-      <p className="rounded-xl bg-ground p-3 text-[14px] text-muted">Le SMS : « {p.sms} »</p>
+      <details className="rounded-xl bg-ground p-3 text-[14px] text-muted">
+        <summary className="min-h-11 cursor-pointer list-none font-semibold text-ink">Le SMS envoyé</summary>
+        <p className="pt-2">« {p.sms} »</p>
+      </details>
       <ButtonLink href={`/achats-groupes/${besoinId}`}>Voir mon achat groupé</ButtonLink>
     </section>
   );
@@ -417,17 +501,22 @@ export function EcranPrevenir({ p, besoinId, message }: { p: Prevenir; besoinId:
 
 /* ---------------------------------------------------------------------------------------------------- le détail */
 
+/**
+ * Le détail : l'état et la prochaine action en haut ; sa liste et ses négoces repliés ; les sorties derrière
+ * « Autres actions ». Un seul bouton jaune.
+ */
 export function DetailAchatGroupe({ id }: { id: string }) {
   const router = useRouter();
   const fetcher = useCallback((signal: AbortSignal) => api<DetailAchat>(`/v1/achats-groupes/${id}`, { signal }), [id]);
   const { data: d, error, reload } = useResource(fetcher);
   const [confirmer, setConfirmer] = useState<"retirer" | string | null>(null);
+  const [sortie, setSortie] = useState(false);
   const [modifier, setModifier] = useState<Record<string, string> | null>(null);
   const [probleme, setProbleme] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
-  if (error) return <p role="alert" className="rounded-xl bg-danger-bg p-4 font-semibold text-danger">{messageErreur(error)}</p>;
+  if (error) return <p role="alert" className={ALERTE}>{messageErreur(error)}</p>;
   if (!d) return null;
 
   async function geste(nom: string, chemin: string, corps?: unknown, apres?: (r: unknown) => void, methode: "POST" | "PUT" = "POST") {
@@ -437,6 +526,7 @@ export function DetailAchatGroupe({ id }: { id: string }) {
       const r = await api(chemin, { method: methode, body: corps });
       apres?.(r);
       setConfirmer(null);
+      setSortie(false);
       setModifier(null);
       setProbleme(null);
       reload();
@@ -448,6 +538,7 @@ export function DetailAchatGroupe({ id }: { id: string }) {
   }
 
   const r = d.resultat;
+  const enAttente = d.etat === "seul" || d.etat === "regroupe" || d.etat === "regroupe_total";
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
@@ -461,21 +552,20 @@ export function DetailAchatGroupe({ id }: { id: string }) {
         <p className="text-[18px] font-extrabold">{d.titre}</p>
         {d.sousTitre ? <p className="text-[15px] text-muted">{d.sousTitre}</p> : null}
         <JaugeVolume j={d.jauge} />
+        <ol aria-label="Étapes" className="grid grid-cols-4 gap-1 pt-1">
+          {d.frise.etapes.map((e, i) => (
+            <li key={e} aria-current={i === d.frise.courante ? "step" : undefined} className="flex flex-col gap-1.5">
+              <span className={`h-1.5 rounded-full ${i <= d.frise.courante ? "bg-accent" : "bg-line"}`} />
+              <span className={`text-[12px] leading-tight ${i === d.frise.courante ? "font-bold text-ink" : "text-muted"}`}>{e}</span>
+            </li>
+          ))}
+        </ol>
       </Card>
       {fait ? (
         <p role="status" className="rounded-xl bg-ok-bg p-4 text-[15px] font-semibold text-ok">
           {fait}
         </p>
       ) : null}
-
-      <ol aria-label="Étapes" className="grid grid-cols-4 gap-1">
-        {d.frise.etapes.map((e, i) => (
-          <li key={e} aria-current={i === d.frise.courante ? "step" : undefined} className="flex flex-col gap-1.5">
-            <span className={`h-1.5 rounded-full ${i <= d.frise.courante ? "bg-accent" : "bg-line"}`} />
-            <span className={`text-[12px] leading-tight ${i === d.frise.courante ? "font-bold text-ink" : "text-muted"}`}>{e}</span>
-          </li>
-        ))}
-      </ol>
 
       {r ? <Resultat id={id} d={d} r={r} pending={pending} geste={geste} /> : null}
 
@@ -515,41 +605,54 @@ export function DetailAchatGroupe({ id }: { id: string }) {
         </Button>
       ) : null}
 
-      <section aria-label="Ma liste" className="flex flex-col gap-2 rounded-2xl bg-surface p-4 shadow-card">
-        <p className="text-[15px] font-bold">Ma liste</p>
-        <ul className="flex flex-col divide-y divide-line">
-          {d.lignes.map((l) => (
-            <li key={l.id} className="flex items-center justify-between gap-3 py-2 text-[15px]">
-              <span>{l.libelle}</span>
-              {modifier ? (
-                <input aria-label={`Quantité de ${l.libelle}`} inputMode="decimal" value={modifier[l.id] ?? ""} onChange={(e) => setModifier({ ...modifier, [l.id]: e.target.value })} className={`${INPUT} max-w-28`} />
-              ) : (
-                <span className="shrink-0 font-semibold whitespace-nowrap">
-                  {quantite(l.quantite)} {l.unite}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-        {modifier ? (
-          <Button
-            variant="secondary"
-            pending={pending === "modifier"}
-            onClick={() => void geste("modifier", `/v1/achats-groupes/${id}`, { quantites: Object.fromEntries(Object.entries(modifier).map(([k, v]) => [k, Number(v.replace(/\s/g, "").replace(",", ".")) || 0])) }, undefined, "PUT")}
-          >
-            Enregistrer
-          </Button>
-        ) : null}
-        <p className="pt-2 text-[15px] text-muted">Tes négoces :</p>
-        <ul className="flex flex-col gap-1">
-          {d.negoces.map((n) => (
-            <li key={n.id} className="text-[15px] font-semibold">
-              {n.nom}
-              <span className="font-normal text-muted">{n.parti ? " · demande partie" : n.prevenu ? " · prévenu" : ""}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {enAttente && d.negoces.some((n) => !n.prevenu) ? <PrevenirDepuisDetail id={id} /> : null}
+
+      <details open={!!modifier} className="rounded-2xl bg-surface p-4 shadow-card">
+        <summary aria-label="Ma liste" className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[16px] font-extrabold">
+          Ma liste
+          <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+        </summary>
+        <section aria-label="Ma liste" className="flex flex-col gap-2 pt-2">
+          <ul className="flex flex-col divide-y divide-line">
+            {d.lignes.map((l) => (
+              <li key={l.id} className="flex items-center justify-between gap-3 py-2 text-[15px]">
+                <span>{l.libelle}</span>
+                {modifier ? (
+                  <input aria-label={`Quantité de ${l.libelle}`} inputMode="decimal" value={modifier[l.id] ?? ""} onChange={(e) => setModifier({ ...modifier, [l.id]: e.target.value })} className={`${INPUT} max-w-28`} />
+                ) : (
+                  <span className="shrink-0 font-semibold whitespace-nowrap">
+                    {quantite(l.quantite)} {l.unite}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+          {modifier ? (
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="secondary" onClick={() => setModifier(null)}>
+                Annuler
+              </Button>
+              <Button variant="ink" pending={pending === "modifier"} onClick={() => void geste("modifier", `/v1/achats-groupes/${id}`, { quantites: Object.fromEntries(Object.entries(modifier).map(([k, v]) => [k, nombre(v) || 0])) }, undefined, "PUT")}>
+                Enregistrer
+              </Button>
+            </div>
+          ) : d.actions.modifier ? (
+            <button type="button" onClick={() => setModifier(Object.fromEntries(d.lignes.map((l) => [l.id, String(l.quantite)])))} className={LIEN_TEXTE}>
+              Modifier mes quantités
+            </button>
+          ) : null}
+          <p className="pt-2 text-[14px] text-muted">
+            Tes négoces :{" "}
+            {d.negoces.map((n, i) => (
+              <span key={n.id} className="font-semibold text-ink">
+                {i ? ", " : ""}
+                {n.nom}
+                <span className="font-normal text-muted">{n.parti ? " (demande partie)" : n.prevenu ? " (prévenu)" : ""}</span>
+              </span>
+            ))}
+          </p>
+        </section>
+      </details>
 
       {confirmer === "retirer" ? (
         <Card role="alertdialog" aria-label="Retirer ma liste" className="flex flex-col gap-3 p-4">
@@ -576,107 +679,119 @@ export function DetailAchatGroupe({ id }: { id: string }) {
             </Button>
           </div>
         </Card>
-      ) : null}
-      {erreur ? (
-        <p role="alert" className="rounded-xl bg-danger-bg p-4 text-[15px] font-semibold text-danger">
-          {erreur}
-        </p>
-      ) : null}
-      <div className="flex flex-wrap gap-2">
-        {d.actions.modifier && !modifier ? (
-          <Button variant="secondary" onClick={() => setModifier(Object.fromEntries(d.lignes.map((l) => [l.id, String(l.quantite)])))}>
-            Modifier mes quantités
-          </Button>
-        ) : null}
-        {d.actions.retirer && !confirmer ? (
-          <Button variant="secondary" onClick={() => setConfirmer("retirer")}>
-            Retirer ma liste
-          </Button>
-        ) : null}
-      </div>
-      {d.actions.sortir && !confirmer ? (
-        <section aria-label="Sortir de l'achat groupé" className="flex flex-col gap-2">
-          <p className="text-[14px] text-muted">Sortir de l&apos;achat groupé, avec le motif :</p>
+      ) : sortie && d.actions.sortir ? (
+        <Card aria-label="Sortir de l'achat groupé" className="flex flex-col gap-2 p-4">
+          <p className="text-[16px] font-bold">Pourquoi tu sors ?</p>
           {d.motifsSortie.map((m) => (
             <Button key={m.valeur} variant="secondary" onClick={() => setConfirmer(m.valeur)}>
               {m.libelle}
             </Button>
           ))}
-        </section>
+          <Button variant="ghost" onClick={() => setSortie(false)}>
+            Finalement, je reste
+          </Button>
+        </Card>
       ) : null}
-      {d.actions.retirer && d.negoces.some((n) => !n.prevenu) ? <PrevenirDepuisDetail id={id} /> : null}
-      <InviteLe phrase={d.invite} libelle={d.metier.toLowerCase()} />
+      {erreur ? (
+        <p role="alert" className={ALERTE}>
+          {erreur}
+        </p>
+      ) : null}
+      {!confirmer && !sortie && (d.actions.retirer || d.actions.sortir) ? (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+          {d.actions.retirer ? (
+            <button type="button" onClick={() => setConfirmer("retirer")} className="min-h-11 text-[15px] font-semibold text-muted underline">
+              Retirer ma liste
+            </button>
+          ) : null}
+          {d.actions.sortir ? (
+            <button type="button" onClick={() => setSortie(true)} className="min-h-11 text-[15px] font-semibold text-muted underline">
+              Sortir de l&apos;achat groupé
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+      {enAttente ? <InviteLe phrase={d.invite} libelle={d.metier.toLowerCase()} /> : null}
     </div>
   );
 }
 
 /**
- * Points 13, 17 à 19 : la phrase de la publication, puis chaque offre sur SES lignes (complètes d'abord, « N lignes non
- * chiffrées »), et pour commander : son négoce habituel, ou ouvrir un compte (conditions, coordonnées avec son accord).
+ * Points 13, 17 à 19 : la phrase de la publication, la meilleure offre en grand (sur SES lignes), les autres repliées ;
+ * pour commander : son négoce habituel, ou ouvrir un compte (conditions, coordonnées avec son accord).
  */
 function Resultat({ id, d, r, pending, geste }: { id: string; d: DetailAchat; r: ResultatAchat; pending: string | null; geste: (nom: string, chemin: string, corps?: unknown, apres?: (r: unknown) => void) => Promise<void> }) {
   const [accord, setAccord] = useState<string | null>(null);
   const [ouvert, setOuvert] = useState<string | null>(null);
+  const [meilleure, ...autres] = r.offres;
+  const carte = (o: NonNullable<typeof meilleure>, principale: boolean) => (
+    <Card key={o.consultationId} className={`flex flex-col gap-3 p-4 ${principale ? "border-2 border-accent" : ""}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <p className="text-[13px] font-semibold text-muted">{principale ? "La meilleure offre" : o.habituel ? "Ton négoce" : "Négoce du groupe"}</p>
+          <p className="text-[18px] font-extrabold">{o.nom}</p>
+        </div>
+        <p className={`shrink-0 font-extrabold whitespace-nowrap ${principale ? "text-[22px]" : "text-[16px]"}`}>{eurosHt(o.totalHt)}</p>
+      </div>
+      <p className={`text-[14px] font-semibold ${o.complete ? "text-ok" : "text-warn"}`}>{o.complete ? "Toute ta liste, livraison comprise" : o.manquantes}</p>
+      <button type="button" aria-expanded={ouvert === o.consultationId} onClick={() => setOuvert(ouvert === o.consultationId ? null : o.consultationId)} className="min-h-11 self-start text-[14px] font-semibold text-accent-text underline">
+        {ouvert === o.consultationId ? "Masquer le détail" : "Voir le détail"}
+      </button>
+      {ouvert === o.consultationId ? (
+        <ul className="flex flex-col divide-y divide-line text-[14px]">
+          {o.lignes.map((l) => (
+            <li key={l.libelle} className="flex justify-between gap-2 py-1.5">
+              <span>
+                {l.libelle} · {quantite(l.quantite)} {l.unite}
+              </span>
+              <span className={l.prixHt === null ? "text-danger" : "font-semibold"}>{l.prixHt === null ? "non chiffrée" : eurosHt(l.prixHt)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {d.actions.commander ? (
+        o.habituel ? (
+          <Button variant={principale ? "primary" : "secondary"} pending={pending === o.consultationId} onClick={() => void geste(o.consultationId, `/v1/achats-groupes/${id}/commander`, { consultationId: o.consultationId })}>
+            <ShoppingCart size={18} aria-hidden="true" /> Commander chez {o.nom}
+          </Button>
+        ) : (
+          <div className="flex flex-col gap-3 rounded-xl bg-ground p-3">
+            <p className="text-[15px] font-semibold">{o.ouvertureCompte}</p>
+            {r.coordonneesTransmises === o.nom ? (
+              <p className="text-[15px] font-semibold text-ok">Tes coordonnées sont parties : {o.nom} te rappelle de la part de Mobiiz.</p>
+            ) : (
+              <>
+                <label className="flex items-start gap-3 text-[14px]">
+                  <input type="checkbox" checked={accord === o.consultationId} onChange={(e) => setAccord(e.target.checked ? o.consultationId : null)} className="mt-0.5 size-5 shrink-0 accent-accent" />
+                  <span>J&apos;accepte que Mobiiz transmette mes coordonnées (nom, entreprise, téléphone, e-mail, SIRET) à {o.nom} pour ouvrir un compte.</span>
+                </label>
+                <Button variant={principale ? "primary" : "secondary"} disabled={accord !== o.consultationId} pending={pending === `c-${o.consultationId}`} onClick={() => void geste(`c-${o.consultationId}`, `/v1/achats-groupes/${id}/coordonnees`, { consultationId: o.consultationId, consentement: true })}>
+                  Je suis intéressé, transmettre mes coordonnées
+                </Button>
+              </>
+            )}
+            <button type="button" disabled={pending === o.consultationId} onClick={() => void geste(o.consultationId, `/v1/achats-groupes/${id}/commander`, { consultationId: o.consultationId })} className={LIEN_TEXTE}>
+              J&apos;ai déjà un compte : commander
+            </button>
+          </div>
+        )
+      ) : null}
+    </Card>
+  );
   return (
     <section aria-label="Les offres" className="flex flex-col gap-3">
       {r.phrase ? <p className="rounded-xl bg-ok-bg p-4 text-[17px] font-bold text-ok">{r.phrase}</p> : null}
       {r.commandeChez ? <p className="text-[15px] font-semibold">Commandé chez {r.commandeChez}.</p> : null}
       {d.commandeAvantLe && d.actions.commander ? <p className="text-[14px] text-muted">Commande avant le {dateFr(d.commandeAvantLe)}.</p> : null}
-      <SectionTitle>Les offres pour ta liste</SectionTitle>
-      {r.offres.map((o, i) => (
-        <Card key={o.consultationId} className="flex flex-col gap-2 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-col gap-0.5">
-              <p className="text-[17px] font-extrabold">{o.nom}</p>
-              <p className="text-[13px] text-muted">{i === 0 ? "La meilleure offre" : o.habituel ? "Ton négoce" : "Négoce du groupe"}</p>
-            </div>
-            <p className="shrink-0 text-[16px] font-bold whitespace-nowrap">{eurosHt(o.totalHt)}</p>
-          </div>
-          <p className={`text-[14px] font-semibold ${o.complete ? "text-ok" : "text-warn"}`}>{o.complete ? "Toute ta liste, livraison comprise" : o.manquantes}</p>
-          <button type="button" aria-expanded={ouvert === o.consultationId} onClick={() => setOuvert(ouvert === o.consultationId ? null : o.consultationId)} className="min-h-11 self-start text-[14px] font-semibold text-accent-text underline">
-            {ouvert === o.consultationId ? "Masquer les prix" : "Voir les prix"}
-          </button>
-          {ouvert === o.consultationId ? (
-            <ul className="flex flex-col divide-y divide-line text-[14px]">
-              {o.lignes.map((l) => (
-                <li key={l.libelle} className="flex justify-between gap-2 py-1.5">
-                  <span>
-                    {l.libelle} · {quantite(l.quantite)} {l.unite}
-                  </span>
-                  <span className={l.prixHt === null ? "text-danger" : "font-semibold"}>{l.prixHt === null ? "non chiffrée" : eurosHt(l.prixHt)}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {d.actions.commander ? (
-            o.habituel ? (
-              <Button variant={i === 0 ? "primary" : "secondary"} pending={pending === o.consultationId} onClick={() => void geste(o.consultationId, `/v1/achats-groupes/${id}/commander`, { consultationId: o.consultationId })}>
-                <ShoppingCart size={18} aria-hidden="true" /> Commander chez {o.nom}
-              </Button>
-            ) : (
-              <div className="flex flex-col gap-2 rounded-xl bg-ground p-3">
-                <p className="text-[15px] font-semibold">{o.ouvertureCompte}</p>
-                {r.coordonneesTransmises === o.nom ? (
-                  <p className="text-[15px] font-semibold text-ok">Tes coordonnées sont parties : {o.nom} te rappelle de la part de Mobiiz.</p>
-                ) : (
-                  <>
-                    <label className="flex items-start gap-3 text-[14px]">
-                      <input type="checkbox" checked={accord === o.consultationId} onChange={(e) => setAccord(e.target.checked ? o.consultationId : null)} className="mt-0.5 size-5 shrink-0 accent-accent" />
-                      <span>J&apos;accepte que Mobiiz transmette à {o.nom} mon nom, mon entreprise, mon téléphone, mon e-mail et mon SIRET, pour ouvrir un compte.</span>
-                    </label>
-                    <Button variant={i === 0 ? "primary" : "secondary"} disabled={accord !== o.consultationId} pending={pending === `c-${o.consultationId}`} onClick={() => void geste(`c-${o.consultationId}`, `/v1/achats-groupes/${id}/coordonnees`, { consultationId: o.consultationId, consentement: true })}>
-                      Je suis intéressé, transmettre mes coordonnées
-                    </Button>
-                  </>
-                )}
-                <Button variant="secondary" pending={pending === o.consultationId} onClick={() => void geste(o.consultationId, `/v1/achats-groupes/${id}/commander`, { consultationId: o.consultationId })}>
-                  J&apos;ai déjà un compte : commander
-                </Button>
-              </div>
-            )
-          ) : null}
-        </Card>
-      ))}
+      {meilleure ? carte(meilleure, true) : null}
+      {autres.length ? (
+        <details className="flex flex-col gap-3">
+          <summary className="min-h-11 cursor-pointer list-none text-[15px] font-semibold text-accent-text underline">
+            {autres.length === 1 ? "L'autre offre" : `Les ${autres.length} autres offres`}
+          </summary>
+          <div className="flex flex-col gap-3 pt-3">{autres.map((o) => carte(o, false))}</div>
+        </details>
+      ) : null}
     </section>
   );
 }
@@ -758,15 +873,16 @@ export function Cloche() {
 /* ------------------------------------------------------------------- « Acheter en groupe » depuis une liste */
 
 /**
- * Depuis la liste (points 2, 3 et 22) : une case par ligne ; cocher une ligne, c'est confirmer d'un tap sa référence du
- * catalogue (« C'est bien de l'ardoise 32×22 ? ») ; « Tout cocher » ; une ligne sans référence reste en demande perso. Une
- * grosse quantité amène la suggestion, qui ouvre les cases avec ces lignes déjà cochées. Puis l'achat ouvert du secteur
- * (ou une date), ses négoces, l'engagement.
+ * Depuis la liste (points 2, 3 et 22), en quatre étapes : 1) une case par ligne (cocher, c'est confirmer d'un tap sa
+ * référence du catalogue ; « Tout cocher » ; une ligne sans référence reste en demande perso ; une grosse quantité amène
+ * la suggestion, qui ouvre les cases avec ces lignes déjà cochées) ; 2) l'achat ouvert du secteur ou une date, la
+ * commune ; 3) ses négoces ; 4) l'engagement.
  */
 export function AcheterEnGroupe({ projectId }: { projectId: string }) {
   const fetcher = useCallback((signal: AbortSignal) => api<LignesListe>(`/v1/projects/${projectId}/achat-groupe`, { signal }).catch(() => null), [projectId]);
   const { data } = useResource(fetcher);
   const [cochees, setCochees] = useState<string[] | null>(null);
+  const [etape, setEtape] = useState(1);
   const [achatId, setAchatId] = useState<string | null | undefined>(undefined);
   const [dateBesoin, setDateBesoin] = useState(dansJours(30));
   const [livraison, setLivraison] = useState<string | null>(null);
@@ -779,14 +895,23 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
   const rattachables = data.lignes.filter((l) => l.question);
   if (rattachables.length === 0) return null;
   const achat = achatId === undefined ? (data.achatsOuverts[0]?.id ?? null) : achatId;
+  const commune = (livraison ?? data.adresse ?? "").trim();
+  const total = 4;
+  const suivant = () => {
+    setErreur(null);
+    setEtape((e) => Math.min(total, e + 1));
+  };
+  const precedent = () => {
+    setErreur(null);
+    setEtape((e) => Math.max(1, e - 1));
+  };
 
   async function lancer() {
     setErreur(null);
-    if (negoces.length === 0) return setErreur("Ajoute au moins un négoce à qui envoyer la demande.");
-    if (!engage) return setErreur("Coche la case d'engagement pour rejoindre l'achat groupé.");
+    if (!engage) return setErreur("Coche la case pour t'engager.");
     setPending(true);
     try {
-      setFait(await api(`/v1/projects/${projectId}/achat-groupe`, { method: "POST", body: { confirmees: cochees ?? [], achatId: achat, livraison: (livraison ?? data?.adresse ?? "").trim() || null, dateBesoin: achat ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true } }));
+      setFait(await api(`/v1/projects/${projectId}/achat-groupe`, { method: "POST", body: { confirmees: cochees ?? [], achatId: achat, livraison: commune || null, dateBesoin: achat ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true } }));
     } catch (e) {
       setErreur(messageErreur(e));
     } finally {
@@ -822,69 +947,95 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
       </div>
     );
   const tout = rattachables.every((l) => cochees.includes(l.key));
+  const achatChoisi = data.achatsOuverts.find((a) => a.id === achat);
   return (
     <Card className="flex flex-col gap-4 p-4" aria-label="Acheter en groupe">
-      <div className="flex items-center justify-between gap-3">
-        <SectionTitle>Acheter en groupe</SectionTitle>
-        <button type="button" onClick={() => setCochees(tout ? [] : rattachables.map((l) => l.key))} className="min-h-11 shrink-0 text-[15px] font-semibold text-accent-text underline">
-          {tout ? "Tout décocher" : "Tout cocher"}
-        </button>
-      </div>
-      <p className="text-[14px] text-muted">Coche les lignes à mettre en achat groupé : chaque case confirme la référence du catalogue. Le reste part en demande à tes négoces.</p>
-      <ul className="flex flex-col gap-2">
-        {data.lignes.map((l) => (
-          <li key={l.key}>
-            {l.question ? (
-              <label className={`flex items-start gap-3 rounded-xl border p-3 ${cochees.includes(l.key) ? "border-ink bg-ground" : "border-line"}`}>
-                <input type="checkbox" checked={cochees.includes(l.key)} onChange={(e) => setCochees((c) => (e.target.checked ? [...(c ?? []), l.key] : (c ?? []).filter((k) => k !== l.key)))} className="mt-0.5 size-6 shrink-0 accent-accent" />
-                <span className="flex flex-col gap-0.5">
-                  <span className="text-[15px] font-semibold">
-                    {l.designation} · {quantite(l.quantite)} {l.unite}
+      {etape === 1 ? (
+        <Etape n={1} total={total} titre="Quelles lignes mettre en achat groupé ?" aide="Cocher une ligne, c'est confirmer sa référence. Le reste part en demande à tes négoces.">
+          <button type="button" onClick={() => setCochees(tout ? [] : rattachables.map((l) => l.key))} className={LIEN_TEXTE}>
+            {tout ? "Tout décocher" : "Tout cocher"}
+          </button>
+          <ul className="flex flex-col gap-2">
+            {data.lignes.map((l) => (
+              <li key={l.key}>
+                {l.question ? (
+                  <label className={`flex items-start gap-3 rounded-xl border p-3 ${cochees.includes(l.key) ? "border-ink bg-ground" : "border-line"}`}>
+                    <input type="checkbox" checked={cochees.includes(l.key)} onChange={(e) => setCochees((c) => (e.target.checked ? [...(c ?? []), l.key] : (c ?? []).filter((k) => k !== l.key)))} className="mt-0.5 size-6 shrink-0 accent-accent" />
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-[15px] font-semibold">
+                        {l.designation} · {quantite(l.quantite)} {l.unite}
+                      </span>
+                      <span className="text-[14px] text-muted">{l.question}</span>
+                    </span>
+                  </label>
+                ) : (
+                  <div className="flex flex-col gap-0.5 rounded-xl border border-dashed border-line p-3">
+                    <span className="text-[15px] font-semibold">
+                      {l.designation} · {quantite(l.quantite)} {l.unite}
+                    </span>
+                    <span className="text-[14px] text-muted">Reste en demande perso à tes négoces.</span>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+          <Button disabled={cochees.length === 0 || !data.droit.ok} onClick={suivant}>
+            Continuer
+          </Button>
+        </Etape>
+      ) : null}
+      {etape === 2 ? (
+        <Etape n={2} total={total} titre="Où et pour quand ?" onRetour={precedent}>
+          <Rappel>{resumeLignes(cochees.length)}</Rappel>
+          {data.achatsOuverts.length ? (
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 text-[14px] font-semibold">Quel achat groupé ?</legend>
+              {data.achatsOuverts.map((a) => (
+                <label key={a.id} className="flex items-start gap-3 rounded-xl border border-line p-3 text-[15px]">
+                  <input type="radio" name="achat" checked={achat === a.id} onChange={() => setAchatId(a.id)} className="mt-0.5 size-5 accent-accent" />
+                  <span>
+                    <span className="font-semibold">{a.titre}</span>
+                    <span className="block text-[14px] text-muted">Ajoute ta liste avant le {dateFr(a.clotureLe)}.</span>
                   </span>
-                  <span className="text-[14px] text-muted">{l.question}</span>
-                </span>
+                </label>
+              ))}
+              <label className="flex items-center gap-3 rounded-xl border border-line p-3 text-[15px]">
+                <input type="radio" name="achat" checked={achat === null} onChange={() => setAchatId(null)} className="size-5 accent-accent" />
+                Une autre date de livraison
               </label>
-            ) : (
-              <div className="flex flex-col gap-0.5 rounded-xl border border-dashed border-line p-3">
-                <span className="text-[15px] font-semibold">
-                  {l.designation} · {quantite(l.quantite)} {l.unite}
-                </span>
-                <span className="text-[14px] text-muted">Reste en demande perso à tes négoces.</span>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-      {data.achatsOuverts.length ? (
-        <fieldset className="flex flex-col gap-2">
-          <legend className="mb-2 text-[14px] font-semibold">Quel achat groupé ?</legend>
-          {data.achatsOuverts.map((a) => (
-            <label key={a.id} className="flex items-start gap-3 rounded-xl border border-line p-3 text-[15px]">
-              <input type="radio" name="achat" checked={achat === a.id} onChange={() => setAchatId(a.id)} className="mt-0.5 size-5 accent-accent" />
-              <span>
-                <span className="font-semibold">{a.titre}</span>
-                <span className="block text-[14px] text-muted">Ajoute ta liste avant le {dateFr(a.clotureLe)}.</span>
-              </span>
-            </label>
-          ))}
-          <label className="flex items-center gap-3 rounded-xl border border-line p-3 text-[15px]">
-            <input type="radio" name="achat" checked={achat === null} onChange={() => setAchatId(null)} className="size-5 accent-accent" />
-            Une autre date de livraison
-          </label>
-        </fieldset>
+            </fieldset>
+          ) : null}
+          <Field id="liste-commune" label="Commune de livraison" placeholder="22300 Lannion" value={livraison ?? data.adresse ?? ""} onChange={(e) => setLivraison(e.target.value)} />
+          {achat === null ? <Field id="liste-date-besoin" label="Livraison avant le" type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} /> : null}
+          <Button disabled={!commune || (achat === null && !dateBesoin)} onClick={suivant}>
+            Continuer
+          </Button>
+        </Etape>
       ) : null}
-      <Field id="liste-commune" label="Commune de livraison" placeholder="22300 Lannion" value={livraison ?? data.adresse ?? ""} onChange={(e) => setLivraison(e.target.value)} />
-      {achat === null ? <Field id="liste-date-besoin" label="Livraison avant le" type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} /> : null}
-      <ChoixNegoces choisis={negoces} onChange={setNegoces} />
-      <Engagement droit={data.droit} texte={data.engagement} coche={engage} onCoche={setEngage} />
-      {erreur ? (
-        <p role="alert" className="text-[15px] font-semibold text-danger">
-          {erreur}
-        </p>
+      {etape === 3 ? (
+        <Etape n={3} total={total} titre="À quels négoces envoyer la demande ?" aide="Tes négoces habituels, ou un autre." onRetour={precedent}>
+          <ChoixNegoces choisis={negoces} onChange={setNegoces} />
+          <Button disabled={negoces.length === 0} onClick={suivant}>
+            Continuer
+          </Button>
+        </Etape>
       ) : null}
-      <Button variant="ink" pending={pending} disabled={cochees.length === 0 || !data.droit.ok} onClick={() => void lancer()}>
-        Je m&apos;engage et j&apos;ajoute {cochees.length > 1 ? `ces ${cochees.length} lignes` : "cette ligne"}
-      </Button>
+      {etape === 4 ? (
+        <Etape n={4} total={total} titre="Ton engagement" onRetour={precedent}>
+          <Rappel>
+            {resumeLignes(cochees.length)} · {achatChoisi ? achatChoisi.titre : commune} · {negoces.length} négoce{negoces.length > 1 ? "s" : ""}
+          </Rappel>
+          <Engagement droit={data.droit} texte={data.engagement} coche={engage} onCoche={setEngage} />
+          {erreur ? (
+            <p role="alert" className="text-[15px] font-semibold text-danger">
+              {erreur}
+            </p>
+          ) : null}
+          <Button pending={pending} disabled={cochees.length === 0 || !data.droit.ok} onClick={() => void lancer()}>
+            Je m&apos;engage et j&apos;ajoute {cochees.length > 1 ? `ces ${cochees.length} lignes` : "cette ligne"}
+          </Button>
+        </Etape>
+      ) : null}
     </Card>
   );
 }

@@ -169,8 +169,12 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await groupe.getByRole("button", { name: "Tout cocher" }).click();
     await expect(groupe.getByRole("checkbox", { name: /Liteaux 27×38/ })).toBeChecked();
     await expect(groupe.getByText("C'est bien de l'ardoise 32×22 Espagne 1er choix ?")).toBeVisible();
+    // Ultra intuitif (27 octobre) : une question par écran, « Continuer » entre chaque.
+    await groupe.getByRole("button", { name: "Continuer" }).click();
     await groupe.getByLabel("Livraison avant le").fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
+    await groupe.getByRole("button", { name: "Continuer" }).click();
     await ajouterNegoce(page, negoceX);
+    await groupe.getByRole("button", { name: "Continuer" }).click();
     await expect(groupe.getByText("Ton premier achat groupé est offert.")).toBeVisible();
     await groupe.getByRole("checkbox", { name: /^Je commande ces quantités/ }).check();
     await capture(page, projet, "2b-tout-cocher-engagement");
@@ -185,14 +189,17 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     const b = await nouvelArtisan(browser, dep, "Paul");
     await b.page.goto("/");
     const ouverts = b.page.getByRole("region", { name: "Achats groupés ouverts dans ton secteur" });
-    await expect(ouverts.getByText(/^Achat groupé couverture ouvert dans ton secteur, livraison avant le \d+ \S+\. Ajoute ta liste avant le \d+ \S+\.$/)).toBeVisible();
+    await expect(ouverts.getByText(/^Ajoute ta liste avant le \d+ \S+\. Livraison avant le \d+ \S+\.$/)).toBeVisible();
     await ouverts.getByRole("link", { name: "Ajouter ma liste" }).first().click();
     await expect(b.page.getByRole("heading", { name: "Ajouter ma liste" })).toBeVisible();
     await b.page.getByLabel("Ajoute tes matériaux").fill("ardoise 32");
     await b.page.getByRole("button", { name: /Ardoise naturelle 32×22 Espagne 1er choix/ }).first().click();
     await b.page.getByLabel("Quantité de Ardoise naturelle 32×22 Espagne 1er choix").fill("900");
+    await b.page.getByRole("button", { name: "Continuer" }).click();
     await b.page.getByLabel("Commune de livraison").fill(`${dep}200 Autre-${dep}`);
+    await b.page.getByRole("button", { name: "Continuer" }).click();
     await ajouterNegoce(b.page, negoceY);
+    await b.page.getByRole("button", { name: "Continuer" }).click();
     const engagement = b.page.getByRole("region", { name: "Mon engagement" });
     await expect(engagement.getByText("Deux sorties seulement, en un clic avec le motif", { exact: false })).toBeVisible();
     await engagement.getByRole("checkbox", { name: /^Je commande ces quantités, chez le moins cher entre la meilleure offre du groupe et mon négoce habituel\.$/ }).check();
@@ -213,6 +220,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(negoce.getByText("Ardoise 32×22 Espagne 1er choix · 2\u00a0700 pièces")).toBeVisible();
     await negoce.getByLabel("Prix de Ardoise 32×22 Espagne 1er choix").fill("1,10");
     await negoce.getByRole("listitem").filter({ hasText: "Liteaux 27×38" }).getByRole("checkbox", { name: "Je ne fournis pas" }).check();
+    await negoce.getByText("Pour ouvrir un compte chez vous").click();
     await negoce.getByRole("checkbox", { name: "Kbis de moins de 3 mois" }).check();
     await negoce.getByRole("checkbox", { name: "RIB" }).check();
     await negoce.getByRole("radio", { name: "Paiement comptant au départ" }).check();
@@ -221,6 +229,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
     await expect(negoce.getByText(/Votre offre est enregistrée/)).toBeVisible();
     await negoce.goto(`/achat-groupe/${await jeton(negoceY.email)}`);
+    await negoce.getByText("Plutôt votre devis PDF ?").click();
     await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
     await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
     await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
@@ -261,6 +270,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     // 6. A sort de l'achat groupé : chantier annulé, en un clic avec le motif.
     await page.goto(`/achats-groupes/${besoinA}`);
     await expect(page.getByText("1 ligne non chiffrée chez ce négoce")).toBeVisible();
+    await page.getByRole("button", { name: "Sortir de l'achat groupé" }).click();
     await page.getByRole("button", { name: "Mon client a annulé le chantier" }).click();
     await expect(page.getByRole("alertdialog", { name: "Sortir de l'achat groupé" })).toBeVisible();
     await capture(page, projet, "6a-sortie-confirmer");
