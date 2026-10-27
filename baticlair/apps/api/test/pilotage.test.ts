@@ -59,7 +59,10 @@ describe("le tableau de bord admin", () => {
     const service = new PilotageService(ctx.prisma as never, { groupe: { admins: [] }, aiCost: {}, authSecret: "x", ai: { provider: "anthropic", apiKey: cle, keySource: "BATICLAIR_ANTHROPIC_KEY" } } as never, ctx.emails as never, {} as never);
     (service as unknown as { exiger: () => Promise<void> }).exiger = async () => undefined;
     let vue: RequestInit | undefined;
-    const r = await service.compteIa({} as never, (async (_u: unknown, init?: RequestInit) => { vue = init; return new Response("{}", { status: 400, headers: { "anthropic-organization-id": "org-1234" } }); }) as typeof fetch);
+    const r = await service.compteIa({} as never, async (_u, init) => {
+      vue = init as RequestInit;
+      return new Response("{}", { status: 400, headers: { "anthropic-organization-id": "org-1234" } });
+    });
     expect(r).toEqual({ variable: "BATICLAIR_ANTHROPIC_KEY", organisation: "org-1234", etat: "refusee" });
     expect(JSON.stringify(r)).not.toContain(cle.slice(-8));
     expect((vue?.headers as Record<string, string>)["x-api-key"]).toBe(cle);

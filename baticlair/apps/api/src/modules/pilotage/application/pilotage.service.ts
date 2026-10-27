@@ -40,6 +40,9 @@ const jourIso = (d: Date) => d.toISOString().slice(0, 10);
  * GROUPE_ADMINS avec double authentification (un code envoyé par e-mail, lié à la session, 12 h) ; chaque accès et chaque
  * détail nominatif est journalisé ; les chiffres sont agrégés ; aucun export nominatif.
  */
+/** Le seul appel HTTP du compte IA, typé ici (la construction de production n'a pas les types web de `fetch`). */
+type AppelHttp = (url: string, init: { headers: Record<string, string>; signal: AbortSignal }) => Promise<{ ok: boolean; headers: { get(nom: string): string | null } }>;
+
 export class PilotageService {
   constructor(
     private readonly prisma: PrismaService,
@@ -55,7 +58,7 @@ export class PilotageService {
    * `anthropic-organization-id` dit à quel compte la clé appartient. La clé ne sort jamais du serveur, ni en entier ni en
    * partie ; seuls le nom de la variable et l'identifiant d'organisation sont rendus.
    */
-  async compteIa(user: AuthenticatedUser, appel: typeof fetch = fetch): Promise<{ variable: string | null; organisation: string | null; etat: "ok" | "sans_cle" | "refusee" | "injoignable" }> {
+  async compteIa(user: AuthenticatedUser, appel: AppelHttp = fetch as unknown as AppelHttp): Promise<{ variable: string | null; organisation: string | null; etat: "ok" | "sans_cle" | "refusee" | "injoignable" }> {
     await this.exiger(user);
     const ai = this.config.ai;
     if (!ai || ai.provider !== "anthropic" || !ai.apiKey) return { variable: ai?.keySource ?? null, organisation: null, etat: "sans_cle" };
