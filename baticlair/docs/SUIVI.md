@@ -35,7 +35,7 @@ Rien ne va dans main, aucune dépense, pas de Stripe live : ces trois règles va
 | 8 | 25/10 | Business model final, points 1 à 12 (chasseur, besoins, veille, observatoire, vérification des négoces, gratuit/payant…) | en ligne | Mode humain par défaut, mode automatique gardé derrière l'interrupteur. |
 | 9 | 25/10 | Point 13 : mise en ligne sur mobiiz.fr | reportée | Tu as dit « Vas-y, mets en ligne », puis tu as interrompu ; le 26/10 tu as posé l'adresse Mobiiz (R7), les mentions légales et la sécurité comme bloquants avant la mise en ligne. mobiiz.fr répond 404 aujourd'hui. Quand : après R7, sur ton accord. |
 | 10 | 25/10 | Point 4 bis, alertes du chasseur | en ligne | Formation, digest de 18 h, rappels J-5 et J-2, date butoir, négoces à appeler. |
-| 11 | 25/10 | Purger les faux négoces des recettes, garder ceux de la démo | en ligne | Bouton « Purger les recettes » (prévisualisation). La recette du chasseur du 26/10 ne l'a pas trouvé (20/22) : à revérifier au rapport de rattrapage. |
+| 11 | 25/10 | Purger les faux négoces des recettes, garder ceux de la démo | en ligne | Bouton « Purger les recettes » dans l'onglet « Test » de l'espace admin (prévisualisation). Revérifié le 27/10 : la recette du chasseur l'a trouvé et actionné (22/22) ; c'est le script qui n'ouvrait pas l'onglet. |
 | 12 | 25/10 | Message d'erreur à l'envoi vers un négoce après validation de l'e-mail | en ligne | Commit 7a1b0d2 : sans adresse d'entreprise, la case s'ouvre dans le bloc. |
 | 13 | 25/10 | Les 20 $ partis : compter les lectures réelles, dire quels tests appellent l'API | en ligne | Rapport fait le 25/10. |
 | 14 | 25/10 | Aucun test automatique n'appelle l'API réelle | en ligne | Workflow « Vraie lecture » à la main seulement ; les clés sont retirées des parcours e2e. |
@@ -62,7 +62,7 @@ Rien ne va dans main, aucune dépense, pas de Stripe live : ces trois règles va
 | 30 | 26/10 | Revue, lot C (règles en dur vers l'admin, vocabulaire BatiClair nulle part, updatedAt, journal RGPD) | à faire | Après le lot B. |
 | 31 | 26/10 | Revue, lot D (responsive 5 tailles, messages d'erreur, journal d'erreurs, 44 px, clavier numérique, un bouton principal) | à faire | Après le lot C. |
 | 32 | 26/10 | Revue, lot E (nettoyage, ARCHITECTURE, SECURITE, CONFORMITE, RGPD, DETTE) | à faire | Après le lot D. |
-| 33 | 26/10 | Après chaque lot : recette complète artisan + négoce + chasseur sur test.mobiiz.fr, rapport avec captures | en cours | Faite pour le lot A (partielle, crédit IA). À rejouer au rapport de rattrapage. |
+| 33 | 26/10 | Après chaque lot : recette complète artisan + négoce + chasseur sur test.mobiiz.fr, rapport avec captures | en ligne | 27/10 : artisan + négoce + chasseur 22/22 sur iPhone SE et sur ordinateur, vrais e-mails (`captures/recette-negocie-27-10/`). Recette produit (script du 24/10) : 31/51, les échecs sont le crédit IA (R11), les écrans de l'ancien mode retirés par R1 et l'espace admin passé derrière le code (ligne 42). Rapport : `docs/groupe/RAPPORT-RATTRAPAGE-27-10.md`. |
 | 34 | 26/10 | Landing « niveau studio » (accueil, /couvreurs, page négoce, mentions), Lighthouse mobile ≥ 95, partage WhatsApp/SMS | en ligne | |
 | 35 | 26/10 | Lien de parrainage vide et image de partage vers vercel.app | en ligne | |
 | 36 | 26/10 | Écart pot seul / palette en peinture, mention « Exemple » | en ligne | |
@@ -71,3 +71,4 @@ Rien ne va dans main, aucune dépense, pas de Stripe live : ces trois règles va
 | 39 | 26/10 | Phrase du concept et trois lignes sous le titre, visibles sur iPhone SE, test de l'œil neuf, captures aux cinq tailles | en ligne | 26/10, commit e82854f. Compris en 5 secondes au 2e passage. Restent trois questions pour toi : le titre ne dit pas qu'on achète à plusieurs ; « prix des gros » (grossiste ou grosses entreprises ?) ; les concurrents voient-ils ce que je commande ? |
 | 40 | 26/10 | Photo de toi ou d'un de tes chantiers sur la landing | reportée | Tu l'envoies dans la semaine ; la page part sans. |
 | 41 | 27/10 | Ce fichier, SUIVI.md, montré avant de reprendre ; lignes changées à chaque rapport ; report annoncé le jour même | en cours | Créé le 27/10. |
+| 42 | 27/10 | Réécrire la recette produit (`recette.mjs`, du 24/10) pour le mode humain : plus de commande du mois ni de « Mets ton négoce dans la boucle », espace admin derrière le code et l'onglet « Test », attendre la facture Stripe (le webhook met 20 à 30 s) | à faire | Annoncée le 27/10 : trouvée en rejouant la recette au rapport de rattrapage. Les étapes d'IA restent bloquées par le crédit (R11). Après le prompt UX. |
