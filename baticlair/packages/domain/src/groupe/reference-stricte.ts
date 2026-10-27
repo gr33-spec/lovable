@@ -13,7 +13,7 @@ import type { FamilleGroupe } from "./groupe.js";
  * regroupement.
  */
 
-export type AttributReference = "format" | "epaisseur" | "largeur" | "origine" | "qualite" | "marque" | "aspect" | "conditionnement";
+export type AttributReference = "format" | "epaisseur" | "largeur" | "origine" | "qualite" | "marque" | "aspect" | "conditionnement" | "teinte" | "finition";
 
 interface TypeGroupable {
   type: string;
@@ -39,6 +39,10 @@ const TYPES: readonly TypeGroupable[] = [
   { type: "bois-charpente", libelle: "Bois de charpente", famille: "charpente", mots: /\b(chevrons?|bastaings?|madriers?|solives?|pannes?|bois de charpente)\b/, requis: ["format"] },
   { type: "osb", libelle: "OSB", famille: "charpente", mots: /\bosb\b/, requis: ["epaisseur", "format"] },
   { type: "isolant", libelle: "Isolant", famille: "second_oeuvre", mots: /\b(laine de (roche|verre|bois)|isolants?|polyurethane|pir)\b/, requis: ["epaisseur"] },
+  // Peintres (Greg, 26 octobre 2026, plan peintres point 3 : « marque + gamme + teinte + conditionnement ; une palette de blanc
+  // mat 15 L se regroupe, pas un blanc avec un gris ») : la sous-couche avant la peinture (« peinture sous-couche »).
+  { type: "sous-couche", libelle: "Sous-couche", famille: "second_oeuvre", mots: /\b(sous ?couches?|impressions?)\b/, requis: ["conditionnement"] },
+  { type: "peinture", libelle: "Peinture", famille: "second_oeuvre", mots: /\bpeintures?\b|\b(blanc|blanche|blancs) (mat|mats|satin|satine|velours|brillant)\b/, requis: ["teinte", "conditionnement"] },
   { type: "plaque-platre", libelle: "Plaque de plâtre", famille: "second_oeuvre", mots: /\b(plaques? de platre|placo|placoplatre|ba ?13|ba ?18)\b/, requis: ["format"] },
 ];
 
@@ -64,6 +68,22 @@ const MARQUES = /\b(cupa|samaca|vmzinc|vm zinc|elzinc|rheinzink|nedzink|eternit|
 const ASPECTS: readonly [RegExp, string][] = [
   [/\bnaturel\b/, "naturel"],
   [/\b(pre ?patine|quartz|anthra|anthracite|pigmento)\b/, "prepatine"],
+];
+
+/** Les teintes et finitions d'une peinture (une teinte de nuancier écrite, « RAL 7016 », compte aussi). */
+const TEINTES: readonly [RegExp, string][] = [
+  [/\bral ?(\d{4})\b/, "ral"],
+  [/\b(blanc|blanche|blancs|blanches)\b/, "blanc"],
+  [/\b(gris|grise)\b/, "gris"],
+  [/\b(noir|noire)\b/, "noir"],
+  [/\b(beige|ivoire|creme|ecru)\b/, "beige"],
+  [/\b(taupe|lin|sable)\b/, "taupe"],
+];
+const FINITIONS: readonly [RegExp, string][] = [
+  [/\b(mat|mats|mate)\b/, "mat"],
+  [/\b(satin|satine|satinee)\b/, "satin"],
+  [/\bvelours\b/, "velours"],
+  [/\b(brillant|brillante|laque)\b/, "brillant"],
 ];
 
 const nombre = (s: string) => Number(s.replace(",", "."));
@@ -131,6 +151,18 @@ export function referenceStricte(designation: string): { ok: true; reference: Re
   }
   const rouleau = /(\d{1,4}(?:[.,]\d+)?) ?m2\b/.exec(texte);
   if (rouleau && /\brouleaux?\b/.test(texte)) attributs.conditionnement = `${propre(nombre(rouleau[1]!))}m2`;
+  // Un pot se dit en litres (« 15 L », « 15l ») : c'est son conditionnement.
+  const litres = [...new Set([...texte.matchAll(/(\d{1,3}(?:[.,]\d+)?) ?(?:l|litres?)\b/g)].map((m) => propre(nombre(m[1]!))))];
+  if (type.type === "peinture" || type.type === "sous-couche") {
+    if (litres.length > 1) return { ok: false, raison: "ambigu" };
+    if (litres[0]) attributs.conditionnement = `${litres[0]}l`;
+    const teintes = TEINTES.map(([re, v]) => { const m = re.exec(texte); return m ? (v === "ral" ? `ral${m[1]}` : v) : null; }).filter((v): v is string => v !== null);
+    if (teintes.length > 1) return { ok: false, raison: "ambigu" };
+    if (teintes[0]) attributs.teinte = teintes[0];
+    const finitions = FINITIONS.filter(([re]) => re.test(texte)).map(([, v]) => v);
+    if (finitions.length > 1) return { ok: false, raison: "ambigu" };
+    if (finitions[0]) attributs.finition = finitions[0];
+  }
   const origines = ORIGINES.filter(([re]) => re.test(texte)).map(([, v]) => v);
   if (origines.length > 1) return { ok: false, raison: "ambigu" };
   if (origines[0]) attributs.origine = origines[0];
@@ -141,7 +173,10 @@ export function referenceStricte(designation: string): { ok: true; reference: Re
   // « Placo » nomme aussi le produit : il n'est une marque que pour un autre type que la plaque de plâtre.
   if (marque && !(type.type === "plaque-platre" && marque === "placo")) attributs.marque = marque.replace(/\s+/g, "");
   if (type.requis.some((a) => !attributs[a])) return { ok: false, raison: "attribut_manquant" };
-  const ordre: readonly AttributReference[] = ["format", "epaisseur", "largeur", "aspect", "conditionnement", "origine", "qualite", "marque"];
+  // La teinte et la finition n'entrent dans la clé que pour la peinture : la clé des autres articles ne change pas (les
+  // regroupements déjà ouverts gardent la leur).
+  const peinture = type.type === "peinture" || type.type === "sous-couche";
+  const ordre: readonly AttributReference[] = peinture ? ["format", "epaisseur", "largeur", "aspect", "teinte", "finition", "conditionnement", "origine", "qualite", "marque"] : ["format", "epaisseur", "largeur", "aspect", "conditionnement", "origine", "qualite", "marque"];
   const cle = `${type.type}|${ordre.map((a) => `${a}=${attributs[a] ?? ""}`).join("|")}`;
   const lisible = [
     type.libelle,
@@ -149,7 +184,9 @@ export function referenceStricte(designation: string): { ok: true; reference: Re
     attributs.epaisseur ? `${attributs.epaisseur.replace(".", ",")} mm` : null,
     attributs.largeur ? `${attributs.largeur} mm` : null,
     attributs.aspect,
-    attributs.conditionnement?.replace("m2", " m²"),
+    attributs.teinte?.replace(/^ral/, "RAL "),
+    attributs.finition,
+    attributs.conditionnement?.replace("m2", " m²").replace(/^([\d.]+)l$/, (_, n: string) => `${n.replace(".", ",")} L`),
     attributs.origine ? attributs.origine.charAt(0).toUpperCase() + attributs.origine.slice(1) : null,
     attributs.qualite ? (attributs.qualite === "extra" ? "extra" : `${attributs.qualite === "1" ? "1er" : `${attributs.qualite}e`} choix`) : null,
     attributs.marque ? attributs.marque.charAt(0).toUpperCase() + attributs.marque.slice(1) : null,

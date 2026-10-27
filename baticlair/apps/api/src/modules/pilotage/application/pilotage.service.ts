@@ -43,11 +43,29 @@ const jourIso = (d: Date) => d.toISOString().slice(0, 10);
 export class PilotageService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: Pick<AppConfig, "groupe" | "aiCost" | "authSecret">,
+    private readonly config: Pick<AppConfig, "groupe" | "aiCost" | "authSecret"> & { ai?: Pick<AppConfig["ai"], "provider" | "apiKey" | "keySource"> },
     private readonly email: TransactionalEmailSender,
     private readonly sources: SourcesPilotage,
     private readonly now: () => Date = () => new Date(),
   ) {}
+
+  /**
+   * LE COMPTE ANTHROPIC DE LA CLÉ (Greg, 27 octobre 2026 : « affiche l'identifiant d'organisation Anthropic dans l'admin,
+   * sans la clé ») : un appel gratuit (liste des modèles, aucune lecture facturée) dont l'en-tête
+   * `anthropic-organization-id` dit à quel compte la clé appartient. La clé ne sort jamais du serveur, ni en entier ni en
+   * partie ; seuls le nom de la variable et l'identifiant d'organisation sont rendus.
+   */
+  async compteIa(user: AuthenticatedUser, appel: typeof fetch = fetch): Promise<{ variable: string | null; organisation: string | null; etat: "ok" | "sans_cle" | "refusee" | "injoignable" }> {
+    await this.exiger(user);
+    const ai = this.config.ai;
+    if (!ai || ai.provider !== "anthropic" || !ai.apiKey) return { variable: ai?.keySource ?? null, organisation: null, etat: "sans_cle" };
+    try {
+      const r = await appel("https://api.anthropic.com/v1/models?limit=1", { headers: { "x-api-key": ai.apiKey, "anthropic-version": "2023-06-01" }, signal: AbortSignal.timeout(8000) });
+      return { variable: ai.keySource, organisation: r.headers.get("anthropic-organization-id"), etat: r.ok ? "ok" : "refusee" };
+    } catch {
+      return { variable: ai.keySource, organisation: null, etat: "injoignable" };
+    }
+  }
 
   // ---------------------------------------------------------------- accès
 

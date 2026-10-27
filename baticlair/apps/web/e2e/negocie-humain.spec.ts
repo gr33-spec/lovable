@@ -10,7 +10,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 const SECRET = "Bearer e2e-secret-de-la-tache";
 const ARDOISE = "Ardoise naturelle 32×22 Espagne 1er choix";
-const VILLES: Record<string, string> = { "56": "56000 Vannes", "29": "29000 Quimper" };
+const VILLES: Record<string, string> = { "56": "56000 Vannes", "29": "29000 Quimper", "75": "75011 Paris" };
 const zoneDe = (projet: string) => (projet === "telephone" ? "56" : "29");
 const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
@@ -190,6 +190,28 @@ test.describe("Business model final : le regroupement négocié par un humain", 
     await form.getByLabel("Pour quand ?").fill(dansTroisSemaines());
     await form.getByRole("button", { name: "Déclarer ce besoin" }).click();
     await expect(page.getByRole("region", { name: "Tes besoins" }).getByLabel("Liteaux 27×38").getByText(/^300 m · pour le/)).toBeVisible();
+  });
+
+  test("Capture de Greg (27 octobre 2026) : hors zone, une phrase en français, jamais « motif : zone_inactive » ; la ville de livraison décide ; la carte vide de l'accueil", async ({ page }) => {
+    // Une entreprise à Paris (département fermé aux regroupements dans les parcours).
+    await inscrire(page, `artisan-${unique()}@example.fr`, "75");
+    await page.goto("/");
+    await expect(page.getByRole("link", { name: "Regroupements : déclarer un besoin" })).toContainText("Tu sais déjà ce que tu vas commander ?");
+    await page.getByRole("link", { name: "Regroupements : déclarer un besoin" }).click();
+    await page.getByRole("button", { name: "Déclarer un besoin" }).click();
+    const form = page.getByRole("form", { name: "Déclarer un besoin" });
+    await form.getByLabel("Ce que tu vas commander").fill("Ardoise naturelle 32×22");
+    await form.getByLabel("Quantité").fill("10");
+    await form.getByLabel("Pour quand ?").fill(dansTroisSemaines());
+    await form.getByRole("button", { name: "Déclarer ce besoin" }).click();
+    const alerte = form.getByRole("alert");
+    await expect(alerte).toHaveText(/^Les regroupements arrivent bientôt dans ton département/);
+    await expect(alerte).not.toContainText("motif");
+    await expect(alerte).not.toContainText("Code support");
+    // Livré dans le 22 : le besoin part, au département de la livraison.
+    await form.getByLabel("Ville de livraison (facultatif)").fill("22300 Lannion");
+    await form.getByRole("button", { name: "Déclarer ce besoin" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Besoin déclaré" })).toBeVisible();
   });
 
   test("Mode humain : plus rien de l'ancien mode côté artisan (ni « Commande du … », ni « Clôture dans », ni commande commune), sur chaque écran", async ({ page }, info) => {

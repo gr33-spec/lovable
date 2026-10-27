@@ -41,6 +41,23 @@ describe("mode humain", () => {
     expect(articleNegociable("Vis inox 4,5×35 boîte de 200").ok).toBe(false);
   });
 
+  it("peinture (plan peintres, point 3, 27 octobre 2026) : teinte et contenance exigées ; un blanc ne rejoint jamais un gris ; la clé de l'ardoise ne change pas", () => {
+    const blanc = articleNegociable("Peinture blanc mat 15 L");
+    const blanc2 = articleNegociable("Blanc mat professionnel, pot de 15 L");
+    const gris = articleNegociable("Peinture grise mat 15 L");
+    if (!blanc.ok || !blanc2.ok || !gris.ok) throw new Error("peintures");
+    expect(blanc.reference.cle).toBe(blanc2.reference.cle);
+    expect(blanc.reference.cle).not.toBe(gris.reference.cle);
+    expect(blanc.reference.libelle).toBe("Peinture blanc mat 15 L");
+    expect(articleNegociable("Sous-couche 15 L").ok).toBe(true);
+    expect(articleNegociable("Peinture 15 L").ok).toBe(false);
+    expect(articleNegociable("Peinture blanche").ok).toBe(false);
+    expect(articleNegociable("Peinture blanc mat 10 L").ok && articleNegociable("Peinture blanc mat 10 L")).not.toEqual(blanc);
+    const ardoise = articleNegociable("Ardoise naturelle 32×22");
+    if (!ardoise.ok) throw new Error("ardoise");
+    expect(ardoise.reference.cle).toBe("ardoise|format=32x22|epaisseur=|largeur=|aspect=|conditionnement=|origine=|qualite=|marque=");
+  });
+
   it("30×20 ne rejoint jamais 32×22 ; même département, dates à 30 jours au plus", () => {
     const a = articleNegociable("Ardoise naturelle 32×22 Espagne 1er choix");
     const b = articleNegociable("Ardoise naturelle 30×20 Espagne 1er choix");

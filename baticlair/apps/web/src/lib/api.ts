@@ -12,6 +12,8 @@ export class ApiError extends Error {
     readonly details?: { path: string; message: string }[],
     /** Motif précis, quand l'API en donne un (ex. document illisible : « encrypted »). */
     readonly reason?: string,
+    /** La phrase en français que l'API donne pour ce refus (« Les regroupements arrivent bientôt… »), affichée telle quelle. */
+    readonly phrase?: string,
   ) {
     super(errorMessage(code, reason));
     this.name = "ApiError";
@@ -92,9 +94,9 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const reason = details && typeof details === "object" && "reason" in details ? String(details.reason) : undefined;
   // Le paywall de l'abonnement (24 octobre 2026) : une action payante refusée ouvre l'écran « Ton essai est terminé ».
   // Recentrage (25 octobre 2026) : la phrase du geste refusé (« En gratuit, ta demande part chez un seul négoce… ») suit.
-  const phrase = details && typeof details === "object" && "phrase" in details ? String(details.phrase) : null;
+  const phrase = details && typeof details === "object" && "phrase" in details ? String(details.phrase) : details && typeof details === "object" && "message" in details ? String(details.message) : null;
   if (code === "abonnement_requis" && typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVENEMENT_ABONNEMENT_REQUIS, { detail: { phrase } }));
-  throw new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason);
+  throw new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason, phrase ?? undefined);
 }
 
 /**
@@ -108,6 +110,9 @@ export function messageErreur(e: unknown, precis: Record<string, string> = {}, o
   const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
   if (err.reason && precis[err.reason]) return precis[err.reason]!;
   if (precis[err.code]) return precis[err.code]!;
+  // Greg, 27 octobre 2026 (capture : « Tu n'as pas le droit… (motif : zone_inactive). Code support… ») : quand l'API donne
+  // sa phrase en français, c'est elle qui s'affiche, jamais un motif technique.
+  if (err.phrase) return err.phrase;
   const trace = err.supportId ? ` Code support : ${err.supportId}.` : err.status >= 500 ? ` Erreur ${err.status}.` : "";
   if (o.vous) {
     if (err.status === 0) return "Pas de connexion internet : réessayez dès que le réseau revient.";

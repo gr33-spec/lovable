@@ -73,6 +73,7 @@ export default function AccueilPage() {
         {/* Landing du 22 octobre : « Inviter un collègue » aussi dans l'app, juste après l'inscription. */}
         <div className="flex w-full max-w-xl flex-col gap-4 text-left">
           <BandeauReprises />
+          {negocie?.mode === "humain" ? <CarteRegroupementVide /> : null}
           <InviterCollegue texte="Plus on est nombreux dans le secteur, plus on pèse face aux négoces." />
           {moisActif ? <BoucleNegoce compact /> : null}
         </div>
@@ -111,6 +112,8 @@ export default function AccueilPage() {
           </span>
           <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
         </Link>
+      ) : negocie?.mode === "humain" ? (
+        <CarteRegroupementVide />
       ) : null}
       <form
         role="search"
@@ -169,5 +172,21 @@ export default function AccueilPage() {
         ) : null}
       </section>
     </>
+  );
+}
+
+/** La carte « Regroupements » vide de l'accueil (Greg, 26 octobre 2026, plan peintres point 2 ter) : jamais une liste vide, une invitation à déclarer. */
+function CarteRegroupementVide() {
+  return (
+    <Link href="/regroupements" aria-label="Regroupements : déclarer un besoin" className="pressable flex items-center gap-4 rounded-2xl bg-accent-soft p-4 shadow-card">
+      <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-surface text-ink" aria-hidden="true">
+        <Users size={24} />
+      </span>
+      <span className="flex min-w-0 grow flex-col gap-0.5">
+        <span className="text-[16px] font-extrabold">Tu sais déjà ce que tu vas commander ?</span>
+        <span className="text-[14px] text-muted">Dis-le, on regroupe et on négocie.</span>
+      </span>
+      <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+    </Link>
   );
 }

@@ -296,6 +296,7 @@ function Chiffres({ t }: { t: Tableau }) {
           <p className="text-[14px] text-muted">Tu reçois un e-mail si une journée dépasse {euros(t.ia.seuilJour)} (barre rouge).</p>
         </Card>
       </Bloc>
+      <CompteIaCarte />
 
       <Bloc titre="Est-ce qu'on gagne de l'argent ? (ce mois)" aide="Ce qui rentre, moins ce qu'on paie pour faire tourner l'app.">
         <Liste>
@@ -456,6 +457,29 @@ function DemoCarte() {
           Tout effacer
         </Button>
       </Card>
+    </Bloc>
+  );
+}
+
+/**
+ * Le compte Anthropic de la clé (Greg, 27 octobre 2026 : recharger le bon compte sans jamais voir la clé) : l'identifiant
+ * d'organisation, à comparer avec celui de la console Anthropic (Settings, Organization).
+ */
+function CompteIaCarte() {
+  const charger = useCallback(
+    (signal: AbortSignal) => api<{ variable: string | null; organisation: string | null; etat: "ok" | "sans_cle" | "refusee" | "injoignable" }>("/v1/admin/pilotage/compte-ia", { signal }),
+    [],
+  );
+  const { data } = useResource(charger);
+  if (!data) return null;
+  const etat = { ok: "La clé fonctionne.", refusee: "La clé est refusée (crédit épuisé ou clé désactivée).", injoignable: "Anthropic ne répond pas pour l'instant.", sans_cle: "Pas de clé posée." }[data.etat];
+  return (
+    <Bloc titre="Compte Anthropic de la clé" aide="Pour recharger le bon compte : compare cet identifiant avec celui de la console Anthropic (Settings, Organization). La clé n'est jamais affichée." label="Compte Anthropic">
+      <Liste>
+        <Ligne titre="Identifiant d'organisation" valeur={data.organisation ?? "—"} />
+        <Ligne titre="Variable lue" valeur={data.variable ?? "—"} />
+        <Ligne titre="État" valeur={etat} />
+      </Liste>
     </Bloc>
   );
 }

@@ -132,6 +132,11 @@ const EXEMPLES: Record<string, readonly ExempleBesoin[]> = {
     { phrase: "60 chevrons 63×75 pour le 20 novembre", designation: "Chevrons 63×75", quantite: 60, unite: "pièces", pour: [11, 20] },
     { phrase: "40 plaques d'OSB 18 mm 2500×675 pour fin novembre", designation: "OSB 18 mm 2500×675", quantite: 40, unite: "pièces", pour: [11, 30] },
   ],
+  // Plan peintres, point 2 ter (Greg, 26 octobre 2026), mot pour mot.
+  painting: [
+    { phrase: "20 pots de blanc mat 15 L pour le 15 novembre", designation: "Peinture blanc mat 15 L", quantite: 20, unite: "pots", pour: [11, 15] },
+    { phrase: "10 pots de sous-couche 15 L pour fin novembre", designation: "Sous-couche 15 L", quantite: 10, unite: "pots", pour: [11, 30] },
+  ],
   drywall: [
     { phrase: "120 m² de laine de verre 200 mm pour le 20 novembre", designation: "Laine de verre 200 mm", quantite: 120, unite: "m²", pour: [11, 20] },
     { phrase: "80 m² de laine de roche 100 mm pour fin novembre", designation: "Laine de roche 100 mm", quantite: 80, unite: "m²", pour: [11, 30] },

@@ -77,8 +77,9 @@ export class DroitsService {
   }
 
   /** Les droits de l'entreprise, avec ce qu'il faut pour l'écran (zone, préavis, lectures du mois). */
-  async droits(companyId: string, maintenant = this.now()): Promise<Droits & { zone: string | null; zoneActive: boolean; preavis: string | null; lecturesCeMois: number }> {
-    const zone = await this.zoneDe(companyId);
+  async droits(companyId: string, maintenant = this.now(), zoneDuGeste?: string | null): Promise<Droits & { zone: string | null; zoneActive: boolean; preavis: string | null; lecturesCeMois: number }> {
+    // `zoneDuGeste` : le département de la livraison d'un besoin, qui l'emporte sur celui de l'entreprise.
+    const zone = zoneDuGeste ?? (await this.zoneDe(companyId));
     const [etat, offre, lectures] = await Promise.all([
       this.abonnement.actif ? this.abonnement.etat(companyId, maintenant) : Promise.resolve(null),
       this.offreDeZone(zone, maintenant),
@@ -97,8 +98,10 @@ export class DroitsService {
   }
 
   /** Le paywall du geste : 402 `abonnement_requis` avec la phrase, ou rien. */
-  async exiger(companyId: string, geste: { type: "envoi"; negoces: number } | { type: "regroupement" }, maintenant = this.now()): Promise<void> {
-    const d = await this.droits(companyId, maintenant);
+  async exiger(companyId: string, geste: { type: "envoi"; negoces: number } | { type: "regroupement"; zone?: string | null }, maintenant = this.now()): Promise<void> {
+    // Un besoin se regroupe dans le département de sa livraison (Greg, 27 octobre 2026 : refus « zone_inactive » pour une
+    // entreprise sans adresse alors que la ville de livraison était tapée) ; sans livraison donnée, celui de l'entreprise.
+    const d = await this.droits(companyId, maintenant, geste.type === "regroupement" ? geste.zone : undefined);
     const v = verifierDroit(d, geste.type === "envoi" ? geste : { type: "regroupement", zoneActive: d.zoneActive });
     if (v.ok) return;
     const { refus, phrase } = v as Extract<typeof v, { ok: false }>;

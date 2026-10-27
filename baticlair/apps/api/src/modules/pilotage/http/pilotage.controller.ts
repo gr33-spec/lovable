@@ -61,6 +61,11 @@ export class PilotageController {
     return this.pilotage.tableau(user);
   }
 
+  @Get("compte-ia")
+  compteIa(@CurrentUser() user: AuthenticatedUser) {
+    return this.pilotage.compteIa(user);
+  }
+
   @Get("detail/:quoi")
   detail(@CurrentUser() user: AuthenticatedUser, @Param("quoi") quoi: string) {
     if (quoi !== "a_risque" && quoi !== "essais_semaine" && quoi !== "paiements_echoues") throw forbidden("Unknown detail");

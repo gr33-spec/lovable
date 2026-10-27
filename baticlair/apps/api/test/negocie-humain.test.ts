@@ -78,6 +78,15 @@ describe("business model final : le regroupement négocié par un humain", { tim
     // Hors zone active : tout sauf les regroupements.
     const brest = await artisan(4, [{ libelle: A3222, quantite: "900", unite: "pièces" }], "1 rue de Siam, 29200 Brest");
     expect((await brest.agent.post("/v1/negocie/besoins").send({ projectId: brest.projectId, articleKey: brest.articles[0], dateBesoin: dans(20) }).expect(403)).body.error.details.reason).toBe("zone_inactive");
+    // La phrase en français suit le refus (Greg, 27 octobre 2026 : l'écran montrait « motif : zone_inactive »).
+    expect((await brest.agent.post("/v1/negocie/besoins").send({ designation: A3222, quantite: 500, unite: "pièces", dateBesoin: dans(20) }).expect(403)).body.error.details.phrase).toMatch(/^Les regroupements arrivent bientôt/);
+    // La livraison décide du département : une entreprise du 29 qui livre dans le 22 se regroupe dans le 22.
+    expect((await brest.agent.post("/v1/negocie/besoins").send({ designation: A3222, quantite: 500, unite: "pièces", dateBesoin: dans(20), livraison: "22300 Lannion" }).expect(201)).body.regroupementId).toBe(ra.regroupementId);
+    // Greg, 27 octobre 2026 (capture) : une entreprise sans adresse, la ville de livraison tapée : accepté, pas « zone_inactive ».
+    const sansAdresse = await artisan(5, [{ libelle: A3222, quantite: "300", unite: "pièces" }]);
+    await ctx.prisma.company.update({ where: { id: sansAdresse.companyId }, data: { address: null } });
+    expect((await sansAdresse.agent.post("/v1/negocie/besoins").send({ designation: A3222, quantite: 300, unite: "pièces", dateBesoin: dans(20) }).expect(400)).body.error.details.reason).toBe("livraison_requise");
+    await sansAdresse.agent.post("/v1/negocie/besoins").send({ designation: A3222, quantite: 300, unite: "pièces", dateBesoin: dans(20), livraison: "22300 Lannion" }).expect(201);
     // La consultation automatique est fermée en mode humain.
     expect((await a.agent.post(`/v1/projects/${a.projectId}/regroupements`).send({ articles: [ardoise], mois: "2026-11-01" }).expect(409)).body.error.details.reason).toBe("mode_humain");
   });

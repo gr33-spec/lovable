@@ -134,7 +134,6 @@ export class NegocieService {
   async declarer(tenant: TenantContext, d: DeclarationBesoin) {
     assertCanWrite(tenant);
     await this.exigerHumain();
-    await this.droits.exiger(tenant.companyId, { type: "regroupement" });
     let designation = d.designation?.trim() ?? "";
     let quantite = d.quantite ?? null;
     let unite = d.unite?.trim() ?? "";
@@ -155,7 +154,8 @@ export class NegocieService {
     livraison = livraison ?? company?.address ?? null;
     const departement = zoneDuCodePostal(livraison) ?? (await this.droits.zoneDe(tenant.companyId));
     if (!departement || !livraison) throw validationFailed("A delivery town with a postcode is required", { reason: "livraison_requise" });
-    if (!this.droits.zoneActive(departement)) throw new DomainError("forbidden", MESSAGE_HORS_ZONE, { reason: "zone_inactive", message: MESSAGE_HORS_ZONE });
+    // Les droits (zone ouverte, formule) se lisent au département de la livraison, pas seulement à celui de l'entreprise.
+    await this.droits.exiger(tenant.companyId, { type: "regroupement", zone: departement });
     const besoin = await this.prisma.besoinNegocie.create({
       data: {
         companyId: tenant.companyId,

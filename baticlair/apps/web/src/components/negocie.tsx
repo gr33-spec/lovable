@@ -118,7 +118,7 @@ export function RegroupementsNegocies() {
   );
 }
 
-const UNITES_BESOIN = ["pièces", "palettes", "m", "m²", "m³", "kg"] as const;
+const UNITES_BESOIN = ["pièces", "palettes", "pots", "m", "m²", "m³", "kg", "litres"] as const;
 
 /** Le formulaire « Déclarer un besoin », sans chantier : article, quantité, unité, date ; livraison à l'adresse de l'entreprise par défaut. */
 function DeclarerUnBesoin({ exemple, onAnnuler, onDeclare }: { exemple: ExempleBesoin | null; onAnnuler: () => void; onDeclare: (phrase: string) => void }) {
@@ -173,7 +173,7 @@ function DeclarerUnBesoin({ exemple, onAnnuler, onDeclare }: { exemple: ExempleB
           </div>
         </div>
         <Field id="besoin-pour-quand" label="Pour quand ?" type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} />
-        <Field id="besoin-livraison" label="Ville de livraison (facultatif)" hint="Vide : l'adresse de ton entreprise." placeholder="22300 Lannion" value={livraison} onChange={(e) => setLivraison(e.target.value)} />
+        <Field id="besoin-livraison" label="Ville de livraison (facultatif)" hint="Vide : l'adresse de ton entreprise." placeholder="Code postal et ville" value={livraison} onChange={(e) => setLivraison(e.target.value)} />
         {erreur ? (
           <p role="alert" className="text-[15px] font-semibold text-danger">
             {erreur}

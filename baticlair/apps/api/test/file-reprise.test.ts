@@ -64,8 +64,11 @@ async function devisDepose(agent: Agent) {
 }
 /** Avance l'heure des reprises dues, comme si le délai était passé (après leur enregistrement, fait en tâche de fond). */
 async function echeance() {
-  for (let i = 0; i < 100 && (await ctx.prisma.reprise.count({ where: { etat: "en_attente" } })) === 0; i++) await new Promise((r) => setTimeout(r, 20));
-  await ctx.prisma.reprise.updateMany({ where: { etat: "en_attente" }, data: { prochaineLe: new Date(Date.now() - 1000) } });
+  // Sous charge (suite complète), l'échec de la lecture s'enregistre en tâche de fond bien après 2 s : on attend jusqu'à 15 s
+  // qu'une reprise soit en attente, et on le vérifie, au lieu d'avancer une heure qui ne touche rien.
+  for (let i = 0; i < 750 && (await ctx.prisma.reprise.count({ where: { etat: "en_attente" } })) === 0; i++) await new Promise((r) => setTimeout(r, 20));
+  const { count } = await ctx.prisma.reprise.updateMany({ where: { etat: "en_attente" }, data: { prochaineLe: new Date(Date.now() - 1000) } });
+  expect(count).toBeGreaterThan(0);
 }
 
 describe("une panne passagère de l'IA repart seule", () => {
@@ -74,7 +77,7 @@ describe("une panne passagère de l'IA repart seule", () => {
     const { projet, documentId } = await devisDepose(agent);
     lecteur.pannes = 1;
     expect((await agent.post(`/v1/documents/${documentId}/takeoff`)).status).toBeGreaterThanOrEqual(400);
-    for (let i = 0; i < 100 && (await ctx.prisma.reprise.count()) === 0; i++) await new Promise((r) => setTimeout(r, 20));
+    for (let i = 0; i < 750 && (await ctx.prisma.reprise.count()) === 0; i++) await new Promise((r) => setTimeout(r, 20));
     const enAttente = (await agent.get("/v1/reprises").expect(200)).body.reprises as { sorte: string; etat: string; prochaineLe: string }[];
     expect(enAttente).toHaveLength(1);
     expect(enAttente[0]).toMatchObject({ sorte: "lecture_ia", etat: "en_attente" });
@@ -93,6 +96,7 @@ describe("une panne passagère de l'IA repart seule", () => {
     const { documentId } = await devisDepose(agent);
     lecteur.pannes = 3;
     await agent.post(`/v1/documents/${documentId}/takeoff`);
+    for (let i = 0; i < 750 && (await ctx.prisma.reprise.count()) === 0; i++) await new Promise((r) => setTimeout(r, 20));
     await echeance();
     expect(await file.traiter()).toMatchObject({ enAttente: 1 });
     await echeance();

@@ -46,6 +46,25 @@ describe("le tableau de bord admin", () => {
     await autreSession.get("/v1/admin/pilotage").expect(403);
   });
 
+  it("le compte Anthropic de la clé (Greg, 27 octobre 2026) : réservé à l'admin, jamais la clé ; l'identifiant d'organisation lu sur un appel gratuit", async () => {
+    const artisan = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
+    await artisan.agent.get("/v1/admin/pilotage/compte-ia").expect(403);
+    const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "Bati Invest", ["roofing"]);
+    await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
+    // Les tests n'ont pas de clé réelle : rien n'est appelé.
+    expect((await greg.agent.get("/v1/admin/pilotage/compte-ia").expect(200)).body).toMatchObject({ organisation: null, etat: "sans_cle" });
+    // Avec une clé : l'en-tête de la réponse dit l'organisation ; la clé n'est jamais rendue.
+    const { PilotageService } = await import("../src/modules/pilotage/application/pilotage.service.js");
+    const cle = "sk-ant-test-0123456789abcdefgh";
+    const service = new PilotageService(ctx.prisma as never, { groupe: { admins: [] }, aiCost: {}, authSecret: "x", ai: { provider: "anthropic", apiKey: cle, keySource: "BATICLAIR_ANTHROPIC_KEY" } } as never, ctx.emails as never, {} as never);
+    (service as unknown as { exiger: () => Promise<void> }).exiger = async () => undefined;
+    let vue: RequestInit | undefined;
+    const r = await service.compteIa({} as never, (async (_u: unknown, init?: RequestInit) => { vue = init; return new Response("{}", { status: 400, headers: { "anthropic-organization-id": "org-1234" } }); }) as typeof fetch);
+    expect(r).toEqual({ variable: "BATICLAIR_ANTHROPIC_KEY", organisation: "org-1234", etat: "refusee" });
+    expect(JSON.stringify(r)).not.toContain(cle.slice(-8));
+    expect((vue?.headers as Record<string, string>)["x-api-key"]).toBe(cle);
+  });
+
   it("les 4 chiffres, la croissance, la fidélité, l'activité, l'IA, la rentabilité ; faux comptes exclus ; détail journalisé", async () => {
     const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "Bati Invest", ["roofing"]);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");

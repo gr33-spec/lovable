@@ -19,9 +19,10 @@ export const COMMISSION_DEFAUT = 2;
 /**
  * Les gros articles qui se négocient en groupe (Greg : ardoise, zinc, bois, isolation de toiture ; jamais crochets ni
  * visserie). Les liteaux y entrent le 26 octobre 2026 (Greg, exemple de l'onglet Regroupements : « 300 ml de liteaux 27×38
- * pour fin novembre »), à la section exacte. Les types de `referenceStricte` retenus ; les autres métiers suivront.
+ * pour fin novembre »), à la section exacte. La peinture et la sous-couche y entrent le 27 octobre 2026 (plan peintres, point 3 :
+ * teinte et conditionnement exigés, la marque et la finition comptent quand elles sont écrites). Les types de `referenceStricte` retenus ; les autres métiers suivront.
  */
-export const TYPES_NEGOCIABLES: readonly string[] = ["ardoise", "ardoise-fibres-ciment", "zinc", "bois-charpente", "liteau", "volige", "osb", "isolant"];
+export const TYPES_NEGOCIABLES: readonly string[] = ["ardoise", "ardoise-fibres-ciment", "zinc", "bois-charpente", "liteau", "volige", "osb", "isolant", "peinture", "sous-couche"];
 
 /** Deux dates de besoin se groupent si elles sont à moins de 30 jours l'une de l'autre (choix de Claude, DECISIONS.md). */
 export const FENETRE_COMPATIBLE_JOURS = 30;
@@ -62,8 +63,8 @@ export function articleNegociable(designation: string): { ok: true; reference: R
 
 export function phraseRefusNegociable(raison: RefusNegociable): string {
   return raison === "non_negociable"
-    ? "Seuls les gros articles se regroupent (ardoise, zinc, bois, isolant) : garde cette ligne dans ta demande perso."
-    : "Référence pas assez précise pour être regroupée (format, épaisseur, origine…) : précise-la ou garde-la dans ta demande perso.";
+    ? "Seuls les gros articles se regroupent (ardoise, zinc, bois, liteaux, isolant, peinture) : garde cette ligne dans ta demande perso."
+    : "Référence pas assez précise pour être regroupée (format, épaisseur, teinte, contenance du pot…) : précise-la ou garde-la dans ta demande perso.";
 }
 
 const JOUR = 86_400_000;
