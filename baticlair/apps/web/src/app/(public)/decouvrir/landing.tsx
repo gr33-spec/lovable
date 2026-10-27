@@ -200,9 +200,10 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
             <LectureAnimee />
           </section>
 
-          <CoupDeMain />
-
+          {/* /peintres : le bloc peinture juste sous l'accroche (Greg, 26 octobre 2026), puis le coup de main (point 30). */}
           {peintres ? <BlocPeinture /> : null}
+
+          <CoupDeMain />
 
           {/* La phrase clé et le compteur 1 → 20. */}
           <section aria-labelledby="vingt" className="mz-section mz-vingt" data-apparait="">
