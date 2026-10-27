@@ -100,6 +100,10 @@ describe("isolation entre entreprises, toutes les routes", () => {
       recu: "",
       recuFichier: "",
       regroupementNegocie: "",
+      achatGroupe: "",
+      besoinAchat: "",
+      participantAchat: "",
+      consultationAchat: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
     const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });
@@ -117,6 +121,13 @@ describe("isolation entre entreprises, toutes les routes", () => {
     const negocieA = await ctx.prisma.regroupementNegocie.create({ data: { cle: "ardoise:32x22", libelle: "Ardoise 32×22", famille: "couverture", departement: "29" } });
     ids.besoinNegocie = (await ctx.prisma.besoinNegocie.create({ data: { companyId, designation: "Ardoise 32×22", cle: "ardoise:32x22", famille: "couverture", quantite: 100, unite: "pièces", departement: "29", livraison: "29200 Brest", dateBesoin: new Date("2026-11-20"), statut: "declare", regroupementId: negocieA.id } })).id;
     ids.regroupementNegocie = negocieA.id;
+    // L'achat groupé automatique (27 octobre 2026) : la participation de A, son négoce, la demande envoyée à ce négoce.
+    const achatA = await ctx.prisma.regroupementNegocie.create({ data: { mode: "automatique", cle: "ardoise:32x22", libelle: "Ardoise 32×22", famille: "couverture", departement: "29", clotureLe: new Date(Date.now() + 10 * 86_400_000), reponseAvantLe: new Date(Date.now() + 13 * 86_400_000) } });
+    const besoinAchatA = await ctx.prisma.besoinNegocie.create({ data: { companyId, designation: "Ardoise 32×22", cle: "ardoise:32x22", famille: "couverture", quantite: 100, unite: "pièces", departement: "29", livraison: "29200 Brest", dateBesoin: new Date(Date.now() + 30 * 86_400_000), statut: "declare", regroupementId: achatA.id } });
+    ids.achatGroupe = achatA.id;
+    ids.besoinAchat = besoinAchatA.id;
+    ids.participantAchat = (await ctx.prisma.negoceParticipant.create({ data: { besoinId: besoinAchatA.id, regroupementId: achatA.id, companyId, nom: "Négoce de A", email: "negoce-a@example.com" } })).id;
+    ids.consultationAchat = (await ctx.prisma.consultationAchatGroupe.create({ data: { regroupementId: achatA.id, email: "negoce-a@example.com", nom: "Négoce de A", clients: ["Toitures A"], quantite: 100, tokenHash: "empreinte-de-a", commissionPct: 0 } })).id;
     // R7 (27 octobre 2026) : un e-mail reçu sur l'adresse Mobiiz de A, avec son fichier.
     const recuA = await ctx.prisma.emailRecuArtisan.create({ data: { companyId, adresse: "toitures-a", de: "Négoce A <a@example.org>", objet: "Devis Toitures A", texte: "Toitures A", recuLe: new Date(), fichiers: { create: [{ nom: "devis-a.pdf", type: "application/pdf", taille: 4, contenu: new Uint8Array([37, 80, 68, 70]) }] } }, include: { fichiers: true } });
     ids.recu = recuA.id;
@@ -178,6 +189,13 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/fichiers$/, ids.recuFichier],
         [/\/chasseur\/regroupements$/, ids.regroupementNegocie],
         [/\/admin\/pilotage\/negoces$/, ids.negoce],
+        // L'achat groupé : la participation de A, son négoce, l'achat ouvert (rejoindre sans corps valable : 400) ; la
+        // réponse du négoce est un jeton ; l'admin (403).
+        [/\/achats-groupes\/ouverts$/, ids.achatGroupe],
+        [/\/achats-groupes\/negoces$/, ids.participantAchat],
+        [/\/achats-groupes$/, ids.besoinAchat],
+        [/\/public\/achat-groupe$/, "jeton-inconnu-de-b-0000000000000000"],
+        [/\/admin\/pilotage\/achats-groupes\/consultations$/, ids.consultationAchat],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

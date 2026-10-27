@@ -98,12 +98,12 @@ export class RegroupementsService {
    * Business model final (25 octobre 2026) : la consultation automatique ne joue qu'en `MODE_REGROUPEMENT=automatique` ;
    * en mode humain (défaut), ces routes répondent 409 `mode_humain` et le regroupement négocié prend le relais.
    */
-  private mode: (() => Promise<"humain" | "automatique">) | null = null;
-  brancherMode(fn: () => Promise<"humain" | "automatique">): void {
+  private mode: (() => Promise<"humain" | "automatique" | "mois">) | null = null;
+  brancherMode(fn: () => Promise<"humain" | "automatique" | "mois">): void {
     this.mode = fn;
   }
   private async exigerAutomatique(): Promise<void> {
-    if (this.mode && (await this.mode()) !== "automatique") throw new DomainError("conflict", "Human mode: use /v1/negocie", { reason: "mode_humain" });
+    if (this.mode && (await this.mode()) !== "mois") throw new DomainError("conflict", "Human mode: use /v1/negocie", { reason: "mode_humain" });
   }
 
   async tenter(tenant: TenantContext, projectId: string, input: { articles: string[]; mois: Mois }, maintenant = this.now()) {

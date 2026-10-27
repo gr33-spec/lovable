@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { DropZone } from "@/components/journey";
 import { Paywall, useBilling } from "@/components/paywall";
-import { BackButton } from "@/components/ui";
-import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Project, type ProjectDocument } from "@/lib/api";
+import { BackButton, Button, INPUT } from "@/components/ui";
+import { api, ApiError, MAX_DOCUMENT_BYTES, messageErreur, newActionKey, type Project, type ProjectDocument } from "@/lib/api";
 import { NEW_PROJECT_NAME } from "@/lib/project-name";
 import { attachFile } from "@/lib/upload";
 import { useSession } from "@/lib/session";
@@ -74,7 +74,7 @@ export default function NouveauChantierPage() {
   return (
     <>
       <BackButton fallback="/chantiers" />
-      <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Nouvelle liste</h1>
+      <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Ma liste de matériaux</h1>
       {erreurListe ? (
         <p role="alert" className="rounded-xl bg-warn-bg p-4 text-[15px] font-semibold text-warn">
           {erreurListe}
@@ -82,6 +82,60 @@ export default function NouveauChantierPage() {
       ) : null}
       <DropZone kind="liste" onFile={(f) => void drop(f, "liste")} pending={pending === "liste"} error={error} />
       <DropZone small onFile={(f) => void drop(f, "devis")} pending={pending === "devis"} error={null} />
+      <SaisieListe />
     </>
+  );
+}
+
+/**
+ * Achat groupé (Greg, 27 octobre 2026, point 1) : la liste se fait aussi À LA MAIN (désignation, quantité, unité), puis
+ * arrive sur le même écran de liste, avec ses deux sorties.
+ */
+function SaisieListe() {
+  const router = useRouter();
+  const [ouvert, setOuvert] = useState(false);
+  const [lignes, setLignes] = useState([{ libelle: "", quantite: "", unite: "pièces" }]);
+  const [pending, setPending] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const pleines = lignes.filter((l) => l.libelle.trim() && l.quantite.trim());
+  if (!ouvert)
+    return (
+      <button type="button" onClick={() => setOuvert(true)} className="min-h-12 self-center text-[16px] font-semibold text-accent-text underline">
+        Je l&apos;écris moi-même
+      </button>
+    );
+  async function creer() {
+    setPending(true);
+    setErreur(null);
+    try {
+      const q = await api<{ projetId: string }>("/v1/quantitatifs", { method: "POST", body: { lignes: pleines.map((l) => ({ libelle: l.libelle.trim(), quantite: l.quantite.trim(), unite: l.unite.trim() || "pièces" })) } });
+      router.push(`/chantiers/${q.projetId}`);
+    } catch (e) {
+      setErreur(messageErreur(e));
+      setPending(false);
+    }
+  }
+  return (
+    <section aria-label="Écrire ma liste" className="flex flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card">
+      <p className="text-[17px] font-extrabold">Écris ta liste</p>
+      {lignes.map((l, i) => (
+        <div key={i} className="grid grid-cols-[1fr_5.5rem_5.5rem] gap-2">
+          <input aria-label={`Matériau ${i + 1}`} placeholder="Ardoise naturelle 32×22 Espagne" value={l.libelle} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, libelle: e.target.value } : x)))} className={INPUT} />
+          <input aria-label={`Quantité ${i + 1}`} inputMode="decimal" placeholder="Qté" value={l.quantite} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, quantite: e.target.value } : x)))} className={INPUT} />
+          <input aria-label={`Unité ${i + 1}`} value={l.unite} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, unite: e.target.value } : x)))} className={INPUT} />
+        </div>
+      ))}
+      <button type="button" onClick={() => setLignes([...lignes, { libelle: "", quantite: "", unite: "pièces" }])} className="min-h-11 self-start text-[15px] font-semibold text-accent-text">
+        + Ajouter une ligne
+      </button>
+      {erreur ? (
+        <p role="alert" className="text-[15px] font-semibold text-danger">
+          {erreur}
+        </p>
+      ) : null}
+      <Button variant="ink" pending={pending} disabled={pleines.length === 0} onClick={() => void creer()}>
+        Créer ma liste
+      </Button>
+    </section>
   );
 }

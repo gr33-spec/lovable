@@ -24,9 +24,12 @@ export async function continuerAbonnement(formule: Formule = "annuel"): Promise<
 }
 
 /** Le bandeau en haut de chaque écran de l'app : l'essai qui court, ou la grâce après un paiement refusé. */
-export function BandeauAbonnement() {
+export function BandeauAbonnement({ seulementRouge = false }: { seulementRouge?: boolean }) {
   const { data } = useAbonnement();
   if (!data?.actif || !data.bandeau) return null;
+  // Achat groupé (Greg, 27 octobre 2026) : le bandeau de l'essai seulement dans Profil ; ailleurs, la pastille « 35 j ».
+  // Le paiement refusé (rouge) reste sur chaque écran.
+  if (seulementRouge && !data.bandeauRouge) return null;
   return (
     <Link
       href="/abonnement"
@@ -34,6 +37,17 @@ export function BandeauAbonnement() {
     >
       <span>{data.bandeau}</span>
       <span aria-hidden="true">→</span>
+    </Link>
+  );
+}
+
+/** La pastille « 35 j » de l'essai, à côté de la cloche : un appui ouvre l'abonnement. */
+export function PastilleEssai() {
+  const { data } = useAbonnement();
+  if (!data?.actif || data.acces !== "essai" || data.joursEssai === null) return null;
+  return (
+    <Link href="/abonnement" aria-label={`Essai gratuit : encore ${data.joursEssai} jours`} className="pressable flex h-8 shrink-0 items-center rounded-full bg-accent-soft px-3 text-[13px] font-extrabold whitespace-nowrap text-ink">
+      {data.joursEssai} j
     </Link>
   );
 }

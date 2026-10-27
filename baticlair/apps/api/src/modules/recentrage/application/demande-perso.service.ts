@@ -480,6 +480,12 @@ export class DemandePersoService {
         if (l) prix.push({ designation: l.designation, unite: l.unite, prixHt: pu, negoce: r.supplier.name, date: r.commandeLe ?? r.reponduLe!, source: r.commandeLe ? "paye" : "recu" });
       }
     }
+    // Achat groupé (point 6, 27 octobre 2026) : le prix d'une commande groupée va dans « Mes prix ».
+    const groupes = await this.prisma.besoinNegocie.findMany({ where: { companyId, statut: "accepte", prixCommandeHt: { not: null }, consultationCommandeId: { not: null } }, select: { designation: true, unite: true, prixCommandeHt: true, accepteLe: true, consultationCommandeId: true } });
+    for (const g of groupes) {
+      const c = await this.prisma.consultationAchatGroupe.findUnique({ where: { id: g.consultationCommandeId! }, select: { nom: true } });
+      prix.push({ designation: g.designation, unite: g.unite, prixHt: Number(g.prixCommandeHt), negoce: c?.nom ?? "", date: g.accepteLe ?? new Date(0), source: "paye" });
+    }
     return prix;
   }
 

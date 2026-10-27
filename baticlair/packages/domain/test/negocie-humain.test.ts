@@ -25,10 +25,10 @@ import {
  * correspondance stricte, dates compatibles, commission intégrée au prix, veille, observatoire, vérification des négoces.
  */
 describe("mode humain", () => {
-  it("le mode par défaut est humain ; l'automatique reste possible", () => {
-    expect(lireModeRegroupement(undefined)).toBe("humain");
+  it("le mode par défaut est automatique (27 octobre 2026) ; l'humain reste possible", () => {
+    expect(lireModeRegroupement(undefined)).toBe("automatique");
     expect(lireModeRegroupement("automatique")).toBe("automatique");
-    expect(lireModeRegroupement("n'importe quoi")).toBe("humain");
+    expect(lireModeRegroupement("n'importe quoi")).toBe("automatique");
   });
 
   it("gros articles seulement : ardoise, zinc, bois, liteaux, isolant ; jamais crochets ni visserie (liteaux admis le 26 octobre 2026)", () => {

@@ -231,6 +231,9 @@ function AFaire({ t }: { t: Tableau }) {
           <Link href="/admin/chasseur" className="flex min-h-12 items-center justify-between rounded-xl px-3 text-[16px] font-semibold hover:bg-ground">
             Écran du chasseur d&apos;opportunités <span aria-hidden="true">→</span>
           </Link>
+          <Link href="/admin/achats-groupes" className="flex min-h-12 items-center justify-between rounded-xl px-3 text-[16px] font-semibold hover:bg-ground">
+            Achats groupés <span aria-hidden="true">→</span>
+          </Link>
         </Card>
       </Bloc>
     </div>

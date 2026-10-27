@@ -15,8 +15,10 @@ import { createTestApp, resetDatabase, type TestContext } from "./support/test-a
  * négoce », interrupteur du mode.
  */
 let ctx: TestContext;
-const avant = { GROUPE: process.env.GROUPE, ZONES_ACTIVES: process.env.ZONES_ACTIVES, GROUPE_ADMINS: process.env.GROUPE_ADMINS, CHASSEURS: process.env.CHASSEURS, CRON_SECRET: process.env.CRON_SECRET };
+const avant = { MODE_REGROUPEMENT: process.env.MODE_REGROUPEMENT, GROUPE: process.env.GROUPE, ZONES_ACTIVES: process.env.ZONES_ACTIVES, GROUPE_ADMINS: process.env.GROUPE_ADMINS, CHASSEURS: process.env.CHASSEURS, CRON_SECRET: process.env.CRON_SECRET };
 beforeAll(async () => {
+  // Depuis le 27 octobre 2026, le mode par défaut est l'achat groupé automatique : ce fichier joue le mode humain.
+  process.env.MODE_REGROUPEMENT = "humain";
   process.env.GROUPE = "on";
   process.env.ZONES_ACTIVES = "22";
   process.env.GROUPE_ADMINS = "greg@example.fr";
@@ -250,13 +252,13 @@ describe("business model final : le regroupement négocié par un humain", { tim
     expect((await b.agent.get(`/v1/demandes-perso/${db.id}/prevenir`).expect(200)).body.negoces).toEqual([]);
   });
 
-  it("l'interrupteur admin : en automatique, la consultation par cycles revient ; le mode humain ferme la déclaration de besoins", async () => {
+  it("l'interrupteur admin : en « mois », la consultation par cycles revient (27 octobre 2026 : « automatique » = l'achat groupé) ; le mode humain ferme la déclaration de besoins", async () => {
     const a = await artisan(1);
     const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
     await greg.agent.put("/v1/admin/pilotage/mode-regroupement").send({ mode: "automatique" }).expect(403);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
-    await greg.agent.put("/v1/admin/pilotage/mode-regroupement").send({ mode: "automatique" }).expect(200);
-    expect((await a.agent.get("/v1/regroupement/mode").expect(200)).body).toEqual({ mode: "automatique" });
+    await greg.agent.put("/v1/admin/pilotage/mode-regroupement").send({ mode: "mois" }).expect(200);
+    expect((await a.agent.get("/v1/regroupement/mode").expect(200)).body).toEqual({ mode: "mois" });
     expect((await a.agent.post("/v1/negocie/besoins").send({ projectId: a.projectId, articleKey: a.articles[0], dateBesoin: dans(20) }).expect(409)).body.error.details.reason).toBe("mode_automatique");
     const l = (await a.agent.get(`/v1/projects/${a.projectId}/regroupements/lignes`).expect(200)).body;
     expect(l.lignes[0].groupable === true || l.lignes[0].groupable === false).toBe(true);

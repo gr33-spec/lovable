@@ -21,7 +21,7 @@ beforeAll(async () => {
   process.env.PRIX_REPERES = "ardoise:pieces=1.2,liteau:m=0.5";
   process.env.SEUIL_VOLUME_MIN = "couverture=3000";
   // Business model final (25 octobre 2026) : la consultation automatique, derrière l'interrupteur.
-  process.env.MODE_REGROUPEMENT = "automatique";
+  process.env.MODE_REGROUPEMENT = "mois";
   ctx = await createTestApp();
 });
 afterAll(async () => {

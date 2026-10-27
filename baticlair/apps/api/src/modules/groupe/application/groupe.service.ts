@@ -1,4 +1,4 @@
-import { cleDeReference, economieEstimee, familleDuMetier, familleDeLaLigne, fenetreValide, lotParti, fraisDeLivraison, messageBesoinAccepte, phraseCompteur, precisionDeLigne, prixAuVolume, prixLivre, quantiteDuBesoin, transitionBesoin, zoneDeLivraison, zoneDuCodePostal, type CompteurDuGroupe, type MessageArtisan, type StatutBesoin } from "@baticlair/domain";
+import { PHRASE_ACTIVITE_REFUSEE, estActiviteBatiment, estCommerceDeGros, cleDeReference, economieEstimee, familleDuMetier, familleDeLaLigne, fenetreValide, lotParti, fraisDeLivraison, messageBesoinAccepte, phraseCompteur, precisionDeLigne, prixAuVolume, prixLivre, quantiteDuBesoin, transitionBesoin, zoneDeLivraison, zoneDuCodePostal, type CompteurDuGroupe, type MessageArtisan, type StatutBesoin } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
@@ -186,13 +186,20 @@ export class GroupeService {
   }
 
   /** Vérifie le SIRET de l'entreprise auprès de l'INSEE ; actif, il ouvre l'accès au groupé. */
-  async verifierSiret(tenant: TenantContext): Promise<{ verifie: boolean; statut: string }> {
+  async verifierSiret(tenant: TenantContext): Promise<{ verifie: boolean; statut: string; message?: string }> {
     assertCanWrite(tenant);
     const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true } });
     const siret = (c.siret ?? "").replace(/\s/g, "");
     if (!siretBienForme(siret)) throw validationFailed("Invalid SIRET", { reason: "siret_invalide" });
     const r = await this.siret.verifier(siret);
-    if (r.statut === "actif") await this.prisma.company.update({ where: { id: tenant.companyId }, data: { siretVerifieLe: new Date() } });
+    // Achat groupé (point 9, 27 octobre 2026) : le code d'activité lu fait foi ; un négoce (commerce de gros) ou une
+    // entreprise hors bâtiment n'accède pas aux achats groupés. Sans code lu (INSEE muet), le SIRET actif suffit.
+    const naf = r.statut === "actif" ? (r.naf ?? null) : null;
+    if (naf && (estCommerceDeGros(naf) || !estActiviteBatiment(naf))) {
+      await this.prisma.company.update({ where: { id: tenant.companyId }, data: { naf, siretVerifieLe: null } });
+      return { verifie: false, statut: "activite_refusee", message: PHRASE_ACTIVITE_REFUSEE };
+    }
+    if (r.statut === "actif") await this.prisma.company.update({ where: { id: tenant.companyId }, data: { siretVerifieLe: new Date(), ...(naf ? { naf } : {}) } });
     return { verifie: r.statut === "actif", statut: r.statut };
   }
 

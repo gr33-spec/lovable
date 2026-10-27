@@ -149,7 +149,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
   // Business model final (même jour) : ces cas jouent la consultation AUTOMATIQUE, derrière l'interrupteur admin ; le mode
   // par défaut (humain) revient après eux (`negocie-humain.spec.ts`).
   test.beforeAll(async ({ request }) => {
-    expect((await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: SECRET }, data: { mode: "automatique" } })).status()).toBe(200);
+    expect((await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: SECRET }, data: { mode: "mois" } })).status()).toBe(200);
   });
   test.afterAll(async ({ request }) => {
     await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: SECRET }, data: { mode: "humain" } });
@@ -286,7 +286,9 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const cle = (await apiJson<{ lignes: { cle: string }[] }>(page, "GET", `/v1/public/chiffrer/${jeton}`)).body.lignes[0]!.cle;
     expect((await apiJson(page, "POST", `/v1/public/chiffrer/${jeton}`, { prix: { [cle]: 1.07 }, livraisonHt: 0, delaiJours: 2, validiteJours: 10 })).status).toBe(200);
 
-    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Mes prix" }).click();
+    // Achat groupé (27 octobre 2026) : « Mes prix » passe dans Profil.
+    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Profil" }).click();
+    await page.getByRole("link", { name: "Mes prix" }).click();
     const liste = page.getByRole("list", { name: "Mes prix par article" });
     await expect(liste.getByText(ARDOISE)).toBeVisible();
     await expect(liste.getByText(/1,07/).first()).toBeVisible();
@@ -458,7 +460,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Bonjour Jean" })).toBeVisible();
     await expect(page.getByRole("link", { name: /^Regroupements en cours/ })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Nouveau chantier" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Ma liste de matériaux" })).toBeVisible();
   });
 
   test("14. hors zone active : tout sauf les regroupements", async ({ page }) => {

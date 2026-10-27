@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Tags, UserRound, Users, Warehouse, type LucideIcon } from "lucide-react";
-import { useCallback } from "react";
+import { ClipboardList, House, Plus, UserRound, Users, type LucideIcon } from "lucide-react";
+import { useCallback, useState } from "react";
+import { FeuilleDeuxPortes } from "@/components/achat-groupe";
 import { api, type Health } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { useTyping } from "@/lib/typing";
@@ -18,21 +19,20 @@ interface NavItem {
 }
 
 /**
- * RECENTRAGE (Greg, 25 octobre 2026, maquette des trois iPhone) : CINQ onglets, une icône et un mot chacun : Accueil,
- * Chantiers, Regroupements, Mes prix, Profil. Le gros bouton « Nouveau chantier » est en tête de l'accueil (plus de rond
- * central). Barre en verre flottante sur téléphone, toujours `position: fixed; bottom: 0` (jamais recalée en JavaScript) ;
- * colonne à gauche sur ordinateur. Avant : trois entrées (21 octobre) et le rond « Nouvelle liste » (22 octobre).
+ * ACHAT GROUPÉ (Greg, 27 octobre 2026, point 10) : Accueil, Achats groupés, le « + » jaune au centre (les deux portes),
+ * Mes listes, Profil. « Mes prix » passe dans Profil. Barre en verre flottante sur téléphone, toujours `position: fixed;
+ * bottom: 0` (jamais recalée en JavaScript) ; colonne à gauche sur ordinateur. Avant : Accueil, Chantiers, Regroupements,
+ * Mes prix, Profil (25 octobre).
  */
 const accueilItem: NavItem = { href: "/", label: fr.nav.home, icon: House, match: (p: string) => p === "/" };
-const chantiersItem: NavItem = {
+const listesItem: NavItem = {
   href: "/chantiers",
-  label: fr.nav.chantiers,
-  icon: Warehouse,
+  label: fr.nav.listes,
+  icon: ClipboardList,
   match: (p: string) => p.startsWith("/chantiers"),
 };
-const groupeItem: NavItem = { href: "/regroupements", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/regroupements") || p.startsWith("/groupe") };
-const prixItem: NavItem = { href: "/mes-prix", label: fr.nav.prix, icon: Tags, match: (p: string) => p.startsWith("/mes-prix") };
-const profilItem: NavItem = { href: "/compte", label: fr.nav.profil, icon: UserRound, match: (p: string) => p.startsWith("/compte") || p.startsWith("/abonnement") || p.startsWith("/fournisseurs") };
+const groupeItem: NavItem = { href: "/achats-groupes", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/achats-groupes") || p.startsWith("/regroupements") || p.startsWith("/groupe") };
+const profilItem: NavItem = { href: "/compte", label: fr.nav.profil, icon: UserRound, match: (p: string) => p.startsWith("/compte") || p.startsWith("/abonnement") || p.startsWith("/fournisseurs") || p.startsWith("/mes-prix") };
 
 /** Le drapeau `groupe` de l'API (route de santé, publique) : éteint, l'onglet n'existe pas. */
 export function useGroupeActif(): boolean {
@@ -54,6 +54,7 @@ export function AppNav() {
   // 2026-10-12 : sur iPhone, l'ancien recalage sur visualViewport la plaçait au milieu de l'accueil) : `position: fixed;
   // bottom: 0`, la zone du geste en marge intérieure.
   const typing = useTyping();
+  const [portes, setPortes] = useState(false);
 
   const link = (item: NavItem) => {
     const active = item.match(pathname);
@@ -82,16 +83,22 @@ export function AppNav() {
       className={`${inChat ? "max-lg:hidden " : ""}${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}fixed z-30 transition-[translate,opacity] duration-200 max-lg:inset-x-0 max-lg:bottom-0 lg:top-4 lg:bottom-4 lg:left-4 lg:w-60`}
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise) ; ordinateur : colonne à gauche. */}
-      <div className="mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] auto-cols-fr grid-flow-col items-center rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-2xl lg:border lg:border-line lg:bg-surface lg:p-3 lg:shadow-card lg:ring-0">
+      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[1fr_1fr_auto_1fr_1fr]" : "grid-cols-[1fr_auto_1fr_1fr]"} rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-2xl lg:border lg:border-line lg:bg-surface lg:p-3 lg:shadow-card lg:ring-0`}>
         <span className="hidden px-3 pt-2 pb-4 lg:block">
           <Logo hauteur={28} />
         </span>
         {link(accueilItem)}
-        {link(chantiersItem)}
         {groupe ? link(groupeItem) : null}
-        {link(prixItem)}
+        <button type="button" onClick={() => setPortes(true)} aria-label="Nouveau : lancer un achat groupé ou faire ma liste" className="flex min-h-13 items-center justify-center px-1 lg:justify-start lg:px-0">
+          <span className="pressable flex size-12 items-center justify-center rounded-full bg-accent text-on-accent shadow-float lg:h-12 lg:w-full lg:gap-2 lg:rounded-xl lg:text-[15px] lg:font-bold">
+            <Plus size={26} strokeWidth={2.6} aria-hidden="true" />
+            <span className="hidden lg:inline">Nouveau</span>
+          </span>
+        </button>
+        {link(listesItem)}
         {link(profilItem)}
       </div>
+      {portes ? <FeuilleDeuxPortes onFermer={() => setPortes(false)} /> : null}
     </nav>
   );
 }

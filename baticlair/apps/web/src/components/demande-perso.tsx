@@ -7,6 +7,7 @@ import { api, messageErreur } from "@/lib/api";
 import { euros, jourFr, type DemandePerso, type LignesGroupables, type NegocesProposes } from "@/lib/recentrage";
 import { DeclarerBesoins, PrevenirNegoce, useModeRegroupement } from "@/components/negocie";
 import { useResource } from "@/lib/use-resource";
+import { AcheterEnGroupe } from "@/components/achat-groupe";
 
 /**
  * LA DEMANDE PERSO, CÔTÉ ÉCRAN (Greg, 25 octobre 2026 : « le cœur, immédiat, sans cycle ») : après la validation du
@@ -22,6 +23,8 @@ export function DemandesPerso({ projectId, articles, canCreate, archived }: { pr
   const { data: demandes, reload } = useResource(fetchDemandes);
   const [ouvert, setOuvert] = useState(false);
   const [aPrevenir, setAPrevenir] = useState<string | null>(null);
+  // Achat groupé (27 octobre 2026) : deux sorties sous la liste ; le jaune va à « Acheter en groupe ».
+  const mode = useModeRegroupement();
 
   return (
     <section aria-label="Mes demandes de prix" className="flex flex-col gap-3">
@@ -33,8 +36,8 @@ export function DemandesPerso({ projectId, articles, canCreate, archived }: { pr
         ouvert ? (
           <EnvoiDemande projectId={projectId} articles={articles} proposes={proposes} onEnvoye={(id) => (setOuvert(false), setAPrevenir(id), reload())} onFermer={() => setOuvert(false)} />
         ) : (
-          <Button onClick={() => setOuvert(true)} className="w-full">
-            <Send size={18} aria-hidden="true" /> Envoyer à mes négoces
+          <Button variant={mode === "automatique" ? "secondary" : "primary"} onClick={() => setOuvert(true)} className="w-full">
+            <Send size={18} aria-hidden="true" /> {mode === "automatique" ? "Demander les prix à mes négoces" : "Envoyer à mes négoces"}
           </Button>
         )
       ) : null}
@@ -240,6 +243,8 @@ function Demande({ d, onChange }: { d: DemandePerso; onChange: () => void }) {
 export function TenterPrixDeGroupe({ projectId }: { projectId: string }) {
   const mode = useModeRegroupement();
   if (mode === null) return null;
+  // Achat groupé (Greg, 27 octobre 2026) : en automatique (défaut), « Acheter en groupe » (jaune), ligne par ligne.
+  if (mode === "automatique") return <AcheterEnGroupe projectId={projectId} />;
   return mode === "humain" ? <DeclarerBesoins projectId={projectId} /> : <TenterAutomatique projectId={projectId} />;
 }
 

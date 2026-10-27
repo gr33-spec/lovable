@@ -19,12 +19,12 @@ test.beforeEach(async ({ page }) => {
 });
 
 /**
- * L'ANCIEN MODE (commande du mois, commande commune par lots) ne se voit qu'en mode automatique (Greg, 26 octobre 2026) :
+ * L'ANCIEN MODE (commande du mois, commande commune par lots) ne se voit qu'en mode « mois » (Greg, 26 et 27 octobre 2026) :
  * ses parcours (`@ancien`, `@lots`) le rallument, tous les autres repartent en mode humain, le mode par défaut.
  */
 test.beforeEach(async ({ request }, info) => {
   const ancien = info.tags.includes("@ancien") || info.tags.includes("@lots");
-  const r = await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: ancien ? "automatique" : "humain" } });
+  const r = await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: ancien ? "mois" : "humain" } });
   expect(r.status()).toBe(200);
 });
 
@@ -199,12 +199,12 @@ async function passQuestions(page: Page) {
 test("un artisan crée son compte et son premier chantier depuis le +", async ({ page }) => {
   await signUp(page);
   await expect(page.getByText("Toitures Martin")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Nouveau chantier" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ma liste de matériaux" })).toBeVisible();
 
   // Le « + » : un nouveau chantier = déposer un fichier, rien d'autre à remplir (§48).
   // Recentrage (25 octobre 2026) : plus de « + » au centre de la barre ; le gros bouton « Nouveau chantier » de l'accueil.
   await page.goto("/");
-  await page.getByRole("link", { name: "Nouveau chantier" }).first().click();
+  await page.getByRole("link", { name: "Ma liste de matériaux" }).first().click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   // Nouveau cap (22 octobre) : le devis est le petit bouton « Je n'ai qu'un devis », sous « Donne ta liste de matériaux ».
   await expect(page.getByText("Je n'ai qu'un devis", { exact: true })).toBeVisible();
@@ -393,10 +393,11 @@ test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaq
 test("le menu : cinq onglets (recentrage du 25 octobre 2026) ; fournisseurs et compte sont derrière l'initiale", async ({ page }) => {
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  // Recentrage (Greg, 25 octobre 2026, maquette) : Accueil, Chantiers, Regroupements, Mes prix, Profil.
-  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Chantiers", "Regroupements", "Mes prix", "Profil"]);
+  // Achat groupé (Greg, 27 octobre 2026) : Accueil, Achats groupés, le « + » jaune au centre, Mes listes, Profil.
+  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Achats groupés", "Mes listes", "Profil"]);
+  await expect(nav.getByRole("button", { name: /Nouveau/ })).toBeVisible();
   await menuArtisan(page, "Mon compte");
-  await expect(page.getByRole("heading", { name: "Mon compte" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Profil" })).toBeVisible();
 
   // Les métiers se changent en deux appuis ; BatiClair adapte la lecture des prochains devis.
   await expect(page.getByRole("button", { name: "Couverture, charpente, zinguerie" })).toHaveAttribute("aria-pressed", "true");
@@ -805,7 +806,7 @@ test("accueil : la prochaine action de chaque chantier, puis l'essai et les form
   await expect(page.getByText(/Comparer les offres|offres reçues|on avance/)).toHaveCount(0);
   // Recentrage (Greg, 25 octobre 2026, maquette) : l'accueil dit « Bonjour », le gros « Nouveau chantier », puis les
   // chantiers ; plus de bloc de la commande du mois (il vit dans l'onglet Regroupements).
-  await expect(page.getByRole("link", { name: "Nouveau chantier" })).toHaveAttribute("href", "/chantiers/nouveau");
+  await expect(page.getByRole("link", { name: "Ma liste de matériaux" })).toHaveAttribute("href", "/chantiers/nouveau");
   await expect(page.getByRole("region", { name: /^Commande d/ })).toHaveCount(0);
 
   // Essai : 3 chantiers. Au 4e, l'écran des formules, sans jargon ni crédits.
@@ -2240,7 +2241,7 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   // Le compte créé (case cochée) garde la date et la version des CGU.
   await signUp(page);
   const cgu = await page.evaluate(async () => (await (await fetch("/v1/me/cgu")).json()) as { accepteLe: string | null; version: string | null });
-  expect(cgu.version).toBe("2026-10-26");
+  expect(cgu.version).toBe("2026-10-27");
   expect(cgu.accepteLe).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 });
 
@@ -2779,7 +2780,7 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   // 1. Les deux gros boutons.
   // Recentrage (25 octobre 2026) : plus de « + » au centre de la barre ; le gros bouton « Nouveau chantier » de l'accueil.
   await page.goto("/");
-  await page.getByRole("link", { name: "Nouveau chantier" }).first().click();
+  await page.getByRole("link", { name: "Ma liste de matériaux" }).first().click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   // Nouveau cap (22 octobre) : un gros bouton pour la liste, un petit pour le devis.
   await expect(page.getByText("Donne ta liste de matériaux", { exact: true })).toBeVisible();

@@ -8,10 +8,15 @@ import { phraseParticipants, SEUIL_ANONYMAT_DEFAUT } from "./regroupements.js";
  * automatique (cycles, grilles, paliers) reste dans le code, derrière `MODE_REGROUPEMENT=automatique`.
  */
 
-export const MODES_REGROUPEMENT = ["humain", "automatique"] as const;
+/**
+ * Les modes (Greg, 27 octobre 2026 : « l'achat groupé devient le cœur de l'app, en automatique ») : « automatique » par
+ * défaut (l'achat groupé consulte seul les négoces des participants) ; « humain » derrière l'interrupteur (un chasseur
+ * négocie) ; « mois » garde l'ancienne commande commune du mois, écrans masqués, pour ses données et ses tests.
+ */
+export const MODES_REGROUPEMENT = ["automatique", "humain", "mois"] as const;
 export type ModeRegroupement = (typeof MODES_REGROUPEMENT)[number];
-export const MODE_REGROUPEMENT_DEFAUT: ModeRegroupement = "humain";
-export const lireModeRegroupement = (v: unknown): ModeRegroupement => (v === "automatique" ? "automatique" : "humain");
+export const MODE_REGROUPEMENT_DEFAUT: ModeRegroupement = "automatique";
+export const lireModeRegroupement = (v: unknown): ModeRegroupement => (MODES_REGROUPEMENT.includes(v as ModeRegroupement) ? (v as ModeRegroupement) : MODE_REGROUPEMENT_DEFAUT);
 
 /** Commission Mobiiz par défaut sur une offre négociée, en %, intégrée au prix affiché (saisie par le chasseur). */
 export const COMMISSION_DEFAUT = 2;

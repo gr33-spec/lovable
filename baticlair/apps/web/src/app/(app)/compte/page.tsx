@@ -3,16 +3,16 @@
 import { AideBouton } from "@/components/aide";
 import { viderCacheAppareil } from "@/components/service-worker";
 import { useRouter } from "next/navigation";
+import { CarteAlertesAchats, CarteSiretAchatGroupe, LienMesPrix } from "@/components/profil-achat-groupe";
 import { useEffect, useId, useState } from "react";
 import { AdresseMobiizCard } from "@/components/adresse-mobiiz";
 import { EconomiesGroupeCard } from "@/components/economies-groupe";
 import { NotificationsCard } from "@/components/notifications-card";
 import { PartnerKeysCard } from "@/components/partner-keys-card";
-import { ResumeAbonnement } from "@/components/abonnement";
+import { BandeauAbonnement, ResumeAbonnement } from "@/components/abonnement";
 import { PlanSummary } from "@/components/paywall";
 import { TradePicker } from "@/components/trade-picker";
 import {
-  BackButton,
   Badge,
   Button,
   Card,
@@ -60,11 +60,13 @@ export default function ComptePage() {
 
   return (
     <>
-      <BackButton fallback="/" />
+      {/* Achat groupé (Greg, 27 octobre 2026, point 10) : « Profil », sans Retour (c'est un onglet), le bandeau de l'essai
+          ici seulement, « Modifier » qui mène aux coordonnées, Mes prix, les alertes, les liens légaux en bas (pied commun). */}
       <div className="flex items-start justify-between gap-3">
-        <PageTitle>Mon compte</PageTitle>
+        <PageTitle>Profil</PageTitle>
         <AideBouton sujet="compte" />
       </div>
+      <BandeauAbonnement />
       {error ? <ErrorNotice error={error} /> : null}
       <Card className="flex flex-col gap-3 p-4">
         <div className="flex flex-col">
@@ -125,7 +127,15 @@ export default function ComptePage() {
         ) : (
           <span className="text-[15px] font-bold">{company?.name}</span>
         )}
+        {company && company.role !== "viewer" ? (
+          <a href="#coordonnees" className="pressable inline-flex min-h-12 items-center justify-center self-start rounded-full border border-line bg-surface px-5 text-[15px] font-semibold">
+            Modifier
+          </a>
+        ) : null}
       </Card>
+      <LienMesPrix />
+      <CarteSiretAchatGroupe />
+      <CarteAlertesAchats />
       {company && company.role !== "viewer" ? (
         <CompanyProfileCard signatureName={me.user.name} />
       ) : null}
@@ -604,7 +614,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
     .filter(Boolean)
     .join(" · ");
   return (
-    <Card className="flex flex-col gap-3 p-4" aria-busy={!charge}>
+    <Card id="coordonnees" className="flex scroll-mt-4 flex-col gap-3 p-4" aria-busy={!charge}>
       <h2 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">
         TES DEMANDES DE DEVIS
       </h2>

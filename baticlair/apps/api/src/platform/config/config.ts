@@ -219,7 +219,17 @@ const envSchema = z
      * Business model final (Greg, 25 octobre 2026) : `humain` (défaut, un chasseur de Mobiiz négocie) ou `automatique`
      * (la consultation des négoces par cycles, gardée telle quelle). L'admin peut basculer sans redéployer.
      */
-    MODE_REGROUPEMENT: z.enum(["humain", "automatique"]).default("humain"),
+    MODE_REGROUPEMENT: z.enum(["automatique", "humain", "mois"]).default("automatique"),
+    /**
+     * L'ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026) : le délai de réponse des négoces (clôture = besoin − livraison −
+     * réponse), le maximum d'alertes par jour et par entreprise, la commission de lancement (0 possible) pour les N premiers
+     * achats groupés, le budget IA par jour pour lire les devis PDF des négoces (euros).
+     */
+    DELAI_REPONSE_NEGOCE_JOURS: z.coerce.number().int().min(1).max(30).default(3),
+    ALERTES_ACHATS_GROUPES_JOUR: z.coerce.number().int().min(0).max(20).default(2),
+    COMMISSION_LANCEMENT: z.coerce.number().min(0).max(20).optional(),
+    COMMISSION_LANCEMENT_PREMIERS: z.coerce.number().int().min(0).max(10_000).default(20),
+    BUDGET_IA_JOUR: z.string().regex(/^\d+(\.\d+)?$/).default("2"),
     /** Les chasseurs d'opportunités (e-mails) : un rôle à part, distinct de l'admin complet (GROUPE_ADMINS). */
     CHASSEURS: z.string().optional(),
     COMMISSION_DEFAUT: z.coerce.number().min(0).max(20).default(2),
@@ -354,7 +364,7 @@ export interface AppConfig {
     /** Recentrage (25 octobre 2026) : seuils et réglages des regroupements, du gratuit et du payant. */
     recentrage: { seuilLigneHt: number; seuilAnonymat: number; seuilVolumeMin: Record<string, number> | null; prixReperes: Record<string, number>; familles: string[]; lecturesGratuites: number; seuilZoneActive: number };
     /** Le regroupement négocié par un humain (business model final, 25 octobre 2026). */
-    negocie: { mode: "humain" | "automatique"; chasseurs: string[]; commissionDefaut: number; emailChasseur: string | null; delaiLivraisonJours: number; naf: string[] | null; rechercheEntreprises: "on" | "off" | "fake" };
+    negocie: { mode: "automatique" | "humain" | "mois"; delaiReponseJours: number; alertesJour: number; commissionLancement: number | null; commissionLancementPremiers: number; budgetIaJourEur: number; chasseurs: string[]; commissionDefaut: number; emailChasseur: string | null; delaiLivraisonJours: number; naf: string[] | null; rechercheEntreprises: "on" | "off" | "fake" };
     /** mois : un regroupement par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
     mode: "mois" | "lots";
     sirene: { departements: string[]; naf: string[] };
@@ -513,6 +523,11 @@ export function loadConfig(source: Record<string, string | undefined> = process.
         commissionDefaut: e.COMMISSION_DEFAUT,
         emailChasseur: (e.EMAIL_CHASSEUR ?? (e.GROUPE_ADMINS ?? "").split(",")[0] ?? "").trim().toLowerCase() || null,
         delaiLivraisonJours: e.DELAI_LIVRAISON_JOURS,
+        delaiReponseJours: e.DELAI_REPONSE_NEGOCE_JOURS,
+        alertesJour: e.ALERTES_ACHATS_GROUPES_JOUR,
+        commissionLancement: e.COMMISSION_LANCEMENT ?? null,
+        commissionLancementPremiers: e.COMMISSION_LANCEMENT_PREMIERS,
+        budgetIaJourEur: Number(e.BUDGET_IA_JOUR),
         naf: e.NAF_MATERIAUX ? e.NAF_MATERIAUX.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) : null,
         rechercheEntreprises: e.RECHERCHE_ENTREPRISES ?? (e.NODE_ENV === "test" ? "fake" : "on"),
       },

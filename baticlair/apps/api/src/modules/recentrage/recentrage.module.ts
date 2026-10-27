@@ -70,7 +70,7 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
       inject: [CONFIG],
     },
   ],
-  exports: [DroitsService, DemandePersoService, RegroupementsService, NegocieService],
+  exports: [DroitsService, DemandePersoService, RegroupementsService, NegocieService, ObservatoireService],
 })
 export class RecentrageModule implements OnModuleInit {
   constructor(

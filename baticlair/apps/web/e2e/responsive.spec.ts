@@ -16,12 +16,12 @@ test.beforeEach(async ({ page }) => {
 });
 
 /**
- * L'ANCIEN MODE (commande du mois, commande commune par lots) ne se voit qu'en mode automatique (Greg, 26 octobre 2026) :
+ * L'ANCIEN MODE (commande du mois, commande commune par lots) ne se voit qu'en mode « mois » (Greg, 26 et 27 octobre 2026) :
  * ses parcours (`@ancien`, `@lots`) le rallument, tous les autres repartent en mode humain, le mode par défaut.
  */
 test.beforeEach(async ({ request }, info) => {
   const ancien = info.tags.includes("@ancien") || info.tags.includes("@lots");
-  const r = await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: ancien ? "automatique" : "humain" } });
+  const r = await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: ancien ? "mois" : "humain" } });
   expect(r.status()).toBe(200);
 });
 

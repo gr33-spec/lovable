@@ -3,7 +3,7 @@
  * besoins de l'artisan, l'offre du chasseur, la veille, « Préviens ton négoce », les prix observés et l'écran du chasseur.
  */
 
-export type ModeRegroupement = "humain" | "automatique";
+export type ModeRegroupement = "humain" | "automatique" | "mois";
 export type StatutRegroupement = "en_collecte" | "en_negociation" | "offre_recue" | "commande" | "abandonne";
 
 export interface OffreNegociee {

@@ -38,6 +38,14 @@ Branche `claude/saas-achat-artisans-prompt-1lyihx` (PR #284), puis `claude/integ
 - **Usage statistique anonymisé** des prix (observatoire) : clause dans les CGU et les conditions négoces ; table sans identifiant.
 - Points à faire relire : A-FAIRE-RELIRE 42 à 46.
 
+### Achat groupé automatique du 27 octobre 2026
+
+- **Conditions** : CGU article 2 « Les achats groupés » (version 2026-10-27) ; conditions négoces, point « Achats groupés automatiques » (version 2026-10-27), acceptées par la case du lien de réponse avant toute offre (date gardée sur la consultation).
+- **Anonymat** : un négoce ne reçoit que les noms de ses propres clients ; un artisan ne voit jamais le nom ni le prix d'un autre artisan ; total seulement à partir de 5 entreprises ; le nom du négoce de la meilleure offre seulement aux abonnés participants (choix 13 de Greg).
+- **Argent** : paiement direct de l'artisan au négoce ; Mobiiz ne touche jamais l'argent ; facture de commission mensuelle préparée, envoi réel coupé (`envoiFacturesActif: false`).
+- **Anti-fraude** : SIRET vérifié et code d'activité du bâtiment exigés, commerce de gros refusé, comptes à surveiller dans l'admin.
+- **Registre** : traitement 20 (`RGPD-REGISTRE.md`).
+
 ## Reste à faire par Greg
 
 ### 1. Les infos du Kbis — fait le 26 octobre 2026
@@ -58,6 +66,10 @@ Relire `docs/A-FAIRE-RELIRE.md` : CGU, conditions négoces, confidentialité, cl
 |---|---|---|---|
 | AV1 | CGU, article 4 | « BATI INVEST est un intermédiaire : ni vendeur ni acheteur » ; commission du négoce comprise dans le prix affiché | Qualification (courtage, apporteur d'affaires, agent commercial ?) ; obligation d'information de l'artisan sur la commission (transparence, art. L. 441-1 et suivants du code de commerce) |
 | AV2 | CGU, article 2, « L'adresse Mobiiz » | Adresse au nom de l'entreprise, envois « X via Mobiiz », réponses reçues par Mobiiz | Mandat d'envoi au nom de l'artisan ; secret des correspondances ; responsabilité en cas d'e-mail perdu |
+| AV-AG1 | CGU, article 2, « Les achats groupés » | Le nom de la meilleure offre réservé aux abonnés ; commande ferme par « Commander » ; « Me désister » après la clôture | Information précontractuelle, égalité de traitement entre participants, portée d'un désistement |
+| AV-AG2 | Conditions négoces, « Achats groupés automatiques » | Offre unique et ferme jusqu'à la date de commande, même si le volume final est un peu inférieur ; commission acceptée par case à cocher, 0 % au lancement | Validité d'une offre ferme sans volume garanti ; formation du contrat de commission par case à cocher ; facturation mensuelle |
+| AV-AG3 | Demande au négoce | « De la part de vos clients X et Y, via Mobiiz », Reply-To vers l'adresse Mobiiz d'un client | Mandat donné par les artisans ; prospection B2B d'un négoce non inscrit |
+| AV-AG4 | Anti-fraude | Refus des entreprises hors bâtiment (code NAF) | Refus de vente / accès au service entre professionnels |
 | AV3 | CGU, article 5, « Les limites de la lecture automatique » | L'IA peut se tromper ; l'artisan valide la liste | Validité de la limitation de responsabilité entre professionnels ; règlement européen sur l'IA (transparence) |
 | AV4 | CGU, article 3 | 49 € HT / mois, 348 € HT / an, essai, renouvellement annuel tacite avec rappel 30 jours, pas de rétractation | Reconduction tacite entre professionnels ; mentions obligatoires |
 | AV5 | Conditions négoces, « Regroupements négociés par Mobiiz » | Commission de 1 à 2 % du HT livré, facturée par BATI INVEST après livraison, payable à 30 jours | Forme du contrat avec chaque négoce, facturation et TVA, pénalités de retard et indemnité de 40 € (mentions obligatoires sur facture) |

@@ -154,6 +154,10 @@ model Company {
   emailsCoupesLe       DateTime?
   /// R7 (Greg, 27 octobre 2026) : l'écran « Voici ton adresse Mobiiz » a été vu (une fois, après l'inscription).
   adresseMobiizVueLe   DateTime? @map("adresse_mobiiz_vue_le") @db.Timestamptz(3)
+  /// Achat groupé (Greg, 27 octobre 2026) : les alertes « Nouvel achat groupé » (toutes | resume | aucune).
+  alertesAchatsGroupes String    @default("toutes") @map("alertes_achats_groupes")
+  /// Le code d'activité (NAF) lu à la vérification du SIRET : bâtiment exigé, commerce de gros refusé.
+  naf                  String?
   /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
   logo                 Bytes?
   logoType             String?
@@ -170,6 +174,8 @@ model Company {
   suppliers          Supplier[]
   priceRequests      PriceRequest[]
   adressesMobiiz     AdresseMobiiz[]
+  desistementsAchatGroupe DesistementAchatGroupe[]
+  alertesAchatGroupe      AlerteAchatGroupe[]
   emailsRecus        EmailRecuArtisan[]
   offers             SupplierOffer[]
   preferences        CompanyPreference[]
@@ -1775,12 +1781,28 @@ model RegroupementNegocie {
   ajoutAlerteLe     DateTime?
   rappelJ5Le        DateTime?
   rappelJ2Le        DateTime?
+  /// ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026) : « automatique » (consultation par l'app) ou « humain » (chasseur).
+  /// Statuts en plus : consultation (négoces consultés) | pas_assez (plan B).
+  mode              String    @default("humain")
+  unite             String?
+  clotureLe         DateTime? @map("cloture_le") @db.Timestamptz(3)
+  reponseAvantLe    DateTime? @map("reponse_avant_le") @db.Timestamptz(3)
+  consulteLe        DateTime? @map("consulte_le") @db.Timestamptz(3)
+  analyseLe         DateTime? @map("analyse_le") @db.Timestamptz(3)
+  pasAssezLe        DateTime? @map("pas_assez_le") @db.Timestamptz(3)
+  /// La commission Mobiiz de cet achat groupé (lancement possible à 0), figée à la consultation.
+  commissionPct     Decimal?  @map("commission_pct") @db.Decimal(5, 2)
+  meilleureId       String?   @map("meilleure_id") @db.Uuid
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  besoins BesoinNegocie[]
-  offre   OffreNegociee?
-  appels  AppelChasseur[]
+  besoins       BesoinNegocie[]
+  offre         OffreNegociee?
+  appels        AppelChasseur[]
+  negoces       NegoceParticipant[]
+  consultations ConsultationAchatGroupe[]
+  desistements  DesistementAchatGroupe[]
+  alertes       AlerteAchatGroupe[]
 
   @@index([departement, cle, statut])
   @@map("regroupement_negocie")
@@ -1813,11 +1835,16 @@ model BesoinNegocie {
   /// L'ajout signalé au chasseur (tout de suite ou au digest de 18 h) ; le rappel à l'artisan 48 h avant la fin de l'offre.
   signaleLe      DateTime?
   rappelOffreLe  DateTime?
+  /// Achat groupé : « Me désister » après la clôture ; la commande passée (négoce choisi, prix unitaire HT livré).
+  desisteLe      DateTime? @map("desiste_le") @db.Timestamptz(3)
+  consultationCommandeId String? @map("consultation_commande_id") @db.Uuid
+  prixCommandeHt Decimal?  @map("prix_commande_ht") @db.Decimal(14, 4)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   company      Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
   regroupement RegroupementNegocie? @relation(fields: [regroupementId], references: [id], onDelete: SetNull)
+  negoces      NegoceParticipant[]
 
   @@index([companyId, statut])
   @@index([departement, cle, statut])
@@ -1987,4 +2014,121 @@ model EmailRecuFichier {
 
   @@index([emailId])
   @@map("email_recu_fichier")
+}
+
+/** ACHAT GROUPÉ : un négoce ajouté par un participant (au moins un par participation, précision 1 du 27 octobre 2026). */
+model NegoceParticipant {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  besoinId       String    @map("besoin_id") @db.Uuid
+  regroupementId String    @map("regroupement_id") @db.Uuid
+  companyId      String    @map("company_id") @db.Uuid
+  supplierId     String?   @map("supplier_id") @db.Uuid
+  nom            String
+  /// En minuscules : un négoce = un e-mail, une seule demande par achat groupé.
+  email          String
+  telephone      String?
+  siret          String?
+  /// « Je l'ai prévenu », le rappel de la veille, le message du jour de l'envoi.
+  prevenuLe      DateTime? @map("prevenu_le") @db.Timestamptz(3)
+  rappelLe       DateTime? @map("rappel_le") @db.Timestamptz(3)
+  partiLe        DateTime? @map("parti_le") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  besoin       BesoinNegocie       @relation(fields: [besoinId], references: [id], onDelete: Cascade)
+  regroupement RegroupementNegocie @relation(fields: [regroupementId], references: [id], onDelete: Cascade)
+
+  @@unique([besoinId, email])
+  @@index([regroupementId])
+  @@map("negoce_participant")
+}
+
+/**
+ * ACHAT GROUPÉ : LA demande envoyée à UN négoce (unique par achat groupé et par e-mail), sa réponse par le lien sans
+ * inscription (prix unitaire HT livré, ou devis PDF lu à l'échéance), le jugement du code (valide | douteuse).
+ */
+model ConsultationAchatGroupe {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  regroupementId        String    @map("regroupement_id") @db.Uuid
+  email                 String
+  nom                   String
+  telephone             String?
+  /// Seulement SES clients participants (jamais ceux d'un autre négoce).
+  clients               String[]  @default([])
+  quantite              Decimal   @db.Decimal(14, 3)
+  tokenHash             String    @unique @map("token_hash")
+  commissionPct         Decimal   @map("commission_pct") @db.Decimal(5, 2)
+  envoyeLe              DateTime? @map("envoye_le") @db.Timestamptz(3)
+  conditionsAccepteesLe DateTime? @map("conditions_acceptees_le") @db.Timestamptz(3)
+  reponduLe             DateTime? @map("repondu_le") @db.Timestamptz(3)
+  prixUnitaireHt        Decimal?  @map("prix_unitaire_ht") @db.Decimal(14, 4)
+  delaiJours            Int?      @map("delai_jours")
+  commentaire           String?
+  pdf                   Bytes?
+  pdfNom                String?   @map("pdf_nom")
+  lecture               Json?
+  luLe                  DateTime? @map("lu_le") @db.Timestamptz(3)
+  coutIaEur             Decimal?  @map("cout_ia_eur") @db.Decimal(10, 4)
+  /// envoyee | repondue | valide | douteuse
+  statut                String    @default("envoyee")
+  raisons               String[]  @default([])
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  regroupement RegroupementNegocie @relation(fields: [regroupementId], references: [id], onDelete: Cascade)
+
+  @@unique([regroupementId, email])
+  @@map("consultation_achat_groupe")
+}
+
+/** ACHAT GROUPÉ : un retrait ou un désistement (après la clôture, « Me désister », visible dans l'admin ; précision 4). */
+model DesistementAchatGroupe {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  besoinId       String   @map("besoin_id") @db.Uuid
+  companyId      String   @map("company_id") @db.Uuid
+  regroupementId String   @map("regroupement_id") @db.Uuid
+  quantite       Decimal  @db.Decimal(14, 3)
+  apresCloture   Boolean  @map("apres_cloture")
+  raison         String?
+  le             DateTime @default(now()) @db.Timestamptz(3)
+
+  company      Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  regroupement RegroupementNegocie @relation(fields: [regroupementId], references: [id], onDelete: Cascade)
+
+  @@index([regroupementId])
+  @@index([companyId, le])
+  @@map("desistement_achat_groupe")
+}
+
+/** ACHAT GROUPÉ : une alerte « Nouvel achat groupé » pour une entreprise (une seule par achat ; au plus N par jour). */
+model AlerteAchatGroupe {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  companyId      String    @map("company_id") @db.Uuid
+  regroupementId String    @map("regroupement_id") @db.Uuid
+  jour           DateTime  @db.Date
+  envoyeeLe      DateTime? @map("envoyee_le") @db.Timestamptz(3)
+  /// En attente du résumé (au-delà du maximum du jour, ou réglage « résumé »).
+  resume         Boolean   @default(false)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company      Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  regroupement RegroupementNegocie @relation(fields: [regroupementId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, regroupementId])
+  @@index([companyId, jour])
+  @@map("alerte_achat_groupe")
+}
+
+/** ACHAT GROUPÉ : la facture de commission du mois à un négoce, préparée d'après les bons envoyés (envoi réel coupé). */
+model FactureCommissionMensuelle {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  mois         String
+  negoceEmail  String    @map("negoce_email")
+  negoceNom    String    @map("negoce_nom")
+  totalHt      Decimal   @map("total_ht") @db.Decimal(14, 2)
+  commissionHt Decimal   @map("commission_ht") @db.Decimal(14, 2)
+  bons         Json
+  prepareeLe   DateTime  @default(now()) @map("preparee_le") @db.Timestamptz(3)
+  envoyeeLe    DateTime? @map("envoyee_le") @db.Timestamptz(3)
+
+  @@unique([mois, negoceEmail])
+  @@map("facture_commission_mensuelle")
 }

@@ -12,6 +12,7 @@ import { OffersModule } from "./modules/offers/index.js";
 import { PartnersModule } from "./modules/partners/partners.module.js";
 import { PilotageModule } from "./modules/pilotage/pilotage.module.js";
 import { RecentrageModule } from "./modules/recentrage/index.js";
+import { AchatGroupeModule } from "./modules/achat-groupe/index.js";
 import { PriceRequestsModule } from "./modules/price-requests/index.js";
 import { PrivacyModule } from "./modules/privacy/index.js";
 import { ProjectsModule } from "./modules/projects/index.js";
@@ -57,6 +58,7 @@ import { PushModule } from "./platform/push/push.module.js";
     GroupeModule,
     PilotageModule,
     RecentrageModule,
+    AchatGroupeModule,
     ReprisesModule,
   ],
 })

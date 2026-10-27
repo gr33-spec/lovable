@@ -32,7 +32,7 @@ export function useModeRegroupement(): ModeRegroupement | null {
  * hors zone ouverte, le refus du serveur se dit dans le formulaire.
  */
 /**
- * L'ANCIEN MODE NE SE MONTRE QU'EN MODE AUTOMATIQUE (Greg, 26 octobre 2026 : « le bandeau « Commande du 1er nov… Clôture
+ * L'ANCIEN MODE NE SE MONTRE QU'EN MODE « MOIS » (27 octobre 2026 : « automatique » est devenu l'achat groupé) (Greg, 26 octobre 2026 : « le bandeau « Commande du 1er nov… Clôture
  * dans » est toujours là en mode humain : retire-le, ainsi que tout reste de l'ancien mode visible côté artisan ») : la
  * commande du mois, la commande commune par lots, leur bandeau, leurs blocs et leur onglet. En mode humain (par défaut),
  * ou tant que le mode n'est pas lu, rien.
@@ -42,7 +42,7 @@ export function useAncienMode(): boolean {
   const groupe = features.groupe === true;
   const fetcher = useCallback((signal: AbortSignal) => (groupe ? api<{ mode: ModeRegroupement }>("/v1/regroupement/mode", { signal }).catch(() => null) : Promise.resolve(null)), [groupe]);
   const { data } = useResource(fetcher);
-  return groupe && data?.mode === "automatique";
+  return groupe && data?.mode === "mois";
 }
 
 export function RegroupementsNegocies() {

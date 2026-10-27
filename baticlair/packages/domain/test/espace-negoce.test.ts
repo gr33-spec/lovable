@@ -130,8 +130,8 @@ describe("les textes côté négoce : vouvoiement, jamais un nom d'artisan", () 
   // Mise en conformité (Greg, 24 octobre 2026) : treize points, dont la grille unique, la concurrence, « ni vendeur ni
   // acheteur » et le versionnement ; la gratuité dans la formulation unique.
   it("les conditions : versionnées, dont grille unique, prix fermes, garantie 30 jours, paliers, confidentialité, concurrence, gratuité, désabonnement", () => {
-    expect(CONDITIONS_NEGOCE).toHaveLength(18);
-    expect(CONDITIONS_NEGOCE_VERSION).toBe("2026-10-26");
+    expect(CONDITIONS_NEGOCE).toHaveLength(19);
+    expect(CONDITIONS_NEGOCE_VERSION).toBe("2026-10-27");
     const titres = CONDITIONS_NEGOCE.map((c) => c.titre);
     expect(titres).toEqual(expect.arrayContaining(["Une seule grille, la même pour tous", "Prix fermes, quel que soit le volume", "Garantie 30 jours si vous êtes retenu", "Livraison selon vos paliers", "Confidentialité des artisans", "Concurrence : vos prix restent les vôtres", "Ni vendeur ni acheteur", "Gratuit pour vous", "Non-sollicitation", "Désabonnement libre", "Liberté de ne pas répondre", "Versions et droit applicable", "Demandes perso", "Pas d'alignement automatique"]));
     expect(CONDITIONS_NEGOCE.find((c) => c.titre === "Gratuit pour vous")!.texte).toMatch(/^Aucun frais pour l'instant\. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce\. /);

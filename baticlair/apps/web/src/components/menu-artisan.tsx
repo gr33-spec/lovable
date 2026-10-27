@@ -7,6 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { revoirLeGuide } from "./guide-premier-lancement";
+import { Cloche } from "./achat-groupe";
+import { PastilleEssai } from "./abonnement";
 
 /** « Jean Martin » → « JM » ; « Jean » → « JE ». */
 export function initials(name: string): string {
@@ -75,13 +77,18 @@ export function MenuArtisan() {
   return (
     <div ref={box} className="relative flex items-center justify-between">
       <span className="truncate text-[16px] font-extrabold">{company?.name}</span>
+      {/* Achat groupé (Greg, 27 octobre 2026, point 10) : la pastille de l'essai et la cloche, à côté de l'initiale. */}
+      <span className="ml-auto flex items-center gap-2 pl-2">
+        <PastilleEssai />
+        <Cloche />
+      </span>
       <button
         type="button"
         aria-label="Mon menu"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="pressable flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-[14px] font-extrabold active:bg-ground"
+        className="pressable ml-2 flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-[14px] font-extrabold active:bg-ground"
       >
         {initials(me.user.name)}
       </button>

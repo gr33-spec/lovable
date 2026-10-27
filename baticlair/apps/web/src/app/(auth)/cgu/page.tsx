@@ -80,6 +80,17 @@ export default function CguPage() {
             percevoir une commission du négoce.
           </li>
           <li>
+            <strong>Les achats groupés</strong> : vous lancez un achat groupé (un matériau à la référence exacte, votre quantité, votre commune, votre date
+            de besoin et au moins un négoce) ou vous rejoignez celui d&apos;une entreprise de votre secteur. Les entreprises du même métier et du même secteur
+            en sont prévenues, sans votre nom. À la clôture, chaque négoce choisi reçoit une seule demande, de la part de ses seuls clients participants, avec le
+            volume total, la référence exacte, les communes et les dates. Vous voyez l&apos;offre de votre négoce, la meilleure offre du groupe et l&apos;économie en
+            euros ; le nom du négoce de la meilleure offre est réservé aux abonnés qui participent avec une quantité. Vous ne voyez jamais le nom ni le prix d&apos;un
+            autre artisan. « Commander » envoie votre bon de commande au négoce : vous le payez directement, sur votre compte habituel ; {NOM_APP} ne touche jamais
+            l&apos;argent et peut percevoir une commission du négoce. Avant la clôture, vous pouvez modifier ou retirer votre participation ; après, « Me désister »
+            reste possible et est enregistré. Sans assez de volume ou sans offre comparable, votre demande part chez vos négoces en un clic. Les achats groupés
+            sont réservés aux entreprises du bâtiment dont le SIRET est vérifié.
+          </li>
+          <li>
             <strong>L&apos;adresse {NOM_APP}</strong> : quand elle est ouverte sur votre compte, votre entreprise reçoit une adresse à son nom sur le domaine
             mobiiz.fr (par exemple bati-invest@mobiiz.fr), modifiable une fois, l&apos;ancienne restant redirigée 90 jours. Vos demandes aux négoces partent sous
             la forme « Votre entreprise via {NOM_APP} », et les réponses des négoces (e-mails et pièces jointes) arrivent à cette adresse : {NOM_APP} les range dans

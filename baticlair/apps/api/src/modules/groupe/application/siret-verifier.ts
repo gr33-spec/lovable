@@ -2,13 +2,17 @@
  * Section 5 du parcours groupé : « SIRET vérifié (API INSEE) avant tout accès au groupé ». Le port dit seulement si
  * l'établissement existe et est actif ; l'adaptateur INSEE l'interroge, les tests le remplacent.
  */
-export type ResultatSiret = { statut: "actif" } | { statut: "inconnu" } | { statut: "ferme" } | { statut: "indisponible" };
+/** Achat groupé (27 octobre 2026) : le code d'activité (NAF) de l'établissement, quand l'INSEE le donne. */
+export type ResultatSiret = { statut: "actif"; naf?: string | null } | { statut: "inconnu" } | { statut: "ferme" } | { statut: "indisponible" };
 
 export interface SiretVerifier {
   verifier(siret: string): Promise<ResultatSiret>;
 }
 
 export const SIRET_VERIFIER = Symbol("SIRET_VERIFIER");
+
+/** En test (vérification « par la forme ») : un SIRET de commerce de gros (NAF 46.73A), refusé aux achats groupés. */
+export const SIRET_TEST_GROSSISTE = "46730000000008";
 
 /** Quatorze chiffres et la clé de Luhn (les SIRET de La Poste, 356000000…, font exception : somme multiple de 5). */
 export function siretBienForme(siret: string): boolean {
@@ -48,9 +52,9 @@ export class InseeSiretVerifier implements SiretVerifier {
       });
       if (res.status === 404) return { statut: "inconnu" };
       if (!res.ok) return { statut: "indisponible" };
-      const body = (await res.json()) as { etablissement?: { periodesEtablissement?: { etatAdministratifEtablissement?: string }[] } };
-      const etat = body.etablissement?.periodesEtablissement?.[0]?.etatAdministratifEtablissement;
-      return etat === "A" ? { statut: "actif" } : { statut: "ferme" };
+      const body = (await res.json()) as { etablissement?: { periodesEtablissement?: { etatAdministratifEtablissement?: string; activitePrincipaleEtablissement?: string | null }[] } };
+      const periode = body.etablissement?.periodesEtablissement?.[0];
+      return periode?.etatAdministratifEtablissement === "A" ? { statut: "actif", naf: periode.activitePrincipaleEtablissement ?? null } : { statut: "ferme" };
     } catch {
       return { statut: "indisponible" };
     }

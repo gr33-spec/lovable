@@ -16,9 +16,108 @@ import { InviterCollegue } from "@/components/inviter";
 import { BoucleNegoce } from "@/components/boucle-negoce";
 import type { MesBesoins } from "@/lib/negocie";
 import type { Droits, ListeRegroupements } from "@/lib/recentrage";
-import { useAncienMode } from "@/components/negocie";
+import { useAncienMode, useModeRegroupement } from "@/components/negocie";
+import { actionsEnAttente, CarteAchatGroupe, CarteAchatOuvert, DeuxPortes } from "@/components/achat-groupe";
+import type { AchatOuvert, MesAchats } from "@/lib/achat-groupe";
 
 export default function AccueilPage() {
+  const mode = useModeRegroupement();
+  if (mode === null) return <Skeleton card="h-56" lines={3} label="Chargement de l'accueil…" />;
+  return mode === "automatique" ? <AccueilAchatGroupe /> : <AccueilAncien />;
+}
+
+/**
+ * L'ACCUEIL DE L'ACHAT GROUPÉ (Greg, 27 octobre 2026, point 10) : les actions qui t'attendent (en jaune), « Achats groupés
+ * près de chez toi » avec Rejoindre, « Mes achats groupés », puis les listes. Compte vide : les deux portes et les achats
+ * groupés ouverts du secteur.
+ */
+function AccueilAchatGroupe() {
+  const { me } = useSession();
+  const fetchMes = useCallback((signal: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal }).catch(() => null), []);
+  const fetchPres = useCallback((signal: AbortSignal) => api<{ achats: AchatOuvert[] }>("/v1/achats-groupes/pres-de-chez-moi", { signal }).catch(() => null), []);
+  const fetchRecent = useCallback((signal: AbortSignal) => api<ProjectPage>("/v1/projects?limit=3", { signal }), []);
+  const fetchNext = useCallback((signal: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal }), []);
+  const { data: mes } = useResource(fetchMes);
+  const { data: pres } = useResource(fetchPres);
+  const { data: recent, error, reload } = useResource(fetchRecent);
+  const { data: next, reload: reloadNext } = useResource(fetchNext);
+  const firstName = me.user.name.split(" ")[0] ?? me.user.name;
+  const actifs = (mes?.achats ?? []).filter((a) => a.etat !== "retire" && a.etat !== "desiste");
+  const actions = actionsEnAttente(actifs, next?.items ?? []);
+  const vide = recent !== null && recent.items.length === 0 && mes !== null && actifs.length === 0;
+  return (
+    <>
+      <div className="flex flex-col gap-1">
+        <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
+        <p className="text-[16px] text-muted">{vide ? "Par où commencer ?" : "Achète en groupe, paie moins cher."}</p>
+      </div>
+      <BandeauReprises />
+      {actions.length > 0 ? (
+        <section aria-label="À faire" className="flex flex-col gap-2 rounded-2xl bg-accent p-4 text-on-accent shadow-card">
+          <p className="text-[16px] font-extrabold">{actions.length === 1 ? "Une action t'attend" : `${actions.length} actions t'attendent`}</p>
+          <ul className="flex flex-col gap-1">
+            {actions.map((a) => (
+              <li key={a.cle}>
+                <Link href={a.href} className="pressable flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface/80 px-3 text-[15px] font-semibold text-ink">
+                  <span>{a.texte}</span>
+                  <ChevronRight size={18} aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      <DeuxPortes grand />
+      {pres && pres.achats.length > 0 ? (
+        <section aria-label={vide ? "Achats groupés ouverts dans ton secteur" : "Achats groupés près de chez toi"} className="flex flex-col gap-3">
+          <SectionTitle>{vide ? "Achats groupés ouverts dans ton secteur" : "Achats groupés près de chez toi"}</SectionTitle>
+          {pres.achats.slice(0, 3).map((a) => (
+            <CarteAchatOuvert key={a.id} a={a} />
+          ))}
+        </section>
+      ) : null}
+      {actifs.length > 0 ? (
+        <section aria-label="Mes achats groupés" className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between">
+            <SectionTitle>Mes achats groupés</SectionTitle>
+            <Link href="/achats-groupes" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
+              Voir tout
+            </Link>
+          </div>
+          {actifs.slice(0, 3).map((c) => (
+            <CarteAchatGroupe key={c.id} c={c} />
+          ))}
+        </section>
+      ) : null}
+      {vide ? null : (
+        <section className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between">
+            <SectionTitle>Mes listes et chantiers</SectionTitle>
+            <Link href="/chantiers" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
+              Voir tout
+            </Link>
+          </div>
+          {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
+          {recent === null && !error ? <Skeleton lines={3} label="Chargement des listes…" /> : null}
+          {recent ? (
+            <ProjectList
+              projects={recent.items}
+              show="active"
+              onChanged={() => {
+                reload();
+                reloadNext();
+              }}
+            />
+          ) : null}
+        </section>
+      )}
+      <InstallHint />
+    </>
+  );
+}
+
+/** L'accueil des modes « humain » et « mois » (avant le 27 octobre 2026), avec le vocabulaire du jour. */
+function AccueilAncien() {
   const router = useRouter();
   const { me, features } = useSession();
   const fetchRecent = useCallback((signal: AbortSignal) => api<ProjectPage>("/v1/projects?limit=3", { signal }), []);
@@ -68,7 +167,7 @@ export default function AccueilPage() {
       <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-8 text-center">
         <h1 className="max-w-[18ch] text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Bonjour {firstName}. Dépose ton devis, ton quantitatif est prêt en quelques minutes.</h1>
         <ButtonLink href="/chantiers/nouveau" className="w-full max-w-sm">
-          <Plus size={20} aria-hidden="true" /> Nouveau chantier
+          <Plus size={20} aria-hidden="true" /> Ma liste de matériaux
         </ButtonLink>
         {/* Landing du 22 octobre : « Inviter un collègue » aussi dans l'app, juste après l'inscription. */}
         <div className="flex w-full max-w-xl flex-col gap-4 text-left">
@@ -90,7 +189,7 @@ export default function AccueilPage() {
         <p className="text-[16px] text-muted">Ton devis, ton quantitatif, tes prix : tout part d&apos;ici.</p>
       </div>
       <ButtonLink href="/chantiers/nouveau" className="w-full">
-        <Plus size={20} aria-hidden="true" /> Nouveau chantier
+        <Plus size={20} aria-hidden="true" /> Ma liste de matériaux
       </ButtonLink>
       <BandeauReprises />
       {droits?.preavis ? (

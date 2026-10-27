@@ -19,7 +19,7 @@ import { NEGOCE_EXTRACTOR, type NegoceExtractor } from "./application/negoce-ext
 import { IaNegoceExtractor } from "./infrastructure/ia-negoce-extractor.js";
 import { fabriqueIa } from "../../platform/ai/fabrique-ia.js";
 import { FakeNegoceExtractor } from "./infrastructure/fake-negoce-extractor.js";
-import { InseeSiretVerifier, SIRET_VERIFIER, siretBienForme, type SiretVerifier } from "./application/siret-verifier.js";
+import { InseeSiretVerifier, SIRET_TEST_GROSSISTE, SIRET_VERIFIER, siretBienForme, type SiretVerifier } from "./application/siret-verifier.js";
 import { NegocesService } from "./application/negoces.service.js";
 import { SIRENE_HTTP, SireneService, type SireneHttp } from "./application/sirene.service.js";
 import { SireneController } from "./http/sirene.controller.js";
@@ -57,7 +57,7 @@ import { ALERTER } from "../../platform/tokens.js";
       // configuration) : un SIRET bien formé vaut actif, sans appel réseau. Sinon, seule l'API Sirene vérifie.
       useFactory: (c: AppConfig): SiretVerifier =>
         (c.env === "test" && !c.groupe.inseeApiKey) || c.groupe.siretVerification === "forme"
-          ? { verifier: async (s) => (siretBienForme(s) ? { statut: "actif" } : { statut: "inconnu" }) }
+          ? { verifier: async (s) => (s === SIRET_TEST_GROSSISTE ? { statut: "actif", naf: "46.73A" } : siretBienForme(s) ? { statut: "actif" } : { statut: "inconnu" }) }
           : new InseeSiretVerifier(c.groupe.inseeApiKey),
       inject: [CONFIG],
     },
@@ -117,6 +117,6 @@ import { ALERTER } from "../../platform/tokens.js";
     { provide: SIRENE_HTTP, useValue: fetch as unknown as SireneHttp },
     { provide: SireneService, useFactory: (p: PrismaService, h: SireneHttp, c: AppConfig) => new SireneService(p, h, { apiKey: c.groupe.inseeApiKey, ...c.groupe.sirene }), inject: [PrismaService, SIRENE_HTTP, CONFIG] },
   ],
-  exports: [CommandeDuMoisService, JeuDemonstrationService, EspaceNegoceService, GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService, CommandeService, NotificationsGroupeService],
+  exports: [NEGOCE_EXTRACTOR, CommandeDuMoisService, JeuDemonstrationService, EspaceNegoceService, GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService, CommandeService, NotificationsGroupeService],
 })
 export class GroupeModule {}
