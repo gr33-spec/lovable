@@ -21,6 +21,8 @@ const apiEnv = {
   CRON_SECRET: "e2e-secret-de-la-tache",
   // BatiClair Groupé, étape 8 : le webhook Resend entrant et l'adresse de réponse des lots, la facture de commission.
   RESEND_WEBHOOK_SECRET: "whsec_ZTJlLXNlY3JldC1kdS13ZWJob29rLTAwMDA=",
+  // R7 : les adresses Mobiiz des artisans (`toitures-martin@mobiiz.test`), reçues par le même webhook.
+  EMAIL_DOMAINE: "mobiiz.test",
   REPONSES_DOMAINE: "reponses.example.com",
   FACTURE_EMETTEUR_NOM: "Société Émettrice",
   FACTURE_EMETTEUR_FORME: "SARL",

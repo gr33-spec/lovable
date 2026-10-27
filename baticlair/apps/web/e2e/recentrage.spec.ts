@@ -103,6 +103,9 @@ async function couvreur(page: Page, zone: string, lignes: { libelle: string; qua
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
   await page.getByRole("button", { name: "Créer mon compte" }).click();
+  // R7 (Greg, 27 octobre 2026) : l'écran dédié « Voici ton adresse Mobiiz : … » avant l'accueil.
+  await expect(page.getByRole("heading", { name: "Voici ton adresse Mobiiz :" })).toBeVisible();
+  await page.getByRole("button", { name: "C'est compris" }).click();
   await expect(page.getByRole("heading", { name: /^Bonjour Jean/ }).or(page.getByRole("dialog", { name: "Guide" })).first()).toBeVisible();
   expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: entreprise, address: adresse(zone), siret: "73282932000074", phone: null, email: null })).status).toBe(200);
   expect((await apiJson(page, "POST", "/v1/groupe/siret")).status).toBe(200);

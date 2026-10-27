@@ -53,7 +53,7 @@ export class ResendEmailSender implements TransactionalEmailSender, EmailCapabil
       method: "POST",
       headers: { authorization: `Bearer ${this.apiKey}`, "content-type": "application/json" },
       body: JSON.stringify({
-        from: this.from,
+        from: email.from ?? this.from,
         to: [email.to],
         subject: email.subject,
         text: email.text,

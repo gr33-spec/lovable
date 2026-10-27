@@ -3,7 +3,7 @@ import type { AppConfig } from "../config/config.js";
 import type { AppLogger } from "../logging/logger.js";
 import { ChannelAlerter } from "../alerts/alerter.js";
 import { ALERTER, CONFIG, EMAIL_RECU, EMAIL_SENDER, LOGGER } from "../tokens.js";
-import { EnveloppeSeule, ResendLecteurEmailRecu } from "./contact-entrant.js";
+import { EnveloppeSeule, LecteurEmailRecuDeTest, ResendLecteurEmailRecu } from "./contact-entrant.js";
 import type { TransactionalEmailSender } from "./email.port.js";
 import { CapturingEmailSender } from "./capturing-email.sender.js";
 import { ConsoleEmailSender } from "./console-email.sender.js";
@@ -48,7 +48,7 @@ export const RELAIS_EMAIL = Symbol("RELAIS_EMAIL");
     {
       // La boîte de contact (contact@mobiiz.fr) : le corps et les pièces jointes relus chez Resend.
       provide: EMAIL_RECU,
-      useFactory: (config: AppConfig, logger: AppLogger) => (config.resend ? new ResendLecteurEmailRecu(config.resend.apiKey, logger) : new EnveloppeSeule()),
+      useFactory: (config: AppConfig, logger: AppLogger) => (config.resend ? new ResendLecteurEmailRecu(config.resend.apiKey, logger) : config.env === "test" ? new LecteurEmailRecuDeTest() : new EnveloppeSeule()),
       inject: [CONFIG, LOGGER],
     },
     {

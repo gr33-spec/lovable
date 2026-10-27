@@ -17,6 +17,8 @@ export interface RecipientRecord {
   status: RecipientStatus;
   sentAt: Date | null;
   document: { id: string; name: string; status: string } | null;
+  /** R7 : l'étiquette de réponse (dans l'adresse « Répondre » et l'objet de la demande). */
+  etiquette: string | null;
 }
 
 /**
@@ -105,6 +107,8 @@ export interface PriceRequestRepository {
   findByDocument(tenant: TenantContext, documentId: string): Promise<PriceRequestRecord | null>;
   setStatus(tenant: TenantContext, recipientId: string, status: RecipientStatus): Promise<void>;
   attachDocument(tenant: TenantContext, recipientId: string, documentId: string): Promise<void>;
+  /** R7 : l'étiquette de réponse posée à l'envoi (`adresse+r<étiquette>@mobiiz.fr`). */
+  setEtiquette(tenant: TenantContext, recipientId: string, etiquette: string): Promise<void>;
   delete(tenant: TenantContext, id: string): Promise<boolean>;
   /** Classe la demande (fournisseurs retenus facultatifs) ; `null` la rouvre. */
   classify(tenant: TenantContext, id: string, retainedSupplierIds: string[] | null): Promise<void>;

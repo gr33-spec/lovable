@@ -94,6 +94,7 @@ export function toDto(r: PriceRequestView) {
       supplier: x.supplier,
       status: x.status,
       sentAt: x.sentAt?.toISOString() ?? null,
+      etiquette: x.etiquette,
       document: x.document,
       email: r.emails.get(x.id) ?? null,
     })),

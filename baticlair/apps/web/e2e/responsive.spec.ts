@@ -79,6 +79,10 @@ for (const size of WIDTHS) {
     await page.getByLabel("Mot de passe").fill("motdepasse-solide");
     await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
     await page.getByRole("button", { name: "Créer mon compte" }).click();
+    // R7 (27 octobre 2026) : l'écran dédié « Voici ton adresse Mobiiz : … » avant l'accueil.
+    await expect(page.getByRole("heading", { name: "Voici ton adresse Mobiiz :" })).toBeVisible();
+    await shoot(page, size.name, "02b-adresse-mobiiz");
+    await page.getByRole("button", { name: "C'est compris" }).click();
     await expect(page.getByRole("heading", { name: /^(Bonjour|Paie tes matériaux moins cher)/ })).toBeVisible();
     await shoot(page, size.name, "03-accueil");
 
@@ -157,6 +161,9 @@ async function inscription(page: Page, email: string) {
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
   await page.getByRole("button", { name: "Créer mon compte" }).click();
+  // R7 (27 octobre 2026) : l'écran dédié « Voici ton adresse Mobiiz : … » avant l'accueil.
+  await expect(page.getByRole("heading", { name: "Voici ton adresse Mobiiz :" })).toBeVisible();
+  await page.getByRole("button", { name: "C'est compris" }).click();
   await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ })).toBeVisible();
 }
 
@@ -240,6 +247,9 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
     await admin.getByLabel("Mot de passe").fill("motdepasse-solide");
     await admin.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
     await admin.getByRole("button", { name: "Créer mon compte" }).click();
+    // R7 (27 octobre 2026) : l'écran dédié « Voici ton adresse Mobiiz : … » avant l'accueil.
+    await expect(admin.getByRole("heading", { name: "Voici ton adresse Mobiiz :" })).toBeVisible();
+    await admin.getByRole("button", { name: "C'est compris" }).click();
     await expect(admin.getByRole("heading", { name: /^(Bonjour Greg|Paie tes matériaux moins cher)/ })).toBeVisible();
   }
   // Sécurité (Greg, 26 octobre 2026) : le code à 6 chiffres de la session d'abord.

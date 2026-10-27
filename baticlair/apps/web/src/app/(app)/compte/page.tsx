@@ -4,6 +4,7 @@ import { AideBouton } from "@/components/aide";
 import { viderCacheAppareil } from "@/components/service-worker";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
+import { AdresseMobiizCard } from "@/components/adresse-mobiiz";
 import { EconomiesGroupeCard } from "@/components/economies-groupe";
 import { NotificationsCard } from "@/components/notifications-card";
 import { PartnerKeysCard } from "@/components/partner-keys-card";
@@ -128,6 +129,7 @@ export default function ComptePage() {
       {company && company.role !== "viewer" ? (
         <CompanyProfileCard signatureName={me.user.name} />
       ) : null}
+      {company ? <AdresseMobiizCard /> : null}
       {company && company.role !== "viewer" ? (
         <TradesCard initial={company.trades} />
       ) : null}

@@ -1,4 +1,4 @@
-import { briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine } from "@baticlair/domain";
+import { briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -162,6 +162,16 @@ export class PriceRequestsService {
     this.complement = f;
   }
 
+  /**
+   * R7 (Greg, 27 octobre 2026) : la demande part de l'ADRESSE MOBIIZ de l'entreprise (« Toitures Martin via Mobiiz »),
+   * « Répondre » écrit à son adresse étiquetée et l'objet porte le repère : la réponse du négoce revient dans Mobiiz.
+   * Branché par le module de l'adresse ; null = l'adresse de l'application et « Répondre » vers l'artisan, comme avant.
+   */
+  private expediteur: (companyId: string) => Promise<{ from: string; replyTo: string; etiquette: string } | null> = async () => null;
+  brancherExpediteur(f: (companyId: string) => Promise<{ from: string; replyTo: string; etiquette: string } | null>): void {
+    this.expediteur = f;
+  }
+
   /** Des e-mails partent-ils vraiment du serveur (sinon : messagerie de l'artisan + PDF à télécharger) ? */
   get deliversEmail(): boolean {
     return this.mailer.deliversEmail;
@@ -213,12 +223,15 @@ export class PriceRequestsService {
     if (!request.packet) throw new DomainError("conflict", "This request predates the supplier packet", { reason: "no_packet" });
     const pdf = await this.pdf(tenant, request.id, recipientId);
     const complement = await this.complement(request.id, recipientId);
+    const via = await this.expediteur(tenant.companyId);
+    if (via) await this.requests.setEtiquette(tenant, recipientId, via.etiquette);
     await this.mailer.send({
       to: recipient.supplier.email,
-      subject: packetSubject(request.packet),
+      subject: via ? objetAvecRepere(packetSubject(request.packet), via.etiquette) : packetSubject(request.packet),
       text: complement ? `${packetMail(request.packet)}\n\n${complement}` : packetMail(request.packet),
-      // La réponse du fournisseur va à l'artisan ; et le mail doit partir, sinon la demande ne passe pas « envoyée ».
-      ...(request.packet.expediteur?.email ? { replyTo: request.packet.expediteur.email } : {}),
+      // La réponse du fournisseur revient dans Mobiiz (adresse étiquetée, R7), sinon à l'artisan ; et le mail doit
+      // partir, sinon la demande ne passe pas « envoyée ».
+      ...(via ? { from: via.from, replyTo: via.replyTo } : request.packet.expediteur?.email ? { replyTo: request.packet.expediteur.email } : {}),
       mustDeliver: true,
       // Le PDF « Demande de devis » (les blocs + les croquis en pages), puis chaque croquis d'origine, pour le zoom.
       attachments: [

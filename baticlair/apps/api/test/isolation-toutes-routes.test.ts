@@ -97,6 +97,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
       lot: "",
       cycle: "",
       besoinNegocie: "",
+      recu: "",
+      recuFichier: "",
       regroupementNegocie: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
@@ -115,6 +117,10 @@ describe("isolation entre entreprises, toutes les routes", () => {
     const negocieA = await ctx.prisma.regroupementNegocie.create({ data: { cle: "ardoise:32x22", libelle: "Ardoise 32×22", famille: "couverture", departement: "29" } });
     ids.besoinNegocie = (await ctx.prisma.besoinNegocie.create({ data: { companyId, designation: "Ardoise 32×22", cle: "ardoise:32x22", famille: "couverture", quantite: 100, unite: "pièces", departement: "29", livraison: "29200 Brest", dateBesoin: new Date("2026-11-20"), statut: "declare", regroupementId: negocieA.id } })).id;
     ids.regroupementNegocie = negocieA.id;
+    // R7 (27 octobre 2026) : un e-mail reçu sur l'adresse Mobiiz de A, avec son fichier.
+    const recuA = await ctx.prisma.emailRecuArtisan.create({ data: { companyId, adresse: "toitures-a", de: "Négoce A <a@example.org>", objet: "Devis Toitures A", texte: "Toitures A", recuLe: new Date(), fichiers: { create: [{ nom: "devis-a.pdf", type: "application/pdf", taille: 4, contenu: new Uint8Array([37, 80, 68, 70]) }] } }, include: { fichiers: true } });
+    ids.recu = recuA.id;
+    ids.recuFichier = recuA.fichiers[0]!.id;
     // L'abonnement (24 octobre 2026) : une session de paiement simulé et une facture de A.
     await ctx.prisma.evenementAbonnement.create({ data: { companyId, type: "session", source: "simule", refExterne: "sim_session_de_a_000000" } });
     const factureA = await ctx.prisma.factureAbonnement.create({ data: { numero: "TEST-000001", serie: "TEST", rang: 1, companyId, raisonSociale: "Toitures A", periodeDebut: new Date(), periodeFin: new Date(), montantHtCentimes: 2900, tvaCentimes: 580, ttcCentimes: 3480, tauxTva: 20, emiseLe: new Date() } });
@@ -167,6 +173,9 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/public\/chiffrer$/, "jeton-inconnu-de-b-0000000000000000"],
         // Business model final : le besoin négocié de A ; B n'est pas chasseur (403) ; l'admin non plus.
         [/\/negocie\/besoins$/, ids.besoinNegocie],
+        // R7 : l'e-mail reçu de A et son fichier.
+        [/\/recus$/, ids.recu],
+        [/\/fichiers$/, ids.recuFichier],
         [/\/chasseur\/regroupements$/, ids.regroupementNegocie],
         [/\/admin\/pilotage\/negoces$/, ids.negoce],
       ];

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CircleHelp, CreditCard, FlaskConical, LayoutDashboard, Phone, Truck, UserRound } from "lucide-react";
+import { CircleHelp, CreditCard, FlaskConical, LayoutDashboard, Phone, Truck, UserRound, Inbox } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -107,6 +107,10 @@ export function MenuArtisan() {
           <Link role="menuitem" href="/fournisseurs" onClick={() => setOpen(false)} className={item}>
             <Truck size={20} aria-hidden="true" className="text-muted" />
             Mes fournisseurs
+          </Link>
+          <Link role="menuitem" href="/recus" onClick={() => setOpen(false)} className={item}>
+            <Inbox size={20} aria-hidden="true" className="text-muted" />
+            Mes reçus
           </Link>
           <Link role="menuitem" href="/abonnement" onClick={() => setOpen(false)} className={item}>
             <CreditCard size={20} aria-hidden="true" className="text-muted" />

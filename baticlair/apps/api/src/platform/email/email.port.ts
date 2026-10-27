@@ -20,6 +20,11 @@ export interface TransactionalEmail {
   mustDeliver?: boolean;
   /** En-têtes ajoutés par la mise en page (List-Unsubscribe). */
   headers?: Record<string, string>;
+  /**
+   * R7 : l'expéditeur de cet e-mail quand il n'est pas celui de l'application (« Toitures Martin via Mobiiz
+   * <toitures-martin@mobiiz.fr> », une demande de prix). Toujours sur le domaine de l'application.
+   */
+  from?: string;
 }
 
 export interface TransactionalEmailSender {

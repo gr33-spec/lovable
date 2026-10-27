@@ -152,6 +152,8 @@ model Company {
   /// RGPD (24 octobre 2026) : l'artisan a coupé les e-mails de notification (lien « Ne plus recevoir ces e-mails ») ; les
   /// e-mails indispensables (compte, bons de commande) partent toujours.
   emailsCoupesLe       DateTime?
+  /// R7 (Greg, 27 octobre 2026) : l'écran « Voici ton adresse Mobiiz » a été vu (une fois, après l'inscription).
+  adresseMobiizVueLe   DateTime? @map("adresse_mobiiz_vue_le") @db.Timestamptz(3)
   /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
   logo                 Bytes?
   logoType             String?
@@ -167,6 +169,8 @@ model Company {
   aiAnalyses         AiAnalysis[]
   suppliers          Supplier[]
   priceRequests      PriceRequest[]
+  adressesMobiiz     AdresseMobiiz[]
+  emailsRecus        EmailRecuArtisan[]
   offers             SupplierOffer[]
   preferences        CompanyPreference[]
   corrections        CorrectionEvent[]
@@ -685,8 +689,11 @@ model PriceRequestRecipient {
   confirmeLe    DateTime?
   livreLe       DateTime?
   negoceId      String?   @db.Uuid
+  /// R7 : l'étiquette de réponse de cette demande (`adresse+r<étiquette>@mobiiz.fr`, « [réf. …] » dans l'objet).
+  etiquette     String?   @unique
 
   priceRequest PriceRequest @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
+  emailsRecus  EmailRecuArtisan[]
   supplier     Supplier     @relation(fields: [supplierId], references: [id], onDelete: Restrict)
   document     Document?    @relation(fields: [documentId], references: [id], onDelete: SetNull)
 
@@ -1916,4 +1923,68 @@ model EvenementTraite {
   @@id([source, id])
   @@index([recuLe])
   @@map("evenement_traite")
+}
+
+/**
+ * R7 (Greg, 26 et 27 octobre 2026) : L'ADRESSE MOBIIZ DE L'ARTISAN. `adresse` est le nom avant le @ (`bati-invest`) sur
+ * le domaine de l'application. Une adresse donnée appartient pour toujours à son entreprise : quand l'artisan en change,
+ * l'ancienne reste active, rien n'est supprimé ni réattribué.
+ */
+model AdresseMobiiz {
+  adresse   String   @id
+  companyId String   @map("company_id") @db.Uuid
+  /// La dernière choisie : celle qui envoie les demandes ; les anciennes reçoivent encore.
+  courante  Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@map("adresse_mobiiz")
+}
+
+/**
+ * R7 : UN E-MAIL REÇU SUR L'ADRESSE MOBIIZ (réponse d'un négoce ou autre). Rattaché à sa demande quand l'étiquette ou le
+ * repère de l'objet la nomme ; sinon dans la boîte « Reçus », à rattacher d'un tap. Les pièces jointes sont gardées
+ * (10 Mo au plus par e-mail) ; un PDF rattaché à une demande devient le devis reçu du négoce (Document `supplier_quote`).
+ */
+model EmailRecuArtisan {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  companyId   String    @map("company_id") @db.Uuid
+  /// L'adresse Mobiiz visée (nom avant le @).
+  adresse     String
+  recipientId String?   @map("recipient_id") @db.Uuid
+  projectId   String?   @map("project_id") @db.Uuid
+  de          String
+  objet       String
+  texte       String?
+  recuLe      DateTime  @map("recu_le") @db.Timestamptz(3)
+  luLe        DateTime? @map("lu_le") @db.Timestamptz(3)
+  /// Pièces trop lourdes, nommées sans être gardées.
+  tropLourdes String[]  @default([]) @map("trop_lourdes")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company   Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  recipient PriceRequestRecipient? @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+  fichiers  EmailRecuFichier[]
+
+  @@index([companyId, recuLe])
+  @@index([projectId])
+  @@map("email_recu_artisan")
+}
+
+model EmailRecuFichier {
+  id         String  @id @default(uuid(7)) @db.Uuid
+  emailId    String  @map("email_id") @db.Uuid
+  nom        String
+  type       String
+  taille     Int
+  contenu    Bytes
+  /// Le Document créé quand ce PDF est devenu le devis reçu d'une demande.
+  documentId String? @map("document_id") @db.Uuid
+
+  email EmailRecuArtisan @relation(fields: [emailId], references: [id], onDelete: Cascade)
+
+  @@index([emailId])
+  @@map("email_recu_fichier")
 }

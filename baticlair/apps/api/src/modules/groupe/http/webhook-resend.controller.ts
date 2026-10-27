@@ -13,6 +13,7 @@ import { Public } from "../../identity/index.js";
 import { DemandeService } from "../application/demande.service.js";
 import { PrismaService } from "../../../platform/database/prisma.service.js";
 import { unSeulTraitement } from "../../../platform/reprise/evenements.js";
+import { ReponsesRecuesService } from "../../adresse-mobiiz/index.js";
 
 /** Le webhook entrant de Resend (`email.received`), signé façon Svix : `svix-id`, `svix-timestamp`, `svix-signature`. */
 export function signatureValide(secret: string, id: string | undefined, timestamp: string | undefined, signature: string | undefined, corps: Buffer): boolean {
@@ -33,7 +34,8 @@ export function signatureValide(secret: string, id: string | undefined, timestam
  * ÉTAPE 8 : la réponse d'un négoce par e-mail à `lot-<n°>@reponses.<domaine>` (section 7, étape 5). Le webhook ne prend
  * aucun devis par e-mail (sans la case d'accord, rien n'est pris en compte, section 6) : il renvoie au négoce son lien de
  * dépôt et journalise. Fermé sans secret ; signature obligatoire ; 404 drapeau éteint (sauf la boîte de contact).
- * Un e-mail à contact@mobiiz.fr part chez l'admin (`renvoyerContact`, Greg, 26 octobre 2026).
+ * Un e-mail à contact@mobiiz.fr part chez l'admin (`renvoyerContact`, Greg, 26 octobre 2026) ; un e-mail à l'adresse
+ * Mobiiz d'un artisan arrive dans Mobiiz (R7, `ReponsesRecuesService`).
  */
 @Controller("v1/webhooks")
 export class WebhookResendController {
@@ -44,6 +46,7 @@ export class WebhookResendController {
     @Inject(EMAIL_SENDER) private readonly envoi: TransactionalEmailSender,
     @Inject(LOGGER) private readonly logger: AppLogger,
     @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(ReponsesRecuesService) private readonly reponses: ReponsesRecuesService,
   ) {}
 
   @Public()
@@ -57,8 +60,8 @@ export class WebhookResendController {
     @Headers("svix-signature") signature: string | undefined,
   ) {
     const secret = this.config.groupe.resendWebhookSecret;
-    // La boîte de contact vit même sans le groupé ; sans elle ni le groupé, la route n'existe pas.
-    if (!this.config.groupe.enabled && !this.config.contact) throw notFound("Route");
+    // La boîte de contact et les adresses Mobiiz (R7) vivent même sans le groupé ; sans rien de tout ça, la route n'existe pas.
+    if (!this.config.groupe.enabled && !this.config.contact && !this.config.emailDomaine) throw notFound("Route");
     if (!secret || !req.rawBody || !signatureValide(secret, id, timestamp, signature, req.rawBody)) throw forbidden("Webhook signature");
     // Revue du 26 octobre 2026 : un envoi rejoué par Resend (même svix-id) n'est jamais traité deux fois.
     return unSeulTraitement(this.prisma, "resend", id, () => this.traiter(req));
@@ -69,6 +72,9 @@ export class WebhookResendController {
     if (evenement.type !== "email.received" || !evenement.data?.from) return { traite: false, raison: "ignore" };
     const contact = await renvoyerContact(this.config.contact, evenement.data, this.lecteur, this.envoi, this.logger);
     if (contact) return contact;
+    // R7 : un e-mail à l'adresse Mobiiz d'un artisan (réponse d'un négoce) arrive dans Mobiiz.
+    const artisan = await this.reponses.recevoir(evenement.data, this.lecteur);
+    if (artisan) return artisan;
     if (!this.config.groupe.enabled) return { traite: false, raison: "adresse_inconnue" };
     const domaine = this.config.groupe.reponsesDomaine;
     if (!domaine) return { traite: false, raison: "domaine_absent" };

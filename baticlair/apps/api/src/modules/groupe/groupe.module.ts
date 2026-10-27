@@ -34,6 +34,7 @@ import { RegroupementController } from "./http/regroupement.controller.js";
 import { ReponseController } from "./http/reponse.controller.js";
 import { TestMailboxController } from "./http/test-mailbox.controller.js";
 import { WebhookResendController } from "./http/webhook-resend.controller.js";
+import { AdresseMobiizModule } from "../adresse-mobiiz/index.js";
 import { SuiviController } from "./http/suivi.controller.js";
 import { SuiviService } from "./application/suivi.service.js";
 import { BanGeocodeur, GEOCODEUR, TableGeocodeur, type Geocodeur } from "./application/geocodeur.js";
@@ -47,7 +48,7 @@ import type { Alerter } from "../../platform/alerts/alerter.js";
 import { ALERTER } from "../../platform/tokens.js";
 
 @Module({
-  imports: [TenancyModule, TakeoffModule, AbonnementModule],
+  imports: [TenancyModule, TakeoffModule, AbonnementModule, AdresseMobiizModule],
   controllers: [SuiviController, GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController, JeuDemonstrationController, CommandeDuMoisController, GrilleNegoceController, CommandeDuMoisTacheController, CommandeDuMoisAdminController, EconomiePubliqueController, EspaceNegoceController],
   providers: [
     {
@@ -67,7 +68,7 @@ import { ALERTER } from "../../platform/tokens.js";
     { provide: JeuDemonstrationService, useFactory: (p: PrismaService) => new JeuDemonstrationService(p), inject: [PrismaService] },
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
     { provide: AdminGroupeService, useFactory: (p: PrismaService, c: AppConfig) => new AdminGroupeService(p, c.groupe.departements), inject: [PrismaService, CONFIG] },
-    { provide: NotificationsGroupeService, useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender, c: AppConfig) => new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId)), inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER, CONFIG] },
+    { provide: NotificationsGroupeService, useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender, c: AppConfig) => new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl), inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER, CONFIG] },
     { provide: RapportMensuelService, useFactory: (p: PrismaService, e: TransactionalEmailSender) => new RapportMensuelService(p, e), inject: [PrismaService, EMAIL_SENDER] },
     { provide: CommandeService, useFactory: (p: PrismaService, e: TransactionalEmailSender, c: AppConfig, n: NotificationsGroupeService) => new CommandeService(p, e, c.groupe.facture, n), inject: [PrismaService, EMAIL_SENDER, CONFIG, NotificationsGroupeService] },
     { provide: ChoixService, useFactory: (p: PrismaService, c: CommandeService) => new ChoixService(p, c), inject: [PrismaService, CommandeService] },

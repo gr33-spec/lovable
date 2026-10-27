@@ -78,6 +78,25 @@ export class EnveloppeSeule implements LecteurEmailRecu {
   }
 }
 
+/**
+ * En test (parcours e2e) : le prochain e-mail « relu » est celui déposé par la boîte de test
+ * (`POST /v1/internal/test/email-recu`), corps et pièces jointes compris ; sans dépôt, l'enveloppe seule.
+ */
+export class LecteurEmailRecuDeTest implements LecteurEmailRecu {
+  private prochain: Partial<EmailRecu> | null = null;
+
+  deposer(email: Partial<EmailRecu>): void {
+    this.prochain = email;
+  }
+
+  lire(): Promise<EmailRecu | null> {
+    const e = this.prochain;
+    this.prochain = null;
+    if (!e) return Promise.resolve(null);
+    return Promise.resolve({ from: e.from ?? "", to: e.to ?? [], subject: e.subject ?? "", date: e.date ?? new Date().toISOString(), text: e.text ?? null, html: e.html ?? null, attachments: e.attachments ?? [], tropLourdes: e.tropLourdes ?? [] });
+  }
+}
+
 /** L'adresse nue d'un « Nom <adresse> ». */
 export function adresseNue(s: string): string {
   return (/<([^>]+)>/.exec(s)?.[1] ?? s).trim().toLowerCase();

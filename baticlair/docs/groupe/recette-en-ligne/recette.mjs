@@ -236,13 +236,21 @@ await etape("Inscription artisan", page, async () => {
   await page.getByLabel("Mot de passe").fill(`Recette-${ts}-solide`);
   await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
   await page.getByRole("button", { name: "Créer mon compte" }).click();
+  // R7 (27 octobre 2026) : l'écran dédié « Voici ton adresse Mobiiz : … » avant le guide.
+  await voir(page.getByRole("heading", { name: "Voici ton adresse Mobiiz :" }), 60000);
+  const adresse = (await page.getByLabel("Ton adresse Mobiiz").innerText()).trim();
+  verif(/^[a-z0-9-]+@mobiiz\.fr$/.test(adresse), `adresse Mobiiz inattendue : ${adresse}`);
+  await zeroReste(page, "adresse mobiiz");
+  await page.getByRole("button", { name: "C'est compris" }).click();
   await voir(page.getByRole("dialog", { name: "Guide" }), 30000);
-  return EMAIL;
+  return `${EMAIL} ; adresse ${adresse}`;
 });
-await etape("Guide : trois écrans, prochaine clôture, « Déposer mon premier devis »", page, async () => {
+await etape("Guide : trois écrans, « Déposer mon premier devis »", page, async () => {
   const guide = page.getByRole("dialog", { name: "Guide" });
   await voir(guide.getByRole("heading", { name: "Dépose ton devis" }));
-  const cloture = await guide.getByText(/^Prochaine clôture :/).innerText();
+  // Mode humain (26 octobre 2026) : plus de « Prochaine clôture » dans le guide.
+  verif(!(await guide.getByText(/^Prochaine clôture :/).count()), "« Prochaine clôture » dans le guide (ancien mode)");
+  const cloture = "sans clôture (mode humain)";
   await zeroReste(page, "guide 1");
   await guide.getByRole("button", { name: "Suivant" }).click();
   await voir(guide.getByRole("heading", { name: /prépare ton quantitatif$/ }));

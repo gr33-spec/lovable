@@ -5,12 +5,14 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
 import { NotificationsPrompt } from "@/components/notifications-prompt";
+import { RappelAdresseMobiiz } from "@/components/adresse-mobiiz";
+import { RecuCard } from "@/components/recus";
 import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { attachFile } from "@/lib/upload";
 import { fetchWhole } from "@/components/file-viewer";
-import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
+import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, type EmailRecu, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
 import { openDocument, openFile } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
@@ -226,7 +228,7 @@ export function ProjectPriceRequests({
           <Say>
             {request.recipients.some((r) => r.status === "to_send")
               ? "La demande est prête. Envoie-la à chaque fournisseur :"
-              : "Demande envoyée. Quand un fournisseur te répond, ajoute son devis sur sa carte."}
+              : "Demande envoyée. Quand un négoce te répond par e-mail, sa réponse arrive ici ; tu peux aussi ajouter son devis sur sa carte."}
           </Say>
         </AssistantMessage>
       )}
@@ -264,6 +266,7 @@ export function ProjectPriceRequests({
         ))}
       </ul>
       {!archived ? <AddRecipients request={request} onChange={replace} /> : null}
+      <RecusDuChantier projectId={projectId} version={version} />
       {partsBlock}
     </section>
   );
@@ -462,6 +465,8 @@ function NewRequest({
             onPreviewClosed?.();
           }}
         >
+          {/* R7 : le rappel en une ligne au premier envoi (Greg, 27 octobre 2026). */}
+          <RappelAdresseMobiiz />
           <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
         </SendSheet>
       ) : null}
@@ -865,5 +870,26 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
         </button>
       </div>
     </div>
+  );
+}
+
+
+/** R7 : « Négoce X t'a répondu par e-mail » sur le chantier : l'e-mail reçu sur l'adresse Mobiiz, son texte et ses fichiers. */
+function RecusDuChantier({ projectId, version }: { projectId: string; version: number }) {
+  const charger = useCallback((signal: AbortSignal) => api<{ items: EmailRecu[] }>(`/v1/recus?projectId=${encodeURIComponent(projectId)}`, { signal }), [projectId]);
+  const { data, setData, reload } = useResource(charger);
+  useEffect(() => {
+    if (version > 0) reload();
+    // Une réponse déposée ou comparée recharge les reçus ; `reload` est stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [version]);
+  if (!data || data.items.length === 0) return null;
+  return (
+    <section aria-label="Réponses reçues par e-mail" className="flex flex-col gap-2">
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">REÇU PAR E-MAIL</h2>
+      {data.items.map((e) => (
+        <RecuCard key={e.id} email={e} compact onChange={(x) => setData({ items: data.items.map((y) => (y.id === x.id ? x : y)) })} />
+      ))}
+    </section>
   );
 }

@@ -48,6 +48,7 @@ interface Row {
     id: string;
     status: RecipientStatus;
     sentAt: Date | null;
+    etiquette?: string | null;
     supplier: {
       id: string;
       name: string;
@@ -151,6 +152,7 @@ function toRecord(row: Row): PriceRequestRecord {
       // Devis reçu puis supprimé du chantier : on revient à « envoyée ».
       status: r.status === "received" && !r.document ? "sent" : r.status,
       sentAt: r.sentAt,
+      etiquette: r.etiquette ?? null,
       document: r.document
         ? {
             id: r.document.id,
@@ -328,6 +330,10 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
         ...(status === "sent" ? { sentAt: new Date() } : status === "to_send" ? { sentAt: null } : {}),
       },
     });
+  }
+
+  async setEtiquette(tenant: TenantContext, recipientId: string, etiquette: string): Promise<void> {
+    await this.prisma.priceRequestRecipient.updateMany({ where: { id: recipientId, priceRequest: { companyId: tenant.companyId } }, data: { etiquette } });
   }
 
   async attachDocument(tenant: TenantContext, recipientId: string, documentId: string): Promise<void> {

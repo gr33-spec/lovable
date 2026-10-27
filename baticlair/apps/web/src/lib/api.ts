@@ -528,6 +528,8 @@ export interface PriceRequestRecipient {
   supplier: Pick<Supplier, "id" | "name" | "contactName" | "email" | "phone">;
   status: RecipientStatus;
   sentAt: string | null;
+  /** R7 : l'étiquette de réponse de la demande (adresse « Répondre » et objet). */
+  etiquette: string | null;
   document: { id: string; name: string; status: string } | null;
   /** E-mail prêt à envoyer (texte brut). */
   email: { subject: string; body: string } | null;
@@ -747,3 +749,39 @@ export interface FactureAbonnement {
   ht: string;
 }
 
+
+/** R7 : l'adresse Mobiiz de l'entreprise (`GET /v1/company/adresse-mobiiz`). */
+export interface EtatAdresseMobiiz {
+  adresse: string;
+  domaine: string | null;
+  email: string | null;
+  vueLe: string | null;
+  anciennes: string[];
+  modifiable: boolean;
+  /** Le nombre de demandes de prix déjà parties (le rappel ne se montre qu'au premier envoi). */
+  envois: number;
+}
+
+/** R7 : un e-mail reçu sur l'adresse Mobiiz (`GET /v1/recus`). */
+export interface EmailRecu {
+  id: string;
+  de: string;
+  expediteur: string;
+  objet: string;
+  texte: string | null;
+  recuLe: string;
+  luLe: string | null;
+  demande: { recipientId: string; projectId: string; negoce: string } | null;
+  fichiers: { id: string; nom: string; type: string; taille: number; devisRecu: boolean }[];
+  tropLourdes: string[];
+}
+
+/** R7 : une demande partie, à laquelle rattacher un e-mail reçu (`GET /v1/recus/demandes`). */
+export interface DemandePartie {
+  recipientId: string;
+  projectId: string;
+  chantier: string;
+  negoce: string;
+  envoyeeLe: string | null;
+  recue: boolean;
+}

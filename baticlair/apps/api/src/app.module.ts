@@ -5,6 +5,7 @@ import { BillingModule } from "./modules/billing/index.js";
 import { DemoModule } from "./modules/demo/index.js";
 import { DocumentsModule } from "./modules/documents/index.js";
 import { GroupeModule } from "./modules/groupe/index.js";
+import { AdresseMobiizModule } from "./modules/adresse-mobiiz/index.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { IdentityModule } from "./modules/identity/index.js";
 import { OffersModule } from "./modules/offers/index.js";
@@ -52,6 +53,7 @@ import { PushModule } from "./platform/push/push.module.js";
     PrivacyModule,
     QuantitatifsModule,
     PartnersModule,
+    AdresseMobiizModule,
     GroupeModule,
     PilotageModule,
     RecentrageModule,

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { EcranAdresseMobiiz } from "@/components/adresse-mobiiz";
 import { TradePicker } from "@/components/trade-picker";
 import { Turnstile, TURNSTILE_ACTIF } from "@/components/turnstile";
 import { Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
@@ -20,6 +21,8 @@ export default function InscriptionPage() {
   const [trades, setTrades] = useState<string[]>([]);
   const [cgu, setCgu] = useState(false);
   const [captcha, setCaptcha] = useState<string | null>(null);
+  // R7 (Greg, 27 octobre 2026) : le compte créé, l'écran « Voici ton adresse Mobiiz » avant l'accueil.
+  const [adresse, setAdresse] = useState(false);
   const companyKey = useRef(newActionKey());
   // Si le compte est créé mais que l'entreprise échoue (réseau), « réessayer »
   // ne doit pas recréer le compte : on reprend à l'étape suivante.
@@ -56,12 +59,15 @@ export default function InscriptionPage() {
       });
       // La case cochée vaut acceptation des CGU de cette version : enregistrée avec le compte.
       await api("/v1/me/cgu", { method: "POST", body: { version: VERSION_CGU } });
-      router.replace("/");
+      setPending(false);
+      setAdresse(true);
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
       setPending(false);
     }
   }
+
+  if (adresse) return <EcranAdresseMobiiz onContinuer={() => router.replace("/")} />;
 
   return (
     <>

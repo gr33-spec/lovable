@@ -322,6 +322,8 @@ export interface AppConfig {
   previewOriginPattern: RegExp | null;
   emailProvider: "resend" | "disabled" | "console" | "capture";
   resend?: { apiKey: string; from: string; replyTo?: string };
+  /** R7 : le domaine des adresses Mobiiz des artisans (`EMAIL_DOMAINE`) ; null sans domaine (local, tests sans e-mail). */
+  emailDomaine: string | null;
   /** La liste blanche de la prévisualisation (null en production et en local). */
   emailGarde: { autorises: string[]; redirigerVers: string | null } | null;
   /** Les adresses de contact du domaine (« contact@mobiiz.fr ») renvoyées vers `vers` ; null sans domaine ni destinataire. */
@@ -455,6 +457,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     ...(emailProvider === "resend" && e.RESEND_API_KEY && emailFrom
       ? { resend: { apiKey: e.RESEND_API_KEY, from: emailFrom, ...(emailReponse ? { replyTo: emailReponse } : {}) } }
       : {}),
+    emailDomaine: e.EMAIL_DOMAINE?.toLowerCase() ?? null,
     emailGarde: e.VERCEL_ENV !== "production" && autorises.length > 0 ? { autorises, redirigerVers: e.EMAIL_REDIRECTION?.toLowerCase() ?? autorises.find((x) => !x.startsWith("@")) ?? null } : null,
     contact: contactDe(e),
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
