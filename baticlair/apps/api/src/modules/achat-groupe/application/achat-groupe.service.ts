@@ -36,6 +36,8 @@ import {
   etatCarte,
   exclu,
   exclusionJusquau,
+  arbreCatalogue,
+  famillesDuCatalogue,
   famillesDuMetier,
   jaugeVolume,
   libelleMetier,
@@ -257,8 +259,20 @@ export class AchatGroupeService {
 
   /* ---------------------------------------------------------------------------------------------- le catalogue */
 
-  catalogue(q: string) {
-    return { references: rechercherCatalogue(q).map((e) => ({ designation: e.designation, unite: e.unite })) };
+  /**
+   * Le catalogue : la recherche par mots, et L'ARBRE DE CHOIX par métier (Greg, 27 octobre 2026 : « un seul bouton
+   * ardoise, puis format, puis choix ; on est multimétier ») : les métiers de l'entreprise d'abord, puis les autres.
+   */
+  async catalogue(tenant: TenantContext, q: string) {
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { trades: true } });
+    const miennes = new Set((c?.trades ?? []).flatMap((t) => famillesDuMetier(t)));
+    const toutes = famillesDuCatalogue().filter((f) => this.cfg.familles.includes(f));
+    const familles = [...toutes.filter((f) => miennes.has(f)), ...toutes.filter((f) => !miennes.has(f))].map((f) => ({ famille: f, libelle: libelleMetier(f), mienne: miennes.has(f) }));
+    return {
+      references: rechercherCatalogue(q).map((e) => ({ designation: e.designation, unite: e.unite })),
+      familles,
+      arbre: Object.fromEntries(familles.map((f) => [f.famille, arbreCatalogue(f.famille)])),
+    };
   }
 
   /** Les négoces proposés : ses habituels (carnet), puis les négoces inscrits du département (recherche nom ou SIRET). */

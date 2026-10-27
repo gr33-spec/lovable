@@ -1,4 +1,5 @@
 import { de } from "../shared/elision.js";
+import type { FamilleGroupe } from "./groupe.js";
 import { NOM_APP } from "./marque.js";
 import { referenceStricte, type ReferenceStricte } from "./reference-stricte.js";
 import { SEUIL_ANONYMAT_DEFAUT, SEUIL_VOLUME_MIN_DEFAUT } from "./regroupements.js";
@@ -49,39 +50,77 @@ export interface EntreeCatalogue {
   unite: string;
   /** Mots de recherche en plus de la désignation. */
   mots: string;
+  /** Le métier de l'achat groupé (famille) auquel la référence appartient. */
+  famille: FamilleGroupe;
+  /** Le chemin de choix, un bouton par niveau (Greg, 27 octobre : « un seul bouton ardoise, puis format, puis choix »). */
+  chemin: readonly [string, ...string[]];
 }
 
 /**
  * Les références les plus commandées, pour lancer un achat groupé sans rien taper de précis. Chaque désignation passe la
  * référence stricte (test permanent) : le catalogue ne propose jamais une ligne qui ne se regroupe pas. Une référence
- * absente se tape (« Ardoise 40×24 Espagne 1er choix ») et passe par la même règle.
+ * absente se tape (« Ardoise 40×24 Espagne 1er choix ») et passe par la même règle. Chaque référence porte son métier et
+ * son chemin de choix (matériau, format, choix) : l'écran guide l'artisan de bouton en bouton (`arbreCatalogue`).
  */
 export const CATALOGUE_ACHATS_GROUPES: readonly EntreeCatalogue[] = [
-  { designation: "Ardoise naturelle 32×22 Espagne 1er choix", unite: "pièces", mots: "ardoise couverture" },
-  { designation: "Ardoise naturelle 40×22 Espagne 1er choix", unite: "pièces", mots: "ardoise couverture" },
-  { designation: "Ardoise naturelle 40×25 Espagne 1er choix", unite: "pièces", mots: "ardoise couverture" },
-  { designation: "Ardoise naturelle 30×20 Espagne 1er choix", unite: "pièces", mots: "ardoise couverture" },
-  { designation: "Ardoise naturelle 32×22 Angers 1er choix", unite: "pièces", mots: "ardoise couverture france trelaze" },
-  { designation: "Ardoise fibres-ciment 60×30", unite: "pièces", mots: "ardoise synthetique couverture" },
-  { designation: "Zinc naturel 0,65 mm", unite: "m²", mots: "zinc feuille bobine couverture" },
-  { designation: "Zinc prépatiné quartz 0,65 mm", unite: "m²", mots: "zinc quartz anthra couverture" },
-  { designation: "Zinc naturel 0,80 mm", unite: "m²", mots: "zinc feuille bobine couverture" },
-  { designation: "Liteaux 27×38", unite: "m", mots: "liteau bois couverture" },
-  { designation: "Liteaux 25×38", unite: "m", mots: "liteau bois couverture" },
-  { designation: "Voliges 18×100", unite: "m²", mots: "volige bois couverture" },
-  { designation: "Chevrons 63×75", unite: "m", mots: "chevron bois charpente" },
-  { designation: "Chevrons 75×100", unite: "m", mots: "chevron bois charpente" },
-  { designation: "Bastaings 63×175", unite: "m", mots: "bastaing bois charpente" },
-  { designation: "OSB 3 12 mm 2500×1250", unite: "pièces", mots: "panneau osb charpente" },
-  { designation: "OSB 3 18 mm 2500×1250", unite: "pièces", mots: "panneau osb plancher" },
-  { designation: "Laine de verre 100 mm", unite: "m²", mots: "isolant isolation laine" },
-  { designation: "Laine de verre 200 mm", unite: "m²", mots: "isolant isolation laine combles" },
-  { designation: "Laine de roche 100 mm", unite: "m²", mots: "isolant isolation laine" },
-  { designation: "Plaque de plâtre BA13 2500×1200", unite: "pièces", mots: "placo plaque platre cloison" },
-  { designation: "Peinture blanc mat 15 L", unite: "pots", mots: "peinture blanc mat pot" },
-  { designation: "Peinture blanc satin 15 L", unite: "pots", mots: "peinture blanc satin pot" },
-  { designation: "Sous-couche 15 L", unite: "pots", mots: "sous couche impression peinture" },
+  { designation: "Ardoise naturelle 32×22 Espagne 1er choix", unite: "pièces", mots: "ardoise couverture", famille: "couverture", chemin: ["Ardoise", "32×22", "Espagne 1er choix"] },
+  { designation: "Ardoise naturelle 32×22 Angers 1er choix", unite: "pièces", mots: "ardoise couverture france trelaze", famille: "couverture", chemin: ["Ardoise", "32×22", "Angers 1er choix"] },
+  { designation: "Ardoise naturelle 40×22 Espagne 1er choix", unite: "pièces", mots: "ardoise couverture", famille: "couverture", chemin: ["Ardoise", "40×22", "Espagne 1er choix"] },
+  { designation: "Ardoise naturelle 40×25 Espagne 1er choix", unite: "pièces", mots: "ardoise couverture", famille: "couverture", chemin: ["Ardoise", "40×25", "Espagne 1er choix"] },
+  { designation: "Ardoise naturelle 30×20 Espagne 1er choix", unite: "pièces", mots: "ardoise couverture", famille: "couverture", chemin: ["Ardoise", "30×20", "Espagne 1er choix"] },
+  { designation: "Ardoise fibres-ciment 60×30", unite: "pièces", mots: "ardoise synthetique couverture", famille: "couverture", chemin: ["Ardoise", "Fibres-ciment", "60×30"] },
+  { designation: "Zinc naturel 0,65 mm", unite: "m²", mots: "zinc feuille bobine couverture", famille: "couverture", chemin: ["Zinc", "Naturel", "0,65 mm"] },
+  { designation: "Zinc naturel 0,80 mm", unite: "m²", mots: "zinc feuille bobine couverture", famille: "couverture", chemin: ["Zinc", "Naturel", "0,80 mm"] },
+  { designation: "Zinc prépatiné quartz 0,65 mm", unite: "m²", mots: "zinc quartz anthra couverture", famille: "couverture", chemin: ["Zinc", "Prépatiné quartz", "0,65 mm"] },
+  { designation: "Liteaux 27×38", unite: "m", mots: "liteau bois couverture", famille: "couverture", chemin: ["Liteaux", "27×38"] },
+  { designation: "Liteaux 25×38", unite: "m", mots: "liteau bois couverture", famille: "couverture", chemin: ["Liteaux", "25×38"] },
+  { designation: "Voliges 18×100", unite: "m²", mots: "volige bois couverture", famille: "couverture", chemin: ["Voliges", "18×100"] },
+  { designation: "Chevrons 63×75", unite: "m", mots: "chevron bois charpente", famille: "charpente", chemin: ["Chevrons", "63×75"] },
+  { designation: "Chevrons 75×100", unite: "m", mots: "chevron bois charpente", famille: "charpente", chemin: ["Chevrons", "75×100"] },
+  { designation: "Bastaings 63×175", unite: "m", mots: "bastaing bois charpente", famille: "charpente", chemin: ["Bastaings", "63×175"] },
+  { designation: "OSB 3 12 mm 2500×1250", unite: "pièces", mots: "panneau osb charpente", famille: "charpente", chemin: ["OSB", "12 mm", "2500×1250"] },
+  { designation: "OSB 3 18 mm 2500×1250", unite: "pièces", mots: "panneau osb plancher", famille: "charpente", chemin: ["OSB", "18 mm", "2500×1250"] },
+  { designation: "Laine de verre 100 mm", unite: "m²", mots: "isolant isolation laine", famille: "second_oeuvre", chemin: ["Isolant", "Laine de verre", "100 mm"] },
+  { designation: "Laine de verre 200 mm", unite: "m²", mots: "isolant isolation laine combles", famille: "second_oeuvre", chemin: ["Isolant", "Laine de verre", "200 mm"] },
+  { designation: "Laine de roche 100 mm", unite: "m²", mots: "isolant isolation laine", famille: "second_oeuvre", chemin: ["Isolant", "Laine de roche", "100 mm"] },
+  { designation: "Plaque de plâtre BA13 2500×1200", unite: "pièces", mots: "placo plaque platre cloison", famille: "second_oeuvre", chemin: ["Plaque de plâtre", "BA13", "2500×1200"] },
+  { designation: "Peinture blanc mat 15 L", unite: "pots", mots: "peinture blanc mat pot", famille: "second_oeuvre", chemin: ["Peinture", "Blanc mat", "15 L"] },
+  { designation: "Peinture blanc satin 15 L", unite: "pots", mots: "peinture blanc satin pot", famille: "second_oeuvre", chemin: ["Peinture", "Blanc satin", "15 L"] },
+  { designation: "Sous-couche 15 L", unite: "pots", mots: "sous couche impression peinture", famille: "second_oeuvre", chemin: ["Sous-couche", "15 L"] },
 ];
+
+/** Un niveau de l'arbre de choix : un bouton ; au bout, la référence. */
+export interface NoeudCatalogue {
+  libelle: string;
+  enfants: NoeudCatalogue[];
+  reference: { designation: string; unite: string } | null;
+}
+
+/** Les métiers (familles) qui ont au moins une référence au catalogue, dans l'ordre du catalogue. */
+export function famillesDuCatalogue(): FamilleGroupe[] {
+  return [...new Set(CATALOGUE_ACHATS_GROUPES.map((e) => e.famille))];
+}
+
+/**
+ * L'arbre de choix d'un métier : un bouton par matériau (« Ardoise »), puis par format (« 32×22 »), puis par choix
+ * (« Espagne 1er choix ») ; le dernier bouton porte la référence. L'ordre est celui du catalogue.
+ */
+export function arbreCatalogue(famille: FamilleGroupe): NoeudCatalogue[] {
+  const racine: NoeudCatalogue[] = [];
+  for (const e of CATALOGUE_ACHATS_GROUPES.filter((x) => x.famille === famille)) {
+    let niveau = racine;
+    e.chemin.forEach((libelle, i) => {
+      let noeud = niveau.find((n) => n.libelle === libelle);
+      if (!noeud) {
+        noeud = { libelle, enfants: [], reference: null };
+        niveau.push(noeud);
+      }
+      if (i === e.chemin.length - 1) noeud.reference = { designation: e.designation, unite: e.unite };
+      niveau = noeud.enfants;
+    });
+  }
+  return racine;
+}
 
 const plat = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[×*]/g, "x");
 

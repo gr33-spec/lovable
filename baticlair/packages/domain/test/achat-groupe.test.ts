@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   CATALOGUE_ACHATS_GROUPES,
+  arbreCatalogue,
+  famillesDuCatalogue,
   commissionAchatGroupe,
   datesAchatGroupe,
   dateBesoinPossible,
@@ -148,5 +150,30 @@ describe("anti-fraude (point 9) et « Préviens ton négoce » (point 12)", () =
     expect(smsPrevenir({ libelle: "Ardoise 32×22", clotureLe: d("2026-11-17"), prenom: "Greg", entreprise: "Bati Invest" })).toBe(
       "Bonjour, je participe à un achat groupé Mobiiz pour ardoise 32×22. Vous allez recevoir la demande de prix le 17 novembre, avec le volume total. Une seule offre possible, merci de nous faire votre meilleur prix. Greg, Bati Invest",
     );
+  });
+});
+
+describe("l'arbre de choix du catalogue (Greg, 27 octobre 2026 : « un seul bouton ardoise, puis format, puis choix »)", () => {
+  it("chaque référence a son métier et un chemin d'au moins deux boutons, sans doublon de feuille", () => {
+    const feuilles = new Set<string>();
+    for (const e of CATALOGUE_ACHATS_GROUPES) {
+      expect(e.chemin.length, e.designation).toBeGreaterThanOrEqual(2);
+      const cle = `${e.famille}/${e.chemin.join("/")}`;
+      expect(feuilles.has(cle), cle).toBe(false);
+      feuilles.add(cle);
+    }
+    expect(famillesDuCatalogue()).toEqual(["couverture", "charpente", "second_oeuvre"]);
+  });
+  it("couverture : Ardoise → 32×22 → Espagne 1er choix porte la référence ; un bouton intermédiaire n'en porte pas", () => {
+    const arbre = arbreCatalogue("couverture");
+    expect(arbre.map((n) => n.libelle)).toEqual(["Ardoise", "Zinc", "Liteaux", "Voliges"]);
+    const ardoise = arbre[0]!;
+    expect(ardoise.reference).toBeNull();
+    expect(ardoise.enfants.map((n) => n.libelle)).toEqual(["32×22", "40×22", "40×25", "30×20", "Fibres-ciment"]);
+    const f32 = ardoise.enfants[0]!;
+    expect(f32.enfants.map((n) => n.libelle)).toEqual(["Espagne 1er choix", "Angers 1er choix"]);
+    expect(f32.enfants[0]!.reference).toEqual({ designation: "Ardoise naturelle 32×22 Espagne 1er choix", unite: "pièces" });
+    expect(arbreCatalogue("charpente").map((n) => n.libelle)).toEqual(["Chevrons", "Bastaings", "OSB"]);
+    expect(arbreCatalogue("plomberie")).toEqual([]);
   });
 });

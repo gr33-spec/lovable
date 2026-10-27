@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLienInvitation } from "@/components/inviter";
 import { Button, ButtonLink, Card, Field, INPUT } from "@/components/ui";
 import { api, messageErreur, type NextAction } from "@/lib/api";
-import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
+import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type Catalogue, type NoeudCatalogue, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -296,7 +296,7 @@ const resumeLignes = (n: number) => `${n} ligne${n > 1 ? "s" : ""}`;
 export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; titre: string } | null }) {
   const [etape, setEtape] = useState(1);
   const [q, setQ] = useState("");
-  const fetchCat = useCallback((signal: AbortSignal) => api<{ references: { designation: string; unite: string }[] }>(`/v1/achats-groupes/catalogue?q=${encodeURIComponent(q)}`, { signal }), [q]);
+  const fetchCat = useCallback((signal: AbortSignal) => api<Catalogue>(`/v1/achats-groupes/catalogue?q=${encodeURIComponent(q)}`, { signal }), [q]);
   const fetchMes = useCallback((signal: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal }), []);
   const { data } = useResource(fetchCat);
   const { data: mes } = useResource(fetchMes);
@@ -361,26 +361,8 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
         </p>
       ) : null}
       {etape === 1 ? (
-        <Etape n={1} total={total} titre="Qu'est-ce que tu commandes ?" aide="Cherche dans le catalogue, puis mets la quantité.">
-          <div className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 focus-within:border-accent">
-            <Search size={18} className="text-muted" aria-hidden="true" />
-            <label htmlFor="cherche-materiau" className="sr-only">
-              Ajoute tes matériaux
-            </label>
-            <input id="cherche-materiau" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ardoise 32×22, liteaux, zinc 0,65…" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" autoComplete="off" />
-          </div>
-          <ul aria-label="Catalogue" className="flex flex-wrap gap-2">
-            {(data?.references ?? [])
-              .filter((r) => !lignes.some((l) => l.designation === r.designation))
-              .slice(0, 8)
-              .map((r) => (
-                <li key={r.designation}>
-                  <button type="button" onClick={() => setLignes((ls) => [...ls, { designation: r.designation, unite: r.unite, qte: "" }])} className="pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-left text-[15px] font-semibold">
-                    <Plus size={16} aria-hidden="true" /> {r.designation}
-                  </button>
-                </li>
-              ))}
-          </ul>
+        <Etape n={1} total={total} titre="Qu'est-ce que tu commandes ?">
+          <ChoixGuide catalogue={data ?? null} q={q} onQ={setQ} deja={lignes.map((l) => l.designation)} onAjouter={(r) => setLignes((ls) => [...ls, { designation: r.designation, unite: r.unite, qte: r.qte }])} />
           {lignes.length ? <LignesPanier lignes={lignes} onChange={setLignes} /> : null}
           <Button disabled={pretes.length === 0 || bloque} onClick={suivant}>
             Continuer
@@ -422,6 +404,124 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
         </Etape>
       ) : null}
     </form>
+  );
+}
+
+/**
+ * LE CHOIX GUIDÉ (Greg, 27 octobre 2026, capture iPhone : « un seul bouton ardoise, puis format, puis choix ; on est
+ * multimétier ») : son métier (les autres en un tap), puis un bouton par matériau, par format, par choix ; au bout, la
+ * quantité et « Ajouter à ma liste ». La recherche par mot reste derrière « Chercher par mot ».
+ */
+function ChoixGuide({ catalogue, q, onQ, deja, onAjouter }: { catalogue: Catalogue | null; q: string; onQ: (q: string) => void; deja: string[]; onAjouter: (r: { designation: string; unite: string; qte: string }) => void }) {
+  const [famille, setFamille] = useState<string | null>(null);
+  const [chemin, setChemin] = useState<string[]>([]);
+  const [feuille, setFeuille] = useState<{ designation: string; unite: string } | null>(null);
+  const [qte, setQte] = useState("");
+  const [parMot, setParMot] = useState(false);
+  const familles = catalogue?.familles ?? [];
+  const courante = famille ?? familles[0]?.famille ?? null;
+  const BOUTON = "pressable flex min-h-13 w-full items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 text-left text-[16px] font-semibold";
+  let niveau: NoeudCatalogue[] = courante ? (catalogue?.arbre[courante] ?? []) : [];
+  for (const l of chemin) niveau = niveau.find((n) => n.libelle === l)?.enfants ?? [];
+  const choisir = (n: NoeudCatalogue) => {
+    if (n.reference) {
+      setFeuille(n.reference);
+      setQte("");
+      return;
+    }
+    setChemin((c) => [...c, n.libelle]);
+  };
+  const retour = () => {
+    if (feuille) return setFeuille(null);
+    setChemin((c) => c.slice(0, -1));
+  };
+  const ajouter = () => {
+    if (!feuille || !(nombre(qte) > 0)) return;
+    onAjouter({ ...feuille, qte });
+    setFeuille(null);
+    setChemin([]);
+    setQte("");
+  };
+  if (!catalogue) return <p className="text-[15px] text-muted">Chargement du catalogue…</p>;
+  if (parMot)
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 focus-within:border-accent">
+          <Search size={18} className="text-muted" aria-hidden="true" />
+          <label htmlFor="cherche-materiau" className="sr-only">
+            Ajoute tes matériaux
+          </label>
+          <input id="cherche-materiau" value={q} onChange={(e) => onQ(e.target.value)} placeholder="Ardoise 32×22, liteaux, zinc 0,65…" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" autoComplete="off" autoFocus />
+        </div>
+        <ul aria-label="Catalogue" className="flex flex-wrap gap-2">
+          {catalogue.references
+            .filter((r) => !deja.includes(r.designation))
+            .slice(0, 8)
+            .map((r) => (
+              <li key={r.designation}>
+                <button type="button" onClick={() => onAjouter({ designation: r.designation, unite: r.unite, qte: "" })} className="pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-left text-[15px] font-semibold">
+                  <Plus size={16} aria-hidden="true" /> {r.designation}
+                </button>
+              </li>
+            ))}
+        </ul>
+        <button type="button" onClick={() => setParMot(false)} className={LIEN_TEXTE}>
+          Choisir bouton par bouton
+        </button>
+      </div>
+    );
+  return (
+    <div className="flex flex-col gap-3">
+      {familles.length > 1 && chemin.length === 0 && !feuille ? (
+        <ul aria-label="Métier" className="flex flex-wrap gap-2">
+          {familles.map((f) => (
+            <li key={f.famille}>
+              <button type="button" aria-pressed={f.famille === courante} onClick={() => setFamille(f.famille)} className={`pressable inline-flex min-h-11 items-center rounded-full px-4 text-[15px] font-semibold ${f.famille === courante ? "bg-ink text-white" : "border border-line bg-surface"}`}>
+                {f.libelle}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {chemin.length || feuille ? (
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={retour} aria-label="Choix précédent" className="pressable grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface">
+            <ChevronLeft size={20} aria-hidden="true" />
+          </button>
+          <p className="text-[15px] font-semibold">{[...chemin, ...(feuille ? [feuille.designation] : [])].join(" › ")}</p>
+        </div>
+      ) : null}
+      {feuille ? (
+        <div className="flex flex-col gap-3 rounded-xl bg-ground p-4">
+          <label htmlFor="qte-feuille" className="text-[16px] font-semibold">
+            Combien de {feuille.designation} ?
+          </label>
+          <div className="flex items-center gap-3">
+            <input id="qte-feuille" aria-label={`Quantité de ${feuille.designation}`} inputMode="decimal" value={qte} onChange={(e) => setQte(e.target.value)} placeholder="Quantité" className={`${INPUT} max-w-40`} autoFocus onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), ajouter())} />
+            <span className="text-[16px] text-muted">{feuille.unite}</span>
+          </div>
+          <Button variant="ink" disabled={!(nombre(qte) > 0)} onClick={ajouter}>
+            <Plus size={18} aria-hidden="true" /> Ajouter à ma liste
+          </Button>
+        </div>
+      ) : (
+        <ul aria-label={chemin.length ? chemin[chemin.length - 1] : "Matériau"} className="flex flex-col gap-2">
+          {niveau.map((n) => (
+            <li key={n.libelle}>
+              <button type="button" onClick={() => choisir(n)} className={BOUTON}>
+                {n.libelle}
+                <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {!feuille ? (
+        <button type="button" onClick={() => setParMot(true)} className={LIEN_TEXTE}>
+          Chercher par mot
+        </button>
+      ) : null}
+    </div>
   );
 }
 

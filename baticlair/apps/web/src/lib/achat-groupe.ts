@@ -143,6 +143,20 @@ export interface PageNegoceAchat {
   reponse: { le: string; prix: Record<string, number | null>; pdf: string | null } | null;
 }
 
+/** Un bouton de l'arbre de choix du catalogue ; au bout, la référence. */
+export interface NoeudCatalogue {
+  libelle: string;
+  enfants: NoeudCatalogue[];
+  reference: { designation: string; unite: string } | null;
+}
+
+/** Le catalogue : la recherche par mots, et l'arbre de choix par métier (les métiers de l'artisan d'abord). */
+export interface Catalogue {
+  references: { designation: string; unite: string }[];
+  familles: { famille: string; libelle: string; mienne: boolean }[];
+  arbre: Record<string, NoeudCatalogue[]>;
+}
+
 export interface LignesListe {
   adresse: string | null;
   lignes: { key: string; designation: string; quantite: number; unite: string; reference: string | null; famille: string | null; question: string | null; suggeree: boolean }[];

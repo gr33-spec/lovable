@@ -192,9 +192,12 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(ouverts.getByText(/^Ajoute ta liste avant le \d+ \S+\. Livraison avant le \d+ \S+\.$/)).toBeVisible();
     await ouverts.getByRole("link", { name: "Ajouter ma liste" }).first().click();
     await expect(b.page.getByRole("heading", { name: "Ajouter ma liste" })).toBeVisible();
-    await b.page.getByLabel("Ajoute tes matériaux").fill("ardoise 32");
-    await b.page.getByRole("button", { name: /Ardoise naturelle 32×22 Espagne 1er choix/ }).first().click();
+    // Le choix guidé (Greg, 27 octobre, capture iPhone) : un bouton par matériau, format, choix, puis la quantité.
+    await b.page.getByRole("button", { name: "Ardoise", exact: true }).click();
+    await b.page.getByRole("button", { name: "32×22", exact: true }).click();
+    await b.page.getByRole("button", { name: "Espagne 1er choix" }).click();
     await b.page.getByLabel("Quantité de Ardoise naturelle 32×22 Espagne 1er choix").fill("900");
+    await b.page.getByRole("button", { name: "Ajouter à ma liste" }).click();
     await b.page.getByRole("button", { name: "Continuer" }).click();
     await b.page.getByLabel("Commune de livraison").fill(`${dep}200 Autre-${dep}`);
     await b.page.getByRole("button", { name: "Continuer" }).click();

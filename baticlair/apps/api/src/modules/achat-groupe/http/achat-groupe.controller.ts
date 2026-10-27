@@ -75,8 +75,8 @@ export class AchatGroupeController {
   constructor(@Inject(AchatGroupeService) private readonly achats: AchatGroupeService) {}
 
   @Get("achats-groupes/catalogue")
-  catalogue(@Query("q") q?: string) {
-    return this.achats.catalogue((q ?? "").slice(0, 100));
+  catalogue(@Tenant() tenant: TenantContext, @Query("q") q?: string) {
+    return this.achats.catalogue(tenant, (q ?? "").slice(0, 100));
   }
 
   @Get("achats-groupes/negoces")

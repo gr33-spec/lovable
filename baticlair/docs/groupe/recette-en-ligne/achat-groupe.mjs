@@ -257,9 +257,11 @@ await etape("Cas 3 : il ajoute sa liste avec la case d'engagement", b, async () 
   const ouverts = b.getByRole("region", { name: "Achats groupés ouverts dans ton secteur" });
   await ouverts.getByRole("link", { name: "Ajouter ma liste" }).first().click();
   await voir(b.getByRole("heading", { name: "Ajouter ma liste" }));
-  await b.getByLabel("Ajoute tes matériaux").fill("ardoise 32");
-  await b.getByRole("button", { name: /Ardoise naturelle 32×22 Espagne 1er choix/ }).first().click();
+  await b.getByRole("button", { name: "Ardoise", exact: true }).click();
+  await b.getByRole("button", { name: "32×22", exact: true }).click();
+  await b.getByRole("button", { name: "Espagne 1er choix" }).click();
   await b.getByLabel("Quantité de Ardoise naturelle 32×22 Espagne 1er choix").fill("900");
+  await b.getByRole("button", { name: "Ajouter à ma liste" }).click();
   await b.getByRole("button", { name: "Continuer" }).click();
   await b.getByLabel("Commune de livraison").fill(LIEU.b);
   await b.getByRole("button", { name: "Continuer" }).click();
