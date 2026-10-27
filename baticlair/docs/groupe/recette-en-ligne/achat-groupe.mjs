@@ -157,9 +157,10 @@ await etape("Admin : code, mode « automatique »", adm, async () => {
   verif(mail, "pas de code");
   await adm.getByLabel("Code reçu par e-mail").fill(/(\d{6})/.exec(mail.text)[1]);
   await adm.getByRole("button", { name: /^Ouvrir/ }).click();
+  // L'espace admin d'abord (le code est validé), puis le mode.
+  await voir(adm.getByRole("region", { name: "Tous les achats" }), 30000);
   const m = await api(adm, "PUT", "/v1/admin/pilotage/mode-regroupement", { mode: "automatique" });
   verif(m.status === 200, `mode ${m.status}`);
-  await voir(adm.getByRole("region", { name: "Tous les achats" }));
   return "mode automatique";
 });
 const carteAdmin = (achatId) => adm.getByRole("region", { name: "Tous les achats" }).locator(`a[href="/admin/achats-groupes/${achatId}"]`).locator("xpath=..");
