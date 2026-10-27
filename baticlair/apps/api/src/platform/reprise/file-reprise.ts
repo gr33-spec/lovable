@@ -57,10 +57,14 @@ export class FileReprise {
     this.executants.set(sorte, executant);
   }
 
-  /** Après un PREMIER échec : l'action repart dans 5 minutes. Déjà planifiée et en attente : rien ne change. */
+  /**
+   * Après un PREMIER échec : l'action repart dans 5 minutes. Déjà planifiée et en attente : rien ne change. Abandonnée :
+   * elle le reste (l'échec d'un essai de la file arrive parfois ici après l'abandon ; Greg est déjà alerté, l'artisan garde
+   * « Réessayer »). Seule une action déjà réussie repart sur un nouvel échec.
+   */
   async planifier(p: { sorte: string; cle: string; charge: unknown; erreur: unknown; companyId?: string | null }): Promise<void> {
     const deja = await this.store.reprise.findUnique({ where: { cle: p.cle } });
-    if (deja?.etat === "en_attente") return;
+    if (deja && deja.etat !== "reussie") return;
     const donnees = { sorte: p.sorte, charge: p.charge as object, etat: "en_attente", tentatives: 1, prochaineLe: new Date(this.maintenant().getTime() + DELAIS_MS[0]), derniereErreur: motif(p.erreur), companyId: p.companyId ?? null, finiLe: null };
     await this.store.reprise.upsert({ where: { cle: p.cle }, create: { cle: p.cle, ...donnees }, update: donnees });
     this.logger.warn({ sorte: p.sorte }, "reprise planifiée");

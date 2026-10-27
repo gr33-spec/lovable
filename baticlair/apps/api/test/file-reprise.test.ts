@@ -96,7 +96,8 @@ describe("une panne passagère de l'IA repart seule", () => {
     const { documentId } = await devisDepose(agent);
     lecteur.pannes = 3;
     await agent.post(`/v1/documents/${documentId}/takeoff`);
-    for (let i = 0; i < 750 && (await ctx.prisma.reprise.count()) === 0; i++) await new Promise((r) => setTimeout(r, 20));
+    // Attendre SA reprise (la ligne du test précédent reste en base : compter toutes les reprises ne suffit pas).
+    for (let i = 0; i < 750 && (await ctx.prisma.reprise.count({ where: { cle: `lecture_ia:${documentId}` } })) === 0; i++) await new Promise((r) => setTimeout(r, 20));
     await echeance();
     expect(await file.traiter()).toMatchObject({ enAttente: 1 });
     await echeance();
