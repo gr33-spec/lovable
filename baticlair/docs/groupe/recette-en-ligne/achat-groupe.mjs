@@ -3,8 +3,8 @@
 // couvreur alerté qui ajoute sa liste avec la case d'engagement ; 4. validation admin, une offre incomplète et une offre
 // PDF douteuse ; 5. publication, un artisan sans compte chez le gagnant (« transmettre mes coordonnées ») ; 6. sortie pour
 // chantier annulé. L'admin de test (`delivered+admin-recette@resend.dev`) clôture et analyse tout de suite (geste réservé
-// à la prévisualisation). Négoces : adresses de test Resend (aucun vrai négoce). Rien en production. Chaque appareil a son
-// département : les deux passes ne se regroupent pas. Les comptes sont supprimés à la fin.
+// à la prévisualisation). Négoces : adresses de test Resend (aucun vrai négoce). Rien en production. Les deux passes se jouent
+// l'une après l'autre dans le 22, seule zone ouverte. Les comptes sont supprimés à la fin.
 //
 //   RESEND_API_KEY=… node docs/groupe/recette-en-ligne/achat-groupe.mjs <se|ordi> <dossier-captures>
 //   SANS_IA=1 : quand l'IA de la prévisualisation est indisponible (crédit épuisé), la liste est notée à la main
@@ -133,8 +133,9 @@ async function ajouterNegoce(page, n) {
   await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
 }
 
-// Chaque appareil son département (aucune autre recette n'y lance d'achat).
-const LIEU = APPAREIL === "se" ? { a: "3 rue de Brest, 29600 Morlaix", b: "29200 Brest" } : { a: "3 rue du Port, 56000 Vannes", b: "56100 Lorient" };
+// Le 22, seule zone ouverte sur la prévisualisation (ailleurs : « Les regroupements arrivent bientôt ») ; les deux passes
+// (iPhone SE, ordinateur) se jouent l'une après l'autre : l'achat de la première est publié avant que la seconde commence.
+const LIEU = APPAREIL === "se" ? { a: "3 rue des Ajoncs, 22300 Lannion", b: "22500 Paimpol" } : { a: "3 rue du Port, 22000 Saint-Brieuc", b: "22200 Guingamp" };
 const FIX = path.join(path.dirname(new URL(import.meta.url).pathname), "../../../apps/web/e2e/fixtures");
 const A = `delivered+ag-a-${APPAREIL}-${ts}@resend.dev`;
 const B = `delivered+ag-b-${APPAREIL}-${ts}@resend.dev`;
