@@ -165,8 +165,7 @@ export default function ReponseAchatGroupePage() {
               </span>
               <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
             </summary>
-            <fieldset className="flex flex-col gap-2 pt-3">
-              <legend className="sr-only">Pour ouvrir un compte chez vous (coché une fois)</legend>
+            <fieldset aria-label="Conditions d'ouverture de compte" className="flex flex-col gap-2 pt-3">
               {page.choixOuverture.pieces.map((p) => (
                 <label key={p.valeur} className="flex min-h-11 items-center gap-3 text-[15px]">
                   <input type="checkbox" checked={mesPieces.includes(p.valeur)} onChange={(e) => setPieces(e.target.checked ? [...mesPieces, p.valeur] : mesPieces.filter((x) => x !== p.valeur))} className="size-5 accent-accent" />
