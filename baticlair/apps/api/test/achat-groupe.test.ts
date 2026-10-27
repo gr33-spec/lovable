@@ -7,7 +7,7 @@ import { SIRET_TEST_GROSSISTE } from "../src/modules/groupe/index.js";
 import { doubleAuthentification } from "./support/admin.js";
 import { couvreurAvecListe, mailsVers } from "./support/cycle.js";
 import { makePdf } from "./support/pdf-fixtures.js";
-import { createTestApp, resetDatabase, type TestContext } from "./support/test-app.js";
+import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
  * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message : « ce message fait foi »), par l'API : un achat = un métier
@@ -308,5 +308,19 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     await greg.agent.post(`/v1/admin/pilotage/achats-groupes/${l.achatId}/publier`).expect(200);
     expect((await greg.agent.get("/v1/admin/pilotage/achats-groupes").expect(200)).body.iaSuivie).toEqual({ publies: 1, sansCorrection: 1, part: 100 });
     expect((await a.agent.get(`/v1/achats-groupes/${l.besoinId}`).expect(200)).body.resultat.phrase).toBe("Ta liste chez le meilleur négoce : 2 530,00 € HT, livraison comprise.");
+  });
+
+  it("le catalogue guidé (Greg, 27 octobre, captures iPhone) : l'arbre par métier, le sien d'abord ; un électricien n'a pas de catalogue et l'écran le dit", async () => {
+    const couvreur = await signUpWithCompany(ctx.app, "cat-couvreur@example.fr", "Toitures Cat", ["roofing"]);
+    const c = (await couvreur.agent.get("/v1/achats-groupes/catalogue").expect(200)).body;
+    expect(c.familles[0]).toEqual({ famille: "couverture", libelle: "Couverture", mienne: true });
+    expect(c.familles.filter((f: { mienne: boolean }) => f.mienne).map((f: { famille: string }) => f.famille)).toEqual(["couverture"]);
+    expect(c.arbre.couverture.map((n: { libelle: string }) => n.libelle)).toEqual(["Ardoise", "Zinc", "Liteaux", "Voliges"]);
+    expect(c.arbre.couverture[0].enfants[0].enfants[0]).toMatchObject({ libelle: "Espagne 1er choix", reference: { designation: A3222, unite: "pièces" } });
+    expect(c.monMetier).toEqual({ libelle: "Couverture", catalogue: true });
+    const electricien = await signUpWithCompany(ctx.app, "cat-elec@example.fr", "Élec Cat", ["electrical"]);
+    const e = (await electricien.agent.get("/v1/achats-groupes/catalogue").expect(200)).body;
+    expect(e.familles.every((f: { mienne: boolean }) => !f.mienne)).toBe(true);
+    expect(e.monMetier).toEqual({ libelle: "Électricité", catalogue: false });
   });
 });

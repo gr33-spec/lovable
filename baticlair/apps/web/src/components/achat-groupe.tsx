@@ -433,6 +433,7 @@ function ChoixGuide({ catalogue, q, onQ, deja, onAjouter }: { catalogue: Catalog
   const [feuille, setFeuille] = useState<{ designation: string; unite: string } | null>(null);
   const [qte, setQte] = useState("");
   const [parMot, setParMot] = useState(false);
+  const [autresMetiers, setAutresMetiers] = useState(false);
   const familles = catalogue?.familles ?? [];
   const courante = famille ?? familles[0]?.famille ?? null;
   const BOUTON = "pressable flex min-h-13 w-full items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 text-left text-[16px] font-semibold";
@@ -458,6 +459,22 @@ function ChoixGuide({ catalogue, q, onQ, deja, onAjouter }: { catalogue: Catalog
     setQte("");
   };
   if (!catalogue) return <p className="text-[15px] text-muted">Chargement du catalogue…</p>;
+  // Un métier sans catalogue (électricien, plombier…) : on le dit, au lieu de proposer les matériaux d'un autre métier.
+  if (catalogue.monMetier && !catalogue.monMetier.catalogue && !autresMetiers)
+    return (
+      <div role="status" className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
+        <p className="text-[16px] font-bold">Pas encore d&apos;achat groupé pour {catalogue.monMetier.libelle.toLowerCase()}.</p>
+        <p className="text-[15px]">En attendant, envoie ta liste à tes négoces : ils te font leur prix.</p>
+        <ButtonLink href="/chantiers/nouveau" variant="secondary">
+          Ma liste de matériaux
+        </ButtonLink>
+        {familles.length ? (
+          <button type="button" onClick={() => setAutresMetiers(true)} className={LIEN_TEXTE}>
+            Je commande aussi pour un autre métier
+          </button>
+        ) : null}
+      </div>
+    );
   if (parMot)
     return (
       <div className="flex flex-col gap-3">

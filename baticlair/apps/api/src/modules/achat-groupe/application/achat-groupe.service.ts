@@ -40,6 +40,7 @@ import {
   famillesDuCatalogue,
   famillesDuMetier,
   jaugeVolume,
+  LIBELLES_FAMILLES,
   libelleMetier,
   lienSms,
   lienTel,
@@ -268,10 +269,14 @@ export class AchatGroupeService {
     const miennes = new Set((c?.trades ?? []).flatMap((t) => famillesDuMetier(t)));
     const toutes = famillesDuCatalogue().filter((f) => this.cfg.familles.includes(f));
     const familles = [...toutes.filter((f) => miennes.has(f)), ...toutes.filter((f) => !miennes.has(f))].map((f) => ({ famille: f, libelle: libelleMetier(f), mienne: miennes.has(f) }));
+    // Le métier de l'entreprise, même sans catalogue (Greg, 27 octobre, électricien : « j'ai toujours des propositions
+    // de couvreur ») : l'écran le dit au lieu de proposer les matériaux d'un autre métier.
+    const premiere = [...miennes][0] ?? null;
     return {
       references: rechercherCatalogue(q).map((e) => ({ designation: e.designation, unite: e.unite })),
       familles,
       arbre: Object.fromEntries(familles.map((f) => [f.famille, arbreCatalogue(f.famille)])),
+      monMetier: premiere ? { libelle: LIBELLES_FAMILLES[premiere] ?? libelleMetier(premiere), catalogue: familles.some((f) => f.mienne) } : null,
     };
   }
 

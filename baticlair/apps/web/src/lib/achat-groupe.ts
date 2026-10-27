@@ -155,6 +155,8 @@ export interface Catalogue {
   references: { designation: string; unite: string }[];
   familles: { famille: string; libelle: string; mienne: boolean }[];
   arbre: Record<string, NoeudCatalogue[]>;
+  /** Le métier de l'entreprise, et s'il a un catalogue ; null sans métier connu. */
+  monMetier: { libelle: string; catalogue: boolean } | null;
 }
 
 export interface LignesListe {
