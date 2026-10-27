@@ -31,7 +31,7 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
   providers: [
     {
       provide: DroitsService,
-      useFactory: (p: PrismaService, a: AbonnementService, c: AppConfig) => new DroitsService(p, a, { zonesActives: c.groupe.departements, seuilZoneActive: c.groupe.recentrage.seuilZoneActive, lecturesGratuites: c.groupe.recentrage.lecturesGratuites }),
+      useFactory: (p: PrismaService, a: AbonnementService, c: AppConfig) => new DroitsService(p, a, { zonesActives: c.groupe.departements, seuilZoneActive: c.groupe.recentrage.seuilZoneActive, lecturesGratuites: c.groupe.recentrage.lecturesGratuites, lecturesIaGratuitTotal: c.groupe.negocie.lecturesIaGratuitTotal }),
       inject: [PrismaService, AbonnementService, CONFIG],
     },
     {
@@ -100,5 +100,9 @@ export class RecentrageModule implements OnModuleInit {
     this.demandes.brancherObservatoire(this.observatoire);
     this.espace.brancherVerification((i) => this.verification.verifier(i));
     this.regroupements.brancherMode(() => this.negocie.mode());
+    // Achat groupé par métier (27 octobre 2026, 2e message) : en mode automatique, plus d'essai (gratuit sans limite de temps).
+    const modeAuto = async () => (await this.negocie.mode()) === "automatique";
+    this.droits.brancherModeAuto(modeAuto);
+    this.abonnement.brancherSansEssai(modeAuto);
   }
 }

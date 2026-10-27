@@ -156,6 +156,8 @@ model Company {
   adresseMobiizVueLe   DateTime? @map("adresse_mobiiz_vue_le") @db.Timestamptz(3)
   /// Achat groupé (Greg, 27 octobre 2026) : les alertes « Nouvel achat groupé » (toutes | resume | aucune).
   alertesAchatsGroupes String    @default("toutes") @map("alertes_achats_groupes")
+  /// ACHAT GROUPÉ PAR MÉTIER (27 octobre 2026, 2e message) : exclu des achats groupés jusqu'à cette date (règle des sorties).
+  achatsGroupesExclusJusquau DateTime? @map("achats_groupes_exclus_jusquau") @db.Timestamptz(3)
   /// Le code d'activité (NAF) lu à la vérification du SIRET : bâtiment exigé, commerce de gros refusé.
   naf                  String?
   /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
@@ -176,6 +178,7 @@ model Company {
   adressesMobiiz     AdresseMobiiz[]
   desistementsAchatGroupe DesistementAchatGroupe[]
   alertesAchatGroupe      AlerteAchatGroupe[]
+  lignesAchatGroupe       LigneAchatGroupe[]
   emailsRecus        EmailRecuArtisan[]
   offers             SupplierOffer[]
   preferences        CompanyPreference[]
@@ -1793,6 +1796,13 @@ model RegroupementNegocie {
   /// La commission Mobiiz de cet achat groupé (lancement possible à 0), figée à la consultation.
   commissionPct     Decimal?  @map("commission_pct") @db.Decimal(5, 2)
   meilleureId       String?   @map("meilleure_id") @db.Uuid
+  /// ACHAT GROUPÉ PAR MÉTIER (27 octobre 2026, 2e message). Statut en plus : validation (offres à valider par l'admin),
+  /// publie (résultats envoyés aux artisans). Le choix de l'IA est gardé pour la statistique « IA suivie sans correction ».
+  iaMeilleureId     String?   @map("ia_meilleure_id") @db.Uuid
+  correctionsAdmin  Int       @default(0) @map("corrections_admin")
+  validationAlerteLe DateTime? @map("validation_alerte_le") @db.Timestamptz(3)
+  publieLe          DateTime? @map("publie_le") @db.Timestamptz(3)
+  commandeAvantLe   DateTime? @map("commande_avant_le") @db.Timestamptz(3)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -1839,12 +1849,29 @@ model BesoinNegocie {
   desisteLe      DateTime? @map("desiste_le") @db.Timestamptz(3)
   consultationCommandeId String? @map("consultation_commande_id") @db.Uuid
   prixCommandeHt Decimal?  @map("prix_commande_ht") @db.Decimal(14, 4)
+  /// ACHAT GROUPÉ PAR MÉTIER (27 octobre 2026, 2e message) : l'engagement (case cochée), offert (premier achat groupé),
+  /// la sortie (motif), la vue des résultats, les coordonnées transmises (consentement), la commande reçue par le négoce
+  /// (jeton du lien), « Livré » ou « Problème », la commande pas passée à temps.
+  engageLe       DateTime? @map("engage_le") @db.Timestamptz(3)
+  offert         Boolean   @default(false)
+  sortieMotif    String?   @map("sortie_motif")
+  sortieLe       DateTime? @map("sortie_le") @db.Timestamptz(3)
+  offreVueLe     DateTime? @map("offre_vue_le") @db.Timestamptz(3)
+  coordonneesTransmisesLe DateTime? @map("coordonnees_transmises_le") @db.Timestamptz(3)
+  coordonneesConsultationId String? @map("coordonnees_consultation_id") @db.Uuid
+  commandeTokenHash String? @unique @map("commande_token_hash")
+  commandeRecueLe DateTime? @map("commande_recue_le") @db.Timestamptz(3)
+  livreLe        DateTime? @map("livre_le") @db.Timestamptz(3)
+  problemeLe     DateTime? @map("probleme_le") @db.Timestamptz(3)
+  problemeTexte  String?   @map("probleme_texte")
+  nonCommandeLe  DateTime? @map("non_commande_le") @db.Timestamptz(3)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   company      Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
   regroupement RegroupementNegocie? @relation(fields: [regroupementId], references: [id], onDelete: SetNull)
   negoces      NegoceParticipant[]
+  lignes       LigneAchatGroupe[]
 
   @@index([companyId, statut])
   @@index([departement, cle, statut])
@@ -2071,6 +2098,12 @@ model ConsultationAchatGroupe {
   /// envoyee | repondue | valide | douteuse
   statut                String    @default("envoyee")
   raisons               String[]  @default([])
+  /// ACHAT GROUPÉ PAR MÉTIER : les lignes envoyées à ce négoce (référence, quantité cumulée), sa réponse ligne par ligne
+  /// (prix unitaire HT livré, ou null « je ne fournis pas »), les prix corrigés par l'admin, l'offre écartée.
+  lignes                Json?
+  prixLignes            Json?     @map("prix_lignes")
+  prixCorriges          Json?     @map("prix_corriges")
+  ecarteeLe             DateTime? @map("ecartee_le") @db.Timestamptz(3)
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   regroupement RegroupementNegocie @relation(fields: [regroupementId], references: [id], onDelete: Cascade)
@@ -2131,4 +2164,58 @@ model FactureCommissionMensuelle {
 
   @@unique([mois, negoceEmail])
   @@map("facture_commission_mensuelle")
+}
+
+/** ACHAT GROUPÉ PAR MÉTIER (27 octobre 2026, 2e message) : une ligne du panier d'un participant, rattachée au catalogue. */
+model LigneAchatGroupe {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  besoinId           String   @map("besoin_id") @db.Uuid
+  regroupementId     String   @map("regroupement_id") @db.Uuid
+  companyId          String   @map("company_id") @db.Uuid
+  /// La clé stricte du catalogue (`referenceStricte`).
+  cle                String
+  libelle            String
+  famille            String
+  unite              String
+  quantite           Decimal  @db.Decimal(14, 3)
+  projectId          String?  @map("project_id") @db.Uuid
+  articleKey         String?  @map("article_key")
+  designationOrigine String   @map("designation_origine")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  besoin  BesoinNegocie @relation(fields: [besoinId], references: [id], onDelete: Cascade)
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([besoinId, cle, unite])
+  @@index([regroupementId])
+  @@map("ligne_achat_groupe")
+}
+
+/** ACHAT GROUPÉ : les conditions d'ouverture de compte d'un négoce, cochées une fois (point 12). */
+model ConditionsOuvertureNegoce {
+  id       String   @id @default(uuid(7)) @db.Uuid
+  email    String   @unique
+  pieces   String[] @default([])
+  paiement String?
+  autre    String?
+  majLe    DateTime @default(now()) @updatedAt @map("maj_le") @db.Timestamptz(3)
+
+  @@map("conditions_ouverture_negoce")
+}
+
+/** ACHAT GROUPÉ : une correction de l'admin sur une offre (prix d'une ligne, offre écartée ou validée), gardée. */
+model CorrectionOffreAchatGroupe {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  consultationId String   @map("consultation_id") @db.Uuid
+  regroupementId String   @map("regroupement_id") @db.Uuid
+  /// prix | ecarter | valider
+  action         String
+  cle            String?
+  avant          Decimal? @db.Decimal(14, 4)
+  apres          Decimal? @db.Decimal(14, 4)
+  adminEmail     String   @map("admin_email")
+  le             DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([regroupementId])
+  @@map("correction_offre_achat_groupe")
 }

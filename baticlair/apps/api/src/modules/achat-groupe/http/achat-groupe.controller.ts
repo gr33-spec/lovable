@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Headers, HttpCode, Inject, Param, Post, Put, Query, Res, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
-import { REGLAGES_ALERTES } from "@baticlair/domain";
+import { CONDITIONS_OUVERTURE, MOTIFS_SORTIE, PAIEMENTS_DEPART, REGLAGES_ALERTES } from "@baticlair/domain";
 import { z } from "zod";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { forbidden } from "../../../platform/errors/domain-error.js";
@@ -24,36 +24,48 @@ const negoce = z.union([
 ]);
 // Précision 1 (27 octobre 2026) : au moins un négoce ; le message vient du service (« Ajoute au moins un négoce… »).
 const negoces = z.array(negoce).max(10);
-const lancerBody = z.object({
-  designation: z.string().trim().min(3).max(300),
-  quantite: z.number().positive().max(10_000_000),
-  unite: z.string().trim().min(1).max(40),
+const ligne = z.object({ designation: z.string().trim().min(3).max(300), quantite: z.number().positive().max(10_000_000), unite: z.string().trim().min(1).max(40) });
+const engagerBody = z.object({
+  achatId: z.uuid().nullable().optional(),
+  lignes: z.array(ligne).min(1).max(200),
   livraison: z.string().trim().min(3).max(300),
-  dateBesoin: z.iso.date(),
+  dateBesoin: z.iso.date().nullable().optional(),
   negoces,
-  projectId: z.uuid().nullable().optional(),
-  articleKey: z.string().min(1).max(200).nullable().optional(),
+  engagement: z.boolean(),
 });
-const rejoindreBody = lancerBody.omit({ designation: true, unite: true });
-const modifierBody = z.object({ quantite: z.number().positive().max(10_000_000).optional(), livraison: z.string().trim().min(3).max(300).optional(), negoces: negoces.optional() });
-const listeBody = z.object({ confirmees: z.array(z.string().min(1).max(200)).max(500), dateBesoin: z.iso.date(), livraison: z.string().trim().min(3).max(300).nullable().optional(), negoces });
-const desisterBody = z.object({ raison: z.string().trim().max(500).nullable().optional() });
+const modifierBody = z.object({ quantites: z.record(z.string().max(60), z.number().min(0).max(10_000_000)).optional(), negoces: negoces.optional() });
+const listeBody = z.object({
+  confirmees: z.array(z.string().min(1).max(200)).max(500),
+  dateBesoin: z.iso.date().nullable().optional(),
+  livraison: z.string().trim().min(3).max(300).nullable().optional(),
+  negoces,
+  engagement: z.boolean(),
+  achatId: z.uuid().nullable().optional(),
+});
+const sortirBody = z.object({ motif: z.enum(MOTIFS_SORTIE) });
 const commanderBody = z.object({ consultationId: z.uuid() });
+const coordonneesBody = z.object({ consultationId: z.uuid(), consentement: z.boolean() });
+const livreBody = z.object({ probleme: z.string().trim().min(1).max(1000).nullable().optional() });
 const alertesBody = z.object({ reglage: z.enum(REGLAGES_ALERTES) });
 const reponseBody = z.object({
   accepteConditions: z.literal(true),
-  prixUnitaireHt: z.number().positive().max(1_000_000).nullable().optional(),
+  prix: z.record(z.string().max(200), z.number().positive().max(1_000_000).nullable()).nullable().optional(),
   delaiJours: z.number().int().min(0).max(365).nullable().optional(),
   commentaire: z.string().trim().max(1000).nullable().optional(),
   pdf: z.object({ nom: z.string().trim().min(1).max(200), contenuBase64: z.string().min(10).max(12_000_000) }).nullable().optional(),
+  conditionsOuverture: z
+    .object({ pieces: z.array(z.enum(CONDITIONS_OUVERTURE)).max(10), paiement: z.enum(PAIEMENTS_DEPART).nullable(), autre: z.string().trim().max(300).nullable().optional() })
+    .nullable()
+    .optional(),
 });
-const avancerBody = z.object({ etape: z.enum(["cloture", "echeance"]) });
+const avancerBody = z.object({ etape: z.enum(["cloture", "echeance", "commande"]) });
 const volumeBody = z.object({ famille: z.string().trim().min(1).max(40), montantHt: z.number().min(0).max(1_000_000) });
+const prixBody = z.object({ cle: z.string().min(1).max(200), prixHt: z.number().positive().max(1_000_000).nullable() });
 
 const date = (s: string) => new Date(`${s}T00:00:00Z`);
 
 /**
- * L'ACHAT GROUPÉ AUTOMATIQUE, CÔTÉ ARTISAN (Greg, 27 octobre 2026) : le catalogue, ses négoces, lancer, rejoindre, ses
+ * L'ACHAT GROUPÉ PAR MÉTIER, CÔTÉ ARTISAN (Greg, 27 octobre 2026, 2e message) : le catalogue, ses négoces, s'engager, ses
  * cartes et leur détail, modifier, retirer, se désister, « Je l'ai prévenu », l'offre et la commande, le plan B, les
  * lignes d'une liste à acheter en groupe, le réglage des alertes.
  */
@@ -83,13 +95,8 @@ export class AchatGroupeController {
   }
 
   @Post("achats-groupes")
-  lancer(@Tenant() tenant: TenantContext, @Body(new ZodPipe(lancerBody)) b: z.infer<typeof lancerBody>) {
-    return this.achats.lancer(tenant, { ...b, dateBesoin: date(b.dateBesoin), negoces: b.negoces as NegoceAjoute[] });
-  }
-
-  @Post("achats-groupes/ouverts/:achatId/rejoindre")
-  rejoindre(@Tenant() tenant: TenantContext, @Param("achatId") achatId: string, @Body(new ZodPipe(rejoindreBody)) b: z.infer<typeof rejoindreBody>) {
-    return this.achats.rejoindre(tenant, achatId, { ...b, dateBesoin: date(b.dateBesoin), negoces: b.negoces as NegoceAjoute[] });
+  engager(@Tenant() tenant: TenantContext, @Body(new ZodPipe(engagerBody)) b: z.infer<typeof engagerBody>) {
+    return this.achats.engager(tenant, { ...b, achatId: b.achatId ?? null, dateBesoin: b.dateBesoin ? date(b.dateBesoin) : null, negoces: b.negoces as NegoceAjoute[] });
   }
 
   @Get("achats-groupes/:besoinId")
@@ -99,7 +106,7 @@ export class AchatGroupeController {
 
   @Put("achats-groupes/:besoinId")
   modifier(@Tenant() tenant: TenantContext, @Param("besoinId") besoinId: string, @Body(new ZodPipe(modifierBody)) b: z.infer<typeof modifierBody>) {
-    return this.achats.modifier(tenant, besoinId, { ...b, negoces: b.negoces as NegoceAjoute[] | undefined });
+    return this.achats.modifier(tenant, besoinId, { quantites: b.quantites, negoces: b.negoces as NegoceAjoute[] | undefined });
   }
 
   @Delete("achats-groupes/:besoinId/negoces/:participantId")
@@ -124,10 +131,22 @@ export class AchatGroupeController {
     return this.achats.retirer(tenant, besoinId);
   }
 
-  @Post("achats-groupes/:besoinId/desister")
+  @Post("achats-groupes/:besoinId/sortir")
   @HttpCode(200)
-  desister(@Tenant() tenant: TenantContext, @Param("besoinId") besoinId: string, @Body(new ZodPipe(desisterBody)) b: z.infer<typeof desisterBody>) {
-    return this.achats.desister(tenant, besoinId, b.raison ?? null);
+  sortir(@Tenant() tenant: TenantContext, @Param("besoinId") besoinId: string, @Body(new ZodPipe(sortirBody)) b: z.infer<typeof sortirBody>) {
+    return this.achats.sortir(tenant, besoinId, b.motif);
+  }
+
+  @Post("achats-groupes/:besoinId/coordonnees")
+  @HttpCode(200)
+  coordonnees(@Tenant() tenant: TenantContext, @Param("besoinId") besoinId: string, @Body(new ZodPipe(coordonneesBody)) b: z.infer<typeof coordonneesBody>) {
+    return this.achats.transmettreCoordonnees(tenant, besoinId, b.consultationId, b.consentement);
+  }
+
+  @Post("achats-groupes/:besoinId/livre")
+  @HttpCode(200)
+  livre(@Tenant() tenant: TenantContext, @Param("besoinId") besoinId: string, @Body(new ZodPipe(livreBody)) b: z.infer<typeof livreBody>) {
+    return this.achats.livre(tenant, besoinId, b.probleme ?? null);
   }
 
   @Post("achats-groupes/:besoinId/commander")
@@ -157,7 +176,7 @@ export class AchatGroupeController {
 
   @Post("projects/:projectId/achat-groupe")
   lancerDepuisListe(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(listeBody)) b: z.infer<typeof listeBody>) {
-    return this.achats.lancerDepuisListe(tenant, projectId, { confirmees: b.confirmees, dateBesoin: date(b.dateBesoin), livraison: b.livraison ?? null, negoces: b.negoces as NegoceAjoute[] });
+    return this.achats.lancerDepuisListe(tenant, projectId, { confirmees: b.confirmees, dateBesoin: b.dateBesoin ? date(b.dateBesoin) : null, livraison: b.livraison ?? null, negoces: b.negoces as NegoceAjoute[], engagement: b.engagement, achatId: b.achatId ?? null });
   }
 
   @Get("me/alertes-achats-groupes")
@@ -188,7 +207,30 @@ export class AchatGroupePublicController {
   @Post(":jeton")
   @HttpCode(200)
   repondre(@Param("jeton") jeton: string, @Body(new ZodPipe(reponseBody)) b: z.infer<typeof reponseBody>) {
-    return this.achats.repondre(jeton, { accepteConditions: b.accepteConditions, prixUnitaireHt: b.prixUnitaireHt ?? null, delaiJours: b.delaiJours ?? null, commentaire: b.commentaire ?? null, pdf: b.pdf ?? null });
+    return this.achats.repondre(jeton, {
+      accepteConditions: b.accepteConditions,
+      prix: b.prix ?? null,
+      delaiJours: b.delaiJours ?? null,
+      commentaire: b.commentaire ?? null,
+      pdf: b.pdf ?? null,
+      conditionsOuverture: b.conditionsOuverture ? { pieces: b.conditionsOuverture.pieces, paiement: b.conditionsOuverture.paiement, autre: b.conditionsOuverture.autre ?? null } : null,
+    });
+  }
+
+  /** Le lien du bon de commande : « Commande reçue » d'un clic. */
+  @Public()
+  @Throttle({ default: HOURLY(120) })
+  @Get("commande/:jeton")
+  commande(@Param("jeton") jeton: string) {
+    return this.achats.pageCommande(jeton);
+  }
+
+  @Public()
+  @Throttle({ default: HOURLY(30) })
+  @Post("commande/:jeton")
+  @HttpCode(200)
+  commandeRecue(@Param("jeton") jeton: string) {
+    return this.achats.commandeRecue(jeton);
   }
 }
 
@@ -233,12 +275,42 @@ export class AchatGroupeTacheController {
     return this.achats.avancer(id, b.etape);
   }
 
+  /** L'écran de validation d'un achat (point 14). */
+  @Get("admin/pilotage/achats-groupes/:id")
+  async achat(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
+    await this.pilotage.exiger(user);
+    return this.achats.adminAchat(id);
+  }
+
+  @Post("admin/pilotage/achats-groupes/:id/publier")
+  @HttpCode(200)
+  async publier(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
+    await this.pilotage.exiger(user);
+    await this.pilotage.journal(user, "achat_groupe_publie", id);
+    return this.achats.publier(id, user.email);
+  }
+
   @Post("admin/pilotage/achats-groupes/consultations/:id/valider")
   @HttpCode(200)
   async valider(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     await this.pilotage.exiger(user);
     await this.pilotage.journal(user, "achat_groupe_offre_validee", id);
-    return this.achats.validerOffre(id);
+    return this.achats.validerOffre(id, user.email);
+  }
+
+  @Post("admin/pilotage/achats-groupes/consultations/:id/ecarter")
+  @HttpCode(200)
+  async ecarter(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
+    await this.pilotage.exiger(user);
+    await this.pilotage.journal(user, "achat_groupe_offre_ecartee", id);
+    return this.achats.ecarter(id, user.email);
+  }
+
+  @Put("admin/pilotage/achats-groupes/consultations/:id/prix")
+  async prix(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string, @Body(new ZodPipe(prixBody)) b: z.infer<typeof prixBody>) {
+    await this.pilotage.exiger(user);
+    await this.pilotage.journal(user, "achat_groupe_prix_corrige", `${id}:${b.cle}=${b.prixHt}`);
+    return this.achats.corrigerPrix(id, b.cle, b.prixHt, user.email);
   }
 
   @Get("admin/pilotage/achats-groupes/consultations/:id/devis.pdf")

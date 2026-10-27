@@ -1,4 +1,4 @@
-import { droitsDe, payantOffertDansLaZone, phrasePreavis, verifierDroit, zoneDuCodePostal, MESSAGE_HORS_ZONE, type Droits } from "@baticlair/domain";
+import { droitsDe, payantOffertDansLaZone, phrasePreavis, verifierDroit, zoneDuCodePostal, MESSAGE_HORS_ZONE, NEGOCES_PAR_DEMANDE_PAYANT, PHRASE_LECTURES_EPUISEES, type Droits } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import type { AbonnementService } from "../../abonnement/index.js";
@@ -14,6 +14,8 @@ export interface ReglagesDroits {
   zonesActives: string[] | null;
   seuilZoneActive: number;
   lecturesGratuites: number;
+  /** Achat groupé par métier (27 octobre 2026, point 24) : les lectures IA offertes en tout, sans abonnement. */
+  lecturesIaGratuitTotal: number;
 }
 
 /** Un artisan actif : une entreprise de la zone qui a ouvert un chantier (hors démonstration) dans les 30 derniers jours. */
@@ -26,6 +28,23 @@ export class DroitsService {
     private readonly reglages: ReglagesDroits,
     private readonly now: () => Date = () => new Date(),
   ) {}
+
+  /**
+   * Achat groupé par métier (Greg, 27 octobre 2026, 2e message) : en mode automatique, plus d'essai ni de zone offerte ;
+   * gratuit sans limite de temps (listes, envoi à ses négoces, achats du secteur), 3 lectures IA en tout ; l'abonnement
+   * pour les achats groupés (le premier offert, vérifié par l'achat groupé).
+   */
+  private modeAuto: () => Promise<boolean> = async () => false;
+  brancherModeAuto(f: () => Promise<boolean>): void {
+    this.modeAuto = f;
+  }
+
+  /** Abonné payant (ou tout ouvert sans abonnement artisan) : ni l'essai ni la zone offerte. */
+  async abonnePayant(companyId: string, maintenant = this.now()): Promise<boolean> {
+    if (!this.abonnement.actif) return true;
+    const etat = await this.abonnement.etat(companyId, maintenant);
+    return etat.acces === "abonne" || etat.acces === "grace";
+  }
 
   /** Le département de l'entreprise (son adresse), ou null. */
   async zoneDe(companyId: string): Promise<string | null> {
@@ -87,7 +106,10 @@ export class DroitsService {
     ]);
     // Sans abonnement artisan (`ABONNEMENT=off`), tout est ouvert : payant pour tous.
     const abonne = etat === null || etat.acces === "abonne" || etat.acces === "grace";
-    const d = droitsDe({ abonne, essai: etat?.acces === "essai", zoneOfferte: offre.offert, zoneActive: this.zoneActive(zone) }, { lecturesGratuites: this.reglages.lecturesGratuites });
+    const auto = await this.modeAuto();
+    const d = droitsDe({ abonne, essai: !auto && etat?.acces === "essai", zoneOfferte: !auto && offre.offert, zoneActive: this.zoneActive(zone) }, { lecturesGratuites: this.reglages.lecturesGratuites });
+    // Gratuit, l'artisan envoie sa liste à ses négoces (point 23).
+    if (auto && d.formule === "gratuit") d.negocesParDemande = NEGOCES_PAR_DEMANDE_PAYANT;
     return { ...d, zone, zoneActive: this.zoneActive(zone), preavis: zone ? phrasePreavis(zone, offre.preavisJusquau) : null, lecturesCeMois: lectures };
   }
 
@@ -112,7 +134,8 @@ export class DroitsService {
   }
 
   /** Pour le compteur des analyses : la limite gratuite, ou null. */
-  async limiteGratuite(companyId: string): Promise<{ limite: number; phrase: (n: number) => string } | null> {
+  async limiteGratuite(companyId: string): Promise<{ limite: number; phrase: (n: number) => string; total?: boolean } | null> {
+    if (await this.modeAuto()) return (await this.abonnePayant(companyId)) ? null : { limite: this.reglages.lecturesIaGratuitTotal, total: true, phrase: () => PHRASE_LECTURES_EPUISEES };
     const d = await this.droits(companyId);
     if (d.lecturesParMois === null) return null;
     return { limite: d.lecturesParMois, phrase: (n) => `Tu as utilisé tes ${n} lectures gratuites du mois. Passe à l'abonnement pour lire tous tes devis.` };

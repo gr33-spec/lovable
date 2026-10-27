@@ -29,8 +29,8 @@ export class PrismaAnalysisRepository implements AnalysisRepository {
     return c?.monthlyAnalysisLimit ?? null;
   }
 
-  countBillable(companyId: string, billingMonth: string): Promise<number> {
-    return this.prisma.aiAnalysis.count({ where: { companyId, billingMonth, billable: true } });
+  countBillable(companyId: string, billingMonth: string | null): Promise<number> {
+    return this.prisma.aiAnalysis.count({ where: { companyId, ...(billingMonth ? { billingMonth } : {}), billable: true } });
   }
 
   create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind }): Promise<AnalysisRecord> {

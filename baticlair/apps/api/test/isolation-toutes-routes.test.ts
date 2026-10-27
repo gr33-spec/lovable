@@ -189,12 +189,12 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/fichiers$/, ids.recuFichier],
         [/\/chasseur\/regroupements$/, ids.regroupementNegocie],
         [/\/admin\/pilotage\/negoces$/, ids.negoce],
-        // L'achat groupé : la participation de A, son négoce, l'achat ouvert (rejoindre sans corps valable : 400) ; la
+        // L'achat groupé : la participation de A, son négoce, l'achat ouvert (l'admin de l'achat : 403) ; la
         // réponse du négoce est un jeton ; l'admin (403).
-        [/\/achats-groupes\/ouverts$/, ids.achatGroupe],
         [/\/achats-groupes\/negoces$/, ids.participantAchat],
         [/\/achats-groupes$/, ids.besoinAchat],
         [/\/public\/achat-groupe$/, "jeton-inconnu-de-b-0000000000000000"],
+        [/\/public\/achat-groupe\/commande$/, "jeton-inconnu-de-b-0000000000000000"],
         [/\/admin\/pilotage\/achats-groupes\/consultations$/, ids.consultationAchat],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));

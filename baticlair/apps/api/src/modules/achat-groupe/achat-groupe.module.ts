@@ -1,9 +1,11 @@
 import { Module } from "@nestjs/common";
+import { MESSAGE_HORS_ZONE } from "@baticlair/domain";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
 import { NotificationsGroupeService } from "../../platform/notifications/notifications-artisan.js";
 import type { PushSender } from "../../platform/push/push.port.js";
+import { DomainError } from "../../platform/errors/domain-error.js";
 import { CONFIG, EMAIL_SENDER, PUSH_SENDER } from "../../platform/tokens.js";
 import { AdresseMobiizModule, AdresseMobiizService } from "../adresse-mobiiz/index.js";
 import { PdfJsPdfReader } from "../documents/index.js";
@@ -17,7 +19,7 @@ import { AchatGroupeService } from "./application/achat-groupe.service.js";
 import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheController } from "./http/achat-groupe.controller.js";
 
 /**
- * L'ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026) : au-dessus du regroupement négocié (mêmes tables, `mode =
+ * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026) : au-dessus du regroupement négocié (mêmes tables, `mode =
  * automatique`), de la demande perso (plan B), de l'adresse Mobiiz (Reply-To) et du lecteur de devis des négoces.
  */
 @Module({
@@ -44,21 +46,24 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
           p,
           {
             zoneDe: (companyId) => droits.zoneDe(companyId),
-            exigerZone: (companyId, zone) => droits.exiger(companyId, { type: "regroupement", zone }),
-            abonne: async (companyId) => (await droits.droits(companyId)).raison === "abonne",
+            // L'achat groupé vérifie lui-même l'abonnement (le premier offert, point 25) : ici, la zone active seulement.
+            exigerZone: async (_companyId, zone) => {
+              if (!droits.zoneActive(zone)) throw new DomainError("forbidden", MESSAGE_HORS_ZONE, { reason: "zone_inactive", refus: "zone", phrase: MESSAGE_HORS_ZONE, message: MESSAGE_HORS_ZONE });
+            },
+            abonne: (companyId) => droits.abonnePayant(companyId),
             dernierPrixPour: (companyId) => demandes.dernierPrixPour(companyId),
             adresseMobiiz: async (companyId) => (await adresses.expediteur(companyId))?.from.match(/<([^>]+)>/)?.[1] ?? null,
             mode: () => negocie.mode(),
             envoyerEnPerso: async (tenant, d) => {
               const projet = await p.project.create({ data: { companyId: tenant.companyId, name: d.nom, address: d.adresse, createdById: tenant.userId }, select: { id: true } });
-              const liste = await takeoffs.fromLines(tenant, projet.id, tenant.trades[0] ?? "roofing", [{ designation: d.ligne.designation, quantity: String(d.ligne.quantite), unit: d.ligne.unite, price: null }]);
+              const liste = await takeoffs.fromLines(tenant, projet.id, tenant.trades[0] ?? "roofing", d.lignes.map((l) => ({ designation: l.designation, quantity: String(l.quantite), unit: l.unite, price: null })));
               await takeoffs.validate(tenant, liste.takeoff.id);
               const vue = await demandes.envoyer(tenant, projet.id, { but: "chiffrer", accord: true, negoces: d.supplierIds.map((supplierId) => ({ supplierId })), dateBesoin: d.dateBesoin, message: null });
               return { projectId: projet.id, demandeId: vue.id };
             },
             lignesDeListe: async (tenant, projectId) => {
               const { adresse, lignes } = await commande.lignesDuChantier(tenant, projectId);
-              return { adresse, lignes: lignes.map((l) => ({ key: l.key, designation: l.designation, quantite: l.quantite, unite: l.unite })) };
+              return { adresse, source: null, lignes: lignes.map((l) => ({ key: l.key, designation: l.designation, quantite: l.quantite, unite: l.unite })) };
             },
             observatoire: (o) => observatoire.enregistrer({ type: "groupe", sourceId: o.sourceId, departement: o.departement, lignes: [{ designation: o.designation, unite: o.unite, quantite: o.quantite, prixHt: o.prixHt }] }),
           },
@@ -81,6 +86,12 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
             seuilVolumeMin: c.groupe.recentrage.seuilVolumeMin,
             prixReperes: c.groupe.recentrage.prixReperes,
             familles: c.groupe.recentrage.familles,
+            validationAdmin: c.groupe.negocie.validationAdmin,
+            delaiValidationAdminHeures: c.groupe.negocie.delaiValidationAdminHeures,
+            delaiCommandeJours: c.groupe.negocie.delaiCommandeJours,
+            exclusionMois: c.groupe.negocie.exclusionMois,
+            seuilSuggestion: c.groupe.negocie.seuilSuggestion,
+            admins: c.groupe.admins,
           },
         ),
       inject: [PrismaService, DroitsService, DemandePersoService, NegocieService, ObservatoireService, AdresseMobiizService, CommandeDuMoisService, TakeoffService, NEGOCE_EXTRACTOR, PUSH_SENDER, EMAIL_SENDER, CONFIG],

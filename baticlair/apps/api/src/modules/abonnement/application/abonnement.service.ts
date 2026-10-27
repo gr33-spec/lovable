@@ -95,6 +95,15 @@ export class AbonnementService {
 
   /** Recentrage (25 octobre 2026) : le payant offert dans la zone de l'entreprise (moins de 10 artisans actifs, ou préavis). */
   private offert: (companyId: string) => Promise<boolean> = async () => false;
+  /**
+   * Achat groupé par métier (Greg, 27 octobre 2026, 2e message, point 26) : plus d'essai de 35 jours. En mode automatique,
+   * le compte est GRATUIT sans limite de temps (ni pastille ni bandeau d'essai) ; l'abonnement sert aux achats groupés.
+   * Le reste (essai, paywall) ne vaut plus que pour l'ancien mode « commande du mois ».
+   */
+  private sansEssai: () => Promise<boolean> = async () => false;
+  brancherSansEssai(f: () => Promise<boolean>): void {
+    this.sansEssai = f;
+  }
   brancherOffert(f: (companyId: string) => Promise<boolean>): void {
     this.offert = f;
   }
@@ -155,6 +164,7 @@ export class AbonnementService {
 
   async permis(companyId: string, action: ActionPayante, maintenant = this.now(), deposeeLe?: Date | null): Promise<boolean> {
     if (!this.actif) return true;
+    if (await this.sansEssai()) return true;
     if (await this.offert(companyId)) return true;
     return actionPermise(await this.etat(companyId, maintenant), action, deposeeLe);
   }
@@ -163,6 +173,7 @@ export class AbonnementService {
   async vue(tenant: TenantContext, maintenant = this.now()) {
     const [etat, reglages, p] = await Promise.all([this.etat(tenant.companyId, maintenant), this.reglages(), this.paiement(tenant.companyId)]);
     const ecart = this.actif ? await this.ecart(tenant.companyId).catch(() => null) : null;
+    const gratuit = this.actif && (etat.acces === "essai" || etat.acces === "bloque") && (await this.sansEssai());
     const formule: Formule = p.formule ?? "mensuel";
     const abonne = p.statut === "actif" || p.statut === "echec" || (p.statut === "resilie" && !!p.periodeFin && p.periodeFin > maintenant);
     const prix = eurosDeCentimes(prixDeFormule(formule, reglages));
@@ -171,7 +182,7 @@ export class AbonnementService {
       actif: this.actif,
       paiement: this.config.abonnement.paiement,
       modeTest: this.config.abonnement.paiement === "simule" ? BANDEAU_MODE_TEST : null,
-      acces: this.actif ? etat.acces : "abonne",
+      acces: !this.actif ? "abonne" : gratuit ? "gratuit" : etat.acces,
       /** La formule de l'abonnement (mensuel tant qu'il n'y en a pas). */
       formule,
       /** Le prix HT de la formule, et sa période (« par mois », « par an »). */
@@ -184,15 +195,15 @@ export class AbonnementService {
       /** Le passage à l'annuel, au prorata : ce qui est déduit du mois en cours et ce qui sera payé tout de suite. */
       bascule: bascule ? { credit: eurosDeCentimes(bascule.creditCentimes), aPayerHt: eurosDeCentimes(bascule.aPayerHtCentimes), aPayerTtc: eurosDeCentimes(montantsFacture(bascule.aPayerHtCentimes, reglages.tauxTva).ttc), jusquau: bascule.fin.toISOString() } : null,
       essaiFinLe: etat.essaiFinLe?.toISOString() ?? null,
-      joursEssai: etat.joursEssai,
+      joursEssai: gratuit ? null : etat.joursEssai,
       graceFinLe: etat.graceFinLe?.toISOString() ?? null,
       periodeFin: etat.periodeFin?.toISOString() ?? null,
       resiliationProgrammee: etat.resiliationProgrammee,
       statut: p.statut,
       tvaIntra: p.ligne?.tvaIntra ?? null,
-      bandeau: this.actif ? (bandeauGrace(etat) ?? bandeauEssai(etat)) : null,
+      bandeau: this.actif ? (bandeauGrace(etat) ?? (gratuit ? null : bandeauEssai(etat))) : null,
       bandeauRouge: this.actif && etat.acces === "grace",
-      paywall: { phrase: phrasePaywall(reglages), economie: phraseEconomiePremierCycle(ecart) },
+      paywall: { phrase: gratuit ? "Abonne-toi pour profiter des achats groupés." : phrasePaywall(reglages), economie: gratuit ? null : phraseEconomiePremierCycle(ecart) },
     };
   }
 
@@ -529,6 +540,7 @@ export class AbonnementService {
   /** Les rappels de fin d'essai des entreprises sans abonnement actif. */
   async rappels(maintenant = this.now()): Promise<number> {
     let n = 0;
+    if (await this.sansEssai()) return 0;
     const depuis = new Date(maintenant.getTime() - 400 * JOUR);
     // Un rappel de fin d'essai est une relance : « Ne plus recevoir ces e-mails » l'arrête (RGPD, opposition en un clic).
     const entreprises = await this.prisma.company.findMany({ where: { createdAt: { gte: depuis }, emailsCoupesLe: null, OR: [{ abonnement: null }, { abonnement: { statut: { in: ["aucun", "resilie"] } } }] }, select: { id: true } });

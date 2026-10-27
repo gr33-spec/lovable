@@ -1,52 +1,78 @@
 import { createHash, randomBytes } from "node:crypto";
 import {
+  CONDITIONS_OUVERTURE,
+  ETAPES_ACHAT_GROUPE,
+  LIBELLES_CONDITIONS_OUVERTURE,
+  LIBELLES_MOTIFS_SORTIE,
+  LIBELLES_PAIEMENTS_DEPART,
+  LIBELLES_REGLAGES_ALERTES,
+  MOTIFS_SORTIE,
   NOM_APP,
+  PAIEMENTS_DEPART,
   PHRASES_DOUTE,
   PHRASE_ACTIVITE_REFUSEE,
   PHRASE_DATE_TROP_PROCHE,
+  PHRASE_ENGAGEMENT,
   PHRASE_NEGOCE_OBLIGATOIRE,
-  SEUIL_VOLUME_MIN_DEFAUT,
-  ETAPES_ACHAT_GROUPE,
-  LIBELLES_REGLAGES_ALERTES,
+  REGLES_ENGAGEMENT,
   SANS_REPONSE_HEURES,
+  SEUIL_SUGGESTION_DEFAUT,
+  SEUIL_VOLUME_MIN_DEFAUT,
+  commandeAvantLe,
   commissionAchatGroupe,
   communeDe,
+  comparerPourArtisan,
   computeAiCost,
-  dateBesoinPossible,
-  datesAchatGroupe,
-  de,
+  cumulerPanier,
+  datesAchatGroupePanier,
   deLaPartDe,
   decisionAlerte,
-  demandeNegoce,
+  demandeNegocePanier,
+  droitAchatGroupe,
   ecranPrevenir,
   estActiviteBatiment,
   estCommerceDeGros,
   etapeCourante,
   etatCarte,
+  exclu,
+  exclusionJusquau,
+  famillesDuMetier,
   jaugeVolume,
-  jugerOffres,
+  libelleMetier,
   lienSms,
   lienTel,
+  lignesASuggerer,
+  lignesPourNegoce,
   lireReglageAlertes,
   microUsdToEur,
   participantSuspect,
-  phraseAlerte,
+  phraseAlerteMetier,
   phraseDemandePartie,
+  phraseExclusion,
+  phraseManquantes,
+  phraseOuvertureCompte,
+  phrasePublication,
   phraseRappelVeille,
   phraseResumeAlertes,
+  phraseSuggestion,
   priceTableAt,
   rattachementPropose,
   rechercherCatalogue,
   referenceStricte,
+  reponseComplete,
   smsPrevenir,
+  titreAchatGroupe,
   uniteRepere,
-  vueOffresArtisan,
   volumeMinimum,
   zoneDuCodePostal,
-  famillesDuMetier,
-  type OffreACompare,
+  type ConditionOuverture,
+  type LignePanier,
+  type MotifSortie,
+  type OffreNegocePanier,
+  type PaiementDepart,
   type RaisonDoute,
   type ReglageAlertes,
+  type ReponseLignes,
 } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
@@ -58,48 +84,67 @@ import type { NegoceExtractor, ReponseLue } from "../../groupe/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 
 /**
- * L'ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026 : « l'achat groupé devient le cœur de l'app, en automatique »).
- * - L'artisan LANCE un achat groupé (une référence stricte, sa quantité, sa commune, sa date de besoin, au moins un
- *   négoce) ou REJOINT celui de son secteur ; le même artisan qui relance la même référence ajoute sa quantité.
- * - À la CLÔTURE (date de besoin − délai de livraison − délai de réponse), chaque négoce reçoit UNE demande, de la part
- *   de SES clients seulement, avec le volume total, la référence exacte, les lieux et les dates ; il répond par un lien
- *   sans inscription (prix ou devis PDF), une seule fois.
- * - À l'ÉCHÉANCE, le code compare sur une base identique (le devis PDF est lu par l'IA, dans le budget du jour) ; une
- *   offre douteuse va à l'admin, jamais mise en avant. L'artisan voit l'offre de son négoce, la meilleure du groupe et
- *   l'économie ; il commande (bon de commande au négoce, paiement direct) ou passe au plan B (sa demande perso).
- * Jamais un nom d'artisan, jamais une commune d'un autre ; le total seulement à partir du seuil d'anonymat.
+ * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message : « ce message fait foi » sur le précédent).
+ * - Un achat groupé = un métier + une zone + une période (« Couverture · secteur Paimpol · livraison avant le 30
+ *   novembre ») ; il contient un PANIER : chaque artisan y met les lignes cochées de sa liste, chacune rattachée d'un tap à
+ *   une référence du catalogue (sinon elle reste en demande perso).
+ * - Rejoindre, c'est S'ENGAGER (case obligatoire, règles dites en clair) : seul le volume engagé est annoncé ; deux
+ *   sorties seulement, avec le motif ; plus d'une par trimestre, ou une commande pas passée sans motif : exclusion.
+ * - À la CLÔTURE, chaque négoce choisi reçoit UNE liste propre (quantités cumulées, ses familles s'il est spécialiste), de
+ *   la part de ses seuls clients ; il répond LIGNE PAR LIGNE (un prix, ou « je ne fournis pas »), le PDF reste un repli
+ *   lu par l'IA ; il coche une fois ses conditions d'ouverture de compte.
+ * - À l'ÉCHÉANCE : l'analyse, puis la VALIDATION DE L'ADMIN (`VALIDATION_ADMIN_OFFRES`) : écarter, corriger un prix,
+ *   publier. Chaque artisan est comparé sur SES lignes, livraison comprise ; les offres complètes d'abord.
+ * - Après la publication : commander (bon au négoce, « Commande reçue »), ou ouvrir un compte (coordonnées transmises
+ *   avec son accord), puis « Livré » / « Problème ». Mobiiz ne touche jamais l'argent.
  */
 
 const JOUR = 86_400_000;
+const HEURE = 3_600_000;
 const CLE_VOLUME_MIN = "achat-groupe:volume-min";
 const MODE_AUTO = "automatique";
-/** Les participations actives (comptées dans le volume). */
-const ACTIFS = ["declare", "accepte"];
 const OUVERT = "en_collecte";
+const ENGAGE = "declare";
 
 const hacher = (jeton: string) => createHash("sha256").update(jeton).digest("hex");
 const qte = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 3 }).replace(/\u202f/g, "\u00a0");
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u202f/g, "\u00a0")} €`;
 const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d);
 const jourIso = (d: Date) => d.toISOString().slice(0, 10);
+const arrondi = (n: number) => Math.round(n * 100) / 100;
 const nombre = (s: string | null | undefined): number | null => {
   if (!s) return null;
   const n = Number(s.replace(/[\s\u00a0\u202f€]/g, "").replace(",", "."));
   return Number.isFinite(n) && n > 0 ? n : null;
 };
 const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+const objet = (v: unknown): Record<string, number | null> => (v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, number | null>) : {});
+const prixDe = (prix: ReponseLignes, cle: string): number | null => {
+  const p = prix[cle];
+  return typeof p === "number" ? p : null;
+};
+const lignesDe = (v: unknown): LignePanier[] => (Array.isArray(v) ? (v as LignePanier[]) : []);
 
 export type NegoceAjoute = { supplierId: string } | { negoceId: string } | { nom: string; email: string; telephone?: string | null };
 
-export interface Lancement {
+export interface LigneEngagee {
   designation: string;
   quantite: number;
   unite: string;
-  livraison: string;
-  dateBesoin: Date;
-  negoces: NegoceAjoute[];
   projectId?: string | null;
   articleKey?: string | null;
+}
+
+export interface Engagement {
+  /** Rejoindre CET achat groupé ; sinon, celui du métier et du secteur qui convient, ou un nouveau. */
+  achatId?: string | null;
+  lignes: LigneEngagee[];
+  livraison: string;
+  /** La date de besoin (ignorée quand on rejoint un achat : c'est la sienne). */
+  dateBesoin: Date | null;
+  negoces: NegoceAjoute[];
+  /** La case « Je commande ces quantités… », obligatoire. */
+  engagement: boolean;
 }
 
 export interface ReglagesAchatGroupe {
@@ -117,30 +162,41 @@ export interface ReglagesAchatGroupe {
   seuilVolumeMin: Record<string, number> | null;
   prixReperes: Record<string, number>;
   familles: string[];
+  validationAdmin: boolean;
+  delaiValidationAdminHeures: number;
+  delaiCommandeJours: number;
+  exclusionMois: number;
+  seuilSuggestion: Record<string, number> | null;
+  admins: string[];
 }
 
 export interface ReponseNegoceAchat {
   accepteConditions: boolean;
-  prixUnitaireHt: number | null;
+  /** Ligne par ligne : un prix unitaire HT livré, ou null (« je ne fournis pas »). */
+  prix: Record<string, number | null> | null;
   delaiJours: number | null;
   commentaire: string | null;
   pdf: { nom: string; contenuBase64: string } | null;
+  conditionsOuverture: { pieces: ConditionOuverture[]; paiement: PaiementDepart | null; autre: string | null } | null;
 }
 
 /** Les briques des autres modules, branchées par le module (pas d'import d'un module voisin hors de son index). */
 export interface PortsAchatGroupe {
   zoneDe(companyId: string): Promise<string | null>;
   exigerZone(companyId: string, zone: string): Promise<void>;
+  /** Abonné payant (ou tout ouvert, sans abonnement artisan) : l'essai et la zone offerte ne comptent pas (point 25). */
   abonne(companyId: string): Promise<boolean>;
   dernierPrixPour(companyId: string): Promise<(cle: string, unite: string) => number | null>;
   /** L'adresse Mobiiz (sans étiquette) de l'entreprise : le Reply-To de la demande au négoce. */
   adresseMobiiz(companyId: string): Promise<string | null>;
   mode(): Promise<string>;
-  /** Le plan B : une liste d'une ligne, validée, puis la demande perso à ses négoces. */
-  envoyerEnPerso(tenant: TenantContext, d: { nom: string; adresse: string; ligne: { designation: string; quantite: number; unite: string }; supplierIds: string[]; dateBesoin: Date }): Promise<{ projectId: string; demandeId: string }>;
-  lignesDeListe(tenant: TenantContext, projectId: string): Promise<{ adresse: string | null; lignes: { key: string; designation: string; quantite: number; unite: string }[] }>;
+  /** Le plan B : une liste validée, puis la demande perso à ses négoces. */
+  envoyerEnPerso(tenant: TenantContext, d: { nom: string; adresse: string; lignes: { designation: string; quantite: number; unite: string }[]; supplierIds: string[]; dateBesoin: Date }): Promise<{ projectId: string; demandeId: string }>;
+  lignesDeListe(tenant: TenantContext, projectId: string): Promise<{ adresse: string | null; source: string | null; lignes: { key: string; designation: string; quantite: number; unite: string }[] }>;
   observatoire(e: { sourceId: string; departement: string; designation: string; unite: string; quantite: number; prixHt: number }): Promise<unknown>;
 }
+
+type Consultation = Awaited<ReturnType<PrismaService["consultationAchatGroupe"]["findMany"]>>[number];
 
 export class AchatGroupeService {
   constructor(
@@ -170,16 +226,33 @@ export class AchatGroupeService {
     return this.volumesMin();
   }
 
+  private get seuilsSuggestion(): Record<string, number> {
+    return { ...SEUIL_SUGGESTION_DEFAUT, ...(this.cfg.seuilSuggestion ?? {}) };
+  }
+
   private async exigerAutomatique(): Promise<void> {
     if ((await this.ports.mode()) !== MODE_AUTO) throw new DomainError("conflict", "Automatic group buying is off", { reason: "mode_humain" });
   }
 
-  /** SIRET vérifié et activité du bâtiment (anti-fraude, point 9). */
+  /** SIRET vérifié et activité du bâtiment (anti-fraude) ; pas d'exclusion en cours (règle des sorties). */
   private async exigerEntreprise(companyId: string): Promise<{ name: string; trades: string[] }> {
-    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { name: true, siretVerifieLe: true, naf: true, trades: true } });
+    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { name: true, siretVerifieLe: true, naf: true, trades: true, achatsGroupesExclusJusquau: true } });
     if (c.naf && (estCommerceDeGros(c.naf) || !estActiviteBatiment(c.naf))) throw new DomainError("forbidden", PHRASE_ACTIVITE_REFUSEE, { reason: "activite_refusee", message: PHRASE_ACTIVITE_REFUSEE });
-    if (!c.siretVerifieLe) throw new DomainError("forbidden", "Verified SIRET required", { reason: "siret_requis", message: "Vérifie ton SIRET dans ton profil pour lancer ou rejoindre un achat groupé." });
+    if (!c.siretVerifieLe) throw new DomainError("forbidden", "Verified SIRET required", { reason: "siret_requis", message: "Vérifie ton SIRET dans ton profil pour rejoindre un achat groupé." });
+    if (exclu(c.achatsGroupesExclusJusquau, this.now())) {
+      const message = phraseExclusion(c.achatsGroupesExclusJusquau!);
+      throw new DomainError("forbidden", message, { reason: "exclu", message });
+    }
     return c;
+  }
+
+  /** Le métier de l'achat : la première famille du métier de l'entreprise, sinon celle de la plupart des lignes. */
+  private metierDe(trades: readonly string[], familles: readonly string[]): string {
+    const duMetier = trades.flatMap((t) => famillesDuMetier(t)).find((f) => this.cfg.familles.includes(f));
+    if (duMetier) return duMetier;
+    const compte = new Map<string, number>();
+    for (const f of familles) compte.set(f, (compte.get(f) ?? 0) + 1);
+    return [...compte.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? familles[0] ?? "couverture";
   }
 
   /* ---------------------------------------------------------------------------------------------- le catalogue */
@@ -212,89 +285,95 @@ export class AchatGroupeService {
     return { habituels: habituels.map((h) => ({ supplierId: h.id, nom: h.name, telephone: h.phone })), inscrits: inscrits.map((n) => ({ negoceId: n.id, nom: n.nom, departement: n.departement })) };
   }
 
-  /* -------------------------------------------------------------------------------------- lancer et rejoindre */
+  /* ------------------------------------------------------------------------------- s'engager (A1 à A3, B6 à B9) */
 
-  /** Lancer un achat groupé, ou rejoindre celui qui existe déjà pour la même référence dans le secteur. */
-  async lancer(tenant: TenantContext, l: Lancement, achatVise: string | null = null) {
-    assertCanWrite(tenant);
-    await this.exigerAutomatique();
-    await this.exigerEntreprise(tenant.companyId);
-    if (l.negoces.length === 0) throw validationFailed(PHRASE_NEGOCE_OBLIGATOIRE, { reason: "negoce_obligatoire", message: PHRASE_NEGOCE_OBLIGATOIRE });
-    const ref = referenceStricte(l.designation);
-    if (!ref.ok || !this.cfg.familles.includes(ref.reference.famille))
-      throw validationFailed("Reference not precise enough", { reason: "reference_imprecise", message: "Référence pas assez précise pour un achat groupé (format, épaisseur, origine…) : choisis-la dans le catalogue ou envoie-la à tes négoces." });
-    if (!(l.quantite > 0)) throw validationFailed("Quantity required", { reason: "quantite_requise" });
-    const maintenant = this.now();
-    if (!dateBesoinPossible(l.dateBesoin, maintenant, this.cfg.delaiLivraisonJours, this.cfg.delaiReponseJours)) throw validationFailed(PHRASE_DATE_TROP_PROCHE, { reason: "date_trop_proche", message: PHRASE_DATE_TROP_PROCHE });
-    const departement = zoneDuCodePostal(l.livraison);
-    if (!departement) throw validationFailed("A delivery town with a postcode is required", { reason: "livraison_requise", message: "Indique la commune de livraison avec son code postal." });
-    await this.ports.exigerZone(tenant.companyId, departement);
-    const negoces = await Promise.all(l.negoces.map((n) => this.negoceDe(tenant, n)));
-    const cle = ref.reference.cle;
-
-    // Précision 4 : le même artisan qui relance la même référence dans le même achat groupé ajoute sa quantité.
-    const mien = await this.prisma.besoinNegocie.findFirst({
-      where: { companyId: tenant.companyId, cle, departement, statut: "declare", regroupement: { mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant } } },
-      orderBy: { createdAt: "asc" },
-    });
-    if (mien && (!achatVise || mien.regroupementId === achatVise)) {
-      await this.prisma.besoinNegocie.update({ where: { id: mien.id }, data: { quantite: Number(mien.quantite) + l.quantite } });
-      await this.ajouterNegoces(mien.id, mien.regroupementId!, tenant.companyId, negoces);
-      return { besoinId: mien.id, achatId: mien.regroupementId!, ajoute: true, rejoint: false, ...(await this.ecranPrevenir(tenant, mien.id)) };
-    }
-
-    const dates = datesAchatGroupe(l.dateBesoin, this.cfg.delaiLivraisonJours, this.cfg.delaiReponseJours);
-    let achat = achatVise
-      ? await this.prisma.regroupementNegocie.findFirst({ where: { id: achatVise, mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant }, cle, departement } })
-      : await this.achatCompatible(cle, departement, l.dateBesoin, dates.clotureLe, maintenant);
-    if (achatVise && !achat) throw new DomainError("conflict", "This group purchase is closed", { reason: "achat_clos", message: "Cet achat groupé est clos : lance le tien." });
-    let cree = false;
-    if (!achat) {
-      achat = await this.prisma.regroupementNegocie.create({
-        data: { mode: MODE_AUTO, cle, libelle: ref.reference.libelle, famille: ref.reference.famille, departement, unite: l.unite, dateBesoinMin: l.dateBesoin, clotureLe: dates.clotureLe, reponseAvantLe: dates.reponseAvantLe },
-      });
-      cree = true;
-    } else if (achat.dateBesoinMin && l.dateBesoin < achat.dateBesoinMin) {
-      achat = await this.prisma.regroupementNegocie.update({ where: { id: achat.id }, data: { dateBesoinMin: l.dateBesoin } });
-    }
-    const besoin = await this.prisma.besoinNegocie.create({
-      data: {
-        companyId: tenant.companyId,
-        projectId: l.projectId ?? null,
-        articleKey: l.articleKey ?? null,
-        designation: l.designation,
-        cle,
-        famille: ref.reference.famille,
-        quantite: l.quantite,
-        unite: l.unite,
-        departement,
-        livraison: l.livraison,
-        dateBesoin: l.dateBesoin,
-        statut: "declare",
-        regroupementId: achat.id,
-      },
-    });
-    await this.ajouterNegoces(besoin.id, achat.id, tenant.companyId, negoces);
-    if (cree) await this.alerter(achat.id, tenant.companyId).catch(() => undefined);
-    return { besoinId: besoin.id, achatId: achat.id, ajoute: false, rejoint: !cree, ...(await this.ecranPrevenir(tenant, besoin.id)) };
+  /** L'accès (point 25) : abonné, ou le tout premier achat groupé, offert. */
+  private async droit(companyId: string) {
+    const engagementsPasses = await this.prisma.besoinNegocie.count({ where: { companyId, engageLe: { not: null } } });
+    return droitAchatGroupe({ abonne: await this.ports.abonne(companyId), engagementsPasses });
   }
 
   /**
-   * L'achat ouvert compatible : même référence stricte, même département, clôture pas avant la sienne (personne ne voit
-   * sa date avancer), date de besoin au plus 30 jours après la plus proche du groupe.
+   * Rejoindre (ou ouvrir) l'achat groupé de son métier et de son secteur avec des lignes rattachées au catalogue, en
+   * s'engageant. Déjà dedans : les lignes s'ajoutent (même référence : la quantité s'additionne).
    */
-  private async achatCompatible(cle: string, departement: string, dateBesoin: Date, cloture: Date, maintenant: Date) {
-    const ouverts = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, cle, departement, clotureLe: { gt: maintenant } }, orderBy: { createdAt: "asc" } });
-    return ouverts.find((a) => a.clotureLe! <= cloture && (!a.dateBesoinMin || dateBesoin.getTime() <= a.dateBesoinMin.getTime() + 30 * JOUR)) ?? null;
+  async engager(tenant: TenantContext, e: Engagement) {
+    assertCanWrite(tenant);
+    await this.exigerAutomatique();
+    const company = await this.exigerEntreprise(tenant.companyId);
+    if (!e.engagement) throw validationFailed("Commitment required", { reason: "engagement_requis", message: "Coche la case d'engagement pour rejoindre l'achat groupé." });
+    if (e.negoces.length === 0) throw validationFailed(PHRASE_NEGOCE_OBLIGATOIRE, { reason: "negoce_obligatoire", message: PHRASE_NEGOCE_OBLIGATOIRE });
+    if (e.lignes.length === 0) throw validationFailed("Nothing to add", { reason: "rien_a_lancer", message: "Coche au moins une ligne rattachée au catalogue." });
+    const lignes = e.lignes.map((l) => {
+      const r = referenceStricte(l.designation);
+      if (!r.ok || !this.cfg.familles.includes(r.reference.famille))
+        throw validationFailed("Reference not precise enough", { reason: "reference_imprecise", message: `« ${l.designation} » n'est pas une référence du catalogue : elle reste en demande perso.` });
+      if (!(l.quantite > 0)) throw validationFailed("Quantity required", { reason: "quantite_requise" });
+      return { ...l, ref: r.reference };
+    });
+    const maintenant = this.now();
+    const departement = zoneDuCodePostal(e.livraison);
+    if (!departement) throw validationFailed("A delivery town with a postcode is required", { reason: "livraison_requise", message: "Indique la commune de livraison avec son code postal." });
+    await this.ports.exigerZone(tenant.companyId, departement);
+
+    let achat = null as Awaited<ReturnType<PrismaService["regroupementNegocie"]["findFirst"]>>;
+    let cree = false;
+    if (e.achatId) {
+      if (!isUuid(e.achatId)) throw notFound("AchatGroupe");
+      achat = await this.prisma.regroupementNegocie.findFirst({ where: { id: e.achatId, mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant }, departement } });
+      if (!achat) throw new DomainError("conflict", "This group purchase is closed", { reason: "achat_clos", message: "Cet achat groupé est clos ou hors de ton secteur." });
+    } else {
+      const famille = this.metierDe(company.trades, lignes.map((l) => l.ref.famille));
+      if (!e.dateBesoin) throw validationFailed("Date required", { reason: "date_requise", message: "Indique ta date de livraison." });
+      const dates = this.dates(e.dateBesoin);
+      if (dates.clotureLe <= maintenant) throw validationFailed(PHRASE_DATE_TROP_PROCHE, { reason: "date_trop_proche", message: PHRASE_DATE_TROP_PROCHE });
+      achat = await this.achatCompatible(famille, departement, e.dateBesoin, maintenant);
+      if (!achat) {
+        const secteur = communeDe(e.livraison) ?? departement;
+        achat = await this.prisma.regroupementNegocie.create({
+          data: { mode: MODE_AUTO, cle: `metier:${famille}`, libelle: titreAchatGroupe({ famille, secteur, dateBesoin: e.dateBesoin }), famille, departement, unite: null, dateBesoinMin: e.dateBesoin, clotureLe: dates.clotureLe, reponseAvantLe: dates.reponseAvantLe },
+        });
+        cree = true;
+      }
+    }
+    const dateBesoin = achat.dateBesoinMin ?? e.dateBesoin ?? achat.clotureLe!;
+    const negoces = await Promise.all(e.negoces.map((n) => this.negoceDe(tenant, n)));
+
+    let besoin = await this.prisma.besoinNegocie.findFirst({ where: { companyId: tenant.companyId, regroupementId: achat.id, statut: ENGAGE } });
+    const ajoute = !!besoin;
+    let offert = false;
+    let phraseDroit: string | null = null;
+    if (!besoin) {
+      const d = await this.droit(tenant.companyId);
+      if (!d.ok) throw new DomainError("abonnement_requis", d.phrase!, { reason: "achat_groupe", refus: "achat_groupe", phrase: d.phrase });
+      offert = d.offert;
+      phraseDroit = d.phrase;
+      besoin = await this.prisma.besoinNegocie.create({
+        data: { companyId: tenant.companyId, designation: achat.libelle, cle: achat.cle, famille: achat.famille, quantite: 0, unite: "lignes", departement, livraison: e.livraison, dateBesoin, statut: ENGAGE, regroupementId: achat.id, engageLe: maintenant, offert },
+      });
+    }
+    for (const l of lignes) {
+      const deja = await this.prisma.ligneAchatGroupe.findUnique({ where: { besoinId_cle_unite: { besoinId: besoin.id, cle: l.ref.cle, unite: l.unite } } });
+      if (deja) await this.prisma.ligneAchatGroupe.update({ where: { id: deja.id }, data: { quantite: Number(deja.quantite) + l.quantite } });
+      else
+        await this.prisma.ligneAchatGroupe.create({
+          data: { besoinId: besoin.id, regroupementId: achat.id, companyId: tenant.companyId, cle: l.ref.cle, libelle: l.ref.libelle, famille: l.ref.famille, unite: l.unite, quantite: l.quantite, projectId: l.projectId ?? null, articleKey: l.articleKey ?? null, designationOrigine: l.designation },
+        });
+    }
+    await this.prisma.besoinNegocie.update({ where: { id: besoin.id }, data: { quantite: await this.prisma.ligneAchatGroupe.count({ where: { besoinId: besoin.id } }) } });
+    await this.ajouterNegoces(besoin.id, achat.id, tenant.companyId, negoces);
+    if (cree) await this.alerter(achat.id, tenant.companyId).catch(() => undefined);
+    return { besoinId: besoin.id, achatId: achat.id, titre: achat.libelle, ajoute, rejoint: !cree && !ajoute, offert, phrase: phraseDroit, ...(await this.ecranPrevenir(tenant, besoin.id)) };
   }
 
-  /** « Rejoindre » depuis une carte ou une alerte : la référence de l'achat, sa quantité, sa commune, ses négoces. */
-  async rejoindre(tenant: TenantContext, achatId: string, d: Omit<Lancement, "designation" | "unite">) {
-    if (!isUuid(achatId)) throw notFound("AchatGroupe");
-    const a = await this.prisma.regroupementNegocie.findFirst({ where: { id: achatId, mode: MODE_AUTO }, include: { besoins: { select: { designation: true, unite: true }, orderBy: { createdAt: "asc" }, take: 1 } } });
-    if (!a) throw notFound("AchatGroupe");
-    const modele = a.besoins[0];
-    return this.lancer(tenant, { ...d, designation: modele?.designation ?? a.libelle, unite: modele?.unite ?? a.unite ?? "" }, a.id);
+  private dates(dateBesoin: Date) {
+    return datesAchatGroupePanier(dateBesoin, { delaiLivraisonJours: this.cfg.delaiLivraisonJours, delaiReponseJours: this.cfg.delaiReponseJours, validationAdminHeures: this.cfg.validationAdmin ? this.cfg.delaiValidationAdminHeures : 0 });
+  }
+
+  /** L'achat ouvert du même métier et du même secteur, livré à temps (au plus 30 jours avant sa date). */
+  private async achatCompatible(famille: string, departement: string, dateBesoin: Date, maintenant: Date) {
+    const ouverts = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, famille, departement, clotureLe: { gt: maintenant } }, orderBy: { createdAt: "asc" } });
+    return ouverts.find((a) => !!a.dateBesoinMin && a.dateBesoinMin.getTime() <= dateBesoin.getTime() && a.dateBesoinMin.getTime() >= dateBesoin.getTime() - 30 * JOUR) ?? null;
   }
 
   /** Un négoce choisi : dans le carnet de l'artisan (créé une fois par e-mail). */
@@ -327,6 +406,54 @@ export class AchatGroupeService {
     }
   }
 
+  /* ----------------------------------------------------------------- depuis une liste : cases, suggestion (A2, F22) */
+
+  /**
+   * Les lignes d'une liste pour l'achat groupé : la référence proposée et sa question (« C'est bien de l'ardoise 32×22 ? »),
+   * la suggestion des grosses quantités (pré-cochées), le droit (premier offert), les règles et les achats ouverts.
+   */
+  async depuisListe(tenant: TenantContext, projectId: string) {
+    const { adresse, source, lignes } = await this.ports.lignesDeListe(tenant, projectId);
+    const vues = lignes.map((l) => {
+      const r = rattachementPropose(l.designation);
+      const groupable = !!r && this.cfg.familles.includes(r.famille);
+      return { key: l.key, designation: l.designation, quantite: l.quantite, unite: l.unite, reference: groupable ? r!.libelle : null, famille: groupable ? r!.famille : null, question: groupable ? r!.question : null };
+    });
+    const suggerees = lignesASuggerer(vues, this.seuilsSuggestion).sort((a, b) => b.quantite - a.quantite);
+    const premiere = suggerees[0];
+    const zone = zoneDuCodePostal(adresse) ?? (await this.ports.zoneDe(tenant.companyId));
+    const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { trades: true } });
+    const familles = company.trades.flatMap((t) => famillesDuMetier(t)) as string[];
+    const ouverts = zone && (await this.ports.mode()) === MODE_AUTO ? await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, departement: zone, clotureLe: { gt: this.now() }, ...(familles.length ? { famille: { in: familles } } : {}) }, orderBy: { clotureLe: "asc" }, take: 5 }) : [];
+    const d = await this.droit(tenant.companyId);
+    return {
+      adresse,
+      source,
+      lignes: vues.map((l) => ({ ...l, suggeree: suggerees.includes(l) })),
+      suggestion: premiere ? { phrase: phraseSuggestion({ quantite: `${qte(premiere.quantite)} ${premiere.unite}`, libelle: premiere.reference ?? premiere.designation }), keys: suggerees.map((l) => l.key) } : null,
+      droit: { ok: d.ok, offert: d.offert, phrase: d.phrase },
+      engagement: { phrase: PHRASE_ENGAGEMENT, regles: REGLES_ENGAGEMENT },
+      achatsOuverts: ouverts.map((a) => ({ id: a.id, titre: a.libelle, clotureLe: a.clotureLe!.toISOString(), dateBesoin: a.dateBesoinMin ? jourIso(a.dateBesoinMin) : null })),
+    };
+  }
+
+  /** Les lignes cochées et confirmées d'un tap partent dans l'achat groupé ; les autres restent en demande perso. */
+  async lancerDepuisListe(tenant: TenantContext, projectId: string, d: { confirmees: string[]; dateBesoin: Date | null; livraison: string | null; negoces: NegoceAjoute[]; engagement: boolean; achatId: string | null }) {
+    const { adresse, lignes } = await this.ports.lignesDeListe(tenant, projectId);
+    const livraison = d.livraison ?? adresse;
+    if (!livraison) throw validationFailed("A delivery town with a postcode is required", { reason: "livraison_requise", message: "Indique la commune de livraison avec son code postal." });
+    const engagees: LigneEngagee[] = [];
+    const perso: { key: string; designation: string }[] = [];
+    for (const l of lignes) {
+      const r = rattachementPropose(l.designation);
+      if (d.confirmees.includes(l.key) && r && this.cfg.familles.includes(r.famille)) engagees.push({ designation: l.designation, quantite: l.quantite, unite: l.unite, projectId, articleKey: l.key });
+      else perso.push({ key: l.key, designation: l.designation });
+    }
+    if (engagees.length === 0) throw validationFailed("Nothing confirmed", { reason: "rien_a_lancer", message: "Coche au moins une ligne rattachée au catalogue." });
+    const r = await this.engager(tenant, { achatId: d.achatId, lignes: engagees, livraison, dateBesoin: d.dateBesoin, negoces: d.negoces, engagement: d.engagement });
+    return { ...r, lancees: engagees.map((l) => ({ key: l.articleKey })), perso };
+  }
+
   /* ---------------------------------------------------------------------------------- « Préviens ton négoce » */
 
   async ecranPrevenir(tenant: TenantContext, besoinId: string) {
@@ -334,14 +461,14 @@ export class AchatGroupeService {
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: b.regroupementId! } });
     const user = await this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { name: true } });
     const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true } });
-    const total = await this.quantiteTotale(a.id);
-    const volume = `${qte(total)} ${a.unite ?? b.unite}`;
-    const sms = smsPrevenir({ libelle: a.libelle, clotureLe: a.clotureLe!, prenom: (user?.name ?? "").trim().split(/\s+/)[0] ?? "", entreprise: company.name });
+    const references = cumulerPanier(await this.lignesPanier(a.id)).length;
+    const metier = libelleMetier(a.famille).toLowerCase();
+    const sms = smsPrevenir({ libelle: `la ${metier}`, clotureLe: a.clotureLe!, prenom: (user?.name ?? "").trim().split(/\s+/)[0] ?? "", entreprise: company.name });
     const negoces = await this.prisma.negoceParticipant.findMany({ where: { besoinId: b.id }, orderBy: { createdAt: "asc" } });
     return {
       prevenir: {
         titre: "Préviens ton négoce",
-        texte: ecranPrevenir({ volumeTotal: volume, libelle: a.libelle, clotureLe: a.clotureLe! }),
+        texte: ecranPrevenir({ volumeTotal: `${references} référence${references > 1 ? "s" : ""}`, libelle: metier, clotureLe: a.clotureLe! }),
         sms,
         negoces: negoces.map((n) => ({ id: n.id, nom: n.nom, telephone: n.telephone, tel: n.telephone ? lienTel(n.telephone) : null, smsLien: lienSms(n.telephone, sms), prevenu: !!n.prevenuLe })),
       },
@@ -359,7 +486,7 @@ export class AchatGroupeService {
     return { fait: true };
   }
 
-  /* ------------------------------------------------------------------------------- modifier, retirer, se désister */
+  /* ------------------------------------------------------------------- modifier, retirer, sortir (B8) */
 
   private async monBesoin(tenant: TenantContext, besoinId: string) {
     if (!isUuid(besoinId)) throw notFound("Besoin");
@@ -370,27 +497,27 @@ export class AchatGroupeService {
 
   private async avantCloture(regroupementId: string) {
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: regroupementId } });
-    if (a.statut !== OUVERT || !a.clotureLe || a.clotureLe <= this.now()) throw new DomainError("conflict", "Registrations are closed", { reason: "cloture_passee", message: "Les inscriptions sont closes : tu peux te désister." });
+    if (a.statut !== OUVERT || !a.clotureLe || a.clotureLe <= this.now()) throw new DomainError("conflict", "Registrations are closed", { reason: "cloture_passee", message: "Les inscriptions sont closes : tes quantités sont annoncées aux négoces." });
     return a;
   }
 
-  async modifier(tenant: TenantContext, besoinId: string, d: { quantite?: number; livraison?: string; negoces?: NegoceAjoute[] }) {
+  /** Avant la clôture : changer une quantité (0 retire la ligne), ajouter un négoce. */
+  async modifier(tenant: TenantContext, besoinId: string, d: { quantites?: Record<string, number>; negoces?: NegoceAjoute[] }) {
     assertCanWrite(tenant);
     const b = await this.monBesoin(tenant, besoinId);
-    if (b.statut !== "declare") throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
+    if (b.statut !== ENGAGE) throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
     await this.avantCloture(b.regroupementId!);
-    const data: { quantite?: number; livraison?: string } = {};
-    if (d.quantite !== undefined) data.quantite = d.quantite;
-    if (d.livraison !== undefined) {
-      if (zoneDuCodePostal(d.livraison) !== b.departement) throw validationFailed("Same department only", { reason: "autre_departement", message: "La livraison doit rester dans le même département." });
-      data.livraison = d.livraison;
+    for (const [ligneId, quantite] of Object.entries(d.quantites ?? {})) {
+      if (!isUuid(ligneId)) continue;
+      if (quantite <= 0) await this.prisma.ligneAchatGroupe.deleteMany({ where: { id: ligneId, besoinId: b.id } });
+      else await this.prisma.ligneAchatGroupe.updateMany({ where: { id: ligneId, besoinId: b.id }, data: { quantite } });
     }
-    await this.prisma.besoinNegocie.update({ where: { id: b.id }, data });
+    if ((await this.prisma.ligneAchatGroupe.count({ where: { besoinId: b.id } })) === 0) return this.retirer(tenant, b.id);
     if (d.negoces?.length) await this.ajouterNegoces(b.id, b.regroupementId!, tenant.companyId, await Promise.all(d.negoces.map((n) => this.negoceDe(tenant, n))));
     return this.detail(tenant, b.id);
   }
 
-  /** Retirer un négoce de sa participation (au moins un doit rester, précision 1). */
+  /** Retirer un négoce de sa participation (au moins un doit rester). */
   async retirerNegoce(tenant: TenantContext, besoinId: string, participantId: string) {
     assertCanWrite(tenant);
     const b = await this.monBesoin(tenant, besoinId);
@@ -401,90 +528,111 @@ export class AchatGroupeService {
     return this.detail(tenant, b.id);
   }
 
-  /** Avant la clôture : « Retirer » (avec confirmation à l'écran). */
+  /** Avant la clôture, rien n'est encore annoncé aux négoces : « Retirer ma liste » ne compte pas comme une sortie. */
   async retirer(tenant: TenantContext, besoinId: string) {
     assertCanWrite(tenant);
     const b = await this.monBesoin(tenant, besoinId);
-    if (b.statut !== "declare") throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
+    if (b.statut !== ENGAGE) throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
     await this.avantCloture(b.regroupementId!);
     await this.prisma.$transaction([
       this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { statut: "retire" } }),
-      this.prisma.desistementAchatGroupe.create({ data: { besoinId: b.id, companyId: tenant.companyId, regroupementId: b.regroupementId!, quantite: b.quantite, apresCloture: false } }),
+      this.prisma.desistementAchatGroupe.create({ data: { besoinId: b.id, companyId: tenant.companyId, regroupementId: b.regroupementId!, quantite: b.quantite, apresCloture: false, raison: "retire_avant_cloture" } }),
     ]);
     return { fait: true };
   }
 
-  /** Après la clôture : « Me désister » (noté pour l'admin ; l'offre du négoce reste ferme, précision 4). */
-  async desister(tenant: TenantContext, besoinId: string, raison: string | null) {
+  /** Après la clôture : une des deux sorties, en un clic, avec son motif (point 8). Comptée pour la règle d'exclusion. */
+  async sortir(tenant: TenantContext, besoinId: string, motif: MotifSortie) {
     assertCanWrite(tenant);
     const b = await this.monBesoin(tenant, besoinId);
-    if (b.statut !== "declare") throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
+    if (b.statut !== ENGAGE) throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: b.regroupementId! } });
     if (a.statut === OUVERT && a.clotureLe && a.clotureLe > this.now()) throw new DomainError("conflict", "Still open: withdraw instead", { reason: "avant_cloture" });
+    const maintenant = this.now();
     await this.prisma.$transaction([
-      this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { statut: "desiste", desisteLe: this.now() } }),
-      this.prisma.desistementAchatGroupe.create({ data: { besoinId: b.id, companyId: tenant.companyId, regroupementId: a.id, quantite: b.quantite, apresCloture: true, raison } }),
+      this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { statut: "sorti", sortieMotif: motif, sortieLe: maintenant, desisteLe: maintenant } }),
+      this.prisma.desistementAchatGroupe.create({ data: { besoinId: b.id, companyId: tenant.companyId, regroupementId: a.id, quantite: b.quantite, apresCloture: true, raison: motif } }),
     ]);
-    return { fait: true };
+    const fin = await this.recalculerExclusion(tenant.companyId);
+    return { fait: true, exclusion: fin ? phraseExclusion(fin) : null };
+  }
+
+  /** La règle des sorties : plus d'une sortie par trimestre, ou une commande pas passée sans motif. */
+  private async recalculerExclusion(companyId: string): Promise<Date | null> {
+    const d = await this.prisma.desistementAchatGroupe.findMany({ where: { companyId, apresCloture: true }, select: { raison: true, le: true } });
+    const fin = exclusionJusquau(
+      { sorties: d.filter((x) => (MOTIFS_SORTIE as readonly string[]).includes(x.raison ?? "")).map((x) => x.le), nonCommandesSansMotif: d.filter((x) => x.raison === "non_commande").map((x) => x.le) },
+      this.cfg.exclusionMois,
+    );
+    await this.prisma.company.update({ where: { id: companyId }, data: { achatsGroupesExclusJusquau: fin } });
+    return fin && exclu(fin, this.now()) ? fin : null;
   }
 
   /* -------------------------------------------------------------------------------------------- les vues */
 
-  private async quantiteTotale(regroupementId: string): Promise<number> {
-    const r = await this.prisma.besoinNegocie.aggregate({ where: { regroupementId, statut: { in: ACTIFS } }, _sum: { quantite: true } });
-    return Number(r._sum.quantite ?? 0);
+  private lignesPanier(regroupementId: string): Promise<LignePanier[]> {
+    return this.prisma.ligneAchatGroupe
+      .findMany({ where: { regroupementId, besoin: { statut: { in: [ENGAGE, "accepte"] } } }, select: { cle: true, libelle: true, famille: true, unite: true, quantite: true } })
+      .then((ls) => ls.map((l) => ({ ...l, quantite: Number(l.quantite) })));
   }
 
-  /** Le volume estimé (€ HT) : prix repère de la référence, sinon le dernier prix de chaque participant ; null sans prix. */
-  private async volumeEstime(a: { id: string; cle: string; libelle: string }): Promise<{ estimeHt: number | null; entreprises: number; total: number }> {
-    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId: a.id, statut: { in: ACTIFS } }, select: { companyId: true, quantite: true, unite: true, designation: true } });
-    const entreprises = new Set(besoins.map((b) => b.companyId)).size;
-    const total = besoins.reduce((s, b) => s + Number(b.quantite), 0);
+  /** Le volume estimé (€ HT) : prix repère de chaque ligne, sinon le dernier prix de son artisan ; null sans prix. */
+  private async volumeEstime(regroupementId: string): Promise<{ estimeHt: number | null; entreprises: number }> {
+    const lignes = await this.prisma.ligneAchatGroupe.findMany({ where: { regroupementId, besoin: { statut: { in: [ENGAGE, "accepte"] } } }, select: { companyId: true, cle: true, unite: true, quantite: true } });
+    const entreprises = new Set(lignes.map((l) => l.companyId)).size;
     let estime = 0;
-    for (const b of besoins) {
-      const r = referenceStricte(b.designation);
-      const unite = uniteRepere(b.unite);
-      const repere = r.ok ? (this.cfg.prixReperes[`${r.reference.type}:${unite}`] ?? null) : null;
-      const pu = repere ?? (await this.ports.dernierPrixPour(b.companyId))(a.cle, unite);
-      if (pu === null) return { estimeHt: null, entreprises, total };
-      estime += pu * Number(b.quantite);
+    for (const l of lignes) {
+      const unite = uniteRepere(l.unite);
+      const repere = this.cfg.prixReperes[`${l.cle.split("|")[0]}:${unite}`] ?? null;
+      const pu = repere ?? (await this.ports.dernierPrixPour(l.companyId))(l.cle, unite);
+      if (pu === null) return { estimeHt: null, entreprises };
+      estime += pu * Number(l.quantite);
     }
-    return { estimeHt: Math.round(estime * 100) / 100, entreprises, total };
+    return { estimeHt: arrondi(estime), entreprises };
   }
 
-  private async carte(tenant: TenantContext, besoinId: string, volumes: Record<string, number>) {
-    const b = await this.prisma.besoinNegocie.findUniqueOrThrow({ where: { id: besoinId }, include: { negoces: { orderBy: { createdAt: "asc" } } } });
+  private async carte(besoinId: string, volumes: Record<string, number>) {
+    const b = await this.prisma.besoinNegocie.findUniqueOrThrow({ where: { id: besoinId }, include: { negoces: { orderBy: { createdAt: "asc" } }, lignes: { orderBy: { createdAt: "asc" } } } });
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: b.regroupementId! } });
-    const v = await this.volumeEstime(a);
-    const unite = a.unite ?? b.unite;
+    const v = await this.volumeEstime(a.id);
+    const references = cumulerPanier(await this.lignesPanier(a.id)).length;
     const etat = etatCarte(
-      { statut: a.statut, clotureLe: a.clotureLe, reponseAvantLe: a.reponseAvantLe, entreprises: v.entreprises, total: v.entreprises >= this.cfg.seuilAnonymat ? `${qte(v.total)} ${unite}` : null },
+      { statut: a.statut, clotureLe: a.clotureLe, reponseAvantLe: a.reponseAvantLe, entreprises: v.entreprises, total: v.entreprises >= this.cfg.seuilAnonymat ? `${references} références` : null },
       { statut: b.statut },
       this.cfg.seuilAnonymat,
     );
-    const ouvert = a.statut === OUVERT && !!a.clotureLe && a.clotureLe > this.now();
-    const jauge = a.statut === OUVERT ? jaugeVolume(v.estimeHt, volumeMinimum(a.famille, volumes), v.entreprises, this.cfg.seuilAnonymat) : null;
+    const maintenant = this.now();
+    const ouvert = a.statut === OUVERT && !!a.clotureLe && a.clotureLe > maintenant;
+    const publie = a.statut === "publie";
+    const aTemps = !a.commandeAvantLe || a.commandeAvantLe > maintenant;
     return {
       id: b.id,
       achatId: a.id,
-      libelle: a.libelle,
-      quantite: Number(b.quantite),
-      unite: b.unite,
+      titreAchat: a.libelle,
+      metier: libelleMetier(a.famille),
+      lignes: b.lignes.map((l) => ({ id: l.id, cle: l.cle, libelle: l.libelle, quantite: Number(l.quantite), unite: l.unite })),
       ...etat,
-      jauge,
+      jauge: a.statut === OUVERT ? jaugeVolume(v.estimeHt, volumeMinimum(a.famille, volumes), v.entreprises, this.cfg.seuilAnonymat) : null,
       commune: communeDe(b.livraison) ?? b.livraison,
       dateBesoin: jourIso(b.dateBesoin),
       clotureLe: a.clotureLe?.toISOString() ?? null,
       reponseAvantLe: a.reponseAvantLe?.toISOString() ?? null,
+      commandeAvantLe: a.commandeAvantLe?.toISOString() ?? null,
+      offert: b.offert,
       actions: {
-        modifier: ouvert && b.statut === "declare",
-        retirer: ouvert && b.statut === "declare",
-        desister: !ouvert && b.statut === "declare" && ["consultation", "offre_recue", OUVERT].includes(a.statut),
-        planB: a.statut === "pas_assez" && b.statut === "declare",
-        commander: a.statut === "offre_recue" && b.statut === "declare",
+        modifier: ouvert && b.statut === ENGAGE,
+        retirer: ouvert && b.statut === ENGAGE,
+        sortir: !ouvert && b.statut === ENGAGE && ["consultation", "validation", "publie", "pas_assez"].includes(a.statut),
+        planB: a.statut === "pas_assez" && b.statut === ENGAGE,
+        commander: publie && b.statut === ENGAGE && aTemps,
+        livre: b.statut === "accepte" && !b.livreLe && !b.problemeLe,
       },
+      motifsSortie: MOTIFS_SORTIE.map((m) => ({ valeur: m, libelle: LIBELLES_MOTIFS_SORTIE[m] })),
       negoces: b.negoces.map((n) => ({ id: n.id, nom: n.nom, telephone: n.telephone, prevenu: !!n.prevenuLe, parti: !!n.partiLe })),
       bonNumero: b.bonNumero,
+      commandeRecue: !!b.commandeRecueLe,
+      livre: !!b.livreLe,
+      probleme: b.problemeTexte,
       _a: a,
       _b: b,
     };
@@ -496,73 +644,100 @@ export class AchatGroupeService {
     const volumes = await this.volumesMin();
     const cartes = [];
     for (const b of besoins) {
-      const { _a, _b, ...c } = await this.carte(tenant, b.id, volumes);
+      const { _a, _b, ...c } = await this.carte(b.id, volumes);
       void _a;
       void _b;
       cartes.push(c);
     }
-    const reglage = (await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { alertesAchatsGroupes: true } }))?.alertesAchatsGroupes;
-    return { mode: await this.ports.mode(), achats: cartes, alertes: lireReglageAlertes(reglage) };
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { alertesAchatsGroupes: true, achatsGroupesExclusJusquau: true } });
+    const exclusion = c?.achatsGroupesExclusJusquau && exclu(c.achatsGroupesExclusJusquau, this.now()) ? phraseExclusion(c.achatsGroupesExclusJusquau) : null;
+    return { mode: await this.ports.mode(), achats: cartes, alertes: lireReglageAlertes(c?.alertesAchatsGroupes), exclusion };
   }
 
-  /** Le détail d'une participation : la frise, la commune, le dernier prix, les négoces, les offres. */
+  /** Le détail d'une participation : la frise, ses lignes, ses négoces ; après la publication, la comparaison sur SES lignes. */
   async detail(tenant: TenantContext, besoinId: string) {
     await this.monBesoin(tenant, besoinId);
-    const { _a: a, _b: b, ...c } = await this.carte(tenant, besoinId, await this.volumesMin());
-    const dernier = (await this.ports.dernierPrixPour(tenant.companyId))(a.cle, uniteRepere(b.unite));
+    const { _a: a, _b: b, ...c } = await this.carte(besoinId, await this.volumesMin());
+    const resultat = a.statut === "publie" || b.statut === "accepte" ? await this.resultatPour(a, b) : null;
+    if (resultat && !b.offreVueLe) await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { offreVueLe: this.now() } });
     return {
       ...c,
       frise: { etapes: ETAPES_ACHAT_GROUPE, courante: etapeCourante(a.statut, b.statut) },
-      dernierPrix: dernier !== null ? `Ton dernier prix : ${euros(dernier)} HT / ${b.unite}` : null,
-      invite: `Un collègue commande aussi ${de(a.libelle).replace(/^d(e |')/, (m) => (m === "de " ? "des " : "de l'"))} ? Invite-le`,
-      offres: a.statut === "offre_recue" || b.statut === "accepte" ? await this.offresPour(tenant, a, b) : null,
+      invite: "Un collègue du métier commande aussi ? Invite-le",
+      resultat,
     };
   }
 
-  /** Point 5 : l'offre de ses négoces, la meilleure du groupe (nom selon les droits), l'économie en euros. */
-  private async offresPour(tenant: TenantContext, a: { id: string; meilleureId: string | null }, b: { id: string; quantite: unknown }) {
-    const consultations = await this.prisma.consultationAchatGroupe.findMany({ where: { regroupementId: a.id }, select: { id: true, nom: true, email: true, prixUnitaireHt: true, statut: true } });
+  /** Les prix effectifs d'une offre : sa réponse, corrigée par l'admin. */
+  private prixEffectifs(c: Pick<Consultation, "prixLignes" | "prixCorriges">): ReponseLignes {
+    return { ...objet(c.prixLignes), ...objet(c.prixCorriges) };
+  }
+
+  private offresDe(consultations: readonly Consultation[]): OffreNegocePanier[] {
+    return consultations.filter((c) => c.reponduLe).map((c) => ({ id: c.id, nom: c.nom, prix: this.prixEffectifs(c), ecartee: !!c.ecarteeLe }));
+  }
+
+  /**
+   * Points 13 et 17 : SES lignes chez chaque négoce (complètes d'abord, puis la moins chère), la meilleure, son négoce
+   * habituel, la phrase, et ce qu'il faut pour commander (compte ouvert ou conditions d'ouverture).
+   */
+  private async resultatPour(a: { id: string }, b: { id: string; consultationCommandeId: string | null; coordonneesTransmisesLe: Date | null; coordonneesConsultationId: string | null }) {
+    const consultations = await this.prisma.consultationAchatGroupe.findMany({ where: { regroupementId: a.id } });
+    const mesLignes = await this.prisma.ligneAchatGroupe.findMany({ where: { besoinId: b.id }, orderBy: { createdAt: "asc" } });
+    const comparees = comparerPourArtisan(mesLignes.map((l) => ({ cle: l.cle, quantite: Number(l.quantite) })), this.offresDe(consultations));
     const mesEmails = new Set((await this.prisma.negoceParticipant.findMany({ where: { besoinId: b.id }, select: { email: true } })).map((n) => n.email));
-    const miennes = consultations.filter((c) => mesEmails.has(c.email));
-    const m = a.meilleureId ? consultations.find((c) => c.id === a.meilleureId && c.statut === "valide") : null;
-    const quantite = Number(b.quantite);
-    const abonne = await this.ports.abonne(tenant.companyId);
-    const vue = vueOffresArtisan({
-      quantite,
-      mesNegoces: miennes.map((c) => ({ nom: c.nom, prixUnitaireHt: c.prixUnitaireHt === null ? null : Number(c.prixUnitaireHt), valide: c.statut === "valide" })),
-      meilleure: m ? { nom: m.nom, prixUnitaireHt: Number(m.prixUnitaireHt), estUnDesMiens: mesEmails.has(m.email) } : null,
-      abonne,
+    const parId = new Map(consultations.map((c) => [c.id, c]));
+    const conditions = new Map((await this.prisma.conditionsOuvertureNegoce.findMany({ where: { email: { in: consultations.map((c) => c.email) } } })).map((x) => [x.email, x]));
+    const meilleure = comparees[0] ?? null;
+    const habituelles = comparees.filter((o) => mesEmails.has(parId.get(o.id)!.email));
+    const monNegoce = habituelles.find((o) => o.complete) ?? habituelles[0] ?? null;
+    const offres = comparees.map((o) => {
+      const c = parId.get(o.id)!;
+      const prix = this.prixEffectifs(c);
+      const cond = conditions.get(c.email);
+      return {
+        consultationId: o.id,
+        nom: o.nom,
+        totalHt: o.totalHt,
+        complete: o.complete,
+        manquantes: phraseManquantes(o.manquantes),
+        habituel: mesEmails.has(c.email),
+        lignes: mesLignes.map((l) => ({ libelle: l.libelle, quantite: Number(l.quantite), unite: l.unite, prixHt: prixDe(prix, l.cle) })),
+        ouvertureCompte: mesEmails.has(c.email) ? null : phraseOuvertureCompte(cond ? { pieces: cond.pieces as ConditionOuverture[], paiement: cond.paiement as PaiementDepart | null, autre: cond.autre } : null),
+        telephone: c.telephone,
+      };
     });
-    const mienne = miennes.filter((c) => c.statut === "valide" && c.prixUnitaireHt !== null).sort((x, y) => Number(x.prixUnitaireHt) - Number(y.prixUnitaireHt))[0];
     return {
-      mien: vue.mien ? { ...vue.mien, consultationId: mienne?.id ?? null, prixUnitaireHt: mienne ? Number(mienne.prixUnitaireHt) : null } : null,
-      meilleure: vue.meilleure ? { nom: vue.meilleure.nom ?? "un négoce du secteur", nomVisible: vue.meilleure.nom !== null, totalHt: vue.meilleure.totalHt, prixUnitaireHt: vue.meilleure.prixUnitaireHt, consultationId: vue.meilleure.nom !== null ? (m?.id ?? null) : null } : null,
-      economieHt: vue.economieHt,
-      enAttente: miennes.filter((c) => c.statut !== "valide").map((c) => ({ nom: c.nom, raison: c.statut === "envoyee" ? "Pas de réponse" : "Offre en vérification" })),
+      phrase: meilleure ? phrasePublication(meilleure.totalHt, monNegoce && monNegoce.id !== meilleure.id ? monNegoce.totalHt : null) : null,
+      meilleure: offres[0] ?? null,
+      monNegoce: monNegoce ? (offres.find((o) => o.consultationId === monNegoce.id) ?? null) : null,
+      offres,
+      commandeChez: b.consultationCommandeId ? (parId.get(b.consultationCommandeId)?.nom ?? null) : null,
+      coordonneesTransmises: b.coordonneesTransmisesLe ? (parId.get(b.coordonneesConsultationId ?? "")?.nom ?? "") : null,
     };
   }
 
-  /** « Achats groupés près de chez toi » : les achats ouverts de son département, de son métier, qu'il n'a pas rejoints. */
+  /** « Achats groupés de ton métier dans ton secteur » : les achats ouverts qu'il n'a pas rejoints. */
   async presDeChezMoi(tenant: TenantContext) {
     const zone = await this.ports.zoneDe(tenant.companyId);
     if (!zone || (await this.ports.mode()) !== MODE_AUTO) return { zone, achats: [] };
     const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { trades: true } });
-    const familles = new Set(company.trades.flatMap((t) => famillesDuMetier(t)));
+    const familles = new Set<string>(company.trades.flatMap((t) => famillesDuMetier(t)));
     const ouverts = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, departement: zone, clotureLe: { gt: this.now() } }, orderBy: { clotureLe: "asc" }, take: 30 });
-    const miens = new Set((await this.prisma.besoinNegocie.findMany({ where: { companyId: tenant.companyId, regroupementId: { in: ouverts.map((o) => o.id) }, statut: { in: ACTIFS } }, select: { regroupementId: true } })).map((b) => b.regroupementId));
+    const miens = new Set((await this.prisma.besoinNegocie.findMany({ where: { companyId: tenant.companyId, regroupementId: { in: ouverts.map((o) => o.id) }, statut: ENGAGE }, select: { regroupementId: true } })).map((b) => b.regroupementId));
     const volumes = await this.volumesMin();
     const achats = [];
-    for (const a of ouverts.filter((o) => !miens.has(o.id) && (familles.size === 0 || familles.has(o.famille as never)))) {
-      const v = await this.volumeEstime(a);
+    for (const a of ouverts.filter((o) => !miens.has(o.id) && (familles.size === 0 || familles.has(o.famille)))) {
+      const v = await this.volumeEstime(a.id);
       if (v.entreprises === 0) continue;
       achats.push({
         id: a.id,
-        libelle: a.libelle,
-        unite: a.unite,
+        titre: a.libelle,
+        metier: libelleMetier(a.famille),
         zone,
         dateBesoin: a.dateBesoinMin ? jourIso(a.dateBesoinMin) : null,
         clotureLe: a.clotureLe!.toISOString(),
-        phrase: phraseAlerte({ libelle: a.libelle, dateBesoin: a.dateBesoinMin ?? a.clotureLe!, zone, clotureLe: a.clotureLe! }),
+        phrase: phraseAlerteMetier({ famille: a.famille, dateBesoin: a.dateBesoinMin ?? a.clotureLe!, clotureLe: a.clotureLe! }),
         entreprises: v.entreprises >= this.cfg.seuilAnonymat ? v.entreprises : null,
         jauge: jaugeVolume(v.estimeHt, volumeMinimum(a.famille, volumes), v.entreprises, this.cfg.seuilAnonymat),
       });
@@ -570,43 +745,7 @@ export class AchatGroupeService {
     return { zone, achats };
   }
 
-  /* ----------------------------------------------------------------- « Acheter en groupe » depuis une liste */
-
-  /** Précision 2 : chaque ligne d'une liste reçoit sa question de rattachement, ou reste en demande perso. */
-  async depuisListe(tenant: TenantContext, projectId: string) {
-    const { adresse, lignes } = await this.ports.lignesDeListe(tenant, projectId);
-    return {
-      adresse,
-      lignes: lignes.map((l) => {
-        const r = rattachementPropose(l.designation);
-        const groupable = !!r && this.cfg.familles.includes(r.famille);
-        return { key: l.key, designation: l.designation, quantite: l.quantite, unite: l.unite, reference: groupable ? r!.libelle : null, question: groupable ? r!.question : null };
-      }),
-    };
-  }
-
-  /** Les lignes confirmées d'un tap rejoignent (ou lancent) leur achat groupé ; les autres restent en demande perso. */
-  async lancerDepuisListe(tenant: TenantContext, projectId: string, d: { confirmees: string[]; dateBesoin: Date; livraison: string | null; negoces: NegoceAjoute[] }) {
-    if (d.negoces.length === 0) throw validationFailed(PHRASE_NEGOCE_OBLIGATOIRE, { reason: "negoce_obligatoire", message: PHRASE_NEGOCE_OBLIGATOIRE });
-    const { adresse, lignes } = await this.ports.lignesDeListe(tenant, projectId);
-    const livraison = d.livraison ?? adresse;
-    if (!livraison) throw validationFailed("A delivery town with a postcode is required", { reason: "livraison_requise", message: "Indique la commune de livraison avec son code postal." });
-    const lancees = [];
-    const perso = [];
-    for (const l of lignes) {
-      const r = rattachementPropose(l.designation);
-      if (!d.confirmees.includes(l.key) || !r || !this.cfg.familles.includes(r.famille)) {
-        perso.push({ key: l.key, designation: l.designation });
-        continue;
-      }
-      const res = await this.lancer(tenant, { designation: l.designation, quantite: l.quantite, unite: l.unite, livraison, dateBesoin: d.dateBesoin, negoces: d.negoces, projectId, articleKey: l.key });
-      lancees.push({ key: l.key, besoinId: res.besoinId, achatId: res.achatId, rejoint: res.rejoint });
-    }
-    if (lancees.length === 0) throw validationFailed("Nothing confirmed", { reason: "rien_a_lancer", message: "Confirme au moins une ligne pour l'acheter en groupe." });
-    return { lancees, perso };
-  }
-
-  /* ------------------------------------------------------------------------------------------ les alertes */
+  /* ------------------------------------------------------------------------------------------ les alertes (F21) */
 
   async reglageAlertes(tenant: TenantContext) {
     const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { alertesAchatsGroupes: true } });
@@ -620,7 +759,7 @@ export class AchatGroupeService {
   }
 
   /**
-   * Point 2 : un nouvel achat groupé prévient les artisans du même métier et du même secteur (notification + e-mail),
+   * Point 21 : un nouvel achat groupé prévient les artisans du même métier et du même secteur (notification + e-mail),
    * au plus N par jour ; au-delà, ou réglage « résumé », il attend le résumé du jour.
    */
   private async alerter(regroupementId: string, lanceur: string) {
@@ -628,24 +767,23 @@ export class AchatGroupeService {
     const maintenant = this.now();
     const jour = new Date(`${jourIso(maintenant)}T00:00:00Z`);
     const candidats = await this.prisma.company.findMany({ where: { id: { not: lanceur }, address: { contains: a.departement.slice(0, 2) } }, select: { id: true, address: true, trades: true, alertesAchatsGroupes: true } });
+    const phrase = phraseAlerteMetier({ famille: a.famille, dateBesoin: a.dateBesoinMin ?? a.clotureLe!, clotureLe: a.clotureLe! });
     let n = 0;
     for (const c of candidats) {
       if (zoneDuCodePostal(c.address) !== a.departement) continue;
-      const familles = c.trades.flatMap((t) => famillesDuMetier(t));
-      if (familles.length && !familles.includes(a.famille as never)) continue;
+      const familles: string[] = c.trades.flatMap((t) => famillesDuMetier(t));
+      if (familles.length && !familles.includes(a.famille)) continue;
       const envoyees = await this.prisma.alerteAchatGroupe.count({ where: { companyId: c.id, jour, envoyeeLe: { not: null }, resume: false } });
       const decision = decisionAlerte(lireReglageAlertes(c.alertesAchatsGroupes), envoyees, this.cfg.alertesJour);
       if (decision === "rien") continue;
-      const deja = await this.prisma.alerteAchatGroupe.findUnique({ where: { companyId_regroupementId: { companyId: c.id, regroupementId } } });
-      if (deja) continue;
+      if (await this.prisma.alerteAchatGroupe.findUnique({ where: { companyId_regroupementId: { companyId: c.id, regroupementId } } })) continue;
       if (decision === "resume") {
         await this.prisma.alerteAchatGroupe.create({ data: { companyId: c.id, regroupementId, jour, resume: true } });
         continue;
       }
       await this.prisma.alerteAchatGroupe.create({ data: { companyId: c.id, regroupementId, jour, envoyeeLe: maintenant } });
-      const phrase = phraseAlerte({ libelle: a.libelle, dateBesoin: a.dateBesoinMin ?? a.clotureLe!, zone: a.departement, clotureLe: a.clotureLe! });
       const url = `/achats-groupes/lancer?rejoindre=${a.id}`;
-      await this.notifs.prevenir(c.id, { titre: "Nouvel achat groupé", corps: phrase, url, etiquette: `achat-${a.id}` }, { objet: `Nouvel achat groupé : ${a.libelle}`, texte: `${phrase}\n\nRejoindre : ${this.notifs.lienVers(url)}\n\n${NOM_APP}` }).catch(() => undefined);
+      await this.notifs.prevenir(c.id, { titre: "Achat groupé dans ton secteur", corps: phrase, url, etiquette: `achat-${a.id}` }, { objet: `Achat groupé ${libelleMetier(a.famille).toLowerCase()} ouvert dans ton secteur`, texte: `${phrase}\n\nAjouter ma liste : ${this.notifs.lienVers(url)}\n\n${NOM_APP}` }).catch(() => undefined);
       n++;
     }
     return n;
@@ -661,7 +799,7 @@ export class AchatGroupeService {
       const ouvertes = alertes.filter((x) => x.regroupement.statut === OUVERT && x.regroupement.clotureLe && x.regroupement.clotureLe > maintenant);
       await this.prisma.alerteAchatGroupe.updateMany({ where: { id: { in: alertes.map((x) => x.id) } }, data: { envoyeeLe: maintenant } });
       if (!ouvertes.length) continue;
-      const phrase = phraseResumeAlertes(ouvertes.map((x) => ({ libelle: x.regroupement.libelle, zone: x.regroupement.departement, clotureLe: x.regroupement.clotureLe! })));
+      const phrase = ouvertes.length === 1 ? phraseAlerteMetier({ famille: ouvertes[0]!.regroupement.famille, dateBesoin: ouvertes[0]!.regroupement.dateBesoinMin ?? ouvertes[0]!.regroupement.clotureLe!, clotureLe: ouvertes[0]!.regroupement.clotureLe! }) : phraseResumeAlertes(ouvertes.map((x) => ({ libelle: x.regroupement.libelle, zone: x.regroupement.departement, clotureLe: x.regroupement.clotureLe! })));
       await this.notifs.prevenir(companyId, { titre: "Achats groupés près de chez toi", corps: phrase, url: "/achats-groupes", etiquette: "achats-resume" }, { objet: "Achats groupés près de chez toi", texte: `${phrase}\n\n${this.notifs.lienVers("/achats-groupes")}\n\n${NOM_APP}` }).catch(() => undefined);
       n++;
     }
@@ -676,8 +814,7 @@ export class AchatGroupeService {
     let consultes = 0;
     let pasAssez = 0;
     for (const a of closes) {
-      const r = await this.cloturer(a.id, maintenant);
-      if (r === "consultation") consultes++;
+      if ((await this.cloturer(a.id, maintenant)) === "consultation") consultes++;
       else pasAssez++;
     }
     const echues = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: "consultation", reponseAvantLe: { lte: maintenant } }, select: { id: true } });
@@ -686,60 +823,73 @@ export class AchatGroupeService {
       await this.analyser(a.id, maintenant);
       analyses++;
     }
+    const rappelsValidation = await this.rappelerValidation(maintenant);
+    const nonCommandes = await this.nonCommandes(maintenant);
     const resumes = await this.resumes(maintenant);
     const factures = maintenant.getUTCDate() === 1 ? await this.preparerFactures(maintenant) : 0;
-    return { rappels, consultes, pasAssez, analyses, resumes, factures };
+    return { rappels, consultes, pasAssez, analyses, rappelsValidation, nonCommandes, resumes, factures };
   }
 
-  /** Point 12 : la veille de la clôture, « Demain, [négoce] reçoit la demande groupée… Tu l'as prévenu ? ». */
+  /** La veille de la clôture, « Demain, [négoce] reçoit la demande groupée… Tu l'as prévenu ? ». */
   private async rappelsVeille(maintenant: Date): Promise<number> {
     const negoces = await this.prisma.negoceParticipant.findMany({
-      where: { rappelLe: null, prevenuLe: null, besoin: { statut: "declare" }, regroupement: { mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant, lte: new Date(maintenant.getTime() + 2 * JOUR) } } },
-      include: { regroupement: { select: { libelle: true } } },
+      where: { rappelLe: null, prevenuLe: null, besoin: { statut: ENGAGE }, regroupement: { mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant, lte: new Date(maintenant.getTime() + 2 * JOUR) } } },
+      include: { regroupement: { select: { famille: true } } },
     });
     for (const n of negoces) {
       await this.prisma.negoceParticipant.update({ where: { id: n.id }, data: { rappelLe: maintenant } });
-      const corps = phraseRappelVeille(n.nom, n.regroupement.libelle);
+      const corps = phraseRappelVeille(n.nom, `la ${libelleMetier(n.regroupement.famille).toLowerCase()}`);
       await this.notifs.prevenir(n.companyId, { titre: "Préviens ton négoce", corps, url: `/achats-groupes/${n.besoinId}`, etiquette: `rappel-${n.besoinId}` }).catch(() => undefined);
     }
     return negoces.length;
   }
 
-  /** La clôture : pas assez de volume (plan B), ou UNE demande par négoce, de la part de ses seuls clients. */
+  /**
+   * La clôture (A4, A5, B7) : seul le volume engagé est annoncé. Chaque négoce choisi reçoit UNE liste propre (les
+   * quantités cumulées de tout le groupe, seulement ses familles s'il est spécialiste), de la part de ses seuls clients ;
+   * un panier de plusieurs métiers est aussi envoyé aux généralistes inscrits du secteur.
+   */
   async cloturer(regroupementId: string, maintenant = this.now()): Promise<"consultation" | "pas_assez"> {
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: regroupementId } });
-    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, statut: "declare" }, include: { negoces: true, company: { select: { id: true, name: true } } }, orderBy: { createdAt: "asc" } });
-    const v = await this.volumeEstime(a);
+    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, statut: ENGAGE }, include: { negoces: true, company: { select: { id: true, name: true } } }, orderBy: { createdAt: "asc" } });
+    const panier = cumulerPanier(await this.lignesPanier(a.id));
+    const v = await this.volumeEstime(a.id);
     const minimum = volumeMinimum(a.famille, await this.volumesMin());
     const negoces = new Map<string, { nom: string; telephone: string | null; besoins: typeof besoins }>();
     for (const b of besoins) for (const n of b.negoces) negoces.set(n.email, { nom: n.nom, telephone: n.telephone, besoins: [...(negoces.get(n.email)?.besoins ?? []), b] });
+    if (new Set(panier.map((l) => l.famille)).size > 1) {
+      const generalistes = await this.prisma.negoce.findMany({ where: { stopLe: null, generaliste: true, departement: a.departement }, select: { nom: true, email: true } });
+      for (const g of generalistes) if (!negoces.has(g.email.toLowerCase())) negoces.set(g.email.toLowerCase(), { nom: g.nom, telephone: null, besoins: [] });
+    }
     // Sans estimation (aucun prix repère ni « Mes prix »), le volume ne bloque pas : la consultation part.
-    if (besoins.length === 0 || negoces.size === 0 || (v.estimeHt !== null && v.estimeHt < minimum)) {
+    if (besoins.length === 0 || panier.length === 0 || negoces.size === 0 || (v.estimeHt !== null && v.estimeHt < minimum)) {
       await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { statut: "pas_assez", pasAssezLe: maintenant } });
-      for (const b of besoins) await this.notifs.prevenir(b.companyId, { titre: "Pas assez de volume cette fois", corps: `${a.libelle} : envoie ta demande à tes négoces en un clic, rien n'est perdu.`, url: `/achats-groupes/${b.id}`, etiquette: `achat-${a.id}` }).catch(() => undefined);
+      for (const b of besoins) await this.notifs.prevenir(b.companyId, { titre: "Pas assez de volume cette fois", corps: `${a.libelle} : envoie ta liste à tes négoces en un clic, rien n'est perdu.`, url: `/achats-groupes/${b.id}`, etiquette: `achat-${a.id}` }).catch(() => undefined);
       return "pas_assez";
     }
     const commission = commissionAchatGroupe(a.numero, { defaut: this.cfg.commissionDefaut, lancement: this.cfg.commissionLancement, premiers: this.cfg.commissionLancementPremiers });
     await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { statut: "consultation", consulteLe: maintenant, commissionPct: commission } });
-    const unite = a.unite ?? besoins[0]!.unite;
-    const total = besoins.reduce((s, b) => s + Number(b.quantite), 0);
-    const livraisons = besoins.map((b) => ({ commune: communeDe(b.livraison) ?? b.departement, date: b.dateBesoin, quantite: qte(Number(b.quantite)) }));
+    const livraisons = besoins.map((b) => ({ commune: communeDe(b.livraison) ?? b.departement, date: b.dateBesoin }));
+    const inscrits = new Map((await this.prisma.negoce.findMany({ where: { email: { in: [...negoces.keys()], mode: "insensitive" }, stopLe: null }, select: { email: true, familles: true, generaliste: true } })).map((n) => [n.email.toLowerCase(), n]));
     for (const [email, n] of negoces) {
+      const inscrit = inscrits.get(email);
+      const lignes = lignesPourNegoce(panier, { generaliste: inscrit?.generaliste ?? false, familles: inscrit && inscrit.familles.length ? inscrit.familles : null });
+      if (lignes.length === 0) continue;
       const jeton = randomBytes(24).toString("base64url");
       const clients = [...new Set(n.besoins.map((b) => b.company.name))];
       const c = await this.prisma.consultationAchatGroupe.upsert({
         where: { regroupementId_email: { regroupementId: a.id, email } },
-        create: { regroupementId: a.id, email, nom: n.nom, telephone: n.telephone, clients, quantite: total, tokenHash: hacher(jeton), commissionPct: commission },
+        create: { regroupementId: a.id, email, nom: n.nom, telephone: n.telephone, clients, quantite: lignes.reduce((s, l) => s + l.quantite, 0), lignes: lignes as never, tokenHash: hacher(jeton), commissionPct: commission },
         update: {},
       });
       if (c.envoyeLe) continue;
       // Le jeton n'est connu que de l'e-mail : un envoi repris (panne du prestataire) reçoit un lien neuf.
       if (c.tokenHash !== hacher(jeton)) await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { tokenHash: hacher(jeton) } });
       const lien = `${this.cfg.webAppUrl}/achat-groupe/${jeton}`;
-      const { objet, texte } = demandeNegoce({ clients, libelle: a.libelle, quantiteTotale: qte(total), unite, livraisons, reponseAvantLe: a.reponseAvantLe!, commandeAvantLe: new Date(a.reponseAvantLe!.getTime() + 2 * JOUR), lien, commissionPct: commission });
-      const replyTo = await this.ports.adresseMobiiz(n.besoins[0]!.companyId).catch(() => null);
+      const demande = demandeNegocePanier({ clients: clients.length ? clients : besoins.map((b) => b.company.name), metier: a.famille, lignes, livraisons, reponseAvantLe: a.reponseAvantLe!, lien, commissionPct: commission });
+      const replyTo = n.besoins[0] ? await this.ports.adresseMobiiz(n.besoins[0].companyId).catch(() => null) : null;
       try {
-        await this.mailer.send({ to: email, subject: objet, text: texte, ...(replyTo ? { replyTo } : {}) });
+        await this.mailer.send({ to: email, subject: demande.objet, text: demande.texte, ...(replyTo ? { replyTo } : {}) });
         await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { envoyeLe: maintenant } });
       } catch {
         continue;
@@ -752,7 +902,7 @@ export class AchatGroupeService {
     return "consultation";
   }
 
-  /* ------------------------------------------------------------------------------- la réponse du négoce (public) */
+  /* --------------------------------------------------------------------------- la réponse du négoce (C11, C12) */
 
   private async consultationDuJeton(jeton: string) {
     if (!/^[A-Za-z0-9_-]{20,80}$/.test(jeton)) throw notFound("Consultation");
@@ -761,31 +911,36 @@ export class AchatGroupeService {
     return c;
   }
 
-  /** La page du lien (vouvoiement) : la demande, les conditions, l'offre déjà déposée. Jamais un autre négoce. */
+  /** La page du lien (vouvoiement) : SA liste, les livraisons, les règles, ses conditions d'ouverture. Jamais un autre négoce. */
   async page(jeton: string) {
     const c = await this.consultationDuJeton(jeton);
     const a = c.regroupement;
-    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId: a.id, statut: { in: [...ACTIFS, "desiste"] }, desisteLe: null }, select: { livraison: true, departement: true, dateBesoin: true, quantite: true } });
+    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId: a.id, statut: { in: [ENGAGE, "accepte"] } }, select: { livraison: true, departement: true, dateBesoin: true } });
     const commission = Number(c.commissionPct);
+    const cond = await this.prisma.conditionsOuvertureNegoce.findUnique({ where: { email: c.email } });
+    const prix = objet(c.prixLignes);
     return {
       deLaPartDe: deLaPartDe(c.clients),
       negoce: c.nom,
-      libelle: a.libelle,
-      quantiteTotale: Number(c.quantite),
-      unite: a.unite,
-      livraisons: besoins.map((b) => ({ commune: communeDe(b.livraison) ?? b.departement, dateBesoin: jourIso(b.dateBesoin), quantite: Number(b.quantite) })),
+      titre: `Achat groupé ${libelleMetier(a.famille).toLowerCase()}`,
+      lignes: lignesDe(c.lignes).map((l) => ({ cle: l.cle, libelle: l.libelle, quantite: l.quantite, unite: l.unite })),
+      livraisons: besoins.map((b) => ({ commune: communeDe(b.livraison) ?? b.departement, dateBesoin: jourIso(b.dateBesoin) })),
       reponseAvantLe: a.reponseAvantLe!.toISOString(),
-      commandeAvantLe: new Date(a.reponseAvantLe!.getTime() + 2 * JOUR).toISOString(),
       close: !!a.reponseAvantLe && a.reponseAvantLe <= this.now(),
-      commissionPct: commission,
       conditions: [
         "Vous n'êtes pas le seul négoce consulté.",
         "Une seule offre, sans deuxième tour : votre meilleur prix.",
-        "Prix HT livraison comprise, ferme jusqu'à la date de commande, même si le volume final est un peu inférieur (désistements).",
-        "Le bon de commande vous arrive directement ; le client vous paie sur son compte habituel. Mobiiz ne touche jamais l'argent.",
-        commission > 0 ? `Commission Mobiiz de ${String(commission).replace(".", ",")} % HT sur les commandes passées, facturée chaque mois.` : "Aucune commission Mobiiz sur cet achat groupé (lancement).",
+        "Ligne par ligne : un prix unitaire HT livraison comprise, ou « je ne fournis pas ».",
+        "Prix ferme sur le volume engagé jusqu'à la date de commande.",
+        `Le bon de commande vous arrive directement ; le client vous paie sur son compte habituel. ${NOM_APP} ne touche jamais l'argent.`,
+        ...(commission > 0 ? [`Commission ${NOM_APP} de ${String(commission).replace(".", ",")} % HT sur les commandes passées, facturée chaque mois.`] : []),
       ],
-      reponse: c.reponduLe ? { le: c.reponduLe.toISOString(), prixUnitaireHt: c.prixUnitaireHt === null ? null : Number(c.prixUnitaireHt), pdf: c.pdfNom } : null,
+      choixOuverture: {
+        pieces: CONDITIONS_OUVERTURE.map((p) => ({ valeur: p, libelle: LIBELLES_CONDITIONS_OUVERTURE[p] })),
+        paiements: PAIEMENTS_DEPART.map((p) => ({ valeur: p, libelle: LIBELLES_PAIEMENTS_DEPART[p] })),
+      },
+      conditionsOuverture: cond ? { pieces: cond.pieces, paiement: cond.paiement, autre: cond.autre } : null,
+      reponse: c.reponduLe ? { le: c.reponduLe.toISOString(), prix, pdf: c.pdfNom } : null,
     };
   }
 
@@ -794,18 +949,27 @@ export class AchatGroupeService {
     if (c.reponduLe) throw new DomainError("conflict", "Already answered", { reason: "deja_repondu", message: "Votre offre est déjà enregistrée : une seule offre par achat groupé." });
     if (c.regroupement.reponseAvantLe && c.regroupement.reponseAvantLe <= this.now()) throw new DomainError("conflict", "Too late", { reason: "trop_tard", message: "La date de réponse est passée." });
     if (!r.accepteConditions) throw validationFailed("Conditions must be accepted", { reason: "conditions_requises", message: "Acceptez les conditions pour déposer votre offre." });
-    if (r.prixUnitaireHt === null && !r.pdf) throw validationFailed("Price or PDF required", { reason: "prix_ou_pdf", message: "Saisissez un prix ou déposez votre devis PDF." });
+    const lignes = lignesDe(c.lignes);
+    const prix = Object.fromEntries(lignes.filter((l) => r.prix && l.cle in r.prix).map((l) => [l.cle, r.prix![l.cle] ?? null]));
     const pdf = r.pdf ? Buffer.from(r.pdf.contenuBase64, "base64") : null;
     if (pdf && (pdf.length > 8 * 1024 * 1024 || pdf.subarray(0, 5).toString() !== "%PDF-")) throw validationFailed("PDF only, 8 MB max", { reason: "pdf_invalide", message: "Déposez un PDF de 8 Mo au plus." });
+    if (!pdf) {
+      if (!reponseComplete(lignes, prix)) throw validationFailed("Every line needs an answer", { reason: "lignes_incompletes", message: "Répondez à chaque ligne : un prix, ou « je ne fournis pas »." });
+      if (Object.values(prix).every((p) => p === null)) throw validationFailed("At least one price", { reason: "aucun_prix", message: "Indiquez au moins un prix, ou déposez votre devis PDF." });
+    }
     const maintenant = this.now();
+    if (r.conditionsOuverture) {
+      const data = { pieces: r.conditionsOuverture.pieces, paiement: r.conditionsOuverture.paiement, autre: r.conditionsOuverture.autre?.trim() || null };
+      await this.prisma.conditionsOuvertureNegoce.upsert({ where: { email: c.email }, create: { email: c.email, ...data }, update: data });
+    }
     await this.prisma.consultationAchatGroupe.update({
       where: { id: c.id },
-      data: { conditionsAccepteesLe: maintenant, reponduLe: maintenant, statut: "repondue", prixUnitaireHt: r.prixUnitaireHt, delaiJours: r.delaiJours, commentaire: r.commentaire, ...(pdf ? { pdf, pdfNom: r.pdf!.nom.slice(0, 120) } : {}) },
+      data: { conditionsAccepteesLe: maintenant, reponduLe: maintenant, statut: "repondue", prixLignes: Object.keys(prix).length ? prix : undefined, delaiJours: r.delaiJours, commentaire: r.commentaire, ...(pdf ? { pdf, pdfNom: r.pdf!.nom.slice(0, 120) } : {}) },
     });
     return this.page(jeton);
   }
 
-  /* --------------------------------------------------------------------------- l'analyse à l'échéance (point 4) */
+  /* ------------------------------------------------------------------- l'analyse à l'échéance (C11, D14, D15) */
 
   /** Ce que l'IA a coûté aujourd'hui (€) : le budget du jour n'est jamais dépassé. */
   private async coutIaDuJour(maintenant: Date): Promise<number> {
@@ -814,7 +978,7 @@ export class AchatGroupeService {
     return Number(r._sum.coutIaEur ?? 0);
   }
 
-  private async lireDevis(c: { id: string; pdf: Uint8Array | null }, a: { numero: number; libelle: string; unite: string | null }, quantite: number, maintenant: Date): Promise<ReponseLue | null> {
+  private async lireDevis(c: { id: string; pdf: Uint8Array | null }, a: { numero: number; libelle: string }, quantite: number, maintenant: Date): Promise<ReponseLue | null> {
     if (!c.pdf || !this.extracteur) return null;
     if ((await this.coutIaDuJour(maintenant)) >= this.cfg.budgetIaJourEur) return null;
     let texte = "";
@@ -825,7 +989,7 @@ export class AchatGroupeService {
       texte = "";
     }
     const document = texte.trim() ? { numberedText: texte, imagePdf: null, imagePages: [] } : { numberedText: "", imagePdf: new Uint8Array(c.pdf), imagePages: [1] };
-    const t = await this.extracteur.lire({ ...document, lot: { numero: a.numero, designation: a.libelle, unite: a.unite ?? "", volumeFerme: String(quantite), volumeProbable: String(quantite) } }).catch(() => null);
+    const t = await this.extracteur.lire({ ...document, lot: { numero: a.numero, designation: a.libelle, unite: "", volumeFerme: String(quantite), volumeProbable: String(quantite) } }).catch(() => null);
     let cout = 0;
     try {
       if (t) cout = microUsdToEur(computeAiCost(t.model, t.usage, priceTableAt(maintenant)).totalMicroUsd, this.cfg.usdToEur).toNumber();
@@ -836,51 +1000,100 @@ export class AchatGroupeService {
     return t?.status === "success" ? t.output : null;
   }
 
-  /** À l'échéance : lecture des devis, jugement sur une base identique, meilleure offre ou plan B, notifications. */
+  /** Le devis PDF lu par l'IA : chaque prix rattaché à une ligne demandée par sa référence stricte ; le reste en alerte. */
+  private prixDuDevis(lu: ReponseLue, lignes: readonly LignePanier[]): { prix: Record<string, number | null>; raisons: string[] } {
+    const prix: Record<string, number | null> = {};
+    const raisons: string[] = [];
+    for (const p of lu.paliers) {
+      const r = referenceStricte(p.designation);
+      const ligne = r.ok ? lignes.find((l) => l.cle === r.reference.cle) : undefined;
+      const pu = nombre(p.prixUnitaireHt) ?? (nombre(p.totalHt) && nombre(p.quantite) ? nombre(p.totalHt)! / nombre(p.quantite)! : null);
+      if (!ligne) {
+        raisons.push(`« ${p.designation} » ne correspond à aucune ligne demandée.`);
+        continue;
+      }
+      if (pu === null) raisons.push(`Prix illisible pour « ${ligne.libelle} ».`);
+      else if (!(ligne.cle in prix)) prix[ligne.cle] = arrondi(pu * 10_000) / 10_000;
+    }
+    if (Object.keys(prix).length === 0) raisons.push(PHRASES_DOUTE.prix_illisible);
+    for (const d of lu.doutes) raisons.push(d);
+    if (/livraison\s+(en\s+sus|non\s+comprise)/i.test(lu.doutes.join(" "))) raisons.push(PHRASES_DOUTE.livraison);
+    return { prix, raisons: [...new Set(raisons)] };
+  }
+
+  /** La meilleure offre sur tout le panier (les complètes d'abord) : la proposition de l'IA à l'admin. */
+  private async proposee(regroupementId: string): Promise<string | null> {
+    const consultations = await this.prisma.consultationAchatGroupe.findMany({ where: { regroupementId } });
+    const panier = cumulerPanier(await this.lignesPanier(regroupementId));
+    return comparerPourArtisan(panier, this.offresDe(consultations))[0]?.id ?? null;
+  }
+
+  /** À l'échéance : lecture des devis PDF, prix rattachés aux lignes, proposition, puis validation de l'admin ou publication. */
   async analyser(regroupementId: string, maintenant = this.now()) {
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: regroupementId } });
     const consultations = await this.prisma.consultationAchatGroupe.findMany({ where: { regroupementId, reponduLe: { not: null } } });
-    const quantite = Number(consultations[0]?.quantite ?? (await this.quantiteTotale(regroupementId)));
-    const offres: OffreACompare[] = [];
     for (const c of consultations) {
-      if (c.prixUnitaireHt !== null) {
-        offres.push({ id: c.id, prixUnitaireHt: Number(c.prixUnitaireHt), designationLue: null, quantiteCouverte: null, delaiJours: c.delaiJours, doutes: [], livraisonEnSus: false });
+      const lignes = lignesDe(c.lignes);
+      if (c.prixLignes) {
+        await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { statut: "valide", raisons: [] } });
         continue;
       }
-      const lu = await this.lireDevis(c, a, quantite, maintenant);
+      const lu = await this.lireDevis(c, a, Number(c.quantite), maintenant);
       if (!lu) {
-        offres.push({ id: c.id, prixUnitaireHt: null, designationLue: null, quantiteCouverte: null, delaiJours: null, doutes: ["Devis non lu (lecteur absent ou budget du jour atteint)."], livraisonEnSus: false });
+        await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { statut: "douteuse", raisons: ["Devis non lu (lecteur absent ou budget du jour atteint) : à chiffrer à la main."] } });
         continue;
       }
-      const palier = lu.paliers.find((p) => {
-        const r = referenceStricte(p.designation);
-        return r.ok && r.reference.cle === a.cle;
-      }) ?? lu.paliers[0];
-      const pu = nombre(palier?.prixUnitaireHt) ?? (nombre(palier?.totalHt) && nombre(palier?.quantite) ? nombre(palier!.totalHt)! / nombre(palier!.quantite)! : null);
-      offres.push({ id: c.id, prixUnitaireHt: pu, designationLue: palier?.designation ?? null, quantiteCouverte: nombre(palier?.quantite), delaiJours: lu.delaiJours, doutes: lu.doutes, livraisonEnSus: /livraison\s+(en\s+sus|non\s+comprise)/i.test(lu.doutes.join(" ")) });
-      if (pu !== null) await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { prixUnitaireHt: pu, delaiJours: lu.delaiJours } });
+      const { prix, raisons } = this.prixDuDevis(lu, lignes);
+      await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { prixLignes: prix, delaiJours: lu.delaiJours, statut: raisons.length ? "douteuse" : "valide", raisons } });
     }
-    const { jugees, meilleure } = jugerOffres(offres, { cle: a.cle, quantiteTotale: quantite, delaiMaxJours: this.cfg.delaiLivraisonJours });
-    for (const j of jugees) await this.prisma.consultationAchatGroupe.update({ where: { id: j.id }, data: { statut: j.valide ? "valide" : "douteuse", raisons: j.raisons } });
-    await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { analyseLe: maintenant, meilleureId: meilleure?.id ?? null, statut: meilleure ? "offre_recue" : "pas_assez", ...(meilleure ? {} : { pasAssezLe: maintenant }) } });
-    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, statut: "declare" }, select: { id: true, companyId: true } });
-    for (const b of besoins)
-      await this.notifs
-        .prevenir(
-          b.companyId,
-          meilleure
-            ? { titre: "Offre reçue", corps: `${a.libelle} : compare et commande si ça te va.`, url: `/achats-groupes/${b.id}`, etiquette: `achat-${a.id}` }
-            : { titre: "Pas assez de volume cette fois", corps: `${a.libelle} : aucune offre comparable. Envoie ta demande à tes négoces en un clic.`, url: `/achats-groupes/${b.id}`, etiquette: `achat-${a.id}` },
-        )
-        .catch(() => undefined);
-    return { meilleure: meilleure?.id ?? null, douteuses: jugees.filter((j) => !j.valide).length };
+    const meilleure = await this.proposee(regroupementId);
+    await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { analyseLe: maintenant, meilleureId: meilleure, iaMeilleureId: meilleure } });
+    const avecPrix = consultations.length > 0 && (meilleure !== null || consultations.some((c) => !c.prixLignes));
+    if (!avecPrix) {
+      await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { statut: "pas_assez", pasAssezLe: maintenant } });
+      const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, statut: ENGAGE }, select: { id: true, companyId: true } });
+      for (const b of besoins) await this.notifs.prevenir(b.companyId, { titre: "Aucune offre cette fois", corps: `${a.libelle} : aucune offre reçue. Envoie ta liste à tes négoces en un clic.`, url: `/achats-groupes/${b.id}`, etiquette: `achat-${a.id}` }).catch(() => undefined);
+      return { statut: "pas_assez", meilleure: null, douteuses: 0 };
+    }
+    const douteuses = (await this.prisma.consultationAchatGroupe.count({ where: { regroupementId, statut: "douteuse" } })) as number;
+    if (!this.cfg.validationAdmin) {
+      await this.publier(regroupementId, null, maintenant);
+      return { statut: "publie", meilleure, douteuses };
+    }
+    await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { statut: "validation", validationAlerteLe: maintenant } });
+    await this.alerterAdmins(a.id, false);
+    return { statut: "validation", meilleure, douteuses };
+  }
+
+  /** Point 15 : l'admin est prévenu (e-mail + notification) dès qu'un achat attend sa validation, puis toutes les 12 h. */
+  private async alerterAdmins(regroupementId: string, rappel: boolean) {
+    const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: regroupementId } });
+    const recues = await this.prisma.consultationAchatGroupe.count({ where: { regroupementId, reponduLe: { not: null } } });
+    const consultees = await this.prisma.consultationAchatGroupe.count({ where: { regroupementId } });
+    const url = `/admin/achats-groupes/${a.id}`;
+    const corps = `${rappel ? "Rappel : " : ""}achat groupé n° ${a.numero} à valider (${a.libelle}), ${recues} offre${recues > 1 ? "s" : ""} sur ${consultees}.`;
+    for (const email of this.cfg.admins) {
+      await this.mailer.send({ to: email, subject: `${rappel ? "Rappel : " : ""}achat groupé n° ${a.numero} à valider`, text: `${corps}\n\n${this.notifs.lienVers(url)}\n\n${NOM_APP}` }).catch(() => undefined);
+      const m = await this.prisma.membership.findFirst({ where: { user: { email } }, select: { companyId: true } });
+      if (m) await this.notifs.prevenir(m.companyId, { titre: "Offres à valider", corps, url, etiquette: `validation-${a.id}` }).catch(() => undefined);
+    }
+  }
+
+  /** Le rappel des achats qui attendent la validation (au plus toutes les 12 h ; la tâche tourne une fois par jour sur Vercel Hobby). */
+  private async rappelerValidation(maintenant: Date): Promise<number> {
+    const attente = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: "validation", validationAlerteLe: { lte: new Date(maintenant.getTime() - 12 * HEURE) } }, select: { id: true } });
+    for (const a of attente) {
+      await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { validationAlerteLe: maintenant } });
+      await this.alerterAdmins(a.id, true);
+    }
+    return attente.length;
   }
 
   /**
    * Recette en prévisualisation (jamais en production, vérifié par le contrôleur) : clôturer tout de suite, ou analyser
-   * les offres tout de suite, sans attendre la tâche du jour.
+   * les offres tout de suite, ou dépasser la date de commande, sans attendre la tâche du jour.
    */
-  async avancer(regroupementId: string, etape: "cloture" | "echeance") {
+  async avancer(regroupementId: string, etape: "cloture" | "echeance" | "commande") {
     if (!isUuid(regroupementId)) throw notFound("AchatGroupe");
     const a = await this.prisma.regroupementNegocie.findFirst({ where: { id: regroupementId, mode: MODE_AUTO } });
     if (!a) throw notFound("AchatGroupe");
@@ -890,73 +1103,188 @@ export class AchatGroupeService {
       await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { clotureLe: maintenant } });
       return { statut: await this.cloturer(a.id, maintenant) };
     }
+    if (etape === "commande") {
+      if (a.statut !== "publie") throw new DomainError("conflict", "Not published", { reason: "pas_publie" });
+      await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { commandeAvantLe: maintenant } });
+      return { nonCommandes: await this.nonCommandes(maintenant) };
+    }
     if (a.statut !== "consultation") throw new DomainError("conflict", "Not in consultation", { reason: "pas_en_consultation" });
     await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { reponseAvantLe: maintenant } });
     return this.analyser(a.id, maintenant);
   }
 
-  /** L'admin valide une offre douteuse après vérification : elle entre dans la comparaison. */
-  async validerOffre(consultationId: string) {
+  /* ---------------------------------------------------------------------- la validation de l'admin (D14, D16) */
+
+  private async consultationAValider(consultationId: string) {
     if (!isUuid(consultationId)) throw notFound("Consultation");
     const c = await this.prisma.consultationAchatGroupe.findUnique({ where: { id: consultationId }, include: { regroupement: true } });
-    if (!c || c.statut !== "douteuse" || c.prixUnitaireHt === null) throw notFound("Consultation");
-    await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { statut: "valide", raisons: [] } });
-    const valides = await this.prisma.consultationAchatGroupe.findMany({ where: { regroupementId: c.regroupementId, statut: "valide", prixUnitaireHt: { not: null } }, orderBy: { prixUnitaireHt: "asc" } });
-    const etaitSansOffre = c.regroupement.statut === "pas_assez";
-    await this.prisma.regroupementNegocie.update({ where: { id: c.regroupementId }, data: { meilleureId: valides[0]!.id, statut: "offre_recue", pasAssezLe: null } });
-    if (etaitSansOffre) {
-      const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId: c.regroupementId, statut: "declare" }, select: { id: true, companyId: true } });
-      for (const b of besoins) await this.notifs.prevenir(b.companyId, { titre: "Offre reçue", corps: `${c.regroupement.libelle} : compare et commande si ça te va.`, url: `/achats-groupes/${b.id}`, etiquette: `achat-${c.regroupementId}` }).catch(() => undefined);
-    }
-    return { fait: true };
+    if (!c || !c.reponduLe) throw notFound("Consultation");
+    if (!["validation", "pas_assez"].includes(c.regroupement.statut)) throw new DomainError("conflict", "Already published", { reason: "deja_publie" });
+    return c;
   }
 
-  /* ---------------------------------------------------------------------------------------- commander (point 6) */
+  private async corrige(c: { id: string; regroupementId: string }, action: string, adminEmail: string, d: { cle?: string; avant?: number | null; apres?: number | null } = {}) {
+    await this.prisma.$transaction([
+      this.prisma.correctionOffreAchatGroupe.create({ data: { consultationId: c.id, regroupementId: c.regroupementId, action, cle: d.cle ?? null, avant: d.avant ?? null, apres: d.apres ?? null, adminEmail } }),
+      this.prisma.regroupementNegocie.update({ where: { id: c.regroupementId }, data: { correctionsAdmin: { increment: 1 } } }),
+    ]);
+    await this.prisma.regroupementNegocie.update({ where: { id: c.regroupementId }, data: { meilleureId: await this.proposee(c.regroupementId) } });
+  }
 
-  async commander(tenant: TenantContext, besoinId: string, consultationId: string) {
+  /** Écarter une offre : elle n'est plus jamais comparée. */
+  async ecarter(consultationId: string, adminEmail: string) {
+    const c = await this.consultationAValider(consultationId);
+    await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { ecarteeLe: this.now() } });
+    await this.corrige(c, "ecarter", adminEmail);
+    return this.adminAchat(c.regroupementId);
+  }
+
+  /** Valider une offre (douteuse, ou écartée par erreur) : elle entre dans la comparaison. */
+  async validerOffre(consultationId: string, adminEmail: string) {
+    const c = await this.consultationAValider(consultationId);
+    const changement = !!c.ecarteeLe || c.statut === "douteuse";
+    await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { ecarteeLe: null, statut: "valide" } });
+    if (c.regroupement.statut === "pas_assez") await this.prisma.regroupementNegocie.update({ where: { id: c.regroupementId }, data: { statut: "validation", pasAssezLe: null } });
+    if (changement) await this.corrige(c, "valider", adminEmail);
+    return this.adminAchat(c.regroupementId);
+  }
+
+  /** Corriger le prix d'une ligne (null : « ne fournit pas ») ; la correction est gardée. */
+  async corrigerPrix(consultationId: string, cle: string, prix: number | null, adminEmail: string) {
+    const c = await this.consultationAValider(consultationId);
+    if (!lignesDe(c.lignes).some((l) => l.cle === cle)) throw validationFailed("Unknown line", { reason: "ligne_inconnue" });
+    const avant = this.prixEffectifs(c)[cle] ?? null;
+    await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { prixCorriges: { ...objet(c.prixCorriges), [cle]: prix } } });
+    await this.corrige(c, "prix", adminEmail, { cle, avant, apres: prix });
+    return this.adminAchat(c.regroupementId);
+  }
+
+  /** L'écran de validation d'un achat : les négoces consultés, les réponses, chaque offre, la proposition. */
+  async adminAchat(regroupementId: string) {
+    if (!isUuid(regroupementId)) throw notFound("AchatGroupe");
+    const a = await this.prisma.regroupementNegocie.findFirst({ where: { id: regroupementId, mode: MODE_AUTO } });
+    if (!a) throw notFound("AchatGroupe");
+    const consultations = await this.prisma.consultationAchatGroupe.findMany({ where: { regroupementId }, orderBy: { nom: "asc" } });
+    const panier = cumulerPanier(await this.lignesPanier(a.id));
+    const comparees = new Map(comparerPourArtisan(panier, this.offresDe(consultations)).map((o) => [o.id, o]));
+    const conditions = new Map((await this.prisma.conditionsOuvertureNegoce.findMany({ where: { email: { in: consultations.map((c) => c.email) } } })).map((x) => [x.email, x]));
+    const repondu = consultations.filter((c) => c.reponduLe).length;
+    return {
+      id: a.id,
+      numero: a.numero,
+      titre: a.libelle,
+      statut: a.statut,
+      consultes: consultations.length,
+      reponses: `${repondu} sur ${consultations.length}`,
+      panier: panier.map((l) => ({ cle: l.cle, libelle: l.libelle, quantite: l.quantite, unite: l.unite })),
+      proposeeId: a.meilleureId,
+      iaId: a.iaMeilleureId,
+      corrections: a.correctionsAdmin,
+      offres: consultations.map((c) => {
+        const prix = this.prixEffectifs(c);
+        const corriges = objet(c.prixCorriges);
+        const lignes = lignesDe(c.lignes);
+        const o = comparees.get(c.id);
+        const cond = conditions.get(c.email);
+        return {
+          consultationId: c.id,
+          nom: c.nom,
+          email: c.email,
+          telephone: c.telephone,
+          repondu: !!c.reponduLe,
+          statut: c.statut,
+          ecartee: !!c.ecarteeLe,
+          alertes: c.raisons.map((r) => PHRASES_DOUTE[r as RaisonDoute] ?? r),
+          pdf: c.pdfNom,
+          totalHt: o?.totalHt ?? null,
+          manquantes: lignes.filter((l) => typeof prix[l.cle] !== "number").map((l) => l.libelle),
+          lignes: lignes.map((l) => ({ cle: l.cle, libelle: l.libelle, quantite: l.quantite, unite: l.unite, prixHt: prixDe(prix, l.cle), corrige: l.cle in corriges })),
+          ouvertureCompte: cond ? phraseOuvertureCompte({ pieces: cond.pieces as ConditionOuverture[], paiement: cond.paiement as PaiementDepart | null, autre: cond.autre }) : null,
+          commentaire: c.commentaire,
+        };
+      }),
+    };
+  }
+
+  /* ------------------------------------------------------------------------------------ publier (E17) */
+
+  /** « Publier » : chaque artisan reçoit SA comparaison (« Ta liste chez le meilleur négoce : … au lieu de … »). */
+  async publier(regroupementId: string, adminEmail: string | null, maintenant = this.now()) {
+    if (!isUuid(regroupementId)) throw notFound("AchatGroupe");
+    const a = await this.prisma.regroupementNegocie.findFirst({ where: { id: regroupementId, mode: MODE_AUTO } });
+    if (!a) throw notFound("AchatGroupe");
+    if (!["validation", "consultation"].includes(a.statut)) throw new DomainError("conflict", "Not awaiting validation", { reason: "pas_en_validation" });
+    const meilleure = await this.proposee(a.id);
+    if (!meilleure) throw validationFailed("No offer to publish", { reason: "aucune_offre", message: "Aucune offre à publier : validez au moins une offre." });
+    await this.prisma.regroupementNegocie.update({ where: { id: a.id }, data: { statut: "publie", publieLe: maintenant, meilleureId: meilleure, commandeAvantLe: commandeAvantLe(maintenant, this.cfg.delaiCommandeJours) } });
+    void adminEmail;
+    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, statut: ENGAGE }, select: { id: true, companyId: true, consultationCommandeId: true, coordonneesTransmisesLe: true, coordonneesConsultationId: true } });
+    for (const b of besoins) {
+      const r = await this.resultatPour(a, b);
+      const corps = r.phrase ?? `${a.libelle} : aucune offre ne chiffre tes lignes. Envoie ta liste à tes négoces.`;
+      const url = `/achats-groupes/${b.id}`;
+      await this.notifs.prevenir(b.companyId, { titre: "Résultats de ton achat groupé", corps, url, etiquette: `achat-${a.id}` }, { objet: `Résultats de ton achat groupé : ${a.libelle}`, texte: `${corps}\n\nCommande avant le ${jourFr(commandeAvantLe(maintenant, this.cfg.delaiCommandeJours))} : ${this.notifs.lienVers(url)}\n\n${NOM_APP}` }).catch(() => undefined);
+    }
+    return { statut: "publie", participants: besoins.length };
+  }
+
+  /* ------------------------------------------------------------------------- après la publication (E18 à E20) */
+
+  private async publieePour(tenant: TenantContext, besoinId: string, consultationId: string) {
     assertCanWrite(tenant);
     const b = await this.monBesoin(tenant, besoinId);
-    if (b.statut !== "declare") throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: b.regroupementId! } });
-    if (a.statut !== "offre_recue") throw new DomainError("conflict", "No offer yet", { reason: "sans_offre" });
-    const vue = await this.offresPour(tenant, a, b);
-    const permises = [vue.mien?.consultationId, vue.meilleure?.consultationId].filter((x): x is string => !!x);
-    if (!permises.includes(consultationId)) throw forbidden("This offer is not available to you");
+    if (a.statut !== "publie") throw new DomainError("conflict", "Not published yet", { reason: "pas_publie" });
+    if (!isUuid(consultationId)) throw notFound("Consultation");
+    const r = await this.resultatPour(a, b);
+    const offre = r.offres.find((o) => o.consultationId === consultationId);
+    if (!offre) throw forbidden("This offer is not available to you");
     const c = await this.prisma.consultationAchatGroupe.findUniqueOrThrow({ where: { id: consultationId } });
+    return { a, b, offre, c };
+  }
+
+  /** « Commander » (point 18) : le bon de SES lignes chiffrées part chez le négoce, qui confirme « Commande reçue ». */
+  async commander(tenant: TenantContext, besoinId: string, consultationId: string) {
+    const { a, b, offre, c } = await this.publieePour(tenant, besoinId, consultationId);
+    if (b.statut !== ENGAGE) throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
     const maintenant = this.now();
+    if (a.commandeAvantLe && a.commandeAvantLe <= maintenant) throw new DomainError("conflict", "Too late", { reason: "commande_trop_tard", message: "La date de commande est passée." });
+    const chiffrees = offre.lignes.filter((l) => l.prixHt !== null);
+    const total = arrondi(chiffrees.reduce((s, l) => s + l.prixHt! * l.quantite, 0));
     const rang = (await this.prisma.besoinNegocie.count({ where: { regroupementId: a.id, bonNumero: { not: null } } })) + 1;
     const bonNumero = a.numero * 1000 + rang;
-    const prix = Number(c.prixUnitaireHt);
-    const quantite = Number(b.quantite);
-    const total = Math.round(prix * quantite * 100) / 100;
-    await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { statut: "accepte", accepteLe: maintenant, bonNumero, consultationCommandeId: c.id, prixCommandeHt: prix } });
+    const jeton = randomBytes(24).toString("base64url");
+    await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { statut: "accepte", accepteLe: maintenant, bonNumero, consultationCommandeId: c.id, prixCommandeHt: total, commandeTokenHash: hacher(jeton) } });
     const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, address: true, phone: true, contactEmail: true } });
-    const pdf = await bonDeCommandePdf({
-      numero: String(bonNumero),
-      date: jourFr(maintenant),
-      acheteur: { nom: company.name, adresse: company.address, telephone: company.phone, email: company.contactEmail },
-      vendeur: { nom: c.nom, email: c.email },
-      livraison: b.livraison,
-      lignes: [{ designation: a.libelle, quantite: qte(quantite), unite: b.unite, prixHt: euros(prix), totalHt: euros(total) }],
-      livraisonHt: "comprise",
-      totalHt: euros(total),
-      mentions: [
-        `Achat groupé ${NOM_APP} n° ${a.numero} : prix ferme livraison comprise, offre du ${c.reponduLe ? jourFr(c.reponduLe) : jourFr(maintenant)}.`,
-        `Paiement directement au vendeur, à 30 jours, sur le compte habituel de l'acheteur. ${NOM_APP} ne vend ni n'achète rien et ne touche jamais l'argent.`,
-      ],
-    });
+    const pdf = await this.bon(bonNumero, maintenant, company, c, b.livraison, chiffrees, total, a.numero);
     const piece = { filename: `bon-de-commande-${bonNumero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") };
     const replyTo = await this.ports.adresseMobiiz(tenant.companyId).catch(() => null);
+    const lien = `${this.cfg.webAppUrl}/achat-groupe/commande/${jeton}`;
     await this.mailer.send({
       to: c.email,
-      subject: `Bon de commande n° ${bonNumero} : ${qte(quantite)} ${b.unite} ${de(a.libelle)} (achat groupé ${NOM_APP})`,
-      text: ["Bonjour,", "", `${company.name} vous commande ${qte(quantite)} ${b.unite} ${de(a.libelle)} au prix de votre offre (${euros(prix)} HT / ${b.unite}, livraison comprise), à livrer : ${b.livraison}.`, "Le bon de commande est joint. Le paiement se fait directement entre vous.", "", NOM_APP].join("\n"),
+      subject: `Bon de commande n° ${bonNumero} : ${chiffrees.length} référence${chiffrees.length > 1 ? "s" : ""} (achat groupé ${NOM_APP})`,
+      text: ["Bonjour,", "", `${company.name} vous commande les lignes de votre offre (${euros(total)} HT, livraison comprise), à livrer : ${b.livraison}.`, "Le bon de commande est joint. Le paiement se fait directement entre vous.", "", `Confirmez la réception d'un clic : ${lien}`, "", NOM_APP].join("\n"),
       attachments: [piece],
       ...(replyTo ? { replyTo } : {}),
     });
-    await this.notifs.prevenir(tenant.companyId, { titre: "C'est commandé", corps: `${qte(quantite)} ${b.unite} ${de(a.libelle)} chez ${c.nom}, ${euros(total)} HT livré.`, url: `/achats-groupes/${b.id}`, etiquette: `commande-${b.id}` }, { objet: `Ta commande groupée n° ${bonNumero} : ${a.libelle}`, texte: `C'est commandé : ${qte(quantite)} ${b.unite} ${de(a.libelle)} chez ${c.nom}, ${euros(total)} HT livré.\nTon bon de commande est joint.\n\n${this.notifs.lienVers("/achats-groupes")}\n\n${NOM_APP}`, piecesJointes: [piece] }).catch(() => undefined);
-    await this.ports.observatoire({ sourceId: a.id, departement: a.departement, designation: a.libelle, unite: b.unite, quantite, prixHt: prix }).catch(() => undefined);
-    return { bonNumero, negoce: c.nom, totalHt: total };
+    const corps = `${chiffrees.length} référence${chiffrees.length > 1 ? "s" : ""} chez ${c.nom}, ${euros(total)} HT livré.`;
+    await this.notifs.prevenir(tenant.companyId, { titre: "C'est commandé", corps, url: `/achats-groupes/${b.id}`, etiquette: `commande-${b.id}` }, { objet: `Ta commande groupée n° ${bonNumero}`, texte: `C'est commandé : ${corps}\nTon bon de commande est joint.\n\n${this.notifs.lienVers("/achats-groupes")}\n\n${NOM_APP}`, piecesJointes: [piece] }).catch(() => undefined);
+    for (const l of chiffrees) await this.ports.observatoire({ sourceId: a.id, departement: a.departement, designation: l.libelle, unite: l.unite, quantite: l.quantite, prixHt: l.prixHt! }).catch(() => undefined);
+    return { bonNumero, negoce: c.nom, totalHt: total, nonChiffrees: offre.lignes.length - chiffrees.length };
+  }
+
+  private bon(numero: number, date: Date, company: { name: string; address: string | null; phone: string | null; contactEmail: string | null }, c: { nom: string; email: string }, livraison: string, lignes: readonly { libelle: string; quantite: number; unite: string; prixHt: number | null }[], total: number, achatNumero: number) {
+    return bonDeCommandePdf({
+      numero: String(numero),
+      date: jourFr(date),
+      acheteur: { nom: company.name, adresse: company.address, telephone: company.phone, email: company.contactEmail },
+      vendeur: { nom: c.nom, email: c.email },
+      livraison,
+      lignes: lignes.map((l) => ({ designation: l.libelle, quantite: qte(l.quantite), unite: l.unite, prixHt: euros(l.prixHt ?? 0), totalHt: euros(arrondi((l.prixHt ?? 0) * l.quantite)) })),
+      livraisonHt: "comprise",
+      totalHt: euros(total),
+      mentions: [`Achat groupé ${NOM_APP} n° ${achatNumero} : prix ferme livraison comprise.`, `Paiement directement au vendeur, sur le compte habituel de l'acheteur. ${NOM_APP} ne vend ni n'achète rien et ne touche jamais l'argent.`],
+    });
   }
 
   async bonPdf(tenant: TenantContext, besoinId: string): Promise<Uint8Array> {
@@ -965,22 +1293,93 @@ export class AchatGroupeService {
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: b.regroupementId! } });
     const c = await this.prisma.consultationAchatGroupe.findUniqueOrThrow({ where: { id: b.consultationCommandeId } });
     const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, address: true, phone: true, contactEmail: true } });
-    const prix = Number(b.prixCommandeHt);
-    const total = Math.round(prix * Number(b.quantite) * 100) / 100;
-    return bonDeCommandePdf({
-      numero: String(b.bonNumero),
-      date: jourFr(b.accepteLe ?? this.now()),
-      acheteur: { nom: company.name, adresse: company.address, telephone: company.phone, email: company.contactEmail },
-      vendeur: { nom: c.nom, email: c.email },
-      livraison: b.livraison,
-      lignes: [{ designation: a.libelle, quantite: qte(Number(b.quantite)), unite: b.unite, prixHt: euros(prix), totalHt: euros(total) }],
-      livraisonHt: "comprise",
-      totalHt: euros(total),
-      mentions: [`Achat groupé ${NOM_APP} n° ${a.numero}.`, `Paiement directement au vendeur. ${NOM_APP} ne touche jamais l'argent.`],
-    });
+    const prix = this.prixEffectifs(c);
+    const lignes = (await this.prisma.ligneAchatGroupe.findMany({ where: { besoinId: b.id }, orderBy: { createdAt: "asc" } })).map((l) => ({ libelle: l.libelle, quantite: Number(l.quantite), unite: l.unite, prixHt: prixDe(prix, l.cle) })).filter((l) => l.prixHt !== null);
+    return this.bon(b.bonNumero, b.accepteLe ?? this.now(), company, c, b.livraison, lignes, Number(b.prixCommandeHt), a.numero);
   }
 
-  /** Le devis PDF déposé par un négoce (admin, pour vérifier une offre douteuse). */
+  /** Le négoce confirme « Commande reçue » d'un clic (lien du bon, sans inscription). */
+  async pageCommande(jeton: string) {
+    const b = await this.besoinDuJeton(jeton);
+    return { numero: b.bonNumero, client: b.company.name, totalHt: Number(b.prixCommandeHt), recue: !!b.commandeRecueLe };
+  }
+
+  async commandeRecue(jeton: string) {
+    const b = await this.besoinDuJeton(jeton);
+    if (!b.commandeRecueLe) {
+      await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { commandeRecueLe: this.now() } });
+      const c = b.consultationCommandeId ? await this.prisma.consultationAchatGroupe.findUnique({ where: { id: b.consultationCommandeId }, select: { nom: true } }) : null;
+      await this.notifs.prevenir(b.companyId, { titre: "Commande reçue", corps: `${c?.nom ?? "Le négoce"} a bien reçu ta commande n° ${b.bonNumero}.`, url: `/achats-groupes/${b.id}`, etiquette: `recue-${b.id}` }).catch(() => undefined);
+    }
+    return this.pageCommande(jeton);
+  }
+
+  private async besoinDuJeton(jeton: string) {
+    if (!/^[A-Za-z0-9_-]{20,80}$/.test(jeton)) throw notFound("Commande");
+    const b = await this.prisma.besoinNegocie.findUnique({ where: { commandeTokenHash: hacher(jeton) }, include: { company: { select: { name: true } } } });
+    if (!b) throw notFound("Commande");
+    return b;
+  }
+
+  /**
+   * Point 19 : sans compte chez le négoce, « Je suis intéressé, transmettre mes coordonnées » (consentement explicite) :
+   * il reçoit nom, entreprise, téléphone, e-mail et SIRET, et rappelle « de la part de Mobiiz ».
+   */
+  async transmettreCoordonnees(tenant: TenantContext, besoinId: string, consultationId: string, consentement: boolean) {
+    if (!consentement) throw validationFailed("Consent required", { reason: "consentement_requis", message: "Coche la case pour accepter que tes coordonnées soient transmises." });
+    const { b, c } = await this.publieePour(tenant, besoinId, consultationId);
+    if (b.coordonneesTransmisesLe && b.coordonneesConsultationId === c.id) return { fait: true, deja: true };
+    const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, phone: true, contactEmail: true, siret: true } });
+    const user = await this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { name: true, email: true } });
+    const email = company.contactEmail ?? user?.email ?? "";
+    await this.mailer.send({
+      to: c.email,
+      subject: `Ouverture de compte : ${company.name}, de la part de ${NOM_APP}`,
+      text: [
+        "Bonjour,",
+        "",
+        `Un artisan de l'achat groupé ${NOM_APP} souhaite ouvrir un compte chez vous pour commander au prix de votre offre. Il a accepté que ses coordonnées vous soient transmises :`,
+        "",
+        `- Nom : ${user?.name ?? ""}`,
+        `- Entreprise : ${company.name}`,
+        `- Téléphone : ${company.phone ?? "non renseigné"}`,
+        `- E-mail : ${email}`,
+        `- SIRET : ${company.siret ?? "non renseigné"}`,
+        "",
+        `Merci de le rappeler « de la part de ${NOM_APP} ».`,
+        "",
+        NOM_APP,
+      ].join("\n"),
+      ...(email ? { replyTo: email } : {}),
+    });
+    await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { coordonneesTransmisesLe: this.now(), coordonneesConsultationId: c.id } });
+    return { fait: true, deja: false };
+  }
+
+  /** Point 20 : « Livré » ou « Problème » (relation directe ensuite). */
+  async livre(tenant: TenantContext, besoinId: string, probleme: string | null) {
+    assertCanWrite(tenant);
+    const b = await this.monBesoin(tenant, besoinId);
+    if (b.statut !== "accepte") throw new DomainError("conflict", "Not ordered", { reason: "pas_commande" });
+    await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: probleme ? { problemeLe: this.now(), problemeTexte: probleme } : { livreLe: this.now() } });
+    return { fait: true };
+  }
+
+  /** Après la date de commande : une participation sans commande ni sortie est une commande pas passée sans motif. */
+  private async nonCommandes(maintenant: Date): Promise<number> {
+    const besoins = await this.prisma.besoinNegocie.findMany({ where: { statut: ENGAGE, regroupement: { mode: MODE_AUTO, statut: "publie", commandeAvantLe: { lte: maintenant } } }, select: { id: true, companyId: true, regroupementId: true, quantite: true } });
+    for (const b of besoins) {
+      await this.prisma.$transaction([
+        this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { statut: "non_commande", nonCommandeLe: maintenant } }),
+        this.prisma.desistementAchatGroupe.create({ data: { besoinId: b.id, companyId: b.companyId, regroupementId: b.regroupementId!, quantite: b.quantite, apresCloture: true, raison: "non_commande" } }),
+      ]);
+      const fin = await this.recalculerExclusion(b.companyId);
+      if (fin) await this.notifs.prevenir(b.companyId, { titre: "Commande pas passée", corps: phraseExclusion(fin), url: `/achats-groupes/${b.id}`, etiquette: `exclu-${b.id}` }).catch(() => undefined);
+    }
+    return besoins.length;
+  }
+
+  /** Le devis PDF déposé par un négoce (admin, l'original à un tap). */
   async devisPdf(consultationId: string): Promise<Uint8Array> {
     if (!isUuid(consultationId)) throw notFound("Consultation");
     const c = await this.prisma.consultationAchatGroupe.findUnique({ where: { id: consultationId }, select: { pdf: true } });
@@ -988,19 +1387,20 @@ export class AchatGroupeService {
     return new Uint8Array(c.pdf);
   }
 
-  /* ------------------------------------------------------------------------------------------- plan B (point 7) */
+  /* ------------------------------------------------------------------------------------------- plan B */
 
-  /** « Envoyer à mes négoces » : la participation devient une demande perso, en un clic, chez ses négoces. */
+  /** « Envoyer à mes négoces » : ses lignes deviennent une demande perso, en un clic, chez ses négoces. */
   async planB(tenant: TenantContext, besoinId: string) {
     assertCanWrite(tenant);
     const b = await this.monBesoin(tenant, besoinId);
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: b.regroupementId! } });
-    if (a.statut !== "pas_assez" || b.statut !== "declare") throw new DomainError("conflict", "Plan B only when volume is short", { reason: "pas_de_plan_b" });
+    if (a.statut !== "pas_assez" || b.statut !== ENGAGE) throw new DomainError("conflict", "Plan B only when volume is short", { reason: "pas_de_plan_b" });
     const negoces = await this.prisma.negoceParticipant.findMany({ where: { besoinId: b.id, supplierId: { not: null } }, select: { supplierId: true } });
+    const lignes = await this.prisma.ligneAchatGroupe.findMany({ where: { besoinId: b.id }, orderBy: { createdAt: "asc" } });
     const r = await this.ports.envoyerEnPerso(tenant, {
-      nom: `Achat groupé : ${a.libelle}`,
+      nom: a.libelle,
       adresse: b.livraison,
-      ligne: { designation: b.designation, quantite: Number(b.quantite), unite: b.unite },
+      lignes: lignes.map((l) => ({ designation: l.designationOrigine, quantite: Number(l.quantite), unite: l.unite })),
       supplierIds: negoces.map((n) => n.supplierId!),
       dateBesoin: b.dateBesoin,
     });
@@ -1010,17 +1410,17 @@ export class AchatGroupeService {
 
   /* -------------------------------------------------------------------------------- la facture de commission */
 
-  /** Le 1er du mois : la facture de commission de chaque négoce, d'après les bons du mois passé (envoi réel coupé). */
+  /** Le 1er du mois : la facture de commission de chaque négoce (rien à 0 %, point 27 ; envoi réel coupé). */
   async preparerFactures(maintenant = this.now()): Promise<number> {
     const debut = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth() - 1, 1));
     const fin = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), 1));
     const mois = debut.toISOString().slice(0, 7);
-    const bons = await this.prisma.besoinNegocie.findMany({ where: { statut: "accepte", accepteLe: { gte: debut, lt: fin }, consultationCommandeId: { not: null } }, select: { bonNumero: true, quantite: true, prixCommandeHt: true, consultationCommandeId: true } });
+    const bons = await this.prisma.besoinNegocie.findMany({ where: { statut: "accepte", accepteLe: { gte: debut, lt: fin }, consultationCommandeId: { not: null } }, select: { bonNumero: true, prixCommandeHt: true, consultationCommandeId: true } });
     const parNegoce = new Map<string, { nom: string; total: number; commission: number; bons: { numero: number | null; totalHt: number }[] }>();
     for (const b of bons) {
       const c = await this.prisma.consultationAchatGroupe.findUnique({ where: { id: b.consultationCommandeId! }, select: { email: true, nom: true, commissionPct: true } });
-      if (!c) continue;
-      const total = Math.round(Number(b.prixCommandeHt) * Number(b.quantite) * 100) / 100;
+      if (!c || Number(c.commissionPct) <= 0) continue;
+      const total = Number(b.prixCommandeHt);
       const f = parNegoce.get(c.email) ?? { nom: c.nom, total: 0, commission: 0, bons: [] };
       f.total += total;
       f.commission += (total * Number(c.commissionPct)) / 100;
@@ -1028,7 +1428,7 @@ export class AchatGroupeService {
       parNegoce.set(c.email, f);
     }
     for (const [email, f] of parNegoce) {
-      const data = { negoceNom: f.nom, totalHt: Math.round(f.total * 100) / 100, commissionHt: Math.round(f.commission * 100) / 100, bons: f.bons };
+      const data = { negoceNom: f.nom, totalHt: arrondi(f.total), commissionHt: arrondi(f.commission), bons: f.bons };
       await this.prisma.factureCommissionMensuelle.upsert({ where: { mois_negoceEmail: { mois, negoceEmail: email } }, create: { mois, negoceEmail: email, ...data }, update: data });
     }
     return parNegoce.size;
@@ -1036,17 +1436,76 @@ export class AchatGroupeService {
 
   /* ------------------------------------------------------------------------------------------------- l'admin */
 
+  /**
+   * Point 32 : le taux de lignes corrigées par l'artisan, par source de la liste préparée (devis lu, photo de liste).
+   * Une ligne corrigée : modifiée ou retirée au moins une fois (journal des corrections).
+   */
+  async correctionsParSource() {
+    const demos = (await this.prisma.project.findMany({ where: { demo: true }, select: { id: true } })).map((p) => p.id);
+    const takeoffs = await this.prisma.takeoff.findMany({ where: { projectId: { notIn: demos } }, select: { id: true, source: true, lines: { select: { id: true, origin: true } } } });
+    const events = await this.prisma.correctionEvent.findMany({ where: { action: { in: ["edit", "delete"] }, takeoffLineId: { not: null } }, select: { takeoffId: true, takeoffLineId: true, action: true } });
+    const parTakeoff = new Map<string, { corrigees: Set<string>; retirees: Set<string> }>();
+    for (const e of events) {
+      if (!e.takeoffId) continue;
+      const t = parTakeoff.get(e.takeoffId) ?? { corrigees: new Set(), retirees: new Set() };
+      t.corrigees.add(e.takeoffLineId!);
+      if (e.action === "delete") t.retirees.add(e.takeoffLineId!);
+      parTakeoff.set(e.takeoffId, t);
+    }
+    const sources = { devis: { lignes: 0, corrigees: 0 }, photo: { lignes: 0, corrigees: 0 } };
+    for (const t of takeoffs) {
+      const source = t.lines.some((l) => l.origin === "liste") ? "photo" : t.source === "pdf" ? "devis" : null;
+      if (!source) continue;
+      const c = parTakeoff.get(t.id);
+      const lues = t.lines.filter((l) => l.origin === (source === "photo" ? "liste" : "ai"));
+      const ids = new Set(lues.map((l) => l.id));
+      const retirees = c ? [...c.retirees].filter((id) => !ids.has(id)).length : 0;
+      sources[source].lignes += lues.length + retirees;
+      sources[source].corrigees += (c ? [...c.corrigees].filter((id) => ids.has(id)).length : 0) + retirees;
+    }
+    return (["devis", "photo"] as const).map((s) => ({ source: s, ...sources[s], taux: sources[s].lignes ? Math.round((sources[s].corrigees / sources[s].lignes) * 100) : null }));
+  }
+
   async admin(maintenant = this.now()) {
-    const achats = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO }, orderBy: { createdAt: "desc" }, take: 200, include: { consultations: { select: { id: true, nom: true, email: true, telephone: true, statut: true, raisons: true, prixUnitaireHt: true, reponduLe: true, envoyeLe: true, pdfNom: true } } } });
+    const achats = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO }, orderBy: { createdAt: "desc" }, take: 200, include: { consultations: { select: { id: true, nom: true, email: true, telephone: true, reponduLe: true } } } });
     const vues = [];
     for (const a of achats) {
-      const v = await this.volumeEstime(a);
-      vues.push({ id: a.id, numero: a.numero, libelle: a.libelle, departement: a.departement, statut: a.statut, clotureLe: a.clotureLe, reponseAvantLe: a.reponseAvantLe, entreprises: v.entreprises, quantite: v.total, unite: a.unite, estimeHt: v.estimeHt, consultations: a.consultations.map((c) => ({ ...c, prixUnitaireHt: c.prixUnitaireHt === null ? null : Number(c.prixUnitaireHt), raisons: c.raisons.map((r) => PHRASES_DOUTE[r as RaisonDoute] ?? r) })) });
+      const v = await this.volumeEstime(a.id);
+      const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId: a.id, engageLe: { not: null } }, select: { companyId: true, statut: true, offreVueLe: true } });
+      let abonnes = 0;
+      for (const b of besoins) if (await this.ports.abonne(b.companyId)) abonnes++;
+      vues.push({
+        id: a.id,
+        numero: a.numero,
+        titre: a.libelle,
+        departement: a.departement,
+        statut: a.statut,
+        clotureLe: a.clotureLe,
+        reponseAvantLe: a.reponseAvantLe,
+        commandeAvantLe: a.commandeAvantLe,
+        entreprises: v.entreprises,
+        references: cumulerPanier(await this.lignesPanier(a.id)).length,
+        estimeHt: v.estimeHt,
+        reponses: `${a.consultations.filter((c) => c.reponduLe).length} sur ${a.consultations.length}`,
+        // Point 28 : vus, abonnés, commandé, sortis (achats publiés).
+        suivi: a.publieLe ? { vus: besoins.filter((b) => b.offreVueLe).length, abonnes, commandes: besoins.filter((b) => b.statut === "accepte").length, sortis: besoins.filter((b) => b.statut === "sorti").length, participants: besoins.length } : null,
+        _a: a,
+      });
     }
-    const limite = new Date(maintenant.getTime() - SANS_REPONSE_HEURES * 3_600_000);
-    const sansReponse = vues.filter((a) => a.statut === "consultation" && achats.find((x) => x.id === a.id)!.consulteLe! <= limite && a.consultations.every((c) => !c.reponduLe)).map((a) => ({ id: a.id, numero: a.numero, libelle: a.libelle, departement: a.departement, negoces: a.consultations.map((c) => ({ nom: c.nom, email: c.email, telephone: c.telephone })) }));
-    const douteuses = vues.flatMap((a) => a.consultations.filter((c) => c.statut === "douteuse").map((c) => ({ achatId: a.id, numero: a.numero, libelle: a.libelle, consultationId: c.id, nom: c.nom, prixUnitaireHt: c.prixUnitaireHt, raisons: c.raisons, pdf: c.pdfNom })));
-    const desistements = (await this.prisma.desistementAchatGroupe.findMany({ orderBy: { le: "desc" }, take: 200, include: { company: { select: { name: true } }, regroupement: { select: { numero: true, libelle: true } } } })).map((d) => ({ id: d.id, le: d.le, entreprise: d.company.name, achat: `n° ${d.regroupement.numero} ${d.regroupement.libelle}`, quantite: Number(d.quantite), apresCloture: d.apresCloture, raison: d.raison }));
+    const limite = new Date(maintenant.getTime() - SANS_REPONSE_HEURES * HEURE);
+    const sansReponse = vues
+      .filter((v) => v.statut === "consultation" && v._a.consulteLe! <= limite && v._a.consultations.every((c) => !c.reponduLe))
+      .map((v) => ({ id: v.id, numero: v.numero, titre: v.titre, departement: v.departement, negoces: v._a.consultations.map((c) => ({ nom: c.nom, email: c.email, telephone: c.telephone })) }));
+    const desistements = (await this.prisma.desistementAchatGroupe.findMany({ orderBy: { le: "desc" }, take: 200, include: { company: { select: { name: true } }, regroupement: { select: { numero: true, libelle: true } } } })).map((d) => ({
+      id: d.id,
+      le: d.le,
+      entreprise: d.company.name,
+      achat: `n° ${d.regroupement.numero} ${d.regroupement.libelle}`,
+      apresCloture: d.apresCloture,
+      raison: d.raison,
+      motif: d.raison === "non_commande" ? "Commande pas passée, sans motif" : d.raison === "retire_avant_cloture" ? "Retiré avant la clôture" : (LIBELLES_MOTIFS_SORTIE[d.raison as MotifSortie] ?? d.raison),
+    }));
+    const exclus = (await this.prisma.company.findMany({ where: { achatsGroupesExclusJusquau: { gt: maintenant } }, select: { id: true, name: true, achatsGroupesExclusJusquau: true } })).map((c) => ({ companyId: c.id, entreprise: c.name, jusquau: c.achatsGroupesExclusJusquau }));
     const parts = await this.prisma.besoinNegocie.groupBy({ by: ["companyId"], where: { regroupement: { mode: MODE_AUTO } }, _count: { _all: true } });
     const suspects = [];
     for (const p of parts) {
@@ -1056,7 +1515,23 @@ export class AchatGroupeService {
         suspects.push({ companyId: p.companyId, entreprise: c?.name ?? "", siret: c?.siret ?? null, naf: c?.naf ?? null, participations: p._count._all, commandes });
       }
     }
+    // Point 16 : la part des achats publiés où le choix de l'IA a été suivi sans correction.
+    const publies = achats.filter((a) => a.publieLe);
+    const suivis = publies.filter((a) => a.correctionsAdmin === 0 && a.meilleureId === a.iaMeilleureId).length;
     const factures = (await this.prisma.factureCommissionMensuelle.findMany({ orderBy: [{ mois: "desc" }, { negoceNom: "asc" }], take: 200 })).map((f) => ({ ...f, totalHt: Number(f.totalHt), commissionHt: Number(f.commissionHt) }));
-    return { achats: vues, sansReponse, douteuses, desistements, suspects, factures, volumesMin: await this.volumesMin(), envoiFacturesActif: false };
+    return {
+      correctionsParSource: await this.correctionsParSource(),
+      achats: vues.map(({ _a, ...v }) => (void _a, v)),
+      aValider: vues.filter((v) => v.statut === "validation").map((v) => ({ id: v.id, numero: v.numero, titre: v.titre, reponses: v.reponses })),
+      sansReponse,
+      desistements,
+      exclus,
+      suspects,
+      iaSuivie: { publies: publies.length, sansCorrection: suivis, part: publies.length ? Math.round((suivis / publies.length) * 100) : null },
+      factures,
+      volumesMin: await this.volumesMin(),
+      envoiFacturesActif: false,
+      commissionPct: this.cfg.commissionDefaut,
+    };
   }
 }
