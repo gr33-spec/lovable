@@ -413,7 +413,10 @@ export class AchatGroupeService {
    * la suggestion des grosses quantités (pré-cochées), le droit (premier offert), les règles et les achats ouverts.
    */
   async depuisListe(tenant: TenantContext, projectId: string) {
-    const { adresse, source, lignes } = await this.ports.lignesDeListe(tenant, projectId);
+    const liste = await this.ports.lignesDeListe(tenant, projectId);
+    const { source, lignes } = liste;
+    // Une liste sans adresse (un devis sans chantier lu) : la livraison part de l'adresse de l'entreprise, modifiable.
+    const adresse = liste.adresse ?? (await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } }))?.address ?? null;
     const vues = lignes.map((l) => {
       const r = rattachementPropose(l.designation);
       const groupable = !!r && this.cfg.familles.includes(r.famille);
@@ -440,7 +443,7 @@ export class AchatGroupeService {
   /** Les lignes cochées et confirmées d'un tap partent dans l'achat groupé ; les autres restent en demande perso. */
   async lancerDepuisListe(tenant: TenantContext, projectId: string, d: { confirmees: string[]; dateBesoin: Date | null; livraison: string | null; negoces: NegoceAjoute[]; engagement: boolean; achatId: string | null }) {
     const { adresse, lignes } = await this.ports.lignesDeListe(tenant, projectId);
-    const livraison = d.livraison ?? adresse;
+    const livraison = d.livraison ?? adresse ?? (await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } }))?.address ?? null;
     if (!livraison) throw validationFailed("A delivery town with a postcode is required", { reason: "livraison_requise", message: "Indique la commune de livraison avec son code postal." });
     const engagees: LigneEngagee[] = [];
     const perso: { key: string; designation: string }[] = [];
@@ -651,7 +654,8 @@ export class AchatGroupeService {
     }
     const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { alertesAchatsGroupes: true, achatsGroupesExclusJusquau: true } });
     const exclusion = c?.achatsGroupesExclusJusquau && exclu(c.achatsGroupesExclusJusquau, this.now()) ? phraseExclusion(c.achatsGroupesExclusJusquau) : null;
-    return { mode: await this.ports.mode(), achats: cartes, alertes: lireReglageAlertes(c?.alertesAchatsGroupes), exclusion };
+    const d = await this.droit(tenant.companyId);
+    return { mode: await this.ports.mode(), achats: cartes, alertes: lireReglageAlertes(c?.alertesAchatsGroupes), exclusion, droit: { ok: d.ok, offert: d.offert, phrase: d.phrase }, engagement: { phrase: PHRASE_ENGAGEMENT, regles: REGLES_ENGAGEMENT } };
   }
 
   /** Le détail d'une participation : la frise, ses lignes, ses négoces ; après la publication, la comparaison sur SES lignes. */

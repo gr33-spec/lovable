@@ -119,7 +119,8 @@ test.describe("Business model final : le regroupement négocié par un humain", 
     await lot.getByLabel("Négoce", { exact: true }).fill("Ardoisière de l'Ouest");
     await lot.getByLabel("E-mail du négoce").fill(`ardoisiere-${unique()}@negoce.example.com`);
     await lot.getByLabel(/Prix négocié HT/).fill("1,10");
-    await expect(lot.getByText("Prix affiché aux artisans : 1,12 € HT (commission incluse).")).toBeVisible();
+    // Point 27 (27 octobre 2026, 2e message) : COMMISSION_DEFAUT=0, aucune mention.
+    await expect(lot.getByText(/commission incluse/)).toHaveCount(0);
     await lot.getByLabel("Valable jusqu'au").fill(dansTroisSemaines());
     await lot.getByRole("button", { name: "Enregistrer l'offre" }).click();
     await lot.getByRole("button", { name: "Envoyer l'offre à tous" }).click();
@@ -130,7 +131,7 @@ test.describe("Business model final : le regroupement négocié par un humain", 
     const offre = page.getByLabel("Offre négociée");
     await expect(offre.getByText(`Négoce vérifié dans le ${zone}`)).toBeVisible();
     await expect(offre.getByText("Négocié pour vous par Mobiiz")).toBeVisible();
-    await expect(offre.getByText("Commission Mobiiz incluse dans le prix")).toBeVisible();
+    await expect(offre.getByText("Commission Mobiiz incluse dans le prix")).toHaveCount(0);
     await expect(offre.getByText("Ardoisière de l'Ouest")).toHaveCount(0);
     await offre.getByRole("button", { name: "J'accepte" }).click();
     await expect(besoin.getByText("Commandé")).toBeVisible();
@@ -234,7 +235,7 @@ test.describe("Business model final : le regroupement négocié par un humain", 
 
   test("/couvreurs : la même page, la couverture d'abord, et les chasseurs d'opportunités", async ({ page }) => {
     await page.goto("/couvreurs");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ton devis.");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Achète tes matériaux au prix des gros.");
     await expect(page.getByText("Pour les couvreurs")).toBeVisible();
     await expect(page.getByText(/ardoise, zinc, bois de charpente/i).first()).toBeVisible();
     await expect(page.getByText("Des chasseurs d'opportunités négocient pour toi.")).toBeVisible();
@@ -245,7 +246,7 @@ test.describe("Business model final : le regroupement négocié par un humain", 
 
   test("/peintres (Greg, 26 octobre 2026) : le bloc peinture en pleine place, juste sous l'accroche ; pas d'ardoise", async ({ page }) => {
     await page.goto("/peintres");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ton devis.");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Achète tes matériaux au prix des gros.");
     await expect(page.getByText("Pour les peintres")).toBeVisible();
     const peinture = page.getByRole("region", { name: "Le même pot, deux fois moins cher." });
     await expect(peinture.getByText("6 à 7 €")).toBeVisible();

@@ -48,7 +48,7 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.goto("/");
   // Sans session : la page publique, puis « Créer un compte » mène à l'inscription.
   // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ton devis\.\s*Ta liste de matériaux\.\s*Tes prix\.$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Achète tes matériaux au prix des gros\.$/);
   const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });
   await expect(lu.getByText("N° DE00000071")).toBeVisible();
   // Greg, 26 octobre 2026 (capture iPhone) : le vrai devis, puis les fournitures qui en sortent une à une dans « Ta liste ».
@@ -206,8 +206,8 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await page.goto("/");
   await page.getByRole("link", { name: "Ma liste de matériaux" }).first().click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
-  // Nouveau cap (22 octobre) : le devis est le petit bouton « Je n'ai qu'un devis », sous « Donne ta liste de matériaux ».
-  await expect(page.getByText("Je n'ai qu'un devis", { exact: true })).toBeVisible();
+  // Greg, 27 octobre 2026, 2e message, point 31 : trois choix, le devis d'abord.
+  await expect(page.getByText("Depuis mon devis — on t'avance", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Nom du chantier")).toHaveCount(0);
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   // Le chantier est créé au dépôt ; la lecture part d'elle-même, sans champ « précisions » ni bouton à toucher.
@@ -1373,8 +1373,8 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   };
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  // 1. Un bouton pour le devis (« Je n'ai qu'un devis », sous « Donne ta liste de matériaux » : nouveau cap, 22 octobre).
-  await expect(page.getByText("Je n'ai qu'un devis", { exact: true })).toBeVisible();
+  // 1. Un bouton pour le devis (point 31 du 27 octobre 2026 : « Depuis mon devis — on t'avance »).
+  await expect(page.getByText("Depuis mon devis — on t'avance", { exact: true })).toBeVisible();
   await clean();
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   // 2. Les questions : une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste ».
@@ -2581,7 +2581,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
   // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ton devis\.\s*Ta liste de matériaux\.\s*Tes prix\.$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Achète tes matériaux au prix des gros\.$/);
   // Le concept sous le titre, avant tout le reste, et les trois lignes visibles sans défiler sur un iPhone SE (Greg, même jour).
   const concept = page.getByText("Mobiiz additionne les commandes de matériaux des artisans d'un même secteur et négocie le prix de gros pour chacun.");
   const trois = page.getByRole("list", { name: "En trois étapes" }).getByRole("listitem");
@@ -2606,7 +2606,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // visiteur arrive sur l'accroche, « Par un artisan, pour les artisans », « Dès 29 € », l'inscription ; aucune démo d'office.
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
   await expect(page.getByText("Par un artisan, pour les artisans.")).toBeVisible();
-  await expect(page.getByText(/^Gratuit pour commencer\. Dès 29 € HT par mois/)).toBeVisible();
+  await expect(page.getByText(/^Gratuit pour faire tes listes et les envoyer à tes négoces\. Abonné pour profiter des achats groupés\. Ton premier achat groupé est offert\./)).toBeVisible();
   await expect(page.getByRole("link", { name: "Commencer gratuitement" }).first()).toBeVisible();
   await page.reload();
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
@@ -2677,8 +2677,8 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.locator("main svg")).toHaveCount(0);
   await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
   // L'abonnement (24 octobre 2026) : l'argument phare (une possibilité tant qu'il n'y a pas 3 cycles) et l'offre.
-  await expect(page.getByText(/^Gratuit pour commencer\. Dès 29 € HT par mois( pour comparer et acheter en groupe\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par regroupement\.)$/)).toBeVisible();
-  await expect(page.getByText(/^29 € HT par mois payé à l'année \(348 €\), ou 49 € HT au mois sans engagement\./)).toBeVisible();
+  // Greg, 27 octobre 2026, 2e message, point 34 : la phrase des tarifs, aucun montant.
+  await expect(page.getByText(/€ HT/)).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Commencer gratuitement" })).toHaveCount(2);
   await expect(page.getByText("des demandes structurées, prêtes à chiffrer, et des volumes groupés. Vos clients artisans paient le juste prix, et vous vendez plus.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
@@ -2782,10 +2782,10 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await page.goto("/");
   await page.getByRole("link", { name: "Ma liste de matériaux" }).first().click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
-  // Nouveau cap (22 octobre) : un gros bouton pour la liste, un petit pour le devis.
-  await expect(page.getByText("Donne ta liste de matériaux", { exact: true })).toBeVisible();
-  await expect(page.getByText("Je n'ai qu'un devis", { exact: true })).toBeVisible();
-  await expect(page.getByText("On t'avance la liste, sans garantie, tu la peaufines.")).toBeVisible();
+  // Point 31 (27 octobre 2026) : trois choix, « Depuis mon devis — on t'avance », « Photo de ma liste », « Je la note moi-même ».
+  await expect(page.getByText("Depuis mon devis — on t'avance", { exact: true })).toBeVisible();
+  await expect(page.getByText("Photo de ma liste", { exact: true })).toBeVisible();
+  await expect(page.getByText("Je la note moi-même", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Déposer mon devis")).toHaveAttribute("accept", /pdf/);
   await expect(page.getByLabel("Déposer ma liste")).toHaveAttribute("accept", /image\/jpeg.*application\/pdf/);
 
@@ -3440,27 +3440,20 @@ test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formul
   await page.getByRole("navigation", { name: "Menu" }).getByRole("link", { name: "Tarifs" }).click();
   await expect(page).toHaveURL(/\/tarifs$/);
   await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
-  await expect(page.getByText(/^Gratuit pour commencer\. Dès 29 € HT par mois( pour comparer et acheter en groupe\.| : en moyenne, nos artisans ont économisé [\d\s\u202f]+ € par regroupement\.)$/)).toBeVisible();
-  for (const etape of ["Commence gratuitement", "Teste le payant", "Continue si ça te sert : dès 29 € HT par mois"]) {
+  // Greg, 27 octobre 2026, 2e message, points 26 et 34 : la phrase des tarifs, aucun montant, plus d'essai.
+  await expect(page.getByText("Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert.", { exact: true })).toBeVisible();
+  for (const etape of ["Commence gratuitement", "Ton premier achat groupé est offert", "Abonne-toi si ça te sert"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
-  // Recentrage (25 octobre 2026) : ce que donne le gratuit, ce que donne le payant.
-  const gp = page.getByRole("region", { name: "Gratuit ou payant" });
-  await expect(gp.getByText("· 1 négoce par demande")).toBeVisible();
-  await expect(gp.getByText("· Les regroupements")).toBeVisible();
-  // Les deux formules (Greg, 24 octobre 2026) : l'annuel d'abord, mis en avant, puis le mensuel.
-  const formules = page.getByRole("region", { name: "Les formules" });
-  await expect(formules.getByText("-40 %")).toBeVisible();
-  await expect(formules.getByText("29 € HT par mois, payé à l'année")).toBeVisible();
-  await expect(formules.getByText("240 € économisés par an")).toBeVisible();
-  await expect(formules.getByText("49 € HT par mois", { exact: true })).toBeVisible();
-  const [annuelBox, mensuelBox] = [await formules.getByText("Annuel", { exact: true }).boundingBox(), await formules.getByText("Mensuel", { exact: true }).boundingBox()];
-  expect(annuelBox!.y + annuelBox!.x).toBeLessThan(mensuelBox!.y + mensuelBox!.x);
-  await expect(page.getByText("L'annuel se renouvelle tout seul ?")).toBeVisible();
+  const ga = page.getByRole("region", { name: "Gratuit ou abonné" });
+  await expect(ga.getByText("· Envoyées à tes négoces")).toBeVisible();
+  await expect(ga.getByText("· Les achats groupés de ton métier")).toBeVisible();
+  await expect(page.getByText(/\d+ € HT/)).toHaveCount(0);
+  await expect(page.getByText(/essai/i)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Gratuit pour les négoces" })).toBeVisible();
   await expect(page.getByText("Comment je résilie ?")).toBeVisible();
 
-  // L'essai : le bandeau compte les jours.
+  // L'essai du mode humain (ce parcours y tourne ; le mode automatique n'en a plus) : le bandeau compte les jours.
   await signUp(page);
   await expect(page.getByRole("link", { name: /Essai gratuit : encore 60 jours/ })).toBeVisible();
   await page.getByRole("link", { name: /Essai gratuit : encore 60 jours/ }).click();

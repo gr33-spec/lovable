@@ -171,7 +171,7 @@ export const PHRASE_PRIX_FERMES_VOLUME = "Prix fermes, quel que soit le volume f
  */
 /** 26 octobre 2026 (points D de Greg) : commission de 1 à 2 %, facturée par BATI INVEST ; non-sollicitation. */
 export const CONDITIONS_NEGOCE_VERSION = "2026-10-27";
-export const CONDITIONS_NEGOCE_MAJEURE = "2026-10-26";
+export const CONDITIONS_NEGOCE_MAJEURE = "2026-10-27";
 /** Une version acceptée est-elle à jour ? Les versions sont des dates : l'ordre alphabétique suffit. */
 export const conditionsNegoceAJour = (acceptee: string | null | undefined) => !!acceptee && acceptee >= CONDITIONS_NEGOCE_MAJEURE;
 

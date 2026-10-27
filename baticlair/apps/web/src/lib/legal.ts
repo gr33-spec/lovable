@@ -12,7 +12,7 @@ export const A_COMPLETER = "[A COMPLETER]";
 /** La version des CGU artisan. Une version MAJEURE (`VERSION_CGU_MAJEURE`) est redemandée à chaque compte. */
 export const VERSION_CGU = "2026-10-27";
 /** La dernière version qui demande une nouvelle acceptation : un compte qui a accepté avant la voit et l'accepte. */
-export const VERSION_CGU_MAJEURE = "2026-10-26";
+export const VERSION_CGU_MAJEURE = "2026-10-27";
 
 /** Une version acceptée (« 2026-10-22 ») est-elle à jour ? Les versions sont des dates : l'ordre alphabétique suffit. */
 export const cguAJour = (acceptee: string | null | undefined) => !!acceptee && acceptee >= VERSION_CGU_MAJEURE;

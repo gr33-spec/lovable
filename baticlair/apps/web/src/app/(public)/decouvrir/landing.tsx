@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ArgumentTarif } from "@/components/argument-tarif";
 import { DemoSurBouton } from "@/components/demo-guidee";
 import { CompteurInscrits } from "@/components/inviter";
 import { Apparition, CompteurVingt, PartageVitrine } from "@/components/landing-mouvement";
@@ -99,6 +98,44 @@ function BlocPeinture() {
   );
 }
 
+/**
+ * « Ta liste de matériaux ? On te file un coup de main. » (Greg, 27 octobre 2026, 2e message, point 30), mot pour mot :
+ * trois façons, jamais les mots « précis », « exact », « automatique » ni « IA » (test `landing-coup-de-main.test.mjs`).
+ */
+export const COUP_DE_MAIN = {
+  titre: "Ta liste de matériaux ? On te file un coup de main.",
+  sous: "Pas besoin de tout taper. Choisis ce qui t'arrange.",
+  choix: [
+    "Donne-nous ton devis, on t'avance ta liste. C'est pas parfait, mais t'as plus qu'à vérifier et peaufiner.",
+    "Tu as déjà ta liste sur papier ? Prends-la en photo, on la met dans l'app pour toi.",
+    "Tu préfères la faire toi-même ? Note-la directement, ligne par ligne.",
+  ],
+} as const;
+
+function CoupDeMain() {
+  return (
+    <section aria-labelledby="coup-de-main" className="mz-section" data-apparait="">
+      <Cote gauche="Ta liste" />
+      <h2 id="coup-de-main" className="mz-titre mz-h2">
+        {COUP_DE_MAIN.titre}
+      </h2>
+      <p className="mz-gris" style={{ marginTop: 12, marginBottom: 20 }}>
+        {COUP_DE_MAIN.sous}
+      </p>
+      <ol className="mz-trois" aria-label="Trois façons de faire ta liste">
+        {COUP_DE_MAIN.choix.map((c, i) => (
+          <li key={c}>
+            <span className="mz-trois-n mz-num" aria-hidden="true">
+              {i + 1}
+            </span>
+            {c}
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 /** Les trois lignes du haut de page, mot pour mot (Greg, 26 octobre 2026). */
 const TROIS_LIGNES = ["Tu dis ce que tu vas commander (ton devis suffit).", "On l'additionne avec les artisans du coin.", "On négocie, tu achètes au prix des gros."] as const;
 
@@ -121,16 +158,16 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
           <section aria-labelledby="accroche" className="mz-accroche">
             <div>
               <p className="mz-kicker mz-etiq">{ACCROCHE_APP}</p>
+              {/* Greg, 27 octobre 2026, 2e message, point 29 : le titre, puis la deuxième promesse juste en dessous. */}
               <h1 id="accroche" className="mz-titre mz-h1">
-                Ton devis.
-                <br />
-                Ta liste de matériaux.
-                <br />
-                <span className="mz-surligne">Tes prix.</span>
+                Achète tes matériaux <span className="mz-surligne">au prix des gros.</span>
               </h1>
+              <p className="mz-concept" style={{ fontWeight: 800 }}>
+                Arrête de perdre du temps sur tes quantitatifs.
+              </p>
               {/* Le concept, juste sous le titre et avant tout le reste (Greg, 26 octobre 2026 : « le concept n'est pas compris
                   en haut de page ») : la phrase en gros, puis trois lignes numérotées, visibles sans défiler sur un iPhone SE. */}
-              <p className="mz-concept">
+              <p className="mz-chapo">
                 {NOM_APP} additionne les commandes de matériaux des artisans d&apos;un même secteur et négocie le prix de gros pour chacun.
               </p>
               <ol className="mz-trois" aria-label="En trois étapes">
@@ -154,14 +191,16 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
                 </Link>
                 <DemoSurBouton className="mz-lien" />
               </div>
-              <ArgumentTarif className="mz-prix" />
-              <p className="mz-prix-detail mz-num">
-                29 € HT par mois payé à l&apos;année (348 €), ou 49 € HT au mois sans engagement. <Link href="/tarifs">Voir les tarifs</Link>
+              {/* Point 34 : aucun montant tant que le prix n'est pas fixé. */}
+              <p className="mz-prix-detail">
+                Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert. <Link href="/tarifs">Voir les tarifs</Link>
               </p>
             </div>
 
             <LectureAnimee />
           </section>
+
+          <CoupDeMain />
 
           {peintres ? <BlocPeinture /> : null}
 

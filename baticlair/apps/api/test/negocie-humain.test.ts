@@ -15,10 +15,12 @@ import { createTestApp, resetDatabase, type TestContext } from "./support/test-a
  * négoce », interrupteur du mode.
  */
 let ctx: TestContext;
-const avant = { MODE_REGROUPEMENT: process.env.MODE_REGROUPEMENT, GROUPE: process.env.GROUPE, ZONES_ACTIVES: process.env.ZONES_ACTIVES, GROUPE_ADMINS: process.env.GROUPE_ADMINS, CHASSEURS: process.env.CHASSEURS, CRON_SECRET: process.env.CRON_SECRET };
+const avant = { COMMISSION_DEFAUT: process.env.COMMISSION_DEFAUT, MODE_REGROUPEMENT: process.env.MODE_REGROUPEMENT, GROUPE: process.env.GROUPE, ZONES_ACTIVES: process.env.ZONES_ACTIVES, GROUPE_ADMINS: process.env.GROUPE_ADMINS, CHASSEURS: process.env.CHASSEURS, CRON_SECRET: process.env.CRON_SECRET };
 beforeAll(async () => {
   // Depuis le 27 octobre 2026, le mode par défaut est l'achat groupé automatique : ce fichier joue le mode humain.
   process.env.MODE_REGROUPEMENT = "humain";
+  // La commission du chasseur (1 à 2 %) ; le défaut est 0 depuis l'achat groupé par métier (27 octobre 2026).
+  process.env.COMMISSION_DEFAUT = "2";
   process.env.GROUPE = "on";
   process.env.ZONES_ACTIVES = "22";
   process.env.GROUPE_ADMINS = "greg@example.fr";

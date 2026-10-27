@@ -81,6 +81,16 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
     <div className="flex flex-col gap-4">
       {error ? <ErrorNotice error={error} /> : null}
       <Card className="flex flex-col gap-3 p-5">
+        {a.acces === "gratuit" ? (
+          <>
+            <p className="text-[20px] font-extrabold">Gratuit</p>
+            <p className="text-[16px]">Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert.</p>
+            <OffresAbonnement offres={a.offres} choisie={formule} onChoisir={setFormule} />
+            <Button variant="secondary" onClick={() => void run("payer", () => continuerAbonnement(formule))} pending={pending === "payer"} className="self-start">
+              M&apos;abonner
+            </Button>
+          </>
+        ) : null}
         {a.acces === "essai" ? (
           <>
             <p className="text-[20px] font-extrabold">Essai gratuit</p>

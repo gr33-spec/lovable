@@ -13,8 +13,6 @@ import { nom, NOM_APP } from "@/lib/nom";
 const PRIX_MENSUEL = "49 €";
 const PRIX_ANNUEL = "348 €";
 
-/** Le plafond du gratuit (Greg, 25 octobre 2026), réglé côté API par `LECTURES_GRATUITES_MOIS`. */
-const LECTURES_GRATUITES = 2;
 
 export const metadata: Metadata = { title: `Conditions générales d'utilisation — ${NOM_APP}` };
 
@@ -80,15 +78,31 @@ export default function CguPage() {
             percevoir une commission du négoce.
           </li>
           <li>
-            <strong>Les achats groupés</strong> : vous lancez un achat groupé (un matériau à la référence exacte, votre quantité, votre commune, votre date
-            de besoin et au moins un négoce) ou vous rejoignez celui d&apos;une entreprise de votre secteur. Les entreprises du même métier et du même secteur
-            en sont prévenues, sans votre nom. À la clôture, chaque négoce choisi reçoit une seule demande, de la part de ses seuls clients participants, avec le
-            volume total, la référence exacte, les communes et les dates. Vous voyez l&apos;offre de votre négoce, la meilleure offre du groupe et l&apos;économie en
-            euros ; le nom du négoce de la meilleure offre est réservé aux abonnés qui participent avec une quantité. Vous ne voyez jamais le nom ni le prix d&apos;un
-            autre artisan. « Commander » envoie votre bon de commande au négoce : vous le payez directement, sur votre compte habituel ; {NOM_APP} ne touche jamais
-            l&apos;argent et peut percevoir une commission du négoce. Avant la clôture, vous pouvez modifier ou retirer votre participation ; après, « Me désister »
-            reste possible et est enregistré. Sans assez de volume ou sans offre comparable, votre demande part chez vos négoces en un clic. Les achats groupés
-            sont réservés aux entreprises du bâtiment dont le SIRET est vérifié.
+            <strong>Les achats groupés</strong> : un achat groupé réunit les listes d&apos;entreprises d&apos;un même métier, d&apos;un même secteur et
+            d&apos;une même période de livraison. Vous y ajoutez les lignes cochées de votre liste, chacune rattachée d&apos;un tap à une référence du catalogue
+            (une ligne non rattachée reste en demande à vos négoces), votre commune, votre date et au moins un négoce. Les entreprises du même métier et du même
+            secteur en sont prévenues, sans votre nom. Réservé aux entreprises du bâtiment dont le SIRET est vérifié (un commerce de gros est refusé).
+          </li>
+          <li>
+            <strong>Votre engagement</strong> : rejoindre un achat groupé, c&apos;est vous engager, case cochée : « Je commande ces quantités, chez le moins cher
+            entre la meilleure offre du groupe et mon négoce habituel. » Seul le volume engagé est annoncé aux négoces ; il n&apos;y a ni prix plafond, ni
+            alignement de prix organisé, ni deuxième tour. Avant la clôture, vous pouvez modifier vos quantités ou retirer votre liste librement. Après, deux
+            sorties seulement, en un clic avec le motif : votre client a annulé le chantier, ou aucune offre n&apos;est livrable dans les délais. Plus d&apos;une
+            sortie par trimestre, ou une commande pas passée à la date sans motif, vous exclut des achats groupés pendant 3 mois ; l&apos;exclusion vous est dite
+            dans l&apos;application et vos listes et demandes à vos négoces restent ouvertes.
+          </li>
+          <li>
+            <strong>Les offres et la commande</strong> : à la clôture, chaque négoce choisi reçoit une seule liste (les quantités cumulées), de la part de ses
+            seuls clients participants. Les offres sont vérifiées par {NOM_APP} avant d&apos;être publiées. Vous êtes comparé sur VOS lignes, livraison comprise,
+            les offres complètes d&apos;abord. Les offres restent confidentielles : vous ne voyez jamais le nom ni les quantités d&apos;un autre artisan, et un
+            négoce ne voit jamais l&apos;offre d&apos;un autre. « Commander » envoie votre bon de commande au négoce : vous le payez directement, sur votre compte
+            habituel ; {NOM_APP} ne touche jamais l&apos;argent. Sans compte chez le négoce retenu, vous pouvez, avec votre accord exprès, lui faire transmettre
+            vos coordonnées (nom, entreprise, téléphone, e-mail, SIRET) pour ouvrir un compte ; ensuite la relation est directe. Sans assez de volume ou sans
+            offre, votre liste part chez vos négoces en un clic.
+          </li>
+          <li>
+            <strong>La liste préparée</strong> : la liste de matériaux que {NOM_APP} prépare depuis un devis ou une photo est une aide. Vous la vérifiez avant
+            de l&apos;envoyer : vous restez seul responsable des quantités commandées.
           </li>
           <li>
             <strong>L&apos;adresse {NOM_APP}</strong> : quand elle est ouverte sur votre compte, votre entreprise reçoit une adresse à son nom sur le domaine
@@ -102,14 +116,13 @@ export default function CguPage() {
             regroupements ou 5 réponses), à afficher des « prix observés dans ton secteur ». Jamais votre nom, ni celui d&apos;un négoce, ni un prix isolé.
           </li>
           <li>
-            <strong>Sans engagement d&apos;achat</strong> : envoyer une demande ou rejoindre un regroupement ne vous oblige à rien. Vous commandez seulement si le prix
-            vous plaît, en confirmant la commande dans l&apos;application.
+            <strong>Demandes à vos négoces</strong> : envoyer votre liste à vos propres négoces ne vous engage à rien ; vous commandez seulement si le prix vous
+            plaît.
           </li>
           <li>
-            <strong>Gratuit et payant</strong> (article 3) : en gratuit, {LECTURES_GRATUITES} devis lus par mois, un négoce par demande, « Mes prix » sur les 3 derniers
-            mois, pas de regroupement. Le payant ouvre les lectures sans limite, jusqu&apos;à 5 négoces par demande, les regroupements et tout l&apos;historique de
-            « Mes prix ». Dans une zone qui démarre (moins de 10 artisans actifs), le payant est offert ; quand la zone franchit ce seuil, vous êtes prévenu 30 jours
-            avant la fin de l&apos;offre. Le service est gratuit pour les négoces.
+            <strong>Gratuit et abonné</strong> (article 3) : gratuit sans limite de temps pour faire vos listes, les envoyer à vos négoces et voir les achats
+            groupés de votre secteur ; 3 listes préparées depuis un devis ou une photo, en tout. L&apos;abonnement ouvre les achats groupés et les listes
+            préparées sans limite ; votre premier achat groupé est offert. Le service est gratuit pour les négoces.
           </li>
         </ul>
       </section>
@@ -130,14 +143,8 @@ export default function CguPage() {
             Une facture émise par {EDITEUR.nom} est disponible à chaque paiement dans « Mes factures ».
           </li>
           <li>
-            <strong>Essai gratuit</strong> : de l&apos;inscription jusqu&apos;à 30 jours après les résultats de votre premier {nom} ; si vous ne déposez aucune liste,
-            l&apos;essai s&apos;arrête 60 jours après l&apos;inscription. Aucune carte n&apos;est demandée pendant l&apos;essai et rien n&apos;est prélevé à sa fin sans
-            votre accord.
-          </li>
-          <li>
-            <strong>Après l&apos;essai, sans abonnement</strong> : votre compte passe en gratuit, avec ses plafonds (article 2). Restent accessibles votre historique,
-            vos bons de commande, vos factures, vos données, votre compte. Une liste déposée pendant l&apos;essai reste dans son regroupement et ses résultats restent
-            visibles.
+            <strong>Sans abonnement</strong> : votre compte reste gratuit, sans limite de temps (article 2). Il n&apos;y a plus d&apos;essai : votre premier achat
+            groupé est offert. Restent toujours accessibles votre historique, vos bons de commande, vos factures, vos données, votre compte.
           </li>
           <li>
             <strong>Renouvellement</strong> : la formule mensuelle se renouvelle chaque mois à la date anniversaire, sans engagement de durée. La formule

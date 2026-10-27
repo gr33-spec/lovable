@@ -28,6 +28,8 @@ export function DropZone({
   error,
   kind = "devis",
   small = false,
+  titre,
+  sousTitre,
 }: {
   onFile: (file: File) => void;
   pending: boolean;
@@ -36,6 +38,9 @@ export function DropZone({
   kind?: "devis" | "liste";
   /** Nouveau cap (22 octobre) : le devis passe en petit bouton sous la liste, « Je n'ai qu'un devis ». */
   small?: boolean;
+  /** Achat groupé par métier (27 octobre 2026, point 31) : le titre et la phrase du petit bouton. */
+  titre?: string;
+  sousTitre?: string;
 }) {
   const liste = kind === "liste";
   const id = useId();
@@ -72,8 +77,8 @@ export function DropZone({
             {pending ? <Loader2 size={20} className="animate-spin" aria-hidden="true" /> : <FileUp size={20} aria-hidden="true" />}
           </span>
           <span className="flex flex-col">
-            <span className="text-[16px] font-semibold">Je n&apos;ai qu&apos;un devis</span>
-            <span className="text-[14px] leading-snug text-muted">On t&apos;avance la liste, sans garantie, tu la peaufines.</span>
+            <span className="text-[16px] font-semibold">{pending && liste ? "Je lis ta liste…" : (titre ?? "Je n'ai qu'un devis")}</span>
+            <span className="text-[14px] leading-snug text-muted">{sousTitre ?? "On t'avance la liste, sans garantie, tu la peaufines."}</span>
           </span>
         </label>
       ) : (

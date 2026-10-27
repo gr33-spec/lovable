@@ -11,10 +11,12 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
  * la numérotation des factures, les rappels de fin d'essai, et le webhook Stripe signé.
  */
 let ctx: TestContext;
-const avant = { GROUPE: process.env.GROUPE, CRON_SECRET: process.env.CRON_SECRET };
+const avant = { MODE_REGROUPEMENT: process.env.MODE_REGROUPEMENT, GROUPE: process.env.GROUPE, CRON_SECRET: process.env.CRON_SECRET };
 beforeAll(async () => {
   process.env.GROUPE = "on";
   process.env.CRON_SECRET = "secret-de-la-tache";
+  // L'essai et le gratuit d'avant (25 octobre 2026) ne valent plus qu'hors du mode automatique (achat groupé par métier, 27 octobre 2026).
+  process.env.MODE_REGROUPEMENT = "mois";
   ctx = await createTestApp();
 });
 afterAll(async () => {

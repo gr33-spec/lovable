@@ -118,7 +118,7 @@ export function PaywallAbonnement() {
 /** Compte : l'abonnement en une ligne, et le lien vers « Mon abonnement » et « Mes factures ». */
 export function ResumeAbonnement() {
   const { data } = useAbonnement();
-  const ligne = !data ? "\u00a0" : !data.actif ? "Tout est ouvert" : data.acces === "abonne" ? `Abonné, ${data.prixHt} HT ${data.periode}` : data.acces === "grace" ? "Paiement refusé" : data.acces === "bloque" ? "Essai terminé" : "Essai gratuit";
+  const ligne = !data ? "\u00a0" : !data.actif ? "Tout est ouvert" : data.acces === "abonne" ? `Abonné, ${data.prixHt} HT ${data.periode}` : data.acces === "grace" ? "Paiement refusé" : data.acces === "bloque" ? "Essai terminé" : data.acces === "gratuit" ? "Gratuit" : "Essai gratuit";
   return (
     <Card className="flex flex-col gap-1.5 p-4">
       <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">ABONNEMENT</span>

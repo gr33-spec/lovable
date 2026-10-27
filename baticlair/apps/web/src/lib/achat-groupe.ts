@@ -1,6 +1,6 @@
 /**
- * L'ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026 : « l'achat groupé devient le cœur de l'app, en automatique ») : les
- * contrats de l'API pour les cartes, le détail, l'offre, « Préviens ton négoce », la page du négoce et l'admin.
+ * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message : « ce message fait foi ») : les contrats de l'API pour les
+ * cartes, le détail et les résultats, l'engagement, « Préviens ton négoce », la page du négoce et l'admin.
  */
 
 export type NegoceChoisi = { supplierId: string; nom: string } | { negoceId: string; nom: string } | { nom: string; email: string; telephone?: string | null };
@@ -11,14 +11,22 @@ export interface Jauge {
   phrase: string | null;
 }
 
-export type EtatAchat = "seul" | "regroupe" | "regroupe_total" | "consultation" | "offre" | "pas_assez" | "commande" | "desiste" | "retire";
+export type EtatAchat = "seul" | "regroupe" | "regroupe_total" | "consultation" | "validation" | "offre" | "pas_assez" | "commande" | "desiste" | "sorti" | "non_commande" | "retire";
+
+export interface LigneAchat {
+  id: string;
+  cle: string;
+  libelle: string;
+  quantite: number;
+  unite: string;
+}
 
 export interface CarteAchat {
   id: string;
   achatId: string;
-  libelle: string;
-  quantite: number;
-  unite: string;
+  titreAchat: string;
+  metier: string;
+  lignes: LigneAchat[];
   etat: EtatAchat;
   titre: string;
   dateCle: string | null;
@@ -28,35 +36,68 @@ export interface CarteAchat {
   dateBesoin: string;
   clotureLe: string | null;
   reponseAvantLe: string | null;
-  actions: { modifier: boolean; retirer: boolean; desister: boolean; planB: boolean; commander: boolean };
+  commandeAvantLe: string | null;
+  offert: boolean;
+  actions: { modifier: boolean; retirer: boolean; sortir: boolean; planB: boolean; commander: boolean; livre: boolean };
+  motifsSortie: { valeur: string; libelle: string }[];
   negoces: { id: string; nom: string; telephone: string | null; prevenu: boolean; parti: boolean }[];
   bonNumero: number | null;
+  commandeRecue: boolean;
+  livre: boolean;
+  probleme: string | null;
 }
 
-export interface OffresAchat {
-  mien: { nom: string; totalHt: number; consultationId: string | null; prixUnitaireHt: number | null } | null;
-  meilleure: { nom: string; nomVisible: boolean; totalHt: number; prixUnitaireHt: number; consultationId: string | null } | null;
-  economieHt: number | null;
-  enAttente: { nom: string; raison: string }[];
+export interface OffrePourMoi {
+  consultationId: string;
+  nom: string;
+  totalHt: number;
+  complete: boolean;
+  manquantes: string | null;
+  habituel: boolean;
+  lignes: { libelle: string; quantite: number; unite: string; prixHt: number | null }[];
+  ouvertureCompte: string | null;
+  telephone: string | null;
+}
+
+export interface ResultatAchat {
+  phrase: string | null;
+  meilleure: OffrePourMoi | null;
+  monNegoce: OffrePourMoi | null;
+  offres: OffrePourMoi[];
+  commandeChez: string | null;
+  coordonneesTransmises: string | null;
 }
 
 export interface DetailAchat extends CarteAchat {
   frise: { etapes: string[]; courante: number };
-  dernierPrix: string | null;
   invite: string;
-  offres: OffresAchat | null;
+  resultat: ResultatAchat | null;
+}
+
+export interface Droit {
+  ok: boolean;
+  offert: boolean;
+  phrase: string | null;
+}
+
+export interface EngagementTexte {
+  phrase: string;
+  regles: string[];
 }
 
 export interface MesAchats {
   mode: "automatique" | "humain" | "mois";
   achats: CarteAchat[];
   alertes: "toutes" | "resume" | "aucune";
+  exclusion: string | null;
+  droit: Droit;
+  engagement: EngagementTexte;
 }
 
 export interface AchatOuvert {
   id: string;
-  libelle: string;
-  unite: string | null;
+  titre: string;
+  metier: string;
   zone: string;
   dateBesoin: string | null;
   clotureLe: string;
@@ -75,8 +116,11 @@ export interface Prevenir {
 export interface Lance {
   besoinId: string;
   achatId: string;
+  titre: string;
   ajoute: boolean;
   rejoint: boolean;
+  offert: boolean;
+  phrase: string | null;
   prevenir: Prevenir;
 }
 
@@ -88,32 +132,82 @@ export interface NegocesProposes {
 export interface PageNegoceAchat {
   deLaPartDe: string;
   negoce: string;
-  libelle: string;
-  quantiteTotale: number;
-  unite: string | null;
-  livraisons: { commune: string; dateBesoin: string; quantite: number }[];
+  titre: string;
+  lignes: { cle: string; libelle: string; quantite: number; unite: string }[];
+  livraisons: { commune: string; dateBesoin: string }[];
   reponseAvantLe: string;
-  commandeAvantLe: string;
   close: boolean;
-  commissionPct: number;
   conditions: string[];
-  reponse: { le: string; prixUnitaireHt: number | null; pdf: string | null } | null;
+  choixOuverture: { pieces: { valeur: string; libelle: string }[]; paiements: { valeur: string; libelle: string }[] };
+  conditionsOuverture: { pieces: string[]; paiement: string | null; autre: string | null } | null;
+  reponse: { le: string; prix: Record<string, number | null>; pdf: string | null } | null;
 }
 
 export interface LignesListe {
   adresse: string | null;
-  lignes: { key: string; designation: string; quantite: number; unite: string; reference: string | null; question: string | null }[];
+  lignes: { key: string; designation: string; quantite: number; unite: string; reference: string | null; famille: string | null; question: string | null; suggeree: boolean }[];
+  suggestion: { phrase: string; keys: string[] } | null;
+  droit: Droit;
+  engagement: EngagementTexte;
+  achatsOuverts: { id: string; titre: string; clotureLe: string; dateBesoin: string | null }[];
 }
 
 export interface AdminAchats {
-  achats: { id: string; numero: number; libelle: string; departement: string; statut: string; clotureLe: string | null; reponseAvantLe: string | null; entreprises: number; quantite: number; unite: string | null; estimeHt: number | null; consultations: { id: string; nom: string; email: string; telephone: string | null; statut: string; raisons: string[]; prixUnitaireHt: number | null; reponduLe: string | null; envoyeLe: string | null; pdfNom: string | null }[] }[];
-  sansReponse: { id: string; numero: number; libelle: string; departement: string; negoces: { nom: string; email: string; telephone: string | null }[] }[];
-  douteuses: { achatId: string; numero: number; libelle: string; consultationId: string; nom: string; prixUnitaireHt: number | null; raisons: string[]; pdf: string | null }[];
-  desistements: { id: string; le: string; entreprise: string; achat: string; quantite: number; apresCloture: boolean; raison: string | null }[];
+  correctionsParSource: { source: "devis" | "photo"; lignes: number; corrigees: number; taux: number | null }[];
+  achats: {
+    id: string;
+    numero: number;
+    titre: string;
+    departement: string;
+    statut: string;
+    clotureLe: string | null;
+    reponseAvantLe: string | null;
+    commandeAvantLe: string | null;
+    entreprises: number;
+    references: number;
+    estimeHt: number | null;
+    reponses: string;
+    suivi: { vus: number; abonnes: number; commandes: number; sortis: number; participants: number } | null;
+  }[];
+  aValider: { id: string; numero: number; titre: string; reponses: string }[];
+  sansReponse: { id: string; numero: number; titre: string; departement: string; negoces: { nom: string; email: string; telephone: string | null }[] }[];
+  desistements: { id: string; le: string; entreprise: string; achat: string; apresCloture: boolean; motif: string | null }[];
+  exclus: { companyId: string; entreprise: string; jusquau: string }[];
   suspects: { companyId: string; entreprise: string; siret: string | null; naf: string | null; participations: number; commandes: number }[];
+  iaSuivie: { publies: number; sansCorrection: number; part: number | null };
   factures: { id: string; mois: string; negoceEmail: string; negoceNom: string; totalHt: number; commissionHt: number; envoyeeLe: string | null }[];
   volumesMin: Record<string, number>;
   envoiFacturesActif: boolean;
+  commissionPct: number;
+}
+
+export interface AdminAchat {
+  id: string;
+  numero: number;
+  titre: string;
+  statut: string;
+  consultes: number;
+  reponses: string;
+  panier: { cle: string; libelle: string; quantite: number; unite: string }[];
+  proposeeId: string | null;
+  iaId: string | null;
+  corrections: number;
+  offres: {
+    consultationId: string;
+    nom: string;
+    email: string;
+    telephone: string | null;
+    repondu: boolean;
+    statut: string;
+    ecartee: boolean;
+    alertes: string[];
+    pdf: string | null;
+    totalHt: number | null;
+    manquantes: string[];
+    lignes: { cle: string; libelle: string; quantite: number; unite: string; prixHt: number | null; corrige: boolean }[];
+    ouvertureCompte: string | null;
+    commentaire: string | null;
+  }[];
 }
 
 const jourFr = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" });

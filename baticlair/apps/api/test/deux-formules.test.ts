@@ -10,9 +10,11 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
  * renouvelle seul, avec un e-mail 30 jours avant ; sa résiliation prend effet à l'échéance, sans remboursement au prorata.
  */
 let ctx: TestContext;
-const avant = { CRON_SECRET: process.env.CRON_SECRET };
+const avant = { MODE_REGROUPEMENT: process.env.MODE_REGROUPEMENT, CRON_SECRET: process.env.CRON_SECRET };
 beforeAll(async () => {
   process.env.CRON_SECRET = "secret-de-la-tache";
+  // L'essai et le gratuit d'avant (25 octobre 2026) ne valent plus qu'hors du mode automatique (achat groupé par métier, 27 octobre 2026).
+  process.env.MODE_REGROUPEMENT = "mois";
   ctx = await createTestApp();
 });
 afterAll(async () => {

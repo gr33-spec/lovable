@@ -1,8 +1,10 @@
-// LA RECETTE EN LIGNE DE L'ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026), sur test.mobiiz.fr, les cinq cas :
-// 1. compte vide ; 2. lancement et « Préviens ton négoce » ; 3. un 2e artisan qui rejoint ; 4. deux offres (une douteuse),
-// la meilleure, la commande ; 5. le plan B. L'admin de test (`delivered+admin-recette@resend.dev`) clôture et analyse
-// tout de suite (geste réservé à la prévisualisation). Négoces : adresses de test Resend (aucun vrai négoce). Rien en
-// production. Les comptes sont supprimés à la fin.
+// LA RECETTE EN LIGNE DE L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message), sur test.mobiiz.fr, les six cas
+// de la méthode : 1. compte vide ; 2. liste depuis un devis (vraie lecture), suggestion puis « Tout cocher » ; 3. un 2e
+// couvreur alerté qui ajoute sa liste avec la case d'engagement ; 4. validation admin, une offre incomplète et une offre
+// PDF douteuse ; 5. publication, un artisan sans compte chez le gagnant (« transmettre mes coordonnées ») ; 6. sortie pour
+// chantier annulé. L'admin de test (`delivered+admin-recette@resend.dev`) clôture et analyse tout de suite (geste réservé
+// à la prévisualisation). Négoces : adresses de test Resend (aucun vrai négoce). Rien en production. Chaque appareil a son
+// département : les deux passes ne se regroupent pas. Les comptes sont supprimés à la fin.
 //
 //   RESEND_API_KEY=… node docs/groupe/recette-en-ligne/achat-groupe.mjs <se|ordi> <dossier-captures>
 import { chromium, devices } from "/opt/node22/lib/node_modules/playwright/index.mjs";
@@ -97,7 +99,7 @@ async function emailsVers(adresse, attendre, timeout = 120000) {
   }
 }
 
-async function inscrire(page, email, entreprise, prenom = "Jean") {
+async function inscrire(page, email, entreprise, adresse, prenom = "Jean") {
   await page.goto(`${BASE}/inscription`, { waitUntil: "networkidle" });
   await page.getByLabel("Prénom et nom").fill(`${prenom} Recette`);
   await page.getByLabel("Nom de ton entreprise").fill(entreprise);
@@ -109,7 +111,7 @@ async function inscrire(page, email, entreprise, prenom = "Jean") {
   await voir(page.getByRole("heading", { name: "Voici ton adresse Mobiiz :" }), 60000);
   await page.getByRole("button", { name: "C'est compris" }).click();
   await voir(page.getByRole("heading", { name: new RegExp(`^Bonjour ${prenom}`) }), 30000);
-  const p = await api(page, "PATCH", "/v1/company/profile", { name: entreprise, address: "3 rue des Ajoncs, 22300 Lannion", siret: "73282932000074", phone: null, email: null });
+  const p = await api(page, "PATCH", "/v1/company/profile", { name: entreprise, address: adresse, siret: "73282932000074", phone: null, email: null });
   verif(p.status === 200, `profil ${p.status}`);
   const s = await api(page, "POST", "/v1/groupe/siret");
   verif(s.status === 200 && s.body?.verifie, `SIRET ${s.status} ${JSON.stringify(s.body)}`);
@@ -121,34 +123,27 @@ async function supprimer(page) {
   await page.getByRole("button", { name: /Supprimer définitivement|Supprimer mon compte/ }).last().click();
   await page.waitForURL((u) => !/\/compte$/.test(u.pathname), { timeout: 30000 });
 }
-async function lancer(page, o) {
-  await page.getByLabel("Quantité").fill(o.quantite);
-  await page.getByLabel("Commune de livraison").fill(o.commune);
+async function ajouterNegoce(page, n) {
   await page.getByRole("button", { name: "Ajouter un autre négoce" }).click();
-  await page.getByLabel("Nom du négoce").fill(o.negoce.nom);
-  await page.getByLabel("Son e-mail").fill(o.negoce.email);
-  await page.getByLabel("Son téléphone (pour le prévenir)").fill(o.negoce.tel);
+  await page.getByLabel("Nom du négoce").fill(n.nom);
+  await page.getByLabel("Son e-mail").fill(n.email);
+  await page.getByLabel("Son téléphone (pour le prévenir)").fill(n.tel);
   await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
-  await page.getByRole("button", { name: o.bouton }).click();
-  await voir(page.getByRole("heading", { name: "Préviens ton négoce" }), 30000);
 }
 
-// Chaque appareil sa référence : les deux passes ne se regroupent pas entre elles.
-const REF = APPAREIL === "se" ? { libelle: "Ardoise 32×22 Espagne 1er choix", designation: "Ardoise naturelle 32×22 Espagne 1er choix", q: "ardoise 32" } : { libelle: "Ardoise 40×22 Espagne 1er choix", designation: "Ardoise naturelle 40×22 Espagne 1er choix", q: "ardoise 40×22" };
-const REF_B = APPAREIL === "se" ? { libelle: "Ardoise 40×25 Espagne 1er choix", designation: "Ardoise naturelle 40×25 Espagne 1er choix", q: "ardoise 40×25" } : { libelle: "Ardoise 30×20 Espagne 1er choix", designation: "Ardoise naturelle 30×20 Espagne 1er choix", q: "ardoise 30" };
+// Chaque appareil son département (aucune autre recette n'y lance d'achat).
+const LIEU = APPAREIL === "se" ? { a: "3 rue de Brest, 29600 Morlaix", b: "29200 Brest" } : { a: "3 rue du Port, 56000 Vannes", b: "56100 Lorient" };
+const FIX = path.join(path.dirname(new URL(import.meta.url).pathname), "../../../apps/web/e2e/fixtures");
 const A = `delivered+ag-a-${APPAREIL}-${ts}@resend.dev`;
 const B = `delivered+ag-b-${APPAREIL}-${ts}@resend.dev`;
-const C = `delivered+ag-c-${APPAREIL}-${ts}@resend.dev`;
 const X = { nom: `Négoce X ${ts}`, email: `delivered+ag-x-${APPAREIL}-${ts}@resend.dev`, tel: "02 96 00 00 01" };
 const Y = { nom: `Négoce Y ${ts}`, email: `delivered+ag-y-${APPAREIL}-${ts}@resend.dev`, tel: "02 96 00 00 02" };
-const Z = { nom: `Négoce Z ${ts}`, email: `delivered+ag-z-${APPAREIL}-${ts}@resend.dev`, tel: "02 96 00 00 03" };
 const ADMIN = "delivered+admin-recette@resend.dev";
 const nouveau = async (qui) => surveiller(await (await browser.newContext({ ...options, locale: "fr-FR", timezoneId: "Europe/Paris" })).newPage(), `${qui}-${APPAREIL}`);
 
 const adm = await nouveau("admin");
-const carteAdmin = (libelle, statut) => adm.getByRole("region", { name: "Tous les achats groupés" }).locator("div").filter({ hasText: libelle }).filter({ hasText: statut }).last();
 await etape("Admin : code, mode « automatique »", adm, async () => {
-  await inscrire(adm, ADMIN, "Mobiiz Admin Recette");
+  await inscrire(adm, ADMIN, "Mobiiz Admin Recette", "3 rue des Ajoncs, 22300 Lannion");
   await adm.goto(`${BASE}/admin/achats-groupes`, { waitUntil: "networkidle" });
   const depuis = Date.now();
   await adm.getByRole("button", { name: "Recevoir mon code" }).click();
@@ -160,180 +155,201 @@ await etape("Admin : code, mode « automatique »", adm, async () => {
   await adm.getByRole("button", { name: /^Ouvrir/ }).click();
   const m = await api(adm, "PUT", "/v1/admin/pilotage/mode-regroupement", { mode: "automatique" });
   verif(m.status === 200, `mode ${m.status}`);
-  await voir(adm.getByRole("heading", { name: /Volume minimum par famille/ }));
+  await voir(adm.getByRole("region", { name: "Tous les achats" }));
   return "mode automatique";
 });
+const carteAdmin = (achatId) => adm.locator(`a[href="/admin/achats-groupes/${achatId}"]`).locator("xpath=..");
 
 const a = await nouveau("artisanA");
-await etape("Cas 1 : compte vide (les deux portes)", a, async () => {
-  await inscrire(a, A, `Toitures A ${APPAREIL}`);
+await etape("Cas 1 : compte vide, gratuit, sans essai", a, async () => {
+  await inscrire(a, A, `Toitures A ${APPAREIL}`, LIEU.a);
   await a.goto(`${BASE}/`, { waitUntil: "networkidle" });
   await voir(a.getByText("Par où commencer ?"));
-  await voir(a.getByRole("link", { name: /Lancer un achat groupé/ }));
+  await voir(a.getByRole("link", { name: /Achat groupé de ton métier/ }));
   await voir(a.getByRole("link", { name: /Ma liste de matériaux/ }));
+  verif((await a.getByText(/Essai gratuit|jours d'essai/).count()) === 0, "essai encore visible");
 });
-await etape("Le « + » jaune : les deux mêmes portes", a, async () => {
-  await a.getByRole("navigation", { name: "Navigation principale" }).getByRole("button", { name: /Nouveau/ }).click();
-  await voir(a.getByRole("dialog", { name: "Que veux-tu faire ?" }));
+await etape("Cas 2 : trois choix pour la liste", a, async () => {
+  await a.getByRole("link", { name: /Ma liste de matériaux/ }).first().click();
+  await voir(a.getByText("Depuis mon devis — on t'avance"));
+  await voir(a.getByText("Photo de ma liste"));
+  await voir(a.getByText("Je la note moi-même"));
 });
-await etape("Cas 2 : lancer (catalogue, au moins un négoce)", a, async () => {
-  await a.keyboard.press("Escape");
-  await a.goto(`${BASE}/achats-groupes/lancer`, { waitUntil: "networkidle" });
-  await a.getByLabel("Quel matériau ?").fill(REF.q);
-  await a.getByRole("button", { name: REF.designation }).click();
-  await a.getByLabel("Quantité").fill("1800");
-  await a.getByRole("button", { name: "Lancer l'achat groupé" }).click();
-  await voir(a.getByText("Ajoute au moins un négoce à qui envoyer la demande."));
-});
-await etape("Cas 2 : « Préviens ton négoce »", a, async () => {
-  await lancer(a, { quantite: "1800", commune: "22300 Lannion", negoce: X, bouton: "Lancer l'achat groupé" });
-  await voir(a.getByText(/^Ton négoce va recevoir une grosse demande : 1 800 pièces d/));
-  const sms = await a.getByRole("link", { name: "SMS" }).first().getAttribute("href");
-  verif(/^sms:0296000001\?&body=Bonjour/.test(sms ?? ""), `SMS : ${sms}`);
-  return "texte exact, Appeler, SMS";
+await etape("Cas 2 : liste depuis un devis (vraie lecture), bandeau, « à vérifier », suggestion", a, async () => {
+  await a.getByLabel("Déposer mon devis").setInputFiles(path.join(FIX, "devis-achat-groupe.pdf"));
+  await a.waitForURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60000 });
+  const liste = a.getByRole("region", { name: "Liste des fournitures" });
+  const questions = a.getByRole("region", { name: "Les questions" });
+  await voir(liste.or(questions), 240000);
+  if (await questions.isVisible()) {
+    await a.getByRole("button", { name: /^Calculer ma liste/ }).click();
+  }
+  await voir(liste, 240000);
+  await voir(a.getByText("Liste préparée à partir de ton devis. Vérifie les quantités avant d'envoyer."));
+  const suggestion = a.getByText(/mets-les en achat groupé pour payer moins cher\.$/);
+  await voir(suggestion, 60000);
+  await suggestion.scrollIntoViewIfNeeded();
+  return await suggestion.first().innerText();
 });
 let besoinA = null;
-await etape("Cas 2 : « Je l'ai prévenu », la carte « Seul jusqu'au … »", a, async () => {
-  await a.getByRole("button", { name: "Je l'ai prévenu" }).first().click();
-  await a.getByRole("link", { name: "Voir mon achat groupé" }).click();
+let achatA = null;
+await etape("Cas 2 : « Mettre en achat groupé », « Tout cocher », engagement", a, async () => {
+  await a.getByRole("button", { name: "Mettre en achat groupé" }).click();
+  const groupe = a.getByLabel("Acheter en groupe");
+  await groupe.getByRole("button", { name: "Tout cocher" }).click();
+  await groupe.getByLabel("Livraison avant le").fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
+  await ajouterNegoce(a, X);
+  await voir(groupe.getByText("Ton premier achat groupé est offert."));
+  await groupe.getByRole("checkbox", { name: /^Je commande ces quantités/ }).check();
+  await groupe.getByRole("button", { name: /^Je m'engage et j'ajoute ces \d+ lignes$/ }).scrollIntoViewIfNeeded();
+});
+await etape("Cas 2 : la liste dans l'achat « Couverture · secteur … »", a, async () => {
+  const groupe = a.getByLabel("Acheter en groupe");
+  await groupe.getByRole("button", { name: /^Je m'engage et j'ajoute ces \d+ lignes$/ }).click();
+  const phrase = a.getByText(/lignes? dans l'achat groupé : Couverture · secteur /);
+  await voir(phrase, 30000);
+  const texte = await phrase.first().innerText();
+  await a.getByRole("link", { name: "Préviens ton négoce" }).click();
   await a.waitForURL(/\/achats-groupes\/[0-9a-f-]{36}$/);
   besoinA = a.url().split("/").pop();
-  await voir(a.getByText(/^Seul jusqu'au \d+ \S+$/));
+  achatA = (await api(a, "GET", `/v1/achats-groupes/${besoinA}`)).body;
+  verif(achatA?.achatId, "pas d'achatId");
+  return texte;
 });
 
 const b = await nouveau("artisanB");
 let besoinB = null;
-await etape("Cas 3 : 2e artisan, l'achat ouvert dans son secteur", b, async () => {
-  await inscrire(b, B, `Couvertures B ${APPAREIL}`, "Paul");
+await etape("Cas 3 : 2e couvreur alerté (achat ouvert dans son secteur)", b, async () => {
+  await inscrire(b, B, `Couvertures B ${APPAREIL}`, `5 place du Marché, ${LIEU.b}`, "Paul");
   await b.goto(`${BASE}/`, { waitUntil: "networkidle" });
-  await voir(b.getByRole("region", { name: /Achats groupés (ouverts dans ton secteur|près de chez toi)/ }).getByText(REF.libelle));
+  const ouverts = b.getByRole("region", { name: "Achats groupés ouverts dans ton secteur" });
+  await voir(ouverts.getByText(/^Achat groupé couverture ouvert dans ton secteur/));
+  await ouverts.scrollIntoViewIfNeeded();
 });
-await etape("Cas 3 : Rejoindre (matériau déjà rempli)", b, async () => {
-  const carte = b.getByRole("region", { name: /Achats groupés (ouverts dans ton secteur|près de chez toi)/ }).locator("div").filter({ hasText: REF.libelle }).filter({ has: b.getByRole("link", { name: "Rejoindre" }) }).last();
-  await carte.getByRole("link", { name: "Rejoindre" }).click();
-  await voir(b.getByRole("heading", { name: "Rejoindre l'achat groupé" }));
-  await voir(b.getByText(REF.libelle));
-  await lancer(b, { quantite: "900", commune: "22500 Paimpol", negoce: Y, bouton: "Rejoindre l'achat groupé" });
-  await b.getByRole("button", { name: "Je l'ai prévenu" }).first().click();
+await etape("Cas 3 : il ajoute sa liste avec la case d'engagement", b, async () => {
+  const ouverts = b.getByRole("region", { name: "Achats groupés ouverts dans ton secteur" });
+  await ouverts.getByRole("link", { name: "Ajouter ma liste" }).first().click();
+  await voir(b.getByRole("heading", { name: "Ajouter ma liste" }));
+  await b.getByLabel("Ajoute tes matériaux").fill("ardoise 32");
+  await b.getByRole("button", { name: /Ardoise naturelle 32×22 Espagne 1er choix/ }).first().click();
+  await b.getByLabel("Quantité de Ardoise naturelle 32×22 Espagne 1er choix").fill("900");
+  await b.getByLabel("Commune de livraison").fill(LIEU.b);
+  await ajouterNegoce(b, Y);
+  const engagement = b.getByRole("region", { name: "Mon engagement" });
+  await engagement.getByRole("checkbox", { name: /^Je commande ces quantités, chez le moins cher/ }).check();
+  await engagement.scrollIntoViewIfNeeded();
+});
+await etape("Cas 3 : « Je m'engage et j'ajoute ma liste »", b, async () => {
+  await b.getByRole("button", { name: "Je m'engage et j'ajoute ma liste" }).click();
+  await voir(b.getByText(/^Ta liste est dans l'achat groupé : Couverture · secteur /), 30000);
   await b.getByRole("link", { name: "Voir mon achat groupé" }).click();
   await b.waitForURL(/\/achats-groupes\/[0-9a-f-]{36}$/);
   besoinB = b.url().split("/").pop();
 });
-await etape("Cas 3 : la carte de A « Regroupé avec d'autres entreprises »", a, async () => {
-  await a.goto(`${BASE}/achats-groupes/${besoinA}`, { waitUntil: "networkidle" });
-  await voir(a.getByText("Regroupé avec d'autres entreprises"));
-  verif((await a.getByText("Paimpol").count()) === 0, "la commune de B est visible");
-});
 
-await etape("Cas 4 : l'admin clôture (une demande par négoce)", adm, async () => {
+await etape("Cas 4 : l'admin clôture (une liste propre par négoce)", adm, async () => {
   await adm.goto(`${BASE}/admin/achats-groupes`, { waitUntil: "networkidle" });
-  const carte = carteAdmin(REF.libelle, "en_collecte");
+  const carte = carteAdmin(achatA.achatId);
   await carte.scrollIntoViewIfNeeded();
-  await carte.getByRole("button", { name: "Clôturer maintenant (test)" }).click();
-  await voir(adm.getByText("Clôturé : les demandes sont parties chez les négoces."));
+  await carte.getByRole("button", { name: "Clôturer maintenant" }).click();
+  await voir(adm.getByText("Clôturé : les listes sont parties chez les négoces."));
 });
-let mailX = null;
-await etape("Cas 4 : e-mail réel au négoce X, de la part de SES clients", adm, async () => {
-  const mx = await emailsVers(X.email, (m) => /Demande de prix groupée/.test(m.subject));
-  mailX = mx.find((m) => /Demande de prix groupée/.test(m.subject));
-  verif(mailX, "pas de demande chez X");
-  verif(/De la part de votre client Toitures A/.test(mailX.text), "pas « De la part de votre client »");
-  verif(!/Couvertures B/.test(mailX.text), "X voit le client de Y");
-  const my = await emailsVers(Y.email, (m) => /Demande de prix groupée/.test(m.subject));
-  verif(my.some((m) => /De la part de votre client Couvertures B/.test(m.text)), "Y : mauvais clients");
-  const vue = await adm.context().newPage();
-  await vue.setContent(mailX.html ?? `<pre style="white-space:pre-wrap;font:15px sans-serif">${mailX.text}</pre>`);
-  const f = await capture(vue, "E-mail au négoce X");
-  await vue.close();
-  return `« ${mailX.subject} » (${f})`;
-});
-const negoce = await nouveau("negoce");
 const lien = (m) => /https?:\/\/[^\s]+\/achat-groupe\/[A-Za-z0-9_-]+/.exec(m.text)[0];
-await etape("Cas 4 : X répond sans inscription (1,10 € livré)", negoce, async () => {
+const demande = async (email) => (await emailsVers(email, (m) => /Demande de prix groupée/.test(m.subject))).filter((m) => /Demande de prix groupée/.test(m.subject)).at(-1);
+const negoce = await nouveau("negoce");
+await etape("Cas 4 : X chiffre ligne par ligne, « je ne fournis pas » les liteaux", negoce, async () => {
+  const mailX = await demande(X.email);
+  verif(mailX, "pas de demande chez X");
+  verif(!/commission/i.test(mailX.text), "le mot commission est dans la demande");
   await negoce.goto(lien(mailX), { waitUntil: "networkidle" });
   await voir(negoce.getByRole("heading", { name: "Demande de prix groupée" }));
-  await negoce.getByLabel(/Prix unitaire HT livré/).fill("1,10");
-  await negoce.getByRole("checkbox").check();
+  await voir(negoce.getByText(/Ardoise 32×22 Espagne 1er choix · 2 700 pièces/));
+  await negoce.getByLabel("Prix de Ardoise 32×22 Espagne 1er choix").fill("1,10");
+  await negoce.getByRole("listitem").filter({ hasText: "Liteaux 27×38" }).getByRole("checkbox", { name: "Je ne fournis pas" }).check();
+  await negoce.getByRole("checkbox", { name: "Kbis de moins de 3 mois" }).check();
+  await negoce.getByRole("checkbox", { name: "RIB" }).check();
+  await negoce.getByRole("radio", { name: "Paiement comptant au départ" }).check();
+  await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
   await negoce.getByRole("button", { name: "Déposer mon offre" }).scrollIntoViewIfNeeded();
   await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
   await voir(negoce.getByText(/Votre offre est enregistrée/));
 });
-await etape("Cas 4 : Y répond moins cher mais livre trop tard (douteuse)", negoce, async () => {
-  const my = await emailsVers(Y.email, (m) => /Demande de prix groupée/.test(m.subject));
-  await negoce.goto(lien(my.find((m) => /Demande de prix groupée/.test(m.subject))), { waitUntil: "networkidle" });
-  await negoce.getByLabel(/Prix unitaire HT livré/).fill("0,95");
-  await negoce.getByLabel(/Délai de livraison/).fill("40");
-  await negoce.getByRole("checkbox").check();
+await etape("Cas 4 : Y répond par un PDF (lu par l'IA)", negoce, async () => {
+  const mailY = await demande(Y.email);
+  verif(mailY, "pas de demande chez Y");
+  await negoce.goto(lien(mailY), { waitUntil: "networkidle" });
+  await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(FIX, "devis-fournisseur-couvreur.pdf"));
+  await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
   await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
-  await voir(negoce.getByText(/Votre offre est enregistrée/));
+  await voir(negoce.getByText(/Votre offre est enregistrée/), 240000);
 });
-await etape("Cas 4 : l'admin analyse ; la douteuse va à l'admin", adm, async () => {
+await etape("Cas 4 : l'admin analyse ; l'artisan voit « vérification en cours »", a, async () => {
   await adm.goto(`${BASE}/admin/achats-groupes`, { waitUntil: "networkidle" });
-  const carte = carteAdmin(REF.libelle, "consultation");
-  await carte.scrollIntoViewIfNeeded();
-  await carte.getByRole("button", { name: /Analyser les offres maintenant/ }).click();
-  await voir(adm.getByText("Offres analysées."));
-  await adm.reload({ waitUntil: "networkidle" });
-  const d = adm.getByRole("region", { name: "Offres douteuses" }).getByText(Y.nom);
-  await voir(d);
-  await d.scrollIntoViewIfNeeded();
-});
-await etape("Cas 4 : A voit son négoce, la meilleure offre", a, async () => {
+  const carte = carteAdmin(achatA.achatId);
+  await carte.getByRole("button", { name: "Analyser maintenant" }).click();
+  await voir(adm.getByText("Offres analysées : à valider."), 240000);
+  const alerte = await emailsVers(ADMIN, (m) => /valider/i.test(m.subject) && /achat/i.test(m.subject), 60000);
   await a.goto(`${BASE}/achats-groupes/${besoinA}`, { waitUntil: "networkidle" });
-  await voir(a.getByText("Offre reçue", { exact: true }));
-  await a.getByRole("region", { name: "Les offres" }).scrollIntoViewIfNeeded();
-  await voir(a.getByText("La meilleure offre du groupe"));
+  await voir(a.getByText("Offres reçues, vérification en cours"));
+  return `e-mail admin : ${alerte.filter((m) => /valider/i.test(m.subject)).map((m) => `« ${m.subject} »`).at(-1) ?? "aucun"}`;
 });
-await etape("Cas 4 : Commander (bon de commande au négoce)", a, async () => {
-  await a.getByRole("button", { name: `Commander chez ${X.nom}` }).click();
-  await voir(a.getByText(`C'est commandé chez ${X.nom}.`, { exact: false }));
-  const mx = await emailsVers(X.email, (m) => /^Bon de commande n° /.test(m.subject));
-  verif(mx.some((m) => /^Bon de commande n° /.test(m.subject)), "pas de bon chez X");
-  return mx.filter((m) => /^Bon de commande/.test(m.subject)).map((m) => `« ${m.subject} »`).join("");
+await etape("Cas 4 : écran de validation (offre incomplète, PDF douteux)", adm, async () => {
+  await adm.goto(`${BASE}/admin/achats-groupes/${achatA.achatId}`, { waitUntil: "networkidle" });
+  await voir(adm.getByText(/^2 sur 2 négoces ont répondu/));
+  const offreX = adm.getByLabel(`Offre ${X.nom}`);
+  const offreY = adm.getByLabel(`Offre ${Y.nom}`);
+  await voir(offreX.getByText("Non chiffrées : Liteaux 27×38"));
+  await voir(offreY.getByRole("link", { name: /Ouvrir le devis d'origine/ }));
+  const alertes = await offreY.getByRole("list", { name: "Alertes" }).count();
+  await offreX.scrollIntoViewIfNeeded();
+  return `${alertes ? "alertes IA sur Y" : "pas d'alerte IA sur Y"}`;
 });
-await etape("Cas 4 : B (essai) voit la meilleure offre sans le nom", b, async () => {
+await etape("Cas 4 : écarter Y, Publier", adm, async () => {
+  const offreY = adm.getByLabel(`Offre ${Y.nom}`);
+  await offreY.getByRole("button", { name: "Écarter" }).click();
+  await voir(offreY.getByText("Écartée"));
+  await adm.getByRole("button", { name: "Publier" }).click();
+  await voir(adm.getByText("Publié : chaque artisan a reçu sa comparaison."));
+});
+await etape("Cas 5 : B voit « Ta liste chez le meilleur négoce », sans compte chez X", b, async () => {
   await b.goto(`${BASE}/achats-groupes/${besoinB}`, { waitUntil: "networkidle" });
-  await voir(b.getByText("un négoce du secteur"));
-  verif((await b.getByText(X.nom).count()) === 0, "nom du négoce visible pour B");
-  await b.getByText("un négoce du secteur").scrollIntoViewIfNeeded();
+  const phrase = b.getByText(/^Ta liste chez le meilleur négoce : .+, livraison comprise\.$/);
+  await voir(phrase);
+  const offre = b.getByRole("region", { name: "Les offres" });
+  await voir(offre.getByText("Pour commander, ouvre un compte : Kbis de moins de 3 mois, RIB, Paiement comptant au départ."));
+  await offre.getByRole("checkbox", { name: /J'accepte que Mobiiz transmette/ }).check();
+  await offre.getByRole("button", { name: "Je suis intéressé, transmettre mes coordonnées" }).scrollIntoViewIfNeeded();
+  return await phrase.innerText();
 });
-
-const c = await nouveau("artisanC");
-let besoinC = null;
-await etape("Cas 5 : un achat sans réponse de négoce", c, async () => {
-  await inscrire(c, C, `Toitures C ${APPAREIL}`, "Luc");
-  await c.goto(`${BASE}/achats-groupes/lancer`, { waitUntil: "networkidle" });
-  await c.getByLabel("Quel matériau ?").fill(REF_B.q);
-  await c.getByRole("button", { name: REF_B.designation }).click();
-  await lancer(c, { quantite: "400", commune: "22300 Lannion", negoce: Z, bouton: "Lancer l'achat groupé" });
-  await c.getByRole("link", { name: "Voir mon achat groupé" }).click();
-  await c.waitForURL(/\/achats-groupes\/[0-9a-f-]{36}$/);
-  besoinC = c.url().split("/").pop();
+await etape("Cas 5 : « transmettre mes coordonnées » (e-mail réel au négoce)", b, async () => {
+  const offre = b.getByRole("region", { name: "Les offres" });
+  await offre.getByRole("button", { name: "Je suis intéressé, transmettre mes coordonnées" }).click();
+  await voir(offre.getByText(`Tes coordonnées sont parties : ${X.nom} te rappelle de la part de Mobiiz.`));
+  const mx = await emailsVers(X.email, (m) => /^Ouverture de compte/.test(m.subject));
+  const m = mx.find((x) => /^Ouverture de compte/.test(x.subject));
+  verif(m, "pas d'e-mail « Ouverture de compte » chez X");
+  verif(/73282932000074|732 829 320 00074/.test(m.text), "SIRET absent de l'e-mail");
+  return `« ${m.subject} »`;
+});
+await etape("Cas 6 : A sort, « Mon client a annulé le chantier »", a, async () => {
+  await a.goto(`${BASE}/achats-groupes/${besoinA}`, { waitUntil: "networkidle" });
+  await a.getByRole("button", { name: "Mon client a annulé le chantier" }).click();
+  await voir(a.getByRole("alertdialog", { name: "Sortir de l'achat groupé" }));
+});
+await etape("Cas 6 : « Oui, sortir »", a, async () => {
+  await a.getByRole("button", { name: "Oui, sortir" }).click();
+  await voir(a.getByText("Tu es sorti de cet achat groupé"));
+});
+await etape("Admin : suivi de l'achat publié (vus, abonnés, commandé, sortis)", adm, async () => {
   await adm.goto(`${BASE}/admin/achats-groupes`, { waitUntil: "networkidle" });
-  await carteAdmin(REF_B.libelle, "en_collecte").getByRole("button", { name: "Clôturer maintenant (test)" }).click();
-  await voir(adm.getByText("Clôturé"));
-  await adm.reload({ waitUntil: "networkidle" });
-  await carteAdmin(REF_B.libelle, "consultation").getByRole("button", { name: /Analyser les offres maintenant/ }).click();
-  await voir(adm.getByText("Offres analysées."));
-});
-await etape("Cas 5 : « Pas assez de volume cette fois »", c, async () => {
-  await c.goto(`${BASE}/achats-groupes/${besoinC}`, { waitUntil: "networkidle" });
-  await voir(c.getByText("Pas assez de volume cette fois"));
-});
-await etape("Cas 5 : « Envoyer à mes négoces » en un clic", c, async () => {
-  await c.getByRole("button", { name: "Envoyer à mes négoces" }).click();
-  await voir(c.getByText(/Ta demande est partie chez tes négoces/), 60000);
-  const mz = await emailsVers(Z.email, (m) => !/Demande de prix groupée/.test(m.subject) && /Toitures C/.test(`${m.from} ${m.subject} ${m.text}`));
-  return `${mz.length} e-mail(s) chez Z`;
-});
-await etape("Profil : Mes prix, SIRET, alertes, essai", a, async () => {
-  await a.goto(`${BASE}/compte`, { waitUntil: "networkidle" });
-  await voir(a.getByRole("heading", { name: "Profil" }));
-  await voir(a.getByText("SIRET vérifié"));
-  await voir(a.getByRole("link", { name: "Mes prix" }));
+  const carte = carteAdmin(achatA.achatId);
+  await carte.scrollIntoViewIfNeeded();
+  const suivi = carte.getByText(/^Vu \d+ · abonnés \d+ · commandé \d+ · sortis \d+/);
+  await voir(suivi);
+  return await suivi.innerText();
 });
 await etape("Nettoyage : comptes supprimés", a, async () => {
-  for (const p of [a, b, c, adm]) await supprimer(p);
+  for (const p of [a, b, adm]) await supprimer(p);
 });
 
 writeFileSync(path.join(OUT, "journal.json"), JSON.stringify({ base: BASE, appareil: APPAREIL, journal, anomalies }, null, 2));

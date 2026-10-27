@@ -225,7 +225,7 @@ function FormulaireOffre({ r, commissionDefaut, onSaisie, pending }: { r: Regrou
       <Field id={`offre-tel-${r.id}`} label="Téléphone (facultatif)" value={telephone} onChange={(e) => setTelephone(e.target.value)} maxLength={30} />
       <Field id={`offre-prix-${r.id}`} label={`Prix négocié HT par ${r.unite.replace(/s$/, "")}`} inputMode="decimal" value={prix} onChange={(e) => setPrix(e.target.value)} />
       <Field id={`offre-commission-${r.id}`} label="Commission Mobiiz (%)" inputMode="decimal" value={commission} onChange={(e) => setCommission(e.target.value)} />
-      {p > 0 && c >= 0 ? <p className="text-[14px] text-muted">Prix affiché aux artisans : {prixFr(prixAvecCommission(p, c))} HT (commission incluse).</p> : null}
+      {p > 0 && c > 0 ? <p className="text-[14px] text-muted">Prix affiché aux artisans : {prixFr(prixAvecCommission(p, c))} HT (commission incluse).</p> : null}
       <Field id={`offre-livraison-${r.id}`} label="Livraison HT (par entreprise)" inputMode="decimal" value={livraison} onChange={(e) => setLivraison(e.target.value)} />
       <Field id={`offre-conditions-${r.id}`} label="Conditions (facultatif)" value={conditions} onChange={(e) => setConditions(e.target.value)} maxLength={1000} />
       <Field id={`offre-validite-${r.id}`} label="Valable jusqu'au" type="date" value={valide} onChange={(e) => setValide(e.target.value)} />

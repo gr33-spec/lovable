@@ -15,7 +15,7 @@ import { useResource } from "@/lib/use-resource";
 /**
  * L'ONGLET « ACHATS GROUPÉS » (Greg, 27 octobre 2026 ; avant : « Regroupements ») selon le mode : l'achat groupé
  * automatique (défaut), le regroupement négocié par un humain, ou l'ancienne commande du mois (« mois », écrans masqués
- * ailleurs). Un seul bouton jaune : « Lancer un achat groupé ».
+ * ailleurs). Un seul bouton jaune : « Ajouter ma liste à un achat groupé ».
  */
 export function PageAchatsGroupes() {
   const mode = useModeRegroupement();
@@ -41,21 +41,27 @@ function AchatsGroupes() {
   const fetchPres = useCallback((signal: AbortSignal) => api<{ zone: string | null; achats: AchatOuvert[] }>("/v1/achats-groupes/pres-de-chez-moi", { signal }), []);
   const { data: mes, error, reload } = useResource(fetchMes);
   const { data: pres } = useResource(fetchPres);
-  const actifs = (mes?.achats ?? []).filter((a) => a.etat !== "retire" && a.etat !== "desiste");
-  const passes = (mes?.achats ?? []).filter((a) => a.etat === "retire" || a.etat === "desiste");
+  const finis = ["retire", "desiste", "sorti", "non_commande"];
+  const actifs = (mes?.achats ?? []).filter((a) => !finis.includes(a.etat));
+  const passes = (mes?.achats ?? []).filter((a) => finis.includes(a.etat));
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <PageTitle>Achats groupés</PageTitle>
-        <p className="text-[16px] leading-relaxed text-muted">Ta quantité s&apos;ajoute à celle des entreprises du secteur ; tes négoces font une seule offre, leur meilleur prix.</p>
+        <p className="text-[16px] leading-relaxed text-muted">Ta liste rejoint celles des artisans de ton métier et de ton secteur ; les négoces reçoivent une liste propre et font une seule offre, leur meilleur prix.</p>
       </div>
+      {mes?.exclusion ? (
+        <p role="alert" className="rounded-xl bg-danger-bg p-4 text-[15px] font-semibold text-danger">
+          {mes.exclusion}
+        </p>
+      ) : null}
       <ButtonLink href="/achats-groupes/lancer" className="w-full">
-        Lancer un achat groupé
+        Ajouter ma liste à un achat groupé
       </ButtonLink>
       {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
       {pres && pres.achats.length > 0 ? (
         <section aria-label="Achats groupés près de chez toi" className="flex flex-col gap-3">
-          <SectionTitle>Achats groupés près de chez toi</SectionTitle>
+          <SectionTitle>Achats groupés de ton métier près de chez toi</SectionTitle>
           {pres.achats.map((a) => (
             <CarteAchatOuvert key={a.id} a={a} />
           ))}
@@ -72,7 +78,7 @@ function AchatsGroupes() {
       ) : null}
       {mes && actifs.length === 0 && (pres?.achats.length ?? 0) === 0 ? (
         <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Pas encore d'achat groupé dans ton secteur">
-          <p className="text-[15px] text-muted">Lance le premier : un matériau, ta quantité, tes négoces. Les entreprises du secteur sont prévenues.</p>
+          <p className="text-[15px] text-muted">Ouvre le premier : coche les lignes de ta liste, choisis tes négoces. Les artisans de ton métier dans le secteur sont prévenus.</p>
         </EmptyState>
       ) : null}
       {passes.length > 0 ? (

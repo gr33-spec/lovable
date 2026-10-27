@@ -1,15 +1,16 @@
+import path from "node:path";
 import { expect, test, type Browser, type Page } from "@playwright/test";
 
 /**
- * L'ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026 : « l'achat groupé devient le cœur de l'app, en automatique ») : les
- * cinq cas de la méthode, sur téléphone et sur ordinateur, avec une capture de chacun (test-results/achat-groupe) :
- * 1. le compte vide (les deux portes) ; 2. le lancement et « Préviens ton négoce » ; 3. un 2e artisan alerté qui rejoint ;
- * 4. deux offres de négoces, l'une douteuse, la meilleure offre et la commande ; 5. le plan B.
+ * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message) : les six cas de la méthode, sur téléphone et sur
+ * ordinateur, avec une capture de chacun (test-results/achat-groupe) : 1. le compte vide ; 2. la liste depuis un devis, la
+ * suggestion « mets-les en achat groupé » puis « Tout cocher » ; 3. un 2e couvreur alerté qui ajoute sa liste avec la case
+ * d'engagement ; 4. l'écran de validation de l'admin avec une offre incomplète et une offre PDF douteuse ; 5. la
+ * publication, un artisan sans compte chez le gagnant (« transmettre mes coordonnées ») ; 6. la sortie pour chantier annulé.
  * Chaque exécution prend un département au hasard : les achats d'une série ne se mélangent pas à ceux d'une autre.
  */
 
 const SECRET = "Bearer e2e-secret-de-la-tache";
-const ARDOISE = "Ardoise naturelle 32×22 Espagne 1er choix";
 const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 const departement = () => String(1 + Math.floor(Math.random() * 19)).padStart(2, "0");
 
@@ -74,142 +75,197 @@ async function nouvelArtisan(browser: Browser, dep: string, prenom: string) {
   return { ctx, page, ...qui };
 }
 
-/** Lancer (ou rejoindre) depuis le formulaire : quantité, commune, un négoce tapé. */
-async function remplirEtEnvoyer(page: Page, o: { quantite: string; commune: string; negoce: { nom: string; email: string; tel: string } }, bouton: string) {
-  await page.getByLabel("Quantité").fill(o.quantite);
-  await page.getByLabel("Commune de livraison").fill(o.commune);
-  // Précision 1 : sans négoce, la demande ne part pas.
-  await page.getByRole("button", { name: bouton }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Ajoute au moins un négoce" })).toHaveText("Ajoute au moins un négoce à qui envoyer la demande.");
-  await page.getByRole("button", { name: "Ajouter un autre négoce" }).click();
-  await page.getByLabel("Nom du négoce").fill(o.negoce.nom);
-  await page.getByLabel("Son e-mail").fill(o.negoce.email);
-  await page.getByLabel("Son téléphone (pour le prévenir)").fill(o.negoce.tel);
-  await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
-  await page.getByRole("button", { name: bouton }).click();
+const ADMIN = "admin-groupe@example.fr";
+
+/** L'admin du groupé, dans son navigateur : connexion (ou inscription la première fois), puis le code reçu par e-mail. */
+async function admin(browser: Browser, chemin: string) {
+  const ctx = await browser.newContext({ ...(test.info().project.use as object) });
+  const page = await ctx.newPage();
+  await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
+    await page.getByRole("button", { name: "Passer le guide" }).click();
+  });
+  await page.goto("/connexion");
+  await page.getByLabel("E-mail").fill(ADMIN);
+  await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+  await page.getByRole("button", { name: "Se connecter" }).click();
+  const refus = page.getByRole("alert").filter({ hasText: "incorrect" });
+  await expect(page.getByRole("heading", { name: /^Bonjour/ }).or(page.getByRole("heading", { name: "Voici ton adresse Mobiiz :" })).or(page.getByRole("heading", { name: "Bienvenue" })).or(refus).first()).toBeVisible();
+  if (await refus.count()) {
+    await page.goto("/inscription");
+    await page.getByLabel("Prénom et nom").fill("Greg Admin");
+    await page.getByLabel("Nom de ton entreprise").fill(`Bati Invest ${unique()}`);
+    await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
+    await page.getByLabel("E-mail professionnel").fill(ADMIN);
+    await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+    await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
+    await page.getByRole("button", { name: "Créer mon compte" }).click();
+    await expect(page.getByRole("heading", { name: "Voici ton adresse Mobiiz :" })).toBeVisible();
+  }
+  // Un compte de l'admin resté sans entreprise (série interrompue) : l'écran « Bienvenue » d'abord.
+  if (await page.getByRole("heading", { name: "Bienvenue" }).isVisible()) {
+    await page.getByLabel("Nom de ton entreprise").fill(`Bati Invest ${unique()}`);
+    await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
+    await page.getByRole("button", { name: "Continuer" }).click();
+  }
+  if (await page.getByRole("heading", { name: "Voici ton adresse Mobiiz :" }).isVisible()) await page.getByRole("button", { name: "C'est compris" }).click();
+  await page.goto(chemin);
+  await page.getByRole("button", { name: "Recevoir mon code" }).click({ timeout: 30_000 });
+  await expect(page.getByLabel("Code reçu par e-mail")).toBeVisible();
+  const mail = (await emailsVers(page, ADMIN)).filter((m) => /code d'accès au pilotage/.test(m.subject)).at(-1)!;
+  await page.getByLabel("Code reçu par e-mail").fill(/(\d{6})/.exec(mail.text)![1]!);
+  await page.getByRole("button", { name: "Ouvrir l'espace admin" }).click();
+  return { ctx, page };
 }
 
-test.describe("Achat groupé automatique (27 octobre 2026)", () => {
-  test.setTimeout(240_000);
+/** Ajouter un négoce tapé à la main (nom, e-mail, téléphone). */
+async function ajouterNegoce(page: Page, n: { nom: string; email: string; tel: string }) {
+  await page.getByRole("button", { name: "Ajouter un autre négoce" }).click();
+  await page.getByLabel("Nom du négoce").fill(n.nom);
+  await page.getByLabel("Son e-mail").fill(n.email);
+  await page.getByLabel("Son téléphone (pour le prévenir)").fill(n.tel);
+  await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
+}
 
-  test("les cinq cas : compte vide, lancement et « Préviens ton négoce », 2e artisan alerté qui rejoint, deux offres dont une douteuse puis commande, plan B", async ({ page, browser }, info) => {
+test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
+  test.setTimeout(600_000);
+
+  test("les six cas : compte vide, liste depuis un devis et suggestion, 2e couvreur engagé, validation admin, publication et coordonnées, sortie", async ({ page, browser }, info) => {
     const projet = info.project.name;
     const dep = departement();
     const negoceX = { nom: `Négoce X ${unique()}`, email: `x-${unique()}@negoce.example`, tel: "02 96 00 00 01" };
     const negoceY = { nom: `Négoce Y ${unique()}`, email: `y-${unique()}@negoce.example`, tel: "02 96 00 00 02" };
 
-    // 1. Le compte vide : les deux portes, rien d'autre à faire.
+    // 1. Le compte vide : gratuit, sans essai ni pastille ; les deux portes.
     await inscrire(page, dep);
     await page.goto("/");
     await expect(page.getByText("Par où commencer ?")).toBeVisible();
-    await expect(page.getByRole("link", { name: /Lancer un achat groupé/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Achat groupé de ton métier/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /Ma liste de matériaux/ })).toBeVisible();
-    // Le « + » jaune de la barre ouvre les deux mêmes portes.
-    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("button", { name: /Nouveau/ }).click();
-    await expect(page.getByRole("dialog", { name: "Que veux-tu faire ?" })).toBeVisible();
-    await page.keyboard.press("Escape");
+    await expect(page.getByRole("link", { name: /Essai gratuit/ })).toHaveCount(0);
     await capture(page, projet, "1-compte-vide");
 
-    // 2. Le lancement : le catalogue, la quantité, la commune, un négoce ; puis « Préviens ton négoce ».
-    await page.getByRole("link", { name: /Lancer un achat groupé/ }).first().click();
-    await page.getByLabel("Quel matériau ?").fill("ardoise 32");
-    await page.getByRole("button", { name: ARDOISE }).first().click();
-    await remplirEtEnvoyer(page, { quantite: "1800", commune: `${dep}100 Ville-${dep}`, negoce: negoceX }, "Lancer l'achat groupé");
-    const prevenir = page.getByRole("region", { name: "Préviens ton négoce" });
-    await expect(prevenir.getByRole("heading", { name: "Préviens ton négoce" })).toBeVisible();
-    await expect(prevenir.getByText(/^Ton négoce va recevoir une grosse demande : 1 800 pièces d'ardoise 32×22 Espagne 1er choix, le \d+ \S+, de la part de Mobiiz\. C'est une belle opportunité pour lui\. Préviens-le pour qu'il ne passe pas à côté, et dis-lui qu'il n'aura qu'une seule offre à faire : son meilleur prix\.$/)).toBeVisible();
-    await expect(prevenir.getByRole("link", { name: "Appeler" })).toHaveAttribute("href", "tel:0296000001");
-    await expect(prevenir.getByRole("link", { name: "SMS" })).toHaveAttribute("href", /^sms:0296000001\?&body=Bonjour%2C%20je%20participe%20%C3%A0%20un%20achat%20group%C3%A9%20Mobiiz/);
-    await capture(page, projet, "2-previens-ton-negoce");
-    await prevenir.getByRole("button", { name: "Je l'ai prévenu" }).click();
-    await expect(prevenir.getByText("Prévenu", { exact: true })).toBeVisible();
-    await prevenir.getByRole("link", { name: "Voir mon achat groupé" }).click();
+    // 2. La liste depuis un devis : trois choix, le bandeau, « à vérifier », la suggestion, « Tout cocher ».
+    await page.getByRole("link", { name: /Ma liste de matériaux/ }).first().click();
+    await expect(page.getByText("Depuis mon devis — on t'avance")).toBeVisible();
+    await expect(page.getByText("Photo de ma liste")).toBeVisible();
+    await expect(page.getByText("Je la note moi-même")).toBeVisible();
+    await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-achat-groupe.pdf"));
+    await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
+    const liste = page.getByRole("region", { name: "Liste des fournitures" });
+    const questions = page.getByRole("region", { name: "Les questions" });
+    await expect(liste.or(questions).first()).toBeVisible({ timeout: 60_000 });
+    if (await questions.isVisible()) await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+    await expect(liste).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText("Liste préparée à partir de ton devis. Vérifie les quantités avant d'envoyer.")).toBeVisible();
+    await expect(liste.getByText("à vérifier").first()).toBeVisible();
+    const suggestion = page.getByText(/^Tu as 1\u00a0800 pièces de ardoise 32×22 Espagne 1er choix, mets-les en achat groupé pour payer moins cher\.$/);
+    await expect(suggestion).toBeVisible({ timeout: 30_000 });
+    await suggestion.scrollIntoViewIfNeeded();
+    await capture(page, projet, "2a-liste-depuis-devis");
+    await page.getByRole("button", { name: "Mettre en achat groupé" }).click();
+    const groupe = page.getByLabel("Acheter en groupe");
+    await expect(groupe.getByRole("checkbox", { name: /Ardoise naturelle 32×22/ })).toBeChecked();
+    await expect(groupe.getByRole("checkbox", { name: /Liteaux 27×38/ })).not.toBeChecked();
+    await groupe.getByRole("button", { name: "Tout cocher" }).click();
+    await expect(groupe.getByRole("checkbox", { name: /Liteaux 27×38/ })).toBeChecked();
+    await expect(groupe.getByText("C'est bien de l'ardoise 32×22 Espagne 1er choix ?")).toBeVisible();
+    await groupe.getByLabel("Livraison avant le").fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
+    await ajouterNegoce(page, negoceX);
+    await expect(groupe.getByText("Ton premier achat groupé est offert.")).toBeVisible();
+    await groupe.getByRole("checkbox", { name: /^Je commande ces quantités/ }).check();
+    await capture(page, projet, "2b-tout-cocher-engagement");
+    await groupe.getByRole("button", { name: /^Je m'engage et j'ajoute ces 2 lignes$/ }).click();
+    await expect(page.getByText(/^2 lignes dans l'achat groupé : Couverture · secteur /)).toBeVisible();
+    await page.getByRole("link", { name: "Préviens ton négoce" }).click();
     await page.waitForURL(/\/achats-groupes\/[0-9a-f-]{36}$/);
-    await expect(page.getByText(/^Seul jusqu'au \d+ \S+$/)).toBeVisible();
     const besoinA = page.url().split("/").pop()!;
+    const achatA = (await apiJson<{ achatId: string; clotureLe: string; reponseAvantLe: string }>(page, "GET", `/v1/achats-groupes/${besoinA}`)).body;
 
-    // 3. Un 2e artisan du même secteur et du même métier est alerté, et rejoint depuis l'alerte (matériau déjà rempli).
+    // 3. Un 2e couvreur du secteur voit l'achat ouvert et y ajoute sa liste, avec la case d'engagement.
     const b = await nouvelArtisan(browser, dep, "Paul");
-    // L'alerte part au lancement : B s'est inscrit après, il voit l'achat dans « près de chez toi ».
     await b.page.goto("/");
-    // Compte vide : « Achats groupés ouverts dans ton secteur » (le libellé de « près de chez toi » à vide).
-    const pres = b.page.getByRole("region", { name: "Achats groupés ouverts dans ton secteur" });
-    await expect(pres.getByText("Ardoise 32×22 Espagne 1er choix").first()).toBeVisible();
-    await capture(b.page, projet, "3a-pres-de-chez-toi");
-    await pres.getByRole("link", { name: "Rejoindre" }).first().click();
-    await expect(b.page.getByRole("heading", { name: "Rejoindre l'achat groupé" })).toBeVisible();
-    await expect(b.page.getByText("Ardoise 32×22 Espagne 1er choix")).toBeVisible();
-    await remplirEtEnvoyer(b.page, { quantite: "900", commune: `${dep}200 Autre-${dep}`, negoce: negoceY }, "Rejoindre l'achat groupé");
-    await expect(b.page.getByText("Tu as rejoint l'achat groupé.")).toBeVisible();
+    const ouverts = b.page.getByRole("region", { name: "Achats groupés ouverts dans ton secteur" });
+    await expect(ouverts.getByText(/^Achat groupé couverture ouvert dans ton secteur, livraison avant le \d+ \S+\. Ajoute ta liste avant le \d+ \S+\.$/)).toBeVisible();
+    await ouverts.getByRole("link", { name: "Ajouter ma liste" }).first().click();
+    await expect(b.page.getByRole("heading", { name: "Ajouter ma liste" })).toBeVisible();
+    await b.page.getByLabel("Ajoute tes matériaux").fill("ardoise 32");
+    await b.page.getByRole("button", { name: /Ardoise naturelle 32×22 Espagne 1er choix/ }).first().click();
+    await b.page.getByLabel("Quantité de Ardoise naturelle 32×22 Espagne 1er choix").fill("900");
+    await b.page.getByLabel("Commune de livraison").fill(`${dep}200 Autre-${dep}`);
+    await ajouterNegoce(b.page, negoceY);
+    const engagement = b.page.getByRole("region", { name: "Mon engagement" });
+    await expect(engagement.getByText("Deux sorties seulement, en un clic avec le motif", { exact: false })).toBeVisible();
+    await engagement.getByRole("checkbox", { name: /^Je commande ces quantités, chez le moins cher entre la meilleure offre du groupe et mon négoce habituel\.$/ }).check();
+    await capture(b.page, projet, "3-engagement-2e-couvreur");
+    await b.page.getByRole("button", { name: "Je m'engage et j'ajoute ma liste" }).click();
+    await expect(b.page.getByText(/^Ta liste est dans l'achat groupé : Couverture · secteur .+ Ton premier achat groupé est offert\.$/)).toBeVisible();
     await b.page.getByRole("link", { name: "Voir mon achat groupé" }).click();
     await b.page.waitForURL(/\/achats-groupes\/[0-9a-f-]{36}$/);
     const besoinB = b.page.url().split("/").pop()!;
-    await page.goto(`/achats-groupes/${besoinA}`);
-    await expect(page.getByText("Regroupé avec d'autres entreprises")).toBeVisible();
-    // Jamais le nom ni la commune de l'autre.
-    await expect(page.getByText(b.entreprise)).toHaveCount(0);
-    await expect(page.getByText(`Autre-${dep}`)).toHaveCount(0);
-    await capture(page, projet, "3b-regroupe");
 
-    // 4. La clôture : une demande par négoce ; X répond 1,10 € ; Y répond avec un délai trop long (douteuse).
-    const detail = (await apiJson<{ clotureLe: string; reponseAvantLe: string }>(page, "GET", `/v1/achats-groupes/${besoinA}`)).body;
-    await tache(page, new Date(new Date(detail.clotureLe).getTime() + 3_600_000));
-    const jeton = async (email: string) => /\/achat-groupe\/([A-Za-z0-9_-]+)/.exec((await emailsVers(page, email)).at(-1)!.text)![1]!;
-    const mailX = (await emailsVers(page, negoceX.email)).at(-1)!;
-    expect(mailX.text).toContain("Vous n'êtes pas le seul négoce consulté.");
-    expect(mailX.text).not.toContain(b.entreprise);
+    // 4. La clôture : une liste propre par négoce ; X ne chiffre pas les liteaux (offre incomplète) ; Y dépose un PDF douteux.
+    await tache(page, new Date(new Date(achatA.clotureLe).getTime() + 3_600_000));
+    const jeton = async (email: string) => /\/achat-groupe\/([A-Za-z0-9_-]+)/.exec((await emailsVers(page, email)).filter((m) => m.subject.startsWith("Demande de prix groupée")).at(-1)!.text)![1]!;
+    expect((await emailsVers(page, negoceX.email)).at(-1)!.text).not.toMatch(/commission/i);
     const negoce = await browser.newPage();
     await negoce.goto(`/achat-groupe/${await jeton(negoceX.email)}`);
     await expect(negoce.getByRole("heading", { name: "Demande de prix groupée" })).toBeVisible();
-    await expect(negoce.getByText("2 700 pièces · Ardoise 32×22 Espagne 1er choix")).toBeVisible();
-    await negoce.getByLabel(/Prix unitaire HT livré/).fill("1,10");
-    await negoce.getByRole("checkbox").check();
-    await capture(negoce, projet, "4a-page-negoce");
+    await expect(negoce.getByText("Ardoise 32×22 Espagne 1er choix · 2\u00a0700 pièces")).toBeVisible();
+    await negoce.getByLabel("Prix de Ardoise 32×22 Espagne 1er choix").fill("1,10");
+    await negoce.getByRole("listitem").filter({ hasText: "Liteaux 27×38" }).getByRole("checkbox", { name: "Je ne fournis pas" }).check();
+    await negoce.getByRole("checkbox", { name: "Kbis de moins de 3 mois" }).check();
+    await negoce.getByRole("checkbox", { name: "RIB" }).check();
+    await negoce.getByRole("radio", { name: "Paiement comptant au départ" }).check();
+    await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
+    await capture(negoce, projet, "4a-page-negoce-ligne-par-ligne");
     await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
-    await expect(negoce.getByText(/Votre offre est enregistrée : 1,10 € HT par pièces, livré/)).toBeVisible();
+    await expect(negoce.getByText(/Votre offre est enregistrée/)).toBeVisible();
     await negoce.goto(`/achat-groupe/${await jeton(negoceY.email)}`);
-    await negoce.getByLabel(/Prix unitaire HT livré/).fill("0,95");
-    await negoce.getByLabel(/Délai de livraison/).fill("40");
-    await negoce.getByRole("checkbox").check();
+    await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
+    await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
     await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
     await expect(negoce.getByText(/Votre offre est enregistrée/)).toBeVisible();
     await negoce.close();
-
-    await tache(page, new Date(new Date(detail.reponseAvantLe).getTime() + 3_600_000));
+    expect((await tache(page, new Date(new Date(achatA.reponseAvantLe).getTime() + 3_600_000))).analyses).toBe(1);
     await page.goto(`/achats-groupes/${besoinA}`);
-    await expect(page.getByText("Offre reçue", { exact: true })).toBeVisible();
-    // La douteuse (0,95 € mais livrée trop tard) n'est jamais mise en avant : la meilleure est celle de X.
-    await expect(page.getByText("La meilleure offre du groupe")).toBeVisible();
-    await expect(page.getByText("1 980,00 € HT livré").first()).toBeVisible();
-    await capture(page, projet, "4b-offres");
-    await page.getByRole("button", { name: `Commander chez ${negoceX.nom}` }).click();
-    await expect(page.getByText(`C'est commandé chez ${negoceX.nom}. Ton bon de commande est parti chez le négoce.`)).toBeVisible();
-    expect((await emailsVers(page, negoceX.email)).some((m) => /^Bon de commande n° \d+/.test(m.subject))).toBe(true);
-    await capture(page, projet, "4c-commande");
-    // B (essai, pas abonné) : la meilleure offre sans le nom du négoce.
+    await expect(page.getByText("Offres reçues, vérification en cours")).toBeVisible();
+
+    const adm = await admin(browser, `/admin/achats-groupes/${achatA.achatId}`);
+    await expect(adm.page.getByText(/^2 sur 2 négoces ont répondu/)).toBeVisible();
+    const offreX = adm.page.getByLabel(`Offre ${negoceX.nom}`);
+    const offreY = adm.page.getByLabel(`Offre ${negoceY.nom}`);
+    await expect(offreX.getByText("Non chiffrées : Liteaux 27×38")).toBeVisible();
+    await expect(offreX.getByText("Pour commander, ouvre un compte : Kbis de moins de 3 mois, RIB, Paiement comptant au départ.")).toBeVisible();
+    await expect(offreY.getByRole("list", { name: "Alertes" })).toBeVisible();
+    await expect(offreY.getByRole("link", { name: /Ouvrir le devis d'origine/ })).toBeVisible();
+    await capture(adm.page, projet, "4b-validation-admin");
+    await offreY.getByRole("button", { name: "Écarter" }).click();
+    await expect(offreY.getByText("Écartée")).toBeVisible();
+    await adm.page.getByRole("button", { name: "Publier" }).click();
+    await expect(adm.page.getByText("Publié : chaque artisan a reçu sa comparaison.")).toBeVisible();
+    await adm.ctx.close();
+
+    // 5. La publication : B n'a pas de compte chez X (le gagnant) : ses conditions, puis ses coordonnées avec son accord.
     await b.page.goto(`/achats-groupes/${besoinB}`);
-    await expect(b.page.getByText("un négoce du secteur")).toBeVisible();
-    await expect(b.page.getByText(negoceX.nom)).toHaveCount(0);
+    await expect(b.page.getByText(/^Ta liste chez le meilleur négoce : 990,00 € HT, livraison comprise\.$/)).toBeVisible();
+    const offre = b.page.getByRole("region", { name: "Les offres" });
+    await expect(offre.getByText("Pour commander, ouvre un compte : Kbis de moins de 3 mois, RIB, Paiement comptant au départ.")).toBeVisible();
+    await offre.getByRole("checkbox", { name: /J'accepte que Mobiiz transmette/ }).check();
+    await capture(b.page, projet, "5a-publication-sans-compte");
+    await offre.getByRole("button", { name: "Je suis intéressé, transmettre mes coordonnées" }).click();
+    await expect(offre.getByText(`Tes coordonnées sont parties : ${negoceX.nom} te rappelle de la part de Mobiiz.`)).toBeVisible();
+    expect((await emailsVers(page, negoceX.email)).some((m) => m.subject.startsWith("Ouverture de compte"))).toBe(true);
+    await capture(b.page, projet, "5b-coordonnees-transmises");
     await b.ctx.close();
 
-    // 5. Le plan B : pas assez de volume (100 pièces × 1,20 € < 3 000 €) → « Envoyer à mes négoces » en un clic.
-    const c = await nouvelArtisan(browser, departement() === dep ? String((Number(dep) % 19) + 1).padStart(2, "0") : departement(), "Luc");
-    await c.page.goto("/achats-groupes/lancer");
-    await c.page.getByLabel("Quel matériau ?").fill("ardoise 40");
-    await c.page.getByRole("button", { name: "Ardoise naturelle 40×25 Espagne 1er choix" }).click();
-    const profil = (await apiJson<{ address: string }>(c.page, "GET", "/v1/company/profile")).body;
-    await remplirEtEnvoyer(c.page, { quantite: "100", commune: profil.address, negoce: { nom: `Négoce Z ${unique()}`, email: `z-${unique()}@negoce.example`, tel: "02 96 00 00 03" } }, "Lancer l'achat groupé");
-    await c.page.getByRole("link", { name: "Voir mon achat groupé" }).click();
-    await c.page.waitForURL(/\/achats-groupes\/[0-9a-f-]{36}$/);
-    const besoinC = c.page.url().split("/").pop()!;
-    const dc = (await apiJson<{ clotureLe: string }>(c.page, "GET", `/v1/achats-groupes/${besoinC}`)).body;
-    await tache(c.page, new Date(new Date(dc.clotureLe).getTime() + 3_600_000));
-    await c.page.reload();
-    await expect(c.page.getByText("Pas assez de volume cette fois")).toBeVisible();
-    await capture(c.page, projet, "5a-pas-assez");
-    await c.page.getByRole("button", { name: "Envoyer à mes négoces" }).click();
-    await expect(c.page.getByText("Ta demande est partie chez tes négoces.", { exact: false })).toBeVisible();
-    await capture(c.page, projet, "5b-plan-b");
-    await c.ctx.close();
+    // 6. A sort de l'achat groupé : chantier annulé, en un clic avec le motif.
+    await page.goto(`/achats-groupes/${besoinA}`);
+    await expect(page.getByText("1 ligne non chiffrée chez ce négoce")).toBeVisible();
+    await page.getByRole("button", { name: "Mon client a annulé le chantier" }).click();
+    await expect(page.getByRole("alertdialog", { name: "Sortir de l'achat groupé" })).toBeVisible();
+    await capture(page, projet, "6a-sortie-confirmer");
+    await page.getByRole("button", { name: "Oui, sortir" }).click();
+    await expect(page.getByText("Tu es sorti de cet achat groupé")).toBeVisible();
+    await capture(page, projet, "6b-sortie");
   });
 });

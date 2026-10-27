@@ -10,10 +10,12 @@ import { createTestApp, resetDatabase, type TestContext } from "./support/test-a
  * qui ne montre que ses propres prix ; en gratuit un seul négoce, en payant cinq.
  */
 let ctx: TestContext;
-const avant = { CRON_SECRET: process.env.CRON_SECRET, ZONES_ACTIVES: process.env.ZONES_ACTIVES };
+const avant = { MODE_REGROUPEMENT: process.env.MODE_REGROUPEMENT, CRON_SECRET: process.env.CRON_SECRET, ZONES_ACTIVES: process.env.ZONES_ACTIVES };
 beforeAll(async () => {
   process.env.CRON_SECRET = "secret-de-la-tache";
   process.env.ZONES_ACTIVES = "22";
+  // L'essai et le gratuit d'avant (25 octobre 2026) ne valent plus qu'hors du mode automatique (achat groupé par métier, 27 octobre 2026).
+  process.env.MODE_REGROUPEMENT = "mois";
   ctx = await createTestApp();
 });
 afterAll(async () => {

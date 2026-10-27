@@ -317,7 +317,7 @@ export class NegocieService {
               conditions: o.conditions,
               valideJusquau: jourIso(o.valideJusquau),
               valide: o.valideJusquau.getTime() + JOUR > maintenant.getTime(),
-              mentions: [LIGNE_NEGOCIE_PAR_MOBIIZ, LIGNE_COMMISSION_INCLUSE],
+              mentions: [LIGNE_NEGOCIE_PAR_MOBIIZ, ...(Number(o.commissionPct) > 0 ? [LIGNE_COMMISSION_INCLUSE] : [])],
             }
           : null,
         perso,
@@ -379,7 +379,7 @@ export class NegocieService {
       lignes: [{ designation: b.designation, quantite: qte(quantite), unite: b.unite, prixHt: euros(prix), totalHt: euros(totalLignes) }],
       livraisonHt: Number(o.livraisonHt) > 0 ? euros(Number(o.livraisonHt)) : "offerte",
       totalHt: euros(total),
-      mentions: [`${LIGNE_NEGOCIE_PAR_MOBIIZ} (regroupement n° ${r.numero}).`, `${LIGNE_COMMISSION_INCLUSE}.`, `Facturation et paiement directement entre l'acheteur et le vendeur. ${NOM_APP} ne vend ni n'achète rien.`],
+      mentions: [`${LIGNE_NEGOCIE_PAR_MOBIIZ} (regroupement n° ${r.numero}).`, ...(Number(o.commissionPct) > 0 ? [`${LIGNE_COMMISSION_INCLUSE}.`] : []), `Facturation et paiement directement entre l'acheteur et le vendeur. ${NOM_APP} ne vend ni n'achète rien.`],
     });
     const email = company?.contactEmail ?? (await this.emailDuProprietaire(tenant.companyId));
     if (email)
@@ -418,7 +418,7 @@ export class NegocieService {
       lignes: [{ designation: b.designation, quantite: qte(quantite), unite: b.unite, prixHt: euros(prix), totalHt: euros(Math.round(prix * quantite * 100) / 100) }],
       livraisonHt: Number(r.offre.livraisonHt) > 0 ? euros(Number(r.offre.livraisonHt)) : "offerte",
       totalHt: euros(Math.round(prix * quantite * 100) / 100 + Number(r.offre.livraisonHt)),
-      mentions: [`${LIGNE_NEGOCIE_PAR_MOBIIZ} (regroupement n° ${r.numero}).`, `${LIGNE_COMMISSION_INCLUSE}.`],
+      mentions: [`${LIGNE_NEGOCIE_PAR_MOBIIZ} (regroupement n° ${r.numero}).`, ...(Number(r.offre.commissionPct) > 0 ? [`${LIGNE_COMMISSION_INCLUSE}.`] : [])],
     });
   }
 

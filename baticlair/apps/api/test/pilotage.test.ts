@@ -8,10 +8,12 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
  * la session) ; chaque accès et chaque détail nominatif journalisés ; chiffres agrégés ; faux comptes exclus.
  */
 let ctx: TestContext;
-const avant = { GROUPE_ADMINS: process.env.GROUPE_ADMINS, CRON_SECRET: process.env.CRON_SECRET };
+const avant = { MODE_REGROUPEMENT: process.env.MODE_REGROUPEMENT, GROUPE_ADMINS: process.env.GROUPE_ADMINS, CRON_SECRET: process.env.CRON_SECRET };
 beforeAll(async () => {
   process.env.GROUPE_ADMINS = "greg@example.fr";
   process.env.CRON_SECRET = "secret-de-la-tache";
+  // L'essai et le gratuit d'avant (25 octobre 2026) ne valent plus qu'hors du mode automatique (achat groupé par métier, 27 octobre 2026).
+  process.env.MODE_REGROUPEMENT = "mois";
   ctx = await createTestApp();
 });
 afterAll(async () => {

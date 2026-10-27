@@ -174,6 +174,12 @@ export function SupplyList({
           <AideBouton sujet="quantitatif" />
         </div>
         <p className="text-[14px] text-muted">C&apos;est ce que reçoit le négoce.</p>
+        {/* Point 31 (27 octobre 2026) : la liste préparée depuis un devis le dit, tant qu'elle n'est pas validée. */}
+        {takeoff.documentId && takeoff.status === "draft" ? (
+          <p role="note" className="mt-2 rounded-2xl bg-accent-soft px-3 py-2 text-[14px] font-semibold">
+            Liste préparée à partir de ton devis. Vérifie les quantités avant d&apos;envoyer.
+          </p>
+        ) : null}
         {/* §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan le dit, ici et dans le PDF. */}
         {takeoff.ratiosEnValidation ? (
           <p className="mt-2 self-start rounded-full bg-warn-bg px-3 py-1 text-[12px] font-semibold text-warn">Ratios en cours de validation</p>
@@ -723,7 +729,10 @@ function Row({
   // Nouveau cap (22 octobre) : une ligne prête mais vague (sans format, origine, choix ou marque) a sa pastille orange et
   // « Précise pour trouver d'autres couvreurs » ; ses questions en boutons. Elle part quand même chez le négoce.
   const vague = !sentTo && editable && row.status !== "check" && (item?.aPreciserPourGroupe?.length ?? 0) > 0;
-  const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : vague ? (takeoff.phrasePrecision ?? "Précise pour trouver d'autres couvreurs") : null;
+  // Achat groupé par métier (Greg, 27 octobre 2026, point 31) : une ligne préparée depuis le devis ou la photo reste « à
+  // vérifier » tant que l'artisan ne l'a ni confirmée ni corrigée et que la liste n'est pas validée.
+  const aVerifier = editable && !sentTo && takeoff.status === "draft" && row.status !== "check" && lines.some((l) => (l.origin === "ai" || l.origin === "liste") && !l.confirmed && !l.edited);
+  const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : vague ? (takeoff.phrasePrecision ?? "Précise pour trouver d'autres couvreurs") : aVerifier ? "à vérifier" : null;
   const dot = sentTo ? DOT.supplier : vague ? { ok: false, label: "à préciser" } : DOT[row.status];
   const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
   const stepper = editable && !sentTo && item && parsed && Number.isFinite(toNumber(parsed.quantity)) ? { value: toNumber(parsed.quantity), unit: parsed.unit } : null;

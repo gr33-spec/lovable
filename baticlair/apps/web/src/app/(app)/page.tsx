@@ -42,7 +42,7 @@ function AccueilAchatGroupe() {
   const { data: recent, error, reload } = useResource(fetchRecent);
   const { data: next, reload: reloadNext } = useResource(fetchNext);
   const firstName = me.user.name.split(" ")[0] ?? me.user.name;
-  const actifs = (mes?.achats ?? []).filter((a) => a.etat !== "retire" && a.etat !== "desiste");
+  const actifs = (mes?.achats ?? []).filter((a) => !["retire", "desiste", "sorti", "non_commande"].includes(a.etat));
   const actions = actionsEnAttente(actifs, next?.items ?? []);
   const vide = recent !== null && recent.items.length === 0 && mes !== null && actifs.length === 0;
   return (

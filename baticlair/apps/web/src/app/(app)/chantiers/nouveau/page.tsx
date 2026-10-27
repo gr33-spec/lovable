@@ -1,5 +1,6 @@
 "use client";
 
+import { PenLine } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { DropZone } from "@/components/journey";
@@ -11,7 +12,8 @@ import { attachFile } from "@/lib/upload";
 import { useSession } from "@/lib/session";
 
 /**
- * NOUVEAU CAP (22 octobre 2026) : UN GROS BOUTON « Donne ta liste de matériaux » (liste remise au propre) et, en petit
+ * ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message, point 31) : trois choix, « Depuis mon devis — on t'avance »,
+ * « Photo de ma liste », « Je la note moi-même ». Avant, NOUVEAU CAP (22 octobre 2026) : UN GROS BOUTON « Donne ta liste de matériaux » (liste remise au propre) et, en petit
  * dessous, « Je n'ai qu'un devis » (« On t'avance la liste, sans garantie, tu la peaufines. »). Avant (21 octobre) : deux
  * gros boutons, « J'ai un devis » (déposer le PDF, parcours §48, étape 1) et « J'ai déjà ma liste » (photo d'une liste écrite à la main, d'un bon ou d'un devis de négoce, PDF ou
  * capture : l'artisan a déjà compté, les lignes sont lues telles qu'écrites, sans calcul ni question). Le chantier se crée
@@ -80,8 +82,9 @@ export default function NouveauChantierPage() {
           {erreurListe}
         </p>
       ) : null}
-      <DropZone kind="liste" onFile={(f) => void drop(f, "liste")} pending={pending === "liste"} error={error} />
-      <DropZone small onFile={(f) => void drop(f, "devis")} pending={pending === "devis"} error={null} />
+      {/* Point 31 (Greg, 27 octobre 2026, 2e message) : trois choix, ses mots. */}
+      <DropZone small titre="Depuis mon devis — on t'avance" sousTitre="Je te prépare la liste, tu vérifies les quantités." onFile={(f) => void drop(f, "devis")} pending={pending === "devis"} error={error} />
+      <DropZone small kind="liste" titre="Photo de ma liste" sousTitre="Une photo, un PDF ou une capture : je la remets au propre." onFile={(f) => void drop(f, "liste")} pending={pending === "liste"} error={null} />
       <SaisieListe />
     </>
   );
@@ -100,8 +103,14 @@ function SaisieListe() {
   const pleines = lignes.filter((l) => l.libelle.trim() && l.quantite.trim());
   if (!ouvert)
     return (
-      <button type="button" onClick={() => setOuvert(true)} className="min-h-12 self-center text-[16px] font-semibold text-accent-text underline">
-        Je l&apos;écris moi-même
+      <button type="button" onClick={() => setOuvert(true)} className="pressable flex min-h-16 items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink" aria-hidden="true">
+          <PenLine size={20} />
+        </span>
+        <span className="flex flex-col">
+          <span className="text-[16px] font-semibold">Je la note moi-même</span>
+          <span className="text-[14px] leading-snug text-muted">Matériau, quantité, unité.</span>
+        </span>
       </button>
     );
   async function creer() {

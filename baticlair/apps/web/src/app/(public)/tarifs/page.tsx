@@ -1,43 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArgumentTarif } from "@/components/argument-tarif";
 import { LiensLegaux } from "@/components/legal";
-import { OffresPubliques } from "@/components/offres-abonnement";
 import { ButtonLink } from "@/components/ui";
 import { NOM_APP } from "@/lib/nom";
 
 export const metadata: Metadata = {
   title: `Tarifs — ${NOM_APP}`,
-  description: "Gratuit pour commencer. Dès 29 € HT par mois à l'année (348 € HT par an), ou 49 € HT par mois sans engagement, pour comparer et acheter en groupe. Gratuit pour les négoces.",
+  description: "Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert.",
 };
 
 /**
- * LA PAGE TARIFS (Greg, 24 octobre 2026) : les deux formules (l'annuel mis en avant, le mensuel à côté), trois étapes, « Gratuit pour les négoces », une FAQ courte (résiliation,
- * factures, après l'essai), le bouton d'inscription. Même registre que la landing : nuit, un jaune signal.
+ * LA PAGE TARIFS (Greg, 27 octobre 2026, 2e message, point 34) : « Gratuit pour faire tes listes et les envoyer à tes
+ * négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert. » Aucun montant ici (le prix est un
+ * réglage, montré dans « Mon abonnement »). Plus d'essai (point 26).
  */
-/**
- * GRATUIT / PAYANT (Greg, 25 octobre 2026, recentrage) : ce que donne chaque formule. Les chiffres viennent des réglages de
- * l'API (`LECTURES_GRATUITES_MOIS`, 5 négoces, 3 mois d'historique) ; l'essai reste ; le payant est offert dans une zone qui
- * démarre (moins de 10 artisans actifs), puis 30 jours de préavis.
- */
+const PHRASE_TARIFS = "Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert.";
+
 const FORMULES = [
-  { titre: "Gratuit", sous: "pour commencer", points: ["2 devis lus par mois", "1 négoce par demande", "Mes prix : tes 3 derniers mois"] },
-  { titre: "Payant", sous: "dès 29 € HT par mois", points: ["Devis lus sans limite", "Jusqu'à 5 négoces par demande, réponses comparées livraison comprise", "Les regroupements", "Mes prix : tout ton historique"] },
+  { titre: "Gratuit", sous: "sans limite de temps", points: ["Tes listes, notées à la main", "Envoyées à tes négoces", "Les achats groupés de ton secteur, pour voir", "3 listes préparées depuis un devis ou une photo"] },
+  { titre: "Abonné", sous: "pour les achats groupés", points: ["Les achats groupés de ton métier", "Ta liste chez le meilleur négoce, livraison comprise", "Listes préparées depuis tes devis et tes photos, sans limite", "Ton premier achat groupé est offert"] },
 ] as const;
 
 const ETAPES = [
   { titre: "Commence gratuitement", texte: "Inscription en deux minutes, sans carte bancaire." },
-  { titre: "Teste le payant", texte: "L'essai te donne tout, regroupements compris. Dans une zone qui démarre, le payant est offert : on te prévient 30 jours avant la fin." },
-  { titre: "Continue si ça te sert : dès 29 € HT par mois", texte: "À l'année ou au mois, tu choisis. Sinon, tu restes en gratuit." },
+  { titre: "Ton premier achat groupé est offert", texte: "Coche les lignes de ta liste, choisis tes négoces : tu vois ce que donne le groupe." },
+  { titre: "Abonne-toi si ça te sert", texte: "À l'année ou au mois, tu choisis. Sinon, tu restes en gratuit : tes listes et tes négoces restent à toi." },
 ] as const;
 
 const FAQ = [
-  { q: "Annuel ou mensuel ?", r: "L'annuel : 348 € HT payés en une fois, soit 29 € par mois, 240 € de moins qu'au mois. Le mensuel : 49 € HT par mois, sans engagement. Tu passes du mois à l'année quand tu veux, ce qui reste de ton mois est déduit." },
-  { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin de la période payée (le mois, ou l'année), puis rien n'est plus prélevé. Une année commencée n'est pas remboursée au prorata." },
-  { q: "L'annuel se renouvelle tout seul ?", r: "Oui, chaque année. Je te préviens par e-mail 30 jours avant : tu as le temps de résilier si tu veux arrêter." },
-  { q: "Est-ce que j'ai des factures ?", r: "Oui, une à chaque paiement (chaque mois, ou chaque année), émise par BATI INVEST, avec la TVA. Elles sont toutes dans « Mes factures »." },
-  { q: "Que se passe-t-il après l'essai ?", r: "Rien n'est prélevé tout seul. Tu continues si tu veux, à l'année ou au mois. Sinon, tu passes en gratuit : tes chantiers et tes bons restent consultables." },
-  { q: "Les regroupements, ça fait baisser les prix ?", r: "On réunit les volumes des gros matériaux identiques pour tenter un meilleur prix. Rien n'est garanti : tu compares et tu commandes seulement si le prix te plaît." },
+  { q: "Qu'est-ce qui est gratuit ?", r: "Faire tes listes à la main et les envoyer à tes négoces, sans limite de temps. Tu vois aussi les achats groupés de ton secteur." },
+  { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin de la période payée, puis rien n'est plus prélevé." },
+  { q: "Est-ce que j'ai des factures ?", r: "Oui, une à chaque paiement, émise par BATI INVEST, avec la TVA. Elles sont toutes dans « Mes factures »." },
+  { q: "Un achat groupé, ça m'engage à quoi ?", r: "À commander tes quantités chez le moins cher entre la meilleure offre du groupe et ton négoce habituel. Deux sorties seulement : chantier annulé, ou aucune offre livrable." },
 ] as const;
 
 export default function TarifsPage() {
@@ -48,10 +42,10 @@ export default function TarifsPage() {
         <h1 id="tarifs" className="font-display text-[48px] leading-[0.96] font-extrabold tracking-[-0.03em] sm:text-[72px]">
           Tarifs
         </h1>
-        <ArgumentTarif className="max-w-[30ch] text-[22px] leading-snug font-bold text-accent sm:text-[28px]" />
+        <p className="max-w-[34ch] text-[22px] leading-snug font-bold text-accent sm:text-[28px]">{PHRASE_TARIFS}</p>
       </section>
 
-      <section aria-label="Gratuit ou payant" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <section aria-label="Gratuit ou abonné" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {FORMULES.map((f) => (
           <div key={f.titre} className="flex flex-col gap-3 rounded-2xl bg-night-2 p-5 ring-1 ring-white/10 sm:p-7">
             <h2 className="text-[24px] font-extrabold">
@@ -64,10 +58,6 @@ export default function TarifsPage() {
             </ul>
           </div>
         ))}
-      </section>
-
-      <section aria-label="Les formules">
-        <OffresPubliques />
       </section>
 
       <section aria-label="Les trois étapes">
@@ -90,7 +80,7 @@ export default function TarifsPage() {
         <h2 id="negoces" className={h2}>
           Gratuit pour les négoces
         </h2>
-        <p className="text-[17px] leading-relaxed">Des demandes structurées, prêtes à chiffrer, et des volumes groupés sur lesquels vous positionner. Sans abonnement ni commission.</p>
+        <p className="text-[17px] leading-relaxed">Une liste propre, prête à chiffrer ligne par ligne, et des volumes engagés sur lesquels vous positionner. Sans abonnement ni commission.</p>
       </section>
 
       <section aria-labelledby="faq" className="flex flex-col gap-6">

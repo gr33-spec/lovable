@@ -230,7 +230,7 @@ export interface TakeoffLine {
   reference: string | null;
   sourceRefs: string[];
   sourcePages: number[];
-  origin: "ai" | "manual";
+  origin: "ai" | "manual" | "partner" | "liste";
   edited: boolean;
   /** Doute exprimé par l'IA sur la ligne. */
   aiDoubt: string | null;
@@ -701,7 +701,7 @@ export interface Abonnement {
   actif: boolean;
   paiement: "simule" | "stripe";
   modeTest: string | null;
-  acces: "essai" | "abonne" | "grace" | "bloque";
+  acces: "essai" | "abonne" | "grace" | "bloque" | "gratuit";
   /** La formule payée (mensuel tant qu'il n'y en a pas). */
   formule: Formule;
   /** Le prix HT de la formule et sa période (« par mois », « par an »). */

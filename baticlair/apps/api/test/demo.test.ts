@@ -3,11 +3,16 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
 import { confirmRemaining } from "./support/confirm.js";
 
 let ctx: TestContext;
+const modeAvant = process.env.MODE_REGROUPEMENT;
 beforeAll(async () => {
+  // L'essai et le gratuit d'avant (25 octobre 2026) ne valent plus qu'hors du mode automatique (achat groupé par métier, 27 octobre 2026).
+  process.env.MODE_REGROUPEMENT = "mois";
   ctx = await createTestApp();
 });
 afterAll(async () => {
   await ctx.app.close();
+  if (modeAvant === undefined) delete process.env.MODE_REGROUPEMENT;
+  else process.env.MODE_REGROUPEMENT = modeAvant;
 });
 beforeEach(async () => {
   await resetDatabase(ctx.prisma);
