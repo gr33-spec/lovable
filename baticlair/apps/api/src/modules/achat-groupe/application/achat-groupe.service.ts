@@ -275,28 +275,31 @@ export class AchatGroupeService {
     };
   }
 
-  /** Les négoces proposés : ses habituels (carnet), puis les négoces inscrits du département (recherche nom ou SIRET). */
+  /**
+   * Les négoces proposés : ses habituels (carnet), puis les négoces inscrits du département ; la recherche se fait par
+   * E-MAIL d'abord (Greg, 27 octobre, capture iPhone : « il faut pas un SIRET ou un nom, mais un mail »), nom ou SIRET.
+   */
   async negoces(tenant: TenantContext, q: string) {
     const t = q.trim();
     const siret = t.replace(/\s/g, "");
     const habituels = await this.prisma.supplier.findMany({
-      where: { companyId: tenant.companyId, archivedAt: null, ...(t ? { name: { contains: t, mode: "insensitive" as const } } : {}) },
-      select: { id: true, name: true, phone: true },
+      where: { companyId: tenant.companyId, archivedAt: null, ...(t ? { OR: [{ name: { contains: t, mode: "insensitive" as const } }, { email: { contains: t, mode: "insensitive" as const } }] } : {}) },
+      select: { id: true, name: true, phone: true, email: true },
       orderBy: { name: "asc" },
       take: 20,
     });
     const zone = await this.ports.zoneDe(tenant.companyId);
     const inscrits = t
       ? await this.prisma.negoce.findMany({
-          where: { stopLe: null, OR: [{ nom: { contains: t, mode: "insensitive" } }, ...(/^\d{9,14}$/.test(siret) ? [{ siret: { startsWith: siret } }] : [])] },
-          select: { id: true, nom: true, departement: true },
+          where: { stopLe: null, OR: [{ nom: { contains: t, mode: "insensitive" } }, { email: { contains: t, mode: "insensitive" } }, ...(/^\d{9,14}$/.test(siret) ? [{ siret: { startsWith: siret } }] : [])] },
+          select: { id: true, nom: true, departement: true, email: true },
           orderBy: { nom: "asc" },
           take: 20,
         })
       : zone
-        ? await this.prisma.negoce.findMany({ where: { stopLe: null, departement: zone }, select: { id: true, nom: true, departement: true }, orderBy: { nom: "asc" }, take: 20 })
+        ? await this.prisma.negoce.findMany({ where: { stopLe: null, departement: zone }, select: { id: true, nom: true, departement: true, email: true }, orderBy: { nom: "asc" }, take: 20 })
         : [];
-    return { habituels: habituels.map((h) => ({ supplierId: h.id, nom: h.name, telephone: h.phone })), inscrits: inscrits.map((n) => ({ negoceId: n.id, nom: n.nom, departement: n.departement })) };
+    return { habituels: habituels.map((h) => ({ supplierId: h.id, nom: h.name, telephone: h.phone, email: h.email })), inscrits: inscrits.map((n) => ({ negoceId: n.id, nom: n.nom, departement: n.departement, email: n.email })) };
   }
 
   /* ------------------------------------------------------------------------------- s'engager (A1 à A3, B6 à B9) */

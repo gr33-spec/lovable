@@ -119,9 +119,7 @@ async function admin(browser: Browser, chemin: string) {
 
 /** Ajouter un négoce tapé à la main (nom, e-mail, téléphone). */
 async function ajouterNegoce(page: Page, n: { nom: string; email: string; tel: string }) {
-  await page.getByRole("button", { name: "Ajouter un autre négoce" }).click();
-  await page.getByLabel("Nom du négoce").fill(n.nom);
-  await page.getByLabel("Son e-mail").fill(n.email);
+  await page.getByLabel(/^(E-mail du négoce|Ou l'e-mail d'un autre négoce)$/).fill(n.email); await page.getByLabel("Nom du négoce").fill(n.nom);
   await page.getByLabel("Son téléphone (pour le prévenir)").fill(n.tel);
   await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
 }

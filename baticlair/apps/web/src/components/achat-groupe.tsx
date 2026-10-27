@@ -168,20 +168,34 @@ function Rappel({ children }: { children: React.ReactNode }) {
 
 /* ----------------------------------------------------------------------------------------- choisir ses négoces */
 
-/** Ses négoces : les habituels (carnet), la recherche par nom ou SIRET, ou un nouveau tapé (nom, e-mail, téléphone). */
+const EMAIL_VALIDE = /^\S+@\S+\.\S+$/;
+
+/**
+ * Ses négoces (Greg, 27 octobre, capture iPhone : « il faut pas un SIRET ou un nom, mais un mail ») : les habituels et
+ * les inscrits du secteur en un tap ; sinon L'E-MAIL du négoce (c'est là que part la demande) ; un e-mail connu
+ * retrouve le négoce, un e-mail nouveau demande son nom (et son téléphone, pour le prévenir).
+ */
 export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; onChange: (n: NegoceChoisi[]) => void }) {
-  const [q, setQ] = useState("");
+  const [email, setEmail] = useState("");
   const [cherche, setCherche] = useState("");
   const fetcher = useCallback((signal: AbortSignal) => api<NegocesProposes>(`/v1/achats-groupes/negoces?q=${encodeURIComponent(cherche)}`, { signal }), [cherche]);
   const { data } = useResource(fetcher);
-  const [nouveau, setNouveau] = useState(false);
   const [nom, setNom] = useState("");
-  const [email, setEmail] = useState("");
   const [tel, setTel] = useState("");
   const cle = (n: NegoceChoisi) => ("supplierId" in n ? `s:${n.supplierId}` : "negoceId" in n ? `n:${n.negoceId}` : `e:${n.email.toLowerCase()}`);
   const deja = new Set(choisis.map(cle));
   const ajouter = (n: NegoceChoisi) => !deja.has(cle(n)) && onChange([...choisis, n]);
-  const propositions: NegoceChoisi[] = [...(data?.habituels ?? []).map((h) => ({ supplierId: h.supplierId, nom: h.nom })), ...(data?.inscrits ?? []).map((i) => ({ negoceId: i.negoceId, nom: i.nom }))].filter((n) => !deja.has(cle(n)));
+  const propositions: (NegoceChoisi & { email?: string | null })[] = [...(data?.habituels ?? []).map((h) => ({ supplierId: h.supplierId, nom: h.nom, email: h.email })), ...(data?.inscrits ?? []).map((i) => ({ negoceId: i.negoceId, nom: i.nom, email: i.email }))].filter((n) => !deja.has(cle(n)));
+  const courriel = email.trim().toLowerCase();
+  const valide = EMAIL_VALIDE.test(courriel);
+  // Un e-mail déjà connu (carnet ou négoce inscrit) : le négoce lui-même, sans rien retaper.
+  const connu = valide ? propositions.find((n) => (n.email ?? "").toLowerCase() === courriel) : undefined;
+  const vider = () => {
+    setEmail("");
+    setCherche("");
+    setNom("");
+    setTel("");
+  };
   return (
     <fieldset className="flex flex-col gap-3">
       <legend className="sr-only">À quels négoces envoyer la demande ?</legend>
@@ -196,7 +210,7 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
           ))}
         </ul>
       ) : null}
-      {propositions.length ? (
+      {!email && propositions.length ? (
         <ul aria-label="Négoces proposés" className="flex flex-wrap gap-2">
           {propositions.slice(0, 8).map((n) => (
             <li key={cle(n)}>
@@ -207,44 +221,45 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
           ))}
         </ul>
       ) : null}
-      <form
-        role="search"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setCherche(q.trim());
+      <Field
+        id="negoce-email"
+        label={choisis.length || propositions.length ? "Ou l'e-mail d'un autre négoce" : "E-mail du négoce"}
+        type="email"
+        inputMode="email"
+        autoComplete="off"
+        placeholder="commandes@negoce.fr"
+        value={email}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          setCherche(e.target.value.trim());
         }}
-        className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 focus-within:border-accent"
-      >
-        <Search size={18} className="text-muted" aria-hidden="true" />
-        <label htmlFor="cherche-negoce" className="sr-only">
-          Chercher un négoce par nom ou SIRET
-        </label>
-        <input id="cherche-negoce" value={q} onChange={(e) => setQ(e.target.value)} onBlur={() => setCherche(q.trim())} placeholder="Chercher un négoce (nom ou SIRET)" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" />
-      </form>
-      {nouveau ? (
+      />
+      {connu ? (
+        <Button
+          variant="ink"
+          onClick={() => {
+            ajouter(connu);
+            vider();
+          }}
+        >
+          <Plus size={18} aria-hidden="true" /> Ajouter {connu.nom}
+        </Button>
+      ) : valide ? (
         <div className="flex flex-col gap-3 rounded-xl bg-ground p-3">
           <Field id="negoce-nom" label="Nom du négoce" value={nom} onChange={(e) => setNom(e.target.value)} />
-          <Field id="negoce-email" label="Son e-mail" type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <Field id="negoce-tel" label="Son téléphone (pour le prévenir)" type="tel" inputMode="tel" value={tel} onChange={(e) => setTel(e.target.value)} />
           <Button
-            variant="secondary"
-            disabled={!nom.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())}
+            variant="ink"
+            disabled={!nom.trim()}
             onClick={() => {
-              ajouter({ nom: nom.trim(), email: email.trim(), telephone: tel.trim() || null });
-              setNom("");
-              setEmail("");
-              setTel("");
-              setNouveau(false);
+              ajouter({ nom: nom.trim(), email: courriel, telephone: tel.trim() || null });
+              vider();
             }}
           >
-            Ajouter ce négoce
+            <Plus size={18} aria-hidden="true" /> Ajouter ce négoce
           </Button>
         </div>
-      ) : (
-        <button type="button" onClick={() => setNouveau(true)} className={LIEN_TEXTE}>
-          Ajouter un autre négoce
-        </button>
-      )}
+      ) : null}
     </fieldset>
   );
 }

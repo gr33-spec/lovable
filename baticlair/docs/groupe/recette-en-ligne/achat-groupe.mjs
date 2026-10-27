@@ -126,9 +126,7 @@ async function supprimer(page) {
   await page.waitForURL((u) => !/\/compte$/.test(u.pathname), { timeout: 30000 });
 }
 async function ajouterNegoce(page, n) {
-  await page.getByRole("button", { name: "Ajouter un autre négoce" }).click();
-  await page.getByLabel("Nom du négoce").fill(n.nom);
-  await page.getByLabel("Son e-mail").fill(n.email);
+  await page.getByLabel(/^(E-mail du négoce|Ou l'e-mail d'un autre négoce)$/).fill(n.email); await page.getByLabel("Nom du négoce").fill(n.nom);
   await page.getByLabel("Son téléphone (pour le prévenir)").fill(n.tel);
   await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
 }

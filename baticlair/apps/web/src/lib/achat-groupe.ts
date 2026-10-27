@@ -125,8 +125,8 @@ export interface Lance {
 }
 
 export interface NegocesProposes {
-  habituels: { supplierId: string; nom: string; telephone: string | null }[];
-  inscrits: { negoceId: string; nom: string; departement: string }[];
+  habituels: { supplierId: string; nom: string; telephone: string | null; email: string | null }[];
+  inscrits: { negoceId: string; nom: string; departement: string; email: string | null }[];
 }
 
 export interface PageNegoceAchat {
