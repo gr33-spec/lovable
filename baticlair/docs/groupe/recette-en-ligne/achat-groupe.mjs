@@ -162,7 +162,7 @@ await etape("Admin : code, mode « automatique »", adm, async () => {
   await voir(adm.getByRole("region", { name: "Tous les achats" }));
   return "mode automatique";
 });
-const carteAdmin = (achatId) => adm.locator(`a[href="/admin/achats-groupes/${achatId}"]`).locator("xpath=..");
+const carteAdmin = (achatId) => adm.getByRole("region", { name: "Tous les achats" }).locator(`a[href="/admin/achats-groupes/${achatId}"]`).locator("xpath=..");
 
 const a = await nouveau("artisanA");
 await etape("Cas 1 : compte vide, gratuit, sans essai", a, async () => {
@@ -300,7 +300,11 @@ await etape(SANS_IA ? "Cas 4 : Y répond ligne par ligne (sans IA)" : "Cas 4 : Y
   const mailY = await demande(Y.email);
   verif(mailY, "pas de demande chez Y");
   await negoce.goto(lien(mailY), { waitUntil: "networkidle" });
-  if (SANS_IA) await negoce.getByLabel("Prix de Ardoise 32×22 Espagne 1er choix").fill("1,25");
+  // Sans IA : un prix sur chaque ligne reçue (la page refuse une ligne sans réponse).
+  if (SANS_IA) {
+    const prix = negoce.getByLabel(/^Prix de /);
+    for (let i = 0; i < (await prix.count()); i++) await prix.nth(i).fill(i === 0 ? "1,25" : "0,62");
+  }
   else await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(FIX, "devis-fournisseur-couvreur.pdf"));
   await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
   await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
@@ -316,7 +320,7 @@ await etape("Cas 4 : l'admin analyse ; l'artisan voit « vérification en cours 
   await voir(a.getByText("Offres reçues, vérification en cours"));
   return `e-mail admin : ${alerte.filter((m) => /valider/i.test(m.subject)).map((m) => `« ${m.subject} »`).at(-1) ?? "aucun"}`;
 });
-await etape("Cas 4 : écran de validation (offre incomplète, PDF douteux)", adm, async () => {
+await etape(SANS_IA ? "Cas 4 : écran de validation (offre incomplète de X)" : "Cas 4 : écran de validation (offre incomplète, PDF douteux)", adm, async () => {
   await adm.goto(`${BASE}/admin/achats-groupes/${achatA.achatId}`, { waitUntil: "networkidle" });
   await voir(adm.getByText(/^2 sur 2 négoces ont répondu/));
   const offreX = adm.getByLabel(`Offre ${X.nom}`);
