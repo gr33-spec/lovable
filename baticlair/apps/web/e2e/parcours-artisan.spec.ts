@@ -3588,3 +3588,21 @@ test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un e
   await demo.getByRole("button", { name: "Tout effacer" }).click();
   await expect(demo.getByRole("status")).toContainText("Effacé : 5 faux artisans");
 });
+
+test("« Je la note moi-même » (27 octobre 2026, recette en ligne sur iPhone SE) : la saisie tient dans l'écran, sans défiler de côté, et « Créer ma liste » mène à la liste", async ({ page }) => {
+  await signUp(page);
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/chantiers/nouveau");
+  await page.getByRole("button", { name: /Je la note moi-même/ }).click();
+  await page.getByLabel("Matériau 1").fill("Ardoise naturelle 32×22 Espagne 1er choix");
+  await page.getByLabel("Quantité 1").fill("1800");
+  await page.getByRole("button", { name: "+ Ajouter une ligne" }).click();
+  await page.getByLabel("Matériau 2").fill("Liteaux 27×38 traités classe 2");
+  await page.getByLabel("Quantité 2").fill("200");
+  await page.getByLabel("Unité 2").fill("m");
+  for (const champ of ["Matériau 2", "Quantité 2", "Unité 2"]) await expect(page.getByLabel(champ)).toBeInViewport({ ratio: 1 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  await page.getByRole("button", { name: "Créer ma liste" }).click();
+  await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
+  await expect(page.getByText(/Ardoise naturelle 32×22/).first()).toBeVisible({ timeout: 30_000 });
+});

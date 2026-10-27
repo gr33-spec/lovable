@@ -128,10 +128,10 @@ function SaisieListe() {
     <section aria-label="Écrire ma liste" className="flex flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card">
       <p className="text-[17px] font-extrabold">Écris ta liste</p>
       {lignes.map((l, i) => (
-        <div key={i} className="grid grid-cols-[1fr_5.5rem_5.5rem] gap-2">
-          <input aria-label={`Matériau ${i + 1}`} placeholder="Ardoise naturelle 32×22 Espagne" value={l.libelle} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, libelle: e.target.value } : x)))} className={INPUT} />
-          <input aria-label={`Quantité ${i + 1}`} inputMode="decimal" placeholder="Qté" value={l.quantite} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, quantite: e.target.value } : x)))} className={INPUT} />
-          <input aria-label={`Unité ${i + 1}`} value={l.unite} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, unite: e.target.value } : x)))} className={INPUT} />
+        <div key={i} className="grid grid-cols-[minmax(0,1fr)_4.5rem_4.5rem] gap-2">
+          <input aria-label={`Matériau ${i + 1}`} placeholder="Ardoise naturelle 32×22 Espagne" value={l.libelle} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, libelle: e.target.value } : x)))} className={`${INPUT} min-w-0`} />
+          <input aria-label={`Quantité ${i + 1}`} inputMode="decimal" placeholder="Qté" value={l.quantite} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, quantite: e.target.value } : x)))} className={`${INPUT} min-w-0`} />
+          <input aria-label={`Unité ${i + 1}`} value={l.unite} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, unite: e.target.value } : x)))} className={`${INPUT} min-w-0`} />
         </div>
       ))}
       <button type="button" onClick={() => setLignes([...lignes, { libelle: "", quantite: "", unite: "pièces" }])} className="min-h-11 self-start text-[15px] font-semibold text-accent-text">
