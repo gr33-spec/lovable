@@ -11,6 +11,7 @@ import { PriceRequestsModule, PriceRequestsService } from "../price-requests/ind
 import { TenancyModule } from "../tenancy/index.js";
 import { PilotageModule } from "../pilotage/index.js";
 import { DemandePersoService } from "./application/demande-perso.service.js";
+import { AdresseMobiizModule, AdresseMobiizService } from "../adresse-mobiiz/index.js";
 import { DroitsService } from "./application/droits.service.js";
 import { RegroupementsService } from "./application/regroupements.service.js";
 import { HypothesesService } from "./application/hypotheses.service.js";
@@ -25,7 +26,7 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
  * le lien de chiffrage dans le mail de demande de devis, le payant offert dans l'abonnement, la limite gratuite des lectures.
  */
 @Module({
-  imports: [TenancyModule, AbonnementModule, PriceRequestsModule, GroupeModule, AiUsageModule, PilotageModule],
+  imports: [TenancyModule, AbonnementModule, PriceRequestsModule, GroupeModule, AiUsageModule, PilotageModule, AdresseMobiizModule],
   controllers: [RecentrageController, ChiffrageController, RecentrageNegoceController, RegroupementsController, HypothesesController, NegocieController, ChasseurController, NegocieAdminController],
   providers: [
     {
@@ -81,12 +82,15 @@ export class RecentrageModule implements OnModuleInit {
     @Inject(CommandeDuMoisService) private readonly commande: CommandeDuMoisService,
     @Inject(RegroupementsService) private readonly regroupements: RegroupementsService,
     @Inject(NegocieService) private readonly negocie: NegocieService,
+    @Inject(AdresseMobiizService) private readonly adresses: AdresseMobiizService,
     @Inject(ObservatoireService) private readonly observatoire: ObservatoireService,
     @Inject(VerificationNegoceService) private readonly verification: VerificationNegoceService,
     @Inject(EspaceNegoceService) private readonly espace: EspaceNegoceService,
   ) {}
 
   onModuleInit(): void {
+    // R7 : le SMS « Préviens ton négoce » nomme l'adresse Mobiiz qui envoie la demande.
+    this.demandes.brancherAdresseEnvoi(async (companyId) => (await this.adresses.expediteur(companyId))?.from.match(/<([^>]+)>/)?.[1] ?? null);
     this.priceRequests.brancherComplement((requestId, recipientId) => this.demandes.complement(requestId, recipientId));
     this.abonnement.brancherOffert((companyId) => this.droits.offertPour(companyId));
     this.meter.brancherLimiteGratuite((companyId) => this.droits.limiteGratuite(companyId));

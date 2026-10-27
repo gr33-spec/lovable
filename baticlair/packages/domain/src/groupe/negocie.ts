@@ -212,7 +212,9 @@ export const PHRASES_REFUS_NEGOCE: Readonly<Record<"inconnue" | "fermee" | "acti
 // ———————————————————————————————————————————————— « Préviens ton négoce »
 
 export const PREVIENS_TITRE = "Ton négoce ne connaît pas encore Mobiiz. Préviens-le, ça prend 2 minutes et tu auras ta réponse plus vite.";
-export const PREVIENS_SMS = "Salut, je t'envoie ma demande de prix par Mobiiz, tu vas recevoir un mail de contact@mobiiz.fr, c'est bien moi.";
+/** R7 (27 octobre 2026) : le SMS nomme l'adresse Mobiiz de l'artisan, celle qui envoie la demande (contact@ à défaut). */
+export const previensSms = (adresse: string | null) => `Salut, je t'envoie ma demande de prix par Mobiiz, tu vas recevoir un mail de ${adresse ?? "contact@mobiiz.fr"}, c'est bien moi.`;
+export const PREVIENS_SMS = previensSms(null);
 /** L'écran ne s'affiche que pour un négoce qui n'a jamais répondu sur Mobiiz et que l'artisan n'a pas déjà prévenu. */
 export const afficherPreviens = (n: { aDejaReponduSurMobiiz: boolean; prevenuLe: Date | null }) => !n.aDejaReponduSurMobiiz && !n.prevenuLe;
 export const lienSms = (telephone: string | null, texte = PREVIENS_SMS) => `sms:${(telephone ?? "").replace(/[^\d+]/g, "")}?&body=${encodeURIComponent(texte)}`;

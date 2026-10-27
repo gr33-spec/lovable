@@ -18,8 +18,8 @@ import {
   afficherPreviens,
   lienSms,
   lienTel,
-  PREVIENS_SMS,
   PREVIENS_TITRE,
+  previensSms,
   relanceDue,
   resultatsNegoce,
   validiteAcceptee,
@@ -91,6 +91,12 @@ export class DemandePersoService {
   ) {}
 
   /* ------------------------------------------------------------------- branchements (business model final, 25 octobre 2026) */
+
+  /** R7 : l'adresse Mobiiz de l'entreprise (celle qui envoie), pour le SMS « Préviens ton négoce » ; branchée par le module de l'adresse. */
+  private adresseEnvoi: (companyId: string) => Promise<string | null> = async () => null;
+  brancherAdresseEnvoi(f: (companyId: string) => Promise<string | null>): void {
+    this.adresseEnvoi = f;
+  }
 
   /** Après l'envoi : les lignes groupables partent en veille (regroupement négocié, `NegocieService`). */
   private apresEnvoi: ((companyId: string, requestId: string) => Promise<unknown>) | null = null;
@@ -239,15 +245,16 @@ export class DemandePersoService {
    */
   async aPrevenir(tenant: TenantContext, requestId: string) {
     const d = await this.demandeDe(tenant, requestId);
+    const sms = previensSms(await this.adresseEnvoi(tenant.companyId).catch(() => null));
     const sortie = [];
     for (const r of d.recipients) {
       const email = r.supplier.email.toLowerCase();
       const dejaRepondu =
         !!(await this.prisma.priceRequestRecipient.findFirst({ where: { reponduLe: { not: null }, supplier: { email: { equals: email, mode: "insensitive" } } }, select: { id: true } })) ||
         !!(await this.prisma.compteNegoce.findFirst({ where: { email, inscritLe: { not: null } }, select: { id: true } }));
-      if (afficherPreviens({ aDejaReponduSurMobiiz: dejaRepondu, prevenuLe: r.supplier.prevenuLe })) sortie.push({ supplierId: r.supplier.id, nom: r.supplier.name, telephone: r.supplier.phone, tel: r.supplier.phone ? lienTel(r.supplier.phone) : null, sms: lienSms(r.supplier.phone) });
+      if (afficherPreviens({ aDejaReponduSurMobiiz: dejaRepondu, prevenuLe: r.supplier.prevenuLe })) sortie.push({ supplierId: r.supplier.id, nom: r.supplier.name, telephone: r.supplier.phone, tel: r.supplier.phone ? lienTel(r.supplier.phone) : null, sms: lienSms(r.supplier.phone, sms) });
     }
-    return { titre: PREVIENS_TITRE, sms: PREVIENS_SMS, negoces: sortie };
+    return { titre: PREVIENS_TITRE, sms, negoces: sortie };
   }
 
   /** « Je l'ai déjà prévenu » : l'écran ne revient plus pour ce négoce. */

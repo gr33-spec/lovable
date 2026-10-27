@@ -109,6 +109,9 @@ async function inscrire(page, email, entreprise) {
   await page.getByLabel("Mot de passe").fill(`Recette-${ts}-solide`);
   await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
   await page.getByRole("button", { name: "Créer mon compte" }).click();
+  // R7 (27 octobre 2026) : l'écran dédié « Voici ton adresse Mobiiz : … » avant l'accueil.
+  await voir(page.getByRole("heading", { name: "Voici ton adresse Mobiiz :" }), 60000);
+  await page.getByRole("button", { name: "C'est compris" }).click();
   await voir(page.getByRole("heading", { name: /^Bonjour Jean/ }), 30000);
   const p = await api(page, "PATCH", "/v1/company/profile", { name: entreprise, address: "3 rue des Ajoncs, 22300 Lannion", siret: "73282932000074", phone: null, email: null });
   verif(p.status === 200, `profil ${p.status}`);
@@ -169,7 +172,8 @@ await etape("Préviens ton négoce", page, async () => {
   await voir(p.getByText(/Ton négoce ne connaît pas encore Mobiiz/), 30000);
   await p.scrollIntoViewIfNeeded();
   const sms = await p.getByRole("link", { name: "SMS" }).getAttribute("href");
-  verif(/bonjour%40mobiiz\.fr/.test(sms ?? ""), `SMS : ${sms}`);
+  // R7 (27 octobre 2026) : le SMS nomme l'adresse Mobiiz de l'artisan (toitures-…@mobiiz.fr), plus contact@.
+  verif(/toitures-[a-z0-9-]+%40mobiiz\.fr/.test(sms ?? ""), `SMS : ${sms}`);
   return "SMS prérempli";
 });
 await etape("E-mail réel au négoce (demande de prix)", page, async () => {
@@ -321,6 +325,8 @@ await etape("Chasseur : acceptations vues, lot transmis au négoce", ch, async (
 });
 await etape("Base de test : purge des faux négoces des recettes (la démo reste)", ch, async () => {
   await ch.goto(`${BASE}/admin/pilotage`, { waitUntil: "networkidle" });
+  // Les gestes de test vivent dans l'onglet « Test » (présent seulement sur la prévisualisation).
+  await ch.getByRole("tab", { name: "Test" }).click();
   const bouton = ch.getByRole("button", { name: "Purger les recettes" });
   await voir(bouton, 30000);
   await bouton.scrollIntoViewIfNeeded();

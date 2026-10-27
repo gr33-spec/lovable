@@ -126,6 +126,14 @@ describe("l'adresse Mobiiz de l'artisan", () => {
     expect(m.to).toBe("ventes@dupont.example");
   });
 
+  it("le SMS « Préviens ton négoce » nomme l'adresse Mobiiz qui envoie la demande", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
+    const { requestId } = await demande(agent);
+    const res = await agent.get(`/v1/demandes-perso/${requestId}/prevenir`);
+    expect(res.status).toBe(200);
+    expect(res.body.sms).toBe("Salut, je t'envoie ma demande de prix par Mobiiz, tu vas recevoir un mail de toitures-martin@mobiiz.fr, c'est bien moi.");
+  });
+
   it("la réponse du négoce revient par l'adresse étiquetée : rattachée à sa demande, son PDF devient le devis reçu, l'artisan prévenu", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
     const { projectId, recipientId } = await demande(agent);
