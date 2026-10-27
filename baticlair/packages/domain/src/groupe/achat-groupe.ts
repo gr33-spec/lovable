@@ -157,7 +157,7 @@ export function jaugeVolume(estimeHt: number | null, minimumHt: number, entrepri
 
 /* ------------------------------------------------------------------------------- la carte (point 8) */
 
-export const ETATS_ACHAT_GROUPE = ["seul", "regroupe", "regroupe_total", "consultation", "offre", "pas_assez", "commande", "desiste", "retire"] as const;
+export const ETATS_ACHAT_GROUPE = ["seul", "regroupe", "regroupe_total", "consultation", "validation", "offre", "pas_assez", "commande", "desiste", "sorti", "retire"] as const;
 export type EtatAchatGroupe = (typeof ETATS_ACHAT_GROUPE)[number];
 
 export interface EtatCarte {
@@ -184,9 +184,12 @@ export function etatCarte(
 ): EtatCarte {
   if (b.statut === "retire") return { etat: "retire", titre: "Tu t'es retiré de cet achat groupé", dateCle: null, sousTitre: null };
   if (b.statut === "desiste") return { etat: "desiste", titre: "Tu t'es désisté de cet achat groupé", dateCle: null, sousTitre: null };
+  if (b.statut === "sorti") return { etat: "sorti", titre: "Tu es sorti de cet achat groupé", dateCle: null, sousTitre: null };
   if (b.statut === "accepte") return { etat: "commande", titre: "Commandé", dateCle: null, sousTitre: "Ton bon de commande est parti chez le négoce." };
   if (a.statut === "pas_assez") return { etat: "pas_assez", titre: "Pas assez de volume cette fois", dateCle: null, sousTitre: "Envoie ta demande à tes négoces en un clic : rien n'est perdu." };
   if (a.statut === "offre_recue") return { etat: "offre", titre: "Offre reçue", dateCle: null, sousTitre: "Compare et commande si ça te va." };
+  // Achat groupé par métier (27 octobre 2026) : à l'échéance, l'admin vérifie les offres avant de les publier.
+  if (a.statut === "validation") return { etat: "validation", titre: "Offres reçues, vérification en cours", dateCle: null, sousTitre: PREVIENT };
   if (a.statut === "consultation")
     return { etat: "consultation", titre: `Négoces consultés, réponse le ${a.reponseAvantLe ? jourFr(a.reponseAvantLe) : "bientôt"}`, dateCle: a.reponseAvantLe ? jourFr(a.reponseAvantLe) : null, sousTitre: PREVIENT };
   const cloture = a.clotureLe ? jourFr(a.clotureLe) : null;
@@ -199,7 +202,7 @@ export function etatCarte(
 export const ETAPES_ACHAT_GROUPE = ["Inscriptions", "Négoces consultés", "Offres", "Commande"] as const;
 export function etapeCourante(statutAchat: string, statutBesoin: string): number {
   if (statutBesoin === "accepte") return 3;
-  if (statutAchat === "offre_recue") return 2;
+  if (statutAchat === "offre_recue" || statutAchat === "validation") return 2;
   if (statutAchat === "consultation") return 1;
   return 0;
 }

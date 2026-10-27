@@ -93,5 +93,47 @@ Rapport en 15 lignes envoyé le 27/10, feu vert le même jour avec mes choix 12 
 | 54 | 27/10 | Prévenir son négoce : écran, SMS prérempli, Appeler, « Je l'ai prévenu », rappel la veille, message le jour de l'envoi | fait | Écran exact, SMS prérempli, Appeler, « Je l'ai prévenu », rappel la veille, « Ta demande est partie chez … » le jour de l'envoi. |
 | 55 | 27/10 | Précision 1 : au moins un négoce pour lancer ou rejoindre (« Ajoute au moins un négoce à qui envoyer la demande. ») | fait | Refus côté écran et côté serveur avec la phrase exacte. |
 | 56 | 27/10 | Précision 2 : une ligne de liste n'est groupable qu'une fois rattachée à une référence du catalogue, confirmée d'un toucher | fait | « C'est bien de l'ardoise 32×22 Espagne 1er choix ? » Oui / Non par ligne ; sans référence ou non confirmée : reste en demande perso. |
-| 57 | 27/10 | Précision 3 : volume minimum en réglage par famille, affiché sur la carte (jauge sous le seuil d'anonymat) | fait | Valeur actuelle : 5 000 € HT couverture, 4 000 € HT charpente, 3 000 € HT second œuvre (estimés aux prix repères). |
-| 58 | 27/10 | Précision 4 : après la clôture, « Me désister » (table des désistements, admin) ; offre ferme même à volume un peu inférieur ; même référence relancée = quantité ajoutée | fait | « Me désister » après la clôture, table et admin ; conditions négoces : offre ferme même à volume un peu inférieur ; quantité ajoutée. |
+| 57 | 27/10 | Précision 3 : volume minimum en réglage par famille, affiché sur la carte (jauge sous le seuil d'anonymat) | remplacé (27/10, 2e message) | Le volume minimum et la jauge cèdent la place à l'engagement (lignes 64 à 67). |
+| 58 | 27/10 | Précision 4 : après la clôture, « Me désister » (table des désistements, admin) ; offre ferme même à volume un peu inférieur ; même référence relancée = quantité ajoutée | remplacé (27/10, 2e message) | « Me désister » remplacé par les deux sorties avec motif et l'exclusion (ligne 66). |
+
+## Achat groupé par métier (27 octobre, 2e message : « Feu vert, avec des changements importants »)
+
+Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, puis déroulé.
+
+| N° | Date | Demande | État | Détail |
+| --- | --- | --- | --- | --- |
+| 59 | 27/10 | A1. Un achat groupé = un métier + une zone + une période, un panier de lignes | en cours | |
+| 60 | 27/10 | A2. Chaque artisan y met les lignes cochées de sa liste, ou « Tout cocher » | en cours | |
+| 61 | 27/10 | A3. Toute ligne groupée rattachée à une référence du catalogue, confirmée d'un toucher ; sinon demande perso | en cours | |
+| 62 | 27/10 | A4. Le négoce reçoit une seule liste propre : référence, quantité cumulée, lieux et dates | en cours | |
+| 63 | 27/10 | A5. Orientation : spécialistes choisis par les participants, seulement leurs familles ; généralistes si choisis | en cours | |
+| 64 | 27/10 | B6. Engagement en rejoignant : « Je commande ces quantités, chez le moins cher… » ; pas de prix plafond | en cours | |
+| 65 | 27/10 | B7. Seul le volume engagé est annoncé aux négoces | en cours | |
+| 66 | 27/10 | B8. Deux sorties avec motif (chantier annulé, aucune offre livrable) ; au-delà : exclusion 3 mois (EXCLUSION_MOIS), admin | en cours | |
+| 67 | 27/10 | B9. Règles en clair au moment de rejoindre, case obligatoire, et dans les CGU | en cours | |
+| 68 | 27/10 | B10. Pas d'alignement organisé, aucun deuxième tour | en cours | |
+| 69 | 27/10 | C11. Réponse du négoce ligne par ligne (prix ou « je ne fournis pas ») ; PDF en secours, lignes manquantes en rouge | en cours | |
+| 70 | 27/10 | C12. Conditions d'ouverture de compte cochées une fois pour toutes | en cours | |
+| 71 | 27/10 | D13. Comparaison par artisan sur SES lignes, offres complètes devant, « N lignes non chiffrées » | en cours | |
+| 72 | 27/10 | D14. VALIDATION_ADMIN_OFFRES = oui : écran admin (valider, écarter, corriger, publier) | en cours | |
+| 73 | 27/10 | D15. Alerte admin dès qu'un achat attend, rappel toutes les 12 h ; DELAI_VALIDATION_ADMIN_HEURES dans la clôture | en cours | |
+| 74 | 27/10 | D16. Statistique : part des achats où le choix de l'IA est suivi sans correction | en cours | |
+| 75 | 27/10 | E17. Notification + e-mail : « Ta liste chez le meilleur négoce : X au lieu de Y, livraison comprise. » | en cours | |
+| 76 | 27/10 | E18. Commander avant DELAI_COMMANDE_JOURS ; bon de commande ; « Commande reçue » côté négoce | en cours | |
+| 77 | 27/10 | E19. Sans compte chez le gagnant : conditions du négoce + « Je suis intéressé, transmettre mes coordonnées » | en cours | |
+| 78 | 27/10 | E20. Ensuite en direct ; Mes prix ; « Livré » ou « Problème » | en cours | |
+| 79 | 27/10 | F21. Alertes de zone par métier, nouvelle phrase | en cours | |
+| 80 | 27/10 | F22. Suggestion « Tu as … de …, mets-les en achat groupé » (seuil par famille), lignes précochées | en cours | |
+| 81 | 27/10 | G23. Gratuit sans limite de durée : listes à la main, envoi à ses négoces, voir les achats du secteur | en cours | |
+| 82 | 27/10 | G24. Lectures IA : 3 offertes au total (LECTURES_IA_GRATUIT_TOTAL) | en cours | |
+| 83 | 27/10 | G25. S'engager = abonnement, sauf le premier achat groupé, offert | en cours | |
+| 84 | 27/10 | G26. Fin de l'essai de 35 jours, de la pastille et du bandeau ; prix de l'abonnement en réglage | en cours | |
+| 85 | 27/10 | G27. COMMISSION_DEFAUT = 0, aucune mention de commission à 0 | en cours | |
+| 86 | 27/10 | G28. Admin : vus, abonnés, commandé, sortis par achat publié | en cours | |
+| 87 | 27/10 | H29. Landing : « Achète tes matériaux au prix des gros. » / « Arrête de perdre du temps sur tes quantitatifs. » | en cours | |
+| 88 | 27/10 | H30. Bloc « Ta liste de matériaux ? On te file un coup de main. » (trois voies, sans « précis », « exact », « automatique », « IA ») | en cours | |
+| 89 | 27/10 | H31. Dans l'app : « Depuis mon devis — on t'avance », « Photo de ma liste », « Je la note moi-même » ; bandeau et « à vérifier » | en cours | |
+| 90 | 27/10 | H32. Chaque correction enregistrée par source ; admin : taux de lignes corrigées par source | en cours | |
+| 91 | 27/10 | H33. CGU : la liste préparée est une aide, l'artisan reste responsable | en cours | |
+| 92 | 27/10 | H34. Onglet Tarifs sans montant | en cours | |
+| 93 | 27/10 | I35. Conditions négoces, CGU, registre RGPD (coordonnées transmises sur consentement), CONFORMITE.md | en cours | |
