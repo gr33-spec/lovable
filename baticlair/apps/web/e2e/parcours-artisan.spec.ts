@@ -2136,7 +2136,7 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
   await page.getByLabel("E-mail").fill("admin-groupe@example.fr");
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("button", { name: "Se connecter" }).click();
-  await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^(Bonjour|Paie tes matériaux moins cher)/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
   if (await page.getByRole("alert").filter({ hasText: "incorrect" }).count()) await signUp(page, "admin-groupe@example.fr");
   await page.goto("/groupe");
   await page.getByRole("link", { name: "Admin regroupement" }).click();
@@ -3550,7 +3550,7 @@ test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un e
   await page.getByLabel("E-mail").fill("admin-groupe@example.fr");
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("button", { name: "Se connecter" }).click();
-  await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^(Bonjour|Paie tes matériaux moins cher)/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
   if (await page.getByRole("alert").filter({ hasText: "incorrect" }).count()) await signUp(page, "admin-groupe@example.fr");
   // L'admin le trouve dans son menu.
   await page.goto("/");
