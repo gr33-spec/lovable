@@ -7,6 +7,8 @@
 // département : les deux passes ne se regroupent pas. Les comptes sont supprimés à la fin.
 //
 //   RESEND_API_KEY=… node docs/groupe/recette-en-ligne/achat-groupe.mjs <se|ordi> <dossier-captures>
+//   SANS_IA=1 : quand l'IA de la prévisualisation est indisponible (crédit épuisé), la liste est notée à la main
+//   (« Je la note moi-même ») et Y répond ligne par ligne au lieu du PDF ; la lecture IA reste couverte par l'e2e.
 import { chromium, devices } from "/opt/node22/lib/node_modules/playwright/index.mjs";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -139,6 +141,7 @@ const B = `delivered+ag-b-${APPAREIL}-${ts}@resend.dev`;
 const X = { nom: `Négoce X ${ts}`, email: `delivered+ag-x-${APPAREIL}-${ts}@resend.dev`, tel: "02 96 00 00 01" };
 const Y = { nom: `Négoce Y ${ts}`, email: `delivered+ag-y-${APPAREIL}-${ts}@resend.dev`, tel: "02 96 00 00 02" };
 const ADMIN = "delivered+admin-recette@resend.dev";
+const SANS_IA = process.env.SANS_IA === "1";
 const nouveau = async (qui) => surveiller(await (await browser.newContext({ ...options, locale: "fr-FR", timezoneId: "Europe/Paris" })).newPage(), `${qui}-${APPAREIL}`);
 
 const adm = await nouveau("admin");
@@ -175,26 +178,44 @@ await etape("Cas 2 : trois choix pour la liste", a, async () => {
   await voir(a.getByText("Photo de ma liste"));
   await voir(a.getByText("Je la note moi-même"));
 });
-await etape("Cas 2 : liste depuis un devis (vraie lecture), bandeau, « à vérifier », suggestion", a, async () => {
-  await a.getByLabel("Déposer mon devis").setInputFiles(path.join(FIX, "devis-achat-groupe.pdf"));
-  await a.waitForURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60000 });
-  const liste = a.getByRole("region", { name: "Liste des fournitures" });
-  const questions = a.getByRole("region", { name: "Les questions" });
-  await voir(liste.or(questions), 240000);
-  if (await questions.isVisible()) {
-    await a.getByRole("button", { name: /^Calculer ma liste/ }).click();
-  }
-  await voir(liste, 240000);
-  await voir(a.getByText("Liste préparée à partir de ton devis. Vérifie les quantités avant d'envoyer."));
-  const suggestion = a.getByText(/mets-les en achat groupé pour payer moins cher\.$/);
-  await voir(suggestion, 60000);
-  await suggestion.scrollIntoViewIfNeeded();
-  return await suggestion.first().innerText();
-});
+if (SANS_IA)
+  await etape("Cas 2 : liste notée à la main (sans IA), « Acheter en groupe »", a, async () => {
+    await a.getByRole("button", { name: /Je la note moi-même/ }).click();
+    await a.getByLabel("Matériau 1").fill("Ardoise naturelle 32×22 Espagne 1er choix");
+    await a.getByLabel("Quantité 1").fill("1800");
+    await a.getByRole("button", { name: "+ Ajouter une ligne" }).click();
+    await a.getByLabel("Matériau 2").fill("Liteaux 27×38 traités classe 2");
+    await a.getByLabel("Quantité 2").fill("200");
+    await a.getByLabel("Unité 2").fill("m");
+    await a.getByRole("button", { name: "Créer ma liste" }).click();
+    await a.waitForURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60000 });
+    const bouton = a.getByRole("button", { name: /^(Mettre en achat groupé|Acheter en groupe)$/ });
+    await voir(bouton, 60000);
+    await bouton.first().scrollIntoViewIfNeeded();
+    const suggestion = a.getByText(/mets-les en achat groupé pour payer moins cher\.$/);
+    return (await suggestion.count()) ? await suggestion.first().innerText() : "pas de suggestion";
+  });
+else
+  await etape("Cas 2 : liste depuis un devis (vraie lecture), bandeau, « à vérifier », suggestion", a, async () => {
+    await a.getByLabel("Déposer mon devis").setInputFiles(path.join(FIX, "devis-achat-groupe.pdf"));
+    await a.waitForURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60000 });
+    const liste = a.getByRole("region", { name: "Liste des fournitures" });
+    const questions = a.getByRole("region", { name: "Les questions" });
+    await voir(liste.or(questions), 240000);
+    if (await questions.isVisible()) {
+      await a.getByRole("button", { name: /^Calculer ma liste/ }).click();
+    }
+    await voir(liste, 240000);
+    await voir(a.getByText("Liste préparée à partir de ton devis. Vérifie les quantités avant d'envoyer."));
+    const suggestion = a.getByText(/mets-les en achat groupé pour payer moins cher\.$/);
+    await voir(suggestion, 60000);
+    await suggestion.scrollIntoViewIfNeeded();
+    return await suggestion.first().innerText();
+  });
 let besoinA = null;
 let achatA = null;
 await etape("Cas 2 : « Mettre en achat groupé », « Tout cocher », engagement", a, async () => {
-  await a.getByRole("button", { name: "Mettre en achat groupé" }).click();
+  await a.getByRole("button", { name: /^(Mettre en achat groupé|Acheter en groupe)$/ }).first().click();
   const groupe = a.getByLabel("Acheter en groupe");
   await groupe.getByRole("button", { name: "Tout cocher" }).click();
   await groupe.getByLabel("Livraison avant le").fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
@@ -274,11 +295,12 @@ await etape("Cas 4 : X chiffre ligne par ligne, « je ne fournis pas » les lite
   await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
   await voir(negoce.getByText(/Votre offre est enregistrée/));
 });
-await etape("Cas 4 : Y répond par un PDF (lu par l'IA)", negoce, async () => {
+await etape(SANS_IA ? "Cas 4 : Y répond ligne par ligne (sans IA)" : "Cas 4 : Y répond par un PDF (lu par l'IA)", negoce, async () => {
   const mailY = await demande(Y.email);
   verif(mailY, "pas de demande chez Y");
   await negoce.goto(lien(mailY), { waitUntil: "networkidle" });
-  await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(FIX, "devis-fournisseur-couvreur.pdf"));
+  if (SANS_IA) await negoce.getByLabel("Prix de Ardoise 32×22 Espagne 1er choix").fill("1,25");
+  else await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(FIX, "devis-fournisseur-couvreur.pdf"));
   await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
   await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
   await voir(negoce.getByText(/Votre offre est enregistrée/), 240000);
@@ -299,7 +321,7 @@ await etape("Cas 4 : écran de validation (offre incomplète, PDF douteux)", adm
   const offreX = adm.getByLabel(`Offre ${X.nom}`);
   const offreY = adm.getByLabel(`Offre ${Y.nom}`);
   await voir(offreX.getByText("Non chiffrées : Liteaux 27×38"));
-  await voir(offreY.getByRole("link", { name: /Ouvrir le devis d'origine/ }));
+  if (!SANS_IA) await voir(offreY.getByRole("link", { name: /Ouvrir le devis d'origine/ }));
   const alertes = await offreY.getByRole("list", { name: "Alertes" }).count();
   await offreX.scrollIntoViewIfNeeded();
   return `${alertes ? "alertes IA sur Y" : "pas d'alerte IA sur Y"}`;
