@@ -2582,13 +2582,15 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page).toHaveURL(/\/$/);
   // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Achète tes matériaux au prix des gros\.$/);
-  // Le concept sous le titre, avant tout le reste, et les trois lignes visibles sans défiler sur un iPhone SE (Greg, même jour).
-  const concept = page.getByText("Mobiiz additionne les commandes de matériaux des artisans d'un même secteur et négocie le prix de gros pour chacun.");
+  // Le concept en trois lignes sous le titre, sans paragraphe autour (Greg, 27 octobre 2026 : « beaucoup trop de lecture ») ;
+  // sur un iPhone SE, le titre, les trois lignes et « Commencer gratuitement » sans défiler.
+  await expect(page.getByText("Mobiiz additionne les commandes de matériaux des artisans d'un même secteur et négocie le prix de gros pour chacun.")).toHaveCount(0);
+  await expect(page.getByText(/^Le devis que tu as fait à ton client suffit/)).toHaveCount(0);
   const trois = page.getByRole("list", { name: "En trois étapes" }).getByRole("listitem");
   await expect(trois).toHaveText(["1Tu dis ce que tu vas commander (ton devis suffit).", "2On l'additionne avec les artisans du coin.", "3On négocie, tu achètes au prix des gros."]);
   const taille = page.viewportSize();
   await page.setViewportSize({ width: 375, height: 667 });
-  await expect(concept).toBeInViewport({ ratio: 1 });
+  await expect(page.getByRole("heading", { level: 1 })).toBeInViewport({ ratio: 1 });
   await expect(trois.last()).toBeInViewport({ ratio: 1 });
   if (taille) await page.setViewportSize(taille);
   const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });
@@ -2606,7 +2608,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // visiteur arrive sur l'accroche, « Par un artisan, pour les artisans », « Dès 29 € », l'inscription ; aucune démo d'office.
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
   await expect(page.getByText("Par un artisan, pour les artisans.")).toBeVisible();
-  await expect(page.getByText(/^Gratuit pour faire tes listes et les envoyer à tes négoces\. Abonné pour profiter des achats groupés\. Ton premier achat groupé est offert\./)).toBeVisible();
+  await expect(page.getByText(/^Gratuit\. Ton premier achat groupé est offert\./)).toBeVisible();
   await expect(page.getByRole("link", { name: "Commencer gratuitement" }).first()).toBeVisible();
   await page.reload();
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
@@ -2654,14 +2656,10 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // promesse d'économie chiffrée.
   await expect(page.getByRole("heading", { name: "Seul, tu es un client parmi d'autres. À vingt, vous êtes le plus gros client du département." })).toBeVisible();
   await expect(page.getByRole("img", { name: "De 1 à 20 artisans du secteur" })).toBeVisible();
-  // L'écart pot seul / palette négociée (Greg, 26 octobre 2026) : la peinture, marqué « Exemple », sans marque ni enseigne.
-  const ecart = page.getByRole("region", { name: "Le même pot, deux fois moins cher." });
-  await expect(ecart.getByText("6 à 7 €", { exact: true })).toBeVisible();
-  await expect(ecart.getByText("moins de 3 €", { exact: true })).toBeVisible();
-  await expect(ecart.getByText("Exemple", { exact: true })).toBeVisible();
-  // Le regroupement montré est marqué « Exemple » jusqu'au premier vrai.
-  await expect(page.getByRole("region", { name: "Les mêmes ardoises, dans le même département." }).getByText("Exemple", { exact: true })).toBeVisible();
-  await expect(page.getByText("Quand d'autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes.")).toBeVisible();
+  // 27 octobre 2026 (« beaucoup trop de lecture ») : l'accueil n'a plus le bloc peinture (il reste sur /peintres) ni
+  // l'exemple de regroupement (il reste sur /couvreurs).
+  await expect(page.getByRole("region", { name: "Le même pot, deux fois moins cher." })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Les mêmes ardoises, dans le même département." })).toHaveCount(0);
   // Business model final (Greg, 25 octobre 2026) : l'argument des chasseurs d'opportunités.
   await expect(page.getByText("Des chasseurs d'opportunités négocient pour toi.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Comment ça marche" })).toBeVisible();
@@ -2680,7 +2678,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Greg, 27 octobre 2026, 2e message, point 34 : la phrase des tarifs, aucun montant.
   await expect(page.getByText(/€ HT/)).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Commencer gratuitement" })).toHaveCount(2);
-  await expect(page.getByText("des demandes structurées, prêtes à chiffrer, et des volumes groupés. Vos clients artisans paient le juste prix, et vous vendez plus.")).toBeVisible();
+  await expect(page.getByText("Des demandes prêtes à chiffrer, des volumes groupés.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
   const partage = page.getByRole("region", { name: "Fais venir tes collègues" });
   const message = /^Je me suis inscrit sur Mobiiz, on regroupe nos commandes de matériaux pour payer moins cher\. Plus on est nombreux, plus on négocie\. Rejoins-nous : http/;

@@ -138,3 +138,4 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 | 92 | 27/10 | H34. Onglet Tarifs sans montant | fait | Phrase exacte, aucun montant (test). |
 | 93 | 27/10 | I35. Conditions négoces, CGU, registre RGPD (coordonnées transmises sur consentement), CONFORMITE.md | fait | Conditions négoces 2026-10-27 majeure, CGU 2026-10-27 majeure, registre lignes 21-22, AV-AG5 à 8. |
 | 94 | 27/10 | MÉTHODE. Captures iPhone SE et ordinateur des six cas, toutes les suites vertes, recette complète rejouée | en cours | e2e « achat-groupe » : six cas, 20 captures ; recette en ligne réécrite pour les six cas (`docs/groupe/recette-en-ligne/achat-groupe.mjs`). |
+| 95 | 27/10 | Landing : simplifier, « beaucoup trop de lecture » | fait | Deux paragraphes du haut retirés, « Commencer gratuitement » visible sans défiler sur iPhone SE ; bloc peinture et exemple de regroupement retirés de l'accueil ; étapes sans paragraphe. 686 → 447 mots. |

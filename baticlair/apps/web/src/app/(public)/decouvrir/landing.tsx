@@ -165,11 +165,8 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
               <p className="mz-concept" style={{ fontWeight: 800 }}>
                 Arrête de perdre du temps sur tes quantitatifs.
               </p>
-              {/* Le concept, juste sous le titre et avant tout le reste (Greg, 26 octobre 2026 : « le concept n'est pas compris
-                  en haut de page ») : la phrase en gros, puis trois lignes numérotées, visibles sans défiler sur un iPhone SE. */}
-              <p className="mz-chapo">
-                {NOM_APP} additionne les commandes de matériaux des artisans d&apos;un même secteur et négocie le prix de gros pour chacun.
-              </p>
+              {/* Le concept en trois lignes numérotées (Greg, 26 octobre 2026), sans paragraphe autour (Greg, 27 octobre 2026 :
+                  « simplifier la landing page, il y a beaucoup trop de lecture »). */}
               <ol className="mz-trois" aria-label="En trois étapes">
                 {TROIS_LIGNES.map((l, i) => (
                   <li key={l}>
@@ -182,18 +179,15 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
               </ol>
               {couvreurs ? <p style={{ fontWeight: 700, marginBottom: 10 }}>Pour les couvreurs : ardoise, zinc, bois de charpente, isolation de toiture.</p> : null}
               {peintres ? <p style={{ fontWeight: 700, marginBottom: 10 }}>Pour les peintres : peinture, sous-couche, enduit, toile de verre.</p> : null}
-              <p className="mz-chapo">
-                Le devis que tu as fait à ton client suffit : {NOM_APP} en sort ta liste de matériaux. Tu peux aussi l&apos;envoyer à tes propres négoces et comparer leurs prix.
-              </p>
               <div className="mz-actions">
                 <Link href="/inscription" className="mz-bouton">
                   Commencer gratuitement
                 </Link>
                 <DemoSurBouton className="mz-lien" />
               </div>
-              {/* Point 34 : aucun montant tant que le prix n'est pas fixé. */}
+              {/* Point 34 : aucun montant ; la phrase entière est sur /tarifs, ici seulement l'essentiel. */}
               <p className="mz-prix-detail">
-                Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert. <Link href="/tarifs">Voir les tarifs</Link>
+                Gratuit. Ton premier achat groupé est offert. <Link href="/tarifs">Voir les tarifs</Link>
               </p>
             </div>
 
@@ -221,11 +215,9 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
             </div>
           </section>
 
-          {/* L'écart pot seul / palette négociée, à sa place sur l'accueil ; pas sur /couvreurs, où il ne parlerait pas au métier. */}
-          {cible === undefined ? <BlocPeinture /> : null}
-
-          {/* Un regroupement, marqué « exemple » jusqu'au premier vrai (d'ardoise : pas sur /peintres). */}
-          {peintres ? null : (
+          {/* Un regroupement, marqué « exemple » jusqu'au premier vrai : seulement sur /couvreurs (27 octobre 2026 : l'accueil
+              se lit vite ; le bloc peinture ne reste que sur /peintres). */}
+          {couvreurs ? (
             <section aria-labelledby="regroupement" className="mz-section mz-deux" data-apparait="">
               <div>
                 <Cote gauche="Un regroupement" />
@@ -233,7 +225,7 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
                   Les mêmes ardoises, dans le même département.
                 </h2>
                 <p className="mz-gris" style={{ marginTop: 16, maxWidth: "40ch" }}>
-                  Quand d&apos;autres artisans du secteur ont besoin des mêmes gros matériaux, on réunit les volumes. Un chasseur d&apos;opportunités appelle les négoces et revient avec une offre. Tu acceptes ou pas.
+                  Les volumes du secteur réunis, une seule demande aux négoces.
                 </p>
               </div>
               <div className="mz-carte mz-ticket">
@@ -256,7 +248,7 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
                 </dl>
               </div>
             </section>
-          )}
+          ) : null}
 
           {/* Les trois étapes, avec les vrais écrans de l'app, entiers. */}
           <section aria-labelledby="comment" id="comment" className="mz-section" style={{ scrollMarginTop: 24 }}>
@@ -277,7 +269,6 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
                       <span className="sr-only">{i + 1}. </span>
                       {e.titre}
                     </h3>
-                    <p>{e.texte}</p>
                   </div>
                   <Ecran nom={e.ecran.nom} alt={e.ecran.alt} />
                 </li>
@@ -316,7 +307,7 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
                 Gratuit pour vous.
               </h2>
               <p style={{ marginTop: 12, maxWidth: "52ch" }}>
-                <span style={{ color: "#fff", fontWeight: 700 }}>Négoces :</span> des demandes structurées, prêtes à chiffrer, et des volumes groupés. Vos clients artisans paient le juste prix, et vous vendez plus.
+                Des demandes prêtes à chiffrer, des volumes groupés.
               </p>
             </div>
             <Link href="/negoce/connexion" className="mz-lien">
