@@ -293,34 +293,45 @@ await etape("Cas 4 : X chiffre ligne par ligne, « je ne fournis pas » les lite
   verif(!/commission/i.test(mailX.text), "le mot commission est dans la demande");
   await negoce.goto(lien(mailX), { waitUntil: "networkidle" });
   await voir(negoce.getByRole("heading", { name: "Demande de prix groupée" }));
-  await voir(negoce.getByText(/Ardoise 32×22 Espagne 1er choix · 2 700 pièces/));
+  // Page négoce (Greg, 28 octobre 2026, point 3) : PDF et Excel sous le titre ; « Déposer mon offre » puis trois façons.
+  await voir(negoce.getByRole("link", { name: "Télécharger en PDF" }));
+  await voir(negoce.getByRole("link", { name: "Exporter en Excel" }));
+  await voir(negoce.getByText(/Ardoise 32×22 Espagne 1er choix/));
+  await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
+  await voir(negoce.getByRole("heading", { name: "Comment voulez-vous répondre ?" }));
+  await negoce.getByRole("button", { name: /^Saisir mes prix ici/ }).click();
   await negoce.getByLabel("Prix de Ardoise 32×22 Espagne 1er choix").fill("1,10");
   await negoce.getByRole("listitem").filter({ hasText: "Liteaux 27×38" }).getByRole("checkbox", { name: "Je ne fournis pas" }).check();
+  await negoce.getByRole("button", { name: "Continuer" }).click();
+  await voir(negoce.getByText("Total HT livré"));
   await negoce.getByText("Pour ouvrir un compte chez vous").click();
   await negoce.getByRole("checkbox", { name: "Kbis de moins de 3 mois" }).check();
   await negoce.getByRole("checkbox", { name: "RIB" }).check();
   await negoce.getByRole("radio", { name: "Paiement comptant au départ" }).check();
   await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
-  await negoce.getByRole("button", { name: "Déposer mon offre" }).scrollIntoViewIfNeeded();
-  await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
-  await voir(negoce.getByText(/Votre offre est enregistrée/));
+  await negoce.getByRole("button", { name: "Envoyer mon offre" }).scrollIntoViewIfNeeded();
+  await negoce.getByRole("button", { name: "Envoyer mon offre" }).click();
+  await voir(negoce.getByText(/^Offre envoyée le /));
 });
 await etape(SANS_IA ? "Cas 4 : Y répond ligne par ligne (sans IA)" : "Cas 4 : Y répond par un PDF (lu par l'IA)", negoce, async () => {
   const mailY = await demande(Y.email);
   verif(mailY, "pas de demande chez Y");
   await negoce.goto(lien(mailY), { waitUntil: "networkidle" });
+  await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
   // Sans IA : un prix sur chaque ligne reçue (la page refuse une ligne sans réponse).
   if (SANS_IA) {
+    await negoce.getByRole("button", { name: /^Saisir mes prix ici/ }).click();
     const prix = negoce.getByLabel(/^Prix de /);
     for (let i = 0; i < (await prix.count()); i++) await prix.nth(i).fill(i === 0 ? "1,25" : "0,62");
   }
   else {
-    await negoce.getByText("Plutôt votre devis PDF ?").click();
-    await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(FIX, "devis-fournisseur-couvreur.pdf"));
+    await negoce.getByRole("button", { name: /^Déposer mon devis PDF/ }).click();
+    await negoce.getByLabel("Votre devis PDF").setInputFiles(path.join(FIX, "devis-fournisseur-couvreur.pdf"));
   }
+  await negoce.getByRole("button", { name: "Continuer" }).click();
   await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
-  await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
-  await voir(negoce.getByText(/Votre offre est enregistrée/), 240000);
+  await negoce.getByRole("button", { name: "Envoyer mon offre" }).click();
+  await voir(negoce.getByText(/^Offre envoyée le /), 240000);
 });
 await etape("Cas 4 : l'admin analyse ; l'artisan voit « vérification en cours »", a, async () => {
   await adm.goto(`${BASE}/admin/achats-groupes`, { waitUntil: "networkidle" });

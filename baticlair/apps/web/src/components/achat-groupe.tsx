@@ -463,7 +463,8 @@ function ChoixGuide({ catalogue, q, onQ, deja, onAjouter }: { catalogue: Catalog
   if (catalogue.monMetier && !catalogue.monMetier.catalogue && !autresMetiers)
     return (
       <div role="status" className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
-        <p className="text-[16px] font-bold">Pas encore d&apos;achat groupé pour {catalogue.monMetier.libelle.toLowerCase()}.</p>
+        {/* Greg, 28 octobre 2026, point 6 : sa phrase, mot pour mot. */}
+        <p className="text-[16px] font-bold">Les achats groupés arrivent bientôt pour ton métier.</p>
         <p className="text-[15px]">En attendant, envoie ta liste à tes négoces : ils te font leur prix.</p>
         <ButtonLink href="/chantiers/nouveau" variant="secondary">
           Ma liste de matériaux

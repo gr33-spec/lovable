@@ -263,6 +263,22 @@ export function ValidationAchat({ id }: { id: string }) {
                 {!o.repondu ? <Badge>Pas de réponse</Badge> : null}
               </div>
             </div>
+            {/* Le suivi par négoce (Greg, 28 octobre 2026, point 3) : vu, PDF téléchargé, Excel téléchargé, répondu. */}
+            <ul aria-label={`Suivi ${o.nom}`} className="flex flex-wrap gap-x-3 gap-y-1 text-[13px] font-semibold">
+              {(
+                [
+                  ["Vu", o.vu],
+                  ["PDF téléchargé", o.pdfTelecharge],
+                  ["Excel téléchargé", o.excelTelecharge],
+                  ["Répondu", o.repondu],
+                ] as const
+              ).map(([t, oui]) => (
+                <li key={t} className={oui ? "text-ok" : "text-muted line-through decoration-1"}>
+                  {oui ? "✓ " : ""}
+                  {t}
+                </li>
+              ))}
+            </ul>
             {o.repondu ? <p className="text-[16px] font-bold">{o.totalHt === null ? "Aucun prix lu" : `${eurosHt(o.totalHt)} sur le panier`}</p> : null}
             {o.manquantes.length && o.repondu ? <p className="text-[14px] font-semibold text-danger">Non chiffrées : {o.manquantes.join(", ")}</p> : null}
             {o.alertes.length ? (

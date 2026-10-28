@@ -99,7 +99,7 @@ export default function TarifsPage() {
 
       <section className="flex flex-col items-start gap-4">
         <ButtonLink href="/inscription" variant="accent" className="min-h-13 px-8 text-[16px]">
-          Commencer gratuitement
+          Créer mon compte gratuit
         </ButtonLink>
         <Link href="/" className="min-h-11 content-center text-[15px] font-semibold text-white/70 underline">
           Retour à l&apos;accueil

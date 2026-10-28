@@ -58,6 +58,7 @@ const reponseBody = z.object({
     .nullable()
     .optional(),
 });
+const excelBody = z.object({ contenuBase64: z.string().min(10).max(6_000_000) });
 const avancerBody = z.object({ etape: z.enum(["cloture", "echeance", "commande"]) });
 const volumeBody = z.object({ famille: z.string().trim().min(1).max(40), montantHt: z.number().min(0).max(1_000_000) });
 const prixBody = z.object({ cle: z.string().min(1).max(200), prixHt: z.number().positive().max(1_000_000).nullable() });
@@ -215,6 +216,37 @@ export class AchatGroupePublicController {
       pdf: b.pdf ?? null,
       conditionsOuverture: b.conditionsOuverture ? { pieces: b.conditionsOuverture.pieces, paiement: b.conditionsOuverture.paiement, autre: b.conditionsOuverture.autre ?? null } : null,
     });
+  }
+
+  /** « Télécharger en PDF » (Greg, 28 octobre 2026, point 3). */
+  @Public()
+  @Throttle({ default: HOURLY(60) })
+  @Get(":jeton/demande.pdf")
+  async demandePdf(@Param("jeton") jeton: string, @Res() res: { setHeader(n: string, v: string): void; end(b: Buffer): void }) {
+    const pdf = await this.achats.demandePdf(jeton);
+    res.setHeader("content-type", "application/pdf");
+    res.setHeader("content-disposition", 'attachment; filename="demande-mobiiz.pdf"');
+    res.end(Buffer.from(pdf));
+  }
+
+  /** « Exporter en Excel ». */
+  @Public()
+  @Throttle({ default: HOURLY(60) })
+  @Get(":jeton/demande.xlsx")
+  async demandeXlsx(@Param("jeton") jeton: string, @Res() res: { setHeader(n: string, v: string): void; end(b: Buffer): void }) {
+    const xlsx = await this.achats.demandeXlsx(jeton);
+    res.setHeader("content-type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("content-disposition", 'attachment; filename="demande-mobiiz.xlsx"');
+    res.end(xlsx);
+  }
+
+  /** « Déposer l'Excel rempli » : lu par le code, les lignes reviennent pour confirmation. */
+  @Public()
+  @Throttle({ default: HOURLY(30) })
+  @Post(":jeton/excel")
+  @HttpCode(200)
+  lireExcel(@Param("jeton") jeton: string, @Body(new ZodPipe(excelBody)) b: z.infer<typeof excelBody>) {
+    return this.achats.lireExcel(jeton, b.contenuBase64);
   }
 
   /** Le lien du bon de commande : « Commande reçue » d'un clic. */

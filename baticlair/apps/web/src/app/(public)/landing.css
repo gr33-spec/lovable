@@ -219,6 +219,19 @@
   line-height: 1.28;
   letter-spacing: -0.01em;
 }
+/* Le mécanisme (Greg, 28 octobre 2026) : trois phrases, lisibles sans défiler sur un iPhone SE. */
+.mz-mecanisme {
+  max-width: 44ch;
+  margin: 0 0 12px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.42;
+}
+@media (min-width: 768px) {
+  .mz-mecanisme {
+    font-size: 20px;
+  }
+}
 .mz-trois {
   display: grid;
   gap: 8px;
@@ -266,6 +279,95 @@
   align-items: center;
   gap: 10px 24px;
   margin-top: 28px;
+}
+/* Le bouton d'inscription et « Sans carte bancaire » dessous. */
+.mz-cta {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.mz-cta-sous {
+  color: var(--mz-gris);
+  font-size: 13px;
+  font-weight: 600;
+}
+/* Sur téléphone : le même bouton, fixé en bas après le premier écran ; il s'efface dès que celui du bas de page a été atteint. */
+.mz-fixe {
+  display: none;
+}
+@media (max-width: 767px) {
+  .mz-fixe {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(244, 244, 241, 0.92);
+    border-top: 1px solid var(--mz-ligne);
+    backdrop-filter: blur(8px);
+    transform: translateY(110%);
+    transition: transform 220ms var(--mz-ease);
+  }
+  .mz-fixe[data-visible] {
+    transform: translateY(0);
+  }
+  .mz-fixe .mz-cta {
+    width: 100%;
+  }
+  .mz-fixe .mz-bouton {
+    width: 100%;
+  }
+  .mz-fixe .mz-cta-sous {
+    font-size: 12px;
+  }
+}
+/* Trois questions franches. */
+.mz-questions {
+  display: grid;
+  gap: 22px;
+  max-width: 62ch;
+  margin: 28px 0 0;
+}
+.mz-questions dt {
+  font-size: clamp(24px, 5.6vw, 34px);
+  margin-bottom: 6px;
+}
+.mz-questions dd {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+}
+/* Par un artisan, pour les artisans : la photo (emplacement réservé) et le mot de Grégory. */
+.mz-artisan {
+  display: grid;
+  gap: 28px;
+}
+@media (min-width: 768px) {
+  .mz-artisan {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: center;
+    gap: 48px;
+  }
+}
+.mz-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 5;
+  max-width: 320px;
+  border: 1px dashed var(--mz-encre);
+  border-radius: var(--mz-rayon);
+  background: var(--mz-blanc);
+  color: var(--mz-gris);
+  font-size: 14px;
+  font-weight: 600;
+}
+.mz-artisan-texte {
+  margin-top: 16px;
+  max-width: 44ch;
+  font-size: 18px;
 }
 .mz-prix {
   margin-top: 22px;

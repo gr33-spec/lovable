@@ -39,6 +39,39 @@ export function Apparition() {
 }
 
 /**
+ * Le bouton d'inscription fixé en bas sur téléphone (Greg, 28 octobre 2026, point 4) : il apparaît une fois le bouton du
+ * haut de page sorti de l'écran, jamais sur un formulaire ni une navigation (la landing n'en a pas, la démo passe par-dessus),
+ * et disparaît dès que le bouton du bas de page est visible ou a été dépassé.
+ */
+export function BoutonFixeInscription({ haut, bas, children }: { haut: string; bas: string; children: React.ReactNode }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (!("IntersectionObserver" in window)) return;
+    const h = document.getElementById(haut);
+    const b = document.getElementById(bas);
+    if (!h || !b) return;
+    let hautPasse = false;
+    let basAtteint = false;
+    const maj = () => setVisible(hautPasse && !basAtteint);
+    const obs = new IntersectionObserver((entrees) => {
+      for (const x of entrees) {
+        if (x.target === h) hautPasse = !x.isIntersecting && x.boundingClientRect.top < 0;
+        if (x.target === b) basAtteint = x.isIntersecting || x.boundingClientRect.top < 0;
+      }
+      maj();
+    });
+    obs.observe(h);
+    obs.observe(b);
+    return () => obs.disconnect();
+  }, [haut, bas]);
+  return (
+    <div className="mz-fixe" data-visible={visible ? "" : undefined} aria-hidden={visible ? undefined : "true"}>
+      {children}
+    </div>
+  );
+}
+
+/**
  * « 1 → 20 artisans » : le chiffre monte et les vingt cases se remplissent quand la phrase clé arrive à l'écran (1,2 s).
  * Rendu à 20 par le serveur ; il ne repart de 1 que s'il n'est pas encore visible.
  */

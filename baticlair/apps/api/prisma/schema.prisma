@@ -2104,6 +2104,10 @@ model ConsultationAchatGroupe {
   prixLignes            Json?     @map("prix_lignes")
   prixCorriges          Json?     @map("prix_corriges")
   ecarteeLe             DateTime? @map("ecartee_le") @db.Timestamptz(3)
+  /// PAGE NÉGOCE (Greg, 28 octobre 2026, point 3) : suivi dans l'admin : vu, PDF téléchargé, Excel téléchargé.
+  vuLe                  DateTime? @map("vu_le") @db.Timestamptz(3)
+  pdfTelechargeLe       DateTime? @map("pdf_telecharge_le") @db.Timestamptz(3)
+  excelTelechargeLe     DateTime? @map("excel_telecharge_le") @db.Timestamptz(3)
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   regroupement RegroupementNegocie @relation(fields: [regroupementId], references: [id], onDelete: Cascade)

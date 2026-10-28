@@ -82,6 +82,8 @@ import type { TransactionalEmailSender } from "../../../platform/email/email.por
 import { DomainError, forbidden, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { NotificationsGroupeService } from "../../../platform/notifications/notifications-artisan.js";
 import { bonDeCommandePdf } from "../../../platform/pdf/bon-de-commande.js";
+import { demandeNegocePdf, offreNegocePdf } from "../../../platform/pdf/demande-negoce.js";
+import { ecrireXlsx, lireXlsx, type Cellule } from "../../../platform/xlsx/xlsx.js";
 import type { PdfReader } from "../../documents/index.js";
 import type { NegoceExtractor, ReponseLue } from "../../groupe/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
@@ -109,6 +111,10 @@ const MODE_AUTO = "automatique";
 const OUVERT = "en_collecte";
 const ENGAGE = "declare";
 
+/** Les colonnes de l'Excel : A Référence, B Désignation, C Quantité, D Unité, E Prix unitaire HT (libre), F Disponible (libre). */
+const ENTETE_EXCEL: Cellule[] = ["Référence", "Désignation", "Quantité", "Unité", "Prix unitaire HT", "Disponible (oui/non)"];
+const COL_PRIX = 4;
+const COL_DISPO = 5;
 const hacher = (jeton: string) => createHash("sha256").update(jeton).digest("hex");
 const qte = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 3 }).replace(/\u202f/g, "\u00a0");
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u202f/g, "\u00a0")} €`;
@@ -200,6 +206,7 @@ export interface PortsAchatGroupe {
 }
 
 type Consultation = Awaited<ReturnType<PrismaService["consultationAchatGroupe"]["findMany"]>>[number];
+type Regroupement = Awaited<ReturnType<PrismaService["regroupementNegocie"]["findMany"]>>[number];
 
 export class AchatGroupeService {
   constructor(
@@ -914,8 +921,10 @@ export class AchatGroupeService {
       const lien = `${this.cfg.webAppUrl}/achat-groupe/${jeton}`;
       const demande = demandeNegocePanier({ clients: clients.length ? clients : besoins.map((b) => b.company.name), metier: a.famille, lignes, livraisons, reponseAvantLe: a.reponseAvantLe!, lien, commissionPct: commission });
       const replyTo = n.besoins[0] ? await this.ports.adresseMobiiz(n.besoins[0].companyId).catch(() => null) : null;
+      // La demande en PDF, jointe (Greg, 28 octobre 2026, point 3) : la même que « Télécharger en PDF ».
+      const pieceJointe = await this.demandePdfDe({ ...c, lignes: lignes as never, clients, regroupement: a }, jeton).catch(() => null);
       try {
-        await this.mailer.send({ to: email, subject: demande.objet, text: demande.texte, ...(replyTo ? { replyTo } : {}) });
+        await this.mailer.send({ to: email, subject: demande.objet, text: demande.texte, ...(replyTo ? { replyTo } : {}), ...(pieceJointe ? { attachments: [{ filename: "demande-mobiiz.pdf", contentType: "application/pdf", contentBase64: Buffer.from(pieceJointe).toString("base64") }] } : {}) });
         await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { envoyeLe: maintenant } });
       } catch {
         continue;
@@ -941,6 +950,7 @@ export class AchatGroupeService {
   async page(jeton: string) {
     const c = await this.consultationDuJeton(jeton);
     const a = c.regroupement;
+    if (!c.vuLe) await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { vuLe: this.now() } }).catch(() => undefined);
     const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId: a.id, statut: { in: [ENGAGE, "accepte"] } }, select: { livraison: true, departement: true, dateBesoin: true } });
     const commission = Number(c.commissionPct);
     const cond = await this.prisma.conditionsOuvertureNegoce.findUnique({ where: { email: c.email } });
@@ -966,8 +976,128 @@ export class AchatGroupeService {
         paiements: PAIEMENTS_DEPART.map((p) => ({ valeur: p, libelle: LIBELLES_PAIEMENTS_DEPART[p] })),
       },
       conditionsOuverture: cond ? { pieces: cond.pieces, paiement: cond.paiement, autre: cond.autre } : null,
-      reponse: c.reponduLe ? { le: c.reponduLe.toISOString(), prix, pdf: c.pdfNom } : null,
+      reponse: c.reponduLe ? { le: c.reponduLe.toISOString(), prix, pdf: c.pdfNom, recap: this.recapOffre(c) } : null,
     };
+  }
+
+  /** Le récapitulatif de SON offre : chaque ligne, le total HT livré, les lignes non fournies. */
+  private recapOffre(c: Pick<Consultation, "lignes" | "prixLignes" | "prixCorriges" | "delaiJours" | "commentaire" | "pdfNom">) {
+    const prix = objet(c.prixLignes);
+    const lignes = lignesDe(c.lignes).map((l) => {
+      const p = prixDe(prix, l.cle);
+      return { cle: l.cle, libelle: l.libelle, quantite: l.quantite, unite: l.unite, prixHt: p, totalHt: p === null ? null : arrondi(p * l.quantite) };
+    });
+    return {
+      lignes,
+      totalHt: arrondi(lignes.reduce((s, l) => s + (l.totalHt ?? 0), 0)),
+      manquantes: lignes.filter((l) => l.prixHt === null).map((l) => l.libelle),
+      delaiJours: c.delaiJours,
+      commentaire: c.commentaire,
+      pdf: c.pdfNom,
+    };
+  }
+
+  /* -------------------------------------------- la demande en PDF et en Excel (Greg, 28 octobre 2026, point 3) */
+
+  /** « Couverture · secteur Paimpol » : le titre sans la date (elle est dite à part). */
+  private titreDemande(a: { libelle: string; famille: string }) {
+    const [metier, secteur] = a.libelle.split(" · ");
+    return secteur ? `${metier} · ${secteur}` : libelleMetier(a.famille);
+  }
+
+  private async demandePdfDe(c: Pick<Consultation, "clients" | "lignes"> & { regroupement: Pick<Regroupement, "libelle" | "famille" | "dateBesoinMin" | "reponseAvantLe" | "commissionPct"> }, jeton: string) {
+    const a = c.regroupement;
+    const commission = Number(a.commissionPct ?? 0);
+    return demandeNegocePdf({
+      titre: this.titreDemande(a),
+      livraisonAvantLe: a.dateBesoinMin ? jourFr(a.dateBesoinMin) : "la date convenue",
+      reponseAvantLe: a.reponseAvantLe ? jourFr(a.reponseAvantLe) : "la date indiquée en ligne",
+      dePart: deLaPartDe(c.clients),
+      lignes: lignesDe(c.lignes).map((l) => ({ reference: l.cle, designation: l.libelle, quantite: qte(l.quantite), unite: l.unite })),
+      regles: `Une seule offre, sans deuxième tour : votre meilleur prix, ferme sur le volume engagé, livraison comprise, ligne par ligne (un prix unitaire HT ou « je ne fournis pas »).${commission > 0 ? ` Commission ${NOM_APP} de ${String(commission).replace(".", ",")} % HT sur les commandes passées.` : ""}`,
+      lien: `${this.cfg.webAppUrl}/achat-groupe/${jeton}`,
+    });
+  }
+
+  /** « Télécharger en PDF » : la demande, et l'admin voit qu'elle a été téléchargée. */
+  async demandePdf(jeton: string): Promise<Uint8Array> {
+    const c = await this.consultationDuJeton(jeton);
+    const pdf = await this.demandePdfDe(c, jeton);
+    if (!c.pdfTelechargeLe) await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { pdfTelechargeLe: this.now() } }).catch(() => undefined);
+    return pdf;
+  }
+
+  /**
+   * « Exporter en Excel » : les mêmes lignes, « Prix unitaire HT » vide et « Disponible (oui/non) » à remplir, les autres
+   * colonnes protégées, une feuille « Conditions », et une feuille cachée `_mobiiz` (l'identifiant de la consultation)
+   * pour reconnaître le fichier au dépôt.
+   */
+  async demandeXlsx(jeton: string): Promise<Buffer> {
+    const c = await this.consultationDuJeton(jeton);
+    const a = c.regroupement;
+    const lignes = lignesDe(c.lignes);
+    const buf = ecrireXlsx([
+      {
+        nom: "Demande",
+        enTete: true,
+        protegee: true,
+        colonnesLibres: [COL_PRIX, COL_DISPO],
+        largeurs: [18, 46, 12, 10, 18, 20],
+        lignes: [ENTETE_EXCEL, ...lignes.map((l): Cellule[] => [l.cle, l.libelle, l.quantite, l.unite, null, null])],
+      },
+      {
+        nom: "Conditions",
+        largeurs: [90],
+        lignes: [
+          [this.titreDemande(a)],
+          [deLaPartDe(c.clients)],
+          [`Livraison souhaitée avant le ${a.dateBesoinMin ? jourFr(a.dateBesoinMin) : "la date convenue"}`],
+          [`Réponse attendue avant le ${a.reponseAvantLe ? jourFr(a.reponseAvantLe) : "la date indiquée en ligne"}`],
+          ["Prix unitaire HT, livraison incluse."],
+          ["Une seule offre, sans deuxième tour : votre meilleur prix."],
+          ["Offre ferme sur le volume engagé jusqu'à la date de commande (validité)."],
+          ["Ligne non fournie : laissez le prix vide et mettez « non » dans Disponible."],
+          [`Déposez le fichier rempli sur votre page : ${this.cfg.webAppUrl}/achat-groupe/${jeton}`],
+        ],
+      },
+      { nom: "_mobiiz", cachee: true, lignes: [[c.id]] },
+    ]);
+    if (!c.excelTelechargeLe) await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { excelTelechargeLe: this.now() } }).catch(() => undefined);
+    return buf;
+  }
+
+  /**
+   * « Déposer l'Excel rempli » : lu par le code, sans IA. Le fichier est reconnu par sa feuille cachée ; les lignes
+   * reconnues reviennent pour confirmation, avec leur état : prix lu, « non fourni », vide ou illisible.
+   * Un fichier modifié (colonne retirée) ou qui n'est pas le sien est refusé avec une phrase claire.
+   */
+  async lireExcel(jeton: string, contenuBase64: string) {
+    const c = await this.consultationDuJeton(jeton);
+    const buf = Buffer.from(contenuBase64, "base64");
+    if (buf.length > 4 * 1024 * 1024 || buf.readUInt32LE(0) !== 0x04034b50) throw validationFailed("xlsx only", { reason: "excel_invalide", message: "Déposez le fichier Excel (.xlsx) exporté depuis cette page." });
+    let feuilles: ReturnType<typeof lireXlsx>;
+    try {
+      feuilles = lireXlsx(buf);
+    } catch {
+      throw validationFailed("xlsx unreadable", { reason: "excel_invalide", message: "Ce fichier n'est pas lisible. Déposez le fichier Excel exporté depuis cette page." });
+    }
+    const marque = feuilles.find((f) => f.nom === "_mobiiz")?.lignes[0]?.[0];
+    if (marque !== c.id) throw validationFailed("not this consultation", { reason: "excel_inconnu", message: "Ce fichier n'est pas l'Excel de cette demande. Exportez-le depuis cette page, remplissez-le, puis déposez-le." });
+    const demande = feuilles.find((f) => f.nom === "Demande");
+    const entete = demande?.lignes[0]?.map((v) => String(v ?? "").trim().toLowerCase()) ?? [];
+    const colonnes = { ref: entete.indexOf("référence"), prix: entete.indexOf("prix unitaire ht"), dispo: entete.indexOf("disponible (oui/non)") };
+    if (!demande || colonnes.ref < 0 || colonnes.prix < 0) throw validationFailed("columns changed", { reason: "excel_modifie", message: "Le fichier a été modifié (une colonne manque). Exportez-le à nouveau et remplissez seulement « Prix unitaire HT » et « Disponible »." });
+    const parRef = new Map(demande.lignes.slice(1).map((l) => [String(l[colonnes.ref] ?? "").trim(), l]));
+    const lignes = lignesDe(c.lignes).map((l) => {
+      const ligne = parRef.get(l.cle);
+      const brutPrix = ligne?.[colonnes.prix] ?? null;
+      const brutDispo = colonnes.dispo >= 0 ? String(ligne?.[colonnes.dispo] ?? "").trim().toLowerCase() : "";
+      const nonFourni = brutDispo === "non";
+      const prix = typeof brutPrix === "number" ? brutPrix : nombre(typeof brutPrix === "string" ? brutPrix : null);
+      const etat = !ligne ? "absente" : nonFourni ? "non_fourni" : prix !== null && prix > 0 ? "ok" : brutPrix === null || brutPrix === "" ? "vide" : "illisible";
+      return { cle: l.cle, libelle: l.libelle, quantite: l.quantite, unite: l.unite, prixHt: etat === "ok" ? arrondi(prix!) : null, etat, lu: brutPrix === null ? null : String(brutPrix) };
+    });
+    return { lignes, aCorriger: lignes.filter((l) => l.etat !== "ok" && l.etat !== "non_fourni").length };
   }
 
   async repondre(jeton: string, r: ReponseNegoceAchat) {
@@ -992,7 +1122,34 @@ export class AchatGroupeService {
       where: { id: c.id },
       data: { conditionsAccepteesLe: maintenant, reponduLe: maintenant, statut: "repondue", prixLignes: Object.keys(prix).length ? prix : undefined, delaiJours: r.delaiJours, commentaire: r.commentaire, ...(pdf ? { pdf, pdfNom: r.pdf!.nom.slice(0, 120) } : {}) },
     });
+    await this.confirmerOffre({ ...c, prixLignes: prix, reponduLe: maintenant, delaiJours: r.delaiJours, commentaire: r.commentaire, pdfNom: pdf ? r.pdf!.nom.slice(0, 120) : null }).catch(() => undefined);
     return this.page(jeton);
+  }
+
+  /** La confirmation par e-mail, avec le PDF de son offre (Greg, 28 octobre 2026, point 3). */
+  private async confirmerOffre(c: Pick<Consultation, "email" | "nom" | "lignes" | "prixLignes" | "prixCorriges" | "delaiJours" | "commentaire" | "pdfNom"> & { reponduLe: Date; regroupement: Pick<Regroupement, "libelle" | "famille"> }) {
+    const recap = this.recapOffre(c);
+    const titre = this.titreDemande(c.regroupement);
+    const pdf = await offreNegocePdf({
+      titre,
+      negoce: c.nom,
+      envoyeeLe: jourFr(c.reponduLe),
+      lignes: recap.lignes.map((l) => ({ reference: l.cle, designation: l.libelle, quantite: qte(l.quantite), unite: l.unite, prixHt: l.prixHt === null ? null : euros(l.prixHt), totalHt: l.totalHt === null ? null : euros(l.totalHt) })),
+      totalHt: euros(recap.totalHt),
+      manquantes: recap.manquantes,
+      delai: c.delaiJours === null ? null : `${c.delaiJours} jour${c.delaiJours > 1 ? "s" : ""}`,
+      commentaire: c.commentaire,
+    });
+    const texte = [
+      "Bonjour,",
+      "",
+      `Votre offre pour « ${titre} » est bien enregistrée le ${jourFr(c.reponduLe)}.`,
+      recap.pdf && !recap.lignes.some((l) => l.prixHt !== null) ? `Votre devis PDF (${recap.pdf}) sera lu et vérifié avant la comparaison.` : `Total HT livré : ${euros(recap.totalHt)}${recap.manquantes.length ? ` (non fourni : ${recap.manquantes.join(", ")})` : ""}.`,
+      "Le récapitulatif est en pièce jointe. Une seule offre par achat groupé : elle est ferme jusqu'à la date de commande.",
+      "",
+      NOM_APP,
+    ].join("\n");
+    await this.mailer.send({ to: c.email, subject: `Offre enregistrée : ${titre}`, text: texte, attachments: [{ filename: "mon-offre-mobiiz.pdf", contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }] });
   }
 
   /* ------------------------------------------------------------------- l'analyse à l'échéance (C11, D14, D15) */
@@ -1218,6 +1375,9 @@ export class AchatGroupeService {
           email: c.email,
           telephone: c.telephone,
           repondu: !!c.reponduLe,
+          vu: !!c.vuLe,
+          pdfTelecharge: !!c.pdfTelechargeLe,
+          excelTelecharge: !!c.excelTelechargeLe,
           statut: c.statut,
           ecartee: !!c.ecarteeLe,
           alertes: c.raisons.map((r) => PHRASES_DOUTE[r as RaisonDoute] ?? r),

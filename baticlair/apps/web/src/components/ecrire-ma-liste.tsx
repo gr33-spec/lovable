@@ -23,7 +23,8 @@ export interface LigneEcrite {
 /** « Ardoise 32×22, 900 pièces » → libellé, quantité, unité ; sans nombre, la quantité reste vide (à vérifier). */
 export function analyserLigne(texte: string): LigneEcrite {
   const t = texte.trim().replace(/\s+/g, " ");
-  const m = /^(.+?)[\s,;:·]+(\d+(?:[.,]\d+)?)\s*([^\d\s].*)?$/.exec(t);
+  // La quantité est le DERNIER nombre (« Ardoise 32×22, 1800 pièces » : 1800, jamais le 32 du format) ; l'unité n'a pas de chiffre, sauf m2 / m3.
+  const m = /^(.+?)[\s,;:·]+(\d+(?:[.,]\d+)?)\s*([^\d\s][^\d]*?[23]?)?\s*$/.exec(t);
   if (!m) return { libelle: t, quantite: "", unite: "pièces" };
   return { libelle: m[1]!.replace(/[\s,;:·]+$/, ""), quantite: m[2]!.replace(",", "."), unite: (m[3] ?? "").trim() || "pièces" };
 }

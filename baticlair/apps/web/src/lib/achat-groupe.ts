@@ -140,7 +140,23 @@ export interface PageNegoceAchat {
   conditions: string[];
   choixOuverture: { pieces: { valeur: string; libelle: string }[]; paiements: { valeur: string; libelle: string }[] };
   conditionsOuverture: { pieces: string[]; paiement: string | null; autre: string | null } | null;
-  reponse: { le: string; prix: Record<string, number | null>; pdf: string | null } | null;
+  reponse: { le: string; prix: Record<string, number | null>; pdf: string | null; recap: RecapOffreNegoce } | null;
+}
+
+/** Le récapitulatif de l'offre du négoce : chaque ligne, le total HT livré, les lignes non fournies. */
+export interface RecapOffreNegoce {
+  lignes: { cle: string; libelle: string; quantite: number; unite: string; prixHt: number | null; totalHt: number | null }[];
+  totalHt: number;
+  manquantes: string[];
+  delaiJours: number | null;
+  commentaire: string | null;
+  pdf: string | null;
+}
+
+/** L'Excel rempli, lu par le code : chaque ligne avec son état (ok, non fourni, vide, illisible, absente). */
+export interface LectureExcel {
+  lignes: { cle: string; libelle: string; quantite: number; unite: string; prixHt: number | null; etat: "ok" | "non_fourni" | "vide" | "illisible" | "absente"; lu: string | null }[];
+  aCorriger: number;
 }
 
 /** Un bouton de l'arbre de choix du catalogue ; au bout, la référence. */
@@ -214,6 +230,9 @@ export interface AdminAchat {
     email: string;
     telephone: string | null;
     repondu: boolean;
+    vu: boolean;
+    pdfTelecharge: boolean;
+    excelTelecharge: boolean;
     statut: string;
     ecartee: boolean;
     alertes: string[];

@@ -1,5 +1,7 @@
+import { execFileSync } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 
 /**
  * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message) : les six cas de la méthode, sur téléphone et sur
@@ -43,6 +45,40 @@ const tache = async (page: Page, maintenant: Date) => {
   expect(r.status).toBe(200);
   return r.body;
 };
+/** Le clavier simulé ouvert (iPhone SE, 375 × 330 ; Greg, 28 octobre 2026, point 1) : le champ reste visible en entier. */
+async function clavierOuvert(page: Page, champ: Locator) {
+  if (test.info().project.name !== "telephone") return;
+  const taille = page.viewportSize();
+  await page.setViewportSize({ width: 375, height: 330 });
+  await champ.click();
+  await expect(champ).toBeFocused();
+  await expect(champ).toBeInViewport({ ratio: 1 });
+  if (taille) await page.setViewportSize(taille);
+}
+/** Un téléchargement (PDF, Excel) déclenché par un lien de la page. */
+async function telecharger(page: Page, lien: string) {
+  const [d] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: lien }).click()]);
+  return d;
+}
+/** L'Excel exporté, rempli dans un vrai tableur (openpyxl s'il est là ; sinon réécrit par le code, mêmes feuilles). */
+async function remplirExcel(fichier: string | null, cellules: Record<string, number | string>) {
+  if (!fichier) throw new Error("export Excel absent");
+  const sortie = path.join(path.dirname(fichier), "rempli.xlsx");
+  try {
+    const lignes = Object.entries(cellules).map(([c, v]) => `ws[${JSON.stringify(c)}] = ${JSON.stringify(v)}`).join("\n");
+    execFileSync("/usr/bin/python3", ["-I", "-c", `import openpyxl, sys\nwb = openpyxl.load_workbook(sys.argv[1])\nws = wb["Demande"]\n${lignes}\nwb.save(sys.argv[2])`, fichier, sortie], { stdio: "ignore" });
+  } catch {
+    const { ecrireXlsx, indexColonne, lireXlsx } = await import("../../api/src/platform/xlsx/xlsx.js");
+    const feuilles = lireXlsx(readFileSync(fichier));
+    for (const [ref, v] of Object.entries(cellules)) {
+      const m = /^([A-Z]+)(\d+)$/.exec(ref)!;
+      const ligne = feuilles[0]!.lignes[Number(m[2]) - 1]!;
+      ligne[indexColonne(m[1]!)] = v;
+    }
+    writeFileSync(sortie, ecrireXlsx(feuilles.map((f) => ({ nom: f.nom, lignes: f.lignes, cachee: f.nom.startsWith("_") }))));
+  }
+  return sortie;
+}
 const capture = (page: Page, projet: string, nom: string) => page.screenshot({ path: `test-results/achat-groupe/${projet}-${nom}.png`, fullPage: true });
 
 /** Un couvreur inscrit (écran de l'adresse Mobiiz passé), SIRET vérifié, adresse dans le département. */
@@ -111,6 +147,7 @@ async function admin(browser: Browser, chemin: string) {
   await page.goto(chemin);
   await page.getByRole("button", { name: "Recevoir mon code" }).click({ timeout: 30_000 });
   await expect(page.getByLabel("Code reçu par e-mail")).toBeVisible();
+  await clavierOuvert(page, page.getByLabel("Code reçu par e-mail"));
   const mail = (await emailsVers(page, ADMIN)).filter((m) => /code d'accès au pilotage/.test(m.subject)).at(-1)!;
   await page.getByLabel("Code reçu par e-mail").fill(/(\d{6})/.exec(mail.text)![1]!);
   await page.getByRole("button", { name: "Ouvrir l'espace admin" }).click();
@@ -217,24 +254,56 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     expect((await emailsVers(page, negoceX.email)).at(-1)!.text).not.toMatch(/commission/i);
     const negoce = await browser.newPage();
     await negoce.goto(`/achat-groupe/${await jeton(negoceX.email)}`);
+    // Point 3 (Greg, 28 octobre) : le titre, la date limite et « Déposer mon offre » visibles sans défiler ; PDF et Excel sous le titre.
     await expect(negoce.getByRole("heading", { name: "Demande de prix groupée" })).toBeVisible();
-    await expect(negoce.getByText("Ardoise 32×22 Espagne 1er choix · 2\u00a0700 pièces")).toBeVisible();
-    await negoce.getByLabel("Prix de Ardoise 32×22 Espagne 1er choix").fill("1,10");
+    await expect(negoce.getByText(/^Réponse avant le /)).toBeInViewport();
+    await expect(negoce.getByRole("button", { name: "Déposer mon offre" })).toBeInViewport();
+    await expect(negoce.getByRole("link", { name: "Télécharger en PDF" })).toBeVisible();
+    const excelExporte = await telecharger(negoce, "Exporter en Excel");
+    expect(excelExporte.suggestedFilename()).toBe("demande-mobiiz.xlsx");
+    const pdfDemande = await telecharger(negoce, "Télécharger en PDF");
+    expect(pdfDemande.suggestedFilename()).toBe("demande-mobiiz.pdf");
+    await capture(negoce, projet, "4a-page-negoce-accueil");
+    // X répond par l'Excel rempli : un prix sur l'ardoise, les liteaux laissés vides, la ligne vide est en rouge et se règle sur place.
+    const rempli = await remplirExcel(await excelExporte.path(), { E2: 1.1 });
+    await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
+    await expect(negoce.getByRole("heading", { name: "Comment voulez-vous répondre ?" })).toBeVisible();
+    await capture(negoce, projet, "4b-trois-facons-de-repondre");
+    await negoce.getByRole("button", { name: /^Déposer l'Excel rempli/ }).click();
+    await negoce.getByLabel("Votre fichier Excel").setInputFiles(rempli);
+    await expect(negoce.getByText("1 ligne à compléter, en rouge.")).toBeVisible();
+    await expect(negoce.getByLabel("Prix de Ardoise 32×22 Espagne 1er choix")).toHaveValue("1,1");
+    await expect(negoce.getByText("Prix vide dans le fichier")).toBeVisible();
+    await capture(negoce, projet, "4c-excel-lu-ligne-vide");
+    // Le clavier ouvert (point 1) : le prix à corriger reste visible au-dessus du clavier, sur téléphone.
+    await clavierOuvert(negoce, negoce.getByLabel("Prix de Liteaux 27×38"));
     await negoce.getByRole("listitem").filter({ hasText: "Liteaux 27×38" }).getByRole("checkbox", { name: "Je ne fournis pas" }).check();
+    await negoce.getByRole("button", { name: "Continuer" }).click();
+    await expect(negoce.getByRole("heading", { name: "Votre offre" })).toBeVisible();
+    await expect(negoce.getByText("Total HT livré")).toBeVisible();
+    await expect(negoce.getByText("1 ligne non fournie", { exact: false })).toBeVisible();
     await negoce.getByText("Pour ouvrir un compte chez vous").click();
     await negoce.getByRole("checkbox", { name: "Kbis de moins de 3 mois" }).check();
     await negoce.getByRole("checkbox", { name: "RIB" }).check();
     await negoce.getByRole("radio", { name: "Paiement comptant au départ" }).check();
     await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
-    await capture(negoce, projet, "4a-page-negoce-ligne-par-ligne");
-    await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
-    await expect(negoce.getByText(/Votre offre est enregistrée/)).toBeVisible();
+    await capture(negoce, projet, "4d-recapitulatif");
+    await negoce.getByRole("button", { name: "Envoyer mon offre" }).click();
+    await expect(negoce.getByText(/^Offre envoyée le /)).toBeVisible();
+    await expect(negoce.getByRole("button", { name: "Déposer mon offre" })).toHaveCount(0);
+    await capture(negoce, projet, "4e-offre-envoyee");
+    // La confirmation par e-mail, avec le PDF de l'offre.
+    const confirmation = (await emailsVers(page, negoceX.email)).find((m) => m.subject.startsWith("Offre enregistrée"))!;
+    expect(confirmation.text).toContain("Total HT livré");
+    // Y dépose son devis PDF.
     await negoce.goto(`/achat-groupe/${await jeton(negoceY.email)}`);
-    await negoce.getByText("Plutôt votre devis PDF ?").click();
-    await negoce.getByLabel(/Ou votre devis PDF/).setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
-    await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
     await negoce.getByRole("button", { name: "Déposer mon offre" }).click();
-    await expect(negoce.getByText(/Votre offre est enregistrée/)).toBeVisible();
+    await negoce.getByRole("button", { name: /^Déposer mon devis PDF/ }).click();
+    await negoce.getByLabel("Votre devis PDF").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
+    await negoce.getByRole("button", { name: "Continuer" }).click();
+    await negoce.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
+    await negoce.getByRole("button", { name: "Envoyer mon offre" }).click();
+    await expect(negoce.getByText(/^Offre envoyée le /)).toBeVisible();
     await negoce.close();
     expect((await tache(page, new Date(new Date(achatA.reponseAvantLe).getTime() + 3_600_000))).analyses).toBe(1);
     await page.goto(`/achats-groupes/${besoinA}`);
@@ -243,6 +312,10 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     const adm = await admin(browser, `/admin/achats-groupes/${achatA.achatId}`);
     await expect(adm.page.getByText(/^2 sur 2 négoces ont répondu/)).toBeVisible();
     const offreX = adm.page.getByLabel(`Offre ${negoceX.nom}`);
+    // Le suivi par négoce : X a vu, téléchargé le PDF et l'Excel, répondu ; Y a vu et répondu.
+    await expect(offreX.getByLabel(`Suivi ${negoceX.nom}`)).toHaveText(/✓ Vu.*✓ PDF téléchargé.*✓ Excel téléchargé.*✓ Répondu/);
+    await expect(adm.page.getByLabel(`Suivi ${negoceY.nom}`)).toHaveText(/✓ Vu.*PDF téléchargé.*Excel téléchargé.*✓ Répondu/);
+    await expect(adm.page.getByLabel(`Suivi ${negoceY.nom}`)).not.toHaveText(/✓ PDF/);
     const offreY = adm.page.getByLabel(`Offre ${negoceY.nom}`);
     await expect(offreX.getByText("Non chiffrées : Liteaux 27×38")).toBeVisible();
     await expect(offreX.getByText("Pour commander, ouvre un compte : Kbis de moins de 3 mois, RIB, Paiement comptant au départ.")).toBeVisible();
@@ -276,7 +349,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(page.getByRole("alertdialog", { name: "Sortir de l'achat groupé" })).toBeVisible();
     await capture(page, projet, "6a-sortie-confirmer");
     await page.getByRole("button", { name: "Oui, sortir" }).click();
-    await expect(page.getByText("Tu es sorti de cet achat groupé")).toBeVisible();
+    await expect(page.getByText("Tu es sorti de cet achat groupé", { exact: true })).toBeVisible();
     await capture(page, projet, "6b-sortie");
   });
 });

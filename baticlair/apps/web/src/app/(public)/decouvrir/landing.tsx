@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DemoSurBouton } from "@/components/demo-guidee";
 import { CompteurInscrits } from "@/components/inviter";
-import { Apparition, CompteurVingt, PartageVitrine } from "@/components/landing-mouvement";
+import { Apparition, BoutonFixeInscription, CompteurVingt, PartageVitrine } from "@/components/landing-mouvement";
 import { EnteteVitrine, PiedVitrine } from "@/components/vitrine";
 import { ECART_PEINTURE, ECRANS, REGROUPEMENT_EXEMPLE } from "@/lib/landing";
 import { LectureAnimee } from "@/components/landing-lecture";
@@ -136,6 +136,73 @@ function CoupDeMain() {
   );
 }
 
+/** Le mécanisme en trois phrases, mot pour mot (Greg, 28 octobre 2026, point 4). */
+export const MECANISME = "Les artisans de ton secteur mettent leurs commandes en commun. Mobiiz demande un prix aux négoces pour le total. Tu commandes au meilleur prix reçu.";
+
+/** Un seul libellé pour tous les boutons d'inscription, avec « Sans carte bancaire » dessous (Greg, 28 octobre 2026, point 4). */
+export const INSCRIPTION = { bouton: "Créer mon compte gratuit", sous: "Sans carte bancaire" } as const;
+
+export function BoutonInscription() {
+  return (
+    <span className="mz-cta">
+      <Link href="/inscription" className="mz-bouton">
+        {INSCRIPTION.bouton}
+      </Link>
+      <span className="mz-cta-sous">{INSCRIPTION.sous}</span>
+    </span>
+  );
+}
+
+/** Trois questions franches, mot pour mot (Greg, 28 octobre 2026, point 4). Visibles d'un coup, sans accordéon. */
+export const TROIS_QUESTIONS = [
+  {
+    q: "Je suis obligé de commander ?",
+    r: "Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel. Tu ne paies jamais plus cher qu'aujourd'hui. Deux sorties possibles : chantier annulé ou aucune offre livrable à temps.",
+  },
+  { q: "Je garde mes négoces ?", r: "Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part." },
+  { q: "C'est gratuit ?", r: "Les listes, l'envoi à tes négoces et les achats groupés de ton secteur sont gratuits, sans limite de durée. Ton premier achat groupé est offert." },
+] as const;
+
+function TroisQuestions() {
+  return (
+    <section aria-labelledby="questions" className="mz-section" data-apparait="">
+      <Cote gauche="Trois questions franches" />
+      <h2 id="questions" className="mz-titre mz-h2">
+        Ce que tu te demandes.
+      </h2>
+      <dl className="mz-questions">
+        {TROIS_QUESTIONS.map((x) => (
+          <div key={x.q}>
+            <dt className="mz-titre">{x.q}</dt>
+            <dd>{x.r}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+/**
+ * « Par un artisan, pour les artisans » en pleine place (Greg, 28 octobre 2026, point 4) : Grégory, couvreur à Paimpol depuis
+ * plus de 20 ans ; l'emplacement de sa photo attend la sienne (rien d'inventé, aucune image d'ailleurs).
+ */
+function ParUnArtisan() {
+  return (
+    <section aria-labelledby="artisan" className="mz-section mz-artisan" data-apparait="">
+      <div className="mz-photo" aria-hidden="true">
+        <span>Photo de Grégory, à venir</span>
+      </div>
+      <div>
+        <Cote gauche="Qui est derrière" />
+        <h2 id="artisan" className="mz-titre mz-h2">
+          {ACCROCHE_APP}
+        </h2>
+        <p className="mz-artisan-texte">Grégory, couvreur à Paimpol depuis plus de 20 ans. {NOM_APP}, c&apos;est son outil de chantier, ouvert aux artisans du secteur.</p>
+      </div>
+    </section>
+  );
+}
+
 /** Les trois lignes du haut de page, mot pour mot (Greg, 26 octobre 2026). */
 const TROIS_LIGNES = ["Tu dis ce que tu vas commander (ton devis suffit).", "On l'additionne avec les artisans du coin.", "On négocie, tu achètes au prix des gros."] as const;
 
@@ -162,6 +229,9 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
               <h1 id="accroche" className="mz-titre mz-h1">
                 Achète tes matériaux <span className="mz-surligne">au prix des gros.</span>
               </h1>
+              {/* Greg, 28 octobre 2026, point 4 : le mécanisme, mot pour mot, visible sans défiler sur un iPhone SE ; « Arrête de
+                  perdre du temps sur tes quantitatifs. » vient APRÈS, jamais avant. */}
+              <p className="mz-mecanisme">{MECANISME}</p>
               <p className="mz-concept" style={{ fontWeight: 800 }}>
                 Arrête de perdre du temps sur tes quantitatifs.
               </p>
@@ -179,10 +249,8 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
               </ol>
               {couvreurs ? <p style={{ fontWeight: 700, marginBottom: 10 }}>Pour les couvreurs : ardoise, zinc, bois de charpente, isolation de toiture.</p> : null}
               {peintres ? <p style={{ fontWeight: 700, marginBottom: 10 }}>Pour les peintres : peinture, sous-couche, enduit, toile de verre.</p> : null}
-              <div className="mz-actions">
-                <Link href="/inscription" className="mz-bouton">
-                  Commencer gratuitement
-                </Link>
+              <div className="mz-actions" id="mz-cta-haut">
+                <BoutonInscription />
                 <DemoSurBouton className="mz-lien" />
               </div>
               {/* Point 34 : aucun montant ; la phrase entière est sur /tarifs, ici seulement l'essentiel. */}
@@ -214,6 +282,10 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
               </div>
             </div>
           </section>
+
+          <TroisQuestions />
+
+          <ParUnArtisan />
 
           {/* Un regroupement, marqué « exemple » jusqu'au premier vrai : seulement sur /couvreurs (27 octobre 2026 : l'accueil
               se lit vite ; le bloc peinture ne reste que sur /peintres). */}
@@ -291,10 +363,8 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
             <h2 id="commencer" className="mz-titre mz-h2" style={{ maxWidth: "14ch" }}>
               Ton prochain chantier, <span className="mz-surligne">au propre.</span>
             </h2>
-            <div className="mz-actions">
-              <Link href="/inscription" className="mz-bouton">
-                Commencer gratuitement
-              </Link>
+            <div className="mz-actions" id="mz-cta-bas">
+              <BoutonInscription />
             </div>
           </section>
 
@@ -317,6 +387,9 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
         </main>
 
         <PiedVitrine />
+        <BoutonFixeInscription haut="mz-cta-haut" bas="mz-cta-bas">
+          <BoutonInscription />
+        </BoutonFixeInscription>
       </div>
     </div>
   );
