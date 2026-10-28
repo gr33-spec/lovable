@@ -8,6 +8,7 @@ import { euros, jourFr, type DemandePerso, type LignesGroupables, type NegocesPr
 import { DeclarerBesoins, PrevenirNegoce, useModeRegroupement } from "@/components/negocie";
 import { useResource } from "@/lib/use-resource";
 import { AcheterEnGroupe } from "@/components/achat-groupe";
+import { useActionChantier } from "@/lib/actions-chantier";
 
 /**
  * LA DEMANDE PERSO, CÔTÉ ÉCRAN (Greg, 25 octobre 2026 : « le cœur, immédiat, sans cycle ») : après la validation du
@@ -16,15 +17,18 @@ import { AcheterEnGroupe } from "@/components/achat-groupe";
  * identité. Puis les réponses comparées LIVRAISON COMPRISE, « Commander » sur une réponse, le suivi Reçue → Confirmée →
  * Livrée. L'artisan ne choisit jamais la catégorie d'un négoce : le négoce la déclare lui-même.
  */
-export function DemandesPerso({ projectId, articles, canCreate, archived }: { projectId: string; articles: string[]; canCreate: boolean; archived: boolean }) {
+export function DemandesPerso({ projectId, articles, canCreate, archived, dejaEnvoye = false, principal = false }: { projectId: string; articles: string[]; canCreate: boolean; archived: boolean; dejaEnvoye?: boolean; principal?: boolean }) {
   const fetchNegoces = useCallback((signal: AbortSignal) => api<NegocesProposes>(`/v1/projects/${projectId}/demandes-perso/negoces`, { signal }), [projectId]);
   const fetchDemandes = useCallback((signal: AbortSignal) => api<DemandePerso[]>(`/v1/projects/${projectId}/demandes-perso`, { signal }), [projectId]);
   const { data: proposes } = useResource(fetchNegoces);
   const { data: demandes, reload } = useResource(fetchDemandes);
   const [ouvert, setOuvert] = useState(false);
   const [aPrevenir, setAPrevenir] = useState<string | null>(null);
-  // Achat groupé (27 octobre 2026) : deux sorties sous la liste ; le jaune va à « Acheter en groupe ».
   const mode = useModeRegroupement();
+  // Point 8 (Greg, 28 octobre 2026) : « Demander les prix à mes négoces » disparaît une fois la demande envoyée ;
+  // « Ajouter un négoce » passe dans le menu « ··· » du chantier.
+  const envoye = dejaEnvoye || (demandes?.length ?? 0) > 0;
+  useActionChantier("ajouter-negoce", "Ajouter un négoce", () => setOuvert(true), !archived && canCreate && !dejaEnvoye && (demandes?.length ?? 0) > 0);
 
   return (
     <section aria-label="Mes demandes de prix" className="flex flex-col gap-3">
@@ -35,11 +39,11 @@ export function DemandesPerso({ projectId, articles, canCreate, archived }: { pr
       {!archived && canCreate && proposes ? (
         ouvert ? (
           <EnvoiDemande projectId={projectId} articles={articles} proposes={proposes} onEnvoye={(id) => (setOuvert(false), setAPrevenir(id), reload())} onFermer={() => setOuvert(false)} />
-        ) : (
-          <Button variant={mode === "automatique" ? "secondary" : "primary"} onClick={() => setOuvert(true)} className="w-full">
+        ) : !envoye ? (
+          <Button variant={mode !== "automatique" || principal ? "primary" : "secondary"} onClick={() => setOuvert(true)} className="w-full">
             <Send size={18} aria-hidden="true" /> {mode === "automatique" ? "Demander les prix à mes négoces" : "Envoyer à mes négoces"}
           </Button>
-        )
+        ) : null
       ) : null}
     </section>
   );

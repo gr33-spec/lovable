@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight, Camera, FileUp, Handshake, PencilLine, Users } from "lucide-react";
 import { DemoSurBouton } from "@/components/demo-guidee";
 import { CompteurInscrits } from "@/components/inviter";
 import { Apparition, BoutonFixeInscription, CompteurVingt, PartageVitrine } from "@/components/landing-mouvement";
@@ -22,7 +23,7 @@ import { ACCROCHE_APP, NOM_APP } from "@/lib/nom";
  */
 
 /** Une vraie capture de l'app, entière (jamais coupée), en AVIF et WebP à deux largeurs. */
-function Ecran({ nom, alt }: { nom: string; alt: string }) {
+function Ecran({ nom, alt, prioritaire = false }: { nom: string; alt: string; prioritaire?: boolean }) {
   const srcset = (ext: string) => `/landing/${nom}-390.${ext} 390w, /landing/${nom}-786.${ext} 786w`;
   const sizes = "(min-width: 1024px) 286px, (min-width: 768px) 246px, 72vw";
   return (
@@ -30,7 +31,7 @@ function Ecran({ nom, alt }: { nom: string; alt: string }) {
       <picture>
         <source type="image/avif" srcSet={srcset("avif")} sizes={sizes} />
         <source type="image/webp" srcSet={srcset("webp")} sizes={sizes} />
-        <img src={`/landing/${nom}-390.webp`} alt={alt} width={786} height={1704} loading="lazy" decoding="async" />
+        <img src={`/landing/${nom}-390.webp`} alt={alt} width={786} height={1704} loading={prioritaire ? "eager" : "lazy"} decoding="async" />
       </picture>
     </div>
   );
@@ -112,25 +113,40 @@ export const COUP_DE_MAIN = {
   ],
 } as const;
 
+/** Les trois façons, en cartes (maquette de Greg, 28 octobre 2026) : l'icône, le nom du choix dans l'app, sa phrase. */
+const CHOIX_LISTE = [
+  { icone: FileUp, titre: "Depuis mon devis — on t'avance" },
+  { icone: Camera, titre: "Photo de ma liste" },
+  { icone: PencilLine, titre: "Je la note moi-même" },
+] as const;
+
 function CoupDeMain() {
   return (
     <section aria-labelledby="coup-de-main" className="mz-section" data-apparait="">
-      <Cote gauche="Ta liste" />
-      <h2 id="coup-de-main" className="mz-titre mz-h2">
+      <h2 id="coup-de-main" className="mz-titre mz-h2 mz-souligne">
         {COUP_DE_MAIN.titre}
       </h2>
       <p className="mz-gris" style={{ marginTop: 12, marginBottom: 20 }}>
         {COUP_DE_MAIN.sous}
       </p>
-      <ol className="mz-trois" aria-label="Trois façons de faire ta liste">
-        {COUP_DE_MAIN.choix.map((c, i) => (
-          <li key={c}>
-            <span className="mz-trois-n mz-num" aria-hidden="true">
-              {i + 1}
-            </span>
-            {c}
-          </li>
-        ))}
+      <ol className="mz-choix" aria-label="Trois façons de faire ta liste">
+        {COUP_DE_MAIN.choix.map((c, i) => {
+          const Icone = CHOIX_LISTE[i]!.icone;
+          return (
+            <li key={c}>
+              <span className="mz-icone" aria-hidden="true">
+                <Icone size={26} strokeWidth={2} />
+              </span>
+              <span className="mz-choix-texte">
+                <strong>{CHOIX_LISTE[i]!.titre}</strong>
+                <span>{c}</span>
+              </span>
+              <Link href="/inscription" className="mz-fleche" aria-label={`${CHOIX_LISTE[i]!.titre} : ${INSCRIPTION.bouton}`}>
+                <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
+              </Link>
+            </li>
+          );
+        })}
       </ol>
     </section>
   );
@@ -203,8 +219,6 @@ function ParUnArtisan() {
   );
 }
 
-/** Les trois lignes du haut de page, mot pour mot (Greg, 26 octobre 2026). */
-const TROIS_LIGNES = ["Tu dis ce que tu vas commander (ton devis suffit).", "On l'additionne avec les artisans du coin.", "On négocie, tu achètes au prix des gros."] as const;
 
 /**
  * `cible` : /couvreurs (la couverture d'abord, sans le bloc peinture) ou /peintres (le bloc peinture en pleine place, juste
@@ -235,18 +249,6 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
               <p className="mz-concept" style={{ fontWeight: 800 }}>
                 Arrête de perdre du temps sur tes quantitatifs.
               </p>
-              {/* Le concept en trois lignes numérotées (Greg, 26 octobre 2026), sans paragraphe autour (Greg, 27 octobre 2026 :
-                  « simplifier la landing page, il y a beaucoup trop de lecture »). */}
-              <ol className="mz-trois" aria-label="En trois étapes">
-                {TROIS_LIGNES.map((l, i) => (
-                  <li key={l}>
-                    <span className="mz-trois-n mz-num" aria-hidden="true">
-                      {i + 1}
-                    </span>
-                    {l}
-                  </li>
-                ))}
-              </ol>
               {couvreurs ? <p style={{ fontWeight: 700, marginBottom: 10 }}>Pour les couvreurs : ardoise, zinc, bois de charpente, isolation de toiture.</p> : null}
               {peintres ? <p style={{ fontWeight: 700, marginBottom: 10 }}>Pour les peintres : peinture, sous-couche, enduit, toile de verre.</p> : null}
               <div className="mz-actions" id="mz-cta-haut">
@@ -259,7 +261,24 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
               </p>
             </div>
 
+            {/* Maquette de Greg (28 octobre 2026) : le vrai écran de l'app dans un téléphone, à côté de l'accroche. */}
+            <div className="mz-hero-tel">
+              <Ecran nom={ECRANS.depot.nom} alt={ECRANS.depot.alt} prioritaire />
+            </div>
+          </section>
+
+          {/* « D'un devis ou une simple photo… à une liste claire » : le vrai devis DE00000071 lu ligne par ligne. */}
+          <section aria-labelledby="du-devis" className="mz-section mz-du-devis" data-apparait="">
+            <h2 id="du-devis" className="mz-titre mz-h2 mz-souligne">
+              D&apos;un devis ou d&apos;une simple photo…
+            </h2>
             <LectureAnimee />
+            <h2 className="mz-titre mz-h2" style={{ marginTop: 28 }}>
+              … à une liste de matériaux claire et rangée.
+            </h2>
+            <p className="mz-gris" style={{ marginTop: 12, maxWidth: "44ch" }}>
+              {NOM_APP} sort ton quantitatif ligne par ligne. Tu vérifies, tu ajustes si besoin.
+            </p>
           </section>
 
           {/* /peintres : le bloc peinture juste sous l'accroche (Greg, 26 octobre 2026), puis le coup de main (point 30). */}
@@ -267,16 +286,31 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
 
           <CoupDeMain />
 
-          {/* La phrase clé et le compteur 1 → 20. */}
+          {/* Achats groupés, la force du collectif (maquette de Greg, 28 octobre 2026) : la phrase clé, mot pour mot, puis deux
+              cartes : le compteur 1 → 20 et les chasseurs d'opportunités. */}
           <section aria-labelledby="vingt" className="mz-section mz-vingt" data-apparait="">
             <span className="mz-trame" aria-hidden="true" />
             <div className="mz-colonne">
-              <Cote gauche="1" droite="20 artisans" />
-              <CompteurVingt />
+              <p className="mz-kicker mz-etiq">Achats groupés, la force du collectif</p>
               <h2 id="vingt" className="mz-titre mz-h2 mz-phrase">
                 <span>Seul, tu es un client parmi d&apos;autres.</span> À vingt, vous êtes le plus gros client du département.
               </h2>
-              <p className="mz-chasse">Des chasseurs d&apos;opportunités négocient pour toi.</p>
+              <div className="mz-collectif">
+                <div className="mz-carte">
+                  <span className="mz-icone" aria-hidden="true">
+                    <Users size={26} strokeWidth={2} />
+                  </span>
+                  <CompteurVingt />
+                  <p className="mz-gris">Les artisans du secteur mettent leurs commandes en commun.</p>
+                </div>
+                <div className="mz-carte">
+                  <span className="mz-icone" aria-hidden="true">
+                    <Handshake size={26} strokeWidth={2} />
+                  </span>
+                  <p className="mz-chasse">Des chasseurs d&apos;opportunités négocient pour toi.</p>
+                  <p className="mz-gris">Ils demandent un prix aux négoces pour le total du secteur.</p>
+                </div>
+              </div>
               <div className="mz-inscrits">
                 <CompteurInscrits />
               </div>
@@ -333,14 +367,15 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
             <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
               {ETAPES.map((e, i) => (
                 <li key={e.titre} className="mz-etape" data-inverse={i === 1 ? "" : undefined} data-apparait="">
-                  <span className="mz-titre mz-etape-no mz-num" aria-hidden="true">
-                    0{i + 1}
-                  </span>
                   <div className="mz-etape-texte">
+                    <span className="mz-rond mz-num" aria-hidden="true">
+                      {i + 1}
+                    </span>
                     <h3 className="mz-titre">
                       <span className="sr-only">{i + 1}. </span>
                       {e.titre}
                     </h3>
+                    <p>{e.texte}</p>
                   </div>
                   <Ecran nom={e.ecran.nom} alt={e.ecran.alt} />
                 </li>
@@ -370,7 +405,7 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
 
           <section aria-labelledby="negoces" className="mz-negoce" data-apparait="">
             <div>
-              <p className="mz-etiq" style={{ color: "var(--mz-jaune)", marginBottom: 10 }}>
+              <p className="mz-etiq" style={{ marginBottom: 10 }}>
                 Vous êtes négoce ?
               </p>
               <h2 id="negoces" className="mz-titre mz-h2">
@@ -380,8 +415,8 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
                 Des demandes prêtes à chiffrer, des volumes groupés.
               </p>
             </div>
-            <Link href="/negoce/connexion" className="mz-lien">
-              Accès négoce
+            <Link href="/negoce/connexion" className="mz-bouton" data-blanc="">
+              Accès négoce <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
             </Link>
           </section>
         </main>

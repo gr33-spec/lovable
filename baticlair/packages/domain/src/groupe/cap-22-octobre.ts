@@ -174,10 +174,10 @@ export function suiviDuChantier(e: EtatDuChantier): Suivi {
       ? { etape, etapes, phrase: "Ta liste est là.", aFaire: `Règle ${pluriel(e.lignesARegler, "ligne orange", "lignes orange")}, puis envoie-la à tes négoces.` }
       : { etape, etapes, phrase: "Ta liste est prête.", aFaire: `Envoie-la à tes négoces, ou ajoute-la ${auNom()}.` };
   }
-  if (etape === 1) return { etape, etapes, phrase: `Demande partie chez ${pluriel(e.demandes, "négoce", "négoces")}. On attend leurs prix.`, aFaire: null };
+  if (etape === 1) return { etape, etapes, phrase: `Demande envoyée à ${pluriel(e.demandes, "négoce", "négoces")}. Tu seras prévenu à chaque réponse.`, aFaire: null };
   if (etape === 2) {
     const meilleur = e.meilleur ? ` Meilleur prix : ${e.meilleur}.` : "";
-    return { etape, etapes, phrase: `${pluriel(e.devis, "devis reçu", "devis reçus")} sur ${pluriel(e.demandes, "demande", "demandes")}.${meilleur}`, aFaire: "Compare et retiens l'offre qui te va." };
+    return { etape, etapes, phrase: `${pluriel(e.devis, "devis reçu", "devis reçus")} sur ${pluriel(e.demandes, "demande", "demandes")}.${meilleur}`, aFaire: "Ouvre les devis et retiens le négoce de ton choix." };
   }
   return { etape, etapes, phrase: "C'est commandé.", aFaire: "Dis « Livré » quand c'est arrivé." };
 }

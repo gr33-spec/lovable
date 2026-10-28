@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Check, ChevronLeft, ChevronRight, ClipboardList, MessageSquare, Phone, Plus, Search, ShoppingCart, Users, X } from "lucide-react";
+import { Bell, Check, ChevronLeft, ChevronRight, ClipboardList, MessageSquare, MoreHorizontal, Phone, Plus, Search, ShoppingCart, Users, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useLienInvitation } from "@/components/inviter";
 import { Button, ButtonLink, Card, Field, INPUT } from "@/components/ui";
@@ -649,6 +649,10 @@ export function DetailAchatGroupe({ id }: { id: string }) {
   const [pending, setPending] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
+  // Point 8 (Greg, 28 octobre 2026) : un seul bouton principal par étape ; le reste dans le menu « ··· » en haut à droite.
+  const [menu, setMenu] = useState(false);
+  const [listeOuverte, setListeOuverte] = useState(false);
+  const [inviter, setInviter] = useState(false);
   if (error) return <p role="alert" className={ALERTE}>{messageErreur(error)}</p>;
   if (!d) return null;
 
@@ -672,10 +676,34 @@ export function DetailAchatGroupe({ id }: { id: string }) {
 
   const r = d.resultat;
   const enAttente = d.etat === "seul" || d.etat === "regroupe" || d.etat === "regroupe_total";
+  const elements: { label: string; run: () => void }[] = [];
+  if (d.actions.modifier) elements.push({ label: "Modifier mes quantités", run: () => (setListeOuverte(true), setModifier(Object.fromEntries(d.lignes.map((l) => [l.id, String(l.quantite)])))) });
+  if (enAttente) elements.push({ label: "Inviter un collègue", run: () => setInviter(true) });
+  if (d.actions.livre && probleme === null) elements.push({ label: "Signaler un problème", run: () => setProbleme("") });
+  if (d.actions.retirer) elements.push({ label: "Retirer ma liste", run: () => setConfirmer("retirer") });
+  if (d.actions.sortir) elements.push({ label: "Sortir de l'achat groupé", run: () => setSortie(true) });
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-[1.08] font-extrabold tracking-[-0.03em]">{d.titreAchat}</h1>
+        <div className="flex items-start gap-2">
+          <h1 className="grow text-[26px] leading-[1.08] font-extrabold tracking-[-0.03em]">{d.titreAchat}</h1>
+          {elements.length ? (
+            <button type="button" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Plus d'actions sur l'achat groupé" className="pressable flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface active:bg-ground">
+              <MoreHorizontal size={20} aria-hidden="true" />
+            </button>
+          ) : null}
+        </div>
+        {menu ? (
+          <ul role="menu" aria-label="Actions sur l'achat groupé" className="animate-rise flex flex-col divide-y divide-line rounded-xl border border-line bg-surface px-4 shadow-card">
+            {elements.map((e) => (
+              <li key={e.label} role="none">
+                <button type="button" role="menuitem" onClick={() => (setMenu(false), e.run())} className="flex min-h-13 w-full items-center text-left text-[16px] font-semibold">
+                  {e.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
         <p className="text-[16px] text-muted">
           {d.lignes.length} ligne{d.lignes.length > 1 ? "s" : ""} · {d.commune}
           {d.offert ? " · offert" : ""}
@@ -721,14 +749,9 @@ export function DetailAchatGroupe({ id }: { id: string }) {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="secondary" pending={pending === "livre"} onClick={() => void geste("livre", `/v1/achats-groupes/${id}/livre`, {}, () => setFait("Merci, c'est noté : livré."))}>
-              <Check size={18} aria-hidden="true" /> Livré
-            </Button>
-            <Button variant="secondary" onClick={() => setProbleme("")}>
-              Problème
-            </Button>
-          </div>
+          <Button pending={pending === "livre"} onClick={() => void geste("livre", `/v1/achats-groupes/${id}/livre`, {}, () => setFait("Merci, c'est noté : livré."))}>
+            <Check size={18} aria-hidden="true" /> Livré
+          </Button>
         )
       ) : null}
 
@@ -740,9 +763,9 @@ export function DetailAchatGroupe({ id }: { id: string }) {
 
       {enAttente && d.negoces.some((n) => !n.prevenu) ? <PrevenirDepuisDetail id={id} /> : null}
 
-      <details open={!!modifier} className="rounded-2xl bg-surface p-4 shadow-card">
+      <details open={listeOuverte || !!modifier} onToggle={(e) => setListeOuverte((e.target as HTMLDetailsElement).open)} className="rounded-2xl bg-surface p-4 shadow-card">
         <summary aria-label="Ma liste" className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[16px] font-extrabold">
-          Ma liste
+          {`Ma liste · ${d.lignes.length} ligne${d.lignes.length > 1 ? "s" : ""}`}
           <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
         </summary>
         <section aria-label="Ma liste" className="flex flex-col gap-2 pt-2">
@@ -769,10 +792,6 @@ export function DetailAchatGroupe({ id }: { id: string }) {
                 Enregistrer
               </Button>
             </div>
-          ) : d.actions.modifier ? (
-            <button type="button" onClick={() => setModifier(Object.fromEntries(d.lignes.map((l) => [l.id, String(l.quantite)])))} className={LIEN_TEXTE}>
-              Modifier mes quantités
-            </button>
           ) : null}
           <p className="pt-2 text-[14px] text-muted">
             Tes négoces :{" "}
@@ -830,21 +849,7 @@ export function DetailAchatGroupe({ id }: { id: string }) {
           {erreur}
         </p>
       ) : null}
-      {!confirmer && !sortie && (d.actions.retirer || d.actions.sortir) ? (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-          {d.actions.retirer ? (
-            <button type="button" onClick={() => setConfirmer("retirer")} className="min-h-11 text-[15px] font-semibold text-muted underline">
-              Retirer ma liste
-            </button>
-          ) : null}
-          {d.actions.sortir ? (
-            <button type="button" onClick={() => setSortie(true)} className="min-h-11 text-[15px] font-semibold text-muted underline">
-              Sortir de l&apos;achat groupé
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-      {enAttente ? <InviteLe phrase={d.invite} libelle={d.metier.toLowerCase()} /> : null}
+      {enAttente && inviter ? <InviteLe phrase={d.invite} libelle={d.metier.toLowerCase()} /> : null}
     </div>
   );
 }
@@ -1063,22 +1068,20 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
         </ButtonLink>
       </div>
     );
-  if (cochees === null)
+  // Point 8 (Greg, 28 octobre 2026) : une seule suggestion, la carte jaune ; « Acheter en groupe » (doublon) disparaît.
+  // Elle ne vient que si un achat groupé de son métier est ouvert dans son secteur, ou si ses quantités en justifient un.
+  if (cochees === null) {
+    const ouvert = data.achatsOuverts[0] ?? null;
+    if (!data.suggestion && !ouvert) return null;
     return (
-      <div className="flex flex-col gap-3">
-        {data.suggestion ? (
-          <div className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
-            <p className="text-[16px] font-bold">{data.suggestion.phrase}</p>
-            <Button onClick={() => setCochees(data.suggestion!.keys)}>
-              <Users size={18} aria-hidden="true" /> Mettre en achat groupé
-            </Button>
-          </div>
-        ) : null}
-        <Button variant={data.suggestion ? "secondary" : "primary"} onClick={() => setCochees([])} className="w-full">
-          <Users size={18} aria-hidden="true" /> Acheter en groupe
+      <div className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
+        <p className="text-[16px] font-bold">{data.suggestion ? data.suggestion.phrase : `Achat groupé ouvert dans ton secteur : ${ouvert!.titre}.`}</p>
+        <Button onClick={() => setCochees(data.suggestion ? data.suggestion.keys : [])}>
+          <Users size={18} aria-hidden="true" /> Mettre en achat groupé
         </Button>
       </div>
     );
+  }
   const tout = rattachables.every((l) => cochees.includes(l.key));
   const achatChoisi = data.achatsOuverts.find((a) => a.id === achat);
   return (

@@ -47,8 +47,18 @@ describe("isolation entre entreprises, toutes les routes", () => {
     await a.agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
     const suppliers = (await a.agent.get("/v1/suppliers")).body.items as { id: string }[];
     const request = (await a.agent.post(`/v1/projects/${demo.projectId}/price-requests`).send({ supplierIds: suppliers.map((x) => x.id) }).expect(201)).body as { recipients: { id: string }[] };
-    await a.agent.post(`/v1/demo/recipients/${request.recipients[0]!.id}/quote`).expect(201);
-    await a.agent.post(`/v1/price-request-recipients/${request.recipients[0]!.id}/analysis`).expect(201);
+    const recu = (await a.agent.post(`/v1/demo/recipients/${request.recipients[0]!.id}/quote`).expect(201)).body as { recipients: { id: string; document: { id: string } | null }[] };
+    // Une lecture d'avant le 28 octobre 2026 (point 7 : plus de nouvelle lecture IA), toujours visible et corrigeable.
+    await ctx.prisma.supplierOffer.create({
+      data: {
+        companyId: a.companyId,
+        documentId: recu.recipients.find((r) => r.id === request.recipients[0]!.id)!.document!.id,
+        promptId: "offre",
+        promptVersion: 1,
+        model: "ancien",
+        lines: { create: [{ position: 1, kind: "main", designation: "Ardoise", requestIndex: 0 }] },
+      },
+    });
     const q = (
       await a.agent
         .post("/v1/quantitatifs")

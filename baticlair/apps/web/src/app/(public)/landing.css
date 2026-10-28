@@ -1029,3 +1029,190 @@
 .mz-negoce-acces {
   padding: 26px 22px;
 }
+
+/*
+ * MAQUETTE DE GREG (28 octobre 2026, « J'adore ça ! ») : même direction artistique, des cartes blanches à icône dans un
+ * carré jaune pâle, une flèche ronde jaune, les vrais écrans dans un téléphone, des étapes numérotées dans un rond jaune,
+ * la carte négoce claire et le pied sombre. Aucune photo tant que Greg ne fournit pas les siennes.
+ */
+.mz-souligne::after {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin-top: 14px;
+  border-radius: 2px;
+  background: var(--mz-jaune);
+}
+.mz-hero-tel {
+  display: flex;
+  justify-content: center;
+}
+.mz-hero-tel .mz-ecran {
+  width: min(250px, 66vw);
+  transform: rotate(-4deg);
+}
+@media (min-width: 1024px) {
+  .mz-hero-tel {
+    padding-top: 24px;
+  }
+  .mz-hero-tel .mz-ecran {
+    width: 300px;
+  }
+}
+.mz-icone {
+  display: inline-flex;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mz-rayon);
+  background: #fff3c2;
+  color: var(--mz-encre);
+}
+.mz-choix {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 1024px) {
+  .mz-choix {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.mz-choix li {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  border-radius: var(--mz-rayon);
+  background: var(--mz-blanc);
+  box-shadow: var(--mz-ombre);
+}
+.mz-choix-texte {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.42;
+  color: var(--mz-gris);
+}
+.mz-choix-texte strong {
+  color: var(--mz-encre);
+  font-size: 16px;
+  line-height: 1.25;
+}
+.mz-fleche {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--mz-jaune);
+  color: var(--mz-encre);
+}
+.mz-fleche:active {
+  transform: translateY(1px);
+}
+.mz-du-devis .mz-lecture {
+  margin-top: 24px;
+}
+.mz-collectif {
+  display: grid;
+  gap: 14px;
+  margin: 28px 0 8px;
+}
+@media (min-width: 768px) {
+  .mz-collectif {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.mz-collectif .mz-carte {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 20px;
+  border-radius: var(--mz-rayon);
+  background: var(--mz-blanc);
+  box-shadow: var(--mz-ombre);
+}
+.mz-collectif .mz-chasse {
+  margin: 0;
+}
+.mz-collectif .mz-compteur-n {
+  font-size: clamp(72px, 20vw, 120px);
+}
+.mz-rond {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: var(--mz-jaune);
+  font-size: 20px;
+  font-weight: 800;
+}
+.mz-etape {
+  margin-top: 14px;
+  padding: 22px;
+  border-top: 0;
+  border-radius: var(--mz-rayon);
+  background: var(--mz-blanc);
+  box-shadow: var(--mz-ombre);
+}
+@media (min-width: 768px) {
+  .mz-etape,
+  .mz-etape[data-inverse] {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+  .mz-etape[data-inverse] .mz-ecran {
+    order: 0;
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .mz-etape[data-inverse] .mz-etape-texte {
+    grid-column: auto;
+  }
+}
+@media (min-width: 1024px) {
+  .mz-etape,
+  .mz-etape[data-inverse] {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+.mz-etape .mz-ecran {
+  justify-self: center;
+}
+.mz-negoce {
+  background: #e9edf2;
+  color: var(--mz-encre);
+}
+.mz-negoce p {
+  color: var(--mz-gris);
+}
+.mz-negoce .mz-etiq {
+  color: var(--mz-encre) !important;
+}
+.mz-bouton[data-blanc] {
+  gap: 10px;
+  justify-self: start;
+  background: var(--mz-blanc);
+  box-shadow: var(--mz-ombre);
+}
+.mz-pied {
+  margin: 0 -16px;
+  padding: 36px 16px 48px;
+  border-top: 0;
+  border-radius: var(--mz-rayon) var(--mz-rayon) 0 0;
+  background: var(--mz-encre);
+  color: rgba(255, 255, 255, 0.66);
+}
+.mz-pied a {
+  color: var(--mz-blanc);
+}

@@ -213,3 +213,17 @@ Greg, après l'achat groupé v2 : « C'est pas assez intuitif ! J'ai du mal à c
 | Page du négoce (`achat-groupe/[jeton]`) | « À savoir » (cinq puces), les lignes, délai, PDF, le cadre des conditions d'ouverture (sept cases), la case, le bouton. | L'écran, c'est la liste : un prix par ligne (bordure verte dès qu'une ligne est répondue, « 1 / 2 »), puis « Déposer mon offre ». Derrière un tap : « Les règles de cette demande » (dans la carte du haut), « Plutôt votre devis PDF ? » (PDF et délai), « Pour ouvrir un compte chez vous » (résumé « 3 conditions cochées, une fois pour toutes »). |
 
 Ce qui n'a pas bougé : les mots validés (phrase d'engagement, règles, motifs de sortie, « Je ne fournis pas », titres), les routes, l'API, le domaine, les e-mails. e2e `achat-groupe.spec.ts` et la recette en ligne suivent les étapes (« Continuer »).
+
+## 7. Un seul bouton principal par étape (28 octobre 2026)
+
+Greg, points 7 et 8 : « on s'y perd ». Sur le chantier, l'étape décide du seul bouton jaune ; le reste passe dans « ··· » en haut à droite.
+
+| Étape | Bouton principal | Ce qu'on voit |
+| --- | --- | --- |
+| Liste prête | « Demander les prix à mes négoces » | Une seule suggestion d'achat groupé, si elle a un sens |
+| En attente | aucun | « Demande envoyée à N négoces. Tu seras prévenu à chaque réponse. » |
+| Devis reçus | « Voir les devis reçus » | Feuille plein écran, une carte par négoce, « Ouvrir le devis (PDF) », « Je retiens ce négoce » |
+| Commandé | aucun | « Commandé chez X. », le devis à rouvrir |
+
+Les devis des négoces de l'artisan ne sont plus lus par l'IA. La landing suit la maquette de Greg du 28 octobre (téléphone avec le vrai écran, cartes à icône, étapes numérotées, pied sombre), sans photo inventée.
+

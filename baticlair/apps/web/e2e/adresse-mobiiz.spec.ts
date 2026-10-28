@@ -150,14 +150,26 @@ test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mai
   const r1 = await emailRecu(page, `${nom}+r${etiquette}@mobiiz.test`, "Re: votre demande", { attachmentsBase64: [{ filename: "devis-dupont.pdf", contentType: "application/pdf", contentBase64: pdf }] });
   expect(r1).toMatchObject({ traite: true, rattache: true });
   await page.goto(`/chantiers/${projectId}#fournisseurs`);
-  const recus = page.getByRole("region", { name: "Réponses reçues par e-mail" });
-  await expect(recus.getByText("Négoce Dupont t'a répondu par e-mail")).toBeVisible();
-  await expect(recus.getByText("Bonjour, voici notre devis. 1 200 € HT livré.")).toBeVisible();
-  await expect(recus.getByRole("button", { name: /devis-dupont\.pdf/ })).toBeVisible();
-  await expect(recus.getByText("devis reçu")).toBeVisible();
-  // La carte du négoce est passée « reçue » : son devis est là, comme déposé à la main.
+  // Points 7 et 8 (Greg, 28 octobre 2026) : plus de lecture IA ; un seul bouton principal, « Voir le devis reçu ».
   const fournisseurs = page.getByRole("region", { name: "Fournisseurs" });
-  await expect(fournisseurs.getByText(/Devis reçu|Reçu/).first()).toBeVisible();
+  await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("1 devis reçu sur 1 demande.");
+  await expect(page.getByText(/n'a pas pu être lu/)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^(Réessayer|Comparer les offres|Voir l'offre reçue)$/ })).toHaveCount(0);
+  await expect(fournisseurs.getByText("Devis reçu").first()).toBeVisible();
+  await fournisseurs.getByRole("button", { name: "Voir le devis reçu" }).click();
+  const feuille = page.getByRole("dialog", { name: "Devis reçu" });
+  const carte = feuille.getByLabel("Devis de Négoce Dupont");
+  // « Négoce Dupont t'a répondu · 28 oct. à 8 h 31 », la première ligne du message, sans l'objet ni de nom de fichier.
+  await expect(carte.getByText(/^Négoce Dupont t'a répondu · \d+ \S+ à \d+ h \d{2}$/)).toBeVisible();
+  await expect(carte.getByText("Bonjour, voici notre devis. 1 200 € HT livré.")).toBeVisible();
+  await expect(carte.getByText(/Re: votre demande|devis-dupont\.pdf/)).toHaveCount(0);
+  await carte.getByRole("button", { name: "Ouvrir le devis (PDF)" }).click();
+  await expect(page.getByRole("dialog", { name: /^Devis Négoce Dupont/ })).toBeVisible();
+  await page.getByRole("button", { name: "Fermer le document" }).click();
+  // « Je retiens ce négoce » : la demande passe à « Commandé », sans bouton principal.
+  await carte.getByRole("button", { name: "Je retiens ce négoce" }).click();
+  await expect(fournisseurs.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce Dupont.");
+  await expect(fournisseurs.getByRole("button", { name: /^Voir les? devis reçus?$/ })).toHaveCount(0);
   // Un e-mail sans étiquette ni repère : « Mes reçus », à rattacher.
   const r2 = await emailRecu(page, `${nom}@mobiiz.test`, "Notre offre spéciale", { from: "Négoce Dupont <ventes@dupont.example>" });
   expect(r2).toMatchObject({ traite: true, rattache: false });

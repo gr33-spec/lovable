@@ -179,17 +179,19 @@ await etape("Cas 2 : trois choix pour la liste", a, async () => {
   await voir(a.getByText("Je la note moi-même"));
 });
 if (SANS_IA)
-  await etape("Cas 2 : liste notée à la main (sans IA), « Acheter en groupe »", a, async () => {
+  await etape("Cas 2 : liste notée à la main (sans IA), « Mettre en achat groupé »", a, async () => {
+    // Point 1 (28 octobre 2026) : « Écris ta liste » en plein écran, une ligne par Entrée, puis « Terminé ».
     await a.getByRole("button", { name: /Je la note moi-même/ }).click();
-    await a.getByLabel("Matériau 1").fill("Ardoise naturelle 32×22 Espagne 1er choix");
-    await a.getByLabel("Quantité 1").fill("1800");
-    await a.getByRole("button", { name: "+ Ajouter une ligne" }).click();
-    await a.getByLabel("Matériau 2").fill("Liteaux 27×38 traités classe 2");
-    await a.getByLabel("Quantité 2").fill("200");
-    await a.getByLabel("Unité 2").fill("m");
-    await a.getByRole("button", { name: "Créer ma liste" }).click();
+    const ecran = a.getByRole("dialog", { name: "Écris ta liste" });
+    const champ = ecran.getByLabel("Matériau et quantité");
+    await champ.fill("Ardoise naturelle 32×22 Espagne 1er choix, 1800 pièces");
+    await champ.press("Enter");
+    await champ.fill("Liteaux 27×38 traités classe 2, 200 m");
+    await champ.press("Enter");
+    await ecran.getByRole("button", { name: "Terminé" }).click();
     await a.waitForURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60000 });
-    const bouton = a.getByRole("button", { name: /^(Mettre en achat groupé|Acheter en groupe)$/ });
+    // Point 8 : une seule suggestion d'achat groupé (« Acheter en groupe » en doublon a disparu).
+    const bouton = a.getByRole("button", { name: "Mettre en achat groupé" });
     await voir(bouton, 60000);
     await bouton.first().scrollIntoViewIfNeeded();
     const suggestion = a.getByText(/mets-les en achat groupé pour payer moins cher\.$/);
@@ -215,7 +217,7 @@ else
 let besoinA = null;
 let achatA = null;
 await etape("Cas 2 : « Mettre en achat groupé », « Tout cocher », engagement", a, async () => {
-  await a.getByRole("button", { name: /^(Mettre en achat groupé|Acheter en groupe)$/ }).first().click();
+  await a.getByRole("button", { name: "Mettre en achat groupé" }).first().click();
   const groupe = a.getByLabel("Acheter en groupe");
   await groupe.getByRole("button", { name: "Tout cocher" }).click();
   // Ultra intuitif (27 octobre) : une question par écran, « Continuer » entre chaque.
@@ -383,13 +385,15 @@ await etape("Cas 5 : « transmettre mes coordonnées » (e-mail réel au négoce
 });
 await etape("Cas 6 : A sort, « Mon client a annulé le chantier »", a, async () => {
   await a.goto(`${BASE}/achats-groupes/${besoinA}`, { waitUntil: "networkidle" });
-  await a.getByRole("button", { name: "Sortir de l'achat groupé" }).click();
+  // Point 8 (28 octobre 2026) : les sorties sont dans le menu « ··· » en haut à droite.
+  await a.getByRole("button", { name: "Plus d'actions sur l'achat groupé" }).click();
+  await a.getByRole("menuitem", { name: "Sortir de l'achat groupé" }).click();
   await a.getByRole("button", { name: "Mon client a annulé le chantier" }).click();
   await voir(a.getByRole("alertdialog", { name: "Sortir de l'achat groupé" }));
 });
 await etape("Cas 6 : « Oui, sortir »", a, async () => {
   await a.getByRole("button", { name: "Oui, sortir" }).click();
-  await voir(a.getByText("Tu es sorti de cet achat groupé"));
+  await voir(a.getByText("Tu es sorti de cet achat groupé", { exact: true }));
 });
 await etape("Admin : suivi de l'achat publié (vus, abonnés, commandé, sortis)", adm, async () => {
   await adm.goto(`${BASE}/admin/achats-groupes`, { waitUntil: "networkidle" });

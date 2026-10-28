@@ -46,13 +46,12 @@ describe("accueil : prochaine action de chaque chantier", () => {
 
     await agent.post(`/v1/demo/recipients/${request.recipients[0].id}/quote`).expect(201);
     await agent.post(`/v1/demo/recipients/${request.recipients[1].id}/quote`).expect(201);
-    expect(await demo()).toMatchObject({ kind: "compare", label: "Comparer les offres", detail: "2 offres reçues" });
-
-    await agent.post(`/v1/price-requests/${request.id}/analysis`).expect(201);
     // Le dernier fournisseur n'a pas encore reçu sa demande : c'est la prochaine action.
     expect(await demo()).toMatchObject({ kind: "send_requests", detail: "1 demande à envoyer" });
+    // Point 7 (Greg, 28 octobre 2026) : plus de lecture IA ; les devis reçus s'ouvrent, l'artisan retient un négoce.
+    expect((await agent.post(`/v1/price-requests/${request.id}/analysis`).expect(409)).body.error.details.reason).toBe("lecture_devis_negoce_retiree");
     await agent.patch(`/v1/price-request-recipients/${request.recipients[2].id}`).send({ status: "declined" }).expect(200);
-    expect(await demo()).toMatchObject({ kind: "choose_supplier", label: "Choisir un fournisseur" });
+    expect(await demo()).toMatchObject({ kind: "view_offer", label: "Voir les devis reçus", detail: "2 devis reçus" });
 
     await agent.patch(`/v1/price-requests/${request.id}/classification`).send({ classified: true, retainedSupplierIds: [suppliers[0]!.id] }).expect(200);
     expect(await demo()).toBeUndefined();

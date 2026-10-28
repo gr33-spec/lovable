@@ -8,7 +8,7 @@ import type { ProjectsService } from "../../projects/index.js";
 import { takeoffDto, type ReviewedTakeoff, type TakeoffService } from "../../takeoff/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { quantitatifView } from "./quantitatif-view.js";
-import { NOM_APP } from "@baticlair/domain";
+import { NOM_APP, nomDeListe } from "@baticlair/domain";
 
 export interface LigneEntree {
   libelle: string;
@@ -501,8 +501,8 @@ export class QuantitatifsService {
     }
     // Un quantitatif sans chantier en crée un : la formule limite les nouveaux chantiers, comme dans l'app.
     await this.billing.assertCanCreateProject(tenant);
-    const day = new Date().toISOString().slice(0, 10);
-    const project = await this.projects.create(tenant, { name: ctx.reference?.trim() || `Devis du ${day}`, address: ctx.adresse ?? null });
+    // Point 7 (28 octobre 2026) : « Liste du 28 octobre », jamais « Devis du 2026-10-28 ».
+    const project = await this.projects.create(tenant, { name: ctx.reference?.trim() || nomDeListe(new Date()), address: ctx.adresse ?? null });
     return project.id;
   }
 

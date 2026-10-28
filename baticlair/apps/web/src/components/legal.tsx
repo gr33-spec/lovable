@@ -22,8 +22,13 @@ export function LiensLegaux({ sauf, clair = false }: { sauf?: string; clair?: bo
   );
 }
 
-/** Le pied léger des écrans : les liens légaux, en petit, sous le contenu. */
-export function PiedLegal() {
+/**
+ * Le pied léger des écrans : les liens légaux, en petit, sous le contenu. Dans l'app, seulement sur Profil (Greg,
+ * 28 octobre 2026, point 8 : « ils vont dans Profil ») ; partout ailleurs (inscription, pages légales, négoce) ils restent.
+ */
+export function PiedLegal({ profilSeulement = false }: { profilSeulement?: boolean }) {
+  const pathname = usePathname();
+  if (profilSeulement && !pathname.startsWith("/compte")) return null;
   return (
     <footer className="mt-auto border-t border-line pt-4">
       <LiensLegaux />

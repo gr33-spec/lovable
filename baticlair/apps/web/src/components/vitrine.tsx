@@ -33,7 +33,7 @@ export function PiedVitrine({ sansEditeur = false }: { sansEditeur?: boolean }) 
     <footer className="mz-pied">
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 16 }}>
         <div>
-          <Logo fond="clair" hauteur={22} />
+          <Logo fond="sombre" hauteur={24} />
           <p style={{ marginTop: 8, fontWeight: 600 }}>{SLOGAN_APP}</p>
         </div>
         <nav aria-label="Pages légales" className="mz-pied-liens">

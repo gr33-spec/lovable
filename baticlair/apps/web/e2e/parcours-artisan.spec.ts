@@ -626,7 +626,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   // §45 : « Envoyer » de l'aperçu a envoyé la demande de devis à chacun, le PDF joint.
   await expect(pointp.getByText("En attente", { exact: true })).toBeVisible();
   await expect(tuiles.getByText("En attente", { exact: true })).toBeVisible();
-  await pointp.getByRole("button", { name: "Voir la demande de devis (PDF)" }).click();
+  await menu(pointp, "Voir la demande de devis (PDF)");
   const demande = page.getByRole("dialog", { name: "Demande de devis" });
   await expect(demande.getByRole("link", { name: "Télécharger" })).toHaveAttribute("download", "demande-de-devis.pdf");
   await demande.getByRole("button", { name: "Fermer le document" }).click();
@@ -637,10 +637,11 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   await expect(pointp.getByText(/^Bonjour,/)).toBeVisible();
   await expect(pointp.getByText(/command/i)).toHaveCount(0);
   await expect(pointp.getByText(/€/)).toHaveCount(0);
-  await expect(page.getByText("Demande envoyée. Quand un fournisseur te répond, ajoute son devis sur sa carte.")).toBeVisible();
-  // La demande est partie : la liste se replie en une ligne, les réponses des fournisseurs passent au-dessus
-  // (retour du fondateur, 2026-10-05) ; un appui la rouvre.
-  const repliee = page.getByRole("button", { name: /Ma liste, envoyée/ });
+  // Point 8 (Greg, 28 octobre 2026) : en attente, pas de bouton principal, seulement l'état.
+  await expect(page.getByText("Demande envoyée à 2 négoces. Tu seras prévenu à chaque réponse.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Demander les prix à mes négoces" })).toHaveCount(0);
+  // La demande est partie : la liste se replie en une ligne, « Ma liste · N lignes », sous les réponses ; un appui la rouvre.
+  const repliee = page.getByRole("button", { name: /^Ma liste · \d+ lignes?/ });
   await expect(repliee).toBeVisible();
   const [haut, bas] = await Promise.all([pointp.boundingBox(), repliee.boundingBox()]);
   expect(haut!.y).toBeLessThan(bas!.y);
@@ -650,21 +651,29 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   await expect(liste.getByRole("button", { name: "Voir la demande envoyée" })).toBeVisible();
   await expect(liste.getByRole("button", { name: "Envoyer aux négoces" })).toHaveCount(0);
   await backToSite(page);
+  // Le menu « ··· » du chantier porte les actions secondaires de l'étape.
+  await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
+  const actions = page.getByRole("menu", { name: "Actions sur le chantier" });
+  for (const item of ["Ajouter un négoce", "Renvoyer à un négoce", "Modifier ma liste", "Supprimer la demande"]) await expect(actions.getByRole("menuitem", { name: item })).toBeVisible();
+  await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
   // Pour tester sans attendre, un devis fictif peut être simulé (dans le menu).
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
   await expect(pointp.getByRole("menuitem", { name: "Test : simuler un devis fictif" })).toBeVisible();
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
 
-  // Le devis du fournisseur arrive : on le dépose sur sa ligne.
+  // Le devis du fournisseur arrive (téléphone, comptoir) : on le range sur sa carte, depuis son menu.
+  await menu(pointp, "Ajouter son devis reçu");
   await pointp.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
   await expect(pointp.getByText("Devis reçu")).toBeVisible();
-  await expect(pointp.getByText("Prêt à comparer")).toBeVisible();
   await page.reload();
   await expect(pointp.getByText("Devis reçu")).toBeVisible();
-  // Un seul devis : on peut déjà le voir, ou attendre l'autre.
-  await expect(page.getByRole("button", { name: "Voir l'offre reçue" })).toBeVisible();
+  // Point 7 : aucune lecture IA, ni « Comparer » ; le devis s'ouvre tel quel.
+  await expect(page.getByRole("button", { name: /^(Comparer les offres|Voir l'offre reçue|Réessayer)$/ })).toHaveCount(0);
+  await expect(pointp.getByRole("button", { name: "Ouvrir le devis (PDF)" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Voir le devis reçu" })).toBeVisible();
 
   // Le même PDF ne peut pas aller chez un second fournisseur.
+  await menu(tuiles, "Ajouter son devis reçu");
   await tuiles.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
   await expect(tuiles.getByRole("alert")).toContainText("déjà rangé chez un autre fournisseur");
   // Un devis peut aussi arriver en photos (une par page), mais jamais mélangées à un PDF.
@@ -676,53 +685,23 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   await tuiles.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-2.pdf"));
   await expect(tuiles.getByText("Devis reçu")).toBeVisible();
 
-  // L'action de l'étape : « Comparer ». BatiClair lit les devis (simulé en test), rapproche et calcule tout.
-  await expect(page.getByText("2 offres reçues")).toBeVisible();
-  await page.getByRole("button", { name: "Comparer les offres" }).click();
-  await expect(pointp.getByText("6/7 articles chiffrés")).toBeVisible();
-  await expect(tuiles.getByText("5/7 articles chiffrés · 2 manquants")).toBeVisible();
-  await expect(page.getByRole("button", { name: /^Comparer les/ })).toHaveCount(0);
-  await expect(page.getByText(/analyse/i)).toHaveCount(0);
+  // L'action de l'étape : « Voir les devis reçus », puis « Je retiens ce négoce ».
+  await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("2 devis reçus sur 2 demandes.");
+  await page.getByRole("button", { name: "Voir les devis reçus" }).click();
+  const feuille = page.getByRole("dialog", { name: "Devis reçus" });
+  await expect(feuille.getByLabel(/^Devis de /)).toHaveCount(2);
+  await feuille.getByLabel("Devis de Point.P Vannes").getByRole("button", { name: "Je retiens ce négoce" }).click();
+  await expect(feuille).toHaveCount(0);
+  const commande = page.getByRole("status", { name: "Commandé" });
+  await expect(commande).toContainText("Commandé chez Point.P Vannes.");
+  await expect(page.getByRole("button", { name: /^Voir les devis reçus$/ })).toHaveCount(0);
+
+  // Tout est conservé ; « Changer de négoce » rouvre le choix.
   await page.reload();
-  await expect(tuiles.getByText("5/7 articles chiffrés · 2 manquants")).toBeVisible();
-  // Le détail lu reste accessible, au second plan.
-  await menu(tuiles, "Voir les lignes de son devis");
-  await expect(tuiles.getByText("Livraison chantier")).toBeVisible();
-
-  // Choisir : ce qui est vraiment chiffré d'un côté, l'estimation de l'autre ; une offre incomplète n'est jamais « la moins chère ».
-  const compare = page.locator("section#comparer");
-  await expect(compare.getByRole("heading", { name: "Choisir un fournisseur" })).toBeVisible();
-  const offers = compare.getByRole("list", { name: "Offres" }).getByRole("listitem");
-  // Les naissances (calculées, §49.1 point 3) ne sont chiffrées par personne : aucune offre n'est complète, aucune n'est « la moins chère ».
-  const pointpOffer = offers.filter({ hasText: "Point.P Vannes" });
-  await expect(pointpOffer).toContainText("2 805,30 €");
-  await expect(pointpOffer.getByText("⚠️ 1 article manquant")).toBeVisible();
-  await expect(compare.getByText("Le moins cher des offres complètes")).toHaveCount(0);
-  const tuilesOffer = offers.filter({ hasText: "Tuiles & Co" });
-  await expect(tuilesOffer.getByText(/2\s213,20\s€/)).toBeVisible();
-  await expect(tuilesOffer.getByText("chiffrés")).toBeVisible();
-  await expect(tuilesOffer.getByText("⚠️ 2 articles manquants")).toBeVisible();
-  await expect(tuilesOffer.getByText(/Total estimé avec les articles manquants : 2\s724,40\s€/)).toBeVisible();
-  await expect(tuilesOffer.getByText(/Livraison 60,00\s€/)).toBeVisible();
-  await expect(tuilesOffer.getByText(/moins cher/i)).toHaveCount(0);
-
-  // « Retenir cette offre » : un geste, compris tout de suite.
-  await pointpOffer.getByRole("button", { name: "Retenir cette offre" }).click();
-  await expect(compare.getByRole("heading", { name: "Offre retenue" })).toBeVisible();
-  await expect(pointpOffer.getByText("✓ Offre retenue")).toBeVisible();
-
-  // §47.5 retour fournisseur : la commande passée, d'un tap ; « modifié » : le bon de commande collé.
-  await expect(pointpOffer.getByText(/Tu as commandé chez .* : tel quel \?/)).toBeVisible();
-  await pointpOffer.getByRole("button", { name: "Modifié" }).click();
-  await pointpOffer.getByLabel(/Colle ton bon de commande/).fill("Tuile romane canal rouge : 1 200 u");
-  await pointpOffer.getByRole("button", { name: "Enregistrer la commande" }).click();
-  await expect(pointpOffer.getByText(/✓ Commande notée : \d+ écarts? avec la liste/)).toBeVisible();
-
-  // Tout est conservé.
-  await page.reload();
-  await expect(pointp.getByText("6/7 articles chiffrés")).toBeVisible();
-  await expect(page.locator("section#comparer").getByText("✓ Offre retenue")).toBeVisible();
-  await expect(page.locator("section#comparer").getByText(/✓ Commande notée/)).toBeVisible();
+  await expect(commande).toContainText("Commandé chez Point.P Vannes.");
+  await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
+  await page.getByRole("menuitem", { name: "Changer de négoce" }).click();
+  await expect(page.getByRole("button", { name: "Voir les devis reçus" })).toBeVisible();
 });
 
 test("plusieurs articles ajoutés à la main, sans unité : gardés tels qu'écrits, la liste part", async ({ page }) => {
@@ -749,7 +728,9 @@ test("plusieurs articles ajoutés à la main, sans unité : gardés tels qu'écr
   await confirmDoubts(page);
   // Gardés tels qu'écrits, à la pièce : la ligne est verte, prête à partir.
   const skimmer = list.getByRole("listitem").filter({ hasText: "Skimmer pour piscine liner" }).first();
-  await expect(skimmer.getByRole("img", { name: "sûr" })).toBeVisible();
+  // Point 2 (Greg, 28 octobre 2026) : une ligne prête n'a rien de spécial ; ni marque, ni « Valider ».
+  await expect(skimmer.getByRole("img")).toHaveCount(0);
+  await expect(skimmer.getByRole("button", { name: /^(Valider|À préciser, ouvrir) : / })).toHaveCount(0);
   await page.reload();
   await openList(page);
   await expect(list.getByRole("listitem").filter({ hasText: "Skimmer pour piscine liner" }).first()).toBeVisible();
@@ -784,14 +765,12 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
     await card.getByRole("button", { name: "Simuler sa réponse (démo)" }).click();
     await expect(card.getByText("Devis reçu")).toBeVisible();
   }
-  await page.getByRole("button", { name: "Comparer les offres" }).click();
-  for (const name of ["Tuilerie de l'Ouest", "Négoce Breizh", "Matériaux Atlantique"]) {
-    await expect(cards.filter({ hasText: name }).getByText(/articles chiffrés/)).toBeVisible();
-  }
-  await expect(cards.filter({ hasText: "Négoce Breizh" }).getByText(/1 manquant/)).toBeVisible();
-  const compare = page.locator("section#comparer");
-  await expect(compare.getByRole("button", { name: "Retenir cette offre" }).first()).toBeVisible();
-  await expect(compare.getByText("⚠️ 1 article manquant")).toBeVisible();
+  // Point 7 (28 octobre 2026) : plus de lecture IA ; les devis s'ouvrent et l'artisan retient un négoce.
+  await page.getByRole("button", { name: "Voir les devis reçus" }).click();
+  const feuille = page.getByRole("dialog", { name: "Devis reçus" });
+  await expect(feuille.getByRole("button", { name: "Ouvrir le devis (PDF)" })).toHaveCount(3);
+  await feuille.getByLabel("Devis de Négoce Breizh (démo)").getByRole("button", { name: "Je retiens ce négoce" }).click();
+  await expect(page.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce Breizh (démo).");
 });
 
 test("accueil : la prochaine action de chaque chantier, puis l'essai et les formules", async ({ page }) => {
@@ -2588,8 +2567,10 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // sur un iPhone SE, le titre, les trois lignes et « Créer mon compte gratuit » sans défiler.
   await expect(page.getByText("Mobiiz additionne les commandes de matériaux des artisans d'un même secteur et négocie le prix de gros pour chacun.")).toHaveCount(0);
   await expect(page.getByText(/^Le devis que tu as fait à ton client suffit/)).toHaveCount(0);
-  const trois = page.getByRole("list", { name: "En trois étapes" }).getByRole("listitem");
-  await expect(trois).toHaveText(["1Tu dis ce que tu vas commander (ton devis suffit).", "2On l'additionne avec les artisans du coin.", "3On négocie, tu achètes au prix des gros."]);
+  // Maquette de Greg (28 octobre 2026) : l'accroche, le mécanisme, le bouton, et le vrai écran de l'app dans un téléphone ;
+  // les trois lignes numérotées laissent la place au mécanisme (même idée, une seule fois).
+  await expect(page.getByRole("list", { name: "En trois étapes" })).toHaveCount(0);
+  await expect(page.locator(".mz-hero-tel").getByRole("img", { name: /^L'écran « Ma liste de matériaux » de Mobiiz/ })).toBeVisible();
   // Greg, 28 octobre 2026, point 4 : le mécanisme en trois phrases, mot pour mot, visible sans défiler sur un iPhone SE ;
   // « Arrête de perdre du temps sur tes quantitatifs. » vient après, jamais avant.
   const mecanisme = page.getByText("Les artisans de ton secteur mettent leurs commandes en commun. Mobiiz demande un prix aux négoces pour le total. Tu commandes au meilleur prix reçu.");
@@ -2695,17 +2676,19 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
-  for (const image of [/^L'écran « Nouvelle liste » de Mobiiz/, /^La liste de fournitures préparée par Mobiiz/, /^Les prix reçus de trois négoces/]) {
+  for (const image of [/^L'écran « Ma liste de matériaux » de Mobiiz/, /^La liste de fournitures préparée par Mobiiz/, /^Les prix reçus de trois négoces/]) {
     await expect(page.getByRole("region", { name: "Comment ça marche" }).getByRole("img", { name: image })).toBeVisible();
   }
   await expect(page.getByText(/tuile/i)).toHaveCount(0);
-  await expect(page.locator("main svg")).toHaveCount(0);
+  // Des icônes dans les cartes (maquette du 28 octobre), toutes décoratives ; jamais un dessin qui porte un sens.
+  await expect(page.locator("main svg:not([aria-hidden='true'])")).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "Trois façons de faire ta liste" }).getByRole("listitem")).toHaveCount(3);
   await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
   // L'abonnement (24 octobre 2026) : l'argument phare (une possibilité tant qu'il n'y a pas 3 cycles) et l'offre.
   // Greg, 27 octobre 2026, 2e message, point 34 : la phrase des tarifs, aucun montant.
   await expect(page.getByText(/€ HT/)).toHaveCount(0);
   // Les deux de la page ; le bouton fixe du téléphone est masqué tant qu'il n'est pas à l'écran.
-  await expect(page.getByRole("link", { name: "Créer mon compte gratuit" })).toHaveCount(2);
+  await expect(page.getByRole("link", { name: "Créer mon compte gratuit", exact: true })).toHaveCount(2);
   await expect(page.getByText("Des demandes prêtes à chiffrer, des volumes groupés.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
   const partage = page.getByRole("region", { name: "Fais venir tes collègues" });
@@ -2877,10 +2860,11 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   const [demande] = await emailsVers(page, negoce);
   expect(demande, "la demande de devis est partie").toBeDefined();
   await page.reload();
-  await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("Demande partie chez 1 négoce. On attend leurs prix.");
+  await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("Demande envoyée à 1 négoce. Tu seras prévenu à chaque réponse.");
   // Le PDF joint porte les lignes (un seul document, §43) ; la liste corrigée est celle qui est partie.
   expect(demande!.attachments.join(" ")).toMatch(/demande-de-devis/);
-  await page.getByRole("button", { name: /Ma liste, envoyée/ }).click();
+  // Point 8 (28 octobre 2026) : « Ma liste · N lignes », repliée ; un toucher l'ouvre.
+  await page.getByRole("button", { name: /^Ma liste · \d+ lignes?/ }).click();
   const envoyee = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(envoyee.getByRole("button", { name: /^Modifier : Chatière/ })).toBeVisible();
   await expect(envoyee.getByRole("button", { name: /^Modifier : Pointes inox 2,8x40/ })).toBeVisible();

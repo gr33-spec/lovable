@@ -119,8 +119,9 @@ describe("la page du négoce : PDF, Excel, trois façons de répondre", { timeou
     expect(feuilles.map((f) => f.nom)).toEqual(["Demande", "Conditions", "_mobiiz"]);
     const demande = feuilles[0]!;
     expect(demande.lignes[0]).toEqual(["Référence", "Désignation", "Quantité", "Unité", "Prix unitaire HT", "Disponible (oui/non)"]);
-    expect(demande.lignes[1]!.slice(1)).toEqual(["Ardoise 32×22 Espagne 1er choix", 2700, "pièces", null, null]);
-    expect(demande.lignes[2]!.slice(1)).toEqual(["Liteaux 27×38", 400, "m", null, null]);
+    // Des références courtes (R1, R2…), jamais la clé interne du catalogue ; « ml » s'écrit « m ».
+    expect(demande.lignes[1]).toEqual(["R1", "Ardoise 32×22 Espagne 1er choix", 2700, "pièces", null, null]);
+    expect(demande.lignes[2]).toEqual(["R2", "Liteaux 27×38", 400, "m", null, null]);
     const conditions = feuilles[1]!.lignes.map((l) => String(l[0]));
     expect(conditions.join("\n")).toMatch(/livraison incluse/i);
     expect(conditions.join("\n")).toMatch(/Réponse attendue avant le/);
@@ -129,7 +130,7 @@ describe("la page du négoce : PDF, Excel, trois façons de répondre", { timeou
     const sheet = dezip(xlsx).get("xl/worksheets/sheet1.xml")!.toString("utf8");
     expect(sheet).toContain("<sheetProtection");
     expect(dezip(xlsx).get("xl/workbook.xml")!.toString("utf8")).toContain('state="hidden"');
-    const [cleArdoise, cleLiteau] = [demande.lignes[1]![0], demande.lignes[2]![0]] as [string, string];
+    const [cleArdoise, cleLiteau] = (await publique().get(`/v1/public/achat-groupe/${x}`).expect(200)).body.lignes.map((l: { cle: string }) => l.cle) as [string, string];
 
     // Rempli dans un vrai tableur (openpyxl) : la ligne 2 avec un prix, la ligne 3 laissée vide.
     const dir = mkdtempSync(path.join(tmpdir(), "negoce-"));

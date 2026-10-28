@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, ChevronRight, CircleCheck, Plus } from "lucide-react";
+import { useActionChantier } from "@/lib/actions-chantier";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
@@ -93,6 +94,8 @@ export function ProjectTakeoff({
   const [unitsView, setUnitsView] = useState(true);
   // Après « Envoyer aux négoces » : l'aperçu d'envoi et les demandes passent devant la liste.
   const [overview, setOverview] = useState(false);
+  // Point 8 (Greg, 28 octobre 2026) : une fois la demande partie, « Modifier ma liste » va dans le menu « ··· ».
+  useActionChantier("modifier-liste", "Modifier ma liste", () => (setOverview(false), setPage(true)), !archived && (sent || overview) && !page);
   const started = useRef(false);
   const refreshProgress = useProgressRefresh();
   const readable = clientQuote ? canPrepareTakeoff(clientQuote) : false;
@@ -392,8 +395,9 @@ export function ProjectTakeoff({
   // une seule fois (business model final, 25 octobre 2026 : l'e2e ne les trouvait pas sous la liste).
   const persoEtGroupe = quantitatif ? (
     <div className="flex flex-col gap-4">
-      <DemandesPerso projectId={projectId} articles={takeoff.purchase.toBuy.map((i) => i.key)} canCreate archived={archived} />
-      <TenterPrixDeGroupe projectId={projectId} />
+      <DemandesPerso projectId={projectId} articles={takeoff.purchase.toBuy.map((i) => i.key)} canCreate archived={archived} dejaEnvoye={sent} principal={!listShown} />
+      {/* Une seule suggestion d'achat groupé, à l'étape « liste prête » seulement (point 8). */}
+      {!sent ? <TenterPrixDeGroupe projectId={projectId} /> : null}
     </div>
   ) : null;
   return (
@@ -460,7 +464,8 @@ export function ProjectTakeoff({
                 </span>
               )}
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="font-bold">{sent ? "Ma liste, envoyée" : "Ma liste"}</span>
+                {/* Point 8 : « Ma liste · 12 lignes », repliée ; un toucher l'ouvre. */}
+                <span className="font-bold">{`Ma liste · ${takeoff.purchase.toBuy.length} ligne${takeoff.purchase.toBuy.length > 1 ? "s" : ""}`}</span>
                 {/* §50.4 : plus de compteur « N fournitures · N à vérifier » ; seulement ce qui reste à régler. */}
                 {!sent && checkCount > 0 ? (
                   <span className="text-[13px] text-muted">

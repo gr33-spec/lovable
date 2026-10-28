@@ -99,7 +99,7 @@ describe("nouveau cap du 22 octobre : regroupement, alertes, livraison au kilom�
     lots = (await a.agent.get("/v1/groupe/lots").expect(200)).body.besoins;
     expect(lots[0]!.compteur.phrase).toBe("2 artisans, 2 demandes envoyées, 0 devis reçu");
     expect(JSON.stringify(lots)).not.toContain("Carrelages B");
-    expect((await b.agent.get(`/v1/projects/${b.projectId}/suivi`).expect(200)).body).toMatchObject({ etape: 1, phrase: "Demande partie chez 2 négoces. On attend leurs prix." });
+    expect((await b.agent.get(`/v1/projects/${b.projectId}/suivi`).expect(200)).body).toMatchObject({ etape: 1, phrase: "Demande envoyée à 2 négoces. Tu seras prévenu à chaque réponse." });
 
     // La page du négoce : sans sa livraison complète (dépôt, gratuite jusqu'à X km, Y € au-delà), rien n'est pris.
     const jeton = jetonPour("general@example.com");
@@ -121,7 +121,7 @@ describe("nouveau cap du 22 octobre : regroupement, alertes, livraison au kilom�
     // Le compteur et le suivi ont vu le devis.
     lots = (await a.agent.get("/v1/groupe/lots").expect(200)).body.besoins;
     expect(lots[0]!.compteur.phrase).toBe("2 artisans, 2 demandes envoyées, 1 devis reçu, meilleur prix 19,90 €");
-    expect((await a.agent.get(`/v1/projects/${a.projectId}/suivi`).expect(200)).body).toMatchObject({ etape: 2, phrase: "1 devis reçu sur 2 demandes. Meilleur prix : 19,90 € HT l'unité.", aFaire: "Compare et retiens l'offre qui te va." });
+    expect((await a.agent.get(`/v1/projects/${a.projectId}/suivi`).expect(200)).body).toMatchObject({ etape: 2, phrase: "1 devis reçu sur 2 demandes. Meilleur prix : 19,90 € HT l'unité.", aFaire: "Ouvre les devis et retiens le négoce de ton choix." });
     // Plan « finition », bloc 6 : le même négoce redépose (devis corrigé) : son devis remplace le premier, il ne compte
     // jamais pour deux.
     expect((await deposer(jeton, [["CAR", CARREAU, "46 u", "19,90", "915,40"]], "DEVIS G bis – Délai de livraison 5 jours", GENERAL)).status).toBe(201);

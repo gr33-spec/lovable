@@ -63,7 +63,7 @@ export const REGROUPEMENT_EXEMPLE = {
 
 /** Les vrais écrans de l'app (mode humain, iPhone 15, 26 octobre 2026), en AVIF et WebP à deux largeurs. */
 export const ECRANS = {
-  depot: { nom: "app-depot", alt: "L'écran « Nouvelle liste » de Mobiiz : donner sa liste ou déposer son devis" },
+  depot: { nom: "app-depot", alt: "L'écran « Ma liste de matériaux » de Mobiiz : depuis mon devis, photo de ma liste, ou je la note moi-même" },
   liste: { nom: "app-liste", alt: "La liste de fournitures préparée par Mobiiz, prête à envoyer aux négoces" },
   prix: { nom: "app-prix", alt: "Les prix reçus de trois négoces, livraison comprise, la moins chère en tête" },
 } as const;

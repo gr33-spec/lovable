@@ -8,6 +8,7 @@ import { ProjectProgressProvider } from "@/components/project-progress";
 import { SuiviChantier } from "@/components/suivi-chantier";
 import { Badge, BackButton, Button, ErrorNotice, Field, Skeleton } from "@/components/ui";
 import { api, ApiError, type Project, type ProjectDocument } from "@/lib/api";
+import { ActionsChantierProvider, useActionsChantier } from "@/lib/actions-chantier";
 import { openDocument } from "@/lib/open-document";
 import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
@@ -33,7 +34,7 @@ export default function ChantierPage() {
   if (!project) return <Skeleton card="h-12" lines={3} label="Chargement du chantier…" />;
 
   return (
-    <>
+    <ActionsChantierProvider>
       {editing ? (
         <EditForm project={project} onDone={(p) => { if (p) setProject(p); setEditing(false); }} />
       ) : (
@@ -54,7 +55,7 @@ export default function ChantierPage() {
         {/* La lecture donne son nom au chantier (« Chantier Dupont ») : l'en-tête se relit quand elle finit. */}
         <ProjectDocuments key={docsKey} projectId={project.id} archived={project.status === "archived"} onProjectChanged={reload} onQuote={setQuote} />
       </ProjectProgressProvider>
-    </>
+    </ActionsChantierProvider>
   );
 }
 
@@ -78,6 +79,8 @@ function Header({
   const [error, setError] = useState<ApiError | null>(null);
   const busy = useRef(false);
   const done = project.status === "archived";
+  // Point 8 (Greg, 28 octobre 2026) : les actions secondaires de l'étape (ajouter un négoce, renvoyer, modifier ma liste…).
+  const etape = useActionsChantier();
 
   async function toggleStatus() {
     if (busy.current) return;
@@ -143,6 +146,13 @@ function Header({
       </div>
       {menu ? (
         <ul role="menu" aria-label="Actions sur le chantier" className="animate-rise flex flex-col divide-y divide-line rounded-xl border border-line bg-surface px-4 shadow-card">
+          {etape.map((a) => (
+            <li key={a.id} role="none">
+              <button type="button" role="menuitem" className={item} onClick={() => { setMenu(false); a.run(); }}>
+                {a.label}
+              </button>
+            </li>
+          ))}
           <li role="none">
             <button type="button" role="menuitem" className={item} onClick={() => { setMenu(false); onEdit(); }}>
               Modifier le chantier

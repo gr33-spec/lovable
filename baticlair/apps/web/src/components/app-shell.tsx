@@ -30,7 +30,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Greg (23 octobre) : le minuteur de la commande du mois sur chaque écran. */}
         <BandeauDuMois />
         {children}
-        <PiedLegal />
+        <PiedLegal profilSeulement />
       </main>
     </SessionGate>
   );

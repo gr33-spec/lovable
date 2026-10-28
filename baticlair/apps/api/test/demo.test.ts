@@ -54,16 +54,12 @@ describe("mode démo", () => {
       const mine = res.body.recipients.find((x: { id: string }) => x.id === r.id);
       expect(mine).toMatchObject({ status: "received" });
       expect(mine.document).not.toBeNull();
-      await agent.post(`/v1/price-request-recipients/${r.id}/analysis`).expect(201);
     }
-
-    const comparison = (await agent.get(`/v1/price-requests/${request.id}/comparison`)).body;
-    expect(comparison.suppliers).toHaveLength(3);
-    // Négoce Breizh oublie un article : la comparaison le signale.
-    const byName = (prefix: string) => comparison.suppliers.find((s: { name: string }) => s.name.startsWith(prefix));
-    expect(byName("Négoce Breizh")).toMatchObject({ missingCount: 1, arithmetic: "consistent" });
-    expect(byName("Tuilerie de l'Ouest")).toMatchObject({ missingCount: 0, feesHT: "45.00", arithmetic: "consistent" });
-    expect(byName("Matériaux Atlantique")).toMatchObject({ missingCount: 0, arithmetic: "consistent" });
+    // Point 7 (Greg, 28 octobre 2026) : les devis reçus ne sont plus lus par l'IA ; aucun appel, l'artisan retient un négoce.
+    expect((await agent.post(`/v1/price-request-recipients/${request.recipients[0].id}/analysis`).expect(409)).body.error.details.reason).toBe("lecture_devis_negoce_retiree");
+    expect((await agent.get(`/v1/price-requests/${request.id}/offers`).expect(200)).body).toMatchObject({ aiAvailable: false, items: [] });
+    const retenu = (await agent.patch(`/v1/price-requests/${request.id}/classification`).send({ classified: true, retainedSupplierIds: [suppliers[0]!.id] }).expect(200)).body;
+    expect(retenu.retainedSupplierIds).toEqual([suppliers[0]!.id]);
 
     // Une seconde réponse est refusée (devis déjà reçu).
     expect((await agent.post(`/v1/demo/recipients/${request.recipients[0].id}/quote`)).status).toBe(409);
@@ -88,6 +84,6 @@ describe("mode démo", () => {
 
     const res = await a.agent.post(`/v1/demo/recipients/${recipientId}/quote`).expect(201);
     expect(res.body.recipients[0]).toMatchObject({ status: "received", document: { name: "devis-fictif-test-devis.pdf" } });
-    await a.agent.post(`/v1/price-request-recipients/${recipientId}/analysis`).expect(201);
+    expect((await a.agent.post(`/v1/price-request-recipients/${recipientId}/analysis`)).status).toBe(409);
   });
 });

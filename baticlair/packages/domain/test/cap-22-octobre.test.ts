@@ -60,9 +60,9 @@ describe("le suivi façon colis", () => {
     expect(suiviDuChantier({ ...vide, liste: true })).toMatchObject({ etape: 0, aFaire: "Envoie-la à tes négoces, ou ajoute-la au regroupement." });
     // Plan « finition », bloc 5 : devis lu, questions en attente : rien n'est coché, et on dit quoi faire.
     expect(suiviDuChantier({ ...vide, questions: true })).toMatchObject({ etape: -1, phrase: "Ta liste se prépare.", aFaire: "Réponds aux questions, puis « Calculer ma liste »." });
-    expect(suiviDuChantier({ ...vide, liste: true, demandes: 2 })).toMatchObject({ etape: 1, phrase: "Demande partie chez 2 négoces. On attend leurs prix.", aFaire: null });
+    expect(suiviDuChantier({ ...vide, liste: true, demandes: 2 })).toMatchObject({ etape: 1, phrase: "Demande envoyée à 2 négoces. Tu seras prévenu à chaque réponse.", aFaire: null });
     const recu = suiviDuChantier({ ...vide, liste: true, demandes: 2, devis: 1, meilleur: "1 840,00 € HT" });
-    expect(recu).toMatchObject({ etape: 2, phrase: "1 devis reçu sur 2 demandes. Meilleur prix : 1 840,00 € HT.", aFaire: "Compare et retiens l'offre qui te va." });
+    expect(recu).toMatchObject({ etape: 2, phrase: "1 devis reçu sur 2 demandes. Meilleur prix : 1 840,00 € HT.", aFaire: "Ouvre les devis et retiens le négoce de ton choix." });
     expect(recu.etapes.map((e) => e.fait)).toEqual([true, true, true, false]);
     expect(suiviDuChantier({ ...vide, liste: true, demandes: 2, devis: 2, commande: true })).toMatchObject({ etape: 3, phrase: "C'est commandé." });
     expect(suiviDuChantier(vide).etape).toBe(-1);

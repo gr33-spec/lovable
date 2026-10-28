@@ -114,6 +114,10 @@ const ENGAGE = "declare";
 /** Les colonnes de l'Excel : A Référence, B Désignation, C Quantité, D Unité, E Prix unitaire HT (libre), F Disponible (libre). */
 const ENTETE_EXCEL: Cellule[] = ["Référence", "Désignation", "Quantité", "Unité", "Prix unitaire HT", "Disponible (oui/non)"];
 const COL_PRIX = 4;
+/** La référence lue par le négoce : « R1 », « R2 »… dans l'ordre de SA liste (la clé du catalogue reste interne). */
+const refCourte = (i: number) => `R${i + 1}`;
+/** Chez le négoce, « ml » s'écrit « m » (comme dans la demande de devis). */
+const uniteNegoce = (u: string) => (u.trim().toLowerCase() === "ml" ? "m" : u);
 const COL_DISPO = 5;
 const hacher = (jeton: string) => createHash("sha256").update(jeton).digest("hex");
 const qte = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 3 }).replace(/\u202f/g, "\u00a0");
@@ -1013,7 +1017,7 @@ export class AchatGroupeService {
       livraisonAvantLe: a.dateBesoinMin ? jourFr(a.dateBesoinMin) : "la date convenue",
       reponseAvantLe: a.reponseAvantLe ? jourFr(a.reponseAvantLe) : "la date indiquée en ligne",
       dePart: deLaPartDe(c.clients),
-      lignes: lignesDe(c.lignes).map((l) => ({ reference: l.cle, designation: l.libelle, quantite: qte(l.quantite), unite: l.unite })),
+      lignes: lignesDe(c.lignes).map((l, i) => ({ reference: refCourte(i), designation: l.libelle, quantite: qte(l.quantite), unite: uniteNegoce(l.unite) })),
       regles: `Une seule offre, sans deuxième tour : votre meilleur prix, ferme sur le volume engagé, livraison comprise, ligne par ligne (un prix unitaire HT ou « je ne fournis pas »).${commission > 0 ? ` Commission ${NOM_APP} de ${String(commission).replace(".", ",")} % HT sur les commandes passées.` : ""}`,
       lien: `${this.cfg.webAppUrl}/achat-groupe/${jeton}`,
     });
@@ -1042,8 +1046,8 @@ export class AchatGroupeService {
         enTete: true,
         protegee: true,
         colonnesLibres: [COL_PRIX, COL_DISPO],
-        largeurs: [18, 46, 12, 10, 18, 20],
-        lignes: [ENTETE_EXCEL, ...lignes.map((l): Cellule[] => [l.cle, l.libelle, l.quantite, l.unite, null, null])],
+        largeurs: [9, 36, 10, 8, 15, 17],
+        lignes: [ENTETE_EXCEL, ...lignes.map((l, i): Cellule[] => [refCourte(i), l.libelle, l.quantite, uniteNegoce(l.unite), null, null])],
       },
       {
         nom: "Conditions",
@@ -1087,9 +1091,9 @@ export class AchatGroupeService {
     const entete = demande?.lignes[0]?.map((v) => String(v ?? "").trim().toLowerCase()) ?? [];
     const colonnes = { ref: entete.indexOf("référence"), prix: entete.indexOf("prix unitaire ht"), dispo: entete.indexOf("disponible (oui/non)") };
     if (!demande || colonnes.ref < 0 || colonnes.prix < 0) throw validationFailed("columns changed", { reason: "excel_modifie", message: "Le fichier a été modifié (une colonne manque). Exportez-le à nouveau et remplissez seulement « Prix unitaire HT » et « Disponible »." });
-    const parRef = new Map(demande.lignes.slice(1).map((l) => [String(l[colonnes.ref] ?? "").trim(), l]));
-    const lignes = lignesDe(c.lignes).map((l) => {
-      const ligne = parRef.get(l.cle);
+    const parRef = new Map(demande.lignes.slice(1).map((l) => [String(l[colonnes.ref] ?? "").trim().toUpperCase(), l]));
+    const lignes = lignesDe(c.lignes).map((l, i) => {
+      const ligne = parRef.get(refCourte(i));
       const brutPrix = ligne?.[colonnes.prix] ?? null;
       const brutDispo = colonnes.dispo >= 0 ? String(ligne?.[colonnes.dispo] ?? "").trim().toLowerCase() : "";
       const nonFourni = brutDispo === "non";
@@ -1134,7 +1138,7 @@ export class AchatGroupeService {
       titre,
       negoce: c.nom,
       envoyeeLe: jourFr(c.reponduLe),
-      lignes: recap.lignes.map((l) => ({ reference: l.cle, designation: l.libelle, quantite: qte(l.quantite), unite: l.unite, prixHt: l.prixHt === null ? null : euros(l.prixHt), totalHt: l.totalHt === null ? null : euros(l.totalHt) })),
+      lignes: recap.lignes.map((l, i) => ({ reference: refCourte(i), designation: l.libelle, quantite: qte(l.quantite), unite: uniteNegoce(l.unite), prixHt: l.prixHt === null ? null : euros(l.prixHt), totalHt: l.totalHt === null ? null : euros(l.totalHt) })),
       totalHt: euros(recap.totalHt),
       manquantes: recap.manquantes,
       delai: c.delaiJours === null ? null : `${c.delaiJours} jour${c.delaiJours > 1 ? "s" : ""}`,

@@ -79,7 +79,14 @@ async function remplirExcel(fichier: string | null, cellules: Record<string, num
   }
   return sortie;
 }
-const capture = (page: Page, projet: string, nom: string) => page.screenshot({ path: `test-results/achat-groupe/${projet}-${nom}.png`, fullPage: true });
+/** Capture de chaque étape ; `CAPTURE_SE=1` : au format iPhone SE (375 × 667) sur téléphone, pour le rapport. */
+async function capture(page: Page, projet: string, nom: string) {
+  const taille = page.viewportSize();
+  const se = process.env.CAPTURE_SE === "1" && projet === "telephone";
+  if (se) await page.setViewportSize({ width: 375, height: 667 });
+  await page.screenshot({ path: `test-results/achat-groupe/${projet}-${nom}.png`, fullPage: !se });
+  if (se && taille) await page.setViewportSize(taille);
+}
 
 /** Un couvreur inscrit (écran de l'adresse Mobiiz passé), SIRET vérifié, adresse dans le département. */
 async function inscrire(page: Page, dep: string, prenom = "Jean"): Promise<{ entreprise: string; email: string }> {
@@ -263,6 +270,10 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     expect(excelExporte.suggestedFilename()).toBe("demande-mobiiz.xlsx");
     const pdfDemande = await telecharger(negoce, "Télécharger en PDF");
     expect(pdfDemande.suggestedFilename()).toBe("demande-mobiiz.pdf");
+    if (process.env.CAPTURE_SE === "1") {
+      await pdfDemande.saveAs(`test-results/achat-groupe/${projet}-demande-mobiiz.pdf`);
+      await excelExporte.saveAs(`test-results/achat-groupe/${projet}-demande-mobiiz.xlsx`);
+    }
     await capture(negoce, projet, "4a-page-negoce-accueil");
     // X répond par l'Excel rempli : un prix sur l'ardoise, les liteaux laissés vides, la ligne vide est en rouge et se règle sur place.
     const rempli = await remplirExcel(await excelExporte.path(), { E2: 1.1 });
@@ -344,7 +355,9 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     // 6. A sort de l'achat groupé : chantier annulé, en un clic avec le motif.
     await page.goto(`/achats-groupes/${besoinA}`);
     await expect(page.getByText("1 ligne non chiffrée chez ce négoce")).toBeVisible();
-    await page.getByRole("button", { name: "Sortir de l'achat groupé" }).click();
+    // Point 8 (28 octobre 2026) : les sorties sont dans le menu « ··· » en haut à droite.
+    await page.getByRole("button", { name: "Plus d'actions sur l'achat groupé" }).click();
+    await page.getByRole("menuitem", { name: "Sortir de l'achat groupé" }).click();
     await page.getByRole("button", { name: "Mon client a annulé le chantier" }).click();
     await expect(page.getByRole("alertdialog", { name: "Sortir de l'achat groupé" })).toBeVisible();
     await capture(page, projet, "6a-sortie-confirmer");

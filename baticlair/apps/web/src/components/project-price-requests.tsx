@@ -6,8 +6,7 @@ import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
 import { NotificationsPrompt } from "@/components/notifications-prompt";
 import { RappelAdresseMobiiz } from "@/components/adresse-mobiiz";
-import { RecuCard } from "@/components/recus";
-import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/components/project-offers";
+import { OfferLines, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { attachFile } from "@/lib/upload";
@@ -19,6 +18,8 @@ import { useProgressRefresh } from "@/components/project-progress";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { useAncienMode } from "@/components/negocie";
+import { useActionChantier } from "@/lib/actions-chantier";
+import { dateHeureCourte, premiereLigneDuMessage } from "../../../../packages/domain/src/groupe/reponse-negoce";
 
 
 function toError(e: unknown): ApiError {
@@ -130,12 +131,53 @@ export function ProjectPriceRequests({
     [requestId],
   );
   const offers = useResource(fetchOffers);
+  // R7 : les e-mails reçus des négoces pour ce chantier (la première ligne de leur message va sur leur carte).
+  const fetchRecus = useCallback((signal: AbortSignal) => api<{ items: EmailRecu[] }>(`/v1/recus?projectId=${encodeURIComponent(projectId)}`, { signal }), [projectId]);
+  const recus = useResource(fetchRecus);
+  // Point 8 (Greg, 28 octobre 2026) : un seul bouton principal par étape ; le reste dans le menu « ··· » du chantier.
+  const [feuille, setFeuille] = useState(false);
+  const [ajout, setAjout] = useState(false);
+  const [renvoi, setRenvoi] = useState(false);
+  const [suppression, setSuppression] = useState(false);
+  const [actionError, setActionError] = useState<ApiError | null>(null);
   const whole = (data?.items ?? []).filter((r) => !r.articles?.length);
   const parts = (data?.items ?? []).filter((r) => (r.articles?.length ?? 0) > 0);
   const sent = Boolean(whole[0]);
   useEffect(() => {
     if (data) onSentChange?.(sent);
   }, [data, sent, onSentChange]);
+  const enCours = whole[0] ?? null;
+  const retenue = Boolean(enCours?.retainedSupplierIds.length);
+  const actif = Boolean(enCours) && !archived;
+  const montrer = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  async function classer(retenus: string[]) {
+    if (!enCours) return;
+    setActionError(null);
+    try {
+      const r = await api<PriceRequest>(`/v1/price-requests/${enCours.id}/classification`, { method: "PATCH", body: retenus.length ? { classified: true, retainedSupplierIds: retenus } : { classified: false } });
+      setData({ items: [r, ...(data?.items ?? []).filter((x) => x.id !== r.id)] });
+      setFeuille(false);
+      refreshProgress();
+    } catch (e) {
+      setActionError(toError(e));
+    }
+  }
+  async function supprimer() {
+    if (!enCours) return;
+    setActionError(null);
+    try {
+      await api<null>(`/v1/price-requests/${enCours.id}`, { method: "DELETE" });
+      setSuppression(false);
+      reload();
+      refreshProgress();
+    } catch (e) {
+      setActionError(toError(e));
+    }
+  }
+  useActionChantier("ajouter-negoce", "Ajouter un négoce", () => (setAjout(true), montrer("ajouter-negoce")), actif && !retenue);
+  useActionChantier("renvoyer", "Renvoyer à un négoce", () => (setRenvoi(true), montrer("renvoyer")), actif && !retenue && Boolean(enCours?.recipients.some((r) => r.status === "sent")));
+  useActionChantier("changer-negoce", "Changer de négoce", () => void classer([]), actif && retenue);
+  useActionChantier("supprimer-demande", "Supprimer la demande", () => (setSuppression(true), montrer("supprimer-demande")), actif);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -215,38 +257,73 @@ export function ProjectPriceRequests({
     );
   }
 
-  const received = request.recipients.filter((r) => r.status === "received" && r.document);
-  const unread = received.filter((r) => !offerOf(r.id)).length;
-  const waiting = request.recipients.filter((r) => r.status === "sent").length;
+  const emailDe = (recipientId: string) =>
+    (recus.data?.items ?? []).filter((e) => e.demande?.recipientId === recipientId).sort((x, y) => y.recuLe.localeCompare(x.recuLe))[0] ?? null;
+  // Point 7 (Greg, 28 octobre 2026) : un devis reçu ne se lit plus par l'IA ; il s'ouvre, et l'artisan retient un négoce.
+  const repondus = request.recipients.filter((r) => r.document || emailDe(r.id));
+  const retenus = request.recipients.filter((r) => request.retainedSupplierIds.includes(r.supplier.id));
+  const aEnvoyer = request.recipients.filter((r) => r.status === "to_send");
   const hasOffers = (offers.data?.items.length ?? 0) > 0;
 
   return (
     <section id="fournisseurs" aria-label="Fournisseurs" className="flex scroll-mt-4 flex-col gap-3">
-      {/* Une fois les offres comparées, la phrase d'attente n'a plus rien à dire : la comparaison parle. */}
-      {hasOffers && waiting === 0 ? null : (
+      {retenus.length > 0 ? (
+        <div role="status" aria-label="Commandé" className="flex flex-col gap-2 rounded-xl bg-ok-bg p-4 text-ok">
+          <p className="text-[16px] font-extrabold">Commandé chez {retenus.map((r) => r.supplier.name).join(", ")}.</p>
+          <p className="text-[14px]">
+            {request.lines.length} ligne{request.lines.length > 1 ? "s" : ""}
+            {request.classifiedAt ? ` · retenu le ${dateHeureCourte(new Date(request.classifiedAt))}` : ""}
+          </p>
+          {retenus
+            .filter((r) => r.document)
+            .map((r) => (
+              <button key={r.id} type="button" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")} className="inline-flex min-h-11 items-center self-start text-[15px] font-bold text-ink underline">
+                Ouvrir le devis (PDF)
+              </button>
+            ))}
+        </div>
+      ) : aEnvoyer.length > 0 ? (
         <AssistantMessage>
-          <Say>
-            {request.recipients.some((r) => r.status === "to_send")
-              ? "La demande est prête. Envoie-la à chaque fournisseur :"
-              : "Demande envoyée. Quand un négoce te répond par e-mail, sa réponse arrive ici ; tu peux aussi ajouter son devis sur sa carte."}
-          </Say>
+          <Say>La demande est prête. Envoie-la à chaque négoce :</Say>
         </AssistantMessage>
-      )}
-      {!archived && !modeMois && unread > 0 && offers.data ? (
-        <CompareQuotes
-          requestId={request.id}
-          received={received.length}
-          waiting={waiting}
-          aiAvailable={offers.data.aiAvailable}
-          onDone={(result) => {
-            offers.setData({ aiAvailable: result.aiAvailable, items: result.items });
-            setVersion((v) => v + 1);
-            refreshProgress();
-          }}
-        />
+      ) : repondus.length > 0 ? (
+        // Le suivi du chantier dit déjà « N devis reçus sur M demandes » : ici, seulement le bouton de l'étape.
+        <Button onClick={() => setFeuille(true)} className="w-full">
+          {repondus.length > 1 ? "Voir les devis reçus" : "Voir le devis reçu"}
+        </Button>
       ) : null}
-      {hasOffers && !modeMois ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">FOURNISSEURS</h2>
+      {actionError ? <ErrorNotice error={actionError} /> : null}
+      {suppression ? (
+        <div id="supprimer-demande" role="group" aria-label="Supprimer la demande" className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+          <p className="text-[15px] font-semibold">Supprimer cette demande ? Les négoces ne sont pas prévenus ; ta liste reste.</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="secondary" onClick={() => setSuppression(false)}>
+              Annuler
+            </Button>
+            <Button variant="ink" onClick={() => void supprimer()}>
+              Oui, supprimer
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {renvoi ? (
+        <div id="renvoyer" role="group" aria-label="Renvoyer à un négoce" className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-4">
+          <p className="text-[15px] font-semibold">À qui renvoyer la demande ?</p>
+          {request.recipients
+            .filter((r) => r.status === "sent")
+            .map((r) => (
+              <a key={r.id} href={mailtoHref(r)} onClick={() => setRenvoi(false)} className="inline-flex min-h-12 items-center justify-between rounded-xl border border-line px-3 text-[15px] font-semibold">
+                Renvoyer à {r.supplier.name}
+                <Mail size={18} aria-hidden="true" />
+              </a>
+            ))}
+          <button type="button" onClick={() => setRenvoi(false)} className="min-h-11 self-start text-[15px] font-semibold text-muted underline">
+            Fermer
+          </button>
+        </div>
+      ) : null}
+      <div id="ajouter-negoce">{!archived ? <AddRecipients request={request} open={ajout} onClose={() => setAjout(false)} onChange={replace} /> : null}</div>
+      {hasOffers && !modeMois && retenus.length === 0 ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
       <NotificationsPrompt trigger={sentCount} />
       <ul className="flex flex-col gap-2" aria-label="Tes fournisseurs">
         {request.recipients.map((r) => (
@@ -257,7 +334,7 @@ export function ProjectPriceRequests({
               request={request}
               archived={archived}
               deliversEmail={deliversEmail}
-              onSent={() => setSentCount((n) => n + 1)}
+              onSent={() => setSentCount((k) => k + 1)}
               onChange={replace}
               onOfferChange={offerChanged}
               onReload={reloadAll}
@@ -265,10 +342,72 @@ export function ProjectPriceRequests({
           </li>
         ))}
       </ul>
-      {!archived ? <AddRecipients request={request} onChange={replace} /> : null}
-      <RecusDuChantier projectId={projectId} version={version} />
       {partsBlock}
+      {feuille ? <DevisRecus request={request} repondus={repondus} emailDe={emailDe} onRetenir={(supplierId) => void classer([supplierId])} onFermer={() => setFeuille(false)} /> : null}
     </section>
+  );
+}
+
+/**
+ * « Voir les devis reçus » (Greg, 28 octobre 2026, points 7 et 8) : en plein écran, une carte par négoce qui a répondu :
+ * « X t'a répondu · 28 oct. à 8 h 31 », la première ligne de son message, « Ouvrir le devis (PDF) » et « Je retiens ce
+ * négoce » (la demande passe à « Commandé »). Aucune lecture IA, aucun nom de fichier.
+ */
+function DevisRecus({ request, repondus, emailDe, onRetenir, onFermer }: { request: PriceRequest; repondus: PriceRequestRecipient[]; emailDe: (id: string) => EmailRecu | null; onRetenir: (supplierId: string) => void; onFermer: () => void }) {
+  useEffect(() => {
+    const avant = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = avant;
+    };
+  }, []);
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Devis reçus" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
+      <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
+        <h2 className="font-display text-[20px] font-extrabold">{repondus.length > 1 ? "Devis reçus" : "Devis reçu"}</h2>
+        <button type="button" onClick={onFermer} aria-label="Revenir au chantier" className="inline-flex size-11 items-center justify-center rounded-xl">
+          <X size={20} aria-hidden="true" />
+        </button>
+      </div>
+      <ul className="mx-auto flex w-full max-w-2xl min-h-0 grow flex-col gap-3 overflow-y-auto px-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+        {repondus.map((r) => {
+          const e = emailDe(r.id);
+          const quand = e ? new Date(e.recuLe) : r.sentAt ? null : null;
+          const ligne = premiereLigneDuMessage(e?.texte);
+          const autres = (e?.fichiers ?? []).filter((f) => !f.devisRecu);
+          return (
+            <li key={r.id}>
+              <Card aria-label={`Devis de ${r.supplier.name}`} className="flex flex-col gap-2.5 p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-[16px] font-extrabold">
+                    {r.supplier.name} t&apos;a répondu{quand ? ` · ${dateHeureCourte(quand)}` : ""}
+                  </p>
+                  {r.document ? <Badge tone="ok">Devis reçu</Badge> : null}
+                </div>
+                {ligne ? <p className="text-[15px] text-muted">{ligne}</p> : null}
+                {r.document ? (
+                  <Button variant="secondary" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")}>
+                    Ouvrir le devis (PDF)
+                  </Button>
+                ) : null}
+                {e
+                  ? autres.map((f, i) => (
+                      <Button key={f.id} variant="secondary" onClick={() => openFile({ url: `/v1/recus/${encodeURIComponent(e.id)}/fichiers/${encodeURIComponent(f.id)}`, title: `Pièce jointe de ${r.supplier.name}`, fileName: f.nom })}>
+                        {autres.length > 1 ? `Ouvrir la pièce jointe ${i + 1}` : "Ouvrir la pièce jointe"}
+                      </Button>
+                    ))
+                  : null}
+                {request.retainedSupplierIds.length === 0 ? (
+                  <Button variant="ink" onClick={() => onRetenir(r.supplier.id)}>
+                    Je retiens ce négoce
+                  </Button>
+                ) : null}
+              </Card>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -474,20 +613,16 @@ function NewRequest({
   );
 }
 
-function AddRecipients({ request, onChange }: { request: PriceRequest; onChange: (r: PriceRequest) => void }) {
-  const [open, setOpen] = useState(false);
+/** « Ajouter un négoce » (menu « ··· » du chantier, point 8) : le carnet, sans ceux qui ont déjà la demande. */
+function AddRecipients({ request, open, onClose, onChange }: { request: PriceRequest; open: boolean; onClose: () => void; onChange: (r: PriceRequest) => void }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const setOpen = (v: boolean) => {
+    if (!v) onClose();
+  };
 
-  if (!open) {
-    return (
-      <Button variant="secondary" onClick={() => setOpen(true)}>
-        <Plus size={18} aria-hidden="true" />
-        Demander à un autre fournisseur
-      </Button>
-    );
-  }
+  if (!open) return null;
 
   async function add() {
     setPending(true);
@@ -505,7 +640,7 @@ function AddRecipients({ request, onChange }: { request: PriceRequest; onChange:
 
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <span className="font-bold">Ajouter des fournisseurs à la demande</span>
+      <span className="font-bold">Ajouter un négoce à la demande</span>
       <SupplierPicker
         exclude={request.recipients.map((r) => r.supplier.id)}
         selected={selected}
@@ -535,18 +670,15 @@ function AddRecipients({ request, onChange }: { request: PriceRequest; onChange:
 type CardState = { label: string; tone: "ok" | "warn" | "neutral"; info: string };
 
 /** Où en est le fournisseur, en deux mots, et une seule information utile. */
-function cardState(r: PriceRequestRecipient, offer: Offer | null): CardState {
-  if (offer) {
-    const facts = offerFacts(offer);
-    return { label: facts.toCheck ? "À vérifier" : "Comparé", tone: facts.toCheck ? "warn" : "ok", info: facts.text };
-  }
+function cardState(r: PriceRequestRecipient): CardState {
   switch (r.status) {
     case "to_send":
       return { label: "À envoyer", tone: "warn", info: r.supplier.email };
     case "sent":
-      return { label: "En attente", tone: "neutral", info: r.sentAt ? `Demande envoyée le ${new Date(r.sentAt).toLocaleDateString("fr-FR")}` : "Demande envoyée" };
+      return { label: "En attente", tone: "neutral", info: r.sentAt ? `Demande envoyée le ${dateHeureCourte(new Date(r.sentAt))}` : "Demande envoyée" };
     case "received":
-      return { label: "Devis reçu", tone: "ok", info: "Prêt à comparer" };
+      // Point 7 (28 octobre 2026) : plus de « Prêt à comparer » : le devis s'ouvre tel quel.
+      return { label: "Devis reçu", tone: "ok", info: "" };
     case "declined":
       return { label: "Pas de réponse", tone: "neutral", info: "" };
   }
@@ -584,7 +716,7 @@ function RecipientCard({
   const [panel, setPanel] = useState<Panel>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
-  const state = cardState(r, offer);
+  const state = cardState(r);
   const demo = isDemoSupplier(r.supplier.email);
   const send = () =>
     run(async () => {
@@ -656,8 +788,9 @@ function RecipientCard({
 
   const items: { label: string; onSelect: () => void }[] = [];
   if (r.email) items.push({ label: panel === "email" ? "Masquer l'e-mail" : "Voir l'e-mail", onSelect: () => toggle("email") });
-  if (r.document) items.push({ label: "Ouvrir son devis", onSelect: () => void openDocument(r.document!.id, r.document!.name, r.document!.name) });
   if (offer) items.push({ label: panel === "lines" ? "Masquer les lignes" : "Voir les lignes de son devis", onSelect: () => toggle("lines") });
+  if (request.packet)
+    items.push({ label: "Voir la demande de devis (PDF)", onSelect: () => openFile({ url: `/v1/price-requests/${encodeURIComponent(request.id)}/demande-de-devis.pdf`, title: "Demande de devis", fileName: "demande-de-devis.pdf" }) });
   if (!archived) {
     if (r.status === "to_send") {
       items.push({ label: "Copier le texte de l'e-mail", onSelect: () => void copy() });
@@ -670,9 +803,7 @@ function RecipientCard({
     }
     if (r.status === "declined") items.push({ label: "Remettre en attente", onSelect: () => void setStatus("sent") });
     // Devis reçu par un autre chemin (téléphone, comptoir, photo) : on peut toujours le ranger ici.
-    if (!r.document && (r.status !== "sent" || demo)) {
-      items.push({ label: panel === "upload" ? "Masquer l'ajout du devis" : "Ajouter son devis reçu", onSelect: () => toggle("upload") });
-    }
+    if (!r.document) items.push({ label: panel === "upload" ? "Masquer l'ajout du devis" : "Ajouter son devis reçu", onSelect: () => toggle("upload") });
     if (r.document) items.push({ label: "Retirer ce devis", onSelect: () => void removeQuote(r.document!.id) });
   }
 
@@ -681,7 +812,7 @@ function RecipientCard({
       <div className="flex items-start gap-3">
         <div className="flex min-w-0 grow flex-col">
           <span className="text-[17px] leading-snug font-extrabold">{r.supplier.name}</span>
-          {state.info ? <span className={`text-[13px] ${state.tone === "warn" && offer ? "font-semibold text-warn" : "text-muted"}`}>{state.info}</span> : null}
+          {state.info ? <span className="text-[13px] text-muted">{state.info}</span> : null}
         </div>
         <Badge tone={state.tone}>{state.label}</Badge>
         {items.length > 0 ? (
@@ -701,7 +832,7 @@ function RecipientCard({
         <ul role="menu" aria-label={`Actions : ${r.supplier.name}`} className="flex flex-col divide-y divide-line rounded-2xl bg-ground px-3">
           {items.map((item) => (
             <li key={item.label} role="none">
-              <button type="button" role="menuitem" onClick={item.onSelect} className="flex min-h-11 w-full items-center text-left text-sm font-bold">
+              <button type="button" role="menuitem" onClick={() => { setMenu(false); item.onSelect(); }} className="flex min-h-11 w-full items-center text-left text-sm font-bold">
                 {item.label}
               </button>
             </li>
@@ -737,18 +868,13 @@ function RecipientCard({
           </Button>
         )
       ) : null}
-      {!archived && request.packet ? (
-        <button
-          type="button"
-          onClick={() => openFile({ url: `/v1/price-requests/${encodeURIComponent(request.id)}/demande-de-devis.pdf`, title: "Demande de devis", fileName: "demande-de-devis.pdf" })}
-          className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text"
-        >
-          Voir la demande de devis (PDF)
-        </button>
+      {r.document ? (
+        // Point 7 (Greg, 28 octobre 2026) : le devis reçu s'ouvre tel quel (aucune lecture IA).
+        <Button variant="secondary" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")}>
+          Ouvrir le devis (PDF)
+        </Button>
       ) : null}
-      {!archived && !r.document && ((!demo && r.status === "sent") || panel === "upload") ? (
-        <QuoteUpload recipientId={r.id} onChange={onChange} />
-      ) : null}
+      {!archived && !r.document && panel === "upload" ? <QuoteUpload recipientId={r.id} onChange={onChange} /> : null}
       {pending ? <Spinner /> : null}
     </Card>
   );
@@ -870,26 +996,5 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
         </button>
       </div>
     </div>
-  );
-}
-
-
-/** R7 : « Négoce X t'a répondu par e-mail » sur le chantier : l'e-mail reçu sur l'adresse Mobiiz, son texte et ses fichiers. */
-function RecusDuChantier({ projectId, version }: { projectId: string; version: number }) {
-  const charger = useCallback((signal: AbortSignal) => api<{ items: EmailRecu[] }>(`/v1/recus?projectId=${encodeURIComponent(projectId)}`, { signal }), [projectId]);
-  const { data, setData, reload } = useResource(charger);
-  useEffect(() => {
-    if (version > 0) reload();
-    // Une réponse déposée ou comparée recharge les reçus ; `reload` est stable.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [version]);
-  if (!data || data.items.length === 0) return null;
-  return (
-    <section aria-label="Réponses reçues par e-mail" className="flex flex-col gap-2">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">REÇU PAR E-MAIL</h2>
-      {data.items.map((e) => (
-        <RecuCard key={e.id} email={e} compact onChange={(x) => setData({ items: data.items.map((y) => (y.id === x.id ? x : y)) })} />
-      ))}
-    </section>
   );
 }
