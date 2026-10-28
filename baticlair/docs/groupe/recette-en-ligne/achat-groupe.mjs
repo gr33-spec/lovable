@@ -222,7 +222,9 @@ await etape("Cas 2 : « Mettre en achat groupé », « Tout cocher », engagemen
   await groupe.getByRole("button", { name: "Tout cocher" }).click();
   // Ultra intuitif (27 octobre) : une question par écran, « Continuer » entre chaque.
   await groupe.getByRole("button", { name: "Continuer" }).click();
-  await groupe.getByLabel("Livraison avant le").fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
+  // Un achat déjà ouvert dans le secteur (« Quel achat groupé ? ») se rejoint ; sinon, une date de livraison.
+  const date = groupe.locator('input[type="date"]');
+  if (await date.count()) await date.fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
   await groupe.getByRole("button", { name: "Continuer" }).click();
   await ajouterNegoce(a, X);
   await groupe.getByRole("button", { name: "Continuer" }).click();
@@ -250,7 +252,8 @@ await etape("Cas 3 : 2e couvreur alerté (achat ouvert dans son secteur)", b, as
   await inscrire(b, B, `Couvertures B ${APPAREIL}`, `5 place du Marché, ${LIEU.b}`, "Paul");
   await b.goto(`${BASE}/`, { waitUntil: "networkidle" });
   const ouverts = b.getByRole("region", { name: "Achats groupés ouverts dans ton secteur" });
-  await voir(ouverts.getByText(/^Achat groupé couverture ouvert dans ton secteur/));
+  // Depuis la refonte du 27 octobre, la carte dit l'échéance : « Ajoute ta liste avant le … Livraison avant le … ».
+  await voir(ouverts.getByText(/^Ajoute ta liste avant le \d+ \S+\. Livraison avant le \d+ \S+\.$/));
   await ouverts.scrollIntoViewIfNeeded();
 });
 await etape("Cas 3 : il ajoute sa liste avec la case d'engagement", b, async () => {
