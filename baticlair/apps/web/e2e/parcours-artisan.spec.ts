@@ -1473,8 +1473,10 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
   await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
-  await expect(list.getByText("Prêt à commander", { exact: true })).toBeVisible();
-  await expect(list.getByText("À préciser : coche pour valider")).toBeVisible();
+  // Greg, 28 octobre 2026 (point 2) : plus de légende ; l'état est sur la ligne (bordure orange, « Valider » à droite).
+  await expect(list.getByText("Prêt à commander", { exact: true })).toHaveCount(0);
+  await expect(list.getByText("À préciser : coche pour valider")).toHaveCount(0);
+  await expect(list.getByRole("button", { name: /^(Valider|À préciser, ouvrir) : / }).first()).toBeVisible();
   const cards = list.getByRole("list", { name: "Fournitures" }).locator(":scope > li");
   const oranges = cards.filter({ has: page.getByRole("img", { name: "à vérifier" }) });
   const n = await oranges.count();
@@ -3589,20 +3591,42 @@ test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un e
   await expect(demo.getByRole("status")).toContainText("Effacé : 5 faux artisans");
 });
 
-test("« Je la note moi-même » (27 octobre 2026, recette en ligne sur iPhone SE) : la saisie tient dans l'écran, sans défiler de côté, et « Créer ma liste » mène à la liste", async ({ page }) => {
+test("« Je la note moi-même » (28 octobre 2026, point 1) : en plein écran, le champ reste visible clavier ouvert, Entrée ajoute la ligne, un tap la modifie, « Terminé » mène à la liste", async ({ page }) => {
   await signUp(page);
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto("/chantiers/nouveau");
   await page.getByRole("button", { name: /Je la note moi-même/ }).click();
-  await page.getByLabel("Matériau 1").fill("Ardoise naturelle 32×22 Espagne 1er choix");
-  await page.getByLabel("Quantité 1").fill("1800");
-  await page.getByRole("button", { name: "+ Ajouter une ligne" }).click();
-  await page.getByLabel("Matériau 2").fill("Liteaux 27×38 traités classe 2");
-  await page.getByLabel("Quantité 2").fill("200");
-  await page.getByLabel("Unité 2").fill("m");
-  for (const champ of ["Matériau 2", "Quantité 2", "Unité 2"]) await expect(page.getByLabel(champ)).toBeInViewport({ ratio: 1 });
+  const ecran = page.getByRole("dialog", { name: "Écris ta liste" });
+  const champ = ecran.getByLabel("Matériau et quantité");
+  await expect(champ).toBeFocused();
+  // Le clavier de l'iPhone SE laisse environ 330 px visibles : le champ, le texte tapé et « Terminé » y restent.
+  await page.setViewportSize({ width: 375, height: 330 });
+  await champ.fill("Ardoise naturelle 32×22 Espagne 1er choix, 1800 pièces");
+  await expect(champ).toBeInViewport({ ratio: 1 });
+  await expect(ecran.getByRole("button", { name: "Terminé" })).toBeInViewport({ ratio: 1 });
+  await champ.press("Enter");
+  await expect(ecran.getByRole("list", { name: "Ma liste" }).getByText("Ardoise naturelle 32×22 Espagne 1er choix")).toBeVisible();
+  await expect(champ).toHaveValue("");
+  await expect(champ).toBeFocused();
+  // Le catalogue se propose pendant la frappe, d'un tap.
+  await champ.fill("liteau");
+  await ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: "Liteaux 27×38" }).click();
+  await expect(champ).toHaveValue("Liteaux 27×38, ");
+  await champ.fill("Liteaux 27×38, 200 m");
+  await champ.press("Enter");
+  // Une ligne sans quantité reste en texte libre, « à vérifier » ; un tap la remet dans le champ.
+  await champ.fill("Crochets inox");
+  await champ.press("Enter");
+  await expect(ecran.getByText("à vérifier")).toBeVisible();
+  await ecran.getByRole("button", { name: "Modifier : Crochets inox" }).click();
+  await expect(champ).toHaveValue("Crochets inox");
+  await champ.fill("Crochets inox, 2 paquets");
+  await champ.press("Enter");
+  await expect(champ).toBeInViewport({ ratio: 1 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
-  await page.getByRole("button", { name: "Créer ma liste" }).click();
+  await page.setViewportSize({ width: 375, height: 667 });
+  await ecran.getByRole("button", { name: "Terminé" }).click();
   await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
   await expect(page.getByText(/Ardoise naturelle 32×22/).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/Liteaux 27×38/).first()).toBeVisible();
 });

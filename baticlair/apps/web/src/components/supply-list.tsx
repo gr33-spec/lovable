@@ -161,12 +161,17 @@ export function SupplyList({
     <section aria-label="Liste des fournitures" className="flex flex-col">
       {editable && !selecting && toCheck.length > 0 ? (
         // §50.3 : une barre fixe discrète en haut, qui disparaît à zéro. Rien d'autre.
-        <div role="status" className="sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface/95 px-4 shadow-card backdrop-blur">
+        // Greg, 28 octobre 2026 (point 2) : « N lignes à vérifier », un tap amène à la première.
+        <button
+          type="button"
+          onClick={() => document.getElementById(`ligne-${toCheck[0]!.key}`)?.scrollIntoView({ block: "center", behavior: "smooth" })}
+          className="pressable sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-11 items-center gap-2 self-start rounded-full border border-line bg-surface/95 px-4 shadow-card backdrop-blur"
+        >
           <span className="size-2.5 shrink-0 rounded-full bg-mark-warn" aria-hidden="true" />
           <span className="text-[14px] leading-tight font-semibold text-warn">
-            {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} à régler
+            {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} à vérifier
           </span>
-        </div>
+        </button>
       ) : null}
       <header className="mb-3 flex flex-col gap-0.5">
         <div className="flex items-start justify-between gap-3">
@@ -252,17 +257,8 @@ export function SupplyList({
           </Button>
         </section>
       ) : null}
-      {/* §49, §50 (retour du fondateur, 2026-10-12) : la légende des repères, sous le titre. */}
-      {/* Retour du fondateur (2026-10-12) : « mets des cases à cocher à chaque ligne pour pouvoir valider ». La case cochée
-          verte : prête à commander ; la case vide orange : à valider (un tap la coche, ou ouvre la question qui reste). */}
-      <p className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted">
-        <span className="inline-flex items-center gap-1.5">
-          <Box checked /> Prêt à commander
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <Box checked={false} /> À préciser : coche pour valider
-        </span>
-      </p>
+      {/* Greg, 28 octobre 2026 (point 2) : plus de légende (une case vide donne envie de cocher et ne fait rien) ; l'état est
+          sur chaque ligne : bordure gauche orange, « À vérifier », « Valider ». Aucune case à cocher qui ne soit une action. */}
       {selecting ? (
         <p className="mb-2 text-[14px] leading-snug font-bold text-ink">
           {pourGroupe && groupe?.mode === "mois" ? "Coche ce que tu ajoutes à la commande. Mets seulement ce que tu es sûr de commander." : pourGroupe ? `Coche ce que tu ajoutes au ${nom}. Ton nom ne part pas avec.` : "Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre."}
@@ -541,23 +537,9 @@ const DOT: Record<ScreenRow["status"], { ok: boolean; label: string }> = {
   supplier: { ok: true, label: "sûr" },
 };
 
-/** La case de la ligne : cochée en vert franc (prête), vide au bord orange vif (à valider). */
-function Box({ checked }: { checked: boolean }) {
-  return checked ? (
-    <span aria-hidden="true" className="flex size-[22px] shrink-0 items-center justify-center rounded-md bg-mark-ok text-white">
-      <Check size={15} strokeWidth={3.5} />
-    </span>
-  ) : (
-    <span aria-hidden="true" className="size-[22px] shrink-0 rounded-md border-[2.5px] border-mark-warn bg-surface" />
-  );
-}
-
+/** Une ligne prête n'a rien de spécial ; une ligne à vérifier porte son repère (lu par VoiceOver, vu par la bordure). */
 function StatusMark({ ok, label }: { ok: boolean; label: string }) {
-  return (
-    <span className="mt-px shrink-0" role="img" aria-label={label}>
-      <Box checked={ok} />
-    </span>
-  );
+  return ok ? null : <span className="sr-only" role="img" aria-label={label} />;
 }
 
 const FIELD = "min-h-11 w-full min-w-0 rounded-xl border-2 border-line bg-surface px-3 text-[15px] outline-none focus:border-accent";
@@ -783,7 +765,7 @@ function Row({
         {quantity || sub ? (
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-[13px] leading-snug">
             {quantity ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
-            {sub ? <span className={`min-w-0 ${sentTo ? "font-bold text-muted" : "font-bold text-warn"}`}>{sub}</span> : null}
+            {sub ? <span className={`min-w-0 ${sentTo ? "font-bold text-muted" : "font-bold text-warn"}`}>{sub}</span> : !dot.ok ? <span className="min-w-0 font-bold text-warn">À vérifier</span> : null}
           </span>
         ) : null}
       </span>
@@ -818,8 +800,8 @@ function Row({
     <li
       id={`ligne-${row.key}`}
       className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-xl border border-line bg-surface px-3 py-2 transition-[background-color,box-shadow] duration-200 ${
-        open ? "z-[51] shadow-[0_24px_60px_-12px_rgba(16,24,40,0.45)]" : ""
-      }`}
+        dot.ok ? "" : "border-l-4 border-l-mark-warn"
+      } ${open ? "z-[51] shadow-[0_24px_60px_-12px_rgba(16,24,40,0.45)]" : ""}`}
     >
       {/* Retour du fondateur (2026-10-11) : la ligne ouverte passe au premier plan, le reste est flouté derrière ; un tap sur le
           flou la referme. */}
@@ -852,29 +834,6 @@ function Row({
       >
         {opens ? (
           <div className="flex min-w-0 items-start gap-1">
-            {/* La case à cocher de la ligne (retour du fondateur, 2026-10-12) : verte cochée, la ligne est prête ; vide, un tap
-                la valide (« C'est bon », la quantité du devis gardée) ou, s'il reste une question, ouvre la ligne sur elle. */}
-            {dot.ok ? (
-              <span className="flex size-11 shrink-0 items-start justify-center pt-2.5" role="img" aria-label={dot.label}>
-                <Box checked />
-              </span>
-            ) : (
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => {
-                  if (quick) void handlers.onDecide(decision!);
-                  else {
-                    setNaming(false);
-                    setOpen(true);
-                  }
-                }}
-                aria-label={quick ? `Valider : ${label}` : `À préciser, ouvrir : ${label}`}
-                className="flex size-11 shrink-0 items-start justify-center rounded-full pt-2.5 active:bg-warn/10 disabled:opacity-50"
-              >
-                <Box checked={false} />
-              </button>
-            )}
             {dot.ok ? null : <span className="sr-only" role="img" aria-label={dot.label} />}
             <button
               type="button"
@@ -889,6 +848,25 @@ function Row({
             >
               {body}
             </button>
+            {/* Greg, 28 octobre 2026 (point 2) : à droite d'une ligne à vérifier, « Valider » (la garde telle quelle) ou
+                « Préciser » (ouvre la question qui reste). Toucher la ligne ouvre la correction. */}
+            {!dot.ok && !open ? (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  if (quick) void handlers.onDecide(decision!);
+                  else {
+                    setNaming(false);
+                    setOpen(true);
+                  }
+                }}
+                aria-label={quick ? `Valider : ${label}` : `À préciser, ouvrir : ${label}`}
+                className="pressable mt-1 inline-flex min-h-9 shrink-0 items-center rounded-full bg-ink px-3 text-[13px] font-semibold text-white disabled:opacity-50"
+              >
+                {quick ? "Valider" : "Préciser"}
+              </button>
+            ) : null}
             {/* Ouverte, le crayon devient une croix : on voit comment refermer (retour du fondateur, 2026-10-10). */}
             <button
               type="button"

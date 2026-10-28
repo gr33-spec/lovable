@@ -1,3 +1,4 @@
+import { ChampVisible } from "@/components/champ-visible";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
@@ -73,6 +74,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-dvh antialiased">
         {children}
         <EnregistrementServiceWorker />
+        <ChampVisible />
       </body>
     </html>
   );

@@ -2,11 +2,12 @@
 
 import { PenLine } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { EcrireMaListe } from "@/components/ecrire-ma-liste";
 import { DropZone } from "@/components/journey";
 import { Paywall, useBilling } from "@/components/paywall";
-import { BackButton, Button, INPUT } from "@/components/ui";
-import { api, ApiError, MAX_DOCUMENT_BYTES, messageErreur, newActionKey, type Project, type ProjectDocument } from "@/lib/api";
+import { BackButton } from "@/components/ui";
+import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Project, type ProjectDocument } from "@/lib/api";
 import { NEW_PROJECT_NAME } from "@/lib/project-name";
 import { attachFile } from "@/lib/upload";
 import { useSession } from "@/lib/session";
@@ -95,14 +96,10 @@ export default function NouveauChantierPage() {
  * arrive sur le même écran de liste, avec ses deux sorties.
  */
 function SaisieListe() {
-  const router = useRouter();
   const [ouvert, setOuvert] = useState(false);
-  const [lignes, setLignes] = useState([{ libelle: "", quantite: "", unite: "pièces" }]);
-  const [pending, setPending] = useState(false);
-  const [erreur, setErreur] = useState<string | null>(null);
-  const pleines = lignes.filter((l) => l.libelle.trim() && l.quantite.trim());
-  if (!ouvert)
-    return (
+  const fermer = useCallback(() => setOuvert(false), []);
+  return (
+    <>
       <button type="button" onClick={() => setOuvert(true)} className="pressable flex min-h-16 items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink" aria-hidden="true">
           <PenLine size={20} />
@@ -112,39 +109,7 @@ function SaisieListe() {
           <span className="text-[14px] leading-snug text-muted">Matériau, quantité, unité.</span>
         </span>
       </button>
-    );
-  async function creer() {
-    setPending(true);
-    setErreur(null);
-    try {
-      const q = await api<{ projetId: string }>("/v1/quantitatifs", { method: "POST", body: { lignes: pleines.map((l) => ({ libelle: l.libelle.trim(), quantite: l.quantite.trim(), unite: l.unite.trim() || "pièces" })) } });
-      router.push(`/chantiers/${q.projetId}`);
-    } catch (e) {
-      setErreur(messageErreur(e));
-      setPending(false);
-    }
-  }
-  return (
-    <section aria-label="Écrire ma liste" className="flex flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card">
-      <p className="text-[17px] font-extrabold">Écris ta liste</p>
-      {lignes.map((l, i) => (
-        <div key={i} className="grid grid-cols-[minmax(0,1fr)_4.5rem_4.5rem] gap-2">
-          <input aria-label={`Matériau ${i + 1}`} placeholder="Ardoise naturelle 32×22 Espagne" value={l.libelle} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, libelle: e.target.value } : x)))} className={`${INPUT} min-w-0`} />
-          <input aria-label={`Quantité ${i + 1}`} inputMode="decimal" placeholder="Qté" value={l.quantite} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, quantite: e.target.value } : x)))} className={`${INPUT} min-w-0`} />
-          <input aria-label={`Unité ${i + 1}`} value={l.unite} onChange={(e) => setLignes(lignes.map((x, j) => (j === i ? { ...x, unite: e.target.value } : x)))} className={`${INPUT} min-w-0`} />
-        </div>
-      ))}
-      <button type="button" onClick={() => setLignes([...lignes, { libelle: "", quantite: "", unite: "pièces" }])} className="min-h-11 self-start text-[15px] font-semibold text-accent-text">
-        + Ajouter une ligne
-      </button>
-      {erreur ? (
-        <p role="alert" className="text-[15px] font-semibold text-danger">
-          {erreur}
-        </p>
-      ) : null}
-      <Button variant="ink" pending={pending} disabled={pleines.length === 0} onClick={() => void creer()}>
-        Créer ma liste
-      </Button>
-    </section>
+      {ouvert ? <EcrireMaListe onFermer={fermer} /> : null}
+    </>
   );
 }

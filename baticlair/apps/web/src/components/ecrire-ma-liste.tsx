@@ -1,0 +1,155 @@
+"use client";
+
+import { Check, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Button, INPUT } from "@/components/ui";
+import { api, messageErreur } from "@/lib/api";
+import { useResource } from "@/lib/use-resource";
+
+/**
+ * « ÉCRIS TA LISTE » EN PLEIN ÉCRAN (Greg, 28 octobre 2026, point 1 : « le clavier recouvre le champ, je tape à
+ * l'aveugle ») : le champ est en haut, sous le titre, jamais derrière le clavier ; chaque ligne ajoutée apparaît au-dessus,
+ * modifiable (un tap la remet dans le champ) et supprimable (la croix) ; Entrée ajoute ; pendant la frappe, les références
+ * du catalogue se proposent et se choisissent d'un tap ; sinon la ligne reste en texte libre, « à vérifier » ; « Terminé »
+ * reste visible au-dessus du clavier (dans l'en-tête de l'écran, pas en bas).
+ */
+export interface LigneEcrite {
+  libelle: string;
+  quantite: string;
+  unite: string;
+}
+
+/** « Ardoise 32×22, 900 pièces » → libellé, quantité, unité ; sans nombre, la quantité reste vide (à vérifier). */
+export function analyserLigne(texte: string): LigneEcrite {
+  const t = texte.trim().replace(/\s+/g, " ");
+  const m = /^(.+?)[\s,;:·]+(\d+(?:[.,]\d+)?)\s*([^\d\s].*)?$/.exec(t);
+  if (!m) return { libelle: t, quantite: "", unite: "pièces" };
+  return { libelle: m[1]!.replace(/[\s,;:·]+$/, ""), quantite: m[2]!.replace(",", "."), unite: (m[3] ?? "").trim() || "pièces" };
+}
+
+export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
+  const router = useRouter();
+  const [lignes, setLignes] = useState<LigneEcrite[]>([]);
+  const [texte, setTexte] = useState("");
+  const [pending, setPending] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const champ = useRef<HTMLInputElement>(null);
+  const liste = useRef<HTMLUListElement>(null);
+  // Les références du catalogue, dès deux lettres tapées (une requête courte, annulée à la frappe suivante).
+  const mot = texte.trim().length >= 2 && !/\d/.test(texte) ? texte.trim() : "";
+  const fetchCat = useCallback((signal: AbortSignal) => (mot ? api<{ references: { designation: string; unite: string }[] }>(`/v1/achats-groupes/catalogue?q=${encodeURIComponent(mot)}`, { signal }).catch(() => null) : Promise.resolve(null)), [mot]);
+  const { data: cat } = useResource(fetchCat);
+  const suggestions = mot ? (cat?.references ?? []).filter((r) => r.designation.toLowerCase() !== mot.toLowerCase()).slice(0, 4) : [];
+
+  useEffect(() => {
+    champ.current?.focus();
+    const fermer = (e: KeyboardEvent) => e.key === "Escape" && onFermer();
+    document.addEventListener("keydown", fermer);
+    return () => document.removeEventListener("keydown", fermer);
+  }, [onFermer]);
+  useEffect(() => {
+    liste.current?.lastElementChild?.scrollIntoView({ block: "nearest" });
+  }, [lignes.length]);
+
+  const ajouter = () => {
+    if (!texte.trim()) return;
+    setLignes((ls) => [...ls, analyserLigne(texte)]);
+    setTexte("");
+    champ.current?.focus();
+  };
+  const reprendre = (i: number) => {
+    const l = lignes[i]!;
+    setTexte(l.quantite ? `${l.libelle}, ${l.quantite} ${l.unite}` : l.libelle);
+    setLignes((ls) => ls.filter((_, j) => j !== i));
+    champ.current?.focus();
+  };
+  const choisir = (designation: string) => {
+    setTexte(`${designation}, `);
+    champ.current?.focus();
+  };
+  async function terminer() {
+    const toutes = texte.trim() ? [...lignes, analyserLigne(texte)] : lignes;
+    if (toutes.length === 0) return onFermer();
+    setPending(true);
+    setErreur(null);
+    try {
+      const q = await api<{ projetId: string }>("/v1/quantitatifs", { method: "POST", body: { lignes: toutes.map((l) => ({ libelle: l.libelle, quantite: l.quantite || null, unite: l.unite || "pièces" })) } });
+      router.push(`/chantiers/${q.projetId}`);
+    } catch (e) {
+      setErreur(messageErreur(e));
+      setPending(false);
+    }
+  }
+
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Écris ta liste" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col bg-ground">
+      <div className="flex items-center justify-between gap-3 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
+        <button type="button" onClick={onFermer} aria-label="Fermer" className="pressable grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface">
+          <X size={20} aria-hidden="true" />
+        </button>
+        <h1 className="grow truncate text-[20px] font-extrabold">Écris ta liste</h1>
+        <Button variant="ink" pending={pending} onClick={() => void terminer()} className="min-h-11 shrink-0 px-5">
+          <Check size={18} aria-hidden="true" /> Terminé
+        </Button>
+      </div>
+      <div className="flex min-h-0 flex-col gap-2 px-4">
+        {lignes.length ? (
+          <ul ref={liste} aria-label="Ma liste" className="flex max-h-[34dvh] flex-col gap-1.5 overflow-y-auto">
+            {lignes.map((l, i) => (
+              <li key={`${l.libelle}-${i}`} className="flex items-center gap-1 rounded-xl bg-surface pl-3 shadow-card">
+                <button type="button" onClick={() => reprendre(i)} aria-label={`Modifier : ${l.libelle}`} className="flex min-h-11 min-w-0 grow items-center gap-2 py-2 text-left text-[15px]">
+                  <span className="truncate font-semibold">{l.libelle}</span>
+                  <span className="shrink-0 whitespace-nowrap text-muted">{l.quantite ? `${l.quantite} ${l.unite}` : "quantité ?"}</span>
+                  {!l.quantite ? <span className="shrink-0 rounded-full bg-warn-bg px-2 py-0.5 text-[12px] font-semibold text-warn">à vérifier</span> : null}
+                </button>
+                <button type="button" onClick={() => setLignes((ls) => ls.filter((_, j) => j !== i))} aria-label={`Retirer : ${l.libelle}`} className="grid size-11 shrink-0 place-items-center rounded-full text-muted">
+                  <X size={18} aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="flex items-center gap-2">
+          <input
+            ref={champ}
+            aria-label="Matériau et quantité"
+            value={texte}
+            onChange={(e) => setTexte(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                ajouter();
+              }
+            }}
+            placeholder={lignes.length ? "Ligne suivante…" : "Ardoise 32×22, 900 pièces"}
+            enterKeyHint="done"
+            autoComplete="off"
+            className={`${INPUT} min-w-0 grow`}
+          />
+          <button type="button" onClick={ajouter} disabled={!texte.trim()} aria-label="Ajouter la ligne" className="pressable grid size-13 shrink-0 place-items-center rounded-full bg-accent text-on-accent disabled:opacity-40">
+            <Plus size={22} aria-hidden="true" />
+          </button>
+        </div>
+        {suggestions.length ? (
+          <ul aria-label="Références proposées" className="flex flex-wrap gap-2">
+            {suggestions.map((r) => (
+              <li key={r.designation}>
+                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => choisir(r.designation)} className="pressable inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-3 text-[14px] font-semibold">
+                  {r.designation}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-[13px] text-muted">{lignes.length ? "Entrée ajoute la ligne. Un tap sur une ligne la modifie." : "Le matériau, puis la quantité. Entrée ajoute la ligne."}</p>
+        )}
+        {erreur ? (
+          <p role="alert" className="text-[15px] font-semibold text-danger">
+            {erreur}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
