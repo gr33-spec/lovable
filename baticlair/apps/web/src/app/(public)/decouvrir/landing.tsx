@@ -267,6 +267,9 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
             </div>
           </section>
 
+          {/* /peintres : le bloc peinture juste sous l'accroche (Greg, 26 octobre 2026), puis le coup de main (point 30). */}
+          {peintres ? <BlocPeinture /> : null}
+
           {/* « D'un devis ou une simple photo… à une liste claire » : le vrai devis DE00000071 lu ligne par ligne. */}
           <section aria-labelledby="du-devis" className="mz-section mz-du-devis" data-apparait="">
             <h2 id="du-devis" className="mz-titre mz-h2 mz-souligne">
@@ -280,9 +283,6 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
               {NOM_APP} sort ton quantitatif ligne par ligne. Tu vérifies, tu ajustes si besoin.
             </p>
           </section>
-
-          {/* /peintres : le bloc peinture juste sous l'accroche (Greg, 26 octobre 2026), puis le coup de main (point 30). */}
-          {peintres ? <BlocPeinture /> : null}
 
           <CoupDeMain />
 

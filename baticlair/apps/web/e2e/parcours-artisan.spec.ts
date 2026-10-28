@@ -1317,9 +1317,8 @@ test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   // Plus de bulle flottante : une barre fine, collée en haut de l'écran quand on descend dans la liste.
-  // §50.3 : « N lignes à régler », rien d'autre (plus de « Tout est bon »).
-  const bar = list.getByRole("status").filter({ hasText: /^\d+ lignes? à régler$/ });
-  await expect(bar.getByRole("button")).toHaveCount(0);
+  // Point 2 (Greg, 28 octobre 2026) : « N lignes à vérifier », un bouton qui amène à la première ; rien d'autre.
+  const bar = list.getByRole("button", { name: /^\d+ lignes? à vérifier$/ });
   await expect(bar).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
   await expect.poll(async () => (await bar.boundingBox())?.y ?? 999).toBeLessThan(40);
@@ -1378,7 +1377,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
     // Les oranges en premier : jamais une orange après une verte.
     else expect(greenSeen, `orange après une verte (carte ${i + 1})`).toBe(false);
   }
-  await expect(list.getByRole("status").filter({ hasText: /^\d+ lignes? à régler$/ })).toBeVisible();
+  await expect(list.getByRole("button", { name: /^\d+ lignes? à vérifier$/ })).toBeVisible();
   // Nouveau cap (22 octobre) : un gros « + Ajouter » sous les cartes ; plus de petits liens sous l'envoi.
   await expect(list.getByRole("button", { name: "Ajouter un article" })).toHaveText("Ajouter");
   await expect(list.getByRole("navigation", { name: "Autres gestes sur la liste" })).toHaveCount(0);
