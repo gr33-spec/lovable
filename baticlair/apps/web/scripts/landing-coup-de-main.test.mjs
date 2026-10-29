@@ -14,6 +14,8 @@ const lire = (p) => readFileSync(join(src, p), "utf8");
 const sansCommentaires = (texte) => texte.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:"'`\\])\/\/.*$/gm, "$1");
 const INTERDITS = /\b(IA|automatiques?|précise?s?|exacte?s?)\b/i;
 
+// Le bloc « coup de main » n'est plus affiché sur l'accueil (Greg, 29 octobre 2026 : doublons) ; son texte reste mot pour
+// mot dans `CoupDeMain`, prêt à revenir.
 test("la landing : le titre, la deuxième promesse, le coup de main mot pour mot, aucun mot interdit", () => {
   const landing = sansCommentaires(lire("app/(public)/decouvrir/landing.tsx"));
   for (const t of [

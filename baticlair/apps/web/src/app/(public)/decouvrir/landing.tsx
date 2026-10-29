@@ -5,7 +5,6 @@ import { CompteurInscrits } from "@/components/inviter";
 import { Apparition, BoutonFixeInscription, CompteurVingt, PartageVitrine } from "@/components/landing-mouvement";
 import { EnteteVitrine, PiedVitrine } from "@/components/vitrine";
 import { ECART_PEINTURE, ECRANS, REGROUPEMENT_EXEMPLE } from "@/lib/landing";
-import { LectureAnimee } from "@/components/landing-lecture";
 import { ACCROCHE_APP, NOM_APP } from "@/lib/nom";
 
 /**
@@ -120,7 +119,8 @@ const CHOIX_LISTE = [
   { icone: PencilLine, titre: "Je la note moi-même" },
 ] as const;
 
-function CoupDeMain() {
+/** Retiré de l'accueil le 29 octobre 2026 (doublon de l'étape 1), gardé pour y revenir. */
+export function CoupDeMain() {
   return (
     <section aria-labelledby="coup-de-main" className="mz-section" data-apparait="">
       <h2 id="coup-de-main" className="mz-titre mz-h2 mz-souligne">
@@ -202,7 +202,8 @@ function TroisQuestions() {
  * « Par un artisan, pour les artisans » en pleine place (Greg, 28 octobre 2026, point 4) : Grégory, couvreur à Paimpol depuis
  * plus de 20 ans. Sans photo (Greg, 29 octobre 2026 : « je ne mettrai pas ma photo ») : le texte seul.
  */
-function ParUnArtisan() {
+/** Retiré de l'accueil le 29 octobre 2026 (doublon de l'accroche), gardé pour y revenir. */
+export function ParUnArtisan() {
   return (
     <section aria-labelledby="artisan" className="mz-section mz-artisan" data-apparait="">
       <div>
@@ -232,7 +233,7 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
         <EnteteVitrine />
 
         <main>
-          {/* L'accroche, à gauche ; à droite, un vrai devis lu sous les yeux du visiteur. */}
+          {/* L'accroche, à gauche ; à droite, le vrai écran de l'app dans un téléphone. */}
           <section aria-labelledby="accroche" className="mz-accroche">
             <div>
               <p className="mz-kicker mz-etiq">{ACCROCHE_APP}</p>
@@ -267,21 +268,37 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
           {/* /peintres : le bloc peinture juste sous l'accroche (Greg, 26 octobre 2026), puis le coup de main (point 30). */}
           {peintres ? <BlocPeinture /> : null}
 
-          {/* « D'un devis ou une simple photo… à une liste claire » : le vrai devis DE00000071 lu ligne par ligne. */}
-          <section aria-labelledby="du-devis" className="mz-section mz-du-devis" data-apparait="">
-            <h2 id="du-devis" className="mz-titre mz-h2 mz-souligne">
-              D&apos;un devis ou d&apos;une simple photo…
-            </h2>
-            <LectureAnimee />
-            <h2 className="mz-titre mz-h2" style={{ marginTop: 28 }}>
-              … à une liste de matériaux claire et rangée.
-            </h2>
-            <p className="mz-gris" style={{ marginTop: 12, maxWidth: "44ch" }}>
-              {NOM_APP} sort ton quantitatif ligne par ligne. Tu vérifies, tu ajustes si besoin.
-            </p>
+          {/* Greg, 29 octobre 2026 (« le comment ça marche me paraît presque suffisant », « pas mal de doublons ») : l'accroche,
+              puis comment ça marche, puis pourquoi c'est moins cher (les achats groupés), puis les questions. Retirés de
+              l'accueil car redits ailleurs : le devis lu ligne par ligne (redit par l'étape 2), « On te file un coup de main »
+              (redit par l'écran de l'étape 1 et le téléphone de l'accroche), « Par un artisan, pour les artisans » en grand
+              (redit au-dessus du titre). Les composants restent (`CoupDeMain`, `ParUnArtisan`, `LectureAnimee`). */}
+          {/* Les trois étapes, avec les vrais écrans de l'app, entiers. */}
+          <section aria-labelledby="comment" id="comment" className="mz-section" style={{ scrollMarginTop: 24 }}>
+            <div data-apparait="">
+              <Cote gauche="Trois étapes, les vrais écrans" />
+              <h2 id="comment" className="mz-titre mz-h2" style={{ marginBottom: 24 }}>
+                Comment ça marche
+              </h2>
+            </div>
+            <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
+              {ETAPES.map((e, i) => (
+                <li key={e.titre} className="mz-etape" data-inverse={i === 1 ? "" : undefined} data-apparait="">
+                  <div className="mz-etape-texte">
+                    <span className="mz-rond mz-num" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    <h3 className="mz-titre">
+                      <span className="sr-only">{i + 1}. </span>
+                      {e.titre}
+                    </h3>
+                    <p>{e.texte}</p>
+                  </div>
+                  <Ecran nom={e.ecran.nom} alt={e.ecran.alt} />
+                </li>
+              ))}
+            </ol>
           </section>
-
-          <CoupDeMain />
 
           {/* Achats groupés, la force du collectif (maquette de Greg, 28 octobre 2026) : la phrase clé, mot pour mot, puis deux
               cartes : le compteur 1 → 20 et les chasseurs d'opportunités. */}
@@ -314,9 +331,8 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
             </div>
           </section>
 
-          <TroisQuestions />
 
-          <ParUnArtisan />
+          <TroisQuestions />
 
           {/* Un regroupement, marqué « exemple » jusqu'au premier vrai : seulement sur /couvreurs (27 octobre 2026 : l'accueil
               se lit vite ; le bloc peinture ne reste que sur /peintres). */}
@@ -352,33 +368,6 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
               </div>
             </section>
           ) : null}
-
-          {/* Les trois étapes, avec les vrais écrans de l'app, entiers. */}
-          <section aria-labelledby="comment" id="comment" className="mz-section" style={{ scrollMarginTop: 24 }}>
-            <div data-apparait="">
-              <Cote gauche="Trois étapes, les vrais écrans" />
-              <h2 id="comment" className="mz-titre mz-h2" style={{ marginBottom: 24 }}>
-                Comment ça marche
-              </h2>
-            </div>
-            <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
-              {ETAPES.map((e, i) => (
-                <li key={e.titre} className="mz-etape" data-inverse={i === 1 ? "" : undefined} data-apparait="">
-                  <div className="mz-etape-texte">
-                    <span className="mz-rond mz-num" aria-hidden="true">
-                      {i + 1}
-                    </span>
-                    <h3 className="mz-titre">
-                      <span className="sr-only">{i + 1}. </span>
-                      {e.titre}
-                    </h3>
-                    <p>{e.texte}</p>
-                  </div>
-                  <Ecran nom={e.ecran.nom} alt={e.ecran.alt} />
-                </li>
-              ))}
-            </ol>
-          </section>
 
           {/* Le partage, comme les artisans se passent la page : WhatsApp et SMS. */}
           <section aria-labelledby="partage" className="mz-section mz-deux" data-apparait="">

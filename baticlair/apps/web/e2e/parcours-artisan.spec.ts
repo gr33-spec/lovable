@@ -47,15 +47,8 @@ const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.goto("/");
   // Sans session : la page publique, puis « Créer un compte » mène à l'inscription.
-  // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
+  // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche.
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Achète tes matériaux au prix des gros\.$/);
-  const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });
-  await expect(lu.getByText("N° DE00000071")).toBeVisible();
-  // Greg, 26 octobre 2026 (capture iPhone) : le vrai devis, puis les fournitures qui en sortent une à une dans « Ta liste ».
-  await expect(lu.getByRole("listitem")).toHaveCount(4);
-  await expect(lu.getByRole("listitem").last()).toBeVisible({ timeout: 15_000 });
-  await expect(lu.getByText("4 fournitures, 3 lignes sans fourniture")).toBeVisible({ timeout: 15_000 });
-  await expect(lu.getByText("Les lignes 2, 4 et 6 sont de la main-d'œuvre", { exact: false })).toBeVisible();
   // Le partage et l'aperçu WhatsApp : écrits dès le serveur avec l'adresse du site, jamais « Rejoins-nous : / » ni vercel.app.
   const html = await (await page.request.get("/")).text();
   expect(html).toContain("Rejoins-nous : http://localhost:3000/");
@@ -2597,20 +2590,20 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(questions.getByText("Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel. Tu ne paies jamais plus cher qu'aujourd'hui. Deux sorties possibles : chantier annulé ou aucune offre livrable à temps.")).toBeVisible();
   await expect(questions.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
   await expect(questions.getByText("Les listes, l'envoi à tes négoces et les achats groupés de ton secteur sont gratuits, sans limite de durée. Ton premier achat groupé est offert.")).toBeVisible();
-  // « Par un artisan, pour les artisans » en pleine place : Grégory, couvreur à Paimpol depuis plus de 20 ans ; sans photo
-  // (Greg, 29 octobre 2026 : « je ne mettrai pas ma photo »), ni emplacement pour elle.
-  await expect(page.getByRole("heading", { name: "Par un artisan, pour les artisans." })).toBeVisible();
-  await expect(page.getByText("Grégory, couvreur à Paimpol depuis plus de 20 ans.", { exact: false })).toBeVisible();
+  // Greg, 29 octobre 2026 (« pas mal de doublons », « le comment ça marche me paraît presque suffisant ») : l'accroche,
+  // comment ça marche, les achats groupés, les questions. Plus de devis lu en grand, de « coup de main », ni de bloc
+  // « Par un artisan » (il reste au-dessus du titre) ; jamais de photo.
+  await expect(page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" })).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "Trois façons de faire ta liste" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Par un artisan, pour les artisans." })).toHaveCount(0);
   await expect(page.getByText(/Photo de Grégory/)).toHaveCount(0);
-  // La lecture animée ne rejoue qu'à l'écran : on remonte en haut de page.
+  const ordre = await Promise.all(
+    ["Achète tes matériaux au prix des gros.", "Comment ça marche", "Seul, tu es un client parmi d'autres. À vingt, vous êtes le plus gros client du département.", "Ce que tu te demandes."].map(
+      async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y,
+    ),
+  );
+  expect([...ordre].sort((x, y) => x - y)).toEqual(ordre);
   await page.evaluate(() => window.scrollTo(0, 0));
-  const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });
-  await expect(lu.getByText("N° DE00000071")).toBeVisible();
-  // Greg, 26 octobre 2026 (capture iPhone) : le vrai devis, puis les fournitures qui en sortent une à une dans « Ta liste ».
-  await expect(lu.getByRole("listitem")).toHaveCount(4);
-  await expect(lu.getByRole("listitem").last()).toBeVisible({ timeout: 15_000 });
-  await expect(lu.getByText("4 fournitures, 3 lignes sans fourniture")).toBeVisible({ timeout: 15_000 });
-  await expect(lu.getByText("Les lignes 2, 4 et 6 sont de la main-d'œuvre", { exact: false })).toBeVisible();
   // Le partage et l'aperçu WhatsApp : écrits dès le serveur avec l'adresse du site, jamais « Rejoins-nous : / » ni vercel.app.
   const html = await (await page.request.get("/")).text();
   expect(html).toContain("Rejoins-nous : http://localhost:3000/");
@@ -2685,7 +2678,6 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText(/tuile/i)).toHaveCount(0);
   // Des icônes dans les cartes (maquette du 28 octobre), toutes décoratives ; jamais un dessin qui porte un sens.
   await expect(page.locator("main svg:not([aria-hidden='true'])")).toHaveCount(0);
-  await expect(page.getByRole("list", { name: "Trois façons de faire ta liste" }).getByRole("listitem")).toHaveCount(3);
   await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
   // L'abonnement (24 octobre 2026) : l'argument phare (une possibilité tant qu'il n'y a pas 3 cycles) et l'offre.
   // Greg, 27 octobre 2026, 2e message, point 34 : la phrase des tarifs, aucun montant.
