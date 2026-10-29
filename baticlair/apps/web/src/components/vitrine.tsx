@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { HEBERGEUR, PAGES_LEGALES } from "@/lib/legal";
@@ -10,8 +11,10 @@ import { BLOC_LEGAL, NOM_APP, SLOGAN_APP } from "@/lib/nom";
 export function EnteteVitrine({ negoce = false }: { negoce?: boolean }) {
   return (
     <header className="mz-entete">
-      <Link href="/" aria-label={`${NOM_APP}, accueil`} style={{ display: "inline-flex", alignItems: "center", minHeight: 44 }}>
-        <Logo fond="clair" hauteur={26} />
+      {/* La marque de la vignette (Greg, 29 octobre 2026) : l'icône jaune aux deux casques, puis le nom, sur la nuit. */}
+      <Link href="/" aria-label={`${NOM_APP}, accueil`} className="mz-marque" style={{ minHeight: 44 }}>
+        <Image src="/icon-192.png" alt="" width={34} height={34} priority />
+        <Logo fond="sombre" hauteur={26} />
       </Link>
       <nav aria-label="Menu" className="mz-nav">
         {negoce ? null : (

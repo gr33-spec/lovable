@@ -24,7 +24,7 @@ const buttonClasses: Record<ButtonVariant, string> = {
   ink: "bg-ink text-white active:opacity-90",
 };
 
-const BUTTON = "pressable inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-6 text-[16px] font-semibold";
+const BUTTON = "pressable inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-6 text-[16px] font-extrabold";
 
 export function Button({
   variant = "primary",

@@ -10,29 +10,31 @@
  * Pour changer la teinte de la marque, ne modifier que les jetons accent.
  */
 @theme {
-  --color-ink: #0d0f14;
+  --color-ink: #15110c;
   /* DIRECTION « CHANTIER HAUTE VISIBILITÉ » (Greg, 23 octobre au soir : « ça ne donne pas envie, je veux un truc qui
      déchire ») : du noir profond et UN jaune signal, comme un gilet de chantier. La landing est sombre d'un bloc ; l'app
      reste claire mais porte la même identité (boutons jaunes à texte noir, carte du mois noire au chrono jaune, pastille
      jaune pâle pour l'onglet actif). Une seule couleur de marque ; ok / warn / danger restent des couleurs d'état. */
-  --color-ground: #f4f4f1;
+  /* DA de la vignette Mobiiz (Greg, 29 octobre 2026) : les mêmes jetons, réchauffés (encre et nuit brun-noir, fond et
+     lignes chauds, gris chaud au même contraste AA) ; le jaune ne change pas. */
+  --color-ground: #f3f1eb;
   --color-surface: #ffffff;
   --color-accent-soft: #fff3b8;
-  --color-on-accent: #0d0f14;
+  --color-on-accent: #15110c;
   --color-accent-hover: #ebbd00;
-  --color-night: #0d0f14;
-  --color-night-2: #171a21;
-  --color-tint-lavender: #f0f0ec;
+  --color-night: #120e0a;
+  --color-night-2: #1d1711;
+  --color-tint-lavender: #efebe2;
   --color-tint-sky: #fff3b8;
   --color-tint-mint: #e6f6ec;
   --color-tint-peach: #fff3b8;
-  --color-muted: #5f6774;
+  --color-muted: #625b4f;
   /* Plus de quatrième gris : `subtle` vaut `muted`. */
-  --color-subtle: #5f6774;
-  --color-line: #e4e7ec;
+  --color-subtle: #625b4f;
+  --color-line: #e5e0d5;
   --color-accent: #ffcc00;
   /* Le jaune n'est jamais un texte sur fond clair : « accent-text » (liens, chrono, libellés accent) est l'encre. */
-  --color-accent-text: #0d0f14;
+  --color-accent-text: #15110c;
   --color-accent-on-dark: #ffcc00;
   --color-ok-bg: #ddf5ec;
   --color-ok: #0b7a53;
@@ -46,7 +48,8 @@
   --color-danger: #b3360f;
   /* Une seule famille (Plus Jakarta Sans) : `font-display` vaut la même. */
   --font-sans: var(--font-jakarta), system-ui, sans-serif;
-  --font-display: var(--font-bricolage), var(--font-jakarta), system-ui, sans-serif;
+  /* Titres en Plus Jakarta Sans très grasse, comme la vignette (29 octobre 2026) ; Bricolage n'est plus utilisée à l'écran. */
+  --font-display: var(--font-jakarta), system-ui, sans-serif;
   /* Trois graisses : 400 (texte), 600 (libellés, boutons), 800 (titres). Les utilitaires y sont ramenés : aucun écran
      ne peut en sortir. */
   --font-weight-medium: 400;
@@ -61,8 +64,8 @@
   --radius-3xl: 24px;
   --radius-4xl: 24px;
   /* Une seule ombre, très légère. Les anciennes (`shadow-float`, `shadow-cta`) valent la même. */
-  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 2px 8px rgba(16, 24, 40, 0.05);
-  --shadow-float: 0 8px 30px rgba(16, 24, 40, 0.12), 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-card: 0 1px 2px rgba(40, 28, 10, 0.05), 0 2px 8px rgba(40, 28, 10, 0.06);
+  --shadow-float: 0 8px 30px rgba(40, 28, 10, 0.14), 0 1px 2px rgba(40, 28, 10, 0.06);
   /* Apparition douce (landing, panneaux) : 200 ms au plus, coupée par prefers-reduced-motion. */
   --animate-rise: bc-rise 0.2s ease-out both;
   @keyframes bc-rise {
@@ -214,5 +217,12 @@ html[data-reveal-pret] [data-reveal] {
   html[data-reveal-pret] [data-reveal] {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Les titres de l'app en Plus Jakarta Sans très grasse, serrés comme ceux de la vignette (Greg, 29 octobre 2026). */
+@layer utilities {
+  .font-display {
+    letter-spacing: -0.025em;
   }
 }

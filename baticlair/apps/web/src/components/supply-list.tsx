@@ -458,7 +458,7 @@ export function SupplyList({
                 </Button>
               ) : (
                 <Button
-                  className="min-w-0 flex-1 gap-1.5 px-3 text-[15px] whitespace-nowrap shadow-card!"
+                  className="min-w-0 flex-1 gap-1.5 px-3 text-[15px] font-bold! tracking-[-0.01em] whitespace-nowrap shadow-card!"
                   pending={pending}
                   onClick={() => {
                     if (toCheck.length === 0) return onSend();

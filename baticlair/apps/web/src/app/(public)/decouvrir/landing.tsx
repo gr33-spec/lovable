@@ -162,7 +162,7 @@ export function BoutonInscription() {
   return (
     <span className="mz-cta">
       <Link href="/inscription" className="mz-bouton">
-        {INSCRIPTION.bouton}
+        {INSCRIPTION.bouton} <ArrowRight size={20} strokeWidth={2.6} aria-hidden="true" />
       </Link>
       <span className="mz-cta-sous">{INSCRIPTION.sous}</span>
     </span>
