@@ -315,8 +315,9 @@ export function argumentTarif(moyenne: { cycles: number; parCommande: number | n
   if (moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && moyenne.parCommande && moyenne.parCommande > 0) {
     return `Gratuit pour commencer. Dès ${prix} HT par mois : en moyenne, nos artisans ont économisé ${eurosRonds(moyenne.parCommande)} par regroupement.`;
   }
-  // Recentrage (Greg, 25 octobre 2026) : aucune promesse d'économie chiffrée ; « HT » ajouté (DECISIONS.md).
-  return `Gratuit pour commencer. Dès ${prix} HT par mois pour comparer et acheter en groupe.`;
+  // Recentrage (Greg, 25 octobre 2026) : aucune promesse d'économie chiffrée ; « HT » ajouté (DECISIONS.md). Greg, 29 octobre
+  // 2026 : comparer les prix de ses négoces est gratuit ; l'abonnement, c'est pour les achats groupés.
+  return `Gratuit pour tes listes et tes négoces. Dès ${prix} HT par mois pour les achats groupés.`;
 }
 
 

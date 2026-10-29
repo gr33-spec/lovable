@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 /** La phrase de possibilité, mot pour mot (Greg, 24 octobre 2026) ; remplacée par la vraie moyenne dès 3 cycles publiés. */
-export const ARGUMENT_PAR_DEFAUT = "Gratuit pour commencer. Dès 29 € HT par mois pour comparer et acheter en groupe.";
+export const ARGUMENT_PAR_DEFAUT = "Gratuit pour tes listes et tes négoces. Dès 29 € HT par mois pour les achats groupés.";
 
 /** L'argument phare des tarifs : la phrase de l'API (`/v1/public/tarif`), la phrase de possibilité en attendant. */
 export function ArgumentTarif({ className = "" }: { className?: string }) {

@@ -284,7 +284,7 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(r.perso).toHaveLength(1);
     expect(r.offert).toBe(true);
 
-    // Point 24 : trois lectures IA offertes en tout (pas par mois), puis « Note ta liste à la main ou abonne-toi. »
+    // Point 24 : trois lectures IA offertes en tout (pas par mois), puis la phrase de `TARIFS.paywallListes`.
     for (const mois of ["2026-07", "2026-08", "2026-09"])
       await ctx.prisma.aiAnalysis.create({ data: { companyId: c.companyId, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote", status: "completed", billable: true, billingMonth: mois } });
     const meter = ctx.app.get(AnalysisMeter);

@@ -2589,7 +2589,8 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(questions.getByRole("term")).toHaveText(["Je suis obligé de commander ?", "Je garde mes négoces ?", "C'est gratuit ?"]);
   await expect(questions.getByText("Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel. Tu ne paies jamais plus cher qu'aujourd'hui. Deux sorties possibles : chantier annulé ou aucune offre livrable à temps.")).toBeVisible();
   await expect(questions.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
-  await expect(questions.getByText("Les listes, l'envoi à tes négoces et les achats groupés de ton secteur sont gratuits, sans limite de durée. Ton premier achat groupé est offert.")).toBeVisible();
+  // Greg, 29 octobre 2026 (« on dit que c'est gratuit alors qu'il y a une partie payante ») : la réponse dit les deux.
+  await expect(questions.getByText("Oui pour tes listes et tes négoces, sans limite de temps. Les achats groupés sont sur abonnement, et le premier est offert.", { exact: false })).toBeVisible();
   // Greg, 29 octobre 2026 (« pas mal de doublons », « le comment ça marche me paraît presque suffisant ») : l'accroche,
   // comment ça marche, les achats groupés, les questions. Plus de devis lu en grand, de « coup de main », ni de bloc
   // « Par un artisan » (il reste au-dessus du titre) ; jamais de photo.
@@ -2612,7 +2613,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // visiteur arrive sur l'accroche, « Par un artisan, pour les artisans », « Dès 29 € », l'inscription ; aucune démo d'office.
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
   await expect(page.getByText("Par un artisan, pour les artisans.").first()).toBeVisible();
-  await expect(page.getByText(/^Gratuit\. Ton premier achat groupé est offert\./)).toBeVisible();
+  await expect(page.getByText(/^Gratuit pour tes listes et tes négoces\. Les achats groupés sont sur abonnement : le premier est offert\./)).toBeVisible();
   await expect(page.getByRole("link", { name: "Créer mon compte gratuit" }).first()).toBeVisible();
   await page.reload();
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
@@ -3446,13 +3447,16 @@ test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formul
   await expect(page).toHaveURL(/\/tarifs$/);
   await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
   // Greg, 27 octobre 2026, 2e message, points 26 et 34 : la phrase des tarifs, aucun montant, plus d'essai.
-  await expect(page.getByText("Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert.", { exact: true })).toBeVisible();
+  // Greg, 29 octobre 2026 : la même phrase que la landing, ce qui est gratuit et ce qui est payant.
+  await expect(page.getByText("Gratuit pour tes listes et tes négoces. Les achats groupés sont sur abonnement : le premier est offert.", { exact: true })).toBeVisible();
   for (const etape of ["Commence gratuitement", "Ton premier achat groupé est offert", "Abonne-toi si ça te sert"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   const ga = page.getByRole("region", { name: "Gratuit ou abonné" });
-  await expect(ga.getByText("· Envoyées à tes négoces")).toBeVisible();
-  await expect(ga.getByText("· Les achats groupés de ton métier")).toBeVisible();
+  await expect(ga.getByText("· Envoyées à tes négoces, leurs prix comparés")).toBeVisible();
+  await expect(ga.getByText("· 3 listes préparées pour toi depuis un devis ou une photo")).toBeVisible();
+  await expect(ga.getByText("· Rejoindre les achats groupés de ton métier")).toBeVisible();
+  await expect(page.getByText("Qu'est-ce qui est payant ?")).toBeVisible();
   await expect(page.getByText(/\d+ € HT/)).toHaveCount(0);
   await expect(page.getByText(/essai/i)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Gratuit pour les négoces" })).toBeVisible();

@@ -52,6 +52,7 @@ export * from "./groupe/rapport-mensuel.js";
 export * from "./groupe/nom.js";
 export * from "./groupe/marque.js";
 export * from "./groupe/titres.js";
+export * from "./groupe/tarifs.js";
 export * from "./groupe/reponse-negoce.js";
 export * from "./groupe/adresse-mobiiz.js";
 export * from "./groupe/adresse-mobiiz-phrases.js";

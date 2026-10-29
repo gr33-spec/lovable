@@ -1,4 +1,5 @@
 import { NOM_APP } from "./marque.js";
+import { TARIFS } from "./tarifs.js";
 
 /**
  * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message : « Feu vert, avec des changements importants ») : du code
@@ -206,7 +207,8 @@ export function phraseSuggestion(l: { quantite: string; libelle: string }): stri
 
 export const PHRASE_PREMIER_OFFERT = "Ton premier achat groupé est offert.";
 export const PHRASE_ABONNEMENT_ACHAT = "Pour rejoindre d'autres achats groupés, abonne-toi.";
-export const PHRASE_LECTURES_EPUISEES = "Note ta liste à la main ou abonne-toi.";
+// Greg, 29 octobre 2026 (« pas clair ») : la phrase dit ce qui reste gratuit (`TARIFS`, tarifs.ts).
+export const PHRASE_LECTURES_EPUISEES = TARIFS.paywallListes;
 
 /** S'engager dans un achat groupé : abonné, ou le tout premier (offert). */
 export function droitAchatGroupe(a: { abonne: boolean; engagementsPasses: number }): { ok: boolean; offert: boolean; phrase: string | null } {

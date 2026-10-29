@@ -6,6 +6,7 @@ import { OffresAbonnement } from "@/components/offres-abonnement";
 import { BackButton, Button, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError, type Abonnement, type FactureAbonnement, type Formule } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
 
 const date = (iso: string | null) => (iso ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(new Date(iso)) : "");
 const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("internal_error", 500));
@@ -84,7 +85,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
         {a.acces === "gratuit" ? (
           <>
             <p className="text-[20px] font-extrabold">Gratuit</p>
-            <p className="text-[16px]">Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert.</p>
+            <p className="text-[16px]">{TARIFS.enUneLigne}</p>
             <OffresAbonnement offres={a.offres} choisie={formule} onChoisir={setFormule} />
             <Button variant="secondary" onClick={() => void run("payer", () => continuerAbonnement(formule))} pending={pending === "payer"} className="self-start">
               M&apos;abonner

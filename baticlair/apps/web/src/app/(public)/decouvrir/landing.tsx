@@ -6,6 +6,7 @@ import { Apparition, BoutonFixeInscription, CompteurVingt, PartageVitrine } from
 import { EnteteVitrine, PiedVitrine } from "@/components/vitrine";
 import { ECART_PEINTURE, ECRANS, REGROUPEMENT_EXEMPLE } from "@/lib/landing";
 import { ACCROCHE_APP, NOM_APP } from "@/lib/nom";
+import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
 
 /**
  * LA PAGE D'ACCUEIL PUBLIQUE, « NIVEAU STUDIO » (Greg, 26 octobre 2026, direction artistique validée) : une page qui parle
@@ -176,7 +177,8 @@ export const TROIS_QUESTIONS = [
     r: "Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel. Tu ne paies jamais plus cher qu'aujourd'hui. Deux sorties possibles : chantier annulé ou aucune offre livrable à temps.",
   },
   { q: "Je garde mes négoces ?", r: "Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part." },
-  { q: "C'est gratuit ?", r: "Les listes, l'envoi à tes négoces et les achats groupés de ton secteur sont gratuits, sans limite de durée. Ton premier achat groupé est offert." },
+  // Greg, 29 octobre 2026 (« on dit que c'est gratuit alors qu'il y a une partie payante ») : la réponse dit les deux.
+  TARIFS.question,
 ] as const;
 
 function TroisQuestions() {
@@ -253,9 +255,9 @@ export function Landing({ cible, origine }: { cible?: "couvreurs" | "peintres"; 
                 <BoutonInscription />
                 <DemoSurBouton className="mz-lien" />
               </div>
-              {/* Point 34 : aucun montant ; la phrase entière est sur /tarifs, ici seulement l'essentiel. */}
+              {/* Point 34 : aucun montant. Greg, 29 octobre 2026 : ce qui est gratuit et ce qui est payant, en une ligne. */}
               <p className="mz-prix-detail">
-                Gratuit. Ton premier achat groupé est offert. <Link href="/tarifs">Voir les tarifs</Link>
+                {TARIFS.enUneLigne} <Link href="/tarifs">Voir les tarifs</Link>
               </p>
             </div>
 

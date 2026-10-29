@@ -39,6 +39,7 @@ test("l'app : trois choix, dans le même ordre ; la page Tarifs sans montant", (
   assert.deepEqual([...ordre].sort((a, b) => a - b), ordre);
   assert.doesNotMatch(nouveau, INTERDITS);
   const tarifs = sansCommentaires(lire("app/(public)/tarifs/page.tsx"));
-  assert.ok(tarifs.includes("Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert."));
+  // Greg, 29 octobre 2026 : la phrase vient de `TARIFS` (domaine), la même partout.
+  assert.ok(tarifs.includes("TARIFS.enUneLigne"));
   assert.doesNotMatch(tarifs, /\d+\s?€/);
 });

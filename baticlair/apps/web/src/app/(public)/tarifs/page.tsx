@@ -3,10 +3,11 @@ import Link from "next/link";
 import { LiensLegaux } from "@/components/legal";
 import { ButtonLink } from "@/components/ui";
 import { NOM_APP } from "@/lib/nom";
+import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
 
 export const metadata: Metadata = {
   title: `Tarifs — ${NOM_APP}`,
-  description: "Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert.",
+  description: TARIFS.enUneLigne,
 };
 
 /**
@@ -14,12 +15,10 @@ export const metadata: Metadata = {
  * négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert. » Aucun montant ici (le prix est un
  * réglage, montré dans « Mon abonnement »). Plus d'essai (point 26).
  */
-const PHRASE_TARIFS = "Gratuit pour faire tes listes et les envoyer à tes négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert.";
+// Greg, 29 octobre 2026 (« pas clair ») : les mots viennent de `TARIFS` (domaine), les mêmes que la landing et l'app.
+const PHRASE_TARIFS = TARIFS.enUneLigne;
 
-const FORMULES = [
-  { titre: "Gratuit", sous: "sans limite de temps", points: ["Tes listes, notées à la main", "Envoyées à tes négoces", "Les achats groupés de ton secteur, pour voir", "3 listes préparées depuis un devis ou une photo"] },
-  { titre: "Abonné", sous: "pour les achats groupés", points: ["Les achats groupés de ton métier", "Ta liste chez le meilleur négoce, livraison comprise", "Listes préparées depuis tes devis et tes photos, sans limite", "Ton premier achat groupé est offert"] },
-] as const;
+const FORMULES = [TARIFS.gratuit, TARIFS.abonne] as const;
 
 const ETAPES = [
   { titre: "Commence gratuitement", texte: "Inscription en deux minutes, sans carte bancaire." },
@@ -28,7 +27,8 @@ const ETAPES = [
 ] as const;
 
 const FAQ = [
-  { q: "Qu'est-ce qui est gratuit ?", r: "Faire tes listes à la main et les envoyer à tes négoces, sans limite de temps. Tu vois aussi les achats groupés de ton secteur." },
+  { q: "Qu'est-ce qui est gratuit ?", r: "Faire tes listes à la main, les envoyer à tes négoces et comparer leurs prix, sans limite de temps. On te prépare aussi tes 3 premières listes depuis un devis ou une photo, et tu vois les achats groupés de ton secteur." },
+  { q: "Qu'est-ce qui est payant ?", r: "Rejoindre les achats groupés (le premier est offert), et les listes préparées depuis tes devis et tes photos au-delà des 3 premières." },
   { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin de la période payée, puis rien n'est plus prélevé." },
   { q: "Est-ce que j'ai des factures ?", r: "Oui, une à chaque paiement, émise par BATI INVEST, avec la TVA. Elles sont toutes dans « Mes factures »." },
   { q: "Un achat groupé, ça m'engage à quoi ?", r: "À commander tes quantités chez le moins cher entre la meilleure offre du groupe et ton négoce habituel. Deux sorties seulement : chantier annulé, ou aucune offre livrable." },

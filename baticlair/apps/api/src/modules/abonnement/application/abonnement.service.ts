@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import {
+  TARIFS,
   BANDEAU_MODE_TEST,
   EMETTEUR_FACTURES,
   MENTIONS_EDITEUR,
@@ -203,7 +204,7 @@ export class AbonnementService {
       tvaIntra: p.ligne?.tvaIntra ?? null,
       bandeau: this.actif ? (bandeauGrace(etat) ?? (gratuit ? null : bandeauEssai(etat))) : null,
       bandeauRouge: this.actif && etat.acces === "grace",
-      paywall: { phrase: gratuit ? "Abonne-toi pour profiter des achats groupés." : phrasePaywall(reglages), economie: gratuit ? null : phraseEconomiePremierCycle(ecart) },
+      paywall: { phrase: gratuit ? TARIFS.paywallAchatGroupe : phrasePaywall(reglages), economie: gratuit ? null : phraseEconomiePremierCycle(ecart) },
     };
   }
 
