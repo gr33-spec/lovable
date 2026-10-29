@@ -149,6 +149,11 @@ model Company {
   siretVerifieLe       DateTime?
   phone                String?
   contactEmail         String?
+  /// LOT FINAL, point 1 (Greg) : le prénom de l'artisan, demandé au premier envoi avec le SIRET et le portable (signature).
+  prenom               String?
+  /// LOT FINAL, point 4 : le message modifié dans l'aperçu, gardé comme modèle personnel ; vouvoiement par défaut.
+  modeleMessage        String?   @map("modele_message")
+  tutoieNegoces        Boolean   @default(false) @map("tutoie_negoces")
   /// RGPD (24 octobre 2026) : l'artisan a coupé les e-mails de notification (lien « Ne plus recevoir ces e-mails ») ; les
   /// e-mails indispensables (compte, bons de commande) partent toujours.
   emailsCoupesLe       DateTime?
@@ -700,6 +705,9 @@ model PriceRequestRecipient {
   negoceId      String?   @db.Uuid
   /// R7 : l'étiquette de réponse de cette demande (`adresse+r<étiquette>@mobiiz.fr`, « [réf. …] » dans l'objet).
   etiquette     String?   @unique
+  /// LOT FINAL, point 6 : l'artisan prévenu que ce négoce n'a pas répondu, à mi-délai puis la veille de la date limite.
+  rappelMiLe     DateTime? @map("rappel_mi_le") @db.Timestamptz(3)
+  rappelVeilleLe DateTime? @map("rappel_veille_le") @db.Timestamptz(3)
 
   priceRequest PriceRequest @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
   emailsRecus  EmailRecuArtisan[]
@@ -2058,6 +2066,9 @@ model NegoceParticipant {
   /// « Je l'ai prévenu », le rappel de la veille, le message du jour de l'envoi.
   prevenuLe      DateTime? @map("prevenu_le") @db.Timestamptz(3)
   rappelLe       DateTime? @map("rappel_le") @db.Timestamptz(3)
+  /// LOT FINAL, point 6 : l'artisan prévenu que SON négoce n'a pas répondu à la consultation (mi-délai, veille).
+  rappelMiLe     DateTime? @map("rappel_mi_le") @db.Timestamptz(3)
+  rappelVeilleLe DateTime? @map("rappel_veille_le") @db.Timestamptz(3)
   partiLe        DateTime? @map("parti_le") @db.Timestamptz(3)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
@@ -2108,6 +2119,8 @@ model ConsultationAchatGroupe {
   vuLe                  DateTime? @map("vu_le") @db.Timestamptz(3)
   pdfTelechargeLe       DateTime? @map("pdf_telecharge_le") @db.Timestamptz(3)
   excelTelechargeLe     DateTime? @map("excel_telecharge_le") @db.Timestamptz(3)
+  /// LOT FINAL, point 6 : la relance factuelle au négoce, à mi-délai (une seule).
+  relanceLe             DateTime? @map("relance_le") @db.Timestamptz(3)
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   regroupement RegroupementNegocie @relation(fields: [regroupementId], references: [id], onDelete: Cascade)

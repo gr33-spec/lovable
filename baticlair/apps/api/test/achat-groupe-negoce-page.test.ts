@@ -46,7 +46,7 @@ const LITEAU = "Liteaux 27×38";
 const publique = () => request(ctx.app.getHttpServer());
 const jour = (jours: number) => new Date(Date.now() + jours * 86_400_000).toISOString().slice(0, 10);
 const tache = (maintenant: string) => publique().get(`/v1/internal/achats-groupes?maintenant=${encodeURIComponent(maintenant)}`).set("authorization", "Bearer secret-de-la-tache").expect(200);
-const jetonDe = (email: string) => /\/achat-groupe\/([A-Za-z0-9_-]+)/.exec(mailsVers(ctx, email).filter((m) => m.subject.startsWith("Demande de prix groupée")).at(-1)!.text)![1]!;
+const jetonDe = (email: string) => /\/achat-groupe\/([A-Za-z0-9_-]+)/.exec(mailsVers(ctx, email).filter((m) => / : achat groupé /.test(m.subject)).at(-1)!.text)![1]!;
 const binaire = (jeton: string, fichier: string) => publique().get(`/v1/public/achat-groupe/${jeton}/${fichier}`).buffer(true).parse((res, cb) => {
   const morceaux: Buffer[] = [];
   res.on("data", (d: Buffer) => morceaux.push(d));
@@ -75,8 +75,9 @@ async function deuxNegoces() {
 describe("la page du négoce : PDF, Excel, trois façons de répondre", { timeout: 240_000 }, () => {
   it("la demande en PDF : jointe à l'e-mail, téléchargeable, sans le client d'un autre négoce ; l'admin voit vu / PDF / Excel / répondu", async () => {
     const { achat, x, y } = await deuxNegoces();
-    const mailX = mailsVers(ctx, "x@negoce.fr").find((m) => m.subject.startsWith("Demande de prix groupée"))!;
-    expect(mailX.attachments?.map((p) => [p.filename, p.contentType])).toEqual([["demande-mobiiz.pdf", "application/pdf"]]);
+    const mailX = mailsVers(ctx, "x@negoce.fr").find((m) => / : achat groupé /.test(m.subject))!;
+    expect(mailX.attachments?.map((p) => [p.filename, p.contentType])).toEqual([["demande-mobiiz.pdf", "application/pdf"], ["demande-mobiiz.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]]);
+    expect(Buffer.from(mailX.attachments![1]!.contentBase64, "base64").subarray(0, 2).toString()).toBe("PK");
     expect(Buffer.from(mailX.attachments![0]!.contentBase64, "base64").subarray(0, 5).toString()).toBe("%PDF-");
 
     const pdf = (await binaire(x, "demande.pdf").expect(200)).body as Buffer;
@@ -202,6 +203,28 @@ wb.save(sys.argv[2])
     expect(texteOffre).toContain("non fourni");
     // Une seule offre : la deuxième est refusée.
     expect((await publique().post(`/v1/public/achat-groupe/${x}`).send({ accepteConditions: true, prix: { [cleArdoise]: 1, [cleLiteau]: 1 } }).expect(409)).body.error.details.reason).toBe("deja_repondu");
+  });
+
+  it("lot final, point 6 : à mi-délai, le négoce sans réponse est rappelé et l'artisan prévenu pour SES négoces ; la veille encore ; rien après la réponse", async () => {
+    const { achat, x } = await deuxNegoces();
+    const consultation = await ctx.prisma.consultationAchatGroupe.findFirstOrThrow({ where: { email: "x@negoce.fr" } });
+    const envoyeLe = consultation.envoyeLe!.getTime();
+    const limite = achat.reponseAvantLe!.getTime();
+    const mi = new Date(envoyeLe + (limite - envoyeLe) / 2 + 60_000).toISOString();
+    expect((await tache(mi)).body.relances).toEqual({ negoces: 2, artisans: 2 });
+    const rappelX = mailsVers(ctx, "x@negoce.fr").at(-1)!;
+    expect(rappelX.subject).toBe("Toitures 1 attend votre offre");
+    expect(rappelX.text).toMatch(/Votre client Toitures 1 attend votre offre\. Les réponses sont closes le \d+ \S+\./);
+    const artisan1 = mailsVers(ctx, "artisan1@toitures.fr").at(-1)!;
+    expect(artisan1.subject).toBe("Négoce X n'a pas encore répondu");
+    expect(artisan1.text).toContain("Négoce X n'a pas encore répondu. Appelle ton commercial : ta demande est peut-être dans ses spams. Plus il y a de négoces qui répondent, meilleur est le prix pour tout le groupe.");
+    // Jamais le négoce d'un autre artisan.
+    expect(mailsVers(ctx, "artisan1@toitures.fr").some((m) => m.subject.includes("Négoce Y"))).toBe(false);
+    // L'ancien lien reste bon ; X répond : plus rien pour lui, Y garde son rappel de la veille.
+    await publique().get(`/v1/public/achat-groupe/${x}`).expect(200);
+    await ctx.prisma.consultationAchatGroupe.update({ where: { id: consultation.id }, data: { reponduLe: new Date() } });
+    expect((await tache(new Date(limite - 3_600_000).toISOString())).body.relances).toEqual({ negoces: 0, artisans: 1 });
+    expect((await tache(new Date(limite - 1_800_000).toISOString())).body.relances).toEqual({ negoces: 0, artisans: 0 });
   });
 });
 

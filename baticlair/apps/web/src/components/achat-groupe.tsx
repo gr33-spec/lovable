@@ -9,6 +9,8 @@ import { Button, ButtonLink, Card, Field, INPUT } from "@/components/ui";
 import { api, messageErreur, type NextAction } from "@/lib/api";
 import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type Catalogue, type NoeudCatalogue, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
 import { useResource } from "@/lib/use-resource";
+import { TON as TON_MOBIIZ } from "../../../../packages/domain/src/groupe/ton";
+import { PHRASE_ADRESSE_GENERIQUE, PHRASE_EMAIL_COMMERCIAL, estAdresseGenerique } from "../../../../packages/domain/src/groupe/contact-negoce";
 
 /**
  * L'ACHAT GROUPÉ PAR MÉTIER, CÔTÉ ÉCRAN (Greg, 27 octobre 2026, 2e message), REFAIT « ULTRA INTUITIF » (Greg, même jour :
@@ -121,7 +123,7 @@ export function CarteAchatOuvert({ a }: { a: AchatOuvert }) {
         <span className="text-[15px]">
           Ajoute ta liste avant le {dateFr(a.clotureLe)}.{a.dateBesoin ? ` Livraison avant le ${dateFr(a.dateBesoin)}.` : ""}
         </span>
-        {a.entreprises ? <span className="text-[14px] text-muted">{a.entreprises} entreprises déjà dedans</span> : null}
+        {a.entreprises ? <span className="text-[14px] text-muted">{a.entreprises} artisans du secteur déjà dedans</span> : null}
       </div>
       <JaugeVolume j={a.jauge} />
       <ButtonLink href={`/achats-groupes/lancer?rejoindre=${a.id}&titre=${encodeURIComponent(a.titre)}`} variant="secondary">
@@ -182,6 +184,7 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
   const { data } = useResource(fetcher);
   const [nom, setNom] = useState("");
   const [tel, setTel] = useState("");
+  const [prenom, setPrenom] = useState("");
   const cle = (n: NegoceChoisi) => ("supplierId" in n ? `s:${n.supplierId}` : "negoceId" in n ? `n:${n.negoceId}` : `e:${n.email.toLowerCase()}`);
   const deja = new Set(choisis.map(cle));
   const ajouter = (n: NegoceChoisi) => !deja.has(cle(n)) && onChange([...choisis, n]);
@@ -195,6 +198,7 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
     setCherche("");
     setNom("");
     setTel("");
+    setPrenom("");
   };
   return (
     <fieldset className="flex flex-col gap-3">
@@ -223,11 +227,12 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
       ) : null}
       <Field
         id="negoce-email"
-        label={choisis.length || propositions.length ? "Ou l'e-mail d'un autre négoce" : "E-mail du négoce"}
+        label={choisis.length || propositions.length ? "Ou l'e-mail du commercial d'un autre négoce" : "E-mail de ton commercial"}
+        hint={PHRASE_EMAIL_COMMERCIAL}
         type="email"
         inputMode="email"
         autoComplete="off"
-        placeholder="commandes@negoce.fr"
+        placeholder="paul.le-goff@negoce.fr"
         value={email}
         onChange={(e) => {
           setEmail(e.target.value);
@@ -246,13 +251,20 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
         </Button>
       ) : valide ? (
         <div className="flex flex-col gap-3 rounded-xl bg-ground p-3">
+          {/* Lot final, point 2 : une adresse générale se signale gentiment, sans bloquer. */}
+          {estAdresseGenerique(courriel) ? (
+            <p role="status" className="text-sm font-semibold text-warn">
+              {PHRASE_ADRESSE_GENERIQUE}
+            </p>
+          ) : null}
           <Field id="negoce-nom" label="Nom du négoce" value={nom} onChange={(e) => setNom(e.target.value)} />
+          <Field id="negoce-prenom" label="Prénom du commercial (si tu le connais)" value={prenom} onChange={(e) => setPrenom(e.target.value)} />
           <Field id="negoce-tel" label="Son téléphone (pour le prévenir)" type="tel" inputMode="tel" value={tel} onChange={(e) => setTel(e.target.value)} />
           <Button
             variant="ink"
             disabled={!nom.trim()}
             onClick={() => {
-              ajouter({ nom: nom.trim(), email: courriel, telephone: tel.trim() || null });
+              ajouter({ nom: nom.trim(), email: courriel, telephone: tel.trim() || null, prenom: prenom.trim() || null });
               vider();
             }}
           >
@@ -287,6 +299,7 @@ export function Engagement({ droit, texte, coche, onCoche }: { droit: Droit; tex
           </li>
         ))}
       </ul>
+      <p className="text-[15px] font-semibold">{TON_MOBIIZ.engagement}</p>
       <label className={`flex items-start gap-3 rounded-xl border-2 p-4 text-[16px] font-semibold ${coche ? "border-ink bg-surface" : "border-line bg-surface"}`}>
         <input type="checkbox" checked={coche} onChange={(e) => onCoche(e.target.checked)} className="mt-0.5 size-6 shrink-0 accent-accent" />
         <span>{texte.phrase}</span>
@@ -920,6 +933,7 @@ function Resultat({ id, d, r, pending, geste }: { id: string; d: DetailAchat; r:
     <section aria-label="Les offres" className="flex flex-col gap-3">
       {r.phrase ? <p className="rounded-xl bg-ok-bg p-4 text-[17px] font-bold text-ok">{r.phrase}</p> : null}
       {r.commandeChez ? <p className="text-[15px] font-semibold">Commandé chez {r.commandeChez}.</p> : null}
+      {r.commandeChez && r.economie ? <p className="rounded-xl bg-ok-bg p-3 text-[15px] font-bold text-ok">{r.economie}</p> : null}
       {d.commandeAvantLe && d.actions.commander ? <p className="text-[14px] text-muted">Commande avant le {dateFr(d.commandeAvantLe)}.</p> : null}
       {meilleure ? carte(meilleure, true) : null}
       {autres.length ? (
@@ -1076,6 +1090,7 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
     return (
       <div className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
         <p className="text-[16px] font-bold">{data.suggestion ? data.suggestion.phrase : `Achat groupé ouvert dans ton secteur : ${ouvert!.titre}.`}</p>
+        <p className="text-[15px]">{TON_MOBIIZ.avantAchatGroupe}</p>
         <Button onClick={() => setCochees(data.suggestion ? data.suggestion.keys : [])}>
           <Users size={18} aria-hidden="true" /> Mettre en achat groupé
         </Button>

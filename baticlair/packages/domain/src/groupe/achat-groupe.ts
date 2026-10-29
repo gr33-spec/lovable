@@ -3,6 +3,7 @@ import type { FamilleGroupe } from "./groupe.js";
 import { NOM_APP } from "./marque.js";
 import { referenceStricte, type ReferenceStricte } from "./reference-stricte.js";
 import { SEUIL_ANONYMAT_DEFAUT, SEUIL_VOLUME_MIN_DEFAUT } from "./regroupements.js";
+import { phraseCarteGroupe } from "./ton.js";
 
 /**
  * L'ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026 : « l'achat groupé devient le cœur de l'app, en automatique ») :
@@ -209,7 +210,7 @@ export interface EtatCarte {
   sousTitre: string | null;
 }
 
-const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d);
+const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d).replace(/^1 /, "1er ");
 const PREVIENT = "On te prévient dès qu'il y a du nouveau.";
 
 /**
@@ -234,8 +235,9 @@ export function etatCarte(
     return { etat: "consultation", titre: `Négoces consultés, réponse le ${a.reponseAvantLe ? jourFr(a.reponseAvantLe) : "bientôt"}`, dateCle: a.reponseAvantLe ? jourFr(a.reponseAvantLe) : null, sousTitre: PREVIENT };
   const cloture = a.clotureLe ? jourFr(a.clotureLe) : null;
   if (a.entreprises <= 1) return { etat: "seul", titre: `Seul jusqu'au ${cloture ?? "…"}`, dateCle: cloture, sousTitre: PREVIENT };
-  if (a.entreprises >= seuilAnonymat && a.total) return { etat: "regroupe_total", titre: `Regroupé ${seuilAnonymat}+ : ${a.total}`, dateCle: cloture, sousTitre: PREVIENT };
-  return { etat: "regroupe", titre: "Regroupé avec d'autres entreprises", dateCle: cloture, sousTitre: PREVIENT };
+  // Lot final (ton) : « 7 artisans du secteur · 3 200 pièces au total », le nombre seulement à partir du seuil d'anonymat.
+  if (a.entreprises >= seuilAnonymat && a.total) return { etat: "regroupe_total", titre: phraseCarteGroupe(a.entreprises, a.total, seuilAnonymat), dateCle: cloture, sousTitre: PREVIENT };
+  return { etat: "regroupe", titre: "Avec d'autres artisans du secteur", dateCle: cloture, sousTitre: PREVIENT };
 }
 
 /** Les étapes de la frise du détail. */

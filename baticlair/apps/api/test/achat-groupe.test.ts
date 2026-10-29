@@ -63,7 +63,7 @@ const engagement = (o: Record<string, unknown> = {}) => ({
   engagement: true,
   ...o,
 });
-const jetonDe = (email: string) => /\/achat-groupe\/([A-Za-z0-9_-]+)/.exec(mailsVers(ctx, email).filter((m) => m.subject.startsWith("Demande de prix groupée")).at(-1)!.text)![1]!;
+const jetonDe = (email: string) => /\/achat-groupe\/([A-Za-z0-9_-]+)/.exec(mailsVers(ctx, email).filter((m) => / : achat groupé /.test(m.subject)).at(-1)!.text)![1]!;
 const abonner = (companyId: string) => ctx.prisma.abonnement.create({ data: { companyId, statut: "actif", fournisseur: "simule", periodeDebut: new Date(), periodeFin: new Date(Date.now() + 30 * 86_400_000) } });
 async function admin() {
   const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
@@ -139,15 +139,21 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     const [y] = mailsVers(ctx, "y@negoce.fr");
     const [gm] = mailsVers(ctx, "g@negoce.fr");
     // Le spécialiste ne reçoit que ses familles ; les quantités sont cumulées ; aucune commission à 0.
-    expect(x!.subject).toMatch(/^Demande de prix groupée couverture : 2 références \(réponse avant le \d+ \S+\)$/);
-    expect(x!.text).toContain("De la part de votre client Toitures 1, via Mobiiz.");
-    expect(x!.text).toContain("- Ardoise 32×22 Espagne 1er choix : 2 700 pièces");
+    // Lot final, point 3 : l'objet au nom de l'entreprise et du secteur, le mail dans l'ordre de Greg, signé par son client.
+    expect(x!.subject).toBe("Toitures 1 : achat groupé couverture, secteur Lannion");
+    expect(x!.text).toMatch(/^Bonjour,\n\nJe participe à un achat groupé avec d'autres artisans du secteur via Mobiiz\. Pouvez-vous chiffrer ce volume \?/);
+    expect(x!.text).toContain("D'autres négoces du secteur sont consultés sur ce même volume.");
+    expect(x!.text).toMatch(/Réponse attendue avant le \d+ \S+\. Passé ce délai, la commande se fera sans vous\./);
+    expect(x!.text).toContain("Toitures 1\n\n--\nMobiiz, des artisans qui achètent ensemble.");
+    expect(x!.html).toContain(">Répondre en ligne</a>");
+    expect(x!.text).toMatch(/- Ardoise 32×22 Espagne 1er choix : 2\s700 pièces/);
     expect(x!.text).not.toContain("Bois de charpente");
     expect(x!.text).not.toMatch(/commission/i);
-    expect(y!.subject).toMatch(/^Demande de prix groupée couverture : 3 références/);
-    expect(y!.text).toContain("De la part de votre client Toitures 2, via Mobiiz.");
+    expect(y!.subject).toBe("Toitures 2 : achat groupé couverture, secteur Lannion");
+    expect(y!.text).toContain("Toitures 2\n\n--");
+    expect(y!.text).not.toContain("Toitures 1");
     // Un panier de deux métiers part aussi chez le généraliste inscrit du secteur.
-    expect(gm!.subject).toMatch(/3 références/);
+    expect(gm!.text).toContain("Bois de charpente");
     expect((await b.agent.post(`/v1/achats-groupes/${lb.besoinId}/retirer`).expect(409)).body.error.details.reason).toBe("cloture_passee");
 
     // X répond ligne par ligne : chaque ligne a un prix ou « je ne fournis pas » ; ses conditions d'ouverture.

@@ -3,6 +3,19 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 
+// Lot final, point 1 : au premier envoi, « Avant d'envoyer » (SIRET, prénom, portable) se remplit tout seul dans ces parcours.
+test.beforeEach(async ({ page }) => {
+  await page.addLocatorHandler(page.getByRole("dialog", { name: "Avant d'envoyer" }), async () => {
+    const d = page.getByRole("dialog", { name: "Avant d'envoyer" });
+    await d.getByLabel("SIRET de ton entreprise").fill("73282932000074");
+    if (!(await d.getByLabel("Ton prénom").inputValue())) await d.getByLabel("Ton prénom").fill("Jean");
+    await d.getByLabel("Ton portable").fill("06 12 34 56 78");
+    await d.getByRole("button", { name: "Continuer" }).click();
+    await d.waitFor({ state: "detached" });
+  });
+});
+
+
 /**
  * LE GUIDE DU PREMIER LANCEMENT (Greg, 24 octobre 2026) s'ouvre par-dessus l'app une fois par compte : chaque parcours le
  * passe dès qu'il paraît (« Passer le guide »), sauf le test du guide, qui retire ce réflexe.
@@ -567,11 +580,13 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   await menuArtisan(page, "Mes fournisseurs");
   await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
   await page.getByLabel("Société").fill("Point.P Vannes");
-  await page.getByLabel("E-mail pour les demandes de prix").fill("pas-un-email");
+  await page.getByLabel("E-mail de ton commercial").fill("pas-un-email");
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();
   await expect(page.getByText("Cette adresse e-mail n'est pas valide.")).toBeVisible();
-  await page.getByLabel("E-mail pour les demandes de prix").fill("Devis@PointP.fr");
-  await page.getByLabel("Contact (facultatif)").fill("Paul");
+  await page.getByLabel("E-mail de ton commercial").fill("Devis@PointP.fr");
+  // Lot final, point 2 : une adresse générale est signalée gentiment, sans bloquer.
+  await expect(page.getByText("C'est une adresse générale. Si tu as celle de ton commercial, mets plutôt la sienne : il répondra plus vite.")).toBeVisible();
+  await page.getByLabel("Son prénom (si tu le connais)").fill("Paul");
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();
   await expect(page.getByText("devis@pointp.fr")).toBeVisible();
 
@@ -596,11 +611,30 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   await expect(apercu.getByRole("checkbox", { name: /Point.P Vannes/ })).toBeChecked();
   await apercu.getByRole("button", { name: "Ajouter un fournisseur" }).click();
   await apercu.getByLabel("Société").fill("Tuiles & Co");
-  await apercu.getByLabel("E-mail pour les demandes de prix").fill("devis@tuiles.fr");
+  await apercu.getByLabel("E-mail de ton commercial").fill("devis@tuiles.fr");
   await apercu.getByRole("button", { name: "Ajouter", exact: true }).click();
   await expect(apercu.getByRole("checkbox", { name: /Tuiles & Co/ })).toBeChecked();
   await expect(apercu.getByRole("article", { name: "Demande de devis" })).toHaveCount(0);
-  await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await apercu.getByRole("button", { name: "Continuer" }).click();
+  // Lot final, point 4 : « Voici ce que ton négoce va recevoir » : l'objet et le mail mot pour mot, au prénom du commercial,
+  // signé du prénom et de l'entreprise ; seul le texte libre se modifie ; « Le tutoyer » ; un seul bouton, « Envoyer ».
+  const recoit = page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" });
+  const mail = recoit.getByLabel("Le mail à ton négoce");
+  await expect(mail).toContainText(/Objet : .+ : demande de prix/);
+  await expect(mail).toContainText("Bonjour Paul,");
+  await expect(mail).toContainText("Je consulte plusieurs fournisseurs, réponse souhaitée avant le");
+  await expect(mail).toContainText("Vous pouvez aussi répondre directement à ce mail, il m'arrive.");
+  await expect(mail).toContainText("Un doute ? Appelez-moi au 06 12 34 56 78.");
+  await expect(mail).toContainText("Mobiiz, des artisans qui achètent ensemble.");
+  await recoit.getByRole("button", { name: "Modifier le message" }).click();
+  await recoit.getByLabel("Ton message").fill("Pouvez-vous me chiffrer cette liste pour la semaine prochaine ?");
+  await recoit.getByRole("button", { name: "Garder ce message" }).click();
+  await expect(mail).toContainText("Pouvez-vous me chiffrer cette liste pour la semaine prochaine ?");
+  await recoit.getByRole("button", { name: "Le tutoyer" }).click();
+  await expect(mail).toContainText("Salut Paul,");
+  await recoit.getByRole("button", { name: "Le vouvoyer" }).click();
+  await expect(mail).toContainText("Bonjour Paul,");
+  await recoit.getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
   // § 43.4 : juste après le premier envoi, et jamais avant, l'écran des notifications ; « Plus tard » le referme.
   const prompt = page.getByRole("dialog", { name: "Activer les notifications" });
@@ -751,7 +785,9 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
     await apercu.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
   }
-  await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await apercu.getByRole("button", { name: "Continuer" }).click();
+  // Lot final, point 4 : « Voici ce que ton négoce va recevoir », puis « Envoyer ».
+  await page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
 
   const cards = page.getByRole("list", { name: "Tes fournisseurs" }).getByRole("listitem");
@@ -2780,7 +2816,7 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await menuArtisan(page, "Mes fournisseurs");
   await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
   await page.getByLabel("Société").fill("Point.P Paimpol");
-  await page.getByLabel("E-mail pour les demandes de prix").fill(negoce);
+  await page.getByLabel("E-mail de ton commercial").fill(negoce);
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();
   await expect(page.getByText(negoce)).toBeVisible();
 
@@ -2853,7 +2889,9 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await page.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(apercu.getByRole("checkbox", { name: /Point.P Paimpol/ })).toBeChecked();
-  await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await apercu.getByRole("button", { name: "Continuer" }).click();
+  // Lot final, point 4 : « Voici ce que ton négoce va recevoir », puis « Envoyer ».
+  await page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
   const [demande] = await emailsVers(page, negoce);
   expect(demande, "la demande de devis est partie").toBeDefined();

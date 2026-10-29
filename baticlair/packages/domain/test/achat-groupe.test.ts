@@ -74,9 +74,9 @@ describe("la carte : un état à la fois", () => {
   const base = { statut: "en_collecte", clotureLe: d("2026-11-17"), reponseAvantLe: d("2026-11-20"), total: null };
   it("seul, regroupé, regroupé 5+ avec total, consultés, offre, pas assez, commandé, désisté", () => {
     expect(etatCarte({ ...base, entreprises: 1 }, { statut: "declare" }).titre).toBe("Seul jusqu'au 17 novembre");
-    expect(etatCarte({ ...base, entreprises: 3 }, { statut: "declare" }).titre).toBe("Regroupé avec d'autres entreprises");
-    expect(etatCarte({ ...base, entreprises: 3, total: "6 000 pièces" }, { statut: "declare" }).titre).toBe("Regroupé avec d'autres entreprises");
-    expect(etatCarte({ ...base, entreprises: 5, total: "9 000 pièces" }, { statut: "declare" }).titre).toBe("Regroupé 5+ : 9 000 pièces");
+    expect(etatCarte({ ...base, entreprises: 3 }, { statut: "declare" }).titre).toBe("Avec d'autres artisans du secteur");
+    expect(etatCarte({ ...base, entreprises: 3, total: "6 000 pièces" }, { statut: "declare" }).titre).toBe("Avec d'autres artisans du secteur");
+    expect(etatCarte({ ...base, entreprises: 5, total: "9 000 pièces" }, { statut: "declare" }).titre).toBe("5 artisans du secteur · 9 000 pièces au total");
     expect(etatCarte({ ...base, statut: "consultation", entreprises: 2 }, { statut: "declare" }).titre).toBe("Négoces consultés, réponse le 20 novembre");
     expect(etatCarte({ ...base, statut: "offre_recue", entreprises: 2 }, { statut: "declare" }).etat).toBe("offre");
     expect(etatCarte({ ...base, statut: "pas_assez", entreprises: 1 }, { statut: "declare" }).titre).toBe("Pas assez de volume cette fois");

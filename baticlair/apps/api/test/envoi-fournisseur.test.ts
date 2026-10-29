@@ -65,10 +65,15 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     expect(packet.detail[0]).toMatchObject({ libelle: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", mesure: "200 m²" });
 
     const email = res.body.recipients[0].email;
-    expect(email.subject).toBe("Demande de devis · Toitures Martin · chantier Dupont — réfection toiture (Brest)");
-    expect(email.body).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest : 200 m²/);
-    expect(email.body).toContain("Livraison sur chantier possible ?");
-    expect(email.body).toContain("Pouvez-vous me chiffrer l'ensemble avant le 15 octobre ? PS : si besoin, le détail du devis est en pièce jointe.");
+    expect(email.subject).toMatch(/^Toitures Martin : demande de prix( [a-zéèêçàâîôû]+)?, Brest$/);
+    // Lot final, point 4 : le message de l'artisan remplace le texte libre ; la date et la pièce jointe restent écrites.
+    // Adressé au prénom du commercial (lot final, point 3).
+    expect(email.body).toMatch(/^Bonjour Paul,\n\nLivraison sur chantier possible \?\n\n/);
+    expect(email.body).toContain("Je consulte plusieurs fournisseurs, réponse souhaitée avant le 15 octobre.");
+    expect(email.body).toContain("La liste est en pièce jointe (PDF), avec le détail du devis sans prix.");
+    // Sans message, le texte libre par défaut dit le chantier.
+    const sans = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({ message: "Je vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest." }).expect(200)).body;
+    expect(sans.mail).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest/);
     // Le test du §42.2 et du §43.5 : rien du devis chiffré ne passe (85,00 €, 42, 19,90…).
     expect(priceLeak(email.body)).toBeNull();
     expect(email.body).not.toMatch(/85,00|19,90/);
@@ -88,7 +93,10 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     const mail = ctx.emails.lastTo("devis@pointp.fr")!;
     expect(mail.subject).toBe(recipient.email.subject);
     // Le lien de chiffrage est propre au négoce : l'aperçu le montre « …/chiffrer/… » (Greg, 28 octobre 2026, point 7).
-    expect(mail.text.replace(/\/chiffrer\/[A-Za-z0-9_-]+/, "/chiffrer/…")).toBe(recipient.email.body);
+    expect(mail.text.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)")).toBe(recipient.email.body);
+    // Lot final, point 5 : le texte en clair accompagne le HTML ; le lien « Répondre en ligne » y est un bouton.
+    expect(mail.html).toContain("Répondre en ligne</a>");
+    expect(mail.html).not.toMatch(/bit\.ly|tinyurl|<img/i);
     expect(mail.attachments).toHaveLength(1);
     expect(mail.attachments![0]).toMatchObject({ filename: "demande-de-devis-dupont-refection-toiture.pdf", contentType: "application/pdf" });
     const pdf = Buffer.from(mail.attachments![0]!.contentBase64, "base64");

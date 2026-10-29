@@ -19,6 +19,8 @@ export interface RecipientRecord {
   document: { id: string; name: string; status: string } | null;
   /** R7 : l'étiquette de réponse (dans l'adresse « Répondre » et l'objet de la demande). */
   etiquette: string | null;
+  /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu (mi-délai ou veille). */
+  rappelLe?: Date | null;
 }
 
 /**
@@ -67,6 +69,11 @@ export interface ValidatedTakeoff {
 export interface Sender {
   companyName: string;
   senderName: string;
+  /** Lot final, points 1, 3 et 4 : le prénom de l'artisan, le métier du chantier, son modèle de message, tu ou vous. */
+  prenom?: string | null;
+  trade?: string | null;
+  modeleMessage?: string | null;
+  tutoie?: boolean;
   project: { id: string; name: string; address: string | null; siteNotes: string | null };
   /** Coordonnées du compte (§45.2, §45.3) ; e-mail de l'artisan à défaut d'un e-mail d'entreprise. */
   company: { address: string | null; siret: string | null; phone: string | null; email: string | null };
@@ -81,6 +88,8 @@ export interface PriceRequestRepository {
    */
   validatedTakeoff(tenant: TenantContext, projectId: string, options?: { anyStatus?: boolean }): Promise<ValidatedTakeoff | null>;
   sender(tenant: TenantContext, projectId: string): Promise<Sender | null>;
+  /** Lot final, point 4 : le message modifié et le tutoiement, gardés comme modèle personnel. */
+  saveModele(tenant: TenantContext, m: { message?: string | undefined; tutoie?: boolean | undefined }): Promise<void>;
   /** Les croquis rattachés à un article de la liste (clé de l'article), avec la précision de l'artisan. */
   itemSketches(tenant: TenantContext, projectId: string): Promise<{ id: string; nom: string; itemKey: string; note: string | null }[]>;
   create(

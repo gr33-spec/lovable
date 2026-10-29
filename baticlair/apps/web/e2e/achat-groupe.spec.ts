@@ -163,7 +163,7 @@ async function admin(browser: Browser, chemin: string) {
 
 /** Ajouter un négoce tapé à la main (nom, e-mail, téléphone). */
 async function ajouterNegoce(page: Page, n: { nom: string; email: string; tel: string }) {
-  await page.getByLabel(/^(E-mail du négoce|Ou l'e-mail d'un autre négoce)$/).fill(n.email); await page.getByLabel("Nom du négoce").fill(n.nom);
+  await page.getByLabel(/^(E-mail de ton commercial|Ou l'e-mail du commercial d'un autre négoce)$/).fill(n.email); await page.getByLabel("Nom du négoce").fill(n.nom);
   await page.getByLabel("Son téléphone (pour le prévenir)").fill(n.tel);
   await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
 }
@@ -257,7 +257,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
 
     // 4. La clôture : une liste propre par négoce ; X ne chiffre pas les liteaux (offre incomplète) ; Y dépose un PDF douteux.
     await tache(page, new Date(new Date(achatA.clotureLe).getTime() + 3_600_000));
-    const jeton = async (email: string) => /\/achat-groupe\/([A-Za-z0-9_-]+)/.exec((await emailsVers(page, email)).filter((m) => m.subject.startsWith("Demande de prix groupée")).at(-1)!.text)![1]!;
+    const jeton = async (email: string) => /\/achat-groupe\/([A-Za-z0-9_-]+)/.exec((await emailsVers(page, email)).filter((m) => / : achat groupé /.test(m.subject)).at(-1)!.text)![1]!;
     expect((await emailsVers(page, negoceX.email)).at(-1)!.text).not.toMatch(/commission/i);
     const negoce = await browser.newPage();
     await negoce.goto(`/achat-groupe/${await jeton(negoceX.email)}`);

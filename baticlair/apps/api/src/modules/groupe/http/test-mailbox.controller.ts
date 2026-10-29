@@ -39,6 +39,6 @@ export class TestMailboxController {
     const secret = this.config.cronSecret;
     if (!secret || authorization !== `Bearer ${secret}`) throw forbidden("Test mailbox");
     const sent = this.email.sent.filter((m) => !to || m.to.toLowerCase() === to.toLowerCase());
-    return { emails: sent.map((m) => ({ to: m.to, subject: m.subject, text: m.text, replyTo: m.replyTo ?? null, from: m.from ?? null, attachments: (m.attachments ?? []).map((a) => a.filename) })) };
+    return { emails: sent.map((m) => ({ to: m.to, subject: m.subject, text: m.text, replyTo: m.replyTo ?? null, from: m.from ?? null, html: m.html ?? null, attachments: (m.attachments ?? []).map((a) => a.filename) })) };
   }
 }

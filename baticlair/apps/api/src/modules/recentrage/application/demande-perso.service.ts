@@ -5,12 +5,15 @@ import {
   NOM_APP,
   PHRASE_COMPTE_APRES_REPONSE,
   blocLienChiffrage,
-  blocLienChiffrageListe,
   clotureDeLaDemande,
   comparerLesReponses,
   debutHistorique,
   finDeValidite,
-  mailRelanceDemandePerso,
+  HEURES_OUVREES_RELANCE,
+  mailRelanceDemande,
+  phraseRelanceArtisan,
+  plusHeuresOuvrees,
+  relancesDues,
   mesPrix,
   cleDeMesPrix,
   offreValide,
@@ -21,7 +24,6 @@ import {
   lienTel,
   PREVIENS_TITRE,
   previensSms,
-  relanceDue,
   resultatsNegoce,
   validiteAcceptee,
   zoneDuCodePostal,
@@ -34,6 +36,7 @@ import {
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
+import { mailEnHtml } from "../../../platform/email/mail-html.js";
 import type { PriceRequestsService } from "../../price-requests/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import type { DroitsService } from "./droits.service.js";
@@ -61,7 +64,7 @@ const nombre = (q: unknown): number | null => {
   return Number.isFinite(n) && n > 0 ? n : null;
 };
 const euros = (n: number) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n).replace(/\u202f|\u00a0/g, " ");
-const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d);
+const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d).replace(/^1 /, "1er ");
 
 export type NegoceChoisi = { supplierId: string } | { negoceId: string } | { nom: string; email: string };
 
@@ -97,6 +100,17 @@ export class DemandePersoService {
   private adresseEnvoi: (companyId: string) => Promise<string | null> = async () => null;
   brancherAdresseEnvoi(f: (companyId: string) => Promise<string | null>): void {
     this.adresseEnvoi = f;
+  }
+
+  /** Lot final, point 6 : l'expéditeur « Entreprise via Mobiiz » et l'adresse de réponse de la demande (étiquette). */
+  private expediteurDe: (companyId: string) => Promise<{ from: string; replyTo: (etiquette: string) => string } | null> = async () => null;
+  brancherExpediteur(f: (companyId: string) => Promise<{ from: string; replyTo: (etiquette: string) => string } | null>): void {
+    this.expediteurDe = f;
+  }
+  /** Lot final, point 6 : prévenir l'artisan (notification sur le téléphone, et e-mail). */
+  private prevenir: ((companyId: string, m: { titre: string; corps: string; url: string; etiquette: string }, courriel: { objet: string; texte: string }) => Promise<unknown>) | null = null;
+  brancherPrevenir(f: (companyId: string, m: { titre: string; corps: string; url: string; etiquette: string }, courriel: { objet: string; texte: string }) => Promise<unknown>): void {
+    this.prevenir = f;
   }
 
   /** Après l'envoi : les lignes groupables partent en veille (regroupement négocié, `NegocieService`). */
@@ -174,20 +188,18 @@ export class DemandePersoService {
    * « Demander les prix à mes négoces » (sans but) chiffre un chantier : le lien y est aussi, pour que la comparaison
    * automatique reste quand le négoce répond par le lien (Greg, 28 octobre 2026, points 7 et 8).
    */
-  async complement(requestId: string, recipientId: string): Promise<string | null> {
+  async complement(requestId: string, recipientId: string): Promise<{ bloc: string } | { lien: string } | null> {
     const r = await this.prisma.priceRequest.findUnique({ where: { id: requestId }, select: { but: true } });
     if (!r) return null;
     const jeton = randomBytes(24).toString("base64url");
     const dest = await this.prisma.priceRequestRecipient.update({ where: { id: recipientId }, data: { tokenHash: hacher(jeton) }, select: { supplier: { select: { negoceId: true } } } });
     if (dest.supplier.negoceId) await this.prisma.priceRequestRecipient.update({ where: { id: recipientId }, data: { negoceId: dest.supplier.negoceId } });
     const lien = `${this.cfg.webAppUrl}/chiffrer/${jeton}`;
-    return r.but ? blocLienChiffrage({ but: r.but as ButDemande, lien, nomApp: NOM_APP }) : blocLienChiffrageListe(lien);
+    // Lot final, point 3 : la demande de la liste porte son lien dans le mail (« Répondre en ligne ») ; la demande perso
+    // (avec un but) garde son bloc d'avant.
+    return r.but ? { bloc: blocLienChiffrage({ but: r.but as ButDemande, lien, nomApp: NOM_APP }) } : { lien };
   }
 
-  /** Le même bloc dans l'aperçu du mail (§45.9) : le lien propre à chaque négoce n'existe qu'à l'envoi. */
-  apercuComplement(): string {
-    return blocLienChiffrageListe(`${this.cfg.webAppUrl}/chiffrer/…`);
-  }
 
   /* --------------------------------------------------------------------------------------- la vue et la comparaison */
 
@@ -455,24 +467,53 @@ export class DemandePersoService {
 
   /* ----------------------------------------------------------------------------------- la tâche (relances, clôtures) */
 
-  /** Une relance par négoce sans réponse à 48 h ouvrées, tant que la demande est ouverte. */
-  async tache(maintenant = this.now()): Promise<{ relances: number }> {
+  /**
+   * LES RELANCES (lot final, point 6) : à mi-délai, l'artisan est prévenu que son négoce n'a pas répondu (« Appelle ton
+   * commercial ») et le négoce reçoit un rappel à son nom (au plus tard à 48 h ouvrées) ; la veille de la date limite,
+   * l'artisan est prévenu encore. Jamais après une réponse, un refus ou la date limite ; deux messages au plus par négoce.
+   */
+  async tache(maintenant = this.now()): Promise<{ relances: number; rappels: number }> {
     const attente = await this.prisma.priceRequestRecipient.findMany({
-      where: { reponduLe: null, refuseLe: null, relanceLe: null, status: "sent", priceRequest: { but: { not: null } } },
-      include: { supplier: { select: { email: true } }, priceRequest: { select: { closLe: true, company: { select: { name: true } } } } },
+      where: { reponduLe: null, refuseLe: null, status: "sent", OR: [{ relanceLe: null }, { rappelVeilleLe: null }], priceRequest: { OR: [{ closLe: null }, { closLe: { gt: maintenant } }] } },
+      include: { supplier: { select: { name: true, email: true, contactName: true, phone: true } }, priceRequest: { select: { id: true, but: true, dueDate: true, closLe: true, projectId: true, companyId: true, company: { select: { name: true } } } } },
       take: 500,
     });
     let relances = 0;
+    let rappels = 0;
     for (const r of attente) {
-      if (!relanceDue({ envoyeLe: r.sentAt ?? r.createdAt, reponduLe: null, relanceLe: null }, maintenant, r.priceRequest.closLe)) continue;
-      // Un nouveau lien : l'ancien n'est connu que haché.
-      const jeton = randomBytes(24).toString("base64url");
-      await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { relanceLe: maintenant, tokenHash: hacher(jeton) } });
-      const m = mailRelanceDemandePerso({ entreprise: r.priceRequest.company.name, lien: `${this.cfg.webAppUrl}/chiffrer/${jeton}` });
-      await this.mailer.send({ to: r.supplier.email, subject: m.objet, text: m.texte }).catch(() => undefined);
-      relances++;
+      const d = r.priceRequest;
+      const envoyeLe = r.sentAt ?? r.createdAt;
+      // La date limite : « réponse avant le X » (fin de journée), sinon la clôture de la demande perso, sinon 30 jours.
+      const dateLimite = d.dueDate ? new Date(d.dueDate.getTime() + 86_400_000) : (d.closLe ?? clotureDeLaDemande(envoyeLe, null));
+      const dues = relancesDues(
+        { envoyeLe, dateLimite, reponduLe: null, refuseLe: null, rappelMiLe: r.rappelMiLe, rappelVeilleLe: r.rappelVeilleLe, relanceNegoceLe: r.relanceLe, relanceNegoceAuPlusTard: plusHeuresOuvrees(envoyeLe, HEURES_OUVREES_RELANCE) },
+        maintenant,
+      );
+      if (dues.negoce) {
+        // Un nouveau lien : l'ancien n'est connu que haché.
+        const jeton = randomBytes(24).toString("base64url");
+        await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { relanceLe: maintenant, tokenHash: hacher(jeton) } });
+        const via = await this.expediteurDe(d.companyId).catch(() => null);
+        const m = mailRelanceDemande({ entreprise: d.company.name, dateLimite: d.dueDate ?? new Date(dateLimite.getTime() - 86_400_000), lien: `${this.cfg.webAppUrl}/chiffrer/${jeton}`, prenomCommercial: r.supplier.contactName });
+        await this.mailer
+          .send({ to: r.supplier.email, subject: m.objet, text: m.texte, html: mailEnHtml(m.texte, `${this.cfg.webAppUrl}/chiffrer/${jeton}`), ...(via ? { from: via.from, ...(r.etiquette ? { replyTo: via.replyTo(r.etiquette) } : {}) } : {}) })
+          .catch(() => undefined);
+        relances++;
+      }
+      if (dues.artisan && this.prevenir) {
+        await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: dues.artisan === "mi" ? { rappelMiLe: maintenant } : { rappelMiLe: r.rappelMiLe ?? maintenant, rappelVeilleLe: maintenant } });
+        const phrase = phraseRelanceArtisan(r.supplier.name);
+        const url = d.projectId ? `/chantiers/${d.projectId}` : "/";
+        const appeler = r.supplier.phone ? `Appeler ${r.supplier.contactName?.trim() || r.supplier.name} : ${r.supplier.phone}` : null;
+        await this.prevenir(
+          d.companyId,
+          { titre: `${r.supplier.name} n'a pas encore répondu`, corps: phrase, url, etiquette: `relance-${r.id}` },
+          { objet: `${r.supplier.name} n'a pas encore répondu`, texte: [phrase, ...(appeler ? ["", appeler] : []), "", `Renvoyer la demande : ${this.cfg.webAppUrl}${url}`, "", NOM_APP].join("\n") },
+        ).catch(() => undefined);
+        rappels++;
+      }
     }
-    return { relances };
+    return { relances, rappels };
   }
 
   /* ---------------------------------------------------------------------------------------------------- « Mes prix » */

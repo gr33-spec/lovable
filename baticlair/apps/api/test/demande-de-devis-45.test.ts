@@ -3,9 +3,10 @@ import { PdfJsPdfReader } from "../src/modules/documents/infrastructure/pdfjs-pd
 import { forbiddenWord, priceLeak } from "../src/modules/price-requests/application/supplier-packet.js";
 import { createTestApp, resetDatabase, signUp, type Agent, type TestContext } from "./support/test-app.js";
 
-/** Le lien de chiffrage est propre à chaque négoce : l'aperçu le montre « …/chiffrer/… » (Greg, 28 octobre 2026, point 7). */
-const sansJeton = (t: string) => t.replace(/\/chiffrer\/[A-Za-z0-9_-]+/, "/chiffrer/…");
-const LIEN_LISTE = /\n\nVous pouvez aussi chiffrer en ligne, sans compte, en deux minutes \(ligne par ligne, livraison, délai et validité de votre offre\) :\nhttps?:\/\/[^\s]+\/chiffrer\/…\nVotre offre n'est vue que par moi\.$/;
+/** Le lien « Répondre en ligne » est propre à chaque négoce : l'aperçu le montre « (votre lien personnel) » (lot final, point 3). */
+const sansJeton = (t: string) => t.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)");
+/** Le pied discret du mail (lot final, point 3) : le seul endroit où le nom de l'application apparaît. */
+const sansPied = (t: string) => t.replace(/\n\n--\nMobiiz, des artisans qui achètent ensemble\.$/, "");
 
 /**
  * §45 — LA DEMANDE DE DEVIS : un mail court (45.2), un PDF structuré avec le logo et les coordonnées du compte (45.3),
@@ -81,20 +82,23 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const { projectId, supplierId } = await chantierTest(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
     const email = created.recipients[0].email;
-    expect(email.subject).toBe("Demande de devis · Bati invest · chantier Test (Brest)");
-    expect(email.body.replace(LIEN_LISTE, "")).toBe(
+    // Lot final, point 3 (Greg, 29 octobre 2026) : l'objet « Entreprise : demande de prix famille, secteur », le texte de
+    // l'artisan, UNE phrase de pression, « Répondre en ligne », le portable (jamais l'e-mail personnel), la signature,
+    // un pied discret ; aucune invitation à s'inscrire, aucune commission.
+    expect(email.subject).toMatch(/^Bati invest : demande de prix( couverture)?, Brest$/);
+    expect(email.body.replace(/réponse souhaitée avant le \d{1,2} [a-zéû]+( \d{4})?\./, "réponse souhaitée avant le [date].")).toBe(
       [
         "Bonjour,",
-        "Je vous envoie la liste des fournitures pour un chantier de couverture zinc à joint debout à Brest : 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage.",
-        "Pouvez-vous me chiffrer l'ensemble ? PS : si besoin, le détail du devis est en pièce jointe.",
-        "Merci d'avance, bonne journée,",
-        "Greg Bati invest · 06 12 34 56 78 · greg@batiinvest.fr",
+        "Je vous envoie la liste des fournitures pour un chantier de couverture zinc à joint debout à Brest : 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage. Pouvez-vous me chiffrer l'ensemble ?",
+        "Je consulte plusieurs fournisseurs, réponse souhaitée avant le [date].",
+        "Répondre en ligne, sans inscription : (votre lien personnel)\nVous pouvez aussi répondre directement à ce mail, il m'arrive.\nLa liste est en pièce jointe (PDF), avec le détail du devis sans prix.\nUn doute ? Appelez-moi au 06 12 34 56 78.",
+        "Greg, Bati invest",
+        "--\nMobiiz, des artisans qui achètent ensemble.",
       ].join("\n\n"),
     );
-    // Point 7 : le lien de chiffrage, sous la signature, sans le nom de l'application.
-    expect(email.body).toMatch(LIEN_LISTE);
-    expect(email.body).not.toMatch(/command|référentiel|BatiClair|Mobiiz/i);
-    expect(forbiddenWord(`${email.subject}\n${email.body}`)).toBeNull();
+    expect(email.body).not.toContain("greg@batiinvest.fr");
+    expect(sansPied(email.body)).not.toMatch(/command|référentiel|BatiClair|Mobiiz|inscri(re|vez)|commission/i);
+    expect(forbiddenWord(sansPied(email.body))).toBeNull();
     expect(priceLeak(email.body)).toBeNull();
     // Le mail qui part est celui-là, avec le PDF joint.
     await agent.post(`/v1/price-request-recipients/${created.recipients[0].id}/send`).expect(200);
@@ -162,8 +166,8 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     await agent.patch("/v1/price-requests/settings").send({ attachQuoteDetail: false }).expect(200);
     const { projectId, supplierId } = await chantierTest(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
-    expect(created.recipients[0].email.body).not.toMatch(/PS/);
-    expect(created.recipients[0].email.body).toContain("Pouvez-vous me chiffrer l'ensemble ?\n\nMerci d'avance");
+    expect(created.recipients[0].email.body).not.toMatch(/détail du devis/);
+    expect(created.recipients[0].email.body).toContain("La liste est en pièce jointe (PDF).");
     const text = await pdfText((await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf`).buffer(true)).body as Buffer);
     expect(text).not.toMatch(/Détail du devis/);
   });

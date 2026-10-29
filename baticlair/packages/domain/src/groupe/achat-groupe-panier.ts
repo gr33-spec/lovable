@@ -9,7 +9,7 @@ import { TARIFS } from "./tarifs.js";
  */
 
 const JOUR = 86_400_000;
-const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d);
+const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d).replace(/^1 /, "1er ");
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/ /g, " ")} €`;
 
 /* ----------------------------------------------------------------------------------------- les réglages */
@@ -229,38 +229,60 @@ export interface DemandeNegocePanier {
   livraisons: readonly { commune: string; date: Date }[];
   reponseAvantLe: Date;
   lien: string;
+  /** Gardée pour l'appel ; plus jamais écrite au négoce (Greg, lot final : « commission négoce à 0 : aucune mention »). */
   commissionPct: number;
+  /** Lot final, point 3 : le secteur (« Paimpol »), le prénom du commercial, les artisans qui signent, le nombre d'artisans. */
+  secteur?: string | null;
+  prenomCommercial?: string | null;
+  signataires?: readonly { prenom: string | null; entreprise: string; portable: string | null }[];
+  artisans?: number;
+  seuilAnonymat?: number;
 }
 
-/** La demande : une liste propre (quantités cumulées), les lieux et dates, les règles ; la commission seulement si > 0. */
+/**
+ * LE MAIL D'ACHAT GROUPÉ AU NÉGOCE (Greg, lot final, point 3), au nom de l'artisan (« Entreprise Dupont via Mobiiz ») et
+ * dans l'ordre : la demande, le volume total engagé (le nombre d'artisans seulement à partir du seuil), les règles en
+ * clair, le rapport de force dit froidement par des faits, « Répondre en ligne » (PDF et Excel joints), « vous pouvez
+ * aussi répondre à ce mail », le portable (jamais l'e-mail personnel), la signature, un pied discret. Vouvoiement ; ni
+ * invitation à s'inscrire, ni commission.
+ */
 export function demandeNegocePanier(d: DemandeNegocePanier): { objet: string; texte: string } {
   const noms = [...new Set(d.clients.map((c) => c.trim()).filter(Boolean))];
-  const liste = noms.length <= 1 ? (noms[0] ?? "") : `${noms.slice(0, -1).join(", ")} et ${noms[noms.length - 1]}`;
-  const dePart = noms.length <= 1 ? `De la part de votre client ${liste}, via ${NOM_APP}` : `De la part de vos clients ${liste}, via ${NOM_APP}`;
-  const fmt = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 3 }).replace(/ /g, " ");
-  const objet = `Demande de prix groupée ${libelleMetier(d.metier).toLowerCase()} : ${d.lignes.length} référence${d.lignes.length > 1 ? "s" : ""} (réponse avant le ${jourFr(d.reponseAvantLe)})`;
+  const fmt = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 3 }).replace(/ /g, " ");
+  const metier = libelleMetier(d.metier).toLowerCase();
+  const plusieurs = noms.length > 1;
+  const objet = `${noms[0] ?? NOM_APP} : achat groupé ${metier}${d.secteur ? `, secteur ${d.secteur}` : ""}`;
+  const signataires = d.signataires?.length ? d.signataires : noms.map((n) => ({ prenom: null, entreprise: n, portable: null }));
+  const portable = signataires.find((x) => x.portable)?.portable ?? null;
+  const nombre = d.artisans !== undefined && d.seuilAnonymat !== undefined && d.artisans >= d.seuilAnonymat ? ` par ${d.artisans} artisans du secteur` : "";
   const texte = [
-    "Bonjour,",
+    `Bonjour${d.prenomCommercial?.trim() ? ` ${d.prenomCommercial.trim()}` : ""},`,
     "",
-    `${dePart}.`,
+    plusieurs
+      ? `Nous participons à un achat groupé avec d'autres artisans du secteur via ${NOM_APP}. Pouvez-vous chiffrer ce volume ?`
+      : `Je participe à un achat groupé avec d'autres artisans du secteur via ${NOM_APP}. Pouvez-vous chiffrer ce volume ?`,
     "",
-    `Achat groupé ${libelleMetier(d.metier).toLowerCase()}, quantités cumulées et engagées :`,
+    `Volume total engagé${nombre} :`,
     ...d.lignes.map((l) => `- ${l.libelle} : ${fmt(l.quantite)} ${l.unite}`),
     "",
     "Livraisons :",
     ...d.livraisons.map((l) => `- ${l.commune}, avant le ${jourFr(l.date)}`),
     "",
-    "À savoir avant de répondre :",
-    "- Vous n'êtes pas le seul négoce consulté.",
-    "- Une seule offre, sans deuxième tour : faites votre meilleur prix.",
-    "- Répondez ligne par ligne : un prix unitaire HT livraison comprise, ou « je ne fournis pas ».",
-    "- Votre offre est ferme sur le volume engagé jusqu'à la date de commande.",
-    "- Le bon de commande vous arrive directement ; le client vous paie sur son compte habituel.",
-    ...(d.commissionPct > 0 ? [`- Une commission ${NOM_APP} de ${String(d.commissionPct).replace(".", ",")} % s'applique aux commandes passées (conditions à accepter avant de répondre).`] : []),
+    "Les règles : une seule offre, ferme, livraison comprise. Un prix unitaire HT par ligne, ou « je ne fournis pas ».",
     "",
-    `Répondre avant le ${jourFr(d.reponseAvantLe)}, sans inscription : ${d.lien}`,
+    "D'autres négoces du secteur sont consultés sur ce même volume.",
+    `Réponse attendue avant le ${jourFr(d.reponseAvantLe)}. Passé ce délai, la commande se fera sans vous.`,
+    "Le mieux placé remporte la commande.",
     "",
-    NOM_APP,
+    `Répondre en ligne, sans inscription : ${d.lien}`,
+    "La demande est jointe en PDF et en Excel.",
+    `Vous pouvez aussi répondre directement à ce mail, ${plusieurs ? "il nous arrive" : "il m'arrive"}.`,
+    ...(portable ? [`Un doute ? ${plusieurs ? "Appelez-nous" : "Appelez-moi"} au ${portable}.`] : []),
+    "",
+    ...signataires.map((x) => [x.prenom, x.entreprise].filter(Boolean).join(", ")),
+    "",
+    "--",
+    `${NOM_APP}, des artisans qui achètent ensemble.`,
   ].join("\n");
   return { objet, texte };
 }

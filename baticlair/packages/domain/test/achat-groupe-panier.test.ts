@@ -49,14 +49,22 @@ describe("A. un achat groupé = un métier + une zone + une période, un panier"
     expect(lignesPourNegoce(panier, { generaliste: true, familles: ["couverture"] })).toHaveLength(3);
     expect(lignesPourNegoce(panier, { generaliste: false, familles: null })).toHaveLength(3);
   });
-  it("la demande : une liste, les livraisons, les règles ; aucune mention de commission à 0", () => {
-    const d = demandeNegocePanier({ clients: ["Toitures A", "Toitures B"], metier: "couverture", lignes: cumulerPanier([A3222, LITEAU]), livraisons: [{ commune: "Paimpol", date: new Date("2026-11-30") }], reponseAvantLe: new Date("2026-11-19T10:00:00Z"), lien: "https://x/achat-groupe/j", commissionPct: 0 });
-    expect(d.objet).toBe("Demande de prix groupée couverture : 2 références (réponse avant le 19 novembre)");
-    expect(d.texte).toContain("De la part de vos clients Toitures A et Toitures B, via Mobiiz.");
-    expect(d.texte).toContain("- Ardoise 32×22 Espagne 1er choix : 1 800 pièces");
-    expect(d.texte).toContain("Répondez ligne par ligne");
-    expect(d.texte).not.toMatch(/commission/i);
-    expect(demandeNegocePanier({ clients: ["A"], metier: "couverture", lignes: [A3222], livraisons: [], reponseAvantLe: new Date(), lien: "l", commissionPct: 2 }).texte).toMatch(/commission Mobiiz de 2 %/);
+  it("la demande (lot final, point 3) : l'objet au nom de l'entreprise, le volume, les règles, les faits ; jamais de commission", () => {
+    const d = demandeNegocePanier({ clients: ["Toitures A", "Toitures B"], metier: "couverture", secteur: "Paimpol", prenomCommercial: "Paul", signataires: [{ prenom: "Jean", entreprise: "Toitures A", portable: "06 12 34 56 78" }, { prenom: null, entreprise: "Toitures B", portable: null }], artisans: 2, seuilAnonymat: 3, lignes: cumulerPanier([A3222, LITEAU]), livraisons: [{ commune: "Paimpol", date: new Date("2026-11-30") }], reponseAvantLe: new Date("2026-11-19T10:00:00Z"), lien: "https://x/achat-groupe/j", commissionPct: 2 });
+    expect(d.objet).toBe("Toitures A : achat groupé couverture, secteur Paimpol");
+    expect(d.texte.startsWith("Bonjour Paul,\n\nNous participons à un achat groupé avec d'autres artisans du secteur via Mobiiz. Pouvez-vous chiffrer ce volume ?")).toBe(true);
+    expect(d.texte).toMatch(/Volume total engagé :\n- Ardoise 32×22 Espagne 1er choix : 1\s800 pièces/);
+    expect(d.texte).not.toContain("2 artisans");
+    expect(d.texte).toContain("Les règles : une seule offre, ferme, livraison comprise.");
+    expect(d.texte).toContain("D'autres négoces du secteur sont consultés sur ce même volume.\nRéponse attendue avant le 19 novembre. Passé ce délai, la commande se fera sans vous.\nLe mieux placé remporte la commande.");
+    expect(d.texte).toContain("Répondre en ligne, sans inscription : https://x/achat-groupe/j");
+    expect(d.texte).toContain("Un doute ? Appelez-nous au 06 12 34 56 78.");
+    expect(d.texte).toContain("Jean, Toitures A\nToitures B");
+    expect(d.texte.endsWith("--\nMobiiz, des artisans qui achètent ensemble.")).toBe(true);
+    expect(d.texte).not.toMatch(/commission|inscri(vez|ption gratuite)|@/i);
+    const seul = demandeNegocePanier({ clients: ["A"], metier: "couverture", artisans: 4, seuilAnonymat: 3, lignes: [A3222], livraisons: [], reponseAvantLe: new Date(), lien: "l", commissionPct: 0 });
+    expect(seul.texte).toContain("Je participe à un achat groupé");
+    expect(seul.texte).toContain("Volume total engagé par 4 artisans du secteur :");
   });
 });
 

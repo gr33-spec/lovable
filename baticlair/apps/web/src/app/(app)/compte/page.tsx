@@ -10,6 +10,7 @@ import { EconomiesGroupeCard } from "@/components/economies-groupe";
 import { NotificationsCard } from "@/components/notifications-card";
 import { PartnerKeysCard } from "@/components/partner-keys-card";
 import { BandeauAbonnement, ResumeAbonnement } from "@/components/abonnement";
+import { CarteIdentite } from "@/components/envoi-negoces";
 import { PlanSummary } from "@/components/paywall";
 import { TradePicker } from "@/components/trade-picker";
 import {
@@ -100,6 +101,8 @@ export default function ComptePage() {
       </Card>
       {/* L'abonnement artisan (24 octobre 2026) remplace l'ancienne carte des formules (`PlanSummary`, gardée dans paywall.tsx). */}
       <ResumeAbonnement />
+      {/* Lot final, point 1 : l'identité demandée au premier envoi, modifiable ici. */}
+      <CarteIdentite />
       <PlanSummary />
       <Card className="flex flex-col gap-2 p-4">
         <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">

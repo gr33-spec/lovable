@@ -530,6 +530,8 @@ export interface PriceRequestRecipient {
   sentAt: string | null;
   /** R7 : l'étiquette de réponse de la demande (adresse « Répondre » et objet). */
   etiquette: string | null;
+  /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu. */
+  rappelLe?: string | null;
   document: { id: string; name: string; status: string } | null;
   /** E-mail prêt à envoyer (texte brut). */
   email: { subject: string; body: string } | null;

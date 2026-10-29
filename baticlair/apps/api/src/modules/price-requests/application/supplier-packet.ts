@@ -64,6 +64,12 @@ export interface SupplierPacket {
   message?: string | null;
   /** Réponse souhaitée avant le… (date en toutes lettres). */
   echeance?: string | null;
+  /** Lot final, point 3 : le prénom de l'artisan (signature « Jean, Toitures Martin »). */
+  prenom?: string | null;
+  /** Lot final, point 3 : la famille de la demande (« couverture »), dans l'objet. */
+  famille?: string | null;
+  /** Lot final, point 4 : tutoiement choisi dans l'aperçu (vouvoiement par défaut). */
+  tutoie?: boolean;
   /** §52 : le métier n'a pas encore été relu par un artisan ; le PDF porte « Ratios en cours de validation ». */
   ratios_en_validation?: boolean;
 }
@@ -77,7 +83,7 @@ export interface SketchFile {
 
 const dateFr = (iso: string) => {
   const [y, m, d] = iso.split("-").map(Number);
-  return new Date(Date.UTC(y!, m! - 1, d!)).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+  return new Date(Date.UTC(y!, m! - 1, d!)).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).replace(/^1 /, "1er ");
 };
 
 /**
@@ -88,25 +94,56 @@ export const chantierLabel = (name: string) => (name.trim() === NEW_PROJECT_NAME
 
 /** §45.2 : « Demande de devis · [entreprise] · [nom du chantier] ([ville]) ». */
 export function packetSubject(p: SupplierPacket): string {
-  const chantier = p.chantier.trim() === NEW_PROJECT_NAME ? (p.commune ? `chantier à ${p.commune}` : "") : `${chantierLabel(p.chantier)}${p.commune ? ` (${p.commune})` : ""}`;
-  return [`Demande de devis`, p.entreprise, chantier].filter(Boolean).join(" · ");
+  // Lot final, point 3 (Greg) : « Entreprise Dupont : demande de prix couverture, Paimpol ».
+  const quoi = ["demande de prix", p.famille?.trim().toLowerCase()].filter(Boolean).join(" ");
+  return `${p.entreprise.trim() || "Demande de prix"}${p.entreprise.trim() ? ` : ${quoi}` : ""}${p.commune ? `, ${p.commune}` : ""}`;
 }
 
-/** La signature : prénom ou nom, entreprise, téléphone, mail (§45.2). Rien de vide. */
+/** Le pied du mail, discret (lot final, point 3). */
+export const PIED_MAIL_NEGOCE = `${NOM_APP}, des artisans qui achètent ensemble.`;
+
+/** La signature : « Jean, Toitures Martin » (lot final, point 3). Jamais l'e-mail personnel de l'artisan. */
 export function packetSignature(p: SupplierPacket): string {
-  const s = p.expediteur;
-  return [[s?.nom, p.entreprise].filter((x) => x && x.trim()).join(" "), s?.telephone, s?.email].filter((x) => x && x.trim()).join(" · ");
+  const prenom = p.prenom?.trim() || p.expediteur?.nom?.trim().split(/\s+/)[0] || "";
+  return [prenom, p.entreprise.trim()].filter(Boolean).join(", ");
 }
+
+/** Le texte libre par défaut, le seul que l'artisan peut modifier dans l'aperçu (lot final, point 4). */
+export function texteLibreParDefaut(p: SupplierPacket): string {
+  const tu = !!p.tutoie;
+  const phrase = (p.phrase ?? `Je vous envoie la liste des fournitures pour le ${chantierLabel(p.chantier)}${p.commune ? ` à ${p.commune}` : ""}.`).replace(/\bJe vous envoie\b/, tu ? "Je t'envoie" : "Je vous envoie");
+  return `${phrase} ${tu ? "Tu peux me chiffrer l'ensemble ?" : "Pouvez-vous me chiffrer l'ensemble ?"}`;
+}
+
+/** Le lien de réponse tel que l'aperçu le montre (le vrai est propre à chaque négoce, créé à l'envoi). */
+export const LIEN_APERCU = "(votre lien personnel)";
 
 /**
- * LE MAIL (§45.2) : court, poli, lisible en dix secondes sur un téléphone ; la liste est dans le PDF joint.
- * Seuls la phrase du chantier, la signature et la présence du PS changent d'un envoi à l'autre.
+ * LE MAIL AU NÉGOCE (lot final, point 3, Greg) : vouvoiement par défaut, adressé au prénom du commercial s'il est connu ;
+ * le texte libre de l'artisan (modifiable), UNE phrase de pression (« Je consulte plusieurs fournisseurs, réponse
+ * souhaitée avant le … »), « Répondre en ligne » sans inscription, « vous pouvez aussi répondre à ce mail », le
+ * portable (jamais l'e-mail personnel), la signature et un pied discret. Aucune invitation à s'inscrire, aucune commission.
  */
-export function packetMail(p: SupplierPacket): string {
-  const phrase = p.phrase ?? `Je vous envoie la liste des fournitures pour le ${chantierLabel(p.chantier)}${p.commune ? ` à ${p.commune}` : ""}.`;
-  const ask = `Pouvez-vous me chiffrer l'ensemble${p.echeance ? ` avant le ${p.echeance}` : ""} ?${p.joindre_detail ? " PS : si besoin, le détail du devis est en pièce jointe." : ""}`;
-  return ["Bonjour,", phrase, ...(p.message?.trim() ? [p.message.trim()] : []), ask, "Merci d'avance, bonne journée,", packetSignature(p)].join("\n\n");
+export function packetMail(p: SupplierPacket, o: { prenomCommercial?: string | null; lien?: string | null } = {}): string {
+  const tu = !!p.tutoie;
+  const prenom = o.prenomCommercial?.trim();
+  const tel = p.expediteur?.telephone?.trim();
+  return [
+    `${tu ? "Salut" : "Bonjour"}${prenom ? ` ${prenom}` : ""},`,
+    p.message?.trim() || texteLibreParDefaut(p),
+    p.echeance ? `Je consulte plusieurs fournisseurs, réponse souhaitée avant le ${p.echeance}.` : "Je consulte plusieurs fournisseurs, réponse souhaitée rapidement.",
+    [
+      ...(o.lien ? [`${tu ? "Réponds" : "Répondre"} en ligne, sans inscription : ${o.lien}`] : []),
+      tu ? "Tu peux aussi répondre directement à ce mail, il m'arrive." : "Vous pouvez aussi répondre directement à ce mail, il m'arrive.",
+      `La liste est en pièce jointe (PDF)${p.joindre_detail ? ", avec le détail du devis sans prix" : ""}.`,
+      ...(tel ? [`Un doute ? ${tu ? "Appelle-moi" : "Appelez-moi"} au ${tel}.`] : []),
+    ].join("\n"),
+    packetSignature(p),
+    `--\n${PIED_MAIL_NEGOCE}`,
+  ].join("\n\n");
 }
+
+export { mailEnHtml } from "../../../platform/email/mail-html.js";
 
 /** Les demandes d'avant le §45 : « Ardoises : 9 200 pièces » → une ligne du tableau. */
 function supplies(p: SupplierPacket): PacketSupply[] {

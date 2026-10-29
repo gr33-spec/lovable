@@ -38,7 +38,7 @@ describe("la liste envoyée aux négoces", () => {
 
     const jeton = (email: string) => lien(mailsVers(ctx, email).at(-1)!.text)!;
     expect(jeton("b@negoce.fr")).toBeTruthy();
-    expect(mailsVers(ctx, "b@negoce.fr").at(-1)!.text).toContain("Vous pouvez aussi chiffrer en ligne");
+    expect(mailsVers(ctx, "b@negoce.fr").at(-1)!.text).toContain("Répondre en ligne, sans inscription : ");
     const page = (await publique().get(`/v1/public/chiffrer/${jeton("b@negoce.fr")}`).expect(200)).body;
     expect(page).toMatchObject({ artisan: "Toitures A", negoce: "Négoce B", but: "chiffrer", etat: "a_chiffrer" });
     const cles = (page.lignes as { cle: string }[]).map((l) => l.cle);

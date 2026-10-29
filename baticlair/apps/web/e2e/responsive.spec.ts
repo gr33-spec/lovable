@@ -1,5 +1,18 @@
 import { expect, test, type Page } from "@playwright/test";
 
+// Lot final, point 1 : au premier envoi, « Avant d'envoyer » (SIRET, prénom, portable) se remplit tout seul dans ces parcours.
+test.beforeEach(async ({ page }) => {
+  await page.addLocatorHandler(page.getByRole("dialog", { name: "Avant d'envoyer" }), async () => {
+    const d = page.getByRole("dialog", { name: "Avant d'envoyer" });
+    await d.getByLabel("SIRET de ton entreprise").fill("73282932000074");
+    if (!(await d.getByLabel("Ton prénom").inputValue())) await d.getByLabel("Ton prénom").fill("Jean");
+    await d.getByLabel("Ton portable").fill("06 12 34 56 78");
+    await d.getByRole("button", { name: "Continuer" }).click();
+    await d.waitFor({ state: "detached" });
+  });
+});
+
+
 /**
  * LE GUIDE DU PREMIER LANCEMENT (Greg, 24 octobre 2026) s'ouvre par-dessus l'app une fois par compte : chaque parcours le
  * passe dès qu'il paraît (« Passer le guide »), sauf le test du guide, qui retire ce réflexe.
@@ -116,7 +129,9 @@ for (const size of WIDTHS) {
     for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
       await apercu.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
     }
-    await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
+    await apercu.getByRole("button", { name: "Continuer" }).click();
+  // Lot final, point 4 : « Voici ce que ton négoce va recevoir », puis « Envoyer ».
+  await page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByRole("button", { name: "Envoyer", exact: true }).click();
     const cards = page.getByRole("list", { name: "Tes fournisseurs" }).getByRole("listitem");
     await expect(cards.first()).toBeVisible();
     await shoot(page, size.name, "07-apres-envoi");

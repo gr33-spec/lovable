@@ -53,6 +53,7 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
             abonne: (companyId) => droits.abonnePayant(companyId),
             dernierPrixPour: (companyId) => demandes.dernierPrixPour(companyId),
             adresseMobiiz: async (companyId) => (await adresses.expediteur(companyId))?.from.match(/<([^>]+)>/)?.[1] ?? null,
+            expediteurMobiiz: async (companyId) => (await adresses.expediteur(companyId))?.from ?? null,
             mode: () => negocie.mode(),
             envoyerEnPerso: async (tenant, d) => {
               const projet = await p.project.create({ data: { companyId: tenant.companyId, name: d.nom, address: d.adresse, createdById: tenant.userId }, select: { id: true } });

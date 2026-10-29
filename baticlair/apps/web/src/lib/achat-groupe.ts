@@ -3,7 +3,7 @@
  * cartes, le détail et les résultats, l'engagement, « Préviens ton négoce », la page du négoce et l'admin.
  */
 
-export type NegoceChoisi = { supplierId: string; nom: string } | { negoceId: string; nom: string } | { nom: string; email: string; telephone?: string | null };
+export type NegoceChoisi = { supplierId: string; nom: string } | { negoceId: string; nom: string } | { nom: string; email: string; telephone?: string | null; prenom?: string | null };
 
 export interface Jauge {
   pourcent: 0 | 25 | 50 | 75 | 100;
@@ -66,6 +66,8 @@ export interface ResultatAchat {
   offres: OffrePourMoi[];
   commandeChez: string | null;
   coordonneesTransmises: string | null;
+  /** « Ensemble, vous avez payé … de moins. » : seulement après la commande, et si l'économie est calculée. */
+  economie?: string | null;
 }
 
 export interface DetailAchat extends CarteAchat {
@@ -246,7 +248,7 @@ export interface AdminAchat {
 }
 
 const jourFr = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" });
-export const dateFr = (iso: string | null | undefined) => (iso ? jourFr.format(new Date(iso)) : "");
+export const dateFr = (iso: string | null | undefined) => (iso ? jourFr.format(new Date(iso)).replace(/^1 /, "1er ") : "");
 export const eurosHt = (n: number) => `${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n).replace(/ /g, " ")} € HT`;
 export const quantite = (n: number) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 3 }).format(n).replace(/ /g, " ");
 
@@ -254,5 +256,5 @@ export const quantite = (n: number) => new Intl.NumberFormat("fr-FR", { maximumF
 export function negocePourApi(n: NegoceChoisi): Record<string, string | null> {
   if ("supplierId" in n) return { supplierId: n.supplierId };
   if ("negoceId" in n) return { negoceId: n.negoceId };
-  return { nom: n.nom, email: n.email, telephone: n.telephone ?? null };
+  return { nom: n.nom, email: n.email, telephone: n.telephone ?? null, prenom: n.prenom ?? null };
 }

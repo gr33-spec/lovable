@@ -120,11 +120,13 @@ describe("la demande perso", () => {
     const envoi = (await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "chiffrer", accord: true, articles: a.articles, dateBesoin: "2099-12-01", negoces: [{ nom: "Négoce B", email: "b@negoce.fr" }] }).expect(201)).body;
     const envoyeLe = (await ctx.prisma.priceRequestRecipient.findFirstOrThrow({ where: { priceRequestId: envoi.id } })).sentAt!;
     const tache = (quand: Date) => publique().get(`/v1/internal/demandes-perso?maintenant=${encodeURIComponent(quand.toISOString())}`).set("authorization", "Bearer secret-de-la-tache").expect(200);
-    expect((await tache(new Date(envoyeLe.getTime() + 3_600_000))).body).toEqual({ relances: 0 });
-    // Quatre jours plus tard (au moins 48 h ouvrées, week-end compris) : une relance.
-    expect((await tache(new Date(envoyeLe.getTime() + 4 * 86_400_000))).body).toEqual({ relances: 1 });
-    expect(mailsVers(ctx, "b@negoce.fr").at(-1)!.subject).toMatch(/^Rappel : la demande de prix de Toitures A attend votre réponse$/);
-    expect((await tache(new Date(envoyeLe.getTime() + 6 * 86_400_000))).body).toEqual({ relances: 0 });
+    expect((await tache(new Date(envoyeLe.getTime() + 3_600_000))).body).toMatchObject({ relances: 0 });
+    // Quatre jours plus tard (au moins 48 h ouvrées, week-end compris) : une relance, au nom de son client (lot final, point 6).
+    expect((await tache(new Date(envoyeLe.getTime() + 4 * 86_400_000))).body).toMatchObject({ relances: 1 });
+    const rappel = mailsVers(ctx, "b@negoce.fr").at(-1)!;
+    expect(rappel.subject).toBe("Toitures A attend votre offre");
+    expect(rappel.text).toMatch(/^Bonjour,\n\nVotre client Toitures A attend votre offre\. Les réponses sont closes le \d+ \S+\./);
+    expect((await tache(new Date(envoyeLe.getTime() + 6 * 86_400_000))).body).toMatchObject({ relances: 0 });
     // La demande close, plus de chiffrage.
     await ctx.prisma.priceRequest.update({ where: { id: envoi.id }, data: { closLe: new Date(Date.now() - 1000) } });
     const r = await publique().post(`/v1/public/chiffrer/${jetonPour("b@negoce.fr")}`).send({ prix: { "0": 1 }, livraisonHt: 0, delaiJours: 1, validiteJours: 7 }).expect(409);

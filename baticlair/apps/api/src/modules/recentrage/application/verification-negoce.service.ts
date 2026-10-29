@@ -1,4 +1,4 @@
-import { verifierNegoce, NAF_MATERIAUX_DEFAUT, PHRASES_REFUS_NEGOCE, type VerificationNegoce } from "@baticlair/domain";
+import { prenomDirigeant, verifierNegoce, NAF_MATERIAUX_DEFAUT, PHRASES_REFUS_NEGOCE, type VerificationNegoce } from "@baticlair/domain";
 import { validationFailed } from "../../../platform/errors/domain-error.js";
 
 /**
@@ -14,6 +14,8 @@ export interface FicheEntreprise {
   naf: string | null;
   nom: string;
   adresse: string | null;
+  /** Lot final, point 1 : le prénom du premier dirigeant (personne physique), pour préremplir l'identité de l'artisan. */
+  prenomDirigeant?: string | null;
 }
 
 export interface RechercheEntreprises {
@@ -43,6 +45,7 @@ interface ReponseRecherche {
     etat_administratif?: string;
     siege?: { siret?: string; adresse?: string; etat_administratif?: string; activite_principale?: string };
     matching_etablissements?: { siret?: string; adresse?: string; etat_administratif?: string; activite_principale?: string }[];
+    dirigeants?: { type_dirigeant?: string; prenoms?: string; nom?: string }[];
   }[];
 }
 
@@ -62,6 +65,7 @@ export class ApiRechercheEntreprises implements RechercheEntreprises {
       naf: etab.activite_principale ?? r.activite_principale ?? null,
       nom: r.nom_raison_sociale ?? r.nom_complet ?? "",
       adresse: etab.adresse ?? null,
+      prenomDirigeant: prenomDirigeant(r.dirigeants?.find((d) => d.type_dirigeant === "personne physique" && d.prenoms)?.prenoms ?? null),
     };
   }
 }
@@ -76,6 +80,12 @@ export class VerificationNegoceService {
    * Le verdict pour une inscription. Sans SIRET ou API en panne : « à vérifier ». En test (`fake`), le domaine compte
    * comme celui de l'entreprise sauf pour une messagerie grand public.
    */
+  /** La fiche de l'annuaire pour un SIRET, ou null (API coupée ou en panne : jamais une erreur). */
+  async fiche(siret: string): Promise<FicheEntreprise | null> {
+    if (!this.recherche) return null;
+    return this.recherche.parSiret(siret).catch(() => null);
+  }
+
   async verifier(i: { siret: string | null; email: string; enseigne: string }): Promise<{ verification: "valide" | "a_verifier"; naf: string | null; raisonSociale: string | null }> {
     if (!i.siret || !this.recherche) return { verification: "a_verifier", naf: null, raisonSociale: null };
     let fiche: FicheEntreprise | null;

@@ -126,7 +126,7 @@ async function supprimer(page) {
   await page.waitForURL((u) => !/\/compte$/.test(u.pathname), { timeout: 30000 });
 }
 async function ajouterNegoce(page, n) {
-  await page.getByLabel(/^(E-mail du négoce|Ou l'e-mail d'un autre négoce)$/).fill(n.email); await page.getByLabel("Nom du négoce").fill(n.nom);
+  await page.getByLabel(/^(E-mail de ton commercial|Ou l'e-mail du commercial d'un autre négoce)$/).fill(n.email); await page.getByLabel("Nom du négoce").fill(n.nom);
   await page.getByLabel("Son téléphone (pour le prévenir)").fill(n.tel);
   await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
 }
@@ -290,7 +290,7 @@ await etape("Cas 4 : l'admin clôture (une liste propre par négoce)", adm, asyn
   await voir(adm.getByText("Clôturé : les listes sont parties chez les négoces."));
 });
 const lien = (m) => /https?:\/\/[^\s]+\/achat-groupe\/[A-Za-z0-9_-]+/.exec(m.text)[0];
-const demande = async (email) => (await emailsVers(email, (m) => /Demande de prix groupée/.test(m.subject))).filter((m) => /Demande de prix groupée/.test(m.subject)).at(-1);
+const demande = async (email) => (await emailsVers(email, (m) => / : achat groupé /.test(m.subject))).filter((m) => / : achat groupé /.test(m.subject)).at(-1);
 const negoce = await nouveau("negoce");
 await etape("Cas 4 : X chiffre ligne par ligne, « je ne fournis pas » les liteaux", negoce, async () => {
   const mailX = await demande(X.email);

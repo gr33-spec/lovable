@@ -44,9 +44,11 @@ const createBody = z.object({
     .transform((v) => (v ? new Date(`${v}T00:00:00Z`) : null)),
   /** §48.5 : « Envoyer une sélection à un autre fournisseur » : les articles cochés (clés de la liste). */
   articles: z.array(z.string().min(1).max(300)).min(1).max(500).optional(),
+  /** Lot final, point 4 : tutoyer le négoce (vouvoiement par défaut). */
+  tutoie: z.boolean().nullish(),
 });
 const addBody = z.object({ supplierIds });
-const previewBody = createBody.omit({ supplierIds: true }).extend({ destinataire: z.string().trim().max(200).nullish() });
+const previewBody = createBody.omit({ supplierIds: true }).extend({ destinataire: z.string().trim().max(200).nullish(), supplierId: z.string().max(60).nullish() });
 const statusBody = z.object({
   status: z.enum(["to_send", "sent", "declined"]),
 });
@@ -95,6 +97,7 @@ export function toDto(r: PriceRequestView) {
       status: x.status,
       sentAt: x.sentAt?.toISOString() ?? null,
       etiquette: x.etiquette,
+      rappelLe: x.rappelLe?.toISOString() ?? null,
       document: x.document,
       email: r.emails.get(x.id) ?? null,
     })),
@@ -164,7 +167,7 @@ export class PriceRequestsController {
   @Post("projects/:projectId/price-requests/preview")
   @HttpCode(200)
   async preview(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(previewBody)) body: z.infer<typeof previewBody>) {
-    return this.requests.preview(tenant, projectId, { message: body.message ?? null, dueDate: body.dueDate ?? null, destinataire: body.destinataire ?? null });
+    return this.requests.preview(tenant, projectId, { message: body.message ?? null, dueDate: body.dueDate ?? null, destinataire: body.destinataire ?? null, supplierId: body.supplierId ?? null, tutoie: body.tutoie ?? null });
   }
 
   @Post("projects/:projectId/price-requests")
@@ -175,7 +178,7 @@ export class PriceRequestsController {
     @Param("projectId") projectId: string,
     @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>,
   ) {
-    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null, ...(body.articles ? { articles: body.articles } : {}) };
+    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null, ...(body.articles ? { articles: body.articles } : {}), ...(typeof body.tutoie === "boolean" ? { tutoie: body.tutoie } : {}) };
     return toDto(await this.requests.create(tenant, projectId, input));
   }
 

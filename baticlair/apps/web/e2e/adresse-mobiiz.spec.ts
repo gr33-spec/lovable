@@ -1,6 +1,19 @@
 import { createHmac } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
 
+// Lot final, point 1 : au premier envoi, « Avant d'envoyer » (SIRET, prénom, portable) se remplit tout seul dans ces parcours.
+test.beforeEach(async ({ page }) => {
+  await page.addLocatorHandler(page.getByRole("dialog", { name: "Avant d'envoyer" }), async () => {
+    const d = page.getByRole("dialog", { name: "Avant d'envoyer" });
+    await d.getByLabel("SIRET de ton entreprise").fill("73282932000074");
+    if (!(await d.getByLabel("Ton prénom").inputValue())) await d.getByLabel("Ton prénom").fill("Jean");
+    await d.getByLabel("Ton portable").fill("06 12 34 56 78");
+    await d.getByRole("button", { name: "Continuer" }).click();
+    await d.waitFor({ state: "detached" });
+  });
+});
+
+
 /**
  * R7 (Greg, 26 et 27 octobre 2026) : L'ADRESSE MOBIIZ DE L'ARTISAN. « Voici ton adresse Mobiiz : … C'est elle qui envoie
  * tes demandes de prix. Les réponses des négoces arrivent ici, dans Mobiiz. » L'écran dédié après l'inscription, le bloc
@@ -127,7 +140,9 @@ test("R7 : l'écran dédié, le bloc Compte (copier, modifier une fois), le rapp
   await page.getByRole("button", { name: /Envoyer au(x)? (fournisseur|négoce)|Demander les prix à mes négoces/ }).first().click();
   const feuille = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(feuille.getByRole("note")).toHaveText(`Les réponses arrivent dans Mobiiz, on te prévient. ${nouvelle}@mobiiz.test`);
-  await feuille.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await feuille.getByRole("button", { name: "Continuer" }).click();
+  // Lot final, point 4 : « Voici ce que ton négoce va recevoir », puis « Envoyer ».
+  await page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("region", { name: "Fournisseurs" })).toBeVisible();
   // La demande est partie de l'adresse Mobiiz, « Répondre » vers l'adresse étiquetée, le repère dans l'objet.
   const mails = (await apiJson<{ emails: { to: string; subject: string; from: string | null; replyTo: string | null }[] }>(page, "GET", "/v1/internal/test/emails?to=ventes%40dupont.example", undefined, SECRET)).body.emails;
@@ -139,6 +154,61 @@ test("R7 : l'écran dédié, le bloc Compte (copier, modifier une fois), le rapp
   // Au deuxième envoi, plus de rappel.
   await page.reload();
   await expect(page.getByRole("note")).toHaveCount(0);
+});
+
+test("lot final, points 1 à 4 : « Avant d'envoyer » une seule fois, l'aperçu fidèle au prénom du commercial, le message modifié, le mail parti à son nom", async ({ page }) => {
+  // Ici on remplit l'identité à la main : le remplissage automatique des autres parcours est retiré.
+  await page.removeLocatorHandler(page.getByRole("dialog", { name: "Avant d'envoyer" }));
+  const { entreprise } = await inscrire(page);
+  const q = await apiJson<{ id: string; projetId: string; questions: { id: string; boutons: { valeur: string }[] }[] }>(page, "POST", "/v1/quantitatifs", { reference: "Dupont", adresse: "12 rue de Siam, 29200 Brest", lignes: [{ libelle: "Chatière de ventilation", quantite: "4", unite: "u" }] });
+  let current = (await apiJson<{ questions: { id: string; boutons: { valeur: string }[] }[] }>(page, "GET", `/v1/quantitatifs/${q.body.id}`)).body;
+  for (let i = 0; i < 10 && current.questions.length > 0; i++) {
+    const question = current.questions[0]!;
+    current = (await apiJson<typeof current>(page, "POST", `/v1/quantitatifs/${q.body.id}/reponses`, { reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
+  }
+  expect((await apiJson(page, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status).toBe(200);
+  expect((await apiJson(page, "POST", "/v1/suppliers", { name: "Négoce Dupont", email: "paul@dupont.example", contactName: "Paul" })).status).toBe(201);
+  await page.goto(`/chantiers/${q.body.projetId}`);
+  await page.getByRole("button", { name: "Demander les prix à mes négoces" }).first().click();
+  // Point 1 : la première fois, SIRET, prénom (prérempli du compte ou de l'annuaire), portable ; la phrase de Greg.
+  const identite = page.getByRole("dialog", { name: "Avant d'envoyer" });
+  await expect(identite.getByText("Ton négoce reçoit la demande au nom de ton entreprise, il doit te reconnaître.")).toBeVisible();
+  await identite.getByLabel("SIRET de ton entreprise").fill("73282932000074");
+  if (!(await identite.getByLabel("Ton prénom").inputValue())) await identite.getByLabel("Ton prénom").fill("Jean");
+  await identite.getByLabel("Ton portable").fill("06 12 34 56 78");
+  await identite.getByRole("button", { name: "Continuer" }).click();
+  // « À qui j'envoie ? » avec la phrase du ton, puis l'aperçu.
+  const qui = page.getByRole("dialog", { name: "À qui j'envoie ?" });
+  await expect(qui.getByText("Mets tes négoces en concurrence. Un négoce sérieux répond, et tu sauras vite qui tient la route.")).toBeVisible();
+  await qui.getByRole("button", { name: "Continuer" }).click();
+  const recoit = page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" });
+  const mail = recoit.getByLabel("Le mail à ton négoce");
+  await expect(mail).toContainText(`Objet : ${entreprise} : demande de prix`);
+  await expect(mail).toContainText("Bonjour Paul,");
+  await expect(mail).toContainText("Je consulte plusieurs fournisseurs, réponse souhaitée avant le");
+  await expect(mail).toContainText("Vous pouvez aussi répondre directement à ce mail, il m'arrive.");
+  await expect(mail).toContainText("Un doute ? Appelez-moi au 06 12 34 56 78.");
+  await expect(mail).toContainText("Mobiiz, des artisans qui achètent ensemble.");
+  // Point 4 : seul le texte libre se modifie ; « Le tutoyer » ; un seul bouton principal.
+  await recoit.getByRole("button", { name: "Modifier le message" }).click();
+  await recoit.getByLabel("Ton message").fill("Pouvez-vous me chiffrer ces chatières pour vendredi ?");
+  await recoit.getByRole("button", { name: "Garder ce message" }).click();
+  await expect(mail).toContainText("Pouvez-vous me chiffrer ces chatières pour vendredi ?");
+  await recoit.getByRole("button", { name: "Le tutoyer" }).click();
+  await expect(mail).toContainText("Salut Paul,");
+  await recoit.getByRole("button", { name: "Le vouvoyer" }).click();
+  await expect(mail).toContainText("Bonjour Paul,");
+  await recoit.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Fournisseurs" })).toBeVisible();
+  // Point 3 et 5 : expéditeur « Entreprise via Mobiiz », le texte et le HTML, le message gardé.
+  const mails = (await apiJson<{ emails: { subject: string; from: string | null; text: string; html?: string | null }[] }>(page, "GET", "/v1/internal/test/emails?to=paul%40dupont.example", undefined, SECRET)).body.emails;
+  const m = mails.at(-1)!;
+  expect(m.from).toMatch(new RegExp(`^${entreprise} via Mobiiz <`));
+  expect(m.subject).toContain(`${entreprise} : demande de prix`);
+  expect(m.text).toContain("Pouvez-vous me chiffrer ces chatières pour vendredi ?");
+  // Asked once : la deuxième fois, plus d'« Avant d'envoyer » ; l'identité se change dans Profil.
+  await page.goto("/compte");
+  await expect(page.getByLabel("Ton identité auprès des négoces")).toContainText("SIRET 73282932000074");
 });
 
 test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mail sans repère va dans « Mes reçus » et se rattache d'un tap", async ({ page }) => {

@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button, Card, ErrorNotice, Field, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur } from "@/lib/api";
+import { phraseCompteARebours } from "../../../../../../../packages/domain/src/groupe/ton";
 import { dateFr, eurosHt, quantite, type LectureExcel, type PageNegoceAchat, type RecapOffreNegoce } from "@/lib/achat-groupe";
 
 const lireNombre = (s: string) => (s.trim() === "" ? null : Number(s.replace(/\s/g, "").replace(",", ".")));
@@ -40,6 +41,8 @@ export default function ReponseAchatGroupePage() {
   const [paiement, setPaiement] = useState<string | null | undefined>(undefined);
   const [autre, setAutre] = useState<string | null>(null);
   const [accepte, setAccepte] = useState(false);
+  // Lot final, point 7 : « Plus que 2 jours pour répondre », calculé à l'ouverture de la page.
+  const [ouvertLe] = useState(() => new Date());
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const haut = useRef<HTMLDivElement>(null);
@@ -128,6 +131,7 @@ export default function ReponseAchatGroupePage() {
     </p>
   ) : null;
 
+  const rebours = phraseCompteARebours(new Date(page.reponseAvantLe), ouvertLe);
   return (
     <div ref={haut} className="flex flex-col gap-5">
       {etape === "accueil" ? (
@@ -135,7 +139,10 @@ export default function ReponseAchatGroupePage() {
           <p className="text-[15px] font-semibold text-muted">{page.deLaPartDe}</p>
           <PageTitle>Demande de prix groupée</PageTitle>
           <p className="text-[18px] font-extrabold">{page.titre}</p>
-          <p className="text-[16px] font-semibold">Réponse avant le {dateFr(page.reponseAvantLe)}.</p>
+          <p className="text-[16px] font-semibold">
+            Réponse avant le {dateFr(page.reponseAvantLe)}.
+            {!page.reponse && !page.close && rebours ? <span className="ml-2 inline-block rounded-full bg-accent-soft px-2.5 py-0.5 text-[14px] font-bold">{rebours}</span> : null}
+          </p>
           {page.reponse ? (
             <div role="status" className="flex flex-col gap-3 rounded-xl bg-ok-bg p-4 text-ok">
               <p className="text-[17px] font-extrabold">Offre envoyée le {dateFr(page.reponse.le)}.</p>

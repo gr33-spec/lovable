@@ -95,7 +95,7 @@ export function mailRelanceDemandePerso(m: { entreprise: string; lien: string })
 }
 
 /** Après la première réponse : l'invitation à créer son compte pour recevoir les regroupements de sa zone. */
-export const PHRASE_COMPTE_APRES_REPONSE = "Merci, votre offre est partie. Créez votre compte négoce pour recevoir aussi les regroupements de votre zone : des volumes groupés sur lesquels vous positionner.";
+export const PHRASE_COMPTE_APRES_REPONSE = "Merci, votre offre est partie. Recevez directement les prochains achats groupés de votre secteur.";
 
 export interface ReponseNegocePerso {
   negoceId: string;

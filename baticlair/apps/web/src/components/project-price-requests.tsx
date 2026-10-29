@@ -19,6 +19,8 @@ import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { useAncienMode } from "@/components/negocie";
 import { useActionChantier } from "@/lib/actions-chantier";
+import { EtapeApercu, EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
+import { TON, phraseRelanceArtisan } from "../../../../packages/domain/src/groupe/ton";
 import { euros, type DemandePerso, type OffrePerso } from "@/lib/recentrage";
 import { dateHeureCourte, premiereLigneDuMessage } from "../../../../packages/domain/src/groupe/reponse-negoce";
 
@@ -307,6 +309,26 @@ export function ProjectPriceRequests({
           {comparer ? "Comparer" : repondus.length > 1 ? "Voir les devis reçus" : "Voir le devis reçu"}
         </Button>
       ) : null}
+      {retenus.length === 0
+        ? request.recipients
+            .filter((r) => r.status === "sent" && r.rappelLe && !repondus.includes(r))
+            .map((r) => (
+              // Lot final, point 6 : le négoce n'a pas répondu à mi-délai ; on appelle le commercial, ou on renvoie.
+              <div key={`rappel-${r.id}`} role="group" aria-label={`${r.supplier.name} n'a pas encore répondu`} className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+                <p className="text-[15px] font-semibold">{phraseRelanceArtisan(r.supplier.name)}</p>
+                <div className="flex flex-wrap gap-2">
+                  {r.supplier.phone ? (
+                    <a href={`tel:${r.supplier.phone.replace(/[^\d+]/g, "")}`} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-extrabold text-on-accent">
+                      Appeler {r.supplier.contactName?.trim() || r.supplier.name}
+                    </a>
+                  ) : null}
+                  <a href={mailtoHref(r)} className="pressable inline-flex min-h-12 items-center justify-center rounded-full border border-line bg-surface px-5 text-[15px] font-bold">
+                    Renvoyer la demande
+                  </a>
+                </div>
+              </div>
+            ))
+        : null}
       {actionError ? <ErrorNotice error={actionError} /> : null}
       {suppression ? (
         <div id="supprimer-demande" role="group" aria-label="Supprimer la demande" className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
@@ -559,6 +581,12 @@ function NewRequest({
   const [previewing, setPreviewing] = useState(openAtStart && quantitatifId !== null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState("");
+  // Lot final, points 1 et 4 : « Avant d'envoyer » la première fois, puis « À qui j'envoie ? », puis l'aperçu du mail.
+  const identite = useIdentite();
+  const [etape, setEtape] = useState<"negoces" | "apercu">("negoces");
+  const [enregistre, setEnregistre] = useState(false);
+  const [messageLibre, setMessageLibre] = useState<string | null>(null);
+  const [tutoie, setTutoie] = useState<boolean | null>(null);
   const [dueDate, setDueDate] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
@@ -587,7 +615,7 @@ function NewRequest({
     try {
       let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
         method: "POST",
-        body: { supplierIds: [...selected], message: message || null, dueDate: dueDate || null },
+        body: { supplierIds: [...selected], message: messageLibre ?? (message || null), dueDate: dueDate || null, ...(tutoie === null ? {} : { tutoie }) },
         idempotencyKey: key.current,
       });
       if (deliversEmail) {
@@ -636,25 +664,50 @@ function NewRequest({
         </div>
       </details>
       {error ? <ErrorNotice error={error} /> : null}
-      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => void create()}>
+      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => (setEtape("negoces"), setPreviewing(true))}>
         <Mail size={18} aria-hidden="true" />
         {selected.size === 0 ? "Coche au moins un fournisseur" : "Envoyer la demande de devis"}
       </Button>
       {previewing ? (
         // §50.7 : l'écran « Ton chantier » EST le document ; l'envoi ne montre plus d'aperçu, seulement à qui il part.
-        <SendSheet
-          canSend={selected.size > 0}
-          sending={pending}
-          onSend={() => void create()}
-          onClose={() => {
-            setPreviewing(false);
-            onPreviewClosed?.();
-          }}
-        >
-          {/* R7 : le rappel en une ligne au premier envoi (Greg, 27 octobre 2026). */}
-          <RappelAdresseMobiiz />
-          <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
-        </SendSheet>
+        identite.data && !identite.data.complete ? (
+          // Lot final, point 1 : la première fois, « Avant d'envoyer » (SIRET, prénom, portable), une seule fois.
+          <SendSheet
+            titre="Avant d'envoyer"
+            principal={{ label: "Continuer", form: FORMULAIRE_IDENTITE, pending: enregistre }}
+            onClose={() => {
+              setPreviewing(false);
+              onPreviewClosed?.();
+            }}
+          >
+            <EtapeIdentite identite={identite.data} onFait={(i) => identite.setData(i)} onPending={setEnregistre} />
+          </SendSheet>
+        ) : etape === "negoces" ? (
+          <SendSheet
+            titre="À qui j'envoie ?"
+            principal={{ label: selected.size === 0 ? "Choisis un négoce" : "Continuer", disabled: selected.size === 0 || !identite.data, onClick: () => setEtape("apercu") }}
+            onClose={() => {
+              setPreviewing(false);
+              onPreviewClosed?.();
+            }}
+          >
+            {/* Lot final, ton : avant l'envoi à ses négoces, une phrase de collègue (docs/groupe/TON.md). */}
+            <p className="text-[15px] font-semibold">{TON.avantEnvoiNegoces}</p>
+            {/* R7 : le rappel en une ligne au premier envoi (Greg, 27 octobre 2026). */}
+            <RappelAdresseMobiiz />
+            <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
+          </SendSheet>
+        ) : (
+          // Lot final, point 4 : « Voici ce que ton négoce va recevoir », l'aperçu fidèle ; un seul bouton, « Envoyer ».
+          <SendSheet
+            titre="Voici ce que ton négoce va recevoir"
+            principal={{ label: "Envoyer", disabled: selected.size === 0, pending, onClick: () => void create() }}
+            onClose={() => setEtape("negoces")}
+          >
+            <EtapeApercu projectId={projectId} supplierId={[...selected][0] ?? null} message={messageLibre} onMessage={setMessageLibre} tutoie={tutoie} onTutoie={setTutoie} />
+            {error ? <ErrorNotice error={error} /> : null}
+          </SendSheet>
+        )
       ) : null}
     </div>
   );
@@ -1014,7 +1067,17 @@ function EmailPreview({ to, email }: { to: string; email: { subject: string; bod
  * §50.7 : après « Envoyer aux négoces », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
  * qu'on vient de quitter (plus d'écran « Ce que le fournisseur va recevoir »).
  */
-function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: boolean; sending: boolean; onSend: () => void; onClose: () => void; children: React.ReactNode }) {
+function SendSheet({
+  titre,
+  principal,
+  onClose,
+  children,
+}: {
+  titre: string;
+  principal: { label: string; disabled?: boolean; pending?: boolean; onClick?: () => void; form?: string };
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -1023,9 +1086,9 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
     };
   }, []);
   return (
-    <div role="dialog" aria-modal="true" aria-label="À qui j'envoie ?" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
+    <div role="dialog" aria-modal="true" aria-label={titre} className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
       <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
-        <h2 className="font-display text-[20px] font-extrabold">À qui j&apos;envoie ?</h2>
+        <h2 className="font-display text-[20px] font-extrabold">{titre}</h2>
         <button type="button" onClick={onClose} aria-label="Revenir à mon chantier" className="inline-flex size-11 items-center justify-center rounded-xl">
           <X size={20} aria-hidden="true" />
         </button>
@@ -1034,9 +1097,14 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
         <div className="mx-auto flex max-w-2xl flex-col gap-3">{children}</div>
       </div>
       <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] border-t border-line">
-        <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!canSend} onClick={onSend}>
-          <Send size={18} aria-hidden="true" />
-          {canSend ? "Envoyer" : "Choisis un fournisseur"}
+        <Button
+          className="min-h-14 w-full max-w-2xl text-[17px]"
+          pending={principal.pending ?? false}
+          disabled={principal.disabled ?? false}
+          {...(principal.form ? { type: "submit" as const, form: principal.form } : { onClick: principal.onClick })}
+        >
+          {principal.label === "Envoyer" ? <Send size={18} aria-hidden="true" /> : null}
+          {principal.label}
         </Button>
         <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
           Revenir à la liste

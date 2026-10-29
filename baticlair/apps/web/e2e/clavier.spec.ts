@@ -100,7 +100,7 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     await champVisible(page, commune);
     await commune.fill("22300 Lannion");
     await page.getByRole("button", { name: "Continuer" }).click();
-    const courriel = page.getByLabel(/^(E-mail du négoce|Ou l'e-mail d'un autre négoce)$/);
+    const courriel = page.getByLabel(/^(E-mail de ton commercial|Ou l'e-mail du commercial d'un autre négoce)$/);
     await champVisible(page, courriel);
     await courriel.fill(`n-${unique()}@negoce.example`);
     const nom = page.getByLabel("Nom du négoce");

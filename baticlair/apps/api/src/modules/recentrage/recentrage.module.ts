@@ -4,9 +4,13 @@ import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
 import { CONFIG, EMAIL_SENDER, PUSH_SENDER } from "../../platform/tokens.js";
 import type { PushSender } from "../../platform/push/push.port.js";
+import { NotificationsGroupeService } from "../../platform/notifications/notifications-artisan.js";
+import { lienEmailsCoupes } from "../privacy/index.js";
 import { AbonnementModule, AbonnementService } from "../abonnement/index.js";
 import { AiUsageModule, AnalysisMeter } from "../ai-usage/index.js";
-import { CommandeDuMoisService, EspaceNegoceService, GroupeModule } from "../groupe/index.js";
+import { CommandeDuMoisService, EspaceNegoceService, GroupeModule, GroupeService } from "../groupe/index.js";
+import { IdentiteService } from "./application/identite.service.js";
+import { IdentiteController } from "./http/identite.controller.js";
 import { PriceRequestsModule, PriceRequestsService } from "../price-requests/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { PilotageModule } from "../pilotage/index.js";
@@ -27,7 +31,7 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
  */
 @Module({
   imports: [TenancyModule, AbonnementModule, PriceRequestsModule, GroupeModule, AiUsageModule, PilotageModule, AdresseMobiizModule],
-  controllers: [RecentrageController, ChiffrageController, RecentrageNegoceController, RegroupementsController, HypothesesController, NegocieController, ChasseurController, NegocieAdminController],
+  controllers: [IdentiteController, RecentrageController, ChiffrageController, RecentrageNegoceController, RegroupementsController, HypothesesController, NegocieController, ChasseurController, NegocieAdminController],
   providers: [
     {
       provide: DroitsService,
@@ -36,9 +40,14 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
     },
     {
       provide: DemandePersoService,
-      useFactory: (p: PrismaService, pr: PriceRequestsService, d: DroitsService, espace: EspaceNegoceService, e: TransactionalEmailSender, c: AppConfig) =>
-        new DemandePersoService(p, pr, d, (n) => espace.inviter(n), e, { webAppUrl: c.webAppUrl }),
-      inject: [PrismaService, PriceRequestsService, DroitsService, EspaceNegoceService, EMAIL_SENDER, CONFIG],
+      useFactory: (p: PrismaService, pr: PriceRequestsService, d: DroitsService, espace: EspaceNegoceService, e: TransactionalEmailSender, push: PushSender, c: AppConfig) => {
+        const s = new DemandePersoService(p, pr, d, (n) => espace.inviter(n), e, { webAppUrl: c.webAppUrl });
+        // Lot final, point 6 : les relances préviennent l'artisan comme les achats groupés (notification, puis e-mail).
+        const notifs = new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl);
+        s.brancherPrevenir((companyId, m, courriel) => notifs.prevenir(companyId, m, courriel));
+        return s;
+      },
+      inject: [PrismaService, PriceRequestsService, DroitsService, EspaceNegoceService, EMAIL_SENDER, PUSH_SENDER, CONFIG],
     },
     {
       provide: RegroupementsService,
@@ -60,6 +69,11 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
       useFactory: (p: PrismaService, d: DroitsService, cmd: CommandeDuMoisService, o: ObservatoireService, e: TransactionalEmailSender, push: PushSender, c: AppConfig) =>
         new NegocieService(p, d, cmd, o, e, push, { webAppUrl: c.webAppUrl, mode: c.groupe.negocie.mode, chasseurs: c.groupe.negocie.chasseurs, admins: c.groupe.admins, commissionDefaut: c.groupe.negocie.commissionDefaut, seuilAnonymat: c.groupe.recentrage.seuilAnonymat, emailChasseur: c.groupe.negocie.emailChasseur, delaiLivraisonJours: c.groupe.negocie.delaiLivraisonJours }),
       inject: [PrismaService, DroitsService, CommandeDuMoisService, ObservatoireService, EMAIL_SENDER, PUSH_SENDER, CONFIG],
+    },
+    {
+      provide: IdentiteService,
+      useFactory: (p: PrismaService, v: VerificationNegoceService, g: GroupeService) => new IdentiteService(p, v, (t) => g.verifierSiret(t)),
+      inject: [PrismaService, VerificationNegoceService, GroupeService],
     },
     {
       provide: VerificationNegoceService,
@@ -91,7 +105,8 @@ export class RecentrageModule implements OnModuleInit {
   onModuleInit(): void {
     // R7 : le SMS « Préviens ton négoce » nomme l'adresse Mobiiz qui envoie la demande.
     this.demandes.brancherAdresseEnvoi(async (companyId) => (await this.adresses.expediteur(companyId))?.from.match(/<([^>]+)>/)?.[1] ?? null);
-    this.priceRequests.brancherComplement((requestId, recipientId) => this.demandes.complement(requestId, recipientId), () => this.demandes.apercuComplement());
+    this.demandes.brancherExpediteur((companyId) => this.adresses.expediteur(companyId));
+    this.priceRequests.brancherComplement((requestId, recipientId) => this.demandes.complement(requestId, recipientId));
     this.abonnement.brancherOffert((companyId) => this.droits.offertPour(companyId));
     this.meter.brancherLimiteGratuite((companyId) => this.droits.limiteGratuite(companyId));
     this.commande.brancherVolume((c) => this.regroupements.volume(c));

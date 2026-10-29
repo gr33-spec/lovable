@@ -20,7 +20,7 @@ function instant(config: AppConfig, demande?: string): Date {
 const negoce = z.union([
   z.object({ supplierId: z.uuid() }),
   z.object({ negoceId: z.uuid() }),
-  z.object({ nom: z.string().trim().min(1).max(120), email: z.email().max(254), telephone: z.string().trim().max(30).nullable().optional() }),
+  z.object({ nom: z.string().trim().min(1).max(120), email: z.email().max(254), telephone: z.string().trim().max(30).nullable().optional(), prenom: z.string().trim().max(60).nullable().optional() }),
 ]);
 // Précision 1 (27 octobre 2026) : au moins un négoce ; le message vient du service (« Ajoute au moins un négoce… »).
 const negoces = z.array(negoce).max(10);

@@ -38,6 +38,13 @@ import {
   exclusionJusquau,
   arbreCatalogue,
   famillesDuCatalogue,
+  portableLisible,
+  prenomDe,
+  mailRelanceDemande,
+  phraseRelanceArtisan,
+  relancesDues,
+  phraseEconomieGroupe,
+  TON,
   famillesDuMetier,
   jaugeVolume,
   LIBELLES_FAMILLES,
@@ -79,6 +86,7 @@ import {
 } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
+import { mailEnHtml } from "../../../platform/email/mail-html.js";
 import { DomainError, forbidden, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { NotificationsGroupeService } from "../../../platform/notifications/notifications-artisan.js";
 import { bonDeCommandePdf } from "../../../platform/pdf/bon-de-commande.js";
@@ -122,7 +130,7 @@ const COL_DISPO = 5;
 const hacher = (jeton: string) => createHash("sha256").update(jeton).digest("hex");
 const qte = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 3 }).replace(/\u202f/g, "\u00a0");
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u202f/g, "\u00a0")} €`;
-const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d);
+const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d).replace(/^1 /, "1er ");
 const jourIso = (d: Date) => d.toISOString().slice(0, 10);
 const arrondi = (n: number) => Math.round(n * 100) / 100;
 const nombre = (s: string | null | undefined): number | null => {
@@ -138,7 +146,7 @@ const prixDe = (prix: ReponseLignes, cle: string): number | null => {
 };
 const lignesDe = (v: unknown): LignePanier[] => (Array.isArray(v) ? (v as LignePanier[]) : []);
 
-export type NegoceAjoute = { supplierId: string } | { negoceId: string } | { nom: string; email: string; telephone?: string | null };
+export type NegoceAjoute = { supplierId: string } | { negoceId: string } | { nom: string; email: string; telephone?: string | null; prenom?: string | null };
 
 export interface LigneEngagee {
   designation: string;
@@ -202,6 +210,8 @@ export interface PortsAchatGroupe {
   dernierPrixPour(companyId: string): Promise<(cle: string, unite: string) => number | null>;
   /** L'adresse Mobiiz (sans étiquette) de l'entreprise : le Reply-To de la demande au négoce. */
   adresseMobiiz(companyId: string): Promise<string | null>;
+  /** « Entreprise Dupont via Mobiiz <adresse> » : l'expéditeur du mail au négoce (lot final, point 3). */
+  expediteurMobiiz?(companyId: string): Promise<string | null>;
   mode(): Promise<string>;
   /** Le plan B : une liste validée, puis la demande perso à ses négoces. */
   envoyerEnPerso(tenant: TenantContext, d: { nom: string; adresse: string; lignes: { designation: string; quantite: number; unite: string }[]; supplierIds: string[]; dateBesoin: Date }): Promise<{ projectId: string; demandeId: string }>;
@@ -423,9 +433,11 @@ export class AchatGroupeService {
         : { id: null, nom: n.nom.trim(), email: n.email.trim().toLowerCase(), siret: null };
     if (!cible) throw notFound("Negoce");
     const telephone = "telephone" in n ? (n.telephone?.trim() ?? null) || null : null;
-    const existant = await this.prisma.supplier.findFirst({ where: { companyId: tenant.companyId, archivedAt: null, email: { equals: cible.email, mode: "insensitive" } }, select: { id: true, name: true, phone: true } });
-    const s = existant ?? (await this.prisma.supplier.create({ data: { companyId: tenant.companyId, name: cible.nom, email: cible.email, phone: telephone, ...(cible.id ? { negoceId: cible.id } : {}) }, select: { id: true, name: true, phone: true } }));
-    if (existant && telephone && !existant.phone) await this.prisma.supplier.update({ where: { id: existant.id }, data: { phone: telephone } });
+    // Lot final, point 2 : le prénom du commercial, pour que la demande lui soit adressée.
+    const prenom = "prenom" in n ? (n.prenom?.trim() ?? null) || null : null;
+    const existant = await this.prisma.supplier.findFirst({ where: { companyId: tenant.companyId, archivedAt: null, email: { equals: cible.email, mode: "insensitive" } }, select: { id: true, name: true, phone: true, contactName: true } });
+    const s = existant ?? (await this.prisma.supplier.create({ data: { companyId: tenant.companyId, name: cible.nom, email: cible.email, phone: telephone, contactName: prenom, ...(cible.id ? { negoceId: cible.id } : {}) }, select: { id: true, name: true, phone: true, contactName: true } }));
+    if (existant && ((telephone && !existant.phone) || (prenom && !existant.contactName))) await this.prisma.supplier.update({ where: { id: existant.id }, data: { ...(telephone && !existant.phone ? { phone: telephone } : {}), ...(prenom && !existant.contactName ? { contactName: prenom } : {}) } });
     return { supplierId: s.id, nom: s.name, email: cible.email.toLowerCase(), telephone: s.phone ?? telephone, siret: cible.siret };
   }
 
@@ -751,7 +763,32 @@ export class AchatGroupeService {
       offres,
       commandeChez: b.consultationCommandeId ? (parId.get(b.consultationCommandeId)?.nom ?? null) : null,
       coordonneesTransmises: b.coordonneesTransmisesLe ? (parId.get(b.coordonneesConsultationId ?? "")?.nom ?? "") : null,
+      // Lot final (ton) : après sa commande, seulement si l'économie du groupe est réelle et calculée.
+      economie: b.consultationCommandeId ? phraseEconomieGroupe(await this.economieGroupe(a.id, consultations)) : null,
     };
+  }
+
+  /**
+   * L'économie du groupe, calculée et jamais estimée : pour chaque artisan qui a commandé, le total de SES lignes chez
+   * son négoce habituel moins le total chez le négoce commandé, quand les deux offres sont complètes ; null sinon.
+   */
+  private async economieGroupe(regroupementId: string, consultations: Consultation[]): Promise<number | null> {
+    const commandes = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, consultationCommandeId: { not: null } }, select: { id: true, consultationCommandeId: true } });
+    const offres = this.offresDe(consultations);
+    const emailDe = new Map(consultations.map((c) => [c.id, c.email]));
+    let total = 0;
+    let calcule = false;
+    for (const b of commandes) {
+      const lignes = await this.prisma.ligneAchatGroupe.findMany({ where: { besoinId: b.id }, select: { cle: true, quantite: true } });
+      const comparees = comparerPourArtisan(lignes.map((l) => ({ cle: l.cle, quantite: Number(l.quantite) })), offres);
+      const mesEmails = new Set((await this.prisma.negoceParticipant.findMany({ where: { besoinId: b.id }, select: { email: true } })).map((n) => n.email));
+      const commandee = comparees.find((o) => o.id === b.consultationCommandeId);
+      const habituel = comparees.find((o) => o.complete && mesEmails.has(emailDe.get(o.id) ?? ""));
+      if (!commandee?.complete || !habituel || habituel.id === commandee.id) continue;
+      total += habituel.totalHt - commandee.totalHt;
+      calcule = true;
+    }
+    return calcule ? total : null;
   }
 
   /** « Achats groupés de ton métier dans ton secteur » : les achats ouverts qu'il n'a pas rejoints. */
@@ -860,11 +897,53 @@ export class AchatGroupeService {
       await this.analyser(a.id, maintenant);
       analyses++;
     }
+    const relances = await this.relancesConsultations(maintenant);
     const rappelsValidation = await this.rappelerValidation(maintenant);
     const nonCommandes = await this.nonCommandes(maintenant);
     const resumes = await this.resumes(maintenant);
     const factures = maintenant.getUTCDate() === 1 ? await this.preparerFactures(maintenant) : 0;
-    return { rappels, consultes, pasAssez, analyses, rappelsValidation, nonCommandes, resumes, factures };
+    return { rappels, consultes, pasAssez, analyses, relances, rappelsValidation, nonCommandes, resumes, factures };
+  }
+
+  /**
+   * LES RELANCES DE LA CONSULTATION (lot final, point 6) : à mi-délai, le négoce qui n'a pas répondu reçoit « Votre client
+   * … attend votre offre » (une fois) ; chaque artisan est prévenu pour SES négoces seulement, à mi-délai puis la veille,
+   * avec « Plus il y a de négoces qui répondent, meilleur est le prix pour tout le groupe. » Rien après une réponse.
+   */
+  private async relancesConsultations(maintenant: Date): Promise<{ negoces: number; artisans: number }> {
+    const consultations = await this.prisma.consultationAchatGroupe.findMany({
+      where: { envoyeLe: { not: null }, reponduLe: null, ecarteeLe: null, regroupement: { statut: "consultation", reponseAvantLe: { gt: maintenant } } },
+      include: { regroupement: { select: { id: true, reponseAvantLe: true } } },
+    });
+    let negoces = 0;
+    let artisans = 0;
+    for (const c of consultations) {
+      const dateLimite = c.regroupement.reponseAvantLe!;
+      const etat = { envoyeLe: c.envoyeLe!, dateLimite, reponduLe: null, refuseLe: null };
+      const participants = await this.prisma.negoceParticipant.findMany({ where: { regroupementId: c.regroupementId, email: c.email, besoin: { statut: ENGAGE } }, include: { besoin: { select: { id: true } } } });
+      if (relancesDues({ ...etat, rappelMiLe: null, rappelVeilleLe: null, relanceNegoceLe: c.relanceLe }, maintenant).negoce) {
+        // Le lien de la demande reste le seul valable (la page, le PDF et l'Excel déjà ouverts) : le rappel y renvoie.
+        await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { relanceLe: maintenant } });
+        const premier = participants[0]?.companyId;
+        const prenom = participants[0]?.supplierId ? ((await this.prisma.supplier.findUnique({ where: { id: participants[0].supplierId }, select: { contactName: true } }))?.contactName ?? null) : null;
+        const m = mailRelanceDemande({ entreprise: c.clients[0] ?? NOM_APP, dateLimite, lien: null, prenomCommercial: prenom });
+        const from = premier && this.ports.expediteurMobiiz ? await this.ports.expediteurMobiiz(premier).catch(() => null) : null;
+        const replyTo = premier ? await this.ports.adresseMobiiz(premier).catch(() => null) : null;
+        await this.mailer.send({ to: c.email, subject: m.objet, text: m.texte, html: mailEnHtml(m.texte, null), ...(from ? { from } : {}), ...(replyTo ? { replyTo } : {}) }).catch(() => undefined);
+        negoces++;
+      }
+      for (const n of participants) {
+        const dues = relancesDues({ ...etat, rappelMiLe: n.rappelMiLe, rappelVeilleLe: n.rappelVeilleLe, relanceNegoceLe: maintenant }, maintenant);
+        if (!dues.artisan) continue;
+        await this.prisma.negoceParticipant.update({ where: { id: n.id }, data: dues.artisan === "mi" ? { rappelMiLe: maintenant } : { rappelMiLe: n.rappelMiLe ?? maintenant, rappelVeilleLe: maintenant } });
+        const corps = `${phraseRelanceArtisan(n.nom)} ${TON.relanceGroupe}`;
+        const url = `/achats-groupes/${n.besoin.id}`;
+        const appeler = n.telephone ? `\n\nAppeler ${n.nom} : ${n.telephone}` : "";
+        await this.notifs.prevenir(n.companyId, { titre: `${n.nom} n'a pas encore répondu`, corps, url, etiquette: `relance-${n.id}` }, { objet: `${n.nom} n'a pas encore répondu`, texte: `${corps}${appeler}\n\n${this.notifs.lienVers(url)}\n\n${NOM_APP}` }).catch(() => undefined);
+        artisans++;
+      }
+    }
+    return { negoces, artisans };
   }
 
   /** La veille de la clôture, « Demain, [négoce] reçoit la demande groupée… Tu l'as prévenu ? ». */
@@ -888,7 +967,7 @@ export class AchatGroupeService {
    */
   async cloturer(regroupementId: string, maintenant = this.now()): Promise<"consultation" | "pas_assez"> {
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: regroupementId } });
-    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, statut: ENGAGE }, include: { negoces: true, company: { select: { id: true, name: true } } }, orderBy: { createdAt: "asc" } });
+    const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, statut: ENGAGE }, include: { negoces: true, company: { select: { id: true, name: true, prenom: true, phone: true, memberships: { select: { user: { select: { name: true } } }, take: 1, orderBy: { createdAt: "asc" } } } } }, orderBy: { createdAt: "asc" } });
     const panier = cumulerPanier(await this.lignesPanier(a.id));
     const v = await this.volumeEstime(a.id);
     const minimum = volumeMinimum(a.famille, await this.volumesMin());
@@ -923,12 +1002,23 @@ export class AchatGroupeService {
       // Le jeton n'est connu que de l'e-mail : un envoi repris (panne du prestataire) reçoit un lien neuf.
       if (c.tokenHash !== hacher(jeton)) await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { tokenHash: hacher(jeton) } });
       const lien = `${this.cfg.webAppUrl}/achat-groupe/${jeton}`;
-      const demande = demandeNegocePanier({ clients: clients.length ? clients : besoins.map((b) => b.company.name), metier: a.famille, lignes, livraisons, reponseAvantLe: a.reponseAvantLe!, lien, commissionPct: commission });
-      const replyTo = n.besoins[0] ? await this.ports.adresseMobiiz(n.besoins[0].companyId).catch(() => null) : null;
-      // La demande en PDF, jointe (Greg, 28 octobre 2026, point 3) : la même que « Télécharger en PDF ».
+      // LOT FINAL, point 3 : au prénom du commercial, signé par ses clients (prénom, entreprise, portable), le nombre
+      // d'artisans seulement au-delà du seuil d'anonymat ; expéditeur « Entreprise via Mobiiz », PDF et Excel joints.
+      const prenomCommercial = (await this.prisma.supplier.findFirst({ where: { companyId: { in: n.besoins.map((b) => b.companyId) }, email: { equals: email, mode: "insensitive" }, contactName: { not: null } }, select: { contactName: true } }))?.contactName ?? null;
+      const signataires = [...new Map(n.besoins.map((b) => [b.company.id, { prenom: b.company.prenom ?? prenomDe(b.company.memberships[0]?.user.name ?? null), entreprise: b.company.name, portable: b.company.phone ? portableLisible(b.company.phone) : null }])).values()];
+      const demande = demandeNegocePanier({ clients: clients.length ? clients : besoins.map((b) => b.company.name), metier: a.famille, secteur: a.libelle.split(" · ")[1]?.replace(/^secteur /i, "") ?? communeDe(n.besoins[0]?.livraison ?? null) ?? undefined, prenomCommercial, signataires: signataires.length ? signataires : undefined, artisans: new Set(besoins.map((b) => b.companyId)).size, seuilAnonymat: this.cfg.seuilAnonymat, lignes, livraisons, reponseAvantLe: a.reponseAvantLe!, lien, commissionPct: commission });
+      const premier = n.besoins[0]?.companyId;
+      const replyTo = premier ? await this.ports.adresseMobiiz(premier).catch(() => null) : null;
+      const from = premier && this.ports.expediteurMobiiz ? await this.ports.expediteurMobiiz(premier).catch(() => null) : null;
+      // La demande en PDF et en Excel, jointes (Greg, 28 octobre 2026, point 3 ; lot final) : les mêmes que sur la page.
       const pieceJointe = await this.demandePdfDe({ ...c, lignes: lignes as never, clients, regroupement: a }, jeton).catch(() => null);
+      const excel = await this.demandeXlsx(jeton, { pieceJointe: true }).catch(() => null);
+      const attachments = [
+        ...(pieceJointe ? [{ filename: "demande-mobiiz.pdf", contentType: "application/pdf", contentBase64: Buffer.from(pieceJointe).toString("base64") }] : []),
+        ...(excel ? [{ filename: "demande-mobiiz.xlsx", contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", contentBase64: excel.toString("base64") }] : []),
+      ];
       try {
-        await this.mailer.send({ to: email, subject: demande.objet, text: demande.texte, ...(replyTo ? { replyTo } : {}), ...(pieceJointe ? { attachments: [{ filename: "demande-mobiiz.pdf", contentType: "application/pdf", contentBase64: Buffer.from(pieceJointe).toString("base64") }] } : {}) });
+        await this.mailer.send({ to: email, subject: demande.objet, text: demande.texte, html: mailEnHtml(demande.texte, lien), ...(from ? { from } : {}), ...(replyTo ? { replyTo } : {}), ...(attachments.length ? { attachments } : {}) });
         await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { envoyeLe: maintenant } });
       } catch {
         continue;
@@ -1036,7 +1126,7 @@ export class AchatGroupeService {
    * colonnes protégées, une feuille « Conditions », et une feuille cachée `_mobiiz` (l'identifiant de la consultation)
    * pour reconnaître le fichier au dépôt.
    */
-  async demandeXlsx(jeton: string): Promise<Buffer> {
+  async demandeXlsx(jeton: string, { pieceJointe = false } = {}): Promise<Buffer> {
     const c = await this.consultationDuJeton(jeton);
     const a = c.regroupement;
     const lignes = lignesDe(c.lignes);
@@ -1066,7 +1156,8 @@ export class AchatGroupeService {
       },
       { nom: "_mobiiz", cachee: true, lignes: [[c.id]] },
     ]);
-    if (!c.excelTelechargeLe) await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { excelTelechargeLe: this.now() } }).catch(() => undefined);
+    // Jointe au mail, elle n'est pas « téléchargée » : l'admin ne voit que ce que le négoce a ouvert.
+    if (!pieceJointe && !c.excelTelechargeLe) await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { excelTelechargeLe: this.now() } }).catch(() => undefined);
     return buf;
   }
 

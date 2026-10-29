@@ -8,7 +8,7 @@ import type { RequestedLine } from "./price-request-email.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { priceRequestEmail, requestedQuantityText, supplierLineLabel } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
-import { packetDocument, packetMail, packetPdf, packetSubject, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket } from "./supplier-packet.js";
+import { LIEN_APERCU, mailEnHtml, texteLibreParDefaut, packetDocument, packetMail, packetPdf, packetSubject, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket } from "./supplier-packet.js";
 
 /** §47.5 : une commande passée chez le fournisseur retenu, telle qu'elle part au journal. */
 export interface SupplierOrder {
@@ -44,8 +44,11 @@ export function buildPacket(
     projectNotes?: string | null;
     /** Coordonnées du compte (§45.2 signature, §45.3 en-tête). */
     profile?: PacketSender;
+    /** Lot final : le prénom de l'artisan et le métier du chantier (objet du mail). */
+    prenom?: string | null;
+    trade?: string | null;
   },
-  options: { date: string; joindreDetail: boolean; message: string | null; dueDate: Date | null },
+  options: { date: string; joindreDetail: boolean; message: string | null; dueDate: Date | null; tutoie?: boolean },
   /** Les lignes reprises du devis telles qu'elles partent (identiques réunies, §43.5 : une ligne par article). */
   direct: readonly RequestedLine[],
   /** Croquis rattachés aux articles (clé de l'article) : la ligne dit « croquis joint », le PDF les montre. */
@@ -96,7 +99,7 @@ export function buildPacket(
   // Retour du fondateur (2026-10-11) : un seul texte descriptif, celui de l'écran.
   const resumeLines = briefResume(brief, sender.projectNotes ?? null, reviewed.takeoff.answers, reviewed.takeoff.fiche ? reviewed.fiche : null);
   const resume = resumeLines.length > 0 ? [briefTexte(resumeLines)] : [];
-  const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" });
+  const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).replace(/^1 /, "1er ");
   // Le devis sans les prix (§42) : une ligne par ouvrage, la main-d'œuvre seule exclue, jamais le prix.
   const kinds = new Map(validation.lines.map((l) => [l.lineId, l.kind]));
   const detail = takeoff.lines
@@ -132,6 +135,9 @@ export function buildPacket(
     ...(sender.projectId ? { reference: shortReference(sender.projectId) } : {}),
     message: options.message?.trim() || null,
     echeance: options.dueDate ? dateFr(options.dueDate) : null,
+    prenom: sender.prenom ?? null,
+    famille: sender.trade ? (FAMILLE_DE_METIER[sender.trade] ?? null) : null,
+    ...(options.tutoie ? { tutoie: true } : {}),
   };
 }
 
@@ -140,6 +146,22 @@ export function buildPacket(
  * l'e-mail préparé (sa messagerie) et dépose à la main le devis reçu ;
  * l'envoi et la réception automatiques reprendront les mêmes statuts.
  */
+/** Lot final, point 3 : le mot de l'objet « demande de prix couverture » pour le métier du chantier. */
+const FAMILLE_DE_METIER: Readonly<Record<string, string>> = {
+  roofing: "couverture", drywall: "plâtrerie", tiling: "carrelage", painting: "peinture", masonry: "maçonnerie", electrical: "électricité",
+  plumbing: "plomberie", joinery: "menuiserie", hvac: "chauffage", carpentry: "charpente", waterproofing: "étanchéité", cladding: "bardage",
+  facade: "façade", ceiling: "plafonds", interior_joinery: "menuiserie", kitchen: "cuisine", solar: "photovoltaïque", decking: "terrasse",
+  couverture: "couverture", platrerie: "plâtrerie", carrelage: "carrelage", peinture: "peinture", maconnerie: "maçonnerie", electricite: "électricité",
+  plomberie: "plomberie", menuiserie: "menuiserie", charpente: "charpente", etancheite: "étanchéité", bardage: "bardage",
+};
+
+/** Lot final, point 3 : la réponse souhaitée trois jours après la demande, à midi (heure du serveur). */
+export function dateLimiteParDefaut(maintenant: Date): Date {
+  const d = new Date(maintenant.getTime() + 3 * 86_400_000);
+  d.setUTCHours(12, 0, 0, 0);
+  return d;
+}
+
 export class PriceRequestsService {
   constructor(
     private readonly requests: PriceRequestRepository,
@@ -157,11 +179,11 @@ export class PriceRequestsService {
    * Recentrage (25 octobre 2026) : la DEMANDE PERSO ajoute au mail son but et le lien de chiffrage en ligne, propre à
    * chaque destinataire (branché par le module des demandes perso ; rien pour une demande sans but).
    */
-  private complement: (requestId: string, recipientId: string) => Promise<string | null> = async () => null;
-  private apercuComplement: () => string | null = () => null;
-  brancherComplement(f: (requestId: string, recipientId: string) => Promise<string | null>, apercu?: () => string): void {
+  // Lot final, point 3 : une demande de la liste reçoit son lien « Répondre en ligne » (`lien`), dans le mail ; une demande
+  // perso (avec un but) garde son bloc d'avant (`bloc`), ajouté sous la signature.
+  private complement: (requestId: string, recipientId: string) => Promise<{ bloc: string } | { lien: string } | null> = async () => null;
+  brancherComplement(f: (requestId: string, recipientId: string) => Promise<{ bloc: string } | { lien: string } | null>): void {
     this.complement = f;
-    if (apercu) this.apercuComplement = apercu;
   }
 
   /**
@@ -227,10 +249,15 @@ export class PriceRequestsService {
     const complement = await this.complement(request.id, recipientId);
     const via = await this.expediteur(tenant.companyId);
     if (via) await this.requests.setEtiquette(tenant, recipientId, via.etiquette);
+    const lien = complement && "lien" in complement ? complement.lien : null;
+    const corps = packetMail(request.packet, { prenomCommercial: recipient.supplier.contactName, lien });
+    const texte = complement && "bloc" in complement ? `${corps}\n\n${complement.bloc}` : corps;
     await this.mailer.send({
       to: recipient.supplier.email,
       subject: via ? objetAvecRepere(packetSubject(request.packet), via.etiquette) : packetSubject(request.packet),
-      text: complement ? `${packetMail(request.packet)}\n\n${complement}` : packetMail(request.packet),
+      // Lot final, point 5 : le texte en clair et sa version HTML (le lien en bouton).
+      text: texte,
+      html: mailEnHtml(texte, lien),
       // La réponse du fournisseur revient dans Mobiiz (adresse étiquetée, R7), sinon à l'artisan ; et le mail doit
       // partir, sinon la demande ne passe pas « envoyée ».
       ...(via ? { from: via.from, replyTo: via.replyTo } : request.packet.expediteur?.email ? { replyTo: request.packet.expediteur.email } : {}),
@@ -258,24 +285,37 @@ export class PriceRequestsService {
     return { filename: fileName(packet.chantier), bytes: await packetPdf(packet, await this.sketchFiles(tenant, packet), { logo }) };
   }
 
-  /** Le mail tel qu'il partira : le lien de chiffrage s'y ajoute quand le serveur envoie (le lien propre au négoce y est « … »). */
-  private mailApercu(packet: SupplierPacket): string {
-    const bloc = this.mailer.deliversEmail ? this.apercuComplement() : null;
-    return bloc ? `${packetMail(packet)}\n\n${bloc}` : packetMail(packet);
+  /** Le mail tel qu'il partira : le lien de réponse quand le serveur envoie (le vrai, propre au négoce, est créé à l'envoi). */
+  private mailApercu(packet: SupplierPacket, prenomCommercial: string | null = null): string {
+    return packetMail(packet, { prenomCommercial, lien: this.mailer.deliversEmail ? LIEN_APERCU : null });
   }
 
   /**
    * L'APERÇU AVANT ENVOI (§45.9) : le document exactement comme le fournisseur le recevra (même générateur que le PDF),
    * l'objet et le mail. Rien ne part tant que l'artisan n'a pas appuyé sur « Envoyer ».
    */
-  async preview(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null; destinataire?: string | null }): Promise<{ subject: string; mail: string; document: PacketDocument; hasLogo: boolean }> {
+  async preview(
+    tenant: TenantContext,
+    projectId: string,
+    input: { message: string | null; dueDate: Date | null; destinataire?: string | null; supplierId?: string | null; tutoie?: boolean | null },
+  ): Promise<{ subject: string; mail: string; texteLibre: string; tutoie: boolean; document: PacketDocument; hasLogo: boolean }> {
     // §50.7 : l'aperçu s'ouvre aussi sur une liste en cours (lignes orange comprises) ; rien ne part d'ici.
-    const { packet, logo } = await this.order(tenant, projectId, { ...input, apercu: true });
-    return { subject: packetSubject(packet), mail: this.mailApercu(packet), document: packetDocument(packet, { destinataire: input.destinataire ?? null }), hasLogo: !!logo };
+    // Lot final, point 3 : l'aperçu dit la même date que la demande (trois jours sans date choisie).
+    const { packet, logo } = await this.order(tenant, projectId, { ...input, dueDate: input.dueDate ?? dateLimiteParDefaut(this.clock()), apercu: true });
+    // Lot final, point 4 : « Voici ce que ton négoce va recevoir », adressé au prénom de SON commercial.
+    const fournisseur = input.supplierId ? await this.suppliers.findById(tenant, input.supplierId) : null;
+    return {
+      subject: packetSubject(packet),
+      mail: this.mailApercu(packet, fournisseur?.contactName ?? null),
+      texteLibre: packet.message?.trim() || texteLibreParDefaut(packet),
+      tutoie: !!packet.tutoie,
+      document: packetDocument(packet, { destinataire: input.destinataire ?? fournisseur?.name ?? null }),
+      hasLogo: !!logo,
+    };
   }
 
   /** Ce qui part chez le fournisseur : les lignes de la demande et le document (§45), depuis la liste validée. */
-  private async order(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null; articles?: readonly string[]; apercu?: boolean }) {
+  private async order(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null; articles?: readonly string[]; apercu?: boolean; tutoie?: boolean | null }) {
     // §48.5 : une SÉLECTION part sans attendre que toute la liste soit validée (devis multi-lots) ; la liste entière, si.
     const selection = input.articles && input.articles.length > 0 ? new Set(input.articles) : null;
     const takeoff = await this.requests.validatedTakeoff(tenant, projectId, { anyStatus: selection !== null || input.apercu === true });
@@ -346,6 +386,8 @@ export class PriceRequestsService {
         projectAddress: sender?.project.address ?? null,
         projectId: sender?.project.id ?? projectId,
         projectNotes: sender?.project.siteNotes ?? null,
+        prenom: sender?.prenom ?? null,
+        trade: sender?.trade ?? null,
         profile: {
           nom: sender?.senderName ?? "",
           adresse: sender?.company.address ?? null,
@@ -354,7 +396,8 @@ export class PriceRequestsService {
           email: sender?.company.email ?? null,
         },
       },
-      { date: today(this.clock()), joindreDetail: await this.requests.attachQuoteDetail(tenant), message: input.message, dueDate: input.dueDate },
+      // Lot final, point 4 : le message modifié devient le modèle de l'artisan ; sans message, son modèle s'applique.
+      { date: today(this.clock()), joindreDetail: await this.requests.attachQuoteDetail(tenant), message: input.message ?? sender?.modeleMessage ?? null, dueDate: input.dueDate, tutoie: input.tutoie ?? sender?.tutoie ?? false },
       grouped,
       await this.requests.itemSketches(tenant, projectId),
     );
@@ -370,9 +413,15 @@ export class PriceRequestsService {
       dueDate: Date | null;
       /** §48.5 : les articles choisis (clés de la liste) ; absent : toute la liste, comme toujours. */
       articles?: string[];
+      /** Lot final, point 4 : tutoiement choisi dans l'aperçu ; gardé avec le message comme modèle personnel. */
+      tutoie?: boolean | null;
     },
   ): Promise<PriceRequestView> {
     assertCanWrite(tenant);
+    // Lot final, point 3 : toujours une date de réponse (« réponse souhaitée avant le … ») ; sans date choisie, trois jours.
+    const dueDate = input.dueDate ?? dateLimiteParDefaut(this.clock());
+    if (input.message?.trim() || input.tutoie !== undefined) await this.requests.saveModele(tenant, { message: input.message?.trim() || undefined, tutoie: input.tutoie ?? undefined });
+    input = { ...input, dueDate };
     const { takeoff, lines, packet } = await this.order(tenant, projectId, input);
     const supplierIds = await this.checkSuppliers(tenant, input.supplierIds);
     const created = await this.requests.create(tenant, {
@@ -559,7 +608,7 @@ export class PriceRequestsService {
     for (const r of request.recipients) {
       // Depuis §45 : le mail court, la liste est dans le PDF joint ; les demandes d'avant §43 gardent leur ancien e-mail.
       if (request.packet) {
-        emails.set(r.id, { subject: packetSubject(request.packet), body: this.mailApercu(request.packet) });
+        emails.set(r.id, { subject: packetSubject(request.packet), body: this.mailApercu(request.packet, r.supplier.contactName) });
         continue;
       }
       emails.set(
