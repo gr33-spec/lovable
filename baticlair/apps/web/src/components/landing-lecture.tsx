@@ -143,7 +143,7 @@ export function LectureAnimee() {
           <span className="mz-etiq" style={{ color: "var(--mz-jaune)" }}>
             Ta liste
           </span>
-          <span className="mz-num" style={{ color: "rgba(255,255,255,.62)" }}>
+          <span className="mz-num" style={{ color: "rgba(251,248,243,.62)" }}>
             {sorties} / {TOTAL_FOURNITURES}
           </span>
         </p>

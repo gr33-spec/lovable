@@ -9,8 +9,8 @@ export const metadata: Metadata = { title: `Pas de réseau — ${NOM_APP}` };
  */
 export default function HorsConnexionPage() {
   return (
-    <main style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", gap: 16, padding: "24px 20px", maxWidth: 420, margin: "0 auto", fontFamily: "-apple-system, Segoe UI, Roboto, Arial, sans-serif", color: "#0E0E0E", background: "#F4F4F2" }}>
-      <div style={{ width: 56, height: 56, borderRadius: 16, background: "#FFC800", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 28 }} aria-hidden="true">
+    <main style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", gap: 16, padding: "24px 20px", maxWidth: 420, margin: "0 auto", fontFamily: "-apple-system, Segoe UI, Roboto, Arial, sans-serif", color: "#130901", background: "#F2F1EE" }}>
+      <div style={{ width: 56, height: 56, borderRadius: 16, background: "#FED206", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 28 }} aria-hidden="true">
         M
       </div>
       <h1 style={{ fontSize: 26, lineHeight: 1.2, margin: 0 }}>Pas de réseau pour l&apos;instant</h1>
@@ -19,7 +19,7 @@ export default function HorsConnexionPage() {
         capte.
       </p>
       {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- un vrai rechargement, pour retenter le réseau */}
-      <a href="/" style={{ display: "block", textAlign: "center", minHeight: 48, lineHeight: "48px", borderRadius: 16, background: "#0E0E0E", color: "#FFFFFF", fontWeight: 700, fontSize: 17, textDecoration: "none" }}>
+      <a href="/" style={{ display: "block", textAlign: "center", minHeight: 48, lineHeight: "48px", borderRadius: 16, background: "#130901", color: "#FBF8F3", fontWeight: 700, fontSize: 17, textDecoration: "none" }}>
         Réessayer
       </a>
     </main>

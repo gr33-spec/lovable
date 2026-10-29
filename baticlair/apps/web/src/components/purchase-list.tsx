@@ -23,7 +23,7 @@ export interface SketchHandlers {
 /** La fiche qui s'ouvre sous une ligne : un panneau blanc bordé, des champs au contour net (mêmes pour toutes les lignes). */
 export const EDIT_PANEL = "flex scroll-mb-52 flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card ring-1 ring-accent/25";
 export const EDIT_FIELD =
-  "min-h-12 w-full rounded-xl border border-[#d5d9e0] bg-surface px-3 text-base font-normal outline-none transition-colors placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/20";
+  "min-h-12 w-full rounded-xl border border-[#99844C55] bg-surface px-3 text-base font-normal outline-none transition-colors placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/20";
 
 /** Le texte et la quantité d'une ligne, tels que l'artisan veut les voir partir chez le fournisseur. */
 export function ItemForm({
@@ -107,7 +107,7 @@ function SketchPicker({ label, onAttach }: { label: string; onAttach: (file: Fil
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-[#c9c2ff] bg-white p-3">
+    <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-[#F4DB5C] bg-white p-3">
       <p className="text-sm font-bold">Croquis ou photo (facultatif)</p>
       <input
         aria-label={`Précision du croquis : ${label}`}
@@ -140,7 +140,7 @@ function SketchPicker({ label, onAttach }: { label: string; onAttach: (file: Fil
           }
         }}
       />
-      <label htmlFor={id} className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#eeedff] px-3 text-sm font-extrabold text-[#4a37d6] ${busy ? "pointer-events-none opacity-60" : ""}`}>
+      <label htmlFor={id} className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#F2F1EE] px-3 text-sm font-extrabold text-[#614822] ${busy ? "pointer-events-none opacity-60" : ""}`}>
         {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Paperclip size={16} aria-hidden="true" />}
         {busy ? "Envoi du croquis…" : "Joindre une photo ou un PDF"}
       </label>

@@ -584,7 +584,7 @@ function QuestionCard({
                 aria-pressed={on}
                 onClick={() => onChange(on ? null : { value: o.value, label: o.label })}
                 className={`inline-flex min-h-12 flex-col items-center justify-center rounded-2xl border-2 px-3 py-1.5 text-center text-[15px] leading-tight font-extrabold transition active:scale-[0.98] ${
-                  on ? "border-accent bg-accent text-on-accent" : usual ? "border-accent/50 bg-[#eef2ff] text-ink" : "border-line bg-surface text-ink"
+                  on ? "border-accent bg-accent text-on-accent" : usual ? "border-accent/50 bg-[#F2F1EE] text-ink" : "border-line bg-surface text-ink"
                 }`}
               >
                 {o.label}

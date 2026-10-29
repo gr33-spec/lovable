@@ -776,7 +776,7 @@ function Row({
   // §48.5 : en mode sélection, la ligne entière coche sa case ; rien d'autre ne s'ouvre.
   if (selectMode) {
     return (
-      <li id={`ligne-${row.key}`} className={`rounded-xl border border-[#dde1e8] px-3 py-2 ${selectMode.checked ? "bg-accent/5" : "bg-surface"} ${selectMode.disabled ? "opacity-60" : ""}`}>
+      <li id={`ligne-${row.key}`} className={`rounded-xl border border-[#99844C4D] px-3 py-2 ${selectMode.checked ? "bg-accent/5" : "bg-surface"} ${selectMode.disabled ? "opacity-60" : ""}`}>
         <label className={`flex min-h-11 items-start gap-2.5 ${selectMode.disabled ? "" : "cursor-pointer"}`}>
           <input
             type="checkbox"
@@ -802,7 +802,7 @@ function Row({
       id={`ligne-${row.key}`}
       className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-xl border border-line bg-surface px-3 py-2 transition-[background-color,box-shadow] duration-200 ${
         dot.ok ? "" : "border-l-4 border-l-mark-warn"
-      } ${open ? "z-[51] shadow-[0_24px_60px_-12px_rgba(16,24,40,0.45)]" : ""}`}
+      } ${open ? "z-[51] shadow-[0_24px_60px_-12px_rgba(19,9,1,0.45)]" : ""}`}
     >
       {/* Retour du fondateur (2026-10-11) : la ligne ouverte passe au premier plan, le reste est flouté derrière ; un tap sur le
           flou la referme. */}
@@ -815,7 +815,7 @@ function Row({
                 setNaming(false);
                 setOpen(false);
               }}
-              className="fixed inset-0 z-50 cursor-default bg-[#0e1116]/35 backdrop-blur-[3px]"
+              className="fixed inset-0 z-50 cursor-default bg-[#130901]/35 backdrop-blur-[3px]"
             />,
             document.body,
           )

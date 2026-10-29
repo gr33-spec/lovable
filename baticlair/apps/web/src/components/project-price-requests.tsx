@@ -496,7 +496,7 @@ function SupplierPicker({
   return (
     <div className="flex flex-col gap-2">
       {choices.length === 0 && !creating ? (
-        <p className={`text-sm ${dark ? "text-[#c9ced6]" : "text-muted"}`}>
+        <p className={`text-sm ${dark ? "text-[#99844C66]" : "text-muted"}`}>
           {data.items.length === 0 ? "Ton carnet de fournisseurs est vide. Ajoutes-en un :" : "Tous tes fournisseurs sont déjà dans cette demande."}
         </p>
       ) : null}

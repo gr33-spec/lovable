@@ -63,7 +63,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Plein écran sur iPhone : la barre du bas et le bouton principal respectent la zone du geste (safe-area).
   viewportFit: "cover",
-  themeColor: "#120e0a",
+  themeColor: "#0D0601",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

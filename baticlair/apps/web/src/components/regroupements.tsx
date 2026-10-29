@@ -17,9 +17,9 @@ import type { Regroupement } from "@/lib/recentrage";
  */
 const TEXTURES: Record<string, string> = {
   couverture:
-    "repeating-linear-gradient(0deg, rgba(255,255,255,0.10) 0 2px, transparent 2px 18px), repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 2px, transparent 2px 26px), linear-gradient(135deg, #4b5563, #6b7280 55%, #374151)",
-  charpente: "repeating-linear-gradient(90deg, rgba(120,72,24,0.35) 0 3px, transparent 3px 14px), linear-gradient(160deg, #d6a46a, #b7793d 60%, #a0652d)",
-  second_oeuvre: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35) 0 3px, transparent 4px), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.25) 0 2px, transparent 3px), linear-gradient(135deg, #e9c46a, #d4a73b)",
+    "repeating-linear-gradient(0deg, rgba(251,248,243,0.10) 0 2px, transparent 2px 18px), repeating-linear-gradient(90deg, rgba(13,6,1,0.18) 0 2px, transparent 2px 26px), linear-gradient(135deg, #614822, #614822 55%, #2E1B05)",
+  charpente: "repeating-linear-gradient(90deg, rgba(97,72,34,0.35) 0 3px, transparent 3px 14px), linear-gradient(160deg, #CA8A1B, #96580C 60%, #96580C)",
+  second_oeuvre: "radial-gradient(circle at 30% 30%, rgba(251,248,243,0.35) 0 3px, transparent 4px), radial-gradient(circle at 70% 60%, rgba(251,248,243,0.25) 0 2px, transparent 3px), linear-gradient(135deg, #F4DB5C, #CA8A1B)",
 };
 
 export function VignetteMateriau({ famille, className = "size-20" }: { famille: string; className?: string }) {
