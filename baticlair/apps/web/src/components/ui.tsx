@@ -212,7 +212,7 @@ export function BackButton({ fallback, label = fr.actions.back, compact = false 
   const back = useBack(fallback);
   if (compact) {
     return (
-      <button type="button" onClick={back} aria-label={label} className="pressable flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface active:bg-ground">
+      <button type="button" onClick={back} aria-label={label} className="pressable bouton-nuit flex size-11 shrink-0 items-center justify-center rounded-full">
         <ChevronLeft size={20} aria-hidden="true" />
       </button>
     );
@@ -221,7 +221,7 @@ export function BackButton({ fallback, label = fr.actions.back, compact = false 
     <button
       type="button"
       onClick={back}
-      className="pressable inline-flex min-h-11 items-center gap-1 self-start rounded-full border border-line bg-surface pr-4 pl-3 text-[14px] font-semibold active:bg-ground"
+      className="pressable bouton-nuit inline-flex min-h-11 items-center gap-1 self-start rounded-full pr-4 pl-3 text-[14px] font-semibold"
     >
       <ChevronLeft size={18} aria-hidden="true" />
       {label}

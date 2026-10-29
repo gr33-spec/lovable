@@ -227,3 +227,73 @@ html[data-reveal-pret] [data-reveal] {
     letter-spacing: -0.025em;
   }
 }
+
+/*
+ * L'APP EN NUIT CHAUDE (Greg, 29 octobre 2026, cinq captures : « fais ce genre d'effet sur l'application, en plus joli ») :
+ * le fond de l'app passe en noir brun, éclairé de deux lueurs ambrées comme une lampe de chantier ; les cartes restent crème,
+ * à encre noire ; les boutons ronds de l'en-tête deviennent du verre fumé cerclé d'ambre. Seules les couleurs de la palette.
+ * Mécanique : sur la nuit, les jetons d'encre et de gris passent au clair ; toute surface claire (carte, jaune, verre, champ,
+ * état) les remet d'origine pour ce qu'elle contient. Rien ne change de taille ni de place.
+ */
+.app-nuit {
+  --color-ground: #130901;
+  --color-ink: #fbf8f3;
+  --color-muted: rgba(251, 248, 243, 0.74);
+  --color-subtle: rgba(251, 248, 243, 0.74);
+  --color-line: rgba(251, 248, 243, 0.16);
+  --color-accent-text: #fed206;
+  color: var(--color-ink);
+}
+body:has(.app-nuit) {
+  background: #130901;
+  color-scheme: dark;
+}
+/* Les lueurs : fixes derrière tout, sans animation (aucun coût au défilement). */
+.app-nuit::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60vmax 42vmax at 100% 0%, rgba(202, 138, 27, 0.34), rgba(150, 88, 12, 0.12) 45%, transparent 70%),
+    radial-gradient(48vmax 38vmax at 0% 62%, rgba(150, 88, 12, 0.26), transparent 68%),
+    radial-gradient(30vmax 22vmax at 92% 92%, rgba(254, 210, 6, 0.1), transparent 70%),
+    radial-gradient(120vmax 80vmax at 50% 40%, transparent 40%, rgba(13, 6, 1, 0.55) 100%),
+    #130901;
+}
+/* Les surfaces claires gardent l'encre noire et le gris brun pour ce qu'elles contiennent. */
+.app-nuit :is([class*="bg-surface"], [class*="bg-accent"], [class*="bg-glass"], [class*="bg-ok-bg"], [class*="bg-warn-bg"], [class*="bg-danger-bg"], [class*="bg-tint"], [class*="bg-white"], input, textarea, select, [role="menu"]) {
+  --color-ground: #f6f3ee;
+  --color-ink: #130901;
+  --color-muted: #614822;
+  --color-subtle: #614822;
+  --color-line: #99844c40;
+  --color-accent-text: #130901;
+  color-scheme: light;
+}
+/* Un bouton ou une bulle « encre » sur la nuit reste noir, cerclé pour se détacher du fond. */
+.app-nuit [class*="bg-ink"] {
+  --color-ink: #130901;
+}
+.app-nuit :not(:is([class*="bg-surface"], [class*="bg-accent"])) > [class*="bg-ink"] {
+  box-shadow: inset 0 0 0 1px rgba(202, 138, 27, 0.5);
+}
+/* Les cartes crème sur la nuit : une ombre profonde teintée brun, un liseré clair à peine visible. */
+.app-nuit .shadow-card {
+  box-shadow:
+    0 1px 0 rgba(251, 248, 243, 0.06) inset,
+    0 18px 40px -22px rgba(13, 6, 1, 0.9),
+    0 2px 6px rgba(13, 6, 1, 0.35);
+}
+/* Les boutons ronds de l'en-tête (cloche, avatar, aide, retour, « ··· ») : verre fumé cerclé d'ambre. */
+@utility bouton-nuit {
+  border: 1px solid rgba(202, 138, 27, 0.55);
+  background-color: rgba(251, 248, 243, 0.06);
+  color: #fbf8f3;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  &:active {
+    background-color: rgba(251, 248, 243, 0.12);
+  }
+}

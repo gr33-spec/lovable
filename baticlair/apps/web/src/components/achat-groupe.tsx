@@ -688,7 +688,7 @@ export function DetailAchatGroupe({ id }: { id: string }) {
         <div className="flex items-start gap-2">
           <h1 className="grow text-[26px] leading-[1.08] font-extrabold tracking-[-0.03em]">{d.titreAchat}</h1>
           {elements.length ? (
-            <button type="button" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Plus d'actions sur l'achat groupé" className="pressable flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface active:bg-ground">
+            <button type="button" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Plus d'actions sur l'achat groupé" className="pressable bouton-nuit flex size-11 shrink-0 items-center justify-center rounded-full">
               <MoreHorizontal size={20} aria-hidden="true" />
             </button>
           ) : null}
@@ -989,7 +989,7 @@ export function Cloche() {
   const actions = actionsEnAttente(mes?.achats ?? [], next?.items ?? []);
   return (
     <div className="relative">
-      <button type="button" aria-label={actions.length ? `Notifications : ${actions.length}` : "Notifications"} aria-expanded={ouvert} onClick={() => setOuvert((o) => !o)} className="pressable relative flex size-11 items-center justify-center rounded-full border border-line bg-surface">
+      <button type="button" aria-label={actions.length ? `Notifications : ${actions.length}` : "Notifications"} aria-expanded={ouvert} onClick={() => setOuvert((o) => !o)} className="pressable bouton-nuit relative flex size-11 items-center justify-center rounded-full">
         <Bell size={20} aria-hidden="true" />
         {actions.length ? <span aria-hidden="true" className="absolute top-1.5 right-1.5 size-3 rounded-full bg-accent ring-2 ring-surface" /> : null}
       </button>

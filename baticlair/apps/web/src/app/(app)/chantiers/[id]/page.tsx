@@ -139,7 +139,7 @@ function Header({
           aria-expanded={menu}
           aria-label="Plus d'actions sur le chantier"
           disabled={pending}
-          className="pressable flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface active:bg-ground disabled:opacity-60"
+          className="pressable bouton-nuit flex size-11 shrink-0 items-center justify-center rounded-full disabled:opacity-60"
         >
           <MoreHorizontal size={20} aria-hidden="true" />
         </button>

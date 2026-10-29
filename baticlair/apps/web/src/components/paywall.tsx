@@ -167,7 +167,9 @@ export function PlanSummary() {
     );
   }
   const { plan, usage } = data;
-  // Plan « finition », bloc 4 : paywall éteint, BatiClair est gratuit (landing, CGU) ; aucune formule à l'écran.
+  // Plan « finition », bloc 4 : paywall éteint, aucune formule à l'écran. Greg, 29 octobre 2026 (capture Profil : « Gratuit
+  // pour l'artisan, rien à payer » sous la carte de l'abonnement) : la carte « Abonnement » dit seule le gratuit et le payant.
+  if (data.payant === false && !CARTE_GRATUITE) return null;
   if (data.payant === false) {
     return (
       <Card className="flex flex-col gap-1.5 p-4">

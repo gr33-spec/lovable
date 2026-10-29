@@ -17,7 +17,7 @@ export function AideBouton({ sujet, className = "" }: { sujet: SujetAide; classN
         aria-expanded={ouverte}
         aria-controls={id}
         onClick={() => setOuverte(!ouverte)}
-        className={`pressable flex size-11 items-center justify-center rounded-full border text-[17px] font-extrabold ${ouverte ? "border-ink bg-ink text-white" : "border-line bg-surface text-accent-text active:bg-ground"}`}
+        className={`pressable flex size-11 items-center justify-center rounded-full border text-[17px] font-extrabold ${ouverte ? "border-ink bg-ink text-white" : "bouton-nuit"}`}
       >
         {ouverte ? <X size={18} aria-hidden="true" /> : "?"}
       </button>

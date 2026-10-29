@@ -88,7 +88,7 @@ export function MenuArtisan() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="pressable ml-2 flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-[14px] font-extrabold active:bg-ground"
+        className="pressable bouton-nuit ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-[14px] font-extrabold"
       >
         {initials(me.user.name)}
       </button>

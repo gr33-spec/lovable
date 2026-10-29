@@ -6,6 +6,7 @@ import { OffresAbonnement } from "@/components/offres-abonnement";
 import { Button, Card } from "@/components/ui";
 import { api, messageErreur, EVENEMENT_ABONNEMENT_REQUIS, type Abonnement, type Formule } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { TARIFS } from "../../../../packages/domain/src/groupe/tarifs";
 
 /**
  * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026) côté écran : le bandeau « Essai gratuit : encore 12 jours » (rouge après un
@@ -124,6 +125,7 @@ export function ResumeAbonnement() {
       <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">ABONNEMENT</span>
       <span className="text-[17px] font-extrabold">{ligne}</span>
       {data?.bandeau ? <span className="text-sm text-muted">{data.bandeau}</span> : null}
+      {data?.acces === "gratuit" ? <span className="text-sm text-muted">{TARIFS.enUneLigne}</span> : null}
       <Link href="/abonnement" className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">
         Mon abonnement et mes factures
       </Link>
