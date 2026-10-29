@@ -262,19 +262,25 @@ body:has(.app-nuit) {
     radial-gradient(120vmax 80vmax at 50% 40%, transparent 40%, rgba(13, 6, 1, 0.55) 100%),
     #130901;
 }
-/* Les surfaces claires gardent l'encre noire et le gris brun pour ce qu'elles contiennent. */
-.app-nuit :is([class*="bg-surface"], [class*="bg-accent"], [class*="bg-glass"], [class*="bg-ok-bg"], [class*="bg-warn-bg"], [class*="bg-danger-bg"], [class*="bg-tint"], [class*="bg-white"], input, textarea, select, [role="menu"]) {
-  --color-ground: #f6f3ee;
-  --color-ink: #130901;
-  --color-muted: #614822;
-  --color-subtle: #614822;
-  --color-line: #99844c40;
-  --color-accent-text: #130901;
-  color-scheme: light;
+/* Les surfaces claires gardent l'encre noire et le gris brun pour ce qu'elles contiennent, texte hérité compris (la
+   couleur se résout là où elle est posée : sans `color` ici, le texte d'une carte restait clair, donc invisible). En
+   couche de base : une couleur de texte écrite sur l'élément (`text-ok`, `text-on-accent`…) l'emporte toujours. */
+@layer base {
+  .app-nuit :where([class*="bg-surface"], [class*="bg-accent"], [class*="bg-glass"], [class*="bg-ok-bg"], [class*="bg-warn-bg"], [class*="bg-danger-bg"], [class*="bg-tint"], [class*="bg-white"], input, textarea, select, [role="menu"]) {
+    --color-ground: #f6f3ee;
+    --color-ink: #130901;
+    --color-muted: #614822;
+    --color-subtle: #614822;
+    --color-line: #99844c40;
+    --color-accent-text: #130901;
+    color: var(--color-ink);
+    color-scheme: light;
+  }
 }
 /* Un bouton ou une bulle « encre » sur la nuit reste noir, cerclé pour se détacher du fond. */
 .app-nuit [class*="bg-ink"] {
   --color-ink: #130901;
+  color: #fbf8f3;
 }
 .app-nuit :not(:is([class*="bg-surface"], [class*="bg-accent"])) > [class*="bg-ink"] {
   box-shadow: inset 0 0 0 1px rgba(202, 138, 27, 0.5);

@@ -2679,7 +2679,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText(/tuile/i)).toHaveCount(0);
   // Des icônes dans les cartes (maquette du 28 octobre), toutes décoratives ; jamais un dessin qui porte un sens.
   await expect(page.locator("main svg:not([aria-hidden='true'])")).toHaveCount(0);
-  await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
+  // Greg, 29 octobre 2026 (« on dit que c'est gratuit alors qu'il y a une partie payante ») : la landing dit l'abonnement
+  // des achats groupés ; toujours aucun pourcentage.
+  await expect(page.getByText(/2 %/)).toHaveCount(0);
   // L'abonnement (24 octobre 2026) : l'argument phare (une possibilité tant qu'il n'y a pas 3 cycles) et l'offre.
   // Greg, 27 octobre 2026, 2e message, point 34 : la phrase des tarifs, aucun montant.
   await expect(page.getByText(/€ HT/)).toHaveCount(0);
