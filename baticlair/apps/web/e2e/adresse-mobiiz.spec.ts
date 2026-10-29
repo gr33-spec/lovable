@@ -124,7 +124,7 @@ test("R7 : l'écran dédié, le bloc Compte (copier, modifier une fois), le rapp
   expect((await apiJson(page, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status).toBe(200);
   expect((await apiJson(page, "POST", "/v1/suppliers", { name: "Négoce Dupont", email: "ventes@dupont.example" })).status).toBe(201);
   await page.goto(`/chantiers/${q.body.projetId}`);
-  await page.getByRole("button", { name: /Envoyer au(x)? (fournisseur|négoce)/ }).first().click();
+  await page.getByRole("button", { name: /Envoyer au(x)? (fournisseur|négoce)|Demander les prix à mes négoces/ }).first().click();
   const feuille = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(feuille.getByRole("note")).toHaveText(`Les réponses arrivent dans Mobiiz, on te prévient. ${nouvelle}@mobiiz.test`);
   await feuille.getByRole("button", { name: "Envoyer", exact: true }).click();

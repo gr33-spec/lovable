@@ -445,9 +445,10 @@ export function SupplyList({
               className={`sticky z-10 mt-2 flex flex-wrap gap-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}
             >
               {onPreview ? (
-                <Button variant="secondary" className="shrink-0 px-3.5 text-[15px]" onClick={onPreview}>
+                // Sur un iPhone étroit, « Aperçu » garde son œil seul : « Demander les prix à mes négoces » tient sur une ligne.
+                <Button variant="secondary" aria-label="Aperçu" className="shrink-0 px-3.5 text-[15px]" onClick={onPreview}>
                   <Eye size={18} aria-hidden="true" />
-                  Aperçu
+                  <span className="hidden min-[400px]:inline">Aperçu</span>
                 </Button>
               ) : null}
               {sent ? (
