@@ -86,7 +86,7 @@ describe("la page du négoce : PDF, Excel, trois façons de répondre", { timeou
     // Le titre, les dates, « De la part de », le tableau (référence, désignation, quantité cumulée, unité), les règles, le lien.
     expect(texte).toContain("Couverture · secteur");
     expect(texte).toMatch(/Livraison souhaitée avant le \d+ \S+/);
-    expect(texte).toMatch(/Réponse attendue avant le \d+ \S+/);
+    expect(texte).toMatch(/Réponse attendue avant le \d+(er)? \S+/);
     expect(texte).toContain("De la part de votre client Toitures 1, via Mobiiz");
     expect(texte).not.toContain("Toitures 2");
     expect(texte).not.toContain("Paimpol");
@@ -214,7 +214,7 @@ wb.save(sys.argv[2])
     expect((await tache(mi)).body.relances).toEqual({ negoces: 2, artisans: 2 });
     const rappelX = mailsVers(ctx, "x@negoce.fr").at(-1)!;
     expect(rappelX.subject).toBe("Toitures 1 attend votre offre");
-    expect(rappelX.text).toMatch(/Votre client Toitures 1 attend votre offre\. Les réponses sont closes le \d+ \S+\./);
+    expect(rappelX.text).toMatch(/Votre client Toitures 1 attend votre offre\. Les réponses sont closes le \d+(er)? \S+\./);
     const artisan1 = mailsVers(ctx, "artisan1@toitures.fr").at(-1)!;
     expect(artisan1.subject).toBe("Négoce X n'a pas encore répondu");
     expect(artisan1.text).toContain("Négoce X n'a pas encore répondu. Appelle ton commercial : ta demande est peut-être dans ses spams. Plus il y a de négoces qui répondent, meilleur est le prix pour tout le groupe.");

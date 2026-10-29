@@ -125,7 +125,7 @@ describe("la demande perso", () => {
     expect((await tache(new Date(envoyeLe.getTime() + 4 * 86_400_000))).body).toMatchObject({ relances: 1 });
     const rappel = mailsVers(ctx, "b@negoce.fr").at(-1)!;
     expect(rappel.subject).toBe("Toitures A attend votre offre");
-    expect(rappel.text).toMatch(/^Bonjour,\n\nVotre client Toitures A attend votre offre\. Les réponses sont closes le \d+ \S+\./);
+    expect(rappel.text).toMatch(/^Bonjour,\n\nVotre client Toitures A attend votre offre\. Les réponses sont closes le \d+(er)? \S+\./);
     expect((await tache(new Date(envoyeLe.getTime() + 6 * 86_400_000))).body).toMatchObject({ relances: 0 });
     // La demande close, plus de chiffrage.
     await ctx.prisma.priceRequest.update({ where: { id: envoi.id }, data: { closLe: new Date(Date.now() - 1000) } });

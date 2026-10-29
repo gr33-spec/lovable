@@ -86,7 +86,7 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     // l'artisan, UNE phrase de pression, « Répondre en ligne », le portable (jamais l'e-mail personnel), la signature,
     // un pied discret ; aucune invitation à s'inscrire, aucune commission.
     expect(email.subject).toMatch(/^Bati invest : demande de prix( couverture)?, Brest$/);
-    expect(email.body.replace(/réponse souhaitée avant le \d{1,2} [a-zéû]+( \d{4})?\./, "réponse souhaitée avant le [date].")).toBe(
+    expect(email.body.replace(/réponse souhaitée avant le \d{1,2}(er)? [a-zéû]+( \d{4})?\./, "réponse souhaitée avant le [date].")).toBe(
       [
         "Bonjour,",
         "Je vous envoie la liste des fournitures pour un chantier de couverture zinc à joint debout à Brest : 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage. Pouvez-vous me chiffrer l'ensemble ?",
@@ -129,7 +129,8 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     expect(priceLeak(text.replace("Détail du devis", ""))).toBeNull();
     // Retour du fondateur (2026-10-12) : « Pas besoin de noter « sans prix », c'est pour le négoce, pas d'info inutile. »
     expect(text).not.toMatch(/sans prix/i);
-    expect(text).not.toMatch(/142|38,00|45,00|52,00/);
+    // La référence « CH-xxxxxx » est tirée au hasard (hexadécimal) : elle peut contenir « 142 », ce n'est pas un prix.
+    expect(text.replace(/Réf\. CH-[0-9A-F]{6}/g, "")).not.toMatch(/142|38,00|45,00|52,00/);
     expect(text).not.toMatch(/command/i);
     // Les lignes du chantier Test (§45.5).
     // Retour du fondateur (2026-10-12) : dans le document, un mètre linéaire se dit « m » (« 222 m », pas « 222 ml »).

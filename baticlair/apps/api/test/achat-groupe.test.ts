@@ -143,7 +143,7 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(x!.subject).toBe("Toitures 1 : achat groupé couverture, secteur Lannion");
     expect(x!.text).toMatch(/^Bonjour,\n\nJe participe à un achat groupé avec d'autres artisans du secteur via Mobiiz\. Pouvez-vous chiffrer ce volume \?/);
     expect(x!.text).toContain("D'autres négoces du secteur sont consultés sur ce même volume.");
-    expect(x!.text).toMatch(/Réponse attendue avant le \d+ \S+\. Passé ce délai, la commande se fera sans vous\./);
+    expect(x!.text).toMatch(/Réponse attendue avant le \d+(er)? \S+\. Passé ce délai, la commande se fera sans vous\./);
     expect(x!.text).toContain("Toitures 1\n\n--\nMobiiz, des artisans qui achètent ensemble.");
     expect(x!.html).toContain(">Répondre en ligne</a>");
     expect(x!.text).toMatch(/- Ardoise 32×22 Espagne 1er choix : 2\s700 pièces/);
