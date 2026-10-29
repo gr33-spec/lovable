@@ -76,6 +76,16 @@ export function blocLienChiffrage(m: { but: ButDemande; lien: string; nomApp: st
   ].join("\n");
 }
 
+/**
+ * Le lien de chiffrage du mail de la LISTE (« Demander les prix à mes négoces », Greg, 28 octobre 2026, points 7 et 8) :
+ * le mail du §45 reste celui de l'artisan, sans le nom de l'application (§45.7) ; le négoce peut chiffrer ligne par ligne
+ * et sa réponse se compare d'office. `lien` vaut « …/chiffrer/… » dans l'aperçu, le lien propre au négoce à l'envoi.
+ */
+export function blocLienChiffrageListe(lien: string): string {
+  // Sans le mot « prix » ni le nom de l'application : le test du §42.2 et du §45.7 vaut pour tout le mail.
+  return ["Vous pouvez aussi chiffrer en ligne, sans compte, en deux minutes (ligne par ligne, livraison, délai et validité de votre offre) :", lien, "Votre offre n'est vue que par moi."].join("\n");
+}
+
 /** La relance à 48 h ouvrées (vouvoiement). */
 export function mailRelanceDemandePerso(m: { entreprise: string; lien: string }): { objet: string; texte: string } {
   return {

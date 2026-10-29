@@ -5,6 +5,7 @@ import {
   NOM_APP,
   PHRASE_COMPTE_APRES_REPONSE,
   blocLienChiffrage,
+  blocLienChiffrageListe,
   clotureDeLaDemande,
   comparerLesReponses,
   debutHistorique,
@@ -168,14 +169,24 @@ export class DemandePersoService {
     return cree.id;
   }
 
-  /** Branché sur l'envoi du mail (§43) : le but et le lien de chiffrage propre au destinataire. */
+  /**
+   * Branché sur l'envoi du mail (§43) : le but et le lien de chiffrage propre au destinataire. Une liste envoyée par
+   * « Demander les prix à mes négoces » (sans but) chiffre un chantier : le lien y est aussi, pour que la comparaison
+   * automatique reste quand le négoce répond par le lien (Greg, 28 octobre 2026, points 7 et 8).
+   */
   async complement(requestId: string, recipientId: string): Promise<string | null> {
     const r = await this.prisma.priceRequest.findUnique({ where: { id: requestId }, select: { but: true } });
-    if (!r?.but) return null;
+    if (!r) return null;
     const jeton = randomBytes(24).toString("base64url");
     const dest = await this.prisma.priceRequestRecipient.update({ where: { id: recipientId }, data: { tokenHash: hacher(jeton) }, select: { supplier: { select: { negoceId: true } } } });
     if (dest.supplier.negoceId) await this.prisma.priceRequestRecipient.update({ where: { id: recipientId }, data: { negoceId: dest.supplier.negoceId } });
-    return blocLienChiffrage({ but: r.but as ButDemande, lien: `${this.cfg.webAppUrl}/chiffrer/${jeton}`, nomApp: NOM_APP });
+    const lien = `${this.cfg.webAppUrl}/chiffrer/${jeton}`;
+    return r.but ? blocLienChiffrage({ but: r.but as ButDemande, lien, nomApp: NOM_APP }) : blocLienChiffrageListe(lien);
+  }
+
+  /** Le même bloc dans l'aperçu du mail (§45.9) : le lien propre à chaque négoce n'existe qu'à l'envoi. */
+  apercuComplement(): string {
+    return blocLienChiffrageListe(`${this.cfg.webAppUrl}/chiffrer/…`);
   }
 
   /* --------------------------------------------------------------------------------------- la vue et la comparaison */
@@ -346,7 +357,7 @@ export class DemandePersoService {
       where: { tokenHash: hacher(jeton) },
       include: { supplier: { select: { name: true, email: true } }, priceRequest: { include: { company: { select: { id: true, name: true, address: true } }, project: { select: { address: true } } } } },
     });
-    if (!r?.priceRequest.but) throw notFound("Link");
+    if (!r) throw notFound("Link");
     return r;
   }
 
@@ -359,7 +370,7 @@ export class DemandePersoService {
     return {
       artisan: d.company.name,
       negoce: r.supplier.name,
-      but: d.but,
+      but: d.but ?? "chiffrer",
       dateBesoin: d.dueDate,
       ville,
       close: !!d.closLe && maintenant >= d.closLe,

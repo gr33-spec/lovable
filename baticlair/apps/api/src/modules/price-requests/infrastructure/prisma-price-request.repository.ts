@@ -49,6 +49,7 @@ interface Row {
     status: RecipientStatus;
     sentAt: Date | null;
     etiquette?: string | null;
+    reponduLe?: Date | null;
     supplier: {
       id: string;
       name: string;
@@ -149,8 +150,9 @@ function toRecord(row: Row): PriceRequestRecord {
     recipients: row.recipients.map((r) => ({
       id: r.id,
       supplier: r.supplier,
-      // Devis reçu puis supprimé du chantier : on revient à « envoyée ».
-      status: r.status === "received" && !r.document ? "sent" : r.status,
+      // Devis reçu puis supprimé du chantier : on revient à « envoyée ». Une réponse par le lien de chiffrage (sans PDF)
+      // reste « reçue » (Greg, 28 octobre 2026, point 7).
+      status: r.status === "received" && !r.document && !r.reponduLe ? "sent" : r.status,
       sentAt: r.sentAt,
       etiquette: r.etiquette ?? null,
       document: r.document

@@ -124,7 +124,7 @@ async function backToSite(page: Page) {
 
 /**
  * LA LISTE DES FOURNITURES : tant qu'il reste de l'orange, l'artisan règle la première carte orange d'un geste, sans
- * quitter la liste (§49.8) ; fini quand le gros bouton dit « Envoyer aux négoces ».
+ * quitter la liste (§49.8) ; fini quand le gros bouton dit « Demander les prix à mes négoces ».
  */
 async function confirmDoubts(page: Page) {
   await openList(page);
@@ -135,7 +135,7 @@ async function confirmDoubts(page: Page) {
     const orange = list.getByRole("listitem").filter({ has: page.getByRole("img", { name: "à vérifier" }) }).first();
     if (!(await orange.isVisible())) {
       await closeOpenLine(page);
-      await expect(list.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
+      await expect(list.getByRole("button", { name: "Demander les prix à mes négoces" })).toBeVisible();
       return;
     }
     await settleCard(page, await openRow(orange));
@@ -493,7 +493,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // §51.5 : les crochets en paquets partent tels qu'écrits ; jamais « combien par paquet » (§49.4 : rien sur une donnée écrite).
   await expect(page.getByText(/combien par paquet|pièces par paquet/i)).toHaveCount(0);
   await confirmDoubts(page);
-  // §50.3 : tout est vert, plus de barre « à régler », un seul bouton « Envoyer aux négoces » ; aucun compteur (§50.4).
+  // §50.3 : tout est vert, plus de barre « à régler », un seul bouton « Demander les prix à mes négoces » ; aucun compteur (§50.4).
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste.getByText(/lignes? à régler/)).toHaveCount(0);
   await expect(liste.getByText(/\d+ fournitures? ·/)).toHaveCount(0);
@@ -536,10 +536,10 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByRole("status").filter({ hasText: "Retiré de la liste" })).toHaveCount(0);
 
   await confirmDoubts(page);
-  // §50.7 : « Envoyer aux négoces » valide la liste et demande seulement à qui l'envoyer (le document est l'écran) ;
+  // §50.7 : « Demander les prix à mes négoces » valide la liste et demande seulement à qui l'envoyer (le document est l'écran) ;
   // « Revenir à la liste » referme.
   await openList(page);
-  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
+  await page.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(apercu.getByRole("button", { name: "Choisis un fournisseur" })).toBeDisabled();
   await apercu.getByRole("button", { name: "Revenir à la liste" }).click();
@@ -549,7 +549,9 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // La liste validée est conservée.
   await page.reload();
   await openList(page);
-  await expect(page.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Demander les prix à mes négoces" })).toBeVisible();
+  // Point 8 (Greg, 28 octobre 2026) : liste prête, UN seul bouton principal « Demander les prix à mes négoces ».
+  await expect(page.getByRole("button", { name: "Demander les prix à mes négoces" })).toHaveCount(1);
 
   // Une ligne se corrige encore après validation, d'un tap sur la ligne puis le plus : la liste est à valider à nouveau.
   await page.getByRole("button", { name: `Modifier : ${tuile}` }).click();
@@ -558,7 +560,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.waitForTimeout(1300);
   await settle(page);
   await confirmDoubts(page);
-  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
+  await page.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toBeVisible();
 });
 
@@ -592,9 +594,9 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   await passQuestions(page);
   // §50.7 : une ligne se règle sur le document même (§50.4 : plus de « Corriger le devis lu »).
   await confirmDoubts(page);
-  // §50.7 : « Envoyer aux négoces » ne montre plus d'aperçu (le document, c'est l'écran) : on y choisit seulement les
+  // §50.7 : « Demander les prix à mes négoces » ne montre plus d'aperçu (le document, c'est l'écran) : on y choisit seulement les
   // fournisseurs, dont un créé sur place.
-  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
+  await page.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(apercu.getByRole("heading", { name: "À qui j'envoie ?" })).toBeVisible();
   // Retour du fondateur (2026-10-10) : « les fournisseurs cochés par défaut, avec possibilité d'en ajouter un facilement ».
@@ -649,7 +651,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   // Le gros bouton de la liste ne propose plus un premier envoi.
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste.getByRole("button", { name: "Voir la demande envoyée" })).toBeVisible();
-  await expect(liste.getByRole("button", { name: "Envoyer aux négoces" })).toHaveCount(0);
+  await expect(liste.getByRole("button", { name: "Demander les prix à mes négoces" })).toHaveCount(0);
   await backToSite(page);
   // Le menu « ··· » du chantier porte les actions secondaires de l'étape.
   await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
@@ -751,7 +753,7 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await expect(demoList.getByText(/lignes? à régler/)).toHaveCount(0);
   await expect(demoList.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
   await expect(demoList.getByText("Embase plomb de sortie de toit")).toBeVisible();
-  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
+  await page.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
     await apercu.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
@@ -1044,7 +1046,7 @@ test("§48.5 : envoyer une partie de la liste à un fournisseur, le reste à un 
   await expect(list.getByText("Envoyé · Négoce Test").first()).toBeVisible();
 
   // L'envoi normal n'a pas bougé : toute la liste, d'un coup, au fournisseur habituel.
-  await expect(list.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
+  await expect(list.getByRole("button", { name: "Demander les prix à mes négoces" })).toBeVisible();
   await expect(list.getByRole("button", { name: "Voir la demande envoyée" })).toHaveCount(0);
 });
 
@@ -1094,7 +1096,7 @@ test("§50.7 : en bas, deux boutons figés : l'aperçu (le mail et le PDF du fou
   // Figés en bas : visibles dès le haut du document, sans descendre.
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(actions.getByRole("button", { name: "Aperçu" })).toBeInViewport();
-  await expect(actions.getByRole("button", { name: "Envoyer aux négoces" })).toBeInViewport();
+  await expect(actions.getByRole("button", { name: "Demander les prix à mes négoces" })).toBeInViewport();
   // L'aperçu : l'objet et le mail mot pour mot, et le PDF joint qui s'ouvre dans BatiClair. Rien ne part.
   await actions.getByRole("button", { name: "Aperçu" }).click();
   const apercu = page.getByRole("dialog", { name: "Ce que reçoit le fournisseur" });
@@ -1117,7 +1119,7 @@ test("§50.7 : en bas, deux boutons figés : l'aperçu (le mail et le PDF du fou
   expect(box.y + box.height).toBeLessThanOrEqual(vp.height + 0.5);
   await pdf.getByRole("button", { name: "Fermer le document" }).click();
   // Depuis l'aperçu, l'envoi : on choisit à qui.
-  await apercu.getByRole("button", { name: "Envoyer aux négoces" }).click();
+  await apercu.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toBeVisible();
 });
 
@@ -1135,9 +1137,9 @@ test("§50.7 : les deux boutons du bas sont là même s'il reste des lignes oran
   const actions = page.getByRole("group", { name: "Envoyer la liste" });
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(actions.getByRole("button", { name: "Aperçu" })).toBeInViewport();
-  await expect(actions.getByRole("button", { name: "Envoyer aux négoces" })).toBeInViewport();
+  await expect(actions.getByRole("button", { name: "Demander les prix à mes négoces" })).toBeInViewport();
   // « Envoyer » : rien ne part, la phrase dit pourquoi et la première ligne orange vient à l'écran.
-  await actions.getByRole("button", { name: "Envoyer aux négoces" }).click();
+  await actions.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toHaveCount(0);
   await expect(actions.getByRole("status")).toHaveText(/^Règle d'abord \d+ lignes? orange\.$/);
   await expect(list.getByRole("listitem").filter({ has: page.getByRole("img", { name: "à vérifier" }) }).first()).toBeInViewport();
@@ -1159,9 +1161,9 @@ test("§50.7 : une ligne ouverte passe au premier plan, le reste flouté ; un ta
   await passQuestions(page);
   await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
-  // « Envoyer aux négoces » tient sur une ligne, même sur un iPhone étroit (375 px).
+  // « Demander les prix à mes négoces » tient sur une ligne, même sur un iPhone étroit (375 px).
   await page.setViewportSize({ width: 375, height: 812 });
-  const envoyer = page.getByRole("group", { name: "Envoyer la liste" }).getByRole("button", { name: "Envoyer aux négoces" });
+  const envoyer = page.getByRole("group", { name: "Envoyer la liste" }).getByRole("button", { name: "Demander les prix à mes négoces" });
   expect((await envoyer.boundingBox())!.height).toBeLessThan(60);
   await list.getByRole("button", { name: /^Modifier la ligne : / }).first().click();
   const ouverte = list.getByRole("group", { name: /^Ligne ouverte : / });
@@ -1273,7 +1275,7 @@ test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par lig
   expect(gestures).toBe(seen.size);
   expect(choices).toBeGreaterThan(0);
   await expect(list.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
-  await expect(list.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
+  await expect(list.getByRole("button", { name: "Demander les prix à mes négoces" })).toBeVisible();
 });
 
 test("une lecture refusée au départ se dit, avec sa raison et « Réessayer » : jamais d'analyse sans fin", async ({ page }) => {
@@ -1333,7 +1335,7 @@ test("rien ne part vide : un devis où je ne lis aucune ligne se dit en une phra
   const failure = page.getByRole("region", { name: "Lecture du devis" });
   await expect(failure.getByText("Je n'ai rien lu dans ce devis.")).toBeVisible({ timeout: 60_000 });
   await expect(failure.getByRole("button")).toHaveText(["Réessayer"]);
-  await expect(page.getByRole("button", { name: /Envoyer aux négoces/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Demander les prix à mes négoces/ })).toHaveCount(0);
   // Un devis déposé par erreur se retire depuis le menu du chantier ; le chantier attend un autre PDF.
   await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
   await page.getByRole("menuitem", { name: "Retirer le devis" }).click();
@@ -1411,9 +1413,9 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   await expect(bref.getByRole("checkbox", { name: "Ajouter le nom du client et l'adresse" })).not.toBeChecked();
   await bref.getByRole("button", { name: "Terminer", exact: true }).click();
   await expect(bref.getByRole("button", { name: /^Modifier le bref : / })).toHaveCount(0);
-  // « Envoyer aux négoces » ne montre plus d'aperçu : seulement « À qui j'envoie ? ».
+  // « Demander les prix à mes négoces » ne montre plus d'aperçu : seulement « À qui j'envoie ? ».
   await confirmDoubts(page);
-  await list.getByRole("button", { name: "Envoyer aux négoces" }).click();
+  await list.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   const sheet = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(sheet).toBeVisible();
   await expect(sheet.getByRole("article", { name: "Demande de devis" })).toHaveCount(0);
@@ -2851,7 +2853,7 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await page.reload();
   await openList(page);
   expect(await emailsVers(page, negoce)).toHaveLength(0);
-  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
+  await page.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(apercu.getByRole("checkbox", { name: /Point.P Paimpol/ })).toBeChecked();
   await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();

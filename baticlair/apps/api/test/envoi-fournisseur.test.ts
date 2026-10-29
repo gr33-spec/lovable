@@ -87,7 +87,8 @@ describe("envoi fournisseur : un document, aucun prix", () => {
 
     const mail = ctx.emails.lastTo("devis@pointp.fr")!;
     expect(mail.subject).toBe(recipient.email.subject);
-    expect(mail.text).toBe(recipient.email.body);
+    // Le lien de chiffrage est propre au négoce : l'aperçu le montre « …/chiffrer/… » (Greg, 28 octobre 2026, point 7).
+    expect(mail.text.replace(/\/chiffrer\/[A-Za-z0-9_-]+/, "/chiffrer/…")).toBe(recipient.email.body);
     expect(mail.attachments).toHaveLength(1);
     expect(mail.attachments![0]).toMatchObject({ filename: "demande-de-devis-dupont-refection-toiture.pdf", contentType: "application/pdf" });
     const pdf = Buffer.from(mail.attachments![0]!.contentBase64, "base64");

@@ -22,7 +22,7 @@ import { NOM, nom } from "@/lib/nom";
  *    cinq mots, sans carte dépliée ;
  *  - sur le document même : un tap ouvre la ligne (moins / plus, boutons de choix, « C'est bon », corbeille), un tap sur
  *    le nom le corrige, un glissement vers la gauche la retire ; aucun écran intermédiaire, plus de voix ;
- *  - en bas, figés, deux boutons : « Aperçu » (le mail et le PDF du fournisseur) et « Envoyer aux négoces » ; en petit
+ *  - en bas, figés, deux boutons : « Aperçu » (le mail et le PDF du fournisseur) et « Demander les prix à mes négoces » (point 8, 28 octobre) ; en petit
  *    dessous, « Ajouter un article » ; à côté du titre « Fournitures », « Envoyer une partie » (une partie chez un
  *    fournisseur, le reste chez un autre).
  */
@@ -467,7 +467,7 @@ export function SupplyList({
                 >
                   {/* Sur un iPhone étroit, l'icône cède sa place pour que le texte tienne sur une ligne. */}
                   <Send size={18} aria-hidden="true" className="hidden min-[400px]:block" />
-                  Envoyer aux négoces
+                  Demander les prix à mes négoces
                 </Button>
               )}
               {blocked && toCheck.length > 0 && !sent ? (

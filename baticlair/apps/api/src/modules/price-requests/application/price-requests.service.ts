@@ -158,8 +158,10 @@ export class PriceRequestsService {
    * chaque destinataire (branché par le module des demandes perso ; rien pour une demande sans but).
    */
   private complement: (requestId: string, recipientId: string) => Promise<string | null> = async () => null;
-  brancherComplement(f: (requestId: string, recipientId: string) => Promise<string | null>): void {
+  private apercuComplement: () => string | null = () => null;
+  brancherComplement(f: (requestId: string, recipientId: string) => Promise<string | null>, apercu?: () => string): void {
     this.complement = f;
+    if (apercu) this.apercuComplement = apercu;
   }
 
   /**
@@ -256,6 +258,12 @@ export class PriceRequestsService {
     return { filename: fileName(packet.chantier), bytes: await packetPdf(packet, await this.sketchFiles(tenant, packet), { logo }) };
   }
 
+  /** Le mail tel qu'il partira : le lien de chiffrage s'y ajoute quand le serveur envoie (le lien propre au négoce y est « … »). */
+  private mailApercu(packet: SupplierPacket): string {
+    const bloc = this.mailer.deliversEmail ? this.apercuComplement() : null;
+    return bloc ? `${packetMail(packet)}\n\n${bloc}` : packetMail(packet);
+  }
+
   /**
    * L'APERÇU AVANT ENVOI (§45.9) : le document exactement comme le fournisseur le recevra (même générateur que le PDF),
    * l'objet et le mail. Rien ne part tant que l'artisan n'a pas appuyé sur « Envoyer ».
@@ -263,7 +271,7 @@ export class PriceRequestsService {
   async preview(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null; destinataire?: string | null }): Promise<{ subject: string; mail: string; document: PacketDocument; hasLogo: boolean }> {
     // §50.7 : l'aperçu s'ouvre aussi sur une liste en cours (lignes orange comprises) ; rien ne part d'ici.
     const { packet, logo } = await this.order(tenant, projectId, { ...input, apercu: true });
-    return { subject: packetSubject(packet), mail: packetMail(packet), document: packetDocument(packet, { destinataire: input.destinataire ?? null }), hasLogo: !!logo };
+    return { subject: packetSubject(packet), mail: this.mailApercu(packet), document: packetDocument(packet, { destinataire: input.destinataire ?? null }), hasLogo: !!logo };
   }
 
   /** Ce qui part chez le fournisseur : les lignes de la demande et le document (§45), depuis la liste validée. */
@@ -551,7 +559,7 @@ export class PriceRequestsService {
     for (const r of request.recipients) {
       // Depuis §45 : le mail court, la liste est dans le PDF joint ; les demandes d'avant §43 gardent leur ancien e-mail.
       if (request.packet) {
-        emails.set(r.id, { subject: packetSubject(request.packet), body: packetMail(request.packet) });
+        emails.set(r.id, { subject: packetSubject(request.packet), body: this.mailApercu(request.packet) });
         continue;
       }
       emails.set(

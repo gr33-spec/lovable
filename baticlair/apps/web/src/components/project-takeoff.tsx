@@ -395,7 +395,7 @@ export function ProjectTakeoff({
   // une seule fois (business model final, 25 octobre 2026 : l'e2e ne les trouvait pas sous la liste).
   const persoEtGroupe = quantitatif ? (
     <div className="flex flex-col gap-4">
-      <DemandesPerso projectId={projectId} articles={takeoff.purchase.toBuy.map((i) => i.key)} canCreate archived={archived} dejaEnvoye={sent} principal={!listShown} />
+      <DemandesPerso projectId={projectId} articles={takeoff.purchase.toBuy.map((i) => i.key)} canCreate archived={archived} dejaEnvoye={sent} principal={!listShown} bouton={false} />
       {/* Une seule suggestion d'achat groupé, à l'étape « liste prête » seulement (point 8). */}
       {!sent ? <TenterPrixDeGroupe projectId={projectId} /> : null}
     </div>

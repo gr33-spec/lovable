@@ -17,7 +17,7 @@ import { useActionChantier } from "@/lib/actions-chantier";
  * identité. Puis les réponses comparées LIVRAISON COMPRISE, « Commander » sur une réponse, le suivi Reçue → Confirmée →
  * Livrée. L'artisan ne choisit jamais la catégorie d'un négoce : le négoce la déclare lui-même.
  */
-export function DemandesPerso({ projectId, articles, canCreate, archived, dejaEnvoye = false, principal = false }: { projectId: string; articles: string[]; canCreate: boolean; archived: boolean; dejaEnvoye?: boolean; principal?: boolean }) {
+export function DemandesPerso({ projectId, articles, canCreate, archived, dejaEnvoye = false, principal = false, bouton = true }: { projectId: string; articles: string[]; canCreate: boolean; archived: boolean; dejaEnvoye?: boolean; principal?: boolean; bouton?: boolean }) {
   const fetchNegoces = useCallback((signal: AbortSignal) => api<NegocesProposes>(`/v1/projects/${projectId}/demandes-perso/negoces`, { signal }), [projectId]);
   const fetchDemandes = useCallback((signal: AbortSignal) => api<DemandePerso[]>(`/v1/projects/${projectId}/demandes-perso`, { signal }), [projectId]);
   const { data: proposes } = useResource(fetchNegoces);
@@ -26,7 +26,9 @@ export function DemandesPerso({ projectId, articles, canCreate, archived, dejaEn
   const [aPrevenir, setAPrevenir] = useState<string | null>(null);
   const mode = useModeRegroupement();
   // Point 8 (Greg, 28 octobre 2026) : « Demander les prix à mes négoces » disparaît une fois la demande envoyée ;
-  // « Ajouter un négoce » passe dans le menu « ··· » du chantier.
+  // « Ajouter un négoce » passe dans le menu « ··· » du chantier. Sur le chantier, le bouton de l'étape est celui, figé, de
+  // la liste (`bouton={false}`) : un seul « Demander les prix à mes négoces », jamais deux. Les anciens modes (humain,
+  // mois) gardent « Envoyer à mes négoces », leur circuit propre (but, date de besoin, paywall).
   const envoye = dejaEnvoye || (demandes?.length ?? 0) > 0;
   useActionChantier("ajouter-negoce", "Ajouter un négoce", () => setOuvert(true), !archived && canCreate && !dejaEnvoye && (demandes?.length ?? 0) > 0);
 
@@ -39,7 +41,7 @@ export function DemandesPerso({ projectId, articles, canCreate, archived, dejaEn
       {!archived && canCreate && proposes ? (
         ouvert ? (
           <EnvoiDemande projectId={projectId} articles={articles} proposes={proposes} onEnvoye={(id) => (setOuvert(false), setAPrevenir(id), reload())} onFermer={() => setOuvert(false)} />
-        ) : !envoye ? (
+        ) : !envoye && (bouton || (mode !== null && mode !== "automatique")) ? (
           <Button variant={mode !== "automatique" || principal ? "primary" : "secondary"} onClick={() => setOuvert(true)} className="w-full">
             <Send size={18} aria-hidden="true" /> {mode === "automatique" ? "Demander les prix à mes négoces" : "Envoyer à mes négoces"}
           </Button>

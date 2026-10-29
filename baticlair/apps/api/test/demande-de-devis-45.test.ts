@@ -3,6 +3,10 @@ import { PdfJsPdfReader } from "../src/modules/documents/infrastructure/pdfjs-pd
 import { forbiddenWord, priceLeak } from "../src/modules/price-requests/application/supplier-packet.js";
 import { createTestApp, resetDatabase, signUp, type Agent, type TestContext } from "./support/test-app.js";
 
+/** Le lien de chiffrage est propre à chaque négoce : l'aperçu le montre « …/chiffrer/… » (Greg, 28 octobre 2026, point 7). */
+const sansJeton = (t: string) => t.replace(/\/chiffrer\/[A-Za-z0-9_-]+/, "/chiffrer/…");
+const LIEN_LISTE = /\n\nVous pouvez aussi chiffrer en ligne, sans compte, en deux minutes \(ligne par ligne, livraison, délai et validité de votre offre\) :\nhttps?:\/\/[^\s]+\/chiffrer\/…\nVotre offre n'est vue que par moi\.$/;
+
 /**
  * §45 — LA DEMANDE DE DEVIS : un mail court (45.2), un PDF structuré avec le logo et les coordonnées du compte (45.3),
  * le vocabulaire du 45.4. Tests permanents du §45.7, sur le chantier Test (zinc joint debout 91 m², Brest).
@@ -78,7 +82,7 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
     const email = created.recipients[0].email;
     expect(email.subject).toBe("Demande de devis · Bati invest · chantier Test (Brest)");
-    expect(email.body).toBe(
+    expect(email.body.replace(LIEN_LISTE, "")).toBe(
       [
         "Bonjour,",
         "Je vous envoie la liste des fournitures pour un chantier de couverture zinc à joint debout à Brest : 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage.",
@@ -87,13 +91,15 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
         "Greg Bati invest · 06 12 34 56 78 · greg@batiinvest.fr",
       ].join("\n\n"),
     );
+    // Point 7 : le lien de chiffrage, sous la signature, sans le nom de l'application.
+    expect(email.body).toMatch(LIEN_LISTE);
     expect(email.body).not.toMatch(/command|référentiel|BatiClair|Mobiiz/i);
     expect(forbiddenWord(`${email.subject}\n${email.body}`)).toBeNull();
     expect(priceLeak(email.body)).toBeNull();
     // Le mail qui part est celui-là, avec le PDF joint.
     await agent.post(`/v1/price-request-recipients/${created.recipients[0].id}/send`).expect(200);
     const mail = ctx.emails.lastTo("devis@pointp-brest.fr")!;
-    expect([mail.subject, mail.text]).toEqual([email.subject, email.body]);
+    expect([mail.subject, sansJeton(mail.text)]).toEqual([email.subject, email.body]);
     expect(mail.attachments![0]).toMatchObject({ filename: "demande-de-devis-test.pdf", contentType: "application/pdf" });
   });
 
@@ -268,7 +274,7 @@ describe("§45.9 — l'aperçu avant envoi", () => {
     await agent.post(`/v1/price-request-recipients/${created.recipients[0].id}/send`).expect(200);
     const mail = ctx.emails.lastTo("devis@pointp-brest.fr")!;
     // Le même mail, le même document.
-    expect([mail.subject, mail.text]).toEqual([preview.subject, preview.mail]);
+    expect([mail.subject, sansJeton(mail.text)]).toEqual([preview.subject, preview.mail]);
     expect(created.document.blocs).toEqual(preview.document.blocs);
     // Chaque ligne de l'aperçu est dans le PDF joint, dans le même ordre (le PDF coupe les longues lignes : espaces réunis).
     const pdf = (await pdfText(Buffer.from(mail.attachments![0]!.contentBase64, "base64"))).replace(/\s+/g, " ");

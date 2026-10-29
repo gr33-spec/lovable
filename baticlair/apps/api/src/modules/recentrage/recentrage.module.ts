@@ -91,7 +91,7 @@ export class RecentrageModule implements OnModuleInit {
   onModuleInit(): void {
     // R7 : le SMS « Préviens ton négoce » nomme l'adresse Mobiiz qui envoie la demande.
     this.demandes.brancherAdresseEnvoi(async (companyId) => (await this.adresses.expediteur(companyId))?.from.match(/<([^>]+)>/)?.[1] ?? null);
-    this.priceRequests.brancherComplement((requestId, recipientId) => this.demandes.complement(requestId, recipientId));
+    this.priceRequests.brancherComplement((requestId, recipientId) => this.demandes.complement(requestId, recipientId), () => this.demandes.apercuComplement());
     this.abonnement.brancherOffert((companyId) => this.droits.offertPour(companyId));
     this.meter.brancherLimiteGratuite((companyId) => this.droits.limiteGratuite(companyId));
     this.commande.brancherVolume((c) => this.regroupements.volume(c));

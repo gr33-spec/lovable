@@ -19,6 +19,7 @@ import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { useAncienMode } from "@/components/negocie";
 import { useActionChantier } from "@/lib/actions-chantier";
+import { euros, type DemandePerso, type OffrePerso } from "@/lib/recentrage";
 import { dateHeureCourte, premiereLigneDuMessage } from "../../../../packages/domain/src/groupe/reponse-negoce";
 
 
@@ -134,6 +135,14 @@ export function ProjectPriceRequests({
   // R7 : les e-mails reçus des négoces pour ce chantier (la première ligne de leur message va sur leur carte).
   const fetchRecus = useCallback((signal: AbortSignal) => api<{ items: EmailRecu[] }>(`/v1/recus?projectId=${encodeURIComponent(projectId)}`, { signal }), [projectId]);
   const recus = useResource(fetchRecus);
+  // Point 7 (Greg, 28 octobre 2026) : un négoce qui a répondu par le lien (prix ligne par ligne ou Excel) se compare
+  // automatiquement, livraison comprise ; les autres devis s'ouvrent, sans lecture.
+  const parLien = Boolean(data?.items.find((r) => r.id === requestId)?.recipients.some((r) => r.status === "received" && !r.document));
+  const fetchChiffrages = useCallback(
+    (signal: AbortSignal) => (requestId && parLien ? api<DemandePerso>(`/v1/demandes-perso/${requestId}`, { signal }).then((d) => d.offres) : Promise.resolve([] as OffrePerso[])),
+    [requestId, parLien],
+  );
+  const chiffrages = useResource(fetchChiffrages).data ?? [];
   // Point 8 (Greg, 28 octobre 2026) : un seul bouton principal par étape ; le reste dans le menu « ··· » du chantier.
   const [feuille, setFeuille] = useState(false);
   const [ajout, setAjout] = useState(false);
@@ -260,7 +269,13 @@ export function ProjectPriceRequests({
   const emailDe = (recipientId: string) =>
     (recus.data?.items ?? []).filter((e) => e.demande?.recipientId === recipientId).sort((x, y) => y.recuLe.localeCompare(x.recuLe))[0] ?? null;
   // Point 7 (Greg, 28 octobre 2026) : un devis reçu ne se lit plus par l'IA ; il s'ouvre, et l'artisan retient un négoce.
-  const repondus = request.recipients.filter((r) => r.document || emailDe(r.id));
+  const offreDe = (recipientId: string) => chiffrages.find((o) => o.recipientId === recipientId) ?? null;
+  const rang = (r: PriceRequestRecipient) => {
+    const i = chiffrages.findIndex((o) => o.recipientId === r.id);
+    return i < 0 ? chiffrages.length : i;
+  };
+  const repondus = request.recipients.filter((r) => r.document || emailDe(r.id) || offreDe(r.id)).sort((a, b) => rang(a) - rang(b));
+  const comparer = repondus.filter((r) => offreDe(r.id)).length >= 2;
   const retenus = request.recipients.filter((r) => request.retainedSupplierIds.includes(r.supplier.id));
   const aEnvoyer = request.recipients.filter((r) => r.status === "to_send");
   const hasOffers = (offers.data?.items.length ?? 0) > 0;
@@ -289,7 +304,7 @@ export function ProjectPriceRequests({
       ) : repondus.length > 0 ? (
         // Le suivi du chantier dit déjà « N devis reçus sur M demandes » : ici, seulement le bouton de l'étape.
         <Button onClick={() => setFeuille(true)} className="w-full">
-          {repondus.length > 1 ? "Voir les devis reçus" : "Voir le devis reçu"}
+          {comparer ? "Comparer" : repondus.length > 1 ? "Voir les devis reçus" : "Voir le devis reçu"}
         </Button>
       ) : null}
       {actionError ? <ErrorNotice error={actionError} /> : null}
@@ -343,7 +358,7 @@ export function ProjectPriceRequests({
         ))}
       </ul>
       {partsBlock}
-      {feuille ? <DevisRecus request={request} repondus={repondus} emailDe={emailDe} onRetenir={(supplierId) => void classer([supplierId])} onFermer={() => setFeuille(false)} /> : null}
+      {feuille ? <DevisRecus request={request} repondus={repondus} emailDe={emailDe} offreDe={offreDe} onRetenir={(supplierId) => void classer([supplierId])} onFermer={() => setFeuille(false)} /> : null}
     </section>
   );
 }
@@ -351,9 +366,24 @@ export function ProjectPriceRequests({
 /**
  * « Voir les devis reçus » (Greg, 28 octobre 2026, points 7 et 8) : en plein écran, une carte par négoce qui a répondu :
  * « X t'a répondu · 28 oct. à 8 h 31 », la première ligne de son message, « Ouvrir le devis (PDF) » et « Je retiens ce
- * négoce » (la demande passe à « Commandé »). Aucune lecture IA, aucun nom de fichier.
+ * négoce » (la demande passe à « Commandé »). Aucune lecture IA, aucun nom de fichier. Un négoce qui a répondu par le
+ * lien montre son total livraison comprise, et les réponses par le lien passent devant, de la moins chère à la plus chère.
  */
-function DevisRecus({ request, repondus, emailDe, onRetenir, onFermer }: { request: PriceRequest; repondus: PriceRequestRecipient[]; emailDe: (id: string) => EmailRecu | null; onRetenir: (supplierId: string) => void; onFermer: () => void }) {
+function DevisRecus({
+  request,
+  repondus,
+  emailDe,
+  offreDe,
+  onRetenir,
+  onFermer,
+}: {
+  request: PriceRequest;
+  repondus: PriceRequestRecipient[];
+  emailDe: (id: string) => EmailRecu | null;
+  offreDe: (id: string) => OffrePerso | null;
+  onRetenir: (supplierId: string) => void;
+  onFermer: () => void;
+}) {
   useEffect(() => {
     const avant = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -375,6 +405,7 @@ function DevisRecus({ request, repondus, emailDe, onRetenir, onFermer }: { reque
           const quand = e ? new Date(e.recuLe) : r.sentAt ? null : null;
           const ligne = premiereLigneDuMessage(e?.texte);
           const autres = (e?.fichiers ?? []).filter((f) => !f.devisRecu);
+          const o = offreDe(r.id);
           return (
             <li key={r.id}>
               <Card aria-label={`Devis de ${r.supplier.name}`} className="flex flex-col gap-2.5 p-4">
@@ -382,9 +413,25 @@ function DevisRecus({ request, repondus, emailDe, onRetenir, onFermer }: { reque
                   <p className="text-[16px] font-extrabold">
                     {r.supplier.name} t&apos;a répondu{quand ? ` · ${dateHeureCourte(quand)}` : ""}
                   </p>
-                  {r.document ? <Badge tone="ok">Devis reçu</Badge> : null}
+                  {o && o.complete && o.valide && o.ecartHt === 0 ? <Badge tone="ok">Le moins cher</Badge> : r.document ? <Badge tone="ok">Devis reçu</Badge> : null}
                 </div>
                 {ligne ? <p className="text-[15px] text-muted">{ligne}</p> : null}
+                {o ? (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[18px] font-extrabold tabular-nums">{euros(o.totalLivreHt)} HT livré</p>
+                    <p className="text-[14px] text-muted">
+                      {o.livraisonHt > 0 ? `dont livraison ${euros(o.livraisonHt)}` : "livraison offerte"}
+                      {o.delaiJours !== null ? ` · ${o.delaiJours} jour${o.delaiJours > 1 ? "s" : ""}` : ""}
+                      {o.ecartHt ? ` · ${euros(o.ecartHt)} de plus` : ""}
+                    </p>
+                    {o.lignesManquantes.length > 0 ? (
+                      <p className="text-[14px] font-semibold text-warn">
+                        {o.lignesManquantes.length} ligne{o.lignesManquantes.length > 1 ? "s" : ""} non chiffrée{o.lignesManquantes.length > 1 ? "s" : ""}
+                      </p>
+                    ) : null}
+                    {!o.valide ? <p className="text-[14px] font-semibold text-warn">Offre échue</p> : null}
+                  </div>
+                ) : null}
                 {r.document ? (
                   <Button variant="secondary" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")}>
                     Ouvrir le devis (PDF)

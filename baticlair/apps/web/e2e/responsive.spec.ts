@@ -104,12 +104,12 @@ for (const size of WIDTHS) {
       for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
       await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
     }
-    await expect(list.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
+    await expect(list.getByRole("button", { name: "Demander les prix à mes négoces" })).toBeVisible();
     // Plan « finition », bloc 5 (capture iPhone SE) : le suivi suit la liste tout de suite, jamais « Ta liste se prépare » au-dessus d'elle.
     await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText(/Ta liste est (là|prête)/, { timeout: 5_000 });
     await shoot(page, size.name, "05-liste-des-fournitures");
 
-    await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
+    await page.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
     const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
     await expect(apercu).toBeVisible();
     await shoot(page, size.name, "06-apercu-envoi");
