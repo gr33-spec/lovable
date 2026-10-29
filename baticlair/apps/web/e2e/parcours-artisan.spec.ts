@@ -2597,9 +2597,11 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(questions.getByText("Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel. Tu ne paies jamais plus cher qu'aujourd'hui. Deux sorties possibles : chantier annulé ou aucune offre livrable à temps.")).toBeVisible();
   await expect(questions.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
   await expect(questions.getByText("Les listes, l'envoi à tes négoces et les achats groupés de ton secteur sont gratuits, sans limite de durée. Ton premier achat groupé est offert.")).toBeVisible();
-  // « Par un artisan, pour les artisans » en pleine place : Grégory, couvreur à Paimpol depuis plus de 20 ans, sa photo à venir.
+  // « Par un artisan, pour les artisans » en pleine place : Grégory, couvreur à Paimpol depuis plus de 20 ans ; sans photo
+  // (Greg, 29 octobre 2026 : « je ne mettrai pas ma photo »), ni emplacement pour elle.
   await expect(page.getByRole("heading", { name: "Par un artisan, pour les artisans." })).toBeVisible();
   await expect(page.getByText("Grégory, couvreur à Paimpol depuis plus de 20 ans.", { exact: false })).toBeVisible();
+  await expect(page.getByText(/Photo de Grégory/)).toHaveCount(0);
   // La lecture animée ne rejoue qu'à l'écran : on remonte en haut de page.
   await page.evaluate(() => window.scrollTo(0, 0));
   const lu = page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" });

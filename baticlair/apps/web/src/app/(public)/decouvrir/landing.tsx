@@ -200,14 +200,11 @@ function TroisQuestions() {
 
 /**
  * « Par un artisan, pour les artisans » en pleine place (Greg, 28 octobre 2026, point 4) : Grégory, couvreur à Paimpol depuis
- * plus de 20 ans ; l'emplacement de sa photo attend la sienne (rien d'inventé, aucune image d'ailleurs).
+ * plus de 20 ans. Sans photo (Greg, 29 octobre 2026 : « je ne mettrai pas ma photo ») : le texte seul.
  */
 function ParUnArtisan() {
   return (
     <section aria-labelledby="artisan" className="mz-section mz-artisan" data-apparait="">
-      <div className="mz-photo" aria-hidden="true">
-        <span>Photo de Grégory, à venir</span>
-      </div>
       <div>
         <Cote gauche="Qui est derrière" />
         <h2 id="artisan" className="mz-titre mz-h2">

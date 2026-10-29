@@ -339,31 +339,7 @@
   font-size: 17px;
   line-height: 1.5;
 }
-/* Par un artisan, pour les artisans : la photo (emplacement réservé) et le mot de Grégory. */
-.mz-artisan {
-  display: grid;
-  gap: 28px;
-}
-@media (min-width: 768px) {
-  .mz-artisan {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    align-items: center;
-    gap: 48px;
-  }
-}
-.mz-photo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 4 / 5;
-  max-width: 320px;
-  border: 1px dashed var(--mz-encre);
-  border-radius: var(--mz-rayon);
-  background: var(--mz-blanc);
-  color: var(--mz-gris);
-  font-size: 14px;
-  font-weight: 600;
-}
+/* Par un artisan, pour les artisans : le mot de Grégory, sans photo (Greg, 29 octobre 2026). */
 .mz-artisan-texte {
   margin-top: 16px;
   max-width: 44ch;
