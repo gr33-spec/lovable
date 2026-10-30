@@ -2613,9 +2613,8 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(histoire.getByText(/^Je suis artisan\. Un jour, j’achète deux palettes/)).toBeVisible();
   await expect(histoire.getByText("Grégory, couvreur à Paimpol, fondateur de Mobiiz")).toBeVisible();
   await expect(page.getByText(/rejoindre gratuitement|rejoins gratuitement/i)).toHaveCount(0);
-  // Les conditions en vigueur (vérifiées avant publication) : gratuit pour les listes et les négoces, achats groupés sur
-  // abonnement avec le premier offert, les réponses validées par Greg.
-  await expect(page.getByText(/^Inscription gratuite · Sans carte bancaire/).first()).toBeVisible();
+  // Greg, 30 octobre 2026 (décision 4) : sous « Rejoindre le collectif », « Gratuit · Sans carte bancaire ».
+  await expect(page.getByText(/^Gratuit · Sans carte bancaire/).first()).toBeVisible();
   // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits, pour tous.
   await expect(page.getByText("Gratuit, pour tous les artisans")).toBeVisible();
   await expect(page.getByText(/premier achat groupé est offert/)).toHaveCount(0);

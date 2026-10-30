@@ -47,7 +47,6 @@ export function PiedVitrine({ sansEditeur = false }: { sansEditeur?: boolean }) 
           ))}
           <Link href="/tarifs">Tarifs</Link>
           <Link href="/negoce/connexion">Accès négoce</Link>
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- rechargement voulu : la démo relit l'adresse ; elle vit sur /couvreurs depuis la landing premium V3 (30 octobre 2026) */}
           <a href="/couvreurs?demo">Revoir la démo</a>
         </nav>
       </div>
