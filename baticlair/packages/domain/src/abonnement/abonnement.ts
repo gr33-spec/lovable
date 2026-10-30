@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OFFRES } from "../groupe/offres.js";
+import { OFFRES } from "../groupe/tarifs.js";
 
 /**
  * RÈGLE CHANGÉE (Greg, 30 octobre 2026, réponses aux six décisions) : DEUX FORMULES MENSUELLES, sans engagement, ESSENTIEL

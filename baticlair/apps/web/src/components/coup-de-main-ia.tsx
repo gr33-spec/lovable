@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
-import { phraseQuota, type Quotas } from "../../../../packages/domain/src/groupe/offres";
+import { phraseQuota, type Quotas } from "../../../../packages/domain/src/groupe/tarifs";
 
 interface Jauge {
   limite: number;
