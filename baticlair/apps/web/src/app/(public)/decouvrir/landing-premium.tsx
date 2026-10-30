@@ -76,9 +76,12 @@ function Sprite() {
         <circle cx="10" cy="10" r="6.6" stroke="currentColor" strokeWidth="2" fill="none" />
         <path d="m15 15 6 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
       </symbol>
+      {/* Le casque de chantier, en silhouette pleine (retour de Greg, 30 octobre 2026 : l'ancien dessin prêtait à confusion) :
+          la calotte, sa nervure centrale, la visière qui déborde. */}
       <symbol id="i-helmet" viewBox="0 0 32 32">
-        <path d="M5.8 19.5v-4.2a10.2 10.2 0 0120.4 0v4.2" fill="none" stroke="currentColor" strokeWidth="2.15" strokeLinecap="round" />
-        <path d="M16 7v7m-13 7h26m-19.5 0v3.7c0 3 2.8 4.3 6.5 4.3s6.5-1.3 6.5-4.3V21" fill="none" stroke="currentColor" strokeWidth="2.15" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M5 21.5C5 14.6 9.6 9.2 16 9.2s11 5.4 11 12.3z" fill="currentColor" />
+        <path d="M13.2 21.5v-9.6c0-1.3 1.2-2.4 2.8-2.4s2.8 1.1 2.8 2.4v9.6" fill="none" stroke="#fff" strokeOpacity=".55" strokeWidth="1.4" />
+        <rect x="2.5" y="21.2" width="27" height="3.6" rx="1.8" fill="currentColor" />
       </symbol>
     </svg>
   );
