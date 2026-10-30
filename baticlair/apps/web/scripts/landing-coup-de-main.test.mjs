@@ -43,3 +43,20 @@ test("l'app : trois choix, dans le même ordre ; la page Tarifs sans montant", (
   assert.ok(tarifs.includes("TARIFS.enUneLigne"));
   assert.doesNotMatch(tarifs, /\d+\s?€/);
 });
+
+// La landing « premium V3 » (Greg, 30 octobre 2026) : les conditions en vigueur, jamais les mots interdits, jamais une
+// adresse écrite en dur (les liens restent ceux du site où elle est servie), l'abonnement dit à côté du premier offert.
+test("la landing premium V3 : conditions en vigueur, aucun mot interdit, aucun lien en dur", () => {
+  const landing = sansCommentaires(lire("app/(public)/decouvrir/landing-premium.tsx"));
+  const client = sansCommentaires(lire("components/landing-premium.tsx"));
+  for (const texte of [landing, client]) {
+    assert.doesNotMatch(texte, INTERDITS);
+    assert.doesNotMatch(texte, /automatisée?s?/i);
+    assert.doesNotMatch(texte, /https?:\/\/[a-z.-]*mobiiz\.fr/);
+  }
+  assert.ok(landing.includes("Sur abonnement : le premier achat groupé est offert"));
+  assert.ok(landing.includes("TARIFS.question.r"));
+  assert.ok(landing.includes("BLOC_LEGAL") && landing.includes("PAGES_LEGALES"));
+  assert.match(client, /EXEMPLE FICTIF/);
+  assert.match(client, /Aucun prix ni pourcentage d’économie garanti/);
+});

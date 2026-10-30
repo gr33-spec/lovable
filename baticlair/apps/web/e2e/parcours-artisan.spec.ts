@@ -62,9 +62,8 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   // Sans session : la page publique, puis « Créer un compte » mène à l'inscription.
   // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche.
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Achète tes matériaux au prix des gros\.$/);
-  // Le partage et l'aperçu WhatsApp : écrits dès le serveur avec l'adresse du site, jamais « Rejoins-nous : / » ni vercel.app.
+  // L'aperçu WhatsApp : écrit dès le serveur avec l'adresse du site, jamais vercel.app.
   const html = await (await page.request.get("/")).text();
-  expect(html).toContain("Rejoins-nous : http://localhost:3000/");
   expect(html).toMatch(/<meta property="og:image" content="http:\/\/localhost:3000\/marque\/partage\.png"/);
   await page.getByRole("link", { name: "Créer mon compte gratuit" }).first().click();
   await expect(page).toHaveURL(/\/inscription/);
@@ -2590,158 +2589,96 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
 });
 
 test("La page d'accueil publique : un visiteur la voit à la racine, un artisan connecté garde l'app", async ({ page }) => {
+  // La landing « premium V3 » (Greg, 30 octobre 2026, maquette du ZIP) : l'accroche, comment ça marche, le pont, « Plus on
+  // est, moins on paie » et ses 20 artisans, l'offre, les questions, le dernier appel.
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
-  // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche, et un vrai devis lu juste à côté.
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Achète tes matériaux au prix des gros\.$/);
-  // Le concept en trois lignes sous le titre, sans paragraphe autour (Greg, 27 octobre 2026 : « beaucoup trop de lecture ») ;
-  // sur un iPhone SE, le titre, les trois lignes et « Créer mon compte gratuit » sans défiler.
-  await expect(page.getByText("Mobiiz additionne les commandes de matériaux des artisans d'un même secteur et négocie le prix de gros pour chacun.")).toHaveCount(0);
-  await expect(page.getByText(/^Le devis que tu as fait à ton client suffit/)).toHaveCount(0);
-  // Maquette de Greg (28 octobre 2026) : l'accroche, le mécanisme, le bouton, et le vrai écran de l'app dans un téléphone ;
-  // les trois lignes numérotées laissent la place au mécanisme (même idée, une seule fois).
-  await expect(page.getByRole("list", { name: "En trois étapes" })).toHaveCount(0);
-  await expect(page.locator(".mz-hero-tel").getByRole("img", { name: /^L'écran « Ma liste de matériaux » de Mobiiz/ })).toBeVisible();
-  // Greg, 28 octobre 2026, point 4 : le mécanisme en trois phrases, mot pour mot, visible sans défiler sur un iPhone SE ;
-  // « Arrête de perdre du temps sur tes quantitatifs. » vient après, jamais avant.
-  const mecanisme = page.getByText("Les artisans de ton secteur mettent leurs commandes en commun. Mobiiz demande un prix aux négoces pour le total. Tu commandes au meilleur prix reçu.");
-  const taille = page.viewportSize();
-  await page.setViewportSize({ width: 375, height: 667 });
-  await expect(page.getByRole("heading", { level: 1 })).toBeInViewport({ ratio: 1 });
-  await expect(mecanisme).toBeInViewport({ ratio: 1 });
-  expect(await page.evaluate(() => document.body.innerText.indexOf("Les artisans de ton secteur mettent leurs commandes en commun.") < document.body.innerText.indexOf("Arrête de perdre du temps sur tes quantitatifs."))).toBe(true);
-  // Un seul libellé d'inscription, « Sans carte bancaire » dessous ; sur téléphone, le bouton fixe apparaît après le premier
-  // écran et s'efface quand celui du bas de page est atteint.
-  const fixe = page.locator(".mz-fixe");
-  await expect(fixe).not.toHaveAttribute("data-visible", "");
-  await page.getByRole("heading", { name: "Ce que tu te demandes." }).scrollIntoViewIfNeeded();
-  await expect(fixe).toHaveAttribute("data-visible", "");
-  await expect(fixe.getByRole("link", { name: "Créer mon compte gratuit" })).toBeVisible();
-  await expect(fixe.getByText("Sans carte bancaire")).toBeVisible();
-  await page.getByRole("heading", { name: "Ton prochain chantier, au propre." }).scrollIntoViewIfNeeded();
-  await expect(fixe).not.toHaveAttribute("data-visible", "");
-  if (taille) await page.setViewportSize(taille);
-  // Les trois questions franches, mot pour mot.
-  const questions = page.getByRole("region", { name: "Ce que tu te demandes." });
-  await expect(questions.getByRole("term")).toHaveText(["Je suis obligé de commander ?", "Je garde mes négoces ?", "C'est gratuit ?"]);
-  await expect(questions.getByText("Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel. Tu ne paies jamais plus cher qu'aujourd'hui. Deux sorties possibles : chantier annulé ou aucune offre livrable à temps.")).toBeVisible();
-  await expect(questions.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
-  // Greg, 29 octobre 2026 (« on dit que c'est gratuit alors qu'il y a une partie payante ») : la réponse dit les deux.
-  await expect(questions.getByText("Oui pour tes listes et tes négoces, sans limite de temps. Les achats groupés sont sur abonnement, et le premier est offert.", { exact: false })).toBeVisible();
-  // Greg, 29 octobre 2026 (« pas mal de doublons », « le comment ça marche me paraît presque suffisant ») : l'accroche,
-  // comment ça marche, les achats groupés, les questions. Plus de devis lu en grand, de « coup de main », ni de bloc
-  // « Par un artisan » (il reste au-dessus du titre) ; jamais de photo.
-  await expect(page.getByRole("figure", { name: "Un vrai devis de couvreur lu par Mobiiz" })).toHaveCount(0);
-  await expect(page.getByRole("list", { name: "Trois façons de faire ta liste" })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Par un artisan, pour les artisans." })).toHaveCount(0);
-  await expect(page.getByText(/Photo de Grégory/)).toHaveCount(0);
+  await expect(page.getByText("Par un artisan, pour les artisans", { exact: true })).toBeVisible();
   const ordre = await Promise.all(
-    ["Achète tes matériaux au prix des gros.", "Comment ça marche", "Seul, tu es un client parmi d'autres. À vingt, vous êtes le plus gros client du département.", "Ce que tu te demandes."].map(
+    [/^Achète tes matériaux/, /^Simple pour toi\./, /^Seul, tu représentes une commande\./, /^Plus on est, moins on paie\./, /^À ton rythme\./, "Tu te poses des questions ?", /^Le prochain bon prix/].map(
       async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y,
     ),
   );
   expect([...ordre].sort((x, y) => x - y)).toEqual(ordre);
+  for (const etape of ["Prépare ta liste.", "Vérifie le quantitatif.", "Compare et choisis."]) await expect(page.getByRole("heading", { name: etape })).toBeVisible();
+  // Les conditions en vigueur (vérifiées avant publication) : gratuit pour les listes et les négoces, achats groupés sur
+  // abonnement avec le premier offert, les réponses validées par Greg.
+  await expect(page.getByText(/Sans carte bancaire · Tes listes et tes négoces restent gratuits/)).toBeVisible();
+  await expect(page.getByText("Sur abonnement : le premier achat groupé est offert")).toBeVisible();
+  await expect(page.getByText("3 premières listes préparées depuis un devis ou une photo")).toBeVisible();
+  const faq = page.getByRole("region", { name: "Tu te poses des questions ?" });
+  await expect(faq.locator("summary")).toHaveText(["Je peux garder mes négoces habituels ?", "Est-ce que Mobiiz est gratuit ?", "Est-ce que je dois obligatoirement commander ?", "Est-ce que je vais forcément payer moins cher ?"]);
+  for (const s of await faq.locator("summary").all()) await s.click();
+  await expect(faq.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
+  await expect(faq.getByText("Oui pour tes listes et tes négoces, sans limite de temps. Les achats groupés sont sur abonnement, et le premier est offert.", { exact: false })).toBeVisible();
+  await expect(faq.getByText("Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel.", { exact: false })).toBeVisible();
+  await expect(faq.getByText(/^Non, aucun prix ni niveau d’économie n’est garanti\./)).toBeVisible();
+  // Jamais les mots « IA », « automatique », « précis », « exact » ; aucun montant d'abonnement (l'exemple fictif 6 € → 3 € HT/L est permis, marqué « Exemple fictif »).
+  expect(await page.locator("main").innerText()).not.toMatch(/\b(IA|automatiques?|automatisée?s?|précise?s?|exacte?s?)\b/i);
+  await expect(page.getByText(/€ HT (par|\/) (mois|an)/)).toHaveCount(0);
+  // L'animation des 20 artisans : à 1 tant qu'elle n'est pas à l'écran, puis jusqu'à 20 au défilement ; « Rejouer » la relance.
+  const demo = page.locator("#animationSurface");
+  await expect(demo).toHaveAttribute("data-artisans", "1");
+  await expect(demo.getByText("EXEMPLE FICTIF")).toBeVisible();
+  await demo.scrollIntoViewIfNeeded();
+  await expect(demo).toHaveAttribute("data-artisans", "20", { timeout: 10_000 });
+  await expect(demo.getByText("20 artisans réunis. Plus on est, moins on paie.")).toBeVisible();
+  await expect(demo.getByText("3,00")).toBeVisible();
+  await expect(demo.getByText(/Simulation pédagogique fictive \(6 € → 3 € HT\/L\)\. Aucun prix ni pourcentage d’économie garanti/)).toBeVisible();
+  await demo.getByRole("button", { name: "Revoir l'animation" }).click();
+  await expect(demo).not.toHaveAttribute("data-artisans", "20");
+  await expect(demo).toHaveAttribute("data-artisans", "20", { timeout: 10_000 });
+  // Les liens : l'inscription (deux boutons et l'en-tête), la connexion, les tarifs, les pages légales, l'accès négoce. En
+  // haut de page, le bouton fixe du téléphone est caché (hors de l'arbre d'accessibilité).
   await page.evaluate(() => window.scrollTo(0, 0));
-  // Le partage et l'aperçu WhatsApp : écrits dès le serveur avec l'adresse du site, jamais « Rejoins-nous : / » ni vercel.app.
-  const html = await (await page.request.get("/")).text();
-  expect(html).toContain("Rejoins-nous : http://localhost:3000/");
-  expect(html).toMatch(/<meta property="og:image" content="http:\/\/localhost:3000\/marque\/partage\.png"/);
-  // Greg, 24 octobre 2026 (capture iPhone : « la démo s'ouvre en plein écran dès l'arrivée, avant même la promesse ») : le
-  // visiteur arrive sur l'accroche, « Par un artisan, pour les artisans », « Dès 29 € », l'inscription ; aucune démo d'office.
-  await expect(page.getByText("Démo · écran")).toHaveCount(0);
-  await expect(page.getByText("Par un artisan, pour les artisans.").first()).toBeVisible();
-  await expect(page.getByText(/^Gratuit pour tes listes et tes négoces\. Les achats groupés sont sur abonnement : le premier est offert\./)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Créer mon compte gratuit" }).first()).toBeVisible();
-  await page.reload();
-  await expect(page.getByText("Démo · écran")).toHaveCount(0);
-  // La démo passe derrière « Voir comment ça marche (30 s) », juste sous l'accroche ; elle s'ouvre en plein écran.
-  await page.getByRole("button", { name: "Voir comment ça marche (30 s)" }).click();
-  const dialogue = page.getByRole("dialog", { name: "Démo" });
-  await expect(dialogue).toBeVisible();
-  const demo = page.getByRole("region", { name: /^Ton quantitatif, au propre/ });
-  await expect(demo.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
-  await expect(demo.getByText("Exemple").first()).toBeVisible();
-  // Multimétier : couverture, puis plomberie, puis placo.
-  await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple couverture)" }).getByRole("listitem")).toHaveCount(5);
-  await demo.getByRole("tab", { name: "Plomberie" }).click();
-  await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple plomberie)" })).toContainText("Tube multicouche 16×2");
-  await demo.getByRole("tab", { name: "Placo" }).click();
-  await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple placo)" })).toContainText("Plaque BA13");
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
-  await demo.getByRole("button", { name: "Suivant" }).click();
-  // Recentrage (Greg, 25 octobre 2026) : envoie à tes négoces et compare, livraison comprise.
-  await expect(page.getByRole("heading", { name: "Envoie à tes négoces et compare" })).toBeVisible();
-  await expect(page.getByRole("list", { name: "Offres reçues (exemple)" }).getByRole("listitem")).toHaveCount(3);
-  await expect(page.getByText("Il manque le faîtage zinc · 2 jours")).toBeVisible();
-  await page.getByRole("button", { name: "Suivant" }).click();
-  // La force du groupe : sous le seuil, ni nombre ni ville ; aucune promesse chiffrée.
-  await expect(page.getByRole("heading", { name: "La force du groupe en plus" })).toBeVisible();
-  await expect(page.getByText("Regroupement en cours · Département 22")).toBeVisible();
-  await expect(dialogue.getByText(/économi/i)).toHaveCount(0);
-  await expect(dialogue.getByRole("link", { name: "Créer mon compte gratuit" })).toBeVisible();
-  // « Passer » la referme ; Échap aussi.
-  await page.getByRole("button", { name: "Passer" }).click();
-  await expect(page.getByText("Démo · écran")).toHaveCount(0);
-  await page.getByRole("button", { name: "Voir comment ça marche (30 s)" }).click();
-  await page.keyboard.press("Escape");
-  await expect(page.getByText("Démo · écran")).toHaveCount(0);
-  // « Revoir la démo » (?demo) l'ouvre : une demande explicite.
-  await page.getByRole("link", { name: "Revoir la démo" }).click();
-  await expect(page.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
-  // La page derrière est inerte tant que la démo est ouverte.
-  await expect(page.getByRole("button", { name: "Voir comment ça marche (30 s)" })).toHaveCount(0);
-  await page.getByRole("button", { name: "Passer" }).click();
-  await expect(page.getByRole("button", { name: "Voir comment ça marche (30 s)" })).toBeFocused();
-  // Landing du 22 octobre (Greg) : ton fun et direct, visuel pro ; « enfumer » vise le prix ; le principe en une phrase ;
-  // trois étapes ; gratuit pour l'artisan ; les autres métiers en une ligne ; une ligne pour les négoces. Rien d'extérieur.
-  // Recentrage (Greg, 25 octobre 2026) : le titre, trois étapes, le bloc groupe et le bloc négoce mot pour mot ; aucune
-  // promesse d'économie chiffrée.
-  await expect(page.getByRole("heading", { name: "Seul, tu es un client parmi d'autres. À vingt, vous êtes le plus gros client du département." })).toBeVisible();
-  await expect(page.getByRole("img", { name: "De 1 à 20 artisans du secteur" })).toBeVisible();
-  // 27 octobre 2026 (« beaucoup trop de lecture ») : l'accueil n'a plus le bloc peinture (il reste sur /peintres) ni
-  // l'exemple de regroupement (il reste sur /couvreurs).
-  await expect(page.getByRole("region", { name: "Le même pot, deux fois moins cher." })).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "Les mêmes ardoises, dans le même département." })).toHaveCount(0);
-  // Business model final (Greg, 25 octobre 2026) : l'argument des chasseurs d'opportunités.
-  await expect(page.getByText("Des chasseurs d'opportunités négocient pour toi.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Comment ça marche" })).toBeVisible();
-  await expect(page.getByText(/centaines|milliers d'euros/)).toHaveCount(0);
-  for (const etape of ["1. Dépose ton devis", "2. Mobiiz prépare ton quantitatif", "3. Envoie à tes négoces et compare"]) {
-    await expect(page.getByRole("heading", { name: etape })).toBeVisible();
-  }
-  // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
-  for (const image of [/^L'écran « Ma liste de matériaux » de Mobiiz/, /^La liste de fournitures préparée par Mobiiz/, /^Les prix reçus de trois négoces/]) {
-    await expect(page.getByRole("region", { name: "Comment ça marche" }).getByRole("img", { name: image })).toBeVisible();
-  }
-  await expect(page.getByText(/tuile/i)).toHaveCount(0);
-  // Des icônes dans les cartes (maquette du 28 octobre), toutes décoratives ; jamais un dessin qui porte un sens.
-  await expect(page.locator("main svg:not([aria-hidden='true'])")).toHaveCount(0);
-  // Greg, 29 octobre 2026 (« on dit que c'est gratuit alors qu'il y a une partie payante ») : la landing dit l'abonnement
-  // des achats groupés ; toujours aucun pourcentage.
-  await expect(page.getByText(/2 %/)).toHaveCount(0);
-  // L'abonnement (24 octobre 2026) : l'argument phare (une possibilité tant qu'il n'y a pas 3 cycles) et l'offre.
-  // Greg, 27 octobre 2026, 2e message, point 34 : la phrase des tarifs, aucun montant.
-  await expect(page.getByText(/€ HT/)).toHaveCount(0);
-  // Les deux de la page ; le bouton fixe du téléphone est masqué tant qu'il n'est pas à l'écran.
+  await expect(page.locator(".sticky-cta")).not.toHaveAttribute("data-visible", "");
   await expect(page.getByRole("link", { name: "Créer mon compte gratuit", exact: true })).toHaveCount(2);
-  await expect(page.getByText("Des demandes prêtes à chiffrer, des volumes groupés.")).toBeVisible();
-  // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
-  const partage = page.getByRole("region", { name: "Fais venir tes collègues" });
-  const message = /^Je me suis inscrit sur Mobiiz, on regroupe nos commandes de matériaux pour payer moins cher\. Plus on est nombreux, plus on négocie\. Rejoins-nous : http/;
-  await expect(partage.getByText(message)).toBeVisible();
-  const whatsapp = decodeURIComponent((await partage.getByRole("link", { name: "Envoyer sur WhatsApp" }).getAttribute("href"))!.replace(/^https:\/\/wa\.me\/\?text=/, ""));
-  expect(whatsapp).toMatch(message);
-  expect(await partage.getByRole("link", { name: "Envoyer par SMS" }).getAttribute("href")).toMatch(/^sms:\?&body=Je%20me%20suis%20inscrit/);
-  await expect(partage.getByRole("button", { name: "Copier le lien" })).toBeVisible();
-  // Le compteur d'inscrits : le vrai chiffre de la base (test API), masqué sous 10 ; jamais un chiffre inventé.
-  const compteur = (await (await page.request.get("/v1/public/compteur")).json()) as { artisans: number | null };
-  if (compteur.artisans === null) await expect(page.getByText(/artisans déjà inscrits/)).toHaveCount(0);
-  else await expect(page.getByRole("status", { name: `${compteur.artisans} artisans déjà inscrits dans les Côtes-d'Armor` })).toBeVisible();
+  // L'en-tête (caché sur téléphone, comme la maquette : le menu et le bouton fixe y suffisent).
+  await expect(page.locator(".nav-right a", { hasText: "Commencer gratuitement" })).toHaveAttribute("href", "/inscription");
+  await expect(page.locator(".nav-right a", { hasText: "Se connecter" })).toHaveAttribute("href", "/connexion");
+  await expect(page.getByRole("link", { name: /^Découvrir l'offre/ })).toHaveAttribute("href", "/tarifs");
+  const pied = page.getByRole("navigation", { name: "Informations et liens légaux" });
+  for (const [nom, href] of <[string, string][]>[["Tarifs", "/tarifs"], ["Mentions légales", "/mentions-legales"], ["CGU", "/cgu"], ["Conditions négoces", "/conditions-negoce"], ["Confidentialité", "/confidentialite"], ["Contact", "/mentions-legales#contact"], ["Accès négoce", "/negoce/connexion"]])
+    await expect(pied.getByRole("link", { name: nom })).toHaveAttribute("href", href);
   await expect(page.getByText(/BATI INVEST, SARL au capital de 1 000 €, RCS Saint-Brieuc 910 796 325, SIRET 910 796 325 00017/)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Confidentialité" })).toHaveAttribute("href", "/confidentialite");
+  // Sur téléphone : le menu s'ouvre et mène à sa section ; le bouton fixe n'apparaît qu'une fois celui de l'accroche passé,
+  // et s'efface devant celui du bas.
+  const taille = page.viewportSize();
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const fixe = page.locator(".sticky-cta");
+  await expect(fixe).not.toHaveAttribute("data-visible", "");
+  await page.getByRole("button", { name: "Ouvrir le menu" }).click();
+  // « Se connecter », caché dans l'en-tête du téléphone, est dans le menu.
+  await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Se connecter" })).toHaveAttribute("href", "/connexion");
+  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "L'offre" }).click();
+  await expect(page.getByRole("button", { name: "Ouvrir le menu" })).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByRole("heading", { name: /^À ton rythme\./ })).toBeInViewport();
+  await expect(fixe).toHaveAttribute("data-visible", "");
+  await expect(fixe.getByRole("link", { name: "Créer mon compte gratuit" })).toBeVisible();
+  await page.locator("#finalPrimaryCTA").scrollIntoViewIfNeeded();
+  await expect(fixe).not.toHaveAttribute("data-visible", "");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  if (taille) await page.setViewportSize(taille);
+  // Rien d'extérieur ; aucun débordement.
   const externes = await page.evaluate(() => [...document.querySelectorAll("script[src], img, link[rel=stylesheet], iframe")].map((e) => (e as HTMLElement).getAttribute("src") ?? (e as HTMLElement).getAttribute("href") ?? "").filter((u) => /^https?:\/\//.test(u)));
   expect(externes).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  // L'aperçu WhatsApp : écrit dès le serveur avec l'adresse du site.
+  const html = await (await page.request.get("/")).text();
+  expect(html).toMatch(/<meta property="og:image" content="http:\/\/localhost:3000\/marque\/partage\.png"/);
+  // La démo guidée et le partage restent sur /couvreurs (ancienne page) : « Revoir la démo » y mène.
+  await page.goto("/couvreurs");
+  await page.getByRole("button", { name: "Voir comment ça marche (30 s)" }).click();
+  await expect(page.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
+  await page.getByRole("button", { name: "Passer" }).click();
+  await expect(page.getByText("Démo · écran")).toHaveCount(0);
+  await page.getByRole("link", { name: "Revoir la démo" }).click();
+  await expect(page.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
+  await page.getByRole("button", { name: "Passer" }).click();
+  const partage = page.getByRole("region", { name: "Fais venir tes collègues" });
+  await expect(partage.getByRole("button", { name: "Copier le lien" })).toBeVisible();
   // Connecté : la racine reste l'accueil de l'app.
   await signUp(page);
   await page.goto("/");
@@ -3022,7 +2959,7 @@ test("Zéro bouton mort (visiteur) : landing, connexion, inscription, mot de pas
   const defauts: string[] = [];
   const ecrans: [string, string][] = [
     ["landing", "/"],
-    ["démo guidée", "/?demo"],
+    ["démo guidée", "/couvreurs?demo"],
     ["connexion", "/connexion"],
     ["inscription", "/inscription"],
     ["mot de passe oublié", "/mot-de-passe-oublie"],
@@ -3484,7 +3421,8 @@ test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le
 test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formules, bandeau d'essai, paiement simulé du mensuel, passage à l'annuel au prorata, factures TEST, résiliation en deux clics", async ({ page }) => {
   // La landing mène aux tarifs : trois étapes, l'argument (une possibilité), gratuit pour les négoces, la FAQ.
   await page.goto("/");
-  await page.getByRole("navigation", { name: "Menu" }).getByRole("link", { name: "Tarifs" }).click();
+  // Landing premium V3 (30 octobre 2026) : « Tarifs » dans le pied de page.
+  await page.getByRole("navigation", { name: "Informations et liens légaux" }).getByRole("link", { name: "Tarifs" }).click();
   await expect(page).toHaveURL(/\/tarifs$/);
   await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
   // Greg, 27 octobre 2026, 2e message, points 26 et 34 : la phrase des tarifs, aucun montant, plus d'essai.
