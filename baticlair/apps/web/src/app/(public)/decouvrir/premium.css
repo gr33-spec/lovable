@@ -349,3 +349,5 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mzp .collectif-cta{margin-top:28px}
 .mzp #pourquoi h2{font-size:clamp(30px,4vw,54px)}
 @media(max-width:900px){.mzp .collectif-cta{width:100%;margin-top:22px}.mzp #pourquoi h2{font-size:clamp(28px,7.6vw,38px)}}
+/* L'illustration maison (31 octobre 2026) : sans le filtre assombrissant de la photo, calée en bas pour garder les casques. */
+.mzp .hero-photo img[src$=".svg"]{filter:none;object-position:center bottom}
