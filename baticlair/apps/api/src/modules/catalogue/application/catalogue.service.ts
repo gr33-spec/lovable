@@ -5,7 +5,9 @@ import {
   LIBELLES_METIERS_CATALOGUE,
   METIERS_CATALOGUE,
   metiersCatalogueDuCompte,
+  clesDeRegroupement,
   rechercherArticles,
+  referenceStricte,
   TOUT_LE_CATALOGUE,
   type MetierCatalogue,
 } from "@baticlair/domain";
@@ -25,6 +27,12 @@ export interface ArticleVue {
   familleAchat: string;
 }
 
+/** Un article choisi pour l'achat groupé : sa clé de regroupement et le nom que lit le négoce. */
+export interface ArticleRegroupe extends ArticleVue {
+  cleRegroupement: string;
+  libelleRegroupement: string;
+}
+
 type Ligne = Awaited<ReturnType<PrismaService["catalogueArticle"]["findMany"]>>[number];
 
 const estMetier = (m: string): m is MetierCatalogue => (METIERS_CATALOGUE as readonly string[]).includes(m);
@@ -37,6 +45,7 @@ const vue = (a: Ligne): ArticleVue => ({ cle: a.cle, metier: a.metier, famille: 
  */
 export class CatalogueService {
   private amorce = false;
+  private regroupement: Map<string, string> | null = null;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -83,11 +92,21 @@ export class CatalogueService {
     return { metiers, metier, resultats: null, arbre };
   }
 
-  /** Un article choisi (jamais masqué), pour l'achat groupé ; null s'il n'existe pas. */
-  async article(cle: string): Promise<ArticleVue | null> {
+  /** Un article choisi (jamais masqué), pour l'achat groupé, avec sa clé de regroupement ; null s'il n'existe pas. */
+  async article(cle: string): Promise<ArticleRegroupe | null> {
     await this.amorcer();
     const a = await this.prisma.catalogueArticle.findUnique({ where: { cle } });
-    return a && !a.masque ? vue(a) : null;
+    if (!a || a.masque) return null;
+    if (!this.regroupement) {
+      const tous = await this.prisma.catalogueArticle.findMany({ where: { masque: false }, select: { cle: true, designation: true } });
+      this.regroupement = clesDeRegroupement(tous, (d) => {
+        const r = referenceStricte(d);
+        return r.ok ? r.reference.cle : null;
+      });
+    }
+    const cleRegroupement = this.regroupement.get(a.cle) ?? `cat:${a.cle}`;
+    const r = referenceStricte(a.designation);
+    return { ...vue(a), cleRegroupement, libelleRegroupement: !cleRegroupement.startsWith("cat:") && r.ok ? r.reference.libelle : a.designation };
   }
 
   /* ------------------------------------------------------------------------------------------------- l'admin */
@@ -102,6 +121,7 @@ export class CatalogueService {
     await this.amorcer();
     const dernier = await this.prisma.catalogueArticle.aggregate({ _max: { ordre: true } });
     const designation = a.designation?.trim() || [a.produit, a.variante].filter(Boolean).join(" ");
+    this.regroupement = null;
     const cree = await this.prisma.catalogueArticle.create({
       data: { cle: `${a.metier}/ajout/${randomUUID()}`, metier: a.metier, famille: a.famille.trim(), produit: a.produit.trim(), variante: a.variante?.trim() || null, designation, unite: a.unite.trim(), synonymes: a.synonymes, ordre: (dernier._max.ordre ?? 0) + 1, ajoute: true },
     });
@@ -125,12 +145,12 @@ export class CatalogueService {
     if (!a) throw validationFailed("Unknown catalogue article", { reason: "article_inconnu", phrase: "Cet article n'est pas au catalogue." });
     const achat = await this.prisma.regroupementNegocie.findUnique({ where: { id: l.regroupementId }, select: { statut: true } });
     if (achat?.statut !== "en_collecte") throw validationFailed("Purchase closed", { reason: "achat_clos", phrase: "L'achat groupé est déjà parti aux négoces." });
-    const deja = await this.prisma.ligneAchatGroupe.findFirst({ where: { besoinId: l.besoinId, cle: `cat:${a.cle}`, unite: a.unite } });
+    const deja = await this.prisma.ligneAchatGroupe.findFirst({ where: { besoinId: l.besoinId, cle: a.cleRegroupement, unite: a.unite } });
     if (deja) {
       await this.prisma.$transaction([this.prisma.ligneAchatGroupe.update({ where: { id: deja.id }, data: { quantite: Number(deja.quantite) + Number(l.quantite) } }), this.prisma.ligneAchatGroupe.delete({ where: { id: l.id } })]);
       return { id: deja.id, cle: a.cle, designation: a.designation };
     }
-    await this.prisma.ligneAchatGroupe.update({ where: { id: l.id }, data: { cle: `cat:${a.cle}`, libelle: a.designation, unite: a.unite, libre: false } });
+    await this.prisma.ligneAchatGroupe.update({ where: { id: l.id }, data: { cle: a.cleRegroupement, libelle: a.libelleRegroupement, unite: a.unite, libre: false } });
     return { id: l.id, cle: a.cle, designation: a.designation };
   }
 
@@ -139,6 +159,7 @@ export class CatalogueService {
     await this.amorcer();
     const a = await this.prisma.catalogueArticle.findUnique({ where: { cle } });
     if (!a) throw notFound("Article");
+    this.regroupement = null;
     const maj = await this.prisma.catalogueArticle.update({ where: { cle }, data: m });
     return { ...vue(maj), masque: maj.masque };
   }

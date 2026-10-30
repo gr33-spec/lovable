@@ -215,7 +215,7 @@ export interface PortsAchatGroupe {
   /** L'adresse Mobiiz (sans étiquette) de l'entreprise : le Reply-To de la demande au négoce. */
   adresseMobiiz(companyId: string): Promise<string | null>;
   /** Point 3 du 30 octobre : un article du catalogue par sa clé (null s'il n'existe pas ou est masqué). */
-  articleCatalogue?(cle: string): Promise<{ cle: string; designation: string; unite: string; familleAchat: string } | null>;
+  articleCatalogue?(cle: string): Promise<{ cle: string; designation: string; unite: string; familleAchat: string; cleRegroupement: string; libelleRegroupement: string } | null>;
   /** « Entreprise Dupont via Mobiiz <adresse> » : l'expéditeur du mail au négoce (lot final, point 3). */
   expediteurMobiiz?(companyId: string): Promise<string | null>;
   mode(): Promise<string>;
@@ -361,7 +361,7 @@ export class AchatGroupeService {
         if (l.cle) {
           const a = this.ports.articleCatalogue ? await this.ports.articleCatalogue(l.cle) : null;
           if (!a) throw validationFailed("Unknown catalogue article", { reason: "article_inconnu", message: `« ${l.designation} » n'est plus au catalogue. Choisis-le à nouveau ou décris-le.` });
-          return { ...l, unite: a.unite, libre: false, ref: { cle: `cat:${a.cle}`, libelle: a.designation, famille: a.familleAchat as string | null } };
+          return { ...l, unite: a.unite, libre: false, ref: { cle: a.cleRegroupement, libelle: a.libelleRegroupement, famille: a.familleAchat as string | null } };
         }
         if (l.libre) return { ...l, libre: true, ref: { cle: `libre:${randomBytes(9).toString("base64url")}`, libelle: l.designation.trim(), famille: null as string | null } };
         const r = referenceStricte(l.designation);

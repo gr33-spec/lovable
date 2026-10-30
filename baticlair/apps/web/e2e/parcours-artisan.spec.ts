@@ -3660,9 +3660,10 @@ test("« Je la note moi-même » (28 octobre 2026, point 1) : en plein écran, l
   await expect(champ).toBeFocused();
   // Le catalogue se propose pendant la frappe, d'un tap.
   await champ.fill("liteau");
-  await ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: "Liteaux 27×38" }).click();
-  await expect(champ).toHaveValue("Liteaux 27×38, ");
-  await champ.fill("Liteaux 27×38, 200 m");
+  // Le catalogue complet (30 octobre, point 3) : « Liteau 27×38 · sapin traité classe 2 ».
+  await ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: "Liteau 27×38 · sapin traité classe 2" }).click();
+  await expect(champ).toHaveValue("Liteau 27×38 · sapin traité classe 2, ");
+  await champ.fill("Liteau 27×38 · sapin traité classe 2, 200 m");
   await champ.press("Enter");
   // Une ligne sans quantité reste en texte libre, « à vérifier » ; un tap la remet dans le champ.
   await champ.fill("Crochets inox");
@@ -3678,5 +3679,5 @@ test("« Je la note moi-même » (28 octobre 2026, point 1) : en plein écran, l
   await ecran.getByRole("button", { name: "Terminé" }).click();
   await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
   await expect(page.getByText(/Ardoise naturelle 32×22/).first()).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText(/Liteaux 27×38/).first()).toBeVisible();
+  await expect(page.getByText(/Liteau 27×38/).first()).toBeVisible();
 });

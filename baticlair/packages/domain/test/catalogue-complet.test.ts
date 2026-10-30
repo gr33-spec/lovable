@@ -67,3 +67,19 @@ describe("le catalogue complet", () => {
     }
   });
 });
+
+describe("la clé de regroupement d'un article du catalogue", () => {
+  it("l'ardoise du catalogue s'additionne avec la même ardoise lue dans un devis ; deux pannes de longueurs différentes jamais", async () => {
+    const { referenceStricte, clesDeRegroupement } = await import("../src/index.js");
+    const stricte = (d: string) => {
+      const r = referenceStricte(d);
+      return r.ok ? r.reference.cle : null;
+    };
+    const cles = clesDeRegroupement(TOUT_LE_CATALOGUE, stricte);
+    expect(cles.get("couverture/ardoises/ardoise-naturelle/32x22-espagne-1er-choix")).toBe(stricte("Ardoise naturelle 32×22 Espagne 1er choix"));
+    const p6 = cles.get("charpente/bois-de-charpente/panne/75x225-6-m-classe-2")!;
+    const p4 = cles.get("charpente/bois-de-charpente/panne/75x225-4-m-classe-2")!;
+    expect(p6).not.toBe(p4);
+    expect(p6.startsWith("cat:")).toBe(true);
+  });
+});

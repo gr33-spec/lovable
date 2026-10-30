@@ -221,3 +221,23 @@ export function arbreArticles<T extends Pick<ArticleCatalogue, "famille" | "prod
   }
   return racine;
 }
+
+/**
+ * La clé de regroupement d'un article du catalogue. Quand la référence stricte le reconnaît ET que sa clé ne désigne
+ * QUE lui dans le catalogue, il prend cette clé : il s'additionne aussi avec la même ligne lue dans un devis (« Ardoise
+ * naturelle 32×22 Espagne 1er choix »). Sinon (une panne de 6 m et une de 4 m ont la même section, donc la même clé
+ * stricte), il garde la sienne : jamais deux articles différents additionnés.
+ */
+export function clesDeRegroupement(articles: readonly Pick<ArticleCatalogue, "cle" | "designation">[], cleStricte: (designation: string) => string | null): Map<string, string> {
+  const parStricte = new Map<string, string[]>();
+  for (const a of articles) {
+    const k = cleStricte(a.designation);
+    if (k) parStricte.set(k, [...(parStricte.get(k) ?? []), a.cle]);
+  }
+  const resultat = new Map<string, string>();
+  for (const a of articles) {
+    const k = cleStricte(a.designation);
+    resultat.set(a.cle, k && parStricte.get(k)!.length === 1 ? k : `cat:${a.cle}`);
+  }
+  return resultat;
+}
