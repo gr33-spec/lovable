@@ -4,7 +4,7 @@ import type { StripeClient } from "../application/stripe.port.js";
 
 /**
  * STRIPE, PRÊT MAIS ÉTEINT (Greg, 24 octobre 2026 : « Stripe branché à la fin sans rien refaire ») : les appels de
- * l'API REST (Checkout en abonnement, mensuel ou annuel ; portail client ; passage à l'annuel au prorata ; résiliation en
+ * l'API REST (Checkout en abonnement, Essentiel ou Pro ; portail client ; passage à Pro au prorata ; résiliation en
  * fin de période) et la vérification de la signature
  * des webhooks, sans dépendance (aucune nouvelle bibliothèque sans l'accord du fondateur). Allumé par `PAIEMENT=stripe`
  * et les variables de `docs/groupe/STRIPE.md`.
@@ -22,7 +22,7 @@ function formulaire(params: Record<string, string | number | boolean | null | un
 
 export class HttpStripeClient implements StripeClient {
   constructor(
-    private readonly cfg: { secretKey: string; prix: { mensuel: string; annuel: string }; taxRateId: string | null },
+    private readonly cfg: { secretKey: string; prix: { essentiel: string; pro: string }; taxRateId: string | null },
     private readonly fetcher: Fetch = fetch as unknown as Fetch,
   ) {}
 
@@ -40,7 +40,7 @@ export class HttpStripeClient implements StripeClient {
 
   formuleDuPrix(priceId: string | null): Formule | null {
     if (!priceId) return null;
-    return priceId === this.cfg.prix.annuel ? "annuel" : priceId === this.cfg.prix.mensuel ? "mensuel" : null;
+    return priceId === this.cfg.prix.pro ? "pro" : priceId === this.cfg.prix.essentiel ? "essentiel" : null;
   }
 
   async checkout(c: { companyId: string; customerId: string | null; email: string | null; formule: Formule; succes: string; annulation: string }) {
@@ -73,17 +73,18 @@ export class HttpStripeClient implements StripeClient {
     return { url: s.url };
   }
 
-  async basculerAnnuel(subscriptionId: string) {
+  async passerPro(subscriptionId: string) {
     const abo = await this.appel<{ items?: { data?: { id: string }[] } }>(`subscriptions/${encodeURIComponent(subscriptionId)}`, {}, "GET");
     const item = abo.items?.data?.[0]?.id;
     if (!item) throw new Error("Stripe : abonnement sans ligne de prix");
-    // Du mois à l'année : Stripe recommence la période le jour même, déduit ce qui reste du mois et facture tout de suite.
+    // D'Essentiel à Pro : Stripe recommence la période le jour même, déduit ce qui reste du mois et facture tout de suite.
     await this.appel(`subscriptions/${encodeURIComponent(subscriptionId)}`, {
       "items[0][id]": item,
-      "items[0][price]": this.cfg.prix.annuel,
+      "items[0][price]": this.cfg.prix.pro,
       proration_behavior: "always_invoice",
+      billing_cycle_anchor: "now",
       payment_behavior: "error_if_incomplete",
-      "metadata[formule]": "annuel",
+      "metadata[formule]": "pro",
     });
   }
 

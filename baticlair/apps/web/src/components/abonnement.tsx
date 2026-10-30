@@ -19,7 +19,7 @@ export function useAbonnement() {
 }
 
 /** « Je continue » : la page de paiement (simulée, ou Stripe Checkout) de la formule choisie. */
-export async function continuerAbonnement(formule: Formule = "annuel"): Promise<void> {
+export async function continuerAbonnement(formule: Formule = "essentiel"): Promise<void> {
   const { url } = await api<{ url: string }>("/v1/abonnement/payer", { method: "POST", body: { formule } });
   window.location.assign(url);
 }
@@ -60,7 +60,7 @@ export function PastilleEssai() {
 export function ContenuPaywall({ abonnement, onFermer, phrase = null }: { abonnement: Abonnement; onFermer: () => void; phrase?: string | null }) {
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
-  const [formule, setFormule] = useState<Formule>("annuel");
+  const [formule, setFormule] = useState<Formule>("essentiel");
   async function continuer() {
     setPending(true);
     setErreur(null);

@@ -54,7 +54,9 @@ test("la landing premium V3 : conditions en vigueur, aucun mot interdit, aucun l
     assert.doesNotMatch(texte, /automatisée?s?/i);
     assert.doesNotMatch(texte, /https?:\/\/[a-z.-]*mobiiz\.fr/);
   }
-  assert.ok(landing.includes("Sur abonnement : le premier achat groupé est offert"));
+  // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits ; plus d'abonnement ni de « premier offert ».
+  assert.ok(landing.includes("Gratuit, pour tous les artisans"));
+  assert.doesNotMatch(landing, /premier achat groupé est offert|Sur abonnement/);
   assert.ok(landing.includes("TARIFS.question.r"));
   assert.ok(landing.includes("BLOC_LEGAL") && landing.includes("PAGES_LEGALES"));
   assert.match(client, /EXEMPLE FICTIF/);

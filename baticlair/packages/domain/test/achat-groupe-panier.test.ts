@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   CONDITIONS_OUVERTURE,
   PHRASE_ENGAGEMENT,
-  PHRASE_PREMIER_OFFERT,
   comparerPourArtisan,
   cumulerPanier,
   datesAchatGroupePanier,
@@ -114,10 +113,10 @@ describe("F et G. alertes, suggestion, accès", () => {
     expect(lignesASuggerer([{ famille: "couverture", quantite: 1800 }, { famille: "couverture", quantite: 20 }, { famille: null, quantite: 5000 }])).toHaveLength(1);
     expect(phraseSuggestion({ quantite: "1 800 pièces", libelle: "Ardoise 32×22" })).toBe("Tu as 1 800 pièces de ardoise 32×22, mets-les en achat groupé pour payer moins cher.");
   });
-  it("le premier achat groupé offert, ensuite l'abonnement ; 3 lectures au total", () => {
-    expect(droitAchatGroupe({ abonne: false, engagementsPasses: 0 })).toEqual({ ok: true, offert: true, phrase: PHRASE_PREMIER_OFFERT });
-    expect(droitAchatGroupe({ abonne: false, engagementsPasses: 1 }).ok).toBe(false);
-    expect(droitAchatGroupe({ abonne: true, engagementsPasses: 4 }).ok).toBe(true);
+  // RÈGLE CHANGÉE (Greg, 30 octobre 2026, décision 1) : les achats groupés sont gratuits, sans abonnement ni « premier offert ».
+  it("les achats groupés gratuits pour tous, à chaque fois ; 3 lectures au total", () => {
+    for (const a of [{ abonne: false, engagementsPasses: 0 }, { abonne: false, engagementsPasses: 7 }, { abonne: true, engagementsPasses: 4 }])
+      expect(droitAchatGroupe(a)).toEqual({ ok: true, offert: false, phrase: null });
     expect(lecturesRestantes(2)).toBe(1);
     expect(lecturesRestantes(5)).toBe(0);
   });

@@ -24,7 +24,7 @@ import { PilotageController, PilotagePublicController } from "./http/pilotage.co
           economies: () => cmd.economieMoyenne(),
           prixFormules: async () => {
             const r = await abo.reglages();
-            return { mensuel: r.prixHtCentimes, annuel: r.prixAnnuelHtCentimes };
+            return { essentiel: r.prixEssentielHtCentimes, pro: r.prixProHtCentimes, annuel: r.prixAnnuelHtCentimes };
           },
           paiementSimule: c.abonnement.paiement === "simule",
           stripeDeTest: c.abonnement.paiement === "stripe" && !!c.abonnement.stripe?.secretKey.startsWith("sk_test_"),

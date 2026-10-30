@@ -11,25 +11,24 @@ export const metadata: Metadata = {
 };
 
 /**
- * LA PAGE TARIFS (Greg, 27 octobre 2026, 2e message, point 34) : « Gratuit pour faire tes listes et les envoyer à tes
- * négoces. Abonné pour profiter des achats groupés. Ton premier achat groupé est offert. » Aucun montant ici (le prix est un
- * réglage, montré dans « Mon abonnement »). Plus d'essai (point 26).
+ * LA PAGE TARIFS (Greg, 27 octobre 2026, 2e message, point 34 ; RÈGLE CHANGÉE le 30 octobre 2026, réponses aux six
+ * décisions) : les achats groupés sont GRATUITS pour tous ; trois formules, Découverte (gratuit), Essentiel et Pro (les
+ * outils IA chaque mois). Les mots et les prix viennent de `TARIFS` et `OFFRES` (domaine), les mêmes que la landing et l'app.
  */
-// Greg, 29 octobre 2026 (« pas clair ») : les mots viennent de `TARIFS` (domaine), les mêmes que la landing et l'app.
 const PHRASE_TARIFS = TARIFS.enUneLigne;
-
-const FORMULES = [TARIFS.gratuit, TARIFS.abonne] as const;
+const FORMULES = [TARIFS.gratuit, TARIFS.essentiel, TARIFS.pro] as const;
 
 const ETAPES = [
   { titre: "Commence gratuitement", texte: "Inscription en deux minutes, sans carte bancaire." },
-  { titre: "Ton premier achat groupé est offert", texte: "Coche les lignes de ta liste, choisis tes négoces : tu vois ce que donne le groupe." },
-  { titre: "Abonne-toi si ça te sert", texte: "À l'année ou au mois, tu choisis. Sinon, tu restes en gratuit : tes listes et tes négoces restent à toi." },
+  { titre: "Rejoins les achats groupés", texte: "Ta liste rejoint celles des artisans de ton métier dans ton département. C'est gratuit, à chaque fois." },
+  { titre: "Abonne-toi si l'aide à la lecture te sert", texte: "Essentiel ou Pro, au mois, sans engagement. Sinon, tu restes en Découverte : tes listes, tes négoces et les achats groupés restent à toi." },
 ] as const;
 
 const FAQ = [
-  { q: "Qu'est-ce qui est gratuit ?", r: "Faire tes listes à la main, les envoyer à tes négoces et comparer leurs prix, sans limite de temps. On te prépare aussi tes 3 premières listes depuis un devis ou une photo, et tu vois les achats groupés de ton secteur." },
-  { q: "Qu'est-ce qui est payant ?", r: "Rejoindre les achats groupés (le premier est offert), et les listes préparées depuis tes devis et tes photos au-delà des 3 premières." },
-  { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin de la période payée, puis rien n'est plus prélevé." },
+  { q: "Qu'est-ce qui est gratuit ?", r: TARIFS.question.r },
+  { q: "Qu'est-ce qui est payant ?", r: "Seulement l'aide à la lecture au-delà des crédits offerts : les analyses de devis et les scans de liste chaque mois, avec Essentiel ou Pro. Rien n'est jamais facturé au-delà d'un quota : tu notes ta liste à la main, c'est gratuit." },
+  { q: "Un gros devis compte double ?", r: "Un devis de plus de 150 lignes compte pour 2 analyses. Tu le vois avant que l'analyse parte." },
+  { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin du mois payé, puis rien n'est plus prélevé." },
   { q: "Est-ce que j'ai des factures ?", r: "Oui, une à chaque paiement, émise par BATI INVEST, avec la TVA. Elles sont toutes dans « Mes factures »." },
   { q: "Un achat groupé, ça m'engage à quoi ?", r: "À commander tes quantités chez le moins cher entre la meilleure offre du groupe et ton négoce habituel. Deux sorties seulement : chantier annulé, ou aucune offre livrable." },
 ] as const;
@@ -45,7 +44,7 @@ export default function TarifsPage() {
         <p className="max-w-[34ch] text-[22px] leading-snug font-bold text-accent sm:text-[28px]">{PHRASE_TARIFS}</p>
       </section>
 
-      <section aria-label="Gratuit ou abonné" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <section aria-label="Les formules" className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {FORMULES.map((f) => (
           <div key={f.titre} className="flex flex-col gap-3 rounded-2xl bg-night-2 p-5 ring-1 ring-white/10 sm:p-7">
             <h2 className="text-[24px] font-extrabold">
@@ -80,7 +79,7 @@ export default function TarifsPage() {
         <h2 id="negoces" className={h2}>
           Gratuit pour les négoces
         </h2>
-        <p className="text-[17px] leading-relaxed">Une liste propre, prête à chiffrer ligne par ligne, et des volumes engagés sur lesquels vous positionner. Sans abonnement ni commission.</p>
+        <p className="text-[17px] leading-relaxed">Une liste propre, prête à chiffrer ligne par ligne, et des volumes engagés sur lesquels vous positionner. Sans abonnement.</p>
       </section>
 
       <section aria-labelledby="faq" className="flex flex-col gap-6">
@@ -99,7 +98,7 @@ export default function TarifsPage() {
 
       <section className="flex flex-col items-start gap-4">
         <ButtonLink href="/inscription" variant="accent" className="min-h-13 px-8 text-[16px]">
-          Créer mon compte gratuit
+          Rejoindre le collectif
         </ButtonLink>
         <Link href="/" className="min-h-11 content-center text-[15px] font-semibold text-white/70 underline">
           Retour à l&apos;accueil

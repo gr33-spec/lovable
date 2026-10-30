@@ -263,7 +263,7 @@ function Chiffres({ t }: { t: Tableau }) {
       <Bloc titre="Qui paie" aide="Les abonnés, et l'argent que ça rapporte.">
         <Liste>
           <Ligne titre="Paient chaque mois" valeur={String(t.abonnes.mensuels)} />
-          <Ligne titre={`Paient à l'année (${pct(t.abonnes.partAnnuels)} des abonnés)`} valeur={String(t.abonnes.annuels)} />
+          {t.abonnes.annuels > 0 ? <Ligne titre={`Paient à l'année, anciens abonnements (${pct(t.abonnes.partAnnuels)} des abonnés)`} valeur={String(t.abonnes.annuels)} /> : null}
           <Ligne titre="Argent qui rentre chaque mois" valeur={euros(t.abonnes.revenuMensuelRecurrent)} />
           <Ligne titre="Argent reçu ce mois" valeur={euros(t.abonnes.encaisseCeMois)} />
         </Liste>

@@ -93,7 +93,7 @@ export function CtaFixePremium({ haut, bas }: { haut: string; bas: string }) {
       <Link className="btn btn-yellow" href="/inscription" tabIndex={visible ? 0 : -1}>
         Rejoindre le collectif <Fleche />
       </Link>
-      <div className="under">Inscription gratuite · Sans carte bancaire</div>
+      <div className="under">Gratuit · Sans carte bancaire</div>
     </div>
   );
 }

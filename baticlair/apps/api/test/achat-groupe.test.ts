@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { PHRASE_ABONNEMENT_ACHAT, PHRASE_LECTURES_EPUISEES, PHRASE_NEGOCE_OBLIGATOIRE, PHRASE_PREMIER_OFFERT } from "@baticlair/domain";
+import { PHRASE_LECTURES_EPUISEES, PHRASE_NEGOCE_OBLIGATOIRE } from "@baticlair/domain";
 import { AnalysisMeter } from "../src/modules/ai-usage/index.js";
 import { SIRET_TEST_GROSSISTE } from "../src/modules/groupe/index.js";
 import { doubleAuthentification } from "./support/admin.js";
@@ -84,7 +84,8 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect((await a.agent.post("/v1/achats-groupes").send(engagement({ dateBesoin: jour(5) })).expect(400)).body.error.details.reason).toBe("date_trop_proche");
 
     const premier = (await a.agent.post("/v1/achats-groupes").send(engagement()).expect(201)).body;
-    expect(premier).toMatchObject({ ajoute: false, rejoint: false, offert: true, phrase: PHRASE_PREMIER_OFFERT });
+    // RÈGLE CHANGÉE (Greg, 30 octobre 2026, décision 1) : les achats groupés sont gratuits, plus de « premier offert ».
+    expect(premier).toMatchObject({ ajoute: false, rejoint: false, offert: false, phrase: null });
     expect(premier.titre).toMatch(/^Couverture · secteur Lannion · livraison avant le \d+ \S+$/);
     expect(premier.prevenir.texte).toMatch(/^Ton négoce va recevoir une grosse demande : 2 références de couverture, le \d+ \S+, de la part de Mobiiz\./);
     // Ajouter encore : la même référence s'additionne.
@@ -92,16 +93,13 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(encore).toMatchObject({ besoinId: premier.besoinId, ajoute: true, offert: false });
     const mes = (await a.agent.get("/v1/achats-groupes").expect(200)).body.achats;
     expect(mes).toHaveLength(1);
-    expect(mes[0]).toMatchObject({ titreAchat: premier.titre, metier: "Couverture", etat: "seul", offert: true });
+    expect(mes[0]).toMatchObject({ titreAchat: premier.titre, metier: "Couverture", etat: "seul", offert: false });
     expect(mes[0].lignes.map((l: { libelle: string; quantite: number }) => [l.libelle, l.quantite])).toEqual([
       ["Ardoise 32×22 Espagne 1er choix", 2000],
       ["Liteaux 27×38", 400],
     ]);
 
-    // Une autre période : un autre achat ; le premier était offert, il faut l'abonnement.
-    const refus = (await a.agent.post("/v1/achats-groupes").send(engagement({ dateBesoin: jour(80) })).expect(402)).body.error.details;
-    expect(refus).toMatchObject({ refus: "achat_groupe", phrase: PHRASE_ABONNEMENT_ACHAT });
-    await abonner(a.companyId);
+    // Une autre période : un autre achat, gratuit lui aussi, sans abonnement.
     expect((await a.agent.post("/v1/achats-groupes").send(engagement({ dateBesoin: jour(80) })).expect(201)).body).toMatchObject({ offert: false, phrase: null });
 
     // Sans SIRET vérifié : refusé ; un SIRET de commerce de gros : refusé à la vérification.
@@ -272,7 +270,7 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(adm.desistements.map((d: { motif: string }) => d.motif).sort()).toEqual(["Aucune offre livrable dans les délais", "Mon client a annulé le chantier", "Retiré avant la clôture"]);
   });
 
-  it("depuis une liste : la question de rattachement, la suggestion des grosses quantités, l'engagement ; 3 lectures IA en tout", async () => {
+  it("depuis une liste : la question de rattachement, la suggestion des grosses quantités, l'engagement ; 1 analyse offerte, puis 3 par mois en Essentiel", async () => {
     const c = await couvreurAvecListe(ctx, "artisan3@toitures.fr", "Toitures 3", "3 rue des Ajoncs, 22300 Lannion", [
       { libelle: A3222, quantite: "1200", unite: "pièces" },
       { libelle: "Crochet inox 100 mm", quantite: "1300", unite: "pièces" },
@@ -281,25 +279,24 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(d.lignes.map((x: { question: string | null }) => x.question)).toEqual(["C'est bien de l'ardoise 32×22 Espagne 1er choix ?", null]);
     expect(d.suggestion.phrase).toBe("Tu as 1 200 pièces de ardoise 32×22 Espagne 1er choix, mets-les en achat groupé pour payer moins cher.");
     expect(d.suggestion.keys).toEqual([d.lignes[0].key]);
-    expect(d.droit).toEqual({ ok: true, offert: true, phrase: PHRASE_PREMIER_OFFERT });
+    expect(d.droit).toEqual({ ok: true, offert: false, phrase: null });
     expect(d.engagement.phrase).toBe("Je commande ces quantités, chez le moins cher entre la meilleure offre du groupe et mon négoce habituel.");
     const corps = { confirmees: d.lignes.map((x: { key: string }) => x.key), dateBesoin: jour(30), negoces: [{ nom: "Négoce X", email: "x@negoce.fr" }] };
     await c.agent.post(`/v1/projects/${c.projectId}/achat-groupe`).send({ ...corps, engagement: false }).expect(400);
     const r = (await c.agent.post(`/v1/projects/${c.projectId}/achat-groupe`).send({ ...corps, engagement: true }).expect(201)).body;
     expect(r.lancees).toHaveLength(1);
     expect(r.perso).toHaveLength(1);
-    expect(r.offert).toBe(true);
+    expect(r.offert).toBe(false);
 
-    // Point 24 : trois lectures IA offertes en tout (pas par mois), puis la phrase de `TARIFS.paywallListes`. La jauge
-    // (30 octobre 2026) dit ce qui reste avant le dépôt, avec le même décompte.
-    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body).toEqual({ jauge: { limite: 3, utilisees: 0, restantes: 3, parMois: false } });
-    for (const mois of ["2026-07", "2026-08", "2026-09"])
-      await ctx.prisma.aiAnalysis.create({ data: { companyId: c.companyId, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote", status: "completed", billable: true, billingMonth: mois } });
+    // Point 24, RÈGLE CHANGÉE le 30 octobre 2026 (décision 2) : Découverte a 1 analyse de devis offerte en tout, puis la
+    // phrase de `TARIFS.paywallListes` ; abonné Essentiel, 3 par mois. La jauge le dit avant le dépôt.
+    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body.quotas).toMatchObject({ formule: "decouverte", analyses: { limite: 1, utilisees: 0, restantes: 1 } });
+    await ctx.prisma.aiAnalysis.create({ data: { companyId: c.companyId, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote", status: "completed", billable: true, billingMonth: "2026-07" } });
     const meter = ctx.app.get(AnalysisMeter);
     await expect(meter.begin({ companyId: c.companyId, userId: null, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote" })).rejects.toMatchObject({ details: { refus: "lectures", phrase: PHRASE_LECTURES_EPUISEES } });
-    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body).toEqual({ jauge: { limite: 3, utilisees: 3, restantes: 0, parMois: false } });
+    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body.quotas).toMatchObject({ formule: "decouverte", analyses: { limite: 1, utilisees: 1, restantes: 0 } });
     await abonner(c.companyId);
-    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body).toEqual({ jauge: null });
+    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body.quotas).toMatchObject({ formule: "essentiel", analyses: { limite: 3, restantes: 3 }, parMois: true });
     expect((await meter.begin({ companyId: c.companyId, userId: null, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote" })).status).toBe("go");
   });
 

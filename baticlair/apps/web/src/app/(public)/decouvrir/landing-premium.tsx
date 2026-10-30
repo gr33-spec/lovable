@@ -13,9 +13,9 @@ import "./premium.css";
  * des 20 artisans, le fonctionnement en quatre étapes (seulement ce qui marche aujourd'hui), l'histoire de Greg, l'offre,
  * les questions, le dernier appel. Styles de la maquette bornés à `.mzp` (`premium.css`).
  *
- * Vérifié contre les conditions en vigueur (`TARIFS`, réponses validées par Greg le 28 octobre) : l'inscription est
- * gratuite, les achats groupés sont sur abonnement avec le premier offert ; d'où « Rejoindre le collectif » et
- * « Inscription gratuite » dessous, jamais « rejoindre gratuitement » (docs/DECISIONS.md, 30/10). Le pied garde l'éditeur,
+ * Vérifié contre les conditions en vigueur (`TARIFS`, réponses validées par Greg le 28 octobre) : depuis le 30 octobre
+ * (décisions de Greg), les achats groupés sont GRATUITS ; seuls les outils IA ont des quotas. Le bouton reste « Rejoindre
+ * le collectif », avec « Gratuit · Sans carte bancaire » dessous (décision 4). Le pied garde l'éditeur,
  * l'hébergeur, les quatre documents, le contact et l'accès négoce. L'ancienne page (`Landing`) reste pour /couvreurs et
  * /peintres.
  */
@@ -29,7 +29,7 @@ function compterLaVisite() {
 const [OBLIGE, NEGOCES] = TROIS_QUESTIONS;
 
 /** Le bouton principal : un seul libellé, partout (en-tête mis à part, qui dit « S'inscrire »). */
-export const CTA_COLLECTIF = { bouton: "Rejoindre le collectif", sous: "Inscription gratuite · Sans carte bancaire" } as const;
+export const CTA_COLLECTIF = { bouton: "Rejoindre le collectif", sous: "Gratuit · Sans carte bancaire" } as const;
 
 function Icone({ id, className }: { id: string; className?: string }) {
   return (
@@ -311,7 +311,7 @@ export function LandingPremium() {
                     <Icone id="i-check" /> Livraison sur ton chantier
                   </li>
                   <li>
-                    <Icone id="i-check" /> Sur abonnement : le premier achat groupé est offert
+                    <Icone id="i-check" /> Gratuit, pour tous les artisans
                   </li>
                 </ul>
                 <Link className="cta-text" href="/tarifs">
@@ -330,7 +330,7 @@ export function LandingPremium() {
                     <Icone id="i-check" /> Tous tes négoces habituels en une demande
                   </li>
                   <li>
-                    <Icone id="i-check" /> 3 premières listes préparées depuis un devis ou une photo
+                    <Icone id="i-check" /> 1 analyse de devis et 3 scans de liste offerts
                   </li>
                 </ul>
                 <Link className="cta-text" href="/inscription">

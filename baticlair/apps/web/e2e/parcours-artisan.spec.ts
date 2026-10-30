@@ -2616,13 +2616,15 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Les conditions en vigueur (vérifiées avant publication) : gratuit pour les listes et les négoces, achats groupés sur
   // abonnement avec le premier offert, les réponses validées par Greg.
   await expect(page.getByText(/^Inscription gratuite · Sans carte bancaire/).first()).toBeVisible();
-  await expect(page.getByText("Sur abonnement : le premier achat groupé est offert")).toBeVisible();
-  await expect(page.getByText("3 premières listes préparées depuis un devis ou une photo")).toBeVisible();
+  // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits, pour tous.
+  await expect(page.getByText("Gratuit, pour tous les artisans")).toBeVisible();
+  await expect(page.getByText(/premier achat groupé est offert/)).toHaveCount(0);
+  await expect(page.getByText("1 analyse de devis et 3 scans de liste offerts")).toBeVisible();
   const faq = page.getByRole("region", { name: "Tu te poses des questions ?" });
   await expect(faq.locator("summary")).toHaveText(["Je peux garder mes négoces habituels ?", "Est-ce que Mobiiz est gratuit ?", "Est-ce que je dois obligatoirement commander ?", "Est-ce que je vais forcément payer moins cher ?", "Avec qui je suis regroupé ?"]);
   for (const s of await faq.locator("summary").all()) await s.click();
   await expect(faq.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
-  await expect(faq.getByText("Oui pour tes listes et tes négoces, sans limite de temps. Les achats groupés sont sur abonnement, et le premier est offert.", { exact: false })).toBeVisible();
+  await expect(faq.getByText("Oui : tes listes, l'envoi à tes négoces et les achats groupés sont gratuits, sans limite de temps.", { exact: false })).toBeVisible();
   await expect(faq.getByText("Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel.", { exact: false })).toBeVisible();
   await expect(faq.getByText(/^Non, aucun prix ni niveau d’économie n’est garanti\./)).toBeVisible();
   // Jamais les mots « IA », « automatique », « précis », « exact » ; aucun montant d'abonnement (l'exemple fictif 6 € → 3 € HT/L est permis, marqué « Exemple fictif »).
@@ -3429,26 +3431,25 @@ test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
-test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formules, bandeau d'essai, paiement simulé du mensuel, passage à l'annuel au prorata, factures TEST, résiliation en deux clics", async ({ page }) => {
-  // La landing mène aux tarifs : trois étapes, l'argument (une possibilité), gratuit pour les négoces, la FAQ.
+test("Abonnement (RÈGLE CHANGÉE le 30 octobre 2026) : « Tarifs » depuis la landing, Découverte, Essentiel et Pro, paiement simulé d'Essentiel, passage à Pro au prorata, factures TEST, résiliation en deux clics", async ({ page }) => {
+  // La landing mène aux tarifs : la phrase, les trois formules et leurs prix, trois étapes, gratuit pour les négoces, la FAQ.
   await page.goto("/");
   // Landing premium V3 (30 octobre 2026) : « Tarifs » dans le pied de page.
   await page.getByRole("navigation", { name: "Informations et liens légaux" }).getByRole("link", { name: "Tarifs" }).click();
   await expect(page).toHaveURL(/\/tarifs$/);
   await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
-  // Greg, 27 octobre 2026, 2e message, points 26 et 34 : la phrase des tarifs, aucun montant, plus d'essai.
-  // Greg, 29 octobre 2026 : la même phrase que la landing, ce qui est gratuit et ce qui est payant.
-  await expect(page.getByText("Gratuit pour tes listes et tes négoces. Les achats groupés sont sur abonnement : le premier est offert.", { exact: true })).toBeVisible();
-  for (const etape of ["Commence gratuitement", "Ton premier achat groupé est offert", "Abonne-toi si ça te sert"]) {
+  // Greg, 30 octobre 2026 (décisions 1 et 2) : les achats groupés gratuits ; seuls les outils IA sont sur abonnement.
+  await expect(page.getByText("Gratuit : tes listes, tes négoces et les achats groupés. Les abonnements ajoutent des analyses de devis et des scans de liste chaque mois.", { exact: true })).toBeVisible();
+  for (const etape of ["Commence gratuitement", "Rejoins les achats groupés", "Abonne-toi si l'aide à la lecture te sert"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
-  const ga = page.getByRole("region", { name: "Gratuit ou abonné" });
-  await expect(ga.getByText("· Envoyées à tes négoces, leurs prix comparés")).toBeVisible();
-  await expect(ga.getByText("· 3 listes préparées pour toi depuis un devis ou une photo")).toBeVisible();
-  await expect(ga.getByText("· Rejoindre les achats groupés de ton métier")).toBeVisible();
-  await expect(page.getByText("Qu'est-ce qui est payant ?")).toBeVisible();
-  await expect(page.getByText(/\d+ € HT/)).toHaveCount(0);
-  await expect(page.getByText(/essai/i)).toHaveCount(0);
+  const formules = page.getByRole("region", { name: "Les formules" });
+  await expect(formules.getByRole("heading")).toHaveText([/^Découverte/, /^Essentiel 19,90 € HT par mois$/, /^Pro 39,90 € HT par mois$/]);
+  await expect(formules.getByText("· Les achats groupés de ton secteur")).toBeVisible();
+  await expect(formules.getByText("· 1 analyse de devis et 3 scans de liste offerts")).toBeVisible();
+  await expect(formules.getByText("· 8 analyses de devis par mois")).toBeVisible();
+  await expect(page.getByText("Un gros devis compte double ?")).toBeVisible();
+  await expect(page.getByText(/49 €|348 €|29 €/)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Gratuit pour les négoces" })).toBeVisible();
   await expect(page.getByText("Comment je résilie ?")).toBeVisible();
 
@@ -3460,43 +3461,41 @@ test("Abonnement (24 octobre 2026) : « Tarifs » depuis la landing, deux formul
   await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
   await expect(page.getByText("Essai gratuit", { exact: true })).toBeVisible();
 
-  // Les deux formules, l'annuel coché d'office ; l'artisan prend le mensuel.
-  await expect(page.getByRole("radio", { name: /Annuel/ })).toHaveAttribute("aria-checked", "true");
-  await page.getByRole("radio", { name: /Mensuel/ }).click();
-  await expect(page.getByRole("radio", { name: /Mensuel/ })).toHaveAttribute("aria-checked", "true");
-  // « M'abonner » : la page de paiement simulée, au prix du mensuel, puis « Payer ».
+  // Les deux formules, Essentiel coché d'office.
+  await expect(page.getByRole("radio", { name: /Essentiel/ })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("radio", { name: /Pro/ })).toHaveAttribute("aria-checked", "false");
+  // « M'abonner » : la page de paiement simulée, au prix d'Essentiel, puis « Payer ».
   await page.getByRole("button", { name: "M'abonner dès maintenant" }).click();
   await expect(page).toHaveURL(/\/paiement-simule\?session=sim_/);
   await expect(page.getByRole("heading", { name: "Paiement (simulation)" })).toBeVisible();
   await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
-  await expect(page.getByText("Abonnement mensuel : 49 € HT par mois (58,80 € TTC), sans engagement.")).toBeVisible();
+  await expect(page.getByText("Abonnement Essentiel : 19,90 € HT par mois (23,88 € TTC), sans engagement.")).toBeVisible();
   await page.getByRole("button", { name: "Payer", exact: true }).click();
   await expect(page).toHaveURL(/\/abonnement$/);
-  await expect(page.getByText("Abonné au mois", { exact: true })).toBeVisible();
-  await expect(page.getByText("49 € HT par mois (58,80 € TTC), sans engagement.")).toBeVisible();
+  await expect(page.getByText("Abonné Essentiel", { exact: true })).toBeVisible();
+  await expect(page.getByText("19,90 € HT par mois (23,88 € TTC), sans engagement.")).toBeVisible();
 
-  // Du mois à l'année, au prorata : ce qui reste du mois est déduit, l'année est payée tout de suite.
-  await expect(page.getByText("Passe à l'annuel : -40 %")).toBeVisible();
-  await expect(page.getByText(/^29 € HT par mois, payé à l'année\. Ce qui reste de ton mois \([\d,]+ €\) est déduit : tu paies [\d\s\u202f,]+ € HT/)).toBeVisible();
-  await page.getByRole("button", { name: "Passer à l'annuel" }).click();
+  // D'Essentiel à Pro, au prorata : ce qui reste du mois est déduit, le mois de Pro est payé tout de suite.
+  await expect(page.getByText("Passe à Pro : 8 analyses de devis par mois, 30 scans de liste par mois")).toBeVisible();
+  await expect(page.getByText(/^39,90 € HT par mois\. Ce qui reste de ton mois \([\d,]+ €\) est déduit : tu paies [\d\s\u202f,]+ € HT/)).toBeVisible();
+  await page.getByRole("button", { name: "Passer à Pro" }).click();
   await page.getByRole("button", { name: /^Oui, payer [\d\s\u202f,]+ € TTC$/ }).click();
-  await expect(page.getByText("Abonné à l'année", { exact: true })).toBeVisible();
-  await expect(page.getByText("348 € HT par an (417,60 € TTC), payé en une fois, renouvelé chaque année.")).toBeVisible();
-  await expect(page.getByText(/Je te préviens par e-mail 30 jours avant\./)).toBeVisible();
+  await expect(page.getByText("Abonné Pro", { exact: true })).toBeVisible();
+  await expect(page.getByText("39,90 € HT par mois (47,88 € TTC), sans engagement.")).toBeVisible();
 
-  // « Mes factures » : les deux factures TEST (le mois, puis le passage à l'annuel), téléchargeables.
+  // « Mes factures » : les deux factures TEST (le mois d'Essentiel, puis le passage à Pro), téléchargeables.
   await page.getByRole("tab", { name: "Mes factures" }).click();
   const factures = page.getByRole("list", { name: "Mes factures" });
   await expect(factures.getByText(/^TEST-\d{6}/)).toHaveCount(2);
-  await expect(factures.getByText(/ 58,80 € TTC/)).toBeVisible();
+  await expect(factures.getByText(/ 23,88 € TTC/)).toBeVisible();
   const download = page.waitForEvent("download");
   await factures.getByRole("link", { name: "Télécharger" }).first().click();
   expect((await download).suggestedFilename()).toMatch(/^TEST-\d{6}\.pdf$/);
 
-  // Résilier en deux clics : effet en fin de période.
+  // Résilier en deux clics : effet en fin de mois payé.
   await page.getByRole("tab", { name: "Mon abonnement" }).click();
   await page.getByRole("button", { name: "Résilier" }).click();
-  await expect(page.getByText(/Une année commencée n'est pas remboursée au prorata\./)).toBeVisible();
+  await expect(page.getByText(/puis rien ne sera plus prélevé\.$/)).toBeVisible();
   await page.getByRole("button", { name: "Oui, résilier" }).click();
   await expect(page.getByText(/^Résilié : ton accès reste jusqu'au/)).toBeVisible();
 });

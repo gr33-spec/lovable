@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { phraseQuota, type Quotas } from "../../../../packages/domain/src/groupe/offres";
 
 interface Jauge {
   limite: number;
@@ -27,9 +28,11 @@ export function phraseJauge(j: Jauge | null): string | null {
  * préparées offertes (point 8, « des jauges d'utilisation », aucun paiement surprise).
  */
 export function CoupDeMainIa() {
-  const lire = useCallback((signal: AbortSignal) => api<{ jauge: Jauge | null }>("/v1/ai-usage/jauge", { signal }), []);
+  const lire = useCallback((signal: AbortSignal) => api<{ jauge: Jauge | null; quotas?: Quotas | null }>("/v1/ai-usage/jauge", { signal }), []);
   const { data } = useResource(lire);
-  const jauge = phraseJauge(data?.jauge ?? null);
+  // Greg, 30 octobre 2026 (décisions 2 et 3) : la jauge de la formule, analyses de devis et scans de liste.
+  const quotas = data?.quotas ?? null;
+  const jauge = quotas ? null : phraseJauge(data?.jauge ?? null);
   return (
     <section aria-labelledby="coup-de-main-ia" className="rounded-2xl border border-line bg-surface p-4 text-[15px] leading-relaxed">
       <h2 id="coup-de-main-ia" className="text-[17px] font-extrabold">
@@ -39,7 +42,13 @@ export function CoupDeMainIa() {
         L&apos;IA peut t&apos;aider à extraire les matériaux de ton devis, mais le résultat dépend de la qualité et de la précision du document. Certaines informations peuvent être manquantes ou
         incorrectes. Pense à toujours vérifier et corriger ta liste avant de l&apos;utiliser.
       </p>
-      {jauge ? (
+      {quotas ? (
+        <ul role="status" aria-label="Ce qu'il te reste" className="mt-2 flex flex-col gap-0.5 font-semibold">
+          <li>{phraseQuota(quotas, "analyses")}</li>
+          <li>{phraseQuota(quotas, "scans")}</li>
+          <li className="font-normal text-muted">Un devis de plus de 150 lignes compte pour 2 analyses.</li>
+        </ul>
+      ) : jauge ? (
         <p role="status" className="mt-2 font-semibold">
           {jauge}
         </p>

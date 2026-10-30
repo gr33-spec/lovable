@@ -217,7 +217,8 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await groupe.getByRole("button", { name: "Continuer" }).click();
     await ajouterNegoce(page, negoceX);
     await groupe.getByRole("button", { name: "Continuer" }).click();
-    await expect(groupe.getByText("Ton premier achat groupé est offert.")).toBeVisible();
+    // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits ; plus de « premier offert ».
+    await expect(groupe.getByText("Ton premier achat groupé est offert.")).toHaveCount(0);
     await groupe.getByRole("checkbox", { name: /^Je commande ces quantités/ }).check();
     await capture(page, projet, "2b-tout-cocher-engagement");
     await groupe.getByRole("button", { name: /^Je m'engage et j'ajoute ces 2 lignes$/ }).click();
@@ -251,7 +252,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await engagement.getByRole("checkbox", { name: /^Je commande ces quantités, chez le moins cher entre la meilleure offre du groupe et mon négoce habituel\.$/ }).check();
     await capture(b.page, projet, "3-engagement-2e-couvreur");
     await b.page.getByRole("button", { name: "Je m'engage et j'ajoute ma liste" }).click();
-    await expect(b.page.getByText(/^Ta liste est dans l'achat groupé : Couverture · secteur .+ Ton premier achat groupé est offert\.$/)).toBeVisible();
+    await expect(b.page.getByText(/^Ta liste est dans l'achat groupé : Couverture · secteur .+\.$/)).toBeVisible();
     await b.page.getByRole("link", { name: "Voir mon achat groupé" }).click();
     await b.page.waitForURL(/\/achats-groupes\/[0-9a-f-]{36}$/);
     const besoinB = b.page.url().split("/").pop()!;

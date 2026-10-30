@@ -1,6 +1,7 @@
 // Crée (ou retrouve) chez Stripe les DEUX PRIX de l'abonnement Mobiiz (Greg, 24 octobre 2026) :
-//   - mensuel : 49 € HT, récurrent tous les mois (clé de recherche « mobiiz_mensuel ») ;
-//   - annuel : 348 € HT, récurrent tous les ans (clé de recherche « mobiiz_annuel »).
+//   - Essentiel : 19,90 € HT, récurrent tous les mois (clé de recherche « mobiiz_essentiel ») ;
+//   - Pro : 39,90 € HT, récurrent tous les mois (clé de recherche « mobiiz_pro »).
+// (Greg, 30 octobre 2026 ; avant : mensuel 49 € et annuel 348 €, prix laissés tels quels chez Stripe.)
 // Puis affiche les deux identifiants à mettre dans Vercel (STRIPE_PRICE_ID_MENSUEL, STRIPE_PRICE_ID_ANNUEL).
 //
 // Lancer : STRIPE_SECRET_KEY=sk_test_… node scripts/stripe-creer-prix.mjs
@@ -15,8 +16,8 @@ if (!cle.startsWith("sk_test_") && !(reel && cle.startsWith("sk_live_"))) {
 }
 
 const PRIX = [
-  { cle: "mobiiz_mensuel", centimes: 4900, intervalle: "month", variable: "STRIPE_PRICE_ID_MENSUEL", nom: "Mensuel, 49 € HT par mois" },
-  { cle: "mobiiz_annuel", centimes: 34800, intervalle: "year", variable: "STRIPE_PRICE_ID_ANNUEL", nom: "Annuel, 348 € HT par an" },
+  { cle: "mobiiz_essentiel", centimes: 1990, intervalle: "month", variable: "STRIPE_PRICE_ID_ESSENTIEL", nom: "Essentiel, 19,90 € HT par mois" },
+  { cle: "mobiiz_pro", centimes: 3990, intervalle: "month", variable: "STRIPE_PRICE_ID_PRO", nom: "Pro, 39,90 € HT par mois" },
 ];
 
 const formulaire = (p) =>

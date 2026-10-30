@@ -144,11 +144,15 @@ const envSchema = z
     PAIEMENT: z.enum(["simule", "stripe"]).default("simule"),
     STRIPE_SECRET_KEY: z.string().min(8).optional(),
     STRIPE_WEBHOOK_SECRET: z.string().min(8).optional(),
-    /** Le prix MENSUEL créé chez Stripe (« price_… »), 49 € HT, récurrent tous les mois. */
+    /** Le prix ESSENTIEL créé chez Stripe (« price_… »), 19,90 € HT, récurrent tous les mois (Greg, 30 octobre 2026). */
+    STRIPE_PRICE_ID_ESSENTIEL: z.string().min(4).optional(),
+    /** Le prix PRO créé chez Stripe (« price_… »), 39,90 € HT, récurrent tous les mois. */
+    STRIPE_PRICE_ID_PRO: z.string().min(4).optional(),
+    /** Ancien prix mensuel (49 €, avant le 30 octobre 2026) : plus lu. */
     STRIPE_PRICE_ID_MENSUEL: z.string().min(4).optional(),
-    /** Le prix ANNUEL créé chez Stripe (« price_… »), 348 € HT, récurrent tous les ans. */
+    /** Ancien prix annuel (348 €, avant le 30 octobre 2026) : plus lu. */
     STRIPE_PRICE_ID_ANNUEL: z.string().min(4).optional(),
-    /** Ancien nom du prix mensuel (une seule formule à 29 €) : lu seulement si `STRIPE_PRICE_ID_MENSUEL` manque. */
+    /** Ancien nom du prix mensuel (une seule formule à 29 €) : plus lu. */
     STRIPE_PRICE_ID: z.string().min(4).optional(),
     /** Le taux de TVA créé chez Stripe (« txr_… », 20 %, non inclus) appliqué à l'abonnement. */
     STRIPE_TAX_RATE_ID: z.string().min(4).optional(),
@@ -239,8 +243,8 @@ const envSchema = z
     DELAI_VALIDATION_ADMIN_HEURES: z.coerce.number().int().min(0).max(168).default(24),
     DELAI_COMMANDE_JOURS: z.coerce.number().int().min(1).max(60).default(5),
     EXCLUSION_MOIS: z.coerce.number().int().min(0).max(24).default(3),
-    /** Les lectures IA (devis ou photo de liste) offertes en tout, sans abonnement (point 24). */
-    LECTURES_IA_GRATUIT_TOTAL: z.coerce.number().int().min(0).max(1000).default(3),
+    /** Les analyses de devis offertes en tout à Découverte (point 24 ; 1 depuis le 30 octobre 2026, `OFFRES`). */
+    LECTURES_IA_GRATUIT_TOTAL: z.coerce.number().int().min(0).max(1000).default(1),
     /** Le seuil de la suggestion « mets-les en achat groupé » par famille (« couverture=300,charpente=100 »). */
     SEUIL_SUGGESTION: z.string().optional(),
     /** Point 4 bis : l'adresse des alertes du chasseur (défaut : le premier admin) et le délai de livraison avant la date de besoin. */
@@ -358,7 +362,7 @@ export interface AppConfig {
   abonnement: {
     actif: boolean;
     paiement: "simule" | "stripe";
-    stripe: { secretKey: string; webhookSecret: string; prix: { mensuel: string; annuel: string }; taxRateId: string | null } | null;
+    stripe: { secretKey: string; webhookSecret: string; prix: { essentiel: string; pro: string }; taxRateId: string | null } | null;
   };
   /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
   groupe: {
@@ -436,9 +440,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
   }
   const isDeployed = e.NODE_ENV === "production" || e.NODE_ENV === "staging";
   const problemes: string[] = [];
-  const prixMensuel = e.STRIPE_PRICE_ID_MENSUEL ?? e.STRIPE_PRICE_ID;
-  if (e.PAIEMENT === "stripe" && !(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && prixMensuel && e.STRIPE_PRICE_ID_ANNUEL)) {
-    problemes.push("PAIEMENT : « stripe » demande STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID_MENSUEL et STRIPE_PRICE_ID_ANNUEL");
+  if (e.PAIEMENT === "stripe" && !(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID_ESSENTIEL && e.STRIPE_PRICE_ID_PRO)) {
+    problemes.push("PAIEMENT : « stripe » demande STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID_ESSENTIEL et STRIPE_PRICE_ID_PRO");
   }
   // La prévisualisation ne touche jamais la base de production (Greg, 24 octobre 2026).
   if (e.VERCEL_ENV === "preview" && e.BASE_PRODUCTION_HOTE && e.DATABASE_URL.includes(e.BASE_PRODUCTION_HOTE)) {
@@ -492,8 +495,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       actif: e.ABONNEMENT === "on",
       paiement: e.PAIEMENT,
       stripe:
-        e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && prixMensuel && e.STRIPE_PRICE_ID_ANNUEL
-          ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, prix: { mensuel: prixMensuel, annuel: e.STRIPE_PRICE_ID_ANNUEL }, taxRateId: e.STRIPE_TAX_RATE_ID ?? null }
+        e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID_ESSENTIEL && e.STRIPE_PRICE_ID_PRO
+          ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, prix: { essentiel: e.STRIPE_PRICE_ID_ESSENTIEL, pro: e.STRIPE_PRICE_ID_PRO }, taxRateId: e.STRIPE_TAX_RATE_ID ?? null }
           : null,
     },
     groupe: {

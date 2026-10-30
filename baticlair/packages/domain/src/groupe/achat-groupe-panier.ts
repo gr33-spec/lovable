@@ -205,16 +205,20 @@ export function phraseSuggestion(l: { quantite: string; libelle: string }): stri
 
 /* ---------------------------------------------------------------------- l'accès gratuit / payant (G) */
 
+/** Gardée pour les anciens appels ; plus dite à l'écran depuis que les achats groupés sont gratuits (30 octobre 2026). */
 export const PHRASE_PREMIER_OFFERT = "Ton premier achat groupé est offert.";
+/** Gardée pour les anciens appels : plus jamais rendue (achats groupés gratuits). */
 export const PHRASE_ABONNEMENT_ACHAT = "Pour rejoindre d'autres achats groupés, abonne-toi.";
 // Greg, 29 octobre 2026 (« pas clair ») : la phrase dit ce qui reste gratuit (`TARIFS`, tarifs.ts).
 export const PHRASE_LECTURES_EPUISEES = TARIFS.paywallListes;
 
-/** S'engager dans un achat groupé : abonné, ou le tout premier (offert). */
-export function droitAchatGroupe(a: { abonne: boolean; engagementsPasses: number }): { ok: boolean; offert: boolean; phrase: string | null } {
-  if (a.abonne) return { ok: true, offert: false, phrase: null };
-  if (a.engagementsPasses === 0) return { ok: true, offert: true, phrase: PHRASE_PREMIER_OFFERT };
-  return { ok: false, offert: false, phrase: PHRASE_ABONNEMENT_ACHAT };
+/**
+ * S'engager dans un achat groupé : TOUJOURS PERMIS (Greg, 30 octobre 2026, décision 1 : « achats groupés gratuits ») ; plus
+ * de « premier offert » ni d'abonnement demandé. L'engagement lui-même (commander ses quantités chez le moins cher) ne change
+ * pas. Les paramètres restent, pour les appels existants.
+ */
+export function droitAchatGroupe(_a: { abonne: boolean; engagementsPasses: number }): { ok: boolean; offert: boolean; phrase: string | null } {
+  return { ok: true, offert: false, phrase: null };
 }
 
 /** Les lectures IA (photo ou devis) offertes : un total, pas par mois. */

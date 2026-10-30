@@ -470,6 +470,8 @@ model AiAnalysis {
   status       AiAnalysisStatus
   /// Décomptée dans le palier (vrai seulement si réussie).
   billable     Boolean          @default(false)
+  /// Combien d'analyses il compte (Greg, 30 octobre 2026, décision 3) : 1, ou 2 pour un devis de plus de 150 lignes.
+  poids        Int              @default(1)
   /// Mois civil de décompte à l'heure de Paris (« 2026-09 »), fixé à la première réussite.
   billingMonth String?
   costMicroUsd BigInt           @default(0)
@@ -1603,7 +1605,7 @@ model PreuveAcceptation {
   @@map("preuve_acceptation")
 }
 
-/// L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026) : 49 € HT par mois sans engagement, ou 348 € HT par an payé en une fois ; résiliable en fin de période payée.
+/// L'ABONNEMENT ARTISAN (Greg, 30 octobre 2026) : Essentiel 19,90 € HT ou Pro 39,90 € HT par mois, sans engagement ; résiliable en fin de période payée. (Avant : 49 € par mois ou 348 € par an.)
 /// Une ligne par entreprise, tenue par les événements du paiement : simulé ou Stripe, les mêmes (actif, renouvelé,
 /// échec, résilié). Sans ligne : l'essai (calculé par `etatAbonnement`).
 model Abonnement {
@@ -1612,7 +1614,7 @@ model Abonnement {
   statut                String    @default("aucun")
   /// simule | stripe
   fournisseur           String
-  /// mensuel | annuel (Greg, 24 octobre 2026 : 49 € HT par mois ou 348 € HT par an)
+  /// essentiel | pro (Greg, 30 octobre 2026 : 19,90 € et 39,90 € HT par mois) ; « mensuel » et « annuel » (avant) comptent comme Essentiel
   formule               String    @default("mensuel")
   periodeDebut          DateTime?
   periodeFin            DateTime?

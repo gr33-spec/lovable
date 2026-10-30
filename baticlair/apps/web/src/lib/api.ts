@@ -707,17 +707,17 @@ export interface Abonnement {
   paiement: "simule" | "stripe";
   modeTest: string | null;
   acces: "essai" | "abonne" | "grace" | "bloque" | "gratuit";
-  /** La formule payée (mensuel tant qu'il n'y en a pas). */
+  /** La formule payée (Essentiel tant qu'il n'y en a pas). */
   formule: Formule;
   /** Le prix HT de la formule et sa période (« par mois », « par an »). */
   prixHt: string;
   prixTtc: string;
   periode: string;
-  /** Les deux formules, l'annuel d'abord. */
+  /** Les deux formules, Essentiel d'abord. */
   offres: OffreAbonnement[];
-  /** « 29 € » : le prix par mois de l'annuel. */
+  /** « 19,90 € » : le prix d'entrée, par mois. */
   prixDes: string;
-  /** Le passage du mensuel à l'annuel, au prorata ; null quand il n'est pas possible. */
+  /** Le passage d'Essentiel à Pro, au prorata ; null quand il n'est pas possible. */
   bascule: { credit: string; aPayerHt: string; aPayerTtc: string; jusquau: string } | null;
   essaiFinLe: string | null;
   joursEssai: number | null;
@@ -731,8 +731,8 @@ export interface Abonnement {
   paywall: { phrase: string; economie: string | null };
 }
 
-/** Les deux formules de l'abonnement (Greg, 24 octobre 2026) : mensuel 49 € HT, annuel 348 € HT. */
-export type Formule = "mensuel" | "annuel";
+/** Les deux formules de l'abonnement (Greg, 30 octobre 2026) : Essentiel 19,90 € HT et Pro 39,90 € HT par mois. */
+export type Formule = "essentiel" | "pro";
 export interface OffreAbonnement {
   formule: Formule;
   titre: string;
@@ -747,7 +747,8 @@ export interface FactureAbonnement {
   id: string;
   numero: string;
   test: boolean;
-  formule: Formule | "bascule";
+  /** Les factures d'avant le 30 octobre 2026 gardent « mensuel », « annuel », « bascule ». */
+  formule: Formule | "passage_pro" | "mensuel" | "annuel" | "bascule";
   emiseLe: string;
   periode: string;
   ttc: string;

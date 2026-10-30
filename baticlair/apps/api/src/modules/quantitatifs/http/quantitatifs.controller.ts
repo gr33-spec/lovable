@@ -51,7 +51,7 @@ const contexte = {
  * Entrée « lignes » (Rappidos, §38) : le devis déjà découpé, sans IA. Entrée « documentId » (l'appli) :
  * un devis déjà déposé sur le chantier. Ni l'une ni l'autre en multipart (PDF).
  */
-const entree = z.object({ ...contexte, lignes: z.array(ligne).min(1).max(500).optional(), documentId: z.string().uuid().optional() });
+const entree = z.object({ ...contexte, lignes: z.array(ligne).min(1).max(500).optional(), documentId: z.string().uuid().optional(), confirmeGros: z.boolean().optional() });
 const rendu = z.object({ ecran: z.enum(["0", "1"]).optional(), projetId: z.string().optional() });
 
 /**
@@ -126,7 +126,8 @@ export class QuantitatifsController {
     if ([file, body.lignes, body.documentId].filter(Boolean).length > 1) throw validationFailed("Send one quote: a PDF, lines or a documentId", [{ path: "lignes", message: "several quotes sent" }]);
     let result;
     if (body.documentId) {
-      result = await this.quantitatifs.fromDocument(tenant, body.documentId, ctx, r);
+      // Greg, 30 octobre 2026 (décision 3) : à l'écran, un devis de plus de 150 lignes attend le « Lancer » de l'artisan.
+      result = await this.quantitatifs.fromDocument(tenant, body.documentId, ctx, r, { confirmeGros: r.ecran ? body.confirmeGros === true : true });
     } else if (file) {
       result = await this.quantitatifs.fromPdf(
         tenant,

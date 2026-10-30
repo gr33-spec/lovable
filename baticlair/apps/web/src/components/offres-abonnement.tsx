@@ -2,19 +2,16 @@
 
 import { useEffect, useState } from "react";
 import type { Formule, OffreAbonnement } from "@/lib/api";
+import { offresAbonnement } from "../../../../packages/domain/src/abonnement/abonnement";
 
 /**
- * LES DEUX FORMULES (Greg, 24 octobre 2026) : l'annuel mis en avant, son badge « -40 % », « 29 € par mois, payé à
- * l'année » et « 240 € économisés par an » ; le mensuel juste à côté. Les textes viennent de l'API (les prix se règlent
- * dans l'admin) ; ceux-ci servent seulement en attendant la réponse.
+ * LES DEUX FORMULES (Greg, 30 octobre 2026) : Essentiel mis en avant, puis Pro ; les textes viennent de l'API (les prix se
+ * règlent dans l'admin) et du domaine (`offresAbonnement`) en attendant sa réponse.
  */
-export const OFFRES_PAR_DEFAUT: OffreAbonnement[] = [
-  { formule: "annuel", titre: "Annuel", badge: "-40 %", prix: "29 € HT par mois, payé à l'année", details: ["348 € HT par an, en une fois", "240 € économisés par an", "Renouvelé chaque année, rappel 30 jours avant"], enAvant: true },
-  { formule: "mensuel", titre: "Mensuel", badge: null, prix: "49 € HT par mois", details: ["Sans engagement", "Résiliable quand tu veux"], enAvant: false },
-];
+export const OFFRES_PAR_DEFAUT: OffreAbonnement[] = offresAbonnement();
 
 /**
- * Les deux cartes côte à côte (l'une sous l'autre sur un petit téléphone), l'annuel d'abord. Avec `onChoisir`, chaque
+ * Les deux cartes côte à côte (l'une sous l'autre sur un petit téléphone), Essentiel d'abord. Avec `onChoisir`, chaque
  * carte est un bouton et la carte choisie est cochée ; sans, elles s'affichent seulement (page /tarifs).
  */
 export function OffresAbonnement({ offres, choisie, onChoisir, sombre = false }: { offres: OffreAbonnement[]; choisie?: Formule; onChoisir?: (f: Formule) => void; sombre?: boolean }) {

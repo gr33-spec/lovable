@@ -22,10 +22,10 @@ export interface AnalysisRepository {
   findByDocument(companyId: string, documentId: string): Promise<AnalysisRecord | null>;
   /** Palier de l'entreprise (nul = pas de plafond). */
   monthlyLimit(companyId: string): Promise<number | null>;
-  /** `billingMonth` null : toutes les lectures décomptées. */
+  /** `billingMonth` null : toutes les lectures décomptées. Chacune compte pour son poids (2 au-delà de 150 lignes). */
   countBillable(companyId: string, billingMonth: string | null): Promise<number>;
-  create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind }): Promise<AnalysisRecord>;
-  restart(id: string, userId: string | null): Promise<AnalysisRecord>;
+  create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind; poids?: number }): Promise<AnalysisRecord>;
+  restart(id: string, userId: string | null, poids?: number): Promise<AnalysisRecord>;
   /** Réussite : décomptée dans le mois donné (sauf si elle l'était déjà). */
   /** `billable: false` : lecture faite dans un lot déjà décompté (devis fournisseurs lus ensemble). */
   complete(id: string, billingMonth: string, at: Date, billable?: boolean): Promise<AnalysisRecord>;

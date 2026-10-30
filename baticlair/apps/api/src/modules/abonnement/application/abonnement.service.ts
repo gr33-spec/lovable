@@ -22,8 +22,9 @@ import {
   phraseEconomiePremierCycle,
   phrasePaywall,
   prixDeFormule,
-  prixParMoisAnnuel,
-  prorataVersAnnuel,
+  formuleDe as formuleEnregistree,
+  prixDes,
+  prorataVersPro,
   rappelEssaiDu,
   rappelRenouvellementDu,
   reglagesAbonnementSchema,
@@ -55,15 +56,15 @@ const JOUR = 86_400_000;
 
 /** Un événement de paiement, le même pour le paiement simulé et pour Stripe (Greg, point 4). */
 export interface EvenementPaiement {
-  type: "actif" | "renouvele" | "bascule_annuel" | "echec" | "resiliation_demandee" | "resilie";
+  type: "actif" | "renouvele" | "passage_pro" | "echec" | "resiliation_demandee" | "resilie";
   source: "simule" | "stripe" | "tache" | "artisan" | "admin";
-  /** La formule payée par cet événement ; absente : celle de l'abonnement (mensuel par défaut). */
+  /** La formule payée par cet événement ; absente : celle de l'abonnement (Essentiel par défaut). */
   formule?: Formule;
   /** L'identifiant de l'événement (Stripe, session simulée) : un même événement n'est appliqué qu'une fois. */
   ref: string | null;
   periodeDebut?: Date;
   periodeFin?: Date;
-  /** Le paiement encaissé (actif, renouvelé, passage à l'annuel) : la facture à émettre. Absent : aucune facture. */
+  /** Le paiement encaissé (actif, renouvelé, passage à Pro) : la facture à émettre. Absent : aucune facture. */
   facture?: { ref: string; htCentimes?: number; tvaCentimes?: number; ttcCentimes?: number } | null;
   stripe?: { customerId?: string | null; subscriptionId?: string | null };
 }
@@ -74,9 +75,9 @@ const dateFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe
  * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026). Tient l'état du paiement (table `abonnement`) à partir des événements, simulés
  * ou Stripe ; dit l'état de l'essai et du paywall (`etatAbonnement` du domaine) ; émet les factures (BATI INVEST, numéros
  * continus, série TEST en simulé) ; envoie les e-mails (échec, résiliation, rappels de fin d'essai avec l'économie réelle).
- * DEUX FORMULES (Greg, 24 octobre 2026) : mensuel (49 € HT) ou annuel (348 € HT, payé en une fois) ; du mensuel à
- * l'annuel à tout moment, au prorata ; l'annuel se renouvelle seul, avec un rappel 30 jours avant ; une résiliation
- * prend effet à l'échéance, sans remboursement au prorata.
+ * DEUX FORMULES (RÈGLE CHANGÉE, Greg, 30 octobre 2026) : Essentiel (19,90 € HT par mois) et Pro (39,90 € HT par mois),
+ * sans engagement ; d'Essentiel à Pro à tout moment, au prorata ; une résiliation prend effet à la fin du mois payé. Les
+ * anciens « mensuel » et « annuel » comptent comme Essentiel (`formuleDe`) ; un ancien annuel garde son rappel.
  */
 export class AbonnementService {
   /** L'écart du premier cycle de l'entreprise (prix le plus cher reçu − prix choisi), branché par le regroupement. */
@@ -147,7 +148,7 @@ export class AbonnementService {
   private async paiement(companyId: string): Promise<EtatPaiement & { ligne: Awaited<ReturnType<PrismaService["abonnement"]["findUnique"]>> }> {
     const a = await this.prisma.abonnement.findUnique({ where: { companyId } });
     if (!a) return { ...PAIEMENT_AUCUN, ligne: null };
-    return { statut: a.statut as StatutPaiement, periodeFin: a.periodeFin, echecLe: a.echecLe, resiliationDemandeeLe: a.resiliationDemandeeLe, formule: estFormule(a.formule) ? a.formule : "mensuel", ligne: a };
+    return { statut: a.statut as StatutPaiement, periodeFin: a.periodeFin, echecLe: a.echecLe, resiliationDemandeeLe: a.resiliationDemandeeLe, formule: formuleEnregistree(a.formule), ligne: a };
   }
 
   async etat(companyId: string, maintenant = this.now()): Promise<EtatAbonnement> {
@@ -175,25 +176,25 @@ export class AbonnementService {
     const [etat, reglages, p] = await Promise.all([this.etat(tenant.companyId, maintenant), this.reglages(), this.paiement(tenant.companyId)]);
     const ecart = this.actif ? await this.ecart(tenant.companyId).catch(() => null) : null;
     const gratuit = this.actif && (etat.acces === "essai" || etat.acces === "bloque") && (await this.sansEssai());
-    const formule: Formule = p.formule ?? "mensuel";
+    const formule: Formule = p.formule ?? "essentiel";
     const abonne = p.statut === "actif" || p.statut === "echec" || (p.statut === "resilie" && !!p.periodeFin && p.periodeFin > maintenant);
     const prix = eurosDeCentimes(prixDeFormule(formule, reglages));
-    const bascule = this.actif && abonne && formule === "mensuel" && p.statut === "actif" && !p.resiliationDemandeeLe && p.ligne?.periodeDebut && p.ligne.periodeFin ? prorataVersAnnuel({ debut: p.ligne.periodeDebut, fin: p.ligne.periodeFin }, maintenant, reglages) : null;
+    const bascule = this.actif && abonne && formule === "essentiel" && p.statut === "actif" && !p.resiliationDemandeeLe && p.ligne?.periodeDebut && p.ligne.periodeFin ? prorataVersPro({ debut: p.ligne.periodeDebut, fin: p.ligne.periodeFin }, maintenant, reglages) : null;
     return {
       actif: this.actif,
       paiement: this.config.abonnement.paiement,
       modeTest: this.config.abonnement.paiement === "simule" ? BANDEAU_MODE_TEST : null,
       acces: !this.actif ? "abonne" : gratuit ? "gratuit" : etat.acces,
-      /** La formule de l'abonnement (mensuel tant qu'il n'y en a pas). */
+      /** La formule de l'abonnement (Essentiel tant qu'il n'y en a pas). */
       formule,
       /** Le prix HT de la formule, et sa période (« par mois », « par an »). */
       prixHt: prix,
       prixTtc: eurosDeCentimes(montantsFacture(prixDeFormule(formule, reglages), reglages.tauxTva).ttc),
-      periode: formule === "annuel" ? "par an" : "par mois",
-      /** Les deux formules, l'annuel d'abord (paywall, « Mon abonnement »). */
+      periode: "par mois",
+      /** Les deux formules, Essentiel d'abord (paywall, « Mon abonnement »). */
       offres: offresAbonnement(reglages).map((o) => ({ ...o, ttc: eurosDeCentimes(montantsFacture(prixDeFormule(o.formule, reglages), reglages.tauxTva).ttc) })),
-      prixDes: prixParMoisAnnuel(reglages),
-      /** Le passage à l'annuel, au prorata : ce qui est déduit du mois en cours et ce qui sera payé tout de suite. */
+      prixDes: prixDes(reglages),
+      /** Le passage à Pro, au prorata : ce qui est déduit du mois en cours et ce qui sera payé tout de suite. */
       bascule: bascule ? { credit: eurosDeCentimes(bascule.creditCentimes), aPayerHt: eurosDeCentimes(bascule.aPayerHtCentimes), aPayerTtc: eurosDeCentimes(montantsFacture(bascule.aPayerHtCentimes, reglages.tauxTva).ttc), jusquau: bascule.fin.toISOString() } : null,
       essaiFinLe: etat.essaiFinLe?.toISOString() ?? null,
       joursEssai: gratuit ? null : etat.joursEssai,
@@ -211,7 +212,7 @@ export class AbonnementService {
   // ---------------------------------------------------------------- le paiement
 
   /** « Je continue » : la page de paiement (simulée, ou Stripe Checkout) de la formule choisie. */
-  async commencerPaiement(tenant: TenantContext, formule: Formule = "mensuel"): Promise<{ url: string }> {
+  async commencerPaiement(tenant: TenantContext, formule: Formule = "essentiel"): Promise<{ url: string }> {
     assertCanWrite(tenant);
     if (!this.actif) throw notFound("Route");
     const web = this.config.webAppUrl.replace(/\/$/, "");
@@ -234,7 +235,7 @@ export class AbonnementService {
     if (!s || s.type !== "session" || s.companyId !== tenant.companyId) throw notFound("Session");
     if (issue === "payer") {
       const f = (s.donnees as { formule?: unknown } | null)?.formule;
-      const formule: Formule = estFormule(f) ? f : "mensuel";
+      const formule: Formule = formuleEnregistree(f);
       await this.appliquer(tenant.companyId, { type: "actif", source: "simule", formule, ref: `${session}:paye`, periodeDebut: maintenant, periodeFin: finDePeriode(maintenant, formule), facture: { ref: `${session}:paye` } }, maintenant);
     } else {
       await this.appliquer(tenant.companyId, { type: "echec", source: "simule", ref: `${session}:echec` }, maintenant);
@@ -247,34 +248,34 @@ export class AbonnementService {
     const s = await this.prisma.evenementAbonnement.findUnique({ where: { refExterne: session } });
     if (!s || s.type !== "session" || s.companyId !== tenant.companyId) throw notFound("Session");
     const f = (s.donnees as { formule?: unknown } | null)?.formule;
-    return estFormule(f) ? f : "mensuel";
+    return formuleEnregistree(f);
   }
 
   /**
-   * PASSER À L'ANNUEL, À TOUT MOMENT, AU PRORATA (Greg, 24 octobre 2026) : l'année commence aujourd'hui ; ce qui reste du
-   * mois payé est déduit de la première facture annuelle. Stripe fait le même calcul (`proration_behavior`), et sa facture
-   * arrive par le webhook ; en simulé, le passage est payé tout de suite.
+   * PASSER À PRO, À TOUT MOMENT, AU PRORATA (30 octobre 2026, sur le modèle du passage à l'annuel du 24 octobre) : le mois
+   * de Pro commence aujourd'hui ; ce qui reste du mois d'Essentiel payé est déduit de la première facture de Pro. Stripe fait
+   * le même calcul (`proration_behavior`), et sa facture arrive par le webhook ; en simulé, le passage est payé tout de suite.
    */
-  async basculerAnnuel(tenant: TenantContext, maintenant = this.now()) {
+  async passerPro(tenant: TenantContext, maintenant = this.now()) {
     assertCanWrite(tenant);
     if (!this.actif) throw notFound("Route");
     const a = await this.prisma.abonnement.findUnique({ where: { companyId: tenant.companyId } });
     if (!a || a.statut !== "actif") throw validationFailed("No active subscription", { reason: "pas_d_abonnement" });
-    if (a.formule === "annuel") throw validationFailed("Already yearly", { reason: "deja_annuel" });
+    if (formuleEnregistree(a.formule) === "pro") throw validationFailed("Already Pro", { reason: "deja_pro" });
     if (a.resiliationDemandeeLe) throw validationFailed("Cancellation pending", { reason: "resiliation_programmee" });
     if (a.fournisseur === "stripe") {
       if (!this.stripe || !a.stripeSubscriptionId) throw new DomainError("internal_error", "Stripe not configured");
-      await this.stripe.basculerAnnuel(a.stripeSubscriptionId);
+      await this.stripe.passerPro(a.stripeSubscriptionId);
       // L'accès et la facture suivent les webhooks (customer.subscription.updated, invoice.paid) ; la formule, tout de suite.
-      await this.prisma.abonnement.update({ where: { companyId: tenant.companyId }, data: { formule: "annuel" } });
-      await this.prisma.evenementAbonnement.create({ data: { companyId: tenant.companyId, type: "bascule_demandee", source: "artisan" } });
+      await this.prisma.abonnement.update({ where: { companyId: tenant.companyId }, data: { formule: "pro" } });
+      await this.prisma.evenementAbonnement.create({ data: { companyId: tenant.companyId, type: "passage_pro_demande", source: "artisan" } });
       return this.vue(tenant, maintenant);
     }
     const reglages = await this.reglages();
     const dernier = await this.prisma.factureAbonnement.findFirst({ where: { companyId: tenant.companyId, periodeFin: a.periodeFin ?? undefined }, orderBy: { rang: "desc" } });
-    const p = prorataVersAnnuel({ debut: a.periodeDebut ?? maintenant, fin: a.periodeFin ?? maintenant }, maintenant, reglages, dernier?.montantHtCentimes ?? reglages.prixHtCentimes);
-    const ref = `bascule:${tenant.companyId}:${maintenant.toISOString()}`;
-    await this.appliquer(tenant.companyId, { type: "bascule_annuel", source: "simule", formule: "annuel", ref, periodeDebut: p.debut, periodeFin: p.fin, facture: { ref, htCentimes: p.aPayerHtCentimes } }, maintenant);
+    const p = prorataVersPro({ debut: a.periodeDebut ?? maintenant, fin: a.periodeFin ?? maintenant }, maintenant, reglages, dernier?.montantHtCentimes ?? reglages.prixEssentielHtCentimes);
+    const ref = `passage-pro:${tenant.companyId}:${maintenant.toISOString()}`;
+    await this.appliquer(tenant.companyId, { type: "passage_pro", source: "simule", formule: "pro", ref, periodeDebut: p.debut, periodeFin: p.fin, facture: { ref, htCentimes: p.aPayerHtCentimes } }, maintenant);
     return this.vue(tenant, maintenant);
   }
 
@@ -317,12 +318,12 @@ export class AbonnementService {
     if (e.ref && (await this.prisma.evenementAbonnement.findUnique({ where: { refExterne: e.ref } }))) return false;
     const fournisseur = e.source === "stripe" ? "stripe" : this.config.abonnement.paiement;
     const avant = await this.prisma.abonnement.findUnique({ where: { companyId } });
-    const formule: Formule = e.formule ?? (estFormule(avant?.formule) ? avant.formule : "mensuel");
+    const formule: Formule = e.formule ?? formuleEnregistree(avant?.formule);
     let data: MajAbonnement = {};
     switch (e.type) {
       case "actif":
       case "renouvele":
-      case "bascule_annuel":
+      case "passage_pro":
         data = { statut: "actif", formule, periodeDebut: e.periodeDebut ?? maintenant, periodeFin: e.periodeFin ?? finDePeriode(e.periodeDebut ?? maintenant, formule), echecLe: null, ...(e.type === "actif" ? { resiliationDemandeeLe: null, resilieLe: null } : {}) };
         break;
       case "echec":
@@ -340,7 +341,7 @@ export class AbonnementService {
     await this.prisma.$transaction(async (tx) => {
       await tx.evenementAbonnement.create({ data: { companyId, type: e.type, source: e.source, refExterne: e.ref, donnees: { periodeFin: e.periodeFin?.toISOString() ?? null, formule } } });
       await tx.abonnement.upsert({ where: { companyId }, create: { ...data, companyId, fournisseur }, update: { ...data, fournisseur } });
-      if (e.facture && (e.type === "actif" || e.type === "renouvele" || e.type === "bascule_annuel")) await this.emettreFacture(tx, companyId, { ...e, formule }, maintenant, fournisseur === "stripe" ? "F" : "TEST");
+      if (e.facture && (e.type === "actif" || e.type === "renouvele" || e.type === "passage_pro")) await this.emettreFacture(tx, companyId, { ...e, formule }, maintenant, fournisseur === "stripe" ? "F" : "TEST");
     });
     await this.prevenir(companyId, e, maintenant).catch(() => undefined);
     return true;
@@ -350,7 +351,7 @@ export class AbonnementService {
   private async emettreFacture(tx: Tx, companyId: string, e: EvenementPaiement, maintenant: Date, serie: SerieFacture) {
     if (e.facture?.ref && (await tx.factureAbonnement.findUnique({ where: { refExterne: e.facture.ref } }))) return;
     const reglages = await this.reglages();
-    const formule: Formule = e.formule ?? "mensuel";
+    const formule: Formule = e.formule ?? "essentiel";
     const calcul = montantsFacture(prixDeFormule(formule, reglages), reglages.tauxTva);
     const ht = e.facture?.htCentimes ?? calcul.ht;
     const tva = e.facture?.tvaCentimes ?? (e.facture?.htCentimes !== undefined ? Math.round((ht * reglages.tauxTva) / 100) : calcul.tva);
@@ -370,7 +371,7 @@ export class AbonnementService {
         tvaIntra: c.abonnement?.tvaIntra ?? null,
         periodeDebut: debut,
         periodeFin: e.periodeFin ?? finDePeriode(debut, formule),
-        formule: e.type === "bascule_annuel" ? "bascule" : formule,
+        formule: e.type === "passage_pro" ? "passage_pro" : formule,
         montantHtCentimes: ht,
         tvaCentimes: tva,
         ttcCentimes: ttc,
@@ -435,13 +436,13 @@ export class AbonnementService {
         const companyId = (await parClient(stripe.customerId)) ?? meta((o.parent as { subscription_details?: unknown } | undefined)?.subscription_details) ?? meta(o.subscription_details);
         if (!companyId) return { traite: false };
         const lignes = (o.lines as { data?: { period?: { start?: number; end?: number }; amount?: number }[] } | undefined)?.data ?? [];
-        // Un passage à l'annuel : une ligne de crédit (négative) pour le mois non utilisé, puis l'année ; la période est celle de l'année.
+        // Un passage à Pro : une ligne de crédit (négative) pour le mois d'Essentiel non utilisé, puis le mois de Pro.
         const ligne = lignes.find((l) => (l.amount ?? 0) > 0) ?? lignes[0];
         const formule = formuleDe(prixDe(ligne));
         const ht = typeof o.subtotal === "number" ? o.subtotal : undefined;
         const ttc = typeof o.total === "number" ? o.total : undefined;
         await this.appliquer(companyId, {
-          type: o.billing_reason === "subscription_create" ? "actif" : o.billing_reason === "subscription_update" ? "bascule_annuel" : "renouvele",
+          type: o.billing_reason === "subscription_create" ? "actif" : o.billing_reason === "subscription_update" ? "passage_pro" : "renouvele",
           source: "stripe",
           ref: evt.id,
           ...(formule ? { formule } : {}),
@@ -508,7 +509,7 @@ export class AbonnementService {
         continue;
       }
       const debut = a.periodeFin!;
-      const formule: Formule = estFormule(a.formule) ? a.formule : "mensuel";
+      const formule: Formule = formuleEnregistree(a.formule);
       const ref = `renouvele:${a.companyId}:${debut.toISOString()}`;
       if (await this.appliquer(a.companyId, { type: "renouvele", source: "simule", formule, ref, periodeDebut: debut, periodeFin: finDePeriode(debut, formule), facture: { ref } }, maintenant)) renouveles++;
     }
@@ -603,11 +604,12 @@ export class AbonnementService {
     const reglages = await this.reglages();
     const test = a?.fournisseur !== "stripe" ? " (mode test : aucun paiement réel)" : "";
     const annuel = a?.formule === "annuel";
-    const offre = annuel ? `${eurosDeCentimes(reglages.prixAnnuelHtCentimes)} HT par an, payé en une fois, renouvelé chaque année (rappel 30 jours avant)` : `${eurosDeCentimes(reglages.prixHtCentimes)} HT par mois, sans engagement`;
+    const nom = formuleEnregistree(a?.formule) === "pro" ? "Pro" : "Essentiel";
+    const offre = annuel ? `${eurosDeCentimes(reglages.prixAnnuelHtCentimes)} HT par an, payé en une fois, renouvelé chaque année (rappel 30 jours avant)` : `${nom}, ${eurosDeCentimes(prixDeFormule(formuleEnregistree(a?.formule), reglages))} HT par mois, sans engagement`;
     if (e.type === "actif") {
-      await this.email.send({ to, subject: `Ton abonnement ${NOM_APP} est actif`, text: ["Bonjour,", "", `Ton abonnement ${annuel ? "annuel" : "mensuel"} ${NOM_APP} est actif${test} : ${offre}.`, a?.periodeFin ? `Prochain renouvellement le ${dateFr(a.periodeFin)}.` : "", "Ta facture est dans « Mes factures ».", "", lien].filter((l) => l !== "").join("\n") });
-    } else if (e.type === "bascule_annuel") {
-      await this.email.send({ to, subject: `Tu es passé à l'abonnement annuel ${NOM_APP}`, text: ["Bonjour,", "", `Tu es passé à l'abonnement annuel${test} : ${offre}.`, "Ce qui restait de ton mois en cours est déduit de ta première facture annuelle.", a?.periodeFin ? `Prochain renouvellement le ${dateFr(a.periodeFin)}.` : "", "Ta facture est dans « Mes factures ».", "", lien].filter((l) => l !== "").join("\n") });
+      await this.email.send({ to, subject: `Ton abonnement ${NOM_APP} est actif`, text: ["Bonjour,", "", `Ton abonnement ${NOM_APP} est actif${test} : ${offre}.`, a?.periodeFin ? `Prochain renouvellement le ${dateFr(a.periodeFin)}.` : "", "Ta facture est dans « Mes factures ».", "", lien].filter((l) => l !== "").join("\n") });
+    } else if (e.type === "passage_pro") {
+      await this.email.send({ to, subject: `Tu es passé à ${NOM_APP} Pro`, text: ["Bonjour,", "", `Tu es passé à l'abonnement Pro${test} : ${offre}.`, "Ce qui restait de ton mois d'Essentiel est déduit de ta première facture Pro.", a?.periodeFin ? `Prochain renouvellement le ${dateFr(a.periodeFin)}.` : "", "Ta facture est dans « Mes factures ».", "", lien].filter((l) => l !== "").join("\n") });
     } else if (e.type === "echec") {
       const fin = new Date((a?.echecLe ?? maintenant).getTime() + reglages.joursGrace * JOUR);
       await this.email.send({ to, subject: `Ton paiement ${NOM_APP} n'est pas passé`, text: ["Bonjour,", "", `Ton paiement n'est pas passé${test}.`, `Tu gardes l'accès jusqu'au ${dateFr(fin)}. Mets à jour ta carte avant cette date pour continuer.`, "", lien].join("\n") });
@@ -621,13 +623,16 @@ export class AbonnementService {
 /** La ligne de la facture : la formule et sa période. */
 function designationFacture(f: { formule: string; periodeDebut: Date; periodeFin: Date }): string {
   const periode = `du ${dateFr(f.periodeDebut)} au ${dateFr(f.periodeFin)}`;
+  if (f.formule === "passage_pro") return `Passage à l'abonnement ${NOM_APP} Pro, ${periode}, moins la part non utilisée du mois d'Essentiel`;
+  // Les factures d'avant le 30 octobre 2026 gardent leur libellé (mensuel, annuel, passage à l'annuel).
   if (f.formule === "bascule") return `Passage à l'abonnement annuel ${NOM_APP}, ${periode}, moins la part non utilisée du mois en cours`;
-  return `Abonnement ${f.formule === "annuel" ? "annuel" : "mensuel"} ${NOM_APP}, ${periode}`;
+  if (f.formule === "annuel" || f.formule === "mensuel") return `Abonnement ${f.formule} ${NOM_APP}, ${periode}`;
+  return `Abonnement ${NOM_APP} ${f.formule === "pro" ? "Pro" : "Essentiel"}, ${periode}`;
 }
 
 /** La mention de bas de facture, selon la formule (CGU, partie Abonnement). */
 function mentionFormule(formule: string): string {
-  return formule === "mensuel"
-    ? "Abonnement mensuel sans engagement, résiliable à tout moment avec effet en fin de période payée."
-    : "Abonnement annuel payé d'avance, renouvelé automatiquement chaque année (rappel 30 jours avant l'échéance) ; résiliable à tout moment avec effet à l'échéance, sans remboursement au prorata.";
+  return formule === "annuel" || formule === "bascule"
+    ? "Abonnement annuel payé d'avance, renouvelé automatiquement chaque année (rappel 30 jours avant l'échéance) ; résiliable à tout moment avec effet à l'échéance, sans remboursement au prorata."
+    : "Abonnement mensuel sans engagement, résiliable à tout moment avec effet en fin de période payée.";
 }

@@ -47,9 +47,9 @@ function Paiement() {
       <PageTitle>Paiement (simulation)</PageTitle>
       <Card className="flex flex-col gap-4 p-5">
         <p className="text-[17px]">
-          {formule === "annuel" ? "Abonnement annuel" : "Abonnement mensuel"} : <strong>{(formule === "annuel" ? offre?.details[0] : offre?.prix) ?? "\u00a0"}</strong>
+          {formule === "pro" ? "Abonnement Pro" : "Abonnement Essentiel"} : <strong>{offre?.prix ?? "\u00a0"}</strong>
           {offre?.ttc ? ` (${offre.ttc} TTC)` : ""}
-          {formule === "mensuel" ? ", sans engagement." : formule === "annuel" ? ", renouvelé chaque année." : ""}
+          {formule ? ", sans engagement." : ""}
         </p>
         {error ? <ErrorNotice error={error} /> : null}
         <Button onClick={() => void envoyer("payer")} pending={pending === "payer"} disabled={!!pending} className="w-full">

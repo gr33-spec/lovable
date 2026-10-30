@@ -109,6 +109,9 @@ export class RecentrageModule implements OnModuleInit {
     this.priceRequests.brancherComplement((requestId, recipientId) => this.demandes.complement(requestId, recipientId));
     this.abonnement.brancherOffert((companyId) => this.droits.offertPour(companyId));
     this.meter.brancherLimiteGratuite((companyId) => this.droits.limiteGratuite(companyId));
+    // Greg, 30 octobre 2026 (décisions 2 et 3) : les quotas d'IA de la formule, pour la jauge et le scan d'une liste.
+    this.meter.brancherQuotas((companyId) => this.droits.quotas(companyId, (parMois) => this.meter.compter(companyId, parMois)));
+    this.meter.brancherScan((companyId) => this.droits.verifierScan(companyId));
     this.commande.brancherVolume((c) => this.regroupements.volume(c));
     // Business model final (25 octobre 2026) : veille, observatoire, vérification des négoces, mode des regroupements.
     this.demandes.brancherApresEnvoi((companyId, requestId) => this.negocie.mettreEnVeille(companyId, requestId));

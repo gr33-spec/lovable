@@ -25,9 +25,13 @@ export class AiUsageController {
     return this.usage.monthly(tenant, q.month);
   }
 
-  /** La jauge des listes préparées offertes : `{ jauge: null }` quand rien n'est limité. */
+  /**
+   * La jauge, avant le dépôt : `quotas` (formule, analyses de devis, scans de liste ; Greg, 30 octobre 2026), sinon
+   * l'ancienne `jauge` des lectures (mode ancien) ; null quand rien n'est limité.
+   */
   @Get("jauge")
   async jauge(@Tenant() tenant: TenantContext) {
-    return { jauge: await this.meter.jauge(tenant.companyId) };
+    const quotas = await this.meter.quotas(tenant.companyId);
+    return { jauge: quotas ? null : await this.meter.jauge(tenant.companyId), quotas };
   }
 }

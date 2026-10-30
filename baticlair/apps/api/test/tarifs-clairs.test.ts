@@ -12,17 +12,17 @@ describe("les tarifs, dits clairement", () => {
     expect(c.groupe.negocie.lecturesIaGratuitTotal).toBe(LISTES_PREPAREES_OFFERTES);
   });
 
-  it("chaque phrase qui dit « gratuit » dit aussi ce qui est payant", () => {
+  it("chaque phrase qui dit « gratuit » dit aussi ce qui est payant (30 octobre 2026 : les achats groupés sont gratuits)", () => {
     for (const p of [TARIFS.enUneLigne, `${TARIFS.question.q} ${TARIFS.question.r}`, argumentTarif({ cycles: 0, parCommande: null })]) {
       expect(p).toMatch(/gratuit/i);
       expect(p).toMatch(/achats groupés/);
-      expect(p).toMatch(/abonnement|abonne|HT par mois/);
+      expect(p).toMatch(/abonnement|Essentiel|HT par mois/);
     }
-    expect(TARIFS.question.r).toContain(`${LISTES_PREPAREES_OFFERTES} premières listes`);
+    expect(TARIFS.question.r).toContain(`${LISTES_PREPAREES_OFFERTES} analyse de devis`);
   });
 
   it("le paywall dit ce qui reste gratuit", () => {
     expect(PHRASE_LECTURES_EPUISEES).toContain("c'est gratuit");
-    expect(TARIFS.paywallAchatGroupe).toContain("restent gratuits");
+    expect(TARIFS.paywallAchatGroupe).toContain("Les achats groupés sont gratuits");
   });
 });

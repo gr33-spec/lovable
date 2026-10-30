@@ -56,6 +56,9 @@ import {
   scopedKey,
   type LectureDevis,
   valeurApprise,
+  lignesDuTexte,
+  phraseGrosDevis,
+  poidsAnalyse,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
@@ -346,11 +349,11 @@ export class TakeoffService {
    * cours » (la lecture continue, l'écran interroge `readingState`). Une lecture déjà en cours n'est
    * jamais relancée (double appui, rechargement) : rien n'est payé deux fois.
    */
-  async start(tenant: TenantContext, documentId: string): Promise<StartResult> {
+  async start(tenant: TenantContext, documentId: string, options: { confirmeGros?: boolean } = {}): Promise<StartResult> {
     assertCanWrite(tenant);
     const running = await this.meter.current(tenant.companyId, documentId);
     if (running?.status === "started" && !this.stale(running.startedAt)) return { state: "reading" };
-    const work = this.extract(tenant, documentId);
+    const work = this.extract(tenant, documentId, options);
     const wait = this.reading.answerWithinMs ?? 8000;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timeout = new Promise<"later">((resolve) => {
@@ -435,7 +438,12 @@ export class TakeoffService {
     return (this.reading.now ?? (() => new Date()))().getTime() - startedAt.getTime() > STALE_READING_MS;
   }
 
-  async extract(tenant: TenantContext, documentId: string): Promise<ReviewedTakeoff> {
+  /**
+   * `confirmeGros` (Greg, 30 octobre 2026, décision 3) : un devis de plus de 150 lignes compte pour 2 analyses ; l'écran le
+   * dit AVANT la lecture (refus `gros_devis`, rien n'est dépensé ni décompté) et relance avec `confirmeGros: true`. Les
+   * autres chemins (reprise, partenaires) lisent sans demander : la lecture compte quand même pour 2.
+   */
+  async extract(tenant: TenantContext, documentId: string, options: { confirmeGros?: boolean } = {}): Promise<ReviewedTakeoff> {
     assertCanWrite(tenant);
     const doc = await this.documents.findById(tenant, documentId);
     if (!doc) throw notFound("Document");
@@ -452,12 +460,19 @@ export class TakeoffService {
     if (plan.estimate.totalMicroUsd > (this.reading.maxAnalysisMicroUsd ?? DEFAULT_MAX_ANALYSIS_MICRO_USD)) {
       throw new DomainError("unreadable_document", "Estimated reading cost is abnormal for a quote", { reason: "abnormal_size" });
     }
+    const lignes = lignesDuTexte(prepared.input.numberedText);
+    const poids = poidsAnalyse(lignes);
+    if (poids === 2 && options.confirmeGros === false) {
+      const quotas = await this.meter.quotas(tenant.companyId);
+      throw new DomainError("conflict", "Large quote: counts as two analyses", { reason: "gros_devis", lignes, poids, restantes: quotas?.analyses.restantes ?? null, message: phraseGrosDevis(lignes, quotas?.analyses.restantes ?? null) });
+    }
     const begin = await this.meter.begin({
       companyId: tenant.companyId,
       userId: tenant.userId,
       projectId: doc.projectId,
       documentId,
       kind: "client_quote",
+      poids,
     });
     if (begin.status === "already_done") throw new DomainError("conflict", "Analysis already completed for this document");
     const analysisId = begin.analysis.id;
@@ -760,6 +775,8 @@ export class TakeoffService {
     assertCanWrite(tenant);
     const listeur = this.reading.listeur;
     if (!listeur) throw new DomainError("ai_unavailable", "AI reading is not configured");
+    // Greg, 30 octobre 2026 (décision 2) : les scans de liste ont leur quota ; au-delà, rien n'est lu ni dépensé.
+    await this.meter.verifierScan(tenant.companyId);
     if (file.bytes.byteLength === 0) throw new DomainError("unreadable_document", "Empty file", { reason: "empty" });
     const mediaType = imageMimeType(file.bytes);
     if (!mediaType && !looksLikePdf(file.bytes)) throw new DomainError("unreadable_document", "Not an image or a PDF", { reason: "not_pdf" });

@@ -29,16 +29,17 @@ export class PrismaAnalysisRepository implements AnalysisRepository {
     return c?.monthlyAnalysisLimit ?? null;
   }
 
-  countBillable(companyId: string, billingMonth: string | null): Promise<number> {
-    return this.prisma.aiAnalysis.count({ where: { companyId, ...(billingMonth ? { billingMonth } : {}), billable: true } });
+  async countBillable(companyId: string, billingMonth: string | null): Promise<number> {
+    const r = await this.prisma.aiAnalysis.aggregate({ where: { companyId, ...(billingMonth ? { billingMonth } : {}), billable: true }, _sum: { poids: true } });
+    return r._sum.poids ?? 0;
   }
 
-  create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind }): Promise<AnalysisRecord> {
+  create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind; poids?: number }): Promise<AnalysisRecord> {
     return this.prisma.aiAnalysis.create({ data: { ...data, status: "started" }, select: FIELDS });
   }
 
-  restart(id: string, userId: string | null): Promise<AnalysisRecord> {
-    return this.prisma.aiAnalysis.update({ where: { id }, data: { status: "started", userId, completedAt: null, startedAt: new Date() }, select: FIELDS });
+  restart(id: string, userId: string | null, poids?: number): Promise<AnalysisRecord> {
+    return this.prisma.aiAnalysis.update({ where: { id }, data: { status: "started", userId, completedAt: null, startedAt: new Date(), ...(poids ? { poids } : {}) }, select: FIELDS });
   }
 
   async complete(id: string, billingMonth: string, at: Date, billable = true): Promise<AnalysisRecord> {

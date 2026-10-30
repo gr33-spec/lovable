@@ -14,7 +14,7 @@ const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("inter
 /**
  * « MON ABONNEMENT » ET « MES FACTURES » (Greg, 24 octobre 2026) : l'état (essai, abonné, paiement refusé, terminé), « Je
  * continue », la résiliation en deux clics (effet en fin de période), le n° de TVA, et les factures émises par BATI INVEST.
- * Deux formules (Greg, 24 octobre 2026) : le choix à l'abonnement, et le passage du mensuel à l'annuel à tout moment, au
+ * Deux formules (Greg, 30 octobre 2026) : Essentiel et Pro au choix, et le passage d'Essentiel à Pro à tout moment, au
  * prorata.
  */
 export default function AbonnementPage() {
@@ -56,7 +56,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [tva, setTva] = useState(a.tvaIntra ?? "");
-  const [formule, setFormule] = useState<Formule>("annuel");
+  const [formule, setFormule] = useState<Formule>("essentiel");
   const [passer, setPasser] = useState(false);
   async function run(cle: string, f: () => Promise<Abonnement | void>) {
     setPending(cle);
@@ -115,34 +115,32 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
         ) : null}
         {a.acces === "abonne" ? (
           <>
-            <p className="text-[20px] font-extrabold">{a.formule === "annuel" ? "Abonné à l'année" : "Abonné au mois"}</p>
-            <p className="text-[16px]">
-              {a.formule === "annuel" ? `${a.prixHt} HT par an (${a.prixTtc} TTC), payé en une fois, renouvelé chaque année.` : `${a.prixHt} HT par mois (${a.prixTtc} TTC), sans engagement.`}
-            </p>
+            <p className="text-[20px] font-extrabold">{a.formule === "pro" ? "Abonné Pro" : "Abonné Essentiel"}</p>
+            <p className="text-[16px]">{`${a.prixHt} HT par mois (${a.prixTtc} TTC), sans engagement.`}</p>
             {a.resiliationProgrammee || a.statut === "resilie" ? (
               <p className="text-[16px] font-semibold">Résilié : ton accès reste jusqu&apos;au {date(a.periodeFin)}. Rien ne sera plus prélevé.</p>
             ) : (
               <>
                 <p className="text-[16px] text-muted">
-                  Prochain renouvellement le {date(a.periodeFin)}.{a.formule === "annuel" ? " Je te préviens par e-mail 30 jours avant." : ""}
+                  Prochain renouvellement le {date(a.periodeFin)}.
                 </p>
                 {a.bascule ? (
                   <div className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
-                    <p className="text-[16px] font-bold">{a.offres.find((o) => o.formule === "annuel")?.badge ? `Passe à l'annuel : ${a.offres.find((o) => o.formule === "annuel")!.badge}` : "Passe à l'annuel"}</p>
+                    <p className="text-[16px] font-bold">Passe à Pro : {a.offres.find((o) => o.formule === "pro")?.details.slice(0, 2).join(", ")}</p>
                     <p className="text-[15px]">
-                      {a.offres.find((o) => o.formule === "annuel")?.prix}. Ce qui reste de ton mois ({a.bascule.credit}) est déduit : tu paies {a.bascule.aPayerHt} HT ({a.bascule.aPayerTtc} TTC) aujourd&apos;hui, pour un an jusqu&apos;au {date(a.bascule.jusquau)}.
+                      {a.offres.find((o) => o.formule === "pro")?.prix}. Ce qui reste de ton mois ({a.bascule.credit}) est déduit : tu paies {a.bascule.aPayerHt} HT ({a.bascule.aPayerTtc} TTC) aujourd&apos;hui, pour un mois de Pro jusqu&apos;au {date(a.bascule.jusquau)}.
                     </p>
                     {!passer ? (
                       <Button variant="secondary" onClick={() => setPasser(true)} className="self-start">
-                        Passer à l&apos;annuel
+                        Passer à Pro
                       </Button>
                     ) : (
                       <div className="flex flex-wrap gap-2">
-                        <Button onClick={() => void run("annuel", () => api<Abonnement>("/v1/abonnement/annuel", { method: "POST" }))} pending={pending === "annuel"}>
+                        <Button onClick={() => void run("pro", () => api<Abonnement>("/v1/abonnement/pro", { method: "POST" }))} pending={pending === "pro"}>
                           Oui, payer {a.bascule.aPayerTtc} TTC
                         </Button>
                         <Button variant="secondary" onClick={() => setPasser(false)}>
-                          Rester au mois
+                          Rester en Essentiel
                         </Button>
                       </div>
                     )}
@@ -160,7 +158,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
                 ) : (
                   <div className="flex flex-col gap-3 rounded-xl bg-ground p-4">
                     <p className="text-[15px]">
-                      Résilier ? Ton accès reste jusqu&apos;au {date(a.periodeFin)}, puis rien ne sera plus prélevé.{a.formule === "annuel" ? " Une année commencée n'est pas remboursée au prorata." : ""}
+                      Résilier ? Ton accès reste jusqu&apos;au {date(a.periodeFin)}, puis rien ne sera plus prélevé.
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <Button variant="ink" onClick={() => void run("resilier", () => api<Abonnement>("/v1/abonnement/resilier", { method: "POST" }))} pending={pending === "resilier"}>

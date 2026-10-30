@@ -1,4 +1,4 @@
-import { droitsDe, payantOffertDansLaZone, phrasePreavis, verifierDroit, zoneDuCodePostal, MESSAGE_HORS_ZONE, NEGOCES_PAR_DEMANDE_PAYANT, PHRASE_LECTURES_EPUISEES, type Droits } from "@baticlair/domain";
+import { droitsDe, formuleDuCompte, payantOffertDansLaZone, phrasePaywallQuota, phrasePreavis, quotasDe, verifierDroit, zoneDuCodePostal, MESSAGE_HORS_ZONE, NEGOCES_PAR_DEMANDE_PAYANT, OFFRES, PHRASE_LECTURES_EPUISEES, type Droits, type FormuleOffre, type Quotas } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import type { AbonnementService } from "../../abonnement/index.js";
@@ -133,9 +133,57 @@ export class DroitsService {
     throw new DomainError("abonnement_requis", phrase, { reason: refus, refus, phrase });
   }
 
-  /** Pour le compteur des analyses : la limite gratuite, ou null. */
+  /**
+   * LA FORMULE DU COMPTE (Greg, 30 octobre 2026, décision 2) : Découverte sans abonnement payé ; Essentiel ou Pro selon
+   * l'abonnement en cours (en grâce compris). Null quand l'abonnement artisan est éteint (rien n'est limité).
+   */
+  async formule(companyId: string, maintenant = this.now()): Promise<FormuleOffre | null> {
+    if (!this.abonnement.actif) return null;
+    if (!(await this.abonnePayant(companyId, maintenant))) return "decouverte";
+    const a = await this.prisma.abonnement.findUnique({ where: { companyId }, select: { formule: true } });
+    return formuleDuCompte({ actif: true, formule: a?.formule ?? null });
+  }
+
+  /** Les crédits de la formule : la limite, et ce qui est déjà pris (le mois en cours pour Essentiel et Pro, tout pour Découverte). */
+  private limites(formule: FormuleOffre): { analyses: number; scans: number } {
+    return formule === "decouverte" ? { analyses: this.reglages.lecturesIaGratuitTotal, scans: OFFRES.decouverte.scans } : { analyses: OFFRES[formule].analyses, scans: OFFRES[formule].scans };
+  }
+
+  /** Les scans de liste réussis (journal des appels IA), depuis le début du mois ou depuis toujours. */
+  private async scansFaits(companyId: string, parMois: boolean, maintenant: Date): Promise<number> {
+    const debut = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), 1));
+    return this.prisma.aiExecution.count({ where: { companyId, task: "lecture_liste", status: "success", ...(parMois ? { createdAt: { gte: debut } } : {}) } });
+  }
+
+  /** Les quotas d'IA du compte (mode automatique), pour la jauge ; null quand rien n'est limité. */
+  async quotas(companyId: string, analysesFaites: (parMois: boolean) => Promise<number>, maintenant = this.now()): Promise<Quotas | null> {
+    if (!(await this.modeAuto())) return null;
+    const f = await this.formule(companyId, maintenant);
+    if (!f) return null;
+    const parMois = OFFRES[f].parMois;
+    const q = quotasDe(f, { analyses: await analysesFaites(parMois), scans: await this.scansFaits(companyId, parMois, maintenant) });
+    const l = this.limites(f);
+    const recale = (c: Quotas["analyses"], limite: number) => ({ limite, utilisees: c.utilisees, restantes: Math.max(0, limite - c.utilisees) });
+    return { ...q, analyses: recale(q.analyses, l.analyses), scans: recale(q.scans, l.scans) };
+  }
+
+  /** Le scan d'une liste est-il permis ? Refusé quand le quota de la formule est pris (rien n'est dépensé). */
+  async verifierScan(companyId: string, maintenant = this.now()): Promise<void> {
+    if (!(await this.modeAuto())) return;
+    const f = await this.formule(companyId, maintenant);
+    if (!f) return;
+    const faits = await this.scansFaits(companyId, OFFRES[f].parMois, maintenant);
+    if (faits >= this.limites(f).scans) throw new DomainError("abonnement_requis", "Scan quota reached", { action: "scan", refus: "scans", phrase: phrasePaywallQuota(f, "scans") });
+  }
+
+  /** Pour le compteur des analyses : la limite de la formule (Découverte en tout, Essentiel et Pro par mois), ou null. */
   async limiteGratuite(companyId: string): Promise<{ limite: number; phrase: (n: number) => string; total?: boolean } | null> {
-    if (await this.modeAuto()) return (await this.abonnePayant(companyId)) ? null : { limite: this.reglages.lecturesIaGratuitTotal, total: true, phrase: () => PHRASE_LECTURES_EPUISEES };
+    if (await this.modeAuto()) {
+      const f = await this.formule(companyId);
+      if (!f) return null;
+      if (f === "decouverte") return { limite: this.limites(f).analyses, total: true, phrase: () => PHRASE_LECTURES_EPUISEES };
+      return { limite: this.limites(f).analyses, total: false, phrase: () => phrasePaywallQuota(f, "analyses") };
+    }
     const d = await this.droits(companyId);
     if (d.lecturesParMois === null) return null;
     return { limite: d.lecturesParMois, phrase: (n) => `Tu as utilisé tes ${n} lectures gratuites du mois. Passe à l'abonnement pour lire tous tes devis.` };

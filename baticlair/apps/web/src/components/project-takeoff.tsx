@@ -15,7 +15,7 @@ import { SendPreview } from "@/components/send-preview";
 import { SupplyList } from "@/components/supply-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
-import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { Button, ButtonLink, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type ScreenRow, type Takeoff, type TakeoffLine } from "@/lib/api";
 import { attachFile } from "@/lib/upload";
 import { parseQuantity } from "@/lib/labels";
@@ -132,11 +132,13 @@ export function ProjectTakeoff({
     }
   }, []);
 
-  const prepare = useCallback(() => {
+  // `confirmeGros` (Greg, 30 octobre 2026, décision 3) : un devis de plus de 150 lignes compte pour 2 analyses ; le serveur
+  // le dit avant la lecture, l'artisan lance (ou note sa liste à la main).
+  const prepare = useCallback((confirmeGros = false) => {
     if (!clientQuote) return;
     // Gros devis : la porte répond « en_cours » et la lecture continue sur le serveur ; l'écran la suit (audit B3).
     void run(
-      () => api<Quantitatif>(`/v1/quantitatifs?ecran=1`, { method: "POST", body: { documentId: clientQuote.id } }),
+      () => api<Quantitatif>(`/v1/quantitatifs?ecran=1`, { method: "POST", body: { documentId: clientQuote.id, ...(confirmeGros ? { confirmeGros: true } : {}) } }),
       (q) => {
         update(q);
       },
@@ -214,6 +216,7 @@ export function ProjectTakeoff({
     const failed = (data.reading?.status === "failed" || refused || lost) && !pending;
     if (!failed) return <AnalysisScreen />;
     const shown = refused ? actionError : lost ? error : actionError;
+    if (refused && actionError?.reason === "gros_devis") return <GrosDevis phrase={actionError.phrase ?? "Ce devis fait plus de 150 lignes : il compte pour 2 analyses."} pending={pending} disabled={archived} onLancer={() => prepare(true)} />;
     // §50.1 : en cas d'échec, la raison en une phrase et « Réessayer ». RIEN NE PART VIDE : une lecture qui n'a trouvé aucune
     // ligne ne fait jamais une liste, elle se relit.
     const nothingRead = (data.reading?.reason === "nothing_read" && !refused && !lost) || (refused && actionError?.reason === "nothing_read");
@@ -224,7 +227,7 @@ export function ProjectTakeoff({
         : lost
           ? "Je n'ai plus de nouvelles de la lecture de ce devis."
           : "Je n'ai pas réussi à lire ce devis jusqu'au bout.";
-    return <ReadFailure sentence={sentence} disabled={archived} onRetry={lost ? reload : prepare} />;
+    return <ReadFailure sentence={sentence} disabled={archived} onRetry={lost ? reload : () => prepare()} />;
   }
 
   // §48 ÉTAPE 3 : les questions de comptoir, toutes d'un coup, AVANT le calcul. Puis ÉTAPE 4 : le calcul.
@@ -609,6 +612,27 @@ function ReadFailure({ sentence, onRetry, disabled }: { sentence: string; onRetr
           Réessayer
         </Button>
       ) : null}
+    </section>
+  );
+}
+
+/**
+ * UN GROS DEVIS (Greg, 30 octobre 2026, décision 3) : plus de 150 lignes, il compte pour 2 analyses ; l'artisan le voit
+ * AVANT la lecture et choisit : « Lancer l'analyse », ou noter sa liste à la main (gratuit). Rien n'est dépensé avant.
+ */
+function GrosDevis({ phrase, pending, disabled, onLancer }: { phrase: string; pending: boolean; disabled: boolean; onLancer: () => void }) {
+  return (
+    <section aria-labelledby="gros-devis" className="flex flex-col gap-3 rounded-2xl bg-surface p-5 shadow-card">
+      <h2 id="gros-devis" className="text-[20px] font-extrabold">
+        Un gros devis
+      </h2>
+      <p className="text-[16px] leading-relaxed">{phrase}</p>
+      <Button variant="accent" disabled={pending || disabled} onClick={onLancer}>
+        Lancer l&apos;analyse
+      </Button>
+      <ButtonLink href="/chantiers/nouveau?liste=1" variant="ghost">
+        Je note ma liste à la main
+      </ButtonLink>
     </section>
   );
 }

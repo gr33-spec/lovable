@@ -141,7 +141,7 @@ export class QuantitatifsService {
   }
 
   /** Un devis déjà déposé sur le chantier (le chat de l'appli) : même quantitatif s'il existe, lecture sinon. */
-  async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}) {
+  async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}, options: { confirmeGros?: boolean } = {}) {
     assertCanWrite(tenant);
     this.tradeFor(tenant, ctx);
     await this.assertQuota(tenant, ctx);
@@ -155,7 +155,7 @@ export class QuantitatifsService {
         data: { companyId: tenant.companyId, projectId: document.projectId, source: "pdf", documentId, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
       }));
     // Déjà lu : rien n'est relu ni décompté. Lecture en cours : elle n'est pas relancée.
-    await this.takeoffs.start(tenant, documentId);
+    await this.takeoffs.start(tenant, documentId, options);
     return this.get(tenant, row.id, rendu);
   }
 

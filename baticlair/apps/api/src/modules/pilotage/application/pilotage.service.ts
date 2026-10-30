@@ -24,7 +24,7 @@ export interface SourcesPilotage {
   apprentissage(): Promise<{ aValider: unknown[]; tauxParMois: { mois: string; taux: number | null }[] }>;
   economies(): Promise<{ total: number; parCommande: number | null; cycles: number }>;
   /** Les prix réglés des deux formules, HT en centimes (repli quand un abonné n'a pas encore de facture de sa formule). */
-  prixFormules(): Promise<Record<Formule, number>>;
+  prixFormules(): Promise<Record<Formule, number> & { annuel: number }>;
   paiementSimule: boolean;
   /** Stripe en clé de TEST (prévisualisation) : aucune carte réellement débitée. */
   stripeDeTest?: boolean;
@@ -230,8 +230,9 @@ export class PilotageService {
       const abonnes = f.flatMap((x) => {
         if (!x.companyId || vues.has(x.companyId)) return [];
         vues.add(x.companyId);
-        const formule: Formule = x.formule === "mensuel" ? "mensuel" : "annuel";
-        return [{ formule, htCentimes: x.formule === "bascule" ? prix.annuel : x.montantHtCentimes }];
+        // Un passage au prorata compte au prix plein de sa formule (Pro ; un ancien passage à l'annuel, l'annuel).
+        const formule = x.formule === "bascule" ? "annuel" : x.formule === "passage_pro" ? "pro" : x.formule;
+        return [{ formule, htCentimes: x.formule === "bascule" ? prix.annuel : x.formule === "passage_pro" ? prix.pro : x.montantHtCentimes }];
       });
       return revenuMensuelRecurrent(abonnes);
     };
@@ -282,7 +283,7 @@ export class PilotageService {
       chiffres: [
         { cle: "actifs", titre: "Utilisateurs actifs", valeur: String(act), detail: "sur 30 jours", fleche: flecheDe(act, actP) },
         { cle: "payants", titre: "Abonnés payants", valeur: String(pay), detail: this.sources.paiementSimule ? "paiements de test" : "sur 30 jours", fleche: flecheDe(pay, payP) },
-        { cle: "revenu", titre: "Revenu mensuel récurrent", valeur: eurosEntiers(mrr.centimes / 100), detail: mrr.partAnnuels === null ? "HT, annuel ÷ 12" : `HT, annuel ÷ 12 · ${mrr.partAnnuels} % en annuel`, fleche: flecheDe(mrr.centimes, mrrAvant.centimes) },
+        { cle: "revenu", titre: "Revenu mensuel récurrent", valeur: eurosEntiers(mrr.centimes / 100), detail: mrr.annuels > 0 ? `HT, annuel ÷ 12 · ${mrr.partAnnuels} % en annuel` : "HT, Essentiel et Pro", fleche: flecheDe(mrr.centimes, mrrAvant.centimes) },
         { cle: "ia", titre: "Coût IA du mois", valeur: eurosEntiers(ia), detail: "", fleche: flecheDe(Math.round(ia), Math.round(iaP), "bas") },
       ],
       croissance: { visites: await this.compteur("visite", mois, new Date(maintenant.getTime() + JOUR)), inscriptions: await inscriptions(mois, maintenant), inscriptionsAvant: await inscriptions(moisPrec, mois), installations: await this.compteur("installation", mois, new Date(maintenant.getTime() + JOUR)), essais: enEssai, conversion: taux(dejaPaye.size, essaiFini) },
