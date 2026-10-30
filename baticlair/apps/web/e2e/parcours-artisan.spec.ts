@@ -61,7 +61,7 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.goto("/");
   // Sans session : la page publique, puis « Créer un compte » mène à l'inscription.
   // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche.
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Regroupe tes achats avec d’autres artisans\. Plus on est, moins on paie\.$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ne te contente plus d’un seul prix\.$/);
   // L'aperçu WhatsApp : écrit dès le serveur avec l'adresse du site, jamais vercel.app.
   const html = await (await page.request.get("/")).text();
   expect(html).toMatch(/<meta property="og:image" content="http:\/\/localhost:3000\/marque\/partage\.png"/);
@@ -2597,18 +2597,22 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // est, moins on paie » et ses 20 artisans, l'offre, les questions, le dernier appel.
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Regroupe tes achats avec d’autres artisans\. Plus on est, moins on paie\.$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ne te contente plus d’un seul prix\.$/);
   await expect(page.getByText("Par un artisan, pour les artisans", { exact: true })).toBeVisible();
   const ordre = await Promise.all(
-    [/^Regroupe tes achats/, /^Plus on est, moins on paie\./, /^Moins de temps au téléphone\./, /^Et si on achetait ensemble/, /^À ton rythme\./, "Tu te poses des questions ?", /^Le prochain bon prix/].map(
+    [/^Ne te contente plus/, /^Une demande\./, /^Plus on est, moins on paie\./, /^Et si on achetait ensemble/, /^À ton rythme\./, "Tu te poses des questions ?", /^Le prochain bon prix/].map(
       async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y,
     ),
   );
   expect([...ordre].sort((x, y) => x - y)).toEqual(ordre);
   // Greg, 30 octobre 2026 (« évolution stratégique ») : le collectif d'abord, quatre étapes qui disent ce qui marche
   // aujourd'hui, son histoire, et « Rejoindre le collectif » (l'inscription est gratuite, pas les achats groupés).
-  for (const etape of ["Prépare ta liste.", "Envoie à plusieurs négoces.", "Rejoins un achat groupé.", "Choisis ton offre."]) await expect(page.getByRole("heading", { name: etape })).toBeVisible();
-  await expect(page.getByText("L’union fait la force", { exact: true })).toBeVisible();
+  // Greg, 30 octobre 2026, soir : trois étapes, l'achat groupé à part (facultatif) ; aucun badge « Recommandé ».
+  for (const etape of ["Prépare ta demande.", "Consulte plusieurs négoces.", "Compare et choisis."]) await expect(page.getByRole("heading", { name: etape })).toBeVisible();
+  await expect(page.locator("#fonctionnement .step")).toHaveCount(3);
+  await expect(page.getByText(/Recommandé/)).toHaveCount(0);
+  await expect(page.getByText(/C’est facultatif, Mobiiz te sert aussi pour tes seules demandes de prix\./)).toBeVisible();
+  await expect(page.getByText("En plus : l’union fait la force", { exact: true })).toBeVisible();
   const histoire = page.getByRole("region", { name: "Et si on achetait ensemble ?" });
   await expect(histoire.getByText(/^Je suis artisan\. Un jour, j’achète deux palettes/)).toBeVisible();
   await expect(histoire.getByText("Grégory, couvreur à Paimpol, fondateur de Mobiiz")).toBeVisible();
@@ -2620,7 +2624,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText(/premier achat groupé est offert/)).toHaveCount(0);
   await expect(page.getByText("1 analyse de devis et 3 scans de liste offerts")).toBeVisible();
   const faq = page.getByRole("region", { name: "Tu te poses des questions ?" });
-  await expect(faq.locator("summary")).toHaveText(["Je peux garder mes négoces habituels ?", "Est-ce que Mobiiz est gratuit ?", "Est-ce que je dois obligatoirement commander ?", "Est-ce que je vais forcément payer moins cher ?", "Avec qui je suis regroupé ?"]);
+  await expect(faq.locator("summary")).toHaveText(["Je peux garder mes négoces habituels ?", "Où arrivent les réponses des négoces ?", "Est-ce que Mobiiz est gratuit ?", "Est-ce que je dois obligatoirement commander ?", "Est-ce que je vais forcément payer moins cher ?", "Avec qui je suis regroupé ?"]);
   for (const s of await faq.locator("summary").all()) await s.click();
   await expect(faq.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
   await expect(faq.getByText("Oui : tes listes, l'envoi à tes négoces et les achats groupés sont gratuits, sans limite de temps.", { exact: false })).toBeVisible();
@@ -2669,6 +2673,10 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByRole("heading", { name: /^À ton rythme\./ })).toBeInViewport();
   await expect(fixe).toHaveAttribute("data-visible", "");
   await expect(fixe.getByRole("link", { name: "Rejoindre le collectif" })).toBeVisible();
+  // Greg, 30 octobre 2026, soir : le bouton fixe est un bouton seul, sans bandeau ni dégradé, qui ne cache pas la lecture.
+  await expect(fixe).toHaveCSS("background-image", "none");
+  expect((await fixe.boundingBox())!.height).toBeLessThan(80);
+  expect((await fixe.getByRole("link", { name: "Rejoindre le collectif" }).boundingBox())!.width).toBeLessThan(330);
   await page.locator("#finalPrimaryCTA").scrollIntoViewIfNeeded();
   await expect(fixe).not.toHaveAttribute("data-visible", "");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);

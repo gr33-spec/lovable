@@ -318,3 +318,30 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
    dans le premier écran d'un iPhone SE. */
 @media(max-width:900px){.mzp .hero h1{font-size:clamp(38px,9vw,60px);line-height:1.02;margin:18px 0 14px}.mzp .hero-lead{font-size:15px;margin-bottom:20px}.mzp .hero{padding-top:36px}}
 @media(max-width:390px){.mzp .hero h1{font-size:36px}}
+
+/* Recentrée sur les économies (Greg, 30 octobre 2026, soir) : trois étapes compactes ; sur téléphone, l'icône à gauche et
+   le texte à droite (une étape tient en une centaine de pixels au lieu d'un écran). */
+.mzp .steps.steps-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.mzp .steps-3 .step{min-height:0;padding:26px;gap:18px}
+.mzp .steps-3 .step-count{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.mzp .steps-3 .step h3{margin:0 0 8px;font-size:23px}
+.mzp .steps-3 .step p{margin:0;max-width:none}
+@media(max-width:900px){
+.mzp .section{padding:56px 0}
+.mzp .heading-row h2{font-size:clamp(32px,8.6vw,44px);margin:12px 0 12px}
+.mzp .steps.steps-3{grid-template-columns:1fr;gap:10px}
+.mzp .steps-3 .step{flex-direction:row;align-items:flex-start;padding:16px;gap:14px;border-radius:18px}
+.mzp .steps-3 .step-ico{width:40px;height:40px;border-radius:12px;flex-shrink:0}
+.mzp .steps-3 .step-ico svg{width:21px;height:21px}
+.mzp .steps-3 .step h3{font-size:19px;margin:0 0 5px}
+.mzp .steps-3 .step p{font-size:14px;line-height:1.5}
+.mzp .steps-3 .step-count{font-size:11px;margin-bottom:3px}
+.mzp .collective-section{padding:56px 0}
+.mzp .collective-copy h2{font-size:clamp(38px,9vw,52px)}
+/* Le bouton fixe : un bouton seul, sans bandeau ni dégradé, qui ne cache jamais la lecture. */
+.mzp .sticky-cta{background:none;padding:0 16px calc(12px + env(safe-area-inset-bottom));text-align:center;pointer-events:none}
+.mzp .sticky-cta.visible{pointer-events:none}
+.mzp .sticky-cta.visible .btn{pointer-events:auto}
+.mzp .sticky-cta .btn{width:auto;min-height:46px;padding:0 22px;font-size:15px;box-shadow:0 10px 26px rgba(12,10,8,.38)}
+.mzp .sticky-cta .under{display:none}
+}

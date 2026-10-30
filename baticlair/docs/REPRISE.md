@@ -15,9 +15,9 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-1. SUIVI 136, « Écris ta liste » (intitulé et quantité séparés, intitulés partagés dès 2 entreprises) : commit
-   5dd74549 fait localement ; suite complète lancée. Si verte : pousser, vérifier test.mobiiz.fr, captures, rapport.
-   Question ouverte à Greg : seuil de partage 2 ou 3 entreprises.
+1. SUIVI 136 « Écris ta liste » : poussé et en ligne (37e7b192). Question ouverte à Greg : seuil 2 ou 3 entreprises.
+   SUIVI 137, landing : code et e2e de la landing faits ; reste la série complète, pousser, captures, compte rendu en 7
+   points (captures avant / après dans le scratchpad f1).
 
 ## À faire ensuite (dans cet ordre)
 

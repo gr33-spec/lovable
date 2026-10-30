@@ -13,6 +13,13 @@ import "./premium.css";
  * des 20 artisans, le fonctionnement en quatre étapes (seulement ce qui marche aujourd'hui), l'histoire de Greg, l'offre,
  * les questions, le dernier appel. Styles de la maquette bornés à `.mzp` (`premium.css`).
  *
+ * RECENTRÉE SUR LES ÉCONOMIES (Greg, 30 octobre 2026, soir : « l'argent économisé est la finalité ») : d'abord faire
+ * jouer la concurrence entre ses négoces (une demande, plusieurs négoces, les réponses au même endroit), en trois étapes ;
+ * ensuite le collectif, facultatif, pour les grosses commandes (« Plus on est, moins on paie. », les 20 artisans) ; puis
+ * l'histoire, l'offre, les questions, le dernier appel. La concurrence est saine : jamais un mot contre les négoces. Rien
+ * n'est promis qui n'existe : la comparaison porte sur les prix donnés par le lien, un devis reçu par e-mail est rangé,
+ * pas lu ; jamais « IA » sur la landing (règle du 27 octobre), la préparation depuis un devis est dite « on t'aide ».
+ *
  * Vérifié contre les conditions en vigueur (`TARIFS`, réponses validées par Greg le 28 octobre) : depuis le 30 octobre
  * (décisions de Greg), les achats groupés sont GRATUITS ; seuls les outils IA ont des quotas. Le bouton reste « Rejoindre
  * le collectif », avec « Gratuit · Sans carte bancaire » dessous (décision 4). Le pied garde l'éditeur,
@@ -75,6 +82,11 @@ function Sprite() {
 
 const QUESTIONS = [
   { q: "Je peux garder mes négoces habituels ?", r: NEGOCES.r, lien: null },
+  {
+    q: "Où arrivent les réponses des négoces ?",
+    r: "Dans Mobiiz, avec ton chantier. Un négoce qui répond par le lien donne ses prix ligne par ligne, et Mobiiz te montre le moins cher. Un devis envoyé à ton adresse Mobiiz est rangé au même endroit. Tu choisis ensuite le négoce que tu veux.",
+    lien: null,
+  },
   { q: "Est-ce que Mobiiz est gratuit ?", r: TARIFS.question.r, lien: { href: "/tarifs", label: "Voir les tarifs détaillés" } },
   { q: "Est-ce que je dois obligatoirement commander ?", r: OBLIGE.r, lien: { href: "/cgu", label: "Lire les CGU" } },
   {
@@ -90,15 +102,14 @@ const QUESTIONS = [
 ] as const;
 
 /**
- * Les quatre étapes (Greg, 30 octobre 2026, point 3), dites avec ce qui marche aujourd'hui : la liste (devis, photo ou à
- * la main), l'envoi à plusieurs négoces avec le PDF, l'achat groupé du métier et du département, les réponses qui
- * arrivent dans Mobiiz. Rien sur une comparaison automatique des devis reçus en PDF : l'artisan les lit lui-même.
+ * Les trois étapes (Greg, 30 octobre 2026, soir : « quatre étapes, c'est confus, on croit l'achat groupé obligatoire ») :
+ * préparer sa demande (à la main, une liste scannée, ou depuis un devis), consulter plusieurs négoces, retrouver et comparer
+ * leurs réponses. L'achat groupé a sa section à part. Pas de badge « Recommandé » : chacun choisit sa façon.
  */
 const ETAPES = [
-  { ico: "i-list", titre: "Prépare ta liste.", texte: "Depuis ton devis, une photo ou à la main. Une ligne par matériau, tu gardes la main sur les quantités." },
-  { ico: "i-upload", titre: "Envoie à plusieurs négoces.", texte: "Ta demande de prix part avec un PDF propre, à tous tes négoces en une fois. Fini les appels un par un." },
-  { ico: "i-people", titre: "Rejoins un achat groupé.", texte: "Ta liste s’ajoute à celles des artisans de ton métier dans ton département. Les négoces chiffrent le volume." },
-  { ico: "i-search", titre: "Choisis ton offre.", texte: "Les réponses arrivent dans Mobiiz. Tu choisis selon le prix, le délai et la livraison." },
+  { ico: "i-list", titre: "Prépare ta demande.", texte: "Écris tes matériaux, prends ta liste en photo ou pars de ton devis, on t’aide à la préparer. Tu vérifies les quantités et c’est prêt." },
+  { ico: "i-upload", titre: "Consulte plusieurs négoces.", texte: "Tes négoces habituels, et d’autres si tu veux. Ils reçoivent tous la même demande, avec un PDF propre, en un seul envoi." },
+  { ico: "i-search", titre: "Compare et choisis.", texte: "Les réponses arrivent dans Mobiiz, avec ton chantier. Les prix donnés en ligne se comparent ligne par ligne : tu vois le moins cher." },
 ] as const;
 
 export function LandingPremium() {
@@ -114,9 +125,9 @@ export function LandingPremium() {
               <div className="hero-copy">
                 <span className="label">{ACCROCHE_APP.replace(/\.$/, "")}</span>
                 <h1 id="heroTitle">
-                  Regroupe tes achats avec d’autres artisans. <span>Plus on est, moins on paie.</span>
+                  Ne te contente plus <span>d’un seul prix.</span>
                 </h1>
-                <p className="hero-lead">Mobiiz réunit les besoins en matériaux des artisans de ton secteur pour demander aux négoces un prix sur le volume. Et au quotidien, tu prépares ta liste et tu l’envoies à tous tes négoces en une fois.</p>
+                <p className="hero-lead">Prépare ta demande de matériaux une fois, envoie-la à plusieurs négoces et compare leurs réponses. Pour les grosses commandes, regroupe-toi avec d’autres artisans : plus on est, moins on paie.</p>
                 <div className="hero-actions">
                   <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/inscription">
                     {CTA_COLLECTIF.bouton} <Icone id="i-arrow" className="arrow" />
@@ -140,17 +151,17 @@ export function LandingPremium() {
                   </picture>
                   <span className="photo-stamp">La force des pros réunis</span>
                 </div>
-                {/* L'aperçu dit le collectif d'abord (Greg, 30 octobre 2026, point 1) ; marqué « Exemple », sans chiffre réel. */}
-                <div className="product-card" role="group" aria-label="Exemple d'achat groupé dans Mobiiz">
+                {/* L'aperçu dit la demande à plusieurs négoces (Greg, 30 octobre 2026, soir) ; marqué « Exemple », sans prix. */}
+                <div className="product-card" role="group" aria-label="Exemple de demande de prix dans Mobiiz">
                   <div className="product-card-top">
                     <span className="mini-brand">Mobiiz</span>
                     <span className="mini-counter">Exemple</span>
                   </div>
-                  <h3>Achat groupé · Couverture</h3>
+                  <h3>Ta demande · 3 négoces</h3>
                   {[
-                    ["i-people", "Les artisans du département réunis"],
-                    ["i-list", "Leurs listes additionnées"],
-                    ["i-upload", "Une seule demande aux négoces"],
+                    ["i-list", "Ta liste, un PDF propre"],
+                    ["i-upload", "Envoyée à tes négoces"],
+                    ["i-search", "Leurs prix côte à côte"],
                   ].map(([ico, t]) => (
                     <div className="product-action" key={t}>
                       <span className="pic">
@@ -164,33 +175,33 @@ export function LandingPremium() {
                   ))}
                 </div>
                 <div className="glass-note">
-                  <Icone id="i-people" /> L’union fait la force.
+                  <Icone id="i-search" /> Fais jouer la concurrence.
                 </div>
               </div>
             </div>
             <div className="value-line">
               <div className="value-item">
-                <Icone id="i-people" />
-                <span>
-                  Des achats groupés
-                  <br />
-                  entre artisans
-                </span>
-              </div>
-              <div className="value-item">
                 <Icone id="i-upload" />
                 <span>
-                  Tous tes négoces
+                  Plusieurs négoces
                   <br />
                   en une demande
                 </span>
               </div>
               <div className="value-item">
-                <Icone id="i-list" />
+                <Icone id="i-search" />
                 <span>
-                  Ta liste prête,
+                  Leurs réponses
                   <br />
-                  sans tout retaper
+                  au même endroit
+                </span>
+              </div>
+              <div className="value-item">
+                <Icone id="i-people" />
+                <span>
+                  Les achats groupés
+                  <br />
+                  en plus
                 </span>
               </div>
             </div>
@@ -200,9 +211,9 @@ export function LandingPremium() {
         <div className="ticker">
           <div className="wrap ticker-inner" role="group" aria-label="Les avantages Mobiiz">
             {[
-              ["✳", "Regroupe"],
-              ["↗", "Demande"],
-              ["✳", "Choisis"],
+              ["✳", "Prépare"],
+              ["↗", "Consulte"],
+              ["✳", "Compare"],
               ["↓", "Plus on est, moins on paie"],
             ].map(([s, t]) => (
               <span className="ticker-item" key={t}>
@@ -213,15 +224,45 @@ export function LandingPremium() {
           </div>
         </div>
 
-        {/* L'argument principal, juste sous l'accroche (Greg, 30 octobre 2026, points 1 et 4). */}
+        <section className="section light" id="fonctionnement" aria-labelledby="stepsTitle">
+          <div className="wrap">
+            <div className="heading-row">
+              <div>
+                <span className="section-kicker smallcap">Comment ça marche</span>
+                <h2 id="stepsTitle">
+                  Une demande.
+                  <br />
+                  Plusieurs négoces.
+                </h2>
+              </div>
+              <p className="aside">Fais jouer la concurrence sans multiplier les appels ni les e-mails. Tu gardes tes négoces habituels.</p>
+            </div>
+            <ol className="steps steps-3" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+              {ETAPES.map((e, i) => (
+                <li className="step" key={e.titre}>
+                  <span className="step-ico">
+                    <Icone id={e.ico} />
+                  </span>
+                  <div>
+                    <span className="step-count">Étape {i + 1}</span>
+                    <h3>{e.titre}</h3>
+                    <p>{e.texte}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* Le collectif, en plus et facultatif (Greg, 30 octobre 2026, soir : un service complémentaire, pas une étape). */}
         <section className="collective-section" id="collectif" aria-labelledby="collectiveTitle">
           <div className="wrap collective-layout">
             <div className="collective-copy">
-              <span className="label">L’union fait la force</span>
+              <span className="label">En plus : l’union fait la force</span>
               <h2 id="collectiveTitle">
                 Plus on est, <span className="gold">moins on paie.</span>
               </h2>
-              <p>Seul, tu représentes une commande. Ensemble, on représente un volume, et un volume se négocie autrement. Regarde le principe sur un exemple.</p>
+              <p>Pour tes grosses commandes, regroupe tes besoins avec les artisans de ton métier, dans ton département : ensemble, on pèse plus face aux négoces. C’est facultatif, Mobiiz te sert aussi pour tes seules demandes de prix.</p>
               <ol className="explain" style={{ listStyle: "none", padding: 0 }}>
                 {["Les artisans de ton secteur se regroupent", "Leurs besoins s’additionnent", "Les négoces chiffrent le volume"].map((t, i) => (
                   <li className="explain-item" key={t}>
@@ -237,36 +278,6 @@ export function LandingPremium() {
           </div>
         </section>
 
-        <section className="section light" id="fonctionnement" aria-labelledby="stepsTitle">
-          <div className="wrap">
-            <div className="heading-row">
-              <div>
-                <span className="section-kicker smallcap">Comment ça marche</span>
-                <h2 id="stepsTitle">
-                  Moins de temps au téléphone.
-                  <br />
-                  Plus de poids pour tes achats.
-                </h2>
-              </div>
-              <p className="aside">Quatre étapes, sans changer ta façon de travailler. Tu gardes tes négoces.</p>
-            </div>
-            <ol className="steps steps-4" style={{ listStyle: "none", margin: 0, padding: 0 }}>
-              {ETAPES.map((e, i) => (
-                <li className="step" key={e.titre}>
-                  <div className="step-top">
-                    <span className="step-count">ÉTAPE 0{i + 1}</span>
-                    <span className="step-ico">
-                      <Icone id={e.ico} />
-                    </span>
-                  </div>
-                  <h3>{e.titre}</h3>
-                  <p>{e.texte}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
         {/* L'histoire de Greg (point 5), ses mots raccourcis ; les négoces ne sont pas des adversaires. */}
         <section className="bridge" id="histoire" aria-labelledby="histoireTitle">
           <div className="wrap">
@@ -276,9 +287,9 @@ export function LandingPremium() {
                 Et si on achetait <span className="accent-underline">ensemble ?</span>
               </h2>
               <blockquote className="histoire">
-                <p>Je suis artisan. Un jour, j’achète deux palettes et j’obtiens un excellent prix. Quelques jours plus tard, je retourne au même négoce pour quelques fournitures : le prix n’a plus rien à voir.</p>
-                <p>À chaque commande, c’est la même histoire : discuter, négocier, presque demander la remise. Alors je me suis posé une question toute simple : et si, au lieu d’acheter chacun dans notre coin, on regroupait nos besoins ?</p>
-                <p>Pour le négoce aussi, un volume regroupé et bien préparé, c’est plus simple à chiffrer et à livrer. C’est comme ça qu’est né Mobiiz.</p>
+                <p>Je suis artisan. Un jour, j’achète deux palettes à un excellent prix. Quelques jours plus tard, pour quelques fournitures au même endroit, le prix n’a plus rien à voir.</p>
+                <p>J’en avais assez de renégocier à chaque commande. Alors je me suis demandé : et si on simplifiait nos demandes de prix, et si on regroupait nos besoins pour peser plus ?</p>
+                <p>Pour le négoce aussi, une demande claire et un volume regroupé, c’est plus simple à chiffrer. C’est comme ça qu’est né Mobiiz.</p>
               </blockquote>
               <figcaption className="histoire-signature">Grégory, couvreur à Paimpol, fondateur de Mobiiz</figcaption>
             </figure>
@@ -296,13 +307,32 @@ export function LandingPremium() {
                   Avec tes besoins.
                 </h2>
               </div>
-              <p className="aside">Commence par tes listes et tes négoces. Rejoins un achat groupé quand c’est le bon moment pour toi.</p>
+              <p className="aside">Commence par tes demandes de prix. Rejoins un achat groupé quand une grosse commande s’y prête.</p>
             </div>
             <div className="benefits">
               <article className="benefit highlight">
-                <span className="benefit-label">01 / La force du groupe</span>
+                <span className="benefit-label">01 / Ton quotidien</span>
+                <h3>Tes négoces en concurrence.</h3>
+                <p>Un outil simple pour préparer tes listes et demander des prix à plusieurs négoces.</p>
+                <ul>
+                  <li>
+                    <Icone id="i-check" /> Des listes de matériaux claires, avec leur PDF
+                  </li>
+                  <li>
+                    <Icone id="i-check" /> Plusieurs négoces en une demande, les réponses au même endroit
+                  </li>
+                  <li>
+                    <Icone id="i-check" /> 1 analyse de devis et 3 scans de liste offerts
+                  </li>
+                </ul>
+                <Link className="cta-text" href="/inscription">
+                  Préparer ma première demande <Icone id="i-arrow" className="arrow" />
+                </Link>
+              </article>
+              <article className="benefit">
+                <span className="benefit-label">02 / En plus, le collectif</span>
                 <h3>Les achats groupés.</h3>
-                <p>Ta liste rejoint celles des artisans de ton métier, dans ton département. Les négoces chiffrent le volume.</p>
+                <p>Pour une grosse commande, ta liste rejoint celles des artisans de ton métier, dans ton département. Les négoces chiffrent le volume.</p>
                 <ul>
                   <li>
                     <Icone id="i-check" /> Les volumes de plusieurs artisans réunis
@@ -316,25 +346,6 @@ export function LandingPremium() {
                 </ul>
                 <Link className="cta-text" href="/tarifs">
                   Découvrir l&apos;offre <Icone id="i-arrow" className="arrow" />
-                </Link>
-              </article>
-              <article className="benefit">
-                <span className="benefit-label">02 / Ton quotidien</span>
-                <h3>Mes listes &amp; mes négoces.</h3>
-                <p>Un outil simple pour garder la main sur tes quantités et demander des prix.</p>
-                <ul>
-                  <li>
-                    <Icone id="i-check" /> Des listes de matériaux claires, avec leur PDF
-                  </li>
-                  <li>
-                    <Icone id="i-check" /> Tous tes négoces habituels en une demande
-                  </li>
-                  <li>
-                    <Icone id="i-check" /> 1 analyse de devis et 3 scans de liste offerts
-                  </li>
-                </ul>
-                <Link className="cta-text" href="/inscription">
-                  Créer ma première liste <Icone id="i-arrow" className="arrow" />
                 </Link>
               </article>
             </div>
@@ -383,9 +394,9 @@ export function LandingPremium() {
             <div className="final-card">
               <span className="label">Par les artisans. Pour les artisans.</span>
               <h2 id="finalTitle">
-                Le prochain bon prix <span>commence ensemble.</span>
+                Le prochain bon prix <span>commence ici.</span>
               </h2>
-              <p>Inscris-toi, prépare ta première liste et rejoins les artisans de ton secteur.</p>
+              <p>Inscris-toi, prépare ta première demande et consulte tes négoces. Le collectif est là quand une commande s’y prête.</p>
               <Link id="finalPrimaryCTA" className="btn btn-yellow" href="/inscription">
                 {CTA_COLLECTIF.bouton} <Icone id="i-arrow" className="arrow" />
               </Link>

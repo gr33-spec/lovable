@@ -37,7 +37,8 @@ test("l'app : trois choix, dans le même ordre ; la page Tarifs sans montant", (
   const ordre = ["Depuis mon devis — on t'avance", "Photo de ma liste", "Je la note moi-même"].map((t) => nouveau.indexOf(t));
   assert.ok(ordre.every((i) => i > 0), JSON.stringify(ordre));
   assert.deepEqual([...ordre].sort((a, b) => a - b), ordre);
-  assert.doesNotMatch(nouveau, INTERDITS);
+  // Ce que voit l'artisan : les lignes d'import (« coup-de-main-ia ») ne s'affichent pas.
+  assert.doesNotMatch(nouveau.replace(/^import .*$/gm, ""), INTERDITS);
   const tarifs = sansCommentaires(lire("app/(public)/tarifs/page.tsx"));
   // Greg, 29 octobre 2026 : la phrase vient de `TARIFS` (domaine), la même partout.
   assert.ok(tarifs.includes("TARIFS.enUneLigne"));

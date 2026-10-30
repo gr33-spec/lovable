@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
     "e2e": "playwright test",
-    "test": "node --test scripts/garde-a-completer.test.mjs scripts/sans-tiers.test.mjs scripts/nom-app.test.mjs scripts/erreurs-precises.test.mjs"
+    "test": "node --test scripts/garde-a-completer.test.mjs scripts/sans-tiers.test.mjs scripts/nom-app.test.mjs scripts/erreurs-precises.test.mjs scripts/landing-coup-de-main.test.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
