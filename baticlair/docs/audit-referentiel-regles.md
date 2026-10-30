@@ -209,7 +209,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `platine-sortie` | `nb_sorties` | §25 | sortie-de-toit | regles-sans-test-audit.test.ts |
 | Besoin | `porte-solin-abergement` | `arrondi_sup(ml_solin / regle.longueur_bande_2m)` | §7 | abergement-cheminee | dernier-recours.test.ts |
 | Besoin | `porte-solin-faconnees` | `arrondi_sup(longueur_bande / regle.longueur_bande_2m)` | §1 | bande-porte-solin | chantier-test-45-5.test.ts (par §1), dernier-recours.test.ts (par §1), document-d2026-018.test.ts (par §1) |
-| Besoin | `profil` | `longueur_gouttiere` | §7, §25, §15 | gouttiere, gouttiere-pvc-alu | lecture-de00000071.test.ts, lot-couverture-4.test.ts, rampant-long-panneaux-habitudes.test.ts, temps-deux-questions.test.ts, trades.test.ts, demande-de-devis-45.test.ts, lecture-51-5.test.ts, prompt-lecture.test.ts, rgpd.test.ts |
+| Besoin | `profil` | `longueur_gouttiere` | §7, §25, §15 | gouttiere, gouttiere-pvc-alu | lecture-de00000071.test.ts, lot-couverture-4.test.ts, rampant-long-panneaux-habitudes.test.ts, temps-deux-questions.test.ts, trades.test.ts, achat-groupe.test.ts, demande-de-devis-45.test.ts, lecture-51-5.test.ts, prompt-lecture.test.ts, rgpd.test.ts |
 | Besoin | `raccords` | `nb_fenetres` | §11 | fenetre-de-toit | lecture-de00000071.test.ts, fiches-epreuves-faux-lecteur.test.ts, lecture-51-5.test.ts |
 | Besoin | `rouleaux-plomb` | `arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb)` | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
 | Besoin | `talons` | `regle.talons_par_ligne * nb_lignes` | §15 | gouttiere-pvc-alu | lot-couverture-3.test.ts |

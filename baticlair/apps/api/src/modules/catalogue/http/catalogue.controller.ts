@@ -52,7 +52,7 @@ export class AdminCatalogueController {
   @Post()
   async ajouter(@Tenant() tenant: TenantContext, @Body(new ZodPipe(ajoutBody)) body: z.infer<typeof ajoutBody>) {
     await this.garde(tenant);
-    return this.catalogue.ajouter(body);
+    return this.catalogue.ajouter({ ...body, variante: body.variante ?? null, designation: body.designation ?? null });
   }
 
   @Get("lignes-libres")

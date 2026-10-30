@@ -371,7 +371,9 @@ export class AchatGroupeService {
       }),
     );
     // Point 4 du 30 octobre : un achat groupé reste rattaché à UN métier.
-    const famillesLues = [...new Set(lues.flatMap((l) => (l.ref.famille ? [l.ref.famille] : [])))];
+    // (Les lignes du catalogue ; une ligne lue dans un devis garde la règle du 27 octobre : un panier de plusieurs métiers
+    // part aussi aux généralistes.)
+    const famillesLues = [...new Set(lues.flatMap((l) => (l.cle && l.ref.famille ? [l.ref.famille] : [])))];
     if (famillesLues.length > 1)
       throw validationFailed("Several trades", { reason: "plusieurs_metiers", message: "Ces lignes sont de plusieurs métiers : un achat groupé n'en prend qu'un. Mets chaque métier dans son propre achat groupé." });
     const maintenant = this.now();
@@ -386,7 +388,7 @@ export class AchatGroupeService {
       achat = await this.prisma.regroupementNegocie.findFirst({ where: { id: e.achatId, mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant }, departement } });
       if (!achat) throw new DomainError("conflict", "This group purchase is closed", { reason: "achat_clos", message: "Cet achat groupé est clos ou hors de ton secteur." });
     } else {
-      const famille = famillesLues[0] ?? this.metierDe(company.trades, []);
+      const famille = famillesLues[0] ?? this.metierDe(company.trades, lues.flatMap((l) => (l.ref.famille ? [l.ref.famille] : [])));
       if (!e.dateBesoin) throw validationFailed("Date required", { reason: "date_requise", message: "Indique ta date de livraison." });
       const dates = this.dates(e.dateBesoin);
       if (dates.clotureLe <= maintenant) throw validationFailed(PHRASE_DATE_TROP_PROCHE, { reason: "date_trop_proche", message: PHRASE_DATE_TROP_PROCHE });
