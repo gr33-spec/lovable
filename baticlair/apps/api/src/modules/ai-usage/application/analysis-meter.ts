@@ -69,6 +69,18 @@ export class AnalysisMeter {
     return { status: "go", analysis };
   }
 
+  /**
+   * La jauge (Greg, 30 octobre 2026, « évolution stratégique », point 8 : « des jauges d'utilisation ») : ce qui reste des
+   * lectures offertes, dit AVANT le dépôt, avec les règles en vigueur et le même décompte que `begin` ; null quand rien
+   * n'est limité (abonné, essai, zone offerte). Ne change aucun droit.
+   */
+  async jauge(companyId: string): Promise<{ limite: number; utilisees: number; restantes: number; parMois: boolean } | null> {
+    const gratuit = await this.limiteGratuite(companyId);
+    if (!gratuit) return null;
+    const utilisees = await this.analyses.countBillable(companyId, gratuit.total ? null : currentMonth(this.now()));
+    return { limite: gratuit.limite, utilisees, restantes: Math.max(0, gratuit.limite - utilisees), parMois: !gratuit.total };
+  }
+
   complete(analysisId: string, options: { billable?: boolean } = {}): Promise<AnalysisRecord> {
     const at = this.now();
     return this.analyses.complete(analysisId, currentMonth(at), at, options.billable ?? true);

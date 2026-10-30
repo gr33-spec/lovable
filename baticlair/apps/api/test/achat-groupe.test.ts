@@ -290,12 +290,16 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(r.perso).toHaveLength(1);
     expect(r.offert).toBe(true);
 
-    // Point 24 : trois lectures IA offertes en tout (pas par mois), puis la phrase de `TARIFS.paywallListes`.
+    // Point 24 : trois lectures IA offertes en tout (pas par mois), puis la phrase de `TARIFS.paywallListes`. La jauge
+    // (30 octobre 2026) dit ce qui reste avant le dépôt, avec le même décompte.
+    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body).toEqual({ jauge: { limite: 3, utilisees: 0, restantes: 3, parMois: false } });
     for (const mois of ["2026-07", "2026-08", "2026-09"])
       await ctx.prisma.aiAnalysis.create({ data: { companyId: c.companyId, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote", status: "completed", billable: true, billingMonth: mois } });
     const meter = ctx.app.get(AnalysisMeter);
     await expect(meter.begin({ companyId: c.companyId, userId: null, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote" })).rejects.toMatchObject({ details: { refus: "lectures", phrase: PHRASE_LECTURES_EPUISEES } });
+    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body).toEqual({ jauge: { limite: 3, utilisees: 3, restantes: 0, parMois: false } });
     await abonner(c.companyId);
+    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body).toEqual({ jauge: null });
     expect((await meter.begin({ companyId: c.companyId, userId: null, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote" })).status).toBe("go");
   });
 
@@ -397,5 +401,8 @@ describe("le catalogue complet et la ligne libre", { timeout: 240_000 }, () => {
     await greg.agent.post("/v1/admin/catalogue/lignes-libres/rattacher").send({ ligneId: libres[0].id, cle: PANNE }).expect(201);
     const lignes = await ctx.prisma.ligneAchatGroupe.findMany({ where: { regroupementId: pa.achatId } });
     expect(lignes.map((l) => [l.cle, Number(l.quantite), l.libre])).toEqual([[`cat:${PANNE}`, 15, false]]);
+    // Chaque geste de l'admin du catalogue est au journal (relecture du 30 octobre 2026).
+    const journal = await ctx.prisma.journalAdmin.findMany({ where: { action: { startsWith: "catalogue:" } }, orderBy: { createdAt: "asc" } });
+    expect(journal.map((j) => j.action)).toEqual(["catalogue:ajout", "catalogue:modification", "catalogue:masque", "catalogue:rattachement"]);
   });
 });

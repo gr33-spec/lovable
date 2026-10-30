@@ -213,6 +213,10 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   // Greg, 27 octobre 2026, 2e message, point 31 : trois choix, le devis d'abord.
   await expect(page.getByText("Depuis mon devis — on t'avance", { exact: true })).toBeVisible();
+  // Greg, 30 octobre 2026 (point 10) : avant de déposer, la lecture est dite comme une aide, ses mots.
+  const coupDeMain = page.getByRole("region", { name: "Besoin d'un coup de main ?" });
+  await expect(coupDeMain.getByText(/^L'IA peut t'aider à extraire les matériaux de ton devis, mais le résultat dépend de la qualité et de la précision du document\./)).toBeVisible();
+  await expect(coupDeMain.getByText(/Pense à toujours vérifier et corriger ta liste avant de l'utiliser\.$/)).toBeVisible();
   await expect(page.getByLabel("Nom du chantier")).toHaveCount(0);
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   // Le chantier est créé au dépôt ; la lecture part d'elle-même, sans champ « précisions » ni bouton à toucher.

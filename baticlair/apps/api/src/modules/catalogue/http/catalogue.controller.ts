@@ -41,6 +41,12 @@ export class AdminCatalogueController {
     const user = await this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });
     if (!user || !this.config.groupe.admins.includes(user.email.toLowerCase())) throw forbidden("Reserved to admins");
     await exigerDeuxFacteurs(this.prisma, tenant.userId);
+    return user.email;
+  }
+
+  /** Chaque changement du catalogue va au journal de l'admin, comme les autres gestes de l'admin (relecture du 30 octobre 2026). */
+  private journal(tenant: TenantContext, email: string, action: string, cible: string) {
+    return this.prisma.journalAdmin.create({ data: { userId: tenant.userId, email, action: `catalogue:${action}`, cible: cible.slice(0, 200) } });
   }
 
   @Get()
@@ -51,8 +57,10 @@ export class AdminCatalogueController {
 
   @Post()
   async ajouter(@Tenant() tenant: TenantContext, @Body(new ZodPipe(ajoutBody)) body: z.infer<typeof ajoutBody>) {
-    await this.garde(tenant);
-    return this.catalogue.ajouter({ ...body, variante: body.variante ?? null, designation: body.designation ?? null });
+    const email = await this.garde(tenant);
+    const r = await this.catalogue.ajouter({ ...body, variante: body.variante ?? null, designation: body.designation ?? null });
+    await this.journal(tenant, email, "ajout", `${body.metier} › ${body.famille} › ${body.produit}${body.variante ? ` › ${body.variante}` : ""}`);
+    return r;
   }
 
   @Get("lignes-libres")
@@ -63,13 +71,17 @@ export class AdminCatalogueController {
 
   @Post("lignes-libres/rattacher")
   async rattacher(@Tenant() tenant: TenantContext, @Body(new ZodPipe(rattacherBody)) body: z.infer<typeof rattacherBody>) {
-    await this.garde(tenant);
-    return this.catalogue.rattacherLigneLibre(body.ligneId, body.cle);
+    const email = await this.garde(tenant);
+    const r = await this.catalogue.rattacherLigneLibre(body.ligneId, body.cle);
+    await this.journal(tenant, email, "rattachement", `${body.ligneId} → ${body.cle}`);
+    return r;
   }
 
   @Patch()
   async modifier(@Tenant() tenant: TenantContext, @Query("cle") cle: string | undefined, @Body(new ZodPipe(modifBody)) body: z.infer<typeof modifBody>) {
-    await this.garde(tenant);
-    return this.catalogue.modifier(cle ?? "", body);
+    const email = await this.garde(tenant);
+    const r = await this.catalogue.modifier(cle ?? "", body);
+    await this.journal(tenant, email, body.masque === true ? "masque" : body.masque === false ? "affiche" : "modification", cle ?? "");
+    return r;
   }
 }

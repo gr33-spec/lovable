@@ -8,6 +8,10 @@
  *   quand le seuil est franchi, chaque artisan de la zone garde le payant 30 jours (préavis) avant le paywall.
  * - Les regroupements n'existent que dans les `ZONES_ACTIVES` (22 au départ) ; ailleurs, tout le reste marche.
  * Du calcul pur : l'API donne l'état (abonnement, essai, zone), ce fichier dit les droits.
+ *
+ * ATTENTION (relecture du 30 octobre 2026) : ces règles sont celles du MODE ANCIEN. En mode achat groupé (`automatique`,
+ * celui en ligne), ce qui est gratuit et payant est dit par `tarifs.ts` (`TARIFS`) et appliqué par `DroitsService` :
+ * 3 listes préparées offertes en tout, plusieurs négoces par demande, achats groupés sur abonnement (le premier offert).
  */
 
 export const LECTURES_GRATUITES_MOIS_DEFAUT = 2;

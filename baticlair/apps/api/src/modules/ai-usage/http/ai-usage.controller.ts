@@ -2,6 +2,7 @@ import { Controller, Get, Inject, Query, UseGuards } from "@nestjs/common";
 import { z } from "zod";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import { AnalysisMeter } from "../application/analysis-meter.js";
 import { AiUsageService } from "../application/ai-usage.service.js";
 
 const query = z.object({
@@ -14,10 +15,19 @@ const query = z.object({
 @Controller("v1/ai-usage")
 @UseGuards(TenantGuard)
 export class AiUsageController {
-  constructor(@Inject(AiUsageService) private readonly usage: AiUsageService) {}
+  constructor(
+    @Inject(AiUsageService) private readonly usage: AiUsageService,
+    @Inject(AnalysisMeter) private readonly meter: AnalysisMeter,
+  ) {}
 
   @Get()
   monthly(@Tenant() tenant: TenantContext, @Query(new ZodPipe(query)) q: z.infer<typeof query>) {
     return this.usage.monthly(tenant, q.month);
+  }
+
+  /** La jauge des listes préparées offertes : `{ jauge: null }` quand rien n'est limité. */
+  @Get("jauge")
+  async jauge(@Tenant() tenant: TenantContext) {
+    return { jauge: await this.meter.jauge(tenant.companyId) };
   }
 }

@@ -26,10 +26,11 @@ export class AdminEmailsController {
     @Inject(EMAIL_RECU) private readonly lecteur: LecteurEmailRecu,
   ) {}
 
-  private async garde(tenant: TenantContext): Promise<void> {
+  private async garde(tenant: TenantContext): Promise<string> {
     const user = await this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });
     if (!user || !this.config.groupe.admins.includes(user.email.toLowerCase())) throw forbidden("Reserved to admins");
     await exigerDeuxFacteurs(this.prisma, tenant.userId);
+    return user.email;
   }
 
   @Get()
@@ -41,7 +42,10 @@ export class AdminEmailsController {
   @Post(":id/rattacher")
   @HttpCode(200)
   async rattacher(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(rattacherBody)) body: z.infer<typeof rattacherBody>) {
-    await this.garde(tenant);
-    return this.recus.rattacherMisDeCote(id, body.adresse, this.lecteur);
+    const email = await this.garde(tenant);
+    const r = await this.recus.rattacherMisDeCote(id, body.adresse, this.lecteur);
+    // Au journal de l'admin, comme ses autres gestes (relecture du 30 octobre 2026).
+    await this.prisma.journalAdmin.create({ data: { userId: tenant.userId, email, action: "email:rattache", cible: `${id} → ${body.adresse}`.slice(0, 200) } });
+    return r;
   }
 }
