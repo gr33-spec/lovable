@@ -81,3 +81,4 @@ export * from "./apprentissage/habitudes.js";
 export * from "./pilotage/tableau.js";
 export * from "./catalogue/catalogue.js";
 export * from "./catalogue/amorce.js";
+export * from "./catalogue/libelles-artisans.js";

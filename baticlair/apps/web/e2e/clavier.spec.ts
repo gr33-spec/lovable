@@ -79,11 +79,14 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     await page.goto("/chantiers/nouveau");
     await page.getByRole("button", { name: "Je la note moi-même" }).click();
     const dialogue = page.getByRole("dialog", { name: "Écris ta liste" });
-    await champVisible(page, dialogue.getByLabel("Matériau et quantité"));
+    await champVisible(page, dialogue.getByLabel("Intitulé"));
     await expect(dialogue.getByRole("button", { name: "Terminé" })).toBeInViewport({ ratio: 1 });
-    await dialogue.getByLabel("Matériau et quantité").fill("Crochets inox 90 pièces");
+    await dialogue.getByLabel("Intitulé").fill("Crochets inox");
     await page.keyboard.press("Enter");
-    await champVisible(page, dialogue.getByLabel("Matériau et quantité"));
+    await champVisible(page, dialogue.getByLabel("Quantité"));
+    await dialogue.getByLabel("Quantité").fill("90");
+    await page.keyboard.press("Enter");
+    await champVisible(page, dialogue.getByLabel("Intitulé"));
     await dialogue.getByRole("button", { name: "Fermer" }).click();
 
     // 3. L'achat groupé : la quantité, la commune, les négoces (e-mail, nom, téléphone).

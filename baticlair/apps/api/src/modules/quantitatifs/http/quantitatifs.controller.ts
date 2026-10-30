@@ -10,6 +10,7 @@ import { ZodPipe } from "../../../platform/http/zod.js";
 import type { RequestWithUser } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { chunkedFields, UploadParts } from "../../documents/index.js";
+import { CatalogueService } from "../../catalogue/index.js";
 import { QuantitatifsService } from "../application/quantitatifs.service.js";
 
 type LigneRecue = { libelle: string; quantite?: string | null; unite?: string | null; prix?: string | null; reference?: string | null };
@@ -108,7 +109,10 @@ const correction = z.discriminatedUnion("action", [
 @Controller("v1/quantitatifs")
 @UseGuards(TenantGuard)
 export class QuantitatifsController {
-  constructor(@Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService) {}
+  constructor(
+    @Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService,
+    @Inject(CatalogueService) private readonly catalogue: CatalogueService,
+  ) {}
 
   @Throttle({ default: HOURLY(30) })
   @Post()
@@ -140,6 +144,9 @@ export class QuantitatifsController {
       );
     } else if (body.lignes) {
       result = await this.quantitatifs.fromLines(tenant, body.lignes.map(ligneEntree), ctx, r);
+      // « Écris ta liste » (Greg, 30 octobre 2026) : les intitulés de l'artisan nourrissent les suggestions ; jamais ceux
+      // d'un partenaire (clé API), et une panne ici ne retient jamais la liste.
+      if (!req.apiKey) await this.catalogue.noterLibelles(tenant.companyId, body.lignes).catch(() => undefined);
     } else {
       throw validationFailed("Missing quote", [{ path: "file", message: "send a PDF (file) or lines (lignes)" }]);
     }

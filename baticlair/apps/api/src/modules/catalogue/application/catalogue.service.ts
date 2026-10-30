@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
 import {
+  aPlat,
   arbreArticles,
+  cleDeLibelle,
+  libelleAPartager,
+  rechercherLibelles,
   FAMILLE_DU_METIER_CATALOGUE,
   LIBELLES_METIERS_CATALOGUE,
   METIERS_CATALOGUE,
@@ -82,14 +86,52 @@ export class CatalogueService {
       // La recherche cherche d'abord dans le métier choisi, puis dans les autres.
       const trouves = rechercherArticles(tous, recherche, 60);
       const duMetier = trouves.filter((a) => a.metier === metier);
-      return { metiers, metier, resultats: [...duMetier, ...trouves.filter((a) => a.metier !== metier)].slice(0, 30).map(vue), arbre: null };
+      const resultats = [...duMetier, ...trouves.filter((a) => a.metier !== metier)].slice(0, 30).map(vue);
+      // Les intitulés écrits par les artisans (Greg, 30 octobre 2026) : les siens et ceux de deux entreprises, après le catalogue.
+      const vus = new Set(resultats.map((a) => cleDeLibelle(a.designation)));
+      const ecrits = (await this.libellesConnus(tenant.companyId, recherche)).filter((l) => !vus.has(cleDeLibelle(l.libelle)));
+      return { metiers, metier, resultats, ecrits: ecrits.map((l) => ({ designation: l.libelle, unite: l.unite })), arbre: null };
     }
     const articles = await this.articles(metier);
     const arbre = arbreArticles(articles.map(vue)).map((f) => ({
       libelle: f.libelle,
       produits: f.enfants.map((p) => ({ libelle: p.libelle, article: p.article, variantes: p.enfants.map((v) => ({ libelle: v.libelle, article: v.article! })) })),
     }));
-    return { metiers, metier, resultats: null, arbre };
+    return { metiers, metier, resultats: null, ecrits: null, arbre };
+  }
+
+  /**
+   * Les intitulés écrits dans « Écris ta liste » (Greg, 30 octobre 2026) : gardés anonymisés, une fois par entreprise ; un
+   * intitulé déjà au catalogue n'est pas gardé. Jamais bloquant : une panne ici ne retient pas la liste.
+   */
+  async noterLibelles(companyId: string, lignes: readonly { libelle: string; unite?: string | null }[]): Promise<void> {
+    const parCle = new Map<string, { libelle: string; unite: string }>();
+    for (const l of lignes) {
+      const libelle = libelleAPartager(l.libelle);
+      if (libelle) parCle.set(cleDeLibelle(libelle), { libelle, unite: (l.unite ?? "").trim().slice(0, 40) || "pièces" });
+    }
+    if (!parCle.size) return;
+    await this.amorcer();
+    const catalogue = new Set((await this.prisma.catalogueArticle.findMany({ select: { designation: true } })).map((a) => cleDeLibelle(a.designation)));
+    const data = [...parCle].filter(([cle]) => !catalogue.has(cle)).map(([cle, l]) => ({ companyId, cle, ...l }));
+    if (data.length) await this.prisma.libelleEcrit.createMany({ data, skipDuplicates: true });
+  }
+
+  /** Les intitulés proposés pour une recherche : ceux qui contiennent le début du premier mot tapé, comptés par entreprise. */
+  private async libellesConnus(companyId: string, recherche: string) {
+    const mot = aPlat(recherche).split(" ").find((m) => m.length >= 3);
+    if (!mot) return [];
+    const lignes = await this.prisma.libelleEcrit.findMany({ where: { cle: { contains: mot.slice(0, 4) } }, select: { cle: true, libelle: true, unite: true, companyId: true }, orderBy: { createdAt: "asc" }, take: 2000 });
+    const parCle = new Map<string, { libelle: string; unite: string; entreprises: Set<string> }>();
+    for (const l of lignes) {
+      const c = parCle.get(l.cle) ?? { libelle: l.libelle, unite: l.unite, entreprises: new Set<string>() };
+      c.entreprises.add(l.companyId);
+      parCle.set(l.cle, c);
+    }
+    return rechercherLibelles(
+      [...parCle.values()].map((c) => ({ libelle: c.libelle, unite: c.unite, entreprises: c.entreprises.size, mien: c.entreprises.has(companyId) })),
+      recherche,
+    );
   }
 
   /** Un article choisi (jamais masqué), pour l'achat groupé, avec sa clé de regroupement ; null s'il n'existe pas. */

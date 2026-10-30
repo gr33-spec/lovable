@@ -3588,43 +3588,70 @@ test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un e
   await expect(demo.getByRole("status")).toContainText("Effacé : 5 faux artisans");
 });
 
-test("« Je la note moi-même » (28 octobre 2026, point 1) : en plein écran, le champ reste visible clavier ouvert, Entrée ajoute la ligne, un tap la modifie, « Terminé » mène à la liste", async ({ page }) => {
+test("« Je la note moi-même » (28 octobre 2026, point 1 ; 30 octobre : intitulé et quantité séparés) : en plein écran, les champs restent visibles clavier ouvert, l'intitulé garde ses chiffres, la quantité peut attendre, un tap modifie, « Terminé » mène à la liste", async ({ page }) => {
   await signUp(page);
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto("/chantiers/nouveau");
   await page.getByRole("button", { name: /Je la note moi-même/ }).click();
   const ecran = page.getByRole("dialog", { name: "Écris ta liste" });
-  const champ = ecran.getByLabel("Matériau et quantité");
+  const champ = ecran.getByLabel("Intitulé");
+  const qte = ecran.getByLabel("Quantité");
   await expect(champ).toBeFocused();
-  // Le clavier de l'iPhone SE laisse environ 330 px visibles : le champ, le texte tapé et « Terminé » y restent.
+  // Le clavier de l'iPhone SE laisse environ 330 px visibles : l'intitulé, la quantité et « Terminé » y restent.
   await page.setViewportSize({ width: 375, height: 330 });
-  await champ.fill("Ardoise naturelle 32×22 Espagne 1er choix, 1800 pièces");
-  await expect(champ).toBeInViewport({ ratio: 1 });
+  // Greg, 30 octobre 2026 : « crochet gouttière bandeau 25 », le 25 est le développé, jamais la quantité.
+  await champ.fill("Crochet gouttière bandeau 25");
+  await champ.press("Enter");
+  await expect(qte).toBeFocused();
+  await expect(qte).toBeInViewport({ ratio: 1 });
   await expect(ecran.getByRole("button", { name: "Terminé" })).toBeInViewport({ ratio: 1 });
-  await champ.press("Enter");
-  await expect(ecran.getByRole("list", { name: "Ma liste" }).getByText("Ardoise naturelle 32×22 Espagne 1er choix")).toBeVisible();
+  await qte.fill("40");
+  await qte.press("Enter");
+  const maListe = ecran.getByRole("list", { name: "Ma liste" });
+  await expect(maListe.getByRole("button", { name: "Modifier : Crochet gouttière bandeau 25" })).toContainText("40 pièces");
   await expect(champ).toHaveValue("");
+  await expect(qte).toHaveValue("");
   await expect(champ).toBeFocused();
-  // Le catalogue se propose pendant la frappe, d'un tap.
+  // Le catalogue se propose pendant la frappe, d'un tap : l'intitulé et son unité, puis la quantité.
   await champ.fill("liteau");
-  // Le catalogue complet (30 octobre, point 3) : « Liteau 27×38 · sapin traité classe 2 ».
   await ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: "Liteau 27×38 · sapin traité classe 2" }).click();
-  await expect(champ).toHaveValue("Liteau 27×38 · sapin traité classe 2, ");
-  await champ.fill("Liteau 27×38 · sapin traité classe 2, 200 m");
-  await champ.press("Enter");
-  // Une ligne sans quantité reste en texte libre, « à vérifier » ; un tap la remet dans le champ.
+  await expect(champ).toHaveValue("Liteau 27×38 · sapin traité classe 2");
+  await expect(qte).toBeFocused();
+  await qte.fill("200");
+  await ecran.getByLabel("Unité").selectOption("m");
+  await ecran.getByRole("button", { name: "Ajouter la ligne" }).click();
+  await expect(ecran.getByLabel("Unité")).toHaveValue("pièces");
+  // Sans quantité, rien ne bloque : la ligne part « à vérifier » ; un tap la remet dans les champs.
   await champ.fill("Crochets inox");
-  await champ.press("Enter");
-  await expect(ecran.getByText("à vérifier")).toBeVisible();
+  await ecran.getByRole("button", { name: "Ajouter la ligne" }).click();
+  await expect(maListe.getByRole("button", { name: "Modifier : Crochets inox" })).toContainText("quantité ?à vérifier");
   await ecran.getByRole("button", { name: "Modifier : Crochets inox" }).click();
   await expect(champ).toHaveValue("Crochets inox");
-  await champ.fill("Crochets inox, 2 paquets");
-  await champ.press("Enter");
+  await qte.fill("2");
+  await ecran.getByLabel("Unité").selectOption("paquets");
+  await qte.press("Enter");
+  await expect(maListe.getByRole("button", { name: "Modifier : Crochets inox" })).toContainText("2 paquets");
   await expect(champ).toBeInViewport({ ratio: 1 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await page.setViewportSize({ width: 375, height: 667 });
   await ecran.getByRole("button", { name: "Terminé" }).click();
   await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
-  await expect(page.getByText(/Ardoise naturelle 32×22/).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/Crochet gouttière bandeau 25/).first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText(/Liteau 27×38/).first()).toBeVisible();
+
+  // Un autre artisan écrit le même intitulé : il est ensuite proposé à tous dès qu'on tape ses mots.
+  await page.context().clearCookies();
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByRole("button", { name: /Je la note moi-même/ }).click();
+  await ecran.getByLabel("Intitulé").fill("crochet gouttière bandeau 25");
+  await ecran.getByRole("button", { name: "Ajouter la ligne" }).click();
+  await ecran.getByRole("button", { name: "Terminé" }).click();
+  await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
+  await page.context().clearCookies();
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByRole("button", { name: /Je la note moi-même/ }).click();
+  await ecran.getByLabel("Intitulé").fill("crochet band");
+  await expect(ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: "Crochet gouttière bandeau 25" })).toBeVisible();
 });

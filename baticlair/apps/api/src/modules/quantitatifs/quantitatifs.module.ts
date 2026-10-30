@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { PrismaService } from "../../platform/database/prisma.service.js";
+import { CatalogueModule } from "../catalogue/index.js";
 import { BillingModule, BillingService } from "../billing/index.js";
 import { DocumentsModule, DocumentsService } from "../documents/index.js";
 import { ProjectsModule, ProjectsService } from "../projects/index.js";
@@ -10,7 +11,7 @@ import { InfosChantierController, ListeExistanteController, QuantitatifsControll
 
 /** La porte d'entrée unique /v1/quantitatifs (§38), au-dessus des modules existants. */
 @Module({
-  imports: [TenancyModule, ProjectsModule, BillingModule, DocumentsModule, TakeoffModule],
+  imports: [TenancyModule, ProjectsModule, BillingModule, DocumentsModule, TakeoffModule, CatalogueModule],
   controllers: [QuantitatifsController, InfosChantierController, ListeExistanteController],
   providers: [
     {

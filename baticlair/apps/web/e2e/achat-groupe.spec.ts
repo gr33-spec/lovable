@@ -460,8 +460,9 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await page.goto("/chantiers/nouveau");
     await page.getByRole("button", { name: /Je la note moi-même/ }).click();
     const ecran = page.getByRole("dialog", { name: "Écris ta liste" });
-    await ecran.getByLabel("Matériau et quantité").fill("Liteaux 27×38, 400 m");
-    await ecran.getByLabel("Matériau et quantité").press("Enter");
+    await ecran.getByLabel("Intitulé").fill("Liteaux 27×38");
+    await ecran.getByLabel("Quantité").fill("400");
+    await ecran.getByLabel("Quantité").press("Enter");
     await expect(ecran.getByRole("list", { name: "Ma liste" })).toContainText("Liteaux 27×38");
     await page.waitForTimeout(700);
     await ecran.getByRole("button", { name: "Fermer" }).click();
