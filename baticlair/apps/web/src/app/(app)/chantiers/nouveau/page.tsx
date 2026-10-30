@@ -1,8 +1,10 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
 import { PenLine } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useRef, useState } from "react";
 import { EcrireMaListe } from "@/components/ecrire-ma-liste";
 import { DropZone } from "@/components/journey";
 import { Paywall, useBilling } from "@/components/paywall";
@@ -86,7 +88,7 @@ export default function NouveauChantierPage() {
       {/* Point 31 (Greg, 27 octobre 2026, 2e message) : trois choix, ses mots. */}
       <DropZone small titre="Depuis mon devis — on t'avance" sousTitre="Je te prépare la liste, tu vérifies les quantités." onFile={(f) => void drop(f, "devis")} pending={pending === "devis"} error={error} />
       <DropZone small kind="liste" titre="Photo de ma liste" sousTitre="Une photo, un PDF ou une capture : je la remets au propre." onFile={(f) => void drop(f, "liste")} pending={pending === "liste"} error={null} />
-      <SaisieListe />
+      <SaisieListeReprise />
     </>
   );
 }
@@ -95,8 +97,19 @@ export default function NouveauChantierPage() {
  * Achat groupé (Greg, 27 octobre 2026, point 1) : la liste se fait aussi À LA MAIN (désignation, quantité, unité), puis
  * arrive sur le même écran de liste, avec ses deux sorties.
  */
+function SaisieListeReprise() {
+  return (
+    <Suspense>
+      <SaisieListe />
+    </Suspense>
+  );
+}
+
 function SaisieListe() {
-  const [ouvert, setOuvert] = useState(false);
+  // « Reprendre ta liste » (accueil) arrive ici avec ?liste=1 : l'écran se rouvre sur la liste gardée.
+  const reprise = useSearchParams().get("liste") === "1";
+  const [ouvertMain, setOuvert] = useState<boolean | null>(null);
+  const ouvert = ouvertMain ?? reprise;
   const fermer = useCallback(() => setOuvert(false), []);
   return (
     <>

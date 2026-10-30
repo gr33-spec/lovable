@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, INPUT } from "@/components/ui";
 import { api, messageErreur } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { useBrouillon } from "@/lib/brouillon";
 
 /**
  * « ÉCRIS TA LISTE » EN PLEIN ÉCRAN (Greg, 28 octobre 2026, point 1 : « le clavier recouvre le champ, je tape à
@@ -31,8 +32,16 @@ export function analyserLigne(texte: string): LigneEcrite {
 
 export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
   const router = useRouter();
-  const [lignes, setLignes] = useState<LigneEcrite[]>([]);
-  const [texte, setTexte] = useState("");
+  // Correction après test de Greg (30 octobre 2026, point 2) : la liste commencée est gardée sur le serveur ; fermer,
+  // passer par le menu puis revenir la rouvre telle quelle (l'accueil propose « Reprendre ta liste »).
+  const b = useBrouillon<{ lignes: LigneEcrite[]; texte: string }>(
+    "liste:nouvelle",
+    { type: "liste", url: "/chantiers/nouveau?liste=1", titre: (d) => `Ta liste · ${d.lignes.length} ligne${d.lignes.length > 1 ? "s" : ""}`, vide: (d) => d.lignes.length === 0 && !d.texte.trim() },
+    { lignes: [], texte: "" },
+  );
+  const { lignes, texte } = b.donnees;
+  const setLignes = (f: (ls: LigneEcrite[]) => LigneEcrite[]) => b.modifier((d) => ({ ...d, lignes: f(d.lignes) }));
+  const setTexte = (t: string) => b.modifier((d) => ({ ...d, texte: t }));
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const champ = useRef<HTMLInputElement>(null);
@@ -76,6 +85,7 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
     setErreur(null);
     try {
       const q = await api<{ projetId: string }>("/v1/quantitatifs", { method: "POST", body: { lignes: toutes.map((l) => ({ libelle: l.libelle, quantite: l.quantite || null, unite: l.unite || "pièces" })) } });
+      b.effacer();
       router.push(`/chantiers/${q.projetId}`);
     } catch (e) {
       setErreur(messageErreur(e));

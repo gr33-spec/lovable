@@ -7,6 +7,7 @@ import {
   expediteurVia,
   fauteAdresse,
   lireAdresseMobiiz,
+  cleAdresse,
   nomAdresse,
   nomExpediteur,
   objetAvecRepere,
@@ -64,6 +65,10 @@ describe("l'adresse Mobiiz de l'artisan", () => {
     expect(lireAdresseMobiiz(["toitures-martin@mobiiz.fr"], "mobiiz.fr")).toEqual({ adresse: "toitures-martin", etiquette: null });
     expect(lireAdresseMobiiz(["toitures-martin@autre.fr", "x@mobiiz.fr"], "mobiiz.fr")).toEqual({ adresse: "x", etiquette: null });
     expect(lireAdresseMobiiz(["toitures-martin@autre.fr"], "mobiiz.fr")).toBeNull();
+    // Correction après test de Greg (30 octobre 2026) : les variantes sont lues, la clé les réunit.
+    expect(lireAdresseMobiiz(["BATI.Invest@Mobiiz.fr"], "mobiiz.fr")).toEqual({ adresse: "bati.invest", etiquette: null });
+    expect(lireAdresseMobiiz(["bati_invest+devis@mobiiz.fr"], "mobiiz.fr")).toEqual({ adresse: "bati_invest", etiquette: null });
+    expect(new Set(["bati-invest", "batiinvest", "BATI-INVEST", "bati.invest", "Bati_Invest"].map(cleAdresse))).toEqual(new Set(["batiinvest"]));
     expect(nomExpediteur("Négoce Dupont <ventes@dupont.fr>")).toBe("Négoce Dupont");
     expect(nomExpediteur("ventes@dupont.fr")).toBe("ventes@dupont.fr");
   });

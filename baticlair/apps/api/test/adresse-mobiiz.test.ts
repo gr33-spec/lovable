@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { EmailRecu, LecteurEmailRecu } from "../src/platform/email/contact-entrant.js";
 import { EMAIL_RECU } from "../src/platform/tokens.js";
 import { makePdf } from "./support/pdf-fixtures.js";
+import { ReponsesRecuesService } from "../src/modules/adresse-mobiiz/index.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
 /**
@@ -188,7 +189,7 @@ describe("l'adresse Mobiiz de l'artisan", () => {
     const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
     const b = await signUpWithCompany(ctx.app, "autre@example.fr", "Couverture Lannion");
     expect((await webhook("toitures-martin@mobiiz.fr", "Spam", "Mobiiz <contact@mobiiz.fr>")).body).toEqual({ traite: false, raison: "boucle" });
-    expect((await webhook("inconnue@mobiiz.fr")).body).toEqual({ traite: false, raison: "adresse_inconnue" });
+    expect((await webhook("inconnue@mobiiz.fr")).body).toMatchObject({ traite: false, raison: "adresse_inconnue", misDeCote: true });
     expect((await webhook("toitures-martin@mobiiz.fr")).body).toMatchObject({ traite: true });
     expect((await b.agent.get("/v1/recus")).body.items).toEqual([]);
     const mien = (await agent.get("/v1/recus")).body.items[0];
@@ -198,5 +199,51 @@ describe("l'adresse Mobiiz de l'artisan", () => {
     recuSimule = { subject: "Encore là" };
     expect((await webhook("toitures-martin@mobiiz.fr", "Encore là")).body).toMatchObject({ traite: true });
     expect((await agent.get("/v1/recus")).body.items.map((e: { objet: string }) => e.objet)).toEqual(["Encore là", "Re: votre demande"]);
+  });
+});
+
+/**
+ * CORRECTION APRÈS TEST DE GREG (30 octobre 2026) : « l'adresse Mobiiz de BATI INVEST ne fonctionne pas correctement ».
+ * Les variantes d'une même adresse (bati-invest@, batiinvest@, majuscules, point) arrivent au même compte ; une variante
+ * déjà prise par une autre entreprise est refusée ; un e-mail à une adresse que personne n'a est mis de côté pour l'admin,
+ * qui le rattache à une entreprise (il rejoint alors ses reçus), jamais perdu.
+ */
+describe("correction après test de Greg : variantes et e-mails mis de côté", () => {
+  it("bati-invest@, batiinvest@, BATI-INVEST@ et bati.invest@ arrivent au même compte", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "BATI INVEST");
+    expect((await agent.get("/v1/company/adresse-mobiiz")).body.adresse).toBe("bati-invest");
+    for (const to of ["bati-invest@mobiiz.fr", "batiinvest@mobiiz.fr", "BATI-INVEST@MOBIIZ.FR", "Bati.Invest@mobiiz.fr", "Greg <BatiInvest@mobiiz.fr>"]) {
+      const r = await webhook(to, `Essai ${to}`);
+      expect(r.status).toBe(200);
+      expect(r.body, to).toMatchObject({ traite: true });
+    }
+    expect((await agent.get("/v1/recus")).body.items).toHaveLength(5);
+  });
+
+  it("une variante d'une adresse prise est refusée à une autre entreprise", async () => {
+    await signUpWithCompany(ctx.app, "greg@example.fr", "BATI INVEST");
+    const b = await signUpWithCompany(ctx.app, "autre@example.fr", "Toitures Martin");
+    const v = (await b.agent.post("/v1/company/adresse-mobiiz/verifier").send({ adresse: "batiinvest" })).body;
+    expect(v).toMatchObject({ libre: false, raison: "Déjà prise par une autre entreprise." });
+  });
+
+  it("une adresse inconnue : l'e-mail est mis de côté, puis l'admin le rattache et il rejoint les reçus", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "BATI INVEST");
+    const r = await webhook("batinvest@mobiiz.fr", "Devis ardoises");
+    expect(r.body).toMatchObject({ traite: false, raison: "adresse_inconnue", misDeCote: true });
+    const recus = ctx.app.get(ReponsesRecuesService);
+    const liste = await recus.misDeCote();
+    expect(liste).toHaveLength(1);
+    expect(liste[0]).toMatchObject({ adresse: "batinvest@mobiiz.fr", objet: "Re: votre demande", de: "Négoce Dupont <ventes@dupont.example>" });
+    expect(liste[0]!.texte).toContain("voici notre devis");
+    expect((await agent.get("/v1/recus")).body.items).toHaveLength(0);
+    await recus.rattacherMisDeCote(liste[0]!.id, "bati-invest@mobiiz.fr", lecteur);
+    expect(await recus.misDeCote()).toHaveLength(0);
+    expect((await agent.get("/v1/recus")).body.items).toHaveLength(1);
+  });
+
+  it("l'admin des e-mails mis de côté est fermé à un artisan", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "BATI INVEST");
+    expect((await agent.get("/v1/admin/emails-mis-de-cote")).status).toBe(403);
   });
 });

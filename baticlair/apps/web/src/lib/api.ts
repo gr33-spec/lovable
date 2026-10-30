@@ -57,6 +57,8 @@ export interface RequestOptions {
   signal?: AbortSignal;
   /** Le jeton du défi Turnstile (`components/turnstile.tsx`), envoyé en `x-captcha-response`. */
   captcha?: string | null;
+  /** La requête survit à la page qu'on quitte (brouillon écrit au départ de l'écran). */
+  keepalive?: boolean;
 }
 
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -76,6 +78,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
       credentials: "same-origin",
       ...(options.body !== undefined ? { body: isForm ? (options.body as FormData) : JSON.stringify(options.body) } : {}),
       ...(options.signal ? { signal: options.signal } : {}),
+      ...(options.keepalive ? { keepalive: true } : {}),
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;

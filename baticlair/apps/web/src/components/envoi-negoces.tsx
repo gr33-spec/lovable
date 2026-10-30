@@ -18,6 +18,10 @@ export interface Identite {
   prenom: string | null;
   telephone: string | null;
   complete: boolean;
+  /** SIRET vérifié (entreprise du bâtiment) : l'achat groupé le demande. */
+  siretVerifie?: boolean;
+  /** Pourquoi un SIRET enregistré n'est pas retenu pour l'achat groupé. */
+  siretMessage?: string | null;
 }
 
 export function useIdentite() {

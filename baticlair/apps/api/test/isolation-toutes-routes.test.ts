@@ -196,6 +196,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/negocie\/besoins$/, ids.besoinNegocie],
         // R7 : l'e-mail reçu de A et son fichier.
         [/\/recus$/, ids.recu],
+        // Correction après test de Greg (30 octobre 2026) : les e-mails mis de côté ; B n'est pas admin (403).
+        [/\/admin\/emails-mis-de-cote$/, ids.recu],
         [/\/fichiers$/, ids.recuFichier],
         [/\/chasseur\/regroupements$/, ids.regroupementNegocie],
         [/\/admin\/pilotage\/negoces$/, ids.negoce],

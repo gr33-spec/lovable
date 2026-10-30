@@ -6,6 +6,7 @@ import { ChevronRight, MailCheck, Plus, Search, Sparkles, Users, Warehouse } fro
 import { useCallback } from "react";
 import { InstallHint } from "@/components/install-hint";
 import { BandeauReprises } from "@/components/reprises";
+import { CartesReprendre } from "@/components/reprendre";
 import { useBilling } from "@/components/paywall";
 import { ProjectList } from "@/components/project-row";
 import { ButtonLink, ErrorNotice, ListCard, ListRow, SectionTitle, Skeleton } from "@/components/ui";
@@ -52,6 +53,7 @@ function AccueilAchatGroupe() {
         <p className="text-[16px] text-muted">{vide ? "Par où commencer ?" : "Achète en groupe, paie moins cher."}</p>
       </div>
       <BandeauReprises />
+      <CartesReprendre />
       {actions.length > 0 ? (
         <section aria-label="À faire" className="flex flex-col gap-2 rounded-2xl bg-accent p-4 text-on-accent shadow-card">
           <p className="text-[16px] font-extrabold">{actions.length === 1 ? "Une action t'attend" : `${actions.length} actions t'attendent`}</p>

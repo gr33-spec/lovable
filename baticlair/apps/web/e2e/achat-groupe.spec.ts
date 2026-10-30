@@ -366,3 +366,103 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await capture(page, projet, "6b-sortie");
   });
 });
+
+/**
+ * CORRECTION APRÈS TEST DE GREG (30 octobre 2026, point 2) : « je commence un achat groupé, l'app me demande mon SIRET,
+ * je vais dans le menu puis je reviens : tout est perdu ». Chaque parcours commencé est gardé sur le serveur ; on le
+ * quitte à chaque étape (menu, accueil) et on revient par la carte « Reprendre » : rien n'est perdu. Le SIRET se demande
+ * sur place et l'étape continue.
+ */
+test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
+  test.setTimeout(300_000);
+
+  async function inscrireSansSiret(page: Page, dep: string) {
+    await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
+      await page.getByRole("button", { name: "Passer le guide" }).click();
+    });
+    const entreprise = `Toitures ${unique()}`;
+    await page.goto("/inscription");
+    await page.getByLabel("Prénom et nom").fill("Jean Martin");
+    await page.getByLabel("Nom de ton entreprise").fill(entreprise);
+    await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
+    await page.getByLabel("E-mail professionnel").fill(`artisan-${unique()}@example.fr`);
+    await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+    await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
+    await page.getByRole("button", { name: "Créer mon compte" }).click();
+    await page.getByRole("button", { name: "C'est compris" }).click();
+    expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: entreprise, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: null, phone: null, email: null })).status).toBe(200);
+  }
+  /** Partir par le menu (Profil), revenir à l'accueil et toucher « Reprendre », comme un artisan. */
+  async function partirEtReprendre(page: Page, carte: string) {
+    const nav = page.getByRole("navigation", { name: "Navigation principale" });
+    // Le clavier refermé (sur téléphone, la barre du menu se cache pendant la frappe).
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await nav.getByRole("link", { name: "Profil" }).click();
+    await page.waitForURL(/\/compte$/);
+    await nav.getByRole("link", { name: "Accueil" }).click();
+    await page.waitForURL(/\/$/);
+    const reprendre = page.getByRole("region", { name: "À reprendre" });
+    await expect(reprendre.getByText(carte)).toBeVisible();
+    await reprendre.getByRole("link", { name: "Reprendre" }).first().click();
+  }
+
+  test("achat groupé : à chaque étape, puis le SIRET sur place, puis l'engagement", async ({ page }) => {
+    const dep = departement();
+    await inscrireSansSiret(page, dep);
+    await page.goto("/achats-groupes/lancer");
+    await page.getByRole("button", { name: "Ardoise", exact: true }).click();
+    await page.getByRole("button", { name: "32×22", exact: true }).click();
+    await page.getByRole("button", { name: "Espagne 1er choix" }).click();
+    await page.getByLabel("Quantité de Ardoise naturelle 32×22 Espagne 1er choix").fill("900");
+    await page.getByRole("button", { name: "Ajouter à ma liste" }).click();
+    // Étape 1 quittée, reprise : la ligne est là.
+    await partirEtReprendre(page, "Reprendre ton achat groupé");
+    await expect(page.getByRole("region", { name: "Qu'est-ce que tu commandes ?" })).toBeVisible();
+    await expect(page.getByText(/Ardoise naturelle 32×22 Espagne 1er choix/).first()).toBeVisible();
+    await page.getByRole("button", { name: "Continuer" }).click();
+    // Étape 2.
+    await page.getByLabel("Commune de livraison").fill(`${dep}200 Autre-${dep}`);
+    await partirEtReprendre(page, "Reprendre ton achat groupé");
+    await expect(page.getByRole("region", { name: "Où et pour quand ?" })).toBeVisible();
+    await expect(page.getByLabel("Commune de livraison")).toHaveValue(`${dep}200 Autre-${dep}`);
+    await page.getByRole("button", { name: "Continuer" }).click();
+    // Étape 3.
+    await ajouterNegoce(page, { nom: `Négoce ${unique()}`, email: `n-${unique()}@negoce.example`, tel: "02 96 00 00 09" });
+    await partirEtReprendre(page, "Reprendre ton achat groupé");
+    await expect(page.getByRole("region", { name: "À quels négoces envoyer la demande ?" })).toBeVisible();
+    await page.getByRole("button", { name: "Continuer" }).click();
+    // Étape 4 : le SIRET sur place (jamais le Profil) ; quitté là aussi, rien n'est perdu.
+    const entreprise = page.getByRole("region", { name: "Ton entreprise" });
+    await expect(entreprise).toBeVisible();
+    await partirEtReprendre(page, "Reprendre ton achat groupé");
+    await expect(entreprise).toBeVisible();
+    await entreprise.getByLabel("SIRET de ton entreprise").fill("73282932000074");
+    if (!(await entreprise.getByLabel("Ton prénom").inputValue())) await entreprise.getByLabel("Ton prénom").fill("Jean");
+    await entreprise.getByLabel("Ton portable").fill("06 12 34 56 78");
+    await page.getByRole("button", { name: "Vérifier et continuer" }).click();
+    // Vérifié : l'étape continue d'elle-même sur l'engagement.
+    const engagement = page.getByRole("region", { name: "Mon engagement" });
+    await expect(engagement).toBeVisible();
+    await engagement.getByRole("checkbox", { name: /^Je commande ces quantités/ }).check();
+    await page.getByRole("button", { name: "Je m'engage et j'ajoute ma liste" }).click();
+    await expect(page.getByText(/^Ta liste est dans l'achat groupé/)).toBeVisible();
+    // Fini : plus rien à reprendre.
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: /^Bonjour/ })).toBeVisible();
+    await expect(page.getByRole("region", { name: "À reprendre" })).toHaveCount(0);
+  });
+
+  test("liste écrite à la main : fermée, reprise telle quelle", async ({ page }) => {
+    await inscrireSansSiret(page, departement());
+    await page.goto("/chantiers/nouveau");
+    await page.getByRole("button", { name: /Je la note moi-même/ }).click();
+    const ecran = page.getByRole("dialog", { name: "Écris ta liste" });
+    await ecran.getByLabel("Matériau et quantité").fill("Liteaux 27×38, 400 m");
+    await ecran.getByLabel("Matériau et quantité").press("Enter");
+    await expect(ecran.getByRole("list", { name: "Ma liste" })).toContainText("Liteaux 27×38");
+    await page.waitForTimeout(700);
+    await ecran.getByRole("button", { name: "Fermer" }).click();
+    await partirEtReprendre(page, "Reprendre ta liste");
+    await expect(page.getByRole("dialog", { name: "Écris ta liste" }).getByRole("list", { name: "Ma liste" })).toContainText("Liteaux 27×38");
+  });
+});

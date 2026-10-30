@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { Bell, Check, ChevronLeft, ChevronRight, ClipboardList, MessageSquare, MoreHorizontal, Phone, Plus, Search, ShoppingCart, Users, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useLienInvitation } from "@/components/inviter";
-import { Button, ButtonLink, Card, Field, INPUT } from "@/components/ui";
+import { Button, ButtonLink, Card, Field, INPUT, Skeleton } from "@/components/ui";
 import { api, messageErreur, type NextAction } from "@/lib/api";
 import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type Catalogue, type NoeudCatalogue, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
 import { useResource } from "@/lib/use-resource";
+import { useBrouillon } from "@/lib/brouillon";
+import { EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
 import { TON as TON_MOBIIZ } from "../../../../packages/domain/src/groupe/ton";
 import { PHRASE_ADRESSE_GENERIQUE, PHRASE_EMAIL_COMMERCIAL, estAdresseGenerique } from "../../../../packages/domain/src/groupe/contact-negoce";
 
@@ -314,6 +316,24 @@ export function Engagement({ droit, texte, coche, onCoche }: { droit: Droit; tex
 const dansJours = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
 const nombre = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
+interface SaisieAchat extends Record<string, unknown> {
+  lignes: { designation: string; unite: string; qte: string }[];
+  livraison: string;
+  dateBesoin: string;
+  negoces: NegoceChoisi[];
+  engage: boolean;
+}
+
+interface SaisieChantier extends Record<string, unknown> {
+  cochees: string[] | null;
+  /** « auto » : l'achat ouvert du secteur, s'il y en a un. */
+  achatId: string | null;
+  dateBesoin: string;
+  livraison: string | null;
+  negoces: NegoceChoisi[];
+  engage: boolean;
+}
+
 /** Le résumé des lignes choisies, pour les étapes suivantes. */
 const resumeLignes = (n: number) => `${n} ligne${n > 1 ? "s" : ""}`;
 
@@ -322,27 +342,48 @@ const resumeLignes = (n: number) => `${n} ligne${n > 1 ? "s" : ""}`;
  * quand on rejoint un achat : c'est la sienne) ; 3) ses négoces ; 4) l'engagement et le bouton.
  */
 export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; titre: string } | null }) {
-  const [etape, setEtape] = useState(1);
+  // Correction après test de Greg (30 octobre 2026, point 2) : la saisie et l'étape sont gardées sur le serveur à chaque
+  // geste ; aller dans le menu puis revenir reprend exactement ici.
+  const b = useBrouillon<SaisieAchat>(
+    rejoindre ? `achat-groupe:rejoindre:${rejoindre.id}` : "achat-groupe:nouveau",
+    {
+      type: "achat-groupe",
+      url: rejoindre ? `/achats-groupes/lancer?rejoindre=${rejoindre.id}&titre=${encodeURIComponent(rejoindre.titre)}` : "/achats-groupes/lancer",
+      titre: (d) => `${rejoindre ? `Achat groupé : ${rejoindre.titre}` : "Ton achat groupé"} · ${resumeLignes(d.lignes.length)}`,
+      vide: (d, e) => d.lignes.length === 0 && e === 1,
+    },
+    { lignes: [], livraison: "", dateBesoin: dansJours(30), negoces: [], engage: false },
+  );
+  const { lignes, livraison, dateBesoin, negoces, engage } = b.donnees;
+  const etape = b.etape;
+  const setLignes = (f: SaisieAchat["lignes"] | ((l: SaisieAchat["lignes"]) => SaisieAchat["lignes"])) => b.modifier((d) => ({ ...d, lignes: typeof f === "function" ? f(d.lignes) : f }));
+  const setLivraison = (v: string) => b.modifier((d) => ({ ...d, livraison: v }));
+  const setDateBesoin = (v: string) => b.modifier((d) => ({ ...d, dateBesoin: v }));
+  const setNegoces = (v: NegoceChoisi[]) => b.modifier((d) => ({ ...d, negoces: v }));
+  const setEngage = (v: boolean) => b.modifier((d) => ({ ...d, engage: v }));
   const [q, setQ] = useState("");
   const fetchCat = useCallback((signal: AbortSignal) => api<Catalogue>(`/v1/achats-groupes/catalogue?q=${encodeURIComponent(q)}`, { signal }), [q]);
   const fetchMes = useCallback((signal: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal }), []);
   const { data } = useResource(fetchCat);
   const { data: mes } = useResource(fetchMes);
-  const [lignes, setLignes] = useState<{ designation: string; unite: string; qte: string }[]>([]);
-  const [livraison, setLivraison] = useState("");
-  // La commune par défaut : l'adresse de l'entreprise (Profil), modifiable.
+  const identite = useIdentite();
+  const [pendingSiret, setPendingSiret] = useState(false);
+  const [messageSiret, setMessageSiret] = useState<string | null>(null);
+  // La commune par défaut : l'adresse de l'entreprise (Profil), modifiable ; jamais par-dessus un brouillon.
+  const pret = b.pret;
   useEffect(() => {
+    if (!pret) return;
     let vivant = true;
     void api<{ address: string | null }>("/v1/company/profile")
-      .then((p) => vivant && p.address && setLivraison((l) => l || p.address!))
+      .then((p) => {
+        if (vivant && p.address) b.modifier((d) => (d.livraison ? d : { ...d, livraison: p.address! }));
+      })
       .catch(() => undefined);
     return () => {
       vivant = false;
     };
-  }, []);
-  const [dateBesoin, setDateBesoin] = useState(dansJours(30));
-  const [negoces, setNegoces] = useState<NegoceChoisi[]>([]);
-  const [engage, setEngage] = useState(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pret]);
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [lance, setLance] = useState<Lance | null>(null);
@@ -350,13 +391,15 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
   const total = 4;
   const suivant = () => {
     setErreur(null);
-    setEtape((e) => Math.min(total, e + 1));
+    b.allerA((e) => Math.min(total, e + 1));
     window.scrollTo({ top: 0 });
   };
   const precedent = () => {
     setErreur(null);
-    setEtape((e) => Math.max(1, e - 1));
+    b.allerA((e) => Math.max(1, e - 1));
   };
+  // Le SIRET se demande ici, sur place, jamais dans le Profil (on y perdait sa saisie).
+  const siretAVerifier = !!identite.data && !identite.data.siretVerifie;
 
   async function envoyer(e: React.FormEvent) {
     e.preventDefault();
@@ -364,12 +407,14 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
     if (!engage) return setErreur("Coche la case pour t'engager.");
     setPending(true);
     try {
-      setLance(
+      const fait = (
         await api<Lance>("/v1/achats-groupes", {
           method: "POST",
           body: { achatId: rejoindre?.id ?? null, lignes: pretes.map((l) => ({ designation: l.designation, quantite: nombre(l.qte), unite: l.unite })), livraison: livraison.trim(), dateBesoin: rejoindre ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true },
-        }),
+        })
       );
+      b.effacer();
+      setLance(fait);
     } catch (err) {
       setErreur(messageErreur(err));
     } finally {
@@ -377,9 +422,35 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
     }
   }
 
+  if (!b.pret) return <Skeleton card="h-56" lines={2} label="Je reprends où tu en étais…" />;
   if (lance) return <EcranPrevenir p={lance.prevenir} besoinId={lance.besoinId} message={lance.ajoute ? "Tes lignes s'ajoutent à ta liste dans cet achat groupé." : `Ta liste est dans l'achat groupé : ${lance.titre}.${lance.offert ? " Ton premier achat groupé est offert." : ""}`} />;
 
   const bloque = !!mes?.exclusion;
+  // Le SIRET, sur place, hors du formulaire de l'achat (un formulaire n'en contient jamais un autre).
+  if (etape === 4 && siretAVerifier && identite.data)
+    return (
+      <div className="flex flex-col gap-5">
+        {rejoindre ? <Rappel>Achat groupé : {rejoindre.titre}</Rappel> : null}
+        <Etape n={4} total={total} titre="Ton entreprise" aide="Une seule fois : l'achat groupé est réservé aux entreprises du bâtiment." onRetour={precedent}>
+          <EtapeIdentite
+            identite={identite.data}
+            onPending={setPendingSiret}
+            onFait={(i) => {
+              identite.setData(i);
+              setMessageSiret(i.siretVerifie ? null : (i.siretMessage ?? "Ce SIRET n'a pas pu être vérifié comme une entreprise du bâtiment. Corrige-le et réessaie."));
+            }}
+          />
+          {messageSiret ? (
+            <p role="alert" className={ALERTE}>
+              {messageSiret}
+            </p>
+          ) : null}
+          <Button type="submit" form={FORMULAIRE_IDENTITE} pending={pendingSiret}>
+            Vérifier et continuer
+          </Button>
+        </Etape>
+      </div>
+    );
   return (
     <form onSubmit={(e) => void envoyer(e)} aria-label={rejoindre ? "Rejoindre l'achat groupé" : "Ajouter ma liste à un achat groupé"} className="flex flex-col gap-5">
       {rejoindre ? <Rappel>Achat groupé : {rejoindre.titre}</Rappel> : null}
@@ -420,7 +491,9 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
           <Rappel>
             {resumeLignes(pretes.length)} · {livraison.trim()} · {negoces.length} négoce{negoces.length > 1 ? "s" : ""}
           </Rappel>
-          {mes ? <Engagement droit={mes.droit} texte={mes.engagement} coche={engage} onCoche={setEngage} /> : null}
+          {mes ? (
+            <Engagement droit={mes.droit} texte={mes.engagement} coche={engage} onCoche={setEngage} />
+          ) : null}
           {erreur ? (
             <p role="alert" className={ALERTE}>
               {erreur}
@@ -1033,17 +1106,29 @@ export function Cloche() {
 export function AcheterEnGroupe({ projectId }: { projectId: string }) {
   const fetcher = useCallback((signal: AbortSignal) => api<LignesListe>(`/v1/projects/${projectId}/achat-groupe`, { signal }).catch(() => null), [projectId]);
   const { data } = useResource(fetcher);
-  const [cochees, setCochees] = useState<string[] | null>(null);
-  const [etape, setEtape] = useState(1);
-  const [achatId, setAchatId] = useState<string | null | undefined>(undefined);
-  const [dateBesoin, setDateBesoin] = useState(dansJours(30));
-  const [livraison, setLivraison] = useState<string | null>(null);
-  const [negoces, setNegoces] = useState<NegoceChoisi[]>([]);
-  const [engage, setEngage] = useState(false);
+  // Correction après test de Greg (30 octobre 2026, point 2) : gardé sur le serveur, repris à l'étape quittée.
+  const b = useBrouillon<SaisieChantier>(
+    `achat-groupe:chantier:${projectId}`,
+    { type: "achat-groupe", url: `/chantiers/${projectId}`, titre: (d) => `Ton achat groupé · ${resumeLignes(d.cochees?.length ?? 0)}`, vide: (d) => d.cochees === null },
+    { cochees: null, achatId: "auto", dateBesoin: dansJours(30), livraison: null, negoces: [], engage: false },
+  );
+  const { cochees, dateBesoin, livraison, negoces, engage } = b.donnees;
+  const achatId = b.donnees.achatId === "auto" ? undefined : b.donnees.achatId;
+  const etape = b.etape;
+  const setEtape = b.allerA;
+  const setCochees = (f: string[] | null | ((c: string[] | null) => string[] | null)) => b.modifier((d) => ({ ...d, cochees: typeof f === "function" ? f(d.cochees) : f }));
+  const setAchatId = (v: string | null) => b.modifier((d) => ({ ...d, achatId: v }));
+  const setDateBesoin = (v: string) => b.modifier((d) => ({ ...d, dateBesoin: v }));
+  const setLivraison = (v: string) => b.modifier((d) => ({ ...d, livraison: v }));
+  const setNegoces = (v: NegoceChoisi[]) => b.modifier((d) => ({ ...d, negoces: v }));
+  const setEngage = (v: boolean) => b.modifier((d) => ({ ...d, engage: v }));
+  const identite = useIdentite();
+  const [pendingSiret, setPendingSiret] = useState(false);
+  const [messageSiret, setMessageSiret] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<(Lance & { perso: unknown[]; lancees: unknown[] }) | null>(null);
-  if (!data) return null;
+  if (!data || !b.pret) return null;
   const rattachables = data.lignes.filter((l) => l.question);
   if (rattachables.length === 0) return null;
   const achat = achatId === undefined ? (data.achatsOuverts[0]?.id ?? null) : achatId;
@@ -1063,7 +1148,9 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
     if (!engage) return setErreur("Coche la case pour t'engager.");
     setPending(true);
     try {
-      setFait(await api(`/v1/projects/${projectId}/achat-groupe`, { method: "POST", body: { confirmees: cochees ?? [], achatId: achat, livraison: commune || null, dateBesoin: achat ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true } }));
+      const r = await api<Lance & { perso: unknown[]; lancees: unknown[] }>(`/v1/projects/${projectId}/achat-groupe`, { method: "POST", body: { confirmees: cochees ?? [], achatId: achat, livraison: commune || null, dateBesoin: achat ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true } });
+      b.effacer();
+      setFait(r);
     } catch (e) {
       setErreur(messageErreur(e));
     } finally {
@@ -1176,15 +1263,39 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
           <Rappel>
             {resumeLignes(cochees.length)} · {achatChoisi ? achatChoisi.titre : commune} · {negoces.length} négoce{negoces.length > 1 ? "s" : ""}
           </Rappel>
-          <Engagement droit={data.droit} texte={data.engagement} coche={engage} onCoche={setEngage} />
-          {erreur ? (
-            <p role="alert" className="text-[15px] font-semibold text-danger">
-              {erreur}
-            </p>
-          ) : null}
-          <Button pending={pending} disabled={cochees.length === 0 || !data.droit.ok} onClick={() => void lancer()}>
-            Je m&apos;engage et j&apos;ajoute {cochees.length > 1 ? `ces ${cochees.length} lignes` : "cette ligne"}
-          </Button>
+          {identite.data && !identite.data.siretVerifie ? (
+            // Le SIRET sur place, jamais dans le Profil : la saisie reste, et l'étape continue une fois vérifié.
+            <>
+              <EtapeIdentite
+                identite={identite.data}
+                onPending={setPendingSiret}
+                onFait={(i) => {
+                  identite.setData(i);
+                  setMessageSiret(i.siretVerifie ? null : (i.siretMessage ?? "Ce SIRET n'a pas pu être vérifié comme une entreprise du bâtiment. Corrige-le et réessaie."));
+                }}
+              />
+              {messageSiret ? (
+                <p role="alert" className="text-[15px] font-semibold text-danger">
+                  {messageSiret}
+                </p>
+              ) : null}
+              <Button type="submit" form={FORMULAIRE_IDENTITE} pending={pendingSiret}>
+                Vérifier et continuer
+              </Button>
+            </>
+          ) : (
+            <>
+              <Engagement droit={data.droit} texte={data.engagement} coche={engage} onCoche={setEngage} />
+              {erreur ? (
+                <p role="alert" className="text-[15px] font-semibold text-danger">
+                  {erreur}
+                </p>
+              ) : null}
+              <Button pending={pending} disabled={cochees.length === 0 || !data.droit.ok} onClick={() => void lancer()}>
+                Je m&apos;engage et j&apos;ajoute {cochees.length > 1 ? `ces ${cochees.length} lignes` : "cette ligne"}
+              </Button>
+            </>
+          )}
         </Etape>
       ) : null}
     </Card>

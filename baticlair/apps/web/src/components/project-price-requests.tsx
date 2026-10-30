@@ -17,6 +17,7 @@ import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
+import { useBrouillon } from "@/lib/brouillon";
 import { useAncienMode } from "@/components/negocie";
 import { useActionChantier } from "@/lib/actions-chantier";
 import { EtapeApercu, EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
@@ -560,6 +561,16 @@ function SupplierPicker({
   );
 }
 
+interface SaisieEnvoi extends Record<string, unknown> {
+  ouvert: boolean;
+  selected: string[];
+  message: string;
+  etapeEnvoi: "negoces" | "apercu";
+  messageLibre: string | null;
+  tutoie: boolean | null;
+  dueDate: string;
+}
+
 function NewRequest({
   openAtStart,
   projectId,
@@ -578,16 +589,26 @@ function NewRequest({
   onCreated: (r: PriceRequest) => void;
 }) {
   const id = useId();
-  const [previewing, setPreviewing] = useState(openAtStart && quantitatifId !== null);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [message, setMessage] = useState("");
+  // Correction après test de Greg (30 octobre 2026, point 2) : l'envoi commencé (négoces cochés, message, étape) est gardé
+  // sur le serveur ; revenir sur le chantier rouvre la feuille où on l'a laissée.
+  const b = useBrouillon<SaisieEnvoi>(
+    `envoi:${projectId}`,
+    { type: "envoi", url: `/chantiers/${projectId}`, titre: (d) => `Demande de prix à ${d.selected.length} négoce${d.selected.length > 1 ? "s" : ""}`, vide: (d) => !d.ouvert && !d.message && d.messageLibre === null },
+    { ouvert: openAtStart && quantitatifId !== null, selected: [], message: "", etapeEnvoi: "negoces", messageLibre: null, tutoie: null, dueDate: "" },
+  );
+  const previewing = b.donnees.ouvert;
+  const setPreviewing = (v: boolean) => b.modifier((d) => ({ ...d, ouvert: v }));
+  const selected = new Set(b.donnees.selected);
+  const { message, messageLibre, tutoie, dueDate } = b.donnees;
+  const etape = b.donnees.etapeEnvoi;
+  const setMessage = (v: string) => b.modifier((d) => ({ ...d, message: v }));
+  const setEtape = (v: "negoces" | "apercu") => b.modifier((d) => ({ ...d, etapeEnvoi: v }));
+  const setMessageLibre = (v: string | null) => b.modifier((d) => ({ ...d, messageLibre: v }));
+  const setTutoie = (v: boolean) => b.modifier((d) => ({ ...d, tutoie: v }));
+  const setDueDate = (v: string) => b.modifier((d) => ({ ...d, dueDate: v }));
   // Lot final, points 1 et 4 : « Avant d'envoyer » la première fois, puis « À qui j'envoie ? », puis l'aperçu du mail.
   const identite = useIdentite();
-  const [etape, setEtape] = useState<"negoces" | "apercu">("negoces");
   const [enregistre, setEnregistre] = useState(false);
-  const [messageLibre, setMessageLibre] = useState<string | null>(null);
-  const [tutoie, setTutoie] = useState<boolean | null>(null);
-  const [dueDate, setDueDate] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const key = useRef(newActionKey());
@@ -601,11 +622,11 @@ function NewRequest({
   };
 
   const toggle = (supplierId: string, on: boolean) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
+    b.modifier((d) => {
+      const next = new Set(d.selected);
       if (on) next.add(supplierId);
       else next.delete(supplierId);
-      return next;
+      return { ...d, selected: [...next] };
     });
 
   // §45.9 : « Envoyer » de l'aperçu crée la demande et, quand le serveur envoie les mails, l'envoie à chacun.
@@ -622,6 +643,7 @@ function NewRequest({
         for (const r of request.recipients) request = await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" });
         onSent();
       }
+      b.effacer();
       setPreviewing(false);
       onCreated(request);
     } catch (e) {
@@ -632,7 +654,7 @@ function NewRequest({
 
   return (
     <div className="flex flex-col gap-3">
-      <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
+      <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
       <details className="rounded-2xl bg-surface p-3 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Ajouter un message ou une date de réponse (facultatif)</summary>
         <label className="flex min-h-11 items-center gap-3 text-sm">
@@ -695,7 +717,7 @@ function NewRequest({
             <p className="text-[15px] font-semibold">{TON.avantEnvoiNegoces}</p>
             {/* R7 : le rappel en une ligne au premier envoi (Greg, 27 octobre 2026). */}
             <RappelAdresseMobiiz />
-            <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
+            <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
           </SendSheet>
         ) : (
           // Lot final, point 4 : « Voici ce que ton négoce va recevoir », l'aperçu fidèle ; un seul bouton, « Envoyer ».

@@ -14,14 +14,14 @@ export class IdentiteService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly annuaire: Pick<VerificationNegoceService, "fiche">,
-    private readonly verifierSiret: (tenant: TenantContext) => Promise<unknown>,
+    private readonly verifierSiret: (tenant: TenantContext) => Promise<{ verifie: boolean; message?: string } | unknown>,
   ) {}
 
   async lire(tenant: TenantContext) {
-    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, address: true, siret: true, phone: true, prenom: true } });
+    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, address: true, siret: true, phone: true, prenom: true, siretVerifieLe: true } });
     const u = await this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { name: true } });
     const prenom = c.prenom ?? prenomDe(u?.name);
-    return { phrase: PHRASE_IDENTITE, entreprise: c.name, adresse: c.address, siret: c.siret, prenom, telephone: c.phone, complete: identiteComplete({ siret: c.siret, prenom: c.prenom, telephone: c.phone }) };
+    return { phrase: PHRASE_IDENTITE, entreprise: c.name, adresse: c.address, siret: c.siret, prenom, telephone: c.phone, complete: identiteComplete({ siret: c.siret, prenom: c.prenom, telephone: c.phone }), siretVerifie: !!c.siretVerifieLe };
   }
 
   /** Ce que l'annuaire dit d'un SIRET, pour préremplir l'écran (rien n'est enregistré). */
@@ -53,7 +53,8 @@ export class IdentiteService {
       },
     });
     // Le SIRET vérifié comme avant (achats groupés) ; une panne de l'INSEE n'empêche pas l'envoi à ses négoces.
-    await this.verifierSiret(tenant).catch(() => undefined);
-    return this.lire(tenant);
+    const v = (await this.verifierSiret(tenant).catch(() => null)) as { verifie?: boolean; message?: string } | null;
+    // L'achat groupé dit pourquoi un SIRET n'est pas retenu, sur place (correction après test de Greg, 30 octobre 2026).
+    return { ...(await this.lire(tenant)), siretMessage: v && !v.verifie ? (v.message ?? null) : null };
   }
 }

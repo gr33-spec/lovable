@@ -25,6 +25,7 @@ import { DatabaseModule } from "./platform/database/database.module.js";
 import { EmailModule } from "./platform/email/email.module.js";
 import { RepriseModule } from "./platform/reprise/reprise.module.js";
 import { ReprisesModule } from "./modules/reprises/reprises.module.js";
+import { BrouillonsModule } from "./modules/brouillons/brouillons.js";
 import { RateLimitModule } from "./platform/http/rate-limit.module.js";
 import { LoggingModule } from "./platform/logging/logging.module.js";
 import { PushModule } from "./platform/push/push.module.js";
@@ -60,6 +61,7 @@ import { PushModule } from "./platform/push/push.module.js";
     RecentrageModule,
     AchatGroupeModule,
     ReprisesModule,
+    BrouillonsModule,
   ],
 })
 export class AppModule {}

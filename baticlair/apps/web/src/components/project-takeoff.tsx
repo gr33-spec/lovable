@@ -94,6 +94,18 @@ export function ProjectTakeoff({
   const [unitsView, setUnitsView] = useState(true);
   // Après « Envoyer aux négoces » : l'aperçu d'envoi et les demandes passent devant la liste.
   const [overview, setOverview] = useState(false);
+  // Correction après test de Greg (30 octobre 2026, point 2) : une demande de prix commencée (feuille d'envoi ouverte)
+  // reprend ici, sur l'écran d'envoi ; la feuille relit son brouillon et rouvre l'étape quittée.
+  useEffect(() => {
+    const c = new AbortController();
+    api<{ brouillon: { donnees: { ouvert?: boolean } } | null }>(`/v1/brouillons/un?cle=${encodeURIComponent(`envoi:${projectId}`)}`, { signal: c.signal }).then(
+      (r) => {
+        if (r.brouillon?.donnees.ouvert) setOverview(true);
+      },
+      () => undefined,
+    );
+    return () => c.abort();
+  }, [projectId]);
   // Point 8 (Greg, 28 octobre 2026) : une fois la demande partie, « Modifier ma liste » va dans le menu « ··· ».
   useActionChantier("modifier-liste", "Modifier ma liste", () => (setOverview(false), setPage(true)), !archived && (sent || overview) && !page);
   const started = useRef(false);

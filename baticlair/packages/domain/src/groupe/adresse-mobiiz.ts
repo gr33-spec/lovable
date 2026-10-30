@@ -96,12 +96,23 @@ export function etiquetteDansObjet(objet: string): string | null {
 export function lireAdresseMobiiz(to: readonly string[], domaine: string): { adresse: string; etiquette: string | null } | null {
   for (const brut of to) {
     const nue = (/<([^>]+)>/.exec(brut)?.[1] ?? brut).trim().toLowerCase();
-    const m = /^([a-z0-9][a-z0-9-]*)(?:\+r([a-z0-9]{8}))?@(.+)$/.exec(nue);
-    if (!m || m[3] !== domaine.toLowerCase()) continue;
-    return { adresse: m[1]!, etiquette: m[2] ?? null };
+    const at = nue.lastIndexOf("@");
+    if (at <= 0 || nue.slice(at + 1) !== domaine.toLowerCase()) continue;
+    // Correction après test de Greg (30 octobre 2026) : toute forme d'adresse du domaine est lue (« bati.invest »,
+    // « Bati_Invest », « bati-invest+nimporte ») ; l'étiquette de réponse est « +r » suivie de huit caractères.
+    const [base, ...suite] = nue.slice(0, at).split("+");
+    if (!base) continue;
+    const etiquette = /^r([a-z0-9]{8})$/.exec(suite.join("+"))?.[1] ?? null;
+    return { adresse: base, etiquette };
   }
   return null;
 }
+
+/**
+ * La clé d'une adresse Mobiiz : sans tiret, point ni tiret bas, en minuscules. « bati-invest », « batiinvest » et
+ * « BATI.INVEST » ont la même clé et arrivent au même compte ; deux entreprises n'ont jamais deux adresses de même clé.
+ */
+export const cleAdresse = (adresse: string): string => adresse.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 /** L'adresse nue d'un « Nom <adresse> ». */
 export function adresseNue(s: string): string {

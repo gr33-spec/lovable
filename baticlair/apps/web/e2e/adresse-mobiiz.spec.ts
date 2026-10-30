@@ -211,6 +211,39 @@ test("lot final, points 1 à 4 : « Avant d'envoyer » une seule fois, l'aperçu
   await expect(page.getByLabel("Ton identité auprès des négoces")).toContainText("SIRET 73282932000074");
 });
 
+test("brouillon de l'envoi aux négoces (correction du 30 octobre, point 2) : quitté sur l'aperçu, repris sur l'aperçu", async ({ page }) => {
+  await inscrire(page);
+  const q = await apiJson<{ id: string; projetId: string; questions: { id: string; boutons: { valeur: string }[] }[] }>(page, "POST", "/v1/quantitatifs", { reference: "Dupont", adresse: "12 rue de Siam, 29200 Brest", lignes: [{ libelle: "Chatière de ventilation", quantite: "4", unite: "u" }] });
+  let current = (await apiJson<{ questions: { id: string; boutons: { valeur: string }[] }[] }>(page, "GET", `/v1/quantitatifs/${q.body.id}`)).body;
+  for (let i = 0; i < 10 && current.questions.length > 0; i++) {
+    const question = current.questions[0]!;
+    current = (await apiJson<typeof current>(page, "POST", `/v1/quantitatifs/${q.body.id}/reponses`, { reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
+  }
+  expect((await apiJson(page, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status).toBe(200);
+  expect((await apiJson(page, "POST", "/v1/suppliers", { name: "Négoce Dupont", email: "ventes@dupont.example", contactName: "Paul" })).status).toBe(201);
+  await page.goto(`/chantiers/${q.body.projetId}`);
+  await page.getByRole("button", { name: "Demander les prix à mes négoces" }).first().click();
+  await page.getByRole("dialog", { name: "À qui j'envoie ?" }).getByRole("button", { name: "Continuer" }).click();
+  await expect(page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByLabel("Le mail à ton négoce")).toContainText("Bonjour Paul,");
+  // L'app fermée puis rouverte (la feuille d'envoi est en plein écran) : la demande reprend sur l'aperçu.
+  await page.waitForTimeout(800);
+  await page.reload();
+  await expect(page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByLabel("Le mail à ton négoce")).toContainText("Bonjour Paul,");
+  // Et l'accueil la propose : « Reprendre ta demande de prix ».
+  await page.goto("/");
+  const reprendre = page.getByRole("region", { name: "À reprendre" });
+  await expect(reprendre.getByText("Reprendre ta demande de prix")).toBeVisible();
+  await reprendre.getByRole("link", { name: "Reprendre" }).first().click();
+  await page.waitForURL(new RegExp(`/chantiers/${q.body.projetId}$`));
+  const recoit2 = page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" });
+  await recoit2.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Fournisseurs" })).toBeVisible();
+  // Envoyée : plus rien à reprendre.
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /^Bonjour/ })).toBeVisible();
+  await expect(page.getByRole("region", { name: "À reprendre" })).toHaveCount(0);
+});
+
 test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mail sans repère va dans « Mes reçus » et se rattache d'un tap", async ({ page }) => {
   const { adresse } = await inscrire(page);
   const nom = adresse.replace(/@.*$/, "");

@@ -79,7 +79,7 @@ describe("contact@mobiiz.fr arrive chez l'admin", () => {
     expect((await request(ctx.app.getHttpServer()).post("/v1/webhooks/resend").set(signe(bonjour)).send(bonjour)).body).toEqual({ traite: true });
     expect(ctx.emails.sent.at(-1)!.subject).toContain("[bonjour@mobiiz.fr]");
     const autre = recu("lot-12@mobiiz.fr");
-    expect((await request(ctx.app.getHttpServer()).post("/v1/webhooks/resend").set(signe(autre)).send(autre)).body).toEqual({ traite: false, raison: "adresse_inconnue" });
+    expect((await request(ctx.app.getHttpServer()).post("/v1/webhooks/resend").set(signe(autre)).send(autre)).body).toMatchObject({ traite: false, raison: "adresse_inconnue", misDeCote: true });
     expect(ctx.emails.sent).toHaveLength(1);
   });
 

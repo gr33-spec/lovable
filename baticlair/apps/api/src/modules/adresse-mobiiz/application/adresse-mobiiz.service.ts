@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { adresseReponseArtisan, candidatsAdresse, etiquetteDepuis, expediteurVia, fauteAdresse, PHRASES_REFUS_ADRESSE, type RefusAdresse } from "@baticlair/domain";
+import { adresseReponseArtisan, candidatsAdresse, cleAdresse, etiquetteDepuis, expediteurVia, fauteAdresse, PHRASES_REFUS_ADRESSE, type RefusAdresse } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { TenantContext } from "../../tenancy/index.js";
@@ -39,8 +39,7 @@ export class AdresseMobiizService {
     if (courante) return courante.adresse;
     const c = await this.prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { name: true, address: true } });
     for (const candidat of candidatsAdresse(c.name, communeDe(c.address))) {
-      const prise = await this.prisma.adresseMobiiz.findUnique({ where: { adresse: candidat } });
-      if (prise) continue;
+      if (await this.entreprisesDeCle(candidat, null).then((ids) => ids.length > 0)) continue;
       try {
         await this.prisma.adresseMobiiz.create({ data: { adresse: candidat, companyId, courante: true } });
         return candidat;
@@ -77,8 +76,8 @@ export class AdresseMobiizService {
     const adresse = souhaitee.trim().toLowerCase();
     const faute: RefusAdresse | null = fauteAdresse(adresse);
     if (faute) return { adresse, libre: false, raison: PHRASES_REFUS_ADRESSE[faute] };
-    const prise = await this.prisma.adresseMobiiz.findUnique({ where: { adresse } });
-    if (prise && prise.companyId !== tenant.companyId) return { adresse, libre: false, raison: "Déjà prise par une autre entreprise." };
+    // Une variante d'une adresse prise (« batiinvest » pour « bati-invest ») l'est aussi : elle arriverait chez l'autre.
+    if ((await this.entreprisesDeCle(adresse, tenant.companyId)).length > 0) return { adresse, libre: false, raison: "Déjà prise par une autre entreprise." };
     return { adresse, libre: true, raison: null };
   }
 
@@ -97,9 +96,21 @@ export class AdresseMobiizService {
     return this.etat(tenant);
   }
 
-  /** L'entreprise derrière une adresse (courante ou ancienne), sinon null. */
+  /**
+   * L'entreprise derrière une adresse (courante ou ancienne), sinon null. Correction après test de Greg (30 octobre 2026) :
+   * les variantes d'une même adresse (« batiinvest », « BATI-INVEST », « bati.invest ») arrivent au même compte.
+   */
   async entrepriseDe(adresse: string): Promise<string | null> {
-    return (await this.prisma.adresseMobiiz.findUnique({ where: { adresse: adresse.toLowerCase() } }))?.companyId ?? null;
+    const exacte = await this.prisma.adresseMobiiz.findUnique({ where: { adresse: adresse.toLowerCase() } });
+    if (exacte) return exacte.companyId;
+    const ids = await this.entreprisesDeCle(adresse, null);
+    return ids.length === 1 ? ids[0]! : null;
+  }
+
+  /** Les entreprises (sauf `sauf`) qui ont une adresse de même clé. */
+  private async entreprisesDeCle(adresse: string, sauf: string | null): Promise<string[]> {
+    const lignes = await this.prisma.$queryRaw<{ company_id: string }[]>`select distinct company_id::text from adresse_mobiiz where regexp_replace(adresse, '[^a-z0-9]', '', 'g') = ${cleAdresse(adresse)}`;
+    return lignes.map((l) => l.company_id).filter((id) => id !== sauf);
   }
 
   /**

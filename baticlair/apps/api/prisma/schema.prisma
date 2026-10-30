@@ -127,81 +127,82 @@ enum MembershipRole {
 }
 
 model Company {
-  id                   String    @id @default(uuid(7)) @db.Uuid
-  name                 String
+  id                         String    @id @default(uuid(7)) @db.Uuid
+  name                       String
   /// Palier d'abonnement : nombre d'analyses de documents incluses par mois.
   /// Nul = pas de plafond (période d'essai, tant que les paliers ne sont pas fixés).
-  monthlyAnalysisLimit Int?
+  monthlyAnalysisLimit       Int?
   /// Formule (catalogue dans la config : trial, solo, pro…). « trial » à l'inscription.
-  plan                 String    @default("trial")
-  planActivatedAt      DateTime?
+  plan                       String    @default("trial")
+  planActivatedAt            DateTime?
   /// Formule demandée depuis l'écran des formules (en attendant le paiement en ligne).
-  requestedPlan        String?
-  requestedPlanAt      DateTime?
+  requestedPlan              String?
+  requestedPlanAt            DateTime?
   /// Métiers de l'entreprise (profils de lecture, PD-033). Vide = « autre métier ».
-  trades               String[]  @default([])
+  trades                     String[]  @default([])
   /// §42.2 : joindre le « Détail du chantier (sans prix) » aux envois fournisseur (case mémorisée).
-  attachQuoteDetail    Boolean   @default(true)
+  attachQuoteDetail          Boolean   @default(true)
   /// §45.3 : coordonnées de l'en-tête de la demande de devis et de la signature du mail (§45.2). Jamais saisies à l'envoi.
-  address              String?
-  siret                String?
+  address                    String?
+  siret                      String?
   /// BatiClair Groupé (section 5) : le SIRET vérifié auprès de l'INSEE ; sans lui, pas d'accès au groupé.
-  siretVerifieLe       DateTime?
-  phone                String?
-  contactEmail         String?
+  siretVerifieLe             DateTime?
+  phone                      String?
+  contactEmail               String?
   /// LOT FINAL, point 1 (Greg) : le prénom de l'artisan, demandé au premier envoi avec le SIRET et le portable (signature).
-  prenom               String?
+  prenom                     String?
   /// LOT FINAL, point 4 : le message modifié dans l'aperçu, gardé comme modèle personnel ; vouvoiement par défaut.
-  modeleMessage        String?   @map("modele_message")
-  tutoieNegoces        Boolean   @default(false) @map("tutoie_negoces")
+  modeleMessage              String?   @map("modele_message")
+  tutoieNegoces              Boolean   @default(false) @map("tutoie_negoces")
   /// RGPD (24 octobre 2026) : l'artisan a coupé les e-mails de notification (lien « Ne plus recevoir ces e-mails ») ; les
   /// e-mails indispensables (compte, bons de commande) partent toujours.
-  emailsCoupesLe       DateTime?
+  emailsCoupesLe             DateTime?
   /// R7 (Greg, 27 octobre 2026) : l'écran « Voici ton adresse Mobiiz » a été vu (une fois, après l'inscription).
-  adresseMobiizVueLe   DateTime? @map("adresse_mobiiz_vue_le") @db.Timestamptz(3)
+  adresseMobiizVueLe         DateTime? @map("adresse_mobiiz_vue_le") @db.Timestamptz(3)
   /// Achat groupé (Greg, 27 octobre 2026) : les alertes « Nouvel achat groupé » (toutes | resume | aucune).
-  alertesAchatsGroupes String    @default("toutes") @map("alertes_achats_groupes")
+  alertesAchatsGroupes       String    @default("toutes") @map("alertes_achats_groupes")
   /// ACHAT GROUPÉ PAR MÉTIER (27 octobre 2026, 2e message) : exclu des achats groupés jusqu'à cette date (règle des sorties).
   achatsGroupesExclusJusquau DateTime? @map("achats_groupes_exclus_jusquau") @db.Timestamptz(3)
   /// Le code d'activité (NAF) lu à la vérification du SIRET : bâtiment exigé, commerce de gros refusé.
-  naf                  String?
+  naf                        String?
   /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
-  logo                 Bytes?
-  logoType             String?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  logo                       Bytes?
+  logoType                   String?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
 
-  memberships        Membership[]
-  partnerKeys        PartnerApiKey[]
-  projects           Project[]
-  documents          Document[]
-  aiExecutions       AiExecution[]
-  takeoffs           Takeoff[]
-  aiAnalyses         AiAnalysis[]
-  suppliers          Supplier[]
-  priceRequests      PriceRequest[]
-  adressesMobiiz     AdresseMobiiz[]
+  memberships             Membership[]
+  partnerKeys             PartnerApiKey[]
+  projects                Project[]
+  documents               Document[]
+  aiExecutions            AiExecution[]
+  takeoffs                Takeoff[]
+  aiAnalyses              AiAnalysis[]
+  suppliers               Supplier[]
+  priceRequests           PriceRequest[]
+  adressesMobiiz          AdresseMobiiz[]
   desistementsAchatGroupe DesistementAchatGroupe[]
   alertesAchatGroupe      AlerteAchatGroupe[]
   lignesAchatGroupe       LigneAchatGroupe[]
-  emailsRecus        EmailRecuArtisan[]
-  offers             SupplierOffer[]
-  preferences        CompanyPreference[]
-  corrections        CorrectionEvent[]
-  consumableHabits   ConsumableHabit[]
-  uploadParts        UploadPart[]
-  quantitatifs       Quantitatif[]
-  ruleConfirmations  RuleConfirmation[]
-  besoins            Besoin[]
-  choixDuMois        ChoixArtisan[]
-  commandesGaranties CommandeGarantie[]
-  negocesAjoutes     Negoce[]            @relation("NegoceAjoutePar")
-  negoces            NegoceArtisan[]
-  desistements       Desistement[]
-  abonnement         Abonnement?
-  reglesApprises     RegleApprise[]
-  facturesAbonnement FactureAbonnement[]
-  besoinsNegocies    BesoinNegocie[]
+  emailsRecus             EmailRecuArtisan[]
+  offers                  SupplierOffer[]
+  preferences             CompanyPreference[]
+  corrections             CorrectionEvent[]
+  consumableHabits        ConsumableHabit[]
+  uploadParts             UploadPart[]
+  quantitatifs            Quantitatif[]
+  ruleConfirmations       RuleConfirmation[]
+  besoins                 Besoin[]
+  choixDuMois             ChoixArtisan[]
+  commandesGaranties      CommandeGarantie[]
+  negocesAjoutes          Negoce[]                 @relation("NegoceAjoutePar")
+  negoces                 NegoceArtisan[]
+  desistements            Desistement[]
+  abonnement              Abonnement?
+  reglesApprises          RegleApprise[]
+  facturesAbonnement      FactureAbonnement[]
+  besoinsNegocies         BesoinNegocie[]
+  brouillons              Brouillon[]
 
   @@map("company")
 }
@@ -690,29 +691,29 @@ model PriceRequestRecipient {
   /// Demande perso (25 octobre 2026) : le lien de chiffrage en ligne sans compte (haché), la réponse du négoce (prix par
   /// ligne, livraison, délai, validité qu'il fixe), la relance à 48 h ouvrées, puis la commande et son suivi
   /// (recue → confirmee → livree). `negoceId` : le négoce de la zone quand l'artisan l'a choisi là (ses résultats).
-  tokenHash     String?   @unique
-  prix          Json?
-  livraisonHt   Decimal?  @db.Decimal(14, 2)
-  delaiJours    Int?
-  validiteJours Int?
-  reponduLe     DateTime?
-  refuseLe      DateTime?
-  relanceLe     DateTime?
-  commandeLe    DateTime?
-  suivi         String?
-  confirmeLe    DateTime?
-  livreLe       DateTime?
-  negoceId      String?   @db.Uuid
+  tokenHash      String?   @unique
+  prix           Json?
+  livraisonHt    Decimal?  @db.Decimal(14, 2)
+  delaiJours     Int?
+  validiteJours  Int?
+  reponduLe      DateTime?
+  refuseLe       DateTime?
+  relanceLe      DateTime?
+  commandeLe     DateTime?
+  suivi          String?
+  confirmeLe     DateTime?
+  livreLe        DateTime?
+  negoceId       String?   @db.Uuid
   /// R7 : l'étiquette de réponse de cette demande (`adresse+r<étiquette>@mobiiz.fr`, « [réf. …] » dans l'objet).
-  etiquette     String?   @unique
+  etiquette      String?   @unique
   /// LOT FINAL, point 6 : l'artisan prévenu que ce négoce n'a pas répondu, à mi-délai puis la veille de la date limite.
   rappelMiLe     DateTime? @map("rappel_mi_le") @db.Timestamptz(3)
   rappelVeilleLe DateTime? @map("rappel_veille_le") @db.Timestamptz(3)
 
-  priceRequest PriceRequest @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
+  priceRequest PriceRequest       @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
   emailsRecus  EmailRecuArtisan[]
-  supplier     Supplier     @relation(fields: [supplierId], references: [id], onDelete: Restrict)
-  document     Document?    @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  supplier     Supplier           @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  document     Document?          @relation(fields: [documentId], references: [id], onDelete: SetNull)
 
   @@unique([priceRequestId, supplierId])
   @@map("price_request_recipient")
@@ -1746,15 +1747,15 @@ model JournalAdmin {
 /// La double authentification de l'admin : un code à 6 chiffres envoyé par e-mail (haché ici), valable 10 minutes, qui
 /// ouvre le pilotage pour CETTE session pendant 12 heures. 5 essais au plus par code.
 model CodeAdmin {
-  sessionId  String    @id
-  userId     String
-  codeHash   String
-  expireLe   DateTime
-  tentatives Int       @default(0)
-  valideLe   DateTime?
+  sessionId          String    @id
+  userId             String
+  codeHash           String
+  expireLe           DateTime
+  tentatives         Int       @default(0)
+  valideLe           DateTime?
   /// La dernière action admin de la session : fermée après 30 minutes sans action (Greg, 26 octobre 2026).
   derniereActiviteLe DateTime?
-  createdAt  DateTime  @default(now())
+  createdAt          DateTime  @default(now())
 
   @@map("code_admin")
 }
@@ -1772,47 +1773,47 @@ model CompteurJour {
 /// LE REGROUPEMENT NÉGOCIÉ PAR UN HUMAIN (Greg, 25 octobre 2026, « business model final ») : des besoins d'une même
 /// référence, d'un même département, à dates compatibles ; un chasseur de Mobiiz négocie et saisit l'offre.
 model RegroupementNegocie {
-  id                String    @id @default(uuid(7)) @db.Uuid
-  numero            Int       @unique @default(autoincrement())
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  numero             Int       @unique @default(autoincrement())
   /// Clé de référence stricte (`referenceStricte`) : 30×20 et 32×22 n'ont jamais la même.
-  cle               String
-  libelle           String
-  famille           String
-  departement       String
+  cle                String
+  libelle            String
+  famille            String
+  departement        String
   /// en_collecte | en_negociation | offre_recue | commande | abandonne
-  statut            String    @default("en_collecte")
-  dateBesoinMin     DateTime? @db.Date
-  chasseurEmail     String?
-  prisEnChargeLe    DateTime?
-  offreEnvoyeeLe    DateTime?
-  commandeLe        DateTime?
-  abandonneLe       DateTime?
+  statut             String    @default("en_collecte")
+  dateBesoinMin      DateTime? @db.Date
+  chasseurEmail      String?
+  prisEnChargeLe     DateTime?
+  offreEnvoyeeLe     DateTime?
+  commandeLe         DateTime?
+  abandonneLe        DateTime?
   /// Alertes du chasseur (point 4 bis) : formation (2e besoin), dernier ajout signalé tout de suite, rappels J-5 et J-2.
-  formationAlerteLe DateTime?
-  ajoutAlerteLe     DateTime?
-  rappelJ5Le        DateTime?
-  rappelJ2Le        DateTime?
+  formationAlerteLe  DateTime?
+  ajoutAlerteLe      DateTime?
+  rappelJ5Le         DateTime?
+  rappelJ2Le         DateTime?
   /// ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026) : « automatique » (consultation par l'app) ou « humain » (chasseur).
   /// Statuts en plus : consultation (négoces consultés) | pas_assez (plan B).
-  mode              String    @default("humain")
-  unite             String?
-  clotureLe         DateTime? @map("cloture_le") @db.Timestamptz(3)
-  reponseAvantLe    DateTime? @map("reponse_avant_le") @db.Timestamptz(3)
-  consulteLe        DateTime? @map("consulte_le") @db.Timestamptz(3)
-  analyseLe         DateTime? @map("analyse_le") @db.Timestamptz(3)
-  pasAssezLe        DateTime? @map("pas_assez_le") @db.Timestamptz(3)
+  mode               String    @default("humain")
+  unite              String?
+  clotureLe          DateTime? @map("cloture_le") @db.Timestamptz(3)
+  reponseAvantLe     DateTime? @map("reponse_avant_le") @db.Timestamptz(3)
+  consulteLe         DateTime? @map("consulte_le") @db.Timestamptz(3)
+  analyseLe          DateTime? @map("analyse_le") @db.Timestamptz(3)
+  pasAssezLe         DateTime? @map("pas_assez_le") @db.Timestamptz(3)
   /// La commission Mobiiz de cet achat groupé (lancement possible à 0), figée à la consultation.
-  commissionPct     Decimal?  @map("commission_pct") @db.Decimal(5, 2)
-  meilleureId       String?   @map("meilleure_id") @db.Uuid
+  commissionPct      Decimal?  @map("commission_pct") @db.Decimal(5, 2)
+  meilleureId        String?   @map("meilleure_id") @db.Uuid
   /// ACHAT GROUPÉ PAR MÉTIER (27 octobre 2026, 2e message). Statut en plus : validation (offres à valider par l'admin),
   /// publie (résultats envoyés aux artisans). Le choix de l'IA est gardé pour la statistique « IA suivie sans correction ».
-  iaMeilleureId     String?   @map("ia_meilleure_id") @db.Uuid
-  correctionsAdmin  Int       @default(0) @map("corrections_admin")
+  iaMeilleureId      String?   @map("ia_meilleure_id") @db.Uuid
+  correctionsAdmin   Int       @default(0) @map("corrections_admin")
   validationAlerteLe DateTime? @map("validation_alerte_le") @db.Timestamptz(3)
-  publieLe          DateTime? @map("publie_le") @db.Timestamptz(3)
-  commandeAvantLe   DateTime? @map("commande_avant_le") @db.Timestamptz(3)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  publieLe           DateTime? @map("publie_le") @db.Timestamptz(3)
+  commandeAvantLe    DateTime? @map("commande_avant_le") @db.Timestamptz(3)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   besoins       BesoinNegocie[]
   offre         OffreNegociee?
@@ -1828,53 +1829,53 @@ model RegroupementNegocie {
 
 /// Un besoin d'artisan pour un regroupement négocié : déclaré, ou en veille (une ligne d'une demande perso).
 model BesoinNegocie {
-  id             String    @id @default(uuid(7)) @db.Uuid
-  companyId      String    @db.Uuid
-  projectId      String?   @db.Uuid
-  articleKey     String?
+  id                        String    @id @default(uuid(7)) @db.Uuid
+  companyId                 String    @db.Uuid
+  projectId                 String?   @db.Uuid
+  articleKey                String?
   /// La demande perso d'où vient une ligne en veille.
-  priceRequestId String?   @db.Uuid
-  designation    String
-  cle            String
-  famille        String
-  quantite       Decimal   @db.Decimal(14, 3)
-  unite          String
-  departement    String
+  priceRequestId            String?   @db.Uuid
+  designation               String
+  cle                       String
+  famille                   String
+  quantite                  Decimal   @db.Decimal(14, 3)
+  unite                     String
+  departement               String
   /// L'adresse ou la commune de livraison : stockée, jamais montrée aux autres artisans.
-  livraison      String
-  dateBesoin     DateTime  @db.Date
+  livraison                 String
+  dateBesoin                DateTime  @db.Date
   /// veille | declare | accepte | refuse | non_merci | retire
-  statut         String
-  regroupementId String?   @db.Uuid
-  notifieLe      DateTime?
-  accepteLe      DateTime?
-  refuseLe       DateTime?
-  bonNumero      Int?
+  statut                    String
+  regroupementId            String?   @db.Uuid
+  notifieLe                 DateTime?
+  accepteLe                 DateTime?
+  refuseLe                  DateTime?
+  bonNumero                 Int?
   /// L'ajout signalé au chasseur (tout de suite ou au digest de 18 h) ; le rappel à l'artisan 48 h avant la fin de l'offre.
-  signaleLe      DateTime?
-  rappelOffreLe  DateTime?
+  signaleLe                 DateTime?
+  rappelOffreLe             DateTime?
   /// Achat groupé : « Me désister » après la clôture ; la commande passée (négoce choisi, prix unitaire HT livré).
-  desisteLe      DateTime? @map("desiste_le") @db.Timestamptz(3)
-  consultationCommandeId String? @map("consultation_commande_id") @db.Uuid
-  prixCommandeHt Decimal?  @map("prix_commande_ht") @db.Decimal(14, 4)
+  desisteLe                 DateTime? @map("desiste_le") @db.Timestamptz(3)
+  consultationCommandeId    String?   @map("consultation_commande_id") @db.Uuid
+  prixCommandeHt            Decimal?  @map("prix_commande_ht") @db.Decimal(14, 4)
   /// ACHAT GROUPÉ PAR MÉTIER (27 octobre 2026, 2e message) : l'engagement (case cochée), offert (premier achat groupé),
   /// la sortie (motif), la vue des résultats, les coordonnées transmises (consentement), la commande reçue par le négoce
   /// (jeton du lien), « Livré » ou « Problème », la commande pas passée à temps.
-  engageLe       DateTime? @map("engage_le") @db.Timestamptz(3)
-  offert         Boolean   @default(false)
-  sortieMotif    String?   @map("sortie_motif")
-  sortieLe       DateTime? @map("sortie_le") @db.Timestamptz(3)
-  offreVueLe     DateTime? @map("offre_vue_le") @db.Timestamptz(3)
-  coordonneesTransmisesLe DateTime? @map("coordonnees_transmises_le") @db.Timestamptz(3)
-  coordonneesConsultationId String? @map("coordonnees_consultation_id") @db.Uuid
-  commandeTokenHash String? @unique @map("commande_token_hash")
-  commandeRecueLe DateTime? @map("commande_recue_le") @db.Timestamptz(3)
-  livreLe        DateTime? @map("livre_le") @db.Timestamptz(3)
-  problemeLe     DateTime? @map("probleme_le") @db.Timestamptz(3)
-  problemeTexte  String?   @map("probleme_texte")
-  nonCommandeLe  DateTime? @map("non_commande_le") @db.Timestamptz(3)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  engageLe                  DateTime? @map("engage_le") @db.Timestamptz(3)
+  offert                    Boolean   @default(false)
+  sortieMotif               String?   @map("sortie_motif")
+  sortieLe                  DateTime? @map("sortie_le") @db.Timestamptz(3)
+  offreVueLe                DateTime? @map("offre_vue_le") @db.Timestamptz(3)
+  coordonneesTransmisesLe   DateTime? @map("coordonnees_transmises_le") @db.Timestamptz(3)
+  coordonneesConsultationId String?   @map("coordonnees_consultation_id") @db.Uuid
+  commandeTokenHash         String?   @unique @map("commande_token_hash")
+  commandeRecueLe           DateTime? @map("commande_recue_le") @db.Timestamptz(3)
+  livreLe                   DateTime? @map("livre_le") @db.Timestamptz(3)
+  problemeLe                DateTime? @map("probleme_le") @db.Timestamptz(3)
+  problemeTexte             String?   @map("probleme_texte")
+  nonCommandeLe             DateTime? @map("non_commande_le") @db.Timestamptz(3)
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
 
   company      Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
   regroupement RegroupementNegocie? @relation(fields: [regroupementId], references: [id], onDelete: SetNull)
@@ -1977,10 +1978,10 @@ model Reprise {
 /// deux fois. Gardés 90 jours.
 model EvenementTraite {
   /// « stripe », « resend »
-  source    String
+  source String
   /// L'identifiant de l'événement chez le prestataire (evt_…, svix-id).
-  id        String
-  recuLe    DateTime @default(now()) @map("recu_le") @db.Timestamptz(3)
+  id     String
+  recuLe DateTime @default(now()) @map("recu_le") @db.Timestamptz(3)
 
   @@id([source, id])
   @@index([recuLe])
@@ -2051,7 +2052,9 @@ model EmailRecuFichier {
   @@map("email_recu_fichier")
 }
 
-/** ACHAT GROUPÉ : un négoce ajouté par un participant (au moins un par participation, précision 1 du 27 octobre 2026). */
+/**
+ * ACHAT GROUPÉ : un négoce ajouté par un participant (au moins un par participation, précision 1 du 27 octobre 2026).
+ */
 model NegoceParticipant {
   id             String    @id @default(uuid(7)) @db.Uuid
   besoinId       String    @map("besoin_id") @db.Uuid
@@ -2129,7 +2132,9 @@ model ConsultationAchatGroupe {
   @@map("consultation_achat_groupe")
 }
 
-/** ACHAT GROUPÉ : un retrait ou un désistement (après la clôture, « Me désister », visible dans l'admin ; précision 4). */
+/**
+ * ACHAT GROUPÉ : un retrait ou un désistement (après la clôture, « Me désister », visible dans l'admin ; précision 4).
+ */
 model DesistementAchatGroupe {
   id             String   @id @default(uuid(7)) @db.Uuid
   besoinId       String   @map("besoin_id") @db.Uuid
@@ -2148,7 +2153,9 @@ model DesistementAchatGroupe {
   @@map("desistement_achat_groupe")
 }
 
-/** ACHAT GROUPÉ : une alerte « Nouvel achat groupé » pour une entreprise (une seule par achat ; au plus N par jour). */
+/**
+ * ACHAT GROUPÉ : une alerte « Nouvel achat groupé » pour une entreprise (une seule par achat ; au plus N par jour).
+ */
 model AlerteAchatGroupe {
   id             String    @id @default(uuid(7)) @db.Uuid
   companyId      String    @map("company_id") @db.Uuid
@@ -2167,7 +2174,9 @@ model AlerteAchatGroupe {
   @@map("alerte_achat_groupe")
 }
 
-/** ACHAT GROUPÉ : la facture de commission du mois à un négoce, préparée d'après les bons envoyés (envoi réel coupé). */
+/**
+ * ACHAT GROUPÉ : la facture de commission du mois à un négoce, préparée d'après les bons envoyés (envoi réel coupé).
+ */
 model FactureCommissionMensuelle {
   id           String    @id @default(uuid(7)) @db.Uuid
   mois         String
@@ -2183,7 +2192,9 @@ model FactureCommissionMensuelle {
   @@map("facture_commission_mensuelle")
 }
 
-/** ACHAT GROUPÉ PAR MÉTIER (27 octobre 2026, 2e message) : une ligne du panier d'un participant, rattachée au catalogue. */
+/**
+ * ACHAT GROUPÉ PAR MÉTIER (27 octobre 2026, 2e message) : une ligne du panier d'un participant, rattachée au catalogue.
+ */
 model LigneAchatGroupe {
   id                 String   @id @default(uuid(7)) @db.Uuid
   besoinId           String   @map("besoin_id") @db.Uuid
@@ -2208,7 +2219,9 @@ model LigneAchatGroupe {
   @@map("ligne_achat_groupe")
 }
 
-/** ACHAT GROUPÉ : les conditions d'ouverture de compte d'un négoce, cochées une fois (point 12). */
+/**
+ * ACHAT GROUPÉ : les conditions d'ouverture de compte d'un négoce, cochées une fois (point 12).
+ */
 model ConditionsOuvertureNegoce {
   id       String   @id @default(uuid(7)) @db.Uuid
   email    String   @unique
@@ -2220,7 +2233,9 @@ model ConditionsOuvertureNegoce {
   @@map("conditions_ouverture_negoce")
 }
 
-/** ACHAT GROUPÉ : une correction de l'admin sur une offre (prix d'une ligne, offre écartée ou validée), gardée. */
+/**
+ * ACHAT GROUPÉ : une correction de l'admin sur une offre (prix d'une ligne, offre écartée ou validée), gardée.
+ */
 model CorrectionOffreAchatGroupe {
   id             String   @id @default(uuid(7)) @db.Uuid
   consultationId String   @map("consultation_id") @db.Uuid
@@ -2235,4 +2250,55 @@ model CorrectionOffreAchatGroupe {
 
   @@index([regroupementId])
   @@map("correction_offre_achat_groupe")
+}
+
+/**
+ * CORRECTION APRÈS TEST DE GREG (30 octobre 2026) : un e-mail reçu sur une adresse Mobiiz que personne n'a n'est jamais
+ * perdu ; il est mis de côté pour l'admin, qui peut le rattacher à une entreprise (il rejoint alors ses reçus).
+ */
+model EmailMisDeCote {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  /// L'adresse visée telle qu'écrite (« batinvest@mobiiz.fr »).
+  adresse    String
+  de         String
+  objet      String
+  texte      String?
+  /// L'identifiant Resend du message (pour relire le corps et les pièces jointes).
+  emailId    String?   @map("email_id")
+  pieces     String[]  @default([])
+  recuLe     DateTime  @map("recu_le") @db.Timestamptz(3)
+  rattacheLe DateTime? @map("rattache_le") @db.Timestamptz(3)
+  companyId  String?   @map("company_id") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([rattacheLe])
+  @@map("email_mis_de_cote")
+}
+
+/**
+ * CORRECTION APRÈS TEST DE GREG (30 octobre 2026, point 2) : « je vais dans le menu puis je reviens : tout est perdu ».
+ * Tout parcours commencé (achat groupé, liste, envoi aux négoces) est gardé ici, à chaque geste ; en revenant, on reprend
+ * à l'étape quittée. Une clé par parcours et par entreprise (« achat-groupe:nouveau », « envoi:<chantier> »).
+ */
+model Brouillon {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  userId    String   @map("user_id")
+  cle       String
+  /// achat-groupe | liste | envoi
+  type      String
+  /// Ce que dit la carte « Reprendre » (« Achat groupé : 3 lignes »).
+  titre     String
+  /// L'écran où reprendre.
+  url       String
+  etape     Int      @default(1)
+  donnees   Json
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, cle])
+  @@index([companyId, updatedAt])
+  @@map("brouillon")
 }

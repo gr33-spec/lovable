@@ -54,7 +54,50 @@ export class ReponsesRecuesService {
     const cible = lireAdresseMobiiz(to, this.domaine);
     if (!cible) return null;
     const companyId = await this.adresses.entrepriseDe(cible.adresse);
-    if (!companyId) return { traite: false, raison: "adresse_inconnue" };
+    // Correction après test de Greg (30 octobre 2026) : une adresse que personne n'a ne perd jamais l'e-mail.
+    if (!companyId) return this.mettreDeCote(evenement, to, lecteur);
+    return this.ranger(companyId, cible, evenement, lecteur);
+  }
+
+  /** L'e-mail d'une adresse inconnue, gardé pour l'admin (corps, noms des pièces jointes, identifiant Resend). */
+  private async mettreDeCote(evenement: Evenement, to: string[], lecteur: LecteurEmailRecu) {
+    const lu = evenement.email_id ? await lecteur.lire(evenement.email_id).catch(() => null) : null;
+    const m = await this.prisma.emailMisDeCote.create({
+      data: {
+        adresse: to.map(adresseNue).find((a) => a.endsWith(`@${this.domaine}`)) ?? to.join(", "),
+        de: evenement.from ?? "",
+        objet: lu?.subject ?? evenement.subject ?? "",
+        texte: lu ? (lu.text ?? texteDuHtml(lu.html)) : null,
+        emailId: evenement.email_id ?? null,
+        pieces: lu ? [...lu.attachments.map((p) => p.filename), ...lu.tropLourdes] : [],
+        recuLe: new Date(lu?.date ?? evenement.created_at ?? this.now().toISOString()),
+      },
+    });
+    this.logger.warn({ id: m.id }, "adresse mobiiz: e-mail mis de côté (adresse inconnue)");
+    return { traite: false, raison: "adresse_inconnue", misDeCote: true, id: m.id };
+  }
+
+  /** Les e-mails mis de côté qui attendent l'admin, du plus récent au plus ancien. */
+  async misDeCote() {
+    const liste = await this.prisma.emailMisDeCote.findMany({ where: { rattacheLe: null }, orderBy: { recuLe: "desc" }, take: 200 });
+    return liste.map((m) => ({ id: m.id, adresse: m.adresse, de: m.de, objet: m.objet, texte: m.texte, pieces: m.pieces, recuLe: m.recuLe.toISOString() }));
+  }
+
+  /** L'admin rattache un e-mail mis de côté à l'entreprise d'une adresse Mobiiz : il rejoint ses reçus, l'artisan est prévenu. */
+  async rattacherMisDeCote(id: string, adresseMobiiz: string, lecteur: LecteurEmailRecu) {
+    const m = await this.prisma.emailMisDeCote.findUnique({ where: { id } });
+    if (!m || m.rattacheLe) throw notFound("E-mail");
+    const nom = adresseMobiiz.trim().toLowerCase().replace(/@.*$/, "");
+    const companyId = await this.adresses.entrepriseDe(nom);
+    if (!companyId) throw validationFailed("Unknown Mobiiz address", { reason: "adresse_inconnue", phrase: "Aucune entreprise n'a cette adresse Mobiiz." });
+    const r = await this.ranger(companyId, { adresse: nom, etiquette: null }, { email_id: m.emailId ?? undefined, from: m.de, to: [m.adresse], subject: m.objet, created_at: m.recuLe.toISOString() }, lecteur, m.texte);
+    await this.prisma.emailMisDeCote.update({ where: { id }, data: { rattacheLe: this.now(), companyId } });
+    return r;
+  }
+
+  /** Range l'e-mail chez l'entreprise : sa demande (étiquette ou repère de l'objet), sinon « Reçus » ; prévient l'artisan. */
+  private async ranger(companyId: string, cible: { adresse: string; etiquette: string | null }, evenement: Evenement, lecteur: LecteurEmailRecu, texteGarde: string | null = null) {
+    const to = Array.isArray(evenement.to) ? evenement.to : evenement.to ? [evenement.to] : [];
     const from = evenement.from ?? "";
     // Pas de boucle : un e-mail parti d'une adresse d'envoi de l'application (contact@, réponse) n'est jamais repris ; une
     // autre adresse du domaine (un vrai négoce ne l'a jamais, mais la recette, si) passe.
@@ -66,7 +109,7 @@ export class ReponsesRecuesService {
       to,
       subject: evenement.subject ?? "",
       date: evenement.created_at ?? this.now().toISOString(),
-      text: null,
+      text: texteGarde,
       html: null,
       attachments: [],
       tropLourdes: [],

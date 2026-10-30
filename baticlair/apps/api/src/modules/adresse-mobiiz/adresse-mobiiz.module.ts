@@ -1,3 +1,4 @@
+import { AdminEmailsController } from "./http/admin-emails.controller.js";
 import { Inject, Module, type OnModuleInit } from "@nestjs/common";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
@@ -16,7 +17,7 @@ import { AdresseMobiizController } from "./http/adresse-mobiiz.controller.js";
 /** R7 (Greg, 26 et 27 octobre 2026) : l'adresse Mobiiz par artisan et les réponses des négoces reçues dans Mobiiz. */
 @Module({
   imports: [TenancyModule, PriceRequestsModule],
-  controllers: [AdresseMobiizController],
+  controllers: [AdresseMobiizController, AdminEmailsController],
   providers: [
     { provide: AdresseMobiizService, useFactory: (p: PrismaService, c: AppConfig) => new AdresseMobiizService(p, c.emailDomaine), inject: [PrismaService, CONFIG] },
     {
