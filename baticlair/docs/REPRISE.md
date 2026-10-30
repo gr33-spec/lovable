@@ -15,13 +15,13 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-1. SUIVI 136 « Écris ta liste » : poussé et en ligne (37e7b192). Question ouverte à Greg : seuil 2 ou 3 entreprises.
-   SUIVI 137, landing : code et e2e de la landing faits ; reste la série complète, pousser, captures, compte rendu en 7
-   points (captures avant / après dans le scratchpad f1).
+Rien. SUIVI 136 (« Écris ta liste ») et 137 (landing) sont en ligne sur test.mobiiz.fr (e1c7f4da), rapportés à Greg.
+Questions ouvertes à Greg : seuil de partage des intitulés (2 ou 3 entreprises) ; libellé du bouton principal avec la
+nouvelle accroche ; photo (décision 5) ; CGU à relire.
 
 ## À faire ensuite (dans cet ordre)
 
-2. SUIVI 137, « Évolution de la landing, de l'expérience et du positionnement » (message de Greg du 30 octobre, soir) :
+2. FAIT (garder pour mémoire) : SUIVI 137, « Évolution de la landing, de l'expérience et du positionnement » (message de Greg du 30 octobre, soir) :
    - Économies au premier plan : consulter plusieurs négoces (concurrence saine, jamais contre les négoces), puis le
      collectif comme service complémentaire (« Plus on est, moins on paie », animation des 20 artisans gardée).
    - « Comment ça marche » en 3 étapes : prépare ta demande (main, scan, devis avec l'IA, vérifier) ; consulte plusieurs
