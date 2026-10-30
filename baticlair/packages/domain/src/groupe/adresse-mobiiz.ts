@@ -102,6 +102,9 @@ export function lireAdresseMobiiz(to: readonly string[], domaine: string): { adr
     // « Bati_Invest », « bati-invest+nimporte ») ; l'étiquette de réponse est « +r » suivie de huit caractères.
     const [base, ...suite] = nue.slice(0, at).split("+");
     if (!base) continue;
+    // Les adresses de réponse des lots (« lot-12@ », `REPONSES_DOMAINE`) ne sont jamais celles d'un artisan, même si le
+    // domaine de réception est le même (relecture du 30 octobre 2026).
+    if (/^lot-\d+$/.test(base)) continue;
     const etiquette = /^r([a-z0-9]{8})$/.exec(suite.join("+"))?.[1] ?? null;
     return { adresse: base, etiquette };
   }

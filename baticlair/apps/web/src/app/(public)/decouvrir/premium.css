@@ -304,3 +304,13 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mzp .hero .value-item span{font-size:10px}
 .mzp .worker-grid{gap:4px}}
 @media(prefers-reduced-motion:reduce){.mzp,.mzp *,.mzp *:before,.mzp *:after{animation-duration:.001ms!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
+
+/* Repensée le 30 octobre 2026 (« évolution stratégique ») : quatre étapes, sans illustration ; l'histoire de Greg. */
+.mzp .steps.steps-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.mzp .steps-4 .step{min-height:0;padding-bottom:27px}
+.mzp .steps-4 .step p{margin:0;max-width:none}
+.mzp .histoire{margin:0;display:grid;gap:14px;max-width:680px}
+.mzp .histoire p{font-size:18px;line-height:1.6;color:#E6DED2;margin:0}
+.mzp .histoire-signature{margin-top:22px;font-size:14px;font-weight:800;color:var(--yellow)}
+@media(max-width:1090px){.mzp .steps.steps-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.mzp .steps.steps-4{grid-template-columns:1fr}.mzp .histoire p{font-size:16px}}

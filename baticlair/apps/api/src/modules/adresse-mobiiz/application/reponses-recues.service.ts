@@ -70,7 +70,7 @@ export class ReponsesRecuesService {
         texte: lu ? (lu.text ?? texteDuHtml(lu.html)) : null,
         emailId: evenement.email_id ?? null,
         pieces: lu ? [...lu.attachments.map((p) => p.filename), ...lu.tropLourdes] : [],
-        recuLe: new Date(lu?.date ?? evenement.created_at ?? this.now().toISOString()),
+        recuLe: dateLisible(lu?.date ?? evenement.created_at, this.now()),
       },
     });
     this.logger.warn({ id: m.id }, "adresse mobiiz: e-mail mis de côté (adresse inconnue)");
@@ -136,7 +136,7 @@ export class ReponsesRecuesService {
         de: from,
         objet: recu.subject,
         texte: recu.text ?? texteDuHtml(recu.html),
-        recuLe: new Date(recu.date),
+        recuLe: dateLisible(recu.date, this.now()),
         tropLourdes,
         fichiers: { create: fichiers.map((f) => ({ nom: f.nom, type: f.type, taille: f.contenu.length, contenu: new Uint8Array(f.contenu) })) },
       },
@@ -274,4 +274,10 @@ export class ReponsesRecuesService {
 export function texteDuHtml(html: string | null): string | null {
   if (!html) return null;
   return html.replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim() || null;
+}
+
+/** Une date d'e-mail illisible ne fait jamais échouer la réception : l'heure d'arrivée la remplace (relecture du 30 octobre 2026). */
+export function dateLisible(texte: string | null | undefined, maintenant: Date): Date {
+  const d = texte ? new Date(texte) : null;
+  return d && !Number.isNaN(d.getTime()) ? d : maintenant;
 }

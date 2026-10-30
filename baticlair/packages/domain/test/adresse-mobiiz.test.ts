@@ -79,3 +79,11 @@ describe("l'adresse Mobiiz de l'artisan", () => {
     expect(PHRASES_ADRESSE.recoit).toBe("Les réponses des négoces arrivent ici, dans Mobiiz.");
   });
 });
+
+describe("relecture du 30 octobre 2026", () => {
+  it("une adresse de réponse de lot (« lot-12@ ») n'est jamais lue comme celle d'un artisan", () => {
+    expect(lireAdresseMobiiz(["lot-12@mobiiz.fr"], "mobiiz.fr")).toBeNull();
+    expect(lireAdresseMobiiz(["Négoce <lot-12@mobiiz.fr>", "bati-invest@mobiiz.fr"], "mobiiz.fr")).toEqual({ adresse: "bati-invest", etiquette: null });
+    expect(lireAdresseMobiiz(["lotissement@mobiiz.fr"], "mobiiz.fr")).toEqual({ adresse: "lotissement", etiquette: null });
+  });
+});

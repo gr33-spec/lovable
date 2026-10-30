@@ -1,5 +1,6 @@
 "use client";
 
+import { CoupDeMainIa } from "@/components/coup-de-main-ia";
 import { useSearchParams } from "next/navigation";
 
 import { PenLine } from "lucide-react";
@@ -85,6 +86,8 @@ export default function NouveauChantierPage() {
           {erreurListe}
         </p>
       ) : null}
+      {/* Greg, 30 octobre 2026 (point 10) : la lecture est une aide, dit avant de déposer. */}
+      <CoupDeMainIa />
       {/* Point 31 (Greg, 27 octobre 2026, 2e message) : trois choix, ses mots. */}
       <DropZone small titre="Depuis mon devis — on t'avance" sousTitre="Je te prépare la liste, tu vérifies les quantités." onFile={(f) => void drop(f, "devis")} pending={pending === "devis"} error={error} />
       <DropZone small kind="liste" titre="Photo de ma liste" sousTitre="Une photo, un PDF ou une capture : je la remets au propre." onFile={(f) => void drop(f, "liste")} pending={pending === "liste"} error={null} />

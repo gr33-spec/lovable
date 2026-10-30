@@ -91,9 +91,9 @@ export function CtaFixePremium({ haut, bas }: { haut: string; bas: string }) {
   return (
     <div className={`sticky-cta${visible ? " visible" : ""}`} aria-hidden={!visible} data-visible={visible ? "" : undefined}>
       <Link className="btn btn-yellow" href="/inscription" tabIndex={visible ? 0 : -1}>
-        Créer mon compte gratuit <Fleche />
+        Rejoindre le collectif <Fleche />
       </Link>
-      <div className="under">Sans carte bancaire</div>
+      <div className="under">Inscription gratuite · Sans carte bancaire</div>
     </div>
   );
 }

@@ -247,3 +247,13 @@ describe("correction après test de Greg : variantes et e-mails mis de côté", 
     expect((await agent.get("/v1/admin/emails-mis-de-cote")).status).toBe(403);
   });
 });
+
+describe("relecture du 30 octobre 2026 : date illisible", () => {
+  it("une date d'e-mail illisible prend l'heure d'arrivée", async () => {
+    const { dateLisible } = await import("../src/modules/adresse-mobiiz/application/reponses-recues.service.js");
+    const maintenant = new Date("2026-10-30T10:00:00Z");
+    expect(dateLisible("pas une date", maintenant)).toEqual(maintenant);
+    expect(dateLisible(undefined, maintenant)).toEqual(maintenant);
+    expect(dateLisible("2026-10-29T08:31:00Z", maintenant).toISOString()).toBe("2026-10-29T08:31:00.000Z");
+  });
+});
