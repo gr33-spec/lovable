@@ -115,7 +115,7 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mzp .step-nudge{display:block;text-align:center;margin-top:29px;color:#665D52;font-size:13px}
 .mzp .step-nudge a{text-decoration:underline;text-underline-offset:3px;font-weight:800;color:#17130E}
 .mzp .bridge{position:relative;isolation:isolate;padding:125px 0;background:#17110C;overflow:hidden}
-.mzp .bridge:before{content:'';z-index:-1;position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,8,5,.83) 0%,rgba(11,8,5,.7) 55%,rgba(11,8,5,.46) 100%),url('/landing/v3/artisans-collectif.webp') center 48%/cover}
+.mzp .bridge:before{content:'';z-index:-1;position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,8,5,.83) 0%,rgba(11,8,5,.7) 55%,rgba(11,8,5,.46) 100%),url('/landing/v3/collectif.svg') center 48%/cover}
 .mzp .bridge-content{max-width:880px}
 .mzp .bridge h2{font-size:clamp(42px,6vw,86px);letter-spacing:-.075em;line-height:1.07;margin:19px 0 23px}
 .mzp .bridge p{font-size:19px;line-height:1.55;max-width:650px;color:#E6DED2;margin:0}
@@ -265,7 +265,7 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mzp .bridge{padding:91px 0}
 .mzp .bridge h2{font-size:clamp(45px,10.2vw,67px)}
 .mzp .bridge p{font-size:16px}
-.mzp .bridge:before{background:linear-gradient(90deg,rgba(11,8,5,.85),rgba(11,8,5,.68)),url('/landing/v3/artisans-collectif-720.webp') 57% center/cover}
+.mzp .bridge:before{background:linear-gradient(90deg,rgba(11,8,5,.85),rgba(11,8,5,.68)),url('/landing/v3/collectif.svg') 57% center/cover}
 .mzp .collective-section{padding:80px 0}
 .mzp .collective-layout{grid-template-columns:1fr;gap:29px}
 .mzp .collective-copy h2{font-size:clamp(47px,10vw,61px);margin:19px 0}

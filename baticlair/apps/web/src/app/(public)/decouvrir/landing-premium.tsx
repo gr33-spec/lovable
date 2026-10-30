@@ -153,10 +153,10 @@ export function LandingPremium() {
               </div>
               <div className="hero-media" role="group" aria-label="Artisans du bâtiment réunis, et un exemple d'achat groupé">
                 <div className="hero-photo">
-                  <picture>
-                    <source media="(max-width: 900px)" srcSet="/landing/v3/artisans-collectif-720.webp" />
-                    <img src="/landing/v3/artisans-collectif.webp" alt="Un collectif d'artisans du bâtiment réunis" width={1080} height={465} fetchPriority="high" />
-                  </picture>
+                  {/* Une illustration dessinée pour Mobiiz, à la place de la photo de la maquette dont les droits ne sont pas
+                      confirmés (Greg, 30 octobre 2026 : « sinon, un visuel dont nous maîtrisons les droits »). */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- une illustration SVG, sans optimisation d'image */}
+                  <img src="/landing/v3/collectif.svg" alt="Illustration : un collectif d'artisans sous une même charpente" width={1080} height={465} fetchPriority="high" />
                   <span className="photo-stamp">La force des pros réunis</span>
                 </div>
                 {/* L'aperçu dit la demande à plusieurs négoces (Greg, 30 octobre 2026, soir) ; marqué « Exemple », sans prix. */}

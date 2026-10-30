@@ -15,9 +15,9 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-Rien. SUIVI 138 (bouton « Commencer gratuitement », intitulés privés et propositions admin, « Pourquoi Mobiiz ? »
-neutre) en ligne et rapporté. Reste ouvert chez Greg : droits de la photo de groupe ; CGU et offres (Essentiel ou
-Collectif, Pro 8 ou 6 analyses, achats groupés offerts) à valider ensemble.
+SUIVI 139 (casques) et 140 (illustration à la place de la photo) : commits locaux, à pousser après la série verte du
+site. Ouvert chez Greg : validation des CGU (doc VNekwvYYq3KzhijCSm2KDX, deux points à trancher en bas du doc).
+Lecture IA réelle (point 13) : la routine du crédit la reprend seule.
 
 ## À faire ensuite (dans cet ordre)
 
