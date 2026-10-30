@@ -24,7 +24,7 @@ const negoce = z.union([
 ]);
 // Précision 1 (27 octobre 2026) : au moins un négoce ; le message vient du service (« Ajoute au moins un négoce… »).
 const negoces = z.array(negoce).max(10);
-const ligne = z.object({ designation: z.string().trim().min(3).max(300), quantite: z.number().positive().max(10_000_000), unite: z.string().trim().min(1).max(40) });
+const ligne = z.object({ designation: z.string().trim().min(3).max(300), quantite: z.number().positive().max(10_000_000), unite: z.string().trim().min(1).max(40), cle: z.string().trim().min(3).max(200).nullable().optional(), libre: z.boolean().optional() });
 const engagerBody = z.object({
   achatId: z.uuid().nullable().optional(),
   lignes: z.array(ligne).min(1).max(200),

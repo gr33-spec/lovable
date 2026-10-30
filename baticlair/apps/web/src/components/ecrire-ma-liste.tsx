@@ -48,9 +48,10 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
   const liste = useRef<HTMLUListElement>(null);
   // Les références du catalogue, dès deux lettres tapées (une requête courte, annulée à la frappe suivante).
   const mot = texte.trim().length >= 2 && !/\d/.test(texte) ? texte.trim() : "";
-  const fetchCat = useCallback((signal: AbortSignal) => (mot ? api<{ references: { designation: string; unite: string }[] }>(`/v1/achats-groupes/catalogue?q=${encodeURIComponent(mot)}`, { signal }).catch(() => null) : Promise.resolve(null)), [mot]);
+  // Le catalogue complet (point 3 du 30 octobre) : les mots du chantier, fautes admises (« pane » → Panne).
+  const fetchCat = useCallback((signal: AbortSignal) => (mot ? api<{ resultats: { designation: string; unite: string }[] | null }>(`/v1/catalogue?q=${encodeURIComponent(mot)}`, { signal }).catch(() => null) : Promise.resolve(null)), [mot]);
   const { data: cat } = useResource(fetchCat);
-  const suggestions = mot ? (cat?.references ?? []).filter((r) => r.designation.toLowerCase() !== mot.toLowerCase()).slice(0, 4) : [];
+  const suggestions = mot ? (cat?.resultats ?? []).filter((r) => r.designation.toLowerCase() !== mot.toLowerCase()).slice(0, 4) : [];
 
   useEffect(() => {
     champ.current?.focus();

@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Check, ChevronLeft, ChevronRight, ClipboardList, MessageSquare, MoreHorizontal, Phone, Plus, Search, ShoppingCart, Users, X } from "lucide-react";
+import { Bell, Check, ChevronLeft, ChevronRight, ClipboardList, MessageSquare, MoreHorizontal, Phone, Plus, ShoppingCart, Users, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useLienInvitation } from "@/components/inviter";
 import { Button, ButtonLink, Card, Field, INPUT, Skeleton } from "@/components/ui";
 import { api, messageErreur, type NextAction } from "@/lib/api";
-import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type Catalogue, type NoeudCatalogue, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
+import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
 import { useResource } from "@/lib/use-resource";
 import { useBrouillon } from "@/lib/brouillon";
+import { CatalogueListes } from "@/components/catalogue-listes";
 import { EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
 import { TON as TON_MOBIIZ } from "../../../../packages/domain/src/groupe/ton";
 import { PHRASE_ADRESSE_GENERIQUE, PHRASE_EMAIL_COMMERCIAL, estAdresseGenerique } from "../../../../packages/domain/src/groupe/contact-negoce";
@@ -317,7 +318,7 @@ const dansJours = (n: number) => new Date(Date.now() + n * 86_400_000).toISOStri
 const nombre = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
 interface SaisieAchat extends Record<string, unknown> {
-  lignes: { designation: string; unite: string; qte: string }[];
+  lignes: { designation: string; unite: string; qte: string; cle?: string; libre?: boolean; familleAchat?: string }[];
   livraison: string;
   dateBesoin: string;
   negoces: NegoceChoisi[];
@@ -341,14 +342,14 @@ const resumeLignes = (n: number) => `${n} ligne${n > 1 ? "s" : ""}`;
  * Sans liste enregistrée : quatre étapes. 1) Les matériaux au catalogue et leurs quantités ; 2) la commune et la date (sauf
  * quand on rejoint un achat : c'est la sienne) ; 3) ses négoces ; 4) l'engagement et le bouton.
  */
-export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; titre: string } | null }) {
+export function FormulaireAchatGroupe({ rejoindre, famille = null }: { rejoindre: { id: string; titre: string } | null; famille?: string | null }) {
   // Correction après test de Greg (30 octobre 2026, point 2) : la saisie et l'étape sont gardées sur le serveur à chaque
   // geste ; aller dans le menu puis revenir reprend exactement ici.
   const b = useBrouillon<SaisieAchat>(
-    rejoindre ? `achat-groupe:rejoindre:${rejoindre.id}` : "achat-groupe:nouveau",
+    rejoindre ? `achat-groupe:rejoindre:${rejoindre.id}` : famille ? `achat-groupe:nouveau:${famille}` : "achat-groupe:nouveau",
     {
       type: "achat-groupe",
-      url: rejoindre ? `/achats-groupes/lancer?rejoindre=${rejoindre.id}&titre=${encodeURIComponent(rejoindre.titre)}` : "/achats-groupes/lancer",
+      url: rejoindre ? `/achats-groupes/lancer?rejoindre=${rejoindre.id}&titre=${encodeURIComponent(rejoindre.titre)}` : famille ? `/achats-groupes/lancer?famille=${famille}` : "/achats-groupes/lancer",
       titre: (d) => `${rejoindre ? `Achat groupé : ${rejoindre.titre}` : "Ton achat groupé"} · ${resumeLignes(d.lignes.length)}`,
       vide: (d, e) => d.lignes.length === 0 && e === 1,
     },
@@ -356,15 +357,24 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
   );
   const { lignes, livraison, dateBesoin, negoces, engage } = b.donnees;
   const etape = b.etape;
+  // Point 4 du 30 octobre : le métier de cet achat groupé, fixé par sa première ligne du catalogue.
+  const familleAchat = famille ?? lignes.find((l) => l.familleAchat)?.familleAchat ?? null;
+  // Un produit d'un autre métier : mis de côté pour l'achat groupé de son métier (une carte « Reprendre » sur l'accueil).
+  async function mettreDeCote(l: LignePanier, m: { libelle: string; familleAchat: string }) {
+    const cle = `achat-groupe:nouveau:${m.familleAchat}`;
+    const deja = (await api<{ brouillon: { donnees: SaisieAchat } | null }>(`/v1/brouillons/un?cle=${encodeURIComponent(cle)}`).catch(() => null))?.brouillon?.donnees;
+    const lignesDeCote = [...(deja?.lignes ?? []), { designation: l.designation, unite: l.unite, qte: l.qte, ...(l.cle ? { cle: l.cle } : {}), ...(l.familleAchat ? { familleAchat: l.familleAchat } : {}) }];
+    await api("/v1/brouillons", {
+      method: "PUT",
+      body: { cle, type: "achat-groupe", titre: `Achat groupé ${m.libelle.toLowerCase()} · ${resumeLignes(lignesDeCote.length)}`, url: `/achats-groupes/lancer?famille=${m.familleAchat}`, etape: 1, donnees: { livraison: "", dateBesoin: dansJours(30), negoces: [], engage: false, ...deja, lignes: lignesDeCote } },
+    }).catch(() => undefined);
+  }
   const setLignes = (f: SaisieAchat["lignes"] | ((l: SaisieAchat["lignes"]) => SaisieAchat["lignes"])) => b.modifier((d) => ({ ...d, lignes: typeof f === "function" ? f(d.lignes) : f }));
   const setLivraison = (v: string) => b.modifier((d) => ({ ...d, livraison: v }));
   const setDateBesoin = (v: string) => b.modifier((d) => ({ ...d, dateBesoin: v }));
   const setNegoces = (v: NegoceChoisi[]) => b.modifier((d) => ({ ...d, negoces: v }));
   const setEngage = (v: boolean) => b.modifier((d) => ({ ...d, engage: v }));
-  const [q, setQ] = useState("");
-  const fetchCat = useCallback((signal: AbortSignal) => api<Catalogue>(`/v1/achats-groupes/catalogue?q=${encodeURIComponent(q)}`, { signal }), [q]);
   const fetchMes = useCallback((signal: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal }), []);
-  const { data } = useResource(fetchCat);
   const { data: mes } = useResource(fetchMes);
   const identite = useIdentite();
   const [pendingSiret, setPendingSiret] = useState(false);
@@ -410,7 +420,7 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
       const fait = (
         await api<Lance>("/v1/achats-groupes", {
           method: "POST",
-          body: { achatId: rejoindre?.id ?? null, lignes: pretes.map((l) => ({ designation: l.designation, quantite: nombre(l.qte), unite: l.unite })), livraison: livraison.trim(), dateBesoin: rejoindre ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true },
+          body: { achatId: rejoindre?.id ?? null, lignes: pretes.map((l) => ({ designation: l.designation, quantite: nombre(l.qte), unite: l.unite, ...(l.cle ? { cle: l.cle } : {}), ...(l.libre ? { libre: true } : {}) })), livraison: livraison.trim(), dateBesoin: rejoindre ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true },
         })
       );
       b.effacer();
@@ -461,7 +471,7 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
       ) : null}
       {etape === 1 ? (
         <Etape n={1} total={total} titre="Qu'est-ce que tu commandes ?">
-          <ChoixGuide catalogue={data ?? null} q={q} onQ={setQ} deja={lignes.map((l) => l.designation)} onAjouter={(r) => setLignes((ls) => [...ls, { designation: r.designation, unite: r.unite, qte: r.qte }])} />
+          <CatalogueListes familleAchat={familleAchat} onAjouter={(r) => setLignes((ls) => [...ls, { designation: r.designation, unite: r.unite, qte: r.qte, ...(r.cle ? { cle: r.cle } : {}), ...(r.libre ? { libre: true } : {}), ...(r.familleAchat ? { familleAchat: r.familleAchat } : {}) }])} onAutreMetier={(l, m) => void mettreDeCote(l, m)} />
           {lignes.length ? <LignesPanier lignes={lignes} onChange={setLignes} /> : null}
           <Button disabled={pretes.length === 0 || bloque} onClick={suivant}>
             Continuer
@@ -508,150 +518,18 @@ export function FormulaireAchatGroupe({ rejoindre }: { rejoindre: { id: string; 
   );
 }
 
-/**
- * LE CHOIX GUIDÉ (Greg, 27 octobre 2026, capture iPhone : « un seul bouton ardoise, puis format, puis choix ; on est
- * multimétier ») : son métier (les autres en un tap), puis un bouton par matériau, par format, par choix ; au bout, la
- * quantité et « Ajouter à ma liste ». La recherche par mot reste derrière « Chercher par mot ».
- */
-function ChoixGuide({ catalogue, q, onQ, deja, onAjouter }: { catalogue: Catalogue | null; q: string; onQ: (q: string) => void; deja: string[]; onAjouter: (r: { designation: string; unite: string; qte: string }) => void }) {
-  const [famille, setFamille] = useState<string | null>(null);
-  const [chemin, setChemin] = useState<string[]>([]);
-  const [feuille, setFeuille] = useState<{ designation: string; unite: string } | null>(null);
-  const [qte, setQte] = useState("");
-  const [parMot, setParMot] = useState(false);
-  const [autresMetiers, setAutresMetiers] = useState(false);
-  const familles = catalogue?.familles ?? [];
-  const courante = famille ?? familles[0]?.famille ?? null;
-  const BOUTON = "pressable flex min-h-13 w-full items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 text-left text-[16px] font-semibold";
-  let niveau: NoeudCatalogue[] = courante ? (catalogue?.arbre[courante] ?? []) : [];
-  for (const l of chemin) niveau = niveau.find((n) => n.libelle === l)?.enfants ?? [];
-  const choisir = (n: NoeudCatalogue) => {
-    if (n.reference) {
-      setFeuille(n.reference);
-      setQte("");
-      return;
-    }
-    setChemin((c) => [...c, n.libelle]);
-  };
-  const retour = () => {
-    if (feuille) return setFeuille(null);
-    setChemin((c) => c.slice(0, -1));
-  };
-  const ajouter = () => {
-    if (!feuille || !(nombre(qte) > 0)) return;
-    onAjouter({ ...feuille, qte });
-    setFeuille(null);
-    setChemin([]);
-    setQte("");
-  };
-  if (!catalogue) return <p className="text-[15px] text-muted">Chargement du catalogue…</p>;
-  // Un métier sans catalogue (électricien, plombier…) : on le dit, au lieu de proposer les matériaux d'un autre métier.
-  if (catalogue.monMetier && !catalogue.monMetier.catalogue && !autresMetiers)
-    return (
-      <div role="status" className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
-        {/* Greg, 28 octobre 2026, point 6 : sa phrase, mot pour mot. */}
-        <p className="text-[16px] font-bold">Les achats groupés arrivent bientôt pour ton métier.</p>
-        <p className="text-[15px]">En attendant, envoie ta liste à tes négoces : ils te font leur prix.</p>
-        <ButtonLink href="/chantiers/nouveau" variant="secondary">
-          Ma liste de matériaux
-        </ButtonLink>
-        {familles.length ? (
-          <button type="button" onClick={() => setAutresMetiers(true)} className={LIEN_TEXTE}>
-            Je commande aussi pour un autre métier
-          </button>
-        ) : null}
-      </div>
-    );
-  if (parMot)
-    return (
-      <div className="flex flex-col gap-3">
-        <div className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 focus-within:border-accent">
-          <Search size={18} className="text-muted" aria-hidden="true" />
-          <label htmlFor="cherche-materiau" className="sr-only">
-            Ajoute tes matériaux
-          </label>
-          <input id="cherche-materiau" value={q} onChange={(e) => onQ(e.target.value)} placeholder="Ardoise 32×22, liteaux, zinc 0,65…" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" autoComplete="off" autoFocus />
-        </div>
-        <ul aria-label="Catalogue" className="flex flex-wrap gap-2">
-          {catalogue.references
-            .filter((r) => !deja.includes(r.designation))
-            .slice(0, 8)
-            .map((r) => (
-              <li key={r.designation}>
-                <button type="button" onClick={() => onAjouter({ designation: r.designation, unite: r.unite, qte: "" })} className="pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-left text-[15px] font-semibold">
-                  <Plus size={16} aria-hidden="true" /> {r.designation}
-                </button>
-              </li>
-            ))}
-        </ul>
-        <button type="button" onClick={() => setParMot(false)} className={LIEN_TEXTE}>
-          Choisir bouton par bouton
-        </button>
-      </div>
-    );
-  return (
-    <div className="flex flex-col gap-3">
-      {familles.length > 1 && chemin.length === 0 && !feuille ? (
-        <ul aria-label="Métier" className="flex flex-wrap gap-2">
-          {familles.map((f) => (
-            <li key={f.famille}>
-              <button type="button" aria-pressed={f.famille === courante} onClick={() => setFamille(f.famille)} className={`pressable inline-flex min-h-11 items-center rounded-full px-4 text-[15px] font-semibold ${f.famille === courante ? "bg-ink text-white" : "border border-line bg-surface"}`}>
-                {f.libelle}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {chemin.length || feuille ? (
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={retour} aria-label="Choix précédent" className="pressable grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface">
-            <ChevronLeft size={20} aria-hidden="true" />
-          </button>
-          <p className="text-[15px] font-semibold">{[...chemin, ...(feuille ? [feuille.designation] : [])].join(" › ")}</p>
-        </div>
-      ) : null}
-      {feuille ? (
-        <div className="flex flex-col gap-3 rounded-xl bg-ground p-4">
-          <label htmlFor="qte-feuille" className="text-[16px] font-semibold">
-            Combien de {feuille.designation} ?
-          </label>
-          <div className="flex items-center gap-3">
-            <input id="qte-feuille" aria-label={`Quantité de ${feuille.designation}`} inputMode="decimal" value={qte} onChange={(e) => setQte(e.target.value)} placeholder="Quantité" className={`${INPUT} max-w-40`} autoFocus onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), ajouter())} />
-            <span className="text-[16px] text-muted">{feuille.unite}</span>
-          </div>
-          <Button variant="ink" disabled={!(nombre(qte) > 0)} onClick={ajouter}>
-            <Plus size={18} aria-hidden="true" /> Ajouter à ma liste
-          </Button>
-        </div>
-      ) : (
-        <ul aria-label={chemin.length ? chemin[chemin.length - 1] : "Matériau"} className="flex flex-col gap-2">
-          {niveau.map((n) => (
-            <li key={n.libelle}>
-              <button type="button" onClick={() => choisir(n)} className={BOUTON}>
-                {n.libelle}
-                <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {!feuille ? (
-        <button type="button" onClick={() => setParMot(true)} className={LIEN_TEXTE}>
-          Chercher par mot
-        </button>
-      ) : null}
-    </div>
-  );
-}
 
 /** Les lignes du panier : la référence, sa quantité, une croix. */
-function LignesPanier({ lignes, onChange }: { lignes: { designation: string; unite: string; qte: string }[]; onChange: (l: { designation: string; unite: string; qte: string }[]) => void }) {
+type LignePanier = { designation: string; unite: string; qte: string; cle?: string; libre?: boolean; familleAchat?: string };
+
+function LignesPanier({ lignes, onChange }: { lignes: LignePanier[]; onChange: (l: LignePanier[]) => void }) {
   return (
     <ul aria-label="Ma liste" className="flex flex-col gap-2">
       {lignes.map((l, i) => (
-        <li key={l.designation} className="flex items-end gap-2 rounded-xl border border-line bg-surface p-3">
+        <li key={`${l.cle ?? l.designation}-${i}`} className="flex items-end gap-2 rounded-xl border border-line bg-surface p-3">
           <div className="flex min-w-0 grow flex-col gap-1">
             <span className="text-[15px] font-semibold">{l.designation}</span>
+            {l.libre ? <span className="text-[13px] text-muted">Ligne libre : elle part telle quelle à tes négoces.</span> : null}
             <label className="flex items-center gap-2 text-[14px] text-muted">
               <span className="sr-only">Quantité de {l.designation}</span>
               <input inputMode="decimal" value={l.qte} placeholder="Quantité" onChange={(e) => onChange(lignes.map((x, j) => (j === i ? { ...x, qte: e.target.value } : x)))} className={`${INPUT} max-w-36`} />

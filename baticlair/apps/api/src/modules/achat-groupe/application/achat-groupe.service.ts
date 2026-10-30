@@ -152,6 +152,10 @@ export interface LigneEngagee {
   designation: string;
   quantite: number;
   unite: string;
+  /** Point 3 du 30 octobre : l'article choisi au catalogue (sa clé l'additionne aux mêmes articles des autres). */
+  cle?: string | null;
+  /** « Je ne trouve pas : je décris mon besoin » : la ligne part telle quelle, jamais cumulée. */
+  libre?: boolean;
   projectId?: string | null;
   articleKey?: string | null;
 }
@@ -210,6 +214,8 @@ export interface PortsAchatGroupe {
   dernierPrixPour(companyId: string): Promise<(cle: string, unite: string) => number | null>;
   /** L'adresse Mobiiz (sans étiquette) de l'entreprise : le Reply-To de la demande au négoce. */
   adresseMobiiz(companyId: string): Promise<string | null>;
+  /** Point 3 du 30 octobre : un article du catalogue par sa clé (null s'il n'existe pas ou est masqué). */
+  articleCatalogue?(cle: string): Promise<{ cle: string; designation: string; unite: string; familleAchat: string } | null>;
   /** « Entreprise Dupont via Mobiiz <adresse> » : l'expéditeur du mail au négoce (lot final, point 3). */
   expediteurMobiiz?(companyId: string): Promise<string | null>;
   mode(): Promise<string>;
@@ -347,13 +353,27 @@ export class AchatGroupeService {
     if (!e.engagement) throw validationFailed("Commitment required", { reason: "engagement_requis", message: "Coche la case d'engagement pour rejoindre l'achat groupé." });
     if (e.negoces.length === 0) throw validationFailed(PHRASE_NEGOCE_OBLIGATOIRE, { reason: "negoce_obligatoire", message: PHRASE_NEGOCE_OBLIGATOIRE });
     if (e.lignes.length === 0) throw validationFailed("Nothing to add", { reason: "rien_a_lancer", message: "Coche au moins une ligne rattachée au catalogue." });
-    const lignes = e.lignes.map((l) => {
-      const r = referenceStricte(l.designation);
-      if (!r.ok || !this.cfg.familles.includes(r.reference.famille))
-        throw validationFailed("Reference not precise enough", { reason: "reference_imprecise", message: `« ${l.designation} » n'est pas une référence du catalogue : elle reste en demande perso.` });
-      if (!(l.quantite > 0)) throw validationFailed("Quantity required", { reason: "quantite_requise" });
-      return { ...l, ref: r.reference };
-    });
+    // Point 3 du 30 octobre : un article du catalogue s'additionne par SA clé ; une ligne libre part telle quelle (jamais
+    // cumulée, sa famille est celle de l'achat) ; sinon, comme avant, la référence stricte.
+    const lues = await Promise.all(
+      e.lignes.map(async (l) => {
+        if (!(l.quantite > 0)) throw validationFailed("Quantity required", { reason: "quantite_requise" });
+        if (l.cle) {
+          const a = this.ports.articleCatalogue ? await this.ports.articleCatalogue(l.cle) : null;
+          if (!a) throw validationFailed("Unknown catalogue article", { reason: "article_inconnu", message: `« ${l.designation} » n'est plus au catalogue. Choisis-le à nouveau ou décris-le.` });
+          return { ...l, unite: a.unite, libre: false, ref: { cle: `cat:${a.cle}`, libelle: a.designation, famille: a.familleAchat as string | null } };
+        }
+        if (l.libre) return { ...l, libre: true, ref: { cle: `libre:${randomBytes(9).toString("base64url")}`, libelle: l.designation.trim(), famille: null as string | null } };
+        const r = referenceStricte(l.designation);
+        if (!r.ok || !this.cfg.familles.includes(r.reference.famille))
+          throw validationFailed("Reference not precise enough", { reason: "reference_imprecise", message: `« ${l.designation} » n'est pas une référence du catalogue : elle reste en demande perso.` });
+        return { ...l, libre: false, ref: { cle: r.reference.cle, libelle: r.reference.libelle, famille: r.reference.famille as string | null } };
+      }),
+    );
+    // Point 4 du 30 octobre : un achat groupé reste rattaché à UN métier.
+    const famillesLues = [...new Set(lues.flatMap((l) => (l.ref.famille ? [l.ref.famille] : [])))];
+    if (famillesLues.length > 1)
+      throw validationFailed("Several trades", { reason: "plusieurs_metiers", message: "Ces lignes sont de plusieurs métiers : un achat groupé n'en prend qu'un. Mets chaque métier dans son propre achat groupé." });
     const maintenant = this.now();
     const departement = zoneDuCodePostal(e.livraison);
     if (!departement) throw validationFailed("A delivery town with a postcode is required", { reason: "livraison_requise", message: "Indique la commune de livraison avec son code postal." });
@@ -366,7 +386,7 @@ export class AchatGroupeService {
       achat = await this.prisma.regroupementNegocie.findFirst({ where: { id: e.achatId, mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant }, departement } });
       if (!achat) throw new DomainError("conflict", "This group purchase is closed", { reason: "achat_clos", message: "Cet achat groupé est clos ou hors de ton secteur." });
     } else {
-      const famille = this.metierDe(company.trades, lignes.map((l) => l.ref.famille));
+      const famille = famillesLues[0] ?? this.metierDe(company.trades, []);
       if (!e.dateBesoin) throw validationFailed("Date required", { reason: "date_requise", message: "Indique ta date de livraison." });
       const dates = this.dates(e.dateBesoin);
       if (dates.clotureLe <= maintenant) throw validationFailed(PHRASE_DATE_TROP_PROCHE, { reason: "date_trop_proche", message: PHRASE_DATE_TROP_PROCHE });
@@ -395,12 +415,15 @@ export class AchatGroupeService {
         data: { companyId: tenant.companyId, designation: achat.libelle, cle: achat.cle, famille: achat.famille, quantite: 0, unite: "lignes", departement, livraison: e.livraison, dateBesoin, statut: ENGAGE, regroupementId: achat.id, engageLe: maintenant, offert },
       });
     }
-    for (const l of lignes) {
-      const deja = await this.prisma.ligneAchatGroupe.findUnique({ where: { besoinId_cle_unite: { besoinId: besoin.id, cle: l.ref.cle, unite: l.unite } } });
+    if (famillesLues[0] && famillesLues[0] !== achat.famille)
+      throw validationFailed("Other trade", { reason: "autre_metier", message: `Ces lignes ne sont pas du même métier que cet achat groupé (${libelleMetier(achat.famille).toLowerCase()}). Mets-les dans l'achat groupé de leur métier.` });
+    for (const l of lues) {
+      const famille = l.ref.famille ?? achat.famille;
+      const deja = l.libre ? null : await this.prisma.ligneAchatGroupe.findUnique({ where: { besoinId_cle_unite: { besoinId: besoin.id, cle: l.ref.cle, unite: l.unite } } });
       if (deja) await this.prisma.ligneAchatGroupe.update({ where: { id: deja.id }, data: { quantite: Number(deja.quantite) + l.quantite } });
       else
         await this.prisma.ligneAchatGroupe.create({
-          data: { besoinId: besoin.id, regroupementId: achat.id, companyId: tenant.companyId, cle: l.ref.cle, libelle: l.ref.libelle, famille: l.ref.famille, unite: l.unite, quantite: l.quantite, projectId: l.projectId ?? null, articleKey: l.articleKey ?? null, designationOrigine: l.designation },
+          data: { besoinId: besoin.id, regroupementId: achat.id, companyId: tenant.companyId, cle: l.ref.cle, libelle: l.ref.libelle, famille, unite: l.unite, quantite: l.quantite, projectId: l.projectId ?? null, articleKey: l.articleKey ?? null, designationOrigine: l.designation, libre: l.libre },
         });
     }
     await this.prisma.besoinNegocie.update({ where: { id: besoin.id }, data: { quantite: await this.prisma.ligneAchatGroupe.count({ where: { besoinId: besoin.id } }) } });

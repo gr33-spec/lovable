@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { MESSAGE_HORS_ZONE } from "@baticlair/domain";
 import type { AppConfig } from "../../platform/config/config.js";
+import { CatalogueModule, CatalogueService } from "../catalogue/index.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
 import { NotificationsGroupeService } from "../../platform/notifications/notifications-artisan.js";
@@ -23,7 +24,7 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
  * automatique`), de la demande perso (plan B), de l'adresse Mobiiz (Reply-To) et du lecteur de devis des négoces.
  */
 @Module({
-  imports: [TenancyModule, RecentrageModule, GroupeModule, AdresseMobiizModule, PilotageModule, TakeoffModule],
+  imports: [TenancyModule, RecentrageModule, GroupeModule, AdresseMobiizModule, PilotageModule, TakeoffModule, CatalogueModule],
   controllers: [AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheController],
   providers: [
     {
@@ -38,6 +39,7 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
         commande: CommandeDuMoisService,
         takeoffs: TakeoffService,
         extracteur: NegoceExtractor | null,
+        catalogue: CatalogueService,
         push: PushSender,
         e: TransactionalEmailSender,
         c: AppConfig,
@@ -54,6 +56,7 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
             dernierPrixPour: (companyId) => demandes.dernierPrixPour(companyId),
             adresseMobiiz: async (companyId) => (await adresses.expediteur(companyId))?.from.match(/<([^>]+)>/)?.[1] ?? null,
             expediteurMobiiz: async (companyId) => (await adresses.expediteur(companyId))?.from ?? null,
+            articleCatalogue: (cle) => catalogue.article(cle),
             mode: () => negocie.mode(),
             envoyerEnPerso: async (tenant, d) => {
               const projet = await p.project.create({ data: { companyId: tenant.companyId, name: d.nom, address: d.adresse, createdById: tenant.userId }, select: { id: true } });
@@ -95,7 +98,7 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
             admins: c.groupe.admins,
           },
         ),
-      inject: [PrismaService, DroitsService, DemandePersoService, NegocieService, ObservatoireService, AdresseMobiizService, CommandeDuMoisService, TakeoffService, NEGOCE_EXTRACTOR, PUSH_SENDER, EMAIL_SENDER, CONFIG],
+      inject: [PrismaService, DroitsService, DemandePersoService, NegocieService, ObservatoireService, AdresseMobiizService, CommandeDuMoisService, TakeoffService, NEGOCE_EXTRACTOR, CatalogueService, PUSH_SENDER, EMAIL_SENDER, CONFIG],
     },
   ],
   exports: [AchatGroupeService],

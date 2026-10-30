@@ -2209,6 +2209,9 @@ model LigneAchatGroupe {
   projectId          String?  @map("project_id") @db.Uuid
   articleKey         String?  @map("article_key")
   designationOrigine String   @map("designation_origine")
+  /// Point 3 du 30 octobre : « Je ne trouve pas : je décris mon besoin ». Partie telle quelle, jamais cumulée, sauf si
+  /// l'admin la rattache à un article du catalogue.
+  libre              Boolean  @default(false)
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   besoin  BesoinNegocie @relation(fields: [besoinId], references: [id], onDelete: Cascade)
@@ -2301,4 +2304,29 @@ model Brouillon {
   @@unique([companyId, cle])
   @@index([companyId, updatedAt])
   @@map("brouillon")
+}
+
+/**
+ * LE CATALOGUE (correction après test de Greg, 30 octobre 2026, point 3) : un article par ligne, amorcé depuis le
+ * domaine (`AMORCE_CATALOGUE`), modifié ensuite par l'admin (ajouter, renommer, masquer) ; la clé ne change jamais : c'est
+ * elle qui additionne les lignes de plusieurs artisans dans un achat groupé.
+ */
+model CatalogueArticle {
+  cle         String   @id
+  metier      String
+  famille     String
+  produit     String
+  variante    String?
+  designation String
+  unite       String
+  synonymes   String[] @default([])
+  masque      Boolean  @default(false)
+  ordre       Int      @default(0)
+  /// Ajouté par l'admin (pas dans l'amorce).
+  ajoute      Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([metier, masque])
+  @@map("catalogue_article")
 }

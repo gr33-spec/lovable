@@ -330,3 +330,72 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(e.monMetier).toEqual({ libelle: "Électricité", catalogue: false });
   });
 });
+
+/**
+ * CORRECTION APRÈS TEST DE GREG (30 octobre 2026, points 3 et 4) : le catalogue complet en listes (« Métier : Couverture
+ * ▾ », les métiers du profil d'abord), la recherche par les mots du chantier ; un article choisi s'additionne par SA clé ;
+ * « Je ne trouve pas : je décris mon besoin » part telle quelle, jamais cumulée, et l'admin peut la rattacher ; un achat
+ * groupé reste d'un seul métier ; l'admin ajoute, renomme, masque.
+ */
+describe("le catalogue complet et la ligne libre", { timeout: 240_000 }, () => {
+  const PANNE = "charpente/bois-de-charpente/panne/75x225-6-m-classe-2";
+  const charpente = (o: Record<string, unknown> = {}) => engagement({ lignes: [{ designation: "Panne 75×225 · 6 m · classe 2", quantite: 12, unite: "pièces", cle: PANNE }], ...o });
+
+  it("les listes du métier, puis la recherche ; « panne », « pane », les métiers du profil d'abord", async () => {
+    const a = await artisan(1);
+    const cat = (await a.agent.get("/v1/catalogue").expect(200)).body;
+    expect(cat.metiers.slice(0, 2).map((m: { code: string; mien: boolean }) => [m.code, m.mien])).toEqual([["couverture", true], ["zinguerie", true]]);
+    expect(cat.metier).toBe("couverture");
+    expect(cat.arbre.map((f: { libelle: string }) => f.libelle)).toContain("Ardoises");
+    const ch = (await a.agent.get("/v1/catalogue?metier=charpente").expect(200)).body;
+    const panne = ch.arbre.find((f: { libelle: string }) => f.libelle === "Bois de charpente").produits.find((p: { libelle: string }) => p.libelle === "Panne");
+    expect(panne.variantes.some((v: { libelle: string; article: { cle: string } }) => v.libelle === "75×225 · 6 m · classe 2" && v.article.cle === PANNE)).toBe(true);
+    for (const q of ["panne", "pane", "PANNES"]) expect((await a.agent.get(`/v1/catalogue?q=${q}`).expect(200)).body.resultats[0].produit, q).toBe("Panne");
+  });
+
+  it("deux artisans, le même article : un seul achat groupé de charpente, leurs quantités sous la même clé ; la ligne libre jamais cumulée", async () => {
+    const a = await artisan(1);
+    const b = await artisan(2, "8 rue du Port, 22500 Paimpol");
+    const libre = { designation: "Faîtière ventilée spéciale modèle ancien", quantite: 30, unite: "pièces", libre: true };
+    const pa = (await a.agent.post("/v1/achats-groupes").send(charpente({ lignes: [{ designation: "Panne 75×225 · 6 m · classe 2", quantite: 12, unite: "pièces", cle: PANNE }, libre] })).expect(201)).body;
+    expect(pa.titre).toMatch(/^Charpente · /);
+    const rb = await b.agent.post("/v1/achats-groupes").send(charpente({ lignes: [{ designation: "Panne 75×225 · 6 m · classe 2", quantite: 8, unite: "pièces", cle: PANNE }, libre], livraison: "22500 Paimpol" }));
+    expect(rb.status, JSON.stringify(rb.body)).toBe(201);
+    const pb = rb.body;
+    expect(pb.achatId).toBe(pa.achatId);
+    const lignes = await ctx.prisma.ligneAchatGroupe.findMany({ where: { regroupementId: pa.achatId }, orderBy: { createdAt: "asc" } });
+    expect(lignes.filter((l) => l.cle === `cat:${PANNE}`).map((l) => Number(l.quantite))).toEqual([12, 8]);
+    const libres = lignes.filter((l) => l.libre);
+    expect(libres).toHaveLength(2);
+    expect(new Set(libres.map((l) => l.cle)).size).toBe(2);
+    expect(libres.every((l) => l.famille === "charpente" && l.libelle === libre.designation)).toBe(true);
+  });
+
+  it("un achat groupé reste d'un seul métier ; un article inconnu ou masqué est refusé", async () => {
+    const a = await artisan(1);
+    const deux = charpente({ lignes: [{ designation: "Panne", quantite: 1, unite: "pièces", cle: PANNE }, { designation: "Peinture", quantite: 2, unite: "pots", cle: "peinture/peintures-interieures/peinture-acrylique-blanc-mat/15-l" }] });
+    expect((await a.agent.post("/v1/achats-groupes").send(deux).expect(400)).body.error.details.reason).toBe("plusieurs_metiers");
+    const inconnu = await a.agent.post("/v1/achats-groupes").send(charpente({ lignes: [{ designation: "Article disparu", quantite: 1, unite: "pièces", cle: "rien/du/tout" }] }));
+    expect(inconnu.status, JSON.stringify(inconnu.body)).toBe(400);
+    expect(inconnu.body.error.details.reason).toBe("article_inconnu");
+  });
+
+  it("l'admin : renomme, masque, ajoute ; rattache une ligne libre à un article, qui se cumule alors", async () => {
+    const greg = await admin();
+    const a = await artisan(1);
+    expect((await a.agent.get("/v1/admin/catalogue")).status).toBe(403);
+    const ajout = (await greg.agent.post("/v1/admin/catalogue").send({ metier: "charpente", famille: "Bois de charpente", produit: "Panne", variante: "75×225 · 9 m · classe 2", designation: null, unite: "pièces", synonymes: [] }).expect(201)).body;
+    expect(ajout.designation).toBe("Panne 75×225 · 9 m · classe 2");
+    await greg.agent.patch(`/v1/admin/catalogue?cle=${encodeURIComponent(ajout.cle)}`).send({ designation: "Panne sapin 75×225 · 9 m · classe 2" }).expect(200);
+    expect((await a.agent.get("/v1/catalogue?q=panne 9 m").expect(200)).body.resultats[0].designation).toBe("Panne sapin 75×225 · 9 m · classe 2");
+    await greg.agent.patch(`/v1/admin/catalogue?cle=${encodeURIComponent(ajout.cle)}`).send({ masque: true }).expect(200);
+    expect((await a.agent.get("/v1/catalogue?q=panne 9 m").expect(200)).body.resultats.some((r: { cle: string }) => r.cle === ajout.cle)).toBe(false);
+
+    const pa = (await a.agent.post("/v1/achats-groupes").send(charpente({ lignes: [{ designation: "Panne 75×225 · 6 m · classe 2", quantite: 12, unite: "pièces", cle: PANNE }, { designation: "Pannes de 6 en 75 par 225", quantite: 3, unite: "pièces", libre: true }] })).expect(201)).body;
+    const libres = (await greg.agent.get("/v1/admin/catalogue/lignes-libres").expect(200)).body.items;
+    expect(libres.map((l: { libelle: string }) => l.libelle)).toEqual(["Pannes de 6 en 75 par 225"]);
+    await greg.agent.post("/v1/admin/catalogue/lignes-libres/rattacher").send({ ligneId: libres[0].id, cle: PANNE }).expect(201);
+    const lignes = await ctx.prisma.ligneAchatGroupe.findMany({ where: { regroupementId: pa.achatId } });
+    expect(lignes.map((l) => [l.cle, Number(l.quantite), l.libre])).toEqual([[`cat:${PANNE}`, 15, false]]);
+  });
+});

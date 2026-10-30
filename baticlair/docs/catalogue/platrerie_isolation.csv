@@ -1,0 +1,53 @@
+﻿Métier;Famille;Produit;Format / dimension / qualité;Désignation envoyée au négoce;Unité;Mots du chantier (recherche);Clé
+Plâtrerie et isolation;Plaques de plâtre;Plaque de plâtre BA13 standard;2500×1200;Plaque de plâtre BA13 standard 2500×1200;pièces;placo, ba13, plaque, platre;platrerie_isolation/plaques-de-platre/plaque-de-platre-ba13-standard/2500x1200
+Plâtrerie et isolation;Plaques de plâtre;Plaque de plâtre BA13 standard;2600×1200;Plaque de plâtre BA13 standard 2600×1200;pièces;placo, ba13, plaque, platre;platrerie_isolation/plaques-de-platre/plaque-de-platre-ba13-standard/2600x1200
+Plâtrerie et isolation;Plaques de plâtre;Plaque de plâtre BA13 standard;2800×1200;Plaque de plâtre BA13 standard 2800×1200;pièces;placo, ba13, plaque, platre;platrerie_isolation/plaques-de-platre/plaque-de-platre-ba13-standard/2800x1200
+Plâtrerie et isolation;Plaques de plâtre;Plaque de plâtre BA13 standard;3000×1200;Plaque de plâtre BA13 standard 3000×1200;pièces;placo, ba13, plaque, platre;platrerie_isolation/plaques-de-platre/plaque-de-platre-ba13-standard/3000x1200
+Plâtrerie et isolation;Plaques de plâtre;Plaque de plâtre hydrofuge BA13;2500×1200;Plaque de plâtre hydrofuge BA13 2500×1200;pièces;placo vert, hydro, plaque hydrofuge;platrerie_isolation/plaques-de-platre/plaque-de-platre-hydrofuge-ba13/2500x1200
+Plâtrerie et isolation;Plaques de plâtre;Plaque de plâtre hydrofuge BA13;2600×1200;Plaque de plâtre hydrofuge BA13 2600×1200;pièces;placo vert, hydro, plaque hydrofuge;platrerie_isolation/plaques-de-platre/plaque-de-platre-hydrofuge-ba13/2600x1200
+Plâtrerie et isolation;Plaques de plâtre;Plaque de plâtre feu BA13;2500×1200;Plaque de plâtre feu BA13 2500×1200;pièces;placo rose, plaque feu;platrerie_isolation/plaques-de-platre/plaque-de-platre-feu-ba13/2500x1200
+Plâtrerie et isolation;Plaques de plâtre;Plaque de plâtre phonique BA13;2500×1200;Plaque de plâtre phonique BA13 2500×1200;pièces;placo phonique, acoustique;platrerie_isolation/plaques-de-platre/plaque-de-platre-phonique-ba13/2500x1200
+Plâtrerie et isolation;Ossature;Rail 48;;Rail 48;longueurs de 3 m;rail, r48;platrerie_isolation/ossature/rail-48
+Plâtrerie et isolation;Ossature;Montant 48;2,50 m;Montant 48 2,50 m;pièces;montant, m48;platrerie_isolation/ossature/montant-48/2-50-m
+Plâtrerie et isolation;Ossature;Montant 48;2,60 m;Montant 48 2,60 m;pièces;montant, m48;platrerie_isolation/ossature/montant-48/2-60-m
+Plâtrerie et isolation;Ossature;Montant 48;2,80 m;Montant 48 2,80 m;pièces;montant, m48;platrerie_isolation/ossature/montant-48/2-80-m
+Plâtrerie et isolation;Ossature;Montant 48;3,00 m;Montant 48 3,00 m;pièces;montant, m48;platrerie_isolation/ossature/montant-48/3-00-m
+Plâtrerie et isolation;Ossature;Fourrure;F530;Fourrure F530;longueurs de 3 m;fourrure, f530;platrerie_isolation/ossature/fourrure/f530
+Plâtrerie et isolation;Ossature;Suspente;courte;Suspente courte;boîtes de 100;suspente, pivot;platrerie_isolation/ossature/suspente/courte
+Plâtrerie et isolation;Ossature;Suspente;longue;Suspente longue;boîtes de 100;suspente, pivot;platrerie_isolation/ossature/suspente/longue
+Plâtrerie et isolation;Ossature;Lisse clipsable;;Lisse clipsable;longueurs de 3 m;lisse;platrerie_isolation/ossature/lisse-clipsable
+Plâtrerie et isolation;Fixations et finitions;Vis TTPC;25 mm;Vis TTPC 25 mm;boîtes de 1000;vis placo, ttpc, vis plaque;platrerie_isolation/fixations-et-finitions/vis-ttpc/25-mm
+Plâtrerie et isolation;Fixations et finitions;Vis TTPC;35 mm;Vis TTPC 35 mm;boîtes de 1000;vis placo, ttpc, vis plaque;platrerie_isolation/fixations-et-finitions/vis-ttpc/35-mm
+Plâtrerie et isolation;Fixations et finitions;Vis TTPC;45 mm;Vis TTPC 45 mm;boîtes de 1000;vis placo, ttpc, vis plaque;platrerie_isolation/fixations-et-finitions/vis-ttpc/45-mm
+Plâtrerie et isolation;Fixations et finitions;Bande à joint papier;150 m;Bande à joint papier 150 m;rouleaux;bande, bande joint;platrerie_isolation/fixations-et-finitions/bande-a-joint-papier/150-m
+Plâtrerie et isolation;Fixations et finitions;Enduit à joint;25 kg prise;Enduit à joint 25 kg prise;sacs;enduit joint, enduit;platrerie_isolation/fixations-et-finitions/enduit-a-joint/25-kg-prise
+Plâtrerie et isolation;Fixations et finitions;Enduit à joint;25 kg séchage;Enduit à joint 25 kg séchage;sacs;enduit joint, enduit;platrerie_isolation/fixations-et-finitions/enduit-a-joint/25-kg-sechage
+Plâtrerie et isolation;Fixations et finitions;Cornière d'angle;papier armé;Cornière d'angle papier armé;longueurs de 3 m;corniere, baguette d'angle;platrerie_isolation/fixations-et-finitions/corniere-d-angle/papier-arme
+Plâtrerie et isolation;Fixations et finitions;Cornière d'angle;PVC;Cornière d'angle PVC;longueurs de 3 m;corniere, baguette d'angle;platrerie_isolation/fixations-et-finitions/corniere-d-angle/pvc
+Plâtrerie et isolation;Isolants;Laine de verre en rouleau;100 mm;Laine de verre en rouleau 100 mm;m²;laine de verre, isolant, isover, laine;platrerie_isolation/isolants/laine-de-verre-en-rouleau/100-mm
+Plâtrerie et isolation;Isolants;Laine de verre en rouleau;120 mm;Laine de verre en rouleau 120 mm;m²;laine de verre, isolant, isover, laine;platrerie_isolation/isolants/laine-de-verre-en-rouleau/120-mm
+Plâtrerie et isolation;Isolants;Laine de verre en rouleau;200 mm;Laine de verre en rouleau 200 mm;m²;laine de verre, isolant, isover, laine;platrerie_isolation/isolants/laine-de-verre-en-rouleau/200-mm
+Plâtrerie et isolation;Isolants;Laine de verre en rouleau;240 mm;Laine de verre en rouleau 240 mm;m²;laine de verre, isolant, isover, laine;platrerie_isolation/isolants/laine-de-verre-en-rouleau/240-mm
+Plâtrerie et isolation;Isolants;Laine de verre en rouleau;300 mm;Laine de verre en rouleau 300 mm;m²;laine de verre, isolant, isover, laine;platrerie_isolation/isolants/laine-de-verre-en-rouleau/300-mm
+Plâtrerie et isolation;Isolants;Laine de verre en panneau semi-rigide;45 mm;Laine de verre en panneau semi-rigide 45 mm;m²;panneau laine, isolant mur;platrerie_isolation/isolants/laine-de-verre-en-panneau-semi-rigide/45-mm
+Plâtrerie et isolation;Isolants;Laine de verre en panneau semi-rigide;75 mm;Laine de verre en panneau semi-rigide 75 mm;m²;panneau laine, isolant mur;platrerie_isolation/isolants/laine-de-verre-en-panneau-semi-rigide/75-mm
+Plâtrerie et isolation;Isolants;Laine de verre en panneau semi-rigide;100 mm;Laine de verre en panneau semi-rigide 100 mm;m²;panneau laine, isolant mur;platrerie_isolation/isolants/laine-de-verre-en-panneau-semi-rigide/100-mm
+Plâtrerie et isolation;Isolants;Laine de verre en panneau semi-rigide;120 mm;Laine de verre en panneau semi-rigide 120 mm;m²;panneau laine, isolant mur;platrerie_isolation/isolants/laine-de-verre-en-panneau-semi-rigide/120-mm
+Plâtrerie et isolation;Isolants;Laine de roche en panneau;50 mm;Laine de roche en panneau 50 mm;m²;laine de roche, rockwool;platrerie_isolation/isolants/laine-de-roche-en-panneau/50-mm
+Plâtrerie et isolation;Isolants;Laine de roche en panneau;100 mm;Laine de roche en panneau 100 mm;m²;laine de roche, rockwool;platrerie_isolation/isolants/laine-de-roche-en-panneau/100-mm
+Plâtrerie et isolation;Isolants;Laine de roche en panneau;140 mm;Laine de roche en panneau 140 mm;m²;laine de roche, rockwool;platrerie_isolation/isolants/laine-de-roche-en-panneau/140-mm
+Plâtrerie et isolation;Isolants;Laine de bois en panneau;60 mm;Laine de bois en panneau 60 mm;m²;fibre de bois, laine de bois;platrerie_isolation/isolants/laine-de-bois-en-panneau/60-mm
+Plâtrerie et isolation;Isolants;Laine de bois en panneau;100 mm;Laine de bois en panneau 100 mm;m²;fibre de bois, laine de bois;platrerie_isolation/isolants/laine-de-bois-en-panneau/100-mm
+Plâtrerie et isolation;Isolants;Laine de bois en panneau;145 mm;Laine de bois en panneau 145 mm;m²;fibre de bois, laine de bois;platrerie_isolation/isolants/laine-de-bois-en-panneau/145-mm
+Plâtrerie et isolation;Isolants;Panneau polyuréthane PIR;60 mm;Panneau polyuréthane PIR 60 mm;m²;pir, polyurethane, pu;platrerie_isolation/isolants/panneau-polyurethane-pir/60-mm
+Plâtrerie et isolation;Isolants;Panneau polyuréthane PIR;80 mm;Panneau polyuréthane PIR 80 mm;m²;pir, polyurethane, pu;platrerie_isolation/isolants/panneau-polyurethane-pir/80-mm
+Plâtrerie et isolation;Isolants;Panneau polyuréthane PIR;100 mm;Panneau polyuréthane PIR 100 mm;m²;pir, polyurethane, pu;platrerie_isolation/isolants/panneau-polyurethane-pir/100-mm
+Plâtrerie et isolation;Isolants;Panneau polyuréthane PIR;120 mm;Panneau polyuréthane PIR 120 mm;m²;pir, polyurethane, pu;platrerie_isolation/isolants/panneau-polyurethane-pir/120-mm
+Plâtrerie et isolation;Isolants;Polystyrène expansé PSE;40 mm;Polystyrène expansé PSE 40 mm;m²;polystyrene, pse, isolant facade;platrerie_isolation/isolants/polystyrene-expanse-pse/40-mm
+Plâtrerie et isolation;Isolants;Polystyrène expansé PSE;80 mm;Polystyrène expansé PSE 80 mm;m²;polystyrene, pse, isolant facade;platrerie_isolation/isolants/polystyrene-expanse-pse/80-mm
+Plâtrerie et isolation;Isolants;Polystyrène expansé PSE;100 mm;Polystyrène expansé PSE 100 mm;m²;polystyrene, pse, isolant facade;platrerie_isolation/isolants/polystyrene-expanse-pse/100-mm
+Plâtrerie et isolation;Isolants;Polystyrène expansé PSE;140 mm;Polystyrène expansé PSE 140 mm;m²;polystyrene, pse, isolant facade;platrerie_isolation/isolants/polystyrene-expanse-pse/140-mm
+Plâtrerie et isolation;Isolants;Doublage plâtre + polystyrène;10+40 · 2500×1200;Doublage plâtre + polystyrène 10+40 · 2500×1200;pièces;doublage, complexe isolant;platrerie_isolation/isolants/doublage-platre-polystyrene/10-40-2500x1200
+Plâtrerie et isolation;Isolants;Doublage plâtre + polystyrène;10+80 · 2500×1200;Doublage plâtre + polystyrène 10+80 · 2500×1200;pièces;doublage, complexe isolant;platrerie_isolation/isolants/doublage-platre-polystyrene/10-80-2500x1200
+Plâtrerie et isolation;Isolants;Doublage plâtre + polystyrène;10+100 · 2500×1200;Doublage plâtre + polystyrène 10+100 · 2500×1200;pièces;doublage, complexe isolant;platrerie_isolation/isolants/doublage-platre-polystyrene/10-100-2500x1200
+Plâtrerie et isolation;Isolants;Pare-vapeur;rouleau 1,50 × 50 m;Pare-vapeur rouleau 1,50 × 50 m;rouleaux;pare vapeur, frein vapeur;platrerie_isolation/isolants/pare-vapeur/rouleau-1-50-x-50-m

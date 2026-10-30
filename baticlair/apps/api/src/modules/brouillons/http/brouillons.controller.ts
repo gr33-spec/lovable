@@ -1,9 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Module, Put, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Inject, Put, Query, UseGuards } from "@nestjs/common";
 import { z } from "zod";
-import { PrismaService } from "../../platform/database/prisma.service.js";
-import { DomainError } from "../../platform/errors/domain-error.js";
-import { ZodPipe } from "../../platform/http/zod.js";
-import { Tenant, TenantGuard, TenancyModule, type TenantContext } from "../tenancy/index.js";
+import { PrismaService } from "../../../platform/database/prisma.service.js";
+import { DomainError } from "../../../platform/errors/domain-error.js";
+import { ZodPipe } from "../../../platform/http/zod.js";
+import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 
 /**
  * LES BROUILLONS (correction après test de Greg, 30 octobre 2026, point 2) : « tout parcours commencé est enregistré
@@ -59,6 +59,3 @@ export class BrouillonsController {
     return { efface: true };
   }
 }
-
-@Module({ imports: [TenancyModule], controllers: [BrouillonsController] })
-export class BrouillonsModule {}

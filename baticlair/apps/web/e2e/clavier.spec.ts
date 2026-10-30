@@ -88,10 +88,11 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
 
     // 3. L'achat groupé : la quantité, la commune, les négoces (e-mail, nom, téléphone).
     await page.goto("/achats-groupes/lancer");
-    await page.getByRole("button", { name: "Ardoise", exact: true }).click();
-    await page.getByRole("button", { name: "32×22", exact: true }).click();
-    await page.getByRole("button", { name: "Espagne 1er choix" }).click();
-    const qte = page.getByLabel("Quantité de Ardoise naturelle 32×22 Espagne 1er choix");
+    // Point 3 du 30 octobre : le catalogue en listes, famille › produit › format.
+    await page.getByRole("button", { name: "Ardoises", exact: true }).click();
+    await page.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
+    await page.getByRole("button", { name: "32×22 · Espagne 1er choix", exact: true }).click();
+    const qte = page.getByLabel("Quantité de Ardoise naturelle 32×22 · Espagne 1er choix");
     await champVisible(page, qte);
     await qte.fill("900");
     await page.getByRole("button", { name: "Ajouter à ma liste" }).click();

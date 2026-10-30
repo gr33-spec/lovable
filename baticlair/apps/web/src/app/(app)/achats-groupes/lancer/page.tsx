@@ -15,6 +15,8 @@ import { useResource } from "@/lib/use-resource";
 function Lancer() {
   const params = useSearchParams();
   const id = params.get("rejoindre");
+  // Point 4 du 30 octobre : un produit d'un autre métier, mis de côté, se reprend dans l'achat groupé de ce métier.
+  const famille = params.get("famille");
   // Depuis une alerte (notification, e-mail), seul l'identifiant vient : le titre se relit dans les achats du secteur.
   const sansTitre = !!id && !params.get("titre");
   const fetcher = useCallback((signal: AbortSignal) => (sansTitre ? api<{ achats: AchatOuvert[] }>("/v1/achats-groupes/pres-de-chez-moi", { signal }) : Promise.resolve(null)), [sansTitre]);
@@ -26,7 +28,7 @@ function Lancer() {
     <>
       <BackButton fallback="/achats-groupes" compact />
       <PageTitle>{rejoindre ? "Ajouter ma liste" : "Achat groupé de ton métier"}</PageTitle>
-      <FormulaireAchatGroupe key={id ?? "nouveau"} rejoindre={rejoindre} />
+      <FormulaireAchatGroupe key={id ?? famille ?? "nouveau"} rejoindre={rejoindre} famille={rejoindre ? null : famille} />
     </>
   );
 }

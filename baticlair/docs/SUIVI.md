@@ -170,3 +170,13 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 | 124 | 29/10 | Lot final 8 à 11 : déjà faits (vérifiés) | fait | Revus par les e2e de la série complète. |
 | 125 | 29/10 | Lot final 12 : landing (mécanisme, CTA, bouton mobile, trois questions) | fait | Déjà là ; deux demandes du lot contredisent tes demandes plus récentes : la réponse « C'est gratuit ? » (gardée celle de la clarté des tarifs) et la photo « Par un artisan » (retirée à ta demande). Animation : en attente de toi. |
 | 126 | 29/10 | Lot final 13 : IA si le crédit est rechargé | reportée | Crédit Anthropic toujours épuisé (dernières lectures refusées « credit balance is too low », zéro jeton). |
+
+## Corrections après test de Greg (30 octobre), prioritaires
+
+| N° | Date | Demande | État | Détail |
+| --- | --- | --- | --- | --- |
+| 127 | 30/10 | 1. Adresse Mobiiz de BATI INVEST défaillante | en cours | Diagnostic : l'adresse existe et reçoit (ton mail du 28/10 est arrivé) ; le refus du 29/10 vient d'avant notre serveur (rien n'est arrivé chez Resend). Variantes réunies (bati-invest@, batiinvest@, majuscules, point), e-mails des adresses inconnues mis de côté (admin « E-mails mis de côté »). Essai réel vers chaque variante : après la mise en ligne. |
+| 128 | 30/10 | 2. Parcours perdu en quittant l'écran du SIRET | fait | Brouillons sur le serveur (achat groupé lancé et depuis un chantier, liste écrite, envoi aux négoces), reprise à l'étape quittée, carte « Reprendre » sur l'accueil, SIRET demandé sur place. e2e « Brouillons » et « brouillon de l'envoi » (téléphone et ordinateur). |
+| 129 | 30/10 | 5. Plan de simplification (avant de coder) | à valider | Le plan est dans ton doc « Mobiiz : plan de simplification » : carte actuelle, doublons, carte cible, supprimé / fusionné / renommé, quatre questions. Rien n'est codé avant ton accord. |
+| 130 | 30/10 | 3. Catalogue complet, métier par métier | fait | Onze métiers, 985 articles, sans marque, trois niveaux, en base et modifiable dans l'admin (« Catalogue ») ; recherche par les mots du chantier, fautes admises (« pane » → Panne) ; « Je ne trouve pas : je décris mon besoin » (ligne libre, jamais cumulée, rattachable par l'admin). Relecture : `docs/catalogue/couverture.csv` et `charpente.csv` d'abord. |
+| 131 | 30/10 | 4. « Je commande pour un autre métier » | fait | Supprimé ; « Métier : Couverture ▾ » en haut du catalogue, les métiers du profil d'abord ; un achat groupé reste d'un seul métier (un produit d'un autre métier se met de côté pour le sien). |
