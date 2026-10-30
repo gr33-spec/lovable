@@ -262,7 +262,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     await nctx.close();
   });
 
-  test("3. relance à 48 h ouvrées, une seule fois", async ({ page }, info) => {
+  test("3. relance à mi-délai, une seule fois (lot final, point 6)", async ({ page }, info) => {
     const zone = zoneDuCas("relance", info.project.name);
     const a = await couvreur(page, zone, [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
     const email = `relance-${unique()}@negoce.example.com`;
@@ -270,10 +270,11 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     expect(envoi.status).toBe(201);
     const tache = async (dans: number) => (await apiJson<{ relances: number }>(page, "GET", `/v1/internal/demandes-perso?maintenant=${encodeURIComponent(new Date(Date.now() + dans).toISOString())}`, undefined, SECRET)).body.relances;
     expect(await tache(3_600_000)).toBe(0);
-    expect(await tache(5 * 86_400_000)).toBeGreaterThanOrEqual(1);
-    expect((await emailsVers(page, email)).some((m) => /^Rappel : la demande de prix de /.test(m.subject))).toBe(true);
+    // Réponse souhaitée trois jours après l'envoi par défaut : le rappel part à mi-délai, au nom du client.
+    expect(await tache(2.5 * 86_400_000)).toBeGreaterThanOrEqual(1);
+    expect((await emailsVers(page, email)).some((m) => / attend votre offre$/.test(m.subject))).toBe(true);
     const avant = (await emailsVers(page, email)).length;
-    await tache(6 * 86_400_000);
+    await tache(3.5 * 86_400_000);
     expect((await emailsVers(page, email)).length).toBe(avant);
   });
 

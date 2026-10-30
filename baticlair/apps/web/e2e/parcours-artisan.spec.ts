@@ -547,7 +547,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await openList(page);
   await page.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
-  await expect(apercu.getByRole("button", { name: "Choisis un fournisseur" })).toBeDisabled();
+  await expect(apercu.getByRole("button", { name: "Choisis un négoce" })).toBeDisabled();
   await apercu.getByRole("button", { name: "Revenir à la liste" }).click();
   await expect(apercu).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
@@ -1130,7 +1130,8 @@ test("§50.7 : en bas, deux boutons figés : l'aperçu (le mail et le PDF du fou
   await actions.getByRole("button", { name: "Aperçu" }).click();
   const apercu = page.getByRole("dialog", { name: "Ce que reçoit le fournisseur" });
   await expect(apercu.getByText("Objet :")).toBeVisible();
-  await expect(apercu.getByText(/Toiture Kerjean/).first()).toBeVisible();
+  // Lot final, point 3 : l'objet est « Entreprise : demande de prix [famille], [commune] ».
+  await expect(apercu.getByText(/: demande de prix/).first()).toBeVisible();
   await apercu.getByRole("button", { name: "Voir le PDF" }).click();
   const pdf = page.getByRole("dialog", { name: "Le PDF joint" });
   await expect(pdf.getByRole("button", { name: "Fermer le document" })).toBeVisible();
