@@ -345,3 +345,7 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mzp .sticky-cta .btn{width:auto;min-height:46px;padding:0 22px;font-size:15px;box-shadow:0 10px 26px rgba(12,10,8,.38)}
 .mzp .sticky-cta .under{display:none}
 }
+/* Le bouton du collectif (Greg, 30 octobre 2026, nuit) : sous ses trois points. */
+.mzp .collectif-cta{margin-top:28px}
+.mzp #pourquoi h2{font-size:clamp(30px,4vw,54px)}
+@media(max-width:900px){.mzp .collectif-cta{width:100%;margin-top:22px}.mzp #pourquoi h2{font-size:clamp(28px,7.6vw,38px)}}

@@ -6,7 +6,7 @@
  */
 export const NOM_APP = "Mobiiz";
 /** L'accroche et le slogan. */
-export const ACCROCHE_APP = "Par un artisan, pour les artisans.";
+export const ACCROCHE_APP = "Par des artisans, pour les artisans.";
 export const SLOGAN_APP = "L'union fait la force.";
 /** La société qui édite le service (mentions, factures, e-mails). */
 export const EDITEUR_APP = "BATI INVEST";

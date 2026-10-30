@@ -4,6 +4,8 @@ import {
   arbreArticles,
   cleDeLibelle,
   libelleAPartager,
+  propositionsDeLibelles,
+  vocabulaireDuCatalogue,
   rechercherLibelles,
   FAMILLE_DU_METIER_CATALOGUE,
   LIBELLES_METIERS_CATALOGUE,
@@ -87,7 +89,8 @@ export class CatalogueService {
       const trouves = rechercherArticles(tous, recherche, 60);
       const duMetier = trouves.filter((a) => a.metier === metier);
       const resultats = [...duMetier, ...trouves.filter((a) => a.metier !== metier)].slice(0, 30).map(vue);
-      // Les intitulés écrits par les artisans (Greg, 30 octobre 2026) : les siens et ceux de deux entreprises, après le catalogue.
+      // Les intitulés écrits par l'entreprise elle-même, après le catalogue (Greg, 30 octobre 2026, nuit : rien n'est
+      // diffusé aux autres ; un intitulé générique ne l'est qu'une fois ajouté au catalogue par l'admin).
       const vus = new Set(resultats.map((a) => cleDeLibelle(a.designation)));
       const ecrits = (await this.libellesConnus(tenant.companyId, recherche)).filter((l) => !vus.has(cleDeLibelle(l.libelle)));
       return { metiers, metier, resultats, ecrits: ecrits.map((l) => ({ designation: l.libelle, unite: l.unite })), arbre: null };
@@ -117,21 +120,44 @@ export class CatalogueService {
     if (data.length) await this.prisma.libelleEcrit.createMany({ data, skipDuplicates: true });
   }
 
-  /** Les intitulés proposés pour une recherche : ceux qui contiennent le début du premier mot tapé, comptés par entreprise. */
+  /** Les intitulés de l'entreprise pour une recherche : ceux qui contiennent le début du premier mot tapé. */
   private async libellesConnus(companyId: string, recherche: string) {
     const mot = aPlat(recherche).split(" ").find((m) => m.length >= 3);
     if (!mot) return [];
-    const lignes = await this.prisma.libelleEcrit.findMany({ where: { cle: { contains: mot.slice(0, 4) } }, select: { cle: true, libelle: true, unite: true, companyId: true }, orderBy: { createdAt: "asc" }, take: 2000 });
+    const lignes = await this.prisma.libelleEcrit.findMany({ where: { companyId, cle: { contains: mot.slice(0, 4) } }, select: { libelle: true, unite: true }, orderBy: { createdAt: "asc" }, take: 500 });
+    return rechercherLibelles(
+      lignes.map((l) => ({ ...l, entreprises: 1, mien: true })),
+      recherche,
+    );
+  }
+
+  /**
+   * Les propositions pour l'admin (Greg, 30 octobre 2026, nuit) : les intitulés génériques écrits par plusieurs entreprises
+   * et pas encore au catalogue ; jamais le nom des entreprises.
+   */
+  async propositions() {
+    await this.amorcer();
+    const articles = await this.prisma.catalogueArticle.findMany({ select: { designation: true, famille: true, produit: true, variante: true, synonymes: true } });
+    const auCatalogue = new Set(articles.map((a) => cleDeLibelle(a.designation)));
+    const lignes = await this.prisma.libelleEcrit.findMany({ select: { cle: true, libelle: true, unite: true, companyId: true }, orderBy: { createdAt: "asc" }, take: 50_000 });
     const parCle = new Map<string, { libelle: string; unite: string; entreprises: Set<string> }>();
     for (const l of lignes) {
+      if (auCatalogue.has(l.cle)) continue;
       const c = parCle.get(l.cle) ?? { libelle: l.libelle, unite: l.unite, entreprises: new Set<string>() };
       c.entreprises.add(l.companyId);
       parCle.set(l.cle, c);
     }
-    return rechercherLibelles(
-      [...parCle.values()].map((c) => ({ libelle: c.libelle, unite: c.unite, entreprises: c.entreprises.size, mien: c.entreprises.has(companyId) })),
-      recherche,
-    );
+    return propositionsDeLibelles(
+      [...parCle.values()].map((c) => ({ libelle: c.libelle, unite: c.unite, entreprises: c.entreprises.size })),
+      vocabulaireDuCatalogue(articles),
+    ).map((p) => ({ cle: cleDeLibelle(p.libelle), ...p }));
+  }
+
+  /** Une proposition ajoutée au catalogue par l'admin : elle devient un article, proposé à tous. */
+  async accepterProposition(cle: string, metier: string, famille: string) {
+    const p = (await this.propositions()).find((x) => x.cle === cle);
+    if (!p) throw notFound("Proposal not found");
+    return this.ajouter({ metier, famille, produit: p.libelle, variante: null, designation: p.libelle, unite: p.unite, synonymes: [] });
   }
 
   /** Un article choisi (jamais masqué), pour l'achat groupé, avec sa clé de regroupement ; null s'il n'existe pas. */

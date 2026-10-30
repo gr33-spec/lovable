@@ -18,7 +18,8 @@ import { useBrouillon } from "@/lib/brouillon";
  * INTITULÉ ET QUANTITÉ SÉPARÉS (Greg, 30 octobre 2026 : « crochet gouttière bandeau 25 », le 25 lu comme la quantité alors
  * que c'est le développé) : l'intitulé s'écrit tel quel, chiffres compris, dans son champ ; la quantité et l'unité ont les
  * leurs. Rien n'est deviné dans l'intitulé, et rien ne bloque l'ajout : sans quantité, la ligne part « à vérifier ». Les
- * propositions mêlent le catalogue et les intitulés déjà écrits par les artisans (`ecrits`, dès deux entreprises).
+ * propositions mêlent le catalogue et les intitulés déjà écrits par l'entreprise elle-même (`ecrits`) ; ceux des autres
+ * ne passent qu'une fois ajoutés au catalogue par l'admin (Greg, 30 octobre 2026, nuit).
  */
 export interface LigneEcrite {
   libelle: string;
@@ -57,7 +58,7 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
   const champ = useRef<HTMLInputElement>(null);
   const champQte = useRef<HTMLInputElement>(null);
   const liste = useRef<HTMLUListElement>(null);
-  // Les références du catalogue et les intitulés des artisans, dès deux lettres tapées (chiffres compris).
+  // Les références du catalogue et les intitulés de l'entreprise, dès deux lettres tapées (chiffres compris).
   const mot = texte.trim().length >= 2 ? texte.trim() : "";
   // Le catalogue complet (point 3 du 30 octobre) : les mots du chantier, fautes admises (« pane » → Panne).
   const fetchCat = useCallback(

@@ -65,7 +65,7 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   // L'aperçu WhatsApp : écrit dès le serveur avec l'adresse du site, jamais vercel.app.
   const html = await (await page.request.get("/")).text();
   expect(html).toMatch(/<meta property="og:image" content="http:\/\/localhost:3000\/marque\/partage\.png"/);
-  await page.getByRole("link", { name: "Rejoindre le collectif" }).first().click();
+  await page.getByRole("link", { name: "Commencer gratuitement" }).first().click();
   await expect(page).toHaveURL(/\/inscription/);
   await page.getByLabel("Prénom et nom").fill("Jean Martin");
   await page.getByLabel("Nom de ton entreprise").fill("Toitures Martin");
@@ -2598,26 +2598,28 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ne te contente plus d’un seul prix\.$/);
-  await expect(page.getByText("Par un artisan, pour les artisans", { exact: true })).toBeVisible();
+  await expect(page.getByText("Par des artisans, pour les artisans", { exact: true })).toBeVisible();
   const ordre = await Promise.all(
-    [/^Ne te contente plus/, /^Une demande\./, /^Plus on est, moins on paie\./, /^Et si on achetait ensemble/, /^À ton rythme\./, "Tu te poses des questions ?", /^Le prochain bon prix/].map(
+    [/^Ne te contente plus/, /^Une demande\./, /^Plus on est, moins on paie\./, /^Un même matériau/, /^À ton rythme\./, "Tu te poses des questions ?", /^Le prochain bon prix/].map(
       async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y,
     ),
   );
   expect([...ordre].sort((x, y) => x - y)).toEqual(ordre);
   // Greg, 30 octobre 2026 (« évolution stratégique ») : le collectif d'abord, quatre étapes qui disent ce qui marche
-  // aujourd'hui, son histoire, et « Rejoindre le collectif » (l'inscription est gratuite, pas les achats groupés).
+  // aujourd'hui, « Pourquoi Mobiiz ? », et « Commencer gratuitement » (l'inscription est gratuite, les achats groupés aussi).
   // Greg, 30 octobre 2026, soir : trois étapes, l'achat groupé à part (facultatif) ; aucun badge « Recommandé ».
   for (const etape of ["Prépare ta demande.", "Consulte plusieurs négoces.", "Compare et choisis."]) await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   await expect(page.locator("#fonctionnement .step")).toHaveCount(3);
   await expect(page.getByText(/Recommandé/)).toHaveCount(0);
   await expect(page.getByText(/C’est facultatif, Mobiiz te sert aussi pour tes seules demandes de prix\./)).toBeVisible();
   await expect(page.getByText("En plus : l’union fait la force", { exact: true })).toBeVisible();
-  const histoire = page.getByRole("region", { name: "Et si on achetait ensemble ?" });
-  await expect(histoire.getByText(/^Je suis artisan\. Un jour, j’achète deux palettes/)).toBeVisible();
-  await expect(histoire.getByText("Grégory, couvreur à Paimpol, fondateur de Mobiiz")).toBeVisible();
+  // Greg, 30 octobre 2026, nuit : « Pourquoi Mobiiz ? » neutre et collectif, sans l'identité du fondateur.
+  const pourquoi = page.getByRole("region", { name: /^Un même matériau ne devrait pas être une surprise à chaque commande\./ });
+  await expect(pourquoi.getByText(/^Dans le bâtiment, on l’a tous vu/)).toBeVisible();
+  await expect(pourquoi.getByText("Mobiiz. Plus on est, moins on paie.")).toBeVisible();
+  await expect(page.getByText(/Grégory|Paimpol|fondateur/)).toHaveCount(0);
   await expect(page.getByText(/rejoindre gratuitement|rejoins gratuitement/i)).toHaveCount(0);
-  // Greg, 30 octobre 2026 (décision 4) : sous « Rejoindre le collectif », « Gratuit · Sans carte bancaire ».
+  // Sous le bouton principal, « Gratuit · Sans carte bancaire ».
   await expect(page.getByText(/^Gratuit · Sans carte bancaire/).first()).toBeVisible();
   // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits, pour tous.
   await expect(page.getByText("Gratuit, pour tous les artisans")).toBeVisible();
@@ -2649,7 +2651,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // haut de page, le bouton fixe du téléphone est caché (hors de l'arbre d'accessibilité).
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(page.locator(".sticky-cta")).not.toHaveAttribute("data-visible", "");
-  await expect(page.getByRole("link", { name: "Rejoindre le collectif", exact: true })).toHaveCount(2);
+  // Greg, 30 octobre 2026, nuit : « Commencer gratuitement » en haut et en bas ; « Rejoindre le collectif » dans sa section.
+  for (const id of ["#heroPrimaryCTA", "#finalPrimaryCTA"]) await expect(page.locator(id)).toHaveText(/^Commencer gratuitement/);
+  await expect(page.locator("#collectif").getByRole("link", { name: "Rejoindre le collectif", exact: true })).toHaveAttribute("href", "/inscription");
   // L'en-tête (caché sur téléphone, comme la maquette : le menu et le bouton fixe y suffisent).
   await expect(page.locator(".nav-right a", { hasText: "Commencer gratuitement" })).toHaveAttribute("href", "/inscription");
   await expect(page.locator(".nav-right a", { hasText: "Se connecter" })).toHaveAttribute("href", "/connexion");
@@ -2672,11 +2676,14 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByRole("button", { name: "Ouvrir le menu" })).toHaveAttribute("aria-expanded", "false");
   await expect(page.getByRole("heading", { name: /^À ton rythme\./ })).toBeInViewport();
   await expect(fixe).toHaveAttribute("data-visible", "");
-  await expect(fixe.getByRole("link", { name: "Rejoindre le collectif" })).toBeVisible();
+  await expect(fixe.getByRole("link", { name: "Commencer gratuitement" })).toBeVisible();
   // Greg, 30 octobre 2026, soir : le bouton fixe est un bouton seul, sans bandeau ni dégradé, qui ne cache pas la lecture.
   await expect(fixe).toHaveCSS("background-image", "none");
   expect((await fixe.boundingBox())!.height).toBeLessThan(80);
-  expect((await fixe.getByRole("link", { name: "Rejoindre le collectif" }).boundingBox())!.width).toBeLessThan(330);
+  expect((await fixe.getByRole("link", { name: "Commencer gratuitement" }).boundingBox())!.width).toBeLessThan(330);
+  // Un seul bouton principal à la fois : devant celui du collectif, le bouton fixe s'efface.
+  await page.locator("#collectifCTA").scrollIntoViewIfNeeded();
+  await expect(fixe).not.toHaveAttribute("data-visible", "");
   await page.locator("#finalPrimaryCTA").scrollIntoViewIfNeeded();
   await expect(fixe).not.toHaveAttribute("data-visible", "");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
@@ -2703,7 +2710,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await signUp(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Rejoindre le collectif" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Commencer gratuitement" })).toHaveCount(0);
   // « Inviter un collègue » aussi dans l'app, après l'inscription (accueil) et sur l'écran Regroupement.
   await expect(page.getByRole("region", { name: "Inviter un collègue" }).getByRole("link", { name: "Envoyer sur WhatsApp" })).toBeVisible();
   await page.goto("/regroupements");
@@ -3647,19 +3654,17 @@ test("« Je la note moi-même » (28 octobre 2026, point 1 ; 30 octobre : intitu
   await expect(page.getByText(/Crochet gouttière bandeau 25/).first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText(/Liteau 27×38/).first()).toBeVisible();
 
-  // Un autre artisan écrit le même intitulé : il est ensuite proposé à tous dès qu'on tape ses mots.
-  await page.context().clearCookies();
-  await signUp(page);
+  // Son intitulé lui revient quand il tape ; un autre artisan ne le voit pas (Greg, 30 octobre 2026, nuit : rien n'est
+  // diffusé ; seul le catalogue, enrichi par l'admin, est proposé à tous).
   await page.goto("/chantiers/nouveau");
   await page.getByRole("button", { name: /Je la note moi-même/ }).click();
-  await ecran.getByLabel("Intitulé").fill("crochet gouttière bandeau 25");
-  await ecran.getByRole("button", { name: "Ajouter la ligne" }).click();
-  await ecran.getByRole("button", { name: "Terminé" }).click();
-  await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
+  await ecran.getByLabel("Intitulé").fill("crochet band");
+  await expect(ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: "Crochet gouttière bandeau 25" })).toBeVisible();
   await page.context().clearCookies();
   await signUp(page);
   await page.goto("/chantiers/nouveau");
   await page.getByRole("button", { name: /Je la note moi-même/ }).click();
   await ecran.getByLabel("Intitulé").fill("crochet band");
-  await expect(ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: "Crochet gouttière bandeau 25" })).toBeVisible();
+  await page.waitForTimeout(800);
+  await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25" })).toHaveCount(0);
 });

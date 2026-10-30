@@ -15,9 +15,15 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-Rien. SUIVI 136 (« Écris ta liste ») et 137 (landing) sont en ligne sur test.mobiiz.fr (e1c7f4da), rapportés à Greg.
-Questions ouvertes à Greg : seuil de partage des intitulés (2 ou 3 entreprises) ; libellé du bouton principal avec la
-nouvelle accroche ; photo (décision 5) ; CGU à relire.
+SUIVI 138 (réponses de Greg du 30 octobre, nuit) :
+- Bouton principal « Commencer gratuitement » (accroche, bas de page, bouton fixe) ; « Rejoindre le collectif » seulement
+  dans la section du collectif ; un seul bouton principal visible à la fois sur téléphone.
+- Intitulés : plus de diffusion automatique à tous. Les siens restent à l'artisan ; les intitulés génériques (tous les
+  mots connus du catalogue, nombres et unités) écrits par plusieurs entreprises deviennent des PROPOSITIONS à valider
+  par l'admin, qui les ajoute au catalogue ; jamais un nom, une référence ou un mot inconnu.
+- « Pourquoi Mobiiz ? » neutre, collectif (texte proposé par Greg, raccourci), aucune identité ni photo du fondateur ;
+  la photo de groupe reste (droits à confirmer).
+- CGU, tarifs, abonnements : ne rien changer ; signaler les incohérences (Essentiel / Collectif, Pro 8 / 6 analyses).
 
 ## À faire ensuite (dans cet ordre)
 

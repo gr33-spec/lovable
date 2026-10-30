@@ -26,6 +26,7 @@ const ajoutBody = z.object({ metier: texte(40), famille: texte(80), produit: tex
 const modifBody = z.object({ famille: texte(80), produit: texte(120), variante: z.string().trim().max(120).nullable(), designation: texte(200), unite: texte(40), synonymes: z.array(texte(60)).max(30), masque: z.boolean() }).partial();
 
 const rattacherBody = z.object({ ligneId: z.uuid(), cle: texte(200) });
+const accepterBody = z.object({ cle: texte(200), metier: texte(40), famille: texte(80) });
 
 /** L'admin du catalogue : ajouter, renommer, masquer (réservé aux `GROUPE_ADMINS`, code à 6 chiffres). */
 @Controller("v1/admin/catalogue")
@@ -60,6 +61,21 @@ export class AdminCatalogueController {
     const email = await this.garde(tenant);
     const r = await this.catalogue.ajouter({ ...body, variante: body.variante ?? null, designation: body.designation ?? null });
     await this.journal(tenant, email, "ajout", `${body.metier} › ${body.famille} › ${body.produit}${body.variante ? ` › ${body.variante}` : ""}`);
+    return r;
+  }
+
+  /** Les intitulés génériques écrits par plusieurs entreprises, à ajouter au catalogue ou non (Greg, 30 octobre 2026, nuit). */
+  @Get("propositions")
+  async propositions(@Tenant() tenant: TenantContext) {
+    await this.garde(tenant);
+    return { items: await this.catalogue.propositions() };
+  }
+
+  @Post("propositions/accepter")
+  async accepter(@Tenant() tenant: TenantContext, @Body(new ZodPipe(accepterBody)) body: z.infer<typeof accepterBody>) {
+    const email = await this.garde(tenant);
+    const r = await this.catalogue.accepterProposition(body.cle, body.metier, body.famille);
+    await this.journal(tenant, email, "proposition", `${body.metier} › ${body.famille} › ${body.cle}`);
     return r;
   }
 

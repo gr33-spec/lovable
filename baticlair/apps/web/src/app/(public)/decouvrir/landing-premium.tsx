@@ -16,7 +16,7 @@ import "./premium.css";
  * RECENTRÉE SUR LES ÉCONOMIES (Greg, 30 octobre 2026, soir : « l'argent économisé est la finalité ») : d'abord faire
  * jouer la concurrence entre ses négoces (une demande, plusieurs négoces, les réponses au même endroit), en trois étapes ;
  * ensuite le collectif, facultatif, pour les grosses commandes (« Plus on est, moins on paie. », les 20 artisans) ; puis
- * l'histoire, l'offre, les questions, le dernier appel. La concurrence est saine : jamais un mot contre les négoces. Rien
+ * « Pourquoi Mobiiz ? », l'offre, les questions, le dernier appel. La concurrence est saine : jamais un mot contre les négoces. Rien
  * n'est promis qui n'existe : la comparaison porte sur les prix donnés par le lien, un devis reçu par e-mail est rangé,
  * pas lu ; jamais « IA » sur la landing (règle du 27 octobre), la préparation depuis un devis est dite « on t'aide ».
  *
@@ -35,8 +35,13 @@ function compterLaVisite() {
 
 const [OBLIGE, NEGOCES] = TROIS_QUESTIONS;
 
-/** Le bouton principal : un seul libellé, partout (en-tête mis à part, qui dit « S'inscrire »). */
-export const CTA_COLLECTIF = { bouton: "Rejoindre le collectif", sous: "Gratuit · Sans carte bancaire" } as const;
+/**
+ * Le bouton principal (Greg, 30 octobre 2026, nuit : « Commencer gratuitement », plus universel : comparer ses négoces comme
+ * rejoindre un achat groupé) : l'accroche, le bas de page et le bouton fixe du téléphone. « Rejoindre le collectif » ne
+ * reste que dans la section du collectif ; sur téléphone, un seul bouton principal visible à la fois.
+ */
+export const CTA_PRINCIPAL = { bouton: "Commencer gratuitement", sous: "Gratuit · Sans carte bancaire" } as const;
+export const CTA_COLLECTIF = { bouton: "Rejoindre le collectif" } as const;
 
 function Icone({ id, className }: { id: string; className?: string }) {
   return (
@@ -130,7 +135,7 @@ export function LandingPremium() {
                 <p className="hero-lead">Prépare ta demande de matériaux une fois, envoie-la à plusieurs négoces et compare leurs réponses. Pour les grosses commandes, regroupe-toi avec d’autres artisans : plus on est, moins on paie.</p>
                 <div className="hero-actions">
                   <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/inscription">
-                    {CTA_COLLECTIF.bouton} <Icone id="i-arrow" className="arrow" />
+                    {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
                   </Link>
                   <a className="text-link" href="#fonctionnement">
                     <span className="circle-down" aria-hidden="true">
@@ -140,7 +145,7 @@ export function LandingPremium() {
                   </a>
                 </div>
                 <p className="under-cta">
-                  {CTA_COLLECTIF.sous} · <Link href="/tarifs">Voir les conditions</Link>
+                  {CTA_PRINCIPAL.sous} · <Link href="/tarifs">Voir les conditions</Link>
                 </p>
               </div>
               <div className="hero-media" role="group" aria-label="Artisans du bâtiment réunis, et un exemple d'achat groupé">
@@ -273,26 +278,29 @@ export function LandingPremium() {
                   </li>
                 ))}
               </ol>
+              <Link id="collectifCTA" className="btn btn-yellow collectif-cta" href="/inscription">
+                {CTA_COLLECTIF.bouton} <Icone id="i-arrow" className="arrow" />
+              </Link>
             </div>
             <DemoVingtArtisans />
           </div>
         </section>
 
-        {/* L'histoire de Greg (point 5), ses mots raccourcis ; les négoces ne sont pas des adversaires. */}
-        <section className="bridge" id="histoire" aria-labelledby="histoireTitle">
+        {/* « Pourquoi Mobiiz ? » (Greg, 30 octobre 2026, nuit : neutre, collectif, sans l'identité ni la photo du fondateur ;
+            son texte raccourci). Les négoces ne sont pas des adversaires : des demandes claires facilitent les échanges. */}
+        <section className="bridge" id="pourquoi" aria-labelledby="pourquoiTitle">
           <div className="wrap">
-            <figure className="bridge-content" style={{ margin: 0 }}>
-              <span className="label">Pourquoi j’ai créé Mobiiz</span>
-              <h2 id="histoireTitle">
-                Et si on achetait <span className="accent-underline">ensemble ?</span>
+            <div className="bridge-content">
+              <span className="label">Pourquoi Mobiiz ?</span>
+              <h2 id="pourquoiTitle">
+                Un même matériau ne devrait pas être <span className="accent-underline">une surprise à chaque commande.</span>
               </h2>
-              <blockquote className="histoire">
-                <p>Je suis artisan. Un jour, j’achète deux palettes à un excellent prix. Quelques jours plus tard, pour quelques fournitures au même endroit, le prix n’a plus rien à voir.</p>
-                <p>J’en avais assez de renégocier à chaque commande. Alors je me suis demandé : et si on simplifiait nos demandes de prix, et si on regroupait nos besoins pour peser plus ?</p>
-                <p>Pour le négoce aussi, une demande claire et un volume regroupé, c’est plus simple à chiffrer. C’est comme ça qu’est né Mobiiz.</p>
-              </blockquote>
-              <figcaption className="histoire-signature">Grégory, couvreur à Paimpol, fondateur de Mobiiz</figcaption>
-            </figure>
+              <div className="histoire">
+                <p>Dans le bâtiment, on l’a tous vu : un jour, un excellent tarif grâce au volume ; le lendemain, pour quelques fournitures, des conditions très différentes. Et quand on travaille toujours avec le même fournisseur, difficile de savoir si l’on a le bon prix.</p>
+                <p>Mobiiz est né de ce constat : consulter facilement plusieurs négoces, comparer leurs propositions, et regrouper nos achats quand le volume s’y prête. Des demandes claires pour les négoces, plus de visibilité pour les artisans.</p>
+              </div>
+              <p className="histoire-signature">Mobiiz. Plus on est, moins on paie.</p>
+            </div>
           </div>
         </section>
 
@@ -398,9 +406,9 @@ export function LandingPremium() {
               </h2>
               <p>Inscris-toi, prépare ta première demande et consulte tes négoces. Le collectif est là quand une commande s’y prête.</p>
               <Link id="finalPrimaryCTA" className="btn btn-yellow" href="/inscription">
-                {CTA_COLLECTIF.bouton} <Icone id="i-arrow" className="arrow" />
+                {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
               </Link>
-              <small>{CTA_COLLECTIF.sous}</small>
+              <small>{CTA_PRINCIPAL.sous}</small>
             </div>
           </div>
         </section>
@@ -432,7 +440,7 @@ export function LandingPremium() {
           </div>
         </div>
       </footer>
-      <CtaFixePremium haut="heroPrimaryCTA" bas="finalPrimaryCTA" />
+      <CtaFixePremium haut="heroPrimaryCTA" bas="finalPrimaryCTA" aussi={["collectifCTA"]} bouton={CTA_PRINCIPAL.bouton} />
     </div>
   );
 }

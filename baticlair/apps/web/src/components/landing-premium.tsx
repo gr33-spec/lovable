@@ -62,7 +62,8 @@ export function EntetePremium() {
 }
 
 /** `haut` et `bas` : les identifiants des deux boutons d'inscription de la page. */
-export function CtaFixePremium({ haut, bas }: { haut: string; bas: string }) {
+/** `aussi` : d'autres boutons principaux de la page ; le bouton fixe s'efface quand l'un d'eux est à l'écran (un seul à la fois). */
+export function CtaFixePremium({ haut, bas, aussi = [], bouton }: { haut: string; bas: string; aussi?: readonly string[]; bouton: string }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     let image = 0;
@@ -74,7 +75,11 @@ export function CtaFixePremium({ haut, bas }: { haut: string; bas: string }) {
       const hautVisible = h.bottom > 100 && h.top < window.innerHeight - 15;
       const basVisible = b.bottom > 100 && b.top < window.innerHeight - 20;
       const menuOuvert = !!document.querySelector(".mzp .nav-links.open");
-      setVisible(!hautVisible && !basVisible && !menuOuvert && window.scrollY > 240);
+      const autreVisible = aussi.some((id) => {
+        const r = document.getElementById(id)?.getBoundingClientRect();
+        return !!r && r.bottom > 60 && r.top < window.innerHeight - 15;
+      });
+      setVisible(!hautVisible && !basVisible && !autreVisible && !menuOuvert && window.scrollY > 240);
     };
     const planifier = () => {
       if (!image) image = requestAnimationFrame(synchro);
@@ -87,11 +92,11 @@ export function CtaFixePremium({ haut, bas }: { haut: string; bas: string }) {
       window.removeEventListener("resize", planifier);
       if (image) cancelAnimationFrame(image);
     };
-  }, [haut, bas]);
+  }, [haut, bas, aussi]);
   return (
     <div className={`sticky-cta${visible ? " visible" : ""}`} aria-hidden={!visible} data-visible={visible ? "" : undefined}>
       <Link className="btn btn-yellow" href="/inscription" tabIndex={visible ? 0 : -1}>
-        Rejoindre le collectif <Fleche />
+        {bouton} <Fleche />
       </Link>
       <div className="under">Gratuit · Sans carte bancaire</div>
     </div>

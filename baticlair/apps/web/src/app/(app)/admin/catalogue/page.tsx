@@ -28,10 +28,73 @@ export default function AdminCataloguePage() {
       <BackButton fallback="/admin/pilotage" />
       <PageTitle>Catalogue</PageTitle>
       <PorteAdmin>
+        <Propositions />
         <LignesLibres />
         <Articles />
       </PorteAdmin>
     </div>
+  );
+}
+
+/**
+ * LES INTITULÉS PROPOSÉS PAR LES ARTISANS (Greg, 30 octobre 2026, nuit : une bibliothèque de matériaux génériques, jamais
+ * de diffusion automatique) : génériques et écrits par plusieurs entreprises, sans le nom d'aucune ; ajoutés ici au
+ * catalogue, ils sont proposés à tous.
+ */
+function Propositions() {
+  const charger = useCallback(
+    (signal: AbortSignal) =>
+      Promise.all([
+        api<{ items: { cle: string; libelle: string; unite: string; entreprises: number }[] }>("/v1/admin/catalogue/propositions", { signal }),
+        api<{ metiers: { code: string; libelle: string }[] }>("/v1/admin/catalogue", { signal }),
+      ]).then(([p, c]) => ({ items: p.items, metiers: c.metiers })),
+    [],
+  );
+  const { data, reload } = useResource(charger);
+  const [choix, setChoix] = useState<Record<string, { metier: string; famille: string }>>({});
+  const [erreur, setErreur] = useState<string | null>(null);
+  if (!data?.items.length) return null;
+  return (
+    <section aria-label="Intitulés proposés par les artisans" className="flex flex-col gap-2">
+      <SectionTitle>Intitulés proposés par les artisans</SectionTitle>
+      <p className="text-[14px] text-muted">Écrits par plusieurs entreprises, sans nom ni référence. Ajoutés au catalogue, ils sont proposés à tous.</p>
+      {erreur ? <p role="alert" className="text-[14px] font-semibold text-danger">{erreur}</p> : null}
+      {data.items.map((p) => {
+        const c = choix[p.cle] ?? { metier: data.metiers[0]?.code ?? "couverture", famille: "" };
+        const maj = (x: Partial<typeof c>) => setChoix((v) => ({ ...v, [p.cle]: { ...c, ...x } }));
+        return (
+          <Card key={p.cle} className="flex flex-col gap-2 p-3">
+            <p className="text-[15px] font-semibold">
+              {p.libelle} · {p.unite}
+            </p>
+            <p className="text-[13px] text-muted">Écrit par {p.entreprises} entreprises</p>
+            <label className="flex flex-col gap-1 text-[14px] font-semibold">
+              Métier
+              <select aria-label={`Métier de ${p.libelle}`} value={c.metier} onChange={(e) => maj({ metier: e.target.value })} className="min-h-11 rounded-xl border border-line bg-surface px-3">
+                {data.metiers.map((m) => (
+                  <option key={m.code} value={m.code}>
+                    {m.libelle}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Field id={`famille-${p.cle}`} label="Famille" value={c.famille} onChange={(e) => maj({ famille: e.target.value })} />
+            <Button
+              variant="secondary"
+              disabled={!c.famille.trim()}
+              onClick={() =>
+                void api("/v1/admin/catalogue/propositions/accepter", { method: "POST", body: { cle: p.cle, metier: c.metier, famille: c.famille.trim() } }).then(
+                  () => reload(),
+                  (e: unknown) => setErreur(messageErreur(e)),
+                )
+              }
+            >
+              Ajouter au catalogue
+            </Button>
+          </Card>
+        );
+      })}
+    </section>
   );
 }
 
