@@ -32,11 +32,17 @@ test("la landing : le titre, la deuxième promesse, le coup de main mot pour mot
   assert.doesNotMatch(landing, /\d+\s?€/);
 });
 
+// Greg, 31 octobre 2026 (« Ma liste de matériaux ») : « Importer un document », « Saisir ma liste », « Décrire mon chantier ».
 test("l'app : trois choix, dans le même ordre ; la page Tarifs sans montant", () => {
   const nouveau = sansCommentaires(lire("app/(app)/chantiers/nouveau/page.tsx"));
-  const ordre = ["Depuis mon devis — on t'avance", "Photo de ma liste", "Je la note moi-même"].map((t) => nouveau.indexOf(t));
+  const ordre = ["<ImporterUnDocument", "<SaisieListeReprise", "<BoutonDecrire"].map((t) => nouveau.indexOf(t));
   assert.ok(ordre.every((i) => i > 0), JSON.stringify(ordre));
   assert.deepEqual([...ordre].sort((a, b) => a - b), ordre);
+  for (const t of ["Importer un document", "Devis, liste, photo, PDF ou capture d'écran.", "Saisir ma liste", "J'ajoute directement les matériaux, quantités et unités."])
+    // Le texte brut : `accept="image/*"` ouvrirait un faux commentaire pour `sansCommentaires`.
+    assert.ok(lire("app/(app)/chantiers/nouveau/page.tsx").includes(t.replace(/'/g, "&apos;")), t);
+  const decrire = sansCommentaires(lire("components/decrire-mon-chantier.tsx"));
+  assert.ok(decrire.includes("Décrire mon chantier") && decrire.includes("À l&apos;écrit ou au micro."));
   // Ce que voit l'artisan : les lignes d'import (« coup-de-main-ia ») ne s'affichent pas.
   assert.doesNotMatch(nouveau.replace(/^import .*$/gm, ""), INTERDITS);
   const tarifs = sansCommentaires(lire("app/(public)/tarifs/page.tsx"));
