@@ -1,6 +1,9 @@
+import { FILE_REPRISE } from "../../platform/reprise/reprise.module.js";
+import type { FileReprise } from "../../platform/reprise/file-reprise.js";
 import { waitUntil } from "@vercel/functions";
 import type { Alerter } from "../../platform/alerts/alerter.js";
-import { Module } from "@nestjs/common";
+import { Inject, Module, type OnModuleInit } from "@nestjs/common";
+import type { TenantContext } from "../tenancy/index.js";
 import { communeOf, DEFAULT_EXTRACTION_POLICY, loadReferential, NEW_PROJECT_NAME, ruleValidatedBy, siteNameFromQuote } from "@baticlair/domain";
 import type { Prisma } from "../../generated/prisma/client.js";
 import type { AppConfig } from "../../platform/config/config.js";
@@ -10,17 +13,21 @@ import { CONFIG, LOGGER, ALERTER, PUSH_SENDER } from "../../platform/tokens.js";
 import type { PushSender } from "../../platform/push/push.port.js";
 import { AiUsageModule, AiUsageRecorder, AnalysisMeter } from "../ai-usage/index.js";
 import { DOCUMENT_REPOSITORY, DocumentAiInput, DocumentsModule, type DocumentRepository } from "../documents/index.js";
-import { CompanyMemory, CorrectionJournal, LearningModule } from "../learning/index.js";
+import { CompanyMemory, CorrectionJournal, HabitudesService, LearningModule } from "../learning/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { TAKEOFF_REPOSITORY, type TakeoffRepository } from "./application/takeoff.repository.js";
 import { manualKey, TakeoffService } from "./application/takeoff.service.js";
 import { TakeoffController } from "./http/takeoff.controller.js";
 import { FICHE_RELECTEUR, type FicheRelecteur } from "./application/fiche-relecture.js";
-import { AnthropicFicheRelecteur } from "./infrastructure/anthropic-fiche-relecteur.js";
+import { IaFicheRelecteur } from "./infrastructure/ia-fiche-relecteur.js";
+import { fabriqueIa } from "../../platform/ai/fabrique-ia.js";
 import { FakeFicheRelecteur } from "./infrastructure/fake-fiche-relecteur.js";
 import { LECTURE_READER, type LectureReader } from "./application/lecture-reader.js";
-import { AnthropicLectureReader } from "./infrastructure/anthropic-lecture-reader.js";
+import { IaLectureReader } from "./infrastructure/ia-lecture-reader.js";
 import { FakeLectureReader } from "./infrastructure/fake-lecture-reader.js";
+import { LISTE_READER, type ListeReader } from "./application/liste-reader.js";
+import { IaListeReader } from "./infrastructure/ia-liste-reader.js";
+import { FakeListeReader } from "./infrastructure/fake-liste-reader.js";
 import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.repository.js";
 
 @Module({
@@ -31,15 +38,28 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
     {
       // §51.5 : la lecture du devis par le modèle le plus capable, en un appel ; simulée (lectures enregistrées) en test.
       provide: LECTURE_READER,
-      useFactory: (config: AppConfig): LectureReader | null =>
-        config.ai.provider === "anthropic" ? new AnthropicLectureReader(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort, undefined, config.ai.quantitatifModel) : config.ai.provider === "fake" ? new FakeLectureReader() : null,
+      useFactory: (config: AppConfig): LectureReader | null => {
+        const ia = fabriqueIa(config);
+        return ia ? new IaLectureReader(ia, config.ai.extractionModel, config.ai.effort, config.ai.quantitatifModel) : config.ai.provider === "fake" ? new FakeLectureReader() : null;
+      },
+      inject: [CONFIG],
+    },
+    {
+      // « J'ai déjà ma liste » : la lecture d'image ou de PDF d'une liste déjà comptée, sans calcul ; même client que les devis.
+      provide: LISTE_READER,
+      useFactory: (config: AppConfig): ListeReader | null => {
+        const ia = fabriqueIa(config);
+        return ia ? new IaListeReader(ia, config.ai.extractionModel, config.ai.effort) : config.ai.provider === "fake" ? new FakeListeReader() : null;
+      },
       inject: [CONFIG],
     },
     {
       // §51.2 : la relecture d'une réponse « Autre », par le modèle de la lecture (le plus capable).
       provide: FICHE_RELECTEUR,
-      useFactory: (config: AppConfig): FicheRelecteur | null =>
-        config.ai.provider === "anthropic" ? new AnthropicFicheRelecteur(config.ai.apiKey!, config.ai.extractionModel) : config.ai.provider === "fake" ? new FakeFicheRelecteur() : null,
+      useFactory: (config: AppConfig): FicheRelecteur | null => {
+        const ia = fabriqueIa(config);
+        return ia ? new IaFicheRelecteur(ia, config.ai.extractionModel) : config.ai.provider === "fake" ? new FakeFicheRelecteur() : null;
+      },
       inject: [CONFIG],
     },
     {
@@ -59,6 +79,9 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         push: PushSender,
         relecteur: FicheRelecteur | null,
         lecteur: LectureReader | null,
+        listeur: ListeReader | null,
+        habitudes: HabitudesService,
+        reprise: FileReprise,
       ) =>
         new TakeoffService(
           repo,
@@ -75,6 +98,8 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             policy: { ...DEFAULT_EXTRACTION_POLICY, textModel: config.ai.extractionModel, visionModel: config.ai.extractionModel },
             ...(relecteur ? { relecteur } : {}),
             ...(lecteur ? { lecteur } : {}),
+            ...(listeur ? { listeur } : {}),
+            habitudes,
             companyName: async (tenant) => (await prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } }))?.name ?? null,
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
             // §48 : « je te préviens quand c'est prêt » : une notification sur chaque appareil abonné de la personne qui
@@ -94,6 +119,10 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             keepAlive: (work) => waitUntil(work),
             answerWithinMs: config.ai.answerWithinMs,
             onReadingFailed: (reason) => alerter.alert("ai_reading_failed", `raison : ${reason}.`),
+            // Revue du 26 octobre 2026 : une panne passagère de l'IA repart seule (file de reprise, 2 nouveaux essais).
+            onEchecPassager: (tenant, documentId, reason) => {
+              void reprise.planifier({ sorte: "lecture_ia", cle: `lecture_ia:${documentId}`, charge: { tenant, documentId }, erreur: reason, companyId: tenant.companyId }).catch(() => undefined);
+            },
             isValidator: async (tenant) => {
               if (config.referentialValidators.length === 0) return false;
               const user = await prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });
@@ -103,12 +132,15 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             nameProject: async (tenant, projectId, read) => {
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { name: true, address: true, clientName: true } });
               if (!project) return;
-              const address = project.address ?? read.address?.slice(0, 300) ?? null;
-              const name = project.name === NEW_PROJECT_NAME ? siteNameFromQuote({ client: read.client, commune: communeOf(address) }) : null;
+              // Le texte lu est déjà anonymisé : d'une adresse lue, il ne reste que la commune.
+              const lue = read.address ? read.address.replace(/\[(?:adresse retirée|client)\],?\s*/g, "").trim() || null : null;
+              const address = project.address ?? lue?.slice(0, 300) ?? null;
+              // RGPD (Greg, 24 octobre 2026 ; RÈGLE CHANGÉE §48, avant : « Chantier Dupont ») : le chantier prend le nom de sa
+              // commune, jamais celui du client lu dans le devis, et le nom du client n'est plus recopié.
+              const name = project.name === NEW_PROJECT_NAME ? siteNameFromQuote({ client: null, commune: communeOf(address) }) : null;
               const data = {
                 ...(name ? { name } : {}),
-                ...(!project.address && read.address ? { address: read.address.slice(0, 300) } : {}),
-                ...(!project.clientName && read.client ? { clientName: read.client.slice(0, 120) } : {}),
+                ...(!project.address && lue ? { address: lue.slice(0, 300) } : {}),
               };
               if (Object.keys(data).length > 0) await prisma.project.updateMany({ where: { id: projectId, companyId: tenant.companyId }, data });
             },
@@ -170,6 +202,11 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
                 });
               },
             },
+            // Le chantier fictif du mode démo : la lecture simulée déterministe, jamais un appel au modèle.
+            lecteurDemo: async (tenant, projectId) => {
+              const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { demo: true } });
+              return project?.demo === true ? new FakeLectureReader() : null;
+            },
             projectNotes: async (tenant, projectId) => {
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { siteNotes: true } });
               return project?.siteNotes ?? null;
@@ -193,9 +230,22 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER, LISTE_READER, HabitudesService, FILE_REPRISE],
     },
   ],
   exports: [TakeoffService],
 })
-export class TakeoffModule {}
+export class TakeoffModule implements OnModuleInit {
+  constructor(
+    @Inject(FILE_REPRISE) private readonly reprise: FileReprise,
+    @Inject(TakeoffService) private readonly takeoff: TakeoffService,
+  ) {}
+
+  /** Revue du 26 octobre 2026 : la file de reprise sait relancer une lecture IA (même artisan, même document). */
+  onModuleInit(): void {
+    this.reprise.brancher("lecture_ia", async (charge) => {
+      const { tenant, documentId } = charge as { tenant: TenantContext; documentId: string };
+      await this.takeoff.extract(tenant, documentId);
+    });
+  }
+}

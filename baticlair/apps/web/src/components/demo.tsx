@@ -5,15 +5,18 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { api, ApiError, type PriceRequest } from "@/lib/api";
+import { NOM_APP } from "@/lib/nom";
 
 /**
  * Mode démo : tester tout le parcours seul, avec un chantier et des
  * fournisseurs fictifs. Les fournisseurs fictifs se reconnaissent à leur adresse.
  */
-export const DEMO_EMAIL_DOMAIN = "demo.baticlair.fr";
+export const DEMO_EMAIL_DOMAIN = "demo.mobiiz.fr";
+/** L'ancien domaine des fournisseurs fictifs (avant Mobiiz) reste reconnu sur les chantiers de démonstration déjà créés. */
+const DOMAINES_DEMO = [DEMO_EMAIL_DOMAIN, "demo.baticlair.fr"];
 
 export function isDemoSupplier(email: string): boolean {
-  return email.toLowerCase().endsWith(`@${DEMO_EMAIL_DOMAIN}`);
+  return DOMAINES_DEMO.some((d) => email.toLowerCase().endsWith(`@${d}`));
 }
 
 const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("internal_error", 500));
@@ -40,7 +43,7 @@ export function DemoCard() {
     <section aria-labelledby="demo-title" className="flex flex-col gap-2.5 rounded-3xl border border-dashed border-line bg-surface p-4">
       <h2 id="demo-title" className="flex items-center gap-2 text-[17px] font-extrabold">
         <FlaskConical size={18} aria-hidden="true" />
-        Essaie BatiClair avec un chantier fictif
+        Essaie {NOM_APP} avec un chantier fictif
       </h2>
       <p className="text-sm text-muted">Découvre tout le parcours : devis client, matériaux, consultation de fournisseurs et comparaison des offres.</p>
       {error ? <ErrorNotice error={error} /> : null}

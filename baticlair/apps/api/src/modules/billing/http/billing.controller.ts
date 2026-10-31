@@ -22,6 +22,7 @@ function toDto(s: BillingStatus) {
     offers: s.offers.map(plan),
     requestedPlan: s.requestedPlan,
     activationEnabled: s.activationEnabled,
+    payant: s.payant,
   };
 }
 

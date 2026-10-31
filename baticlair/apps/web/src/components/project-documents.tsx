@@ -34,6 +34,7 @@ export function ProjectDocuments({
   const { data, setData, error, reload } = useResource(fetchDocs);
   const [notice, setNotice] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [hasList, setHasList] = useState(false);
   const [uploadError, setUploadError] = useState<ApiError | null>(null);
   const refreshProgress = useProgressRefresh();
   // Sur la page des fournitures, le devis déposé et les avis du chantier s'effacent : la liste seule.
@@ -84,7 +85,7 @@ export function ProjectDocuments({
   }
   return (
     <div className="flex flex-col gap-4">
-      {quote || archived ? null : (
+      {quote || archived || hasList ? null : (
         <div id="devis" className="scroll-mt-4">
           <DropZone onFile={(f) => void drop(f)} pending={uploading} error={uploadError} />
         </div>
@@ -97,6 +98,7 @@ export function ProjectDocuments({
       ) : null}
 
       <ProjectTakeoff
+        onHasList={setHasList}
         key={quote?.id ?? "none"}
         projectId={projectId}
         clientQuote={quote}

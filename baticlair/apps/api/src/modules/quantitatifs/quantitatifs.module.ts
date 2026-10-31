@@ -1,17 +1,18 @@
 import { Module } from "@nestjs/common";
 import { PrismaService } from "../../platform/database/prisma.service.js";
+import { CatalogueModule } from "../catalogue/index.js";
 import { BillingModule, BillingService } from "../billing/index.js";
 import { DocumentsModule, DocumentsService } from "../documents/index.js";
 import { ProjectsModule, ProjectsService } from "../projects/index.js";
 import { TakeoffModule, TakeoffService } from "../takeoff/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { QuantitatifsService } from "./application/quantitatifs.service.js";
-import { InfosChantierController, QuantitatifsController } from "./http/quantitatifs.controller.js";
+import { InfosChantierController, ListeExistanteController, QuantitatifsController } from "./http/quantitatifs.controller.js";
 
 /** La porte d'entrée unique /v1/quantitatifs (§38), au-dessus des modules existants. */
 @Module({
-  imports: [TenancyModule, ProjectsModule, BillingModule, DocumentsModule, TakeoffModule],
-  controllers: [QuantitatifsController, InfosChantierController],
+  imports: [TenancyModule, ProjectsModule, BillingModule, DocumentsModule, TakeoffModule, CatalogueModule],
+  controllers: [QuantitatifsController, InfosChantierController, ListeExistanteController],
   providers: [
     {
       provide: QuantitatifsService,

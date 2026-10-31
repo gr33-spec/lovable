@@ -2,72 +2,115 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Plus, Truck, UserRound, Warehouse } from "lucide-react";
+import { ClipboardList, House, Plus, Truck, UserRound, Users, type LucideIcon } from "lucide-react";
+import { useCallback, useState } from "react";
+import { FeuilleDeuxPortes } from "@/components/achat-groupe";
+import { api, type Health } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { useTyping } from "@/lib/typing";
+import { useResource } from "@/lib/use-resource";
+import { Logo } from "@/components/logo";
+import { useTheme } from "@/lib/theme";
 
-const items = [
-  { href: "/", label: fr.nav.home, icon: Home, match: (p: string) => p === "/" },
-  { href: "/chantiers", label: fr.nav.projects, icon: Warehouse, match: (p: string) => p.startsWith("/chantiers") },
-  { href: "/fournisseurs", label: fr.nav.suppliers, icon: Truck, match: (p: string) => p.startsWith("/fournisseurs") },
-  { href: "/compte", label: fr.nav.account, icon: UserRound, match: (p: string) => p.startsWith("/compte") },
-];
+interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  match: (p: string) => boolean;
+}
 
 /**
- * Navigation principale : barre flottante en bas sur téléphone (pouce),
- * colonne à gauche sur ordinateur. Le « + » central crée un chantier, le
- * cœur de BatiClair : un appui, aucune question.
+ * ACHAT GROUPÉ (Greg, 27 octobre 2026, point 10) : Accueil, Achats groupés, le « + » jaune au centre (les deux portes),
+ * Mes listes, Profil. « Mes prix » passe dans Profil. Barre en verre flottante sur téléphone, toujours `position: fixed;
+ * bottom: 0` (jamais recalée en JavaScript) ; colonne à gauche sur ordinateur. Avant : Accueil, Chantiers, Regroupements,
+ * Mes prix, Profil (25 octobre).
+ */
+const accueilItem: NavItem = { href: "/", label: fr.nav.home, icon: House, match: (p: string) => p === "/" };
+const listesItem: NavItem = {
+  href: "/chantiers",
+  label: fr.nav.listes,
+  icon: ClipboardList,
+  match: (p: string) => p.startsWith("/chantiers"),
+};
+const groupeItem: NavItem = { href: "/achats-groupes", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/achats-groupes") || p.startsWith("/regroupements") || p.startsWith("/groupe") };
+/** Ordinateur seulement (Greg, 31 octobre 2026, soir : « on a de la place sur l'écran ») : « Mes négoces » à portée de clic. */
+const negocesItem: NavItem = { href: "/fournisseurs", label: "Mes négoces", icon: Truck, match: (p: string) => p.startsWith("/fournisseurs") };
+const profilItem: NavItem = { href: "/compte", label: fr.nav.profil, icon: UserRound, match: (p: string) => p.startsWith("/compte") || p.startsWith("/abonnement") || p.startsWith("/fournisseurs") || p.startsWith("/mes-prix") };
+
+/** Le drapeau `groupe` de l'API (route de santé, publique) : éteint, l'onglet n'existe pas. */
+export function useGroupeActif(): boolean {
+  const fetchHealth = useCallback((signal: AbortSignal) => api<Health>("/v1/health", { signal }), []);
+  const { data } = useResource(fetchHealth);
+  return data?.features.groupe === true;
+}
+
+/**
+ * Navigation principale : barre figée en bas sur téléphone (pouce), colonne à gauche sur ordinateur. Le rond central
+ * ouvre une nouvelle liste : un appui, aucune question.
  */
 export function AppNav() {
   const pathname = usePathname();
-  const [left, right] = [items.slice(0, 2), items.slice(2)];
+  const theme = useTheme();
+  const groupe = useGroupeActif();
   // Le chat d'un chantier se lit en plein écran sur téléphone (référentiel §21) : le menu laisse la place à la barre de message.
   const inChat = /^\/chantiers\/(?!nouveau$)[^/]+$/.test(pathname);
   // La barre se cache pendant la saisie (`useTyping`). Elle n'est JAMAIS recalée en JavaScript (retour du fondateur,
   // 2026-10-12 : sur iPhone, l'ancien recalage sur visualViewport la plaçait au milieu de l'accueil) : `position: fixed;
   // bottom: 0`, la zone du geste en marge intérieure.
   const typing = useTyping();
+  const [portes, setPortes] = useState(false);
 
-  const link = (item: (typeof items)[number]) => {
+  /**
+   * Un lien du menu. Téléphone : inchangé. Ordinateur (Greg, 31 octobre 2026, soir) : une colonne sombre pleine hauteur,
+   * l'élément actif sur un verre clair avec l'icône jaune ; « Profil » ne s'allume plus sur « Mes négoces », qui a son lien.
+   */
+  const link = (item: NavItem, ordinateurSeulement = false) => {
     const active = item.match(pathname);
+    const activeOrdinateur = active && !(item === profilItem && negocesItem.match(pathname));
     const Icon = item.icon;
     return (
       <Link
         key={item.href}
         href={item.href}
         aria-current={active ? "page" : undefined}
-        className={`flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-3xl text-[11px] lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-[15px] ${
-          active ? "bg-nav-active font-bold text-white shadow-[0_6px_16px_-6px_rgba(91,69,255,0.7)]" : "font-semibold text-muted hover:text-ink"
-        }`}
+        className={`${ordinateurSeulement ? "hidden lg:flex " : "flex "}min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] font-semibold transition-[color,background-color] duration-150 lg:min-h-11 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px] ${
+          active ? "max-lg:text-accent-text" : "max-lg:text-muted max-lg:active:text-ink"
+        } ${activeOrdinateur ? "lg:bg-(--voile-3) lg:text-ink" : "lg:text-ink/65 lg:hover:bg-(--voile-1) lg:hover:text-ink"}`}
       >
-        <Icon size={21} aria-hidden="true" />
-        <span>{item.label}</span>
+        <span className={`flex h-8 w-11 items-center justify-center rounded-full transition-[background-color] duration-150 lg:h-auto lg:w-auto lg:bg-transparent ${active ? "max-lg:bg-accent-soft" : ""} ${activeOrdinateur ? "lg:text-accent-text" : ""}`}>
+          <Icon size={22} aria-hidden="true" strokeWidth={active ? 2.4 : 2} />
+        </span>
+        <span className="text-center leading-tight whitespace-nowrap">{item.label}</span>
       </Link>
     );
   };
 
   return (
-    <>
-      {/* Téléphone : figée en bas de l'écran (bottom: 0), la zone du geste de l'iPhone en marge intérieure ; ordinateur : colonne à gauche. */}
-      <nav
-        aria-label="Navigation principale"
-        data-typing={typing || undefined}
-        className={`${inChat ? "max-lg:hidden " : ""}${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}pointer-events-none fixed z-30 transition-[translate,opacity] duration-200 max-lg:inset-x-0 max-lg:bottom-0 max-lg:px-2 max-lg:pb-[max(12px,env(safe-area-inset-bottom))] lg:top-4 lg:bottom-4 lg:left-4 lg:w-60`}
-      >
-        <div className="pointer-events-auto grid h-(--nav-height) grid-cols-[1fr_1fr_64px_1fr_1fr] items-center rounded-[28px] border border-white/70 bg-surface/95 p-1 shadow-[0_12px_32px_-8px_rgba(20,24,60,0.25)] backdrop-blur-xl lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:p-3">
-        <span className="hidden px-3 pt-2 pb-4 font-display text-xl font-extrabold text-ink lg:block">BatiClair</span>
-        {left.map(link)}
-        <Link
-          href="/chantiers/nouveau"
-          aria-label="Nouveau chantier"
-          className="flex size-13.5 items-center justify-center justify-self-center rounded-full bg-cta text-white shadow-cta ring-4 ring-white lg:order-first lg:mb-3 lg:h-13 lg:w-full lg:gap-2 lg:rounded-2xl lg:font-extrabold"
-        >
-          <Plus size={26} strokeWidth={2.6} aria-hidden="true" />
-          <span className="hidden lg:inline">Nouveau chantier</span>
-        </Link>
-        {right.map(link)}
-        </div>
-      </nav>
-    </>
+    <nav
+      aria-label="Navigation principale"
+      data-typing={typing || undefined}
+      className={`${inChat ? "max-lg:hidden " : ""}${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}fixed z-30 transition-[translate,opacity] duration-200 max-lg:inset-x-0 max-lg:bottom-0 lg:inset-y-0 lg:left-0 lg:w-64`}
+    >
+      {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
+          colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}
+      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[1fr_1fr_auto_1fr_1fr]" : "grid-cols-[1fr_auto_1fr_1fr]"} rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
+        <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
+          <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
+        </span>
+        {link(accueilItem)}
+        {groupe ? link(groupeItem) : null}
+        <button type="button" onClick={() => setPortes(true)} aria-label="Nouveau : lancer un achat groupé ou faire ma liste" className="flex min-h-13 items-center justify-center px-1 lg:order-[-1] lg:mb-5 lg:justify-start lg:px-0">
+          <span className="pressable flex size-12 items-center justify-center rounded-full bg-accent text-on-accent shadow-float lg:h-12 lg:w-full lg:gap-2 lg:rounded-xl lg:text-[15px] lg:font-bold lg:shadow-[0_12px_30px_rgba(254,210,6,0.18)]">
+            <Plus size={26} strokeWidth={2.6} aria-hidden="true" />
+            <span className="hidden lg:inline">Nouveau</span>
+          </span>
+        </button>
+        {link(listesItem)}
+        {link(negocesItem, true)}
+        <span aria-hidden="true" className="hidden grow lg:block" />
+        {link(profilItem)}
+      </div>
+      {portes ? <FeuilleDeuxPortes onFermer={() => setPortes(false)} /> : null}
+    </nav>
   );
 }

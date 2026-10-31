@@ -6,6 +6,7 @@ import { useCallback, useId, useState } from "react";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type BillingPlan, type BillingStatus } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { NOM_APP } from "@/lib/nom";
 
 const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("internal_error", 500));
 
@@ -51,7 +52,7 @@ export function Paywall({ status, onChange }: { status: BillingStatus; onChange:
         <h1 id="paywall-title" className="font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">
           {blocked ? (status.plan.key === "trial" ? "Ton essai est terminé" : "Limite de ta formule atteinte") : "Nos formules"}
         </h1>
-        <p className="text-[15px] text-muted">Continue à utiliser BatiClair pour lire tes devis et comparer tes fournisseurs.</p>
+        <p className="text-[15px] text-muted">Continue à utiliser {NOM_APP} pour lire tes devis et comparer tes fournisseurs.</p>
         {blocked ? <p className="text-sm text-muted">Tes chantiers en cours restent accessibles.</p> : null}
       </div>
 
@@ -112,7 +113,7 @@ export function Paywall({ status, onChange }: { status: BillingStatus; onChange:
               value={code}
               onChange={(e) => setCode(e.target.value)}
               autoComplete="off"
-              className="min-h-12 rounded-2xl bg-surface px-3 text-base shadow-card outline-none focus-visible:ring-2 focus-visible:ring-ink"
+              className="min-h-12 rounded-2xl border border-line bg-surface px-3 text-[16px] outline-none focus-visible:border-accent"
             />
             <Button type="submit" variant="secondary" pending={pending === "code"}>
               Activer
@@ -133,17 +134,54 @@ export function PlansScreen() {
   const { data, setData, error, reload } = useBilling();
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
+  // L'abonnement (24 octobre 2026) a sa propre carte (`ResumeAbonnement`) : « Gratuit pour l'artisan » n'est plus vrai.
+  if (data.payant === false && !CARTE_GRATUITE) return null;
+  if (data.payant === false) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h1 className="font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Gratuit pour l&apos;artisan</h1>
+        <p className="text-[15px] leading-relaxed text-muted">
+          Aujourd&apos;hui, {NOM_APP} est gratuit pour l&apos;artisan : aucune limite de chantiers, rien à payer.
+        </p>
+      </section>
+    );
+  }
   return <Paywall status={data} onChange={setData} />;
 }
 
-/** Compte : la formule en une ligne, et le lien vers les formules. */
+/** L'ancienne carte « Gratuit pour l'artisan » (paywall éteint), gardée mais plus montrée depuis l'abonnement. */
+const CARTE_GRATUITE = false;
+
+/** Compte : la formule en une ligne, et le lien vers les formules (seulement quand l'ancien paywall `PAYWALL=on` est allumé). */
 export function PlanSummary() {
   const { data } = useBilling();
-  if (!data) return null;
+  if (!data) {
+    // Lighthouse (CLS) : la carte prend sa place avant la réponse, le reste de l'écran ne descend pas d'un coup.
+    return (
+      <Card className="flex flex-col gap-1.5 p-4" aria-busy="true">
+        <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">FORMULE</span>
+        <span className="text-[17px] font-extrabold">&nbsp;</span>
+        <span className="text-sm text-muted">&nbsp;</span>
+        <span className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">Voir les formules</span>
+      </Card>
+    );
+  }
   const { plan, usage } = data;
+  // Plan « finition », bloc 4 : paywall éteint, aucune formule à l'écran. Greg, 29 octobre 2026 (capture Profil : « Gratuit
+  // pour l'artisan, rien à payer » sous la carte de l'abonnement) : la carte « Abonnement » dit seule le gratuit et le payant.
+  if (data.payant === false && !CARTE_GRATUITE) return null;
+  if (data.payant === false) {
+    return (
+      <Card className="flex flex-col gap-1.5 p-4">
+        <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">FORMULE</span>
+        <span className="text-[17px] font-extrabold">Gratuit pour l&apos;artisan</span>
+        <span className="text-sm text-muted">Aucune limite de chantiers, rien à payer.</span>
+      </Card>
+    );
+  }
   return (
     <Card className="flex flex-col gap-1.5 p-4">
-      <span className="text-xs font-extrabold tracking-[0.04em] text-muted">FORMULE</span>
+      <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">FORMULE</span>
       <span className="text-[17px] font-extrabold">{plan.label}</span>
       {usage.limit !== null ? (
         <span className={`text-sm ${data.limitReached ? "font-semibold text-warn" : "text-muted"}`}>
@@ -151,7 +189,7 @@ export function PlanSummary() {
           {plan.period === "month" ? " ce mois-ci" : ""}
         </span>
       ) : null}
-      <Link href="/formules" className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text">
+      <Link href="/formules" className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">
         Voir les formules
       </Link>
     </Card>

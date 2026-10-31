@@ -5,16 +5,25 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
 import { NotificationsPrompt } from "@/components/notifications-prompt";
-import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/components/project-offers";
+import { RappelAdresseMobiiz } from "@/components/adresse-mobiiz";
+import { OfferLines, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { attachFile } from "@/lib/upload";
 import { fetchWhole } from "@/components/file-viewer";
-import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
+import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, type EmailRecu, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
 import { openDocument, openFile } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
+import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
+import { useBrouillon } from "@/lib/brouillon";
+import { useAncienMode } from "@/components/negocie";
+import { useActionChantier } from "@/lib/actions-chantier";
+import { EtapeApercu, EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
+import { TON, phraseRelanceArtisan } from "../../../../packages/domain/src/groupe/ton";
+import { euros, type DemandePerso, type OffrePerso } from "@/lib/recentrage";
+import { dateHeureCourte, premiereLigneDuMessage } from "../../../../packages/domain/src/groupe/reponse-negoce";
 
 
 function toError(e: unknown): ApiError {
@@ -86,7 +95,7 @@ export function ProjectPriceRequests({
   archived: boolean;
   canCreate: boolean;
   quantitatifId?: string | null;
-  /** « Envoyer au fournisseur » du document : ouvre « À qui j'envoie ? » (ou montre les fournisseurs si la demande est partie). */
+  /** « Envoyer aux négoces » du document : ouvre « À qui j'envoie ? » (ou montre les fournisseurs si la demande est partie). */
   openSignal?: number;
   /** §48.5 : une sélection vient de partir depuis la liste : on relit les demandes. */
   refreshSignal?: number;
@@ -105,6 +114,10 @@ export function ProjectPriceRequests({
   }, [refreshSignal, reload]);
 
   const refreshProgress = useProgressRefresh();
+  // Commande du mois (Greg, 23 octobre) : plus de « X offres reçues / Comparer les offres » par chantier ; le prix vient de
+  // le regroupement, le chantier garde seulement l'envoi aux négoces.
+  const { features } = useSession();
+  const modeMois = useAncienMode() && features.commandeCommune !== "lots";
   // Des e-mails partent-ils du serveur (§43) ? Sinon, l'artisan envoie depuis sa messagerie.
   const fetchSettings = useCallback((signal: AbortSignal) => api<PriceRequestSettings & { deliversEmail: boolean }>("/v1/price-requests/settings", { signal }), []);
   const deliversEmail = useResource(fetchSettings).data?.deliversEmail ?? false;
@@ -122,12 +135,61 @@ export function ProjectPriceRequests({
     [requestId],
   );
   const offers = useResource(fetchOffers);
+  // R7 : les e-mails reçus des négoces pour ce chantier (la première ligne de leur message va sur leur carte).
+  const fetchRecus = useCallback((signal: AbortSignal) => api<{ items: EmailRecu[] }>(`/v1/recus?projectId=${encodeURIComponent(projectId)}`, { signal }), [projectId]);
+  const recus = useResource(fetchRecus);
+  // Point 7 (Greg, 28 octobre 2026) : un négoce qui a répondu par le lien (prix ligne par ligne ou Excel) se compare
+  // automatiquement, livraison comprise ; les autres devis s'ouvrent, sans lecture.
+  const parLien = Boolean(data?.items.find((r) => r.id === requestId)?.recipients.some((r) => r.status === "received" && !r.document));
+  const fetchChiffrages = useCallback(
+    (signal: AbortSignal) => (requestId && parLien ? api<DemandePerso>(`/v1/demandes-perso/${requestId}`, { signal }).then((d) => d.offres) : Promise.resolve([] as OffrePerso[])),
+    [requestId, parLien],
+  );
+  const chiffrages = useResource(fetchChiffrages).data ?? [];
+  // Point 8 (Greg, 28 octobre 2026) : un seul bouton principal par étape ; le reste dans le menu « ··· » du chantier.
+  const [feuille, setFeuille] = useState(false);
+  const [ajout, setAjout] = useState(false);
+  const [renvoi, setRenvoi] = useState(false);
+  const [suppression, setSuppression] = useState(false);
+  const [actionError, setActionError] = useState<ApiError | null>(null);
   const whole = (data?.items ?? []).filter((r) => !r.articles?.length);
   const parts = (data?.items ?? []).filter((r) => (r.articles?.length ?? 0) > 0);
   const sent = Boolean(whole[0]);
   useEffect(() => {
     if (data) onSentChange?.(sent);
   }, [data, sent, onSentChange]);
+  const enCours = whole[0] ?? null;
+  const retenue = Boolean(enCours?.retainedSupplierIds.length);
+  const actif = Boolean(enCours) && !archived;
+  const montrer = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  async function classer(retenus: string[]) {
+    if (!enCours) return;
+    setActionError(null);
+    try {
+      const r = await api<PriceRequest>(`/v1/price-requests/${enCours.id}/classification`, { method: "PATCH", body: retenus.length ? { classified: true, retainedSupplierIds: retenus } : { classified: false } });
+      setData({ items: [r, ...(data?.items ?? []).filter((x) => x.id !== r.id)] });
+      setFeuille(false);
+      refreshProgress();
+    } catch (e) {
+      setActionError(toError(e));
+    }
+  }
+  async function supprimer() {
+    if (!enCours) return;
+    setActionError(null);
+    try {
+      await api<null>(`/v1/price-requests/${enCours.id}`, { method: "DELETE" });
+      setSuppression(false);
+      reload();
+      refreshProgress();
+    } catch (e) {
+      setActionError(toError(e));
+    }
+  }
+  useActionChantier("ajouter-negoce", "Ajouter un négoce", () => (setAjout(true), montrer("ajouter-negoce")), actif && !retenue);
+  useActionChantier("renvoyer", "Renvoyer à un négoce", () => (setRenvoi(true), montrer("renvoyer")), actif && !retenue && Boolean(enCours?.recipients.some((r) => r.status === "sent")));
+  useActionChantier("changer-negoce", "Changer de négoce", () => void classer([]), actif && retenue);
+  useActionChantier("supprimer-demande", "Supprimer la demande", () => (setSuppression(true), montrer("supprimer-demande")), actif);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -207,38 +269,99 @@ export function ProjectPriceRequests({
     );
   }
 
-  const received = request.recipients.filter((r) => r.status === "received" && r.document);
-  const unread = received.filter((r) => !offerOf(r.id)).length;
-  const waiting = request.recipients.filter((r) => r.status === "sent").length;
+  const emailDe = (recipientId: string) =>
+    (recus.data?.items ?? []).filter((e) => e.demande?.recipientId === recipientId).sort((x, y) => y.recuLe.localeCompare(x.recuLe))[0] ?? null;
+  // Point 7 (Greg, 28 octobre 2026) : un devis reçu ne se lit plus par l'IA ; il s'ouvre, et l'artisan retient un négoce.
+  const offreDe = (recipientId: string) => chiffrages.find((o) => o.recipientId === recipientId) ?? null;
+  const rang = (r: PriceRequestRecipient) => {
+    const i = chiffrages.findIndex((o) => o.recipientId === r.id);
+    return i < 0 ? chiffrages.length : i;
+  };
+  const repondus = request.recipients.filter((r) => r.document || emailDe(r.id) || offreDe(r.id)).sort((a, b) => rang(a) - rang(b));
+  const comparer = repondus.filter((r) => offreDe(r.id)).length >= 2;
+  const retenus = request.recipients.filter((r) => request.retainedSupplierIds.includes(r.supplier.id));
+  const aEnvoyer = request.recipients.filter((r) => r.status === "to_send");
   const hasOffers = (offers.data?.items.length ?? 0) > 0;
 
   return (
     <section id="fournisseurs" aria-label="Fournisseurs" className="flex scroll-mt-4 flex-col gap-3">
-      {/* Une fois les offres comparées, la phrase d'attente n'a plus rien à dire : la comparaison parle. */}
-      {hasOffers && waiting === 0 ? null : (
+      {retenus.length > 0 ? (
+        <div role="status" aria-label="Commandé" className="flex flex-col gap-2 rounded-xl bg-ok-bg p-4 text-ok">
+          <p className="text-[16px] font-extrabold">Commandé chez {retenus.map((r) => r.supplier.name).join(", ")}.</p>
+          <p className="text-[14px]">
+            {request.lines.length} ligne{request.lines.length > 1 ? "s" : ""}
+            {request.classifiedAt ? ` · retenu le ${dateHeureCourte(new Date(request.classifiedAt))}` : ""}
+          </p>
+          {retenus
+            .filter((r) => r.document)
+            .map((r) => (
+              <button key={r.id} type="button" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")} className="inline-flex min-h-11 items-center self-start text-[15px] font-bold text-ink underline">
+                Ouvrir le devis (PDF)
+              </button>
+            ))}
+        </div>
+      ) : aEnvoyer.length > 0 ? (
         <AssistantMessage>
-          <Say>
-            {request.recipients.some((r) => r.status === "to_send")
-              ? "La demande est prête. Envoie-la à chaque fournisseur :"
-              : "Demande envoyée. Quand un fournisseur te répond, ajoute son devis sur sa carte."}
-          </Say>
+          <Say>La demande est prête. Envoie-la à chaque négoce :</Say>
         </AssistantMessage>
-      )}
-      {!archived && unread > 0 && offers.data ? (
-        <CompareQuotes
-          requestId={request.id}
-          received={received.length}
-          waiting={waiting}
-          aiAvailable={offers.data.aiAvailable}
-          onDone={(result) => {
-            offers.setData({ aiAvailable: result.aiAvailable, items: result.items });
-            setVersion((v) => v + 1);
-            refreshProgress();
-          }}
-        />
+      ) : repondus.length > 0 ? (
+        // Le suivi du chantier dit déjà « N devis reçus sur M demandes » : ici, seulement le bouton de l'étape.
+        <Button onClick={() => setFeuille(true)} className="w-full">
+          {comparer ? "Comparer" : repondus.length > 1 ? "Voir les devis reçus" : "Voir le devis reçu"}
+        </Button>
       ) : null}
-      {hasOffers ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">FOURNISSEURS</h2>
+      {retenus.length === 0
+        ? request.recipients
+            .filter((r) => r.status === "sent" && r.rappelLe && !repondus.includes(r))
+            .map((r) => (
+              // Lot final, point 6 : le négoce n'a pas répondu à mi-délai ; on appelle le commercial, ou on renvoie.
+              <div key={`rappel-${r.id}`} role="group" aria-label={`${r.supplier.name} n'a pas encore répondu`} className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+                <p className="text-[15px] font-semibold">{phraseRelanceArtisan(r.supplier.name)}</p>
+                <div className="flex flex-wrap gap-2">
+                  {r.supplier.phone ? (
+                    <a href={`tel:${r.supplier.phone.replace(/[^\d+]/g, "")}`} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-extrabold text-on-accent">
+                      Appeler {r.supplier.contactName?.trim() || r.supplier.name}
+                    </a>
+                  ) : null}
+                  <a href={mailtoHref(r)} className="pressable inline-flex min-h-12 items-center justify-center rounded-full border border-line bg-surface px-5 text-[15px] font-bold">
+                    Renvoyer la demande
+                  </a>
+                </div>
+              </div>
+            ))
+        : null}
+      {actionError ? <ErrorNotice error={actionError} /> : null}
+      {suppression ? (
+        <div id="supprimer-demande" role="group" aria-label="Supprimer la demande" className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+          <p className="text-[15px] font-semibold">Supprimer cette demande ? Les négoces ne sont pas prévenus ; ta liste reste.</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="secondary" onClick={() => setSuppression(false)}>
+              Annuler
+            </Button>
+            <Button variant="ink" onClick={() => void supprimer()}>
+              Oui, supprimer
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {renvoi ? (
+        <div id="renvoyer" role="group" aria-label="Renvoyer à un négoce" className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-4">
+          <p className="text-[15px] font-semibold">À qui renvoyer la demande ?</p>
+          {request.recipients
+            .filter((r) => r.status === "sent")
+            .map((r) => (
+              <a key={r.id} href={mailtoHref(r)} onClick={() => setRenvoi(false)} className="inline-flex min-h-12 items-center justify-between rounded-xl border border-line px-3 text-[15px] font-semibold">
+                Renvoyer à {r.supplier.name}
+                <Mail size={18} aria-hidden="true" />
+              </a>
+            ))}
+          <button type="button" onClick={() => setRenvoi(false)} className="min-h-11 self-start text-[15px] font-semibold text-muted underline">
+            Fermer
+          </button>
+        </div>
+      ) : null}
+      <div id="ajouter-negoce">{!archived ? <AddRecipients request={request} open={ajout} onClose={() => setAjout(false)} onChange={replace} /> : null}</div>
+      {hasOffers && !modeMois && retenus.length === 0 ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
       <NotificationsPrompt trigger={sentCount} />
       <ul className="flex flex-col gap-2" aria-label="Tes fournisseurs">
         {request.recipients.map((r) => (
@@ -249,7 +372,7 @@ export function ProjectPriceRequests({
               request={request}
               archived={archived}
               deliversEmail={deliversEmail}
-              onSent={() => setSentCount((n) => n + 1)}
+              onSent={() => setSentCount((k) => k + 1)}
               onChange={replace}
               onOfferChange={offerChanged}
               onReload={reloadAll}
@@ -257,9 +380,104 @@ export function ProjectPriceRequests({
           </li>
         ))}
       </ul>
-      {!archived ? <AddRecipients request={request} onChange={replace} /> : null}
       {partsBlock}
+      {feuille ? <DevisRecus request={request} repondus={repondus} emailDe={emailDe} offreDe={offreDe} onRetenir={(supplierId) => void classer([supplierId])} onFermer={() => setFeuille(false)} /> : null}
     </section>
+  );
+}
+
+/**
+ * « Voir les devis reçus » (Greg, 28 octobre 2026, points 7 et 8) : en plein écran, une carte par négoce qui a répondu :
+ * « X t'a répondu · 28 oct. à 8 h 31 », la première ligne de son message, « Ouvrir le devis (PDF) » et « Je retiens ce
+ * négoce » (la demande passe à « Commandé »). Aucune lecture IA, aucun nom de fichier. Un négoce qui a répondu par le
+ * lien montre son total livraison comprise, et les réponses par le lien passent devant, de la moins chère à la plus chère.
+ */
+function DevisRecus({
+  request,
+  repondus,
+  emailDe,
+  offreDe,
+  onRetenir,
+  onFermer,
+}: {
+  request: PriceRequest;
+  repondus: PriceRequestRecipient[];
+  emailDe: (id: string) => EmailRecu | null;
+  offreDe: (id: string) => OffrePerso | null;
+  onRetenir: (supplierId: string) => void;
+  onFermer: () => void;
+}) {
+  useEffect(() => {
+    const avant = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = avant;
+    };
+  }, []);
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Devis reçus" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
+      <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
+        <h2 className="font-display text-[20px] font-extrabold">{repondus.length > 1 ? "Devis reçus" : "Devis reçu"}</h2>
+        <button type="button" onClick={onFermer} aria-label="Revenir au chantier" className="inline-flex size-11 items-center justify-center rounded-xl">
+          <X size={20} aria-hidden="true" />
+        </button>
+      </div>
+      <ul className="mx-auto flex w-full max-w-2xl min-h-0 grow flex-col gap-3 overflow-y-auto px-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+        {repondus.map((r) => {
+          const e = emailDe(r.id);
+          const quand = e ? new Date(e.recuLe) : r.sentAt ? null : null;
+          const ligne = premiereLigneDuMessage(e?.texte);
+          const autres = (e?.fichiers ?? []).filter((f) => !f.devisRecu);
+          const o = offreDe(r.id);
+          return (
+            <li key={r.id}>
+              <Card aria-label={`Devis de ${r.supplier.name}`} className="flex flex-col gap-2.5 p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-[16px] font-extrabold">
+                    {r.supplier.name} t&apos;a répondu{quand ? ` · ${dateHeureCourte(quand)}` : ""}
+                  </p>
+                  {o && o.complete && o.valide && o.ecartHt === 0 ? <Badge tone="ok">Le moins cher</Badge> : r.document ? <Badge tone="ok">Devis reçu</Badge> : null}
+                </div>
+                {ligne ? <p className="text-[15px] text-muted">{ligne}</p> : null}
+                {o ? (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[18px] font-extrabold tabular-nums">{euros(o.totalLivreHt)} HT livré</p>
+                    <p className="text-[14px] text-muted">
+                      {o.livraisonHt > 0 ? `dont livraison ${euros(o.livraisonHt)}` : "livraison offerte"}
+                      {o.delaiJours !== null ? ` · ${o.delaiJours} jour${o.delaiJours > 1 ? "s" : ""}` : ""}
+                      {o.ecartHt ? ` · ${euros(o.ecartHt)} de plus` : ""}
+                    </p>
+                    {o.lignesManquantes.length > 0 ? (
+                      <p className="text-[14px] font-semibold text-warn">
+                        {o.lignesManquantes.length} ligne{o.lignesManquantes.length > 1 ? "s" : ""} non chiffrée{o.lignesManquantes.length > 1 ? "s" : ""}
+                      </p>
+                    ) : null}
+                    {!o.valide ? <p className="text-[14px] font-semibold text-warn">Offre échue</p> : null}
+                  </div>
+                ) : null}
+                {r.document ? (
+                  <Button variant="secondary" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")}>
+                    Ouvrir le devis (PDF)
+                  </Button>
+                ) : null}
+                {e
+                  ? autres.map((f, i) => (
+                      <Button key={f.id} variant="secondary" onClick={() => openFile({ url: `/v1/recus/${encodeURIComponent(e.id)}/fichiers/${encodeURIComponent(f.id)}`, title: `Pièce jointe de ${r.supplier.name}`, fileName: f.nom })}>
+                        {autres.length > 1 ? `Ouvrir la pièce jointe ${i + 1}` : "Ouvrir la pièce jointe"}
+                      </Button>
+                    ))
+                  : null}
+                {request.retainedSupplierIds.length === 0 ? (
+                  <Button variant="ink" onClick={() => onRetenir(r.supplier.id)}>
+                    Je retiens ce négoce
+                  </Button>
+                ) : null}
+              </Card>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -301,7 +519,7 @@ function SupplierPicker({
   return (
     <div className="flex flex-col gap-2">
       {choices.length === 0 && !creating ? (
-        <p className={`text-sm ${dark ? "text-[#c9ced6]" : "text-muted"}`}>
+        <p className={`text-sm ${dark ? "text-[#99844C66]" : "text-muted"}`}>
           {data.items.length === 0 ? "Ton carnet de fournisseurs est vide. Ajoutes-en un :" : "Tous tes fournisseurs sont déjà dans cette demande."}
         </p>
       ) : null}
@@ -343,6 +561,16 @@ function SupplierPicker({
   );
 }
 
+interface SaisieEnvoi extends Record<string, unknown> {
+  ouvert: boolean;
+  selected: string[];
+  message: string;
+  etapeEnvoi: "negoces" | "apercu";
+  messageLibre: string | null;
+  tutoie: boolean | null;
+  dueDate: string;
+}
+
 function NewRequest({
   openAtStart,
   projectId,
@@ -361,10 +589,26 @@ function NewRequest({
   onCreated: (r: PriceRequest) => void;
 }) {
   const id = useId();
-  const [previewing, setPreviewing] = useState(openAtStart && quantitatifId !== null);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [message, setMessage] = useState("");
-  const [dueDate, setDueDate] = useState("");
+  // Correction après test de Greg (30 octobre 2026, point 2) : l'envoi commencé (négoces cochés, message, étape) est gardé
+  // sur le serveur ; revenir sur le chantier rouvre la feuille où on l'a laissée.
+  const b = useBrouillon<SaisieEnvoi>(
+    `envoi:${projectId}`,
+    { type: "envoi", url: `/chantiers/${projectId}`, titre: (d) => `Demande de prix à ${d.selected.length} négoce${d.selected.length > 1 ? "s" : ""}`, vide: (d) => !d.ouvert && !d.message && d.messageLibre === null },
+    { ouvert: openAtStart && quantitatifId !== null, selected: [], message: "", etapeEnvoi: "negoces", messageLibre: null, tutoie: null, dueDate: "" },
+  );
+  const previewing = b.donnees.ouvert;
+  const setPreviewing = (v: boolean) => b.modifier((d) => ({ ...d, ouvert: v }));
+  const selected = new Set(b.donnees.selected);
+  const { message, messageLibre, tutoie, dueDate } = b.donnees;
+  const etape = b.donnees.etapeEnvoi;
+  const setMessage = (v: string) => b.modifier((d) => ({ ...d, message: v }));
+  const setEtape = (v: "negoces" | "apercu") => b.modifier((d) => ({ ...d, etapeEnvoi: v }));
+  const setMessageLibre = (v: string | null) => b.modifier((d) => ({ ...d, messageLibre: v }));
+  const setTutoie = (v: boolean) => b.modifier((d) => ({ ...d, tutoie: v }));
+  const setDueDate = (v: string) => b.modifier((d) => ({ ...d, dueDate: v }));
+  // Lot final, points 1 et 4 : « Avant d'envoyer » la première fois, puis « À qui j'envoie ? », puis l'aperçu du mail.
+  const identite = useIdentite();
+  const [enregistre, setEnregistre] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const key = useRef(newActionKey());
@@ -378,11 +622,11 @@ function NewRequest({
   };
 
   const toggle = (supplierId: string, on: boolean) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
+    b.modifier((d) => {
+      const next = new Set(d.selected);
       if (on) next.add(supplierId);
       else next.delete(supplierId);
-      return next;
+      return { ...d, selected: [...next] };
     });
 
   // §45.9 : « Envoyer » de l'aperçu crée la demande et, quand le serveur envoie les mails, l'envoie à chacun.
@@ -392,13 +636,14 @@ function NewRequest({
     try {
       let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
         method: "POST",
-        body: { supplierIds: [...selected], message: message || null, dueDate: dueDate || null },
+        body: { supplierIds: [...selected], message: messageLibre ?? (message || null), dueDate: dueDate || null, ...(tutoie === null ? {} : { tutoie }) },
         idempotencyKey: key.current,
       });
       if (deliversEmail) {
         for (const r of request.recipients) request = await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" });
         onSent();
       }
+      b.effacer();
       setPreviewing(false);
       onCreated(request);
     } catch (e) {
@@ -409,7 +654,7 @@ function NewRequest({
 
   return (
     <div className="flex flex-col gap-3">
-      <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
+      <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
       <details className="rounded-2xl bg-surface p-3 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Ajouter un message ou une date de réponse (facultatif)</summary>
         <label className="flex min-h-11 items-center gap-3 text-sm">
@@ -426,7 +671,7 @@ function NewRequest({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="ex. Livraison sur chantier possible ?"
-            className="rounded-2xl bg-surface p-3 text-base text-ink outline-none placeholder:text-subtle"
+            className="rounded-2xl bg-surface p-3 text-base text-ink outline-none placeholder:text-muted"
           />
           <label htmlFor={`${id}-due`} className="font-bold">
             Réponse souhaitée avant le
@@ -441,42 +686,65 @@ function NewRequest({
         </div>
       </details>
       {error ? <ErrorNotice error={error} /> : null}
-      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => void create()}>
+      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => (setEtape("negoces"), setPreviewing(true))}>
         <Mail size={18} aria-hidden="true" />
         {selected.size === 0 ? "Coche au moins un fournisseur" : "Envoyer la demande de devis"}
       </Button>
       {previewing ? (
         // §50.7 : l'écran « Ton chantier » EST le document ; l'envoi ne montre plus d'aperçu, seulement à qui il part.
-        <SendSheet
-          canSend={selected.size > 0}
-          sending={pending}
-          onSend={() => void create()}
-          onClose={() => {
-            setPreviewing(false);
-            onPreviewClosed?.();
-          }}
-        >
-          <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
-        </SendSheet>
+        identite.data && !identite.data.complete ? (
+          // Lot final, point 1 : la première fois, « Avant d'envoyer » (SIRET, prénom, portable), une seule fois.
+          <SendSheet
+            titre="Avant d'envoyer"
+            principal={{ label: "Continuer", form: FORMULAIRE_IDENTITE, pending: enregistre }}
+            onClose={() => {
+              setPreviewing(false);
+              onPreviewClosed?.();
+            }}
+          >
+            <EtapeIdentite identite={identite.data} onFait={(i) => identite.setData(i)} onPending={setEnregistre} />
+          </SendSheet>
+        ) : etape === "negoces" ? (
+          <SendSheet
+            titre="À qui j'envoie ?"
+            principal={{ label: selected.size === 0 ? "Choisis un négoce" : "Continuer", disabled: selected.size === 0 || !identite.data, onClick: () => setEtape("apercu") }}
+            onClose={() => {
+              setPreviewing(false);
+              onPreviewClosed?.();
+            }}
+          >
+            {/* Lot final, ton : avant l'envoi à ses négoces, une phrase de collègue (docs/groupe/TON.md). */}
+            <p className="text-[15px] font-semibold">{TON.avantEnvoiNegoces}</p>
+            {/* R7 : le rappel en une ligne au premier envoi (Greg, 27 octobre 2026). */}
+            <RappelAdresseMobiiz />
+            <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
+          </SendSheet>
+        ) : (
+          // Lot final, point 4 : « Voici ce que ton négoce va recevoir », l'aperçu fidèle ; un seul bouton, « Envoyer ».
+          <SendSheet
+            titre="Voici ce que ton négoce va recevoir"
+            principal={{ label: "Envoyer", disabled: selected.size === 0, pending, onClick: () => void create() }}
+            onClose={() => setEtape("negoces")}
+          >
+            <EtapeApercu projectId={projectId} supplierId={[...selected][0] ?? null} message={messageLibre} onMessage={setMessageLibre} tutoie={tutoie} onTutoie={setTutoie} />
+            {error ? <ErrorNotice error={error} /> : null}
+          </SendSheet>
+        )
       ) : null}
     </div>
   );
 }
 
-function AddRecipients({ request, onChange }: { request: PriceRequest; onChange: (r: PriceRequest) => void }) {
-  const [open, setOpen] = useState(false);
+/** « Ajouter un négoce » (menu « ··· » du chantier, point 8) : le carnet, sans ceux qui ont déjà la demande. */
+function AddRecipients({ request, open, onClose, onChange }: { request: PriceRequest; open: boolean; onClose: () => void; onChange: (r: PriceRequest) => void }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const setOpen = (v: boolean) => {
+    if (!v) onClose();
+  };
 
-  if (!open) {
-    return (
-      <Button variant="secondary" onClick={() => setOpen(true)}>
-        <Plus size={18} aria-hidden="true" />
-        Demander à un autre fournisseur
-      </Button>
-    );
-  }
+  if (!open) return null;
 
   async function add() {
     setPending(true);
@@ -494,7 +762,7 @@ function AddRecipients({ request, onChange }: { request: PriceRequest; onChange:
 
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <span className="font-bold">Ajouter des fournisseurs à la demande</span>
+      <span className="font-bold">Ajouter un négoce à la demande</span>
       <SupplierPicker
         exclude={request.recipients.map((r) => r.supplier.id)}
         selected={selected}
@@ -524,18 +792,15 @@ function AddRecipients({ request, onChange }: { request: PriceRequest; onChange:
 type CardState = { label: string; tone: "ok" | "warn" | "neutral"; info: string };
 
 /** Où en est le fournisseur, en deux mots, et une seule information utile. */
-function cardState(r: PriceRequestRecipient, offer: Offer | null): CardState {
-  if (offer) {
-    const facts = offerFacts(offer);
-    return { label: facts.toCheck ? "À vérifier" : "Comparé", tone: facts.toCheck ? "warn" : "ok", info: facts.text };
-  }
+function cardState(r: PriceRequestRecipient): CardState {
   switch (r.status) {
     case "to_send":
       return { label: "À envoyer", tone: "warn", info: r.supplier.email };
     case "sent":
-      return { label: "En attente", tone: "neutral", info: r.sentAt ? `Demande envoyée le ${new Date(r.sentAt).toLocaleDateString("fr-FR")}` : "Demande envoyée" };
+      return { label: "En attente", tone: "neutral", info: r.sentAt ? `Demande envoyée le ${dateHeureCourte(new Date(r.sentAt))}` : "Demande envoyée" };
     case "received":
-      return { label: "Devis reçu", tone: "ok", info: "Prêt à comparer" };
+      // Point 7 (28 octobre 2026) : plus de « Prêt à comparer » : le devis s'ouvre tel quel.
+      return { label: "Devis reçu", tone: "ok", info: "" };
     case "declined":
       return { label: "Pas de réponse", tone: "neutral", info: "" };
   }
@@ -573,7 +838,7 @@ function RecipientCard({
   const [panel, setPanel] = useState<Panel>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
-  const state = cardState(r, offer);
+  const state = cardState(r);
   const demo = isDemoSupplier(r.supplier.email);
   const send = () =>
     run(async () => {
@@ -645,8 +910,9 @@ function RecipientCard({
 
   const items: { label: string; onSelect: () => void }[] = [];
   if (r.email) items.push({ label: panel === "email" ? "Masquer l'e-mail" : "Voir l'e-mail", onSelect: () => toggle("email") });
-  if (r.document) items.push({ label: "Ouvrir son devis", onSelect: () => void openDocument(r.document!.id, r.document!.name, r.document!.name) });
   if (offer) items.push({ label: panel === "lines" ? "Masquer les lignes" : "Voir les lignes de son devis", onSelect: () => toggle("lines") });
+  if (request.packet)
+    items.push({ label: "Voir la demande de devis (PDF)", onSelect: () => openFile({ url: `/v1/price-requests/${encodeURIComponent(request.id)}/demande-de-devis.pdf`, title: "Demande de devis", fileName: "demande-de-devis.pdf" }) });
   if (!archived) {
     if (r.status === "to_send") {
       items.push({ label: "Copier le texte de l'e-mail", onSelect: () => void copy() });
@@ -659,9 +925,7 @@ function RecipientCard({
     }
     if (r.status === "declined") items.push({ label: "Remettre en attente", onSelect: () => void setStatus("sent") });
     // Devis reçu par un autre chemin (téléphone, comptoir, photo) : on peut toujours le ranger ici.
-    if (!r.document && (r.status !== "sent" || demo)) {
-      items.push({ label: panel === "upload" ? "Masquer l'ajout du devis" : "Ajouter son devis reçu", onSelect: () => toggle("upload") });
-    }
+    if (!r.document) items.push({ label: panel === "upload" ? "Masquer l'ajout du devis" : "Ajouter son devis reçu", onSelect: () => toggle("upload") });
     if (r.document) items.push({ label: "Retirer ce devis", onSelect: () => void removeQuote(r.document!.id) });
   }
 
@@ -670,7 +934,7 @@ function RecipientCard({
       <div className="flex items-start gap-3">
         <div className="flex min-w-0 grow flex-col">
           <span className="text-[17px] leading-snug font-extrabold">{r.supplier.name}</span>
-          {state.info ? <span className={`text-[13px] ${state.tone === "warn" && offer ? "font-semibold text-warn" : "text-muted"}`}>{state.info}</span> : null}
+          {state.info ? <span className="text-[13px] text-muted">{state.info}</span> : null}
         </div>
         <Badge tone={state.tone}>{state.label}</Badge>
         {items.length > 0 ? (
@@ -690,7 +954,7 @@ function RecipientCard({
         <ul role="menu" aria-label={`Actions : ${r.supplier.name}`} className="flex flex-col divide-y divide-line rounded-2xl bg-ground px-3">
           {items.map((item) => (
             <li key={item.label} role="none">
-              <button type="button" role="menuitem" onClick={item.onSelect} className="flex min-h-11 w-full items-center text-left text-sm font-bold">
+              <button type="button" role="menuitem" onClick={() => { setMenu(false); item.onSelect(); }} className="flex min-h-11 w-full items-center text-left text-sm font-bold">
                 {item.label}
               </button>
             </li>
@@ -726,18 +990,13 @@ function RecipientCard({
           </Button>
         )
       ) : null}
-      {!archived && request.packet ? (
-        <button
-          type="button"
-          onClick={() => openFile({ url: `/v1/price-requests/${encodeURIComponent(request.id)}/demande-de-devis.pdf`, title: "Demande de devis", fileName: "demande-de-devis.pdf" })}
-          className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text"
-        >
-          Voir la demande de devis (PDF)
-        </button>
+      {r.document ? (
+        // Point 7 (Greg, 28 octobre 2026) : le devis reçu s'ouvre tel quel (aucune lecture IA).
+        <Button variant="secondary" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")}>
+          Ouvrir le devis (PDF)
+        </Button>
       ) : null}
-      {!archived && !r.document && ((!demo && r.status === "sent") || panel === "upload") ? (
-        <QuoteUpload recipientId={r.id} onChange={onChange} />
-      ) : null}
+      {!archived && !r.document && panel === "upload" ? <QuoteUpload recipientId={r.id} onChange={onChange} /> : null}
       {pending ? <Spinner /> : null}
     </Card>
   );
@@ -827,10 +1086,20 @@ function EmailPreview({ to, email }: { to: string; email: { subject: string; bod
 }
 
 /**
- * §50.7 : après « Envoyer au fournisseur », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
+ * §50.7 : après « Envoyer aux négoces », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
  * qu'on vient de quitter (plus d'écran « Ce que le fournisseur va recevoir »).
  */
-function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: boolean; sending: boolean; onSend: () => void; onClose: () => void; children: React.ReactNode }) {
+function SendSheet({
+  titre,
+  principal,
+  onClose,
+  children,
+}: {
+  titre: string;
+  principal: { label: string; disabled?: boolean; pending?: boolean; onClick?: () => void; form?: string };
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -839,9 +1108,9 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
     };
   }, []);
   return (
-    <div role="dialog" aria-modal="true" aria-label="À qui j'envoie ?" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
+    <div role="dialog" aria-modal="true" aria-label={titre} className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
       <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
-        <h2 className="font-display text-[20px] font-extrabold">À qui j&apos;envoie ?</h2>
+        <h2 className="font-display text-[20px] font-extrabold">{titre}</h2>
         <button type="button" onClick={onClose} aria-label="Revenir à mon chantier" className="inline-flex size-11 items-center justify-center rounded-xl">
           <X size={20} aria-hidden="true" />
         </button>
@@ -849,10 +1118,15 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
       <div className="min-h-0 grow overflow-y-auto px-3 pb-4">
         <div className="mx-auto flex max-w-2xl flex-col gap-3">{children}</div>
       </div>
-      <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_16px_-12px_rgba(16,24,40,0.25)]">
-        <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!canSend} onClick={onSend}>
-          <Send size={18} aria-hidden="true" />
-          {canSend ? "Envoyer" : "Choisis un fournisseur"}
+      <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] border-t border-line">
+        <Button
+          className="min-h-14 w-full max-w-2xl text-[17px]"
+          pending={principal.pending ?? false}
+          disabled={principal.disabled ?? false}
+          {...(principal.form ? { type: "submit" as const, form: principal.form } : { onClick: principal.onClick })}
+        >
+          {principal.label === "Envoyer" ? <Send size={18} aria-hidden="true" /> : null}
+          {principal.label}
         </Button>
         <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
           Revenir à la liste

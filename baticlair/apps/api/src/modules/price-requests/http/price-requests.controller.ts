@@ -21,15 +21,17 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
 import { memoryStorage } from "multer";
 import { z } from "zod";
+import { COULEURS_PDF, MODELES_PDF, type CouleurPdf } from "@baticlair/domain";
 import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { assembleQuote, chunkedFields, UploadParts } from "../../documents/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { PriceRequestsService, type PriceRequestView } from "../application/price-requests.service.js";
-import { packetDocument } from "../application/supplier-packet.js";
+import { packetDocument, type ZonePdf } from "../application/supplier-packet.js";
 
 const supplierIds = z.array(z.string()).min(1).max(20);
-const settingsBody = z.object({ attachQuoteDetail: z.boolean() });
+// Assistant (31 octobre 2026) : le modèle et la couleur du PDF se règlent ici aussi ; chaque champ est facultatif.
+const settingsBody = z.object({ attachQuoteDetail: z.boolean().optional(), modelePdf: z.enum(MODELES_PDF).optional(), couleurPdf: z.enum(COULEURS_PDF.map((c) => c.id) as [CouleurPdf, ...CouleurPdf[]]).optional() });
 const createBody = z.object({
   supplierIds,
   message: z
@@ -44,9 +46,11 @@ const createBody = z.object({
     .transform((v) => (v ? new Date(`${v}T00:00:00Z`) : null)),
   /** §48.5 : « Envoyer une sélection à un autre fournisseur » : les articles cochés (clés de la liste). */
   articles: z.array(z.string().min(1).max(300)).min(1).max(500).optional(),
+  /** Lot final, point 4 : tutoyer le négoce (vouvoiement par défaut). */
+  tutoie: z.boolean().nullish(),
 });
 const addBody = z.object({ supplierIds });
-const previewBody = createBody.omit({ supplierIds: true }).extend({ destinataire: z.string().trim().max(200).nullish() });
+const previewBody = createBody.omit({ supplierIds: true }).extend({ destinataire: z.string().trim().max(200).nullish(), supplierId: z.string().max(60).nullish() });
 const statusBody = z.object({
   status: z.enum(["to_send", "sent", "declined"]),
 });
@@ -94,6 +98,8 @@ export function toDto(r: PriceRequestView) {
       supplier: x.supplier,
       status: x.status,
       sentAt: x.sentAt?.toISOString() ?? null,
+      etiquette: x.etiquette,
+      rappelLe: x.rappelLe?.toISOString() ?? null,
       document: x.document,
       email: r.emails.get(x.id) ?? null,
     })),
@@ -152,6 +158,17 @@ export class PriceRequestsController {
     return new StreamableFile(pdf.bytes);
   }
 
+  /**
+   * Assistant Mobiiz (31 octobre 2026, point 6) : les zones des lignes du PDF de l'aperçu (clé de l'article, page, rectangle
+   * en points PDF), pour toucher une ligne dans le PDF et la modifier. Le même rendu que `?apercu=1`.
+   */
+  @Get("projects/:projectId/demande-de-devis.zones")
+  async zonesPdf(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
+    const zones: ZonePdf[] = [];
+    await this.requests.exportPdf(tenant, projectId, { apercu: true, zones });
+    return { zones };
+  }
+
   @Get("projects/:projectId/price-requests")
   async list(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
     return {
@@ -163,7 +180,7 @@ export class PriceRequestsController {
   @Post("projects/:projectId/price-requests/preview")
   @HttpCode(200)
   async preview(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(previewBody)) body: z.infer<typeof previewBody>) {
-    return this.requests.preview(tenant, projectId, { message: body.message ?? null, dueDate: body.dueDate ?? null, destinataire: body.destinataire ?? null });
+    return this.requests.preview(tenant, projectId, { message: body.message ?? null, dueDate: body.dueDate ?? null, destinataire: body.destinataire ?? null, supplierId: body.supplierId ?? null, tutoie: body.tutoie ?? null });
   }
 
   @Post("projects/:projectId/price-requests")
@@ -174,7 +191,7 @@ export class PriceRequestsController {
     @Param("projectId") projectId: string,
     @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>,
   ) {
-    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null, ...(body.articles ? { articles: body.articles } : {}) };
+    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null, ...(body.articles ? { articles: body.articles } : {}), ...(typeof body.tutoie === "boolean" ? { tutoie: body.tutoie } : {}) };
     return toDto(await this.requests.create(tenant, projectId, input));
   }
 

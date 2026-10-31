@@ -13,7 +13,7 @@ type PdfJs = typeof import("pdfjs-dist/legacy/build/pdf.mjs");
 
 let pdfjs: Promise<PdfJs> | undefined;
 /** pdf.js, chargé une fois, sans fichier « worker » à servir : le même montage que la lecture côté API. */
-function loadPdfJs(): Promise<PdfJs> {
+export function loadPdfJs(): Promise<PdfJs> {
   pdfjs ??= (async () => {
     const worker = await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs");
     (globalThis as { pdfjsWorker?: unknown }).pdfjsWorker = worker;
@@ -30,7 +30,24 @@ const MAX_ZOOM = 4;
  * dessinée à la taille de l'écran, entière en largeur et en hauteur ; deux doigts zooment, un double tap aussi.
  * Si le dessin échoue, `onError` rend la main à l'afficheur du téléphone.
  */
-export function PdfPages({ file, title, onError }: { file: Blob; title: string; onError: () => void }) {
+export function PdfPages({
+  file,
+  title,
+  onError,
+  overlay,
+  largeur = false,
+}: {
+  file: Blob;
+  title: string;
+  onError: () => void;
+  /**
+   * Assistant Mobiiz (31 octobre 2026, point 6) : ce qui se pose sur une page (les zones des lignes, à toucher), avec
+   * l'échelle points PDF → pixels et la hauteur de la page en points. Absent : la page seule, comme avant.
+   */
+  overlay?: (page: number, echelle: number, hauteurPoints: number) => React.ReactNode;
+  /** Le panneau d'aperçu de l'ordinateur : la page prend toute la largeur (lisible), on fait défiler. */
+  largeur?: boolean;
+}) {
   const box = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<Rendered[] | null>(null);
   const [fit, setFit] = useState<{ w: number; h: number } | null>(null);
@@ -120,8 +137,8 @@ export function PdfPages({ file, title, onError }: { file: Blob; title: string; 
         <div className="flex min-h-full flex-col items-center justify-center gap-3 p-2" style={{ width: zoom > 1 ? `${zoom * 100}%` : undefined }}>
           {pages.map((p, i) => {
             // En entier : la page tient dans la largeur ET dans la hauteur de l'écran.
-            const w = Math.min(fit.w, (fit.h * p.width) / p.height) * zoom;
-            return (
+            const w = (largeur ? fit.w : Math.min(fit.w, (fit.h * p.width) / p.height)) * zoom;
+            const image = (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={p.url}
@@ -132,9 +149,34 @@ export function PdfPages({ file, title, onError }: { file: Blob; title: string; 
                 style={{ width: w, height: (w * p.height) / p.width }}
               />
             );
+            if (!overlay) return image;
+            return (
+              <div key={p.url} className="relative shrink-0" style={{ width: w, height: (w * p.height) / p.width }}>
+                {image}
+                {overlay(i, w / p.width, p.height)}
+              </div>
+            );
           })}
         </div>
       )}
     </div>
   );
+}
+
+/** Le texte des premières pages d'un PDF (pour savoir, sans IA, si c'est un devis ou une liste) ; null s'il est illisible. */
+export async function texteDuPdf(file: Blob, pages = 3): Promise<string | null> {
+  try {
+    const lib = await loadPdfJs();
+    const task = lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
+    const doc = await task.promise;
+    const out: string[] = [];
+    for (let n = 1; n <= Math.min(pages, doc.numPages); n++) {
+      const c = await (await doc.getPage(n)).getTextContent();
+      out.push(c.items.map((i) => ("str" in i ? i.str : "")).join(" "));
+    }
+    await task.destroy();
+    return out.join("\n");
+  } catch {
+    return null;
+  }
 }

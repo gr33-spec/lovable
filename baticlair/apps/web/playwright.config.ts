@@ -1,5 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Aucun parcours n'appelle l'API Anthropic réelle (Greg, 25 octobre 2026) : les clés du shell ne passent jamais aux serveurs.
+delete process.env.BATICLAIR_ANTHROPIC_KEY;
+delete process.env.ANTHROPIC_API_KEY;
+
 /**
  * Parcours de bout en bout, dans un vrai navigateur, contre la vraie API
  * et une vraie base PostgreSQL. Démarre l'API (port 4000) et le site
@@ -12,7 +16,19 @@ const apiEnv = {
   AUTH_SECRET: "e2e-secret-e2e-secret-e2e-secret-0000",
   API_PUBLIC_URL: "http://localhost:3000",
   WEB_APP_URL: "http://localhost:3000",
-  EMAIL_PROVIDER: process.env.E2E_EMAIL_PROVIDER ?? "console",
+  // Les e-mails sont capturés et lus par les parcours (boîte aux lettres de test, `GET /v1/internal/test/emails`, secret CRON_SECRET).
+  EMAIL_PROVIDER: process.env.E2E_EMAIL_PROVIDER ?? "capture",
+  CRON_SECRET: "e2e-secret-de-la-tache",
+  // BatiClair Groupé, étape 8 : le webhook Resend entrant et l'adresse de réponse des lots, la facture de commission.
+  RESEND_WEBHOOK_SECRET: "whsec_ZTJlLXNlY3JldC1kdS13ZWJob29rLTAwMDA=",
+  // R7 : les adresses Mobiiz des artisans (`toitures-martin@mobiiz.test`), reçues par le même webhook.
+  EMAIL_DOMAINE: "mobiiz.test",
+  REPONSES_DOMAINE: "reponses.example.com",
+  FACTURE_EMETTEUR_NOM: "Société Émettrice",
+  FACTURE_EMETTEUR_FORME: "SARL",
+  FACTURE_EMETTEUR_SIRET: "000 000 000 00000",
+  FACTURE_EMETTEUR_ADRESSE: "1 rue de l'Exemple, 22000 Ville",
+  FACTURE_EMETTEUR_TVA: "FR00000000000",
   AI_PROVIDER: "fake",
   PLAN_ACTIVATION_CODES: "E2E-SOLO-CODE:solo",
   // Le paywall est en pause en production (fondateur, 2026-10-11) ; les parcours gardent son écran prêt pour plus tard.
@@ -26,6 +42,21 @@ const apiEnv = {
   LOG_LEVEL: "warn",
   // 26 parcours créent chacun un compte et une entreprise depuis la même adresse : la limite de débit (5 entreprises/h) les bloquerait ; elle a son propre test API.
   RATE_LIMIT: "off",
+  // BatiClair Groupé : allumé pour ses parcours ; une entreprise sans SIRET vérifié n'en voit rien (gratuit pour l'artisan).
+  GROUPE: "on",
+  // La commande commune du mois (par défaut) ; « lots » pour la passe de l'ancien regroupement (`--grep @lots`).
+  COMMANDE_COMMUNE: process.env.E2E_COMMANDE_COMMUNE ?? "mois",
+  // Étape 9 : l'admin du groupé (journal, lots, factures) pour ce seul compte des parcours.
+  GROUPE_ADMINS: "admin-groupe@example.fr",
+  // Business model final (25 octobre 2026) : un chasseur d'opportunités par appareil des parcours (téléphone, ordinateur).
+  CHASSEURS: "chasseur-telephone@example.fr,chasseur-ordinateur@example.fr",
+  // Recentrage (25 octobre 2026) : les regroupements ouverts dans toute la métropole sauf Paris (75), qui sert au parcours
+  // « hors zone active » ; des prix repères de TEST (pas des prix réels) et le volume minimum de la couverture.
+  ZONES_ACTIVES: Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, "0"))
+    .filter((z) => z !== "75" && z !== "20")
+    .join(","),
+  PRIX_REPERES: "ardoise:pieces=1.2,liteau:m=0.5",
+  SEUIL_VOLUME_MIN: "couverture=3000",
 };
 
 export default defineConfig({
@@ -45,7 +76,9 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "pnpm --filter @baticlair/api exec prisma migrate deploy && pnpm --filter @baticlair/api exec tsx src/main.ts",
+      // Dette n° 2 (21 octobre) : chaque série repart d'une base vide, sinon les lots des séries précédentes (même
+      // département, même référence) faussent les parcours groupé.
+      command: "pnpm --filter @baticlair/api exec prisma migrate deploy && pnpm --filter @baticlair/api exec node scripts/vider-base-e2e.mjs && pnpm --filter @baticlair/api exec tsx src/main.ts",
       url: "http://localhost:4000/v1/health",
       env: apiEnv,
       reuseExistingServer: true,

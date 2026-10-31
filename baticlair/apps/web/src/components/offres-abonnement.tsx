@@ -1,0 +1,74 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import type { Formule, OffreAbonnement } from "@/lib/api";
+import { FORMULES_PAYANTES, OFFRES, prixDeLOffre } from "../../../../packages/domain/src/groupe/tarifs";
+
+/**
+ * LES DEUX FORMULES (Greg, 30 octobre 2026) : Essentiel mis en avant, puis Pro ; les textes viennent de l'API (les prix se
+ * règlent dans l'admin) et du domaine (`offresAbonnement`) en attendant sa réponse.
+ */
+/** Les mêmes mots que `offresAbonnement` du domaine, tirés de `OFFRES` (le web n'importe que des fichiers sans import). */
+export const OFFRES_PAR_DEFAUT: OffreAbonnement[] = FORMULES_PAYANTES.map((f) => {
+  const o = OFFRES[f];
+  return { formule: f, titre: o.nom, badge: null, prix: prixDeLOffre(o), details: [`${o.analyses} analyses de devis par mois`, `${o.scans} scans de liste par mois`, "Sans engagement, résiliable quand tu veux"], enAvant: f === "essentiel" };
+});
+
+/**
+ * Les deux cartes côte à côte (l'une sous l'autre sur un petit téléphone), Essentiel d'abord. Avec `onChoisir`, chaque
+ * carte est un bouton et la carte choisie est cochée ; sans, elles s'affichent seulement (page /tarifs).
+ */
+export function OffresAbonnement({ offres, choisie, onChoisir, sombre = false }: { offres: OffreAbonnement[]; choisie?: Formule; onChoisir?: (f: Formule) => void; sombre?: boolean }) {
+  return (
+    <div role={onChoisir ? "radiogroup" : undefined} aria-label="Choisis ta formule" className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+      {offres.map((o) => {
+        const coche = onChoisir ? choisie === o.formule : o.enAvant;
+        const fond = sombre ? (o.enAvant ? "bg-accent text-ink" : "bg-night-2 text-white ring-1 ring-white/15") : coche ? "bg-surface ring-2 ring-ink" : "bg-surface ring-1 ring-line";
+        const contenu = (
+          <>
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-[13px] font-semibold tracking-[0.06em] uppercase">{o.titre}</span>
+              {o.badge ? <span className={`rounded-full px-2.5 py-0.5 text-[13px] font-extrabold ${sombre ? "bg-ink text-accent" : "bg-accent text-ink"}`}>{o.badge}</span> : null}
+            </span>
+            <span className="text-[20px] leading-tight font-extrabold">{o.prix}</span>
+            <span className="flex flex-col gap-0.5">
+              {o.details.map((d) => (
+                <span key={d} className={`text-[14px] ${sombre ? (o.enAvant ? "text-ink/80" : "text-white/70") : "text-muted"}`}>
+                  {d}
+                </span>
+              ))}
+            </span>
+          </>
+        );
+        const classes = `flex flex-col gap-2 rounded-[20px] p-4 text-left shadow-card ${fond}`;
+        return onChoisir ? (
+          <button key={o.formule} type="button" role="radio" aria-checked={coche} onClick={() => onChoisir(o.formule)} className={`${classes} min-h-11`}>
+            {contenu}
+          </button>
+        ) : (
+          <div key={o.formule} className={classes}>
+            {contenu}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Les deux formules de la page publique (`/v1/public/tarif`), les textes par défaut en attendant. */
+export function OffresPubliques() {
+  const [offres, setOffres] = useState(OFFRES_PAR_DEFAUT);
+  useEffect(() => {
+    let vivant = true;
+    fetch("/v1/public/tarif", { headers: { accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b: { offres?: OffreAbonnement[] } | null) => {
+        if (vivant && b?.offres?.length) setOffres(b.offres);
+      })
+      .catch(() => undefined);
+    return () => {
+      vivant = false;
+    };
+  }, []);
+  return <OffresAbonnement offres={offres} sombre />;
+}

@@ -21,6 +21,7 @@ const STATUS: Record<ErrorCode, number> = {
   no_referential: 422,
   analysis_quota_reached: 402,
   plan_limit_reached: 402,
+  abonnement_requis: 402,
   ai_unavailable: 503,
   analysis_failed: 502,
   email_not_sent: 502,

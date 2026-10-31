@@ -5,6 +5,10 @@ export interface RequestContext {
   requestId: string;
   userId?: string;
   companyId?: string;
+  /** La session de connexion (la double authentification de l'admin lui est attachée). */
+  sessionId?: string;
+  /** L'adresse IP du client (derrière le relais Vercel, `trust proxy`), pour le journal de l'admin. */
+  ip?: string;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();

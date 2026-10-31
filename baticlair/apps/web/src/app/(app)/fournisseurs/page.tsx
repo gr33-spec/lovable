@@ -1,10 +1,12 @@
 "use client";
 
+import { AideBouton } from "@/components/aide";
 import { Mail, Pencil, Phone, Plus, Truck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
+import { MesNegocesCard, useGroupeOuvert } from "@/components/mes-negoces";
 import { SupplierForm } from "@/components/supplier-form";
-import { Badge, Button, Card, EmptyState, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, ErrorNotice, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, type Supplier } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
@@ -30,9 +32,11 @@ function Suppliers() {
   }
   const [editingId, setEditingId] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  // BatiClair Groupé, étape 3 : « Mes négoces », seulement quand le groupé existe pour l'entreprise (drapeau, SIRET vérifié).
+  const groupeOuvert = useGroupeOuvert();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
-  if (!data) return <Spinner />;
+  if (!data) return <Skeleton lines={3} label="Chargement des fournisseurs…" />;
 
   const items = data.items;
   const saved = (s: Supplier) => {
@@ -47,11 +51,15 @@ function Suppliers() {
 
   return (
     <>
-      <PageTitle>Fournisseurs</PageTitle>
+      <div className="flex items-start justify-between gap-3">
+        <PageTitle>Fournisseurs</PageTitle>
+        <AideBouton sujet="negoces" />
+      </div>
+      {groupeOuvert ? <MesNegocesCard /> : null}
 
       {creating ? (
         <Card className="flex flex-col gap-3 p-4">
-          <h2 className="font-display text-xl font-extrabold">Nouveau fournisseur</h2>
+          <h2 className="text-[20px] font-extrabold tracking-[-0.02em]">Nouveau fournisseur</h2>
           <SupplierForm
             submitLabel="Ajouter"
             others={items}
@@ -62,7 +70,7 @@ function Suppliers() {
           />
         </Card>
       ) : (
-        <Button onClick={() => setCreating(true)}>
+        <Button onClick={() => setCreating(true)} className="lg:w-auto lg:self-start lg:px-6">
           <Plus size={20} aria-hidden="true" />
           Nouveau fournisseur
         </Button>
@@ -84,11 +92,12 @@ function Suppliers() {
           placeholder="Chercher un fournisseur"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          className="min-h-13 rounded-2xl bg-surface px-4 text-base shadow-card outline-none placeholder:text-subtle focus-visible:ring-2 focus-visible:ring-ink"
+          className="min-h-13 rounded-2xl border border-line bg-surface px-4 text-[16px] outline-none placeholder:text-muted focus-visible:border-accent"
         />
       ) : null}
 
-      <ul className="flex flex-col gap-2.5">
+      {/* Ordinateur (Greg, 31 octobre 2026, soir) : les négoces en grille, deux ou trois par ligne. */}
+      <ul className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 2xl:grid-cols-3">
         {shown.map((s) => (
           <li key={s.id}>
             {editingId === s.id ? (

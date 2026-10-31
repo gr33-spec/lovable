@@ -1,3 +1,4 @@
+import { nom, NOM, NOM_APP, NOM_PLURIEL } from "@/lib/nom";
 /**
  * Textes d'interface partagés (français). Les textes propres à un seul
  * écran restent dans cet écran ; tout ce qui se répète (navigation,
@@ -5,7 +6,7 @@
  * pour le lexique.
  */
 export const fr = {
-  nav: { home: "Accueil", projects: "Chantiers", suppliers: "Fournisseurs", account: "Compte" },
+  nav: { home: "Accueil", projects: "Mes chantiers", chantiers: "Chantiers", listes: "Mes listes", groupe: "Achats groupés", groupeAncien: NOM_PLURIEL, prix: "Mes prix", profil: "Profil", suppliers: "Fournisseurs", account: "Compte" },
   status: { active: "En cours", archived: "Terminé" },
   actions: {
     retry: "Réessayer",
@@ -28,12 +29,13 @@ const errorMessages: Record<string, string> = {
   request_in_progress: "C'est en cours d'enregistrement, patiente une seconde.",
   payload_too_large: "C'est trop volumineux pour être envoyé.",
   unreadable_document: "Ce fichier ne peut pas être lu.",
-  no_referential: "BatiClair ne calcule pas encore les matériaux de ce métier.",
+  no_referential: `${NOM_APP} ne calcule pas encore les matériaux de ce métier.`,
   analysis_quota_reached: "Tu as atteint la limite de ta formule ce mois-ci. Tes chantiers en cours restent consultables.",
   ai_unavailable: "Cette fonction n'est pas encore activée sur ton compte.",
   analysis_failed: "Ce devis n'a pas pu être lu. Réessaie dans un instant.",
   email_not_sent: "Le mail n'est pas parti chez le fournisseur. Rien n'est envoyé : réessaie dans un instant.",
   plan_limit_reached: "Tu as atteint le nombre de chantiers de ta formule.",
+  abonnement_requis: "Ton essai est terminé : continue avec l'abonnement pour faire ça.",
   onboarding_required: "Indique d'abord le nom de ton entreprise.",
   company_selection_required: "Choisis l'entreprise avec laquelle travailler.",
   too_many_requests: "Trop d'essais en peu de temps. Attends quelques minutes, puis réessaie.",
@@ -41,6 +43,7 @@ const errorMessages: Record<string, string> = {
   INVALID_EMAIL_OR_PASSWORD: "E-mail ou mot de passe incorrect.",
   INVALID_EMAIL: "Cette adresse e-mail n'est pas valide.",
   PASSWORD_TOO_SHORT: "Le mot de passe doit faire au moins 10 caractères.",
+  PASSWORD_COMPROMISED: "Ce mot de passe a déjà fuité sur Internet. Choisis-en un autre.",
   PASSWORD_TOO_LONG: "Le mot de passe est trop long.",
   USER_ALREADY_EXISTS: "Un compte existe déjà avec cette adresse. Connecte-toi.",
   USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "Un compte existe déjà avec cette adresse. Connecte-toi.",
@@ -64,14 +67,45 @@ const unreadableReasons: Record<string, string> = {
 
 /** Motifs précis renvoyés par l'API, quel que soit le code. */
 const reasonMessages: Record<string, string> = {
+  // BatiClair Groupé : les refus de l'API, dits avec les mots de l'artisan.
+  quantite_plafonnee: `Cette quantité dépasse trois fois ce que les autres artisans proposent pour cette référence : le ${nom} la refuse. Vérifie-la, ou passe par ton négoce en direct.`,
+  ligne_a_regler: "Règle d'abord cette ligne (quantité ou question en attente) : un engagement ferme porte sur une quantité ferme.",
+  adresse_requise: "Renseigne l'adresse du chantier (avec le code postal) : le lot se forme par département.",
+  ligne_vague: `Cette ligne est trop vague pour le ${nom} : précise-la (format, origine, choix, marque), ou envoie-la à ton négoce.`,
+  deja_propose: `Cette ligne est déjà dans le ${nom}.`,
+  engagement_requis: "Coche la phrase d'engagement pour proposer en « Chantier signé ».",
+  fenetre_invalide: "La fenêtre de livraison n'est pas bonne : au plus tôt avant au plus tard, dans les 6 mois.",
+  groupe_ferme: `Le ${nom} n'est pas ouvert à ton entreprise pour l'instant : regarde l'onglet ${NOM}.`,
+  sans_quantite: "Cette ligne n'a pas de quantité : indique-la d'abord.",
+  sans_famille: `Ce métier n'a pas encore de famille dans le ${nom}.`,
+  siret_invalide: "Ce SIRET n'a pas 14 chiffres valides : corrige-le dans Compte.",
+  // Le regroupement du mois (Greg, 22 octobre 2026).
+  commande_close: "La commande est close : on ne peut plus rien retirer.",
+  deja_commande: "Tu as déjà commandé pour cette commande.",
+  grille_incomplete: "Ce négoce n'a pas chiffré toute ta liste : choisis-en un qui a tout chiffré.",
+  pas_de_resultats: "Les prix ne sont pas encore là.",
+  pas_de_liste: "Ce chantier n'a pas encore de liste.",
+  rien_a_ajouter: "Aucune de ces lignes ne peut aller dans la commande : précise-les d'abord (format, choix, quantité).",
+  pas_de_cycle: "Pas de commande ouverte pour l'instant.",
+  delai_passe: "Le délai de réponse est passé : la commande est figée.",
+  devis_requis: "Joignez votre devis en PDF.",
+  deux_devis_au_plus: "Deux PDF au plus.",
+  pdf_seulement: "Seulement des fichiers PDF.",
+  livraison_requise: "Indiquez vos conditions de livraison (gratuite jusqu'à combien de km, et le prix au-delà).",
+  // L'espace négoce (Greg, 23 octobre 2026) : prix fermes, compte inscrit, zone non livrée, grille garantie.
+  prix_fermes_requis: "Cochez « Prix fermes, quel que soit le volume final » pour déposer votre devis.",
+  inscription_requise: "Créez d'abord votre accès (dépôts et paliers de livraison) : le lien est sur cette page.",
+  ne_livre_pas: "Ce négoce ne livre pas ta zone : choisis-en un autre.",
+  pas_de_garantie: "Cette grille garantie n'est plus ouverte.",
+  reglages_invalides: "Ces réglages ne vont pas : deux jours de clôture différents entre 1 et 28, heures entre 0 et 23, réponse en 1 à 40 jours ouvrés.",
   nothing_read: "Je n'ai rien lu dans ce devis. Réessaie, ou redépose le PDF.",
   empty_list: "La liste est vide : rien ne part au fournisseur.",
   faconnage_required: "Dis-moi d'abord, pour chaque pièce de zinc, si tu la façonnes ou si tu la commandes façonnée.",
   // Lecture IA d'un devis échouée (analysis_failed) : le motif, en clair, pour savoir quoi faire.
-  provider_error: "Le service de lecture a refusé la demande. Réessaie dans un instant ; si ça recommence, envoie-nous le code support.",
-  invalid_output: "La lecture a rendu une réponse incomplète. Réessaie ; si ça recommence, envoie-nous le code support.",
+  provider_error: "Le service de lecture n'a pas répondu. Réessaie dans un instant ; si ça recommence, écris-nous par « Contact » en bas de page.",
+  invalid_output: "La lecture a rendu une réponse incomplète. Réessaie ; si ça recommence, écris-nous par « Contact » en bas de page.",
   timeout: "La lecture a pris trop de temps. Réessaie dans un instant.",
-  refused: "Le service de lecture a refusé ce document. Envoie-nous le code support.",
+  refused: "Le service de lecture a refusé ce document. Écris-nous par « Contact » en bas de page.",
   email_taken: "Ce fournisseur est déjà dans ton carnet (même adresse e-mail).",
   takeoff_not_validated: "Valide d'abord la liste de matériaux.",
   lines_to_check: "Des lignes sont encore à vérifier : pour chacune, « C'est bon » ou « Corriger ».",

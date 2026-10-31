@@ -60,12 +60,14 @@ const QUESTIONS_7954: readonly [string, (t: string) => boolean][] = [
   ["modèle des parois de douche « à définir »", (t) => /paroi/.test(t)],
   ["usage des 10 alimentations radiateur en plus des 49 appareils", (t) => /alimentation|radiateur/.test(t) && /59|49|10/.test(t)],
   ["logement de rattachement du bloc chambre / dégagement de la page 12", (t) => /(page 12|chambre|degagement)/.test(t) && /logement|rattach/.test(t)],
+  // Décision du fondateur (24 octobre 2026, vraie lecture) : la pose, encastrée ou en saillie, est une question utile.
+  ["pose encastrée ou en saillie", (t) => /encastre/.test(t) && /saillie/.test(t)],
 ];
 
 /**
  * §6 du référentiel électricité : « Aucune question sur une marque, un modèle ou une contenance écrits au devis. » La
  * composition des tableaux, elle, est une question (correction du fondateur, 2026-10-12 : §4, composition déduite,
- * ligne orange avec « C'est bon / Modifier » ; §51.6, tout orange a sa question) : sept questions.
+ * ligne orange avec « C'est bon / Modifier » ; §51.6, tout orange a sa question) ; plus la pose, encastrée ou en saillie (décision du fondateur, 24 octobre 2026) : huit questions.
  */
 const ECRIT_7954 = /\b(marque|hager|essensya|atoll|aldes|bahia|malicio|litres?|contenance|porcelanosa|ancoflash|rondo|grade|coffret|connecteur)\b/;
 
@@ -109,7 +111,9 @@ export function controleLecture7954(lecture: LectureDevis, devis: readonly Ligne
   for (const [label, test] of QUESTIONS_7954) if (!textes.some(test)) out.push(`Question absente : ${label}`);
   for (const [i, t] of textes.entries()) {
     const texte = lecture.questions[i]!.texte;
-    if (ECRIT_7954.test(t) && !QUESTIONS_7954[0]![1](t) && !QUESTIONS_7954[1]![1](t)) out.push(`Question sur une donnée écrite : ${texte}`);
+    // La teinte, la composition des tableaux et les alimentations en trop peuvent citer une marque écrite (« Essensya »,
+    // « Atoll ») : la question porte sur une donnée qui manque, pas sur la marque.
+    if (ECRIT_7954.test(t) && ![0, 1, 5].some((k) => QUESTIONS_7954[k]![1](t))) out.push(`Question sur une donnée écrite : ${texte}`);
   }
   return out;
 }
@@ -132,7 +136,8 @@ export function controleLectureDe00000071(lecture: LectureDevis, devis: readonly
     ...brefManquant(lecture, [
       ["bac acier isolé", /bac acier isole/],
       ["pas de couverture neuve", /pas de couverture neuve/],
-      ["gouttière demi-ronde zinc naturel 17,40 m", /gouttiere demi.ronde zinc naturel 17,40 m/],
+      // Les mêmes faits dans la même phrase, l'ordre libre (vraie lecture du 24 octobre : « Gouttière 17,40 m demi-ronde… »).
+      ["gouttière demi-ronde zinc naturel 17,40 m", [/gouttiere/, /demi.ronde/, /zinc naturel/, /17,40 m/]],
       ["crochets Négrafix", /negrafix/],
       ["chéneau 11,70 m", [/cheneau/, /11,70 m\b/]],
       ["membrane", /membrane/],
@@ -143,6 +148,11 @@ export function controleLectureDe00000071(lecture: LectureDevis, devis: readonly
     ]),
   );
   out.push(...fournitures(lecture, /^(depose|realisation des tremies|pose de vel)/, null));
+  // Une précision technique ne saute jamais (décision du fondateur, 24 octobre 2026) : le raccord d'un Velux posé « sur bac
+  // acier isolé » se commande « pour bac acier », dans son nom ou sa précision.
+  const raccords = lecture.lignes.flatMap((l) => l.fournitures).filter((f) => /raccord/.test(n(f.nom)));
+  if (raccords.length === 0) out.push("Fourniture absente : raccords des Velux");
+  for (const f of raccords) if (!/bac acier/.test(n(`${f.nom} ${f.precision ?? ""}`))) out.push(`Précision perdue : « ${f.nom} » sans « pour bac acier »`);
   const textes = lecture.questions.map((q) => n(q.texte));
   if (lecture.questions.length !== QUESTIONS_DE00000071.length) out.push(`Questions : ${lecture.questions.length} au lieu de ${QUESTIONS_DE00000071.length}`);
   for (const [label, test] of QUESTIONS_DE00000071) if (!textes.some(test)) out.push(`Question absente : ${label}`);

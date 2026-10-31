@@ -1,6 +1,7 @@
 import { PDFDocument } from "pdf-lib";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import { looksLikePdf } from "../domain/document.js";
+import { NOM_APP } from "@baticlair/domain";
 
 export interface UploadedPart {
   fileName: string;
@@ -27,8 +28,8 @@ const PAGE_LONG_SIDE_PT = 842;
 export async function photosToPdf(photos: { kind: PhotoKind; bytes: Uint8Array }[]): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   pdf.setTitle("Devis fournisseur (photos)");
-  pdf.setProducer("BatiClair");
-  pdf.setCreator("BatiClair");
+  pdf.setProducer(NOM_APP);
+  pdf.setCreator(NOM_APP);
   pdf.setCreationDate(new Date(0));
   pdf.setModificationDate(new Date(0));
   for (const photo of photos) {

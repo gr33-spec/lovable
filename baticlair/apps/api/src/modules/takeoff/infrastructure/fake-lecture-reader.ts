@@ -43,10 +43,13 @@ export class FakeLectureReader implements LectureReader {
   async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null> {
     const text = request.document.numberedText;
     const hit = this.recorded.find((r) => r.marker.test(text));
-    const lecture = hit ? structuredClone(hit.lecture) : lectureSimulee(request);
+    const lue = hit ? structuredClone(hit.lecture) : lectureSimulee(request);
+    // Comme le vrai lecteur : une tranche ne rend que ses lignes (modèle rapide), la synthèse tout sauf les lignes.
+    const lecture: LectureDevis =
+      request.etape === "lignes" ? { ...lue, metier: null, lots: [], fiche: { donnees: [] }, bref: [], questions: [], contexte: null, notes: [] } : request.etape === "synthese" ? { ...lue, lignes: [] } : lue;
     return {
       provider: this.provider,
-      model: "claude-opus-5-5",
+      model: request.etape === "lignes" ? "claude-sonnet-5-5" : "claude-opus-5-5",
       usage: { inputTokens: Math.ceil(text.length / 3) + 16000, outputTokens: 1200 },
       status: "success",
       output: lecture,

@@ -1,0 +1,46 @@
+name: Sauvegarde de la base (chaque nuit)
+
+# Greg, 26 octobre 2026 : « sauvegardes quotidiennes ; dis-moi si le plan Neon ne sauvegarde pas chaque jour ».
+# Le plan Neon gratuit ne garde que 6 heures d'historique (retour à un instant donné), sans sauvegarde quotidienne.
+# Ce workflow, gratuit, fait chaque nuit un export complet (pg_dump), chiffré (AES-256, clé de Greg), gardé 30 jours
+# comme artefact GitHub. Il ne fait rien tant que les deux secrets ne sont pas posés par Greg :
+# - SAUVEGARDE_DATABASE_URL : l'adresse de connexion Neon en LECTURE SEULE (rôle dédié) ;
+# - SAUVEGARDE_CLE : la phrase de chiffrement (gardée hors de GitHub par Greg pour pouvoir déchiffrer).
+# Restauration : docs/SECURITE.md, « Sauvegardes ». Un horaire GitHub ne part que depuis la branche par défaut (main).
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sauvegarde:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SAUVEGARDE_DATABASE_URL: ${{ secrets.SAUVEGARDE_DATABASE_URL }}
+      SAUVEGARDE_CLE: ${{ secrets.SAUVEGARDE_CLE }}
+    steps:
+      - name: Secrets posés ?
+        id: pret
+        run: |
+          if [ -n "$SAUVEGARDE_DATABASE_URL" ] && [ -n "$SAUVEGARDE_CLE" ]; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "Secrets absents : rien n'est sauvegardé."; fi
+      - name: Export et chiffrement
+        if: steps.pret.outputs.ok == '1'
+        run: |
+          sudo apt-get -qq update && sudo apt-get -qq install -y postgresql-client-17 >/dev/null 2>&1 || sudo apt-get -qq install -y postgresql-client >/dev/null
+          NOM="base-$(date -u +%Y-%m-%d).dump"
+          pg_dump --format=custom --no-owner --no-privileges "$SAUVEGARDE_DATABASE_URL" > "$NOM"
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -in "$NOM" -out "$NOM.enc" -pass env:SAUVEGARDE_CLE
+          rm "$NOM"
+          echo "NOM=$NOM.enc" >> "$GITHUB_ENV"
+          ls -l "$NOM.enc"
+      - name: Garder 30 jours
+        if: steps.pret.outputs.ok == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NOM }}
+          path: ${{ env.NOM }}
+          retention-days: 30
