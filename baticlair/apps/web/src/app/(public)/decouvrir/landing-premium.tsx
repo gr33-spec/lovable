@@ -151,8 +151,19 @@ function Telephone({ n }: { n: number }) {
           <span className="mz2-tel-ilot" />
           <span className="mz2-tel-etat" />
         </div>
+        {/* Greg, 31 octobre 2026, soir (« ça pixelise sur PC ») : la capture d'origine (1170 px) et deux tailles plus
+            légères ; l'écran incliné est servi au double de sa taille au moins, pour un texte net. */}
         {/* eslint-disable-next-line @next/next/no-img-element -- une capture déjà optimisée (WebP, 600 px), chargée tard */}
-        <img src={e.src} alt={e.alt} width={600} height={1298} loading="lazy" decoding="async" />
+        <img
+          src={e.src}
+          srcSet={`${e.src} 600w, ${e.src.replace(".webp", "-900.webp")} 900w, ${e.src.replace(".webp", "-1170.webp")} 1170w`}
+          sizes="(max-width: 900px) 150px, 400px"
+          alt={e.alt}
+          width={1170}
+          height={2532}
+          loading="lazy"
+          decoding="async"
+        />
       </div>
       {n === 2 ? <figcaption className="mz2-tel-exemple">Exemple</figcaption> : null}
     </figure>

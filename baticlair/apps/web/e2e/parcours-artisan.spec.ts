@@ -2630,7 +2630,8 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
     const img = ecrans.nth(i);
     await img.scrollIntoViewIfNeeded();
     await expect(img).toHaveAttribute("src", `/landing/v3/${nom}.webp`);
-    await expect.poll(() => img.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth)).toBe(600);
+    // Greg, 31 octobre 2026, soir : jamais une capture plus petite que deux fois l'écran affiché (texte net, sans pixels).
+    await expect.poll(() => img.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth >= 600 && e.naturalWidth >= 2 * e.getBoundingClientRect().width)).toBe(true);
   }
   await expect(page.locator("#fonctionnement").getByText(/iPhone|Apple/)).toHaveCount(0);
   await expect(page.getByText(/Recommandé/)).toHaveCount(0);
