@@ -10,6 +10,7 @@ import { fr } from "@/lib/fr";
 import { useTyping } from "@/lib/typing";
 import { useResource } from "@/lib/use-resource";
 import { Logo } from "@/components/logo";
+import { useTheme } from "@/lib/theme";
 
 interface NavItem {
   href: string;
@@ -49,6 +50,7 @@ export function useGroupeActif(): boolean {
  */
 export function AppNav() {
   const pathname = usePathname();
+  const theme = useTheme();
   const groupe = useGroupeActif();
   // Le chat d'un chantier se lit en plein écran sur téléphone (référentiel §21) : le menu laisse la place à la barre de message.
   const inChat = /^\/chantiers\/(?!nouveau$)[^/]+$/.test(pathname);
@@ -73,9 +75,9 @@ export function AppNav() {
         aria-current={active ? "page" : undefined}
         className={`${ordinateurSeulement ? "hidden lg:flex " : "flex "}min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] font-semibold transition-[color,background-color] duration-150 lg:min-h-11 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px] ${
           active ? "max-lg:text-accent-text" : "max-lg:text-muted max-lg:active:text-ink"
-        } ${activeOrdinateur ? "lg:bg-[rgba(251,248,243,0.08)] lg:text-[#FBF8F3]" : "lg:text-[#FBF8F3]/65 lg:hover:bg-[rgba(251,248,243,0.04)] lg:hover:text-[#FBF8F3]"}`}
+        } ${activeOrdinateur ? "lg:bg-(--voile-3) lg:text-ink" : "lg:text-ink/65 lg:hover:bg-(--voile-1) lg:hover:text-ink"}`}
       >
-        <span className={`flex h-8 w-11 items-center justify-center rounded-full transition-[background-color] duration-150 lg:h-auto lg:w-auto lg:bg-transparent ${active ? "max-lg:bg-accent-soft" : ""} ${activeOrdinateur ? "lg:text-accent" : ""}`}>
+        <span className={`flex h-8 w-11 items-center justify-center rounded-full transition-[background-color] duration-150 lg:h-auto lg:w-auto lg:bg-transparent ${active ? "max-lg:bg-accent-soft" : ""} ${activeOrdinateur ? "lg:text-accent-text" : ""}`}>
           <Icon size={22} aria-hidden="true" strokeWidth={active ? 2.4 : 2} />
         </span>
         <span className="text-center leading-tight whitespace-nowrap">{item.label}</span>
@@ -91,9 +93,9 @@ export function AppNav() {
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
           colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}
-      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[1fr_1fr_auto_1fr_1fr]" : "grid-cols-[1fr_auto_1fr_1fr]"} rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-white/[0.07] lg:bg-[#100E0B] lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
+      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[1fr_1fr_auto_1fr_1fr]" : "grid-cols-[1fr_auto_1fr_1fr]"} rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
         <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
-          <Logo fond="sombre" hauteur={30} />
+          <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
         </span>
         {link(accueilItem)}
         {groupe ? link(groupeItem) : null}

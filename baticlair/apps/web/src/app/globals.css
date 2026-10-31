@@ -248,6 +248,37 @@ body:has(.app-nuit) {
   background: #130901;
   color-scheme: dark;
 }
+/* Les voiles (surfaces translucides de l'accueil ordinateur) et le fond du menu ordinateur, propres à chaque thème. */
+.app-nuit {
+  --voile-1: rgba(251, 248, 243, 0.03);
+  --voile-2: rgba(251, 248, 243, 0.06);
+  --voile-3: rgba(251, 248, 243, 0.08);
+  --menu-fond: #100e0b;
+}
+/*
+ * L'APP CLAIRE (Greg, 31 octobre 2026 : « deux options : Clair / Sombre ») : les jetons de base (ivoire, encre, jaune), ceux
+ * de l'app d'avant la nuit ; seules les pièces dessinées pour la nuit y sont reprises (voiles, menu, boutons ronds).
+ */
+.app-clair {
+  --voile-1: rgba(19, 9, 1, 0.025);
+  --voile-2: rgba(19, 9, 1, 0.05);
+  --voile-3: rgba(19, 9, 1, 0.07);
+  --menu-fond: #fbf8f3;
+  color: var(--color-ink);
+}
+body:has(.app-clair) {
+  background: var(--color-ground);
+  color-scheme: light;
+}
+.app-clair .bouton-nuit {
+  border-color: var(--color-line);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-card);
+}
+.app-clair .bouton-nuit:active {
+  background-color: var(--color-ground);
+}
 /* Les lueurs : fixes derrière tout, sans animation (aucun coût au défilement). */
 .app-nuit::before {
   content: "";

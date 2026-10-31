@@ -14,13 +14,16 @@ import {
   PaywallAbonnement,
 } from "./abonnement";
 import { GuidePremierLancement } from "./guide-premier-lancement";
+import { classeTheme, useTheme } from "@/lib/theme";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   useTrackNavigation();
+  const theme = useTheme();
   return (
     <SessionGate>
-      {/* L'app en nuit chaude (Greg, 29 octobre 2026) : `app-nuit` dans globals.css. */}
-      <div className="app-nuit">
+      {/* L'app en nuit chaude (Greg, 29 octobre 2026) : `app-nuit` dans globals.css ; ou claire, au choix dans Profil
+          (Greg, 31 octobre 2026 : « deux options : Clair / Sombre »), `app-clair`. */}
+      <div className={classeTheme(theme)}>
         <AppNav />
         <FileViewer />
         {/* Greg (24 octobre 2026) : au premier lancement, une fois inscrit, le guide en trois écrans. */}

@@ -157,11 +157,11 @@ function ChiffresOrdinateur({ actions, achats }: { actions: number; achats: numb
         <li key={t.titre}>
           <Link
             href={t.href}
-            className={`flex h-full flex-col gap-1 rounded-2xl border p-5 transition-[background-color,border-color] duration-150 ${t.fort ? "border-accent/50 bg-accent/[0.08] hover:bg-accent/[0.12]" : "border-white/[0.08] bg-[rgba(251,248,243,0.03)] hover:bg-[rgba(251,248,243,0.06)]"}`}
+            className={`flex h-full flex-col gap-1 rounded-2xl border p-5 transition-[background-color,border-color] duration-150 ${t.fort ? "border-accent/50 bg-accent/[0.08] hover:bg-accent/[0.12]" : "border-line bg-(--voile-1) hover:bg-(--voile-2)"}`}
           >
-            <span className="text-[13px] font-bold tracking-[0.08em] text-[#FBF8F3]/60 uppercase">{t.titre}</span>
-            <span className={`text-[34px] leading-none font-extrabold tabular-nums ${t.fort ? "text-accent" : "text-[#FBF8F3]"}`}>{t.valeur ?? "–"}</span>
-            <span className="text-[14px] text-[#FBF8F3]/60">{t.texte}</span>
+            <span className="text-[13px] font-bold tracking-[0.08em] text-ink/60 uppercase">{t.titre}</span>
+            <span className={`text-[34px] leading-none font-extrabold tabular-nums ${t.fort ? "text-accent-text" : "text-ink"}`}>{t.valeur ?? "–"}</span>
+            <span className="text-[14px] text-ink/60">{t.texte}</span>
           </Link>
         </li>
       ))}
@@ -177,22 +177,22 @@ function ColonneOrdinateur({ sansAchats }: { sansAchats: boolean }) {
   return (
     <div className="hidden flex-col gap-6 lg:flex">
       {sansAchats ? (
-        <section aria-label="Le collectif" className="flex flex-col gap-4 rounded-2xl border border-white/[0.08] bg-[rgba(251,248,243,0.03)] p-5">
+        <section aria-label="Le collectif" className="flex flex-col gap-4 rounded-2xl border border-line bg-(--voile-1) p-5">
           <div className="flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-xl bg-accent text-on-accent" aria-hidden="true">
               <Users size={20} />
             </span>
             <p className="text-[17px] font-extrabold">Achète en collectif</p>
           </div>
-          <ol className="flex flex-col gap-3 text-[14px] leading-snug text-[#FBF8F3]/75">
+          <ol className="flex flex-col gap-3 text-[14px] leading-snug text-ink/75">
             <li className="flex gap-3">
-              <span className="font-extrabold text-accent tabular-nums">1</span>Tu ajoutes ta liste à un achat groupé de ton métier.
+              <span className="font-extrabold text-accent-text tabular-nums">1</span>Tu ajoutes ta liste à un achat groupé de ton métier.
             </li>
             <li className="flex gap-3">
-              <span className="font-extrabold text-accent tabular-nums">2</span>Les négoces chiffrent le volume de tous.
+              <span className="font-extrabold text-accent-text tabular-nums">2</span>Les négoces chiffrent le volume de tous.
             </li>
             <li className="flex gap-3">
-              <span className="font-extrabold text-accent tabular-nums">3</span>Tu commandes au meilleur prix, ou chez ton négoce s&apos;il fait mieux.
+              <span className="font-extrabold text-accent-text tabular-nums">3</span>Tu commandes au meilleur prix, ou chez ton négoce s&apos;il fait mieux.
             </li>
           </ol>
           <Link href="/achats-groupes" className="inline-flex min-h-11 items-center gap-1 text-[14px] font-semibold text-accent-text">
@@ -200,15 +200,15 @@ function ColonneOrdinateur({ sansAchats }: { sansAchats: boolean }) {
           </Link>
         </section>
       ) : null}
-      <Link href="/fournisseurs" className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-[rgba(251,248,243,0.03)] p-5 transition-[background-color] duration-150 hover:bg-[rgba(251,248,243,0.06)]">
-        <span className="flex size-10 items-center justify-center rounded-xl bg-[rgba(251,248,243,0.08)] text-accent" aria-hidden="true">
+      <Link href="/fournisseurs" className="flex items-center gap-4 rounded-2xl border border-line bg-(--voile-1) p-5 transition-[background-color] duration-150 hover:bg-(--voile-2)">
+        <span className="flex size-10 items-center justify-center rounded-xl bg-(--voile-3) text-accent-text" aria-hidden="true">
           <Warehouse size={20} />
         </span>
         <span className="flex min-w-0 flex-col">
           <span className="text-[16px] font-extrabold">Mes négoces</span>
-          <span className="text-[14px] text-[#FBF8F3]/60">Ajoute ou modifie ceux qui reçoivent tes listes.</span>
+          <span className="text-[14px] text-ink/60">Ajoute ou modifie ceux qui reçoivent tes listes.</span>
         </span>
-        <ChevronRight size={18} className="ml-auto shrink-0 text-[#FBF8F3]/50" aria-hidden="true" />
+        <ChevronRight size={18} className="ml-auto shrink-0 text-ink/50" aria-hidden="true" />
       </Link>
     </div>
   );

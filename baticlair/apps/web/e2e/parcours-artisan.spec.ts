@@ -369,6 +369,27 @@ test("déconnexion puis reconnexion ramène à la page demandée", async ({ page
   await expect(page).toHaveURL(/\/chantiers\?q=dupont/);
 });
 
+test("Clair / Sombre (Greg, 31 octobre 2026) : sombre par défaut, Clair dans Profil, gardé après rechargement, lisible", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/compte");
+  const groupe = page.getByRole("group", { name: "Apparence de Mobiiz" });
+  await expect(groupe.getByRole("button", { name: "Sombre" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".app-nuit")).toHaveCount(1);
+  await groupe.getByRole("button", { name: "Clair" }).click();
+  await expect(page.locator(".app-clair")).toHaveCount(1);
+  await expect(page.locator(".app-nuit")).toHaveCount(0);
+  await page.goto("/");
+  await expect(page.locator(".app-clair")).toHaveCount(1);
+  // Le fond de page est clair et le titre en encre foncée : jamais du clair sur clair.
+  const fond = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  expect(fond).toBe("rgb(246, 243, 238)");
+  const encre = await page.locator("main h1").first().evaluate((el) => getComputedStyle(el).color);
+  expect(encre).toBe("rgb(19, 9, 1)");
+  await page.goto("/compte");
+  await page.getByRole("group", { name: "Apparence de Mobiiz" }).getByRole("button", { name: "Sombre" }).click();
+  await expect(page.locator(".app-nuit")).toHaveCount(1);
+});
+
 test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaque page, et le bas de page ne passe jamais dessous", async ({ page }, info) => {
   test.skip(info.project.name !== "telephone", "la barre flottante est celle du téléphone");
   await signUp(page);
