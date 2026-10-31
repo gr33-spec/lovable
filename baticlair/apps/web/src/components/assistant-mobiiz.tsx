@@ -644,20 +644,20 @@ function FeuilleLigne({
 }
 
 
-/** L'entrée de l'assistant sur « Ton chantier » (avant l'envoi) : une carte, un bouton. */
+/**
+ * L'entrée de l'assistant sur « Ton chantier » (avant l'envoi) : UNE ligne, pour que « Envoyer une partie » reste visible
+ * sans descendre sur téléphone (§48.5).
+ */
 export function CarteAssistant({ onOpen }: { onOpen: () => void }) {
   return (
-    <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-3 rounded-2xl bg-surface p-4 shadow-card lg:grid-cols-[auto_1fr_auto]">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent" aria-hidden="true">
-        <Sparkles size={19} />
+    <button type="button" onClick={onOpen} className="pressable flex min-h-12 items-center gap-3 rounded-2xl bg-surface px-3 py-2 text-left shadow-card">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent" aria-hidden="true">
+        <Sparkles size={16} />
       </span>
-      <span className="flex flex-col">
-        <span className="text-[15px] font-bold text-ink">Assistant Mobiiz</span>
-        <span className="text-[14px] text-muted">Complète ta demande en écrivant ou au micro, le PDF suit.</span>
-      </span>
-      <button type="button" onClick={onOpen} className="pressable col-span-2 min-h-11 rounded-full bg-ink px-4 text-[15px] font-bold text-white lg:col-span-1">
+      <span className="flex-1 text-[15px] font-semibold text-ink">
         Ouvrir l&apos;assistant
-      </button>
-    </div>
+        <span className="font-normal text-muted max-sm:hidden"> · écris ou dicte, le PDF suit</span>
+      </span>
+    </button>
   );
 }
