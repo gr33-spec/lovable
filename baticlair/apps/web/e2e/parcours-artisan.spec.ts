@@ -2602,11 +2602,14 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Greg, 31 octobre 2026 (maquette jointe) : le héros, « Comment ça marche ? » en trois étapes, la bande « Achète en
   // collectif (si tu le souhaites) », les bénéfices, « Pourquoi Mobiiz ? », les questions, le dernier appel.
   const ordre = await Promise.all(
-    [/^Compare les négoces/, "Comment ça marche ?", /^Achète en collectif/, "Simple et rapide", /^Un même matériau/, "Tu te poses des questions ?", /^Le prochain bon prix/].map(
+    [/^Compare les négoces/, "Comment ça marche ?", /^Achète en collectif/, "Simple et rapide", /^Un même matériau/, /^Le prochain bon prix/, "Tu te poses des questions ?"].map(
       async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y,
     ),
   );
   expect([...ordre].sort((x, y) => x - y)).toEqual(ordre);
+  // Greg, 31 octobre 2026, soir (capture iPhone) : sur téléphone, les mots des grands titres ne se touchent jamais.
+  if (page.viewportSize()!.width <= 900)
+    for (const id of ["pourquoiTitle", "finalTitle", "faqTitle"]) expect(Number.parseFloat(await page.locator(`#${id}`).evaluate((e) => getComputedStyle(e).letterSpacing))).toBeGreaterThan(-1.6);
   await expect(page.getByText("Une seule demande, envoyée jusqu’à 5 négoces.", { exact: false })).toBeVisible();
   // Le visuel du premier écran (Greg, 31 octobre 2026, soir) : la photo choisie, chargée, coins arrondis ; le cadrage serré
   // sur téléphone, le panoramique sur ordinateur.

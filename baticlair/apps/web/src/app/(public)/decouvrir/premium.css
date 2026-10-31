@@ -480,3 +480,8 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mz2-benefices li+li{border-left:0}
 .mz2-benefices-wrap{padding:8px 0 44px;border-radius:0 0 30px 30px}
 }
+/* Les grands titres sur téléphone (Greg, 31 octobre 2026, soir : « ça manque d'espace ») : l'interlettrage serré du
+   desktop collait les mots entre eux sur iPhone ; il s'ouvre et l'espace entre les mots est garanti. */
+@media(max-width:900px){
+.mzp .bridge h2,.mzp .faq-layout h2,.mzp .final-card h2,.mzp .heading-row h2,.mzp .collective-copy h2{letter-spacing:-.035em;word-spacing:.08em;line-height:1.1}
+}

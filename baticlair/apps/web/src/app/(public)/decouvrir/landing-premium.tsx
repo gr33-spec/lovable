@@ -304,6 +304,23 @@ export function LandingPremium() {
           </div>
         </section>
 
+        {/* « Le prochain bon prix » avant les questions (Greg, 31 octobre 2026, soir). */}
+        <section className="final-section" id="commencer" aria-labelledby="finalTitle">
+          <div className="wrap">
+            <div className="final-card">
+              <span className="label">Par les artisans. Pour les artisans.</span>
+              <h2 id="finalTitle">
+                Le prochain bon prix <span>commence ici.</span>
+              </h2>
+              <p>Inscris-toi, prépare ta première demande et consulte tes négoces. Le collectif est là quand une commande s’y prête.</p>
+              <Link id="finalPrimaryCTA" className="btn btn-yellow" href="/inscription">
+                {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
+              </Link>
+              <small>{CTA_PRINCIPAL.sous}</small>
+            </div>
+          </div>
+        </section>
+
         <section className="faq-section" id="questions" aria-labelledby="faqTitle">
           <div className="wrap faq-layout">
             <div>
@@ -326,22 +343,6 @@ export function LandingPremium() {
                   </p>
                 </details>
               ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="final-section" id="commencer" aria-labelledby="finalTitle">
-          <div className="wrap">
-            <div className="final-card">
-              <span className="label">Par les artisans. Pour les artisans.</span>
-              <h2 id="finalTitle">
-                Le prochain bon prix <span>commence ici.</span>
-              </h2>
-              <p>Inscris-toi, prépare ta première demande et consulte tes négoces. Le collectif est là quand une commande s’y prête.</p>
-              <Link id="finalPrimaryCTA" className="btn btn-yellow" href="/inscription">
-                {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
-              </Link>
-              <small>{CTA_PRINCIPAL.sous}</small>
             </div>
           </div>
         </section>

@@ -196,3 +196,4 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 | 145 | 31/10 | Un produit inconnu devient référence quand un autre artisan l'écrit ou le commande en achat groupé | fait | Dès 2 entreprises, proposé à tous « écrit par d'autres artisans » ; l'admin écarte ou ajoute au catalogue. docs/catalogue-metier.md §3 bis. |
 | 146 | 31/10 | Premier écran de la landing : la photo choisie à la place de l'illustration | fait | Deux cadrages (ordinateur, téléphone), WebP optimisées ; e2e « La page d'accueil publique » complété. |
 | 147 | 31/10 | Premier écran : « essaye plutôt cette image » (les matériaux) | fait | Remplace la photo d'artisans ; deux cadrages, WebP de 16 à 56 Ko. |
+| 148 | 31/10 | Titres collés sur téléphone ; « Le prochain bon prix » avant les questions | fait | Interlettrage mobile ouvert ; ordre des sections changé ; e2e « La page d'accueil publique » complété. |
