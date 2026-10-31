@@ -5,7 +5,7 @@ import { croiser, produit, type ArticleCatalogue, type Fiche } from "../catalogu
  * Ardoises : format × origine et choix ; tuiles : par modèle (le négoce propose la marque) ; accessoires à l'unité.
  */
 const M = "couverture" as const;
-const ARDOISES = ["32×22", "35×25", "40×22", "40×25", "45×30", "50×25", "30×20", "27×18", "22×32 trapézoïdale"];
+const ARDOISES = ["32×22", "30×22", "35×25", "40×22", "40×25", "45×30", "50×25", "30×20", "27×18", "22×32 trapézoïdale"];
 const CHOIX = ["Espagne 1er choix", "Espagne 2e choix", "Angers (France) 1er choix", "Pays de Galles 1er choix", "Brésil 1er choix"];
 
 /**

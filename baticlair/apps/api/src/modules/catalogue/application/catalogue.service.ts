@@ -16,6 +16,8 @@ import {
   metiersCatalogueDuCompte,
   clesDeRegroupement,
   rechercherAvecPrecisions,
+  departementDeLAdresse,
+  regionDuDepartement,
   referenceStricte,
   TOUT_LE_CATALOGUE,
   type MetierCatalogue,
@@ -104,7 +106,17 @@ export class CatalogueService {
   /** Les métiers du sélecteur : ceux du profil d'abord (« Métier : Couverture ▾ »), puis les autres. */
   private async metiers(tenant: TenantContext) {
     const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { trades: true } });
-    const miens = metiersCatalogueDuCompte(c?.trades ?? []);
+    return this.metiersDe(c?.trades ?? []);
+  }
+
+  /** La région du §26.2 de l'entreprise (code postal de son adresse), pour proposer d'abord ses matériaux. */
+  private async regionDe(tenant: TenantContext) {
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } });
+    return regionDuDepartement(departementDeLAdresse(c?.address));
+  }
+
+  private metiersDe(trades: string[]) {
+    const miens = metiersCatalogueDuCompte(trades);
     const ordre = [...miens, ...METIERS_CATALOGUE.filter((m) => !miens.includes(m))];
     return ordre.map((m) => ({ code: m, libelle: LIBELLES_METIERS_CATALOGUE[m], mien: miens.includes(m), familleAchat: FAMILLE_DU_METIER_CATALOGUE[m] }));
   }
@@ -118,7 +130,15 @@ export class CatalogueService {
       const tous = await this.articles(null);
       // La recherche cherche d'abord dans le métier choisi, puis dans les autres.
       // Le moteur métier (Greg, 31 octobre 2026) : dimensions, références exactes, précisions gardées (« H14 rouge »).
-      const trouves = rechercherAvecPrecisions(tous.map((a) => ({ ...a, statut: FICHES.get(a.cle)?.statut ?? null })), recherche, 60);
+      // Région par région (Greg, 31 octobre 2026, soir ; §26.2) : à score égal, les matériaux de la région d'abord.
+      const region = await this.regionDe(tenant);
+      const dominants = new Set(region?.dominants ?? []);
+      const trouves = rechercherAvecPrecisions(
+        tous.map((a) => ({ ...a, statut: FICHES.get(a.cle)?.statut ?? null })),
+        recherche,
+        60,
+        dominants.size ? (a) => dominants.has(a.produit) : undefined,
+      );
       const duMetier = trouves.filter((t) => t.article.metier === metier);
       const resultats = [...duMetier, ...trouves.filter((t) => t.article.metier !== metier)].slice(0, 30).map((t) => ({ ...vue(t.article), precisions: t.precisions }));
       // Les intitulés écrits par l'entreprise elle-même, après le catalogue (Greg, 30 octobre 2026, nuit : rien n'est

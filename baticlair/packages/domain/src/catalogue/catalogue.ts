@@ -245,7 +245,13 @@ export interface Trouvaille<T> {
  * (jamais une à la place d'une autre) ; une couleur, une finition ou une gamme absente de l'article le précise au lieu
  * de l'écarter. Chaque mot qui désigne doit être trouvé ; un article sans aucun mot désignant trouvé n'est pas proposé.
  */
-export function rechercherAvecPrecisions<T extends Pick<ArticleCatalogue, "designation" | "famille" | "produit" | "synonymes"> & { statut?: string | null }>(articles: readonly T[], q: string, max = 30): Trouvaille<T>[] {
+export function rechercherAvecPrecisions<T extends Pick<ArticleCatalogue, "designation" | "famille" | "produit" | "synonymes"> & { statut?: string | null }>(
+  articles: readonly T[],
+  q: string,
+  max = 30,
+  /** À score égal, les articles de la région du chantier d'abord (§26.2, `REGIONS_COUVERTURE`). */
+  prefere?: (a: T) => boolean,
+): Trouvaille<T>[] {
   const tapes = requeteAPlat(q).split(" ").filter(Boolean);
   if (!tapes.length) return [];
   const originaux = new Map(q.split(/\s+/).filter(Boolean).map((w) => [aPlat(w), w] as const));
@@ -274,7 +280,14 @@ export function rechercherAvecPrecisions<T extends Pick<ArticleCatalogue, "desig
   });
   return trouves
     // À score égal : moins de précisions laissées, puis un article sourcé (référentiel, fabricant), puis l'ordre du catalogue.
-    .sort((x, y) => y.score - x.score || x.precisions.length - y.precisions.length || (x.article.statut ? 0 : 1) - (y.article.statut ? 0 : 1) || x.i - y.i)
+    .sort(
+      (x, y) =>
+        y.score - x.score ||
+        x.precisions.length - y.precisions.length ||
+        (prefere ? (prefere(x.article) ? 0 : 1) - (prefere(y.article) ? 0 : 1) : 0) ||
+        (x.article.statut ? 0 : 1) - (y.article.statut ? 0 : 1) ||
+        x.i - y.i,
+    )
     .slice(0, max)
     .map(({ i: _i, ...t }) => t);
 }
