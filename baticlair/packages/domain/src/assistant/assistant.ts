@@ -32,26 +32,28 @@ export interface EtatAssistant {
 }
 
 export const LIVRAISON_CHANTIER = "Livraison sur le chantier";
-export const RETRAIT_DEPOT = "Retrait au dépôt";
+export const RETRAIT_DEPOT = "Retrait en agence";
 const DATES = ["Dès que possible", "Cette semaine", "La semaine prochaine"];
 
 /** Les questions qui restent, dans l'ordre : où, livré ou retiré, quand. */
 export function questionsAssistant(e: EtatAssistant): QuestionAssistant[] {
   const q: QuestionAssistant[] = [];
-  if (!e.adresse && !e.passees.includes("adresse")) q.push({ cle: "adresse", texte: "Adresse du chantier ?", choix: [] });
-  if (!e.livraison && !e.passees.includes("livraison")) q.push({ cle: "livraison", texte: "Souhaites-tu une livraison ?", choix: ["Oui, sur le chantier", "Non, je passe au dépôt"] });
+  // Les mots de la maquette de Greg (31 octobre 2026).
+  if (!e.adresse && !e.passees.includes("adresse")) q.push({ cle: "adresse", texte: "Où se trouve le chantier ?", choix: [] });
+  if (!e.livraison && !e.passees.includes("livraison")) q.push({ cle: "livraison", texte: "Livraison sur chantier ou retrait en agence ?", choix: ["Livraison", "Retrait"] });
   if (e.livraison?.startsWith(LIVRAISON_CHANTIER) && !aUneDate(e.livraison) && !e.passees.includes("date")) q.push({ cle: "date", texte: "Pour quand ?", choix: DATES });
   return q;
 }
 
-/** Le premier message : ce qui est prêt, ce qui reste à vérifier, et toutes les questions d'un coup. */
+/**
+ * Le premier message (maquette de Greg, 31 octobre 2026) : ce qui est prêt et combien de précisions il manque ; chaque
+ * question vient ensuite dans sa propre bulle, la question active avec ses réponses d'un tap et « Passer ».
+ */
 export function messageOuverture(nbLignes: number, aVerifier: number, questions: readonly { texte: string }[]): string {
-  const liste = `Ta liste est prête : ${nbLignes} ligne${nbLignes > 1 ? "s" : ""}${aVerifier > 0 ? `, dont ${aVerifier} à vérifier` : ""}.`;
-  if (questions.length === 0) return `${liste} Je n'ai rien à te demander : tu peux relire le PDF et l'envoyer.`;
-  // Toutes dans un seul message ; au-delà de quatre, le compte (les cartes les montrent toutes).
-  const dites = questions.slice(0, 4).map((x) => x.texte).join(" ");
-  const autres = questions.length > 4 ? ` Et ${questions.length - 4} autre${questions.length > 5 ? "s" : ""}, plus bas.` : "";
-  return `${liste} Pour ta demande de prix, ${questions.length === 1 ? "une question" : `${questions.length} questions`} : ${dites}${autres} Tu peux répondre à tout d'un coup, ou passer.`;
+  const liste = `${nbLignes} ligne${nbLignes > 1 ? "s" : ""}${aVerifier > 0 ? `, dont ${aVerifier} à vérifier` : ""}`;
+  if (questions.length === 0) return `Ta liste est prête : ${liste}. Je n'ai rien à te demander : tu peux relire le PDF et l'envoyer.`;
+  const n = questions.length;
+  return `J'ai préparé ta liste : ${liste}. Il me manque ${n === 1 ? "une précision" : `${n} précisions`}. Tu peux répondre à plusieurs d'un coup, ou passer.`;
 }
 
 export type Consigne =
@@ -160,8 +162,8 @@ function uneConsigne(brut: string, lignes: readonly LigneAssistant[], attendu: C
   if (/(je (ne )?(le )?sais pas|aucune idee|je sais plus|pas encore|je ne sais pas encore)/.test(n)) return { type: "ne_sait_pas" };
 
   // La livraison et sa date se reconnaissent partout ; l'adresse, à sa question ou avec un code postal.
-  if (/(livr|retrait|enlevement|au depot|je passe (le |les )?(prendre|chercher)|je recupere|a emporter)/.test(n) || (attendu === "livraison" && /^(oui|non)\b/.test(n))) {
-    const depot = /(retrait|au depot|je passe|je recupere|a emporter|^non)/.test(n) && !/livraison sur/.test(n);
+  if (/(livr|retrait|enlevement|au depot|en agence|je passe (le |les )?(prendre|chercher)|je recupere|a emporter)/.test(n) || (attendu === "livraison" && /^(oui|non)\b/.test(n))) {
+    const depot = /(retrait|au depot|en agence|je passe|je recupere|a emporter|^non)/.test(n) && !/livraison sur/.test(n);
     const date = dateDite(brut);
     return { type: "livraison", texte: depot ? RETRAIT_DEPOT : `${LIVRAISON_CHANTIER}${date ? `, ${date}` : ""}` };
   }
@@ -266,7 +268,7 @@ export function resumeConsignes(cs: readonly Consigne[]): string {
     else if (c.type === "retirer") faits.push(`retiré « ${c.libelle} »`);
     else if (c.type === "quantite") faits.push(`« ${c.libelle} » passe à ${c.quantite}${c.unite ? ` ${c.unite}` : ""}`);
     else if (c.type === "adresse") faits.push(`adresse notée : ${c.texte}`);
-    else if (c.type === "livraison") faits.push(c.texte === RETRAIT_DEPOT ? "retrait au dépôt noté" : `noté : ${c.texte.charAt(0).toLowerCase()}${c.texte.slice(1)}`);
+    else if (c.type === "livraison") faits.push(c.texte === RETRAIT_DEPOT ? "retrait en agence noté" : `noté : ${c.texte.charAt(0).toLowerCase()}${c.texte.slice(1)}`);
     else if (c.type === "date") faits.push(`date notée : ${c.texte}`);
     else if (c.type === "ambigu") doutes.push(`« ${c.texte} » : laquelle ? ${c.candidats.map((x) => x.libelle).join(" ou ")}`);
     else if (c.type === "incompris") doutes.push(`je n'ai pas compris « ${c.texte} »`);
@@ -355,7 +357,8 @@ export interface QuestionLigne {
 }
 
 const sansPoint = (t: string) => t.replace(/\s*\?\s*$/, "").trim();
-const minuscule = (t: string) => (t ? t.charAt(0).toLowerCase() + t.slice(1) : t);
+/** « Matière » → « matière », mais « WC suspendu » ou « PVC » restent tels quels (sigle). */
+const minuscule = (t: string) => (t && !/^.[A-ZÀ-Ý]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t);
 
 export function questionsDuDocument(items: readonly ItemPourQuestions[]): QuestionLigne[] {
   const parReponse = new Map<string, QuestionLigne>();
@@ -380,6 +383,8 @@ export function questionsDuDocument(items: readonly ItemPourQuestions[]): Questi
 /** Le texte d'une question de ligne, tel que l'assistant le dit : « Crochet ardoise : matière ? ». */
 export function texteQuestionLigne(q: QuestionLigne): string {
   const ligne = q.lignes.length > 1 ? `${q.lignes[0]} (et ${q.lignes.length - 1} autre${q.lignes.length > 2 ? "s" : ""})` : q.lignes[0];
+  // Une question qui nomme déjà sa ligne (« WC suspendu : quelle unité ») ne la redit pas.
+  if (q.lignes.length === 1 && normaliser(q.texte).startsWith(normaliser(q.lignes[0]!))) return `${q.texte} ?`;
   return q.sorte.type === "reponse" ? `${ligne} : ${minuscule(q.texte)} ?` : `${ligne} : ${q.texte} ?`;
 }
 

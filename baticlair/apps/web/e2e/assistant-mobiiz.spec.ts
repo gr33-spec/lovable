@@ -64,10 +64,13 @@ test("Assistant Mobiiz : questions d'un coup, réponses multiples, consignes, an
   // Toutes les questions dans un seul message, jamais une quantité.
   // Les questions DU DOCUMENT d'abord (l'ardoise ne dit ni son origine ni son choix ; les crochets disent inox et 90 mm, rien
   // à demander), puis le chantier.
-  await expect(assistant.getByText("Ta liste est prête : 3 lignes. Pour ta demande de prix, 4 questions : Ardoise naturelle 32×22 : origine ? Ardoise naturelle 32×22 : choix ? Adresse du chantier ? Souhaites-tu une livraison ? Tu peux répondre à tout d'un coup, ou passer.")).toBeVisible();
-  await expect(assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toBeVisible();
+  await expect(assistant.getByText("J'ai préparé ta liste : 3 lignes. Il me manque 4 précisions. Tu peux répondre à plusieurs d'un coup, ou passer.")).toBeVisible();
+  // La question active, dans sa bulle, avec ses réponses d'un tap et « Passer » ; une seule à la fois.
+  const active = assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" });
+  await expect(active).toBeVisible();
+  await expect(active.getByRole("button", { name: "Passer" })).toBeVisible();
   await expect(assistant.getByRole("group", { name: /^Crochet ardoise/ })).toHaveCount(0);
-  await expect(assistant.getByRole("group", { name: "Adresse du chantier ?" })).toBeVisible();
+  await expect(assistant.getByRole("group", { name: "Où se trouve le chantier ?" })).toHaveCount(0);
   await expect(assistant.getByText(/combien/i)).toHaveCount(0);
   // Le micro est là (la dictée remplit la case, n'envoie rien) ; ici, on écrit.
   await expect(assistant.getByRole("button", { name: "Dicter" })).toBeVisible();
@@ -77,7 +80,7 @@ test("Assistant Mobiiz : questions d'un coup, réponses multiples, consignes, an
   await assistant.getByRole("button", { name: "Envoyer le message" }).click();
   await expect(assistant.getByText("C'est noté : Espagne et 1er choix pour « Ardoise naturelle 32×22 ». C'est fait : adresse notée : 3 rue du Port 22300 Lannion, noté : livraison sur le chantier, demain. C'est tout bon de mon côté : relis le PDF, puis envoie-le à tes négoces.")).toBeVisible();
   await expect(assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toHaveCount(0);
-  await expect(assistant.getByRole("group", { name: "Adresse du chantier ?" })).toHaveCount(0);
+  await expect(assistant.getByRole("group", { name: "Où se trouve le chantier ?" })).toHaveCount(0);
   expect((await ecran(page, id)).chantier).toEqual({ adresse: "3 rue du Port 22300 Lannion", livraison: "Livraison sur le chantier, demain" });
   // La réponse s'écrit dans la ligne (ce que reçoit le négoce).
   expect((await ecran(page, id)).purchase.toBuy.map((b) => b.label)).toContain("Ardoise naturelle 32×22 Espagne 1er choix");
@@ -132,41 +135,97 @@ test("Assistant Mobiiz : « Passer » ferme une question pour de bon ; « Je ne 
   await page.goto(`/chantiers/${projetId}`);
   await page.getByRole("button", { name: "Ouvrir l'assistant" }).click();
   const assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
-  await assistant.getByRole("group", { name: "Adresse du chantier ?" }).getByRole("button", { name: "Passer" }).click();
-  await expect(assistant.getByRole("group", { name: "Adresse du chantier ?" })).toHaveCount(0);
-  // « Je ne sais pas » passe la question en cours (la première : l'origine de l'ardoise).
+  // « Passer », petit, sur la question active.
+  await assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" }).getByRole("button", { name: "Passer" }).click();
+  await expect(assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toHaveCount(0);
+  await expect(assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : choix ?" })).toBeVisible();
+  // « Je ne sais pas » passe la question en cours.
   await assistant.getByLabel("Ton message").fill("je ne sais pas");
   await assistant.getByRole("button", { name: "Envoyer le message" }).click();
-  await expect(assistant.getByText("Pas de souci, on passe. Ardoise naturelle 32×22 : choix ?")).toBeVisible();
-  await expect(assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toHaveCount(0);
+  await expect(assistant.getByText("Pas de souci, on passe.")).toBeVisible();
+  await expect(assistant.getByRole("group", { name: "Où se trouve le chantier ?" })).toBeVisible();
   await assistant.getByRole("button", { name: "Fermer l'assistant" }).click();
+  // Reprendre plus tard : le fil est gardé, les questions passées ne reviennent pas.
   await page.reload();
   await page.getByRole("button", { name: "Ouvrir l'assistant" }).click();
   const rouvert = page.getByRole("dialog", { name: "Assistant Mobiiz" });
-  await expect(rouvert.getByRole("group", { name: "Souhaites-tu une livraison ?" })).toBeVisible();
-  await expect(rouvert.getByRole("group", { name: "Adresse du chantier ?" })).toHaveCount(0);
-  await expect(rouvert.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toHaveCount(0);
+  await expect(rouvert.getByText("je ne sais pas")).toBeVisible();
+  await expect(rouvert.getByRole("group", { name: "Où se trouve le chantier ?" })).toBeVisible();
+  await expect(rouvert.getByRole("group", { name: /^Ardoise naturelle 32×22 : (origine|choix) \?$/ })).toHaveCount(0);
 });
 
-test("Décris ton chantier : les quantités dites deviennent la liste, le reste se coche, rien d'inventé", async ({ page }) => {
-  test.setTimeout(120_000);
+test("Décris ton chantier : une vraie conversation ; les quantités dites font la liste, le reste se propose ; « Voir PDF » garde le brouillon", async ({ page }, info) => {
+  test.setTimeout(150_000);
+  const tel = info.project.name === "telephone";
   await compteEtListe(page);
   await page.goto("/chantiers/nouveau");
   await page.getByRole("button", { name: /Je décris mon chantier/ }).click();
   const d = page.getByRole("dialog", { name: "Décris ton chantier" });
+  await expect(d.getByText("Décris-moi ton chantier ou indique directement les matériaux et quantités dont tu as besoin. Tu peux écrire ou utiliser le micro.")).toBeVisible();
+  // Plus de formulaire : une barre en bas, le micro dedans, l'envoi rond ; aucun bouton « Lire ma description ».
+  await expect(d.getByRole("button", { name: "Lire ma description" })).toHaveCount(0);
+  await expect(d.getByLabel("Ton message")).toHaveAttribute("placeholder", "Réponds ici…");
   await expect(d.getByRole("button", { name: "Dicter" })).toBeVisible();
-  await d.getByLabel("Ta description").fill("Il me faut 40 m² de placo BA13, 3 rouleaux de laine de verre 100 mm et un WC suspendu, plus de la colle carrelage");
-  await d.getByRole("button", { name: "Lire ma description" }).click();
-  const compris = d.getByRole("region", { name: "Ce que j'ai compris" });
-  await expect(compris.getByRole("checkbox", { name: /Placo BA13/ })).toBeChecked();
-  await expect(compris.getByRole("checkbox", { name: /Laine de verre 100 mm/ })).toBeChecked();
-  await expect(compris.getByRole("checkbox", { name: /WC suspendu/ })).not.toBeChecked();
-  await expect(compris.getByRole("checkbox", { name: /Colle carrelage.*Quantité à préciser/ })).not.toBeChecked();
-  await compris.getByText("WC suspendu").click();
-  await d.getByRole("button", { name: "Créer ma liste (3 lignes)" }).click();
+  await expect(d.getByRole("button", { name: "Envoyer le message" })).toBeDisabled();
+  await d.getByLabel("Ton message").fill("Il me faut 40 m² de placo BA13, 3 rouleaux de laine de verre 100 mm et un WC suspendu, plus de la colle carrelage");
+  await d.getByRole("button", { name: "Envoyer le message" }).click();
+  // La liste est créée et LA MÊME conversation continue avec l'assistant.
+  const a = page.getByRole("dialog", { name: "Assistant Mobiiz" });
+  await expect(a.getByText(/^Il me faut 40 m² de placo BA13/)).toBeVisible({ timeout: 30_000 });
+  await expect(a.getByText("C'est noté : Placo BA13 (40 m²), Laine de verre 100 mm (3 rouleaux).")).toBeVisible();
+  const propositions = a.getByRole("group", { name: "Sans quantité en chiffres" });
+  await propositions.getByRole("button", { name: "Ajouter « WC suspendu »" }).click();
+  await expect(a.getByText("C'est fait : ajouté « WC suspendu », 1.")).toBeVisible();
+  // Dit sans unité : la question vient du document (§51.6), une réponse d'un tap.
+  await a.getByRole("group", { name: "WC suspendu : quelle unité ?" }).getByRole("button", { name: "Pièces" }).click();
+  await expect(a.getByRole("group", { name: "Où se trouve le chantier ?" })).toBeVisible();
+  await a.getByLabel("Ton message").fill("75011 Paris");
+  await a.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(a.getByText(/adresse notée : 75011 Paris/)).toBeVisible();
+  await expect(a.getByRole("group", { name: "Livraison sur chantier ou retrait en agence ?" })).toBeVisible();
+  // « Voir PDF » (téléphone) puis retour : messages et brouillon intacts.
+  await a.getByLabel("Ton message").fill("brouillon en cours");
+  if (tel) {
+    await a.getByRole("button", { name: "Voir PDF" }).click();
+    await expect(page.getByRole("dialog", { name: "Le PDF de ta demande" })).toBeVisible();
+    await expect(page.locator("button[data-cle]").first()).toBeVisible({ timeout: 20_000 });
+    await page.getByRole("button", { name: "Retour à l'assistant" }).click();
+  } else await expect(page.locator("button[data-cle]").first()).toBeVisible({ timeout: 20_000 });
+  await expect(a.getByLabel("Ton message")).toHaveValue("brouillon en cours");
+  await expect(a.getByText("C'est fait : ajouté « WC suspendu », 1.")).toBeVisible();
+  await a.getByRole("group", { name: "Livraison sur chantier ou retrait en agence ?" }).getByRole("button", { name: "Retrait" }).click();
+  await expect(a.getByText(/retrait en agence noté/)).toBeVisible();
+  await a.getByRole("button", { name: "Fermer l'assistant" }).click();
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
   await expect(page.getByText("Placo BA13").first()).toBeVisible();
+  await expect(page.getByText("WC suspendu").first()).toBeVisible();
   await expect(page.getByText(/Colle carrelage/)).toHaveCount(0);
+});
+
+test("Le clavier ouvert (iPhone SE) : la barre de saisie reste visible au-dessus, le dernier message aussi", async ({ page }, info) => {
+  test.skip(info.project.name !== "telephone", "le clavier simulé est celui du téléphone");
+  test.setTimeout(120_000);
+  const { projetId } = await compteEtListe(page);
+  await page.goto(`/chantiers/${projetId}`);
+  await page.getByRole("button", { name: "Ouvrir l'assistant" }).click();
+  const a = page.getByRole("dialog", { name: "Assistant Mobiiz" });
+  await a.getByLabel("Ton message").click();
+  // Le clavier natif rétrécit la zone visible : 375 × 330 (comme `clavier.spec.ts`).
+  await page.setViewportSize({ width: 375, height: 330 });
+  await expect(a.getByLabel("Ton message")).toBeInViewport({ ratio: 1 });
+  await expect(a.getByRole("button", { name: "Envoyer le message" })).toBeInViewport({ ratio: 1 });
+  await expect(a.getByRole("button", { name: "Dicter" })).toBeInViewport({ ratio: 1 });
+  // Le champ grandit avec le texte, jusqu'à cinq lignes environ, puis défile.
+  const h1 = (await a.getByLabel("Ton message").boundingBox())!.height;
+  await a.getByLabel("Ton message").fill("ligne 1\nligne 2\nligne 3\nligne 4\nligne 5\nligne 6\nligne 7");
+  const h2 = (await a.getByLabel("Ton message").boundingBox())!.height;
+  expect(h2).toBeGreaterThan(h1 * 3);
+  expect(h2).toBeLessThan(h1 * 6);
+  await a.getByLabel("Ton message").fill("75011 Paris");
+  await a.getByRole("button", { name: "Envoyer le message" }).click();
+  // Le fil descend tout seul : le dernier élément (la question suivante) est visible, la barre aussi.
+  await expect(a.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toBeInViewport();
+  await expect(a.getByLabel("Ton message")).toBeInViewport({ ratio: 1 });
 });
 
 test("Contrôle de conformité : après la photo d'une liste, l'assistant s'ouvre seul et pose les questions DU DOCUMENT ; réponses libres groupées ; une seule ouverture", async ({ page }) => {
@@ -180,16 +239,15 @@ test("Contrôle de conformité : après la photo d'une liste, l'assistant s'ouvr
   const assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
   await expect(assistant).toBeVisible({ timeout: 60_000 });
   const projetId = /\/chantiers\/([0-9a-f-]{36})/.exec(page.url())![1]!;
-  // Des questions tirées des lignes lues (pas une liste générique) : l'écran sous-toiture sans type, les pointes sans format.
-  await expect(assistant.getByRole("group", { name: "Écran sous-toiture : type ?" })).toBeVisible();
-  await expect(assistant.getByRole("group", { name: /^Pointes inox : format \?$/ })).toBeVisible();
+  // Des questions tirées des lignes lues (pas une liste générique) : la première, la marque de la tuile, est active.
+  await expect(assistant.getByText("J'ai préparé ta liste : 5 lignes. Il me manque 6 précisions. Tu peux répondre à plusieurs d'un coup, ou passer.")).toBeVisible();
+  await expect(assistant.getByRole("group", { name: "Tuile romane canal rouge : marque ?" })).toBeVisible();
   // Une ligne déjà précise n'a pas de question (le liteau dit sa section).
   await expect(assistant.getByRole("group", { name: /^Liteau sapin 27x38/ })).toHaveCount(0);
   // Deux réponses d'un coup, en texte libre.
   await assistant.getByLabel("Ton message").fill("HPV et pointes 2,8×40");
   await assistant.getByRole("button", { name: "Envoyer le message" }).click();
   await expect(assistant.getByText(/C'est noté : HPV pour « Écran sous-toiture », 2,8×40 pour « Pointes inox »\./)).toBeVisible();
-  await expect(assistant.getByRole("group", { name: "Écran sous-toiture : type ?" })).toHaveCount(0);
   const q = await apiJson<{ items: { ecran: Ecran }[] }>(page, "GET", `/v1/quantitatifs?projetId=${projetId}&ecran=1`);
   const labels = q.body.items[0]!.ecran.purchase.toBuy.map((b) => b.label);
   expect(labels).toContain("Écran sous-toiture HPV");
@@ -198,7 +256,7 @@ test("Contrôle de conformité : après la photo d'une liste, l'assistant s'ouvr
   await assistant.getByRole("button", { name: "Annuler la dernière modification" }).click();
   await expect(assistant.getByText(/J'ai annulé « 2,8×40 » sur Pointes inox\./)).toBeVisible();
   // Passer tout de suite : la liste ; l'assistant ne se rouvre pas seul.
-  await assistant.getByRole("button", { name: "Voir ma liste" }).click();
+  await assistant.getByRole("button", { name: "Fermer l'assistant" }).click();
   await expect(assistant).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 30_000 });
@@ -239,6 +297,7 @@ test("La dictée : remplit la case sans envoyer ; navigateur sans dictée ou mic
   await expect(assistant.getByLabel("Ton message")).toHaveValue("ajoute 6 sacs de mortier");
   // Rien n'est parti tout seul.
   expect((await ecran(page, id)).purchase.toBuy.some((b) => /Mortier/.test(b.label))).toBe(false);
+  await assistant.getByLabel("Ton message").fill("ajoute 6 sacs de mortier");
   await assistant.getByRole("button", { name: "Envoyer le message" }).click();
   await expect(assistant.getByText(/ajouté « Mortier », 6 sacs/)).toBeVisible();
   // Micro refusé : la phrase, le clavier reste.

@@ -23,9 +23,8 @@ describe("les questions de l'assistant", () => {
     const q = questionsAssistant({ adresse: null, livraison: null, passees: [] });
     expect(q.map((x) => x.cle)).toEqual(["adresse", "livraison"]);
     const m = messageOuverture(12, 2, q);
-    expect(m).toContain("Adresse du chantier ?");
-    expect(m).toContain("Souhaites-tu une livraison ?");
-    expect(m).toContain("dont 2 à vérifier");
+    expect(m).toBe("J'ai préparé ta liste : 12 lignes, dont 2 à vérifier. Il me manque 2 précisions. Tu peux répondre à plusieurs d'un coup, ou passer.");
+    expect(q.map((x) => x.texte)).toEqual(["Où se trouve le chantier ?", "Livraison sur chantier ou retrait en agence ?"]);
     expect(m).not.toMatch(/combien|quelle quantit/i);
   });
   it("une question passée ne revient jamais ; la date ne se demande que pour une livraison", () => {
@@ -71,6 +70,10 @@ describe("l'interprète des consignes", () => {
     expect(interpreter("oui, demain", LIGNES, "livraison")).toEqual([{ type: "livraison", texte: `${LIVRAISON_CHANTIER}, demain` }]);
     expect(interpreter("non", LIGNES, "livraison")).toEqual([{ type: "livraison", texte: RETRAIT_DEPOT }]);
     expect(interpreter("je passe au dépôt", LIGNES)).toEqual([{ type: "livraison", texte: RETRAIT_DEPOT }]);
+    // Les puces de la maquette : « Livraison », « Retrait ».
+    expect(interpreter("Livraison", LIGNES, "livraison")).toEqual([{ type: "livraison", texte: LIVRAISON_CHANTIER }]);
+    expect(interpreter("Retrait", LIGNES, "livraison")).toEqual([{ type: "livraison", texte: RETRAIT_DEPOT }]);
+    expect(interpreter("75011 Paris", LIGNES, "adresse")).toEqual([{ type: "adresse", texte: "75011 Paris" }]);
     expect(interpreter("livraison sur chantier le 12 novembre", LIGNES)).toEqual([{ type: "livraison", texte: `${LIVRAISON_CHANTIER}, le 12 novembre` }]);
     expect(interpreter("je ne sais pas", LIGNES, "adresse")).toEqual([{ type: "ne_sait_pas" }]);
     expect(interpreter("Passer", LIGNES, "adresse")).toEqual([{ type: "passer" }]);
@@ -131,6 +134,9 @@ describe("les questions du document (contrôle de conformité, 31 octobre 2026)"
       "Crochet ardoise 100 mm : matière ?",
     ]);
     expect(questionsDuDocument([ITEMS[4]!])).toEqual([]);
+    // Une question qui nomme déjà sa ligne ne la redit pas ; un sigle garde ses majuscules.
+    const wc = questionsDuDocument([{ key: "w", label: "WC suspendu", asks: [{ key: "unite:1", text: "WC suspendu : quelle unité ?", unit: null, options: [{ label: "Pièces", value: "pièces" }] }] }]);
+    expect(wc.map(texteQuestionLigne)).toEqual(["WC suspendu : quelle unité ?"]);
   });
   it("plusieurs réponses libres d'un coup, rattachées à leur question ; le reste passe à l'interprète", () => {
     const q = questionsDuDocument(ITEMS);

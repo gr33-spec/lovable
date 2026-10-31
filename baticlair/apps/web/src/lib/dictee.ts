@@ -80,5 +80,11 @@ export function useDictee(surTexte: (texte: string, final: boolean) => void) {
     }
   }, []);
 
-  return { ecoute, probleme, demarrer, arreter, effacerProbleme: () => setProbleme(null) };
+  /** Annuler : la dictée s'arrête et ce qu'elle avait écrit est retiré par l'appelant (il garde le texte d'avant). */
+  const annuler = useCallback(() => {
+    rec.current?.abort();
+    setEcoute(false);
+  }, []);
+
+  return { ecoute, probleme, demarrer, arreter, annuler, effacerProbleme: () => setProbleme(null) };
 }

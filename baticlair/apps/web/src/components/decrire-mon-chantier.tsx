@@ -1,19 +1,23 @@
 "use client";
 
-import { Check, Mic, MessageSquareText, X } from "lucide-react";
+import { MessageSquareText } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { lireDescription, type LigneDecrite } from "../../../../packages/domain/src/assistant/assistant";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, type Quantitatif, type Takeoff } from "@/lib/api";
 import { useDictee } from "@/lib/dictee";
+import { AssistantMobiiz, marquerAssistantOuvert, type Message } from "./assistant-mobiiz";
+import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, Puce, TexteMobiiz, useChampDicte, useFil, useZoneVisible } from "./chat-mobiiz";
 
 /**
- * « DÉCRIS TON CHANTIER » (Greg, 31 octobre 2026, point 1) : le quatrième départ d'une liste. L'artisan écrit ou dicte ; le
- * code (aucun appel IA, aucun quota) en tire les lignes : une quantité dite en chiffres fait une ligne cochée ; le reste
- * (nombre en lettres, rien de chiffré) est proposé décoché, l'artisan coche ce qui est bien un matériau. Rien d'inventé :
- * sans quantité dite, la ligne arrive « à préciser ». Puis la liste arrive sur le même écran que les autres départs.
+ * « DÉCRIS TON CHANTIER » EN CONVERSATION (Greg, 31 octobre 2026, capture « Assistant Mobiiz » : « une véritable interface
+ * de discussion, pas un formulaire ») : le quatrième départ d'une liste. L'artisan écrit ou dicte dans la barre du bas ; le
+ * code (aucun appel IA, aucun quota) tire les lignes du message (`lireDescription`) : une quantité dite en chiffres fait
+ * une ligne ; ce qui est dit sans quantité en chiffres est proposé d'un tap, jamais compté d'office. Dès la première ligne,
+ * la liste est créée (la porte habituelle, `POST /v1/quantitatifs`) et LA MÊME CONVERSATION continue avec l'assistant
+ * (questions, consignes, « Voir PDF »). Rien d'inventé : sans quantité dite, la ligne arrive « à préciser ».
  */
-type Proposee = LigneDecrite & { id: number; cochee: boolean; sure: boolean };
+const ACCUEIL = "Décris-moi ton chantier ou indique directement les matériaux et quantités dont tu as besoin. Tu peux écrire ou utiliser le micro.";
 
 export function BoutonDecrire() {
   const [ouvert, setOuvert] = useState(false);
@@ -36,140 +40,125 @@ export function BoutonDecrire() {
 
 function DecrireMonChantier({ onFermer }: { onFermer: () => void }) {
   const router = useRouter();
-  const [texte, setTexte] = useState("");
-  const [proposees, setProposees] = useState<Proposee[] | null>(null);
-  const [envoi, setEnvoi] = useState(false);
-  const [erreur, setErreur] = useState<string | null>(null);
-  const base = useRef("");
-  const dictee = useDictee(
-    useCallback((t: string) => {
-      setTexte(`${base.current}${base.current && t ? " " : ""}${t}`.trimStart());
-    }, []),
-  );
-  useEffect(() => {
-    const avant = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = avant;
-    };
-  }, []);
+  const [messages, setMessages] = useState<Message[]>([{ de: "mobiiz", texte: ACCUEIL }]);
+  const [aConfirmer, setAConfirmer] = useState<LigneDecrite[]>([]);
+  const [occupe, setOccupe] = useState(false);
+  const [liste, setListe] = useState<{ q: Quantitatif; takeoff: Takeoff; propositions: LigneDecrite[]; historique: Message[] } | null>(null);
+  const champDicte = useChampDicte();
+  const dictee = useDictee(champDicte.surVoix);
+  const { fil, enBas } = useFil([messages, aConfirmer.length]);
+  const zone = useZoneVisible(enBas);
 
-  function lire() {
-    dictee.arreter();
-    const r = lireDescription(texte);
-    let id = 0;
-    setProposees([...r.lignes.map((l) => ({ ...l, id: id++, cochee: true, sure: true })), ...r.aConfirmer.map((l) => ({ ...l, id: id++, cochee: false, sure: false }))]);
-  }
-
-  async function creer() {
-    const lignes = (proposees ?? []).filter((p) => p.cochee);
-    if (lignes.length === 0) return;
-    setEnvoi(true);
-    setErreur(null);
+  /** La liste naît avec ses premières lignes ; la conversation continue avec l'assistant, dans le même fil. */
+  async function creer(lignes: LigneDecrite[], reste: LigneDecrite[], fil: Message[]) {
+    setOccupe(true);
     try {
-      const q = await api<{ projetId: string }>("/v1/quantitatifs", { method: "POST", body: { lignes: lignes.map((l) => ({ libelle: l.libelle, quantite: l.quantite, unite: l.unite })) } });
-      router.push(`/chantiers/${q.projetId}`);
+      const q = await api<Quantitatif>("/v1/quantitatifs?ecran=1", { method: "POST", body: { lignes: lignes.map((l) => ({ libelle: l.libelle, quantite: l.quantite, unite: l.unite })) } });
+      const complet = q.ecran ? q : await api<Quantitatif>(`/v1/quantitatifs/${encodeURIComponent(q.id)}?ecran=1`);
+      marquerAssistantOuvert(complet.projetId);
+      if (complet.ecran) setListe({ q: complet, takeoff: complet.ecran, propositions: reste, historique: fil });
+      else router.push(`/chantiers/${complet.projetId}`);
     } catch (e) {
-      setErreur(e instanceof ApiError && e.message ? e.message : "La liste n'est pas créée. Réessaie dans un instant.");
-      setEnvoi(false);
+      setMessages((m) => [...m, { de: "mobiiz", texte: e instanceof ApiError && e.message ? `La liste n'est pas créée : ${e.message}` : "La liste n'est pas créée. Réessaie dans un instant." }]);
+    } finally {
+      setOccupe(false);
     }
   }
 
-  const nb = (proposees ?? []).filter((p) => p.cochee).length;
+  function envoyer() {
+    const texte = champDicte.saisie.trim();
+    if (!texte || occupe) return;
+    dictee.arreter();
+    champDicte.setSaisie("");
+    const fil: Message[] = [...messages, { de: "moi", texte }];
+    setMessages(fil);
+    const r = lireDescription(texte);
+    const reste = [...aConfirmer, ...r.aConfirmer];
+    if (r.lignes.length > 0) {
+      const dites = r.lignes.map((l) => `${l.libelle}${l.quantite ? ` (${l.quantite}${l.unite ? ` ${l.unite}` : ""})` : ""}`).join(", ");
+      void creer(r.lignes, reste, [...fil, { de: "mobiiz", texte: `C'est noté : ${dites}.` }]);
+      return;
+    }
+    setAConfirmer(reste);
+    setMessages((m) => [
+      ...m,
+      {
+        de: "mobiiz",
+        texte: reste.length
+          ? "Je n'ai compté que ce qui a une quantité en chiffres. Donne-la (« 1 WC suspendu ») ou touche ce que tu veux garder."
+          : "Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle ».",
+      },
+    ]);
+  }
+
+  if (liste)
+    return (
+      <AssistantMobiiz
+        takeoff={liste.takeoff}
+        projectId={liste.q.projetId}
+        quantitatifId={liste.q.id}
+        historique={liste.historique}
+        propositions={liste.propositions}
+        onUpdated={(q) => {
+          if (q.ecran) setListe((x) => (x ? { ...x, q, takeoff: q.ecran! } : x));
+        }}
+        onClose={() => router.push(`/chantiers/${liste.q.projetId}`)}
+        onSend={() => router.push(`/chantiers/${liste.q.projetId}`)}
+      />
+    );
+
   return (
-    <div role="dialog" aria-modal="true" aria-label="Décris ton chantier" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col bg-ground text-ink">
-      <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
-        <h2 className="text-[18px] font-extrabold">Décris ton chantier</h2>
-        <button type="button" onClick={onFermer} aria-label="Fermer" className="pressable flex size-11 items-center justify-center rounded-full border border-line">
-          <X size={19} aria-hidden="true" />
-        </button>
-      </header>
-      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">
-        <p className="text-[15px] text-muted">Dis ce qu&apos;il te faut, avec les quantités : « 40 m² de placo BA13, 3 rouleaux de laine de verre 100 mm, 6 sacs de mortier ».</p>
-        <div className="flex items-end gap-2">
-          <label className="flex flex-1 rounded-2xl border border-line bg-surface px-4 focus-within:border-ink">
-            <span className="sr-only">Ta description</span>
-            <textarea
-              rows={4}
-              value={texte}
-              onChange={(e) => {
-                setTexte(e.target.value);
-                base.current = e.target.value;
-              }}
-              placeholder={dictee.ecoute ? "Je t'écoute…" : "Écris ou dicte ici"}
-              className="w-full resize-none bg-transparent py-3 text-[16px] outline-none"
-            />
-          </label>
-          <button
-            type="button"
-            aria-label={dictee.ecoute ? "Arrêter la dictée" : "Dicter"}
-            aria-pressed={dictee.ecoute}
-            onClick={() => {
-              if (dictee.ecoute) dictee.arreter();
-              else {
-                base.current = texte;
-                dictee.demarrer();
-              }
-            }}
-            className={`pressable flex size-12 shrink-0 items-center justify-center rounded-full border ${dictee.ecoute ? "border-danger bg-danger text-white" : "border-line bg-surface text-ink"}`}
-          >
-            <Mic size={20} aria-hidden="true" />
-          </button>
+    <div
+      ref={zone}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Décris ton chantier"
+      className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[#FBF8F3]"
+      style={{ backgroundColor: COULEURS_CHAT.fond }}
+    >
+      <EnTeteChat onFermer={onFermer} />
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
+        <div ref={fil} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
+          {messages.map((m, i) =>
+            m.de === "moi" ? (
+              <Bulle key={i} de="moi">
+                {m.texte}
+              </Bulle>
+            ) : (
+              <Bulle key={i} de="mobiiz">
+                <TexteMobiiz>{m.texte}</TexteMobiiz>
+              </Bulle>
+            ),
+          )}
+          {aConfirmer.length > 0 ? (
+            <div role="group" aria-label="À garder ?" className="flex flex-wrap gap-2 pl-10">
+              {aConfirmer.map((p) => (
+                <Puce key={p.libelle} disabled={occupe} onClick={() => void creer([p], aConfirmer.filter((x) => x !== p), [...messages, { de: "moi", texte: `Garder « ${p.libelle} »` }])}>
+                  Garder « {p.libelle} »{p.quantite ? ` (${p.quantite})` : ""}
+                </Puce>
+              ))}
+            </div>
+          ) : null}
+          {occupe ? <p className="pl-10 text-[14px] text-[#FBF8F3]/60">Je prépare ta liste…</p> : null}
         </div>
-        {dictee.probleme ? (
-          <p role="alert" className="text-[14px] font-semibold text-danger">
-            {dictee.probleme}
-          </p>
-        ) : null}
-        <button type="button" disabled={!texte.trim()} onClick={lire} className="pressable min-h-12 self-start rounded-full bg-ink px-5 text-[15px] font-bold text-white disabled:opacity-40">
-          Lire ma description
-        </button>
-        {proposees ? (
-          proposees.length === 0 ? (
-            <p className="text-[15px] text-muted">Je n&apos;ai trouvé aucun matériau. Ajoute les quantités : « 10 sacs de colle ».</p>
-          ) : (
-            <section aria-label="Ce que j'ai compris" className="flex flex-col gap-2">
-              <h3 className="text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">Ce que j&apos;ai compris</h3>
-              <ul className="flex flex-col divide-y divide-line rounded-2xl bg-surface shadow-card">
-                {proposees.map((p) => (
-                  <li key={p.id}>
-                    <label className="flex min-h-14 cursor-pointer items-center gap-3 px-4 py-2.5">
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={p.cochee}
-                        onChange={() => setProposees((all) => (all ?? []).map((x) => (x.id === p.id ? { ...x, cochee: !x.cochee } : x)))}
-                      />
-                      <span className={`flex size-6 shrink-0 items-center justify-center rounded-md border ${p.cochee ? "border-ink bg-ink text-white" : "border-line"}`} aria-hidden="true">
-                        {p.cochee ? <Check size={14} strokeWidth={3} /> : null}
-                      </span>
-                      <span className="flex flex-1 flex-col">
-                        <span className="text-[15px] font-semibold">{p.libelle}</span>
-                        <span className="text-[13px] text-muted">
-                          {p.quantite ? `${p.quantite}${p.unite ? ` ${p.unite}` : ""}` : "Quantité à préciser"}
-                          {p.sure ? "" : " · à cocher si c'est un matériau"}
-                        </span>
-                      </span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )
-        ) : null}
-        {erreur ? (
-          <p role="alert" className="text-[14px] font-semibold text-danger">
-            {erreur}
-          </p>
-        ) : null}
+        <BarreSaisie
+          valeur={champDicte.saisie}
+          onChange={champDicte.setSaisie}
+          onEnvoyer={envoyer}
+          occupe={occupe}
+          ecoute={dictee.ecoute}
+          probleme={dictee.probleme}
+          onDicter={() => {
+            champDicte.avantDictee();
+            dictee.demarrer();
+          }}
+          onArreter={dictee.arreter}
+          onAnnulerDictee={() => {
+            dictee.annuler();
+            champDicte.rendre();
+          }}
+        />
       </div>
-      {proposees && proposees.length > 0 ? (
-        <div className="border-t border-line px-4 pt-3 pb-[max(env(safe-area-inset-bottom),12px)]">
-          <button type="button" disabled={nb === 0 || envoi} onClick={() => void creer()} className="pressable mx-auto flex min-h-13 w-full max-w-2xl items-center justify-center rounded-full bg-accent text-[16px] font-bold text-on-accent disabled:opacity-50">
-            {envoi ? "Je crée ta liste…" : `Créer ma liste (${nb} ligne${nb > 1 ? "s" : ""})`}
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -209,3 +209,4 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 | 158 | 31/10 | Assistant : conversation + PDF interactif (ordinateur deux panneaux, téléphone plein écran), micro, Passer, annuler | fait | Carte « Assistant Mobiiz » sur « Ton chantier » ; e2e `assistant-mobiiz.spec.ts`. |
 | 159 | 31/10 | Décrire son chantier (texte ou voix) → quantitatif, quantités dites seulement | fait | « Je décris mon chantier » dans Ma liste de matériaux. |
 | 160 | 31/10 | Contrôle de conformité de l'assistant : questions tirées du document, ouverture automatique, texte au négoce, vérifications | fait | `docs/assistant-mobiiz.md` §6 ; IA hybride étudiée, non activée (attend l'accord de Greg). |
+| 161 | 31/10 | « Décris ton chantier » en vraie conversation mobile (fil, barre fixe, micro intégré, clavier natif, Voir PDF qui garde tout) | fait | `chat-mobiiz.tsx`, `decrire-mon-chantier.tsx`, `assistant-mobiiz.tsx` ; e2e `assistant-mobiiz.spec.ts` (7 parcours). |

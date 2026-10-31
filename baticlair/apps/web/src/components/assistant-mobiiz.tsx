@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowUp, Eye, Mic, Plus, Sparkles, Undo2, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Plus, Sparkles, Undo2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   interpreter,
   LIVRAISON_CHANTIER,
@@ -24,6 +24,8 @@ import { useOrdinateur } from "@/lib/ordinateur";
 import { parseQuantity } from "@/lib/labels";
 import { fetchWhole } from "./file-viewer";
 import { PdfPages } from "./pdf-pages";
+import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, Puce, TexteMobiiz, useChampDicte, useFil, useZoneVisible } from "./chat-mobiiz";
+import type { LigneDecrite } from "../../../../packages/domain/src/assistant/assistant";
 
 /**
  * L'ASSISTANT MOBIIZ (Greg, 31 octobre 2026, « Refonte de l'expérience de création des quantitatifs, assistant IA et PDF
@@ -33,12 +35,11 @@ import { PdfPages } from "./pdf-pages";
  * appel IA, aucun crédit). Rien ne part sans l'artisan : « Envoyer aux négoces » ouvre l'envoi habituel.
  */
 
-type Message = { de: "mobiiz" | "moi"; texte: string };
+export type Message = { de: "mobiiz" | "moi"; texte: string };
 type Retour = { libelle: string; corps: unknown[] };
 type Zone = { cle: string; page: number; x: number; y: number; largeur: number; hauteur: number };
 
 const AIDE = "Réponds par écrit, utilise le micro ou passe directement à ta liste.";
-const ETAPES = ["Liste des matériaux", "Détails chantier", "Négoces", "Validation"] as const;
 
 function lireStockage(cle: string): string | null {
   try {
@@ -96,6 +97,8 @@ export function AssistantMobiiz({
   onUpdated,
   onClose,
   onSend,
+  historique,
+  propositions: propositionsInitiales = [],
 }: {
   takeoff: Takeoff;
   projectId: string;
@@ -103,6 +106,10 @@ export function AssistantMobiiz({
   onUpdated: (q: Quantitatif) => void;
   onClose: () => void;
   onSend: () => void;
+  /** « Décris ton chantier » : la conversation déjà commencée continue dans le même fil. */
+  historique?: Message[];
+  /** « Décris ton chantier » : ce qui a été dit sans quantité en chiffres, proposé d'un tap. */
+  propositions?: LigneDecrite[];
 }) {
   // La liste à jour : le parent la reçoit de chaque correction (`onUpdated`) et la redonne ici.
   const courant = takeoff;
@@ -120,35 +127,35 @@ export function AssistantMobiiz({
   // calcul, puis ce que le comptoir demanderait), puis le chantier (adresse, livraison, date).
   const questions = toutesLesQuestions(courant, passees);
   const lignes = useMemo(() => lignesDe(courant), [courant]);
-  const [messages, setMessages] = useState<Message[]>(() => [{ de: "mobiiz", texte: messageOuverture(lignesDe(takeoff).length, takeoff.purchase.screen.toCheck, toutesLesQuestions(takeoff, passees)) }]);
-  const [saisie, setSaisie] = useState("");
+  // Le fil est gardé pour ce chantier (reprendre plus tard) ; à la réouverture, l'état du moment s'ajoute à la suite.
+  const cleFil = `mobiiz-assistant-fil:${projectId}`;
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const ouverture: Message = { de: "mobiiz", texte: messageOuverture(lignesDe(takeoff).length, takeoff.purchase.screen.toCheck, toutesLesQuestions(takeoff, passees)) };
+    if (historique) return [...historique, ouverture];
+    try {
+      const garde = JSON.parse(lireStockage(cleFil) ?? "null") as { messages?: Message[] } | null;
+      if (garde?.messages?.length) return [...garde.messages, ouverture];
+    } catch {
+      // Fil illisible : on repart du début.
+    }
+    return [ouverture];
+  });
+  const champDicte = useChampDicte();
+  const { saisie, setSaisie } = champDicte;
+  const [propositions, setPropositions] = useState<LigneDecrite[]>(propositionsInitiales);
+  useEffect(() => {
+    ecrireStockage(cleFil, JSON.stringify({ messages: messages.slice(-60) }));
+  }, [messages, cleFil]);
   const [occupe, setOccupe] = useState(false);
   const [retours, setRetours] = useState<Retour[]>([]);
   const [version, setVersion] = useState(0);
   const [voirPdf, setVoirPdf] = useState(false);
   const [edition, setEdition] = useState<{ cle: string | null } | null>(null);
-  const fil = useRef<HTMLDivElement>(null);
   // Un seul aperçu monté : le panneau de droite sur ordinateur, le plein écran sur téléphone.
   const ordinateur = useOrdinateur();
-  const base = useRef("");
-
-  // Page derrière figée (écrans plein écran, CLAUDE.md).
-  useEffect(() => {
-    const avant = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = avant;
-    };
-  }, []);
-  useEffect(() => {
-    fil.current?.scrollTo({ top: fil.current.scrollHeight });
-  }, [messages, questions.length]);
-
-  const dictee = useDictee(
-    useCallback((texte: string) => {
-      setSaisie(`${base.current}${base.current && texte ? " " : ""}${texte}`.trimStart());
-    }, []),
-  );
+  const { fil, enBas } = useFil([messages, questions.length, propositions.length]);
+  const zone = useZoneVisible(enBas);
+  const dictee = useDictee(champDicte.surVoix);
 
   const qid = encodeURIComponent(quantitatifId);
   const corriger = useCallback(
@@ -268,11 +275,32 @@ export function AssistantMobiiz({
     }
   }, [retours, corriger]);
 
-  /** Après chaque échange : la question suivante, ou « tout est bon ». */
+  /** Après chaque échange : la question suivante vient dans sa bulle ; plus rien : « tout est bon ». */
   const suite = (t: Takeoff, passeesApres: string[]) => {
     const reste = toutesLesQuestions(t, passeesApres);
-    return reste.length > 0 ? ` ${reste[0]!.texte}` : " C'est tout bon de mon côté : relis le PDF, puis envoie-le à tes négoces.";
+    return reste.length > 0 ? "" : " C'est tout bon de mon côté : relis le PDF, puis envoie-le à tes négoces.";
   };
+
+  /** Une proposition de « Décris ton chantier » ajoutée d'un tap (sa quantité seulement si elle a été dite). */
+  const ajouterProposition = useCallback(
+    async (p: LigneDecrite) => {
+      setOccupe(true);
+      try {
+        const avant = new Set(courant.lines.map((l) => l.id));
+        const apres = await corriger({ action: "ajouter", ligne: { libelle: p.libelle, quantite: p.quantite, unite: p.unite } });
+        const neuve = apres.lines.find((l) => !avant.has(l.id));
+        if (neuve) setRetours((r) => [...r, { libelle: `l'ajout de « ${p.libelle} »`, corps: [{ action: "retirer", id: neuve.id }] }]);
+        setPropositions((x) => x.filter((y) => y !== p));
+        setMessages((m) => [...m, { de: "mobiiz", texte: `C'est fait : ajouté « ${p.libelle} »${p.quantite ? `, ${p.quantite}${p.unite ? ` ${p.unite}` : ""}` : " (quantité à préciser)"}.` }]);
+        setVersion((v) => v + 1);
+      } catch {
+        setMessages((m) => [...m, { de: "mobiiz", texte: "Ça n'est pas passé. Réessaie dans un instant." }]);
+      } finally {
+        setOccupe(false);
+      }
+    },
+    [courant, corriger],
+  );
 
   /** Un choix touché sur une carte de question du document. */
   const choisir = useCallback(
@@ -301,7 +329,6 @@ export function AssistantMobiiz({
       if (!propre || occupe) return;
       dictee.arreter();
       setSaisie("");
-      base.current = "";
       setMessages((m) => [...m, { de: "moi", texte: propre }]);
       const premiere = questions[0] ?? null;
       const docOuvertes = questions.flatMap((q) => (q.doc ? [q.doc] : []));
@@ -365,177 +392,139 @@ export function AssistantMobiiz({
       setMessages((m) => [...m, { de: "mobiiz", texte: `${passe ? "Pas de souci, on passe." : phrases || "C'est noté."}${probleme ? "" : suite(t, passeesApres)}` }]);
     },
      
-    [occupe, dictee, questions, lignes, annuler, courant, passer, appliquer, repondreDoc, passees],
+    [occupe, dictee, questions, lignes, annuler, courant, passer, appliquer, repondreDoc, passees, setSaisie],
   );
 
-  const etape = questions.length > 0 ? 1 : 3;
-
+  const active = questions[0] ?? null;
   const pdf = <ApercuPdf projectId={projectId} version={version} onLigne={(cle) => setEdition({ cle })} onAjouter={() => setEdition({ cle: null })} />;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Assistant Mobiiz" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col bg-ground text-ink">
-      <header className="flex items-center gap-3 border-b border-line px-4 py-3 lg:px-8">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent" aria-hidden="true">
-          <Sparkles size={18} />
-        </span>
-        <h2 className="text-[16px] font-extrabold whitespace-nowrap lg:text-[17px]">Assistant Mobiiz</h2>
-        <ol aria-label="Étapes" className="ml-6 hidden items-center gap-2 lg:flex">
-          {ETAPES.map((e, i) => (
-            <li key={e} aria-current={i === etape ? "step" : undefined} className={`rounded-full px-3 py-1 text-[13px] font-semibold ${i === etape ? "bg-accent text-on-accent" : i < etape ? "text-ink" : "text-muted"}`}>
-              {i + 1}. {e}
-            </li>
-          ))}
-        </ol>
-        <span className="flex-1" />
-        <button type="button" onClick={() => setVoirPdf(true)} className="pressable flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-line px-3 text-[14px] font-semibold whitespace-nowrap lg:hidden">
-          <Eye size={17} aria-hidden="true" />
-          Voir PDF
-        </button>
-        <button type="button" onClick={onClose} aria-label="Fermer l'assistant" className="pressable flex size-11 items-center justify-center rounded-full border border-line">
-          <X size={19} aria-hidden="true" />
-        </button>
-      </header>
+    <div
+      ref={zone}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Assistant Mobiiz"
+      className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[#FBF8F3]"
+      style={{ backgroundColor: COULEURS_CHAT.fond }}
+    >
+      <EnTeteChat onFermer={onClose} onVoirPdf={ordinateur ? undefined : () => setVoirPdf(true)} />
       <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <section aria-label="Conversation" className="flex min-h-0 flex-col">
-          <div ref={fil} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4 lg:px-8">
+          <div ref={fil} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4 lg:px-6">
             {aide ? (
-              <div role="note" className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-3 text-[14px] text-ink">
-                <span className="flex-1">{AIDE}</span>
+              <div role="note" className="flex items-center gap-2 self-center rounded-full px-3 py-1 text-[13px] text-[#FBF8F3]/70" style={{ backgroundColor: "rgba(251,248,243,0.06)" }}>
+                <span>{AIDE}</span>
                 <button
                   type="button"
                   onClick={() => {
                     setAide(false);
                     ecrireStockage("mobiiz-assistant-aide", "vue");
                   }}
-                  className="min-h-9 shrink-0 rounded-full px-3 text-[14px] font-semibold"
+                  className="min-h-8 shrink-0 rounded-full px-2 font-semibold text-[#FED206]"
                 >
                   Compris
                 </button>
               </div>
             ) : null}
-            {messages.map((m, i) => (
-              <p
-                key={i}
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[15px] leading-snug ${m.de === "moi" ? "self-end bg-accent text-on-accent" : "self-start bg-surface text-ink shadow-card"}`}
-              >
-                {m.texte}
-              </p>
-            ))}
-            {questions.map((q) => (
-              <div key={q.id} role="group" aria-label={q.texte} className="flex flex-col gap-2.5 rounded-2xl bg-surface p-4 shadow-card">
-                <div className="flex items-start justify-between gap-3">
-                  <span className="text-[16px] font-bold text-ink">{q.texte}</span>
-                  <button type="button" onClick={() => passer(q.id)} className="min-h-9 shrink-0 rounded-full px-3 text-[14px] font-semibold text-muted">
+            {messages.map((m, i) =>
+              m.de === "moi" ? (
+                <Bulle key={i} de="moi">
+                  {m.texte}
+                </Bulle>
+              ) : (
+                <Bulle key={i} de="mobiiz">
+                  <TexteMobiiz>{m.texte}</TexteMobiiz>
+                </Bulle>
+              ),
+            )}
+            {propositions.length > 0 ? (
+              <Bulle de="mobiiz" label="Sans quantité en chiffres">
+                <TexteMobiiz>Sans quantité en chiffres, je n&apos;ai rien compté pour : {propositions.map((p) => p.libelle).join(", ")}. Je les ajoute ?</TexteMobiiz>
+                <div className="flex flex-wrap gap-2">
+                  {propositions.map((p) => (
+                    <Puce key={p.libelle} disabled={occupe} onClick={() => void ajouterProposition(p)}>
+                      Ajouter « {p.libelle} »
+                    </Puce>
+                  ))}
+                  <Puce discret onClick={() => setPropositions([])}>
+                    Non merci
+                  </Puce>
+                </div>
+              </Bulle>
+            ) : null}
+            {/* La question active, dans sa bulle : ses réponses d'un tap et « Passer », petit, à côté. */}
+            {active ? (
+              <Bulle de="mobiiz" label={active.texte}>
+                <TexteMobiiz>{active.texte}</TexteMobiiz>
+                <div className="flex flex-wrap items-center gap-2">
+                  {active.choix.map((c) => (
+                    <Puce key={c.valeur} disabled={occupe} onClick={() => void (active.doc ? choisir(active.doc, c.valeur, c.libelle) : envoyer(c.libelle))}>
+                      {c.libelle}
+                    </Puce>
+                  ))}
+                  <Puce discret onClick={() => passer(active.id)}>
                     Passer
+                  </Puce>
+                </div>
+              </Bulle>
+            ) : (
+              <div className="flex flex-wrap gap-2 pl-10">
+                <Puce
+                  onClick={() => {
+                    onClose();
+                    onSend();
+                  }}
+                >
+                  Envoyer aux négoces
+                </Puce>
+                <Puce discret onClick={onClose}>
+                  Voir ma liste
+                </Puce>
+              </div>
+            )}
+            {occupe ? <p className="pl-10 text-[14px] text-[#FBF8F3]/60">Je mets ta liste à jour…</p> : null}
+          </div>
+          <BarreSaisie
+            valeur={saisie}
+            onChange={setSaisie}
+            onEnvoyer={() => void envoyer(saisie)}
+            occupe={occupe}
+            ecoute={dictee.ecoute}
+            probleme={dictee.probleme}
+            onDicter={() => {
+              champDicte.avantDictee();
+              dictee.demarrer();
+            }}
+            onArreter={dictee.arreter}
+            onAnnulerDictee={() => {
+              dictee.annuler();
+              champDicte.rendre();
+            }}
+            avant={
+              retours.length > 0 ? (
+                <div className="flex pb-2">
+                  <button type="button" disabled={occupe} onClick={() => void annuler()} className="pressable flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-semibold text-[#FBF8F3]/75" style={{ backgroundColor: "rgba(251,248,243,0.06)" }}>
+                    <Undo2 size={14} aria-hidden="true" />
+                    Annuler la dernière modification
                   </button>
                 </div>
-                {q.choix.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {q.choix.map((c) => (
-                      <button
-                        key={c.valeur}
-                        type="button"
-                        disabled={occupe}
-                        onClick={() => void (q.doc ? choisir(q.doc, c.valeur, c.libelle) : envoyer(q.chantier?.cle === "livraison" ? (c.libelle.startsWith("Oui") ? "oui" : "non") : c.libelle))}
-                        className="pressable min-h-10 rounded-full border border-line px-4 text-[14px] font-semibold text-ink"
-                      >
-                        {c.libelle}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-[13px] text-muted">Écris-la ou dicte-la ci-dessous.</span>
-                )}
-              </div>
-            ))}
-            {occupe ? <p className="self-start text-[14px] text-muted">Je mets ta liste à jour…</p> : null}
-          </div>
-          <div className="flex flex-col gap-2 border-t border-line px-4 pt-3 pb-[max(env(safe-area-inset-bottom),12px)] lg:px-8">
-            {dictee.probleme ? (
-              <p role="alert" className="text-[13px] font-semibold text-danger">
-                {dictee.probleme}
-              </p>
-            ) : null}
-            <form
-              className="flex items-end gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void envoyer(saisie);
-              }}
-            >
-              <label className="flex min-h-12 flex-1 items-center rounded-3xl border border-line bg-surface px-4 focus-within:border-ink">
-                <span className="sr-only">Ton message</span>
-                <textarea
-                  rows={1}
-                  value={saisie}
-                  onChange={(e) => {
-                    setSaisie(e.target.value);
-                    base.current = e.target.value;
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      void envoyer(saisie);
-                    }
-                  }}
-                  placeholder={dictee.ecoute ? "Je t'écoute…" : "Écris ou dicte ta réponse"}
-                  className="max-h-32 w-full resize-none bg-transparent py-3 text-[16px] outline-none"
-                />
-              </label>
-              <button
-                type="button"
-                aria-label={dictee.ecoute ? "Arrêter la dictée" : "Dicter"}
-                aria-pressed={dictee.ecoute}
-                onClick={() => {
-                  if (dictee.ecoute) dictee.arreter();
-                  else {
-                    base.current = saisie;
-                    dictee.demarrer();
-                  }
-                }}
-                className={`pressable flex size-12 shrink-0 items-center justify-center rounded-full border ${dictee.ecoute ? "border-danger bg-danger text-white" : "border-line bg-surface text-ink"}`}
-              >
-                <Mic size={20} aria-hidden="true" />
-              </button>
-              <button type="submit" aria-label="Envoyer le message" disabled={!saisie.trim() || occupe} className="pressable flex size-12 shrink-0 items-center justify-center rounded-full bg-ink text-white disabled:opacity-40">
-                <ArrowUp size={20} aria-hidden="true" />
-              </button>
-            </form>
-            <div className="flex flex-wrap items-center gap-2">
-              {retours.length > 0 ? (
-                <button type="button" disabled={occupe} onClick={() => void annuler()} className="pressable flex min-h-10 items-center gap-1.5 rounded-full px-3 text-[14px] font-semibold text-ink">
-                  <Undo2 size={16} aria-hidden="true" />
-                  Annuler la dernière modification
-                </button>
-              ) : null}
-              <span className="flex-1" />
-              <button type="button" onClick={onClose} className="pressable min-h-11 rounded-full border border-line px-4 text-[14px] font-semibold">
-                Voir ma liste
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onSend();
-                }}
-                className="pressable min-h-11 rounded-full bg-accent px-5 text-[15px] font-bold text-on-accent"
-              >
-                Envoyer aux négoces
-              </button>
-            </div>
-          </div>
+              ) : null
+            }
+          />
         </section>
         {ordinateur ? (
-          <section aria-label="Aperçu du PDF" className="flex min-h-0 flex-col border-l border-line bg-(--voile-2)">
+          <section aria-label="Aperçu du PDF" className="flex min-h-0 flex-col border-l bg-[#1A1918]" style={{ borderColor: COULEURS_CHAT.trait }}>
             {pdf}
           </section>
         ) : null}
       </div>
+      {/* « Voir PDF » : par-dessus la conversation, qui reste montée (messages, brouillon, position gardés). */}
       {voirPdf && !ordinateur ? (
-        <div role="dialog" aria-modal="true" aria-label="Le PDF de ta demande" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col bg-night lg:hidden">
-          <div className="flex items-center justify-between gap-3 px-4 py-3 text-white">
+        <div role="dialog" aria-modal="true" aria-label="Le PDF de ta demande" className="absolute inset-x-0 top-0 z-10 flex h-full w-full flex-col bg-[#111111]">
+          <div className="flex items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),8px)] pb-2 text-white">
             <span className="text-[16px] font-bold">Ta demande de prix</span>
-            <button type="button" onClick={() => setVoirPdf(false)} className="pressable min-h-11 rounded-full bg-white/10 px-4 text-[14px] font-semibold text-white">
+            <button type="button" onClick={() => setVoirPdf(false)} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-white/10 px-4 text-[14px] font-semibold text-white">
+              <X size={16} aria-hidden="true" />
               Retour à l&apos;assistant
             </button>
           </div>
