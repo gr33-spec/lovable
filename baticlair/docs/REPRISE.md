@@ -15,9 +15,12 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-SUIVI 139 (casques) et 140 (illustration à la place de la photo) : commits locaux, à pousser après la série verte du
-site. Ouvert chez Greg : validation des CGU (doc VNekwvYYq3KzhijCSm2KDX, deux points à trancher en bas du doc).
-Lecture IA réelle (point 13) : la routine du crédit la reprend seule.
+SUIVI 141 (message de Greg du 31 octobre, maquette jointe) : landing retravaillée d'après la maquette, sans casser la
+DA (noir, jaune, ivoire) : héros « Compare les négoces. Achète tes matériaux au bon prix. », « Comment ça marche ? » en
+3 étapes avec téléphones inclinés (écrans de l'app mis en scène), bloc « Achète en collectif (si tu le souhaites) »
+1 / 5 / 20 artisans et prix illustratifs qui baissent, bénéfices (simple, visibilité, poids), fond de nappes de lumière
+floues très lentes (réduites sous prefers-reduced-motion), mobile soigné. Pas de photo sans droits (illustration
+maison), pas d'« Avis » inventés. Puis tests complets, captures, rapport. CGU : toujours en attente de Greg.
 
 ## À faire ensuite (dans cet ordre)
 

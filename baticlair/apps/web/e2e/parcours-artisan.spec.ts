@@ -61,7 +61,7 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.goto("/");
   // Sans session : la page publique, puis « Créer un compte » mène à l'inscription.
   // Landing « niveau studio » (Greg, 26 octobre 2026) : l'accroche.
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ne te contente plus d’un seul prix\.$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Compare les négoces\. Achète tes matériaux au bon prix\.$/);
   // L'aperçu WhatsApp : écrit dès le serveur avec l'adresse du site, jamais vercel.app.
   const html = await (await page.request.get("/")).text();
   expect(html).toMatch(/<meta property="og:image" content="http:\/\/localhost:3000\/marque\/partage\.png"/);
@@ -2597,56 +2597,57 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // est, moins on paie » et ses 20 artisans, l'offre, les questions, le dernier appel.
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Ne te contente plus d’un seul prix\.$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Compare les négoces\. Achète tes matériaux au bon prix\.$/);
   await expect(page.getByText("Par des artisans, pour les artisans", { exact: true })).toBeVisible();
+  // Greg, 31 octobre 2026 (maquette jointe) : le héros, « Comment ça marche ? » en trois étapes, la bande « Achète en
+  // collectif (si tu le souhaites) », les bénéfices, « Pourquoi Mobiiz ? », les questions, le dernier appel.
   const ordre = await Promise.all(
-    [/^Ne te contente plus/, /^Une demande\./, /^Plus on est, moins on paie\./, /^Un même matériau/, /^À ton rythme\./, "Tu te poses des questions ?", /^Le prochain bon prix/].map(
+    [/^Compare les négoces/, "Comment ça marche ?", /^Achète en collectif/, "Simple et rapide", /^Un même matériau/, "Tu te poses des questions ?", /^Le prochain bon prix/].map(
       async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y,
     ),
   );
   expect([...ordre].sort((x, y) => x - y)).toEqual(ordre);
-  // Greg, 30 octobre 2026 (« évolution stratégique ») : le collectif d'abord, quatre étapes qui disent ce qui marche
-  // aujourd'hui, « Pourquoi Mobiiz ? », et « Commencer gratuitement » (l'inscription est gratuite, les achats groupés aussi).
-  // Greg, 30 octobre 2026, soir : trois étapes, l'achat groupé à part (facultatif) ; aucun badge « Recommandé ».
-  for (const etape of ["Prépare ta demande.", "Consulte plusieurs négoces.", "Compare et choisis."]) await expect(page.getByRole("heading", { name: etape })).toBeVisible();
-  await expect(page.locator("#fonctionnement .step")).toHaveCount(3);
+  await expect(page.getByText("Une seule demande, envoyée jusqu’à 5 négoces.", { exact: false })).toBeVisible();
+  for (const etape of ["Prépare ta liste", "Consulte tes négoces", "Compare et choisis"]) await expect(page.getByRole("heading", { name: etape, exact: true })).toBeVisible();
+  await expect(page.locator("#fonctionnement .mz2-etape")).toHaveCount(3);
+  // Les écrans mis en scène : trois téléphones, chacun incliné autrement ; les prix marqués « Exemple ».
+  const angles = await page.locator(".mz2-tel").evaluateAll((els) => els.map((e) => getComputedStyle(e).transform));
+  expect(new Set(angles).size).toBe(3);
+  await expect(page.locator(".mz2-tel-3").getByText("Exemple")).toHaveCount(1);
   await expect(page.getByText(/Recommandé/)).toHaveCount(0);
-  await expect(page.getByText(/C’est facultatif, Mobiiz te sert aussi pour tes seules demandes de prix\./)).toBeVisible();
-  await expect(page.getByText("En plus : l’union fait la force", { exact: true })).toBeVisible();
+  for (const b of ["Simple et rapide", "Plus de visibilité", "Plus de poids"]) await expect(page.getByRole("heading", { name: b })).toBeVisible();
   // Greg, 30 octobre 2026, nuit : « Pourquoi Mobiiz ? » neutre et collectif, sans l'identité du fondateur.
   const pourquoi = page.getByRole("region", { name: /^Un même matériau ne devrait pas être une surprise à chaque commande\./ });
   await expect(pourquoi.getByText(/^Dans le bâtiment, on l’a tous vu/)).toBeVisible();
   await expect(pourquoi.getByText("Mobiiz. Plus on est, moins on paie.")).toBeVisible();
   await expect(page.getByText(/Grégory|Paimpol|fondateur/)).toHaveCount(0);
   await expect(page.getByText(/rejoindre gratuitement|rejoins gratuitement/i)).toHaveCount(0);
-  // Sous le bouton principal, « Gratuit · Sans carte bancaire ».
   await expect(page.getByText(/^Gratuit · Sans carte bancaire/).first()).toBeVisible();
-  // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits, pour tous.
-  await expect(page.getByText("Gratuit, pour tous les artisans")).toBeVisible();
+  // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits, pour tous ; le collectif reste facultatif.
+  await expect(page.getByText("si tu le souhaites", { exact: true })).toBeVisible();
+  await expect(page.getByText(/^Gratuit, pour tous les artisans\. Exemple fictif/)).toBeVisible();
   await expect(page.getByText(/premier achat groupé est offert/)).toHaveCount(0);
-  await expect(page.getByText("1 analyse de devis et 3 scans de liste offerts")).toBeVisible();
   const faq = page.getByRole("region", { name: "Tu te poses des questions ?" });
   await expect(faq.locator("summary")).toHaveText(["Je peux garder mes négoces habituels ?", "Où arrivent les réponses des négoces ?", "Est-ce que Mobiiz est gratuit ?", "Est-ce que je dois obligatoirement commander ?", "Est-ce que je vais forcément payer moins cher ?", "Avec qui je suis regroupé ?"]);
   for (const s of await faq.locator("summary").all()) await s.click();
   await expect(faq.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
   await expect(faq.getByText("Oui : tes listes, l'envoi à tes négoces et les achats groupés sont gratuits, sans limite de temps.", { exact: false })).toBeVisible();
+  await expect(faq.getByText(/1 analyse de devis et 3 scans de liste/)).toBeVisible();
   await expect(faq.getByText("Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel.", { exact: false })).toBeVisible();
   await expect(faq.getByText(/^Non, aucun prix ni niveau d’économie n’est garanti\./)).toBeVisible();
-  // Jamais les mots « IA », « automatique », « précis », « exact » ; aucun montant d'abonnement (l'exemple fictif 6 € → 3 € HT/L est permis, marqué « Exemple fictif »).
+  // Jamais les mots « IA », « automatique », « précis », « exact » ; aucun montant d'abonnement.
   expect(await page.locator("main").innerText()).not.toMatch(/\b(IA|automatiques?|automatisée?s?|précise?s?|exacte?s?)\b/i);
   await expect(page.getByText(/€ HT (par|\/) (mois|an)/)).toHaveCount(0);
-  // L'animation des 20 artisans : à 1 tant qu'elle n'est pas à l'écran, puis jusqu'à 20 au défilement ; « Rejouer » la relance.
-  const demo = page.locator("#animationSurface");
-  await expect(demo).toHaveAttribute("data-artisans", "1");
-  await expect(demo.getByText("EXEMPLE FICTIF")).toBeVisible();
-  await demo.scrollIntoViewIfNeeded();
-  await expect(demo).toHaveAttribute("data-artisans", "20", { timeout: 10_000 });
-  await expect(demo.getByText("20 artisans réunis. Plus on est, moins on paie.")).toBeVisible();
-  await expect(demo.getByText("3,00")).toBeVisible();
-  await expect(demo.getByText(/Simulation pédagogique fictive \(6 € → 3 € HT\/L\)\. Aucun prix ni pourcentage d’économie garanti/)).toBeVisible();
-  await demo.getByRole("button", { name: "Revoir l'animation" }).click();
-  await expect(demo).not.toHaveAttribute("data-artisans", "20");
-  await expect(demo).toHaveAttribute("data-artisans", "20", { timeout: 10_000 });
+  // Les paliers du collectif : éteints tant que la bande n'est pas à l'écran, puis 1, 5 et 20 artisans s'allument, le
+  // dernier prix (d'exemple) en jaune.
+  const paliers = page.locator(".mz2-paliers");
+  await expect(paliers).toHaveAttribute("data-palier", "0");
+  await paliers.scrollIntoViewIfNeeded();
+  await expect(paliers).toHaveAttribute("data-palier", "3", { timeout: 10_000 });
+  await expect(paliers.locator(".mz2-palier.on")).toHaveCount(3);
+  await expect(paliers).toHaveAttribute("aria-label", "Exemple fictif : 1 480 € seul, 1 280 € à 5 artisans, 1 190 € à 20 artisans");
+  // Le fond : des nappes de lumière décoratives, hors de l'arbre d'accessibilité.
+  await expect(page.locator(".mz2-nappes")).toHaveAttribute("aria-hidden", "true");
   // Les liens : l'inscription (deux boutons et l'en-tête), la connexion, les tarifs, les pages légales, l'accès négoce. En
   // haut de page, le bouton fixe du téléphone est caché (hors de l'arbre d'accessibilité).
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -2657,7 +2658,6 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // L'en-tête (caché sur téléphone, comme la maquette : le menu et le bouton fixe y suffisent).
   await expect(page.locator(".nav-right a", { hasText: "Commencer gratuitement" })).toHaveAttribute("href", "/inscription");
   await expect(page.locator(".nav-right a", { hasText: "Se connecter" })).toHaveAttribute("href", "/connexion");
-  await expect(page.getByRole("link", { name: /^Découvrir l'offre/ })).toHaveAttribute("href", "/tarifs");
   const pied = page.getByRole("navigation", { name: "Informations et liens légaux" });
   for (const [nom, href] of <[string, string][]>[["Tarifs", "/tarifs"], ["Mentions légales", "/mentions-legales"], ["CGU", "/cgu"], ["Conditions négoces", "/conditions-negoce"], ["Confidentialité", "/confidentialite"], ["Contact", "/mentions-legales#contact"], ["Accès négoce", "/negoce/connexion"]])
     await expect(pied.getByRole("link", { name: nom })).toHaveAttribute("href", href);
@@ -2672,9 +2672,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await page.getByRole("button", { name: "Ouvrir le menu" }).click();
   // « Se connecter », caché dans l'en-tête du téléphone, est dans le menu.
   await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Se connecter" })).toHaveAttribute("href", "/connexion");
-  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "L'offre" }).click();
+  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Comment ça marche" }).click();
   await expect(page.getByRole("button", { name: "Ouvrir le menu" })).toHaveAttribute("aria-expanded", "false");
-  await expect(page.getByRole("heading", { name: /^À ton rythme\./ })).toBeInViewport();
+  await expect(page.getByRole("heading", { name: "Comment ça marche ?" })).toBeInViewport();
   await expect(fixe).toHaveAttribute("data-visible", "");
   await expect(fixe.getByRole("link", { name: "Commencer gratuitement" })).toBeVisible();
   // Greg, 30 octobre 2026, soir : le bouton fixe est un bouton seul, sans bandeau ni dégradé, qui ne cache pas la lecture.

@@ -21,7 +21,7 @@ function Fleche() {
 const ANCRES = [
   { href: "#fonctionnement", label: "Comment ça marche" },
   { href: "#collectif", label: "Achats groupés" },
-  { href: "#offre", label: "L'offre" },
+  { href: "/tarifs", label: "Tarifs" },
   { href: "#questions", label: "Questions" },
 ] as const;
 
@@ -205,6 +205,64 @@ export function DemoVingtArtisans() {
         </button>
       </div>
       <p className="disclaimer">Simulation pédagogique fictive (6 € → 3 € HT/L). Aucun prix ni pourcentage d’économie garanti ; les prix réels dépendent des offres reçues.</p>
+    </div>
+  );
+}
+
+/**
+ * « PLUS ON EST, MOINS ON PAIE » EN TROIS PALIERS (maquette de Greg, 31 octobre 2026) : 1 artisan, 5, puis 20 ; les prix
+ * d'exemple baissent, le dernier en jaune. Les paliers s'allument l'un après l'autre quand la bande arrive à l'écran
+ * (`data-palier` de 0 à 3) ; sous « réduire les animations », tout est allumé d'emblée. Exemple fictif, jamais un prix réel.
+ */
+const PALIERS = [
+  { artisans: 1, prix: "1 480 €", ico: "i-person" },
+  { artisans: 5, prix: "1 280 €", ico: "i-people" },
+  { artisans: 20, prix: "1 190 €", ico: "i-people" },
+] as const;
+
+export function PaliersCollectif() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [palier, setPalier] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const id = requestAnimationFrame(() => setPalier(PALIERS.length));
+      return () => cancelAnimationFrame(id);
+    }
+    let minuteries: number[] = [];
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (!e?.isIntersecting) return;
+        obs.disconnect();
+        minuteries = PALIERS.map((_, i) => window.setTimeout(() => setPalier(i + 1), 250 + i * 650));
+      },
+      { threshold: 0.4 },
+    );
+    obs.observe(el);
+    return () => {
+      obs.disconnect();
+      minuteries.forEach((t) => window.clearTimeout(t));
+    };
+  }, []);
+  return (
+    <div ref={ref} className="mz2-paliers" data-palier={palier} role="img" aria-label="Exemple fictif : 1 480 € seul, 1 280 € à 5 artisans, 1 190 € à 20 artisans">
+      {PALIERS.map((p, i) => (
+        <div key={p.artisans} className={`mz2-palier${i < palier ? " on" : ""}${i === PALIERS.length - 1 ? " dernier" : ""}`}>
+          <svg className="mz2-palier-ico" aria-hidden="true">
+            <use href={`#${p.ico}`} />
+          </svg>
+          <span className="mz2-palier-qui">
+            {p.artisans} artisan{p.artisans > 1 ? "s" : ""}
+          </span>
+          <span className="mz2-palier-prix">{p.prix}</span>
+          {i < PALIERS.length - 1 ? (
+            <span className="mz2-palier-fleche" aria-hidden="true">
+              →
+            </span>
+          ) : null}
+        </div>
+      ))}
     </div>
   );
 }

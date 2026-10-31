@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CtaFixePremium, DemoVingtArtisans, EntetePremium } from "@/components/landing-premium";
+import { CtaFixePremium, EntetePremium, PaliersCollectif } from "@/components/landing-premium";
 import { HEBERGEUR, PAGES_LEGALES } from "@/lib/legal";
 import { ACCROCHE_APP, BLOC_LEGAL } from "@/lib/nom";
 import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
@@ -69,6 +69,10 @@ function Sprite() {
         <circle cx="9" cy="7" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <path d="M2.5 20v-2.6A5.4 5.4 0 018 12h2a5.4 5.4 0 015.5 5.4V20M17 4a3 3 0 010 6m1.5 3c2.2.6 3 2.3 3 4.3V20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </symbol>
+      <symbol id="i-person" viewBox="0 0 24 24">
+        <circle cx="12" cy="7.5" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4.5 20.5v-1.6A5.9 5.9 0 0110.4 13h3.2a5.9 5.9 0 015.9 5.9v1.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </symbol>
       <symbol id="i-check" viewBox="0 0 24 24">
         <path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
       </symbol>
@@ -110,15 +114,53 @@ const QUESTIONS = [
 ] as const;
 
 /**
- * Les trois étapes (Greg, 30 octobre 2026, soir : « quatre étapes, c'est confus, on croit l'achat groupé obligatoire ») :
- * préparer sa demande (à la main, une liste scannée, ou depuis un devis), consulter plusieurs négoces, retrouver et comparer
- * leurs réponses. L'achat groupé a sa section à part. Pas de badge « Recommandé » : chacun choisit sa façon.
+ * Les trois étapes (Greg, 30 octobre 2026, soir, puis la maquette du 31 octobre) : préparer sa liste, consulter ses
+ * négoces, comparer et choisir. L'achat groupé a sa bande à part. Pas de badge « Recommandé ».
  */
 const ETAPES = [
-  { ico: "i-list", titre: "Prépare ta demande.", texte: "Écris tes matériaux, prends ta liste en photo ou pars de ton devis, on t’aide à la préparer. Tu vérifies les quantités et c’est prêt." },
-  { ico: "i-upload", titre: "Consulte plusieurs négoces.", texte: "Tes négoces habituels, et d’autres si tu veux. Ils reçoivent tous la même demande, avec un PDF propre, en un seul envoi." },
-  { ico: "i-search", titre: "Compare et choisis.", texte: "Les réponses arrivent dans Mobiiz, avec ton chantier. Les prix donnés en ligne se comparent ligne par ligne : tu vois le moins cher." },
+  { titre: "Prépare ta liste", texte: "Écris tes matériaux, photographie ta liste ou pars de ton devis. Tu vérifies, c’est prêt." },
+  { titre: "Consulte tes négoces", texte: "Une seule demande, avec un PDF propre, envoyée jusqu’à 5 négoces." },
+  { titre: "Compare et choisis", texte: "Les réponses arrivent dans Mobiiz. Les prix donnés en ligne se comparent ligne par ligne." },
 ] as const;
+
+const BENEFICES = [
+  { ico: "i-check", titre: "Simple et rapide", texte: "Une demande au lieu de cinq appels." },
+  { ico: "i-search", titre: "Plus de visibilité", texte: "Tu compares facilement les propositions." },
+  { ico: "i-people", titre: "Plus de poids", texte: "Le collectif négocie de meilleurs tarifs." },
+] as const;
+
+/** Les écrans de l'app mis en scène dans un téléphone : contenu d'exemple, jamais un vrai client ni un vrai prix. */
+const ECRANS = [
+  { titre: "Ma liste", lignes: [["Plaque BA13", "40"], ["Isolant 120", "18"], ["Rail R48", "24"], ["Vis placo", "2"]] },
+  { titre: "Mes négoces", lignes: [["Négoce A", ""], ["Négoce B", ""], ["Négoce C", ""]] },
+  { titre: "Réponses", lignes: [["Négoce A", "1 248 €"], ["Négoce B", "1 276 €"], ["Négoce C", "1 318 €"]] },
+] as const;
+
+function Telephone({ n }: { n: number }) {
+  const e = ECRANS[n]!;
+  return (
+    <div className={`mz2-tel mz2-tel-${n + 1}`} aria-hidden="true">
+      <div className="mz2-tel-ecran">
+        <div className="mz2-tel-barre">
+          <span>9:41</span>
+          <span className="mz2-tel-ilot" />
+        </div>
+        <p className="mz2-tel-titre">
+          {e.titre}
+          {n === 2 ? <em>Exemple</em> : null}
+        </p>
+        {e.lignes.map(([l, v], i) => (
+          <div className={`mz2-tel-ligne${n === 2 && i === 0 ? " moins-cher" : ""}`} key={l}>
+            <Icone id="i-check" className="mz2-coche" />
+            <span>{l.startsWith("Négoce ") ? <><i className="pref">Négoce </i>{l.slice(7)}</> : l}</span>
+            {v ? <b>{v}</b> : null}
+          </div>
+        ))}
+        {n === 2 ? <p className="mz2-tel-pied">Le moins cher : Négoce A</p> : null}
+      </div>
+    </div>
+  );
+}
 
 export function LandingPremium() {
   compterLaVisite();
@@ -127,166 +169,111 @@ export function LandingPremium() {
       <Sprite />
       <EntetePremium />
       <main id="haut">
-        <section className="hero" aria-labelledby="heroTitle">
-          <div className="wrap">
-            <div className="hero-layout">
-              <div className="hero-copy">
-                <span className="label">{ACCROCHE_APP.replace(/\.$/, "")}</span>
-                <h1 id="heroTitle">
-                  Ne te contente plus <span>d’un seul prix.</span>
-                </h1>
-                <p className="hero-lead">Prépare ta demande de matériaux une fois, envoie-la à plusieurs négoces et compare leurs réponses. Pour les grosses commandes, regroupe-toi avec d’autres artisans : plus on est, moins on paie.</p>
-                <div className="hero-actions">
-                  <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/inscription">
-                    {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
-                  </Link>
-                  <a className="text-link" href="#fonctionnement">
-                    <span className="circle-down" aria-hidden="true">
-                      ↓
-                    </span>{" "}
-                    Voir comment ça marche
-                  </a>
-                </div>
-                <p className="under-cta">
-                  {CTA_PRINCIPAL.sous} · <Link href="/tarifs">Voir les conditions</Link>
-                </p>
+        {/* Les nappes de lumière du fond (Greg, 31 octobre 2026) : floues, très lentes, à peine visibles ; immobiles sous
+            « réduire les animations ». Purement décoratives. */}
+        <div className="mz2-nappes" aria-hidden="true">
+          <span className="n1" />
+          <span className="n2" />
+          <span className="n3" />
+          <span className="n4" />
+        </div>
+
+        <section className="mz2-hero" aria-labelledby="heroTitle">
+          <div className="wrap mz2-hero-grid">
+            <div className="mz2-hero-copy">
+              <span className="mz2-kicker">{ACCROCHE_APP.replace(/\.$/, "")}</span>
+              <h1 id="heroTitle">
+                <span className="l1">Compare les négoces.</span> Achète tes matériaux <span>au bon prix.</span>
+              </h1>
+              <p className="mz2-lead">Une seule demande, envoyée jusqu’à 5 négoces. Compare leurs offres et, si tu le souhaites, regroupe tes achats pour négocier plus fort.</p>
+              <div className="hero-actions">
+                <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/inscription">
+                  {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
+                </Link>
+                <a className="text-link" href="#fonctionnement">
+                  <span className="circle-down" aria-hidden="true">
+                    ↓
+                  </span>{" "}
+                  Voir comment ça marche
+                </a>
               </div>
-              <div className="hero-media" role="group" aria-label="Artisans du bâtiment réunis, et un exemple d'achat groupé">
-                <div className="hero-photo">
-                  {/* Une illustration dessinée pour Mobiiz, à la place de la photo de la maquette dont les droits ne sont pas
-                      confirmés (Greg, 30 octobre 2026 : « sinon, un visuel dont nous maîtrisons les droits »). */}
-                  {/* eslint-disable-next-line @next/next/no-img-element -- une illustration SVG, sans optimisation d'image */}
-                  <img src="/landing/v3/collectif.svg" alt="Illustration : un collectif d'artisans sous une même charpente" width={1080} height={465} fetchPriority="high" />
-                  <span className="photo-stamp">La force des pros réunis</span>
-                </div>
-                {/* L'aperçu dit la demande à plusieurs négoces (Greg, 30 octobre 2026, soir) ; marqué « Exemple », sans prix. */}
-                <div className="product-card" role="group" aria-label="Exemple de demande de prix dans Mobiiz">
-                  <div className="product-card-top">
-                    <span className="mini-brand">Mobiiz</span>
-                    <span className="mini-counter">Exemple</span>
-                  </div>
-                  <h3>Ta demande · 3 négoces</h3>
-                  {[
-                    ["i-list", "Ta liste, un PDF propre"],
-                    ["i-upload", "Envoyée à tes négoces"],
-                    ["i-search", "Leurs prix côte à côte"],
-                  ].map(([ico, t]) => (
-                    <div className="product-action" key={t}>
-                      <span className="pic">
-                        <Icone id={ico!} />
-                      </span>
-                      <strong>{t}</strong>
-                      <span className="tiny-arrow" aria-hidden="true">
-                        ✓
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="glass-note">
-                  <Icone id="i-search" /> Fais jouer la concurrence.
-                </div>
-              </div>
+              <p className="under-cta">
+                {CTA_PRINCIPAL.sous} · <Link href="/tarifs">Voir les conditions</Link>
+              </p>
             </div>
-            <div className="value-line">
-              <div className="value-item">
-                <Icone id="i-upload" />
-                <span>
-                  Plusieurs négoces
-                  <br />
-                  en une demande
-                </span>
-              </div>
-              <div className="value-item">
-                <Icone id="i-search" />
-                <span>
-                  Leurs réponses
-                  <br />
-                  au même endroit
-                </span>
-              </div>
-              <div className="value-item">
-                <Icone id="i-people" />
-                <span>
-                  Les achats groupés
-                  <br />
-                  en plus
-                </span>
-              </div>
+            {/* Une illustration dessinée pour Mobiiz (droits maîtrisés ; aucune photo sans droits confirmés), devant la bande
+                jaune en diagonale de la maquette. */}
+            <div className="mz2-hero-visuel">
+              <span className="mz2-bande" aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element -- une illustration SVG, sans optimisation d'image */}
+              <img src="/landing/v3/collectif.svg" alt="Illustration : un collectif d'artisans sous une même charpente" width={1080} height={465} fetchPriority="high" />
             </div>
           </div>
         </section>
 
-        <div className="ticker">
-          <div className="wrap ticker-inner" role="group" aria-label="Les avantages Mobiiz">
-            {[
-              ["✳", "Prépare"],
-              ["↗", "Consulte"],
-              ["✳", "Compare"],
-              ["↓", "Plus on est, moins on paie"],
-            ].map(([s, t]) => (
-              <span className="ticker-item" key={t}>
-                <b aria-hidden="true">{s}</b>
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <section className="section light" id="fonctionnement" aria-labelledby="stepsTitle">
+        {/* « Comment ça marche ? » (maquette du 31 octobre) : trois étapes courtes, chacune avec son écran de l'app mis en
+            scène (contenu d'exemple, prix marqués « Exemple »), téléphones légèrement inclinés, jamais deux fois pareil. */}
+        <section className="mz2-carte" id="fonctionnement" aria-labelledby="stepsTitle">
           <div className="wrap">
-            <div className="heading-row">
-              <div>
-                <span className="section-kicker smallcap">Comment ça marche</span>
-                <h2 id="stepsTitle">
-                  Une demande.
-                  <br />
-                  Plusieurs négoces.
-                </h2>
-              </div>
-              <p className="aside">Fais jouer la concurrence sans multiplier les appels ni les e-mails. Tu gardes tes négoces habituels.</p>
-            </div>
-            <ol className="steps steps-3" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            <h2 id="stepsTitle" className="mz2-souligne">
+              Comment ça marche ?
+            </h2>
+            <ol className="mz2-etapes">
               {ETAPES.map((e, i) => (
-                <li className="step" key={e.titre}>
-                  <span className="step-ico">
-                    <Icone id={e.ico} />
-                  </span>
-                  <div>
-                    <span className="step-count">Étape {i + 1}</span>
-                    <h3>{e.titre}</h3>
-                    <p>{e.texte}</p>
+                <li className="mz2-etape" key={e.titre}>
+                  <div className="mz2-etape-texte">
+                    <span className="mz2-num" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    <div>
+                      <h3>{e.titre}</h3>
+                      <p>{e.texte}</p>
+                    </div>
                   </div>
+                  <Telephone n={i} />
                 </li>
               ))}
             </ol>
           </div>
         </section>
 
-        {/* Le collectif, en plus et facultatif (Greg, 30 octobre 2026, soir : un service complémentaire, pas une étape). */}
-        <section className="collective-section" id="collectif" aria-labelledby="collectiveTitle">
-          <div className="wrap collective-layout">
-            <div className="collective-copy">
-              <span className="label">En plus : l’union fait la force</span>
-              <h2 id="collectiveTitle">
-                Plus on est, <span className="gold">moins on paie.</span>
-              </h2>
-              <p>Pour tes grosses commandes, regroupe tes besoins avec les artisans de ton métier, dans ton département : ensemble, on pèse plus face aux négoces. C’est facultatif, Mobiiz te sert aussi pour tes seules demandes de prix.</p>
-              <ol className="explain" style={{ listStyle: "none", padding: 0 }}>
-                {["Les artisans de ton secteur se regroupent", "Leurs besoins s’additionnent", "Les négoces chiffrent le volume"].map((t, i) => (
-                  <li className="explain-item" key={t}>
-                    <span className="number" aria-hidden="true">
-                      0{i + 1}
-                    </span>{" "}
-                    {t}
-                  </li>
-                ))}
-              </ol>
-              <Link id="collectifCTA" className="btn btn-yellow collectif-cta" href="/inscription">
-                {CTA_COLLECTIF.bouton} <Icone id="i-arrow" className="arrow" />
-              </Link>
+        {/* Le collectif, fortement mis en avant mais facultatif (« si tu le souhaites ») : plus on est, moins on paie, en
+            trois paliers qui s'allument au défilement (`PaliersCollectif`). Prix d'exemple, jamais une économie promise. */}
+        <section className="mz2-collectif-wrap" id="collectif" aria-labelledby="collectiveTitle">
+          <div className="wrap">
+            <div className="mz2-collectif">
+              <div className="mz2-collectif-texte">
+                <span className="mz2-collectif-ico" aria-hidden="true">
+                  <Icone id="i-people" />
+                </span>
+                <div>
+                  <h2 id="collectiveTitle">
+                    Achète en collectif <span className="mz2-pastille">si tu le souhaites</span>
+                  </h2>
+                  <p>Regroupe tes besoins avec d’autres artisans de ton métier et de ton département, et négociez ensemble un meilleur prix. Plus on est, moins on paie.</p>
+                  <Link id="collectifCTA" className="mz2-lien-jaune" href="/inscription">
+                    {CTA_COLLECTIF.bouton} <Icone id="i-arrow" className="arrow" />
+                  </Link>
+                </div>
+              </div>
+              <PaliersCollectif />
             </div>
-            <DemoVingtArtisans />
+            <p className="mz2-note">Gratuit, pour tous les artisans. Exemple fictif : les prix réels dépendent des offres reçues, aucune économie n’est garantie.</p>
           </div>
+        </section>
+
+        <section className="mz2-benefices-wrap" aria-label="Ce que Mobiiz t'apporte">
+          <ul className="wrap mz2-benefices">
+            {BENEFICES.map((b) => (
+              <li key={b.titre}>
+                <Icone id={b.ico} />
+                <div>
+                  <h3>{b.titre}</h3>
+                  <p>{b.texte}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* « Pourquoi Mobiiz ? » (Greg, 30 octobre 2026, nuit : neutre, collectif, sans l'identité ni la photo du fondateur ;
@@ -304,73 +291,6 @@ export function LandingPremium() {
               </div>
               <p className="histoire-signature">Mobiiz. Plus on est, moins on paie.</p>
             </div>
-          </div>
-        </section>
-
-        <section className="choice-section" id="offre" aria-labelledby="offerTitle">
-          <div className="wrap">
-            <div className="heading-row">
-              <div>
-                <span className="section-kicker smallcap">Deux façons d&apos;avancer</span>
-                <h2 id="offerTitle">
-                  À ton rythme.
-                  <br />
-                  Avec tes besoins.
-                </h2>
-              </div>
-              <p className="aside">Commence par tes demandes de prix. Rejoins un achat groupé quand une grosse commande s’y prête.</p>
-            </div>
-            <div className="benefits">
-              <article className="benefit highlight">
-                <span className="benefit-label">01 / Ton quotidien</span>
-                <h3>Tes négoces en concurrence.</h3>
-                <p>Un outil simple pour préparer tes listes et demander des prix à plusieurs négoces.</p>
-                <ul>
-                  <li>
-                    <Icone id="i-check" /> Des listes de matériaux claires, avec leur PDF
-                  </li>
-                  <li>
-                    <Icone id="i-check" /> Plusieurs négoces en une demande, les réponses au même endroit
-                  </li>
-                  <li>
-                    <Icone id="i-check" /> 1 analyse de devis et 3 scans de liste offerts
-                  </li>
-                </ul>
-                <Link className="cta-text" href="/inscription">
-                  Préparer ma première demande <Icone id="i-arrow" className="arrow" />
-                </Link>
-              </article>
-              <article className="benefit">
-                <span className="benefit-label">02 / En plus, le collectif</span>
-                <h3>Les achats groupés.</h3>
-                <p>Pour une grosse commande, ta liste rejoint celles des artisans de ton métier, dans ton département. Les négoces chiffrent le volume.</p>
-                <ul>
-                  <li>
-                    <Icone id="i-check" /> Les volumes de plusieurs artisans réunis
-                  </li>
-                  <li>
-                    <Icone id="i-check" /> Livraison sur ton chantier
-                  </li>
-                  <li>
-                    <Icone id="i-check" /> Gratuit, pour tous les artisans
-                  </li>
-                </ul>
-                <Link className="cta-text" href="/tarifs">
-                  Découvrir l&apos;offre <Icone id="i-arrow" className="arrow" />
-                </Link>
-              </article>
-            </div>
-            <p className="condition-note">
-              Les fonctionnalités, quotas et conditions d’engagement varient selon l’offre et le type d’achat groupé. Consulte les{" "}
-              <Link href="/tarifs" style={{ textDecoration: "underline" }}>
-                tarifs
-              </Link>{" "}
-              et les{" "}
-              <Link href="/cgu" style={{ textDecoration: "underline" }}>
-                CGU
-              </Link>{" "}
-              à jour.
-            </p>
           </div>
         </section>
 
