@@ -24,7 +24,7 @@ SUIVI 142, « CATALOGUE MÉTIER INTELLIGENT » (message de Greg du 31 octobre). 
 - [x] 6. Lecture IA : la question « Quel modèle ? » répondue avec le même moteur ; jamais une référence inventée
 - [x] 7. Achats groupés : rapprochement par clé technique (existant `clesDeRegroupement`), carte discrète
 - [x] 8. Référence conservée dans liste, PDF, demandes ; tests de non-régression ; rapport
-État détaillé : docs/catalogue-metier.md. Étapes 1-4 en ligne (57823ac) ; 5-8 faites localement (à pousser après série verte), puis rapport à Greg.
+État détaillé : docs/catalogue-metier.md. Étapes 1-8 en ligne (c6f878a), rapportées à Greg. Suite : données vérifiées à étendre (voir docs/catalogue-metier.md §5).
 Règles : rien d'inventé ni de faux produit ; pas de collecte massive ; pas de migration destructive ; landing, abonnements,
 DA intouchés.
 
