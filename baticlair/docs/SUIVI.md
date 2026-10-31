@@ -198,3 +198,4 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 | 147 | 31/10 | Premier écran : « essaye plutôt cette image » (les matériaux) | fait | Remplace la photo d'artisans ; deux cadrages, WebP de 16 à 56 Ko. |
 | 148 | 31/10 | Titres collés sur téléphone ; « Le prochain bon prix » avant les questions | fait | Interlettrage mobile ouvert ; ordre des sections changé ; e2e « La page d'accueil publique » complété. |
 | 149 | 31/10 | Page Tarifs : plus de marron, classe et premium dans la DA | fait | Cartes sombres à filet, prix en grand, coches jaunes ; e2e Abonnement adapté. |
+| 150 | 31/10 | Cohérence Tarifs / CGU (sans modifier les CGU) | fait (rapport) | 8 contradictions relevées, toutes déjà corrigées dans la proposition de CGU du 30 octobre, sauf la commission dans les conditions négoces et l'essai encore actif en mode négocié. CGU en ligne inchangées. |
