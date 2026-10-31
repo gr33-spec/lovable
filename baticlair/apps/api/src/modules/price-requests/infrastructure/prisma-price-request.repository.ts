@@ -1,4 +1,5 @@
 import { Prisma } from "../../../generated/prisma/client.js";
+import { prenomDe } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
@@ -48,6 +49,10 @@ interface Row {
     id: string;
     status: RecipientStatus;
     sentAt: Date | null;
+    etiquette?: string | null;
+    reponduLe?: Date | null;
+    rappelMiLe?: Date | null;
+    rappelVeilleLe?: Date | null;
     supplier: {
       id: string;
       name: string;
@@ -128,6 +133,11 @@ function packet(value: unknown): SupplierPacket | null {
     ...(typeof p.reference === "string" ? { reference: p.reference } : {}),
     ...(typeof p.message === "string" ? { message: p.message } : {}),
     ...(typeof p.echeance === "string" ? { echeance: p.echeance } : {}),
+    ...(p.ratios_en_validation === true ? { ratios_en_validation: true } : {}),
+    // Lot final : le prénom de l'artisan, la famille de la demande, le tutoiement.
+    ...(typeof p.prenom === "string" ? { prenom: p.prenom } : {}),
+    ...(typeof p.famille === "string" ? { famille: p.famille } : {}),
+    ...(p.tutoie === true ? { tutoie: true } : {}),
   };
 }
 
@@ -148,9 +158,12 @@ function toRecord(row: Row): PriceRequestRecord {
     recipients: row.recipients.map((r) => ({
       id: r.id,
       supplier: r.supplier,
-      // Devis reçu puis supprimé du chantier : on revient à « envoyée ».
-      status: r.status === "received" && !r.document ? "sent" : r.status,
+      // Devis reçu puis supprimé du chantier : on revient à « envoyée ». Une réponse par le lien de chiffrage (sans PDF)
+      // reste « reçue » (Greg, 28 octobre 2026, point 7).
+      status: r.status === "received" && !r.document && !r.reponduLe ? "sent" : r.status,
       sentAt: r.sentAt,
+      etiquette: r.etiquette ?? null,
+      rappelLe: r.rappelVeilleLe ?? r.rappelMiLe ?? null,
       document: r.document
         ? {
             id: r.document.id,
@@ -198,11 +211,15 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
     return rows.map((r) => ({ id: r.id, nom: r.originalName, itemKey: r.itemKey!, note: r.note }));
   }
 
+  async saveModele(tenant: TenantContext, m: { message?: string | undefined; tutoie?: boolean | undefined }): Promise<void> {
+    await this.prisma.company.update({ where: { id: tenant.companyId }, data: { ...(m.message !== undefined ? { modeleMessage: m.message } : {}), ...(m.tutoie !== undefined ? { tutoieNegoces: m.tutoie } : {}) } });
+  }
+
   async sender(tenant: TenantContext, projectId: string): Promise<Sender | null> {
     const [company, user, project] = await Promise.all([
       this.prisma.company.findUnique({
         where: { id: tenant.companyId },
-        select: { name: true, address: true, siret: true, phone: true, contactEmail: true, logo: true, logoType: true },
+        select: { name: true, address: true, siret: true, phone: true, contactEmail: true, logo: true, logoType: true, prenom: true, modeleMessage: true, tutoieNegoces: true, trades: true },
       }),
       this.prisma.user.findUnique({
         where: { id: tenant.userId },
@@ -211,7 +228,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
       isUuid(projectId)
         ? this.prisma.project.findFirst({
             where: { id: projectId, companyId: tenant.companyId },
-            select: { id: true, name: true, address: true, siteNotes: true },
+            select: { id: true, name: true, address: true, siteNotes: true, trade: true },
           })
         : Promise.resolve(null),
     ]);
@@ -219,7 +236,11 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
     return {
       companyName: company.name,
       senderName: user?.name ?? "",
-      project,
+      prenom: company.prenom ?? prenomDe(user?.name),
+      trade: project.trade ?? company.trades[0] ?? null,
+      modeleMessage: company.modeleMessage,
+      tutoie: company.tutoieNegoces,
+      project: { id: project.id, name: project.name, address: project.address, siteNotes: project.siteNotes },
       company: { address: company.address, siret: company.siret, phone: company.phone, email: company.contactEmail ?? user?.email ?? null },
       logo: company.logo && company.logoType ? { bytes: new Uint8Array(company.logo), type: company.logoType } : null,
     };
@@ -330,6 +351,10 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
     });
   }
 
+  async setEtiquette(tenant: TenantContext, recipientId: string, etiquette: string): Promise<void> {
+    await this.prisma.priceRequestRecipient.updateMany({ where: { id: recipientId, priceRequest: { companyId: tenant.companyId } }, data: { etiquette } });
+  }
+
   async attachDocument(tenant: TenantContext, recipientId: string, documentId: string): Promise<void> {
     await this.prisma.priceRequestRecipient.updateMany({
       where: { id: recipientId, priceRequest: { companyId: tenant.companyId } },
@@ -366,5 +391,14 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
 
   async setAttachQuoteDetail(tenant: TenantContext, value: boolean): Promise<void> {
     await this.prisma.company.update({ where: { id: tenant.companyId }, data: { attachQuoteDetail: value } });
+  }
+
+  async reglagesPdf(tenant: TenantContext): Promise<{ modele: string | null; couleur: string | null }> {
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { pdfModele: true, pdfCouleur: true } });
+    return { modele: c?.pdfModele ?? null, couleur: c?.pdfCouleur ?? null };
+  }
+
+  async setReglagesPdf(tenant: TenantContext, r: { modele?: string | undefined; couleur?: string | undefined }): Promise<void> {
+    await this.prisma.company.update({ where: { id: tenant.companyId }, data: { ...(r.modele !== undefined ? { pdfModele: r.modele } : {}), ...(r.couleur !== undefined ? { pdfCouleur: r.couleur } : {}) } });
   }
 }

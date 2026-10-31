@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { z } from "zod";
+import { titreLisible } from "@baticlair/domain";
 import { validationFailed } from "../../../platform/errors/domain-error.js";
 import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
@@ -55,7 +56,7 @@ function decodeCursor(raw: string): ProjectCursor {
 function toDto(p: Project) {
   return {
     id: p.id,
-    name: p.name,
+    name: titreLisible(p.name),
     clientName: p.clientName,
     address: p.address,
     siteNotes: p.siteNotes,

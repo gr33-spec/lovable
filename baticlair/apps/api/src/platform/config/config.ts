@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NOM_APP, lireTableNombres, lireZonesActives } from "@baticlair/domain";
 import { parseActivationCodes, parsePlans, type Plan } from "./plans.js";
 
 /**
@@ -21,7 +22,12 @@ const envSchema = z
      */
     API_PUBLIC_URL: z.url().default("http://localhost:4000"),
     /** URL de l'application web (CORS, redirections après vérification). */
-    WEB_APP_URL: z.url().default("http://localhost:3000"),
+    /** L'adresse du web ; plusieurs, séparées par des virgules, quand une prévisualisation en a une autre (la première sert aux liens). */
+    WEB_APP_URL: z
+      .string()
+      .default("http://localhost:3000")
+      .transform((v) => v.split(",").map((x) => x.trim().replace(/\/$/, "")).filter(Boolean))
+      .pipe(z.array(z.url()).min(1)),
     /**
      * Envoi des e-mails transactionnels (vérification, mot de passe oublié) :
      * - `resend`   : envoi réel via Resend (RESEND_API_KEY, EMAIL_FROM) ;
@@ -33,8 +39,35 @@ const envSchema = z
      */
     EMAIL_PROVIDER: z.enum(["resend", "disabled", "console", "capture"]).optional(),
     RESEND_API_KEY: z.string().min(1).optional(),
-    /** Expéditeur, ex. « BatiClair <bonjour@mondomaine.fr> » (domaine vérifié chez Resend). */
+    /** Expéditeur, ex. « Mobiiz <contact@mondomaine.fr> » (domaine vérifié chez Resend). */
     EMAIL_FROM: z.string().min(3).optional(),
+    /**
+     * LES E-MAILS RÉELS (Greg, 24 octobre 2026) : le domaine vérifié chez Resend (« mobiiz.fr ») et l'adresse d'envoi
+     * (« contact », Greg, 26 octobre 2026 ; avant « bonjour ») ; l'expéditeur devient « Mobiiz <contact@mobiiz.fr> ».
+     * EMAIL_FROM, s'il est donné, l'emporte.
+     */
+    EMAIL_DOMAINE: z.string().regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i).optional(),
+    EMAIL_EXPEDITEUR: z.string().regex(/^[a-z0-9._-]+$/i).default("contact"),
+    /**
+     * LA BOÎTE DE CONTACT (Greg, 26 octobre 2026 : « MX sur mobiiz.fr directement, chez Resend ») : les adresses du
+     * domaine renvoyées chez Greg (« contact,bonjour » : contact@mobiiz.fr, et l'ancienne bonjour@ pour les e-mails déjà
+     * partis), et l'adresse qui les reçoit (par défaut, la première de GROUPE_ADMINS).
+     */
+    CONTACT_ADRESSES: z.string().default("contact,bonjour"),
+    CONTACT_RENVOI_VERS: z.email().optional(),
+    /**
+     * L'adresse de « Répondre » de chaque e-mail (Greg, 25 octobre 2026 : les réponses arrivent dans sa boîte par le
+     * renvoi de contact@mobiiz.fr). Par défaut, l'adresse de l'expéditeur. Un e-mail qui doit répondre ailleurs
+     * (l'artisan qui commande, l'adresse d'un lot) garde la sienne.
+     */
+    EMAIL_REPONDRE_A: z.string().email().optional(),
+    /**
+     * La liste blanche de la PRÉVISUALISATION : adresses ou domaines (« @exemple.fr »), séparés par des virgules. Les
+     * autres destinataires sont redirigés vers EMAIL_REDIRECTION (objet « [TEST → destinataire réel] … »). Obligatoire
+     * pour envoyer de vrais e-mails depuis une prévisualisation ; ignorée en production.
+     */
+    EMAILS_AUTORISES: z.string().optional(),
+    EMAIL_REDIRECTION: z.email().optional(),
     /**
      * Taille maximale d'un document déposé : 20 Mo par défaut (un devis scanné).
      * Au-delà de 4 Mo, le navigateur l'envoie en morceaux (`UploadParts`) :
@@ -65,7 +98,11 @@ const envSchema = z
      * - `fake`      : extraction simulée, déterministe (développement et tests uniquement).
      * Par défaut : `anthropic` si une clé est fournie, sinon `disabled`.
      */
-    AI_PROVIDER: z.enum(["anthropic", "disabled", "fake"]).optional(),
+    AI_PROVIDER: z.enum(["anthropic", "openai", "enregistre", "disabled", "fake"]).optional(),
+    /** Le second fournisseur (squelette, revue du 26 octobre 2026) : sa clé, lue seulement avec AI_PROVIDER=openai. */
+    OPENAI_API_KEY: z.string().min(1).optional(),
+    /** Délai maximal d'une lecture IA (ms) : au-delà, la tentative est arrêtée et notée « timeout ». */
+    AI_TIMEOUT_MS: z.coerce.number().int().min(5_000).max(300_000).default(170_000),
     /** La clé de l'app (Vercel, décision du fondateur 2026-10-12), lue avant ANTHROPIC_API_KEY. */
     BATICLAIR_ANTHROPIC_KEY: z.string().min(1).optional(),
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
@@ -96,10 +133,148 @@ const envSchema = z
      */
     PAYWALL: z.enum(["on", "off"]).default("off"),
     /**
+     * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 348 € HT par an, essai, paywall sur déposer, voir les résultats,
+     * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
+     */
+    ABONNEMENT: z.enum(["on", "off"]).default("on"),
+    /**
+     * Le paiement : `simule` (page « Paiement (simulation) », factures « TEST », aucun argent) ou `stripe` (Checkout,
+     * portail, webhooks signés ; `docs/groupe/STRIPE.md`). Les deux envoient les mêmes événements.
+     */
+    PAIEMENT: z.enum(["simule", "stripe"]).default("simule"),
+    STRIPE_SECRET_KEY: z.string().min(8).optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().min(8).optional(),
+    /** Le prix ESSENTIEL créé chez Stripe (« price_… »), 19,90 € HT, récurrent tous les mois (Greg, 30 octobre 2026). */
+    STRIPE_PRICE_ID_ESSENTIEL: z.string().min(4).optional(),
+    /** Le prix PRO créé chez Stripe (« price_… »), 39,90 € HT, récurrent tous les mois. */
+    STRIPE_PRICE_ID_PRO: z.string().min(4).optional(),
+    /** Ancien prix mensuel (49 €, avant le 30 octobre 2026) : plus lu. */
+    STRIPE_PRICE_ID_MENSUEL: z.string().min(4).optional(),
+    /** Ancien prix annuel (348 €, avant le 30 octobre 2026) : plus lu. */
+    STRIPE_PRICE_ID_ANNUEL: z.string().min(4).optional(),
+    /** Ancien nom du prix mensuel (une seule formule à 29 €) : plus lu. */
+    STRIPE_PRICE_ID: z.string().min(4).optional(),
+    /** Le taux de TVA créé chez Stripe (« txr_… », 20 %, non inclus) appliqué à l'abonnement. */
+    STRIPE_TAX_RATE_ID: z.string().min(4).optional(),
+    /**
+     * L'identifiant du point d'accès Neon de la base de PRODUCTION (« ep-… »), donné aux seules prévisualisations : une
+     * prévisualisation dont la base le contient refuse de démarrer (et de migrer, `scripts/garde-base-preview.mjs`).
+     */
+    BASE_PRODUCTION_HOTE: z.string().min(4).optional(),
+    /**
+     * BatiClair Groupé (document du fondateur, 2026-10-19) : DÉSACTIVÉ par défaut, « rien en prod sans mon accord
+     * explicite » ; `on` l'ouvre (écrans, regroupement, envois aux négoces).
+     */
+    GROUPE: z.enum(["on", "off"]).default("off"),
+    /** Le regroupement du mois (Greg, 22 octobre 2026) par défaut ; `lots` rallume l'ancien regroupement au fil de l'eau. */
+    COMMANDE_COMMUNE: z.enum(["mois", "lots"]).default("mois"),
+    /** Clé d'intégration de l'API Sirene de l'INSEE (vérification du SIRET avant le groupé). Vide : vérification indisponible. */
+    INSEE_API_KEY: z.string().min(1).optional(),
+    /**
+     * Vérification du SIRET : `insee` (l'API Sirene, la seule admise en production) ou `forme` (un SIRET bien formé vaut
+     * vérifié : prévisualisation seulement, décision du fondateur, 2026-10-20). Refusé en production Vercel.
+     */
+    SIRET_VERIFICATION: z.enum(["insee", "forme"]).default("insee"),
+    /**
+     * L'émetteur de la facture de commission du groupé (décision du fondateur, 2026-10-20) : en variables, jamais en dur.
+     * Les cinq vont ensemble ; sans elles, la facture dit « émetteur non configuré » et Greg est prévenu par le journal.
+     */
+    FACTURE_EMETTEUR_NOM: z.string().min(1).optional(),
+    FACTURE_EMETTEUR_FORME: z.string().min(1).optional(),
+    FACTURE_EMETTEUR_SIRET: z.string().min(9).optional(),
+    FACTURE_EMETTEUR_ADRESSE: z.string().min(5).optional(),
+    FACTURE_EMETTEUR_TVA: z.string().min(4).optional(),
+    /** La TVA sur la commission, en pour cent (assujettie : 20). */
+    FACTURE_TVA_POURCENT: z.coerce.number().min(0).max(100).default(20),
+    /**
+     * La facturation automatique des négoces (Greg, 24 octobre 2026 : plus de commission de 2 %). Éteinte par défaut : aucune
+     * facture n'est émise ni relancée, aucun accord ne porte de taux. Le code reste, prêt pour une commission future
+     * (« avec un préavis de 60 jours et l'accord du négoce »).
+     */
+    FACTURATION_NEGOCE: z.enum(["on", "off"]).default("off"),
+    /** Le domaine des adresses de réponse des lots (`lot-<n°>@<domaine>`, webhook Resend entrant). Vide : pas d'adresse de réponse. */
+    REPONSES_DOMAINE: z.string().min(3).optional(),
+    /** Le secret de signature du webhook Resend (Svix, « whsec_… »). Vide : webhook fermé. */
+    RESEND_WEBHOOK_SECRET: z.string().min(8).optional(),
+    /** Les e-mails qui voient l'admin du groupé (étape 9) ; vides : les validateurs du référentiel (Greg). */
+    GROUPE_ADMINS: z.string().optional(),
+    /** Les départements où le groupé est ouvert (« 22,29 »), ou « * » pour tous (défaut). Décision du 2026-10-20 : le 22 d'abord en prod. */
+    GROUPE_DEPARTEMENTS: z.string().default("*"),
+    /**
+     * Recentrage (Greg, 25 octobre 2026) : les départements où les regroupements existent (« 22 » au départ ; « * » :
+     * tous). Hors zone active, l'artisan a tout sauf les regroupements. `GROUPE_DEPARTEMENTS` (s'il n'est pas « * ») prime.
+     */
+    ZONES_ACTIVES: z.string().default("22"),
+    /** Le montant HT estimé (euros) sous lequel une ligne ne se regroupe pas. */
+    SEUIL_LIGNE_GROUPABLE: z.coerce.number().min(0).default(1000),
+    /** Sous ce nombre de participants, seulement « Regroupement en cours ». */
+    SEUIL_ANONYMAT: z.coerce.number().int().min(2).default(5),
+    /** Volume minimum par famille à la clôture, en euros HT estimés (« couverture=5000,charpente=4000 ») ; vide : défauts du domaine. */
+    SEUIL_VOLUME_MIN: z.string().optional(),
+    /** Les prix repères HT par type et unité, pour estimer une ligne (« ardoise:pieces=1.2,zinc:m=18 ») ; vide : aucun. */
+    PRIX_REPERES: z.string().optional(),
+    /** Les familles dont les gros articles se regroupent (« couverture,charpente,second_oeuvre »). */
+    FAMILLES_GROUPABLES: z.string().default("couverture,charpente,second_oeuvre"),
+    /** Gratuit : lectures de devis par mois. */
+    LECTURES_GRATUITES_MOIS: z.coerce.number().int().min(0).default(2),
+    /** Sous ce nombre d'artisans actifs dans une zone, le payant y est offert. */
+    SEUIL_ZONE_ACTIVE: z.coerce.number().int().min(1).default(10),
+    /**
+     * Business model final (Greg, 25 octobre 2026) : `humain` (défaut, un chasseur de Mobiiz négocie) ou `automatique`
+     * (la consultation des négoces par cycles, gardée telle quelle). L'admin peut basculer sans redéployer.
+     */
+    MODE_REGROUPEMENT: z.enum(["automatique", "humain", "mois"]).default("automatique"),
+    /**
+     * L'ACHAT GROUPÉ AUTOMATIQUE (Greg, 27 octobre 2026) : le délai de réponse des négoces (clôture = besoin − livraison −
+     * réponse), le maximum d'alertes par jour et par entreprise, la commission de lancement (0 possible) pour les N premiers
+     * achats groupés, le budget IA par jour pour lire les devis PDF des négoces (euros).
+     */
+    DELAI_REPONSE_NEGOCE_JOURS: z.coerce.number().int().min(1).max(30).default(3),
+    ALERTES_ACHATS_GROUPES_JOUR: z.coerce.number().int().min(0).max(20).default(2),
+    COMMISSION_LANCEMENT: z.coerce.number().min(0).max(20).optional(),
+    COMMISSION_LANCEMENT_PREMIERS: z.coerce.number().int().min(0).max(10_000).default(20),
+    BUDGET_IA_JOUR: z.string().regex(/^\d+(\.\d+)?$/).default("2"),
+    /** Les chasseurs d'opportunités (e-mails) : un rôle à part, distinct de l'admin complet (GROUPE_ADMINS). */
+    CHASSEURS: z.string().optional(),
+    /** Achat groupé par métier (Greg, 27 octobre 2026, 2e message) : 0 par défaut ; à 0, rien n'est calculé ni dit. */
+    COMMISSION_DEFAUT: z.coerce.number().min(0).max(20).default(0),
+    /** « oui » : l'admin valide les offres avant publication (point 14). */
+    VALIDATION_ADMIN_OFFRES: z.enum(["oui", "non"]).default("oui"),
+    DELAI_VALIDATION_ADMIN_HEURES: z.coerce.number().int().min(0).max(168).default(24),
+    DELAI_COMMANDE_JOURS: z.coerce.number().int().min(1).max(60).default(5),
+    EXCLUSION_MOIS: z.coerce.number().int().min(0).max(24).default(3),
+    /** Les analyses de devis offertes en tout à Découverte (point 24 ; 1 depuis le 30 octobre 2026, `OFFRES`). */
+    LECTURES_IA_GRATUIT_TOTAL: z.coerce.number().int().min(0).max(1000).default(1),
+    /** Le seuil de la suggestion « mets-les en achat groupé » par famille (« couverture=300,charpente=100 »). */
+    SEUIL_SUGGESTION: z.string().optional(),
+    /** Point 4 bis : l'adresse des alertes du chasseur (défaut : le premier admin) et le délai de livraison avant la date de besoin. */
+    EMAIL_CHASSEUR: z.string().email().optional(),
+    DELAI_LIVRAISON_JOURS: z.coerce.number().int().min(0).max(60).default(10),
+    /** Codes NAF du commerce de matériaux acceptés à l'inscription d'un négoce (séparés par des virgules). */
+    NAF_MATERIAUX: z.string().optional(),
+    /** Vérification du SIRET des négoces par l'API Recherche d'entreprises : `on` en ligne, `fake` dans les tests. */
+    RECHERCHE_ENTREPRISES: z.enum(["on", "off", "fake"]).optional(),
+    /** La base négoces Sirene (bloc 3 du plan) : départements importés et codes NAF du négoce de matériaux. */
+    SIRENE_DEPARTEMENTS: z.string().default("22,29,35,56"),
+    SIRENE_NAF: z.string().default("46.73A,46.73B,47.52A,47.52B"),
+    VERCEL_ENV: z.string().optional(),
+    /**
      * Limitation de débit (connexion, inscription, dépôts de devis, lecture IA) : `on` partout,
      * `off` uniquement pour les tests automatisés qui enchaînent des centaines de requêtes.
      */
     RATE_LIMIT: z.enum(["on", "off"]).default("on"),
+    /**
+     * LES MOTS DE PASSE FUITÉS (Greg, 26 octobre 2026, feu vert sécurité) : à l'inscription et au changement de mot de
+     * passe, les 5 premiers caractères de l'empreinte SHA-1 partent à Have I Been Pwned (k-anonymat : jamais le mot de
+     * passe) ; un mot de passe déjà fuité est refusé. Par défaut : en ligne oui, en local et en test non (pas de réseau).
+     */
+    MOTS_DE_PASSE_FUITES: z.enum(["on", "off"]).optional(),
+    /**
+     * TURNSTILE (Cloudflare, gratuit ; Greg, 26 octobre 2026, feu vert sécurité) : la clé secrète. Posée, l'inscription,
+     * le mot de passe oublié et les pages négoce (inscription, lien de connexion) demandent le jeton du défi
+     * (`x-captcha-response`). Vide : rien n'est demandé (local, tests, tant que Greg n'a pas créé le site Turnstile).
+     */
+    TURNSTILE_SECRET_KEY: z.string().min(10).optional(),
     /** Délai de réponse d'une lecture de devis : au-delà, « lecture en cours » et elle continue en arrière-plan. */
     /** Alertes de production (B5) : webhook (Slack, Discord, ntfy…) et/ou e-mail. Vide : pas d'alerte. */
     ALERT_WEBHOOK_URL: z.url().optional(),
@@ -123,14 +298,20 @@ const envSchema = z
     if (isDeployed && env.AI_PROVIDER === "fake") {
       ctx.addIssue({ code: "custom", path: ["AI_PROVIDER"], message: "« fake » est réservé au développement et aux tests" });
     }
+    if (env.AI_PROVIDER === "openai" && !env.OPENAI_API_KEY) {
+      ctx.addIssue({ code: "custom", path: ["OPENAI_API_KEY"], message: "obligatoire avec AI_PROVIDER=openai" });
+    }
+    if (isDeployed && env.AI_PROVIDER === "enregistre") {
+      ctx.addIssue({ code: "custom", path: ["AI_PROVIDER"], message: "« enregistre » est réservé au développement et aux tests" });
+    }
     if (env.AI_PROVIDER === "anthropic" && !env.BATICLAIR_ANTHROPIC_KEY && !env.ANTHROPIC_API_KEY) {
       ctx.addIssue({ code: "custom", path: ["BATICLAIR_ANTHROPIC_KEY"], message: "obligatoire avec AI_PROVIDER=anthropic" });
     }
     if (env.EMAIL_PROVIDER === "resend" && !env.RESEND_API_KEY) {
       ctx.addIssue({ code: "custom", path: ["RESEND_API_KEY"], message: "obligatoire avec EMAIL_PROVIDER=resend" });
     }
-    if ((env.EMAIL_PROVIDER === "resend" || (!env.EMAIL_PROVIDER && env.RESEND_API_KEY)) && !env.EMAIL_FROM) {
-      ctx.addIssue({ code: "custom", path: ["EMAIL_FROM"], message: "obligatoire pour envoyer des e-mails" });
+    if ((env.EMAIL_PROVIDER === "resend" || (!env.EMAIL_PROVIDER && env.RESEND_API_KEY)) && !env.EMAIL_FROM && !env.EMAIL_DOMAINE) {
+      ctx.addIssue({ code: "custom", path: ["EMAIL_DOMAINE"], message: "obligatoire pour envoyer des e-mails (ou EMAIL_FROM)" });
     }
     for (const provider of ["GOOGLE", "MICROSOFT"] as const) {
       if (Boolean(env[`${provider}_CLIENT_ID`]) !== Boolean(env[`${provider}_CLIENT_SECRET`])) {
@@ -156,22 +337,66 @@ export interface AppConfig {
   authSecret: string;
   apiPublicUrl: string;
   webAppUrl: string;
+  /** Toutes les origines web acceptées (CORS, origines de confiance de l'authentification). */
+  webAppOrigins: string[];
+  /**
+   * En prévisualisation Vercel, les adresses de prévisualisation du web (`https://<…>-gr33-spec.vercel.app`) sont
+   * acceptées d'office : le fondateur teste une branche depuis son téléphone sans poser l'adresse à la main.
+   */
+  previewOriginPattern: RegExp | null;
   emailProvider: "resend" | "disabled" | "console" | "capture";
-  resend?: { apiKey: string; from: string };
+  resend?: { apiKey: string; from: string; replyTo?: string };
+  /** R7 : le domaine des adresses Mobiiz des artisans (`EMAIL_DOMAINE`) ; null sans domaine (local, tests sans e-mail). */
+  emailDomaine: string | null;
+  /** La liste blanche de la prévisualisation (null en production et en local). */
+  emailGarde: { autorises: string[]; redirigerVers: string | null } | null;
+  /** Les adresses de contact du domaine (« contact@mobiiz.fr ») renvoyées vers `vers` ; null sans domaine ni destinataire. */
+  contact: { adresses: string[]; vers: string } | null;
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
   documents: { maxBytes: number; maxPages: number };
   aiCost: { usdToEur: string; monthlyBudgetEur: string; analysisMaxEur: string };
   /** E-mails (en minuscules) des validateurs du référentiel. */
   referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
+  /** L'abonnement artisan (`ABONNEMENT`, `PAIEMENT`). */
+  abonnement: {
+    actif: boolean;
+    paiement: "simule" | "stripe";
+    stripe: { secretKey: string; webhookSecret: string; prix: { essentiel: string; pro: string }; taxRateId: string | null } | null;
+  };
+  /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
+  groupe: {
+    enabled: boolean;
+    inseeApiKey: string | null;
+    siretVerification: "insee" | "forme";
+    facture: { emetteur: { nom: string; forme: string | null; siret: string; adresse: string; tvaIntracom: string } | null; tvaPourcent: number; active: boolean };
+    reponsesDomaine: string | null;
+    resendWebhookSecret: string | null;
+    admins: string[];
+    /** `null` = tous les départements ; sinon la liste des départements ouverts. */
+    departements: string[] | null;
+    /** Recentrage (25 octobre 2026) : seuils et réglages des regroupements, du gratuit et du payant. */
+    recentrage: { seuilLigneHt: number; seuilAnonymat: number; seuilVolumeMin: Record<string, number> | null; prixReperes: Record<string, number>; familles: string[]; lecturesGratuites: number; seuilZoneActive: number };
+    /** Le regroupement négocié par un humain (business model final, 25 octobre 2026). */
+    negocie: { mode: "automatique" | "humain" | "mois"; delaiReponseJours: number; alertesJour: number; commissionLancement: number | null; commissionLancementPremiers: number; budgetIaJourEur: number; validationAdmin: boolean; delaiValidationAdminHeures: number; delaiCommandeJours: number; exclusionMois: number; lecturesIaGratuitTotal: number; seuilSuggestion: Record<string, number> | null; chasseurs: string[]; commissionDefaut: number; emailChasseur: string | null; delaiLivraisonJours: number; naf: string[] | null; rechercheEntreprises: "on" | "off" | "fake" };
+    /** mois : un regroupement par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
+    mode: "mois" | "lots";
+    sirene: { departements: string[]; naf: string[] };
+  };
   rateLimit: { enabled: boolean };
+  /** Refuser un mot de passe présent dans Have I Been Pwned. */
+  motsDePasseFuites: boolean;
+  /** La clé secrète Turnstile ; null : pas de défi. */
+  turnstileSecret: string | null;
   alerts: { webhookUrl?: string; email?: string };
   cronSecret?: string;
   ai: {
-    provider: "anthropic" | "disabled" | "fake";
+    provider: "anthropic" | "openai" | "enregistre" | "disabled" | "fake";
     apiKey?: string;
     /** Le nom de la variable d'où vient la clé (jamais sa valeur), dit par la route de santé. */
-    keySource: "BATICLAIR_ANTHROPIC_KEY" | "ANTHROPIC_API_KEY" | null;
+    keySource: "BATICLAIR_ANTHROPIC_KEY" | "ANTHROPIC_API_KEY" | "OPENAI_API_KEY" | null;
+    /** Délai maximal d'une lecture (ms). */
+    timeoutMs: number;
     extractionModel: string;
     quantitatif: boolean;
     quantitatifModel: string;
@@ -186,6 +411,16 @@ export class ConfigError extends Error {
     super(`Configuration invalide :\n${problems.map((p) => `  - ${p}`).join("\n")}`);
     this.name = "ConfigError";
   }
+}
+
+/** Les adresses de prévisualisation Vercel du compte gr33-spec (jamais un autre compte). */
+export const PREVIEW_ORIGIN = /^https:\/\/[a-z0-9-]+-gr33-spec\.vercel\.app$/;
+/** La même règle, écrite pour les origines de confiance de l'authentification (jokers sur l'hôte). */
+export const PREVIEW_ORIGIN_JOKER = "https://*-gr33-spec.vercel.app";
+
+export function originesAcceptees(config: Pick<AppConfig, "webAppOrigins" | "previewOriginPattern">, origin: string | undefined): boolean | null {
+  if (!origin) return null;
+  return config.webAppOrigins.includes(origin) || (config.previewOriginPattern?.test(origin) ?? false);
 }
 
 export function loadConfig(source: Record<string, string | undefined> = process.env): AppConfig {
@@ -204,6 +439,29 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     throw new ConfigError([`BILLING_PLANS : ${err instanceof Error ? err.message : String(err)}`]);
   }
   const isDeployed = e.NODE_ENV === "production" || e.NODE_ENV === "staging";
+  const problemes: string[] = [];
+  if (e.PAIEMENT === "stripe" && !(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID_ESSENTIEL && e.STRIPE_PRICE_ID_PRO)) {
+    problemes.push("PAIEMENT : « stripe » demande STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID_ESSENTIEL et STRIPE_PRICE_ID_PRO");
+  }
+  // La prévisualisation ne touche jamais la base de production (Greg, 24 octobre 2026).
+  if (e.VERCEL_ENV === "preview" && e.BASE_PRODUCTION_HOTE && e.DATABASE_URL.includes(e.BASE_PRODUCTION_HOTE)) {
+    problemes.push("DATABASE_URL : cette prévisualisation pointe sur la base de production (BASE_PRODUCTION_HOTE)");
+  }
+  // Un paiement simulé en production donnerait l'accès sans payer.
+  if (e.PAIEMENT === "simule" && e.ABONNEMENT === "on" && e.VERCEL_ENV === "production") {
+    problemes.push("PAIEMENT : « simule » est réservé à la prévisualisation ; en production, PAIEMENT=stripe (ou ABONNEMENT=off)");
+  }
+  if (e.SIRET_VERIFICATION === "forme" && e.VERCEL_ENV === "production") {
+    problemes.push("SIRET_VERIFICATION : « forme » est réservé à la prévisualisation, jamais en production");
+  }
+  const autorises = (e.EMAILS_AUTORISES ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean);
+  const envoiReel = e.EMAIL_PROVIDER === "resend" || (!e.EMAIL_PROVIDER && !!e.RESEND_API_KEY);
+  if (e.VERCEL_ENV === "preview" && envoiReel && autorises.length === 0) {
+    problemes.push("EMAILS_AUTORISES : obligatoire pour envoyer de vrais e-mails depuis une prévisualisation (la liste blanche)");
+  }
+  const emailFrom = e.EMAIL_FROM ?? (e.EMAIL_DOMAINE ? `${NOM_APP} <${e.EMAIL_EXPEDITEUR}@${e.EMAIL_DOMAINE}>` : undefined);
+  const emailReponse = e.EMAIL_REPONDRE_A ?? (e.EMAIL_DOMAINE ? `${e.EMAIL_EXPEDITEUR}@${e.EMAIL_DOMAINE}` : undefined);
+  if (problemes.length) throw new ConfigError(problemes);
   const emailProvider = e.EMAIL_PROVIDER ?? (e.RESEND_API_KEY ? "resend" : isDeployed ? "disabled" : "console");
   const oauth = (id?: string, secret?: string) => (id && secret ? { clientId: id, clientSecret: secret } : undefined);
   const google = oauth(e.GOOGLE_CLIENT_ID, e.GOOGLE_CLIENT_SECRET);
@@ -215,11 +473,16 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     databaseUrl: e.DATABASE_URL,
     authSecret: e.AUTH_SECRET,
     apiPublicUrl: e.API_PUBLIC_URL,
-    webAppUrl: e.WEB_APP_URL,
+    webAppUrl: e.WEB_APP_URL[0]!,
+    webAppOrigins: e.WEB_APP_URL,
+    previewOriginPattern: e.VERCEL_ENV === "preview" ? PREVIEW_ORIGIN : null,
     emailProvider,
-    ...(emailProvider === "resend" && e.RESEND_API_KEY && e.EMAIL_FROM
-      ? { resend: { apiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM } }
+    ...(emailProvider === "resend" && e.RESEND_API_KEY && emailFrom
+      ? { resend: { apiKey: e.RESEND_API_KEY, from: emailFrom, ...(emailReponse ? { replyTo: emailReponse } : {}) } }
       : {}),
+    emailDomaine: e.EMAIL_DOMAINE?.toLowerCase() ?? null,
+    emailGarde: e.VERCEL_ENV !== "production" && autorises.length > 0 ? { autorises, redirigerVers: e.EMAIL_REDIRECTION?.toLowerCase() ?? autorises.find((x) => !x.startsWith("@")) ?? null } : null,
+    contact: contactDe(e),
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
     documents: { maxBytes: e.DOCUMENT_MAX_BYTES, maxPages: e.DOCUMENT_MAX_PAGES },
     aiCost: { usdToEur: e.AI_USD_TO_EUR, monthlyBudgetEur: e.AI_MONTHLY_BUDGET_EUR, analysisMaxEur: e.AI_ANALYSIS_MAX_EUR },
@@ -228,13 +491,78 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
+    abonnement: {
+      actif: e.ABONNEMENT === "on",
+      paiement: e.PAIEMENT,
+      stripe:
+        e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID_ESSENTIEL && e.STRIPE_PRICE_ID_PRO
+          ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, prix: { essentiel: e.STRIPE_PRICE_ID_ESSENTIEL, pro: e.STRIPE_PRICE_ID_PRO }, taxRateId: e.STRIPE_TAX_RATE_ID ?? null }
+          : null,
+    },
+    groupe: {
+      enabled: e.GROUPE === "on",
+      inseeApiKey: e.INSEE_API_KEY ?? null,
+      siretVerification: e.SIRET_VERIFICATION,
+      facture: {
+        emetteur:
+          e.FACTURE_EMETTEUR_NOM && e.FACTURE_EMETTEUR_SIRET && e.FACTURE_EMETTEUR_ADRESSE && e.FACTURE_EMETTEUR_TVA
+            ? { nom: e.FACTURE_EMETTEUR_NOM, forme: e.FACTURE_EMETTEUR_FORME ?? null, siret: e.FACTURE_EMETTEUR_SIRET, adresse: e.FACTURE_EMETTEUR_ADRESSE, tvaIntracom: e.FACTURE_EMETTEUR_TVA }
+            : null,
+        tvaPourcent: e.FACTURE_TVA_POURCENT,
+        active: e.FACTURATION_NEGOCE === "on",
+      },
+      reponsesDomaine: e.REPONSES_DOMAINE ?? null,
+      resendWebhookSecret: e.RESEND_WEBHOOK_SECRET ?? null,
+      // La liste blanche de l'admin : GROUPE_ADMINS seule, jamais élargie en douce (Greg, 26 octobre 2026).
+      admins: (e.GROUPE_ADMINS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
+      departements:
+        e.GROUPE_DEPARTEMENTS.trim() !== "*"
+          ? e.GROUPE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean)
+          : e.ZONES_ACTIVES.trim() === "*"
+            ? null
+            : lireZonesActives(e.ZONES_ACTIVES),
+      recentrage: {
+        seuilLigneHt: e.SEUIL_LIGNE_GROUPABLE,
+        seuilAnonymat: e.SEUIL_ANONYMAT,
+        seuilVolumeMin: e.SEUIL_VOLUME_MIN ? lireTableNombres(e.SEUIL_VOLUME_MIN) : null,
+        prixReperes: lireTableNombres(e.PRIX_REPERES),
+        familles: e.FAMILLES_GROUPABLES.split(",").map((x) => x.trim()).filter(Boolean),
+        lecturesGratuites: e.LECTURES_GRATUITES_MOIS,
+        seuilZoneActive: e.SEUIL_ZONE_ACTIVE,
+      },
+      negocie: {
+        mode: e.MODE_REGROUPEMENT,
+        chasseurs: (e.CHASSEURS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
+        commissionDefaut: e.COMMISSION_DEFAUT,
+        emailChasseur: (e.EMAIL_CHASSEUR ?? (e.GROUPE_ADMINS ?? "").split(",")[0] ?? "").trim().toLowerCase() || null,
+        delaiLivraisonJours: e.DELAI_LIVRAISON_JOURS,
+        delaiReponseJours: e.DELAI_REPONSE_NEGOCE_JOURS,
+        alertesJour: e.ALERTES_ACHATS_GROUPES_JOUR,
+        commissionLancement: e.COMMISSION_LANCEMENT ?? null,
+        commissionLancementPremiers: e.COMMISSION_LANCEMENT_PREMIERS,
+        budgetIaJourEur: Number(e.BUDGET_IA_JOUR),
+        validationAdmin: e.VALIDATION_ADMIN_OFFRES === "oui",
+        delaiValidationAdminHeures: e.DELAI_VALIDATION_ADMIN_HEURES,
+        delaiCommandeJours: e.DELAI_COMMANDE_JOURS,
+        exclusionMois: e.EXCLUSION_MOIS,
+        lecturesIaGratuitTotal: e.LECTURES_IA_GRATUIT_TOTAL,
+        seuilSuggestion: e.SEUIL_SUGGESTION ? lireTableNombres(e.SEUIL_SUGGESTION) : null,
+        naf: e.NAF_MATERIAUX ? e.NAF_MATERIAUX.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) : null,
+        rechercheEntreprises: e.RECHERCHE_ENTREPRISES ?? (e.NODE_ENV === "test" ? "fake" : "on"),
+      },
+      mode: e.COMMANDE_COMMUNE,
+      sirene: { departements: e.SIRENE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean), naf: e.SIRENE_NAF.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) },
+    },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
+    motsDePasseFuites: (e.MOTS_DE_PASSE_FUITES ?? (isDeployed ? "on" : "off")) === "on",
+    turnstileSecret: e.TURNSTILE_SECRET_KEY ?? null,
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
     ai: {
       provider: e.AI_PROVIDER ?? (apiKey ? "anthropic" : "disabled"),
-      ...(apiKey ? { apiKey } : {}),
-      keySource: e.BATICLAIR_ANTHROPIC_KEY ? "BATICLAIR_ANTHROPIC_KEY" : e.ANTHROPIC_API_KEY ? "ANTHROPIC_API_KEY" : null,
+      ...(e.AI_PROVIDER === "openai" ? { apiKey: e.OPENAI_API_KEY! } : apiKey ? { apiKey } : {}),
+      keySource: e.AI_PROVIDER === "openai" ? "OPENAI_API_KEY" : e.BATICLAIR_ANTHROPIC_KEY ? "BATICLAIR_ANTHROPIC_KEY" : e.ANTHROPIC_API_KEY ? "ANTHROPIC_API_KEY" : null,
+      timeoutMs: e.AI_TIMEOUT_MS,
       extractionModel: e.AI_EXTRACTION_MODEL,
       quantitatif: e.AI_QUANTITATIF === "on",
       quantitatifModel: e.AI_QUANTITATIF_MODEL,
@@ -242,4 +570,14 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },
   };
+}
+
+/** La boîte de contact : `contact@<EMAIL_DOMAINE>` (et les autres noms donnés) renvoyée chez l'admin. */
+function contactDe(e: { EMAIL_DOMAINE?: string | undefined; CONTACT_ADRESSES: string; CONTACT_RENVOI_VERS?: string | undefined; GROUPE_ADMINS?: string | undefined }): { adresses: string[]; vers: string } | null {
+  const vers = (e.CONTACT_RENVOI_VERS ?? (e.GROUPE_ADMINS ?? "").split(",")[0] ?? "").trim().toLowerCase();
+  if (!e.EMAIL_DOMAINE || !vers) return null;
+  const domaine = e.EMAIL_DOMAINE.toLowerCase();
+  const adresses = e.CONTACT_ADRESSES.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean).map((x) => `${x}@${domaine}`);
+  // Jamais de boucle : l'adresse qui reçoit le renvoi n'est pas une adresse de contact.
+  return adresses.includes(vers) ? null : { adresses, vers };
 }

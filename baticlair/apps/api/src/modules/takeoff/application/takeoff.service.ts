@@ -1,5 +1,7 @@
 import {
   baseOf,
+  type SectionDuDevis,
+  lectureParLots,
   AI_ADDITION,
   MISSING_INFO,
   CONSUMABLES_KEY,
@@ -53,15 +55,21 @@ import {
   piecewiseParams,
   scopedKey,
   type LectureDevis,
+  valeurApprise,
+  lignesDuTexte,
+  phraseGrosDevis,
+  poidsAnalyse,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
-import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
-import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
+import { imageMimeType, looksLikePdf, type DocumentAiInput, type DocumentRepository, type DocumentWithProcessing, type PreparedDocument } from "../../documents/index.js";
+import type { CompanyMemory, CorrectionJournal, HabitudesService } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
 import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader } from "./lecture-reader.js";
+import { lireLotParLot } from "./lecture-par-lots.js";
+import { LISTE_PROMPT, type ListeReader } from "./liste-reader.js";
 import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
 /**
@@ -75,12 +83,23 @@ import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.rep
  *   avant tout appel, et le nombre d'appels est plafonné.
  */
 export interface ReadingOptions {
+  /**
+   * L'apprentissage des corrections (Greg, 24 octobre 2026) : une correction répétée sur 2 chantiers (ou validée par l'admin
+   * après 3 artisans) s'applique d'elle-même à la liste, « Ajusté selon tes habitudes », annulable en un clic.
+   */
+  habitudes?: Pick<HabitudesService, "apprendre" | "ajustements" | "annuler">;
   /** Compte autorisé à voir les calculs des règles en brouillon (marqués « provisoire »), pour les valider. */
   isValidator?: (tenant: TenantContext) => Promise<boolean>;
   /** Adresse du chantier (code postal → zone climatique), sans rien demander à l'artisan. */
   projectAddress?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
   /** Infos chantier facultatives : la note de l'artisan (texte libre, commentaires de croquis), lue à chaque calcul. */
   projectNotes?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
+  /**
+   * Le chantier fictif du mode démo (« Essayer avec un chantier fictif ») : son devis, inventé, est lu par la lecture
+   * simulée déterministe (celle des tests), sans appel au modèle : immédiat et gratuit (recette en ligne du 25 octobre
+   * 2026 : plus d'une minute de vraie lecture payante à chaque essai). Un vrai devis n'y passe jamais.
+   */
+  lecteurDemo?: (tenant: TenantContext, projectId: string) => Promise<LectureReader | null>;
   /**
    * Version figée par chantier (plan v3 §3) : le référentiel est enregistré à sa version quand le quantitatif naît,
    * et chaque recalcul relit CETTE version. Sans ce port, le référentiel du jour sert (tests unitaires).
@@ -96,6 +115,8 @@ export interface ReadingOptions {
    * ligne. Absent, ou lecteur simulé sans lecture enregistrée pour ce devis : l'ancienne lecture (prompt A) sert encore.
    */
   lecteur?: LectureReader;
+  /** « J'ai déjà ma liste » : la lecture d'image ou de PDF d'une liste déjà comptée (lignes telles qu'écrites, aucun calcul). */
+  listeur?: ListeReader;
   /** Le nom de l'entreprise, injecté dans le prompt B ({nom_entreprise}). */
   companyName?: (tenant: TenantContext) => Promise<string | null>;
   /**
@@ -113,6 +134,12 @@ export interface ReadingOptions {
   answerWithinMs?: number;
   /** Lecture échouée (IA en panne, réponse inutilisable, erreur imprévue) : prévenir l'équipe (B5). */
   onReadingFailed?: (reason: string) => void;
+  /**
+   * Revue du 26 octobre 2026 : une panne PASSAGÈRE du fournisseur d'IA (indisponible, trop lent) part dans la file de
+   * reprise (deux nouveaux essais, puis alerte). Une réponse illisible ou refusée ne se retente pas seule (elle coûterait
+   * pour rien) : l'artisan garde « Réessayer ».
+   */
+  onEchecPassager?: (tenant: TenantContext, documentId: string, reason: string) => void;
   /**
    * §48 : « Va boire un café, je te préviens quand c'est prêt. » Une lecture ou un calcul trop long pour une réponse
    * (passé en arrière-plan) prévient l'artisan qui l'a lancé quand il finit : questions prêtes, ou liste prête.
@@ -288,6 +315,8 @@ export interface ReviewedTakeoff {
   siteNotes?: string | null;
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché, hors de la liste. */
   aiSuggestions: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
+  /** Les lignes ajustées d'elles-mêmes par une règle apprise (24 octobre 2026) : « Ajusté selon tes habitudes », « Annuler ». */
+  ajustements?: { itemKey: string; regleId: string; texte: string }[];
 }
 
 
@@ -320,11 +349,11 @@ export class TakeoffService {
    * cours » (la lecture continue, l'écran interroge `readingState`). Une lecture déjà en cours n'est
    * jamais relancée (double appui, rechargement) : rien n'est payé deux fois.
    */
-  async start(tenant: TenantContext, documentId: string): Promise<StartResult> {
+  async start(tenant: TenantContext, documentId: string, options: { confirmeGros?: boolean } = {}): Promise<StartResult> {
     assertCanWrite(tenant);
     const running = await this.meter.current(tenant.companyId, documentId);
     if (running?.status === "started" && !this.stale(running.startedAt)) return { state: "reading" };
-    const work = this.extract(tenant, documentId);
+    const work = this.extract(tenant, documentId, options);
     const wait = this.reading.answerWithinMs ?? 8000;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timeout = new Promise<"later">((resolve) => {
@@ -409,7 +438,12 @@ export class TakeoffService {
     return (this.reading.now ?? (() => new Date()))().getTime() - startedAt.getTime() > STALE_READING_MS;
   }
 
-  async extract(tenant: TenantContext, documentId: string): Promise<ReviewedTakeoff> {
+  /**
+   * `confirmeGros` (Greg, 30 octobre 2026, décision 3) : un devis de plus de 150 lignes compte pour 2 analyses ; l'écran le
+   * dit AVANT la lecture (refus `gros_devis`, rien n'est dépensé ni décompté) et relance avec `confirmeGros: true`. Les
+   * autres chemins (reprise, partenaires) lisent sans demander : la lecture compte quand même pour 2.
+   */
+  async extract(tenant: TenantContext, documentId: string, options: { confirmeGros?: boolean } = {}): Promise<ReviewedTakeoff> {
     assertCanWrite(tenant);
     const doc = await this.documents.findById(tenant, documentId);
     if (!doc) throw notFound("Document");
@@ -426,12 +460,19 @@ export class TakeoffService {
     if (plan.estimate.totalMicroUsd > (this.reading.maxAnalysisMicroUsd ?? DEFAULT_MAX_ANALYSIS_MICRO_USD)) {
       throw new DomainError("unreadable_document", "Estimated reading cost is abnormal for a quote", { reason: "abnormal_size" });
     }
+    const lignes = lignesDuTexte(prepared.input.numberedText);
+    const poids = poidsAnalyse(lignes);
+    if (poids === 2 && options.confirmeGros === false) {
+      const quotas = await this.meter.quotas(tenant.companyId);
+      throw new DomainError("conflict", "Large quote: counts as two analyses", { reason: "gros_devis", lignes, poids, restantes: quotas?.analyses.restantes ?? null, message: phraseGrosDevis(lignes, quotas?.analyses.restantes ?? null) });
+    }
     const begin = await this.meter.begin({
       companyId: tenant.companyId,
       userId: tenant.userId,
       projectId: doc.projectId,
       documentId,
       kind: "client_quote",
+      poids,
     });
     if (begin.status === "already_done") throw new DomainError("conflict", "Analysis already completed for this document");
     const analysisId = begin.analysis.id;
@@ -446,7 +487,10 @@ export class TakeoffService {
     } catch (error) {
       const known = error instanceof DomainError && error.code === "analysis_failed";
       if (!known) await this.meter.fail(analysisId).catch(() => undefined);
-      this.reading.onReadingFailed?.(known ? String((error.details as { reason?: string } | undefined)?.reason ?? "analysis_failed") : "unexpected_error");
+      const reason = known ? String((error.details as { reason?: string } | undefined)?.reason ?? "analysis_failed") : "unexpected_error";
+      this.reading.onReadingFailed?.(reason);
+      const essaiAuto = known && (error.details as { essaiAuto?: boolean } | undefined)?.essaiAuto === true;
+      if (essaiAuto) this.reading.onEchecPassager?.(tenant, documentId, reason);
       throw error;
     }
   }
@@ -476,11 +520,15 @@ export class TakeoffService {
       return lecteur.lire({ document, trade: t, tradeLabel: tradeProfile(t).label, referentiel, siteNotes });
     };
     const donne = referentialFor(trade)?.trade ?? tradeIdOf(trade.split(",")[0] ?? "");
-    const vus = donne === "general" ? [] : await this.reperer(lecteur, document.numberedText, compter);
+    const reperage = donne === "general" ? { metiers: [], sections: [] } : await this.reperer(lecteur, document.numberedText, compter);
+    const vus = reperage.metiers;
     // Un devis d'un autre métier que le compte : ce métier ; un devis à plusieurs lots sans le métier du compte : le principal.
     if (vus.length > 0 && !vus.includes(donne)) trade = vus[0]!;
     const principal = referentialFor(trade)?.trade ?? trade;
     const dejaLus = vus.length > 1 ? [principal, ...vus.filter((m) => m !== principal)] : [principal];
+    // Décision du fondateur (24 octobre 2026, « option 1 ») : un GROS devis de plusieurs métiers est lu en UN APPEL PAR
+    // MÉTIER, en parallèle, chacun avec son référentiel ; un appel unique avec tous les référentiels était coupé (7954).
+    if (lectureParLots(dejaLus, document.numberedText)) return this.lireParLots(lecteur, document, dejaLus, reperage.sections, siteNotes, compter);
     let result = await lire(trade, dejaLus);
     if (result === null) return null;
     await compter(1, result, LECTURE_PROMPT);
@@ -506,18 +554,51 @@ export class TakeoffService {
     return { result, trade };
   }
 
+  /**
+   * La lecture lot par lot (décision du fondateur, 24 octobre 2026) : un appel par métier, en parallèle, chacun avec son
+   * seul référentiel et la consigne de ne rendre que ses lignes (le principal rend aussi les lignes sans lot) ; les
+   * lectures sont fusionnées (`fusionnerLectures`). Un lot en échec n'empêche pas les autres : il est gardé dans
+   * `lotsNonLus` et l'écran le dit (« Je n'ai pas pu lire la partie … ») ; tous en échec, la lecture échoue comme avant.
+   */
+  private async lireParLots(
+    lecteur: LectureReader,
+    document: DocumentInput,
+    metiers: readonly string[],
+    sections: readonly SectionDuDevis[],
+    siteNotes: string | null,
+    compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>,
+  ): Promise<{ result: ReadAttempt<LectureDevis>; trade: string } | null> {
+    const { lecture, appels, metier, dureeMs } = await lireLotParLot(lecteur, document, metiers, sections, siteNotes);
+    const lus = appels.flatMap((a) => (a.attempt ? [a.attempt] : []));
+    if (lus.length === 0) return null;
+    for (const [i, e] of lus.entries()) await compter(i + 1, e, LECTURE_PROMPT);
+    const premier = lus.find((e) => e.status === "success" && e.output) ?? lus[0]!;
+    const usage = {
+      inputTokens: lus.reduce((t, e) => t + e.usage.inputTokens, 0),
+      outputTokens: lus.reduce((t, e) => t + e.usage.outputTokens, 0),
+      cacheReadTokens: lus.reduce((t, e) => t + (e.usage.cacheReadTokens ?? 0), 0),
+    };
+    const durationMs = dureeMs;
+    const result: ReadAttempt<LectureDevis> = lecture ? { ...premier, usage, durationMs, status: "success", output: lecture, errorCode: null } : { ...premier, usage, durationMs, output: null };
+    return { result, trade: metier };
+  }
+
   /** Le repérage des métiers (texte seul, modèle rapide) : jamais bloquant, un échec ou un silence laisse le métier donné. */
-  private async reperer(lecteur: LectureReader, numberedText: string, compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>): Promise<string[]> {
-    if (!lecteur.reperer) return [];
+  private async reperer(lecteur: LectureReader, numberedText: string, compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>): Promise<{ metiers: string[]; sections: SectionDuDevis[] }> {
+    const rien = { metiers: [], sections: [] };
+    if (!lecteur.reperer) return rien;
     try {
       // 25 s au plus : un repérage lent ne retarde jamais la lecture plus que la relecture qu'il évite.
       let timer: ReturnType<typeof setTimeout> | undefined;
       const r = await Promise.race([lecteur.reperer(numberedText), new Promise<null>((resolve) => (timer = setTimeout(() => resolve(null), REPERAGE_MAX_MS)))]).finally(() => clearTimeout(timer));
-      if (!r) return [];
+      if (!r) return rien;
       await compter(0, r, REPERAGE_PROMPT);
-      return r.status === "success" && r.output ? r.output.filter((m) => referentialFor(m)?.trade === m) : [];
+      if (r.status !== "success" || !r.output) return rien;
+      const lu = Array.isArray(r.output) ? { metiers: r.output, sections: [] } : r.output;
+      const metiers = lu.metiers.filter((m) => referentialFor(m)?.trade === m);
+      return { metiers, sections: lu.sections.filter((x) => metiers.includes(x.metier)) };
     } catch {
-      return [];
+      return rien;
     }
   }
 
@@ -528,19 +609,22 @@ export class TakeoffService {
    * lit pas ce devis (lecteur simulé sans lecture enregistrée) ; une lecture en échec est une lecture échouée.
    */
   private async readLecture(tenant: TenantContext, doc: DocumentWithProcessing, prepared: Prepared, analysisId: string): Promise<ReviewedTakeoff | null> {
-    const lecteur = this.reading.lecteur!;
+    const demo = doc.projectId ? ((await this.reading.lecteurDemo?.(tenant, doc.projectId)) ?? null) : null;
+    const lecteur = demo ?? this.reading.lecteur!;
     const started = Date.now();
     let trade = doc.trade;
     let ref = referentialFor(trade);
     const siteNotes = doc.projectId ? ((await this.reading.projectNotes?.(tenant, doc.projectId)) ?? null) : null;
-    // Le devis complet : son texte numéroté (pour citer les lignes) et le PDF entier, toutes pages.
-    const content = await this.documents.readContent(tenant, doc.id);
-    const pages = prepared.pages.map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
-    const document = { numberedText: prepared.input.numberedText, imagePdf: content?.bytes ?? prepared.input.imagePdf, imagePages: pages };
+    // RGPD (Greg, 24 octobre 2026 ; RÈGLE CHANGÉE §51.5, avant : « le PDF entier ») : le texte numéroté, déjà débarrassé
+    // des coordonnées du client, et seulement l'image des pages sans texte (un scan ne se nettoie pas sans le lire). Le
+    // PDF d'origine n'est plus joint quand toutes ses pages ont du texte.
+    const pages = prepared.pages.filter((p) => p.route === "vision").map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
+    const document = { numberedText: prepared.input.numberedText, imagePdf: prepared.input.imagePdf, imagePages: pages };
     const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
     let cost = 0;
     const lu = await this.lireLeDevis(lecteur, document, trade, siteNotes, async (n, r, prompt) => {
-      cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, n, r, prompt);
+      // La lecture simulée du chantier fictif ne coûte rien : rien n'est compté comme un appel au modèle.
+      if (!demo) cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, n, r, prompt);
     });
     if (lu === null) return null;
     const result = lu.result;
@@ -571,7 +655,10 @@ export class TakeoffService {
     if (result.status !== "success" || !result.output) {
       await this.saveStats(analysisId, stats("failed", result.status));
       await this.meter.fail(analysisId);
-      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: result.status });
+      // Une panne passagère (fournisseur indisponible, trop lent, 429) repart seule ; un refus (crédit épuisé, requête
+      // refusée) ou une réponse illisible attend l'artisan. `essaiAuto` le dit à l'écran.
+      const essaiAuto = result.status === "timeout" || (result.status === "provider_error" && !/^http_4(?!29)/.test(result.errorCode ?? ""));
+      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: result.status, essaiAuto });
     }
     const lecture = result.output;
     const lignes = lignesDeLecture(lecture);
@@ -668,6 +755,93 @@ export class TakeoffService {
         aiDoubt: null,
         priceRaw: l.price?.trim() || null,
         origin: "partner",
+      })),
+    });
+    return this.review(tenant, takeoff);
+  }
+
+  /** Une liste déjà comptée peut-elle être lue ? (le lecteur d'image est configuré) */
+  get listeAvailable(): boolean {
+    return this.reading.listeur !== undefined;
+  }
+
+  /**
+   * « J'AI DÉJÀ MA LISTE » : une photo (JPEG, PNG, WebP) ou un PDF d'une liste écrite à la main, d'un bon ou d'un devis de
+   * négoce. L'IA lit les lignes TELLES QU'ÉCRITES (article, quantité, unité) ; aucun calcul de quantitatif, aucune question :
+   * l'artisan a déjà compté. La liste arrive sur le même écran que celle d'un devis (modifier, supprimer, ajouter une ligne) ;
+   * rien ne part sans sa validation. L'appel est enregistré (coût mesuré) mais ne compte pas comme une analyse de devis.
+   */
+  async fromListe(tenant: TenantContext, projectId: string, trade: string, file: { name: string; bytes: Uint8Array }): Promise<ReviewedTakeoff> {
+    assertCanWrite(tenant);
+    const listeur = this.reading.listeur;
+    if (!listeur) throw new DomainError("ai_unavailable", "AI reading is not configured");
+    // Greg, 30 octobre 2026 (décision 2) : les scans de liste ont leur quota ; au-delà, rien n'est lu ni dépensé.
+    await this.meter.verifierScan(tenant.companyId);
+    if (file.bytes.byteLength === 0) throw new DomainError("unreadable_document", "Empty file", { reason: "empty" });
+    const mediaType = imageMimeType(file.bytes);
+    if (!mediaType && !looksLikePdf(file.bytes)) throw new DomainError("unreadable_document", "Not an image or a PDF", { reason: "not_pdf" });
+    const attempt = await listeur.lire({
+      fileName: file.name,
+      trade,
+      document: mediaType ? { numberedText: "", imagePdf: null, imagePages: [], images: [{ mediaType, bytes: file.bytes }] } : { numberedText: "", imagePdf: file.bytes, imagePages: [] },
+    });
+    if (attempt) {
+      try {
+        await this.recorder.record({
+          companyId: tenant.companyId,
+          projectId,
+          documentId: null,
+          userId: tenant.userId,
+          task: LISTE_PROMPT.id,
+          route: "vision",
+          provider: attempt.provider,
+          model: attempt.model,
+          promptId: LISTE_PROMPT.id,
+          promptVersion: LISTE_PROMPT.version,
+          attempt: 1,
+          pagesText: 0,
+          pagesVision: 1,
+          usage: attempt.usage,
+          status: attempt.status,
+          errorCode: attempt.errorCode,
+          durationMs: attempt.durationMs,
+        });
+      } catch (error) {
+        this.onRecordFailure(error);
+      }
+    }
+    if (!attempt || attempt.status !== "success" || !attempt.output) {
+      this.reading.onReadingFailed?.(attempt?.status ?? "no_reader");
+      // Le motif du prestataire (« http_400: invalid_request_error, … », jamais la clé) suit, pour le journal du serveur.
+      throw new DomainError("analysis_failed", "The AI could not read this list", { reason: attempt?.status ?? "no_reader", ...(attempt?.errorCode ? { motif: attempt.errorCode } : {}) });
+    }
+    const lignes = attempt.output.lignes;
+    if (lignes.length === 0) throw new DomainError("analysis_failed", "Nothing was read in this list", { reason: "nothing_read" });
+    const ref = referentialFor(trade);
+    if (ref) await this.reading.referentials?.ensure(ref);
+    const takeoff = await this.takeoffs.create(tenant, {
+      projectId,
+      documentId: null,
+      source: "lignes",
+      referentialVersion: ref?.version ?? null,
+      analysisId: null,
+      trade,
+      calculated: true,
+      promptId: LISTE_PROMPT.id,
+      promptVersion: LISTE_PROMPT.version,
+      model: attempt.model,
+      notes: [],
+      lines: lignes.map((l) => ({
+        designation: l.designation,
+        quantityRaw: l.quantite,
+        unitRaw: l.unite,
+        reference: null,
+        sourceRefs: [],
+        sourcePages: [],
+        section: [],
+        aiDoubt: null,
+        priceRaw: null,
+        origin: "liste",
       })),
     });
     return this.review(tenant, takeoff);
@@ -900,7 +1074,7 @@ export class TakeoffService {
 
   async answer(tenant: TenantContext, takeoffId: string, key: string, value: EngineAnswer): Promise<ReviewedTakeoff> {
     // Une correction d'article (§41.4, §45.8, §45.9 : depuis l'aperçu avant envoi) ne lève aucun doute : la liste validée le reste.
-    const itemOnly = /^(quantite|libelle|precision|retire|ajout|bref):/.test(key);
+    const itemOnly = /^(quantite|libelle|precision|retire|ajout|bref|habitude|chantier):/.test(key);
     const takeoff = itemOnly ? await this.itemEditable(tenant, await this.takeoffs.findById(tenant, takeoffId)) : await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const previous = takeoff.answers[key];
     // §45.8 : « On ajoute ? » — Oui / Non d'un tap, mémorisé pour l'entreprise.
@@ -925,7 +1099,8 @@ export class TakeoffService {
       if (corrected[1] === "retire" && value !== "oui" && value !== null) throw validationFailed("Answer oui", { reason: "invalid_answer" });
       const answers = { ...takeoff.answers };
       for (const k of ["quantite", "libelle", "precision", "retire"]) delete answers[`${k}:${itemKey}`];
-      const engine = (await this.review(tenant, { ...takeoff, answers })).purchase.toBuy.find((b) => b.key === itemKey);
+      // La proposition d'avant toute correction : celle du moteur, sans les habitudes apprises (on apprend de l'écart à l'IA).
+      const engine = (await this.reviewBrut(tenant, { ...takeoff, answers })).purchase.toBuy.find((b) => b.key === itemKey);
       await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
       const after = await this.reload(tenant, takeoff.id);
       const now = after.purchase.toBuy.find((b) => b.key === itemKey);
@@ -950,8 +1125,22 @@ export class TakeoffService {
             })),
           },
         });
+        // L'apprentissage (24 octobre 2026) : la même correction sur 2 chantiers deviendra une habitude de l'artisan.
+        const champ = corrected[1] as "quantite" | "libelle" | "precision" | "retire";
+        if (champ !== "retire" && this.reading.habitudes) {
+          const valeur = valeurApprise(champ, { label: engine.label, count: engine.order?.count ?? null }, value as string | { value: string; unit: string } | null);
+          if (valeur) await this.reading.habitudes.apprendre(tenant, { metier: takeoff.trade, propose: engine.label, champ, valeur, projectId: takeoff.projectId }).catch(() => undefined);
+        }
       }
       return after;
+    }
+    // « Annuler » sur une ligne ajustée par une habitude : la ligne revient à la proposition, la règle de l'artisan s'arrête.
+    if (key.startsWith("habitude:")) {
+      if (value !== "non") throw validationFailed("Answer non", { reason: "invalid_answer" });
+      const ajustement = (await this.review(tenant, takeoff)).ajustements?.find((a) => a.itemKey === key.slice("habitude:".length));
+      await this.takeoffs.setAnswer(tenant, takeoff.id, key, "non");
+      if (ajustement) await this.reading.habitudes?.annuler(tenant, ajustement.regleId);
+      return this.reload(tenant, takeoff.id);
     }
     // §47.3 / §47.4 : « C'est bon » sur une quantité calculée avec une règle « à vérifier » : la ligne passe au vert,
     // chaque règle est confirmée pour l'entreprise (trois entreprises différentes la valident), et tout va au journal.
@@ -1191,8 +1380,25 @@ export class TakeoffService {
    * L'écran, recalculé à chaque lecture avec les règles de sa version (§51.5) : la lecture du modèle, ou, sans lecture
    * (lignes d'un partenaire, ancien quantitatif), chaque ligne telle qu'écrite.
    */
-  private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
+  /** L'écran sans les habitudes apprises : ce que proposent la lecture et le moteur. */
+  private async reviewBrut(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
     return this.reviewLecture(tenant, record, record.lecture ?? lectureDepuisLignes(record.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw }))));
+  }
+
+  private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
+    const lecture = record.lecture ?? lectureDepuisLignes(record.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw })));
+    const brut = await this.reviewLecture(tenant, record, lecture);
+    // L'apprentissage (24 octobre 2026) : les règles apprises posent leur réponse sur la ligne, comme une correction à la
+    // main, sauf là où l'artisan a déjà répondu ou a annulé l'ajustement (« habitude:<ligne> »).
+    const h = this.reading.habitudes;
+    if (!h) return brut;
+    const lignes = brut.purchase.toBuy.map((b) => ({ key: b.key, label: b.label, count: b.order?.count ?? null, unit: b.order?.unit ?? null }));
+    const ajustements = await h.ajustements(tenant, record.trade, lignes, (cle) => cle in record.answers).catch(() => []);
+    if (ajustements.length === 0) return brut;
+    const appris = Object.fromEntries(ajustements.map((a) => [`${a.champ}:${a.itemKey}`, a.reponse]));
+    const ajuste = await this.reviewLecture(tenant, { ...record, answers: { ...appris, ...record.answers } }, lecture);
+    const vus = new Set<string>();
+    return { ...ajuste, ajustements: ajustements.filter((a) => !vus.has(a.itemKey) && vus.add(a.itemKey)).map((a) => ({ itemKey: a.itemKey, regleId: a.regleId, texte: a.texte })) };
   }
 
   /**

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
+import { Turnstile, TURNSTILE_ACTIF } from "@/components/turnstile";
 import { api, ApiError, type Health } from "@/lib/api";
 
 export default function MotDePasseOubliePage() {
@@ -10,6 +11,7 @@ export default function MotDePasseOubliePage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [captcha, setCaptcha] = useState<string | null>(null);
 
   useEffect(() => {
     api<Health>("/v1/health")
@@ -26,6 +28,7 @@ export default function MotDePasseOubliePage() {
       await api("/v1/auth/request-password-reset", {
         method: "POST",
         body: { email: String(form.get("email")).trim(), redirectTo: `${window.location.origin}/nouveau-mot-de-passe` },
+        captcha,
       });
       setSent(true);
     } catch (e) {
@@ -51,7 +54,8 @@ export default function MotDePasseOubliePage() {
         <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
           {error ? <ErrorNotice error={error} /> : null}
           <Field id="email" name="email" type="email" label="E-mail du compte" autoComplete="email" inputMode="email" required />
-          <Button type="submit" pending={pending}>
+          <Turnstile onToken={setCaptcha} />
+          <Button type="submit" pending={pending} disabled={TURNSTILE_ACTIF && !captcha}>
             Recevoir un lien
           </Button>
         </form>

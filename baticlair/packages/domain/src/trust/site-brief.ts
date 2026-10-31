@@ -292,7 +292,7 @@ export function briefTexte(lines: readonly { cle: string; texte: string }[]): st
  * Renvoie ce qui a été trouvé, ou null si le texte est propre.
  */
 export function priceLeak(text: string): string | null {
-  const patterns = [/€/, /\d[\d\s]*[.,]\d{2}\s*(?:€|eur|euros?)\b/i, /\b(?:HT|TTC|TVA)\b/, /\b(?:remise|montant|prix unitaire|p\.u\.|total)\b/i, /(?<!sans )\bprix\b/i];
+  const patterns = [/€/, /\d[\d\s]*[.,]\d{2}\s*(?:€|eur|euros?)\b/i, /\b(?:HT|TTC|TVA)\b/, /\b(?:remise|montant|prix unitaire|p\.u\.|total)\b/i, /(?<!sans |demande de |meilleurs )\bprix\b/i];
   for (const re of patterns) {
     const m = re.exec(text);
     if (m) return m[0];

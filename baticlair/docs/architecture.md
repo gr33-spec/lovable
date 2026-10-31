@@ -1,4 +1,6 @@
-# Architecture
+# Architecture (cible de 2025, en partie dépassée)
+
+> **Lire d'abord `ARCHITECTURE.md`** : il décrit ce qui tourne aujourd'hui (pas de worker ni de stockage objet ; tout se fait dans la requête ou dans une tâche planifiée). Ce document garde la cible d'origine et les principes (monolithe modulaire, ports et adapters, multi-tenant).
 
 ## Vue d'ensemble
 

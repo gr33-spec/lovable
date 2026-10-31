@@ -82,6 +82,8 @@ export function lectureAttendue7954(): LectureDevis {
       { cle: "repartition_per", texte: "Les 890 m de PER : combien en 10×12 et combien en 13×16 ?", boutons: [], unite: "m", donnee: "répartition du PER", ligne: null },
       { cle: "modele_paroi_douche", texte: "Quel modèle pour les parois de douche « à définir » ?", boutons: [], unite: null, donnee: "modèle des parois de douche", ligne: null },
       { cle: "usage_alimentations_radiateur", texte: "59 alimentations radiateur pour 49 appareils : à quoi servent les 10 en plus ?", boutons: [], unite: null, donnee: "usage des 10 alimentations en plus", ligne: null },
+      // Décision du fondateur (24 octobre 2026, vraie lecture) : la pose est une question utile.
+      { cle: "mode_pose", texte: "Tu poses en encastré ou en saillie ?", boutons: [{ label: "Encastré", valeur: "encastre" }, { label: "Saillie", valeur: "saillie" }], unite: null, donnee: "mode de pose", ligne: null },
       { cle: "logement_bloc_page_12", texte: "La chambre et le dégagement de la page 12 : à quel logement les rattacher ?", boutons: [], unite: null, donnee: "logement du bloc de la page 12", ligne: null },
     ],
     lignes,

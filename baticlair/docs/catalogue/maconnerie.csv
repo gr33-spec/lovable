@@ -1,0 +1,43 @@
+﻿Métier;Famille;Produit;Format / dimension / qualité;Désignation envoyée au négoce;Unité;Mots du chantier (recherche);Clé
+Maçonnerie;Liants;Ciment CEM II 32,5;35 kg;Ciment CEM II 32,5 35 kg;sacs;ciment, cem2;maconnerie/liants/ciment-cem-ii-32-5/35-kg
+Maçonnerie;Liants;Ciment CEM II 32,5;25 kg;Ciment CEM II 32,5 25 kg;sacs;ciment, cem2;maconnerie/liants/ciment-cem-ii-32-5/25-kg
+Maçonnerie;Liants;Chaux hydraulique NHL 3,5;35 kg;Chaux hydraulique NHL 3,5 35 kg;sacs;chaux, nhl;maconnerie/liants/chaux-hydraulique-nhl-3-5/35-kg
+Maçonnerie;Liants;Chaux hydraulique NHL 3,5;25 kg;Chaux hydraulique NHL 3,5 25 kg;sacs;chaux, nhl;maconnerie/liants/chaux-hydraulique-nhl-3-5/25-kg
+Maçonnerie;Liants;Mortier prêt à l'emploi;25 kg;Mortier prêt à l'emploi 25 kg;sacs;mortier, mortier sec;maconnerie/liants/mortier-pret-a-l-emploi/25-kg
+Maçonnerie;Liants;Béton prêt à l'emploi;35 kg;Béton prêt à l'emploi 35 kg;sacs;beton sac;maconnerie/liants/beton-pret-a-l-emploi/35-kg
+Maçonnerie;Granulats;Sable 0/4;big bag 1 t;Sable 0/4 big bag 1 t;tonnes;sable, sable a beton;maconnerie/granulats/sable-0-4/big-bag-1-t
+Maçonnerie;Granulats;Sable 0/4;vrac;Sable 0/4 vrac;tonnes;sable, sable a beton;maconnerie/granulats/sable-0-4/vrac
+Maçonnerie;Granulats;Gravillon 4/20;big bag 1 t;Gravillon 4/20 big bag 1 t;tonnes;gravier, gravillons, caillou;maconnerie/granulats/gravillon-4-20/big-bag-1-t
+Maçonnerie;Granulats;Gravillon 4/20;vrac;Gravillon 4/20 vrac;tonnes;gravier, gravillons, caillou;maconnerie/granulats/gravillon-4-20/vrac
+Maçonnerie;Granulats;Grave 0/31,5;vrac;Grave 0/31,5 vrac;tonnes;grave, tout venant;maconnerie/granulats/grave-0-31-5/vrac
+Maçonnerie;Blocs;Parpaing creux;20×20×50 (60 pièces);Parpaing creux 20×20×50 (60 pièces);palettes;parpaing, bloc beton, agglo;maconnerie/blocs/parpaing-creux/20x20x50-60-pieces
+Maçonnerie;Blocs;Parpaing creux;15×20×50 (80 pièces);Parpaing creux 15×20×50 (80 pièces);palettes;parpaing, bloc beton, agglo;maconnerie/blocs/parpaing-creux/15x20x50-80-pieces
+Maçonnerie;Blocs;Parpaing creux;10×20×50 (120 pièces);Parpaing creux 10×20×50 (120 pièces);palettes;parpaing, bloc beton, agglo;maconnerie/blocs/parpaing-creux/10x20x50-120-pieces
+Maçonnerie;Blocs;Bloc à bancher;20×20×50;Bloc à bancher 20×20×50;palettes;bloc a bancher;maconnerie/blocs/bloc-a-bancher/20x20x50
+Maçonnerie;Blocs;Bloc à bancher;25×20×50;Bloc à bancher 25×20×50;palettes;bloc a bancher;maconnerie/blocs/bloc-a-bancher/25x20x50
+Maçonnerie;Blocs;Brique monomur;30 cm;Brique monomur 30 cm;palettes;brique, monomur;maconnerie/blocs/brique-monomur/30-cm
+Maçonnerie;Blocs;Brique monomur;37,5 cm;Brique monomur 37,5 cm;palettes;brique, monomur;maconnerie/blocs/brique-monomur/37-5-cm
+Maçonnerie;Blocs;Brique plâtrière;5 cm;Brique plâtrière 5 cm;palettes;platriere, brique plâtrière;maconnerie/blocs/brique-platriere/5-cm
+Maçonnerie;Blocs;Brique plâtrière;7 cm;Brique plâtrière 7 cm;palettes;platriere, brique plâtrière;maconnerie/blocs/brique-platriere/7-cm
+Maçonnerie;Blocs;Bloc béton cellulaire;20 cm;Bloc béton cellulaire 20 cm;palettes;beton cellulaire, siporex;maconnerie/blocs/bloc-beton-cellulaire/20-cm
+Maçonnerie;Blocs;Bloc béton cellulaire;25 cm;Bloc béton cellulaire 25 cm;palettes;beton cellulaire, siporex;maconnerie/blocs/bloc-beton-cellulaire/25-cm
+Maçonnerie;Blocs;Bloc béton cellulaire;30 cm;Bloc béton cellulaire 30 cm;palettes;beton cellulaire, siporex;maconnerie/blocs/bloc-beton-cellulaire/30-cm
+Maçonnerie;Acier;Treillis soudé;ST 25 C (2,40 × 6 m);Treillis soudé ST 25 C (2,40 × 6 m);panneaux;treillis, ferraillage, grillage soude;maconnerie/acier/treillis-soude/st-25-c-2-40x6-m
+Maçonnerie;Acier;Treillis soudé;ST 10 (2,40 × 3,60 m);Treillis soudé ST 10 (2,40 × 3,60 m);panneaux;treillis, ferraillage, grillage soude;maconnerie/acier/treillis-soude/st-10-2-40x3-60-m
+Maçonnerie;Acier;Chaînage en U;15 × 15;Chaînage en U 15 × 15;barres de 6 m;chainage, armature;maconnerie/acier/chainage-en-u/15x15
+Maçonnerie;Acier;Chaînage en U;20 × 20;Chaînage en U 20 × 20;barres de 6 m;chainage, armature;maconnerie/acier/chainage-en-u/20x20
+Maçonnerie;Acier;Fer à béton HA;Ø 8;Fer à béton HA Ø 8;barres de 6 m;fer, ha, rond a beton;maconnerie/acier/fer-a-beton-ha/8
+Maçonnerie;Acier;Fer à béton HA;Ø 10;Fer à béton HA Ø 10;barres de 6 m;fer, ha, rond a beton;maconnerie/acier/fer-a-beton-ha/10
+Maçonnerie;Acier;Fer à béton HA;Ø 12;Fer à béton HA Ø 12;barres de 6 m;fer, ha, rond a beton;maconnerie/acier/fer-a-beton-ha/12
+Maçonnerie;Coffrage et linteaux;Linteau béton précontraint;1,00 m · section 20;Linteau béton précontraint 1,00 m · section 20;pièces;linteau;maconnerie/coffrage-et-linteaux/linteau-beton-precontraint/1-00-m-section-20
+Maçonnerie;Coffrage et linteaux;Linteau béton précontraint;1,40 m · section 20;Linteau béton précontraint 1,40 m · section 20;pièces;linteau;maconnerie/coffrage-et-linteaux/linteau-beton-precontraint/1-40-m-section-20
+Maçonnerie;Coffrage et linteaux;Linteau béton précontraint;2,00 m · section 20;Linteau béton précontraint 2,00 m · section 20;pièces;linteau;maconnerie/coffrage-et-linteaux/linteau-beton-precontraint/2-00-m-section-20
+Maçonnerie;Coffrage et linteaux;Planelle;5×20×50;Planelle 5×20×50;pièces;planelle;maconnerie/coffrage-et-linteaux/planelle/5x20x50
+Maçonnerie;Enduits;Enduit de façade monocouche;25 kg blanc;Enduit de façade monocouche 25 kg blanc;sacs;enduit, crepi, monocouche;maconnerie/enduits/enduit-de-facade-monocouche/25-kg-blanc
+Maçonnerie;Enduits;Enduit de façade monocouche;25 kg ton pierre;Enduit de façade monocouche 25 kg ton pierre;sacs;enduit, crepi, monocouche;maconnerie/enduits/enduit-de-facade-monocouche/25-kg-ton-pierre
+Maçonnerie;Assainissement;Tube PVC assainissement;Ø 100;Tube PVC assainissement Ø 100;longueurs de 4 m;tube pvc, evacuation, tuyau;maconnerie/assainissement/tube-pvc-assainissement/100
+Maçonnerie;Assainissement;Tube PVC assainissement;Ø 125;Tube PVC assainissement Ø 125;longueurs de 4 m;tube pvc, evacuation, tuyau;maconnerie/assainissement/tube-pvc-assainissement/125
+Maçonnerie;Assainissement;Tube PVC assainissement;Ø 160;Tube PVC assainissement Ø 160;longueurs de 4 m;tube pvc, evacuation, tuyau;maconnerie/assainissement/tube-pvc-assainissement/160
+Maçonnerie;Assainissement;Regard béton;30×30;Regard béton 30×30;pièces;regard;maconnerie/assainissement/regard-beton/30x30
+Maçonnerie;Assainissement;Regard béton;40×40;Regard béton 40×40;pièces;regard;maconnerie/assainissement/regard-beton/40x40
+Maçonnerie;Étanchéité;Film polyane;4 × 25 m;Film polyane 4 × 25 m;rouleaux;polyane, film;maconnerie/etancheite/film-polyane/4x25-m

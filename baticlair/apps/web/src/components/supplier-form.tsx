@@ -4,6 +4,7 @@ import { useId, useRef, useState } from "react";
 import { Button, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey, type Supplier } from "@/lib/api";
 import { fr } from "@/lib/fr";
+import { PHRASE_ADRESSE_GENERIQUE, PHRASE_EMAIL_COMMERCIAL, estAdresseGenerique } from "../../../../packages/domain/src/groupe/contact-negoce";
 
 const FIELD_ERRORS: Record<string, string> = {
   name: "Indique le nom de la société.",
@@ -84,17 +85,24 @@ export function SupplierForm({
       ) : null}
       <Field
         id={`${id}-email`}
-        label="E-mail pour les demandes de prix"
+        label="E-mail de ton commercial"
         type="email"
         inputMode="email"
         autoComplete="off"
-        placeholder="ex. devis@fournisseur.fr"
+        placeholder="ex. paul.le-goff@negoce.fr"
         value={values.email}
         onChange={set("email")}
         error={fieldError("email")}
+        hint={PHRASE_EMAIL_COMMERCIAL}
       />
-      <Field id={`${id}-contact`} label="Contact (facultatif)" placeholder="ex. Paul" value={values.contactName} onChange={set("contactName")} error={fieldError("contactName")} />
-      <Field id={`${id}-phone`} label="Téléphone (facultatif)" type="tel" value={values.phone} onChange={set("phone")} error={fieldError("phone")} />
+      {/* Lot final, point 2 : une adresse générale se signale gentiment, sans bloquer. */}
+      {!fieldError("email") && estAdresseGenerique(values.email) ? (
+        <p role="status" className="-mt-2 text-sm font-semibold text-warn">
+          {PHRASE_ADRESSE_GENERIQUE}
+        </p>
+      ) : null}
+      <Field id={`${id}-contact`} label="Son prénom (si tu le connais)" placeholder="ex. Paul" value={values.contactName} onChange={set("contactName")} error={fieldError("contactName")} />
+      <Field id={`${id}-phone`} label="Son téléphone (si tu le connais)" type="tel" value={values.phone} onChange={set("phone")} error={fieldError("phone")} />
       <div className="flex flex-col gap-1.5">
         <label htmlFor={`${id}-notes`} className="text-sm font-bold">
           Notes, spécialités (facultatif)
@@ -105,7 +113,7 @@ export function SupplierForm({
           placeholder="ex. Tuiles, zinc, livraison le mardi"
           value={values.notes}
           onChange={set("notes")}
-          className="rounded-2xl bg-surface p-4 text-base shadow-card outline-none placeholder:text-subtle focus-visible:ring-2 focus-visible:ring-ink"
+          className="rounded-2xl border border-line bg-surface p-4 text-[16px] outline-none placeholder:text-muted focus-visible:border-accent"
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
