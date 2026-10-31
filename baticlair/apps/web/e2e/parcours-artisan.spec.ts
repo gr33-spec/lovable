@@ -2611,8 +2611,8 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Le visuel du premier écran (Greg, 31 octobre 2026, soir) : la photo choisie, chargée, coins arrondis ; le cadrage serré
   // sur téléphone, le panoramique sur ordinateur.
   const visuel = page.locator(".mz2-hero-visuel img");
-  await expect(visuel).toHaveAttribute("alt", /artisans/);
-  await expect.poll(() => visuel.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0 && e.currentSrc)).toMatch(page.viewportSize()!.width <= 900 ? /hero-artisans-mobile-\d+\.webp$/ : /hero-artisans-\d+\.webp$/);
+  await expect(visuel).toHaveAttribute("alt", /matériaux/);
+  await expect.poll(() => visuel.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0 && e.currentSrc)).toMatch(page.viewportSize()!.width <= 900 ? /hero-materiaux-mobile-\d+\.webp$/ : /hero-materiaux-\d+\.webp$/);
   expect(Number.parseFloat(await visuel.evaluate((e) => getComputedStyle(e).borderTopLeftRadius))).toBeGreaterThan(10);
   for (const etape of ["Prépare ta liste", "Consulte tes négoces", "Compare et choisis"]) await expect(page.getByRole("heading", { name: etape, exact: true })).toBeVisible();
   await expect(page.locator("#fonctionnement .mz2-etape")).toHaveCount(3);

@@ -198,18 +198,19 @@ export function LandingPremium() {
                 {CTA_PRINCIPAL.sous} · <Link href="/tarifs">Voir les conditions</Link>
               </p>
             </div>
-            {/* Le visuel choisi par Greg (31 octobre 2026, soir) : des artisans devant les rayonnages d'un dépôt, au soleil
-                couchant, devant la bande jaune en diagonale de la maquette. Panoramique sur ordinateur ; sur téléphone, un
-                cadrage plus serré sur les trois visages du centre. WebP de 40 à 100 Ko, deux tailles chacun. */}
+            {/* Le visuel choisi par Greg (31 octobre 2026, soir, second choix) : les matériaux des métiers (parpaing, liteaux,
+                plaques, isolant, PVC, peinture) sur fond noir, lumière jaune, devant la bande jaune en diagonale de la
+                maquette. Panoramique sur ordinateur ; sur téléphone, un cadrage moins large où tous les matériaux restent.
+                WebP de 16 à 56 Ko, deux tailles chacun. */}
             <div className="mz2-hero-visuel">
               <span className="mz2-bande" aria-hidden="true" />
               <picture>
-                <source media="(max-width: 900px)" type="image/webp" srcSet="/landing/v3/hero-artisans-mobile-640.webp 640w, /landing/v3/hero-artisans-mobile-1000.webp 1000w" sizes="calc(100vw - 32px)" width={1000} height={667} />
+                <source media="(max-width: 900px)" type="image/webp" srcSet="/landing/v3/hero-materiaux-mobile-640.webp 640w, /landing/v3/hero-materiaux-mobile-1000.webp 1000w" sizes="calc(100vw - 32px)" width={1000} height={498} />
                 <img
-                  src="/landing/v3/hero-artisans-1600.webp"
-                  srcSet="/landing/v3/hero-artisans-1000.webp 1000w, /landing/v3/hero-artisans-1600.webp 1600w"
+                  src="/landing/v3/hero-materiaux-1600.webp"
+                  srcSet="/landing/v3/hero-materiaux-1000.webp 1000w, /landing/v3/hero-materiaux-1600.webp 1600w"
                   sizes="(max-width: 1240px) 50vw, 600px"
-                  alt="Des artisans, bras croisés et sourire aux lèvres, devant les rayonnages de matériaux d'un dépôt"
+                  alt="Les matériaux du chantier : tuyau PVC, parpaing, plaques, liteaux, rouleau d'isolant, seau et rouleau de peinture"
                   width={1600}
                   height={689}
                   fetchPriority="high"
