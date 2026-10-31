@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Plus, X } from "lucide-react";
+import { BadgeCheck, Check, ChevronLeft, ChevronRight, History, Package, Plus, Search, Users, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, INPUT } from "@/components/ui";
@@ -34,6 +34,10 @@ interface Proposition {
   variante?: string | null;
   precisions?: string[];
   statut?: "verifie" | "generique" | null;
+  famille?: string;
+  marque?: string | null;
+  /** Un intitulé déjà écrit par l'entreprise elle-même. */
+  mien?: boolean;
   /** Une référence des artisans : écrite ou commandée par plusieurs entreprises, jamais vérifiée (Greg, 31 octobre 2026, soir). */
   commune?: boolean;
 }
@@ -55,8 +59,32 @@ function regrouper(resultats: readonly Proposition[], ecrits: readonly Propositi
     const seule = articles.length > 1 ? exacte(articles) : articles[0]!;
     return seule ? { type: "article" as const, article: seule } : { type: "produit" as const, produit, articles };
   });
-  return [...entrees.slice(0, 4), ...ecrits.map((article) => ({ type: "article" as const, article })), ...communes.map((article) => ({ type: "article" as const, article: { ...article, commune: true } }))].slice(0, 7);
+  return [...entrees.slice(0, 5), ...ecrits.map((article) => ({ type: "article" as const, article: { ...article, mien: true } })), ...communes.map((article) => ({ type: "article" as const, article: { ...article, commune: true } }))].slice(0, 7);
 }
+/** Sans accents ni casse, pour comparer ce qui est tapé et ce qui est proposé. */
+const plat = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+/** Les mots de la proposition qui commencent comme un mot tapé passent en gras (« lit » dans « Liteau »). */
+function Surligne({ texte, q }: { texte: string; q: string }) {
+  const mots = plat(q).split(/[\s,;·]+/).filter((m) => m.length >= 2);
+  if (!mots.length) return <>{texte}</>;
+  return (
+    <>
+      {texte.split(/(\s+)/).map((m, i) => {
+        const p = plat(m).replace(/[^a-z0-9×x]/g, "");
+        const vu = p.length > 0 && mots.some((t) => p.startsWith(t.replace(/[^a-z0-9×x]/g, "")) && t.replace(/[^a-z0-9×x]/g, "").length > 0);
+        return vu ? (
+          <strong key={i} className="font-extrabold">
+            {m}
+          </strong>
+        ) : (
+          <span key={i}>{m}</span>
+        );
+      })}
+    </>
+  );
+}
+
 export interface LigneEcrite {
   libelle: string;
   quantite: string;
@@ -105,11 +133,23 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
   const { data: cat } = useResource(fetchCat);
   const [ouvert, setOuvert] = useState<string | null>(null);
   const [libre, setLibre] = useState(false);
+  const [saisieActive, setSaisieActive] = useState(true);
+  const [actif, setActif] = useState(-1);
   const [marqueLibre, setMarqueLibre] = useState("");
   const dejaChoisi = (r: Proposition) => r.designation.toLowerCase() === mot.toLowerCase() || texte.toLowerCase().startsWith(r.designation.toLowerCase());
   const suggestions = mot && !libre ? regrouper((cat?.resultats ?? []).filter((r) => !dejaChoisi(r)), (cat?.ecrits ?? []).filter((r) => !dejaChoisi(r)), (cat?.communes ?? []).filter((r) => !dejaChoisi(r))) : [];
   const groupeOuvert = ouvert ? suggestions.find((e) => e.type === "produit" && e.produit === ouvert) : undefined;
   const unites = UNITES.includes(unite) ? UNITES : [...UNITES, unite];
+  // Le panneau des propositions : seulement pendant la saisie de l'intitulé (replié à la quantité, ou en saisie libre).
+  const panneau = Boolean(mot) && !libre && saisieActive;
+  // Les choix du clavier (↑ ↓ Entrée), dans l'ordre de l'écran.
+  const options: { run: () => void }[] =
+    groupeOuvert && groupeOuvert.type === "produit"
+      ? [...groupeOuvert.articles.map((r) => ({ run: () => choisir(r) })), { run: () => setOuvert(null) }]
+      : [
+          ...suggestions.map((e) => ({ run: () => (e.type === "produit" ? setOuvert(e.produit) : choisir(e.article)) })),
+          { run: () => setLibre(true) },
+        ];
 
   useEffect(() => {
     champ.current?.focus();
@@ -158,7 +198,8 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Écris ta liste" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col bg-ground">
-      <div className="flex items-center justify-between gap-3 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
+      {/* Ordinateur : une colonne centrée (2xl), lisible, au lieu de champs étirés sur tout l'écran. */}
+      <div className="flex items-center justify-between gap-3 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2 lg:mx-auto lg:w-full lg:max-w-2xl lg:pt-10 lg:pb-4">
         <button type="button" onClick={onFermer} aria-label="Fermer" className="pressable grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface">
           <X size={20} aria-hidden="true" />
         </button>
@@ -167,7 +208,7 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
           <Check size={18} aria-hidden="true" /> Terminé
         </Button>
       </div>
-      <div className="flex min-h-0 flex-col gap-2 px-4">
+      <div className="flex min-h-0 flex-col gap-2 px-4 lg:mx-auto lg:w-full lg:max-w-2xl lg:gap-3">
         {lignes.length ? (
           <ul ref={liste} aria-label="Ma liste" className="flex max-h-[30dvh] flex-col gap-1.5 overflow-y-auto">
             {lignes.map((l, i) => (
@@ -184,26 +225,196 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
             ))}
           </ul>
         ) : null}
-        <input
-          ref={champ}
-          aria-label="Intitulé"
-          value={texte}
-          onChange={(e) => saisir({ texte: e.target.value })}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              if (texte.trim()) champQte.current?.focus();
-            }
-          }}
-          placeholder={lignes.length ? "Ligne suivante…" : "Crochet gouttière bandeau 25"}
-          enterKeyHint="next"
-          autoComplete="off"
-          className={`${INPUT} w-full`}
-        />
+        {/* LA SAISIE (Greg, 31 octobre 2026, soir : « pas très intuitif quand on commence à taper ») : les propositions
+            s'ouvrent JUSTE SOUS le champ, en liste (pas en pastilles éparpillées), chacune avec ce qui la distingue (famille,
+            marque vérifiée, déjà écrite par toi, écrite par d'autres artisans) et son unité ; les mots tapés en gras ; un
+            produit à plusieurs formats ouvre ses formats en grille ; « Je cherche… » pendant la recherche ; sur ordinateur,
+            ↑ ↓ et Entrée. La liste se replie dès qu'on passe à la quantité (le champ reste au-dessus du clavier). */}
+        <div className="relative flex flex-col gap-2">
+          <div className="relative">
+            <Search size={18} aria-hidden="true" className="pointer-events-none absolute top-1/2 left-4 z-10 -translate-y-1/2 text-[#8a7650]" />
+            <input
+              ref={champ}
+              aria-label="Intitulé"
+              aria-autocomplete="list"
+              onFocus={() => setSaisieActive(true)}
+              value={texte}
+              onChange={(e) => {
+                saisir({ texte: e.target.value });
+                setActif(-1);
+              }}
+              onKeyDown={(e) => {
+                if (panneau && options.length && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+                  e.preventDefault();
+                  setActif((i) => (e.key === "ArrowDown" ? (i + 1) % options.length : (i <= 0 ? options.length : i) - 1));
+                  return;
+                }
+                if (e.key === "Escape" && actif >= 0) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActif(-1);
+                  return;
+                }
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (panneau && actif >= 0 && options[actif]) {
+                    options[actif].run();
+                    setActif(-1);
+                    return;
+                  }
+                  if (texte.trim()) champQte.current?.focus();
+                }
+              }}
+              placeholder={lignes.length ? "Ligne suivante…" : "Tape un matériau : liteau, H14, BA13…"}
+              enterKeyHint="next"
+              autoComplete="off"
+              className={`${INPUT} w-full pl-11`}
+            />
+          </div>
+          {panneau ? (
+            <div className="flex max-h-[42dvh] flex-col overflow-y-auto rounded-2xl border border-line bg-surface shadow-card lg:max-h-[50dvh]">
+              {groupeOuvert && groupeOuvert.type === "produit" ? (
+                <div className="flex flex-col gap-3 p-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onMouseDown={(ev) => ev.preventDefault()}
+                      onClick={() => {
+                        setOuvert(null);
+                        setActif(-1);
+                      }}
+                      className={`pressable inline-flex min-h-10 items-center gap-1 rounded-full border border-line px-3 text-[14px] font-semibold ${actif === groupeOuvert.articles.length ? "bg-ground ring-2 ring-accent" : ""}`}
+                    >
+                      <ChevronLeft size={16} aria-hidden="true" />
+                      Retour
+                    </button>
+                    <p className="min-w-0 truncate text-[15px] font-extrabold">{groupeOuvert.produit}</p>
+                    <span className="ml-auto shrink-0 text-[13px] text-muted">choisis le format</span>
+                  </div>
+                  <ul aria-label={`Formats de ${groupeOuvert.produit}`} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {groupeOuvert.articles.map((r, i) => (
+                      <li key={r.designation}>
+                        <button
+                          type="button"
+                          onMouseDown={(ev) => ev.preventDefault()}
+                          onClick={() => choisir(r)}
+                          className={`pressable flex min-h-11 w-full items-center rounded-xl border border-line px-3 text-left text-[15px] font-semibold hover:bg-ground ${actif === i ? "bg-ground ring-2 ring-accent" : ""}`}
+                        >
+                          {r.variante ?? r.designation}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <>
+                  {cat === null ? (
+                    <p role="status" className="flex min-h-12 items-center gap-2 px-4 text-[14px] text-muted">
+                      <Search size={16} aria-hidden="true" /> Je cherche « {mot} »…
+                    </p>
+                  ) : suggestions.length === 0 ? (
+                    <p className="px-4 pt-3 text-[14px] text-muted">Rien au catalogue pour « {mot} ». Tu peux l&apos;ajouter tel quel.</p>
+                  ) : null}
+                  <ul aria-label="Références proposées" className="flex flex-col divide-y divide-line">
+                    {suggestions.map((e, i) => {
+                      const surbrillance = actif === i ? "bg-ground" : "";
+                      if (e.type === "produit") {
+                        const famille = e.articles[0]?.famille;
+                        return (
+                          <li key={`p:${e.produit}`}>
+                            <button
+                              type="button"
+                              onMouseDown={(ev) => ev.preventDefault()}
+                              onClick={() => {
+                                setOuvert(e.produit);
+                                setActif(-1);
+                              }}
+                              aria-label={`${e.produit} : choisir le format`}
+                              className={`flex min-h-14 w-full items-center gap-3 px-4 py-2 text-left hover:bg-ground ${surbrillance}`}
+                            >
+                              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-ground text-muted" aria-hidden="true">
+                                <Package size={18} />
+                              </span>
+                              <span className="flex min-w-0 grow flex-col">
+                                <span className="truncate text-[15px] font-semibold">
+                                  <Surligne texte={e.produit} q={mot} />
+                                </span>
+                                <span className="truncate text-[13px] text-muted">
+                                  {e.articles.length} formats{famille ? ` · ${famille}` : ""}
+                                </span>
+                              </span>
+                              <span className="flex shrink-0 items-center gap-1 text-[13px] font-semibold text-muted">
+                                Choisir <ChevronRight size={16} aria-hidden="true" />
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      }
+                      const r = e.article;
+                      const nom = [r.designation, ...(r.precisions ?? [])].join(" ");
+                      const sous = r.commune
+                        ? "Écrit par d'autres artisans"
+                        : r.mien
+                          ? "Déjà écrit par toi"
+                          : [r.famille, r.statut === "verifie" && r.marque ? `${r.marque}, référence vérifiée` : null].filter(Boolean).join(" · ");
+                      const Icone = r.commune ? Users : r.mien ? History : r.statut === "verifie" ? BadgeCheck : Package;
+                      return (
+                        <li key={`a:${r.designation}`}>
+                          <button
+                            type="button"
+                            onMouseDown={(ev) => ev.preventDefault()}
+                            onClick={() => choisir(r)}
+                            aria-label={r.commune ? `${r.designation} (écrit par d'autres artisans)` : nom}
+                            className={`flex min-h-14 w-full items-center gap-3 px-4 py-2 text-left hover:bg-ground ${surbrillance}`}
+                          >
+                            <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${r.statut === "verifie" ? "bg-accent/25 text-ink" : "bg-ground text-muted"}`} aria-hidden="true">
+                              <Icone size={18} />
+                            </span>
+                            <span className="flex min-w-0 grow flex-col">
+                              <span className="text-[15px] font-semibold">
+                                <Surligne texte={r.designation} q={mot} />
+                                {r.precisions?.length ? <span className="font-normal text-muted"> {r.precisions.join(" ")}</span> : null}
+                              </span>
+                              {sous ? <span className="truncate text-[13px] text-muted">{sous}</span> : null}
+                            </span>
+                            {r.unite ? <span className="shrink-0 rounded-full bg-ground px-2.5 py-1 text-[12px] font-semibold text-muted">{r.unite}</span> : null}
+                          </button>
+                        </li>
+                      );
+                    })}
+                    <li>
+                      <button
+                        type="button"
+                        onMouseDown={(ev) => ev.preventDefault()}
+                        onClick={() => {
+                          setLibre(true);
+                          setActif(-1);
+                        }}
+                        className={`flex min-h-14 w-full items-center gap-3 px-4 py-2 text-left hover:bg-ground ${actif === suggestions.length ? "bg-ground" : ""}`}
+                      >
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-dashed border-line text-muted" aria-hidden="true">
+                          <Plus size={18} />
+                        </span>
+                        <span className="flex min-w-0 grow flex-col">
+                          <span className="text-[15px] font-semibold">Je ne trouve pas mon matériau — le saisir moi-même</span>
+                          <span className="truncate text-[13px] text-muted">« {mot} » partira tel quel, avec la marque si tu la connais</span>
+                        </span>
+                      </button>
+                    </li>
+                  </ul>
+                  <p aria-hidden="true" className="hidden border-t border-line px-4 py-2 text-[12px] text-muted lg:block">
+                    ↑ ↓ pour choisir · Entrée pour valider · Échap pour revenir au champ
+                  </p>
+                </>
+              )}
+            </div>
+          ) : null}
+        </div>
         <div className="flex items-center gap-2">
           <input
             ref={champQte}
             aria-label="Quantité"
+            onFocus={() => setSaisieActive(false)}
             value={quantite}
             onChange={(e) => saisir({ quantite: e.target.value.replace(/[^\d.,]/g, "") })}
             onKeyDown={(e) => {
@@ -218,7 +429,7 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
             autoComplete="off"
             className={`${INPUT} w-24 shrink-0 text-center`}
           />
-          <select aria-label="Unité" value={unite} onChange={(e) => saisir({ unite: e.target.value })} className={`${INPUT} min-w-0 grow`}>
+          <select aria-label="Unité" onFocus={() => setSaisieActive(false)} value={unite} onChange={(e) => saisir({ unite: e.target.value })} className={`${INPUT} min-w-0 grow`}>
             {unites.map((u) => (
               <option key={u} value={u}>
                 {u}
@@ -239,58 +450,9 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
             className={`${INPUT} w-full`}
           />
         ) : null}
-        {groupeOuvert && groupeOuvert.type === "produit" ? (
-          <div className="flex flex-col gap-2">
-            <p className="text-[13px] font-semibold text-muted">Précise : {groupeOuvert.produit}</p>
-            <ul aria-label={`Formats de ${groupeOuvert.produit}`} className="flex flex-wrap gap-2">
-              {groupeOuvert.articles.map((r) => (
-                <li key={r.designation}>
-                  <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => choisir(r)} className="pressable inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-3 text-left text-[14px] font-semibold">
-                    {r.variante ?? r.designation}
-                  </button>
-                </li>
-              ))}
-              <li>
-                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setOuvert(null)} className="pressable inline-flex min-h-10 items-center rounded-full px-3 text-[14px] font-semibold text-muted underline">
-                  Retour
-                </button>
-              </li>
-            </ul>
-          </div>
-        ) : suggestions.length || (mot && !libre) ? (
-          <ul aria-label="Références proposées" className="flex flex-wrap gap-2">
-            {suggestions.map((e) =>
-              e.type === "produit" ? (
-                <li key={`p:${e.produit}`}>
-                  <button type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => setOuvert(e.produit)} aria-label={`${e.produit} : choisir le format`} className="pressable inline-flex min-h-10 items-center gap-1 rounded-full border border-line bg-surface px-3 text-left text-[14px] font-semibold">
-                    {e.produit} <span aria-hidden="true">›</span>
-                  </button>
-                </li>
-              ) : (
-                <li key={e.article.designation}>
-                  <button
-                    type="button"
-                    onMouseDown={(ev) => ev.preventDefault()}
-                    onClick={() => choisir(e.article)}
-                    aria-label={e.article.commune ? `${e.article.designation} (écrit par d'autres artisans)` : undefined}
-                    className="pressable inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-3 text-left text-[14px] font-semibold"
-                  >
-                    {e.article.designation}
-                    {e.article.precisions?.length ? <span className="ml-1 font-normal text-muted">{e.article.precisions.join(" ")}</span> : null}
-                    {e.article.commune ? <span className="ml-1 text-[12px] font-normal text-muted">· écrit par d&apos;autres artisans</span> : null}
-                  </button>
-                </li>
-              ),
-            )}
-            <li>
-              <button type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => setLibre(true)} className="pressable inline-flex min-h-10 items-center rounded-full px-3 text-left text-[14px] font-semibold text-muted underline">
-                Je ne trouve pas mon matériau — le saisir moi-même
-              </button>
-            </li>
-          </ul>
-        ) : (
+        {!panneau && !libre ? (
           <p className="text-[13px] text-muted">{lignes.length ? "Un tap sur une ligne la modifie. Sans quantité, elle reste à vérifier." : "Écris l'intitulé comme tu veux, puis la quantité. Elle peut attendre."}</p>
-        )}
+        ) : null}
         {erreur ? (
           <p role="alert" className="text-[15px] font-semibold text-danger">
             {erreur}

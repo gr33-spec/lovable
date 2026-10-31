@@ -3660,12 +3660,20 @@ test("« Je la note moi-même » (28 octobre 2026, point 1 ; 30 octobre : intitu
   // Catalogue métier (Greg, 31 octobre 2026) : « liteau » propose le produit, puis ses sections en boutons, celles du
   // référentiel d'abord ; « 18 40 » trouve la 18×40.
   await champ.fill("liteau");
-  await ecran.getByRole("button", { name: "Liteau : choisir le format" }).click();
+  // Greg, 31 octobre 2026, soir (« pas très intuitif quand on commence à taper ») : les propositions en liste juste sous
+  // le champ ; sur ordinateur, ↓ puis Entrée ouvre la première ; au doigt, un tap.
+  await expect(ecran.getByRole("button", { name: "Liteau : choisir le format" })).toBeVisible();
+  if (page.viewportSize()!.width >= 1024) {
+    await champ.press("ArrowDown");
+    await champ.press("Enter");
+  } else await ecran.getByRole("button", { name: "Liteau : choisir le format" }).click();
   const formats = ecran.getByRole("list", { name: "Formats de Liteau" });
   await expect(formats.getByRole("button").first()).toHaveText("18×40 · sapin traité classe 2");
   await formats.getByRole("button", { name: "18×40 · sapin traité classe 2" }).click();
   await expect(champ).toHaveValue("Liteau 18×40 · sapin traité classe 2");
   await expect(qte).toBeFocused();
+  // À la quantité, les propositions se replient : rien ne pousse le champ sous le clavier.
+  await expect(ecran.getByRole("list", { name: "Références proposées" })).toHaveCount(0);
   await expect(ecran.getByLabel("Unité")).toHaveValue("m");
   await qte.fill("200");
   await ecran.getByRole("button", { name: "Ajouter la ligne" }).click();
