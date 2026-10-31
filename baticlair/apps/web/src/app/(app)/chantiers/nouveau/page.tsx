@@ -129,12 +129,14 @@ function ImporterUnDocument({ pending, onFichier }: { pending: boolean; onFichie
     setOuvert(false);
     if (f && !pending) onFichier(f);
   };
+  // Feuille fermée : les champs ne se touchent que par ses options (ni Tab, ni lecteur d'écran avant le bouton).
+  const cache = ouvert ? {} : { "aria-hidden": true, tabIndex: -1 };
   const option = "pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl px-3 text-[16px] font-semibold active:bg-ground";
   return (
     <>
-      <input id={ids.photo} type="file" accept="image/*" capture="environment" aria-label="Prendre une photo" className="sr-only" disabled={pending} onChange={prendre} />
-      <input id={ids.galerie} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" aria-label="Choisir une photo" className="sr-only" disabled={pending} onChange={prendre} />
-      <input id={ids.fichier} type="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/webp" aria-label="Choisir un PDF ou un fichier" className="sr-only" disabled={pending} onChange={prendre} />
+      <input id={ids.photo} type="file" accept="image/*" capture="environment" aria-label="Prendre une photo" className="sr-only" disabled={pending} onChange={prendre} {...cache} />
+      <input id={ids.galerie} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" aria-label="Choisir une photo" className="sr-only" disabled={pending} onChange={prendre} {...cache} />
+      <input id={ids.fichier} type="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/webp" aria-label="Choisir un PDF ou un fichier" className="sr-only" disabled={pending} onChange={prendre} {...cache} />
       <button type="button" disabled={pending} onClick={() => setOuvert(true)} className="pressable flex min-h-16 items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground disabled:opacity-80">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent" aria-hidden="true">
           {pending ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
