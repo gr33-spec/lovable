@@ -18,7 +18,9 @@ describe("le catalogue complet", () => {
     const cles = TOUT_LE_CATALOGUE.map((a) => a.cle);
     expect(new Set(cles).size).toBe(cles.length);
     for (const a of TOUT_LE_CATALOGUE) {
-      expect(a.designation, a.cle).not.toMatch(MARQUES);
+      // Catalogue métier (Greg, 31 octobre 2026) : une marque seulement sur une référence vérifiée à sa source.
+      if (a.statut === "verifie") expect(a.marque && a.reference && a.source?.url, a.cle).toBeTruthy();
+      else expect(a.designation, a.cle).not.toMatch(MARQUES);
       expect(a.famille && a.produit, a.cle).toBeTruthy();
       expect(a.unite.length, a.cle).toBeGreaterThan(0);
     }

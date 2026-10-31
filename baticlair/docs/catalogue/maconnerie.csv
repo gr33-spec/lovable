@@ -22,10 +22,10 @@ Maçonnerie;Blocs;Brique plâtrière;7 cm;Brique plâtrière 7 cm;palettes;platr
 Maçonnerie;Blocs;Bloc béton cellulaire;20 cm;Bloc béton cellulaire 20 cm;palettes;beton cellulaire, siporex;maconnerie/blocs/bloc-beton-cellulaire/20-cm
 Maçonnerie;Blocs;Bloc béton cellulaire;25 cm;Bloc béton cellulaire 25 cm;palettes;beton cellulaire, siporex;maconnerie/blocs/bloc-beton-cellulaire/25-cm
 Maçonnerie;Blocs;Bloc béton cellulaire;30 cm;Bloc béton cellulaire 30 cm;palettes;beton cellulaire, siporex;maconnerie/blocs/bloc-beton-cellulaire/30-cm
-Maçonnerie;Acier;Treillis soudé;ST 25 C (2,40 × 6 m);Treillis soudé ST 25 C (2,40 × 6 m);panneaux;treillis, ferraillage, grillage soude;maconnerie/acier/treillis-soude/st-25-c-2-40-x-6-m
-Maçonnerie;Acier;Treillis soudé;ST 10 (2,40 × 3,60 m);Treillis soudé ST 10 (2,40 × 3,60 m);panneaux;treillis, ferraillage, grillage soude;maconnerie/acier/treillis-soude/st-10-2-40-x-3-60-m
-Maçonnerie;Acier;Chaînage en U;15 × 15;Chaînage en U 15 × 15;barres de 6 m;chainage, armature;maconnerie/acier/chainage-en-u/15-x-15
-Maçonnerie;Acier;Chaînage en U;20 × 20;Chaînage en U 20 × 20;barres de 6 m;chainage, armature;maconnerie/acier/chainage-en-u/20-x-20
+Maçonnerie;Acier;Treillis soudé;ST 25 C (2,40 × 6 m);Treillis soudé ST 25 C (2,40 × 6 m);panneaux;treillis, ferraillage, grillage soude;maconnerie/acier/treillis-soude/st-25-c-2-40x6-m
+Maçonnerie;Acier;Treillis soudé;ST 10 (2,40 × 3,60 m);Treillis soudé ST 10 (2,40 × 3,60 m);panneaux;treillis, ferraillage, grillage soude;maconnerie/acier/treillis-soude/st-10-2-40x3-60-m
+Maçonnerie;Acier;Chaînage en U;15 × 15;Chaînage en U 15 × 15;barres de 6 m;chainage, armature;maconnerie/acier/chainage-en-u/15x15
+Maçonnerie;Acier;Chaînage en U;20 × 20;Chaînage en U 20 × 20;barres de 6 m;chainage, armature;maconnerie/acier/chainage-en-u/20x20
 Maçonnerie;Acier;Fer à béton HA;Ø 8;Fer à béton HA Ø 8;barres de 6 m;fer, ha, rond a beton;maconnerie/acier/fer-a-beton-ha/8
 Maçonnerie;Acier;Fer à béton HA;Ø 10;Fer à béton HA Ø 10;barres de 6 m;fer, ha, rond a beton;maconnerie/acier/fer-a-beton-ha/10
 Maçonnerie;Acier;Fer à béton HA;Ø 12;Fer à béton HA Ø 12;barres de 6 m;fer, ha, rond a beton;maconnerie/acier/fer-a-beton-ha/12
@@ -40,4 +40,4 @@ Maçonnerie;Assainissement;Tube PVC assainissement;Ø 125;Tube PVC assainissemen
 Maçonnerie;Assainissement;Tube PVC assainissement;Ø 160;Tube PVC assainissement Ø 160;longueurs de 4 m;tube pvc, evacuation, tuyau;maconnerie/assainissement/tube-pvc-assainissement/160
 Maçonnerie;Assainissement;Regard béton;30×30;Regard béton 30×30;pièces;regard;maconnerie/assainissement/regard-beton/30x30
 Maçonnerie;Assainissement;Regard béton;40×40;Regard béton 40×40;pièces;regard;maconnerie/assainissement/regard-beton/40x40
-Maçonnerie;Étanchéité;Film polyane;4 × 25 m;Film polyane 4 × 25 m;rouleaux;polyane, film;maconnerie/etancheite/film-polyane/4-x-25-m
+Maçonnerie;Étanchéité;Film polyane;4 × 25 m;Film polyane 4 × 25 m;rouleaux;polyane, film;maconnerie/etancheite/film-polyane/4x25-m

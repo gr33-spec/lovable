@@ -213,7 +213,10 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(groupe.getByText("C'est bien de l'ardoise 32×22 Espagne 1er choix ?")).toBeVisible();
     // Ultra intuitif (27 octobre) : une question par écran, « Continuer » entre chaque.
     await groupe.getByRole("button", { name: "Continuer" }).click();
-    await groupe.getByLabel("Livraison avant le").fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
+    // Un achat groupé ouvert par un autre parcours dans le même département ajoute ses boutons radio : on garde sa date à soi.
+    const autreDate = groupe.getByRole("radio", { name: "Une autre date de livraison" });
+    if (await autreDate.count()) await autreDate.check();
+    await groupe.locator("#liste-date-besoin").fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
     await groupe.getByRole("button", { name: "Continuer" }).click();
     await ajouterNegoce(page, negoceX);
     await groupe.getByRole("button", { name: "Continuer" }).click();
