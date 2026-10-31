@@ -197,3 +197,4 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 | 146 | 31/10 | Premier écran de la landing : la photo choisie à la place de l'illustration | fait | Deux cadrages (ordinateur, téléphone), WebP optimisées ; e2e « La page d'accueil publique » complété. |
 | 147 | 31/10 | Premier écran : « essaye plutôt cette image » (les matériaux) | fait | Remplace la photo d'artisans ; deux cadrages, WebP de 16 à 56 Ko. |
 | 148 | 31/10 | Titres collés sur téléphone ; « Le prochain bon prix » avant les questions | fait | Interlettrage mobile ouvert ; ordre des sections changé ; e2e « La page d'accueil publique » complété. |
+| 149 | 31/10 | Page Tarifs : plus de marron, classe et premium dans la DA | fait | Cartes sombres à filet, prix en grand, coches jaunes ; e2e Abonnement adapté. |

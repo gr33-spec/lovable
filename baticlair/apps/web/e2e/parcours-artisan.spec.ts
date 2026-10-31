@@ -3476,14 +3476,16 @@ test("Abonnement (RÈGLE CHANGÉE le 30 octobre 2026) : « Tarifs » depuis la l
   await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
   // Greg, 30 octobre 2026 (décisions 1 et 2) : les achats groupés gratuits ; seuls les outils IA sont sur abonnement.
   await expect(page.getByText("Gratuit : tes listes, tes négoces et les achats groupés. Les abonnements ajoutent des analyses de devis et des scans de liste chaque mois.", { exact: true })).toBeVisible();
+  // Greg, 31 octobre 2026, soir : plus de marron, la DA de la landing (noir profond, ivoire, jaune).
+  for (const carte of await page.getByRole("region", { name: "Les formules" }).locator(":scope > div").all()) expect(await carte.evaluate((e) => getComputedStyle(e).backgroundColor)).not.toBe("rgb(46, 27, 5)");
   for (const etape of ["Commence gratuitement", "Rejoins les achats groupés", "Abonne-toi si l'aide à la lecture te sert"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   const formules = page.getByRole("region", { name: "Les formules" });
   await expect(formules.getByRole("heading")).toHaveText([/^Découverte/, /^Essentiel 19,90 € HT par mois$/, /^Pro 39,90 € HT par mois$/]);
-  await expect(formules.getByText("· Les achats groupés de ton secteur")).toBeVisible();
-  await expect(formules.getByText("· 1 analyse de devis et 3 scans de liste offerts")).toBeVisible();
-  await expect(formules.getByText("· 8 analyses de devis par mois")).toBeVisible();
+  await expect(formules.getByText("Les achats groupés de ton secteur", { exact: true })).toBeVisible();
+  await expect(formules.getByText("1 analyse de devis et 3 scans de liste offerts", { exact: true })).toBeVisible();
+  await expect(formules.getByText("8 analyses de devis par mois", { exact: true })).toBeVisible();
   await expect(page.getByText("Un gros devis compte double ?")).toBeVisible();
   await expect(page.getByText(/49 €|348 €|29 €/)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Gratuit pour les négoces" })).toBeVisible();

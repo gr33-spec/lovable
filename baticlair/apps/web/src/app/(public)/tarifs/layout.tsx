@@ -10,8 +10,8 @@ import { NOM_APP } from "@/lib/nom";
  */
 export default function TarifsLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-dvh bg-night text-white">
-      <header className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+    <div className="min-h-dvh bg-[#0C0A08] text-white">
+      <header className="relative z-10 mx-auto flex h-16 w-full max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5" aria-label={`${NOM_APP}, accueil`}>
           <Logo fond="sombre" hauteur={30} />
         </Link>
