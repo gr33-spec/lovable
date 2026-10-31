@@ -16,7 +16,7 @@ ce qui a été fait, d'où viennent les données et ce qui reste. Il est tenu à
 | Achats groupés | `clesDeRegroupement`, `referenceStricte` | Un article du catalogue se regroupe par sa clé ; jamais deux articles différents additionnés |
 | Demande au négoce | `supplier-packet.ts` | La désignation part telle quelle (liste, PDF, mail) ; la référence d'une ligne n'a pas de colonne à part dans le PDF |
 
-## 2. Ce qui est fait (étapes 1 à 4)
+## 2. Ce qui est fait (étapes 1 à 7)
 
 - **Moteur de recherche métier** (`rechercherAvecPrecisions`, `requeteAPlat`) :
   - dimensions de toutes les écritures (« 18x40 », « 18 x 40 », « 18/40 », « 18*40 », « 18×40 », « 18 40 ») ;
@@ -30,7 +30,22 @@ ce qui a été fait, d'où viennent les données et ce qui reste. Il est tenu à
   `source` (libellé, lien, date de vérification). L'API la rend avec chaque résultat (`GET /v1/catalogue?q=`).
 - **Écris ta liste** : un produit à plusieurs formats tient en une puce (« Liteau › »), ses formats en boutons ;
   « Je ne trouve pas mon matériau — le saisir moi-même » ouvre la saisie libre, avec « Marque, modèle ou référence
-  (facultatif) » ajouté à la désignation (après une virgule : un « - » couperait la ligne, voir §5).
+  (facultatif) » ajouté à la désignation (après une virgule).
+- **Une ligne écrite n'est plus coupée** : dans une liste sans lecture (`lectureDepuisLignes`), ce qui suit « - » devient
+  la précision de la ligne au lieu d'être perdu (test `ligne-ecrite-entiere.test.ts`).
+- **Apprentissage** (`candidatesDeLibelles`) : les intitulés voisins (« Tuile XYZ rouge », « XYZ terre cuite rouge »,
+  « Tuile modèle XYZ ») se rapprochent par leurs mots qui identifient (un mot inconnu du catalogue, une référence) ; des
+  dimensions différentes ne se rapprochent jamais ; un groupe devient candidat à `CATALOGUE_SEUIL_PROPOSITION` entreprises
+  (3 par défaut) ; un mot inconnu doit être écrit par ce nombre d'entreprises (un nom de client ne passe pas) ; jamais de
+  mots comme chantier, client, réf., rue. L'admin voit la candidate et ses variantes (Admin › Catalogue), vérifie le
+  produit et l'ajoute ; seul le catalogue est proposé à tous. Un seul système : celui des propositions existant.
+- **Lecture IA** : une question de modèle ou de référence (« Modèle de la tuile ? ») propose, sous la réponse écrite, les
+  références du même moteur (`ReferencesCatalogue`, à l'écran des questions et dans la ligne ouverte) ; la quantité du
+  devis est gardée ; la réponse entre dans la fiche du chantier, qui part au négoce. Jamais une référence choisie sans
+  l'artisan (e2e « Catalogue métier »).
+- **Achats groupés** : déjà en place (rien de nouveau à construire) : la liste montre au plus une suggestion d'achat
+  groupé ouvert de son métier et de son secteur ; un article du catalogue se regroupe par sa clé technique
+  (`clesDeRegroupement`), jamais deux articles différents additionnés.
 
 ## 3. Les sources réellement intégrées
 
@@ -56,13 +71,12 @@ avec leurs conditions de réutilisation. La fiche d'article ci-dessus peut accue
 - e2e : « Je la note moi-même » (Liteau › 18×40, H14 rouge, saisie libre avec modèle).
 - À la main, sur test.mobiiz.fr : Nouvelle liste › Je la note moi-même, taper « liteau », « H14 rouge », « 18 40 ».
 
-## 5. Ce qui reste (étapes 5 à 8)
+## 5. Ce qui reste
 
-- **Apprentissage** : rapprocher les intitulés voisins (« Tuile XYZ rouge », « XYZ terre cuite rouge ») avant le seuil des
-  propositions ; seuils configurables (aujourd'hui 3 entreprises, constante `SEUIL_PROPOSITION`).
-- **Lecture IA** : la question « Quel modèle de tuile ? » répondue avec le même moteur (puces du catalogue + saisie
-  libre), la quantité du devis gardée.
-- **Achats groupés** : signaler sur la liste un achat ouvert pour une référence compatible (clé technique, unité).
-- **Une ligne écrite à la main est coupée au premier « - »** dans la lecture sans modèle (`lectureDepuisLignes`) : la
-  fourniture garde seulement ce qui précède. À corriger pour garder la désignation entière.
-- **Données** : étendre la couverture (ardoises par fabricant, accessoires) avec des fiches vérifiées, puis la zinguerie.
+- **Données** : étendre la couverture avec des fiches fabricant vérifiées (ardoises, accessoires de tuiles, écrans),
+  puis la zinguerie et les autres métiers ; un import ETIM ou FAB-DIS quand un fabricant ou un distributeur fournit ses
+  données avec leur licence.
+- **La réponse « modèle » dans la ligne** : aujourd'hui elle entre dans la fiche du chantier (le bref envoyé au négoce)
+  quand la lecture la pose pour tout le chantier ; la lecture réelle (Opus) la relie à sa ligne (`reponsesDeLaLigne`) :
+  à revérifier en ligne quand le crédit IA reviendra.
+- **Rapprochement plus fin** des intitulés (synonymes, unités) après les premiers retours de l'admin.

@@ -6,6 +6,7 @@ import { ListScene, ReadingStage } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
+import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
 import { useTyping } from "@/lib/typing";
 import { NOM_APP } from "@/lib/nom";
 
@@ -602,12 +603,17 @@ function QuestionCard({
 /**
  * « Autre » : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (un modèle de tuile, une pente de 38°). Un
  * appui sur « Autre » ouvre la case ; « OK » la garde comme réponse.
+ *
+ * CATALOGUE MÉTIER (Greg, 31 octobre 2026 : « Tuile rouge, 250 unités » → « Quel modèle de tuile ? », l'artisan tape
+ * « H14 » et choisit la référence) : sur une question de modèle ou de référence, le même moteur que « Écris ta liste »
+ * propose ses références pendant la frappe ; un tap les prend, ce qui s'écrit librement reste possible.
  */
 function OtherAnswer({ question: q, given, onChange, startOpen = false }: { question: CounterQuestion; given: Given | null; onChange: (g: Given | null) => void; startOpen?: boolean }) {
   const id = useId();
   const [open, setOpen] = useState(startOpen || Boolean(given?.custom));
   const [value, setValue] = useState(given?.custom ? given.value : "");
   const numeric = q.free === "number";
+  const references = useReferencesCatalogue(value, open && !numeric && QUESTION_DE_MODELE.test(q.text));
   const unitLabel = q.unit && q.unit !== "u" ? (q.unit === "m2" ? "m²" : q.unit) : "";
   const clean = value.trim().replace(",", ".");
   const valid = numeric ? /^\d+(?:\.\d+)?$/.test(clean) && Number(clean) > 0 : value.trim().length >= 2;
@@ -629,7 +635,7 @@ function OtherAnswer({ question: q, given, onChange, startOpen = false }: { ques
   }
   return (
     <form
-      className="col-span-full flex items-center gap-2"
+      className="col-span-full flex flex-wrap items-center gap-2"
       onSubmit={(e) => {
         e.preventDefault();
         save();
@@ -655,6 +661,14 @@ function OtherAnswer({ question: q, given, onChange, startOpen = false }: { ques
       <Button type="submit" className="shrink-0" disabled={!valid}>
         OK
       </Button>
+      <ReferencesCatalogue
+        question={q.text}
+        references={references}
+        onChoisir={(r) => {
+          setValue(r);
+          onChange({ value: r, label: r, custom: true });
+        }}
+      />
     </form>
   );
 }

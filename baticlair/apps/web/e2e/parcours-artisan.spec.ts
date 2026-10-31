@@ -3692,3 +3692,25 @@ test("« Je la note moi-même » (28 octobre 2026, point 1 ; 30 octobre : intitu
   await page.waitForTimeout(800);
   await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25" })).toHaveCount(0);
 });
+
+test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèle → la question se répond avec le catalogue (« H14 »), la quantité du devis gardée", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-tuile-modele.pdf"));
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  // Mobiiz ne choisit pas le modèle : il le demande ; l'artisan tape « H14 », le catalogue propose la référence.
+  await questions.getByRole("textbox", { name: "Autre : Modele de la tuile ?" }).fill("H14");
+  const refs = questions.getByRole("list", { name: "Références du catalogue : Modele de la tuile ?" });
+  await expect(refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)" })).toBeVisible();
+  await expect(refs.getByRole("button", { name: /HP 10/ })).toHaveCount(0);
+  await refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)" }).click();
+  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list).toBeVisible({ timeout: 60_000 });
+  // La quantité du devis est gardée ; la réponse entre dans la fiche du chantier, qui part au négoce (le bref).
+  await expect(list.getByRole("listitem").filter({ hasText: /Tuile rouge/ }).first()).toContainText("250");
+  const pid = /chantiers\/([0-9a-f-]{36})/.exec(page.url())![1];
+  const q0 = (await (await page.request.get(`/v1/quantitatifs?projetId=${pid}&ecran=1`)).json()).items[0] as { fiche: { cle: string; valeur: string; origine: string }[] };
+  expect(q0.fiche.find((f) => f.cle === "modele_de_la_tuile")).toMatchObject({ valeur: "Tuile H 14 Huguenot, réf. 204 (Edilians)", origine: "reponse" });
+});

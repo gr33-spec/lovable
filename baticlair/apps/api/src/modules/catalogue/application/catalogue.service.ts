@@ -4,7 +4,8 @@ import {
   arbreArticles,
   cleDeLibelle,
   libelleAPartager,
-  propositionsDeLibelles,
+  candidatesDeLibelles,
+  SEUIL_PROPOSITION,
   vocabulaireDuCatalogue,
   rechercherLibelles,
   FAMILLE_DU_METIER_CATALOGUE,
@@ -163,18 +164,10 @@ export class CatalogueService {
     await this.amorcer();
     const articles = await this.prisma.catalogueArticle.findMany({ select: { designation: true, famille: true, produit: true, variante: true, synonymes: true } });
     const auCatalogue = new Set(articles.map((a) => cleDeLibelle(a.designation)));
-    const lignes = await this.prisma.libelleEcrit.findMany({ select: { cle: true, libelle: true, unite: true, companyId: true }, orderBy: { createdAt: "asc" }, take: 50_000 });
-    const parCle = new Map<string, { libelle: string; unite: string; entreprises: Set<string> }>();
-    for (const l of lignes) {
-      if (auCatalogue.has(l.cle)) continue;
-      const c = parCle.get(l.cle) ?? { libelle: l.libelle, unite: l.unite, entreprises: new Set<string>() };
-      c.entreprises.add(l.companyId);
-      parCle.set(l.cle, c);
-    }
-    return propositionsDeLibelles(
-      [...parCle.values()].map((c) => ({ libelle: c.libelle, unite: c.unite, entreprises: c.entreprises.size })),
-      vocabulaireDuCatalogue(articles),
-    ).map((p) => ({ cle: cleDeLibelle(p.libelle), ...p }));
+    const ecrits = (await this.prisma.libelleEcrit.findMany({ select: { cle: true, libelle: true, unite: true, companyId: true }, orderBy: { createdAt: "asc" }, take: 50_000 })).filter((l) => !auCatalogue.has(l.cle));
+    // Les intitulés voisins se rapprochent (catalogue métier, Greg, 31 octobre 2026) ; le seuil se règle sans code.
+    const seuil = Math.max(2, Number(process.env.CATALOGUE_SEUIL_PROPOSITION) || SEUIL_PROPOSITION);
+    return candidatesDeLibelles(ecrits, vocabulaireDuCatalogue(articles), seuil);
   }
 
   /** Une proposition ajoutée au catalogue par l'admin : elle devient un article, proposé à tous. */

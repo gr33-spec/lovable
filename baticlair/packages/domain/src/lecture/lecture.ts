@@ -1203,13 +1203,17 @@ export function lectureDepuisLignes(lines: readonly { id: string; designation: s
     questions: [],
     lignes: lines.map((l) => {
       const sans = isWithoutSupplyUnit(l.unit);
+      // Ce qui suit « - » n'est jamais perdu (catalogue métier, Greg, 31 octobre 2026 : « conserve la désignation ») : le
+      // nom garde ce qui précède, la précision le reste (« Tuile Zéphyr - modèle ZX 12 »).
+      const [avant, ...apres] = withoutLabour(l.designation).split(" - ");
+      const reste = apres.join(" - ").trim();
       return {
         ref: l.id,
         designation: l.designation,
         quantite: l.quantity,
         unite: l.unit,
         role: sans ? ("hors_quantitatif" as const) : ("fourniture" as const),
-        fournitures: sans ? [] : [{ nom: withoutLabour(l.designation).split(" - ")[0]!.trim() || l.designation, quantite: l.quantity, unite: l.unit, ouvrage: null, emplacement: null, donnees: {}, attend: [], aPreciser: [], precision: null }],
+        fournitures: sans ? [] : [{ nom: avant!.trim() || l.designation, quantite: l.quantity, unite: l.unit, ouvrage: null, emplacement: null, donnees: {}, attend: [], aPreciser: [], precision: reste || null }],
       };
     }),
     contexte: null,

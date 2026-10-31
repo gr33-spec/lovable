@@ -1,5 +1,6 @@
 "use client";
 
+import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
 import { AideBouton } from "@/components/aide";
 import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Plus, Send, Trash2, Users, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
@@ -1046,7 +1047,7 @@ function CardActions({
           </div>
           {written === a.key ? (
             <form
-              className="flex items-center gap-2"
+              className="flex flex-wrap items-center gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 const v = other.trim();
@@ -1066,6 +1067,7 @@ function CardActions({
               <Button type="submit" className="shrink-0" pending={pending}>
                 OK
               </Button>
+              <ReponseDuCatalogue question={a.text} actif={!a.unit} texte={other} onChoisir={(r) => void answer(a.key, a.unit, r)} />
             </form>
           ) : null}
         </div>
@@ -1170,7 +1172,7 @@ function PrecisionActions({ label, questions, pending, onAnswer }: { label: stri
           </div>
           {written === q.cle ? (
             <form
-              className="flex items-center gap-2"
+              className="flex flex-wrap items-center gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (other.trim()) void onAnswer(q.cle, other).then(() => {
@@ -1191,10 +1193,27 @@ function PrecisionActions({ label, questions, pending, onAnswer }: { label: stri
               <Button type="submit" className="shrink-0" pending={pending}>
                 OK
               </Button>
+              <ReponseDuCatalogue
+                question={q.question}
+                actif
+                texte={other}
+                onChoisir={(r) =>
+                  void onAnswer(q.cle, r).then(() => {
+                    setWritten(null);
+                    setOther("");
+                  })
+                }
+              />
             </form>
           ) : null}
         </div>
       ))}
     </div>
   );
+}
+
+/** Les références du catalogue sous une réponse écrite, sur une question de modèle ou de référence (catalogue métier). */
+function ReponseDuCatalogue({ question, actif, texte, onChoisir }: { question: string; actif: boolean; texte: string; onChoisir: (r: string) => void }) {
+  const references = useReferencesCatalogue(texte, actif && QUESTION_DE_MODELE.test(question));
+  return <ReferencesCatalogue question={question} references={references} onChoisir={onChoisir} />;
 }

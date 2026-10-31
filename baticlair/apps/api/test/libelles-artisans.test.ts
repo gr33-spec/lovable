@@ -57,6 +57,14 @@ describe("les intitulés écrits par les artisans", () => {
     await greg.agent.post("/v1/admin/catalogue/propositions/accepter").send({ cle: items[0]!.cle, metier: "couverture", famille: "Zinguerie" }).expect((r) => expect([200, 201]).toContain(r.status));
     expect(await proposes(d.agent, "crochet bandeau")).toContain("Crochet gouttière bandeau 25");
     expect((await greg.agent.get("/v1/admin/catalogue/propositions").expect(200)).body.items).toEqual([]);
+    // Des intitulés voisins d'un produit inconnu (Greg, 31 octobre 2026) : rapprochés en une candidate, avec leurs variantes.
+    await ecrire(a.agent, [{ libelle: "Tuile XYZ rouge", quantite: "250", unite: "pièces" }]);
+    await ecrire(b.agent, [{ libelle: "XYZ terre cuite rouge", quantite: "120", unite: "pièces" }]);
+    await ecrire(c.agent, [{ libelle: "Tuile modèle XYZ", quantite: "80", unite: "pièces" }]);
+    expect(await proposes(d.agent, "tuile xyz")).toEqual([]);
+    const xyz = ((await greg.agent.get("/v1/admin/catalogue/propositions").expect(200)).body.items as { libelle: string; entreprises: number; variantes: string[] }[]).find((i) => /XYZ/.test(i.libelle))!;
+    expect(xyz.entreprises).toBe(3);
+    expect([xyz.libelle, ...xyz.variantes].sort()).toEqual(["Tuile XYZ rouge", "Tuile modèle XYZ", "XYZ terre cuite rouge"].sort());
     // Rien de personnel n'est gardé.
     expect(await ctx.prisma.libelleEcrit.count({ where: { libelle: { contains: "Dupont" } } })).toBe(0);
   });

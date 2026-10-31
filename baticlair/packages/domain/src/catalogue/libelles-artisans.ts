@@ -81,3 +81,75 @@ export function rechercherLibelles(connus: readonly LibelleConnu[], q: string, m
 export function propositionsDeLibelles(connus: readonly Omit<LibelleConnu, "mien">[], vocabulaire: ReadonlySet<string>): Omit<LibelleConnu, "mien">[] {
   return connus.filter((l) => l.entreprises >= SEUIL_PROPOSITION && libelleGenerique(l.libelle, vocabulaire)).sort((a, b) => b.entreprises - a.entreprises || a.libelle.localeCompare(b.libelle));
 }
+
+/** Les mots qui ne distinguent pas un produit (« modèle », « réf. ») : ignorés pour rapprocher deux intitulés. */
+const NEUTRES = new Set(["modele", "model", "type", "gamme", "serie", "coloris", "teinte", "couleur", "env", "environ", "neuf", "neuve"]);
+
+export interface IntituleEcrit {
+  cle: string;
+  libelle: string;
+  unite: string;
+  companyId: string;
+}
+
+export interface Candidate {
+  /** La clé de l'intitulé qui la représente (le plus écrit). */
+  cle: string;
+  libelle: string;
+  unite: string;
+  /** Combien d'entreprises indépendantes, jamais lesquelles. */
+  entreprises: number;
+  /** Les autres façons de l'écrire (« XYZ terre cuite rouge »). */
+  variantes: string[];
+}
+
+/**
+ * LES RÉFÉRENCES CANDIDATES (Greg, 31 octobre 2026 : « Tuile XYZ rouge », « XYZ terre cuite rouge » et « Tuile modèle
+ * XYZ » écrits par trois entreprises sont sans doute le même produit). Deux intitulés se rapprochent quand ils partagent un
+ * mot qui identifie (un mot inconnu du catalogue, ou une référence avec chiffres) et que leurs dimensions ne se
+ * contredisent pas, ou quand leurs mots se recouvrent à moitié au moins. Un groupe devient candidat quand `seuil`
+ * entreprises différentes l'ont écrit ; un mot inconnu n'y est admis que s'il est écrit par `seuil` entreprises (un nom de
+ * client ou une référence de chantier ne se répète pas d'une entreprise à l'autre) ; jamais de mots comme chantier,
+ * client, réf., rue. Le candidat attend la validation de l'admin : rien n'est publié seul.
+ */
+export function candidatesDeLibelles(ecrits: readonly IntituleEcrit[], vocabulaire: ReadonlySet<string>, seuil = SEUIL_PROPOSITION): Candidate[] {
+  const connu = (m: string) => vocabulaire.has(m) || vocabulaire.has(m.replace(/[sx]$/, ""));
+  const motsDe = (l: string) => aPlat(l).split(" ").filter((m) => m && !LIAISONS.has(m) && !NEUTRES.has(m) && !UNITES.has(m));
+  const parCle = new Map<string, { libelle: string; unite: string; entreprises: Set<string>; mots: string[] }>();
+  for (const e of ecrits) {
+    const c = parCle.get(e.cle) ?? { libelle: e.libelle, unite: e.unite, entreprises: new Set<string>(), mots: motsDe(e.libelle) };
+    c.entreprises.add(e.companyId);
+    parCle.set(e.cle, c);
+  }
+  const fiches = [...parCle].map(([cle, c]) => ({ cle, ...c, identifiants: c.mots.filter((m) => /\d/.test(m) || (/^[a-z]{2,}$/.test(m) && !connu(m))), dimensions: c.mots.filter((m) => /\d/.test(m)) }));
+  // Rapprocher : union des intitulés voisins.
+  const parent = fiches.map((_, i) => i);
+  const racine = (i: number): number => (parent[i] === i ? i : (parent[i] = racine(parent[i]!)));
+  const voisins = (a: (typeof fiches)[number], b: (typeof fiches)[number]) => {
+    const dimsA = new Set(a.dimensions);
+    if (a.dimensions.length && b.dimensions.length && !b.dimensions.some((d) => dimsA.has(d))) return false;
+    if (a.identifiants.some((m) => b.identifiants.includes(m))) return true;
+    const A = new Set(a.mots);
+    const commun = b.mots.filter((m) => A.has(m)).length;
+    return commun / new Set([...a.mots, ...b.mots]).size >= 0.5;
+  };
+  for (let i = 0; i < fiches.length; i++) for (let j = i + 1; j < fiches.length; j++) if (voisins(fiches[i]!, fiches[j]!)) parent[racine(j)] = racine(i);
+  const groupes = new Map<number, (typeof fiches)[number][]>();
+  fiches.forEach((f, i) => groupes.set(racine(i), [...(groupes.get(racine(i)) ?? []), f]));
+  const candidates: Candidate[] = [];
+  for (const g of groupes.values()) {
+    if (g.some((f) => f.mots.some((m) => EXCLUS.has(m)))) continue;
+    const entreprises = new Set(g.flatMap((f) => [...f.entreprises]));
+    if (entreprises.size < seuil) continue;
+    // Chaque mot inconnu du représentant doit être écrit par `seuil` entreprises du groupe.
+    const tete = [...g].sort((a, b) => b.entreprises.size - a.entreprises.size || a.libelle.length - b.libelle.length)[0]!;
+    const inconnus = tete.mots.filter((m) => /^[a-z]{2,}$/.test(m) && !connu(m) && !PRECISIONS_MOTS.has(m));
+    const sur = inconnus.every((m) => new Set(g.filter((f) => f.mots.includes(m)).flatMap((f) => [...f.entreprises])).size >= seuil);
+    if (!sur || !tete.mots.some((m) => /^[a-z]{3,}$/.test(m) && connu(m))) continue;
+    candidates.push({ cle: tete.cle, libelle: tete.libelle, unite: tete.unite, entreprises: entreprises.size, variantes: g.filter((f) => f !== tete).map((f) => f.libelle) });
+  }
+  return candidates.sort((a, b) => b.entreprises - a.entreprises || a.libelle.localeCompare(b.libelle));
+}
+
+/** Les couleurs et finitions courantes : ni inconnues, ni identifiantes. */
+const PRECISIONS_MOTS = new Set(["rouge", "brun", "noir", "gris", "blanc", "beige", "vert", "bleu", "anthracite", "vieilli", "sable", "flamme", "nuance", "naturel", "mat", "satin", "velours", "brillant"]);

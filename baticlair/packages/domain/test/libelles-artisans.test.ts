@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleDeLibelle, libelleAPartager, libelleGenerique, propositionsDeLibelles, rechercherLibelles, SEUIL_PROPOSITION, TOUT_LE_CATALOGUE, vocabulaireDuCatalogue, type LibelleConnu } from "../src/index.js";
+import { candidatesDeLibelles, cleDeLibelle, libelleAPartager, libelleGenerique, propositionsDeLibelles, rechercherLibelles, SEUIL_PROPOSITION, TOUT_LE_CATALOGUE, vocabulaireDuCatalogue, type LibelleConnu } from "../src/index.js";
 
 /**
  * LES INTITULÉS ÉCRITS PAR LES ARTISANS (Greg, 30 octobre 2026, puis la nuit même : pas de diffusion automatique, une
@@ -44,5 +44,25 @@ describe("les intitulés écrits par les artisans", () => {
       { libelle: "Gouttière chantier Lebrun", unite: "m", entreprises: 9 },
     ];
     expect(propositionsDeLibelles(connus, vocabulaire).map((l) => l.libelle)).toEqual(["Crochet gouttière bandeau 25"]);
+  });
+});
+
+describe("les références candidates (rapprochement des intitulés voisins)", () => {
+  const ecrit = (companyId: string, libelle: string, unite = "pièces") => ({ cle: cleDeLibelle(libelle), libelle, unite, companyId });
+  it("« Tuile XYZ rouge », « XYZ terre cuite rouge », « Tuile modèle XYZ » de trois entreprises : une candidate, avec ses variantes", () => {
+    const c = candidatesDeLibelles([ecrit("A", "Tuile XYZ rouge"), ecrit("B", "XYZ terre cuite rouge"), ecrit("C", "Tuile modèle XYZ")], vocabulaire);
+    expect(c).toHaveLength(1);
+    expect(c[0]).toMatchObject({ entreprises: 3 });
+    expect([c[0]!.libelle, ...c[0]!.variantes].sort()).toEqual(["Tuile XYZ rouge", "Tuile modèle XYZ", "XYZ terre cuite rouge"].sort());
+  });
+
+  it("deux entreprises ne suffisent pas ; un mot inconnu d'une seule entreprise (un nom) ne passe pas ; des dimensions différentes ne se rapprochent pas", () => {
+    expect(candidatesDeLibelles([ecrit("A", "Tuile XYZ rouge"), ecrit("B", "XYZ terre cuite")], vocabulaire)).toEqual([]);
+    expect(candidatesDeLibelles([ecrit("A", "Ardoise Kerbrat"), ecrit("B", "Ardoise naturelle"), ecrit("C", "Ardoise naturelle 1er choix")], vocabulaire).map((x) => x.libelle)).not.toContain("Ardoise Kerbrat");
+    expect(candidatesDeLibelles([ecrit("A", "Liteau 18x40 douglas"), ecrit("B", "Liteau 27x40 douglas"), ecrit("C", "Liteau 14x40 douglas")], vocabulaire)).toEqual([]);
+  });
+
+  it("le seuil se règle", () => {
+    expect(candidatesDeLibelles([ecrit("A", "Tuile XYZ rouge"), ecrit("B", "XYZ terre cuite")], vocabulaire, 2)).toHaveLength(1);
   });
 });
