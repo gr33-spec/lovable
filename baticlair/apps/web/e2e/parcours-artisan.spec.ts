@@ -403,7 +403,9 @@ test("le menu : cinq onglets (recentrage du 25 octobre 2026) ; fournisseurs et c
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
   // Achat groupé (Greg, 27 octobre 2026) : Accueil, Achats groupés, le « + » jaune au centre, Mes listes, Profil.
-  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Achats groupés", "Mes listes", "Profil"]);
+  // Ordinateur (Greg, 31 octobre 2026, soir : « on a de la place ») : « Mes négoces » en plus, dans la colonne.
+  const ordinateur = page.viewportSize()!.width >= 1024;
+  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Accueil", "Achats groupés", "Mes listes", "Mes négoces", "Profil"] : ["Accueil", "Achats groupés", "Mes listes", "Profil"]);
   await expect(nav.getByRole("button", { name: /Nouveau/ })).toBeVisible();
   await menuArtisan(page, "Mon compte");
   await expect(page.getByRole("heading", { name: "Profil" })).toBeVisible();
