@@ -13,6 +13,7 @@ import { ButtonLink, ErrorNotice, ListCard, ListRow, SectionTitle, Skeleton } fr
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
+import { useOrdinateur } from "@/lib/ordinateur";
 import { InviterCollegue } from "@/components/inviter";
 import { BoucleNegoce } from "@/components/boucle-negoce";
 import type { MesBesoins } from "@/lib/negocie";
@@ -48,73 +49,168 @@ function AccueilAchatGroupe() {
   const vide = recent !== null && recent.items.length === 0 && mes !== null && actifs.length === 0;
   return (
     <>
-      <div className="flex flex-col gap-1">
-        <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
-        <p className="text-[16px] text-muted">{vide ? "Par où commencer ?" : "Achète en groupe, paie moins cher."}</p>
+      <div className="flex flex-col gap-1 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em] lg:text-[40px]">Bonjour {firstName}</h1>
+          <p className="text-[16px] text-muted">{vide ? "Par où commencer ?" : "Achète en groupe, paie moins cher."}</p>
+        </div>
       </div>
       <BandeauReprises />
       <CartesReprendre />
-      {actions.length > 0 ? (
-        <section aria-label="À faire" className="flex flex-col gap-2 rounded-2xl bg-accent p-4 text-on-accent shadow-card">
-          <p className="text-[16px] font-extrabold">{actions.length === 1 ? "Une action t'attend" : `${actions.length} actions t'attendent`}</p>
-          <ul className="flex flex-col gap-1">
-            {actions.map((a) => (
-              <li key={a.cle}>
-                <Link href={a.href} className="pressable flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface/80 px-3 text-[15px] font-semibold text-ink">
-                  <span>{a.texte}</span>
-                  <ChevronRight size={18} aria-hidden="true" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-      <DeuxPortes grand />
-      {pres && pres.achats.length > 0 ? (
-        <section aria-label={vide ? "Achats groupés ouverts dans ton secteur" : "Achats groupés près de chez toi"} className="flex flex-col gap-3">
-          <SectionTitle>{vide ? "Achats groupés ouverts dans ton secteur" : "Achats groupés près de chez toi"}</SectionTitle>
-          {pres.achats.slice(0, 3).map((a) => (
-            <CarteAchatOuvert key={a.id} a={a} />
-          ))}
-        </section>
-      ) : null}
-      {actifs.length > 0 ? (
-        <section aria-label="Mes achats groupés" className="flex flex-col gap-3">
-          <div className="flex items-baseline justify-between">
-            <SectionTitle>Mes achats groupés</SectionTitle>
-            <Link href="/achats-groupes" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
-              Voir tout
-            </Link>
-          </div>
-          {actifs.slice(0, 3).map((c) => (
-            <CarteAchatGroupe key={c.id} c={c} />
-          ))}
-        </section>
-      ) : null}
-      {vide ? null : (
-        <section className="flex flex-col gap-3">
-          <div className="flex items-baseline justify-between">
-            <SectionTitle>Mes listes et chantiers</SectionTitle>
-            <Link href="/chantiers" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
-              Voir tout
-            </Link>
-          </div>
-          {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
-          {recent === null && !error ? <Skeleton lines={3} label="Chargement des listes…" /> : null}
-          {recent ? (
-            <ProjectList
-              projects={recent.items}
-              show="active"
-              onChanged={() => {
-                reload();
-                reloadNext();
-              }}
-            />
+      {/* Ordinateur (Greg, 31 octobre 2026, soir) : les chiffres du moment d'un coup d'œil, puis deux colonnes : à gauche ce
+          que je fais (les deux portes, à faire, mes listes), à droite le collectif et mes négoces. Téléphone : l'ordre
+          d'avant, une colonne (les colonnes s'effacent, `contents`, et `order` garde la suite). */}
+      <ChiffresOrdinateur actions={actions.length} achats={actifs.length} />
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
+          {actions.length > 0 ? (
+            <section id="a-faire" aria-label="À faire" className="order-1 flex flex-col gap-2 rounded-2xl bg-accent p-4 text-on-accent shadow-card lg:p-5">
+              <p className="text-[16px] font-extrabold">{actions.length === 1 ? "Une action t'attend" : `${actions.length} actions t'attendent`}</p>
+              <ul className="flex flex-col gap-1 lg:grid lg:grid-cols-2 lg:gap-2">
+                {actions.map((a) => (
+                  <li key={a.cle}>
+                    <Link href={a.href} className="pressable flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface/80 px-3 text-[15px] font-semibold text-ink">
+                      <span>{a.texte}</span>
+                      <ChevronRight size={18} aria-hidden="true" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ) : null}
-        </section>
-      )}
-      <InstallHint />
+          <div className="order-2">
+            <DeuxPortes grand />
+          </div>
+          {vide ? null : (
+            <section className="order-5 flex flex-col gap-3">
+              <div className="flex items-baseline justify-between">
+                <SectionTitle>Mes listes et chantiers</SectionTitle>
+                <Link href="/chantiers" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
+                  Voir tout
+                </Link>
+              </div>
+              {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
+              {recent === null && !error ? <Skeleton lines={3} label="Chargement des listes…" /> : null}
+              {recent ? (
+                <ProjectList
+                  projects={recent.items}
+                  show="active"
+                  onChanged={() => {
+                    reload();
+                    reloadNext();
+                  }}
+                />
+              ) : null}
+            </section>
+          )}
+          <div className="order-6">
+            <InstallHint />
+          </div>
+        </div>
+        <div className="contents lg:flex lg:flex-col lg:gap-6">
+          {pres && pres.achats.length > 0 ? (
+            <section aria-label={vide ? "Achats groupés ouverts dans ton secteur" : "Achats groupés près de chez toi"} className="order-3 flex flex-col gap-3">
+              <SectionTitle>{vide ? "Achats groupés ouverts dans ton secteur" : "Achats groupés près de chez toi"}</SectionTitle>
+              {pres.achats.slice(0, 3).map((a) => (
+                <CarteAchatOuvert key={a.id} a={a} />
+              ))}
+            </section>
+          ) : null}
+          {actifs.length > 0 ? (
+            <section aria-label="Mes achats groupés" className="order-4 flex flex-col gap-3">
+              <div className="flex items-baseline justify-between">
+                <SectionTitle>Mes achats groupés</SectionTitle>
+                <Link href="/achats-groupes" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
+                  Voir tout
+                </Link>
+              </div>
+              {actifs.slice(0, 3).map((c) => (
+                <CarteAchatGroupe key={c.id} c={c} />
+              ))}
+            </section>
+          ) : null}
+          <ColonneOrdinateur sansAchats={!(pres && pres.achats.length > 0) && actifs.length === 0} />
+        </div>
+      </div>
     </>
+  );
+}
+
+/** Ordinateur seulement : trois chiffres du moment, chacun mène à sa page. */
+function ChiffresOrdinateur({ actions, achats }: { actions: number; achats: number }) {
+  const ordinateur = useOrdinateur();
+  const fetchListes = useCallback((signal: AbortSignal) => (ordinateur ? api<ProjectPage>("/v1/projects?limit=50", { signal }).catch(() => null) : Promise.resolve(null)), [ordinateur]);
+  const fetchNegoces = useCallback((signal: AbortSignal) => (ordinateur ? api<{ items: unknown[] }>("/v1/suppliers", { signal }).catch(() => null) : Promise.resolve(null)), [ordinateur]);
+  const { data: listes } = useResource(fetchListes);
+  const { data: negoces } = useResource(fetchNegoces);
+  if (!ordinateur) return null;
+  const enCours = listes ? listes.items.filter((p) => p.status !== "archived").length : null;
+  const tuiles: { titre: string; valeur: number | null; texte: string; href: string; fort?: boolean }[] = [
+    { titre: "À faire", valeur: actions, texte: actions ? "à régler maintenant" : "rien ne t'attend", href: "#a-faire", fort: actions > 0 },
+    { titre: "Listes en cours", valeur: enCours, texte: "préparées ou envoyées", href: "/chantiers" },
+    { titre: "Achats groupés", valeur: achats, texte: achats ? "où tu es engagé" : "rejoins-en un", href: "/achats-groupes" },
+    { titre: "Mes négoces", valeur: negoces ? negoces.items.length : null, texte: "dans ton carnet", href: "/fournisseurs" },
+  ];
+  return (
+    <ul aria-label="En un coup d'œil" className="hidden gap-4 lg:grid lg:grid-cols-4">
+      {tuiles.map((t) => (
+        <li key={t.titre}>
+          <Link
+            href={t.href}
+            className={`flex h-full flex-col gap-1 rounded-2xl border p-5 transition-[background-color,border-color] duration-150 ${t.fort ? "border-accent/50 bg-accent/[0.08] hover:bg-accent/[0.12]" : "border-white/[0.08] bg-[rgba(251,248,243,0.03)] hover:bg-[rgba(251,248,243,0.06)]"}`}
+          >
+            <span className="text-[13px] font-bold tracking-[0.08em] text-[#FBF8F3]/60 uppercase">{t.titre}</span>
+            <span className={`text-[34px] leading-none font-extrabold tabular-nums ${t.fort ? "text-accent" : "text-[#FBF8F3]"}`}>{t.valeur ?? "–"}</span>
+            <span className="text-[14px] text-[#FBF8F3]/60">{t.texte}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Ordinateur seulement, la colonne de droite : le collectif expliqué en trois lignes quand aucun achat groupé n'est là,
+ * puis le raccourci vers « Mes négoces ». Jamais un texte répété de la page.
+ */
+function ColonneOrdinateur({ sansAchats }: { sansAchats: boolean }) {
+  return (
+    <div className="hidden flex-col gap-6 lg:flex">
+      {sansAchats ? (
+        <section aria-label="Le collectif" className="flex flex-col gap-4 rounded-2xl border border-white/[0.08] bg-[rgba(251,248,243,0.03)] p-5">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-accent text-on-accent" aria-hidden="true">
+              <Users size={20} />
+            </span>
+            <p className="text-[17px] font-extrabold">Achète en collectif</p>
+          </div>
+          <ol className="flex flex-col gap-3 text-[14px] leading-snug text-[#FBF8F3]/75">
+            <li className="flex gap-3">
+              <span className="font-extrabold text-accent tabular-nums">1</span>Tu ajoutes ta liste à un achat groupé de ton métier.
+            </li>
+            <li className="flex gap-3">
+              <span className="font-extrabold text-accent tabular-nums">2</span>Les négoces chiffrent le volume de tous.
+            </li>
+            <li className="flex gap-3">
+              <span className="font-extrabold text-accent tabular-nums">3</span>Tu commandes au meilleur prix, ou chez ton négoce s&apos;il fait mieux.
+            </li>
+          </ol>
+          <Link href="/achats-groupes" className="inline-flex min-h-11 items-center gap-1 text-[14px] font-semibold text-accent-text">
+            Voir les achats groupés <ChevronRight size={16} aria-hidden="true" />
+          </Link>
+        </section>
+      ) : null}
+      <Link href="/fournisseurs" className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-[rgba(251,248,243,0.03)] p-5 transition-[background-color] duration-150 hover:bg-[rgba(251,248,243,0.06)]">
+        <span className="flex size-10 items-center justify-center rounded-xl bg-[rgba(251,248,243,0.08)] text-accent" aria-hidden="true">
+          <Warehouse size={20} />
+        </span>
+        <span className="flex min-w-0 flex-col">
+          <span className="text-[16px] font-extrabold">Mes négoces</span>
+          <span className="text-[14px] text-[#FBF8F3]/60">Ajoute ou modifie ceux qui reçoivent tes listes.</span>
+        </span>
+        <ChevronRight size={18} className="ml-auto shrink-0 text-[#FBF8F3]/50" aria-hidden="true" />
+      </Link>
+    </div>
   );
 }
 

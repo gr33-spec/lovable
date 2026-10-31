@@ -50,10 +50,18 @@ export default function ChantierPage() {
         />
       )}
       <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"} bar={false}>
-        {/* Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier ; relu à chaque changement signalé. */}
-        <SuiviChantier projectId={project.id} />
-        {/* La lecture donne son nom au chantier (« Chantier Dupont ») : l'en-tête se relit quand elle finit. */}
-        <ProjectDocuments key={docsKey} projectId={project.id} archived={project.status === "archived"} onProjectChanged={reload} onQuote={setQuote} />
+        {/* Ordinateur (Greg, 31 octobre 2026, soir : « on a de la place ») : la liste et ses actions à gauche, le suivi façon
+            colis à droite, qui reste à l'écran pendant qu'on descend. Téléphone : l'ordre d'avant (suivi, puis la liste). */}
+        <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_23rem]">
+          {/* Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier ; relu à chaque changement signalé. */}
+          <div className="contents lg:sticky lg:top-8 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-4">
+            <SuiviChantier projectId={project.id} />
+          </div>
+          {/* La lecture donne son nom au chantier (« Chantier Dupont ») : l'en-tête se relit quand elle finit. */}
+          <div className="contents lg:col-start-1 lg:row-start-1 lg:flex lg:min-w-0 lg:flex-col lg:gap-4">
+            <ProjectDocuments key={docsKey} projectId={project.id} archived={project.status === "archived"} onProjectChanged={reload} onQuote={setQuote} />
+          </div>
+        </div>
       </ProjectProgressProvider>
     </ActionsChantierProvider>
   );

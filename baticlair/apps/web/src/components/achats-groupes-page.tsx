@@ -47,49 +47,87 @@ function AchatsGroupes() {
   const passes = (mes?.achats ?? []).filter((a) => finis.includes(a.etat));
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle>Achats groupés</PageTitle>
+      {/* Ordinateur (Greg, 31 octobre 2026, soir) : le titre et « Ajouter ma liste » sur une ligne ; à gauche les achats
+          groupés, à droite comment ça marche et l'invitation. Téléphone : l'ordre d'avant. */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <PageTitle>Achats groupés</PageTitle>
+        <ButtonLink href="/achats-groupes/lancer" className="w-full lg:w-auto lg:px-6">
+          Ajouter ma liste à un achat groupé
+        </ButtonLink>
+      </div>
       {mes?.exclusion ? (
         <p role="alert" className="rounded-xl bg-danger-bg p-4 text-[15px] font-semibold text-danger">
           {mes.exclusion}
         </p>
       ) : null}
-      <ButtonLink href="/achats-groupes/lancer" className="w-full">
-        Ajouter ma liste à un achat groupé
-      </ButtonLink>
       {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
-      {pres && pres.achats.length > 0 ? (
-        <section aria-label="Achats groupés près de chez toi" className="flex flex-col gap-3">
-          <SectionTitle>Achats groupés de ton métier près de chez toi</SectionTitle>
-          {pres.achats.map((a) => (
-            <CarteAchatOuvert key={a.id} a={a} />
-          ))}
-        </section>
-      ) : null}
-      {!mes && !error ? <Skeleton card="h-40" lines={2} label="Chargement de tes achats groupés…" /> : null}
-      {mes && actifs.length > 0 ? (
-        <section aria-label="Mes achats groupés" className="flex flex-col gap-3">
-          <SectionTitle>Mes achats groupés</SectionTitle>
-          {actifs.map((c) => (
-            <CarteAchatGroupe key={c.id} c={c} />
-          ))}
-        </section>
-      ) : null}
-      {mes && actifs.length === 0 && (pres?.achats.length ?? 0) === 0 ? (
-        <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Pas encore d'achat groupé dans ton secteur">
-          <p className="text-[15px] text-muted">Ouvre le premier : les artisans de ton métier dans le secteur sont prévenus.</p>
-        </EmptyState>
-      ) : null}
-      {passes.length > 0 ? (
-        <section aria-label="Terminés" className="flex flex-col gap-3">
-          <SectionTitle>Terminés</SectionTitle>
-          {passes.map((c) => (
-            <CarteAchatGroupe key={c.id} c={c} />
-          ))}
-        </section>
-      ) : null}
-      {/* Point 8 : la grande carte « Inviter un collègue » passe sous la liste. */}
-      <InviterCollegue texte="Plus on est nombreux dans le secteur, meilleur est le prix." />
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="flex min-w-0 flex-col gap-6">
+          {pres && pres.achats.length > 0 ? (
+            <section aria-label="Achats groupés près de chez toi" className="flex flex-col gap-3">
+              <SectionTitle>Achats groupés de ton métier près de chez toi</SectionTitle>
+              <div className="flex flex-col gap-3 2xl:grid 2xl:grid-cols-2">
+                {pres.achats.map((a) => (
+                  <CarteAchatOuvert key={a.id} a={a} />
+                ))}
+              </div>
+            </section>
+          ) : null}
+          {!mes && !error ? <Skeleton card="h-40" lines={2} label="Chargement de tes achats groupés…" /> : null}
+          {mes && actifs.length > 0 ? (
+            <section aria-label="Mes achats groupés" className="flex flex-col gap-3">
+              <SectionTitle>Mes achats groupés</SectionTitle>
+              {actifs.map((c) => (
+                <CarteAchatGroupe key={c.id} c={c} />
+              ))}
+            </section>
+          ) : null}
+          {mes && actifs.length === 0 && (pres?.achats.length ?? 0) === 0 ? (
+            <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Pas encore d'achat groupé dans ton secteur">
+              <p className="text-[15px] text-muted">Ouvre le premier : les artisans de ton métier dans le secteur sont prévenus.</p>
+            </EmptyState>
+          ) : null}
+          {passes.length > 0 ? (
+            <section aria-label="Terminés" className="flex flex-col gap-3">
+              <SectionTitle>Terminés</SectionTitle>
+              {passes.map((c) => (
+                <CarteAchatGroupe key={c.id} c={c} />
+              ))}
+            </section>
+          ) : null}
+        </div>
+        <div className="flex flex-col gap-6 lg:sticky lg:top-8">
+          <CommentCaMarcheOrdinateur />
+          {/* Point 8 : la grande carte « Inviter un collègue » passe sous la liste. */}
+          <InviterCollegue texte="Plus on est nombreux dans le secteur, meilleur est le prix." />
+        </div>
+      </div>
     </div>
+  );
+}
+
+/** Ordinateur seulement : l'achat groupé en trois étapes, à côté de la liste (sur téléphone, la page reste courte). */
+function CommentCaMarcheOrdinateur() {
+  const etapes = [
+    ["Ajoute ta liste", "Les lignes de ton métier, ta commune, ta date et au moins un négoce."],
+    ["Les négoces chiffrent", "Ils reçoivent le volume de tous, jamais ton nom. Gratuit, à chaque fois."],
+    ["Tu commandes au mieux", "Chez le moins cher entre la meilleure offre du groupe et ton négoce habituel."],
+  ] as const;
+  return (
+    <section aria-label="Comment marche un achat groupé" className="hidden flex-col gap-4 rounded-2xl border border-line p-5 lg:flex">
+      <p className="text-[17px] font-extrabold">Comment ça marche</p>
+      <ol className="flex flex-col gap-4">
+        {etapes.map(([titre, texte], i) => (
+          <li key={titre} className="flex gap-3">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-[14px] font-extrabold text-on-accent tabular-nums">{i + 1}</span>
+            <span className="flex flex-col gap-0.5">
+              <span className="text-[15px] font-bold">{titre}</span>
+              <span className="text-[14px] leading-snug text-muted">{texte}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

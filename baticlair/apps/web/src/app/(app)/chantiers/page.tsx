@@ -99,9 +99,17 @@ function ChantiersList() {
     <>
       <div className="flex items-start justify-between gap-3">
         <PageTitle>Chantiers</PageTitle>
-        <AideBouton sujet="chantiers" />
+        <span className="flex items-center gap-3">
+          {/* Ordinateur (Greg, 31 octobre 2026, soir) : la nouvelle liste à portée de clic, en haut à droite. */}
+          <ButtonLink href="/chantiers/nouveau" className="hidden min-h-11 px-5 text-[15px] lg:inline-flex">
+            Nouvelle liste
+          </ButtonLink>
+          <AideBouton sujet="chantiers" />
+        </span>
       </div>
-      <div className="flex flex-col gap-2">
+      {/* Ordinateur : la recherche et les filtres sur une ligne. */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-4">
+      <div className="flex flex-col gap-2 lg:grow">
         <label htmlFor="search" className="text-[14px] font-semibold">
           Chercher un chantier, un client ou une adresse
         </label>
@@ -131,6 +139,7 @@ function ChantiersList() {
           </button>
         ))}
       </div>
+      </div>
 
       {error ? <ErrorNotice error={error} onRetry={() => { setMoreError(null); reload(); }} /> : null}
       {items === null && !error ? <Skeleton lines={4} label="Chargement des chantiers…" /> : null}
@@ -139,7 +148,15 @@ function ChantiersList() {
           <p className="text-[14px] text-muted" aria-live="polite">
             {searching ? `Résultats pour « ${q} »${filter === "tous" ? " (en cours et terminés)" : ""}` : "Le dernier travaillé en premier"}
           </p>
-          <ProjectList projects={items} show={API_STATUS[filter] as "active" | "archived" | "all"} />
+          {/* Ordinateur : les colonnes du tableau des listes (les lignes les remplissent, `ResumeOrdinateur`). */}
+          <div aria-hidden="true" className="-mb-2 hidden items-center gap-5 px-4 text-[12px] font-bold tracking-[0.08em] text-muted uppercase lg:flex">
+            <span className="grow">Liste</span>
+            <span className="hidden w-[17rem] xl:block">Ce qu&apos;il reste à faire</span>
+            <span className="w-[11.5rem]">Étape</span>
+            <span className="hidden w-[4.5rem] text-right 2xl:block">Activité</span>
+            <span className="w-[18px]" />
+          </div>
+          <ProjectList projects={items} detail show={API_STATUS[filter] as "active" | "archived" | "all"} />
           {cursor ? (
             <Button variant="secondary" pending={loadingMore} onClick={() => void loadMore()}>
               {fr.actions.loadMore}

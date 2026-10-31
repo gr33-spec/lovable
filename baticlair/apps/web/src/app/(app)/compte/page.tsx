@@ -69,6 +69,9 @@ export default function ComptePage() {
       </div>
       <BandeauAbonnement />
       {error ? <ErrorNotice error={error} /> : null}
+      {/* Ordinateur (Greg, 31 octobre 2026, soir) : les cartes du profil sur deux colonnes, chacune entière. Téléphone :
+          une colonne, l'ordre d'avant. */}
+      <div className="contents lg:block lg:columns-2 lg:gap-6 lg:[&>*]:mb-6 lg:[&>*]:break-inside-avoid">
       <Card className="flex flex-col gap-3 p-4">
         <div className="flex flex-col">
           <span className="text-[15px] font-bold">{me.user.name}</span>
@@ -161,6 +164,7 @@ export default function ComptePage() {
         Se déconnecter
       </Button>
       <MyData onDeleted={() => router.replace("/connexion?compte=supprime")} />
+      </div>
     </>
   );
 }

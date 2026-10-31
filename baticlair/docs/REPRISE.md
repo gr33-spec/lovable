@@ -15,6 +15,8 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
+SUIVI 152 : refonte de l'app sur ordinateur (lg: seulement, mobile inchangé). Fait : menu, accueil, listes, chantier, achats groupés, négoces, profil. Reste : e2e complets, push, captures avant / après à Greg (script de capture temporaire : scratchpad `zz-captures-pc.spec.ts`).
+
 SUIVI 143-145 (messages de Greg du 31 octobre, après le catalogue métier), dans cet ordre :
 - [x] 143. Landing « Comment ça marche ? » : vraies captures de l'app (données fictives) dans un cadre de téléphone
   neutre, sans marque, à la place des trois téléphones dessinés ; CTA fixe mobile qui ne cache plus le texte du collectif.

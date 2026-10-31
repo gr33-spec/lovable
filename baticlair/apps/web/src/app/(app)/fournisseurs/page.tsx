@@ -70,7 +70,7 @@ function Suppliers() {
           />
         </Card>
       ) : (
-        <Button onClick={() => setCreating(true)}>
+        <Button onClick={() => setCreating(true)} className="lg:w-auto lg:self-start lg:px-6">
           <Plus size={20} aria-hidden="true" />
           Nouveau fournisseur
         </Button>
@@ -96,7 +96,8 @@ function Suppliers() {
         />
       ) : null}
 
-      <ul className="flex flex-col gap-3">
+      {/* Ordinateur (Greg, 31 octobre 2026, soir) : les négoces en grille, deux ou trois par ligne. */}
+      <ul className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 2xl:grid-cols-3">
         {shown.map((s) => (
           <li key={s.id}>
             {editingId === s.id ? (
