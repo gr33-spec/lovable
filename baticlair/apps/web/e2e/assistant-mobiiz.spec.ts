@@ -1,3 +1,4 @@
+import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 /**
@@ -61,18 +62,25 @@ test("Assistant Mobiiz : questions d'un coup, réponses multiples, consignes, an
   await assistant.getByRole("button", { name: "Compris" }).click();
   await expect(assistant.getByRole("note")).toHaveCount(0);
   // Toutes les questions dans un seul message, jamais une quantité.
-  await expect(assistant.getByText(/Ta liste est prête : 3 lignes\. Pour ta demande de prix, 2 questions : Adresse du chantier \? Souhaites-tu une livraison \?/)).toBeVisible();
+  // Les questions DU DOCUMENT d'abord (l'ardoise ne dit ni son origine ni son choix ; les crochets disent inox et 90 mm, rien
+  // à demander), puis le chantier.
+  await expect(assistant.getByText("Ta liste est prête : 3 lignes. Pour ta demande de prix, 4 questions : Ardoise naturelle 32×22 : origine ? Ardoise naturelle 32×22 : choix ? Adresse du chantier ? Souhaites-tu une livraison ? Tu peux répondre à tout d'un coup, ou passer.")).toBeVisible();
+  await expect(assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toBeVisible();
+  await expect(assistant.getByRole("group", { name: /^Crochet ardoise/ })).toHaveCount(0);
   await expect(assistant.getByRole("group", { name: "Adresse du chantier ?" })).toBeVisible();
   await expect(assistant.getByText(/combien/i)).toHaveCount(0);
   // Le micro est là (la dictée remplit la case, n'envoie rien) ; ici, on écrit.
   await expect(assistant.getByRole("button", { name: "Dicter" })).toBeVisible();
   const champ = assistant.getByLabel("Ton message");
-  // Deux réponses d'un coup.
-  await champ.fill("3 rue du Port 22300 Lannion. Livraison sur chantier demain");
+  // Quatre réponses d'un coup, en une phrase.
+  await champ.fill("Espagne, 1er choix. 3 rue du Port 22300 Lannion. Livraison sur chantier demain");
   await assistant.getByRole("button", { name: "Envoyer le message" }).click();
-  await expect(assistant.getByText("C'est fait : adresse notée : 3 rue du Port 22300 Lannion, noté : livraison sur le chantier, demain. C'est tout bon de mon côté : relis le PDF, puis envoie-le à tes négoces.")).toBeVisible();
+  await expect(assistant.getByText("C'est noté : Espagne et 1er choix pour « Ardoise naturelle 32×22 ». C'est fait : adresse notée : 3 rue du Port 22300 Lannion, noté : livraison sur le chantier, demain. C'est tout bon de mon côté : relis le PDF, puis envoie-le à tes négoces.")).toBeVisible();
+  await expect(assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toHaveCount(0);
   await expect(assistant.getByRole("group", { name: "Adresse du chantier ?" })).toHaveCount(0);
   expect((await ecran(page, id)).chantier).toEqual({ adresse: "3 rue du Port 22300 Lannion", livraison: "Livraison sur le chantier, demain" });
+  // La réponse s'écrit dans la ligne (ce que reçoit le négoce).
+  expect((await ecran(page, id)).purchase.toBuy.map((b) => b.label)).toContain("Ardoise naturelle 32×22 Espagne 1er choix");
   // Deux consignes dans une phrase : retirer, ajouter (quantité dite seulement).
   await champ.fill("retire les vis et ajoute 10 sacs de colle C2");
   await champ.press("Enter");
@@ -126,14 +134,18 @@ test("Assistant Mobiiz : « Passer » ferme une question pour de bon ; « Je ne 
   const assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
   await assistant.getByRole("group", { name: "Adresse du chantier ?" }).getByRole("button", { name: "Passer" }).click();
   await expect(assistant.getByRole("group", { name: "Adresse du chantier ?" })).toHaveCount(0);
+  // « Je ne sais pas » passe la question en cours (la première : l'origine de l'ardoise).
   await assistant.getByLabel("Ton message").fill("je ne sais pas");
   await assistant.getByRole("button", { name: "Envoyer le message" }).click();
-  await expect(assistant.getByText(/Pas de souci, on passe\./)).toBeVisible();
-  await expect(assistant.getByRole("group", { name: "Souhaites-tu une livraison ?" })).toHaveCount(0);
+  await expect(assistant.getByText("Pas de souci, on passe. Ardoise naturelle 32×22 : choix ?")).toBeVisible();
+  await expect(assistant.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toHaveCount(0);
   await assistant.getByRole("button", { name: "Fermer l'assistant" }).click();
   await page.reload();
   await page.getByRole("button", { name: "Ouvrir l'assistant" }).click();
-  await expect(page.getByRole("dialog", { name: "Assistant Mobiiz" }).getByText(/Je n'ai rien à te demander/)).toBeVisible();
+  const rouvert = page.getByRole("dialog", { name: "Assistant Mobiiz" });
+  await expect(rouvert.getByRole("group", { name: "Souhaites-tu une livraison ?" })).toBeVisible();
+  await expect(rouvert.getByRole("group", { name: "Adresse du chantier ?" })).toHaveCount(0);
+  await expect(rouvert.getByRole("group", { name: "Ardoise naturelle 32×22 : origine ?" })).toHaveCount(0);
 });
 
 test("Décris ton chantier : les quantités dites deviennent la liste, le reste se coche, rien d'inventé", async ({ page }) => {
@@ -155,4 +167,97 @@ test("Décris ton chantier : les quantités dites deviennent la liste, le reste 
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
   await expect(page.getByText("Placo BA13").first()).toBeVisible();
   await expect(page.getByText(/Colle carrelage/)).toHaveCount(0);
+});
+
+test("Contrôle de conformité : après la photo d'une liste, l'assistant s'ouvre seul et pose les questions DU DOCUMENT ; réponses libres groupées ; une seule ouverture", async ({ page }) => {
+  test.setTimeout(180_000);
+  // Les tests gardent l'écran de liste ; celui-ci active l'ouverture automatique de l'assistant (comme pour un artisan).
+  await page.addInitScript(() => localStorage.setItem("mobiiz-assistant-auto", "oui"));
+  await compteEtListe(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}$/, { timeout: 60_000 });
+  const assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
+  await expect(assistant).toBeVisible({ timeout: 60_000 });
+  const projetId = /\/chantiers\/([0-9a-f-]{36})/.exec(page.url())![1]!;
+  // Des questions tirées des lignes lues (pas une liste générique) : l'écran sous-toiture sans type, les pointes sans format.
+  await expect(assistant.getByRole("group", { name: "Écran sous-toiture : type ?" })).toBeVisible();
+  await expect(assistant.getByRole("group", { name: /^Pointes inox : format \?$/ })).toBeVisible();
+  // Une ligne déjà précise n'a pas de question (le liteau dit sa section).
+  await expect(assistant.getByRole("group", { name: /^Liteau sapin 27x38/ })).toHaveCount(0);
+  // Deux réponses d'un coup, en texte libre.
+  await assistant.getByLabel("Ton message").fill("HPV et pointes 2,8×40");
+  await assistant.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(assistant.getByText(/C'est noté : HPV pour « Écran sous-toiture », 2,8×40 pour « Pointes inox »\./)).toBeVisible();
+  await expect(assistant.getByRole("group", { name: "Écran sous-toiture : type ?" })).toHaveCount(0);
+  const q = await apiJson<{ items: { ecran: Ecran }[] }>(page, "GET", `/v1/quantitatifs?projetId=${projetId}&ecran=1`);
+  const labels = q.body.items[0]!.ecran.purchase.toBuy.map((b) => b.label);
+  expect(labels).toContain("Écran sous-toiture HPV");
+  expect(labels.some((l) => /^Pointes inox 2,8×40/.test(l))).toBe(true);
+  // Revenir sur un choix : « Annuler » rend l'ancienne désignation.
+  await assistant.getByRole("button", { name: "Annuler la dernière modification" }).click();
+  await expect(assistant.getByText(/J'ai annulé « 2,8×40 » sur Pointes inox\./)).toBeVisible();
+  // Passer tout de suite : la liste ; l'assistant ne se rouvre pas seul.
+  await assistant.getByRole("button", { name: "Voir ma liste" }).click();
+  await expect(assistant).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("dialog", { name: "Assistant Mobiiz" })).toHaveCount(0);
+});
+
+test("La dictée : remplit la case sans envoyer ; navigateur sans dictée ou micro refusé : une phrase et le clavier", async ({ page }) => {
+  test.setTimeout(120_000);
+  // Une reconnaissance vocale simulée (comme Chrome Android ou Safari iOS, `webkitSpeechRecognition`).
+  await page.addInitScript(() => {
+    class FausseDictee {
+      lang = "";
+      interimResults = false;
+      continuous = false;
+      onresult: ((e: unknown) => void) | null = null;
+      onerror: ((e: unknown) => void) | null = null;
+      onend: (() => void) | null = null;
+      start() {
+        const mode = localStorage.getItem("fausse-dictee");
+        setTimeout(() => {
+          if (mode === "refus") this.onerror?.({ error: "not-allowed" });
+          else this.onresult?.({ resultIndex: 0, results: [Object.assign([{ transcript: "ajoute 6 sacs de mortier" }], { isFinal: true })] });
+          this.onend?.();
+        }, 50);
+      }
+      stop() {}
+      abort() {}
+    }
+    // Chrome expose aussi `SpeechRecognition` sans préfixe : les deux sont remplacés.
+    (window as unknown as { webkitSpeechRecognition: unknown }).webkitSpeechRecognition = FausseDictee;
+    (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = FausseDictee;
+  });
+  const { projetId, id } = await compteEtListe(page);
+  await page.goto(`/chantiers/${projetId}`);
+  await page.getByRole("button", { name: "Ouvrir l'assistant" }).click();
+  const assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
+  await assistant.getByRole("button", { name: "Dicter" }).click();
+  await expect(assistant.getByLabel("Ton message")).toHaveValue("ajoute 6 sacs de mortier");
+  // Rien n'est parti tout seul.
+  expect((await ecran(page, id)).purchase.toBuy.some((b) => /Mortier/.test(b.label))).toBe(false);
+  await assistant.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(assistant.getByText(/ajouté « Mortier », 6 sacs/)).toBeVisible();
+  // Micro refusé : la phrase, le clavier reste.
+  await page.evaluate(() => localStorage.setItem("fausse-dictee", "refus"));
+  await assistant.getByRole("button", { name: "Dicter" }).click();
+  await expect(assistant.getByRole("alert")).toHaveText("Le micro est bloqué. Autorise-le dans les réglages du navigateur, ou écris ta réponse.");
+  await expect(assistant.getByLabel("Ton message")).toBeEditable();
+});
+
+test("Navigateur sans dictée : le micro le dit, rien ne casse", async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.addInitScript(() => {
+    delete (window as unknown as { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition;
+    delete (window as unknown as { SpeechRecognition?: unknown }).SpeechRecognition;
+  });
+  const { projetId } = await compteEtListe(page);
+  await page.goto(`/chantiers/${projetId}`);
+  await page.getByRole("button", { name: "Ouvrir l'assistant" }).click();
+  const assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
+  await assistant.getByRole("button", { name: "Dicter" }).click();
+  await expect(assistant.getByRole("alert")).toHaveText("La dictée n'est pas disponible sur ce navigateur. Utilise le micro de ton clavier, ou écris ta réponse.");
 });

@@ -32,12 +32,9 @@ export const hexCouleurPdf = (id: string | null | undefined): string => (COULEUR
 export const TITRE_PDF = "Demande de prix — Matériaux";
 /** Le bloc de réponse (point 10, mot pour mot). */
 export const PHRASE_REPONSE_PDF = "Merci d'envoyer votre proposition commerciale à l'adresse suivante :";
-/**
- * Le texte facultatif (point 10, complété par Claude : la phrase du brief s'arrêtait sur « … » ; point 11 : les frais de
- * livraison à part).
- */
+/** Le texte au négoce, mot pour mot (Greg, 31 octobre 2026, contrôle de conformité, point 4). */
 export const CONDITIONS_PDF =
-  "Merci d'indiquer vos meilleurs prix, vos disponibilités et vos conditions de livraison, frais de livraison à part. Vous pouvez proposer des produits équivalents en le précisant sur la ligne.";
+  "Merci de nous transmettre vos meilleurs prix, les disponibilités des matériaux et les délais de livraison. Merci de préciser séparément les éventuels frais de livraison. Vous pouvez proposer des références équivalentes en indiquant leurs différences techniques.";
 
 /**
  * « 400 pièces » → { quantite: "400", unite: "pièces" } ; « 4 longueurs de 4 m (13 m à couvrir) » → « 4 » et

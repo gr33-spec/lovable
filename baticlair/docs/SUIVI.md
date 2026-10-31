@@ -208,3 +208,4 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 | 157 | 31/10 | PDF « Demande de prix — Matériaux » : 3 modèles, couleur, bloc de réponse Mobiiz, chantier et livraison | fait | Profil > Ma demande de prix ; tests `pdf-modeles`, `adresse-mobiiz` (adresse du PDF = Répondre à), e2e « Ma demande de prix ». |
 | 158 | 31/10 | Assistant : conversation + PDF interactif (ordinateur deux panneaux, téléphone plein écran), micro, Passer, annuler | fait | Carte « Assistant Mobiiz » sur « Ton chantier » ; e2e `assistant-mobiiz.spec.ts`. |
 | 159 | 31/10 | Décrire son chantier (texte ou voix) → quantitatif, quantités dites seulement | fait | « Je décris mon chantier » dans Ma liste de matériaux. |
+| 160 | 31/10 | Contrôle de conformité de l'assistant : questions tirées du document, ouverture automatique, texte au négoce, vérifications | fait | `docs/assistant-mobiiz.md` §6 ; IA hybride étudiée, non activée (attend l'accord de Greg). |

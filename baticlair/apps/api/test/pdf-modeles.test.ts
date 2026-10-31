@@ -61,14 +61,15 @@ describe("le PDF « Demande de prix — Matériaux » en trois modèles", () => 
     expect(detaille).toContain("3");
   });
 
-  it("le bloc de réponse : la phrase du brief, l'adresse donnée, les conditions (frais de livraison à part)", async () => {
+  it("le bloc de réponse : la phrase du brief, l'adresse donnée, les conditions (texte de Greg)", async () => {
     const d = packetDocument(PACKET, { reponse: "toitures-exemple+rabcdefgh@mobiiz.fr" });
     expect(d.reponse?.phrase).toBe("Merci d'envoyer votre proposition commerciale à l'adresse suivante :");
     expect(packetDocumentLines(d)).toContain("toitures-exemple+rabcdefgh@mobiiz.fr");
     const t = await items(await packetPdf(PACKET, [], { reponse: "toitures-exemple+rabcdefgh@mobiiz.fr", couleur: "bleu" }));
     expect(t).toContain("Merci d'envoyer votre proposition commerciale à l'adresse suivante :");
     expect(t).toContain("toitures-exemple+rabcdefgh@mobiiz.fr");
-    expect(t.join(" ")).toMatch(/frais de livraison à part/);
+    // Le texte de Greg (31 octobre 2026), mot pour mot.
+    expect(t.join(" ")).toContain("Merci de préciser séparément les éventuels frais de livraison.");
     expect(packetDocument(PACKET).reponse).toBeNull();
   });
 

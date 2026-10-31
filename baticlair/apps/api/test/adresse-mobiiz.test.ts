@@ -152,6 +152,45 @@ describe("l'adresse Mobiiz de l'artisan", () => {
     expect(apercu.body.document.reponse.adresse).toBe("toitures-martin@mobiiz.fr");
   });
 
+  it("contrôle de conformité (31 octobre 2026) : chaque négoce et chaque demande a SA propre adresse de réponse, imprimée dans SON PDF", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
+    const { projectId, recipientId } = await demande(agent, "Négoce Dupont", "ventes@dupont.example");
+    const autre = (await agent.post("/v1/suppliers").send({ name: "Négoce Le Gall", email: "devis@legall.example" })).body;
+    const r2 = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [autre.id] })).body;
+    await agent.post(`/v1/price-request-recipients/${recipientId}/send`).expect(200);
+    await agent.post(`/v1/price-request-recipients/${r2.recipients[0].id}/send`).expect(200);
+    const dupont = ctx.emails.sent.find((m) => m.to === "ventes@dupont.example")!;
+    const legall = ctx.emails.sent.find((m) => m.to === "devis@legall.example")!;
+    expect(dupont.replyTo).not.toBe(legall.replyTo);
+    for (const [m, autreAdresse] of [[dupont, legall.replyTo!], [legall, dupont.replyTo!]] as const) {
+      const texte = await textePdf(Buffer.from(m.attachments!.find((a) => a.contentType === "application/pdf")!.contentBase64, "base64"));
+      expect(texte).toContain(m.replyTo!);
+      expect(texte).not.toContain(autreAdresse);
+    }
+    // Une autre demande (autre chantier) pour le même négoce : encore une autre adresse.
+    const deux = await demande(agent, "Négoce Dupont 2", "ventes2@dupont.example");
+    await agent.post(`/v1/price-request-recipients/${deux.recipientId}/send`).expect(200);
+    const troisieme = ctx.emails.sent.find((m) => m.to === "ventes2@dupont.example")!;
+    expect(new Set([dupont.replyTo, legall.replyTo, troisieme.replyTo]).size).toBe(3);
+    // Le PDF retéléchargé pour un négoce redit son adresse.
+    const pdf = (await agent.get(`/v1/price-requests/${r2.id}/demande-de-devis.pdf?destinataire=${r2.recipients[0].id}`).buffer(true)).body as Buffer;
+    expect(await textePdf(pdf)).toContain(legall.replyTo!);
+  });
+
+  it("contrôle de conformité : le PDF affiché (aperçu), téléchargé et envoyé disent la même chose ; seules l'adresse de réponse et le destinataire changent", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
+    const { projectId, recipientId } = await demande(agent);
+    const lignes = (t: string) => t.split("\n").map((l) => l.trim()).filter((l) => l && !/@mobiiz\.fr|^Destinataire$|^Négoce Dupont$/.test(l));
+    const apercu = lignes(await textePdf((await agent.get(`/v1/projects/${projectId}/demande-de-devis.pdf?apercu=1`).buffer(true)).body as Buffer));
+    const telecharge = lignes(await textePdf((await agent.get(`/v1/projects/${projectId}/demande-de-devis.pdf`).buffer(true)).body as Buffer));
+    await agent.post(`/v1/price-request-recipients/${recipientId}/send`).expect(200);
+    const m = ctx.emails.sent.at(-1)!;
+    const envoye = lignes(await textePdf(Buffer.from(m.attachments!.find((a) => a.contentType === "application/pdf")!.contentBase64, "base64")));
+    expect(telecharge).toEqual(apercu);
+    expect(envoye).toEqual(apercu);
+    expect(apercu).toContain("Chatière de ventilation");
+  });
+
   it("le SMS « Préviens ton négoce » nomme l'adresse Mobiiz qui envoie la demande", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
     const { requestId } = await demande(agent);

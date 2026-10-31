@@ -10,7 +10,7 @@ import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, Qu
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
-import { AssistantMobiiz, CarteAssistant } from "@/components/assistant-mobiiz";
+import { AssistantMobiiz, assistantDejaOuvert, CarteAssistant, marquerAssistantOuvert } from "@/components/assistant-mobiiz";
 import { SiteUnitsView } from "@/components/site-units-view";
 import { SendPreview } from "@/components/send-preview";
 import { SupplyList } from "@/components/supply-list";
@@ -90,6 +90,7 @@ export function ProjectTakeoff({
   const [previewing, setPreviewing] = useState(false);
   // Assistant Mobiiz (Greg, 31 octobre 2026) : la conversation et le PDF, par-dessus « Ton chantier ».
   const [assistant, setAssistant] = useState(false);
+  const [autoFermee, setAutoFermee] = useState(false);
   // La liste a sa page (`?vue=fournitures`) ; sur le chantier, elle tient en une ligne. Après l'envoi, les réponses des
   // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
   const [page, setPage] = useListPage();
@@ -328,6 +329,11 @@ export function ProjectTakeoff({
     // Une ligne qui attend une réponse (ou qu'aucun article ne porte) : on retire la ou les lignes du devis d'où elle vient.
     else for (const id of row.lineIds) await call("corrections", { action: "retirer", id });
   };
+  // Contrôle de conformité (Greg, 31 octobre 2026, validé) : après la lecture d'un devis ou d'une photo, l'assistant s'ouvre
+  // de lui-même, une fois par liste, avant l'envoi ; « Fermer » ou « Voir ma liste » passent tout de suite. Une liste notée à
+  // la main ne l'ouvre pas (saisie manuelle indépendante).
+  const lueParMobiiz = takeoff.lines.some((l) => l.origin === "ai" || l.origin === "liste");
+  const ouvertureAuto = !autoFermee && editable && !sent && lueParMobiiz && !previewing && !showList && !assistantDejaOuvert(projectId);
   let body: React.ReactNode;
   if (showList) {
     body = (
@@ -364,8 +370,19 @@ export function ProjectTakeoff({
     body = (
       <>
       {editable && !sent && quantitatif ? <CarteAssistant onOpen={() => setAssistant(true)} /> : null}
-      {assistant && quantitatif ? (
-        <AssistantMobiiz takeoff={takeoff} projectId={projectId} quantitatifId={quantitatif.id} onUpdated={update} onClose={() => setAssistant(false)} onSend={send} />
+      {(assistant || ouvertureAuto) && quantitatif ? (
+        <AssistantMobiiz
+          takeoff={takeoff}
+          projectId={projectId}
+          quantitatifId={quantitatif.id}
+          onUpdated={update}
+          onClose={() => {
+            marquerAssistantOuvert(projectId);
+            setAssistant(false);
+            setAutoFermee(true);
+          }}
+          onSend={send}
+        />
       ) : null}
       <SupplyList
         takeoff={takeoff}

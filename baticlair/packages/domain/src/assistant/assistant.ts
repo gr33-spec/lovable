@@ -45,10 +45,13 @@ export function questionsAssistant(e: EtatAssistant): QuestionAssistant[] {
 }
 
 /** Le premier message : ce qui est prêt, ce qui reste à vérifier, et toutes les questions d'un coup. */
-export function messageOuverture(nbLignes: number, aVerifier: number, questions: readonly QuestionAssistant[]): string {
+export function messageOuverture(nbLignes: number, aVerifier: number, questions: readonly { texte: string }[]): string {
   const liste = `Ta liste est prête : ${nbLignes} ligne${nbLignes > 1 ? "s" : ""}${aVerifier > 0 ? `, dont ${aVerifier} à vérifier` : ""}.`;
   if (questions.length === 0) return `${liste} Je n'ai rien à te demander : tu peux relire le PDF et l'envoyer.`;
-  return `${liste} Pour ta demande de prix, ${questions.length === 1 ? "une question" : `${questions.length} questions`} : ${questions.map((x) => x.texte).join(" ")} Tu peux répondre à tout d'un coup, ou passer.`;
+  // Toutes dans un seul message ; au-delà de quatre, le compte (les cartes les montrent toutes).
+  const dites = questions.slice(0, 4).map((x) => x.texte).join(" ");
+  const autres = questions.length > 4 ? ` Et ${questions.length - 4} autre${questions.length > 5 ? "s" : ""}, plus bas.` : "";
+  return `${liste} Pour ta demande de prix, ${questions.length === 1 ? "une question" : `${questions.length} questions`} : ${dites}${autres} Tu peux répondre à tout d'un coup, ou passer.`;
 }
 
 export type Consigne =
@@ -321,4 +324,118 @@ export function lireDescription(texte: string): { lignes: LigneDecrite[]; aConfi
     if (sans.libelle && /[a-z]/i.test(sans.libelle) && sans.libelle.length <= 120) aConfirmer.push({ libelle: sans.libelle, quantite: null, unite: null });
   }
   return { lignes, aConfirmer };
+}
+
+/**
+ * LES QUESTIONS DU DOCUMENT (Greg, 31 octobre 2026, contrôle de conformité, point 2) : l'assistant ne pose pas une liste
+ * générique. Il reprend, ligne par ligne, ce que le moteur sait déjà manquer DANS CE DOCUMENT :
+ * - `asks` (§49.8) : la donnée qui manque au calcul ou le défaut à confirmer (pente, développé, Ø…) ; une même question
+ *   partagée par plusieurs lignes n'est posée qu'une fois (une réponse les règle toutes) ;
+ * - `aPreciserPourGroupe` : ce que le comptoir demanderait sur la ligne (format, origine et choix d'une ardoise, matière et
+ *   longueur d'un crochet, marque et teinte d'une tuile…), seulement quand la désignation ne le dit pas déjà.
+ * Une ligne déjà précise n'a aucune question ; un document complet n'en a aucune.
+ */
+export interface ItemPourQuestions {
+  key: string;
+  label: string;
+  asks?: readonly { key: string; text: string; unit: string | null; options: readonly { label: string; value: string }[] }[];
+  aPreciserPourGroupe?: readonly { cle: string; question: string; options: readonly string[] }[];
+}
+
+export interface QuestionLigne {
+  /** Identifiant stable de la question (pour « Passer »). */
+  id: string;
+  /** La ligne visée (son nom affiché), ou plusieurs quand la question est partagée. */
+  lignes: string[];
+  itemKeys: string[];
+  texte: string;
+  choix: { libelle: string; valeur: string }[];
+  /** `reponse` : une réponse du moteur (clé, unité) ; `precision` : la réponse s'écrit dans la désignation. */
+  sorte: { type: "reponse"; cle: string; unite: string | null } | { type: "precision"; cle: string };
+}
+
+const sansPoint = (t: string) => t.replace(/\s*\?\s*$/, "").trim();
+const minuscule = (t: string) => (t ? t.charAt(0).toLowerCase() + t.slice(1) : t);
+
+export function questionsDuDocument(items: readonly ItemPourQuestions[]): QuestionLigne[] {
+  const parReponse = new Map<string, QuestionLigne>();
+  const precisions: QuestionLigne[] = [];
+  for (const it of items) {
+    for (const a of it.asks ?? []) {
+      const deja = parReponse.get(a.key);
+      if (deja) {
+        deja.lignes.push(it.label);
+        deja.itemKeys.push(it.key);
+        continue;
+      }
+      parReponse.set(a.key, { id: `reponse:${a.key}`, lignes: [it.label], itemKeys: [it.key], texte: sansPoint(a.text), choix: a.options.map((o) => ({ libelle: o.label, valeur: o.value })), sorte: { type: "reponse", cle: a.key, unite: a.unit } });
+    }
+    for (const q of it.aPreciserPourGroupe ?? [])
+      precisions.push({ id: `precision:${it.key}:${q.cle}`, lignes: [it.label], itemKeys: [it.key], texte: minuscule(sansPoint(q.question)), choix: q.options.map((o) => ({ libelle: o, valeur: o })), sorte: { type: "precision", cle: q.cle } });
+  }
+  // Ce qui bloque le calcul d'abord, puis les précisions du comptoir.
+  return [...parReponse.values(), ...precisions];
+}
+
+/** Le texte d'une question de ligne, tel que l'assistant le dit : « Crochet ardoise : matière ? ». */
+export function texteQuestionLigne(q: QuestionLigne): string {
+  const ligne = q.lignes.length > 1 ? `${q.lignes[0]} (et ${q.lignes.length - 1} autre${q.lignes.length > 2 ? "s" : ""})` : q.lignes[0];
+  return q.sorte.type === "reponse" ? `${ligne} : ${minuscule(q.texte)} ?` : `${ligne} : ${q.texte} ?`;
+}
+
+const formeOption = (t: string) =>
+  normaliser(t)
+    .replace(/[×*]/g, "x")
+    .replace(/°|degres?/g, "")
+    .replace(/ø/g, "")
+    .replace(/[^a-z0-9x,.]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+/**
+ * Une réponse libre aux questions du document (« naturelles, crochets inox de 100 mm, marque Edilians ») : chaque morceau
+ * qui contient UN choix proposé répond aux questions qui l'offrent ; quand le morceau nomme une ligne, seulement à elle.
+ * Rien n'est deviné : un morceau sans choix reconnu n'est pas une réponse (il passe à l'interprète des consignes).
+ */
+export function reponsesLibres(message: string, questions: readonly QuestionLigne[]): { reponses: { question: QuestionLigne; valeur: string; libelle: string }[]; reste: string[] } {
+  // La virgule décimale (« 2,8×40 », « 0,65 mm ») ne coupe pas un morceau.
+  const morceaux = message
+    .split(/\n|;|\.(?=\s|$)|,(?!\d)|\s+et\s+/i)
+    .map((m) => m.trim())
+    .filter(Boolean);
+  const reponses: { question: QuestionLigne; valeur: string; libelle: string }[] = [];
+  const reste: string[] = [];
+  const dejaRepondues = new Set<string>();
+  for (const m of morceaux) {
+    const f = ` ${formeOption(m)} `;
+    const trouvees: { question: QuestionLigne; choix: { libelle: string; valeur: string } }[] = [];
+    for (const q of questions) {
+      if (dejaRepondues.has(q.id)) continue;
+      // Le choix le plus long d'abord (« 1er choix » avant « choix »), mot entier.
+      const c = [...q.choix].sort((a, b) => b.libelle.length - a.libelle.length).find((o) => formeOption(o.libelle).length > 0 && f.includes(` ${formeOption(o.libelle)} `));
+      if (c) trouvees.push({ question: q, choix: c });
+    }
+    if (trouvees.length === 0) {
+      reste.push(m);
+      continue;
+    }
+    // Le morceau nomme-t-il une ligne ? Alors seulement ses questions.
+    const nommees = trouvees.filter((t) => t.question.lignes.some((l) => ligneVisee(m, [{ cle: "x", libelle: l }]) !== null));
+    for (const t of nommees.length > 0 ? nommees : trouvees) {
+      reponses.push({ question: t.question, valeur: t.choix.valeur, libelle: t.choix.libelle });
+      dejaRepondues.add(t.question.id);
+    }
+  }
+  return { reponses, reste };
+}
+
+/** « Espagne et 1er choix pour « Ardoise naturelle 32×22 », développé de la gouttière 33 » : les réponses, par ligne. */
+export function resumeReponses(reponses: readonly { question: QuestionLigne; libelle: string }[]): string {
+  const parLigne = new Map<string, string[]>();
+  for (const r of reponses) {
+    const ligne = r.question.lignes[0]!;
+    const dit = r.question.sorte.type === "reponse" ? `${minuscule(r.question.texte)} : ${r.libelle}` : r.libelle;
+    parLigne.set(ligne, [...(parLigne.get(ligne) ?? []), dit]);
+  }
+  return [...parLigne.entries()].map(([l, v]) => `${v.length > 1 ? `${v.slice(0, -1).join(", ")} et ${v.at(-1)}` : v[0]} pour « ${l} »`).join(", ");
 }

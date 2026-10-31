@@ -67,6 +67,22 @@ describe("assistant Mobiiz : adresse, livraison, annuler, zones", () => {
     expect((await agent.post(`/v1/quantitatifs/${l.id}/corrections`).send({ action: "remettre_article", id: cles[0] })).status).toBe(404);
   });
 
+  it("aucun crédit IA : les gestes de l'assistant (adresse, livraison, réponses, quantités, aperçu, zones) n'appellent aucune IA et ne décomptent rien", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "ia@example.fr", "Toitures Martin");
+    const l = await liste(agent);
+    const avant = { executions: await ctx.prisma.aiExecution.count(), analyses: await ctx.prisma.aiAnalysis.count() };
+    await agent.post(`/v1/quantitatifs/${l.id}/corrections?ecran=1`).send({ action: "chantier", champ: "adresse", texte: "3 rue du Port, Lannion" }).expect(201);
+    await agent.post(`/v1/quantitatifs/${l.id}/corrections?ecran=1`).send({ action: "ajouter", ligne: { libelle: "Mortier", quantite: "6", unite: "sacs" } }).expect(201);
+    await agent.post(`/v1/projects/${l.projetId}/price-requests/preview`).send({}).expect(200);
+    await agent.get(`/v1/projects/${l.projetId}/demande-de-devis.zones`).expect(200);
+    await agent.get(`/v1/projects/${l.projetId}/demande-de-devis.pdf?apercu=1`).expect(200);
+    expect({ executions: await ctx.prisma.aiExecution.count(), analyses: await ctx.prisma.aiAnalysis.count() }).toEqual(avant);
+    // Les modifications sont gardées : relues depuis la base.
+    const relu = (await agent.get(`/v1/quantitatifs/${l.id}?ecran=1`)).body.ecran;
+    expect(relu.chantier.adresse).toBe("3 rue du Port, Lannion");
+    expect(relu.purchase.toBuy.map((b: { label: string }) => b.label)).toContain("Mortier");
+  });
+
   it("les zones des lignes du PDF de l'aperçu : une par ligne, avec sa clé", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "d@example.fr", "Toitures Martin");
     const l = await liste(agent);

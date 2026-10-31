@@ -3,7 +3,7 @@
  * libres (plusieurs dans un message), quantités seulement dites, « je ne sais pas », « passer » ; tout en code.
  */
 import { describe, expect, it } from "vitest";
-import { dateDite, interpreter, lireDescription, lireArticle, ligneVisee, messageOuverture, questionsAssistant, resumeConsignes, LIVRAISON_CHANTIER, RETRAIT_DEPOT, type LigneAssistant } from "../src/index.js";
+import { dateDite, interpreter, lireDescription, questionsDuDocument, reponsesLibres, resumeReponses, texteQuestionLigne, lireArticle, ligneVisee, messageOuverture, questionsAssistant, resumeConsignes, LIVRAISON_CHANTIER, RETRAIT_DEPOT, type LigneAssistant } from "../src/index.js";
 
 const LIGNES: LigneAssistant[] = [
   { cle: "a", libelle: "Ardoise naturelle 32×22" },
@@ -111,5 +111,45 @@ describe("Décris ton chantier (texte ou voix)", () => {
       { libelle: "Gouttière zinc", quantite: "24", unite: "m" },
       { libelle: "Mortier", quantite: "6", unite: "sacs" },
     ]);
+  });
+});
+
+describe("les questions du document (contrôle de conformité, 31 octobre 2026)", () => {
+  const ITEMS = [
+    { key: "a", label: "Ardoise naturelle 32×22", aPreciserPourGroupe: [{ cle: "origine", question: "Origine ?", options: ["Espagne", "France", "Pays de Galles"] }, { cle: "choix", question: "Choix ?", options: ["1er choix", "2e choix"] }] },
+    { key: "b", label: "Crochet ardoise 100 mm", aPreciserPourGroupe: [{ cle: "matiere", question: "Matière ?", options: ["Inox", "Galva", "Cuivre"] }] },
+    { key: "c", label: "Gouttière zinc", asks: [{ key: "param:developpe", text: "Développé de la gouttière ?", unit: "cm", options: [{ label: "25", value: "25" }, { label: "33", value: "33" }] }] },
+    { key: "d", label: "Naissance zinc", asks: [{ key: "param:developpe", text: "Développé de la gouttière ?", unit: "cm", options: [{ label: "25", value: "25" }, { label: "33", value: "33" }] }] },
+    { key: "e", label: "Écran sous-toiture HPV" },
+  ];
+  it("viennent du document : ce qui manque au calcul d'abord, une question partagée une fois, une ligne précise sans question", () => {
+    const q = questionsDuDocument(ITEMS);
+    expect(q.map(texteQuestionLigne)).toEqual([
+      "Gouttière zinc (et 1 autre) : développé de la gouttière ?",
+      "Ardoise naturelle 32×22 : origine ?",
+      "Ardoise naturelle 32×22 : choix ?",
+      "Crochet ardoise 100 mm : matière ?",
+    ]);
+    expect(questionsDuDocument([ITEMS[4]!])).toEqual([]);
+  });
+  it("plusieurs réponses libres d'un coup, rattachées à leur question ; le reste passe à l'interprète", () => {
+    const q = questionsDuDocument(ITEMS);
+    const r = reponsesLibres("Espagne 1er choix, crochets en inox, développé 33 et retire l'écran", q);
+    expect(r.reponses.map((x) => [x.question.id, x.valeur])).toEqual([
+      ["precision:a:origine", "Espagne"],
+      ["precision:a:choix", "1er choix"],
+      ["precision:b:matiere", "Inox"],
+      ["reponse:param:developpe", "33"],
+    ]);
+    expect(r.reste).toEqual(["retire l'écran"]);
+  });
+  it("« 1er choix » répond au choix, jamais deviné ailleurs ; un mot inconnu n'est pas une réponse", () => {
+    const q = questionsDuDocument(ITEMS);
+    expect(reponsesLibres("1er choix", q).reponses.map((x) => x.question.id)).toEqual(["precision:a:choix"]);
+    expect(reponsesLibres("ardoises bleues", q).reponses).toEqual([]);
+    // La virgule décimale ne coupe pas la réponse.
+    const pointes = questionsDuDocument([{ key: "p", label: "Pointes inox", aPreciserPourGroupe: [{ cle: "format", question: "Format ?", options: ["2,5×30", "2,8×40"] }] }]);
+    expect(reponsesLibres("pointes 2,8x40, merci", pointes).reponses.map((x) => x.valeur)).toEqual(["2,8×40"]);
+    expect(resumeReponses(reponsesLibres("Espagne, 1er choix, développé 33", q).reponses)).toBe("Espagne et 1er choix pour « Ardoise naturelle 32×22 », développé de la gouttière : 33 pour « Gouttière zinc »");
   });
 });

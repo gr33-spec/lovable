@@ -62,3 +62,49 @@ est possible plus tard par le fournisseur IA existant, mais il n'est PAS branch�
 4. **I5 Décrire son chantier** : quatrième départ, texte ou voix, quantités explicites seulement.
 
 Chaque étape : suites vertes (domaine, API, web, e2e) avant de pousser, captures iPhone SE et ordinateur.
+
+## 6. Contrôle de conformité (Greg, 31 octobre 2026, soir)
+
+### 6.1 Ce que l'assistant fait réellement (code : `packages/domain/src/assistant/assistant.ts`, écran : `apps/web/src/components/assistant-mobiiz.tsx`)
+
+| Question de Greg | Réponse honnête |
+|---|---|
+| Comment il comprend un message libre | En deux passes, en code. 1) `reponsesLibres` : chaque morceau du message (coupé aux virgules, « et », points, sauf virgule décimale) qui contient UN choix proposé par une question ouverte du document y répond (« Espagne, 1er choix, crochets inox »). 2) `interpreter` : le reste est lu comme des consignes. |
+| Quelles consignes | Ajouter (« ajoute / il me faut / + 10 sacs de colle »), retirer (« retire / enlève / pas de … »), changer une quantité (« passe les liteaux à 200 m », « 1300 au lieu de 1200 pour les ardoises », « écran : 4 rouleaux », « ligne 3 à 1500 »), adresse, livraison, date, « je ne sais pas », « passer », « annuler ». |
+| Plusieurs demandes dans une phrase | Oui : découpe aux virgules et « et » suivis d'un verbe d'action, aux points et aux retours à la ligne ; chaque morceau est traité, le résumé les reprend tous. |
+| Matériaux, quantités, dimensions, unités | Quantité = nombre en tête ou en fin de morceau ; unité = liste fermée (pièces, m, m², m³, kg, litres, sacs, rouleaux, palettes, boîtes, bottes, plaques…) ; le reste est la désignation, dimensions comprises (« 18×40 », « 100 mm » restent dans le nom). Une ligne visée l'est par ses mots (nom de tête prioritaire : « les ardoises » ≠ « crochet d'ardoise »), ou par son numéro. |
+| Les informations du devis ou de la photo | AVANT ce contrôle : ignorées (seulement adresse / livraison). DEPUIS : l'assistant reprend ce que le moteur sait manquer DANS CE DOCUMENT, ligne par ligne (`questionsDuDocument`) : les données du calcul (`asks` §49.8 : pente, développé, Ø… ; une question partagée posée une fois) puis ce que le comptoir demanderait (format, origine, choix d'ardoise ; matière et longueur de crochet ; marque et teinte de tuile ; type d'écran ; format de pointes ; épaisseur du zinc ; matière et développé de gouttière…), seulement quand la désignation ne le dit pas. |
+| Les précisions techniques manquantes | Par la lecture IA du devis (déjà existante, §51.5 : `asks`) et par les familles de précision du catalogue (`precisionDeLigne`). Une ligne déjà précise n'a aucune question ; un document complet n'en a aucune. |
+| Une demande imprévue | Rien n'est deviné : « Je n'ai pas compris « … ». Dis-le autrement, ou touche la ligne dans le PDF. » Une cible ambiguë demande laquelle. C'est la limite du tout-code : voir 6.3. |
+
+Preuves : `packages/domain/test/assistant-mobiiz.test.ts` (16 tests), `apps/api/test/assistant-mobiiz.test.ts`,
+`apps/api/test/adresse-mobiiz.test.ts`, `apps/web/e2e/assistant-mobiiz.spec.ts` (6 parcours × téléphone et ordinateur).
+
+### 6.2 Ce qui a été corrigé ce soir (sûr, sans IA)
+
+- Les questions du document dans l'assistant (cartes à boutons, réponses libres groupées, réponse écrite dans la ligne ou
+  donnée au moteur ; « Annuler » rend l'ancienne valeur ; « Passer » / « Je ne sais pas » ferment la question en cours).
+- Ouverture automatique après la lecture d'un devis ou d'une photo, une fois par liste ; jamais pour une liste notée à la main.
+- Le texte au négoce de Greg, mot pour mot.
+- Tests ajoutés : PDF affiché = téléchargé = envoyé ; adresse de réponse propre à chaque négoce et à chaque demande ;
+  aucun appel IA ni décompte par les gestes de l'assistant ; dictée simulée (texte dans la case, jamais envoyé seul ; micro
+  refusé ; navigateur sans dictée).
+
+### 6.3 Architecture hybride proposée (NON activée, attend l'accord de Greg)
+
+- **Quand** : seulement si le code n'a rien compris (`incompris`) ou n'a pas pu trancher (`ambigu`), jamais pour un message
+  déjà traité. Pas d'appel pour « passer », un choix touché, un nombre seul, une consigne reconnue.
+- **Quoi** : un appel au modèle rapide déjà configuré (`AI_QUANTITATIF_MODEL`, Sonnet 5.5 ; ou Haiku 4.5 si on veut moins
+  cher), par le lecteur IA existant (`platform/ai/lecteur-ia.ts`, journal `ai_execution`, grille de prix
+  `packages/domain/src/ai-cost/pricing.ts`). Entrée : le message, les lignes (clé, nom, quantité, unité), les questions
+  ouvertes ; prompt système fixe mis en cache. Sortie : JSON structuré de consignes du même format que `Consigne`.
+- **Coût estimé** (grille du dépôt) : ~3 000 jetons d'entrée et ~200 de sortie par appel. Sonnet 5.5 : 3 000 × 2 $/M +
+  200 × 10 $/M ≈ 0,008 $ ; Haiku 4.5 ≈ 0,004 $. Plafond proposé : 5 appels par liste, soit au plus ~4 centimes par
+  conversation ; en pratique 0 à 2 appels.
+- **Quotas et crédits** : non décompté dans les « analyses de devis » ni les « scans » (règles commerciales inchangées) ;
+  plafond par liste et par mois en configuration ; coupé automatiquement si le crédit IA manque (repli sur le message
+  « Dis-le autrement »).
+- **Contre les inventions** : le modèle ne peut que proposer des consignes ; le code les vérifie avant d'agir : une ligne visée
+  doit exister (clé connue) ; une quantité doit figurer en chiffres dans le message de l'artisan ; un choix doit être une
+  option de la question ; tout ajout sans quantité dite arrive « quantité à préciser » ; l'artisan voit le résultat et
+  « Annuler » reste disponible. Tests avec le double de test (`FakeLectureReader`), jamais l'API réelle.

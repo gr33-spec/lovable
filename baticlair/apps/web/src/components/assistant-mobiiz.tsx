@@ -7,8 +7,14 @@ import {
   LIVRAISON_CHANTIER,
   messageOuverture,
   questionsAssistant,
+  questionsDuDocument,
+  reponsesLibres,
+  resumeReponses,
+  texteQuestionLigne,
+  type QuestionLigne,
   resumeConsignes,
   type CleQuestion,
+  type QuestionAssistant,
   type Consigne,
   type LigneAssistant,
 } from "../../../../packages/domain/src/assistant/assistant";
@@ -49,6 +55,35 @@ function ecrireStockage(cle: string, valeur: string) {
   }
 }
 
+/**
+ * L'ouverture automatique, une fois par liste (gardé sur l'appareil). Les tests automatiques (navigateur piloté) gardent
+ * l'écran de liste, sauf ceux de l'assistant qui l'activent (`mobiiz-assistant-auto` = « oui »).
+ */
+export function assistantDejaOuvert(projectId: string): boolean {
+  if (typeof window === "undefined") return true;
+  if (navigator.webdriver && lireStockage("mobiiz-assistant-auto") !== "oui") return true;
+  return lireStockage(`mobiiz-assistant-vu:${projectId}`) === "oui";
+}
+export function marquerAssistantOuvert(projectId: string) {
+  ecrireStockage(`mobiiz-assistant-vu:${projectId}`, "oui");
+}
+
+/** Une question telle que l'assistant la montre : du document (ligne) ou du chantier. */
+type QuestionVue = { id: string; texte: string; choix: { libelle: string; valeur: string }[]; doc?: QuestionLigne; chantier?: QuestionAssistant };
+
+function toutesLesQuestions(t: Takeoff, passees: readonly string[]): QuestionVue[] {
+  const doc = questionsDuDocument(t.purchase.toBuy)
+    .filter((q) => !passees.includes(q.id))
+    .map((q) => ({ id: q.id, texte: texteQuestionLigne(q), choix: q.choix, doc: q }));
+  const chantier = questionsAssistant({ adresse: t.chantier?.adresse ?? null, livraison: t.chantier?.livraison ?? null, passees: passees.filter((p): p is CleQuestion => p === "adresse" || p === "livraison" || p === "date") }).map((q) => ({
+    id: q.cle,
+    texte: q.texte,
+    choix: q.choix.map((c) => ({ libelle: c, valeur: c })),
+    chantier: q,
+  }));
+  return [...doc, ...chantier];
+}
+
 /** Les lignes que l'assistant peut viser : celles de la liste, dans l'ordre du document. */
 function lignesDe(t: Takeoff): LigneAssistant[] {
   return [...t.purchase.toBuy.map((b) => ({ cle: b.key, libelle: b.label })), ...t.purchase.toQuote.map((q) => ({ cle: q.key, libelle: q.label }))];
@@ -72,18 +107,20 @@ export function AssistantMobiiz({
   // La liste à jour : le parent la reçoit de chaque correction (`onUpdated`) et la redonne ici.
   const courant = takeoff;
   const cleStockage = `mobiiz-assistant:${projectId}`;
-  const [passees, setPassees] = useState<CleQuestion[]>(() => {
+  // Les questions passées (« Passer », « Je ne sais pas ») : jamais reposées, gardées pour ce chantier sur l'appareil.
+  const [passees, setPassees] = useState<string[]>(() => {
     try {
-      return JSON.parse(lireStockage(cleStockage) ?? "[]") as CleQuestion[];
+      return JSON.parse(lireStockage(cleStockage) ?? "[]") as string[];
     } catch {
       return [];
     }
   });
   const [aide, setAide] = useState(() => lireStockage("mobiiz-assistant-aide") !== "vue");
-  const chantier = courant.chantier ?? { adresse: null, livraison: null };
-  const questions = questionsAssistant({ adresse: chantier.adresse, livraison: chantier.livraison, passees });
+  // Contrôle de conformité (Greg, 31 octobre 2026) : d'abord les questions DU DOCUMENT, ligne par ligne (ce qui manque au
+  // calcul, puis ce que le comptoir demanderait), puis le chantier (adresse, livraison, date).
+  const questions = toutesLesQuestions(courant, passees);
   const lignes = useMemo(() => lignesDe(courant), [courant]);
-  const [messages, setMessages] = useState<Message[]>(() => [{ de: "mobiiz", texte: messageOuverture(lignesDe(takeoff).length, takeoff.purchase.screen.toCheck, questions) }]);
+  const [messages, setMessages] = useState<Message[]>(() => [{ de: "mobiiz", texte: messageOuverture(lignesDe(takeoff).length, takeoff.purchase.screen.toCheck, toutesLesQuestions(takeoff, passees)) }]);
   const [saisie, setSaisie] = useState("");
   const [occupe, setOccupe] = useState(false);
   const [retours, setRetours] = useState<Retour[]>([]);
@@ -116,7 +153,11 @@ export function AssistantMobiiz({
   const qid = encodeURIComponent(quantitatifId);
   const corriger = useCallback(
     async (corps: unknown): Promise<Takeoff> => {
-      const q = await api<Quantitatif>(`/v1/quantitatifs/${qid}/corrections?ecran=1`, { method: "POST", body: corps });
+      // `{ _reponses }` : une réponse aux questions du moteur (ou son retrait, pour « Annuler ») ; sinon une correction.
+      const reponses = (corps as { _reponses?: unknown })._reponses;
+      const q = reponses
+        ? await api<Quantitatif>(`/v1/quantitatifs/${qid}/reponses?ecran=1`, { method: "POST", body: { reponses } })
+        : await api<Quantitatif>(`/v1/quantitatifs/${qid}/corrections?ecran=1`, { method: "POST", body: corps });
       onUpdated(q);
       return q.ecran ?? courant;
     },
@@ -124,7 +165,7 @@ export function AssistantMobiiz({
   );
 
   const passer = useCallback(
-    (cle: CleQuestion) => {
+    (cle: string) => {
       const suivantes = Array.from(new Set([...passees, cle]));
       setPassees(suivantes);
       ecrireStockage(cleStockage, JSON.stringify(suivantes));
@@ -184,6 +225,33 @@ export function AssistantMobiiz({
     [corriger],
   );
 
+  /** Une réponse à une question du document : au moteur (clé, unité), ou écrite dans la désignation de la ligne. */
+  const repondreDoc = useCallback(
+    async (q: QuestionLigne, valeur: string, t: Takeoff): Promise<{ t: Takeoff; retour: Retour | null }> => {
+      if (q.sorte.type === "reponse") {
+        const apres = await corriger({ _reponses: [{ question: q.sorte.cle, valeur, ...(q.sorte.unite ? { unite: q.sorte.unite } : {}) }] });
+        return { t: apres, retour: { libelle: `la réponse « ${valeur} »`, corps: [{ _reponses: [{ question: q.sorte.cle, valeur: null }] }] } };
+      }
+      const dit = q.sorte.cle === "developpe" && /^\d+$/.test(valeur) ? `dév. ${valeur}` : valeur;
+      let apres = t;
+      const inverse: unknown[] = [];
+      for (const key of q.itemKeys) {
+        const it = apres.purchase.toBuy.find((b) => b.key === key) ?? t.purchase.toBuy.find((b) => b.key === key);
+        if (!it) continue;
+        const direct = it.kind === "direct" ? apres.lines.find((l) => it.lineIds.includes(l.id)) : undefined;
+        if (direct) {
+          apres = await corriger({ action: "modifier_ligne", id: direct.id, ligne: { libelle: `${direct.designation.trim()} ${dit}`, quantite: direct.quantity, unite: direct.unit, reference: direct.reference } });
+          inverse.push({ action: "modifier_ligne", id: direct.id, ligne: { libelle: direct.designation, quantite: direct.quantity, unite: direct.unit, reference: direct.reference } });
+        } else {
+          apres = await corriger({ action: "renommer", id: it.key, libelle: `${it.label.trim()} ${dit}` });
+          inverse.push({ action: "renommer", id: it.key, libelle: it.label });
+        }
+      }
+      return { t: apres, retour: inverse.length ? { libelle: `« ${dit} » sur ${q.lignes[0]}`, corps: inverse } : null };
+    },
+    [corriger],
+  );
+
   const annuler = useCallback(async () => {
     const dernier = retours.at(-1);
     if (!dernier) return;
@@ -200,6 +268,33 @@ export function AssistantMobiiz({
     }
   }, [retours, corriger]);
 
+  /** Après chaque échange : la question suivante, ou « tout est bon ». */
+  const suite = (t: Takeoff, passeesApres: string[]) => {
+    const reste = toutesLesQuestions(t, passeesApres);
+    return reste.length > 0 ? ` ${reste[0]!.texte}` : " C'est tout bon de mon côté : relis le PDF, puis envoie-le à tes négoces.";
+  };
+
+  /** Un choix touché sur une carte de question du document. */
+  const choisir = useCallback(
+    async (q: QuestionLigne, valeur: string, libelle: string) => {
+      if (occupe) return;
+      setMessages((m) => [...m, { de: "moi", texte: libelle }]);
+      setOccupe(true);
+      try {
+        const r = await repondreDoc(q, valeur, courant);
+        if (r.retour) setRetours((x) => [...x, r.retour!]);
+        setMessages((m) => [...m, { de: "mobiiz", texte: `C'est noté : ${resumeReponses([{ question: q, libelle }])}.${suite(r.t, passees)}` }]);
+      } catch (e) {
+        setMessages((m) => [...m, { de: "mobiiz", texte: e instanceof ApiError && e.message ? `Ça n'est pas passé : ${e.message}` : "Ça n'est pas passé. Réessaie dans un instant." }]);
+      } finally {
+        setOccupe(false);
+        setVersion((v) => v + 1);
+      }
+    },
+     
+    [occupe, repondreDoc, courant, passees],
+  );
+
   const envoyer = useCallback(
     async (texte: string) => {
       const propre = texte.trim();
@@ -208,20 +303,48 @@ export function AssistantMobiiz({
       setSaisie("");
       base.current = "";
       setMessages((m) => [...m, { de: "moi", texte: propre }]);
-      const attendu = questions[0]?.cle ?? null;
-      const consignes = interpreter(propre, lignes, attendu);
-      if (consignes.some((c) => c.type === "annuler")) {
+      const premiere = questions[0] ?? null;
+      const docOuvertes = questions.flatMap((q) => (q.doc ? [q.doc] : []));
+      // 1. Les réponses aux questions du document (« Espagne, 1er choix, crochets inox »), plusieurs d'un coup.
+      const libres = reponsesLibres(propre, docOuvertes);
+      let resteTexte = libres.reste.join(", ");
+      // Un nombre seul répond à la première question chiffrée en cours (« 45 » pour la pente).
+      if (libres.reponses.length === 0 && premiere?.doc?.sorte.type === "reponse" && /^\d+(?:[.,]\d+)?\s*\S{0,6}$/.test(propre) && premiere.doc.sorte.unite) {
+        libres.reponses.push({ question: premiere.doc, valeur: propre.match(/\d+(?:[.,]\d+)?/)![0].replace(",", "."), libelle: propre });
+        resteTexte = "";
+      }
+      // 2. Le reste : les consignes (ajouter, retirer, quantité, adresse, livraison, passer, annuler…).
+      const attendu = premiere?.chantier?.cle ?? null;
+      const consignes = resteTexte ? interpreter(resteTexte, lignes, attendu) : [];
+      if (libres.reponses.length === 0 && consignes.some((c) => c.type === "annuler")) {
         await annuler();
         return;
       }
       setOccupe(true);
       let t = courant;
+      const repondues: { question: QuestionLigne; libelle: string }[] = [];
+      const ratees: string[] = [];
       const faites: Consigne[] = [];
       const nouveaux: Retour[] = [];
       let probleme = false;
+      let passeesApres = passees;
+      for (const r of libres.reponses) {
+        try {
+          const x = await repondreDoc(r.question, r.valeur, t);
+          t = x.t;
+          if (x.retour) nouveaux.push(x.retour);
+          repondues.push(r);
+        } catch (e) {
+          probleme = true;
+          ratees.push(`« ${r.libelle} » n'est pas passé${e instanceof ApiError && e.message ? ` (${e.message})` : ""}`);
+        }
+      }
       for (const c of consignes) {
         if (c.type === "passer" || c.type === "ne_sait_pas") {
-          if (attendu) passer(attendu);
+          if (premiere) {
+            passeesApres = Array.from(new Set([...passeesApres, premiere.id]));
+            passer(premiere.id);
+          }
           continue;
         }
         try {
@@ -237,12 +360,12 @@ export function AssistantMobiiz({
       setRetours((r) => [...r, ...nouveaux]);
       setOccupe(false);
       setVersion((v) => v + 1);
-      const passe = consignes.every((c) => c.type === "passer" || c.type === "ne_sait_pas");
-      const reste = questionsAssistant({ adresse: t.chantier?.adresse ?? null, livraison: t.chantier?.livraison ?? null, passees: attendu && passe ? [...passees, attendu] : passees });
-      const suite = reste.length > 0 ? ` ${reste[0]!.texte}` : " C'est tout bon de mon côté : relis le PDF, puis envoie-le à tes négoces.";
-      setMessages((m) => [...m, { de: "mobiiz", texte: `${passe ? "Pas de souci, on passe." : resumeConsignes(faites)}${probleme ? "" : suite}` }]);
+      const passe = libres.reponses.length === 0 && consignes.length > 0 && consignes.every((c) => c.type === "passer" || c.type === "ne_sait_pas");
+      const phrases = [repondues.length ? `C'est noté : ${resumeReponses(repondues)}.` : "", ratees.length ? `${ratees.join(", ")}.` : "", faites.length ? resumeConsignes(faites) : ""].filter(Boolean).join(" ");
+      setMessages((m) => [...m, { de: "mobiiz", texte: `${passe ? "Pas de souci, on passe." : phrases || "C'est noté."}${probleme ? "" : suite(t, passeesApres)}` }]);
     },
-    [occupe, dictee, questions, lignes, annuler, courant, passer, appliquer, passees],
+     
+    [occupe, dictee, questions, lignes, annuler, courant, passer, appliquer, repondreDoc, passees],
   );
 
   const etape = questions.length > 0 ? 1 : 3;
@@ -299,18 +422,24 @@ export function AssistantMobiiz({
               </p>
             ))}
             {questions.map((q) => (
-              <div key={q.cle} role="group" aria-label={q.texte} className="flex flex-col gap-2.5 rounded-2xl bg-surface p-4 shadow-card">
+              <div key={q.id} role="group" aria-label={q.texte} className="flex flex-col gap-2.5 rounded-2xl bg-surface p-4 shadow-card">
                 <div className="flex items-start justify-between gap-3">
                   <span className="text-[16px] font-bold text-ink">{q.texte}</span>
-                  <button type="button" onClick={() => passer(q.cle)} className="min-h-9 shrink-0 rounded-full px-3 text-[14px] font-semibold text-muted">
+                  <button type="button" onClick={() => passer(q.id)} className="min-h-9 shrink-0 rounded-full px-3 text-[14px] font-semibold text-muted">
                     Passer
                   </button>
                 </div>
                 {q.choix.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {q.choix.map((c) => (
-                      <button key={c} type="button" disabled={occupe} onClick={() => void envoyer(q.cle === "livraison" ? (c.startsWith("Oui") ? "oui" : "non") : c)} className="pressable min-h-10 rounded-full border border-line px-4 text-[14px] font-semibold text-ink">
-                        {c}
+                      <button
+                        key={c.valeur}
+                        type="button"
+                        disabled={occupe}
+                        onClick={() => void (q.doc ? choisir(q.doc, c.valeur, c.libelle) : envoyer(q.chantier?.cle === "livraison" ? (c.libelle.startsWith("Oui") ? "oui" : "non") : c.libelle))}
+                        className="pressable min-h-10 rounded-full border border-line px-4 text-[14px] font-semibold text-ink"
+                      >
+                        {c.libelle}
                       </button>
                     ))}
                   </div>
