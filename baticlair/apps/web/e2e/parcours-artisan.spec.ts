@@ -2608,6 +2608,12 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   );
   expect([...ordre].sort((x, y) => x - y)).toEqual(ordre);
   await expect(page.getByText("Une seule demande, envoyée jusqu’à 5 négoces.", { exact: false })).toBeVisible();
+  // Le visuel du premier écran (Greg, 31 octobre 2026, soir) : la photo choisie, chargée, coins arrondis ; le cadrage serré
+  // sur téléphone, le panoramique sur ordinateur.
+  const visuel = page.locator(".mz2-hero-visuel img");
+  await expect(visuel).toHaveAttribute("alt", /artisans/);
+  await expect.poll(() => visuel.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0 && e.currentSrc)).toMatch(page.viewportSize()!.width <= 900 ? /hero-artisans-mobile-\d+\.webp$/ : /hero-artisans-\d+\.webp$/);
+  expect(Number.parseFloat(await visuel.evaluate((e) => getComputedStyle(e).borderTopLeftRadius))).toBeGreaterThan(10);
   for (const etape of ["Prépare ta liste", "Consulte tes négoces", "Compare et choisis"]) await expect(page.getByRole("heading", { name: etape, exact: true })).toBeVisible();
   await expect(page.locator("#fonctionnement .mz2-etape")).toHaveCount(3);
   // Les écrans mis en scène : trois téléphones, chacun incliné autrement ; les prix marqués « Exemple ».

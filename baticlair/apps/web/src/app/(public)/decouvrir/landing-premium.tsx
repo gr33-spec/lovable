@@ -198,12 +198,24 @@ export function LandingPremium() {
                 {CTA_PRINCIPAL.sous} · <Link href="/tarifs">Voir les conditions</Link>
               </p>
             </div>
-            {/* Une illustration dessinée pour Mobiiz (droits maîtrisés ; aucune photo sans droits confirmés), devant la bande
-                jaune en diagonale de la maquette. */}
+            {/* Le visuel choisi par Greg (31 octobre 2026, soir) : des artisans devant les rayonnages d'un dépôt, au soleil
+                couchant, devant la bande jaune en diagonale de la maquette. Panoramique sur ordinateur ; sur téléphone, un
+                cadrage plus serré sur les trois visages du centre. WebP de 40 à 100 Ko, deux tailles chacun. */}
             <div className="mz2-hero-visuel">
               <span className="mz2-bande" aria-hidden="true" />
-              {/* eslint-disable-next-line @next/next/no-img-element -- une illustration SVG, sans optimisation d'image */}
-              <img src="/landing/v3/collectif.svg" alt="Illustration : un collectif d'artisans sous une même charpente" width={1080} height={465} fetchPriority="high" />
+              <picture>
+                <source media="(max-width: 900px)" type="image/webp" srcSet="/landing/v3/hero-artisans-mobile-640.webp 640w, /landing/v3/hero-artisans-mobile-1000.webp 1000w" sizes="calc(100vw - 32px)" width={1000} height={667} />
+                <img
+                  src="/landing/v3/hero-artisans-1600.webp"
+                  srcSet="/landing/v3/hero-artisans-1000.webp 1000w, /landing/v3/hero-artisans-1600.webp 1600w"
+                  sizes="(max-width: 1240px) 50vw, 600px"
+                  alt="Des artisans, bras croisés et sourire aux lèvres, devant les rayonnages de matériaux d'un dépôt"
+                  width={1600}
+                  height={689}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </picture>
             </div>
           </div>
         </section>
