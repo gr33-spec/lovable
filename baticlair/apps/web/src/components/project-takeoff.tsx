@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { ArrowLeft, ChevronRight, CircleCheck, Plus } from "lucide-react";
 import { useActionChantier } from "@/lib/actions-chantier";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
@@ -220,7 +222,7 @@ export function ProjectTakeoff({
     const failed = (data.reading?.status === "failed" || refused || lost) && !pending;
     if (!failed) return <AnalysisScreen />;
     const shown = refused ? actionError : lost ? error : actionError;
-    if (refused && actionError?.reason === "gros_devis") return <GrosDevis phrase={actionError.phrase ?? "Ce devis fait plus de 150 lignes : il compte pour 2 analyses."} pending={pending} disabled={archived} onLancer={() => prepare(true)} />;
+    if (refused && actionError?.reason === "gros_devis") return <GrosDevis phrase={actionError.phrase ?? "Ce devis fait plus de 150 lignes : il compte pour 2 analyses."} pending={pending} disabled={archived} onLancer={() => prepare(true)} onAnnuler={onRedeposit} />;
     // §50.1 : en cas d'échec, la raison en une phrase et « Réessayer ». RIEN NE PART VIDE : une lecture qui n'a trouvé aucune
     // ligne ne fait jamais une liste, elle se relit.
     const nothingRead = (data.reading?.reason === "nothing_read" && !refused && !lost) || (refused && actionError?.reason === "nothing_read");
@@ -647,18 +649,40 @@ function ReadFailure({ sentence, onRetry, disabled }: { sentence: string; onRetr
  * UN GROS DEVIS (Greg, 30 octobre 2026, décision 3) : plus de 150 lignes, il compte pour 2 analyses ; l'artisan le voit
  * AVANT la lecture et choisit : « Lancer l'analyse », ou noter sa liste à la main (gratuit). Rien n'est dépensé avant.
  */
-function GrosDevis({ phrase, pending, disabled, onLancer }: { phrase: string; pending: boolean; disabled: boolean; onLancer: () => void }) {
+/**
+ * UN GROS DOCUMENT (Greg, 30 et 31 octobre 2026) : après le choix du fichier et AVANT l'analyse, « Ce document contient plus
+ * de 150 lignes et utilisera 2 analyses. » ; « Analyser le document » ou « Annuler » (le document est retiré, rien n'est
+ * décompté). La phrase du serveur dit ce qu'il reste.
+ */
+function GrosDevis({ phrase, pending, disabled, onLancer, onAnnuler }: { phrase: string; pending: boolean; disabled: boolean; onLancer: () => void; onAnnuler?: (() => Promise<void>) | undefined }) {
+  const router = useRouter();
+  const [annule, setAnnule] = useState(false);
+  // « Ce devis fait 180 lignes : il compte pour 2 analyses. Il t'en reste 3. » → « Il t'en reste 3. »
+  const reste = phrase.split(/(?<=\.)\s+/).slice(1).join(" ");
   return (
     <section aria-labelledby="gros-devis" className="flex flex-col gap-3 rounded-2xl bg-surface p-5 shadow-card">
       <h2 id="gros-devis" className="text-[20px] font-extrabold">
-        Un gros devis
+        Un gros document
       </h2>
-      <p className="text-[16px] leading-relaxed">{phrase}</p>
+      <p className="text-[16px] leading-relaxed">Ce document contient plus de 150 lignes et utilisera 2 analyses.</p>
+      {reste ? <p className="text-[15px] text-muted">{reste}</p> : null}
       <Button variant="accent" disabled={pending || disabled} onClick={onLancer}>
-        Lancer l&apos;analyse
+        Analyser le document
+      </Button>
+      <Button
+        variant="secondary"
+        disabled={pending || annule}
+        onClick={async () => {
+          // Le document est retiré (rien n'est décompté), puis retour à « Ma liste de matériaux ».
+          setAnnule(true);
+          await onAnnuler?.().catch(() => undefined);
+          router.push("/chantiers/nouveau");
+        }}
+      >
+        Annuler
       </Button>
       <ButtonLink href="/chantiers/nouveau?liste=1" variant="ghost">
-        Je note ma liste à la main
+        Saisir ma liste à la main (gratuit)
       </ButtonLink>
     </section>
   );

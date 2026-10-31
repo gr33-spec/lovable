@@ -29,8 +29,8 @@ export function BoutonDecrire() {
           <MessageSquareText size={20} />
         </span>
         <span className="flex flex-col">
-          <span className="text-[16px] font-semibold">Je décris mon chantier</span>
-          <span className="text-[14px] leading-snug text-muted">À l&apos;écrit ou au micro : je garde les quantités que tu dis.</span>
+          <span className="text-[16px] font-semibold">Décrire mon chantier</span>
+          <span className="text-[14px] leading-snug text-muted">À l&apos;écrit ou au micro.</span>
         </span>
       </button>
       {ouvert ? <DecrireMonChantier onFermer={fermer} /> : null}

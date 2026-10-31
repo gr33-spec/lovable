@@ -211,14 +211,17 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await page.goto("/");
   await page.getByRole("link", { name: "Ma liste de matériaux" }).first().click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
-  // Greg, 27 octobre 2026, 2e message, point 31 : trois choix, le devis d'abord.
-  await expect(page.getByText("Depuis mon devis — on t'avance", { exact: true })).toBeVisible();
-  // Greg, 30 octobre 2026 (point 10) : avant de déposer, la lecture est dite comme une aide, ses mots.
-  const coupDeMain = page.getByRole("region", { name: "Besoin d'un coup de main ?" });
+  // Greg, 31 octobre 2026 : « Importer un document » d'abord ; l'information en une phrase, le détail dans une fenêtre.
+  await expect(page.getByText("Importer un document", { exact: true })).toBeVisible();
+  await expect(page.getByText("MOBIIZ prépare une première liste. Tu pourras tout vérifier et modifier.")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Besoin d'un coup de main ?" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Comment fonctionne l'analyse ?" }).click();
+  const coupDeMain = page.getByRole("dialog", { name: "Comment fonctionne l'analyse ?" });
   await expect(coupDeMain.getByText(/^L'IA peut t'aider à extraire les matériaux de ton devis, mais le résultat dépend de la qualité et de la précision du document\./)).toBeVisible();
   await expect(coupDeMain.getByText(/Pense à toujours vérifier et corriger ta liste avant de l'utiliser\.$/)).toBeVisible();
+  await coupDeMain.getByRole("button", { name: "Fermer" }).click();
   await expect(page.getByLabel("Nom du chantier")).toHaveCount(0);
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   // Le chantier est créé au dépôt ; la lecture part d'elle-même, sans champ « précisions » ni bouton à toucher.
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
   await expect(page.getByRole("button", { name: "Lire le devis" })).toHaveCount(0);
@@ -463,7 +466,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   const fixture = (name: string) => path.join(__dirname, "fixtures", name);
 
   // Un fichier qui n'est pas un PDF est refusé avec un message clair.
-  await page.getByLabel("Déposer mon devis").setInputFiles({
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles({
     name: "devis.pdf",
     mimeType: "application/pdf",
     buffer: Buffer.from("<html>pas un pdf</html>"),
@@ -471,7 +474,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await expect(page.getByRole("alert").filter({ hasText: "Ce fichier n'est pas un PDF" })).toBeVisible();
 
   // Devis client : 3 pages (tableau, page scannée, conditions générales).
-  await page.getByLabel("Déposer mon devis").setInputFiles(fixture("devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(fixture("devis-client-couvreur.pdf"));
   // §48 : déposé, il est lu tout de suite (aucun champ, aucun bouton), puis les questions, puis la liste.
   await passQuestions(page);
   // §50.4 : plus de carte du PDF ; le titre du chantier rouvre le devis.
@@ -499,7 +502,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
     await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
     await page.getByRole("menuitem", { name: "Retirer le devis" }).click();
     await page.getByRole("button", { name: "Oui, retirer" }).click();
-    await expect(page.getByLabel("Déposer mon devis")).toBeAttached();
+    await expect(page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/)).toBeAttached();
   };
   await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
   await page.getByRole("menuitem", { name: "Retirer le devis" }).click();
@@ -508,7 +511,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
   await removeQuote();
   await expect(title).toHaveCount(0);
-  await page.getByLabel("Déposer mon devis").setInputFiles(fixture("devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(fixture("devis-client-couvreur.pdf"));
   await passQuestions(page);
   await expect(title).toBeVisible();
 
@@ -517,7 +520,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   const heavy = Buffer.concat([fs.readFileSync(fixture("devis-client-couvreur.pdf")), Buffer.from(`\n%${"x".repeat(7_000_000)}\n`)]);
   const parts: string[] = [];
   page.on("request", (r) => r.url().includes("/v1/uploads/") && parts.push(r.url()));
-  await page.getByLabel("Déposer mon devis").setInputFiles({ name: "devis-scanne.pdf", mimeType: "application/pdf", buffer: heavy });
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles({ name: "devis-scanne.pdf", mimeType: "application/pdf", buffer: heavy });
   await passQuestions(page);
   await expect(title).toBeVisible();
   expect(parts).toHaveLength(3);
@@ -534,7 +537,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
 test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et la valide", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Morel", "Mme Morel", "3 impasse des Lilas, Lorient");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant. La lecture part d'elle-même (§48).
   await passQuestions(page);
 
@@ -640,7 +643,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
 
   // Chantier, devis client, liste validée.
   await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   // §50.7 : une ligne se règle sur le document même (§50.4 : plus de « Corriger le devis lu »).
   await confirmDoubts(page);
@@ -778,7 +781,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
 test("plusieurs articles ajoutés à la main, sans unité : gardés tels qu'écrits, la liste part", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Piscine Le Goff", "M. Le Goff", "2 rue des Dunes, Carnac");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible();
 
@@ -930,7 +933,7 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
 test("plusieurs logements : un devis d'électricien pièce par pièce donne la liste à commander", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Résidence Les Pins", "SCI Les Pins", "4 allée des Pins, Vannes");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-electricien-logements.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-electricien-logements.pdf"));
   await passQuestions(page);
   // §52 : un devis d'un seul lot n'a pas de carte « Parties du devis ».
   await expect(page.getByRole("region", { name: "Parties du devis" })).toHaveCount(0);
@@ -945,7 +948,7 @@ test("plusieurs logements : un devis d'électricien pièce par pièce donne la l
 test("§52 : la carte « Parties du devis » : retirer un lot, en ajouter un, « C'est bon », une section par lot gardé", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Immeuble Les Tilleuls", "SCI Les Tilleuls", "8 rue des Tilleuls, Vannes");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-multi-lots.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-multi-lots.pdf"));
   // Directive du fondateur (2026-10-13) : après la lecture, « Parties du devis : Électricité · VMC · Sanitaire ».
   const carte = page.getByRole("region", { name: "Parties du devis" });
   await expect(carte.getByRole("heading", { name: "Parties du devis : Électricité · VMC · Sanitaire" })).toBeVisible({ timeout: 60_000 });
@@ -971,7 +974,7 @@ test("§52 : la carte « Parties du devis » : retirer un lot, en ajouter un, «
 test("§48.4 et règle numéro un : questions au bouton seulement, avant le calcul ; rien d'absent du devis ; puis la main sur le document (§50.7)", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Kervella", "M. Kervella", "2 rue du Port, Lorient");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
 
   // ÉTAPE 3 : un seul écran, AU BOUTON : ni micro, ni zone de texte ici.
   const questions = page.getByRole("region", { name: "Les questions" });
@@ -1046,7 +1049,7 @@ test("§48.5 : envoyer une partie de la liste à un fournisseur, le reste à un 
     expect(ok).toBe(true);
   }
   await createProject(page, "Toiture Le Bihan", "M. Le Bihan", "3 quai Duguay-Trouin, Saint-Malo");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible();
@@ -1126,7 +1129,7 @@ test("§49.8 : sur chaque ligne, un ✓ pour valider sans l'ouvrir, et un crayon
   // ligne. Et un crayon pour modifier. »
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-doublon.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-doublon.pdf"));
   // Une faîtière écrite deux fois de suite : doublon ou quantités à additionner ? La ligne est orange, un ✓ la garde (§49.1).
   await passQuestions(page);
   await openList(page);
@@ -1160,7 +1163,7 @@ test("§50.7 : en bas, deux boutons figés : l'aperçu (le mail et le PDF du fou
   // prévisualiser le PDF et le mail envoyé ».
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   await passQuestions(page);
   await confirmDoubts(page);
   const actions = page.getByRole("group", { name: "Envoyer la liste" });
@@ -1201,7 +1204,7 @@ test("§50.7 : les deux boutons du bas sont là même s'il reste des lignes oran
   // d'abord à la première ligne à régler (rien ne part avec une ligne orange).
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   await passQuestions(page);
   await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -1229,7 +1232,7 @@ test("§50.7 : une ligne ouverte passe au premier plan, le reste flouté ; un ta
   // reste pour rendre plus lisible et visible la case ouverte ».
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   await passQuestions(page);
   await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -1259,7 +1262,7 @@ test("§49.8 : une info qui manque se demande en clair sur la ligne qu'elle conc
   // la carte des tuiles : celle des liteaux, ouverte, était vide.
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-canal-manque.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-canal-manque.pdf"));
   // Les questions au premier bouton, sauf le traitement des liteaux : laissé sans réponse, il revient sur la ligne, orange.
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
@@ -1292,7 +1295,7 @@ test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamai
   // Retour du fondateur (2026-10-10, capture iPhone) : « Quand je clique sur un bouton, rien ne se passe. »
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   await passQuestions(page);
   await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -1308,7 +1311,7 @@ test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamai
 test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par ligne, sans quitter la liste", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   // Les questions de comptoir laissées sans réponse : leurs lignes sortent orange « Info manquante ».
   await passQuestions(page);
   await openList(page);
@@ -1360,7 +1363,7 @@ test("une lecture refusée au départ se dit, avec sa raison et « Réessayer »
     refused++;
     await route.fulfill({ status: 429, contentType: "application/json", body: JSON.stringify({ error: { code: "too_many_requests", message: "Too many requests, retry later" } }) });
   });
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   // §50.1 : la raison en une phrase, et « Réessayer ».
   await expect(page.getByRole("alert").filter({ hasText: "Trop d'essais en peu de temps" })).toBeVisible({ timeout: 30_000 });
   // « Réessayer » relance la lecture, qui passe cette fois.
@@ -1372,7 +1375,7 @@ test("une lecture refusée au départ se dit, avec sa raison et « Réessayer »
 test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en haut sans rien cacher", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Le Goff", "M. Le Goff", "4 rue du Port, Paimpol");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   // Une question par pièce écrite, à son nom ; jamais « Bandes zinc (solin, rive, égout…) : tu façonnes ? ».
@@ -1402,7 +1405,7 @@ test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en
 test("rien ne part vide : un devis où je ne lis aucune ligne se dit en une phrase, avec « Réessayer », jamais un bouton d'envoi", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-vide.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-vide.pdf"));
   // §50.1 : en cas d'échec, la raison en une phrase et « Réessayer », rien d'autre.
   const failure = page.getByRole("region", { name: "Lecture du devis" });
   await expect(failure.getByText("Je n'ai rien lu dans ce devis.")).toBeVisible({ timeout: 60_000 });
@@ -1412,7 +1415,7 @@ test("rien ne part vide : un devis où je ne lis aucune ligne se dit en une phra
   await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
   await page.getByRole("menuitem", { name: "Retirer le devis" }).click();
   await page.getByRole("button", { name: "Oui, retirer" }).click();
-  await expect(page.getByLabel("Déposer mon devis")).toBeAttached({ timeout: 20_000 });
+  await expect(page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/)).toBeAttached({ timeout: 20_000 });
 });
 
 test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ page }) => {
@@ -1425,10 +1428,10 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   };
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  // 1. Un bouton pour le devis (point 31 du 27 octobre 2026 : « Depuis mon devis — on t'avance »).
-  await expect(page.getByText("Depuis mon devis — on t'avance", { exact: true })).toBeVisible();
+  // 1. Un bouton pour le document (Greg, 31 octobre 2026 : « Importer un document »).
+  await expect(page.getByText("Importer un document", { exact: true })).toBeVisible();
   await clean();
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   // 2. Les questions : une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste ».
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
@@ -1497,7 +1500,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
 test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont repliés sous « lignes sans fourniture »", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-reparation.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-reparation.pdf"));
   await passQuestions(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list.getByText(/^Tuile terre cuite mécanique/).first()).toBeVisible();
@@ -1518,7 +1521,7 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
   // mais rien pour répondre. Une ligne orange se règle là où on l'ouvre : sa question d'abord, ses boutons, « Autre ».
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await questions.getByRole("button", { name: /^Je commande façonné/ }).click();
@@ -1553,7 +1556,7 @@ test("§50.2 : « Calculer ma liste » reste collé en bas de l'écran, même ap
   // saisie ; la place est gardée sous la dernière carte. Sur ordinateur : collé en bas de la colonne (sticky).
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   const pente = questions.getByRole("group", { name: "Pente du toit ?" });
@@ -1591,7 +1594,7 @@ test("§50.2 : « Calculer ma liste » reste collé en bas de l'écran, même ap
 test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (une pente de 38°)", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   // Retour du fondateur (2026-10-10) : une valeur à boutons a aussi « Autre », qui laisse écrire.
@@ -1620,7 +1623,7 @@ test("retour du fondateur (2026-10-12) : un refus du serveur se dit sur la carte
   // (`reponses.N.valeur`) : la carte de cette question passe au rouge avec sa phrase, l'écran l'amène, rien en haut.
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await page.route("**/calcul?**", async (route) => {
@@ -1647,7 +1650,7 @@ test("retour du fondateur (2026-10-12) : une question qui ne sert pas se retire 
   // part sans réponse ; sa ligne reste orange dans la liste, où elle se règle (§51.6). Le façonnage, obligatoire, n'en a pas.
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   const ardoise = () => questions.getByRole("listitem").filter({ has: page.getByRole("group", { name: /^Quelle ardoise/ }) });
@@ -1672,7 +1675,7 @@ test("retour du fondateur (2026-10-12) : une question qui ne sert pas se retire 
 test("temps deux (2026-10-12) : « Autre » partout où il y a des boutons, consommables compris", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   const cards = questions.getByRole("listitem").filter({ has: page.getByRole("group") });
@@ -1709,7 +1712,7 @@ test("§50.1 : « Je lis ton devis » prend tout l'écran, avec le retour pour n
     }
   });
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   const lecture = page.getByRole("region", { name: "Analyse du devis" });
   await expect(lecture.getByRole("heading", { name: "Je lis ton devis" })).toBeVisible();
   const box = (await lecture.boundingBox())!;
@@ -1738,7 +1741,7 @@ test("§50.1 : passé 30 s, « Gros devis, j'y suis encore… » (une seule phra
     }
   });
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   const lecture = page.getByRole("region", { name: "Analyse du devis" });
   await expect(lecture.getByRole("heading", { name: "Je lis ton devis" })).toBeVisible();
   await page.clock.fastForward(31_000);
@@ -1770,7 +1773,7 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   await signUp(page);
   const adresse = adresseDuProjet();
   await createProject(page, "Toiture Le Groupé", "M. Le Bihan", adresse);
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   await confirmDoubts(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -1919,7 +1922,7 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   // Un devis déposé sans SIRET : « Ton chantier » montre le bloc grisé qui renvoie à l'onglet Groupé.
   await createProject(page, "Toiture Le Bihan", "M. Le Bihan", "3 quai Duguay-Trouin, Saint-Malo");
   const chantier = page.url();
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   const ferme = page.getByRole("region", { name: "Regroupement fermée" });
   await expect(ferme.getByText("Renseigne ton SIRET pour rejoindre le regroupement")).toBeVisible();
@@ -2014,7 +2017,7 @@ async function compteAuGroupe(page: Page, entreprise: string, adresse: string, s
 /** Un chantier déposé, lu, et sa première ligne proposée au groupé en « Chantier signé ». Rend l'id du chantier. */
 async function chantierAuGroupe(page: Page, nom: string, adresse: string, avant?: (projectId: string) => Promise<void>): Promise<string> {
   const projectId = await createProject(page, nom, "M. Client", adresse);
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   await confirmDoubts(page);
   if (avant) {
@@ -2359,7 +2362,7 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   const pageC = await passeGuide(await contexteC.newPage());
   await compteAuGroupe(pageC, "Toitures Plafond", adresseA);
   const projetC = await createProject(pageC, "Toiture Plafond", "M. Client", adresseA);
-  await pageC.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await pageC.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(pageC);
   await confirmDoubts(pageC);
   const takeoff = (await apiJson<{ takeoff: { lines: { id: string; designation: string; quantity: string | null; unit: string | null }[] } }>(pageC, "GET", `/v1/projects/${projetC}/takeoff`)).body.takeoff;
@@ -2455,7 +2458,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   expect(etat2.excluJusquau).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   // Un nouveau lot est refusé : « Ton chantier » montre le bloc grisé, l'API ferme.
   const projet4 = await createProject(page, "Toiture Nord 4", "M. Client", "3 quai Duguay-Trouin, 35400 Saint-Malo");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   await confirmDoubts(page);
   await expect(page.getByRole("region", { name: "Regroupement fermée" })).toBeVisible();
@@ -2494,7 +2497,7 @@ test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap
   }
   // Sur « Ton chantier » (le quantitatif), le « ? » est à côté du titre de la liste.
   await createProject(page, "Toiture Aide", "M. Client", "3 quai Duguay-Trouin, 35400 Saint-Malo");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   await confirmDoubts(page);
   await page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: "Aide" }).click();
@@ -2576,7 +2579,7 @@ test("Liste donnée en photo, chantier sans adresse : la barre de la commande de
     if (r.status() === 400 && /\/commande-du-mois/.test(r.url())) refus.push(r.url());
   });
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
@@ -2812,7 +2815,7 @@ test("Rapport mensuel : le 1er du mois, l'artisan reçoit « ce mois : X chantie
   // Un artisan qui a déposé un devis ce mois-ci, un autre qui n'a rien fait.
   const email = await signUp(page);
   await createProject(page, "Toiture Rapport", "M. Client", "4 rue du Port, 22500 Paimpol");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   const dejaRecus = (await emailsVers(page, email)).length;
   // Le 1er du mois suivant, 7 h (la date ne se force qu'en test).
@@ -2854,15 +2857,21 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await page.goto("/");
   await page.getByRole("link", { name: "Ma liste de matériaux" }).first().click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
-  // Point 31 (27 octobre 2026) : trois choix, « Depuis mon devis — on t'avance », « Photo de ma liste », « Je la note moi-même ».
-  await expect(page.getByText("Depuis mon devis — on t'avance", { exact: true })).toBeVisible();
-  await expect(page.getByText("Photo de ma liste", { exact: true })).toBeVisible();
-  await expect(page.getByText("Je la note moi-même", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Déposer mon devis")).toHaveAttribute("accept", /pdf/);
-  await expect(page.getByLabel("Déposer ma liste")).toHaveAttribute("accept", /image\/jpeg.*application\/pdf/);
+  // Greg, 31 octobre 2026 : trois entrées ; « Importer un document » ouvre ce que le téléphone sait faire.
+  await expect(page.getByText("Importer un document", { exact: true })).toBeVisible();
+  await expect(page.getByText("Saisir ma liste", { exact: true })).toBeVisible();
+  await expect(page.getByText("Décrire mon chantier", { exact: true })).toBeVisible();
+  await expect(page.getByText("Photo de ma liste", { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: /^Importer un document/ }).click();
+  const feuille = page.getByRole("dialog", { name: "Importer un document" });
+  for (const o of ["Prendre une photo", "Choisir une photo", "Choisir un PDF ou un fichier"]) await expect(feuille.getByText(o, { exact: true })).toBeVisible();
+  await feuille.getByRole("button", { name: "Fermer" }).click();
+  await expect(page.getByLabel("Prendre une photo")).toHaveAttribute("capture", "environment");
+  await expect(page.getByLabel("Choisir une photo")).toHaveAttribute("accept", /image\/jpeg/);
+  await expect(page.getByLabel("Choisir un PDF ou un fichier")).toHaveAttribute("accept", /application\/pdf.*image\/jpeg/);
 
   // 2. La photo d'une liste écrite à la main : les lignes telles qu'écrites, aucune question, aucun calcul.
-  await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}$/, { timeout: 60_000 });
   await expect(page.getByRole("heading", { name: /^Ma liste du / })).toBeVisible();
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
@@ -2945,7 +2954,7 @@ test("« J'ai déjà ma liste » : un bon de négoce (photo) et un tableau (PDF)
   ];
   for (const c of cas) {
     await page.goto("/chantiers/nouveau");
-    await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", c.fichier));
+    await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", c.fichier));
     await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}$/, { timeout: 60_000 });
     const liste = page.getByRole("region", { name: "Liste des fournitures" });
     await expect(liste).toBeVisible({ timeout: 60_000 });
@@ -2955,10 +2964,47 @@ test("« J'ai déjà ma liste » : un bon de négoce (photo) et un tableau (PDF)
   }
 });
 
+test("« Importer un document » (Greg, 31 octobre 2026) : une capture d'écran (photo) et une photo prise se lisent comme une liste ; une analyse de photo, jamais une analyse de devis ; le type n'est jamais demandé", async ({ page }) => {
+  test.slow();
+  await signUp(page);
+  // Une photo passe par le scan de liste (lecture_liste), jamais par l'analyse de devis : la jauge des analyses ne bouge pas.
+  const avant = (await apiJson(page, "GET", "/v1/ai-usage/jauge")).body;
+  for (const champ of ["Choisir une photo", "Prendre une photo"]) {
+    await page.goto("/chantiers/nouveau");
+    await page.getByRole("button", { name: /Importer un document/ }).click();
+    const feuille = page.getByRole("dialog", { name: "Importer un document" });
+    await expect(feuille.getByText("Devis ou liste : je le reconnais tout seul.")).toBeVisible();
+    await expect(page.getByText(/devis ou une liste \?|Quel type/)).toHaveCount(0);
+    await page.getByLabel(champ).setInputFiles({ name: "Capture d'écran.png", mimeType: "image/png", buffer: fs.readFileSync(path.join(__dirname, "fixtures", "bon-negoce.png")) });
+    const liste = page.getByRole("region", { name: "Liste des fournitures" });
+    await expect(liste).toBeVisible({ timeout: 60_000 });
+    await expect(liste.getByRole("button", { name: /^Modifier : / }).first()).toBeVisible();
+  }
+  expect((await apiJson(page, "GET", "/v1/ai-usage/jauge")).body).toEqual(avant);
+});
+
+test("« Ma liste de matériaux » sur téléphone : rien sous la barre du bas, ni l'écran ni le bouton de « Saisir ma liste »", async ({ page }, info) => {
+  test.skip(info.project.name !== "telephone", "la barre du bas n'existe que sur téléphone");
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  const nav = page.getByRole("navigation", { name: "Navigation principale" });
+  const decrire = page.getByRole("button", { name: /Décrire mon chantier/ });
+  await decrire.scrollIntoViewIfNeeded();
+  const [b, n] = [await decrire.boundingBox(), await nav.boundingBox()];
+  if (b && n && n.y > 0) expect(b.y + b.height).toBeLessThanOrEqual(n.y + 1);
+  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  const bouton = page.getByRole("button", { name: "Sélectionne un matériau" });
+  await expect(bouton).toBeVisible();
+  const c = (await bouton.boundingBox())!;
+  const dessus = await page.evaluate(([x, y]) => document.elementFromPoint(x!, y!)?.closest("button")?.textContent ?? "", [c.x + c.width / 2, c.y + c.height / 2]);
+  expect(dessus).toContain("Sélectionne un matériau");
+  expect(c.y + c.height).toBeLessThanOrEqual(page.viewportSize()!.height);
+});
+
 test("« J'ai déjà ma liste » : un fichier qui n'est ni une photo ni un PDF se dit en clair, rien n'est créé", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer ma liste").setInputFiles({ name: "liste.txt", mimeType: "text/plain", buffer: Buffer.from("du texte") });
+  await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles({ name: "liste.txt", mimeType: "text/plain", buffer: Buffer.from("du texte") });
   await expect(page.getByRole("alert").filter({ hasText: /ni une photo ni un PDF|rien lu/ })).toBeVisible();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
 });
@@ -3080,7 +3126,7 @@ test("Zéro bouton mort (artisan) : accueil, chantiers, nouvelle liste, Ton chan
   await compteAuGroupe(page, "Toitures Clics", "4 rue de Kerampont, 22300 Lannion");
   // Une liste lue (photo), avec une ligne vague et des lignes précises.
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
   const chantier = new URL(page.url()).pathname;
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
@@ -3111,7 +3157,7 @@ test("Zéro bouton mort (artisan) : accueil, chantiers, nouvelle liste, Ton chan
 test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau coupé, photo floue, un seul chantier malgré les essais, retour arrière, session expirée, liens expirés", { tag: "@ancien" }, async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  const depot = page.getByLabel("Déposer ma liste");
+  const depot = page.getByLabel("Choisir un PDF ou un fichier");
   const photo = fs.readFileSync(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   // Un fichier de plus de 20 Mo : refusé avant l'envoi, en clair.
   await depot.setInputFiles({ name: "liste.png", mimeType: "image/png", buffer: Buffer.alloc(21_000_000, 1) });
@@ -3669,120 +3715,99 @@ test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un e
   await expect(demo.getByRole("status")).toContainText("Effacé : 5 faux artisans");
 });
 
-test("« Je la note moi-même » (28 octobre 2026, point 1 ; 30 octobre : intitulé et quantité séparés) : en plein écran, les champs restent visibles clavier ouvert, l'intitulé garde ses chiffres, la quantité peut attendre, un tap modifie, « Terminé » mène à la liste", async ({ page }) => {
+test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat groupé, sans sa logique ; une suggestion, un matériau absent, la désignation libre, quantité et unité, retour sans perte, bouton dynamique, puis l'éditeur ; aucun crédit, aucun achat groupé, aucun négoce", async ({ page }) => {
   await signUp(page);
-  await page.setViewportSize({ width: 375, height: 667 });
+  const jaugeAvant = (await apiJson<{ quotas?: unknown; jauge?: unknown }>(page, "GET", "/v1/ai-usage/jauge")).body;
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Je la note moi-même/ }).click();
-  const ecran = page.getByRole("dialog", { name: "Écris ta liste" });
-  const champ = ecran.getByLabel("Intitulé");
-  const qte = ecran.getByLabel("Quantité");
-  await expect(champ).toBeFocused();
-  // Le clavier de l'iPhone SE laisse environ 330 px visibles : l'intitulé, la quantité et « Terminé » y restent.
-  await page.setViewportSize({ width: 375, height: 330 });
-  // Greg, 30 octobre 2026 : « crochet gouttière bandeau 25 », le 25 est le développé, jamais la quantité.
-  await champ.fill("Crochet gouttière bandeau 25");
-  await champ.press("Enter");
-  await expect(qte).toBeFocused();
-  await expect(qte).toBeInViewport({ ratio: 1 });
-  await expect(ecran.getByRole("button", { name: "Terminé" })).toBeInViewport({ ratio: 1 });
-  await qte.fill("40");
-  await qte.press("Enter");
-  const maListe = ecran.getByRole("list", { name: "Ma liste" });
-  await expect(maListe.getByRole("button", { name: "Modifier : Crochet gouttière bandeau 25" })).toContainText("40 pièces");
-  await expect(champ).toHaveValue("");
-  await expect(qte).toHaveValue("");
-  await expect(champ).toBeFocused();
-  // Le catalogue se propose pendant la frappe, d'un tap : l'intitulé et son unité, puis la quantité.
-  // Catalogue métier (Greg, 31 octobre 2026) : « liteau » propose le produit, puis ses sections en boutons, celles du
-  // référentiel d'abord ; « 18 40 » trouve la 18×40.
-  await champ.fill("liteau");
-  // Greg, 31 octobre 2026, soir (« pas très intuitif quand on commence à taper ») : les propositions en liste juste sous
-  // le champ ; sur ordinateur, ↓ puis Entrée ouvre la première ; au doigt, un tap.
-  await expect(ecran.getByRole("button", { name: "Liteau : choisir le format" })).toBeVisible();
-  if (page.viewportSize()!.width >= 1024) {
-    await champ.press("ArrowDown");
-    await champ.press("Enter");
-  } else await ecran.getByRole("button", { name: "Liteau : choisir le format" }).click();
-  const formats = ecran.getByRole("list", { name: "Formats de Liteau" });
-  await expect(formats.getByRole("button").first()).toHaveText("18×40 · sapin traité classe 2");
-  await formats.getByRole("button", { name: "18×40 · sapin traité classe 2" }).click();
-  await expect(champ).toHaveValue("Liteau 18×40 · sapin traité classe 2");
-  await expect(qte).toBeFocused();
-  // À la quantité, les propositions se replient : rien ne pousse le champ sous le clavier.
-  await expect(ecran.getByRole("list", { name: "Références proposées" })).toHaveCount(0);
-  await expect(ecran.getByLabel("Unité")).toHaveValue("m");
-  await qte.fill("200");
-  await ecran.getByRole("button", { name: "Ajouter la ligne" }).click();
-  await expect(ecran.getByLabel("Unité")).toHaveValue("pièces");
-  // « H14 rouge » : la tuile H 14 Huguenot (réf. Edilians), coloris Rouge de sa fiche (31 octobre 2026, soir), d'un tap ;
-  // jamais une HP10.
-  await champ.fill("H14 rouge");
-  const proposees = ecran.getByRole("list", { name: "Références proposées" });
-  await expect(proposees.getByRole("button", { name: /^Tuile H 14 Huguenot, réf\. 204 \(Edilians\)/ })).toBeVisible();
-  await expect(proposees.getByRole("button", { name: /HP 10/ })).toHaveCount(0);
-  await expect(proposees.getByRole("button", { name: /Tuile H 14 Huguenot.* : choisir le format/ })).toHaveCount(0);
-  await proposees.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians) Rouge", exact: true }).click();
-  await expect(champ).toHaveValue("Tuile H 14 Huguenot, réf. 204 (Edilians) Rouge");
-  await qte.fill("250");
-  await qte.press("Enter");
-  // Un matériau inconnu : « Je ne trouve pas mon matériau » ouvre la saisie libre, la marque ou la référence part avec.
-  await champ.fill("Tuile Zéphyr terre cuite");
-  await ecran.getByRole("button", { name: "Je ne trouve pas mon matériau — le saisir moi-même" }).click();
-  await ecran.getByLabel("Marque, modèle ou référence (facultatif)").fill("modèle ZX 12");
-  await qte.fill("40");
-  await qte.press("Enter");
-  await expect(maListe.getByRole("button", { name: "Modifier : Tuile Zéphyr terre cuite, modèle ZX 12" })).toContainText("40 pièces");
-  await expect(ecran.getByLabel("Marque, modèle ou référence (facultatif)")).toHaveCount(0);
-  // Sans quantité, rien ne bloque : la ligne part « à vérifier » ; un tap la remet dans les champs.
-  await champ.fill("Crochets inox");
-  await ecran.getByRole("button", { name: "Ajouter la ligne" }).click();
-  await expect(maListe.getByRole("button", { name: "Modifier : Crochets inox" })).toContainText("quantité ?à vérifier");
-  await ecran.getByRole("button", { name: "Modifier : Crochets inox" }).click();
-  await expect(champ).toHaveValue("Crochets inox");
-  await qte.fill("2");
-  await ecran.getByLabel("Unité").selectOption("paquets");
-  await qte.press("Enter");
-  await expect(maListe.getByRole("button", { name: "Modifier : Crochets inox" })).toContainText("2 paquets");
-  await expect(champ).toBeInViewport({ ratio: 1 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
-  await page.setViewportSize({ width: 375, height: 667 });
-  await ecran.getByRole("button", { name: "Terminé" }).click();
+  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
+  await expect(ecran.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" })).toBeVisible();
+  // Rien de l'achat groupé : ni étapes, ni commune, ni négoces, ni engagement.
+  await expect(ecran.getByText(/Achat groupé de ton métier|Commune de livraison|négoces|Je m'engage/)).toHaveCount(0);
+  await expect(ecran.getByLabel("Métier")).toBeVisible();
+  const bouton = page.getByRole("button", { name: /^(Sélectionne un matériau|Ajouter \d+ matériaux? à ma liste)$/ });
+  await expect(bouton).toHaveText("Sélectionne un matériau");
+  await expect(bouton).toBeDisabled();
+  // 1. Une suggestion du catalogue (familles › produit › format), sans quantité imposée.
+  await ecran.getByRole("button", { name: "Ardoises", exact: true }).click();
+  await ecran.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
+  await ecran.getByRole("button", { name: "32×22 · Espagne 1er choix", exact: true }).click();
+  await ecran.getByLabel("Quantité de Ardoise naturelle 32×22 · Espagne 1er choix").fill("900");
+  await ecran.getByRole("button", { name: "Ajouter ce matériau" }).click();
+  await expect(bouton).toHaveText("Ajouter 1 matériau à ma liste");
+  // 2. Un autre métier n'est jamais bloqué : la recherche trouve ailleurs.
+  await ecran.getByLabel("Métier").selectOption({ label: "Électricité" });
+  // 3. Un matériau absent : ce qui est tapé s'ajoute tel quel, sans produit imposé, quantité et unité facultatives.
+  await ecran.getByLabel("Rechercher un matériau").fill("Faîtière ventilée modèle ancien");
+  await ecran.getByRole("button", { name: /Ajouter « Faîtière ventilée modèle ancien » tel que je l'écris/ }).click();
+  await expect(ecran.getByLabel("Désignation", { exact: true }).first()).toHaveValue("Faîtière ventilée modèle ancien");
+  await ecran.getByRole("button", { name: "Ajouter ce matériau" }).click();
+  await expect(bouton).toHaveText("Ajouter 2 matériaux à ma liste");
+  // 4. Chaque ligne se modifie librement : désignation, caractéristiques, quantité, unité.
+  const liste = ecran.getByRole("region", { name: "Ma liste en cours" });
+  const desig = liste.getByLabel("Désignation").nth(1);
+  await desig.fill("Faîtière ventilée terre cuite, modèle ancien");
+  await liste.getByLabel("Caractéristiques ou précision").nth(1).fill("Rouge vieilli");
+  await liste.getByLabel("Quantité de Faîtière ventilée terre cuite, modèle ancien").fill("12");
+  await liste.getByLabel("Unité de Faîtière ventilée terre cuite, modèle ancien").selectOption("pièces");
+  // 5. Retour en arrière : une confirmation ; « Rester » ne perd rien ; rouvert plus tard, tout est là.
+  await page.waitForTimeout(700);
+  await ecran.getByRole("button", { name: "Retour" }).click();
+  await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
+  await page.goto("/chantiers/nouveau?liste=1");
+  await expect(ecran.getByRole("region", { name: "Ma liste en cours" }).getByLabel("Désignation").nth(1)).toHaveValue("Faîtière ventilée terre cuite, modèle ancien");
+  await expect(bouton).toHaveText("Ajouter 2 matériaux à ma liste");
+  // 6. Le même éditeur que les autres méthodes ; la précision part sur la ligne (PDF du négoce), jamais dans la désignation.
+  const precisions: string[] = [];
+  page.on("response", async (r) => {
+    if (/\/v1\/quantitatifs\/[^/]+\/corrections$/.test(r.url()) && r.request().method() === "POST" && r.ok()) precisions.push(r.request().postData() ?? "");
+  });
+  await bouton.click();
   await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
-  await expect(page.getByText(/Crochet gouttière bandeau 25/).first()).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText(/Liteau 18×40/).first()).toBeVisible();
-  await expect(page.getByText(/Tuile H 14 Huguenot, réf\. 204 \(Edilians\) Rouge/).first()).toBeVisible();
-  await expect(page.getByText(/Tuile Zéphyr terre cuite, modèle ZX 12/).first()).toBeVisible();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/Ardoise naturelle 32×22/).first()).toBeVisible();
+  await expect(page.getByText(/Faîtière ventilée terre cuite, modèle ancien/).first()).toBeVisible();
+  expect(precisions.some((b) => b.includes('"preciser"') && b.includes("Rouge vieilli"))).toBe(true);
+  // 7. Aucun crédit, aucun achat groupé, aucune demande de prix.
+  expect((await apiJson(page, "GET", "/v1/ai-usage/jauge")).body).toEqual(jaugeAvant);
+  const achats = (await apiJson<{ achats?: unknown[]; mesAchats?: unknown[] }>(page, "GET", "/v1/achats-groupes")).body;
+  expect(JSON.stringify(achats)).not.toMatch(/Ardoise naturelle 32×22|Faîtière ventilée/);
+  const projet = /\/chantiers\/([0-9a-f-]{36})/.exec(page.url())![1]!;
+  expect((await apiJson<{ items: unknown[] }>(page, "GET", `/v1/projects/${projet}/price-requests`)).body.items).toEqual([]);
+});
 
-  // Son intitulé lui revient quand il tape ; un autre artisan ne le voit jamais comme le sien (Greg, 30 octobre 2026,
-  // nuit). Écrit aussi par une autre entreprise, il est proposé à tous, marqué « écrit par d'autres artisans » (Greg,
-  // 31 octobre 2026, soir : « le produit sera existant »).
+test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan reviennent ; ceux d'autres artisans sont marqués, jamais leur entreprise", async ({ page }) => {
+  await signUp(page);
+  expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Crochet gouttière bandeau 25", quantite: "40", unite: "pièces" }] })).status).toBe(201);
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Je la note moi-même/ }).click();
-  await ecran.getByLabel("Intitulé").fill("crochet band");
-  await expect(ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: "Crochet gouttière bandeau 25" })).toBeVisible();
+  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
+  await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
+  await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25 (déjà écrit par toi)" })).toBeVisible();
   await page.context().clearCookies();
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Je la note moi-même/ }).click();
-  await ecran.getByLabel("Intitulé").fill("crochet band");
+  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
   await page.waitForTimeout(800);
-  await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25", exact: true })).toHaveCount(0);
-  // Ce deuxième artisan écrit à son tour la tuile Zéphyr (à sa façon) : un troisième la voit, marquée, sans nom d'entreprise.
+  await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25 (déjà écrit par toi)" })).toHaveCount(0);
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "tuile zephyr terre cuite modele zx12", quantite: "40", unite: "pièces" }] })).status).toBe(201);
   await page.context().clearCookies();
   await signUp(page);
+  expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Tuile Zéphyr terre cuite, modèle ZX 12", quantite: "10", unite: "pièces" }] })).status).toBe(201);
+  await page.context().clearCookies();
+  await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Je la note moi-même/ }).click();
-  await ecran.getByLabel("Intitulé").fill("zephyr zx12");
-  await expect(ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: /Zéphyr.*\(écrit par d'autres artisans\)$/i })).toBeVisible();
-  await expect(ecran.getByRole("list", { name: "Références proposées" })).not.toContainText(/Toitures/);
+  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  await ecran.getByLabel("Rechercher un matériau").fill("zephyr zx12");
+  await expect(ecran.getByRole("button", { name: /Zéphyr.*\(écrit par d'autres artisans\)$/i })).toBeVisible();
+  await expect(ecran.getByRole("list", { name: "Résultats" })).not.toContainText(/Toitures/);
 });
 
 test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèle → la question se répond avec le catalogue (« H14 »), la quantité du devis gardée", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-tuile-modele.pdf"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-tuile-modele.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   // Mobiiz ne choisit pas le modèle : il le demande ; l'artisan tape « H14 », le catalogue propose la référence.

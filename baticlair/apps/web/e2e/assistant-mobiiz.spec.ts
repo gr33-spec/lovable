@@ -159,7 +159,7 @@ test("Décris ton chantier : une vraie conversation ; les quantités dites font 
   const tel = info.project.name === "telephone";
   await compteEtListe(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Je décris mon chantier/ }).click();
+  await page.getByRole("button", { name: /Décrire mon chantier/ }).click();
   const d = page.getByRole("dialog", { name: "Décris ton chantier" });
   await expect(d.getByText("Décris-moi ton chantier ou indique directement les matériaux et quantités dont tu as besoin. Tu peux écrire ou utiliser le micro.")).toBeVisible();
   // Plus de formulaire : une barre en bas, le micro dedans, l'envoi rond ; aucun bouton « Lire ma description ».
@@ -234,7 +234,7 @@ test("Contrôle de conformité : après la photo d'une liste, l'assistant s'ouvr
   await page.addInitScript(() => localStorage.setItem("mobiiz-assistant-auto", "oui"));
   await compteEtListe(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}$/, { timeout: 60_000 });
   const assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
   await expect(assistant).toBeVisible({ timeout: 60_000 });

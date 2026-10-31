@@ -188,10 +188,11 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
 
     // 2. La liste depuis un devis : trois choix, le bandeau, « à vérifier », la suggestion, « Tout cocher ».
     await page.getByRole("link", { name: /Ma liste de matériaux/ }).first().click();
-    await expect(page.getByText("Depuis mon devis — on t'avance")).toBeVisible();
-    await expect(page.getByText("Photo de ma liste")).toBeVisible();
-    await expect(page.getByText("Je la note moi-même")).toBeVisible();
-    await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-achat-groupe.pdf"));
+    // Greg, 31 octobre 2026 : trois entrées, « Importer un document », « Saisir ma liste », « Décrire mon chantier ».
+    await expect(page.getByText("Importer un document", { exact: true })).toBeVisible();
+    await expect(page.getByText("Saisir ma liste", { exact: true })).toBeVisible();
+    await expect(page.getByText("Décrire mon chantier", { exact: true })).toBeVisible();
+    await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-achat-groupe.pdf"));
     await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
     const liste = page.getByRole("region", { name: "Liste des fournitures" });
     const questions = page.getByRole("region", { name: "Les questions" });
@@ -461,15 +462,18 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
   test("liste écrite à la main : fermée, reprise telle quelle", async ({ page }) => {
     await inscrireSansSiret(page, departement());
     await page.goto("/chantiers/nouveau");
-    await page.getByRole("button", { name: /Je la note moi-même/ }).click();
-    const ecran = page.getByRole("dialog", { name: "Écris ta liste" });
-    await ecran.getByLabel("Intitulé").fill("Liteaux 27×38");
-    await ecran.getByLabel("Quantité").fill("400");
-    await ecran.getByLabel("Quantité").press("Enter");
-    await expect(ecran.getByRole("list", { name: "Ma liste" })).toContainText("Liteaux 27×38");
+    await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+    const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
+    await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
+    await ecran.getByRole("button", { name: /Ajouter « Liteaux 27×38 maison » tel que je l'écris/ }).click();
+    await ecran.getByLabel("Quantité de la ligne libre").fill("400");
+    await ecran.getByRole("button", { name: "Ajouter ce matériau" }).click();
+    await expect(ecran.getByRole("region", { name: "Ma liste en cours" })).toBeVisible();
+    await expect(ecran.getByRole("region", { name: "Ma liste en cours" }).getByRole("textbox").first()).toHaveValue("Liteaux 27×38 maison");
     await page.waitForTimeout(700);
-    await ecran.getByRole("button", { name: "Fermer" }).click();
+    await ecran.getByRole("button", { name: "Retour" }).click();
+    await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
     await partirEtReprendre(page, "Reprendre ta liste");
-    await expect(page.getByRole("dialog", { name: "Écris ta liste" }).getByRole("list", { name: "Ma liste" })).toContainText("Liteaux 27×38");
+    await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByRole("textbox").first()).toHaveValue("Liteaux 27×38 maison");
   });
 });

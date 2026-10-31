@@ -15,6 +15,8 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
+SUIVI 162 (Greg, 31 octobre : « Ma liste de matériaux ») : fait, voir `docs/ma-liste-de-materiaux.md`. En attente de Greg : le compteur unique (option A ou B), l'IA hybride, la proposition de CGU.
+
 SUIVI 155-159 (brief de Greg du 31 octobre : « Assistant Mobiiz, PDF interactif » + Clair / Sombre) : TOUT FAIT
 (thème, audit, PDF trois modèles + bloc de réponse, assistant, « Je décris mon chantier »). En ligne sur test.mobiiz.fr (commit bba85b3e),
 rapport envoyé à Greg. En attente de ses retours. Plan et choix : `docs/assistant-mobiiz.md`, DECISIONS du 31/10.

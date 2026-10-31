@@ -1,14 +1,16 @@
 "use client";
 
-import { CoupDeMainIa } from "@/components/coup-de-main-ia";
+import { InfoAnalyse } from "@/components/coup-de-main-ia";
 import { useSearchParams } from "next/navigation";
 
-import { PenLine } from "lucide-react";
+import { Camera, FileText, Image as ImageIcon, Loader2, PenLine, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Suspense, useCallback, useRef, useState } from "react";
-import { EcrireMaListe } from "@/components/ecrire-ma-liste";
+import { Suspense, useCallback, useId, useRef, useState } from "react";
+import { SaisirMaListe } from "@/components/saisir-ma-liste";
+import { texteDuPdf } from "@/components/pdf-pages";
+import { natureDuDocument } from "../../../../../../../packages/domain/src/documents/nature";
 import { BoutonDecrire } from "@/components/decrire-mon-chantier";
-import { DropZone } from "@/components/journey";
+import { ErrorNotice } from "@/components/ui";
 import { Paywall, useBilling } from "@/components/paywall";
 import { BackButton } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Project, type ProjectDocument } from "@/lib/api";
@@ -78,23 +80,92 @@ export default function NouveauChantierPage() {
     );
   }
 
+  /** « Importer un document » : le type (devis ou liste) se détermine sans le demander (`natureDuDocument`). */
+  async function importer(file: File) {
+    // Ni une photo ni un PDF : dit tout de suite, rien n'est créé ni décompté.
+    const pdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (!pdf && !file.type.startsWith("image/") && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) {
+      setError(null);
+      setErreurListe("Ce fichier n'est ni une photo ni un PDF.");
+      return;
+    }
+    // Trop lourd : refusé par le dépôt, en clair, sans lire le fichier.
+    if (file.size > MAX_DOCUMENT_BYTES) return drop(file, "liste");
+    const nature = natureDuDocument({ type: file.type, nom: file.name }, file.type === "application/pdf" || /\.pdf$/i.test(file.name) ? await texteDuPdf(file) : null);
+    await drop(file, nature);
+  }
+
   return (
     <>
       <BackButton fallback="/chantiers" />
-      <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Ma liste de matériaux</h1>
+      {/* Greg, 31 octobre 2026 : trois entrées, moins d'espace, l'information en une phrase. */}
+      <h1 className="text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Ma liste de matériaux</h1>
       {erreurListe ? (
         <p role="alert" className="rounded-xl bg-warn-bg p-4 text-[15px] font-semibold text-warn">
           {erreurListe}
         </p>
       ) : null}
-      {/* Greg, 30 octobre 2026 (point 10) : la lecture est une aide, dit avant de déposer. */}
-      <CoupDeMainIa />
-      {/* Point 31 (Greg, 27 octobre 2026, 2e message) : trois choix, ses mots. */}
-      <DropZone small titre="Depuis mon devis — on t'avance" sousTitre="Je te prépare la liste, tu vérifies les quantités." onFile={(f) => void drop(f, "devis")} pending={pending === "devis"} error={error} />
-      <DropZone small kind="liste" titre="Photo de ma liste" sousTitre="Une photo, un PDF ou une capture : je la remets au propre." onFile={(f) => void drop(f, "liste")} pending={pending === "liste"} error={null} />
+      {error ? <ErrorNotice error={error} /> : null}
+      <InfoAnalyse />
+      <ImporterUnDocument pending={pending !== null} onFichier={(f) => void importer(f)} />
       <SaisieListeReprise />
-      {/* Assistant Mobiiz (Greg, 31 octobre 2026, point 1) : le quatrième départ, la description écrite ou dictée. */}
+      {/* Assistant Mobiiz (Greg, 31 octobre 2026, point 1) : la description écrite ou dictée. */}
       <BoutonDecrire />
+    </>
+  );
+}
+
+/**
+ * « IMPORTER UN DOCUMENT » (Greg, 31 octobre 2026) : un devis, une liste, une photo, un PDF ou une capture, une seule
+ * entrée ; au toucher, ce que le téléphone sait faire : prendre une photo, choisir une photo, choisir un PDF ou un
+ * fichier. Les champs de fichier restent toujours dans la page (le toucher d'une option les ouvre).
+ */
+function ImporterUnDocument({ pending, onFichier }: { pending: boolean; onFichier: (f: File) => void }) {
+  const [ouvert, setOuvert] = useState(false);
+  const ids = { photo: useId(), galerie: useId(), fichier: useId() };
+  const prendre = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    setOuvert(false);
+    if (f && !pending) onFichier(f);
+  };
+  const option = "pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl px-3 text-[16px] font-semibold active:bg-ground";
+  return (
+    <>
+      <input id={ids.photo} type="file" accept="image/*" capture="environment" aria-label="Prendre une photo" className="sr-only" disabled={pending} onChange={prendre} />
+      <input id={ids.galerie} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" aria-label="Choisir une photo" className="sr-only" disabled={pending} onChange={prendre} />
+      <input id={ids.fichier} type="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/webp" aria-label="Choisir un PDF ou un fichier" className="sr-only" disabled={pending} onChange={prendre} />
+      <button type="button" disabled={pending} onClick={() => setOuvert(true)} className="pressable flex min-h-16 items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground disabled:opacity-80">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent" aria-hidden="true">
+          {pending ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
+        </span>
+        <span className="flex flex-col">
+          <span className="text-[16px] font-semibold">{pending ? "Je prépare ta liste…" : "Importer un document"}</span>
+          <span className="text-[14px] leading-snug text-muted">Devis, liste, photo, PDF ou capture d&apos;écran.</span>
+        </span>
+      </button>
+      {ouvert ? (
+        <div className="fixed top-0 left-0 z-[60] flex h-[100dvh] w-full items-end justify-center bg-black/40 lg:items-center" onClick={() => setOuvert(false)}>
+          <div role="dialog" aria-modal="true" aria-label="Importer un document" onClick={(e) => e.stopPropagation()} className="flex w-full max-w-md flex-col gap-1 rounded-t-3xl bg-surface p-4 pb-[max(env(safe-area-inset-bottom),16px)] text-ink shadow-card lg:rounded-3xl">
+            <div className="flex items-center justify-between px-1 pb-1">
+              <h2 className="text-[18px] font-extrabold">Importer un document</h2>
+              <button type="button" onClick={() => setOuvert(false)} aria-label="Fermer" className="grid size-10 place-items-center rounded-full">
+                <X size={19} aria-hidden="true" />
+              </button>
+            </div>
+            <label htmlFor={ids.photo} className={option}>
+              <Camera size={21} aria-hidden="true" /> Prendre une photo
+            </label>
+            <label htmlFor={ids.galerie} className={option}>
+              <ImageIcon size={21} aria-hidden="true" /> Choisir une photo
+            </label>
+            <label htmlFor={ids.fichier} className={option}>
+              <FileText size={21} aria-hidden="true" /> Choisir un PDF ou un fichier
+            </label>
+            <p className="px-1 pt-1 text-[13px] text-muted">Devis ou liste : je le reconnais tout seul.</p>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
@@ -124,11 +195,11 @@ function SaisieListe() {
           <PenLine size={20} />
         </span>
         <span className="flex flex-col">
-          <span className="text-[16px] font-semibold">Je la note moi-même</span>
-          <span className="text-[14px] leading-snug text-muted">Matériau, quantité, unité.</span>
+          <span className="text-[16px] font-semibold">Saisir ma liste</span>
+          <span className="text-[14px] leading-snug text-muted">J&apos;ajoute directement les matériaux, quantités et unités.</span>
         </span>
       </button>
-      {ouvert ? <EcrireMaListe onFermer={fermer} /> : null}
+      {ouvert ? <SaisirMaListe onFermer={fermer} /> : null}
     </>
   );
 }

@@ -75,19 +75,19 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     expect(await apiJson(page, "PATCH", "/v1/company/profile", { name: `Toitures ${unique()}`, address: "3 rue de la Gare, 22100 Ville-22", siret: "73282932000074", phone: null, email: null })).toBe(200);
     expect(await apiJson(page, "POST", "/v1/groupe/siret")).toBe(200);
 
-    // 2. « Écris ta liste » : le champ sous le titre, « Terminé » au-dessus du clavier.
+    // 2. « Saisir ma liste » (31 octobre 2026) : la recherche, la ligne libre, la quantité ; le bouton du bas reste visible.
     await page.goto("/chantiers/nouveau");
-    await page.getByRole("button", { name: "Je la note moi-même" }).click();
-    const dialogue = page.getByRole("dialog", { name: "Écris ta liste" });
-    await champVisible(page, dialogue.getByLabel("Intitulé"));
-    await expect(dialogue.getByRole("button", { name: "Terminé" })).toBeInViewport({ ratio: 1 });
-    await dialogue.getByLabel("Intitulé").fill("Crochets inox");
-    await page.keyboard.press("Enter");
-    await champVisible(page, dialogue.getByLabel("Quantité"));
-    await dialogue.getByLabel("Quantité").fill("90");
-    await page.keyboard.press("Enter");
-    await champVisible(page, dialogue.getByLabel("Intitulé"));
-    await dialogue.getByRole("button", { name: "Fermer" }).click();
+    await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+    const dialogue = page.getByRole("dialog", { name: "Saisir ma liste" });
+    await champVisible(page, dialogue.getByLabel("Rechercher un matériau"));
+    await dialogue.getByLabel("Rechercher un matériau").fill("Crochets inox maison");
+    await dialogue.getByRole("button", { name: /Ajouter « Crochets inox maison » tel que je l'écris/ }).click();
+    await champVisible(page, dialogue.getByLabel("Quantité de la ligne libre"));
+    await dialogue.getByLabel("Quantité de la ligne libre").fill("90");
+    await dialogue.getByRole("button", { name: "Ajouter ce matériau" }).click();
+    await champVisible(page, dialogue.getByLabel("Quantité de Crochets inox maison"));
+    await dialogue.getByRole("button", { name: "Retour" }).click();
+    await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
 
     // 3. L'achat groupé : la quantité, la commune, les négoces (e-mail, nom, téléphone).
     await page.goto("/achats-groupes/lancer");

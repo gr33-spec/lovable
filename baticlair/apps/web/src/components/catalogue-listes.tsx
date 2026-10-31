@@ -35,6 +35,9 @@ interface Reponse {
   metiers: Metier[];
   metier: string;
   resultats: ArticleCatalogueVue[] | null;
+  /** Les intitulés déjà écrits par l'entreprise, et ceux écrits par plusieurs artisans (« Écris ta liste », gardés). */
+  ecrits?: { designation: string; unite: string }[] | null;
+  communes?: { designation: string; unite: string }[] | null;
   arbre: { libelle: string; produits: { libelle: string; article: ArticleCatalogueVue | null; variantes: { libelle: string; article: ArticleCatalogueVue }[] }[] }[] | null;
 }
 
@@ -54,7 +57,23 @@ const BOUTON = "pressable flex min-h-13 w-full items-center justify-between gap-
 const LIEN = "min-h-11 self-start text-[15px] font-semibold text-accent-text underline underline-offset-4";
 const nombre = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
-export function CatalogueListes({ familleAchat, onAjouter, onAutreMetier }: { familleAchat: string | null; onAjouter: (l: LigneChoisie) => void; onAutreMetier?: (l: LigneChoisie, metier: Metier) => void }) {
+export function CatalogueListes({
+  familleAchat,
+  onAjouter,
+  onAutreMetier,
+  mode = "achat-groupe",
+}: {
+  familleAchat: string | null;
+  onAjouter: (l: LigneChoisie) => void;
+  onAutreMetier?: (l: LigneChoisie, metier: Metier) => void;
+  /**
+   * « Saisir ma liste » (Greg, 31 octobre 2026) : le même sélecteur, sans la logique de l'achat groupé. En mode « liste » :
+   * « Rechercher un matériau… », la quantité peut attendre (rien n'est inventé), ce qui est tapé s'ajoute tel quel
+   * (catalogue jamais fermé), « Ajouter ce matériau ». L'achat groupé garde son comportement (valeur par défaut).
+   */
+  mode?: "achat-groupe" | "liste";
+}) {
+  const liste = mode === "liste";
   const [metier, setMetier] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [chemin, setChemin] = useState<{ famille: string | null; produit: string | null }>({ famille: null, produit: null });
@@ -63,7 +82,7 @@ export function CatalogueListes({ familleAchat, onAjouter, onAutreMetier }: { fa
   const [libre, setLibre] = useState(false);
   const [libreTexte, setLibreTexte] = useState("");
   const [libreQte, setLibreQte] = useState("");
-  const [libreUnite, setLibreUnite] = useState("pièces");
+  const [libreUnite, setLibreUnite] = useState(liste ? "" : "pièces");
   const [autre, setAutre] = useState<{ ligne: LigneChoisie; metier: Metier } | null>(null);
   const recherche = q.trim();
   const charger = useCallback((signal: AbortSignal) => api<Reponse>(`/v1/catalogue?${new URLSearchParams({ ...(metier ? { metier } : {}), ...(recherche ? { q: recherche } : {}) })}`, { signal }), [metier, recherche]);
@@ -86,6 +105,8 @@ export function CatalogueListes({ familleAchat, onAjouter, onAutreMetier }: { fa
     setArticle(null);
     setChemin({ famille: null, produit: null });
     setQte("");
+    // Mode liste : la recherche repart à zéro pour le matériau suivant.
+    if (liste) setQ("");
   };
 
   if (autre)
@@ -165,23 +186,66 @@ export function CatalogueListes({ familleAchat, onAjouter, onAutreMetier }: { fa
             <input id="qte-article" aria-label={`Quantité de ${article.designation}`} inputMode="decimal" value={qte} onChange={(e) => setQte(e.target.value)} placeholder="Quantité" className={`${INPUT} max-w-40`} autoFocus onKeyDown={(e) => e.key === "Enter" && nombre(qte) > 0 && (e.preventDefault(), ajouter({ designation: article.designation, unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier }))} />
             <span className="text-[16px] text-muted">{article.unite}</span>
           </div>
-          <Button variant="ink" disabled={!(nombre(qte) > 0)} onClick={() => ajouter({ designation: article.designation, unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier })}>
-            <Plus size={18} aria-hidden="true" /> Ajouter à ma liste
+          <Button variant="ink" disabled={!liste && !(nombre(qte) > 0)} onClick={() => ajouter({ designation: article.designation, unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier })}>
+            <Plus size={18} aria-hidden="true" /> {liste ? "Ajouter ce matériau" : "Ajouter à ma liste"}
           </Button>
+          {liste ? <p className="text-[13px] text-muted">La quantité peut attendre : tu la mettras dans ta liste.</p> : null}
         </div>
       ) : (
         <>
           <div className="flex min-h-13 items-center gap-3 rounded-xl border border-line bg-surface px-4 focus-within:border-accent">
             <Search size={18} className="text-muted" aria-hidden="true" />
             <label htmlFor="cherche-catalogue" className="sr-only">
-              Chercher un matériau
+              {liste ? "Rechercher un matériau" : "Chercher un matériau"}
             </label>
-            <input id="cherche-catalogue" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ou cherche : panne, liteau, crochet…" className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" autoComplete="off" />
+            <input id="cherche-catalogue" value={q} onChange={(e) => setQ(e.target.value)} placeholder={liste ? "Rechercher un matériau…" : "Ou cherche : panne, liteau, crochet…"} className="min-h-12 grow bg-transparent text-[16px] outline-none placeholder:text-muted" autoComplete="off" />
           </div>
           {!data ? (
             <p className="text-[15px] text-muted">Chargement du catalogue…</p>
           ) : recherche ? (
             <ul aria-label="Résultats" className="flex flex-col gap-2">
+              {/* Mode liste : ce qui est tapé s'ajoute tel quel, sans produit imposé (le catalogue n'est jamais fermé). */}
+              {liste && recherche.length >= 2 ? (
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLibreTexte(recherche);
+                      setLibre(true);
+                    }}
+                    className={`${BOUTON} border-dashed`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <PenLine size={18} aria-hidden="true" className="shrink-0" />
+                      <span>Ajouter « {recherche} » tel que je l&apos;écris</span>
+                    </span>
+                    <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+                  </button>
+                </li>
+              ) : null}
+              {/* Mode liste : les intitulés déjà écrits par toi, puis ceux d'autres artisans (jamais leur nom d'entreprise). */}
+              {liste
+                ? [...(data.ecrits ?? []).map((e) => ({ ...e, de: "toi" as const })), ...(data.communes ?? []).map((e) => ({ ...e, de: "autres" as const }))].map((e) => (
+                    <li key={`${e.de}-${e.designation}`}>
+                      <button
+                        type="button"
+                        aria-label={e.de === "autres" ? `${e.designation} (écrit par d'autres artisans)` : `${e.designation} (déjà écrit par toi)`}
+                        onClick={() => {
+                          setLibreTexte(e.designation);
+                          setLibreUnite(e.unite || "");
+                          setLibre(true);
+                        }}
+                        className={BOUTON}
+                      >
+                        <span className="flex flex-col">
+                          <span>{e.designation}</span>
+                          <span className="text-[13px] font-normal text-muted">{e.de === "autres" ? "Écrit par d'autres artisans" : "Déjà écrit par toi"}</span>
+                        </span>
+                        <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+                      </button>
+                    </li>
+                  ))
+                : null}
               {(data.resultats ?? []).map((a) => (
                 <li key={a.cle}>
                   <button type="button" onClick={() => choisir(a)} className={BOUTON}>
@@ -193,7 +257,7 @@ export function CatalogueListes({ familleAchat, onAjouter, onAutreMetier }: { fa
                   </button>
                 </li>
               ))}
-              {data.resultats?.length === 0 ? <li className="text-[15px] text-muted">Rien de ce nom. Décris-le ci-dessous, il partira quand même.</li> : null}
+              {data.resultats?.length === 0 && !liste ? <li className="text-[15px] text-muted">Rien de ce nom. Décris-le ci-dessous, il partira quand même.</li> : null}
             </ul>
           ) : (
             <Niveaux data={data} chemin={chemin} onChemin={setChemin} onArticle={choisir} />
@@ -205,12 +269,13 @@ export function CatalogueListes({ familleAchat, onAjouter, onAutreMetier }: { fa
       {libre ? (
         <div className="flex flex-col gap-3 rounded-xl border border-dashed border-line p-4">
           <label htmlFor="libre-texte" className="text-[16px] font-semibold">
-            Décris ton besoin
+            {liste ? "Désignation" : "Décris ton besoin"}
           </label>
           <input id="libre-texte" value={libreTexte} onChange={(e) => setLibreTexte(e.target.value)} placeholder="Ex. faîtière ventilée modèle ancien" className={INPUT} autoFocus />
           <div className="flex gap-2">
-            <input aria-label="Quantité de la ligne libre" inputMode="decimal" value={libreQte} onChange={(e) => setLibreQte(e.target.value)} placeholder="Quantité" className={`${INPUT} max-w-32`} />
+            <input aria-label="Quantité de la ligne libre" inputMode="decimal" value={libreQte} onChange={(e) => setLibreQte(e.target.value)} placeholder={liste ? "Quantité (facultatif)" : "Quantité"} className={`${INPUT} max-w-40`} />
             <select aria-label="Unité de la ligne libre" value={libreUnite} onChange={(e) => setLibreUnite(e.target.value)} className={`${INPUT} grow`}>
+              {liste ? <option value="">Unité</option> : null}
               {UNITES.map((u) => (
                 <option key={u}>{u}</option>
               ))}
@@ -218,7 +283,7 @@ export function CatalogueListes({ familleAchat, onAjouter, onAutreMetier }: { fa
           </div>
           <Button
             variant="ink"
-            disabled={libreTexte.trim().length < 3 || !(nombre(libreQte) > 0)}
+            disabled={libreTexte.trim().length < (liste ? 2 : 3) || (!liste && !(nombre(libreQte) > 0))}
             onClick={() => {
               ajouter({ designation: libreTexte.trim(), unite: libreUnite, qte: libreQte, libre: true });
               setLibre(false);
@@ -226,12 +291,12 @@ export function CatalogueListes({ familleAchat, onAjouter, onAutreMetier }: { fa
               setLibreQte("");
             }}
           >
-            <Plus size={18} aria-hidden="true" /> Ajouter cette ligne
+            <Plus size={18} aria-hidden="true" /> {liste ? "Ajouter ce matériau" : "Ajouter cette ligne"}
           </Button>
         </div>
       ) : (
         <button type="button" onClick={() => setLibre(true)} className="pressable flex min-h-13 items-center gap-3 rounded-xl px-1 text-left text-[15px] font-semibold text-accent-text">
-          <PenLine size={18} aria-hidden="true" /> Je ne trouve pas : je décris mon besoin.
+          <PenLine size={18} aria-hidden="true" /> {liste ? "Je ne trouve pas : je l'écris moi-même." : "Je ne trouve pas : je décris mon besoin."}
         </button>
       )}
     </div>

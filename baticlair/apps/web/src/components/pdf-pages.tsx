@@ -13,7 +13,7 @@ type PdfJs = typeof import("pdfjs-dist/legacy/build/pdf.mjs");
 
 let pdfjs: Promise<PdfJs> | undefined;
 /** pdf.js, chargé une fois, sans fichier « worker » à servir : le même montage que la lecture côté API. */
-function loadPdfJs(): Promise<PdfJs> {
+export function loadPdfJs(): Promise<PdfJs> {
   pdfjs ??= (async () => {
     const worker = await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs");
     (globalThis as { pdfjsWorker?: unknown }).pdfjsWorker = worker;
@@ -161,4 +161,22 @@ export function PdfPages({
       )}
     </div>
   );
+}
+
+/** Le texte des premières pages d'un PDF (pour savoir, sans IA, si c'est un devis ou une liste) ; null s'il est illisible. */
+export async function texteDuPdf(file: Blob, pages = 3): Promise<string | null> {
+  try {
+    const lib = await loadPdfJs();
+    const task = lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
+    const doc = await task.promise;
+    const out: string[] = [];
+    for (let n = 1; n <= Math.min(pages, doc.numPages); n++) {
+      const c = await (await doc.getPage(n)).getTextContent();
+      out.push(c.items.map((i) => ("str" in i ? i.str : "")).join(" "));
+    }
+    await task.destroy();
+    return out.join("\n");
+  } catch {
+    return null;
+  }
 }

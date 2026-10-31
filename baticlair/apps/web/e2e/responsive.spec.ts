@@ -100,7 +100,7 @@ for (const size of WIDTHS) {
     await shoot(page, size.name, "03-accueil");
 
     await page.goto("/chantiers/nouveau");
-    await expect(page.getByLabel("Déposer mon devis")).toBeVisible();
+    await expect(page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/)).toBeVisible();
     await shoot(page, size.name, "04-nouveau-chantier");
 
     await page.goto("/");

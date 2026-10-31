@@ -15,6 +15,7 @@ export { ROOFING_PROFILE, TRADE_PROFILES, DEFAULT_TRADE, TRADES, normalizeTrades
 export * from "./documents/page-analysis.js";
 export * from "./documents/cost-estimate.js";
 export * from "./documents/modele-pdf.js";
+export * from "./documents/nature.js";
 export * from "./assistant/assistant.js";
 export { containsKeyword, type MaterialFamily } from "./trades/trade-profile.js";
 export { COMMON_LABOR, LABOR_ONLY } from "./trades/common.js";
