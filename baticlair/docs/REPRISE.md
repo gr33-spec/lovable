@@ -15,6 +15,11 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
+SUIVI 155-159 (brief de Greg du 31 octobre : « Assistant Mobiiz, PDF interactif » + Clair / Sombre) : TOUT FAIT
+(thème, audit, PDF trois modèles + bloc de réponse, assistant, « Je décris mon chantier »). Reste : suites complètes,
+push, captures et rapport à Greg. Plan et choix : `docs/assistant-mobiiz.md`, DECISIONS du 31/10.
+
+
 SUIVI 152 : refonte de l'app sur ordinateur (lg: seulement, mobile inchangé). Fait : menu, accueil, listes, chantier, achats groupés, négoces, profil. Reste : e2e complets, push, captures avant / après à Greg (script de capture temporaire : scratchpad `zz-captures-pc.spec.ts`).
 
 SUIVI 143-145 (messages de Greg du 31 octobre, après le catalogue métier), dans cet ordre :

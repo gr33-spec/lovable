@@ -10,6 +10,7 @@ import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, Qu
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
+import { AssistantMobiiz, CarteAssistant } from "@/components/assistant-mobiiz";
 import { SiteUnitsView } from "@/components/site-units-view";
 import { SendPreview } from "@/components/send-preview";
 import { SupplyList } from "@/components/supply-list";
@@ -87,6 +88,8 @@ export function ProjectTakeoff({
   const [sent, setSent] = useState(false);
   // « Aperçu » : le mail et le PDF du fournisseur, par-dessus la liste.
   const [previewing, setPreviewing] = useState(false);
+  // Assistant Mobiiz (Greg, 31 octobre 2026) : la conversation et le PDF, par-dessus « Ton chantier ».
+  const [assistant, setAssistant] = useState(false);
   // La liste a sa page (`?vue=fournitures`) ; sur le chantier, elle tient en une ligne. Après l'envoi, les réponses des
   // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
   const [page, setPage] = useListPage();
@@ -357,7 +360,13 @@ export function ProjectTakeoff({
     );
   } else {
     // §50.7 : « Ton chantier », le document que reçoit le fournisseur ; dessous, en petit, ajouter un article, envoyer une sélection.
+    // Assistant Mobiiz (Greg, 31 octobre 2026) : avant l'envoi, une carte ouvre l'assistant (conversation + PDF).
     body = (
+      <>
+      {editable && !sent && quantitatif ? <CarteAssistant onOpen={() => setAssistant(true)} /> : null}
+      {assistant && quantitatif ? (
+        <AssistantMobiiz takeoff={takeoff} projectId={projectId} quantitatifId={quantitatif.id} onUpdated={update} onClose={() => setAssistant(false)} onSend={send} />
+      ) : null}
       <SupplyList
         takeoff={takeoff}
         editable={editable}
@@ -382,6 +391,7 @@ export function ProjectTakeoff({
             }
           : {})}
       />
+      </>
     );
   }
   if (previewing) {

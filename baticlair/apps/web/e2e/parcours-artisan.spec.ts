@@ -390,6 +390,22 @@ test("Clair / Sombre (Greg, 31 octobre 2026) : sombre par défaut, Clair dans Pr
   await expect(page.locator(".app-nuit")).toHaveCount(1);
 });
 
+test("Ma demande de prix (Greg, 31 octobre 2026) : le modèle du PDF et sa couleur se choisissent dans Profil et restent", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/compte");
+  const modeles = page.getByRole("radiogroup", { name: "Modèle du PDF" });
+  await expect(modeles.getByRole("radio", { name: /Classique/ })).toHaveAttribute("aria-checked", "true");
+  await modeles.getByRole("radio", { name: /Détaillé/ }).click();
+  const couleurs = page.getByRole("radiogroup", { name: "Couleur du PDF" });
+  await expect(couleurs.getByRole("radio", { name: "Jaune Mobiiz" })).toHaveAttribute("aria-checked", "true");
+  const enregistre = page.waitForResponse((r) => r.url().includes("/v1/price-requests/settings") && r.request().method() === "PATCH");
+  await couleurs.getByRole("radio", { name: "Bleu" }).click();
+  expect((await enregistre).ok()).toBe(true);
+  await page.reload();
+  await expect(page.getByRole("radiogroup", { name: "Modèle du PDF" }).getByRole("radio", { name: /Détaillé/ })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("radiogroup", { name: "Couleur du PDF" }).getByRole("radio", { name: "Bleu" })).toHaveAttribute("aria-checked", "true");
+});
+
 test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaque page, et le bas de page ne passe jamais dessous", async ({ page }, info) => {
   test.skip(info.project.name !== "telephone", "la barre flottante est celle du téléphone");
   await signUp(page);

@@ -114,7 +114,7 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const pdf = (await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf?destinataire=${created.recipients[0].id}`).buffer(true)).body as Buffer;
     const text = await pdfText(pdf);
     if (process.env.SHOW_PDF) console.log(text);
-    const order = ["Demande de devis", "Point.P Brest", "Le chantier en bref", "1. Fournitures à chiffrer", "2. Détail du devis"].map((t) => text.indexOf(t));
+    const order = ["Demande de prix — Matériaux", "Point.P Brest", "Le chantier en bref", "1. Fournitures à chiffrer", "2. Détail du devis"].map((t) => text.indexOf(t));
     for (const i of order) expect(i).toBeGreaterThanOrEqual(0);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Rien à préciser sur ce chantier : le bloc « À préciser avec vous » est absent, les suivants se renumérotent.
@@ -134,12 +134,13 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     expect(text).not.toMatch(/command/i);
     // Les lignes du chantier Test (§45.5).
     // Retour du fondateur (2026-10-12) : dans le document, un mètre linéaire se dit « m » (« 222 m », pas « 222 ml »).
-    expect(text).toMatch(/Gouttière zinc demi-ronde dév\. 33\s+4 longueurs de 4 m \(13\s+m à couvrir\)/);
+    // Assistant (31 octobre 2026) : la quantité et l'unité en deux colonnes (« 4 » · « longueurs de 4 m (13 m à couvrir) »).
+    expect(text).toMatch(/Gouttière zinc demi-ronde dév\. 33[\s\S]{0,120}?\b4\s+longueurs\s+de\s+4\s+m\s+\(13\s+m\s+à\s+couvrir\)/);
     // RÈGLE NUMÉRO UN : ni pattes ni pointes, le devis n'en écrit pas. Bande de 13 ml façonnée sur place : des feuilles
     // 2 × 1 m estimées d'après le développé (§48.6), jamais un bobineau.
     expect(text).not.toMatch(/Pattes|Pointes|Bobineau/);
     // §50.7 : la feuille dit sa pièce (« pour bande zinc d'égout ») ; le nom long passe sur deux lignes du PDF.
-    expect(text).toMatch(/Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour\s+\d+ pièces?\s+pour 13 m de bande[\s\S]*bande zinc d'égout/);
+    expect(text).toMatch(/Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour\s+pour 13 m de bande[\s\S]*?\d+\s+pièces?[\s\S]*bande zinc d'égout/);
   });
 
   it("3. un chantier sans ligne « à préciser » n'a pas de bloc 3 ; un chantier qui en a une le montre, avec « merci de proposer ce que vous avez »", async () => {
@@ -282,10 +283,11 @@ describe("§45.9 — l'aperçu avant envoi", () => {
     expect([mail.subject, sansJeton(mail.text)]).toEqual([preview.subject, preview.mail]);
     expect(created.document.blocs).toEqual(preview.document.blocs);
     // Chaque ligne de l'aperçu est dans le PDF joint, dans le même ordre (le PDF coupe les longues lignes : espaces réunis).
+    // Assistant (31 octobre 2026) : le tableau se lit désignation, caractéristiques, quantité, unité.
     const pdf = (await pdfText(Buffer.from(mail.attachments![0]!.contentBase64, "base64"))).replace(/\s+/g, " ");
     let at = 0;
     for (const b of preview.document.blocs as { titre: string; numero: number; kind: string; lignes: (string | { designation: string; quantite: string; precision: string | null })[] }[]) {
-      const texts = [b.numero > 0 ? `${b.numero}. ${b.titre}` : b.titre, ...b.lignes.flatMap((l) => (typeof l === "string" ? [l] : [l.designation, l.quantite, ...(l.precision ? [l.precision] : [])]))];
+      const texts = [b.numero > 0 ? `${b.numero}. ${b.titre}` : b.titre, ...b.lignes.flatMap((l) => (typeof l === "string" ? [l] : [l.designation, ...(l.precision ? [l.precision] : []), l.quantite]))];
       for (const t of texts) {
         // Un nom long passe sur deux lignes du PDF (la quantité s'intercale à la lecture) : ses mots, dans l'ordre.
         let from = at;

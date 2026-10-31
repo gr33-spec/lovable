@@ -1,4 +1,4 @@
-import { briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere } from "@baticlair/domain";
+import { briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere, COULEUR_PDF_DEFAUT, estCouleurPdf, estModelePdf, MODELE_PDF_DEFAUT, type CouleurPdf, type ModelePdf } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -8,7 +8,7 @@ import type { RequestedLine } from "./price-request-email.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { priceRequestEmail, requestedQuantityText, supplierLineLabel } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
-import { LIEN_APERCU, mailEnHtml, texteLibreParDefaut, packetDocument, packetMail, packetPdf, packetSubject, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket } from "./supplier-packet.js";
+import { LIEN_APERCU, mailEnHtml, texteLibreParDefaut, packetDocument, packetMail, packetPdf, packetSubject, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket, type ZonePdf } from "./supplier-packet.js";
 
 /** §47.5 : une commande passée chez le fournisseur retenu, telle qu'elle part au journal. */
 export interface SupplierOrder {
@@ -138,6 +138,9 @@ export function buildPacket(
     prenom: sender.prenom ?? null,
     famille: sender.trade ? (FAMILLE_DE_METIER[sender.trade] ?? null) : null,
     ...(options.tutoie ? { tutoie: true } : {}),
+    // Assistant Mobiiz (31 octobre 2026, points 9 et 11) : l'adresse du chantier et la livraison, seulement si l'artisan les dit.
+    ...(typeof takeoff.answers["chantier:adresse"] === "string" && takeoff.answers["chantier:adresse"].trim() ? { adresse_chantier: takeoff.answers["chantier:adresse"].trim() } : {}),
+    ...(typeof takeoff.answers["chantier:livraison"] === "string" && takeoff.answers["chantier:livraison"].trim() ? { livraison: takeoff.answers["chantier:livraison"].trim() } : {}),
   };
 }
 
@@ -201,14 +204,37 @@ export class PriceRequestsService {
     return this.mailer.deliversEmail;
   }
 
-  async settings(tenant: TenantContext): Promise<{ attachQuoteDetail: boolean }> {
-    return { attachQuoteDetail: await this.requests.attachQuoteDetail(tenant) };
+  async settings(tenant: TenantContext): Promise<{ attachQuoteDetail: boolean; modelePdf: ModelePdf; couleurPdf: CouleurPdf }> {
+    const r = await this.requests.reglagesPdf(tenant);
+    return { attachQuoteDetail: await this.requests.attachQuoteDetail(tenant), modelePdf: estModelePdf(r.modele) ? r.modele : MODELE_PDF_DEFAUT, couleurPdf: estCouleurPdf(r.couleur) ? r.couleur : COULEUR_PDF_DEFAUT };
   }
 
-  async setSettings(tenant: TenantContext, settings: { attachQuoteDetail: boolean }): Promise<{ attachQuoteDetail: boolean }> {
+  async setSettings(
+    tenant: TenantContext,
+    settings: { attachQuoteDetail?: boolean | undefined; modelePdf?: ModelePdf | undefined; couleurPdf?: CouleurPdf | undefined },
+  ): Promise<{ attachQuoteDetail: boolean; modelePdf: ModelePdf; couleurPdf: CouleurPdf }> {
     assertCanWrite(tenant);
-    await this.requests.setAttachQuoteDetail(tenant, settings.attachQuoteDetail);
-    return { attachQuoteDetail: settings.attachQuoteDetail };
+    if (settings.attachQuoteDetail !== undefined) await this.requests.setAttachQuoteDetail(tenant, settings.attachQuoteDetail);
+    if (settings.modelePdf !== undefined || settings.couleurPdf !== undefined) await this.requests.setReglagesPdf(tenant, { modele: settings.modelePdf, couleur: settings.couleurPdf });
+    return this.settings(tenant);
+  }
+
+  /**
+   * L'ADRESSE DE RÉPONSE IMPRIMÉE DANS LE PDF (assistant, point 10) : celle qui sert DÉJÀ de « Répondre à » du mail. Avec
+   * l'adresse Mobiiz : l'adresse étiquetée du négoce (sa réponse revient sur sa demande) ; avant l'envoi (aperçu, export),
+   * l'adresse Mobiiz de l'entreprise (la réponse arrive dans « Reçus »). Sans domaine : l'e-mail de l'entreprise. Jamais
+   * une adresse inventée ; rien ne change à l'envoi du mail.
+   */
+  private adresseReponse: (companyId: string, etiquette: string | null) => Promise<string | null> = async () => null;
+  brancherAdresseReponse(f: (companyId: string, etiquette: string | null) => Promise<string | null>): void {
+    this.adresseReponse = f;
+  }
+
+  /** Le modèle, la couleur et l'adresse de réponse du PDF, pour un exemplaire (étiquette du négoce) ou l'aperçu. */
+  private async optionsPdf(tenant: TenantContext, packet: SupplierPacket, etiquette: string | null): Promise<{ modele: ModelePdf; couleur: CouleurPdf; reponse: string | null }> {
+    const r = await this.settings(tenant);
+    const mobiiz = await this.adresseReponse(tenant.companyId, etiquette).catch(() => null);
+    return { modele: r.modelePdf, couleur: r.couleurPdf, reponse: mobiiz ?? packet.expediteur?.email ?? null };
   }
 
   /** Le PDF « Demande de devis » (§45.3) d'une demande : au nom d'un destinataire quand il est donné. */
@@ -217,7 +243,8 @@ export class PriceRequestsService {
     if (!request?.packet) throw notFound("PriceRequest");
     const recipient = recipientId ? request.recipients.find((r) => r.id === recipientId) : undefined;
     const sender = await this.requests.sender(tenant, request.projectId);
-    const bytes = await packetPdf(request.packet, await this.sketchFiles(tenant, request.packet), { logo: sender?.logo ?? null, destinataire: recipient?.supplier.name ?? null });
+    const reglages = await this.optionsPdf(tenant, request.packet, recipient?.etiquette ?? null);
+    const bytes = await packetPdf(request.packet, await this.sketchFiles(tenant, request.packet), { logo: sender?.logo ?? null, destinataire: recipient?.supplier.name ?? null, ...reglages });
     return { filename: fileName(request.packet.chantier), bytes };
   }
 
@@ -245,10 +272,11 @@ export class PriceRequestsService {
     // fournisseurs qui n'ont rien reçu (audit avant commercialisation, 2026-10-11).
     if (recipient.status !== "to_send") return this.reload(tenant, request.id);
     if (!request.packet) throw new DomainError("conflict", "This request predates the supplier packet", { reason: "no_packet" });
-    const pdf = await this.pdf(tenant, request.id, recipientId);
-    const complement = await this.complement(request.id, recipientId);
+    // L'étiquette d'abord (assistant, point 10) : le PDF imprime l'adresse étiquetée qui sert de « Répondre à ».
     const via = await this.expediteur(tenant.companyId);
     if (via) await this.requests.setEtiquette(tenant, recipientId, via.etiquette);
+    const pdf = await this.pdf(tenant, request.id, recipientId);
+    const complement = await this.complement(request.id, recipientId);
     const lien = complement && "lien" in complement ? complement.lien : null;
     const corps = packetMail(request.packet, { prenomCommercial: recipient.supplier.contactName, lien });
     const texte = complement && "bloc" in complement ? `${corps}\n\n${complement.bloc}` : corps;
@@ -280,9 +308,9 @@ export class PriceRequestsService {
    * « Exporter la liste en PDF » (§21.3, §45.9) : la liste validée, rendue par LE MÊME générateur que le PDF envoyé au
    * fournisseur (un seul générateur, une seule mise en page, aucun prix) ; pour l'imprimer ou la donner au comptoir.
    */
-  async exportPdf(tenant: TenantContext, projectId: string, options: { apercu?: boolean } = {}): Promise<{ filename: string; bytes: Uint8Array }> {
+  async exportPdf(tenant: TenantContext, projectId: string, options: { apercu?: boolean; zones?: ZonePdf[] } = {}): Promise<{ filename: string; bytes: Uint8Array }> {
     const { packet, logo } = await this.order(tenant, projectId, { message: null, dueDate: null, apercu: options.apercu === true });
-    return { filename: fileName(packet.chantier), bytes: await packetPdf(packet, await this.sketchFiles(tenant, packet), { logo }) };
+    return { filename: fileName(packet.chantier), bytes: await packetPdf(packet, await this.sketchFiles(tenant, packet), { logo, ...(await this.optionsPdf(tenant, packet, null)), ...(options.zones ? { zones: options.zones } : {}) }) };
   }
 
   /** Le mail tel qu'il partira : le lien de réponse quand le serveur envoie (le vrai, propre au négoce, est créé à l'envoi). */
@@ -309,7 +337,7 @@ export class PriceRequestsService {
       mail: this.mailApercu(packet, fournisseur?.contactName ?? null),
       texteLibre: packet.message?.trim() || texteLibreParDefaut(packet),
       tutoie: !!packet.tutoie,
-      document: packetDocument(packet, { destinataire: input.destinataire ?? fournisseur?.name ?? null }),
+      document: packetDocument(packet, { destinataire: input.destinataire ?? fournisseur?.name ?? null, reponse: (await this.optionsPdf(tenant, packet, null)).reponse }),
       hasLogo: !!logo,
     };
   }

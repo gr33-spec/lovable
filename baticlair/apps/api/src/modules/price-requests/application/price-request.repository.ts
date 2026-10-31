@@ -108,6 +108,9 @@ export interface PriceRequestRepository {
   /** Case « Joindre le détail du chantier » (§42.2), mémorisée par entreprise. */
   attachQuoteDetail(tenant: TenantContext): Promise<boolean>;
   setAttachQuoteDetail(tenant: TenantContext, value: boolean): Promise<void>;
+  /** Assistant (31 octobre 2026, point 12) : le modèle et la couleur du PDF, retenus par entreprise (nuls = défauts). */
+  reglagesPdf(tenant: TenantContext): Promise<{ modele: string | null; couleur: string | null }>;
+  setReglagesPdf(tenant: TenantContext, r: { modele?: string | undefined; couleur?: string | undefined }): Promise<void>;
   addRecipients(tenant: TenantContext, requestId: string, supplierIds: string[]): Promise<void>;
   listByProject(tenant: TenantContext, projectId: string): Promise<PriceRequestRecord[]>;
   findById(tenant: TenantContext, id: string): Promise<PriceRequestRecord | null>;

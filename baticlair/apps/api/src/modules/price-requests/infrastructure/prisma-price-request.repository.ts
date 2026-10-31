@@ -392,4 +392,13 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
   async setAttachQuoteDetail(tenant: TenantContext, value: boolean): Promise<void> {
     await this.prisma.company.update({ where: { id: tenant.companyId }, data: { attachQuoteDetail: value } });
   }
+
+  async reglagesPdf(tenant: TenantContext): Promise<{ modele: string | null; couleur: string | null }> {
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { pdfModele: true, pdfCouleur: true } });
+    return { modele: c?.pdfModele ?? null, couleur: c?.pdfCouleur ?? null };
+  }
+
+  async setReglagesPdf(tenant: TenantContext, r: { modele?: string | undefined; couleur?: string | undefined }): Promise<void> {
+    await this.prisma.company.update({ where: { id: tenant.companyId }, data: { ...(r.modele !== undefined ? { pdfModele: r.modele } : {}), ...(r.couleur !== undefined ? { pdfCouleur: r.couleur } : {}) } });
+  }
 }

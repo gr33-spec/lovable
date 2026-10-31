@@ -132,6 +132,11 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // l'adresse seulement si l'artisan les ajoute (`bref:avec-client`).
     brefTexte: brief ? briefTexte(briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null)) : "",
     brefAvecClient: takeoff.answers["bref:avec-client"] === "oui",
+    // Assistant Mobiiz (31 octobre 2026) : l'adresse du chantier et la livraison dites par l'artisan (PDF, points 9 et 11).
+    chantier: {
+      adresse: typeof takeoff.answers["chantier:adresse"] === "string" ? takeoff.answers["chantier:adresse"] : null,
+      livraison: typeof takeoff.answers["chantier:livraison"] === "string" ? takeoff.answers["chantier:livraison"] : null,
+    },
     // §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan porte « Ratios en cours de
     // validation » sur l'écran 3 et dans le PDF fournisseur ; pas la couverture.
     /** La phrase de la pastille orange d'une ligne vague (« Précise pour trouver d'autres couvreurs »). */

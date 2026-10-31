@@ -65,6 +65,17 @@ beforeEach(async () => {
   recuSimule = {};
 });
 
+/** Le texte d'un PDF, ligne à ligne (pdf.js). */
+async function textePdf(bytes: Uint8Array): Promise<string> {
+  const worker = await import("pdfjs-dist/legacy/build/pdf.worker.mjs");
+  (globalThis as { pdfjsWorker?: unknown }).pdfjsWorker = worker;
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(bytes), useSystemFonts: false }).promise;
+  const out: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) out.push(...(await (await doc.getPage(i)).getTextContent()).items.flatMap((x) => ("str" in x ? [x.str] : [])));
+  return out.join("\n");
+}
+
 async function demande(agent: Agent, fournisseur = "Négoce Dupont", email = "ventes@dupont.example") {
   const q = (await agent.post("/v1/quantitatifs").send({ reference: "Dupont", adresse: "12 rue de Siam, 29200 Brest", lignes: [{ libelle: "Chatière de ventilation", quantite: "4", unite: "u" }] })).body;
   let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
@@ -125,6 +136,20 @@ describe("l'adresse Mobiiz de l'artisan", () => {
     expect(m.replyTo).toBe(`toitures-martin+r${etiquette}@mobiiz.fr`);
     expect(m.subject).toMatch(new RegExp(`\\[réf\\. ${etiquette}\\]$`));
     expect(m.to).toBe("ventes@dupont.example");
+  });
+
+  it("assistant (31 octobre 2026, point 10) : le PDF joint imprime l'adresse de réponse, la même que « Répondre à » ; l'aperçu, l'adresse Mobiiz", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
+    const { projectId, recipientId } = await demande(agent);
+    await agent.post(`/v1/price-request-recipients/${recipientId}/send`).expect(200);
+    const m = ctx.emails.sent.at(-1)!;
+    const pdf = m.attachments!.find((a) => a.contentType === "application/pdf")!;
+    const texte = await textePdf(Buffer.from(pdf.contentBase64, "base64"));
+    expect(texte).toContain("Merci d'envoyer votre proposition commerciale à l'adresse suivante :");
+    expect(texte).toContain(m.replyTo!);
+    // L'aperçu avant envoi : l'adresse Mobiiz de l'entreprise, jamais une adresse inventée.
+    const apercu = await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({});
+    expect(apercu.body.document.reponse.adresse).toBe("toitures-martin@mobiiz.fr");
   });
 
   it("le SMS « Préviens ton négoce » nomme l'adresse Mobiiz qui envoie la demande", async () => {

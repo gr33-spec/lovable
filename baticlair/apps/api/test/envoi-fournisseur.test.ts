@@ -173,7 +173,7 @@ describe("envoi fournisseur : un document, aucun prix", () => {
 
   it("case « Joindre le détail du devis » : cochée par défaut, mémorisée par entreprise, et le bloc du détail disparaît si elle est décochée", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
-    expect((await agent.get("/v1/price-requests/settings")).body).toEqual({ attachQuoteDetail: true, deliversEmail: true });
+    expect((await agent.get("/v1/price-requests/settings")).body).toEqual({ attachQuoteDetail: true, modelePdf: "classique", couleurPdf: "mobiiz", deliversEmail: true });
     expect((await agent.patch("/v1/price-requests/settings").send({ attachQuoteDetail: false })).body.attachQuoteDetail).toBe(false);
     expect((await agent.get("/v1/price-requests/settings")).body.attachQuoteDetail).toBe(false);
     const { projectId, supplierId } = await chantierPret(agent);
@@ -184,6 +184,17 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     // L'autre entreprise garde la valeur par défaut.
     const other = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures Le Gall");
     expect((await other.agent.get("/v1/price-requests/settings")).body.attachQuoteDetail).toBe(true);
+  });
+
+  it("assistant (31 octobre 2026, point 12) : le modèle et la couleur du PDF se retiennent par entreprise ; une couleur hors liste est refusée", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "pdf@example.fr", "Toitures Martin");
+    const r = (await agent.patch("/v1/price-requests/settings").send({ modelePdf: "detaille", couleurPdf: "bleu" })).body;
+    expect(r).toMatchObject({ attachQuoteDetail: true, modelePdf: "detaille", couleurPdf: "bleu" });
+    expect((await agent.get("/v1/price-requests/settings")).body).toMatchObject({ modelePdf: "detaille", couleurPdf: "bleu" });
+    expect((await agent.patch("/v1/price-requests/settings").send({ couleurPdf: "#ff00ff" })).status).toBe(400);
+    expect((await agent.patch("/v1/price-requests/settings").send({ modelePdf: "luxe" })).status).toBe(400);
+    expect(priceLeak("Demande de prix — Matériaux. Merci d'indiquer vos meilleurs prix.")).toBeNull();
+    expect(priceLeak("Prix : 12 €")).not.toBeNull();
   });
 
   it("le générateur refuse les prix : le test du §42.2 attrape €, HT, TVA, un montant suivi d'une devise, mais pas « sans prix »", () => {

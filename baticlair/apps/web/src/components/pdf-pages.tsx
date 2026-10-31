@@ -30,7 +30,24 @@ const MAX_ZOOM = 4;
  * dessinée à la taille de l'écran, entière en largeur et en hauteur ; deux doigts zooment, un double tap aussi.
  * Si le dessin échoue, `onError` rend la main à l'afficheur du téléphone.
  */
-export function PdfPages({ file, title, onError }: { file: Blob; title: string; onError: () => void }) {
+export function PdfPages({
+  file,
+  title,
+  onError,
+  overlay,
+  largeur = false,
+}: {
+  file: Blob;
+  title: string;
+  onError: () => void;
+  /**
+   * Assistant Mobiiz (31 octobre 2026, point 6) : ce qui se pose sur une page (les zones des lignes, à toucher), avec
+   * l'échelle points PDF → pixels et la hauteur de la page en points. Absent : la page seule, comme avant.
+   */
+  overlay?: (page: number, echelle: number, hauteurPoints: number) => React.ReactNode;
+  /** Le panneau d'aperçu de l'ordinateur : la page prend toute la largeur (lisible), on fait défiler. */
+  largeur?: boolean;
+}) {
   const box = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<Rendered[] | null>(null);
   const [fit, setFit] = useState<{ w: number; h: number } | null>(null);
@@ -120,8 +137,8 @@ export function PdfPages({ file, title, onError }: { file: Blob; title: string; 
         <div className="flex min-h-full flex-col items-center justify-center gap-3 p-2" style={{ width: zoom > 1 ? `${zoom * 100}%` : undefined }}>
           {pages.map((p, i) => {
             // En entier : la page tient dans la largeur ET dans la hauteur de l'écran.
-            const w = Math.min(fit.w, (fit.h * p.width) / p.height) * zoom;
-            return (
+            const w = (largeur ? fit.w : Math.min(fit.w, (fit.h * p.width) / p.height)) * zoom;
+            const image = (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={p.url}
@@ -131,6 +148,13 @@ export function PdfPages({ file, title, onError }: { file: Blob; title: string; 
                 className="shrink-0 rounded-lg bg-white shadow-card select-none"
                 style={{ width: w, height: (w * p.height) / p.width }}
               />
+            );
+            if (!overlay) return image;
+            return (
+              <div key={p.url} className="relative shrink-0" style={{ width: w, height: (w * p.height) / p.width }}>
+                {image}
+                {overlay(i, w / p.width, p.height)}
+              </div>
             );
           })}
         </div>

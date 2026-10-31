@@ -21,15 +21,17 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
 import { memoryStorage } from "multer";
 import { z } from "zod";
+import { COULEURS_PDF, MODELES_PDF, type CouleurPdf } from "@baticlair/domain";
 import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { assembleQuote, chunkedFields, UploadParts } from "../../documents/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { PriceRequestsService, type PriceRequestView } from "../application/price-requests.service.js";
-import { packetDocument } from "../application/supplier-packet.js";
+import { packetDocument, type ZonePdf } from "../application/supplier-packet.js";
 
 const supplierIds = z.array(z.string()).min(1).max(20);
-const settingsBody = z.object({ attachQuoteDetail: z.boolean() });
+// Assistant (31 octobre 2026) : le modèle et la couleur du PDF se règlent ici aussi ; chaque champ est facultatif.
+const settingsBody = z.object({ attachQuoteDetail: z.boolean().optional(), modelePdf: z.enum(MODELES_PDF).optional(), couleurPdf: z.enum(COULEURS_PDF.map((c) => c.id) as [CouleurPdf, ...CouleurPdf[]]).optional() });
 const createBody = z.object({
   supplierIds,
   message: z
@@ -154,6 +156,17 @@ export class PriceRequestsController {
     res.setHeader("Content-Disposition", `attachment; filename="${pdf.filename}"`);
     res.setHeader("Cache-Control", "private, no-store");
     return new StreamableFile(pdf.bytes);
+  }
+
+  /**
+   * Assistant Mobiiz (31 octobre 2026, point 6) : les zones des lignes du PDF de l'aperçu (clé de l'article, page, rectangle
+   * en points PDF), pour toucher une ligne dans le PDF et la modifier. Le même rendu que `?apercu=1`.
+   */
+  @Get("projects/:projectId/demande-de-devis.zones")
+  async zonesPdf(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
+    const zones: ZonePdf[] = [];
+    await this.requests.exportPdf(tenant, projectId, { apercu: true, zones });
+    return { zones };
   }
 
   @Get("projects/:projectId/price-requests")

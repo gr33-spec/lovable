@@ -14,6 +14,8 @@ export { normalizeText, type TradeProfile } from "./trades/trade-profile.js";
 export { ROOFING_PROFILE, TRADE_PROFILES, DEFAULT_TRADE, TRADES, normalizeTrades, tradeKey, tradeProfile } from "./trades/index.js";
 export * from "./documents/page-analysis.js";
 export * from "./documents/cost-estimate.js";
+export * from "./documents/modele-pdf.js";
+export * from "./assistant/assistant.js";
 export { containsKeyword, type MaterialFamily } from "./trades/trade-profile.js";
 export { COMMON_LABOR, LABOR_ONLY } from "./trades/common.js";
 export * from "./takeoff/validation.js";

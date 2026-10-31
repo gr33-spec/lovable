@@ -1074,7 +1074,7 @@ export class TakeoffService {
 
   async answer(tenant: TenantContext, takeoffId: string, key: string, value: EngineAnswer): Promise<ReviewedTakeoff> {
     // Une correction d'article (§41.4, §45.8, §45.9 : depuis l'aperçu avant envoi) ne lève aucun doute : la liste validée le reste.
-    const itemOnly = /^(quantite|libelle|precision|retire|ajout|bref|habitude):/.test(key);
+    const itemOnly = /^(quantite|libelle|precision|retire|ajout|bref|habitude|chantier):/.test(key);
     const takeoff = itemOnly ? await this.itemEditable(tenant, await this.takeoffs.findById(tenant, takeoffId)) : await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const previous = takeoff.answers[key];
     // §45.8 : « On ajoute ? » — Oui / Non d'un tap, mémorisé pour l'entreprise.

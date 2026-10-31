@@ -7,6 +7,7 @@ import { PenLine } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useRef, useState } from "react";
 import { EcrireMaListe } from "@/components/ecrire-ma-liste";
+import { BoutonDecrire } from "@/components/decrire-mon-chantier";
 import { DropZone } from "@/components/journey";
 import { Paywall, useBilling } from "@/components/paywall";
 import { BackButton } from "@/components/ui";
@@ -92,6 +93,8 @@ export default function NouveauChantierPage() {
       <DropZone small titre="Depuis mon devis — on t'avance" sousTitre="Je te prépare la liste, tu vérifies les quantités." onFile={(f) => void drop(f, "devis")} pending={pending === "devis"} error={error} />
       <DropZone small kind="liste" titre="Photo de ma liste" sousTitre="Une photo, un PDF ou une capture : je la remets au propre." onFile={(f) => void drop(f, "liste")} pending={pending === "liste"} error={null} />
       <SaisieListeReprise />
+      {/* Assistant Mobiiz (Greg, 31 octobre 2026, point 1) : le quatrième départ, la description écrite ou dictée. */}
+      <BoutonDecrire />
     </>
   );
 }

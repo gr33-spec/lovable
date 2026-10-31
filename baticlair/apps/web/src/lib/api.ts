@@ -286,6 +286,8 @@ export interface Takeoff {
   brefTexte?: string;
   /** Le client et l'adresse sont-ils dans le bref ? (non par défaut : un négoce n'en a pas besoin pour chiffrer). */
   brefAvecClient?: boolean;
+  /** Assistant Mobiiz (31 octobre 2026) : l'adresse du chantier et la livraison dites par l'artisan. */
+  chantier?: { adresse: string | null; livraison: string | null };
   /** §52 : le métier n'a pas encore été relu par un artisan, l'écran 3 porte « Ratios en cours de validation ». */
   ratiosEnValidation?: boolean;
   /** §52, la carte « Lots repérés » : les lots lus, ceux gardés ou ajoutés (null avant « C'est bon »), les métiers à ajouter. */

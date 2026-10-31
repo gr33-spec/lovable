@@ -99,6 +99,9 @@ const correction = z.discriminatedUnion("action", [
   // §50.7 : une ligne du chantier en bref, réécrite (texte) ou retirée (texte vide).
   z.object({ action: z.literal("bref"), cle: z.string().min(1).max(80), texte: z.string().trim().max(200) }),
   z.object({ action: z.literal("retirer_article"), id: z.string().min(1).max(200) }),
+  // Assistant Mobiiz (31 octobre 2026) : « Annuler » un retrait ; l'adresse du chantier et la livraison (PDF, points 9, 11).
+  z.object({ action: z.literal("remettre_article"), id: z.string().min(1).max(200) }),
+  z.object({ action: z.literal("chantier"), champ: z.enum(["adresse", "livraison"]), texte: z.string().trim().max(200) }),
   z.object({ action: z.literal("suggestion"), id: z.string().min(1).max(200), reponse: z.enum(["oui", "non"]) }),
 ]);
 

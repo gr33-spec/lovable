@@ -168,6 +168,10 @@ model Company {
   /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
   logo                       Bytes?
   logoType                   String?
+  /// Assistant Mobiiz (Greg, 31 octobre 2026, point 12) : le modèle du PDF « Demande de prix » (essentiel | classique |
+  /// detaille ; nul = classique) et sa couleur principale (identifiant de COULEURS_PDF ; nul = jaune Mobiiz).
+  pdfModele                  String?   @map("pdf_modele")
+  pdfCouleur                 String?   @map("pdf_couleur")
   createdAt                  DateTime  @default(now())
   updatedAt                  DateTime  @updatedAt
 

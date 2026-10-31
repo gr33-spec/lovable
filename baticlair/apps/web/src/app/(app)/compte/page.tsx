@@ -2,6 +2,7 @@
 
 import { AideBouton } from "@/components/aide";
 import { CarteApparence } from "@/components/apparence";
+import { CarteReglagesPdf } from "@/components/reglages-pdf";
 import { viderCacheAppareil } from "@/components/service-worker";
 import { useRouter } from "next/navigation";
 import { CarteAlertesAchats, CarteSiretAchatGroupe, LienMesPrix } from "@/components/profil-achat-groupe";
@@ -107,6 +108,7 @@ export default function ComptePage() {
       <ResumeAbonnement />
       {/* Lot final, point 1 : l'identité demandée au premier envoi, modifiable ici. */}
       <CarteIdentite />
+      <CarteReglagesPdf />
       <CarteApparence />
       <PlanSummary />
       <Card className="flex flex-col gap-2 p-4">

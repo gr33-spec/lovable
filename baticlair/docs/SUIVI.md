@@ -203,3 +203,8 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 | 152 | 31/10 | Refonte de l'app sur ordinateur (accueil, listes, chantier, achats groupés, négoces, profil) | fait | Voir DECISIONS (31/10, app sur ordinateur). |
 | 153 | 31/10 | « Écris ta liste » : la saisie par mots-clés, intuitive sur téléphone et ordinateur | fait | Voir DECISIONS (31/10, la saisie). e2e « Je la note moi-même » complété (clavier ↓ Entrée, repli à la quantité). |
 | 154 | 31/10 | Couverture région par région, voliges, liteaux, tout le support | fait | 20 produits sourcés §26-§36, 12 régions, classement régional. Tests : domaine couverture-regions, API catalogue-regions. |
+| 155 | 31/10 | Clair / Sombre pour tout Mobiiz | fait | Profil > Apparence ; sombre par défaut ; e2e « Clair / Sombre ». |
+| 156 | 31/10 | Assistant Mobiiz : audit et plan | fait | `docs/assistant-mobiiz.md` (existant, coûts IA, risques, plan I2 → I5). |
+| 157 | 31/10 | PDF « Demande de prix — Matériaux » : 3 modèles, couleur, bloc de réponse Mobiiz, chantier et livraison | fait | Profil > Ma demande de prix ; tests `pdf-modeles`, `adresse-mobiiz` (adresse du PDF = Répondre à), e2e « Ma demande de prix ». |
+| 158 | 31/10 | Assistant : conversation + PDF interactif (ordinateur deux panneaux, téléphone plein écran), micro, Passer, annuler | fait | Carte « Assistant Mobiiz » sur « Ton chantier » ; e2e `assistant-mobiiz.spec.ts`. |
+| 159 | 31/10 | Décrire son chantier (texte ou voix) → quantitatif, quantités dites seulement | fait | « Je décris mon chantier » dans Ma liste de matériaux. |

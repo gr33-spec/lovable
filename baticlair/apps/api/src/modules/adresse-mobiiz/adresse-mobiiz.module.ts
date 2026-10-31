@@ -1,3 +1,4 @@
+import { adresseNue } from "@baticlair/domain";
 import { AdminEmailsController } from "./http/admin-emails.controller.js";
 import { Inject, Module, type OnModuleInit } from "@nestjs/common";
 import type { AppConfig } from "../../platform/config/config.js";
@@ -46,6 +47,12 @@ export class AdresseMobiizModule implements OnModuleInit {
       if (!e) return null;
       const etiquette = await this.adresses.etiquetteNeuve();
       return { from: e.from, replyTo: e.replyTo(etiquette), etiquette };
+    });
+    // Assistant (31 octobre 2026, point 10) : l'adresse imprimée dans le PDF, la même que « Répondre à » du mail.
+    this.priceRequests.brancherAdresseReponse(async (companyId, etiquette) => {
+      const e = await this.adresses.expediteur(companyId);
+      if (!e) return null;
+      return etiquette ? e.replyTo(etiquette) : adresseNue(e.from);
     });
   }
 }

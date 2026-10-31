@@ -49,6 +49,9 @@ export type Correction =
   | { action: "preciser"; id: string; precision: string }
   | { action: "bref"; cle: string; texte: string }
   | { action: "retirer_article"; id: string }
+  // Assistant Mobiiz (31 octobre 2026) : « Annuler » un retrait ; l'adresse du chantier et la livraison dites par l'artisan.
+  | { action: "remettre_article"; id: string }
+  | { action: "chantier"; champ: "adresse" | "livraison"; texte: string }
   | { action: "suggestion"; id: string; reponse: "oui" | "non" };
 
 type Row = { id: string; companyId: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
@@ -425,6 +428,14 @@ export class QuantitatifsService {
             : await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, "oui");
         return this.view(row, after, rendu);
       }
+      case "remettre_article": {
+        // Assistant (« Annuler ») : un article retiré revient, tel que le moteur le calcule ; rien d'autre ne bouge.
+        if (reviewed.takeoff.answers[`retire:${correction.id}`] !== "oui") throw notFound("Line");
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, null), rendu);
+      }
+      case "chantier":
+        // Assistant (points 9 et 11) : seulement ce que l'artisan dit ; vide, la donnée est retirée. Elle part dans le PDF.
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `chantier:${correction.champ}`, correction.texte.trim() || null), rendu);
       case "bref": {
         // §50.7 : seule une ligne du bref montré se corrige ; vide, elle est retirée (au document comme chez le fournisseur).
         // « avec-client » : l'artisan ajoute (« oui ») ou retire (vide) le client et l'adresse du bref.
