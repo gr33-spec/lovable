@@ -1,4 +1,4 @@
-import { croiser, produit, type ArticleCatalogue } from "../catalogue.js";
+import { croiser, produit, type ArticleCatalogue, type Fiche } from "../catalogue.js";
 
 /**
  * COUVERTURE (relecture de Greg en premier). Désignations génériques, sans marque ; formats et qualités usuels du comptoir.
@@ -19,12 +19,19 @@ const EDILIANS_HP10 = { libelle: "Documentation HP 10 Huguenot, réf. 205 (Edili
 const EDILIANS_CANAL = { libelle: "Tuiles canal Poudenx (Edilians)", url: "https://edilians.com/media/wysiwyg/Encyclopedie/canal-tuiles-edilians.pdf", verifieLe: "2026-10-04" };
 /** Les sections de liteau du référentiel : §200 (tuile 27×40, ardoise 18×40 et 27×27) et §760 (selon l'entraxe des chevrons). */
 const SECTIONS_LITEAU = ["18×40", "14×40", "27×40", "14×50", "18×50", "18×75", "25×50", "27×27"];
-const tuileEdilians = (nom: string, reference: string, source: typeof EDILIANS_H14, synonymes: readonly string[]) =>
-  produit(M, "Tuiles terre cuite", nom, "pièces", [null], {
+/**
+ * Une tuile Edilians : sans coloris précisé, puis ses coloris publiés sur sa fiche produit avec leur EAN (relevés le
+ * 31 octobre 2026, voir `couverture-fabricants.ts`).
+ */
+const tuileEdilians = (nom: string, reference: string, source: typeof EDILIANS_H14, synonymes: readonly string[], page?: string, coloris: readonly (readonly [string, string])[] = []) => {
+  const ean = new Map(coloris);
+  return produit(M, "Tuiles terre cuite", nom, "pièces", [null, ...coloris.map(([c]) => c)], {
     synonymes,
-    designation: () => `${nom}, réf. ${reference} (Edilians)`,
-    fiche: { marque: "Edilians", reference, statut: "verifie", source },
+    designation: (v) => `${nom}, réf. ${reference} (Edilians)${v ? ` ${v}` : ""}`,
+    fiche: (v): Fiche =>
+      v && page ? { marque: "Edilians", reference, ...(ean.get(v) ? { ean: ean.get(v)! } : {}), statut: "verifie", source: { libelle: `Fiche ${nom} (Edilians)`, url: page, verifieLe: "2026-10-31" } } : { marque: "Edilians", reference, statut: "verifie", source },
   });
+};
 
 export const COUVERTURE: readonly ArticleCatalogue[] = [
   // Ardoises
@@ -32,14 +39,14 @@ export const COUVERTURE: readonly ArticleCatalogue[] = [
   ...produit(M, "Ardoises", "Ardoise fibres-ciment", "pièces", croiser(["60×30", "40×40", "40×24", "60×40"], ["gris ardoise", "noir bleuté"]), { synonymes: ["ardoise synthétique", "ardoise fibro", "fibro ciment", "eternit"] }),
   ...produit(M, "Ardoises", "Ardoise de faîtage (lignolet)", "pièces", ["Espagne", "Angers (France)"], { synonymes: ["lignolet", "faîtage ardoise"] }),
   // Tuiles terre cuite : les modèles vérifiés chez le fabricant d'abord (Edilians), puis les désignations génériques.
-  ...tuileEdilians("Tuile H 14 Huguenot", "204", EDILIANS_H14, ["h14", "h 14", "huguenot", "grand moule faiblement galbee"]),
-  ...tuileEdilians("Tuile HP 10 Huguenot", "205", EDILIANS_HP10, ["hp10", "hp 10", "huguenot"]),
-  ...tuileEdilians("Tuile canal 50 Poudenx", "414 / 454", EDILIANS_CANAL, ["canal 50", "poudenx"]),
-  ...tuileEdilians("Tuile Canal Gironde 50 Poudenx", "406 / 456", EDILIANS_CANAL, ["canal gironde", "gironde 50", "poudenx"]),
-  ...tuileEdilians("Tuile Canal Gironde à blocage Poudenx", "409 / 459", EDILIANS_CANAL, ["gironde a blocage", "poudenx"]),
-  ...tuileEdilians("Tuile Canal Lyonnaise 40 Poudenx", "401 / 451", EDILIANS_CANAL, ["canal lyonnaise", "lyonnaise 40", "poudenx"]),
-  ...tuileEdilians("Tuile Canal Charentaise Poudenx", "405 / 455", EDILIANS_CANAL, ["canal charentaise", "charentaise", "poudenx"]),
-  ...tuileEdilians("Tuile Canal Charentaise à blocage Poudenx", "410 / 460", EDILIANS_CANAL, ["charentaise a blocage", "poudenx"]),
+  ...tuileEdilians("Tuile H 14 Huguenot", "204", EDILIANS_H14, ["h14", "h 14", "huguenot", "grand moule faiblement galbee"], "https://edilians.com/h-14-huguenot.html", [["Flammé Rustique", "3661223030822"], ["Rouge", "3661223024425"], ["Vieilli Masse", "3661223069723"]]),
+  ...tuileEdilians("Tuile HP 10 Huguenot", "205", EDILIANS_HP10, ["hp10", "hp 10", "huguenot"], "https://edilians.com/hp-10-huguenot.html", [["Ardoisé", "3661223312263"], ["Flammé Rustique", "3661223022551"], ["Argentique", "3661223165999"], ["Gris Quartz", "3661223312270"], ["Rouge", "3661223311839"], ["Vieilli Masse", "3661223314571"]]),
+  ...tuileEdilians("Tuile canal 50 Poudenx", "414 / 454", EDILIANS_CANAL, ["canal 50", "poudenx"], "https://edilians.com/canal-50-poudenx.html", [["Bastide", "3661223302523"], ["Littoral Flammé", "3661223303681"], ["Brun", "3661223307672"], ["Paysage", "3661223303032"], ["Ancien", "3661223302417"], ["Vieux Toits", "3661223303971"], ["Pastel", "3661223307689"], ["Emporda", "3661223302462"], ["Rose", "3661223307665"], ["Rouergue", "3661223303551"], ["Rouge", "3661223302431"], ["Terroir", "3661223302486"], ["Tradition", "3661223302509"]]),
+  ...tuileEdilians("Tuile Canal Gironde 50 Poudenx", "406 / 456", EDILIANS_CANAL, ["canal gironde", "gironde 50", "poudenx"], "https://edilians.com/canal-gironde-50-poudenx.html", [["Paysage", "3661223049923"], ["Gabarre", "3661223339734"], ["Pastel", "3661223049947"], ["Réthaise", "3661223265507"], ["Rose", "3661223049909"], ["Rouge", "3661223049886"], ["Saintonge", "3661223049985"]]),
+  ...tuileEdilians("Tuile Canal Gironde à blocage Poudenx", "409 / 459", EDILIANS_CANAL, ["gironde a blocage", "poudenx"], "https://edilians.com/canal-gironde-a-blocage.html", [["Saintonge", "3661223170252"]]),
+  ...tuileEdilians("Tuile Canal Lyonnaise 40 Poudenx", "401 / 451", EDILIANS_CANAL, ["canal lyonnaise", "lyonnaise 40", "poudenx"], "https://edilians.com/canal-lyonnaise-40-poudenx.html", [["Rouge", "3661223029932"], ["Vieux Toits", "3661223029406"]]),
+  ...tuileEdilians("Tuile Canal Charentaise Poudenx", "405 / 455", EDILIANS_CANAL, ["canal charentaise", "charentaise", "poudenx"], "https://edilians.com/canal-charentaise-poudenx.html", [["Gabarre", "3661223339932"], ["Paysage", "3661223033069"], ["Rouge", "3661223032239"], ["Saintonge", "3661223030129"]]),
+  ...tuileEdilians("Tuile Canal Charentaise à blocage Poudenx", "410 / 460", EDILIANS_CANAL, ["charentaise a blocage", "poudenx"], "https://edilians.com/canal-charentaise-a-blocage.html", [["Paysage", "3661223186475"]]),
   ...produit(M, "Tuiles terre cuite", "Tuile mécanique à emboîtement petit moule", "pièces", ["rouge", "rouge vieilli", "brun", "ardoisé", "sablé"], { synonymes: ["tuile mécanique", "tuile emboîtement", "petit moule"] }),
   ...produit(M, "Tuiles terre cuite", "Tuile mécanique à emboîtement grand moule", "pièces", ["rouge", "rouge vieilli", "brun", "ardoisé", "sablé"], { synonymes: ["tuile mécanique", "grand moule", "tuile 10 au m²"] }),
   ...produit(M, "Tuiles terre cuite", "Tuile plate", "pièces", croiser(["17×27", "16×24"], ["rouge", "brun vieilli", "ardoisé"]), { synonymes: ["tuile plate", "petite tuile"] }),

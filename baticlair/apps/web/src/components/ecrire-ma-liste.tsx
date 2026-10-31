@@ -19,7 +19,8 @@ import { useBrouillon } from "@/lib/brouillon";
  * que c'est le développé) : l'intitulé s'écrit tel quel, chiffres compris, dans son champ ; la quantité et l'unité ont les
  * leurs. Rien n'est deviné dans l'intitulé, et rien ne bloque l'ajout : sans quantité, la ligne part « à vérifier ». Les
  * propositions mêlent le catalogue et les intitulés déjà écrits par l'entreprise elle-même (`ecrits`) ; ceux des autres
- * ne passent qu'une fois ajoutés au catalogue par l'admin (Greg, 30 octobre 2026, nuit).
+ * passent une fois ajoutés au catalogue par l'admin (Greg, 30 octobre 2026, nuit), ou, depuis le 31 octobre au soir, dès
+ * qu'une autre entreprise écrit ou commande en achat groupé la même chose (`communes`, « écrit par d'autres artisans »).
  *
  * LE CATALOGUE MÉTIER (Greg, 31 octobre 2026) : un produit à plusieurs formats se choisit en deux touchers (« Liteau ›
  * 18×40 ») ; les mots qui précisent sans être au catalogue (« rouge » dans « H14 rouge ») restent dans la désignation ;
@@ -33,19 +34,28 @@ interface Proposition {
   variante?: string | null;
   precisions?: string[];
   statut?: "verifie" | "generique" | null;
+  /** Une référence des artisans : écrite ou commandée par plusieurs entreprises, jamais vérifiée (Greg, 31 octobre 2026, soir). */
+  commune?: boolean;
 }
 
 /** Les propositions, regroupées par produit : un produit à plusieurs formats n'occupe qu'une puce. */
-function regrouper(resultats: readonly Proposition[], ecrits: readonly Proposition[]) {
+function regrouper(resultats: readonly Proposition[], ecrits: readonly Proposition[], communes: readonly Proposition[] = []) {
   const groupes = new Map<string, Proposition[]>();
   for (const r of resultats) {
     const k = r.produit ?? r.designation;
     groupes.set(k, [...(groupes.get(k) ?? []), r]);
   }
-  const entrees: ({ type: "produit"; produit: string; articles: Proposition[] } | { type: "article"; article: Proposition })[] = [...groupes].map(([produit, articles]) =>
-    articles.length > 1 ? { type: "produit" as const, produit, articles } : { type: "article" as const, article: articles[0]! },
-  );
-  return [...entrees.slice(0, 4), ...ecrits.map((article) => ({ type: "article" as const, article }))].slice(0, 6);
+  // Ce qui est tapé désigne déjà une variante (« H14 rouge » : le coloris Rouge, sans mot de reste) : elle se propose seule,
+  // d'un tap ; sinon le produit tient en une puce et ses variantes s'ouvrent (« Liteau › »).
+  const exacte = (articles: Proposition[]) => {
+    const sans = articles.filter((a) => !a.precisions?.length && a.variante);
+    return sans.length === 1 && articles.some((a) => a.precisions?.length) ? sans[0]! : null;
+  };
+  const entrees: ({ type: "produit"; produit: string; articles: Proposition[] } | { type: "article"; article: Proposition })[] = [...groupes].map(([produit, articles]) => {
+    const seule = articles.length > 1 ? exacte(articles) : articles[0]!;
+    return seule ? { type: "article" as const, article: seule } : { type: "produit" as const, produit, articles };
+  });
+  return [...entrees.slice(0, 4), ...ecrits.map((article) => ({ type: "article" as const, article })), ...communes.map((article) => ({ type: "article" as const, article: { ...article, commune: true } }))].slice(0, 7);
 }
 export interface LigneEcrite {
   libelle: string;
@@ -89,7 +99,7 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
   // Le catalogue complet (point 3 du 30 octobre) : les mots du chantier, fautes admises (« pane » → Panne).
   const fetchCat = useCallback(
     (signal: AbortSignal) =>
-      mot ? api<{ resultats: Proposition[] | null; ecrits?: Proposition[] | null }>(`/v1/catalogue?q=${encodeURIComponent(mot)}`, { signal }).catch(() => null) : Promise.resolve(null),
+      mot ? api<{ resultats: Proposition[] | null; ecrits?: Proposition[] | null; communes?: Proposition[] | null }>(`/v1/catalogue?q=${encodeURIComponent(mot)}`, { signal }).catch(() => null) : Promise.resolve(null),
     [mot],
   );
   const { data: cat } = useResource(fetchCat);
@@ -97,7 +107,7 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
   const [libre, setLibre] = useState(false);
   const [marqueLibre, setMarqueLibre] = useState("");
   const dejaChoisi = (r: Proposition) => r.designation.toLowerCase() === mot.toLowerCase() || texte.toLowerCase().startsWith(r.designation.toLowerCase());
-  const suggestions = mot && !libre ? regrouper((cat?.resultats ?? []).filter((r) => !dejaChoisi(r)), (cat?.ecrits ?? []).filter((r) => !dejaChoisi(r))) : [];
+  const suggestions = mot && !libre ? regrouper((cat?.resultats ?? []).filter((r) => !dejaChoisi(r)), (cat?.ecrits ?? []).filter((r) => !dejaChoisi(r)), (cat?.communes ?? []).filter((r) => !dejaChoisi(r))) : [];
   const groupeOuvert = ouvert ? suggestions.find((e) => e.type === "produit" && e.produit === ouvert) : undefined;
   const unites = UNITES.includes(unite) ? UNITES : [...UNITES, unite];
 
@@ -258,9 +268,16 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
                 </li>
               ) : (
                 <li key={e.article.designation}>
-                  <button type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => choisir(e.article)} className="pressable inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-3 text-left text-[14px] font-semibold">
+                  <button
+                    type="button"
+                    onMouseDown={(ev) => ev.preventDefault()}
+                    onClick={() => choisir(e.article)}
+                    aria-label={e.article.commune ? `${e.article.designation} (écrit par d'autres artisans)` : undefined}
+                    className="pressable inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-3 text-left text-[14px] font-semibold"
+                  >
                     {e.article.designation}
                     {e.article.precisions?.length ? <span className="ml-1 font-normal text-muted">{e.article.precisions.join(" ")}</span> : null}
+                    {e.article.commune ? <span className="ml-1 text-[12px] font-normal text-muted">· écrit par d&apos;autres artisans</span> : null}
                   </button>
                 </li>
               ),

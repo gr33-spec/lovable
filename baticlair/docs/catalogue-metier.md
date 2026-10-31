@@ -52,17 +52,37 @@ ce qui a été fait, d'où viennent les données et ce qui reste. Il est tenu à
 | Données | Source | Statut |
 |---|---|---|
 | Liteaux 18×40, 14×40, 27×40, 14×50, 18×50, 18×75, 25×50, 27×27 (sapin traité classe 2) | Référentiel couverture du fondateur, §200 et §760 | générique, sourcé |
-| Tuile H 14 Huguenot, réf. 204 (Edilians) | [Fiche Edilians](https://edilians.eu/h-14-huguenot.html), consultée le 31/10/2026 | vérifié ; coloris non publiés sur la fiche, donc non listés |
+| Tuile H 14 Huguenot, réf. 204 (Edilians) | [Fiche Edilians](https://edilians.eu/h-14-huguenot.html), consultée le 31/10/2026 | vérifié |
 | Tuile HP 10 Huguenot, réf. 205 (Edilians) | [Documentation Edilians](https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf) (référentiel) | vérifié |
 | Six tuiles canal Poudenx (réf. 401/451 à 410/460, Edilians) | [Tuiles canal Edilians](https://edilians.com/media/wysiwyg/Encyclopedie/canal-tuiles-edilians.pdf) (référentiel §35.3) | vérifié |
+| **52 autres modèles de tuiles Edilians** (Oméga 10 et 13, Oméga Max, Alpha 10, Rhôna 10, Delta 10, H 10, PV 10, PV 13, HP 13, HP 17, Double HP 20, Panne H2, Panne S, Monopole N°1, Losangées, Marseille, Méridionale, Romane Sans, Canal S, Canal Sablière, Médiane, Plein Sud, plates 16×24, 17×27, 20×30, Élixir…), **avec leurs coloris et l'EAN de chaque coloris** ; les coloris aussi pour H 14, HP 10 et les canaux Poudenx | Une fiche produit par modèle sur edilians.com (trouvée par l'index public `sitemap.xml`, lue une fois le 31/10/2026, une page toutes les 1,5 s) : nom, référence = numéro de la fiche technique (« 104_fog_omega_10… » → réf. 104), coloris et EAN publiés. Sans numéro de fiche, la référence est l'EAN du coloris | vérifié |
+| **Ardoises fibres-ciment Cedral** : Kergoat, Orléane, Pommay, Vertigo, Vertigo Alterna, Alterna, Tecta Texture, avec formats, bords et coloris | Pages modèle de [cedral.world/fr-fr](https://www.cedral.world/fr-fr/toiture/ardoises-fibres-ciment/kergoat/), 31/10/2026 | vérifié |
+| **Ardoises naturelles Cupa Pizarras** : carrières CUPA 3, 4 (Armadilla), 5 (Valdacal), 6, 7, 9, 10 (Las Arcas), 13, 17, en 13 formats (50×25 à 27×18) | [Catalogue couvreur Cupa Pizarras](https://www.cupapizarras.com/sites/default/files/catalogue_couvreur.pdf) (édition 2024) : carrières et tableau de pose. Un format se confirme auprès du négoce selon la carrière | vérifié (carrière) |
+| **Peinture par attributs** : usage × liant × finition × teinte × conditionnement (murs et plafonds, pièces humides, boiseries, fer, façade, sols, impressions, bois extérieur) | Désignations génériques du comptoir, sans marque (`peinture-attributs.ts`) | générique |
 
-Rien d'autre n'a été importé. Les articles de l'amorce d'origine (sans statut) restent des désignations génériques non
-sourcées, à faire relire.
+Pas encore : Terreal, Monier (Bramac), Wienerberger (Koramic), ardoises d'Angers et Rathscheck (leur site ne publie pas d'index lisible, ou le catalogue n'a pas été trouvé en ligne : à demander au fabricant ou au négoce).
 
 **ETIM, FAB-DIS** : ce sont des formats d'échange (classification et fiches produit des fabricants vers les
 distributeurs), pas des catalogues publics. Les données FAB-DIS s'obtiennent auprès des fabricants ou des distributeurs,
 avec leurs conditions de réutilisation. La fiche d'article ci-dessus peut accueillir un import ETIM ou FAB-DIS plus tard
 (marque, référence, attributs, source) ; rien n'est récupéré automatiquement, aucune collecte massive.
+
+## 3 bis. Les références des artisans (31 octobre 2026, soir)
+
+Demande de Greg : « un produit que nous n'avons pas […] devient une référence à partir du moment où quelqu'un d'autre
+formule la même chose ou commande en achat groupé ». Ce qui se passe :
+
+- **Comptent** : les intitulés écrits dans les listes (`libelle_ecrit`) et les lignes libres des achats groupés (« je décris
+  mon besoin »), une fois par entreprise, anonymisés (un intitulé où l'anonymisation retire quelque chose n'est jamais
+  gardé ; un intitulé qui contient chantier, client, rue, chez, M., Mme… n'entre jamais).
+- **Rapprochés** : même mot qui identifie (« ZX 12 » = « zx12 », « Zéphyr » = « zephyr »), jamais deux dimensions
+  différentes.
+- **Publiés dès deux entreprises** (`CATALOGUE_SEUIL_COMMUNAUTE`, 2 par défaut) : proposés à tous dans « Écris ta liste »,
+  marqués « écrit par d'autres artisans », jamais « vérifié », sans nom d'entreprise. Un mot inconnu doit venir de deux
+  entreprises (un nom de client ne se répète pas d'une entreprise à l'autre).
+- **L'admin** (Admin › Catalogue) voit chaque référence, « proposé à tous » ou non ; il l'écarte (« Ne plus le proposer à
+  tous », table `reference_ecartee`, les intitulés écrits restent) ou l'ajoute au catalogue (elle devient un article).
+- Test permanent : `apps/api/test/libelles-artisans.test.ts` (« RÉFÉRENCES DES ARTISANS »).
 
 ## 4. Comment tester
 

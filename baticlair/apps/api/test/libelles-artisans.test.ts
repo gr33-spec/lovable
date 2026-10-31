@@ -68,4 +68,45 @@ describe("les intitulés écrits par les artisans", () => {
     // Rien de personnel n'est gardé.
     expect(await ctx.prisma.libelleEcrit.count({ where: { libelle: { contains: "Dupont" } } })).toBe(0);
   });
+
+  it("RÉFÉRENCES DES ARTISANS (Greg, 31 octobre 2026, soir) : écrit par une autre entreprise, ou commandé en achat groupé, un produit inconnu est proposé à tous ; seul, il reste privé ; l'admin l'écarte", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A");
+    const b = await signUpWithCompany(ctx.app, "b@toitures.fr", "Toitures B");
+    const c = await signUpWithCompany(ctx.app, "c@toitures.fr", "Toitures C");
+    const d = await signUpWithCompany(ctx.app, "d@toitures.fr", "Toitures D");
+    const communes = async (agent: Agent, q: string) => ((await agent.get(`/v1/catalogue?q=${encodeURIComponent(q)}`).expect(200)).body.communes as { designation: string; entreprises: number }[]).map((x) => x.designation);
+
+    // Une seule entreprise : privé (chez elle seulement, dans ses intitulés).
+    await ecrire(a.agent, [{ libelle: "Tuile Zéphyr ZX 12 terre cuite", quantite: "300", unite: "pièces" }, { libelle: "Bande Zéphyr chez Mme Lambert", quantite: "2", unite: "m" }]);
+    expect(await communes(d.agent, "zephyr")).toEqual([]);
+    // Une autre entreprise écrit la même chose (à sa façon) : la référence existe pour tous, sans nom d'entreprise.
+    await ecrire(b.agent, [{ libelle: "tuile zephyr zx12 terre cuite", quantite: "40", unite: "pièces" }, { libelle: "Bande Zéphyr chez M. Kerbrat", quantite: "1", unite: "m" }]);
+    expect(await communes(d.agent, "zephyr")).toEqual(["Tuile Zéphyr ZX 12 terre cuite"]);
+    expect(await communes(d.agent, "zx 12")).toEqual(["Tuile Zéphyr ZX 12 terre cuite"]);
+    expect(JSON.stringify((await d.agent.get("/v1/catalogue?q=zephyr").expect(200)).body)).not.toMatch(/Toitures|Lambert|Kerbrat|chez/);
+
+    // Commandé en achat groupé (ligne libre « je décris mon besoin ») par une entreprise, écrit par une autre : référence aussi.
+    await ecrire(c.agent, [{ libelle: "Closoir Aéroflex 390 anthracite", quantite: "5", unite: "rouleaux" }]);
+    expect(await communes(d.agent, "aeroflex")).toEqual([]);
+    const achat = await ctx.prisma.regroupementNegocie.create({ data: { mode: "automatique", cle: "libre:closoir", libelle: "Closoir", famille: "couverture", departement: "22", clotureLe: new Date(Date.now() + 10 * 86_400_000), reponseAvantLe: new Date(Date.now() + 13 * 86_400_000) } });
+    const besoin = await ctx.prisma.besoinNegocie.create({ data: { companyId: a.companyId, designation: "Closoir Aéroflex 390 anthracite", cle: "libre:closoir", famille: "couverture", quantite: 4, unite: "rouleaux", departement: "22", livraison: "chantier", dateBesoin: new Date(), statut: "regroupe", regroupementId: achat.id } });
+    await ctx.prisma.ligneAchatGroupe.create({ data: { besoinId: besoin.id, regroupementId: achat.id, companyId: a.companyId, cle: "libre:closoir-aeroflex", libelle: "Closoir Aéroflex 390 anthracite", famille: "couverture", unite: "rouleaux", quantite: 4, designationOrigine: "Closoir Aéroflex 390 anthracite", libre: true } });
+    // Le calcul est mis en cache une minute ; un nouvel intitulé le renouvelle.
+    await ecrire(d.agent, [{ libelle: "Liteau 18x40", quantite: "10", unite: "m" }]);
+    await ecrire(b.agent, [{ libelle: "Gouttière demi-ronde 25 zinc", quantite: "10", unite: "m" }]);
+    expect(await communes(d.agent, "aeroflex")).toEqual(["Closoir Aéroflex 390 anthracite"]);
+
+    // L'admin la voit publiée, l'écarte : plus proposée à tous ; les intitulés écrits restent.
+    const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "Bati Invest");
+    await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
+    const items = (await greg.agent.get("/v1/admin/catalogue/propositions").expect(200)).body.items as { cle: string; libelle: string; publiee: boolean }[];
+    const zephyr = items.find((i) => i.libelle === "Tuile Zéphyr ZX 12 terre cuite")!;
+    expect(zephyr.publiee).toBe(true);
+    expect(items.some((i) => /chez|Lambert|Kerbrat/.test(i.libelle))).toBe(false);
+    await d.agent.post("/v1/admin/catalogue/propositions/ecarter").send({ cle: zephyr.cle }).expect(403);
+    await greg.agent.post("/v1/admin/catalogue/propositions/ecarter").send({ cle: zephyr.cle }).expect((r) => expect([200, 201]).toContain(r.status));
+    expect(await communes(d.agent, "zephyr")).toEqual([]);
+    expect(((await greg.agent.get("/v1/admin/catalogue/propositions").expect(200)).body.items as { cle: string; publiee: boolean }[]).find((i) => i.cle === zephyr.cle)?.publiee).toBe(false);
+    expect(await ctx.prisma.libelleEcrit.count({ where: { cle: { contains: "zephyr" } } })).toBe(2);
+  });
 });

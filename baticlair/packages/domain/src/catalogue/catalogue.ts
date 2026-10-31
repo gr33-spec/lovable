@@ -98,6 +98,8 @@ export interface ArticleCatalogue {
    */
   marque?: string;
   reference?: string;
+  /** Le code EAN (GTIN-13) d'un coloris ou d'un format, publié par le fabricant : la même tuile partout. */
+  ean?: string;
   statut?: "verifie" | "generique";
   source?: { libelle: string; url?: string; verifieLe: string };
 }
@@ -117,6 +119,9 @@ export const aPlat = (s: string) =>
 
 const slug = (s: string) => aPlat(s).replace(/\./g, "-").replace(/\s+/g, "-");
 
+/** La fiche d'un article : marque, référence, EAN, statut et source (une par variante quand elle en dépend). */
+export type Fiche = Pick<ArticleCatalogue, "marque" | "reference" | "ean" | "statut" | "source">;
+
 /** Fabrique d'articles : un produit et ses variantes (formats, dimensions, qualités). */
 export function produit(
   metier: MetierCatalogue,
@@ -124,10 +129,10 @@ export function produit(
   nom: string,
   unite: string,
   variantes: readonly (string | null)[] = [null],
-  o: { synonymes?: readonly string[]; designation?: (v: string | null) => string; fiche?: Pick<ArticleCatalogue, "marque" | "reference" | "statut" | "source"> } = {},
+  o: { synonymes?: readonly string[]; designation?: (v: string | null) => string; fiche?: Fiche | ((v: string | null) => Fiche) } = {},
 ): ArticleCatalogue[] {
   return variantes.map((v) => ({
-    ...o.fiche,
+    ...(typeof o.fiche === "function" ? o.fiche(v) : o.fiche),
     cle: `${metier}/${slug(famille)}/${slug(nom)}${v ? `/${slug(v)}` : ""}`,
     metier,
     famille,

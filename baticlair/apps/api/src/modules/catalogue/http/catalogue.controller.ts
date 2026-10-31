@@ -27,6 +27,7 @@ const modifBody = z.object({ famille: texte(80), produit: texte(120), variante: 
 
 const rattacherBody = z.object({ ligneId: z.uuid(), cle: texte(200) });
 const accepterBody = z.object({ cle: texte(200), metier: texte(40), famille: texte(80) });
+const ecarterBody = z.object({ cle: texte(200) });
 
 /** L'admin du catalogue : ajouter, renommer, masquer (réservé aux `GROUPE_ADMINS`, code à 6 chiffres). */
 @Controller("v1/admin/catalogue")
@@ -76,6 +77,15 @@ export class AdminCatalogueController {
     const email = await this.garde(tenant);
     const r = await this.catalogue.accepterProposition(body.cle, body.metier, body.famille);
     await this.journal(tenant, email, "proposition", `${body.metier} › ${body.famille} › ${body.cle}`);
+    return r;
+  }
+
+  /** Écarter une référence des artisans (Greg, 31 octobre 2026, soir) : elle n'est plus proposée à tous. */
+  @Post("propositions/ecarter")
+  async ecarter(@Tenant() tenant: TenantContext, @Body(new ZodPipe(ecarterBody)) body: z.infer<typeof ecarterBody>) {
+    const email = await this.garde(tenant);
+    const r = await this.catalogue.ecarterProposition(body.cle);
+    await this.journal(tenant, email, "proposition écartée", body.cle);
     return r;
   }
 

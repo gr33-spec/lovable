@@ -37,15 +37,16 @@ export default function AdminCataloguePage() {
 }
 
 /**
- * LES INTITULÉS PROPOSÉS PAR LES ARTISANS (Greg, 30 octobre 2026, nuit : une bibliothèque de matériaux génériques, jamais
- * de diffusion automatique) : génériques et écrits par plusieurs entreprises, sans le nom d'aucune ; ajoutés ici au
- * catalogue, ils sont proposés à tous.
+ * LES INTITULÉS PROPOSÉS PAR LES ARTISANS (Greg, 30 octobre 2026, nuit : une bibliothèque de matériaux génériques) :
+ * génériques et écrits par plusieurs entreprises, sans le nom d'aucune ; ajoutés ici au catalogue, ils sont proposés à
+ * tous. Depuis le 31 octobre au soir (« le produit sera existant »), dès deux entreprises (écrit ou commandé en achat
+ * groupé) ils sont déjà proposés à tous comme « écrit par d'autres artisans » ; l'admin peut les écarter.
  */
 function Propositions() {
   const charger = useCallback(
     (signal: AbortSignal) =>
       Promise.all([
-        api<{ items: { cle: string; libelle: string; unite: string; entreprises: number; variantes?: string[] }[] }>("/v1/admin/catalogue/propositions", { signal }),
+        api<{ items: { cle: string; libelle: string; unite: string; entreprises: number; variantes?: string[]; publiee?: boolean }[] }>("/v1/admin/catalogue/propositions", { signal }),
         api<{ metiers: { code: string; libelle: string }[] }>("/v1/admin/catalogue", { signal }),
       ]).then(([p, c]) => ({ items: p.items, metiers: c.metiers })),
     [],
@@ -57,7 +58,9 @@ function Propositions() {
   return (
     <section aria-label="Intitulés proposés par les artisans" className="flex flex-col gap-2">
       <SectionTitle>Intitulés proposés par les artisans</SectionTitle>
-      <p className="text-[14px] text-muted">Écrits par plusieurs entreprises, intitulés voisins rapprochés, sans nom ni référence de chantier. Vérifie l&apos;existence du produit et sa désignation avant de l&apos;ajouter : ajouté au catalogue, il est proposé à tous.</p>
+      <p className="text-[14px] text-muted">
+        Écrits par plusieurs entreprises, ou commandés en achat groupé, intitulés voisins rapprochés, sans nom ni référence de chantier. Dès deux entreprises, l&apos;intitulé est déjà proposé à tous comme « écrit par d&apos;autres artisans » : écarte-le s&apos;il ne doit pas l&apos;être, ou vérifie le produit et ajoute-le au catalogue.
+      </p>
       {erreur ? <p role="alert" className="text-[14px] font-semibold text-danger">{erreur}</p> : null}
       {data.items.map((p) => {
         const c = choix[p.cle] ?? { metier: data.metiers[0]?.code ?? "couverture", famille: "" };
@@ -67,7 +70,9 @@ function Propositions() {
             <p className="text-[15px] font-semibold">
               {p.libelle} · {p.unite}
             </p>
-            <p className="text-[13px] text-muted">Écrit par {p.entreprises} entreprises</p>
+            <p className="text-[13px] text-muted">
+              Écrit par {p.entreprises} entreprises{p.publiee ? " · proposé à tous (écrit par d'autres artisans)" : p.publiee === false ? " · écarté, pas proposé à tous" : ""}
+            </p>
             {p.variantes?.length ? <p className="text-[13px] text-muted">Aussi écrit : {p.variantes.join(" · ")}</p> : null}
             <label className="flex flex-col gap-1 text-[14px] font-semibold">
               Métier
@@ -92,6 +97,19 @@ function Propositions() {
             >
               Ajouter au catalogue
             </Button>
+            {p.publiee ? (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  void api("/v1/admin/catalogue/propositions/ecarter", { method: "POST", body: { cle: p.cle } }).then(
+                    () => reload(),
+                    (e: unknown) => setErreur(messageErreur(e)),
+                  )
+                }
+              >
+                Ne plus le proposer à tous
+              </Button>
+            ) : null}
           </Card>
         );
       })}

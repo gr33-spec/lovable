@@ -3654,13 +3654,15 @@ test("« Je la note moi-même » (28 octobre 2026, point 1 ; 30 octobre : intitu
   await qte.fill("200");
   await ecran.getByRole("button", { name: "Ajouter la ligne" }).click();
   await expect(ecran.getByLabel("Unité")).toHaveValue("pièces");
-  // « H14 rouge » : la tuile H 14 Huguenot (réf. Edilians), « rouge » gardé ; jamais une HP10.
+  // « H14 rouge » : la tuile H 14 Huguenot (réf. Edilians), coloris Rouge de sa fiche (31 octobre 2026, soir), d'un tap ;
+  // jamais une HP10.
   await champ.fill("H14 rouge");
   const proposees = ecran.getByRole("list", { name: "Références proposées" });
   await expect(proposees.getByRole("button", { name: /^Tuile H 14 Huguenot, réf\. 204 \(Edilians\)/ })).toBeVisible();
   await expect(proposees.getByRole("button", { name: /HP 10/ })).toHaveCount(0);
-  await proposees.getByRole("button", { name: /^Tuile H 14 Huguenot/ }).click();
-  await expect(champ).toHaveValue("Tuile H 14 Huguenot, réf. 204 (Edilians) rouge");
+  await expect(proposees.getByRole("button", { name: /Tuile H 14 Huguenot.* : choisir le format/ })).toHaveCount(0);
+  await proposees.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians) Rouge", exact: true }).click();
+  await expect(champ).toHaveValue("Tuile H 14 Huguenot, réf. 204 (Edilians) Rouge");
   await qte.fill("250");
   await qte.press("Enter");
   // Un matériau inconnu : « Je ne trouve pas mon matériau » ouvre la saisie libre, la marque ou la référence part avec.
@@ -3688,11 +3690,12 @@ test("« Je la note moi-même » (28 octobre 2026, point 1 ; 30 octobre : intitu
   await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
   await expect(page.getByText(/Crochet gouttière bandeau 25/).first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText(/Liteau 18×40/).first()).toBeVisible();
-  await expect(page.getByText(/Tuile H 14 Huguenot, réf\. 204 \(Edilians\) rouge/).first()).toBeVisible();
+  await expect(page.getByText(/Tuile H 14 Huguenot, réf\. 204 \(Edilians\) Rouge/).first()).toBeVisible();
   await expect(page.getByText(/Tuile Zéphyr terre cuite, modèle ZX 12/).first()).toBeVisible();
 
-  // Son intitulé lui revient quand il tape ; un autre artisan ne le voit pas (Greg, 30 octobre 2026, nuit : rien n'est
-  // diffusé ; seul le catalogue, enrichi par l'admin, est proposé à tous).
+  // Son intitulé lui revient quand il tape ; un autre artisan ne le voit jamais comme le sien (Greg, 30 octobre 2026,
+  // nuit). Écrit aussi par une autre entreprise, il est proposé à tous, marqué « écrit par d'autres artisans » (Greg,
+  // 31 octobre 2026, soir : « le produit sera existant »).
   await page.goto("/chantiers/nouveau");
   await page.getByRole("button", { name: /Je la note moi-même/ }).click();
   await ecran.getByLabel("Intitulé").fill("crochet band");
@@ -3703,7 +3706,16 @@ test("« Je la note moi-même » (28 octobre 2026, point 1 ; 30 octobre : intitu
   await page.getByRole("button", { name: /Je la note moi-même/ }).click();
   await ecran.getByLabel("Intitulé").fill("crochet band");
   await page.waitForTimeout(800);
-  await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25" })).toHaveCount(0);
+  await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25", exact: true })).toHaveCount(0);
+  // Ce deuxième artisan écrit à son tour la tuile Zéphyr (à sa façon) : un troisième la voit, marquée, sans nom d'entreprise.
+  expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "tuile zephyr terre cuite modele zx12", quantite: "40", unite: "pièces" }] })).status).toBe(201);
+  await page.context().clearCookies();
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByRole("button", { name: /Je la note moi-même/ }).click();
+  await ecran.getByLabel("Intitulé").fill("zephyr zx12");
+  await expect(ecran.getByRole("list", { name: "Références proposées" }).getByRole("button", { name: /Zéphyr.*\(écrit par d'autres artisans\)$/i })).toBeVisible();
+  await expect(ecran.getByRole("list", { name: "Références proposées" })).not.toContainText(/Toitures/);
 });
 
 test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèle → la question se répond avec le catalogue (« H14 »), la quantité du devis gardée", async ({ page }) => {
@@ -3715,9 +3727,9 @@ test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèl
   // Mobiiz ne choisit pas le modèle : il le demande ; l'artisan tape « H14 », le catalogue propose la référence.
   await questions.getByRole("textbox", { name: "Autre : Modele de la tuile ?" }).fill("H14");
   const refs = questions.getByRole("list", { name: "Références du catalogue : Modele de la tuile ?" });
-  await expect(refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)" })).toBeVisible();
+  await expect(refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)", exact: true })).toBeVisible();
   await expect(refs.getByRole("button", { name: /HP 10/ })).toHaveCount(0);
-  await refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)" }).click();
+  await refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)", exact: true }).click();
   await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });

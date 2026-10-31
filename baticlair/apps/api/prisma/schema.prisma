@@ -2351,3 +2351,12 @@ model LibelleEcrit {
   @@index([cle])
   @@map("libelle_ecrit")
 }
+
+/// Une référence des artisans écartée par l'admin (Greg, 31 octobre 2026, soir) : elle n'est plus proposée à tous.
+model ReferenceEcartee {
+  /// `cleDeLibelle` de l'intitulé qui la représente.
+  cle       String   @id
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("reference_ecartee")
+}

@@ -20,13 +20,18 @@ describe("le moteur de recherche métier", () => {
     expect(chercher("liteau 18x40")[0]!.article).toMatchObject({ statut: "generique", source: { libelle: "Référentiel couverture du fondateur, §200 et §760" } });
   });
 
-  it("« H14 rouge » : la H 14 Huguenot (Edilians, réf. 204), « rouge » gardé en précision ; jamais une HP10 ; « HP10 » : la HP 10", () => {
+  it("« H14 rouge » : la H 14 Huguenot (Edilians, réf. 204) en coloris Rouge, avec son EAN ; jamais une HP10 ; « HP10 » : la HP 10", () => {
+    // Couverture approfondie (Greg, 31 octobre 2026, soir) : les coloris publiés sur la fiche Edilians sont au catalogue.
     const h14 = chercher("H14 rouge");
-    expect(h14.map((t) => t.article.designation)).toEqual(["Tuile H 14 Huguenot, réf. 204 (Edilians)"]);
-    expect(h14[0]).toMatchObject({ precisions: ["rouge"], article: { marque: "Edilians", reference: "204", statut: "verifie", source: { url: "https://edilians.eu/h-14-huguenot.html" } } });
-    expect(noms("HP10")).toEqual(["Tuile HP 10 Huguenot, réf. 205 (Edilians)"]);
-    expect(noms("hp 10")).toEqual(["Tuile HP 10 Huguenot, réf. 205 (Edilians)"]);
-    expect(noms("h14")).not.toContain("Tuile HP 10 Huguenot, réf. 205 (Edilians)");
+    expect(h14[0]).toMatchObject({ precisions: [], article: { designation: "Tuile H 14 Huguenot, réf. 204 (Edilians) Rouge", marque: "Edilians", reference: "204", ean: "3661223024425", statut: "verifie" } });
+    expect(h14.every((t) => t.article.designation.startsWith("Tuile H 14 Huguenot"))).toBe(true);
+    // Sans coloris au catalogue, la couleur reste en précision (« H14 bleu » : la H 14, « bleu » gardé).
+    expect(chercher("H14 bleu")[0]).toMatchObject({ precisions: ["bleu"], article: { designation: "Tuile H 14 Huguenot, réf. 204 (Edilians)", source: { url: "https://edilians.eu/h-14-huguenot.html" } } });
+    for (const q of ["HP10", "hp 10"]) {
+      expect(noms(q)[0]).toBe("Tuile HP 10 Huguenot, réf. 205 (Edilians)");
+      expect(noms(q).every((n) => n.startsWith("Tuile HP 10 Huguenot"))).toBe(true);
+    }
+    expect(noms("h14", 30).some((n) => n.includes("HP 10"))).toBe(false);
   });
 
   it("« tuile » : les vrais modèles d'abord, puis les désignations génériques", () => {

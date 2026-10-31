@@ -114,9 +114,16 @@ export interface Candidate {
  */
 export function candidatesDeLibelles(ecrits: readonly IntituleEcrit[], vocabulaire: ReadonlySet<string>, seuil = SEUIL_PROPOSITION): Candidate[] {
   const connu = (m: string) => vocabulaire.has(m) || vocabulaire.has(m.replace(/[sx]$/, ""));
-  const motsDe = (l: string) => aPlat(l).split(" ").filter((m) => m && !LIAISONS.has(m) && !NEUTRES.has(m) && !UNITES.has(m));
+  // « ZX 12 » et « zx12 » sont la même référence (comme « H 14 » et « H14 »).
+  const motsDe = (l: string) =>
+    aPlat(l)
+      .replace(/\b([a-z]{1,3}) (\d+)\b/g, "$1$2")
+      .split(" ")
+      .filter((m) => m && !LIAISONS.has(m) && !NEUTRES.has(m) && !UNITES.has(m));
   const parCle = new Map<string, { libelle: string; unite: string; entreprises: Set<string>; mots: string[] }>();
   for (const e of ecrits) {
+    // Un intitulé qui dit un chantier, une personne ou une adresse n'entre jamais (et n'écarte pas ses voisins).
+    if (aPlat(e.libelle).split(" ").some((m) => EXCLUS.has(m))) continue;
     const c = parCle.get(e.cle) ?? { libelle: e.libelle, unite: e.unite, entreprises: new Set<string>(), mots: motsDe(e.libelle) };
     c.entreprises.add(e.companyId);
     parCle.set(e.cle, c);
@@ -142,7 +149,9 @@ export function candidatesDeLibelles(ecrits: readonly IntituleEcrit[], vocabulai
     const entreprises = new Set(g.flatMap((f) => [...f.entreprises]));
     if (entreprises.size < seuil) continue;
     // Chaque mot inconnu du représentant doit être écrit par `seuil` entreprises du groupe.
-    const tete = [...g].sort((a, b) => b.entreprises.size - a.entreprises.size || a.libelle.length - b.libelle.length)[0]!;
+    // Le représentant : le plus écrit, puis le mieux écrit (majuscules, accents), puis le plus court.
+    const soin = (l: string) => (/\p{Lu}/u.test(l) ? 1 : 0) + (/[à-ÿ]/i.test(l) ? 1 : 0);
+    const tete = [...g].sort((a, b) => b.entreprises.size - a.entreprises.size || soin(b.libelle) - soin(a.libelle) || a.libelle.length - b.libelle.length)[0]!;
     const inconnus = tete.mots.filter((m) => /^[a-z]{2,}$/.test(m) && !connu(m) && !PRECISIONS_MOTS.has(m));
     const sur = inconnus.every((m) => new Set(g.filter((f) => f.mots.includes(m)).flatMap((f) => [...f.entreprises])).size >= seuil);
     if (!sur || !tete.mots.some((m) => /^[a-z]{3,}$/.test(m) && connu(m))) continue;
