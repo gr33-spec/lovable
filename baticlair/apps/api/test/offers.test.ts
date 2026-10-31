@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { OFFER_EXTRACTOR, type OfferAttempt, type OfferExtractor } from "../src/modules/offers/application/offer-extractor.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
@@ -54,82 +53,57 @@ async function withTwoQuotes(agent: Agent) {
   return { requestId: request.id as string, ra: ra!.id, rb: rb!.id, supplierA: a.body.id as string, supplierB: b.body.id as string };
 }
 
-describe("lecture des devis fournisseurs (IA simulée)", () => {
-  it("lit un devis une seule fois, relie chaque ligne à la liste et vérifie les totaux", async () => {
+/** Une lecture faite avant le 28 octobre 2026 (point 7) : gardée, toujours visible et corrigeable. */
+async function ancienneLecture(companyId: string, documentId: string) {
+  return ctx.prisma.supplierOffer.create({
+    data: {
+      companyId,
+      documentId,
+      promptId: "offer_extraction",
+      promptVersion: 2,
+      model: "ancien",
+      totalHT: "1400.00",
+      lines: { create: [{ position: 1, kind: "main", designation: "Tuile romane canal rouge 12,5 u/m²", quantityRaw: "1 250 u", unitPrice: "1.12", lineTotal: "1400", requestIndex: 0, matchConfidence: "probable" }] },
+    },
+  });
+}
+
+describe("devis reçus des négoces de l'artisan : plus de lecture IA (Greg, 28 octobre 2026, point 7)", () => {
+  it("aucune lecture, ni d'un devis, ni de tous : refus clair, aucun appel IA, aucune analyse décomptée", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
-    const { ra } = await withTwoQuotes(agent);
-    const before = await ctx.prisma.aiExecution.count();
+    const { requestId, ra } = await withTwoQuotes(agent);
+    const appels = await ctx.prisma.aiExecution.count({ where: { task: "offer_extraction" } });
+    const utilisees = (await agent.get("/v1/ai-usage")).body.analyses.used;
 
-    const res = await agent.post(`/v1/price-request-recipients/${ra}/analysis`);
-    expect(res.status).toBe(201);
-    expect(res.body.lines).toHaveLength(6);
-    // §51.5 : la demande reprend les désignations du devis sans référence d'article : la correspondance se fait au nom (« probable »).
-    expect(res.body.lines[0]).toMatchObject({ reference: "TUI-RC12", unitPrice: "1.12", lineTotal: "1400", amount: "1400.00", requestLine: 1, matchConfidence: "probable" });
-    // Sept lignes demandées (les naissances de la gouttière à 2 descentes en plus du devis), six chiffrées.
-    expect(res.body).toMatchObject({ requestedCount: 7, answeredCount: 6, computedTotalHT: "2805.30", arithmetic: { status: "consistent" } });
-    expect(res.body.printed.totalHT).toBe("2805.30");
-
-    // Relire le même devis ne coûte rien de plus.
-    await agent.post(`/v1/price-request-recipients/${ra}/analysis`).expect(201);
-    expect(await ctx.prisma.aiExecution.count()).toBe(before + 1);
-    const execution = await ctx.prisma.aiExecution.findFirstOrThrow({ where: { task: "offer_extraction" } });
-    expect(execution).toMatchObject({ promptId: "offer_extraction", promptVersion: 2, status: "success" });
-    expect((await agent.get("/v1/ai-usage")).body.analyses.used).toBe(2);
+    const un = await agent.post(`/v1/price-request-recipients/${ra}/analysis`).expect(409);
+    expect(un.body.error.details).toMatchObject({ reason: "lecture_devis_negoce_retiree", message: "Mobiiz ne lit plus les devis de tes négoces : ouvre le devis, puis retiens le négoce de ton choix." });
+    expect((await agent.post(`/v1/price-requests/${requestId}/analysis`).expect(409)).body.error.details.reason).toBe("lecture_devis_negoce_retiree");
+    expect(await ctx.prisma.aiExecution.count({ where: { task: "offer_extraction" } })).toBe(appels);
+    expect((await agent.get("/v1/ai-usage")).body.analyses.used).toBe(utilisees);
+    expect((await agent.get(`/v1/price-requests/${requestId}/offers`).expect(200)).body).toEqual({ aiAvailable: false, items: [] });
+    // Le devis reçu reste là, à ouvrir tel quel.
+    const demande = (await agent.get(`/v1/projects/${(await agent.get("/v1/projects")).body.items[0].id}/price-requests`)).body.items[0];
+    expect(demande.recipients.map((r: { status: string; document: { name: string } | null }) => [r.status, r.document?.name])).toEqual([
+      ["received", "pointp.pdf"],
+      ["received", "tuiles.pdf"],
+    ]);
   });
 
-  it("« Lire et comparer » : tous les devis reçus d'un coup, pour une seule analyse", async () => {
-    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
-    const other = await signUpWithCompany(ctx.app, "b@example.fr", "Couverture Leroy");
-    const { requestId, ra, rb } = await withTwoQuotes(agent);
-    const usedBefore = (await agent.get("/v1/ai-usage")).body.analyses.used; // le devis client
-
-    expect((await other.agent.post(`/v1/price-requests/${requestId}/analysis`)).status).toBe(404);
-
-    const res = await agent.post(`/v1/price-requests/${requestId}/analysis`).expect(201);
-    expect(res.body).toMatchObject({ read: 2, failed: [] });
-    expect(res.body.items.map((o: { recipientId: string }) => o.recipientId).sort()).toEqual([ra, rb].sort());
-    expect((await agent.get("/v1/ai-usage")).body.analyses.used).toBe(usedBefore + 1);
-
-    // Rien de nouveau à lire : aucun appel, aucun décompte.
-    const executions = await ctx.prisma.aiExecution.count();
-    expect((await agent.post(`/v1/price-requests/${requestId}/analysis`).expect(201)).body).toMatchObject({ read: 0 });
-    expect(await ctx.prisma.aiExecution.count()).toBe(executions);
-    expect((await agent.get("/v1/ai-usage")).body.analyses.used).toBe(usedBefore + 1);
-    expect((await agent.get(`/v1/price-requests/${requestId}/comparison`)).body.suppliers).toHaveLength(2);
+  it("une lecture d'avant reste visible et corrigeable ; la comparaison du code suit", async () => {
+    const { agent, companyId } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const { requestId, ra } = await withTwoQuotes(agent);
+    const demande = (await agent.get(`/v1/projects/${(await agent.get("/v1/projects")).body.items[0].id}/price-requests`)).body.items[0];
+    await ancienneLecture(companyId, demande.recipients.find((r: { id: string }) => r.id === ra).document.id);
+    const lues = (await agent.get(`/v1/price-requests/${requestId}/offers`)).body;
+    expect(lues.items.map((o: { recipientId: string }) => o.recipientId)).toEqual([ra]);
+    // Relire une lecture déjà faite ne coûte rien et ne relance rien.
+    expect((await agent.post(`/v1/price-request-recipients/${ra}/analysis`).expect(201)).body.lines).toHaveLength(1);
+    const ligne = lues.items[0].lines[0];
+    expect((await agent.patch(`/v1/offer-lines/${ligne.id}`).send({ requestLine: null }).expect(200)).body.lines[0]).toMatchObject({ requestLine: null, edited: true });
+    expect((await agent.get(`/v1/price-requests/${requestId}/comparison`)).body.suppliers).toHaveLength(1);
   });
 
-  it("compare ligne à ligne avec un total honnête (article manquant, livraison)", async () => {
-    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
-    const { requestId, ra, rb, supplierA, supplierB } = await withTwoQuotes(agent);
-    await agent.post(`/v1/price-request-recipients/${ra}/analysis`).expect(201);
-    const b = await agent.post(`/v1/price-request-recipients/${rb}/analysis`);
-    expect(b.body.lines.find((l: { designation: string }) => l.designation === "Livraison chantier")).toMatchObject({ kind: "fee", requestLine: null });
-
-    const cmp = (await agent.get(`/v1/price-requests/${requestId}/comparison`)).body;
-    const [sa, sb] = cmp.suppliers;
-    // Les naissances (calculées, §49.1 point 3) ne sont chiffrées par personne : manquantes partout, sans estimation possible.
-    expect(sa).toMatchObject({ supplierId: supplierA, name: "Point.P", missingCount: 1, comparability: "complete", comparableTotalHT: "2805.30" });
-    // Gouttière absente chez le second : estimée au prix de l'autre, jamais comptée à zéro.
-    expect(sb).toMatchObject({ supplierId: supplierB, missingCount: 2, feesHT: "60.00", comparability: "estimated", estimatedPartHT: "511.20" });
-    expect(sb.comparableTotalHT).toBe("2724.40");
-    const tuile = cmp.items[0];
-    expect(tuile).toMatchObject({ index: 1, designation: "Tuile romane canal rouge 12,5 u/m²", lowestSupplierId: supplierB });
-    const gouttiere = cmp.items[5];
-    expect(gouttiere.offers.find((o: { supplierId: string }) => o.supplierId === supplierB)).toMatchObject({ status: "missing", estimatedAmount: "511.20" });
-
-    // L'artisan corrige une correspondance : la comparaison suit.
-    const tuileB = b.body.lines[0];
-    const edited = await agent.patch(`/v1/offer-lines/${tuileB.id}`).send({ requestLine: null });
-    expect(edited.body.lines[0]).toMatchObject({ requestLine: null, matchConfirmed: true, edited: true });
-    const after = (await agent.get(`/v1/price-requests/${requestId}/comparison`)).body;
-    expect(after.suppliers[1].missingCount).toBe(3);
-    expect((await agent.patch(`/v1/offer-lines/${tuileB.id}`).send({ requestLine: 99 })).status).toBe(400);
-
-    const list = (await agent.get(`/v1/price-requests/${requestId}/offers`)).body;
-    expect(list.items.map((o: { recipientId: string }) => o.recipientId)).toEqual([ra, rb]);
-  });
-
-  it("« Classé » : fournisseurs retenus facultatifs, puis réouverture", async () => {
+  it("« Je retiens ce négoce » : fournisseur retenu, puis réouverture", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const { requestId, supplierB } = await withTwoQuotes(agent);
     const classified = await agent.patch(`/v1/price-requests/${requestId}/classification`).send({ classified: true, retainedSupplierIds: [supplierB] });
@@ -141,13 +115,15 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
     expect(reopened.body).toMatchObject({ classifiedAt: null, retainedSupplierIds: [] });
   });
 
-  it("refuse sans devis déposé et isole les entreprises", async () => {
+  it("isole les entreprises", async () => {
     const a = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const b = await signUpWithCompany(ctx.app, "b@example.fr", "Couverture Leroy");
     const { requestId, ra } = await withTwoQuotes(a.agent);
-    await a.agent.post(`/v1/price-request-recipients/${ra}/analysis`).expect(201);
+    const demande = (await a.agent.get(`/v1/projects/${(await a.agent.get("/v1/projects")).body.items[0].id}/price-requests`)).body.items[0];
+    await ancienneLecture(a.companyId, demande.recipients[0].document.id);
 
     expect((await b.agent.post(`/v1/price-request-recipients/${ra}/analysis`)).status).toBe(404);
+    expect((await b.agent.post(`/v1/price-requests/${requestId}/analysis`)).status).toBe(404);
     expect((await b.agent.get(`/v1/price-requests/${requestId}/comparison`)).status).toBe(404);
     const line = (await a.agent.get(`/v1/price-requests/${requestId}/offers`)).body.items[0].lines[0];
     expect((await b.agent.patch(`/v1/offer-lines/${line.id}`).send({ requestLine: null })).status).toBe(404);
@@ -158,39 +134,11 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
       .attach("file", Buffer.from(await makePdf(["devis"], undefined, undefined, "DEVIS INTRUS")), { filename: "x.pdf", contentType: "application/pdf" });
     expect(intrusion.status).toBe(404);
 
-    // Devis retiré : plus rien à lire.
-    const request = (await a.agent.get(`/v1/projects/${(await a.agent.get("/v1/projects")).body.items[0].id}/price-requests`)).body.items[0];
-    const recipient = request.recipients[1];
+    // Devis retiré : plus rien à ouvrir.
+    const recipient = demande.recipients[1];
     await a.agent.delete(`/v1/documents/${recipient.document.id}`).expect(204);
     const res = await a.agent.post(`/v1/price-request-recipients/${recipient.id}/analysis`);
     expect(res.status).toBe(400);
     expect(res.body.error.details).toMatchObject({ reason: "no_quote" });
-  });
-});
-
-describe("devis fournisseur dont la réponse est coupée", () => {
-  let cut: TestContext;
-  let calls = 0;
-  const truncated: OfferExtractor = {
-    provider: "anthropic",
-    async extract(): Promise<OfferAttempt> {
-      calls++;
-      return { provider: "anthropic", model: "claude-sonnet-5-5", usage: { inputTokens: 9000, outputTokens: 16000 }, status: "invalid_output", output: null, errorCode: "max_tokens", durationMs: 1 };
-    },
-  };
-  beforeAll(async () => {
-    cut = await createTestApp((b) => b.overrideProvider(OFFER_EXTRACTOR).useValue(truncated));
-  });
-  afterAll(async () => {
-    await cut.app.close();
-  });
-
-  it("n'est pas redemandé à l'identique : un seul appel payé, échec net", async () => {
-    await resetDatabase(cut.prisma);
-    const { agent } = await signUpWithCompany(cut.app, "a@example.fr", "Toitures Martin");
-    const { ra } = await withTwoQuotes(agent);
-    const res = await agent.post(`/v1/price-request-recipients/${ra}/analysis`);
-    expect(res.status).toBe(502);
-    expect(calls).toBe(1);
   });
 });

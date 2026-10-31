@@ -42,7 +42,8 @@ export class PrismaNextActionsQuery {
     return projects.flatMap((p) => {
       const request = p.priceRequests[0];
       const action = nextAction({
-        hasClientQuote: p.documents.length > 0,
+        // Une liste donnée telle quelle (« J'ai déjà ma liste ») vaut le devis : on ne redemande pas le devis client.
+        hasClientQuote: p.documents.length > 0 || takeoffOf.has(p.id),
         takeoff: takeoffOf.get(p.id) ?? "none",
         request: request
           ? {

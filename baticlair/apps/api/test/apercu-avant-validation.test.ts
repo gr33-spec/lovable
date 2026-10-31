@@ -29,7 +29,7 @@ describe("§50.7 : l'aperçu avant que la liste soit validée", () => {
     const q = (await agent.post("/v1/quantitatifs").send({ reference: "Test", adresse: "18 rue de Siam, 29200 Brest", lignes: LIGNES }).expect(201)).body;
     const projectId = (await agent.get(`/v1/quantitatifs/${q.id}?ecran=1`).expect(200)).body.projetId as string;
     const preview = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
-    expect(preview.subject).toMatch(/^Demande de devis/);
+    expect(preview.subject).toMatch(/ : demande de prix/);
     expect(preview.mail).toMatch(/^Bonjour,/);
     const pdf = await agent.get(`/v1/projects/${projectId}/demande-de-devis.pdf?apercu=1`).buffer(true).expect(200);
     expect(pdf.headers["content-type"]).toBe("application/pdf");

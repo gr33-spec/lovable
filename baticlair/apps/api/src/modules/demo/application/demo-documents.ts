@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, type PDFFont, type PDFPage } from "pdf-lib";
+import { DOMAINE_DEMO, estAdresseDemo } from "../../../platform/demo-domaine.js";
 
 /**
  * Documents fictifs du mode démo : un devis client de couvreur et les devis
@@ -6,11 +7,11 @@ import { PDFDocument, StandardFonts, type PDFFont, type PDFPage } from "pdf-lib"
  * déterministe (mêmes lignes, mêmes prix).
  */
 
-/** Domaine réservé aux fournisseurs fictifs : jamais une vraie adresse. */
-export const DEMO_EMAIL_DOMAIN = "demo.baticlair.fr";
+/** Domaine réservé aux fournisseurs fictifs : jamais une vraie adresse (`platform/demo-domaine.ts`). */
+export const DEMO_EMAIL_DOMAIN = DOMAINE_DEMO;
 
 export function isDemoSupplier(email: string): boolean {
-  return email.toLowerCase().endsWith(`@${DEMO_EMAIL_DOMAIN}`);
+  return estAdresseDemo(email);
 }
 
 interface DemoSupplierProfile {

@@ -5,8 +5,10 @@ import { MapPin, MoreHorizontal } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { ProjectDocuments } from "@/components/project-documents";
 import { ProjectProgressProvider } from "@/components/project-progress";
-import { Badge, BackButton, Button, ErrorNotice, Field, Spinner } from "@/components/ui";
+import { SuiviChantier } from "@/components/suivi-chantier";
+import { Badge, BackButton, Button, ErrorNotice, Field, Skeleton } from "@/components/ui";
 import { api, ApiError, type Project, type ProjectDocument } from "@/lib/api";
+import { ActionsChantierProvider, useActionsChantier } from "@/lib/actions-chantier";
 import { openDocument } from "@/lib/open-document";
 import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
@@ -29,10 +31,10 @@ export default function ChantierPage() {
       </>
     );
   }
-  if (!project) return <Spinner />;
+  if (!project) return <Skeleton card="h-12" lines={3} label="Chargement du chantier…" />;
 
   return (
-    <>
+    <ActionsChantierProvider>
       {editing ? (
         <EditForm project={project} onDone={(p) => { if (p) setProject(p); setEditing(false); }} />
       ) : (
@@ -48,10 +50,20 @@ export default function ChantierPage() {
         />
       )}
       <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"} bar={false}>
-        {/* La lecture donne son nom au chantier (« Chantier Dupont ») : l'en-tête se relit quand elle finit. */}
-        <ProjectDocuments key={docsKey} projectId={project.id} archived={project.status === "archived"} onProjectChanged={reload} onQuote={setQuote} />
+        {/* Ordinateur (Greg, 31 octobre 2026, soir : « on a de la place ») : la liste et ses actions à gauche, le suivi façon
+            colis à droite, qui reste à l'écran pendant qu'on descend. Téléphone : l'ordre d'avant (suivi, puis la liste). */}
+        <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_23rem]">
+          {/* Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier ; relu à chaque changement signalé. */}
+          <div className="contents lg:sticky lg:top-8 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-4">
+            <SuiviChantier projectId={project.id} />
+          </div>
+          {/* La lecture donne son nom au chantier (« Chantier Dupont ») : l'en-tête se relit quand elle finit. */}
+          <div className="contents lg:col-start-1 lg:row-start-1 lg:flex lg:min-w-0 lg:flex-col lg:gap-4">
+            <ProjectDocuments key={docsKey} projectId={project.id} archived={project.status === "archived"} onProjectChanged={reload} onQuote={setQuote} />
+          </div>
+        </div>
       </ProjectProgressProvider>
-    </>
+    </ActionsChantierProvider>
   );
 }
 
@@ -75,6 +87,8 @@ function Header({
   const [error, setError] = useState<ApiError | null>(null);
   const busy = useRef(false);
   const done = project.status === "archived";
+  // Point 8 (Greg, 28 octobre 2026) : les actions secondaires de l'étape (ajouter un négoce, renvoyer, modifier ma liste…).
+  const etape = useActionsChantier();
 
   async function toggleStatus() {
     if (busy.current) return;
@@ -111,14 +125,14 @@ function Header({
     }
   }
 
-  const item = "flex min-h-11 w-full items-center text-left text-sm font-bold";
+  const item = "flex min-h-13 w-full items-center text-left text-[16px] font-semibold";
   return (
     // En-tête d'une conversation : retour, nom du chantier, menu ; le client et l'adresse en petit dessous.
     <header className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
         <BackButton fallback="/chantiers" compact />
         {/* Le nom lu dans le devis ; un tap rouvre le devis (§50.4). Il se renomme par « Modifier le chantier ». */}
-        <h1 className="flex min-w-0 grow font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
+        <h1 className="flex min-w-0 grow text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
           {quote ? (
             <button type="button" onClick={() => void openDocument(quote.id, quote.name, quote.name)} aria-label={`Ouvrir le devis : ${project.name}`} className="min-h-11 min-w-0 truncate text-left">
               {project.name}
@@ -133,13 +147,20 @@ function Header({
           aria-expanded={menu}
           aria-label="Plus d'actions sur le chantier"
           disabled={pending}
-          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface shadow-card disabled:opacity-60"
+          className="pressable bouton-nuit flex size-11 shrink-0 items-center justify-center rounded-full disabled:opacity-60"
         >
           <MoreHorizontal size={20} aria-hidden="true" />
         </button>
       </div>
       {menu ? (
-        <ul role="menu" aria-label="Actions sur le chantier" className="flex flex-col divide-y divide-line rounded-2xl bg-surface px-4 shadow-card">
+        <ul role="menu" aria-label="Actions sur le chantier" className="animate-rise flex flex-col divide-y divide-line rounded-xl border border-line bg-surface px-4 shadow-card">
+          {etape.map((a) => (
+            <li key={a.id} role="none">
+              <button type="button" role="menuitem" className={item} onClick={() => { setMenu(false); a.run(); }}>
+                {a.label}
+              </button>
+            </li>
+          ))}
           <li role="none">
             <button type="button" role="menuitem" className={item} onClick={() => { setMenu(false); onEdit(); }}>
               Modifier le chantier
@@ -174,7 +195,7 @@ function Header({
         </ul>
       ) : null}
       {error ? <ErrorNotice error={error} /> : null}
-      <div className="flex flex-wrap items-center gap-x-3 pl-13 text-sm text-muted">
+      <div className="flex flex-wrap items-center gap-x-3 pl-13 text-[14px] text-muted">
         {done ? <Badge tone="ok">{fr.status.archived}</Badge> : null}
         {project.clientName ? <span>{project.clientName}</span> : null}
         {mapsUrl ? (

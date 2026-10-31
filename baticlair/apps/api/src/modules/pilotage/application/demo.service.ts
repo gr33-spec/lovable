@@ -1,0 +1,207 @@
+import { randomUUID } from "node:crypto";
+import { articleNegociable, COMMISSION_DEFAUT, CONDITIONS_NEGOCE_VERSION, PALIERS_DEFAUT, prixAffiche } from "@baticlair/domain";
+import type { PrismaService } from "../../../platform/database/prisma.service.js";
+import { notFound } from "../../../platform/errors/domain-error.js";
+import type { AbonnementService } from "../../abonnement/index.js";
+import type { CommandeDuMoisService, JeuDemonstrationService } from "../../groupe/index.js";
+
+/**
+ * LA DÉMO ADMIN (Greg, 24 octobre 2026) : jouer un cycle complet sur iPhone sans attendre le calendrier. « Créer un jeu
+ * de test » met 5 faux artisans dans le 22, chacun sa liste déposée dans la commande ouverte, et 3 faux négoces inscrits ;
+ * les boutons font avancer le cycle (clôture, réponses, résultats) et l'abonnement de l'admin (fin d'essai, échec de
+ * paiement). Tout ce qui est faux porte `@demo.mobiiz.fr` : exclu des statistiques, effacé d'un bouton.
+ */
+export const ZONE_DEMO = "22";
+
+const ARTISANS = [
+  ["Yann Le Gall", "Toitures Le Gall (démo)", "3 rue des Ajoncs, 22300 Lannion"],
+  ["Erwan Le Bihan", "Le Bihan Couverture (démo)", "8 rue du Port, 22500 Paimpol"],
+  ["Gwenaël Guillou", "Guillou Toiture (démo)", "14 rue Saint-Guillaume, 22000 Saint-Brieuc"],
+  ["Loïc Tanguy", "Tanguy Zinguerie (démo)", "6 place du Centre, 22200 Guingamp"],
+  ["Ronan Morvan", "Morvan Ardoise (démo)", "11 rue du Général Leclerc, 22620 Ploubazlanec"],
+] as const;
+/**
+ * Multimétier (Greg, 25 octobre 2026) : un généraliste (il chiffre toute la liste) et deux spécialistes (la couverture
+ * seule, le second œuvre seul) : les résultats montrent « Tout chez … » et les combinaisons par famille.
+ */
+const NEGOCES = [
+  ["Comptoir Breton du Bâtiment (démo)", "ZI des Châtelets, 22440 Ploufragan", 48.4893, -2.7942, true, []],
+  ["Ardoisière du Trégor (démo)", "ZA de Kerverzot, 22300 Lannion", 48.7326, -3.4566, false, ["couverture"]],
+  ["Placo de l'Argoat (démo)", "Rue de la Gare, 22200 Guingamp", 48.5615, -3.1497, false, ["second_oeuvre"]],
+] as const;
+/** Le chantier de démonstration de l'admin : dans le 22, à Lannion. */
+const ADRESSE_ADMIN = "2 rue de Kerampont, 22300 Lannion";
+/** Les mêmes articles chez chacun, à des quantités différentes : ils se regroupent dans la grille. */
+const LIGNES = [
+  { designation: "Ardoise naturelle 32×22 Espagne 1er choix", unite: "pièces", base: 1800, famille: "couverture" },
+  { designation: "Crochet inox 100 mm", unite: "pièces", base: 1900, famille: "couverture" },
+  { designation: "Liteau sapin traité 27×38", unite: "m", base: 420, famille: "couverture" },
+  { designation: "Écran de sous-toiture HPV, rouleau de 75 m²", unite: "rouleaux", base: 2, famille: "couverture" },
+  { designation: "Plaque de plâtre BA13 2,50 × 1,20 m", unite: "plaques", base: 40, famille: "second_oeuvre" },
+  { designation: "Rail R48 3 m", unite: "pièces", base: 30, famille: "second_oeuvre" },
+] as const;
+
+/** Les prix unitaires HT FICTIFS de la démo, ligne par ligne (dans l'ordre de `LIGNES`). Jamais des prix réels. */
+const PRIX_DEMO = [1.18, 0.21, 0.62, 96, 7.9, 3.4] as const;
+
+export class DemoService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jeu: Pick<JeuDemonstrationService, "effacer">,
+    private readonly commande: Pick<CommandeDuMoisService, "deposerPourLaDemo" | "avancerPourLaDemo" | "repondrePourLaDemo">,
+    private readonly abonnement: Pick<AbonnementService, "finirEssai" | "simulerEchec">,
+    private readonly domaine: string,
+  ) {}
+
+  /** Efface l'ancien jeu, puis crée 3 faux négoces inscrits et 5 faux artisans qui ont déposé leur liste. */
+  async creer(maintenant = new Date(), adminUserId: string | null = null) {
+    await this.effacer();
+    const p = this.prisma;
+    for (const [i, [enseigne, adresse, lat, lon, generaliste, familles]] of NEGOCES.entries()) {
+      const email = `negoce-test-${i + 1}@${this.domaine}`;
+      const compte = await p.compteNegoce.create({ data: { email, enseigne, telephone: "02 96 00 00 00", livraison: { ...PALIERS_DEFAUT } as object, departements: [ZONE_DEMO], generaliste, familles: [...familles], inscritLe: maintenant, conditionsAccepteesLe: maintenant, conditionsVersion: CONDITIONS_NEGOCE_VERSION, depots: { create: [{ adresse, departement: ZONE_DEMO, lat, lon }] } } });
+      await p.negoce.create({ data: { nom: enseigne, email, departement: ZONE_DEMO, familles: [...familles], generaliste, compteId: compte.id, createdAt: new Date(maintenant.getTime() - 60_000) } });
+    }
+    let lignes = 0;
+    const artisans: { companyId: string; projectId: string; adresse: string }[] = [];
+    for (const [i, [nom, entreprise, adresse]] of ARTISANS.entries()) {
+      const user = await p.user.create({ data: { id: randomUUID(), name: nom, email: `artisan-test-${i + 1}@${this.domaine}`, emailVerified: true } });
+      const company = await p.company.create({ data: { name: entreprise, trades: ["roofing"], address: adresse, siret: "73282932000074", siretVerifieLe: maintenant } });
+      await p.membership.create({ data: { companyId: company.id, userId: user.id, role: "owner" } });
+      const project = await p.project.create({ data: { companyId: company.id, name: `Chantier ${adresse.split(" ").at(-1)} (démo)`, address: adresse, demo: true, createdById: user.id } });
+      const takeoff = await p.takeoff.create({ data: { companyId: company.id, projectId: project.id, source: "lignes", trade: "roofing", status: "validated", promptId: "demo", promptVersion: 1, model: "demo", calculatedAt: maintenant, validatedAt: maintenant } });
+      artisans.push({ companyId: company.id, projectId: project.id, adresse });
+      const facteur = [1, 0.6, 1.4, 0.8, 1.2][i]!;
+      lignes += await this.commande.deposerPourLaDemo({ companyId: company.id, projectId: project.id, takeoffId: takeoff.id, adresse, lignes: LIGNES.filter((l) => l.famille === "couverture" || i % 2 === 0).map((l) => ({ designation: l.designation, unite: l.unite, famille: l.famille, quantite: Math.max(1, Math.round(l.base * facteur)) })) }, maintenant);
+    }
+    // L'admin lui-même (multimétier, 25 octobre 2026) : une liste de démonstration couverture et placo dans le 22, pour voir
+    // ses options (« Tout chez … », une famille chez l'un et l'autre chez l'autre) et commander, sans lecture IA. Le chantier
+    // « Démo regroupement » disparaît avec « Tout effacer ».
+    let pourToi = 0;
+    if (adminUserId) {
+      const companyId = await this.entrepriseDe(adminUserId);
+      const project = await p.project.create({ data: { companyId, name: "Démo regroupement (couverture et placo)", address: ADRESSE_ADMIN, demo: true, createdById: adminUserId } });
+      const takeoff = await p.takeoff.create({ data: { companyId, projectId: project.id, source: "lignes", trade: "roofing", status: "validated", promptId: "demo", promptVersion: 1, model: "demo", calculatedAt: maintenant, validatedAt: maintenant } });
+      pourToi = await this.commande.deposerPourLaDemo({ companyId, projectId: project.id, takeoffId: takeoff.id, adresse: ADRESSE_ADMIN, lignes: LIGNES.map((l) => ({ designation: l.designation, unite: l.unite, famille: l.famille, quantite: l.base })) }, maintenant);
+      await this.demandePersoDemo(companyId, project.id, takeoff.id, maintenant);
+      artisans.push({ companyId, projectId: project.id, adresse: ADRESSE_ADMIN });
+    }
+    const negocies = await this.regroupementsNegociesDemo(artisans, maintenant);
+    return { artisans: ARTISANS.length, negoces: NEGOCES.length, lignes, zone: ZONE_DEMO, pourToi, negocies };
+  }
+
+  /**
+   * Recentrage (25 octobre 2026) : une DEMANDE PERSO de démonstration sur le chantier de l'admin, déjà chiffrée par les
+   * trois faux négoces (prix fictifs, livraison, validité) : la comparaison livrée, « Commander » et « Mes prix » se voient
+   * sans lecture IA. Tout disparaît avec « Tout effacer ».
+   */
+  private async demandePersoDemo(companyId: string, projectId: string, takeoffId: string, maintenant: Date): Promise<void> {
+    const lines = LIGNES.map((l) => ({ designation: l.designation, quantity: String(l.base), unit: l.unite, reference: null }));
+    const envoyeLe = new Date(maintenant.getTime() - 26 * 3_600_000);
+    const recipients = [];
+    for (const [i, [enseigne]] of NEGOCES.entries()) {
+      const email = `negoce-test-${i + 1}@${this.domaine}`;
+      const supplier = await this.prisma.supplier.create({ data: { companyId, name: enseigne, email } });
+      // Le généraliste chiffre tout ; chaque spécialiste ses seules familles ; un écart propre à chacun.
+      const ecart = [1, 0.93, 0.96][i]!;
+      const prix: Record<string, number> = {};
+      LIGNES.forEach((l, k) => {
+        const chiffre = i === 0 || (i === 1 && l.famille === "couverture") || (i === 2 && l.famille === "second_oeuvre");
+        if (chiffre) prix[String(k)] = Math.round(PRIX_DEMO[k]! * ecart * 100) / 100;
+      });
+      recipients.push({ supplierId: supplier.id, status: "received" as const, sentAt: envoyeLe, prix, livraisonHt: [0, 45, 35][i]!, delaiJours: [3, 2, 4][i]!, validiteJours: [14, 7, 10][i]!, reponduLe: new Date(envoyeLe.getTime() + (i + 2) * 3_600_000) });
+    }
+    await this.prisma.priceRequest.create({
+      data: { companyId, projectId, takeoffId, lines, but: "chiffrer", accordIdentiteLe: envoyeLe, closLe: new Date(maintenant.getTime() + 21 * 86_400_000), createdAt: envoyeLe, recipients: { create: recipients } },
+    });
+  }
+
+  /**
+   * Business model final (25 octobre 2026) : deux REGROUPEMENTS NÉGOCIÉS de démonstration dans le 22. L'ardoise a déjà
+   * son offre (négoce masqué, prix fictif, commission par défaut incluse) : chaque artisan, l'admin compris, peut accepter
+   * ou refuser. Le zinc est « en collecte » : l'écran du chasseur le prend en charge. Tout disparaît avec « Tout effacer ».
+   */
+  private async regroupementsNegociesDemo(artisans: { companyId: string; projectId: string; adresse: string }[], maintenant: Date): Promise<number> {
+    const dateBesoin = new Date(maintenant.getTime() + 21 * 86_400_000);
+    const lots = [
+      { designation: "Ardoise naturelle 32×22 Espagne 1er choix", unite: "pièces", base: 1800, offre: { prix: 1.1, livraison: 0 } },
+      { designation: "Bobine zinc naturel 0,65 mm, largeur 650 mm", unite: "m", base: 60, offre: null },
+    ];
+    let n = 0;
+    for (const lot of lots) {
+      const a = articleNegociable(lot.designation);
+      if (!a.ok) continue;
+      const r = await this.prisma.regroupementNegocie.create({
+        data: { cle: a.reference.cle, libelle: a.reference.libelle, famille: a.reference.famille, departement: ZONE_DEMO, statut: lot.offre ? "offre_recue" : "en_collecte", dateBesoinMin: dateBesoin, ...(lot.offre ? { prisEnChargeLe: maintenant, offreEnvoyeeLe: maintenant, chasseurEmail: `chasseur@${this.domaine}` } : {}) },
+      });
+      for (const [i, x] of artisans.entries()) {
+        await this.prisma.besoinNegocie.create({
+          data: { companyId: x.companyId, projectId: x.projectId, designation: lot.designation, cle: a.reference.cle, famille: a.reference.famille, quantite: Math.round(lot.base * [1, 0.6, 1.4, 0.8, 1.2, 1][i % 6]!), unite: lot.unite, departement: ZONE_DEMO, livraison: x.adresse, dateBesoin, statut: "declare", regroupementId: r.id },
+        });
+      }
+      if (lot.offre) {
+        const [enseigne] = NEGOCES[1]!;
+        await this.prisma.offreNegociee.create({
+          data: { regroupementId: r.id, negoceNom: enseigne, negoceEmail: `negoce-test-2@${this.domaine}`, negoceTelephone: "02 96 00 00 00", prixNegocieHt: lot.offre.prix, commissionPct: COMMISSION_DEFAUT, prixAfficheHt: prixAffiche(lot.offre.prix, COMMISSION_DEFAUT), livraisonHt: lot.offre.livraison, conditions: "Prix ferme, livraison sous 5 jours ouvrés (démo)", valideJusquau: new Date(maintenant.getTime() + 10 * 86_400_000), saisieParEmail: `chasseur@${this.domaine}`, envoyeeLe: maintenant },
+        });
+      }
+      n++;
+    }
+    return n;
+  }
+
+  cloturer(maintenant = new Date()) {
+    return this.commande.avancerPourLaDemo("cloturer", ZONE_DEMO, maintenant);
+  }
+
+  async repondre(maintenant = new Date()) {
+    return { reponses: await this.commande.repondrePourLaDemo(this.domaine, maintenant) };
+  }
+
+  publier(maintenant = new Date()) {
+    return this.commande.avancerPourLaDemo("publier", ZONE_DEMO, maintenant);
+  }
+
+  /** « Finir l'essai » et « Simuler un échec de paiement » : sur l'entreprise de l'admin lui-même. */
+  async finirEssai(userId: string, maintenant = new Date()) {
+    await this.abonnement.finirEssai(await this.entrepriseDe(userId), maintenant);
+    return { fait: true };
+  }
+
+  async simulerEchec(userId: string, maintenant = new Date()) {
+    await this.abonnement.simulerEchec(await this.entrepriseDe(userId), maintenant);
+    return { fait: true };
+  }
+
+  /**
+   * Les faux négoces des recettes en ligne (adresses de test Resend `…@resend.dev`, Greg, 25 octobre 2026 : « purge les
+   * faux négoces des recettes précédentes en gardant seulement ceux du mode démo »). Ceux de la démo (`@demo.mobiiz.fr`)
+   * restent ; un vrai négoce n'a jamais une adresse `@resend.dev`.
+   */
+  async purgerRecettes() {
+    const recette = { endsWith: "@resend.dev", mode: "insensitive" as const };
+    const negoces = await this.prisma.negoce.deleteMany({ where: { email: recette } });
+    const comptes = await this.prisma.compteNegoce.deleteMany({ where: { email: recette } });
+    return { negoces: negoces.count, comptesNegoce: comptes.count };
+  }
+
+  /** Tout ce qui est faux disparaît : comptes, entreprises, chantiers, besoins, négoces et leurs comptes. */
+  async effacer() {
+    // Les regroupements négociés de démonstration : ceux qui ont un besoin sur un chantier de démo.
+    const projets = (await this.prisma.project.findMany({ where: { demo: true }, select: { id: true } })).map((x) => x.id);
+    const regroupements = [...new Set((await this.prisma.besoinNegocie.findMany({ where: { projectId: { in: projets } }, select: { regroupementId: true } })).map((b) => b.regroupementId).filter((x): x is string => !!x))];
+    await this.prisma.besoinNegocie.deleteMany({ where: { projectId: { in: projets } } });
+    await this.prisma.regroupementNegocie.deleteMany({ where: { id: { in: regroupements } } });
+    const avant = await this.jeu.effacer();
+    // Les faux négoces ajoutés au carnet de l'admin (demande perso de démonstration), après leurs demandes.
+    await this.prisma.supplier.deleteMany({ where: { email: { endsWith: `@${this.domaine}` } } });
+    const comptes = await this.prisma.compteNegoce.deleteMany({ where: { email: { endsWith: `@${this.domaine}` } } });
+    return { ...avant, comptesNegoce: comptes.count };
+  }
+
+  private async entrepriseDe(userId: string): Promise<string> {
+    const m = await this.prisma.membership.findFirst({ where: { userId, role: "owner" }, select: { companyId: true } });
+    if (!m) throw notFound("Company");
+    return m.companyId;
+  }
+}

@@ -3,11 +3,16 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
 import { confirmRemaining } from "./support/confirm.js";
 
 let ctx: TestContext;
+const modeAvant = process.env.MODE_REGROUPEMENT;
 beforeAll(async () => {
+  // L'essai et le gratuit d'avant (25 octobre 2026) ne valent plus qu'hors du mode automatique (achat groupé par métier, 27 octobre 2026).
+  process.env.MODE_REGROUPEMENT = "mois";
   ctx = await createTestApp();
 });
 afterAll(async () => {
   await ctx.app.close();
+  if (modeAvant === undefined) delete process.env.MODE_REGROUPEMENT;
+  else process.env.MODE_REGROUPEMENT = modeAvant;
 });
 beforeEach(async () => {
   await resetDatabase(ctx.prisma);
@@ -26,11 +31,14 @@ describe("mode démo", () => {
     // Les 3 fournisseurs fictifs sont dans le carnet, une seule fois même après un second chantier démo.
     await agent.post("/v1/demo/project").expect(201);
     const suppliers = (await agent.get("/v1/suppliers")).body.items as { id: string; email: string }[];
-    expect(suppliers.filter((s) => s.email.endsWith("@demo.baticlair.fr"))).toHaveLength(3);
+    expect(suppliers.filter((s) => s.email.endsWith("@demo.mobiiz.fr"))).toHaveLength(3);
 
     // Liste de matériaux (IA simulée), validée.
     const takeoff = (await agent.post(`/v1/documents/${docs[0].id}/takeoff`).expect(201)).body;
     expect(takeoff.lines.length).toBeGreaterThan(3);
+    // Recette en ligne du 25 octobre 2026 : le devis fictif est lu par la lecture simulée, jamais par le modèle ; aucun
+    // appel n'est compté (ni coût, ni quota).
+    expect(await ctx.prisma.aiExecution.count({ where: { documentId: docs[0].id } })).toBe(0);
     for (const line of takeoff.lines.filter((l: { status: string }) => l.status === "to_verify")) {
       await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
     }
@@ -46,16 +54,12 @@ describe("mode démo", () => {
       const mine = res.body.recipients.find((x: { id: string }) => x.id === r.id);
       expect(mine).toMatchObject({ status: "received" });
       expect(mine.document).not.toBeNull();
-      await agent.post(`/v1/price-request-recipients/${r.id}/analysis`).expect(201);
     }
-
-    const comparison = (await agent.get(`/v1/price-requests/${request.id}/comparison`)).body;
-    expect(comparison.suppliers).toHaveLength(3);
-    // Négoce Breizh oublie un article : la comparaison le signale.
-    const byName = (prefix: string) => comparison.suppliers.find((s: { name: string }) => s.name.startsWith(prefix));
-    expect(byName("Négoce Breizh")).toMatchObject({ missingCount: 1, arithmetic: "consistent" });
-    expect(byName("Tuilerie de l'Ouest")).toMatchObject({ missingCount: 0, feesHT: "45.00", arithmetic: "consistent" });
-    expect(byName("Matériaux Atlantique")).toMatchObject({ missingCount: 0, arithmetic: "consistent" });
+    // Point 7 (Greg, 28 octobre 2026) : les devis reçus ne sont plus lus par l'IA ; aucun appel, l'artisan retient un négoce.
+    expect((await agent.post(`/v1/price-request-recipients/${request.recipients[0].id}/analysis`).expect(409)).body.error.details.reason).toBe("lecture_devis_negoce_retiree");
+    expect((await agent.get(`/v1/price-requests/${request.id}/offers`).expect(200)).body).toMatchObject({ aiAvailable: false, items: [] });
+    const retenu = (await agent.patch(`/v1/price-requests/${request.id}/classification`).send({ classified: true, retainedSupplierIds: [suppliers[0]!.id] }).expect(200)).body;
+    expect(retenu.retainedSupplierIds).toEqual([suppliers[0]!.id]);
 
     // Une seconde réponse est refusée (devis déjà reçu).
     expect((await agent.post(`/v1/demo/recipients/${request.recipients[0].id}/quote`)).status).toBe(409);
@@ -80,6 +84,6 @@ describe("mode démo", () => {
 
     const res = await a.agent.post(`/v1/demo/recipients/${recipientId}/quote`).expect(201);
     expect(res.body.recipients[0]).toMatchObject({ status: "received", document: { name: "devis-fictif-test-devis.pdf" } });
-    await a.agent.post(`/v1/price-request-recipients/${recipientId}/analysis`).expect(201);
+    expect((await a.agent.post(`/v1/price-request-recipients/${recipientId}/analysis`)).status).toBe(409);
   });
 });

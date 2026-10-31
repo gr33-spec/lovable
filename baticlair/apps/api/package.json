@@ -14,7 +14,7 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "vercel-build": "pnpm --filter @baticlair/domain build && prisma generate && pnpm run migrate:deploy && tsc -p tsconfig.build.json",
+    "vercel-build": "node scripts/garde-base-preview.mjs && pnpm --filter @baticlair/domain build && prisma generate && pnpm run migrate:deploy && tsc -p tsconfig.build.json",
     "migrate:deploy": "prisma migrate deploy || (sleep 20 && prisma migrate deploy) || (sleep 40 && prisma migrate deploy)"
   },
   "dependencies": {
@@ -29,7 +29,7 @@
     "@vercel/functions": "^3.9.11",
     "better-auth": "1.7.6",
     "helmet": "^8.3.0",
-    "multer": "^2.4.0",
+    "multer": "^2.5.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.3.289",
     "pg": "^8.16.0",

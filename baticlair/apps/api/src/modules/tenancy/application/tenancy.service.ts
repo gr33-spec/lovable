@@ -15,9 +15,17 @@ const blank = (v: string | null | undefined, max: number) => {
 export class TenancyService {
   constructor(private readonly companies: CompanyRepository) {}
 
+  /** R7 : ce qui suit la création d'une entreprise (son adresse Mobiiz) ; branché par le module de l'adresse. */
+  private apresCreation: (companyId: string) => Promise<void> = async () => {};
+  brancherApresCreation(f: (companyId: string) => Promise<void>): void {
+    this.apresCreation = f;
+  }
+
   /** Onboarding : crée l'entreprise et en fait l'utilisateur propriétaire. */
-  createCompany(userId: string, rawName: string, trades: readonly string[] = []): Promise<CompanyMembershipView> {
-    return this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades));
+  async createCompany(userId: string, rawName: string, trades: readonly string[] = []): Promise<CompanyMembershipView> {
+    const vue = await this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades));
+    await this.apresCreation(vue.companyId).catch(() => undefined);
+    return vue;
   }
 
   /** L'artisan change ses métiers (Mon compte) : s'applique aux prochains devis lus. */
