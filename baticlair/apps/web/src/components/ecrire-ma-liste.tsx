@@ -20,7 +20,33 @@ import { useBrouillon } from "@/lib/brouillon";
  * leurs. Rien n'est deviné dans l'intitulé, et rien ne bloque l'ajout : sans quantité, la ligne part « à vérifier ». Les
  * propositions mêlent le catalogue et les intitulés déjà écrits par l'entreprise elle-même (`ecrits`) ; ceux des autres
  * ne passent qu'une fois ajoutés au catalogue par l'admin (Greg, 30 octobre 2026, nuit).
+ *
+ * LE CATALOGUE MÉTIER (Greg, 31 octobre 2026) : un produit à plusieurs formats se choisit en deux touchers (« Liteau ›
+ * 18×40 ») ; les mots qui précisent sans être au catalogue (« rouge » dans « H14 rouge ») restent dans la désignation ;
+ * « Je ne trouve pas mon matériau » ouvre la saisie libre, avec la marque ou la référence si l'artisan la connaît, écrite
+ * dans la désignation (elle part ainsi dans la liste, le PDF et la demande). Jamais une référence imposée.
  */
+interface Proposition {
+  designation: string;
+  unite: string;
+  produit?: string;
+  variante?: string | null;
+  precisions?: string[];
+  statut?: "verifie" | "generique" | null;
+}
+
+/** Les propositions, regroupées par produit : un produit à plusieurs formats n'occupe qu'une puce. */
+function regrouper(resultats: readonly Proposition[], ecrits: readonly Proposition[]) {
+  const groupes = new Map<string, Proposition[]>();
+  for (const r of resultats) {
+    const k = r.produit ?? r.designation;
+    groupes.set(k, [...(groupes.get(k) ?? []), r]);
+  }
+  const entrees: ({ type: "produit"; produit: string; articles: Proposition[] } | { type: "article"; article: Proposition })[] = [...groupes].map(([produit, articles]) =>
+    articles.length > 1 ? { type: "produit" as const, produit, articles } : { type: "article" as const, article: articles[0]! },
+  );
+  return [...entrees.slice(0, 4), ...ecrits.map((article) => ({ type: "article" as const, article }))].slice(0, 6);
+}
 export interface LigneEcrite {
   libelle: string;
   quantite: string;
@@ -63,11 +89,16 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
   // Le catalogue complet (point 3 du 30 octobre) : les mots du chantier, fautes admises (« pane » → Panne).
   const fetchCat = useCallback(
     (signal: AbortSignal) =>
-      mot ? api<{ resultats: { designation: string; unite: string }[] | null; ecrits?: { designation: string; unite: string }[] | null }>(`/v1/catalogue?q=${encodeURIComponent(mot)}`, { signal }).catch(() => null) : Promise.resolve(null),
+      mot ? api<{ resultats: Proposition[] | null; ecrits?: Proposition[] | null }>(`/v1/catalogue?q=${encodeURIComponent(mot)}`, { signal }).catch(() => null) : Promise.resolve(null),
     [mot],
   );
   const { data: cat } = useResource(fetchCat);
-  const suggestions = mot ? [...(cat?.resultats ?? []).slice(0, 3), ...(cat?.ecrits ?? [])].filter((r) => r.designation.toLowerCase() !== mot.toLowerCase()).slice(0, 5) : [];
+  const [ouvert, setOuvert] = useState<string | null>(null);
+  const [libre, setLibre] = useState(false);
+  const [marqueLibre, setMarqueLibre] = useState("");
+  const dejaChoisi = (r: Proposition) => r.designation.toLowerCase() === mot.toLowerCase() || texte.toLowerCase().startsWith(r.designation.toLowerCase());
+  const suggestions = mot && !libre ? regrouper((cat?.resultats ?? []).filter((r) => !dejaChoisi(r)), (cat?.ecrits ?? []).filter((r) => !dejaChoisi(r))) : [];
+  const groupeOuvert = ouvert ? suggestions.find((e) => e.type === "produit" && e.produit === ouvert) : undefined;
   const unites = UNITES.includes(unite) ? UNITES : [...UNITES, unite];
 
   useEffect(() => {
@@ -80,11 +111,14 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
     liste.current?.lastElementChild?.scrollIntoView({ block: "nearest" });
   }, [lignes.length]);
 
-  const enCours = (): LigneEcrite => ({ libelle: texte.trim().replace(/\s+/g, " "), quantite: quantite.trim().replace(",", "."), unite });
+  const enCours = (): LigneEcrite => ({ libelle: [texte.trim(), marqueLibre.trim()].filter(Boolean).join(", ").replace(/\s+/g, " "), quantite: quantite.trim().replace(",", "."), unite });
   const ajouter = () => {
     if (!texte.trim()) return;
     const l = enCours();
     b.modifier((d) => ({ ...d, lignes: [...d.lignes, l], texte: "", quantite: "", unite: "pièces" }));
+    setLibre(false);
+    setMarqueLibre("");
+    setOuvert(null);
     champ.current?.focus();
   };
   const reprendre = (i: number) => {
@@ -92,8 +126,9 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
     b.modifier((d) => ({ ...d, lignes: d.lignes.filter((_, j) => j !== i), texte: l.libelle, quantite: l.quantite, unite: l.unite || "pièces" }));
     champ.current?.focus();
   };
-  const choisir = (r: { designation: string; unite: string }) => {
-    saisir({ texte: r.designation, unite: r.unite || unite });
+  const choisir = (r: Proposition) => {
+    saisir({ texte: [r.designation, ...(r.precisions ?? [])].join(" "), unite: r.unite || unite });
+    setOuvert(null);
     champQte.current?.focus();
   };
   async function terminer() {
@@ -184,15 +219,57 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
             <Plus size={22} aria-hidden="true" />
           </button>
         </div>
-        {suggestions.length ? (
-          <ul aria-label="Références proposées" className="flex flex-wrap gap-2">
-            {suggestions.map((r) => (
-              <li key={r.designation}>
-                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => choisir(r)} className="pressable inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-3 text-left text-[14px] font-semibold">
-                  {r.designation}
+        {libre ? (
+          <input
+            aria-label="Marque, modèle ou référence (facultatif)"
+            value={marqueLibre}
+            onChange={(e) => setMarqueLibre(e.target.value)}
+            placeholder="Marque, modèle ou référence (facultatif)"
+            autoComplete="off"
+            className={`${INPUT} w-full`}
+          />
+        ) : null}
+        {groupeOuvert && groupeOuvert.type === "produit" ? (
+          <div className="flex flex-col gap-2">
+            <p className="text-[13px] font-semibold text-muted">Précise : {groupeOuvert.produit}</p>
+            <ul aria-label={`Formats de ${groupeOuvert.produit}`} className="flex flex-wrap gap-2">
+              {groupeOuvert.articles.map((r) => (
+                <li key={r.designation}>
+                  <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => choisir(r)} className="pressable inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-3 text-left text-[14px] font-semibold">
+                    {r.variante ?? r.designation}
+                  </button>
+                </li>
+              ))}
+              <li>
+                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setOuvert(null)} className="pressable inline-flex min-h-10 items-center rounded-full px-3 text-[14px] font-semibold text-muted underline">
+                  Retour
                 </button>
               </li>
-            ))}
+            </ul>
+          </div>
+        ) : suggestions.length || (mot && !libre) ? (
+          <ul aria-label="Références proposées" className="flex flex-wrap gap-2">
+            {suggestions.map((e) =>
+              e.type === "produit" ? (
+                <li key={`p:${e.produit}`}>
+                  <button type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => setOuvert(e.produit)} aria-label={`${e.produit} : choisir le format`} className="pressable inline-flex min-h-10 items-center gap-1 rounded-full border border-line bg-surface px-3 text-left text-[14px] font-semibold">
+                    {e.produit} <span aria-hidden="true">›</span>
+                  </button>
+                </li>
+              ) : (
+                <li key={e.article.designation}>
+                  <button type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => choisir(e.article)} className="pressable inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-3 text-left text-[14px] font-semibold">
+                    {e.article.designation}
+                    {e.article.precisions?.length ? <span className="ml-1 font-normal text-muted">{e.article.precisions.join(" ")}</span> : null}
+                  </button>
+                </li>
+              ),
+            )}
+            <li>
+              <button type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => setLibre(true)} className="pressable inline-flex min-h-10 items-center rounded-full px-3 text-left text-[14px] font-semibold text-muted underline">
+                Je ne trouve pas mon matériau — le saisir moi-même
+              </button>
+            </li>
           </ul>
         ) : (
           <p className="text-[13px] text-muted">{lignes.length ? "Un tap sur une ligne la modifie. Sans quantité, elle reste à vérifier." : "Écris l'intitulé comme tu veux, puis la quantité. Elle peut attendre."}</p>

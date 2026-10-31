@@ -91,6 +91,15 @@ export interface ArticleCatalogue {
   designation: string;
   unite: string;
   synonymes: readonly string[];
+  /**
+   * Le catalogue métier (Greg, 31 octobre 2026) : une RÉFÉRENCE COMMERCIALE (marque, référence fabricant) n'entre que
+   * vérifiée sur une source (fiche du fabricant, référentiel du fondateur), avec sa date ; une désignation GÉNÉRIQUE
+   * (« Liteau 18×40 ») n'a ni marque ni référence. Sans statut : article de l'amorce d'origine, générique.
+   */
+  marque?: string;
+  reference?: string;
+  statut?: "verifie" | "generique";
+  source?: { libelle: string; url?: string; verifieLe: string };
 }
 
 /** Le texte « à plat » : sans accent, en minuscules, × écrit x, ponctuation retirée. */
@@ -103,6 +112,7 @@ export const aPlat = (s: string) =>
     .replace(/(\d),(\d)/g, "$1.$2")
     .replace(/[^a-z0-9.x ]+/g, " ")
     .replace(/\s+/g, " ")
+    .replace(/(\d) ?x ?(\d)/g, "$1x$2")
     .trim();
 
 const slug = (s: string) => aPlat(s).replace(/\./g, "-").replace(/\s+/g, "-");
@@ -114,9 +124,10 @@ export function produit(
   nom: string,
   unite: string,
   variantes: readonly (string | null)[] = [null],
-  o: { synonymes?: readonly string[]; designation?: (v: string | null) => string } = {},
+  o: { synonymes?: readonly string[]; designation?: (v: string | null) => string; fiche?: Pick<ArticleCatalogue, "marque" | "reference" | "statut" | "source"> } = {},
 ): ArticleCatalogue[] {
   return variantes.map((v) => ({
+    ...o.fiche,
     cle: `${metier}/${slug(famille)}/${slug(nom)}${v ? `/${slug(v)}` : ""}`,
     metier,
     famille,
@@ -151,15 +162,37 @@ const fautesAdmises = (mot: string) => (mot.length < 4 ? 0 : mot.length < 8 ? 1 
 /** Le singulier simple (« pannes » → « panne », « chevrons » → « chevron »). */
 const singulier = (m: string) => (m.length > 3 && /[sx]$/.test(m) && !/(ss|us)$/.test(m) ? m.slice(0, -1) : m);
 
+/**
+ * Le masculin des qualificatifs du comptoir (catalogue métier, Greg, 31 octobre 2026 : « peinture blanche mate » doit
+ * trouver « blanc mat ») : la forme sous laquelle le catalogue les écrit.
+ */
+const MASCULINS: Readonly<Record<string, string>> = {
+  blanche: "blanc", mate: "mat", grise: "gris", noire: "noir", brune: "brun", verte: "vert", bleue: "bleu", satinee: "satine",
+  vieillie: "vieilli", sablee: "sable", ardoisee: "ardoise", galvanisee: "galvanise", laquee: "laque", traitee: "traite",
+};
+const forme = (m: string) => MASCULINS[m] ?? MASCULINS[singulier(m)] ?? singulier(m);
+
+/**
+ * Les mots qui PRÉCISENT sans désigner (couleur, finition, gamme de qualité) : absents d'un article, ils ne l'écartent pas
+ * (« H14 rouge » trouve la H14, dont le coloris n'est pas au catalogue) ; ils restent dans la désignation de l'artisan.
+ */
+const PRECISIONS = new Set([
+  "rouge", "brun", "noir", "gris", "blanc", "beige", "vert", "bleu", "anthracite", "ardoise", "vieilli", "sable", "flamme", "nuance", "naturel", "terre",
+  "mat", "satin", "satine", "velours", "brillant", "lisse", "pro", "professionnel", "professionnelle", "qualite", "premium", "standard", "interieur", "exterieur",
+]);
+
 /** La qualité de la rencontre d'un mot tapé avec des mots : 3 le mot même, 2 son début, 1 ou 1,5 à une faute près, 0 rien. */
 function rencontre(tape: string, mots: readonly string[]): number {
-  const t = singulier(tape);
+  const t = forme(tape);
+  // Une dimension ou une référence (un chiffre dans le mot : « 18x40 », « h14 », « hp10 ») ne se rapproche jamais à une
+  // faute près : une 18×50 n'est pas une 18×40, une H14 n'est pas une HP10.
+  const technique = /\d/.test(tape);
   let meilleure = 0;
   for (const m of mots) {
-    const s = singulier(m);
+    const s = forme(m);
     if (s === t || m === tape) return 3;
     if (s.startsWith(t) || m.startsWith(tape)) meilleure = Math.max(meilleure, 2);
-    else {
+    else if (!technique) {
       const admis = fautesAdmises(t);
       // Une lettre oubliée ou doublée (« pane » pour « panne ») est la faute la plus courante : elle passe devant une lettre changée.
       if (admis > 0 && Math.abs(s.length - t.length) <= admis && distance(s, t) <= admis) meilleure = Math.max(meilleure, s.length !== t.length ? 1.5 : 1);
@@ -186,6 +219,59 @@ export function scoreArticle(a: Pick<ArticleCatalogue, "designation" | "famille"
   // Le produit qui COMMENCE par le premier mot tapé passe devant (« panne » : la Panne, puis le porte-panne).
   score += rencontre(tapes[0]!, duProduit.slice(0, 1));
   return score;
+}
+
+/**
+ * La recherche telle que l'artisan la tape, à plat : « 18 x 40 », « 18/40 », « 18*40 » et « 18 40 » deviennent « 18x40 » ;
+ * « hp 10 » reste deux mots (le catalogue porte les deux écritures dans ses synonymes).
+ */
+export const requeteAPlat = (q: string) => aPlat(q.replace(/(\d)\s*[/x×*]\s*(\d)/gi, "$1x$2")).replace(/\b(\d{1,3}) (\d{2,3})\b/g, "$1x$2");
+
+/** Un article trouvé, avec les mots de l'artisan qui le précisent sans être au catalogue (« rouge » pour « H14 rouge »). */
+export interface Trouvaille<T> {
+  article: T;
+  precisions: string[];
+  score: number;
+}
+
+/**
+ * LE MOTEUR DE RECHERCHE MÉTIER (Greg, 31 octobre 2026 : « Mobiiz doit comprendre le langage des artisans ») : mots
+ * partiels, fautes légères, synonymes et abréviations ; dimensions écrites de toutes les façons ; références exactes
+ * (jamais une à la place d'une autre) ; une couleur, une finition ou une gamme absente de l'article le précise au lieu
+ * de l'écarter. Chaque mot qui désigne doit être trouvé ; un article sans aucun mot désignant trouvé n'est pas proposé.
+ */
+export function rechercherAvecPrecisions<T extends Pick<ArticleCatalogue, "designation" | "famille" | "produit" | "synonymes"> & { statut?: string | null }>(articles: readonly T[], q: string, max = 30): Trouvaille<T>[] {
+  const tapes = requeteAPlat(q).split(" ").filter(Boolean);
+  if (!tapes.length) return [];
+  const originaux = new Map(q.split(/\s+/).filter(Boolean).map((w) => [aPlat(w), w] as const));
+  const trouves: (Trouvaille<T> & { i: number })[] = [];
+  articles.forEach((a, i) => {
+    const duProduit = aPlat(a.produit).split(" ");
+    const tout = aPlat(`${a.designation} ${a.famille} ${a.produit} ${a.synonymes.join(" ")}`).split(" ");
+    let score = 0;
+    let designants = 0;
+    const precisions: string[] = [];
+    for (const t of tapes) {
+      const precision = PRECISIONS.has(forme(t));
+      const r = rencontre(t, tout);
+      // Un mot qui précise ne compte que s'il est écrit tel quel (« pro » ne choisit pas « plafond profond »).
+      if (r > 0 && (!precision || r === 3)) {
+        score += r + rencontre(t, duProduit) * 2;
+        if (!precision) designants++;
+      } else if (precision) {
+        precisions.push(originaux.get(t) ?? t);
+        score -= 0.5;
+      } else return;
+    }
+    if (designants === 0) return;
+    score += rencontre(tapes[0]!, duProduit.slice(0, 1));
+    trouves.push({ article: a, precisions, score, i });
+  });
+  return trouves
+    // À score égal : moins de précisions laissées, puis un article sourcé (référentiel, fabricant), puis l'ordre du catalogue.
+    .sort((x, y) => y.score - x.score || x.precisions.length - y.precisions.length || (x.article.statut ? 0 : 1) - (y.article.statut ? 0 : 1) || x.i - y.i)
+    .slice(0, max)
+    .map(({ i: _i, ...t }) => t);
 }
 
 export function rechercherArticles<T extends Pick<ArticleCatalogue, "designation" | "famille" | "produit" | "synonymes">>(articles: readonly T[], q: string, max = 30): T[] {

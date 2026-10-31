@@ -15,8 +15,18 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-Rien. SUIVI 141 (landing d'après la maquette) en ligne et rapporté. Ouvert chez Greg : CGU (doc VNekwvYYq3KzhijCSm2KDX,
-deux formulations). Lecture IA réelle (point 13) : la routine du crédit la reprend seule.
+SUIVI 142, « CATALOGUE MÉTIER INTELLIGENT » (message de Greg du 31 octobre). Plan par étapes (cocher au fil de l'eau) :
+- [x] 1. Audit (catalogue en données, recherche, Écris ta liste, lecture IA, achats groupés, PDF) → docs/catalogue-metier.md
+- [x] 2. Moteur de recherche : dimensions (18x40, 18 40, 18×40), références exactes (H14 ≠ HP10), abréviations, fautes
+- [x] 3. Couverture d'abord : seulement des données sourcées (référentiel du fondateur, fabricants vérifiés), sinon « à vérifier »
+- [x] 4. Écris ta liste : préciser seulement ce qui manque (variantes en boutons), « Je ne trouve pas mon matériau », référence
+- [ ] 5. Apprentissage : propositions existantes (admin) + rapprochement de désignations voisines, seuils configurables
+- [ ] 6. Lecture IA : la question « Quel modèle ? » répondue avec le même moteur ; jamais une référence inventée
+- [ ] 7. Achats groupés : rapprochement par clé technique (existant `clesDeRegroupement`), carte discrète
+- [ ] 8. Référence conservée dans liste, PDF, demandes ; tests de non-régression ; rapport
+État détaillé : docs/catalogue-metier.md. Étapes 1-4 faites localement (commit à pousser après série verte).
+Règles : rien d'inventé ni de faux produit ; pas de collecte massive ; pas de migration destructive ; landing, abonnements,
+DA intouchés.
 
 ## À faire ensuite (dans cet ordre)
 

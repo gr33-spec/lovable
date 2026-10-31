@@ -8,12 +8,38 @@ const M = "couverture" as const;
 const ARDOISES = ["32×22", "35×25", "40×22", "40×25", "45×30", "50×25", "30×20", "27×18", "22×32 trapézoïdale"];
 const CHOIX = ["Espagne 1er choix", "Espagne 2e choix", "Angers (France) 1er choix", "Pays de Galles 1er choix", "Brésil 1er choix"];
 
+/**
+ * LE CATALOGUE MÉTIER, COUVERTURE D'ABORD (Greg, 31 octobre 2026 : « une base fiable plutôt qu'un catalogue immense et
+ * imprécis »). Seules des sources vérifiées : le référentiel du fondateur (`docs/referentiel-couverture.md`) et les fiches
+ * des fabricants. Aucune référence inventée ; un coloris non publié par le fabricant n'est pas listé (l'artisan le précise).
+ */
+const REFERENTIEL = (section: string) => ({ libelle: `Référentiel couverture du fondateur, ${section}`, verifieLe: "2026-10-31" });
+const EDILIANS_H14 = { libelle: "Fiche H 14 Huguenot, réf. 204 (Edilians)", url: "https://edilians.eu/h-14-huguenot.html", verifieLe: "2026-10-31" };
+const EDILIANS_HP10 = { libelle: "Documentation HP 10 Huguenot, réf. 205 (Edilians)", url: "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf", verifieLe: "2026-10-01" };
+const EDILIANS_CANAL = { libelle: "Tuiles canal Poudenx (Edilians)", url: "https://edilians.com/media/wysiwyg/Encyclopedie/canal-tuiles-edilians.pdf", verifieLe: "2026-10-04" };
+/** Les sections de liteau du référentiel : §200 (tuile 27×40, ardoise 18×40 et 27×27) et §760 (selon l'entraxe des chevrons). */
+const SECTIONS_LITEAU = ["18×40", "14×40", "27×40", "14×50", "18×50", "18×75", "25×50", "27×27"];
+const tuileEdilians = (nom: string, reference: string, source: typeof EDILIANS_H14, synonymes: readonly string[]) =>
+  produit(M, "Tuiles terre cuite", nom, "pièces", [null], {
+    synonymes,
+    designation: () => `${nom}, réf. ${reference} (Edilians)`,
+    fiche: { marque: "Edilians", reference, statut: "verifie", source },
+  });
+
 export const COUVERTURE: readonly ArticleCatalogue[] = [
   // Ardoises
   ...produit(M, "Ardoises", "Ardoise naturelle", "pièces", croiser(ARDOISES, CHOIX), { synonymes: ["ardoise", "ardoises", "schiste", "ardoise naturelle"] }),
   ...produit(M, "Ardoises", "Ardoise fibres-ciment", "pièces", croiser(["60×30", "40×40", "40×24", "60×40"], ["gris ardoise", "noir bleuté"]), { synonymes: ["ardoise synthétique", "ardoise fibro", "fibro ciment", "eternit"] }),
   ...produit(M, "Ardoises", "Ardoise de faîtage (lignolet)", "pièces", ["Espagne", "Angers (France)"], { synonymes: ["lignolet", "faîtage ardoise"] }),
-  // Tuiles terre cuite
+  // Tuiles terre cuite : les modèles vérifiés chez le fabricant d'abord (Edilians), puis les désignations génériques.
+  ...tuileEdilians("Tuile H 14 Huguenot", "204", EDILIANS_H14, ["h14", "h 14", "huguenot", "grand moule faiblement galbee"]),
+  ...tuileEdilians("Tuile HP 10 Huguenot", "205", EDILIANS_HP10, ["hp10", "hp 10", "huguenot"]),
+  ...tuileEdilians("Tuile canal 50 Poudenx", "414 / 454", EDILIANS_CANAL, ["canal 50", "poudenx"]),
+  ...tuileEdilians("Tuile Canal Gironde 50 Poudenx", "406 / 456", EDILIANS_CANAL, ["canal gironde", "gironde 50", "poudenx"]),
+  ...tuileEdilians("Tuile Canal Gironde à blocage Poudenx", "409 / 459", EDILIANS_CANAL, ["gironde a blocage", "poudenx"]),
+  ...tuileEdilians("Tuile Canal Lyonnaise 40 Poudenx", "401 / 451", EDILIANS_CANAL, ["canal lyonnaise", "lyonnaise 40", "poudenx"]),
+  ...tuileEdilians("Tuile Canal Charentaise Poudenx", "405 / 455", EDILIANS_CANAL, ["canal charentaise", "charentaise", "poudenx"]),
+  ...tuileEdilians("Tuile Canal Charentaise à blocage Poudenx", "410 / 460", EDILIANS_CANAL, ["charentaise a blocage", "poudenx"]),
   ...produit(M, "Tuiles terre cuite", "Tuile mécanique à emboîtement petit moule", "pièces", ["rouge", "rouge vieilli", "brun", "ardoisé", "sablé"], { synonymes: ["tuile mécanique", "tuile emboîtement", "petit moule"] }),
   ...produit(M, "Tuiles terre cuite", "Tuile mécanique à emboîtement grand moule", "pièces", ["rouge", "rouge vieilli", "brun", "ardoisé", "sablé"], { synonymes: ["tuile mécanique", "grand moule", "tuile 10 au m²"] }),
   ...produit(M, "Tuiles terre cuite", "Tuile plate", "pièces", croiser(["17×27", "16×24"], ["rouge", "brun vieilli", "ardoisé"]), { synonymes: ["tuile plate", "petite tuile"] }),
@@ -45,7 +71,8 @@ export const COUVERTURE: readonly ArticleCatalogue[] = [
   ...produit(M, "Écrans et pare-vapeur", "Écran sous-toiture réfléchissant", "rouleaux", ["rouleau 1,50 × 25 m"], { synonymes: ["ecran reflechissant"] }),
   ...produit(M, "Écrans et pare-vapeur", "Pare-vapeur", "rouleaux", ["rouleau 1,50 × 50 m", "rouleau 2,00 × 50 m"], { synonymes: ["frein vapeur", "membrane"] }),
   ...produit(M, "Écrans et pare-vapeur", "Adhésif pour écran", "rouleaux", ["60 mm × 25 m"], { synonymes: ["scotch ecran", "ruban adhesif"] }),
-  // Bois de couverture
+  // Bois de couverture : les sections du référentiel du fondateur d'abord (§200, §760).
+  ...produit(M, "Bois de couverture", "Liteau", "m", croiser(SECTIONS_LITEAU, ["sapin traité classe 2"]), { synonymes: ["latte", "liteaux", "lattes", "litonnage"], fiche: { statut: "generique", source: REFERENTIEL("§200 et §760") } }),
   ...produit(M, "Bois de couverture", "Liteau", "m", croiser(["27×38", "25×38", "30×40", "38×38", "18×38"], ["sapin traité classe 2", "sapin non traité"]), { synonymes: ["latte", "liteaux", "lattes", "litonnage"] }),
   ...produit(M, "Bois de couverture", "Contre-latte", "m", croiser(["27×38", "38×38", "40×40"], ["traité classe 2"]), { synonymes: ["contre liteau", "contre lattage", "contre-liteau", "contrelatte"] }),
   ...produit(M, "Bois de couverture", "Volige", "m²", croiser(["18×100", "18×120", "18×150", "22×100", "27×150"], ["sapin brut", "peuplier brut", "sapin traité"]), { synonymes: ["voliges", "voligeage", "planche de couverture"] }),

@@ -12,7 +12,7 @@ import {
   METIERS_CATALOGUE,
   metiersCatalogueDuCompte,
   clesDeRegroupement,
-  rechercherArticles,
+  rechercherAvecPrecisions,
   referenceStricte,
   TOUT_LE_CATALOGUE,
   type MetierCatalogue,
@@ -31,7 +31,14 @@ export interface ArticleVue {
   unite: string;
   /** La famille d'achat groupé (le métier des négoces) : un achat groupé n'en a qu'une. */
   familleAchat: string;
+  /** La fiche du catalogue métier (amorce du domaine) : marque et référence vérifiées, statut, source. */
+  marque: string | null;
+  reference: string | null;
+  statut: "verifie" | "generique" | null;
+  source: { libelle: string; url?: string; verifieLe: string } | null;
 }
+
+const FICHES = new Map(TOUT_LE_CATALOGUE.map((a) => [a.cle, a]));
 
 /** Un article choisi pour l'achat groupé : sa clé de regroupement et le nom que lit le négoce. */
 export interface ArticleRegroupe extends ArticleVue {
@@ -42,7 +49,23 @@ export interface ArticleRegroupe extends ArticleVue {
 type Ligne = Awaited<ReturnType<PrismaService["catalogueArticle"]["findMany"]>>[number];
 
 const estMetier = (m: string): m is MetierCatalogue => (METIERS_CATALOGUE as readonly string[]).includes(m);
-const vue = (a: Ligne): ArticleVue => ({ cle: a.cle, metier: a.metier, famille: a.famille, produit: a.produit, variante: a.variante, designation: a.designation, unite: a.unite, familleAchat: estMetier(a.metier) ? FAMILLE_DU_METIER_CATALOGUE[a.metier] : a.metier });
+const vue = (a: Ligne): ArticleVue => {
+  const f = FICHES.get(a.cle);
+  return {
+    cle: a.cle,
+    metier: a.metier,
+    famille: a.famille,
+    produit: a.produit,
+    variante: a.variante,
+    designation: a.designation,
+    unite: a.unite,
+    familleAchat: estMetier(a.metier) ? FAMILLE_DU_METIER_CATALOGUE[a.metier] : a.metier,
+    marque: f?.marque ?? null,
+    reference: f?.reference ?? null,
+    statut: f?.statut ?? null,
+    source: f?.source ?? null,
+  };
+};
 
 /**
  * LE CATALOGUE EN DONNÉES (correction après test de Greg, 30 octobre 2026, points 3 et 4) : amorcé depuis le domaine la
@@ -86,9 +109,10 @@ export class CatalogueService {
     if (recherche) {
       const tous = await this.articles(null);
       // La recherche cherche d'abord dans le métier choisi, puis dans les autres.
-      const trouves = rechercherArticles(tous, recherche, 60);
-      const duMetier = trouves.filter((a) => a.metier === metier);
-      const resultats = [...duMetier, ...trouves.filter((a) => a.metier !== metier)].slice(0, 30).map(vue);
+      // Le moteur métier (Greg, 31 octobre 2026) : dimensions, références exactes, précisions gardées (« H14 rouge »).
+      const trouves = rechercherAvecPrecisions(tous.map((a) => ({ ...a, statut: FICHES.get(a.cle)?.statut ?? null })), recherche, 60);
+      const duMetier = trouves.filter((t) => t.article.metier === metier);
+      const resultats = [...duMetier, ...trouves.filter((t) => t.article.metier !== metier)].slice(0, 30).map((t) => ({ ...vue(t.article), precisions: t.precisions }));
       // Les intitulés écrits par l'entreprise elle-même, après le catalogue (Greg, 30 octobre 2026, nuit : rien n'est
       // diffusé aux autres ; un intitulé générique ne l'est qu'une fois ajouté au catalogue par l'admin).
       const vus = new Set(resultats.map((a) => cleDeLibelle(a.designation)));
