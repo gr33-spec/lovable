@@ -15,6 +15,15 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
+SUIVI 143-145 (messages de Greg du 31 octobre, après le catalogue métier), dans cet ordre :
+- [x] 143. Landing « Comment ça marche ? » : vraies captures de l'app (données fictives) dans un cadre de téléphone
+  neutre, sans marque, à la place des trois téléphones dessinés ; CTA fixe mobile qui ne cache plus le texte du collectif.
+- [ ] 144. Couverture et peinture : recherche poussée, données vérifiées (tuiles, ardoises naturelles et synthétiques,
+  canal, plates, accessoires), sources et dates ; peinture plus générique (par attributs).
+- [ ] 145. Un produit inconnu devient une référence quand un autre artisan écrit la même chose ou quand il est commandé
+  en achat groupé (garder confidentialité et contrôle ; décision dans DECISIONS).
+
+Précédent :
 SUIVI 142, « CATALOGUE MÉTIER INTELLIGENT » (message de Greg du 31 octobre). Plan par étapes (cocher au fil de l'eau) :
 - [x] 1. Audit (catalogue en données, recherche, Écris ta liste, lecture IA, achats groupés, PDF) → docs/catalogue-metier.md
 - [x] 2. Moteur de recherche : dimensions (18x40, 18 40, 18×40), références exactes (H14 ≠ HP10), abréviations, fautes

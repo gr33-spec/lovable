@@ -2614,6 +2614,16 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   const angles = await page.locator(".mz2-tel").evaluateAll((els) => els.map((e) => getComputedStyle(e).transform));
   expect(new Set(angles).size).toBe(3);
   await expect(page.locator(".mz2-tel-3").getByText("Exemple")).toHaveCount(1);
+  // Greg, 31 octobre 2026 : de vraies captures de l'app (données fictives), chargées, dans un cadre sans marque.
+  const ecrans = page.locator(".mz2-tel img");
+  await expect(ecrans).toHaveCount(3);
+  for (const [i, nom] of ["ecran-liste", "ecran-negoces", "ecran-reponses"].entries()) {
+    const img = ecrans.nth(i);
+    await img.scrollIntoViewIfNeeded();
+    await expect(img).toHaveAttribute("src", `/landing/v3/${nom}.webp`);
+    await expect.poll(() => img.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth)).toBe(600);
+  }
+  await expect(page.locator("#fonctionnement").getByText(/iPhone|Apple/)).toHaveCount(0);
   await expect(page.getByText(/Recommandé/)).toHaveCount(0);
   for (const b of ["Simple et rapide", "Plus de visibilité", "Plus de poids"]) await expect(page.getByRole("heading", { name: b })).toBeVisible();
   // Greg, 30 octobre 2026, nuit : « Pourquoi Mobiiz ? » neutre et collectif, sans l'identité du fondateur.
@@ -2683,6 +2693,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   expect((await fixe.getByRole("link", { name: "Commencer gratuitement" }).boundingBox())!.width).toBeLessThan(330);
   // Un seul bouton principal à la fois : devant celui du collectif, le bouton fixe s'efface.
   await page.locator("#collectifCTA").scrollIntoViewIfNeeded();
+  await expect(fixe).not.toHaveAttribute("data-visible", "");
+  // Greg, 31 octobre 2026 (capture iPhone) : le bouton fixe ne cache jamais le texte du collectif, dès son titre.
+  await page.locator("#collectiveTitle").evaluate((e) => window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 120));
   await expect(fixe).not.toHaveAttribute("data-visible", "");
   await page.locator("#finalPrimaryCTA").scrollIntoViewIfNeeded();
   await expect(fixe).not.toHaveAttribute("data-visible", "");
@@ -3128,7 +3141,7 @@ async function ajouterAuMois(page: Page, projectId: string, nature: "Un chantier
   await page.goto(`/chantiers/${projectId}`);
   const bloc = page.getByRole("region", { name: /^Regroupement d/ });
   await expect(bloc.getByText("Une commande toutes les deux semaines avec les artisans de ta région.")).toBeVisible();
-  await expect(bloc.getByText(/^Clôture dans \d+ j/)).toBeVisible();
+  await expect(bloc.getByText(/^Clôture dans \d+ (j|h|min)/)).toBeVisible();
   await bloc.getByRole("button", { name: /^Ajouter à la commande d/ }).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   const boxes = list.getByRole("checkbox", { name: /^Ajouter à la commande : / }).and(page.locator(":enabled"));
@@ -3182,7 +3195,7 @@ async function accesNegoceCree(browser: Browser, page: Page, email: string, ense
   // Son espace, pendant les dépôts des artisans : le chrono, rien d'autre ; aucun nom d'artisan.
   await pageN.goto("/negoce");
   await expect(pageN.getByRole("heading", { name: enseigne })).toBeVisible();
-  await expect(pageN.getByRole("region", { name: "Prochaine clôture" })).toContainText(/Prochaine clôture dans\s*\d+ j/);
+  await expect(pageN.getByRole("region", { name: "Prochaine clôture" })).toContainText(/Prochaine clôture dans\s*\d+ (j|h|min)/);
   await expect(pageN.getByText(/Toitures [ABC]|rue des Ajoncs|rue du Port/)).toHaveCount(0);
   expect(await pageN.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await contexte.close();
@@ -3240,7 +3253,7 @@ test("Commande du mois : un cycle complet, trois artisans (C après la clôture)
   const carteA = page.getByRole("region", { name: /^Commande d/ }).first();
   await expect(carteA.getByText(/^Toi seul : 2\s000 pièces d'ardoise naturelle 32×22/)).toBeVisible();
   await expect(carteA.getByText("Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande.")).toBeVisible();
-  await expect(carteA.getByText(/^Clôture dans \d+ j/)).toBeVisible();
+  await expect(carteA.getByText(/^Clôture dans \d+ (j|h|min)/)).toBeVisible();
   await expect(page.getByText(/\d+ couvreurs|\d+ demandes envoyées|entreprises/)).toHaveCount(0);
   const cycle = (await apiJson<{ commandes: CommandeMoisApi[] }>(page, "GET", "/v1/commande-du-mois")).body.commandes.find((c) => c.phase === "inscriptions")!;
 

@@ -130,35 +130,32 @@ const BENEFICES = [
 ] as const;
 
 /** Les écrans de l'app mis en scène dans un téléphone : contenu d'exemple, jamais un vrai client ni un vrai prix. */
+/**
+ * LES VRAIS ÉCRANS DE L'APP (Greg, 31 octobre 2026 : « des vraies captures d'écran avec des téléphones type iPhone sans
+ * nommer la marque », puis « des captures qui donnent envie : c'est une landing page »). Captures de l'app réelle, données
+ * fictives (Toitures Exemple, Négoce A à E, prix d'exemple), dans un cadre de téléphone neutre : aucune marque, aucun logo.
+ */
 const ECRANS = [
-  { titre: "Ma liste", lignes: [["Plaque BA13", "40"], ["Isolant 120", "18"], ["Rail R48", "24"], ["Vis placo", "2"]] },
-  { titre: "Mes négoces", lignes: [["Négoce A", ""], ["Négoce B", ""], ["Négoce C", ""]] },
-  { titre: "Réponses", lignes: [["Négoce A", "1 248 €"], ["Négoce B", "1 276 €"], ["Négoce C", "1 318 €"]] },
+  { src: "/landing/v3/ecran-liste.webp", alt: "L'app Mobiiz : ta liste de fournitures, prête à partir" },
+  { src: "/landing/v3/ecran-negoces.webp", alt: "L'app Mobiiz : la liste envoyée à cinq négoces en une fois" },
+  { src: "/landing/v3/ecran-reponses.webp", alt: "L'app Mobiiz : les devis reçus, du moins cher au plus cher (exemple)" },
 ] as const;
 
 function Telephone({ n }: { n: number }) {
   const e = ECRANS[n]!;
   return (
-    <div className={`mz2-tel mz2-tel-${n + 1}`} aria-hidden="true">
+    <figure className={`mz2-tel mz2-tel-${n + 1}`}>
       <div className="mz2-tel-ecran">
-        <div className="mz2-tel-barre">
+        <div className="mz2-tel-barre" aria-hidden="true">
           <span>9:41</span>
           <span className="mz2-tel-ilot" />
+          <span className="mz2-tel-etat" />
         </div>
-        <p className="mz2-tel-titre">
-          {e.titre}
-          {n === 2 ? <em>Exemple</em> : null}
-        </p>
-        {e.lignes.map(([l, v], i) => (
-          <div className={`mz2-tel-ligne${n === 2 && i === 0 ? " moins-cher" : ""}`} key={l}>
-            <Icone id="i-check" className="mz2-coche" />
-            <span>{l.startsWith("Négoce ") ? <><i className="pref">Négoce </i>{l.slice(7)}</> : l}</span>
-            {v ? <b>{v}</b> : null}
-          </div>
-        ))}
-        {n === 2 ? <p className="mz2-tel-pied">Le moins cher : Négoce A</p> : null}
+        {/* eslint-disable-next-line @next/next/no-img-element -- une capture déjà optimisée (WebP, 600 px), chargée tard */}
+        <img src={e.src} alt={e.alt} width={600} height={1298} loading="lazy" decoding="async" />
       </div>
-    </div>
+      {n === 2 ? <figcaption className="mz2-tel-exemple">Exemple</figcaption> : null}
+    </figure>
   );
 }
 
@@ -363,7 +360,7 @@ export function LandingPremium() {
           </div>
         </div>
       </footer>
-      <CtaFixePremium haut="heroPrimaryCTA" bas="finalPrimaryCTA" aussi={["collectifCTA"]} bouton={CTA_PRINCIPAL.bouton} />
+      <CtaFixePremium haut="heroPrimaryCTA" bas="finalPrimaryCTA" aussi={["collectif"]} bouton={CTA_PRINCIPAL.bouton} />
     </div>
   );
 }
