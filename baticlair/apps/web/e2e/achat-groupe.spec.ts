@@ -242,9 +242,12 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
 
     // 3. Un 2e couvreur du secteur voit l'achat ouvert et y ajoute sa liste, avec la case d'engagement.
     const b = await nouvelArtisan(browser, dep, "Paul");
+    // L'accueil (1er novembre 2026) : « Rejoindre un achat groupé » ouvre les achats groupés de son secteur.
     await b.page.goto("/");
-    const ouverts = b.page.getByRole("region", { name: "Achats groupés ouverts dans ton secteur" });
-    await expect(ouverts.getByText(/^Ajoute ta liste avant le \d+ \S+\. Livraison avant le \d+ \S+\.$/)).toBeVisible();
+    await b.page.getByRole("region", { name: "Commencer" }).getByRole("link", { name: /^Rejoindre un achat groupé/ }).click();
+    await b.page.waitForURL(/\/achats-groupes$/);
+    const ouverts = b.page.getByRole("region", { name: "Achats groupés près de chez toi" });
+    await expect(ouverts.getByText(/Ajoute ta liste avant le \d+(?:er)? \S+\. Livraison avant le \d+(?:er)? \S+\./).first()).toBeVisible();
     await ouverts.getByRole("link", { name: "Ajouter ma liste" }).first().click();
     await expect(b.page.getByRole("heading", { name: "Ajouter ma liste" })).toBeVisible();
     // Le choix guidé (Greg, 27 octobre, capture iPhone) : un bouton par matériau, format, choix, puis la quantité.
