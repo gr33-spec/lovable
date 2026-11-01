@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { ContenuPaywall, continuerAbonnement, useAbonnement } from "@/components/abonnement";
 import { OffresAbonnement } from "@/components/offres-abonnement";
-import { BackButton, Button, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
+import { BackButton, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type Abonnement, type FactureAbonnement, type Formule } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
@@ -22,8 +22,11 @@ export default function AbonnementPage() {
   const [onglet, setOnglet] = useState<"abonnement" | "factures">("abonnement");
   return (
     <div className="flex flex-col gap-4">
-      <BackButton fallback="/compte" />
-      <PageTitle>Mon abonnement</PageTitle>
+      {/* Audit UX (1er novembre 2026) : le retour rond à côté du titre, comme dans les rubriques de Profil. */}
+      <div className="flex items-center gap-2">
+        <BackButton fallback="/compte" compact />
+        <h1 className="font-display text-[26px] leading-tight font-extrabold tracking-[-0.02em]">Mon abonnement</h1>
+      </div>
       {data?.modeTest ? (
         <p role="status" className="rounded-xl bg-danger px-4 py-3 text-[15px] font-bold text-white">
           {data.modeTest}

@@ -170,8 +170,10 @@ function MesListes() {
             />
           </div>
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <div role="group" aria-label="Filtrer" className="flex min-w-0 gap-1.5">
+        {/* Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » chevauchait « Terminées » ; il passe à la ligne
+            seulement quand la place manque. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+          <div role="group" aria-label="Filtrer" className="flex gap-1.5">
             {FILTERS.map((f) => (
               <button
                 key={f.value}
@@ -188,7 +190,7 @@ function MesListes() {
             ))}
           </div>
           {filter === "toutes" && items && items.length > 0 && !selection ? (
-            <button type="button" onClick={() => setSelection(new Set())} className="min-h-11 shrink-0 px-1 text-[15px] font-bold whitespace-nowrap text-accent-text">
+            <button type="button" onClick={() => setSelection(new Set())} className="ml-auto min-h-11 shrink-0 px-1 text-[15px] font-bold whitespace-nowrap text-accent-text">
               Sélectionner
             </button>
           ) : null}

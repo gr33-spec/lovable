@@ -58,18 +58,20 @@ export function useZoneVisible(surChangement?: () => void) {
 export function EnTeteChat({ onFermer, onVoirPdf, croix = false }: { onFermer: () => void; onVoirPdf?: (() => void) | undefined; croix?: boolean }) {
   return (
     <header className="flex shrink-0 items-center gap-2.5 border-b px-3 pt-[max(env(safe-area-inset-top),8px)] pb-2 lg:px-6" style={{ borderColor: COULEURS_CHAT.trait }}>
-      <button type="button" onClick={onFermer} aria-label="Fermer l'assistant" className="pressable -ml-1 flex size-9 shrink-0 items-center justify-center rounded-full text-[#FBF8F3] active:bg-white/10">
+      <button type="button" onClick={onFermer} aria-label="Fermer l'assistant" className="pressable -ml-1.5 flex size-11 shrink-0 items-center justify-center rounded-full text-[#FBF8F3] active:bg-white/10">
         {croix ? <X size={20} aria-hidden="true" /> : <ArrowLeft size={20} aria-hidden="true" />}
       </button>
       <Logo fond="sombre" hauteur={19} className="shrink-0" />
       <span className="h-4 w-px shrink-0 bg-white/25" aria-hidden="true" />
-      <h2 className="min-w-0 truncate text-[14px] font-semibold text-[#FBF8F3]">Assistant Mobiiz</h2>
+      <h2 className="min-w-0 truncate text-[14px] font-semibold text-[#FBF8F3]">
+        Assistant<span className="max-[399px]:hidden"> Mobiiz</span>
+      </h2>
       <span className="flex-1" />
       {onVoirPdf ? (
         <button
           type="button"
           onClick={onVoirPdf}
-          className="pressable flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-[13px] font-semibold whitespace-nowrap text-[#FBF8F3] lg:hidden"
+          className="pressable flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold whitespace-nowrap text-[#FBF8F3] lg:hidden"
           style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: "rgba(251,248,243,0.06)" }}
         >
           <Eye size={16} aria-hidden="true" className="text-[#FED206]" />
@@ -114,7 +116,7 @@ export function Puce({ children, onClick, disabled, discret = false }: { childre
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`pressable min-h-10 rounded-full border px-4 text-[15px] font-semibold disabled:opacity-50 ${discret ? "text-[#FBF8F3]/70" : "text-[#FBF8F3]"}`}
+      className={`pressable min-h-11 rounded-full border px-4 text-[15px] font-semibold disabled:opacity-50 ${discret ? "text-[#FBF8F3]/70" : "text-[#FBF8F3]"}`}
       style={{ borderColor: discret ? "transparent" : "rgba(251,248,243,0.28)" }}
     >
       {children}

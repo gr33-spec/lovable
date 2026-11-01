@@ -75,7 +75,7 @@ export function AppNav() {
         key={item.href}
         href={item.href}
         aria-current={active ? "page" : undefined}
-        className={`${ordinateurSeulement ? "hidden lg:flex " : "flex "}min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] font-semibold transition-[color,background-color] duration-150 lg:min-h-11 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px] ${
+        className={`${ordinateurSeulement ? "hidden lg:flex " : "flex "}min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl text-[12px] font-semibold transition-[color,background-color] duration-150 lg:min-h-11 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px] ${
           active ? "max-lg:text-accent-text" : "max-lg:text-muted max-lg:active:text-ink"
         } ${activeOrdinateur ? "lg:bg-(--voile-3) lg:text-ink" : "lg:text-ink/65 lg:hover:bg-(--voile-1) lg:hover:text-ink"}`}
       >

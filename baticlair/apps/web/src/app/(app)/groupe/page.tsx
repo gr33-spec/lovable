@@ -346,7 +346,7 @@ function MesLots() {
     <Card className="flex flex-col gap-3 p-4">
       <SectionTitle>{`Mes ${noms}`}</SectionTitle>
       {data.besoins.length === 0 ? (
-        <p className="text-[15px] font-semibold text-muted">Rien pour l&apos;instant : ajoute un chantier à le {nom}.</p>
+        <p className="text-[15px] font-semibold text-muted">Rien pour l&apos;instant : ajoute un chantier au {nom}.</p>
       ) : (
         <ul aria-label={`Mes ${noms}`} className="flex flex-col gap-2">
           {data.besoins.map((b) => (

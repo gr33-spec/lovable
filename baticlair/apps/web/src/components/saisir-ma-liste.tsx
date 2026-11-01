@@ -119,7 +119,7 @@ export function SaisirMaListe({ onFermer }: { onFermer: () => void }) {
         <h2 className="text-[19px] font-extrabold">Saisir ma liste</h2>
       </header>
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 pt-4 pb-6">
-        <h3 className="text-[22px] leading-tight font-extrabold tracking-[-0.02em]">Quels matériaux veux-tu ajouter ?</h3>
+        <h3 className="text-[22px] leading-tight font-extrabold tracking-[-0.02em]">Quels matériaux veux-tu ajouter&nbsp;?</h3>
         <CatalogueListes mode="liste" familleAchat={null} onAjouter={ajouter} />
         {ajoute ? (
           <p role="status" className="text-[14px] font-semibold text-ok">

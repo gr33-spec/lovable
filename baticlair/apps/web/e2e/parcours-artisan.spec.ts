@@ -665,8 +665,8 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   await signUp(page);
 
   // Carnet de fournisseurs : « Nouveau fournisseur » vit dans sa page.
-  await menuArtisan(page, "Mes fournisseurs");
-  await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
+  await menuArtisan(page, "Mes négoces");
+  await page.getByRole("button", { name: "Nouveau négoce" }).click();
   await page.getByLabel("Société").fill("Point.P Vannes");
   await page.getByLabel("E-mail de ton commercial").fill("pas-un-email");
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();
@@ -1876,8 +1876,8 @@ test("BatiClair Groupé, étape 3 : « Mes négoces », e-mail, familles, favori
   await signUp(page);
   await page.goto("/fournisseurs");
   // Sans SIRET vérifié, pas de carte « Mes négoces » : la page des fournisseurs ne change pas.
-  await expect(page.getByRole("heading", { name: "Fournisseurs" })).toBeVisible();
-  await expect(page.getByRole("list", { name: "Mes négoces" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Mes négoces", level: 1 })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Négoces des achats groupés" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Ajouter un négoce" })).toHaveCount(0);
 
   expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Toitures Martin", address: "3 quai Duguay-Trouin, 35400 Saint-Malo", siret: "73282932000074", phone: null, email: null })).toBe(200);
@@ -1892,7 +1892,7 @@ test("BatiClair Groupé, étape 3 : « Mes négoces », e-mail, familles, favori
   await expect(form.getByRole("button", { name: "Ajouter" })).toBeDisabled();
   await form.getByLabel("Vend : Couverture").check();
   await form.getByRole("button", { name: "Ajouter" }).click();
-  const liste = page.getByRole("list", { name: "Mes négoces" });
+  const liste = page.getByRole("list", { name: "Négoces des achats groupés" });
   const premier = liste.getByRole("listitem").filter({ hasText: "Négoce Ardoises" });
   await expect(premier).toBeVisible();
   await expect(premier.getByLabel("Favori")).toBeVisible();
@@ -2892,8 +2892,8 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await signUp(page);
   // Une adresse propre à ce test : la boîte de test est partagée par toute la série.
   const negoce = `liste-${Date.now()}@example.com`;
-  await menuArtisan(page, "Mes fournisseurs");
-  await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
+  await menuArtisan(page, "Mes négoces");
+  await page.getByRole("button", { name: "Nouveau négoce" }).click();
   await page.getByLabel("Société").fill("Point.P Paimpol");
   await page.getByLabel("E-mail de ton commercial").fill(negoce);
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();

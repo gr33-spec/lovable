@@ -79,7 +79,8 @@ export function compteurAnalyses(quotas: Quotas | null, jauge: Jauge | null): st
  */
 export function CompteursAnalyses({ quotas }: { quotas: Quotas }) {
   return (
-    <dl role="status" aria-label="Analyses disponibles" className="my-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[14px] text-muted">
+    <div role="status" aria-label="Analyses disponibles">
+    <dl className="my-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[14px] text-muted">
       <dt className="col-span-2 font-semibold text-ink">Analyses disponibles</dt>
       <dt>Devis PDF :</dt>
       <dd className="font-semibold text-ink">{quotas.analyses.restantes}</dd>
@@ -88,6 +89,7 @@ export function CompteursAnalyses({ quotas }: { quotas: Quotas }) {
       <dt>Saisie manuelle et description :</dt>
       <dd className="font-semibold text-ink">gratuites</dd>
     </dl>
+    </div>
   );
 }
 
@@ -107,8 +109,8 @@ export function InfoAnalyse() {
           {compteur}
         </p>
       ) : null}
-      <button type="button" onClick={() => setOuvert(true)} className="min-h-9 self-start font-semibold text-accent-text underline underline-offset-4">
-        Comment fonctionne l&apos;analyse ?
+      <button type="button" onClick={() => setOuvert(true)} className="min-h-11 self-start font-semibold text-accent-text underline underline-offset-4">
+        Comment fonctionne l&apos;analyse&nbsp;?
       </button>
       {ouvert ? (
         <div className="fixed top-0 left-0 z-[60] flex h-[100dvh] w-full items-end justify-center bg-black/40 p-4 lg:items-center" onClick={() => setOuvert(false)}>

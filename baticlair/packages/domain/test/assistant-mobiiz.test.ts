@@ -3,7 +3,7 @@
  * libres (plusieurs dans un message), quantités seulement dites, « je ne sais pas », « passer » ; tout en code.
  */
 import { describe, expect, it } from "vitest";
-import { dateDite, interpreter, lireDescription, questionsDuDocument, reponsesLibres, resumeReponses, texteQuestionLigne, lireArticle, ligneVisee, messageOuverture, questionsAssistant, resumeConsignes, LIVRAISON_CHANTIER, RETRAIT_DEPOT, type LigneAssistant } from "../src/index.js";
+import { dateDite, filALaReouverture, interpreter, lireDescription, questionsDuDocument, reponsesLibres, resumeReponses, texteQuestionLigne, lireArticle, ligneVisee, messageOuverture, questionsAssistant, resumeConsignes, LIVRAISON_CHANTIER, RETRAIT_DEPOT, type LigneAssistant } from "../src/index.js";
 
 const LIGNES: LigneAssistant[] = [
   { cle: "a", libelle: "Ardoise naturelle 32×22" },
@@ -157,5 +157,26 @@ describe("les questions du document (contrôle de conformité, 31 octobre 2026)"
     const pointes = questionsDuDocument([{ key: "p", label: "Pointes inox", aPreciserPourGroupe: [{ cle: "format", question: "Format ?", options: ["2,5×30", "2,8×40"] }] }]);
     expect(reponsesLibres("pointes 2,8x40, merci", pointes).reponses.map((x) => x.valeur)).toEqual(["2,8×40"]);
     expect(resumeReponses(reponsesLibres("Espagne, 1er choix, développé 33", q).reponses)).toBe("Espagne et 1er choix pour « Ardoise naturelle 32×22 », développé de la gouttière : 33 pour « Gouttière zinc »");
+  });
+});
+
+describe("le fil à la réouverture (audit UX, 1er novembre 2026)", () => {
+  const ouverture = { de: "mobiiz" as const, texte: "J'ai préparé ta liste : 3 lignes. Il me manque une précision." };
+  it("rouvert sans changement : le message d'ouverture n'est pas répété ; le reste du fil est gardé", () => {
+    const garde = [ouverture, { de: "moi" as const, texte: "12 mètres" }, { de: "mobiiz" as const, texte: "C'est noté." }];
+    expect(filALaReouverture(garde, ouverture)).toEqual([...garde, ouverture]);
+    const encore = filALaReouverture(filALaReouverture(garde, ouverture), ouverture);
+    expect(encore.filter((m) => m.texte === ouverture.texte)).toHaveLength(2);
+    expect(encore.at(-1)).toEqual(ouverture);
+  });
+  it("le même état rouvert trois fois de suite : un seul message", () => {
+    let fil = [ouverture];
+    for (let i = 0; i < 3; i++) fil = filALaReouverture(fil, ouverture);
+    expect(fil).toEqual([ouverture]);
+  });
+  it("les doublons déjà gardés sur l'appareil sont repliés ; un nouvel état s'ajoute", () => {
+    const nouveau = { de: "mobiiz" as const, texte: "Ta liste est prête : 3 lignes." };
+    expect(filALaReouverture([ouverture, ouverture, ouverture, ouverture], nouveau)).toEqual([ouverture, nouveau]);
+    expect(filALaReouverture([], ouverture)).toEqual([ouverture]);
   });
 });

@@ -56,6 +56,23 @@ export function messageOuverture(nbLignes: number, aVerifier: number, questions:
   return `J'ai préparé ta liste : ${liste}. Il me manque ${n === 1 ? "une précision" : `${n} précisions`}. Tu peux répondre à plusieurs d'un coup, ou passer.`;
 }
 
+/**
+ * LE FIL À LA RÉOUVERTURE (audit UX, 1er novembre 2026 : « J'ai préparé ta liste… » répété à chaque réouverture). Le fil
+ * gardé reste entier ; l'état du moment ne s'y ajoute que s'il dit autre chose que le dernier message de Mobiiz. Les
+ * doublons collés déjà gardés sur l'appareil (le même message de Mobiiz deux fois de suite) sont repliés en un seul.
+ */
+export function filALaReouverture<M extends { de: string; texte: string }>(garde: readonly M[], ouverture: M): M[] {
+  const fil: M[] = [];
+  for (const m of garde) {
+    const avant = fil[fil.length - 1];
+    if (avant && m.de === "mobiiz" && avant.de === "mobiiz" && avant.texte === m.texte) continue;
+    fil.push(m);
+  }
+  const dernierMobiiz = [...fil].reverse().find((m) => m.de === "mobiiz");
+  if (dernierMobiiz?.texte === ouverture.texte) return fil;
+  return [...fil, ouverture];
+}
+
 export type Consigne =
   | { type: "ajouter"; libelle: string; quantite: string | null; unite: string | null }
   | { type: "retirer"; cle: string; libelle: string }

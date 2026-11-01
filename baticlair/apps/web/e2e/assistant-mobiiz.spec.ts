@@ -325,3 +325,33 @@ test("Navigateur sans dictée : le micro le dit, rien ne casse", async ({ page }
   await assistant.getByRole("button", { name: "Dicter" }).click();
   await expect(assistant.getByRole("alert")).toHaveText("La dictée n'est pas disponible sur ce navigateur. Utilise le micro de ton clavier, ou écris ta réponse.");
 });
+
+test("Audit UX (1er novembre 2026) : rouvert trois fois, l'assistant ne répète pas son message d'ouverture ; le fil reste", async ({ page }) => {
+  test.setTimeout(120_000);
+  const { projetId } = await compteEtListe(page);
+  await page.goto(`/chantiers/${projetId}`);
+  await page.getByRole("button", { name: "Ouvrir l'assistant" }).click();
+  let assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
+  await expect(assistant.getByText(/^J'ai préparé ta liste/)).toHaveCount(1);
+  // Une réponse écrite, puis trois réouvertures (rechargement compris) : le fil est gardé, l'ouverture n'est pas répétée.
+  await assistant.getByLabel("Ton message").fill("je ne sais pas");
+  await assistant.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(assistant.getByText("Pas de souci, on passe.")).toBeVisible();
+  for (let i = 0; i < 3; i++) {
+    await assistant.getByRole("button", { name: "Fermer l'assistant" }).click();
+    if (i === 1) await page.reload();
+    await page.getByRole("button", { name: "Ouvrir l'assistant" }).click();
+    assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
+    await expect(assistant.getByText("je ne sais pas")).toBeVisible();
+  }
+  // L'état a changé une fois (une question passée) : au plus deux messages d'ouverture, jamais un par réouverture.
+  expect(await assistant.getByText(/^J'ai préparé ta liste/).count()).toBeLessThanOrEqual(2);
+  const avant = await assistant.getByText(/^J'ai préparé ta liste/).count();
+  await assistant.getByRole("button", { name: "Fermer l'assistant" }).click();
+  await page.getByRole("button", { name: "Ouvrir l'assistant" }).click();
+  await expect(page.getByRole("dialog", { name: "Assistant Mobiiz" }).getByText(/^J'ai préparé ta liste/)).toHaveCount(avant);
+  // Le bouton de fermeture fait 44 px au doigt.
+  const fermer = (await page.getByRole("button", { name: "Fermer l'assistant" }).boundingBox())!;
+  expect(fermer.width).toBeGreaterThanOrEqual(44);
+  expect(fermer.height).toBeGreaterThanOrEqual(44);
+});

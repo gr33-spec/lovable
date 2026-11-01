@@ -8,13 +8,14 @@ import { PAGES_LEGALES } from "@/lib/legal";
  * Le pied de TOUTES les pages (mise en conformité du 24 octobre 2026) : mentions légales, CGU, conditions négoces,
  * confidentialité, contact. La page en cours n'est pas reprise. `clair` : sur un fond de nuit (la landing).
  */
-export function LiensLegaux({ sauf, clair = false }: { sauf?: string; clair?: boolean }) {
+/** `cibles` : dans l'app (Profil), chaque lien fait 44 px de haut au doigt (audit UX, 1er novembre 2026) ; les pages publiques ne changent pas. */
+export function LiensLegaux({ sauf, clair = false, cibles = false }: { sauf?: string; clair?: boolean; cibles?: boolean }) {
   const pathname = usePathname();
   const ici = sauf ?? pathname;
   return (
     <nav aria-label="Pages légales" className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
       {PAGES_LEGALES.filter((p) => p.href !== ici).map((p) => (
-        <Link key={p.href} href={p.href} className={`font-semibold underline ${clair ? "text-white/70" : "text-muted"}`}>
+        <Link key={p.href} href={p.href} className={`${cibles ? "inline-flex min-h-11 items-center " : ""}font-semibold underline ${clair ? "text-white/70" : "text-muted"}`}>
           {p.label}
         </Link>
       ))}
@@ -31,7 +32,7 @@ export function PiedLegal({ profilSeulement = false }: { profilSeulement?: boole
   if (profilSeulement && !pathname.startsWith("/compte")) return null;
   return (
     <footer className="mt-auto border-t border-line pt-4">
-      <LiensLegaux />
+      <LiensLegaux cibles={profilSeulement} />
     </footer>
   );
 }

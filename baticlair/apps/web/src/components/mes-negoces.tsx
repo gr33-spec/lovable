@@ -77,10 +77,10 @@ export function MesNegocesCard() {
   };
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">MES NÉGOCES</h2>
-      <p className="text-sm text-muted">Les négoces chez qui tu commandes, et ce que chacun vend. Ton favori reçoit les demandes de le {nom} en premier ; tu commandes toujours sur ton propre compte.</p>
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted uppercase">Négoces des achats groupés</h2>
+      <p className="text-sm text-muted">Les négoces chez qui tu commandes, et ce que chacun vend. Ton favori reçoit les demandes du {nom} en premier ; tu commandes toujours sur ton propre compte.</p>
       {negoces.length > 0 ? (
-        <ul aria-label="Mes négoces" className="flex flex-col divide-y divide-line">
+        <ul aria-label="Négoces des achats groupés" className="flex flex-col divide-y divide-line">
           {negoces.map((n) => (
             <li key={n.id} className="flex flex-col gap-1.5 py-2.5">
               <div className="flex items-center justify-between gap-3">
@@ -108,7 +108,7 @@ export function MesNegocesCard() {
           ))}
         </ul>
       ) : liste.data ? (
-        <p className="text-sm text-muted">Aucun négoce encore : ajoute celui chez qui tu commandes d&apos;habitude.</p>
+        <p className="text-sm text-muted">Aucun négoce pour les achats groupés : ajoute celui chez qui tu commandes d&apos;habitude.</p>
       ) : null}
       {error ? <ErrorNotice error={error} /> : null}
       {adding ? (
@@ -124,7 +124,7 @@ export function MesNegocesCard() {
         <>
           {(fournisseurs.data?.items ?? []).filter((f) => !f.archived && f.email && !negoces.some((n) => n.email.toLowerCase() === f.email.toLowerCase())).length > 0 ? (
             <div className="flex flex-col gap-1.5">
-              <p className="text-[13px] font-bold text-muted">Reprendre un de tes fournisseurs :</p>
+              <p className="text-[13px] font-bold text-muted">Reprendre un de tes négoces :</p>
               <div className="flex flex-wrap gap-1.5">
                 {(fournisseurs.data?.items ?? [])
                   .filter((f) => !f.archived && f.email && !negoces.some((n) => n.email.toLowerCase() === f.email.toLowerCase()))
@@ -139,7 +139,7 @@ export function MesNegocesCard() {
           ) : null}
           <Button variant="secondary" onClick={() => setAdding(true)}>
             <Plus size={18} aria-hidden="true" />
-            Ajouter un négoce
+            Ajouter un négoce aux achats groupés
           </Button>
         </>
       )}

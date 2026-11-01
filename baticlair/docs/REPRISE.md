@@ -28,6 +28,10 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
+SUIVI 167 (Greg, 1er novembre : audit UX puis lot 1 des corrections sûres) : en local, pas déployé (modification
+importante : pas de déploiement automatique). Voir `docs/ameliorations-ux-2026-11-01.md`. Décisions attendues : pastille
+du regroupement sur une liste individuelle (§2), fusion des deux carnets de négoces (§3), propositions intermédiaires (§4).
+
 SUIVI 163-166 (Greg, 1er novembre : corrections ciblées, accueil, Mes listes, Profil et paramètres) : EN LIGNE sur
 test.mobiiz.fr (commit 89011e1f, accord de Greg pour le test seulement), après sauvegarde Neon vérifiée
 (`sauvegarde-avant-mes-listes`) et suite complète verte ; migration additive `20261101090000_liste_supprimee` appliquée à la

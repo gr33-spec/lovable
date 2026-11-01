@@ -137,9 +137,10 @@ html {
   background-color: var(--color-night);
   background-image: radial-gradient(90% 70% at 100% 0%, rgba(254, 210, 6, 0.16) 0%, rgba(254, 210, 6, 0) 60%);
 }
-/* Le verre de la barre du bas : blanc translucide, flou derrière. */
+/* Le verre de la barre du bas : blanc translucide, flou derrière. Audit UX (1er novembre 2026) : 0,78 laissait lire le
+   texte de dessous à travers les libellés du menu ; 0,92 garde l'effet sans mélange. */
 @utility bg-glass {
-  background-color: rgba(251, 248, 243, 0.78);
+  background-color: rgba(251, 248, 243, 0.92);
   backdrop-filter: saturate(1.6) blur(18px);
   -webkit-backdrop-filter: saturate(1.6) blur(18px);
 }

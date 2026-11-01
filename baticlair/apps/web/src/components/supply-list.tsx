@@ -209,7 +209,7 @@ export function SupplyList({
           <button
             type="button"
             onClick={() => setChecked(allChecked ? new Set() : new Set(selectable))}
-            className="inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-accent-text"
+            className="inline-flex min-h-11 items-center gap-1.5 text-[13px] font-bold text-accent-text"
           >
             {allChecked ? "Tout décocher" : "Tout cocher"}
           </button>
@@ -589,7 +589,7 @@ function Brief({ takeoff, editable, pending, onBrief }: { takeoff: Takeoff; edit
             type="button"
             onClick={() => setEditing((e) => !e)}
             aria-label={editing ? "Terminer" : "Modifier le bref"}
-            className="inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-accent-text"
+            className="inline-flex min-h-11 items-center gap-1.5 text-[13px] font-bold text-accent-text"
           >
             {editing ? <Check size={15} aria-hidden="true" /> : <Pencil size={14} aria-hidden="true" />}
             {editing ? "Terminer" : "Modifier"}
@@ -629,7 +629,7 @@ function BriefLine({ text, editable, pending, onSave }: { text: string; editable
     return (
       <li className="flex flex-col gap-2 py-2">
         <InlineText label={`Modifier le bref : ${text}`} value={text} pending={pending} onCancel={() => setEditing(false)} onSave={async (t) => void (await onSave(t), setEditing(false))} />
-        <button type="button" onClick={() => void onSave("")} className="inline-flex min-h-10 items-center gap-1.5 self-start text-[13px] font-bold text-danger">
+        <button type="button" onClick={() => void onSave("")} className="inline-flex min-h-11 items-center gap-1.5 self-start text-[13px] font-bold text-danger">
           <Trash2 size={15} aria-hidden="true" />
           Retirer du bref
         </button>
@@ -872,7 +872,7 @@ function Row({
                   }
                 }}
                 aria-label={quick ? `Valider : ${label}` : `À préciser, ouvrir : ${label}`}
-                className="pressable mt-1 inline-flex min-h-9 shrink-0 items-center rounded-full bg-ink px-3 text-[13px] font-semibold text-white disabled:opacity-50"
+                className="pressable inline-flex min-h-11 shrink-0 items-center rounded-full bg-ink px-3 text-[13px] font-semibold text-white disabled:opacity-50"
               >
                 {quick ? "Valider" : "Préciser"}
               </button>
@@ -905,7 +905,7 @@ function Row({
             naming ? (
               <InlineText label={`Nom : ${label}`} value={item?.label ?? nameLine?.article ?? nameLine?.designation ?? label} pending={pending} onCancel={() => setNaming(false)} onSave={rename} />
             ) : (
-              <button type="button" onClick={() => setNaming(true)} aria-label={`Modifier le nom : ${label}`} className="inline-flex min-h-10 items-center gap-1.5 self-start text-[13px] font-bold text-accent-text">
+              <button type="button" onClick={() => setNaming(true)} aria-label={`Modifier le nom : ${label}`} className="inline-flex min-h-11 items-center gap-1.5 self-start text-[13px] font-bold text-accent-text">
                 <Pencil size={14} aria-hidden="true" />
                 Modifier le nom
               </button>
@@ -915,7 +915,7 @@ function Row({
             precising ? (
               <InlineText label={`Précision : ${label}`} value={item.precision ?? ""} pending={pending} onCancel={() => setPrecising(false)} onSave={async (v) => { await onEdit(item, { libelle: item.label, quantite: parsed?.quantity ?? null, unite: parsed?.unit ?? null, precision: v }); setPrecising(false); }} />
             ) : (
-              <button type="button" onClick={() => setPrecising(true)} aria-label={`${item.precision ? "Modifier la précision" : "Ajouter une précision"} : ${label}`} className="inline-flex min-h-10 items-center gap-1.5 self-start text-[13px] font-bold text-accent-text">
+              <button type="button" onClick={() => setPrecising(true)} aria-label={`${item.precision ? "Modifier la précision" : "Ajouter une précision"} : ${label}`} className="inline-flex min-h-11 items-center gap-1.5 self-start text-[13px] font-bold text-accent-text">
                 <Pencil size={14} aria-hidden="true" />
                 {item.precision ? "Modifier la précision" : "Ajouter une précision"}
               </button>
@@ -956,7 +956,7 @@ function Row({
                     e.target.value = "";
                   }}
                 />
-                <button type="button" onClick={() => file.current?.click()} className="inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-accent-text">
+                <button type="button" onClick={() => file.current?.click()} className="inline-flex min-h-11 items-center gap-1.5 text-[13px] font-bold text-accent-text">
                   <Paperclip size={14} aria-hidden="true" />
                   Joindre un croquis
                 </button>
@@ -969,7 +969,7 @@ function Row({
                   setOpen(false);
                   onSetAside();
                 }}
-                className="inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-danger"
+                className="inline-flex min-h-11 items-center gap-1.5 text-[13px] font-bold text-danger"
               >
                 <Trash2 size={15} aria-hidden="true" />
                 Retirer de la liste

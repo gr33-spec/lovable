@@ -36,7 +36,7 @@ function Suppliers() {
   const groupeOuvert = useGroupeOuvert();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
-  if (!data) return <Skeleton lines={3} label="Chargement des fournisseurs…" />;
+  if (!data) return <Skeleton lines={3} label="Chargement de tes négoces…" />;
 
   const items = data.items;
   const saved = (s: Supplier) => {
@@ -52,14 +52,15 @@ function Suppliers() {
   return (
     <>
       <div className="flex items-start justify-between gap-3">
-        <PageTitle>Fournisseurs</PageTitle>
+        {/* Audit UX (1er novembre 2026, Greg : « Mes négoces » partout) : la page et ses boutons disent « négoce » ;
+            les routes et les données (`/fournisseurs`, `suppliers`) ne changent pas. */}
+        <PageTitle>Mes négoces</PageTitle>
         <AideBouton sujet="negoces" />
       </div>
-      {groupeOuvert ? <MesNegocesCard /> : null}
 
       {creating ? (
         <Card className="flex flex-col gap-3 p-4">
-          <h2 className="text-[20px] font-extrabold tracking-[-0.02em]">Nouveau fournisseur</h2>
+          <h2 className="text-[20px] font-extrabold tracking-[-0.02em]">Nouveau négoce</h2>
           <SupplierForm
             submitLabel="Ajouter"
             others={items}
@@ -72,14 +73,14 @@ function Suppliers() {
       ) : (
         <Button onClick={() => setCreating(true)} className="lg:w-auto lg:self-start lg:px-6">
           <Plus size={20} aria-hidden="true" />
-          Nouveau fournisseur
+          Nouveau négoce
         </Button>
       )}
 
       {items.length === 0 && !creating ? (
-        <EmptyState icon={<Truck size={40} />} title="Aucun fournisseur">
+        <EmptyState icon={<Truck size={40} />} title="Aucun négoce">
           <p className="max-w-xs text-[15px] text-muted">
-            Ajoute tes fournisseurs habituels avec leur e-mail : tu les choisiras ensuite depuis un chantier pour leur demander leurs
+            Ajoute tes négoces habituels avec leur e-mail : tu les choisiras ensuite depuis une liste pour leur demander leurs
             prix.
           </p>
         </EmptyState>
@@ -88,8 +89,8 @@ function Suppliers() {
       {items.length > 5 ? (
         <input
           type="search"
-          aria-label="Chercher un fournisseur"
-          placeholder="Chercher un fournisseur"
+          aria-label="Chercher un négoce"
+          placeholder="Chercher un négoce"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           className="min-h-13 rounded-2xl border border-line bg-surface px-4 text-[16px] outline-none placeholder:text-muted focus-visible:border-accent"
@@ -125,6 +126,10 @@ function Suppliers() {
           </li>
         ))}
       </ul>
+      {/* Les négoces des ACHATS GROUPÉS (carnet distinct, `/v1/groupe/negoces` : favori, familles, numéro de compte) : après
+          le carnet des demandes de prix, sous leur propre titre ; rien n'est fusionné (achats individuels et groupés restent
+          indépendants). */}
+      {groupeOuvert ? <MesNegocesCard /> : null}
     </>
   );
 }
@@ -190,7 +195,7 @@ function ArchiveButton({ supplier, onChange }: { supplier: Supplier; onChange: (
     <>
       {error ? <ErrorNotice error={error} /> : null}
       <Button variant="ghost" pending={pending} onClick={() => void toggle()}>
-        {supplier.archived ? "Réactiver ce fournisseur" : "Archiver (ne plus le proposer)"}
+        {supplier.archived ? "Réactiver ce négoce" : "Archiver (ne plus le proposer)"}
       </Button>
     </>
   );
@@ -217,12 +222,12 @@ function DeleteButton({ supplier, onDeleted }: { supplier: Supplier; onDeleted: 
   if (!confirming) {
     return (
       <button type="button" onClick={() => setConfirming(true)} className="inline-flex min-h-11 items-center self-center text-sm font-bold text-muted">
-        Supprimer ce fournisseur
+        Supprimer ce négoce
       </button>
     );
   }
   return (
-    <div role="group" aria-label="Confirmer la suppression du fournisseur" className="flex flex-col gap-2 rounded-2xl bg-ground p-3">
+    <div role="group" aria-label="Confirmer la suppression du négoce" className="flex flex-col gap-2 rounded-2xl bg-ground p-3">
       {error ? <ErrorNotice error={error} /> : <p className="text-sm font-semibold">Supprimer {supplier.name} ? C&apos;est définitif.</p>}
       <div className="flex gap-2">
         {!error ? (

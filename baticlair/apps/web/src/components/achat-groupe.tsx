@@ -470,7 +470,7 @@ export function FormulaireAchatGroupe({ rejoindre, famille = null }: { rejoindre
         </p>
       ) : null}
       {etape === 1 ? (
-        <Etape n={1} total={total} titre="Qu'est-ce que tu commandes ?">
+        <Etape n={1} total={total} titre={"Qu'est-ce que tu commandes\u00a0?"}>
           <CatalogueListes familleAchat={familleAchat} onAjouter={(r) => setLignes((ls) => [...ls, { designation: r.designation, unite: r.unite, qte: r.qte, ...(r.cle ? { cle: r.cle } : {}), ...(r.libre ? { libre: true } : {}), ...(r.familleAchat ? { familleAchat: r.familleAchat } : {}) }])} onAutreMetier={(l, m) => void mettreDeCote(l, m)} />
           {lignes.length ? <LignesPanier lignes={lignes} onChange={setLignes} /> : null}
           <Button disabled={pretes.length === 0 || bloque} onClick={suivant}>

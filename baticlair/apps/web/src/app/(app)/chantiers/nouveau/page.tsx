@@ -101,9 +101,12 @@ export default function NouveauChantierPage() {
 
   return (
     <>
-      <BackButton fallback="/chantiers" />
-      {/* Greg, 31 octobre 2026 : trois entrées, moins d'espace, l'information en une phrase. */}
-      <h1 className="text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Ma liste de matériaux</h1>
+      {/* Greg, 31 octobre 2026 : trois entrées, moins d'espace, l'information en une phrase. Audit UX (1er novembre 2026) :
+          le retour rond à côté du titre, comme sur un chantier et dans Profil (un seul style de retour). */}
+      <div className="flex items-center gap-2">
+        <BackButton fallback="/chantiers" compact />
+        <h1 className="text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Ma liste de matériaux</h1>
+      </div>
       {erreurListe ? (
         <p role="alert" className="rounded-xl bg-warn-bg p-4 text-[15px] font-semibold text-warn">
           {erreurListe}

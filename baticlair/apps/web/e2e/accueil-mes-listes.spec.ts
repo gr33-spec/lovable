@@ -314,3 +314,42 @@ test("Accueil et Mes listes, thèmes clair et sombre : le titre et le texte des 
     }
   }
 });
+
+test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne chevauche plus les filtres ; « Télécharger » du PDF est lisible ; le menu du bas en 12 px", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await inscrire(page);
+  await liste(page, "Liste A");
+  await liste(page, "Liste B");
+  await page.goto("/chantiers");
+  const selectionner = page.getByRole("button", { name: "Sélectionner" });
+  await expect(selectionner).toBeVisible();
+  const s = (await selectionner.boundingBox())!;
+  for (const nom of ["Toutes", "En cours", "Terminées"]) {
+    const f = (await page.getByRole("group", { name: "Filtrer" }).getByRole("button", { name: nom }).boundingBox())!;
+    const chevauche = f.x < s.x + s.width && s.x < f.x + f.width && f.y < s.y + s.height && s.y < f.y + f.height;
+    expect(chevauche, `« ${nom} » chevauche « Sélectionner »`).toBe(false);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  // Le menu du bas : libellés à 12 px, sans déborder.
+  const nav = page.getByRole("navigation", { name: "Navigation principale" });
+  for (const nom of ["Accueil", "Achats groupés", "Mes listes", "Profil"]) {
+    const lien = nav.getByRole("link", { name: nom });
+    expect(await lien.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
+    const b = (await lien.boundingBox())!;
+    expect(b.x).toBeGreaterThanOrEqual(0);
+    expect(b.x + b.width).toBeLessThanOrEqual(375);
+  }
+  // L'afficheur PDF : « Télécharger » en encre sur le jaune (plus de blanc sur jaune), « Fermer » lisible en sombre.
+  for (const theme of ["sombre", "clair"] as const) {
+    await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
+    await page.goto("/chantiers");
+    await page.getByRole("heading", { name: "Mes listes", level: 1 }).waitFor();
+    const { projetId } = await liste(page, `PDF ${theme}`);
+    await page.evaluate((id) => window.dispatchEvent(new CustomEvent("baticlair:open-file", { detail: { url: `/v1/projects/${id}/demande-de-devis.pdf?apercu=1`, title: "Le PDF joint", fileName: "demande.pdf" } })), projetId);
+    const telecharger = page.getByRole("link", { name: "Télécharger" });
+    await expect(telecharger).toBeVisible({ timeout: 30_000 });
+    expect(await telecharger.evaluate((el) => getComputedStyle(el).color), theme).toBe("rgb(19, 9, 1)");
+    expect(await page.getByRole("button", { name: "Fermer le document" }).evaluate((el) => getComputedStyle(el).color), theme).toBe("rgb(255, 255, 255)");
+    await page.getByRole("button", { name: "Fermer le document" }).click();
+  }
+});

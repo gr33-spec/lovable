@@ -113,7 +113,7 @@ export function MenuArtisan() {
           ) : null}
           <Link role="menuitem" href="/fournisseurs" onClick={() => setOpen(false)} className={item}>
             <Truck size={20} aria-hidden="true" className="text-muted" />
-            Mes fournisseurs
+            Mes négoces
           </Link>
           <Link role="menuitem" href="/recus" onClick={() => setOpen(false)} className={item}>
             <Inbox size={20} aria-hidden="true" className="text-muted" />

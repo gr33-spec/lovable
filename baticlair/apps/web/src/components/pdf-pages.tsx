@@ -110,6 +110,8 @@ export function PdfPages({
   return (
     <div
       ref={box}
+      // Audit UX (1er novembre 2026) : la zone qui défile s'atteint au clavier (axe, `scrollable-region-focusable`).
+      tabIndex={0}
       aria-label={title}
       className="h-full w-full overflow-auto overscroll-contain [touch-action:pan-x_pan-y]"
       onTouchStart={(e) => {

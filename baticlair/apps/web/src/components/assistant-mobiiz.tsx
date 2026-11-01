@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   interpreter,
   LIVRAISON_CHANTIER,
+  filALaReouverture,
   messageOuverture,
   questionsAssistant,
   questionsDuDocument,
@@ -127,14 +128,15 @@ export function AssistantMobiiz({
   // calcul, puis ce que le comptoir demanderait), puis le chantier (adresse, livraison, date).
   const questions = toutesLesQuestions(courant, passees);
   const lignes = useMemo(() => lignesDe(courant), [courant]);
-  // Le fil est gardé pour ce chantier (reprendre plus tard) ; à la réouverture, l'état du moment s'ajoute à la suite.
+  // Le fil est gardé pour ce chantier (reprendre plus tard) ; à la réouverture, l'état du moment s'ajoute à la suite,
+  // seulement s'il dit autre chose que le dernier message de Mobiiz (audit UX, 1er novembre 2026 : il se répétait).
   const cleFil = `mobiiz-assistant-fil:${projectId}`;
   const [messages, setMessages] = useState<Message[]>(() => {
     const ouverture: Message = { de: "mobiiz", texte: messageOuverture(lignesDe(takeoff).length, takeoff.purchase.screen.toCheck, toutesLesQuestions(takeoff, passees)) };
-    if (historique) return [...historique, ouverture];
+    if (historique) return filALaReouverture(historique, ouverture);
     try {
       const garde = JSON.parse(lireStockage(cleFil) ?? "null") as { messages?: Message[] } | null;
-      if (garde?.messages?.length) return [...garde.messages, ouverture];
+      if (garde?.messages?.length) return filALaReouverture(garde.messages, ouverture);
     } catch {
       // Fil illisible : on repart du début.
     }
@@ -420,7 +422,7 @@ export function AssistantMobiiz({
                     setAide(false);
                     ecrireStockage("mobiiz-assistant-aide", "vue");
                   }}
-                  className="min-h-8 shrink-0 rounded-full px-2 font-semibold text-[#FED206]"
+                  className="min-h-11 shrink-0 rounded-full px-3 font-semibold text-[#FED206]"
                 >
                   Compris
                 </button>
@@ -583,7 +585,8 @@ function ApercuPdf({ projectId, version, onLigne, onAjouter }: { projectId: stri
   return (
     <>
       <div className="flex items-center justify-between gap-3 px-4 py-2.5 lg:px-6">
-        <span className="text-[13px] font-semibold text-muted max-lg:text-white/70">Touche une ligne pour la modifier.</span>
+        {/* Le panneau de l'aperçu est toujours sombre (#1A1918), quel que soit le thème : texte ivoire (audit UX, contraste 2,05:1). */}
+        <span className="text-[13px] font-semibold text-[#FBF8F3]/75">Touche une ligne pour la modifier.</span>
         <button type="button" onClick={onAjouter} className="pressable flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-line px-3.5 text-[14px] font-semibold whitespace-nowrap max-lg:border-white/30 max-lg:text-white">
           <Plus size={16} aria-hidden="true" />
           Ajouter une ligne
