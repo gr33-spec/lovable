@@ -680,7 +680,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
 
   // Modifier une fiche.
   await page.getByRole("button", { name: "Modifier Point.P Vannes" }).click();
-  await page.getByLabel("Notes, spécialités (facultatif)").fill("Tuiles, zinc");
+  await page.getByLabel("Notes (facultatif)").fill("Tuiles, zinc");
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByText("Tuiles, zinc")).toBeVisible();
 

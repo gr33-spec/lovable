@@ -76,7 +76,7 @@ function Chantier() {
           }}
         />
       )}
-      <BarreOnglets onglet={onglet} onChoisir={choisirOnglet} />
+      <BarreOnglets projectId={project.id} onglet={onglet} onChoisir={choisirOnglet} />
       {onglet !== "resume" ? (
         <div role="tabpanel" aria-label={onglet === "reponses" ? "Réponses" : onglet === "offres" ? "Offres" : "Documents"} className="flex flex-col gap-3">
           {onglet === "reponses" ? <OngletReponses projectId={project.id} /> : onglet === "offres" ? <OngletOffres projectId={project.id} onComparer={() => choisirOnglet("resume")} /> : <OngletDocuments projectId={project.id} />}

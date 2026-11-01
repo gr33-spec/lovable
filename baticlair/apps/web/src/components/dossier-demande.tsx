@@ -30,13 +30,26 @@ export type OngletDossier = (typeof ONGLETS_DOSSIER)[number]["value"];
 export const estOngletDossier = (v: string | null): v is OngletDossier =>
   ONGLETS_DOSSIER.some((o) => o.value === v);
 
+/**
+ * La barre n'apparaît qu'une fois la demande partie (ou un onglet demandé dans l'adresse) : avant l'envoi, Réponses et Offres
+ * seraient vides, et la liste garde toute la place sur téléphone.
+ */
 export function BarreOnglets({
+  projectId,
   onglet,
   onChoisir,
 }: {
+  projectId: string;
   onglet: OngletDossier;
   onChoisir: (o: OngletDossier) => void;
 }) {
+  const { data } = useDossier(projectId);
+  const partie = Boolean(
+    data &&
+      (data.demandes.some((d) => d.recipients.some((r) => r.sentAt)) ||
+        data.perso.some((d) => d.destinataires.some((r) => r.statut !== "a_envoyer"))),
+  );
+  if (!partie && onglet === "resume") return null;
   return (
     <div
       role="tablist"
