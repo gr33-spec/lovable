@@ -175,6 +175,20 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   lastActivityAt: string;
+  /** Avec `?resume=1` (« Mes listes », accueil ; 1er novembre 2026). */
+  resume?: ResumeListe | null;
+}
+
+/** Le résumé d'une liste : ce que montre sa carte et ce que le serveur permet (suppression définitive). */
+export interface ResumeListe {
+  lignes: number;
+  origine: "Devis" | "Photo ou document" | "Saisie" | null;
+  statut: string;
+  demande: { negoces: number; reponses: number; choisi: boolean } | null;
+  achatGroupe: boolean;
+  supprimable: boolean;
+  raison: "demande" | "reponse" | "offre" | "achat_groupe" | null;
+  phrase: string | null;
 }
 
 export interface ProjectPage {

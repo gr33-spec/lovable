@@ -207,6 +207,7 @@ model Company {
   facturesAbonnement      FactureAbonnement[]
   besoinsNegocies         BesoinNegocie[]
   brouillons              Brouillon[]
+  listesSupprimees        ListeSupprimee[]
   libellesEcrits          LibelleEcrit[]
 
   @@map("company")
@@ -2364,3 +2365,19 @@ model ReferenceEcartee {
 
   @@map("reference_ecartee")
 }
+
+/// « MES LISTES » (Greg, 1er novembre 2026) : la trace minimale d'une liste supprimée définitivement : son identifiant,
+/// son auteur et la date, jamais son contenu. Sert aussi l'idempotence (une suppression rejouée répond « supprimée »).
+model ListeSupprimee {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+  projectId   String   @map("project_id") @db.Uuid
+  userId      String?  @map("user_id")
+  supprimeeLe DateTime @default(now()) @map("supprimee_le") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, projectId])
+  @@map("liste_supprimee")
+}
+

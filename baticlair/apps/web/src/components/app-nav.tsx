@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ClipboardList, House, Plus, Truck, UserRound, Users, type LucideIcon } from "lucide-react";
-import { useCallback, useState } from "react";
-import { FeuilleDeuxPortes } from "@/components/achat-groupe";
+import { useCallback } from "react";
 import { api, type Health } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { useTyping } from "@/lib/typing";
@@ -20,7 +19,8 @@ interface NavItem {
 }
 
 /**
- * ACHAT GROUPÉ (Greg, 27 octobre 2026, point 10) : Accueil, Achats groupés, le « + » jaune au centre (les deux portes),
+ * ACHAT GROUPÉ (Greg, 27 octobre 2026, point 10) : Accueil, Achats groupés, le « + » jaune au centre (depuis le 1er novembre 2026 :
+ * « Créer une liste », plus la feuille des deux portes),
  * Mes listes, Profil. « Mes prix » passe dans Profil. Barre en verre flottante sur téléphone, toujours `position: fixed;
  * bottom: 0` (jamais recalée en JavaScript) ; colonne à gauche sur ordinateur. Avant : Accueil, Chantiers, Regroupements,
  * Mes prix, Profil (25 octobre).
@@ -58,7 +58,6 @@ export function AppNav() {
   // 2026-10-12 : sur iPhone, l'ancien recalage sur visualViewport la plaçait au milieu de l'accueil) : `position: fixed;
   // bottom: 0`, la zone du geste en marge intérieure.
   const typing = useTyping();
-  const [portes, setPortes] = useState(false);
 
   /**
    * Un lien du menu. Téléphone : inchangé. Ordinateur (Greg, 31 octobre 2026, soir) : une colonne sombre pleine hauteur,
@@ -99,18 +98,19 @@ export function AppNav() {
         </span>
         {link(accueilItem)}
         {groupe ? link(groupeItem) : null}
-        <button type="button" onClick={() => setPortes(true)} aria-label="Nouveau : lancer un achat groupé ou faire ma liste" className="flex min-h-13 items-center justify-center px-1 lg:order-[-1] lg:mb-5 lg:justify-start lg:px-0">
+        {/* Greg, 1er novembre 2026 : le « + » ouvre LE départ de création d'une liste, le même que « Créer une liste » de
+            l'accueil et « Nouvelle liste » de Mes listes (un seul point de départ, une seule expérience). */}
+        <Link href="/chantiers/nouveau" aria-label="Créer une liste" className="flex min-h-13 items-center justify-center px-1 lg:order-[-1] lg:mb-5 lg:justify-start lg:px-0">
           <span className="pressable flex size-12 items-center justify-center rounded-full bg-accent text-on-accent shadow-float lg:h-12 lg:w-full lg:gap-2 lg:rounded-xl lg:text-[15px] lg:font-bold lg:shadow-[0_12px_30px_rgba(254,210,6,0.18)]">
             <Plus size={26} strokeWidth={2.6} aria-hidden="true" />
-            <span className="hidden lg:inline">Nouveau</span>
+            <span className="hidden lg:inline">Nouvelle liste</span>
           </span>
-        </button>
+        </Link>
         {link(listesItem)}
         {link(negocesItem, true)}
         <span aria-hidden="true" className="hidden grow lg:block" />
         {link(profilItem)}
       </div>
-      {portes ? <FeuilleDeuxPortes onFermer={() => setPortes(false)} /> : null}
     </nav>
   );
 }

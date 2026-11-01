@@ -290,66 +290,44 @@ test("marquer terminé retire le chantier des « En cours » sans le perdre", as
   await page.getByRole("menuitem", { name: "Marquer terminé" }).click();
   await expect(page.getByText("Terminé", { exact: true })).toBeVisible();
 
-  await page.goto("/chantiers");
-  await expect(page.getByText("Aucun chantier en cours")).toBeVisible();
-  await page.getByRole("button", { name: "Terminés" }).click();
+  // « Mes listes » (Greg, 1er novembre 2026) : Toutes / En cours / Terminées.
+  await page.goto("/chantiers?statut=en-cours");
+  await expect(page.getByRole("heading", { name: "Mes listes" })).toBeVisible();
+  await expect(page.getByText("Aucune liste en cours")).toBeVisible();
+  await page.getByRole("button", { name: "Terminées" }).click();
   await expect(page.getByRole("link", { name: /Bardage Lefèvre/ })).toBeVisible();
   // Filtre « En cours » choisi, puis recherche : la recherche voit tout (PD-022).
   await page.getByRole("button", { name: "En cours" }).click();
   await page.getByRole("searchbox").fill("lefevre");
   await expect(page.getByRole("link", { name: /Bardage Lefèvre/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Tous" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "Toutes" })).toHaveAttribute("aria-pressed", "true");
 });
 
-/** Glisse une ligne de la liste vers la gauche, du bout du doigt (souris en test), sur `ratio` de sa largeur. */
-async function swipeLeft(page: Page, name: RegExp, ratio: number) {
-  const box = (await page.getByRole("link", { name }).boundingBox())!;
-  const y = box.y + box.height / 2;
-  await page.mouse.move(box.x + box.width - 10, y);
-  await page.mouse.down();
-  for (let i = 1; i <= 10; i++) await page.mouse.move(box.x + box.width - 10 - (box.width * ratio * i) / 10, y);
-  await page.mouse.up();
-}
-
-test("glisser un chantier vers la gauche le range dans Terminés, et « Annuler » le remet", async ({ page }) => {
+test("« Mes listes » (Greg, 1er novembre 2026) : le « … » de chaque carte, jamais un geste caché ; « Marquer terminée » puis « Remettre en cours »", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Le Bris", "M. Le Bris", "Quimper");
   await createProject(page, "Zinguerie Morvan", "Mme Morvan", "Brest");
-  await page.goto("/chantiers");
-  const bris = page.getByRole("link", { name: /Toiture Le Bris/ });
+  await page.goto("/chantiers?statut=en-cours");
+  const bris = page.getByRole("link", { name: /^Toiture Le Bris/ });
   await expect(bris).toBeVisible();
-
-  // Petit glissement : le bouton « Terminé » apparaît, le chantier ne s'ouvre pas.
-  await swipeLeft(page, /Toiture Le Bris/, 0.3);
-  await expect(page).toHaveURL(/\/chantiers$/);
-  await page.getByRole("button", { name: "Marquer terminé : Toiture Le Bris" }).click();
-  await expect(bris).toHaveCount(0);
-  await expect(page.getByRole("status").filter({ hasText: "Rangé dans Terminés" })).toBeVisible();
-  await page.getByRole("button", { name: "Annuler" }).click();
-  await expect(bris).toBeVisible();
-
-  // Long glissement : rangé d'un geste. Rien n'est perdu : il est dans « Terminés », d'où on le reprend.
-  await swipeLeft(page, /Toiture Le Bris/, 0.8);
-  await expect(bris).toHaveCount(0);
-  await expect(page.getByRole("link", { name: /Zinguerie Morvan/ })).toBeVisible();
-  // Le chantier disparaît tout de suite ; le bandeau dit qu'il est enregistré. Recharger avant reperdrait l'appel en cours.
-  await expect(page.getByRole("status").filter({ hasText: "Rangé dans Terminés" })).toBeVisible();
-  await page.reload();
-  await expect(page.getByRole("link", { name: /Zinguerie Morvan/ })).toBeVisible();
-  await expect(bris).toHaveCount(0);
-  await page.getByRole("button", { name: "Terminés" }).click();
-  await expect(bris).toBeVisible();
-  await page.getByRole("button", { name: "Reprendre : Toiture Le Bris" }).focus();
-  // Le chantier quitte « Terminés » tout de suite ; on attend que le serveur l'ait enregistré avant d'ouvrir « En cours »
-  // (sinon la liste peut se relire avant, sans lui : échec vu en CI).
-  const saved = page.waitForResponse((r) => r.request().method() === "PATCH" && /\/v1\/projects\/[^/]+$/.test(new URL(r.url()).pathname));
+  // La carte dit son lieu, sa date et son statut ; le « … » est un vrai bouton, au clavier comme au doigt.
+  const menu = page.getByRole("button", { name: "Actions : Toiture Le Bris" });
+  await menu.focus();
   await page.keyboard.press("Enter");
+  const actions = page.getByRole("menu", { name: "Actions : Toiture Le Bris" });
+  await expect(actions.getByRole("menuitem")).toHaveText(["Ouvrir", "Marquer terminée", "Supprimer définitivement"]);
+  await actions.getByRole("menuitem", { name: "Marquer terminée" }).click();
   await expect(bris).toHaveCount(0);
-  expect((await saved).ok()).toBe(true);
+  await expect(page.getByRole("link", { name: /^Zinguerie Morvan/ })).toBeVisible();
+  await page.getByRole("button", { name: "Terminées" }).click();
+  await expect(bris).toBeVisible();
+  await expect(bris).toContainText("Terminée");
+  await page.getByRole("button", { name: "Actions : Toiture Le Bris" }).click();
+  await page.getByRole("menuitem", { name: "Remettre en cours" }).click();
+  await expect(bris).toHaveCount(0);
   await page.getByRole("button", { name: "En cours" }).click();
   await expect(bris).toBeVisible();
-
-  // Un simple appui ouvre toujours le chantier.
+  // Un simple appui ouvre toujours la liste.
   await bris.click();
   await expect(page.getByRole("heading", { name: "Toiture Le Bris" })).toBeVisible();
 });
@@ -1777,7 +1755,7 @@ test("§50.1 : « Je lis ton devis » prend tout l'écran, avec le retour pour n
   expect(box.height).toBeGreaterThanOrEqual(vp.height - 1);
   // Une seule phrase (§50.1) ; et un retour : la lecture continue, l'artisan est prévenu quand c'est prêt.
   await expect(lecture.getByRole("heading")).toHaveCount(1);
-  await expect(lecture.getByRole("button", { name: "Revenir à mes chantiers" })).toBeVisible();
+  await expect(lecture.getByRole("button", { name: "Revenir à mes listes" })).toBeVisible();
 });
 
 test("§50.1 : passé 30 s, « Gros devis, j'y suis encore… » (une seule phrase)", async ({ page }) => {

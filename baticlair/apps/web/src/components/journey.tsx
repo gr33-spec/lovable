@@ -116,7 +116,7 @@ export function DropZone({
 /**
  * §50.1 : pendant la lecture, une seule phrase : « Je lis ton devis ». Retour du fondateur (2026-10-11) : « une animation
  * plus fun qui prend tout l'écran » : le devis en grand, lu au surligneur et balayé par le scanner, d'où sortent les
- * fournitures (`ReadingStage`). Plein écran, par-dessus le menu ; « Revenir à mes chantiers » laisse la lecture continuer
+ * fournitures (`ReadingStage`). Plein écran, par-dessus le menu ; « Revenir à mes listes » (Greg, 1er novembre 2026 : « Mes listes » partout) laisse la lecture continuer
  * (le serveur prévient quand c'est prêt), on n'y reste jamais coincé.
  */
 /** Au-delà, « Je lis ton devis » devient « Gros devis, j'y suis encore… » (décision du fondateur, 2026-10-13). */
@@ -144,7 +144,7 @@ export function AnalysisScreen() {
         <button
           type="button"
           onClick={() => router.push("/chantiers")}
-          aria-label="Revenir à mes chantiers"
+          aria-label="Revenir à mes listes"
           className="inline-flex size-11 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
         >
           <ChevronLeft size={22} aria-hidden="true" />

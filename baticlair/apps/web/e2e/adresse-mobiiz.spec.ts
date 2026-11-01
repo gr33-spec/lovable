@@ -229,11 +229,13 @@ test("brouillon de l'envoi aux négoces (correction du 30 octobre, point 2) : qu
   await page.waitForTimeout(800);
   await page.reload();
   await expect(page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByLabel("Le mail à ton négoce")).toContainText("Bonjour Paul,");
-  // Et l'accueil la propose : « Reprendre ta demande de prix ».
+  // Et l'accueil la propose (1er novembre 2026) : « À faire maintenant », « Terminer ta demande de prix », « Continuer ».
   await page.goto("/");
-  const reprendre = page.getByRole("region", { name: "À reprendre" });
-  await expect(reprendre.getByText("Reprendre ta demande de prix")).toBeVisible();
-  await reprendre.getByRole("link", { name: "Reprendre" }).first().click();
+  const afaire = page.getByRole("region", { name: "À faire maintenant" });
+  await expect(afaire.getByText("Brouillon", { exact: true })).toBeVisible();
+  await expect(afaire.getByText("Terminer ta demande de prix")).toBeVisible();
+  await expect(afaire.getByText(/^Liste vérifiée · \d+ négoces? à confirmer$/)).toBeVisible();
+  await afaire.getByRole("link", { name: /^Terminer ta demande de prix/ }).click();
   await page.waitForURL(new RegExp(`/chantiers/${q.body.projetId}$`));
   const recoit2 = page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" });
   await recoit2.getByRole("button", { name: "Envoyer", exact: true }).click();

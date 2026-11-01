@@ -15,6 +15,8 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
+SUIVI 163-164 (Greg, 1er novembre : corrections ciblées, puis accueil et « Mes listes ») : code et tests écrits ; suites complètes, push, captures et rapport à faire. Voir `docs/accueil-et-mes-listes.md`.
+
 SUIVI 162 (Greg, 31 octobre : « Ma liste de matériaux ») : fait, voir `docs/ma-liste-de-materiaux.md`. En attente de Greg : le compteur unique (option A ou B), l'IA hybride, la proposition de CGU.
 
 SUIVI 155-159 (brief de Greg du 31 octobre : « Assistant Mobiiz, PDF interactif » + Clair / Sombre) : TOUT FAIT

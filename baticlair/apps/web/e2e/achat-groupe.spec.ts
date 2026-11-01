@@ -185,14 +185,17 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     // 1. Le compte vide : gratuit, sans essai ni pastille ; les deux portes.
     await inscrire(page, dep);
     await page.goto("/");
-    await expect(page.getByText("Par où commencer ?")).toBeVisible();
-    await expect(page.getByRole("link", { name: /Achat groupé de ton métier/ })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Ma liste de matériaux/ })).toBeVisible();
+    // L'accueil (Greg, 1er novembre 2026) : rien à reprendre, donc pas de « À faire maintenant » ; « Commencer » ; « Suivi en cours » vide.
+    await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
+    const commencer = page.getByRole("region", { name: "Commencer" });
+    await expect(commencer.getByRole("link", { name: /Rejoindre un achat groupé/ })).toHaveAttribute("href", "/achats-groupes");
+    await expect(commencer.getByRole("link", { name: /Créer une liste/ })).toHaveAttribute("href", "/chantiers/nouveau");
+    await expect(page.getByRole("region", { name: "Suivi en cours" }).getByText("Aucun dossier en cours")).toBeVisible();
     await expect(page.getByRole("link", { name: /Essai gratuit/ })).toHaveCount(0);
     await capture(page, projet, "1-compte-vide");
 
     // 2. La liste depuis un devis : trois choix, le bandeau, « à vérifier », la suggestion, « Tout cocher ».
-    await page.getByRole("link", { name: /Ma liste de matériaux/ }).first().click();
+    await page.getByRole("link", { name: /Créer une liste/ }).first().click();
     // Greg, 31 octobre 2026 : trois entrées, « Importer un document », « Saisir ma liste », « Décrire mon chantier ».
     await expect(page.getByText("Importer un document", { exact: true })).toBeVisible();
     await expect(page.getByText("Saisir ma liste", { exact: true })).toBeVisible();
@@ -412,9 +415,9 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await page.waitForURL(/\/compte$/);
     await nav.getByRole("link", { name: "Accueil" }).click();
     await page.waitForURL(/\/$/);
-    const reprendre = page.getByRole("region", { name: "À reprendre" });
-    await expect(reprendre.getByText(carte)).toBeVisible();
-    await reprendre.getByRole("link", { name: "Reprendre" }).first().click();
+    // L'accueil (1er novembre 2026) : le parcours quitté est « À faire maintenant », sa carte le reprend tel quel.
+    const afaire = page.getByRole("region", { name: "À faire maintenant" });
+    await afaire.getByRole("link", { name: new RegExp(`^${carte}`) }).first().click();
   }
 
   test("achat groupé : à chaque étape, puis le SIRET sur place, puis l'engagement", async ({ page }) => {
@@ -428,25 +431,25 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await page.getByLabel("Quantité de Ardoise naturelle 32×22 · Espagne 1er choix").fill("900");
     await page.getByRole("button", { name: "Ajouter à ma liste" }).click();
     // Étape 1 quittée, reprise : la ligne est là.
-    await partirEtReprendre(page, "Reprendre ton achat groupé");
+    await partirEtReprendre(page, "Terminer ton achat groupé");
     await expect(page.getByRole("region", { name: "Qu'est-ce que tu commandes ?" })).toBeVisible();
     await expect(page.getByText(/Ardoise naturelle 32×22 · Espagne 1er choix/).first()).toBeVisible();
     await page.getByRole("button", { name: "Continuer" }).click();
     // Étape 2.
     await page.getByLabel("Commune de livraison").fill(`${dep}200 Autre-${dep}`);
-    await partirEtReprendre(page, "Reprendre ton achat groupé");
+    await partirEtReprendre(page, "Terminer ton achat groupé");
     await expect(page.getByRole("region", { name: "Où et pour quand ?" })).toBeVisible();
     await expect(page.getByLabel("Commune de livraison")).toHaveValue(`${dep}200 Autre-${dep}`);
     await page.getByRole("button", { name: "Continuer" }).click();
     // Étape 3.
     await ajouterNegoce(page, { nom: `Négoce ${unique()}`, email: `n-${unique()}@negoce.example`, tel: "02 96 00 00 09" });
-    await partirEtReprendre(page, "Reprendre ton achat groupé");
+    await partirEtReprendre(page, "Terminer ton achat groupé");
     await expect(page.getByRole("region", { name: "À quels négoces envoyer la demande ?" })).toBeVisible();
     await page.getByRole("button", { name: "Continuer" }).click();
     // Étape 4 : le SIRET sur place (jamais le Profil) ; quitté là aussi, rien n'est perdu.
     const entreprise = page.getByRole("region", { name: "Ton entreprise" });
     await expect(entreprise).toBeVisible();
-    await partirEtReprendre(page, "Reprendre ton achat groupé");
+    await partirEtReprendre(page, "Terminer ton achat groupé");
     await expect(entreprise).toBeVisible();
     await entreprise.getByLabel("SIRET de ton entreprise").fill("73282932000074");
     if (!(await entreprise.getByLabel("Ton prénom").inputValue())) await entreprise.getByLabel("Ton prénom").fill("Jean");
@@ -478,7 +481,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await page.waitForTimeout(700);
     await ecran.getByRole("button", { name: "Retour" }).click();
     await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
-    await partirEtReprendre(page, "Reprendre ta liste");
+    await partirEtReprendre(page, "Terminer ta liste");
     await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByRole("textbox").first()).toHaveValue("Liteaux 27×38 maison");
   });
 });

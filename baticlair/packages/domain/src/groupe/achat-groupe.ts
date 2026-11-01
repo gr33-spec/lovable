@@ -234,7 +234,8 @@ export function etatCarte(
   if (a.statut === "consultation")
     return { etat: "consultation", titre: `Négoces consultés, réponse le ${a.reponseAvantLe ? jourFr(a.reponseAvantLe) : "bientôt"}`, dateCle: a.reponseAvantLe ? jourFr(a.reponseAvantLe) : null, sousTitre: PREVIENT };
   const cloture = a.clotureLe ? jourFr(a.clotureLe) : null;
-  if (a.entreprises <= 1) return { etat: "seul", titre: `Seul jusqu'au ${cloture ?? "…"}`, dateCle: cloture, sousTitre: PREVIENT };
+  // Greg, 1er novembre 2026 : « Ne plus afficher « Seul jusqu'au… » ».
+  if (a.entreprises <= 1) return { etat: "seul", titre: `Inscriptions ouvertes jusqu'au ${cloture ?? "…"}`, dateCle: cloture, sousTitre: PREVIENT };
   // Lot final (ton) : « 7 artisans du secteur · 3 200 pièces au total », le nombre seulement à partir du seuil d'anonymat.
   if (a.entreprises >= seuilAnonymat && a.total) return { etat: "regroupe_total", titre: phraseCarteGroupe(a.entreprises, a.total, seuilAnonymat), dateCle: cloture, sousTitre: PREVIENT };
   return { etat: "regroupe", titre: "Avec d'autres artisans du secteur", dateCle: cloture, sousTitre: PREVIENT };
