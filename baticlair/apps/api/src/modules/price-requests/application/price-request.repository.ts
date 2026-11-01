@@ -88,6 +88,10 @@ export interface PriceRequestRepository {
    */
   validatedTakeoff(tenant: TenantContext, projectId: string, options?: { anyStatus?: boolean }): Promise<ValidatedTakeoff | null>;
   sender(tenant: TenantContext, projectId: string): Promise<Sender | null>;
+  /** Apparence (Greg, 1er novembre 2026) : l'entreprise seule (nom, coordonnées, logo), pour l'aperçu des réglages du PDF. */
+  entreprise(tenant: TenantContext): Promise<Pick<Sender, "companyName" | "senderName" | "company" | "logo"> | null>;
+  /** La dernière demande réellement préparée (son document figé), pour l'aperçu des réglages du PDF ; null s'il n'y en a pas. */
+  derniereDemande(tenant: TenantContext): Promise<{ projectId: string; packet: SupplierPacket } | null>;
   /** Lot final, point 4 : le message modifié et le tutoiement, gardés comme modèle personnel. */
   saveModele(tenant: TenantContext, m: { message?: string | undefined; tutoie?: boolean | undefined }): Promise<void>;
   /** Les croquis rattachés à un article de la liste (clé de l'article), avec la précision de l'artisan. */

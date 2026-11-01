@@ -246,6 +246,25 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
     };
   }
 
+  async entreprise(tenant: TenantContext) {
+    const [company, user] = await Promise.all([
+      this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true, address: true, siret: true, phone: true, contactEmail: true, logo: true, logoType: true } }),
+      this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { name: true, email: true } }),
+    ]);
+    if (!company) return null;
+    return {
+      companyName: company.name,
+      senderName: user?.name ?? "",
+      company: { address: company.address, siret: company.siret, phone: company.phone, email: company.contactEmail ?? user?.email ?? null },
+      logo: company.logo && company.logoType ? { bytes: new Uint8Array(company.logo), type: company.logoType } : null,
+    };
+  }
+
+  async derniereDemande(tenant: TenantContext) {
+    const r = await this.prisma.priceRequest.findFirst({ where: { companyId: tenant.companyId, packet: { not: Prisma.DbNull } }, orderBy: { createdAt: "desc" }, select: { projectId: true, packet: true } });
+    return r?.packet ? { projectId: r.projectId, packet: r.packet as unknown as SupplierPacket } : null;
+  }
+
   async create(
     tenant: TenantContext,
     data: {

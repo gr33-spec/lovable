@@ -31,6 +31,7 @@ import { packetDocument, type ZonePdf } from "../application/supplier-packet.js"
 
 const supplierIds = z.array(z.string()).min(1).max(20);
 // Assistant (31 octobre 2026) : le modèle et la couleur du PDF se règlent ici aussi ; chaque champ est facultatif.
+const apercuQuery = z.object({ modele: z.enum(MODELES_PDF).optional(), couleur: z.enum(COULEURS_PDF.map((c) => c.id) as [CouleurPdf, ...CouleurPdf[]]).optional() });
 const settingsBody = z.object({ attachQuoteDetail: z.boolean().optional(), modelePdf: z.enum(MODELES_PDF).optional(), couleurPdf: z.enum(COULEURS_PDF.map((c) => c.id) as [CouleurPdf, ...CouleurPdf[]]).optional() });
 const createBody = z.object({
   supplierIds,
@@ -145,6 +146,17 @@ export class PriceRequestsController {
   @HttpCode(200)
   async send(@Tenant() tenant: TenantContext, @Param("id") id: string) {
     return toDto(await this.requests.send(tenant, id));
+  }
+
+  /** Apparence (1er novembre 2026) : l'aperçu en direct des réglages du PDF ; `modele` et `couleur` pour essayer avant d'enregistrer. */
+  @Get("price-requests/settings/apercu.pdf")
+  async apercuReglages(@Tenant() tenant: TenantContext, @Query(new ZodPipe(apercuQuery)) q: z.infer<typeof apercuQuery>, @Res({ passthrough: true }) res: Response) {
+    const pdf = await this.requests.apercuReglages(tenant, { modele: q.modele, couleur: q.couleur });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename="${pdf.filename}"`);
+    res.setHeader("Cache-Control", "private, no-store");
+    res.setHeader("X-Apercu-Exemple", pdf.exemple ? "1" : "0");
+    return new StreamableFile(pdf.bytes);
   }
 
   /** « Exporter la liste en PDF » (§21.3, §45.9) : la liste validée du chantier, même PDF que celui du fournisseur, aucun prix. */

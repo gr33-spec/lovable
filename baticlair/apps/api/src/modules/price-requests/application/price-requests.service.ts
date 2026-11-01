@@ -237,6 +237,26 @@ export class PriceRequestsService {
     return { modele: r.modelePdf, couleur: r.couleurPdf, reponse: mobiiz ?? packet.expediteur?.email ?? null };
   }
 
+  /**
+   * APPARENCE, « TA DEMANDE DE PRIX » (Greg, 1er novembre 2026) : l'aperçu en direct des réglages, rendu par LE MÊME
+   * générateur et les mêmes options que le PDF envoyé (`packetPdf`, `optionsPdf` : logo, coordonnées, adresse de réponse).
+   * Le document est celui de la dernière demande réellement préparée ; sans demande, un exemple marqué « Exemple ». Le
+   * modèle et la couleur choisis à l'écran (pas encore enregistrés) remplacent ceux du compte, pour cet aperçu seulement.
+   */
+  async apercuReglages(tenant: TenantContext, choix: { modele?: ModelePdf | undefined; couleur?: CouleurPdf | undefined }): Promise<{ filename: string; bytes: Uint8Array; exemple: boolean }> {
+    const derniere = await this.requests.derniereDemande(tenant);
+    const entreprise = await this.requests.entreprise(tenant);
+    const packet = derniere ? derniere.packet : exemplePacket(entreprise, today(this.clock()));
+    const reglages = await this.optionsPdf(tenant, packet, null);
+    const bytes = await packetPdf(packet, derniere ? await this.sketchFiles(tenant, packet) : [], {
+      logo: entreprise?.logo ?? null,
+      ...reglages,
+      ...(choix.modele ? { modele: choix.modele } : {}),
+      ...(choix.couleur ? { couleur: choix.couleur } : {}),
+    });
+    return { filename: "apercu-demande-de-prix.pdf", bytes, exemple: !derniere };
+  }
+
   /** Le PDF « Demande de devis » (§45.3) d'une demande : au nom d'un destinataire quand il est donné. */
   async pdf(tenant: TenantContext, requestId: string, recipientId?: string): Promise<{ filename: string; bytes: Uint8Array }> {
     const request = await this.requests.findById(tenant, requestId);
@@ -657,3 +677,30 @@ export class PriceRequestsService {
     return { ...request, emails };
   }
 }
+
+/**
+ * L'exemple de l'aperçu (aucune demande encore préparée) : les vraies coordonnées de l'entreprise, des matériaux
+ * d'exemple, et « Exemple » écrit dans le chantier et sa référence, pour qu'il ne passe jamais pour une vraie demande.
+ */
+function exemplePacket(entreprise: { companyName: string; senderName: string; company: { address: string | null; siret: string | null; phone: string | null; email: string | null } } | null, date: string): SupplierPacket {
+  return {
+    entreprise: entreprise?.companyName ?? "",
+    chantier: "Exemple · Rénovation toiture",
+    commune: null,
+    date,
+    articles: [],
+    a_chiffrer: [],
+    resume: ["Exemple : ta prochaine demande de prix s'affichera ainsi."],
+    detail: [],
+    joindre_detail: false,
+    question_lien: null,
+    fournitures: [
+      { designation: "Ardoise naturelle 32 × 22", quantite: "900 pièces", precision: null },
+      { designation: "Crochets inox", quantite: "1 000 pièces", precision: null },
+      { designation: "Liteaux 27 × 38", quantite: "80 m", precision: null },
+    ],
+    expediteur: { nom: entreprise?.senderName ?? "", adresse: entreprise?.company.address ?? null, siret: entreprise?.company.siret ?? null, telephone: entreprise?.company.phone ?? null, email: entreprise?.company.email ?? null },
+    reference: "EXEMPLE",
+  };
+}
+
