@@ -28,47 +28,9 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-SUIVI 167 (Greg, 1er novembre : audit UX puis lot 1 des corrections sûres) : en local, pas déployé (modification
-importante : pas de déploiement automatique). Voir `docs/ameliorations-ux-2026-11-01.md`. Décisions attendues : pastille
-du regroupement sur une liste individuelle (§2), fusion des deux carnets de négoces (§3), propositions intermédiaires (§4).
-
-SUIVI 163-166 (Greg, 1er novembre : corrections ciblées, accueil, Mes listes, Profil et paramètres) : EN LIGNE sur
-test.mobiiz.fr (commit 89011e1f, accord de Greg pour le test seulement), après sauvegarde Neon vérifiée
-(`sauvegarde-avant-mes-listes`) et suite complète verte ; migration additive `20261101090000_liste_supprimee` appliquée à la
-base de test seulement. Point de retour et procédure : `docs/retour-arriere-2026-11-01.md`. Rien vers `main`.
-
-SUIVI 163-164 (Greg, 1er novembre : corrections ciblées, puis accueil et « Mes listes ») : code et tests écrits ; suites complètes, push, captures et rapport à faire. Voir `docs/accueil-et-mes-listes.md`.
-
-SUIVI 162 (Greg, 31 octobre : « Ma liste de matériaux ») : fait, voir `docs/ma-liste-de-materiaux.md`. En attente de Greg : le compteur unique (option A ou B), l'IA hybride, la proposition de CGU.
-
-SUIVI 155-159 (brief de Greg du 31 octobre : « Assistant Mobiiz, PDF interactif » + Clair / Sombre) : TOUT FAIT
-(thème, audit, PDF trois modèles + bloc de réponse, assistant, « Je décris mon chantier »). En ligne sur test.mobiiz.fr (commit bba85b3e),
-rapport envoyé à Greg. En attente de ses retours. Plan et choix : `docs/assistant-mobiiz.md`, DECISIONS du 31/10.
-
-
-SUIVI 152 : refonte de l'app sur ordinateur (lg: seulement, mobile inchangé). Fait : menu, accueil, listes, chantier, achats groupés, négoces, profil. Reste : e2e complets, push, captures avant / après à Greg (script de capture temporaire : scratchpad `zz-captures-pc.spec.ts`).
-
-SUIVI 143-145 (messages de Greg du 31 octobre, après le catalogue métier), dans cet ordre :
-- [x] 143. Landing « Comment ça marche ? » : vraies captures de l'app (données fictives) dans un cadre de téléphone
-  neutre, sans marque, à la place des trois téléphones dessinés ; CTA fixe mobile qui ne cache plus le texte du collectif.
-- [x] 144. Couverture et peinture : recherche poussée, données vérifiées (tuiles, ardoises naturelles et synthétiques,
-  canal, plates, accessoires), sources et dates ; peinture plus générique (par attributs).
-- [x] 145. Un produit inconnu devient une référence quand un autre artisan écrit la même chose ou quand il est commandé
-  en achat groupé (garder confidentialité et contrôle ; décision dans DECISIONS).
-
-Précédent :
-SUIVI 142, « CATALOGUE MÉTIER INTELLIGENT » (message de Greg du 31 octobre). Plan par étapes (cocher au fil de l'eau) :
-- [x] 1. Audit (catalogue en données, recherche, Écris ta liste, lecture IA, achats groupés, PDF) → docs/catalogue-metier.md
-- [x] 2. Moteur de recherche : dimensions (18x40, 18 40, 18×40), références exactes (H14 ≠ HP10), abréviations, fautes
-- [x] 3. Couverture d'abord : seulement des données sourcées (référentiel du fondateur, fabricants vérifiés), sinon « à vérifier »
-- [x] 4. Écris ta liste : préciser seulement ce qui manque (variantes en boutons), « Je ne trouve pas mon matériau », référence
-- [x] 5. Apprentissage : propositions existantes (admin) + rapprochement de désignations voisines, seuils configurables
-- [x] 6. Lecture IA : la question « Quel modèle ? » répondue avec le même moteur ; jamais une référence inventée
-- [x] 7. Achats groupés : rapprochement par clé technique (existant `clesDeRegroupement`), carte discrète
-- [x] 8. Référence conservée dans liste, PDF, demandes ; tests de non-régression ; rapport
-État détaillé : docs/catalogue-metier.md. Étapes 1-8 en ligne (c6f878a), rapportées à Greg. Suite : données vérifiées à étendre (voir docs/catalogue-metier.md §5).
-Règles : rien d'inventé ni de faux produit ; pas de collecte massive ; pas de migration destructive ; landing, abonnements,
-DA intouchés.
+Pilote 20 à 100 couvreurs (SUIVI 168, `docs/pilote-couvreurs-2026-11-01.md`). Branche LOCALE `claude/pilote-fiabilite`
+(lot UX 1 + CI corrigée + sauvegarde corrigée), NON poussée : tout vert en local (domaine, API 640/641, e2e 243 + lots 16/16).
+Attend Greg : accord pour chaque action en ligne (push, mise en production, réglages Vercel, Neon, Stripe, Resend, crédit IA).
 
 ## À faire ensuite (dans cet ordre)
 
