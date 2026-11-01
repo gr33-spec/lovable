@@ -65,7 +65,8 @@ function MesListes() {
 
   useEffect(() => {
     if (draft === q) return;
-    const t = setTimeout(() => updateUrl({ q: draft.trim() }), 250);
+    // Une recherche porte sur toutes les listes (PD-022) : un filtre choisi avant de taper ne cache pas une liste terminée.
+    const t = setTimeout(() => updateUrl({ q: draft.trim(), statut: null }), 250);
     return () => clearTimeout(t);
   }, [draft, q, updateUrl]);
 
@@ -131,8 +132,9 @@ function MesListes() {
     try {
       await api(`/v1/projects/${encodeURIComponent(p.id)}`, { method: "PATCH", body: { status: p.status === "archived" ? "active" : "archived" } });
       setRefus(null);
-      if (filter !== "toutes") setRetirees((r) => new Set([...r, p.id]));
-      else reload();
+      // Le statut change : la liste se relit (seule une liste supprimée disparaît pour de bon de l'écran).
+      setMore(null);
+      reload();
     } catch {
       setErreur("Le changement n'est pas passé. Réessaie dans un instant.");
     }
