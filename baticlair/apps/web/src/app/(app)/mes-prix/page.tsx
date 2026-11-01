@@ -34,7 +34,7 @@ export default function MesPrixPage() {
         <EmptyState icon={<Tags size={28} aria-hidden="true" />} title="Pas encore de prix">
           <p className="text-[15px] text-muted">Envoie une demande à tes négoces depuis un chantier : leurs prix arrivent ici.</p>
           <ButtonLink href="/chantiers" variant="secondary" className="mt-3">
-            Mes listes
+            Mes demandes
           </ButtonLink>
         </EmptyState>
       ) : null}

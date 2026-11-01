@@ -10,15 +10,24 @@ import { api, ApiError, type Project, type ProjectPage } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
 
-type Filter = "toutes" | "en-cours" | "terminees";
+type Filter = "toutes" | "a-preparer" | "envoyees" | "reponses" | "terminees";
+/** « MES DEMANDES » (Greg, 1er novembre 2026) : les étapes d'un dossier. Pas d'« Archivées » : l'archivage, c'est « Terminées ». */
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "toutes", label: "Toutes" },
-  { value: "en-cours", label: "En cours" },
+  { value: "a-preparer", label: "À préparer" },
+  { value: "envoyees", label: "Envoyées" },
+  { value: "reponses", label: "Réponses reçues" },
   { value: "terminees", label: "Terminées" },
 ];
-const API_STATUS: Record<Filter, "all" | "active" | "archived"> = { toutes: "all", "en-cours": "active", terminees: "archived" };
-/** Les anciens liens (« ?statut=tous », « termines ») restent valables. */
-const ANCIENS: Record<string, Filter> = { tous: "toutes", termines: "terminees", "en-cours": "en-cours", toutes: "toutes", terminees: "terminees" };
+/** Les anciens liens (« ?statut=tous », « termines », « en-cours ») restent valables. */
+const ANCIENS: Record<string, Filter> = { tous: "toutes", termines: "terminees", "en-cours": "toutes", toutes: "toutes", terminees: "terminees", "a-preparer": "a-preparer", envoyees: "envoyees", reponses: "reponses" };
+const VIDES: Record<Filter, string> = {
+  toutes: "Aucune demande pour l'instant",
+  "a-preparer": "Rien à préparer",
+  envoyees: "Aucune demande en attente de réponse",
+  reponses: "Aucune réponse à lire",
+  terminees: "Aucune demande terminée",
+};
 
 /**
  * « MES LISTES » (Greg, 1er novembre 2026 ; avant : « Chantiers », alors que le menu disait « Mes listes ») : le titre,
@@ -70,10 +79,10 @@ function MesListes() {
     return () => clearTimeout(t);
   }, [draft, q, updateUrl]);
 
-  const queryKey = `${API_STATUS[filter]}|${q.trim()}`;
+  const queryKey = `${filter}|${q.trim()}`;
   const fetchPage = useCallback(
     (signal: AbortSignal | undefined, after: string | null) => {
-      const sp = new URLSearchParams({ status: API_STATUS[filter], limit: "30", resume: "1" });
+      const sp = new URLSearchParams(filter === "toutes" ? { status: "all", limit: "30", resume: "1" } : { etape: filter, limit: "30", resume: "1" });
       if (q.trim()) sp.set("q", q.trim());
       if (after) sp.set("cursor", after);
       return api<ProjectPage>(`/v1/projects?${sp.toString()}`, signal ? { signal } : {});
@@ -144,10 +153,10 @@ function MesListes() {
   return (
     <>
       <div className="flex items-start justify-between gap-3">
-        <PageTitle>Mes listes</PageTitle>
+        <PageTitle>Mes demandes</PageTitle>
         <span className="flex items-center gap-3">
           <ButtonLink href="/chantiers/nouveau" className="min-h-11 shrink-0 px-4 text-[15px] whitespace-nowrap">
-            Nouvelle liste
+            Nouvelle demande
           </ButtonLink>
           <AideBouton sujet="chantiers" />
         </span>
@@ -155,7 +164,7 @@ function MesListes() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-4">
         <div className="flex flex-col gap-1.5 lg:grow">
           <label htmlFor="search" className="sr-only">
-            Rechercher une liste ou un chantier
+            Rechercher une demande ou un chantier
           </label>
           <div className="flex min-h-12 items-center gap-3 rounded-xl border border-line bg-surface px-4 text-ink transition-[border-color] duration-150 focus-within:border-accent">
             <Search size={20} className="text-muted" aria-hidden="true" />
@@ -165,7 +174,7 @@ function MesListes() {
               enterKeyHint="search"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Rechercher une liste ou un chantier…"
+              placeholder="Rechercher une demande ou un chantier…"
               className="min-h-11 grow bg-transparent text-[16px] outline-none placeholder:text-muted"
             />
           </div>
@@ -173,7 +182,8 @@ function MesListes() {
         {/* Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » chevauchait « Terminées » ; il passe à la ligne
             seulement quand la place manque. */}
         <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-          <div role="group" aria-label="Filtrer" className="flex gap-1.5">
+          {/* Cinq étapes : la rangée défile au doigt sur téléphone, jamais la page. */}
+          <div role="group" aria-label="Filtrer" className="-mx-4 flex min-w-0 grow gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:px-0">
             {FILTERS.map((f) => (
               <button
                 key={f.value}
@@ -220,7 +230,7 @@ function MesListes() {
       {items && items.length > 0 ? (
         <>
           <p className="sr-only" aria-live="polite">
-            {items.length > 1 ? `${items.length} listes` : "1 liste"}
+            {items.length > 1 ? `${items.length} demandes` : "1 demande"}
           </p>
           <ul className={`grid grid-cols-1 gap-2.5 lg:grid-cols-2 ${selection ? "pb-24" : ""}`}>
             {items.map((p) => (
@@ -244,12 +254,12 @@ function MesListes() {
       ) : null}
       {items && items.length === 0 ? (
         q.trim() ? (
-          <EmptyState icon={<Search size={40} />} title="Aucune liste trouvée">
+          <EmptyState icon={<Search size={40} />} title="Aucune demande trouvée">
             <p className="max-w-xs text-[16px] text-muted">Essaie un nom de liste, un client, une ville ou une partie de l&apos;adresse.</p>
           </EmptyState>
         ) : (
-          <EmptyState icon={<ClipboardList size={40} />} title={filter === "terminees" ? "Aucune liste terminée" : filter === "en-cours" ? "Aucune liste en cours" : "Aucune liste pour l'instant"}>
-            {filter !== "terminees" ? <ButtonLink href="/chantiers/nouveau">Nouvelle liste</ButtonLink> : null}
+          <EmptyState icon={<ClipboardList size={40} />} title={VIDES[filter]}>
+            {filter === "toutes" || filter === "a-preparer" ? <ButtonLink href="/chantiers/nouveau">Nouvelle demande</ButtonLink> : null}
           </EmptyState>
         )
       ) : null}

@@ -158,7 +158,7 @@ export function RegroupementsAutomatiques() {
         <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Aucun regroupement en cours pour tes métiers">
           <p className="text-[15px] text-muted">Lance le premier depuis un chantier : sur ta liste, « Tenter un prix de groupe » sur tes gros articles.</p>
           <ButtonLink href="/chantiers" variant="secondary" className="mt-3">
-            Mes listes
+            Mes demandes
           </ButtonLink>
         </EmptyState>
       ) : null}

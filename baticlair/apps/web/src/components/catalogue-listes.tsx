@@ -6,6 +6,9 @@ import { Button, INPUT } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
+/** Greg, 1er novembre 2026 : le message d'une liste qui couvre plusieurs familles (remplace le blocage par métier). */
+export const PHRASE_PLUSIEURS_FAMILLES = "Cette liste contient plusieurs familles de matériaux. MOBIIZ va les organiser en lots adaptés. Vérifie la répartition avant de continuer.";
+
 /**
  * LE CATALOGUE EN LISTES (correction après test de Greg, 30 octobre 2026, points 3 et 4) : en haut, « Métier : Couverture
  * ▾ » (les métiers du profil d'abord, un toucher pour changer) ; puis un toucher par niveau, famille › produit › format ;
@@ -95,7 +98,7 @@ export function CatalogueListes({
     setQte("");
   };
   const ajouter = (l: LigneChoisie) => {
-    // Un achat groupé reste d'un seul métier : un produit d'un autre métier se met de côté pour le sien.
+    // Un achat groupé est organisé par métier : un produit d'un autre métier va dans le lot de son métier, sur accord.
     const m = metiers.find((x) => x.code === l.metier) ?? null;
     if (familleAchat && l.familleAchat && l.familleAchat !== familleAchat && m) {
       setAutre({ ligne: l, metier: m });
@@ -112,10 +115,12 @@ export function CatalogueListes({
   if (autre)
     return (
       <div role="status" className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
-        <p className="text-[16px] font-bold">
-          {autre.ligne.designation} est de la {autre.metier.libelle.toLowerCase()}.
+        {/* Greg, 1er novembre 2026 : plus de blocage « un achat groupé reste d'un seul métier » ; la liste est rangée en
+            lots, l'artisan vérifie la répartition, rien ne rejoint un autre achat groupé sans son accord. */}
+        <p className="text-[16px] font-bold">{PHRASE_PLUSIEURS_FAMILLES}</p>
+        <p className="text-[15px]">
+          {autre.ligne.designation} : lot {autre.metier.libelle.toLowerCase()}.
         </p>
-        <p className="text-[15px]">Un achat groupé reste d&apos;un seul métier. Mets-le dans l&apos;achat groupé {autre.metier.libelle.toLowerCase()} : tu le retrouves sur l&apos;accueil.</p>
         {onAutreMetier ? (
           <Button
             onClick={() => {
@@ -124,7 +129,7 @@ export function CatalogueListes({
               setArticle(null);
             }}
           >
-            Le mettre dans l&apos;achat groupé {autre.metier.libelle.toLowerCase()}
+            Le ranger dans le lot {autre.metier.libelle.toLowerCase()}
           </Button>
         ) : null}
         <button type="button" onClick={() => setAutre(null)} className={LIEN}>

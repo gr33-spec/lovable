@@ -36,6 +36,8 @@ const listQuery = z.object({
   q: z.string().trim().max(100).optional(),
   /** Par défaut : en cours ; en recherche : tous. */
   status: z.enum(["active", "archived", "all"]).optional(),
+  /** « Mes demandes » : l'étape du dossier (prime sur `status`). */
+  etape: z.enum(["a-preparer", "envoyees", "reponses", "terminees"]).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(30),
   cursor: z.string().max(200).optional(),
   /** « Mes listes » et l'accueil (1er novembre 2026) : le résumé de chaque liste (lignes, origine, statut, demande, supprimable). */
@@ -95,6 +97,7 @@ export class ProjectsController {
     const page = await this.projects.list(tenant, {
       status: query.status ?? (search.length > 0 ? "all" : "active"),
       limit: query.limit,
+      ...(query.etape ? { etape: query.etape } : {}),
       ...(search.length > 0 ? { search } : {}),
       ...(query.cursor ? { cursor: decodeCursor(query.cursor) } : {}),
     });

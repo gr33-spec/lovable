@@ -114,7 +114,11 @@ export default function NouveauChantierPage() {
       ) : null}
       {error ? <ErrorNotice error={error} /> : null}
       <InfoAnalyse />
+      {/* Les quatre départs du « + » (Greg, 1er novembre 2026) : importer, photographier une liste papier, créer à la main,
+          décrire son chantier. */}
+      <p className="text-[14px] leading-snug text-muted">Devis, liste de matériaux, PDF, photo, scan, liste écrite à la main, ou ta description écrite ou dictée.</p>
       <ImporterUnDocument pending={pending !== null} onFichier={(f) => void importer(f)} />
+      <PhotographierListe pending={pending !== null} onFichier={(f) => void importer(f)} />
       {aConfirmer ? (
         <ConfirmerAnalyse
           nature={aConfirmer.nature}
@@ -194,6 +198,41 @@ function ImporterUnDocument({ pending, onFichier }: { pending: boolean; onFichie
 }
 
 /**
+ * « PHOTOGRAPHIER UNE LISTE PAPIER » (Greg, 1er novembre 2026) : l'appareil photo directement, sans passer par la feuille
+ * d'import ; la photo suit le même chemin (type reconnu, coût dit avant l'analyse).
+ */
+function PhotographierListe({ pending, onFichier }: { pending: boolean; onFichier: (f: File) => void }) {
+  const id = useId();
+  return (
+    <>
+      <input
+        id={id}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        aria-label="Photographier une liste papier"
+        className="sr-only"
+        disabled={pending}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = "";
+          if (f && !pending) onFichier(f);
+        }}
+      />
+      <label htmlFor={id} aria-hidden="true" className={`pressable flex min-h-16 cursor-pointer items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground ${pending ? "pointer-events-none opacity-80" : ""}`}>
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink">
+          <Camera size={20} />
+        </span>
+        <span className="flex flex-col">
+          <span className="text-[16px] font-semibold">Photographier une liste papier</span>
+          <span className="text-[14px] leading-snug text-muted">Une liste écrite à la main, un bon, un tableau.</span>
+        </span>
+      </label>
+    </>
+  );
+}
+
+/**
  * Achat groupé (Greg, 27 octobre 2026, point 1) : la liste se fait aussi À LA MAIN (désignation, quantité, unité), puis
  * arrive sur le même écran de liste, avec ses deux sorties.
  */
@@ -218,7 +257,7 @@ function SaisieListe() {
           <PenLine size={20} />
         </span>
         <span className="flex flex-col">
-          <span className="text-[16px] font-semibold">Saisir ma liste</span>
+          <span className="text-[16px] font-semibold">Créer une liste à la main</span>
           <span className="text-[14px] leading-snug text-muted">J&apos;ajoute directement les matériaux, quantités et unités.</span>
         </span>
       </button>
