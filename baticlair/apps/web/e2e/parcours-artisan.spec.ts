@@ -1022,11 +1022,13 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await createProject(page, "Toiture Kervella", "M. Kervella", "2 rue du Port, Lorient");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
 
-  // ÉTAPE 3 : un seul écran, AU BOUTON : ni micro, ni zone de texte ici.
+  // ÉTAPE 3 : un seul écran. RÈGLE CHANGÉE (Greg, 1er novembre 2026) : une conversation en tête (questions numérotées, une
+  // réponse libre au clavier ou à la voix) ; les cartes restent au bouton, sans zone de texte à elles.
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("button", { name: /voix/ })).toHaveCount(0);
-  await expect(page.getByRole("textbox")).toHaveCount(0);
+  await expect(page.getByRole("textbox")).toHaveCount(1);
+  await expect(questions.getByRole("region", { name: "Conversation avec MOBIIZ" }).getByRole("textbox", { name: "Ton message" })).toBeVisible();
   // §50.2 : une question par carte, groupées par ouvrage, sans explication ; la valeur prise par défaut est marquée. §49.4 :
   // les consommables ne sont jamais une liste d'articles proposés, seulement UNE question oui / non ; ici, non.
   await expect(questions.getByRole("heading", { level: 3 }).first()).toBeVisible();
@@ -1483,7 +1485,8 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await clean();
   await expect(questions.getByRole("heading", { level: 3 }).first()).toBeVisible();
-  await expect(page.getByRole("textbox")).toHaveCount(0);
+  // Une seule case : celle de la conversation (Greg, 1er novembre 2026) ; les cartes restent au bouton.
+  await expect(page.getByRole("textbox")).toHaveCount(1);
   // Le façonnage est obligatoire (48.6) ; le reste peut rester sans réponse.
   await questions.getByRole("button", { name: /^Je commande façonné/ }).click();
   await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
@@ -3916,4 +3919,34 @@ test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèl
   const pid = /chantiers\/([0-9a-f-]{36})/.exec(page.url())![1];
   const q0 = (await (await page.request.get(`/v1/quantitatifs?projetId=${pid}&ecran=1`)).json()).items[0] as { fiche: { cle: string; valeur: string; origine: string }[] };
   expect(q0.fiche.find((f) => f.cle === "modele_de_la_tuile")).toMatchObject({ valeur: "Tuile H 14 Huguenot, réf. 204 (Edilians)", origine: "reponse" });
+});
+
+test("conversation après l'analyse (Greg, 1er novembre 2026) : questions numérotées, une réponse libre, chaque réponse à sa carte, seules les autres reposées", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Kervella", "M. Kervella", "2 rue du Port, Lorient");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  const conversation = questions.getByRole("region", { name: "Conversation avec MOBIIZ" });
+  const premier = conversation.getByRole("group", { name: "Message de MOBIIZ" }).first();
+  await expect(premier).toContainText("Réponds à tout en une fois, avec les numéros");
+  // Le numéro de la question du façonnage, lu dans le message (jamais deviné).
+  const texte = (await premier.innerText()).split("\n");
+  const ligne = texte.find((l) => /^\d+\. .*façonn/i.test(l));
+  expect(ligne, "une question de façonnage numérotée").toBeTruthy();
+  const n = Number(/^(\d+)\./.exec(ligne!)![1]);
+  await conversation.getByRole("textbox", { name: "Ton message" }).fill(`${n}. je commande façonné`);
+  await conversation.getByRole("button", { name: "Envoyer le message" }).click();
+  // Les lignes d'état, puis la réponse : notée, et la carte du dessous prend le bouton.
+  const reponse = conversation.getByRole("group", { name: "Message de MOBIIZ" }).nth(1);
+  await expect(reponse).toContainText("Noté :");
+  await expect(reponse).toContainText(`${n}. Je commande façonné`);
+  await expect(questions.getByRole("button", { name: /^Je commande façonné/ }).first()).toHaveAttribute("aria-pressed", "true");
+  // Les questions sans réponse sont reposées, celle du façonnage non.
+  await expect(reponse).toContainText("Il me manque encore ces réponses :");
+  const relance = (await reponse.innerText()).split("Il me manque encore ces réponses :")[1]!;
+  expect(relance).not.toMatch(new RegExp(`^${n}\\. `, "m"));
+  expect(relance).toMatch(/^\d+\. /m);
+  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0, { timeout: 60_000 });
 });

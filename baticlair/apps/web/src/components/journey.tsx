@@ -1,5 +1,6 @@
 "use client";
 
+import { ConversationQuestions, type QuestionDeConversation } from "@/components/conversation-questions";
 import { Check, ChevronLeft, FileUp, ListChecks, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListScene, ReadingStage } from "@/components/chantier-scenes";
@@ -459,9 +460,16 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
   // §50.2 : groupées par ouvrage, dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
   const order = [...new Set(questions.map((q) => q.group))].sort((a, b) => Number(a === SITE_GROUP || a === CONSUMABLES_GROUP) - Number(b === SITE_GROUP || b === CONSUMABLES_GROUP) || Number(a === CONSUMABLES_GROUP) - Number(b === CONSUMABLES_GROUP));
 
+  // La conversation (Greg, 1er novembre 2026) : les mêmes questions, numérotées dans l'ordre des cartes ; ses réponses
+  // remplissent les cartes, qui restent la référence.
+  const numerotees = order.flatMap((group) => questions.filter((q) => q.group === group));
+  const conversation: QuestionDeConversation[] = numerotees.map((q, i) => ({ numero: i + 1, cle: q.key, texte: q.text, options: q.options, unite: q.unit, libre: q.free, numerique: q.numeric, retirable: !mandatory(q) }));
+  const aRepondre = new Set(conversation.filter((q) => !given[q.cle] && !retired.has(q.cle)).map((q) => q.numero));
+
   return (
     <section aria-label="Les questions" className="flex flex-col gap-3">
       {error && errors.size === 0 ? <ErrorNotice error={error} /> : null}
+      {conversation.length > 0 ? <ConversationQuestions questions={conversation} aRepondre={aRepondre} onReponse={(cle, g) => set(cle, g)} onSansReponse={(cle) => retire(cle, true)} /> : null}
       {order.map((group) => (
         <section key={group} aria-label={group} className="flex flex-col gap-2.5">
           <h3 className="px-1 pt-2 font-display text-[17px] font-extrabold tracking-[-0.01em]">{group}</h3>
