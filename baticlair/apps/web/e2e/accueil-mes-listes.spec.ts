@@ -318,7 +318,8 @@ test("Accueil et Mes listes, thèmes clair et sombre : le titre et le texte des 
 test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne chevauche plus les filtres ; « Télécharger » du PDF est lisible ; le menu du bas en 12 px", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await inscrire(page);
-  await liste(page, "Liste A");
+  // Deux listes : l'offre gratuite des e2e (paywall allumé) en permet trois.
+  const { projetId } = await liste(page, "Liste A");
   await liste(page, "Liste B");
   await page.goto("/chantiers");
   const selectionner = page.getByRole("button", { name: "Sélectionner" });
@@ -344,7 +345,6 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     await page.goto("/chantiers");
     await page.getByRole("heading", { name: "Mes listes", level: 1 }).waitFor();
-    const { projetId } = await liste(page, `PDF ${theme}`);
     await page.evaluate((id) => window.dispatchEvent(new CustomEvent("baticlair:open-file", { detail: { url: `/v1/projects/${id}/demande-de-devis.pdf?apercu=1`, title: "Le PDF joint", fileName: "demande.pdf" } })), projetId);
     const telecharger = page.getByRole("link", { name: "Télécharger" });
     await expect(telecharger).toBeVisible({ timeout: 30_000 });

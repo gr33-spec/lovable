@@ -94,3 +94,16 @@ achats groupés » par négoce).
   c'est le texte de la maquette de Greg (31 octobre), non modifié ; proposition : « (1/N) » sur la question active.
 - Lignes cliquables du PDF de l'assistant sur ordinateur (23 px de haut) : elles suivent la hauteur des lignes du PDF ;
   les agrandir changerait le PDF : laissé.
+
+## 6. Tests du lot 1 (niveau « modification importante » : ciblés + fonctions liées)
+
+| Série | Résultat |
+|---|---|
+| Domaine (types, 937 tests, build) | vert (937/937, dont 3 nouveaux : le fil de l'assistant à la réouverture) |
+| API (types) | vert |
+| Web (types, lint, tests unitaires, build) | vert |
+| e2e liés (assistant, accueil, Mes listes, Profil, clavier, responsive, adresse Mobiiz, parcours artisan ciblé, achats groupés ; téléphone et ordinateur) | 122 réussis, 28 ignorés, 2 en échec (le nouveau test créait une 4e liste au-delà de l'offre gratuite des e2e), corrigé puis 2/2 réussis |
+| Nouveaux e2e | « rouvert trois fois, l'assistant ne répète pas son message d'ouverture » ; « iPhone SE : Sélectionner ne chevauche plus les filtres ; Télécharger lisible (encre sur jaune) et Fermer blanc, en clair et en sombre ; menu du bas en 12 px » |
+| axe après le lot (19 écrans clés, iPhone SE et ordinateur, clair et sombre) | plus aucune erreur de contraste ni de débordement ; restent les lignes cliquables du PDF de l'assistant sur ordinateur (23 px, §5) et un lien recouvert par le menu de l'initiale quand il est ouvert (état passager) |
+
+Non déployé (modification importante : pas de déploiement automatique).
