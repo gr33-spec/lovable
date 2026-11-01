@@ -1093,8 +1093,8 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
   const [fait, setFait] = useState<(Lance & { perso: unknown[]; lancees: unknown[] }) | null>(null);
   const router = useRouter();
   // Venu de « Ajouter mes quantités » (Greg, 1er novembre 2026) : l'achat est déjà choisi, on ne redemande rien.
-  const [contexte, setContexte] = useState<ContexteAchat | null>(null);
-  useEffect(() => setContexte(lireContexteAchat()), []);
+  // Lu une fois côté navigateur (la carte n'apparaît qu'après le chargement de la liste, jamais au rendu serveur).
+  const [contexte] = useState<ContexteAchat | null>(() => (typeof window === "undefined" ? null : lireContexteAchat()));
   if (!data || !b.pret) return null;
   const rattachables = data.lignes.filter((l) => l.question);
   if (rattachables.length === 0) return null;
