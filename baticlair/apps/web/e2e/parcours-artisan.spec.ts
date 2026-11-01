@@ -341,6 +341,8 @@ test("déconnexion puis reconnexion ramène à la page demandée", async ({ page
   const metiers = page.getByRole("list", { name: "Métiers couverts" });
   await expect(metiers.getByRole("listitem").filter({ hasText: "Couverture" }).first()).toContainText("Relu par un artisan");
   await expect(metiers.getByRole("listitem").filter({ hasText: "Électricité" }).first()).toContainText("En validation");
+  // Profil et paramètres (1er novembre 2026) : « Se déconnecter » est dans « Informations personnelles ».
+  await page.goto("/compte/informations");
   await page.getByRole("button", { name: "Se déconnecter" }).click();
   await expect(page).toHaveURL(/\/connexion/);
 
