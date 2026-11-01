@@ -58,7 +58,7 @@ async function demandeEnvoyee(agent: Agent) {
 describe("Apparence : l'aperçu du PDF de la demande de prix", () => {
   it("sans demande : un exemple marqué « Exemple », aux vraies coordonnées de l'entreprise ; le modèle essayé change l'aperçu, pas le réglage", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
-    await agent.patch("/v1/company/profile").send({ name: "BATI INVEST", address: "12 rue des Artisans, 44000 Nantes", siret: "73282932000074", phone: "06 47 10 04 99", email: null }).expect(200);
+    await agent.patch("/v1/company/profile").send({ name: "BATI INVEST", address: "12 rue des Artisans, 44000 Nantes", siret: "73282932000074", phone: "06 39 98 12 34", email: null }).expect(200);
     const res = await binaire(agent, "/v1/price-requests/settings/apercu.pdf").expect(200);
     expect(res.headers["content-type"]).toBe("application/pdf");
     expect(res.headers["x-apercu-exemple"]).toBe("1");
@@ -98,7 +98,7 @@ describe("Apparence : l'aperçu du PDF de la demande de prix", () => {
 
   it("deux entreprises : chacune voit son propre document, jamais le nom, les coordonnées ou la demande de l'autre", async () => {
     const a = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
-    await a.agent.patch("/v1/company/profile").send({ name: "BATI INVEST", address: "12 rue des Artisans, 44000 Nantes", siret: "73282932000074", phone: "06 47 10 04 99", email: null }).expect(200);
+    await a.agent.patch("/v1/company/profile").send({ name: "BATI INVEST", address: "12 rue des Artisans, 44000 Nantes", siret: "73282932000074", phone: "06 39 98 12 34", email: null }).expect(200);
     await demandeEnvoyee(a.agent);
     await a.agent.patch("/v1/price-requests/settings").send({ couleurPdf: "vert" }).expect(200);
     const b = await signUpWithCompany(ctx.app, "b@example.fr", "Couverture Le Gall");
@@ -106,7 +106,7 @@ describe("Apparence : l'aperçu du PDF de la demande de prix", () => {
     expect(res.headers["x-apercu-exemple"]).toBe("1");
     const t = (await texte(res.body as Buffer)).join(" ");
     expect(t).toMatch(/Couverture Le Gall/);
-    expect(t).not.toMatch(/BATI INVEST|06 47 10 04 99|Chatière|Nantes/);
+    expect(t).not.toMatch(/BATI INVEST|06 39 98 12 34|Chatière|Nantes/);
     expect((await b.agent.get("/v1/price-requests/settings")).body.couleurPdf).toBe("mobiiz");
   });
 });
