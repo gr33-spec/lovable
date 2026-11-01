@@ -28,9 +28,10 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-SUIVI 166 (Greg, 1er novembre : « Profil et paramètres ») : code, tests API et e2e écrits, en local. Voir
-`docs/profil-et-parametres.md`. Pas de push tant que Greg n'a pas donné son accord explicite (déploiement de test.mobiiz.fr
-et sauvegarde Neon « sauvegarde-avant-mes-listes », question posée).
+SUIVI 163-166 (Greg, 1er novembre : corrections ciblées, accueil, Mes listes, Profil et paramètres) : EN LIGNE sur
+test.mobiiz.fr (commit 89011e1f, accord de Greg pour le test seulement), après sauvegarde Neon vérifiée
+(`sauvegarde-avant-mes-listes`) et suite complète verte ; migration additive `20261101090000_liste_supprimee` appliquée à la
+base de test seulement. Point de retour et procédure : `docs/retour-arriere-2026-11-01.md`. Rien vers `main`.
 
 SUIVI 163-164 (Greg, 1er novembre : corrections ciblées, puis accueil et « Mes listes ») : code et tests écrits ; suites complètes, push, captures et rapport à faire. Voir `docs/accueil-et-mes-listes.md`.
 
