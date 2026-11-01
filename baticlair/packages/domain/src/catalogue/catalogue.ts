@@ -175,7 +175,40 @@ const MASCULINS: Readonly<Record<string, string>> = {
   blanche: "blanc", mate: "mat", grise: "gris", noire: "noir", brune: "brun", verte: "vert", bleue: "bleu", satinee: "satine",
   vieillie: "vieilli", sablee: "sable", ardoisee: "ardoise", galvanisee: "galvanise", laquee: "laque", traitee: "traite",
 };
-const forme = (m: string) => MASCULINS[m] ?? MASCULINS[singulier(m)] ?? singulier(m);
+const FORMES = new Map<string, string>();
+const forme = (m: string) => {
+  let f = FORMES.get(m);
+  if (f === undefined) {
+    f = MASCULINS[m] ?? MASCULINS[singulier(m)] ?? singulier(m);
+    if (FORMES.size < 50_000) FORMES.set(m, f);
+  }
+  return f;
+};
+
+/**
+ * Vrai si la distance d'édition entre a et b est au plus `max` (même distance que `distance`, mais une ligne à la fois et
+ * arrêt dès que toute la ligne dépasse `max` : la recherche ne veut savoir que « à une ou deux fautes près »).
+ */
+function procheAuPlus(a: string, b: string, max: number): boolean {
+  if (Math.abs(a.length - b.length) > max) return false;
+  let avant2: number[] = [];
+  let avant = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const ligne = [i];
+    let mini = i;
+    for (let j = 1; j <= b.length; j++) {
+      const cout = a[i - 1] === b[j - 1] ? 0 : 1;
+      let v = Math.min(avant[j]! + 1, ligne[j - 1]! + 1, avant[j - 1]! + cout);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) v = Math.min(v, avant2[j - 2]! + 1);
+      ligne.push(v);
+      if (v < mini) mini = v;
+    }
+    if (mini > max) return false;
+    avant2 = avant;
+    avant = ligne;
+  }
+  return avant[b.length]! <= max;
+}
 
 /**
  * Les mots qui PRÉCISENT sans désigner (couleur, finition, gamme de qualité) : absents d'un article, ils ne l'écartent pas
@@ -200,10 +233,25 @@ function rencontre(tape: string, mots: readonly string[]): number {
     else if (!technique) {
       const admis = fautesAdmises(t);
       // Une lettre oubliée ou doublée (« pane » pour « panne ») est la faute la plus courante : elle passe devant une lettre changée.
-      if (admis > 0 && Math.abs(s.length - t.length) <= admis && distance(s, t) <= admis) meilleure = Math.max(meilleure, s.length !== t.length ? 1.5 : 1);
+      if (admis > 0 && procheAuPlus(s, t, admis)) meilleure = Math.max(meilleure, s.length !== t.length ? 1.5 : 1);
     }
   }
   return meilleure;
+}
+
+/**
+ * Les mots « à plat » d'un article, calculés une fois par article et gardés tant que l'article vit (la recherche tourne à
+ * chaque lettre tapée sur tout le catalogue : refaire `aPlat` sur chaque article à chaque fois coûtait l'essentiel du
+ * temps ; CI du 31 octobre 2026, `catalogue-complet.test.ts` au-delà de 5 s). Mêmes mots, mêmes résultats.
+ */
+const MOTS_DES_ARTICLES = new WeakMap<object, { duProduit: string[]; tout: string[]; cle: string }>();
+function motsDeLArticle(a: Pick<ArticleCatalogue, "designation" | "famille" | "produit" | "synonymes">): { duProduit: string[]; tout: string[] } {
+  const cle = `${a.designation}\u0000${a.famille}\u0000${a.produit}\u0000${a.synonymes.join("\u0001")}`;
+  const garde = MOTS_DES_ARTICLES.get(a);
+  if (garde && garde.cle === cle) return garde;
+  const mots = { duProduit: aPlat(a.produit).split(" "), tout: aPlat(`${a.designation} ${a.famille} ${a.produit} ${a.synonymes.join(" ")}`).split(" "), cle };
+  MOTS_DES_ARTICLES.set(a, mots);
+  return mots;
 }
 
 /**
@@ -213,8 +261,7 @@ function rencontre(tape: string, mots: readonly string[]): number {
 export function scoreArticle(a: Pick<ArticleCatalogue, "designation" | "famille" | "produit" | "synonymes">, q: string): number | null {
   const tapes = aPlat(q).split(" ").filter(Boolean);
   if (!tapes.length) return 0;
-  const duProduit = aPlat(a.produit).split(" ");
-  const tout = aPlat(`${a.designation} ${a.famille} ${a.produit} ${a.synonymes.join(" ")}`).split(" ");
+  const { duProduit, tout } = motsDeLArticle(a);
   let score = 0;
   for (const t of tapes) {
     const r = rencontre(t, tout);

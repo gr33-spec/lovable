@@ -751,7 +751,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   // L'e-mail se relit mot pour mot : le contenu en trois blocs, sans un prix.
   await menu(pointp, "Voir l'e-mail");
   await expect(pointp.getByText("Objet :")).toBeVisible();
-  await expect(pointp.getByText(/^Bonjour,/)).toBeVisible();
+  await expect(pointp.getByText(/^Bonjour Paul,/)).toBeVisible();
   await expect(pointp.getByText(/command/i)).toHaveCount(0);
   await expect(pointp.getByText(/€/)).toHaveCount(0);
   // Point 8 (Greg, 28 octobre 2026) : en attente, pas de bouton principal, seulement l'état.
@@ -1955,8 +1955,8 @@ test("BatiClair Groupé, étape 5 : la page du lien « pas concerné » (confirm
 test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes cochées une à une, puis « Mes commandes groupées » ; le bloc en haut de « Ton chantier »", { tag: "@lots" }, async ({ page }) => {
   passeLots();
   await signUp(page);
-  const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  await nav.getByRole("link", { name: "Regroupement" }).click();
+  // L'onglet du menu mène aux achats groupés depuis le 27 octobre 2026 ; l'écran du regroupement reste à /groupe.
+  await page.goto("/groupe");
   await expect(page).toHaveURL(/\/groupe$/);
   await expect(page.getByRole("heading", { name: "Regroupement" })).toBeVisible();
   // L'accroche suit le métier du compte (un couvreur ici).
@@ -1970,7 +1970,7 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   const chantier = page.url();
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
-  const ferme = page.getByRole("region", { name: "Regroupement fermée" });
+  const ferme = page.getByRole("region", { name: "Regroupement fermé" });
   await expect(ferme.getByText("Renseigne ton SIRET pour rejoindre le regroupement")).toBeVisible();
   await expect(page.getByRole("region", { name: "Ajouter au regroupement" })).toHaveCount(0);
   await ferme.getByRole("link", { name: "Regroupement" }).click();
@@ -1988,7 +1988,7 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   await expect(bloc.getByRole("button", { name: "Ajouter au regroupement" })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(bloc).toBeInViewport();
-  await expect(page.getByRole("region", { name: "Regroupement fermée" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Regroupement fermé" })).toHaveCount(0);
   // Sur téléphone, le chantier se lit en plein écran sans la barre du menu : retour à l'onglet par l'adresse.
   await page.goto("/groupe");
   await expect(manque.getByLabel("Fait")).toHaveCount(2);
@@ -2003,7 +2003,7 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   await page.goto("/groupe");
   const economies = page.getByRole("region", { name: "Économisé grâce au regroupement" });
   await expect(economies).toContainText("0,00 €");
-  await expect(economies).toContainText("Aucune regroupement pour l'instant.");
+  await expect(economies).toContainText("Aucun regroupement pour l'instant.");
 });
 
 /** La boîte aux lettres de test (décision du 2026-10-20) : les e-mails capturés par l'API, lus par le parcours. */
@@ -2498,7 +2498,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await lots.getByRole("button", { name: "Je ne commande pas, c'est sûr" }).click();
   await expect(lots.getByText("Tu ne commandes pas. C'est noté.")).toHaveCount(2);
   await page.reload();
-  await expect(page.getByRole("status").filter({ hasText: /Le regroupement t'est fermée jusqu'au .* : deux commandes annulées en 12 mois/ })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: /Le regroupement t'est fermé jusqu'au .* : deux commandes annulées en 12 mois/ })).toBeVisible();
   const etat2 = (await apiJson<{ eligible: boolean; raisons: string[]; excluJusquau: string | null }>(page, "GET", "/v1/groupe")).body;
   expect(etat2.eligible).toBe(false);
   expect(etat2.raisons).toContain("exclu_du_groupe");
@@ -2508,7 +2508,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   await confirmDoubts(page);
-  await expect(page.getByRole("region", { name: "Regroupement fermée" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Regroupement fermé" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: "Ajouter au regroupement" })).toHaveCount(0);
   const refus = await apiJson<{ error: { code: string; details: { reason: string } } }>(page, "POST", `/v1/projects/${projet4}/groupe`, { articles: ["x"], fenetre: { tot: "2026-11-02", tard: "2026-11-20" }, statut: "signe", engagement: true });
   expect(refus.status).toBe(403);

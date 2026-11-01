@@ -47,14 +47,21 @@ export function SupplierForm({
   const key = useRef(newActionKey());
 
   const twin = others.find((o) => o.id !== supplier?.id && sameName(o.name, values.name));
-  const fieldError = (path: string) => (error?.details?.some((d) => d.path === path) ? (FIELD_ERRORS[path] ?? "Texte trop long.") : undefined);
-  const set = (field: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+  // Une erreur d'un champ disparaît dès qu'on le corrige (sinon « pas valide » restait sous une adresse devenue bonne
+  // et cachait le conseil « adresse générale ») ; l'envoi suivant repart de zéro.
+  const [corriges, setCorriges] = useState<ReadonlySet<string>>(new Set());
+  const fieldError = (path: string) =>
+    !corriges.has(path) && error?.details?.some((d) => d.path === path) ? (FIELD_ERRORS[path] ?? "Texte trop long.") : undefined;
+  const set = (field: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setValues({ ...values, [field]: e.target.value });
+    if (!corriges.has(field)) setCorriges(new Set([...corriges, field]));
+  };
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
     setError(null);
+    setCorriges(new Set());
     const body = {
       name: values.name,
       email: values.email,
