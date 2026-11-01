@@ -10,6 +10,7 @@ import { useSelectionSend } from "@/components/selection-send";
 import { useGroupe, useGroupeFerme } from "@/components/groupe";
 import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
+import { specialiteDuMetier, type LotAEnvoyer } from "../../../../packages/domain/src/groupe/specialites";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
 import { AssistantMobiiz, assistantDejaOuvert, CarteAssistant, marquerAssistantOuvert } from "@/components/assistant-mobiiz";
@@ -442,9 +443,30 @@ export function ProjectTakeoff({
   const listShown = page || (!sent && !overview);
   // La demande perso et le prix de groupe : sous la liste quand elle est l'écran du chantier, sinon sur le chantier ; montés
   // une seule fois (business model final, 25 octobre 2026 : l'e2e ne les trouvait pas sous la liste).
+  // « Qui reçoit quoi » (Greg, 1er novembre 2026) : les lots de la liste, chacun avec la spécialité qui le chiffre. Un devis
+  // à plusieurs lots donne un lot par section ; une ligne hors section rejoint le premier lot (rien ne disparaît).
+  const aAcheter = takeoff.purchase.toBuy.map((i) => i.key);
+  const lotsEnvoi: LotAEnvoyer[] = (() => {
+    const achetables = new Set(aAcheter);
+    const sections = takeoff.purchase.screen.groups.filter((g) => g.key.startsWith("lot:"));
+    if (sections.length === 0) {
+      const metier = takeoff.metier ?? null;
+      return [{ cle: "liste", libelle: "Ma liste", specialite: specialiteDuMetier(metier), articles: aAcheter }];
+    }
+    const pris = new Set<string>();
+    const lots = sections.map((g) => {
+      const metier = g.key.slice("lot:".length);
+      const articles = g.rows.map((r) => r.itemKey ?? (r.quoteKey ? `quote:${r.quoteKey}` : null)).filter((k): k is string => Boolean(k && achetables.has(k) && !pris.has(k)));
+      articles.forEach((k) => pris.add(k));
+      return { cle: metier, libelle: g.label, specialite: specialiteDuMetier(metier), articles };
+    });
+    const reste = aAcheter.filter((k) => !pris.has(k));
+    if (reste.length && lots[0]) lots[0] = { ...lots[0], articles: [...lots[0].articles, ...reste] };
+    return lots.filter((l) => l.articles.length > 0);
+  })();
   const persoEtGroupe = quantitatif ? (
     <div className="flex flex-col gap-4">
-      <DemandesPerso projectId={projectId} articles={takeoff.purchase.toBuy.map((i) => i.key)} canCreate archived={archived} dejaEnvoye={sent} principal={!listShown} bouton={false} />
+      <DemandesPerso projectId={projectId} articles={aAcheter} lots={lotsEnvoi} canCreate archived={archived} dejaEnvoye={sent} principal={!listShown} bouton={false} />
       {/* Une seule suggestion d'achat groupé, à l'étape « liste prête » seulement (point 8). */}
       {!sent ? <TenterPrixDeGroupe projectId={projectId} /> : null}
     </div>

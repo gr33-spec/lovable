@@ -629,9 +629,11 @@ model Supplier {
   updatedAt   DateTime  @updatedAt
 
   /// Recentrage (25 octobre 2026) : le négoce inscrit de la zone que l'artisan a ajouté à son carnet.
-  negoceId  String?   @db.Uuid
+  negoceId    String?   @db.Uuid
   /// « Préviens ton négoce » : l'artisan dit l'avoir déjà prévenu (l'écran ne revient plus).
-  prevenuLe DateTime?
+  prevenuLe   DateTime?
+  /// Spécialités déclarées par l'artisan (generaliste, couverture, charpente…), corrigeables (Greg, 1er novembre 2026).
+  specialites String[]  @default([])
 
   company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
   recipients PriceRequestRecipient[]
@@ -717,6 +719,8 @@ model PriceRequestRecipient {
   /// LOT FINAL, point 6 : l'artisan prévenu que ce négoce n'a pas répondu, à mi-délai puis la veille de la date limite.
   rappelMiLe     DateTime? @map("rappel_mi_le") @db.Timestamptz(3)
   rappelVeilleLe DateTime? @map("rappel_veille_le") @db.Timestamptz(3)
+  /// Ce que l'artisan savait du négoce à l'envoi (nom, e-mail, spécialités, lots envoyés), figé (Greg, 1er novembre 2026).
+  instantane     Json?
 
   priceRequest PriceRequest       @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
   emailsRecus  EmailRecuArtisan[]
@@ -2380,4 +2384,3 @@ model ListeSupprimee {
   @@unique([companyId, projectId])
   @@map("liste_supprimee")
 }
-

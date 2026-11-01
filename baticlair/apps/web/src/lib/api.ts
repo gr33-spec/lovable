@@ -289,6 +289,8 @@ export interface Quantitatif {
 }
 
 export interface Takeoff {
+  /** Le métier du quantitatif : le lot unique de « Qui reçoit quoi » (1er novembre 2026). */
+  metier?: string | null;
   /** Nouveau cap (22 octobre) : la phrase de la pastille orange d'une ligne vague. */
   phrasePrecision?: string;
   /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
@@ -535,6 +537,9 @@ export interface Supplier {
   email: string;
   phone: string | null;
   notes: string | null;
+  /** Spécialités déclarées (Greg, 1er novembre 2026) ; vides : non renseignées. */
+  specialites?: string[];
+  specialitesSource?: "artisan" | "negoce" | null;
   archived: boolean;
   createdAt: string;
   updatedAt: string;

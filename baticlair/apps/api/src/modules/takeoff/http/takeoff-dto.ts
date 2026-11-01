@@ -141,6 +141,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // validation » sur l'écran 3 et dans le PDF fournisseur ; pas la couverture.
     /** La phrase de la pastille orange d'une ligne vague (« Précise pour trouver d'autres couvreurs »). */
     phrasePrecision: phrasePrecision(takeoff.trade),
+    /** Le métier du quantitatif (1er novembre 2026) : le lot unique de « Qui reçoit quoi » avant l'envoi aux négoces. */
+    metier: takeoff.trade ?? null,
     ratiosEnValidation: ratiosEnValidationDuDevis(takeoff.lecture ? { ...takeoff.lecture, lots: lotsRetenus(takeoff.lecture, takeoff.answers[LOTS_KEY]) } : null, takeoff.trade),
     // §52, la carte « Lots repérés » (directive du fondateur, 2026-10-13) : les lots que la lecture a repérés, ceux que
     // l'artisan a gardés ou ajoutés (null tant qu'il n'a pas dit « C'est bon »), et les métiers qu'il peut ajouter.

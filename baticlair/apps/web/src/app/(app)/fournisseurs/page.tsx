@@ -1,5 +1,6 @@
 "use client";
 
+import { LIBELLES_SPECIALITES, type Specialite } from "../../../../../../packages/domain/src/groupe/specialites";
 import { AideBouton } from "@/components/aide";
 import { Mail, Pencil, Phone, Plus, Truck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -160,6 +161,18 @@ function SupplierCard({ supplier: s, onEdit }: { supplier: Supplier; onEdit: () 
           <Pencil size={18} aria-hidden="true" />
         </button>
       </div>
+      {/* Greg, 1er novembre 2026 : les spécialités déclarées, ou « à préciser » (corrigeables par « Modifier »). */}
+      <span aria-label={`Spécialités de ${s.name}`} className="flex flex-wrap gap-1.5 text-[13px] font-semibold">
+        {s.specialites?.length ? (
+          s.specialites.map((sp) => (
+            <span key={sp} className="rounded-full bg-ground px-2.5 py-1">
+              {LIBELLES_SPECIALITES[sp as Specialite] ?? sp}
+            </span>
+          ))
+        ) : (
+          <span className="rounded-full bg-warn-bg px-2.5 py-1 text-warn">Spécialités à préciser</span>
+        )}
+      </span>
       <a href={`mailto:${s.email}`} className="inline-flex min-h-9 items-center gap-2 self-start text-sm font-bold text-accent-text">
         <Mail size={16} aria-hidden="true" />
         {s.email}

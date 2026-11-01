@@ -66,6 +66,7 @@ export * from "./groupe/adresse-mobiiz.js";
 export * from "./groupe/adresse-mobiiz-phrases.js";
 export * from "./groupe/achat-groupe.js";
 export * from "./groupe/achat-groupe-panier.js";
+export * from "./groupe/specialites.js";
 export * from "./groupe/precision.js";
 export * from "./groupe/cap-22-octobre.js";
 export * from "./groupe/commande-du-mois.js";

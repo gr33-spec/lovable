@@ -21,7 +21,7 @@ export interface NegocesProposes {
   max: number;
   formule: "payant" | "gratuit";
   accord: string;
-  habituels: { supplierId: string; nom: string; email: string }[];
+  habituels: { supplierId: string; nom: string; email: string; specialites?: string[] }[];
   zoneNegoces: { negoceId: string; nom: string; generaliste: boolean; familles: string[] }[];
 }
 

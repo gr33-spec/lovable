@@ -1,5 +1,6 @@
 "use client";
 
+import { LIBELLES_SPECIALITES, SPECIALITES } from "../../../../packages/domain/src/groupe/specialites";
 import { useId, useRef, useState } from "react";
 import { Button, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey, type Supplier } from "@/lib/api";
@@ -41,6 +42,8 @@ export function SupplierForm({
     phone: supplier?.phone ?? "",
     notes: supplier?.notes ?? "",
   });
+  // Greg, 1er novembre 2026 : les spécialités du négoce, déclarées par l'artisan, corrigeables à tout moment.
+  const [specialites, setSpecialites] = useState<string[]>(supplier?.specialites ?? []);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   // Une clé par formulaire : double appui = un seul fournisseur.
@@ -68,6 +71,7 @@ export function SupplierForm({
       contactName: values.contactName || null,
       phone: values.phone || null,
       notes: values.notes || null,
+      specialites,
     };
     try {
       onDone(
@@ -110,9 +114,29 @@ export function SupplierForm({
       ) : null}
       <Field id={`${id}-contact`} label="Son prénom (si tu le connais)" placeholder="ex. Paul" value={values.contactName} onChange={set("contactName")} error={fieldError("contactName")} />
       <Field id={`${id}-phone`} label="Son téléphone (si tu le connais)" type="tel" value={values.phone} onChange={set("phone")} error={fieldError("phone")} />
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-1 text-sm font-bold">Ses spécialités</legend>
+        <div className="flex flex-wrap gap-2">
+          {SPECIALITES.map((sp) => {
+            const choisie = specialites.includes(sp);
+            return (
+              <button
+                key={sp}
+                type="button"
+                aria-pressed={choisie}
+                onClick={() => setSpecialites((l) => (choisie ? l.filter((x) => x !== sp) : [...l, sp]))}
+                className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${choisie ? "bg-ink text-white" : "border border-line bg-surface text-ink active:bg-ground"}`}
+              >
+                {LIBELLES_SPECIALITES[sp]}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[13px] text-muted">Ce que tu sais de lui : tu pourras le corriger. Un généraliste peut recevoir plusieurs lots.</p>
+      </fieldset>
       <div className="flex flex-col gap-1.5">
         <label htmlFor={`${id}-notes`} className="text-sm font-bold">
-          Notes, spécialités (facultatif)
+          Notes (facultatif)
         </label>
         <textarea
           id={`${id}-notes`}

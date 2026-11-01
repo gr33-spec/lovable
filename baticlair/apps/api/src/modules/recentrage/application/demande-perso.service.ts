@@ -132,7 +132,7 @@ export class DemandePersoService {
     if (!project) throw notFound("Project");
     const zone = zoneDuCodePostal(project.address) ?? zoneDuCodePostal(project.company.address);
     const [habituels, droits] = await Promise.all([
-      this.prisma.supplier.findMany({ where: { companyId: tenant.companyId, archivedAt: null }, select: { id: true, name: true, email: true, negoceId: true }, orderBy: { name: "asc" } }),
+      this.prisma.supplier.findMany({ where: { companyId: tenant.companyId, archivedAt: null }, select: { id: true, name: true, email: true, negoceId: true, specialites: true }, orderBy: { name: "asc" } }),
       this.droits.droits(tenant.companyId),
     ]);
     const deja = new Set(habituels.map((h) => h.email.toLowerCase()));
@@ -144,7 +144,8 @@ export class DemandePersoService {
       max: droits.negocesParDemande,
       formule: droits.formule,
       accord: ACCORD_IDENTITE,
-      habituels: habituels.map((h) => ({ supplierId: h.id, nom: h.name, email: h.email })),
+      // Greg, 1er novembre 2026 : les spécialités déclarées par l'artisan, pour « Qui reçoit quoi » avant l'envoi.
+      habituels: habituels.map((h) => ({ supplierId: h.id, nom: h.name, email: h.email, specialites: h.specialites })),
       // Le négoce ne se catégorise que lui-même (généraliste, spécialiste de ses familles) ; on n'affiche jamais son e-mail.
       zoneNegoces: zoneNegoces.map((n) => ({ negoceId: n.id, nom: n.nom, generaliste: n.generaliste, familles: n.familles })),
     };

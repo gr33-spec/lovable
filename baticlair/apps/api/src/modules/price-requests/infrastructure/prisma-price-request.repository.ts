@@ -361,11 +361,20 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
   }
 
   async setStatus(tenant: TenantContext, recipientId: string, status: RecipientStatus): Promise<void> {
+    const maintenant = new Date();
+    // L'INSTANTANÉ À L'ENVOI (Greg, 1er novembre 2026) : ce que l'artisan savait du négoce quand la demande est partie
+    // (nom, e-mail, spécialités, articles envoyés), figé ; une fiche corrigée plus tard ne réécrit jamais l'histoire.
+    const instantane =
+      status === "sent"
+        ? await this.prisma.priceRequestRecipient
+            .findFirst({ where: { id: recipientId, priceRequest: { companyId: tenant.companyId } }, select: { supplier: { select: { name: true, email: true, specialites: true } }, priceRequest: { select: { itemKeys: true } } } })
+            .then((r) => (r ? { nom: r.supplier.name, email: r.supplier.email, specialites: r.supplier.specialites, articles: r.priceRequest.itemKeys, le: maintenant.toISOString() } : null))
+        : null;
     await this.prisma.priceRequestRecipient.updateMany({
       where: { id: recipientId, priceRequest: { companyId: tenant.companyId } },
       data: {
         status,
-        ...(status === "sent" ? { sentAt: new Date() } : status === "to_send" ? { sentAt: null } : {}),
+        ...(status === "sent" ? { sentAt: maintenant, ...(instantane ? { instantane } : {}) } : status === "to_send" ? { sentAt: null } : {}),
       },
     });
   }

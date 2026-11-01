@@ -1,5 +1,6 @@
 "use client";
 
+import { articlesPour, phraseLotSansNegoce, quiRecoitQuoi, type LotAEnvoyer, type QuiRecoitQuoi } from "../../../../packages/domain/src/groupe/specialites";
 import { Check, Send, ShoppingCart, Truck, Users } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button, Card, Field, SectionTitle } from "@/components/ui";
@@ -17,7 +18,7 @@ import { useActionChantier } from "@/lib/actions-chantier";
  * identité. Puis les réponses comparées LIVRAISON COMPRISE, « Commander » sur une réponse, le suivi Reçue → Confirmée →
  * Livrée. L'artisan ne choisit jamais la catégorie d'un négoce : le négoce la déclare lui-même.
  */
-export function DemandesPerso({ projectId, articles, canCreate, archived, dejaEnvoye = false, principal = false, bouton = true }: { projectId: string; articles: string[]; canCreate: boolean; archived: boolean; dejaEnvoye?: boolean; principal?: boolean; bouton?: boolean }) {
+export function DemandesPerso({ projectId, articles, lots, canCreate, archived, dejaEnvoye = false, principal = false, bouton = true }: { projectId: string; articles: string[]; lots?: LotAEnvoyer[]; canCreate: boolean; archived: boolean; dejaEnvoye?: boolean; principal?: boolean; bouton?: boolean }) {
   const fetchNegoces = useCallback((signal: AbortSignal) => api<NegocesProposes>(`/v1/projects/${projectId}/demandes-perso/negoces`, { signal }), [projectId]);
   const fetchDemandes = useCallback((signal: AbortSignal) => api<DemandePerso[]>(`/v1/projects/${projectId}/demandes-perso`, { signal }), [projectId]);
   const { data: proposes } = useResource(fetchNegoces);
@@ -40,7 +41,7 @@ export function DemandesPerso({ projectId, articles, canCreate, archived, dejaEn
       ))}
       {!archived && canCreate && proposes ? (
         ouvert ? (
-          <EnvoiDemande projectId={projectId} articles={articles} proposes={proposes} onEnvoye={(id) => (setOuvert(false), setAPrevenir(id), reload())} onFermer={() => setOuvert(false)} />
+          <EnvoiDemande projectId={projectId} articles={articles} lots={lots ?? null} proposes={proposes} onEnvoye={(id) => (setOuvert(false), setAPrevenir(id), reload())} onFermer={() => setOuvert(false)} />
         ) : !envoye && (bouton || (mode !== null && mode !== "automatique")) ? (
           <Button variant={mode !== "automatique" || principal ? "primary" : "secondary"} onClick={() => setOuvert(true)} className="w-full">
             <Send size={18} aria-hidden="true" /> {mode === "automatique" ? "Demander les prix à mes négoces" : "Envoyer à mes négoces"}
@@ -51,9 +52,9 @@ export function DemandesPerso({ projectId, articles, canCreate, archived, dejaEn
   );
 }
 
-type Choix = { cle: string; libelle: string; corps: { supplierId: string } | { negoceId: string } | { nom: string; email: string } };
+type Choix = { cle: string; libelle: string; specialites: string[]; corps: { supplierId: string } | { negoceId: string } | { nom: string; email: string } };
 
-function EnvoiDemande({ projectId, articles, proposes, onEnvoye, onFermer }: { projectId: string; articles: string[]; proposes: NegocesProposes; onEnvoye: (demandeId: string) => void; onFermer: () => void }) {
+function EnvoiDemande({ projectId, articles, lots, proposes, onEnvoye, onFermer }: { projectId: string; articles: string[]; lots: LotAEnvoyer[] | null; proposes: NegocesProposes; onEnvoye: (demandeId: string) => void; onFermer: () => void }) {
   const [but, setBut] = useState<"chiffrer" | "commander">("chiffrer");
   const [choisis, setChoisis] = useState<string[]>([]);
   const [nouveaux, setNouveaux] = useState<Choix[]>([]);
@@ -66,20 +67,42 @@ function EnvoiDemande({ projectId, articles, proposes, onEnvoye, onFermer }: { p
   const [erreur, setErreur] = useState<string | null>(null);
 
   const options: Choix[] = [
-    ...proposes.habituels.map((h) => ({ cle: `s:${h.supplierId}`, libelle: h.nom, corps: { supplierId: h.supplierId } })),
-    ...proposes.zoneNegoces.map((n) => ({ cle: `n:${n.negoceId}`, libelle: `${n.nom}${n.generaliste ? " · généraliste" : ""}`, corps: { negoceId: n.negoceId } })),
+    ...proposes.habituels.map((h) => ({ cle: `s:${h.supplierId}`, libelle: h.nom, specialites: h.specialites ?? [], corps: { supplierId: h.supplierId } })),
+    ...proposes.zoneNegoces.map((n) => ({ cle: `n:${n.negoceId}`, libelle: `${n.nom}${n.generaliste ? " · généraliste" : ""}`, specialites: [...(n.generaliste ? ["generaliste"] : []), ...n.familles], corps: { negoceId: n.negoceId } })),
     ...nouveaux,
   ];
   const basculer = (cle: string) => setChoisis((c) => (c.includes(cle) ? c.filter((x) => x !== cle) : c.length >= proposes.max ? (proposes.max === 1 ? [cle] : c) : [...c, cle]));
+
+  // « QUI REÇOIT QUOI » (Greg, 1er novembre 2026) : chaque lot va aux négoces compatibles ; un envoi hors spécialité
+  // n'existe que confirmé (`forces`). Une liste d'un seul lot garde l'envoi d'avant, avec les avertissements.
+  const [forces, setForces] = useState<Set<string>>(new Set());
+  const choisies = options.filter((o) => choisis.includes(o.cle));
+  const qrq = lots && lots.length ? quiRecoitQuoi(lots, choisies.map((o) => ({ id: o.cle, nom: o.libelle, specialites: o.specialites })), forces) : null;
+  const sansLot = qrq ? qrq.negoces.filter((n) => n.sansLot) : [];
 
   async function envoyer() {
     setPending(true);
     setErreur(null);
     try {
-      const envoyee = await api<{ id: string }>(`/v1/projects/${projectId}/demandes-perso`, {
-        method: "POST",
-        body: { but, accord: true, articles, dateBesoin: dateBesoin || null, negoces: options.filter((o) => choisis.includes(o.cle)).map((o) => o.corps) },
-      });
+      // Les négoces qui reçoivent les mêmes articles partent ensemble ; un spécialisé ne reçoit que ses lots.
+      const groupes = new Map<string, { articles: string[]; negoces: Choix["corps"][] }>();
+      for (const o of choisies) {
+        const ses = qrq && lots ? articlesPour(qrq, lots, o.cle) : articles;
+        if (ses.length === 0) continue;
+        const cle = ses.join("|");
+        const g = groupes.get(cle) ?? { articles: ses, negoces: [] };
+        g.negoces.push(o.corps);
+        groupes.set(cle, g);
+      }
+      let derniere: { id: string } | null = null;
+      for (const g of groupes.values()) {
+        derniere = await api<{ id: string }>(`/v1/projects/${projectId}/demandes-perso`, {
+          method: "POST",
+          body: { but, accord: true, articles: g.articles, dateBesoin: dateBesoin || null, negoces: g.negoces },
+        });
+      }
+      if (!derniere) throw new Error("rien à envoyer");
+      const envoyee = derniere;
       onEnvoye(envoyee.id);
     } catch (e) {
       setErreur(messageErreur(e, { negoces: "En gratuit, ta demande part chez un seul négoce.", accord_requis: "Coche l'accord pour transmettre ton identité." }));
@@ -122,7 +145,7 @@ function EnvoiDemande({ projectId, articles, proposes, onEnvoye, onFermer }: { p
           disabled={!nom.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())}
           onClick={() => {
             const cle = `e:${email.trim().toLowerCase()}`;
-            setNouveaux((n) => [...n.filter((x) => x.cle !== cle), { cle, libelle: nom.trim(), corps: { nom: nom.trim(), email: email.trim() } }]);
+            setNouveaux((n) => [...n.filter((x) => x.cle !== cle), { cle, libelle: nom.trim(), specialites: [], corps: { nom: nom.trim(), email: email.trim() } }]);
             basculer(cle);
             setNom("");
             setEmail("");
@@ -131,6 +154,7 @@ function EnvoiDemande({ projectId, articles, proposes, onEnvoye, onFermer }: { p
           Ajouter ce négoce
         </Button>
       </div>
+      {qrq && choisies.length > 0 ? <QuiRecoitQuoiPanneau qrq={qrq} lots={lots ?? []} forcer={(cle) => setForces((f) => new Set([...f, cle]))} /> : null}
       <Field id="perso-date" label="Date de besoin (facultatif)" type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} />
       <label className="flex items-start gap-3 text-[14px] leading-snug">
         <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-accent" />
@@ -141,7 +165,7 @@ function EnvoiDemande({ projectId, articles, proposes, onEnvoye, onFermer }: { p
           {erreur}
         </p>
       ) : null}
-      <Button onClick={() => void envoyer()} pending={pending} disabled={!accord || choisis.length === 0}>
+      <Button onClick={() => void envoyer()} pending={pending} disabled={!accord || choisis.length === 0 || sansLot.length === choisies.length}>
         <Send size={18} aria-hidden="true" /> {choisis.length > 1 ? `Envoyer à ${choisis.length} négoces` : "Envoyer"}
       </Button>
       <button type="button" onClick={onFermer} className="min-h-11 self-center text-[15px] font-semibold text-muted underline">
@@ -326,6 +350,47 @@ function TenterAutomatique({ projectId }: { projectId: string }) {
           </Button>
         </Card>
       )}
+    </section>
+  );
+}
+
+/**
+ * « QUI REÇOIT QUOI » AVANT L'ENVOI (Greg, 1er novembre 2026) : chaque lot et ses négoces (spécialisé, généraliste, à
+ * préciser), les lots sans destinataire avec la phrase de Greg, et « Envoyer quand même » après l'avertissement.
+ */
+function QuiRecoitQuoiPanneau({ qrq, lots, forcer }: { qrq: QuiRecoitQuoi; lots: LotAEnvoyer[]; forcer: (cle: string) => void }) {
+  const marque: Record<string, string> = { specialiste: "spécialisé", generaliste: "généraliste", a_preciser: "spécialités à préciser", non: "hors spécialité, confirmé" };
+  return (
+    <section aria-label="Qui reçoit quoi" className="flex flex-col gap-2 rounded-xl border border-line p-3">
+      <p className="text-[15px] font-bold">Qui reçoit quoi</p>
+      <ul className="flex flex-col gap-2">
+        {qrq.lots.map((l) => (
+          <li key={l.cle} className="flex flex-col gap-1">
+            <span className="text-[14px] font-semibold">
+              {l.libelle} · {l.lignes} ligne{l.lignes > 1 ? "s" : ""}
+            </span>
+            {l.couvert ? (
+              <span className="text-[14px] text-muted">{l.destinataires.map((d) => `${d.nom} (${marque[d.compatibilite]})`).join(", ")}</span>
+            ) : (
+              <span role="alert" className="text-[14px] font-semibold text-warn">
+                {phraseLotSansNegoce(l.lignes, l.libelle)}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+      {qrq.negoces
+        .filter((n) => n.sansLot)
+        .map((n) => (
+          <div key={n.id} className="flex flex-col gap-1.5 rounded-lg bg-warn-bg p-2.5 text-[14px] text-warn">
+            <span className="font-semibold">{n.nom} n&apos;est noté pour aucun lot de cette liste.</span>
+            {lots.map((l) => (
+              <button key={l.cle} type="button" onClick={() => forcer(`${n.id}:${l.cle}`)} className="min-h-11 self-start font-bold underline">
+                Lui envoyer quand même le lot {l.libelle.toLowerCase()}
+              </button>
+            ))}
+          </div>
+        ))}
     </section>
   );
 }

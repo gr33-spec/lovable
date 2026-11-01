@@ -2,13 +2,24 @@ import type { Prisma } from "../../../generated/prisma/client.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
+import { SPECIALITES } from "@baticlair/domain";
 import type { SupplierFields, SupplierRecord, SupplierRepository } from "../application/supplier.repository.js";
 
 type Row = Awaited<ReturnType<PrismaService["supplier"]["findFirstOrThrow"]>>;
 
-function toRecord(r: Row): SupplierRecord {
+/** Les familles d'un négoce inscrit (base des achats groupés), lues comme spécialités quand l'artisan n'en a pas déclaré. */
+function specialitesDuNegoce(n: { familles: string[]; generaliste: boolean } | undefined): string[] {
+  if (!n) return [];
+  const connues = new Set<string>(SPECIALITES);
+  return [...(n.generaliste ? ["generaliste"] : []), ...n.familles.filter((f) => connues.has(f))];
+}
+
+function toRecord(r: Row, negoce?: { familles: string[]; generaliste: boolean }): SupplierRecord {
+  const duNegoce = r.specialites.length === 0 ? specialitesDuNegoce(negoce) : [];
   return {
     id: r.id,
+    specialites: r.specialites.length ? r.specialites : duNegoce,
+    specialitesSource: r.specialites.length ? "artisan" : duNegoce.length ? "negoce" : null,
     name: r.name,
     contactName: r.contactName,
     email: r.email,
@@ -22,6 +33,14 @@ function toRecord(r: Row): SupplierRecord {
 
 export class PrismaSupplierRepository implements SupplierRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  /** Une seule source pour l'artisan : sans spécialité déclarée, celles du négoce inscrit lié (une requête par page). */
+  private async avecNegoces(rows: Row[]): Promise<SupplierRecord[]> {
+    const ids = [...new Set(rows.filter((r) => r.specialites.length === 0 && r.negoceId).map((r) => r.negoceId!))];
+    const negoces = ids.length ? await this.prisma.negoce.findMany({ where: { id: { in: ids } }, select: { id: true, familles: true, generaliste: true } }) : [];
+    const parId = new Map(negoces.map((n) => [n.id, n]));
+    return rows.map((r) => toRecord(r, r.negoceId ? parId.get(r.negoceId) : undefined));
+  }
 
   async list(tenant: TenantContext, options: { search: string[]; includeArchived: boolean }): Promise<SupplierRecord[]> {
     const where: Prisma.SupplierWhereInput = {
@@ -41,7 +60,7 @@ export class PrismaSupplierRepository implements SupplierRepository {
       orderBy: [{ archivedAt: { sort: "asc", nulls: "first" } }, { name: "asc" }],
       take: 500,
     });
-    return rows.map(toRecord);
+    return this.avecNegoces(rows);
   }
 
   async findById(tenant: TenantContext, id: string): Promise<SupplierRecord | null> {
@@ -49,7 +68,7 @@ export class PrismaSupplierRepository implements SupplierRepository {
     const row = await this.prisma.supplier.findFirst({
       where: { id, companyId: tenant.companyId },
     });
-    return row ? toRecord(row) : null;
+    return row ? (await this.avecNegoces([row]))[0]! : null;
   }
 
   async findByIds(tenant: TenantContext, ids: readonly string[]): Promise<SupplierRecord[]> {
@@ -58,7 +77,7 @@ export class PrismaSupplierRepository implements SupplierRepository {
     const rows = await this.prisma.supplier.findMany({
       where: { id: { in: valid }, companyId: tenant.companyId },
     });
-    return rows.map(toRecord);
+    return this.avecNegoces(rows);
   }
 
   async findByEmail(tenant: TenantContext, email: string): Promise<SupplierRecord | null> {
@@ -68,15 +87,14 @@ export class PrismaSupplierRepository implements SupplierRepository {
         email: { equals: email, mode: "insensitive" },
       },
     });
-    return row ? toRecord(row) : null;
+    return row ? (await this.avecNegoces([row]))[0]! : null;
   }
 
   async create(tenant: TenantContext, fields: SupplierFields): Promise<SupplierRecord> {
-    return toRecord(
-      await this.prisma.supplier.create({
-        data: { ...fields, companyId: tenant.companyId },
-      }),
-    );
+    const row = await this.prisma.supplier.create({
+      data: { ...fields, specialites: fields.specialites ?? [], companyId: tenant.companyId },
+    });
+    return (await this.avecNegoces([row]))[0]!;
   }
 
   async update(
