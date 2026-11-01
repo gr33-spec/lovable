@@ -467,7 +467,8 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
   const aRepondre = new Set(conversation.filter((q) => !given[q.cle] && !retired.has(q.cle)).map((q) => q.numero));
 
   return (
-    <>
+    // Un seul conteneur : sur ordinateur, « Calculer ma liste » colle au bas de l'écran dès le haut de page, conversation comprise.
+    <div className="flex flex-col gap-3">
     {/* Au-dessus des cartes, hors de leur région : le message reprend leurs textes, les cartes restent la référence. */}
     {conversation.length > 0 ? <ConversationQuestions questions={conversation} aRepondre={aRepondre} onReponse={(cle, g) => set(cle, g)} onSansReponse={(cle) => retire(cle, true)} /> : null}
     <section aria-label="Les questions" className="flex flex-col gap-3">
@@ -496,6 +497,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
           </ol>
         </section>
       ))}
+    </section>
       {/* Retour du fondateur (2026-10-12, capture iPhone) : le bouton restait accroché au milieu de l'écran une fois le clavier
           refermé (case « Autre »). Sur téléphone : `position: fixed; bottom: 0`, la zone du geste en marge intérieure, caché
           pendant la saisie (`useTyping`, qui fait aussi recalculer l'écran à Safari), et la place gardée sous la dernière carte. */}
@@ -526,8 +528,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
           </Button>
         </div>
       </div>
-    </section>
-    </>
+    </div>
   );
 }
 

@@ -183,8 +183,8 @@ function MesListes() {
         {/* Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » chevauchait « Terminées » ; il passe à la ligne
             seulement quand la place manque. Sans marge négative : elle élargissait la page sur téléphone (barre du menu décalée). */}
         <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-          {/* Cinq étapes : la rangée défile au doigt sur téléphone, jamais la page. */}
-          <div role="group" aria-label="Filtrer" className="flex min-w-0 grow gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] lg:flex-wrap">
+          {/* Cinq étapes, toutes visibles : elles passent à la ligne sur téléphone (jamais un filtre caché hors de l'écran). */}
+          <div role="group" aria-label="Filtrer" className="flex min-w-0 grow flex-wrap gap-1.5 pb-1">
             {FILTERS.map((f) => (
               <button
                 key={f.value}
