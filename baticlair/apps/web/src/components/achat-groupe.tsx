@@ -10,6 +10,7 @@ import { api, messageErreur, type NextAction } from "@/lib/api";
 import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
 import { useResource } from "@/lib/use-resource";
 import { useBrouillon } from "@/lib/brouillon";
+import { lireContexteAchat, oublierContexteAchat, type ContexteAchat } from "@/lib/contexte-achat";
 import { CatalogueListes } from "@/components/catalogue-listes";
 import { EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
 import { TON as TON_MOBIIZ } from "../../../../packages/domain/src/groupe/ton";
@@ -1006,6 +1007,10 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<(Lance & { perso: unknown[]; lancees: unknown[] }) | null>(null);
+  const router = useRouter();
+  // Venu de « Ajouter mes quantités » (Greg, 1er novembre 2026) : l'achat est déjà choisi, on ne redemande rien.
+  const [contexte, setContexte] = useState<ContexteAchat | null>(null);
+  useEffect(() => setContexte(lireContexteAchat()), []);
   if (!data || !b.pret) return null;
   const rattachables = data.lignes.filter((l) => l.question);
   if (rattachables.length === 0) return null;
@@ -1028,6 +1033,7 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
     try {
       const r = await api<Lance & { perso: unknown[]; lancees: unknown[] }>(`/v1/projects/${projectId}/achat-groupe`, { method: "POST", body: { confirmees: cochees ?? [], achatId: achat, livraison: commune || null, dateBesoin: achat ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true } });
       b.effacer();
+      oublierContexteAchat();
       setFait(r);
     } catch (e) {
       setErreur(messageErreur(e));
@@ -1047,19 +1053,41 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
         </ButtonLink>
       </div>
     );
-  // Point 8 (Greg, 28 octobre 2026) : une seule suggestion, la carte jaune ; « Acheter en groupe » (doublon) disparaît.
-  // Elle ne vient que si un achat groupé de son métier est ouvert dans son secteur, ou si ses quantités en justifient un.
+  // APRÈS LA VALIDATION DE LA LISTE (Greg, 1er novembre 2026) : les choix, toujours là tant que rien n'est parti ; le
+  // bouton principal « Demander les prix à mes négoces » reste celui, figé, de la liste. Venu d'un achat groupé : seulement
+  // « Ajouter toute ma liste » et « Choisir les articles à regrouper », sur cet achat.
   if (cochees === null) {
-    const ouvert = data.achatsOuverts[0] ?? null;
-    if (!data.suggestion && !ouvert) return null;
+    const toutes = rattachables.map((l) => l.key);
+    // Les gros volumes d'abord (la suggestion du serveur) ; l'artisan garde la décision finale.
+    const preselection = data.suggestion ? data.suggestion.keys.filter((k) => toutes.includes(k)) : [];
+    const sur = contexte && data.achatsOuverts.some((a) => a.id === contexte.achatId) ? contexte : null;
+    const choisir = (keys: string[]) => {
+      if (sur) setAchatId(sur.achatId);
+      setCochees(keys);
+    };
     return (
-      <div className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
-        <p className="text-[16px] font-bold">{data.suggestion ? data.suggestion.phrase : `Achat groupé ouvert dans ton secteur : ${ouvert!.titre}.`}</p>
-        <p className="text-[15px]">{TON_MOBIIZ.avantAchatGroupe}</p>
-        <Button onClick={() => setCochees(data.suggestion ? data.suggestion.keys : [])}>
-          <Users size={18} aria-hidden="true" /> Mettre en achat groupé
+      <section aria-label="Et maintenant ?" className="flex flex-col gap-2 rounded-xl bg-surface p-4 shadow-card">
+        <p className="text-[16px] font-bold">{sur ? `Ajouter à l'achat groupé : ${sur.titre ?? "celui que tu as choisi"}` : "Et maintenant ?"}</p>
+        {!sur ? <p className="text-[14px] text-muted">« Demander les prix à mes négoces » est en bas de ta liste.</p> : null}
+        <Button variant={sur ? "primary" : "secondary"} onClick={() => choisir(toutes)}>
+          <Users size={18} aria-hidden="true" /> {sur ? "Ajouter toute ma liste" : "Ajouter toute ma liste à un achat groupé"}
         </Button>
-      </div>
+        <Button variant="secondary" onClick={() => choisir(preselection)}>
+          {sur ? "Choisir les articles à regrouper" : "Regrouper seulement certains articles"}
+        </Button>
+        {!sur ? (
+          <button
+            type="button"
+            className={LIEN_TEXTE}
+            onClick={() => {
+              oublierContexteAchat();
+              router.push("/chantiers?statut=a-preparer");
+            }}
+          >
+            Enregistrer pour plus tard
+          </button>
+        ) : null}
+      </section>
     );
   }
   const tout = rattachables.every((l) => cochees.includes(l.key));
