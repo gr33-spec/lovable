@@ -28,8 +28,11 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-Pilote 20 à 100 couvreurs (SUIVI 168, `docs/pilote-couvreurs-2026-11-01.md`). Branche LOCALE `claude/pilote-fiabilite`
-(lot UX 1 + CI corrigée + sauvegarde corrigée), NON poussée : tout vert en local (domaine, API 640/641, e2e 243 + lots 16/16).
+Architecture UX validée par Greg, mise en œuvre (SUIVI 170) sur la branche LOCALE `claude/pilote-fiabilite`, NON poussée,
+au-dessus du pilote 20 à 100 couvreurs (SUIVI 168). Lots R1 à R6 faits et commités ; migration ADDITIVE
+`20261102090000_specialites_negoces` appliquée aux seules bases locales de test. Arrêt prévu avant le push qui déploie
+test.mobiiz.fr : accord de Greg pour ce push précis. Restent : vue liste + détail côte à côte sur ordinateur dans
+« Mes demandes », interprète IA de la conversation (accord et crédit), CGU et règles d'engagement (Greg).
 Attend Greg : accord pour chaque action en ligne (push, mise en production, réglages Vercel, Neon, Stripe, Resend, crédit IA).
 
 ## À faire ensuite (dans cet ordre)

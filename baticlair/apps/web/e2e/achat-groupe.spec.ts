@@ -200,7 +200,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await page.getByRole("link", { name: /Créer une liste/ }).first().click();
     // Greg, 31 octobre 2026 : trois entrées, « Importer un document », « Saisir ma liste », « Décrire mon chantier ».
     await expect(page.getByText("Importer un document", { exact: true })).toBeVisible();
-    await expect(page.getByText("Saisir ma liste", { exact: true })).toBeVisible();
+    await expect(page.getByText("Créer une liste à la main", { exact: true })).toBeVisible();
     await expect(page.getByText("Décrire mon chantier", { exact: true })).toBeVisible();
     await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-achat-groupe.pdf"));
     await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
@@ -482,7 +482,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
   test("liste écrite à la main : fermée, reprise telle quelle", async ({ page }) => {
     await inscrireSansSiret(page, departement());
     await page.goto("/chantiers/nouveau");
-    await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+    await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
     const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
     await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
     await ecran.getByRole("button", { name: /Ajouter « Liteaux 27×38 maison » tel que je l'écris/ }).click();

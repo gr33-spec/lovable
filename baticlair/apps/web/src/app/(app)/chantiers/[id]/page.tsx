@@ -1,9 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MapPin, MoreHorizontal } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useRef, useState } from "react";
 import { ProjectDocuments } from "@/components/project-documents";
+import { BarreOnglets, estOngletDossier, OngletDocuments, OngletOffres, OngletReponses, type OngletDossier } from "@/components/dossier-demande";
 import { ProjectProgressProvider } from "@/components/project-progress";
 import { SuiviChantier } from "@/components/suivi-chantier";
 import { Badge, BackButton, Button, ErrorNotice, Field, Skeleton } from "@/components/ui";
@@ -14,7 +15,33 @@ import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
 
 export default function ChantierPage() {
+  return (
+    <Suspense fallback={<Skeleton card="h-12" lines={3} label="Chargement du chantier…" />}>
+      <Chantier />
+    </Suspense>
+  );
+}
+
+/** L'onglet du dossier (Greg, 1er novembre 2026), dans l'adresse (`?onglet=`) : un retour ramène au même onglet. */
+function useOnglet(): [OngletDossier, (o: OngletDossier) => void] {
+  const params = useSearchParams();
+  const router = useRouter();
+  const chemin = usePathname();
+  const brut = params.get("onglet");
+  const onglet: OngletDossier = estOngletDossier(brut) ? brut : "resume";
+  const choisir = (o: OngletDossier) => {
+    const suite = new URLSearchParams(params.toString());
+    if (o === "resume") suite.delete("onglet");
+    else suite.set("onglet", o);
+    const q = suite.toString();
+    router.replace(q ? `${chemin}?${q}` : chemin, { scroll: false });
+  };
+  return [onglet, choisir];
+}
+
+function Chantier() {
   const { id } = useParams<{ id: string }>();
+  const [onglet, choisirOnglet] = useOnglet();
   const fetchProject = useCallback((signal: AbortSignal) => api<Project>(`/v1/projects/${encodeURIComponent(id)}`, { signal }), [id]);
   const { data: project, setData: setProject, error, reload } = useResource(fetchProject);
   const [editing, setEditing] = useState(false);
@@ -49,6 +76,14 @@ export default function ChantierPage() {
           }}
         />
       )}
+      <BarreOnglets onglet={onglet} onChoisir={choisirOnglet} />
+      {onglet !== "resume" ? (
+        <div role="tabpanel" aria-label={onglet === "reponses" ? "Réponses" : onglet === "offres" ? "Offres" : "Documents"} className="flex flex-col gap-3">
+          {onglet === "reponses" ? <OngletReponses projectId={project.id} /> : onglet === "offres" ? <OngletOffres projectId={project.id} onComparer={() => choisirOnglet("resume")} /> : <OngletDocuments projectId={project.id} />}
+        </div>
+      ) : null}
+      {/* Le résumé reste monté (liste, envoi, lecture en cours) : changer d'onglet ne perd rien. */}
+      <div role="tabpanel" aria-label="Résumé" hidden={onglet !== "resume"} className={onglet === "resume" ? "contents" : "hidden"}>
       <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"} bar={false}>
         {/* Ordinateur (Greg, 31 octobre 2026, soir : « on a de la place ») : la liste et ses actions à gauche, le suivi façon
             colis à droite, qui reste à l'écran pendant qu'on descend. Téléphone : l'ordre d'avant (suivi, puis la liste). */}
@@ -63,6 +98,7 @@ export default function ChantierPage() {
           </div>
         </div>
       </ProjectProgressProvider>
+      </div>
     </ActionsChantierProvider>
   );
 }

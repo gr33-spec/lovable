@@ -77,7 +77,7 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
 
     // 2. « Saisir ma liste » (31 octobre 2026) : la recherche, la ligne libre, la quantité ; le bouton du bas reste visible.
     await page.goto("/chantiers/nouveau");
-    await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+    await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
     const dialogue = page.getByRole("dialog", { name: "Saisir ma liste" });
     await champVisible(page, dialogue.getByLabel("Rechercher un matériau"));
     await dialogue.getByLabel("Rechercher un matériau").fill("Crochets inox maison");

@@ -152,7 +152,8 @@ function MesListes() {
   const choisies = items && selection ? items.filter((p) => selection.has(p.id)) : [];
   return (
     <>
-      <div className="flex items-start justify-between gap-3">
+      {/* « Mes demandes » + « Nouvelle demande » + Aide débordaient d'un iPhone SE : les actions passent à la ligne. */}
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
         <PageTitle>Mes demandes</PageTitle>
         <span className="flex items-center gap-3">
           <ButtonLink href="/chantiers/nouveau" className="min-h-11 shrink-0 px-4 text-[15px] whitespace-nowrap">
@@ -180,10 +181,10 @@ function MesListes() {
           </div>
         </div>
         {/* Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » chevauchait « Terminées » ; il passe à la ligne
-            seulement quand la place manque. */}
+            seulement quand la place manque. Sans marge négative : elle élargissait la page sur téléphone (barre du menu décalée). */}
         <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
           {/* Cinq étapes : la rangée défile au doigt sur téléphone, jamais la page. */}
-          <div role="group" aria-label="Filtrer" className="-mx-4 flex min-w-0 grow gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:px-0">
+          <div role="group" aria-label="Filtrer" className="flex min-w-0 grow gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] lg:flex-wrap">
             {FILTERS.map((f) => (
               <button
                 key={f.value}

@@ -467,9 +467,11 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
   const aRepondre = new Set(conversation.filter((q) => !given[q.cle] && !retired.has(q.cle)).map((q) => q.numero));
 
   return (
+    <>
+    {/* Au-dessus des cartes, hors de leur région : le message reprend leurs textes, les cartes restent la référence. */}
+    {conversation.length > 0 ? <ConversationQuestions questions={conversation} aRepondre={aRepondre} onReponse={(cle, g) => set(cle, g)} onSansReponse={(cle) => retire(cle, true)} /> : null}
     <section aria-label="Les questions" className="flex flex-col gap-3">
       {error && errors.size === 0 ? <ErrorNotice error={error} /> : null}
-      {conversation.length > 0 ? <ConversationQuestions questions={conversation} aRepondre={aRepondre} onReponse={(cle, g) => set(cle, g)} onSansReponse={(cle) => retire(cle, true)} /> : null}
       {order.map((group) => (
         <section key={group} aria-label={group} className="flex flex-col gap-2.5">
           <h3 className="px-1 pt-2 font-display text-[17px] font-extrabold tracking-[-0.01em]">{group}</h3>
@@ -525,6 +527,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
         </div>
       </div>
     </section>
+    </>
   );
 }
 

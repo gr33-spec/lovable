@@ -290,14 +290,14 @@ test("marquer terminé retire le chantier des « En cours » sans le perdre", as
   await page.getByRole("menuitem", { name: "Marquer terminé" }).click();
   await expect(page.getByText("Terminé", { exact: true })).toBeVisible();
 
-  // « Mes listes » (Greg, 1er novembre 2026) : Toutes / En cours / Terminées.
-  await page.goto("/chantiers?statut=en-cours");
-  await expect(page.getByRole("heading", { name: "Mes listes" })).toBeVisible();
-  await expect(page.getByText("Aucune liste en cours")).toBeVisible();
+  // « Mes demandes » (Greg, 1er novembre 2026) : Toutes / À préparer / Envoyées / Réponses reçues / Terminées.
+  await page.goto("/chantiers?statut=a-preparer");
+  await expect(page.getByRole("heading", { name: "Mes demandes" })).toBeVisible();
+  await expect(page.getByText("Rien à préparer")).toBeVisible();
   await page.getByRole("button", { name: "Terminées" }).click();
   await expect(page.getByRole("link", { name: /Bardage Lefèvre/ })).toBeVisible();
-  // Filtre « En cours » choisi, puis recherche : la recherche voit tout (PD-022).
-  await page.getByRole("button", { name: "En cours" }).click();
+  // Filtre « À préparer » choisi, puis recherche : la recherche voit tout (PD-022).
+  await page.getByRole("button", { name: "À préparer" }).click();
   await page.getByRole("searchbox").fill("lefevre");
   await expect(page.getByRole("link", { name: /Bardage Lefèvre/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Toutes" })).toHaveAttribute("aria-pressed", "true");
@@ -307,7 +307,7 @@ test("« Mes listes » (Greg, 1er novembre 2026) : le « … » de chaque carte,
   await signUp(page);
   await createProject(page, "Toiture Le Bris", "M. Le Bris", "Quimper");
   await createProject(page, "Zinguerie Morvan", "Mme Morvan", "Brest");
-  await page.goto("/chantiers?statut=en-cours");
+  await page.goto("/chantiers?statut=a-preparer");
   const bris = page.getByRole("link", { name: /^Toiture Le Bris/ });
   await expect(bris).toBeVisible();
   // La carte dit son lieu, sa date et son statut ; le « … » est un vrai bouton, au clavier comme au doigt.
@@ -325,7 +325,7 @@ test("« Mes listes » (Greg, 1er novembre 2026) : le « … » de chaque carte,
   await page.getByRole("button", { name: "Actions : Toiture Le Bris" }).click();
   await page.getByRole("menuitem", { name: "Remettre en cours" }).click();
   await expect(bris).toHaveCount(0);
-  await page.getByRole("button", { name: "En cours" }).click();
+  await page.getByRole("button", { name: "À préparer" }).click();
   await expect(bris).toBeVisible();
   // Un simple appui ouvre toujours la liste.
   await bris.click();
@@ -486,7 +486,7 @@ test("le menu : cinq onglets (recentrage du 25 octobre 2026) ; fournisseurs et c
   // Ordinateur (Greg, 31 octobre 2026, soir : « on a de la place ») : « Mes négoces » en plus, dans la colonne.
   const ordinateur = page.viewportSize()!.width >= 1024;
   // Le « + » (Greg, 1er novembre 2026) : un lien vers le départ unique d'une liste (« Nouvelle liste » écrit sur ordinateur).
-  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Accueil", "Achats groupés", "Nouvelle liste", "Mes listes", "Mes négoces", "Profil"] : ["Accueil", "Achats groupés", "Nouvelle liste", "Mes listes", "Profil"]);
+  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Accueil", "Achats groupés", "Nouvelle demande", "Mes demandes", "Mes négoces", "Profil"] : ["Accueil", "Achats groupés", "Nouvelle demande", "Mes demandes", "Profil"]);
   await expect(nav.getByRole("link", { name: "Créer une liste" })).toHaveAttribute("href", "/chantiers/nouveau");
   await menuArtisan(page, "Mon compte");
   await expect(page.getByRole("heading", { name: "Profil et paramètres" })).toBeVisible();
@@ -1028,7 +1028,7 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("button", { name: /voix/ })).toHaveCount(0);
   await expect(page.getByRole("textbox")).toHaveCount(1);
-  await expect(questions.getByRole("region", { name: "Conversation avec MOBIIZ" }).getByRole("textbox", { name: "Ton message" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Conversation avec MOBIIZ" }).getByRole("textbox", { name: "Ton message" })).toBeVisible();
   // §50.2 : une question par carte, groupées par ouvrage, sans explication ; la valeur prise par défaut est marquée. §49.4 :
   // les consommables ne sont jamais une liste d'articles proposés, seulement UNE question oui / non ; ici, non.
   await expect(questions.getByRole("heading", { level: 3 }).first()).toBeVisible();
@@ -2909,7 +2909,7 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   // Greg, 31 octobre 2026 : trois entrées ; « Importer un document » ouvre ce que le téléphone sait faire.
   await expect(page.getByText("Importer un document", { exact: true })).toBeVisible();
-  await expect(page.getByText("Saisir ma liste", { exact: true })).toBeVisible();
+  await expect(page.getByText("Créer une liste à la main", { exact: true })).toBeVisible();
   await expect(page.getByText("Décrire mon chantier", { exact: true })).toBeVisible();
   await expect(page.getByText("Photo de ma liste", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: /^Importer un document/ }).click();
@@ -3079,7 +3079,7 @@ test("« Ma liste de matériaux » sur téléphone : rien sous la barre du bas, 
   await decrire.scrollIntoViewIfNeeded();
   const [b, n] = [await decrire.boundingBox(), await nav.boundingBox()];
   if (b && n && n.y > 0) expect(b.y + b.height).toBeLessThanOrEqual(n.y + 1);
-  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
   const bouton = page.getByRole("button", { name: "Sélectionne un matériau" });
   await expect(bouton).toBeVisible();
   const c = (await bouton.boundingBox())!;
@@ -3806,7 +3806,7 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   await signUp(page);
   const jaugeAvant = (await apiJson<{ quotas?: unknown; jauge?: unknown }>(page, "GET", "/v1/ai-usage/jauge")).body;
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await expect(ecran.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" })).toBeVisible();
   // Rien de l'achat groupé : ni étapes, ni commune, ni négoces, ni engagement.
@@ -3875,14 +3875,14 @@ test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan revien
   await signUp(page);
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Crochet gouttière bandeau 25", quantite: "40", unite: "pièces" }] })).status).toBe(201);
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
   await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25 (déjà écrit par toi)" })).toBeVisible();
   await page.context().clearCookies();
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
   await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
   await page.waitForTimeout(800);
   await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25 (déjà écrit par toi)" })).toHaveCount(0);
@@ -3893,7 +3893,7 @@ test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan revien
   await page.context().clearCookies();
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
   await ecran.getByLabel("Rechercher un matériau").fill("zephyr zx12");
   await expect(ecran.getByRole("button", { name: /Zéphyr.*\(écrit par d'autres artisans\)$/i })).toBeVisible();
   await expect(ecran.getByRole("list", { name: "Résultats" })).not.toContainText(/Toitures/);
@@ -3927,7 +3927,7 @@ test("conversation après l'analyse (Greg, 1er novembre 2026) : questions numér
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
-  const conversation = questions.getByRole("region", { name: "Conversation avec MOBIIZ" });
+  const conversation = page.getByRole("region", { name: "Conversation avec MOBIIZ" });
   const premier = conversation.getByRole("group", { name: "Message de MOBIIZ" }).first();
   await expect(premier).toContainText("Réponds à tout en une fois, avec les numéros");
   // Le numéro de la question du façonnage, lu dans le message (jamais deviné).

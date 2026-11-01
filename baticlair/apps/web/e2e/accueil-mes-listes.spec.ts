@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { confirmerEmail } from "./confirmer-email";
 
 /**
  * L'ACCUEIL ET « MES LISTES » (Greg, 1er novembre 2026, maquette « Bonjour Greg ») : 1) « À faire maintenant » (une action,
@@ -36,12 +37,15 @@ async function inscrire(page: Page, prenom = "Jean") {
   await page.getByLabel("Prénom et nom").fill(`${prenom} Martin`);
   await page.getByLabel("Nom de ton entreprise").fill(entreprise);
   await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
-  await page.getByLabel("E-mail professionnel").fill(`artisan-${unique()}@example.fr`);
+  const email = `artisan-${unique()}@example.fr`;
+  await page.getByLabel("E-mail professionnel").fill(email);
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
   await page.getByRole("button", { name: "Créer mon compte" }).click();
   await page.getByRole("button", { name: "C'est compris" }).click();
   await expect(page.getByRole("heading", { name: new RegExp(`^Bonjour ${prenom}`) }).or(page.getByRole("dialog", { name: "Guide" })).first()).toBeVisible();
+  // Greg, 1er novembre 2026 : un e-mail confirmé pour ajouter des quantités à un achat groupé (boîte de test).
+  await confirmerEmail(page, email);
   return entreprise;
 }
 
@@ -101,7 +105,7 @@ test("Accueil : rien à reprendre, « Commencer », aucun suivi ; le « + », «
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   await expect(page.getByRole("heading", { name: "Ma liste de matériaux" })).toBeVisible();
   await page.goto("/chantiers");
-  await expect(page.getByRole("link", { name: "Nouvelle liste" }).first()).toHaveAttribute("href", "/chantiers/nouveau");
+  await expect(page.getByRole("link", { name: "Nouvelle demande" }).first()).toHaveAttribute("href", "/chantiers/nouveau");
   await page.goto("/");
   await commencer.getByRole("link", { name: /^Rejoindre un achat groupé/ }).click();
   await expect(page).toHaveURL(/\/achats-groupes$/);
@@ -123,7 +127,7 @@ test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre 
   await page.waitForTimeout(50);
   // Puis une liste commencée dans « Saisir ma liste » et quittée.
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Saisir ma liste/ }).click();
+  await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
   await ecran.getByRole("button", { name: /Ajouter « Liteaux 27×38 maison » tel que je l'écris/ }).click();
@@ -197,9 +201,9 @@ test("Mes listes : le nom, la recherche, les filtres, la carte ; supprimer un br
   const garde = await liste(page, "Liste gardée");
   const brouillon = await liste(page, "Liste de test à jeter");
   await page.goto("/chantiers");
-  await expect(page.getByRole("heading", { name: "Mes listes", level: 1 })).toBeVisible();
-  await expect(page.getByRole("searchbox")).toHaveAttribute("placeholder", "Rechercher une liste ou un chantier…");
-  await expect(page.getByRole("group", { name: "Filtrer" }).getByRole("button")).toHaveText(["Toutes", "En cours", "Terminées"]);
+  await expect(page.getByRole("heading", { name: "Mes demandes", level: 1 })).toBeVisible();
+  await expect(page.getByRole("searchbox")).toHaveAttribute("placeholder", "Rechercher une demande ou un chantier…");
+  await expect(page.getByRole("group", { name: "Filtrer" }).getByRole("button")).toHaveText(["Toutes", "À préparer", "Envoyées", "Réponses reçues", "Terminées"]);
   await expect(page.getByRole("button", { name: "Toutes" })).toHaveAttribute("aria-pressed", "true");
   const carte = page.getByRole("link", { name: /^Liste de test à jeter/ });
   await expect(carte).toContainText("1 ligne");
@@ -325,15 +329,21 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   const selectionner = page.getByRole("button", { name: "Sélectionner" });
   await expect(selectionner).toBeVisible();
   const s = (await selectionner.boundingBox())!;
-  for (const nom of ["Toutes", "En cours", "Terminées"]) {
-    const f = (await page.getByRole("group", { name: "Filtrer" }).getByRole("button", { name: nom }).boundingBox())!;
+  // Cinq filtres : la rangée défile au doigt ; seuls ceux visibles dans la rangée peuvent chevaucher « Sélectionner ».
+  const rangee = (await page.getByRole("group", { name: "Filtrer" }).boundingBox())!;
+  for (const nom of ["Toutes", "À préparer", "Envoyées", "Réponses reçues", "Terminées"]) {
+    const brut = (await page.getByRole("group", { name: "Filtrer" }).getByRole("button", { name: nom }).boundingBox())!;
+    const gauche = Math.max(brut.x, rangee.x);
+    const droite = Math.min(brut.x + brut.width, rangee.x + rangee.width);
+    if (droite <= gauche) continue;
+    const f = { x: gauche, y: brut.y, width: droite - gauche, height: brut.height };
     const chevauche = f.x < s.x + s.width && s.x < f.x + f.width && f.y < s.y + s.height && s.y < f.y + f.height;
     expect(chevauche, `« ${nom} » chevauche « Sélectionner »`).toBe(false);
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   // Le menu du bas : libellés à 12 px, sans déborder.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  for (const nom of ["Accueil", "Achats groupés", "Mes listes", "Profil"]) {
+  for (const nom of ["Accueil", "Achats groupés", "Mes demandes", "Profil"]) {
     const lien = nav.getByRole("link", { name: nom });
     expect(await lien.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
     const b = (await lien.boundingBox())!;
@@ -344,7 +354,7 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   for (const theme of ["sombre", "clair"] as const) {
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     await page.goto("/chantiers");
-    await page.getByRole("heading", { name: "Mes listes", level: 1 }).waitFor();
+    await page.getByRole("heading", { name: "Mes demandes", level: 1 }).waitFor();
     await page.evaluate((id) => window.dispatchEvent(new CustomEvent("baticlair:open-file", { detail: { url: `/v1/projects/${id}/demande-de-devis.pdf?apercu=1`, title: "Le PDF joint", fileName: "demande.pdf" } })), projetId);
     const telecharger = page.getByRole("link", { name: "Télécharger" });
     await expect(telecharger).toBeVisible({ timeout: 30_000 });
@@ -352,4 +362,38 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
     expect(await page.getByRole("button", { name: "Fermer le document" }).evaluate((el) => getComputedStyle(el).color), theme).toBe("rgb(255, 255, 255)");
     await page.getByRole("button", { name: "Fermer le document" }).click();
   }
+});
+
+test("Dossier d'une demande (Greg, 1er novembre 2026) : Résumé, Réponses, Offres, Documents ; aucune fausse messagerie ; l'onglet se garde dans l'adresse", async ({ page }) => {
+  await inscrire(page);
+  const { projectId, recipientId } = await demandeEnvoyee(page, "Toiture Le Goff");
+  await page.goto(`/chantiers/${projectId}`);
+  const onglets = page.getByRole("tablist", { name: "Dossier de la demande" });
+  await expect(onglets.getByRole("tab")).toHaveText(["Résumé", "Réponses", "Offres", "Documents"]);
+  await expect(onglets.getByRole("tab", { name: "Résumé" })).toHaveAttribute("aria-selected", "true");
+  // Réponses : le négoce et son état, « Écrire à » ouvre la vraie messagerie ; pas de champ pour lui répondre ici.
+  await onglets.getByRole("tab", { name: "Réponses" }).click();
+  await expect(page).toHaveURL(/onglet=reponses/);
+  const reponses = page.getByRole("tabpanel", { name: "Réponses" });
+  await expect(reponses.getByText("En attente de réponse")).toBeVisible();
+  await expect(reponses.getByRole("link", { name: /^Écrire à Négoce/ })).toHaveAttribute("href", /^mailto:ventes-/);
+  await expect(reponses.getByRole("textbox")).toHaveCount(0);
+  await expect(reponses.getByText(/Tu ne peux pas encore répondre à un négoce depuis MOBIIZ/)).toBeVisible();
+  await expect(page.getByRole("tabpanel", { name: "Résumé", includeHidden: true })).toBeHidden();
+  // Offres : rien encore, puis le devis rangé.
+  await onglets.getByRole("tab", { name: "Offres" }).click();
+  await expect(page.getByRole("tabpanel", { name: "Offres" }).getByText("Aucune offre reçue pour l'instant. Tu seras prévenu à chaque réponse.")).toBeVisible();
+  await reponseRecue(page, recipientId);
+  await page.reload();
+  const offres = page.getByRole("tabpanel", { name: "Offres" });
+  await expect(offres.getByRole("button", { name: "Ouvrir le devis (PDF)" })).toBeVisible();
+  // Documents : la demande envoyée et le devis du négoce.
+  await onglets.getByRole("tab", { name: "Documents" }).click();
+  const documents = page.getByRole("tabpanel", { name: "Documents" });
+  await expect(documents.getByRole("button", { name: /^Demande envoyée à Négoce/ })).toBeVisible();
+  await expect(documents.getByRole("button", { name: /^Devis d'un négoce/ })).toBeVisible();
+  // Retour au résumé : l'écran du chantier, tel qu'avant.
+  await onglets.getByRole("tab", { name: "Résumé" }).click();
+  await expect(page).not.toHaveURL(/onglet=/);
+  await expect(page.getByRole("tabpanel", { name: "Résumé" })).toBeVisible();
 });
