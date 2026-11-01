@@ -487,9 +487,11 @@ test("le menu : cinq onglets (recentrage du 25 octobre 2026) ; fournisseurs et c
   await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Accueil", "Achats groupés", "Nouvelle liste", "Mes listes", "Mes négoces", "Profil"] : ["Accueil", "Achats groupés", "Nouvelle liste", "Mes listes", "Profil"]);
   await expect(nav.getByRole("link", { name: "Créer une liste" })).toHaveAttribute("href", "/chantiers/nouveau");
   await menuArtisan(page, "Mon compte");
-  await expect(page.getByRole("heading", { name: "Profil" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Profil et paramètres" })).toBeVisible();
 
-  // Les métiers se changent en deux appuis ; BatiClair adapte la lecture des prochains devis.
+  // Les métiers se changent en deux appuis (rubrique « Mon entreprise » depuis le 1er novembre 2026) ; BatiClair adapte
+  // la lecture des prochains devis.
+  await page.getByRole("link", { name: /^Mon entreprise/ }).click();
   await expect(page.getByRole("button", { name: "Couverture, charpente, zinguerie" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Peinture" }).click();
   await page.getByRole("button", { name: "Enregistrer mes métiers" }).click();

@@ -206,7 +206,7 @@ test("4, 5, 6, 8, 10, 11, 12 : Apparence — Clair / Sombre ; le modèle et la c
   const patch = page.waitForResponse((r) => r.url().includes("/v1/price-requests/settings") && r.request().method() === "PATCH");
   await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   expect((await patch).ok()).toBe(true);
-  await expect(page.getByText("Réglages enregistrés.")).toBeVisible();
+  await expect(page.getByText("Réglages enregistrés.").filter({ visible: true })).toBeVisible();
   await page.getByRole("button", { name: "Retour à Profil et paramètres" }).click();
   await expect(page).toHaveURL(/\/compte$/);
   await page.goto("/compte/apparence");
