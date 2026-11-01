@@ -123,6 +123,8 @@ Avant de toucher au moteur, aux règles ou aux écrans, lire la section concern�
 
 ## Commandes utiles
 
+- NIVEAUX DE TESTS (Greg, 1er novembre 2026, `docs/REPRISE.md`) : petite modification = tests ciblés ; modification importante = ciblés + fonctions liées ; avant un déploiement important = suite complète API et e2e. Quand tout est relancé : dire pourquoi, la progression et la durée normale ; rien ne se déploie avant que le niveau soit vert ; chaque série a une limite de temps.
+
 - `pnpm --filter @baticlair/domain build` (l'API importe `dist`)
 - `pnpm -r typecheck`, `pnpm -r lint`, `npx vitest run` dans `packages/domain` et `apps/api`
 - e2e : `pnpm --filter @baticlair/web build` puis `npx playwright test` dans `apps/web`

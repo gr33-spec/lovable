@@ -13,6 +13,19 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 - Chaque choix fait seul : une ligne dans `docs/DECISIONS.md` ; chaque demande : une ligne numérotée dans `docs/SUIVI.md`.
 - Rapport court en français, captures iPhone SE et ordinateur (avant / après).
 
+## Niveaux de tests (Greg, 1er novembre 2026)
+
+- **Petite modification** (un texte, un style, une fonction isolée) : les tests ciblés de la fonctionnalité touchée
+  (le fichier de test du domaine ou de l'API, les parcours e2e qui la nomment, `-g`), plus types et lint du paquet touché.
+- **Modification importante** (un écran, une route, une règle, une migration) : les tests ciblés + ceux des fonctions
+  liées (écrans et routes qui partagent le composant, la donnée ou la règle), plus types, lint et build.
+- **Avant un déploiement important** (plusieurs lots, migration, suppression de données, parcours d'achat) : la suite
+  complète, domaine, API (≈ 17 min), web (≈ 3 min), e2e (≈ 30 min), une seule série à la fois.
+- Quand tout est relancé : dire pourquoi, la progression (étape, nombre de tests passés) et la durée normale (≈ 55 min).
+- Aucun déploiement tant que les vérifications du niveau ne sont pas vertes.
+- Jamais un processus bloqué : chaque série est lancée avec une limite de temps (`timeout`) ; une série qui la dépasse
+  est arrêtée, la cause cherchée, puis relancée.
+
 ## En cours
 
 SUIVI 163-164 (Greg, 1er novembre : corrections ciblées, puis accueil et « Mes listes ») : code et tests écrits ; suites complètes, push, captures et rapport à faire. Voir `docs/accueil-et-mes-listes.md`.
