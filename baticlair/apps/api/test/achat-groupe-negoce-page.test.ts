@@ -85,7 +85,7 @@ describe("la page du négoce : PDF, Excel, trois façons de répondre", { timeou
     const texte = execFileSync("/usr/bin/python3", ["-I", "-c", "import sys; from pypdf import PdfReader; print('\\n'.join(p.extract_text() for p in PdfReader(sys.argv[1]).pages))", ecrire(pdf, "demande.pdf")]).toString();
     // Le titre, les dates, « De la part de », le tableau (référence, désignation, quantité cumulée, unité), les règles, le lien.
     expect(texte).toContain("Couverture · secteur");
-    expect(texte).toMatch(/Livraison souhaitée avant le \d+ \S+/);
+    expect(texte).toMatch(/Livraison souhaitée avant le \d+(?:er)? \S+/);
     expect(texte).toMatch(/Réponse attendue avant le \d+(er)? \S+/);
     expect(texte).toContain("De la part de votre client Toitures 1, via Mobiiz");
     expect(texte).not.toContain("Toitures 2");

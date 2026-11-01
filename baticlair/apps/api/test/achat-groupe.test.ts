@@ -86,8 +86,8 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     const premier = (await a.agent.post("/v1/achats-groupes").send(engagement()).expect(201)).body;
     // RÈGLE CHANGÉE (Greg, 30 octobre 2026, décision 1) : les achats groupés sont gratuits, plus de « premier offert ».
     expect(premier).toMatchObject({ ajoute: false, rejoint: false, offert: false, phrase: null });
-    expect(premier.titre).toMatch(/^Couverture · secteur Lannion · livraison avant le \d+ \S+$/);
-    expect(premier.prevenir.texte).toMatch(/^Ton négoce va recevoir une grosse demande : 2 références de couverture, le \d+ \S+, de la part de Mobiiz\./);
+    expect(premier.titre).toMatch(/^Couverture · secteur Lannion · livraison avant le \d+(?:er)? \S+$/);
+    expect(premier.prevenir.texte).toMatch(/^Ton négoce va recevoir une grosse demande : 2 références de couverture, le \d+(?:er)? \S+, de la part de Mobiiz\./);
     // Ajouter encore : la même référence s'additionne.
     const encore = (await a.agent.post("/v1/achats-groupes").send(engagement({ lignes: [{ designation: A3222, quantite: 200, unite: "pièces" }] })).expect(201)).body;
     expect(encore).toMatchObject({ besoinId: premier.besoinId, ajoute: true, offert: false });
@@ -118,7 +118,7 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     const la = (await a.agent.post("/v1/achats-groupes").send(engagement()).expect(201)).body;
     // Point 21 : B (même métier, même secteur) est alerté, mot pour mot.
     const alerte = mailsVers(ctx, "artisan2@toitures.fr").find((m) => m.subject.startsWith("Achat groupé couverture ouvert"))!;
-    expect(alerte.text).toMatch(/^Achat groupé couverture ouvert dans ton secteur, livraison avant le \d+ \S+\. Ajoute ta liste avant le \d+ \S+\./);
+    expect(alerte.text).toMatch(/^Achat groupé couverture ouvert dans ton secteur, livraison avant le \d+(?:er)? \S+\. Ajoute ta liste avant le \d+(?:er)? \S+\./);
     const pres = (await b.agent.get("/v1/achats-groupes/pres-de-chez-moi").expect(200)).body.achats;
     expect(pres).toHaveLength(1);
     expect(JSON.stringify(pres)).not.toMatch(/Toitures 1/);
@@ -235,7 +235,7 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect((await b.agent.get(`/v1/achats-groupes/${lb.besoinId}`).expect(200)).body).toMatchObject({ etat: "non_commande" });
     const exclu = (await b.agent.post("/v1/achats-groupes").send(engagement({ livraison: "22500 Paimpol", dateBesoin: jour(80) })).expect(403)).body.error.details;
     expect(exclu.reason).toBe("exclu");
-    expect(exclu.message).toMatch(/^Tu ne peux pas rejoindre d'achat groupé avant le \d+ \S+ \(règle des sorties\)\.$/);
+    expect(exclu.message).toMatch(/^Tu ne peux pas rejoindre d'achat groupé avant le \d+(?:er)? \S+ \(règle des sorties\)\.$/);
 
     // L'admin : suivi de l'achat publié, IA suivie sans correction, sorties, exclus ; rien à facturer à 0 %.
     const adm = (await greg.agent.get("/v1/admin/pilotage/achats-groupes").expect(200)).body;
