@@ -54,6 +54,9 @@ export function AppNav() {
   const groupe = useGroupeActif();
   // Le chat d'un chantier se lit en plein écran sur téléphone (référentiel §21) : le menu laisse la place à la barre de message.
   const inChat = /^\/chantiers\/(?!nouveau$)[^/]+$/.test(pathname);
+  // Profil, Apparence (Greg, 1er novembre 2026) : un écran d'édition, l'aperçu du PDF et « Enregistrer » ont besoin de la
+  // place ; la flèche retour ramène à Profil et paramètres.
+  const pleinEcran = inChat || pathname === "/compte/apparence";
   // La barre se cache pendant la saisie (`useTyping`). Elle n'est JAMAIS recalée en JavaScript (retour du fondateur,
   // 2026-10-12 : sur iPhone, l'ancien recalage sur visualViewport la plaçait au milieu de l'accueil) : `position: fixed;
   // bottom: 0`, la zone du geste en marge intérieure.
@@ -88,7 +91,7 @@ export function AppNav() {
     <nav
       aria-label="Navigation principale"
       data-typing={typing || undefined}
-      className={`${inChat ? "max-lg:hidden " : ""}${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}fixed z-30 transition-[translate,opacity] duration-200 max-lg:inset-x-0 max-lg:bottom-0 lg:inset-y-0 lg:left-0 lg:w-64`}
+      className={`${pleinEcran ? "max-lg:hidden " : ""}${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}fixed z-30 transition-[translate,opacity] duration-200 max-lg:inset-x-0 max-lg:bottom-0 lg:inset-y-0 lg:left-0 lg:w-64`}
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
           colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}

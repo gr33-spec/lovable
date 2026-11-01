@@ -334,7 +334,7 @@ test("« Mes listes » (Greg, 1er novembre 2026) : le « … » de chaque carte,
 
 test("déconnexion puis reconnexion ramène à la page demandée", async ({ page }) => {
   const email = await signUp(page);
-  await page.goto("/compte");
+  await page.goto("/compte/entreprise");
   // §52 (mission du fondateur, 2026-10-19) : « Métiers couverts », l'état de chaque métier. FRICTIONS : la liste est
   // repliée derrière « Voir les N métiers ».
   await page.getByText(/^Voir les \d+ métiers$/).click();
@@ -406,7 +406,9 @@ test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche 
 
 test("Clair / Sombre (Greg, 31 octobre 2026) : sombre par défaut, Clair dans Profil, gardé après rechargement, lisible", async ({ page }) => {
   await signUp(page);
-  await page.goto("/compte");
+  // Profil et paramètres (1er novembre 2026) : Apparence, onglet « Application ».
+  await page.goto("/compte/apparence");
+  await page.getByRole("tab", { name: "Application" }).click();
   const groupe = page.getByRole("group", { name: "Apparence de Mobiiz" });
   await expect(groupe.getByRole("button", { name: "Sombre" })).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator(".app-nuit")).toHaveCount(1);
@@ -420,22 +422,26 @@ test("Clair / Sombre (Greg, 31 octobre 2026) : sombre par défaut, Clair dans Pr
   expect(fond).toBe("rgb(246, 243, 238)");
   const encre = await page.locator("main h1").first().evaluate((el) => getComputedStyle(el).color);
   expect(encre).toBe("rgb(19, 9, 1)");
-  await page.goto("/compte");
+  await page.goto("/compte/apparence");
+  await page.getByRole("tab", { name: "Application" }).click();
   await page.getByRole("group", { name: "Apparence de Mobiiz" }).getByRole("button", { name: "Sombre" }).click();
   await expect(page.locator(".app-nuit")).toHaveCount(1);
 });
 
 test("Ma demande de prix (Greg, 31 octobre 2026) : le modèle du PDF et sa couleur se choisissent dans Profil et restent", async ({ page }) => {
   await signUp(page);
-  await page.goto("/compte");
+  // Profil et paramètres (1er novembre 2026) : Apparence, onglet « Demande de prix », un seul « Enregistrer ».
+  await page.goto("/compte/apparence");
   const modeles = page.getByRole("radiogroup", { name: "Modèle du PDF" });
   await expect(modeles.getByRole("radio", { name: /Classique/ })).toHaveAttribute("aria-checked", "true");
   await modeles.getByRole("radio", { name: /Détaillé/ }).click();
   const couleurs = page.getByRole("radiogroup", { name: "Couleur du PDF" });
   await expect(couleurs.getByRole("radio", { name: "Jaune Mobiiz" })).toHaveAttribute("aria-checked", "true");
-  const enregistre = page.waitForResponse((r) => r.url().includes("/v1/price-requests/settings") && r.request().method() === "PATCH");
   await couleurs.getByRole("radio", { name: "Bleu" }).click();
+  const enregistre = page.waitForResponse((r) => r.url().includes("/v1/price-requests/settings") && r.request().method() === "PATCH");
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   expect((await enregistre).ok()).toBe(true);
+  await expect(page.getByRole("button", { name: "Enregistré", exact: true })).toBeDisabled();
   await page.reload();
   await expect(page.getByRole("radiogroup", { name: "Modèle du PDF" }).getByRole("radio", { name: /Détaillé/ })).toHaveAttribute("aria-checked", "true");
   await expect(page.getByRole("radiogroup", { name: "Couleur du PDF" }).getByRole("radio", { name: "Bleu" })).toHaveAttribute("aria-checked", "true");
@@ -523,7 +529,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await expect(title).toBeVisible();
 
   // Compte : la formule en mots simples (essai, chantiers utilisés), jamais de coûts techniques.
-  await page.goto("/compte");
+  await page.goto("/compte/abonnement");
   // L'abonnement (24 octobre 2026) et, l'ancien paywall allumé en e2e, la formule par chantiers.
   await expect(page.getByText("Essai gratuit", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("1 chantier sur 3")).toBeVisible();
@@ -927,7 +933,8 @@ test("accueil : la prochaine action de chaque chantier, puis l'essai et les form
 test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en tapant SUPPRIMER)", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Dupont", "M. Dupont", "4 rue du Port, Quimper");
-  await page.goto("/compte");
+  // Profil et paramètres (1er novembre 2026) : « Données et confidentialité », les e-mails dans « Notifications ».
+  await page.goto("/compte/donnees");
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Télécharger mes données" }).click();
   expect((await download).suggestedFilename()).toMatch(/^mobiiz-mes-donnees-\d{4}-\d{2}-\d{2}\.json$/);
@@ -935,6 +942,7 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   await expect(page.getByRole("link", { name: "En PDF" })).toHaveAttribute("href", "/v1/me/export.pdf");
   const pdf = await page.request.get("/v1/me/export.pdf");
   expect(pdf.headers()["content-type"]).toMatch(/application\/pdf/);
+  await page.goto("/compte/notifications");
   const recevoir = page.getByRole("checkbox", { name: /Recevoir les e-mails/ });
   await expect(recevoir).toBeChecked();
   await recevoir.uncheck();
@@ -945,13 +953,14 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
   await page.goto("/negoce/opposition/faux");
   await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
-  await page.goto("/compte");
+  await page.goto("/compte/preferences");
 
   // Des essais au hasard ne restent pas des habitudes : on efface ce que BatiClair a appris, les chantiers restent.
   await page.getByRole("button", { name: "Effacer ce que Mobiiz a appris" }).click();
   await page.getByRole("button", { name: "Oui, tout effacer" }).click();
   await expect(page.getByText("C'est effacé. Les prochains chantiers reposeront les questions.")).toBeVisible();
 
+  await page.goto("/compte/donnees");
   await page.getByRole("button", { name: "Supprimer mon compte" }).click();
   const confirm = page.getByRole("button", { name: "Supprimer définitivement" });
   await expect(confirm).toBeDisabled();
@@ -1985,8 +1994,9 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   await expect(page.getByRole("heading", { name: "Mes regroupements" })).toBeVisible();
   await expect(page.getByText("Rien pour l'instant : ajoute un chantier au regroupement.")).toBeVisible();
   await expect(manque).toHaveCount(0);
-  // Étape 7 : le compteur « Économisé grâce au groupé » dans Compte, à zéro.
-  await page.goto("/compte");
+  // Étape 7 : le compteur « Économisé grâce au groupé », à zéro ; il a quitté Profil pour l'écran du regroupement
+  // (Greg, 1er novembre 2026).
+  await page.goto("/groupe");
   const economies = page.getByRole("region", { name: "Économisé grâce au regroupement" });
   await expect(economies).toContainText("0,00 €");
   await expect(economies).toContainText("Aucune regroupement pour l'instant.");

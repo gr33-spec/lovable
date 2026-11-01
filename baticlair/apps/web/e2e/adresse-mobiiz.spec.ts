@@ -108,7 +108,7 @@ async function demandeEnvoyee(page: Page): Promise<{ projectId: string; recipien
 test("R7 : l'écran dédié, le bloc Compte (copier, modifier une fois), le rappel au premier envoi, la demande qui part de l'adresse", async ({ page }) => {
   const { adresse } = await inscrire(page);
   // Compte : le bloc « Mon adresse Mobiiz », avec « Donne-la à tes négoces ».
-  await page.goto("/compte");
+  await page.goto("/compte/adresse");
   const bloc = page.getByRole("region", { name: "Mon adresse Mobiiz" }).or(page.locator("#adresse"));
   await expect(bloc.getByLabel("Ton adresse Mobiiz")).toHaveText(adresse);
   await expect(bloc.getByText("Donne-la à tes négoces : tout ce qu'ils y envoient arrive ici.")).toBeVisible();
@@ -207,7 +207,7 @@ test("lot final, points 1 à 4 : « Avant d'envoyer » une seule fois, l'aperçu
   expect(m.subject).toContain(`${entreprise} : demande de prix`);
   expect(m.text).toContain("Pouvez-vous me chiffrer ces chatières pour vendredi ?");
   // Asked once : la deuxième fois, plus d'« Avant d'envoyer » ; l'identité se change dans Profil.
-  await page.goto("/compte");
+  await page.goto("/compte/entreprise");
   await expect(page.getByLabel("Ton identité auprès des négoces")).toContainText("SIRET 73282932000074");
 });
 

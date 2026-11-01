@@ -115,8 +115,7 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     await tel.fill("02 96 00 00 09");
 
     // 4. Le profil.
-    await page.goto("/compte");
-    await page.getByRole("link", { name: "Modifier" }).first().click();
+    await page.goto("/compte/entreprise");
     for (const label of ["Nom de l'entreprise", "Adresse", "SIRET", "Téléphone"]) await champVisible(page, page.getByLabel(label, { exact: true }));
 
     // 5. La connexion.

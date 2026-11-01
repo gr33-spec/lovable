@@ -6,6 +6,7 @@ import { CarteAchatGroupe, CarteAchatOuvert } from "@/components/achat-groupe";
 import { RegroupementsNegocies, useModeRegroupement } from "@/components/negocie";
 import { InviterCollegue } from "@/components/inviter";
 import { CarteRegroupement } from "@/components/regroupements";
+import { EconomiesGroupeCard } from "@/components/economies-groupe";
 import { ButtonLink, EmptyState, ErrorNotice, PageTitle, SectionTitle, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { AchatOuvert, MesAchats } from "@/lib/achat-groupe";
@@ -97,6 +98,8 @@ function AchatsGroupes() {
           ) : null}
         </div>
         <div className="flex flex-col gap-6 lg:sticky lg:top-8">
+          {/* Greg, 1er novembre 2026 : le compteur d'économies quitte Profil (absent tant que rien n'est commandé en groupe). */}
+          <EconomiesGroupeCard />
           <CommentCaMarcheOrdinateur />
           {/* Point 8 : la grande carte « Inviter un collègue » passe sous la liste. */}
           <InviterCollegue texte="Plus on est nombreux dans le secteur, meilleur est le prix." />

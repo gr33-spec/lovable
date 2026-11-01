@@ -13,6 +13,7 @@ import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { NOM, nom, noms } from "@/lib/nom";
 import { InviterCollegue } from "@/components/inviter";
+import { EconomiesGroupeCard } from "@/components/economies-groupe";
 import { BoucleNegoce } from "@/components/boucle-negoce";
 import { BlocDuMois, CommandeDuMoisPanneau, EtapesDuMois, useProchaineCommande } from "@/components/commande-du-mois";
 
@@ -205,6 +206,8 @@ function GroupeAncienMode() {
       )}
       {/* Un artisan déjà dans un lot (proposé depuis « Ton chantier ») voit toujours ses lots, même sans négoce à lui. */}
       {etat.data.eligible || etat.data.raisons.includes("exclu_du_groupe") ? mois ? <PanneauDuMois /> : <MesLots /> : null}
+      {/* Greg, 1er novembre 2026 : « Économisé grâce au regroupement » quitte Profil et vit ici, avec l'historique. */}
+      {etat.data.eligible || etat.data.raisons.includes("exclu_du_groupe") ? <EconomiesGroupeCard /> : null}
     </>
   );
 }

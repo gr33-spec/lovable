@@ -28,6 +28,10 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
+SUIVI 166 (Greg, 1er novembre : « Profil et paramètres ») : code, tests API et e2e écrits, en local. Voir
+`docs/profil-et-parametres.md`. Pas de push tant que Greg n'a pas donné son accord explicite (déploiement de test.mobiiz.fr
+et sauvegarde Neon « sauvegarde-avant-mes-listes », question posée).
+
 SUIVI 163-164 (Greg, 1er novembre : corrections ciblées, puis accueil et « Mes listes ») : code et tests écrits ; suites complètes, push, captures et rapport à faire. Voir `docs/accueil-et-mes-listes.md`.
 
 SUIVI 162 (Greg, 31 octobre : « Ma liste de matériaux ») : fait, voir `docs/ma-liste-de-materiaux.md`. En attente de Greg : le compteur unique (option A ou B), l'IA hybride, la proposition de CGU.

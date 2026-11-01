@@ -121,7 +121,7 @@ function MenuListe({ projet, occupe, onSupprimer, onTerminer }: { projet: Projec
   );
 }
 
-function Fenetre({ titre, children, onFermer }: { titre: string; children: React.ReactNode; onFermer: () => void }) {
+export function Fenetre({ titre, children, onFermer }: { titre: string; children: React.ReactNode; onFermer: () => void }) {
   useEffect(() => {
     const echap = (e: KeyboardEvent) => e.key === "Escape" && onFermer();
     document.addEventListener("keydown", echap);
