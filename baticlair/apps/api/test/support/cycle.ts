@@ -11,6 +11,8 @@ export const SIRET_ARTISAN = "73282932000074";
 export async function couvreurAvecListe(ctx: TestContext, email: string, nom: string, adresse: string, lignes: { libelle: string; quantite: string; unite: string }[], telephone: string | null = null) {
   const { agent, companyId } = await signUpWithCompany(ctx.app, email, nom, ["roofing"]);
   await ctx.prisma.company.update({ where: { id: companyId }, data: { siret: SIRET_ARTISAN, siretVerifieLe: new Date() } });
+  // Données de test : e-mail confirmé comme par le lien d'inscription (exigé pour un achat groupé, 1er novembre 2026).
+  await ctx.prisma.user.update({ where: { email }, data: { emailVerified: true } });
   await agent.patch("/v1/company/profile").send({ name: nom, address: adresse, siret: SIRET_ARTISAN, phone: telephone, email: null }).expect(200);
   const q = (await agent.post("/v1/quantitatifs").send({ lignes }).expect(201)).body as { id: string; projetId: string };
   await agent.patch(`/v1/projects/${q.projetId}`).send({ address: adresse }).expect(200);

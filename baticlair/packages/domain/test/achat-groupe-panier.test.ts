@@ -69,7 +69,8 @@ describe("A. un achat groupé = un métier + une zone + une période, un panier"
 
 describe("B. l'engagement et ses deux sorties", () => {
   it("la phrase, et l'exclusion : plus d'une sortie sur 3 mois, ou une non-commande sans motif", () => {
-    expect(PHRASE_ENGAGEMENT).toBe("Je commande ces quantités, chez le moins cher entre la meilleure offre du groupe et mon négoce habituel.");
+    // Greg, 1er novembre 2026 : un besoin réel, pas encore une commande ferme.
+    expect(PHRASE_ENGAGEMENT).toBe("Je confirme que ces quantités correspondent à un besoin réel de mon entreprise.");
     expect(exclusionJusquau({ sorties: [new Date("2026-10-01")], nonCommandesSansMotif: [] })).toBeNull();
     const fin = exclusionJusquau({ sorties: [new Date("2026-10-01"), new Date("2026-11-15")], nonCommandesSansMotif: [] });
     expect(fin!.toISOString().slice(0, 10)).toBe("2027-02-15");

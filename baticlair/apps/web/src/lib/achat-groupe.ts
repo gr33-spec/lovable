@@ -23,6 +23,9 @@ export interface LigneAchat {
 
 export interface CarteAchat {
   id: string;
+  /** « Mes propositions » : l'achat que cette entreprise a ouvert. */
+  jePropose?: boolean;
+  reunies?: Reunies;
   achatId: string;
   titreAchat: string;
   metier: string;
@@ -80,6 +83,8 @@ export interface Droit {
   ok: boolean;
   offert: boolean;
   phrase: string | null;
+  /** « email » : l'adresse e-mail n'est pas encore confirmée (Greg, 1er novembre 2026). */
+  raison?: "email" | null;
 }
 
 export interface EngagementTexte {
@@ -96,8 +101,16 @@ export interface MesAchats {
   engagement: EngagementTexte;
 }
 
+/** Les totaux visibles d'un achat groupé (Greg, 1er novembre 2026) : entreprises vérifiées, agrégés, jamais une identité. */
+export interface Reunies {
+  totaux: string[];
+  entreprises: string;
+  nombre: number;
+}
+
 export interface AchatOuvert {
   id: string;
+  reunies?: Reunies;
   titre: string;
   metier: string;
   zone: string;

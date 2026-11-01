@@ -12,7 +12,10 @@ import {
   PHRASES_DOUTE,
   PHRASE_ACTIVITE_REFUSEE,
   PHRASE_DATE_TROP_PROCHE,
+  PHRASE_EMAIL_A_CONFIRMER,
   PHRASE_ENGAGEMENT,
+  phraseEntreprises,
+  quantitesReunies,
   PHRASE_NEGOCE_OBLIGATOIRE,
   REGLES_ENGAGEMENT,
   SANS_REPONSE_HEURES,
@@ -265,7 +268,9 @@ export class AchatGroupeService {
   }
 
   /** SIRET vérifié et activité du bâtiment (anti-fraude) ; pas d'exclusion en cours (règle des sorties). */
-  private async exigerEntreprise(companyId: string): Promise<{ name: string; trades: string[] }> {
+  private async exigerEntreprise(companyId: string, userId?: string): Promise<{ name: string; trades: string[] }> {
+    // Greg, 1er novembre 2026 : ajouter des quantités demande un e-mail confirmé (et le SIRET actif ci-dessous).
+    if (userId && !(await this.emailConfirme(userId))) throw new DomainError("forbidden", "Email not verified", { reason: "email_a_confirmer", message: PHRASE_EMAIL_A_CONFIRMER });
     const c = await this.prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { name: true, siretVerifieLe: true, naf: true, trades: true, achatsGroupesExclusJusquau: true } });
     if (c.naf && (estCommerceDeGros(c.naf) || !estActiviteBatiment(c.naf))) throw new DomainError("forbidden", PHRASE_ACTIVITE_REFUSEE, { reason: "activite_refusee", message: PHRASE_ACTIVITE_REFUSEE });
     if (!c.siretVerifieLe) throw new DomainError("forbidden", "Verified SIRET required", { reason: "siret_requis", message: "Vérifie ton SIRET dans ton profil pour rejoindre un achat groupé." });
@@ -337,9 +342,33 @@ export class AchatGroupeService {
   /* ------------------------------------------------------------------------------- s'engager (A1 à A3, B6 à B9) */
 
   /** L'accès (point 25) : abonné, ou le tout premier achat groupé, offert. */
-  private async droit(companyId: string) {
+  private async droit(companyId: string, userId?: string): Promise<{ ok: boolean; offert: boolean; phrase: string | null; raison: "email" | null }> {
+    if (userId && !(await this.emailConfirme(userId))) return { ok: false, offert: false, phrase: PHRASE_EMAIL_A_CONFIRMER, raison: "email" };
     const engagementsPasses = await this.prisma.besoinNegocie.count({ where: { companyId, engageLe: { not: null } } });
-    return droitAchatGroupe({ abonne: await this.ports.abonne(companyId), engagementsPasses });
+    return { ...droitAchatGroupe({ abonne: await this.ports.abonne(companyId), engagementsPasses }), raison: null };
+  }
+
+  private async emailConfirme(userId: string): Promise<boolean> {
+    const u = await this.prisma.user.findUnique({ where: { id: userId }, select: { emailVerified: true } });
+    // Une clé API (partenaire) n'a pas d'utilisateur de session : son auteur est vérifié à la création de la clé.
+    return !u || u.emailVerified;
+  }
+
+  /**
+   * LES QUANTITÉS RÉUNIES VISIBLES (Greg, 1er novembre 2026) : seules comptent les participations confirmées d'entreprises
+   * vérifiées (SIRET actif et un membre à l'e-mail confirmé) ; totaux agrégés, jamais une quantité ni une identité.
+   * Le volume interne (jauge, consultation) ne change pas.
+   */
+  private async reunies(regroupementId: string): Promise<{ totaux: string[]; entreprises: string; nombre: number }> {
+    const lignes = await this.prisma.ligneAchatGroupe.findMany({ where: { regroupementId, besoin: { statut: { in: [ENGAGE, "accepte"] }, engageLe: { not: null } } }, select: { companyId: true, libelle: true, unite: true, quantite: true } });
+    const ids = [...new Set(lignes.map((l) => l.companyId))];
+    const companies = ids.length ? await this.prisma.company.findMany({ where: { id: { in: ids } }, select: { id: true, siretVerifieLe: true, memberships: { select: { user: { select: { emailVerified: true } } } } } }) : [];
+    const verifiees = new Set(companies.filter((c) => c.siretVerifieLe && c.memberships.some((m) => m.user.emailVerified)).map((c) => c.id));
+    const r = quantitesReunies(
+      lignes.map((l) => ({ companyId: l.companyId, libelle: l.libelle, unite: l.unite, quantite: Number(l.quantite), compte: verifiees.has(l.companyId) })),
+      this.cfg.seuilAnonymat,
+    );
+    return { totaux: r.totaux, entreprises: phraseEntreprises(r.entreprises, this.cfg.seuilAnonymat), nombre: r.entreprises };
   }
 
   /**
@@ -349,7 +378,7 @@ export class AchatGroupeService {
   async engager(tenant: TenantContext, e: Engagement) {
     assertCanWrite(tenant);
     await this.exigerAutomatique();
-    const company = await this.exigerEntreprise(tenant.companyId);
+    const company = await this.exigerEntreprise(tenant.companyId, tenant.userId);
     if (!e.engagement) throw validationFailed("Commitment required", { reason: "engagement_requis", message: "Coche la case d'engagement pour rejoindre l'achat groupé." });
     if (e.negoces.length === 0) throw validationFailed(PHRASE_NEGOCE_OBLIGATOIRE, { reason: "negoce_obligatoire", message: PHRASE_NEGOCE_OBLIGATOIRE });
     if (e.lignes.length === 0) throw validationFailed("Nothing to add", { reason: "rien_a_lancer", message: "Coche au moins une ligne rattachée au catalogue." });
@@ -498,13 +527,13 @@ export class AchatGroupeService {
     const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { trades: true } });
     const familles = company.trades.flatMap((t) => famillesDuMetier(t)) as string[];
     const ouverts = zone && (await this.ports.mode()) === MODE_AUTO ? await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, departement: zone, clotureLe: { gt: this.now() }, ...(familles.length ? { famille: { in: familles } } : {}) }, orderBy: { clotureLe: "asc" }, take: 5 }) : [];
-    const d = await this.droit(tenant.companyId);
+    const d = await this.droit(tenant.companyId, tenant.userId);
     return {
       adresse,
       source,
       lignes: vues.map((l) => ({ ...l, suggeree: suggerees.includes(l) })),
       suggestion: premiere ? { phrase: phraseSuggestion({ quantite: `${qte(premiere.quantite)} ${premiere.unite}`, libelle: premiere.reference ?? premiere.designation }), keys: suggerees.map((l) => l.key) } : null,
-      droit: { ok: d.ok, offert: d.offert, phrase: d.phrase },
+      droit: { ok: d.ok, offert: d.offert, phrase: d.phrase, raison: d.raison },
       engagement: { phrase: PHRASE_ENGAGEMENT, regles: REGLES_ENGAGEMENT },
       achatsOuverts: ouverts.map((a) => ({ id: a.id, titre: a.libelle, clotureLe: a.clotureLe!.toISOString(), dateBesoin: a.dateBesoinMin ? jourIso(a.dateBesoinMin) : null })),
     };
@@ -718,14 +747,15 @@ export class AchatGroupeService {
     const cartes = [];
     for (const b of besoins) {
       const { _a, _b, ...c } = await this.carte(b.id, volumes);
-      void _a;
       void _b;
-      cartes.push(c);
+      // « Mes propositions » : l'achat groupé que cette entreprise a ouvert (la première participation).
+      const premiere = await this.prisma.besoinNegocie.findFirst({ where: { regroupementId: _a.id }, orderBy: { createdAt: "asc" }, select: { companyId: true } });
+      cartes.push({ ...c, jePropose: premiere?.companyId === tenant.companyId, reunies: await this.reunies(_a.id) });
     }
     const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { alertesAchatsGroupes: true, achatsGroupesExclusJusquau: true } });
     const exclusion = c?.achatsGroupesExclusJusquau && exclu(c.achatsGroupesExclusJusquau, this.now()) ? phraseExclusion(c.achatsGroupesExclusJusquau) : null;
-    const d = await this.droit(tenant.companyId);
-    return { mode: await this.ports.mode(), achats: cartes, alertes: lireReglageAlertes(c?.alertesAchatsGroupes), exclusion, droit: { ok: d.ok, offert: d.offert, phrase: d.phrase }, engagement: { phrase: PHRASE_ENGAGEMENT, regles: REGLES_ENGAGEMENT } };
+    const d = await this.droit(tenant.companyId, tenant.userId);
+    return { mode: await this.ports.mode(), achats: cartes, alertes: lireReglageAlertes(c?.alertesAchatsGroupes), exclusion, droit: { ok: d.ok, offert: d.offert, phrase: d.phrase, raison: d.raison }, engagement: { phrase: PHRASE_ENGAGEMENT, regles: REGLES_ENGAGEMENT } };
   }
 
   /** Le détail d'une participation : la frise, ses lignes, ses négoces ; après la publication, la comparaison sur SES lignes. */
@@ -839,6 +869,7 @@ export class AchatGroupeService {
         phrase: phraseAlerteMetier({ famille: a.famille, dateBesoin: a.dateBesoinMin ?? a.clotureLe!, clotureLe: a.clotureLe! }),
         entreprises: v.entreprises >= this.cfg.seuilAnonymat ? v.entreprises : null,
         jauge: jaugeVolume(v.estimeHt, volumeMinimum(a.famille, volumes), v.entreprises, this.cfg.seuilAnonymat),
+        reunies: await this.reunies(a.id),
       });
     }
     return { zone, achats };

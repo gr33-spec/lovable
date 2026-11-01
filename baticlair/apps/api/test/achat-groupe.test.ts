@@ -102,6 +102,12 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     // Une autre période : un autre achat, gratuit lui aussi, sans abonnement.
     expect((await a.agent.post("/v1/achats-groupes").send(engagement({ dateBesoin: jour(80) })).expect(201)).body).toMatchObject({ offert: false, phrase: null });
 
+    // E-mail pas confirmé (Greg, 1er novembre 2026) : refusé, avec la phrase ; la liste se prépare, rien n'est compté.
+    const nonConfirme = await artisan(8);
+    await ctx.prisma.user.update({ where: { email: nonConfirme.email }, data: { emailVerified: false } });
+    const refus = (await nonConfirme.agent.post("/v1/achats-groupes").send(engagement()).expect(403)).body.error.details;
+    expect(refus).toMatchObject({ reason: "email_a_confirmer", message: "Confirme ton adresse e-mail pour ajouter tes quantités : le lien est dans l'e-mail reçu à l'inscription." });
+
     // Sans SIRET vérifié : refusé ; un SIRET de commerce de gros : refusé à la vérification.
     const g = await artisan(9);
     await ctx.prisma.company.update({ where: { id: g.companyId }, data: { siret: SIRET_TEST_GROSSISTE, siretVerifieLe: null } });
@@ -122,6 +128,13 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     const pres = (await b.agent.get("/v1/achats-groupes/pres-de-chez-moi").expect(200)).body.achats;
     expect(pres).toHaveLength(1);
     expect(JSON.stringify(pres)).not.toMatch(/Toitures 1/);
+    // Greg, 1er novembre 2026 : les totaux agrégés des entreprises vérifiées, jamais une quantité exacte sous 5 entreprises,
+    // jamais une identité ; « moins de 5 entreprises ».
+    expect(pres[0].reunies.entreprises).toBe("moins de 5 entreprises");
+    expect(pres[0].reunies.totaux.length).toBeGreaterThan(0);
+    for (const t of pres[0].reunies.totaux as string[]) expect(t).toMatch(/^plus de /);
+    // « Mes propositions » : A a ouvert cet achat.
+    expect((await a.agent.get("/v1/achats-groupes").expect(200)).body.achats[0]).toMatchObject({ jePropose: true });
     const lb = (
       await b.agent
         .post("/v1/achats-groupes")
@@ -279,8 +292,8 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(d.lignes.map((x: { question: string | null }) => x.question)).toEqual(["C'est bien de l'ardoise 32×22 Espagne 1er choix ?", null]);
     expect(d.suggestion.phrase).toBe("Tu as 1 200 pièces de ardoise 32×22 Espagne 1er choix, mets-les en achat groupé pour payer moins cher.");
     expect(d.suggestion.keys).toEqual([d.lignes[0].key]);
-    expect(d.droit).toEqual({ ok: true, offert: false, phrase: null });
-    expect(d.engagement.phrase).toBe("Je commande ces quantités, chez le moins cher entre la meilleure offre du groupe et mon négoce habituel.");
+    expect(d.droit).toEqual({ ok: true, offert: false, phrase: null, raison: null });
+    expect(d.engagement.phrase).toBe("Je confirme que ces quantités correspondent à un besoin réel de mon entreprise.");
     const corps = { confirmees: d.lignes.map((x: { key: string }) => x.key), dateBesoin: jour(30), negoces: [{ nom: "Négoce X", email: "x@negoce.fr" }] };
     await c.agent.post(`/v1/projects/${c.projectId}/achat-groupe`).send({ ...corps, engagement: false }).expect(400);
     const r = (await c.agent.post(`/v1/projects/${c.projectId}/achat-groupe`).send({ ...corps, engagement: true }).expect(201)).body;

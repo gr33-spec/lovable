@@ -27,7 +27,7 @@ function Lancer() {
   return (
     <>
       <BackButton fallback="/achats-groupes" compact />
-      <PageTitle>{rejoindre ? "Ajouter ma liste" : "Achat groupé de ton métier"}</PageTitle>
+      <PageTitle>{rejoindre ? "Ajouter mes quantités" : "Proposer un besoin groupé"}</PageTitle>
       <FormulaireAchatGroupe key={id ?? famille ?? "nouveau"} rejoindre={rejoindre} famille={rejoindre ? null : famille} />
     </>
   );

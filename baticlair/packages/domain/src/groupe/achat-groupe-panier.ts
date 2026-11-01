@@ -76,7 +76,13 @@ export function lignesPourNegoce(panier: readonly LignePanier[], negoce: { gener
 
 /* -------------------------------------------------------------------------- l'engagement (B6 à B10) */
 
-export const PHRASE_ENGAGEMENT = "Je commande ces quantités, chez le moins cher entre la meilleure offre du groupe et mon négoce habituel.";
+/**
+ * LA CONFIRMATION D'UNE PARTICIPATION (Greg, 1er novembre 2026) : un besoin réel de l'entreprise, pas encore une commande
+ * ferme. Avant : « Je commande ces quantités, chez le moins cher entre la meilleure offre du groupe et mon négoce habituel. »
+ */
+export const PHRASE_ENGAGEMENT = "Je confirme que ces quantités correspondent à un besoin réel de mon entreprise.";
+/** Pour ajouter des quantités : e-mail confirmé et SIRET actif (Greg, 1er novembre 2026 ; pas de SMS pour l'instant). */
+export const PHRASE_EMAIL_A_CONFIRMER = "Confirme ton adresse e-mail pour ajouter tes quantités : le lien est dans l'e-mail reçu à l'inscription.";
 
 /** Les règles dites en clair au moment de rejoindre (point 9), au-dessus de la case obligatoire. */
 export const REGLES_ENGAGEMENT: readonly string[] = [
@@ -289,4 +295,57 @@ export function demandeNegocePanier(d: DemandeNegocePanier): { objet: string; te
     `${NOM_APP}, des artisans qui achètent ensemble.`,
   ].join("\n");
   return { objet, texte };
+}
+
+/* ------------------------------------------------------------- les quantités réunies (Greg, 1er novembre 2026) */
+
+/** Une ligne d'une participation, telle que la base la garde ; `compte` : entreprise vérifiée et participation confirmée. */
+export interface LigneReunie {
+  companyId: string;
+  libelle: string;
+  unite: string;
+  quantite: number;
+  compte: boolean;
+}
+
+/**
+ * « 2 400 ardoises », arrondi par tranche quand il y a moins de `seuil` entreprises (« plus de 2 000 ardoises ») : un total
+ * fait d'une ou deux entreprises ne doit jamais redonner la quantité exacte d'un concurrent.
+ */
+export function tranche(n: number): number {
+  if (n < 10) return Math.floor(n);
+  const pas = 10 ** Math.floor(Math.log10(n));
+  return Math.floor(n / pas) * pas;
+}
+
+const entier = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 0 }).replace(/\u202f/g, "\u00a0");
+
+/**
+ * Les totaux visibles d'une proposition : seules les lignes comptées (entreprise vérifiée, participation confirmée),
+ * additionnées par article et unité, les plus grosses d'abord (trois au plus) ; jamais une quantité individuelle ni une
+ * identité. Sous le seuil, chaque total est arrondi par tranche.
+ */
+export function quantitesReunies(lignes: readonly LigneReunie[], seuil: number): { entreprises: number; totaux: string[] } {
+  const comptees = lignes.filter((l) => l.compte && l.quantite > 0);
+  const entreprises = new Set(comptees.map((l) => l.companyId)).size;
+  const parArticle = new Map<string, { libelle: string; unite: string; total: number }>();
+  for (const l of comptees) {
+    const cle = `${l.libelle.trim().toLowerCase()}|${l.unite.trim().toLowerCase()}`;
+    const t = parArticle.get(cle) ?? { libelle: l.libelle.trim(), unite: l.unite.trim(), total: 0 };
+    t.total += l.quantite;
+    parArticle.set(cle, t);
+  }
+  const sousSeuil = entreprises < seuil;
+  const totaux = [...parArticle.values()]
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 3)
+    .map((t) => (sousSeuil ? `plus de ${entier(Math.max(1, tranche(t.total)))} ${t.unite} · ${t.libelle}` : `${entier(t.total)} ${t.unite} · ${t.libelle}`));
+  return { entreprises, totaux };
+}
+
+/** « 7 entreprises » ; sous le seuil, « moins de 5 entreprises » (jamais le nombre exact). */
+export function phraseEntreprises(n: number, seuil: number): string {
+  if (n === 0) return "Aucune entreprise vérifiée pour l'instant";
+  if (n < seuil) return `moins de ${seuil} entreprises`;
+  return `${n} entreprises`;
 }

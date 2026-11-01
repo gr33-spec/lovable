@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { confirmerEmail } from "./confirmer-email";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
 
@@ -110,6 +111,7 @@ async function inscrire(page: Page, dep: string, prenom = "Jean"): Promise<{ ent
   await expect(page.getByRole("heading", { name: new RegExp(`^Bonjour ${prenom}`) }).or(page.getByRole("dialog", { name: "Guide" })).first()).toBeVisible();
   expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: entreprise, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: "73282932000074", phone: null, email: null })).status).toBe(200);
   expect((await apiJson(page, "POST", "/v1/groupe/siret")).status).toBe(200);
+  await confirmerEmail(page, email);
   return { entreprise, email };
 }
 
@@ -213,7 +215,8 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(suggestion).toBeVisible({ timeout: 30_000 });
     await suggestion.scrollIntoViewIfNeeded();
     await capture(page, projet, "2a-liste-depuis-devis");
-    await page.getByRole("button", { name: "Mettre en achat groupé" }).click();
+    // Greg, 1er novembre 2026 : après la liste, « Regrouper seulement certains articles » (les gros volumes cochés d'office).
+    await page.getByRole("button", { name: "Regrouper seulement certains articles" }).click();
     const groupe = page.getByLabel("Acheter en groupe");
     await expect(groupe.getByRole("checkbox", { name: /Ardoise naturelle 32×22/ })).toBeChecked();
     await expect(groupe.getByRole("checkbox", { name: /Liteaux 27×38/ })).not.toBeChecked();
@@ -231,7 +234,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await groupe.getByRole("button", { name: "Continuer" }).click();
     // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits ; plus de « premier offert ».
     await expect(groupe.getByText("Ton premier achat groupé est offert.")).toHaveCount(0);
-    await groupe.getByRole("checkbox", { name: /^Je commande ces quantités/ }).check();
+    await groupe.getByRole("checkbox", { name: /^Je confirme que ces quantités correspondent à un besoin réel de mon entreprise/ }).check();
     await capture(page, projet, "2b-tout-cocher-engagement");
     await groupe.getByRole("button", { name: /^Je m'engage et j'ajoute ces 2 lignes$/ }).click();
     await expect(page.getByText(/^2 lignes dans l'achat groupé : Couverture · secteur /)).toBeVisible();
@@ -246,10 +249,14 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await b.page.goto("/");
     await b.page.getByRole("region", { name: "Commencer" }).getByRole("link", { name: /^Rejoindre un achat groupé/ }).click();
     await b.page.waitForURL(/\/achats-groupes$/);
-    const ouverts = b.page.getByRole("region", { name: "Achats groupés près de chez toi" });
-    await expect(ouverts.getByText(/Ajoute ta liste avant le \d+(?:er)? \S+\. Livraison avant le \d+(?:er)? \S+\./).first()).toBeVisible();
-    await ouverts.getByRole("link", { name: "Ajouter ma liste" }).first().click();
-    await expect(b.page.getByRole("heading", { name: "Ajouter ma liste" })).toBeVisible();
+    const ouverts = b.page.getByRole("tabpanel", { name: "Propositions ouvertes" });
+    await b.page.getByRole("tab", { name: /^Propositions ouvertes/ }).click();
+    await expect(ouverts.getByText(/^Clôture le \d+(?:er)? \S+$/).first()).toBeVisible();
+    await expect(ouverts.getByText(/^Livraison avant le \d+(?:er)? \S+\.$/).first()).toBeVisible();
+    // Greg, 1er novembre 2026 : totaux agrégés et « moins de 5 entreprises », jamais une quantité exacte d'un concurrent.
+    await expect(ouverts.getByText("moins de 5 entreprises").first()).toBeVisible();
+    await ouverts.getByRole("link", { name: "Ajouter mes quantités" }).first().click();
+    await expect(b.page.getByRole("heading", { name: "Ajouter mes quantités" })).toBeVisible();
     // Le choix guidé (Greg, 27 octobre, capture iPhone) : un bouton par matériau, format, choix, puis la quantité.
     // Point 3 du 30 octobre : le catalogue en listes, famille › produit › format.
     await b.page.getByRole("button", { name: "Ardoises", exact: true }).click();
@@ -264,7 +271,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await b.page.getByRole("button", { name: "Continuer" }).click();
     const engagement = b.page.getByRole("region", { name: "Mon engagement" });
     await expect(engagement.getByText("Deux sorties seulement, en un clic avec le motif", { exact: false })).toBeVisible();
-    await engagement.getByRole("checkbox", { name: /^Je commande ces quantités, chez le moins cher entre la meilleure offre du groupe et mon négoce habituel\.$/ }).check();
+    await engagement.getByRole("checkbox", { name: /^Je confirme que ces quantités correspondent à un besoin réel de mon entreprise\./ }).check();
     await capture(b.page, projet, "3-engagement-2e-couvreur");
     await b.page.getByRole("button", { name: "Je m'engage et j'ajoute ma liste" }).click();
     await expect(b.page.getByText(/^Ta liste est dans l'achat groupé : Couverture · secteur .+\.$/)).toBeVisible();
@@ -402,11 +409,13 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await page.getByLabel("Prénom et nom").fill("Jean Martin");
     await page.getByLabel("Nom de ton entreprise").fill(entreprise);
     await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
-    await page.getByLabel("E-mail professionnel").fill(`artisan-${unique()}@example.fr`);
+    const email = `artisan-${unique()}@example.fr`;
+    await page.getByLabel("E-mail professionnel").fill(email);
     await page.getByLabel("Mot de passe").fill("motdepasse-solide");
     await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
     await page.getByRole("button", { name: "Créer mon compte" }).click();
     await page.getByRole("button", { name: "C'est compris" }).click();
+    await confirmerEmail(page, email);
     expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: entreprise, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: null, phone: null, email: null })).status).toBe(200);
   }
   /** Partir par le menu (Profil), revenir à l'accueil et toucher « Reprendre », comme un artisan. */
@@ -461,7 +470,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     // Vérifié : l'étape continue d'elle-même sur l'engagement.
     const engagement = page.getByRole("region", { name: "Mon engagement" });
     await expect(engagement).toBeVisible();
-    await engagement.getByRole("checkbox", { name: /^Je commande ces quantités/ }).check();
+    await engagement.getByRole("checkbox", { name: /^Je confirme que ces quantités correspondent à un besoin réel de mon entreprise/ }).check();
     await page.getByRole("button", { name: "Je m'engage et j'ajoute ma liste" }).click();
     await expect(page.getByText(/^Ta liste est dans l'achat groupé/)).toBeVisible();
     // Fini : plus rien à reprendre.

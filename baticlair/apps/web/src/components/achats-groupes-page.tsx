@@ -1,7 +1,8 @@
 "use client";
 
-import { Users } from "lucide-react";
-import { useCallback } from "react";
+import { Plus, Users } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback } from "react";
 import { CarteAchatGroupe, CarteAchatOuvert } from "@/components/achat-groupe";
 import { RegroupementsNegocies, useModeRegroupement } from "@/components/negocie";
 import { InviterCollegue } from "@/components/inviter";
@@ -35,10 +36,30 @@ export function PageAchatsGroupes() {
     );
   }
   if (mode === "mois") return <RegroupementsAutomatiques />;
-  return <AchatsGroupes />;
+  return (
+    <Suspense fallback={<Skeleton card="h-56" lines={2} label="Chargement des achats groupés…" />}>
+      <AchatsGroupes />
+    </Suspense>
+  );
 }
 
+type Vue = "ouvertes" | "participations" | "propositions";
+const VUES: { value: Vue; label: string }[] = [
+  { value: "ouvertes", label: "Propositions ouvertes" },
+  { value: "participations", label: "Mes participations" },
+  { value: "propositions", label: "Mes propositions" },
+];
+
+/**
+ * TROIS VUES (Greg, 1er novembre 2026) : « Propositions ouvertes » (celles du secteur que je n'ai pas rejointes),
+ * « Mes participations » (toutes les miennes), « Mes propositions » (celles que j'ai ouvertes). « Proposer un besoin
+ * groupé » ouvre une proposition ; « Ajouter mes quantités » rejoint une proposition existante. La vue vit dans l'adresse.
+ */
 function AchatsGroupes() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const vueParam = params.get("vue");
   const fetchMes = useCallback((signal: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal }), []);
   const fetchPres = useCallback((signal: AbortSignal) => api<{ zone: string | null; achats: AchatOuvert[] }>("/v1/achats-groupes/pres-de-chez-moi", { signal }), []);
   const { data: mes, error, reload } = useResource(fetchMes);
@@ -46,14 +67,17 @@ function AchatsGroupes() {
   const finis = ["retire", "desiste", "sorti", "non_commande"];
   const actifs = (mes?.achats ?? []).filter((a) => !finis.includes(a.etat));
   const passes = (mes?.achats ?? []).filter((a) => finis.includes(a.etat));
+  const proposees = (mes?.achats ?? []).filter((a) => a.jePropose);
+  // Par défaut : mes participations s'il y en a, sinon les propositions ouvertes.
+  const vue: Vue = vueParam === "ouvertes" || vueParam === "participations" || vueParam === "propositions" ? vueParam : actifs.length > 0 ? "participations" : "ouvertes";
+  const choisir = (v: Vue) => router.replace(`${pathname}?vue=${v}`, { scroll: false });
+  const compte: Record<Vue, number | null> = { ouvertes: pres ? pres.achats.length : null, participations: mes ? actifs.length : null, propositions: mes ? proposees.length : null };
   return (
-    <div className="flex flex-col gap-6">
-      {/* Ordinateur (Greg, 31 octobre 2026, soir) : le titre et « Ajouter ma liste » sur une ligne ; à gauche les achats
-          groupés, à droite comment ça marche et l'invitation. Téléphone : l'ordre d'avant. */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <PageTitle>Achats groupés</PageTitle>
         <ButtonLink href="/achats-groupes/lancer" className="w-full lg:w-auto lg:px-6">
-          Ajouter ma liste à un achat groupé
+          <Plus size={18} aria-hidden="true" /> Proposer un besoin groupé
         </ButtonLink>
       </div>
       {mes?.exclusion ? (
@@ -62,39 +86,68 @@ function AchatsGroupes() {
         </p>
       ) : null}
       {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
+      <div role="tablist" aria-label="Vues des achats groupés" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:px-0">
+        {VUES.map((v) => (
+          <button
+            key={v.value}
+            type="button"
+            role="tab"
+            aria-selected={vue === v.value}
+            onClick={() => choisir(v.value)}
+            className={`pressable min-h-11 shrink-0 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${vue === v.value ? "bg-ink text-white" : "border border-line bg-surface text-ink active:bg-ground"}`}
+          >
+            {v.label}
+            {compte[v.value] ? <span className="ml-1.5 tabular-nums opacity-70">{compte[v.value]}</span> : null}
+          </button>
+        ))}
+      </div>
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
-        <div className="flex min-w-0 flex-col gap-6">
-          {pres && pres.achats.length > 0 ? (
-            <section aria-label="Achats groupés près de chez toi" className="flex flex-col gap-3">
-              <SectionTitle>Achats groupés de ton métier près de chez toi</SectionTitle>
+        <div role="tabpanel" aria-label={VUES.find((v) => v.value === vue)!.label} className="flex min-w-0 flex-col gap-3">
+          {vue === "ouvertes" ? (
+            !pres ? (
+              <Skeleton card="h-40" lines={2} label="Chargement des propositions…" />
+            ) : pres.achats.length ? (
               <div className="flex flex-col gap-3 2xl:grid 2xl:grid-cols-2">
                 {pres.achats.map((a) => (
                   <CarteAchatOuvert key={a.id} a={a} />
                 ))}
               </div>
-            </section>
+            ) : (
+              <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Aucune proposition ouverte dans ton secteur">
+                <p className="text-[15px] text-muted">Propose un besoin groupé : les artisans de ton métier dans le secteur sont prévenus.</p>
+              </EmptyState>
+            )
           ) : null}
-          {!mes && !error ? <Skeleton card="h-40" lines={2} label="Chargement de tes achats groupés…" /> : null}
-          {mes && actifs.length > 0 ? (
-            <section aria-label="Mes achats groupés" className="flex flex-col gap-3">
-              <SectionTitle>Mes achats groupés</SectionTitle>
-              {actifs.map((c) => (
-                <CarteAchatGroupe key={c.id} c={c} />
-              ))}
-            </section>
+          {vue !== "ouvertes" && !mes && !error ? <Skeleton card="h-40" lines={2} label="Chargement de tes achats groupés…" /> : null}
+          {vue === "participations" && mes ? (
+            actifs.length || passes.length ? (
+              <>
+                {actifs.map((c) => (
+                  <CarteAchatGroupe key={c.id} c={c} />
+                ))}
+                {passes.length > 0 ? (
+                  <section aria-label="Terminés" className="flex flex-col gap-3 pt-2">
+                    <SectionTitle>Terminés</SectionTitle>
+                    {passes.map((c) => (
+                      <CarteAchatGroupe key={c.id} c={c} />
+                    ))}
+                  </section>
+                ) : null}
+              </>
+            ) : (
+              <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Aucune participation pour l'instant">
+                <p className="text-[15px] text-muted">Ouvre une proposition et ajoute tes quantités.</p>
+              </EmptyState>
+            )
           ) : null}
-          {mes && actifs.length === 0 && (pres?.achats.length ?? 0) === 0 ? (
-            <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Pas encore d'achat groupé dans ton secteur">
-              <p className="text-[15px] text-muted">Ouvre le premier : les artisans de ton métier dans le secteur sont prévenus.</p>
-            </EmptyState>
-          ) : null}
-          {passes.length > 0 ? (
-            <section aria-label="Terminés" className="flex flex-col gap-3">
-              <SectionTitle>Terminés</SectionTitle>
-              {passes.map((c) => (
-                <CarteAchatGroupe key={c.id} c={c} />
-              ))}
-            </section>
+          {vue === "propositions" && mes ? (
+            proposees.length ? (
+              proposees.map((c) => <CarteAchatGroupe key={c.id} c={c} />)
+            ) : (
+              <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Tu n'as encore proposé aucun besoin groupé">
+                <p className="text-[15px] text-muted">« Proposer un besoin groupé » ouvre un achat groupé de ton métier dans ton secteur.</p>
+              </EmptyState>
+            )
           ) : null}
         </div>
         <div className="flex flex-col gap-6 lg:sticky lg:top-8">
@@ -112,7 +165,7 @@ function AchatsGroupes() {
 /** Ordinateur seulement : l'achat groupé en trois étapes, à côté de la liste (sur téléphone, la page reste courte). */
 function CommentCaMarcheOrdinateur() {
   const etapes = [
-    ["Ajoute ta liste", "Les lignes de ton métier, ta commune, ta date et au moins un négoce."],
+    ["Ajoute tes quantités", "Les lignes de ton métier, ta commune, ta date et au moins un négoce."],
     ["Les négoces chiffrent", "Ils reçoivent le volume de tous, jamais ton nom. Gratuit, à chaque fois."],
     ["Tu commandes au mieux", "Chez le moins cher entre la meilleure offre du groupe et ton négoce habituel."],
   ] as const;

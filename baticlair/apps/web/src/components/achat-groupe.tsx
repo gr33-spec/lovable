@@ -7,10 +7,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useLienInvitation } from "@/components/inviter";
 import { Button, ButtonLink, Card, Field, INPUT, Skeleton } from "@/components/ui";
 import { api, messageErreur, type NextAction } from "@/lib/api";
-import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
+import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type Reunies, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
 import { useResource } from "@/lib/use-resource";
 import { useBrouillon } from "@/lib/brouillon";
-import { lireContexteAchat, oublierContexteAchat, type ContexteAchat } from "@/lib/contexte-achat";
+import { lireContexteAchat, oublierContexteAchat, retenirContexteAchat, type ContexteAchat } from "@/lib/contexte-achat";
 import { CatalogueListes } from "@/components/catalogue-listes";
 import { EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
 import { TON as TON_MOBIIZ } from "../../../../packages/domain/src/groupe/ton";
@@ -113,26 +113,83 @@ export function CarteAchatGroupe({ c }: { c: CarteAchat }) {
         <ChevronRight size={20} className="mt-1 shrink-0 text-muted" aria-hidden="true" />
       </span>
       <span className="text-[15px] font-bold">{c.titre}</span>
+      <TotauxReunis r={c.reunies} />
       <JaugeVolume j={c.jauge} />
     </Link>
   );
 }
 
-/** Un achat groupé ouvert du secteur : le titre, la date limite, un bouton. */
+/** Les totaux visibles (entreprises vérifiées, agrégés) et le nombre d'entreprises, jamais exact sous 5. */
+export function TotauxReunis({ r }: { r: Reunies | undefined }) {
+  if (!r) return null;
+  return (
+    <div aria-label="Quantités réunies" className="flex flex-col gap-0.5">
+      {r.totaux.length ? (
+        <ul className="flex flex-col gap-0.5 text-[14px] font-semibold">
+          {r.totaux.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ul>
+      ) : null}
+      <span className="text-[13px] text-muted">{r.entreprises}</span>
+    </div>
+  );
+}
+
+/**
+ * Une proposition ouverte du secteur (Greg, 1er novembre 2026) : titre, famille, zone, clôture, quantités réunies,
+ * entreprises, « Ajouter mes quantités ».
+ */
 export function CarteAchatOuvert({ a }: { a: AchatOuvert }) {
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card">
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-1">
         <span className="text-[16px] font-extrabold">{a.titre}</span>
-        <span className="text-[15px]">
-          Ajoute ta liste avant le {dateFr(a.clotureLe)}.{a.dateBesoin ? ` Livraison avant le ${dateFr(a.dateBesoin)}.` : ""}
+        <span className="flex flex-wrap gap-1.5 text-[13px] font-semibold">
+          <span className="rounded-full bg-ground px-2.5 py-1">{a.metier}</span>
+          <span className="rounded-full bg-ground px-2.5 py-1">Zone {a.zone}</span>
+          <span className="rounded-full bg-ground px-2.5 py-1">Clôture le {dateFr(a.clotureLe)}</span>
         </span>
-        {a.entreprises ? <span className="text-[14px] text-muted">{a.entreprises} artisans du secteur déjà dedans</span> : null}
+        {a.dateBesoin ? <span className="text-[14px] text-muted">Livraison avant le {dateFr(a.dateBesoin)}.</span> : null}
       </div>
+      <TotauxReunis r={a.reunies} />
       <JaugeVolume j={a.jauge} />
       <ButtonLink href={`/achats-groupes/lancer?rejoindre=${a.id}&titre=${encodeURIComponent(a.titre)}`} variant="secondary">
-        Ajouter ma liste
+        Ajouter mes quantités
       </ButtonLink>
+    </div>
+  );
+}
+
+/**
+ * LES AUTRES FAÇONS D'AJOUTER SES QUANTITÉS (Greg, 1er novembre 2026) : depuis une liste enregistrée, en important un
+ * document, en photographiant une liste papier, en décrivant son chantier. L'achat choisi est gardé : sur la liste
+ * validée, MOBIIZ propose directement « Ajouter toute ma liste » ou « Choisir les articles à regrouper ».
+ */
+function AutresSources({ achat }: { achat: { id: string; titre: string } }) {
+  const router = useRouter();
+  const aller = (href: string) => {
+    retenirContexteAchat({ achatId: achat.id, titre: achat.titre || null });
+    router.push(href);
+  };
+  const lien = "pressable min-h-11 rounded-full border border-line bg-surface px-3.5 text-[14px] font-semibold active:bg-ground";
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-[14px] text-muted">À la main ci-dessous, ou depuis :</p>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className={lien} onClick={() => aller("/chantiers?statut=a-preparer")}>
+          Une liste enregistrée
+        </button>
+        <button type="button" className={lien} onClick={() => aller("/chantiers/nouveau")}>
+          Importer un document
+        </button>
+        <button type="button" className={lien} onClick={() => aller("/chantiers/nouveau#photo")}>
+          Photographier une liste papier
+        </button>
+        <button type="button" className={lien} onClick={() => aller("/chantiers/nouveau#decrire")}>
+          Décrire mon chantier
+        </button>
+      </div>
     </div>
   );
 }
@@ -283,7 +340,33 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
 /* ------------------------------------------------------------------------------------- l'engagement (B6 à B9) */
 
 /** Point 9 : les règles en clair (quatre lignes), puis la case obligatoire ; le premier achat groupé est offert. */
+/** L'e-mail pas encore confirmé (Greg, 1er novembre 2026) : la phrase et « Renvoyer l'e-mail de confirmation ». */
+function EmailAConfirmer({ phrase }: { phrase: string | null }) {
+  const [etat, setEtat] = useState<"" | "envoi" | "envoye" | "erreur">("");
+  async function renvoyer() {
+    setEtat("envoi");
+    try {
+      const me = await api<{ user: { email: string } }>("/v1/me");
+      await api("/v1/auth/send-verification-email", { method: "POST", body: { email: me.user.email, callbackURL: window.location.href } });
+      setEtat("envoye");
+    } catch {
+      setEtat("erreur");
+    }
+  }
+  return (
+    <div role="status" className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
+      <p className="text-[16px] font-bold">{phrase}</p>
+      {etat === "envoye" ? <p className="text-[15px] font-semibold text-ok">E-mail renvoyé : ouvre le lien, puis reviens ici.</p> : null}
+      {etat === "erreur" ? <p className="text-[15px] font-semibold text-danger">L&apos;e-mail n&apos;est pas parti. Réessaie dans un instant.</p> : null}
+      <Button variant="secondary" pending={etat === "envoi"} onClick={() => void renvoyer()}>
+        Renvoyer l&apos;e-mail de confirmation
+      </Button>
+    </div>
+  );
+}
+
 export function Engagement({ droit, texte, coche, onCoche }: { droit: Droit; texte: EngagementTexte; coche: boolean; onCoche: (v: boolean) => void }) {
+  if (!droit.ok && droit.raison === "email") return <EmailAConfirmer phrase={droit.phrase} />;
   if (!droit.ok)
     return (
       <div role="status" className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
@@ -463,7 +546,7 @@ export function FormulaireAchatGroupe({ rejoindre, famille = null }: { rejoindre
       </div>
     );
   return (
-    <form onSubmit={(e) => void envoyer(e)} aria-label={rejoindre ? "Rejoindre l'achat groupé" : "Ajouter ma liste à un achat groupé"} className="flex flex-col gap-5">
+    <form onSubmit={(e) => void envoyer(e)} aria-label={rejoindre ? "Ajouter mes quantités" : "Proposer un besoin groupé"} className="flex flex-col gap-5">
       {rejoindre ? <Rappel>Achat groupé : {rejoindre.titre}</Rappel> : null}
       {mes?.exclusion ? (
         <p role="alert" className={ALERTE}>
@@ -472,6 +555,7 @@ export function FormulaireAchatGroupe({ rejoindre, famille = null }: { rejoindre
       ) : null}
       {etape === 1 ? (
         <Etape n={1} total={total} titre={"Qu'est-ce que tu commandes\u00a0?"}>
+          {rejoindre ? <AutresSources achat={rejoindre} /> : null}
           <CatalogueListes familleAchat={familleAchat} onAjouter={(r) => setLignes((ls) => [...ls, { designation: r.designation, unite: r.unite, qte: r.qte, ...(r.cle ? { cle: r.cle } : {}), ...(r.libre ? { libre: true } : {}), ...(r.familleAchat ? { familleAchat: r.familleAchat } : {}) }])} onAutreMetier={(l, m) => void mettreDeCote(l, m)} />
           {lignes.length ? <LignesPanier lignes={lignes} onChange={setLignes} /> : null}
           <Button disabled={pretes.length === 0 || bloque} onClick={suivant}>
@@ -1068,6 +1152,7 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
     return (
       <section aria-label="Et maintenant ?" className="flex flex-col gap-2 rounded-xl bg-surface p-4 shadow-card">
         <p className="text-[16px] font-bold">{sur ? `Ajouter à l'achat groupé : ${sur.titre ?? "celui que tu as choisi"}` : "Et maintenant ?"}</p>
+        {!sur && data.suggestion ? <p className="text-[15px]">{data.suggestion.phrase}</p> : null}
         {!sur ? <p className="text-[14px] text-muted">« Demander les prix à mes négoces » est en bas de ta liste.</p> : null}
         <Button variant={sur ? "primary" : "secondary"} onClick={() => choisir(toutes)}>
           <Users size={18} aria-hidden="true" /> {sur ? "Ajouter toute ma liste" : "Ajouter toute ma liste à un achat groupé"}
