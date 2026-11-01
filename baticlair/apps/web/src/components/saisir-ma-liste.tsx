@@ -27,7 +27,8 @@ export interface LigneSaisie {
 const UNITES = ["", "pièces", "m", "m²", "m³", "kg", "sacs", "rouleaux", "palettes", "boîtes", "litres", "pots"];
 
 export function boutonSaisie(n: number): string {
-  return n === 0 ? "Sélectionne un matériau" : n === 1 ? "Ajouter 1 matériau à ma liste" : `Ajouter ${n} matériaux à ma liste`;
+  // Greg, 1er novembre 2026 : « Créer ma liste avec N matériaux » (le bouton crée la liste et ouvre l'éditeur).
+  return n === 0 ? "Sélectionne un matériau" : n === 1 ? "Créer ma liste avec 1 matériau" : `Créer ma liste avec ${n} matériaux`;
 }
 
 export function SaisirMaListe({ onFermer }: { onFermer: () => void }) {

@@ -84,7 +84,7 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     await dialogue.getByRole("button", { name: /Ajouter « Crochets inox maison » tel que je l'écris/ }).click();
     await champVisible(page, dialogue.getByLabel("Quantité de la ligne libre"));
     await dialogue.getByLabel("Quantité de la ligne libre").fill("90");
-    await dialogue.getByRole("button", { name: "Ajouter ce matériau" }).click();
+    await dialogue.getByRole("button", { name: "Ajouter à la sélection" }).click();
     await champVisible(page, dialogue.getByLabel("Quantité de Crochets inox maison"));
     await dialogue.getByRole("button", { name: "Retour" }).click();
     await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();

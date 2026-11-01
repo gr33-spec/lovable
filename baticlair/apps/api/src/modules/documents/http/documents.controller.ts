@@ -29,6 +29,7 @@ import { CONFIG } from "../../../platform/tokens.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import type { DocumentWithProcessing, PageRecord } from "../application/document.repository.js";
 import { DocumentsService } from "../application/documents.service.js";
+import { assembleQuote } from "../infrastructure/photos-to-pdf.js";
 import { chunkedFields, MAX_PART_BYTES, UploadParts } from "../infrastructure/upload-parts.js";
 
 /** Fichier reçu par multer (stockage en mémoire). */
@@ -106,7 +107,13 @@ export class DocumentsController {
     @Body(new ZodPipe(uploadBody)) body: z.infer<typeof uploadBody>,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const received = await this.uploads.fileOf(tenant, file, body);
+    let received = await this.uploads.fileOf(tenant, file, body);
+    // Photo d'un devis (Greg, 1er novembre 2026 : « photo d'un devis → analyse de devis ») : la photo (JPEG, PNG) devient un
+    // PDF d'image, comme un devis de négoce en photos (`assembleQuote`) ; la lecture passe alors par l'image. Un PDF passe tel quel.
+    if (body.purpose === "client_quote") {
+      const pdf = await assembleQuote([{ fileName: received.name, bytes: received.bytes }]);
+      received = { name: pdf.fileName, bytes: pdf.bytes };
+    }
     const result = await this.documents.upload(tenant, projectId, { purpose: body.purpose, fileName: received.name, bytes: received.bytes });
     res.status(result.duplicate ? 200 : 201);
     return { ...this.toDto(result.document), duplicate: result.duplicate };

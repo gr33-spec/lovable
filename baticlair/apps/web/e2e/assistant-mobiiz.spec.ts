@@ -1,5 +1,10 @@
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { confirmerAnalyseDoffice } from "./confirmer-analyse";
+
+test.beforeEach(async ({ page }) => {
+  await confirmerAnalyseDoffice(page);
+});
 
 /**
  * L'ASSISTANT MOBIIZ (Greg, 31 octobre 2026, « Refonte de l'expérience de création des quantitatifs, assistant IA et PDF

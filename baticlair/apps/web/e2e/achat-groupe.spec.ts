@@ -2,6 +2,11 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { confirmerAnalyseDoffice } from "./confirmer-analyse";
+
+test.beforeEach(async ({ page }) => {
+  await confirmerAnalyseDoffice(page);
+});
 
 /**
  * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message) : les six cas de la méthode, sur téléphone et sur
@@ -467,7 +472,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
     await ecran.getByRole("button", { name: /Ajouter « Liteaux 27×38 maison » tel que je l'écris/ }).click();
     await ecran.getByLabel("Quantité de la ligne libre").fill("400");
-    await ecran.getByRole("button", { name: "Ajouter ce matériau" }).click();
+    await ecran.getByRole("button", { name: "Ajouter à la sélection" }).click();
     await expect(ecran.getByRole("region", { name: "Ma liste en cours" })).toBeVisible();
     await expect(ecran.getByRole("region", { name: "Ma liste en cours" }).getByRole("textbox").first()).toHaveValue("Liteaux 27×38 maison");
     await page.waitForTimeout(700);

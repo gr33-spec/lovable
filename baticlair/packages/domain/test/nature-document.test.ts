@@ -26,4 +26,11 @@ describe("Importer un document : le type se détermine sans le demander (Greg, 3
   it("un seul indice ne suffit pas (le mot « devis » dans une liste)", () => {
     expect(natureDuDocument({ type: "application/pdf", nom: "l.pdf" }, "Liste pour le devis du client : ardoises 1200 pièces, liteaux 180 m, crochets 1250")).toBe("liste");
   });
+  it("une photo dont le nom dit un devis (1er novembre 2026) : le devis ; une photo sans nom parlant : la liste", () => {
+    expect(natureDuDocument({ type: "image/jpeg", nom: "Devis Martin.jpg" }, null)).toBe("devis");
+    expect(natureDuDocument({ type: "image/png", nom: "facture_2026.png" }, null)).toBe("devis");
+    expect(natureDuDocument({ type: "image/jpeg", nom: "IMG_2041.jpg" }, null)).toBe("liste");
+    // WebP ou HEIC : la lecture de devis ne prend que JPEG et PNG ; la liste lit tout.
+    expect(natureDuDocument({ type: "image/webp", nom: "devis.webp" }, null)).toBe("liste");
+  });
 });

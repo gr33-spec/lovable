@@ -34,6 +34,8 @@ export default function NouveauChantierPage() {
   const [pending, setPending] = useState<"devis" | "liste" | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [erreurListe, setErreurListe] = useState<string | null>(null);
+  // Avant toute analyse (Greg, 1er novembre 2026) : le type reconnu et ce qu'il coûte ; rien n'est décompté avant « Analyser ».
+  const [aConfirmer, setAConfirmer] = useState<{ file: File; nature: "devis" | "liste" } | null>(null);
   // Une clé par dépôt : double appui ou nouvelle tentative = un seul chantier.
   const key = useRef(newActionKey());
   const project = useRef<Project | null>(null);
@@ -92,7 +94,9 @@ export default function NouveauChantierPage() {
     // Trop lourd : refusé par le dépôt, en clair, sans lire le fichier.
     if (file.size > MAX_DOCUMENT_BYTES) return drop(file, "liste");
     const nature = natureDuDocument({ type: file.type, nom: file.name }, file.type === "application/pdf" || /\.pdf$/i.test(file.name) ? await texteDuPdf(file) : null);
-    await drop(file, nature);
+    setError(null);
+    setErreurListe(null);
+    setAConfirmer({ file, nature });
   }
 
   return (
@@ -108,6 +112,20 @@ export default function NouveauChantierPage() {
       {error ? <ErrorNotice error={error} /> : null}
       <InfoAnalyse />
       <ImporterUnDocument pending={pending !== null} onFichier={(f) => void importer(f)} />
+      {aConfirmer ? (
+        <ConfirmerAnalyse
+          nature={aConfirmer.nature}
+          // L'analyse de devis lit un PDF, une photo JPEG ou PNG (pas WebP ni HEIC) : sinon, pas de bascule vers le devis.
+          peutChanger={aConfirmer.nature === "devis" || /^(application\/pdf|image\/jpeg|image\/png)$/.test(aConfirmer.file.type) || /\.(pdf|jpe?g|png)$/i.test(aConfirmer.file.name)}
+          onChanger={() => setAConfirmer((c) => (c ? { ...c, nature: c.nature === "devis" ? "liste" : "devis" } : c))}
+          onAnnuler={() => setAConfirmer(null)}
+          onAnalyser={() => {
+            const c = aConfirmer;
+            setAConfirmer(null);
+            void drop(c.file, c.nature);
+          }}
+        />
+      ) : null}
       <SaisieListeReprise />
       {/* Assistant Mobiiz (Greg, 31 octobre 2026, point 1) : la description écrite ou dictée. */}
       <BoutonDecrire />
@@ -203,5 +221,36 @@ function SaisieListe() {
       </button>
       {ouvert ? <SaisirMaListe onFermer={fermer} /> : null}
     </>
+  );
+}
+
+/**
+ * AVANT DE CONSOMMER UN CRÉDIT (Greg, 1er novembre 2026) : le type reconnu et son coût, mot pour mot ; « Annuler » ne
+ * décompte rien et ne crée rien. Le type se corrige d'un tap (une photo de devis sans nom parlant arrive en « liste »).
+ */
+function ConfirmerAnalyse({ nature, peutChanger, onChanger, onAnnuler, onAnalyser }: { nature: "devis" | "liste"; peutChanger: boolean; onChanger: () => void; onAnnuler: () => void; onAnalyser: () => void }) {
+  const devis = nature === "devis";
+  return (
+    <div className="fixed top-0 left-0 z-[60] flex h-[100dvh] w-full items-end justify-center bg-black/50 p-4 lg:items-center" onClick={onAnnuler}>
+      <div role="alertdialog" aria-modal="true" aria-label="Analyser ce document ?" onClick={(e) => e.stopPropagation()} className="flex w-full max-w-md flex-col gap-3 rounded-3xl bg-surface p-5 pb-[max(env(safe-area-inset-bottom),20px)] text-ink shadow-card">
+        <h2 className="text-[18px] font-extrabold">Analyser ce document ?</h2>
+        <p className="text-[16px] leading-snug">
+          {devis ? "Ce document semble être un devis. Son analyse utilisera 1 analyse de devis." : "Ce document semble être une liste. Son analyse utilisera 1 analyse de photo ou de liste."}
+        </p>
+        {peutChanger ? (
+          <button type="button" onClick={onChanger} className="min-h-10 self-start text-[14px] font-semibold text-accent-text underline underline-offset-4">
+            {devis ? "C'est une liste ? L'analyser comme une liste" : "C'est un devis ? L'analyser comme un devis"}
+          </button>
+        ) : null}
+        <div className="mt-1 grid grid-cols-2 gap-2">
+          <button type="button" onClick={onAnnuler} className="pressable min-h-12 rounded-xl border border-line px-3 text-[15px] font-semibold">
+            Annuler
+          </button>
+          <button type="button" onClick={onAnalyser} className="pressable min-h-12 rounded-xl bg-accent px-3 text-[15px] font-bold text-on-accent">
+            Analyser le document
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

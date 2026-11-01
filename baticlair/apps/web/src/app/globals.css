@@ -308,6 +308,24 @@ body:has(.app-clair) {
     color-scheme: light;
   }
 }
+/*
+ * LE MENU ORDINATEUR SUR LA NUIT (Greg, 1er novembre 2026 : « les liens du menu de gauche restent presque invisibles ») :
+ * sa colonne garde la classe du verre clair du téléphone (`bg-glass`), qui remettait l'encre noire sur le fond sombre du
+ * menu. Sur ordinateur, la colonne reprend les jetons de la nuit (crème, gris crème, jaune MOBIIZ) ; le bouton jaune
+ * « Nouveau » garde son encre noire (règle des surfaces claires, posée sur lui-même).
+ */
+@media (min-width: 64rem) {
+  .app-nuit nav[aria-label="Navigation principale"] > [class*="bg-glass"],
+  .app-nuit nav[aria-label="Navigation principale"] [class*="max-lg:bg-accent-soft"] {
+    --color-ink: #fbf8f3;
+    --color-muted: rgba(251, 248, 243, 0.74);
+    --color-subtle: rgba(251, 248, 243, 0.74);
+    --color-line: rgba(251, 248, 243, 0.16);
+    --color-accent-text: #fed206;
+    color: var(--color-ink);
+    color-scheme: dark;
+  }
+}
 /* Un bouton ou une bulle « encre » sur la nuit reste noir, cerclé pour se détacher du fond. */
 .app-nuit [class*="bg-ink"] {
   --color-ink: #130901;

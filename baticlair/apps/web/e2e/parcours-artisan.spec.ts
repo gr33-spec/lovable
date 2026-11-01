@@ -2,6 +2,11 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
+
+test.beforeEach(async ({ page }) => {
+  await confirmerAnalyseDoffice(page);
+});
 
 // Lot final, point 1 : au premier envoi, « Avant d'envoyer » (SIRET, prénom, portable) se remplit tout seul dans ces parcours.
 test.beforeEach(async ({ page }) => {
@@ -370,6 +375,55 @@ test("déconnexion puis reconnexion ramène à la page demandée", async ({ page
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("button", { name: "Se connecter" }).click();
   await expect(page).toHaveURL(/\/chantiers\?q=dupont/);
+});
+
+test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche se lit, en sombre comme en clair (contraste AA, 4,5:1 au moins)", async ({ page }, info) => {
+  test.skip(info.project.name !== "ordinateur", "le menu de gauche n'existe que sur ordinateur");
+  await signUp(page);
+  for (const theme of ["sombre", "clair"]) {
+    await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
+    await page.goto("/chantiers/nouveau");
+    const nav = page.getByRole("navigation", { name: "Navigation principale" });
+    await expect(nav.getByRole("link").first()).toBeVisible();
+    const ratios = await nav.getByRole("link").evaluateAll((liens) => {
+      // N'importe quelle couleur CSS (rgb, oklab, color-mix) ramenée en [r, g, b, a] par un pixel de canevas.
+      const toile = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
+      const rgb = (c: string) => {
+        toile.clearRect(0, 0, 1, 1);
+        toile.fillStyle = c;
+        toile.fillRect(0, 0, 1, 1);
+        const [r, g, b, a] = toile.getImageData(0, 0, 1, 1).data;
+        return [r!, g!, b!, a! / 255];
+      };
+      const lum = ([r, g, b]: number[]) => {
+        const f = (v: number) => {
+          const x = v / 255;
+          return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+        };
+        return 0.2126 * f(r!) + 0.7152 * f(g!) + 0.0722 * f(b!);
+      };
+      // Le fond réel : le premier ancêtre qui a une couleur de fond opaque.
+      const fond = (el: Element | null): number[] => {
+        for (let e = el; e; e = e.parentElement) {
+          const c = rgb(getComputedStyle(e).backgroundColor);
+          if (c[3]! > 0.9) return c.slice(0, 3);
+        }
+        return [255, 255, 255];
+      };
+      return liens
+        .filter((l) => (l as HTMLElement).offsetParent !== null)
+        .map((l) => {
+          const texte = rgb(getComputedStyle(l).color);
+          const a = texte[3] ?? 1;
+          const f = fond(l);
+          const melange = [0, 1, 2].map((i) => texte[i]! * a + f[i]! * (1 - a));
+          const [l1, l2] = [lum(melange), lum(f)].sort((x, y) => y - x);
+          return { nom: (l.textContent ?? "").trim(), ratio: (l1! + 0.05) / (l2! + 0.05) };
+        });
+    });
+    expect(ratios.length).toBeGreaterThan(2);
+    for (const r of ratios) expect(r.ratio, `${theme} · ${r.nom}`).toBeGreaterThanOrEqual(4.5);
+  }
 });
 
 test("Clair / Sombre (Greg, 31 octobre 2026) : sombre par défaut, Clair dans Profil, gardé après rechargement, lisible", async ({ page }) => {
@@ -2983,6 +3037,43 @@ test("« Importer un document » (Greg, 31 octobre 2026) : une capture d'écran 
   expect((await apiJson(page, "GET", "/v1/ai-usage/jauge")).body).toEqual(avant);
 });
 
+test("« Importer un document » (Greg, 1er novembre 2026) : avant toute analyse, le type reconnu et son coût ; « Annuler » ne crée et ne décompte rien ; une photo de devis part à l'analyse de devis", async ({ page }) => {
+  test.slow();
+  await garderFenetreAnalyse(page);
+  await signUp(page);
+  const jauge = (await apiJson(page, "GET", "/v1/ai-usage/jauge")).body;
+  const chantiers = (await apiJson(page, "GET", "/v1/projects")).body;
+  const fenetre = page.getByRole("alertdialog", { name: "Analyser ce document ?" });
+  // Un PDF de devis : « devis », puis Annuler : rien de créé, rien de décompté.
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 analyse de devis.");
+  await fenetre.getByRole("button", { name: "Annuler" }).click();
+  await expect(fenetre).toHaveCount(0);
+  // Une liste en PDF : « liste ».
+  await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-tableau.pdf"));
+  await expect(fenetre).toContainText("Ce document semble être une liste. Son analyse utilisera 1 analyse de photo ou de liste.");
+  await fenetre.getByRole("button", { name: "Annuler" }).click();
+  // Une photo sans nom parlant : « liste », corrigeable d'un tap en devis ; puis Annuler.
+  const png = fs.readFileSync(path.join(__dirname, "fixtures", "bon-negoce.png"));
+  await page.getByLabel("Choisir une photo").setInputFiles({ name: "IMG_2041.png", mimeType: "image/png", buffer: png });
+  await expect(fenetre).toContainText("Ce document semble être une liste.");
+  await fenetre.getByRole("button", { name: "C'est un devis ? L'analyser comme un devis" }).click();
+  await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 analyse de devis.");
+  await fenetre.getByRole("button", { name: "Annuler" }).click();
+  expect(page.url()).toMatch(/\/chantiers\/nouveau$/);
+  expect((await apiJson(page, "GET", "/v1/projects")).body).toEqual(chantiers);
+  expect((await apiJson(page, "GET", "/v1/ai-usage/jauge")).body).toEqual(jauge);
+  // Une photo de devis (son nom le dit) : « devis », et elle part bien à l'analyse de devis (PDF d'image, devis client).
+  await page.getByLabel("Choisir une photo").setInputFiles({ name: "Devis Martin.png", mimeType: "image/png", buffer: png });
+  await expect(fenetre).toContainText("Ce document semble être un devis.");
+  await fenetre.getByRole("button", { name: "Analyser le document" }).click();
+  await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
+  const projet = /\/chantiers\/([0-9a-f-]{36})/.exec(page.url())![1]!;
+  const docs = (await apiJson<{ items: { purpose: string; name: string }[] }>(page, "GET", `/v1/projects/${projet}/documents`)).body.items;
+  expect(docs).toEqual([expect.objectContaining({ purpose: "client_quote", name: "Devis Martin.pdf" })]);
+});
+
 test("« Ma liste de matériaux » sur téléphone : rien sous la barre du bas, ni l'écran ni le bouton de « Saisir ma liste »", async ({ page }, info) => {
   test.skip(info.project.name !== "telephone", "la barre du bas n'existe que sur téléphone");
   await signUp(page);
@@ -3725,7 +3816,7 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   // Rien de l'achat groupé : ni étapes, ni commune, ni négoces, ni engagement.
   await expect(ecran.getByText(/Achat groupé de ton métier|Commune de livraison|négoces|Je m'engage/)).toHaveCount(0);
   await expect(ecran.getByLabel("Métier")).toBeVisible();
-  const bouton = page.getByRole("button", { name: /^(Sélectionne un matériau|Ajouter \d+ matériaux? à ma liste)$/ });
+  const bouton = page.getByRole("button", { name: /^(Sélectionne un matériau|Créer ma liste avec \d+ matériaux?)$/ });
   await expect(bouton).toHaveText("Sélectionne un matériau");
   await expect(bouton).toBeDisabled();
   // 1. Une suggestion du catalogue (familles › produit › format), sans quantité imposée.
@@ -3733,16 +3824,16 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   await ecran.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
   await ecran.getByRole("button", { name: "32×22 · Espagne 1er choix", exact: true }).click();
   await ecran.getByLabel("Quantité de Ardoise naturelle 32×22 · Espagne 1er choix").fill("900");
-  await ecran.getByRole("button", { name: "Ajouter ce matériau" }).click();
-  await expect(bouton).toHaveText("Ajouter 1 matériau à ma liste");
+  await ecran.getByRole("button", { name: "Ajouter à la sélection" }).click();
+  await expect(bouton).toHaveText("Créer ma liste avec 1 matériau");
   // 2. Un autre métier n'est jamais bloqué : la recherche trouve ailleurs.
   await ecran.getByLabel("Métier").selectOption({ label: "Électricité" });
   // 3. Un matériau absent : ce qui est tapé s'ajoute tel quel, sans produit imposé, quantité et unité facultatives.
   await ecran.getByLabel("Rechercher un matériau").fill("Faîtière ventilée modèle ancien");
   await ecran.getByRole("button", { name: /Ajouter « Faîtière ventilée modèle ancien » tel que je l'écris/ }).click();
   await expect(ecran.getByLabel("Désignation", { exact: true }).first()).toHaveValue("Faîtière ventilée modèle ancien");
-  await ecran.getByRole("button", { name: "Ajouter ce matériau" }).click();
-  await expect(bouton).toHaveText("Ajouter 2 matériaux à ma liste");
+  await ecran.getByRole("button", { name: "Ajouter à la sélection" }).click();
+  await expect(bouton).toHaveText("Créer ma liste avec 2 matériaux");
   // 4. Chaque ligne se modifie librement : désignation, caractéristiques, quantité, unité.
   const liste = ecran.getByRole("region", { name: "Ma liste en cours" });
   const desig = liste.getByLabel("Désignation").nth(1);
@@ -3756,7 +3847,7 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
   await page.goto("/chantiers/nouveau?liste=1");
   await expect(ecran.getByRole("region", { name: "Ma liste en cours" }).getByLabel("Désignation").nth(1)).toHaveValue("Faîtière ventilée terre cuite, modèle ancien");
-  await expect(bouton).toHaveText("Ajouter 2 matériaux à ma liste");
+  await expect(bouton).toHaveText("Créer ma liste avec 2 matériaux");
   // 6. Le même éditeur que les autres méthodes ; la précision part sur la ligne (PDF du négoce), jamais dans la désignation.
   const precisions: string[] = [];
   page.on("response", async (r) => {
@@ -3768,6 +3859,14 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   await expect(page.getByText(/Ardoise naturelle 32×22/).first()).toBeVisible();
   await expect(page.getByText(/Faîtière ventilée terre cuite, modèle ancien/).first()).toBeVisible();
   expect(precisions.some((b) => b.includes('"preciser"') && b.includes("Rouge vieilli"))).toBe(true);
+  // La précision se lit sous la désignation (Greg, 1er novembre 2026) et se modifie depuis la ligne ouverte.
+  const carte = page.getByRole("listitem").filter({ has: page.getByRole("button", { name: /^(Modifier|Fermer) : Faîtière ventilée terre cuite, modèle ancien$/ }) });
+  await expect(carte.getByText("Rouge vieilli", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Modifier la ligne : Faîtière ventilée terre cuite, modèle ancien" }).click();
+  await page.getByRole("button", { name: "Modifier la précision : Faîtière ventilée terre cuite, modèle ancien" }).click();
+  await page.getByLabel("Précision : Faîtière ventilée terre cuite, modèle ancien").fill("Rouge vieilli, modèle Beauvoise");
+  await page.getByLabel("Précision : Faîtière ventilée terre cuite, modèle ancien").press("Enter");
+  await expect(carte.getByText("Rouge vieilli, modèle Beauvoise", { exact: true })).toBeVisible();
   // 7. Aucun crédit, aucun achat groupé, aucune demande de prix.
   expect((await apiJson(page, "GET", "/v1/ai-usage/jauge")).body).toEqual(jaugeAvant);
   const achats = (await apiJson<{ achats?: unknown[]; mesAchats?: unknown[] }>(page, "GET", "/v1/achats-groupes")).body;

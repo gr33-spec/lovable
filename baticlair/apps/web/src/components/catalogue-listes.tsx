@@ -69,7 +69,7 @@ export function CatalogueListes({
   /**
    * « Saisir ma liste » (Greg, 31 octobre 2026) : le même sélecteur, sans la logique de l'achat groupé. En mode « liste » :
    * « Rechercher un matériau… », la quantité peut attendre (rien n'est inventé), ce qui est tapé s'ajoute tel quel
-   * (catalogue jamais fermé), « Ajouter ce matériau ». L'achat groupé garde son comportement (valeur par défaut).
+   * (catalogue jamais fermé), « Ajouter à la sélection » (Greg, 1er novembre 2026). L'achat groupé garde son comportement (valeur par défaut).
    */
   mode?: "achat-groupe" | "liste";
 }) {
@@ -187,7 +187,7 @@ export function CatalogueListes({
             <span className="text-[16px] text-muted">{article.unite}</span>
           </div>
           <Button variant="ink" disabled={!liste && !(nombre(qte) > 0)} onClick={() => ajouter({ designation: article.designation, unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier })}>
-            <Plus size={18} aria-hidden="true" /> {liste ? "Ajouter ce matériau" : "Ajouter à ma liste"}
+            <Plus size={18} aria-hidden="true" /> {liste ? "Ajouter à la sélection" : "Ajouter à ma liste"}
           </Button>
           {liste ? <p className="text-[13px] text-muted">La quantité peut attendre : tu la mettras dans ta liste.</p> : null}
         </div>
@@ -291,7 +291,7 @@ export function CatalogueListes({
               setLibreQte("");
             }}
           >
-            <Plus size={18} aria-hidden="true" /> {liste ? "Ajouter ce matériau" : "Ajouter cette ligne"}
+            <Plus size={18} aria-hidden="true" /> {liste ? "Ajouter à la sélection" : "Ajouter cette ligne"}
           </Button>
         </div>
       ) : (

@@ -690,6 +690,7 @@ function Row({
 }) {
   const [open, setOpen] = useState(false);
   const [naming, setNaming] = useState(false);
+  const [precising, setPrecising] = useState(false);
   const [dx, setDx] = useState(0);
   // Une ligne orange réglée (« C'est bon », un choix) se referme d'elle-même : le flou derrière elle s'en va avec elle.
   const [seenStatus, setSeenStatus] = useState(row.status);
@@ -764,6 +765,13 @@ function Row({
       <span className="flex min-w-0 grow flex-col">
         {/* Le nom entier : c'est ce que le comptoir lit (jamais coupé). Sur téléphone, la quantité passe dessous. */}
         <span className="text-[14px] leading-snug font-semibold">{label}</span>
+        {/* La précision (Greg, 1er novembre 2026 : « Rouge vieilli » sous la désignation) : une ligne discrète, coupée
+            proprement sur téléphone, en entier au survol ; c'est celle qui part dans le PDF. */}
+        {item?.precision ? (
+          <span title={item.precision} className="truncate text-[13px] leading-snug text-muted sm:whitespace-normal">
+            {item.precision}
+          </span>
+        ) : null}
         {quantity || sub ? (
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-[13px] leading-snug">
             {quantity ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
@@ -900,6 +908,16 @@ function Row({
               <button type="button" onClick={() => setNaming(true)} aria-label={`Modifier le nom : ${label}`} className="inline-flex min-h-10 items-center gap-1.5 self-start text-[13px] font-bold text-accent-text">
                 <Pencil size={14} aria-hidden="true" />
                 Modifier le nom
+              </button>
+            )
+          ) : null}
+          {item && editable && !sentTo ? (
+            precising ? (
+              <InlineText label={`Précision : ${label}`} value={item.precision ?? ""} pending={pending} onCancel={() => setPrecising(false)} onSave={async (v) => { await onEdit(item, { libelle: item.label, quantite: parsed?.quantity ?? null, unite: parsed?.unit ?? null, precision: v }); setPrecising(false); }} />
+            ) : (
+              <button type="button" onClick={() => setPrecising(true)} aria-label={`${item.precision ? "Modifier la précision" : "Ajouter une précision"} : ${label}`} className="inline-flex min-h-10 items-center gap-1.5 self-start text-[13px] font-bold text-accent-text">
+                <Pencil size={14} aria-hidden="true" />
+                {item.precision ? "Modifier la précision" : "Ajouter une précision"}
               </button>
             )
           ) : null}

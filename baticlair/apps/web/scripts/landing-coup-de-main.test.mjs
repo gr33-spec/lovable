@@ -69,3 +69,12 @@ test("la landing premium V3 : conditions en vigueur, aucun mot interdit, aucun l
   assert.match(client, /EXEMPLE FICTIF/);
   assert.match(client, /Aucun prix ni pourcentage d’économie garanti/);
 });
+
+// Greg, 1er novembre 2026 : les deux compteurs, séparés, mot pour mot ; jamais un total unique.
+test("Ma liste de matériaux : « Analyses disponibles », deux compteurs séparés, la saisie et la description gratuites", () => {
+  const info = sansCommentaires(lire("components/coup-de-main-ia.tsx"));
+  for (const t of ["Analyses disponibles", "Devis PDF :", "{quotas.analyses.restantes}", "Photos et listes :", "{quotas.scans.restantes}", "Saisie manuelle et description :", "gratuites"]) assert.ok(info.includes(t), t);
+  assert.doesNotMatch(info, /analyses\.restantes\s*\+\s*quotas\.scans|scans\.restantes\s*\+/);
+  const page = lire("app/(app)/chantiers/nouveau/page.tsx");
+  for (const t of ["Ce document semble être un devis. Son analyse utilisera 1 analyse de devis.", "Ce document semble être une liste. Son analyse utilisera 1 analyse de photo ou de liste.", "Annuler", "Analyser le document"]) assert.ok(page.includes(t), t);
+});

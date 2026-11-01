@@ -1,4 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import { confirmerAnalyseDoffice } from "./confirmer-analyse";
+
+test.beforeEach(async ({ page }) => {
+  await confirmerAnalyseDoffice(page);
+});
 
 // Lot final, point 1 : au premier envoi, « Avant d'envoyer » (SIRET, prénom, portable) se remplit tout seul dans ces parcours.
 test.beforeEach(async ({ page }) => {

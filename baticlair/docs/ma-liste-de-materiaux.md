@@ -68,11 +68,35 @@ de photo. » Rien n'a été fusionné.
 - Chaque ligne : désignation, caractéristiques ou précision, quantité, unité ; tout se modifie ; rien n'est inventé (une
   quantité vide reste vide, la ligne arrive « à préciser »). La précision part sur la ligne (correction `preciser`) :
   elle apparaît dans le PDF du négoce et dans la fiche de la ligne, pas dans la désignation.
-- Choix du bouton : les matériaux s'ajoutent un par un (« Ajouter ce matériau »), et le bouton du bas dit l'état :
-  « Sélectionne un matériau » (désactivé), « Ajouter 1 matériau à ma liste », « Ajouter N matériaux à ma liste ».
+- Choix du bouton : les matériaux s'ajoutent un par un (« Ajouter à la sélection », Greg, 1er novembre 2026), et le
+  bouton du bas dit l'état : « Sélectionne un matériau » (désactivé), « Créer ma liste avec 1 matériau », « Créer ma liste
+  avec N matériaux ».
   Raison : c'est le geste de l'achat groupé (le même composant), on voit sa liste grandir, et on ne crée la liste qu'une
   fois, quand on a fini.
 - Brouillon serveur (`liste:saisie`) : rien ne se perd au changement de métier, au retour arrière ou au départ ;
   « Quitter la saisie ? » (Rester / Quitter) quand des lignes ne sont pas encore envoyées ; « Reprendre ta liste » à
   l'accueil.
 - Séparation stricte : aucun achat groupé, aucune participation, aucun négoce, aucune demande de prix, aucun crédit.
+
+## 6. Corrections du 1er novembre 2026 (Greg)
+
+- **Avant toute analyse**, une fenêtre dit le type reconnu et son coût, mot pour mot : « Ce document semble être un
+  devis. Son analyse utilisera 1 analyse de devis. » ou « Ce document semble être une liste. Son analyse utilisera
+  1 analyse de photo ou de liste. » ; « Annuler » ne crée rien et ne décompte rien ; « Analyser le document » lance.
+  Un lien corrige le type d'un tap (« C'est un devis ? L'analyser comme un devis »).
+- **Photo d'un devis → analyse de devis** : le dépôt d'un devis client accepte maintenant une photo JPEG ou PNG, mise en
+  PDF d'image par le mécanisme déjà utilisé pour les devis de négoce en photos (`assembleQuote`), puis lue par l'analyse
+  de devis (lecture en image des pages scannées).
+- **Reconnaissance d'une photo** : sans lecture, le contenu d'une photo ne se connaît pas. Aucune lecture gratuite
+  n'existe dans l'app (pas d'OCR, pas de nouvelle dépendance), et aucun appel IA n'a été ajouté pour détecter le type.
+  Règle appliquée : une photo dont le nom dit un devis (« Devis Martin.jpg », « facture.png ») part en devis ; une
+  autre photo part en liste, et la fenêtre de confirmation permet de la passer en devis avant tout décompte.
+  Proposition (non activée, attend Greg) : un repérage par le modèle rapide (Haiku), une image réduite, une réponse d'un
+  mot, plafonné à un appel par document (de l'ordre de 0,001 € l'appel), avant la fenêtre.
+- **Compteurs** : « Analyses disponibles », « Devis PDF : N », « Photos et listes : N », « Saisie manuelle et
+  description : gratuites ». Deux quotas séparés, aucun total, abonnements, quotas et page Tarifs inchangés.
+- **Précision visible** : sous la désignation, sur une ligne discrète (coupée sur téléphone, entière sur ordinateur) ;
+  « Modifier la précision » / « Ajouter une précision » dans la ligne ouverte (correction `preciser`, la même qui part
+  dans le PDF).
+- **Menu ordinateur en thème sombre** : les liens reprennent la couleur crème de la nuit (ils héritaient de l'encre
+  noire du verre clair du téléphone) ; contraste vérifié en sombre et en clair (4,5:1 au moins).

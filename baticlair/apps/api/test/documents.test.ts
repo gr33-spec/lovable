@@ -81,6 +81,17 @@ describe("dépôt et lecture d'un devis (sans IA)", () => {
     expect(await ctx.prisma.documentProcessing.count()).toBe(1);
   });
 
+  it("une photo de devis (Greg, 1er novembre 2026) devient un PDF d'image et part à l'analyse de devis ; un fichier ni photo ni PDF reste refusé", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const projectId = await chantier(agent);
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==", "base64");
+    const res = await agent.post(`/v1/projects/${projectId}/documents`).field("purpose", "client_quote").attach("file", png, { filename: "IMG_2041.png", contentType: "image/png" });
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({ name: "IMG_2041.pdf" });
+    const doc = await ctx.prisma.document.findFirstOrThrow({ where: { projectId } });
+    expect(doc).toMatchObject({ mimeType: "application/pdf", purpose: "client_quote" });
+  });
+
   it("refuse un fichier qui n'est pas un PDF, quelle que soit son extension", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const projectId = await chantier(agent);

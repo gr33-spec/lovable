@@ -73,15 +73,35 @@ export function compteurAnalyses(quotas: Quotas | null, jauge: Jauge | null): st
   return phraseJauge(jauge);
 }
 
+/**
+ * LES DEUX COMPTEURS (Greg, 1er novembre 2026 : « Je ne choisis ni l'option A ni l'option B ») : les deux quotas, séparés
+ * comme ils le sont techniquement, jamais un total qui pourrait ensuite refuser un devis.
+ */
+export function CompteursAnalyses({ quotas }: { quotas: Quotas }) {
+  return (
+    <dl role="status" aria-label="Analyses disponibles" className="my-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[14px] text-muted">
+      <dt className="col-span-2 font-semibold text-ink">Analyses disponibles</dt>
+      <dt>Devis PDF :</dt>
+      <dd className="font-semibold text-ink">{quotas.analyses.restantes}</dd>
+      <dt>Photos et listes :</dt>
+      <dd className="font-semibold text-ink">{quotas.scans.restantes}</dd>
+      <dt>Saisie manuelle et description :</dt>
+      <dd className="font-semibold text-ink">gratuites</dd>
+    </dl>
+  );
+}
+
 export function InfoAnalyse() {
   const lire = useCallback((signal: AbortSignal) => api<{ jauge: Jauge | null; quotas?: Quotas | null }>("/v1/ai-usage/jauge", { signal }), []);
   const { data } = useResource(lire);
   const [ouvert, setOuvert] = useState(false);
   const quotas = data?.quotas ?? null;
-  const compteur = data ? compteurAnalyses(quotas, data.jauge ?? null) : null;
+  // Sans quotas (formule sans limite, mode négocié) : l'ancienne phrase de la jauge, s'il y en a une.
+  const compteur = data && !quotas ? compteurAnalyses(null, data.jauge ?? null) : null;
   return (
     <div className="flex flex-col gap-1 text-[14px] leading-snug">
       <p className="text-ink">MOBIIZ prépare une première liste. Tu pourras tout vérifier et modifier.</p>
+      {quotas ? <CompteursAnalyses quotas={quotas} /> : null}
       {compteur ? (
         <p role="status" className="text-muted">
           {compteur}
@@ -104,7 +124,7 @@ export function InfoAnalyse() {
               incorrectes. Pense à toujours vérifier et corriger ta liste avant de l&apos;utiliser.
             </p>
             <ul className="flex list-disc flex-col gap-1 pl-5 text-muted">
-              <li>Un devis en PDF compte pour une analyse de devis ; une photo ou une capture, pour une analyse de photo.</li>
+              <li>Un devis (PDF ou photo) compte pour une analyse de devis ; une liste (photo, capture ou PDF), pour une analyse de photo ou de liste. Je te dis lequel avant d&apos;analyser.</li>
               <li>Un document de plus de 150 lignes compte pour 2 analyses : je te préviens avant.</li>
               <li>Une analyse ratée ne compte pas. Un document déjà analysé n&apos;est jamais recompté.</li>
               <li>Saisir ta liste ou décrire ton chantier est gratuit.</li>

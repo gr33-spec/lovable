@@ -13,6 +13,8 @@ export interface ItemEdit {
   libelle: string;
   quantite: string | null;
   unite: string | null;
+  /** La précision de la ligne (Greg, 1er novembre 2026 : visible sous la désignation, modifiable) ; absente = inchangée. */
+  precision?: string;
 }
 
 export interface SketchHandlers {

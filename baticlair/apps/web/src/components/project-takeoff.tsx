@@ -289,6 +289,11 @@ export function ProjectTakeoff({
     const direct = item.kind === "direct" ? takeoff.lines.find((l) => item.lineIds.includes(l.id)) : undefined;
     const before = item.quantity ? parseQuantity(item.quantity) : null;
     const quantityChanged = (e.quantite ?? "") !== (before?.quantity ?? "") || (e.unite ?? "") !== (before?.unit ?? "");
+    // La précision se corrige à part (« preciser »), sur l'article, quelle que soit son origine ; vide = retirée.
+    if (e.precision !== undefined) {
+      if (e.precision.trim() !== (item.precision ?? "")) await call("corrections", { action: "preciser", id: item.key, precision: e.precision.trim() });
+      return;
+    }
     if (direct) {
       // Quantité inchangée : on garde celle du devis telle qu'écrite (« 1 250 u »), pas sa forme affichée (« pièces »).
       const ligne = { libelle: e.libelle, quantite: quantityChanged ? e.quantite : direct.quantity, unite: quantityChanged ? e.unite : direct.unit, reference: direct.reference };

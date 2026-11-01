@@ -1,8 +1,8 @@
 /**
  * « IMPORTER UN DOCUMENT » (Greg, 31 octobre 2026) : un seul bouton pour un devis, une liste, une photo, un PDF ou une
  * capture ; le TYPE se détermine sans le demander à l'artisan, en code (aucun appel IA, rien de décompté) :
- * - une photo ou une capture (image) : la lecture de liste, qui sort les lignes telles qu'écrites (elle lit aussi un bon
- *   ou un devis de négoce photographié) ;
+ * - une photo ou une capture (image) : la lecture de liste, qui sort les lignes telles qu'écrites, sauf quand son nom dit
+ *   un devis (« Devis Martin.jpg ») : l'analyse de devis (règle du 1er novembre 2026) ;
  * - un PDF avec du texte : un devis s'il en a le titre (« DEVIS », « Devis n° … ») ou les marques (montants, total HT/TTC,
  *   TVA, prix unitaire) ; sinon
  *   une liste ;
@@ -22,7 +22,10 @@ const MARQUES_DEVIS = [
 
 export function natureDuDocument(fichier: { type: string; nom: string }, texte: string | null): NatureDocument {
   const image = fichier.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(fichier.nom);
-  if (image) return "liste";
+  // Photo (Greg, 1er novembre 2026 : « photo d'un devis → analyse de devis ») : sans lecture, seul le nom du fichier parle
+  // (« Devis Martin.jpg », « facture.png ») ; une photo de devis en JPEG ou PNG part alors à l'analyse de devis. Sinon,
+  // une liste ; l'écran de confirmation dit le type avant toute analyse et l'artisan peut le corriger.
+  if (image && texte === null) return /\b(devis|facture)\b|^de\d{4,}/i.test(fichier.nom.replace(/[_.-]+/g, " ")) && /^image\/(jpeg|png)$|\.(jpe?g|png)$/i.test(fichier.type || fichier.nom) ? "devis" : "liste";
   const t = (texte ?? "").replace(/\s+/g, " ").trim();
   if (t.length < 40) return "devis";
   // Un titre de devis (« DEVIS », « Devis n° 2026-018 », « Devis D-2026-018 ») suffit à lui seul.
