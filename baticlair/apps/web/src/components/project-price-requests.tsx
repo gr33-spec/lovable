@@ -1,5 +1,6 @@
 "use client";
 
+import { ConflitGroupe, conflitGroupe } from "@/components/conflit-groupe";
 import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
@@ -152,6 +153,8 @@ export function ProjectPriceRequests({
   const [renvoi, setRenvoi] = useState(false);
   const [suppression, setSuppression] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
+  const [conflit, setConflit] = useState<{ phrase: string; retenus: string[] } | null>(null);
+  const [retrait, setRetrait] = useState(false);
   const whole = (data?.items ?? []).filter((r) => !r.articles?.length);
   const parts = (data?.items ?? []).filter((r) => (r.articles?.length ?? 0) > 0);
   const sent = Boolean(whole[0]);
@@ -162,16 +165,24 @@ export function ProjectPriceRequests({
   const retenue = Boolean(enCours?.retainedSupplierIds.length);
   const actif = Boolean(enCours) && !archived;
   const montrer = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
-  async function classer(retenus: string[]) {
+  async function classer(retenus: string[], retirerDesGroupes = false) {
     if (!enCours) return;
     setActionError(null);
+    setConflit(null);
     try {
-      const r = await api<PriceRequest>(`/v1/price-requests/${enCours.id}/classification`, { method: "PATCH", body: retenus.length ? { classified: true, retainedSupplierIds: retenus } : { classified: false } });
+      const r = await api<PriceRequest>(`/v1/price-requests/${enCours.id}/classification`, { method: "PATCH", body: retenus.length ? { classified: true, retainedSupplierIds: retenus, ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } : { classified: false } });
       setData({ items: [r, ...(data?.items ?? []).filter((x) => x.id !== r.id)] });
       setFeuille(false);
       refreshProgress();
     } catch (e) {
-      setActionError(toError(e));
+      // §19 : une ligne tenue par un achat groupé ouvert attend le geste explicite de l'artisan.
+      const phrase = conflitGroupe(e);
+      if (phrase) {
+        // La feuille plein écran se ferme : la question se pose sur le chantier, bien visible.
+        setFeuille(false);
+        setConflit({ phrase, retenus });
+        montrer("conflit-groupe");
+      } else setActionError(toError(e));
     }
   }
   async function supprimer() {
@@ -331,6 +342,19 @@ export function ProjectPriceRequests({
             ))
         : null}
       {actionError ? <ErrorNotice error={actionError} /> : null}
+      {conflit ? (
+        <div id="conflit-groupe" className="scroll-mt-4">
+        <ConflitGroupe
+          phrase={conflit.phrase}
+          pending={retrait}
+          onAnnuler={() => setConflit(null)}
+          onRetirer={() => {
+            setRetrait(true);
+            void classer(conflit.retenus, true).finally(() => setRetrait(false));
+          }}
+        />
+        </div>
+      ) : null}
       {suppression ? (
         <div id="supprimer-demande" role="group" aria-label="Supprimer la demande" className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
           <p className="text-[15px] font-semibold">Supprimer cette demande ? Les négoces ne sont pas prévenus ; ta liste reste.</p>

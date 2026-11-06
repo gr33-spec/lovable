@@ -56,7 +56,7 @@ const statusBody = z.object({
   status: z.enum(["to_send", "sent", "declined"]),
 });
 const quoteBody = z.object(chunkedFields);
-const classifyBody = z.object({ classified: z.boolean(), retainedSupplierIds: z.array(z.string()).max(20).optional() });
+const classifyBody = z.object({ classified: z.boolean(), retainedSupplierIds: z.array(z.string()).max(20).optional(), retirerDesGroupes: z.boolean().optional() });
 const orderBody = z.object({ supplierId: z.string(), outcome: z.enum(["as_is", "modified"]), text: z.string().max(20000).nullish() });
 const orderDocumentBody = z.object({ ...chunkedFields, supplierId: z.string() });
 
@@ -222,7 +222,7 @@ export class PriceRequestsController {
   /** « Classé » (fournisseurs retenus facultatifs), ou réouverture. */
   @Patch("price-requests/:id/classification")
   async classify(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(classifyBody)) body: z.infer<typeof classifyBody>) {
-    return toDto(await this.requests.classify(tenant, id, body.classified, body.retainedSupplierIds ?? []));
+    return toDto(await this.requests.classify(tenant, id, body.classified, body.retainedSupplierIds ?? [], { retirerDesGroupes: body.retirerDesGroupes === true }));
   }
 
   @Patch("price-request-recipients/:id")

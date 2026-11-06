@@ -614,12 +614,21 @@ export class PriceRequestsService {
    * « Classé » : l'artisan a fait son choix ; retenir un ou plusieurs
    * fournisseurs est facultatif. `classified: false` rouvre la demande.
    */
-  async classify(tenant: TenantContext, requestId: string, classified: boolean, retainedSupplierIds: string[]): Promise<PriceRequestView> {
+  /** Le cycle de vie (§19) : la garde d'une commande seule (branchée par le module ; rien par défaut dans les tests unitaires). */
+  private gardeCommande: (tenant: TenantContext, projectId: string, keys: string[] | null, retirerDesGroupes: boolean) => Promise<void> = async () => undefined;
+  brancherGardeCommande(f: (tenant: TenantContext, projectId: string, keys: string[] | null, retirerDesGroupes: boolean) => Promise<void>): void {
+    this.gardeCommande = f;
+  }
+
+  async classify(tenant: TenantContext, requestId: string, classified: boolean, retainedSupplierIds: string[], options: { retirerDesGroupes?: boolean } = {}): Promise<PriceRequestView> {
     assertCanWrite(tenant);
     const request = await this.requests.findById(tenant, requestId);
     if (!request) throw notFound("PriceRequest");
     const known = new Set(request.recipients.map((r) => r.supplier.id));
     if (retainedSupplierIds.some((id) => !known.has(id))) throw validationFailed("Unknown supplier", { reason: "not_a_recipient" });
+    // Retenir un négoce = commander seul ces lignes : jamais une ligne déjà commandée ou tenue par un achat groupé.
+    if (classified && retainedSupplierIds.length > 0 && request.retainedSupplierIds.length === 0)
+      await this.gardeCommande(tenant, request.projectId, request.itemKeys.length ? request.itemKeys : null, options.retirerDesGroupes === true);
     await this.requests.classify(tenant, request.id, classified ? [...new Set(retainedSupplierIds)] : null);
     return this.reload(tenant, request.id);
   }

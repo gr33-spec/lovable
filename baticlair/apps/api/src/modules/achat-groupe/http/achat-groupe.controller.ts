@@ -196,6 +196,11 @@ export class AchatGroupeController {
 
   /* -------------------------------------------- rapprochement continu (Greg, 6 novembre 2026, points 7 à 9) */
 
+  @Get("projects/:projectId/cycle")
+  cycle(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
+    return this.rapprochement.cycle(tenant, projectId);
+  }
+
   @Get("projects/:projectId/rapprochement")
   analyserRapprochement(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
     return this.rapprochement.analyser(tenant, projectId);

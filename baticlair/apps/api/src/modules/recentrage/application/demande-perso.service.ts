@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { gardeCommandeSeule } from "../../../platform/cycle/lignes.js";
 import {
   ACCORD_IDENTITE,
   BUTS_DEMANDE,
@@ -292,7 +293,7 @@ export class DemandePersoService {
 
   /* ---------------------------------------------------------------------------------------------- la commande (artisan) */
 
-  async commander(tenant: TenantContext, requestId: string, recipientId: string) {
+  async commander(tenant: TenantContext, requestId: string, recipientId: string, options: { retirerDesGroupes?: boolean } = {}) {
     assertCanWrite(tenant);
     const d = await this.demandeDe(tenant, requestId);
     if (d.recipients.some((r) => r.commandeLe)) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
@@ -300,6 +301,9 @@ export class DemandePersoService {
     if (!r?.reponduLe || !r.prix) throw validationFailed("No offer from this supplier", { reason: "sans_offre" });
     const maintenant = this.now();
     if (!offreValide(r.reponduLe, r.validiteJours ?? VALIDITE_MIN_JOURS, maintenant)) throw new DomainError("conflict", "Offer expired", { reason: "offre_expiree" });
+    // Le cycle de vie (§19) : pas de double commande avec un achat groupé ; une ligne tenue par un achat groupé ouvert
+    // n'en sort que sur le geste explicite de l'artisan.
+    await gardeCommandeSeule(this.prisma, tenant.companyId, d.projectId, d.itemKeys.length ? d.itemKeys : null, { retirerDesGroupes: options.retirerDesGroupes }, maintenant);
     const prix = r.prix as Record<string, number>;
     const lignes = this.lignes(d.lines).filter((l) => prix[l.cle] !== undefined && l.quantite > 0);
     const totalLignes = lignes.reduce((s, l) => s + prix[l.cle]! * l.quantite, 0);

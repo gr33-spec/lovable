@@ -1,4 +1,5 @@
 import { emailsDemo } from "../../../platform/demo-domaine.js";
+import { exiger as exigerCycle, faitsDesLignes } from "../../../platform/cycle/lignes.js";
 import { createHash, createHmac, randomUUID } from "node:crypto";
 import {
   affichageDeLaCommande,
@@ -352,6 +353,14 @@ export class CommandeDuMoisService {
     if (!takeoff) throw validationFailed("No materials list", { reason: "pas_de_liste" });
     const lignes = lignesProposables(await this.reviewed(tenant, takeoff.id), d.articles);
     if (lignes.length === 0) throw validationFailed("Nothing to add", { reason: "rien_a_ajouter" });
+    // Le cycle de vie (§19) : une ligne déjà dans un achat groupé, ou commandée seule, n'entre pas dans la commande du mois.
+    const faits = await faitsDesLignes(this.prisma, tenant.companyId, projectId, maintenant);
+    for (const { item } of lignes) {
+      const f = faits(item.key);
+      // Sa propre présence dans la commande du mois reste refusée plus bas (« deja_propose »), comme avant.
+      if (f.groupe?.titre === "Commande du mois" && f.lignesGroupe.length === 0) continue;
+      exigerCycle(f, "rejoindre_groupe", item.label);
+    }
     const ajoutes: { quantite: number; unite: string; designation: string; cycleId: string }[] = [];
     let moisDeLaListe: Mois | null = null;
     let tardPour: Mois | null = null;

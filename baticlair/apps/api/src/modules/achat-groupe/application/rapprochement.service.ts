@@ -14,6 +14,7 @@ import {
   type EtatLigneRapprochement,
   type NiveauRapprochement,
 } from "@baticlair/domain";
+import { etatsDuChantier, exiger as exigerCycle, faitsDesLignes } from "../../../platform/cycle/lignes.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { NotificationsGroupeService } from "../../../platform/notifications/notifications-artisan.js";
@@ -79,6 +80,13 @@ export class RapprochementService {
 
   /* --------------------------------------------------------------------------------- la liste, ligne par ligne */
 
+  /** Le cycle de vie de chaque ligne du chantier (§19) : son état et les gestes encore permis. */
+  async cycle(tenant: TenantContext, projectId: string) {
+    if (!isUuid(projectId)) throw notFound("Project");
+    const { lignes } = await this.ports.lignesDeListe(tenant, projectId);
+    return { lignes: await etatsDuChantier(this.prisma, tenant.companyId, projectId, lignes, this.now()) };
+  }
+
   /** Ce que chaque ligne de la liste peut faire : partir tout de suite (toujours), rejoindre une collecte qui correspond exactement, ou chercher. */
   async analyser(tenant: TenantContext, projectId: string) {
     if (!isUuid(projectId)) throw notFound("Project");
@@ -89,6 +97,7 @@ export class RapprochementService {
     const deja = await this.prisma.ligneRapprochement.findMany({ where: { companyId: tenant.companyId, projectId } });
     const commandees = await clesCommandees(this.prisma, tenant.companyId, projectId);
     const collectes = departement ? await this.collectesOuvertes(departement, maintenant, tenant.companyId) : [];
+    const faits = await faitsDesLignes(this.prisma, tenant.companyId, projectId, maintenant);
     return {
       phrase: PHRASE_RECHERCHE_RAPPROCHEMENT,
       resteIndividuelle: PHRASE_RESTE_INDIVIDUELLE,
@@ -106,8 +115,8 @@ export class RapprochementService {
           quantite: l.quantite,
           unite: l.unite,
           reference: r.ok ? r.reference.libelle : null,
-          rapprochable: r.ok && !!departement && !couverte(commandees, l.key),
-          raison: couverte(commandees, l.key) ? "Une offre est déjà acceptée pour cette ligne." : !r.ok ? ("raison" in r && r.raison === "accessoire" ? "Petit accessoire : il part en demande individuelle." : "Article pas assez précis pour un rapprochement sûr.") : !departement ? "Indique l'adresse du chantier avec son code postal." : null,
+          rapprochable: r.ok && !!departement && !couverte(commandees, l.key) && !faits(l.key).groupe,
+          raison: couverte(commandees, l.key) ? "Une offre est déjà acceptée pour cette ligne." : faits(l.key).groupe ? `Déjà dans l'achat groupé « ${faits(l.key).groupe!.titre} ».` : !r.ok ? ("raison" in r && r.raison === "accessoire" ? "Petit accessoire : il part en demande individuelle." : "Article pas assez précis pour un rapprochement sûr.") : !departement ? "Indique l'adresse du chantier avec son code postal." : null,
           collecte: collecte ? { id: collecte.id, titre: collecte.libelle, clotureLe: collecte.clotureLe.toISOString() } : null,
           recherche: recherche ? { id: recherche.id, statut: recherche.statut, jusquau: recherche.jusquau.toISOString() } : null,
         };
@@ -126,10 +135,13 @@ export class RapprochementService {
     const departement = zoneDuCodePostal(adresse);
     if (!departement) throw validationFailed("A site address with a postcode is required", { reason: "livraison_requise", message: "Indique l'adresse du chantier avec son code postal." });
     const commandees = await clesCommandees(this.prisma, tenant.companyId, projectId);
+    // Le cycle de vie (§19) : une ligne déjà dans un achat groupé ne cherche pas d'autre rapprochement.
+    const faits = await faitsDesLignes(this.prisma, tenant.companyId, projectId, maintenant);
     const choisies = d.articles.map((key) => {
       const l = lignes.find((x) => x.key === key);
       if (!l) throw validationFailed("Unknown line", { reason: "ligne_inconnue" });
       if (couverte(commandees, key)) throw new DomainError("conflict", "An offer is already accepted for this line", { reason: "offre_deja_acceptee", message: `« ${l.designation} » est déjà couverte par une offre acceptée : pas de recherche, pas de double commande.` });
+      exigerCycle(faits(key), "chercher", l.designation);
       const r = referenceStricte(l.designation);
       if (!r.ok) throw validationFailed("Line cannot be matched safely", { reason: "ligne_non_rapprochable", message: `« ${l.designation} » n'est pas assez précise pour un rapprochement sûr.` });
       return { l, ref: r.reference };
@@ -138,7 +150,11 @@ export class RapprochementService {
     for (const { l, ref } of choisies) {
       const data = { designation: l.designation, cle: ref.cle, type: ref.type, libelle: ref.libelle, famille: ref.famille, quantite: l.quantite, unite: l.unite, departement, modeLivraison: d.modeLivraison, dateMax: d.dateMax, jusquau: d.jusquau };
       const existante = await this.prisma.ligneRapprochement.findUnique({ where: { companyId_projectId_articleKey: { companyId: tenant.companyId, projectId, articleKey: l.key } } });
-      if (!existante) await this.prisma.ligneRapprochement.create({ data: { ...data, companyId: tenant.companyId, projectId, articleKey: l.key } });
+      if (!existante)
+        // Double clic : la seconde création tombe sur la clé unique ; la ligne existe déjà, c'est fait (jamais une 500).
+        await this.prisma.ligneRapprochement.create({ data: { ...data, companyId: tenant.companyId, projectId, articleKey: l.key } }).catch((e: unknown) => {
+          if (!(e instanceof Error && "code" in e && (e as { code?: string }).code === "P2002")) throw e;
+        });
       else if (existante.statut === "rejointe") continue;
       else await this.prisma.ligneRapprochement.update({ where: { id: existante.id }, data: { ...data, ...(ACTIFS.includes(existante.statut as EtatLigneRapprochement) ? {} : { statut: "disponible", retraitMotif: null, retireLe: null }) } });
     }

@@ -99,7 +99,7 @@ import { ecrireXlsx, lireXlsx, type Cellule } from "../../../platform/xlsx/xlsx.
 import type { PdfReader } from "../../documents/index.js";
 import type { NegoceExtractor, ReponseLue } from "../../groupe/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
-import { clesCommandees } from "./rapprochement.service.js";
+import { exiger as exigerCycle, faitsDesLignes } from "../../../platform/cycle/lignes.js";
 
 /**
  * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message : « ce message fait foi » sur le précédent).
@@ -403,11 +403,15 @@ export class AchatGroupeService {
     );
     // Pas de double commande (Greg, 6 novembre 2026, point 7) : une ligne déjà couverte par une offre individuelle
     // acceptée ne rejoint pas un achat groupé.
+    // Le cycle de vie (§19) : une ligne de liste ne rejoint qu'UN achat groupé, jamais une ligne commandée ; la même ligne
+    // envoyée deux fois dans la même demande ne compte qu'une fois.
+    const vues = new Set<string>();
     for (const l of e.lignes) {
       if (!l.projectId || !l.articleKey) continue;
-      const cles = await clesCommandees(this.prisma, tenant.companyId, l.projectId);
-      if (cles === "toutes" || cles.has(l.articleKey))
-        throw new DomainError("conflict", "Already ordered individually", { reason: "deja_commande", message: `« ${l.designation} » est déjà couverte par une offre que tu as acceptée : elle ne rejoint pas l'achat groupé.` });
+      const id = `${l.projectId}:${l.articleKey}`;
+      if (vues.has(id)) throw validationFailed("Same line twice", { reason: "ligne_en_double", message: `« ${l.designation} » est en double dans ce que tu ajoutes.` });
+      vues.add(id);
+      await this.verifierLigneLibre(tenant.companyId, l);
     }
     // Point 4 du 30 octobre : un achat groupé reste rattaché à UN métier.
     // (Les lignes du catalogue ; une ligne lue dans un devis garde la règle du 27 octobre : un panier de plusieurs métiers
@@ -458,15 +462,25 @@ export class AchatGroupeService {
     }
     if (famillesLues[0] && famillesLues[0] !== achat.famille)
       throw validationFailed("Other trade", { reason: "autre_metier", message: `Ces lignes ne sont pas du même métier que cet achat groupé (${libelleMetier(achat.famille).toLowerCase()}). Mets-les dans l'achat groupé de leur métier.` });
-    for (const l of lues) {
-      const famille = l.ref.famille ?? achat.famille;
-      const deja = l.libre ? null : await this.prisma.ligneAchatGroupe.findUnique({ where: { besoinId_cle_unite: { besoinId: besoin.id, cle: l.ref.cle, unite: l.unite } } });
-      if (deja) await this.prisma.ligneAchatGroupe.update({ where: { id: deja.id }, data: { quantite: Number(deja.quantite) + l.quantite } });
-      else
-        await this.prisma.ligneAchatGroupe.create({
-          data: { besoinId: besoin.id, regroupementId: achat.id, companyId: tenant.companyId, cle: l.ref.cle, libelle: l.ref.libelle, famille, unite: l.unite, quantite: l.quantite, projectId: l.projectId ?? null, articleKey: l.articleKey ?? null, designationOrigine: l.designation, libre: l.libre },
-        });
-    }
+    // Un double clic ou deux onglets : les lignes d'une entreprise s'engagent l'une après l'autre (verrou de transaction),
+    // et chaque ligne de liste est revérifiée sous le verrou : jamais deux engagements de la même ligne.
+    const besoinId = besoin.id;
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`engagement:${tenant.companyId}`}))`;
+      for (const l of lues) {
+        if (l.projectId && l.articleKey) await this.verifierLigneLibre(tenant.companyId, l, tx as unknown as PrismaService);
+        const famille = l.ref.famille ?? achat.famille;
+        const deja = l.libre || l.articleKey ? null : await tx.ligneAchatGroupe.findUnique({ where: { besoinId_cle_unite: { besoinId, cle: l.ref.cle, unite: l.unite } } });
+        if (deja) await tx.ligneAchatGroupe.update({ where: { id: deja.id }, data: { quantite: Number(deja.quantite) + l.quantite } });
+        else if (l.articleKey && (await tx.ligneAchatGroupe.findUnique({ where: { besoinId_cle_unite: { besoinId, cle: l.ref.cle, unite: l.unite } } })))
+          // Deux lignes de liste du même article : la seconde s'ajoute à la première ligne d'achat (la clé reste unique).
+          await tx.ligneAchatGroupe.update({ where: { besoinId_cle_unite: { besoinId, cle: l.ref.cle, unite: l.unite } }, data: { quantite: { increment: l.quantite } } });
+        else
+          await tx.ligneAchatGroupe.create({
+            data: { besoinId, regroupementId: achat.id, companyId: tenant.companyId, cle: l.ref.cle, libelle: l.ref.libelle, famille, unite: l.unite, quantite: l.quantite, projectId: l.projectId ?? null, articleKey: l.articleKey ?? null, designationOrigine: l.designation, libre: l.libre },
+          });
+      }
+    });
     await this.prisma.besoinNegocie.update({ where: { id: besoin.id }, data: { quantite: await this.prisma.ligneAchatGroupe.count({ where: { besoinId: besoin.id } }) } });
     await this.ajouterNegoces(besoin.id, achat.id, tenant.companyId, negoces);
     if (cree) await this.alerter(achat.id, tenant.companyId).catch(() => undefined);
@@ -614,6 +628,13 @@ export class AchatGroupeService {
   }
 
   /** Avant la clôture : changer une quantité (0 retire la ligne), ajouter un négoce. */
+  /** Le cycle de vie (§19) : une ligne de liste déjà dans un achat groupé, ou commandée, ne rejoint pas celui-ci. */
+  private async verifierLigneLibre(companyId: string, l: { projectId?: string | null; articleKey?: string | null; designation: string }, db: PrismaService = this.prisma) {
+    if (!l.projectId || !l.articleKey) return;
+    const faits = await faitsDesLignes(db, companyId, l.projectId, this.now());
+    exigerCycle(faits(l.articleKey), "rejoindre_groupe", l.designation);
+  }
+
   async modifier(tenant: TenantContext, besoinId: string, d: { quantites?: Record<string, number>; negoces?: NegoceAjoute[] }) {
     assertCanWrite(tenant);
     const b = await this.monBesoin(tenant, besoinId);
@@ -1639,6 +1660,19 @@ export class AchatGroupeService {
     const { a, b, offre, c } = await this.publieePour(tenant, besoinId, consultationId);
     if (b.statut !== ENGAGE) throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
     const maintenant = this.now();
+    // Le cycle de vie (§19) : pas de commande groupée d'une ligne déjà commandée seule.
+    const lignesListe = await this.prisma.ligneAchatGroupe.findMany({ where: { besoinId: b.id, projectId: { not: null }, articleKey: { not: null } }, select: { projectId: true, articleKey: true, designationOrigine: true } });
+    const doubles: string[] = [];
+    for (const projectId of [...new Set(lignesListe.map((l) => l.projectId!))]) {
+      const faits = await faitsDesLignes(this.prisma, tenant.companyId, projectId, maintenant);
+      for (const l of lignesListe.filter((x) => x.projectId === projectId)) if (faits(l.articleKey!).commandeeSeule) doubles.push(l.designationOrigine);
+    }
+    if (doubles.length)
+      throw new DomainError("conflict", "Lines already ordered individually", {
+        reason: "deja_commande",
+        lignes: doubles,
+        message: `${doubles.map((d) => `« ${d} »`).join(", ")} ${doubles.length > 1 ? "sont déjà commandées" : "est déjà commandée"} seule${doubles.length > 1 ? "s" : ""} : pas de seconde commande. Sors de l'achat groupé avec le motif « déjà commandé ailleurs ».`,
+      });
     if (a.commandeAvantLe && a.commandeAvantLe <= maintenant) throw new DomainError("conflict", "Too late", { reason: "commande_trop_tard", message: "La date de commande est passée." });
     const chiffrees = offre.lignes.filter((l) => l.prixHt !== null);
     const total = arrondi(chiffrees.reduce((s, l) => s + l.prixHt! * l.quantite, 0));

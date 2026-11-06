@@ -32,6 +32,8 @@ const envoiBody = z.object({
   articles: z.array(z.string().min(1).max(200)).max(500).optional(),
 });
 const destinataireBody = z.object({ recipientId: z.uuid() });
+/** « Commander » : `retirerDesGroupes` est le geste explicite qui retire de l'achat groupé les lignes commandées ici. */
+const commanderBody = destinataireBody.extend({ retirerDesGroupes: z.boolean().optional() });
 const finEssaiBody = z.object({ email: z.email().max(254) });
 const modeTestBody = z.object({ mode: z.enum(MODES_REGROUPEMENT) });
 const zoneTestBody = z.object({ zone: z.string().regex(/^\d[\dAB]$/), franchiLe: z.iso.datetime().nullable() });
@@ -89,8 +91,8 @@ export class RecentrageController {
 
   @Post("demandes-perso/:id/commander")
   @HttpCode(200)
-  commander(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(destinataireBody)) body: z.infer<typeof destinataireBody>) {
-    return this.demandes.commander(tenant, id, body.recipientId);
+  commander(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(commanderBody)) body: z.infer<typeof commanderBody>) {
+    return this.demandes.commander(tenant, id, body.recipientId, { retirerDesGroupes: body.retirerDesGroupes === true });
   }
 
   @Post("demandes-perso/:id/livree")

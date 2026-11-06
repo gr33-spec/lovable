@@ -1,5 +1,6 @@
 "use client";
 
+import { ConflitGroupe, conflitGroupe } from "@/components/conflit-groupe";
 import { Check } from "lucide-react";
 import { useCallback, useState } from "react";
 import { OrderFeedbackBox } from "@/components/order-feedback";
@@ -166,6 +167,7 @@ export function ProjectComparison({
   const { data, error, reload } = useResource(fetchComparison);
   const [pending, setPending] = useState<string | null>(null);
   const [actionError, setActionError] = useState<ApiError | null>(null);
+  const [conflit, setConflit] = useState<{ phrase: string; supplierId: string } | null>(null);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -183,18 +185,22 @@ export function ProjectComparison({
   const names = new Map(data.suppliers.map((s) => [s.supplierId, s.name]));
   const chosen = request.classifiedAt ? new Set(request.retainedSupplierIds) : null;
 
-  async function choose(supplierId: string | null) {
+  async function choose(supplierId: string | null, retirerDesGroupes = false) {
     setPending(supplierId ?? "reset");
     setActionError(null);
+    setConflit(null);
     try {
       onRequestChange(
         await api<PriceRequest>(`/v1/price-requests/${request.id}/classification`, {
           method: "PATCH",
-          body: supplierId ? { classified: true, retainedSupplierIds: [supplierId] } : { classified: false, retainedSupplierIds: [] },
+          body: supplierId ? { classified: true, retainedSupplierIds: [supplierId], ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } : { classified: false, retainedSupplierIds: [] },
         }),
       );
     } catch (e) {
-      setActionError(toError(e));
+      // §19 : une ligne tenue par un achat groupé ouvert attend le geste explicite de l'artisan.
+      const phrase = conflitGroupe(e);
+      if (phrase && supplierId) setConflit({ phrase, supplierId });
+      else setActionError(toError(e));
     } finally {
       setPending(null);
     }
@@ -209,6 +215,7 @@ export function ProjectComparison({
         <span className="text-xs font-bold text-muted">Prix HT</span>
       </div>
       {actionError ? <ErrorNotice error={actionError} /> : null}
+      {conflit ? <ConflitGroupe phrase={conflit.phrase} pending={pending === conflit.supplierId} onAnnuler={() => setConflit(null)} onRetirer={() => void choose(conflit.supplierId, true)} /> : null}
       <ol className="flex flex-col gap-2" aria-label="Offres">
         {ranked.map((s) => {
           const isRef = reference?.supplierId === s.supplierId && complete.length > 0 && ranked.length > 1;

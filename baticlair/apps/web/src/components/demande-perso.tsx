@@ -2,6 +2,7 @@
 
 import { articlesPour, phraseLotSansNegoce, quiRecoitQuoi, type LotAEnvoyer, type QuiRecoitQuoi } from "../../../../packages/domain/src/groupe/specialites";
 import { Check, Send, ShoppingCart, Truck, Users } from "lucide-react";
+import { ConflitGroupe, conflitGroupe } from "@/components/conflit-groupe";
 import { useCallback, useState } from "react";
 import { Button, Card, Field, SectionTitle } from "@/components/ui";
 import { api, messageErreur } from "@/lib/api";
@@ -181,15 +182,20 @@ const SUIVI: Record<string, string> = { recue: "Commande reçue", confirmee: "Co
 function Demande({ d, onChange }: { d: DemandePerso; onChange: () => void }) {
   const [pending, setPending] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [conflit, setConflit] = useState<{ phrase: string; recipientId: string } | null>(null);
   const meilleure = d.offres.find((o) => o.complete && o.valide);
-  async function poster(chemin: string, recipientId: string) {
+  async function poster(chemin: string, recipientId: string, retirerDesGroupes = false) {
     setPending(recipientId);
     setErreur(null);
+    setConflit(null);
     try {
-      await api(`/v1/demandes-perso/${d.id}/${chemin}`, { method: "POST", body: { recipientId } });
+      await api(`/v1/demandes-perso/${d.id}/${chemin}`, { method: "POST", body: { recipientId, ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } });
       onChange();
     } catch (e) {
-      setErreur(messageErreur(e, { offre_expiree: "Cette offre n'est plus valable : demande au négoce de la renouveler.", deja_commande: "Cette demande est déjà commandée." }));
+      // §19 : une ligne tenue par un achat groupé ouvert attend le geste explicite de l'artisan.
+      const phrase = chemin === "commander" ? conflitGroupe(e) : null;
+      if (phrase) setConflit({ phrase, recipientId });
+      else setErreur(messageErreur(e, { offre_expiree: "Cette offre n'est plus valable : demande au négoce de la renouveler.", deja_commande: "Cette demande est déjà commandée." }));
     } finally {
       setPending(null);
     }
@@ -257,6 +263,7 @@ function Demande({ d, onChange }: { d: DemandePerso; onChange: () => void }) {
       ) : (
         <p className="text-[14px] text-muted">Les réponses arrivent ici, comparées livraison comprise. Relance automatique à 48 h ouvrées.</p>
       )}
+      {conflit ? <ConflitGroupe phrase={conflit.phrase} pending={pending === conflit.recipientId} onAnnuler={() => setConflit(null)} onRetirer={() => void poster("commander", conflit.recipientId, true)} /> : null}
       {erreur ? (
         <p role="alert" className="text-[15px] font-semibold text-danger">
           {erreur}
