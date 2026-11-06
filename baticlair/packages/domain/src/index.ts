@@ -19,6 +19,7 @@ export * from "./documents/nature.js";
 export * from "./accueil/accueil.js";
 export * from "./assistant/assistant.js";
 export * from "./assistant/reponses-libres-numerotees.js";
+export * from "./groupe/rapprochement.js";
 export { containsKeyword, type MaterialFamily } from "./trades/trade-profile.js";
 export { COMMON_LABOR, LABOR_ONLY } from "./trades/common.js";
 export * from "./takeoff/validation.js";

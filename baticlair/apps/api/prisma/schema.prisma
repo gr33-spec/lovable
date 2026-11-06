@@ -187,6 +187,8 @@ model Company {
   adressesMobiiz          AdresseMobiiz[]
   desistementsAchatGroupe DesistementAchatGroupe[]
   alertesAchatGroupe      AlerteAchatGroupe[]
+  lignesRapprochement     LigneRapprochement[]
+  propositionsRapprochement PropositionRapprochement[]
   lignesAchatGroupe       LigneAchatGroupe[]
   emailsRecus             EmailRecuArtisan[]
   offers                  SupplierOffer[]
@@ -2383,4 +2385,61 @@ model ListeSupprimee {
 
   @@unique([companyId, projectId])
   @@map("liste_supprimee")
+}
+
+/// Rapprochement continu (Greg, 6 novembre 2026) : une ligne d'une liste validée que l'artisan laisse chercher, jusqu'à
+/// une date, un besoin compatible d'un autre artisan ou une collecte ouverte. Jamais ajoutée seule à un achat groupé.
+model LigneRapprochement {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  companyId     String    @map("company_id") @db.Uuid
+  projectId     String    @map("project_id") @db.Uuid
+  articleKey    String    @map("article_key")
+  designation   String
+  /// La référence stricte (clé, type, libellé) au moment du choix.
+  cle           String
+  type          String
+  libelle       String
+  famille       String
+  quantite      Decimal   @db.Decimal(14, 3)
+  unite         String
+  departement   String
+  modeLivraison String    @default("livraison") @map("mode_livraison")
+  dateMax       DateTime? @map("date_max") @db.Date
+  jusquau       DateTime  @db.Timestamptz(3)
+  statut        String    @default("disponible")
+  retraitMotif  String?   @map("retrait_motif")
+  retireLe      DateTime? @map("retire_le") @db.Timestamptz(3)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company      Company                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  propositions PropositionRapprochement[]
+
+  @@unique([companyId, projectId, articleKey])
+  @@index([statut, departement, type])
+  @@map("ligne_rapprochement")
+}
+
+/// Un rapprochement proposé à UNE entreprise pour UNE de ses lignes : avec la ligne d'un autre artisan (« ligne:<id> »)
+/// ou une collecte ouverte (« collecte:<id> »). Les écarts sont gardés tels qu'expliqués ; rien n'est publié tout seul.
+model PropositionRapprochement {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  ligneId     String    @map("ligne_id") @db.Uuid
+  companyId   String    @map("company_id") @db.Uuid
+  cible       String
+  niveau      String
+  differences String[]  @default([])
+  score       Int
+  notifieLe   DateTime? @map("notifie_le") @db.Timestamptz(3)
+  relanceLe   DateTime? @map("relance_le") @db.Timestamptz(3)
+  reponse     String?
+  reponduLe   DateTime? @map("repondu_le") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  ligne   LigneRapprochement @relation(fields: [ligneId], references: [id], onDelete: Cascade)
+  company Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([ligneId, cible])
+  @@index([companyId, reponse])
+  @@map("proposition_rapprochement")
 }

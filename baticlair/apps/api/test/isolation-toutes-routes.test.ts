@@ -114,6 +114,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
       besoinAchat: "",
       participantAchat: "",
       consultationAchat: "",
+      ligneRapprochement: "",
+      propositionRapprochement: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
     const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });
@@ -146,6 +148,10 @@ describe("isolation entre entreprises, toutes les routes", () => {
     await ctx.prisma.evenementAbonnement.create({ data: { companyId, type: "session", source: "simule", refExterne: "sim_session_de_a_000000" } });
     const factureA = await ctx.prisma.factureAbonnement.create({ data: { numero: "TEST-000001", serie: "TEST", rang: 1, companyId, raisonSociale: "Toitures A", periodeDebut: new Date(), periodeFin: new Date(), montantHtCentimes: 2900, tvaCentimes: 580, ttcCentimes: 3480, tauxTva: 20, emiseLe: new Date() } });
     const abonnementDeA = { session: "sim_session_de_a_000000", facture: factureA.id };
+    // Le rapprochement continu (6 novembre 2026) : une ligne de A en recherche et sa proposition.
+    const ligneRapA = await ctx.prisma.ligneRapprochement.create({ data: { companyId, projectId: ids.project, articleKey: "art-a", designation: "Ardoise 32×22", cle: "ardoise|format=32x22", type: "ardoise", libelle: "Ardoise 32×22", famille: "couverture", quantite: 100, unite: "pièces", departement: "29", jusquau: new Date(Date.now() + 5 * 86_400_000) } });
+    ids.ligneRapprochement = ligneRapA.id;
+    ids.propositionRapprochement = (await ctx.prisma.propositionRapprochement.create({ data: { ligneId: ligneRapA.id, companyId, cible: `collecte:${achatA.id}`, niveau: "exacte", score: 100 } })).id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -208,6 +214,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/public\/achat-groupe$/, "jeton-inconnu-de-b-0000000000000000"],
         [/\/public\/achat-groupe\/commande$/, "jeton-inconnu-de-b-0000000000000000"],
         [/\/admin\/pilotage\/achats-groupes\/consultations$/, ids.consultationAchat],
+        [/\/rapprochements\/propositions$/, ids.propositionRapprochement],
+        [/\/rapprochements\/lignes$/, ids.ligneRapprochement],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

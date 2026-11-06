@@ -5,6 +5,7 @@ import { CatalogueModule, CatalogueService } from "../catalogue/index.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
 import { NotificationsGroupeService } from "../../platform/notifications/notifications-artisan.js";
+import { RapprochementService } from "./application/rapprochement.service.js";
 import type { PushSender } from "../../platform/push/push.port.js";
 import { DomainError } from "../../platform/errors/domain-error.js";
 import { CONFIG, EMAIL_SENDER, PUSH_SENDER } from "../../platform/tokens.js";
@@ -27,6 +28,22 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
   imports: [TenancyModule, RecentrageModule, GroupeModule, AdresseMobiizModule, PilotageModule, TakeoffModule, CatalogueModule],
   controllers: [AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheController],
   providers: [
+    {
+      provide: RapprochementService,
+      useFactory: (p: PrismaService, commande: CommandeDuMoisService, push: PushSender, e: TransactionalEmailSender, c: AppConfig) =>
+        new RapprochementService(
+          p,
+          {
+            lignesDeListe: async (tenant, projectId) => {
+              const { adresse, lignes } = await commande.lignesDuChantier(tenant, projectId);
+              return { adresse, lignes: lignes.map((l) => ({ key: l.key, designation: l.designation, quantite: l.quantite, unite: l.unite })) };
+            },
+          },
+          new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl),
+          { seuilAnonymat: c.groupe.recentrage.seuilAnonymat },
+        ),
+      inject: [PrismaService, CommandeDuMoisService, PUSH_SENDER, EMAIL_SENDER, CONFIG],
+    },
     {
       provide: AchatGroupeService,
       useFactory: (
@@ -101,6 +118,6 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
       inject: [PrismaService, DroitsService, DemandePersoService, NegocieService, ObservatoireService, AdresseMobiizService, CommandeDuMoisService, TakeoffService, NEGOCE_EXTRACTOR, CatalogueService, PUSH_SENDER, EMAIL_SENDER, CONFIG],
     },
   ],
-  exports: [AchatGroupeService],
+  exports: [AchatGroupeService, RapprochementService],
 })
 export class AchatGroupeModule {}

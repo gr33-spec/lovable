@@ -11,6 +11,7 @@ import { CurrentUser, Public, type AuthenticatedUser } from "../../identity/inde
 import { PilotageService } from "../../pilotage/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { AchatGroupeService, type NegoceAjoute } from "../application/achat-groupe.service.js";
+import { RapprochementService } from "../application/rapprochement.service.js";
 
 /** En test seulement : « maintenant » se règle par la requête (clôture, échéance). */
 function instant(config: AppConfig, demande?: string): Date {
@@ -64,6 +65,9 @@ const volumeBody = z.object({ famille: z.string().trim().min(1).max(40), montant
 const prixBody = z.object({ cle: z.string().min(1).max(200), prixHt: z.number().positive().max(1_000_000).nullable() });
 
 const date = (s: string) => new Date(`${s}T00:00:00Z`);
+const JOUR_ISO = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const rapprochementBody = z.object({ articles: z.array(z.string().min(1).max(200)).min(1).max(200), jusquau: JOUR_ISO, dateMax: JOUR_ISO.nullable().optional(), modeLivraison: z.enum(["livraison", "retrait"]).default("livraison") });
+const reponseRapprochementBody = z.object({ reponse: z.enum(["examinee", "refusee"]) });
 
 /**
  * L'ACHAT GROUPÉ PAR MÉTIER, CÔTÉ ARTISAN (Greg, 27 octobre 2026, 2e message) : le catalogue, ses négoces, s'engager, ses
@@ -73,7 +77,10 @@ const date = (s: string) => new Date(`${s}T00:00:00Z`);
 @Controller("v1")
 @UseGuards(TenantGuard)
 export class AchatGroupeController {
-  constructor(@Inject(AchatGroupeService) private readonly achats: AchatGroupeService) {}
+  constructor(
+    @Inject(AchatGroupeService) private readonly achats: AchatGroupeService,
+    @Inject(RapprochementService) private readonly rapprochement: RapprochementService,
+  ) {}
 
   @Get("achats-groupes/catalogue")
   catalogue(@Tenant() tenant: TenantContext, @Query("q") q?: string) {
@@ -180,6 +187,41 @@ export class AchatGroupeController {
     return this.achats.lancerDepuisListe(tenant, projectId, { confirmees: b.confirmees, dateBesoin: b.dateBesoin ? date(b.dateBesoin) : null, livraison: b.livraison ?? null, negoces: b.negoces as NegoceAjoute[], engagement: b.engagement, achatId: b.achatId ?? null });
   }
 
+  /* -------------------------------------------- rapprochement continu (Greg, 6 novembre 2026, points 7 à 9) */
+
+  @Get("projects/:projectId/rapprochement")
+  analyserRapprochement(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
+    return this.rapprochement.analyser(tenant, projectId);
+  }
+
+  @Post("projects/:projectId/rapprochement")
+  @HttpCode(200)
+  rendreDisponible(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(rapprochementBody)) b: z.infer<typeof rapprochementBody>) {
+    return this.rapprochement.rendreDisponible(tenant, projectId, { articles: b.articles, jusquau: new Date(`${b.jusquau}T18:00:00Z`), dateMax: b.dateMax ? date(b.dateMax) : null, modeLivraison: b.modeLivraison });
+  }
+
+  @Get("rapprochements")
+  mesRapprochements(@Tenant() tenant: TenantContext) {
+    return this.rapprochement.mesRapprochements(tenant);
+  }
+
+  @Get("rapprochements/actions")
+  actionsRapprochement(@Tenant() tenant: TenantContext) {
+    return this.rapprochement.actions(tenant);
+  }
+
+  @Post("rapprochements/propositions/:propositionId/reponse")
+  @HttpCode(200)
+  repondreRapprochement(@Tenant() tenant: TenantContext, @Param("propositionId") propositionId: string, @Body(new ZodPipe(reponseRapprochementBody)) b: z.infer<typeof reponseRapprochementBody>) {
+    return this.rapprochement.repondre(tenant, propositionId, b.reponse);
+  }
+
+  @Delete("rapprochements/lignes/:ligneId")
+  @HttpCode(200)
+  retirerRapprochement(@Tenant() tenant: TenantContext, @Param("ligneId") ligneId: string) {
+    return this.rapprochement.retirer(tenant, ligneId);
+  }
+
   @Get("me/alertes-achats-groupes")
   alertes(@Tenant() tenant: TenantContext) {
     return this.achats.reglageAlertes(tenant);
@@ -273,6 +315,7 @@ export class AchatGroupeTacheController {
     @Inject(AchatGroupeService) private readonly achats: AchatGroupeService,
     @Inject(PilotageService) private readonly pilotage: PilotageService,
     @Inject(CONFIG) private readonly config: AppConfig,
+    @Inject(RapprochementService) private readonly rapprochement: RapprochementService,
   ) {}
 
   @Public()
@@ -281,7 +324,9 @@ export class AchatGroupeTacheController {
   tache(@Headers("authorization") authorization: string | undefined, @Query("maintenant") m?: string) {
     const secret = this.config.cronSecret;
     if (!secret || authorization !== `Bearer ${secret}`) throw forbidden("Scheduled task only");
-    return this.achats.tache(instant(this.config, m));
+    const maintenant = instant(this.config, m);
+    // Le rapprochement continu passe après la tâche des achats groupés (clôtures, collectes ouvertes du jour).
+    return this.achats.tache(maintenant).then(async (r) => ({ ...r, rapprochement: await this.rapprochement.rechercher(maintenant) }));
   }
 
   @Get("admin/pilotage/achats-groupes")

@@ -98,6 +98,7 @@ import { ecrireXlsx, lireXlsx, type Cellule } from "../../../platform/xlsx/xlsx.
 import type { PdfReader } from "../../documents/index.js";
 import type { NegoceExtractor, ReponseLue } from "../../groupe/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
+import { clesCommandees } from "./rapprochement.service.js";
 
 /**
  * L'ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message : « ce message fait foi » sur le précédent).
@@ -399,6 +400,14 @@ export class AchatGroupeService {
         return { ...l, libre: false, ref: { cle: r.reference.cle, libelle: r.reference.libelle, famille: r.reference.famille as string | null } };
       }),
     );
+    // Pas de double commande (Greg, 6 novembre 2026, point 7) : une ligne déjà couverte par une offre individuelle
+    // acceptée ne rejoint pas un achat groupé.
+    for (const l of e.lignes) {
+      if (!l.projectId || !l.articleKey) continue;
+      const cles = await clesCommandees(this.prisma, tenant.companyId, l.projectId);
+      if (cles === "toutes" || cles.has(l.articleKey))
+        throw new DomainError("conflict", "Already ordered individually", { reason: "deja_commande", message: `« ${l.designation} » est déjà couverte par une offre que tu as acceptée : elle ne rejoint pas l'achat groupé.` });
+    }
     // Point 4 du 30 octobre : un achat groupé reste rattaché à UN métier.
     // (Les lignes du catalogue ; une ligne lue dans un devis garde la règle du 27 octobre : un panier de plusieurs métiers
     // part aussi aux généralistes.)
