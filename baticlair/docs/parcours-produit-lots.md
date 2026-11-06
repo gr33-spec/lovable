@@ -120,3 +120,30 @@ déplacer l'heure en base, ce que les e2e ne font pas ; l'écran est contrôlé 
 département (les adresses des artisans ne sont jamais géocodées : ni service payant, ni base des communes ajoutée).
 
 **Tests** : domaine `test/geographie.test.ts` (4) ; API `test/recherche-geographique.test.ts` (3) ; e2e « Lot 5 » dans `rapprochement.spec.ts` (téléphone et ordinateur, capture de la carte).
+
+## Lot 6 : administration des familles, file d'exceptions et score de fiabilité
+
+**Terminé**
+- Domaine `supervision/supervision.ts` : les onze types d'exceptions du prompt maître (libellé, gravité), `prixIncoherent`
+  (écart d'un facteur 3 à la médiane des autres prix de la même ligne, jugé seulement avec deux autres prix au moins),
+  `scoreFiabilite` (50 % réponses, un « ne peut pas chiffrer » comptant moitié ; 30 % complétude ; 20 % délai ; aucun
+  score sous trois demandes ; dit toujours sa base), familles configurables.
+- Familles : table `famille_materiau`. Tant qu'elle est vide, `FAMILLES_GROUPABLES` fait foi comme avant ; la première
+  ouverture de l'écran admin la recopie, puis l'admin règle libellé, ordre et « Proposée » ; une famille ajoutée naît
+  non proposée ; on ne retire pas la dernière. Les achats groupés et « Découvrir » lisent ces familles (cache 30 s).
+- File d'exceptions : table `exception_supervision`, une clé par cas (un même cas ne remonte qu'une fois tant qu'il est
+  ouvert, le compteur monte) ; résolution avec une note ; « Autre anomalie » à la main. Sources branchées : échec d'envoi
+  d'une demande de prix, devis où la lecture ne trouve rien (document illisible), offre incomplète et prix incohérent
+  d'un négoce par le lien, SIRET non retenu par l'annuaire. Jamais bloquant pour l'artisan.
+- Fiabilité : par adresse e-mail du négoce (toutes entreprises : la déduplication), à partir des demandes envoyées ;
+  écran admin seulement, avec la phrase « Jamais montré aux artisans ni aux négoces ».
+- Écran `/admin/supervision` (Exceptions, Familles, Négoces), lien depuis le pilotage ; routes
+  `/v1/admin/pilotage/{familles,exceptions,negoces/fiabilite}`, double authentification, journal des accès.
+- Migration ADDITIVE `20261107120000_supervision`.
+
+**Pas branché (dit tel quel)** : « résultat IA incohérent », « adresse incertaine », « produit ambigu », « doublon
+incertain » et « accès croisé » existent dans la file (signalables à la main) mais aucun détecteur automatique ne les
+alimente encore : il faudrait d'abord définir, avec Greg, ce qui est « incohérent » ou « incertain » sans fausse alerte.
+
+**Tests** : domaine `test/supervision.test.ts` (4) ; API `test/supervision.test.ts` (5) et `isolation-toutes-routes`
+(nouvelles routes : 403 pour un artisan) ; e2e « Lot 6 » dans `achat-groupe.spec.ts` (téléphone et ordinateur).

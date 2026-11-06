@@ -496,3 +496,33 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByRole("textbox").first()).toHaveValue("Liteaux 27×38 maison");
   });
 });
+
+test.describe("Lot 6 : la supervision de l'admin", () => {
+  test("exceptions, familles (ajout, libellé, proposée) et fiabilité des négoces, sur téléphone et ordinateur", async ({ browser }, info) => {
+    test.setTimeout(120_000);
+    const { ctx, page } = await admin(browser, "/admin/supervision");
+    await expect(page.getByRole("heading", { name: "Supervision", level: 1 })).toBeVisible();
+    const onglets = page.getByRole("tablist", { name: "Supervision" });
+    await expect(page.getByRole("region", { name: "File d'exceptions" })).toBeVisible();
+    await expect(page.getByLabel("Type")).toContainText("Échec d'envoi");
+    await page.screenshot({ path: `test-results/supervision/${info.project.name}-exceptions.png`, fullPage: true });
+    await onglets.getByRole("tab", { name: "Familles" }).click();
+    const familles = page.getByRole("region", { name: "Familles de matériaux" });
+    await expect(familles.getByLabel("Libellé de couverture")).toBeVisible();
+    // Une famille d'essai (code unique), ajoutée non proposée, renommée puis proposée et retirée : rien d'autre ne bouge.
+    const code = `essai_${Date.now().toString(36)}`;
+    await familles.getByLabel("Code de la famille").fill(code);
+    await familles.getByLabel("Libellé de la famille").fill("Famille d'essai");
+    await familles.getByRole("button", { name: "Ajouter la famille" }).click();
+    await expect(familles.getByRole("status")).toHaveText("Famille ajoutée.");
+    await familles.getByLabel(`Libellé de ${code}`).fill("Famille d'essai renommée");
+    await familles.getByLabel(`Libellé de ${code}`).locator("xpath=..").getByRole("button", { name: "Enregistrer" }).click();
+    await expect(familles.getByRole("status")).toHaveText("Libellé enregistré.");
+    await page.screenshot({ path: `test-results/supervision/${info.project.name}-familles.png`, fullPage: true });
+    await onglets.getByRole("tab", { name: "Négoces" }).click();
+    await expect(page.getByRole("region", { name: "Fiabilité des négoces" }).getByText(/Jamais montré aux artisans ni aux négoces/)).toBeVisible();
+    await page.screenshot({ path: `test-results/supervision/${info.project.name}-negoces.png`, fullPage: true });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+    await ctx.close();
+  });
+});

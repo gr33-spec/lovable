@@ -1,6 +1,7 @@
 import { briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere, COULEUR_PDF_DEFAUT, estCouleurPdf, estModelePdf, MODELE_PDF_DEFAUT, type CouleurPdf, type ModelePdf } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
+import type { ExceptionSignalee } from "../../../platform/supervision/exceptions.js";
 import type { DocumentsService } from "../../documents/index.js";
 import type { SupplierRepository } from "../../suppliers/index.js";
 import type { ReviewedTakeoff } from "../../takeoff/index.js";
@@ -300,7 +301,7 @@ export class PriceRequestsService {
     const lien = complement && "lien" in complement ? complement.lien : null;
     const corps = packetMail(request.packet, { prenomCommercial: recipient.supplier.contactName, lien });
     const texte = complement && "bloc" in complement ? `${corps}\n\n${complement.bloc}` : corps;
-    await this.mailer.send({
+    await this.envoyerSupervise(tenant, recipient.supplier, {
       to: recipient.supplier.email,
       subject: via ? objetAvecRepere(packetSubject(request.packet), via.etiquette) : packetSubject(request.packet),
       // Lot final, point 5 : le texte en clair et sa version HTML (le lien en bouton).
@@ -615,6 +616,23 @@ export class PriceRequestsService {
    * fournisseurs est facultatif. `classified: false` rouvre la demande.
    */
   /** Le cycle de vie (§19) : la garde d'une commande seule (branchée par le module ; rien par défaut dans les tests unitaires). */
+  /** Lot 6 : la file d'exceptions (branchée par le module ; rien en test unitaire). */
+  private signaler: (e: ExceptionSignalee) => Promise<void> = async () => undefined;
+  brancherSupervision(f: (e: ExceptionSignalee) => Promise<void>): void {
+    this.signaler = f;
+  }
+
+  /** Un e-mail qui doit partir : s'il ne part pas, l'admin le voit (échec d'envoi), et l'erreur remonte comme avant. */
+  private async envoyerSupervise(tenant: TenantContext, supplier: { id: string; name: string }, mail: Parameters<TransactionalEmailSender["send"]>[0]) {
+    try {
+      await this.mailer.send(mail);
+    } catch (e) {
+      if (e instanceof DomainError && e.code === "email_not_sent")
+        await this.signaler({ type: "echec_envoi", cle: `${supplier.id}`, titre: `L'e-mail de demande de prix n'est pas parti chez ${supplier.name}`, detail: "Le prestataire d'envoi a refusé ou n'a pas répondu ; l'artisan a vu « réessaie dans un instant ».", companyId: tenant.companyId }).catch(() => undefined);
+      throw e;
+    }
+  }
+
   private gardeCommande: (tenant: TenantContext, projectId: string, keys: string[] | null, retirerDesGroupes: boolean) => Promise<void> = async () => undefined;
   brancherGardeCommande(f: (tenant: TenantContext, projectId: string, keys: string[] | null, retirerDesGroupes: boolean) => Promise<void>): void {
     this.gardeCommande = f;

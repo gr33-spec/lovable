@@ -1,3 +1,4 @@
+import { signalerException } from "../../../platform/supervision/exceptions.js";
 import { identiteComplete, portableLisible, portableValide, prenomDe, PHRASE_IDENTITE } from "@baticlair/domain";
 import { siretBienForme } from "../../groupe/index.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -54,6 +55,9 @@ export class IdentiteService {
     });
     // Le SIRET vérifié comme avant (achats groupés) ; une panne de l'INSEE n'empêche pas l'envoi à ses négoces.
     const v = (await this.verifierSiret(tenant).catch(() => null)) as { verifie?: boolean; message?: string } | null;
+    // Lot 6 : un SIRET que l'annuaire ne retient pas remonte dans la file d'exceptions (décision humaine).
+    if (v && !v.verifie)
+      await signalerException(this.prisma, { type: "entreprise_non_verifiee", cle: tenant.companyId, titre: `SIRET non vérifié pour une entreprise inscrite`, detail: `SIRET ${siret} : ${v.message ?? "non retenu par l'annuaire"}`, companyId: tenant.companyId });
     // L'achat groupé dit pourquoi un SIRET n'est pas retenu, sur place (correction après test de Greg, 30 octobre 2026).
     return { ...(await this.lire(tenant)), siretMessage: v && !v.verifie ? (v.message ?? null) : null };
   }

@@ -9,12 +9,19 @@ import { HabitudesService, LearningModule } from "../learning/index.js";
 import { DemoService } from "./application/demo.service.js";
 import { PilotageService } from "./application/pilotage.service.js";
 import { PilotageController, PilotagePublicController } from "./http/pilotage.controller.js";
+import { SupervisionService } from "./application/supervision.service.js";
+import { SupervisionController } from "./http/supervision.controller.js";
 
 /** Le pilotage admin (24 octobre 2026) : tableau de bord, double authentification, journal des accès. */
 @Module({
   imports: [AbonnementModule, LearningModule, GroupeModule],
-  controllers: [PilotageController, PilotagePublicController],
+  controllers: [PilotageController, PilotagePublicController, SupervisionController],
   providers: [
+    {
+      provide: SupervisionService,
+      useFactory: (p: PrismaService, c: AppConfig) => new SupervisionService(p, c.groupe.recentrage.familles),
+      inject: [PrismaService, CONFIG],
+    },
     {
       provide: PilotageService,
       useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender, abo: AbonnementService, h: HabitudesService, cmd: CommandeDuMoisService) =>

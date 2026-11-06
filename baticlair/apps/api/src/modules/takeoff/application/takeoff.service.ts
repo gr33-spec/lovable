@@ -145,6 +145,8 @@ export interface ReadingOptions {
    * (passé en arrière-plan) prévient l'artisan qui l'a lancé quand il finit : questions prêtes, ou liste prête.
    */
   onReady?: (tenant: TenantContext, ready: { step: "questions" | "resultat"; projectId: string }) => Promise<void>;
+  /** Lot 6 : un devis où la lecture n'a rien trouvé remonte dans la file d'exceptions de l'admin (document illisible). */
+  onIllisible?: (tenant: TenantContext, d: { documentId: string; projectId: string | null; nom: string }) => Promise<void>;
   /** Garde la lecture en vie après la réponse (Vercel : waitUntil). Par défaut : elle continue seule. */
   keepAlive?: (work: Promise<unknown>) => void;
   /** §45.8 : la mémoire des consommables de l'entreprise (« On ajoute ? »). */
@@ -665,6 +667,7 @@ export class TakeoffService {
     if (lignes.length === 0) {
       await this.saveStats(analysisId, stats("failed", "nothing_read"));
       await this.meter.fail(analysisId);
+      await this.reading.onIllisible?.(tenant, { documentId: doc.id, projectId: doc.projectId ?? null, nom: doc.originalName ?? "devis" }).catch(() => undefined);
       throw new DomainError("analysis_failed", "Nothing was read in this quote", { reason: "nothing_read" });
     }
     await this.saveStats(analysisId, stats("completed", undefined, lignes.length));

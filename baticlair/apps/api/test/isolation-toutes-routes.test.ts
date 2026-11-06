@@ -194,6 +194,9 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/admin\/pilotage\/apprentissage$/, abonnementDeA.facture],
         // La démo admin : B n'est pas admin (403), quel que soit le geste.
         [/\/admin\/pilotage\/demo$/, "jeu"],
+        // Lot 6 : la supervision (familles, file d'exceptions) : B n'est pas admin (403).
+        [/\/admin\/pilotage\/familles$/, "couverture"],
+        [/\/admin\/pilotage\/exceptions$/, ids.project],
         // Recentrage (25 octobre 2026) : la demande perso de A, le regroupement (cycle) de A ; le chiffrage en ligne est un jeton.
         [/\/demandes-perso$/, ids.priceRequest],
         [/\/regroupements$/, ids.cycle],

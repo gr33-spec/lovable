@@ -2459,3 +2459,44 @@ model PropositionRapprochement {
   @@index([companyId, reponse])
   @@map("proposition_rapprochement")
 }
+
+/// LOT 6 (Greg, 6 novembre 2026, prompt maître point 6) : la taxonomie des familles de matériaux, configurable par l'admin
+/// (libellé, ordre, proposée ou non dans les achats groupés). Vide tant que l'admin n'y a pas touché : la configuration
+/// (`FAMILLES_GROUPABLES`) fait foi ; la première ouverture de l'écran la recopie ici.
+model FamilleMateriau {
+  code      String   @id
+  libelle   String
+  ordre     Int      @default(0)
+  active    Boolean  @default(true)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("famille_materiau")
+}
+
+/// LOT 6 (point 14) : la file d'exceptions. Seuls les cas qui demandent une décision humaine y remontent ; une même clé
+/// ne remonte qu'une fois tant qu'elle est ouverte (le compteur dit combien de fois le cas s'est reproduit).
+model ExceptionSupervision {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  /// document_illisible | resultat_ia_incoherent | adresse_incertaine | entreprise_non_verifiee | produit_ambigu |
+  /// offre_incomplete | prix_incoherent | doublon_incertain | echec_envoi | acces_croise | autre
+  type        String
+  gravite     Int       @default(1)
+  /// Clé de déduplication (« echec_envoi:<destinataire> »).
+  cle         String    @unique
+  titre       String
+  detail      String?
+  /// Le lien de l'admin vers l'objet (jamais une donnée d'un autre artisan dans le titre).
+  lien        String?
+  companyId   String?   @map("company_id") @db.Uuid
+  /// ouverte | resolue
+  statut      String    @default("ouverte")
+  occurrences Int       @default(1)
+  dernierLe   DateTime  @default(now()) @map("dernier_le") @db.Timestamptz(3)
+  resoluLe    DateTime? @map("resolu_le") @db.Timestamptz(3)
+  resoluPar   String?   @map("resolu_par")
+  note        String?
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([statut, gravite])
+  @@map("exception_supervision")
+}

@@ -103,6 +103,7 @@ import {
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { mailEnHtml } from "../../../platform/email/mail-html.js";
+import { famillesConfigurees } from "../../../platform/supervision/familles.js";
 import { DomainError, forbidden, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { NotificationsGroupeService } from "../../../platform/notifications/notifications-artisan.js";
 import { bonDeCommandePdf } from "../../../platform/pdf/bon-de-commande.js";
@@ -263,6 +264,14 @@ export class AchatGroupeService {
 
   /* ------------------------------------------------------------------------------------------------- réglages */
 
+  /** Lot 6 : les familles réglées par l'admin (table `famille_materiau`), sinon la configuration, comme avant. */
+  private get famillesCfg() {
+    return famillesConfigurees(this.prisma, this.cfg.familles);
+  }
+  private get famillesGroupables(): string[] {
+    return this.famillesCfg.codes();
+  }
+
   /** Le volume minimum de chaque famille (€ HT estimés) : réglage de l'admin, sinon `SEUIL_VOLUME_MIN`, sinon défaut. */
   async volumesMin(): Promise<Record<string, number>> {
     const p = await this.prisma.parametreGroupe.findUnique({ where: { cle: CLE_VOLUME_MIN } });
@@ -301,7 +310,7 @@ export class AchatGroupeService {
 
   /** Le métier de l'achat : la première famille du métier de l'entreprise, sinon celle de la plupart des lignes. */
   private metierDe(trades: readonly string[], familles: readonly string[]): string {
-    const duMetier = trades.flatMap((t) => famillesDuMetier(t)).find((f) => this.cfg.familles.includes(f));
+    const duMetier = trades.flatMap((t) => famillesDuMetier(t)).find((f) => this.famillesGroupables.includes(f));
     if (duMetier) return duMetier;
     const compte = new Map<string, number>();
     for (const f of familles) compte.set(f, (compte.get(f) ?? 0) + 1);
@@ -317,7 +326,7 @@ export class AchatGroupeService {
   async catalogue(tenant: TenantContext, q: string) {
     const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { trades: true } });
     const miennes = new Set((c?.trades ?? []).flatMap((t) => famillesDuMetier(t)));
-    const toutes = famillesDuCatalogue().filter((f) => this.cfg.familles.includes(f));
+    const toutes = famillesDuCatalogue().filter((f) => this.famillesGroupables.includes(f));
     const familles = [...toutes.filter((f) => miennes.has(f)), ...toutes.filter((f) => !miennes.has(f))].map((f) => ({ famille: f, libelle: libelleMetier(f), mienne: miennes.has(f) }));
     // Le métier de l'entreprise, même sans catalogue (Greg, 27 octobre, électricien : « j'ai toujours des propositions
     // de couvreur ») : l'écran le dit au lieu de proposer les matériaux d'un autre métier.
@@ -412,7 +421,7 @@ export class AchatGroupeService {
         }
         if (l.libre) return { ...l, libre: true, ref: { cle: `libre:${randomBytes(9).toString("base64url")}`, libelle: l.designation.trim(), famille: null as string | null } };
         const r = referenceStricte(l.designation);
-        if (!r.ok || !this.cfg.familles.includes(r.reference.famille))
+        if (!r.ok || !this.famillesGroupables.includes(r.reference.famille))
           throw validationFailed("Reference not precise enough", { reason: "reference_imprecise", message: `« ${l.designation} » n'est pas une référence du catalogue : elle reste en demande perso.` });
         return { ...l, libre: false, ref: { cle: r.reference.cle, libelle: r.reference.libelle, famille: r.reference.famille as string | null } };
       }),
@@ -558,7 +567,7 @@ export class AchatGroupeService {
     const adresse = liste.adresse ?? (await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } }))?.address ?? null;
     const vues = lignes.map((l) => {
       const r = rattachementPropose(l.designation);
-      const groupable = !!r && this.cfg.familles.includes(r.famille);
+      const groupable = !!r && this.famillesGroupables.includes(r.famille);
       return { key: l.key, designation: l.designation, quantite: l.quantite, unite: l.unite, reference: groupable ? r!.libelle : null, famille: groupable ? r!.famille : null, question: groupable ? r!.question : null };
     });
     const suggerees = lignesASuggerer(vues, this.seuilsSuggestion).sort((a, b) => b.quantite - a.quantite);
@@ -588,7 +597,7 @@ export class AchatGroupeService {
     const perso: { key: string; designation: string }[] = [];
     for (const l of lignes) {
       const r = rattachementPropose(l.designation);
-      if (d.confirmees.includes(l.key) && r && this.cfg.familles.includes(r.famille)) engagees.push({ designation: l.designation, quantite: l.quantite, unite: l.unite, projectId, articleKey: l.key });
+      if (d.confirmees.includes(l.key) && r && this.famillesGroupables.includes(r.famille)) engagees.push({ designation: l.designation, quantite: l.quantite, unite: l.unite, projectId, articleKey: l.key });
       else perso.push({ key: l.key, designation: l.designation });
     }
     if (engagees.length === 0) throw validationFailed("Nothing confirmed", { reason: "rien_a_lancer", message: "Coche au moins une ligne rattachée au catalogue." });
@@ -964,6 +973,7 @@ export class AchatGroupeService {
   ) {
     const zone = await this.ports.zoneDe(tenant.companyId);
     if ((await this.ports.mode()) !== MODE_AUTO) return { zone, departement: null, achats: [] };
+    await this.famillesCfg.rafraichir();
     const departement = f.departement === "tous" || f.region ? null : (f.departement ?? zone);
     // Lot 5 : un secteur se dit par département, par région, ou par un rayon autour du département choisi (le sien par défaut).
     const departements = f.region ? departementsDeLaRegion(f.region) : departement && f.rayonKm ? departementsAutour(departement, f.rayonKm) : departement ? [departement] : null;
@@ -994,7 +1004,7 @@ export class AchatGroupeService {
       achats.push({
         id: a.id,
         titre: a.libelle,
-        metier: libelleMetier(a.famille),
+        metier: this.famillesCfg.libelle(a.famille),
         famille: a.famille,
         zone: a.departement,
         secteur: nomSecteur(a.departement),
@@ -1020,7 +1030,7 @@ export class AchatGroupeService {
       regions: REGIONS,
       rayons: RAYONS_KM,
       carte: [...carte].map(([code, n]) => ({ code, secteur: nomSecteur(code), n })),
-      familles: this.cfg.familles, libellesFamilles: Object.fromEntries(this.cfg.familles.map((f) => [f, LIBELLES_FAMILLES[f as keyof typeof LIBELLES_FAMILLES] ?? f])), collectif: PHRASE_COLLECTIF, achats };
+      familles: this.famillesGroupables, libellesFamilles: this.famillesCfg.libelles(this.famillesGroupables), collectif: PHRASE_COLLECTIF, achats };
   }
 
   /* ------------------------------------------------------------------------------------------ les alertes (F21) */

@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { signalerException } from "../../platform/supervision/exceptions.js";
 import { gardeCommandeSeule } from "../../platform/cycle/lignes.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { EmailCapability, TransactionalEmailSender } from "../../platform/email/email.port.js";
@@ -35,6 +36,8 @@ import { PrismaPriceRequestRepository } from "./infrastructure/prisma-price-requ
         );
         // Le cycle de vie (§19) : « Je retiens ce négoce » est une commande seule ; jamais en double avec un achat groupé.
         service.brancherGardeCommande((tenant, projectId, keys, retirerDesGroupes) => gardeCommandeSeule(prisma, tenant.companyId, projectId, keys, { retirerDesGroupes }).then(() => undefined));
+        // Lot 6 : un e-mail au négoce qui ne part pas remonte dans la file d'exceptions de l'admin.
+        service.brancherSupervision((e) => signalerException(prisma, e));
         return service;
       },
       inject: [PRICE_REQUEST_REPOSITORY, SUPPLIER_REPOSITORY, DocumentsService, TakeoffService, EMAIL_SENDER, PrismaService],

@@ -225,6 +225,9 @@ function AFaire({ t }: { t: Tableau }) {
 
       <Bloc titre="Les autres écrans" aide="Pour les commandes communes du mois et les négoces.">
         <Card className="flex flex-col gap-1 p-2">
+          <Link href="/admin/supervision" className="flex min-h-12 items-center justify-between rounded-xl px-3 text-[16px] font-semibold hover:bg-ground">
+            Supervision : exceptions, familles, négoces <span aria-hidden="true">→</span>
+          </Link>
           <Link href="/admin/groupe" className="flex min-h-12 items-center justify-between rounded-xl px-3 text-[16px] font-semibold hover:bg-ground">
             Commandes communes et négoces <span aria-hidden="true">→</span>
           </Link>

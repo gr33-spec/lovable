@@ -1,3 +1,4 @@
+import { signalerException } from "../../platform/supervision/exceptions.js";
 import { FILE_REPRISE } from "../../platform/reprise/reprise.module.js";
 import type { FileReprise } from "../../platform/reprise/file-reprise.js";
 import { waitUntil } from "@vercel/functions";
@@ -115,6 +116,8 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
                 if (sent === "gone") await prisma.pushSubscription.deleteMany({ where: { endpoint: d.endpoint } });
               }
             },
+            onIllisible: (tenant, d) =>
+              signalerException(prisma, { type: "document_illisible", cle: d.documentId, titre: "Un devis déposé n'a donné aucune ligne à la lecture", detail: `Fichier : ${d.nom}. L'artisan a vu « Je n'ai rien lu dans ce devis » (réessayer ou redéposer).`, companyId: tenant.companyId }),
             // Sur Vercel, la lecture d'un gros devis continue après la réponse (sinon la fonction s'arrête).
             keepAlive: (work) => waitUntil(work),
             answerWithinMs: config.ai.answerWithinMs,

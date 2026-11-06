@@ -25,6 +25,7 @@ import {
   lienTel,
   PREVIENS_TITRE,
   previensSms,
+  prixIncoherent,
   resultatsNegoce,
   validiteAcceptee,
   zoneDuCodePostal,
@@ -36,6 +37,7 @@ import {
 } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
+import { signalerException } from "../../../platform/supervision/exceptions.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { mailEnHtml } from "../../../platform/email/mail-html.js";
 import type { PriceRequestsService } from "../../price-requests/index.js";
@@ -459,6 +461,21 @@ export class DemandePersoService {
     return { fait: true };
   }
 
+  private async superviserOffre(recipientId: string, priceRequestId: string, nom: string, companyId: string, lignes: { cle: string; designation: string }[], prix: Record<string, number>) {
+    const chiffrees = lignes.filter((l) => prix[l.cle] !== undefined).length;
+    if (chiffrees < lignes.length)
+      await signalerException(this.prisma, { type: "offre_incomplete", cle: recipientId, titre: `${nom} a chiffré ${chiffrees} ligne${chiffrees > 1 ? "s" : ""} sur ${lignes.length}`, detail: `Lignes sans prix : ${lignes.filter((l) => prix[l.cle] === undefined).map((l) => l.designation).slice(0, 10).join(" ; ")}`, companyId });
+    const autres = (await this.prisma.priceRequestRecipient.findMany({ where: { priceRequestId, id: { not: recipientId }, reponduLe: { not: null } }, select: { prix: true } })).filter((a) => a.prix && typeof a.prix === "object");
+    const ecarts = lignes.filter((l) => {
+      const v = prix[l.cle];
+      if (v === undefined) return false;
+      const ailleurs = autres.map((a) => (a.prix as Record<string, unknown>)[l.cle]).filter((x): x is number => typeof x === "number");
+      return prixIncoherent(v, ailleurs);
+    });
+    if (ecarts.length)
+      await signalerException(this.prisma, { type: "prix_incoherent", cle: recipientId, titre: `Prix très éloignés des autres offres chez ${nom}`, detail: ecarts.map((l) => `${l.designation} : ${prix[l.cle]} € HT`).slice(0, 10).join(" ; "), companyId });
+  }
+
   async chiffrer(jeton: string, body: { prix: Record<string, number>; livraisonHt: number; delaiJours: number | null; validiteJours: number }) {
     const r = await this.parJeton(jeton);
     const d = r.priceRequest;
@@ -475,6 +492,8 @@ export class DemandePersoService {
       where: { id: r.id },
       data: { prix, livraisonHt: body.livraisonHt, delaiJours: body.delaiJours, validiteJours: body.validiteJours, reponduLe: maintenant, refuseLe: null, status: "received" },
     });
+    // Lot 6 : la file d'exceptions (offre incomplète, prix incohérent face aux autres négoces de la même demande).
+    await this.superviserOffre(r.id, r.priceRequestId, r.supplier.name, d.company.id, this.lignes(d.lines), prix);
     // L'observatoire : le prix de chaque ligne chiffrée, sans le négoce ni l'artisan.
     await this.obs
       ?.enregistrer({
