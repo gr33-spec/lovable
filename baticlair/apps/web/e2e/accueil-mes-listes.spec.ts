@@ -353,25 +353,50 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   }
 });
 
-test("Dossier d'une demande (Greg, 1er novembre 2026) : Résumé, Réponses, Offres, Documents ; aucune fausse messagerie ; l'onglet se garde dans l'adresse", async ({ page }) => {
+test("Dossier d'une demande (Greg, 6 novembre 2026) : Suivi, Offres, Documents ; le négoce va répondre, demande une précision, l'artisan répond d'ici ; l'onglet se garde dans l'adresse", async ({ page }, info) => {
+  test.setTimeout(120_000);
   await inscrire(page);
   const { projectId, recipientId } = await demandeEnvoyee(page, "Toiture Le Goff");
+  // Le négoce, par son lien sécurisé (boîte de test) : « Je vais répondre », puis une question.
+  const demande = (await apiJson<{ items: { recipients: { id: string; supplier: { email: string } }[] }[] }>(page, "GET", `/v1/projects/${projectId}/price-requests`)).body.items[0]!;
+  const emailNegoce = demande.recipients[0]!.supplier.email;
+  const mails = await page.evaluate(async (to) => (await (await fetch(`/v1/internal/test/emails?to=${encodeURIComponent(to)}`, { headers: { authorization: "Bearer e2e-secret-de-la-tache" } })).json()).emails as { text: string }[], emailNegoce);
+  const jeton = /\/chiffrer\/([A-Za-z0-9_-]+)/.exec(mails.at(-1)!.text)![1]!;
+  const negoce = await page.context().newPage();
+  await negoce.goto(`/chiffrer/${jeton}`);
+  const reponse = negoce.getByRole("region", { name: "Votre réponse" });
+  await reponse.getByRole("button", { name: "Je vais répondre" }).click();
+  await expect(reponse.getByText(/sait que vous allez répondre/)).toBeVisible();
+  await reponse.getByRole("button", { name: "J'ai besoin d'une précision" }).click();
+  await reponse.getByLabel("Votre question").fill("Les liteaux : traités classe 2 ou classe 4 ?");
+  await reponse.getByRole("button", { name: "Envoyer ma question" }).click();
+  await expect(negoce.getByRole("region", { name: "Votre question" })).toContainText("sa réponse s'affichera ici");
+  await negoce.screenshot({ path: `test-results/negoce/${info.project.name}-question.png`, fullPage: true });
+
   await page.goto(`/chantiers/${projectId}`);
   const onglets = page.getByRole("tablist", { name: "Dossier de la demande" });
-  await expect(onglets.getByRole("tab")).toHaveText(["Résumé", "Réponses", "Offres", "Documents"]);
-  await expect(onglets.getByRole("tab", { name: "Résumé" })).toHaveAttribute("aria-selected", "true");
-  // Réponses : le négoce et son état, « Écrire à » ouvre la vraie messagerie ; pas de champ pour lui répondre ici.
-  await onglets.getByRole("tab", { name: "Réponses" }).click();
-  await expect(page).toHaveURL(/onglet=reponses/);
-  const reponses = page.getByRole("tabpanel", { name: "Réponses" });
-  await expect(reponses.getByText("En attente de réponse")).toBeVisible();
-  await expect(reponses.getByRole("link", { name: /^Écrire à Négoce/ })).toHaveAttribute("href", /^mailto:ventes-/);
-  await expect(reponses.getByRole("textbox")).toHaveCount(0);
-  await expect(reponses.getByText(/Tu ne peux pas encore répondre à un négoce depuis MOBIIZ/)).toBeVisible();
-  await expect(page.getByRole("tabpanel", { name: "Résumé", includeHidden: true })).toBeHidden();
+  await expect(onglets.getByRole("tab")).toHaveText(["Suivi", "Offres", "Documents"]);
+  await expect(onglets.getByRole("tab", { name: "Suivi" })).toHaveAttribute("aria-selected", "true");
+  // Suivi : le négoce, son intention, sa question ; l'artisan répond d'ici.
+  const suivi = page.getByRole("region", { name: "Suivi de la demande" });
+  await expect(suivi.getByText("Va répondre")).toBeVisible();
+  await expect(suivi).toContainText("Les liteaux : traités classe 2 ou classe 4 ?");
+  await expect(suivi.getByRole("link", { name: /^Écrire à Négoce/ })).toHaveAttribute("href", /^mailto:ventes-/);
+  await suivi.getByLabel("Ta réponse").fill("Classe 4, autoclave vert.");
+  await suivi.getByRole("button", { name: /^Envoyer ma réponse à / }).click();
+  await expect(suivi.getByText("Ta réponse : « Classe 4, autoclave vert. »")).toBeVisible();
+  await suivi.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `test-results/negoce/${info.project.name}-suivi.png` });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+  // La réponse s'affiche sur la page du négoce.
+  await negoce.reload();
+  await expect(negoce.getByRole("region", { name: "Votre question" })).toContainText("Classe 4, autoclave vert.");
+  await negoce.close();
   // Offres : rien encore, puis le devis rangé.
   await onglets.getByRole("tab", { name: "Offres" }).click();
+  await expect(page).toHaveURL(/onglet=offres/);
   await expect(page.getByRole("tabpanel", { name: "Offres" }).getByText("Aucune offre reçue pour l'instant. Tu seras prévenu à chaque réponse.")).toBeVisible();
+  await expect(page.getByRole("tabpanel", { name: "Suivi", includeHidden: true })).toBeHidden();
   await reponseRecue(page, recipientId);
   await page.reload();
   const offres = page.getByRole("tabpanel", { name: "Offres" });
@@ -381,8 +406,12 @@ test("Dossier d'une demande (Greg, 1er novembre 2026) : Résumé, Réponses, Off
   const documents = page.getByRole("tabpanel", { name: "Documents" });
   await expect(documents.getByRole("button", { name: /^Demande envoyée à Négoce/ })).toBeVisible();
   await expect(documents.getByRole("button", { name: /^Devis d'un négoce/ })).toBeVisible();
-  // Retour au résumé : l'écran du chantier, tel qu'avant.
-  await onglets.getByRole("tab", { name: "Résumé" }).click();
+  // Retour au Suivi : l'écran du chantier, tel qu'avant ; une ancienne adresse (« reponses ») mène au Suivi.
+  await onglets.getByRole("tab", { name: "Suivi" }).click();
   await expect(page).not.toHaveURL(/onglet=/);
-  await expect(page.getByRole("tabpanel", { name: "Résumé" })).toBeVisible();
+  await expect(page.getByRole("tabpanel", { name: "Suivi" })).toBeVisible();
+  await page.goto(`/chantiers/${projectId}?onglet=reponses`);
+  await expect(onglets.getByRole("tab", { name: "Suivi" })).toHaveAttribute("aria-selected", "true");
+  // Ordinateur : la liste des demandes reste à gauche.
+  if (page.viewportSize()!.width >= 1280) await expect(page.getByRole("navigation", { name: "Mes demandes" }).getByRole("link", { name: /Toiture Le Goff/ })).toHaveAttribute("aria-current", "page");
 });

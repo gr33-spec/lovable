@@ -51,6 +51,14 @@ interface Row {
     sentAt: Date | null;
     etiquette?: string | null;
     reponduLe?: Date | null;
+    refuseLe?: Date | null;
+    intention?: string | null;
+    intentionLe?: Date | null;
+    refusMotif?: string | null;
+    precisionQuestion?: string | null;
+    precisionDemandeeLe?: Date | null;
+    precisionReponse?: string | null;
+    precisionRepondueLe?: Date | null;
     rappelMiLe?: Date | null;
     rappelVeilleLe?: Date | null;
     supplier: {
@@ -164,6 +172,11 @@ function toRecord(row: Row): PriceRequestRecord {
       sentAt: r.sentAt,
       etiquette: r.etiquette ?? null,
       rappelLe: r.rappelVeilleLe ?? r.rappelMiLe ?? null,
+      negoce: {
+        intentionLe: r.intention === "repondra" ? (r.intentionLe ?? null) : null,
+        refusMotif: r.refuseLe ? (r.refusMotif ?? null) : null,
+        precision: r.precisionQuestion ? { question: r.precisionQuestion, demandeeLe: r.precisionDemandeeLe ?? null, reponse: r.precisionReponse ?? null, repondueLe: r.precisionRepondueLe ?? null } : null,
+      },
       document: r.document
         ? {
             id: r.document.id,

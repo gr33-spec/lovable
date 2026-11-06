@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Badge, Button, Card, ErrorNotice, Skeleton } from "@/components/ui";
 import {
   api,
+  messageErreur,
   type PriceRequest,
   type PriceRequestRecipient,
   type ProjectDocument,
@@ -13,22 +14,25 @@ import { euros, type DemandePerso } from "@/lib/recentrage";
 import { useResource } from "@/lib/use-resource";
 
 /**
- * LE DOSSIER D'UNE DEMANDE (Greg, 1er novembre 2026 : « Mes demandes » avec Résumé / Réponses / Offres / Documents).
- * Résumé : l'écran du chantier tel qu'il était (liste, envoi, suivi), jamais démonté. Réponses : où en est chaque négoce.
+ * LE DOSSIER D'UNE DEMANDE (Greg, 6 novembre 2026, prompt maître point 18 : Suivi / Offres / Documents ; avant, Résumé /
+ * Réponses / Offres / Documents). Suivi : où en est chaque négoce (va répondre, précision à donner, ne chiffre pas) et
+ * chaque ligne (cycle de vie), puis l'écran du chantier tel qu'il était (liste, envoi, suivi), jamais démonté.
  * Offres : ce que chacun a envoyé (prix par le lien, devis PDF). Documents : tout ce qui est rangé dans la demande.
  * PAS DE FAUSSE MESSAGERIE : l'artisan ne peut pas encore répondre depuis MOBIIZ, donc aucun fil de discussion ; « Écrire à »
  * ouvre sa vraie messagerie.
  */
 export const ONGLETS_DOSSIER = [
-  { value: "resume", label: "Résumé" },
-  { value: "reponses", label: "Réponses" },
+  { value: "suivi", label: "Suivi" },
   { value: "offres", label: "Offres" },
   { value: "documents", label: "Documents" },
 ] as const;
 export type OngletDossier = (typeof ONGLETS_DOSSIER)[number]["value"];
 
-export const estOngletDossier = (v: string | null): v is OngletDossier =>
-  ONGLETS_DOSSIER.some((o) => o.value === v);
+/** L'onglet de l'adresse ; les anciennes adresses (« resume », « reponses ») mènent au Suivi (6 novembre 2026). */
+export function ongletDossier(v: string | null): OngletDossier {
+  if (v === "offres" || v === "documents") return v;
+  return "suivi";
+}
 
 /**
  * La barre n'apparaît qu'une fois la demande partie (ou un onglet demandé dans l'adresse) : avant l'envoi, Réponses et Offres
@@ -49,7 +53,7 @@ export function BarreOnglets({
       (data.demandes.some((d) => d.recipients.some((r) => r.sentAt)) ||
         data.perso.some((d) => d.destinataires.some((r) => r.statut !== "a_envoyer"))),
   );
-  if (!partie && onglet === "resume") return null;
+  if (!partie && onglet === "suivi") return null;
   return (
     <div
       role="tablist"
@@ -126,70 +130,141 @@ function useDossier(projectId: string) {
 const RIEN_ENVOYE =
   "Rien n'est encore parti. Quand ta liste partira chez tes négoces, tu suivras ici leurs réponses.";
 
-export function OngletReponses({ projectId }: { projectId: string }) {
-  const { data, error, reload } = useDossier(projectId);
-  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
-  if (!data)
-    return <Skeleton card="h-20" lines={2} label="Chargement des réponses…" />;
-  const lignes = [
+/** Où en est chaque négoce (Suivi) : sa réponse, son intention, sa question à laquelle l'artisan répond d'ici. */
+export function SuiviDemande({ projectId }: { projectId: string }) {
+  const { data, reload } = useDossier(projectId);
+  const { data: cycle } = useResource(
+    useCallback((signal: AbortSignal) => api<{ lignes: LigneCycle[] }>(`/v1/projects/${encodeURIComponent(projectId)}/cycle`, { signal }).catch(() => null), [projectId]),
+  );
+  if (!data) return null;
+  const lignes: LigneNegoce[] = [
     ...data.demandes.flatMap((d) =>
-      d.recipients.map((r) => ({
-        cle: r.id,
-        nom: r.supplier.name,
-        statut: STATUT_DEMANDE[r.status],
-        envoye: jour(r.sentAt),
-        email: r.supplier.email,
-      })),
+      d.recipients
+        .filter((r) => r.sentAt)
+        .map((r) => ({
+          cle: r.id,
+          nom: r.supplier.name,
+          statut: STATUT_DEMANDE[r.status],
+          envoye: jour(r.sentAt),
+          email: r.supplier.email,
+          vaRepondre: Boolean(r.negoce?.vaRepondreLe) && r.status === "sent",
+          refusMotif: r.negoce?.refusMotif ?? null,
+          precision: r.negoce?.precision ?? null,
+        })),
     ),
     ...data.perso.flatMap((d) =>
-      d.destinataires.map((r) => ({
-        cle: r.id,
-        nom: r.nom,
-        statut: STATUT_PERSO[r.statut],
-        envoye: null as string | null,
-        email: null as string | null,
-      })),
+      d.destinataires
+        .filter((r) => r.statut !== "a_envoyer")
+        .map((r) => ({ cle: r.id, nom: r.nom, statut: STATUT_PERSO[r.statut], envoye: null as string | null, email: null as string | null, vaRepondre: Boolean(r.vaRepondre), refusMotif: r.refusMotif ?? null, precision: r.precision ?? null })),
     ),
   ];
-  if (lignes.length === 0)
-    return (
-      <p className="rounded-xl bg-surface p-4 text-[15px] text-muted shadow-card">
-        {RIEN_ENVOYE}
-      </p>
-    );
+  if (lignes.length === 0) return null;
+  const etats = cycle?.lignes ?? [];
   return (
-    <div className="flex flex-col gap-3">
-      <ul className="flex flex-col divide-y divide-line rounded-xl bg-surface shadow-card">
+    <section aria-label="Suivi de la demande" className="flex flex-col gap-3">
+      <ul aria-label="Les négoces" className="flex flex-col divide-y divide-line rounded-xl bg-surface shadow-card">
         {lignes.map((l) => (
-          <li
-            key={l.cle}
-            className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
-          >
-            <div className="min-w-0">
-              <p className="text-[16px] font-bold">{l.nom}</p>
-              {l.envoye ? (
-                <p className="text-[13px] text-muted">Envoyé le {l.envoye}</p>
-              ) : null}
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge tone={l.statut.ton}>{l.statut.texte}</Badge>
-              {l.email ? (
-                <a
-                  href={`mailto:${l.email}`}
-                  className="pressable inline-flex min-h-11 items-center rounded-xl px-2 text-[14px] font-semibold underline"
-                >
-                  Écrire à {l.nom}
-                </a>
-              ) : null}
-            </div>
-          </li>
+          <LigneSuiviNegoce key={l.cle} l={l} onRepondu={reload} />
         ))}
       </ul>
-      <p className="text-[13px] text-muted">
-        Tu ne peux pas encore répondre à un négoce depuis MOBIIZ : « Écrire à »
-        ouvre ta messagerie. Sa réponse arrive ici.
-      </p>
-    </div>
+      {etats.length > 0 ? (
+        <details className="rounded-xl bg-surface p-4 shadow-card">
+          <summary className="cursor-pointer text-[15px] font-bold">Où en est chaque ligne ({etats.length})</summary>
+          <ul aria-label="État des lignes" className="mt-2 flex flex-col gap-1.5">
+            {etats.map((e) => (
+              <li key={e.key} className="flex flex-wrap items-center justify-between gap-2 text-[14px]">
+                <span className="min-w-0">{e.designation}</span>
+                <Badge tone={e.etat.startsWith("commandee") ? "ok" : e.etat === "libre" ? "neutral" : "warn"}>{e.groupe && e.etat === "dans_un_groupe" ? `${e.libelle} · ${e.groupe.titre}` : e.libelle}</Badge>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </section>
+  );
+}
+
+interface LigneCycle {
+  key: string;
+  designation: string;
+  etat: string;
+  libelle: string;
+  groupe: { titre: string; avantCloture: boolean } | null;
+}
+
+interface LigneNegoce {
+  cle: string;
+  nom: string;
+  statut: { texte: string; ton: "ok" | "warn" | "neutral" };
+  envoye: string | null;
+  email: string | null;
+  vaRepondre: boolean;
+  refusMotif: string | null;
+  precision: { question: string; reponse: string | null } | null;
+}
+
+function LigneSuiviNegoce({ l, onRepondu }: { l: LigneNegoce; onRepondu: () => void }) {
+  const [reponse, setReponse] = useState("");
+  const [pending, setPending] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  async function repondre(e: React.FormEvent) {
+    e.preventDefault();
+    if (!reponse.trim()) return setErreur("Écris ta réponse.");
+    setPending(true);
+    setErreur(null);
+    try {
+      await api(`/v1/price-request-recipients/${encodeURIComponent(l.cle)}/precision`, { method: "POST", body: { reponse: reponse.trim() } });
+      setReponse("");
+      onRepondu();
+    } catch (err) {
+      setErreur(messageErreur(err));
+    } finally {
+      setPending(false);
+    }
+  }
+  return (
+    <li className="flex flex-col gap-2 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[16px] font-bold">{l.nom}</p>
+          {l.envoye ? <p className="text-[13px] text-muted">Envoyé le {l.envoye}</p> : null}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone={l.vaRepondre ? "ok" : l.statut.ton}>{l.vaRepondre ? "Va répondre" : l.statut.texte}</Badge>
+          {l.email ? (
+            <a href={`mailto:${l.email}`} className="pressable inline-flex min-h-11 items-center rounded-xl px-2 text-[14px] font-semibold underline">
+              Écrire à {l.nom}
+            </a>
+          ) : null}
+        </div>
+      </div>
+      {l.refusMotif ? <p className="text-[14px] text-muted">Motif : « {l.refusMotif} »</p> : null}
+      {l.precision ? (
+        <div className="flex flex-col gap-2 rounded-lg border border-line p-3">
+          <p className="text-[14px]">
+            <span className="font-semibold">Question de {l.nom} :</span> « {l.precision.question} »
+          </p>
+          {l.precision.reponse ? (
+            <p className="text-[14px] text-muted">Ta réponse : « {l.precision.reponse} »</p>
+          ) : (
+            <form onSubmit={(e) => void repondre(e)} className="flex flex-col gap-2">
+              <label htmlFor={`precision-${l.cle}`} className="text-[14px] font-semibold">
+                Ta réponse
+              </label>
+              <textarea id={`precision-${l.cle}`} value={reponse} onChange={(e) => setReponse(e.target.value)} rows={2} maxLength={1000} className="rounded-xl border border-line bg-surface p-3 text-[16px] outline-none focus-visible:border-accent" />
+              {erreur ? (
+                <p role="alert" className="text-[14px] font-semibold text-danger">
+                  {erreur}
+                </p>
+              ) : null}
+              <Button type="submit" pending={pending}>
+                Envoyer ma réponse à {l.nom}
+              </Button>
+            </form>
+          )}
+        </div>
+      ) : null}
+    </li>
   );
 }
 

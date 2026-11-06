@@ -557,6 +557,8 @@ export interface PriceRequestRecipient {
   /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu. */
   rappelLe?: string | null;
   document: { id: string; name: string; status: string } | null;
+  /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », motif d'un refus, précision demandée. */
+  negoce?: { vaRepondreLe: string | null; refusMotif: string | null; precision: { question: string; demandeeLe: string | null; reponse: string | null; repondueLe: string | null } | null } | null;
   /** E-mail prêt à envoyer (texte brut). */
   email: { subject: string; body: string } | null;
 }

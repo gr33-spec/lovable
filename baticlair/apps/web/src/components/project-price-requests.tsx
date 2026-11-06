@@ -821,12 +821,15 @@ function cardState(r: PriceRequestRecipient): CardState {
     case "to_send":
       return { label: "À envoyer", tone: "warn", info: r.supplier.email };
     case "sent":
+      // Le parcours du négoce (6 novembre 2026) : sa question d'abord, puis « Va répondre ».
+      if (r.negoce?.precision && !r.negoce.precision.reponse) return { label: "Question", tone: "warn", info: "Il a besoin d'une précision : réponds-lui dans le Suivi." };
+      if (r.negoce?.vaRepondreLe) return { label: "Va répondre", tone: "ok", info: r.sentAt ? `Demande envoyée le ${dateHeureCourte(new Date(r.sentAt))}` : "Demande envoyée" };
       return { label: "En attente", tone: "neutral", info: r.sentAt ? `Demande envoyée le ${dateHeureCourte(new Date(r.sentAt))}` : "Demande envoyée" };
     case "received":
       // Point 7 (28 octobre 2026) : plus de « Prêt à comparer » : le devis s'ouvre tel quel.
       return { label: "Devis reçu", tone: "ok", info: "" };
     case "declined":
-      return { label: "Pas de réponse", tone: "neutral", info: "" };
+      return { label: "Ne chiffre pas", tone: "neutral", info: r.negoce?.refusMotif ? `« ${r.negoce.refusMotif} »` : "" };
   }
 }
 

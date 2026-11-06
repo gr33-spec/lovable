@@ -256,6 +256,13 @@ export class RapprochementService {
       if (couverte(await clesCommandees(this.prisma, tenant.companyId, e.projectId!), e.articleKey!))
         items.push({ cle: `double:${e.id}`, genre: "rapprochement", texte: `« ${e.libelle} » est déjà commandé en demande individuelle : retire-le de l'achat groupé`, href: `/achats-groupes/${e.besoinId}` });
     }
+    // Le parcours du négoce (6 novembre 2026) : une question d'un négoce attend la réponse de l'artisan.
+    const questions = await this.prisma.priceRequestRecipient.findMany({
+      where: { precisionQuestion: { not: null }, precisionReponse: null, priceRequest: { companyId: tenant.companyId } },
+      select: { id: true, supplier: { select: { name: true } }, priceRequest: { select: { projectId: true } } },
+      take: 10,
+    });
+    for (const q of questions) items.push({ cle: `precision:${q.id}`, genre: "rapprochement", texte: `${q.supplier.name} a besoin d'une précision`, href: `/chantiers/${q.priceRequest.projectId}?onglet=suivi` });
     return { items };
   }
 

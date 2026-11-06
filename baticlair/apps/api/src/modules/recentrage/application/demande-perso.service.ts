@@ -40,6 +40,7 @@ import type { TransactionalEmailSender } from "../../../platform/email/email.por
 import { mailEnHtml } from "../../../platform/email/mail-html.js";
 import type { PriceRequestsService } from "../../price-requests/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
+import { isUuid } from "../../../platform/validation/ids.js";
 import type { DroitsService } from "./droits.service.js";
 import type { ObservatoireService } from "./observatoire.service.js";
 import { bonDeCommandePdf } from "../../../platform/pdf/bon-de-commande.js";
@@ -250,6 +251,10 @@ export class DemandePersoService {
         nom: r.supplier.name,
         statut: r.refuseLe ? "refuse" : r.reponduLe ? "repondu" : r.relanceLe ? "relance" : r.status === "sent" ? "envoye" : "a_envoyer",
         suivi: r.suivi,
+        // Le parcours du négoce (6 novembre 2026).
+        vaRepondre: r.intention === "repondra" && !r.reponduLe && !r.refuseLe,
+        refusMotif: r.refuseLe ? r.refusMotif : null,
+        precision: r.precisionQuestion ? { question: r.precisionQuestion, reponse: r.precisionReponse } : null,
       })),
       offres: comparees.map((o) => ({ ...o, recipientId: o.negoceId, valideJusquau: o.valideJusquau.toISOString() })),
       commande: commande ? { recipientId: commande.id, nom: commande.supplier.name, suivi: commande.suivi, commandeLe: commande.commandeLe } : null,
@@ -396,7 +401,62 @@ export class DemandePersoService {
       etat: r.commandeLe ? "commande" : r.refuseLe ? "refuse" : r.reponduLe ? "repondu" : "a_chiffrer",
       reponse: r.reponduLe ? { prix: r.prix, livraisonHt: Number(r.livraisonHt ?? 0), delaiJours: r.delaiJours, validiteJours: r.validiteJours, valideJusquau: finDeValidite(r.reponduLe, r.validiteJours ?? VALIDITE_MIN_JOURS) } : null,
       commande: r.commandeLe ? { le: r.commandeLe, suivi: r.suivi } : null,
+      // Le parcours du négoce (6 novembre 2026, point 13).
+      vaRepondre: r.intention === "repondra" && !r.reponduLe && !r.refuseLe,
+      refusMotif: r.refuseLe ? r.refusMotif : null,
+      precision: r.precisionQuestion ? { question: r.precisionQuestion, reponse: r.precisionReponse, repondueLe: r.precisionRepondueLe } : null,
     };
+  }
+
+  /** « Je vais répondre » : l'artisan le voit dans son suivi ; aucun e-mail (pas de bruit), la relance garde sa date. */
+  async annoncer(jeton: string) {
+    const r = await this.parJeton(jeton);
+    if (r.commandeLe || r.reponduLe || r.refuseLe) return { fait: true };
+    if (r.priceRequest.closLe && this.now() >= r.priceRequest.closLe) throw new DomainError("conflict", "Request closed", { reason: "demande_close" });
+    if (r.intention !== "repondra") await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { intention: "repondra", intentionLe: this.now() } });
+    return { fait: true };
+  }
+
+  /** « J'ai besoin d'une précision » : la question part à l'artisan (e-mail), qui répond depuis son suivi. */
+  async demanderPrecision(jeton: string, question: string) {
+    const r = await this.parJeton(jeton);
+    const d = r.priceRequest;
+    if (r.commandeLe) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
+    if (d.closLe && this.now() >= d.closLe) throw new DomainError("conflict", "Request closed", { reason: "demande_close" });
+    const texte = question.trim();
+    if (texte.length < 3) throw validationFailed("Question required", { reason: "question_requise", message: "Écrivez votre question." });
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { precisionQuestion: texte, precisionDemandeeLe: this.now(), precisionReponse: null, precisionRepondueLe: null } });
+    const emailArtisan = await this.emailDe(d.company.id);
+    if (emailArtisan)
+      await this.mailer
+        .send({
+          to: emailArtisan,
+          subject: `${r.supplier.name} a besoin d'une précision`,
+          text: ["Bonjour,", "", `${r.supplier.name} a besoin d'une précision pour chiffrer ta demande :`, "", `« ${texte} »`, "", "Réponds-lui depuis le suivi de ta demande :", `${this.cfg.webAppUrl}/chantiers/${d.projectId}?onglet=suivi`, "", NOM_APP].join("\n"),
+        })
+        .catch(() => undefined);
+    return { fait: true };
+  }
+
+  /** La réponse de l'artisan à une précision : enregistrée, envoyée au négoce (vouvoiement), visible sur sa page. */
+  async repondrePrecision(tenant: TenantContext, recipientId: string, reponse: string) {
+    assertCanWrite(tenant);
+    if (!isUuid(recipientId)) throw notFound("Recipient");
+    const r = await this.prisma.priceRequestRecipient.findFirst({
+      where: { id: recipientId, priceRequest: { companyId: tenant.companyId } },
+      include: { supplier: { select: { name: true, email: true } }, priceRequest: { select: { company: { select: { name: true } } } } },
+    });
+    if (!r) throw notFound("Recipient");
+    if (!r.precisionQuestion) throw validationFailed("No question", { reason: "pas_de_question" });
+    const texte = reponse.trim();
+    if (texte.length < 1) throw validationFailed("Answer required", { reason: "reponse_requise", message: "Écris ta réponse." });
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { precisionReponse: texte, precisionRepondueLe: this.now() } });
+    await this.mailer.send({
+      to: r.supplier.email,
+      subject: `Réponse à votre question : ${r.priceRequest.company.name}`,
+      text: ["Bonjour,", "", `Vous demandiez : « ${r.precisionQuestion} »`, "", `Réponse de ${r.priceRequest.company.name} : « ${texte} »`, "", "Vous pouvez reprendre votre chiffrage avec le lien de la demande reçue.", "", NOM_APP].join("\n"),
+    });
+    return { fait: true };
   }
 
   async chiffrer(jeton: string, body: { prix: Record<string, number>; livraisonHt: number; delaiJours: number | null; validiteJours: number }) {
@@ -449,10 +509,22 @@ export class DemandePersoService {
     return { phrase: PHRASE_COMPTE_APRES_REPONSE, lien: `${this.cfg.webAppUrl}/negoce/rejoindre/${jeton}` };
   }
 
-  async refuser(jeton: string) {
+  /** « Je ne peux pas chiffrer » : le motif (facultatif) va à l'artisan ; plus de relance. */
+  async refuser(jeton: string, motif?: string | null) {
     const r = await this.parJeton(jeton);
     if (r.commandeLe) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
-    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { refuseLe: this.now(), status: "declined" } });
+    const deja = !!r.refuseLe;
+    const texte = motif?.trim() || null;
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { refuseLe: this.now(), status: "declined", refusMotif: texte } });
+    const emailArtisan = deja ? null : await this.emailDe(r.priceRequest.company.id);
+    if (emailArtisan)
+      await this.mailer
+        .send({
+          to: emailArtisan,
+          subject: `${r.supplier.name} ne peut pas chiffrer ta demande`,
+          text: ["Bonjour,", "", `${r.supplier.name} ne peut pas chiffrer ta demande${texte ? ` : « ${texte} »` : "."}`, "Tu peux l'envoyer à un autre négoce depuis ta demande :", `${this.cfg.webAppUrl}/chantiers/${r.priceRequest.projectId}?onglet=suivi`, "", NOM_APP].join("\n"),
+        })
+        .catch(() => undefined);
     return { fait: true };
   }
 

@@ -101,6 +101,13 @@ export function toDto(r: PriceRequestView) {
       sentAt: x.sentAt?.toISOString() ?? null,
       etiquette: x.etiquette,
       rappelLe: x.rappelLe?.toISOString() ?? null,
+      negoce: x.negoce
+        ? {
+            vaRepondreLe: x.negoce.intentionLe?.toISOString() ?? null,
+            refusMotif: x.negoce.refusMotif,
+            precision: x.negoce.precision ? { question: x.negoce.precision.question, demandeeLe: x.negoce.precision.demandeeLe?.toISOString() ?? null, reponse: x.negoce.precision.reponse, repondueLe: x.negoce.precision.repondueLe?.toISOString() ?? null } : null,
+          }
+        : null,
       document: x.document,
       email: r.emails.get(x.id) ?? null,
     })),

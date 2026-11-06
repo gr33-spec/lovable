@@ -21,6 +21,8 @@ export interface RecipientRecord {
   etiquette: string | null;
   /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu (mi-délai ou veille). */
   rappelLe?: Date | null;
+  /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », le motif d'un refus, une précision demandée. */
+  negoce?: { intentionLe: Date | null; refusMotif: string | null; precision: { question: string; demandeeLe: Date | null; reponse: string | null; repondueLe: Date | null } | null };
 }
 
 /**

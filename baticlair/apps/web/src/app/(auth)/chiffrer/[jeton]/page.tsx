@@ -12,7 +12,7 @@ const lireNombre = (s: string) => (s.trim() === "" ? null : Number(s.replace(/\s
 /**
  * LE CHIFFRAGE EN LIGNE, SANS COMPTE (Greg, 25 octobre 2026) : le négoce reçoit un e-mail au nom de l'artisan avec un lien
  * sécurisé ; ici, un prix par ligne, la livraison, le délai et la validité (7 jours au moins). Une grille partielle passe.
- * « Je ne chiffre pas » d'un tap. Après la première réponse, l'invitation à créer son compte. Une commande reçue se
+ * Trois gestes (6 novembre 2026) : « Je vais répondre », « J'ai besoin d'une précision », « Je ne peux pas chiffrer ». Après la première réponse, l'invitation à créer son compte. Une commande reçue se
  * confirme ici. Vouvoiement ; jamais le prix d'un autre négoce.
  */
 export default function ChiffrerPage() {
@@ -27,6 +27,9 @@ export default function ChiffrerPage() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [compte, setCompte] = useState<{ phrase: string; lien: string } | null>(null);
   const [modifier, setModifier] = useState(false);
+  // Le parcours du négoce (6 novembre 2026, point 13) : trois gestes avant (ou au lieu) du chiffrage.
+  const [geste, setGeste] = useState<"precision" | "refus" | null>(null);
+  const [texte, setTexte] = useState("");
   const chemin = `/v1/public/chiffrer/${encodeURIComponent(jeton)}`;
 
   function charger() {
@@ -68,11 +71,13 @@ export default function ChiffrerPage() {
     }
   }
 
-  async function action(quoi: "refuser" | "confirmer") {
+  async function action(quoi: "refuser" | "confirmer" | "intention" | "precision", corps?: Record<string, string | null>) {
     setPending(true);
     setErreur(null);
     try {
-      await api(`${chemin}/${quoi}`, { method: "POST" });
+      await api(`${chemin}/${quoi}`, { method: "POST", ...(corps ? { body: corps } : {}) });
+      setGeste(null);
+      setTexte("");
       charger();
     } catch (e) {
       setErreur(messageErreur(e));
@@ -118,8 +123,83 @@ export default function ChiffrerPage() {
         </Card>
       ) : null}
 
+      {page.precision ? (
+        <section aria-label="Votre question">
+        <Card className="flex flex-col gap-1.5 p-4">
+          <p className="text-[14px] font-semibold text-muted">Votre question</p>
+          <p className="text-[15px]">« {page.precision.question} »</p>
+          {page.precision.reponse ? (
+            <p className="text-[15px] font-semibold">
+              Réponse de {page.artisan} : « {page.precision.reponse} »
+            </p>
+          ) : (
+            <p className="text-[14px] text-muted">{page.artisan} a reçu votre question ; sa réponse s&apos;affichera ici et vous arrivera par e-mail.</p>
+          )}
+        </Card>
+        </section>
+      ) : null}
+
+      {page.etat === "a_chiffrer" && !page.close && !page.commande ? (
+        <section aria-label="Votre réponse">
+        <Card className="flex flex-col gap-3 p-4">
+          <SectionTitle>Votre réponse</SectionTitle>
+          {page.vaRepondre ? <p className="text-[15px] font-semibold text-ok">{page.artisan} sait que vous allez répondre.</p> : null}
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            {!page.vaRepondre ? (
+              <Button variant="secondary" onClick={() => void action("intention")} pending={pending && geste === null}>
+                Je vais répondre
+              </Button>
+            ) : null}
+            <Button variant="secondary" onClick={() => (setGeste(geste === "precision" ? null : "precision"), setTexte(""))} disabled={pending}>
+              J&apos;ai besoin d&apos;une précision
+            </Button>
+            <Button variant="secondary" onClick={() => (setGeste(geste === "refus" ? null : "refus"), setTexte(""))} disabled={pending}>
+              Je ne peux pas chiffrer
+            </Button>
+          </div>
+          {geste ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (geste === "precision") {
+                  if (texte.trim().length < 3) return setErreur("Écrivez votre question.");
+                  void action("precision", { question: texte.trim() });
+                } else void action("refuser", { motif: texte.trim() || null });
+              }}
+              className="flex flex-col gap-2"
+            >
+              <label htmlFor="geste-texte" className="text-[14px] font-semibold">
+                {geste === "precision" ? "Votre question" : "Pourquoi ? (facultatif)"}
+              </label>
+              <textarea
+                id="geste-texte"
+                value={texte}
+                onChange={(e) => setTexte(e.target.value)}
+                maxLength={geste === "precision" ? 1000 : 300}
+                rows={3}
+                placeholder={geste === "precision" ? "Ex. : les liteaux, traités classe 2 ou classe 4 ?" : "Ex. : article pas en stock, hors de notre secteur…"}
+                className="rounded-xl border border-line bg-surface p-3 text-[16px] outline-none focus-visible:border-accent"
+              />
+              <Button type="submit" pending={pending}>
+                {geste === "precision" ? "Envoyer ma question" : "Confirmer : je ne chiffre pas"}
+              </Button>
+            </form>
+          ) : null}
+          {erreur && geste ? (
+            <p role="alert" className="text-[15px] font-semibold text-danger">
+              {erreur}
+            </p>
+          ) : null}
+        </Card>
+        </section>
+      ) : null}
+
       {page.close && page.etat === "a_chiffrer" ? <p className="rounded-xl bg-ground p-4 text-[15px]">Cette demande est close : la date de besoin est passée.</p> : null}
-      {page.etat === "refuse" && !formulaire ? <p className="rounded-xl bg-ground p-4 text-[15px]">Vous avez indiqué ne pas chiffrer cette demande.</p> : null}
+      {page.etat === "refuse" ? (
+        <p className="rounded-xl bg-ground p-4 text-[15px]">
+          Vous avez indiqué ne pas chiffrer cette demande{page.refusMotif ? ` (« ${page.refusMotif} »)` : ""}. Vous pouvez encore envoyer une offre ci-dessous.
+        </p>
+      ) : null}
 
       {page.reponse && !formulaire && !page.commande ? (
         <Card className="flex flex-col gap-2 p-4">
@@ -175,11 +255,7 @@ export default function ChiffrerPage() {
             <Button type="submit" pending={pending} className="w-full">
               Envoyer mon offre
             </Button>
-            {page.etat === "a_chiffrer" ? (
-              <Button type="button" variant="secondary" onClick={() => void action("refuser")} disabled={pending} className="w-full">
-                Je ne chiffre pas
-              </Button>
-            ) : null}
+
           </>
         ) : null}
       </form>

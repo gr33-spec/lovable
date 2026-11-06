@@ -723,6 +723,15 @@ model PriceRequestRecipient {
   rappelVeilleLe DateTime? @map("rappel_veille_le") @db.Timestamptz(3)
   /// Ce que l'artisan savait du négoce à l'envoi (nom, e-mail, spécialités, lots envoyés), figé (Greg, 1er novembre 2026).
   instantane     Json?
+  /// LE PARCOURS DU NÉGOCE (Greg, 6 novembre 2026, prompt maître point 13) : « Je vais répondre » (intention), « Je ne
+  /// peux pas chiffrer » (refuseLe + motif), « J'ai besoin d'une précision » (question, puis la réponse de l'artisan).
+  intention           String?   @map("intention")
+  intentionLe         DateTime? @map("intention_le") @db.Timestamptz(3)
+  refusMotif          String?   @map("refus_motif")
+  precisionQuestion   String?   @map("precision_question")
+  precisionDemandeeLe DateTime? @map("precision_demandee_le") @db.Timestamptz(3)
+  precisionReponse    String?   @map("precision_reponse")
+  precisionRepondueLe DateTime? @map("precision_repondue_le") @db.Timestamptz(3)
 
   priceRequest PriceRequest       @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
   emailsRecus  EmailRecuArtisan[]

@@ -4,7 +4,8 @@ import { useParams, usePathname, useRouter, useSearchParams } from "next/navigat
 import { MapPin, MoreHorizontal } from "lucide-react";
 import { Suspense, useCallback, useRef, useState } from "react";
 import { ProjectDocuments } from "@/components/project-documents";
-import { BarreOnglets, estOngletDossier, OngletDocuments, OngletOffres, OngletReponses, type OngletDossier } from "@/components/dossier-demande";
+import { DemandesLaterales } from "@/components/demandes-laterales";
+import { BarreOnglets, OngletDocuments, OngletOffres, ongletDossier, SuiviDemande, type OngletDossier } from "@/components/dossier-demande";
 import { ProjectProgressProvider } from "@/components/project-progress";
 import { SuiviChantier } from "@/components/suivi-chantier";
 import { Badge, BackButton, Button, ErrorNotice, Field, Skeleton } from "@/components/ui";
@@ -15,10 +16,17 @@ import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
 
 export default function ChantierPage() {
+  const { id } = useParams<{ id: string }>();
+  // Ordinateur (6 novembre 2026) : la liste des demandes à gauche, le détail à droite ; téléphone : inchangé.
   return (
-    <Suspense fallback={<Skeleton card="h-12" lines={3} label="Chargement du chantier…" />}>
-      <Chantier />
-    </Suspense>
+    <div className="contents xl:grid xl:grid-cols-[13rem_minmax(0,1fr)] xl:items-start xl:gap-6">
+      <DemandesLaterales courant={id} />
+      <div className="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-6">
+        <Suspense fallback={<Skeleton card="h-12" lines={3} label="Chargement du chantier…" />}>
+          <Chantier />
+        </Suspense>
+      </div>
+    </div>
   );
 }
 
@@ -28,10 +36,10 @@ function useOnglet(): [OngletDossier, (o: OngletDossier) => void] {
   const router = useRouter();
   const chemin = usePathname();
   const brut = params.get("onglet");
-  const onglet: OngletDossier = estOngletDossier(brut) ? brut : "resume";
+  const onglet: OngletDossier = ongletDossier(brut);
   const choisir = (o: OngletDossier) => {
     const suite = new URLSearchParams(params.toString());
-    if (o === "resume") suite.delete("onglet");
+    if (o === "suivi") suite.delete("onglet");
     else suite.set("onglet", o);
     const q = suite.toString();
     router.replace(q ? `${chemin}?${q}` : chemin, { scroll: false });
@@ -77,17 +85,19 @@ function Chantier() {
         />
       )}
       <BarreOnglets projectId={project.id} onglet={onglet} onChoisir={choisirOnglet} />
-      {onglet !== "resume" ? (
-        <div role="tabpanel" aria-label={onglet === "reponses" ? "Réponses" : onglet === "offres" ? "Offres" : "Documents"} className="flex flex-col gap-3">
-          {onglet === "reponses" ? <OngletReponses projectId={project.id} /> : onglet === "offres" ? <OngletOffres projectId={project.id} onComparer={() => choisirOnglet("resume")} /> : <OngletDocuments projectId={project.id} />}
+      {onglet !== "suivi" ? (
+        <div role="tabpanel" aria-label={onglet === "offres" ? "Offres" : "Documents"} className="flex flex-col gap-3">
+          {onglet === "offres" ? <OngletOffres projectId={project.id} onComparer={() => choisirOnglet("suivi")} /> : <OngletDocuments projectId={project.id} />}
         </div>
       ) : null}
       {/* Le résumé reste monté (liste, envoi, lecture en cours) : changer d'onglet ne perd rien. */}
-      <div role="tabpanel" aria-label="Résumé" hidden={onglet !== "resume"} className={onglet === "resume" ? "contents" : "hidden"}>
+      <div role="tabpanel" aria-label="Suivi" hidden={onglet !== "suivi"} className={onglet === "suivi" ? "contents" : "hidden"}>
+      {/* Suivi (6 novembre 2026) : où en est chaque négoce et chaque ligne, une fois la demande partie. */}
+      <SuiviDemande projectId={project.id} />
       <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"} bar={false}>
         {/* Ordinateur (Greg, 31 octobre 2026, soir : « on a de la place ») : la liste et ses actions à gauche, le suivi façon
             colis à droite, qui reste à l'écran pendant qu'on descend. Téléphone : l'ordre d'avant (suivi, puis la liste). */}
-        <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_23rem]">
+        <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_19rem] xl:gap-6">
           {/* Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier ; relu à chaque changement signalé. */}
           <div className="contents lg:sticky lg:top-8 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-4">
             <SuiviChantier projectId={project.id} />

@@ -59,7 +59,11 @@ function actionsDesAchats(achats: CarteAchat[]): Action[] {
 }
 
 function actionsDesRapprochements(items: { cle: string; texte: string; href: string }[]): Action[] {
-  return items.map((r) => ({ cle: r.cle, sorte: "rapprochement", immediate: true, echeance: null, modifieLe: null, statut: "À examiner", titre: r.texte, sousTitre: "Rien n'est ajouté sans ton accord", bouton: "Examiner", href: r.href }));
+  return items.map((r) =>
+    r.cle.startsWith("precision:")
+      ? { cle: r.cle, sorte: "rapprochement", immediate: true, echeance: null, modifieLe: null, statut: "Question", titre: r.texte, sousTitre: "Ta demande de prix", bouton: "Répondre", href: r.href }
+      : { cle: r.cle, sorte: "rapprochement", immediate: true, echeance: null, modifieLe: null, statut: "À examiner", titre: r.texte, sousTitre: "Rien n'est ajouté sans ton accord", bouton: "Examiner", href: r.href },
+  );
 }
 
 function actionsDesListes(next: NextAction[], projets: Map<string, { lastActivityAt: string }>, dejaBrouillon: Set<string>): Action[] {

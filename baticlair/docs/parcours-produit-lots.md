@@ -35,3 +35,26 @@ RÉELLEMENT terminé à chaque lot ; le tableau final des sections 1 à 22 est �
 **Tests** : domaine `test/cycle-de-vie.test.ts` (6) ; API `test/cycle-de-vie.test.ts` (5 : double engagement et double
 clic, geste explicite, commande groupée, après clôture, isolation), suite API complète 655/656 puis la correction ;
 e2e `e2e/cycle-de-vie.spec.ts` (téléphone et ordinateur).
+
+## Lot 2 : dossier Demandes et parcours complet des négoces
+
+**Terminé**
+- Négoce, par son lien sécurisé (`/chiffrer/<jeton>`, une seule page pour la demande de la liste et la demande perso) :
+  « Je vais répondre » (l'artisan le voit, sans e-mail), « J'ai besoin d'une précision » (question envoyée à
+  l'artisan par e-mail et dans « À faire » ; sa réponse revient par e-mail au négoce et s'affiche sur sa page), « Je
+  ne peux pas chiffrer » (motif facultatif, l'artisan est prévenu une fois ; le négoce peut encore envoyer une offre).
+  Avant : seulement « Je ne chiffre pas », sans motif. Le PDF, l'Excel, le QR, le chiffrage en ligne et les relances
+  automatiques existaient déjà (lot final, point 3 et 6) et sont gardés.
+- Migration ADDITIVE `20261107090000_parcours_negoce` (colonnes de `price_request_recipient` : intention, motif du
+  refus, question et réponse de précision, avec leurs dates).
+- Routes : `POST /v1/public/chiffrer/:jeton/intention`, `…/precision`, `…/refuser` (motif) ; artisan :
+  `POST /v1/price-request-recipients/:id/precision` (isolation : 404 pour une autre entreprise).
+- Dossier d'une demande : **Suivi / Offres / Documents** (avant : Résumé / Réponses / Offres / Documents). Suivi = où
+  en est chaque négoce (« Va répondre », « Question » avec la case pour répondre, « Ne chiffre pas » et son motif,
+  « Devis reçu ») et chaque ligne (cycle de vie du lot 1), puis l'écran du chantier tel qu'avant. Les anciennes
+  adresses `?onglet=resume|reponses` mènent au Suivi. La carte du négoce dit aussi « Va répondre » / « Question » /
+  « Ne chiffre pas » (avant : « Pas de réponse »).
+- Ordinateur (≥ 1280 px) : la liste des demandes reste à gauche du détail (`DemandesLaterales`) ; téléphone inchangé.
+
+**Tests** : API `test/parcours-negoce.test.ts` (4) ; e2e « Dossier d'une demande (Greg, 6 novembre 2026) » dans
+`accueil-mes-listes.spec.ts` (négoce + artisan, téléphone et ordinateur).

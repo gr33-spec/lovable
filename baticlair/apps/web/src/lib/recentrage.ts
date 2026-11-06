@@ -48,7 +48,7 @@ export interface DemandePerso {
   closLe: string | null;
   close: boolean;
   lignes: { cle: string; designation: string; quantite: number; unite: string; repere: string | null }[];
-  destinataires: { id: string; nom: string; statut: "a_envoyer" | "envoye" | "relance" | "repondu" | "refuse"; suivi: string | null }[];
+  destinataires: { id: string; nom: string; statut: "a_envoyer" | "envoye" | "relance" | "repondu" | "refuse"; suivi: string | null; vaRepondre?: boolean; refusMotif?: string | null; precision?: { question: string; reponse: string | null } | null }[];
   offres: OffrePerso[];
   commande: { recipientId: string; nom: string; suivi: "recue" | "confirmee" | "livree" | null; commandeLe: string } | null;
 }
@@ -65,6 +65,10 @@ export interface PageChiffrage {
   etat: "a_chiffrer" | "repondu" | "refuse" | "commande";
   reponse: { prix: Record<string, number>; livraisonHt: number; delaiJours: number | null; validiteJours: number | null; valideJusquau: string } | null;
   commande: { le: string; suivi: string | null } | null;
+  /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », motif d'un refus, précision et sa réponse. */
+  vaRepondre?: boolean;
+  refusMotif?: string | null;
+  precision?: { question: string; reponse: string | null; repondueLe: string | null } | null;
 }
 
 export interface MesPrix {

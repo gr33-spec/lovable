@@ -32,6 +32,10 @@ const envoiBody = z.object({
   articles: z.array(z.string().min(1).max(200)).max(500).optional(),
 });
 const destinataireBody = z.object({ recipientId: z.uuid() });
+/** Le parcours du négoce (6 novembre 2026) : motif d'un refus, question, réponse de l'artisan. */
+const refusBody = z.object({ motif: z.string().trim().max(300).nullable().optional() }).default({});
+const precisionBody = z.object({ question: z.string().trim().min(3).max(1000) });
+const reponsePrecisionBody = z.object({ reponse: z.string().trim().min(1).max(1000) });
 /** « Commander » : `retirerDesGroupes` est le geste explicite qui retire de l'achat groupé les lignes commandées ici. */
 const commanderBody = destinataireBody.extend({ retirerDesGroupes: z.boolean().optional() });
 const finEssaiBody = z.object({ email: z.email().max(254) });
@@ -101,6 +105,13 @@ export class RecentrageController {
     return this.demandes.livree(tenant, id, body.recipientId);
   }
 
+  /** La réponse de l'artisan à la précision demandée par un négoce. */
+  @Post("price-request-recipients/:id/precision")
+  @HttpCode(200)
+  repondrePrecision(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(reponsePrecisionBody)) body: z.infer<typeof reponsePrecisionBody>) {
+    return this.demandes.repondrePrecision(tenant, id, body.reponse);
+  }
+
   @Get("mes-prix")
   mesPrix(@Tenant() tenant: TenantContext) {
     return this.demandes.mesPrix(tenant);
@@ -131,8 +142,26 @@ export class ChiffrageController {
   @Throttle({ default: HOURLY(60) })
   @Post(":jeton/refuser")
   @HttpCode(200)
-  refuser(@Param("jeton") jeton: string) {
-    return this.demandes.refuser(jeton);
+  refuser(@Param("jeton") jeton: string, @Body(new ZodPipe(refusBody)) body: z.infer<typeof refusBody>) {
+    return this.demandes.refuser(jeton, body.motif ?? null);
+  }
+
+  /** « Je vais répondre » (parcours du négoce, 6 novembre 2026). */
+  @Public()
+  @Throttle({ default: HOURLY(60) })
+  @Post(":jeton/intention")
+  @HttpCode(200)
+  annoncer(@Param("jeton") jeton: string) {
+    return this.demandes.annoncer(jeton);
+  }
+
+  /** « J'ai besoin d'une précision » : la question part à l'artisan. */
+  @Public()
+  @Throttle({ default: HOURLY(30) })
+  @Post(":jeton/precision")
+  @HttpCode(200)
+  precision(@Param("jeton") jeton: string, @Body(new ZodPipe(precisionBody)) body: z.infer<typeof precisionBody>) {
+    return this.demandes.demanderPrecision(jeton, body.question);
   }
 
   @Public()
