@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import {
   comparerCoutLivre,
+  departement as departementConnu,
   departementsAutour,
   departementsDeLaRegion,
   distanceDepartements,
@@ -997,7 +998,8 @@ export class AchatGroupeService {
     const achats = [];
     for (const a of ouverts) {
       const v = await this.volumeEstime(a.id);
-      if (v.entreprises === 0) continue;
+      // Aucune collecte vide affichée, sauf une collecte lancée par Mobiiz (point 11 : « quelques campagnes animées »).
+      if (v.entreprises === 0 && !a.campagneLe) continue;
       const reunies = await this.reunies(a.id);
       const texte = `${a.libelle} ${libelleMetier(a.famille)} ${reunies.totaux.join(" ")}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       if (q && !q.split(/\s+/).every((m) => texte.includes(m))) continue;
@@ -1011,6 +1013,7 @@ export class AchatGroupeService {
         region: regionDe(a.departement),
         distanceKm: zone ? distanceDepartements(zone, a.departement) : null,
         modeLivraison: a.modeLivraison === "retrait" ? "retrait" : "livraison",
+        campagne: !!a.campagneLe,
         dateBesoin: a.dateBesoinMin ? jourIso(a.dateBesoinMin) : null,
         clotureLe: a.clotureLe!.toISOString(),
         phrase: phraseAlerteMetier({ famille: a.famille, dateBesoin: a.dateBesoinMin ?? a.clotureLe!, clotureLe: a.clotureLe! }),
@@ -1031,6 +1034,25 @@ export class AchatGroupeService {
       rayons: RAYONS_KM,
       carte: [...carte].map(([code, n]) => ({ code, secteur: nomSecteur(code), n })),
       familles: this.famillesGroupables, libellesFamilles: this.famillesCfg.libelles(this.famillesGroupables), collectif: PHRASE_COLLECTIF, achats };
+  }
+
+  /* --------------------------------------------------------------------- les collectes lancées par Mobiiz (point 11) */
+
+  /**
+   * Prompt maître point 11 : l'admin lance une COLLECTE DE BESOINS sur un produit standard (ou une famille cohérente),
+   * dans une zone pilote, avec sa date de besoin (la clôture en découle). Elle se voit dans « Découvrir » avant le premier
+   * besoin ; elle n'est jamais une commande ; rien n'est reporté sur la période suivante (elle se clôt comme les autres).
+   */
+  async lancerCampagne(c: { famille: string; departement: string; libelle: string; dateBesoin: Date; modeLivraison: "livraison" | "retrait" }) {
+    if (!this.famillesGroupables.includes(c.famille)) throw validationFailed("Unknown family", { reason: "famille_inconnue", message: "Cette famille n'est pas proposée en achat groupé (Supervision › Familles)." });
+    if (!departementConnu(c.departement)) throw validationFailed("Unknown department", { reason: "departement_inconnu", message: "Département inconnu." });
+    const maintenant = this.now();
+    const dates = this.dates(c.dateBesoin);
+    if (dates.clotureLe <= maintenant) throw validationFailed(PHRASE_DATE_TROP_PROCHE, { reason: "date_trop_proche", message: PHRASE_DATE_TROP_PROCHE });
+    const a = await this.prisma.regroupementNegocie.create({
+      data: { mode: MODE_AUTO, cle: `metier:${c.famille}`, libelle: c.libelle, famille: c.famille, departement: c.departement, unite: null, dateBesoinMin: c.dateBesoin, clotureLe: dates.clotureLe, reponseAvantLe: dates.reponseAvantLe, modeLivraison: c.modeLivraison, campagneLe: maintenant },
+    });
+    return { id: a.id, titre: a.libelle, clotureLe: a.clotureLe!.toISOString() };
   }
 
   /* ------------------------------------------------------------------------------------------ les alertes (F21) */

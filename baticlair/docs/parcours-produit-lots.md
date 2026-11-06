@@ -187,3 +187,13 @@ avec le double, corps invalide) et `isolation-toutes-routes` ; e2e de la convers
   l'écran Supervision n'affiche « Enregistrer » qu'après un changement (lot 6) ; suite `responsive.spec.ts` verte.
 
 **Tests** : API `emails-reels.test.ts` (la signature en pied) ; suites complètes avant déploiement (voir le rapport).
+
+## Complément : collectes de besoins lancées par Mobiiz (prompt maître point 11)
+
+- L'admin lance une collecte (« Lancer une collecte de besoins » sur l'écran admin des achats groupés) : intitulé
+  (produit standard ou famille cohérente), famille proposée, département pilote, date de besoin (la clôture en découle),
+  livraison ou retrait. Route `POST /v1/admin/pilotage/achats-groupes/campagnes` (double authentification, journal).
+- Elle se voit dans « Découvrir » AVANT le premier besoin, marquée « Collecte Mobiiz » ; les collectes vides lancées par
+  un artisan restent cachées. Elle se clôt comme les autres : rien n'est reporté sur la période suivante.
+- Migration ADDITIVE `20261107130000_collectes_mobiiz` (`regroupement_negocie.campagne_le`).
+- Tests : API `test/collectes-mobiiz.test.ts` (2).

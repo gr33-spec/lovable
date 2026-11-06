@@ -45,6 +45,13 @@ const listeBody = z.object({
   achatId: z.uuid().nullable().optional(),
   modeLivraison: z.enum(["livraison", "retrait"]).optional(),
 });
+const campagneBody = z.object({
+  famille: z.string().regex(/^[a-z][a-z0-9_]{1,39}$/),
+  departement: z.string().regex(/^(?:\d{2,3}|2[AB])$/),
+  libelle: z.string().trim().min(5).max(120),
+  dateBesoin: z.iso.date(),
+  modeLivraison: z.enum(["livraison", "retrait"]).default("livraison"),
+});
 const sortirBody = z.object({ motif: z.enum(MOTIFS_SORTIE) });
 const commanderBody = z.object({ consultationId: z.uuid() });
 const coordonneesBody = z.object({ consultationId: z.uuid(), consentement: z.boolean() });
@@ -379,6 +386,14 @@ export class AchatGroupeTacheController {
   async admin(@CurrentUser() user: AuthenticatedUser, @Query("maintenant") m?: string) {
     await this.pilotage.exiger(user);
     return this.achats.admin(instant(this.config, m));
+  }
+
+  /** Prompt maître point 11 : une collecte de besoins lancée par Mobiiz (produit standard, zone pilote, dates). */
+  @Post("admin/pilotage/achats-groupes/campagnes")
+  async lancerCampagne(@CurrentUser() user: AuthenticatedUser, @Body(new ZodPipe(campagneBody)) b: z.infer<typeof campagneBody>) {
+    await this.pilotage.exiger(user);
+    await this.pilotage.journal(user, "collecte_lancee", `${b.famille}:${b.departement}`);
+    return this.achats.lancerCampagne({ famille: b.famille, departement: b.departement, libelle: b.libelle, dateBesoin: date(b.dateBesoin), modeLivraison: b.modeLivraison });
   }
 
   @Put("admin/pilotage/achats-groupes/volume-min")

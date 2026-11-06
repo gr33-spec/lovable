@@ -146,6 +146,7 @@ export function CarteAchatOuvert({ a }: { a: AchatOuvert }) {
       <div className="flex flex-col gap-1">
         <span className="text-[16px] font-extrabold">{a.titre}</span>
         <span className="flex flex-wrap gap-1.5 text-[13px] font-semibold">
+          {a.campagne ? <span className="rounded-full bg-accent-soft px-2.5 py-1">Collecte Mobiiz</span> : null}
           <span className="rounded-full bg-ground px-2.5 py-1">{a.metier}</span>
           <span className="rounded-full bg-ground px-2.5 py-1">{a.secteur ?? `Zone ${a.zone}`}</span>
           {a.distanceKm ? <span className="rounded-full bg-ground px-2.5 py-1">≈ {a.distanceKm} km</span> : null}

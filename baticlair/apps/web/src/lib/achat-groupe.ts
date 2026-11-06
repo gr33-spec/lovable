@@ -123,6 +123,8 @@ export interface AchatOuvert {
   region?: string | null;
   distanceKm?: number | null;
   modeLivraison?: "livraison" | "retrait";
+  /** Prompt maître point 11 : collecte lancée par Mobiiz. */
+  campagne?: boolean;
   dateBesoin: string | null;
   clotureLe: string;
   phrase: string;

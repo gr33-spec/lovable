@@ -1837,6 +1837,9 @@ model RegroupementNegocie {
   commandeAvantLe    DateTime? @map("commande_avant_le") @db.Timestamptz(3)
   /// Lot 5 (6 novembre 2026) : livraison sur chantier ou retrait au dépôt, choisi par qui lance l'achat groupé.
   modeLivraison      String    @default("livraison") @map("mode_livraison")
+  /// Prompt maître point 11 : une COLLECTE DE BESOINS lancée par Mobiiz (l'admin) sur un produit standard, une zone et des
+  /// dates ; visible dans « Découvrir » même avant le premier besoin. Null : lancée par un artisan.
+  campagneLe         DateTime? @map("campagne_le") @db.Timestamptz(3)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
