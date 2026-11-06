@@ -74,3 +74,25 @@ e2e `e2e/cycle-de-vie.spec.ts` (téléphone et ordinateur).
 
 **Tests** : API `test/collecte-depuis-carte.test.ts` (2) ; e2e « Lot 3 » dans `rapprochement.spec.ts` (deux artisans,
 téléphone et ordinateur).
+
+## Lot 4 : clôture, reconfirmation et comparaison du coût total livré
+
+**Terminé**
+- Reconfirmation (prompt maître point 12) : dans les 48 h avant la clôture d'un achat groupé automatique, la tâche
+  planifiée demande UNE fois à chaque participant engagé depuis plus de 3 jours de reconfirmer (notification « Reconfirme
+  ta participation », `reconfirmationDue`). Sur l'écran de l'achat groupé : section « Reconfirmation », la phrase,
+  « Je confirme ma participation », puis « Participation reconfirmée le … ». À la clôture, une participation à qui la
+  reconfirmation a été demandée et qui ne l'a pas faite ne part pas aux négoces : statut « retiré », désistement
+  `non_reconfirme` (jamais compté comme une sortie, aucune exclusion), notification « Liste non reconfirmée ».
+  Interrupteur `RECONFIRMATION_GROUPE` (allumé par défaut, éteint seulement en test unitaire).
+- Coût total livré (point 11) : dans le résultat d'un achat groupé, pour les MÊMES lignes de l'artisan, l'offre du groupe
+  (livraison comprise) face à sa meilleure offre individuelle (prix par lien des mêmes désignations + sa livraison) :
+  « Pour ces 2 lignes, livré : achat groupé 1 080,00 € HT ; ta meilleure offre individuelle (Kerbrat) 1 140,00 € HT.
+  Écart : 60,00 € HT de moins en groupe. » ; jamais « économie » ni « garanti » ; écart non calculé quand une offre ne
+  chiffre pas toutes les lignes ; « Aucune offre individuelle chiffrée à comparer. » sinon (`comparerCoutLivre`, code pur).
+- Migration ADDITIVE `20261107100000_reconfirmation_groupe` (`besoin_negocie.reconfirmation_demandee_le`, `reconfirme_le`).
+- Route : `POST /v1/achats-groupes/:besoinId/reconfirmer` (idempotente ; isolation : 404 pour une autre entreprise).
+
+**Tests** : domaine `test/cout-total-livre.test.ts` (4) ; API `test/cloture-reconfirmation.test.ts` (2), plus
+`achat-groupe.test.ts` et `isolation-toutes-routes.test.ts` verts. Pas d'e2e propre : la fenêtre des 48 h demande de
+déplacer l'heure en base, ce que les e2e ne font pas ; l'écran est contrôlé par capture (téléphone et ordinateur).

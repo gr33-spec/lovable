@@ -111,6 +111,7 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
             delaiValidationAdminHeures: c.groupe.negocie.delaiValidationAdminHeures,
             delaiCommandeJours: c.groupe.negocie.delaiCommandeJours,
             exclusionMois: c.groupe.negocie.exclusionMois,
+            reconfirmation: c.groupe.negocie.reconfirmation,
             seuilSuggestion: c.groupe.negocie.seuilSuggestion,
             admins: c.groupe.admins,
           },

@@ -1885,6 +1885,9 @@ model BesoinNegocie {
   /// la sortie (motif), la vue des résultats, les coordonnées transmises (consentement), la commande reçue par le négoce
   /// (jeton du lien), « Livré » ou « Problème », la commande pas passée à temps.
   engageLe                  DateTime? @map("engage_le") @db.Timestamptz(3)
+  /// Lot 4 (6 novembre 2026) : la reconfirmation demandée dans les 48 h avant la clôture, et faite par l'artisan.
+  reconfirmationDemandeeLe  DateTime? @map("reconfirmation_demandee_le") @db.Timestamptz(3)
+  reconfirmeLe              DateTime? @map("reconfirme_le") @db.Timestamptz(3)
   offert                    Boolean   @default(false)
   sortieMotif               String?   @map("sortie_motif")
   sortieLe                  DateTime? @map("sortie_le") @db.Timestamptz(3)

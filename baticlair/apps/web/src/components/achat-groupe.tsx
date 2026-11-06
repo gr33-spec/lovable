@@ -777,6 +777,25 @@ export function DetailAchatGroupe({ id }: { id: string }) {
         </p>
       ) : null}
 
+      {/* Lot 4 (6 novembre 2026) : la reconfirmation avant la clôture. */}
+      {d.reconfirmation ? (
+        <section aria-label="Reconfirmation" className={`flex flex-col gap-3 rounded-xl border-2 p-4 ${d.reconfirmation.nonFaite || d.reconfirmation.faiteLe ? "border-line bg-surface" : "border-[var(--color-warn)] bg-surface"}`}>
+          {d.reconfirmation.faiteLe ? (
+            <p className="text-[15px] font-semibold text-ok">Participation reconfirmée le {dateFr(d.reconfirmation.faiteLe)}.</p>
+          ) : (
+            <p className="text-[15px] font-semibold">{d.reconfirmation.phrase}</p>
+          )}
+          {!d.reconfirmation.faiteLe && !d.reconfirmation.nonFaite ? (
+            <>
+              {d.reconfirmation.avantLe ? <p className="text-[14px] text-muted">Avant le {dateFr(d.reconfirmation.avantLe)}.</p> : null}
+              <Button pending={pending === "reconfirmer"} onClick={() => void geste("reconfirmer", `/v1/achats-groupes/${id}/reconfirmer`)}>
+                Je confirme ma participation
+              </Button>
+            </>
+          ) : null}
+        </section>
+      ) : null}
+
       {r ? <Resultat id={id} d={d} r={r} pending={pending} geste={geste} /> : null}
 
       {d.bonNumero ? (
@@ -968,6 +987,11 @@ function Resultat({ id, d, r, pending, geste }: { id: string; d: DetailAchat; r:
   return (
     <section aria-label="Les offres" className="flex flex-col gap-3">
       {r.phrase ? <p className="rounded-xl bg-ok-bg p-4 text-[17px] font-bold text-ok">{r.phrase}</p> : null}
+      {r.coutLivre ? (
+        <p aria-label="Coût total livré" className="rounded-xl bg-surface p-4 text-[15px] leading-snug shadow-card">
+          {r.coutLivre.phrase}
+        </p>
+      ) : null}
       {r.commandeChez ? <p className="text-[15px] font-semibold">Commandé chez {r.commandeChez}.</p> : null}
       {r.commandeChez && r.economie ? <p className="rounded-xl bg-ok-bg p-3 text-[15px] font-bold text-ok">{r.economie}</p> : null}
       {d.commandeAvantLe && d.actions.commander ? <p className="text-[14px] text-muted">Commande avant le {dateFr(d.commandeAvantLe)}.</p> : null}

@@ -243,6 +243,8 @@ const envSchema = z
     DELAI_VALIDATION_ADMIN_HEURES: z.coerce.number().int().min(0).max(168).default(24),
     DELAI_COMMANDE_JOURS: z.coerce.number().int().min(1).max(60).default(5),
     EXCLUSION_MOIS: z.coerce.number().int().min(0).max(24).default(3),
+    /** Lot 4 (6 novembre 2026) : la reconfirmation avant clôture écarte une liste non reconfirmée ; « on » partout sauf les tests (où chaque test l'allume). */
+    RECONFIRMATION_GROUPE: z.enum(["on", "off"]).optional(),
     /** Les analyses de devis offertes en tout à Découverte (point 24 ; 1 depuis le 30 octobre 2026, `OFFRES`). */
     LECTURES_IA_GRATUIT_TOTAL: z.coerce.number().int().min(0).max(1000).default(1),
     /** Le seuil de la suggestion « mets-les en achat groupé » par famille (« couverture=300,charpente=100 »). */
@@ -378,7 +380,7 @@ export interface AppConfig {
     /** Recentrage (25 octobre 2026) : seuils et réglages des regroupements, du gratuit et du payant. */
     recentrage: { seuilLigneHt: number; seuilAnonymat: number; seuilVolumeMin: Record<string, number> | null; prixReperes: Record<string, number>; familles: string[]; lecturesGratuites: number; seuilZoneActive: number };
     /** Le regroupement négocié par un humain (business model final, 25 octobre 2026). */
-    negocie: { mode: "automatique" | "humain" | "mois"; delaiReponseJours: number; alertesJour: number; commissionLancement: number | null; commissionLancementPremiers: number; budgetIaJourEur: number; validationAdmin: boolean; delaiValidationAdminHeures: number; delaiCommandeJours: number; exclusionMois: number; lecturesIaGratuitTotal: number; seuilSuggestion: Record<string, number> | null; chasseurs: string[]; commissionDefaut: number; emailChasseur: string | null; delaiLivraisonJours: number; naf: string[] | null; rechercheEntreprises: "on" | "off" | "fake" };
+    negocie: { mode: "automatique" | "humain" | "mois"; delaiReponseJours: number; alertesJour: number; commissionLancement: number | null; commissionLancementPremiers: number; budgetIaJourEur: number; validationAdmin: boolean; delaiValidationAdminHeures: number; delaiCommandeJours: number; exclusionMois: number; reconfirmation: boolean; lecturesIaGratuitTotal: number; seuilSuggestion: Record<string, number> | null; chasseurs: string[]; commissionDefaut: number; emailChasseur: string | null; delaiLivraisonJours: number; naf: string[] | null; rechercheEntreprises: "on" | "off" | "fake" };
     /** mois : un regroupement par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
     mode: "mois" | "lots";
     sirene: { departements: string[]; naf: string[] };
@@ -545,6 +547,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
         delaiValidationAdminHeures: e.DELAI_VALIDATION_ADMIN_HEURES,
         delaiCommandeJours: e.DELAI_COMMANDE_JOURS,
         exclusionMois: e.EXCLUSION_MOIS,
+        reconfirmation: e.RECONFIRMATION_GROUPE ? e.RECONFIRMATION_GROUPE === "on" : e.NODE_ENV !== "test",
         lecturesIaGratuitTotal: e.LECTURES_IA_GRATUIT_TOTAL,
         seuilSuggestion: e.SEUIL_SUGGESTION ? lireTableNombres(e.SEUIL_SUGGESTION) : null,
         naf: e.NAF_MATERIAUX ? e.NAF_MATERIAUX.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) : null,

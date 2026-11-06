@@ -1,5 +1,10 @@
 import { createHash, randomBytes } from "node:crypto";
 import {
+  comparerCoutLivre,
+  PHRASE_NON_RECONFIRMEE,
+  PHRASE_RECONFIRMATION,
+  RECONFIRMATION_FENETRE_H,
+  reconfirmationDue,
   CONDITIONS_OUVERTURE,
   ETAPES_ACHAT_GROUPE,
   LIBELLES_CONDITIONS_OUVERTURE,
@@ -196,6 +201,8 @@ export interface ReglagesAchatGroupe {
   delaiValidationAdminHeures: number;
   delaiCommandeJours: number;
   exclusionMois: number;
+  /** Lot 4 : sans reconfirmation demandée et non faite, la liste ne part pas à la clôture. */
+  reconfirmation?: boolean;
   seuilSuggestion: Record<string, number> | null;
   admins: string[];
 }
@@ -800,7 +807,35 @@ export class AchatGroupeService {
       frise: { etapes: ETAPES_ACHAT_GROUPE, courante: etapeCourante(a.statut, b.statut) },
       invite: "Un collègue du métier commande aussi ? Invite-le",
       resultat,
+      // Lot 4 : la reconfirmation avant la clôture (demandée dans les 48 h, faite ou non).
+      reconfirmation:
+        b.statut === ENGAGE && b.reconfirmationDemandeeLe
+          ? { phrase: PHRASE_RECONFIRMATION, faiteLe: b.reconfirmeLe?.toISOString() ?? null, avantLe: a.clotureLe?.toISOString() ?? null }
+          : b.statut === "retire" && (await this.prisma.desistementAchatGroupe.count({ where: { besoinId: b.id, raison: "non_reconfirme" } })) > 0
+            ? { phrase: PHRASE_NON_RECONFIRMEE, faiteLe: null, avantLe: null, nonFaite: true }
+            : null,
     };
+  }
+
+  /**
+   * Lot 4 : le coût total livré des lignes de l'artisan : l'offre du groupe (la moins chère, prix livrés) face aux
+   * réponses chiffrées de SES demandes individuelles (prix par ligne + livraison), sur les mêmes lignes.
+   */
+  private async coutLivre(besoinId: string, mesLignes: { designationOrigine: string; quantite: unknown; unite: string; projectId: string | null }[], meilleure: { totalHt: number; complete: boolean } | null) {
+    if (!meilleure || mesLignes.length === 0) return null;
+    const lignes = mesLignes.map((l) => ({ designation: l.designationOrigine, quantite: Number(l.quantite), unite: l.unite }));
+    const b = await this.prisma.besoinNegocie.findUniqueOrThrow({ where: { id: besoinId }, select: { companyId: true } });
+    const projets = [...new Set(mesLignes.map((l) => l.projectId).filter((x): x is string => !!x))];
+    const recipients = await this.prisma.priceRequestRecipient.findMany({
+      where: { reponduLe: { not: null }, priceRequest: { companyId: b.companyId, ...(projets.length ? { projectId: { in: projets } } : {}) } },
+      select: { prix: true, livraisonHt: true, supplier: { select: { name: true } }, priceRequest: { select: { lines: true } } },
+    });
+    const offres = recipients.filter((r) => r.prix && typeof r.prix === "object").map((r) => {
+      const demande = ((r.priceRequest.lines as { designation?: string; unit?: string | null }[] | null) ?? []).map((l, i) => ({ cle: String(i), designation: l.designation ?? "", unite: l.unit ?? "" }));
+      const prix = r.prix as Record<string, number>;
+      return { nom: r.supplier.name, livraisonHt: Number(r.livraisonHt ?? 0), prix: demande.filter((l) => typeof prix[l.cle] === "number").map((l) => ({ designation: l.designation, unite: l.unite, prixHt: prix[l.cle]! })) };
+    });
+    return comparerCoutLivre(lignes, { totalLivreHt: meilleure.totalHt, complet: meilleure.complete }, offres);
   }
 
   /** Les prix effectifs d'une offre : sa réponse, corrigée par l'admin. */
@@ -849,6 +884,8 @@ export class AchatGroupeService {
       offres,
       commandeChez: b.consultationCommandeId ? (parId.get(b.consultationCommandeId)?.nom ?? null) : null,
       coordonneesTransmises: b.coordonneesTransmisesLe ? (parId.get(b.coordonneesConsultationId ?? "")?.nom ?? "") : null,
+      // Lot 4 : le coût total livré pour SES lignes, face à sa meilleure offre individuelle (jamais une économie promise).
+      coutLivre: await this.coutLivre(b.id, mesLignes, offres[0] ?? null),
       // Lot final (ton) : après sa commande, seulement si l'économie du groupe est réelle et calculée.
       economie: b.consultationCommandeId ? phraseEconomieGroupe(await this.economieGroupe(a.id, consultations)) : null,
     };
@@ -1015,6 +1052,7 @@ export class AchatGroupeService {
 
   async tache(maintenant = this.now()) {
     const rappels = await this.rappelsVeille(maintenant);
+    const reconfirmations = await this.demanderReconfirmations(maintenant);
     const closes = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, clotureLe: { lte: maintenant } }, select: { id: true } });
     let consultes = 0;
     let pasAssez = 0;
@@ -1033,7 +1071,7 @@ export class AchatGroupeService {
     const nonCommandes = await this.nonCommandes(maintenant);
     const resumes = await this.resumes(maintenant);
     const factures = maintenant.getUTCDate() === 1 ? await this.preparerFactures(maintenant) : 0;
-    return { rappels, consultes, pasAssez, analyses, relances, rappelsValidation, nonCommandes, resumes, factures };
+    return { rappels, reconfirmations, consultes, pasAssez, analyses, relances, rappelsValidation, nonCommandes, resumes, factures };
   }
 
   /**
@@ -1077,6 +1115,34 @@ export class AchatGroupeService {
     return { negoces, artisans };
   }
 
+  /** Lot 4 : dans les 48 h avant la clôture, la reconfirmation est demandée (une fois) à qui s'est engagé plus de 3 jours avant. */
+  private async demanderReconfirmations(maintenant: Date): Promise<number> {
+    const besoins = await this.prisma.besoinNegocie.findMany({
+      where: { statut: ENGAGE, reconfirmationDemandeeLe: null, regroupement: { mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant, lte: new Date(maintenant.getTime() + RECONFIRMATION_FENETRE_H * 3_600_000) } } },
+      select: { id: true, companyId: true, engageLe: true, regroupement: { select: { libelle: true, clotureLe: true } } },
+    });
+    let n = 0;
+    for (const b of besoins) {
+      if (!reconfirmationDue({ engageLe: b.engageLe, clotureLe: b.regroupement!.clotureLe!, demandeeLe: null }, maintenant)) continue;
+      await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { reconfirmationDemandeeLe: maintenant } });
+      await this.notifs
+        .prevenir(b.companyId, { titre: "Reconfirme ta participation", corps: `${b.regroupement!.libelle} : ${PHRASE_RECONFIRMATION}`, url: `/achats-groupes/${b.id}`, etiquette: `reconfirmation-${b.id}` })
+        .catch(() => undefined);
+      n++;
+    }
+    return n;
+  }
+
+  /** Lot 4 : « Je confirme ma participation » (avant la clôture seulement). */
+  async reconfirmer(tenant: TenantContext, besoinId: string) {
+    assertCanWrite(tenant);
+    const b = await this.monBesoin(tenant, besoinId);
+    if (b.statut !== ENGAGE) throw new DomainError("conflict", "Not open", { reason: "besoin_ferme" });
+    await this.avantCloture(b.regroupementId!);
+    if (!b.reconfirmeLe) await this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { reconfirmeLe: this.now() } });
+    return this.detail(tenant, b.id);
+  }
+
   /** La veille de la clôture, « Demain, [négoce] reçoit la demande groupée… Tu l'as prévenu ? ». */
   private async rappelsVeille(maintenant: Date): Promise<number> {
     const negoces = await this.prisma.negoceParticipant.findMany({
@@ -1098,6 +1164,18 @@ export class AchatGroupeService {
    */
   async cloturer(regroupementId: string, maintenant = this.now()): Promise<"consultation" | "pas_assez"> {
     const a = await this.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: regroupementId } });
+    // Lot 4 : une participation à qui la reconfirmation a été demandée, et qui ne l'a pas faite, ne part pas aux négoces ;
+    // ce n'est pas une sortie (aucune exclusion), et l'artisan est prévenu.
+    if (this.cfg.reconfirmation) {
+      const muettes = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, statut: ENGAGE, reconfirmationDemandeeLe: { not: null }, reconfirmeLe: null }, select: { id: true, companyId: true, quantite: true } });
+      for (const b of muettes) {
+        await this.prisma.$transaction([
+          this.prisma.besoinNegocie.update({ where: { id: b.id }, data: { statut: "retire" } }),
+          this.prisma.desistementAchatGroupe.create({ data: { besoinId: b.id, companyId: b.companyId, regroupementId, quantite: b.quantite, apresCloture: false, raison: "non_reconfirme" } }),
+        ]);
+        await this.notifs.prevenir(b.companyId, { titre: "Liste non reconfirmée", corps: PHRASE_NON_RECONFIRMEE, url: `/achats-groupes/${b.id}`, etiquette: `reconfirmation-${b.id}` }).catch(() => undefined);
+      }
+    }
     const besoins = await this.prisma.besoinNegocie.findMany({ where: { regroupementId, statut: ENGAGE }, include: { negoces: true, company: { select: { id: true, name: true, prenom: true, phone: true, memberships: { select: { user: { select: { name: true } } }, take: 1, orderBy: { createdAt: "asc" } } } } }, orderBy: { createdAt: "asc" } });
     const panier = cumulerPanier(await this.lignesPanier(a.id));
     const v = await this.volumeEstime(a.id);

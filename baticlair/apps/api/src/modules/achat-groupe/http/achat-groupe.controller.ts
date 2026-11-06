@@ -140,6 +140,12 @@ export class AchatGroupeController {
     return this.achats.prevenu(tenant, participantId);
   }
 
+  @Post("achats-groupes/:besoinId/reconfirmer")
+  @HttpCode(200)
+  reconfirmer(@Tenant() tenant: TenantContext, @Param("besoinId") besoinId: string) {
+    return this.achats.reconfirmer(tenant, besoinId);
+  }
+
   @Post("achats-groupes/:besoinId/retirer")
   @HttpCode(200)
   retirer(@Tenant() tenant: TenantContext, @Param("besoinId") besoinId: string) {

@@ -71,12 +71,16 @@ export interface ResultatAchat {
   coordonneesTransmises: string | null;
   /** « Ensemble, vous avez payé … de moins. » : seulement après la commande, et si l'économie est calculée. */
   economie?: string | null;
+  /** Lot 4 : pour ses lignes, l'offre du groupe face à sa meilleure offre individuelle, livraison comprise. */
+  coutLivre?: { lignes: number; groupe: { totalLivreHt: number; complet: boolean }; individuelle: { nom: string; totalLivreHt: number; complet: boolean } | null; ecartHt: number | null; phrase: string } | null;
 }
 
 export interface DetailAchat extends CarteAchat {
   frise: { etapes: string[]; courante: number };
   invite: string;
   resultat: ResultatAchat | null;
+  /** Lot 4 : la reconfirmation avant la clôture (demandée, faite, ou non faite). */
+  reconfirmation?: { phrase: string; faiteLe: string | null; avantLe: string | null; nonFaite?: boolean } | null;
 }
 
 export interface Droit {
