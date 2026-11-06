@@ -54,7 +54,7 @@ export function BarreOnglets({
     <div
       role="tablist"
       aria-label="Dossier de la demande"
-      className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:px-0"
+      className="flex flex-wrap gap-1.5 pb-1"
     >
       {ONGLETS_DOSSIER.map((o) => (
         <button
