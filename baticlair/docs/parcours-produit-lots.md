@@ -174,3 +174,16 @@ existante), puis faire une vraie recette ; tant que ce n'est pas fait, le lot es
 
 **Tests** : domaine `test/interpretation-ia.test.ts` (5) ; API `test/interpretation-ia.test.ts` (3 : éteinte, allumée
 avec le double, corps invalide) et `isolation-toutes-routes` ; e2e de la conversation inchangé (IA éteinte).
+
+## Lot 8 : finitions, libellés, signature MOBIIZ, téléphone et ordinateur
+
+**Terminé**
+- Signature officielle « Mobiiz. Plus on est, moins on paie. » (`SIGNATURE_APP`, domaine) : en pied de CHAQUE e-mail
+  (texte et HTML, mise en page commune), et en bas de « Profil et paramètres » dans l'application.
+- Libellés relus : aucune promesse chiffrée d'économie, aucune urgence artificielle (recherche sur tout le code ; seules
+  restent la simulation pédagogique de la landing, dite fictive, et la « grille garantie » qu'un négoce s'engage à tenir).
+- Téléphone et ordinateur : chaque lot a son e-2-e sur les deux projets (Pixel 7 et 1280 × 800) avec contrôle de
+  l'absence de défilement horizontal ; « Découvrir » passe ses filtres en deux colonnes sur téléphone (lot 5) ;
+  l'écran Supervision n'affiche « Enregistrer » qu'après un changement (lot 6) ; suite `responsive.spec.ts` verte.
+
+**Tests** : API `emails-reels.test.ts` (la signature en pied) ; suites complètes avant déploiement (voir le rapport).

@@ -1,4 +1,4 @@
-import { BLOC_LEGAL, NOM_APP } from "@baticlair/domain";
+import { BLOC_LEGAL, NOM_APP, SIGNATURE_APP } from "@baticlair/domain";
 import type { TransactionalEmail } from "./email.port.js";
 
 /**
@@ -43,12 +43,13 @@ export function miseEnPage(email: TransactionalEmail, webAppUrl: string): Transa
     `<div style="padding:0 0 16px"><img src="${webAppUrl}/marque/logo-clair.png" alt="${NOM_APP}" height="32" style="height:32px;width:auto;display:block"></div>`,
     `<div style="background:#FFFFFF;border-radius:16px;padding:24px;font-size:15px;line-height:1.5">${corps}</div>`,
     `<div style="padding:16px 4px 0;font-size:12px;line-height:1.5;color:#555555">`,
+    `<p style="margin:0 0 8px;font-weight:700;color:#0E0E0E">${echapper(SIGNATURE_APP)}</p>`,
     `<p style="margin:0 0 8px">${echapper(PIED_LEGAL)}</p>`,
     `<p style="margin:0 0 8px">${echapper(PHRASE_REPONSES)}</p>`,
     `<p style="margin:0"><a href="${stop.url}" style="color:#555555">${motStop}</a></p>`,
     `</div></div></body></html>`,
   ].join("");
-  const text = `${texteSansStop}\n\n--\n${PIED_LEGAL}\n${PHRASE_REPONSES}\n${motStop} : ${stop.url}`;
+  const text = `${texteSansStop}\n\n--\n${SIGNATURE_APP}\n${PIED_LEGAL}\n${PHRASE_REPONSES}\n${motStop} : ${stop.url}`;
   return { ...email, text, html, headers: { "List-Unsubscribe": `<${stop.url}>` } };
 }
 

@@ -67,6 +67,9 @@ describe("la mise en page", () => {
     expect(m.html).toContain("Ne plus recevoir ces e-mails");
     expect(m.text.match(/https:\/\/x\.fr\/stop\/9/g)).toHaveLength(1);
     expect(m.text).toContain(PIED_LEGAL);
+    // Lot 8 (prompt maître point 17) : la signature officielle en pied de chaque e-mail.
+    expect(m.text).toContain("\n--\nMobiiz. Plus on est, moins on paie.\n");
+    expect(m.html).toContain("Mobiiz. Plus on est, moins on paie.");
     // Greg, 26 octobre 2026 : le bloc légal complet (capital, RCS, contact) et l'information sur les réponses reçues.
     expect(m.text).toContain("BATI INVEST, SARL au capital de 1 000 €, RCS Saint-Brieuc 910 796 325, SIRET 910 796 325 00017, TVA FR61910796325, 6 impasse du Ouipoure, 22620 Ploubazlanec. Contact : contact@mobiiz.fr.");
     expect(m.text).toContain(PHRASE_REPONSES);

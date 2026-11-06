@@ -8,6 +8,9 @@ export const NOM_APP = "Mobiiz";
 /** L'accroche et le slogan. */
 export const ACCROCHE_APP = "Par des artisans, pour les artisans.";
 export const SLOGAN_APP = "L'union fait la force.";
+/** LA SIGNATURE OFFICIELLE (Greg, 6 novembre 2026, prompt maître point 17 : « conserver la signature officielle »), en
+ * pied de chaque e-mail et de l'application ; jamais une promesse d'économie chiffrée. */
+export const SIGNATURE_APP = `${NOM_APP}. Plus on est, moins on paie.`;
 /** La société qui édite le service (mentions, factures, e-mails). */
 export const EDITEUR_APP = "BATI INVEST";
 /** L'émetteur des factures d'abonnement (les mentions légales du site) ; les variables FACTURE_EMETTEUR_* le remplacent. */

@@ -1,5 +1,6 @@
 "use client";
 
+import { SIGNATURE_APP } from "@/lib/nom";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { AideBouton } from "@/components/aide";
@@ -67,6 +68,8 @@ export default function ComptePage() {
           </section>
         ))}
       </div>
+      {/* Lot 8 (prompt maître point 17) : la signature officielle. */}
+      <p className="pt-2 text-center text-[13px] font-semibold text-muted">{SIGNATURE_APP}</p>
     </>
   );
 }
