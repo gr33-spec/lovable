@@ -12,7 +12,8 @@
 const K = process.env.NEON_API_KEY;
 if (!K) throw new Error("NEON_API_KEY absente");
 const SOURCE = "preview/claude/saas-achat-artisans-prompt-1lyihx";
-const SAUVEGARDE = "sauvegarde-avant-mes-listes";
+// Le nom se choisit par déploiement (`SAUVEGARDE_NOM`), pour garder les sauvegardes précédentes.
+const SAUVEGARDE = process.env.SAUVEGARDE_NOM?.trim() || "sauvegarde-avant-mes-listes";
 const h = { authorization: `Bearer ${K}`, accept: "application/json", "content-type": "application/json" };
 const api = async (u, init = {}) => {
   const r = await fetch(`https://console.neon.tech/api/v2${u}`, { headers: h, ...init });
@@ -101,7 +102,7 @@ for (const t of new Set([...eSource.tables, ...eSauvegarde.tables])) if (eSource
 const total = (e) => Object.values(e.comptes).reduce((a, b) => a + b, 0);
 console.log(`test       : ${eSource.tables.length} tables, ${total(eSource)} lignes, ${eSource.migrations} migrations, dernière ${eSource.derniereMigration}`);
 console.log(`sauvegarde : ${eSauvegarde.tables.length} tables, ${total(eSauvegarde)} lignes, ${eSauvegarde.migrations} migrations, dernière ${eSauvegarde.derniereMigration}`);
-console.log(`liste_supprimee présente sur test : ${eSource.tables.includes("liste_supprimee")}`);
+console.log(`ligne_rapprochement présente sur test : ${eSource.tables.includes("ligne_rapprochement")}`);
 for (const t of ["project", "company", "price_request", "user"]) if (t in eSource.comptes) console.log(`  ${t} : test ${eSource.comptes[t]} / sauvegarde ${eSauvegarde.comptes[t]}`);
 if (diff.length) {
   console.log(`ÉCARTS (${diff.length}) : ${diff.join(" ; ")}`);
