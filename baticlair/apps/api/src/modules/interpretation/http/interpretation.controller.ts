@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, Inject, Post, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
+import type { QuestionNumerotee } from "@baticlair/domain";
 import { z } from "zod";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
@@ -30,6 +31,6 @@ export class InterpretationController {
   @Post("interpretation")
   @HttpCode(200)
   interpreter(@Tenant() _tenant: TenantContext, @Body(new ZodPipe(body)) b: z.infer<typeof body>) {
-    return this.service.interpreter(b.questions, b.texte);
+    return this.service.interpreter(b.questions as QuestionNumerotee[], b.texte);
   }
 }

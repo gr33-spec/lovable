@@ -1,7 +1,9 @@
-import { etatLigne, LIBELLES_ETAT_LIGNE, PARTICIPATION_ACTIVE, peut, type ActionLigne, type EtatLigne, type FaitsLigne } from "@baticlair/domain";
+import { etatLigne, LIBELLES_ETAT_LIGNE, PARTICIPATION_ACTIVE, peut, type ActionLigne, type EtatLigne, type FaitsLigne, type Verdict } from "@baticlair/domain";
 import type { PrismaService } from "../database/prisma.service.js";
 import { DomainError } from "../errors/domain-error.js";
 
+
+type Refus = Extract<Verdict, { permis: false }>;
 /**
  * LE CYCLE DE VIE CÔTÉ SERVEUR (Greg, 6 novembre 2026, prompt maître §7, §9, §19) : les faits de chaque ligne d'une liste
  * (demande partie, offre acceptée, recherche, achat groupé), lus en base, puis le verdict du domaine (`peut`). Partagé par
@@ -66,7 +68,10 @@ export async function faitsDesLignes(prisma: Prisma, companyId: string, projectI
 /** Refuse le geste d'après le domaine, avec la phrase et, s'il existe, le geste explicite qui débloque. */
 export function exiger(f: FaitsLigne, action: ActionLigne, designation: string): void {
   const v = peut(f, action, designation);
-  if (!v.permis) throw new DomainError("conflict", "Line state forbids this action", { reason: v.raison, message: v.message, ...(v.deblocage ? { deblocage: v.deblocage } : {}) });
+  if (v.permis) return;
+  // `Refus` explicite : la compilation de Vercel (mode non strict) ne rétrécit pas l'union sur `permis`.
+  const r = v as Refus;
+  throw new DomainError("conflict", "Line state forbids this action", { reason: r.raison, message: r.message, ...(r.deblocage ? { deblocage: r.deblocage } : {}) });
 }
 
 /**
@@ -99,8 +104,9 @@ export async function gardeCommandeSeule(
     const f = faits(key);
     // La commande seule elle-même ne compte pas ici : seule la tenue par un achat groupé est vérifiée.
     const sansCommande = { ...f, commandeeSeule: false };
-    const v = peut(sansCommande, "commander_seul", nom(key));
-    if (v.permis) continue;
+    const verdict = peut(sansCommande, "commander_seul", nom(key));
+    if (verdict.permis) continue;
+    const v = verdict as Refus;
     if (v.raison === "dans_un_groupe" && options.retirerDesGroupes) {
       aRetirer.push(...f.lignesGroupe);
       continue;
