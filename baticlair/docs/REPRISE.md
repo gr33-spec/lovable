@@ -28,15 +28,14 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-SUIVI 170 et 171 (architecture UX, puis parcours produit du 6 novembre : rapprochement continu, Groupes, À faire,
-Nouveau besoin) : EN LIGNE sur test.mobiiz.fr (commit e5d33e80, accord de Greg « Oui pour les 3 », test seulement), après
-sauvegarde Neon vérifiée (`sauvegarde-avant-rapprochement`) et suites complètes vertes ; migrations additives
-`20261102090000_specialites_negoces` et `20261106090000_rapprochement_continu` appliquées à la base de test seulement.
-Point de retour et procédure : `docs/retour-arriere-2026-11-06.md`. Rien vers `main`. Ce commit de suivi est local (non
-poussé : à pousser avec le prochain lot, sur accord).
-Restent (voir SUIVI 171) : carte, rayon / région / retrait, file d'exceptions, score des négoces, « J'ai besoin d'une
-précision », onglets Suivi / Offres / Documents, interprète IA (accord et crédit).
-Attend Greg : accord pour chaque action en ligne (production, réglages Vercel, Neon, Stripe, Resend, crédit IA).
+SUIVI 172 (6 novembre 2026, soir) : les huit lots du prompt maître sont faits et committés en local sur
+`claude/pilote-fiabilite` (6464f8c4 → da1064e0), chacun avec ses tests ; détail réel dans
+`docs/parcours-produit-lots.md`. Quatre migrations ADDITIVES nouvelles (parcours négoce, reconfirmation, recherche
+géographique, supervision), appliquées aux seules bases locales de test.
+Prochaine étape : suites complètes vertes, sauvegarde Neon de la branche de test, puis déploiement sur test.mobiiz.fr
+(jamais la production ni sa base) et le rapport final à Greg (tableau des sections 1 à 22, recette globale).
+Attend Greg : allumer l'interprète IA (`INTERPRETE_IA=on`, ≈ 0,002 $ par interprétation), et toute action en ligne
+qui n'est pas le test.
 
 ## À faire ensuite (dans cet ordre)
 
