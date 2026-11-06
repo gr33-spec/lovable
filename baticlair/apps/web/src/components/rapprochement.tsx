@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useId, useState } from "react";
 import { Badge, Button, ErrorNotice } from "@/components/ui";
-import { api, ApiError, newActionKey } from "@/lib/api";
+import { api, ApiError, newActionKey, type Supplier } from "@/lib/api";
 import { retenirContexteAchat } from "@/lib/contexte-achat";
-import { ETAT_LIGNE, MOTIF_RETRAIT, jourCourt, type AnalyseRapprochement, type LigneEnRecherche, type PropositionVue } from "@/lib/rapprochement";
+import { ETAT_LIGNE, MOTIF_RETRAIT, jourCourt, type AnalyseRapprochement, type LigneAnalysee, type LigneEnRecherche, type PropositionVue } from "@/lib/rapprochement";
 import { useResource } from "@/lib/use-resource";
 
 const dansJours = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
@@ -21,6 +22,11 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
   const { data, setData, reload } = useResource(fetcher);
   const [cochees, setCochees] = useState<ReadonlySet<string>>(new Set());
   const [jusquau, setJusquau] = useState(dansJours(7));
+  // Lot 3 (6 novembre 2026) : la date de besoin au plus tard et livraison / retrait, pris en compte par le rapprochement.
+  const [dateMax, setDateMax] = useState("");
+  const [mode, setMode] = useState<"livraison" | "retrait">("livraison");
+  const [rejoindre, setRejoindre] = useState<string | null>(null);
+  const [rejointe, setRejointe] = useState<{ phrase: string; href: string } | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [envoye, setEnvoye] = useState(false);
@@ -28,13 +34,13 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
   const libres = data.lignes.filter((l) => l.rapprochable && !(l.recherche && ["disponible", "proposee", "rejointe"].includes(l.recherche.statut)));
   const enRecherche = data.lignes.filter((l) => l.recherche && ["disponible", "proposee", "rejointe"].includes(l.recherche.statut));
   const seulement = data.lignes.filter((l) => !l.rapprochable && !l.recherche);
-  if (libres.length === 0 && enRecherche.length === 0) return null;
+  if (libres.length === 0 && enRecherche.length === 0 && !rejointe) return null;
 
   async function lancer() {
     setPending(true);
     setError(null);
     try {
-      setData(await api<AnalyseRapprochement>(`/v1/projects/${projectId}/rapprochement`, { method: "POST", body: { articles: [...cochees], jusquau }, idempotencyKey: newActionKey() }));
+      setData(await api<AnalyseRapprochement>(`/v1/projects/${projectId}/rapprochement`, { method: "POST", body: { articles: [...cochees], jusquau, modeLivraison: mode, dateMax: dateMax || null }, idempotencyKey: newActionKey() }));
       setCochees(new Set());
       setEnvoye(true);
     } catch (e) {
@@ -62,6 +68,8 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
                 <span className="font-semibold">{l.reference ?? l.designation}</span>
                 <span className="block text-[13px] text-muted">
                   {ETAT_LIGNE[l.recherche!.statut as LigneEnRecherche["statut"]]} jusqu&apos;au {jourCourt(l.recherche!.jusquau)}
+                  {l.recherche!.modeLivraison === "retrait" ? " · retrait au dépôt" : " · livraison sur chantier"}
+                  {l.recherche!.dateMax ? ` · besoin avant le ${jourCourt(l.recherche!.dateMax)}` : ""}
                 </span>
               </span>
               {l.recherche!.statut !== "rejointe" ? (
@@ -91,14 +99,30 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
                     {l.quantite.toLocaleString("fr-FR")} {l.unite}
                   </span>
                   {l.collecte ? (
-                    <span className="mt-1">
+                    <span className="mt-1 flex flex-wrap items-center gap-2">
                       <Badge tone="ok">Une collecte ouverte correspond · clôture le {jourCourt(l.collecte.clotureLe)}</Badge>
+                      <button type="button" onClick={(e) => (e.preventDefault(), setRejoindre(rejoindre === l.key ? null : l.key))} className="pressable inline-flex min-h-11 items-center rounded-xl px-2 text-[14px] font-bold underline">
+                        Rejoindre cette collecte
+                      </button>
                     </span>
                   ) : null}
                 </span>
               </label>
             ))}
           </fieldset>
+          {rejoindre && libres.find((l) => l.key === rejoindre)?.collecte ? (
+            <RejoindreCollecte
+              projectId={projectId}
+              ligne={libres.find((l) => l.key === rejoindre)!}
+              engagement={data.engagement}
+              onAnnuler={() => setRejoindre(null)}
+              onRejointe={(r) => {
+                setRejoindre(null);
+                setRejointe(r);
+                reload();
+              }}
+            />
+          ) : null}
           <div className="flex flex-col gap-1.5">
             <label htmlFor={`${id}-jusquau`} className="text-[14px] font-semibold">
               Chercher jusqu&apos;au
@@ -113,10 +137,40 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
               className="min-h-12 rounded-xl border border-line bg-surface px-3 text-[16px]"
             />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={`${id}-date-max`} className="text-[14px] font-semibold">
+              Besoin au plus tard le (facultatif)
+            </label>
+            <input id={`${id}-date-max`} type="date" value={dateMax} min={dansJours(1)} onChange={(e) => setDateMax(e.target.value)} className="min-h-12 rounded-xl border border-line bg-surface px-3 text-[16px]" />
+          </div>
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className="mb-1 text-[14px] font-semibold">Réception</legend>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  ["livraison", "Livraison sur chantier"],
+                  ["retrait", "Retrait au dépôt"],
+                ] as const
+              ).map(([v, label]) => (
+                <label key={v} className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border px-3 text-[15px] ${mode === v ? "border-ink font-semibold" : "border-line"}`}>
+                  <input type="radio" name={`${id}-mode`} value={v} checked={mode === v} onChange={() => setMode(v)} className="size-4 accent-[var(--color-accent)]" />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <Button onClick={() => void lancer()} pending={pending} disabled={cochees.size === 0}>
             Rechercher des besoins compatibles
           </Button>
         </>
+      ) : null}
+      {rejointe ? (
+        <p role="status" className="flex flex-wrap items-center gap-2 text-[14px] font-semibold text-ok">
+          {rejointe.phrase}
+          <Link href={rejointe.href} className="underline">
+            Voir l&apos;achat groupé
+          </Link>
+        </p>
       ) : null}
       {envoye ? (
         <p role="status" className="text-[14px] font-semibold text-ok">
@@ -137,6 +191,91 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
           </ul>
         </details>
       ) : null}
+    </section>
+  );
+}
+
+/**
+ * REJOINDRE UNE COLLECTE COMPATIBLE DEPUIS LA CARTE (Greg, 6 novembre 2026, lot 3) : la ligne correspond exactement à une
+ * collecte ouverte ; l'artisan choisit son négoce, coche l'engagement (besoin réel), et la ligne rejoint la collecte. Rien
+ * sans ce geste explicite ; le serveur revérifie tout (cycle de vie, double engagement, SIRET, e-mail confirmé).
+ */
+function RejoindreCollecte({ projectId, ligne, engagement, onAnnuler, onRejointe }: { projectId: string; ligne: LigneAnalysee; engagement: string; onAnnuler: () => void; onRejointe: (r: { phrase: string; href: string }) => void }) {
+  const id = useId();
+  const { data: carnet } = useResource(useCallback((signal: AbortSignal) => api<{ items: Supplier[] }>("/v1/suppliers", { signal }).catch(() => ({ items: [] as Supplier[] })), []));
+  const negoces = (carnet?.items ?? []).filter((s) => !s.archived);
+  const [choix, setChoix] = useState<string>("");
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [engage, setEngage] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  const autre = choix === "autre" || (carnet && negoces.length === 0);
+  async function rejoindre() {
+    setPending(true);
+    setError(null);
+    try {
+      const negoce = autre ? { nom: nom.trim(), email: email.trim() } : { supplierId: choix };
+      const r = await api<{ besoinId: string; titre: string }>(`/v1/projects/${projectId}/achat-groupe`, {
+        method: "POST",
+        body: { confirmees: [ligne.key], achatId: ligne.collecte!.id, negoces: [negoce], engagement: true },
+        idempotencyKey: newActionKey(),
+      });
+      onRejointe({ phrase: `« ${ligne.reference ?? ligne.designation} » a rejoint la collecte « ${r.titre} ».`, href: `/achats-groupes/${r.besoinId}` });
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setPending(false);
+    }
+  }
+  const pret = engage && (autre ? nom.trim().length > 1 && /.+@.+\..+/.test(email.trim()) : choix !== "");
+  return (
+    <section aria-label="Rejoindre la collecte" className="flex flex-col gap-3 rounded-xl border-2 border-[var(--color-accent)] p-3">
+      <p className="text-[15px] font-bold">Collecte « {ligne.collecte!.titre} »</p>
+      <p className="text-[14px] text-muted">
+        Ta ligne : {ligne.quantite.toLocaleString("fr-FR")} {ligne.unite} · clôture le {jourCourt(ligne.collecte!.clotureLe)}
+        {ligne.collecte!.dateBesoin ? ` · livraison avant le ${jourCourt(ligne.collecte!.dateBesoin)}` : ""}
+      </p>
+      {error ? <ErrorNotice error={error} /> : null}
+      <fieldset className="flex flex-col gap-1.5">
+        <legend className="mb-1 text-[14px] font-semibold">Ton négoce (il reçoit le volume du groupe, jamais ton nom)</legend>
+        {negoces.map((n) => (
+          <label key={n.id} className="flex min-h-11 items-center gap-2 text-[15px]">
+            <input type="radio" name={`${id}-negoce`} value={n.id} checked={choix === n.id} onChange={() => setChoix(n.id)} className="size-4 accent-[var(--color-accent)]" />
+            {n.name}
+          </label>
+        ))}
+        {negoces.length > 0 ? (
+          <label className="flex min-h-11 items-center gap-2 text-[15px]">
+            <input type="radio" name={`${id}-negoce`} value="autre" checked={choix === "autre"} onChange={() => setChoix("autre")} className="size-4 accent-[var(--color-accent)]" />
+            Un autre négoce
+          </label>
+        ) : null}
+        {autre ? (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <label className="flex flex-col gap-1 text-[13px] font-semibold">
+              Nom du négoce
+              <input value={nom} onChange={(e) => setNom(e.target.value)} className="min-h-11 rounded-lg border border-line bg-surface px-3 text-[16px] font-normal" />
+            </label>
+            <label className="flex flex-col gap-1 text-[13px] font-semibold">
+              E-mail du négoce
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="min-h-11 rounded-lg border border-line bg-surface px-3 text-[16px] font-normal" />
+            </label>
+          </div>
+        ) : null}
+      </fieldset>
+      <label className="flex min-h-11 items-start gap-3 text-[15px]">
+        <input type="checkbox" checked={engage} onChange={(e) => setEngage(e.target.checked)} className="mt-1 size-5 shrink-0 accent-[var(--color-accent)]" />
+        <span>{engagement}</span>
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={() => void rejoindre()} pending={pending} disabled={!pret}>
+          Rejoindre la collecte
+        </Button>
+        <Button variant="secondary" onClick={onAnnuler} disabled={pending}>
+          Annuler
+        </Button>
+      </div>
     </section>
   );
 }

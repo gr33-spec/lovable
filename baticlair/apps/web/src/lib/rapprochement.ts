@@ -12,8 +12,8 @@ export interface LigneAnalysee {
   reference: string | null;
   rapprochable: boolean;
   raison: string | null;
-  collecte: { id: string; titre: string; clotureLe: string } | null;
-  recherche: { id: string; statut: string; jusquau: string } | null;
+  collecte: { id: string; titre: string; clotureLe: string; dateBesoin: string | null } | null;
+  recherche: { id: string; statut: string; jusquau: string; modeLivraison: "livraison" | "retrait"; dateMax: string | null } | null;
 }
 
 export interface AnalyseRapprochement {
@@ -22,6 +22,8 @@ export interface AnalyseRapprochement {
   collectif: string;
   departement: string | null;
   rechercheMaxJours: number;
+  /** La phrase de la case d'engagement (rejoindre une collecte depuis la carte). */
+  engagement: string;
   lignes: LigneAnalysee[];
 }
 

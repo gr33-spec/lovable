@@ -152,3 +152,56 @@ test("Groupes › Découvrir : les filtres (produit, famille, département, clô
   await expect(page.getByRole("tabpanel", { name: "Découvrir" }).getByText(/Aucune collecte ouverte avec ces critères|Ajouter mes quantités/).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
 });
+
+test("Lot 3 : une collecte ouverte qui correspond se rejoint depuis la carte (négoce, engagement) ; la recherche garde retrait et date de besoin", async ({ page, browser }, info) => {
+  test.setTimeout(180_000);
+  const dep = String(40 + Math.floor(Math.random() * 40)).padStart(2, "0");
+  const siret = async (p: Page) => {
+    expect((await apiJson(p, "PATCH", "/v1/company/profile", { name: `Toitures ${unique()}`, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: "73282932000074", phone: null, email: null })).status).toBe(200);
+    expect((await apiJson(p, "POST", "/v1/groupe/siret")).status).toBe(200);
+  };
+  // B ouvre une collecte dans le département avec la même ardoise.
+  const b = await autreArtisan(browser, info.project.use.baseURL, "Paul", `Couvreurs ${unique()}`);
+  await siret(b.page);
+  const projetB = await listeValidee(b.page, dep, "Ardoise naturelle 32×22 Espagne 1er choix", "450");
+  const cleB = (await apiJson<{ lignes: { key: string; designation: string }[] }>(b.page, "GET", `/v1/projects/${projetB}/rapprochement`)).body.lignes[0]!.key;
+  const ouvre = await apiJson(b.page, "POST", `/v1/projects/${projetB}/achat-groupe`, { confirmees: [cleB], dateBesoin: jour(30), negoces: [{ nom: "Négoce test", email: `test-${unique()}@negoce.example` }], engagement: true });
+  expect(ouvre.status, JSON.stringify(ouvre.body)).toBe(201);
+  await b.context.close();
+
+  // A, même ardoise : la carte propose la collecte.
+  await inscrire(page, "Jean", `Toitures ${unique()}`);
+  await siret(page);
+  const projetA = await listeValidee(page, dep, "Ardoise naturelle 32×22 Espagne 1er choix", "900");
+  await page.goto(`/chantiers/${projetA}`);
+  const carte = page.getByRole("region", { name: "Rechercher des besoins compatibles" });
+  await expect(carte.getByText(/^Une collecte ouverte correspond/)).toBeVisible({ timeout: 30_000 });
+  await carte.getByRole("button", { name: "Rejoindre cette collecte" }).click();
+  const panneau = carte.getByRole("region", { name: "Rejoindre la collecte" });
+  await expect(panneau).toContainText(/livraison avant le/);
+  const bouton = panneau.getByRole("button", { name: "Rejoindre la collecte" });
+  await expect(bouton).toBeDisabled();
+  await panneau.getByLabel("Nom du négoce").fill("Négoce de Jean");
+  await panneau.getByLabel("E-mail du négoce").fill(`jean-${unique()}@negoce.example`);
+  await expect(bouton).toBeDisabled();
+  await panneau.getByRole("checkbox", { name: /besoin réel de mon entreprise/ }).check();
+  await panneau.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `test-results/rapprochement/${info.project.name}-3-rejoindre.png` });
+  await bouton.click();
+  await expect(carte.getByRole("status").filter({ hasText: /a rejoint la collecte/ })).toBeVisible();
+  await expect(carte.getByRole("link", { name: "Voir l'achat groupé" })).toHaveAttribute("href", /\/achats-groupes\/[0-9a-f-]{36}$/);
+  const cycle = (await apiJson<{ lignes: { etat: string }[] }>(page, "GET", `/v1/projects/${projetA}/cycle`)).body.lignes;
+  expect(cycle[0]!.etat).toBe("dans_un_groupe");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+
+  // Une autre liste : la recherche garde retrait au dépôt et date de besoin.
+  const projetC = await listeValidee(page, String((Number(dep) % 90) + 1).padStart(2, "0"), "Ardoise naturelle 30×20 Espagne 1er choix", "300");
+  await page.goto(`/chantiers/${projetC}`);
+  const carteC = page.getByRole("region", { name: "Rechercher des besoins compatibles" });
+  await carteC.getByRole("checkbox", { name: /Ardoise/ }).check();
+  await carteC.getByLabel("Besoin au plus tard le (facultatif)").fill(jour(25));
+  await carteC.getByRole("radio", { name: "Retrait au dépôt" }).check();
+  await carteC.getByRole("button", { name: "Rechercher des besoins compatibles" }).click();
+  await expect(carteC.getByRole("list", { name: "Lignes en recherche" })).toContainText("retrait au dépôt");
+  await expect(carteC.getByRole("list", { name: "Lignes en recherche" })).toContainText("besoin avant le");
+});

@@ -58,3 +58,19 @@ e2e `e2e/cycle-de-vie.spec.ts` (téléphone et ordinateur).
 
 **Tests** : API `test/parcours-negoce.test.ts` (4) ; e2e « Dossier d'une demande (Greg, 6 novembre 2026) » dans
 `accueil-mes-listes.spec.ts` (négoce + artisan, téléphone et ordinateur).
+
+## Lot 3 : rejoindre une collecte compatible depuis la carte, date de besoin, livraison ou retrait
+
+**Terminé**
+- Carte « Rechercher des besoins compatibles » : une ligne qui correspond EXACTEMENT à une collecte ouverte de son
+  département montre « Rejoindre cette collecte » ; le panneau dit la collecte, la clôture, la livraison, demande le
+  négoce (carnet, ou un autre : nom et e-mail) et la case d'engagement (la phrase de l'achat groupé, `PHRASE_ENGAGEMENT`,
+  donnée par le serveur) ; sans la case, rien ne part. Le serveur revérifie tout (lot 1 : cycle de vie, une ligne dans un
+  seul achat groupé, SIRET, e-mail confirmé). Après : « … a rejoint la collecte « … » », lien vers l'achat groupé, et la
+  ligne n'est plus proposée (« Déjà dans l'achat groupé … »).
+- Recherche de rapprochement : « Besoin au plus tard le » (facultatif) et « Livraison sur chantier / Retrait au dépôt » ;
+  la ligne en recherche les rappelle ; le rapprochement les compare (dates, « Mode différent »).
+- Analyse (`GET projects/:id/rapprochement`) : `engagement`, `collecte.dateBesoin`, `recherche.modeLivraison`, `recherche.dateMax`.
+
+**Tests** : API `test/collecte-depuis-carte.test.ts` (2) ; e2e « Lot 3 » dans `rapprochement.spec.ts` (deux artisans,
+téléphone et ordinateur).

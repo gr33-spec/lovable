@@ -1,4 +1,5 @@
 import {
+  PHRASE_ENGAGEMENT,
   LIBELLES_NIVEAU,
   PHRASE_COLLECTIF,
   PHRASE_RECHERCHE_RAPPROCHEMENT,
@@ -104,6 +105,8 @@ export class RapprochementService {
       collectif: PHRASE_COLLECTIF,
       departement,
       rechercheMaxJours: RECHERCHE_MAX_JOURS,
+      // Rejoindre une collecte depuis la carte (lot 3) : la case d'engagement, la même phrase que l'achat groupé.
+      engagement: PHRASE_ENGAGEMENT,
       lignes: lignes.map((l) => {
         const r = referenceStricte(l.designation);
         const recherche = deja.find((d) => d.articleKey === l.key);
@@ -117,8 +120,8 @@ export class RapprochementService {
           reference: r.ok ? r.reference.libelle : null,
           rapprochable: r.ok && !!departement && !couverte(commandees, l.key) && !faits(l.key).groupe,
           raison: couverte(commandees, l.key) ? "Une offre est déjà acceptée pour cette ligne." : faits(l.key).groupe ? `Déjà dans l'achat groupé « ${faits(l.key).groupe!.titre} ».` : !r.ok ? ("raison" in r && r.raison === "accessoire" ? "Petit accessoire : il part en demande individuelle." : "Article pas assez précis pour un rapprochement sûr.") : !departement ? "Indique l'adresse du chantier avec son code postal." : null,
-          collecte: collecte ? { id: collecte.id, titre: collecte.libelle, clotureLe: collecte.clotureLe.toISOString() } : null,
-          recherche: recherche ? { id: recherche.id, statut: recherche.statut, jusquau: recherche.jusquau.toISOString() } : null,
+          collecte: collecte && !faits(l.key).groupe ? { id: collecte.id, titre: collecte.libelle, clotureLe: collecte.clotureLe.toISOString(), dateBesoin: collecte.dateBesoin ? jourIso(collecte.dateBesoin) : null } : null,
+          recherche: recherche ? { id: recherche.id, statut: recherche.statut, jusquau: recherche.jusquau.toISOString(), modeLivraison: recherche.modeLivraison === "retrait" ? "retrait" : "livraison", dateMax: recherche.dateMax ? jourIso(recherche.dateMax) : null } : null,
         };
       }),
     };
@@ -292,7 +295,7 @@ export class RapprochementService {
 
   private async collectesOuvertes(departement: string, maintenant: Date, saufCompanyId?: string) {
     const collectes = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, departement, clotureLe: { gt: maintenant } }, select: { id: true, libelle: true, clotureLe: true, dateBesoinMin: true } });
-    const out: { id: string; libelle: string; clotureLe: Date; participants: Set<string>; lignes: BesoinComparable[] }[] = [];
+    const out: { id: string; libelle: string; clotureLe: Date; dateBesoin: Date | null; participants: Set<string>; lignes: BesoinComparable[] }[] = [];
     for (const c of collectes) {
       const lignes = await this.prisma.ligneAchatGroupe.findMany({ where: { regroupementId: c.id, besoin: { statut: ENGAGE } }, select: { companyId: true, designationOrigine: true, unite: true } });
       const participants = new Set(lignes.map((l) => l.companyId));
@@ -300,6 +303,7 @@ export class RapprochementService {
         id: c.id,
         libelle: c.libelle,
         clotureLe: c.clotureLe!,
+        dateBesoin: c.dateBesoinMin,
         participants,
         lignes: lignes.filter((l) => l.companyId !== saufCompanyId).map((l) => ({ designation: l.designationOrigine, unite: l.unite, departement, dateMax: c.dateBesoinMin ? jourIso(c.dateBesoinMin) : null, modeLivraison: "livraison" as const })),
       });
