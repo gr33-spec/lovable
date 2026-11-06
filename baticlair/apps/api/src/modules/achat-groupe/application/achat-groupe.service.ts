@@ -51,6 +51,7 @@ import {
   famillesDuMetier,
   jaugeVolume,
   LIBELLES_FAMILLES,
+  PHRASE_COLLECTIF,
   libelleMetier,
   lienSms,
   lienTel,
@@ -882,6 +883,50 @@ export class AchatGroupeService {
       });
     }
     return { zone, achats };
+  }
+
+  /**
+   * « Découvrir » (Greg, 6 novembre 2026, point 10) : les collectes ouvertes, cherchées comme des annonces, SANS filtre de
+   * métier ni de code APE (un artisan peut rejoindre une collecte utile hors de son métier principal). Par défaut le
+   * secteur de l'entreprise ; un département choisi, ou tous. Jamais le détail d'un autre artisan : les totaux réunis
+   * seulement, et seulement les collectes qui ont au moins un besoin déclaré (aucune collecte vide affichée).
+   */
+  async decouvrir(tenant: TenantContext, f: { q?: string; famille?: string; departement?: string; clotureAvant?: Date }) {
+    const zone = await this.ports.zoneDe(tenant.companyId);
+    if ((await this.ports.mode()) !== MODE_AUTO) return { zone, departement: null, achats: [] };
+    const departement = f.departement === "tous" ? null : (f.departement ?? zone);
+    const maintenant = this.now();
+    const ouverts = await this.prisma.regroupementNegocie.findMany({
+      where: { mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant, ...(f.clotureAvant ? { lte: f.clotureAvant } : {}) }, ...(departement ? { departement } : {}), ...(f.famille ? { famille: f.famille } : {}) },
+      orderBy: { clotureLe: "asc" },
+      take: 60,
+    });
+    const miens = new Set((await this.prisma.besoinNegocie.findMany({ where: { companyId: tenant.companyId, regroupementId: { in: ouverts.map((o) => o.id) }, statut: ENGAGE }, select: { regroupementId: true } })).map((b) => b.regroupementId));
+    const q = (f.q ?? "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const volumes = await this.volumesMin();
+    const achats = [];
+    for (const a of ouverts) {
+      const v = await this.volumeEstime(a.id);
+      if (v.entreprises === 0) continue;
+      const reunies = await this.reunies(a.id);
+      const texte = `${a.libelle} ${libelleMetier(a.famille)} ${reunies.totaux.join(" ")}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (q && !q.split(/\s+/).every((m) => texte.includes(m))) continue;
+      achats.push({
+        id: a.id,
+        titre: a.libelle,
+        metier: libelleMetier(a.famille),
+        famille: a.famille,
+        zone: a.departement,
+        dateBesoin: a.dateBesoinMin ? jourIso(a.dateBesoinMin) : null,
+        clotureLe: a.clotureLe!.toISOString(),
+        phrase: phraseAlerteMetier({ famille: a.famille, dateBesoin: a.dateBesoinMin ?? a.clotureLe!, clotureLe: a.clotureLe! }),
+        entreprises: v.entreprises >= this.cfg.seuilAnonymat ? v.entreprises : null,
+        jauge: jaugeVolume(v.estimeHt, volumeMinimum(a.famille, volumes), v.entreprises, this.cfg.seuilAnonymat),
+        reunies,
+        dejaDedans: miens.has(a.id),
+      });
+    }
+    return { zone, departement, familles: this.cfg.familles, libellesFamilles: Object.fromEntries(this.cfg.familles.map((f) => [f, LIBELLES_FAMILLES[f as keyof typeof LIBELLES_FAMILLES] ?? f])), collectif: PHRASE_COLLECTIF, achats };
   }
 
   /* ------------------------------------------------------------------------------------------ les alertes (F21) */

@@ -61,10 +61,15 @@ test("1, 2, 12, 15 : le sommaire, ses quatre groupes, chaque rubrique s'ouvre et
   if (info.project.name === "telephone") await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
   await inscrire(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  await nav.getByRole("link", { name: "Profil" }).click();
+  // Greg, 6 novembre 2026 : sur téléphone, le profil passe par l'avatar ; sur ordinateur, il reste dans la colonne.
+  const telephone = info.project.name === "telephone";
+  if (telephone) {
+    await page.getByRole("button", { name: "Mon menu" }).click();
+    await page.getByRole("menuitem", { name: "Mon compte" }).click();
+  } else await nav.getByRole("link", { name: "Profil" }).click();
   await expect(page).toHaveURL(/\/compte$/);
   await expect(page.getByRole("heading", { level: 1, name: "Profil et paramètres" })).toBeVisible();
-  await expect(nav.getByRole("link", { name: "Profil" })).toHaveAttribute("aria-current", "page");
+  if (!telephone) await expect(nav.getByRole("link", { name: "Profil" })).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("link", { name: /Greg Martin/ })).toBeVisible();
   // Aucun formulaire sur le sommaire, et « Économisé grâce au regroupement » n'y est plus.
   await expect(page.locator("main input, main textarea, main select")).toHaveCount(0);
@@ -108,7 +113,7 @@ test("1, 2, 12, 15 : le sommaire, ses quatre groupes, chaque rubrique s'ouvre et
     await page.getByRole("link", { name: new RegExp(`^${titre}`) }).click();
     await expect(page).toHaveURL(url);
     await expect(page.getByRole("heading", { level: 1, name: titre })).toBeVisible();
-    await expect(nav.getByRole("link", { name: "Profil" })).toHaveAttribute("aria-current", "page");
+    if (!telephone) await expect(nav.getByRole("link", { name: "Profil" })).toHaveAttribute("aria-current", "page");
     await verifier(page);
     await page.getByRole("button", { name: "Retour à Profil et paramètres" }).click();
     await expect(page).toHaveURL(/\/compte$/);

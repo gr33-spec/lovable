@@ -1035,8 +1035,11 @@ export function Cloche() {
   const fetchNext = useCallback((signal: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal }).catch(() => null), []);
   const { data: mes } = useResource(fetchMes);
   const { data: next } = useResource(fetchNext);
+  const fetchRap = useCallback((signal: AbortSignal) => api<{ items: { cle: string; texte: string; href: string }[] }>("/v1/rapprochements/actions", { signal }).catch(() => null), []);
+  const { data: rap } = useResource(fetchRap);
   const [ouvert, setOuvert] = useState(false);
-  const actions = actionsEnAttente(mes?.achats ?? [], next?.items ?? []);
+  // Greg, 6 novembre 2026 : les rapprochements à examiner sonnent aussi la cloche.
+  const actions = [...actionsEnAttente(mes?.achats ?? [], next?.items ?? []), ...(rap?.items ?? []).map((r) => ({ cle: r.cle, texte: r.texte, href: r.href }))];
   return (
     <div className="relative">
       <button type="button" aria-label={actions.length ? `Notifications : ${actions.length}` : "Notifications"} aria-expanded={ouvert} onClick={() => setOuvert((o) => !o)} className="pressable bouton-nuit relative flex size-11 items-center justify-center rounded-full">

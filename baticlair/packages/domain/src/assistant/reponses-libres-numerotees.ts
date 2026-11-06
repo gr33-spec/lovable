@@ -41,7 +41,8 @@ export interface ReponseInterpretee {
 }
 
 /** Les lignes d'état montrées pendant la relecture (jamais le raisonnement). */
-export const ETAPES_RELECTURE = ["Je relis tes réponses…", "Je vérifie les unités…", "Je mets à jour le quantitatif…"] as const;
+/** Greg, 6 novembre 2026 : quatre états courts, jamais le raisonnement. */
+export const ETAPES_RELECTURE = ["Je relis le document…", "Je rattache les informations…", "Je vérifie les articles…", "Je mets la liste à jour…"] as const;
 
 export const LONGUEUR_MAX_ECRITE = 300;
 

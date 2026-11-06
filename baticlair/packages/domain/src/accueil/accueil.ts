@@ -54,7 +54,7 @@ export function statutDemande(d: ResumeDemande): StatutSuivi {
 /** Ce que l'accueil peut proposer de reprendre. */
 export interface ActionCandidate {
   cle: string;
-  sorte: "brouillon-demande" | "brouillon-achat" | "brouillon-liste" | "achat-offre" | "achat-pas-assez" | "demande-reponses" | "liste-a-verifier" | "demande-a-envoyer";
+  sorte: "brouillon-demande" | "brouillon-achat" | "brouillon-liste" | "achat-offre" | "achat-pas-assez" | "demande-reponses" | "liste-a-verifier" | "demande-a-envoyer" | "rapprochement";
   /** Une réponse est attendue de l'artisan (offre à choisir, réponses à lire). */
   immediate: boolean;
   /** L'échéance (ISO), quand il y en a une. */

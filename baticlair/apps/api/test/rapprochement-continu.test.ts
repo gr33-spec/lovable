@@ -164,4 +164,30 @@ describe("le rapprochement continu", () => {
     await a.agent.delete(`/v1/rapprochements/lignes/${ligneA.id}`).expect(200);
     expect((await a.agent.get("/v1/rapprochements").expect(200)).body.lignes[0].statut).toBe("retiree");
   });
+
+  it("collecte ouverte : Découvrir la montre sans filtre de métier ; une ligne qui correspond exactement la propose ; « Examiner » renvoie la collecte, sans rien ajouter", async () => {
+    // Une collecte de test dans le 22, déclarée par une autre entreprise (données de test, aucun négoce réel).
+    const autre = await artisan("x@toitures.fr", "Toitures X", "2 rue Neuve, 22300 Lannion", [ARDOISE]);
+    const collecte = await ctx.prisma.regroupementNegocie.create({ data: { mode: "automatique", statut: "en_collecte", cle: "metier:couverture", libelle: "Couverture · Lannion", famille: "couverture", departement: "22", clotureLe: new Date(Date.now() + 6 * 86_400_000), dateBesoinMin: new Date(Date.now() + 20 * 86_400_000) } });
+    const besoin = await ctx.prisma.besoinNegocie.create({ data: { companyId: autre.companyId, designation: "Couverture · Lannion", cle: "metier:couverture", famille: "couverture", quantite: 1, unite: "lignes", departement: "22", livraison: "22300 Lannion", dateBesoin: new Date(Date.now() + 20 * 86_400_000), statut: "declare", regroupementId: collecte.id } });
+    await ctx.prisma.ligneAchatGroupe.create({ data: { besoinId: besoin.id, regroupementId: collecte.id, companyId: autre.companyId, cle: "ardoise|x", libelle: "Ardoise 32×22 Espagne 1er choix", famille: "couverture", unite: "pièces", quantite: 1200, designationOrigine: ARDOISE.libelle } });
+    // Un charpentier d'ailleurs la voit en cherchant le 22 : pas de filtre de métier ; filtres texte et famille.
+    const charpentier = await signUpWithCompany(ctx.app, "charpente@bois.fr", "Charpentes Bois", ["carpentry"]);
+    const d = (await charpentier.agent.get("/v1/achats-groupes/decouvrir?departement=22").expect(200)).body;
+    expect(d.achats.map((x: { id: string }) => x.id)).toEqual([collecte.id]);
+    expect(JSON.stringify(d)).not.toMatch(/Toitures X|1200|1 200/);
+    expect((await charpentier.agent.get("/v1/achats-groupes/decouvrir?departement=22&q=zinc").expect(200)).body.achats).toEqual([]);
+    expect((await charpentier.agent.get("/v1/achats-groupes/decouvrir?departement=22&famille=charpente").expect(200)).body.achats).toEqual([]);
+    expect((await charpentier.agent.get("/v1/achats-groupes/decouvrir?departement=29").expect(200)).body.achats).toEqual([]);
+
+    const a = await artisan("a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [ARDOISE]);
+    const ligne = a.analyse.lignes.find((l: { designation: string }) => /ardoise/i.test(l.designation));
+    expect(ligne.collecte).toMatchObject({ id: collecte.id, titre: "Couverture · Lannion" });
+    await disponible(a, [ligne.key]).expect(200);
+    const p = (await a.agent.get("/v1/rapprochements").expect(200)).body.lignes[0].propositions[0];
+    expect(p).toMatchObject({ niveau: "exacte", collecte: { titre: "Couverture · Lannion" }, entreprises: "moins de 5 entreprises", total: null });
+    expect(mailsVers(ctx, "a@toitures.fr").at(-1)!.text).toMatch(/Une collecte ouverte dans ton secteur correspond/);
+    expect((await a.agent.post(`/v1/rapprochements/propositions/${p.id}/reponse`).send({ reponse: "examinee" }).expect(200)).body).toMatchObject({ achat: { id: collecte.id, titre: "Couverture · Lannion" }, href: `/chantiers/${a.projectId}` });
+    expect(await ctx.prisma.ligneAchatGroupe.count({ where: { companyId: a.companyId } })).toBe(0);
+  });
 });

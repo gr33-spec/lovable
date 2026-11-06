@@ -66,7 +66,7 @@ describe("réponses libres aux questions numérotées", () => {
     expect(m.split("\n")).toHaveLength(5);
     expect(m).toContain("1. La descente, en quelle matière ? (Zinc, PVC, Alu)");
     expect(messageDesQuestions([Q[1]!], true)).toBe("Il me manque encore une réponse :\n2. Le Ø de la descente ? (Ø 80, Ø 100)");
-    expect(ETAPES_RELECTURE).toEqual(["Je relis tes réponses…", "Je vérifie les unités…", "Je mets à jour le quantitatif…"]);
+    expect(ETAPES_RELECTURE).toEqual(["Je relis le document…", "Je rattache les informations…", "Je vérifie les articles…", "Je mets la liste à jour…"]);
   });
 
   it("le façonnage : « je façonne » choisit le bouton qui le dit, « bobine » le seul qui la nomme", () => {

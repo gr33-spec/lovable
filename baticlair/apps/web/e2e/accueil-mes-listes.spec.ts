@@ -5,8 +5,8 @@ import { confirmerEmail } from "./confirmer-email";
 
 /**
  * L'ACCUEIL ET « MES LISTES » (Greg, 1er novembre 2026, maquette « Bonjour Greg ») : 1) « À faire maintenant » (une action,
- * la règle de priorité, « Voir N autres brouillons », la reprise exacte), « Commencer » (le même départ que le « + »),
- * « Suivi en cours » (deux dossiers, statuts explicites) ; 2) « Mes listes » : la carte et son « … », la suppression
+ * la règle de priorité, « Voir N autres brouillons », la reprise exacte)
+ * (Greg, 6 novembre 2026 : « À faire » ne montre que des actions, sinon « Aucun besoin en cours ») ; 2) « Mes listes » : la carte et son « … », la suppression
  * définitive (annuler, confirmer, double clic, refus motivé, sélection multiple sans suppression partielle silencieuse).
  * Rien n'est envoyé à un négoce depuis l'accueil. Données de test seulement.
  */
@@ -84,38 +84,31 @@ async function reponseRecue(page: Page, recipientId: string) {
   expect(res.status(), await res.text()).toBeLessThan(300);
 }
 
-test("Accueil : rien à reprendre, « Commencer », aucun suivi ; le « + », « Créer une liste » et « Nouvelle liste » mènent au même départ ; rien sous la barre du menu", async ({ page }, info) => {
+test("À faire (Greg, 6 novembre 2026) : rien à faire, « Aucun besoin en cours » et « Nouveau besoin » ; le bouton jaune et « Nouvelle demande » mènent au même départ ; rien sous la barre du menu", async ({ page }, info) => {
   await inscrire(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Bonjour Jean", level: 1 })).toBeVisible();
-  // Aucun slogan sous le prénom ; les anciennes sections ont quitté l'accueil.
+  // Seulement des actions : ni « Commencer » ni « Suivi en cours » (le suivi vit dans Demandes et Groupes).
   await expect(page.getByText(/Achète en groupe, paie moins cher|Par où commencer \?|Mes listes et chantiers|Achats groupés près de chez toi/)).toHaveCount(0);
   await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
-  const titres = await page.locator("main h2").allTextContents();
-  expect(titres.filter((t) => ["À faire maintenant", "Commencer", "Suivi en cours"].includes(t))).toEqual(["Commencer", "Suivi en cours"]);
-  const commencer = page.getByRole("region", { name: "Commencer" });
-  await expect(commencer.getByRole("link", { name: /^Créer une liste/ })).toContainText("Document, saisie ou description");
-  await expect(commencer.getByRole("link", { name: /^Rejoindre un achat groupé/ })).toContainText("Regrouper tes besoins avec d'autres artisans");
-  await expect(page.getByRole("region", { name: "Suivi en cours" })).toContainText("Aucun dossier en cours");
-  // Un seul départ : le « + » (téléphone) / « Nouvelle liste » (ordinateur), « Créer une liste », « Nouvelle liste » de Mes listes.
+  await expect(page.getByRole("region", { name: /^(Commencer|Suivi en cours)$/ })).toHaveCount(0);
+  const vide = page.getByRole("region", { name: "Aucun besoin en cours" });
+  await expect(vide).toBeVisible();
+  await expect(vide.getByRole("link", { name: "Nouveau besoin" })).toHaveAttribute("href", "/chantiers/nouveau");
+  // Un seul départ : le bouton jaune « Nouveau besoin » du menu, celui de l'écran vide, « Nouvelle demande » de Demandes.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  await expect(nav.getByRole("link", { name: "Créer une liste" })).toHaveAttribute("href", "/chantiers/nouveau");
-  await expect(commencer.getByRole("link", { name: /^Créer une liste/ })).toHaveAttribute("href", "/chantiers/nouveau");
-  await nav.getByRole("link", { name: "Créer une liste" }).click();
+  await expect(nav.getByRole("link", { name: "Nouveau besoin" })).toHaveAttribute("href", "/chantiers/nouveau");
+  await nav.getByRole("link", { name: "Nouveau besoin" }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   await expect(page.getByRole("heading", { name: "Ma liste de matériaux" })).toBeVisible();
   await page.goto("/chantiers");
   await expect(page.getByRole("link", { name: "Nouvelle demande" }).first()).toHaveAttribute("href", "/chantiers/nouveau");
-  await page.goto("/");
-  await commencer.getByRole("link", { name: /^Rejoindre un achat groupé/ }).click();
-  await expect(page).toHaveURL(/\/achats-groupes$/);
-  // Téléphone : la dernière carte se lit au-dessus de la barre du menu.
+  // Téléphone : l'écran vide se lit au-dessus de la barre du menu.
   if (info.project.name === "telephone") {
     await page.goto("/");
-    const derniere = page.getByRole("region", { name: "Suivi en cours" });
-    await derniere.scrollIntoViewIfNeeded();
+    await vide.scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    const [b, n] = [await derniere.boundingBox(), await nav.boundingBox()];
+    const [b, n] = [await vide.boundingBox(), await nav.boundingBox()];
     expect(b!.y + b!.height).toBeLessThanOrEqual(n!.y + 1);
   }
 });
@@ -149,33 +142,28 @@ test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre 
   await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByLabel("Désignation")).toHaveValue("Liteaux 27×38 maison");
 });
 
-test("Accueil : une demande envoyée se suit (« Consultation des négoces », « 1 négoce consulté ») ; la réponse reçue passe « À faire maintenant » ; rien ne part depuis l'accueil", async ({ page }) => {
+test("À faire : une demande envoyée sans réponse n'y est pas ; la réponse reçue passe « À faire maintenant » ; rien ne part depuis l'accueil", async ({ page }) => {
   await inscrire(page);
   const { projectId, recipientId } = await demandeEnvoyee(page, "Maison Dupont");
   const demandes = async () => (await apiJson<{ items: { recipients: unknown[] }[] }>(page, "GET", `/v1/projects/${projectId}/price-requests`)).body.items;
   const avant = JSON.stringify(await demandes());
   await page.goto("/");
-  const suivi = page.getByRole("region", { name: "Suivi en cours" });
-  const carte = suivi.getByRole("link", { name: /^Demande de prix · Maison Dupont/ });
-  await expect(carte).toContainText("Consultation des négoces");
-  await expect(carte).toContainText("1 négoce consulté");
-  await expect(suivi.getByText("Aucun achat groupé en cours")).toBeVisible();
-  await expect(suivi.getByRole("link", { name: "Voir tout" })).toHaveAttribute("href", "/chantiers");
+  await expect(page.getByRole("region", { name: "Aucun besoin en cours" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
 
   await reponseRecue(page, recipientId);
   await page.goto("/");
   const afaire = page.getByRole("region", { name: "À faire maintenant" });
   await expect(afaire.getByRole("link").first()).toContainText("Voir les réponses de tes négoces");
   await expect(afaire.getByRole("link").first()).toContainText("Maison Dupont");
-  // La même demande n'est pas répétée dans le suivi.
-  await expect(suivi.getByRole("link", { name: /^Demande de prix · Maison Dupont/ })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Aucun besoin en cours" })).toHaveCount(0);
   // Ouvrir l'accueil ne déclenche aucun envoi : la demande est la même qu'avant.
   expect(JSON.stringify((await demandes()).map((d) => ({ ...d, recipients: d.recipients.length })))).toBe(JSON.stringify(JSON.parse(avant).map((d: { recipients: unknown[] }) => ({ ...d, recipients: d.recipients.length }))));
   await afaire.getByRole("link").first().click();
   await expect(page).toHaveURL(new RegExp(`/chantiers/${projectId}`));
 });
 
-test("Accueil : un achat groupé actif se suit (« Inscriptions ouvertes », « Clôture … · N lignes ») ; jamais « Seul jusqu'au… »", async ({ page }) => {
+test("Groupes : un achat groupé actif se suit dans « Mes groupes » (« Inscriptions ouvertes ») ; jamais « Seul jusqu'au… »", async ({ page }) => {
   await inscrire(page);
   const dep = String(1 + Math.floor(Math.random() * 19)).padStart(2, "0");
   expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: `Toitures ${unique()}`, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: "73282932000074", phone: null, email: null })).status).toBe(200);
@@ -186,10 +174,10 @@ test("Accueil : un achat groupé actif se suit (« Inscriptions ouvertes », « 
   const dans = new Date(Date.now() + 40 * 86_400_000).toISOString().slice(0, 10);
   const r = await apiJson(page, "POST", "/v1/achats-groupes", { achatId: null, lignes: [ligne], livraison: `${dep}100 Ville-${dep}`, dateBesoin: dans, negoces: [{ nom: "Négoce test", email: `test-${unique()}@negoce.example` }], engagement: true });
   expect(r.status, JSON.stringify(r.body)).toBeLessThan(300);
-  await page.goto("/");
-  const carte = page.getByRole("region", { name: "Suivi en cours" }).getByRole("link").filter({ hasText: "Inscriptions ouvertes" });
+  await page.goto("/achats-groupes");
+  await expect(page.getByRole("tab", { name: "Mes groupes" })).toHaveAttribute("aria-selected", "true");
+  const carte = page.getByRole("tabpanel", { name: "Mes groupes" }).getByRole("region", { name: /^Mes (participations|propositions)$/ }).getByRole("link").filter({ hasText: "Inscriptions ouvertes" }).first();
   await expect(carte).toBeVisible();
-  await expect(carte).toContainText(/Clôture \d+ \S+ · 1 ligne/);
   await expect(page.getByText(/Seul jusqu/)).toHaveCount(0);
   await carte.click();
   await expect(page).toHaveURL(/\/achats-groupes\/[0-9a-f-]{36}$/);
@@ -279,12 +267,13 @@ test("Mes listes : une liste envoyée ne se supprime pas (raison dite) ; « Sél
 
 test("Accueil et Mes listes, thèmes clair et sombre : le titre et le texte des cartes se lisent (contraste AA)", async ({ page }) => {
   await inscrire(page);
-  await liste(page, "Liste du thème");
-  for (const theme of ["sombre", "clair"]) {
+  // « À faire » vide d'abord (« Nouveau besoin »), puis la liste créée pour « Mes demandes ».
+  for (const [url, texte, theme] of [["/", "Nouveau besoin", "sombre"], ["/", "Nouveau besoin", "clair"], ["/chantiers", "Liste du thème", "sombre"], ["/chantiers", "Liste du thème", "clair"]] as const) {
+    if (url === "/chantiers" && theme === "sombre") await liste(page, "Liste du thème");
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
-    for (const [url, texte] of [["/", "Créer une liste"], ["/chantiers", "Liste du thème"]] as const) {
+    {
       await page.goto(url);
-      await expect(page.getByText(texte, { exact: true }).first()).toBeVisible();
+      await expect(page.locator("main").getByText(texte, { exact: true }).first()).toBeVisible();
       const ratios = await page.evaluate((cible) => {
         const toile = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
         const rgb = (c: string) => {
@@ -343,7 +332,7 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   // Le menu du bas : libellés à 12 px, sans déborder.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  for (const nom of ["Accueil", "Achats groupés", "Mes demandes", "Profil"]) {
+  for (const nom of ["À faire", "Groupes", "Demandes"]) {
     const lien = nav.getByRole("link", { name: nom });
     expect(await lien.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
     const b = (await lien.boundingBox())!;

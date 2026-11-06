@@ -1,0 +1,154 @@
+import { expect, test, type Browser, type Page } from "@playwright/test";
+import { confirmerEmail } from "./confirmer-email";
+
+/**
+ * LE RAPPROCHEMENT CONTINU, À L'ÉCRAN (Greg, 6 novembre 2026, points 7 à 11) : sur une liste validée, « Rechercher des
+ * besoins compatibles » ligne par ligne jusqu'à une date ; la demande individuelle reste libre ; un besoin compatible
+ * d'une autre entreprise apparaît dans « Groupes › Mes groupes » (« Mes rapprochements »), sans son nom ni sa quantité ;
+ * « Pas intéressé » arrête ; « Découvrir » filtre sans métier imposé. Données de test seulement, aucun vrai e-mail.
+ */
+const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+const jour = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+
+const SECRET = "Bearer e2e-secret-de-la-tache";
+
+/** Le guide d'accueil se referme de lui-même ; le regroupement en mode automatique (celui des collectes). */
+async function passerLeGuide(page: Page) {
+  await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
+    await page.getByRole("button", { name: "Passer le guide" }).click();
+  });
+}
+
+test.beforeEach(async ({ page, request }) => {
+  await passerLeGuide(page);
+  expect((await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: SECRET }, data: { mode: "automatique" } })).status()).toBe(200);
+});
+
+async function apiJson<T = unknown>(page: Page, method: string, url: string, body?: unknown): Promise<{ status: number; body: T }> {
+  return page.evaluate(
+    async ({ method, url, body }) => {
+      const companyId = localStorage.getItem("baticlair.companyId");
+      const res = await fetch(url, { method, headers: { "content-type": "application/json", accept: "application/json", ...(companyId ? { "x-company-id": companyId } : {}) }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+      return { status: res.status, body: (await res.json().catch(() => null)) as T };
+    },
+    { method, url, body },
+  );
+}
+
+async function inscrire(page: Page, prenom: string, entreprise: string) {
+  await page.goto("/inscription");
+  await page.getByLabel("Prénom et nom").fill(`${prenom} Martin`);
+  await page.getByLabel("Nom de ton entreprise").fill(entreprise);
+  await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
+  const email = `artisan-${unique()}@example.fr`;
+  await page.getByLabel("E-mail professionnel").fill(email);
+  await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+  await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
+  await page.getByRole("button", { name: "Créer mon compte" }).click();
+  await page.getByRole("button", { name: "C'est compris" }).click();
+  await expect(page.getByRole("heading", { name: new RegExp(`^Bonjour ${prenom}`) }).or(page.getByRole("dialog", { name: "Guide" })).first()).toBeVisible();
+  await confirmerEmail(page, email);
+}
+
+/** Une liste saisie (aucune IA), à l'adresse du chantier, validée (questions au premier bouton). */
+async function listeValidee(page: Page, dep: string, designation: string, quantite: string) {
+  const q = await apiJson<{ id: string; projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: designation, quantite, unite: "pièces" }] });
+  expect(q.status).toBe(201);
+  expect((await apiJson(page, "PATCH", `/v1/projects/${q.body.projetId}`, { name: `Chantier ${unique()}`, address: `3 rue de la Gare, ${dep}100 Ville-${dep}` })).status).toBe(200);
+  let courant = (await apiJson<{ questions: { id: string; boutons: { valeur: string }[] }[] }>(page, "GET", `/v1/quantitatifs/${q.body.id}`)).body;
+  for (let i = 0; i < 10 && courant.questions.length > 0; i++) {
+    const question = courant.questions[0]!;
+    courant = (await apiJson<typeof courant>(page, "POST", `/v1/quantitatifs/${q.body.id}/reponses`, { reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
+  }
+  expect((await apiJson(page, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status).toBe(200);
+  return q.body.projetId;
+}
+
+async function autreArtisan(browser: Browser, baseURL: string | undefined, prenom: string, entreprise: string) {
+  const context = await browser.newContext({ baseURL });
+  const page = await context.newPage();
+  await passerLeGuide(page);
+  await inscrire(page, prenom, entreprise);
+  return { context, page };
+}
+
+test("Rapprochement : la ligne cherche jusqu'à une date, la demande reste libre ; un besoin compatible arrive dans « Mes rapprochements » sans nom ni quantité ; « Pas intéressé »", async ({ page, browser }, info) => {
+  test.setTimeout(180_000);
+  // Un département à part (les autres parcours e2e partagent la base) ; tous les départements sont actifs en e2e.
+  const dep = String(40 + Math.floor(Math.random() * 40)).padStart(2, "0");
+  const entrepriseA = `Toitures A ${unique()}`;
+  const entrepriseB = `Couvreurs B ${unique()}`;
+  await inscrire(page, "Jean", entrepriseA);
+  const projetA = await listeValidee(page, dep, "Ardoise naturelle 32×22 Espagne 1er choix", "900");
+
+  // 1. Sur la liste validée : la carte, la phrase, la case de la ligne, la date, le bouton.
+  await page.goto(`/chantiers/${projetA}`);
+  const carte = page.getByRole("region", { name: "Rechercher des besoins compatibles" });
+  await expect(carte).toBeVisible({ timeout: 30_000 });
+  await expect(carte.getByText(/^Ta demande peut partir maintenant à tes négoces\./)).toBeVisible();
+  const bouton = carte.getByRole("button", { name: "Rechercher des besoins compatibles" });
+  await expect(bouton).toBeDisabled();
+  await carte.getByRole("checkbox", { name: /Ardoise/ }).check();
+  await carte.getByLabel("Chercher jusqu'au").fill(jour(10));
+  await carte.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `test-results/rapprochement/${info.project.name}-1-recherche.png` });
+  await bouton.click();
+  const enRecherche = carte.getByRole("list", { name: "Lignes en recherche" });
+  await expect(enRecherche.getByText(/^En recherche jusqu'au/)).toBeVisible();
+  await expect(carte.getByRole("status")).toContainText(/individuelle/i);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+
+  // 2. Une autre entreprise du même secteur cherche la même ardoise : la tâche du jour la rapproche.
+  const b = await autreArtisan(browser, info.project.use.baseURL, "Paul", entrepriseB);
+  const projetB = await listeValidee(b.page, dep, "ardoise 32x22 espagne 1er choix", "450");
+  const analyseB = (await apiJson<{ lignes: { key: string; designation: string }[] }>(b.page, "GET", `/v1/projects/${projetB}/rapprochement`)).body;
+  const cleB = analyseB.lignes.find((l) => /ardoise/i.test(l.designation))!.key;
+  expect((await apiJson(b.page, "POST", `/v1/projects/${projetB}/rapprochement`, { articles: [cleB], jusquau: jour(10) })).status).toBe(200);
+  await b.context.close();
+
+  // 3. Groupes › Mes groupes : « Mes rapprochements », le niveau, jamais le nom ni la quantité de l'autre.
+  // Sur téléphone, la page de la liste couvre la barre du menu : « Groupes » s'ouvre par son adresse.
+  await page.goto("/achats-groupes");
+  await page.getByRole("tab", { name: "Mes groupes" }).click();
+  const panneau = page.getByRole("region", { name: "Mes rapprochements" });
+  await expect(panneau).toBeVisible({ timeout: 30_000 });
+  const article = panneau.getByRole("article").first();
+  await expect(article).toContainText("Rapprochement à examiner");
+  await expect(article).toContainText(/correspondance exacte/i);
+  await expect(article).toContainText(new RegExp(`Département ${dep}`));
+  await expect(article).toContainText("moins de 5 entreprises");
+  await expect(panneau).not.toContainText(entrepriseB);
+  await expect(panneau).not.toContainText("450");
+  await expect(article.getByRole("button", { name: "Examiner le rapprochement" })).toBeVisible();
+  await page.screenshot({ path: `test-results/rapprochement/${info.project.name}-2-mes-rapprochements.png`, fullPage: true });
+  // « À faire » le signale aussi, sans rien ajouter.
+  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "À faire" }).click();
+  await expect(page.getByRole("region", { name: "À faire maintenant" })).toContainText(/Correspondance exacte pour « .*Ardoise/i);
+
+  // 4. « Pas intéressé » : la proposition est close, plus de bouton.
+  await page.goto("/achats-groupes?vue=mes-groupes");
+  await panneau.getByRole("button", { name: "Pas intéressé" }).first().click();
+  await expect(panneau.getByText("Tu n'es pas intéressé.").first()).toBeVisible();
+});
+
+test("Groupes › Découvrir : les filtres (produit, famille, département, clôture) vivent dans l'adresse ; aucun métier imposé", async ({ page }) => {
+  await inscrire(page, "Jean", `Toitures ${unique()}`);
+  await page.goto("/achats-groupes?vue=decouvrir");
+  await expect(page.getByRole("heading", { name: "Groupes", level: 1 })).toBeVisible();
+  // La phrase du collectif (section 17) : la même à l'écran (ordinateur) que celle du serveur.
+  const { collectif } = (await apiJson<{ collectif: string }>(page, "GET", "/v1/achats-groupes/decouvrir")).body;
+  expect(collectif).toMatch(/^Un achat groupé fonctionne si chacun joue sa part/);
+  if (page.viewportSize()!.width >= 1024) await expect(page.getByText(collectif, { exact: true })).toBeVisible();
+  const recherche = page.getByRole("search", { name: "Chercher une collecte" });
+  await expect(recherche).toBeVisible();
+  await recherche.getByLabel("Matériau ou produit").fill("ardoise");
+  await recherche.getByRole("button", { name: "Chercher" }).click();
+  await expect(page).toHaveURL(/q=ardoise/);
+  await recherche.getByLabel("Département").selectOption("tous");
+  await expect(page).toHaveURL(/departement=tous/);
+  await recherche.getByLabel("Clôture avant le").fill(jour(20));
+  await expect(page).toHaveURL(new RegExp(`clotureAvant=${jour(20)}`));
+  // Le résultat : des collectes, ou l'écran vide qui le dit ; jamais un compteur inventé.
+  await expect(page.getByRole("tabpanel", { name: "Découvrir" }).getByText(/Aucune collecte ouverte avec ces critères|Ajouter mes quantités/).first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+});

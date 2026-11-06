@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, ClipboardList, PlusCircle, Users } from "lucide-react";
+import { ChevronRight, ClipboardList, PlusCircle } from "lucide-react";
 import { useCallback, useState } from "react";
-import { actionPrioritaire, lienAutres, statutAchatGroupe, statutDemande, type ActionCandidate, type StatutSuivi } from "../../../../packages/domain/src/accueil/accueil";
+import { actionPrioritaire, lienAutres, type ActionCandidate } from "../../../../packages/domain/src/accueil/accueil";
 import { InstallHint } from "@/components/install-hint";
 import { BandeauReprises } from "@/components/reprises";
 import { Skeleton } from "@/components/ui";
@@ -30,17 +30,6 @@ interface Action extends ActionCandidate {
   href: string;
 }
 
-interface Suivi {
-  cle: string;
-  titre: string;
-  statut: StatutSuivi;
-  sousTitre: string;
-  href: string;
-  icone: "achat" | "demande";
-  /** Pour l'ordre : ce qui demande de l'attention d'abord, puis le plus récent. */
-  rang: number;
-  date: number;
-}
 
 const jourCourt = (iso: string | null) => (iso ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" }).format(new Date(iso)) : null);
 const pluriel = (n: number, un: string, plusieurs: string) => `${n} ${n > 1 ? plusieurs : un}`;
@@ -69,6 +58,10 @@ function actionsDesAchats(achats: CarteAchat[]): Action[] {
   return out;
 }
 
+function actionsDesRapprochements(items: { cle: string; texte: string; href: string }[]): Action[] {
+  return items.map((r) => ({ cle: r.cle, sorte: "rapprochement", immediate: true, echeance: null, modifieLe: null, statut: "À examiner", titre: r.texte, sousTitre: "Rien n'est ajouté sans ton accord", bouton: "Examiner", href: r.href }));
+}
+
 function actionsDesListes(next: NextAction[], projets: Map<string, { lastActivityAt: string }>, dejaBrouillon: Set<string>): Action[] {
   const out: Action[] = [];
   for (const n of next) {
@@ -90,25 +83,7 @@ function actionsDesReponses(projets: ProjectPage["items"]): Action[] {
   });
 }
 
-function suivisDesAchats(achats: CarteAchat[]): Suivi[] {
-  return achats.flatMap((c) => {
-    const statut = statutAchatGroupe(c.etat);
-    if (!statut) return [];
-    const inscriptions = ["seul", "regroupe", "regroupe_total"].includes(c.etat);
-    const date = inscriptions ? c.clotureLe : c.etat === "consultation" ? c.reponseAvantLe : c.etat === "offre" ? c.commandeAvantLe : null;
-    const quand = date ? `${inscriptions ? "Clôture" : c.etat === "consultation" ? "Réponses" : "Commande avant le"} ${jourCourt(date)}` : null;
-    return [{ cle: `a-${c.id}`, titre: [c.metier, c.commune].filter(Boolean).join(" · ") || c.titreAchat, statut, sousTitre: [quand, pluriel(c.lignes.length, "ligne", "lignes")].filter(Boolean).join(" · "), href: `/achats-groupes/${c.id}`, icone: "achat" as const, rang: statut.ton === "jaune" ? 0 : 1, date: date ? Date.parse(date) : 0 }];
-  });
-}
 
-function suivisDesDemandes(projets: ProjectPage["items"]): Suivi[] {
-  return projets.flatMap((p) => {
-    const d = p.resume?.demande;
-    if (!d || d.choisi) return [];
-    const statut = statutDemande(d);
-    return [{ cle: `d-${p.id}`, titre: `Demande de prix · ${p.name}`, statut, sousTitre: pluriel(d.negoces, "négoce consulté", "négoces consultés"), href: `/chantiers/${p.id}#fournisseurs`, icone: "demande" as const, rang: d.reponses > 0 ? 0 : 1, date: Date.parse(p.lastActivityAt) }];
-  });
-}
 
 export function AccueilMaquette() {
   const { me } = useSession();
@@ -117,21 +92,17 @@ export function AccueilMaquette() {
   const { data: mes } = useResource(useCallback((s: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal: s }).catch(() => null), []));
   const { data: next } = useResource(useCallback((s: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal: s }).catch(() => ({ items: [] })), []));
   const { data: projets } = useResource(useCallback((s: AbortSignal) => api<ProjectPage>("/v1/projects?limit=30&resume=1", { signal: s }).catch(() => ({ items: [], nextCursor: null })), []));
+  // Greg, 6 novembre 2026 : les rapprochements à examiner, et une ligne commandée seule mais encore dans un achat groupé.
+  const { data: rapprochements } = useResource(useCallback((s: AbortSignal) => api<{ items: { cle: string; texte: string; href: string }[] }>("/v1/rapprochements/actions", { signal: s }).catch(() => ({ items: [] })), []));
   const [tout, setTout] = useState(false);
 
   const charge = brouillons !== null && next !== null && projets !== null;
   const achats = mes?.achats ?? [];
   const parProjet = new Map(projets?.items.map((p) => [p.id, p]) ?? []);
   const projetsBrouillon = new Set((brouillons?.items ?? []).map((b) => projetDeUrl(b.url)).filter((x): x is string => x !== null));
-  const candidats = charge ? [...actionsDeBrouillons(brouillons.items), ...actionsDesAchats(achats), ...actionsDesReponses(projets.items), ...actionsDesListes(next.items, parProjet, projetsBrouillon)] : [];
+  const candidats = charge ? [...actionsDeBrouillons(brouillons.items), ...actionsDesAchats(achats), ...actionsDesReponses(projets.items), ...actionsDesListes(next.items, parProjet, projetsBrouillon), ...actionsDesRapprochements(rapprochements?.items ?? [])] : [];
   const { premiere, autres } = actionPrioritaire(candidats);
   const lien = lienAutres(autres);
-  const suivis = [...suivisDesAchats(achats), ...suivisDesDemandes(projets?.items ?? [])]
-    .filter((s) => !premiere || s.href !== premiere.href)
-    .sort((a, b) => a.rang - b.rang || b.date - a.date || (a.cle < b.cle ? -1 : 1));
-  const montres = suivis.slice(0, 2);
-  const avecAchat = suivis.some((s) => s.icone === "achat");
-  const voirTout = suivis.some((s) => s.icone === "demande") ? "/chantiers" : "/achats-groupes";
 
   return (
     <div className="flex flex-col gap-6 lg:mx-auto lg:w-full lg:max-w-[56rem] lg:gap-8">
@@ -163,39 +134,15 @@ export function AccueilMaquette() {
         </section>
       ) : null}
 
-      <section aria-labelledby="commencer-titre" className="flex flex-col gap-3">
-        <h2 id="commencer-titre" className="text-[22px] font-extrabold tracking-[-0.02em]">
-          Commencer
-        </h2>
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <CarteLien href="/chantiers/nouveau" titre="Créer une liste" sousTitre="Document, saisie ou description" icone={<PlusCircle size={26} aria-hidden="true" />} jaune />
-          <CarteLien href="/achats-groupes" titre="Rejoindre un achat groupé" sousTitre="Regrouper tes besoins avec d'autres artisans" icone={<Users size={24} aria-hidden="true" />} />
-        </div>
-      </section>
-
-      {charge ? (
-        <section aria-labelledby="suivi-titre" className="flex flex-col gap-3">
-          <div className="flex items-baseline justify-between">
-            <h2 id="suivi-titre" className="text-[22px] font-extrabold tracking-[-0.02em]">
-              Suivi en cours
-            </h2>
-            {suivis.length > 0 ? (
-              <Link href={voirTout} className="inline-flex min-h-11 items-center text-[15px] font-bold text-accent-text">
-                Voir tout
-              </Link>
-            ) : null}
-          </div>
-          {montres.length === 0 ? <p className="text-[15px] text-muted">Aucun dossier en cours</p> : null}
-          {montres.length > 0 ? (
-            <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              {montres.map((s) => (
-                <li key={s.cle}>
-                  <CarteSuivi s={s} />
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {montres.length > 0 && !avecAchat ? <p className="text-[14px] text-muted">Aucun achat groupé en cours</p> : null}
+      {/* Greg, 6 novembre 2026 : l'écran « À faire » ne montre que les actions concrètes ; sans action, une phrase et
+          « Nouveau besoin ». Le suivi détaillé vit dans Demandes et Groupes. */}
+      {charge && !premiere ? (
+        <section aria-label="Aucun besoin en cours" className="flex flex-col items-start gap-4 rounded-2xl bg-surface p-5 shadow-card">
+          <p className="text-[20px] font-extrabold">Aucun besoin en cours</p>
+          <Link href="/chantiers/nouveau" className="pressable inline-flex min-h-12 items-center gap-2 rounded-2xl bg-accent px-5 text-[16px] font-extrabold text-on-accent">
+            <PlusCircle size={22} aria-hidden="true" />
+            <span>Nouveau besoin</span>
+          </Link>
         </section>
       ) : null}
       <InstallHint />
@@ -233,34 +180,4 @@ function CarteAction({ a, principale = false }: { a: Action; principale?: boolea
   );
 }
 
-function CarteLien({ href, titre, sousTitre, icone, jaune = false }: { href: string; titre: string; sousTitre: string; icone: React.ReactNode; jaune?: boolean }) {
-  return (
-    <Link href={href} className="pressable flex min-h-[4.5rem] items-center gap-3 rounded-2xl bg-surface p-3.5 text-ink shadow-card">
-      <span aria-hidden="true" className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${jaune ? "bg-accent text-on-accent" : "bg-ground"}`}>
-        {icone}
-      </span>
-      <span className="flex min-w-0 grow flex-col">
-        <span className="text-[16px] font-extrabold">{titre}</span>
-        <span className="text-[14px] text-muted">{sousTitre}</span>
-      </span>
-      <ChevronRight size={20} aria-hidden="true" className="shrink-0 text-muted" />
-    </Link>
-  );
-}
 
-function CarteSuivi({ s }: { s: Suivi }) {
-  const ton = s.statut.ton === "vert" ? "bg-ok-bg text-ok" : s.statut.ton === "jaune" ? "bg-accent/35 text-ink" : "bg-ground text-ink";
-  return (
-    <Link href={s.href} aria-label={`${s.titre} : ${s.statut.libelle}`} className="pressable flex min-h-[4.5rem] items-center gap-3 rounded-2xl bg-surface p-3.5 text-ink shadow-card">
-      <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-ground">
-        {s.icone === "achat" ? <Users size={24} /> : <ClipboardList size={24} />}
-      </span>
-      <span className="flex min-w-0 grow flex-col gap-1">
-        <span className="text-[16px] leading-tight font-extrabold">{s.titre}</span>
-        <span className={`self-start rounded-full px-2.5 py-0.5 text-[13px] font-bold ${ton}`}>{s.statut.libelle}</span>
-        <span className="text-[14px] text-muted">{s.sousTitre}</span>
-      </span>
-      <ChevronRight size={20} aria-hidden="true" className="shrink-0 text-muted" />
-    </Link>
-  );
-}

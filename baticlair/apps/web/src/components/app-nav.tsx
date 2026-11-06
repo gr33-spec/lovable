@@ -95,7 +95,7 @@ export function AppNav() {
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
           colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}
-      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[1fr_1fr_auto_1fr_1fr]" : "grid-cols-[1fr_auto_1fr_1fr]"} rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
+      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[1fr_1fr_auto_1fr]" : "grid-cols-[1fr_auto_1fr]"} rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
         <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
           <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
         </span>
@@ -103,16 +103,18 @@ export function AppNav() {
         {groupe ? link(groupeItem) : null}
         {/* Greg, 1er novembre 2026 : le « + » ouvre LE départ de création d'une liste, le même que « Créer une liste » de
             l'accueil et « Nouvelle liste » de Mes listes (un seul point de départ, une seule expérience). */}
-        <Link href="/chantiers/nouveau" aria-label="Créer une liste" className="flex min-h-13 items-center justify-center px-1 lg:order-[-1] lg:mb-5 lg:justify-start lg:px-0">
+        {/* Greg, 6 novembre 2026 : trois espaces (À faire, Demandes, Groupes) et le bouton jaune « Nouveau besoin » ; le
+            profil, l'entreprise et les négoces passent par l'avatar sur téléphone. */}
+        <Link href="/chantiers/nouveau" aria-label="Nouveau besoin" className="flex min-h-13 items-center justify-center px-1 lg:order-[-1] lg:mb-5 lg:justify-start lg:px-0">
           <span className="pressable flex size-12 items-center justify-center rounded-full bg-accent text-on-accent shadow-float lg:h-12 lg:w-full lg:gap-2 lg:rounded-xl lg:text-[15px] lg:font-bold lg:shadow-[0_12px_30px_rgba(254,210,6,0.18)]">
             <Plus size={26} strokeWidth={2.6} aria-hidden="true" />
-            <span className="hidden lg:inline">Nouvelle demande</span>
+            <span className="hidden lg:inline">Nouveau besoin</span>
           </span>
         </Link>
         {link(listesItem)}
         {link(negocesItem, true)}
         <span aria-hidden="true" className="hidden grow lg:block" />
-        {link(profilItem)}
+        {link(profilItem, true)}
       </div>
     </nav>
   );

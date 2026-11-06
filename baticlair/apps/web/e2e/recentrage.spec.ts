@@ -288,7 +288,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     expect((await apiJson(page, "POST", `/v1/public/chiffrer/${jeton}`, { prix: { [cle]: 1.07 }, livraisonHt: 0, delaiJours: 2, validiteJours: 10 })).status).toBe(200);
 
     // Achat groupé (27 octobre 2026) : « Mes prix » passe dans Profil.
-    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Profil" }).click();
+    await page.goto("/compte"); // Greg, 6 novembre 2026 : sur téléphone, Profil passe par l'avatar.
     // Profil et paramètres (1er novembre 2026) : « Mes prix » est dans « Adresse Mobiiz et réponses ».
     await page.getByRole("link", { name: /^Adresse Mobiiz et réponses/ }).click();
     await page.getByRole("link", { name: "Mes prix" }).click();
@@ -374,7 +374,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const carteR = page.getByRole("article", { name: /, Regroupement en cours$/ });
     await expect(carteR).toBeVisible();
     await expect(carteR.getByText("Tu es dedans")).toBeVisible();
-    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Accueil" }).click();
+    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "À faire" }).click();
     await expect(page.getByRole("link", { name: /^Regroupements en cours : 1$/ })).toBeVisible();
   });
 

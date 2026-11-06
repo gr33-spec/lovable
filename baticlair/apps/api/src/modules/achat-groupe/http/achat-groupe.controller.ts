@@ -97,6 +97,13 @@ export class AchatGroupeController {
     return this.achats.mesAchats(tenant);
   }
 
+  @Get("achats-groupes/decouvrir")
+  decouvrir(@Tenant() tenant: TenantContext, @Query("q") q?: string, @Query("famille") famille?: string, @Query("departement") departement?: string, @Query("clotureAvant") clotureAvant?: string) {
+    const dep = departement && /^(?:\d{2,3}|2[AB]|tous)$/.test(departement) ? departement : undefined;
+    const cloture = clotureAvant && /^\d{4}-\d{2}-\d{2}$/.test(clotureAvant) ? new Date(`${clotureAvant}T23:59:59Z`) : undefined;
+    return this.achats.decouvrir(tenant, { q: (q ?? "").slice(0, 80), ...(famille && /^[a-z_]{2,40}$/.test(famille) ? { famille } : {}), ...(dep ? { departement: dep } : {}), ...(cloture ? { clotureAvant: cloture } : {}) });
+  }
+
   @Get("achats-groupes/pres-de-chez-moi")
   presDeChezMoi(@Tenant() tenant: TenantContext) {
     return this.achats.presDeChezMoi(tenant);

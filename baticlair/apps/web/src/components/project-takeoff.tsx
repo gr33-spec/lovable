@@ -10,6 +10,7 @@ import { useSelectionSend } from "@/components/selection-send";
 import { useGroupe, useGroupeFerme } from "@/components/groupe";
 import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
+import { RechercheRapprochement } from "@/components/rapprochement";
 import { specialiteDuMetier, type LotAEnvoyer } from "../../../../packages/domain/src/groupe/specialites";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
@@ -469,6 +470,8 @@ export function ProjectTakeoff({
       <DemandesPerso projectId={projectId} articles={aAcheter} lots={lotsEnvoi} canCreate archived={archived} dejaEnvoye={sent} principal={!listShown} bouton={false} />
       {/* Une seule suggestion d'achat groupé, à l'étape « liste prête » seulement (point 8). */}
       {!sent ? <TenterPrixDeGroupe projectId={projectId} /> : null}
+      {/* Greg, 6 novembre 2026 : la demande part quand l'artisan veut ; certaines lignes peuvent AUSSI chercher un rapprochement. */}
+      <RechercheRapprochement projectId={projectId} />
     </div>
   ) : null;
   return (

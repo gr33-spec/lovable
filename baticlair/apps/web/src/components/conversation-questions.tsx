@@ -49,12 +49,12 @@ export function ConversationQuestions({
     setMessages((m) => [...m, { de: "moi", texte }]);
     const posees = questions.filter((q) => aRepondre.has(q.numero));
     const reduit = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    for (const e of ETAPES_RELECTURE.slice(0, 2)) {
+    for (const e of ETAPES_RELECTURE.slice(0, -1)) {
       setEtape(e);
       if (!reduit) await new Promise((r) => setTimeout(r, PAUSE_MS));
     }
     const lues = interpreterReponsesNumerotees(posees, texte);
-    setEtape(ETAPES_RELECTURE[2]);
+    setEtape(ETAPES_RELECTURE[ETAPES_RELECTURE.length - 1]!);
     if (!reduit) await new Promise((r) => setTimeout(r, PAUSE_MS));
     const notees: ReponseInterpretee[] = [];
     const laissees: ReponseInterpretee[] = [];

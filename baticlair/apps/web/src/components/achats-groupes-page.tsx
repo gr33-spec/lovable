@@ -2,13 +2,15 @@
 
 import { Plus, Users } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { CarteAchatGroupe, CarteAchatOuvert } from "@/components/achat-groupe";
 import { RegroupementsNegocies, useModeRegroupement } from "@/components/negocie";
 import { InviterCollegue } from "@/components/inviter";
 import { CarteRegroupement } from "@/components/regroupements";
 import { EconomiesGroupeCard } from "@/components/economies-groupe";
-import { ButtonLink, EmptyState, ErrorNotice, PageTitle, SectionTitle, Skeleton } from "@/components/ui";
+import { Button, ButtonLink, EmptyState, ErrorNotice, PageTitle, SectionTitle, Skeleton } from "@/components/ui";
+import { RapprochementsPanneau } from "@/components/rapprochement";
+import { PHRASE_COLLECTIF } from "@/lib/rapprochement";
 import { api } from "@/lib/api";
 import type { AchatOuvert, MesAchats } from "@/lib/achat-groupe";
 import type { ListeRegroupements } from "@/lib/recentrage";
@@ -43,39 +45,46 @@ export function PageAchatsGroupes() {
   );
 }
 
-type Vue = "ouvertes" | "participations" | "propositions";
+type Vue = "decouvrir" | "mes-groupes";
 const VUES: { value: Vue; label: string }[] = [
-  { value: "ouvertes", label: "Propositions ouvertes" },
-  { value: "participations", label: "Mes participations" },
-  { value: "propositions", label: "Mes propositions" },
+  { value: "decouvrir", label: "Découvrir" },
+  { value: "mes-groupes", label: "Mes groupes" },
 ];
+/** Les anciennes adresses (« ?vue=ouvertes », « participations », « propositions ») restent valables. */
+const ANCIENNES: Record<string, Vue> = { decouvrir: "decouvrir", ouvertes: "decouvrir", "mes-groupes": "mes-groupes", participations: "mes-groupes", propositions: "mes-groupes" };
+
+interface Decouverte {
+  zone: string | null;
+  departement: string | null;
+  familles: string[];
+  /** Les noms des familles et la phrase du collectif viennent du serveur (le domaine ne s'importe pas tel quel ici). */
+  libellesFamilles: Record<string, string>;
+  collectif: string;
+  achats: (AchatOuvert & { famille: string; dejaDedans: boolean })[];
+}
 
 /**
- * TROIS VUES (Greg, 1er novembre 2026) : « Propositions ouvertes » (celles du secteur que je n'ai pas rejointes),
- * « Mes participations » (toutes les miennes), « Mes propositions » (celles que j'ai ouvertes). « Proposer un besoin
- * groupé » ouvre une proposition ; « Ajouter mes quantités » rejoint une proposition existante. La vue vit dans l'adresse.
+ * L'ESPACE « GROUPES » (Greg, 6 novembre 2026, point 10) : « Découvrir » (les collectes ouvertes, cherchées comme des
+ * annonces, sans filtre de métier : produit, famille, département, date de clôture) et « Mes groupes » (mes rapprochements
+ * à examiner, mes participations, mes propositions). La vue et les filtres vivent dans l'adresse.
  */
 function AchatsGroupes() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const vueParam = params.get("vue");
   const fetchMes = useCallback((signal: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal }), []);
-  const fetchPres = useCallback((signal: AbortSignal) => api<{ zone: string | null; achats: AchatOuvert[] }>("/v1/achats-groupes/pres-de-chez-moi", { signal }), []);
   const { data: mes, error, reload } = useResource(fetchMes);
-  const { data: pres } = useResource(fetchPres);
   const finis = ["retire", "desiste", "sorti", "non_commande"];
   const actifs = (mes?.achats ?? []).filter((a) => !finis.includes(a.etat));
   const passes = (mes?.achats ?? []).filter((a) => finis.includes(a.etat));
-  const proposees = (mes?.achats ?? []).filter((a) => a.jePropose);
-  // Par défaut : mes participations s'il y en a, sinon les propositions ouvertes.
-  const vue: Vue = vueParam === "ouvertes" || vueParam === "participations" || vueParam === "propositions" ? vueParam : actifs.length > 0 ? "participations" : "ouvertes";
+  const proposees = actifs.filter((a) => a.jePropose);
+  const participations = actifs.filter((a) => !a.jePropose);
+  const vue: Vue = ANCIENNES[params.get("vue") ?? ""] ?? (actifs.length > 0 ? "mes-groupes" : "decouvrir");
   const choisir = (v: Vue) => router.replace(`${pathname}?vue=${v}`, { scroll: false });
-  const compte: Record<Vue, number | null> = { ouvertes: pres ? pres.achats.length : null, participations: mes ? actifs.length : null, propositions: mes ? proposees.length : null };
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <PageTitle>Achats groupés</PageTitle>
+        <PageTitle>Groupes</PageTitle>
         <ButtonLink href="/achats-groupes/lancer" className="w-full lg:w-auto lg:px-6">
           <Plus size={18} aria-hidden="true" /> Proposer un besoin groupé
         </ButtonLink>
@@ -86,7 +95,7 @@ function AchatsGroupes() {
         </p>
       ) : null}
       {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
-      <div role="tablist" aria-label="Vues des achats groupés" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:px-0">
+      <div role="tablist" aria-label="Vues des groupes" className="flex flex-wrap gap-1.5 pb-1">
         {VUES.map((v) => (
           <button
             key={v.value}
@@ -97,63 +106,54 @@ function AchatsGroupes() {
             className={`pressable min-h-11 shrink-0 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${vue === v.value ? "bg-ink text-white" : "border border-line bg-surface text-ink active:bg-ground"}`}
           >
             {v.label}
-            {compte[v.value] ? <span className="ml-1.5 tabular-nums opacity-70">{compte[v.value]}</span> : null}
+            {v.value === "mes-groupes" && mes && actifs.length ? <span className="ml-1.5 tabular-nums opacity-70">{actifs.length}</span> : null}
           </button>
         ))}
       </div>
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div role="tabpanel" aria-label={VUES.find((v) => v.value === vue)!.label} className="flex min-w-0 flex-col gap-3">
-          {vue === "ouvertes" ? (
-            !pres ? (
-              <Skeleton card="h-40" lines={2} label="Chargement des propositions…" />
-            ) : pres.achats.length ? (
-              <div className="flex flex-col gap-3 2xl:grid 2xl:grid-cols-2">
-                {pres.achats.map((a) => (
-                  <CarteAchatOuvert key={a.id} a={a} />
-                ))}
-              </div>
-            ) : (
-              <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Aucune proposition ouverte dans ton secteur">
-                <p className="text-[15px] text-muted">Propose un besoin groupé : les artisans de ton métier dans le secteur sont prévenus.</p>
-              </EmptyState>
-            )
-          ) : null}
-          {vue !== "ouvertes" && !mes && !error ? <Skeleton card="h-40" lines={2} label="Chargement de tes achats groupés…" /> : null}
-          {vue === "participations" && mes ? (
-            actifs.length || passes.length ? (
-              <>
-                {actifs.map((c) => (
-                  <CarteAchatGroupe key={c.id} c={c} />
-                ))}
-                {passes.length > 0 ? (
-                  <section aria-label="Terminés" className="flex flex-col gap-3 pt-2">
-                    <SectionTitle>Terminés</SectionTitle>
-                    {passes.map((c) => (
-                      <CarteAchatGroupe key={c.id} c={c} />
-                    ))}
-                  </section>
-                ) : null}
-              </>
-            ) : (
-              <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Aucune participation pour l'instant">
-                <p className="text-[15px] text-muted">Ouvre une proposition et ajoute tes quantités.</p>
-              </EmptyState>
-            )
-          ) : null}
-          {vue === "propositions" && mes ? (
-            proposees.length ? (
-              proposees.map((c) => <CarteAchatGroupe key={c.id} c={c} />)
-            ) : (
-              <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Tu n'as encore proposé aucun besoin groupé">
-                <p className="text-[15px] text-muted">« Proposer un besoin groupé » ouvre un achat groupé de ton métier dans ton secteur.</p>
-              </EmptyState>
-            )
+          {vue === "decouvrir" ? <Decouvrir /> : null}
+          {vue === "mes-groupes" ? (
+            <>
+              <RapprochementsPanneau />
+              {!mes && !error ? <Skeleton card="h-40" lines={2} label="Chargement de tes groupes…" /> : null}
+              {mes && actifs.length === 0 && passes.length === 0 ? (
+                <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Aucun groupe pour l'instant">
+                  <p className="text-[15px] text-muted">Découvre les collectes ouvertes, ou laisse des lignes de ta demande chercher des besoins compatibles.</p>
+                </EmptyState>
+              ) : null}
+              {participations.length > 0 ? (
+                <section aria-label="Mes participations" className="flex flex-col gap-3">
+                  <SectionTitle>Mes participations</SectionTitle>
+                  {participations.map((c) => (
+                    <CarteAchatGroupe key={c.id} c={c} />
+                  ))}
+                </section>
+              ) : null}
+              {proposees.length > 0 ? (
+                <section aria-label="Mes propositions" className="flex flex-col gap-3">
+                  <SectionTitle>Mes propositions</SectionTitle>
+                  {proposees.map((c) => (
+                    <CarteAchatGroupe key={c.id} c={c} />
+                  ))}
+                </section>
+              ) : null}
+              {passes.length > 0 ? (
+                <section aria-label="Terminés" className="flex flex-col gap-3 pt-2">
+                  <SectionTitle>Terminés</SectionTitle>
+                  {passes.map((c) => (
+                    <CarteAchatGroupe key={c.id} c={c} />
+                  ))}
+                </section>
+              ) : null}
+            </>
           ) : null}
         </div>
         <div className="flex flex-col gap-6 lg:sticky lg:top-8">
           {/* Greg, 1er novembre 2026 : le compteur d'économies quitte Profil (absent tant que rien n'est commandé en groupe). */}
           <EconomiesGroupeCard />
           <CommentCaMarcheOrdinateur />
+          <p className="hidden text-[14px] leading-snug text-muted lg:block">{PHRASE_COLLECTIF}</p>
           {/* Point 8 : la grande carte « Inviter un collègue » passe sous la liste. */}
           <InviterCollegue texte="Plus on est nombreux dans le secteur, meilleur est le prix." />
         </div>
@@ -161,6 +161,99 @@ function AchatsGroupes() {
     </div>
   );
 }
+
+/**
+ * « Découvrir » : les filtres (produit, famille, département, clôture avant) dans l'adresse ; aucune collecte vide, aucun
+ * compteur gonflé (les entreprises ne sont comptées qu'à partir du seuil d'anonymat), jamais le détail d'un artisan.
+ */
+function Decouvrir() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const q = params.get("q") ?? "";
+  const famille = params.get("famille") ?? "";
+  const departement = params.get("departement") ?? "";
+  const clotureAvant = params.get("clotureAvant") ?? "";
+  const requete = new URLSearchParams({ ...(q ? { q } : {}), ...(famille ? { famille } : {}), ...(departement ? { departement } : {}), ...(clotureAvant ? { clotureAvant } : {}) }).toString();
+  const fetcher = useCallback((signal: AbortSignal) => api<Decouverte>(`/v1/achats-groupes/decouvrir${requete ? `?${requete}` : ""}`, { signal }), [requete]);
+  const { data, error, reload } = useResource(fetcher);
+  const [texte, setTexte] = useState(q);
+  const changer = (cle: string, valeur: string) => {
+    const suite = new URLSearchParams(params.toString());
+    suite.set("vue", "decouvrir");
+    if (valeur) suite.set(cle, valeur);
+    else suite.delete(cle);
+    router.replace(`${pathname}?${suite.toString()}`, { scroll: false });
+  };
+  return (
+    <div className="flex flex-col gap-3">
+      <form
+        role="search"
+        aria-label="Chercher une collecte"
+        onSubmit={(e) => {
+          e.preventDefault();
+          changer("q", texte.trim());
+        }}
+        className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card"
+      >
+        <div className="flex gap-2">
+          <label className="sr-only" htmlFor="decouvrir-q">
+            Matériau ou produit
+          </label>
+          <input id="decouvrir-q" type="search" value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="Matériau ou produit (ex. ardoise 32×22)" className="min-h-11 min-w-0 grow rounded-lg border border-line bg-surface px-3 text-[16px]" />
+          <Button type="submit" className="shrink-0 px-4">
+            Chercher
+          </Button>
+        </div>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <label className="flex flex-col gap-1 text-[13px] font-semibold">
+            Famille
+            <select value={famille} onChange={(e) => changer("famille", e.target.value)} className="min-h-11 rounded-lg border border-line bg-surface px-2 text-[15px] font-normal">
+              <option value="">Toutes</option>
+              {(data?.familles ?? []).map((f) => (
+                <option key={f} value={f}>
+                  {data?.libellesFamilles[f] ?? f}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-[13px] font-semibold">
+            Département
+            <select value={departement || data?.zone || ""} onChange={(e) => changer("departement", e.target.value)} className="min-h-11 rounded-lg border border-line bg-surface px-2 text-[15px] font-normal">
+              {data?.zone ? <option value={data.zone}>Mon secteur ({data.zone})</option> : null}
+              <option value="tous">Tous les départements</option>
+              {DEPARTEMENTS.filter((d) => d !== data?.zone).map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-[13px] font-semibold">
+            Clôture avant le
+            <input type="date" value={clotureAvant} onChange={(e) => changer("clotureAvant", e.target.value)} className="min-h-11 rounded-lg border border-line bg-surface px-2 text-[15px] font-normal" />
+          </label>
+        </div>
+      </form>
+      {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
+      {!data && !error ? <Skeleton card="h-40" lines={2} label="Chargement des collectes…" /> : null}
+      {data && data.achats.length === 0 ? (
+        <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Aucune collecte ouverte avec ces critères">
+          <p className="text-[15px] text-muted">Élargis la recherche, ou propose un besoin groupé.</p>
+        </EmptyState>
+      ) : null}
+      {data && data.achats.length > 0 ? (
+        <div className="flex flex-col gap-3 2xl:grid 2xl:grid-cols-2">
+          {data.achats.map((a) => (
+            <CarteAchatOuvert key={a.id} a={a} />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+const DEPARTEMENTS = [...Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, "0")).filter((d) => d !== "20"), "2A", "2B"];
 
 /** Ordinateur seulement : l'achat groupé en trois étapes, à côté de la liste (sur téléphone, la page reste courte). */
 function CommentCaMarcheOrdinateur() {

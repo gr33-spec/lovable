@@ -187,17 +187,16 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     // 1. Le compte vide : gratuit, sans essai ni pastille ; les deux portes.
     await inscrire(page, dep);
     await page.goto("/");
-    // L'accueil (Greg, 1er novembre 2026) : rien à reprendre, donc pas de « À faire maintenant » ; « Commencer » ; « Suivi en cours » vide.
+    // « À faire » (Greg, 6 novembre 2026) : rien à faire, donc « Aucun besoin en cours » et « Nouveau besoin ».
     await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
-    const commencer = page.getByRole("region", { name: "Commencer" });
-    await expect(commencer.getByRole("link", { name: /Rejoindre un achat groupé/ })).toHaveAttribute("href", "/achats-groupes");
-    await expect(commencer.getByRole("link", { name: /Créer une liste/ })).toHaveAttribute("href", "/chantiers/nouveau");
-    await expect(page.getByRole("region", { name: "Suivi en cours" }).getByText("Aucun dossier en cours")).toBeVisible();
+    const vide = page.getByRole("region", { name: "Aucun besoin en cours" });
+    await expect(vide.getByRole("link", { name: "Nouveau besoin" })).toHaveAttribute("href", "/chantiers/nouveau");
+    await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Groupes" })).toHaveAttribute("href", "/achats-groupes");
     await expect(page.getByRole("link", { name: /Essai gratuit/ })).toHaveCount(0);
     await capture(page, projet, "1-compte-vide");
 
     // 2. La liste depuis un devis : trois choix, le bandeau, « à vérifier », la suggestion, « Tout cocher ».
-    await page.getByRole("link", { name: /Créer une liste/ }).first().click();
+    await vide.getByRole("link", { name: "Nouveau besoin" }).click();
     // Greg, 31 octobre 2026 : trois entrées, « Importer un document », « Saisir ma liste », « Décrire mon chantier ».
     await expect(page.getByText("Importer un document", { exact: true })).toBeVisible();
     await expect(page.getByText("Créer une liste à la main", { exact: true })).toBeVisible();
@@ -245,12 +244,12 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
 
     // 3. Un 2e couvreur du secteur voit l'achat ouvert et y ajoute sa liste, avec la case d'engagement.
     const b = await nouvelArtisan(browser, dep, "Paul");
-    // L'accueil (1er novembre 2026) : « Rejoindre un achat groupé » ouvre les achats groupés de son secteur.
+    // Greg, 6 novembre 2026 : « Groupes » dans le menu, vue « Découvrir » (son secteur d'office).
     await b.page.goto("/");
-    await b.page.getByRole("region", { name: "Commencer" }).getByRole("link", { name: /^Rejoindre un achat groupé/ }).click();
-    await b.page.waitForURL(/\/achats-groupes$/);
-    const ouverts = b.page.getByRole("tabpanel", { name: "Propositions ouvertes" });
-    await b.page.getByRole("tab", { name: /^Propositions ouvertes/ }).click();
+    await b.page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Groupes" }).click();
+    await b.page.waitForURL(/\/achats-groupes/);
+    const ouverts = b.page.getByRole("tabpanel", { name: "Découvrir" });
+    await b.page.getByRole("tab", { name: "Découvrir" }).click();
     await expect(ouverts.getByText(/^Clôture le \d+(?:er)? \S+$/).first()).toBeVisible();
     await expect(ouverts.getByText(/^Livraison avant le \d+(?:er)? \S+\.$/).first()).toBeVisible();
     // Greg, 1er novembre 2026 : totaux agrégés et « moins de 5 entreprises », jamais une quantité exacte d'un concurrent.
@@ -418,14 +417,14 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await confirmerEmail(page, email);
     expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: entreprise, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: null, phone: null, email: null })).status).toBe(200);
   }
-  /** Partir par le menu (Profil), revenir à l'accueil et toucher « Reprendre », comme un artisan. */
+  /** Partir par le menu (Demandes), revenir à « À faire » et toucher « Reprendre », comme un artisan. */
   async function partirEtReprendre(page: Page, carte: string) {
     const nav = page.getByRole("navigation", { name: "Navigation principale" });
     // Le clavier refermé (sur téléphone, la barre du menu se cache pendant la frappe).
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-    await nav.getByRole("link", { name: "Profil" }).click();
-    await page.waitForURL(/\/compte$/);
-    await nav.getByRole("link", { name: "Accueil" }).click();
+    await nav.getByRole("link", { name: "Demandes" }).click();
+    await page.waitForURL(/\/chantiers$/);
+    await nav.getByRole("link", { name: "À faire" }).click();
     await page.waitForURL(/\/$/);
     // L'accueil (1er novembre 2026) : le parcours quitté est « À faire maintenant », sa carte le reprend tel quel.
     const afaire = page.getByRole("region", { name: "À faire maintenant" });
