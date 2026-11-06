@@ -118,6 +118,10 @@ const envSchema = z
     AI_QUANTITATIF: z.enum(["on", "off"]).default("on"),
     /** Modèle de l'appel n° 2 (il lit un dossier en texte, pas le PDF) : Sonnet 5.5 (§41 : Sonnet pour le raisonnement métier). */
     AI_QUANTITATIF_MODEL: z.string().min(1).default("claude-sonnet-5-5"),
+    /** Lot 7 (6 novembre 2026) : l'IA qui rattache les réponses libres que le code n'a pas comprises. ÉTEINTE par défaut :
+     * Greg l'allume après avoir vu le coût estimé (docs/parcours-produit-lots.md, lot 7). */
+    INTERPRETE_IA: z.enum(["on", "off"]).default("off"),
+    AI_INTERPRETE_MODEL: z.string().min(1).default("claude-haiku-4-5"),
     AI_EXTRACTION_EFFORT: z.enum(["low", "medium", "high", "xhigh", "max"]).default("high"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
@@ -402,6 +406,9 @@ export interface AppConfig {
     extractionModel: string;
     quantitatif: boolean;
     quantitatifModel: string;
+    /** Lot 7 : l'interprétation IA des réponses libres (éteinte par défaut) et son modèle. */
+    interprete: boolean;
+    interpreteModel: string;
     effort: "low" | "medium" | "high" | "xhigh" | "max";
     /** Délai de réponse d'une lecture avant de passer en arrière-plan (ms). */
     answerWithinMs: number;
@@ -569,6 +576,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       extractionModel: e.AI_EXTRACTION_MODEL,
       quantitatif: e.AI_QUANTITATIF === "on",
       quantitatifModel: e.AI_QUANTITATIF_MODEL,
+      interprete: e.INTERPRETE_IA === "on",
+      interpreteModel: e.AI_INTERPRETE_MODEL,
       effort: e.AI_EXTRACTION_EFFORT,
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },

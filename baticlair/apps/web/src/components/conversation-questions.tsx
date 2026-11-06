@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { api } from "@/lib/api";
 import { useDictee } from "@/lib/dictee";
 import { BarreSaisie, Bulle, COULEURS_CHAT, TexteMobiiz, useChampDicte, useFil } from "./chat-mobiiz";
 import { ETAPES_RELECTURE, interpreterReponsesNumerotees, messageDesQuestions, type QuestionNumerotee, type ReponseInterpretee } from "../../../../packages/domain/src/assistant/reponses-libres-numerotees";
@@ -8,7 +9,8 @@ import { ETAPES_RELECTURE, interpreterReponsesNumerotees, messageDesQuestions, t
 /**
  * LA CONVERSATION APRÈS L'ANALYSE (Greg, 1er novembre 2026 : « MOBIIZ fonctionne comme ChatGPT »). Un seul message avec
  * toutes les questions numérotées ; l'artisan répond librement en une fois, au clavier ou à la voix ; chaque réponse va à sa
- * question (code, `interpreterReponsesNumerotees`, aucun appel IA) et remplit la carte du dessous ; seules les questions
+ * question (le code d'abord, `interpreterReponsesNumerotees` ; puis, lot 7, l'IA du serveur pour ce que le code n'a pas
+ * compris, si elle est allumée) et remplit la carte du dessous ; seules les questions
  * ambiguës ou sans réponse sont reposées. Lignes d'état courtes, jamais le raisonnement. Les cartes à boutons restent
  * dessous, inchangées : la conversation ne fait que les remplir, et le serveur revalide tout au « Calculer ma liste ».
  */
@@ -53,7 +55,16 @@ export function ConversationQuestions({
       setEtape(e);
       if (!reduit) await new Promise((r) => setTimeout(r, PAUSE_MS));
     }
-    const lues = interpreterReponsesNumerotees(posees, texte);
+    let lues = interpreterReponsesNumerotees(posees, texte);
+    // Lot 7 : ce que le code n'a pas compris passe au serveur, qui peut le confier à l'IA (si Greg l'a allumée) et
+    // revalide tout ; sans réseau ou IA éteinte, la lecture du code reste telle quelle.
+    if (lues.some((r) => r.statut !== "compris")) {
+      const r = await api<{ ia: boolean; reponses: ReponseInterpretee[] }>("/v1/assistant/interpretation", {
+        method: "POST",
+        body: { questions: posees.map((q) => ({ numero: q.numero, cle: q.cle, texte: q.texte, options: q.options, unite: q.unite, ...(q.libre ? { libre: q.libre } : {}), ...(q.numerique ? { numerique: true } : {}) })), texte: texte.slice(0, 2000) },
+      }).catch(() => null);
+      if (r?.ia && r.reponses.length === lues.length) lues = r.reponses;
+    }
     setEtape(ETAPES_RELECTURE[ETAPES_RELECTURE.length - 1]!);
     if (!reduit) await new Promise((r) => setTimeout(r, PAUSE_MS));
     const notees: ReponseInterpretee[] = [];

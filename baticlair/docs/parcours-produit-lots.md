@@ -147,3 +147,30 @@ alimente encore : il faudrait d'abord définir, avec Greg, ce qui est « incohé
 
 **Tests** : domaine `test/supervision.test.ts` (4) ; API `test/supervision.test.ts` (5) et `isolation-toutes-routes`
 (nouvelles routes : 403 pour un artisan) ; e2e « Lot 6 » dans `achat-groupe.spec.ts` (téléphone et ordinateur).
+
+## Lot 7 : interprétation des réponses libres par l'IA (préparée, éteinte, zéro dépense)
+
+**Terminé**
+- Domaine `assistant/interpretation-ia.ts` : la consigne (« N'invente jamais une quantité, une dimension, une qualité,
+  une référence ou une compatibilité »), le dossier envoyé (questions, boutons, unité, réponse de l'artisan ; aucun nom
+  de client, aucun document), et surtout la REVALIDATION en code de tout ce que rend le modèle : un bouton doit être un
+  bouton de la question, un nombre doit avoir été dit par l'artisan (jamais converti), un texte doit se lire dans sa
+  réponse ; sinon la question est reposée. Ce que le code a compris n'est jamais remplacé.
+- Serveur : `POST /v1/assistant/interpretation` (module `interpretation`) : le code d'abord, puis l'IA SEULEMENT pour les
+  questions que le code n'a pas comprises, SEULEMENT si `INTERPRETE_IA=on` (éteinte par défaut, en test comme en
+  ligne). Modèle `AI_INTERPRETE_MODEL` (défaut `claude-haiku-4-5`), effort bas, coût journalisé ; une panne de l'IA rend
+  la lecture du code.
+- Écran : la conversation après l'analyse appelle cette route quand le code laisse des questions ; IA éteinte, rien ne
+  change pour l'artisan.
+- Double de test `FakeInterpreteur` (`AI_PROVIDER=fake`, jamais en ligne) : aucune consommation réelle.
+
+**Coût estimé (grille de prix du dépôt, `ai-cost/pricing.ts`, version du 30 septembre 2026, `claude-haiku-4-5`)** :
+3 questions et une réponse de 150 caractères ≈ 0,0015 $ ; 5 questions / 300 caractères ≈ 0,0021 $ ; 10 questions /
+800 caractères ≈ 0,0035 $. Soit environ 2 $ pour 1 000 interprétations (seules les réponses que le code ne comprend
+pas partent à l'IA). À revérifier sur la grille du fournisseur avant d'allumer.
+
+**Reste à la décision de Greg** : allumer `INTERPRETE_IA=on` sur test.mobiiz.fr (coût ci-dessus, sur la clé IA
+existante), puis faire une vraie recette ; tant que ce n'est pas fait, le lot est « prêt, non activé ».
+
+**Tests** : domaine `test/interpretation-ia.test.ts` (5) ; API `test/interpretation-ia.test.ts` (3 : éteinte, allumée
+avec le double, corps invalide) et `isolation-toutes-routes` ; e2e de la conversation inchangé (IA éteinte).

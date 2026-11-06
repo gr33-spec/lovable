@@ -3,6 +3,7 @@ import { AbonnementModule } from "./modules/abonnement/index.js";
 import { AiUsageModule } from "./modules/ai-usage/index.js";
 import { BillingModule } from "./modules/billing/index.js";
 import { DemoModule } from "./modules/demo/index.js";
+import { InterpretationModule } from "./modules/interpretation/interpretation.module.js";
 import { DocumentsModule } from "./modules/documents/index.js";
 import { GroupeModule } from "./modules/groupe/index.js";
 import { AdresseMobiizModule } from "./modules/adresse-mobiiz/index.js";
@@ -50,6 +51,7 @@ import { PushModule } from "./platform/push/push.module.js";
     PriceRequestsModule,
     OffersModule,
     DemoModule,
+    InterpretationModule,
     BillingModule,
     AbonnementModule,
     HealthModule,

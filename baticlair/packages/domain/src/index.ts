@@ -94,3 +94,4 @@ export * from "./cycle/cycle-de-vie.js";
 export * from "./groupe/cout-total-livre.js";
 export * from "./groupe/geographie.js";
 export * from "./supervision/supervision.js";
+export * from "./assistant/interpretation-ia.js";
