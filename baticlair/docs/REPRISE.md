@@ -28,11 +28,15 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-Parcours produit du 6 novembre 2026 (SUIVI 171) sur la branche LOCALE `claude/pilote-fiabilite`, NON poussée, au-dessus
-de SUIVI 170. S1 (rapprochement continu : domaine, migration ADDITIVE `20261106090000_rapprochement_continu` appliquée aux
-seules bases locales de test, API, tests) et S2 (écrans, menu, e2e) commités. S3 en cours : suites complètes, captures,
-rapport. Arrêt prévu avant tout push (test.mobiiz.fr) : accord de Greg pour ce push précis.
-Attend Greg : accord pour chaque action en ligne (push, mise en production, réglages Vercel, Neon, Stripe, Resend, crédit IA).
+SUIVI 170 et 171 (architecture UX, puis parcours produit du 6 novembre : rapprochement continu, Groupes, À faire,
+Nouveau besoin) : EN LIGNE sur test.mobiiz.fr (commit e5d33e80, accord de Greg « Oui pour les 3 », test seulement), après
+sauvegarde Neon vérifiée (`sauvegarde-avant-rapprochement`) et suites complètes vertes ; migrations additives
+`20261102090000_specialites_negoces` et `20261106090000_rapprochement_continu` appliquées à la base de test seulement.
+Point de retour et procédure : `docs/retour-arriere-2026-11-06.md`. Rien vers `main`. Ce commit de suivi est local (non
+poussé : à pousser avec le prochain lot, sur accord).
+Restent (voir SUIVI 171) : carte, rayon / région / retrait, file d'exceptions, score des négoces, « J'ai besoin d'une
+précision », onglets Suivi / Offres / Documents, interprète IA (accord et crédit).
+Attend Greg : accord pour chaque action en ligne (production, réglages Vercel, Neon, Stripe, Resend, crédit IA).
 
 ## À faire ensuite (dans cet ordre)
 
