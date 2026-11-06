@@ -32,8 +32,11 @@ SUIVI 172 (6 novembre 2026, soir) : les huit lots du prompt maître sont faits e
 `claude/pilote-fiabilite` (6464f8c4 → da1064e0), chacun avec ses tests ; détail réel dans
 `docs/parcours-produit-lots.md`. Quatre migrations ADDITIVES nouvelles (parcours négoce, reconfirmation, recherche
 géographique, supervision), appliquées aux seules bases locales de test.
-Prochaine étape : suites complètes vertes, sauvegarde Neon de la branche de test, puis déploiement sur test.mobiiz.fr
-(jamais la production ni sa base) et le rapport final à Greg (tableau des sections 1 à 22, recette globale).
+Suites complètes VERTES (domaine 985, API 675 + ciblés, e2e 259 + 16 « lots » + ciblés). Rapport envoyé à Greg.
+BLOQUÉ en attente de Greg : la sauvegarde Neon de la branche de test (refusée par le contrôle des permissions sans son
+accord explicite), puis la poussée sur `claude/saas-achat-artisans-prompt-1lyihx` qui déploie test.mobiiz.fr.
+Restent partiels (décisions de Greg) : §6 famille affichée sur chaque ligne (contraire au §50), §12 critères du coût
+livré que les négoces ne donnent pas encore, §14 détecteurs automatiques des 6 autres types d'exceptions.
 Attend Greg : allumer l'interprète IA (`INTERPRETE_IA=on`, ≈ 0,002 $ par interprétation), et toute action en ligne
 qui n'est pas le test.
 
