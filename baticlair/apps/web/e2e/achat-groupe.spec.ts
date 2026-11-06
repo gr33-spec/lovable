@@ -526,3 +526,33 @@ test.describe("Lot 6 : la supervision de l'admin", () => {
     await ctx.close();
   });
 });
+
+test.describe("Prompt maître point 11 : collecte lancée par Mobiiz", () => {
+  test("l'admin lance une collecte de besoins ; un artisan la voit dans Découvrir, marquée « Collecte Mobiiz »", async ({ browser, page }, info) => {
+    test.setTimeout(120_000);
+    const titre = `Ardoise 32×22 · pilote ${Date.now().toString(36)}`;
+    const dans = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+    const { ctx, page: adminPage } = await admin(browser, "/admin/achats-groupes");
+    const form = adminPage.getByRole("region", { name: "Lancer une collecte" });
+    await form.getByLabel("Intitulé").fill(titre);
+    await form.getByLabel("Département").fill("22");
+    await form.getByLabel("Besoin au plus tard le").fill(dans(40));
+    await form.getByRole("button", { name: "Lancer la collecte" }).click();
+    await expect(adminPage.getByRole("status").filter({ hasText: "Collecte lancée" })).toBeVisible();
+    await adminPage.screenshot({ path: `test-results/supervision/${info.project.name}-collecte-mobiiz.png`, fullPage: true });
+    await ctx.close();
+    // Un artisan : Découvrir, toute la France (son secteur dépend de son adresse).
+    await page.goto("/inscription");
+    await page.getByLabel("Prénom et nom").fill("Jean Martin");
+    await page.getByLabel("Nom de ton entreprise").fill(`Toitures ${unique()}`);
+    await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
+    await page.getByLabel("E-mail professionnel").fill(`artisan-${unique()}@example.fr`);
+    await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+    await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
+    await page.getByRole("button", { name: "Créer mon compte" }).click();
+    await page.getByRole("button", { name: "C'est compris" }).click();
+    await page.goto("/achats-groupes?vue=decouvrir&departement=22");
+    const carte = page.getByRole("tabpanel", { name: "Découvrir" }).locator("div").filter({ hasText: titre }).filter({ has: page.getByRole("link", { name: "Ajouter mes quantités" }) }).last();
+    await expect(carte).toContainText("Collecte Mobiiz");
+  });
+});
