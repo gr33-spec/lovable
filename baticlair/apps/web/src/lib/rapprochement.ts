@@ -13,7 +13,7 @@ export interface LigneAnalysee {
   rapprochable: boolean;
   raison: string | null;
   collecte: { id: string; titre: string; clotureLe: string; dateBesoin: string | null } | null;
-  recherche: { id: string; statut: string; jusquau: string; modeLivraison: "livraison" | "retrait"; dateMax: string | null } | null;
+  recherche: { id: string; statut: string; jusquau: string; modeLivraison: "livraison" | "retrait"; rayonKm?: number; dateMax: string | null } | null;
 }
 
 export interface AnalyseRapprochement {

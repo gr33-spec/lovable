@@ -131,7 +131,7 @@ test("Rapprochement : la ligne cherche jusqu'à une date, la demande reste libre
   await expect(panneau.getByText("Tu n'es pas intéressé.").first()).toBeVisible();
 });
 
-test("Groupes › Découvrir : les filtres (produit, famille, département, clôture) vivent dans l'adresse ; aucun métier imposé", async ({ page }) => {
+test("Groupes › Découvrir : les filtres (produit, famille, secteur, clôture) vivent dans l'adresse ; aucun métier imposé", async ({ page }) => {
   await inscrire(page, "Jean", `Toitures ${unique()}`);
   await page.goto("/achats-groupes?vue=decouvrir");
   await expect(page.getByRole("heading", { name: "Groupes", level: 1 })).toBeVisible();
@@ -144,7 +144,7 @@ test("Groupes › Découvrir : les filtres (produit, famille, département, clô
   await recherche.getByLabel("Matériau ou produit").fill("ardoise");
   await recherche.getByRole("button", { name: "Chercher" }).click();
   await expect(page).toHaveURL(/q=ardoise/);
-  await recherche.getByLabel("Département").selectOption("tous");
+  await recherche.getByLabel("Secteur").selectOption("tous");
   await expect(page).toHaveURL(/departement=tous/);
   await recherche.getByLabel("Clôture avant le").fill(jour(20));
   await expect(page).toHaveURL(new RegExp(`clotureAvant=${jour(20)}`));
@@ -204,4 +204,56 @@ test("Lot 3 : une collecte ouverte qui correspond se rejoint depuis la carte (n�
   await carteC.getByRole("button", { name: "Rechercher des besoins compatibles" }).click();
   await expect(carteC.getByRole("list", { name: "Lignes en recherche" })).toContainText("retrait au dépôt");
   await expect(carteC.getByRole("list", { name: "Lignes en recherche" })).toContainText("besoin avant le");
+});
+
+test("Lot 5 : Découvrir par secteur, région, retrait au dépôt et sur la carte ; la recherche de besoins compatibles prend un rayon", async ({ page, browser }, info) => {
+  test.setTimeout(180_000);
+  const dep = String(40 + Math.floor(Math.random() * 40)).padStart(2, "0");
+  const siret = async (p: Page) => {
+    expect((await apiJson(p, "PATCH", "/v1/company/profile", { name: `Toitures ${unique()}`, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: "73282932000074", phone: null, email: null })).status).toBe(200);
+    expect((await apiJson(p, "POST", "/v1/groupe/siret")).status).toBe(200);
+  };
+  // B lance un achat groupé en RETRAIT AU DÉPÔT dans le département.
+  const b = await autreArtisan(browser, info.project.use.baseURL, "Paul", `Couvreurs ${unique()}`);
+  await siret(b.page);
+  const projetB = await listeValidee(b.page, dep, "Ardoise naturelle 32×22 Espagne 1er choix", "450");
+  const cleB = (await apiJson<{ lignes: { key: string }[] }>(b.page, "GET", `/v1/projects/${projetB}/rapprochement`)).body.lignes[0]!.key;
+  const ouvre = await apiJson<{ achatId: string; titre: string }>(b.page, "POST", `/v1/projects/${projetB}/achat-groupe`, { confirmees: [cleB], dateBesoin: jour(30), negoces: [{ nom: "Négoce test", email: `test-${unique()}@negoce.example` }], engagement: true, modeLivraison: "retrait" });
+  expect(ouvre.status, JSON.stringify(ouvre.body)).toBe(201);
+  await b.context.close();
+
+  await inscrire(page, "Jean", `Toitures ${unique()}`);
+  await siret(page);
+  await page.goto("/achats-groupes?vue=decouvrir");
+  const recherche = page.getByRole("search", { name: "Chercher une collecte" });
+  await expect(recherche.getByLabel("Secteur")).toHaveValue("mien");
+  await recherche.getByLabel("Livraison").selectOption("retrait");
+  await expect(page).toHaveURL(/mode=retrait/);
+  const panneau = page.getByRole("tabpanel", { name: "Découvrir" });
+  const carteCollecte = panneau.locator("div").filter({ hasText: ouvre.body.titre }).filter({ has: page.getByRole("link", { name: "Ajouter mes quantités" }) }).last();
+  await expect(carteCollecte).toContainText("Retrait au dépôt");
+  await expect(carteCollecte).toContainText(`(${dep})`);
+  await recherche.getByLabel("Secteur").selectOption("rayon:100");
+  await expect(page).toHaveURL(/rayon=100/);
+  await expect(recherche.getByText(/Distance à vol d'oiseau entre chefs-lieux/)).toBeVisible();
+  await expect(panneau.getByText(ouvre.body.titre).first()).toBeVisible();
+  // La carte : un rond pour le département, qui filtre la liste.
+  await page.getByRole("group", { name: "Affichage" }).getByRole("button", { name: "Carte" }).click();
+  const plan = page.getByRole("region", { name: "Carte des collectes" });
+  await expect(plan).toBeVisible();
+  await page.screenshot({ path: `test-results/rapprochement/${info.project.name}-5-carte.png`, fullPage: true });
+  await plan.getByRole("button", { name: new RegExp(`\\(${dep}\\) : \\d+ collectes?`) }).click();
+  await expect(page).toHaveURL(new RegExp(`departement=${dep}`));
+  await expect(panneau.getByText(ouvre.body.titre).first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+
+  // La recherche de besoins compatibles prend un rayon, rappelé sur la ligne.
+  const projetA = await listeValidee(page, dep, "Ardoise naturelle 30×20 Espagne 1er choix", "300");
+  await page.goto(`/chantiers/${projetA}`);
+  const carteA = page.getByRole("region", { name: "Rechercher des besoins compatibles" });
+  await carteA.getByRole("checkbox", { name: /Ardoise/ }).check();
+  await carteA.getByLabel("Secteur").selectOption("100");
+  await expect(carteA.getByText(/si l'autre artisan accepte aussi la distance/)).toBeVisible();
+  await carteA.getByRole("button", { name: "Rechercher des besoins compatibles" }).click();
+  await expect(carteA.getByRole("list", { name: "Lignes en recherche" })).toContainText("jusqu'à 100 km");
 });

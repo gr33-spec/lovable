@@ -1835,6 +1835,8 @@ model RegroupementNegocie {
   validationAlerteLe DateTime? @map("validation_alerte_le") @db.Timestamptz(3)
   publieLe           DateTime? @map("publie_le") @db.Timestamptz(3)
   commandeAvantLe    DateTime? @map("commande_avant_le") @db.Timestamptz(3)
+  /// Lot 5 (6 novembre 2026) : livraison sur chantier ou retrait au dépôt, choisi par qui lance l'achat groupé.
+  modeLivraison      String    @default("livraison") @map("mode_livraison")
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -2416,6 +2418,8 @@ model LigneRapprochement {
   unite         String
   departement   String
   modeLivraison String    @default("livraison") @map("mode_livraison")
+  /// Lot 5 (6 novembre 2026) : le rayon accepté autour de son département (km entre chefs-lieux) ; 0 : son département.
+  rayonKm       Int       @default(0) @map("rayon_km")
   dateMax       DateTime? @map("date_max") @db.Date
   jusquau       DateTime  @db.Timestamptz(3)
   statut        String    @default("disponible")

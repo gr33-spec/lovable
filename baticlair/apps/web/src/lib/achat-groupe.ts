@@ -118,6 +118,11 @@ export interface AchatOuvert {
   titre: string;
   metier: string;
   zone: string;
+  /** Lot 5 (Découvrir) : « Côtes-d'Armor (22) », sa région, la distance entre chefs-lieux depuis son secteur, le mode. */
+  secteur?: string;
+  region?: string | null;
+  distanceKm?: number | null;
+  modeLivraison?: "livraison" | "retrait";
   dateBesoin: string | null;
   clotureLe: string;
   phrase: string;

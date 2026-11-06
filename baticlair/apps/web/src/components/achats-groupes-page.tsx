@@ -15,6 +15,7 @@ import { api } from "@/lib/api";
 import type { AchatOuvert, MesAchats } from "@/lib/achat-groupe";
 import type { ListeRegroupements } from "@/lib/recentrage";
 import { useResource } from "@/lib/use-resource";
+import { DEPARTEMENTS, pointSurLaCarte } from "../../../../packages/domain/src/groupe/geographie";
 
 /**
  * L'ONGLET « ACHATS GROUPÉS » (Greg, 27 octobre 2026 ; avant : « Regroupements ») selon le mode : l'achat groupé
@@ -61,6 +62,10 @@ interface Decouverte {
   libellesFamilles: Record<string, string>;
   collectif: string;
   achats: (AchatOuvert & { famille: string; dejaDedans: boolean })[];
+  /** Lot 5 : les régions et les rayons proposés, et les départements qui ont des collectes (pour la carte). */
+  regions?: string[];
+  rayons?: number[];
+  carte?: { code: string; secteur: string; n: number }[];
 }
 
 /**
@@ -163,28 +168,39 @@ function AchatsGroupes() {
 }
 
 /**
- * « Découvrir » : les filtres (produit, famille, département, clôture avant) dans l'adresse ; aucune collecte vide, aucun
- * compteur gonflé (les entreprises ne sont comptées qu'à partir du seuil d'anonymat), jamais le détail d'un artisan.
+ * « Découvrir » : les filtres (produit, famille, secteur, livraison ou retrait, besoin avant, clôture avant) dans
+ * l'adresse ; aucune collecte vide, aucun compteur gonflé (les entreprises ne sont comptées qu'à partir du seuil
+ * d'anonymat), jamais le détail d'un artisan. Lot 5 (6 novembre 2026) : le secteur se dit par département, par région ou
+ * par un rayon autour de son département (distance entre chefs-lieux, approximative) ; « Carte » montre les mêmes
+ * collectes sur un plan de la France dessiné sans service extérieur.
  */
 function Decouvrir() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const q = params.get("q") ?? "";
-  const famille = params.get("famille") ?? "";
-  const departement = params.get("departement") ?? "";
-  const clotureAvant = params.get("clotureAvant") ?? "";
-  const requete = new URLSearchParams({ ...(q ? { q } : {}), ...(famille ? { famille } : {}), ...(departement ? { departement } : {}), ...(clotureAvant ? { clotureAvant } : {}) }).toString();
+  const lus = ["q", "famille", "departement", "region", "rayon", "mode", "besoinAvant", "clotureAvant"] as const;
+  const f = Object.fromEntries(lus.map((k) => [k, params.get(k) ?? ""])) as Record<(typeof lus)[number], string>;
+  const affichage = params.get("affichage") === "carte" ? "carte" : "liste";
+  const requete = new URLSearchParams(Object.entries(f).filter(([, v]) => v)).toString();
   const fetcher = useCallback((signal: AbortSignal) => api<Decouverte>(`/v1/achats-groupes/decouvrir${requete ? `?${requete}` : ""}`, { signal }), [requete]);
   const { data, error, reload } = useResource(fetcher);
-  const [texte, setTexte] = useState(q);
-  const changer = (cle: string, valeur: string) => {
+  const [texte, setTexte] = useState(f.q);
+  const changer = (valeurs: Record<string, string>) => {
     const suite = new URLSearchParams(params.toString());
     suite.set("vue", "decouvrir");
-    if (valeur) suite.set(cle, valeur);
-    else suite.delete(cle);
+    for (const [cle, valeur] of Object.entries(valeurs)) {
+      if (valeur) suite.set(cle, valeur);
+      else suite.delete(cle);
+    }
     router.replace(`${pathname}?${suite.toString()}`, { scroll: false });
   };
+  // Le secteur en un seul choix : « rayon:50 », « region:Bretagne », « dep:29 », « tous ».
+  const secteur = f.region ? `region:${f.region}` : f.departement === "tous" ? "tous" : f.rayon ? `rayon:${f.rayon}` : f.departement && f.departement !== data?.zone ? `dep:${f.departement}` : "mien";
+  const choisirSecteur = (v: string) => {
+    const [genre, valeur = ""] = v.split(/:(.*)/s);
+    changer({ departement: genre === "dep" ? valeur : genre === "tous" ? "tous" : "", region: genre === "region" ? valeur : "", rayon: genre === "rayon" ? valeur : "" });
+  };
+  const champ = "min-h-11 w-full min-w-0 rounded-lg border border-line bg-surface px-2 text-[15px] font-normal";
   return (
     <div className="flex flex-col gap-3">
       <form
@@ -192,7 +208,7 @@ function Decouvrir() {
         aria-label="Chercher une collecte"
         onSubmit={(e) => {
           e.preventDefault();
-          changer("q", texte.trim());
+          changer({ q: texte.trim() });
         }}
         className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card"
       >
@@ -205,44 +221,87 @@ function Decouvrir() {
             Chercher
           </Button>
         </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-flow-row-dense grid-cols-2 gap-2 xl:grid-cols-3">
           <label className="flex flex-col gap-1 text-[13px] font-semibold">
             Famille
-            <select value={famille} onChange={(e) => changer("famille", e.target.value)} className="min-h-11 rounded-lg border border-line bg-surface px-2 text-[15px] font-normal">
+            <select value={f.famille} onChange={(e) => changer({ famille: e.target.value })} className={champ}>
               <option value="">Toutes</option>
-              {(data?.familles ?? []).map((f) => (
-                <option key={f} value={f}>
-                  {data?.libellesFamilles[f] ?? f}
+              {(data?.familles ?? []).map((x) => (
+                <option key={x} value={x}>
+                  {data?.libellesFamilles[x] ?? x}
                 </option>
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[13px] font-semibold">
-            Département
-            <select value={departement || data?.zone || ""} onChange={(e) => changer("departement", e.target.value)} className="min-h-11 rounded-lg border border-line bg-surface px-2 text-[15px] font-normal">
-              {data?.zone ? <option value={data.zone}>Mon secteur ({data.zone})</option> : null}
-              <option value="tous">Tous les départements</option>
-              {DEPARTEMENTS.filter((d) => d !== data?.zone).map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
+          <label className="col-span-2 flex flex-col gap-1 text-[13px] font-semibold xl:col-span-1">
+            Secteur
+            <select value={secteur} onChange={(e) => choisirSecteur(e.target.value)} className={champ}>
+              <option value="mien">{data?.zone ? `Mon département (${data.zone})` : "Mon département"}</option>
+              {data?.zone
+                ? (data.rayons ?? []).filter((r) => r > 0).map((r) => (
+                    <option key={r} value={`rayon:${r}`}>
+                      Autour de moi : {r} km
+                    </option>
+                  ))
+                : null}
+              <optgroup label="Région">
+                {(data?.regions ?? []).map((r) => (
+                  <option key={r} value={`region:${r}`}>
+                    {r}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Département">
+                {DEPARTEMENTS.filter((d) => d.code !== data?.zone).map((d) => (
+                  <option key={d.code} value={`dep:${d.code}`}>
+                    {d.nom} ({d.code})
+                  </option>
+                ))}
+              </optgroup>
+              <option value="tous">Toute la France</option>
             </select>
           </label>
           <label className="flex flex-col gap-1 text-[13px] font-semibold">
+            Livraison
+            <select value={f.mode} onChange={(e) => changer({ mode: e.target.value })} className={champ}>
+              <option value="">Livraison ou retrait</option>
+              <option value="livraison">Livraison sur chantier</option>
+              <option value="retrait">Retrait au dépôt</option>
+            </select>
+          </label>
+          <label className="flex min-w-0 flex-col gap-1 text-[13px] font-semibold">
+            Besoin avant le
+            <input type="date" value={f.besoinAvant} onChange={(e) => changer({ besoinAvant: e.target.value })} className={champ} />
+          </label>
+          <label className="flex min-w-0 flex-col gap-1 text-[13px] font-semibold">
             Clôture avant le
-            <input type="date" value={clotureAvant} onChange={(e) => changer("clotureAvant", e.target.value)} className="min-h-11 rounded-lg border border-line bg-surface px-2 text-[15px] font-normal" />
+            <input type="date" value={f.clotureAvant} onChange={(e) => changer({ clotureAvant: e.target.value })} className={champ} />
           </label>
         </div>
+        {f.rayon ? <p className="text-[13px] text-muted">Distance à vol d&apos;oiseau entre chefs-lieux de département : une approximation.</p> : null}
       </form>
+      <div role="group" aria-label="Affichage" className="flex gap-1.5">
+        {(["liste", "carte"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            aria-pressed={affichage === v}
+            onClick={() => changer({ affichage: v === "carte" ? "carte" : "" })}
+            className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${affichage === v ? "bg-ink text-white" : "border border-line bg-surface text-ink"}`}
+          >
+            {v === "liste" ? "Liste" : "Carte"}
+          </button>
+        ))}
+      </div>
       {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
       {!data && !error ? <Skeleton card="h-40" lines={2} label="Chargement des collectes…" /> : null}
+      {data && affichage === "carte" ? <CarteDesCollectes data={data} choisir={(code) => changer({ departement: code, region: "", rayon: "", affichage: "" })} /> : null}
       {data && data.achats.length === 0 ? (
         <EmptyState icon={<Users size={28} aria-hidden="true" />} title="Aucune collecte ouverte avec ces critères">
-          <p className="text-[15px] text-muted">Élargis la recherche, ou propose un besoin groupé.</p>
+          <p className="text-[15px] text-muted">Élargis le secteur, ou propose un besoin groupé.</p>
         </EmptyState>
       ) : null}
-      {data && data.achats.length > 0 ? (
+      {data && data.achats.length > 0 && affichage === "liste" ? (
         <div className="flex flex-col gap-3 2xl:grid 2xl:grid-cols-2">
           {data.achats.map((a) => (
             <CarteAchatOuvert key={a.id} a={a} />
@@ -253,7 +312,52 @@ function Decouvrir() {
   );
 }
 
-const DEPARTEMENTS = [...Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, "0")).filter((d) => d !== "20"), "2A", "2B"];
+/**
+ * LA CARTE (lot 5) : un plan de la France métropolitaine en points (un par département, à son chef-lieu), sans tuiles ni
+ * service extérieur ; un département qui a des collectes ouvertes est un rond accent avec leur nombre, et le toucher
+ * filtre la liste sur lui. L'outre-mer, hors du plan, se lit dessous.
+ */
+function CarteDesCollectes({ data, choisir }: { data: Decouverte; choisir: (code: string) => void }) {
+  const L = 340;
+  const H = 340;
+  const n = new Map((data.carte ?? []).map((c) => [c.code, c]));
+  const outreMer = (data.carte ?? []).filter((c) => c.code.length === 3);
+  return (
+    <section aria-label="Carte des collectes" className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
+      <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={`${data.achats.length} collecte${data.achats.length > 1 ? "s" : ""} sur la carte`} className="mx-auto w-full max-w-[28rem]">
+        {DEPARTEMENTS.map((d) => {
+          const p = pointSurLaCarte(d.code, L, H);
+          if (!p || n.has(d.code)) return null;
+          return <circle key={d.code} cx={p.x} cy={p.y} r={3} className={d.code === data.zone ? "fill-ink" : "fill-line"} />;
+        })}
+        {[...n.values()].map((c) => {
+          const p = pointSurLaCarte(c.code, L, H);
+          if (!p) return null;
+          return (
+            <g key={c.code} role="button" tabIndex={0} aria-label={`${c.secteur} : ${c.n} collecte${c.n > 1 ? "s" : ""}`} onClick={() => choisir(c.code)} onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && choisir(c.code)} className="cursor-pointer">
+              <circle cx={p.x} cy={p.y} r={12} className="fill-accent" />
+              <text x={p.x} y={p.y + 4.5} textAnchor="middle" className="fill-on-accent text-[12px] font-extrabold">
+                {c.n}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <p className="text-[13px] text-muted">Un rond = les collectes d&apos;un département. Touche-le pour les voir.{data.zone ? " Le point noir : ton département." : ""}</p>
+      {outreMer.length > 0 ? (
+        <ul className="flex flex-wrap gap-1.5">
+          {outreMer.map((c) => (
+            <li key={c.code}>
+              <button type="button" onClick={() => choisir(c.code)} className="pressable min-h-11 rounded-full border border-line px-3 text-[14px] font-semibold">
+                {c.secteur} : {c.n}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
 
 /** Ordinateur seulement : l'achat groupé en trois étapes, à côté de la liste (sur téléphone, la page reste courte). */
 function CommentCaMarcheOrdinateur() {

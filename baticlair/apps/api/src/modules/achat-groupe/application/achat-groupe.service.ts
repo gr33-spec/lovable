@@ -1,6 +1,13 @@
 import { createHash, randomBytes } from "node:crypto";
 import {
   comparerCoutLivre,
+  departementsAutour,
+  departementsDeLaRegion,
+  distanceDepartements,
+  nomSecteur,
+  RAYONS_KM,
+  regionDe,
+  REGIONS,
   PHRASE_NON_RECONFIRMEE,
   PHRASE_RECONFIRMATION,
   RECONFIRMATION_FENETRE_H,
@@ -180,6 +187,8 @@ export interface Engagement {
   negoces: NegoceAjoute[];
   /** La case « Je commande ces quantités… », obligatoire. */
   engagement: boolean;
+  /** Lot 5 : livraison sur chantier (défaut) ou retrait au dépôt ; choisi à la création, ignoré quand on rejoint. */
+  modeLivraison?: "livraison" | "retrait";
 }
 
 export interface ReglagesAchatGroupe {
@@ -442,11 +451,11 @@ export class AchatGroupeService {
       if (!e.dateBesoin) throw validationFailed("Date required", { reason: "date_requise", message: "Indique ta date de livraison." });
       const dates = this.dates(e.dateBesoin);
       if (dates.clotureLe <= maintenant) throw validationFailed(PHRASE_DATE_TROP_PROCHE, { reason: "date_trop_proche", message: PHRASE_DATE_TROP_PROCHE });
-      achat = await this.achatCompatible(famille, departement, e.dateBesoin, maintenant);
+      achat = await this.achatCompatible(famille, departement, e.dateBesoin, maintenant, e.modeLivraison ?? "livraison");
       if (!achat) {
         const secteur = communeDe(e.livraison) ?? departement;
         achat = await this.prisma.regroupementNegocie.create({
-          data: { mode: MODE_AUTO, cle: `metier:${famille}`, libelle: titreAchatGroupe({ famille, secteur, dateBesoin: e.dateBesoin }), famille, departement, unite: null, dateBesoinMin: e.dateBesoin, clotureLe: dates.clotureLe, reponseAvantLe: dates.reponseAvantLe },
+          data: { mode: MODE_AUTO, cle: `metier:${famille}`, libelle: titreAchatGroupe({ famille, secteur, dateBesoin: e.dateBesoin }), famille, departement, unite: null, dateBesoinMin: e.dateBesoin, clotureLe: dates.clotureLe, reponseAvantLe: dates.reponseAvantLe, modeLivraison: e.modeLivraison ?? "livraison" },
         });
         cree = true;
       }
@@ -499,8 +508,8 @@ export class AchatGroupeService {
   }
 
   /** L'achat ouvert du même métier et du même secteur, livré à temps (au plus 30 jours avant sa date). */
-  private async achatCompatible(famille: string, departement: string, dateBesoin: Date, maintenant: Date) {
-    const ouverts = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, famille, departement, clotureLe: { gt: maintenant } }, orderBy: { createdAt: "asc" } });
+  private async achatCompatible(famille: string, departement: string, dateBesoin: Date, maintenant: Date, modeLivraison: "livraison" | "retrait" = "livraison") {
+    const ouverts = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, famille, departement, modeLivraison, clotureLe: { gt: maintenant } }, orderBy: { createdAt: "asc" } });
     return ouverts.find((a) => !!a.dateBesoinMin && a.dateBesoinMin.getTime() <= dateBesoin.getTime() && a.dateBesoinMin.getTime() >= dateBesoin.getTime() - 30 * JOUR) ?? null;
   }
 
@@ -571,7 +580,7 @@ export class AchatGroupeService {
   }
 
   /** Les lignes cochées et confirmées d'un tap partent dans l'achat groupé ; les autres restent en demande perso. */
-  async lancerDepuisListe(tenant: TenantContext, projectId: string, d: { confirmees: string[]; dateBesoin: Date | null; livraison: string | null; negoces: NegoceAjoute[]; engagement: boolean; achatId: string | null }) {
+  async lancerDepuisListe(tenant: TenantContext, projectId: string, d: { confirmees: string[]; dateBesoin: Date | null; livraison: string | null; negoces: NegoceAjoute[]; engagement: boolean; achatId: string | null; modeLivraison?: "livraison" | "retrait" }) {
     const { adresse, lignes } = await this.ports.lignesDeListe(tenant, projectId);
     const livraison = d.livraison ?? adresse ?? (await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } }))?.address ?? null;
     if (!livraison) throw validationFailed("A delivery town with a postcode is required", { reason: "livraison_requise", message: "Indique la commune de livraison avec son code postal." });
@@ -583,7 +592,7 @@ export class AchatGroupeService {
       else perso.push({ key: l.key, designation: l.designation });
     }
     if (engagees.length === 0) throw validationFailed("Nothing confirmed", { reason: "rien_a_lancer", message: "Coche au moins une ligne rattachée au catalogue." });
-    const r = await this.engager(tenant, { achatId: d.achatId, lignes: engagees, livraison, dateBesoin: d.dateBesoin, negoces: d.negoces, engagement: d.engagement });
+    const r = await this.engager(tenant, { achatId: d.achatId, lignes: engagees, livraison, dateBesoin: d.dateBesoin, negoces: d.negoces, engagement: d.engagement, ...(d.modeLivraison ? { modeLivraison: d.modeLivraison } : {}) });
     return { ...r, lancees: engagees.map((l) => ({ key: l.articleKey })), perso };
   }
 
@@ -949,13 +958,26 @@ export class AchatGroupeService {
    * secteur de l'entreprise ; un département choisi, ou tous. Jamais le détail d'un autre artisan : les totaux réunis
    * seulement, et seulement les collectes qui ont au moins un besoin déclaré (aucune collecte vide affichée).
    */
-  async decouvrir(tenant: TenantContext, f: { q?: string; famille?: string; departement?: string; clotureAvant?: Date }) {
+  async decouvrir(
+    tenant: TenantContext,
+    f: { q?: string; famille?: string; departement?: string; region?: string; rayonKm?: number; modeLivraison?: "livraison" | "retrait"; besoinAvant?: Date; clotureAvant?: Date },
+  ) {
     const zone = await this.ports.zoneDe(tenant.companyId);
     if ((await this.ports.mode()) !== MODE_AUTO) return { zone, departement: null, achats: [] };
-    const departement = f.departement === "tous" ? null : (f.departement ?? zone);
+    const departement = f.departement === "tous" || f.region ? null : (f.departement ?? zone);
+    // Lot 5 : un secteur se dit par département, par région, ou par un rayon autour du département choisi (le sien par défaut).
+    const departements = f.region ? departementsDeLaRegion(f.region) : departement && f.rayonKm ? departementsAutour(departement, f.rayonKm) : departement ? [departement] : null;
     const maintenant = this.now();
     const ouverts = await this.prisma.regroupementNegocie.findMany({
-      where: { mode: MODE_AUTO, statut: OUVERT, clotureLe: { gt: maintenant, ...(f.clotureAvant ? { lte: f.clotureAvant } : {}) }, ...(departement ? { departement } : {}), ...(f.famille ? { famille: f.famille } : {}) },
+      where: {
+        mode: MODE_AUTO,
+        statut: OUVERT,
+        clotureLe: { gt: maintenant, ...(f.clotureAvant ? { lte: f.clotureAvant } : {}) },
+        ...(departements ? { departement: { in: departements } } : {}),
+        ...(f.famille ? { famille: f.famille } : {}),
+        ...(f.modeLivraison ? { modeLivraison: f.modeLivraison } : {}),
+        ...(f.besoinAvant ? { OR: [{ dateBesoinMin: { lte: f.besoinAvant } }, { dateBesoinMin: null, clotureLe: { lte: f.besoinAvant } }] } : {}),
+      },
       orderBy: { clotureLe: "asc" },
       take: 60,
     });
@@ -975,6 +997,10 @@ export class AchatGroupeService {
         metier: libelleMetier(a.famille),
         famille: a.famille,
         zone: a.departement,
+        secteur: nomSecteur(a.departement),
+        region: regionDe(a.departement),
+        distanceKm: zone ? distanceDepartements(zone, a.departement) : null,
+        modeLivraison: a.modeLivraison === "retrait" ? "retrait" : "livraison",
         dateBesoin: a.dateBesoinMin ? jourIso(a.dateBesoinMin) : null,
         clotureLe: a.clotureLe!.toISOString(),
         phrase: phraseAlerteMetier({ famille: a.famille, dateBesoin: a.dateBesoinMin ?? a.clotureLe!, clotureLe: a.clotureLe! }),
@@ -984,7 +1010,17 @@ export class AchatGroupeService {
         dejaDedans: miens.has(a.id),
       });
     }
-    return { zone, departement, familles: this.cfg.familles, libellesFamilles: Object.fromEntries(this.cfg.familles.map((f) => [f, LIBELLES_FAMILLES[f as keyof typeof LIBELLES_FAMILLES] ?? f])), collectif: PHRASE_COLLECTIF, achats };
+    const carte = new Map<string, number>();
+    for (const a of achats) carte.set(a.zone, (carte.get(a.zone) ?? 0) + 1);
+    return {
+      zone,
+      departement,
+      region: f.region ?? null,
+      rayonKm: f.rayonKm ?? 0,
+      regions: REGIONS,
+      rayons: RAYONS_KM,
+      carte: [...carte].map(([code, n]) => ({ code, secteur: nomSecteur(code), n })),
+      familles: this.cfg.familles, libellesFamilles: Object.fromEntries(this.cfg.familles.map((f) => [f, LIBELLES_FAMILLES[f as keyof typeof LIBELLES_FAMILLES] ?? f])), collectif: PHRASE_COLLECTIF, achats };
   }
 
   /* ------------------------------------------------------------------------------------------ les alertes (F21) */

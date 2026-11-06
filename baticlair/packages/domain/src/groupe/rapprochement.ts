@@ -1,3 +1,4 @@
+import { memeSecteur, nomSecteur } from "./geographie.js";
 import { referenceStricte, type AttributReference } from "./reference-stricte.js";
 
 /**
@@ -25,6 +26,8 @@ export interface BesoinComparable {
   dateMax: string | null;
   /** Livraison sur chantier ou retrait au dépôt. */
   modeLivraison: "livraison" | "retrait";
+  /** Lot 5 : le rayon accepté autour de son département (km entre chefs-lieux) ; absent ou 0 : son département seul. */
+  rayonKm?: number;
 }
 
 export interface ResultatRapprochement {
@@ -65,8 +68,11 @@ export function comparerBesoins(a: BesoinComparable, b: BesoinComparable): Resul
   if (!ra.ok || !rb.ok) return non("Article non reconnu avec certitude");
   if (ra.reference.type !== rb.reference.type) return non("Autre article");
   if (uniteNormale(a.unite) !== uniteNormale(b.unite)) return non(`Unités différentes : ${a.unite} et ${b.unite}`);
-  if (!a.departement || !b.departement || a.departement !== b.departement) return non("Autre secteur de livraison");
+  // Lot 5 : deux départements voisins se rapprochent si les DEUX artisans l'acceptent (le plus petit des deux rayons).
+  const secteur = memeSecteur(a.departement, b.departement, Math.min(a.rayonKm ?? 0, b.rayonKm ?? 0));
+  if (!secteur.ok) return non("Autre secteur de livraison");
   const differences: string[] = [];
+  if (a.departement !== b.departement) differences.push(`Secteur voisin : ${nomSecteur(b.departement!)}, ≈ ${secteur.km} km`);
   if (a.dateMax && b.dateMax) {
     const ecart = Math.abs(Date.parse(a.dateMax) - Date.parse(b.dateMax)) / JOUR;
     if (ecart > ECART_DATES_MAX_JOURS) return non("Dates de livraison trop éloignées");

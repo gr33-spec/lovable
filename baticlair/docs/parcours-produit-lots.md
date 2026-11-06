@@ -96,3 +96,27 @@ téléphone et ordinateur).
 **Tests** : domaine `test/cout-total-livre.test.ts` (4) ; API `test/cloture-reconfirmation.test.ts` (2), plus
 `achat-groupe.test.ts` et `isolation-toutes-routes.test.ts` verts. Pas d'e2e propre : la fenêtre des 48 h demande de
 déplacer l'heure en base, ce que les e2e ne font pas ; l'écran est contrôlé par capture (téléphone et ordinateur).
+
+## Lot 5 : recherche géographique, filtres et carte
+
+**Terminé**
+- Domaine `groupe/geographie.ts` (code pur, sans dépendance) : les 101 départements avec leur nom, leur région et les
+  coordonnées de leur chef-lieu (arrondies au 0,01°) ; distance à vol d'oiseau entre chefs-lieux (« ≈ 90 km », dite
+  approximative) ; départements dans un rayon ; régions ; point de chaque département sur un plan de la métropole.
+- « Découvrir » : secteur en un seul choix (mon département, autour de moi 50 / 100 / 150 km, une région, un département,
+  toute la France), « Livraison sur chantier / Retrait au dépôt », « Besoin avant le », « Clôture avant le », famille,
+  produit ; chaque carte dit le secteur en clair (« Ille-et-Vilaine (35) »), la distance depuis le sien, le retrait.
+  « Liste / Carte » : la carte est un plan de la France en points dessiné en SVG (aucune tuile, aucun service, aucune
+  dépendance) ; un rond par département qui a des collectes, avec leur nombre ; le toucher filtre la liste.
+- Rapprochement : « Secteur » (mon département seulement, jusqu'à 50 / 100 / 150 km) sur la recherche de besoins
+  compatibles ; deux départements voisins ne se rapprochent que si LES DEUX artisans acceptent la distance (le plus petit
+  des deux rayons), jamais en correspondance exacte : « Secteur voisin : Ille-et-Vilaine (35), ≈ 90 km ». Les collectes
+  des départements voisins dans le rayon de l'artisan lui sont aussi proposées.
+- Achat groupé : qui le lance choisit « Livraison sur chantier » (défaut) ou « Retrait au dépôt » ; un achat groupé
+  compatible n'est rejoint d'office que dans le même mode.
+- Migration ADDITIVE `20261107110000_recherche_geographique` (`ligne_rapprochement.rayon_km`, `regroupement_negocie.mode_livraison`).
+
+**Pas fait (dit tel quel)** : la recherche par commune exacte et la distance de route ; les secteurs restent au
+département (les adresses des artisans ne sont jamais géocodées : ni service payant, ni base des communes ajoutée).
+
+**Tests** : domaine `test/geographie.test.ts` (4) ; API `test/recherche-geographique.test.ts` (3) ; e2e « Lot 5 » dans `rapprochement.spec.ts` (téléphone et ordinateur, capture de la carte).

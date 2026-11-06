@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Headers, HttpCode, Inject, Param, Post, Put, Query, Res, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
-import { CONDITIONS_OUVERTURE, MOTIFS_SORTIE, PAIEMENTS_DEPART, REGLAGES_ALERTES } from "@baticlair/domain";
+import { CONDITIONS_OUVERTURE, MOTIFS_SORTIE, PAIEMENTS_DEPART, RAYONS_KM, REGIONS, REGLAGES_ALERTES } from "@baticlair/domain";
 import { z } from "zod";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { forbidden } from "../../../platform/errors/domain-error.js";
@@ -33,6 +33,7 @@ const engagerBody = z.object({
   dateBesoin: z.iso.date().nullable().optional(),
   negoces,
   engagement: z.boolean(),
+  modeLivraison: z.enum(["livraison", "retrait"]).optional(),
 });
 const modifierBody = z.object({ quantites: z.record(z.string().max(60), z.number().min(0).max(10_000_000)).optional(), negoces: negoces.optional() });
 const listeBody = z.object({
@@ -42,6 +43,7 @@ const listeBody = z.object({
   negoces,
   engagement: z.boolean(),
   achatId: z.uuid().nullable().optional(),
+  modeLivraison: z.enum(["livraison", "retrait"]).optional(),
 });
 const sortirBody = z.object({ motif: z.enum(MOTIFS_SORTIE) });
 const commanderBody = z.object({ consultationId: z.uuid() });
@@ -66,7 +68,7 @@ const prixBody = z.object({ cle: z.string().min(1).max(200), prixHt: z.number().
 
 const date = (s: string) => new Date(`${s}T00:00:00Z`);
 const JOUR_ISO = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
-const rapprochementBody = z.object({ articles: z.array(z.string().min(1).max(200)).min(1).max(200), jusquau: JOUR_ISO, dateMax: JOUR_ISO.nullable().optional(), modeLivraison: z.enum(["livraison", "retrait"]).default("livraison") });
+const rapprochementBody = z.object({ articles: z.array(z.string().min(1).max(200)).min(1).max(200), jusquau: JOUR_ISO, dateMax: JOUR_ISO.nullable().optional(), modeLivraison: z.enum(["livraison", "retrait"]).default("livraison"), rayonKm: z.union([z.literal(0), z.literal(50), z.literal(100), z.literal(150)]).default(0) });
 const reponseRapprochementBody = z.object({ reponse: z.enum(["examinee", "refusee"]) });
 
 /**
@@ -98,10 +100,36 @@ export class AchatGroupeController {
   }
 
   @Get("achats-groupes/decouvrir")
-  decouvrir(@Tenant() tenant: TenantContext, @Query("q") q?: string, @Query("famille") famille?: string, @Query("departement") departement?: string, @Query("clotureAvant") clotureAvant?: string) {
+  decouvrir(
+    @Tenant() tenant: TenantContext,
+    @Query("q") q?: string,
+    @Query("famille") famille?: string,
+    @Query("departement") departement?: string,
+    @Query("clotureAvant") clotureAvant?: string,
+    @Query("region") region?: string,
+    @Query("rayon") rayon?: string,
+    @Query("mode") mode?: string,
+    @Query("besoinAvant") besoinAvant?: string,
+  ) {
     const dep = departement && /^(?:\d{2,3}|2[AB]|tous)$/.test(departement) ? departement : undefined;
-    const cloture = clotureAvant && /^\d{4}-\d{2}-\d{2}$/.test(clotureAvant) ? new Date(`${clotureAvant}T23:59:59Z`) : undefined;
-    return this.achats.decouvrir(tenant, { q: (q ?? "").slice(0, 80), ...(famille && /^[a-z_]{2,40}$/.test(famille) ? { famille } : {}), ...(dep ? { departement: dep } : {}), ...(cloture ? { clotureAvant: cloture } : {}) });
+    const jour = (v?: string) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v)) ? new Date(`${v}T23:59:59Z`) : undefined);
+    const cloture = jour(clotureAvant);
+    const besoin = jour(besoinAvant);
+    // Lot 5 : région connue seulement, rayon parmi ceux proposés, livraison ou retrait.
+    const reg = region && (REGIONS as readonly string[]).includes(region) ? region : undefined;
+    const r = Number(rayon);
+    const rayonKm = (RAYONS_KM as readonly number[]).includes(r) && r > 0 ? r : undefined;
+    const modeLivraison = mode === "livraison" || mode === "retrait" ? mode : undefined;
+    return this.achats.decouvrir(tenant, {
+      q: (q ?? "").slice(0, 80),
+      ...(famille && /^[a-z_]{2,40}$/.test(famille) ? { famille } : {}),
+      ...(dep ? { departement: dep } : {}),
+      ...(cloture ? { clotureAvant: cloture } : {}),
+      ...(besoin ? { besoinAvant: besoin } : {}),
+      ...(reg ? { region: reg } : {}),
+      ...(rayonKm ? { rayonKm } : {}),
+      ...(modeLivraison ? { modeLivraison } : {}),
+    });
   }
 
   @Get("achats-groupes/pres-de-chez-moi")
@@ -197,7 +225,7 @@ export class AchatGroupeController {
 
   @Post("projects/:projectId/achat-groupe")
   lancerDepuisListe(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(listeBody)) b: z.infer<typeof listeBody>) {
-    return this.achats.lancerDepuisListe(tenant, projectId, { confirmees: b.confirmees, dateBesoin: b.dateBesoin ? date(b.dateBesoin) : null, livraison: b.livraison ?? null, negoces: b.negoces as NegoceAjoute[], engagement: b.engagement, achatId: b.achatId ?? null });
+    return this.achats.lancerDepuisListe(tenant, projectId, { confirmees: b.confirmees, dateBesoin: b.dateBesoin ? date(b.dateBesoin) : null, livraison: b.livraison ?? null, negoces: b.negoces as NegoceAjoute[], engagement: b.engagement, achatId: b.achatId ?? null, ...(b.modeLivraison ? { modeLivraison: b.modeLivraison } : {}) });
   }
 
   /* -------------------------------------------- rapprochement continu (Greg, 6 novembre 2026, points 7 à 9) */
@@ -215,7 +243,7 @@ export class AchatGroupeController {
   @Post("projects/:projectId/rapprochement")
   @HttpCode(200)
   rendreDisponible(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(rapprochementBody)) b: z.infer<typeof rapprochementBody>) {
-    return this.rapprochement.rendreDisponible(tenant, projectId, { articles: b.articles, jusquau: new Date(`${b.jusquau}T18:00:00Z`), dateMax: b.dateMax ? date(b.dateMax) : null, modeLivraison: b.modeLivraison });
+    return this.rapprochement.rendreDisponible(tenant, projectId, { articles: b.articles, jusquau: new Date(`${b.jusquau}T18:00:00Z`), dateMax: b.dateMax ? date(b.dateMax) : null, modeLivraison: b.modeLivraison, rayonKm: b.rayonKm });
   }
 
   @Get("rapprochements")

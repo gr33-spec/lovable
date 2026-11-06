@@ -25,6 +25,8 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
   // Lot 3 (6 novembre 2026) : la date de besoin au plus tard et livraison / retrait, pris en compte par le rapprochement.
   const [dateMax, setDateMax] = useState("");
   const [mode, setMode] = useState<"livraison" | "retrait">("livraison");
+  // Lot 5 : le rayon accepté autour de son département (0 : son département seul).
+  const [rayon, setRayon] = useState<0 | 50 | 100 | 150>(0);
   const [rejoindre, setRejoindre] = useState<string | null>(null);
   const [rejointe, setRejointe] = useState<{ phrase: string; href: string } | null>(null);
   const [pending, setPending] = useState(false);
@@ -40,7 +42,7 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
     setPending(true);
     setError(null);
     try {
-      setData(await api<AnalyseRapprochement>(`/v1/projects/${projectId}/rapprochement`, { method: "POST", body: { articles: [...cochees], jusquau, modeLivraison: mode, dateMax: dateMax || null }, idempotencyKey: newActionKey() }));
+      setData(await api<AnalyseRapprochement>(`/v1/projects/${projectId}/rapprochement`, { method: "POST", body: { articles: [...cochees], jusquau, modeLivraison: mode, rayonKm: rayon, dateMax: dateMax || null }, idempotencyKey: newActionKey() }));
       setCochees(new Set());
       setEnvoye(true);
     } catch (e) {
@@ -69,6 +71,7 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
                 <span className="block text-[13px] text-muted">
                   {ETAT_LIGNE[l.recherche!.statut as LigneEnRecherche["statut"]]} jusqu&apos;au {jourCourt(l.recherche!.jusquau)}
                   {l.recherche!.modeLivraison === "retrait" ? " · retrait au dépôt" : " · livraison sur chantier"}
+                  {l.recherche!.rayonKm ? ` · jusqu'à ${l.recherche!.rayonKm} km` : ""}
                   {l.recherche!.dateMax ? ` · besoin avant le ${jourCourt(l.recherche!.dateMax)}` : ""}
                 </span>
               </span>
@@ -159,6 +162,18 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
               ))}
             </div>
           </fieldset>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={`${id}-rayon`} className="text-[14px] font-semibold">
+              Secteur
+            </label>
+            <select id={`${id}-rayon`} value={rayon} onChange={(e) => setRayon(Number(e.target.value) as 0 | 50 | 100 | 150)} className="min-h-12 rounded-xl border border-line bg-surface px-3 text-[16px]">
+              <option value={0}>Mon département seulement</option>
+              <option value={50}>Jusqu&apos;à 50 km</option>
+              <option value={100}>Jusqu&apos;à 100 km</option>
+              <option value={150}>Jusqu&apos;à 150 km</option>
+            </select>
+            {rayon ? <p className="text-[13px] text-muted">Les départements voisins comptent si l&apos;autre artisan accepte aussi la distance (approximative, entre chefs-lieux).</p> : null}
+          </div>
           <Button onClick={() => void lancer()} pending={pending} disabled={cochees.size === 0}>
             Rechercher des besoins compatibles
           </Button>

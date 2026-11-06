@@ -147,10 +147,12 @@ export function CarteAchatOuvert({ a }: { a: AchatOuvert }) {
         <span className="text-[16px] font-extrabold">{a.titre}</span>
         <span className="flex flex-wrap gap-1.5 text-[13px] font-semibold">
           <span className="rounded-full bg-ground px-2.5 py-1">{a.metier}</span>
-          <span className="rounded-full bg-ground px-2.5 py-1">Zone {a.zone}</span>
+          <span className="rounded-full bg-ground px-2.5 py-1">{a.secteur ?? `Zone ${a.zone}`}</span>
+          {a.distanceKm ? <span className="rounded-full bg-ground px-2.5 py-1">≈ {a.distanceKm} km</span> : null}
+          {a.modeLivraison === "retrait" ? <span className="rounded-full bg-ground px-2.5 py-1">Retrait au dépôt</span> : null}
           <span className="rounded-full bg-ground px-2.5 py-1">Clôture le {dateFr(a.clotureLe)}</span>
         </span>
-        {a.dateBesoin ? <span className="text-[14px] text-muted">Livraison avant le {dateFr(a.dateBesoin)}.</span> : null}
+        {a.dateBesoin ? <span className="text-[14px] text-muted">{a.modeLivraison === "retrait" ? "Retrait" : "Livraison"} avant le {dateFr(a.dateBesoin)}.</span> : null}
       </div>
       <TotauxReunis r={a.reunies} />
       <JaugeVolume j={a.jauge} />
@@ -481,6 +483,8 @@ export function FormulaireAchatGroupe({ rejoindre, famille = null }: { rejoindre
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [lance, setLance] = useState<Lance | null>(null);
+  // Lot 5 : qui lance l'achat groupé dit livraison sur chantier ou retrait au dépôt (Découvrir le filtre).
+  const [modeLivraison, setModeLivraison] = useState<"livraison" | "retrait">("livraison");
   const pretes = lignes.filter((l) => nombre(l.qte) > 0);
   const total = 4;
   const suivant = () => {
@@ -504,7 +508,7 @@ export function FormulaireAchatGroupe({ rejoindre, famille = null }: { rejoindre
       const fait = (
         await api<Lance>("/v1/achats-groupes", {
           method: "POST",
-          body: { achatId: rejoindre?.id ?? null, lignes: pretes.map((l) => ({ designation: l.designation, quantite: nombre(l.qte), unite: l.unite, ...(l.cle ? { cle: l.cle } : {}), ...(l.libre ? { libre: true } : {}) })), livraison: livraison.trim(), dateBesoin: rejoindre ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true },
+          body: { achatId: rejoindre?.id ?? null, lignes: pretes.map((l) => ({ designation: l.designation, quantite: nombre(l.qte), unite: l.unite, ...(l.cle ? { cle: l.cle } : {}), ...(l.libre ? { libre: true } : {}) })), livraison: livraison.trim(), dateBesoin: rejoindre ? null : dateBesoin, negoces: negoces.map(negocePourApi), engagement: true, ...(rejoindre ? {} : { modeLivraison }) },
         })
       );
       b.effacer();
@@ -567,7 +571,25 @@ export function FormulaireAchatGroupe({ rejoindre, famille = null }: { rejoindre
         <Etape n={2} total={total} titre="Où et pour quand ?" onRetour={precedent}>
           <Rappel>{resumeLignes(pretes.length)}</Rappel>
           <Field id="commune" label="Commune de livraison" placeholder="22300 Lannion" value={livraison} onChange={(e) => setLivraison(e.target.value)} />
-          {rejoindre ? null : <Field id="date-besoin" label="Livraison avant le" type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} />}
+          {rejoindre ? null : <Field id="date-besoin" label={modeLivraison === "retrait" ? "Retrait avant le" : "Livraison avant le"} type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} />}
+          {rejoindre ? null : (
+            <fieldset className="flex flex-col gap-1.5">
+              <legend className="mb-1 text-[14px] font-semibold">Réception</legend>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    ["livraison", "Livraison sur chantier"],
+                    ["retrait", "Retrait au dépôt"],
+                  ] as const
+                ).map(([v, label]) => (
+                  <label key={v} className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border px-3 text-[15px] ${modeLivraison === v ? "border-ink font-semibold" : "border-line"}`}>
+                    <input type="radio" name="mode-livraison" value={v} checked={modeLivraison === v} onChange={() => setModeLivraison(v)} className="size-4 accent-[var(--color-accent)]" />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
           <Button disabled={!livraison.trim() || (!rejoindre && !dateBesoin)} onClick={suivant}>
             Continuer
           </Button>

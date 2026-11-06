@@ -4,8 +4,10 @@ import {
   PHRASE_COLLECTIF,
   PHRASE_RECHERCHE_RAPPROCHEMENT,
   PHRASE_RESTE_INDIVIDUELLE,
+  RAYON_MAX_KM,
   SEUIL_ANONYMAT_DEFAUT,
   comparerBesoins,
+  departementsAutour,
   phraseNotificationRapprochement,
   referenceStricte,
   tranche,
@@ -121,14 +123,14 @@ export class RapprochementService {
           rapprochable: r.ok && !!departement && !couverte(commandees, l.key) && !faits(l.key).groupe,
           raison: couverte(commandees, l.key) ? "Une offre est déjà acceptée pour cette ligne." : faits(l.key).groupe ? `Déjà dans l'achat groupé « ${faits(l.key).groupe!.titre} ».` : !r.ok ? ("raison" in r && r.raison === "accessoire" ? "Petit accessoire : il part en demande individuelle." : "Article pas assez précis pour un rapprochement sûr.") : !departement ? "Indique l'adresse du chantier avec son code postal." : null,
           collecte: collecte && !faits(l.key).groupe ? { id: collecte.id, titre: collecte.libelle, clotureLe: collecte.clotureLe.toISOString(), dateBesoin: collecte.dateBesoin ? jourIso(collecte.dateBesoin) : null } : null,
-          recherche: recherche ? { id: recherche.id, statut: recherche.statut, jusquau: recherche.jusquau.toISOString(), modeLivraison: recherche.modeLivraison === "retrait" ? "retrait" : "livraison", dateMax: recherche.dateMax ? jourIso(recherche.dateMax) : null } : null,
+          recherche: recherche ? { id: recherche.id, statut: recherche.statut, jusquau: recherche.jusquau.toISOString(), modeLivraison: recherche.modeLivraison === "retrait" ? "retrait" : "livraison", rayonKm: recherche.rayonKm, dateMax: recherche.dateMax ? jourIso(recherche.dateMax) : null } : null,
         };
       }),
     };
   }
 
   /** L'artisan laisse les lignes choisies chercher jusqu'à une date. Refait le même geste : rien de plus (idempotent). */
-  async rendreDisponible(tenant: TenantContext, projectId: string, d: { articles: string[]; jusquau: Date; dateMax: Date | null; modeLivraison: "livraison" | "retrait" }) {
+  async rendreDisponible(tenant: TenantContext, projectId: string, d: { articles: string[]; jusquau: Date; dateMax: Date | null; modeLivraison: "livraison" | "retrait"; rayonKm?: number }) {
     assertCanWrite(tenant);
     if (!isUuid(projectId)) throw notFound("Project");
     const maintenant = this.now();
@@ -151,7 +153,7 @@ export class RapprochementService {
     });
     if (choisies.length === 0) throw validationFailed("Nothing chosen", { reason: "rien_choisi", message: "Choisis au moins une ligne." });
     for (const { l, ref } of choisies) {
-      const data = { designation: l.designation, cle: ref.cle, type: ref.type, libelle: ref.libelle, famille: ref.famille, quantite: l.quantite, unite: l.unite, departement, modeLivraison: d.modeLivraison, dateMax: d.dateMax, jusquau: d.jusquau };
+      const data = { designation: l.designation, cle: ref.cle, type: ref.type, libelle: ref.libelle, famille: ref.famille, quantite: l.quantite, unite: l.unite, departement, modeLivraison: d.modeLivraison, rayonKm: d.rayonKm ?? 0, dateMax: d.dateMax, jusquau: d.jusquau };
       const existante = await this.prisma.ligneRapprochement.findUnique({ where: { companyId_projectId_articleKey: { companyId: tenant.companyId, projectId, articleKey: l.key } } });
       if (!existante)
         // Double clic : la seconde création tombe sur la clé unique ; la ligne existe déjà, c'est fait (jamais une 500).
@@ -289,12 +291,12 @@ export class RapprochementService {
     }
   }
 
-  private comparable(l: Pick<Ligne, "designation" | "unite" | "departement" | "dateMax" | "modeLivraison">): BesoinComparable {
-    return { designation: l.designation, unite: l.unite, departement: l.departement, dateMax: l.dateMax ? jourIso(l.dateMax) : null, modeLivraison: l.modeLivraison === "retrait" ? "retrait" : "livraison" };
+  private comparable(l: Pick<Ligne, "designation" | "unite" | "departement" | "dateMax" | "modeLivraison" | "rayonKm">): BesoinComparable {
+    return { designation: l.designation, unite: l.unite, departement: l.departement, dateMax: l.dateMax ? jourIso(l.dateMax) : null, modeLivraison: l.modeLivraison === "retrait" ? "retrait" : "livraison", rayonKm: l.rayonKm };
   }
 
   private async collectesOuvertes(departement: string, maintenant: Date, saufCompanyId?: string) {
-    const collectes = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, departement, clotureLe: { gt: maintenant } }, select: { id: true, libelle: true, clotureLe: true, dateBesoinMin: true } });
+    const collectes = await this.prisma.regroupementNegocie.findMany({ where: { mode: MODE_AUTO, statut: OUVERT, departement, clotureLe: { gt: maintenant } }, select: { id: true, libelle: true, clotureLe: true, dateBesoinMin: true, modeLivraison: true } });
     const out: { id: string; libelle: string; clotureLe: Date; dateBesoin: Date | null; participants: Set<string>; lignes: BesoinComparable[] }[] = [];
     for (const c of collectes) {
       const lignes = await this.prisma.ligneAchatGroupe.findMany({ where: { regroupementId: c.id, besoin: { statut: ENGAGE } }, select: { companyId: true, designationOrigine: true, unite: true } });
@@ -305,7 +307,7 @@ export class RapprochementService {
         clotureLe: c.clotureLe!,
         dateBesoin: c.dateBesoinMin,
         participants,
-        lignes: lignes.filter((l) => l.companyId !== saufCompanyId).map((l) => ({ designation: l.designationOrigine, unite: l.unite, departement, dateMax: c.dateBesoinMin ? jourIso(c.dateBesoinMin) : null, modeLivraison: "livraison" as const })),
+        lignes: lignes.filter((l) => l.companyId !== saufCompanyId).map((l) => ({ designation: l.designationOrigine, unite: l.unite, departement, dateMax: c.dateBesoinMin ? jourIso(c.dateBesoinMin) : null, modeLivraison: c.modeLivraison === "retrait" ? ("retrait" as const) : ("livraison" as const), rayonKm: RAYON_MAX_KM })),
       });
     }
     return out;
@@ -319,7 +321,7 @@ export class RapprochementService {
    */
   async rechercher(maintenant = this.now(), departement?: string) {
     await this.synchroniser(maintenant);
-    const actives = await this.prisma.ligneRapprochement.findMany({ where: { statut: { in: ACTIFS }, jusquau: { gt: maintenant }, ...(departement ? { departement } : {}) } });
+    const actives = await this.prisma.ligneRapprochement.findMany({ where: { statut: { in: ACTIFS }, jusquau: { gt: maintenant }, ...(departement ? { departement: { in: departementsAutour(departement, RAYON_MAX_KM) } } : {}) } });
     const nouvelles: { companyId: string; ligne: Ligne; niveau: NiveauRapprochement; collecte: boolean }[] = [];
     const proposer = async (ligne: Ligne, cible: string, niveau: NiveauRapprochement, differences: string[], score: number, collecte: boolean) => {
       const existe = await this.prisma.propositionRapprochement.findUnique({ where: { ligneId_cible: { ligneId: ligne.id, cible } } });
@@ -336,7 +338,8 @@ export class RapprochementService {
       for (let j = i + 1; j < actives.length; j++) {
         const a = actives[i]!;
         const b = actives[j]!;
-        if (a.companyId === b.companyId || a.departement !== b.departement || a.type !== b.type) continue;
+        // Lot 5 : le secteur (même département, ou voisin dans le rayon des deux artisans) est jugé par `comparerBesoins`.
+        if (a.companyId === b.companyId || a.type !== b.type) continue;
         // Chaque entreprise lit les écarts de son point de vue : sa valeur d'abord.
         const r = comparerBesoins(this.comparable(a), this.comparable(b));
         if (r.niveau === "incompatible") continue;
@@ -346,8 +349,13 @@ export class RapprochementService {
       }
     const parDepartement = new Map<string, Awaited<ReturnType<RapprochementService["collectesOuvertes"]>>>();
     for (const l of actives) {
-      if (!parDepartement.has(l.departement)) parDepartement.set(l.departement, await this.collectesOuvertes(l.departement, maintenant));
-      for (const c of parDepartement.get(l.departement)!) {
+      // Lot 5 : les collectes du département, et celles des départements voisins dans le rayon accepté par l'artisan.
+      const collectes = [];
+      for (const dep of departementsAutour(l.departement, l.rayonKm)) {
+        if (!parDepartement.has(dep)) parDepartement.set(dep, await this.collectesOuvertes(dep, maintenant));
+        collectes.push(...parDepartement.get(dep)!);
+      }
+      for (const c of collectes) {
         if (c.participants.has(l.companyId)) continue;
         const resultats = c.lignes.map((cl) => comparerBesoins(this.comparable(l), cl)).filter((r) => r.niveau !== "incompatible").sort((x, y) => y.score - x.score);
         const meilleur = resultats[0];
