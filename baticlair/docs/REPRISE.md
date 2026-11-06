@@ -28,11 +28,10 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-Architecture UX validée par Greg, mise en œuvre (SUIVI 170) sur la branche LOCALE `claude/pilote-fiabilite`, NON poussée,
-au-dessus du pilote 20 à 100 couvreurs (SUIVI 168). Lots R1 à R6 faits et commités ; migration ADDITIVE
-`20261102090000_specialites_negoces` appliquée aux seules bases locales de test. Arrêt prévu avant le push qui déploie
-test.mobiiz.fr : accord de Greg pour ce push précis. Restent : vue liste + détail côte à côte sur ordinateur dans
-« Mes demandes », interprète IA de la conversation (accord et crédit), CGU et règles d'engagement (Greg).
+Parcours produit du 6 novembre 2026 (SUIVI 171) sur la branche LOCALE `claude/pilote-fiabilite`, NON poussée, au-dessus
+de SUIVI 170. S1 (rapprochement continu : domaine, migration ADDITIVE `20261106090000_rapprochement_continu` appliquée aux
+seules bases locales de test, API, tests) et S2 (écrans, menu, e2e) commités. S3 en cours : suites complètes, captures,
+rapport. Arrêt prévu avant tout push (test.mobiiz.fr) : accord de Greg pour ce push précis.
 Attend Greg : accord pour chaque action en ligne (push, mise en production, réglages Vercel, Neon, Stripe, Resend, crédit IA).
 
 ## À faire ensuite (dans cet ordre)
