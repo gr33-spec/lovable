@@ -32,8 +32,11 @@ SUIVI 173 (7 novembre 2026) : accord de Greg « Oui pour la sauvegarde Neon puis
 `sauvegarde-avant-lots-prompt-maitre` (br-noisy-frog-b2wy0xkl) faite ; 9429dc8e déployé (5 migrations) ; plan de retour
 arrière dans `docs/retour-arriere-2026-11-07.md`. Puis les 4 décisions de Greg (interprète IA plafonné 1 $ / 500, badge
 « Famille à vérifier », conditions du négoce, détections prudentes) et l'ACCÈS DÉMO « Découvrir l'application »
-(option 1, `ACCES_DEMO`, `docs/acces-demo.md`), à pousser sur la branche de test seulement, puis contrôles en ligne et
-rapport. Aucune production.
+(option 1, `ACCES_DEMO`, `docs/acces-demo.md`). EN LIGNE sur test.mobiiz.fr : f7bb44c8 (site dpl_…, API
+prévisualisation), migration `20261107140000_conditions_negoce` appliquée à la base de test, accès démo vérifié en ligne
+(iPhone SE, Android, ordinateur ; paiement refusé 403). Sauvegarde `sauvegarde-avant-acces-demo` (br-empty-credit-b26ty9mn)
+créée SANS point d'accès (plafond de points d'accès Neon atteint ; supprimer celui d'une vieille sauvegarde a été refusé par
+le contrôle des permissions). Aucune production.
 
 ## À faire ensuite (dans cet ordre)
 
