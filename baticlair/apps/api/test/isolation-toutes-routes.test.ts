@@ -12,12 +12,17 @@ import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 let ctx: TestContext;
+const avantV1 = process.env.ACHATS_GROUPES_V1;
 beforeAll(async () => {
+  // Achats groupés V1 (7 novembre 2026) : allumés ici pour que leurs routes soient réellement essayées par B.
+  process.env.ACHATS_GROUPES_V1 = "on";
   ctx = await createTestApp();
   await resetDatabase(ctx.prisma);
 });
 afterAll(async () => {
   await ctx.app.close();
+  if (avantV1 === undefined) delete process.env.ACHATS_GROUPES_V1;
+  else process.env.ACHATS_GROUPES_V1 = avantV1;
 });
 
 interface Route {
@@ -116,6 +121,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
       consultationAchat: "",
       ligneRapprochement: "",
       propositionRapprochement: "",
+      achatV1: "",
+      besoinV1: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
     const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });
@@ -152,6 +159,11 @@ describe("isolation entre entreprises, toutes les routes", () => {
     const ligneRapA = await ctx.prisma.ligneRapprochement.create({ data: { companyId, projectId: ids.project, articleKey: "art-a", designation: "Ardoise 32×22", cle: "ardoise|format=32x22", type: "ardoise", libelle: "Ardoise 32×22", famille: "couverture", quantite: 100, unite: "pièces", departement: "29", jusquau: new Date(Date.now() + 5 * 86_400_000) } });
     ids.ligneRapprochement = ligneRapA.id;
     ids.propositionRapprochement = (await ctx.prisma.propositionRapprochement.create({ data: { ligneId: ligneRapA.id, companyId, cible: `collecte:${achatA.id}`, niveau: "exacte", score: 100 } })).id;
+    // Achats groupés V1 : un achat et le besoin de A (lieu et quantité privés), son lot corrigé.
+    const achatV1 = await ctx.prisma.achatGroupeV1.create({ data: { type: "ardoise", cle: "v1:ardoise|format=32x22|origine=espagne|qualite=1|epaisseur=5", nom: "Ardoise naturelle 32 × 22 · Espagne · 1er choix · 5 mm", lot: "couverture", departement: "22", reception: "livraison", dateBesoin: new Date(Date.now() + 40 * 86_400_000), ouvertJusquau: new Date(Date.now() + 22 * 86_400_000) } });
+    ids.achatV1 = achatV1.id;
+    ids.besoinV1 = (await ctx.prisma.besoinGroupeV1.create({ data: { achatId: achatV1.id, companyId, projectId: ids.project, articleKey: "art-v1-a", designation: "Ardoise de A", attributs: {}, quantite: 4800, quantiteSaisie: 10, uniteSaisie: "palette", parUnite: 480, reception: "livraison", lieu: "Lieu privé de A", dateBesoin: new Date(Date.now() + 40 * 86_400_000), statut: "confirme" } })).id;
+    await ctx.prisma.lotLigneV1.create({ data: { projectId: ids.project, articleKey: "art-v1-a", companyId, lot: "zinguerie" } });
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -219,6 +231,9 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/admin\/pilotage\/achats-groupes\/consultations$/, ids.consultationAchat],
         [/\/rapprochements\/propositions$/, ids.propositionRapprochement],
         [/\/rapprochements\/lignes$/, ids.ligneRapprochement],
+        // Achats groupés V1 : le besoin de A ; l'admin (B n'est pas admin : 403).
+        [/\/ag\/besoins$/, ids.besoinV1],
+        [/\/admin\/ag\/achats$/, ids.achatV1],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

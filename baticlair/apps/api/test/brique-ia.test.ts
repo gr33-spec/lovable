@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "../src/platform/config/config.js";
-import { AnthropicDocumentReader } from "../src/platform/ai/anthropic-document-reader.js";
 import { fabriqueIa } from "../src/platform/ai/fabrique-ia.js";
 import { empreinte, LecteurEnregistre } from "../src/platform/ai/lecteur-enregistre.js";
 import type { ReadRequest } from "../src/platform/ai/lecteur-ia.js";
@@ -25,9 +24,12 @@ const demande: ReadRequest<typeof schema> = {
 
 describe("la fabrique suit la configuration", () => {
   it("anthropic par défaut avec une clé ; openai et enregistre sur demande ; rien sans clé", () => {
-    expect(fabriqueIa(loadConfig({ ...base, BATICLAIR_ANTHROPIC_KEY: "k" }))!({ model: "m", effort: "low" })).toBeInstanceOf(AnthropicDocumentReader);
+    // Depuis l'accès démo (7 novembre 2026), le lecteur est enveloppé par `sansIaEnDemo` : on vérifie le fournisseur et le
+    // modèle qu'il porte, plus sa classe.
+    const anthropic = fabriqueIa(loadConfig({ ...base, BATICLAIR_ANTHROPIC_KEY: "k" }))!({ model: "m", effort: "low" });
+    expect(anthropic).toMatchObject({ provider: "anthropic", model: "m" });
     const openai = fabriqueIa(loadConfig({ ...base, AI_PROVIDER: "openai", OPENAI_API_KEY: "k" }))!({ model: "gpt-x", effort: "high" });
-    expect(openai).toBeInstanceOf(OpenAiDocumentReader);
+    expect(openai.provider).toBe("openai");
     expect(openai.model).toBe("gpt-x");
     expect(fabriqueIa(loadConfig({ ...base, AI_PROVIDER: "enregistre" }))!({ model: "m", effort: "low" }).provider).toBe("enregistre");
     expect(fabriqueIa(loadConfig(base))).toBeNull();
