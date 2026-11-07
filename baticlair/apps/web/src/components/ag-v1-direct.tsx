@@ -186,6 +186,25 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
     }
   }
 
+  const manqueQuantite = [!qOk ? "la quantité" : null, !reception ? "livraison ou retrait" : null, lieu.trim().length < 3 ? "le lieu" : null, !dateBesoin ? "la date de besoin" : null].filter(Boolean);
+  const bloque =
+    etape === "produit" && produit && !complet
+      ? "Choisis toutes les caractéristiques pour continuer."
+      : etape === "produit" && produit && !conversionOk
+        ? "Confirme ou corrige le conditionnement pour continuer."
+        : etape === "quantite" && !etat.zone
+          ? "Ajoute l'adresse de ton entreprise (code postal) dans Profil pour continuer."
+          : etape === "quantite" && manqueQuantite.length
+            ? `Il manque ${manqueQuantite.join(", ")}.`
+            : etape === "resultat" && compat && !compat.compatible && !compat.ouverture.possible
+              ? compat.ouverture.message
+              : etape === "raison" && !raison
+                ? "Choisis une raison pour continuer."
+                : etape === "verification" && !etat.verification.complete
+                  ? "Complète les trois points ci-dessus pour continuer."
+                  : etape === "confirmer" && !coche
+                    ? "Coche la case pour confirmer."
+                    : null;
   const titre = etape === "produit" ? "Choisis précisément le produit" : etape === "quantite" ? "Combien, où et pour quand ?" : etape === "resultat" ? (compat?.compatible ? "Un achat groupé correspond" : "Aucun achat groupé compatible pour le moment") : etape === "raison" ? "Pourquoi cet achat groupé ne te convient pas ?" : etape === "verification" ? "Ton entreprise" : "Confirmer mon besoin";
 
   return (
@@ -353,6 +372,12 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
       ) : null}
 
       <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 flex flex-col gap-2 bg-gradient-to-t from-ground via-ground/95 to-transparent px-4 pt-6 pb-2 lg:static lg:bg-none lg:p-0">
+        {/* Greg, 7 novembre 2026 : la raison d'un bouton désactivé se lit tout de suite, juste au-dessus de lui. */}
+        {bloque ? (
+          <p role="status" className="text-center text-[14px] font-semibold text-ink">
+            {bloque}
+          </p>
+        ) : null}
         {etape === "produit" && produit ? (
           <Button className="w-full" disabled={!complet || !conversionOk} onClick={() => setEtape("quantite")}>
             Continuer

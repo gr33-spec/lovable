@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, ClipboardList, PlusCircle } from "lucide-react";
+import { ChevronRight, ClipboardList, ListChecks, Package, Users } from "lucide-react";
 import { useCallback, useState } from "react";
 import { actionPrioritaire, lienAutres, type ActionCandidate } from "../../../../packages/domain/src/accueil/accueil";
 import { InstallHint } from "@/components/install-hint";
@@ -9,6 +9,7 @@ import { BandeauReprises } from "@/components/reprises";
 import { Skeleton } from "@/components/ui";
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import type { Brouillon } from "@/lib/brouillon";
+import { useAgV1 } from "@/lib/ag-v1";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import type { CarteAchat, MesAchats } from "@/lib/achat-groupe";
@@ -108,6 +109,7 @@ export function AccueilMaquette() {
   const [tout, setTout] = useState(false);
 
   const charge = brouillons !== null && next !== null && projets !== null;
+  const { etat: agV1 } = useAgV1();
   const achats = mes?.achats ?? [];
   const parProjet = new Map(projets?.items.map((p) => [p.id, p]) ?? []);
   const projetsBrouillon = new Set((brouillons?.items ?? []).map((b) => projetDeUrl(b.url)).filter((x): x is string => x !== null));
@@ -145,19 +147,43 @@ export function AccueilMaquette() {
         </section>
       ) : null}
 
-      {/* Greg, 6 novembre 2026 : l'écran « À faire » ne montre que les actions concrètes ; sans action, une phrase et
-          « Nouveau besoin ». Le suivi détaillé vit dans Demandes et Groupes. */}
-      {charge && !premiere ? (
-        <section aria-label="Aucun besoin en cours" className="flex flex-col items-start gap-4 rounded-2xl bg-surface p-5 shadow-card">
-          <p className="text-[20px] font-extrabold">Aucun besoin en cours</p>
-          <Link href="/chantiers/nouveau" className="pressable inline-flex min-h-12 items-center gap-2 rounded-2xl bg-accent px-5 text-[16px] font-extrabold text-on-accent">
-            <PlusCircle size={22} aria-hidden="true" />
-            <span>Nouveau besoin</span>
-          </Link>
+      {charge && !premiere ? <p className="text-[18px] font-bold">Aucun besoin en cours</p> : null}
+      {/* RÈGLE CHANGÉE (Greg, 7 novembre 2026) : des actions explicites, jamais un « + » seul ; l'achat individuel et les
+          achats groupés ne se mélangent jamais (deux blocs). */}
+      <section aria-labelledby="a-individuel" className="flex flex-col gap-2">
+        <h2 id="a-individuel" className="text-[15px] font-bold text-muted">
+          Achat individuel
+        </h2>
+        <ActionExplicite href="/chantiers/nouveau" titre="Créer un quantitatif" detail="Ta liste de matériaux, à faire chiffrer par tes négoces." icone={<ClipboardList size={22} aria-hidden="true" />} principale />
+      </section>
+      {agV1 ? (
+        <section aria-labelledby="a-groupes" className="flex flex-col gap-2">
+          <h2 id="a-groupes" className="text-[15px] font-bold text-muted">
+            Achats groupés
+          </h2>
+          <ActionExplicite href="/achats-groupes/nouveau" titre="Ajouter un matériau en achat groupé" detail="Un produit précis, sa quantité, ta date : il rejoint ou ouvre un achat groupé." icone={<Package size={22} aria-hidden="true" />} />
+          <ActionExplicite href="/achats-groupes/quantitatif" titre="Depuis un quantitatif" detail="Choisis des articles déjà calculés ; chacun rejoint ou ouvre son propre achat groupé." icone={<ListChecks size={22} aria-hidden="true" />} />
+          <ActionExplicite href="/achats-groupes/mes-besoins" titre="Mes besoins groupés" detail="Suivre, modifier, reconfirmer, voir les offres." icone={<Users size={22} aria-hidden="true" />} />
         </section>
       ) : null}
       <InstallHint />
     </div>
+  );
+}
+
+/** Une action de départ, écrite en toutes lettres (jamais un « + » seul). */
+function ActionExplicite({ href, titre, detail, icone, principale = false }: { href: string; titre: string; detail: string; icone: React.ReactNode; principale?: boolean }) {
+  return (
+    <Link href={href} className={`pressable flex min-h-16 items-center gap-3 rounded-2xl p-3.5 shadow-card ${principale ? "bg-accent text-on-accent" : "bg-surface text-ink"}`}>
+      <span aria-hidden="true" className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${principale ? "bg-black/10" : "bg-ground"}`}>
+        {icone}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="text-[17px] leading-tight font-extrabold">{titre}</span>
+        <span className={`text-[14px] leading-snug ${principale ? "text-on-accent/80" : "text-muted"}`}>{detail}</span>
+      </span>
+      <ChevronRight size={20} aria-hidden="true" className="shrink-0" />
+    </Link>
   );
 }
 

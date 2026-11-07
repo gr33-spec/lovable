@@ -136,7 +136,7 @@ function AchatsGroupes() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <PageTitle>Achat en gros</PageTitle>
+        <PageTitle>Achats groupés</PageTitle>
         <ButtonLink
           href="/achats-groupes/lancer"
           className="w-full lg:w-auto lg:px-6"
@@ -199,7 +199,7 @@ function AchatsGroupes() {
                   title="Aucun groupe pour l'instant"
                 >
                   <p className="text-[15px] text-muted">
-                    Découvre les collectes ouvertes, ou laisse des lignes de ta
+                    Découvre les achats groupés ouverts, ou laisse des lignes de ta
                     demande chercher des besoins compatibles.
                   </p>
                 </EmptyState>
@@ -326,7 +326,7 @@ function Decouvrir() {
     <div className="flex flex-col gap-3">
       <form
         role="search"
-        aria-label="Chercher une collecte"
+        aria-label="Chercher un achat groupé"
         onSubmit={(e) => {
           e.preventDefault();
           changer({ q: texte.trim() });
@@ -456,7 +456,7 @@ function Decouvrir() {
       </div>
       {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
       {!data && !error ? (
-        <Skeleton card="h-40" lines={2} label="Chargement des collectes…" />
+        <Skeleton card="h-40" lines={2} label="Chargement des achats groupés…" />
       ) : null}
       {data && affichage === "carte" ? (
         <CarteDesCollectes
@@ -469,7 +469,7 @@ function Decouvrir() {
       {data && data.achats.length === 0 ? (
         <EmptyState
           icon={<Users size={28} aria-hidden="true" />}
-          title="Aucune collecte ouverte avec ces critères"
+          title="Aucun achat groupé ouvert avec ces critères"
         >
           <p className="text-[15px] text-muted">
             Élargis le secteur, ou propose un besoin groupé.
@@ -505,13 +505,13 @@ function CarteDesCollectes({
   const outreMer = (data.carte ?? []).filter((c) => c.code.length === 3);
   return (
     <section
-      aria-label="Carte des collectes"
+      aria-label="Carte des achats groupés"
       className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card"
     >
       <svg
         viewBox={`0 0 ${L} ${H}`}
         role="img"
-        aria-label={`${data.achats.length} collecte${data.achats.length > 1 ? "s" : ""} sur la carte`}
+        aria-label={`${data.achats.length} achat${data.achats.length > 1 ? "s" : ""} groupé${data.achats.length > 1 ? "s" : ""} sur la carte`}
         className="mx-auto w-full max-w-[28rem]"
       >
         {DEPARTEMENTS.map((d) => {
@@ -544,7 +544,7 @@ function CarteDesCollectes({
               key={c.code}
               role="button"
               tabIndex={0}
-              aria-label={`${c.secteur} : ${c.n} collecte${c.n > 1 ? "s" : ""}`}
+              aria-label={`${c.secteur} : ${c.n} achat${c.n > 1 ? "s" : ""} groupé${c.n > 1 ? "s" : ""}`}
               onClick={() => choisir(c.code)}
               onKeyDown={(e) =>
                 (e.key === "Enter" || e.key === " ") && choisir(c.code)
@@ -565,7 +565,7 @@ function CarteDesCollectes({
         })}
       </svg>
       <p className="text-[13px] text-muted">
-        Un rond = les collectes d&apos;un département. Touche-le pour les voir.
+        Un rond = les achats groupés d&apos;un département. Touche-le pour les voir.
         {data.zone ? " Le petit point jaune cerclé : ton département." : ""}
       </p>
       {outreMer.length > 0 ? (

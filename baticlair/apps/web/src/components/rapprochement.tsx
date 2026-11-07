@@ -103,9 +103,9 @@ export function RechercheRapprochement({ projectId }: { projectId: string }) {
                   </span>
                   {l.collecte ? (
                     <span className="mt-1 flex flex-wrap items-center gap-2">
-                      <Badge tone="ok">Une collecte ouverte correspond · clôture le {jourCourt(l.collecte.clotureLe)}</Badge>
+                      <Badge tone="ok">Un achat groupé ouvert correspond · clôture le {jourCourt(l.collecte.clotureLe)}</Badge>
                       <button type="button" onClick={(e) => (e.preventDefault(), setRejoindre(rejoindre === l.key ? null : l.key))} className="pressable inline-flex min-h-11 items-center rounded-xl px-2 text-[14px] font-bold underline">
-                        Rejoindre cette collecte
+                        Rejoindre cet achat groupé
                       </button>
                     </span>
                   ) : null}
@@ -236,7 +236,7 @@ function RejoindreCollecte({ projectId, ligne, engagement, onAnnuler, onRejointe
         body: { confirmees: [ligne.key], achatId: ligne.collecte!.id, negoces: [negoce], engagement: true },
         idempotencyKey: newActionKey(),
       });
-      onRejointe({ phrase: `« ${ligne.reference ?? ligne.designation} » a rejoint la collecte « ${r.titre} ».`, href: `/achats-groupes/${r.besoinId}` });
+      onRejointe({ phrase: `« ${ligne.reference ?? ligne.designation} » a rejoint l'achat groupé « ${r.titre} ».`, href: `/achats-groupes/${r.besoinId}` });
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
     } finally {
@@ -245,8 +245,8 @@ function RejoindreCollecte({ projectId, ligne, engagement, onAnnuler, onRejointe
   }
   const pret = engage && (autre ? nom.trim().length > 1 && /.+@.+\..+/.test(email.trim()) : choix !== "");
   return (
-    <section aria-label="Rejoindre la collecte" className="flex flex-col gap-3 rounded-xl border-2 border-[var(--color-accent)] p-3">
-      <p className="text-[15px] font-bold">Collecte « {ligne.collecte!.titre} »</p>
+    <section aria-label="Rejoindre l'achat groupé" className="flex flex-col gap-3 rounded-xl border-2 border-[var(--color-accent)] p-3">
+      <p className="text-[15px] font-bold">Achat groupé « {ligne.collecte!.titre} »</p>
       <p className="text-[14px] text-muted">
         Ta ligne : {ligne.quantite.toLocaleString("fr-FR")} {ligne.unite} · clôture le {jourCourt(ligne.collecte!.clotureLe)}
         {ligne.collecte!.dateBesoin ? ` · livraison avant le ${jourCourt(ligne.collecte!.dateBesoin)}` : ""}
@@ -285,7 +285,7 @@ function RejoindreCollecte({ projectId, ligne, engagement, onAnnuler, onRejointe
       </label>
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => void rejoindre()} pending={pending} disabled={!pret}>
-          Rejoindre la collecte
+          Rejoindre l&apos;achat groupé
         </Button>
         <Button variant="secondary" onClick={onAnnuler} disabled={pending}>
           Annuler
@@ -338,7 +338,7 @@ export function RapprochementsPanneau() {
             <div key={p.id} className="flex flex-col gap-2 rounded-lg border border-line p-3">
               <p className="text-[15px] font-semibold">
                 {p.libelleNiveau}
-                {p.collecte ? ` · collecte « ${p.collecte.titre} », clôture le ${jourCourt(p.collecte.clotureLe)}` : " · un besoin d'un autre artisan"}
+                {p.collecte ? ` · achat groupé « ${p.collecte.titre} », clôture le ${jourCourt(p.collecte.clotureLe)}` : " · un besoin d'un autre artisan"}
               </p>
               {p.differences.length > 0 ? (
                 <ul aria-label="Différences" className="list-disc pl-5 text-[14px]">

@@ -190,14 +190,16 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await page.goto("/");
     // « À faire » (Greg, 6 novembre 2026) : rien à faire, donc « Aucun besoin en cours » et « Nouveau besoin ».
     await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
-    const vide = page.getByRole("region", { name: "Aucun besoin en cours" });
-    await expect(vide.getByRole("link", { name: "Nouveau besoin" })).toHaveAttribute("href", "/chantiers/nouveau");
-    await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achat en gros" })).toHaveAttribute("href", "/achats-groupes");
+    // Greg, 7 novembre 2026 : des actions écrites en toutes lettres, l'achat individuel à part.
+    await expect(page.getByText("Aucun besoin en cours")).toBeVisible();
+    const vide = page.getByRole("region", { name: "Achat individuel" });
+    await expect(vide.getByRole("link", { name: /^Créer un quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
+    await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés" })).toHaveAttribute("href", "/achats-groupes");
     await expect(page.getByRole("link", { name: /Essai gratuit/ })).toHaveCount(0);
     await capture(page, projet, "1-compte-vide");
 
     // 2. La liste depuis un devis : trois choix, le bandeau, « à vérifier », la suggestion, « Tout cocher ».
-    await vide.getByRole("link", { name: "Nouveau besoin" }).click();
+    await vide.getByRole("link", { name: /^Créer un quantitatif/ }).click();
     // Deux parcours reliés (Greg, 7 novembre 2026) : une conversation ; le « + » ouvre photo, document et catalogue.
     await expect(page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" })).toBeVisible();
     await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-achat-groupe.pdf"));
@@ -249,7 +251,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     const b = await nouvelArtisan(browser, dep, "Paul");
     // Greg, 6 novembre 2026 : « Groupes » dans le menu, vue « Découvrir » (son secteur d'office).
     await b.page.goto("/");
-    await b.page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achat en gros" }).click();
+    await b.page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés" }).click();
     await b.page.waitForURL(/\/achats-groupes/);
     const ouverts = b.page.getByRole("tabpanel", { name: "Découvrir" });
     await b.page.getByRole("tab", { name: "Découvrir" }).click();
@@ -559,6 +561,6 @@ test.describe("Prompt maître point 11 : collecte lancée par Mobiiz", () => {
     await page.getByRole("button", { name: "C'est compris" }).click();
     await page.goto("/achats-groupes?vue=decouvrir&departement=22");
     const carte = page.getByRole("tabpanel", { name: "Découvrir" }).locator("div").filter({ hasText: titre }).filter({ has: page.getByRole("link", { name: "Ajouter mes quantités" }) }).last();
-    await expect(carte).toContainText("Collecte Mobiiz");
+    await expect(carte).toContainText("Achat groupé Mobiiz");
   });
 });

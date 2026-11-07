@@ -231,6 +231,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           </p>
         ) : null}
         <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 bg-gradient-to-t from-ground via-ground/95 to-transparent px-4 pt-6 pb-2 lg:static lg:bg-none lg:p-0">
+          {nb === 0 ? <p role="status" className="pb-2 text-center text-[14px] font-semibold text-ink">Coche au moins une ligne compatible pour continuer.</p> : null}
           <Button className="w-full" disabled={nb === 0} onClick={continuer}>
             {nb === 0 ? "Sélectionne des lignes" : `Continuer avec ${nb} ligne${nb > 1 ? "s" : ""}`}
           </Button>
@@ -324,6 +325,18 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
         </p>
       ) : null}
       <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 flex flex-col gap-2 bg-gradient-to-t from-ground via-ground/95 to-transparent px-4 pt-6 pb-2 lg:static lg:bg-none lg:p-0">
+        {/* Greg, 7 novembre 2026 : la raison d'un bouton désactivé se lit tout de suite. */}
+        {!pret || !etat.verification.complete || !coche ? (
+          <p role="status" className="text-center text-[14px] font-semibold text-ink">
+            {!reception || lieu.trim().length < 3 || !dateBesoin
+              ? `Il manque ${[!reception ? "livraison ou retrait" : null, lieu.trim().length < 3 ? "le lieu" : null, !dateBesoin ? "la date de besoin" : null].filter(Boolean).join(", ")}.`
+              : !pret
+                ? "Vérifie la quantité et le conditionnement de chaque ligne."
+                : !etat.verification.complete
+                  ? "Complète la vérification ci-dessus : SIRET, e-mail, qualité."
+                  : "Coche la case pour confirmer."}
+          </p>
+        ) : null}
         <Button className="w-full" pending={pending} disabled={!coche || !pret || !etat.verification.complete} onClick={() => void confirmer()}>
           {plusieurs ? `Confirmer mes ${choisies.length} besoins` : "Confirmer mon besoin"}
         </Button>

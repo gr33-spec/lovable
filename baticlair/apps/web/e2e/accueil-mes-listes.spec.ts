@@ -92,13 +92,15 @@ test("À faire (Greg, 6 novembre 2026) : rien à faire, « Aucun besoin en cours
   await expect(page.getByText(/Achète en groupe, paie moins cher|Par où commencer \?|Mes listes et chantiers|Achats groupés près de chez toi/)).toHaveCount(0);
   await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: /^(Commencer|Suivi en cours)$/ })).toHaveCount(0);
-  const vide = page.getByRole("region", { name: "Aucun besoin en cours" });
+  // RÈGLE CHANGÉE (Greg, 7 novembre 2026) : « Aucun besoin en cours », puis des actions écrites en toutes lettres.
+  await expect(page.getByText("Aucun besoin en cours")).toBeVisible();
+  const vide = page.getByRole("region", { name: "Achat individuel" });
   await expect(vide).toBeVisible();
-  await expect(vide.getByRole("link", { name: "Nouveau besoin" })).toHaveAttribute("href", "/chantiers/nouveau");
+  await expect(vide.getByRole("link", { name: /^Créer un quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
   // Un seul départ : le bouton jaune « Nouveau besoin » du menu, celui de l'écran vide, « Nouvelle demande » de Demandes.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  await expect(nav.getByRole("link", { name: "Nouveau besoin" })).toHaveAttribute("href", "/chantiers/nouveau");
-  await nav.getByRole("link", { name: "Nouveau besoin" }).click();
+  await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveAttribute("href", "/chantiers/nouveau");
+  await nav.getByRole("link", { name: "Créer un quantitatif" }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   await expect(page.getByRole("dialog", { name: "Nouveau quantitatif" })).toBeVisible();
   await page.goto("/chantiers");
@@ -148,7 +150,7 @@ test("À faire : une demande envoyée sans réponse n'y est pas ; la réponse re
   const demandes = async () => (await apiJson<{ items: { recipients: unknown[] }[] }>(page, "GET", `/v1/projects/${projectId}/price-requests`)).body.items;
   const avant = JSON.stringify(await demandes());
   await page.goto("/");
-  await expect(page.getByRole("region", { name: "Aucun besoin en cours" })).toBeVisible();
+  await expect(page.getByText("Aucun besoin en cours")).toBeVisible();
   await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
 
   await reponseRecue(page, recipientId);
@@ -156,7 +158,7 @@ test("À faire : une demande envoyée sans réponse n'y est pas ; la réponse re
   const afaire = page.getByRole("region", { name: "À faire maintenant" });
   await expect(afaire.getByRole("link").first()).toContainText("Voir les réponses de tes négoces");
   await expect(afaire.getByRole("link").first()).toContainText("Maison Dupont");
-  await expect(page.getByRole("region", { name: "Aucun besoin en cours" })).toHaveCount(0);
+  await expect(page.getByText("Aucun besoin en cours")).toHaveCount(0);
   // Ouvrir l'accueil ne déclenche aucun envoi : la demande est la même qu'avant.
   expect(JSON.stringify((await demandes()).map((d) => ({ ...d, recipients: d.recipients.length })))).toBe(JSON.stringify(JSON.parse(avant).map((d: { recipients: unknown[] }) => ({ ...d, recipients: d.recipients.length }))));
   await afaire.getByRole("link").first().click();
@@ -267,8 +269,8 @@ test("Mes listes : une liste envoyée ne se supprime pas (raison dite) ; « Sél
 
 test("Accueil et Mes listes, thèmes clair et sombre : le titre et le texte des cartes se lisent (contraste AA)", async ({ page }) => {
   await inscrire(page);
-  // « À faire » vide d'abord (« Nouveau besoin »), puis la liste créée pour « Mes demandes ».
-  for (const [url, texte, theme] of [["/", "Nouveau besoin", "sombre"], ["/", "Nouveau besoin", "clair"], ["/chantiers", "Liste du thème", "sombre"], ["/chantiers", "Liste du thème", "clair"]] as const) {
+  // « À faire » vide d'abord (« Créer un quantitatif »), puis la liste créée pour « Mes demandes ».
+  for (const [url, texte, theme] of [["/", "Créer un quantitatif", "sombre"], ["/", "Créer un quantitatif", "clair"], ["/chantiers", "Liste du thème", "sombre"], ["/chantiers", "Liste du thème", "clair"]] as const) {
     if (url === "/chantiers" && theme === "sombre") await liste(page, "Liste du thème");
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     {
@@ -332,7 +334,7 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   // Le menu du bas : libellés à 12 px, sans déborder.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  for (const nom of ["À faire", "Achat en gros", "Demandes"]) {
+  for (const nom of ["À faire", "Achats groupés", "Créer un quantitatif", "Demandes"]) {
     const lien = nav.getByRole("link", { name: nom });
     expect(await lien.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
     const b = (await lien.boundingBox())!;

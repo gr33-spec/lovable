@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, ListChecks, Search } from "lucide-react";
+import { ChevronRight, ListChecks, Package, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { CarteAchat, CARTE, LigneZone } from "@/components/ag-v1-commun";
@@ -36,9 +36,28 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         <PageTitle>Achats groupés</PageTitle>
         <p className="text-[16px] leading-relaxed text-muted">Regroupe tes besoins avec d&apos;autres entreprises pour présenter aux négoces des volumes clairs et mieux négocier les conditions.</p>
       </div>
+      {/* Greg, 7 novembre 2026 : les deux entrées se voient tout de suite, écrites en toutes lettres. */}
       <div className="flex flex-col gap-2">
-        <label htmlFor="ag-recherche" className="sr-only">
-          Quel matériau veux-tu acheter en groupe ?
+        <Link href="/achats-groupes/nouveau" className="pressable flex min-h-16 items-center gap-3 rounded-2xl bg-accent p-3.5 text-on-accent shadow-card">
+          <Package size={22} aria-hidden="true" className="shrink-0" />
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="text-[17px] leading-tight font-extrabold">Ajouter un matériau</span>
+            <span className="text-[14px] leading-snug">Article par article : un produit précis, sa quantité, ta date.</span>
+          </span>
+          <ChevronRight size={20} aria-hidden="true" className="shrink-0" />
+        </Link>
+        <Link href="/achats-groupes/quantitatif" className="pressable flex min-h-16 items-center gap-3 rounded-2xl border-2 border-ink bg-surface p-3.5 text-ink">
+          <ListChecks size={22} aria-hidden="true" className="shrink-0" />
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="text-[17px] leading-tight font-extrabold">Depuis un quantitatif</span>
+            <span className="text-[14px] leading-snug text-muted">Plusieurs articles déjà calculés ; chacun rejoint ou ouvre son propre achat groupé.</span>
+          </span>
+          <ChevronRight size={20} aria-hidden="true" className="shrink-0" />
+        </Link>
+      </div>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="ag-recherche" className="text-[15px] font-bold">
+          Ou cherche directement un matériau
         </label>
         <div className="flex min-h-13 items-center gap-2 rounded-xl border border-line bg-surface px-4 focus-within:border-accent">
           <Search size={20} aria-hidden="true" className="shrink-0" />
@@ -73,11 +92,6 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
           <span className="text-[15px] text-muted">Mon département</span>
           <span className="text-[16px] font-bold">{etat.zone ? zoneLisible(etat.zone) : "À renseigner"}</span>
         </div>
-        <Link href="/achats-groupes/quantitatif" className="flex min-h-13 items-center gap-3 border-b border-line px-4 py-3 text-[16px] font-semibold">
-          <ListChecks size={20} aria-hidden="true" />
-          <span className="flex-1">Depuis un quantitatif</span>
-          <ChevronRight size={20} aria-hidden="true" />
-        </Link>
         <Link href="/achats-groupes/mes-besoins" className="flex min-h-13 items-center gap-3 px-4 py-3">
           <span className="flex flex-1 flex-col">
             <span className="text-[16px] font-semibold">Mes besoins groupés</span>
@@ -92,7 +106,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
       ) : data.achats.length === 0 ? (
         <div className={`${CARTE} flex flex-col gap-2 p-4`}>
           <p className="text-[17px] font-bold">Aucun achat groupé ouvert{lot ? " dans ce lot" : ""} pour le moment</p>
-          <p className="text-[15px] text-muted">Les premiers achats groupés se forment avec les premiers besoins ouverts. Cherche ton matériau ci-dessus pour ouvrir le tien.</p>
+          <p className="text-[15px] text-muted">Les premiers achats groupés se forment avec les premiers besoins ouverts. Touche « Ajouter un matériau » pour ouvrir le tien.</p>
         </div>
       ) : (
         <ul aria-label="Achats groupés ouverts" className="flex flex-col gap-3">

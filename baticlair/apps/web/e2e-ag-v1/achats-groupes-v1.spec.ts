@@ -95,9 +95,17 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(page.getByText(zone().nom)).toBeVisible();
   for (const f of ["Couverture", "Zinguerie", "Isolation", "Bois", "Électricité"]) await expect(page.getByRole("button", { name: f, exact: true })).toBeVisible();
   await expect(page.getByText("Mobiiz. Plus on est, moins on paie.")).toBeVisible();
+  // Greg, 7 novembre 2026 : les deux entrées se voient tout de suite, écrites en toutes lettres ; aucun « + » seul.
+  await expect(page.getByRole("link", { name: /^Ajouter un matériau/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Depuis un quantitatif/ })).toBeVisible();
+  const menu = page.getByRole("navigation", { name: "Navigation principale" });
+  await expect(menu.getByRole("link", { name: "Achats groupés" })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Créer un quantitatif" })).toBeVisible();
+  for (const lien of await page.getByRole("link").all()) expect((await lien.innerText()).trim()).not.toBe("+");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await capture(page, "01-accueil");
   // 1. Choisir précisément le produit.
-  await page.getByLabel("Quel matériau veux-tu acheter en groupe ?").fill("ardoise");
+  await page.getByLabel("Ou cherche directement un matériau").fill("ardoise");
   await page.getByRole("link", { name: "Ardoise naturelle" }).click();
   await expect(page.getByRole("heading", { name: "Choisis précisément le produit" })).toBeVisible();
   await page.getByLabel("Format").selectOption("32x22");

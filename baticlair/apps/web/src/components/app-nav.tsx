@@ -105,11 +105,12 @@ export function AppNav() {
             l'accueil et « Nouvelle liste » de Mes listes (un seul point de départ, une seule expérience). */}
         {/* Greg, 6 novembre 2026 : trois espaces (À faire, Demandes, Groupes) et le bouton jaune « Nouveau besoin » ; le
             profil, l'entreprise et les négoces passent par l'avatar sur téléphone. */}
-        <Link href="/chantiers/nouveau" aria-label="Nouveau besoin" className="flex min-h-13 items-center justify-center px-1 lg:order-[-1] lg:mb-5 lg:justify-start lg:px-0">
-          <span className="pressable flex size-12 items-center justify-center rounded-full bg-accent text-on-accent shadow-float lg:h-12 lg:w-full lg:gap-2 lg:rounded-xl lg:text-[15px] lg:font-bold lg:shadow-[0_12px_30px_rgba(254,210,6,0.18)]">
-            <Plus size={26} strokeWidth={2.6} aria-hidden="true" />
-            <span className="hidden lg:inline">Nouveau besoin</span>
+        {/* Greg, 7 novembre 2026 : « aucun + seul pour une action principale » ; le bouton jaune dit ce qu'il crée. */}
+        <Link href="/chantiers/nouveau" className="pressable flex min-h-13 flex-col items-center justify-center gap-0.5 px-1 text-center text-[12px] leading-tight font-bold lg:order-[-1] lg:mb-5 lg:h-12 lg:min-h-0 lg:flex-row lg:justify-start lg:gap-2 lg:rounded-xl lg:bg-accent lg:px-4 lg:text-[15px] lg:text-on-accent lg:shadow-[0_12px_30px_rgba(254,210,6,0.18)]">
+          <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-accent text-on-accent shadow-float lg:size-auto lg:bg-transparent lg:shadow-none">
+            <Plus size={22} strokeWidth={2.6} />
           </span>
+          <span>Créer un quantitatif</span>
         </Link>
         {link(listesItem)}
         {link(negocesItem, true)}

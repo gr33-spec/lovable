@@ -136,7 +136,7 @@ test("Rapprochement : la ligne cherche jusqu'à une date, la demande reste libre
 test("Groupes › Découvrir : les filtres (produit, famille, secteur, clôture) vivent dans l'adresse ; aucun métier imposé", async ({ page }) => {
   await inscrire(page, "Jean", `Toitures ${unique()}`);
   await page.goto("/achats-groupes?vue=decouvrir");
-  await expect(page.getByRole("heading", { name: "Achat en gros", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Achats groupés", level: 1 })).toBeVisible();
   // La phrase du collectif (section 17) : la même à l'écran (ordinateur) que celle du serveur.
   const { collectif } = (await apiJson<{ collectif: string }>(page, "GET", "/v1/achats-groupes/decouvrir")).body;
   expect(collectif).toMatch(/^Un achat groupé fonctionne si chacun joue sa part/);

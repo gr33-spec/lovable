@@ -493,8 +493,8 @@ test("le menu : cinq onglets (recentrage du 25 octobre 2026) ; fournisseurs et c
   // Le « + » (Greg, 1er novembre 2026) : un lien vers le départ unique d'une liste (« Nouvelle liste » écrit sur ordinateur).
   // Greg, 6 novembre 2026 : trois espaces (À faire, Groupes, Demandes) et le bouton jaune « Nouveau besoin » ; sur téléphone,
   // le profil passe par l'avatar.
-  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["À faire", "Achat en gros", "Nouveau besoin", "Demandes", "Mes négoces", "Profil"] : ["À faire", "Achat en gros", "Nouveau besoin", "Demandes"]);
-  await expect(nav.getByRole("link", { name: "Nouveau besoin" })).toHaveAttribute("href", "/chantiers/nouveau");
+  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["À faire", "Achats groupés", "Créer un quantitatif", "Demandes", "Mes négoces", "Profil"] : ["À faire", "Achats groupés", "Créer un quantitatif", "Demandes"]);
+  await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveAttribute("href", "/chantiers/nouveau");
   await menuArtisan(page, "Mon compte");
   await expect(page.getByRole("heading", { name: "Profil et paramètres" })).toBeVisible();
 

@@ -436,8 +436,9 @@ export function EcrireMaListe({ onFermer }: { onFermer: () => void }) {
               </option>
             ))}
           </select>
-          <button type="button" onClick={ajouter} disabled={!texte.trim()} aria-label="Ajouter la ligne" className="pressable grid size-13 shrink-0 place-items-center rounded-full bg-accent text-on-accent disabled:opacity-40">
-            <Plus size={22} aria-hidden="true" />
+          <button type="button" onClick={ajouter} disabled={!texte.trim()} aria-label="Ajouter la ligne" className="pressable flex min-h-13 shrink-0 items-center gap-1.5 rounded-full bg-accent px-4 text-[16px] font-extrabold text-on-accent disabled:opacity-40">
+            <Plus size={20} aria-hidden="true" />
+            Ajouter
           </button>
         </div>
         {libre ? (

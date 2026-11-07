@@ -337,7 +337,7 @@ export function SupplyList({
           className="pressable mt-2 flex min-h-13 w-full items-center justify-center gap-2 rounded-full border border-line bg-surface text-[16px] font-semibold text-ink active:bg-ground"
         >
           <Plus size={22} strokeWidth={2.6} aria-hidden="true" />
-          Ajouter
+          Ajouter un article
         </button>
       ) : null}
       {/* §49.9 : les lignes du devis sans fourniture (heures, forfait, évacuation) ne sont pas dans la liste et ne partent

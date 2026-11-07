@@ -6,7 +6,7 @@ import { nom, NOM, NOM_APP, NOM_PLURIEL } from "@/lib/nom";
  * pour le lexique.
  */
 export const fr = {
-  nav: { home: "À faire", projects: "Mes chantiers", chantiers: "Chantiers", listes: "Demandes", groupe: "Achat en gros", groupeAncien: NOM_PLURIEL, prix: "Mes prix", profil: "Profil", suppliers: "Fournisseurs", account: "Compte" },
+  nav: { home: "À faire", projects: "Mes chantiers", chantiers: "Chantiers", listes: "Demandes", groupe: "Achats groupés", groupeAncien: NOM_PLURIEL, prix: "Mes prix", profil: "Profil", suppliers: "Fournisseurs", account: "Compte" },
   status: { active: "En cours", archived: "Terminé" },
   actions: {
     retry: "Réessayer",
