@@ -251,6 +251,7 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
     lignes: [
       { libelle: "Ardoise naturelle 32x22 Espagne 1er choix 5 mm", quantite: "10", unite: "palettes" },
       { libelle: "Crochets inox 100 mm", quantite: "950", unite: "u" },
+      { libelle: "Liteaux", quantite: "300", unite: "m" },
       { libelle: "Ardoise naturelle 35x25 Espagne", quantite: "3000", unite: "pièces" },
       { libelle: "Gouttière zinc dév. 33", quantite: "40", unite: "m" },
       { libelle: "Câble R2V 3G2,5", quantite: "6", unite: "couronnes" },
@@ -272,6 +273,10 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   await expect(page.getByText("Recommandé pour un achat groupé").first()).toBeVisible();
   await expect(page.getByText("Compatible avec un achat groupé").first()).toBeVisible();
   await expect(page.getByText("À préciser : choix et épaisseur manquants")).toBeVisible();
+  // Les liteaux tapés seuls ne disparaissent jamais : désactivés, avec la raison exacte.
+  const liteaux = page.getByRole("listitem").filter({ has: page.getByText("Liteaux", { exact: true }) });
+  await expect(liteaux.getByText("À préciser : section et essence manquantes")).toBeVisible();
+  await expect(liteaux.getByRole("checkbox")).toBeDisabled();
   await expect(page.getByText("Pas encore ouvert aux achats groupés").first()).toBeVisible();
   // Rien n'est coché d'office.
   await expect(page.getByRole("button", { name: "Sélectionne des lignes" })).toBeDisabled();

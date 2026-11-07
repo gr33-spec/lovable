@@ -44,7 +44,7 @@ import {
   type OffreV1,
   type ProduitV1,
 } from "@baticlair/domain";
-import { faitsDesLignes } from "../../../platform/cycle/lignes.js";
+import { cleVerrouCircuit, faitsDesLignes } from "../../../platform/cycle/lignes.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -272,6 +272,10 @@ export class AchatsGroupesV1Service {
     const ids: string[] = [];
     try {
       await this.prisma.$transaction(async (tx) => {
+        // Le verrou commun « une ligne, un seul circuit » de chaque chantier concerné, pris d'abord et dans un ordre fixe
+        // (jamais d'interblocage) : un envoi de demande individuelle en cours sur ce chantier se termine avant.
+        for (const projectId of [...new Set(prepares.map((x) => x.b.projectId).filter((p): p is string => !!p && isUuid(p)))].sort())
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${cleVerrouCircuit(projectId)}))`;
         for (const [i, x] of prepares.entries()) {
           const { b, p, cle, nom } = x;
           // Une ligne de quantitatif : elle doit appartenir à l'entreprise et être libre.

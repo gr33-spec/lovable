@@ -293,7 +293,9 @@ export class PriceRequestsService {
     // fournisseurs qui n'ont rien reçu (audit avant commercialisation, 2026-10-11).
     if (recipient.status !== "to_send") return this.reload(tenant, request.id);
     if (!request.packet) throw new DomainError("conflict", "This request predates the supplier packet", { reason: "no_packet" });
+    // Vérification rapide avant de préparer le PDF ; la vraie protection est le verrou commun autour de l'envoi.
     await this.gardeCircuit(tenant, request.projectId, request.itemKeys.length ? request.itemKeys : null);
+    const packet = request.packet;
     // L'étiquette d'abord (assistant, point 10) : le PDF imprime l'adresse étiquetée qui sert de « Répondre à ».
     const via = await this.expediteur(tenant.companyId);
     if (via) await this.requests.setEtiquette(tenant, recipientId, via.etiquette);
@@ -302,27 +304,29 @@ export class PriceRequestsService {
     const lien = complement && "lien" in complement ? complement.lien : null;
     const corps = packetMail(request.packet, { prenomCommercial: recipient.supplier.contactName, lien });
     const texte = complement && "bloc" in complement ? `${corps}\n\n${complement.bloc}` : corps;
-    await this.envoyerSupervise(tenant, recipient.supplier, {
-      to: recipient.supplier.email,
-      subject: via ? objetAvecRepere(packetSubject(request.packet), via.etiquette) : packetSubject(request.packet),
-      // Lot final, point 5 : le texte en clair et sa version HTML (le lien en bouton).
-      text: texte,
-      html: mailEnHtml(texte, lien),
-      // La réponse du fournisseur revient dans Mobiiz (adresse étiquetée, R7), sinon à l'artisan ; et le mail doit
-      // partir, sinon la demande ne passe pas « envoyée ».
-      ...(via ? { from: via.from, replyTo: via.replyTo } : request.packet.expediteur?.email ? { replyTo: request.packet.expediteur.email } : {}),
-      mustDeliver: true,
-      // Le PDF « Demande de devis » (les blocs + les croquis en pages), puis chaque croquis d'origine, pour le zoom.
-      attachments: [
-        { filename: pdf.filename, contentType: "application/pdf", contentBase64: Buffer.from(pdf.bytes).toString("base64") },
-        ...(await this.sketchFiles(tenant, request.packet)).map((f) => ({
-          filename: request.packet!.croquis?.find((c) => c.id === f.id)?.nom ?? "croquis",
-          contentType: f.mimeType,
-          contentBase64: Buffer.from(f.bytes).toString("base64"),
-        })),
-      ],
+    await this.verrouCircuit(tenant, request.projectId, request.itemKeys.length ? request.itemKeys : null, async () => {
+      await this.envoyerSupervise(tenant, recipient.supplier, {
+        to: recipient.supplier.email,
+        subject: via ? objetAvecRepere(packetSubject(packet), via.etiquette) : packetSubject(packet),
+        // Lot final, point 5 : le texte en clair et sa version HTML (le lien en bouton).
+        text: texte,
+        html: mailEnHtml(texte, lien),
+        // La réponse du fournisseur revient dans Mobiiz (adresse étiquetée, R7), sinon à l'artisan ; et le mail doit
+        // partir, sinon la demande ne passe pas « envoyée ».
+        ...(via ? { from: via.from, replyTo: via.replyTo } : packet.expediteur?.email ? { replyTo: packet.expediteur.email } : {}),
+        mustDeliver: true,
+        // Le PDF « Demande de devis » (les blocs + les croquis en pages), puis chaque croquis d'origine, pour le zoom.
+        attachments: [
+          { filename: pdf.filename, contentType: "application/pdf", contentBase64: Buffer.from(pdf.bytes).toString("base64") },
+          ...(await this.sketchFiles(tenant, packet)).map((f) => ({
+            filename: packet.croquis?.find((c) => c.id === f.id)?.nom ?? "croquis",
+            contentType: f.mimeType,
+            contentBase64: Buffer.from(f.bytes).toString("base64"),
+          })),
+        ],
+      });
+      await this.requests.setStatus(tenant, recipientId, "sent");
     });
-    await this.requests.setStatus(tenant, recipientId, "sent");
     return this.reload(tenant, request.id);
   }
 
@@ -513,7 +517,9 @@ export class PriceRequestsService {
       throw new DomainError("conflict", "A quote was already received", {
         reason: "quote_received",
       });
-    await this.requests.setStatus(tenant, recipientId, status);
+    // « Envoyée » à la main : le même verrou commun que l'envoi par le serveur.
+    if (status === "sent") await this.verrouCircuit(tenant, request.projectId, request.itemKeys.length ? request.itemKeys : null, () => this.requests.setStatus(tenant, recipientId, status));
+    else await this.requests.setStatus(tenant, recipientId, status);
     return this.reload(tenant, request.id);
   }
 
@@ -633,6 +639,15 @@ export class PriceRequestsService {
         await this.signaler({ type: "echec_envoi", cle: `${supplier.id}`, titre: `L'e-mail de demande de prix n'est pas parti chez ${supplier.name}`, detail: "Le prestataire d'envoi a refusé ou n'a pas répondu ; l'artisan a vu « réessaie dans un instant ».", companyId: tenant.companyId }).catch(() => undefined);
       throw e;
     }
+  }
+
+  /**
+   * Achats groupés V1 : le verrou commun en base autour de l'engagement d'une demande (vérification, mail, « envoyée »),
+   * partagé avec la confirmation d'un besoin d'achat groupé (branché par le module ; sans lui, l'engagement seul).
+   */
+  private verrouCircuit: <T>(tenant: TenantContext, projectId: string, keys: string[] | null, engager: () => Promise<T>) => Promise<T> = (_t, _p, _k, engager) => engager();
+  brancherVerrouCircuit(f: <T>(tenant: TenantContext, projectId: string, keys: string[] | null, engager: () => Promise<T>) => Promise<T>): void {
+    this.verrouCircuit = f;
   }
 
   /** Achats groupés V1 : une ligne tenue par un achat groupé ne part pas en demande individuelle (branché par le module). */

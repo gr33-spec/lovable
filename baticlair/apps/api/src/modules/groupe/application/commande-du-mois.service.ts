@@ -355,11 +355,15 @@ export class CommandeDuMoisService {
     const takeoff = await this.prisma.takeoff.findFirst({ where: { projectId, companyId: tenant.companyId }, orderBy: { createdAt: "desc" }, select: { id: true } });
     if (!takeoff) return [];
     const reviewed = await this.reviewed(tenant, takeoff.id);
-    return reviewed.purchase.toBuy.map((item) => {
+    const aAcheter = reviewed.purchase.toBuy.map((item) => {
       const aRegler = item.state !== "ready" || (item.waitsOn?.length ?? 0) > 0 || (item.toConfirm?.length ?? 0) > 0;
       const q = quantiteDuBesoinV1(item.order, item.quantity);
       return { key: item.key, designation: item.label, quantite: q ? Number(q.quantite) : null, unite: q?.unite ?? item.order?.unit ?? "", aRegler };
     });
+    // Les lignes « à faire chiffrer » (gris) aussi : jamais une ligne qui disparaît ; sans quantité sûre, elles
+    // s'affichent « À préciser » ou « Pas encore ouvert aux achats groupés ».
+    const aChiffrer = reviewed.purchase.toQuote.map((item) => ({ key: `quote:${item.key}`, designation: item.label, quantite: null, unite: "", aRegler: false }));
+    return [...aAcheter, ...aChiffrer];
   }
 
   /**

@@ -280,3 +280,18 @@ describe("unités écrites par le moteur de liste", () => {
     expect(c).toMatchObject({ mention: "recommande", quantite: { valeur: 10, unite: "longueur", conditionnement: { unite: "longueur", parDefaut: 4 } } });
   });
 });
+
+describe("aucune ligne ne disparaît (Greg, 7 novembre 2026)", () => {
+  it("chaque ligne d'une liste tapée reçoit une mention et une raison, même sans quantité", () => {
+    const cas: [string, number, string, string, boolean][] = [
+      ["Liteaux", 300, "m", "À préciser : section et essence manquantes", false],
+      ["Liteaux sapin", 300, "m", "À préciser : section manquante", false],
+      ["Liteaux 27x40 sapin", 300, "m", "Compatible avec un achat groupé", true],
+      ["Liteaux 27x40 sapin", 0, "", "À préciser : quantité en m", false],
+      ["Parpaing creux 20x20x50", 200, "u", "Pas encore ouvert aux achats groupés", false],
+      ["Truc inconnu", 0, "", "Pas encore ouvert aux achats groupés", false],
+    ];
+    for (const [designation, quantite, unite, texte, selectionnable] of cas)
+      expect(classerLigneV1({ designation, quantite, unite, faits: libre }), designation).toMatchObject({ texte, selectionnable });
+  });
+});

@@ -182,3 +182,24 @@ export async function etatsDuChantier(prisma: PrismaService, companyId: string, 
     return { key: l.key, designation: l.designation, etat, libelle: LIBELLES_ETAT_LIGNE[etat], groupe: f.groupe ? { titre: f.groupe.titre, avantCloture: f.groupe.avantCloture } : null, actions };
   });
 }
+
+/** La clé du verrou commun d'un chantier : demande individuelle ET achat groupé la prennent avant d'engager une ligne. */
+export const cleVerrouCircuit = (projectId: string) => `circuit:${projectId}`;
+
+/**
+ * LE VERROU COMMUN « UNE LIGNE, UN SEUL CIRCUIT » (Greg, 7 novembre 2026 : « une protection atomique côté base de
+ * données… une simple lecture avant écriture ne suffit pas »). Un verrou de transaction PostgreSQL par chantier
+ * (`pg_advisory_xact_lock`), pris AVANT la vérification et gardé jusqu'à ce que l'engagement soit écrit : l'envoi d'une
+ * demande individuelle le garde pendant l'envoi du mail et la marque « envoyée » ; la confirmation d'un besoin d'achat
+ * groupé le prend au début de sa transaction. L'un attend l'autre, puis voit son résultat validé et refuse.
+ */
+export async function avecVerrouCircuit<T>(prisma: PrismaService, companyId: string, projectId: string, keys: string[] | null, engager: () => Promise<T>): Promise<T> {
+  return prisma.$transaction(
+    async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${cleVerrouCircuit(projectId)}))`;
+      await gardeDemandeIndividuelle(tx, companyId, projectId, keys);
+      return engager();
+    },
+    { maxWait: 20_000, timeout: 120_000 },
+  );
+}

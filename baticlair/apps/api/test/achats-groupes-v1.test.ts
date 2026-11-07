@@ -232,6 +232,33 @@ describe("depuis un quantitatif : une ligne, un seul circuit", () => {
     expect(par(/Parpaing/)).toMatchObject({ lot: "maconnerie", mention: "non_ouvert", texte: "Pas encore ouvert aux achats groupés", selectionnable: false });
   });
 
+  it("liste tapée : aucune ligne ne disparaît — incomplète désactivée avec sa raison, famille fermée dite, compatible sélectionnable", async () => {
+    // Greg, 7 novembre 2026 : « les liteaux tapés seuls disparaissent de la sélection ». Cause : la sélection passait par
+    // les lignes « proposables » de l'ancien achat groupé, qui écartent en silence une ligne vague (« Liteaux » sans section).
+    const a = await entreprise("a@toitures.fr");
+    const tapees = [
+      { libelle: "Liteaux", quantite: "300", unite: "m" },
+      { libelle: "Liteaux sapin", quantite: "300", unite: "m" },
+      { libelle: "Liteaux 27x40 sapin", quantite: "300", unite: "m" },
+      { libelle: "Parpaing creux 20x20x50", quantite: "200", unite: "u" },
+      { libelle: "Ardoise naturelle 32x22 Espagne 1er choix 5 mm", quantite: "10", unite: "palettes" },
+    ];
+    const { lignes } = await liste(a.agent, tapees);
+    const seule = (re: RegExp) => {
+      const t = lignes.filter((l) => re.test(l.designation));
+      expect(t, `${re} doit apparaître une fois`).toHaveLength(1);
+      return t[0]!;
+    };
+    expect(seule(/^Liteaux$/)).toMatchObject({ mention: "a_preciser", texte: "À préciser : section et essence manquantes", selectionnable: false });
+    expect(seule(/^Liteaux sapin$/)).toMatchObject({ mention: "a_preciser", texte: "À préciser : section manquante", selectionnable: false });
+    expect(seule(/^Liteaux 27x40 sapin$/)).toMatchObject({ mention: "compatible", texte: "Compatible avec un achat groupé", selectionnable: true });
+    expect(seule(/^Parpaing creux/)).toMatchObject({ mention: "non_ouvert", texte: "Pas encore ouvert aux achats groupés", selectionnable: false });
+    expect(seule(/^Ardoise naturelle 32x22/)).toMatchObject({ mention: "recommande", selectionnable: true });
+    // Chaque ligne tapée est là, chacune avec une raison lisible.
+    expect(lignes.length).toBeGreaterThanOrEqual(tapees.length);
+    for (const l of lignes) expect(l.texte.length, l.designation).toBeGreaterThan(0);
+  });
+
   it("correction du lot ligne par ligne, sans déplacer les autres", async () => {
     const a = await entreprise("a@toitures.fr");
     const { projectId, lignes } = await liste(a.agent, [
@@ -378,4 +405,48 @@ describe("l'offre, jusqu'à « Offre à examiner »", () => {
     // Pas d'« Offre acceptée » : aucune transition ne l'atteint.
     expect((await g.post(`/v1/admin/ag/achats/${ba.achat.id}/preparation`).send({})).status).toBe(409);
   });
+});
+
+describe("double engagement simultané : demande individuelle contre achat groupé (verrou commun en base)", () => {
+  /**
+   * Greg, 7 novembre 2026 : « La création d'un achat groupé et l'envoi d'une demande individuelle pour la même ligne
+   * doivent partager une protection atomique côté base de données… Ajoute un test réellement concurrent qui lance les
+   * deux opérations simultanément et vérifie qu'une seule réussit, dans les deux ordres possibles. » L'e-mail est
+   * ralenti (300 ms) pour ouvrir la fenêtre où l'envoi est en cours : sans verrou commun, les deux réussissaient.
+   */
+  async function preparer(n: number) {
+    const a = await entreprise(`course${n}@toitures.fr`, `Toitures Course ${n}`);
+    const { projectId, lignes } = await liste(a.agent, [{ libelle: "Ardoise naturelle 32x22 Espagne 1er choix 5 mm", quantite: "10", unite: "palettes" }]);
+    const key = lignes[0]!.key;
+    const s = (await a.agent.post("/v1/suppliers").send({ name: "Kerbrat", email: `devis${n}@kerbrat.example` }).expect(201)).body;
+    const demande = (await a.agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.id], articles: [key] }).expect(201)).body;
+    return { a, projectId, key, recipientId: demande.recipients[0].id as string };
+  }
+  const envoyer = (x: Awaited<ReturnType<typeof preparer>>) => x.a.agent.post(`/v1/price-request-recipients/${x.recipientId}/send`);
+  const rejoindre = (x: Awaited<ReturnType<typeof preparer>>) => confirmer(x.a.agent, [besoin({ projectId: x.projectId, articleKey: x.key })]);
+
+  for (const ordre of ["envoi d'abord", "achat groupé d'abord"] as const)
+    it(`une seule des deux opérations réussit (${ordre}, 3 fois)`, async () => {
+      const envoi = ctx.emails.send.bind(ctx.emails);
+      ctx.emails.send = async (m) => {
+        await new Promise((r) => setTimeout(r, 300));
+        return envoi(m);
+      };
+      try {
+        for (let i = 0; i < 3; i++) {
+          const x = await preparer(i + (ordre === "envoi d'abord" ? 0 : 10));
+          const [r1, r2] = ordre === "envoi d'abord" ? await Promise.all([envoyer(x), rejoindre(x)]) : await Promise.all([rejoindre(x), envoyer(x)]).then(([g, e]) => [e, g] as const);
+          // r1 : l'envoi, r2 : l'achat groupé.
+          const reussis = [r1.status === 200, r2.status === 201].filter(Boolean).length;
+          expect(reussis, `envoi ${r1.status}, achat groupé ${r2.status}`).toBe(1);
+          expect([r1.status, r2.status]).toContain(409);
+          const envoye = (await ctx.prisma.priceRequestRecipient.findUniqueOrThrow({ where: { id: x.recipientId } })).sentAt !== null;
+          const tenue = (await ctx.prisma.besoinGroupeV1.count({ where: { projectId: x.projectId, articleKey: x.key, statut: { not: "retire" } } })) > 0;
+          expect(envoye && tenue).toBe(false);
+          expect(envoye || tenue).toBe(true);
+        }
+      } finally {
+        ctx.emails.send = envoi;
+      }
+    });
 });
