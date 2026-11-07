@@ -34,6 +34,12 @@ complètes seulement avant un déploiement important, et en le disant.
 
 ## En cours
 
+SUIVI 179 (7 novembre 2026) : V1 des achats groupés EN LIGNE sur test.mobiiz.fr (commit e1998d75 ; déploiements
+`dpl_JAck1CBYB3Ud2WrmoCtqcCinkmUH` site, `dpl_CKpzsiMXCQDCR3bSG597WowKDvWv` API) ; migration `20261108090000_achats_groupes_v1`
+appliquée à la base de test ; recette en ligne 17/17 sur iPhone SE, Android, ordinateur. Retour arrière :
+`docs/retour-arriere-2026-11-07-achats-groupes-v1.md`. La conversation IA « Nouveau quantitatif » reste sur la branche
+locale `assistant-ia-saisie` (non poussée). Attendre les retours de Greg.
+
 SUIVI 176 (7 novembre 2026) : les deux points bloquants sont corrigés (verrou `avecVerrouCircuit` commun à la demande
 individuelle et à la confirmation V1 ; aucune ligne cachée dans « Depuis un quantitatif »), suites complètes vertes,
 migration testée (vierge et copie). Toujours local, rien poussé : attendre l'accord explicite de Greg, puis suivre
