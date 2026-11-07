@@ -113,3 +113,20 @@ describe("le parcours du négoce", () => {
     expect((await destinataire(a, demandeId, "Négoce B")).negoce.precision.reponse).toBeNull();
   });
 });
+
+describe("le coût réellement livré (Greg, 7 novembre 2026)", () => {
+  it("le négoce dit livraison en plusieurs fois, minimum et déchargement ; la disponibilité se déduit ; l'artisan le voit", async () => {
+    const { a, demandeId } = await demandeEnvoyee();
+    const jeton = jetonPour("b@negoce.fr");
+    const jetonC = jetonPour("c@negoce.fr");
+    const cles = ((await publique().get(`/v1/public/chiffrer/${jeton}`).expect(200)).body.lignes as { cle: string }[]).map((l) => l.cle);
+    await publique().post(`/v1/public/chiffrer/${jeton}`).send({ prix: { [cles[0]!]: 1.1 }, livraisonHt: 60, delaiJours: 5, validiteJours: 14, livraisons: "plusieurs", minimumCommandeHt: 500, dechargement: "Hayon, pas de grue" }).expect(200);
+    const page = (await publique().get(`/v1/public/chiffrer/${jeton}`).expect(200)).body;
+    expect(page.reponse).toMatchObject({ disponibilite: "partielle", lignesChiffrees: 1, lignesDemandees: 2, livraisons: "plusieurs", minimumCommandeHt: 500, dechargement: "Hayon, pas de grue" });
+    // Tout est facultatif : la réponse d'avant passe encore telle quelle.
+    await publique().post(`/v1/public/chiffrer/${jetonC}`).send({ prix: { [cles[0]!]: 1.2, [cles[1]!]: 0.9 }, livraisonHt: 0, delaiJours: null, validiteJours: 14 }).expect(200);
+    expect((await publique().get(`/v1/public/chiffrer/${jetonC}`).expect(200)).body.reponse).toMatchObject({ disponibilite: "complete", livraisons: null, minimumCommandeHt: null });
+    const b = await destinataire(a, demandeId, "Négoce B");
+    expect(b.negoce.conditions).toEqual({ livraisons: "plusieurs", minimumCommandeHt: 500, dechargement: "Hayon, pas de grue" });
+  });
+});

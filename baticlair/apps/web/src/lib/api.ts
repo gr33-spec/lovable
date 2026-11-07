@@ -560,7 +560,12 @@ export interface PriceRequestRecipient {
   rappelLe?: string | null;
   document: { id: string; name: string; status: string } | null;
   /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », motif d'un refus, précision demandée. */
-  negoce?: { vaRepondreLe: string | null; refusMotif: string | null; precision: { question: string; demandeeLe: string | null; reponse: string | null; repondueLe: string | null } | null } | null;
+  negoce?: {
+    vaRepondreLe: string | null;
+    refusMotif: string | null;
+    precision: { question: string; demandeeLe: string | null; reponse: string | null; repondueLe: string | null } | null;
+    conditions?: { livraisons: string | null; minimumCommandeHt: number | null; dechargement: string | null } | null;
+  } | null;
   /** E-mail prêt à envoyer (texte brut). */
   email: { subject: string; body: string } | null;
 }

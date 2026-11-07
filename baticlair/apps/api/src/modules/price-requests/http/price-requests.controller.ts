@@ -105,6 +105,7 @@ export function toDto(r: PriceRequestView) {
         ? {
             vaRepondreLe: x.negoce.intentionLe?.toISOString() ?? null,
             refusMotif: x.negoce.refusMotif,
+            conditions: x.negoce.conditions ?? null,
             precision: x.negoce.precision ? { question: x.negoce.precision.question, demandeeLe: x.negoce.precision.demandeeLe?.toISOString() ?? null, reponse: x.negoce.precision.reponse, repondueLe: x.negoce.precision.repondueLe?.toISOString() ?? null } : null,
           }
         : null,

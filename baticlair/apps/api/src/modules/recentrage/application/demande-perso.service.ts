@@ -401,7 +401,7 @@ export class DemandePersoService {
       lignes: this.lignes(d.lines),
       validiteMin: VALIDITE_MIN_JOURS,
       etat: r.commandeLe ? "commande" : r.refuseLe ? "refuse" : r.reponduLe ? "repondu" : "a_chiffrer",
-      reponse: r.reponduLe ? { prix: r.prix, livraisonHt: Number(r.livraisonHt ?? 0), delaiJours: r.delaiJours, validiteJours: r.validiteJours, valideJusquau: finDeValidite(r.reponduLe, r.validiteJours ?? VALIDITE_MIN_JOURS) } : null,
+      reponse: r.reponduLe ? { prix: r.prix, livraisonHt: Number(r.livraisonHt ?? 0), delaiJours: r.delaiJours, validiteJours: r.validiteJours, valideJusquau: finDeValidite(r.reponduLe, r.validiteJours ?? VALIDITE_MIN_JOURS), ...this.conditions(r, this.lignes(r.priceRequest.lines).length) } : null,
       commande: r.commandeLe ? { le: r.commandeLe, suivi: r.suivi } : null,
       // Le parcours du négoce (6 novembre 2026, point 13).
       vaRepondre: r.intention === "repondra" && !r.reponduLe && !r.refuseLe,
@@ -461,6 +461,22 @@ export class DemandePersoService {
     return { fait: true };
   }
 
+  /**
+   * Le coût réellement livré (Greg, 7 novembre 2026) : la disponibilité se DÉDUIT des lignes chiffrées (jamais
+   * redemandée), puis ce que le négoce a dit (livraison unique ou plusieurs, minimum de commande, déchargement).
+   */
+  private conditions(r: { prix: unknown; livraisons: string | null; minimumCommandeHt: unknown; dechargement: string | null }, nbLignes: number) {
+    const chiffrees = r.prix && typeof r.prix === "object" ? Object.values(r.prix as Record<string, unknown>).filter((v) => typeof v === "number").length : 0;
+    return {
+      disponibilite: chiffrees === 0 ? null : chiffrees >= nbLignes ? ("complete" as const) : ("partielle" as const),
+      lignesChiffrees: chiffrees,
+      lignesDemandees: nbLignes,
+      livraisons: r.livraisons === "plusieurs" ? ("plusieurs" as const) : r.livraisons === "unique" ? ("unique" as const) : null,
+      minimumCommandeHt: r.minimumCommandeHt == null ? null : Number(r.minimumCommandeHt),
+      dechargement: r.dechargement,
+    };
+  }
+
   private async superviserOffre(recipientId: string, priceRequestId: string, nom: string, companyId: string, lignes: { cle: string; designation: string }[], prix: Record<string, number>) {
     const chiffrees = lignes.filter((l) => prix[l.cle] !== undefined).length;
     if (chiffrees < lignes.length)
@@ -476,7 +492,7 @@ export class DemandePersoService {
       await signalerException(this.prisma, { type: "prix_incoherent", cle: recipientId, titre: `Prix très éloignés des autres offres chez ${nom}`, detail: ecarts.map((l) => `${l.designation} : ${prix[l.cle]} € HT`).slice(0, 10).join(" ; "), companyId });
   }
 
-  async chiffrer(jeton: string, body: { prix: Record<string, number>; livraisonHt: number; delaiJours: number | null; validiteJours: number }) {
+  async chiffrer(jeton: string, body: { prix: Record<string, number>; livraisonHt: number; delaiJours: number | null; validiteJours: number; livraisons?: "unique" | "plusieurs" | null; minimumCommandeHt?: number | null; dechargement?: string | null }) {
     const r = await this.parJeton(jeton);
     const d = r.priceRequest;
     const maintenant = this.now();
@@ -490,7 +506,7 @@ export class DemandePersoService {
     const premiere = !r.reponduLe;
     await this.prisma.priceRequestRecipient.update({
       where: { id: r.id },
-      data: { prix, livraisonHt: body.livraisonHt, delaiJours: body.delaiJours, validiteJours: body.validiteJours, reponduLe: maintenant, refuseLe: null, status: "received" },
+      data: { prix, livraisonHt: body.livraisonHt, delaiJours: body.delaiJours, validiteJours: body.validiteJours, livraisons: body.livraisons ?? null, minimumCommandeHt: body.minimumCommandeHt ?? null, dechargement: body.dechargement ?? null, reponduLe: maintenant, refuseLe: null, status: "received" },
     });
     // Lot 6 : la file d'exceptions (offre incomplète, prix incohérent face aux autres négoces de la même demande).
     await this.superviserOffre(r.id, r.priceRequestId, r.supplier.name, d.company.id, this.lignes(d.lines), prix);

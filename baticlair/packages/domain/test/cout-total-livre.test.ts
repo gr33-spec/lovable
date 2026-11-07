@@ -45,3 +45,14 @@ describe("le coût total livré", () => {
     expect(reconfirmationDue({ engageLe: engage, clotureLe: cloture, demandeeLe: null }, new Date("2026-11-20T18:00:01Z"))).toBe(false);
   });
 });
+
+describe("le minimum de commande (Greg, 7 novembre 2026)", () => {
+  it("une offre sous son minimum de commande n'est pas comparée telle quelle, et le dit", () => {
+    const c = comparerCoutLivre(LIGNES, { totalLivreHt: 1080, complet: true }, [
+      { nom: "Kerbrat", prix: [{ designation: LIGNES[0]!.designation, unite: "pièces", prixHt: 1.1 }, { designation: "Liteaux 27×38", unite: "ml", prixHt: 0.9 }], livraisonHt: 60, minimumCommandeHt: 1500 },
+    ]);
+    expect(c.individuelle).toMatchObject({ nom: "Kerbrat", totalLivreHt: 1140, sousMinimum: 1500, complet: false });
+    expect(c.ecartHt).toBeNull();
+    expect(c.phrase).toContain("(Kerbrat) 1 140,00 € HT (sous son minimum de commande de 1 500,00 € HT).");
+  });
+});

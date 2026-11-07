@@ -46,6 +46,10 @@ const chiffrageBody = z.object({
   livraisonHt: z.number().min(0).max(100_000),
   delaiJours: z.number().int().min(0).max(365).nullable(),
   validiteJours: z.number().int().min(1).max(365),
+  // Greg, 7 novembre 2026 : le coût réellement livré, sans formulaire compliqué (tout facultatif).
+  livraisons: z.enum(["unique", "plusieurs"]).nullable().optional(),
+  minimumCommandeHt: z.number().min(0).max(1_000_000).nullable().optional(),
+  dechargement: z.string().trim().max(200).nullable().optional(),
 });
 
 /**
@@ -135,7 +139,7 @@ export class ChiffrageController {
   @Post(":jeton")
   @HttpCode(200)
   chiffrer(@Param("jeton") jeton: string, @Body(new ZodPipe(chiffrageBody)) body: z.infer<typeof chiffrageBody>) {
-    return this.demandes.chiffrer(jeton, { prix: body.prix, livraisonHt: body.livraisonHt, delaiJours: body.delaiJours ?? null, validiteJours: body.validiteJours });
+    return this.demandes.chiffrer(jeton, { prix: body.prix, livraisonHt: body.livraisonHt, delaiJours: body.delaiJours ?? null, validiteJours: body.validiteJours, livraisons: body.livraisons ?? null, minimumCommandeHt: body.minimumCommandeHt ?? null, dechargement: body.dechargement?.trim() || null });
   }
 
   @Public()

@@ -15,12 +15,14 @@ export interface OffreIndividuelle {
   /** Prix unitaire HT par désignation (telle qu'écrite dans la demande). */
   prix: { designation: string; unite: string; prixHt: number }[];
   livraisonHt: number;
+  /** Greg, 7 novembre 2026 : le minimum de commande HT du négoce, s'il en a un. */
+  minimumCommandeHt?: number | null;
 }
 
 export interface ComparaisonLivree {
   lignes: number;
   groupe: { totalLivreHt: number; complet: boolean };
-  individuelle: { nom: string; totalLivreHt: number; complet: boolean } | null;
+  individuelle: { nom: string; totalLivreHt: number; complet: boolean; sousMinimum?: number } | null;
   /** Groupe moins individuel (négatif : le groupe coûte moins) ; null si l'une des deux offres est incomplète. */
   ecartHt: number | null;
   phrase: string;
@@ -51,7 +53,14 @@ export function totalIndividuel(lignes: readonly LigneComparee[], o: OffreIndivi
 }
 
 export function comparerCoutLivre(lignes: readonly LigneComparee[], groupe: { totalLivreHt: number; complet: boolean }, offres: readonly OffreIndividuelle[]): ComparaisonLivree {
-  const candidates = offres.map((o) => ({ nom: o.nom, ...totalIndividuel(lignes, o) })).filter((o) => o.totalLivreHt > 0);
+  const candidates = offres
+    .map((o) => {
+      const t = totalIndividuel(lignes, o);
+      // Sous le minimum de commande du négoce, l'offre n'est pas comparable telle quelle : elle passe après les autres.
+      const sous = o.minimumCommandeHt != null && o.minimumCommandeHt > 0 && t.totalLivreHt < o.minimumCommandeHt ? o.minimumCommandeHt : undefined;
+      return { nom: o.nom, ...t, ...(sous ? { sousMinimum: sous, complet: false } : {}) };
+    })
+    .filter((o) => o.totalLivreHt > 0);
   // La meilleure : complète d'abord, puis la moins chère.
   candidates.sort((a, b) => Number(b.complet) - Number(a.complet) || a.totalLivreHt - b.totalLivreHt);
   const individuelle = candidates[0] ?? null;
@@ -61,7 +70,7 @@ export function comparerCoutLivre(lignes: readonly LigneComparee[], groupe: { to
   let phrase: string;
   if (!individuelle) phrase = `${pour} : achat groupé ${euros(groupe.totalLivreHt)} HT${groupe.complet ? "" : " (offre incomplète)"}. Aucune offre individuelle chiffrée à comparer.`;
   else {
-    phrase = `${pour} : achat groupé ${euros(groupe.totalLivreHt)} HT${groupe.complet ? "" : " (offre incomplète)"} ; ta meilleure offre individuelle (${individuelle.nom}) ${euros(individuelle.totalLivreHt)} HT${individuelle.complet ? "" : " (incomplète)"}.`;
+    phrase = `${pour} : achat groupé ${euros(groupe.totalLivreHt)} HT${groupe.complet ? "" : " (offre incomplète)"} ; ta meilleure offre individuelle (${individuelle.nom}) ${euros(individuelle.totalLivreHt)} HT${individuelle.sousMinimum ? ` (sous son minimum de commande de ${euros(individuelle.sousMinimum)} HT)` : individuelle.complet ? "" : " (incomplète)"}.`;
     if (ecartHt !== null) phrase += ecartHt === 0 ? " Même total." : ` Écart : ${euros(Math.abs(ecartHt))} HT ${ecartHt < 0 ? "de moins en groupe" : "de plus en groupe"}.`;
     else phrase += " Écart non calculé : une offre ne chiffre pas toutes les lignes.";
   }

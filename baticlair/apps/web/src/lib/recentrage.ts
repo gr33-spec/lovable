@@ -63,7 +63,18 @@ export interface PageChiffrage {
   lignes: { cle: string; designation: string; quantite: number; unite: string }[];
   validiteMin: number;
   etat: "a_chiffrer" | "repondu" | "refuse" | "commande";
-  reponse: { prix: Record<string, number>; livraisonHt: number; delaiJours: number | null; validiteJours: number | null; valideJusquau: string } | null;
+  reponse: {
+    prix: Record<string, number>;
+    livraisonHt: number;
+    delaiJours: number | null;
+    validiteJours: number | null;
+    valideJusquau: string;
+    /** Greg, 7 novembre 2026 : le coût réellement livré. */
+    disponibilite?: "complete" | "partielle" | null;
+    livraisons?: "unique" | "plusieurs" | null;
+    minimumCommandeHt?: number | null;
+    dechargement?: string | null;
+  } | null;
   commande: { le: string; suivi: string | null } | null;
   /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », motif d'un refus, précision et sa réponse. */
   vaRepondre?: boolean;

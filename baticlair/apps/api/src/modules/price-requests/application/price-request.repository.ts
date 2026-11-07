@@ -22,7 +22,13 @@ export interface RecipientRecord {
   /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu (mi-délai ou veille). */
   rappelLe?: Date | null;
   /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », le motif d'un refus, une précision demandée. */
-  negoce?: { intentionLe: Date | null; refusMotif: string | null; precision: { question: string; demandeeLe: Date | null; reponse: string | null; repondueLe: Date | null } | null };
+  negoce?: {
+    intentionLe: Date | null;
+    refusMotif: string | null;
+    precision: { question: string; demandeeLe: Date | null; reponse: string | null; repondueLe: Date | null } | null;
+    /** Greg, 7 novembre 2026 : ce que le négoce a dit pour le coût réellement livré. */
+    conditions?: { livraisons: string | null; minimumCommandeHt: number | null; dechargement: string | null };
+  };
 }
 
 /**

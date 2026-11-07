@@ -847,12 +847,12 @@ export class AchatGroupeService {
     const projets = [...new Set(mesLignes.map((l) => l.projectId).filter((x): x is string => !!x))];
     const recipients = await this.prisma.priceRequestRecipient.findMany({
       where: { reponduLe: { not: null }, priceRequest: { companyId: b.companyId, ...(projets.length ? { projectId: { in: projets } } : {}) } },
-      select: { prix: true, livraisonHt: true, supplier: { select: { name: true } }, priceRequest: { select: { lines: true } } },
+      select: { prix: true, livraisonHt: true, minimumCommandeHt: true, supplier: { select: { name: true } }, priceRequest: { select: { lines: true } } },
     });
     const offres = recipients.filter((r) => r.prix && typeof r.prix === "object").map((r) => {
       const demande = ((r.priceRequest.lines as { designation?: string; unit?: string | null }[] | null) ?? []).map((l, i) => ({ cle: String(i), designation: l.designation ?? "", unite: l.unit ?? "" }));
       const prix = r.prix as Record<string, number>;
-      return { nom: r.supplier.name, livraisonHt: Number(r.livraisonHt ?? 0), prix: demande.filter((l) => typeof prix[l.cle] === "number").map((l) => ({ designation: l.designation, unite: l.unite, prixHt: prix[l.cle]! })) };
+      return { nom: r.supplier.name, livraisonHt: Number(r.livraisonHt ?? 0), minimumCommandeHt: r.minimumCommandeHt == null ? null : Number(r.minimumCommandeHt), prix: demande.filter((l) => typeof prix[l.cle] === "number").map((l) => ({ designation: l.designation, unite: l.unite, prixHt: prix[l.cle]! })) };
     });
     return comparerCoutLivre(lignes, { totalLivreHt: meilleure.totalHt, complet: meilleure.complete }, offres);
   }

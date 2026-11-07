@@ -59,6 +59,9 @@ interface Row {
     precisionDemandeeLe?: Date | null;
     precisionReponse?: string | null;
     precisionRepondueLe?: Date | null;
+    livraisons?: string | null;
+    minimumCommandeHt?: unknown;
+    dechargement?: string | null;
     rappelMiLe?: Date | null;
     rappelVeilleLe?: Date | null;
     supplier: {
@@ -176,6 +179,7 @@ function toRecord(row: Row): PriceRequestRecord {
         intentionLe: r.intention === "repondra" ? (r.intentionLe ?? null) : null,
         refusMotif: r.refuseLe ? (r.refusMotif ?? null) : null,
         precision: r.precisionQuestion ? { question: r.precisionQuestion, demandeeLe: r.precisionDemandeeLe ?? null, reponse: r.precisionReponse ?? null, repondueLe: r.precisionRepondueLe ?? null } : null,
+        conditions: { livraisons: r.livraisons ?? null, minimumCommandeHt: r.minimumCommandeHt == null ? null : Number(r.minimumCommandeHt), dechargement: r.dechargement ?? null },
       },
       document: r.document
         ? {

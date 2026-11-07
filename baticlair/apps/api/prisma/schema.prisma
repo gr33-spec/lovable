@@ -732,6 +732,11 @@ model PriceRequestRecipient {
   precisionDemandeeLe DateTime? @map("precision_demandee_le") @db.Timestamptz(3)
   precisionReponse    String?   @map("precision_reponse")
   precisionRepondueLe DateTime? @map("precision_repondue_le") @db.Timestamptz(3)
+  /// Le coût réellement livré (Greg, 7 novembre 2026) : livraison unique ou plusieurs, minimum de commande s'il existe,
+  /// contrainte de déchargement (facultative). La disponibilité se déduit des lignes chiffrées (jamais redemandée).
+  livraisons          String?   @map("livraisons")
+  minimumCommandeHt   Decimal?  @map("minimum_commande_ht") @db.Decimal(14, 2)
+  dechargement        String?   @map("dechargement")
 
   priceRequest PriceRequest       @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
   emailsRecus  EmailRecuArtisan[]

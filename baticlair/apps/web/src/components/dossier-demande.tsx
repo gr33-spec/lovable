@@ -150,6 +150,7 @@ export function SuiviDemande({ projectId }: { projectId: string }) {
           vaRepondre: Boolean(r.negoce?.vaRepondreLe) && r.status === "sent",
           refusMotif: r.negoce?.refusMotif ?? null,
           precision: r.negoce?.precision ?? null,
+          conditions: r.negoce?.conditions ?? null,
         })),
     ),
     ...data.perso.flatMap((d) =>
@@ -201,6 +202,8 @@ interface LigneNegoce {
   vaRepondre: boolean;
   refusMotif: string | null;
   precision: { question: string; reponse: string | null } | null;
+  /** Greg, 7 novembre 2026 : ce que le négoce a dit pour le coût réellement livré. */
+  conditions?: { livraisons: string | null; minimumCommandeHt: number | null; dechargement: string | null } | null;
 }
 
 function LigneSuiviNegoce({ l, onRepondu }: { l: LigneNegoce; onRepondu: () => void }) {
@@ -239,6 +242,17 @@ function LigneSuiviNegoce({ l, onRepondu }: { l: LigneNegoce; onRepondu: () => v
         </div>
       </div>
       {l.refusMotif ? <p className="text-[14px] text-muted">Motif : « {l.refusMotif} »</p> : null}
+      {l.conditions && (l.conditions.livraisons === "plusieurs" || l.conditions.minimumCommandeHt != null || l.conditions.dechargement) ? (
+        <p className="text-[14px] text-muted">
+          {[
+            l.conditions.livraisons === "plusieurs" ? "Livraison en plusieurs fois" : null,
+            l.conditions.minimumCommandeHt != null ? `Minimum de commande ${l.conditions.minimumCommandeHt.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })} HT` : null,
+            l.conditions.dechargement ? `Déchargement : ${l.conditions.dechargement}` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+      ) : null}
       {l.precision ? (
         <div className="flex flex-col gap-2 rounded-lg border border-line p-3">
           <p className="text-[14px]">
