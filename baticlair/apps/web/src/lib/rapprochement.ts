@@ -11,12 +11,18 @@ export interface LigneAnalysee {
   unite: string;
   reference: string | null;
   rapprochable: boolean;
+  /** Deux parcours reliés (Greg, 7 novembre 2026) : la ligne a du potentiel en achat groupé, et pourquoi. */
+  recommandee?: boolean;
+  pourquoi?: string | null;
+  besoinsCompatibles?: number;
   raison: string | null;
   collecte: { id: string; titre: string; clotureLe: string; dateBesoin: string | null } | null;
   recherche: { id: string; statut: string; jusquau: string; modeLivraison: "livraison" | "retrait"; rayonKm?: number; dateMax: string | null } | null;
 }
 
 export interface AnalyseRapprochement {
+  /** La phrase d'ensemble des opportunités, ou null s'il n'y en a pas. */
+  opportunites?: string | null;
   phrase: string;
   resteIndividuelle: string;
   collectif: string;

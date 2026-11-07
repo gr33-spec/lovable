@@ -83,6 +83,8 @@ test("Rapprochement : la ligne cherche jusqu'à une date, la demande reste libre
 
   // 1. Sur la liste validée : la carte, la phrase, la case de la ligne, la date, le bouton.
   await page.goto(`/chantiers/${projetA}`);
+  // Deux parcours reliés (Greg, 7 novembre 2026) : les réglages détaillés sont sous « Plus d'options de regroupement ».
+  await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();
   const carte = page.getByRole("region", { name: "Rechercher des besoins compatibles" });
   await expect(carte).toBeVisible({ timeout: 30_000 });
   await expect(carte.getByText(/^Ta demande peut partir maintenant à tes négoces\./)).toBeVisible();
@@ -134,7 +136,7 @@ test("Rapprochement : la ligne cherche jusqu'à une date, la demande reste libre
 test("Groupes › Découvrir : les filtres (produit, famille, secteur, clôture) vivent dans l'adresse ; aucun métier imposé", async ({ page }) => {
   await inscrire(page, "Jean", `Toitures ${unique()}`);
   await page.goto("/achats-groupes?vue=decouvrir");
-  await expect(page.getByRole("heading", { name: "Groupes", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Achat en gros", level: 1 })).toBeVisible();
   // La phrase du collectif (section 17) : la même à l'écran (ordinateur) que celle du serveur.
   const { collectif } = (await apiJson<{ collectif: string }>(page, "GET", "/v1/achats-groupes/decouvrir")).body;
   expect(collectif).toMatch(/^Un achat groupé fonctionne si chacun joue sa part/);
@@ -174,6 +176,8 @@ test("Lot 3 : une collecte ouverte qui correspond se rejoint depuis la carte (n�
   await siret(page);
   const projetA = await listeValidee(page, dep, "Ardoise naturelle 32×22 Espagne 1er choix", "900");
   await page.goto(`/chantiers/${projetA}`);
+  // Deux parcours reliés (Greg, 7 novembre 2026) : les réglages détaillés sont sous « Plus d'options de regroupement ».
+  await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();
   const carte = page.getByRole("region", { name: "Rechercher des besoins compatibles" });
   await expect(carte.getByText(/^Une collecte ouverte correspond/)).toBeVisible({ timeout: 30_000 });
   await carte.getByRole("button", { name: "Rejoindre cette collecte" }).click();
@@ -197,6 +201,8 @@ test("Lot 3 : une collecte ouverte qui correspond se rejoint depuis la carte (n�
   // Une autre liste : la recherche garde retrait au dépôt et date de besoin.
   const projetC = await listeValidee(page, String((Number(dep) % 90) + 1).padStart(2, "0"), "Ardoise naturelle 30×20 Espagne 1er choix", "300");
   await page.goto(`/chantiers/${projetC}`);
+  // Deux parcours reliés (Greg, 7 novembre 2026) : les réglages détaillés sont sous « Plus d'options de regroupement ».
+  await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();
   const carteC = page.getByRole("region", { name: "Rechercher des besoins compatibles" });
   await carteC.getByRole("checkbox", { name: /Ardoise/ }).check();
   await carteC.getByLabel("Besoin au plus tard le (facultatif)").fill(jour(25));
@@ -250,6 +256,8 @@ test("Lot 5 : Découvrir par secteur, région, retrait au dépôt et sur la cart
   // La recherche de besoins compatibles prend un rayon, rappelé sur la ligne.
   const projetA = await listeValidee(page, dep, "Ardoise naturelle 30×20 Espagne 1er choix", "300");
   await page.goto(`/chantiers/${projetA}`);
+  // Deux parcours reliés (Greg, 7 novembre 2026) : les réglages détaillés sont sous « Plus d'options de regroupement ».
+  await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();
   const carteA = page.getByRole("region", { name: "Rechercher des besoins compatibles" });
   await carteA.getByRole("checkbox", { name: /Ardoise/ }).check();
   await carteA.getByLabel("Secteur").selectOption("100");

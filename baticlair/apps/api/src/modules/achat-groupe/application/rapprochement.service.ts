@@ -8,6 +8,8 @@ import {
   SEUIL_ANONYMAT_DEFAUT,
   comparerBesoins,
   departementsAutour,
+  phraseOpportunites,
+  recommander,
   phraseNotificationRapprochement,
   referenceStricte,
   tranche,
@@ -73,6 +75,8 @@ export async function clesCommandees(prisma: PrismaService, companyId: string, p
 
 const couverte = (cles: Set<string> | "toutes", key: string) => cles === "toutes" || cles.has(key);
 
+const uniteCourte = (u: string) => u.trim().toLowerCase().replace(/^pi[eè]ces?$|^pcs?$|^u$|^unit[eé]s?$/, "u").replace(/^m²$/, "m2").replace(/^ml$/, "m");
+
 export class RapprochementService {
   constructor(
     private readonly prisma: PrismaService,
@@ -102,7 +106,37 @@ export class RapprochementService {
     const commandees = await clesCommandees(this.prisma, tenant.companyId, projectId);
     const collectes = departement ? await this.collectesOuvertes(departement, maintenant, tenant.companyId) : [];
     const faits = await faitsDesLignes(this.prisma, tenant.companyId, projectId, maintenant);
+    // Deux parcours reliés (Greg, 7 novembre 2026) : les besoins IDENTIQUES d'autres entreprises du secteur (même clé produit),
+    // comptés par entreprise, jamais nommés ni détaillés.
+    const autres = departement
+      ? await this.prisma.ligneRapprochement.findMany({ where: { statut: { in: ACTIFS }, jusquau: { gt: maintenant }, departement, companyId: { not: tenant.companyId } }, select: { cle: true, unite: true, companyId: true } })
+      : [];
+    const besoinsDe = (cle: string, unite: string) => new Set(autres.filter((a) => a.cle === cle && uniteCourte(a.unite) === uniteCourte(unite)).map((a) => a.companyId)).size;
+    const vues = lignes.map((l) => {
+        const r = referenceStricte(l.designation);
+        const recherche = deja.find((d) => d.articleKey === l.key);
+        const besoin: BesoinComparable = { designation: l.designation, unite: l.unite, departement, dateMax: null, modeLivraison: "livraison" };
+        const collecte = r.ok ? collectes.find((c) => c.lignes.some((cl) => comparerBesoins(besoin, cl).niveau === "exacte")) : undefined;
+        const rapprochable = r.ok && !!departement && !couverte(commandees, l.key) && !faits(l.key).groupe;
+        const besoinsCompatibles = r.ok ? besoinsDe(r.reference.cle, l.unite) : 0;
+        const reco = recommander({ rapprochable, type: r.ok ? r.reference.type : null, quantite: l.quantite === null || l.quantite === undefined ? null : Number(l.quantite), unite: l.unite, collecte: !!collecte && !faits(l.key).groupe, besoinsCompatibles });
+        return {
+          key: l.key,
+          designation: l.designation,
+          quantite: l.quantite,
+          unite: l.unite,
+          reference: r.ok ? r.reference.libelle : null,
+          rapprochable,
+          recommandee: reco.recommandee,
+          pourquoi: reco.raison,
+          besoinsCompatibles,
+          raison: couverte(commandees, l.key) ? "Une offre est déjà acceptée pour cette ligne." : faits(l.key).groupe ? `Déjà dans l'achat groupé « ${faits(l.key).groupe!.titre} ».` : !r.ok ? ("raison" in r && r.raison === "accessoire" ? "Petit accessoire : il part en demande individuelle." : "Article pas assez précis pour un rapprochement sûr.") : !departement ? "Indique l'adresse du chantier avec son code postal." : null,
+          collecte: collecte && !faits(l.key).groupe ? { id: collecte.id, titre: collecte.libelle, clotureLe: collecte.clotureLe.toISOString(), dateBesoin: collecte.dateBesoin ? jourIso(collecte.dateBesoin) : null } : null,
+          recherche: recherche ? { id: recherche.id, statut: recherche.statut, jusquau: recherche.jusquau.toISOString(), modeLivraison: recherche.modeLivraison === "retrait" ? "retrait" : "livraison", rayonKm: recherche.rayonKm, dateMax: recherche.dateMax ? jourIso(recherche.dateMax) : null } : null,
+        };
+      });
     return {
+      opportunites: phraseOpportunites(vues.map((v) => ({ recommandee: v.recommandee, collecte: !!v.collecte, besoinsCompatibles: v.besoinsCompatibles }))),
       phrase: PHRASE_RECHERCHE_RAPPROCHEMENT,
       resteIndividuelle: PHRASE_RESTE_INDIVIDUELLE,
       collectif: PHRASE_COLLECTIF,
@@ -110,23 +144,7 @@ export class RapprochementService {
       rechercheMaxJours: RECHERCHE_MAX_JOURS,
       // Rejoindre une collecte depuis la carte (lot 3) : la case d'engagement, la même phrase que l'achat groupé.
       engagement: PHRASE_ENGAGEMENT,
-      lignes: lignes.map((l) => {
-        const r = referenceStricte(l.designation);
-        const recherche = deja.find((d) => d.articleKey === l.key);
-        const besoin: BesoinComparable = { designation: l.designation, unite: l.unite, departement, dateMax: null, modeLivraison: "livraison" };
-        const collecte = r.ok ? collectes.find((c) => c.lignes.some((cl) => comparerBesoins(besoin, cl).niveau === "exacte")) : undefined;
-        return {
-          key: l.key,
-          designation: l.designation,
-          quantite: l.quantite,
-          unite: l.unite,
-          reference: r.ok ? r.reference.libelle : null,
-          rapprochable: r.ok && !!departement && !couverte(commandees, l.key) && !faits(l.key).groupe,
-          raison: couverte(commandees, l.key) ? "Une offre est déjà acceptée pour cette ligne." : faits(l.key).groupe ? `Déjà dans l'achat groupé « ${faits(l.key).groupe!.titre} ».` : !r.ok ? ("raison" in r && r.raison === "accessoire" ? "Petit accessoire : il part en demande individuelle." : "Article pas assez précis pour un rapprochement sûr.") : !departement ? "Indique l'adresse du chantier avec son code postal." : null,
-          collecte: collecte && !faits(l.key).groupe ? { id: collecte.id, titre: collecte.libelle, clotureLe: collecte.clotureLe.toISOString(), dateBesoin: collecte.dateBesoin ? jourIso(collecte.dateBesoin) : null } : null,
-          recherche: recherche ? { id: recherche.id, statut: recherche.statut, jusquau: recherche.jusquau.toISOString(), modeLivraison: recherche.modeLivraison === "retrait" ? "retrait" : "livraison", rayonKm: recherche.rayonKm, dateMax: recherche.dateMax ? jourIso(recherche.dateMax) : null } : null,
-        };
-      }),
+      lignes: vues,
     };
   }
 

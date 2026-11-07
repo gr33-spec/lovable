@@ -14,10 +14,11 @@ import {
   Res,
   StreamableFile,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { microUsdToEur } from "@baticlair/domain";
 import type { Response } from "express";
 import { memoryStorage } from "multer";
@@ -29,7 +30,7 @@ import { CONFIG } from "../../../platform/tokens.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import type { DocumentWithProcessing, PageRecord } from "../application/document.repository.js";
 import { DocumentsService } from "../application/documents.service.js";
-import { assembleQuote } from "../infrastructure/photos-to-pdf.js";
+import { assembleQuote, MAX_PHOTOS_PAR_ENVOI } from "../infrastructure/photos-to-pdf.js";
 import { chunkedFields, MAX_PART_BYTES, UploadParts } from "../infrastructure/upload-parts.js";
 
 /** Fichier reçu par multer (stockage en mémoire). */
@@ -99,19 +100,22 @@ export class DocumentsController {
 
   @Throttle({ default: HOURLY(30) })
   @Post("projects/:projectId/documents")
-  @UseInterceptors(FileInterceptor("file", { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: 1 } }))
+  @UseInterceptors(FilesInterceptor("file", MAX_PHOTOS_PAR_ENVOI, { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: MAX_PHOTOS_PAR_ENVOI } }))
   async upload(
     @Tenant() tenant: TenantContext,
     @Param("projectId") projectId: string,
-    @UploadedFile() file: UploadedPdf | undefined,
+    @UploadedFiles() files: UploadedPdf[] | undefined,
     @Body(new ZodPipe(uploadBody)) body: z.infer<typeof uploadBody>,
     @Res({ passthrough: true }) res: Response,
   ) {
-    let received = await this.uploads.fileOf(tenant, file, body);
+    // Plusieurs photos d'un même devis (Greg, 7 novembre 2026 : « plusieurs photos ») : un seul PDF, une page par photo.
+    if ((files?.length ?? 0) > 1 && body.purpose !== "client_quote") throw validationFailed("Several files", [{ path: "file", message: "one file only for this purpose" }]);
+    const recus = files?.length ? await Promise.all(files.map((f) => this.uploads.fileOf(tenant, f, {}))) : [await this.uploads.fileOf(tenant, undefined, body)];
+    let received = recus[0]!;
     // Photo d'un devis (Greg, 1er novembre 2026 : « photo d'un devis → analyse de devis ») : la photo (JPEG, PNG) devient un
     // PDF d'image, comme un devis de négoce en photos (`assembleQuote`) ; la lecture passe alors par l'image. Un PDF passe tel quel.
     if (body.purpose === "client_quote") {
-      const pdf = await assembleQuote([{ fileName: received.name, bytes: received.bytes }]);
+      const pdf = await assembleQuote(recus.map((r) => ({ fileName: r.name, bytes: r.bytes })));
       received = { name: pdf.fileName, bytes: pdf.bytes };
     }
     const result = await this.documents.upload(tenant, projectId, { purpose: body.purpose, fileName: received.name, bytes: received.bytes });

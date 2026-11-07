@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Req, Res, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
 import { memoryStorage } from "multer";
@@ -9,7 +9,7 @@ import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import type { RequestWithUser } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
-import { chunkedFields, UploadParts } from "../../documents/index.js";
+import { assembleQuote, chunkedFields, MAX_PHOTOS_PAR_ENVOI, UploadParts } from "../../documents/index.js";
 import { CatalogueService } from "../../catalogue/index.js";
 import { QuantitatifsService } from "../application/quantitatifs.service.js";
 
@@ -255,15 +255,21 @@ export class ListeExistanteController {
 
   @Throttle({ default: HOURLY(30) })
   @Post()
-  @UseInterceptors(FileInterceptor("file", { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: 1 } }))
+  @UseInterceptors(FilesInterceptor("file", MAX_PHOTOS_PAR_ENVOI, { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: MAX_PHOTOS_PAR_ENVOI } }))
   async create(
     @Tenant() tenant: TenantContext,
     @Param("projetId") projetId: string,
-    @UploadedFile() file: (UploadedPdf & { size: number }) | undefined,
+    @UploadedFiles() files: (UploadedPdf & { size: number })[] | undefined,
     @Body(new ZodPipe(z.object({ ...chunkedFields }))) body: z.infer<z.ZodObject<typeof chunkedFields>>,
     @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>,
   ) {
-    const received = await this.uploads.fileOf(tenant, file, body);
+    // Plusieurs photos d'une liste papier (Greg, 7 novembre 2026) : un seul PDF, une page par photo, lu en une fois.
+    if ((files?.length ?? 0) > 1) {
+      const recus = await Promise.all(files!.map((f) => this.uploads.fileOf(tenant, f, {})));
+      const pdf = await assembleQuote(recus.map((r) => ({ fileName: r.name, bytes: r.bytes })));
+      return this.quantitatifs.fromListe(tenant, projetId, { name: pdf.fileName, bytes: pdf.bytes }, { ecran: query.ecran === "1" });
+    }
+    const received = await this.uploads.fileOf(tenant, files?.[0], body);
     return this.quantitatifs.fromListe(tenant, projetId, { name: received.name, bytes: received.bytes }, { ecran: query.ecran === "1" });
   }
 }

@@ -192,16 +192,14 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
     const vide = page.getByRole("region", { name: "Aucun besoin en cours" });
     await expect(vide.getByRole("link", { name: "Nouveau besoin" })).toHaveAttribute("href", "/chantiers/nouveau");
-    await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Groupes" })).toHaveAttribute("href", "/achats-groupes");
+    await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achat en gros" })).toHaveAttribute("href", "/achats-groupes");
     await expect(page.getByRole("link", { name: /Essai gratuit/ })).toHaveCount(0);
     await capture(page, projet, "1-compte-vide");
 
     // 2. La liste depuis un devis : trois choix, le bandeau, « à vérifier », la suggestion, « Tout cocher ».
     await vide.getByRole("link", { name: "Nouveau besoin" }).click();
-    // Greg, 31 octobre 2026 : trois entrées, « Importer un document », « Saisir ma liste », « Décrire mon chantier ».
-    await expect(page.getByText("Importer un document", { exact: true })).toBeVisible();
-    await expect(page.getByText("Créer une liste à la main", { exact: true })).toBeVisible();
-    await expect(page.getByText("Décrire mon chantier", { exact: true })).toBeVisible();
+    // Deux parcours reliés (Greg, 7 novembre 2026) : une conversation ; le « + » ouvre photo, document et catalogue.
+    await expect(page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" })).toBeVisible();
     await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-achat-groupe.pdf"));
     await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
     const liste = page.getByRole("region", { name: "Liste des fournitures" });
@@ -211,6 +209,9 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(liste).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("Liste préparée à partir de ton devis. Vérifie les quantités avant d'envoyer.")).toBeVisible();
     await expect(liste.getByText("à vérifier").first()).toBeVisible();
+    // La carte « Ton quantitatif est prêt » (Greg, 7 novembre 2026) ; l'achat groupé précis sous « Plus d'options ».
+    await expect(page.getByRole("region", { name: "Ton quantitatif est prêt" })).toBeVisible();
+    await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();
     const suggestion = page.getByText(/^Tu as 1\u00a0800 pièces de ardoise 32×22 Espagne 1er choix, mets-les en achat groupé pour payer moins cher\.$/);
     await expect(suggestion).toBeVisible({ timeout: 30_000 });
     await suggestion.scrollIntoViewIfNeeded();
@@ -248,7 +249,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     const b = await nouvelArtisan(browser, dep, "Paul");
     // Greg, 6 novembre 2026 : « Groupes » dans le menu, vue « Découvrir » (son secteur d'office).
     await b.page.goto("/");
-    await b.page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Groupes" }).click();
+    await b.page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achat en gros" }).click();
     await b.page.waitForURL(/\/achats-groupes/);
     const ouverts = b.page.getByRole("tabpanel", { name: "Découvrir" });
     await b.page.getByRole("tab", { name: "Découvrir" }).click();
@@ -483,7 +484,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
   test("liste écrite à la main : fermée, reprise telle quelle", async ({ page }) => {
     await inscrireSansSiret(page, departement());
     await page.goto("/chantiers/nouveau");
-    await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
+    await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
     const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
     await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
     await ecran.getByRole("button", { name: /Ajouter « Liteaux 27×38 maison » tel que je l'écris/ }).click();

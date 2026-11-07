@@ -129,7 +129,7 @@ function AchatsGroupes() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <PageTitle>Groupes</PageTitle>
+        <PageTitle>Achat en gros</PageTitle>
         <ButtonLink
           href="/achats-groupes/lancer"
           className="w-full lg:w-auto lg:px-6"

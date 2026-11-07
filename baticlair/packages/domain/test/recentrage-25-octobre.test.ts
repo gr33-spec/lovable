@@ -50,7 +50,8 @@ describe("référence stricte : une 30×20 ne rejoint jamais une 32×22", () => 
     expect(referenceStricte("Ardoise naturelle Espagne")).toEqual({ ok: false, raison: "attribut_manquant" });
     expect(referenceStricte("Ardoise 32x22 ou 30x20")).toEqual({ ok: false, raison: "ambigu" });
     expect(referenceStricte("Zinc naturel")).toEqual({ ok: false, raison: "attribut_manquant" });
-    expect(referenceStricte("Tuile romane canal")).toEqual({ ok: false, raison: "type_inconnu" });
+    // Greg, 7 novembre 2026 : la tuile est un type reconnu, mais seulement avec sa marque et son modèle ; sans marque, le doute reste.
+    expect(referenceStricte("Tuile romane canal")).toEqual({ ok: false, raison: "attribut_manquant" });
   });
   it("les petits accessoires ne se regroupent jamais", () => {
     expect(referenceStricte("Crochet inox 100 mm")).toEqual({ ok: false, raison: "accessoire" });

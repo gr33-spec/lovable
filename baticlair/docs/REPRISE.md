@@ -34,6 +34,13 @@ complètes seulement avant un déploiement important, et en le disant.
 
 ## En cours
 
+SUIVI 174 (7 novembre 2026) : « mets en place tout ça pour que je puisse tester » (5 captures). Fait : conversation
+« Nouveau quantitatif » (`nouveau-quantitatif.tsx`), carte « Ton quantitatif est prêt » (`liste-prete.tsx`), recommandations
+du rapprochement (`opportunites.ts`, paliers = HYPOTHÈSES), 10 photos par envoi (un PDF), « Achat en gros ». Limites V1 :
+questions après un document = écran actuel ; notifications inchangées ; page « Achat en gros » seulement renommée ; un
+document importé quand une liste tapée existe ouvre une nouvelle liste. Les 5 questions ouvertes à Greg restent aux
+réglages actuels (DECISIONS).
+
 SUIVI 173 (7 novembre 2026) : accord de Greg « Oui pour la sauvegarde Neon puis test.mobiiz.fr uniquement ». Sauvegarde
 `sauvegarde-avant-lots-prompt-maitre` (br-noisy-frog-b2wy0xkl) faite ; 9429dc8e déployé (5 migrations) ; plan de retour
 arrière dans `docs/retour-arriere-2026-11-07.md`. Puis les 4 décisions de Greg (interprète IA plafonné 1 $ / 500, badge

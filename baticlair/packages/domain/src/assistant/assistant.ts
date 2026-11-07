@@ -309,7 +309,9 @@ export interface LigneDecrite {
 
 const VERBES_DE_CHANTIER = /^(?:je|j'|on|il faut|il me faut|faut|prevoir|prevois|pour|avec|plus|et|puis|aussi|ensuite|alors|donc)\b\s*(?:(?:vais|va|dois|doit|refais|refait|fais|fait|pose|poser|change|changer|remplace|remplacer|mets|mettre|ai besoin d[e']|aurai besoin d[e']|prends|prendre|commande|commander)\s*)?/;
 
-export function lireDescription(texte: string): { lignes: LigneDecrite[]; aConfirmer: LigneDecrite[] } {
+export function lireDescription(texteBrut: string): { lignes: LigneDecrite[]; aConfirmer: LigneDecrite[] } {
+  // « 1 000 ardoises » (Greg, 7 novembre 2026) : l'espace des milliers fait partie du nombre, jamais « 1 » et « 000 ardoises ».
+  const texte = texteBrut.replace(/(?<![\d,.])(\d{1,3})(?:[ \u00a0\u202f](\d{3}))+(?!\d)/g, (m) => m.replace(/[ \u00a0\u202f]/g, ""));
   const morceaux = texte
     .split(/\n|;|\.(?=\s|$)|,|\s+et\s+(?=\d|un\b|une\b|des\b|du\b|de la\b)|\s+(?:puis|plus|avec)\s+(?=\d)/i)
     .map((m) => m.trim())

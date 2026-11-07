@@ -92,6 +92,28 @@ describe("dépôt et lecture d'un devis (sans IA)", () => {
     expect(doc).toMatchObject({ mimeType: "application/pdf", purpose: "client_quote" });
   });
 
+  it("plusieurs photos d'un même devis (Greg, 7 novembre 2026) font UN seul PDF d'image ; plusieurs fichiers ailleurs que pour un devis sont refusés", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const projectId = await chantier(agent);
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==", "base64");
+    const res = await agent
+      .post(`/v1/projects/${projectId}/documents`)
+      .field("purpose", "client_quote")
+      .attach("file", png, { filename: "IMG_1.png", contentType: "image/png" })
+      .attach("file", Buffer.from(png), { filename: "IMG_2.png", contentType: "image/png" });
+    expect(res.status).toBe(201);
+    expect(await ctx.prisma.document.count({ where: { projectId } })).toBe(1);
+    const doc = await ctx.prisma.document.findFirstOrThrow({ where: { projectId } });
+    expect(doc).toMatchObject({ mimeType: "application/pdf", purpose: "client_quote" });
+    const refus = await agent
+      .post(`/v1/projects/${projectId}/documents`)
+      .field("purpose", "sketch")
+      .attach("file", png, { filename: "a.png", contentType: "image/png" })
+      .attach("file", Buffer.from(png), { filename: "b.png", contentType: "image/png" });
+    expect(refus.status).toBeGreaterThanOrEqual(400);
+    expect(refus.status).toBeLessThan(500);
+  });
+
   it("refuse un fichier qui n'est pas un PDF, quelle que soit son extension", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const projectId = await chantier(agent);

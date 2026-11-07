@@ -1,22 +1,9 @@
 "use client";
 
-import { InfoAnalyse } from "@/components/coup-de-main-ia";
-import { useSearchParams } from "next/navigation";
-
-import { Camera, FileText, Image as ImageIcon, Loader2, PenLine, Upload, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Suspense, useCallback, useId, useRef, useState } from "react";
-import { SaisirMaListe } from "@/components/saisir-ma-liste";
-import { texteDuPdf } from "@/components/pdf-pages";
-import { natureDuDocument } from "../../../../../../../packages/domain/src/documents/nature";
-import { BoutonDecrire } from "@/components/decrire-mon-chantier";
-import { ErrorNotice } from "@/components/ui";
+import { Suspense } from "react";
+import { NouveauQuantitatif } from "@/components/nouveau-quantitatif";
 import { Paywall, useBilling } from "@/components/paywall";
 import { BackButton } from "@/components/ui";
-import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Project, type ProjectDocument } from "@/lib/api";
-import { NEW_PROJECT_NAME } from "@/lib/project-name";
-import { attachFile } from "@/lib/upload";
-import { useSession } from "@/lib/session";
 
 /**
  * ACHAT GROUPÉ PAR MÉTIER (Greg, 27 octobre 2026, 2e message, point 31) : trois choix, « Depuis mon devis — on t'avance »,
@@ -28,51 +15,7 @@ import { useSession } from "@/lib/session";
  * chemins arrivent sur le même écran de liste. Rien à taper.
  */
 export default function NouveauChantierPage() {
-  const router = useRouter();
-  const { company } = useSession();
   const billing = useBilling();
-  const [pending, setPending] = useState<"devis" | "liste" | null>(null);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [erreurListe, setErreurListe] = useState<string | null>(null);
-  // Avant toute analyse (Greg, 1er novembre 2026) : le type reconnu et ce qu'il coûte ; rien n'est décompté avant « Analyser ».
-  const [aConfirmer, setAConfirmer] = useState<{ file: File; nature: "devis" | "liste" } | null>(null);
-  // Une clé par dépôt : double appui ou nouvelle tentative = un seul chantier.
-  const key = useRef(newActionKey());
-  const project = useRef<Project | null>(null);
-
-  async function drop(file: File, kind: "devis" | "liste") {
-    setError(null);
-    setErreurListe(null);
-    if (file.size > MAX_DOCUMENT_BYTES) return setError(new ApiError("payload_too_large", 413));
-    setPending(kind);
-    try {
-      const trade = company?.trades.find((t) => t !== "other") ?? null;
-      project.current ??= await api<Project>("/v1/projects", { method: "POST", body: { name: NEW_PROJECT_NAME, clientName: null, address: null, trade }, idempotencyKey: key.current });
-      const form = new FormData();
-      if (kind === "liste") {
-        await attachFile(form, file);
-        await api(`/v1/projects/${encodeURIComponent(project.current.id)}/liste?ecran=1`, { method: "POST", body: form });
-        // Une liste n'a ni client ni adresse à lire : le chantier porte la date de la liste (renommable d'un tap).
-        const jour = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
-        await api(`/v1/projects/${encodeURIComponent(project.current.id)}`, { method: "PATCH", body: { name: `Ma liste du ${jour}` } }).catch(() => undefined);
-      } else {
-        form.append("purpose", "client_quote");
-        await attachFile(form, file);
-        await api<ProjectDocument>(`/v1/projects/${encodeURIComponent(project.current.id)}/documents`, { method: "POST", body: form });
-      }
-      // replace : « Retour » depuis le chantier ramène à la liste des chantiers, pas au dépôt. La lecture part là-bas.
-      router.replace(`/chantiers/${project.current.id}`);
-    } catch (e) {
-      const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
-      if (err.code === "plan_limit_reached") billing.reload();
-      // Seul « rien lu » parle de la photo ; une panne du service de lecture dit la panne, avec son code support.
-      else if (kind === "liste" && (err.reason === "nothing_read" || err.code === "unreadable_document")) {
-        setErreurListe(err.reason === "nothing_read" ? "Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF." : "Ce fichier n'est ni une photo ni un PDF.");
-      } else setError(err);
-      setPending(null);
-    }
-  }
-
   if (billing.data?.limitReached) {
     return (
       <>
@@ -81,218 +24,11 @@ export default function NouveauChantierPage() {
       </>
     );
   }
-
-  /** « Importer un document » : le type (devis ou liste) se détermine sans le demander (`natureDuDocument`). */
-  async function importer(file: File) {
-    // Ni une photo ni un PDF : dit tout de suite, rien n'est créé ni décompté.
-    const pdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
-    if (!pdf && !file.type.startsWith("image/") && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) {
-      setError(null);
-      setErreurListe("Ce fichier n'est ni une photo ni un PDF.");
-      return;
-    }
-    // Trop lourd : refusé par le dépôt, en clair, sans lire le fichier.
-    if (file.size > MAX_DOCUMENT_BYTES) return drop(file, "liste");
-    const nature = natureDuDocument({ type: file.type, nom: file.name }, file.type === "application/pdf" || /\.pdf$/i.test(file.name) ? await texteDuPdf(file) : null);
-    setError(null);
-    setErreurListe(null);
-    setAConfirmer({ file, nature });
-  }
-
-  return (
-    <>
-      {/* Greg, 31 octobre 2026 : trois entrées, moins d'espace, l'information en une phrase. Audit UX (1er novembre 2026) :
-          le retour rond à côté du titre, comme sur un chantier et dans Profil (un seul style de retour). */}
-      <div className="flex items-center gap-2">
-        <BackButton fallback="/chantiers" compact />
-        <h1 className="text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Ma liste de matériaux</h1>
-      </div>
-      {erreurListe ? (
-        <p role="alert" className="rounded-xl bg-warn-bg p-4 text-[15px] font-semibold text-warn">
-          {erreurListe}
-        </p>
-      ) : null}
-      {error ? <ErrorNotice error={error} /> : null}
-      <InfoAnalyse />
-      {/* Les quatre départs du « + » (Greg, 1er novembre 2026) : importer, photographier une liste papier, créer à la main,
-          décrire son chantier. */}
-      <p className="text-[14px] leading-snug text-muted">Devis, liste de matériaux, PDF, photo, scan, liste écrite à la main, ou ta description écrite ou dictée.</p>
-      <ImporterUnDocument pending={pending !== null} onFichier={(f) => void importer(f)} />
-      <PhotographierListe pending={pending !== null} onFichier={(f) => void importer(f)} />
-      {aConfirmer ? (
-        <ConfirmerAnalyse
-          nature={aConfirmer.nature}
-          // L'analyse de devis lit un PDF, une photo JPEG ou PNG (pas WebP ni HEIC) : sinon, pas de bascule vers le devis.
-          peutChanger={aConfirmer.nature === "devis" || /^(application\/pdf|image\/jpeg|image\/png)$/.test(aConfirmer.file.type) || /\.(pdf|jpe?g|png)$/i.test(aConfirmer.file.name)}
-          onChanger={() => setAConfirmer((c) => (c ? { ...c, nature: c.nature === "devis" ? "liste" : "devis" } : c))}
-          onAnnuler={() => setAConfirmer(null)}
-          onAnalyser={() => {
-            const c = aConfirmer;
-            setAConfirmer(null);
-            void drop(c.file, c.nature);
-          }}
-        />
-      ) : null}
-      <SaisieListeReprise />
-      {/* Assistant Mobiiz (Greg, 31 octobre 2026, point 1) : la description écrite ou dictée. */}
-      <BoutonDecrire />
-    </>
-  );
-}
-
-/**
- * « IMPORTER UN DOCUMENT » (Greg, 31 octobre 2026) : un devis, une liste, une photo, un PDF ou une capture, une seule
- * entrée ; au toucher, ce que le téléphone sait faire : prendre une photo, choisir une photo, choisir un PDF ou un
- * fichier. Les champs de fichier restent toujours dans la page (le toucher d'une option les ouvre).
- */
-function ImporterUnDocument({ pending, onFichier }: { pending: boolean; onFichier: (f: File) => void }) {
-  const [ouvert, setOuvert] = useState(false);
-  const ids = { photo: useId(), galerie: useId(), fichier: useId() };
-  const prendre = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    e.target.value = "";
-    setOuvert(false);
-    if (f && !pending) onFichier(f);
-  };
-  // Feuille fermée : les champs ne se touchent que par ses options (ni Tab, ni lecteur d'écran avant le bouton).
-  const cache = ouvert ? {} : { "aria-hidden": true, tabIndex: -1 };
-  const option = "pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl px-3 text-[16px] font-semibold active:bg-ground";
-  return (
-    <>
-      <input id={ids.photo} type="file" accept="image/*" capture="environment" aria-label="Prendre une photo" className="sr-only" disabled={pending} onChange={prendre} {...cache} />
-      <input id={ids.galerie} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" aria-label="Choisir une photo" className="sr-only" disabled={pending} onChange={prendre} {...cache} />
-      <input id={ids.fichier} type="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/webp" aria-label="Choisir un PDF ou un fichier" className="sr-only" disabled={pending} onChange={prendre} {...cache} />
-      <button type="button" disabled={pending} onClick={() => setOuvert(true)} className="pressable flex min-h-16 items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground disabled:opacity-80">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent" aria-hidden="true">
-          {pending ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
-        </span>
-        <span className="flex flex-col">
-          <span className="text-[16px] font-semibold">{pending ? "Je prépare ta liste…" : "Importer un document"}</span>
-          <span className="text-[14px] leading-snug text-muted">Devis, liste, photo, PDF ou capture d&apos;écran.</span>
-        </span>
-      </button>
-      {ouvert ? (
-        <div className="fixed top-0 left-0 z-[60] flex h-[100dvh] w-full items-end justify-center bg-black/40 lg:items-center" onClick={() => setOuvert(false)}>
-          <div role="dialog" aria-modal="true" aria-label="Importer un document" onClick={(e) => e.stopPropagation()} className="flex w-full max-w-md flex-col gap-1 rounded-t-3xl bg-surface p-4 pb-[max(env(safe-area-inset-bottom),16px)] text-ink shadow-card lg:rounded-3xl">
-            <div className="flex items-center justify-between px-1 pb-1">
-              <h2 className="text-[18px] font-extrabold">Importer un document</h2>
-              <button type="button" onClick={() => setOuvert(false)} aria-label="Fermer" className="grid size-10 place-items-center rounded-full">
-                <X size={19} aria-hidden="true" />
-              </button>
-            </div>
-            <label htmlFor={ids.photo} className={option}>
-              <Camera size={21} aria-hidden="true" /> Prendre une photo
-            </label>
-            <label htmlFor={ids.galerie} className={option}>
-              <ImageIcon size={21} aria-hidden="true" /> Choisir une photo
-            </label>
-            <label htmlFor={ids.fichier} className={option}>
-              <FileText size={21} aria-hidden="true" /> Choisir un PDF ou un fichier
-            </label>
-            <p className="px-1 pt-1 text-[13px] text-muted">Devis ou liste : je le reconnais tout seul.</p>
-          </div>
-        </div>
-      ) : null}
-    </>
-  );
-}
-
-/**
- * « PHOTOGRAPHIER UNE LISTE PAPIER » (Greg, 1er novembre 2026) : l'appareil photo directement, sans passer par la feuille
- * d'import ; la photo suit le même chemin (type reconnu, coût dit avant l'analyse).
- */
-function PhotographierListe({ pending, onFichier }: { pending: boolean; onFichier: (f: File) => void }) {
-  const id = useId();
-  return (
-    <>
-      <input
-        id={id}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        aria-label="Photographier une liste papier"
-        className="sr-only"
-        disabled={pending}
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          e.target.value = "";
-          if (f && !pending) onFichier(f);
-        }}
-      />
-      <label htmlFor={id} aria-hidden="true" className={`pressable flex min-h-16 cursor-pointer items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground ${pending ? "pointer-events-none opacity-80" : ""}`}>
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink">
-          <Camera size={20} />
-        </span>
-        <span className="flex flex-col">
-          <span className="text-[16px] font-semibold">Photographier une liste papier</span>
-          <span className="text-[14px] leading-snug text-muted">Une liste écrite à la main, un bon, un tableau.</span>
-        </span>
-      </label>
-    </>
-  );
-}
-
-/**
- * Achat groupé (Greg, 27 octobre 2026, point 1) : la liste se fait aussi À LA MAIN (désignation, quantité, unité), puis
- * arrive sur le même écran de liste, avec ses deux sorties.
- */
-function SaisieListeReprise() {
+  // Deux parcours reliés (Greg, 7 novembre 2026) : une seule porte, la conversation (écrire, dicter, photos, document, catalogue).
   return (
     <Suspense>
-      <SaisieListe />
+      <NouveauQuantitatif />
     </Suspense>
   );
 }
 
-function SaisieListe() {
-  // « Reprendre ta liste » (accueil) arrive ici avec ?liste=1 : l'écran se rouvre sur la liste gardée.
-  const reprise = useSearchParams().get("liste") === "1";
-  const [ouvertMain, setOuvert] = useState<boolean | null>(null);
-  const ouvert = ouvertMain ?? reprise;
-  const fermer = useCallback(() => setOuvert(false), []);
-  return (
-    <>
-      <button type="button" onClick={() => setOuvert(true)} className="pressable flex min-h-16 items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink" aria-hidden="true">
-          <PenLine size={20} />
-        </span>
-        <span className="flex flex-col">
-          <span className="text-[16px] font-semibold">Créer une liste à la main</span>
-          <span className="text-[14px] leading-snug text-muted">J&apos;ajoute directement les matériaux, quantités et unités.</span>
-        </span>
-      </button>
-      {ouvert ? <SaisirMaListe onFermer={fermer} /> : null}
-    </>
-  );
-}
-
-/**
- * AVANT DE CONSOMMER UN CRÉDIT (Greg, 1er novembre 2026) : le type reconnu et son coût, mot pour mot ; « Annuler » ne
- * décompte rien et ne crée rien. Le type se corrige d'un tap (une photo de devis sans nom parlant arrive en « liste »).
- */
-function ConfirmerAnalyse({ nature, peutChanger, onChanger, onAnnuler, onAnalyser }: { nature: "devis" | "liste"; peutChanger: boolean; onChanger: () => void; onAnnuler: () => void; onAnalyser: () => void }) {
-  const devis = nature === "devis";
-  return (
-    <div className="fixed top-0 left-0 z-[60] flex h-[100dvh] w-full items-end justify-center bg-black/50 p-4 lg:items-center" onClick={onAnnuler}>
-      <div role="alertdialog" aria-modal="true" aria-label="Analyser ce document ?" onClick={(e) => e.stopPropagation()} className="flex w-full max-w-md flex-col gap-3 rounded-3xl bg-surface p-5 pb-[max(env(safe-area-inset-bottom),20px)] text-ink shadow-card">
-        <h2 className="text-[18px] font-extrabold">Analyser ce document ?</h2>
-        <p className="text-[16px] leading-snug">
-          {devis ? "Ce document semble être un devis. Son analyse utilisera 1 analyse de devis." : "Ce document semble être une liste. Son analyse utilisera 1 analyse de photo ou de liste."}
-        </p>
-        {peutChanger ? (
-          <button type="button" onClick={onChanger} className="min-h-10 self-start text-[14px] font-semibold text-accent-text underline underline-offset-4">
-            {devis ? "C'est une liste ? L'analyser comme une liste" : "C'est un devis ? L'analyser comme un devis"}
-          </button>
-        ) : null}
-        <div className="mt-1 grid grid-cols-2 gap-2">
-          <button type="button" onClick={onAnnuler} className="pressable min-h-12 rounded-xl border border-line px-3 text-[15px] font-semibold">
-            Annuler
-          </button>
-          <button type="button" onClick={onAnalyser} className="pressable min-h-12 rounded-xl bg-accent px-3 text-[15px] font-bold text-on-accent">
-            Analyser le document
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}

@@ -69,3 +69,6 @@ export async function assembleQuote(parts: UploadedPart[]): Promise<UploadedPart
   const base = first.fileName.replace(/\.[^.]*$/, "").trim() || "devis";
   return { fileName: `${base}.pdf`, bytes };
 }
+
+/** Le nombre de photos d'un même envoi (devis ou liste papier), assemblées en un seul PDF (Greg, 7 novembre 2026). */
+export const MAX_PHOTOS_PAR_ENVOI = 10;

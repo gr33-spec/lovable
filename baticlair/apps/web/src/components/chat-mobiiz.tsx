@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowUp, Eye, Mic, Sparkles, Square, X } from "lucide-react";
+import { ArrowLeft, ArrowUp, Eye, Mic, Plus, Sparkles, Square, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Logo } from "./logo";
 
@@ -143,6 +143,8 @@ export function BarreSaisie({
   onArreter,
   onAnnulerDictee,
   avant,
+  onPlus,
+  invite,
 }: {
   valeur: string;
   onChange: (v: string) => void;
@@ -155,6 +157,10 @@ export function BarreSaisie({
   onAnnulerDictee: () => void;
   /** Ce qui se pose juste au-dessus de la barre (« Annuler la dernière modification »). */
   avant?: React.ReactNode;
+  /** Le « + » jaune à gauche (photos, document, catalogue ; Greg, 7 novembre 2026). */
+  onPlus?: () => void;
+  /** Le texte d'attente de la case (« Décris ton besoin… »). */
+  invite?: string;
 }) {
   const champ = useRef<HTMLTextAreaElement>(null);
   const ajuster = useCallback(() => {
@@ -193,6 +199,11 @@ export function BarreSaisie({
           if (plein && !occupe) onEnvoyer();
         }}
       >
+        {onPlus ? (
+          <button type="button" aria-label="Ajouter : photo, document ou catalogue" onClick={onPlus} className="pressable flex size-11 shrink-0 items-center justify-center rounded-full text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+            <Plus size={22} strokeWidth={2.4} aria-hidden="true" />
+          </button>
+        ) : null}
         <label className="flex min-h-11 flex-1 items-center pl-3">
           <span className="sr-only">Ton message</span>
           <textarea
@@ -208,7 +219,7 @@ export function BarreSaisie({
                 if (plein && !occupe) onEnvoyer();
               }
             }}
-            placeholder={ecoute ? "Je t'écoute…" : "Réponds ici…"}
+            placeholder={ecoute ? "Je t'écoute…" : (invite ?? "Réponds ici…")}
             className="w-full resize-none bg-transparent py-2.5 text-[16px] leading-[22px] text-[#111111] outline-none placeholder:text-[#111111]/45"
           />
         </label>

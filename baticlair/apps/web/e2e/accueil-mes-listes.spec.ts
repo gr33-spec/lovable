@@ -100,7 +100,7 @@ test("À faire (Greg, 6 novembre 2026) : rien à faire, « Aucun besoin en cours
   await expect(nav.getByRole("link", { name: "Nouveau besoin" })).toHaveAttribute("href", "/chantiers/nouveau");
   await nav.getByRole("link", { name: "Nouveau besoin" }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
-  await expect(page.getByRole("heading", { name: "Ma liste de matériaux" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Nouveau quantitatif" })).toBeVisible();
   await page.goto("/chantiers");
   await expect(page.getByRole("link", { name: "Nouvelle demande" }).first()).toHaveAttribute("href", "/chantiers/nouveau");
   // Téléphone : l'écran vide se lit au-dessus de la barre du menu.
@@ -120,7 +120,7 @@ test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre 
   await page.waitForTimeout(50);
   // Puis une liste commencée dans « Saisir ma liste » et quittée.
   await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Créer une liste à la main/ }).click();
+  await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
   await ecran.getByRole("button", { name: /Ajouter « Liteaux 27×38 maison » tel que je l'écris/ }).click();
@@ -332,7 +332,7 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   // Le menu du bas : libellés à 12 px, sans déborder.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  for (const nom of ["À faire", "Groupes", "Demandes"]) {
+  for (const nom of ["À faire", "Achat en gros", "Demandes"]) {
     const lien = nav.getByRole("link", { name: nom });
     expect(await lien.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
     const b = (await lien.boundingBox())!;

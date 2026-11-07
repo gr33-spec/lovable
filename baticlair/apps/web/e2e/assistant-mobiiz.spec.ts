@@ -159,53 +159,8 @@ test("Assistant Mobiiz : « Passer » ferme une question pour de bon ; « Je ne 
   await expect(rouvert.getByRole("group", { name: /^Ardoise naturelle 32×22 : (origine|choix) \?$/ })).toHaveCount(0);
 });
 
-test("Décris ton chantier : une vraie conversation ; les quantités dites font la liste, le reste se propose ; « Voir PDF » garde le brouillon", async ({ page }, info) => {
-  test.setTimeout(150_000);
-  const tel = info.project.name === "telephone";
-  await compteEtListe(page);
-  await page.goto("/chantiers/nouveau");
-  await page.getByRole("button", { name: /Décrire mon chantier/ }).click();
-  const d = page.getByRole("dialog", { name: "Décris ton chantier" });
-  await expect(d.getByText("Décris-moi ton chantier ou indique directement les matériaux et quantités dont tu as besoin. Tu peux écrire ou utiliser le micro.")).toBeVisible();
-  // Plus de formulaire : une barre en bas, le micro dedans, l'envoi rond ; aucun bouton « Lire ma description ».
-  await expect(d.getByRole("button", { name: "Lire ma description" })).toHaveCount(0);
-  await expect(d.getByLabel("Ton message")).toHaveAttribute("placeholder", "Réponds ici…");
-  await expect(d.getByRole("button", { name: "Dicter" })).toBeVisible();
-  await expect(d.getByRole("button", { name: "Envoyer le message" })).toBeDisabled();
-  await d.getByLabel("Ton message").fill("Il me faut 40 m² de placo BA13, 3 rouleaux de laine de verre 100 mm et un WC suspendu, plus de la colle carrelage");
-  await d.getByRole("button", { name: "Envoyer le message" }).click();
-  // La liste est créée et LA MÊME conversation continue avec l'assistant.
-  const a = page.getByRole("dialog", { name: "Assistant Mobiiz" });
-  await expect(a.getByText(/^Il me faut 40 m² de placo BA13/)).toBeVisible({ timeout: 30_000 });
-  await expect(a.getByText("C'est noté : Placo BA13 (40 m²), Laine de verre 100 mm (3 rouleaux).")).toBeVisible();
-  const propositions = a.getByRole("group", { name: "Sans quantité en chiffres" });
-  await propositions.getByRole("button", { name: "Ajouter « WC suspendu »" }).click();
-  await expect(a.getByText("C'est fait : ajouté « WC suspendu », 1.")).toBeVisible();
-  // Dit sans unité : la question vient du document (§51.6), une réponse d'un tap.
-  await a.getByRole("group", { name: "WC suspendu : quelle unité ?" }).getByRole("button", { name: "Pièces" }).click();
-  await expect(a.getByRole("group", { name: "Où se trouve le chantier ?" })).toBeVisible();
-  await a.getByLabel("Ton message").fill("75011 Paris");
-  await a.getByRole("button", { name: "Envoyer le message" }).click();
-  await expect(a.getByText(/adresse notée : 75011 Paris/)).toBeVisible();
-  await expect(a.getByRole("group", { name: "Livraison sur chantier ou retrait en agence ?" })).toBeVisible();
-  // « Voir PDF » (téléphone) puis retour : messages et brouillon intacts.
-  await a.getByLabel("Ton message").fill("brouillon en cours");
-  if (tel) {
-    await a.getByRole("button", { name: "Voir PDF" }).click();
-    await expect(page.getByRole("dialog", { name: "Le PDF de ta demande" })).toBeVisible();
-    await expect(page.locator("button[data-cle]").first()).toBeVisible({ timeout: 20_000 });
-    await page.getByRole("button", { name: "Retour à l'assistant" }).click();
-  } else await expect(page.locator("button[data-cle]").first()).toBeVisible({ timeout: 20_000 });
-  await expect(a.getByLabel("Ton message")).toHaveValue("brouillon en cours");
-  await expect(a.getByText("C'est fait : ajouté « WC suspendu », 1.")).toBeVisible();
-  await a.getByRole("group", { name: "Livraison sur chantier ou retrait en agence ?" }).getByRole("button", { name: "Retrait" }).click();
-  await expect(a.getByText(/retrait en agence noté/)).toBeVisible();
-  await a.getByRole("button", { name: "Fermer l'assistant" }).click();
-  await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
-  await expect(page.getByText("Placo BA13").first()).toBeVisible();
-  await expect(page.getByText("WC suspendu").first()).toBeVisible();
-  await expect(page.getByText(/Colle carrelage/)).toHaveCount(0);
-});
+// « Décris ton chantier » (31 octobre 2026) est devenu LA conversation de départ (Greg, 7 novembre 2026) : e2e
+// `deux-parcours.spec.ts` (plusieurs articles par phrase, « J'ai compris », rien d'ajouté sans le bouton).
 
 test("Le clavier ouvert (iPhone SE) : la barre de saisie reste visible au-dessus, le dernier message aussi", async ({ page }, info) => {
   test.skip(info.project.name !== "telephone", "le clavier simulé est celui du téléphone");

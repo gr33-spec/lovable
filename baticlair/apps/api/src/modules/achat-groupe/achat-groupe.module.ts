@@ -1,3 +1,4 @@
+import { zoneDuCodePostal } from "@baticlair/domain";
 import { Module } from "@nestjs/common";
 import { MESSAGE_HORS_ZONE } from "@baticlair/domain";
 import type { AppConfig } from "../../platform/config/config.js";
@@ -36,7 +37,10 @@ import { AchatGroupeController, AchatGroupePublicController, AchatGroupeTacheCon
           {
             lignesDeListe: async (tenant, projectId) => {
               const { adresse, lignes } = await commande.lignesDuChantier(tenant, projectId);
-              return { adresse, lignes: lignes.map((l) => ({ key: l.key, designation: l.designation, quantite: l.quantite, unite: l.unite })) };
+              // Une liste écrite dans la conversation n'a pas d'adresse de chantier (Greg, 7 novembre 2026) : le secteur est
+              // alors celui de l'entreprise (son adresse), jamais deviné ; sans l'une ni l'autre, rien ne se rapproche.
+              const secteur = adresse && zoneDuCodePostal(adresse) ? adresse : ((await p.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } }))?.address ?? adresse);
+              return { adresse: secteur, lignes: lignes.map((l) => ({ key: l.key, designation: l.designation, quantite: l.quantite, unite: l.unite })) };
             },
           },
           new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl),

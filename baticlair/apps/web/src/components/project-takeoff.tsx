@@ -11,6 +11,7 @@ import { useGroupe, useGroupeFerme } from "@/components/groupe";
 import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
 import { RechercheRapprochement } from "@/components/rapprochement";
+import { ListePrete } from "@/components/liste-prete";
 import { specialiteDuMetier, type LotAEnvoyer } from "../../../../packages/domain/src/groupe/specialites";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
@@ -468,10 +469,20 @@ export function ProjectTakeoff({
   const persoEtGroupe = quantitatif ? (
     <div className="flex flex-col gap-4">
       <DemandesPerso projectId={projectId} articles={aAcheter} lots={lotsEnvoi} canCreate archived={archived} dejaEnvoye={sent} principal={!listShown} bouton={false} />
-      {/* Une seule suggestion d'achat groupé, à l'étape « liste prête » seulement (point 8). */}
-      {!sent ? <TenterPrixDeGroupe projectId={projectId} /> : null}
-      {/* Greg, 6 novembre 2026 : la demande part quand l'artisan veut ; certaines lignes peuvent AUSSI chercher un rapprochement. */}
-      <RechercheRapprochement projectId={projectId} />
+      {/* Deux parcours reliés (Greg, 7 novembre 2026, capture « Ton quantitatif est prêt ») : UNE carte, la demande de prix et
+          l'interrupteur du regroupement ligne par ligne ; les anciens réglages derrière « Plus d'options de regroupement ». */}
+      <ListePrete
+        projectId={projectId}
+        nbArticles={aAcheter.length}
+        envoye={sent}
+        onDemanderPrix={send}
+        options={
+          <>
+            {!sent ? <TenterPrixDeGroupe projectId={projectId} /> : null}
+            <RechercheRapprochement projectId={projectId} />
+          </>
+        }
+      />
     </div>
   ) : null;
   return (

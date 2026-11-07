@@ -49,6 +49,11 @@ const NOMS: Readonly<Record<AttributReference, string>> = {
   conditionnement: "Conditionnement différent",
   teinte: "Couleur différente",
   finition: "Finition différente",
+  reference: "Référence différente",
+  gamme: "Gamme différente",
+  matiere: "Matière différente",
+  developpe: "Développé différent",
+  modele: "Modèle différent",
 };
 
 /** L'écart d'une date au-delà duquel deux besoins ne se rapprochent pas (une collecte livre en une fois). */
@@ -84,7 +89,7 @@ export function comparerBesoins(a: BesoinComparable, b: BesoinComparable): Resul
     const vb = rb.reference.attributs[at];
     if (va === vb) continue;
     if (va && vb) differences.push(`${NOMS[at]} : ${lisible(at, va)} et ${lisible(at, vb)}`);
-    else differences.push(`${NOMS[at].replace(/ différente?$/, "")} précisé${at === "qualite" || at === "marque" || at === "origine" || at === "epaisseur" || at === "largeur" || at === "teinte" || at === "finition" ? "e" : ""} d'un seul côté : ${lisible(at, (va ?? vb)!)}`);
+    else differences.push(`${NOMS[at].replace(/ différente?$/, "")} précisé${at === "qualite" || at === "marque" || at === "origine" || at === "epaisseur" || at === "largeur" || at === "teinte" || at === "finition" || at === "reference" || at === "gamme" || at === "matiere" ? "e" : ""} d'un seul côté : ${lisible(at, (va ?? vb)!)}`);
   }
   if (a.modeLivraison !== b.modeLivraison) differences.push("Mode différent : livraison sur chantier et retrait au dépôt");
   if (differences.length === 0) return { niveau: "exacte", differences: [], score: 100 };

@@ -13,7 +13,7 @@ import type { FamilleGroupe } from "./groupe.js";
  * regroupement.
  */
 
-export type AttributReference = "format" | "epaisseur" | "largeur" | "origine" | "qualite" | "marque" | "aspect" | "conditionnement" | "teinte" | "finition";
+export type AttributReference = "format" | "epaisseur" | "largeur" | "origine" | "qualite" | "marque" | "aspect" | "conditionnement" | "teinte" | "finition" | "reference" | "gamme" | "matiere" | "developpe" | "modele";
 
 interface TypeGroupable {
   type: string;
@@ -30,6 +30,12 @@ interface TypeGroupable {
  * « ardoise »). Un type absent d'ici ne se regroupe jamais : le doute protège l'artisan.
  */
 const TYPES: readonly TypeGroupable[] = [
+  // Deux parcours reliés (Greg, 7 novembre 2026 : « les ardoises, Velux, gouttières… ») : la fenêtre de toit à sa
+  // RÉFÉRENCE DE TAILLE (MK04, SK06…), la gouttière à sa MATIÈRE et son DÉVELOPPÉ, la tuile à sa MARQUE et son MODÈLE.
+  // Placées avant le zinc : « gouttière zinc » est une gouttière, pas une feuille de zinc.
+  { type: "fenetre-de-toit", libelle: "Fenêtre de toit", famille: "couverture", mots: /\b(velux|fenetres? de toit|fenetres? de toiture|fakro|roto)\b/, requis: ["reference"] },
+  { type: "gouttiere", libelle: "Gouttière", famille: "couverture", mots: /\bgouttieres?\b/, requis: ["matiere", "developpe"] },
+  { type: "tuile", libelle: "Tuile", famille: "couverture", mots: /\btuiles?\b/, requis: ["marque", "modele"] },
   { type: "ardoise-fibres-ciment", libelle: "Ardoise fibres-ciment", famille: "couverture", mots: /\bardoises? (en )?fibres? ?ciment\b|\bardoises? synthetiques?\b/, requis: ["format"] },
   { type: "ardoise", libelle: "Ardoise", famille: "couverture", mots: /\bardoises?\b/, requis: ["format"] },
   { type: "zinc", libelle: "Zinc", famille: "couverture", mots: /\b(zinc|quartz zinc|vmzinc)\b/, requis: ["epaisseur"] },
@@ -47,7 +53,7 @@ const TYPES: readonly TypeGroupable[] = [
 ];
 
 /** Les petits accessoires : jamais groupés, quelle que soit la quantité. */
-const ACCESSOIRES = /\b(crochets?|clous?|pointes?|vis|pattes?|colliers?|mastics?|silicones?|joints?|agrafes?|chevilles?|rivets?|soudures?|etain|decapant|bandes? adhesives?|adhesifs?|closoirs?|talons?|naissances?|coudes?|manchons?|equerres?|sabots?|boulons?)\b/;
+const ACCESSOIRES = /\b(crochets?|clous?|pointes?|vis|pattes?|colliers?|mastics?|silicones?|joints?|agrafes?|chevilles?|rivets?|soudures?|etain|decapant|bandes? adhesives?|adhesifs?|closoirs?|talons?|naissances?|coudes?|manchons?|equerres?|sabots?|boulons?|raccords?|stores?|volets?)\b/;
 
 const ORIGINES: readonly [RegExp, string][] = [
   [/\bespagn(e|ol|ole|oles)\b/, "espagne"],
@@ -64,7 +70,15 @@ const QUALITES: readonly [RegExp, string][] = [
   [/\bextra\b/, "extra"],
 ];
 /** Les marques connues des gros articles (une marque précisée fait partie de la clé). */
-const MARQUES = /\b(cupa|samaca|vmzinc|vm zinc|elzinc|rheinzink|nedzink|eternit|edilians|imerys|monier|terreal|isover|rockwool|ursa|knauf|placo|siniat|delta|ubbink|onduline)\b/;
+const MARQUES = /\b(cupa|samaca|vmzinc|vm zinc|elzinc|rheinzink|nedzink|eternit|edilians|imerys|monier|terreal|isover|rockwool|ursa|knauf|placo|siniat|delta|ubbink|onduline|velux|fakro|roto|bouyer leroux|koramic|wienerberger)\b/;
+/** Les modèles de tuiles les plus courants (une tuile ne se regroupe qu'avec son modèle et sa marque). */
+const MODELES_TUILE = /\b(romane|huguenot|omega|actua|beauvoise|sud|canal|galleane|panne|plate|marseille|losangee|regence|rhona|perspective|ambiance|vauban|signy|occitane|gelis|h ?14|20 ?x ?27|alpha|meridional)\b/;
+const MATIERES_GOUTTIERE: readonly [RegExp, string][] = [
+  [/\bzinc\b/, "zinc"],
+  [/\bpvc\b/, "pvc"],
+  [/\b(alu|aluminium)\b/, "alu"],
+  [/\bcuivre\b/, "cuivre"],
+];
 const ASPECTS: readonly [RegExp, string][] = [
   [/\bnaturel\b/, "naturel"],
   [/\b(pre ?patine|quartz|anthra|anthracite|pigmento)\b/, "prepatine"],
@@ -172,11 +186,43 @@ export function referenceStricte(designation: string): { ok: true; reference: Re
   const marque = MARQUES.exec(texte)?.[1];
   // « Placo » nomme aussi le produit : il n'est une marque que pour un autre type que la plaque de plâtre.
   if (marque && !(type.type === "plaque-platre" && marque === "placo")) attributs.marque = marque.replace(/\s+/g, "");
+  if (type.type === "fenetre-de-toit") {
+    const refs = [...new Set([...texte.matchAll(/\b([a-z]{1,2}\d{2})\b/g)].map((m) => m[1]!))];
+    if (refs.length > 1) return { ok: false, raison: "ambigu" };
+    if (refs[0]) attributs.reference = refs[0];
+    const gamme = /\b(ggl|ggu|gpl|gpu|ghl|ghu|gtl|gtu|gbl|gil|gel)\b/.exec(texte)?.[1];
+    if (gamme) attributs.gamme = gamme;
+    // La marque d'une fenêtre est son fabricant ; « Velux » seul nomme souvent la fenêtre de toit en général.
+    if (attributs.marque === "velux") delete attributs.marque;
+    delete attributs.format;
+  }
+  if (type.type === "gouttiere") {
+    const matieres = MATIERES_GOUTTIERE.filter(([re]) => re.test(texte)).map(([, v]) => v);
+    if (matieres.length > 1) return { ok: false, raison: "ambigu" };
+    if (matieres[0]) attributs.matiere = matieres[0];
+    const dev = /\b(?:dev|developpe|developpement)\.? ?(\d{2,3})\b/.exec(texte)?.[1] ?? /\b(?:de|en) (25|33|40|50)\b/.exec(texte)?.[1];
+    if (dev) attributs.developpe = dev;
+    delete attributs.epaisseur;
+  }
+  if (type.type === "tuile") {
+    const modele = MODELES_TUILE.exec(texte)?.[1];
+    if (modele) attributs.modele = modele.replace(/\s+/g, "");
+    delete attributs.format;
+  }
   if (type.requis.some((a) => !attributs[a])) return { ok: false, raison: "attribut_manquant" };
   // La teinte et la finition n'entrent dans la clé que pour la peinture : la clé des autres articles ne change pas (les
   // regroupements déjà ouverts gardent la leur).
   const peinture = type.type === "peinture" || type.type === "sous-couche";
-  const ordre: readonly AttributReference[] = peinture ? ["format", "epaisseur", "largeur", "aspect", "teinte", "finition", "conditionnement", "origine", "qualite", "marque"] : ["format", "epaisseur", "largeur", "aspect", "conditionnement", "origine", "qualite", "marque"];
+  const nouveaux: Partial<Record<string, readonly AttributReference[]>> = {
+    "fenetre-de-toit": ["reference", "gamme", "marque"],
+    gouttiere: ["matiere", "developpe", "aspect", "marque"],
+    tuile: ["marque", "modele", "teinte"],
+  };
+  if (type.type === "tuile") {
+    const teinte = /\b(rouge|vieilli|ardoise|ardoisee|brun|nuance|naturel|flamme|sable|noir|anthracite)\b/.exec(texte)?.[1];
+    if (teinte) attributs.teinte = teinte;
+  }
+  const ordre: readonly AttributReference[] = nouveaux[type.type] ?? (peinture ? ["format", "epaisseur", "largeur", "aspect", "teinte", "finition", "conditionnement", "origine", "qualite", "marque"] : ["format", "epaisseur", "largeur", "aspect", "conditionnement", "origine", "qualite", "marque"]);
   const cle = `${type.type}|${ordre.map((a) => `${a}=${attributs[a] ?? ""}`).join("|")}`;
   const lisible = [
     type.libelle,
@@ -190,6 +236,11 @@ export function referenceStricte(designation: string): { ok: true; reference: Re
     attributs.origine ? attributs.origine.charAt(0).toUpperCase() + attributs.origine.slice(1) : null,
     attributs.qualite ? (attributs.qualite === "extra" ? "extra" : `${attributs.qualite === "1" ? "1er" : `${attributs.qualite}e`} choix`) : null,
     attributs.marque ? attributs.marque.charAt(0).toUpperCase() + attributs.marque.slice(1) : null,
+    attributs.reference?.toUpperCase(),
+    attributs.gamme?.toUpperCase(),
+    attributs.matiere,
+    attributs.developpe ? `dév. ${attributs.developpe}` : null,
+    attributs.modele ? attributs.modele.charAt(0).toUpperCase() + attributs.modele.slice(1) : null,
   ]
     .filter(Boolean)
     .join(" ");
