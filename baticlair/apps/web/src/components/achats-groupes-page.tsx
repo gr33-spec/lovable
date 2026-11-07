@@ -4,6 +4,8 @@ import { Plus, Users } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
 import { CarteAchatGroupe, CarteAchatOuvert } from "@/components/achat-groupe";
+import { AccueilAchatsGroupesV1 } from "@/components/ag-v1-accueil";
+import { useAgV1 } from "@/lib/ag-v1";
 import {
   RegroupementsNegocies,
   useModeRegroupement,
@@ -39,6 +41,11 @@ import {
  */
 export function PageAchatsGroupes() {
   const mode = useModeRegroupement();
+  // Achats groupés V1 (V5.2) : affichés seulement quand le réglage ACHATS_GROUPES_V1 est allumé ; sinon, rien ne change.
+  const { etat: v1 } = useAgV1();
+  if (v1 === undefined)
+    return <Skeleton card="h-56" lines={2} label="Chargement des achats groupés…" />;
+  if (v1) return <AccueilAchatsGroupesV1 etat={v1} />;
   if (mode === null)
     return (
       <Skeleton card="h-56" lines={2} label="Chargement des achats groupés…" />

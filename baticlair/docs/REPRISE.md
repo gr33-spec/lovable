@@ -34,6 +34,13 @@ complètes seulement avant un déploiement important, et en le disant.
 
 ## En cours
 
+SUIVI 175 (7 novembre 2026) : V5.2 VALIDÉE, fin des maquettes ; développement LOCAL de la V1 des achats groupés
+(`docs/achats-groupes-v1.md`). Branche locale `achats-groupes-v1` (partie de c99cdc12), NON POUSSÉE ; aucune sauvegarde
+Neon, aucun déploiement sans accord explicite de Greg. Réglage `ACHATS_GROUPES_V1` coupé par défaut. Fait : domaine,
+migration additive `20261108090000_achats_groupes_v1`, API `/v1/ag`, écrans, e2e (`playwright.ag-v1.config.ts`).
+Hors V1 (ne pas développer sans accord) : acceptation finale, « Offre acceptée », second tour, commande, envoi réel aux
+négoces, CGU. Rapport final envoyé ; attendre la décision de Greg (pousser, sauvegarder Neon, déployer).
+
 SUIVI 174 (7 novembre 2026) : « mets en place tout ça pour que je puisse tester » (5 captures). Fait : conversation
 « Nouveau quantitatif » (`nouveau-quantitatif.tsx`), carte « Ton quantitatif est prêt » (`liste-prete.tsx`), recommandations
 du rapprochement (`opportunites.ts`, paliers = HYPOTHÈSES), 10 photos par envoi (un PDF), « Achat en gros ». Limites V1 :

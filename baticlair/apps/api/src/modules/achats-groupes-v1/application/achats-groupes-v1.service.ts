@@ -176,6 +176,8 @@ export class AchatsGroupesV1Service {
       numero: a.numero,
       nom: a.nom,
       type: a.type,
+      // Les caractéristiques du PRODUIT (lues dans sa clé), jamais une donnée d'entreprise : pour préremplir « Rejoindre ».
+      attributs: Object.fromEntries(a.cle.split("|").slice(1).map((kv) => kv.split("=") as [string, string])),
       lot: a.lot,
       zone: { code: a.departement, nom: departementConnu(a.departement)?.nom ?? a.departement },
       reception: a.reception,

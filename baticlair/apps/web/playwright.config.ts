@@ -9,7 +9,7 @@ delete process.env.ANTHROPIC_API_KEY;
  * et une vraie base PostgreSQL. Démarre l'API (port 4000) et le site
  * (port 3000) sauf s'ils tournent déjà.
  */
-const apiEnv = {
+export const apiEnv = {
   NODE_ENV: "test",
   PORT: "4000",
   DATABASE_URL: process.env.E2E_DATABASE_URL ?? "postgresql://postgres@localhost:5432/baticlair_e2e",
