@@ -245,7 +245,8 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
   await page.getByRole("menuitem", { name: "Modifier le chantier" }).click();
   await page.getByLabel("Nom du chantier").fill("Toiture Dupont");
-  await page.getByRole("button", { name: "Enregistrer" }).click();
+  // « Enregistrer pour plus tard » (carte « Ton quantitatif est prêt ») est aussi à l'écran : le nom exact.
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Toiture Dupont" })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { name: "Toiture Dupont" })).toBeVisible();
@@ -3142,6 +3143,9 @@ async function toutCliquer(page: Page, ecran: string, ouvrir: () => Promise<void
     }
     const bouton = page.getByRole("button").nth(i);
     if (!(await bouton.isVisible().catch(() => false)) || !(await bouton.isEnabled().catch(() => false))) continue;
+    // Un bouton derrière un écran plein écran (la conversation « Nouveau quantitatif » rend l'en-tête et le menu inertes,
+    // 7 novembre 2026) est volontairement hors d'atteinte : ce n'est pas un bouton mort.
+    if ((await bouton.evaluate((el) => !!el.closest("[inert]")).catch(() => false)) as boolean) continue;
     const vu = ((await bouton.getAttribute("aria-label").catch(() => null)) ?? (await bouton.innerText().catch(() => "")) ?? "").trim().replace(/\s+/g, " ");
     if (vu !== nom) continue; // l'écran a changé depuis le relevé (une ligne retirée…) : le bouton n'est plus le même
     // Un champ fichier caché s'ouvre par son étiquette visible (la zone « Donne ta liste… ») : c'est elle qu'on touche.
@@ -3247,15 +3251,19 @@ test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau co
   const depot = page.getByLabel("Choisir un PDF ou un fichier");
   const photo = fs.readFileSync(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   // Conversation « Nouveau quantitatif » (Greg, 7 novembre 2026) : chaque document se confirme avant l'analyse.
-  const confirmer = () => page.getByRole("alertdialog", { name: "Analyser ce document ?" }).getByRole("button", { name: "Analyser le document" }).click();
+  // La fenêtre ne revient pas pour les documents suivants de la même conversation : on la confirme quand elle est là.
+  const confirmer = async () => {
+    const bouton = page.getByRole("alertdialog", { name: "Analyser ce document ?" }).getByRole("button", { name: "Analyser le document" });
+    if (await bouton.waitFor({ timeout: 3000 }).then(() => true, () => false)) await bouton.click();
+  };
   // Un fichier de plus de 20 Mo : refusé avant l'envoi, en clair.
   await depot.setInputFiles({ name: "liste.png", mimeType: "image/png", buffer: Buffer.alloc(21_000_000, 1) });
   await expect(page.getByText("C'est trop volumineux pour être envoyé.")).toBeVisible();
   // Réseau coupé : rien n'est perdu, l'écran le dit.
   await page.context().setOffline(true);
   await depot.setInputFiles({ name: "liste-manuscrite.png", mimeType: "image/png", buffer: photo });
-  await confirmer();
-  await expect(page.getByText("Pas de connexion internet. Rien n'est perdu : réessaie dès que le réseau revient.")).toBeVisible();
+  // Hors connexion, la conversation le dit tout de suite, sans fenêtre de confirmation (rien ne peut partir).
+  await expect(page.getByText("Pas de connexion internet. Rien n'est perdu : réessaie dès que le réseau revient.", { exact: false })).toBeVisible();
   await page.context().setOffline(false);
   // Photo floue : le modèle ne lit aucune ligne ; on dit comment refaire la photo, jamais « devis » ni « PDF » abîmé.
   await depot.setInputFiles({ name: "photo-floue.png", mimeType: "image/png", buffer: photo });
@@ -3266,7 +3274,8 @@ test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau co
   await confirmer();
   await expect(page.getByText("Le service de lecture n'a pas répondu.", { exact: false })).toBeVisible();
   await expect(page.getByText(/Code support : /)).toBeVisible();
-  await expect(page.getByText("Je n'ai rien lu sur ce fichier.", { exact: false })).toHaveCount(0);
+  // La conversation garde ses messages : celui de la photo floue reste, la panne n'en ajoute pas un second.
+  await expect(page.getByText("Je n'ai rien lu sur ce fichier.", { exact: false })).toHaveCount(1);
   // Puis la bonne photo : la liste arrive, et tous ces essais n'ont créé qu'un chantier.
   await depot.setInputFiles({ name: "liste-manuscrite.png", mimeType: "image/png", buffer: photo });
   await confirmer();

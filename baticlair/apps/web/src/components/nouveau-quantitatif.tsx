@@ -1,7 +1,8 @@
 "use client";
 
 import { Camera, ChevronRight, ClipboardList, FileText, Layers, PencilLine, ShoppingCart, Tag, Package, X } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { lireDescription, type LigneDecrite } from "../../../../packages/domain/src/assistant/assistant";
 import { precisionsLisibles } from "../../../../packages/domain/src/groupe/precisions-lisibles";
@@ -24,7 +25,7 @@ import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, TexteMobiiz, useChampDic
  * photos (plusieurs d'un coup), devis ou PDF, catalogue. Un document est lu par l'IA, son coût dit avant, comme avant ;
  * jamais une quantité ni une caractéristique inventée : ce qui manque reste à préciser sur la ligne.
  */
-type SansId = { de: "mobiiz"; texte: string } | { de: "moi"; texte: string } | { de: "compris"; texte: string; lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige" };
+type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean } | { de: "moi"; texte: string } | { de: "compris"; texte: string; lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige" };
 type Element = SansId & { id: number };
 
 const EXEMPLE = "Ex. : 1 000 ardoises 32×22 Espagne 1er choix et 950 crochets inox 100 mm";
@@ -71,6 +72,7 @@ export function NouveauQuantitatif() {
   });
   const ajouterElement = (e: SansId) => setElements((xs) => [...xs, { ...e, id: ++compteur.current }]);
   const dire = (texte: string) => ajouterElement({ de: "mobiiz", texte });
+  const pathname = usePathname();
 
   function envoyer() {
     const texte = champ.saisie.trim();
@@ -147,7 +149,9 @@ export function NouveauQuantitatif() {
       router.replace(`/chantiers/${projet.id}`);
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
-      dire(err.reason === "nothing_read" ? "Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF." : `Le document n'est pas lu : ${messageErreur(err)}`);
+      if (err.reason === "nothing_read") dire("Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF.");
+      // Plan « finition », bloc 6 : une session expirée dit quoi faire, avec le lien qui ramène ici après la connexion.
+      else ajouterElement({ de: "mobiiz", texte: `Le document n'est pas lu : ${messageErreur(err)}`, ...(err.code === "unauthenticated" ? { reconnecter: true } : {}) });
       // La même clé au nouvel essai : un seul chantier, quel que soit le nombre d'essais (cas limites, bloc 6).
       setLecture(false);
     }
@@ -192,6 +196,11 @@ export function NouveauQuantitatif() {
             ) : e.de === "mobiiz" ? (
               <Bulle key={e.id} de="mobiiz">
                 <TexteMobiiz>{e.texte}</TexteMobiiz>
+                {e.reconnecter ? (
+                  <Link href={`/connexion?retour=${encodeURIComponent(pathname)}`} className="mt-2 inline-flex min-h-11 items-center rounded-full bg-[#FED206] px-4 font-semibold text-[#111111]">
+                    Me reconnecter
+                  </Link>
+                ) : null}
               </Bulle>
             ) : (
               <CarteCompris
