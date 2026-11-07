@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { filtreVisiteurs } from "../../../platform/demo-domaine.js";
 import { gardeCommandeSeule } from "../../../platform/cycle/lignes.js";
 import {
   ACCORD_IDENTITE,
@@ -586,7 +587,7 @@ export class DemandePersoService {
    */
   async tache(maintenant = this.now()): Promise<{ relances: number; rappels: number }> {
     const attente = await this.prisma.priceRequestRecipient.findMany({
-      where: { reponduLe: null, refuseLe: null, status: "sent", OR: [{ relanceLe: null }, { rappelVeilleLe: null }], priceRequest: { OR: [{ closLe: null }, { closLe: { gt: maintenant } }] } },
+      where: { reponduLe: null, refuseLe: null, status: "sent", OR: [{ relanceLe: null }, { rappelVeilleLe: null }], priceRequest: { OR: [{ closLe: null }, { closLe: { gt: maintenant } }], company: { memberships: { none: { user: filtreVisiteurs() } } } } },
       include: { supplier: { select: { name: true, email: true, contactName: true, phone: true } }, priceRequest: { select: { id: true, but: true, dueDate: true, closLe: true, projectId: true, companyId: true, company: { select: { name: true } } } } },
       take: 500,
     });

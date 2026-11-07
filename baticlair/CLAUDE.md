@@ -118,6 +118,8 @@ Avant de toucher au moteur, aux règles ou aux écrans, lire la section concern�
 - Un négoce ne voit JAMAIS les prix d'un autre (test `apps/api/test/concurrence-prix-negoces.test.ts`). Rien n'est facturé aux négoces (`FACTURATION_NEGOCE=off`) ; une seule formule : `PHRASE_REMUNERATION_NEGOCE`.
 - CGU et conditions négoces versionnées par date, réacceptées à chaque version majeure. Aucun script ni cookie tiers (`apps/web/scripts/sans-tiers.test.mjs`). Une info légale manquante est `A_COMPLETER` (`apps/web/src/lib/legal.ts`) : la construction de production échoue tant qu'il en reste un (`scripts/garde-a-completer.mjs`). État : `docs/groupe/CONFORMITE.md`.
 
+- ACCÈS DÉMO « DÉCOUVRIR L'APPLICATION » (Greg, 7 novembre 2026, option 1, test.mobiiz.fr seulement, `docs/acces-demo.md`) : `ACCES_DEMO` coupé par défaut, refusé en production ; un compte éphémère `visiteur-…@demo.mobiiz.fr` et une entreprise fictive PAR VISITE, effacés après 24 h ; pendant une requête du visiteur (`estRequeteDemo`), aucun e-mail (simulé), aucun appel IA (`sansIaEnDemo`, lecture simulée), et 403 sur paiement, clés partenaires, SIRET, achats groupés, rapprochements, commande du mois, négoce et admin (`routeInterditeEnDemo`) ; bandeau « Mode démonstration » sur chaque écran. Tests : `apps/api/test/acces-demo.test.ts`, e2e `acces-demo.spec.ts`.
+
 ## Partenaires
 
 - Clé API partenaire (`X-Api-Key: bc_…`, module `partners`) : une clé par intégration, hachée en base, montrée une seule fois, rattachée à l'entreprise et à son auteur ; quota mensuel de quantitatifs créés (429 au-delà, les lectures ne comptent pas) ; révocation immédiate ; une clé ne gère jamais les clés. Test : `apps/api/test/partner-keys.test.ts`. Notice : `docs/api-quantitatifs.md`.

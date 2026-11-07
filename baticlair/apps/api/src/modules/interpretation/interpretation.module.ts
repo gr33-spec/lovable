@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { INTERPRETATION_PROMPT } from "@baticlair/domain";
 import { fabriqueIa } from "../../platform/ai/fabrique-ia.js";
+import { estRequeteDemo } from "../../platform/logging/request-context.js";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { AppLogger } from "../../platform/logging/logger.js";
@@ -25,7 +26,8 @@ export function budgetInterpretation(prisma: PrismaService, recorder: AiUsageRec
   let creditEpuise = false;
   return {
     async autorise() {
-      if (creditEpuise) return false;
+      // Accès démo (Greg, 7 novembre 2026) : un visiteur fictif ne consomme jamais d'IA ; le code seul répond.
+      if (creditEpuise || estRequeteDemo()) return false;
       const agg = await prisma.aiExecution.aggregate({ where: { task: TACHE_INTERPRETATION }, _count: { _all: true }, _sum: { costMicroUsd: true } });
       return agg._count._all < plafond.appels && Number(agg._sum.costMicroUsd ?? 0) < plafond.microUsd;
     },

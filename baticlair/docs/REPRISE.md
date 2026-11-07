@@ -28,17 +28,12 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 
 ## En cours
 
-SUIVI 172 (6 novembre 2026, soir) : les huit lots du prompt maître sont faits et committés en local sur
-`claude/pilote-fiabilite` (6464f8c4 → da1064e0), chacun avec ses tests ; détail réel dans
-`docs/parcours-produit-lots.md`. Quatre migrations ADDITIVES nouvelles (parcours négoce, reconfirmation, recherche
-géographique, supervision), appliquées aux seules bases locales de test.
-Suites complètes VERTES (domaine 985, API 675 + ciblés, e2e 259 + 16 « lots » + ciblés). Rapport envoyé à Greg.
-BLOQUÉ en attente de Greg : la sauvegarde Neon de la branche de test (refusée par le contrôle des permissions sans son
-accord explicite), puis la poussée sur `claude/saas-achat-artisans-prompt-1lyihx` qui déploie test.mobiiz.fr.
-Restent partiels (décisions de Greg) : §6 famille affichée sur chaque ligne (contraire au §50), §12 critères du coût
-livré que les négoces ne donnent pas encore, §14 détecteurs automatiques des 6 autres types d'exceptions.
-Attend Greg : allumer l'interprète IA (`INTERPRETE_IA=on`, ≈ 0,002 $ par interprétation), et toute action en ligne
-qui n'est pas le test.
+SUIVI 173 (7 novembre 2026) : accord de Greg « Oui pour la sauvegarde Neon puis test.mobiiz.fr uniquement ». Sauvegarde
+`sauvegarde-avant-lots-prompt-maitre` (br-noisy-frog-b2wy0xkl) faite ; 9429dc8e déployé (5 migrations) ; plan de retour
+arrière dans `docs/retour-arriere-2026-11-07.md`. Puis les 4 décisions de Greg (interprète IA plafonné 1 $ / 500, badge
+« Famille à vérifier », conditions du négoce, détections prudentes) et l'ACCÈS DÉMO « Découvrir l'application »
+(option 1, `ACCES_DEMO`, `docs/acces-demo.md`), à pousser sur la branche de test seulement, puis contrôles en ligne et
+rapport. Aucune production.
 
 ## À faire ensuite (dans cet ordre)
 

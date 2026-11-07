@@ -314,7 +314,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
     // Ce qui répond sans session : la santé du service, le compteur et l'argument des tarifs de la page publique (un nombre, rien d'une
     // entreprise), et les demandes d'accès elles-mêmes (inscription, connexion…).
     // Les conditions négoce et la déconnexion de l'espace négoce se lisent sans compte (23 octobre 2026) : aucune donnée.
-    expect(open.filter((o) => !/\/v1\/health|\/v1\/public\/(compteur|tarif|visite)|\/api\/auth|\/v1\/auth|\/v1\/negoce\/(conditions|deconnexion)/.test(o))).toEqual([]);
+    expect(open.filter((o) => !/\/v1\/health|\/v1\/public\/(compteur|tarif|visite|demo)|\/api\/auth|\/v1\/auth|\/v1\/negoce\/(conditions|deconnexion)/.test(o))).toEqual([]);
   });
 });
 

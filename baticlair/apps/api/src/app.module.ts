@@ -3,6 +3,7 @@ import { AbonnementModule } from "./modules/abonnement/index.js";
 import { AiUsageModule } from "./modules/ai-usage/index.js";
 import { BillingModule } from "./modules/billing/index.js";
 import { DemoModule } from "./modules/demo/index.js";
+import { AccesDemoModule } from "./modules/acces-demo/acces-demo.module.js";
 import { InterpretationModule } from "./modules/interpretation/interpretation.module.js";
 import { DocumentsModule } from "./modules/documents/index.js";
 import { GroupeModule } from "./modules/groupe/index.js";
@@ -51,6 +52,7 @@ import { PushModule } from "./platform/push/push.module.js";
     PriceRequestsModule,
     OffersModule,
     DemoModule,
+    AccesDemoModule,
     InterpretationModule,
     BillingModule,
     AbonnementModule,

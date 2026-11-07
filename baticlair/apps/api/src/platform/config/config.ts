@@ -140,6 +140,11 @@ const envSchema = z
      */
     PAYWALL: z.enum(["on", "off"]).default("off"),
     /**
+     * L'ACCÈS DÉMO (Greg, 7 novembre 2026, option 1, test.mobiiz.fr seulement) : « Découvrir l'application » ouvre un
+     * espace fictif sans inscription. Coupé par défaut ; `on` l'allume ; refusé en production.
+     */
+    ACCES_DEMO: z.enum(["on", "off"]).default("off"),
+    /**
      * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 348 € HT par an, essai, paywall sur déposer, voir les résultats,
      * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
      */
@@ -367,6 +372,8 @@ export interface AppConfig {
   /** E-mails (en minuscules) des validateurs du référentiel. */
   referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
+  /** L'accès démo « Découvrir l'application » (visiteur fictif, sans inscription). */
+  accesDemo: boolean;
   /** L'abonnement artisan (`ABONNEMENT`, `PAIEMENT`). */
   abonnement: {
     actif: boolean;
@@ -464,6 +471,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
   if (e.PAIEMENT === "simule" && e.ABONNEMENT === "on" && e.VERCEL_ENV === "production") {
     problemes.push("PAIEMENT : « simule » est réservé à la prévisualisation ; en production, PAIEMENT=stripe (ou ABONNEMENT=off)");
   }
+  if (e.ACCES_DEMO === "on" && e.VERCEL_ENV === "production") {
+    problemes.push("ACCES_DEMO : l'accès démo est réservé à la prévisualisation (test.mobiiz.fr), jamais en production");
+  }
   if (e.SIRET_VERIFICATION === "forme" && e.VERCEL_ENV === "production") {
     problemes.push("SIRET_VERIFICATION : « forme » est réservé à la prévisualisation, jamais en production");
   }
@@ -504,6 +514,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
+    accesDemo: e.ACCES_DEMO === "on",
     abonnement: {
       actif: e.ABONNEMENT === "on",
       paiement: e.PAIEMENT,

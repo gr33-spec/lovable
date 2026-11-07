@@ -33,6 +33,8 @@ const apiEnv = {
   PLAN_ACTIVATION_CODES: "E2E-SOLO-CODE:solo",
   // Le paywall est en pause en production (fondateur, 2026-10-11) ; les parcours gardent son écran prêt pour plus tard.
   PAYWALL: "on",
+  // L'accès démo « Découvrir l'application » (Greg, 7 novembre 2026) : allumé ici comme sur test.mobiiz.fr.
+  ACCES_DEMO: "on",
   // Les parcours vérifient la limite de l'essai (3 chantiers), comme à l'ouverture ; en bêta, l'essai est sans limite.
   BILLING_PLANS: JSON.stringify([
     { key: "trial", label: "Essai gratuit", projectLimit: 3, period: "trial", priceEurMonth: null, offered: false },

@@ -1,3 +1,4 @@
+import { estRequeteDemo } from "../logging/request-context.js";
 import type { AppLogger } from "../logging/logger.js";
 import type { EmailCapability, TransactionalEmail, TransactionalEmailSender } from "./email.port.js";
 import { garder, miseEnPage, type GardeEnvoi } from "./mise-en-page.js";
@@ -19,6 +20,11 @@ export class EmailSortantSender implements TransactionalEmailSender, EmailCapabi
   }
 
   async send(email: TransactionalEmail): Promise<void> {
+    // Accès démo (Greg, 7 novembre 2026) : un visiteur fictif n'envoie JAMAIS un e-mail, liste blanche ou pas ; l'envoi est simulé.
+    if (estRequeteDemo()) {
+      this.logger.info({ subject: email.subject }, "email: accès démo, envoi simulé, rien n'est parti");
+      return;
+    }
     const garde = garder(this.garde, email);
     if (!garde) {
       this.logger.warn({ subject: email.subject }, "email: destinataire hors liste blanche, rien n'est parti");

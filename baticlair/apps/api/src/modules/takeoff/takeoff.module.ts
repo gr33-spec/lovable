@@ -22,6 +22,7 @@ import { TakeoffController } from "./http/takeoff.controller.js";
 import { FICHE_RELECTEUR, type FicheRelecteur } from "./application/fiche-relecture.js";
 import { IaFicheRelecteur } from "./infrastructure/ia-fiche-relecteur.js";
 import { fabriqueIa } from "../../platform/ai/fabrique-ia.js";
+import { estRequeteDemo } from "../../platform/logging/request-context.js";
 import { FakeFicheRelecteur } from "./infrastructure/fake-fiche-relecteur.js";
 import { LECTURE_READER, type LectureReader } from "./application/lecture-reader.js";
 import { IaLectureReader } from "./infrastructure/ia-lecture-reader.js";
@@ -207,6 +208,8 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
             // Le chantier fictif du mode démo : la lecture simulée déterministe, jamais un appel au modèle.
             lecteurDemo: async (tenant, projectId) => {
+              // Accès démo (Greg, 7 novembre 2026) : tout devis déposé par un visiteur est lu par la lecture simulée.
+              if (estRequeteDemo()) return new FakeLectureReader();
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { demo: true } });
               return project?.demo === true ? new FakeLectureReader() : null;
             },

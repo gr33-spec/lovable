@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BoutonDecouvrir } from "@/components/acces-demo";
 import { CtaFixePremium, EntetePremium, PaliersCollectif } from "@/components/landing-premium";
 import { HEBERGEUR, PAGES_LEGALES } from "@/lib/legal";
 import { ACCROCHE_APP, BLOC_LEGAL } from "@/lib/nom";
@@ -198,6 +199,8 @@ export function LandingPremium() {
                 <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/inscription">
                   {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
                 </Link>
+                {/* L'accès démo (Greg, 7 novembre 2026, test.mobiiz.fr seulement) : absent tant que le serveur ne l'allume pas. */}
+                <BoutonDecouvrir />
                 <a className="text-link" href="#fonctionnement">
                   <span className="circle-down" aria-hidden="true">
                     ↓

@@ -14,6 +14,7 @@ import {
   PaywallAbonnement,
 } from "./abonnement";
 import { GuidePremierLancement } from "./guide-premier-lancement";
+import { BandeauDemo } from "./acces-demo";
 import { classeTheme, useTheme } from "@/lib/theme";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -34,6 +35,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 pt-4 pb-(--nav-space) lg:mx-0 lg:ml-64 lg:w-auto lg:max-w-none lg:gap-6 lg:px-10 lg:pt-8 lg:pb-14 xl:px-14">
           <div className="contents lg:mx-auto lg:flex lg:w-full lg:max-w-[76rem] lg:flex-col lg:gap-6">
           <MenuArtisan />
+          {/* L'accès démo (Greg, 7 novembre 2026) : le visiteur sait toujours qu'il est dans un espace fictif. */}
+          <BandeauDemo />
           <CguAJour />
           {/* L'abonnement : le paiement refusé, en rouge, sur chaque écran ; l'essai dans Profil (27 octobre 2026). */}
           <BandeauAbonnement seulementRouge />
