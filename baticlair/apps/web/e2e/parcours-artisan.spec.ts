@@ -458,7 +458,8 @@ test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaq
   await createProject(page, "Toiture Barre", "M. Barre", "3 rue du Port, Brest");
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
   const viewport = page.viewportSize()!;
-  for (const path of ["/", "/chantiers", "/fournisseurs", "/compte", "/chantiers/nouveau"]) {
+  // « Nouveau besoin » (Greg, 7 novembre 2026) est la conversation plein écran, par-dessus le menu : hors de cette règle.
+  for (const path of ["/", "/chantiers", "/fournisseurs", "/compte"]) {
     await page.goto(path);
     await expect(nav).toBeVisible();
     for (const scroll of ["haut", "bas"] as const) {

@@ -60,12 +60,13 @@ export function ListePrete({ projectId, nbArticles, envoye, onDemanderPrix, opti
         setFait(`${articles.length} ligne${articles.length > 1 ? "s cherchent" : " cherche"} un regroupement jusqu'au ${jourLisible(jusquau)}. Tu seras prévenu, et rien ne rejoint un groupe sans ton accord.`);
         setCoches(new Set());
       }
-      if (prix && !envoye) onDemanderPrix();
     } catch (e) {
+      // Le regroupement ne bloque jamais la demande de prix : elle part quand même.
       setErreur(messageErreur(e));
     } finally {
       setPending(false);
     }
+    if (prix && !envoye) onDemanderPrix();
   }
 
   return (

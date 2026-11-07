@@ -311,6 +311,8 @@ test.describe("Recentrage du 25 octobre 2026", () => {
       { libelle: CROCHET, quantite: "5000", unite: "pièces" },
     ]);
     await page.goto(`/chantiers/${a.projectId}`);
+    // Deux parcours reliés (Greg, 7 novembre 2026) : sous « Plus d'options de regroupement ».
+    await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();
     await page.getByRole("button", { name: /^Tenter un prix de groupe \(1 gros article\)$/ }).click();
     const carte = page.getByRole("region", { name: "Tenter un prix de groupe" });
     const crochet = carte.getByRole("checkbox").nth(1);
@@ -364,6 +366,8 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const zone = zoneDuCas("lancement", info.project.name);
     const a = await couvreur(page, zone, [{ libelle: ARDOISE, quantite: "1800", unite: "pièces" }]);
     await page.goto(`/chantiers/${a.projectId}`);
+    // Deux parcours reliés (Greg, 7 novembre 2026) : sous « Plus d'options de regroupement ».
+    await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();
     await page.getByRole("button", { name: /^Tenter un prix de groupe/ }).click();
     const carte = page.getByRole("region", { name: "Tenter un prix de groupe" });
     await carte.getByRole("radio", { name: /^Ce cycle/ }).click();

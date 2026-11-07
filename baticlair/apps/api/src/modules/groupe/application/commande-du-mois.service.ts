@@ -331,7 +331,15 @@ export class CommandeDuMoisService {
     const takeoff = await this.prisma.takeoff.findFirst({ where: { projectId, companyId: tenant.companyId }, orderBy: { createdAt: "desc" }, select: { id: true } });
     if (!takeoff) return { takeoffId: "", adresse: project.address, lignes: [] };
     const reviewed = await this.reviewed(tenant, takeoff.id);
-    const lignes = lignesProposables(reviewed, reviewed.purchase.toBuy.map((b) => b.key));
+    // Ligne par ligne (Greg, 7 novembre 2026) : une ligne vague ou à régler reste à la demande individuelle, sans empêcher
+    // les autres d'être proposées.
+    const lignes = reviewed.purchase.toBuy.flatMap((b) => {
+      try {
+        return lignesProposables(reviewed, [b.key]);
+      } catch {
+        return [];
+      }
+    });
     return { takeoffId: takeoff.id, adresse: project.address, lignes: lignes.map(({ item, q, famille }) => ({ key: item.key, designation: item.label, quantite: Number(q.quantite), unite: q.unite, famille })) };
   }
 

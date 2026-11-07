@@ -82,6 +82,8 @@ test.describe("Business model final : le regroupement négocié par un humain", 
 
     // Sur le chantier : seuls les gros articles se déclarent ; le crochet garde sa raison.
     await page.goto(`/chantiers/${projectId}`);
+    // Deux parcours reliés (Greg, 7 novembre 2026) : sous « Plus d'options de regroupement ».
+    await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();
     await page.getByRole("button", { name: /Tenter un prix de groupe \(1 gros article\)/ }).click();
     const carte = page.getByRole("region", { name: "Tenter un prix de groupe" });
     await expect(carte.getByRole("checkbox", { name: /Crochet inox 100 mm/ })).toBeDisabled();

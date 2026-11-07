@@ -495,6 +495,9 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await page.waitForTimeout(700);
     await ecran.getByRole("button", { name: "Retour" }).click();
     await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
+    // Retour à la conversation « Nouveau quantitatif » (plein écran, par-dessus le menu) : on la ferme.
+    await page.getByRole("dialog", { name: "Nouveau quantitatif" }).getByRole("button", { name: "Fermer l'assistant" }).click();
+    await page.waitForURL(/\/chantiers$/);
     await partirEtReprendre(page, "Terminer ta liste");
     await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByRole("textbox").first()).toHaveValue("Liteaux 27×38 maison");
   });

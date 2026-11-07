@@ -72,6 +72,12 @@ describe("le rapprochement continu", () => {
     expect((await disponible(a, [ardoise.key], jour(45))).body.error.details.reason).toBe("date_recherche");
   });
 
+  it("une ligne vague dans la liste (Greg, 7 novembre 2026) n'empêche pas l'analyse : les lignes précises restent proposées", async () => {
+    const a = await artisan("v@toitures.fr", "Toitures V", "3 rue des Ajoncs, 22300 Lannion", [ARDOISE, { libelle: "Tuiles", quantite: "50", unite: "pièces" }]);
+    const ardoise = a.analyse.lignes.find((l: { designation: string }) => /Ardoise/.test(l.designation));
+    expect(ardoise).toMatchObject({ rapprochable: true });
+  });
+
   it("un besoin compatible apparaît plus tard : les deux entreprises sont prévenues, sans nom ni quantité de l'autre ; double clic sans effet", async () => {
     const a = await artisan("a@toitures.fr", "Toitures Armor", "3 rue des Ajoncs, 22300 Lannion", [ARDOISE]);
     const cle = cleDe(a.analyse, /Ardoise/);
