@@ -1,6 +1,6 @@
 import { Controller, Get, HttpCode, Inject, Post, Req, Res } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
-import type { Request, Response } from "express";
+import type { Request, Response as ReponseExpress } from "express";
 import { fromNodeHeaders } from "better-auth/node";
 import { CONFIG, AUTH } from "../../../platform/tokens.js";
 import type { AppConfig } from "../../../platform/config/config.js";
@@ -33,10 +33,12 @@ export class AccesDemoController {
   @Throttle({ default: HOURLY(20) })
   @Post("session")
   @HttpCode(201)
-  async session(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async session(@Req() req: Request, @Res({ passthrough: true }) res: ReponseExpress) {
     if (!this.config.accesDemo) throw new DomainError("not_found", "Not found");
     const { email, motDePasse } = await this.demo.ouvrir();
-    const reponse = await this.auth.api.signInEmail({ body: { email, password: motDePasse, rememberMe: false }, headers: fromNodeHeaders(req.headers), asResponse: true });
+    // La réponse de l'authentification, décrite par ce qui sert (le type « Response » global n'existe pas dans la
+    // compilation de Vercel).
+    const reponse = (await this.auth.api.signInEmail({ body: { email, password: motDePasse, rememberMe: false }, headers: fromNodeHeaders(req.headers), asResponse: true })) as unknown as { ok: boolean; headers: { getSetCookie(): string[] } };
     if (!reponse.ok) throw new DomainError("internal_error", "La session de démonstration n'a pas pu s'ouvrir");
     for (const cookie of reponse.headers.getSetCookie()) res.append("Set-Cookie", cookie);
     return { demo: true };
