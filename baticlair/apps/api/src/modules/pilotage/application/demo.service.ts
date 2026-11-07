@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { filtreVisiteurs } from "../../../platform/demo-domaine.js";
 import { articleNegociable, COMMISSION_DEFAUT, CONDITIONS_NEGOCE_VERSION, PALIERS_DEFAUT, prixAffiche } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { notFound } from "../../../platform/errors/domain-error.js";
@@ -194,7 +195,8 @@ export class DemoService {
     await this.prisma.regroupementNegocie.deleteMany({ where: { id: { in: regroupements } } });
     const avant = await this.jeu.effacer();
     // Les faux négoces ajoutés au carnet de l'admin (demande perso de démonstration), après leurs demandes.
-    await this.prisma.supplier.deleteMany({ where: { email: { endsWith: `@${this.domaine}` } } });
+    // Jamais ceux des visiteurs de l'accès démo (Greg, 7 novembre 2026) : leur espace s'efface seul, après 24 h.
+    await this.prisma.supplier.deleteMany({ where: { email: { endsWith: `@${this.domaine}` }, company: { memberships: { none: { user: filtreVisiteurs() } } } } });
     const comptes = await this.prisma.compteNegoce.deleteMany({ where: { email: { endsWith: `@${this.domaine}` } } });
     return { ...avant, comptesNegoce: comptes.count };
   }

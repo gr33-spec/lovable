@@ -5,6 +5,7 @@
  */
 import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
+import { DemoService as DemoAdmin } from "../src/modules/pilotage/application/demo.service.js";
 import { loadConfig } from "../src/platform/config/config.js";
 import { routeInterditeEnDemo, estVisiteurDemo } from "../src/platform/demo-domaine.js";
 import { runWithRequestContext } from "../src/platform/logging/request-context.js";
@@ -119,5 +120,15 @@ describe("l'accès démo", () => {
     expect(await c.prisma.user.findUnique({ where: { id: ancien.id } })).toBeNull();
     expect(await c.prisma.user.count({ where: { email: { startsWith: "visiteur-" } } })).toBe(1);
     expect(await c.prisma.company.count()).toBe(1);
+  });
+
+  it("le jeu de démonstration de l'admin (créer, tout effacer) ne touche jamais l'espace d'un visiteur", async () => {
+    const c = await app("on");
+    await visiteur(c);
+    const admin = c.app.get(DemoAdmin);
+    await admin.creer(new Date(), null);
+    await admin.effacer();
+    expect(await c.prisma.user.count({ where: { email: { startsWith: "visiteur-" } } })).toBe(1);
+    expect(await c.prisma.supplier.count({ where: { company: { memberships: { some: { user: { email: { startsWith: "visiteur-" } } } } } } })).toBeGreaterThanOrEqual(6);
   });
 });
