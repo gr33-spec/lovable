@@ -30,8 +30,8 @@ Greg, 7 novembre 2026, option 1, **test.mobiiz.fr seulement**.
 
 - Un compte `visiteur-<hasard>@demo.mobiiz.fr` et une entreprise **par visite** : l'isolation est celle de toute
   entreprise (test `isolation-toutes-routes`, test `acces-demo`).
-- Effacé après **24 h** (à la visite suivante) ; 300 visiteurs au plus en même temps. Le jeu de démonstration de l'admin
-  (« Tout effacer ») les efface aussi.
+- Effacé après **24 h** (à la visite suivante) ; 300 visiteurs au plus en même temps. « Tout effacer » du jeu
+  de démonstration de l'admin ne les touche pas (ils ont leur propre effacement).
 
 ## Le réglage
 

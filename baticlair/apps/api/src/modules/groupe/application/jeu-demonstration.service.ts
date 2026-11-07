@@ -1,4 +1,4 @@
-import { DOMAINE_DEMO, emailsDemo } from "../../../platform/demo-domaine.js";
+import { DOMAINE_DEMO, emailsDemo, filtreVisiteurs } from "../../../platform/demo-domaine.js";
 import { randomUUID } from "node:crypto";
 import { economieEstimee } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -144,7 +144,8 @@ export class JeuDemonstrationService {
     const p = this.prisma;
     const lots = await p.lotGroupe.deleteMany({ where: { cle: { startsWith: "demo-" } } });
     const negoces = await p.negoce.deleteMany({ where: { OR: emailsDemo() } });
-    const users = await p.user.findMany({ where: { OR: emailsDemo() }, select: { id: true } });
+    // Les visiteurs de l'accès démo (Greg, 7 novembre 2026) ont leur propre effacement (24 h) : jamais pris ici.
+    const users = await p.user.findMany({ where: { OR: emailsDemo(), NOT: filtreVisiteurs() }, select: { id: true } });
     const entreprises = await p.membership.findMany({ where: { userId: { in: users.map((u) => u.id) } }, select: { companyId: true } });
     await p.company.deleteMany({ where: { id: { in: entreprises.map((e) => e.companyId) } } });
     const artisans = await p.user.deleteMany({ where: { id: { in: users.map((u) => u.id) } } });
