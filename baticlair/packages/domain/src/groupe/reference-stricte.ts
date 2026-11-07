@@ -135,6 +135,17 @@ export type RefusReference = "accessoire" | "type_inconnu" | "attribut_manquant"
  * La référence stricte d'une ligne, ou la raison du refus. Jamais un rapprochement approché.
  */
 export function referenceStricte(designation: string): { ok: true; reference: ReferenceStricte } | { ok: false; raison: RefusReference } {
+  const lu = lireReference(designation);
+  if (!lu.ok) return lu;
+  return referenceDepuis(lu.type, lu.attributs);
+}
+
+/**
+ * ACHATS GROUPÉS V1 (Greg, 7 novembre 2026, V5.2 validée) : la lecture SEULE d'une ligne (son type et les attributs
+ * écrits), même incomplète, pour dire à l'artisan ce qu'il manque (« À préciser : origine, choix »). Même lecture que
+ * `referenceStricte`, sans le contrôle des attributs requis.
+ */
+export function lireReference(designation: string): { ok: true; type: string; libelle: string; famille: FamilleGroupe; attributs: Partial<Record<AttributReference, string>>; texte: string } | { ok: false; raison: Exclude<RefusReference, "attribut_manquant"> } {
   const texte = ` ${normalizeText(designation.replace(/m²/g, "m2")).replace(/[^a-z0-9.,×*]+/g, " ").replace(/\s+/g, " ")} `;
   const types = TYPES.filter((t) => t.mots.test(texte));
   // « ardoise fibres-ciment » reconnaît aussi « ardoise » : le premier type (le plus précis) l'emporte.
@@ -209,6 +220,15 @@ export function referenceStricte(designation: string): { ok: true; reference: Re
     if (modele) attributs.modele = modele.replace(/\s+/g, "");
     delete attributs.format;
   }
+  if (type.type === "tuile") {
+    const teinte = /\b(rouge|vieilli|ardoise|ardoisee|brun|nuance|naturel|flamme|sable|noir|anthracite)\b/.exec(texte)?.[1];
+    if (teinte) attributs.teinte = teinte;
+  }
+  return { ok: true, type: type.type, libelle: type.libelle, famille: type.famille, attributs, texte };
+}
+
+function referenceDepuis(typeNom: string, attributs: Partial<Record<AttributReference, string>>): { ok: true; reference: ReferenceStricte } | { ok: false; raison: RefusReference } {
+  const type = TYPES.find((t) => t.type === typeNom)!;
   if (type.requis.some((a) => !attributs[a])) return { ok: false, raison: "attribut_manquant" };
   // La teinte et la finition n'entrent dans la clé que pour la peinture : la clé des autres articles ne change pas (les
   // regroupements déjà ouverts gardent la leur).
@@ -218,10 +238,6 @@ export function referenceStricte(designation: string): { ok: true; reference: Re
     gouttiere: ["matiere", "developpe", "aspect", "marque"],
     tuile: ["marque", "modele", "teinte"],
   };
-  if (type.type === "tuile") {
-    const teinte = /\b(rouge|vieilli|ardoise|ardoisee|brun|nuance|naturel|flamme|sable|noir|anthracite)\b/.exec(texte)?.[1];
-    if (teinte) attributs.teinte = teinte;
-  }
   const ordre: readonly AttributReference[] = nouveaux[type.type] ?? (peinture ? ["format", "epaisseur", "largeur", "aspect", "teinte", "finition", "conditionnement", "origine", "qualite", "marque"] : ["format", "epaisseur", "largeur", "aspect", "conditionnement", "origine", "qualite", "marque"]);
   const cle = `${type.type}|${ordre.map((a) => `${a}=${attributs[a] ?? ""}`).join("|")}`;
   const lisible = [

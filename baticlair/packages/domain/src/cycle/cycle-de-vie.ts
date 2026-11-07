@@ -78,6 +78,11 @@ export interface FaitsLigne {
   enRecherche: boolean;
   /** La participation active qui la tient, s'il y en a une. */
   groupe: { titre: string; statut: string; avantCloture: boolean } | null;
+  /**
+   * ACHATS GROUPÉS V1 (V5.2, « Une ligne, un seul circuit ») : la ligne est tenue par un besoin d'achat groupé V1 actif ;
+   * elle ne part alors jamais en même temps en demande individuelle (l'ancien achat groupé, lui, garde sa règle).
+   */
+  achatGroupeV1?: boolean;
 }
 
 /** L'état d'une ligne : une commande l'emporte sur tout, puis l'achat groupé, la recherche, la demande. */
@@ -116,6 +121,8 @@ export function peut(f: FaitsLigne, action: ActionLigne, designation = "Cette li
     if (action === "envoyer_demande") return { permis: false, raison: "deja_commande", message: `${nom} est déjà commandée : une nouvelle demande n'est pas utile.` };
     return { permis: false, raison: "deja_commande", message: `${nom} est déjà couverte par une offre que tu as acceptée : pas de double commande.` };
   }
+  if (action === "envoyer_demande" && f.achatGroupeV1)
+    return { permis: false, raison: "dans_un_achat_groupe", message: `${nom} est dans un achat groupé : elle ne part pas en même temps en demande individuelle. Retire d'abord ton besoin de l'achat groupé.` };
   if (action === "envoyer_demande") return { permis: true };
   if (etat === "dans_un_groupe") {
     if (action === "chercher") return { permis: false, raison: "deja_dans_un_groupe", message: `${nom} est déjà dans l'achat groupé « ${f.groupe!.titre} » : elle ne cherche pas d'autre rapprochement.` };

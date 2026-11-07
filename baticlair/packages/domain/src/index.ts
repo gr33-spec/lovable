@@ -77,6 +77,7 @@ export * from "./groupe/commande-du-mois.js";
 export * from "./groupe/espace-negoce.js";
 export * from "./groupe/multimetier.js";
 export * from "./groupe/suivi-des-demandes.js";
+export * from "./groupe/achats-groupes-v1.js";
 export * from "./groupe/reference-stricte.js";
 export * from "./groupe/regroupements.js";
 export * from "./groupe/offre-artisan.js";
