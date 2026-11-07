@@ -78,7 +78,8 @@ test("une phrase, deux articles : « J'ai compris », ajouter, voir ma liste, pu
         const r = await fetch(url, { headers: { accept: "application/json", ...(companyId ? { "x-company-id": companyId } : {}) } });
         return (await r.json()) as { lignes: { recherche: { statut: string } | null }[] };
       }, `/v1/projects/${projectId}/rapprochement`);
-      return a.lignes.filter((l) => l.recherche?.statut === "disponible").length;
+      // « proposee » quand un besoin compatible d'une autre entreprise existe déjà (série ordinateur après téléphone).
+      return a.lignes.filter((l) => ["disponible", "proposee", "rejointe"].includes(l.recherche?.statut ?? "")).length;
     }, { timeout: 15_000 })
     .toBe(1);
 });
