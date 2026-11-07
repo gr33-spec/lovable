@@ -34,6 +34,11 @@ complètes seulement avant un déploiement important, et en le disant.
 
 ## En cours
 
+SUIVI 176 (7 novembre 2026) : les deux points bloquants sont corrigés (verrou `avecVerrouCircuit` commun à la demande
+individuelle et à la confirmation V1 ; aucune ligne cachée dans « Depuis un quantitatif »), suites complètes vertes,
+migration testée (vierge et copie). Toujours local, rien poussé : attendre l'accord explicite de Greg, puis suivre
+`docs/deploiement-achats-groupes-v1.md` (sauvegarde Neon, push, migration de la base de test, `ACHATS_GROUPES_V1=on` en Preview).
+
 SUIVI 175 (7 novembre 2026) : V5.2 VALIDÉE, fin des maquettes ; développement LOCAL de la V1 des achats groupés
 (`docs/achats-groupes-v1.md`). Branche locale `achats-groupes-v1` (partie de c99cdc12), NON POUSSÉE ; aucune sauvegarde
 Neon, aucun déploiement sans accord explicite de Greg. Réglage `ACHATS_GROUPES_V1` coupé par défaut. Fait : domaine,
