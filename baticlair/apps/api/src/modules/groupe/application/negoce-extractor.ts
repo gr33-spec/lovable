@@ -22,6 +22,14 @@ export const reponseNegoceSchema = z.object({
   /** Le délai de livraison en jours, s'il est écrit. */
   delaiJours: z.number().int().nullable(),
   totalHt: z.string().nullable(),
+  // Greg, 7 novembre 2026 : ce qui fait le coût réellement livré, recopié SEULEMENT s'il est écrit (sinon vide) ; jamais
+  // redemandé au négoce quand son devis le dit. Facultatifs : une lecture d'avant reste valable.
+  fraisLivraisonHt: z.string().nullable().optional(),
+  tva: z.string().nullable().optional(),
+  totalTtc: z.string().nullable().optional(),
+  minimumCommandeHt: z.string().nullable().optional(),
+  /** « complète », « partielle » ou ce que dit le devis sur la disponibilité. */
+  disponibilite: z.string().nullable().optional(),
   doutes: z.array(z.string()),
 });
 export type ReponseLue = z.infer<typeof reponseNegoceSchema>;
