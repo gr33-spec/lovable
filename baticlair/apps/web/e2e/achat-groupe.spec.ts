@@ -169,10 +169,11 @@ async function admin(browser: Browser, chemin: string) {
 }
 
 /** Ajouter un négoce tapé à la main (nom, e-mail, téléphone). */
-async function ajouterNegoce(page: Page, n: { nom: string; email: string; tel: string }) {
+async function ajouterNegoce(page: Page, n: { nom: string; email: string; tel: string }, { parContinuer = false } = {}) {
   await page.getByLabel(/^(E-mail de ton commercial|Ou l'e-mail du commercial d'un autre négoce)$/).fill(n.email); await page.getByLabel("Nom du négoce").fill(n.nom);
   await page.getByLabel("Son téléphone (pour le prévenir)").fill(n.tel);
-  await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
+  // Retour de Greg (7 novembre 2026) : « Continuer » suffit, il ajoute le négoce rempli.
+  if (!parContinuer) await page.getByRole("button", { name: "Ajouter ce négoce" }).click();
 }
 
 test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
@@ -229,8 +230,9 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     if (await autreDate.count()) await autreDate.check();
     await groupe.locator("#liste-date-besoin").fill(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
     await groupe.getByRole("button", { name: "Continuer" }).click();
-    await ajouterNegoce(page, negoceX);
+    await ajouterNegoce(page, negoceX, { parContinuer: true });
     await groupe.getByRole("button", { name: "Continuer" }).click();
+    await expect(groupe.getByText(/· 1 négoce$/)).toBeVisible();
     // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits ; plus de « premier offert ».
     await expect(groupe.getByText("Ton premier achat groupé est offert.")).toHaveCount(0);
     await groupe.getByRole("checkbox", { name: /^Je confirme que ces quantités correspondent à un besoin réel de mon entreprise/ }).check();

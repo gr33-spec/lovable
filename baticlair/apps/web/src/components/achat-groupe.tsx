@@ -241,7 +241,7 @@ const EMAIL_VALIDE = /^\S+@\S+\.\S+$/;
  * les inscrits du secteur en un tap ; sinon L'E-MAIL du négoce (c'est là que part la demande) ; un e-mail connu
  * retrouve le négoce, un e-mail nouveau demande son nom (et son téléphone, pour le prévenir).
  */
-export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; onChange: (n: NegoceChoisi[]) => void }) {
+export function ChoixNegoces({ choisis, onChange, onEnCours }: { choisis: NegoceChoisi[]; onChange: (n: NegoceChoisi[]) => void; onEnCours?: (n: NegoceChoisi | null) => void }) {
   const [email, setEmail] = useState("");
   const [cherche, setCherche] = useState("");
   const fetcher = useCallback((signal: AbortSignal) => api<NegocesProposes>(`/v1/achats-groupes/negoces?q=${encodeURIComponent(cherche)}`, { signal }), [cherche]);
@@ -257,6 +257,14 @@ export function ChoixNegoces({ choisis, onChange }: { choisis: NegoceChoisi[]; o
   const valide = EMAIL_VALIDE.test(courriel);
   // Un e-mail déjà connu (carnet ou négoce inscrit) : le négoce lui-même, sans rien retaper.
   const connu = valide ? propositions.find((n) => (n.email ?? "").toLowerCase() === courriel) : undefined;
+  // Retour de Greg (7 novembre 2026, capture iPhone : « on ne comprend pas qu'il faut cliquer sur Ajouter ce négoce ; ça
+  // devrait plutôt être Continuer ») : le négoce rempli mais pas encore ajouté est dit au parent, dont « Continuer » l'ajoute.
+  const enCours: NegoceChoisi | null = connu ?? (valide && nom.trim() ? { nom: nom.trim(), email: courriel, telephone: tel.trim() || null, prenom: prenom.trim() || null } : null);
+  const cleEnCours = enCours ? `${cle(enCours)}|${enCours.nom}|${"telephone" in enCours ? (enCours.telephone ?? "") : ""}|${"prenom" in enCours ? (enCours.prenom ?? "") : ""}` : "";
+  useEffect(() => {
+    onEnCours?.(enCours);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- la clé résume le négoce en cours
+  }, [cleEnCours]);
   const vider = () => {
     setEmail("");
     setCherche("");
@@ -460,6 +468,7 @@ export function FormulaireAchatGroupe({ rejoindre, famille = null }: { rejoindre
   const setLivraison = (v: string) => b.modifier((d) => ({ ...d, livraison: v }));
   const setDateBesoin = (v: string) => b.modifier((d) => ({ ...d, dateBesoin: v }));
   const setNegoces = (v: NegoceChoisi[]) => b.modifier((d) => ({ ...d, negoces: v }));
+  const [negoceEnCours, setNegoceEnCours] = useState<NegoceChoisi | null>(null);
   const setEngage = (v: boolean) => b.modifier((d) => ({ ...d, engage: v }));
   const fetchMes = useCallback((signal: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal }), []);
   const { data: mes } = useResource(fetchMes);
@@ -598,8 +607,15 @@ export function FormulaireAchatGroupe({ rejoindre, famille = null }: { rejoindre
       ) : null}
       {etape === 3 ? (
         <Etape n={3} total={total} titre="À quels négoces envoyer la demande ?" aide="Tes négoces habituels, ou un autre." onRetour={precedent}>
-          <ChoixNegoces choisis={negoces} onChange={setNegoces} />
-          <Button disabled={negoces.length === 0} onClick={suivant}>
+          <ChoixNegoces choisis={negoces} onChange={setNegoces} onEnCours={setNegoceEnCours} />
+          <Button
+            disabled={negoces.length === 0 && !negoceEnCours}
+            onClick={() => {
+              // « Continuer » ajoute le négoce rempli sans avoir touché « Ajouter ce négoce ».
+              if (negoceEnCours) setNegoces([...negoces, negoceEnCours]);
+              suivant();
+            }}
+          >
             Continuer
           </Button>
         </Etape>
@@ -1134,6 +1150,7 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
   const setDateBesoin = (v: string) => b.modifier((d) => ({ ...d, dateBesoin: v }));
   const setLivraison = (v: string) => b.modifier((d) => ({ ...d, livraison: v }));
   const setNegoces = (v: NegoceChoisi[]) => b.modifier((d) => ({ ...d, negoces: v }));
+  const [negoceEnCours, setNegoceEnCours] = useState<NegoceChoisi | null>(null);
   const setEngage = (v: boolean) => b.modifier((d) => ({ ...d, engage: v }));
   const identite = useIdentite();
   const [pendingSiret, setPendingSiret] = useState(false);
@@ -1293,8 +1310,15 @@ export function AcheterEnGroupe({ projectId }: { projectId: string }) {
       ) : null}
       {etape === 3 ? (
         <Etape n={3} total={total} titre="À quels négoces envoyer la demande ?" aide="Tes négoces habituels, ou un autre." onRetour={precedent}>
-          <ChoixNegoces choisis={negoces} onChange={setNegoces} />
-          <Button disabled={negoces.length === 0} onClick={suivant}>
+          <ChoixNegoces choisis={negoces} onChange={setNegoces} onEnCours={setNegoceEnCours} />
+          <Button
+            disabled={negoces.length === 0 && !negoceEnCours}
+            onClick={() => {
+              // « Continuer » ajoute le négoce rempli sans avoir touché « Ajouter ce négoce ».
+              if (negoceEnCours) setNegoces([...negoces, negoceEnCours]);
+              suivant();
+            }}
+          >
             Continuer
           </Button>
         </Etape>
