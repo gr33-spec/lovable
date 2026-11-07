@@ -1,11 +1,13 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { z } from "zod";
+import { titreLisible } from "@baticlair/domain";
 import { validationFailed } from "../../../platform/errors/domain-error.js";
 import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import type { ProjectCursor } from "../application/project.repository.js";
+import { ListesService } from "../application/listes.service.js";
 import { ProjectsService } from "../application/projects.service.js";
 import type { Project } from "../domain/project.js";
 import { BillingService } from "../../billing/index.js";
@@ -34,8 +36,12 @@ const listQuery = z.object({
   q: z.string().trim().max(100).optional(),
   /** Par défaut : en cours ; en recherche : tous. */
   status: z.enum(["active", "archived", "all"]).optional(),
+  /** « Mes demandes » : l'étape du dossier (prime sur `status`). */
+  etape: z.enum(["a-preparer", "envoyees", "reponses", "terminees"]).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(30),
   cursor: z.string().max(200).optional(),
+  /** « Mes listes » et l'accueil (1er novembre 2026) : le résumé de chaque liste (lignes, origine, statut, demande, supprimable). */
+  resume: z.enum(["1"]).optional(),
 });
 
 /** Curseur opaque pour le client : base64url de « date|id ». */
@@ -55,7 +61,7 @@ function decodeCursor(raw: string): ProjectCursor {
 function toDto(p: Project) {
   return {
     id: p.id,
-    name: p.name,
+    name: titreLisible(p.name),
     clientName: p.clientName,
     address: p.address,
     siteNotes: p.siteNotes,
@@ -73,6 +79,7 @@ export class ProjectsController {
   constructor(
     @Inject(ProjectsService) private readonly projects: ProjectsService,
     @Inject(BillingService) private readonly billing: BillingService,
+    @Inject(ListesService) private readonly listes: ListesService,
   ) {}
 
   @Post()
@@ -90,10 +97,12 @@ export class ProjectsController {
     const page = await this.projects.list(tenant, {
       status: query.status ?? (search.length > 0 ? "all" : "active"),
       limit: query.limit,
+      ...(query.etape ? { etape: query.etape } : {}),
       ...(search.length > 0 ? { search } : {}),
       ...(query.cursor ? { cursor: decodeCursor(query.cursor) } : {}),
     });
-    return { items: page.items.map(toDto), nextCursor: page.nextCursor ? encodeCursor(page.nextCursor) : null };
+    const resumes = query.resume ? await this.listes.resumes(tenant.companyId, page.items) : null;
+    return { items: page.items.map((p) => (resumes ? { ...toDto(p), resume: resumes.get(p.id) ?? null } : toDto(p))), nextCursor: page.nextCursor ? encodeCursor(page.nextCursor) : null };
   }
 
   @Get(":id")

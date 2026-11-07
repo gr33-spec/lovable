@@ -17,6 +17,18 @@ export interface RecipientRecord {
   status: RecipientStatus;
   sentAt: Date | null;
   document: { id: string; name: string; status: string } | null;
+  /** R7 : l'étiquette de réponse (dans l'adresse « Répondre » et l'objet de la demande). */
+  etiquette: string | null;
+  /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu (mi-délai ou veille). */
+  rappelLe?: Date | null;
+  /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », le motif d'un refus, une précision demandée. */
+  negoce?: {
+    intentionLe: Date | null;
+    refusMotif: string | null;
+    precision: { question: string; demandeeLe: Date | null; reponse: string | null; repondueLe: Date | null } | null;
+    /** Greg, 7 novembre 2026 : ce que le négoce a dit pour le coût réellement livré. */
+    conditions?: { livraisons: string | null; minimumCommandeHt: number | null; dechargement: string | null };
+  };
 }
 
 /**
@@ -65,6 +77,11 @@ export interface ValidatedTakeoff {
 export interface Sender {
   companyName: string;
   senderName: string;
+  /** Lot final, points 1, 3 et 4 : le prénom de l'artisan, le métier du chantier, son modèle de message, tu ou vous. */
+  prenom?: string | null;
+  trade?: string | null;
+  modeleMessage?: string | null;
+  tutoie?: boolean;
   project: { id: string; name: string; address: string | null; siteNotes: string | null };
   /** Coordonnées du compte (§45.2, §45.3) ; e-mail de l'artisan à défaut d'un e-mail d'entreprise. */
   company: { address: string | null; siret: string | null; phone: string | null; email: string | null };
@@ -79,6 +96,12 @@ export interface PriceRequestRepository {
    */
   validatedTakeoff(tenant: TenantContext, projectId: string, options?: { anyStatus?: boolean }): Promise<ValidatedTakeoff | null>;
   sender(tenant: TenantContext, projectId: string): Promise<Sender | null>;
+  /** Apparence (Greg, 1er novembre 2026) : l'entreprise seule (nom, coordonnées, logo), pour l'aperçu des réglages du PDF. */
+  entreprise(tenant: TenantContext): Promise<Pick<Sender, "companyName" | "senderName" | "company" | "logo"> | null>;
+  /** La dernière demande réellement préparée (son document figé), pour l'aperçu des réglages du PDF ; null s'il n'y en a pas. */
+  derniereDemande(tenant: TenantContext): Promise<{ projectId: string; packet: SupplierPacket } | null>;
+  /** Lot final, point 4 : le message modifié et le tutoiement, gardés comme modèle personnel. */
+  saveModele(tenant: TenantContext, m: { message?: string | undefined; tutoie?: boolean | undefined }): Promise<void>;
   /** Les croquis rattachés à un article de la liste (clé de l'article), avec la précision de l'artisan. */
   itemSketches(tenant: TenantContext, projectId: string): Promise<{ id: string; nom: string; itemKey: string; note: string | null }[]>;
   create(
@@ -97,6 +120,9 @@ export interface PriceRequestRepository {
   /** Case « Joindre le détail du chantier » (§42.2), mémorisée par entreprise. */
   attachQuoteDetail(tenant: TenantContext): Promise<boolean>;
   setAttachQuoteDetail(tenant: TenantContext, value: boolean): Promise<void>;
+  /** Assistant (31 octobre 2026, point 12) : le modèle et la couleur du PDF, retenus par entreprise (nuls = défauts). */
+  reglagesPdf(tenant: TenantContext): Promise<{ modele: string | null; couleur: string | null }>;
+  setReglagesPdf(tenant: TenantContext, r: { modele?: string | undefined; couleur?: string | undefined }): Promise<void>;
   addRecipients(tenant: TenantContext, requestId: string, supplierIds: string[]): Promise<void>;
   listByProject(tenant: TenantContext, projectId: string): Promise<PriceRequestRecord[]>;
   findById(tenant: TenantContext, id: string): Promise<PriceRequestRecord | null>;
@@ -105,6 +131,8 @@ export interface PriceRequestRepository {
   findByDocument(tenant: TenantContext, documentId: string): Promise<PriceRequestRecord | null>;
   setStatus(tenant: TenantContext, recipientId: string, status: RecipientStatus): Promise<void>;
   attachDocument(tenant: TenantContext, recipientId: string, documentId: string): Promise<void>;
+  /** R7 : l'étiquette de réponse posée à l'envoi (`adresse+r<étiquette>@mobiiz.fr`). */
+  setEtiquette(tenant: TenantContext, recipientId: string, etiquette: string): Promise<void>;
   delete(tenant: TenantContext, id: string): Promise<boolean>;
   /** Classe la demande (fournisseurs retenus facultatifs) ; `null` la rouvre. */
   classify(tenant: TenantContext, id: string, retainedSupplierIds: string[] | null): Promise<void>;

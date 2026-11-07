@@ -9,13 +9,19 @@ import { createTestApp, resetDatabase, signUp, signUpWithCompany, type TestConte
 let ctx: TestContext;
 let recorder: AiUsageRecorder;
 let meter: AnalysisMeter;
+// Ces tests portent sur le palier du mois et le compteur : la limite de Découverte (1 analyse offerte depuis le
+// 30 octobre 2026) est levée ici, elle a son test dans `offres-quotas.test.ts`.
+const lecturesAvant = process.env.LECTURES_IA_GRATUIT_TOTAL;
 beforeAll(async () => {
+  process.env.LECTURES_IA_GRATUIT_TOTAL = "100";
   ctx = await createTestApp();
   recorder = ctx.app.get(AiUsageRecorder);
   meter = ctx.app.get(AnalysisMeter);
 });
 afterAll(async () => {
   await ctx.app.close();
+  if (lecturesAvant === undefined) delete process.env.LECTURES_IA_GRATUIT_TOTAL;
+  else process.env.LECTURES_IA_GRATUIT_TOTAL = lecturesAvant;
 });
 beforeEach(async () => {
   await resetDatabase(ctx.prisma);

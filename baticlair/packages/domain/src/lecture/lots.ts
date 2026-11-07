@@ -4,6 +4,7 @@ import { referentialFor, tradeIdOf } from "../referential/registry.js";
 import { tradeProfile } from "../trades/index.js";
 import { POINTS_ELECTRIQUES } from "./electricite.js";
 import type { EcranDeLecture, LectureDevis, LectureLot } from "./lecture.js";
+import type { ScreenRow } from "../trust/purchase-view.js";
 import { ecranDeLecture } from "./lecture.js";
 
 type Entree = Parameters<typeof ecranDeLecture>[0];
@@ -55,7 +56,14 @@ export function ecranParLots(input: Entree & { refDe: (metier: string) => Refere
   const tous = parLot.map((x) => x.e);
   const unique = <T>(xs: T[], key: (x: T) => string) => [...new Map(xs.map((x) => [key(x), x])).values()];
   const questionsEcran = unique(tous.flatMap((e) => e.purchase.questions), (d) => d.key);
-  const groups = parLot.map(({ lot, e }, i) => ({ key: `lot:${i}:${lot.metier}`, label: lot.libelle, measure: null, kind: "autres" as const, rows: e.purchase.screen.groups.flatMap((g) => g.rows) }));
+  // Greg, 7 novembre 2026 : la famille est le titre de la section ; une ligne qu'aucun lot ne citait (rangée au lot
+  // principal faute de mieux) porte seule « Famille à vérifier ».
+  const citee = (ref: string) => {
+    const base = ref.split(/[.:]/)[0]!;
+    return lots.some((l) => l.lignes.some((x) => x === ref || x === base));
+  };
+  const marquer = (r: ScreenRow): ScreenRow => (r.lineIds.length > 0 && r.lineIds.every((id) => !citee(id)) ? { ...r, familleIncertaine: true } : r);
+  const groups = parLot.map(({ lot, e }, i) => ({ key: `lot:${i}:${lot.metier}`, label: lot.libelle, measure: null, kind: "autres" as const, rows: e.purchase.screen.groups.flatMap((g) => g.rows).map(marquer) }));
   const p0 = tous[principal]!;
   const purchase = {
     ...p0.purchase,

@@ -1,3 +1,4 @@
+import { SPECIALITES } from "@baticlair/domain";
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { z } from "zod";
 import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
@@ -20,9 +21,11 @@ const fields = {
   email: z.string().trim().toLowerCase().pipe(z.email()),
   phone: optional(40),
   notes: optional(1000),
+  /** Greg, 1er novembre 2026 : les spécialités déclarées (généraliste, couverture…), corrigeables. */
+  specialites: z.array(z.enum(SPECIALITES)).max(SPECIALITES.length).transform((v) => [...new Set(v)]),
 };
 
-const createBody = z.object(fields);
+const createBody = z.object({ ...fields, specialites: fields.specialites.optional() });
 const updateBody = z
   .object({ ...fields, archived: z.boolean() })
   .partial()
@@ -40,6 +43,8 @@ export function supplierDto(s: SupplierRecord) {
     email: s.email,
     phone: s.phone,
     notes: s.notes,
+    specialites: s.specialites,
+    specialitesSource: s.specialitesSource,
     archived: s.archived,
     createdAt: s.createdAt.toISOString(),
     updatedAt: s.updatedAt.toISOString(),
@@ -77,6 +82,7 @@ export class SuppliersController {
       contactName: body.contactName ?? null,
       phone: body.phone ?? null,
       notes: body.notes ?? null,
+      specialites: body.specialites ?? [],
     };
     return supplierDto(await this.suppliers.create(tenant, fields));
   }

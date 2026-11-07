@@ -7,6 +7,7 @@ import { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import { enrichRequestContext } from "../../../platform/logging/request-context.js";
 import { AUTH } from "../../../platform/tokens.js";
+import { estVisiteurDemo, PHRASE_ACTION_DEMO, routeInterditeEnDemo } from "../../../platform/demo-domaine.js";
 import type { AuthenticatedUser } from "../authenticated-user.js";
 import type { Auth } from "../infrastructure/auth.js";
 
@@ -81,8 +82,12 @@ export class SessionGuard implements CanActivate {
       email: session.user.email,
       name: session.user.name,
       emailVerified: session.user.emailVerified,
+      sessionId: session.session.id,
     };
-    enrichRequestContext({ userId: session.user.id });
+    const demo = estVisiteurDemo(session.user.email);
+    enrichRequestContext({ userId: session.user.id, sessionId: session.session.id, ...(demo ? { demo: true } : {}) });
+    // Accès démo : paiement, clés partenaires et tout ce qui touche d'autres entreprises sont refusés au visiteur.
+    if (demo && routeInterditeEnDemo(req.method, req.originalUrl ?? req.url)) throw new DomainError("forbidden", PHRASE_ACTION_DEMO, { raison: "acces_demo", phrase: PHRASE_ACTION_DEMO });
     this.noteVisit(session.user.id);
     return true;
   }

@@ -8,6 +8,7 @@ import type { ProjectsService } from "../../projects/index.js";
 import { takeoffDto, type ReviewedTakeoff, type TakeoffService } from "../../takeoff/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { quantitatifView } from "./quantitatif-view.js";
+import { NOM_APP, nomDeListe } from "@baticlair/domain";
 
 export interface LigneEntree {
   libelle: string;
@@ -48,6 +49,9 @@ export type Correction =
   | { action: "preciser"; id: string; precision: string }
   | { action: "bref"; cle: string; texte: string }
   | { action: "retirer_article"; id: string }
+  // Assistant Mobiiz (31 octobre 2026) : « Annuler » un retrait ; l'adresse du chantier et la livraison dites par l'artisan.
+  | { action: "remettre_article"; id: string }
+  | { action: "chantier"; champ: "adresse" | "livraison"; texte: string }
   | { action: "suggestion"; id: string; reponse: "oui" | "non" };
 
 type Row = { id: string; companyId: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
@@ -69,6 +73,10 @@ export class QuantitatifsService {
 
   get iaDisponible(): boolean {
     return this.takeoffs.aiAvailable;
+  }
+
+  get listeDisponible(): boolean {
+    return this.takeoffs.listeAvailable;
   }
 
   /**
@@ -94,7 +102,7 @@ export class QuantitatifsService {
       throw new DomainError("no_referential", `No referential for trade « ${ctx.metier ?? trade} »`, {
         metier: METIER_NAMES[trade] ?? ctx.metier ?? trade,
         disponibles,
-        message: `BatiClair ne calcule pas encore les matériaux de ce métier. Métiers disponibles : ${disponibles.join(", ")}.`,
+        message: `${NOM_APP} ne calcule pas encore les matériaux de ce métier. Métiers disponibles : ${disponibles.join(", ")}.`,
       });
     }
     return trade;
@@ -119,8 +127,24 @@ export class QuantitatifsService {
     return this.get(tenant, row.id, rendu);
   }
 
+  /**
+   * « J'AI DÉJÀ MA LISTE » : photo ou PDF d'une liste déjà comptée (écrite à la main, bon ou devis de négoce, tableau).
+   * Les lignes sont lues telles qu'écrites, sans calcul ni question ; la liste arrive sur le même écran qu'un devis.
+   */
+  async fromListe(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, rendu: Rendu = {}) {
+    assertCanWrite(tenant);
+    if (!/^[0-9a-f-]{36}$/i.test(projectId)) throw notFound("Project");
+    const project = await this.projects.get(tenant, projectId);
+    const trade = project.trade && referentialFor(project.trade) ? project.trade : (tenant.trades.find((t) => referentialFor(t)) ?? tenant.trades[0] ?? "roofing");
+    const reviewed = await this.takeoffs.fromListe(tenant, projectId, trade, file);
+    const row = await this.prisma.quantitatif.create({
+      data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: null, apiKeyId: null },
+    });
+    return this.view(row, reviewed, rendu);
+  }
+
   /** Un devis déjà déposé sur le chantier (le chat de l'appli) : même quantitatif s'il existe, lecture sinon. */
-  async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}) {
+  async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}, options: { confirmeGros?: boolean } = {}) {
     assertCanWrite(tenant);
     this.tradeFor(tenant, ctx);
     await this.assertQuota(tenant, ctx);
@@ -134,7 +158,7 @@ export class QuantitatifsService {
         data: { companyId: tenant.companyId, projectId: document.projectId, source: "pdf", documentId, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
       }));
     // Déjà lu : rien n'est relu ni décompté. Lecture en cours : elle n'est pas relancée.
-    await this.takeoffs.start(tenant, documentId);
+    await this.takeoffs.start(tenant, documentId, options);
     return this.get(tenant, row.id, rendu);
   }
 
@@ -237,6 +261,13 @@ export class QuantitatifsService {
         const text = r.valeur?.trim() ?? null;
         if (text !== null && (text === "" || text.length > 300)) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, preciserKey, text);
+        continue;
+      }
+      // L'apprentissage (Greg, 24 octobre 2026) : « Annuler » sur une ligne « Ajusté selon tes habitudes ».
+      const habitudeKey = r.question.replace(/^engine:/, "");
+      if (/^habitude:.{1,200}$/.test(habitudeKey)) {
+        if (r.valeur !== "non") throw validationFailed("This question takes « non »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, habitudeKey, "non");
         continue;
       }
       // Temps deux (§51.6) : l'unité d'une ligne qui n'en a pas (un bouton, ou l'unité écrite sous « Autre »).
@@ -397,6 +428,14 @@ export class QuantitatifsService {
             : await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, "oui");
         return this.view(row, after, rendu);
       }
+      case "remettre_article": {
+        // Assistant (« Annuler ») : un article retiré revient, tel que le moteur le calcule ; rien d'autre ne bouge.
+        if (reviewed.takeoff.answers[`retire:${correction.id}`] !== "oui") throw notFound("Line");
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, null), rendu);
+      }
+      case "chantier":
+        // Assistant (points 9 et 11) : seulement ce que l'artisan dit ; vide, la donnée est retirée. Elle part dans le PDF.
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `chantier:${correction.champ}`, correction.texte.trim() || null), rendu);
       case "bref": {
         // §50.7 : seule une ligne du bref montré se corrige ; vide, elle est retirée (au document comme chez le fournisseur).
         // « avec-client » : l'artisan ajoute (« oui ») ou retire (vide) le client et l'adresse du bref.
@@ -473,8 +512,8 @@ export class QuantitatifsService {
     }
     // Un quantitatif sans chantier en crée un : la formule limite les nouveaux chantiers, comme dans l'app.
     await this.billing.assertCanCreateProject(tenant);
-    const day = new Date().toISOString().slice(0, 10);
-    const project = await this.projects.create(tenant, { name: ctx.reference?.trim() || `Devis du ${day}`, address: ctx.adresse ?? null });
+    // Point 7 (28 octobre 2026) : « Liste du 28 octobre », jamais « Devis du 2026-10-28 ».
+    const project = await this.projects.create(tenant, { name: ctx.reference?.trim() || nomDeListe(new Date()), address: ctx.adresse ?? null });
     return project.id;
   }
 

@@ -1,18 +1,27 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { ArrowLeft, ChevronRight, CircleCheck, Plus } from "lucide-react";
+import { useActionChantier } from "@/lib/actions-chantier";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
+import { useGroupe, useGroupeFerme } from "@/components/groupe";
 import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
+import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
+import { RechercheRapprochement } from "@/components/rapprochement";
+import { ListePrete } from "@/components/liste-prete";
+import { specialiteDuMetier, type LotAEnvoyer } from "../../../../packages/domain/src/groupe/specialites";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
+import { AssistantMobiiz, assistantDejaOuvert, CarteAssistant, marquerAssistantOuvert } from "@/components/assistant-mobiiz";
 import { SiteUnitsView } from "@/components/site-units-view";
 import { SendPreview } from "@/components/send-preview";
 import { SupplyList } from "@/components/supply-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
-import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { Button, ButtonLink, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type ScreenRow, type Takeoff, type TakeoffLine } from "@/lib/api";
 import { attachFile } from "@/lib/upload";
 import { parseQuantity } from "@/lib/labels";
@@ -32,7 +41,7 @@ export function canPrepareTakeoff(doc: ProjectDocument): boolean {
  *  2. il dit ce qu'il a compris (ouvrages, mesures, hypothèses : pente 45°, zone 3) ;
  *  3. UNE question à la fois, seulement si elle change la commande, toujours à boutons ;
  *  4. la carte du quantitatif, rangée par ouvrage, hypothèses modifiables ;
- *  5. « Envoyer au fournisseur ».
+ *  5. « Envoyer aux négoces ».
  * Jamais de quantité demandée à l'artisan. Le devis lu reste à un appui pour corriger une ligne.
  */
 export function ProjectTakeoff({
@@ -42,7 +51,10 @@ export function ProjectTakeoff({
   autoStart,
   onProjectChanged,
   onRedeposit,
+  onHasList,
 }: {
+  /** « J'ai déjà ma liste » : une liste sans devis existe ; le chantier ne propose plus de déposer un devis. */
+  onHasList?: (has: boolean) => void;
   projectId: string;
   clientQuote: ProjectDocument | null;
   archived: boolean;
@@ -59,6 +71,11 @@ export function ProjectTakeoff({
     [projectId],
   );
   const { data: raw, setData, error, reload } = useResource(fetchQuantitatif);
+  // Le regroupement choisi dans « Ton quantitatif est prêt », lancé par « Demander les prix à mes négoces ».
+  const avantEnvoiRef = useRef<(() => Promise<void>) | null>(null);
+  const brancherLancement = useCallback((lancer: (() => Promise<void>) | null) => {
+    avantEnvoiRef.current = lancer;
+  }, []);
   const quantitatif = raw?.items[0] ?? null;
   const data = useMemo(() => {
     if (!raw) return null;
@@ -75,16 +92,36 @@ export function ProjectTakeoff({
   // §48.5 : « Envoyer une sélection à un autre fournisseur » ; une sélection partie fait relire les demandes.
   const [requestsSignal, setRequestsSignal] = useState(0);
   const selection = useSelectionSend(projectId, () => setRequestsSignal((n) => n + 1));
+  // BatiClair Groupé : null tant que le drapeau est éteint ou que l'entreprise n'y a pas accès (l'écran 3 ne change pas).
+  const groupe = useGroupe(projectId);
+  const groupeFerme = useGroupeFerme();
   const [sent, setSent] = useState(false);
   // « Aperçu » : le mail et le PDF du fournisseur, par-dessus la liste.
   const [previewing, setPreviewing] = useState(false);
+  // Assistant Mobiiz (Greg, 31 octobre 2026) : la conversation et le PDF, par-dessus « Ton chantier ».
+  const [assistant, setAssistant] = useState(false);
+  const [autoFermee, setAutoFermee] = useState(false);
   // La liste a sa page (`?vue=fournitures`) ; sur le chantier, elle tient en une ligne. Après l'envoi, les réponses des
   // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
   const [page, setPage] = useListPage();
   // Un chantier de plusieurs logements s'ouvre « par logement » ; le total à commander est à l'onglet d'à côté.
   const [unitsView, setUnitsView] = useState(true);
-  // Après « Envoyer au fournisseur » : l'aperçu d'envoi et les demandes passent devant la liste.
+  // Après « Envoyer aux négoces » : l'aperçu d'envoi et les demandes passent devant la liste.
   const [overview, setOverview] = useState(false);
+  // Correction après test de Greg (30 octobre 2026, point 2) : une demande de prix commencée (feuille d'envoi ouverte)
+  // reprend ici, sur l'écran d'envoi ; la feuille relit son brouillon et rouvre l'étape quittée.
+  useEffect(() => {
+    const c = new AbortController();
+    api<{ brouillon: { donnees: { ouvert?: boolean } } | null }>(`/v1/brouillons/un?cle=${encodeURIComponent(`envoi:${projectId}`)}`, { signal: c.signal }).then(
+      (r) => {
+        if (r.brouillon?.donnees.ouvert) setOverview(true);
+      },
+      () => undefined,
+    );
+    return () => c.abort();
+  }, [projectId]);
+  // Point 8 (Greg, 28 octobre 2026) : une fois la demande partie, « Modifier ma liste » va dans le menu « ··· ».
+  useActionChantier("modifier-liste", "Modifier ma liste", () => (setOverview(false), setPage(true)), !archived && (sent || overview) && !page);
   const started = useRef(false);
   const refreshProgress = useProgressRefresh();
   const readable = clientQuote ? canPrepareTakeoff(clientQuote) : false;
@@ -109,11 +146,13 @@ export function ProjectTakeoff({
     }
   }, []);
 
-  const prepare = useCallback(() => {
+  // `confirmeGros` (Greg, 30 octobre 2026, décision 3) : un devis de plus de 150 lignes compte pour 2 analyses ; le serveur
+  // le dit avant la lecture, l'artisan lance (ou note sa liste à la main).
+  const prepare = useCallback((confirmeGros = false) => {
     if (!clientQuote) return;
     // Gros devis : la porte répond « en_cours » et la lecture continue sur le serveur ; l'écran la suit (audit B3).
     void run(
-      () => api<Quantitatif>(`/v1/quantitatifs?ecran=1`, { method: "POST", body: { documentId: clientQuote.id } }),
+      () => api<Quantitatif>(`/v1/quantitatifs?ecran=1`, { method: "POST", body: { documentId: clientQuote.id, ...(confirmeGros ? { confirmeGros: true } : {}) } }),
       (q) => {
         update(q);
       },
@@ -148,6 +187,11 @@ export function ProjectTakeoff({
     }
     if (before === "calcul" && step === "resultat") notifyReady("Ta liste est prête", "Les matériaux sont calculés : il te reste à vérifier les lignes orange.", `chantier-${projectId}`);
   }, [step, onProjectChanged, projectId]);
+
+  const hasList = Boolean(data?.takeoff);
+  useEffect(() => {
+    onHasList?.(hasList);
+  }, [hasList, onHasList]);
 
   // Devis tout juste déposé : on lit sans attendre un appui de plus.
   useEffect(() => {
@@ -186,6 +230,7 @@ export function ProjectTakeoff({
     const failed = (data.reading?.status === "failed" || refused || lost) && !pending;
     if (!failed) return <AnalysisScreen />;
     const shown = refused ? actionError : lost ? error : actionError;
+    if (refused && actionError?.reason === "gros_devis") return <GrosDevis phrase={actionError.phrase ?? "Ce devis fait plus de 150 lignes : il compte pour 2 analyses."} pending={pending} disabled={archived} onLancer={() => prepare(true)} onAnnuler={onRedeposit} />;
     // §50.1 : en cas d'échec, la raison en une phrase et « Réessayer ». RIEN NE PART VIDE : une lecture qui n'a trouvé aucune
     // ligne ne fait jamais une liste, elle se relit.
     const nothingRead = (data.reading?.reason === "nothing_read" && !refused && !lost) || (refused && actionError?.reason === "nothing_read");
@@ -196,7 +241,7 @@ export function ProjectTakeoff({
         : lost
           ? "Je n'ai plus de nouvelles de la lecture de ce devis."
           : "Je n'ai pas réussi à lire ce devis jusqu'au bout.";
-    return <ReadFailure sentence={sentence} disabled={archived} onRetry={lost ? reload : prepare} />;
+    return <ReadFailure sentence={sentence} disabled={archived} onRetry={lost ? reload : () => prepare()} />;
   }
 
   // §48 ÉTAPE 3 : les questions de comptoir, toutes d'un coup, AVANT le calcul. Puis ÉTAPE 4 : le calcul.
@@ -252,6 +297,11 @@ export function ProjectTakeoff({
     const direct = item.kind === "direct" ? takeoff.lines.find((l) => item.lineIds.includes(l.id)) : undefined;
     const before = item.quantity ? parseQuantity(item.quantity) : null;
     const quantityChanged = (e.quantite ?? "") !== (before?.quantity ?? "") || (e.unite ?? "") !== (before?.unit ?? "");
+    // La précision se corrige à part (« preciser »), sur l'article, quelle que soit son origine ; vide = retirée.
+    if (e.precision !== undefined) {
+      if (e.precision.trim() !== (item.precision ?? "")) await call("corrections", { action: "preciser", id: item.key, precision: e.precision.trim() });
+      return;
+    }
     if (direct) {
       // Quantité inchangée : on garde celle du devis telle qu'écrite (« 1 250 u »), pas sa forme affichée (« pièces »).
       const ligne = { libelle: e.libelle, quantite: quantityChanged ? e.quantite : direct.quantity, unite: quantityChanged ? e.unite : direct.unit, reference: direct.reference };
@@ -274,8 +324,11 @@ export function ProjectTakeoff({
   };
   const detachSketch = (sketchId: string) =>
     run(() => api<null>(`/v1/documents/${encodeURIComponent(sketchId)}`, { method: "DELETE" }), () => reload());
-  // « Envoyer au fournisseur » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
+  // « Envoyer aux négoces » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
+  // Deux parcours reliés (Greg, 7 novembre 2026) : le même bouton lance aussi le regroupement choisi dans « Ton quantitatif
+  // est prêt », sans attendre ni bloquer la demande.
   const send = () => {
+    void avantEnvoiRef.current?.();
     setShowList(false);
     setPage(false);
     setOverview(true);
@@ -294,6 +347,11 @@ export function ProjectTakeoff({
     // Une ligne qui attend une réponse (ou qu'aucun article ne porte) : on retire la ou les lignes du devis d'où elle vient.
     else for (const id of row.lineIds) await call("corrections", { action: "retirer", id });
   };
+  // Contrôle de conformité (Greg, 31 octobre 2026, validé) : après la lecture d'un devis ou d'une photo, l'assistant s'ouvre
+  // de lui-même, une fois par liste, avant l'envoi ; « Fermer » ou « Voir ma liste » passent tout de suite. Une liste notée à
+  // la main ne l'ouvre pas (saisie manuelle indépendante).
+  const lueParMobiiz = takeoff.lines.some((l) => l.origin === "ai" || l.origin === "liste");
+  const ouvertureAuto = !autoFermee && editable && !sent && lueParMobiiz && !previewing && !showList && !assistantDejaOuvert(projectId);
   let body: React.ReactNode;
   if (showList) {
     body = (
@@ -326,7 +384,24 @@ export function ProjectTakeoff({
     );
   } else {
     // §50.7 : « Ton chantier », le document que reçoit le fournisseur ; dessous, en petit, ajouter un article, envoyer une sélection.
+    // Assistant Mobiiz (Greg, 31 octobre 2026) : avant l'envoi, une carte ouvre l'assistant (conversation + PDF).
     body = (
+      <>
+      {editable && !sent && quantitatif ? <CarteAssistant onOpen={() => setAssistant(true)} /> : null}
+      {(assistant || ouvertureAuto) && quantitatif ? (
+        <AssistantMobiiz
+          takeoff={takeoff}
+          projectId={projectId}
+          quantitatifId={quantitatif.id}
+          onUpdated={update}
+          onClose={() => {
+            marquerAssistantOuvert(projectId);
+            setAssistant(false);
+            setAutoFermee(true);
+          }}
+          onSend={send}
+        />
+      ) : null}
       <SupplyList
         takeoff={takeoff}
         editable={editable}
@@ -339,9 +414,11 @@ export function ProjectTakeoff({
         error={actionError}
         docked={false}
         sent={sent}
+        groupeFerme={groupeFerme}
         sketches={quantitatif?.infos?.croquis ?? []}
         sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
         {...(!archived ? { selection } : {})}
+        {...(!archived && groupe ? { groupe } : {})}
         {...(editable
           ? {
               onAdd: () => setShowList("ajouter"),
@@ -349,6 +426,7 @@ export function ProjectTakeoff({
             }
           : {})}
       />
+      </>
     );
   }
   if (previewing) {
@@ -373,6 +451,48 @@ export function ProjectTakeoff({
   // §48 ÉTAPE 5 : la liste EST l'écran du chantier tant qu'elle n'est pas partie ; ensuite, les réponses des fournisseurs
   // passent devant et la liste tient en une ligne.
   const listShown = page || (!sent && !overview);
+  // La demande perso et le prix de groupe : sous la liste quand elle est l'écran du chantier, sinon sur le chantier ; montés
+  // une seule fois (business model final, 25 octobre 2026 : l'e2e ne les trouvait pas sous la liste).
+  // « Qui reçoit quoi » (Greg, 1er novembre 2026) : les lots de la liste, chacun avec la spécialité qui le chiffre. Un devis
+  // à plusieurs lots donne un lot par section ; une ligne hors section rejoint le premier lot (rien ne disparaît).
+  const aAcheter = takeoff.purchase.toBuy.map((i) => i.key);
+  const lotsEnvoi: LotAEnvoyer[] = (() => {
+    const achetables = new Set(aAcheter);
+    const sections = takeoff.purchase.screen.groups.filter((g) => g.key.startsWith("lot:"));
+    if (sections.length === 0) {
+      const metier = takeoff.metier ?? null;
+      return [{ cle: "liste", libelle: "Ma liste", specialite: specialiteDuMetier(metier), articles: aAcheter }];
+    }
+    const pris = new Set<string>();
+    const lots = sections.map((g) => {
+      const metier = g.key.slice("lot:".length);
+      const articles = g.rows.map((r) => r.itemKey ?? (r.quoteKey ? `quote:${r.quoteKey}` : null)).filter((k): k is string => Boolean(k && achetables.has(k) && !pris.has(k)));
+      articles.forEach((k) => pris.add(k));
+      return { cle: metier, libelle: g.label, specialite: specialiteDuMetier(metier), articles };
+    });
+    const reste = aAcheter.filter((k) => !pris.has(k));
+    if (reste.length && lots[0]) lots[0] = { ...lots[0], articles: [...lots[0].articles, ...reste] };
+    return lots.filter((l) => l.articles.length > 0);
+  })();
+  const persoEtGroupe = quantitatif ? (
+    <div className="flex flex-col gap-4">
+      <DemandesPerso projectId={projectId} articles={aAcheter} lots={lotsEnvoi} canCreate archived={archived} dejaEnvoye={sent} principal={!listShown} bouton={false} />
+      {/* Deux parcours reliés (Greg, 7 novembre 2026, capture « Ton quantitatif est prêt ») : UNE carte, la demande de prix et
+          l'interrupteur du regroupement ligne par ligne ; les anciens réglages derrière « Plus d'options de regroupement ». */}
+      <ListePrete
+        projectId={projectId}
+        nbArticles={aAcheter.length + takeoff.purchase.toQuote.length}
+        envoye={sent}
+        brancherLancement={brancherLancement}
+        options={
+          <>
+            {!sent ? <TenterPrixDeGroupe projectId={projectId} /> : null}
+            <RechercheRapprochement projectId={projectId} />
+          </>
+        }
+      />
+    </div>
+  ) : null;
   return (
     <>
       {listShown ? (
@@ -414,6 +534,7 @@ export function ProjectTakeoff({
             </div>
           ) : null}
           {body}
+          {persoEtGroupe}
         </section>
       ) : null}
       {/* Le chantier après l'envoi : reste monté sous la liste (l'aperçu d'envoi s'y ouvre), il est seulement caché. */}
@@ -426,7 +547,7 @@ export function ProjectTakeoff({
                 setOverview(false);
                 setPage(true);
               }}
-              className="flex min-h-14 w-full items-center gap-3 rounded-[20px] bg-surface px-4 py-3 text-left shadow-card active:bg-ground"
+              className="flex min-h-14 w-full items-center gap-3 rounded-xl bg-surface px-4 py-3 text-left shadow-card active:bg-ground"
             >
               {sent || checkCount === 0 ? (
                 <CircleCheck size={22} className="shrink-0 text-ok" aria-hidden="true" />
@@ -436,7 +557,8 @@ export function ProjectTakeoff({
                 </span>
               )}
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="font-bold">{sent ? "Ma liste, envoyée" : "Ma liste"}</span>
+                {/* Point 8 : « Ma liste · 12 lignes », repliée ; un toucher l'ouvre. */}
+                <span className="font-bold">{`Ma liste · ${takeoff.purchase.toBuy.length} ligne${takeoff.purchase.toBuy.length > 1 ? "s" : ""}`}</span>
                 {/* §50.4 : plus de compteur « N fournitures · N à vérifier » ; seulement ce qui reste à régler. */}
                 {!sent && checkCount > 0 ? (
                   <span className="text-[13px] text-muted">
@@ -451,6 +573,8 @@ export function ProjectTakeoff({
           <div className={sent ? "order-first" : undefined}>
             <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} openSignal={sendSignal} refreshSignal={requestsSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
           </div>
+          {/* Recentrage (Greg, 25 octobre 2026) : la demande perso part sur les lignes de la liste, sans attendre la validation. */}
+          {!listShown ? persoEtGroupe : null}
         </div>
       </div>
     </>
@@ -508,7 +632,7 @@ function LineForm({
   const [unit, setUnit] = useState(initial?.unit ?? "");
   const [reference, setReference] = useState(initial?.reference ?? "");
   const input =
-    "min-h-12 w-full rounded-2xl bg-ground px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ink";
+    "min-h-12 w-full rounded-2xl bg-ground px-3 text-base outline-none focus-visible:border-accent";
 
   return (
     <form
@@ -557,7 +681,7 @@ function LineForm({
 /** §50.1 : un échec de lecture se dit en une phrase, avec « Réessayer ». Rien d'autre. */
 function ReadFailure({ sentence, onRetry, disabled }: { sentence: string; onRetry?: () => void; disabled: boolean }) {
   return (
-    <section id="materiaux" aria-label="Lecture du devis" className="flex scroll-mt-4 flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
+    <section id="materiaux" aria-label="Lecture du devis" className="flex scroll-mt-4 flex-col gap-3 rounded-xl bg-surface p-5 shadow-card">
       <p role="alert" className="text-[17px] leading-snug font-bold">
         {sentence}
       </p>
@@ -566,6 +690,49 @@ function ReadFailure({ sentence, onRetry, disabled }: { sentence: string; onRetr
           Réessayer
         </Button>
       ) : null}
+    </section>
+  );
+}
+
+/**
+ * UN GROS DEVIS (Greg, 30 octobre 2026, décision 3) : plus de 150 lignes, il compte pour 2 analyses ; l'artisan le voit
+ * AVANT la lecture et choisit : « Lancer l'analyse », ou noter sa liste à la main (gratuit). Rien n'est dépensé avant.
+ */
+/**
+ * UN GROS DOCUMENT (Greg, 30 et 31 octobre 2026) : après le choix du fichier et AVANT l'analyse, « Ce document contient plus
+ * de 150 lignes et utilisera 2 analyses. » ; « Analyser le document » ou « Annuler » (le document est retiré, rien n'est
+ * décompté). La phrase du serveur dit ce qu'il reste.
+ */
+function GrosDevis({ phrase, pending, disabled, onLancer, onAnnuler }: { phrase: string; pending: boolean; disabled: boolean; onLancer: () => void; onAnnuler?: (() => Promise<void>) | undefined }) {
+  const router = useRouter();
+  const [annule, setAnnule] = useState(false);
+  // « Ce devis fait 180 lignes : il compte pour 2 analyses. Il t'en reste 3. » → « Il t'en reste 3. »
+  const reste = phrase.split(/(?<=\.)\s+/).slice(1).join(" ");
+  return (
+    <section aria-labelledby="gros-devis" className="flex flex-col gap-3 rounded-2xl bg-surface p-5 shadow-card">
+      <h2 id="gros-devis" className="text-[20px] font-extrabold">
+        Un gros document
+      </h2>
+      <p className="text-[16px] leading-relaxed">Ce document contient plus de 150 lignes et utilisera 2 analyses.</p>
+      {reste ? <p className="text-[15px] text-muted">{reste}</p> : null}
+      <Button variant="accent" disabled={pending || disabled} onClick={onLancer}>
+        Analyser le document
+      </Button>
+      <Button
+        variant="secondary"
+        disabled={pending || annule}
+        onClick={async () => {
+          // Le document est retiré (rien n'est décompté), puis retour à « Ma liste de matériaux ».
+          setAnnule(true);
+          await onAnnuler?.().catch(() => undefined);
+          router.push("/chantiers/nouveau");
+        }}
+      >
+        Annuler
+      </Button>
+      <ButtonLink href="/chantiers/nouveau?liste=1" variant="ghost">
+        Saisir ma liste à la main (gratuit)
+      </ButtonLink>
     </section>
   );
 }

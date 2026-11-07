@@ -189,12 +189,13 @@ describe("demandes de prix", () => {
       supplier: { name: "Point.P", email: "contact@pointp.fr" },
     });
     // §45.2 : une demande de devis, un mail court ; la liste est dans le PDF joint.
-    expect(first.email.subject).toBe("Demande de devis · Toitures Martin · chantier Toiture Dupont (Vannes)");
-    expect(first.email.body).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour /);
+    // Lot final, point 3 : « Entreprise : demande de prix [famille], [commune] ».
+    expect(first.email.subject).toBe("Toitures Martin : demande de prix couverture, Vannes");
+    // Au prénom du commercial ; le message de l'artisan remplace la phrase par défaut (lot final, point 4).
+    expect(first.email.body).toMatch(/^Bonjour Paul,\n\nLivraison sur chantier possible \?\n\nJe consulte plusieurs fournisseurs, réponse souhaitée avant le 15 octobre\./);
     // §51.5 : la ligne part sous la désignation lue par le modèle, sans la référence d'article du devis.
     expect(created.body.packet.articles).toContain("Tuile romane canal rouge 12,5 u/m² : 1 250 u");
     expect(first.email.body).toContain("Livraison sur chantier possible ?");
-    expect(first.email.body).toContain("Pouvez-vous me chiffrer l'ensemble avant le 15 octobre ?");
 
     const sent = await agent.patch(`/v1/price-request-recipients/${first.id}`).send({ status: "sent" });
     expect(sent.body.recipients[0]).toMatchObject({ status: "sent" });

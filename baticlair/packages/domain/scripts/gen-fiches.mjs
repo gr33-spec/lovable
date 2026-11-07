@@ -19,3 +19,14 @@ if (!existsSync(sortie) || readFileSync(sortie, "utf8") !== contenu) {
   renameSync(tmp, sortie);
 }
 console.log(`gen-fiches : ${sources.length} fiche(s) métier`);
+
+// BatiClair Groupé, étape 4 : les seuils de formation des lots (`baticlair/groupe/seuils.json`) deviennent un module de la
+// même façon : changer un seuil = changer le fichier, zéro code.
+const seuils = readFileSync(join(here, "../../../groupe/seuils.json"), "utf8");
+const sortieSeuils = join(here, "../src/groupe/seuils.generated.ts");
+const contenuSeuils = `// Généré par scripts/gen-fiches.mjs depuis groupe/seuils.json : ne pas modifier à la main.\nexport const SEUILS_SOURCE: string = ${JSON.stringify(seuils)};\n`;
+if (!existsSync(sortieSeuils) || readFileSync(sortieSeuils, "utf8") !== contenuSeuils) {
+  const tmp = `${sortieSeuils}.${process.pid}.tmp`;
+  writeFileSync(tmp, contenuSeuils);
+  renameSync(tmp, sortieSeuils);
+}

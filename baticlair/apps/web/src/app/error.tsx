@@ -13,7 +13,7 @@ export default function ErrorPage({ error, retry }: { error: Error & { digest?: 
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-4 px-5">
       <h1 className="font-display text-[26px] leading-tight font-extrabold">Oups, cet écran a eu un souci</h1>
       <p className="text-[15px] text-muted">Rien n&apos;est perdu : ton chantier est enregistré. On est prévenus.</p>
-      <button type="button" onClick={() => retry()} className="inline-flex min-h-13 items-center justify-center rounded-2xl bg-cta px-5 text-base font-extrabold text-white">
+      <button type="button" onClick={() => retry()} className="inline-flex min-h-13 items-center justify-center rounded-2xl bg-cta px-5 text-base font-extrabold text-on-accent">
         Réessayer
       </button>
       {/* Un rechargement complet, voulu : après une erreur, on repart d'un état propre. */}

@@ -4,6 +4,7 @@ import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
 import type { Project } from "../domain/project.js";
 import type {
+  EtapeDemande,
   NewProject,
   ProjectListQuery,
   ProjectPage,
@@ -37,7 +38,9 @@ export class PrismaProjectRepository implements ProjectRepository {
    */
   async list(tenant: TenantContext, query: ProjectListQuery): Promise<ProjectPage> {
     const conditions: Prisma.Sql[] = [Prisma.sql`"companyId" = ${tenant.companyId}::uuid`];
-    if (query.status !== "all") {
+    if (query.etape) {
+      conditions.push(etapeSql(query.etape));
+    } else if (query.status !== "all") {
       conditions.push(Prisma.sql`"status" = ${query.status}::"ProjectStatus"`);
     }
     for (const word of query.search ?? []) {
@@ -77,5 +80,27 @@ export class PrismaProjectRepository implements ProjectRepository {
       data: { ...patch, lastActivityAt: new Date() },
     });
     return count === 0 ? null : this.findById(tenant, id);
+  }
+}
+
+/* « Mes demandes » : l'étape d'un dossier, d'après ses demandes de prix (mêmes règles que `ListesService.resumes`). */
+const PARTIE = Prisma.sql`EXISTS (SELECT 1 FROM "price_request" pr JOIN "price_request_recipient" r ON r."priceRequestId" = pr."id"
+  WHERE pr."projectId" = "project"."id" AND (r."status" <> 'to_send' OR r."sentAt" IS NOT NULL))`;
+const REPONDUE = Prisma.sql`EXISTS (SELECT 1 FROM "price_request" pr JOIN "price_request_recipient" r ON r."priceRequestId" = pr."id"
+  WHERE pr."projectId" = "project"."id" AND (r."status" = 'received' OR r."reponduLe" IS NOT NULL OR r."documentId" IS NOT NULL))`;
+const RETENUE = Prisma.sql`EXISTS (SELECT 1 FROM "price_request" pr
+  WHERE pr."projectId" = "project"."id" AND (pr."classifiedAt" IS NOT NULL OR cardinality(pr."retainedSupplierIds") > 0))`;
+
+function etapeSql(etape: EtapeDemande): Prisma.Sql {
+  const enCours = Prisma.sql`"status" = 'active'::"ProjectStatus"`;
+  switch (etape) {
+    case "a-preparer":
+      return Prisma.sql`(${enCours} AND NOT ${PARTIE})`;
+    case "envoyees":
+      return Prisma.sql`(${enCours} AND ${PARTIE} AND NOT ${REPONDUE} AND NOT ${RETENUE})`;
+    case "reponses":
+      return Prisma.sql`(${enCours} AND ${REPONDUE} AND NOT ${RETENUE})`;
+    case "terminees":
+      return Prisma.sql`("status" = 'archived'::"ProjectStatus" OR ${RETENUE})`;
   }
 }

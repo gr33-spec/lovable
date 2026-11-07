@@ -47,5 +47,13 @@ export function parseQuantity(text: string): { quantity: string; unit: string } 
  * couvrir »). Seul l'affichage change ; la quantité enregistrée et le calcul gardent leur unité.
  */
 export function enMetres(text: string): string {
-  return text.replace(/(\d)\s*ml\b/g, "$1 m").replace(/^ml$/, "m");
+  return milliers(text.replace(/(\d)\s*ml\b/g, "$1 m").replace(/^ml$/, "m"));
+}
+
+/**
+ * Plan « finition », bloc 4 : « 1250 pièces » s'affiche « 1 250 pièces », comme tous les montants de l'app (espace fine
+ * insécable). Seul un entier écrit d'un bloc en tête est touché ; la quantité enregistrée ne change pas.
+ */
+export function milliers(text: string): string {
+  return text.replace(/^(\d{4,})(?=(?:[.,]\d+)?(?:\s|$))/, (n) => n.replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f"));
 }

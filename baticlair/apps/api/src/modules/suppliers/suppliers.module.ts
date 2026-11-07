@@ -1,3 +1,4 @@
+import { signalerException } from "../../platform/supervision/exceptions.js";
 import { Module } from "@nestjs/common";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import { TenancyModule } from "../tenancy/index.js";
@@ -17,8 +18,8 @@ import { PrismaSupplierRepository } from "./infrastructure/prisma-supplier.repos
     },
     {
       provide: SuppliersService,
-      useFactory: (r: SupplierRepository) => new SuppliersService(r),
-      inject: [SUPPLIER_REPOSITORY],
+      useFactory: (r: SupplierRepository, p: PrismaService) => new SuppliersService(r, (e) => signalerException(p, e)),
+      inject: [SUPPLIER_REPOSITORY, PrismaService],
     },
   ],
   exports: [SUPPLIER_REPOSITORY],

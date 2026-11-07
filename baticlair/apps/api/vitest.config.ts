@@ -7,6 +7,8 @@ export default defineConfig({
   test: {
     include: ["test/**/*.test.ts"],
     globalSetup: ["test/support/global-setup.ts"],
+    // Aucun test n'appelle l'API Anthropic réelle (Greg, 25 octobre 2026) : clés retirées, appels refusés.
+    setupFiles: ["test/support/sans-ia-reelle.ts"],
     // Les tests d'intégration partagent une base : exécution séquentielle.
     fileParallelism: false,
     env: {
@@ -18,6 +20,8 @@ export default defineConfig({
       LOG_LEVEL: process.env.TEST_LOG_LEVEL ?? "silent",
       // Les tests enchaînent des centaines de requêtes depuis une même adresse ; rate-limit.test.ts rétablit la vraie limite.
       RATE_LIMIT: "off",
+      // Recentrage (25 octobre 2026) : les tests d'avant ouvrent les regroupements partout ; recentrage.test.ts règle le 22.
+      ZONES_ACTIVES: "*",
       API_PUBLIC_URL: "http://localhost:4000",
       WEB_APP_URL: "http://localhost:3000",
       // Les tests métier créent librement des chantiers ; billing.test.ts vérifie les vraies limites.

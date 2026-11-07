@@ -113,18 +113,14 @@ describe("§47.5 — retour fournisseur", () => {
     expect((await journal(projectId)).length).toBe(before);
   });
 
-  it("« modifié » avec la photo du bon : gardée, puis lue (une analyse) ; les écarts sont faits par le code", async () => {
-    const { agent, requestId, supplierId, lines, projectId } = await demande();
+  it("« modifié » avec la photo du bon : gardée, jamais lue par l'IA (point 7, 28 octobre 2026) ; le bon se colle", async () => {
+    const { agent, requestId, supplierId, lines } = await demande();
     const rows: FixtureRow[] = lines.map((l, i) => [`R${i}`, l.designation, `${i === 0 ? n(l.quantity) - 100 : n(l.quantity)} u`, "1,00", "1,00"]);
     const pdf = Buffer.from(await makePdf(["devis"], rows, "Total HT 1,00   TVA 20 % 0,20   Total TTC 1,20", "BON DE COMMANDE N° 88"));
     const stored = (await agent.post(`/v1/price-requests/${requestId}/order/document`).field("supplierId", supplierId).attach("file", pdf, { filename: "bon.pdf", contentType: "application/pdf" }).expect(201)).body;
     expect(stored.orderFeedback).toMatchObject({ outcome: "modified", source: "document", pendingReading: true, gaps: [] });
-    const read = (await agent.post(`/v1/price-requests/${requestId}/order/analysis`).expect(201)).body;
-    expect(read.orderFeedback.pendingReading).toBe(false);
-    const first = read.orderFeedback.gaps[0];
-    expect(first).toMatchObject({ kind: "changed", designation: lines[0]!.designation });
-    // Chaque écart (et chaque ligne reprise telle quelle) est au journal, une fois.
-    expect((await journal(projectId)).filter((e) => (e.context as Record<string, unknown>).source === "bon_de_commande")).toHaveLength(read.orderFeedback.gaps.length);
-    expect((await agent.post(`/v1/price-requests/${requestId}/order/analysis`)).status).toBe(400);
+    const appels = await ctx.prisma.aiExecution.count();
+    expect((await agent.post(`/v1/price-requests/${requestId}/order/analysis`).expect(409)).body.error.details.reason).toBe("lecture_devis_negoce_retiree");
+    expect(await ctx.prisma.aiExecution.count()).toBe(appels);
   });
 });

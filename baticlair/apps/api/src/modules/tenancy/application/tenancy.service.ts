@@ -15,9 +15,23 @@ const blank = (v: string | null | undefined, max: number) => {
 export class TenancyService {
   constructor(private readonly companies: CompanyRepository) {}
 
+  /** R7 : ce qui suit la création d'une entreprise (son adresse Mobiiz) ; branché par le module de l'adresse. */
+  private apresCreation: (companyId: string) => Promise<void> = async () => {};
+  brancherApresCreation(f: (companyId: string) => Promise<void>): void {
+    this.apresCreation = f;
+  }
+
+  /** Lot 6 (Greg, 7 novembre 2026) : une entreprise demandée dont l'utilisateur n'est pas membre (branché par le module). */
+  private accesCroise: (userId: string, companyId: string) => Promise<void> = async () => {};
+  brancherAccesCroise(f: (userId: string, companyId: string) => Promise<void>): void {
+    this.accesCroise = f;
+  }
+
   /** Onboarding : crée l'entreprise et en fait l'utilisateur propriétaire. */
-  createCompany(userId: string, rawName: string, trades: readonly string[] = []): Promise<CompanyMembershipView> {
-    return this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades));
+  async createCompany(userId: string, rawName: string, trades: readonly string[] = []): Promise<CompanyMembershipView> {
+    const vue = await this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades));
+    await this.apresCreation(vue.companyId).catch(() => undefined);
+    return vue;
   }
 
   /** L'artisan change ses métiers (Mon compte) : s'applique aux prochains devis lus. */
@@ -87,7 +101,11 @@ export class TenancyService {
       const membership = isUuid(requestedCompanyId)
         ? await this.companies.findMembership(userId, requestedCompanyId)
         : null;
-      if (!membership) throw new DomainError("not_found", "Company not found");
+      if (!membership) {
+        // L'accès reste refusé (404, jamais un indice) ; une alerte de sécurité minimale est créée si l'entreprise existe.
+        if (isUuid(requestedCompanyId)) await this.accesCroise(userId, requestedCompanyId).catch(() => undefined);
+        throw new DomainError("not_found", "Company not found");
+      }
       return { companyId: membership.companyId, userId, role: membership.role, trades: normalizeTrades(membership.trades) };
     }
 

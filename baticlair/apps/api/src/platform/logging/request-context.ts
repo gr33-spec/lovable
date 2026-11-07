@@ -5,6 +5,12 @@ export interface RequestContext {
   requestId: string;
   userId?: string;
   companyId?: string;
+  /** La session de connexion (la double authentification de l'admin lui est attachée). */
+  sessionId?: string;
+  /** L'adresse IP du client (derrière le relais Vercel, `trust proxy`), pour le journal de l'admin. */
+  ip?: string;
+  /** Un visiteur de l'accès démo (Greg, 7 novembre 2026) : aucun e-mail, aucun appel IA, aucun paiement. */
+  demo?: boolean;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
@@ -16,6 +22,9 @@ export function runWithRequestContext<T>(context: RequestContext, fn: () => T): 
 export function currentRequestContext(): RequestContext | undefined {
   return storage.getStore();
 }
+
+/** Vrai pendant une requête d'un visiteur de l'accès démo. */
+export const estRequeteDemo = (): boolean => storage.getStore()?.demo === true;
 
 /** Complète le contexte courant (ex. une fois l'utilisateur authentifié). */
 export function enrichRequestContext(values: Partial<Omit<RequestContext, "requestId">>): void {
