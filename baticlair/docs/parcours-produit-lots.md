@@ -197,3 +197,28 @@ avec le double, corps invalide) et `isolation-toutes-routes` ; e2e de la convers
   un artisan restent cachées. Elle se clôt comme les autres : rien n'est reporté sur la période suivante.
 - Migration ADDITIVE `20261107130000_collectes_mobiiz` (`regroupement_negocie.campagne_le`).
 - Tests : API `test/collectes-mobiiz.test.ts` (2).
+
+## Décisions de Greg du 7 novembre 2026
+
+1. **Interprète IA** : allumé sur l'environnement de test seulement (`INTERPRETE_IA=on`, variable de la seule branche de
+   test), secours du code (jamais à chaque frappe : seulement quand le code ne comprend pas). Chaque appel va au journal
+   des appels IA (tâche `interpretation_reponses` : coût, statut, erreur). Plafond total : 1 $ ou 500 appels
+   (`INTERPRETE_IA_PLAFOND_USD`, `INTERPRETE_IA_PLAFOND_APPELS`) ; au-delà, le code seul. Crédit épuisé : l'interprète se
+   coupe et le signale dans la file d'exceptions ; aucun achat. Sortie structurée revalidée par le serveur ; l'IA n'écrit
+   jamais en base.
+2. **Famille sur les lignes** : titre de section (le lot) ; badge « Famille à vérifier » seulement sur une ligne qu'aucun
+   lot ne citait. Section 6 : réalisée avec cette décision.
+3. **Coût réellement livré** : la page du négoce garde sa rapidité (tout facultatif) : livraison en une ou plusieurs fois,
+   minimum de commande s'il existe, contrainte de déchargement ; la disponibilité se DÉDUIT des lignes chiffrées ; le
+   dépôt du PDF par réponse à l'e-mail est rappelé. L'artisan voit ces conditions dans le Suivi ; une offre sous son
+   minimum n'est pas comparée telle quelle. La lecture IA des offres PDF des achats groupés recopie aussi, s'ils sont
+   écrits, frais de livraison, TVA, total TTC, minimum et disponibilité (consigne v2). Migration additive
+   `20261107140000_conditions_negoce`.
+4. **Détections automatiques** (une exception à examiner, jamais une correction) : accès croisé (entreprise demandée
+   dont on n'est pas membre : 404 et alerte minimale), doublon incertain (téléphone, SIRET, nom proche ou même domaine),
+   adresse incertaine (code postal ou commune manquants, département inconnu), produit ambigu (caractéristiques
+   indispensables manquantes), résultat IA incohérent (sortie invalide, valeur refusée par la validation, prix
+   impossible, ou au moins trois doutes / aucun prix lu sur une offre PDF). « Autre » reste manuel.
+
+Tests : domaine `famille-a-verifier`, `cout-total-livre` (minimum), `supervision` (doublon) ; API `interpretation-ia`
+(plafond), `parcours-negoce` (conditions), `detections-exceptions` (4).

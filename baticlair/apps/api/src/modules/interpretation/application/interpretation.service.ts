@@ -46,6 +46,8 @@ export class InterpretationService {
     private readonly interpreteur: Interpreteur | null,
     private readonly journal: (e: { provider: string; model: string; status: string; microUsd: number | null; questions: number }) => void = () => undefined,
     private readonly budget: BudgetInterpretation | null = null,
+    /** Lot 6 : une réponse du modèle que la validation du serveur refuse (incohérente) remonte à l'admin. */
+    private readonly incoherent: (e: { companyId: string; questions: number; refusees: number }) => Promise<void> = async () => undefined,
   ) {}
 
   get actif(): boolean {
@@ -67,8 +69,15 @@ export class InterpretationService {
     }
     this.journal({ provider: this.interpreteur.provider, model: r?.model ?? "?", status: r?.status ?? "error", microUsd, questions: restantes.length });
     if (this.budget && qui) await this.budget.enregistrer({ ...qui, attempt: r, provider: this.interpreteur.provider }).catch(() => undefined);
-    if (!r || r.status !== "success" || !r.output) return { ia: false, reponses: code };
-    return { ia: true, reponses: fusionnerInterpretations(code, validerInterpretation(restantes, texte, r.output)) };
+    if (!r || r.status !== "success" || !r.output) {
+      if (r?.status === "invalid_output" && qui) await this.incoherent({ companyId: qui.companyId, questions: restantes.length, refusees: restantes.length }).catch(() => undefined);
+      return { ia: false, reponses: code };
+    }
+    const validees = validerInterpretation(restantes, texte, r.output);
+    // Le modèle dit « compris » mais le code refuse la valeur (hors boutons, nombre non dit, mots ajoutés) : incohérent.
+    const refusees = r.output.reponses.filter((x) => x.statut === "compris" && validees.find((v) => v.numero === x.numero)?.statut !== "compris").length;
+    if (refusees > 0 && qui) await this.incoherent({ companyId: qui.companyId, questions: restantes.length, refusees }).catch(() => undefined);
+    return { ia: true, reponses: fusionnerInterpretations(code, validees) };
   }
 }
 

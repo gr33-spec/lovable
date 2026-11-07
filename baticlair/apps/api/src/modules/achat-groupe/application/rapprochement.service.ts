@@ -21,6 +21,7 @@ import { etatsDuChantier, exiger as exigerCycle, faitsDesLignes } from "../../..
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { NotificationsGroupeService } from "../../../platform/notifications/notifications-artisan.js";
+import { signalerException } from "../../../platform/supervision/exceptions.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 
@@ -138,6 +139,8 @@ export class RapprochementService {
       throw validationFailed("Search date out of range", { reason: "date_recherche", message: `Choisis une date entre demain et dans ${RECHERCHE_MAX_JOURS} jours.` });
     const { adresse, lignes } = await this.ports.lignesDeListe(tenant, projectId);
     const departement = zoneDuCodePostal(adresse);
+    if (!departement)
+      await signalerException(this.prisma, { type: "adresse_incertaine", cle: `${tenant.companyId}:${projectId}`, titre: "Adresse de chantier incertaine (recherche de besoins compatibles)", detail: "Code postal manquant ou illisible : la recherche est refusée tant que l'adresse n'est pas précisée.", companyId: tenant.companyId });
     if (!departement) throw validationFailed("A site address with a postcode is required", { reason: "livraison_requise", message: "Indique l'adresse du chantier avec son code postal." });
     const commandees = await clesCommandees(this.prisma, tenant.companyId, projectId);
     // Le cycle de vie (§19) : une ligne déjà dans un achat groupé ne cherche pas d'autre rapprochement.

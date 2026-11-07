@@ -134,3 +134,48 @@ export function famillesActives(familles: readonly FamilleConfiguree[]): { codes
   const triees = [...familles].sort((a, b) => a.ordre - b.ordre || a.code.localeCompare(b.code));
   return { codes: triees.filter((f) => f.active).map((f) => f.code), libelles: Object.fromEntries(triees.map((f) => [f.code, f.libelle])) };
 }
+
+/* ---------------------------------------------------------------------------------- les doublons incertains */
+
+export interface FicheNegoce {
+  nom: string;
+  email: string;
+  telephone?: string | null;
+  siret?: string | null;
+}
+
+const DOMAINES_GENERIQUES = new Set(["gmail.com", "orange.fr", "wanadoo.fr", "free.fr", "hotmail.fr", "hotmail.com", "outlook.fr", "outlook.com", "yahoo.fr", "yahoo.com", "laposte.net", "sfr.fr", "icloud.com"]);
+const MOTS_VIDES = new Set(["sa", "sas", "sarl", "eurl", "et", "de", "des", "du", "la", "le", "les", "negoce", "materiaux", "bois", "agence"]);
+const motsDuNom = (s: string) =>
+  new Set(
+    s
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((m) => m.length > 1 && !MOTS_VIDES.has(m)),
+  );
+const chiffres = (s: string | null | undefined) => (s ?? "").replace(/\D/g, "").replace(/^33/, "0");
+
+/**
+ * DOUBLON INCERTAIN (Greg, 7 novembre 2026, point 14) : un négoce ajouté ressemble en partie à un négoce déjà connu sans
+ * correspondance certaine (l'e-mail diffère) : même téléphone, même SIRET, ou même domaine d'e-mail professionnel, ou
+ * noms très proches. Rend la raison, sinon null. Ne fusionne JAMAIS rien : c'est une exception à examiner.
+ */
+export function doublonIncertain(nouveau: FicheNegoce, existants: readonly FicheNegoce[]): { avec: string; raison: string } | null {
+  const email = nouveau.email.trim().toLowerCase();
+  const domaine = email.split("@")[1] ?? "";
+  const mots = motsDuNom(nouveau.nom);
+  for (const e of existants) {
+    const autre = e.email.trim().toLowerCase();
+    if (autre === email) continue; // même e-mail : un vrai doublon, déjà refusé ailleurs, pas « incertain »
+    if (chiffres(nouveau.telephone).length >= 9 && chiffres(nouveau.telephone) === chiffres(e.telephone)) return { avec: e.nom, raison: "même téléphone, e-mail différent" };
+    if (chiffres(nouveau.siret).length === 14 && chiffres(nouveau.siret) === chiffres(e.siret)) return { avec: e.nom, raison: "même SIRET, e-mail différent" };
+    const leurs = motsDuNom(e.nom);
+    const communs = [...mots].filter((m) => leurs.has(m)).length;
+    const proche = communs > 0 && communs / Math.max(mots.size, leurs.size) >= 0.6;
+    if (proche && domaine && !DOMAINES_GENERIQUES.has(domaine) && autre.endsWith(`@${domaine}`)) return { avec: e.nom, raison: "nom proche et même domaine d'e-mail" };
+    if (proche) return { avec: e.nom, raison: "nom très proche, e-mail différent" };
+  }
+  return null;
+}

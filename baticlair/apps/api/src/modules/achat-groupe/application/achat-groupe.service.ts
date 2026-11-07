@@ -104,6 +104,7 @@ import {
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { mailEnHtml } from "../../../platform/email/mail-html.js";
+import { signalerException } from "../../../platform/supervision/exceptions.js";
 import { famillesConfigurees } from "../../../platform/supervision/familles.js";
 import { DomainError, forbidden, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { NotificationsGroupeService } from "../../../platform/notifications/notifications-artisan.js";
@@ -422,6 +423,9 @@ export class AchatGroupeService {
         }
         if (l.libre) return { ...l, libre: true, ref: { cle: `libre:${randomBytes(9).toString("base64url")}`, libelle: l.designation.trim(), famille: null as string | null } };
         const r = referenceStricte(l.designation);
+        // Lot 6 : une ligne dont les caractéristiques indispensables manquent remonte « produit ambigu » (rien n'est corrigé).
+        if (!r.ok && !("raison" in r && r.raison === "accessoire"))
+          await signalerException(this.prisma, { type: "produit_ambigu", cle: `${tenant.companyId}:${l.designation.toLowerCase().slice(0, 120)}`, titre: "Article trop peu précis pour un achat groupé", detail: `« ${l.designation.slice(0, 200)} » : caractéristiques indispensables manquantes (format, qualité…). La ligne reste en demande perso.`, companyId: tenant.companyId });
         if (!r.ok || !this.famillesGroupables.includes(r.reference.famille))
           throw validationFailed("Reference not precise enough", { reason: "reference_imprecise", message: `« ${l.designation} » n'est pas une référence du catalogue : elle reste en demande perso.` });
         return { ...l, libre: false, ref: { cle: r.reference.cle, libelle: r.reference.libelle, famille: r.reference.famille as string | null } };
@@ -447,6 +451,7 @@ export class AchatGroupeService {
       throw validationFailed("Several trades", { reason: "plusieurs_metiers", message: "Ces lignes sont de plusieurs métiers : un achat groupé n'en prend qu'un. Mets chaque métier dans son propre achat groupé." });
     const maintenant = this.now();
     const departement = zoneDuCodePostal(e.livraison);
+    await this.adresseIncertaine(tenant.companyId, e.livraison, departement);
     if (!departement) throw validationFailed("A delivery town with a postcode is required", { reason: "livraison_requise", message: "Indique la commune de livraison avec son code postal." });
     await this.ports.exigerZone(tenant.companyId, departement);
 
@@ -1036,6 +1041,15 @@ export class AchatGroupeService {
       familles: this.famillesGroupables, libellesFamilles: this.famillesCfg.libelles(this.famillesGroupables), collectif: PHRASE_COLLECTIF, achats };
   }
 
+  /**
+   * Lot 6 (Greg, 7 novembre 2026) : « adresse incertaine » = code postal ou commune manquant, ou aucun département connu
+   * pour ce code. Une exception à examiner ; l'adresse n'est jamais corrigée en silence.
+   */
+  private async adresseIncertaine(companyId: string, adresse: string | null, departement: string | null) {
+    const pb = !adresse?.trim() ? "adresse vide" : !departement ? "code postal manquant ou illisible" : !departementConnu(departement) ? `aucun département connu pour « ${departement} »` : !/[a-zà-ü]{2,}/i.test(adresse.replace(/\b\d{5}\b/, "")) ? "commune manquante" : null;
+    if (pb) await signalerException(this.prisma, { type: "adresse_incertaine", cle: `${companyId}:${(adresse ?? "").toLowerCase().slice(0, 120)}`, titre: "Adresse de livraison incertaine", detail: `${pb} (« ${(adresse ?? "").slice(0, 120)} »).`, companyId });
+  }
+
   /* --------------------------------------------------------------------- les collectes lancées par Mobiiz (point 11) */
 
   /**
@@ -1552,6 +1566,20 @@ export class AchatGroupeService {
       cout = 0;
     }
     await this.prisma.consultationAchatGroupe.update({ where: { id: c.id }, data: { luLe: maintenant, coutIaEur: cout, lecture: (t?.output ?? null) as never } });
+    // Lot 6 (Greg, 7 novembre 2026) : « résultat IA incohérent » = sortie invalide, valeur impossible (prix négatif ou nul),
+    // ou confiance sous le seuil (au moins trois doutes, ou aucun prix lu). Une exception à examiner, rien n'est corrigé.
+    const prixLus = (t?.output?.paliers ?? []).map((p) => nombre(p.prixUnitaireHt)).filter((x): x is number => x !== null);
+    const pb =
+      !t || t.status !== "success" || !t.output
+        ? `lecture ${t?.status ?? "en échec"}`
+        : prixLus.some((x) => x <= 0)
+          ? "prix nul ou négatif lu"
+          : prixLus.length === 0 && !t.output.totalHt
+            ? "aucun prix lu"
+            : t.output.doutes.length >= 3
+              ? `${t.output.doutes.length} doutes de lecture`
+              : null;
+    if (pb) await signalerException(this.prisma, { type: "resultat_ia_incoherent", cle: `offre:${c.id}`, titre: `Offre PDF de l'achat groupé n° ${a.numero} : lecture à vérifier`, detail: `${pb}. L'admin valide l'offre avant toute publication.` });
     return t?.status === "success" ? t.output : null;
   }
 

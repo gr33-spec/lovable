@@ -48,3 +48,15 @@ describe("la supervision", () => {
     expect(f.libelles.plomberie).toBe("Plomberie");
   });
 });
+
+describe("le doublon incertain", () => {
+  const connus = [{ nom: "Point P Lannion", email: "lannion@pointp.fr", telephone: "02 96 00 00 01" }];
+  it("même téléphone, nom proche ou même domaine : à examiner ; un négoce différent : rien", async () => {
+    const { doublonIncertain } = await import("../src/index.js");
+    expect(doublonIncertain({ nom: "Kerbrat", email: "devis@kerbrat.fr", telephone: "+33 2 96 00 00 01" }, connus)).toMatchObject({ raison: "même téléphone, e-mail différent" });
+    expect(doublonIncertain({ nom: "POINT P - Lannion", email: "commercial@pointp.fr" }, connus)).toMatchObject({ avec: "Point P Lannion", raison: "nom proche et même domaine d'e-mail" });
+    expect(doublonIncertain({ nom: "Kerbrat Matériaux", email: "devis@kerbrat.fr" }, connus)).toBeNull();
+    // Même e-mail : ce n'est pas « incertain » (refusé ailleurs).
+    expect(doublonIncertain({ nom: "Point P", email: "lannion@pointp.fr" }, connus)).toBeNull();
+  });
+});

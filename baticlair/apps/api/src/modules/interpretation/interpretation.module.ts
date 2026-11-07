@@ -65,7 +65,13 @@ export function budgetInterpretation(prisma: PrismaService, recorder: AiUsageRec
         if (!config.ai.interprete) return new InterpretationService(null);
         const ia = fabriqueIa(config);
         const interpreteur = ia ? new IaInterpreteur(ia, config.ai.interpreteModel) : config.ai.provider === "fake" ? new FakeInterpreteur() : null;
-        return new InterpretationService(interpreteur, (e) => logger.info({ interpretation: e }, "interprétation IA d'une réponse libre"), budgetInterpretation(prisma, recorder, config.ai.interpretePlafond));
+        return new InterpretationService(
+          interpreteur,
+          (e) => logger.info({ interpretation: e }, "interprétation IA d'une réponse libre"),
+          budgetInterpretation(prisma, recorder, config.ai.interpretePlafond),
+          // Lot 6 : une réponse du modèle refusée par la validation du serveur (le texte de l'artisan n'est pas recopié).
+          (e) => signalerException(prisma, { type: "resultat_ia_incoherent", cle: `interpretation:${e.companyId}:${new Date().toISOString().slice(0, 13)}`, titre: "Interprète IA : réponse refusée par la validation du serveur", detail: `${e.refusees} valeur(s) refusée(s) sur ${e.questions} question(s) ; la question est reposée à l'artisan.`, companyId: e.companyId }),
+        );
       },
       inject: [CONFIG, LOGGER, PrismaService, AiUsageRecorder],
     },
