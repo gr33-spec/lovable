@@ -69,6 +69,7 @@ const U = {
   couronne: { code: "couronne", singulier: "couronne", pluriel: "couronnes", feminin: true },
   botte: { code: "botte", singulier: "botte", pluriel: "bottes", feminin: true },
   paquet: { code: "paquet", singulier: "paquet", pluriel: "paquets", feminin: false },
+  longueur: { code: "longueur", singulier: "longueur", pluriel: "longueurs", feminin: true },
 } as const satisfies Record<string, UniteV1>;
 
 export interface OptionV1 {
@@ -167,7 +168,7 @@ export const PRODUITS_V1: readonly ProduitV1[] = [
     libelle: "Gouttière",
     lot: "zinguerie",
     unite: U.metre,
-    conditionnements: [],
+    conditionnements: [{ unite: U.longueur, parDefaut: 4 }],
     caracteristiques: [
       { attribut: "matiere", libelle: "Matière", feminin: true, options: opt([["zinc", "zinc"], ["alu", "alu"], ["pvc", "PVC"], ["cuivre", "cuivre"]]) },
       { attribut: "developpe", libelle: "Développé", feminin: false, options: opt([["25", "dév. 25"], ["33", "dév. 33"], ["40", "dév. 40"], ["50", "dév. 50"]]) },
@@ -339,8 +340,22 @@ const UNITES_LUES: readonly [RegExp, string][] = [
 ];
 /** Le code d'une unité écrite (« Palettes » → palette, « ml » → m, « m² » → m2) ; null si inconnue. */
 export function codeUnite(unite: string): string | null {
+  return lireUnite(unite)?.code ?? null;
+}
+
+/**
+ * L'unité écrite et, si elle le dit, son contenu (« longueurs de 4 m » → longueur de 4 ; « couronnes de 100 m » →
+ * couronne de 100). Ce contenu reste une proposition : l'artisan le confirme toujours.
+ */
+export function lireUnite(unite: string): { code: string; contenu: number | null } | null {
   const u = normalizeText(unite.replace(/m²/g, "m2")).replace(/\.$/, "").trim();
-  return UNITES_LUES.find(([re]) => re.test(u))?.[1] ?? null;
+  const avec = /^(longueurs?|couronnes?|bottes?|rouleaux?|palettes?) de (\d+(?:[.,]\d+)?) ?(m|m2|ml|pieces?|u)?$/.exec(u);
+  if (avec) {
+    const code = UNITES_LUES.find(([re]) => re.test(avec[1]!))?.[1] ?? (avec[1]!.startsWith("longueur") ? "longueur" : null);
+    return code ? { code, contenu: Number(avec[2]!.replace(",", ".")) } : null;
+  }
+  const code = UNITES_LUES.find(([re]) => re.test(u))?.[1] ?? (/^longueurs?$/.test(u) ? "longueur" : null);
+  return code ? { code, contenu: null } : null;
 }
 
 /** L'unité écrite est-elle l'unité de référence du produit, un de ses conditionnements, ou aucune des deux ? */
@@ -450,7 +465,8 @@ export function classerLigneV1(l: { designation: string; quantite: number; unite
   const manquantes = p && lu ? manquantesV1(p.type, lu.attributs) : [];
   const produit = p && lu ? { type: p.type, nom: nomProduitV1(p.type, lu.attributs), cle: cleProduitV1(p.type, lu.attributs), attributs: lu.attributs, manquantes: manquantes.map((m) => ({ attribut: m.attribut, libelle: m.libelle })) } : null;
   const u = p ? uniteDuProduit(p, l.unite) : null;
-  const quantite = p && u && l.quantite > 0 ? { valeur: l.quantite, unite: codeUnite(l.unite)!, conditionnement: u.sorte === "conditionnement" ? { unite: u.conditionnement.unite.code, parDefaut: u.conditionnement.parDefaut } : null } : null;
+  const contenu = lireUnite(l.unite)?.contenu ?? null;
+  const quantite = p && u && l.quantite > 0 ? { valeur: l.quantite, unite: codeUnite(l.unite)!, conditionnement: u.sorte === "conditionnement" ? { unite: u.conditionnement.unite.code, parDefaut: contenu ?? u.conditionnement.parDefaut } : null } : null;
   const non = (mention: MentionLigneV1, pourquoi: string, texte = TEXTES_MENTION[mention]): LigneClasseeV1 => ({ ...base, produit, quantite, mention, texte, pourquoi, selectionnable: false });
   if (circuit === "commandee") return non("commandee", "Cette ligne est déjà commandée.");
   if (circuit === "achat_groupe") return non("deja_groupe", "Une ligne ne rejoint qu'un seul achat groupé.");
@@ -458,7 +474,7 @@ export function classerLigneV1(l: { designation: string; quantite: number; unite
   if (!p || !produit) return non("non_ouvert", "Cette famille n'a pas encore ses caractéristiques indispensables définies : la ligne reste dans ton quantitatif.");
   if (manquantes.length) return non("a_preciser", "Tant qu'une caractéristique indispensable manque, le produit ne peut rejoindre aucun achat groupé.", phraseAPreciser(manquantes));
   if (!quantite) return non("a_preciser", `La quantité doit être en ${p.unite.pluriel}${p.conditionnements.length ? ` ou en ${p.conditionnements.map((c) => c.unite.pluriel).join(", ")}` : ""}.`, `À préciser : quantité en ${p.unite.pluriel}`);
-  const enReference = quantiteReference(quantite.valeur, quantite.conditionnement?.parDefaut ?? (quantite.conditionnement ? 0 : 1));
+  const enReference = quantiteReference(quantite.valeur, quantite.conditionnement ? (quantite.conditionnement.parDefaut ?? 0) : 1);
   const recommande = enReference >= p.seuilRecommande;
   return {
     ...base,

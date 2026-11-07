@@ -1,3 +1,4 @@
+import { quantiteDuBesoin as quantiteDuBesoinV1 } from "@baticlair/domain";
 import { emailsDemo } from "../../../platform/demo-domaine.js";
 import { exiger as exigerCycle, faitsDesLignes } from "../../../platform/cycle/lignes.js";
 import { createHash, createHmac, randomUUID } from "node:crypto";
@@ -341,6 +342,24 @@ export class CommandeDuMoisService {
       }
     });
     return { takeoffId: takeoff.id, adresse: project.address, lignes: lignes.map(({ item, q, famille }) => ({ key: item.key, designation: item.label, quantite: Number(q.quantite), unite: q.unite, famille })) };
+  }
+
+  /**
+   * ACHATS GROUPÉS V1 (V5.2) : TOUTES les lignes à acheter de la liste, même vagues ou à régler (elles s'affichent
+   * « À préciser », jamais cachées) ; la quantité et l'unité de la commande quand elles sont sûres.
+   */
+  async toutesLesLignes(tenant: TenantContext, projectId: string): Promise<{ key: string; designation: string; quantite: number | null; unite: string; aRegler: boolean }[]> {
+    if (!isUuid(projectId)) throw notFound("Project");
+    const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { id: true } });
+    if (!project) throw notFound("Project");
+    const takeoff = await this.prisma.takeoff.findFirst({ where: { projectId, companyId: tenant.companyId }, orderBy: { createdAt: "desc" }, select: { id: true } });
+    if (!takeoff) return [];
+    const reviewed = await this.reviewed(tenant, takeoff.id);
+    return reviewed.purchase.toBuy.map((item) => {
+      const aRegler = item.state !== "ready" || (item.waitsOn?.length ?? 0) > 0 || (item.toConfirm?.length ?? 0) > 0;
+      const q = quantiteDuBesoinV1(item.order, item.quantity);
+      return { key: item.key, designation: item.label, quantite: q ? Number(q.quantite) : null, unite: q?.unite ?? item.order?.unit ?? "", aRegler };
+    });
   }
 
   /**

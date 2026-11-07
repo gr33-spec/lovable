@@ -14,7 +14,7 @@ export interface FaitsServeur extends FaitsLigne {
   lignesGroupe: { id: string; besoinId: string }[];
 }
 
-type Prisma = Pick<PrismaService, "priceRequest" | "ligneRapprochement" | "ligneAchatGroupe" | "besoin">;
+type Prisma = Pick<PrismaService, "priceRequest" | "ligneRapprochement" | "ligneAchatGroupe" | "besoin" | "besoinGroupeV1">;
 
 /** La commande du mois (ancien regroupement, table `besoin`) : ces statuts tiennent encore la ligne. */
 const MOIS_ACTIF = ["en_attente", "signe", "engage", "commande", "livre"];
@@ -22,7 +22,7 @@ const MOIS_COMMANDE = ["commande", "livre"];
 
 /** Les faits de chaque ligne du chantier ; une demande sans `itemKeys` vaut pour toute la liste (`toutes`). */
 export async function faitsDesLignes(prisma: Prisma, companyId: string, projectId: string, maintenant = new Date()) {
-  const [demandes, recherches, groupes, mois] = await Promise.all([
+  const [demandes, recherches, groupes, mois, v1] = await Promise.all([
     prisma.priceRequest.findMany({
       where: { companyId, projectId },
       select: { itemKeys: true, retainedSupplierIds: true, recipients: { select: { sentAt: true, commandeLe: true } } },
@@ -33,6 +33,8 @@ export async function faitsDesLignes(prisma: Prisma, companyId: string, projectI
       select: { id: true, besoinId: true, articleKey: true, besoin: { select: { statut: true, regroupement: { select: { libelle: true, statut: true, clotureLe: true } } } } },
     }),
     prisma.besoin.findMany({ where: { companyId, projectId, statut: { in: MOIS_ACTIF } }, select: { articleKey: true, statut: true } }),
+    // Achats groupés V1 (V5.2) : un besoin actif tient sa ligne (« une ligne, un seul circuit »).
+    prisma.besoinGroupeV1.findMany({ where: { companyId, projectId, articleKey: { not: null }, statut: { not: "retire" }, achat: { statut: { not: "annule" } } }, select: { articleKey: true, achat: { select: { nom: true } } } }),
   ]);
   const envoyees = demandes.filter((d) => d.recipients.some((r) => r.sentAt));
   const commandees = demandes.filter((d) => d.retainedSupplierIds.length > 0 || d.recipients.some((r) => r.commandeLe));
@@ -56,12 +58,41 @@ export async function faitsDesLignes(prisma: Prisma, companyId: string, projectI
     if (!cur.groupe || commandee) cur.groupe = { titre: "Commande du mois", statut: commandee ? "accepte" : "declare", avantCloture: false };
     parCle.set(m.articleKey, cur);
   }
+  const parCleV1 = new Map(v1.map((b) => [b.articleKey!, b.achat.nom]));
+  for (const [key, titre] of parCleV1) {
+    const cur = parCle.get(key) ?? { groupe: null, lignes: [] };
+    if (!cur.groupe) cur.groupe = { titre, statut: "declare", avantCloture: true };
+    parCle.set(key, cur);
+  }
   return (key: string): FaitsServeur => ({
     demandeEnvoyee: couvre(envoyees, key),
     commandeeSeule: couvre(commandees, key),
     enRecherche: enRecherche.has(key),
     groupe: parCle.get(key)?.groupe ?? null,
     lignesGroupe: parCle.get(key)?.lignes ?? [],
+    achatGroupeV1: parCleV1.has(key),
+  });
+}
+
+/**
+ * ACHATS GROUPÉS V1 (V5.2, « Une ligne, un seul circuit ») : avant de créer ou d'envoyer une demande individuelle, aucune
+ * de ses lignes n'est tenue par un besoin d'achat groupé actif ; sinon un refus qui nomme les lignes (jamais en silence).
+ * `keys` null = toute la liste.
+ */
+export async function gardeDemandeIndividuelle(prisma: Pick<PrismaService, "besoinGroupeV1">, companyId: string, projectId: string, keys: string[] | null): Promise<void> {
+  const tenues = await prisma.besoinGroupeV1.findMany({
+    where: { companyId, projectId, articleKey: keys ? { in: keys } : { not: null }, statut: { not: "retire" }, achat: { statut: { not: "annule" } } },
+    select: { articleKey: true, designation: true },
+  });
+  if (tenues.length === 0) return;
+  const noms = tenues.map((t) => `« ${t.designation} »`);
+  throw new DomainError("conflict", "Lines held by a group purchase", {
+    reason: "dans_un_achat_groupe",
+    lignes: tenues.map((t) => ({ key: t.articleKey, designation: t.designation })),
+    message:
+      tenues.length === 1
+        ? `${noms[0]} est dans un achat groupé : elle ne part pas en même temps en demande individuelle. Retire d'abord ton besoin de l'achat groupé, ou envoie les autres lignes.`
+        : `${tenues.length} lignes sont dans un achat groupé (${noms.join(", ")}) : elles ne partent pas en même temps en demande individuelle. Envoie les autres lignes, ou retire d'abord ces besoins de l'achat groupé.`,
   });
 }
 

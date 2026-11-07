@@ -271,6 +271,12 @@ export class RapprochementService {
   }
 
   /** Les actions « À faire » du rapprochement : propositions à examiner, et une ligne commandée seule mais encore dans une collecte. */
+  /** Achats groupés V1 : leurs actions (reconfirmer, examiner une offre) entrent dans « À faire », source de référence. */
+  private actionsV1: (tenant: TenantContext) => Promise<{ cle: string; genre: "achat_groupe"; texte: string; href: string }[]> = async () => [];
+  brancherActionsV1(f: (tenant: TenantContext) => Promise<{ cle: string; genre: "achat_groupe"; texte: string; href: string }[]>): void {
+    this.actionsV1 = f;
+  }
+
   async actions(tenant: TenantContext) {
     const maintenant = this.now();
     await this.synchroniser(maintenant, tenant.companyId);
@@ -289,7 +295,8 @@ export class RapprochementService {
       take: 10,
     });
     for (const q of questions) items.push({ cle: `precision:${q.id}`, genre: "rapprochement", texte: `${q.supplier.name} a besoin d'une précision`, href: `/chantiers/${q.priceRequest.projectId}?onglet=suivi` });
-    return { items };
+    // Les actions des achats groupés V1 d'abord (elles ont une échéance).
+    return { items: [...(await this.actionsV1(tenant)), ...items] };
   }
 
   /* ---------------------------------------------------------------------------------- la recherche */

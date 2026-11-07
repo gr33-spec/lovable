@@ -293,6 +293,7 @@ export class PriceRequestsService {
     // fournisseurs qui n'ont rien reçu (audit avant commercialisation, 2026-10-11).
     if (recipient.status !== "to_send") return this.reload(tenant, request.id);
     if (!request.packet) throw new DomainError("conflict", "This request predates the supplier packet", { reason: "no_packet" });
+    await this.gardeCircuit(tenant, request.projectId, request.itemKeys.length ? request.itemKeys : null);
     // L'étiquette d'abord (assistant, point 10) : le PDF imprime l'adresse étiquetée qui sert de « Répondre à ».
     const via = await this.expediteur(tenant.companyId);
     if (via) await this.requests.setEtiquette(tenant, recipientId, via.etiquette);
@@ -471,6 +472,7 @@ export class PriceRequestsService {
     const dueDate = input.dueDate ?? dateLimiteParDefaut(this.clock());
     if (input.message?.trim() || input.tutoie !== undefined) await this.requests.saveModele(tenant, { message: input.message?.trim() || undefined, tutoie: input.tutoie ?? undefined });
     input = { ...input, dueDate };
+    await this.gardeCircuit(tenant, projectId, input.articles && input.articles.length > 0 ? [...new Set(input.articles)] : null);
     const { takeoff, lines, packet } = await this.order(tenant, projectId, input);
     const supplierIds = await this.checkSuppliers(tenant, input.supplierIds);
     const created = await this.requests.create(tenant, {
@@ -631,6 +633,12 @@ export class PriceRequestsService {
         await this.signaler({ type: "echec_envoi", cle: `${supplier.id}`, titre: `L'e-mail de demande de prix n'est pas parti chez ${supplier.name}`, detail: "Le prestataire d'envoi a refusé ou n'a pas répondu ; l'artisan a vu « réessaie dans un instant ».", companyId: tenant.companyId }).catch(() => undefined);
       throw e;
     }
+  }
+
+  /** Achats groupés V1 : une ligne tenue par un achat groupé ne part pas en demande individuelle (branché par le module). */
+  private gardeCircuit: (tenant: TenantContext, projectId: string, keys: string[] | null) => Promise<void> = async () => undefined;
+  brancherGardeCircuit(f: (tenant: TenantContext, projectId: string, keys: string[] | null) => Promise<void>): void {
+    this.gardeCircuit = f;
   }
 
   private gardeCommande: (tenant: TenantContext, projectId: string, keys: string[] | null, retirerDesGroupes: boolean) => Promise<void> = async () => undefined;

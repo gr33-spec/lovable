@@ -172,45 +172,50 @@ model Company {
   /// detaille ; nul = classique) et sa couleur principale (identifiant de COULEURS_PDF ; nul = jaune Mobiiz).
   pdfModele                  String?   @map("pdf_modele")
   pdfCouleur                 String?   @map("pdf_couleur")
+  /// ACHATS GROUPÉS V1 (V5.2) : « Je déclare être : Dirigeant / Autorisé à agir pour l'entreprise », une fois (ou après
+  /// un changement important : SIRET changé).
+  habilitationAg             String?   @map("habilitation_ag")
+  habilitationAgLe           DateTime? @map("habilitation_ag_le") @db.Timestamptz(3)
   createdAt                  DateTime  @default(now())
   updatedAt                  DateTime  @updatedAt
 
-  memberships             Membership[]
-  partnerKeys             PartnerApiKey[]
-  projects                Project[]
-  documents               Document[]
-  aiExecutions            AiExecution[]
-  takeoffs                Takeoff[]
-  aiAnalyses              AiAnalysis[]
-  suppliers               Supplier[]
-  priceRequests           PriceRequest[]
-  adressesMobiiz          AdresseMobiiz[]
-  desistementsAchatGroupe DesistementAchatGroupe[]
-  alertesAchatGroupe      AlerteAchatGroupe[]
-  lignesRapprochement     LigneRapprochement[]
+  memberships               Membership[]
+  partnerKeys               PartnerApiKey[]
+  projects                  Project[]
+  documents                 Document[]
+  aiExecutions              AiExecution[]
+  takeoffs                  Takeoff[]
+  aiAnalyses                AiAnalysis[]
+  suppliers                 Supplier[]
+  priceRequests             PriceRequest[]
+  adressesMobiiz            AdresseMobiiz[]
+  desistementsAchatGroupe   DesistementAchatGroupe[]
+  alertesAchatGroupe        AlerteAchatGroupe[]
+  besoinsGroupeV1           BesoinGroupeV1[]
+  lignesRapprochement       LigneRapprochement[]
   propositionsRapprochement PropositionRapprochement[]
-  lignesAchatGroupe       LigneAchatGroupe[]
-  emailsRecus             EmailRecuArtisan[]
-  offers                  SupplierOffer[]
-  preferences             CompanyPreference[]
-  corrections             CorrectionEvent[]
-  consumableHabits        ConsumableHabit[]
-  uploadParts             UploadPart[]
-  quantitatifs            Quantitatif[]
-  ruleConfirmations       RuleConfirmation[]
-  besoins                 Besoin[]
-  choixDuMois             ChoixArtisan[]
-  commandesGaranties      CommandeGarantie[]
-  negocesAjoutes          Negoce[]                 @relation("NegoceAjoutePar")
-  negoces                 NegoceArtisan[]
-  desistements            Desistement[]
-  abonnement              Abonnement?
-  reglesApprises          RegleApprise[]
-  facturesAbonnement      FactureAbonnement[]
-  besoinsNegocies         BesoinNegocie[]
-  brouillons              Brouillon[]
-  listesSupprimees        ListeSupprimee[]
-  libellesEcrits          LibelleEcrit[]
+  lignesAchatGroupe         LigneAchatGroupe[]
+  emailsRecus               EmailRecuArtisan[]
+  offers                    SupplierOffer[]
+  preferences               CompanyPreference[]
+  corrections               CorrectionEvent[]
+  consumableHabits          ConsumableHabit[]
+  uploadParts               UploadPart[]
+  quantitatifs              Quantitatif[]
+  ruleConfirmations         RuleConfirmation[]
+  besoins                   Besoin[]
+  choixDuMois               ChoixArtisan[]
+  commandesGaranties        CommandeGarantie[]
+  negocesAjoutes            Negoce[]                   @relation("NegoceAjoutePar")
+  negoces                   NegoceArtisan[]
+  desistements              Desistement[]
+  abonnement                Abonnement?
+  reglesApprises            RegleApprise[]
+  facturesAbonnement        FactureAbonnement[]
+  besoinsNegocies           BesoinNegocie[]
+  brouillons                Brouillon[]
+  listesSupprimees          ListeSupprimee[]
+  libellesEcrits            LibelleEcrit[]
 
   @@map("company")
 }
@@ -703,26 +708,26 @@ model PriceRequestRecipient {
   /// Demande perso (25 octobre 2026) : le lien de chiffrage en ligne sans compte (haché), la réponse du négoce (prix par
   /// ligne, livraison, délai, validité qu'il fixe), la relance à 48 h ouvrées, puis la commande et son suivi
   /// (recue → confirmee → livree). `negoceId` : le négoce de la zone quand l'artisan l'a choisi là (ses résultats).
-  tokenHash      String?   @unique
-  prix           Json?
-  livraisonHt    Decimal?  @db.Decimal(14, 2)
-  delaiJours     Int?
-  validiteJours  Int?
-  reponduLe      DateTime?
-  refuseLe       DateTime?
-  relanceLe      DateTime?
-  commandeLe     DateTime?
-  suivi          String?
-  confirmeLe     DateTime?
-  livreLe        DateTime?
-  negoceId       String?   @db.Uuid
+  tokenHash           String?   @unique
+  prix                Json?
+  livraisonHt         Decimal?  @db.Decimal(14, 2)
+  delaiJours          Int?
+  validiteJours       Int?
+  reponduLe           DateTime?
+  refuseLe            DateTime?
+  relanceLe           DateTime?
+  commandeLe          DateTime?
+  suivi               String?
+  confirmeLe          DateTime?
+  livreLe             DateTime?
+  negoceId            String?   @db.Uuid
   /// R7 : l'étiquette de réponse de cette demande (`adresse+r<étiquette>@mobiiz.fr`, « [réf. …] » dans l'objet).
-  etiquette      String?   @unique
+  etiquette           String?   @unique
   /// LOT FINAL, point 6 : l'artisan prévenu que ce négoce n'a pas répondu, à mi-délai puis la veille de la date limite.
-  rappelMiLe     DateTime? @map("rappel_mi_le") @db.Timestamptz(3)
-  rappelVeilleLe DateTime? @map("rappel_veille_le") @db.Timestamptz(3)
+  rappelMiLe          DateTime? @map("rappel_mi_le") @db.Timestamptz(3)
+  rappelVeilleLe      DateTime? @map("rappel_veille_le") @db.Timestamptz(3)
   /// Ce que l'artisan savait du négoce à l'envoi (nom, e-mail, spécialités, lots envoyés), figé (Greg, 1er novembre 2026).
-  instantane     Json?
+  instantane          Json?
   /// LE PARCOURS DU NÉGOCE (Greg, 6 novembre 2026, prompt maître point 13) : « Je vais répondre » (intention), « Je ne
   /// peux pas chiffrer » (refuseLe + motif), « J'ai besoin d'une précision » (question, puis la réponse de l'artisan).
   intention           String?   @map("intention")
@@ -2507,4 +2512,140 @@ model ExceptionSupervision {
 
   @@index([statut, gravite])
   @@map("exception_supervision")
+}
+
+/// ACHATS GROUPÉS V1 (Greg, 7 novembre 2026, V5.2 validée) : UN produit précis (clé stricte), une zone (le département
+/// de l'entreprise), un mode de réception, une période de besoin. Statuts : ouvert | preparation | consultation |
+/// offre_verification | offre_a_examiner | renegociation | annule. « Offre acceptée » n'existe pas en V1.
+model AchatGroupeV1 {
+  id                      String    @id @default(uuid(7)) @db.Uuid
+  numero                  Int       @unique @default(autoincrement())
+  type                    String
+  cle                     String
+  nom                     String
+  lot                     String
+  departement             String
+  reception               String
+  dateBesoin              DateTime  @map("date_besoin") @db.Date
+  ouvertJusquau           DateTime  @map("ouvert_jusquau") @db.Timestamptz(3)
+  statut                  String    @default("ouvert")
+  /// Le conditionnement confirmé par qui a ouvert l'achat (« 1 palette = 480 pièces ») ; ceux qui rejoignent le confirment.
+  conditionnementUnite    String?   @map("conditionnement_unite")
+  conditionnementParUnite Decimal?  @map("conditionnement_par_unite") @db.Decimal(14, 3)
+  reconfirmerAvant        DateTime? @map("reconfirmer_avant") @db.Timestamptz(3)
+  rappelLe                DateTime? @map("rappel_le") @db.Timestamptz(3)
+  /// La consultation partie : le volume RECONFIRMÉ transmis aux négoces (jamais l'indicatif).
+  consultationLe          DateTime? @map("consultation_le") @db.Timestamptz(3)
+  volumeTransmis          Decimal?  @map("volume_transmis") @db.Decimal(14, 3)
+  offreAvant              DateTime? @map("offre_avant") @db.Timestamptz(3)
+  annuleLe                DateTime? @map("annule_le") @db.Timestamptz(3)
+  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  besoins BesoinGroupeV1[]
+  offre   OffreAchatGroupeV1?
+
+  @@index([departement, cle, reception, statut])
+  @@index([statut])
+  @@map("achat_groupe_v1")
+}
+
+/// Le besoin d'UNE entreprise dans un achat groupé V1. Le lieu, les contraintes et la quantité ne sont jamais montrés aux
+/// autres entreprises. Statuts : indicatif | confirme | reconfirme | retire. Une ligne de quantitatif n'est tenue que par un
+/// besoin actif (index unique partiel en SQL : project_id, article_key, statut <> 'retire').
+model BesoinGroupeV1 {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  achatId               String    @map("achat_id") @db.Uuid
+  companyId             String    @map("company_id") @db.Uuid
+  userId                String?   @map("user_id")
+  projectId             String?   @map("project_id") @db.Uuid
+  articleKey            String?   @map("article_key")
+  designation           String
+  attributs             Json
+  /// La quantité dans l'unité de référence du produit (pièces, m, rouleaux…).
+  quantite              Decimal   @db.Decimal(14, 3)
+  quantiteSaisie        Decimal   @map("quantite_saisie") @db.Decimal(14, 3)
+  uniteSaisie           String    @map("unite_saisie")
+  parUnite              Decimal?  @map("par_unite") @db.Decimal(14, 3)
+  conversionConfirmeeLe DateTime? @map("conversion_confirmee_le") @db.Timestamptz(3)
+  reception             String
+  lieu                  String
+  contraintes           String?
+  dateBesoin            DateTime  @map("date_besoin") @db.Date
+  statut                String
+  confirmeLe            DateTime? @map("confirme_le") @db.Timestamptz(3)
+  reconfirmeLe          DateTime? @map("reconfirme_le") @db.Timestamptz(3)
+  retireLe              DateTime? @map("retire_le") @db.Timestamptz(3)
+  motifRetrait          String?   @map("motif_retrait")
+  precisionRetrait      String?   @map("precision_retrait")
+  /// Retiré après l'envoi de la consultation (bêta : 3 → rappel, puis vérification manuelle ; jamais de suspension).
+  retraitTardif         Boolean   @default(false) @map("retrait_tardif")
+  /// Les e-mails de rappel (complémentaires : l'action reste dans « À faire » même si l'e-mail échoue).
+  rappelEnvoyeLe        DateTime? @map("rappel_envoye_le") @db.Timestamptz(3)
+  offreSignaleeLe       DateTime? @map("offre_signalee_le") @db.Timestamptz(3)
+  cleIdempotence        String?   @map("cle_idempotence")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  achat      AchatGroupeV1              @relation(fields: [achatId], references: [id], onDelete: Cascade)
+  company    Company                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  historique HistoriqueBesoinGroupeV1[]
+
+  @@unique([companyId, cleIdempotence])
+  @@index([achatId, statut])
+  @@index([companyId, statut])
+  @@index([projectId])
+  @@map("besoin_groupe_v1")
+}
+
+/// L'historique d'un besoin (création, confirmation, modification, retrait, transmission) : gardé, jamais réécrit.
+model HistoriqueBesoinGroupeV1 {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  besoinId  String   @map("besoin_id") @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  type      String
+  detail    Json?
+  /// Transmis aux négoces concernés (modification ou retrait après l'envoi de la consultation).
+  transmis  Boolean  @default(false)
+  le        DateTime @default(now()) @db.Timestamptz(3)
+
+  besoin BesoinGroupeV1 @relation(fields: [besoinId], references: [id], onDelete: Cascade)
+
+  @@index([besoinId, le])
+  @@map("historique_besoin_groupe_v1")
+}
+
+/// L'offre d'un achat groupé V1, saisie par Mobiiz (aucun envoi réel aux négoces en V1 locale). Complète : « Offre à
+/// examiner » ; incomplète : « Offre reçue — vérification en cours ». Jamais acceptable en V1.
+model OffreAchatGroupeV1 {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  achatId        String   @unique @map("achat_id") @db.Uuid
+  fournisseur    String?
+  prixUnitaireHt Decimal? @map("prix_unitaire_ht") @db.Decimal(14, 4)
+  livraisonHt    Decimal? @map("livraison_ht") @db.Decimal(14, 2)
+  tvaPct         Decimal  @default(20) @map("tva_pct") @db.Decimal(5, 2)
+  delai          String?
+  lieu           String?
+  paiement       String?
+  validite       String?
+  annulation     String?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  achat AchatGroupeV1 @relation(fields: [achatId], references: [id], onDelete: Cascade)
+
+  @@map("offre_achat_groupe_v1")
+}
+
+/// Le lot d'une ligne corrigé par l'artisan (« Lot : Couverture ▾ »), ligne par ligne.
+model LotLigneV1 {
+  projectId  String   @map("project_id") @db.Uuid
+  articleKey String   @map("article_key")
+  companyId  String   @map("company_id") @db.Uuid
+  lot        String
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@id([projectId, articleKey])
+  @@index([companyId])
+  @@map("lot_ligne_v1")
 }

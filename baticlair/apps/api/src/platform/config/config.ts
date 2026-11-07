@@ -145,6 +145,11 @@ const envSchema = z
      */
     ACCES_DEMO: z.enum(["on", "off"]).default("off"),
     /**
+     * ACHATS GROUPÉS V1 (Greg, 7 novembre 2026, V5.2 validée) : le nouveau parcours (un produit précis par achat groupé).
+     * Coupé par défaut : rien ne change en ligne tant qu'il n'est pas allumé ; développement local seulement.
+     */
+    ACHATS_GROUPES_V1: z.enum(["on", "off"]).default("off"),
+    /**
      * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 348 € HT par an, essai, paywall sur déposer, voir les résultats,
      * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
      */
@@ -374,6 +379,7 @@ export interface AppConfig {
   billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
   /** L'accès démo « Découvrir l'application » (visiteur fictif, sans inscription). */
   accesDemo: boolean;
+  achatsGroupesV1: boolean;
   /** L'abonnement artisan (`ABONNEMENT`, `PAIEMENT`). */
   abonnement: {
     actif: boolean;
@@ -515,6 +521,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
     accesDemo: e.ACCES_DEMO === "on",
+    achatsGroupesV1: e.ACHATS_GROUPES_V1 === "on",
     abonnement: {
       actif: e.ABONNEMENT === "on",
       paiement: e.PAIEMENT,

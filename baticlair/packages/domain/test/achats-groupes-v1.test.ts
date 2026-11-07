@@ -269,3 +269,14 @@ describe("cycle partagé : la demande individuelle refuse une ligne d'achat grou
     expect(peut({ demandeEnvoyee: false, commandeeSeule: false, enRecherche: false, groupe }, "envoyer_demande").permis).toBe(true);
   });
 });
+
+describe("unités écrites par le moteur de liste", () => {
+  it("« longueurs de 4 m » : conditionnement proposé (4 m), à confirmer ; « m » reste l'unité de référence", async () => {
+    const { lireUnite, codeUnite } = await import("../src/index.js");
+    expect(lireUnite("longueurs de 4 m")).toEqual({ code: "longueur", contenu: 4 });
+    expect(lireUnite("couronnes de 100 m")).toEqual({ code: "couronne", contenu: 100 });
+    expect(codeUnite("ml")).toBe("m");
+    const c = classerLigneV1({ designation: "Gouttière zinc dév. 33", quantite: 10, unite: "longueurs de 4 m", faits: libre });
+    expect(c).toMatchObject({ mention: "recommande", quantite: { valeur: 10, unite: "longueur", conditionnement: { unite: "longueur", parDefaut: 4 } } });
+  });
+});
