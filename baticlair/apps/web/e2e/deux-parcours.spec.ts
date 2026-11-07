@@ -58,17 +58,27 @@ test("une phrase, deux articles : « J'ai compris », ajouter, voir ma liste, pu
   await expect(chat.getByRole("button", { name: "Ma liste · 2" })).toBeVisible();
   await chat.getByRole("button", { name: "Voir ma liste (2)" }).click();
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
-  // « Ton quantitatif est prêt » : la demande de prix cochée, l'interrupteur allumé sur l'article à fort potentiel.
+  // « Ton quantitatif est prêt » : l'interrupteur allumé sur l'article à fort potentiel ; un seul bouton principal.
   const prete = page.getByRole("region", { name: "Ton quantitatif est prêt" });
   await expect(prete).toBeVisible({ timeout: 20_000 });
-  await expect(prete.getByRole("checkbox", { name: /Demander des prix pour les 2 articles/ })).toHaveAttribute("aria-checked", "true");
+  await expect(prete).toContainText("Ton quantitatif est prêt : 2 articles.");
   const inter = prete.getByRole("switch", { name: "Chercher aussi un regroupement" });
   await expect(inter).toHaveAttribute("aria-checked", "true");
   await prete.getByRole("button", { name: "Voir les 1 article sélectionné" }).click();
   await expect(prete.getByRole("list", { name: "Articles pour le regroupement" })).toContainText(/Gros volume|cherche ce produit/);
   await expect(prete.getByText("Rien ne rejoint un groupe sans ton accord.")).toBeVisible();
-  // Seulement le regroupement : la ligne cherche seule ; la demande de prix reste libre.
-  await prete.getByRole("checkbox", { name: /Demander des prix/ }).click();
-  await prete.getByRole("button", { name: "Continuer" }).click();
-  await expect(prete.getByRole("status")).toContainText("1 ligne cherche un regroupement");
+  await expect(prete.getByRole("button", { name: "Continuer" })).toHaveCount(0);
+  // « Demander les prix à mes négoces » (le bouton de la liste) : la demande s'ouvre ET la ligne cherche, seule.
+  const projectId = /\/chantiers\/([0-9a-f-]{36})/.exec(page.url())![1]!;
+  await page.getByRole("button", { name: "Demander les prix à mes négoces" }).first().click();
+  await expect
+    .poll(async () => {
+      const a = await page.evaluate(async (url) => {
+        const companyId = localStorage.getItem("baticlair.companyId");
+        const r = await fetch(url, { headers: { accept: "application/json", ...(companyId ? { "x-company-id": companyId } : {}) } });
+        return (await r.json()) as { lignes: { recherche: { statut: string } | null }[] };
+      }, `/v1/projects/${projectId}/rapprochement`);
+      return a.lignes.filter((l) => l.recherche?.statut === "disponible").length;
+    }, { timeout: 15_000 })
+    .toBe(1);
 });

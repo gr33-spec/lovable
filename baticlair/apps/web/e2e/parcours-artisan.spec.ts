@@ -3246,24 +3246,30 @@ test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau co
   await page.goto("/chantiers/nouveau");
   const depot = page.getByLabel("Choisir un PDF ou un fichier");
   const photo = fs.readFileSync(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  // Conversation « Nouveau quantitatif » (Greg, 7 novembre 2026) : chaque document se confirme avant l'analyse.
+  const confirmer = () => page.getByRole("alertdialog", { name: "Analyser ce document ?" }).getByRole("button", { name: "Analyser le document" }).click();
   // Un fichier de plus de 20 Mo : refusé avant l'envoi, en clair.
   await depot.setInputFiles({ name: "liste.png", mimeType: "image/png", buffer: Buffer.alloc(21_000_000, 1) });
   await expect(page.getByText("C'est trop volumineux pour être envoyé.")).toBeVisible();
   // Réseau coupé : rien n'est perdu, l'écran le dit.
   await page.context().setOffline(true);
   await depot.setInputFiles({ name: "liste-manuscrite.png", mimeType: "image/png", buffer: photo });
+  await confirmer();
   await expect(page.getByText("Pas de connexion internet. Rien n'est perdu : réessaie dès que le réseau revient.")).toBeVisible();
   await page.context().setOffline(false);
   // Photo floue : le modèle ne lit aucune ligne ; on dit comment refaire la photo, jamais « devis » ni « PDF » abîmé.
   await depot.setInputFiles({ name: "photo-floue.png", mimeType: "image/png", buffer: photo });
+  await confirmer();
   await expect(page.getByText("Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF.")).toBeVisible();
   // Le service de lecture en panne (recette en ligne, 24 octobre 2026) : la panne et son code support, jamais « reprends la photo ».
   await depot.setInputFiles({ name: "liste-panne.png", mimeType: "image/png", buffer: photo });
+  await confirmer();
   await expect(page.getByText("Le service de lecture n'a pas répondu.", { exact: false })).toBeVisible();
-  await expect(page.getByText(/^Code support : /)).toBeVisible();
+  await expect(page.getByText(/Code support : /)).toBeVisible();
   await expect(page.getByText("Je n'ai rien lu sur ce fichier.", { exact: false })).toHaveCount(0);
   // Puis la bonne photo : la liste arrive, et tous ces essais n'ont créé qu'un chantier.
   await depot.setInputFiles({ name: "liste-manuscrite.png", mimeType: "image/png", buffer: photo });
+  await confirmer();
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
   const chantier = page.url();
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });

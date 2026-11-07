@@ -2,7 +2,7 @@
 
 import { Camera, ChevronRight, ClipboardList, FileText, Layers, PencilLine, ShoppingCart, Tag, Package, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { lireDescription, type LigneDecrite } from "../../../../packages/domain/src/assistant/assistant";
 import { precisionsLisibles } from "../../../../packages/domain/src/groupe/precisions-lisibles";
 import { natureDuDocument } from "../../../../packages/domain/src/documents/nature";
@@ -52,6 +52,19 @@ export function NouveauQuantitatif() {
   const compteur = useRef(0);
   const ids = { photo: useId(), galerie: useId(), document: useId() };
   const cleDepot = useRef(newActionKey());
+  // Plein écran par-dessus l'app : l'en-tête et le menu derrière deviennent inertes (ni touchés, ni lus) tant qu'elle est ouverte.
+  useEffect(() => {
+    const inertes: HTMLElement[] = [];
+    for (let el = zone.current as HTMLElement | null; el && el !== document.body; el = el.parentElement) {
+      for (const frere of Array.from(el.parentElement?.children ?? [])) {
+        if (frere !== el && frere instanceof HTMLElement && !frere.inert && frere.tagName !== "SCRIPT" && !(frere instanceof HTMLInputElement)) {
+          frere.inert = true;
+          inertes.push(frere);
+        }
+      }
+    }
+    return () => inertes.forEach((e) => (e.inert = false));
+  });
   const ajouterElement = (e: SansId) => setElements((xs) => [...xs, { ...e, id: ++compteur.current }]);
   const dire = (texte: string) => ajouterElement({ de: "mobiiz", texte });
 
@@ -103,7 +116,7 @@ export function NouveauQuantitatif() {
     const images = fs.filter((f) => f.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
     if (pdfs.length + images.length !== fs.length) return dire("Ce fichier n'est ni une photo ni un PDF.");
     if (pdfs.length > 1 || (pdfs.length === 1 && images.length > 0)) return dire("Un PDF à la fois, ou plusieurs photos ensemble.");
-    if (fs.some((f) => f.size > MAX_DOCUMENT_BYTES)) return dire("Ce fichier est trop lourd. Envoie une photo plus légère ou un PDF de moins de pages.");
+    if (fs.some((f) => f.size > MAX_DOCUMENT_BYTES)) return dire("C'est trop volumineux pour être envoyé. Envoie une photo plus légère ou un PDF de moins de pages.");
     const nature = fs.length === 1 ? natureDuDocument({ type: fs[0]!.type, nom: fs[0]!.name }, pdfs.length ? await texteDuPdf(fs[0]!) : null) : "liste";
     setAConfirmer({ fichiers: fs, nature });
   }
@@ -131,7 +144,7 @@ export function NouveauQuantitatif() {
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
       dire(err.reason === "nothing_read" ? "Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF." : `Le document n'est pas lu : ${messageErreur(err)}`);
-      cleDepot.current = newActionKey();
+      // La même clé au nouvel essai : un seul chantier, quel que soit le nombre d'essais (cas limites, bloc 6).
       setLecture(false);
     }
   }
@@ -146,9 +159,9 @@ export function NouveauQuantitatif() {
   // liste commencée : un document ouvre une nouvelle liste.
   const champs = (
     <>
-      <input id={ids.photo} type="file" accept="image/*" capture="environment" multiple className="sr-only" aria-label="Prendre une photo" tabIndex={-1} disabled={lecture} onChange={prendre} />
-      <input id={ids.galerie} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple className="sr-only" aria-label="Choisir une photo" tabIndex={-1} disabled={lecture} onChange={prendre} />
-      <input id={ids.document} type="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" multiple className="sr-only" aria-label="Choisir un PDF ou un fichier" tabIndex={-1} disabled={lecture} onChange={prendre} />
+      <input id={ids.photo} type="file" accept="image/*" capture="environment" multiple className="sr-only" aria-label="Prendre une photo" aria-hidden="true" tabIndex={-1} disabled={lecture} onChange={prendre} />
+      <input id={ids.galerie} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple className="sr-only" aria-label="Choisir une photo" aria-hidden="true" tabIndex={-1} disabled={lecture} onChange={prendre} />
+      <input id={ids.document} type="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" multiple className="sr-only" aria-label="Choisir un PDF ou un fichier" aria-hidden="true" tabIndex={-1} disabled={lecture} onChange={prendre} />
     </>
   );
 

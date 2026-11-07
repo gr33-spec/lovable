@@ -79,5 +79,11 @@ describe("la saisie en conversation (point 2)", () => {
       { libelle: "Crochets inox 100 mm", quantite: "950", unite: null },
     ]);
     expect(lireDescription("2 velux GGL MK04, 30 m de gouttière zinc dév 33").lignes.map((l) => l.quantite)).toEqual(["2", "30"]);
+    // Recette en ligne (7 novembre 2026) : « dév. 33 » devenait « Gouttière zinc dév », le développé perdu.
+    expect(lireDescription("1 000 ardoises naturelles 32×22 et 40 m de gouttière zinc dév. 33").lignes).toEqual([
+      { libelle: "Ardoises naturelles 32×22", quantite: "1000", unite: null },
+      { libelle: "Gouttière zinc dév. 33", quantite: "40", unite: "m" },
+    ]);
+    expect(lireDescription("20 tuiles. 30 crochets").lignes.map((l) => l.quantite)).toEqual(["20", "30"]);
   });
 });

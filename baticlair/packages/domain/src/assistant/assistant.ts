@@ -311,9 +311,10 @@ const VERBES_DE_CHANTIER = /^(?:je|j'|on|il faut|il me faut|faut|prevoir|prevois
 
 export function lireDescription(texteBrut: string): { lignes: LigneDecrite[]; aConfirmer: LigneDecrite[] } {
   // « 1 000 ardoises » (Greg, 7 novembre 2026) : l'espace des milliers fait partie du nombre, jamais « 1 » et « 000 ardoises ».
+  // Le point d'une abréviation (« dév. 33 », « ép. 0,65 », « réf. MK04 ») ne coupe jamais la phrase.
   const texte = texteBrut.replace(/(?<![\d,.])(\d{1,3})(?:[ \u00a0\u202f](\d{3}))+(?!\d)/g, (m) => m.replace(/[ \u00a0\u202f]/g, ""));
   const morceaux = texte
-    .split(/\n|;|\.(?=\s|$)|,|\s+et\s+(?=\d|un\b|une\b|des\b|du\b|de la\b)|\s+(?:puis|plus|avec)\s+(?=\d)/i)
+    .split(/\n|;|(?<!\b(?:dév|dev|ép|ep|épaisseur|diam|réf|ref|env|dim|long|larg|haut|qté|n°|no))\.(?=\s|$)|,|\s+et\s+(?=\d|un\b|une\b|des\b|du\b|de la\b)|\s+(?:puis|plus|avec)\s+(?=\d)/i)
     .map((m) => m.trim())
     .filter((m) => m.length >= 2);
   const lignes: LigneDecrite[] = [];

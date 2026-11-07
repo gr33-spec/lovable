@@ -71,6 +71,11 @@ export function ProjectTakeoff({
     [projectId],
   );
   const { data: raw, setData, error, reload } = useResource(fetchQuantitatif);
+  // Le regroupement choisi dans « Ton quantitatif est prêt », lancé par « Demander les prix à mes négoces ».
+  const avantEnvoiRef = useRef<(() => Promise<void>) | null>(null);
+  const brancherLancement = useCallback((lancer: (() => Promise<void>) | null) => {
+    avantEnvoiRef.current = lancer;
+  }, []);
   const quantitatif = raw?.items[0] ?? null;
   const data = useMemo(() => {
     if (!raw) return null;
@@ -320,7 +325,10 @@ export function ProjectTakeoff({
   const detachSketch = (sketchId: string) =>
     run(() => api<null>(`/v1/documents/${encodeURIComponent(sketchId)}`, { method: "DELETE" }), () => reload());
   // « Envoyer aux négoces » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
+  // Deux parcours reliés (Greg, 7 novembre 2026) : le même bouton lance aussi le regroupement choisi dans « Ton quantitatif
+  // est prêt », sans attendre ni bloquer la demande.
   const send = () => {
+    void avantEnvoiRef.current?.();
     setShowList(false);
     setPage(false);
     setOverview(true);
@@ -473,9 +481,9 @@ export function ProjectTakeoff({
           l'interrupteur du regroupement ligne par ligne ; les anciens réglages derrière « Plus d'options de regroupement ». */}
       <ListePrete
         projectId={projectId}
-        nbArticles={aAcheter.length}
+        nbArticles={aAcheter.length + takeoff.purchase.toQuote.length}
         envoye={sent}
-        onDemanderPrix={send}
+        brancherLancement={brancherLancement}
         options={
           <>
             {!sent ? <TenterPrixDeGroupe projectId={projectId} /> : null}
