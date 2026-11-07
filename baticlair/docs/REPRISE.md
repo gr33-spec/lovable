@@ -13,6 +13,12 @@ Ne pas redemander d'autorisation pour ce qui est listé ici. Ne jamais contourne
 - Chaque choix fait seul : une ligne dans `docs/DECISIONS.md` ; chaque demande : une ligne numérotée dans `docs/SUIVI.md`.
 - Rapport court en français, captures iPhone SE et ordinateur (avant / après).
 
+## Petite modification = tests ciblés SEULEMENT (Greg, 7 novembre 2026, ferme)
+
+« Ne refais plus jamais les tests à chaque fois que je te demande une simple modification. » Une petite demande (libellé,
+couleur, bouton) : types, lint, le test ciblé s'il existe, une capture ; JAMAIS les suites complètes API ou e2e. Les suites
+complètes seulement avant un déploiement important, et en le disant.
+
 ## Niveaux de tests (Greg, 1er novembre 2026)
 
 - **Petite modification** (un texte, un style, une fonction isolée) : les tests ciblés de la fonctionnalité touchée

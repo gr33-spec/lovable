@@ -67,7 +67,7 @@ export function BarreOnglets({
           role="tab"
           aria-selected={onglet === o.value}
           onClick={() => onChoisir(o.value)}
-          className={`pressable min-h-11 shrink-0 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${onglet === o.value ? "bg-ink text-white" : "border border-line bg-surface text-ink active:bg-ground"}`}
+          className={`pressable min-h-11 shrink-0 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${onglet === o.value ? "bg-accent text-on-accent shadow-card" : "border border-line bg-transparent text-ink active:bg-ground"}`}
         >
           {o.label}
         </button>

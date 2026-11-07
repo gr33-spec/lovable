@@ -194,7 +194,7 @@ function MesListes() {
                   setSelection(null);
                   updateUrl({ statut: f.value });
                 }}
-                className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${filter === f.value ? "bg-ink text-white" : "border border-line bg-surface text-ink active:bg-ground"}`}
+                className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${filter === f.value ? "bg-accent text-on-accent shadow-card" : "border border-line bg-transparent text-ink active:bg-ground"}`}
               >
                 {f.label}
               </button>

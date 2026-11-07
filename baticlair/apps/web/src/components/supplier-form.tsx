@@ -125,7 +125,7 @@ export function SupplierForm({
                 type="button"
                 aria-pressed={choisie}
                 onClick={() => setSpecialites((l) => (choisie ? l.filter((x) => x !== sp) : [...l, sp]))}
-                className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${choisie ? "bg-ink text-white" : "border border-line bg-surface text-ink active:bg-ground"}`}
+                className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${choisie ? "bg-accent text-on-accent shadow-card" : "border border-line bg-transparent text-ink active:bg-ground"}`}
               >
                 {LIBELLES_SPECIALITES[sp]}
               </button>

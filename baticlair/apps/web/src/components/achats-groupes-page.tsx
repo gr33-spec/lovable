@@ -158,7 +158,7 @@ function AchatsGroupes() {
             role="tab"
             aria-selected={vue === v.value}
             onClick={() => choisir(v.value)}
-            className={`pressable min-h-11 shrink-0 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${vue === v.value ? "bg-ink text-white" : "border border-line bg-surface text-ink active:bg-ground"}`}
+            className={`pressable min-h-11 shrink-0 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${vue === v.value ? "bg-accent text-on-accent shadow-card" : "border border-line bg-transparent text-ink active:bg-ground"}`}
           >
             {v.label}
             {v.value === "mes-groupes" && mes && actifs.length ? (
@@ -441,7 +441,7 @@ function Decouvrir() {
             type="button"
             aria-pressed={affichage === v}
             onClick={() => changer({ affichage: v === "carte" ? "carte" : "" })}
-            className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${affichage === v ? "bg-ink text-white" : "border border-line bg-surface text-ink"}`}
+            className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${affichage === v ? "bg-accent text-on-accent shadow-card" : "border border-line bg-transparent text-ink"}`}
           >
             {v === "liste" ? "Liste" : "Carte"}
           </button>

@@ -44,7 +44,7 @@ export default function AdminSupervisionPage() {
               role="tab"
               aria-selected={onglet === o.value}
               onClick={() => setOnglet(o.value)}
-              className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${onglet === o.value ? "bg-ink text-white" : "border border-line bg-surface text-ink"}`}
+              className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${onglet === o.value ? "bg-accent text-on-accent shadow-card" : "border border-line bg-transparent text-ink"}`}
             >
               {o.label}
             </button>
