@@ -122,6 +122,9 @@ const envSchema = z
      * Greg l'allume après avoir vu le coût estimé (docs/parcours-produit-lots.md, lot 7). */
     INTERPRETE_IA: z.enum(["on", "off"]).default("off"),
     AI_INTERPRETE_MODEL: z.string().min(1).default("claude-haiku-4-5"),
+    /** Le plafond TOTAL de l'interprète (Greg, 7 novembre 2026 : 1 $ ou 500 interprétations sur le test). */
+    INTERPRETE_IA_PLAFOND_USD: z.coerce.number().min(0).max(100).default(1),
+    INTERPRETE_IA_PLAFOND_APPELS: z.coerce.number().int().min(0).max(100_000).default(500),
     AI_EXTRACTION_EFFORT: z.enum(["low", "medium", "high", "xhigh", "max"]).default("high"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
@@ -409,6 +412,7 @@ export interface AppConfig {
     /** Lot 7 : l'interprétation IA des réponses libres (éteinte par défaut) et son modèle. */
     interprete: boolean;
     interpreteModel: string;
+    interpretePlafond: { microUsd: number; appels: number };
     effort: "low" | "medium" | "high" | "xhigh" | "max";
     /** Délai de réponse d'une lecture avant de passer en arrière-plan (ms). */
     answerWithinMs: number;
@@ -578,6 +582,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       quantitatifModel: e.AI_QUANTITATIF_MODEL,
       interprete: e.INTERPRETE_IA === "on",
       interpreteModel: e.AI_INTERPRETE_MODEL,
+      interpretePlafond: { microUsd: Math.round(e.INTERPRETE_IA_PLAFOND_USD * 1_000_000), appels: e.INTERPRETE_IA_PLAFOND_APPELS },
       effort: e.AI_EXTRACTION_EFFORT,
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },

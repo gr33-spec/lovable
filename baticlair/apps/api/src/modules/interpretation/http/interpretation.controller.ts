@@ -30,7 +30,7 @@ export class InterpretationController {
   @Throttle({ default: HOURLY(120) })
   @Post("interpretation")
   @HttpCode(200)
-  interpreter(@Tenant() _tenant: TenantContext, @Body(new ZodPipe(body)) b: z.infer<typeof body>) {
-    return this.service.interpreter(b.questions as QuestionNumerotee[], b.texte);
+  interpreter(@Tenant() tenant: TenantContext, @Body(new ZodPipe(body)) b: z.infer<typeof body>) {
+    return this.service.interpreter(b.questions as QuestionNumerotee[], b.texte, { companyId: tenant.companyId, userId: tenant.userId ?? null });
   }
 }

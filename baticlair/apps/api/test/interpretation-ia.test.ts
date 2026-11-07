@@ -14,12 +14,14 @@ const QUESTIONS = [
 const TEXTE = "pour la descente on part sur du métal gris pas le plastique, le tuyau fait 80, et les tuiles rouge vieilli";
 
 let ctx: TestContext | null = null;
-const avant = process.env.INTERPRETE_IA;
+const avant = { INTERPRETE_IA: process.env.INTERPRETE_IA, INTERPRETE_IA_PLAFOND_APPELS: process.env.INTERPRETE_IA_PLAFOND_APPELS };
 afterEach(async () => {
   await ctx?.app.close();
   ctx = null;
-  if (avant === undefined) delete process.env.INTERPRETE_IA;
-  else process.env.INTERPRETE_IA = avant;
+  for (const [k, v] of Object.entries(avant)) {
+    if (v === undefined) delete process.env[k];
+    else process.env[k] = v;
+  }
 });
 
 async function artisan(interprete: "on" | "off") {
@@ -52,5 +54,18 @@ describe("l'interprétation IA des réponses libres", () => {
     const agent = await artisan("on");
     expect((await agent.post("/v1/assistant/interpretation").send({ questions: [], texte: "x" })).status).toBe(400);
     expect((await agent.post("/v1/assistant/interpretation").send({ questions: QUESTIONS, texte: "x".repeat(2001) })).status).toBe(400);
+  });
+
+  it("le plafond (Greg, 7 novembre : 1 $ ou 500 interprétations) : chaque appel est journalisé ; au-delà, le code seul répond", async () => {
+    process.env.INTERPRETE_IA_PLAFOND_APPELS = "2";
+    const agent = await artisan("on");
+    for (let i = 0; i < 2; i++) expect((await agent.post("/v1/assistant/interpretation").send({ questions: QUESTIONS, texte: TEXTE }).expect(200)).body.ia).toBe(true);
+    // Le troisième dépasse le plafond : aucun appel, la lecture du code.
+    expect((await agent.post("/v1/assistant/interpretation").send({ questions: QUESTIONS, texte: TEXTE }).expect(200)).body.ia).toBe(false);
+    const journal = await ctx!.prisma.aiExecution.findMany({ where: { task: "interpretation_reponses" } });
+    expect(journal).toHaveLength(2);
+    expect(journal.every((j) => j.status === "success" && j.costMicroUsd > 0n)).toBe(true);
+    // Une réponse que le code comprend seul n'appelle jamais l'IA (pas d'appel à chaque frappe).
+    expect((await agent.post("/v1/assistant/interpretation").send({ questions: QUESTIONS.slice(0, 1), texte: "1. zinc" }).expect(200)).body.ia).toBe(false);
   });
 });
