@@ -57,7 +57,11 @@ export function NouveauQuantitatif() {
     const inertes: HTMLElement[] = [];
     for (let el = zone.current as HTMLElement | null; el && el !== document.body; el = el.parentElement) {
       for (const frere of Array.from(el.parentElement?.children ?? [])) {
-        if (frere !== el && frere instanceof HTMLElement && !frere.inert && frere.tagName !== "SCRIPT" && !(frere instanceof HTMLInputElement)) {
+        // Dans la page : tout le reste (en-tête, bandeaux). Hors de la page : seulement le menu, jamais le guide de première
+        // visite ni l'afficheur de fichiers, qui s'ouvrent par-dessus la conversation.
+        const dansLaPage = !!el.parentElement?.closest("main");
+        const menu = frere.tagName === "NAV" || !!frere.querySelector?.('nav[aria-label="Navigation principale"]');
+        if (frere !== el && frere instanceof HTMLElement && !frere.inert && frere.tagName !== "SCRIPT" && !(frere instanceof HTMLInputElement) && (dansLaPage || menu)) {
           frere.inert = true;
           inertes.push(frere);
         }
