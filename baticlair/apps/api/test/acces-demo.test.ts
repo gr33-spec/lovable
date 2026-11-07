@@ -12,7 +12,7 @@ import { runWithRequestContext } from "../src/platform/logging/request-context.j
 import { createTestApp, resetDatabase, signUpWithCompany, WEB_ORIGIN, type TestContext } from "./support/test-app.js";
 
 let ctx: TestContext | null = null;
-const avant = { ACCES_DEMO: process.env.ACCES_DEMO, INTERPRETE_IA: process.env.INTERPRETE_IA };
+const avant = { ACCES_DEMO: process.env.ACCES_DEMO, INTERPRETE_IA: process.env.INTERPRETE_IA, MOTS_DE_PASSE_FUITES: process.env.MOTS_DE_PASSE_FUITES };
 afterEach(async () => {
   await ctx?.app.close();
   ctx = null;
@@ -25,6 +25,8 @@ afterEach(async () => {
 async function app(acces: "on" | "off", interprete: "on" | "off" = "off") {
   process.env.ACCES_DEMO = acces;
   process.env.INTERPRETE_IA = interprete;
+  // Comme en ligne (recette du 7 novembre 2026 : 500 sur test.mobiiz.fr) : le contrôle des mots de passe fuités allumé.
+  process.env.MOTS_DE_PASSE_FUITES = "on";
   ctx = await createTestApp();
   await resetDatabase(ctx.prisma);
   return ctx;
