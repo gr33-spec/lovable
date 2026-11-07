@@ -415,6 +415,8 @@ export interface ScreenRow {
   /** La raison d'une ligne orange (« Quantité à confirmer : colle 4 kg/m² »), sinon « À vérifier ». */
   reason?: string;
   lineIds: string[];
+  /** Greg, 7 novembre 2026 : la famille (le lot) de la ligne n'est pas sûre ; seule cette ligne porte un badge. */
+  familleIncertaine?: boolean;
 }
 export interface SupplyScreen {
   groups: { key: string; label: string; measure: string | null; kind: "principal" | "singulier" | "evacuation" | "autres" | "consommables"; rows: ScreenRow[] }[];

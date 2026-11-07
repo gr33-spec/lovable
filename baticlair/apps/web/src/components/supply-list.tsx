@@ -772,6 +772,8 @@ function Row({
             {item.precision}
           </span>
         ) : null}
+        {/* Greg, 7 novembre 2026 : la famille est le titre de la section ; un badge seulement quand elle est incertaine. */}
+        {row.familleIncertaine ? <span className="self-start rounded-full bg-warn-bg px-2 py-0.5 text-[12px] font-bold text-warn">Famille à vérifier</span> : null}
         {quantity || sub ? (
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-[13px] leading-snug">
             {quantity ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
