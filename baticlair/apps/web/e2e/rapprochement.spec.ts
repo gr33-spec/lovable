@@ -141,7 +141,7 @@ test("Groupes › Découvrir : les filtres (produit, famille, secteur, clôture)
   const { collectif } = (await apiJson<{ collectif: string }>(page, "GET", "/v1/achats-groupes/decouvrir")).body;
   expect(collectif).toMatch(/^Un achat groupé fonctionne si chacun joue sa part/);
   if (page.viewportSize()!.width >= 1024) await expect(page.getByText(collectif, { exact: true })).toBeVisible();
-  const recherche = page.getByRole("search", { name: "Chercher une collecte" });
+  const recherche = page.getByRole("search", { name: "Chercher un achat groupé" });
   await expect(recherche).toBeVisible();
   await recherche.getByLabel("Matériau ou produit").fill("ardoise");
   await recherche.getByRole("button", { name: "Chercher" }).click();
@@ -151,7 +151,7 @@ test("Groupes › Découvrir : les filtres (produit, famille, secteur, clôture)
   await recherche.getByLabel("Clôture avant le").fill(jour(20));
   await expect(page).toHaveURL(new RegExp(`clotureAvant=${jour(20)}`));
   // Le résultat : des collectes, ou l'écran vide qui le dit ; jamais un compteur inventé.
-  await expect(page.getByRole("tabpanel", { name: "Découvrir" }).getByText(/Aucune collecte ouverte avec ces critères|Ajouter mes quantités/).first()).toBeVisible();
+  await expect(page.getByRole("tabpanel", { name: "Découvrir" }).getByText(/Aucun achat groupé ouvert avec ces critères|Ajouter mes quantités/).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
 });
 
@@ -179,11 +179,11 @@ test("Lot 3 : une collecte ouverte qui correspond se rejoint depuis la carte (n�
   // Deux parcours reliés (Greg, 7 novembre 2026) : les réglages détaillés sont sous « Plus d'options de regroupement ».
   await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();
   const carte = page.getByRole("region", { name: "Rechercher des besoins compatibles" });
-  await expect(carte.getByText(/^Une collecte ouverte correspond/)).toBeVisible({ timeout: 30_000 });
-  await carte.getByRole("button", { name: "Rejoindre cette collecte" }).click();
-  const panneau = carte.getByRole("region", { name: "Rejoindre la collecte" });
+  await expect(carte.getByText(/^Un achat groupé ouvert correspond/)).toBeVisible({ timeout: 30_000 });
+  await carte.getByRole("button", { name: "Rejoindre cet achat groupé" }).click();
+  const panneau = carte.getByRole("region", { name: "Rejoindre l'achat groupé" });
   await expect(panneau).toContainText(/livraison avant le/);
-  const bouton = panneau.getByRole("button", { name: "Rejoindre la collecte" });
+  const bouton = panneau.getByRole("button", { name: "Rejoindre l'achat groupé" });
   await expect(bouton).toBeDisabled();
   await panneau.getByLabel("Nom du négoce").fill("Négoce de Jean");
   await panneau.getByLabel("E-mail du négoce").fill(`jean-${unique()}@negoce.example`);
@@ -192,7 +192,7 @@ test("Lot 3 : une collecte ouverte qui correspond se rejoint depuis la carte (n�
   await panneau.scrollIntoViewIfNeeded();
   await page.screenshot({ path: `test-results/rapprochement/${info.project.name}-3-rejoindre.png` });
   await bouton.click();
-  await expect(carte.getByRole("status").filter({ hasText: /a rejoint la collecte/ })).toBeVisible();
+  await expect(carte.getByRole("status").filter({ hasText: /a rejoint l'achat groupé/ })).toBeVisible();
   await expect(carte.getByRole("link", { name: "Voir l'achat groupé" })).toHaveAttribute("href", /\/achats-groupes\/[0-9a-f-]{36}$/);
   const cycle = (await apiJson<{ lignes: { etat: string }[] }>(page, "GET", `/v1/projects/${projetA}/cycle`)).body.lignes;
   expect(cycle[0]!.etat).toBe("dans_un_groupe");
@@ -231,7 +231,7 @@ test("Lot 5 : Découvrir par secteur, région, retrait au dépôt et sur la cart
   await inscrire(page, "Jean", `Toitures ${unique()}`);
   await siret(page);
   await page.goto("/achats-groupes?vue=decouvrir");
-  const recherche = page.getByRole("search", { name: "Chercher une collecte" });
+  const recherche = page.getByRole("search", { name: "Chercher un achat groupé" });
   await expect(recherche.getByLabel("Secteur")).toHaveValue("mien");
   await recherche.getByLabel("Livraison").selectOption("retrait");
   await expect(page).toHaveURL(/mode=retrait/);
@@ -245,10 +245,10 @@ test("Lot 5 : Découvrir par secteur, région, retrait au dépôt et sur la cart
   await expect(panneau.getByText(ouvre.body.titre).first()).toBeVisible();
   // La carte : un rond pour le département, qui filtre la liste.
   await page.getByRole("group", { name: "Affichage" }).getByRole("button", { name: "Carte" }).click();
-  const plan = page.getByRole("region", { name: "Carte des collectes" });
+  const plan = page.getByRole("region", { name: "Carte des achats groupés" });
   await expect(plan).toBeVisible();
   await page.screenshot({ path: `test-results/rapprochement/${info.project.name}-5-carte.png`, fullPage: true });
-  await plan.getByRole("button", { name: new RegExp(`\\(${dep}\\) : \\d+ collectes?`) }).click();
+  await plan.getByRole("button", { name: new RegExp(`\\(${dep}\\) : \\d+ achats? groupés?`) }).click();
   await expect(page).toHaveURL(new RegExp(`departement=${dep}`));
   await expect(panneau.getByText(ouvre.body.titre).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);

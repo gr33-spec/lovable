@@ -1512,7 +1512,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   }
   await expect(list.getByRole("button", { name: /^\d+ lignes? à vérifier$/ })).toBeVisible();
   // Nouveau cap (22 octobre) : un gros « + Ajouter » sous les cartes ; plus de petits liens sous l'envoi.
-  await expect(list.getByRole("button", { name: "Ajouter un article" })).toHaveText("Ajouter");
+  await expect(list.getByRole("button", { name: "Ajouter un article" })).toHaveText("Ajouter un article");
   await expect(list.getByRole("navigation", { name: "Autres gestes sur la liste" })).toHaveCount(0);
 
   // §50.7 : l'écran 3 est le document : « Ton chantier », le chantier en bref, puis la liste ; aucune voix.
