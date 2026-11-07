@@ -87,6 +87,8 @@ export class AccesDemoService {
     const p = this.prisma;
     const project = await p.project.create({ data: { companyId, name: "Chantier Lannion (démo)", address: ADRESSE, demo: true, createdById: userId } });
     const takeoff = await p.takeoff.create({ data: { companyId, projectId: project.id, source: "lignes", trade: "roofing", status: "validated", promptId: "demo", promptVersion: 1, model: "demo", calculatedAt: maintenant, validatedAt: maintenant } });
+    // La liste elle-même, reprise telle qu'écrite (comme celle d'un partenaire) : « Ma liste » n'est jamais vide.
+    await p.takeoffLine.createMany({ data: LIGNES.map((l, i) => ({ takeoffId: takeoff.id, position: i + 1, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, origin: "partner", role: "purchase", confirmedAt: maintenant })) });
     const envoyeLe = new Date(maintenant.getTime() - 26 * 3_600_000);
     const recipients = [];
     for (const [i, nom] of NEGOCES.entries()) {
