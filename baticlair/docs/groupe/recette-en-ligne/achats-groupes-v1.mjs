@@ -318,7 +318,7 @@ await etape("A : « À faire » montre la reconfirmation ; A reconfirme", a, asy
 await etape("Admin : clôture de test, offre incomplète puis complète ; A : « Offre à examiner », bouton final grisé", a, async () => {
   const c = await api(adm, "POST", `/v1/admin/ag/achats/${achatId}/cloture`, { avantLHeure: true });
   verif(c.status === 200, `clôture ${c.status} ${JSON.stringify(c.body).slice(0, 160)}`);
-  const offre = { fournisseur: "Négoce de test", prixUnitaireHt: 0.98, livraisonHt: 45, delai: "10 jours ouvrés", lieu: "Livraison sur chantier", paiement: "30 jours fin de mois", validite: "72 heures" };
+  const offre = { fournisseur: "Négoce de test", prixUnitaireHt: 0.98, livraisonHt: 45, delai: "10 jours ouvrés", lieu: "Livraison sur chantier", paiement: "30 jours fin de mois", validite: "72 heures", annulation: null };
   verif((await api(adm, "PUT", `/v1/admin/ag/achats/${achatId}/offre`, offre)).status === 200, "offre incomplète");
   await a.goto(besoinA, { waitUntil: "networkidle" });
   await voir(a.getByText(/Offre reçue — vérification en cours/));

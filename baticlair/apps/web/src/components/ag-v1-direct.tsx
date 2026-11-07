@@ -208,7 +208,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
   const titre = etape === "produit" ? "Choisis précisément le produit" : etape === "quantite" ? "Combien, où et pour quand ?" : etape === "resultat" ? (compat?.compatible ? "Un achat groupé correspond" : "Aucun achat groupé compatible pour le moment") : etape === "raison" ? "Pourquoi cet achat groupé ne te convient pas ?" : etape === "verification" ? "Ton entreprise" : "Confirmer mon besoin";
 
   return (
-    <div className="flex flex-col gap-4 pb-28 lg:mx-auto lg:w-full lg:max-w-[40rem]">
+    <div className="flex flex-col gap-4 pb-44 lg:mx-auto lg:pb-0 lg:w-full lg:max-w-[40rem]">
       <PageTitle>{titre}</PageTitle>
       {etape !== "produit" && produit ? <p className="text-[16px] font-semibold break-words">{nomExact || produit.libelle}</p> : null}
 
@@ -371,7 +371,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
         </p>
       ) : null}
 
-      <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 flex flex-col gap-2 bg-gradient-to-t from-ground via-ground/95 to-transparent px-4 pt-6 pb-2 lg:static lg:bg-none lg:p-0">
+      <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 flex flex-col gap-2 border-t border-line bg-ground px-4 pt-3 pb-2 lg:static lg:border-t-0 lg:bg-transparent lg:p-0">
         {/* Greg, 7 novembre 2026 : la raison d'un bouton désactivé se lit tout de suite, juste au-dessus de lui. */}
         {bloque ? (
           <p role="status" className="text-center text-[14px] font-semibold text-ink">

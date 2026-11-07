@@ -169,7 +169,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
 
   if (etape === "selection")
     return (
-      <div className="flex flex-col gap-4 pb-28 lg:mx-auto lg:w-full lg:max-w-[44rem]">
+      <div className="flex flex-col gap-4 pb-44 lg:mx-auto lg:pb-0 lg:w-full lg:max-w-[44rem]">
         <p className="text-[15px] font-semibold text-muted">Depuis un quantitatif</p>
         <PageTitle>{data.nom}</PageTitle>
         <Button variant="secondary" className="self-start" disabled={!lignes.some((l) => l.mention === "recommande")} onClick={() => setCoches(new Set(lignes.filter((l) => l.mention === "recommande").map((l) => l.key)))}>
@@ -230,7 +230,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
             {erreur}
           </p>
         ) : null}
-        <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 bg-gradient-to-t from-ground via-ground/95 to-transparent px-4 pt-6 pb-2 lg:static lg:bg-none lg:p-0">
+        <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 border-t border-line bg-ground px-4 pt-3 pb-2 lg:static lg:border-t-0 lg:bg-transparent lg:p-0">
           {nb === 0 ? <p role="status" className="pb-2 text-center text-[14px] font-semibold text-ink">Coche au moins une ligne compatible pour continuer.</p> : null}
           <Button className="w-full" disabled={nb === 0} onClick={continuer}>
             {nb === 0 ? "Sélectionne des lignes" : `Continuer avec ${nb} ligne${nb > 1 ? "s" : ""}`}
@@ -241,7 +241,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
 
   const plusieurs = choisies.length > 1;
   return (
-    <div className="flex flex-col gap-4 pb-28 lg:mx-auto lg:w-full lg:max-w-[44rem]">
+    <div className="flex flex-col gap-4 pb-44 lg:mx-auto lg:pb-0 lg:w-full lg:max-w-[44rem]">
       <p className="text-[15px] font-semibold text-muted">Depuis un quantitatif</p>
       <PageTitle>{plusieurs ? `Confirmer mes ${choisies.length} besoins` : "Confirmer mon besoin"}</PageTitle>
       <div className={`${CARTE} flex flex-col gap-4 p-4`}>
@@ -324,7 +324,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           {erreur}
         </p>
       ) : null}
-      <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 flex flex-col gap-2 bg-gradient-to-t from-ground via-ground/95 to-transparent px-4 pt-6 pb-2 lg:static lg:bg-none lg:p-0">
+      <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 flex flex-col gap-2 border-t border-line bg-ground px-4 pt-3 pb-2 lg:static lg:border-t-0 lg:bg-transparent lg:p-0">
         {/* Greg, 7 novembre 2026 : la raison d'un bouton désactivé se lit tout de suite. */}
         {!pret || !etat.verification.complete || !coche ? (
           <p role="status" className="text-center text-[14px] font-semibold text-ink">
