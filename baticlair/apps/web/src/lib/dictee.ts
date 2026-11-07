@@ -32,6 +32,20 @@ export const PHRASES_DICTEE = {
   erreur: "La dictée s'est arrêtée. Réessaie, ou écris ta réponse.",
 };
 
+/**
+ * MICRO BLOQUÉ (Greg, 7 novembre 2026 : « un accès directement vers les réglages du téléphone ») : une page web ne peut
+ * pas ouvrir les Réglages du téléphone (seule une application installée le peut). On donne donc le chemin exact pour CE
+ * téléphone et CE navigateur, en étapes courtes, puis « Réessayer ».
+ */
+export type AideMicro = { titre: string; etapes: string[] };
+export function aideMicro(ua: string): AideMicro {
+  const ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && /Mobile/i.test(ua));
+  if (ios && /CriOS/i.test(ua)) return { titre: "Autoriser le micro (Chrome sur iPhone)", etapes: ["Ouvre l'app Réglages de ton iPhone.", "Descends jusqu'à « Chrome ».", "Active « Micro ».", "Reviens ici et touche « Réessayer »."] };
+  if (ios) return { titre: "Autoriser le micro (Safari sur iPhone)", etapes: ["Touche « aA » (ou l'icône à gauche de l'adresse test.mobiiz.fr).", "Touche « Réglages du site web ».", "Micro : choisis « Autoriser ».", "Touche « Réessayer » ci-dessous."] };
+  if (/Android/i.test(ua)) return { titre: "Autoriser le micro (Android)", etapes: ["Touche l'icône à gauche de l'adresse (cadenas ou réglages).", "Touche « Autorisations » puis « Micro ».", "Choisis « Autoriser ».", "Touche « Réessayer » ci-dessous."] };
+  return { titre: "Autoriser le micro", etapes: ["Clique sur le cadenas à gauche de l'adresse.", "Micro : choisis « Autoriser ».", "Clique sur « Réessayer » ci-dessous."] };
+}
+
 export function useDictee(surTexte: (texte: string, final: boolean) => void) {
   const [ecoute, setEcoute] = useState(false);
   const [probleme, setProbleme] = useState<string | null>(null);
@@ -68,6 +82,8 @@ export function useDictee(surTexte: (texte: string, final: boolean) => void) {
         rappel.current(texte, final);
       };
       r.onerror = (e) => {
+        // Refus, silence ou panne : la dictée est finie, « Je t'écoute » ne reste jamais affiché (capture iPhone de Greg).
+        setEcoute(false);
         setProbleme(e.error === "not-allowed" || e.error === "service-not-allowed" ? PHRASES_DICTEE.refuse : e.error === "no-speech" ? PHRASES_DICTEE.rien : e.error === "aborted" ? null : PHRASES_DICTEE.erreur);
       };
       r.onend = () => setEcoute(false);

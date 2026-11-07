@@ -263,7 +263,11 @@ test("La dictée : remplit la case sans envoyer ; navigateur sans dictée ou mic
   // Micro refusé : la phrase, le clavier reste.
   await page.evaluate(() => localStorage.setItem("fausse-dictee", "refus"));
   await assistant.getByRole("button", { name: "Dicter" }).click();
-  await expect(assistant.getByRole("alert")).toHaveText("Le micro est bloqué. Autorise-le dans les réglages du navigateur, ou écris ta réponse.");
+  // Greg (7 novembre 2026) : le chemin des réglages pour CE téléphone, puis « Réessayer » ; plus de « Je t'écoute » restant.
+  await expect(assistant.getByRole("alert")).toContainText("Le micro est bloqué.");
+  await expect(assistant.getByRole("alert").getByRole("listitem").first()).toBeVisible();
+  await expect(assistant.getByRole("alert").getByRole("button", { name: "Réessayer" })).toBeVisible();
+  await expect(assistant.getByRole("button", { name: "Dicter" })).toBeVisible();
   await expect(assistant.getByLabel("Ton message")).toBeEditable();
 });
 

@@ -3,6 +3,7 @@
 import { ArrowLeft, ArrowUp, Eye, Mic, Plus, Sparkles, Square, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Logo } from "./logo";
+import { aideMicro, PHRASES_DICTEE } from "@/lib/dictee";
 
 /**
  * LA CONVERSATION MOBIIZ (Greg, 31 octobre 2026, capture « Assistant Mobiiz » : « une véritable interface de discussion,
@@ -129,7 +130,7 @@ const LIGNES_MAX = 5;
 /**
  * LA BARRE DE SAISIE (façon ChatGPT) : fixe en bas, un champ « Réponds ici… » qui commence sur une ligne et grandit
  * jusqu'à cinq ; le micro DANS la barre (bien visible quand le champ est vide) ; l'envoi rond jaune, actif dès qu'il y a
- * du texte. Pendant la dictée : « Je t'écoute… », Arrêter ou Annuler ; le texte dicté reste dans le champ, à corriger avant
+ * du texte. Pendant la dictée : « Je t'écoute… » dans le champ, le carré rouge arrête ; le texte dicté reste dans le champ, à corriger avant
  * l'envoi, jamais envoyé seul.
  */
 export function BarreSaisie({
@@ -141,7 +142,6 @@ export function BarreSaisie({
   probleme,
   onDicter,
   onArreter,
-  onAnnulerDictee,
   avant,
   onPlus,
   invite,
@@ -154,7 +154,8 @@ export function BarreSaisie({
   probleme: string | null;
   onDicter: () => void;
   onArreter: () => void;
-  onAnnulerDictee: () => void;
+  /** Gardé pour les appelants : il n'y a plus de bouton « Annuler » pendant la dictée (le carré rouge arrête). */
+  onAnnulerDictee?: () => void;
   /** Ce qui se pose juste au-dessus de la barre (« Annuler la dernière modification »). */
   avant?: React.ReactNode;
   /** Le « + » jaune à gauche (photos, document, catalogue ; Greg, 7 novembre 2026). */
@@ -177,19 +178,18 @@ export function BarreSaisie({
   return (
     <div className="shrink-0 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),10px)] lg:px-6" style={{ backgroundColor: COULEURS_CHAT.fond }}>
       {avant}
-      {probleme ? (
+      {probleme === PHRASES_DICTEE.refuse ? (
+        <AideMicroBloque onReessayer={onDicter} />
+      ) : probleme ? (
         <p role="alert" className="px-2 pb-2 text-[14px] font-semibold text-[#FF8A6B]">
           {probleme}
         </p>
       ) : null}
+      {/* Pendant la dictée (Greg, 7 novembre 2026) : pas de ligne « Annuler » au-dessus, le carré rouge arrête. */}
       {ecoute ? (
-        <div role="status" className="flex items-center gap-2 px-2 pb-2 text-[14px] text-[#FBF8F3]">
-          <span className="size-2.5 animate-pulse rounded-full bg-[#FF5A3C]" aria-hidden="true" />
-          <span className="flex-1 font-semibold">Je t&apos;écoute… tu pourras corriger avant d&apos;envoyer.</span>
-          <button type="button" onClick={onAnnulerDictee} className="min-h-9 rounded-full px-3 font-semibold text-[#FBF8F3]/75">
-            Annuler
-          </button>
-        </div>
+        <p role="status" className="sr-only">
+          Je t&apos;écoute… tu pourras corriger avant d&apos;envoyer.
+        </p>
       ) : null}
       <form
         className="flex items-end gap-2 rounded-[28px] p-1.5"
@@ -277,4 +277,25 @@ export function useChampDicte() {
   }, [saisie]);
   const rendre = useCallback(() => setSaisieBrute(base.current), []);
   return { saisie, setSaisie, surVoix, avantDictee, rendre };
+}
+
+/** Le micro refusé : le chemin exact pour ce téléphone, puis « Réessayer » (une page web n'ouvre pas les Réglages). */
+function AideMicroBloque({ onReessayer }: { onReessayer: () => void }) {
+  const [aide] = useState(() => aideMicro(typeof navigator === "undefined" ? "" : navigator.userAgent));
+  return (
+    <div role="alert" className="mx-1 mb-2 flex flex-col gap-2 rounded-2xl p-3 text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.ivoire }}>
+      <p className="text-[15px] font-bold">Le micro est bloqué. {aide.titre} :</p>
+      <ol className="flex list-decimal flex-col gap-1 pl-5 text-[15px]">
+        {aide.etapes.map((e) => (
+          <li key={e}>{e}</li>
+        ))}
+      </ol>
+      <div className="flex items-center gap-3">
+        <button type="button" onClick={onReessayer} className="pressable min-h-11 rounded-full px-5 text-[15px] font-bold" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+          Réessayer
+        </button>
+        <span className="text-[14px] text-[#111111]/70">Ou écris ta réponse.</span>
+      </div>
+    </div>
+  );
 }
