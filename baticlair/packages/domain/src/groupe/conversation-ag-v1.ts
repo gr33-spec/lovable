@@ -222,12 +222,12 @@ export const uniteDeLaQuestion = (p: ProduitConv | null | undefined) => (p ? (p.
 
 /** L'adresse du parcours habituel, préremplie avec le besoin. */
 export function lienDuBesoin(b: BesoinConv): string {
-  const q = new URLSearchParams();
-  if (b.type) q.set("type", b.type);
-  for (const [k, v] of Object.entries(b.attributs)) q.set(k, v);
-  if (b.quantite !== null) q.set("quantite", String(b.quantite));
-  if (b.unite) q.set("unite", b.unite);
-  if (b.reception) q.set("reception", b.reception);
-  if (b.dateBesoin) q.set("date", b.dateBesoin);
-  return `/achats-groupes/nouveau?${q.toString()}`;
+  const q: [string, string][] = [];
+  if (b.type) q.push(["type", b.type]);
+  for (const [k, v] of Object.entries(b.attributs)) q.push([k, v]);
+  if (b.quantite !== null) q.push(["quantite", String(b.quantite)]);
+  if (b.unite) q.push(["unite", b.unite]);
+  if (b.reception) q.push(["reception", b.reception]);
+  if (b.dateBesoin) q.push(["date", b.dateBesoin]);
+  return `/achats-groupes/nouveau?${q.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&")}`;
 }
