@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Inject, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { z } from "zod";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -8,6 +8,8 @@ import { ZodPipe } from "../../../platform/http/zod.js";
 import { CONFIG } from "../../../platform/tokens.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { CatalogueService } from "../application/catalogue.service.js";
+
+const comprendreBody = z.object({ lignes: z.array(z.object({ libelle: z.string().trim().min(1).max(200), unite: z.string().trim().max(40).nullable().optional() })).min(1).max(20) });
 
 /** Le catalogue de l'artisan : « Métier : Couverture ▾ », les listes (un toucher par niveau), la recherche. */
 @Controller("v1/catalogue")
@@ -19,7 +21,15 @@ export class CatalogueController {
   lire(@Tenant() tenant: TenantContext, @Query("metier") metier?: string, @Query("q") q?: string) {
     return this.catalogue.lire(tenant, metier, (q ?? "").slice(0, 120));
   }
+
+  /** « 36 mètres de Lito » : l'article du catalogue le plus probable, ses variantes et ce qu'il reste à demander. */
+  @Post("comprendre")
+  @HttpCode(200)
+  comprendre(@Body(new ZodPipe(comprendreBody)) body: z.infer<typeof comprendreBody>) {
+    return this.catalogue.comprendre(body.lignes.map((l) => ({ libelle: l.libelle, unite: l.unite ?? null })));
+  }
 }
+
 
 const texte = (max: number) => z.string().trim().min(1).max(max);
 const ajoutBody = z.object({ metier: texte(40), famille: texte(80), produit: texte(120), variante: z.string().trim().max(120).nullable(), designation: z.string().trim().max(200).nullable(), unite: texte(40), synonymes: z.array(texte(60)).max(30).default([]) });

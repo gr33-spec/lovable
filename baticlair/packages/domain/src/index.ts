@@ -18,6 +18,8 @@ export * from "./documents/modele-pdf.js";
 export * from "./documents/nature.js";
 export * from "./accueil/accueil.js";
 export * from "./assistant/assistant.js";
+export * from "./assistant/article-compris.js";
+export * from "./assistant/comprehension.js";
 export * from "./assistant/reponses-libres-numerotees.js";
 export * from "./groupe/rapprochement.js";
 export * from "./groupe/opportunites.js";

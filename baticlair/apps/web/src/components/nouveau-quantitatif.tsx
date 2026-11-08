@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { lireDescription, type LigneDecrite } from "../../../../packages/domain/src/assistant/assistant";
+import { choisirProduit, choisirValeur, confirmer, designationFinale, etapeSuivante, refuser, type ArticleCompris } from "../../../../packages/domain/src/assistant/article-compris";
 import { precisionsLisibles } from "../../../../packages/domain/src/groupe/precisions-lisibles";
 import { natureDuDocument } from "../../../../packages/domain/src/documents/nature";
 import { texteDuPdf } from "@/components/pdf-pages";
@@ -25,7 +26,7 @@ import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, TexteMobiiz, useChampDic
  * photos (plusieurs d'un coup), devis ou PDF, catalogue. Un document est lu par l'IA, son coût dit avant, comme avant ;
  * jamais une quantité ni une caractéristique inventée : ce qui manque reste à préciser sur la ligne.
  */
-type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean } | { de: "moi"; texte: string } | { de: "compris"; texte: string; lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige" };
+type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean } | { de: "moi"; texte: string } | { de: "compris"; texte: string; lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige"; comprises?: (ArticleCompris | null)[] };
 type Element = SansId & { id: number };
 
 const EXEMPLE = "Ex. : 1 000 ardoises 32×22 Espagne 1er choix et 950 crochets inox 100 mm";
@@ -70,7 +71,13 @@ export function NouveauQuantitatif() {
     }
     return () => inertes.forEach((e) => (e.inert = false));
   });
-  const ajouterElement = (e: SansId) => setElements((xs) => [...xs, { ...e, id: ++compteur.current }]);
+  // L'identifiant est pris tout de suite (jamais dans la mise à jour, qui s'exécute plus tard) : une réponse du serveur
+  // retrouve ainsi sa carte.
+  const ajouterElement = (e: SansId) => {
+    const id = ++compteur.current;
+    setElements((xs) => [...xs, { ...e, id }]);
+    return id;
+  };
   const dire = (texte: string) => ajouterElement({ de: "mobiiz", texte });
   const pathname = usePathname();
 
@@ -83,7 +90,16 @@ export function NouveauQuantitatif() {
     const r = lireDescription(texte);
     const lignes = [...r.lignes, ...r.aConfirmer].map(avecUnite);
     if (lignes.length === 0) return dire("Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo, un document ou le catalogue.");
-    ajouterElement({ de: "compris", texte, lignes, etat: "ouvert" });
+    const id = ajouterElement({ de: "compris", texte, lignes, etat: "ouvert" });
+    // Greg, 8 novembre 2026 (« 36 mètres de Lito ») : chaque article est rapproché du catalogue métier, sans appel IA ; une
+    // interprétation à confirmer et les questions utiles s'affichent dans la carte. Sans réponse du serveur : rien ne change.
+    void api<{ articles: (ArticleCompris | null)[] }>("/v1/catalogue/comprendre", { method: "POST", body: { lignes: lignes.map((l) => ({ libelle: l.libelle, unite: l.unite })) } })
+      .then((r) => setElements((xs) => xs.map((x) => (x.id === id && x.de === "compris" ? { ...x, comprises: r.articles } : x))))
+      .catch(() => undefined);
+  }
+
+  function changerCompris(id: number, i: number, c: ArticleCompris | null) {
+    setElements((xs) => xs.map((x) => (x.id === id && x.de === "compris" ? { ...x, comprises: (x.comprises ?? x.lignes.map(() => null)).map((y, j) => (j === i ? c : y)) } : x)));
   }
 
   /** « Ajouter à ma liste » : la liste naît avec ces lignes, ou les reçoit. */
@@ -206,9 +222,11 @@ export function NouveauQuantitatif() {
               <CarteCompris
                 key={e.id}
                 lignes={e.lignes}
+                comprises={e.comprises}
+                onCompris={(i, c) => changerCompris(e.id, i, c)}
                 etat={e.etat}
                 occupe={occupe}
-                onAjouter={() => void ajouter(e.id, e.lignes)}
+                onAjouter={() => void ajouter(e.id, lignesRetenues(e.lignes, e.comprises))}
                 onCorriger={() => corriger(e.id, e.texte)}
                 onMoiMeme={liste ? undefined : () => setCatalogue(true)}
               />
@@ -261,14 +279,22 @@ export function NouveauQuantitatif() {
   );
 }
 
+/** La désignation retenue : celle du catalogue une fois l'interprétation confirmée, sinon les mots de l'artisan. */
+const designationRetenue = (l: LigneDecrite, c: ArticleCompris | null | undefined) => (c && c.confirme && c.choixProduit !== null ? designationFinale(c) : l.libelle);
+const lignesRetenues = (lignes: LigneDecrite[], comprises?: (ArticleCompris | null)[]) => lignes.map((l, i) => ({ ...l, libelle: designationRetenue(l, comprises?.[i]) }));
+
 /** « J'ai compris » : chaque article lu, ses caractéristiques reconnues, sa quantité ; rien d'ajouté sans le bouton. */
-function CarteCompris({ lignes, etat, occupe, onAjouter, onCorriger, onMoiMeme }: { lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige"; occupe: boolean; onAjouter: () => void; onCorriger: () => void; onMoiMeme?: (() => void) | undefined }) {
+function CarteCompris({ lignes, comprises, onCompris, etat, occupe, onAjouter, onCorriger, onMoiMeme }: { lignes: LigneDecrite[]; comprises?: (ArticleCompris | null)[] | undefined; onCompris: (i: number, c: ArticleCompris | null) => void; etat: "ouvert" | "ajoute" | "corrige"; occupe: boolean; onAjouter: () => void; onCorriger: () => void; onMoiMeme?: (() => void) | undefined }) {
+  // Une question à la fois (Greg, 8 novembre 2026) : celle du premier article qui en a encore une.
+  const enCours = etat === "ouvert" ? lignes.findIndex((l, i) => { const c = comprises?.[i]; return !!c && etapeSuivante(c, l.quantite, l.unite) !== null; }) : -1;
   return (
     <div className="flex flex-col gap-2">
       <section aria-label="J'ai compris" className="ml-10 flex flex-col gap-3 rounded-[22px] bg-[#FBF8F3] p-4 text-[#111111]">
         <p className="text-[18px] font-extrabold">J&apos;ai compris{lignes.length > 1 ? ` ${lignes.length} articles` : ""}</p>
         <ul className="flex flex-col gap-3">
-          {lignes.map((l, i) => {
+          {lignes.map((l0, i) => {
+            const c = comprises?.[i];
+            const l = { ...l0, libelle: designationRetenue(l0, c) };
             const precisions = precisionsLisibles(l.libelle);
             return (
               <li key={i} className="flex flex-col gap-1 border-b border-[#111111]/10 pb-2 last:border-b-0 last:pb-0">
@@ -285,6 +311,7 @@ function CarteCompris({ lignes, etat, occupe, onAjouter, onCorriger, onMoiMeme }
                   <Package size={16} aria-hidden="true" className="shrink-0" />
                   {l.quantite ? `${nombreFr(l.quantite)}${l.unite ? ` ${l.unite}` : ""}` : <span className="text-[#B5560F]">Quantité à préciser</span>}
                 </span>
+                {i === enCours && c ? <QuestionArticle key={`${c.choixProduit}|${c.confirme}|${c.valeurs.join("|")}|${c.produits.length}`} c={c} ligne={l0} onCompris={(x) => onCompris(i, x)} /> : null}
               </li>
             );
           })}
@@ -307,6 +334,84 @@ function CarteCompris({ lignes, etat, occupe, onAjouter, onCorriger, onMoiMeme }
           <PencilLine size={18} aria-hidden="true" /> Ce n&apos;est pas ça : je l&apos;écris moi-même
         </button>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * LA QUESTION DE L'ARTICLE (Greg, 8 novembre 2026) : « Tu veux dire 36 mètres linéaires de liteaux ? » (Oui / Non), puis
+ * l'article exact s'il y en a plusieurs, puis chaque caractéristique utile (« Quelle section ? ») avec les valeurs du
+ * catalogue, « Autre » (ses mots) et « Passer ». Rien n'est inventé ; « Ajouter à ma liste » reste la validation finale.
+ */
+function QuestionArticle({ c, ligne, onCompris }: { c: ArticleCompris; ligne: LigneDecrite; onCompris: (c: ArticleCompris | null) => void }) {
+  const [autre, setAutre] = useState<string | null>(null);
+  const etape = etapeSuivante(c, ligne.quantite, ligne.unite);
+  if (!etape) return null;
+  const puce = "pressable min-h-11 rounded-full border border-[#111111]/25 bg-white px-4 text-[15px] font-semibold";
+  const lien = "min-h-11 px-2 text-[15px] font-semibold underline underline-offset-4";
+  return (
+    <div role="group" aria-label="Question de Mobiiz" className="mt-1 flex flex-col gap-2 rounded-2xl bg-[#111111]/5 p-3">
+      {etape.type === "confirmer" ? (
+        <>
+          <p className="text-[16px] font-bold">{etape.phrase}</p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className={`${puce} border-[#111111] bg-[#FED206]`} onClick={() => onCompris(confirmer(c))}>
+              Oui
+            </button>
+            <button type="button" className={puce} onClick={() => onCompris(refuser(c))}>
+              Non
+            </button>
+          </div>
+        </>
+      ) : etape.type === "produit" ? (
+        <>
+          <p className="text-[16px] font-bold">{etape.question}</p>
+          <div className="flex flex-wrap gap-2">
+            {etape.choix.map((x, j) => (
+              <button key={x} type="button" className={puce} onClick={() => onCompris(choisirProduit(c, j))}>
+                {x}
+              </button>
+            ))}
+          </div>
+          <button type="button" className={`${lien} self-start`} onClick={() => onCompris(null)}>
+            Aucun : garder « {c.dit} »
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="text-[16px] font-bold">{etape.question}</p>
+          <div className="flex flex-wrap gap-2">
+            {etape.choix.map((x) => (
+              <button key={x} type="button" className={puce} onClick={() => onCompris(choisirValeur(c, etape.index, x))}>
+                {x}
+              </button>
+            ))}
+            <button type="button" className={puce} onClick={() => setAutre("")}>
+              Autre
+            </button>
+          </div>
+          {autre !== null ? (
+            <form
+              className="flex gap-2"
+              onSubmit={(ev) => {
+                ev.preventDefault();
+                if (autre.trim()) {
+                  onCompris(choisirValeur(c, etape.index, autre));
+                  setAutre(null);
+                }
+              }}
+            >
+              <input aria-label={etape.question} autoFocus value={autre} onChange={(ev) => setAutre(ev.target.value)} maxLength={80} className="min-h-11 min-w-0 flex-1 rounded-xl border border-[#111111]/25 bg-white px-3 text-[16px]" />
+              <button type="submit" className={`${puce} border-[#111111]`}>
+                OK
+              </button>
+            </form>
+          ) : null}
+          <button type="button" className={`${lien} self-start`} onClick={() => onCompris(choisirValeur(c, etape.index, ""))}>
+            Passer : le négoce précisera
+          </button>
+        </>
+      )}
     </div>
   );
 }

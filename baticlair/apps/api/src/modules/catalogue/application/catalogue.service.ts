@@ -20,6 +20,9 @@ import {
   regionDuDepartement,
   referenceStricte,
   TOUT_LE_CATALOGUE,
+  comprendreArticle,
+  type ArticleCatalogue,
+  type ArticleCompris,
   type MetierCatalogue,
 } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -119,6 +122,19 @@ export class CatalogueService {
     const miens = metiersCatalogueDuCompte(trades);
     const ordre = [...miens, ...METIERS_CATALOGUE.filter((m) => !miens.includes(m))];
     return ordre.map((m) => ({ code: m, libelle: LIBELLES_METIERS_CATALOGUE[m], mien: miens.includes(m), familleAchat: FAMILLE_DU_METIER_CATALOGUE[m] }));
+  }
+
+  /**
+   * L'ASSISTANT COMPREND LES MOTS DE L'ARTISAN (Greg, 8 novembre 2026 : « 36 mètres de Lito ») : chaque désignation dite
+   * est rapprochée du catalogue (celui de la base, modifications de l'admin comprises), sans appel IA. `null` : rien ne
+   * correspond, la ligne reste telle qu'écrite.
+   */
+  async comprendre(lignes: readonly { libelle: string; unite: string | null }[]): Promise<{ articles: (ArticleCompris | null)[] }> {
+    const tous: ArticleCatalogue[] = (await this.articles(null)).map((a) => {
+      const f = FICHES.get(a.cle);
+      return { cle: a.cle, metier: a.metier as MetierCatalogue, famille: a.famille, produit: a.produit, variante: a.variante, designation: a.designation, unite: a.unite, synonymes: a.synonymes, ...(f?.marque ? { marque: f.marque } : {}), ...(f?.statut ? { statut: f.statut } : {}) };
+    });
+    return { articles: lignes.map((l) => comprendreArticle(l.libelle, tous, l.unite)) };
   }
 
   /** L'écran : le métier choisi (sinon le premier du profil), son arbre, ou les résultats d'une recherche (tous métiers). */

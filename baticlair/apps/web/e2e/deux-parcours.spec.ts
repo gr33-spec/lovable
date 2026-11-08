@@ -83,3 +83,31 @@ test("une phrase, deux articles : « J'ai compris », ajouter, voir ma liste, pu
     }, { timeout: 15_000 })
     .toBe(1);
 });
+
+test("le langage des artisans (Greg, 8 novembre 2026) : « 36 mètres de Lito » → « Tu veux dire 36 mètres linéaires de liteaux ? », la section, puis la validation finale", async ({ page }) => {
+  await inscrire(page);
+  await page.goto("/chantiers/nouveau");
+  const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  await chat.getByRole("textbox", { name: "Ton message" }).fill("36 mètres de Lito");
+  await chat.getByRole("button", { name: "Envoyer le message" }).click();
+  const compris = chat.getByRole("region", { name: "J'ai compris" });
+  const question = compris.getByRole("group", { name: "Question de Mobiiz" });
+  await expect(question).toContainText("Tu veux dire 36 mètres linéaires de liteaux ?");
+  // Tant que l'artisan n'a pas dit « Oui », la ligne garde SES mots.
+  await expect(compris).toContainText("Lito");
+  await question.getByRole("button", { name: "Oui" }).click();
+  await expect(question).toContainText("Quelle section ?");
+  for (const s of ["18×40", "27×40", "Autre"]) await expect(question.getByRole("button", { name: s, exact: true })).toBeVisible();
+  await question.getByRole("button", { name: "27×40", exact: true }).click();
+  await expect(question).toContainText("Quel traitement ?");
+  await question.getByRole("button", { name: "Passer : le négoce précisera" }).click();
+  await expect(compris.getByRole("group", { name: "Question de Mobiiz" })).toHaveCount(0);
+  await expect(compris).toContainText("Liteau 27×40");
+  await expect(compris).toContainText("36 m");
+  // La validation finale reste à l'artisan.
+  await compris.getByRole("button", { name: "Ajouter à ma liste" }).click();
+  await expect(chat.getByRole("button", { name: "Ma liste · 1" })).toBeVisible();
+  await chat.getByRole("button", { name: "Voir ma liste (1)" }).click();
+  await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
+  await expect(page.getByText("Liteau 27×40").first()).toBeVisible({ timeout: 20_000 });
+});
