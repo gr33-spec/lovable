@@ -93,21 +93,29 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(page.getByRole("heading", { name: "Achats groupés" })).toBeVisible();
   await expect(page.getByText("Regroupe tes besoins avec d'autres entreprises")).toBeVisible();
   await expect(page.getByText(zone().nom)).toBeVisible();
-  for (const f of ["Couverture", "Zinguerie", "Isolation", "Bois", "Électricité"]) await expect(page.getByRole("button", { name: f, exact: true })).toBeVisible();
+  // Greg, 8 novembre 2026 : un seul filtre (« Métier »), aucune rangée de boutons.
+  await expect(page.getByRole("combobox", { name: "Filtrer par métier" })).toBeVisible();
+  for (const f of ["Couverture", "Zinguerie", "Isolation", "Bois", "Électricité"]) await expect(page.getByRole("button", { name: f, exact: true })).toHaveCount(0);
   await expect(page.getByText("Mobiiz. Plus on est, moins on paie.")).toBeVisible();
-  // Greg, 7 novembre 2026 : les deux entrées se voient tout de suite, écrites en toutes lettres ; aucun « + » seul.
-  await expect(page.getByRole("link", { name: /^Ajouter un matériau/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /^Depuis un quantitatif/ })).toBeVisible();
+  // Greg, 8 novembre 2026 : un bouton flottant « Ajouter un matériau » ouvre les trois façons, écrites en toutes lettres.
+  await page.getByRole("button", { name: "Ajouter un matériau" }).click();
+  const ajout = page.getByRole("dialog", { name: "Ajouter un matériau" });
+  for (const nom of [/^Parler à Mobiiz/, /^Choisir dans le catalogue/, /^Depuis un quantitatif/]) await expect(ajout.getByRole("link", { name: nom })).toBeVisible();
+  await capture(page, "01b-ajouter-un-materiau");
+  await ajout.getByRole("button", { name: "Fermer" }).click();
   const menu = page.getByRole("navigation", { name: "Navigation principale" });
   await expect(menu.getByRole("link", { name: "Achats groupés" })).toBeVisible();
   await expect(menu.getByRole("link", { name: "Créer un quantitatif" })).toBeVisible();
   for (const lien of await page.getByRole("link").all()) expect((await lien.innerText()).trim()).not.toBe("+");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await capture(page, "01-accueil");
-  // 1. Choisir précisément le produit.
-  await page.getByLabel("Ou cherche directement un matériau").fill("ardoise");
-  await page.getByRole("link", { name: "Ardoise naturelle" }).click();
+  // 1. Choisir précisément le produit : le catalogue, métier puis matériau.
+  await page.getByRole("button", { name: "Ajouter un matériau" }).click();
+  await page.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Choisir dans le catalogue/ }).click();
   await expect(page.getByRole("heading", { name: "Choisis précisément le produit" })).toBeVisible();
+  await expect(page.getByLabel("Matériau")).toBeDisabled();
+  await page.getByLabel("Métier").selectOption("couverture");
+  await page.getByLabel("Matériau").selectOption("ardoise");
   await page.getByLabel("Format").selectOption("32x22");
   await page.getByLabel("Origine").selectOption("espagne");
   await page.getByLabel("Choix").selectOption("1");
@@ -239,7 +247,8 @@ test("« Ajouter un matériau » avec Mobiiz (Greg, 8 novembre) : une phrase de 
   test.setTimeout(120_000);
   await inscrire(page);
   await page.goto("/achats-groupes");
-  await page.getByRole("link", { name: /^Ajouter un matériau/ }).click();
+  await page.getByRole("button", { name: "Ajouter un matériau" }).click();
+  await page.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Parler à Mobiiz/ }).click();
   const chat = page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" });
   await expect(chat.getByText(/Quel matériau veux-tu acheter en groupe \?/).first()).toBeVisible();
   // Une réponse rapide, puis une phrase : Mobiiz garde ce qui est dit et demande ce qui manque, une chose à la fois.
@@ -302,7 +311,8 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   }
   expect((await apiJson(page, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status).toBe(200);
   await page.goto("/achats-groupes");
-  await page.getByRole("link", { name: "Depuis un quantitatif" }).click();
+  await page.getByRole("button", { name: "Ajouter un matériau" }).click();
+  await page.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Depuis un quantitatif/ }).click();
   await expect(page.getByRole("heading", { name: "Depuis un quantitatif" })).toBeVisible();
   await page.goto(`/achats-groupes/quantitatif/${q.body.projetId}`);
   for (const lot of ["Couverture", "Zinguerie", "Électricité", "Maçonnerie"]) await expect(page.getByRole("heading", { name: lot, exact: true })).toBeVisible();

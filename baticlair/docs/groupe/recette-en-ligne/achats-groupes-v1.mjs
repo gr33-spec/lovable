@@ -184,16 +184,18 @@ await etape("Accueil : achat individuel à part, quatre actions écrites, aucun 
   await sansDebordement(a, "accueil");
 });
 
-await etape("Achats groupés : les deux entrées visibles tout de suite", a, async () => {
+await etape("Achats groupés : un seul filtre, le bouton flottant et ses trois choix", a, async () => {
   await a.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés" }).click();
   await voir(a.getByRole("heading", { name: "Achats groupés" }));
-  await voir(a.getByRole("link", { name: /^Ajouter un matériau/ }));
-  await voir(a.getByRole("link", { name: /^Depuis un quantitatif/ }));
+  await voir(a.getByRole("combobox", { name: "Filtrer par métier" }));
+  await a.getByRole("button", { name: "Ajouter un matériau" }).click();
+  const ajout = a.getByRole("dialog", { name: "Ajouter un matériau" });
+  for (const nom of [/^Parler à Mobiiz/, /^Choisir dans le catalogue/, /^Depuis un quantitatif/]) await voir(ajout.getByRole("link", { name: nom }));
   await sansDebordement(a, "accueil des achats groupés");
 });
 
 await etape("« Ajouter un matériau » avec Mobiiz : une phrase de comptoir, question suivante, besoin prérempli", a, async () => {
-  await a.getByRole("link", { name: /^Ajouter un matériau/ }).click();
+  await a.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Parler à Mobiiz/ }).click();
   const chat = a.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" });
   await voir(chat.getByText(/Quel matériau veux-tu acheter en groupe/));
   await chat.getByRole("group", { name: "Réponses rapides" }).getByRole("button", { name: "Ardoise naturelle" }).click();
@@ -351,7 +353,8 @@ await etape("« Depuis un quantitatif » : liteaux à préciser, famille non ouv
   verif((await api(a, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status === 200, "validation");
   projetQ = q.body.projetId;
   await a.goto(`${BASE}/achats-groupes`, { waitUntil: "networkidle" });
-  await a.getByRole("link", { name: /^Depuis un quantitatif/ }).click();
+  await a.getByRole("button", { name: "Ajouter un matériau" }).click();
+  await a.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Depuis un quantitatif/ }).click();
   await voir(a.getByRole("heading", { name: "Depuis un quantitatif" }));
   await a.goto(`${BASE}/achats-groupes/quantitatif/${projetQ}`, { waitUntil: "networkidle" });
   const liteaux = a.getByRole("listitem").filter({ has: a.getByText("Liteaux", { exact: true }) });

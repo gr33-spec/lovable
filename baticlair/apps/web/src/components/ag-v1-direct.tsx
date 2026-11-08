@@ -7,7 +7,7 @@ import { useState } from "react";
 import { CARTE, LigneZone, Note, VerificationEntreprise, Volumes } from "@/components/ag-v1-commun";
 import { Button, INPUT, PageTitle } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
-import { CASE_UNE_LIGNE, dateCourte, dateLongue, jourDans, libelleLot, PHRASE_ADRESSE_PRIVEE, zoneLisible, type BesoinV1, type CompatibiliteV1, type EtatV1, type ProduitV1 } from "@/lib/ag-v1";
+import { CASE_UNE_LIGNE, LOTS_V1, dateCourte, dateLongue, jourDans, libelleLot, PHRASE_ADRESSE_PRIVEE, zoneLisible, type BesoinV1, type CompatibiliteV1, type EtatV1, type ProduitV1 } from "@/lib/ag-v1";
 
 type Etape = "produit" | "quantite" | "resultat" | "raison" | "verification" | "confirmer";
 
@@ -108,6 +108,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
     return p ? Object.fromEntries(p.caracteristiques.map((c) => [c.attribut, params.get(c.attribut) ?? ""]).filter(([, v]) => v)) : {};
   });
   const [etape, setEtape] = useState<Etape>("produit");
+  const [metier, setMetier] = useState("");
   // Le besoin dit dans la conversation Mobiiz arrive prérempli (quantité, unité, réception, date) ; tout reste modifiable.
   const uniteDite = params.get("unite");
   const [unite, setUnite] = useState<string>(() => (uniteDite && produit && [produit.unite.code, ...produit.conditionnements.map((c) => c.unite.code)].includes(uniteDite) ? uniteDite : (produit?.conditionnements[0]?.unite.code ?? produit?.unite.code ?? "")));
@@ -217,16 +218,47 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
       {etape === "produit" ? (
         <>
           {!produit ? (
-            <ul aria-label="Produits ouverts aux achats groupés" className={`${CARTE} flex flex-col`}>
-              {etat.produits.map((p) => (
-                <li key={p.type} className="border-b border-line last:border-b-0">
-                  <button type="button" onClick={() => choisirProduit(p)} className="flex min-h-13 w-full items-center justify-between gap-3 px-4 py-2 text-left text-[16px] font-semibold">
-                    <span>{p.libelle}</span>
-                    <span className="text-[14px] font-normal text-muted">{libelleLot(p.lot)}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            // Greg, 8 novembre 2026 : le catalogue en listes déroulantes, le métier d'abord, puis le matériau, puis ses
+            // caractéristiques (marque comprise quand elle fait le produit) ; seuls les métiers ouverts sont proposés.
+            <div className={`${CARTE} flex flex-col`}>
+              <div className="flex flex-col gap-1 border-b border-line px-4 py-3">
+                <label htmlFor="ag-metier" className="text-[14px] font-semibold text-muted">
+                  Métier
+                </label>
+                <select id="ag-metier" value={metier} onChange={(e) => setMetier(e.target.value)} className={INPUT}>
+                  <option value="">Choisis ton métier</option>
+                  {LOTS_V1.filter((l) => etat.produits.some((p) => p.lot === l.id)).map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.libelle}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1 px-4 py-3">
+                <label htmlFor="ag-materiau" className="text-[14px] font-semibold text-muted">
+                  Matériau
+                </label>
+                <select
+                  id="ag-materiau"
+                  value=""
+                  disabled={!metier}
+                  onChange={(e) => {
+                    const p = etat.produits.find((x) => x.type === e.target.value);
+                    if (p) choisirProduit(p);
+                  }}
+                  className={`${INPUT} disabled:opacity-50`}
+                >
+                  <option value="">{metier ? "Choisis le matériau" : "Choisis d'abord ton métier"}</option>
+                  {etat.produits
+                    .filter((p) => p.lot === metier)
+                    .map((p) => (
+                      <option key={p.type} value={p.type}>
+                        {p.libelle}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
           ) : (
             <>
               <p className="text-[15px] text-muted">
