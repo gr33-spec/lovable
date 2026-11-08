@@ -198,8 +198,8 @@ await etape("« Ajouter un matériau » avec Mobiiz : une phrase de comptoir, qu
   await voir(chat.getByText(/Quel matériau veux-tu acheter en groupe/));
   await chat.getByRole("group", { name: "Réponses rapides" }).getByRole("button", { name: "Ardoise naturelle" }).click();
   await voir(chat.getByText("Ardoise naturelle : c'est noté. Format ?"));
-  const [, m, j] = jourDans(45).split("-");
-  await chat.getByRole("textbox", { name: "Ton message" }).fill(`32 22 Espagne 1er choix 5 mm, 10 palettes livrées sur chantier pour le ${j}/${m}`);
+  const [an, m, j] = jourDans(45).split("-");
+  await chat.getByRole("textbox", { name: "Ton message" }).fill(`32 22 Espagne 1er choix 5 mm, 10 palettes livrées sur chantier pour le ${j}/${m}/${an}`);
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
   await voir(chat.getByText(/^C'est complet : Ardoise naturelle · 32 × 22 · Espagne · 1er choix · 5 mm, 10 palettes, livraison sur chantier/));
   await sansDebordement(a, "conversation");
