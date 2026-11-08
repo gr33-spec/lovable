@@ -231,3 +231,49 @@ export function lienDuBesoin(b: BesoinConv): string {
   if (b.dateBesoin) q.push(["date", b.dateBesoin]);
   return `/achats-groupes/nouveau?${q.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&")}`;
 }
+
+/**
+ * L'AUTOCOMPLÉTION (Greg, 8 novembre 2026 : « je commence à écrire ardoise 3… ça me sort une liste qui se peaufine petit à
+ * petit ; et si pas d'article, je continue manuellement ») : à chaque caractère, les produits ouverts qui correspondent,
+ * complétés de la caractéristique suivante dont le libellé commence par ce qui est en train d'être tapé (« ardoise 3 » →
+ * « Ardoise naturelle · 32 × 22 », « · 35 × 25 », « · 30 × 20 »). Rien ne correspond : aucune suggestion, l'artisan continue
+ * d'écrire et la conversation lit sa phrase. `besoin` donne le produit déjà dit quand la saisie ne le redit pas.
+ */
+export interface SuggestionConv {
+  libelle: string;
+  type: string;
+  attributs: Record<string, string>;
+}
+export function suggestionsSaisie(produits: readonly ProduitConv[], texte: string, besoin: BesoinConv = BESOIN_VIDE, max = 6): SuggestionConv[] {
+  const brut = texte.replace(/\s+$/, "");
+  if (!brut.trim()) return [];
+  const finieParEspace = /\s$/.test(texte);
+  const t = norm(brut);
+  const mots = t.trim().split(" ");
+  const partiel = finieParEspace ? "" : (mots.at(-1) ?? "");
+  const sansPartiel = norm(finieParEspace ? brut : mots.slice(0, -1).join(" "));
+  let produit = trouverProduit(produits, t) ?? produits.find((p) => p.type === besoin.type) ?? null;
+  // Un début de mot de produit (« ard », « gout ») : les produits qui commencent ainsi.
+  if (!produit) {
+    if (partiel.length < 2) return [];
+    return produits
+      .filter((p) => [...(SYNONYMES[p.type] ?? []), norm(p.libelle).trim()].some((m) => m.startsWith(partiel) || m.split(" ").some((w) => w.startsWith(partiel))))
+      .slice(0, max)
+      .map((p) => ({ libelle: p.libelle, type: p.type, attributs: {} }));
+  }
+  const motProduit = [...(SYNONYMES[produit.type] ?? []), norm(produit.libelle).trim()].some((m) => m.startsWith(partiel) || m.split(" ").some((w) => w.startsWith(partiel)));
+  const base = produit.type === besoin.type ? besoin.attributs : {};
+  const attributs = lireAttributs(produit, partiel && !motProduit ? sansPartiel : t, base);
+  const suivante = produit.caracteristiques.find((c) => !attributs[c.attribut]);
+  // Tout est dit : plus rien à proposer, l'artisan continue (quantité, date…).
+  if (!suivante) return [];
+  const filtre = partiel && !motProduit ? partiel : "";
+  return suivante.options
+    .filter((o) => !filtre || [norm(o.libelle).trim(), norm(o.valeur).trim()].some((f) => f.startsWith(filtre) || f.split(" ").some((w) => w.startsWith(filtre))))
+    .slice(0, max)
+    .map((o) => {
+      const a = { ...attributs, [suivante.attribut]: o.valeur };
+      return { libelle: nomDuBesoin(produit!, a), type: produit!.type, attributs: a };
+    });
+}
+

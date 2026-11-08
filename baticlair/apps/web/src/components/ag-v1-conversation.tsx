@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { BESOIN_VIDE, lienDuBesoin, tourAchatGroupe, uniteDeLaQuestion, type BesoinConv, type ProduitConv } from "../../../../packages/domain/src/groupe/conversation-ag-v1";
+import { BESOIN_VIDE, lienDuBesoin, suggestionsSaisie, tourAchatGroupe, uniteDeLaQuestion, type BesoinConv, type ProduitConv } from "../../../../packages/domain/src/groupe/conversation-ag-v1";
 import { useDictee } from "@/lib/dictee";
 import { useSession } from "@/lib/session";
 import type { EtatV1 } from "@/lib/ag-v1";
@@ -33,6 +33,8 @@ export function ConversationAchatGroupeV1({ etat }: { etat: EtatV1 }) {
   const { fil, enBas } = useFil([messages.length, complet]);
   const zone = useZoneVisible(enBas);
   const compteur = useRef(1);
+  // Greg, 8 novembre 2026 : l'autocomplétion se peaufine à chaque caractère ; rien ne correspond : on continue d'écrire.
+  const autocompletion = champ.saisie.trim() ? suggestionsSaisie(produits, champ.saisie, besoin) : [];
   // Plein écran par-dessus l'app : l'en-tête et le menu derrière deviennent inertes tant qu'elle est ouverte.
   useEffect(() => {
     const inertes: HTMLElement[] = [];
@@ -109,7 +111,17 @@ export function ConversationAchatGroupeV1({ etat }: { etat: EtatV1 }) {
           }}
           invite={complet ? "Corrige ou précise…" : "Décris ton besoin…"}
           avant={
-            complet ? (
+            autocompletion.length ? (
+              <ul aria-label="Suggestions" className="mb-2 flex max-h-[40dvh] flex-col overflow-y-auto rounded-2xl bg-[#FBF8F3] text-[#111111]">
+                {autocompletion.map((x) => (
+                  <li key={x.libelle} className="border-b border-[#111111]/10 last:border-b-0">
+                    <button type="button" onClick={() => champ.setSaisie(`${x.libelle} `)} className="flex min-h-12 w-full items-center px-4 py-2 text-left text-[16px] font-semibold">
+                      {x.libelle}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : complet ? (
               <button type="button" onClick={() => router.push(lienDuBesoin(besoin))} className="pressable mb-2 flex min-h-12 w-full items-center justify-center rounded-2xl text-[16px] font-extrabold text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
                 Continuer : vérifier et confirmer
               </button>

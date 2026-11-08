@@ -61,3 +61,18 @@ describe("les dates dites", () => {
     expect(tourAchatGroupe(P, BESOIN_VIDE, "ardoise pour le 15/03", AUJ).besoin.dateBesoin).toBe("2027-03-15");
   });
 });
+
+describe("l'autocomplétion se peaufine à chaque caractère", () => {
+  it("« ard » → l'ardoise ; « ardoise 3 » → les formats en 3 ; « ardoise 32 22 Esp » → Espagne", async () => {
+    const { suggestionsSaisie } = await import("../src/groupe/conversation-ag-v1.js");
+    expect(suggestionsSaisie(P, "ard").map((s) => s.libelle)).toEqual(["Ardoise naturelle"]);
+    expect(suggestionsSaisie(P, "ardoise 3").map((s) => s.libelle)).toEqual(["Ardoise naturelle · 32 × 22", "Ardoise naturelle · 35 × 25", "Ardoise naturelle · 30 × 20"]);
+    expect(suggestionsSaisie(P, "ardoise 32 22 Esp").map((s) => s.libelle)).toEqual(["Ardoise naturelle · 32 × 22 · Espagne"]);
+    expect(suggestionsSaisie(P, "Ardoise naturelle · 32 × 22 · Espagne ").map((s) => s.libelle)[0]).toBe("Ardoise naturelle · 32 × 22 · Espagne · 1er choix");
+  });
+  it("rien ne correspond : aucune suggestion, l'artisan continue à écrire", async () => {
+    const { suggestionsSaisie } = await import("../src/groupe/conversation-ag-v1.js");
+    expect(suggestionsSaisie(P, "parpaing")).toEqual([]);
+    expect(suggestionsSaisie(P, "ardoise 9")).toEqual([]);
+  });
+});

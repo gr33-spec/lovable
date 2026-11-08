@@ -272,6 +272,32 @@ test("« Ajouter un matériau » avec Mobiiz (Greg, 8 novembre) : une phrase de 
   await expect(page.getByRole("heading", { name: /Aucun achat groupé compatible|Un achat groupé correspond/ })).toBeVisible();
 });
 
+test("l'autocomplétion (Greg, 8 novembre) : « ardoise 3 » propose les formats, chaque choix affine, rien ne correspond : on continue d'écrire", async ({ page }) => {
+  await inscrire(page);
+  await page.goto("/achats-groupes/nouveau");
+  const chat = page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" });
+  const champ = chat.getByRole("textbox", { name: "Ton message" });
+  const suggestions = chat.getByRole("list", { name: "Suggestions" });
+  await champ.fill("ardoise 3");
+  await expect(suggestions.getByRole("button")).toHaveText(["Ardoise naturelle · 32 × 22", "Ardoise naturelle · 35 × 25", "Ardoise naturelle · 30 × 20"]);
+  await capture(page, "24-autocompletion");
+  await suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22" }).click();
+  await expect(champ).toHaveValue("Ardoise naturelle · 32 × 22 ");
+  await expect(suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22 · Espagne" })).toBeVisible();
+  await suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22 · Espagne" }).click();
+  await champ.pressSequentially("1");
+  await suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22 · Espagne · 1er choix" }).click();
+  await champ.pressSequentially("5");
+  await suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22 · Espagne · 1er choix · 5 mm" }).click();
+  await champ.pressSequentially("10 palettes");
+  await expect(suggestions).toHaveCount(0);
+  await chat.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(chat.getByText("Livraison sur chantier ou retrait au dépôt ?")).toBeVisible();
+  // Rien ne correspond : aucune liste, on écrit librement.
+  await champ.fill("parpaing");
+  await expect(suggestions).toHaveCount(0);
+});
+
 test("retirer un besoin : « Garder mon besoin » d'abord, puis « Confirmer le retrait »", async ({ page }) => {
   test.setTimeout(120_000);
   await inscrire(page);
