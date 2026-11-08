@@ -235,6 +235,34 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await g.ctx.close();
 });
 
+test("« Ajouter un matériau » avec Mobiiz (Greg, 8 novembre) : une phrase de comptoir, une question à la fois, réponses rapides, puis le besoin prérempli", async ({ page }) => {
+  test.setTimeout(120_000);
+  await inscrire(page);
+  await page.goto("/achats-groupes");
+  await page.getByRole("link", { name: /^Ajouter un matériau/ }).click();
+  const chat = page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" });
+  await expect(chat.getByText(/Quel matériau veux-tu acheter en groupe \?/).first()).toBeVisible();
+  // Une réponse rapide, puis une phrase : Mobiiz garde ce qui est dit et demande ce qui manque, une chose à la fois.
+  await chat.getByRole("group", { name: "Réponses rapides" }).getByRole("button", { name: "Ardoise naturelle" }).click();
+  await expect(chat.getByText("Ardoise naturelle : c'est noté. Format ?")).toBeVisible();
+  await capture(page, "22-conversation-question");
+  await chat.getByRole("textbox", { name: "Ton message" }).fill("32 22 Espagne 1er choix 5 mm, 10 palettes livrées sur chantier pour le 15/03");
+  await chat.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(chat.getByText(/^C'est complet : Ardoise naturelle · 32 × 22 · Espagne · 1er choix · 5 mm, 10 palettes, livraison sur chantier, avant le 15 mars/)).toBeVisible();
+  await capture(page, "23-conversation-complete");
+  await chat.getByRole("button", { name: "Continuer : vérifier et confirmer" }).click();
+  // Le parcours habituel, prérempli : il ne reste que le conditionnement et le lieu privé.
+  await expect(page.getByRole("heading", { name: "Choisis précisément le produit" })).toBeVisible();
+  await page.getByRole("button", { name: "Confirmer 480 pièces par palette" }).click();
+  await page.getByRole("button", { name: "Continuer" }).click();
+  await expect(page.getByLabel("Quantité (palettes)")).toHaveValue("10");
+  await expect(page.getByLabel("J'ai besoin de ces matériaux avant le")).toHaveValue(/-03-15$/);
+  await expect(page.getByText("10 palettes = 4 800 pièces")).toBeVisible();
+  await page.getByLabel("Lieu de livraison (privé)").fill(`12 rue du Port, ${zone().cp} ${zone().ville}`);
+  await page.getByRole("button", { name: "Continuer" }).click();
+  await expect(page.getByRole("heading", { name: /Aucun achat groupé compatible|Un achat groupé correspond/ })).toBeVisible();
+});
+
 test("retirer un besoin : « Garder mon besoin » d'abord, puis « Confirmer le retrait »", async ({ page }) => {
   test.setTimeout(120_000);
   await inscrire(page);

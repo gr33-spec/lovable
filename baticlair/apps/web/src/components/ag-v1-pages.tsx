@@ -1,8 +1,9 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { BesoinV1Detail, MesBesoinsV1 } from "@/components/ag-v1-besoins";
+import { ConversationAchatGroupeV1 } from "@/components/ag-v1-conversation";
 import { ParcoursDirectV1 } from "@/components/ag-v1-direct";
 import { ChoixDuQuantitatif, DepuisQuantitatifV1 } from "@/components/ag-v1-quantitatif";
 import { BackButton, EmptyState, Skeleton } from "@/components/ui";
@@ -20,9 +21,16 @@ export function PageNouveauV1() {
   return (
     <>
       <BackButton fallback="/achats-groupes" compact />
-      <AvecV1>{(etat) => <ParcoursDirectV1 etat={etat} />}</AvecV1>
+      <AvecV1>{(etat) => <NouveauV1 etat={etat} />}</AvecV1>
     </>
   );
+}
+
+/** Greg, 8 novembre 2026 : « Ajouter un matériau » s'ouvre sur la conversation Mobiiz ; un produit déjà choisi (carte d'un
+ *  achat, besoin dit dans la conversation) ou « Voir la liste des produits ouverts » ouvre le parcours habituel. */
+function NouveauV1({ etat }: { etat: EtatV1 }) {
+  const params = useSearchParams();
+  return params.get("type") || params.get("liste") ? <ParcoursDirectV1 etat={etat} /> : <ConversationAchatGroupeV1 etat={etat} />;
 }
 
 export function PageMesBesoinsV1() {

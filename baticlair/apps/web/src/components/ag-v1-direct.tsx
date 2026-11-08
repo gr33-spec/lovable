@@ -108,13 +108,15 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
     return p ? Object.fromEntries(p.caracteristiques.map((c) => [c.attribut, params.get(c.attribut) ?? ""]).filter(([, v]) => v)) : {};
   });
   const [etape, setEtape] = useState<Etape>("produit");
-  const [unite, setUnite] = useState<string>(() => produit?.conditionnements[0]?.unite.code ?? produit?.unite.code ?? "");
+  // Le besoin dit dans la conversation Mobiiz arrive prérempli (quantité, unité, réception, date) ; tout reste modifiable.
+  const uniteDite = params.get("unite");
+  const [unite, setUnite] = useState<string>(() => (uniteDite && produit && [produit.unite.code, ...produit.conditionnements.map((c) => c.unite.code)].includes(uniteDite) ? uniteDite : (produit?.conditionnements[0]?.unite.code ?? produit?.unite.code ?? "")));
   const [parUnite, setParUnite] = useState<number | null>(() => produit?.conditionnements[0]?.parDefaut ?? null);
   const [conversionConfirmee, setConversionConfirmee] = useState(false);
-  const [quantite, setQuantite] = useState("");
-  const [reception, setReception] = useState<"livraison" | "retrait" | null>(null);
+  const [quantite, setQuantite] = useState(() => params.get("quantite") ?? "");
+  const [reception, setReception] = useState<"livraison" | "retrait" | null>(() => (params.get("reception") === "livraison" || params.get("reception") === "retrait" ? (params.get("reception") as "livraison" | "retrait") : null));
   const [lieu, setLieu] = useState("");
-  const [dateBesoin, setDateBesoin] = useState("");
+  const [dateBesoin, setDateBesoin] = useState(() => (/^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? params.get("date")! : ""));
   const [contraintes, setContraintes] = useState("");
   const [compat, setCompat] = useState<CompatibiliteV1 | null>(null);
   const [rejoindre, setRejoindre] = useState<string | null>(null);

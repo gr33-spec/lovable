@@ -192,28 +192,28 @@ await etape("Achats groupés : les deux entrées visibles tout de suite", a, asy
   await sansDebordement(a, "accueil des achats groupés");
 });
 
-await etape("« Ajouter un matériau » : produit précis, raison du bouton grisé, conditionnement confirmé", a, async () => {
+await etape("« Ajouter un matériau » avec Mobiiz : une phrase de comptoir, question suivante, besoin prérempli", a, async () => {
   await a.getByRole("link", { name: /^Ajouter un matériau/ }).click();
+  const chat = a.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" });
+  await voir(chat.getByText(/Quel matériau veux-tu acheter en groupe/));
+  await chat.getByRole("group", { name: "Réponses rapides" }).getByRole("button", { name: "Ardoise naturelle" }).click();
+  await voir(chat.getByText("Ardoise naturelle : c'est noté. Format ?"));
+  const [, m, j] = jourDans(45).split("-");
+  await chat.getByRole("textbox", { name: "Ton message" }).fill(`32 22 Espagne 1er choix 5 mm, 10 palettes livrées sur chantier pour le ${j}/${m}`);
+  await chat.getByRole("button", { name: "Envoyer le message" }).click();
+  await voir(chat.getByText(/^C'est complet : Ardoise naturelle · 32 × 22 · Espagne · 1er choix · 5 mm, 10 palettes, livraison sur chantier/));
+  await sansDebordement(a, "conversation");
+  await chat.getByRole("button", { name: "Continuer : vérifier et confirmer" }).click();
   await voir(a.getByRole("heading", { name: "Choisis précisément le produit" }));
-  await a.getByRole("button", { name: /Ardoise naturelle/ }).first().click();
-  await a.getByLabel("Format").selectOption("32x22");
-  await a.getByLabel("Origine").selectOption("espagne");
-  await a.getByLabel("Choix").selectOption("1");
-  await voir(a.getByText("Choisis toutes les caractéristiques pour continuer."));
-  verif(await a.getByRole("button", { name: "Continuer" }).isDisabled(), "Continuer devrait être grisé");
-  await a.getByLabel("Épaisseur").selectOption("5");
   await a.getByRole("button", { name: "Confirmer 480 pièces par palette" }).click();
   await a.getByRole("button", { name: "Continuer" }).click();
   await voir(a.getByRole("heading", { name: "Combien, où et pour quand ?" }));
-  await sansDebordement(a, "produit");
+  verif((await a.getByLabel("Quantité (palettes)").inputValue()) === "10", "quantité non préremplie");
 });
 
-await etape("Quantité, livraison, date ; aucun achat compatible : l'ouvrir ; entreprise ; confirmer", a, async () => {
-  await a.getByLabel("Quantité (palettes)").fill("10");
+await etape("Lieu privé ; aucun achat compatible : l'ouvrir ; entreprise ; confirmer", a, async () => {
   await voir(a.getByText("10 palettes = 4 800 pièces"));
-  await a.getByText("Livraison sur chantier").click();
   await a.getByLabel("Lieu de livraison (privé)").fill("12 rue du Port, 22300 Lannion");
-  await a.getByLabel("J'ai besoin de ces matériaux avant le").fill(jourDans(45));
   await a.getByRole("button", { name: "Continuer" }).click();
   await voir(a.getByRole("heading", { name: /Aucun achat groupé compatible|Un achat groupé correspond/ }), 30000);
   if (await a.getByRole("button", { name: "Ouvrir cet achat groupé" }).count()) await a.getByRole("button", { name: "Ouvrir cet achat groupé" }).click();
