@@ -164,6 +164,9 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   // Une autre entreprise : l'achat correspond ; « ne me convient pas » ne propose pas la zone ; elle rejoint.
   const b = await nouvelArtisan(browser, "Paul");
   await b.page.goto("/achats-groupes");
+  // Greg, 8 novembre 2026 : une ligne par achat, le nom du produit et le temps qui reste, rien d'autre.
+  await expect(b.page.getByRole("list", { name: "Achats groupés ouverts" }).getByText(/^Se termine dans \d+ jours$/).first()).toBeVisible();
+  await capture(b.page, "08b-liste-compacte");
   await b.page.getByRole("link", { name: /Ardoise naturelle 32 × 22 · Espagne · 1er choix · 5 mm/ }).click();
   await b.page.getByRole("button", { name: "Confirmer 480 pièces par palette" }).click();
   await b.page.getByRole("button", { name: "Continuer" }).click();
