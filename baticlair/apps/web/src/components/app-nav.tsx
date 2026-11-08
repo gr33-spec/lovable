@@ -99,9 +99,6 @@ export function AppNav() {
         <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
           <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
         </span>
-        {link(accueilItem)}
-        {link(listesItem)}
-        {groupe ? link(groupeItem) : null}
         {/* Greg, 1er novembre 2026 : le « + » ouvre LE départ de création d'une liste, le même que « Créer une liste » de
             l'accueil et « Nouvelle liste » de Mes listes (un seul point de départ, une seule expérience). */}
         {/* Greg, 6 novembre 2026 : trois espaces (À faire, Demandes, Groupes) et le bouton jaune « Nouveau besoin » ; le
@@ -111,10 +108,13 @@ export function AppNav() {
             « Demandes » coupé, et deux boutons jaunes empilés sur Achats groupés). La barre ne fait que naviguer : trois
             onglets égaux. Chaque écran porte sa propre création (« Créer un quantitatif » sur À faire et Demandes,
             « Ajouter un matériau » sur Achats groupés). Ordinateur : le bouton reste en tête de la colonne. */}
-        <Link href="/chantiers/nouveau" className="pressable hidden lg:order-[-1] lg:mb-5 lg:flex lg:h-12 lg:items-center lg:gap-2 lg:rounded-xl lg:bg-accent lg:px-4 lg:text-[15px] lg:font-bold lg:text-on-accent lg:shadow-[0_12px_30px_rgba(254,210,6,0.18)]">
+        <Link href="/chantiers/nouveau" className="pressable hidden lg:mb-5 lg:flex lg:h-12 lg:items-center lg:gap-2 lg:rounded-xl lg:bg-accent lg:px-4 lg:text-[15px] lg:font-bold lg:text-on-accent lg:shadow-[0_12px_30px_rgba(254,210,6,0.18)]">
           <Plus aria-hidden="true" size={22} strokeWidth={2.6} />
           <span>Créer un quantitatif</span>
         </Link>
+        {link(accueilItem)}
+        {link(listesItem)}
+        {groupe ? link(groupeItem) : null}
         {link(negocesItem, true)}
         <span aria-hidden="true" className="hidden grow lg:block" />
         {link(profilItem, true)}
