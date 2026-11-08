@@ -179,7 +179,11 @@ await etape("Accueil : achat individuel à part, quatre actions écrites, aucun 
   for (const l of await a.getByRole("button").all()) verif((await l.innerText()).trim() !== "+", "un bouton « + » seul");
   const menu = a.getByRole("navigation", { name: "Navigation principale" });
   await voir(menu.getByRole("link", { name: "Achats groupés" }));
-  await voir(menu.getByRole("link", { name: "Créer un quantitatif" }));
+  await voir(menu.getByRole("link", { name: "Demandes" }));
+  // Revue UX (8 novembre 2026) : sur téléphone, la barre ne fait que naviguer ; la création vit sur l'écran.
+  if (APPAREIL === "ordi") await voir(menu.getByRole("link", { name: "Créer un quantitatif" }));
+  else verif((await menu.getByRole("link", { name: "Créer un quantitatif" }).count()) === 0, "un bouton de création dans la barre du bas");
+  await voir(a.getByRole("main").getByRole("link", { name: /^Créer un quantitatif/ }).first());
   verif((await a.getByText(/Achat en gros|collecte/i).count()) === 0, "« Achat en gros » ou « collecte » encore affiché");
   await sansDebordement(a, "accueil");
 });
