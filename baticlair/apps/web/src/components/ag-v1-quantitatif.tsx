@@ -22,6 +22,14 @@ const TON: Record<LigneQuantitatifV1["mention"], string> = {
   non_ouvert: "bg-ground text-muted",
 };
 
+/** La raison d'un article qu'on ne peut pas cocher, en une phrase simple. */
+const RAISON_SIMPLE: Partial<Record<LigneQuantitatifV1["mention"], string>> = {
+  demande_individuelle: "Déjà envoyé à tes négoces en demande de prix.",
+  deja_groupe: "Déjà dans un achat groupé.",
+  commandee: "Déjà commandé.",
+  non_ouvert: "Pas encore proposé en achat groupé : il reste pour tes négoces.",
+};
+
 /** « Depuis un quantitatif » sans liste choisie : les listes de l'entreprise. */
 export function ChoixDuQuantitatif() {
   const { data } = useResource(useCallback((s: AbortSignal) => api<{ items: { id: string; name: string }[] }>("/v1/projects?limit=30", { signal: s }), []));
@@ -237,15 +245,20 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           </section>
         ))}
         {nonGroupables.length ? (
-          <details className={`${CARTE} p-4`}>
+          // « UNE LIGNE, UN SEUL CIRCUIT » (V5.2, Greg, 8 novembre 2026 : « explique simplement le blocage ») : un article
+          // déjà envoyé à ses négoces ne se coche pas, et la raison se lit en une phrase. Le serveur refuse de toute façon.
+          <details open={parLotGroupables.length === 0} className={`${CARTE} p-4`}>
             <summary className="min-h-11 cursor-pointer text-[15px] font-semibold">
-              {nonGroupables.length} article{nonGroupables.length > 1 ? "s" : ""} hors achats groupés
+              {nonGroupables.length} article{nonGroupables.length > 1 ? "s" : ""} ne peu{nonGroupables.length > 1 ? "vent" : "t"} pas être groupé{nonGroupables.length > 1 ? "s" : ""}
             </summary>
-            <ul className="mt-2 flex flex-col gap-2">
+            {nonGroupables.some((l) => l.mention === "demande_individuelle" || l.mention === "deja_groupe") ? (
+              <p className="mt-2 text-[14px] text-muted">Un article part soit chez tes négoces, soit en achat groupé, jamais les deux.</p>
+            ) : null}
+            <ul aria-label="Articles qui ne peuvent pas être groupés" className="mt-2 flex flex-col gap-2">
               {nonGroupables.map((l) => (
                 <li key={l.key} className="flex flex-col">
                   <span className="text-[15px] font-semibold break-words">{l.designation}</span>
-                  <span className="text-[14px] text-muted">{l.texte}</span>
+                  <span className="text-[14px] text-muted">{RAISON_SIMPLE[l.mention] ?? l.texte}</span>
                 </li>
               ))}
             </ul>

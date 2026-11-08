@@ -84,7 +84,7 @@ async function reponseRecue(page: Page, recipientId: string) {
   expect(res.status(), await res.text()).toBeLessThan(300);
 }
 
-test("À faire (Greg, 6 novembre 2026) : rien à faire, « Aucun besoin en cours » et « Nouveau besoin » ; « Créer un quantitatif » mène au même départ partout ; rien sous la barre du menu", async ({ page }, info) => {
+test("À faire (Greg, 6 novembre 2026 ; UX simplifiée du 8 novembre) : un seul bouton principal, « Rien à faire pour le moment » ; « Créer un quantitatif » mène au même départ partout ; rien sous la barre du menu", async ({ page }, info) => {
   await inscrire(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Bonjour Jean", level: 1 })).toBeVisible();
@@ -93,9 +93,11 @@ test("À faire (Greg, 6 novembre 2026) : rien à faire, « Aucun besoin en cours
   await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: /^(Commencer|Suivi en cours)$/ })).toHaveCount(0);
   // RÈGLE CHANGÉE (Greg, 7 novembre 2026) : « Aucun besoin en cours », puis des actions écrites en toutes lettres.
-  await expect(page.getByText("Aucun besoin en cours")).toBeVisible();
-  const vide = page.getByRole("region", { name: "Achat individuel" });
-  await expect(vide).toBeVisible();
+  // UX simplifiée (Greg, 8 novembre 2026) : UN bouton principal, « Créer un quantitatif » ; rien d'autre que ce qui attend.
+  await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
+  for (const t of ["Achat individuel", "Achats groupés"]) await expect(page.getByRole("main").getByRole("heading", { name: t, exact: true })).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("link", { name: /^Ajouter un matériau|^Depuis un quantitatif|^Mes besoins groupés/ })).toHaveCount(0);
+  const vide = page.getByRole("main");
   await expect(vide.getByRole("link", { name: /^Créer un quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
   // Un seul départ, un seul nom (revue UX, 8 novembre 2026) : la carte de l'écran vide, le bouton de Demandes et, sur
   // ordinateur, celui de la colonne. Sur téléphone, la barre du bas ne porte plus de bouton de création.
@@ -110,9 +112,10 @@ test("À faire (Greg, 6 novembre 2026) : rien à faire, « Aucun besoin en cours
   // Téléphone : l'écran vide se lit au-dessus de la barre du menu.
   if (info.project.name === "telephone") {
     await page.goto("/");
-    await vide.scrollIntoViewIfNeeded();
+    const fin = page.getByText("Rien à faire pour le moment.");
+    await fin.scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    const [b, n] = [await vide.boundingBox(), await nav.boundingBox()];
+    const [b, n] = [await fin.boundingBox(), await nav.boundingBox()];
     expect(b!.y + b!.height).toBeLessThanOrEqual(n!.y + 1);
   }
 });
@@ -152,7 +155,7 @@ test("À faire : une demande envoyée sans réponse n'y est pas ; la réponse re
   const demandes = async () => (await apiJson<{ items: { recipients: unknown[] }[] }>(page, "GET", `/v1/projects/${projectId}/price-requests`)).body.items;
   const avant = JSON.stringify(await demandes());
   await page.goto("/");
-  await expect(page.getByText("Aucun besoin en cours")).toBeVisible();
+  await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
   await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
 
   await reponseRecue(page, recipientId);
@@ -160,7 +163,7 @@ test("À faire : une demande envoyée sans réponse n'y est pas ; la réponse re
   const afaire = page.getByRole("region", { name: "À faire maintenant" });
   await expect(afaire.getByRole("link").first()).toContainText("Voir les réponses de tes négoces");
   await expect(afaire.getByRole("link").first()).toContainText("Maison Dupont");
-  await expect(page.getByText("Aucun besoin en cours")).toHaveCount(0);
+  await expect(page.getByText("Rien à faire pour le moment.")).toHaveCount(0);
   // Ouvrir l'accueil ne déclenche aucun envoi : la demande est la même qu'avant.
   expect(JSON.stringify((await demandes()).map((d) => ({ ...d, recipients: d.recipients.length })))).toBe(JSON.stringify(JSON.parse(avant).map((d: { recipients: unknown[] }) => ({ ...d, recipients: d.recipients.length }))));
   await afaire.getByRole("link").first().click();

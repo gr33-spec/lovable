@@ -169,34 +169,32 @@ await etape("Entreprise A : compte, SIRET, e-mail confirmé ; /v1/ag/etat 200", 
   return `zone ${e.body.zone.nom} (${e.body.zone.code}), e-mail vérifié : ${e.body.verification.emailVerifie}`;
 });
 
-await etape("Accueil : achat individuel à part, quatre actions écrites, aucun « + » seul", a, async () => {
+await etape("Accueil simplifié : un seul bouton principal « Créer un quantitatif », aucune autre entrée", a, async () => {
   await a.goto(`${BASE}/`, { waitUntil: "networkidle" });
-  const ind = a.getByRole("region", { name: "Achat individuel" });
-  await voir(ind.getByRole("link", { name: /^Créer un quantitatif/ }));
-  const grp = a.getByRole("region", { name: "Achats groupés" });
-  for (const nom of [/^Ajouter un matériau en achat groupé/, /^Depuis un quantitatif/, /^Mes besoins groupés/]) await voir(grp.getByRole("link", { name: nom }));
+  const main = a.getByRole("main");
+  await voir(main.getByRole("link", { name: /^Créer un quantitatif/ }).first());
+  verif((await main.getByRole("link", { name: /^Ajouter un matériau|^Depuis un quantitatif|^Mes besoins groupés/ }).count()) === 0, "l'accueil propose encore plusieurs chemins");
   for (const l of await a.getByRole("link").all()) verif((await l.innerText()).trim() !== "+", "un lien « + » seul");
   for (const l of await a.getByRole("button").all()) verif((await l.innerText()).trim() !== "+", "un bouton « + » seul");
   const menu = a.getByRole("navigation", { name: "Navigation principale" });
   await voir(menu.getByRole("link", { name: "Achats groupés" }));
   await voir(menu.getByRole("link", { name: "Demandes" }));
-  // Revue UX (8 novembre 2026) : sur téléphone, la barre ne fait que naviguer ; la création vit sur l'écran.
   if (APPAREIL === "ordi") await voir(menu.getByRole("link", { name: "Créer un quantitatif" }));
   else verif((await menu.getByRole("link", { name: "Créer un quantitatif" }).count()) === 0, "un bouton de création dans la barre du bas");
-  await voir(a.getByRole("main").getByRole("link", { name: /^Créer un quantitatif/ }).first());
   verif((await a.getByText(/Achat en gros|collecte/i).count()) === 0, "« Achat en gros » ou « collecte » encore affiché");
   await sansDebordement(a, "accueil");
 });
 
-await etape("Achats groupés : un seul filtre, le bouton flottant et ses deux choix", a, async () => {
+await etape("Onglet Achats groupés : « Mes besoins » puis « Achats ouverts » ; les autres entrées derrière un lien discret", a, async () => {
   await a.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés" }).click();
-  await voir(a.getByRole("heading", { name: "Achats groupés" }));
+  await voir(a.getByRole("heading", { name: "Mes besoins", exact: true }));
+  await voir(a.getByRole("heading", { name: "Achats ouverts", exact: true }));
   await voir(a.getByRole("combobox", { name: "Filtrer par métier" }));
-  await a.getByRole("button", { name: "Ajouter un matériau" }).click();
+  await a.getByRole("button", { name: "Ajouter un matériau sans quantitatif" }).click();
   const ajout = a.getByRole("dialog", { name: "Ajouter un matériau" });
   for (const nom of [/^Parler à Mobiiz/, /^Depuis un quantitatif/]) await voir(ajout.getByRole("link", { name: nom }));
   verif((await ajout.getByRole("link").count()) === 2, "le catalogue est encore proposé");
-  await sansDebordement(a, "accueil des achats groupés");
+  await sansDebordement(a, "onglet des achats groupés");
 });
 
 await etape("« Ajouter un matériau » avec Mobiiz : une phrase de comptoir, question suivante, besoin prérempli", a, async () => {
@@ -366,35 +364,36 @@ await etape("« Depuis un quantitatif » : liteaux à préciser, famille non ouv
   }
   verif((await api(a, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status === 200, "validation");
   projetQ = q.body.projetId;
-  await a.goto(`${BASE}/achats-groupes`, { waitUntil: "networkidle" });
-  await a.getByRole("button", { name: "Ajouter un matériau" }).click();
-  await a.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Depuis un quantitatif/ }).click();
-  await voir(a.getByRole("heading", { name: "Depuis un quantitatif" }));
-  await a.goto(`${BASE}/achats-groupes/quantitatif/${projetQ}`, { waitUntil: "networkidle" });
+  // Le parcours principal : la fiche du quantitatif, « Ajouter aux achats groupés ».
+  await a.goto(`${BASE}/chantiers/${projetQ}`, { waitUntil: "networkidle" });
+  await a.getByRole("region", { name: "Achats groupés" }).getByRole("link", { name: "Ajouter aux achats groupés" }).click();
+  await voir(a.getByRole("heading", { name: "Quels articles grouper ?" }));
   const liteaux = a.getByRole("listitem").filter({ has: a.getByText("Liteaux", { exact: true }) });
   await voir(liteaux.getByText("À préciser : section et essence manquantes"));
   verif(await liteaux.getByRole("checkbox").isDisabled(), "les liteaux sont cochables");
-  await voir(a.getByText("Pas encore ouvert aux achats groupés"));
-  await voir(a.getByText("Coche au moins une ligne compatible pour continuer."));
+  await a.getByText(/ne peu(t|vent) pas être groupés?$/).click();
+  await voir(a.getByRole("list", { name: "Articles qui ne peuvent pas être groupés" }).getByText(/Pas encore proposé en achat groupé/));
+  await voir(a.getByText("Coche au moins un article pour continuer."));
   await sansDebordement(a, "sélection depuis un quantitatif");
 });
 
 await etape("Depuis un quantitatif : deux lignes confirmées, chacune dans son achat groupé", a, async () => {
-  await a.getByRole("button", { name: "Sélectionner les recommandations" }).click().catch(() => undefined);
+  await a.getByRole("button", { name: "Cocher les articles conseillés" }).click().catch(() => undefined);
   for (const nom of ["Gouttière", "Câble"]) {
     const li = a.getByRole("listitem").filter({ hasText: nom }).getByRole("checkbox");
     if ((await li.count()) && !(await li.first().isChecked())) await li.first().check();
   }
-  await a.getByRole("button", { name: /^Continuer avec \d+ lignes?$/ }).click();
-  await voir(a.getByRole("heading", { name: /^Confirmer mes? \d* ?besoins?$/ }));
+  await a.getByRole("button", { name: /^Continuer avec \d+ articles?$/ }).click();
+  await voir(a.getByRole("heading", { name: "Vérifie et valide" }));
   await a.getByText("Livraison sur chantier").click();
   await a.getByLabel("Lieu de livraison (privé)").fill("3 rue des Ajoncs, 22300 Lannion");
   await a.getByLabel("J'ai besoin de ces matériaux avant le").fill(jourDans(40));
   const conversions = a.getByRole("button", { name: /^Confirmer \d+ (pièces|m) par / });
   for (let i = 0; i < 4 && (await conversions.count()); i++) await conversions.first().click();
   await a.getByRole("checkbox", { name: /Je confirme qu'il s'agit de besoins réels|Je confirme que cette quantité/ }).check();
-  await a.getByRole("button", { name: /^Confirmer mes? \d* ?besoins?$/ }).click();
-  await a.waitForURL(/\/achats-groupes\/mes-besoins/, { timeout: 30000 });
+  await a.getByRole("button", { name: /^Valider( mes \d+ articles)?$/ }).click();
+  await a.waitForURL(/\/achats-groupes\?ajoutes=\d+/, { timeout: 30000 });
+  await voir(a.getByText(/^C'est fait/));
   const lignes = await api(a, "GET", `/v1/ag/projects/${projetQ}/lignes`);
   const groupees = (lignes.body?.lignes ?? []).filter((l) => l.texte === "Déjà dans un achat groupé").length;
   verif(groupees >= 1, `aucune ligne marquée « Déjà dans un achat groupé » (${JSON.stringify(lignes.body).slice(0, 160)})`);

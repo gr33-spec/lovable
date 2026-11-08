@@ -486,6 +486,7 @@ export function ProjectTakeoff({
         <section aria-label="Achats groupés" className="flex flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card">
           <p className="text-[17px] font-extrabold">Achats groupés</p>
           <p className="text-[15px] text-muted">Achète certains articles avec d&apos;autres artisans pour payer moins cher. Tu choisis lesquels.</p>
+          <CircuitsDeLaListe projectId={projectId} />
           <ButtonLink href={`/achats-groupes/quantitatif/${projectId}`} variant="secondary" className="w-full text-center">
             Ajouter aux achats groupés
           </ButtonLink>
@@ -754,5 +755,23 @@ function GrosDevis({ phrase, pending, disabled, onLancer, onAnnuler }: { phrase:
         Saisir ma liste à la main (gratuit)
       </ButtonLink>
     </section>
+  );
+}
+
+/**
+ * « UNE LIGNE, UN SEUL CIRCUIT » dit sur la fiche (Greg, 8 novembre 2026) : combien d'articles sont déjà dans les achats
+ * groupés (ils ne partent pas chez les négoces) et combien sont déjà partis chez les négoces (ils ne se groupent pas).
+ */
+function CircuitsDeLaListe({ projectId }: { projectId: string }) {
+  const { data } = useResource(useCallback((s: AbortSignal) => api<{ lignes: { mention: string }[] }>(`/v1/ag/projects/${projectId}/lignes`, { signal: s }).catch(() => null), [projectId]));
+  const groupes = data?.lignes.filter((l) => l.mention === "deja_groupe").length ?? 0;
+  const envoyes = data?.lignes.filter((l) => l.mention === "demande_individuelle").length ?? 0;
+  if (!groupes && !envoyes) return null;
+  const s = (n: number) => (n > 1 ? "s" : "");
+  return (
+    <ul aria-label="Articles déjà engagés" className="flex flex-col gap-1 rounded-xl bg-ground p-3 text-[14px]">
+      {groupes ? <li>{`${groupes} article${s(groupes)} dans les achats groupés : il${s(groupes)} ne part${groupes > 1 ? "ent" : ""} pas chez tes négoces.`}</li> : null}
+      {envoyes ? <li>{`${envoyes} article${s(envoyes)} déjà envoyé${s(envoyes)} à tes négoces : il${s(envoyes)} ne peu${envoyes > 1 ? "vent" : "t"} pas être groupé${s(envoyes)}.`}</li> : null}
+    </ul>
   );
 }

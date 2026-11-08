@@ -138,9 +138,9 @@ export function AccueilMaquette() {
       {premiere ? (
         <section aria-labelledby="a-faire-titre" className="flex flex-col gap-2">
           <h2 id="a-faire-titre" className="text-[18px] font-extrabold tracking-[-0.02em]">
-            À faire
+            À faire maintenant
           </h2>
-          <CarteAction a={premiere} />
+          <CarteAction a={premiere} principale />
           {lien ? (
             tout ? (
               <ul aria-label="Autres choses à reprendre" className="flex flex-col gap-2">
@@ -187,7 +187,8 @@ function CarteAction({ a, principale = false }: { a: Action; principale?: boolea
         <ChevronRight size={20} aria-hidden="true" className="shrink-0 text-muted" />
       </span>
       {principale ? (
-        <span aria-hidden="true" className="inline-flex min-h-12 items-center justify-center self-start rounded-full bg-accent px-8 text-[16px] font-extrabold text-on-accent">
+        // UX simplifiée (Greg, 8 novembre 2026) : un seul jaune sur l'accueil, « Créer un quantitatif » ; « Continuer » en contour.
+        <span aria-hidden="true" className="inline-flex min-h-12 items-center justify-center self-start rounded-full border-2 border-ink px-8 text-[16px] font-extrabold text-ink">
           {a.bouton}
         </span>
       ) : null}

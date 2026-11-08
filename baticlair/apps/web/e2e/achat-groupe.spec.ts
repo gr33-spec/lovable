@@ -191,8 +191,11 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     // « À faire » (Greg, 6 novembre 2026) : rien à faire, donc « Aucun besoin en cours » et « Nouveau besoin ».
     await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
     // Greg, 7 novembre 2026 : des actions écrites en toutes lettres, l'achat individuel à part.
-    await expect(page.getByText("Aucun besoin en cours")).toBeVisible();
-    const vide = page.getByRole("region", { name: "Achat individuel" });
+    // UX simplifiée (Greg, 8 novembre 2026) : UN bouton principal, « Créer un quantitatif » ; rien d'autre que ce qui attend.
+    await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
+    for (const t of ["Achat individuel", "Achats groupés"]) await expect(page.getByRole("main").getByRole("heading", { name: t, exact: true })).toHaveCount(0);
+    await expect(page.getByRole("main").getByRole("link", { name: /^Ajouter un matériau|^Depuis un quantitatif|^Mes besoins groupés/ })).toHaveCount(0);
+    const vide = page.getByRole("main");
     await expect(vide.getByRole("link", { name: /^Créer un quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
     await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés" })).toHaveAttribute("href", "/achats-groupes");
     await expect(page.getByRole("link", { name: /Essai gratuit/ })).toHaveCount(0);

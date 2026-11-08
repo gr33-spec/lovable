@@ -91,14 +91,18 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   // Accueil des achats groupés.
   await page.goto("/achats-groupes");
   await expect(page.getByRole("heading", { name: "Achats groupés" })).toBeVisible();
-  await expect(page.getByText("Regroupe tes besoins avec d'autres entreprises")).toBeVisible();
+  await expect(page.getByText("Achète avec d'autres artisans de ton secteur")).toBeVisible();
+  // UX simplifiée (Greg, 8 novembre 2026) : l'onglet montre « Mes besoins » puis « Achats ouverts ».
+  await expect(page.getByRole("heading", { name: "Mes besoins", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Achats ouverts", exact: true })).toBeVisible();
   await expect(page.getByText(zone().nom)).toBeVisible();
   // Greg, 8 novembre 2026 : un seul filtre (« Métier »), aucune rangée de boutons.
   await expect(page.getByRole("combobox", { name: "Filtrer par métier" })).toBeVisible();
   for (const f of ["Couverture", "Zinguerie", "Isolation", "Bois", "Électricité"]) await expect(page.getByRole("button", { name: f, exact: true })).toHaveCount(0);
   await expect(page.getByText("Mobiiz. Plus on est, moins on paie.")).toBeVisible();
-  // Greg, 8 novembre 2026 : un bouton flottant « Ajouter un matériau » : Mobiiz ou ta liste ; plus de catalogue.
-  await page.getByRole("button", { name: "Ajouter un matériau" }).click();
+  // UX simplifiée : plus de bouton flottant ; les autres façons d'ajouter restent derrière un lien discret.
+  await expect(page.getByRole("button", { name: "Ajouter un matériau", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Ajouter un matériau sans quantitatif" }).click();
   const ajout = page.getByRole("dialog", { name: "Ajouter un matériau" });
   for (const nom of [/^Parler à Mobiiz/, /^Depuis un quantitatif/]) await expect(ajout.getByRole("link", { name: nom })).toBeVisible();
   await expect(ajout.getByRole("link")).toHaveCount(2);
@@ -255,7 +259,7 @@ test("« Ajouter un matériau » avec Mobiiz (Greg, 8 novembre) : une phrase de 
   test.setTimeout(120_000);
   await inscrire(page);
   await page.goto("/achats-groupes");
-  await page.getByRole("button", { name: "Ajouter un matériau" }).click();
+  await page.getByRole("button", { name: "Ajouter un matériau sans quantitatif" }).click();
   await page.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Parler à Mobiiz/ }).click();
   const chat = page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" });
   await expect(chat.getByText(/Quel matériau veux-tu acheter en groupe \?/).first()).toBeVisible();
@@ -344,12 +348,12 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
     courant = (await apiJson<typeof courant>(page, "POST", `/v1/quantitatifs/${q.body.id}/reponses`, { reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
   }
   expect((await apiJson(page, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status).toBe(200);
-  await page.goto("/achats-groupes");
-  await page.getByRole("button", { name: "Ajouter un matériau" }).click();
-  await page.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Depuis un quantitatif/ }).click();
-  await expect(page.getByRole("heading", { name: "Depuis un quantitatif" })).toBeVisible();
-  await page.goto(`/achats-groupes/quantitatif/${q.body.projetId}`);
-  for (const lot of ["Couverture", "Zinguerie", "Électricité", "Maçonnerie"]) await expect(page.getByRole("heading", { name: lot, exact: true })).toBeVisible();
+  // UX simplifiée (Greg, 8 novembre 2026) : depuis la fiche du quantitatif, « Ajouter aux achats groupés ».
+  await page.goto(`/chantiers/${q.body.projetId}`);
+  const carteAg = page.getByRole("region", { name: "Achats groupés" });
+  await carteAg.getByRole("link", { name: "Ajouter aux achats groupés" }).click();
+  await expect(page.getByRole("heading", { name: "Quels articles grouper ?" })).toBeVisible();
+  for (const lot of ["Couverture", "Zinguerie", "Électricité"]) await expect(page.getByRole("heading", { name: lot, exact: true })).toBeVisible();
   await expect(page.getByText("Recommandé pour un achat groupé").first()).toBeVisible();
   await expect(page.getByText("Compatible avec un achat groupé").first()).toBeVisible();
   await expect(page.getByText("À préciser : choix et épaisseur manquants")).toBeVisible();
@@ -357,24 +361,31 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   const liteaux = page.getByRole("listitem").filter({ has: page.getByText("Liteaux", { exact: true }) });
   await expect(liteaux.getByText("À préciser : section et essence manquantes")).toBeVisible();
   await expect(liteaux.getByRole("checkbox")).toBeDisabled();
-  await expect(page.getByText("Pas encore ouvert aux achats groupés").first()).toBeVisible();
+  // Ce qui ne se groupe pas est replié en bas, avec sa raison en une phrase (rien n'est caché).
+  await page.getByText(/ne peu(t|vent) pas être groupés?$/).click();
+  await expect(page.getByRole("list", { name: "Articles qui ne peuvent pas être groupés" })).toContainText("Parpaing creux 20x20x50");
+  await expect(page.getByRole("list", { name: "Articles qui ne peuvent pas être groupés" })).toContainText("Pas encore proposé en achat groupé");
   // Rien n'est coché d'office.
-  await expect(page.getByRole("button", { name: "Sélectionne des lignes" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Choisis des articles" })).toBeDisabled();
   await capture(page, "18-selection-par-lot");
-  // Correction du lot d'UNE ligne (les crochets en zinguerie), sans déplacer les autres.
-  await page.getByLabel("Lot de la ligne Crochets inox 100 mm").selectOption("zinguerie");
-  await expect(page.getByRole("region", { name: "Zinguerie" }).getByText("Crochets inox 100 mm", { exact: true })).toBeVisible();
+  // Correction du lot d'UNE ligne (le câble rangé en électricité passe en zinguerie, puis revient), sous « Pourquoi ? ».
+  const cable = () => page.getByRole("listitem").filter({ has: page.getByText(/^Câble R2V/) });
+  await cable().getByRole("button", { name: "Pourquoi ?" }).click();
+  await page.getByLabel(/^Lot de la ligne Câble R2V/).selectOption("zinguerie");
+  await expect(page.getByRole("region", { name: "Zinguerie" }).getByText(/^Câble R2V/)).toBeVisible();
+  await page.getByLabel(/^Lot de la ligne Câble R2V/).selectOption("electricite");
+  await expect(page.getByRole("region", { name: "Électricité" }).getByText(/^Câble R2V/)).toBeVisible();
   await expect(page.getByRole("region", { name: "Couverture" }).getByText("Ardoise naturelle 32 × 22 · Espagne · 1er choix · 5 mm", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Sélectionner les recommandations" }).click();
-  await expect(page.getByRole("button", { name: "Continuer avec 2 lignes" })).toBeVisible();
+  await page.getByRole("button", { name: "Cocher les articles conseillés" }).click();
+  await expect(page.getByRole("button", { name: "Continuer avec 2 articles" })).toBeVisible();
   await capture(page, "19-selection-2-lignes");
-  await page.getByRole("button", { name: "Continuer avec 2 lignes" }).click();
-  await expect(page.getByRole("heading", { name: "Confirmer mes 2 besoins" })).toBeVisible();
+  await page.getByRole("button", { name: "Continuer avec 2 articles" }).click();
+  await expect(page.getByRole("heading", { name: "Vérifie et valide" })).toBeVisible();
   await page.getByText("Livraison sur chantier").click();
   await page.getByLabel("Lieu de livraison (privé)").fill(`3 rue des Ajoncs, ${zone().cp} ${zone().ville}`);
   await page.getByLabel("J'ai besoin de ces matériaux avant le").fill(jourDans(40));
-  // Chaque ligne rejoint l'achat compatible (la gouttière du parcours précédent) ou ouvre le sien.
-  await expect(page.getByText(/^(Rejoindra cet achat groupé|Ouvrira un nouvel achat groupé) après confirmation$/)).toHaveCount(2);
+  // Mobiiz dit pour chaque article s'il rejoint un achat ouvert ou en ouvre un.
+  await expect(page.getByText(/^(Rejoint un achat groupé ouvert|Ouvre un nouvel achat groupé)$/)).toHaveCount(2);
   const conversions = page.getByRole("button", { name: /^Confirmer \d+ (pièces|m) par (palette|longueur)$/ });
   await expect(conversions).toHaveCount(2);
   await conversions.first().click();
@@ -386,11 +397,56 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("checkbox", { name: /Je confirme qu'il s'agit de besoins réels de mon entreprise/ }).check();
   await capture(page, "20-confirmer-2-besoins");
-  await page.getByRole("button", { name: "Confirmer mes 2 besoins" }).click();
-  await expect(page).toHaveURL(/\/achats-groupes\/mes-besoins/);
-  await expect(page.getByText("Besoin confirmé")).toHaveCount(2);
+  await page.getByRole("button", { name: "Valider mes 2 articles" }).click();
+  // Retour à l'onglet : « C'est fait », puis « Mes besoins ».
+  await expect(page).toHaveURL(/\/achats-groupes\?ajoutes=2/);
+  await expect(page.getByText("C'est fait : tes 2 articles sont dans les achats groupés.")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Mes besoins" }).getByText(/Besoin confirmé/)).toHaveCount(2);
   await capture(page, "21-mes-besoins-2");
+  // La fiche le dit : ces articles ne partent pas chez les négoces.
+  await page.goto(`/chantiers/${q.body.projetId}`);
+  await expect(page.getByRole("list", { name: "Articles déjà engagés" })).toContainText("2 articles dans les achats groupés : ils ne partent pas chez tes négoces.");
   // Les deux lignes ne partent plus en demande individuelle.
   const lignes = await apiJson<{ lignes: { texte: string }[] }>(page, "GET", `/v1/ag/projects/${q.body.projetId}/lignes`);
   expect(lignes.body.lignes.filter((l) => l.texte === "Déjà dans un achat groupé")).toHaveLength(2);
+});
+
+test("une ligne, un seul circuit (Greg, 8 novembre 2026) : un article déjà envoyé à un négoce ne se groupe pas, et la raison est dite simplement", async ({ page }) => {
+  test.setTimeout(180_000);
+  await inscrire(page);
+  const q = await apiJson<{ id: string; projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Ardoise naturelle 32x22 Espagne 1er choix 5 mm", quantite: "10", unite: "palettes" }] });
+  expect(q.status).toBe(201);
+  let courant = (await apiJson<{ questions: { id: string; boutons: { valeur: string }[] }[] }>(page, "GET", `/v1/quantitatifs/${q.body.id}`)).body;
+  for (let i = 0; i < 15 && courant.questions.length > 0; i++) {
+    const question = courant.questions[0]!;
+    courant = (await apiJson<typeof courant>(page, "POST", `/v1/quantitatifs/${q.body.id}/reponses`, { reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
+  }
+  expect((await apiJson(page, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status).toBe(200);
+  const negoce = (await apiJson<{ id: string }>(page, "POST", "/v1/suppliers", { name: `Négoce ${unique()}`, email: `ventes-${unique()}@negoce.example` })).body;
+  const demande = await apiJson<{ recipients: { id: string }[] }>(page, "POST", `/v1/projects/${q.body.projetId}/price-requests`, { supplierIds: [negoce.id] });
+  expect(demande.status).toBe(201);
+  expect((await apiJson(page, "POST", `/v1/price-request-recipients/${demande.body.recipients[0]!.id}/send`)).status).toBe(200);
+  // La fiche le dit, puis l'écran de sélection : l'article ne se coche pas, la raison en une phrase.
+  await page.goto(`/chantiers/${q.body.projetId}`);
+  await expect(page.getByRole("list", { name: "Articles déjà engagés" })).toContainText("1 article déjà envoyé à tes négoces : il ne peut pas être groupé.");
+  await page.getByRole("region", { name: "Achats groupés" }).getByRole("link", { name: "Ajouter aux achats groupés" }).click();
+  await expect(page.getByRole("heading", { name: "Quels articles grouper ?" })).toBeVisible();
+  const bloques = page.getByRole("list", { name: "Articles qui ne peuvent pas être groupés" });
+  await expect(bloques).toBeVisible();
+  await expect(bloques).toContainText("Déjà envoyé à tes négoces en demande de prix.");
+  await expect(page.getByText("Un article part soit chez tes négoces, soit en achat groupé, jamais les deux.")).toBeVisible();
+  await expect(page.getByRole("checkbox")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Choisis des articles" })).toBeDisabled();
+  await capture(page, "22-un-seul-circuit");
+  // Et le serveur refuse quand même, quoi qu'envoie l'écran.
+  const etat = (await apiJson<{ produits: unknown[] }>(page, "GET", "/v1/ag/etat")).body;
+  expect(etat.produits.length).toBeGreaterThan(0);
+  const lignes = (await apiJson<{ lignes: { key: string; texte: string }[] }>(page, "GET", `/v1/ag/projects/${q.body.projetId}/lignes`)).body.lignes;
+  expect(lignes[0]!.texte).toBe("Déjà dans une demande individuelle");
+  const refus = await apiJson<{ error: { details?: { message?: string } } }>(page, "POST", "/v1/ag/besoins", {
+    confirmation: true,
+    cleIdempotence: unique(),
+    besoins: [{ type: "ardoise", attributs: { format: "32x22", origine: "espagne", choix: "1", epaisseur: "5" }, quantite: 10, unite: "palette", parUnite: 480, conversionConfirmee: true, reception: "livraison", lieu: `3 rue des Ajoncs, ${zone().cp} ${zone().ville}`, dateBesoin: jourDans(40), achatId: null, projectId: q.body.projetId, articleKey: lignes[0]!.key }],
+  });
+  expect(refus.status).toBeGreaterThanOrEqual(400);
 });
