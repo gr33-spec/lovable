@@ -65,7 +65,7 @@ test("une phrase, deux articles : « J'ai compris », ajouter, voir ma liste, pu
   const inter = prete.getByRole("switch", { name: "Chercher aussi un regroupement" });
   await expect(inter).toHaveAttribute("aria-checked", "true");
   await prete.getByRole("button", { name: "Voir les 1 article sélectionné" }).click();
-  await expect(prete.getByRole("list", { name: "Articles pour le regroupement" })).toContainText(/Gros volume|cherche ce produit/);
+  await expect(prete.getByRole("list", { name: "Articles pour le regroupement" })).toContainText(/Gros volume|cherchen?t? ce produit/);
   await expect(prete.getByText("Rien ne rejoint un groupe sans ton accord.")).toBeVisible();
   await expect(prete.getByRole("button", { name: "Continuer" })).toHaveCount(0);
   // « Demander les prix à mes négoces » (le bouton de la liste) : la demande s'ouvre ET la ligne cherche, seule.
@@ -88,7 +88,12 @@ test("le langage des artisans (Greg, 8 novembre 2026) : « 36 mètres de Lito »
   await inscrire(page);
   await page.goto("/chantiers/nouveau");
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
-  await chat.getByRole("textbox", { name: "Ton message" }).fill("36 mètres de Lito");
+  await expect(chat.getByText("Bonjour Jean. Que veux-tu préparer ?")).toBeVisible();
+  // Le guide de première visite peut s'ouvrir par-dessus et vider la case en se fermant : on réécrit jusqu'à pouvoir envoyer.
+  await expect(async () => {
+    await chat.getByRole("textbox", { name: "Ton message" }).fill("36 mètres de Lito");
+    await expect(chat.getByRole("button", { name: "Envoyer le message" })).toBeEnabled({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
   const compris = chat.getByRole("region", { name: "J'ai compris" });
   const question = compris.getByRole("group", { name: "Question de Mobiiz" });
