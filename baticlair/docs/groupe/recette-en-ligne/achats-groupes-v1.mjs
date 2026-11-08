@@ -247,7 +247,16 @@ await etape("Entreprise B : rejoint le même achat (« identique », pas de 2e a
   await inscrire(b, B, NOM_B, "8 quai Morand, 22500 Paimpol", "Bruno");
   await confirmerEmail(b, B);
   await b.goto(`${BASE}/achats-groupes`, { waitUntil: "networkidle" });
+  // La base de test garde les achats des recettes passées : on filtre sur le métier, comme un artisan.
+  await b.getByRole("combobox", { name: "Filtrer par métier" }).selectOption({ label: "Couverture" });
+  await b.waitForLoadState("networkidle");
+  // Greg, 8 novembre 2026 : 5 achats visibles, les autres derrière « Voir les N autres achats ouverts ».
+  const autres = b.getByRole("button", { name: /^Voir les \d+ autres achats ouverts$/ });
+  if (await autres.count()) await autres.click();
   await b.getByRole("link", { name: /Ardoise naturelle 32 × 22 · Espagne · 1er choix · 5 mm/ }).first().click();
+  // Le produit d'un achat ouvert par d'autres se rejoint sans se modifier.
+  await voir(b.getByRole("heading", { name: "Ajoute ta quantité" }));
+  verif((await b.getByRole("combobox").count()) === 0, "le produit d'un achat ouvert reste modifiable");
   await b.getByRole("button", { name: "Confirmer 480 pièces par palette" }).click();
   await b.getByRole("button", { name: "Continuer" }).click();
   await b.getByLabel("Quantité (palettes)").fill("4");
