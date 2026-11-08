@@ -184,13 +184,14 @@ await etape("Accueil : achat individuel à part, quatre actions écrites, aucun 
   await sansDebordement(a, "accueil");
 });
 
-await etape("Achats groupés : un seul filtre, le bouton flottant et ses trois choix", a, async () => {
+await etape("Achats groupés : un seul filtre, le bouton flottant et ses deux choix", a, async () => {
   await a.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés" }).click();
   await voir(a.getByRole("heading", { name: "Achats groupés" }));
   await voir(a.getByRole("combobox", { name: "Filtrer par métier" }));
   await a.getByRole("button", { name: "Ajouter un matériau" }).click();
   const ajout = a.getByRole("dialog", { name: "Ajouter un matériau" });
-  for (const nom of [/^Parler à Mobiiz/, /^Choisir dans le catalogue/, /^Depuis un quantitatif/]) await voir(ajout.getByRole("link", { name: nom }));
+  for (const nom of [/^Parler à Mobiiz/, /^Depuis un quantitatif/]) await voir(ajout.getByRole("link", { name: nom }));
+  verif((await ajout.getByRole("link").count()) === 2, "le catalogue est encore proposé");
   await sansDebordement(a, "accueil des achats groupés");
 });
 

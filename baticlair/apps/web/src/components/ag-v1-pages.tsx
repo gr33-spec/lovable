@@ -26,11 +26,12 @@ export function PageNouveauV1() {
   );
 }
 
-/** Greg, 8 novembre 2026 : « Ajouter un matériau » s'ouvre sur la conversation Mobiiz ; un produit déjà choisi (carte d'un
- *  achat, besoin dit dans la conversation) ou « Voir la liste des produits ouverts » ouvre le parcours habituel. */
+/** Greg, 8 novembre 2026 : « Ajouter un matériau » s'ouvre sur la conversation Mobiiz ; seul un produit déjà choisi (carte
+ *  d'un achat, besoin dit dans la conversation) ouvre le parcours habituel. Plus de catalogue (« il manquera toujours des
+ *  produits »). */
 function NouveauV1({ etat }: { etat: EtatV1 }) {
   const params = useSearchParams();
-  return params.get("type") || params.get("liste") ? <ParcoursDirectV1 etat={etat} /> : <ConversationAchatGroupeV1 etat={etat} />;
+  return params.get("type") ? <ParcoursDirectV1 etat={etat} /> : <ConversationAchatGroupeV1 etat={etat} />;
 }
 
 export function PageMesBesoinsV1() {

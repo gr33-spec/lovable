@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BESOIN_VIDE, lienDuBesoin, tourAchatGroupe, uniteDeLaQuestion, type BesoinConv, type ProduitConv } from "../../../../packages/domain/src/groupe/conversation-ag-v1";
@@ -86,11 +85,6 @@ export function ConversationAchatGroupeV1({ etat }: { etat: EtatV1 }) {
                 </Puce>
               ))}
             </div>
-          ) : null}
-          {!besoin.type ? (
-            <Link href="/achats-groupes/nouveau?liste=1" className="min-h-11 pl-10 text-[15px] font-semibold underline underline-offset-4" style={{ color: COULEURS_CHAT.jaune }}>
-              Voir la liste des produits ouverts
-            </Link>
           ) : null}
         </div>
         <BarreSaisie

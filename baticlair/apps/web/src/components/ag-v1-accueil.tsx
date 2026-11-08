@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, ListChecks, Package, Plus, Sparkles, Timer, X } from "lucide-react";
+import { ChevronRight, Package, Plus, Sparkles, Timer, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { CARTE, LigneZone } from "@/components/ag-v1-commun";
@@ -25,8 +25,8 @@ export function finDans(ouvertJusquau: string, maintenant = new Date()): string 
  * L'ACCUEIL DES ACHATS GROUPÉS (V5.2, écran 1 ; RÈGLE CHANGÉE, Greg, 8 novembre 2026, capture : « des filtres mais pas plein
  * de boutons… les vignettes beaucoup trop grosses… uniquement le nom du produit avec une sorte de chronomètre… un bouton
  * flottant ») : « Mes besoins groupés » et le département en une ligne, UN filtre (« Métier »), la liste des achats ouverts
- * réduite au nom du produit et au temps qui reste, et le bouton flottant « Ajouter un matériau » (Mobiiz, catalogue, ou
- * depuis un quantitatif).
+ * réduite au nom du produit et au temps qui reste, et le bouton flottant « Ajouter un matériau » (Mobiiz, ou depuis un
+ * quantitatif).
  */
 export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
   const [lot, setLot] = useState<string>("");
@@ -101,7 +101,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
   );
 }
 
-/** Les trois façons d'ajouter un matériau, écrites en toutes lettres. */
+/** Les deux façons d'ajouter un matériau (Greg, 8 novembre 2026 : « soit par la liste, soit par l'IA » ; le catalogue est retiré, il y manquera toujours des produits). */
 function ChoixAjout({ onFermer }: { onFermer: () => void }) {
   const option = "pressable flex min-h-16 items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 text-left";
   return (
@@ -118,13 +118,6 @@ function ChoixAjout({ onFermer }: { onFermer: () => void }) {
           <span className="flex flex-col">
             <span className="text-[16px] font-bold">Parler à Mobiiz</span>
             <span className="text-[14px] text-muted">Dis ton besoin comme au comptoir, Mobiiz complète avec toi.</span>
-          </span>
-        </Link>
-        <Link href="/achats-groupes/nouveau?liste=1" className={option}>
-          <ListChecks size={22} aria-hidden="true" className="shrink-0" />
-          <span className="flex flex-col">
-            <span className="text-[16px] font-bold">Choisir dans le catalogue</span>
-            <span className="text-[14px] text-muted">Métier, matériau, puis ses caractéristiques.</span>
           </span>
         </Link>
         <Link href="/achats-groupes/quantitatif" className={option}>

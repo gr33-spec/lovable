@@ -7,7 +7,7 @@ import { useState } from "react";
 import { CARTE, LigneZone, Note, VerificationEntreprise, Volumes } from "@/components/ag-v1-commun";
 import { Button, INPUT, PageTitle } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
-import { CASE_UNE_LIGNE, LOTS_V1, dateCourte, dateLongue, jourDans, libelleLot, PHRASE_ADRESSE_PRIVEE, zoneLisible, type BesoinV1, type CompatibiliteV1, type EtatV1, type ProduitV1 } from "@/lib/ag-v1";
+import { CASE_UNE_LIGNE, dateCourte, dateLongue, jourDans, libelleLot, PHRASE_ADRESSE_PRIVEE, zoneLisible, type BesoinV1, type CompatibiliteV1, type EtatV1, type ProduitV1 } from "@/lib/ag-v1";
 
 type Etape = "produit" | "quantite" | "resultat" | "raison" | "verification" | "confirmer";
 
@@ -101,14 +101,13 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
   const params = useSearchParams();
   const [etat, setEtat] = useState(etat0);
   const initial = params.get("type");
-  const [type, setType] = useState<string | null>(initial && etat.produits.some((p) => p.type === initial) ? initial : null);
+  const [type] = useState<string | null>(initial && etat.produits.some((p) => p.type === initial) ? initial : null);
   const produit = etat.produits.find((p) => p.type === type) ?? null;
   const [attributs, setAttributs] = useState<Record<string, string>>(() => {
     const p = etat.produits.find((x) => x.type === initial);
     return p ? Object.fromEntries(p.caracteristiques.map((c) => [c.attribut, params.get(c.attribut) ?? ""]).filter(([, v]) => v)) : {};
   });
   const [etape, setEtape] = useState<Etape>("produit");
-  const [metier, setMetier] = useState("");
   // Le besoin dit dans la conversation Mobiiz arrive prérempli (quantité, unité, réception, date) ; tout reste modifiable.
   const uniteDite = params.get("unite");
   const [unite, setUnite] = useState<string>(() => (uniteDite && produit && [produit.unite.code, ...produit.conditionnements.map((c) => c.unite.code)].includes(uniteDite) ? uniteDite : (produit?.conditionnements[0]?.unite.code ?? produit?.unite.code ?? "")));
@@ -137,13 +136,6 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
   const nomExact = compat?.produit.nom ?? produit?.libelle ?? "";
   const quantiteLisible = produit && qOk ? (cond && parUnite ? `${nf(q)} ${unitesDe(q, cond.unite)} = ${nf(q * parUnite)} ${unitesDe(q * parUnite, produit.unite)}` : `${nf(q)} ${unitesDe(q, produit.unite)}`) : "";
 
-  function choisirProduit(p: ProduitV1) {
-    setType(p.type);
-    setAttributs({});
-    setUnite(p.conditionnements[0]?.unite.code ?? p.unite.code);
-    setParUnite(p.conditionnements[0]?.parDefaut ?? null);
-    setConversionConfirmee(false);
-  }
 
   async function chercher() {
     if (!produit || !reception || !dateBesoin) return;
@@ -218,54 +210,18 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
       {etape === "produit" ? (
         <>
           {!produit ? (
-            // Greg, 8 novembre 2026 : le catalogue en listes déroulantes, le métier d'abord, puis le matériau, puis ses
-            // caractéristiques (marque comprise quand elle fait le produit) ; seuls les métiers ouverts sont proposés.
-            <div className={`${CARTE} flex flex-col`}>
-              <div className="flex flex-col gap-1 border-b border-line px-4 py-3">
-                <label htmlFor="ag-metier" className="text-[14px] font-semibold text-muted">
-                  Métier
-                </label>
-                <select id="ag-metier" value={metier} onChange={(e) => setMetier(e.target.value)} className={INPUT}>
-                  <option value="">Choisis ton métier</option>
-                  {LOTS_V1.filter((l) => etat.produits.some((p) => p.lot === l.id)).map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.libelle}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1 px-4 py-3">
-                <label htmlFor="ag-materiau" className="text-[14px] font-semibold text-muted">
-                  Matériau
-                </label>
-                <select
-                  id="ag-materiau"
-                  value=""
-                  disabled={!metier}
-                  onChange={(e) => {
-                    const p = etat.produits.find((x) => x.type === e.target.value);
-                    if (p) choisirProduit(p);
-                  }}
-                  className={`${INPUT} disabled:opacity-50`}
-                >
-                  <option value="">{metier ? "Choisis le matériau" : "Choisis d'abord ton métier"}</option>
-                  {etat.produits
-                    .filter((p) => p.lot === metier)
-                    .map((p) => (
-                      <option key={p.type} value={p.type}>
-                        {p.libelle}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            </div>
+            // Greg, 8 novembre 2026 : plus de catalogue ; un produit inconnu renvoie à Mobiiz.
+            <p className={`${CARTE} p-4 text-[15px]`}>
+              Ce produit n&apos;est pas reconnu.{" "}
+              <Link href="/achats-groupes/nouveau" className="font-semibold underline underline-offset-4">
+                Dis ton besoin à Mobiiz
+              </Link>
+              .
+            </p>
           ) : (
             <>
               <p className="text-[15px] text-muted">
-                <button type="button" onClick={() => setType(null)} className="min-h-11 underline underline-offset-4">
-                  {libelleLot(produit.lot)}
-                </button>{" "}
-                › {produit.libelle}
+                {libelleLot(produit.lot)} › {produit.libelle}
               </p>
               <ChoixCaracteristiques produit={produit} attributs={attributs} onChange={setAttributs} />
               {produit.conditionnements.length ? (

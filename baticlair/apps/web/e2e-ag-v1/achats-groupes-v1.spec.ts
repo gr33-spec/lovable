@@ -97,10 +97,11 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(page.getByRole("combobox", { name: "Filtrer par métier" })).toBeVisible();
   for (const f of ["Couverture", "Zinguerie", "Isolation", "Bois", "Électricité"]) await expect(page.getByRole("button", { name: f, exact: true })).toHaveCount(0);
   await expect(page.getByText("Mobiiz. Plus on est, moins on paie.")).toBeVisible();
-  // Greg, 8 novembre 2026 : un bouton flottant « Ajouter un matériau » ouvre les trois façons, écrites en toutes lettres.
+  // Greg, 8 novembre 2026 : un bouton flottant « Ajouter un matériau » : Mobiiz ou ta liste ; plus de catalogue.
   await page.getByRole("button", { name: "Ajouter un matériau" }).click();
   const ajout = page.getByRole("dialog", { name: "Ajouter un matériau" });
-  for (const nom of [/^Parler à Mobiiz/, /^Choisir dans le catalogue/, /^Depuis un quantitatif/]) await expect(ajout.getByRole("link", { name: nom })).toBeVisible();
+  for (const nom of [/^Parler à Mobiiz/, /^Depuis un quantitatif/]) await expect(ajout.getByRole("link", { name: nom })).toBeVisible();
+  await expect(ajout.getByRole("link")).toHaveCount(2);
   await capture(page, "01b-ajouter-un-materiau");
   await ajout.getByRole("button", { name: "Fermer" }).click();
   const menu = page.getByRole("navigation", { name: "Navigation principale" });
@@ -109,13 +110,9 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   for (const lien of await page.getByRole("link").all()) expect((await lien.innerText()).trim()).not.toBe("+");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await capture(page, "01-accueil");
-  // 1. Choisir précisément le produit : le catalogue, métier puis matériau.
-  await page.getByRole("button", { name: "Ajouter un matériau" }).click();
-  await page.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Choisir dans le catalogue/ }).click();
+  // 1. Choisir précisément le produit (le produit arrive choisi, comme depuis Mobiiz ou la carte d'un achat).
+  await page.goto("/achats-groupes/nouveau?type=ardoise");
   await expect(page.getByRole("heading", { name: "Choisis précisément le produit" })).toBeVisible();
-  await expect(page.getByLabel("Matériau")).toBeDisabled();
-  await page.getByLabel("Métier").selectOption("couverture");
-  await page.getByLabel("Matériau").selectOption("ardoise");
   await page.getByLabel("Format").selectOption("32x22");
   await page.getByLabel("Origine").selectOption("espagne");
   await page.getByLabel("Choix").selectOption("1");
