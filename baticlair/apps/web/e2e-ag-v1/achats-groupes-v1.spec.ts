@@ -106,7 +106,9 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await ajout.getByRole("button", { name: "Fermer" }).click();
   const menu = page.getByRole("navigation", { name: "Navigation principale" });
   await expect(menu.getByRole("link", { name: "Achats groupés" })).toBeVisible();
-  await expect(menu.getByRole("link", { name: "Créer un quantitatif" })).toBeVisible();
+  // Revue UX (8 novembre 2026) : sur téléphone, plus aucun bouton de création dans la barre (un seul jaune à l'écran).
+  if (test.info().project.name === "ordinateur") await expect(menu.getByRole("link", { name: "Créer un quantitatif" })).toBeVisible();
+  else await expect(menu.getByRole("link", { name: "Créer un quantitatif" })).toHaveCount(0);
   for (const lien of await page.getByRole("link").all()) expect((await lien.innerText()).trim()).not.toBe("+");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await capture(page, "01-accueil");

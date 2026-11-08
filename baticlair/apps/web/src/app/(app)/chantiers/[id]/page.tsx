@@ -18,10 +18,12 @@ import { useResource } from "@/lib/use-resource";
 export default function ChantierPage() {
   const { id } = useParams<{ id: string }>();
   // Ordinateur (6 novembre 2026) : la liste des demandes à gauche, le détail à droite ; téléphone : inchangé.
+  // Revue UX (8 novembre 2026) : à 1280 px, trois colonnes écrasaient la liste (boutons coupés) ; la colonne des demandes
+  // n'apparaît qu'à partir de 1536 px.
   return (
-    <div className="contents xl:grid xl:grid-cols-[13rem_minmax(0,1fr)] xl:items-start xl:gap-6">
+    <div className="contents 2xl:grid 2xl:grid-cols-[13rem_minmax(0,1fr)] 2xl:items-start 2xl:gap-6">
       <DemandesLaterales courant={id} />
-      <div className="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-6">
+      <div className="contents 2xl:flex 2xl:min-w-0 2xl:flex-col 2xl:gap-6">
         <Suspense fallback={<Skeleton card="h-12" lines={3} label="Chargement du chantier…" />}>
           <Chantier />
         </Suspense>

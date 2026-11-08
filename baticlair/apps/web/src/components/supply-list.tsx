@@ -447,8 +447,8 @@ export function SupplyList({
             >
               {onPreview ? (
                 // Sur un iPhone étroit, « Aperçu » garde son œil seul : « Demander les prix à mes négoces » tient sur une ligne.
-                <Button variant="secondary" aria-label="Aperçu" className="shrink-0 px-3.5 text-[15px]" onClick={onPreview}>
-                  <Eye size={18} aria-hidden="true" />
+                <Button variant="secondary" aria-label="Aperçu" className="w-13 shrink-0 px-0! text-[15px] min-[400px]:w-auto min-[400px]:px-3.5!" onClick={onPreview}>
+                  <Eye size={18} aria-hidden="true" className="shrink-0" />
                   <span className="hidden min-[400px]:inline">Aperçu</span>
                 </Button>
               ) : null}
@@ -459,7 +459,7 @@ export function SupplyList({
                 </Button>
               ) : (
                 <Button
-                  className="min-w-0 flex-1 gap-1.5 px-3 text-[15px] font-bold! tracking-[-0.01em] whitespace-nowrap shadow-card!"
+                  className="min-w-0 flex-1 gap-1.5 px-4 py-1.5 text-center text-[15px] leading-tight font-bold! tracking-[-0.01em] text-balance shadow-card!"
                   pending={pending}
                   onClick={() => {
                     if (toCheck.length === 0) return onSend();
@@ -467,7 +467,8 @@ export function SupplyList({
                     document.getElementById(`ligne-${ordered[0]!.key}`)?.scrollIntoView?.({ block: "center", behavior: "smooth" });
                   }}
                 >
-                  {/* Sur un iPhone étroit, l'icône cède sa place pour que le texte tienne sur une ligne. */}
+                  {/* Sur un iPhone étroit, l'icône cède sa place. Revue UX (8 novembre 2026) : le texte débordait du bouton
+                      jaune (iPhone SE, colonne du milieu sur ordinateur) ; il passe à la ligne plutôt que d'être coupé. */}
                   <Send size={18} aria-hidden="true" className="hidden min-[400px]:block" />
                   Demander les prix à mes négoces
                 </Button>

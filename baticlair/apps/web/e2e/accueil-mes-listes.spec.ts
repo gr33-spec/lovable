@@ -84,7 +84,7 @@ async function reponseRecue(page: Page, recipientId: string) {
   expect(res.status(), await res.text()).toBeLessThan(300);
 }
 
-test("À faire (Greg, 6 novembre 2026) : rien à faire, « Aucun besoin en cours » et « Nouveau besoin » ; le bouton jaune et « Nouvelle demande » mènent au même départ ; rien sous la barre du menu", async ({ page }, info) => {
+test("À faire (Greg, 6 novembre 2026) : rien à faire, « Aucun besoin en cours » et « Nouveau besoin » ; « Créer un quantitatif » mène au même départ partout ; rien sous la barre du menu", async ({ page }, info) => {
   await inscrire(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Bonjour Jean", level: 1 })).toBeVisible();
@@ -97,14 +97,16 @@ test("À faire (Greg, 6 novembre 2026) : rien à faire, « Aucun besoin en cours
   const vide = page.getByRole("region", { name: "Achat individuel" });
   await expect(vide).toBeVisible();
   await expect(vide.getByRole("link", { name: /^Créer un quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
-  // Un seul départ : le bouton jaune « Nouveau besoin » du menu, celui de l'écran vide, « Nouvelle demande » de Demandes.
+  // Un seul départ, un seul nom (revue UX, 8 novembre 2026) : la carte de l'écran vide, le bouton de Demandes et, sur
+  // ordinateur, celui de la colonne. Sur téléphone, la barre du bas ne porte plus de bouton de création.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveAttribute("href", "/chantiers/nouveau");
-  await nav.getByRole("link", { name: "Créer un quantitatif" }).click();
+  if (info.project.name === "telephone") await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveCount(0);
+  else await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveAttribute("href", "/chantiers/nouveau");
+  await vide.getByRole("link", { name: /^Créer un quantitatif/ }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   await expect(page.getByRole("dialog", { name: "Nouveau quantitatif" })).toBeVisible();
   await page.goto("/chantiers");
-  await expect(page.getByRole("link", { name: "Nouvelle demande" }).first()).toHaveAttribute("href", "/chantiers/nouveau");
+  await expect(page.getByRole("link", { name: "Créer un quantitatif" }).first()).toHaveAttribute("href", "/chantiers/nouveau");
   // Téléphone : l'écran vide se lit au-dessus de la barre du menu.
   if (info.project.name === "telephone") {
     await page.goto("/");
@@ -192,7 +194,7 @@ test("Mes listes : le nom, la recherche, les filtres, la carte ; supprimer un br
   const brouillon = await liste(page, "Liste de test à jeter");
   await page.goto("/chantiers");
   await expect(page.getByRole("heading", { name: "Mes demandes", level: 1 })).toBeVisible();
-  await expect(page.getByRole("searchbox")).toHaveAttribute("placeholder", "Rechercher une demande ou un chantier…");
+  await expect(page.getByRole("searchbox")).toHaveAttribute("placeholder", "Rechercher une demande…");
   await expect(page.getByRole("group", { name: "Filtrer" }).getByRole("button")).toHaveText(["Toutes", "À préparer", "Envoyées", "Réponses reçues", "Terminées"]);
   await expect(page.getByRole("button", { name: "Toutes" })).toHaveAttribute("aria-pressed", "true");
   const carte = page.getByRole("link", { name: /^Liste de test à jeter/ });
@@ -334,7 +336,7 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   // Le menu du bas : libellés à 12 px, sans déborder.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  for (const nom of ["À faire", "Achats groupés", "Créer un quantitatif", "Demandes"]) {
+  for (const nom of ["À faire", "Demandes", "Achats groupés"]) {
     const lien = nav.getByRole("link", { name: nom });
     expect(await lien.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
     const b = (await lien.boundingBox())!;
@@ -414,6 +416,9 @@ test("Dossier d'une demande (Greg, 6 novembre 2026) : Suivi, Offres, Documents ;
   await expect(page.getByRole("tabpanel", { name: "Suivi" })).toBeVisible();
   await page.goto(`/chantiers/${projectId}?onglet=reponses`);
   await expect(onglets.getByRole("tab", { name: "Suivi" })).toHaveAttribute("aria-selected", "true");
-  // Ordinateur : la liste des demandes reste à gauche.
-  if (page.viewportSize()!.width >= 1280) await expect(page.getByRole("navigation", { name: "Mes demandes" }).getByRole("link", { name: /Toiture Le Goff/ })).toHaveAttribute("aria-current", "page");
+  // Grand écran (1536 px et plus, revue UX du 8 novembre 2026) : la liste des demandes reste à gauche.
+  if (page.viewportSize()!.width >= 1280) {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await expect(page.getByRole("navigation", { name: "Mes demandes" }).getByRole("link", { name: /Toiture Le Goff/ })).toHaveAttribute("aria-current", "page");
+  }
 });

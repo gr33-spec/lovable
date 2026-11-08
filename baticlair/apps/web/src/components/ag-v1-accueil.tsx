@@ -53,10 +53,10 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
       </Link>
       {!etat.zone ? <LigneZone zone={null} /> : null}
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-[18px] font-extrabold">Achats ouverts</h2>
-        <label className="flex items-center gap-2 text-[15px]">
+        <h2 className="text-[18px] font-extrabold whitespace-nowrap">Achats ouverts</h2>
+        <label className="flex min-w-0 items-center gap-2 text-[15px]">
           <span className="text-muted">Métier</span>
-          <select aria-label="Filtrer par métier" value={lot} onChange={(e) => setLot(e.target.value)} className="min-h-11 rounded-full border border-line bg-surface px-3 text-[15px] font-semibold">
+          <select aria-label="Filtrer par métier" value={lot} onChange={(e) => setLot(e.target.value)} className="min-h-11 max-w-[11rem] min-w-0 truncate rounded-full border border-line bg-surface px-3 text-[15px] font-semibold">
             <option value="">Tous</option>
             {metiers.map((f) => (
               <option key={f.id} value={f.id}>
@@ -69,7 +69,11 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
       {data === null ? (
         <Skeleton card="h-24" lines={0} label="Chargement des achats groupés…" />
       ) : data.achats.length === 0 ? (
-        <p className={`${CARTE} p-4 text-[15px] text-muted`}>Aucun achat groupé ouvert{lot ? " pour ce métier" : ""} pour le moment. Touche « Ajouter un matériau » pour ouvrir le tien.</p>
+        // Revue UX (8 novembre 2026) : liste vide, l'action vit dans la carte (le bouton flottant recouvrait ce texte).
+        <div className={`${CARTE} flex flex-col items-start gap-3 p-4`}>
+          <p className="text-[15px] text-muted">Aucun achat groupé ouvert{lot ? " pour ce métier" : ""} pour le moment. Ajoute ton matériau : il ouvre le premier.</p>
+          <BoutonAjouter onClick={() => setChoix(true)} />
+        </div>
       ) : (
         <ul aria-label="Achats groupés ouverts" className={`${CARTE} flex flex-col`}>
           {data.achats.map((a) => (
@@ -89,13 +93,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         </ul>
       )}
       <p className="pt-2 text-center text-[13px] text-muted">{SIGNATURE}</p>
-      <button
-        type="button"
-        onClick={() => setChoix(true)}
-        className="pressable fixed right-4 bottom-[calc(var(--nav-height)+var(--nav-gap)+12px)] z-30 flex min-h-13 items-center gap-2 rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent shadow-float lg:bottom-8"
-      >
-        <Plus size={20} aria-hidden="true" /> Ajouter un matériau
-      </button>
+      {data && data.achats.length > 0 ? <BoutonAjouter flottant onClick={() => setChoix(true)} /> : null}
       {choix ? <ChoixAjout onFermer={() => setChoix(false)} /> : null}
     </div>
   );
@@ -129,5 +127,18 @@ function ChoixAjout({ onFermer }: { onFermer: () => void }) {
         </Link>
       </div>
     </div>
+  );
+}
+
+/** « Ajouter un matériau » : flottant au-dessus de la liste, ou dans la carte quand aucun achat n'est ouvert. */
+function BoutonAjouter({ flottant = false, onClick }: { flottant?: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`pressable flex min-h-13 items-center gap-2 rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent ${flottant ? "fixed right-4 bottom-[calc(var(--nav-height)+var(--nav-gap)+12px)] z-30 shadow-float lg:bottom-8" : "shadow-card"}`}
+    >
+      <Plus size={20} aria-hidden="true" /> Ajouter un matériau
+    </button>
   );
 }

@@ -154,7 +154,8 @@ export function AccueilMaquette() {
         <h2 id="a-individuel" className="text-[15px] font-bold text-muted">
           Achat individuel
         </h2>
-        <ActionExplicite href="/chantiers/nouveau" titre="Créer un quantitatif" detail="Ta liste de matériaux, à faire chiffrer par tes négoces." icone={<ClipboardList size={22} aria-hidden="true" />} principale />
+        {/* Revue UX (8 novembre 2026) : jaune seulement quand rien n'est à faire ; sinon « Continuer » reste le seul jaune. */}
+        <ActionExplicite href="/chantiers/nouveau" titre="Créer un quantitatif" detail="Ta liste de matériaux, à faire chiffrer par tes négoces." icone={<ClipboardList size={22} aria-hidden="true" />} principale={charge && !premiere} />
       </section>
       {agV1 ? (
         <section aria-labelledby="a-groupes" className="flex flex-col gap-2">

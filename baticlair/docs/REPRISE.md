@@ -34,6 +34,10 @@ complètes seulement avant un déploiement important, et en le disant.
 
 ## En cours
 
+SUIVI 184 (8 novembre 2026) : revue UX du site entier (menu du bas à trois onglets, une action un nom, boutons qui ne
+coupent plus leur texte, écrans vides avec leur action). Après les suites vertes : push sur la branche de test, domaines
+test.mobiiz.fr / api-test.mobiiz.fr rattachés, recette en ligne. Attendre le retour de Greg (un designer va juger).
+
 SUIVI 179 (7 novembre 2026) : V1 des achats groupés EN LIGNE sur test.mobiiz.fr (commit e1998d75 ; déploiements
 `dpl_JAck1CBYB3Ud2WrmoCtqcCinkmUH` site, `dpl_CKpzsiMXCQDCR3bSG597WowKDvWv` API) ; migration `20261108090000_achats_groupes_v1`
 appliquée à la base de test ; recette en ligne 17/17 sur iPhone SE, Android, ordinateur. Retour arrière :

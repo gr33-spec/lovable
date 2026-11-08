@@ -95,24 +95,26 @@ export function AppNav() {
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
           colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}
-      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[1fr_1fr_auto_1fr]" : "grid-cols-[1fr_auto_1fr]"} rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
+      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-3" : "grid-cols-2"} rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
         <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
           <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
         </span>
         {link(accueilItem)}
+        {link(listesItem)}
         {groupe ? link(groupeItem) : null}
         {/* Greg, 1er novembre 2026 : le « + » ouvre LE départ de création d'une liste, le même que « Créer une liste » de
             l'accueil et « Nouvelle liste » de Mes listes (un seul point de départ, une seule expérience). */}
         {/* Greg, 6 novembre 2026 : trois espaces (À faire, Demandes, Groupes) et le bouton jaune « Nouveau besoin » ; le
             profil, l'entreprise et les négoces passent par l'avatar sur téléphone. */}
         {/* Greg, 7 novembre 2026 : « aucun + seul pour une action principale » ; le bouton jaune dit ce qu'il crée. */}
-        <Link href="/chantiers/nouveau" className="pressable flex min-h-13 flex-col items-center justify-center gap-0.5 px-1 text-center text-[12px] leading-tight font-bold lg:order-[-1] lg:mb-5 lg:h-12 lg:min-h-0 lg:flex-row lg:justify-start lg:gap-2 lg:rounded-xl lg:bg-accent lg:px-4 lg:text-[15px] lg:text-on-accent lg:shadow-[0_12px_30px_rgba(254,210,6,0.18)]">
-          <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-accent text-on-accent shadow-float lg:size-auto lg:bg-transparent lg:shadow-none">
-            <Plus size={22} strokeWidth={2.6} />
-          </span>
+        {/* Revue UX (8 novembre 2026) : sur téléphone, plus de rond jaune au milieu de la barre (libellé sur deux lignes,
+            « Demandes » coupé, et deux boutons jaunes empilés sur Achats groupés). La barre ne fait que naviguer : trois
+            onglets égaux. Chaque écran porte sa propre création (« Créer un quantitatif » sur À faire et Demandes,
+            « Ajouter un matériau » sur Achats groupés). Ordinateur : le bouton reste en tête de la colonne. */}
+        <Link href="/chantiers/nouveau" className="pressable hidden lg:order-[-1] lg:mb-5 lg:flex lg:h-12 lg:items-center lg:gap-2 lg:rounded-xl lg:bg-accent lg:px-4 lg:text-[15px] lg:font-bold lg:text-on-accent lg:shadow-[0_12px_30px_rgba(254,210,6,0.18)]">
+          <Plus aria-hidden="true" size={22} strokeWidth={2.6} />
           <span>Créer un quantitatif</span>
         </Link>
-        {link(listesItem)}
         {link(negocesItem, true)}
         <span aria-hidden="true" className="hidden grow lg:block" />
         {link(profilItem, true)}

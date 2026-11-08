@@ -14,7 +14,7 @@ export function DemandesLaterales({ courant }: { courant: string }) {
   const { data } = useResource(useCallback((signal: AbortSignal) => api<ProjectPage>("/v1/projects?limit=30&resume=1", { signal }).catch(() => null), []));
   const items = (data?.items ?? []).filter((p) => p.status !== "archived");
   return (
-    <nav aria-label="Mes demandes" className="hidden xl:sticky xl:top-8 xl:flex xl:max-h-[calc(100dvh-4rem)] xl:flex-col xl:gap-2 xl:overflow-y-auto">
+    <nav aria-label="Mes demandes" className="hidden 2xl:sticky 2xl:top-8 2xl:flex 2xl:max-h-[calc(100dvh-4rem)] 2xl:flex-col 2xl:gap-2 2xl:overflow-y-auto">
       <Link href="/chantiers" className="px-2 text-[13px] font-bold tracking-wide text-muted uppercase">
         Mes demandes
       </Link>

@@ -152,12 +152,13 @@ function MesListes() {
   const choisies = items && selection ? items.filter((p) => selection.has(p.id)) : [];
   return (
     <>
-      {/* « Mes demandes » + « Nouvelle demande » + Aide débordaient d'un iPhone SE : les actions passent à la ligne. */}
+      {/* « Mes demandes » + « Créer un quantitatif » + Aide débordaient d'un iPhone SE : les actions passent à la ligne.
+          Revue UX (8 novembre 2026) : une action, un nom partout (« Créer un quantitatif », jamais « Nouvelle demande »). */}
       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
         <PageTitle>Mes demandes</PageTitle>
         <span className="flex items-center gap-3">
           <ButtonLink href="/chantiers/nouveau" className="min-h-11 shrink-0 px-4 text-[15px] whitespace-nowrap">
-            Nouvelle demande
+            Créer un quantitatif
           </ButtonLink>
           <AideBouton sujet="chantiers" />
         </span>
@@ -175,7 +176,7 @@ function MesListes() {
               enterKeyHint="search"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Rechercher une demande ou un chantier…"
+              placeholder="Rechercher une demande…"
               className="min-h-11 grow bg-transparent text-[16px] outline-none placeholder:text-muted"
             />
           </div>
@@ -260,7 +261,7 @@ function MesListes() {
           </EmptyState>
         ) : (
           <EmptyState icon={<ClipboardList size={40} />} title={VIDES[filter]}>
-            {filter === "toutes" || filter === "a-preparer" ? <ButtonLink href="/chantiers/nouveau">Nouvelle demande</ButtonLink> : null}
+            {filter === "toutes" || filter === "a-preparer" ? <ButtonLink href="/chantiers/nouveau">Créer un quantitatif</ButtonLink> : null}
           </EmptyState>
         )
       ) : null}

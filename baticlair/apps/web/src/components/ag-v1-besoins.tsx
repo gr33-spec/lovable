@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -96,6 +96,10 @@ export function MesBesoinsV1() {
         <div className={`${CARTE} flex flex-col gap-2 p-4`}>
           <p className="text-[17px] font-bold">Aucun besoin groupé pour le moment</p>
           <p className="text-[15px] text-muted">Les premiers achats groupés se forment avec les premiers besoins ouverts.</p>
+          {/* Revue UX (8 novembre 2026) : un écran vide propose l'action qui le remplit. */}
+          <Link href="/achats-groupes/nouveau" className="pressable inline-flex min-h-12 items-center gap-2 self-start rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent shadow-card">
+            <Plus size={20} aria-hidden="true" /> Ajouter un matériau
+          </Link>
           <Link href="/achats-groupes" className="min-h-11 py-2 text-[15px] font-semibold underline underline-offset-4">
             Voir les achats groupés
           </Link>
