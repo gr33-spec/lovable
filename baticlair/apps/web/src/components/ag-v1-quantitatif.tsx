@@ -96,7 +96,10 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
       }),
     [data, precisions, etat.produits],
   );
-  const parLot = LOTS_V1.map((lot) => ({ lot, lignes: lignes.filter((l) => l.lot === lot.id) })).filter((g) => g.lignes.length > 0);
+  // Les lignes qu'on ne peut pas grouper (déjà demandées, pas encore ouvertes…) sont repliées en bas : rien n'est caché.
+  const groupables = (l: LigneQuantitatifV1) => l.selectionnable || l.mention === "a_preciser";
+  const parLotGroupables = LOTS_V1.map((lot) => ({ lot, lignes: lignes.filter((l) => l.lot === lot.id && groupables(l)) })).filter((g) => g.lignes.length > 0);
+  const nonGroupables = lignes.filter((l) => !groupables(l));
   const nb = lignes.filter((l) => coches.has(l.key) && l.selectionnable).length;
 
   async function changerLot(l: LigneQuantitatifV1, lot: string) {
@@ -156,7 +159,8 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           }),
         },
       });
-      router.push(r.besoins.length === 1 ? `/achats-groupes/besoins/${r.besoins[0]!.id}?nouveau=1` : "/achats-groupes/mes-besoins?nouveaux=1");
+      // UX simplifiée (Greg, 8 novembre 2026) : retour à l'onglet « Achats groupés », les besoins en tête.
+      router.push(`/achats-groupes?ajoutes=${r.besoins.length}`);
     } catch (e) {
       setErreur(messageErreur(e, e instanceof ApiError && e.reason === "besoin_identique" ? { besoin_identique: "Un achat groupé identique vient de s'ouvrir : vérifie à nouveau, chaque ligne le rejoindra." } : {}));
       if (e instanceof ApiError && e.reason === "besoin_identique") setCompat({});
@@ -170,12 +174,15 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   if (etape === "selection")
     return (
       <div className="flex flex-col gap-4 pb-44 lg:mx-auto lg:pb-0 lg:w-full lg:max-w-[44rem]">
-        <p className="text-[15px] font-semibold text-muted">Depuis un quantitatif</p>
-        <PageTitle>{data.nom}</PageTitle>
-        <Button variant="secondary" className="self-start" disabled={!lignes.some((l) => l.mention === "recommande")} onClick={() => setCoches(new Set(lignes.filter((l) => l.mention === "recommande").map((l) => l.key)))}>
-          Sélectionner les recommandations
-        </Button>
-        {parLot.map(({ lot, lignes: ls }) => (
+        <p className="text-[15px] font-semibold text-muted">{data.nom}</p>
+        <PageTitle>Quels articles grouper ?</PageTitle>
+        <p className="text-[16px] text-muted">Coche les articles à acheter avec d&apos;autres artisans. Les autres restent dans ton quantitatif, pour tes négoces.</p>
+        {lignes.some((l) => l.mention === "recommande") ? (
+          <Button variant="secondary" className="self-start" onClick={() => setCoches(new Set(lignes.filter((l) => l.mention === "recommande").map((l) => l.key)))}>
+            Cocher les articles conseillés
+          </Button>
+        ) : null}
+        {parLotGroupables.map(({ lot, lignes: ls }) => (
           <section key={lot.id} aria-labelledby={`lot-${lot.id}`} className="flex flex-col gap-2">
             <h2 id={`lot-${lot.id}`} className="text-[20px] font-extrabold">
               {lot.libelle}
@@ -197,23 +204,27 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
                       <button type="button" onClick={() => setPourquoi(pourquoi === l.key ? null : l.key)} aria-expanded={pourquoi === l.key} className="min-h-11 text-[14px] font-semibold underline underline-offset-4">
                         Pourquoi ?
                       </button>
-                      <label className="sr-only" htmlFor={`lot-${l.key}`}>
-                        Lot de la ligne {l.designation}
-                      </label>
-                      <select id={`lot-${l.key}`} value={l.lot} onChange={(e) => void changerLot(l, e.target.value)} className="min-h-11 rounded-full border border-line bg-surface px-3 text-[14px] font-semibold">
-                        {LOTS_V1.map((x) => (
-                          <option key={x.id} value={x.id}>
-                            Lot : {x.libelle}
-                          </option>
-                        ))}
-                      </select>
                       {l.mention === "a_preciser" && produit && l.produit?.manquantes.length ? (
                         <button type="button" onClick={() => setOuvertPreciser(ouvertPreciser === l.key ? null : l.key)} className="min-h-11 text-[14px] font-semibold underline underline-offset-4">
                           Préciser
                         </button>
                       ) : null}
                     </div>
-                    {pourquoi === l.key ? <p className="pl-8 text-[14px] text-muted">{l.pourquoi}</p> : null}
+                    {pourquoi === l.key ? (
+                      <div className="flex flex-col gap-2 pl-8">
+                        <p className="text-[14px] text-muted">{l.pourquoi}</p>
+                        <label className="sr-only" htmlFor={`lot-${l.key}`}>
+                          Lot de la ligne {l.designation}
+                        </label>
+                        <select id={`lot-${l.key}`} value={l.lot} onChange={(e) => void changerLot(l, e.target.value)} className="min-h-11 self-start rounded-full border border-line bg-surface px-3 text-[14px] font-semibold">
+                          {LOTS_V1.map((x) => (
+                            <option key={x.id} value={x.id}>
+                              Lot : {x.libelle}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : null}
                     {ouvertPreciser === l.key && produit && l.produit ? (
                       <div className="pl-8">
                         <ChoixCaracteristiques produit={produit} attributs={{ ...l.produit.attributs, ...(precisions[l.key] ?? {}) }} onChange={(a) => setPrecisions((p) => ({ ...p, [l.key]: a }))} />
@@ -225,15 +236,30 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
             </ul>
           </section>
         ))}
+        {nonGroupables.length ? (
+          <details className={`${CARTE} p-4`}>
+            <summary className="min-h-11 cursor-pointer text-[15px] font-semibold">
+              {nonGroupables.length} article{nonGroupables.length > 1 ? "s" : ""} hors achats groupés
+            </summary>
+            <ul className="mt-2 flex flex-col gap-2">
+              {nonGroupables.map((l) => (
+                <li key={l.key} className="flex flex-col">
+                  <span className="text-[15px] font-semibold break-words">{l.designation}</span>
+                  <span className="text-[14px] text-muted">{l.texte}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
         {erreur ? (
           <p role="alert" className="text-[15px] font-semibold text-danger">
             {erreur}
           </p>
         ) : null}
         <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 border-t border-line bg-ground px-4 pt-3 pb-2 lg:static lg:border-t-0 lg:bg-transparent lg:p-0">
-          {nb === 0 ? <p role="status" className="pb-2 text-center text-[14px] font-semibold text-ink">Coche au moins une ligne compatible pour continuer.</p> : null}
+          {nb === 0 ? <p role="status" className="pb-2 text-center text-[14px] font-semibold text-ink">Coche au moins un article pour continuer.</p> : null}
           <Button className="w-full" disabled={nb === 0} onClick={continuer}>
-            {nb === 0 ? "Sélectionne des lignes" : `Continuer avec ${nb} ligne${nb > 1 ? "s" : ""}`}
+            {nb === 0 ? "Choisis des articles" : `Continuer avec ${nb} article${nb > 1 ? "s" : ""}`}
           </Button>
         </div>
       </div>
@@ -242,8 +268,9 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   const plusieurs = choisies.length > 1;
   return (
     <div className="flex flex-col gap-4 pb-44 lg:mx-auto lg:pb-0 lg:w-full lg:max-w-[44rem]">
-      <p className="text-[15px] font-semibold text-muted">Depuis un quantitatif</p>
-      <PageTitle>{plusieurs ? `Confirmer mes ${choisies.length} besoins` : "Confirmer mon besoin"}</PageTitle>
+      <p className="text-[15px] font-semibold text-muted">{data.nom}</p>
+      <PageTitle>Vérifie et valide</PageTitle>
+      <p className="text-[16px] text-muted">Mobiiz met chaque article dans un achat groupé compatible, ou en ouvre un.</p>
       <div className={`${CARTE} flex flex-col gap-4 p-4`}>
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 text-[14px] font-semibold">Réception (obligatoire)</legend>
@@ -296,9 +323,9 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
               </p>
               {k && k !== "erreur" ? (
                 k.compatible ? (
-                  <p className="text-[15px] font-bold">Rejoindra cet achat groupé après confirmation</p>
+                  <p className="text-[15px] font-bold">Rejoint un achat groupé ouvert</p>
                 ) : k.ouverture.possible ? (
-                  <p className="text-[15px] font-bold">Ouvrira un nouvel achat groupé après confirmation</p>
+                  <p className="text-[15px] font-bold">Ouvre un nouvel achat groupé</p>
                 ) : (
                   <p className="text-[15px] font-semibold text-danger">{k.ouverture.message}</p>
                 )
@@ -338,7 +365,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           </p>
         ) : null}
         <Button className="w-full" pending={pending} disabled={!coche || !pret || !etat.verification.complete} onClick={() => void confirmer()}>
-          {plusieurs ? `Confirmer mes ${choisies.length} besoins` : "Confirmer mon besoin"}
+          {plusieurs ? `Valider mes ${choisies.length} articles` : "Valider"}
         </Button>
         <button type="button" onClick={() => setEtape("selection")} className="min-h-11 self-center text-[15px] font-semibold underline underline-offset-4">
           Revenir à la sélection

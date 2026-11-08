@@ -12,6 +12,7 @@ import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, Qu
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
 import { RechercheRapprochement } from "@/components/rapprochement";
 import { ListePrete } from "@/components/liste-prete";
+import { useAgV1 } from "@/lib/ag-v1";
 import { specialiteDuMetier, type LotAEnvoyer } from "../../../../packages/domain/src/groupe/specialites";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
@@ -77,6 +78,7 @@ export function ProjectTakeoff({
     avantEnvoiRef.current = lancer;
   }, []);
   const quantitatif = raw?.items[0] ?? null;
+  const agV1 = !!useAgV1().etat;
   const data = useMemo(() => {
     if (!raw) return null;
     const q = raw.items[0];
@@ -477,8 +479,25 @@ export function ProjectTakeoff({
   const persoEtGroupe = quantitatif ? (
     <div className="flex flex-col gap-4">
       <DemandesPerso projectId={projectId} articles={aAcheter} lots={lotsEnvoi} canCreate archived={archived} dejaEnvoye={sent} principal={!listShown} bouton={false} />
-      {/* Deux parcours reliés (Greg, 7 novembre 2026, capture « Ton quantitatif est prêt ») : UNE carte, la demande de prix et
-          l'interrupteur du regroupement ligne par ligne ; les anciens réglages derrière « Plus d'options de regroupement ». */}
+      {/* UX SIMPLIFIÉE (Greg, 8 novembre 2026) : réglage des achats groupés allumé, la fiche porte UN bouton clair,
+          « Ajouter aux achats groupés » (sélection des articles, quantités, validation) ; les anciens réglages du
+          regroupement restent, repliés sous « Autres options de regroupement ». */}
+      {agV1 ? (
+        <section aria-label="Achats groupés" className="flex flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card">
+          <p className="text-[17px] font-extrabold">Achats groupés</p>
+          <p className="text-[15px] text-muted">Achète certains articles avec d&apos;autres artisans pour payer moins cher. Tu choisis lesquels.</p>
+          <ButtonLink href={`/achats-groupes/quantitatif/${projectId}`} variant="secondary" className="w-full text-center">
+            Ajouter aux achats groupés
+          </ButtonLink>
+          <details>
+            <summary className="min-h-11 cursor-pointer py-2 text-[14px] font-semibold text-muted">Autres options de regroupement</summary>
+            <div className="flex flex-col gap-3 pt-2">
+              {!sent ? <TenterPrixDeGroupe projectId={projectId} /> : null}
+              <RechercheRapprochement projectId={projectId} />
+            </div>
+          </details>
+        </section>
+      ) : (
       <ListePrete
         projectId={projectId}
         nbArticles={aAcheter.length + takeoff.purchase.toQuote.length}
@@ -491,6 +510,7 @@ export function ProjectTakeoff({
           </>
         }
       />
+      )}
     </div>
   ) : null;
   return (

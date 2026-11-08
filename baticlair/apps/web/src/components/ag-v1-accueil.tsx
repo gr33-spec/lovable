@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronRight, Package, Plus, Sparkles, Timer, X } from "lucide-react";
+import { ChevronRight, Package, Sparkles, Timer, X } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { CARTE, LigneZone } from "@/components/ag-v1-commun";
 import { PageTitle, Skeleton } from "@/components/ui";
@@ -42,7 +43,8 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
   const fetcher = useCallback((s: AbortSignal) => api<{ achats: AchatV1[] }>(`/v1/ag/achats${lot ? `?lot=${lot}` : ""}`, { signal: s }), [lot]);
   const { data } = useResource(fetcher);
   const { data: mes } = useResource(useCallback((s: AbortSignal) => api<{ aFaire: BesoinV1[]; enCours: BesoinV1[] }>("/v1/ag/besoins", { signal: s }).catch(() => ({ aFaire: [], enCours: [] })), []));
-  const resume = mes ? [mes.aFaire.length ? `${mes.aFaire.length} action${mes.aFaire.length > 1 ? "s" : ""} à faire` : null, mes.enCours.length ? `${mes.enCours.length} en cours` : null].filter(Boolean).join(" · ") : "";
+  const mesBesoins = mes ? [...mes.aFaire, ...mes.enCours] : [];
+  const ajoutes = useSearchParams().get("ajoutes");
   // Seuls les métiers qui ont des produits ouverts sont proposés.
   const metiers = FILTRES_V1.filter((f) => etat.produits.some((p) => p.lot === f.id));
 
@@ -50,15 +52,47 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
     <div className="flex flex-col gap-4 pb-24 lg:mx-auto lg:w-full lg:max-w-[48rem]">
       <div className="flex flex-col gap-1">
         <PageTitle>Achats groupés</PageTitle>
-        <p className="text-[15px] leading-relaxed text-muted">Regroupe tes besoins avec d&apos;autres entreprises de ton département pour mieux négocier.</p>
+        <p className="text-[15px] leading-relaxed text-muted">Achète avec d&apos;autres artisans de ton secteur{etat.zone ? ` · ${zoneLisible(etat.zone)}` : ""}, pour payer moins cher. Tu décides à la réception de l&apos;offre.</p>
       </div>
-      <Link href="/achats-groupes/mes-besoins" className={`${CARTE} pressable flex min-h-14 items-center gap-3 px-4 py-3`}>
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="text-[16px] font-bold">Mes besoins groupés</span>
-          <span className="text-[14px] text-muted">{[resume, etat.zone ? zoneLisible(etat.zone) : null].filter(Boolean).join(" · ")}</span>
-        </span>
-        <ChevronRight size={20} aria-hidden="true" className="shrink-0" />
-      </Link>
+      {ajoutes ? (
+        <p role="status" className="rounded-xl bg-ok-bg p-3 text-[15px] font-semibold text-ok">
+          {Number(ajoutes) > 1 ? `C'est fait : tes ${ajoutes} articles sont dans les achats groupés.` : "C'est fait : ton article est dans les achats groupés."} Ce n&apos;est pas une commande : tu décideras à la réception de l&apos;offre.
+        </p>
+      ) : null}
+      {/* UX SIMPLIFIÉE (Greg, 8 novembre 2026) : l'onglet montre seulement « Mes besoins » puis « Achats ouverts ». */}
+      <section aria-labelledby="ag-mes-besoins" className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 id="ag-mes-besoins" className="text-[18px] font-extrabold">
+            Mes besoins
+          </h2>
+          {mesBesoins.length ? (
+            <Link href="/achats-groupes/mes-besoins" className="min-h-11 py-2 text-[15px] font-semibold underline underline-offset-4">
+              Tout voir
+            </Link>
+          ) : null}
+        </div>
+        {mes === null ? (
+          <Skeleton card="h-16" lines={0} label="Chargement de tes besoins…" />
+        ) : mesBesoins.length === 0 ? (
+          <p className={`${CARTE} p-4 text-[15px] text-muted`}>Aucun pour le moment. Ouvre un de tes quantitatifs et touche « Ajouter aux achats groupés ».</p>
+        ) : (
+          <ul aria-label="Mes besoins" className={`${CARTE} flex flex-col`}>
+            {mesBesoins.slice(0, 5).map((b) => (
+              <li key={b.id} className="border-b border-line last:border-b-0">
+                <Link href={`/achats-groupes/besoins/${b.id}`} className="pressable flex min-h-14 items-center gap-3 px-4 py-2.5">
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-[16px] leading-snug font-semibold break-words">{b.nom}</span>
+                    <span className="text-[13px] text-muted">
+                      {b.quantite.lisible} · {b.statut.libelle}
+                    </span>
+                  </span>
+                  <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       {!etat.zone ? <LigneZone zone={null} /> : null}
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-[18px] font-extrabold whitespace-nowrap">Achats ouverts</h2>
@@ -79,8 +113,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
       ) : data.achats.length === 0 ? (
         // Revue UX (8 novembre 2026) : liste vide, l'action vit dans la carte (le bouton flottant recouvrait ce texte).
         <div className={`${CARTE} flex flex-col items-start gap-3 p-4`}>
-          <p className="text-[15px] text-muted">Aucun achat groupé ouvert{lot ? " pour ce métier" : ""} pour le moment. Ajoute ton matériau : il ouvre le premier.</p>
-          <BoutonAjouter onClick={() => setChoix(true)} />
+          <p className="text-[15px] text-muted">Aucun achat groupé ouvert{lot ? " pour ce métier" : ""} pour le moment. Les articles que tu ajoutes depuis ton quantitatif en ouvrent un.</p>
         </div>
       ) : (
         <ul aria-label="Achats groupés ouverts" className={`${CARTE} flex flex-col`}>
@@ -106,7 +139,11 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         </button>
       ) : null}
       <p className="pt-2 text-center text-[13px] text-muted">{SIGNATURE}</p>
-      {data && data.achats.length > 0 ? <BoutonAjouter flottant onClick={() => setChoix(true)} /> : null}
+      {/* Les autres façons d'ajouter (Mobiiz, un quantitatif choisi ici) restent, en option discrète : le chemin principal
+          part du quantitatif (« Ajouter aux achats groupés »). */}
+      <button type="button" onClick={() => setChoix(true)} className="min-h-11 self-center py-2 text-[15px] font-semibold underline underline-offset-4">
+        Ajouter un matériau sans quantitatif
+      </button>
       {choix ? <ChoixAjout onFermer={() => setChoix(false)} /> : null}
     </div>
   );
@@ -140,18 +177,5 @@ function ChoixAjout({ onFermer }: { onFermer: () => void }) {
         </Link>
       </div>
     </div>
-  );
-}
-
-/** « Ajouter un matériau » : flottant au-dessus de la liste, ou dans la carte quand aucun achat n'est ouvert. */
-function BoutonAjouter({ flottant = false, onClick }: { flottant?: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`pressable flex min-h-13 items-center gap-2 rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent ${flottant ? "fixed right-4 bottom-[calc(var(--nav-height)+var(--nav-gap)+12px)] z-30 shadow-float lg:bottom-8" : "shadow-card"}`}
-    >
-      <Plus size={20} aria-hidden="true" /> Ajouter un matériau
-    </button>
   );
 }
