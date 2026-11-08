@@ -167,6 +167,12 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(b.page.getByRole("list", { name: "Achats groupés ouverts" }).getByText(/^Se termine dans \d+ jours$/).first()).toBeVisible();
   await capture(b.page, "08b-liste-compacte");
   await b.page.getByRole("link", { name: /Ardoise naturelle 32 × 22 · Espagne · 1er choix · 5 mm/ }).click();
+  // Greg, 8 novembre 2026 : le produit d'un achat ouvert par d'autres ne se modifie pas ; on ajoute sa quantité.
+  await expect(b.page.getByRole("heading", { name: "Ajoute ta quantité" })).toBeVisible();
+  await expect(b.page.getByText("Achat groupé ouvert par d'autres entreprises : tu ajoutes ta quantité, le produit ne se modifie pas.")).toBeVisible();
+  await expect(b.page.getByRole("combobox")).toHaveCount(0);
+  await expect(b.page.getByRole("definition").filter({ hasText: "32 × 22" })).toBeVisible();
+  await capture(b.page, "08c-produit-verrouille");
   await b.page.getByRole("button", { name: "Confirmer 480 pièces par palette" }).click();
   await b.page.getByRole("button", { name: "Continuer" }).click();
   await b.page.getByLabel("Quantité (palettes)").fill("4");

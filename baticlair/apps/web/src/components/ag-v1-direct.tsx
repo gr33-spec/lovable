@@ -43,6 +43,26 @@ export function ChoixCaracteristiques({ produit, attributs, onChange }: { produi
   );
 }
 
+/**
+ * Le produit d'un achat déjà ouvert par d'autres entreprises, en lecture seule (Greg, 8 novembre 2026) : on le rejoint
+ * tel quel ; un produit différent passe par Mobiiz et ouvre un autre achat.
+ */
+function ProduitVerrouille({ produit, attributs }: { produit: ProduitV1; attributs: Record<string, string> }) {
+  return (
+    <div className={`${CARTE} flex flex-col gap-3 p-4`}>
+      <p className="text-[15px] text-muted">Achat groupé ouvert par d&apos;autres entreprises : tu ajoutes ta quantité, le produit ne se modifie pas.</p>
+      <dl aria-label="Produit de l'achat groupé" className="flex flex-col">
+        {produit.caracteristiques.map((c) => (
+          <div key={c.attribut} className="flex items-baseline justify-between gap-3 border-b border-line py-2 last:border-b-0">
+            <dt className="text-[14px] text-muted">{c.libelle}</dt>
+            <dd className="text-right text-[15px] font-semibold">{c.options.find((o) => o.valeur === attributs[c.attribut])?.libelle ?? attributs[c.attribut]}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
 /** « 1 palette = 480 pièces » : visible, vérifiable ; confirmé par l'artisan ou corrigé, jamais supposé. */
 export function ConfirmerConditionnement({ produit, unite, parUnite, confirme, onChange }: { produit: ProduitV1; unite: string; parUnite: number | null; confirme: boolean; onChange: (v: { parUnite: number | null; confirme: boolean }) => void }) {
   const c = produit.conditionnements.find((x) => x.unite.code === unite);
@@ -108,6 +128,8 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
     return p ? Object.fromEntries(p.caracteristiques.map((c) => [c.attribut, params.get(c.attribut) ?? ""]).filter(([, v]) => v)) : {};
   });
   const [etape, setEtape] = useState<Etape>("produit");
+  // Venu de la carte d'un achat ouvert : le produit des autres entreprises ne se modifie pas, on ajoute sa quantité.
+  const verrouille = !!params.get("achat") && !!produit && produit.caracteristiques.every((c) => attributs[c.attribut]);
   // Le besoin dit dans la conversation Mobiiz arrive prérempli (quantité, unité, réception, date) ; tout reste modifiable.
   const uniteDite = params.get("unite");
   const [unite, setUnite] = useState<string>(() => (uniteDite && produit && [produit.unite.code, ...produit.conditionnements.map((c) => c.unite.code)].includes(uniteDite) ? uniteDite : (produit?.conditionnements[0]?.unite.code ?? produit?.unite.code ?? "")));
@@ -200,7 +222,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
                   : etape === "confirmer" && !coche
                     ? "Coche la case pour confirmer."
                     : null;
-  const titre = etape === "produit" ? "Choisis précisément le produit" : etape === "quantite" ? "Combien, où et pour quand ?" : etape === "resultat" ? (compat?.compatible ? "Un achat groupé correspond" : "Aucun achat groupé compatible pour le moment") : etape === "raison" ? "Pourquoi cet achat groupé ne te convient pas ?" : etape === "verification" ? "Ton entreprise" : "Confirmer mon besoin";
+  const titre = etape === "produit" ? (verrouille ? "Ajoute ta quantité" : "Choisis précisément le produit") : etape === "quantite" ? "Combien, où et pour quand ?" : etape === "resultat" ? (compat?.compatible ? "Un achat groupé correspond" : "Aucun achat groupé compatible pour le moment") : etape === "raison" ? "Pourquoi cet achat groupé ne te convient pas ?" : etape === "verification" ? "Ton entreprise" : "Confirmer mon besoin";
 
   return (
     <div className="flex flex-col gap-4 pb-44 lg:mx-auto lg:pb-0 lg:w-full lg:max-w-[40rem]">
@@ -223,7 +245,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
               <p className="text-[15px] text-muted">
                 {libelleLot(produit.lot)} › {produit.libelle}
               </p>
-              <ChoixCaracteristiques produit={produit} attributs={attributs} onChange={setAttributs} />
+              {verrouille ? <ProduitVerrouille produit={produit} attributs={attributs} /> : <ChoixCaracteristiques produit={produit} attributs={attributs} onChange={setAttributs} />}
               {produit.conditionnements.length ? (
                 <fieldset className="flex flex-col gap-2">
                   <legend className="mb-1 text-[15px] font-semibold">Je compte en</legend>
@@ -240,9 +262,15 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
               {cond ? <ConfirmerConditionnement produit={produit} unite={unite} parUnite={parUnite} confirme={conversionConfirmee} onChange={(v) => { setParUnite(v.parUnite); setConversionConfirmee(v.confirme); }} /> : null}
             </>
           )}
-          <Link href="/achats-groupes" className="min-h-11 self-center py-2 text-[15px] font-semibold underline underline-offset-4">
-            Je ne trouve pas mon produit
-          </Link>
+          {verrouille ? (
+            <Link href="/achats-groupes/nouveau" className="min-h-11 self-center py-2 text-center text-[15px] font-semibold underline underline-offset-4">
+              Pas exactement ton produit ? Dis-le à Mobiiz
+            </Link>
+          ) : (
+            <Link href="/achats-groupes" className="min-h-11 self-center py-2 text-[15px] font-semibold underline underline-offset-4">
+              Je ne trouve pas mon produit
+            </Link>
+          )}
         </>
       ) : null}
 

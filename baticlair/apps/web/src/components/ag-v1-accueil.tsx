@@ -9,8 +9,15 @@ import { api } from "@/lib/api";
 import { FILTRES_V1, SIGNATURE, zoneLisible, type AchatV1, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
 import { useResource } from "@/lib/use-resource";
 
-/** Le lien de « Rejoindre » d'un achat : le parcours direct prérempli avec SON produit exact. */
-export const lienAchat = (a: AchatV1) => `/achats-groupes/nouveau?type=${encodeURIComponent(a.type)}&${Object.entries(a.attributs).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&")}`;
+/**
+ * Le lien de « Rejoindre » d'un achat : le parcours direct prérempli avec SON produit exact. `achat` verrouille le produit
+ * (Greg, 8 novembre 2026 : « je dois pouvoir ajouter des choses mais pas les modifier si c'étaient de vraies demandes
+ * d'autres artisans ») : on ajoute sa quantité, on ne change jamais le produit des autres.
+ */
+export const lienAchat = (a: AchatV1) => `/achats-groupes/nouveau?type=${encodeURIComponent(a.type)}&${Object.entries(a.attributs).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&")}&reception=${a.reception}&achat=${encodeURIComponent(a.id)}`;
+
+/** Greg, 8 novembre 2026 (« mets que quelques exemples, là c'est trop ») : les 5 qui se terminent le plus tôt d'abord. */
+export const ACHATS_VISIBLES = 5;
 
 /** Le temps qui reste avant la fin des inscriptions (« Se termine dans 21 jours »). */
 export function finDans(ouvertJusquau: string, maintenant = new Date()): string {
@@ -31,6 +38,7 @@ export function finDans(ouvertJusquau: string, maintenant = new Date()): string 
 export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
   const [lot, setLot] = useState<string>("");
   const [choix, setChoix] = useState(false);
+  const [tout, setTout] = useState(false);
   const fetcher = useCallback((s: AbortSignal) => api<{ achats: AchatV1[] }>(`/v1/ag/achats${lot ? `?lot=${lot}` : ""}`, { signal: s }), [lot]);
   const { data } = useResource(fetcher);
   const { data: mes } = useResource(useCallback((s: AbortSignal) => api<{ aFaire: BesoinV1[]; enCours: BesoinV1[] }>("/v1/ag/besoins", { signal: s }).catch(() => ({ aFaire: [], enCours: [] })), []));
@@ -76,7 +84,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         </div>
       ) : (
         <ul aria-label="Achats groupés ouverts" className={`${CARTE} flex flex-col`}>
-          {data.achats.map((a) => (
+          {[...data.achats].sort((x, y) => x.ouvertJusquau.localeCompare(y.ouvertJusquau)).slice(0, tout ? undefined : ACHATS_VISIBLES).map((a) => (
             <li key={a.id} className="border-b border-line last:border-b-0">
               <Link href={lienAchat(a)} className="pressable flex min-h-14 items-center gap-3 px-4 py-2.5">
                 <span className="flex min-w-0 flex-1 flex-col">
@@ -92,6 +100,11 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
           ))}
         </ul>
       )}
+      {data && data.achats.length > ACHATS_VISIBLES ? (
+        <button type="button" onClick={() => setTout(!tout)} className="min-h-11 self-center py-2 text-[15px] font-semibold underline underline-offset-4">
+          {tout ? "Voir moins" : `Voir les ${data.achats.length - ACHATS_VISIBLES} autres achats ouverts`}
+        </button>
+      ) : null}
       <p className="pt-2 text-center text-[13px] text-muted">{SIGNATURE}</p>
       {data && data.achats.length > 0 ? <BoutonAjouter flottant onClick={() => setChoix(true)} /> : null}
       {choix ? <ChoixAjout onFermer={() => setChoix(false)} /> : null}
