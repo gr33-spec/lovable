@@ -22,3 +22,13 @@ Rien ici ne concerne la production (branche git `main`, branche Neon `main`, mob
 4. SEULEMENT SUR ACCORD EXPLICITE DE GREG : supprimer les treize tables (commande dans `docs/ux-complet.md`, partie 5), ou
    restaurer la branche de test à l'instant du relevé depuis la console Neon. Testé sur une copie locale : 25 entreprises
    et 7 e-mails reçus conservés après la migration, puis après le retour arrière.
+
+## Après ce déploiement (état du 10 novembre 2026, 23 h 50 UTC)
+
+- En ligne sur test.mobiiz.fr : commit `81409636`, site `dpl_FZUzof6me6hC8KRpyoTjrFcc4KgL`, API
+  `dpl_J2WwqxXo83Q9SVaD8mAWASDWBy16` (rattachés à la main à `test.mobiiz.fr` et `api-test.mobiiz.fr`).
+- `GET https://api-test.mobiiz.fr/v1/health` : `features.missions: true`.
+- Base de test : 112 tables (les 99 d'avant et les 13 nouvelles), aucune table disparue. Seule `rate_limit` a perdu des
+  lignes (18 → 16) : ce sont des compteurs de débit qui expirent seuls, pas des données.
+- Un premier build de l'API (`b82864d9`) a échoué après avoir appliqué la migration : la compilation de l'hébergeur est en
+  mode non strict. À VÉRIFIER AVANT CHAQUE POUSSÉE : `npx tsc -p tsconfig.vercel.json` dans `apps/api`.

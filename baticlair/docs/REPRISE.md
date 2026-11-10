@@ -84,6 +84,12 @@ Automatique. Tests : domaine `missions.test.ts`, API `missions.test.ts`, `missio
 test, relevé de la base avant et après (`releve-base-test.mjs`), rattacher les deux domaines de test. Restent différents
 des maquettes : la présentation carte par carte des parcours Quantitatifs (02, 03, 27 à 32) et Achats groupés (04 à 05,
 33 à 42, 48), gardés tels qu'ils fonctionnent. Aucune production.
+EN LIGNE sur test.mobiiz.fr le 10 novembre : commit 81409636 (site dpl_FZUzof6me6hC8KRpyoTjrFcc4KgL, API
+dpl_J2WwqxXo83Q9SVaD8mAWASDWBy16), recette en ligne 25/25 sur trois appareils, base conservée. Avant chaque poussée :
+`npx tsc -p tsconfig.vercel.json` dans `apps/api` (l'hébergeur compile en mode non strict ; un build en échec applique
+quand même la migration). Tests liés à l'heure : `relances-lot-final.test.ts` échoue s'il est lancé après 23 h UTC
+(échéance fabriquée à minuit) ; ce n'est pas un défaut du produit. En attente de Greg : validation, 3 ou 5 négoces,
+plafond de branches Neon, présentation des parcours Quantitatifs et Achats groupés.
 
 ## À faire ensuite (dans cet ordre)
 
