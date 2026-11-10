@@ -73,6 +73,18 @@ prévisualisation), migration `20261107140000_conditions_negoce` appliquée à l
 créée SANS point d'accès (plafond de points d'accès Neon atteint ; supprimer celui d'une vieille sauvegarde a été refusé par
 le contrôle des permissions). Aucune production.
 
+SUIVI 188 (10 novembre 2026) : INTERFACE ET PARCOURS COMPLETS (archive MOBIIZ-UX-COMPLET, prompt maître, 52 captures), voir
+`docs/ux-complet.md`. Branche locale `ux-complet` (partie de fd157e1c), à pousser sur
+`claude/saas-achat-artisans-prompt-1lyihx` une fois les suites vertes. Fait : missions (domaine, migration
+`20261110200000_missions_messages_alertes`, API derrière `MISSIONS_V1`, écrans), « Messages et réponses », cloche,
+réglages de notification, menu du compte, « Profil et paramètres », quatre onglets, accueil à trois cartes, thème
+Automatique, trois négoces au plus. Tests : domaine `missions.test.ts`, API `missions.test.ts`, `missions-coupees.test.ts`,
+`isolation-toutes-routes.test.ts`, e2e `e2e-ag-v1/missions.spec.ts` (la configuration `playwright.ag-v1.config.ts` allume
+`ACHATS_GROUPES_V1` ET `MISSIONS_V1`, comme test.mobiiz.fr). Déploiement : `MISSIONS_V1=on` en Preview sur la branche de
+test, relevé de la base avant et après (`releve-base-test.mjs`), rattacher les deux domaines de test. Restent différents
+des maquettes : la présentation carte par carte des parcours Quantitatifs (02, 03, 27 à 32) et Achats groupés (04 à 05,
+33 à 42, 48), gardés tels qu'ils fonctionnent. Aucune production.
+
 ## À faire ensuite (dans cet ordre)
 
 2. FAIT (garder pour mémoire) : SUIVI 137, « Évolution de la landing, de l'expérience et du positionnement » (message de Greg du 30 octobre, soir) :
