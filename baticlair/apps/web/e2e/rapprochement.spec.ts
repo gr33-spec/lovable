@@ -124,8 +124,8 @@ test("Rapprochement : la ligne cherche jusqu'à une date, la demande reste libre
   await expect(article.getByRole("button", { name: "Examiner le rapprochement" })).toBeVisible();
   await page.screenshot({ path: `test-results/rapprochement/${info.project.name}-2-mes-rapprochements.png`, fullPage: true });
   // « À faire » le signale aussi, sans rien ajouter.
-  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "À faire" }).click();
-  await expect(page.getByRole("region", { name: "À faire maintenant" })).toContainText(/Correspondance exacte pour « .*Ardoise/i);
+  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Accueil", exact: true }).click();
+  await expect(page.getByRole("region", { name: "À faire", exact: true })).toContainText(/Correspondance exacte pour « .*Ardoise/i);
 
   // 4. « Pas intéressé » : la proposition est close, plus de bouton.
   await page.goto("/achats-groupes?vue=mes-groupes");

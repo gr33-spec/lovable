@@ -90,7 +90,7 @@ test("À faire (Greg, 6 novembre 2026 ; UX simplifiée du 8 novembre) : un seul 
   await expect(page.getByRole("heading", { name: "Bonjour Jean", level: 1 })).toBeVisible();
   // Seulement des actions : ni « Commencer » ni « Suivi en cours » (le suivi vit dans Demandes et Groupes).
   await expect(page.getByText(/Achète en groupe, paie moins cher|Par où commencer \?|Mes listes et chantiers|Achats groupés près de chez toi/)).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "À faire", exact: true })).toHaveCount(0);
   await expect(page.getByRole("region", { name: /^(Commencer|Suivi en cours)$/ })).toHaveCount(0);
   // RÈGLE CHANGÉE (Greg, 7 novembre 2026) : « Aucun besoin en cours », puis des actions écrites en toutes lettres.
   // UX simplifiée (Greg, 8 novembre 2026) : UN bouton principal, « Créer un quantitatif » ; rien d'autre que ce qui attend.
@@ -134,7 +134,7 @@ test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre 
   await ecran.getByRole("button", { name: "Ajouter à la sélection" }).click();
   await page.waitForTimeout(800);
   await page.goto("/");
-  const afaire = page.getByRole("region", { name: "À faire maintenant" });
+  const afaire = page.getByRole("region", { name: "À faire", exact: true });
   await expect(afaire).toBeVisible();
   const premiere = afaire.getByRole("link").first();
   await expect(premiere).toContainText("Brouillon");
@@ -156,11 +156,11 @@ test("À faire : une demande envoyée sans réponse n'y est pas ; la réponse re
   const avant = JSON.stringify(await demandes());
   await page.goto("/");
   await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
-  await expect(page.getByRole("region", { name: "À faire maintenant" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "À faire", exact: true })).toHaveCount(0);
 
   await reponseRecue(page, recipientId);
   await page.goto("/");
-  const afaire = page.getByRole("region", { name: "À faire maintenant" });
+  const afaire = page.getByRole("region", { name: "À faire", exact: true });
   await expect(afaire.getByRole("link").first()).toContainText("Voir les réponses de tes négoces");
   await expect(afaire.getByRole("link").first()).toContainText("Maison Dupont");
   await expect(page.getByText("Rien à faire pour le moment.")).toHaveCount(0);
@@ -196,8 +196,8 @@ test("Mes listes : le nom, la recherche, les filtres, la carte ; supprimer un br
   const garde = await liste(page, "Liste gardée");
   const brouillon = await liste(page, "Liste de test à jeter");
   await page.goto("/chantiers");
-  await expect(page.getByRole("heading", { name: "Mes demandes", level: 1 })).toBeVisible();
-  await expect(page.getByRole("searchbox")).toHaveAttribute("placeholder", "Rechercher une demande…");
+  await expect(page.getByRole("heading", { name: "Mes quantitatifs", level: 1 })).toBeVisible();
+  await expect(page.getByRole("searchbox")).toHaveAttribute("placeholder", "Rechercher un quantitatif");
   await expect(page.getByRole("group", { name: "Filtrer" }).getByRole("button")).toHaveText(["Toutes", "À préparer", "Envoyées", "Réponses reçues", "Terminées"]);
   await expect(page.getByRole("button", { name: "Toutes" })).toHaveAttribute("aria-pressed", "true");
   const carte = page.getByRole("link", { name: /^Liste de test à jeter/ });
@@ -339,7 +339,7 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   // Le menu du bas : libellés à 12 px, sans déborder.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  for (const nom of ["À faire", "Demandes", "Achats groupés"]) {
+  for (const nom of ["Accueil", "Quantitatifs", "Achats groupés"]) {
     const lien = nav.getByRole("link", { name: nom });
     expect(await lien.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
     const b = (await lien.boundingBox())!;
@@ -350,7 +350,7 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   for (const theme of ["sombre", "clair"] as const) {
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     await page.goto("/chantiers");
-    await page.getByRole("heading", { name: "Mes demandes", level: 1 }).waitFor();
+    await page.getByRole("heading", { name: "Mes quantitatifs", level: 1 }).waitFor();
     await page.evaluate((id) => window.dispatchEvent(new CustomEvent("baticlair:open-file", { detail: { url: `/v1/projects/${id}/demande-de-devis.pdf?apercu=1`, title: "Le PDF joint", fileName: "demande.pdf" } })), projetId);
     const telecharger = page.getByRole("link", { name: "Télécharger" });
     await expect(telecharger).toBeVisible({ timeout: 30_000 });

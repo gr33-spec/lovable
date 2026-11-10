@@ -232,7 +232,7 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(page.getByText(/Reconfirme ta quantité : Ardoise naturelle 32 × 22/).first()).toBeVisible();
   await capture(page, "12-a-faire-accueil");
   await page.goto("/achats-groupes/mes-besoins");
-  await expect(page.getByRole("region", { name: "À faire" }).getByText("Préparation de la consultation")).toBeVisible();
+  await expect(page.getByRole("region", { name: "À faire", exact: true }).getByText("Préparation de la consultation")).toBeVisible();
   await capture(page, "13-mes-besoins");
   await page.getByRole("link", { name: "Reconfirmer ma quantité" }).click();
   await capture(page, "14-preparation");

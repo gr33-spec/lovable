@@ -65,7 +65,7 @@ test("1, 2, 12, 15 : le sommaire, ses quatre groupes, chaque rubrique s'ouvre et
   const telephone = info.project.name === "telephone";
   if (telephone) {
     await page.getByRole("button", { name: "Mon menu" }).click();
-    await page.getByRole("menuitem", { name: "Mon compte" }).click();
+    await page.getByRole("menuitem", { name: "Profil et paramètres" }).click();
   } else await nav.getByRole("link", { name: "Profil" }).click();
   await expect(page).toHaveURL(/\/compte$/);
   await expect(page.getByRole("heading", { level: 1, name: "Profil et paramètres" })).toBeVisible();
@@ -74,12 +74,12 @@ test("1, 2, 12, 15 : le sommaire, ses quatre groupes, chaque rubrique s'ouvre et
   // Aucun formulaire sur le sommaire, et « Économisé grâce au regroupement » n'y est plus.
   await expect(page.locator("main input, main textarea, main select")).toHaveCount(0);
   await expect(page.getByText(/Économisé grâce/)).toHaveCount(0);
-  for (const groupe of ["Mon compte", "Personnalisation", "Services", "Données et aide"]) await expect(page.getByRole("region", { name: groupe })).toBeVisible();
+  for (const groupe of ["Entreprise", "Préférences", "Compte et services", "Données et aide"]) await expect(page.getByRole("region", { name: groupe })).toBeVisible();
   await capture(page, "01-sommaire", info);
 
   // Chaque rubrique : la ligne s'ouvre, le titre, et ce qu'elle doit montrer (les réglages d'avant, gardés).
   const rubriques: [string, RegExp | string, (p: Page) => Promise<void>][] = [
-    ["Informations personnelles", /\/compte\/informations$/, async (p) => {
+    ["Compte et sécurité", /\/compte\/informations$/, async (p) => {
       await expect(p.getByRole("button", { name: "Se déconnecter" })).toBeVisible();
     }],
     ["Mon entreprise", /\/compte\/entreprise$/, async (p) => {
@@ -90,15 +90,15 @@ test("1, 2, 12, 15 : le sommaire, ses quatre groupes, chaque rubrique s'ouvre et
     ["Notifications", /\/compte\/notifications$/, async (p) => {
       await expect(p.getByRole("checkbox", { name: /Recevoir les e-mails/ })).toBeVisible();
     }],
-    ["Abonnement et factures", /\/compte\/abonnement$/, async (p) => {
+    ["Abonnement, factures et reçus", /\/compte\/abonnement$/, async (p) => {
       await expect(p.getByRole("link", { name: "Mon abonnement et mes factures" })).toBeVisible();
     }],
-    ["Adresse Mobiiz et réponses", /\/compte\/adresse$/, async (p) => {
+    ["E-mails Mobiiz et réponses", /\/compte\/adresse$/, async (p) => {
       await expect(p.getByRole("button", { name: "Copier l'adresse" })).toBeVisible();
       await expect(p.getByRole("link", { name: "Mes prix" })).toBeVisible();
     }],
     ["Connexions", /\/compte\/connexions$/, async () => {}],
-    ["Préférences apprises", /\/compte\/preferences$/, async (p) => {
+    ["Mémoire de Mobiiz", /\/compte\/preferences$/, async (p) => {
       await expect(p.getByRole("button", { name: "Effacer ce que Mobiiz a appris" })).toBeVisible();
     }],
     ["Données et confidentialité", /\/compte\/donnees$/, async (p) => {
@@ -110,7 +110,7 @@ test("1, 2, 12, 15 : le sommaire, ses quatre groupes, chaque rubrique s'ouvre et
     }],
   ];
   for (const [titre, url, verifier] of rubriques) {
-    await page.getByRole("link", { name: new RegExp(`^${titre}`) }).click();
+    await page.getByRole("region").getByRole("link", { name: new RegExp(`^${titre}`) }).click();
     await expect(page).toHaveURL(url);
     await expect(page.getByRole("heading", { level: 1, name: titre })).toBeVisible();
     if (!telephone) await expect(nav.getByRole("link", { name: "Profil" })).toHaveAttribute("aria-current", "page");
@@ -125,11 +125,11 @@ test("1, 2, 12, 15 : le sommaire, ses quatre groupes, chaque rubrique s'ouvre et
   // 12 : téléphone, en bas du sommaire, la dernière ligne n'est pas sous le menu.
   if (info.project.name === "telephone") {
     await page.goto("/compte");
-    await expect(page.getByRole("link", { name: /^Aide et contact/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Guide et chantier fictif/ })).toBeVisible();
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(300);
     await capture(page, "01b-sommaire-bas", info);
-    const derniere = (await page.getByRole("link", { name: /^Aide et contact/ }).boundingBox())!;
+    const derniere = (await page.getByRole("link", { name: /^Guide et chantier fictif/ }).boundingBox())!;
     const menu = (await nav.boundingBox())!;
     expect(derniere.y + derniere.height).toBeLessThanOrEqual(menu.y);
   }

@@ -378,7 +378,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const carteR = page.getByRole("article", { name: /, Regroupement en cours$/ });
     await expect(carteR).toBeVisible();
     await expect(carteR.getByText("Tu es dedans")).toBeVisible();
-    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "À faire" }).click();
+    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Accueil", exact: true }).click();
     await expect(page.getByRole("link", { name: /^Regroupements en cours : 1$/ })).toBeVisible();
   });
 

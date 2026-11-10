@@ -155,7 +155,11 @@ function MesListes() {
       {/* « Mes demandes » + « Créer un quantitatif » + Aide débordaient d'un iPhone SE : les actions passent à la ligne.
           Revue UX (8 novembre 2026) : une action, un nom partout (« Créer un quantitatif », jamais « Nouvelle demande »). */}
       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
-        <PageTitle>Mes demandes</PageTitle>
+        {/* Prompt maître (Greg, 10 novembre 2026, capture 02 ; RÈGLE CHANGÉE : « Mes demandes » devient « Mes quantitatifs »). */}
+        <span className="flex flex-col gap-1">
+          <PageTitle>Mes quantitatifs</PageTitle>
+          <span className="text-[14px] text-muted">Prépare et envoie tes listes de matériaux.</span>
+        </span>
         <span className="flex items-center gap-3">
           <ButtonLink href="/chantiers/nouveau" className="min-h-11 shrink-0 px-4 text-[15px] whitespace-nowrap">
             Créer un quantitatif
@@ -166,7 +170,7 @@ function MesListes() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-4">
         <div className="flex flex-col gap-1.5 lg:grow">
           <label htmlFor="search" className="sr-only">
-            Rechercher une demande ou un chantier
+            Rechercher un quantitatif ou un chantier
           </label>
           <div className="flex min-h-12 items-center gap-3 rounded-xl border border-line bg-surface px-4 text-ink transition-[border-color] duration-150 focus-within:border-accent">
             <Search size={20} className="text-muted" aria-hidden="true" />
@@ -176,7 +180,7 @@ function MesListes() {
               enterKeyHint="search"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Rechercher une demande…"
+              placeholder="Rechercher un quantitatif"
               className="min-h-11 grow bg-transparent text-[16px] outline-none placeholder:text-muted"
             />
           </div>

@@ -165,8 +165,14 @@ async function openRow(row: Locator) {
  */
 /** Le menu derrière l'initiale de l'artisan (en haut à droite) : Mes fournisseurs, Mon compte, l'essai sur un chantier fictif. */
 async function menuArtisan(page: Page, entree: string) {
+  // Menu du compte refait (Greg, 10 novembre 2026, capture 17) : « Mon compte » s'appelle « Profil et paramètres », « Mon
+  // abonnement » « Abonnement, factures et reçus » ; l'essai sur un chantier fictif et le guide vivent dans « Aide, guide et
+  // démonstration ».
+  const dansAide = entree === "Essayer avec un chantier fictif" || entree === "Revoir le guide";
+  const nom = dansAide ? "Aide, guide et démonstration" : entree === "Mon compte" ? "Profil et paramètres" : entree === "Mon abonnement" ? "Abonnement, factures et reçus" : entree;
   await page.getByRole("button", { name: "Mon menu" }).click();
-  await page.getByRole("menuitem", { name: entree }).click();
+  await page.getByRole("menuitem", { name: nom }).click();
+  if (dansAide) await page.getByRole("button", { name: entree }).click();
 }
 
 async function createProject(page: Page, name: string, client: string, address: string) {
@@ -296,7 +302,7 @@ test("marquer terminé retire le chantier des « En cours » sans le perdre", as
 
   // « Mes demandes » (Greg, 1er novembre 2026) : Toutes / À préparer / Envoyées / Réponses reçues / Terminées.
   await page.goto("/chantiers?statut=a-preparer");
-  await expect(page.getByRole("heading", { name: "Mes demandes" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Mes quantitatifs" })).toBeVisible();
   await expect(page.getByText("Rien à préparer")).toBeVisible();
   await page.getByRole("button", { name: "Terminées" }).click();
   await expect(page.getByRole("link", { name: /Bardage Lefèvre/ })).toBeVisible();
@@ -495,7 +501,7 @@ test("le menu : cinq onglets (recentrage du 25 octobre 2026) ; fournisseurs et c
   // le profil passe par l'avatar.
   // Revue UX (8 novembre 2026) : sur téléphone, trois onglets égaux, plus de bouton de création dans la barre ; sur
   // ordinateur, « Créer un quantitatif » reste en tête de la colonne.
-  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Créer un quantitatif", "À faire", "Demandes", "Achats groupés", "Mes négoces", "Profil"] : ["À faire", "Demandes", "Achats groupés"]);
+  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Créer un quantitatif", "Accueil", "Quantitatifs", "Achats groupés", "Mes négoces", "Profil"] : ["Accueil", "Quantitatifs", "Achats groupés"]);
   if (ordinateur) await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveAttribute("href", "/chantiers/nouveau");
   await menuArtisan(page, "Mon compte");
   await expect(page.getByRole("heading", { name: "Profil et paramètres" })).toBeVisible();
@@ -2683,8 +2689,7 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
   await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ })).toBeVisible();
   await expect(guide).toHaveCount(0);
   // « Revoir le guide » dans le menu le rouvre ; « Passer le guide » le referme.
-  await page.getByRole("button", { name: "Mon menu" }).click();
-  await page.getByRole("menuitem", { name: "Revoir le guide" }).click();
+  await menuArtisan(page, "Revoir le guide");
   await expect(guide.getByRole("heading", { name: "Dépose ton devis" })).toBeVisible();
   await guide.getByRole("button", { name: "Passer le guide" }).click();
   await expect(guide).toHaveCount(0);
