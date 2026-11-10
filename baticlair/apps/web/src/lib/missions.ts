@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { api, ApiError, type Health } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
+import { santeUneFois } from "@/lib/sante";
 import { openFile } from "@/lib/open-document";
 import { useResource } from "@/lib/use-resource";
 
@@ -81,7 +82,7 @@ export interface AlerteVue { id: string; categorie: string; genre: "action" | "i
 
 /** Le réglage `MISSIONS_V1` de l'API (route de santé, publique) : `undefined` pendant le chargement. */
 export function useMissionsActif(): boolean | undefined {
-  const fetcher = useCallback((signal: AbortSignal) => api<Health>("/v1/health", { signal }), []);
+  const fetcher = useCallback(() => santeUneFois(), []);
   const { data, error } = useResource(fetcher);
   return error ? false : data === null ? undefined : data.features.missions === true;
 }

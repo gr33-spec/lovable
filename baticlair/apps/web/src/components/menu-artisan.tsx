@@ -133,7 +133,8 @@ export function MenuArtisan() {
                 : null}
               {ligne("/fournisseurs", Truck, "Mes négoces")}
               {ligne("/messages", Mail, "Messages et réponses")}
-              {ligne("/compte/abonnement", CreditCard, "Abonnement, factures et reçus")}
+              {/* La page « Mon abonnement » réunit déjà l'offre, les factures et les reçus de paiement. */}
+              {ligne("/abonnement", CreditCard, "Abonnement, factures et reçus")}
               {ligne("/compte/guide", CircleHelp, "Aide, guide et démonstration")}
             </div>
             {admin ? (

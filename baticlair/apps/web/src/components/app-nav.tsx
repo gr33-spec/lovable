@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Briefcase, ClipboardList, House, Plus, Truck, UserRound, Users, type LucideIcon } from "lucide-react";
 import { useCallback } from "react";
-import { api, type Health } from "@/lib/api";
+import { santeUneFois } from "@/lib/sante";
 import { fr } from "@/lib/fr";
 import { useTyping } from "@/lib/typing";
 import { useResource } from "@/lib/use-resource";
@@ -42,7 +42,7 @@ const profilItem: NavItem = { href: "/compte", label: fr.nav.profil, icon: UserR
 
 /** Le drapeau `groupe` de l'API (route de santé, publique) : éteint, l'onglet n'existe pas. */
 export function useGroupeActif(): boolean {
-  const fetchHealth = useCallback((signal: AbortSignal) => api<Health>("/v1/health", { signal }), []);
+  const fetchHealth = useCallback(() => santeUneFois(), []);
   const { data } = useResource(fetchHealth);
   return data?.features.groupe === true;
 }
