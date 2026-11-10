@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CircleHelp, CreditCard, FlaskConical, LayoutDashboard, Phone, Truck, UserRound, Inbox } from "lucide-react";
+import { Building2, ChevronRight, CircleHelp, CreditCard, FolderOpen, LayoutGrid, Mail, Sparkles, Truck, UserRound, X, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { api, ApiError } from "@/lib/api";
+import { api } from "@/lib/api";
+import { useMissionsActif } from "@/lib/missions";
 import { useSession } from "@/lib/session";
-import { revoirLeGuide } from "./guide-premier-lancement";
 import { Cloche } from "./achat-groupe";
 import { PastilleEssai } from "./abonnement";
+import { viderCacheAppareil } from "./service-worker";
 
 /** « Jean Martin » → « JM » ; « Jean » → « JE ». */
 export function initials(name: string): string {
@@ -18,20 +19,23 @@ export function initials(name: string): string {
 }
 
 /**
- * Simplification (21 octobre) : Fournisseurs et Compte ne sont plus dans la barre du bas. Ils vivent derrière l'initiale
- * de l'artisan, en haut à droite de chaque écran, avec l'essai sur un chantier fictif.
+ * LE MENU DU COMPTE (Greg, 10 novembre 2026, capture 17 ; avant : une petite liste déroulante, 21 octobre). Derrière
+ * l'initiale, en haut à droite : une feuille ivoire, « Profil et paramètres » en tête (jaune), puis l'entreprise, les
+ * documents, les opportunités commerciales (les comptes qui y ont droit), les négoces, les messages, l'abonnement avec ses
+ * factures et reçus, l'aide. L'ADMINISTRATION N'APPARAÎT QUE POUR UN COMPTE AUTORISÉ (le serveur le dit, et il refuse de
+ * toute façon les autres). Rien n'a disparu : « Essayer avec un chantier fictif » et « Revoir le guide » vivent dans
+ * « Aide, guide et démonstration ».
  */
 export function MenuArtisan() {
   const { me, company } = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const box = useRef<HTMLDivElement>(null);
-  // Point 4 bis : pour un chasseur d'opportunités, l'entrée de son écran et le compteur « à traiter ».
+  const bouton = useRef<HTMLButtonElement>(null);
   const [chasseur, setChasseur] = useState<{ aTraiter: number } | null>(null);
-  // Greg (25 octobre 2026) : l'espace admin se trouve dans le menu, plus seulement par un lien de l'onglet Regroupement.
   const [admin, setAdmin] = useState(false);
+  const missions = useMissionsActif() === true;
   useEffect(() => {
     if (!open) return;
     let vivant = true;
@@ -48,102 +52,101 @@ export function MenuArtisan() {
 
   useEffect(() => {
     if (!open) return;
-    const close = (e: Event) => {
-      if (e instanceof KeyboardEvent ? e.key === "Escape" : !box.current?.contains(e.target as Node)) setOpen(false);
+    const fermer = () => {
+      setOpen(false);
+      bouton.current?.focus();
     };
-    document.addEventListener("pointerdown", close);
-    document.addEventListener("keydown", close);
-    return () => {
-      document.removeEventListener("pointerdown", close);
-      document.removeEventListener("keydown", close);
+    const clavier = (e: KeyboardEvent) => {
+      if (e.key === "Escape") fermer();
     };
+    document.addEventListener("keydown", clavier);
+    box.current?.querySelector<HTMLElement>("a,button")?.focus();
+    return () => document.removeEventListener("keydown", clavier);
   }, [open]);
 
-  async function demo() {
-    setPending(true);
-    setError(false);
+  async function signOut() {
+    setLeaving(true);
     try {
-      const { projectId } = await api<{ projectId: string }>("/v1/demo/project", { method: "POST" });
-      setOpen(false);
-      router.push(`/chantiers/${projectId}`);
-    } catch (e) {
-      setError(e instanceof ApiError || e instanceof Error);
+      await api("/v1/auth/sign-out", { method: "POST", body: {} });
     } finally {
-      setPending(false);
+      await viderCacheAppareil();
+      router.replace("/connexion");
     }
   }
 
-  const item = "flex min-h-13 w-full items-center gap-3 px-4 text-left text-[16px] font-semibold transition-[background-color] duration-150 hover:bg-ground active:bg-ground";
+  const ligne = (href: string, Icone: LucideIcon, titre: string, pastille?: React.ReactNode) => (
+    <Link role="menuitem" href={href} onClick={() => setOpen(false)} className="flex min-h-14 items-center gap-4 px-2 text-[16px] font-extrabold transition-[background-color] duration-150 hover:bg-black/5 active:bg-black/5">
+      <Icone size={22} aria-hidden="true" className="shrink-0 text-[#6b5300]" />
+      <span className="min-w-0 flex-1">{titre}</span>
+      {pastille}
+      <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
+    </Link>
+  );
   return (
-    <div ref={box} className="relative flex items-center justify-between">
-      <span className="truncate text-[16px] font-extrabold">{company?.name}</span>
-      {/* Achat groupé (Greg, 27 octobre 2026, point 10) : la pastille de l'essai et la cloche, à côté de l'initiale. */}
+    <div className="relative flex items-center justify-between">
+      <span className="truncate text-[16px] font-extrabold tracking-[0.01em] uppercase">{company?.name}</span>
       <span className="ml-auto flex items-center gap-2 pl-2">
         <PastilleEssai />
         <Cloche />
       </span>
-      <button
-        type="button"
-        aria-label="Mon menu"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        className="pressable bouton-nuit ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-[14px] font-extrabold"
-      >
+      <button ref={bouton} type="button" aria-label="Mon menu" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="pressable bouton-nuit ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-[14px] font-extrabold">
         {initials(me.user.name)}
       </button>
       {open ? (
-        <div role="menu" aria-label="Mon menu" className="animate-rise absolute top-13 right-0 z-40 flex w-64 flex-col divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-card">
-          {admin ? (
-            <Link role="menuitem" href="/admin/pilotage" onClick={() => setOpen(false)} className={item}>
-              <LayoutDashboard size={20} aria-hidden="true" className="text-muted" />
-              Espace admin
-            </Link>
-          ) : null}
-          {chasseur ? (
-            <Link role="menuitem" href="/admin/chasseur" onClick={() => setOpen(false)} className={item}>
-              <Phone size={20} aria-hidden="true" className="text-muted" />
-              Chasseur d&apos;opportunités
-              {chasseur.aTraiter > 0 ? (
-                <span aria-label={`${chasseur.aTraiter} à traiter`} className="ml-auto flex h-6 min-w-6 items-center justify-center rounded-full bg-accent px-2 text-[13px] font-extrabold text-on-accent">
-                  {chasseur.aTraiter}
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-3 lg:items-start lg:justify-end lg:p-6" onPointerDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
+          <div ref={box} role="menu" aria-label="Mon menu" className="animate-rise flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col overflow-y-auto rounded-[28px] bg-surface p-4 text-[#130901] shadow-float lg:mt-14">
+            <span aria-hidden="true" className="mx-auto mb-3 h-1.5 w-16 shrink-0 rounded-full bg-black/15 lg:hidden" />
+            <div className="flex items-center gap-3 pb-3">
+              <span aria-hidden="true" className="flex size-13 shrink-0 items-center justify-center rounded-full bg-accent text-[15px] font-extrabold text-on-accent">
+                {initials(me.user.name)}
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-[20px] leading-tight font-extrabold">{me.user.name.split(" ")[0]}</span>
+                <span className="truncate text-[13px] text-[#5c5648]">
+                  {company?.name}
+                  {me.user.emailVerified ? " · compte vérifié" : " · e-mail à confirmer"}
                 </span>
-              ) : null}
+              </span>
+              <button type="button" aria-label="Fermer le menu" onClick={() => setOpen(false)} className="pressable flex size-11 shrink-0 items-center justify-center rounded-full">
+                <X size={22} aria-hidden="true" />
+              </button>
+            </div>
+            <Link role="menuitem" href="/compte" onClick={() => setOpen(false)} className="pressable mb-2 flex min-h-14 items-center gap-4 rounded-[18px] bg-[linear-gradient(135deg,#ffe45c_0%,#fed206_45%,#f1c400_100%)] px-4 text-[16px] font-extrabold text-on-accent shadow-card">
+              <UserRound size={22} aria-hidden="true" className="shrink-0" />
+              <span className="flex-1">Profil et paramètres</span>
+              <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
             </Link>
-          ) : null}
-          <Link role="menuitem" href="/fournisseurs" onClick={() => setOpen(false)} className={item}>
-            <Truck size={20} aria-hidden="true" className="text-muted" />
-            Mes négoces
-          </Link>
-          <Link role="menuitem" href="/recus" onClick={() => setOpen(false)} className={item}>
-            <Inbox size={20} aria-hidden="true" className="text-muted" />
-            Mes reçus
-          </Link>
-          <Link role="menuitem" href="/abonnement" onClick={() => setOpen(false)} className={item}>
-            <CreditCard size={20} aria-hidden="true" className="text-muted" />
-            Mon abonnement
-          </Link>
-          <Link role="menuitem" href="/compte" onClick={() => setOpen(false)} className={item}>
-            <UserRound size={20} aria-hidden="true" className="text-muted" />
-            Mon compte
-          </Link>
-          <button type="button" role="menuitem" onClick={() => void demo()} disabled={pending} className={`${item} disabled:opacity-60`}>
-            <FlaskConical size={20} aria-hidden="true" className="text-muted" />
-            {pending ? "Préparation…" : "Essayer avec un chantier fictif"}
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              revoirLeGuide();
-            }}
-            className={item}
-          >
-            <CircleHelp size={20} aria-hidden="true" className="text-muted" />
-            Revoir le guide
-          </button>
-          {error ? <p className="px-4 py-3 text-[14px] font-semibold text-warn">Ça n&apos;a pas marché, réessaie.</p> : null}
+            <div className="flex flex-col divide-y divide-black/10 border-t border-black/10">
+              {ligne("/compte/entreprise", Building2, "Mon entreprise")}
+              {missions ? ligne("/compte/documents", FolderOpen, "Documents et qualifications") : null}
+              {chasseur
+                ? ligne(
+                    "/admin/chasseur",
+                    Sparkles,
+                    "Opportunités commerciales",
+                    chasseur.aTraiter > 0 ? (
+                      <span aria-label={`${chasseur.aTraiter} à traiter`} className="flex h-7 min-w-9 items-center justify-center rounded-full bg-accent px-2 text-[13px] font-extrabold text-on-accent">
+                        {chasseur.aTraiter}
+                      </span>
+                    ) : undefined,
+                  )
+                : null}
+              {ligne("/fournisseurs", Truck, "Mes négoces")}
+              {ligne("/messages", Mail, "Messages et réponses")}
+              {ligne("/compte/abonnement", CreditCard, "Abonnement, factures et reçus")}
+              {ligne("/compte/guide", CircleHelp, "Aide, guide et démonstration")}
+            </div>
+            {admin ? (
+              <Link role="menuitem" href="/admin/pilotage" onClick={() => setOpen(false)} className="pressable mt-3 flex min-h-14 items-center gap-4 rounded-[18px] bg-[#0b0b0c] px-4 text-[16px] font-extrabold text-white">
+                <LayoutGrid size={22} aria-hidden="true" className="shrink-0 text-accent" />
+                <span className="flex-1">Espace administration</span>
+                <ChevronRight size={18} aria-hidden="true" className="shrink-0 text-accent" />
+              </Link>
+            ) : null}
+            <button type="button" role="menuitem" onClick={() => void signOut()} disabled={leaving} className="mt-2 min-h-13 self-center px-4 text-[15px] font-extrabold text-[#a3261a] disabled:opacity-60">
+              {leaving ? "Déconnexion…" : "Se déconnecter"}
+            </button>
+          </div>
         </div>
       ) : null}
     </div>

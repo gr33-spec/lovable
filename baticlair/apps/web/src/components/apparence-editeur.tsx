@@ -52,7 +52,8 @@ export function EditeurApparence() {
   const companyId = getActiveCompanyId();
   const router = useRouter();
   const back = () => router.push("/compte");
-  const [onglet, setOnglet] = useState<Onglet>("demande");
+  // Capture 20 (Greg, 10 novembre 2026) : l'affichage de l'application d'abord ; les documents et demandes dans l'onglet voisin.
+  const [onglet, setOnglet] = useState<Onglet>("application");
   const charger = useCallback((signal: AbortSignal) => api<Reglages>("/v1/price-requests/settings", { signal }), []);
   const reglages = useResource(charger);
   const enregistre: Choix | null = reglages.data ? { modele: reglages.data.modelePdf, couleur: reglages.data.couleurPdf } : null;

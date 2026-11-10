@@ -121,7 +121,7 @@ describe("pièces jointes : type, taille et contenu", () => {
   it("refusé : vide, trop lourd, format hors liste, contenu qui n'est pas celui du format, nom à chemin", () => {
     expect(fauteFichier({ nom: "cv.pdf", type: "application/pdf", taille: 1000 }, pdf)).toBeNull();
     expect(fauteFichier({ nom: "cv.pdf", type: "application/pdf", taille: 0 }, pdf)).toBe("vide");
-    expect(fauteFichier({ nom: "cv.pdf", type: "application/pdf", taille: 8 * 1024 * 1024 + 1 }, pdf)).toBe("trop_lourd");
+    expect(fauteFichier({ nom: "cv.pdf", type: "application/pdf", taille: 4 * 1024 * 1024 + 1 }, pdf)).toBe("trop_lourd");
     expect(fauteFichier({ nom: "a.exe", type: "application/x-msdownload", taille: 10 }, [0x4d, 0x5a])).toBe("type_refuse");
     expect(fauteFichier({ nom: "a.svg", type: "image/svg+xml", taille: 10 }, [0x3c, 0x73])).toBe("type_refuse");
     expect(fauteFichier({ nom: "faux.pdf", type: "application/pdf", taille: 10 }, png)).toBe("contenu_different");

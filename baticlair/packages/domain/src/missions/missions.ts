@@ -332,7 +332,8 @@ export function fauteMessage(t: unknown): string | null {
 
 /* ------------------------------------------------------------------------------------------------ Pièces jointes */
 
-export const FICHIER_MAX_OCTETS = 8 * 1024 * 1024;
+/** 4 Mo : la limite d'une requête chez l'hébergeur est de 4,5 Mo ; au-delà, l'envoi échouerait sans explication. */
+export const FICHIER_MAX_OCTETS = 4 * 1024 * 1024;
 export const FICHIERS_PAR_ANNONCE = 6;
 export const DOCUMENTS_PAR_ENTREPRISE = 40;
 export const TYPES_FICHIER: Record<string, { extensions: string[]; libelle: string }> = {
@@ -341,7 +342,7 @@ export const TYPES_FICHIER: Record<string, { extensions: string[]; libelle: stri
   "image/png": { extensions: ["png"], libelle: "Image" },
   "image/webp": { extensions: ["webp"], libelle: "Image" },
 };
-export const PHRASE_FORMATS = "PDF, JPEG, PNG ou WebP, 8 Mo au plus par fichier.";
+export const PHRASE_FORMATS = "PDF, JPEG, PNG ou WebP, 4 Mo au plus par fichier.";
 
 /** Le type RÉEL d'un fichier, lu dans ses premiers octets (jamais dans son nom ni dans ce qu'annonce le navigateur). */
 export function typeReel(entete: ArrayLike<number>): string | null {
@@ -355,7 +356,7 @@ export function typeReel(entete: ArrayLike<number>): string | null {
 export type FauteFichier = "vide" | "trop_lourd" | "type_refuse" | "contenu_different" | "nom";
 export const PHRASE_FAUTE_FICHIER: Record<FauteFichier, string> = {
   vide: "Ce fichier est vide.",
-  trop_lourd: "Ce fichier dépasse 8 Mo.",
+  trop_lourd: "Ce fichier dépasse 4 Mo.",
   type_refuse: `Format refusé. ${PHRASE_FORMATS}`,
   contenu_different: "Le contenu de ce fichier ne correspond pas à son format.",
   nom: "Nom de fichier à corriger.",

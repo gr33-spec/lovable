@@ -19,6 +19,9 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 
+  /** Les fautes de saisie nommées par le serveur (champ et phrase), quand il en donne. */
+  fautes?: { champ: string; message: string }[];
+
   get retryable(): boolean {
     return this.code === "network" || this.status >= 500 || this.code === "request_in_progress";
   }
@@ -99,7 +102,10 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   // Recentrage (25 octobre 2026) : la phrase du geste refusé (« En gratuit, ta demande part chez un seul négoce… ») suit.
   const phrase = details && typeof details === "object" && "phrase" in details ? String(details.phrase) : details && typeof details === "object" && "message" in details ? String(details.message) : null;
   if (code === "abonnement_requis" && typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVENEMENT_ABONNEMENT_REQUIS, { detail: { phrase } }));
-  throw new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason, phrase ?? undefined);
+  const erreur = new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason, phrase ?? undefined);
+  // Missions (10 novembre 2026) : les fautes de saisie nommées par le serveur, champ par champ.
+  if (details && typeof details === "object" && "fautes" in details && Array.isArray(details.fautes)) erreur.fautes = details.fautes as { champ: string; message: string }[];
+  throw erreur;
 }
 
 /**
@@ -227,7 +233,7 @@ export const MAX_REQUEST_BYTES = 4_000_000;
 
 export interface Health {
   status: "ok" | "degrade";
-  features: { email: boolean; ai: boolean; alerts?: boolean; groupe?: boolean; commandeCommune?: "mois" | "lots" };
+  features: { email: boolean; ai: boolean; alerts?: boolean; groupe?: boolean; commandeCommune?: "mois" | "lots"; missions?: boolean };
 }
 
 export interface TakeoffIssue {

@@ -29,7 +29,7 @@ export default function ChasseurPage() {
   return (
     <div className="flex flex-col gap-5">
       <BackButton fallback="/" />
-      <PageTitle>Chasseur d&apos;opportunités</PageTitle>
+      <PageTitle>Opportunités commerciales</PageTitle>
       {erreur ? <ErrorNotice error={erreur} /> : null}
       {!statut && !erreur ? <Spinner /> : null}
       {statut && !statut.chasseur ? <Card className="p-5 text-[16px]">Cette page est réservée aux chasseurs d&apos;opportunités Mobiiz.</Card> : null}

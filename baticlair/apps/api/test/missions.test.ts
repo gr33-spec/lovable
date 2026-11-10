@@ -262,7 +262,7 @@ describe("Missions : pièces jointes et dossier professionnel", () => {
     expect(await raison(PNG, "faux.pdf", "application/pdf")).toBe("fichier_contenu_different");
     expect(await raison(Buffer.from("<html><script>alert(1)</script>"), "page.pdf", "application/pdf")).toBe("fichier_type_refuse");
     expect(await raison(Buffer.alloc(0), "vide.pdf", "application/pdf")).toBe("fichier_vide");
-    const lourd = await joindre(a.agent, url, Buffer.concat([Buffer.from("%PDF-1.4"), Buffer.alloc(8 * 1024 * 1024 + 10)]), "lourd.pdf", "application/pdf", { cle: cle() });
+    const lourd = await joindre(a.agent, url, Buffer.concat([Buffer.from("%PDF-1.4"), Buffer.alloc(4 * 1024 * 1024 + 10)]), "lourd.pdf", "application/pdf", { cle: cle() });
     expect(lourd.status).toBeGreaterThanOrEqual(400);
     expect(await ctx.prisma.fichierPro.count()).toBe(0);
     expect(await ctx.prisma.messageMission.count()).toBe(0);

@@ -7,6 +7,8 @@ import { useCallback, useState } from "react";
 import { ResumeAbonnement } from "@/components/abonnement";
 import { AdresseMobiizCard } from "@/components/adresse-mobiiz";
 import { EditeurApparence } from "@/components/apparence-editeur";
+import { DossierProfessionnel, GuideEtChantierFictif, OuLireLesReponses, ProfilPublicEditeur, ReglagesNotifications } from "@/components/compte-missions";
+import { ButtonLink } from "@/components/ui";
 import { EnTeteRubrique } from "@/components/en-tete-rubrique";
 import { CompteursAnalyses } from "@/components/coup-de-main-ia";
 import { CarteIdentite } from "@/components/envoi-negoces";
@@ -72,9 +74,16 @@ function Contenu({ id }: { id: Exclude<RubriqueProfil, "apparence"> }) {
           <MetiersCard />
         </>
       );
+    case "profil-public":
+      return <ProfilPublicEditeur />;
+    case "documents":
+      return <DossierProfessionnel />;
+    case "guide":
+      return <GuideEtChantierFictif />;
     case "notifications":
       return (
         <>
+          <ReglagesNotifications />
           <NotificationsCard />
           <CarteAlertesAchats />
           <Card className="flex flex-col gap-1 p-4">
@@ -90,12 +99,17 @@ function Contenu({ id }: { id: Exclude<RubriqueProfil, "apparence"> }) {
           <ResumeAbonnement />
           <Analyses />
           <PlanSummary />
+          {/* Greg, 10 novembre 2026 : l'abonnement, les factures et les reçus de paiement au même endroit. */}
+          <ButtonLink href="/abonnement" variant="secondary">
+            Voir mes factures et reçus de paiement
+          </ButtonLink>
         </>
       );
     case "adresse":
       return (
         <>
           {company ? <AdresseMobiizCard /> : null}
+          <OuLireLesReponses />
           <LienMesPrix />
         </>
       );

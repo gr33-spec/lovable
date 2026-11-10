@@ -1,12 +1,17 @@
-import { AtSign, Bell, Building2, CreditCard, LifeBuoy, Palette, Plug, ShieldCheck, Sparkles, UserRound, type LucideIcon } from "lucide-react";
+import { AtSign, Bell, Building2, CreditCard, FolderOpen, LifeBuoy, Palette, Plug, ShieldCheck, Sparkles, UserRound, type LucideIcon } from "lucide-react";
 
 /**
- * « PROFIL ET PARAMÈTRES » (Greg, 1er novembre 2026) : le sommaire, en quatre groupes, chaque ligne ouvre sa rubrique
- * (`/compte/<id>`). Les titres et sous-titres sont ceux de la maquette, mot pour mot.
+ * « PROFIL ET PARAMÈTRES » (Greg, 1er novembre 2026, puis 10 novembre : captures 18 et 19) : le sommaire, en quatre groupes,
+ * chaque ligne ouvre sa rubrique (`/compte/<id>`). Les identifiants d'avant sont gardés (aucun lien cassé) ; trois rubriques
+ * naissent : « Profil public et missions », « Documents et qualifications », « Guide et chantier fictif ». Renommées :
+ * « Informations personnelles » → « Compte et sécurité », « Abonnement et factures » → « Abonnement, factures et reçus »,
+ * « Adresse Mobiiz et réponses » → « E-mails Mobiiz et réponses », « Préférences apprises » → « Mémoire de Mobiiz ».
  */
 export type RubriqueProfil =
   | "informations"
   | "entreprise"
+  | "profil-public"
+  | "documents"
   | "apparence"
   | "notifications"
   | "abonnement"
@@ -14,46 +19,52 @@ export type RubriqueProfil =
   | "connexions"
   | "preferences"
   | "donnees"
-  | "aide";
+  | "aide"
+  | "guide";
 
 export interface LigneProfil {
   id: RubriqueProfil;
   titre: string;
   sousTitre: string;
   icone: LucideIcon;
-  /** Apparence : le fond jaune pâle de la maquette (la rubrique mise en avant). */
+  /** Apparence : le fond jaune de la maquette (la rubrique mise en avant). */
   enAvant?: boolean;
+  /** Rubrique des missions : absente du sommaire tant que le réglage `MISSIONS_V1` est coupé. */
+  missions?: boolean;
 }
 
 export const GROUPES_PROFIL: { titre: string; lignes: LigneProfil[] }[] = [
   {
-    titre: "Mon compte",
+    titre: "Entreprise",
     lignes: [
-      { id: "informations", titre: "Informations personnelles", sousTitre: "Nom, e-mail et sécurité", icone: UserRound },
-      { id: "entreprise", titre: "Mon entreprise", sousTitre: "Coordonnées, SIRET et métiers", icone: Building2 },
+      { id: "entreprise", titre: "Mon entreprise", sousTitre: "Coordonnées, SIRET, métiers et zones", icone: Building2 },
+      { id: "profil-public", titre: "Profil public et missions", sousTitre: "Présentation, services et disponibilités", icone: UserRound, missions: true },
+      { id: "documents", titre: "Documents et qualifications", sousTitre: "Dossier, assurances, CV et références", icone: FolderOpen, missions: true },
     ],
   },
   {
-    titre: "Personnalisation",
+    titre: "Préférences",
     lignes: [
-      { id: "apparence", titre: "Apparence", sousTitre: "Application, logo et demandes de prix", icone: Palette, enAvant: true },
-      { id: "notifications", titre: "Notifications", sousTitre: "Réponses, analyses et achats groupés", icone: Bell },
+      { id: "apparence", titre: "Apparence", sousTitre: "Mode clair, sombre ou automatique", icone: Palette, enAvant: true },
+      { id: "notifications", titre: "Notifications", sousTitre: "E-mails, alertes et rappels", icone: Bell },
+      { id: "preferences", titre: "Mémoire de Mobiiz", sousTitre: "Informations conservées pour t'aider", icone: Sparkles },
     ],
   },
   {
-    titre: "Services",
+    titre: "Compte et services",
     lignes: [
-      { id: "abonnement", titre: "Abonnement et factures", sousTitre: "Offre, analyses et paiements", icone: CreditCard },
-      { id: "adresse", titre: "Adresse Mobiiz et réponses", sousTitre: "E-mails fournisseurs et reçus", icone: AtSign },
-      { id: "connexions", titre: "Connexions", sousTitre: "Logiciel de devis", icone: Plug },
+      { id: "informations", titre: "Compte et sécurité", sousTitre: "Mot de passe, connexions et accès", icone: ShieldCheck },
+      { id: "abonnement", titre: "Abonnement, factures et reçus", sousTitre: "Offre, paiements et documents", icone: CreditCard },
+      { id: "adresse", titre: "E-mails Mobiiz et réponses", sousTitre: "Adresses d'envoi et messages reçus", icone: AtSign },
+      { id: "connexions", titre: "Connexions", sousTitre: "Logiciels de devis et intégrations", icone: Plug },
     ],
   },
   {
     titre: "Données et aide",
     lignes: [
-      { id: "preferences", titre: "Préférences apprises", sousTitre: "Ce que Mobiiz retient pour t'aider", icone: Sparkles },
-      { id: "donnees", titre: "Données et confidentialité", sousTitre: "Exporter ou supprimer", icone: ShieldCheck },
-      { id: "aide", titre: "Aide et contact", sousTitre: "Questions fréquentes et contact", icone: LifeBuoy },
+      { id: "donnees", titre: "Données et confidentialité", sousTitre: "Exporter, corriger ou supprimer", icone: ShieldCheck },
+      { id: "aide", titre: "Aide et contact", sousTitre: "Questions fréquentes et assistance", icone: LifeBuoy },
+      { id: "guide", titre: "Guide et chantier fictif", sousTitre: "Revoir le parcours sans risque", icone: Sparkles },
     ],
   },
 ];

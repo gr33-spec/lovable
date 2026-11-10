@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ClipboardList, House, Plus, Truck, UserRound, Users, type LucideIcon } from "lucide-react";
+import { Briefcase, ClipboardList, House, Plus, Truck, UserRound, Users, type LucideIcon } from "lucide-react";
 import { useCallback } from "react";
 import { api, type Health } from "@/lib/api";
 import { fr } from "@/lib/fr";
@@ -10,6 +10,7 @@ import { useTyping } from "@/lib/typing";
 import { useResource } from "@/lib/use-resource";
 import { Logo } from "@/components/logo";
 import { useTheme } from "@/lib/theme";
+import { useMissionsActif } from "@/lib/missions";
 
 interface NavItem {
   href: string;
@@ -33,6 +34,8 @@ const listesItem: NavItem = {
   match: (p: string) => p.startsWith("/chantiers"),
 };
 const groupeItem: NavItem = { href: "/achats-groupes", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/achats-groupes") || p.startsWith("/regroupements") || p.startsWith("/groupe") };
+/** Missions entre entreprises (Greg, 10 novembre 2026) : le quatrième onglet, allumé par le réglage `MISSIONS_V1` ; les messages y vivent. */
+const missionsItem: NavItem = { href: "/missions", label: fr.nav.missions, icon: Briefcase, match: (p: string) => p.startsWith("/missions") || (p.startsWith("/messages") && !p.startsWith("/messages/negoce")) };
 /** Ordinateur seulement (Greg, 31 octobre 2026, soir : « on a de la place sur l'écran ») : « Mes négoces » à portée de clic. */
 const negocesItem: NavItem = { href: "/fournisseurs", label: "Mes négoces", icon: Truck, match: (p: string) => p.startsWith("/fournisseurs") };
 const profilItem: NavItem = { href: "/compte", label: fr.nav.profil, icon: UserRound, match: (p: string) => p.startsWith("/compte") || p.startsWith("/abonnement") || p.startsWith("/fournisseurs") || p.startsWith("/mes-prix") };
@@ -52,6 +55,7 @@ export function AppNav() {
   const pathname = usePathname();
   const theme = useTheme();
   const groupe = useGroupeActif();
+  const missions = useMissionsActif() === true;
   // Le chat d'un chantier se lit en plein écran sur téléphone (référentiel §21) : le menu laisse la place à la barre de message.
   const inChat = /^\/chantiers\/(?!nouveau$)[^/]+$/.test(pathname);
   // Profil, Apparence (Greg, 1er novembre 2026) : un écran d'édition, l'aperçu du PDF et « Enregistrer » ont besoin de la
@@ -82,7 +86,7 @@ export function AppNav() {
         <span className={`flex h-8 w-11 items-center justify-center rounded-full transition-[background-color] duration-150 lg:h-auto lg:w-auto lg:bg-transparent ${active ? "max-lg:bg-accent-soft" : ""} ${activeOrdinateur ? "lg:text-accent-text" : ""}`}>
           <Icon size={22} aria-hidden="true" strokeWidth={active ? 2.4 : 2} />
         </span>
-        <span className="text-center leading-tight whitespace-nowrap">{item.label}</span>
+        <span className="text-center leading-[1.1] text-balance max-lg:text-[11px] lg:whitespace-nowrap">{item.label}</span>
       </Link>
     );
   };
@@ -95,7 +99,7 @@ export function AppNav() {
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
           colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}
-      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-3" : "grid-cols-2"} rounded-full bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
+      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${["grid-cols-2", "grid-cols-3", "grid-cols-4"][Number(groupe) + Number(missions)]} rounded-[26px] bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
         <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
           <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
         </span>
@@ -115,6 +119,8 @@ export function AppNav() {
         {link(accueilItem)}
         {link(listesItem)}
         {groupe ? link(groupeItem) : null}
+        {/* Prompt maître (Greg, 10 novembre 2026) : quatre entrées fixes, Accueil, Quantitatifs, Achats groupés, Missions. */}
+        {missions ? link(missionsItem) : null}
         {link(negocesItem, true)}
         <span aria-hidden="true" className="hidden grow lg:block" />
         {link(profilItem, true)}

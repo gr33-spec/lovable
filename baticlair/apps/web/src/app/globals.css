@@ -237,7 +237,7 @@ html[data-reveal-pret] [data-reveal] {
  * état) les remet d'origine pour ce qu'elle contient. Rien ne change de taille ni de place.
  */
 .app-nuit {
-  --color-ground: #130901;
+  --color-ground: #0b0b0c;
   --color-ink: #fbf8f3;
   --color-muted: rgba(251, 248, 243, 0.74);
   --color-subtle: rgba(251, 248, 243, 0.74);
@@ -246,7 +246,7 @@ html[data-reveal-pret] [data-reveal] {
   color: var(--color-ink);
 }
 body:has(.app-nuit) {
-  background: #130901;
+  background: #0b0b0c;
   color-scheme: dark;
 }
 /* Les voiles (surfaces translucides de l'accueil ordinateur) et le fond du menu ordinateur, propres à chaque thème. */
@@ -254,7 +254,7 @@ body:has(.app-nuit) {
   --voile-1: rgba(251, 248, 243, 0.03);
   --voile-2: rgba(251, 248, 243, 0.06);
   --voile-3: rgba(251, 248, 243, 0.08);
-  --menu-fond: #100e0b;
+  --menu-fond: #0d0d0e;
 }
 /*
  * L'APP CLAIRE (Greg, 31 octobre 2026 : « deux options : Clair / Sombre ») : les jetons de base (ivoire, encre, jaune), ceux
@@ -288,11 +288,10 @@ body:has(.app-clair) {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(60vmax 42vmax at 100% 0%, rgba(202, 138, 27, 0.34), rgba(150, 88, 12, 0.12) 45%, transparent 70%),
-    radial-gradient(48vmax 38vmax at 0% 62%, rgba(150, 88, 12, 0.26), transparent 68%),
-    radial-gradient(30vmax 22vmax at 92% 92%, rgba(254, 210, 6, 0.1), transparent 70%),
-    radial-gradient(120vmax 80vmax at 50% 40%, transparent 40%, rgba(13, 6, 1, 0.55) 100%),
-    #130901;
+    /* Prompt maître (Greg, 10 novembre 2026) : « noir profond, blanc et ivoire ; aucun marron ». Le téléphone prend le noir de
+       l'ordinateur : une seule lueur jaune, très douce, en haut à droite (les captures de référence). */
+    radial-gradient(70vmax 46vmax at 100% 0%, rgba(254, 210, 6, 0.09), transparent 70%),
+    #0b0b0c;
 }
 /* Les surfaces claires gardent l'encre noire et le gris brun pour ce qu'elles contiennent, texte hérité compris (la
    couleur se résout là où elle est posée : sans `color` ici, le texte d'une carte restait clair, donc invisible). En
@@ -359,15 +358,37 @@ body:has(.app-clair) {
    téléphone garde sa nuit chaude. */
 @media (min-width: 1024px) {
   body:has(.app-nuit) {
-    background: #0c0a08;
+    background: #0b0b0c;
   }
   .app-nuit {
-    --color-ground: #0c0a08;
+    --color-ground: #0b0b0c;
   }
   .app-nuit::before {
     background:
       radial-gradient(50vmax 34vmax at 100% 0%, rgba(254, 210, 6, 0.07), transparent 70%),
-      #0c0a08;
+      #0b0b0c;
   }
 }
 
+
+/*
+ * LA BARRE DU BAS SUR LA NUIT (Greg, 10 novembre 2026, captures MOBIIZ-PREMIUM) : une capsule sombre cerclée, les libellés
+ * ivoire, l'onglet actif sur une pastille jaune à l'icône noire. Avant : le verre clair du thème clair, repris sur la nuit.
+ */
+@media (max-width: 63.99rem) {
+  .app-nuit nav[aria-label="Navigation principale"] > [class*="bg-glass"] {
+    --color-ink: #fbf8f3;
+    --color-muted: rgba(251, 248, 243, 0.78);
+    --color-accent-text: #fbf8f3;
+    color: var(--color-ink);
+    color-scheme: dark;
+    background: rgba(24, 24, 27, 0.94);
+    box-shadow:
+      0 0 0 1px rgba(251, 248, 243, 0.14),
+      0 14px 34px rgba(0, 0, 0, 0.55);
+  }
+  .app-nuit nav[aria-label="Navigation principale"] [class*="max-lg:bg-accent-soft"] {
+    background: #fed206;
+    color: #130901;
+  }
+}

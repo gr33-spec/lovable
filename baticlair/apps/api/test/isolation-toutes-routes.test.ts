@@ -127,6 +127,11 @@ describe("isolation entre entreprises, toutes les routes", () => {
       propositionRapprochement: "",
       achatV1: "",
       besoinV1: "",
+      annonceMission: "",
+      reponseMission: "",
+      conversationMission: "",
+      fichierPro: "",
+      alerte: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
     const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });

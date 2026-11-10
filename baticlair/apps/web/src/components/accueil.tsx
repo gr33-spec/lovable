@@ -1,12 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { ChevronRight, ClipboardList } from "lucide-react";
+import { Briefcase, ClipboardList, Users } from "lucide-react";
 import { useCallback, useState } from "react";
 import { actionPrioritaire, lienAutres, type ActionCandidate } from "../../../../packages/domain/src/accueil/accueil";
 import { InstallHint } from "@/components/install-hint";
 import { BandeauReprises } from "@/components/reprises";
 import { Skeleton } from "@/components/ui";
+import { CarteLien, Etiquette } from "@/components/ux-kit";
+import { useGroupeActif } from "@/components/app-nav";
+import { useMissionsActif } from "@/lib/missions";
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import type { Brouillon } from "@/lib/brouillon";
 import { useSession } from "@/lib/session";
@@ -106,6 +108,8 @@ export function AccueilMaquette() {
   // Greg, 6 novembre 2026 : les rapprochements à examiner, et une ligne commandée seule mais encore dans un achat groupé.
   const { data: rapprochements } = useResource(useCallback((s: AbortSignal) => api<{ items: { cle: string; texte: string; href: string }[] }>("/v1/rapprochements/actions", { signal: s }).catch(() => ({ items: [] })), []));
   const [tout, setTout] = useState(false);
+  const groupe = useGroupeActif();
+  const missions = useMissionsActif() === true;
 
   const charge = brouillons !== null && next !== null && projets !== null;
   const achats = mes?.achats ?? [];
@@ -116,34 +120,30 @@ export function AccueilMaquette() {
   const lien = lienAutres(autres);
 
   return (
-    <div className="flex flex-col gap-6 lg:mx-auto lg:w-full lg:max-w-[56rem] lg:gap-8">
-      <h1 className="text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em] lg:text-[40px]">Bonjour {prenom}</h1>
+    <div className="flex flex-col gap-4 lg:mx-auto lg:w-full lg:max-w-[56rem] lg:gap-5">
+      {/* PROMPT MAÎTRE (Greg, 10 novembre 2026, capture 01 ; RÈGLE CHANGÉE pour « un seul bouton » du 8 novembre) : « Bonjour
+          [prénom], que veux-tu faire ? », puis les trois activités, chacune indépendante : créer un quantitatif (jaune, la
+          seule action dominante), voir les achats groupés, les missions entre entreprises ; puis « À faire ». Rien ici
+          n'envoie quoi que ce soit : chaque carte ouvre son espace. */}
+      <header className="flex flex-col gap-1">
+        <h1 className="font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em] lg:text-[40px]">Bonjour {prenom}</h1>
+        <p className="text-[16px] text-muted">Que veux-tu faire ?</p>
+      </header>
       <BandeauReprises />
-      {!charge ? <Skeleton card="h-40" lines={2} label="Chargement de l'accueil…" /> : null}
+      <CarteLien jaune href="/chantiers/nouveau" icone={ClipboardList} titre="Créer un quantitatif" sous="Prépare ta liste de matériaux." />
+      {groupe ? <CarteLien href="/achats-groupes" icone={Users} titre="Voir les achats groupés" sous="Découvre les achats ouverts près de toi." /> : null}
+      {missions ? <CarteLien href="/missions" icone={Briefcase} titre="Missions entre entreprises" sous="Propose une mission ou tes services." /> : null}
 
-      {/* UX SIMPLIFIÉE (Greg, 8 novembre 2026) : UN bouton principal, « Créer un quantitatif ». Les achats groupés partent
-          ensuite de la fiche du quantitatif (« Ajouter aux achats groupés ») ; les autres entrées restent dans l'onglet
-          « Achats groupés ». Ce qui attend l'artisan suit, en cartes simples. */}
-      <Link href="/chantiers/nouveau" className="pressable flex min-h-16 items-center gap-3 rounded-2xl bg-accent p-4 text-on-accent shadow-card">
-        <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-black/10">
-          <ClipboardList size={22} />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="text-[18px] leading-tight font-extrabold">Créer un quantitatif</span>
-          <span className="text-[14px] leading-snug text-on-accent/80">Ta liste de matériaux, depuis un devis, une photo ou ta voix.</span>
-        </span>
-        <ChevronRight size={20} aria-hidden="true" className="shrink-0" />
-      </Link>
-
+      {!charge ? <Skeleton card="h-24" lines={1} label="Chargement de l'accueil…" /> : null}
       {premiere ? (
-        <section aria-labelledby="a-faire-titre" className="flex flex-col gap-2">
-          <h2 id="a-faire-titre" className="text-[18px] font-extrabold tracking-[-0.02em]">
-            À faire maintenant
+        <section aria-labelledby="a-faire-titre" className="flex flex-col gap-3 pt-2">
+          <h2 id="a-faire-titre" className="text-[22px] font-extrabold tracking-[-0.02em]">
+            À faire
           </h2>
-          <CarteAction a={premiere} principale />
+          <CarteAction a={premiere} />
           {lien ? (
             tout ? (
-              <ul aria-label="Autres choses à reprendre" className="flex flex-col gap-2">
+              <ul aria-label="Autres choses à reprendre" className="flex flex-col gap-3">
                 {autres.map((a) => (
                   <li key={a.cle}>
                     <CarteAction a={a} />
@@ -158,42 +158,14 @@ export function AccueilMaquette() {
           ) : null}
         </section>
       ) : charge ? (
-        <p className="text-[15px] text-muted">Rien à faire pour le moment.</p>
+        <p className="pt-2 text-[15px] text-muted">Rien à faire pour le moment.</p>
       ) : null}
       <InstallHint />
     </div>
   );
 }
 
-/** La carte de « À faire maintenant » : la seule qui domine (bord jaune, bouton jaune) ; entièrement cliquable. */
-function CarteAction({ a, principale = false }: { a: Action; principale?: boolean }) {
-  return (
-    <Link
-      href={a.href}
-      aria-label={`${a.titre} : ${a.sousTitre}`}
-      className={`pressable relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-surface text-ink shadow-card ${principale ? "border-l-[6px] border-accent p-4 pl-4 lg:p-5" : "p-3.5"}`}
-    >
-      <span className="flex items-center gap-3">
-        {principale ? (
-          <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-ground">
-            <ClipboardList size={24} />
-          </span>
-        ) : null}
-        <span className="flex min-w-0 grow flex-col gap-1">
-          <span className="self-start rounded-md bg-accent/35 px-2 py-0.5 text-[12px] font-extrabold tracking-[0.04em] uppercase">{a.statut}</span>
-          <span className={`${principale ? "text-[19px]" : "text-[16px]"} leading-tight font-extrabold`}>{a.titre}</span>
-          <span className="text-[14px] text-muted">{a.sousTitre}</span>
-        </span>
-        <ChevronRight size={20} aria-hidden="true" className="shrink-0 text-muted" />
-      </span>
-      {principale ? (
-        // UX simplifiée (Greg, 8 novembre 2026) : un seul jaune sur l'accueil, « Créer un quantitatif » ; « Continuer » en contour.
-        <span aria-hidden="true" className="inline-flex min-h-12 items-center justify-center self-start rounded-full border-2 border-ink px-8 text-[16px] font-extrabold text-ink">
-          {a.bouton}
-        </span>
-      ) : null}
-    </Link>
-  );
+/** Une carte de « À faire » : son état en étiquette, ce qu'il y a à faire, de quoi il s'agit ; entièrement cliquable. */
+function CarteAction({ a }: { a: Action }) {
+  return <CarteLien href={a.href} titre={a.titre} sous={a.sousTitre} etiquette={<Etiquette>{a.statut}</Etiquette>} />;
 }
-
-

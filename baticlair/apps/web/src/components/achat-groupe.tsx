@@ -1100,27 +1100,17 @@ export function Cloche() {
   const { data: next } = useResource(fetchNext);
   const fetchRap = useCallback((signal: AbortSignal) => api<{ items: { cle: string; texte: string; href: string }[] }>("/v1/rapprochements/actions", { signal }).catch(() => null), []);
   const { data: rap } = useResource(fetchRap);
-  const [ouvert, setOuvert] = useState(false);
-  // Greg, 6 novembre 2026 : les rapprochements à examiner sonnent aussi la cloche.
-  const actions = [...actionsEnAttente(mes?.achats ?? [], next?.items ?? []), ...(rap?.items ?? []).map((r) => ({ cle: r.cle, texte: r.texte, href: r.href }))];
+  // Greg, 10 novembre 2026 (capture 26) : la cloche ouvre « Notifications », des alertes courtes qui mènent à la bonne
+  // action. Elle compte ce qui attend l'artisan (source : « À faire », même si un e-mail n'est jamais parti) et les alertes
+  // non lues (nouveau message, nouvelle proposition). Les conversations complètes se lisent dans « Messages et réponses ».
+  const fetchAlertes = useCallback((signal: AbortSignal) => api<{ nonLues: number }>("/v1/alertes", { signal }).catch(() => null), []);
+  const { data: alertes } = useResource(fetchAlertes);
+  const n = actionsEnAttente(mes?.achats ?? [], next?.items ?? []).length + (rap?.items ?? []).length + (alertes?.nonLues ?? 0);
   return (
-    <div className="relative">
-      <button type="button" aria-label={actions.length ? `Notifications : ${actions.length}` : "Notifications"} aria-expanded={ouvert} onClick={() => setOuvert((o) => !o)} className="pressable bouton-nuit relative flex size-11 items-center justify-center rounded-full">
-        <Bell size={20} aria-hidden="true" />
-        {actions.length ? <span aria-hidden="true" className="absolute top-1.5 right-1.5 size-3 rounded-full bg-accent ring-2 ring-surface" /> : null}
-      </button>
-      {ouvert ? (
-        <div role="dialog" aria-label="Notifications" className="animate-rise absolute top-13 right-0 z-40 flex w-72 flex-col divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-card">
-          {actions.length === 0 ? <p className="p-4 text-[15px] text-muted">Rien de nouveau. On te prévient dès qu&apos;il y a du nouveau.</p> : null}
-          {actions.map((a) => (
-            <Link key={a.cle} href={a.href} onClick={() => setOuvert(false)} className="flex min-h-13 items-center justify-between gap-2 px-4 py-2 text-[15px] font-semibold hover:bg-ground">
-              {a.texte}
-              <ChevronRight size={16} aria-hidden="true" className="shrink-0 text-muted" />
-            </Link>
-          ))}
-        </div>
-      ) : null}
-    </div>
+    <Link href="/notifications" aria-label={n ? `Notifications : ${n}` : "Notifications"} className="pressable bouton-nuit relative flex size-11 items-center justify-center rounded-full">
+      <Bell size={20} aria-hidden="true" />
+      {n ? <span aria-hidden="true" className="absolute top-1.5 right-1.5 size-3 rounded-full bg-accent ring-2 ring-surface" /> : null}
+    </Link>
   );
 }
 

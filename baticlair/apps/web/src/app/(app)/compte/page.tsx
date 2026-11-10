@@ -8,6 +8,7 @@ import { BandeauAbonnement } from "@/components/abonnement";
 import { initials } from "@/components/menu-artisan";
 import { Badge, PageTitle } from "@/components/ui";
 import { GROUPES_PROFIL } from "@/lib/rubriques-profil";
+import { useMissionsActif } from "@/lib/missions";
 import { useSession } from "@/lib/session";
 
 /**
@@ -17,6 +18,7 @@ import { useSession } from "@/lib/session";
  */
 export default function ComptePage() {
   const { me } = useSession();
+  const missions = useMissionsActif() === true;
   return (
     <>
       <div className="flex items-start justify-between gap-3">
@@ -42,24 +44,24 @@ export default function ComptePage() {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
         {GROUPES_PROFIL.map((g) => (
           <section key={g.titre} aria-label={g.titre} className="flex min-w-0 flex-col gap-2">
-            <h2 className="px-1 text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">{g.titre}</h2>
-            <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-xl bg-surface shadow-card">
-              {g.lignes.map((l) => {
+            <h2 className="px-1 text-[12px] font-extrabold tracking-[0.06em] text-ink/80 uppercase">{g.titre}</h2>
+            <ul className="flex flex-col gap-2.5">
+              {g.lignes.filter((l) => !l.missions || missions).map((l) => {
                 const Icone = l.icone;
                 return (
                   <li key={l.id}>
                     <Link
                       href={`/compte/${l.id}`}
-                      className={`flex min-h-16 items-center gap-3 px-4 py-3 transition-[background-color] duration-150 hover:bg-ground active:bg-ground ${l.enAvant ? "bg-accent-soft" : ""}`}
+                      className={`pressable flex min-h-16 items-center gap-3 rounded-[18px] px-4 py-3 text-ink shadow-card ${l.enAvant ? "bg-accent text-on-accent" : "bg-surface"}`}
                     >
-                      <span aria-hidden="true" className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${l.enAvant ? "bg-accent text-on-accent" : "bg-ground text-ink"}`}>
+                      <span aria-hidden="true" className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${l.enAvant ? "bg-black/10 text-on-accent" : "bg-[#efece6] text-[#130901]"}`}>
                         <Icone size={20} />
                       </span>
                       <span className="flex min-w-0 grow flex-col">
                         <span className="text-[16px] leading-tight font-semibold">{l.titre}</span>
-                        <span className="text-[13px] leading-snug text-muted">{l.sousTitre}</span>
+                        <span className={`text-[13px] leading-snug ${l.enAvant ? "text-on-accent/85" : "text-[#5c5648]"}`}>{l.sousTitre}</span>
                       </span>
-                      <ChevronRight size={18} aria-hidden="true" className="shrink-0 text-muted" />
+                      <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
                     </Link>
                   </li>
                 );
