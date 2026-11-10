@@ -4,7 +4,9 @@
 // Vérifie : santé, /v1/ag/etat, accueil (actions écrites en toutes lettres, aucun « + » seul, aucun débordement),
 // « Ajouter un matériau » (direct), une 2e entreprise qui rejoint sans diviser, l'isolation, modifier / reporter,
 // reconfirmer depuis « À faire », l'offre saisie par l'admin jusqu'à « Offre à examiner », « Depuis un quantitatif »
-// (liteaux à préciser, famille non ouverte), le blocage de la demande individuelle, le retrait. Comptes supprimés à la fin.
+// (liteaux à préciser, famille non ouverte), le blocage de la demande individuelle, le retrait ; puis les MISSIONS (10 novembre
+// 2026) : publier, répondre avec un document, cloche, conversation, non-lus, pièce jointe, coordonnées, isolation, compte.
+// Comptes supprimés à la fin.
 //
 //   RESEND_API_KEY=… node docs/groupe/recette-en-ligne/achats-groupes-v1.mjs <se|android|ordi> <dossier-captures> [décalage-jours]
 import { chromium, devices } from "/opt/node22/lib/node_modules/playwright/index.mjs";
@@ -169,16 +171,15 @@ await etape("Entreprise A : compte, SIRET, e-mail confirmé ; /v1/ag/etat 200", 
   return `zone ${e.body.zone.nom} (${e.body.zone.code}), e-mail vérifié : ${e.body.verification.emailVerifie}`;
 });
 
-await etape("Accueil simplifié : un seul bouton principal « Créer un quantitatif », aucune autre entrée", a, async () => {
+await etape("Accueil : trois activités (quantitatif, achats groupés, missions), « À faire » ; quatre onglets", a, async () => {
   await a.goto(`${BASE}/`, { waitUntil: "networkidle" });
   const main = a.getByRole("main");
-  await voir(main.getByRole("link", { name: /^Créer un quantitatif/ }).first());
-  verif((await main.getByRole("link", { name: /^Ajouter un matériau|^Depuis un quantitatif|^Mes besoins groupés/ }).count()) === 0, "l'accueil propose encore plusieurs chemins");
+  for (const carte of [/^Créer un quantitatif/, /^Voir les achats groupés/, /^Missions entre entreprises/]) await voir(main.getByRole("link", { name: carte }).first());
+  verif((await main.getByRole("link", { name: /^Ajouter un matériau|^Depuis un quantitatif|^Mes besoins groupés/ }).count()) === 0, "l'accueil propose encore plusieurs chemins vers les achats groupés");
   for (const l of await a.getByRole("link").all()) verif((await l.innerText()).trim() !== "+", "un lien « + » seul");
   for (const l of await a.getByRole("button").all()) verif((await l.innerText()).trim() !== "+", "un bouton « + » seul");
   const menu = a.getByRole("navigation", { name: "Navigation principale" });
-  await voir(menu.getByRole("link", { name: "Achats groupés" }));
-  await voir(menu.getByRole("link", { name: "Demandes" }));
+  for (const onglet of ["Accueil", "Quantitatifs", "Achats groupés", "Missions"]) await voir(menu.getByRole("link", { name: onglet, exact: true }));
   if (APPAREIL === "ordi") await voir(menu.getByRole("link", { name: "Créer un quantitatif" }));
   else verif((await menu.getByRole("link", { name: "Créer un quantitatif" }).count()) === 0, "un bouton de création dans la barre du bas");
   verif((await a.getByText(/Achat en gros|collecte/i).count()) === 0, "« Achat en gros » ou « collecte » encore affiché");
@@ -415,6 +416,178 @@ await etape("Retrait : « Garder mon besoin » d'abord, puis « Confirmer le ret
   await voir(a.getByRole("button", { name: "Garder mon besoin" }));
   await a.getByRole("button", { name: "Confirmer le retrait" }).click();
   await voir(a.getByText(/Besoin retiré/));
+});
+
+// ---------------------------------------------------------------------------------------------------------------------
+// MISSIONS ENTRE ENTREPRISES, « MESSAGES ET RÉPONSES », CLOCHE, COMPTE (Greg, 10 novembre 2026, prompt maître). Les deux
+// entreprises de la recette (A publie, B répond) et le compte admin comme troisième partie : aucun vrai négoce, aucun
+// e-mail hors des adresses de test.
+const PDF_TEST = Buffer.concat([Buffer.from("%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\n"), Buffer.alloc(300, 0x20), Buffer.from("\n%%EOF")]);
+const VILLE = `Recette${ts.slice(-5)}`;
+let missionId = null;
+let convId = null;
+await etape("Missions : réglage allumé, quatrième onglet, accueil des missions", a, async () => {
+  const sante = await api(a, "GET", "/v1/health");
+  verif(sante.body?.features?.missions === true, "le réglage MISSIONS_V1 n'est pas allumé sur cette prévisualisation");
+  await a.goto(`${BASE}/missions`, { waitUntil: "networkidle" });
+  await voir(a.getByRole("heading", { name: "Missions", exact: true }));
+  await voir(a.getByText("Mise en relation entre entreprises du bâtiment."));
+  await sansDebordement(a, "missions");
+});
+await etape("A publie une mission (trois étapes, aperçu) : conditions dites indicatives", a, async () => {
+  await a.getByRole("link", { name: /^Je propose une mission/ }).click();
+  await voir(a.getByRole("heading", { name: "De quelle aide as-tu besoin ?" }));
+  await a.getByRole("button", { name: "Continuer" }).click();
+  await voir(a.getByText("Choisis le métier recherché."));
+  await a.getByLabel("Métier recherché").fill("Couverture - Toiture");
+  await a.getByLabel("Lieu de la mission (commune)").fill(VILLE);
+  await a.getByLabel("Code postal").fill("22580");
+  await a.getByLabel("Du", { exact: true }).fill(jourDans(10));
+  await a.getByLabel("Au", { exact: true }).fill(jourDans(12));
+  await a.getByRole("button", { name: "Renfort ponctuel" }).click();
+  await a.getByLabel("Description").fill("Recette : pose d'ardoises naturelles sur une maison individuelle.");
+  await sansDebordement(a, "proposer une mission");
+  await a.getByRole("button", { name: "Continuer" }).click();
+  await voir(a.getByRole("heading", { name: "Précise le profil attendu" }));
+  await a.getByLabel("Niveau souhaité").selectOption("autonome");
+  await a.getByRole("button", { name: "Continuer" }).click();
+  await voir(a.getByRole("heading", { name: "Informations proposées" }));
+  await a.getByLabel("Mode de chiffrage proposé").selectOption("jour");
+  await a.getByLabel(/^Budget indicatif, de/).fill("400");
+  await a.getByLabel("à (€ HT)").fill("500");
+  await voir(a.getByText("Mobiiz ne contractualise pas la mission."));
+  await a.getByRole("button", { name: "Continuer vers l'aperçu" }).click();
+  await voir(a.getByRole("region", { name: "Aperçu" }).getByText("400 à 500 € HT / jour"));
+  await a.getByRole("button", { name: "Publier ma mission" }).click();
+  await a.waitForURL(/\/missions\/[0-9a-f-]{36}$/, { timeout: 30000 });
+  missionId = a.url().split("/").pop();
+  await voir(a.getByRole("heading", { name: `Couverture - Toiture à ${VILLE}` }));
+  await sansDebordement(a, "ma mission");
+  return `mission ${missionId}`;
+});
+await etape("B : dossier professionnel (un fichier faux est refusé, un PDF est gardé), puis réponse à la mission", b, async () => {
+  await b.goto(`${BASE}/compte/documents`, { waitUntil: "networkidle" });
+  await voir(b.getByRole("heading", { name: "Ton dossier professionnel" }));
+  await b.getByLabel("Ajouter : assurances").setInputFiles({ name: "faux.pdf", mimeType: "application/pdf", buffer: Buffer.from("ceci n'est pas un PDF") });
+  await voir(b.getByRole("alert").filter({ hasText: "Format refusé" }));
+  await b.getByLabel("Ajouter : cv ou dossier professionnel").setInputFiles({ name: "CV-recette.pdf", mimeType: "application/pdf", buffer: PDF_TEST });
+  await voir(b.getByRole("list", { name: "Documents" }).getByText("CV-recette.pdf"));
+  await sansDebordement(b, "documents et qualifications");
+  await b.goto(`${BASE}/missions/${missionId}`, { waitUntil: "networkidle" });
+  await voir(b.getByText(NOM_A));
+  await b.getByRole("link", { name: "Contacter cette entreprise" }).click();
+  await b.getByLabel(/^Ton niveau sur cette mission/).selectOption("confirme");
+  await b.getByLabel("Expérience correspondante (années)").fill("8");
+  await b.getByLabel("Équipe disponible (personnes)").fill("2");
+  await b.getByRole("checkbox", { name: /CV-recette\.pdf/ }).check();
+  await b.getByRole("button", { name: "Continuer" }).click();
+  await b.getByLabel("Tarif proposé (€ HT / jour)").fill("420");
+  await b.getByLabel("Message à l'entreprise").fill("Recette : équipe autonome, disponible les trois jours.");
+  await voir(b.getByText("Aucun contrat n'est créé par Mobiiz."));
+  await sansDebordement(b, "ma proposition");
+  await b.getByRole("button", { name: "Envoyer ma proposition" }).click();
+  await voir(b.getByRole("heading", { name: "Réponse envoyée" }));
+  await voir(b.getByText("Tes coordonnées restent privées."));
+});
+await etape("A : la cloche porte une alerte courte ; réponses reçues, profil déclaré, document partagé, conversation ouverte", a, async () => {
+  await a.goto(`${BASE}/notifications`, { waitUntil: "networkidle" });
+  const alerte = a.getByRole("list", { name: "Notifications" }).getByRole("link", { name: /Nouvelle réponse à ta mission/ }).first();
+  await voir(alerte);
+  verif(!(await alerte.innerText()).includes("équipe autonome"), "la cloche montre le texte de la réponse");
+  await sansDebordement(a, "notifications");
+  await alerte.click();
+  await voir(a.getByRole("heading", { name: "1 entreprise a répondu" }));
+  await a.getByRole("list", { name: "Réponses reçues" }).getByRole("link").first().click();
+  await voir(a.getByText("Informations déclarées par l'entreprise."));
+  await voir(a.getByRole("region", { name: "Documents partagés" }).getByText("CV-recette.pdf"));
+  await sansDebordement(a, "profil de l'entreprise");
+  await a.getByRole("button", { name: "Démarrer une conversation" }).click();
+  await a.waitForURL(/\/messages\/[0-9a-f-]{36}$/, { timeout: 30000 });
+  convId = a.url().split("/").pop();
+  await a.getByLabel("Écrire un message").fill("Bonjour, la mission est toujours disponible. Appelez-moi au 06 12 34 56 78.");
+  await a.getByRole("button", { name: "Envoyer le message" }).click();
+  await voir(a.getByRole("list", { name: "Messages" }).getByText("la mission est toujours disponible"));
+  return `conversation ${convId}`;
+});
+await etape("B : « Messages et réponses » (non lu, filtres), numéro masqué, réponse, pièce jointe refusée puis acceptée", b, async () => {
+  await b.goto(`${BASE}/messages`, { waitUntil: "networkidle" });
+  const filtres = b.getByRole("group", { name: "Filtrer la boîte" });
+  for (const f of ["Tous", "Missions", "Négoces", "Non lus"]) await voir(filtres.getByRole("button", { name: f, exact: true }));
+  const element = b.getByRole("link", { name: new RegExp(`^Mission, ${NOM_A}, non lu`) });
+  await voir(element);
+  await sansDebordement(b, "messages et réponses");
+  await filtres.getByRole("button", { name: "Non lus", exact: true }).click();
+  await element.click();
+  const messages = b.getByRole("list", { name: "Messages" });
+  await voir(messages.getByText(/coordonnées masquées/));
+  verif(!(await messages.innerText()).includes("06 12 34 56 78"), "le numéro est visible avant l'accord des deux entreprises");
+  await b.getByLabel("Écrire un message").fill("Bonjour. Nous sommes disponibles.");
+  await b.getByRole("button", { name: "Envoyer le message" }).click();
+  await voir(messages.getByText("Nous sommes disponibles."));
+  await b.getByLabel(/^Joindre un fichier/).setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("notes") });
+  await voir(b.getByRole("alert").filter({ hasText: "Format refusé" }));
+  await b.getByLabel(/^Joindre un fichier/).setInputFiles({ name: "references.pdf", mimeType: "application/pdf", buffer: PDF_TEST });
+  await voir(messages.getByRole("button", { name: /references\.pdf/ }));
+  await sansDebordement(b, "conversation");
+  await b.goto(`${BASE}/messages`, { waitUntil: "networkidle" });
+  await voir(b.getByRole("link", { name: new RegExp(`^Mission, ${NOM_A}$`) }));
+});
+await etape("Coordonnées : B propose, rien n'est montré ; A accepte, les deux les voient", b, async () => {
+  await b.goto(`${BASE}/messages/${convId}`, { waitUntil: "networkidle" });
+  await b.getByRole("button", { name: "Proposer l'échange des coordonnées" }).click();
+  verif(await b.getByRole("button", { name: "Proposer le partage" }).isDisabled(), "le partage se propose sans cocher l'accord");
+  await b.getByRole("checkbox", { name: /J'accepte de partager mes coordonnées/ }).check();
+  await sansDebordement(b, "échange des coordonnées");
+  await b.getByRole("button", { name: "Proposer le partage" }).click();
+  await voir(b.getByText("En attente de l'accord de l'autre entreprise."));
+  verif((await b.getByRole("region", { name: "Coordonnées partagées" }).count()) === 0, "coordonnées montrées après un seul accord");
+  await a.goto(`${BASE}/messages/${convId}`, { waitUntil: "networkidle" });
+  await a.getByRole("button", { name: "Répondre à la proposition d'échange" }).click();
+  await a.getByRole("checkbox", { name: /J'accepte de partager mes coordonnées/ }).check();
+  await a.getByRole("button", { name: "Accepter le partage" }).click();
+  await voir(a.getByRole("region", { name: "Coordonnées partagées" }));
+  await b.reload({ waitUntil: "networkidle" });
+  await voir(b.getByRole("region", { name: "Coordonnées partagées" }).getByText(NOM_A));
+});
+await etape("Isolation : un troisième compte ne lit ni n'écrit rien de la conversation, des réponses, du document", adm, async () => {
+  const essais = [
+    ["GET", `/v1/missions/conversations/${convId}`],
+    ["POST", `/v1/missions/conversations/${convId}/messages`, { texte: "Je m'invite", cle: `cle-recette-intrus-${ts}` }],
+    ["GET", `/v1/missions/annonces/${missionId}/reponses`],
+    ["POST", `/v1/missions/annonces/${missionId}/statut`, { action: "fermer" }],
+  ];
+  const statuts = [];
+  for (const [m, u, corps] of essais) {
+    const r = await api(adm, m, u, corps);
+    statuts.push(r.status);
+    verif(r.status === 404 || r.status === 403 || r.status === 401, `${m} ${u} accepté pour un tiers : ${r.status}`);
+    verif(!JSON.stringify(r.body ?? "").includes("toujours disponible"), "un message d'une autre entreprise a fui");
+  }
+  const vue = await api(a, "GET", `/v1/missions/conversations/${convId}`);
+  verif(vue.status === 200 && vue.body.messages.every((m) => m.texte !== "Je m'invite"), "le message d'un tiers a été écrit");
+  return `refus : ${statuts.join(", ")}`;
+});
+await etape("Compte : menu sans administration pour un artisan, « Profil et paramètres », un réglage de notification gardé", a, async () => {
+  await a.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await a.getByRole("button", { name: "Mon menu" }).click();
+  const menu = a.getByRole("menu", { name: "Mon menu" });
+  for (const l of ["Profil et paramètres", "Mon entreprise", "Documents et qualifications", "Mes négoces", "Messages et réponses", "Abonnement, factures et reçus", "Aide, guide et démonstration"]) await voir(menu.getByRole("menuitem", { name: l, exact: true }));
+  verif((await menu.getByRole("menuitem", { name: /Espace administration/ }).count()) === 0, "l'administration est visible d'un artisan");
+  const refus = await api(a, "GET", "/v1/admin/missions/signalements");
+  verif(refus.status === 403, `route admin ouverte à un artisan : ${refus.status}`);
+  await sansDebordement(a, "menu du compte");
+  await menu.getByRole("menuitem", { name: "Profil et paramètres", exact: true }).click();
+  for (const g of ["Entreprise", "Préférences", "Compte et services", "Données et aide"]) await voir(a.getByRole("region", { name: g, exact: true }));
+  await sansDebordement(a, "profil et paramètres");
+  await a.goto(`${BASE}/compte/notifications`, { waitUntil: "networkidle" });
+  const conseils = a.getByRole("switch", { name: "Conseils Mobiiz" });
+  await voir(conseils);
+  verif((await conseils.getAttribute("aria-checked")) === "false", "« Conseils Mobiiz » allumé par défaut");
+  await conseils.click();
+  await a.reload({ waitUntil: "networkidle" });
+  verif((await a.getByRole("switch", { name: "Conseils Mobiiz" }).getAttribute("aria-checked")) === "true", "le réglage n'est pas gardé");
+  verif((await a.getByRole("switch", { name: "Demandes de prix" }).getAttribute("aria-checked")) === "true", "un autre réglage a bougé");
+  await sansDebordement(a, "notifications");
 });
 
 if (process.env.GARDER !== "1")
