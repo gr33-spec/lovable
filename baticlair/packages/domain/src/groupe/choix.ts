@@ -71,7 +71,10 @@ export function prixAuVolume(prix: readonly PrixDePalier[], volumeFerme: number)
 /** La livraison promise : dépôt + délai, jamais avant le début de la fenêtre ; sans délai écrit, le début de la fenêtre. */
 export function dateDeLivraison(r: Pick<ReponseAChoisir, "deposeLe" | "delaiJours">, fenetre: FenetreLivraison): Date {
   if (!r.deposeLe || r.delaiJours === null) return fenetre.tot;
-  const promise = new Date(r.deposeLe.getTime() + r.delaiJours * JOUR);
+  // Une livraison se promet pour un jour, pas pour une heure : un devis déposé à 23 h avec 10 jours de délai
+  // livre « le 20 », et reste donc dans une fenêtre qui finit le 20.
+  const brut = r.deposeLe.getTime() + r.delaiJours * JOUR;
+  const promise = new Date(brut - (((brut % JOUR) + JOUR) % JOUR));
   return promise < fenetre.tot ? fenetre.tot : promise;
 }
 

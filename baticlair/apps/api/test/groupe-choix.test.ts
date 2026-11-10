@@ -27,7 +27,9 @@ beforeEach(async () => {
   ctx.emails.sent.length = 0;
 });
 
-const FENETRE = { tot: "2026-11-02", tard: "2026-11-20" };
+// Fenêtre relative au jour du test (elle était figée en novembre 2026 : le test cassait selon la date).
+const jour = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+const FENETRE = { tot: jour(-8), tard: jour(12) };
 async function carreleur(email: string, adresse = "3 rue des Ajoncs, 22300 Lannion") {
   const { agent, companyId } = await signUpWithCompany(ctx.app, email, `Carrelages ${email}`, ["tiling"]);
   await ctx.prisma.company.update({ where: { id: companyId }, data: { siret: "73282932000074", siretVerifieLe: new Date() } });
@@ -98,7 +100,7 @@ describe("groupé, étape 6 : le choix du négoce et l'offre de chaque artisan",
     const vueA = (await a.agent.get(`/v1/projects/${a.projectId}/groupe`).expect(200)).body.besoins[0];
     expect(vueA.statut).toBe("commande");
     expect(vueA.offre).toMatchObject({ lotNumero: lot.numero, prixUnitaire: "18.5", negoce: "Négoce Carrelage", prixReference: null, economie: null, probleme: null });
-    expect(vueA.offre.dateLivraison).toMatch(/^2026-11-/);
+    expect(vueA.offre.dateLivraison).toMatch(/^\d{4}-\d{2}-\d{2}/);
     const offres = (await a.agent.get("/v1/groupe/offres").expect(200)).body.offres as { id: string; designation: string; quantite: string }[];
     expect(offres).toHaveLength(1);
     expect(JSON.stringify(offres)).not.toMatch(/b@example|Carrelages b|12 rue de Kerampont/);

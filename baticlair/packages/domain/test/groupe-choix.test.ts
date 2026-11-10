@@ -41,6 +41,18 @@ describe("groupé, étape 6 : le prix au volume ferme", () => {
     expect(dateDeLivraison({ deposeLe: d("2026-11-08"), delaiJours: 5 }, fenetre)).toEqual(d("2026-11-13"));
     expect(dateDeLivraison({ deposeLe: d("2026-11-08"), delaiJours: null }, fenetre)).toEqual(d("2026-11-10"));
   });
+
+  it("la livraison promise est un jour, pas une heure : un devis déposé le soir reste dans la fenêtre le dernier jour (10 novembre 2026)", () => {
+    const f = { tot: d("2026-11-02"), tard: d("2026-11-20") };
+    const soir = new Date("2026-11-10T23:13:00Z");
+    expect(dateDeLivraison({ deposeLe: soir, delaiJours: 10 }, f)).toEqual(d("2026-11-20"));
+    const choix = choisirLeNegoce({ volumeFerme: 10, fenetre: f }, [
+      { negoceId: "n1", deposeLe: soir, pasConcerneLe: null, statutExtraction: "lue", delaiJours: 10, livraisonHt: null, prix: [{ palier: null, prixUnitaire: "18,50", totalHt: null }] } as ReponseAChoisir,
+      { negoceId: "n2", deposeLe: soir, pasConcerneLe: null, statutExtraction: "lue", delaiJours: 11, livraisonHt: null, prix: [{ palier: null, prixUnitaire: "10,00", totalHt: null }] } as ReponseAChoisir,
+    ]);
+    expect(choix.retenu?.negoceId).toBe("n1");
+    expect(choix.ecartes).toEqual([{ negoceId: "n2", raison: "hors_fenetre" }]);
+  });
 });
 
 describe("groupé, étape 6 : un seul négoce, le moins cher qui couvre tout le lot", () => {
