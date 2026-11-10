@@ -216,6 +216,20 @@ model Company {
   brouillons                Brouillon[]
   listesSupprimees          ListeSupprimee[]
   libellesEcrits            LibelleEcrit[]
+  annoncesMission           AnnonceMission[]
+  reponsesMission           ReponseMission[]
+  conversationsAnnonceur    ConversationMission[]      @relation("ConversationAnnonceur")
+  conversationsAutre        ConversationMission[]      @relation("ConversationAutre")
+  fichiersPro               FichierPro[]
+  blocagesPoses             BlocageEntreprise[]        @relation("BlocagePar")
+  blocagesSubis             BlocageEntreprise[]        @relation("BlocageCible")
+  signalementsMission       SignalementMission[]
+  annoncesEnregistrees      AnnonceEnregistree[]
+  historiqueMission         HistoriqueMission[]
+  alertesCourtes            AlerteCourte[]
+  reglageAlertes            ReglageAlertes?
+  profilPublic              ProfilPublic?
+  lecturesBoite             LectureBoite[]
 
   @@map("company")
 }
@@ -2648,4 +2662,293 @@ model LotLigneV1 {
   @@id([projectId, articleKey])
   @@index([companyId])
   @@map("lot_ligne_v1")
+}
+
+/// MISSIONS ENTRE ENTREPRISES (Greg, 10 novembre 2026) : une annonce est une MISSION (« je cherche une entreprise ») ou une
+/// DISPONIBILITÉ (« je propose mes services »). Mobiiz assure uniquement la mise en relation. Statuts : publiee | suspendue
+/// | fermee. Le lieu exact n'est jamais gardé : la commune et le département seulement.
+model AnnonceMission {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  companyId      String    @map("company_id") @db.Uuid
+  userId         String    @map("user_id")
+  type           String
+  statut         String    @default("publiee")
+  metier         String
+  autreMetier    String?   @map("autre_metier")
+  lieu           String
+  departement    String
+  rayonKm        Int?      @map("rayon_km")
+  debut          DateTime  @db.Date
+  fin            DateTime? @db.Date
+  types          String[]  @default([])
+  description    String
+  niveau         String?
+  experience     String?
+  qualifications String[]  @default([])
+  equipe         String?
+  contexte       String?
+  /// Conditions PROPOSÉES par l'entreprise qui publie : toujours indicatives.
+  modeChiffrage  String?   @map("mode_chiffrage")
+  budgetMin      Decimal?  @map("budget_min") @db.Decimal(12, 2)
+  budgetMax      Decimal?  @map("budget_max") @db.Decimal(12, 2)
+  frais          String?
+  conditions     String?
+  /// Disponibilité : tarif journalier INDICATIF HT (ni devis ni engagement), masquable.
+  tarifJour      Decimal?  @map("tarif_jour") @db.Decimal(10, 2)
+  tarifUnite     String?   @map("tarif_unite")
+  dureeMinJours  Int?      @map("duree_min_jours")
+  negociable     Boolean   @default(true)
+  tarifVisible   Boolean   @default(true) @map("tarif_visible")
+  consultations  Int       @default(0)
+  fermeeLe       DateTime? @map("fermee_le") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company       Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  reponses      ReponseMission[]
+  conversations ConversationMission[]
+  fichiers      FichierPro[]
+  enregistrees  AnnonceEnregistree[]
+
+  @@index([type, statut, departement])
+  @@index([companyId, createdAt])
+  @@map("annonce_mission")
+}
+
+/// La réponse d'une entreprise à une mission : UNE par entreprise et par mission. Niveau et expérience sont DÉCLARATIFS.
+/// `documentIds` : les documents du dossier professionnel que l'entreprise a choisi de partager pour cette mission.
+model ReponseMission {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  annonceId     String   @map("annonce_id") @db.Uuid
+  companyId     String   @map("company_id") @db.Uuid
+  userId        String   @map("user_id")
+  statut        String   @default("envoyee")
+  niveau        String
+  experienceAns Int      @map("experience_ans")
+  equipe        Int
+  message       String
+  tarifJour     Decimal? @map("tarif_jour") @db.Decimal(10, 2)
+  tarifUnite    String?  @map("tarif_unite")
+  jours         String?
+  deplacement   String?
+  documentIds   String[] @default([]) @map("document_ids") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  annonce AnnonceMission @relation(fields: [annonceId], references: [id], onDelete: Cascade)
+  company Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([annonceId, companyId])
+  @@index([companyId])
+  @@map("reponse_mission")
+}
+
+/// Une conversation n'existe qu'à propos d'une annonce, entre l'entreprise qui l'a publiée (`annonceurId`) et UNE autre
+/// (`autreId`). Les coordonnées ne se montrent qu'après l'accord des deux (deux dates). Lu, archivé : un état par côté.
+model ConversationMission {
+  id                     String    @id @default(uuid(7)) @db.Uuid
+  annonceId              String    @map("annonce_id") @db.Uuid
+  annonceurId            String    @map("annonceur_id") @db.Uuid
+  autreId                String    @map("autre_id") @db.Uuid
+  ouvertePar             String    @map("ouverte_par") @db.Uuid
+  coordonneesAnnonceurLe DateTime? @map("coordonnees_annonceur_le") @db.Timestamptz(3)
+  coordonneesAutreLe     DateTime? @map("coordonnees_autre_le") @db.Timestamptz(3)
+  luAnnonceurLe          DateTime? @map("lu_annonceur_le") @db.Timestamptz(3)
+  luAutreLe              DateTime? @map("lu_autre_le") @db.Timestamptz(3)
+  archiveeAnnonceurLe    DateTime? @map("archivee_annonceur_le") @db.Timestamptz(3)
+  archiveeAutreLe        DateTime? @map("archivee_autre_le") @db.Timestamptz(3)
+  bloqueeLe              DateTime? @map("bloquee_le") @db.Timestamptz(3)
+  bloqueePar             String?   @map("bloquee_par") @db.Uuid
+  dernierMessageLe       DateTime? @map("dernier_message_le") @db.Timestamptz(3)
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  annonce   AnnonceMission   @relation(fields: [annonceId], references: [id], onDelete: Cascade)
+  annonceur Company          @relation("ConversationAnnonceur", fields: [annonceurId], references: [id], onDelete: Cascade)
+  autre     Company          @relation("ConversationAutre", fields: [autreId], references: [id], onDelete: Cascade)
+  messages  MessageMission[]
+
+  @@unique([annonceId, annonceurId, autreId])
+  @@index([annonceurId, dernierMessageLe])
+  @@index([autreId, dernierMessageLe])
+  @@map("conversation_mission")
+}
+
+/// Un message d'une conversation Missions. `cle` : la clé d'idempotence du navigateur (un message renvoyé n'est écrit
+/// qu'une fois). Ce circuit ne contient JAMAIS un e-mail de négoce (table `email_recu_artisan`, à part).
+model MessageMission {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  conversationId String   @map("conversation_id") @db.Uuid
+  companyId      String   @map("company_id") @db.Uuid
+  userId         String   @map("user_id")
+  texte          String
+  cle            String
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  conversation ConversationMission @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  fichiers     FichierPro[]
+
+  @@unique([conversationId, cle])
+  @@index([conversationId, createdAt])
+  @@map("message_mission")
+}
+
+/// Un fichier professionnel : document du dossier (`portee` = dossier, avec sa catégorie), pièce d'une annonce (plans,
+/// photos) ou pièce jointe d'un message. Toujours la propriété de `companyId` ; une autre entreprise ne le voit que dans
+/// le cadre autorisé par son propriétaire (réponse à une mission, conversation, profil public).
+model FichierPro {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  portee    String
+  categorie String?
+  annonceId String?  @map("annonce_id") @db.Uuid
+  messageId String?  @map("message_id") @db.Uuid
+  titre     String?
+  nom       String
+  type      String
+  taille    Int
+  contenu   Bytes
+  /// Dossier : visible sur le profil public (réalisations).
+  surProfil Boolean  @default(false) @map("sur_profil")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  annonce AnnonceMission? @relation(fields: [annonceId], references: [id], onDelete: Cascade)
+  message MessageMission? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, portee])
+  @@index([annonceId])
+  @@index([messageId])
+  @@map("fichier_pro")
+}
+
+/// Une entreprise n'écrit plus à une autre et n'en reçoit plus rien (dans les deux sens).
+model BlocageEntreprise {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  cibleId   String   @map("cible_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation("BlocagePar", fields: [companyId], references: [id], onDelete: Cascade)
+  cible   Company @relation("BlocageCible", fields: [cibleId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, cibleId])
+  @@index([cibleId])
+  @@map("blocage_entreprise")
+}
+
+/// Un signalement, lu par l'équipe (admin). Jamais montré à l'entreprise signalée.
+model SignalementMission {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  companyId      String    @map("company_id") @db.Uuid
+  cibleId        String    @map("cible_id") @db.Uuid
+  conversationId String?   @map("conversation_id") @db.Uuid
+  annonceId      String?   @map("annonce_id") @db.Uuid
+  motif          String
+  precision      String?
+  traiteLe       DateTime? @map("traite_le") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([traiteLe, createdAt])
+  @@map("signalement_mission")
+}
+
+/// « Enregistrer la mission » / « Enregistrer le profil ».
+model AnnonceEnregistree {
+  companyId String   @map("company_id") @db.Uuid
+  annonceId String   @map("annonce_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  annonce AnnonceMission @relation(fields: [annonceId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, annonceId])
+  @@map("annonce_enregistree")
+}
+
+/// L'historique des changements importants d'une annonce, d'une réponse ou d'une conversation (qui, quoi, quand).
+model HistoriqueMission {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  companyId      String   @map("company_id") @db.Uuid
+  userId         String   @map("user_id")
+  annonceId      String?  @map("annonce_id") @db.Uuid
+  conversationId String?  @map("conversation_id") @db.Uuid
+  action         String
+  detail         Json?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([annonceId])
+  @@index([conversationId])
+  @@map("historique_mission")
+}
+
+/// LA CLOCHE : une alerte courte qui ouvre la bonne action. Jamais le texte d'un message ni le contenu d'une proposition
+/// (ils se lisent dans « Messages et réponses »). `cle` : une alerte par fait et par entreprise.
+model AlerteCourte {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  companyId String    @map("company_id") @db.Uuid
+  categorie String
+  genre     String
+  titre     String
+  detail    String
+  action    String
+  href      String
+  cle       String
+  luLe      DateTime? @map("lu_le") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, cle])
+  @@index([companyId, createdAt])
+  @@map("alerte_courte")
+}
+
+/// Les réglages de notification d'une entreprise : une case par catégorie, une par canal (e-mail, push). Les alertes dans
+/// l'application restent toujours actives pour les actions importantes.
+model ReglageAlertes {
+  companyId String   @id @map("company_id") @db.Uuid
+  prix      Boolean  @default(true)
+  groupe    Boolean  @default(true)
+  missions  Boolean  @default(true)
+  conseils  Boolean  @default(false)
+  email     Boolean  @default(true)
+  push      Boolean  @default(true)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("reglage_alertes")
+}
+
+/// Le profil public d'une entreprise (Missions) : rien n'est visible tant que `visible` est faux.
+model ProfilPublic {
+  companyId    String   @id @map("company_id") @db.Uuid
+  visible      Boolean  @default(false)
+  presentation String?
+  metiers      String[] @default([])
+  services     String?
+  equipe       String?
+  ville        String?
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("profil_public")
+}
+
+/// « Messages et réponses » : ce qui a été lu parmi les réponses des négoces saisies par le lien (les e-mails reçus ont
+/// déjà `lu_le`, les conversations Missions leur propre état). `cle` : « reponse:<destinataire> ».
+model LectureBoite {
+  companyId String   @map("company_id") @db.Uuid
+  cle       String
+  luLe      DateTime @default(now()) @map("lu_le") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, cle])
+  @@map("lecture_boite")
 }

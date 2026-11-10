@@ -2,7 +2,7 @@ import type { MessageArtisan } from "@baticlair/domain";
 import type { PrismaService } from "../database/prisma.service.js";
 import type { TransactionalEmailSender } from "../email/email.port.js";
 import type { PushSender } from "../push/push.port.js";
-import { NOM_APP } from "@baticlair/domain";
+import { categorieDuLien, NOM_APP } from "@baticlair/domain";
 
 /**
  * LES NOTIFICATIONS DE L'ARTISAN (déplacées dans la plateforme le 27 octobre 2026 : le groupé et l'adresse Mobiiz, R7,
@@ -35,11 +35,18 @@ export class NotificationsGroupeService {
     return proprietaire?.user.email ?? null;
   }
 
-  async prevenir(companyId: string, message: MessageArtisan, courriel?: { objet: string; texte: string; piecesJointes?: { filename: string; contentType: string; contentBase64: string }[] }): Promise<{ push: number; email: boolean }> {
+  async prevenir(companyId: string, message: MessageArtisan, courriel?: { objet: string; texte: string; piecesJointes?: { filename: string; contentType: string; contentBase64: string }[] }, options: { sansEmail?: boolean } = {}): Promise<{ push: number; email: boolean }> {
+    // RÉGLAGES DE NOTIFICATION (Greg, 10 novembre 2026) : une catégorie coupée ou un canal coupé ne reçoit plus de push ni
+    // d'e-mail ; un e-mail qui porte un bon de commande part toujours. La catégorie vient de l'écran que la notification ouvre.
+    const reglage = await this.prisma.reglageAlertes.findUnique({ where: { companyId } }).catch(() => null);
+    const categorie = categorieDuLien(message.url);
+    const categorieCoupee = !!reglage && !!categorie && !reglage[categorie];
+    const pushCoupe = categorieCoupee || reglage?.push === false;
+    const emailCoupe = options.sansEmail === true || categorieCoupee || reglage?.email === false;
     const membres = await this.prisma.membership.findMany({ where: { companyId }, select: { userId: true } });
     const appareils = await this.prisma.pushSubscription.findMany({ where: { userId: { in: membres.map((m) => m.userId) } } });
     let envoyes = 0;
-    for (const a of appareils) {
+    for (const a of pushCoupe ? [] : appareils) {
       const r = await this.push.send(a, { title: message.titre, body: message.corps, url: message.url, tag: message.etiquette });
       if (r === "gone") await this.prisma.pushSubscription.deleteMany({ where: { endpoint: a.endpoint } });
       if (r === "sent") envoyes++;
@@ -48,7 +55,7 @@ export class NotificationsGroupeService {
     // Opposition en un clic (24 octobre 2026) : une entreprise qui a coupé ces e-mails ne reçoit plus que le push ; un
     // e-mail qui porte un bon de commande part quand même (il est indispensable à la commande).
     const coupe = (await this.prisma.company.findUnique({ where: { id: companyId }, select: { emailsCoupesLe: true } }))?.emailsCoupesLe;
-    const to = coupe && !courriel?.piecesJointes?.length ? null : await this.emailDe(companyId);
+    const to = (coupe || emailCoupe) && !courriel?.piecesJointes?.length ? null : await this.emailDe(companyId);
     if (to) {
       const pied = this.lienStop ? `\n\nNe plus recevoir ces e-mails : ${this.lienStop(companyId)}` : "";
       try {

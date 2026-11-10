@@ -150,6 +150,11 @@ const envSchema = z
      */
     ACHATS_GROUPES_V1: z.enum(["on", "off"]).default("off"),
     /**
+     * MISSIONS ENTRE ENTREPRISES (Greg, 10 novembre 2026) : annonces, réponses, conversations, dossier professionnel et profil
+     * public. Coupé par défaut : routes en 404 et onglet absent ; allumé seulement sur la prévisualisation (test.mobiiz.fr).
+     */
+    MISSIONS_V1: z.enum(["on", "off"]).default("off"),
+    /**
      * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 348 € HT par an, essai, paywall sur déposer, voir les résultats,
      * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
      */
@@ -380,6 +385,7 @@ export interface AppConfig {
   /** L'accès démo « Découvrir l'application » (visiteur fictif, sans inscription). */
   accesDemo: boolean;
   achatsGroupesV1: boolean;
+  missionsV1: boolean;
   /** L'abonnement artisan (`ABONNEMENT`, `PAIEMENT`). */
   abonnement: {
     actif: boolean;
@@ -522,6 +528,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
     accesDemo: e.ACCES_DEMO === "on",
     achatsGroupesV1: e.ACHATS_GROUPES_V1 === "on",
+    missionsV1: e.MISSIONS_V1 === "on",
     abonnement: {
       actif: e.ABONNEMENT === "on",
       paiement: e.PAIEMENT,

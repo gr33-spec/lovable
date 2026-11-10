@@ -13,14 +13,18 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
 
 let ctx: TestContext;
 const avantV1 = process.env.ACHATS_GROUPES_V1;
+const avantMissions = process.env.MISSIONS_V1;
 beforeAll(async () => {
   // Achats groupés V1 (7 novembre 2026) : allumés ici pour que leurs routes soient réellement essayées par B.
   process.env.ACHATS_GROUPES_V1 = "on";
+  process.env.MISSIONS_V1 = "on";
   ctx = await createTestApp();
   await resetDatabase(ctx.prisma);
 });
 afterAll(async () => {
   await ctx.app.close();
+  if (avantMissions === undefined) delete process.env.MISSIONS_V1;
+  else process.env.MISSIONS_V1 = avantMissions;
   if (avantV1 === undefined) delete process.env.ACHATS_GROUPES_V1;
   else process.env.ACHATS_GROUPES_V1 = avantV1;
 });
@@ -164,6 +168,19 @@ describe("isolation entre entreprises, toutes les routes", () => {
     ids.achatV1 = achatV1.id;
     ids.besoinV1 = (await ctx.prisma.besoinGroupeV1.create({ data: { achatId: achatV1.id, companyId, projectId: ids.project, articleKey: "art-v1-a", designation: "Ardoise de A", attributs: {}, quantite: 4800, quantiteSaisie: 10, uniteSaisie: "palette", parUnite: 480, reception: "livraison", lieu: "Lieu privé de A", dateBesoin: new Date(Date.now() + 40 * 86_400_000), statut: "confirme" } })).id;
     await ctx.prisma.lotLigneV1.create({ data: { projectId: ids.project, articleKey: "art-v1-a", companyId, lot: "zinguerie" } });
+    // Missions (10 novembre 2026) : une annonce SUSPENDUE de A (donc privée), sa réponse à la mission d'un tiers, sa
+    // conversation avec ce tiers, un document de son dossier, une alerte de sa cloche.
+    const tiers = await ctx.prisma.company.create({ data: { name: "Tiers Missions", siretVerifieLe: new Date() } });
+    const proprietaireA = (await ctx.prisma.membership.findFirstOrThrow({ where: { companyId } })).userId;
+    const annonce = (d: Record<string, unknown>) => ({ userId: proprietaireA, type: "mission", metier: "Couverture", lieu: "Plouha", departement: "22", debut: new Date(Date.now() + 10 * 86_400_000), fin: new Date(Date.now() + 12 * 86_400_000), types: ["renfort"], description: "Mission de Toitures A", ...d });
+    ids.annonceMission = (await ctx.prisma.annonceMission.create({ data: annonce({ companyId, statut: "suspendue" }) as never })).id;
+    const annonceTiers = await ctx.prisma.annonceMission.create({ data: annonce({ companyId: tiers.id, statut: "suspendue", description: "Mission du tiers" }) as never });
+    ids.reponseMission = (await ctx.prisma.reponseMission.create({ data: { annonceId: annonceTiers.id, companyId, userId: proprietaireA, niveau: "confirme", experienceAns: 8, equipe: 2, message: "Réponse de Toitures A" } })).id;
+    const conversation = await ctx.prisma.conversationMission.create({ data: { annonceId: annonceTiers.id, annonceurId: tiers.id, autreId: companyId, ouvertePar: tiers.id, dernierMessageLe: new Date() } });
+    ids.conversationMission = conversation.id;
+    await ctx.prisma.messageMission.create({ data: { conversationId: conversation.id, companyId, userId: proprietaireA, texte: "Message de Toitures A", cle: "cle-isolation-0001" } });
+    ids.fichierPro = (await ctx.prisma.fichierPro.create({ data: { companyId, portee: "dossier", categorie: "cv", nom: "devis-a.pdf", type: "application/pdf", taille: 9, contenu: Buffer.from("%PDF-1.4\n") } })).id;
+    ids.alerte = (await ctx.prisma.alerteCourte.create({ data: { companyId, categorie: "missions", genre: "action", titre: "Nouveau message", detail: "Toitures A", action: "Ouvrir", href: "/messages", cle: "isolation-alerte" } })).id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -234,6 +251,15 @@ describe("isolation entre entreprises, toutes les routes", () => {
         // Achats groupés V1 : le besoin de A ; l'admin (B n'est pas admin : 403).
         [/\/ag\/besoins$/, ids.besoinV1],
         [/\/admin\/ag\/achats$/, ids.achatV1],
+        // Missions : l'annonce privée, la réponse, la conversation, le document et l'alerte de A ; son profil (invisible).
+        [/\/missions\/annonces$/, ids.annonceMission],
+        [/\/missions\/reponses$/, ids.reponseMission],
+        [/\/missions\/conversations$/, ids.conversationMission],
+        [/\/dossier-pro$/, ids.fichierPro],
+        [/\/fichiers-pro\/ouvrir$/, `${ids.fichierPro}.9999999999999.signature-inconnue-de-b`],
+        [/\/fichiers-pro$/, ids.fichierPro],
+        [/\/profil-public$/, companyId],
+        [/\/alertes$/, ids.alerte],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

@@ -1,4 +1,6 @@
 import { adresseNue, etiquetteDansObjet, lireAdresseMobiiz, NOM_APP, nomExpediteur } from "@baticlair/domain";
+import { alertePropositionNegoce } from "@baticlair/domain";
+import { ecrireAlerte } from "../../../platform/notifications/alertes.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { EmailRecu, LecteurEmailRecu } from "../../../platform/email/contact-entrant.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -146,6 +148,8 @@ export class ReponsesRecuesService {
     if (destinataire) rattache = await this.devisDepuisPdf(companyId, destinataire.id, email.id);
     const negoce = destinataire?.supplier.name ?? nomExpediteur(from);
     const url = destinataire ? `/chantiers/${destinataire.priceRequest.projectId}#fournisseurs` : "/recus";
+    // LA CLOCHE (Greg, 10 novembre 2026) : une alerte courte, une seule par e-mail (un webhook rejoué n'en écrit pas deux).
+    await ecrireAlerte(this.prisma, companyId, alertePropositionNegoce({ emailId: email.id, negoce, chantier: null })).catch(() => false);
     await this.notifications
       .prevenir(
         companyId,

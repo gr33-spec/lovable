@@ -32,7 +32,7 @@ export { estRequeteDemo } from "./logging/request-context.js";
  * espaces négoce et admin). Les lectures (GET) restent ouvertes ; le reste de l'app se parcourt en entier.
  */
 const ROUTES_INTERDITES_EN_DEMO: readonly RegExp[] = [
-  /^\/v1\/(abonnement|billing|partner-keys|achats-groupes|rapprochements|groupe|commande-du-mois|negoce|chasseur|admin|internal)(\/|$)/,
+  /^\/v1\/(abonnement|billing|partner-keys|achats-groupes|rapprochements|groupe|missions|dossier-pro|profil-public|fichiers-pro|commande-du-mois|negoce|chasseur|admin|internal)(\/|$)/,
   /^\/v1\/company\/identite(\/|$)/,
   /^\/v1\/me\/alertes-achats-groupes(\/|$)/,
   /^\/v1\/projects\/[^/]+\/(achat-groupe|rapprochement|groupe|commande-du-mois)(\/|$)/,
