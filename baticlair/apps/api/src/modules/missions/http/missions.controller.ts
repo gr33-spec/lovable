@@ -271,7 +271,15 @@ export class DossierProController {
 
   @Put("profil-public")
   enregistrerProfil(@Tenant() t: TenantContext, @Body(new ZodPipe(profilBody)) b: z.infer<typeof profilBody>) {
-    return this.m.enregistrerProfil(t, b);
+    // Objet écrit champ par champ : la compilation de l'hébergeur (mode non strict) lit ces champs comme facultatifs.
+    return this.m.enregistrerProfil(t, {
+      visible: b.visible,
+      presentation: b.presentation ?? null,
+      metiers: b.metiers,
+      services: b.services ?? null,
+      equipe: b.equipe ?? null,
+      ville: b.ville ?? null,
+    });
   }
 
   @Get("profil-public/:companyId")
