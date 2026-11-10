@@ -13,7 +13,7 @@ import { useBack } from "@/lib/history";
  */
 
 export const CARTE = "rounded-[20px] bg-surface text-ink shadow-card";
-const JAUNE = "bg-[linear-gradient(135deg,#ffe45c_0%,#fed206_45%,#f1c400_100%)] text-on-accent";
+const JAUNE = "bg-accent bg-[linear-gradient(135deg,#ffe45c_0%,#fed206_45%,#f1c400_100%)] text-on-accent";
 
 /** L'en-tête d'un écran intérieur : la flèche retour (écran précédent, sinon `retour`) et son titre. */
 export function EcranTitre({ titre, retour }: { titre: string; retour: string }) {

@@ -140,7 +140,7 @@ test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre 
   await expect(premiere).toContainText("Brouillon");
   await expect(premiere).toContainText("Terminer ta liste");
   await expect(premiere).toContainText("Ta liste · 1 matériau");
-  await expect(premiere).toContainText("Continuer");
+  // Capture 01 (Greg, 10 novembre 2026) : la carte entière reprend la saisie, sans bouton « Continuer » dedans.
   await expect(afaire.getByRole("link")).toHaveCount(1);
   await afaire.getByRole("button", { name: "Voir 1 autre brouillon" }).click();
   await expect(afaire.getByRole("link", { name: /^Terminer ton achat groupé/ })).toBeVisible();

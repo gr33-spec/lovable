@@ -111,7 +111,7 @@ export function MenuArtisan() {
                 <X size={22} aria-hidden="true" />
               </button>
             </div>
-            <Link role="menuitem" href="/compte" onClick={() => setOpen(false)} className="pressable mb-2 flex min-h-14 items-center gap-4 rounded-[18px] bg-[linear-gradient(135deg,#ffe45c_0%,#fed206_45%,#f1c400_100%)] px-4 text-[16px] font-extrabold text-on-accent shadow-card">
+            <Link role="menuitem" href="/compte" onClick={() => setOpen(false)} className="pressable mb-2 flex min-h-14 items-center gap-4 rounded-[18px] bg-accent bg-[linear-gradient(135deg,#ffe45c_0%,#fed206_45%,#f1c400_100%)] px-4 text-[16px] font-extrabold text-on-accent shadow-card">
               <UserRound size={22} aria-hidden="true" className="shrink-0" />
               <span className="flex-1">Profil et paramètres</span>
               <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
