@@ -290,7 +290,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     // Achat groupé (27 octobre 2026) : « Mes prix » passe dans Profil.
     await page.goto("/compte"); // Greg, 6 novembre 2026 : sur téléphone, Profil passe par l'avatar.
     // Profil et paramètres (1er novembre 2026) : « Mes prix » est dans « Adresse Mobiiz et réponses ».
-    await page.getByRole("link", { name: /^Adresse Mobiiz et réponses/ }).click();
+    await page.getByRole("link", { name: /^E-mails Mobiiz et réponses/ }).click();
     await page.getByRole("link", { name: "Mes prix" }).click();
     const liste = page.getByRole("list", { name: "Mes prix par article" });
     await expect(liste.getByText(ARDOISE)).toBeVisible();

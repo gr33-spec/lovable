@@ -167,5 +167,5 @@ export function AccueilMaquette() {
 
 /** Une carte de « À faire » : son état en étiquette, ce qu'il y a à faire, de quoi il s'agit ; entièrement cliquable. */
 function CarteAction({ a }: { a: Action }) {
-  return <CarteLien href={a.href} titre={a.titre} sous={a.sousTitre} etiquette={<Etiquette>{a.statut}</Etiquette>} />;
+  return <CarteLien href={a.href} titre={a.titre} sous={a.sousTitre} etiquette={<Etiquette>{a.statut}</Etiquette>} label={`${a.titre} : ${a.sousTitre} (${a.statut})`} />;
 }

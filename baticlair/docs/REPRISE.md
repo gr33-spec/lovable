@@ -78,7 +78,7 @@ SUIVI 188 (10 novembre 2026) : INTERFACE ET PARCOURS COMPLETS (archive MOBIIZ-UX
 `claude/saas-achat-artisans-prompt-1lyihx` une fois les suites vertes. Fait : missions (domaine, migration
 `20261110200000_missions_messages_alertes`, API derrière `MISSIONS_V1`, écrans), « Messages et réponses », cloche,
 réglages de notification, menu du compte, « Profil et paramètres », quatre onglets, accueil à trois cartes, thème
-Automatique, trois négoces au plus. Tests : domaine `missions.test.ts`, API `missions.test.ts`, `missions-coupees.test.ts`,
+Automatique. Tests : domaine `missions.test.ts`, API `missions.test.ts`, `missions-coupees.test.ts`,
 `isolation-toutes-routes.test.ts`, e2e `e2e-ag-v1/missions.spec.ts` (la configuration `playwright.ag-v1.config.ts` allume
 `ACHATS_GROUPES_V1` ET `MISSIONS_V1`, comme test.mobiiz.fr). Déploiement : `MISSIONS_V1=on` en Preview sur la branche de
 test, relevé de la base avant et après (`releve-base-test.mjs`), rattacher les deux domaines de test. Restent différents

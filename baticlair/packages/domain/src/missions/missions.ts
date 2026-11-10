@@ -466,9 +466,6 @@ export function quandBoite(iso: string, maintenant: Date): string {
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" }).format(d);
 }
 
-/** Demande individuelle : trois négoces au plus par envoi (prompt maître, parcours 1, point 7). */
-export const NEGOCES_PAR_ENVOI = 3;
-
 /** La catégorie d'une notification d'après l'écran qu'elle ouvre (réglages de la cloche, de l'e-mail et du push). */
 export function categorieDuLien(url: string): CategorieAlerte | null {
   if (/^\/(missions|messages(?!\/negoce))/.test(url)) return "missions";

@@ -1,6 +1,5 @@
 "use client";
 
-import { NEGOCES_PAR_ENVOI } from "../../../../packages/domain/src/missions/missions";
 import { ConflitGroupe, conflitGroupe } from "@/components/conflit-groupe";
 import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -732,7 +731,7 @@ function NewRequest({
         ) : etape === "negoces" ? (
           <SendSheet
             titre="À qui j'envoie ?"
-            principal={{ label: selected.size === 0 ? "Choisis un négoce" : selected.size > NEGOCES_PAR_ENVOI ? `${NEGOCES_PAR_ENVOI} négoces au plus` : `Continuer avec ${selected.size} ${selected.size > 1 ? "négoces" : "négoce"}`, disabled: selected.size === 0 || selected.size > NEGOCES_PAR_ENVOI || !identite.data, onClick: () => setEtape("apercu") }}
+            principal={{ label: selected.size === 0 ? "Choisis un négoce" : "Continuer", disabled: selected.size === 0 || !identite.data, onClick: () => setEtape("apercu") }}
             onClose={() => {
               setPreviewing(false);
               onPreviewClosed?.();
@@ -743,14 +742,6 @@ function NewRequest({
             {/* R7 : le rappel en une ligne au premier envoi (Greg, 27 octobre 2026). */}
             <RappelAdresseMobiiz />
             <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
-            {/* Prompt maître (Greg, 10 novembre 2026, capture 30) : jusqu'à trois négoces ; la raison d'un bouton éteint se lit ici. */}
-            <p role="status" className={`rounded-2xl px-4 py-3 text-[14px] font-semibold ${selected.size > NEGOCES_PAR_ENVOI ? "bg-warn-bg text-warn" : "bg-ground text-muted"}`}>
-              {selected.size > NEGOCES_PAR_ENVOI
-                ? `Tu en as coché ${selected.size} : décoche-en pour n'en garder que ${NEGOCES_PAR_ENVOI}.`
-                : selected.size === 0
-                  ? `Choisis jusqu'à ${NEGOCES_PAR_ENVOI} négoces.`
-                  : `${selected.size} ${selected.size > 1 ? "négoces sélectionnés" : "négoce sélectionné"} sur ${NEGOCES_PAR_ENVOI} au plus. Tu pourras vérifier avant l'envoi.`}
-            </p>
           </SendSheet>
         ) : (
           // Lot final, point 4 : « Voici ce que ton négoce va recevoir », l'aperçu fidèle ; un seul bouton, « Envoyer ».

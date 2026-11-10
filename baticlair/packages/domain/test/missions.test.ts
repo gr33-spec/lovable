@@ -21,7 +21,6 @@ import {
   groupesBoite,
   masquerCoordonnees,
   METIERS_BATIMENT,
-  NEGOCES_PAR_ENVOI,
   periodeLisible,
   peutAnnonce,
   quandBoite,
@@ -163,8 +162,5 @@ describe("la cloche et la boîte", () => {
     expect(quandBoite("2026-11-09T10:00:00Z", maintenant)).toBe("hier");
     expect(quandBoite("2026-11-06T10:00:00Z", maintenant)).toBe("vendredi");
     expect(quandBoite("2026-10-20T10:00:00Z", maintenant)).toBe("20 oct.");
-  });
-  it("trois négoces au plus par envoi", () => {
-    expect(NEGOCES_PAR_ENVOI).toBe(3);
   });
 });

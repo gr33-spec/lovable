@@ -25,7 +25,7 @@ séparés ».
 | 02 | Mes quantitatifs | `/chantiers` | `chantiers/page.tsx` | titre, sous-titre, recherche ; les cinq filtres d'avant sont gardés |
 | 03, 27, 28 | Créer un quantitatif, assistant | `/chantiers/nouveau` | `nouveau-quantitatif.tsx` | existant gardé (une question à la fois depuis le 8 novembre) ; présentation non refaite |
 | 29 | Fiche du quantitatif | `/chantiers/[id]` | `project-takeoff.tsx` | existant gardé (deux actions distinctes depuis le 8 novembre) |
-| 30 | Choisir les négoces | feuille « À qui j'envoie ? » | `project-price-requests.tsx` | TROIS négoces au plus, à l'écran et sur le serveur |
+| 30 | Choisir les négoces | feuille « À qui j'envoie ? » | `project-price-requests.tsx` | existant gardé : 1 négoce en gratuit, 5 en payant (la limite de 3 attend la décision de Greg, voir 4) |
 | 31, 32 | Demande envoyée, comparer | `/chantiers/[id]` | `dossier-demande.tsx`, `project-offers.tsx` | existant gardé |
 | 04, 04b, 05, 33 à 42, 48 | Achats groupés | `/achats-groupes/...` | `ag-v1-*.tsx` | existant gardé (V1 du 7 et 8 novembre) |
 | 06 | Missions | `/missions` | `missions.tsx` | fait |
@@ -82,10 +82,13 @@ séparés ».
 5. Capture 15, pastilles « Disponible » / « À vérifier » sur une réponse : non reprises (aucune règle ne les définit) ; la
    pastille dit « En conversation ».
 6. Captures 02, 03, 27 à 32 et 04 à 05, 33 à 42, 48 : les parcours existants sont gardés tels qu'ils fonctionnent ; seuls le
-   titre, la recherche et la limite des trois négoces ont changé. Leur présentation n'est pas redessinée carte par carte.
+   titre et la recherche ont changé. Leur présentation n'est pas redessinée carte par carte.
 7. Le menu garde une ligne de plus que la capture 17, « Messages et réponses », pour que la boîte reste accessible quand
    les missions sont coupées.
 8. Budget, tarif, niveau et expérience sont toujours dits « indicatifs » ou « déclarés ».
+9. « Jusqu'à 3 négoces » (prompt maître, capture 30) N'EST PAS appliqué : la formule payante et la page publique promettent
+   « jusqu'à 5 négoces » (recentrage du 25 octobre, `droits.service.ts`). Changer cette promesse touche l'offre commerciale :
+   décision de Greg.
 
 ## 5. Migration et retour arrière
 

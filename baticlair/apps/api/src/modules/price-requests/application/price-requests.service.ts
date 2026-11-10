@@ -1,4 +1,4 @@
-import { briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere, COULEUR_PDF_DEFAUT, estCouleurPdf, estModelePdf, MODELE_PDF_DEFAUT, type CouleurPdf, type ModelePdf, NEGOCES_PAR_ENVOI } from "@baticlair/domain";
+import { briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere, COULEUR_PDF_DEFAUT, estCouleurPdf, estModelePdf, MODELE_PDF_DEFAUT, type CouleurPdf, type ModelePdf } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { ExceptionSignalee } from "../../../platform/supervision/exceptions.js";
@@ -472,9 +472,6 @@ export class PriceRequestsService {
     },
   ): Promise<PriceRequestView> {
     assertCanWrite(tenant);
-    // Prompt maître (Greg, 10 novembre 2026, parcours 1, point 7) : trois négoces au plus par envoi. Le serveur le garantit,
-    // quoi que montre l'écran ; « Ajouter un négoce », plus tard, reste possible.
-    if (new Set(input.supplierIds).size > NEGOCES_PAR_ENVOI) throw validationFailed("Too many suppliers", { reason: "trop_de_negoces", phrase: `Choisis ${NEGOCES_PAR_ENVOI} négoces au plus pour cette demande.` });
     // Lot final, point 3 : toujours une date de réponse (« réponse souhaitée avant le … ») ; sans date choisie, trois jours.
     const dueDate = input.dueDate ?? dateLimiteParDefaut(this.clock());
     if (input.message?.trim() || input.tutoie !== undefined) await this.requests.saveModele(tenant, { message: input.message?.trim() || undefined, tutoie: input.tutoie ?? undefined });

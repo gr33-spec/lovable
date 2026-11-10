@@ -393,16 +393,3 @@ describe("« Messages et réponses » et la cloche : deux circuits séparés", (
     await b.agent.put("/v1/alertes/reglages").send({ missions: "oui" }).expect(400);
   });
 });
-
-describe("Demande individuelle : trois négoces au plus par envoi (prompt maître, parcours 1, point 7)", () => {
-  it("le serveur refuse un envoi à quatre négoces et dit pourquoi ; rien n'est créé", async () => {
-    const { agent } = await entreprise("a@exemple.fr", "Toitures Martin");
-    const projet = (await agent.post("/v1/projects").send({ name: "Chantier Plouha" }).expect(201)).body as { id: string };
-    const ids: string[] = [];
-    for (const n of ["Point.P", "Larivière", "Quéguiner", "Dupont"]) ids.push((await agent.post("/v1/suppliers").send({ name: n, email: `${n.toLowerCase().replace(/[^a-z]/g, "")}@negoce.example` }).expect(201)).body.id as string);
-    const refus = await agent.post(`/v1/projects/${projet.id}/price-requests`).send({ supplierIds: ids });
-    expect(refus.status).toBe(400);
-    expect(refus.body.error.details).toMatchObject({ reason: "trop_de_negoces", phrase: "Choisis 3 négoces au plus pour cette demande." });
-    expect(await ctx.prisma.priceRequest.count()).toBe(0);
-  });
-});
