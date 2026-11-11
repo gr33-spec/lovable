@@ -413,9 +413,12 @@ test("page publique, missions ouvertes : la section « Missions » à part enti�
   expect(await page.locator("main").innerText()).not.toMatch(/\b(IA|automatiques?|automatisée?s?|précise?s?|exacte?s?)\b/i);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
   await section.scrollIntoViewIfNeeded();
+  // Captures de section : l'en-tête collant et la barre du bas passeraient devant le bloc photographié.
+  const sansBarres = await page.addStyleTag({ content: ".mzp .site-header{position:static!important}.mzp .sticky-cta{display:none!important}" });
   await page.locator("#missions").screenshot({ path: `${CAPTURES}/${info.project.name}/landing-section-missions.png` });
   await page.locator("#offres").screenshot({ path: `${CAPTURES}/${info.project.name}/landing-bloc-offres.png` });
   await page.evaluate(() => window.scrollTo(0, 0));
+  await sansBarres.evaluate((e) => (e as HTMLElement).remove());
   await page.screenshot({ path: `${CAPTURES}/${info.project.name}/landing-entier.png`, fullPage: true });
 });
 

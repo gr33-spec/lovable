@@ -187,7 +187,7 @@ const ECRANS = [
   { src: "/landing/v3/ecran-reponses.webp", alt: "L'app Mobiiz : les devis reçus, du moins cher au plus cher (exemple)" },
 ] as const;
 
-function Cadre({ src, alt, classe, exemple }: { src: string; alt: string; classe: string; exemple: boolean }) {
+function Cadre({ src, alt, classe, exemple, tailles = "(max-width: 900px) 150px, 400px" }: { src: string; alt: string; classe: string; exemple: boolean; tailles?: string }) {
   return (
     <figure className={`mz2-tel ${classe}`}>
       <div className="mz2-tel-ecran">
@@ -202,7 +202,7 @@ function Cadre({ src, alt, classe, exemple }: { src: string; alt: string; classe
         <img
           src={src}
           srcSet={`${src} 600w, ${src.replace(".webp", "-900.webp")} 900w, ${src.replace(".webp", "-1170.webp")} 1170w`}
-          sizes="(max-width: 900px) 150px, 400px"
+          sizes={tailles}
           alt={alt}
           width={1170}
           height={2532}
@@ -385,8 +385,8 @@ export function LandingPremium() {
               </div>
               <div className="mz2-ms-visuel">
                 <span className="mz2-bande mz2-ms-bande" aria-hidden="true" />
-                <Cadre src={ECRANS_MISSIONS[1].src} alt={ECRANS_MISSIONS[1].alt} classe="mz2-ms-tel-arriere" exemple={false} />
-                <Cadre src={ECRANS_MISSIONS[0].src} alt={ECRANS_MISSIONS[0].alt} classe="mz2-ms-tel-avant" exemple />
+                <Cadre src={ECRANS_MISSIONS[1].src} alt={ECRANS_MISSIONS[1].alt} classe="mz2-ms-tel-arriere" exemple={false} tailles="(max-width: 900px) 190px, 420px" />
+                <Cadre src={ECRANS_MISSIONS[0].src} alt={ECRANS_MISSIONS[0].alt} classe="mz2-ms-tel-avant" exemple tailles="(max-width: 900px) 190px, 420px" />
               </div>
             </div>
           </section>

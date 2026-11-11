@@ -34,6 +34,10 @@ complètes seulement avant un déploiement important, et en le disant.
 
 ## En cours
 
+SUIVI 194 (11 novembre 2026) : nouvelle version de la page publique (section Missions à part, bloc compact « Commence
+gratuitement ») et du guide (un écran par grand usage). EN ATTENTE DE LA VALIDATION VISUELLE EXPLICITE DE GREG : ne rien
+pousser d'autre, aucune production, pas de reprise graphique des Quantitatifs ni des Achats groupés.
+
 SUIVI 184 (8 novembre 2026) : revue UX du site entier (menu du bas à trois onglets, une action un nom, boutons qui ne
 coupent plus leur texte, écrans vides avec leur action). Après les suites vertes : push sur la branche de test, domaines
 test.mobiiz.fr / api-test.mobiiz.fr rattachés, recette en ligne. Attendre le retour de Greg (un designer va juger).
