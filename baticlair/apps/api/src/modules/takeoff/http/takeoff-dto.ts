@@ -130,7 +130,7 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     bref: brief ? briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null) : [],
     // Retour du fondateur (2026-10-11) : le bref en UN texte descriptif (le même que chez le fournisseur) ; le client et
     // l'adresse seulement si l'artisan les ajoute (`bref:avec-client`).
-    brefTexte: brief ? briefTexte(briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null)) : "",
+    brefTexte: brief ? briefTexte(briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null), Boolean(brief.ville || brief.situation)) : "",
     brefAvecClient: takeoff.answers["bref:avec-client"] === "oui",
     // Assistant Mobiiz (31 octobre 2026) : l'adresse du chantier et la livraison dites par l'artisan (PDF, points 9 et 11).
     chantier: {

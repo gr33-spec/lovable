@@ -61,6 +61,45 @@ export function materialOf(designation: string): string | null {
   return text.split(" ").length >= 2 ? text.charAt(0).toLowerCase() + text.slice(1) : null;
 }
 
+/** Les mots d'un libellé d'ouvrage qui ne disent rien du chantier (« en », « à », « au »). */
+const MOTS_VIDES = new Set(["a", "au", "aux", "d", "de", "des", "du", "en", "et", "l", "la", "le", "les", "sur"]);
+const racine = (mot: string) => norm(mot).replace(/[^a-z0-9]/g, "").replace(/(?<=.{3})[sx]$/, "");
+
+/**
+ * LE LIBELLÉ D'UN OUVRAGE, RÉDUIT AUX MOTS ÉCRITS (Greg, 11 novembre 2026 ; règle numéro un) : « Couverture en ardoises au
+ * crochet » ne garde « au crochet » que si le document écrit un crochet, « à emboîtement » que s'il l'écrit. Le libellé
+ * s'arrête au premier mot que le document ne porte pas ; le nom du métier (« Couverture ») est libre. Sans aucun mot
+ * écrit, pas de libellé : le bref reste neutre plutôt que de nommer un matériau ou un système que personne n'a saisi.
+ */
+export function libelleEcrit(libelle: string, metier: string, textes: string): string | null {
+  const ecrits = new Set(textes.split(/[^\p{L}\p{N}]+/u).map(racine).filter(Boolean));
+  const mots = libelle.replace(/\s*\(.*\)$/, "").split(/\s+/).filter(Boolean);
+  const gardes: string[] = [];
+  let porte = false;
+  for (const [i, mot] of mots.entries()) {
+    const r = racine(mot);
+    if (MOTS_VIDES.has(r) || r === "") gardes.push(mot);
+    else if (i === 0 && r.startsWith(racine(metier).slice(0, 6))) gardes.push(mot);
+    else if (ecrits.has(r)) {
+      gardes.push(mot);
+      porte = true;
+    } else break;
+  }
+  while (gardes.length > 0 && MOTS_VIDES.has(racine(gardes[gardes.length - 1]!))) gardes.pop();
+  return porte ? gardes.join(" ") : null;
+}
+
+/**
+ * L'ouvrage que NOMME une fourniture rangée à cet emplacement, réduit aux mots écrits ; null si l'emplacement n'est pas la
+ * fourniture principale de l'ouvrage (un liteau ne nomme pas une couverture en tuiles) ou si rien n'en est écrit.
+ */
+export function ouvrageEcrit(ref: Referential, ouvrage: string, emplacement: string, textes: string): string | null {
+  const w = ref.workItems.find((x) => x.id === baseOf(ouvrage));
+  const famille = w?.slots.find((x) => x.key === emplacement)?.family;
+  if (!w || famille === undefined || !w.triggers.includes(famille)) return null;
+  return libelleEcrit(w.label, METIER_NAMES[tradeIdOf(ref.trade)] ?? ref.trade, norm(textes));
+}
+
 export function siteBrief(input: {
   ref: Referential;
   plan: QuotePlan;
@@ -73,17 +112,29 @@ export function siteBrief(input: {
 }): SiteBrief {
   const { ref, plan } = input;
   const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned");
-  // L'ouvrage principal : la plus grande surface du devis, sinon la première ligne reconnue.
+  // L'ouvrage principal : la plus grande surface du devis, sinon la première ligne reconnue. SEULE UNE LIGNE QUI ÉCRIT LA
+  // FOURNITURE PRINCIPALE D'UN OUVRAGE LE NOMME (Greg, 11 novembre 2026) : l'ardoise, la tuile, le zinc, c'est-à-dire
+  // l'emplacement dont la famille déclenche l'ouvrage. Un accessoire commun à plusieurs ouvrages (liteau, écran de
+  // sous-toiture, pointe), rangé dans le premier ouvrage du tiroir qui le porte, ne dit rien du type de couverture : une
+  // liste d'ardoises sortait « Couverture en tuiles à emboîtement ». Sans fourniture principale écrite, le bref est neutre.
+  const principale = (l: (typeof planned)[number]) => {
+    const w = ref.workItems.find((x) => x.id === baseOf(l.workItemId));
+    const famille = w?.slots.find((x) => x.key === l.slot)?.family;
+    return famille !== undefined && w!.triggers.includes(famille);
+  };
   const area = (id: string) => {
     const l = input.lines.find((x) => x.id === id);
     if (!l?.quantity || !/^(m2|m²)$/i.test((l.unit ?? "").trim())) return -1;
     const n = Number(l.quantity.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : -1;
   };
-  const main = [...planned].sort((a, b) => area(b.ref) - area(a.ref))[0];
+  const main = planned.filter(principale).sort((a, b) => area(b.ref) - area(a.ref))[0];
   const work = main ? ref.workItems.find((w) => w.id === baseOf(main.workItemId)) : undefined;
   const metier = METIER_NAMES[tradeIdOf(ref.trade)] ?? ref.trade;
-  const label = work ? norm(work.label).startsWith(norm(metier).slice(0, 6)) ? work.label.replace(/\s*\(.*\)$/, "").toLowerCase() : `${metier} (${work.label.replace(/\s*\(.*\)$/, "").toLowerCase()})` : null;
+  const texts = norm([...input.lines.map((l) => l.designation), ...Object.values(input.context ?? {})].join(" \n "));
+  // Le libellé de l'ouvrage, réduit aux mots que le document écrit (jamais « au crochet » sans crochet écrit).
+  const ecrit = work ? libelleEcrit(work.label, metier, texts) : null;
+  const label = ecrit ? (norm(ecrit).startsWith(norm(metier).slice(0, 6)) ? ecrit.toLowerCase() : `${metier} (${ecrit.toLowerCase()})`) : null;
 
   // Une donnée est un FAIT si l'artisan l'a répondue, ou si le devis, un document ou la note la donne.
   const fact = (key: string): { value: Decimal; unit: string } | null => {
@@ -117,7 +168,6 @@ export function siteBrief(input: {
 
   const faits: string[] = [];
   const mainLine = main ? input.lines.find((l) => l.id === main.ref) : undefined;
-  const texts = norm([...input.lines.map((l) => l.designation), ...Object.values(input.context ?? {})].join(" \n "));
   const forme = FORMES.find(([re]) => re.test(texts))?.[1];
   if (mainLine?.quantity) faits.push(`${mainLine.quantity.replace(".", ",")} ${unitText((mainLine.unit ?? "").replace("²", "2"))}${forme ? ` en ${forme}` : ""}`.trim());
   const pente = fact("pente");
@@ -239,13 +289,17 @@ const plainLabel = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0
  * fournisseur. L'ouvrage et sa surface ouvrent le texte, puis le matériau, puis les autres faits en une phrase, puis la
  * ville ; le client et l'adresse, s'ils sont demandés, le ferment. Rien n'est inventé : chaque mot vient d'une ligne du bref.
  */
-export function briefTexte(lines: readonly { cle: string; texte: string }[]): string {
+export function briefTexte(
+  lines: readonly { cle: string; texte: string }[],
+  /** La dernière ligne sans libellé est la ville (elle ferme le bref) : faux quand le chantier n'a ni ville ni situation. */
+  avecVille = true,
+): string {
   // §51.5 : le bref écrit par le modèle en phrases (« fiche-bref-N ») : chaque phrase telle quelle, puis la ville.
   const phrases = lines.filter((l) => /^fiche-bref-\d+$/.test(l.cle));
   if (phrases.length > 0) {
     const rest = lines.filter((l) => !/^fiche-bref-\d+$/.test(l.cle));
     // La ville (sans libellé) ferme le texte ; le client et l'adresse, s'ils sont demandés, viennent après elle.
-    const ville = rest.filter((l) => !/ : /.test(l.texte)).map((l) => `Chantier à ${l.texte.replace(/[.\s]+$/, "")}.`);
+    const ville = (avecVille ? rest.filter((l) => !/ : /.test(l.texte)) : []).map((l) => `Chantier à ${l.texte.replace(/[.\s]+$/, "")}.`);
     const tail = briefTexte(rest.filter((l) => / : /.test(l.texte)));
     return [...phrases.map((p) => `${p.texte.replace(/[.\s]+$/, "")}.`), ...ville, ...(tail ? [tail] : [])].join(" ");
   }
@@ -263,8 +317,9 @@ export function briefTexte(lines: readonly { cle: string; texte: string }[]): st
   const client = take(/^(?:client|maitre)/);
   const adresse = take(/^adresse/);
   take(/^code.?postal/);
-  // La ville et sa situation : la dernière ligne sans libellé.
-  const lastPlain = parts.length > 0 && !parts[parts.length - 1]!.label ? parts.pop() : undefined;
+  // La ville et sa situation : la dernière ligne sans libellé, quand le chantier en a une (sinon ce serait prendre un fait,
+  // « 1200 pièces », pour une ville : « Chantier à 1200 pièces »).
+  const lastPlain = avecVille && parts.length > 0 && !parts[parts.length - 1]!.label ? parts.pop() : undefined;
   const sentences: string[] = [];
   if (ouvrage) sentences.push(`${capitalize(ouvrage.value)}${surface ? `, ${surface.value}` : ""}`);
   else if (surface) sentences.push(`Surface ${surface.value}`);

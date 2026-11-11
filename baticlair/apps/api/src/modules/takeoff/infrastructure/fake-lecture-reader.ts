@@ -10,6 +10,7 @@ import {
   LABOR_ONLY,
   lignesDeLecture,
   normalizeText,
+  ouvrageEcrit,
   planDeLecture,
   readDimension,
   referentialFor,
@@ -324,9 +325,14 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
     }
   }
   // La fiche nomme l'ouvrage principal et sa surface (§51), comme le modèle : la première ligne mesurée (m², ml) d'un ouvrage.
-  const principal = lignes.flatMap((l) => l.fournitures.filter((f) => f.ouvrage && f.quantite && /^(m²|m2|ml|m)$/i.test(f.unite ?? "")).map((f) => ({ f, l }))).find(Boolean);
+  // (Greg, 11 novembre 2026) Seule une ligne qui écrit la fourniture PRINCIPALE d'un ouvrage le nomme, avec ses seuls mots
+  // écrits : « Liteau 18 × 40, 180 m », rangé dans le premier ouvrage du tiroir qui porte un liteau (la tuile), faisait dire
+  // « couverture en tuiles à emboîtement » à une liste d'ardoises. Une fiche de calcul (sans tiroir) garde son ouvrage.
+  const ecrits = lignes.map((l) => l.designation).join(" \n ");
+  const nomme = (f: LectureFourniture) => (ref && ref.workItems.length > 0 ? ouvrageEcrit(ref, f.ouvrage!, f.emplacement ?? "", ecrits) : (ref?.workItems.find((w) => w.id === f.ouvrage)?.label ?? f.nom));
+  const principal = lignes.flatMap((l) => l.fournitures.filter((f) => f.ouvrage && f.quantite && /^(m²|m2|ml|m)$/i.test(f.unite ?? "") && nomme(f)).map((f) => ({ f, l }))).find(Boolean);
   if (principal && ref) {
-    const label = ref.workItems.find((w) => w.id === principal.f.ouvrage)?.label ?? principal.f.nom;
+    const label = nomme(principal.f)!;
     const preuve = `Devis, ligne ${principal.l.ref} : « ${principal.l.designation} »`;
     fiche.unshift({ cle: "ouvrage", libelle: "Ouvrage", valeur: label.charAt(0).toLowerCase() + label.slice(1), origine: "devis", preuve });
     if (/^(m²|m2)$/i.test(principal.f.unite ?? "")) fiche.splice(1, 0, { cle: "surface", libelle: "Surface", valeur: `${principal.f.quantite} m²`, origine: "devis", preuve });

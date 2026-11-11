@@ -99,7 +99,7 @@ export function buildPacket(
   // §50.7 : le bref de l'écran « Ton chantier », corrections de l'artisan comprises : le fournisseur reçoit le même.
   // Retour du fondateur (2026-10-11) : un seul texte descriptif, celui de l'écran.
   const resumeLines = briefResume(brief, sender.projectNotes ?? null, reviewed.takeoff.answers, reviewed.takeoff.fiche ? reviewed.fiche : null);
-  const resume = resumeLines.length > 0 ? [briefTexte(resumeLines)] : [];
+  const resume = resumeLines.length > 0 ? [briefTexte(resumeLines, Boolean(brief.ville || brief.situation))] : [];
   const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).replace(/^1 /, "1er ");
   // Le devis sans les prix (§42) : une ligne par ouvrage, la main-d'œuvre seule exclue, jamais le prix.
   const kinds = new Map(validation.lines.map((l) => [l.lineId, l.kind]));
