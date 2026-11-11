@@ -3,6 +3,10 @@ import { LISTES_ENREGISTREES } from "../src/modules/takeoff/infrastructure/fake-
 import { decodeListe, listeSystemPrompt, listeWireSchema } from "../src/modules/takeoff/application/liste-reader.js";
 import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
+import { horlogeAu } from "./support/horloge-decalee.js";
+
+// Dates en dur dans ce fichier (novembre 2026) : l'horloge du test est fixée, il ne dépend plus du jour où on le lance.
+horlogeAu("2026-11-05T09:00:00.000Z");
 
 /**
  * « J'AI DÉJÀ MA LISTE » (demande du fondateur, 21 octobre 2026), crédit API à zéro : trois listes fictives enregistrées

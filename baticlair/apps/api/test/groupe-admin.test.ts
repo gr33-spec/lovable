@@ -4,6 +4,10 @@ import { ChoixService } from "../src/modules/groupe/index.js";
 import { doubleAuthentification } from "./support/admin.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
+import { horlogeAu } from "./support/horloge-decalee.js";
+
+// Dates en dur dans ce fichier (novembre 2026) : l'horloge du test est fixée, il ne dépend plus du jour où on le lance.
+horlogeAu("2026-11-05T09:00:00.000Z");
 
 /**
  * BATICLAIR GROUPÉ, ÉTAPE 9 : L'ADMIN DE GREG (document du fondateur, 2026-10-19, section 7 étape 9 ; section 5 : le

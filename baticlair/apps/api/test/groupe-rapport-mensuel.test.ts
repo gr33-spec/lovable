@@ -4,6 +4,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ChoixService } from "../src/modules/groupe/index.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
+import { horlogeAu } from "./support/horloge-decalee.js";
+
+// Dates en dur dans ce fichier (novembre 2026) : l'horloge du test est fixée, il ne dépend plus du jour où on le lance.
+horlogeAu("2026-11-05T09:00:00.000Z");
 
 /**
  * PLAN 2 DU 21 OCTOBRE 2026, BLOC 4 : LE RAPPORT MENSUEL DE L'ARTISAN. Le 1er du mois, la tâche envoie à chaque

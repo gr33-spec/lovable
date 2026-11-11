@@ -3,6 +3,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ChoixService, CommandeService } from "../src/modules/groupe/index.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
+import { horlogeAu } from "./support/horloge-decalee.js";
+
+// Dates en dur dans ce fichier (novembre 2026) : l'horloge du test est fixée, il ne dépend plus du jour où on le lance.
+horlogeAu("2026-11-05T09:00:00.000Z");
 
 /**
  * BATICLAIR GROUPÉ, ÉTAPE 7 : BONS DE COMMANDE, FACTURE, LIVRAISON, DÉSISTEMENT (document du fondateur, 2026-10-19,

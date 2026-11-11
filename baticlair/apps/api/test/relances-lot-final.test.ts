@@ -2,6 +2,10 @@ import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ARDOISE, LITEAU, couvreurAvecListe, mailsVers } from "./support/cycle.js";
 import { createTestApp, resetDatabase, type TestContext } from "./support/test-app.js";
+import { horlogeAu } from "./support/horloge-decalee.js";
+
+// Dates en dur dans ce fichier (novembre 2026) : l'horloge du test est fixée, il ne dépend plus du jour où on le lance.
+horlogeAu("2026-11-05T09:00:00.000Z");
 
 /**
  * LOT FINAL, point 6 (Greg, 29 octobre 2026) : à mi-délai, l'artisan est prévenu (« [Négoce] n'a pas encore répondu.

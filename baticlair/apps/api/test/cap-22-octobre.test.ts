@@ -5,6 +5,10 @@ import type { CapturingPushSender } from "../src/platform/push/web-push.sender.j
 import { PUSH_SENDER } from "../src/platform/tokens.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
+import { horlogeAu } from "./support/horloge-decalee.js";
+
+// Dates en dur dans ce fichier (novembre 2026) : l'horloge du test est fixée, il ne dépend plus du jour où on le lance.
+horlogeAu("2026-11-05T09:00:00.000Z");
 
 /**
  * NOUVEAU CAP DU 22 OCTOBRE 2026 (décidé avec Greg, section 0 du doc « BatiClair Groupé ») : le mail qui prévient chaque

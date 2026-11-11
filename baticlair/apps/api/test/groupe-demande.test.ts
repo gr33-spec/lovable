@@ -3,6 +3,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PHRASE_COMMISSION, VERSION_CONTRAT } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 import { makePdf } from "./support/pdf-fixtures.js";
+import { horlogeAu } from "./support/horloge-decalee.js";
+
+// Dates en dur dans ce fichier (novembre 2026) : l'horloge du test est fixée, il ne dépend plus du jour où on le lance.
+horlogeAu("2026-11-05T09:00:00.000Z");
 
 /**
  * BATICLAIR GROUPÉ, ÉTAPE 5 : LA DEMANDE AUX NÉGOCES (document du fondateur, 2026-10-19, section 2 étape 5 ; décision du

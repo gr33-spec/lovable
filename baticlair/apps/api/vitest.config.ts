@@ -8,7 +8,7 @@ export default defineConfig({
     include: ["test/**/*.test.ts"],
     globalSetup: ["test/support/global-setup.ts"],
     // Aucun test n'appelle l'API Anthropic réelle (Greg, 25 octobre 2026) : clés retirées, appels refusés.
-    setupFiles: ["test/support/sans-ia-reelle.ts"],
+    setupFiles: ["test/support/sans-ia-reelle.ts", "test/support/horloge-decalee.ts"],
     // Les tests d'intégration partagent une base : exécution séquentielle.
     fileParallelism: false,
     env: {

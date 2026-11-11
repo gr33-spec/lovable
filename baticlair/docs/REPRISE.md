@@ -91,6 +91,16 @@ quand même la migration). Tests liés à l'heure : `relances-lot-final.test.ts`
 (échéance fabriquée à minuit) ; ce n'est pas un défaut du produit. En attente de Greg : validation, 3 ou 5 négoces,
 plafond de branches Neon, présentation des parcours Quantitatifs et Achats groupés.
 
+SUIVI 189 (11 novembre 2026) : VÉRIFICATION AVANT VALIDATION, voir `docs/verification-2026-11-11.md`. Greg ne valide ni
+la fin du chantier ni la production. ATTENTION : `test.mobiiz.fr` et `api-test.mobiiz.fr` suivent tout seuls le dernier
+déploiement de la branche ; on ne pousse donc RIEN après avoir testé la version finale (les résultats vont dans le rapport
+et le livrable de preuves, hors dépôt). Horloge des tests : `horlogeAu(...)` fixe un fichier, `TEST_DECALAGE_JOURS=n`
+avance tous les autres (`apps/api/test/support/horloge-decalee.ts`). EN ATTENTE DE L'ACCORD DE GREG : 1) supprimer une
+branche Neon (recommandée : `sauvegarde-avant-lots-prompt-maitre`), puis créer et vérifier
+`sauvegarde-avant-ux-complet-2026-11-11` ; 2) lancer `reception-negoce.mjs --envoyer` (une vingtaine d'e-mails, 0 €) ;
+3) la reprise graphique des Quantitatifs et des Achats groupés (chantier séparé, liste dans le document) ; 4) 3 ou 5
+négoces.
+
 ## À faire ensuite (dans cet ordre)
 
 2. FAIT (garder pour mémoire) : SUIVI 137, « Évolution de la landing, de l'expérience et du positionnement » (message de Greg du 30 octobre, soir) :

@@ -3,6 +3,10 @@ import { afterAll, beforeAll, expect, it } from "vitest";
 import { ChoixService } from "../src/modules/groupe/index.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
+import { horlogeAu } from "./support/horloge-decalee.js";
+
+// Dates en dur dans ce fichier (novembre 2026) : l'horloge du test est fixée, il ne dépend plus du jour où on le lance.
+horlogeAu("2026-11-05T09:00:00.000Z");
 
 /**
  * PLUS DE COMMISSION (Greg, 24 octobre 2026) : drapeau `FACTURATION_NEGOCE` éteint (le défaut), le lot va jusqu'aux bons
