@@ -125,7 +125,7 @@ Complexité : S = moins d'une demi-journée, M = un à deux jours, L = plus de d
 | 27 Assistant, clarification | conversation de `nouveau-quantitatif.tsx` | bulles jaunes et claires, boutons de choix, encart « Pourquoi cette question ? » | questions, choix, réponse libre, dictée | reprise visuelle des bulles et de l'encart | faible | M |
 | 28 Assistant, liste prête | même écran | carte « Ta liste en cours » avec lot, « Ajouter un autre matériau », « Créer mon quantitatif » | la liste se construit et se valide | carte récapitulative dans la conversation | moyen : touche la validation | M |
 | 29 Fiche du quantitatif | `/chantiers/[id]`, `project-takeoff.tsx` | maquette : état, articles par lot, deux cartes d'action, « Modifier » ; ici une frise d'étapes, « Ouvrir l'assistant », « Ton chantier », les fournitures, une barre « Aperçu / Demander les prix », un bloc regroupement | tout le suivi et les deux actions | refonte de la fiche | ÉLEVÉ : écran le plus testé et régi par le référentiel (§48 à §50) | L |
-| 30 Choisir les négoces | feuille « À qui j'envoie ? », `project-price-requests.tsx` | page entière avec recherche ; la maquette dit « jusqu'à 3 négoces », la règle retenue est 5 (1 en gratuit) ; ici une feuille | carnet, spécialités, envoi | page dédiée, à écrire avec « jusqu'à 5 négoces » (décision du 11 novembre) | moyen : droits des formules | M |
+| 30 Choisir les négoces | feuille « À qui j'envoie ? », `project-price-requests.tsx` | page entière avec recherche ; la maquette dit « jusqu'à 3 négoces », la règle retenue est 5 pour toutes les formules ; ici une feuille | carnet, spécialités, envoi | page dédiée, à écrire avec « jusqu'à 5 négoces » (décision du 11 novembre) | moyen : droits des formules | M |
 | 31 Demande envoyée | `/chantiers/[id]`, onglet Suivi, `dossier-demande.tsx` | écran de confirmation dédié (coche, « Envoyée à », « Et maintenant ? ») ; ici on arrive sur le dossier de la demande | suivi, relance, écrire au négoce | écran de confirmation | faible | S |
 | 32 Comparer les propositions | onglet Offres, `project-offers.tsx` | cartes avec total, « Meilleur total », livraison, « 3/3 articles chiffrés » ; ici le devis reçu s'ouvre en PDF, la comparaison chiffrée n'existe que pour une réponse saisie par le lien | réponse par lien comparée article par article | cartes de totaux ; le total d'un PDF demande une lecture (IA payante ou saisie) | moyen ; dépend d'une décision sur la lecture des devis | L |
 | (hors maquette) | page « Page introuvable » | s'affiche sur fond clair même en thème sombre | fonctionne | suivre le thème | faible | S |
@@ -200,4 +200,67 @@ de compte, 6 avis à l'artisan, 2 codes d'admin, 2 avis de connexion admin), 8 r
 `resend.dev` et `mobiiz.fr`. L'estimation annoncée était d'une vingtaine pour une passe. Sur la journée du 11 novembre,
 99 e-mails sont partis au total (les neuf recettes en ligne comprises) : le plafond gratuit de 100 par jour est atteint,
 plus aucun envoi de recette ce jour-là. Coût : 0 €.
+
+## 8. Négoces par envoi, ancien prix, dernier contrôle d'isolation (11 novembre, soir)
+
+### La règle des négoces : ce que fait le code, avant toute modification
+
+Décision de Greg pour le pilote : jusqu'à 5 négoces par envoi pour toutes les formules, Découverte gratuite comprise ;
+Essentiel et Pro tiennent aux quotas d'analyses et de scans. La formule « 1 en gratuit, 5 en payant » écrite plus tôt dans
+les documents n'avait pas été validée : elle est retirée.
+
+| Où | Ce que fait le code aujourd'hui | Conforme à la décision |
+|---|---|---|
+| Demande à ses négoces, mode `automatique` (celui de test.mobiiz.fr, lu dans la base de test) | gratuit : 5 ; abonné : 5 (`droits.service.ts`, ligne « Gratuit, l'artisan envoie sa liste à ses négoces ») | oui ; test permanent `apps/api/test/negoces-par-envoi.test.ts` (5 partent, le 6e est refusé) |
+| Même demande, anciens modes `humain` et `mois` (éteints sur le test) | gratuit : 1 (`NEGOCES_PAR_DEMANDE_GRATUIT`), payant : 5 | non |
+| Refus au 6e négoce pour un compte gratuit, mode `automatique` | réponse « abonnement requis » avec la phrase « En gratuit, ta demande part chez un seul négoce. Abonne-toi pour comparer jusqu'à 5 négoces. » ; l'écran, lui, empêche d'en cocher plus de 5 | non (phrase fausse, visible seulement par un appel direct) |
+| Envoi classique `POST /v1/projects/:id/price-requests` (feuille « À qui j'envoie ? ») | jusqu'à 20 négoces, sans regarder la formule | non (plus large que 5) |
+| Page publique | « Une seule demande, envoyée jusqu'à 5 négoces », sans condition de formule | oui |
+| Page Tarifs et `tarifs.ts` | « Le PDF et l'envoi à tous tes négoces », « tes listes et tes négoces » gratuits | à peu près : ne dit pas « 5 » |
+| CGU | aucune limite de négoces | oui |
+
+La limite de 1 en gratuit existe donc bien dans le code, mais seulement dans deux anciens modes qui ne sont pas ceux du
+site de test ; en ligne, le gratuit a déjà 5.
+
+Modifications du produit proposées, NON faites (accord de Greg attendu) :
+1. `packages/domain/src/groupe/offre-artisan.ts` : `NEGOCES_PAR_DEMANDE_GRATUIT` à 5, phrase du refus « Jusqu'à 5 négoces
+   par demande. » pour tous ; `apps/api/src/modules/recentrage/application/droits.service.ts` : le refus devient une
+   limite (400), plus un paywall (402) ; `apps/web/src/components/demande-perso.tsx` : retirer « un seul en gratuit ».
+   Tests à adapter : `packages/domain/test/recentrage-25-octobre.test.ts`, `apps/api/test/demande-perso-recentrage.test.ts`,
+   `apps/web/e2e/recentrage.spec.ts` (ils affirment aujourd'hui « un seul négoce »).
+2. `apps/api/src/modules/price-requests/http/price-requests.controller.ts` : plafond de 20 ramené à 5 par envoi, et la
+   feuille `project-price-requests.tsx` qui le dit avant l'envoi. À vérifier d'abord : aucun parcours existant n'envoie à
+   plus de 5 en une fois.
+3. `packages/domain/src/groupe/tarifs.ts` : « l'envoi à tous tes négoces » → « jusqu'à 5 négoces par envoi » (page Tarifs).
+À rejouer ensuite : domaine, API complète, parcours complets (téléphone et ordinateur), passe « lots », parcours réglages
+allumés, puis recette en ligne un jour où le plafond d'e-mails le permet.
+
+### L'ancien prix « 49 € HT par mois ou 348 € HT par an »
+
+C'était le prix de l'abonnement du 24 octobre 2026 (une formule, au mois ou à l'année), remplacé le 30 octobre par
+Essentiel 19,90 € et Pro 39,90 € HT par mois (`tarifs.ts`). Dans `offre-artisan.ts`, ce n'était qu'un commentaire : aucun
+prix n'y est lu. Le commentaire est corrigé (il dit que ce prix est remplacé). Aucune règle de facturation n'est touchée.
+Reste, hors de ce commentaire : la page des CGU (`apps/web/src/app/(auth)/cgu/page.tsx`) affiche encore « Mensuelle :
+49 € HT par mois » et « Annuelle : 348 € HT par an ». C'est un texte juridique visible : non modifié, décision de Greg.
+Dans `config.ts`, les deux anciens prix sont déjà marqués « plus lu ».
+
+### Dernier contrôle d'isolation, sans aucun e-mail
+
+Les deux e-mails mis de côté (`personne-mwc0s2gt@mobiiz.fr`, `personne-mwc0xgyt@mobiiz.fr`) sont dans la table
+`email_mis_de_cote`, sans entreprise (`company_id` vide), non rattachés ; aucune ligne de `email_recu_artisan` ne les
+porte. Les deux entreprises de la recette du midi ayant été supprimées, le contrôle a été fait avec deux entreprises
+neuves ouvertes par l'accès de démonstration (aucun e-mail) :
+
+| Appel | Entreprise 1 | Entreprise 2 | Sans session |
+|---|---|---|---|
+| sa liste de reçus | 200, vide | 200, vide | 401 |
+| liste de l'admin | 403 | 403 | 401 |
+| contenu de chacun des deux e-mails | 404, 404 | 404, 404 | 401 |
+| rattacher l'un des deux (route de l'admin) | 403, 403 | 403, 403 | |
+| rattacher l'un des deux (route de l'artisan) | 404, 404 | 404, 404 | |
+
+L'accès de l'admin autorisé (liste ouverte, les deux e-mails lus) a été constaté à midi (`cas6.log`) ; il n'a pas été
+rejoué le soir, car sa connexion envoie un code par e-mail. Réserve : dans un espace de démonstration, les routes de
+l'admin sont aussi fermées par la règle de la démonstration ; le refus à un artisan ordinaire (403) avait été constaté à
+midi avec un compte normal. E-mails partis pendant ce contrôle : zéro (99 sur la journée, inchangé).
 

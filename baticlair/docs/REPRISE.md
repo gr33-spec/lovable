@@ -103,7 +103,7 @@ branche Neon (recommandée : `sauvegarde-avant-lots-prompt-maitre`), puis créer
 SUIVI 190 (11 novembre 2026, après-midi) : FAIT, partie 7 du même document. Branche Neon
 `sauvegarde-avant-lots-prompt-maitre` supprimée (la seule) ; sauvegarde `sauvegarde-test-2026-11-11-35d83f77`
 (`br-wild-violet-b2etltsm`) créée et vérifiée. Recette réelle de réception passée (aucun défaut du circuit). Décision de
-Greg : jusqu'à 5 négoces par envoi en payant, 1 en gratuit. ATTENTION : chaque recette en ligne envoie une douzaine
+Greg (corrigée le soir même, suivi 191) : jusqu'à 5 négoces par envoi pour TOUTES les formules, gratuit compris. ATTENTION : chaque recette en ligne envoie une douzaine
 d'e-mails ; le plafond gratuit est de 100 par jour (99 partis le 11 novembre). Le plafond Neon de 10 branches est de
 nouveau atteint. Reste en attente de Greg : sa validation sur de vrais téléphones, puis la reprise graphique.
 

@@ -25,7 +25,7 @@ séparés ».
 | 02 | Mes quantitatifs | `/chantiers` | `chantiers/page.tsx` | titre, sous-titre, recherche ; les cinq filtres d'avant sont gardés |
 | 03, 27, 28 | Créer un quantitatif, assistant | `/chantiers/nouveau` | `nouveau-quantitatif.tsx` | existant gardé (une question à la fois depuis le 8 novembre) ; présentation non refaite |
 | 29 | Fiche du quantitatif | `/chantiers/[id]` | `project-takeoff.tsx` | existant gardé (deux actions distinctes depuis le 8 novembre) |
-| 30 | Choisir les négoces | feuille « À qui j'envoie ? » | `project-price-requests.tsx` | existant gardé : 1 négoce en gratuit, 5 en payant (décision de Greg du 11 novembre, voir 4) |
+| 30 | Choisir les négoces | feuille « À qui j'envoie ? » | `project-price-requests.tsx` | existant gardé ; règle retenue : jusqu'à 5 négoces pour toutes les formules (décision de Greg du 11 novembre, voir 4) |
 | 31, 32 | Demande envoyée, comparer | `/chantiers/[id]` | `dossier-demande.tsx`, `project-offers.tsx` | existant gardé |
 | 04, 04b, 05, 33 à 42, 48 | Achats groupés | `/achats-groupes/...` | `ag-v1-*.tsx` | existant gardé (V1 du 7 et 8 novembre) |
 | 06 | Missions | `/missions` | `missions.tsx` | fait |
@@ -86,9 +86,9 @@ séparés ».
 7. Le menu garde une ligne de plus que la capture 17, « Messages et réponses », pour que la boîte reste accessible quand
    les missions sont coupées.
 8. Budget, tarif, niveau et expérience sont toujours dits « indicatifs » ou « déclarés ».
-9. « Jusqu'à 3 négoces » (prompt maître, capture 30) n'est pas appliqué, et ne le sera pas : DÉCIDÉ par Greg le 11 novembre 2026 : jusqu'à 5 négoces par envoi en formule payante (1 en gratuit), comme la page publique ; la mention « jusqu'à 3 » du prompt maître et de la capture 30 est abandonnée.
-   La limite technique (`droits.service.ts`) et la promesse commerciale (page publique) disent déjà 5 : rien n'a été changé
-   dans le code. La capture 30, si elle est reprise, devra dire « jusqu'à 5 négoces ».
+9. « Jusqu'à 3 négoces » (prompt maître, capture 30) n'est pas appliqué. DÉCIDÉ par Greg le 11 novembre 2026 pour le pilote : jusqu'à 5 négoces par envoi pour TOUTES les formules, Découverte gratuite comprise ; les abonnements Essentiel et Pro tiennent aux quotas d'analyses de devis et de scans de liste, pas au nombre de négoces.
+   État du code et points à aligner : `docs/verification-2026-11-11.md`, partie 8. La capture 30, si elle est reprise, devra
+   dire « jusqu'à 5 négoces ».
 
 ## 5. Migration et retour arrière
 

@@ -2,8 +2,9 @@
  * GRATUIT ET PAYANT (Greg, 25 octobre 2026, recentrage) : « gratuit, tu gagnes du temps ; payant, tu gagnes de l'argent ».
  * - Gratuit : `LECTURES_GRATUITES_MOIS` lectures de devis par mois (2), envoi à UN seul négoce par demande, « Mes prix »
  *   limité aux 3 derniers mois, pas de regroupement.
- * - Payant (49 € HT par mois ou 348 € HT par an) : lectures illimitées (usage raisonnable), jusqu'à 5 négoces par
- *   demande, regroupements, « Mes prix » complet.
+ * - Payant : lectures illimitées (usage raisonnable), jusqu'à 5 négoces par demande, regroupements, « Mes prix »
+ *   complet. (Le prix de ce mode, 49 € HT par mois ou 348 € HT par an, a été remplacé le 30 octobre 2026 par Essentiel
+ *   19,90 € et Pro 39,90 € HT par mois, `tarifs.ts` ; aucun prix n'est lu dans ce fichier.)
  * - L'essai existant donne le payant. Dans une zone sous `SEUIL_ZONE_ACTIVE` artisans actifs (10), le payant est OFFERT ;
  *   quand le seuil est franchi, chaque artisan de la zone garde le payant 30 jours (préavis) avant le paywall.
  * - Les regroupements n'existent que dans les `ZONES_ACTIVES` (22 au départ) ; ailleurs, tout le reste marche.
@@ -12,6 +13,12 @@
  * ATTENTION (relecture du 30 octobre 2026) : ces règles sont celles du MODE ANCIEN. En mode achat groupé (`automatique`,
  * celui en ligne), ce qui est gratuit et payant est dit par `tarifs.ts` (`TARIFS`) et appliqué par `DroitsService` :
  * 3 listes préparées offertes en tout, plusieurs négoces par demande, achats groupés sur abonnement (le premier offert).
+ *
+ * NÉGOCES PAR ENVOI (décision de Greg, 11 novembre 2026, pour le pilote) : jusqu'à 5 négoces par envoi pour TOUTES les
+ * formules, Découverte gratuite comprise ; les abonnements tiennent aux quotas d'analyses et de scans, pas au nombre de
+ * négoces. En mode `automatique` (celui en ligne), `DroitsService` donne déjà 5 au gratuit (test
+ * `apps/api/test/negoces-par-envoi.test.ts`). La limite de 1 ci-dessous (`NEGOCES_PAR_DEMANDE_GRATUIT`) ne joue plus que
+ * dans les deux anciens modes (`humain`, `mois`) : l'aligner est une modification du produit, en attente de l'accord de Greg.
  */
 
 export const LECTURES_GRATUITES_MOIS_DEFAUT = 2;
