@@ -83,6 +83,10 @@ function Sprite() {
         <path d="M4 5.5h16v10H8.5L4 19.5z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
         <path d="M8 9.5h8M8 12.5h5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
       </symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24">
+        <rect x="4.5" y="10.5" width="15" height="10" rx="2.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M8 10.5V8a4 4 0 018 0v2.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </symbol>
       <symbol id="i-check" viewBox="0 0 24 24">
         <path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
       </symbol>
@@ -138,30 +142,37 @@ const ETAPES = [
   { titre: "Compare et choisis", texte: "Les réponses arrivent dans Mobiiz. Les prix donnés en ligne se comparent ligne par ligne." },
 ] as const;
 
-/**
- * Les trois bénéfices (11 novembre 2026, après le tour de l'application) : ce que l'artisan gagne, dit avec ce qui existe
- * vraiment. La boîte « Messages et réponses » remplace « plus de visibilité », trop vague.
- */
 const BENEFICES = [
   { ico: "i-check", titre: "Simple et rapide", texte: "Une demande au lieu de cinq appels." },
-  { ico: "i-inbox", titre: "Tout au même endroit", texte: "Les réponses de tes négoces sont rangées avec ta demande." },
-  { ico: "i-people", titre: "Plus de poids", texte: "À plusieurs, le volume pèse dans la négociation." },
+  { ico: "i-search", titre: "Plus de visibilité", texte: "Tu compares facilement les propositions." },
+  { ico: "i-people", titre: "Plus de poids", texte: "Le collectif négocie de meilleurs tarifs." },
 ] as const;
 
 /** La question des missions : seulement quand elles sont ouvertes (`SiMissions`). */
 const QUESTION_MISSIONS = {
   q: "Les missions entre entreprises, c’est quoi ?",
-  r: "Une mise en relation entre entreprises du bâtiment : tu publies une mission quand tu cherches du renfort, ou tu proposes tes services quand tu as du temps. Mobiiz ne fait que vous mettre en relation ; vos coordonnées ne sont partagées que si vous êtes d’accord tous les deux.",
+  r: "Une mise en relation entre entreprises indépendantes du bâtiment. Tu publies une mission quand tu recherches une entreprise, ou tu indiques tes disponibilités. Mobiiz met en relation, rien de plus : ce n’est ni de l’intérim ni du recrutement, et aucune mission n’est garantie. Les coordonnées ne sont partagées qu’après l’accord des deux entreprises.",
 } as const;
 
 /**
- * Les trois formules, avec les mots de la page Tarifs (`TARIFS`, le domaine fait foi). AUCUN MONTANT ici : la règle de la
- * page publique (Greg, 30 octobre 2026) tient, les prix se lisent sur la page Tarifs, à un lien.
+ * « Commence gratuitement » (Greg, 11 novembre 2026, après la première version) : trois grandes cartes sans prix donnaient
+ * l'impression qu'une information manquait. Un bloc compact dit ce qui est gratuit et renvoie à la page Tarifs, seul
+ * endroit où les trois formules et leurs prix sont détaillés. AUCUN montant ici (règle du 30 octobre 2026).
  */
-const FORMULES = [
-  { titre: TARIFS.gratuit.titre, sous: "Gratuit, sans limite de temps", points: TARIFS.gratuit.points, pastille: "Pour commencer" },
-  { titre: TARIFS.essentiel.titre, sous: "Sur abonnement, sans engagement", points: TARIFS.essentiel.points.filter((x) => x !== "Sans engagement"), pastille: null },
-  { titre: TARIFS.pro.titre, sous: "Sur abonnement, sans engagement", points: TARIFS.pro.points.filter((x) => x !== "Sans engagement"), pastille: null },
+const GRATUIT = ["Quantitatifs et listes saisies à la main", "Demandes jusqu’à 5 négoces", "Achats groupés de ton secteur"] as const;
+
+/**
+ * Les deux écrans de l'app de la section Missions : de VRAIES captures (données fictives, entreprises « Exemple »), dans
+ * le même cadre de téléphone que les étapes. Aucune photo, aucun chiffre, aucun témoignage inventé.
+ */
+const ECRANS_MISSIONS = [
+  { src: "/landing/v3/ecran-missions.webp", alt: "L'app Mobiiz : les missions publiées par des entreprises du secteur (exemple)" },
+  { src: "/landing/v3/ecran-disponible.webp", alt: "L'app Mobiiz : une entreprise disponible, son secteur et son tarif journalier indicatif (exemple)" },
+] as const;
+
+const PARCOURS_MISSIONS = [
+  { titre: "Je recherche une entreprise", texte: "Métier, lieu, dates et conditions indicatives." },
+  { titre: "Je suis disponible", texte: "Secteur, disponibilités, profil professionnel et tarif HT/jour indicatif." },
 ] as const;
 
 /** Les écrans de l'app mis en scène dans un téléphone : contenu d'exemple, jamais un vrai client ni un vrai prix. */
@@ -176,10 +187,9 @@ const ECRANS = [
   { src: "/landing/v3/ecran-reponses.webp", alt: "L'app Mobiiz : les devis reçus, du moins cher au plus cher (exemple)" },
 ] as const;
 
-function Telephone({ n }: { n: number }) {
-  const e = ECRANS[n]!;
+function Cadre({ src, alt, classe, exemple }: { src: string; alt: string; classe: string; exemple: boolean }) {
   return (
-    <figure className={`mz2-tel mz2-tel-${n + 1}`}>
+    <figure className={`mz2-tel ${classe}`}>
       <div className="mz2-tel-ecran">
         <div className="mz2-tel-barre" aria-hidden="true">
           <span>9:41</span>
@@ -190,19 +200,24 @@ function Telephone({ n }: { n: number }) {
             légères ; l'écran incliné est servi au double de sa taille au moins, pour un texte net. */}
         {/* eslint-disable-next-line @next/next/no-img-element -- une capture déjà optimisée (WebP, 600 px), chargée tard */}
         <img
-          src={e.src}
-          srcSet={`${e.src} 600w, ${e.src.replace(".webp", "-900.webp")} 900w, ${e.src.replace(".webp", "-1170.webp")} 1170w`}
+          src={src}
+          srcSet={`${src} 600w, ${src.replace(".webp", "-900.webp")} 900w, ${src.replace(".webp", "-1170.webp")} 1170w`}
           sizes="(max-width: 900px) 150px, 400px"
-          alt={e.alt}
+          alt={alt}
           width={1170}
           height={2532}
           loading="lazy"
           decoding="async"
         />
       </div>
-      {n === 2 ? <figcaption className="mz2-tel-exemple">Exemple</figcaption> : null}
+      {exemple ? <figcaption className="mz2-tel-exemple">Exemple</figcaption> : null}
     </figure>
   );
+}
+
+function Telephone({ n }: { n: number }) {
+  const e = ECRANS[n]!;
+  return <Cadre src={e.src} alt={e.alt} classe={`mz2-tel-${n + 1}`} exemple={n === 2} />;
 }
 
 export function LandingPremium() {
@@ -228,7 +243,7 @@ export function LandingPremium() {
               <h1 id="heroTitle">
                 <span className="l1">Compare les négoces.</span> Achète tes matériaux <span>au bon prix.</span>
               </h1>
-              <p className="mz2-lead">Prépare ta liste, envoie-la jusqu’à 5 négoces et retrouve leurs réponses au même endroit. Et si tu le souhaites, regroupe tes achats pour négocier plus fort.</p>
+              <p className="mz2-lead">Une seule demande, envoyée jusqu’à 5 négoces. Compare leurs offres et, si tu le souhaites, regroupe tes achats pour négocier plus fort.</p>
               <div className="hero-actions">
                 <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/inscription">
                   {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
@@ -317,35 +332,6 @@ export function LandingPremium() {
               <PaliersCollectif />
             </div>
             <p className="mz2-note">Gratuit, pour tous les artisans. Exemple fictif : les prix réels dépendent des offres reçues, aucune économie n’est garantie.</p>
-            {/* Les missions entre entreprises (11 novembre 2026) : la troisième activité, dite sans promesse. Mobiiz met en
-                relation, rien de plus ; la bande n'existe que si le serveur a ouvert les missions. */}
-            <SiMissions>
-              <div className="mz2-missions" id="missions" role="region" aria-labelledby="missionsTitle">
-                <span className="mz2-missions-ico" aria-hidden="true">
-                  <Icone id="i-case" />
-                </span>
-                <div className="mz2-missions-texte">
-                  <h2 id="missionsTitle">
-                    Missions entre entreprises <span className="mz2-pastille mz2-pastille-claire">nouveau</span>
-                  </h2>
-                  <p>Un chantier qui déborde, ou du temps devant toi ? Trouve du renfort, ou propose le tien, entre entreprises du bâtiment.</p>
-                </div>
-                <ul className="mz2-missions-points">
-                  <li>
-                    <strong>Tu cherches du renfort</strong>
-                    <span>Publie une mission : métier, dates, lieu, conditions indicatives.</span>
-                  </li>
-                  <li>
-                    <strong>Tu as du temps</strong>
-                    <span>Propose tes services et ton tarif indicatif, si tu veux le donner.</span>
-                  </li>
-                  <li>
-                    <strong>Vous vous arrangez entre vous</strong>
-                    <span>Mobiiz met en relation. Les coordonnées ne se partagent que d’un commun accord.</span>
-                  </li>
-                </ul>
-              </div>
-            </SiMissions>
           </div>
         </section>
 
@@ -362,6 +348,49 @@ export function LandingPremium() {
             ))}
           </ul>
         </section>
+
+        {/* LES MISSIONS ENTRE ENTREPRISES (Greg, 11 novembre 2026 : « une véritable section dédiée, clairement séparée des
+            achats groupés ») : sur fond noir, le titre en deux questions, deux parcours, la ligne de confiance, et deux
+            vrais écrans de l'app devant la bande jaune de l'accroche. Mobiiz met en relation des entreprises indépendantes :
+            ni intérim, ni recrutement, ni mission garantie. La section n'existe que si le serveur a ouvert les missions. */}
+        <SiMissions>
+          <section className="mz2-ms" id="missions" aria-labelledby="missionsTitle">
+            <div className="wrap mz2-ms-grid">
+              <div className="mz2-ms-copy">
+                <span className="label">Missions entre entreprises</span>
+                <h2 id="missionsTitle">
+                  Besoin d’une entreprise sur un chantier ? <span>Disponible pour une mission ?</span>
+                </h2>
+                <p className="mz2-ms-lead">Mobiiz met en relation des entreprises du bâtiment. Publie une mission ou indique tes disponibilités, ton secteur et ton tarif journalier indicatif.</p>
+                <ol className="mz2-ms-parcours">
+                  {PARCOURS_MISSIONS.map((x, i) => (
+                    <li key={x.titre}>
+                      <span className="mz2-num" aria-hidden="true">
+                        {i + 1}
+                      </span>
+                      <div>
+                        <h3>{x.titre}</h3>
+                        <p>{x.texte}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mz2-ms-confiance">
+                  <Icone id="i-lock" />
+                  <span>Les échanges restent liés à une mission. Les coordonnées ne sont partagées qu’après l’accord des deux entreprises.</span>
+                </p>
+                <Link id="missionsCTA" className="btn btn-yellow" href="/inscription">
+                  Découvrir les missions <Icone id="i-arrow" className="arrow" />
+                </Link>
+              </div>
+              <div className="mz2-ms-visuel">
+                <span className="mz2-bande mz2-ms-bande" aria-hidden="true" />
+                <Cadre src={ECRANS_MISSIONS[1].src} alt={ECRANS_MISSIONS[1].alt} classe="mz2-ms-tel-arriere" exemple={false} />
+                <Cadre src={ECRANS_MISSIONS[0].src} alt={ECRANS_MISSIONS[0].alt} classe="mz2-ms-tel-avant" exemple />
+              </div>
+            </div>
+          </section>
+        </SiMissions>
 
         {/* « Pourquoi Mobiiz ? » (Greg, 30 octobre 2026, nuit : neutre, collectif, sans l'identité ni la photo du fondateur ;
             son texte raccourci). Les négoces ne sont pas des adversaires : des demandes claires facilitent les échanges. */}
@@ -381,35 +410,33 @@ export function LandingPremium() {
           </div>
         </section>
 
-        {/* Ce que ça coûte (11 novembre 2026) : la page disait « Gratuit » sans dire ce que l'abonnement ajoute. Trois
-            formules, les mots et les prix du domaine (`TARIFS`), et la règle qui lève le doute : les négoces et les achats
-            groupés sont les mêmes pour tous. */}
-        <section className="mz2-tarifs" id="tarifs" aria-labelledby="tarifsTitle">
+        {/* « Commence gratuitement » : un bloc compact, sans prix ; les formules se lisent sur la page Tarifs. */}
+        <section className="mz2-offre" id="offres" aria-labelledby="offreTitle">
           <div className="wrap">
-            <span className="label">Ce que ça coûte</span>
-            <h2 id="tarifsTitle">
-              Gratuit pour commencer. <span>Un abonnement seulement si tu en as besoin.</span>
-            </h2>
-            <p className="mz2-tarifs-chapo">Tes listes, tes demandes jusqu’à 5 négoces et les achats groupés sont gratuits, sans limite de temps. Les abonnements ajoutent seulement des analyses de devis et des scans de liste chaque mois.</p>
-            <ul className="mz2-formules">
-              {FORMULES.map((f) => (
-                <li key={f.titre} className={f.pastille ? "mz2-formule mz2-formule-une" : "mz2-formule"}>
-                  {f.pastille ? <span className="mz2-formule-pastille">{f.pastille}</span> : null}
-                  <h3>{f.titre}</h3>
-                  <p className="mz2-formule-prix">{f.sous}</p>
-                  <ul>
-                    {f.points.map((p) => (
-                      <li key={p}>
-                        <Icone id="i-check" /> {p}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-            <p className="mz2-tarifs-suite">
-              Les abonnements sont au mois, sans engagement. <Link href="/tarifs">Voir les prix et le détail</Link>
-            </p>
+            <div className="mz2-offre-carte">
+              <div className="mz2-offre-titre">
+                <span className="label">Sans carte bancaire</span>
+                <h2 id="offreTitle">Commence gratuitement</h2>
+              </div>
+              <div className="mz2-offre-corps">
+                <ul>
+                  {GRATUIT.map((x) => (
+                    <li key={x}>
+                      <Icone id="i-check" /> {x}
+                    </li>
+                  ))}
+                  <SiMissions>
+                    <li>
+                      <Icone id="i-check" /> Missions entre entreprises
+                    </li>
+                  </SiMissions>
+                </ul>
+                <p>Analyses de devis et scans de liste supplémentaires avec Essentiel ou Pro.</p>
+              </div>
+              <Link id="offresCTA" className="btn btn-outline" href="/tarifs">
+                Voir les offres et les tarifs <Icone id="i-arrow" className="arrow" />
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -421,7 +448,7 @@ export function LandingPremium() {
               <h2 id="finalTitle">
                 Le prochain bon prix <span>commence ici.</span>
               </h2>
-              <p>Inscris-toi, prépare ton premier quantitatif et consulte tes négoces. Le collectif est là quand une commande s’y prête.</p>
+              <p>Inscris-toi, prépare ta première demande et consulte tes négoces. Le collectif est là quand une commande s’y prête.</p>
               <Link id="finalPrimaryCTA" className="btn btn-yellow" href="/inscription">
                 {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
               </Link>
@@ -489,7 +516,7 @@ export function LandingPremium() {
           </div>
         </div>
       </footer>
-      <CtaFixePremium haut="heroPrimaryCTA" bas="finalPrimaryCTA" aussi={["collectif"]} bouton={CTA_PRINCIPAL.bouton} />
+      <CtaFixePremium haut="heroPrimaryCTA" bas="finalPrimaryCTA" aussi={["collectif", "missionsCTA"]} bouton={CTA_PRINCIPAL.bouton} />
     </div>
   );
 }

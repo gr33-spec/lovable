@@ -245,19 +245,19 @@ await etape("Inscription artisan", page, async () => {
   await voir(page.getByRole("dialog", { name: "Guide" }), 30000);
   return `${EMAIL} ; adresse ${adresse}`;
 });
-await etape("Guide : trois écrans, « Créer mon premier quantitatif »", page, async () => {
+await etape("Guide : un écran par usage, « Accéder à Mobiiz »", page, async () => {
   const guide = page.getByRole("dialog", { name: "Guide" });
-  await voir(guide.getByRole("heading", { name: "Prépare ton quantitatif" }));
+  await voir(guide.getByRole("heading", { name: "Compare tes négoces" }));
   // Mode humain (26 octobre 2026) : plus de « Prochaine clôture » dans le guide.
   verif(!(await guide.getByText(/^Prochaine clôture :/).count()), "« Prochaine clôture » dans le guide (ancien mode)");
   const cloture = "sans clôture (mode humain)";
   await zeroReste(page, "guide 1");
   await guide.getByRole("button", { name: "Suivant" }).click();
-  await voir(guide.getByRole("heading", { name: "Envoie-le à tes négoces" }));
-  await guide.getByRole("button", { name: "Suivant" }).click();
-  await voir(guide.getByRole("heading", { name: "Achète à plusieurs" }));
-  await guide.getByRole("link", { name: "Créer mon premier quantitatif" }).click();
-  await page.waitForURL(/\/chantiers\/nouveau/);
+  await voir(guide.getByRole("heading", { name: "Achète en collectif" }));
+  // Missions ouvertes : un troisième écran.
+  if (await guide.getByRole("button", { name: "Suivant" }).count()) await guide.getByRole("button", { name: "Suivant" }).click();
+  await guide.getByRole("link", { name: "Accéder à Mobiiz" }).click();
+  await page.waitForURL((u) => u.pathname === "/");
   return cloture.replace(/\s+/g, " ");
 });
 await etape("Guide : ne revient pas ; « Revoir le guide » dans le menu", page, async () => {

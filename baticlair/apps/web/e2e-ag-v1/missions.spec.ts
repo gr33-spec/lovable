@@ -375,24 +375,78 @@ test("compte : le menu, « Profil et paramètres », notifications par catégori
   await expect(page.getByRole("button", { name: "Revoir le guide" })).toBeVisible();
 });
 
-test("page publique, missions ouvertes : la bande « Missions entre entreprises », sa question, le guide qui les nomme ; rien ne déborde", async ({ page }, info) => {
+test("page publique, missions ouvertes : la section « Missions » à part entière, son entrée de menu, deux parcours, la ligne de confiance, deux vrais écrans ; le bloc compact des offres", async ({ page }, info) => {
   await page.goto("/decouvrir");
-  const bande = page.getByRole("region", { name: /^Missions entre entreprises/ });
-  await expect(bande).toBeVisible();
-  for (const t of ["Tu cherches du renfort", "Tu as du temps", "Vous vous arrangez entre vous"]) await expect(bande.getByText(t, { exact: true })).toBeVisible();
-  await expect(bande.getByText("Mobiiz met en relation. Les coordonnées ne se partagent que d’un commun accord.")).toBeVisible();
-  // Les trois activités dans l'ordre : comparer ses négoces, acheter en collectif, les missions ; puis ce que ça coûte.
-  const ordre = await Promise.all(["Comment ça marche ?", /^Achète en collectif/, /^Missions entre entreprises/, /^Gratuit pour commencer/].map(async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y));
+  const section = page.getByRole("region", { name: /^Besoin d’une entreprise sur un chantier \? Disponible pour une mission \?/ });
+  await expect(section).toBeVisible();
+  await expect(section.getByText("Mobiiz met en relation des entreprises du bâtiment. Publie une mission ou indique tes disponibilités, ton secteur et ton tarif journalier indicatif.")).toBeVisible();
+  await expect(section.getByRole("heading", { level: 3 })).toHaveText(["Je recherche une entreprise", "Je suis disponible"]);
+  await expect(section.getByText("Métier, lieu, dates et conditions indicatives.")).toBeVisible();
+  await expect(section.getByText("Secteur, disponibilités, profil professionnel et tarif HT/jour indicatif.")).toBeVisible();
+  await expect(section.getByText("Les échanges restent liés à une mission. Les coordonnées ne sont partagées qu’après l’accord des deux entreprises.")).toBeVisible();
+  await expect(section.getByRole("link", { name: "Découvrir les missions" })).toHaveAttribute("href", "/inscription");
+  // Deux vrais écrans de l'app, chargés, dans le cadre sans marque ; l'exemple est dit.
+  const ecrans = section.locator(".mz2-tel img");
+  await expect(ecrans).toHaveCount(2);
+  for (const [i, nom] of ["ecran-disponible", "ecran-missions"].entries()) {
+    const img = ecrans.nth(i);
+    await img.scrollIntoViewIfNeeded();
+    await expect(img).toHaveAttribute("src", `/landing/v3/${nom}.webp`);
+    await expect.poll(() => img.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth >= e.getBoundingClientRect().width)).toBe(true);
+  }
+  await expect(section.getByText("Exemple", { exact: true })).toHaveCount(1);
+  // Jamais de l'intérim, du recrutement ni une garantie ; plus les tournures familières de la première version.
+  expect(await section.innerText()).not.toMatch(/intérim|recrut|salari|garanti|déborde|propose le tien|arrangez/i);
+  // Séparée des achats groupés, à sa place dans la page et dans le menu.
+  const ordre = await Promise.all(["Comment ça marche ?", /^Achète en collectif/, /^Besoin d’une entreprise/, /^Un même matériau/, "Commence gratuitement", /^Le prochain bon prix/].map(async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y));
   expect([...ordre].sort((x, y) => x - y)).toEqual(ordre);
+  await expect(page.locator("#collectif").getByText(/mission/i)).toHaveCount(0);
+  await expect(page.locator(".nav-links a")).toHaveText(["Comment ça marche", "Achats groupés", "Missions", "Tarifs", "Questions", "Se connecter"]);
+  await expect(page.locator(".nav-links a", { hasText: "Missions" })).toHaveAttribute("href", "#missions");
+  // Le bloc compact : sans prix, un seul bouton, la ligne « Missions » puisqu'elles sont ouvertes.
+  const offre = page.getByRole("region", { name: "Commence gratuitement" });
+  await expect(offre.getByText("Missions entre entreprises", { exact: true })).toBeVisible();
+  await expect(offre.getByRole("link")).toHaveCount(1);
+  await expect(offre.getByRole("link", { name: "Voir les offres et les tarifs" })).toHaveAttribute("href", "/tarifs");
   await expect(page.getByRole("region", { name: "Tu te poses des questions ?" }).locator("summary", { hasText: "Les missions entre entreprises, c’est quoi ?" })).toHaveCount(1);
-  // Aucun montant d'abonnement sur la page publique ; jamais « IA ».
   await expect(page.getByText(/€ HT (par|\/) (mois|an)/)).toHaveCount(0);
   expect(await page.locator("main").innerText()).not.toMatch(/\b(IA|automatiques?|automatisée?s?|précise?s?|exacte?s?)\b/i);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
-  await bande.scrollIntoViewIfNeeded();
-  await page.screenshot({ path: `${CAPTURES}/${info.project.name}/landing-missions.png` });
-  await page.getByRole("heading", { name: /^Gratuit pour commencer/ }).scrollIntoViewIfNeeded();
-  await page.screenshot({ path: `${CAPTURES}/${info.project.name}/landing-formules.png` });
+  await section.scrollIntoViewIfNeeded();
+  await page.locator("#missions").screenshot({ path: `${CAPTURES}/${info.project.name}/landing-section-missions.png` });
+  await page.locator("#offres").screenshot({ path: `${CAPTURES}/${info.project.name}/landing-bloc-offres.png` });
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: `${CAPTURES}/${info.project.name}/landing-entier.png`, fullPage: true });
+});
+
+test("guide d'accueil, missions ouvertes : trois écrans, un par usage (négoces, collectif, missions), « Accéder à Mobiiz »", async ({ page }, info) => {
+  // Ici, le guide se regarde : les autres parcours le passent d'office.
+  await page.removeLocatorHandler(page.getByRole("dialog", { name: "Guide" }));
+  await page.goto("/inscription");
+  await page.getByLabel("Prénom et nom").fill("Greg Martin");
+  await page.getByLabel("Nom de ton entreprise").fill(`Toitures ${unique()}`);
+  await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
+  await page.getByLabel("E-mail professionnel").fill(`guide-${unique()}@example.fr`);
+  await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+  await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
+  await page.getByRole("button", { name: "Créer mon compte" }).click();
+  await page.getByRole("button", { name: "C'est compris" }).click();
+  const guide = page.getByRole("dialog", { name: "Guide" });
+  const ecrans: [string, RegExp][] = [
+    ["Compare tes négoces", /Prépare ton quantitatif, consulte jusqu'à 5 négoces et retrouve leurs réponses dans Mobiiz\./],
+    ["Achète en collectif", /Ajoute les matériaux concernés aux achats groupés de ton métier et de ton secteur\./],
+    ["Publie ou trouve une mission", /Recherche une entreprise ou indique tes disponibilités et ton tarif indicatif\./],
+  ];
+  for (const [i, [titre, texte]] of ecrans.entries()) {
+    await expect(guide.getByRole("heading", { name: titre, exact: true })).toBeVisible();
+    await expect(guide.getByText(texte)).toBeVisible();
+    await expect(guide.getByText(`${i + 1} sur 3`)).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+    await page.screenshot({ path: `${CAPTURES}/${info.project.name}/guide-${i + 1}.png` });
+    if (i < 2) await guide.getByRole("button", { name: "Suivant" }).click();
+  }
+  await guide.getByRole("link", { name: "Accéder à Mobiiz" }).click();
+  await expect(guide).toHaveCount(0);
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Missions" })).toBeVisible();
 });

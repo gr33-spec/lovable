@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useMissionsOuvertes } from "@/components/landing-missions";
 
 /**
  * Les trois mouvements de la landing « premium V3 » (Greg, 30 octobre 2026), repris du script de la maquette : le menu du
@@ -21,12 +22,16 @@ function Fleche() {
 const ANCRES = [
   { href: "#fonctionnement", label: "Comment ça marche" },
   { href: "#collectif", label: "Achats groupés" },
-  { href: "#tarifs", label: "Tarifs" },
+  { href: "/tarifs", label: "Tarifs" },
   { href: "#questions", label: "Questions" },
 ] as const;
+/** « Missions » dans le menu, après les achats groupés, seulement quand le serveur a ouvert les missions. */
+const ANCRE_MISSIONS = { href: "#missions", label: "Missions" } as const;
 
 export function EntetePremium() {
   const [ouvert, setOuvert] = useState(false);
+  const missions = useMissionsOuvertes();
+  const ancres = missions ? [ANCRES[0], ANCRES[1], ANCRE_MISSIONS, ANCRES[2], ANCRES[3]] : ANCRES;
   return (
     <header className="site-header">
       <div className="wrap nav">
@@ -35,7 +40,7 @@ export function EntetePremium() {
           <img src="/landing/v3/logo-mobiiz.png" alt="Mobiiz" width={151} height={44} />
         </a>
         <nav className={`nav-links${ouvert ? " open" : ""}`} id="navMenu" aria-label="Navigation principale">
-          {ANCRES.map((a) => (
+          {ancres.map((a) => (
             <a key={a.href} href={a.href} onClick={() => setOuvert(false)}>
               {a.label}
             </a>

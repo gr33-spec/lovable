@@ -2671,19 +2671,23 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
   await signUp(page);
   const guide = page.getByRole("dialog", { name: "Guide" });
   await expect(guide).toBeVisible();
-  await expect(guide.getByRole("heading", { name: "Prépare ton quantitatif" })).toBeVisible();
+  await expect(guide.getByRole("heading", { name: "Compare tes négoces" })).toBeVisible();
   await expect(guide.getByText(/^Prochaine clôture : \w+ \d{1,2} \w+ à \d{1,2} h/)).toBeVisible();
   await expect(guide.getByRole("button", { name: "Passer le guide" })).toBeVisible();
   // La page derrière est inerte.
   await expect(page.getByRole("button", { name: "Mon menu" })).toHaveCount(0);
+  // RÈGLE CHANGÉE (Greg, 11 novembre 2026) : un écran par grand usage, jamais deux pour le même parcours. Missions
+  // coupées ici : deux écrans, les deux services d'achat ; aucun mot des missions ; « Accéder à Mobiiz » mène à l'accueil.
+  await expect(guide.getByText("1 sur 2")).toBeVisible();
+  await expect(guide.getByText(/consulte jusqu'à 5 négoces et retrouve leurs réponses dans Mobiiz/)).toBeVisible();
   await guide.getByRole("button", { name: "Suivant" }).click();
-  await expect(guide.getByRole("heading", { name: "Envoie-le à tes négoces" })).toBeVisible();
-  await expect(guide.getByText(/jusqu'à 5 négoces/)).toBeVisible();
-  await guide.getByRole("button", { name: "Suivant" }).click();
-  await expect(guide.getByRole("heading", { name: "Achète à plusieurs" })).toBeVisible();
+  await expect(guide.getByRole("heading", { name: "Achète en collectif" })).toBeVisible();
+  await expect(guide.getByText("2 sur 2")).toBeVisible();
+  await expect(guide.getByText(/mission/i)).toHaveCount(0);
+  await expect(guide.getByRole("button", { name: "Suivant" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
-  await guide.getByRole("link", { name: "Créer mon premier quantitatif" }).click();
-  await expect(page).toHaveURL(/\/chantiers\/nouveau/);
+  await guide.getByRole("link", { name: "Accéder à Mobiiz" }).click();
+  await expect(page).toHaveURL(/\/$/);
   await expect(guide).toHaveCount(0);
   // Une seule fois : ni au rechargement, ni ailleurs.
   await page.goto("/");
@@ -2691,7 +2695,7 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
   await expect(guide).toHaveCount(0);
   // « Revoir le guide » dans le menu le rouvre ; « Passer le guide » le referme.
   await menuArtisan(page, "Revoir le guide");
-  await expect(guide.getByRole("heading", { name: "Prépare ton quantitatif" })).toBeVisible();
+  await expect(guide.getByRole("heading", { name: "Compare tes négoces" })).toBeVisible();
   await guide.getByRole("button", { name: "Passer le guide" }).click();
   await expect(guide).toHaveCount(0);
   await page.reload();
@@ -2709,7 +2713,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Greg, 31 octobre 2026 (maquette jointe) : le héros, « Comment ça marche ? » en trois étapes, la bande « Achète en
   // collectif (si tu le souhaites) », les bénéfices, « Pourquoi Mobiiz ? », les questions, le dernier appel.
   const ordre = await Promise.all(
-    [/^Compare les négoces/, "Comment ça marche ?", /^Achète en collectif/, "Simple et rapide", /^Un même matériau/, /^Gratuit pour commencer/, /^Le prochain bon prix/, "Tu te poses des questions ?"].map(
+    [/^Compare les négoces/, "Comment ça marche ?", /^Achète en collectif/, "Simple et rapide", /^Un même matériau/, "Commence gratuitement", /^Le prochain bon prix/, "Tu te poses des questions ?"].map(
       async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y,
     ),
   );
@@ -2717,7 +2721,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Greg, 31 octobre 2026, soir (capture iPhone) : sur téléphone, les mots des grands titres ne se touchent jamais.
   if (page.viewportSize()!.width <= 900)
     for (const id of ["pourquoiTitle", "finalTitle", "faqTitle"]) expect(Number.parseFloat(await page.locator(`#${id}`).evaluate((e) => getComputedStyle(e).letterSpacing))).toBeGreaterThan(-1.6);
-  await expect(page.getByText("Prépare ta liste, envoie-la jusqu’à 5 négoces et retrouve leurs réponses au même endroit.", { exact: false })).toBeVisible();
+  await expect(page.getByText("Une seule demande, envoyée jusqu’à 5 négoces.", { exact: false })).toBeVisible();
   // Le visuel du premier écran (Greg, 31 octobre 2026, soir) : la photo choisie, chargée, coins arrondis ; le cadrage serré
   // sur téléphone, le panoramique sur ordinateur.
   const visuel = page.locator(".mz2-hero-visuel img");
@@ -2744,13 +2748,18 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   }
   await expect(page.locator("#fonctionnement").getByText(/iPhone|Apple/)).toHaveCount(0);
   await expect(page.getByText(/Recommandé/)).toHaveCount(0);
-  // Tour de l'application (Greg, 11 novembre 2026) : « Tout au même endroit » (la boîte des réponses) remplace « Plus de
-  // visibilité » ; ce que ça coûte se lit en trois formules, sans aucun montant (les prix restent sur la page Tarifs).
-  for (const b of ["Simple et rapide", "Tout au même endroit", "Plus de poids"]) await expect(page.getByRole("heading", { name: b })).toBeVisible();
-  const cout = page.getByRole("region", { name: /^Gratuit pour commencer/ });
-  for (const f of ["Découverte", "Essentiel", "Pro"]) await expect(cout.getByRole("heading", { name: f, exact: true })).toBeVisible();
-  await expect(cout.getByText("Le PDF et l'envoi jusqu'à 5 négoces par demande")).toBeVisible();
-  await expect(cout.getByRole("link", { name: "Voir les prix et le détail" })).toHaveAttribute("href", "/tarifs");
+  for (const b of ["Simple et rapide", "Plus de visibilité", "Plus de poids"]) await expect(page.getByRole("heading", { name: b })).toBeVisible();
+  // « Commence gratuitement » (Greg, 11 novembre 2026) : un bloc compact, sans prix ni cartes de formules ; un seul bouton,
+  // vers la page Tarifs. Missions coupées ici : ni section, ni entrée de menu, ni ligne « Missions », ni question.
+  const offre = page.getByRole("region", { name: "Commence gratuitement" });
+  for (const t of ["Quantitatifs et listes saisies à la main", "Demandes jusqu’à 5 négoces", "Achats groupés de ton secteur"]) await expect(offre.getByText(t, { exact: true })).toBeVisible();
+  await expect(offre.getByText("Analyses de devis et scans de liste supplémentaires avec Essentiel ou Pro.")).toBeVisible();
+  await expect(offre.getByRole("link")).toHaveCount(1);
+  await expect(offre.getByRole("link", { name: "Voir les offres et les tarifs" })).toHaveAttribute("href", "/tarifs");
+  await expect(page.locator(".mz2-formule")).toHaveCount(0);
+  await expect(page.locator("#missions")).toHaveCount(0);
+  await expect(page.getByText(/missions?/i)).toHaveCount(0);
+  await expect(page.locator(".nav-links a", { hasText: "Tarifs" })).toHaveAttribute("href", "/tarifs");
   // Greg, 30 octobre 2026, nuit : « Pourquoi Mobiiz ? » neutre et collectif, sans l'identité du fondateur.
   const pourquoi = page.getByRole("region", { name: /^Un même matériau ne devrait pas être une surprise à chaque commande\./ });
   await expect(pourquoi.getByText(/^Dans le bâtiment, on l’a tous vu/)).toBeVisible();

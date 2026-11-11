@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, ClipboardList, Send, Users } from "lucide-react";
+import { Briefcase, CalendarClock, ClipboardList, Users } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -24,22 +24,15 @@ const dejaVuIci = (userId: string) => {
 };
 
 /**
- * Les trois écrans (Greg, 11 novembre 2026 : « la rendre plus intuitive », après le tour de l'application) : ils disaient
- * encore « Dépose ton devis » (25 octobre), alors que l'application tient en trois activités. Un écran par activité, dans
- * l'ordre du menu : le quantitatif, les négoces, puis acheter à plusieurs (et les missions quand elles sont ouvertes).
+ * LES ÉCRANS DU GUIDE (Greg, 11 novembre 2026) : un écran par grand usage du produit, jamais deux pour le même parcours,
+ * et jamais un tutoriel. Comparer ses négoces, acheter en collectif, puis les missions SEULEMENT quand le serveur les a
+ * ouvertes : sans elles, le guide tient en deux écrans, les deux services d'achat.
  */
-const etapesDuGuide = (missions: boolean) =>
-  [
-    { titre: "Prépare ton quantitatif", texte: `Dis ton besoin à ${NOM_APP}, importe un devis, prends une photo ou saisis ta liste. Tu vérifies : c'est toujours toi qui valides.`, Icone: ClipboardList },
-    { titre: "Envoie-le à tes négoces", texte: "Une seule demande, jusqu'à 5 négoces. Leurs réponses arrivent dans « Messages et réponses », rangées avec ta demande : tu compares et tu choisis.", Icone: Send },
-    {
-      titre: "Achète à plusieurs",
-      texte: missions
-        ? "Les achats groupés de ton secteur sont gratuits et sans engagement. Et dans « Missions », publie une mission ou propose tes services à d'autres entreprises."
-        : "Les achats groupés de ton secteur sont gratuits et sans engagement : tu décides à la réception de l'offre.",
-      Icone: Users,
-    },
-  ] as const;
+const etapesDuGuide = (missions: boolean) => [
+  { titre: "Compare tes négoces", texte: `Prépare ton quantitatif, consulte jusqu'à 5 négoces et retrouve leurs réponses dans ${NOM_APP}.`, Icone: ClipboardList },
+  { titre: "Achète en collectif", texte: "Ajoute les matériaux concernés aux achats groupés de ton métier et de ton secteur.", Icone: Users },
+  ...(missions ? [{ titre: "Publie ou trouve une mission", texte: "Recherche une entreprise ou indique tes disponibilités et ton tarif indicatif.", Icone: Briefcase }] : []),
+];
 
 /** « jeudi 31 octobre à 18 h », heure de Paris. */
 export function dateDeCloture(iso: string): string {
@@ -51,7 +44,7 @@ export function dateDeCloture(iso: string): string {
 
 /**
  * LE GUIDE DU PREMIER LANCEMENT (Greg, 24 octobre 2026) : une fois inscrit, trois écrans plein écran, sautables à chaque
- * étape (« Passer le guide »), avec la date de la prochaine clôture, et pour finir « Déposer ma première liste ». Vu ou
+ * étape (« Passer le guide »), avec la date de la prochaine clôture, et pour finir « Accéder à Mobiiz ». Vu ou
  * passé, il est noté sur le compte (`POST /v1/me/guide/vu`) et ne revient plus d'office ; « Revoir le guide », dans le
  * menu, le rouvre. Rien d'autre ne s'ouvre par-dessus tant qu'il est là.
  */
@@ -163,8 +156,8 @@ function Fenetre({ etape, setEtape, fermer, cloture, missions }: { etape: number
             ))}
           </ol>
           {derniere ? (
-            <Link href="/chantiers/nouveau" onClick={fermer} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-[16px] font-semibold text-on-accent active:bg-accent-hover">
-              Créer mon premier quantitatif
+            <Link href="/" onClick={fermer} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-[16px] font-semibold text-on-accent active:bg-accent-hover">
+              Accéder à Mobiiz
             </Link>
           ) : (
             <button type="button" onClick={() => setEtape(etape + 1)} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-[16px] font-semibold text-on-accent active:bg-accent-hover">
