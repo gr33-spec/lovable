@@ -10,8 +10,9 @@ import { Public, type Auth } from "../../identity/index.js";
 import { AccesDemoService } from "../application/acces-demo.service.js";
 
 /**
- * « Découvrir l'application » (Greg, 7 novembre 2026) : sans inscription ni mot de passe. Coupé (`ACCES_DEMO=off`, par
- * défaut), la route n'existe pas (404) et la landing ne montre pas le bouton.
+ * « Découvrir l'application » (Greg, 7 novembre 2026) : sans inscription ni mot de passe. RETIRÉ DU PUBLIC (Greg, 11
+ * novembre 2026) : la landing n'a plus ce bouton ; le point d'entrée ne s'ouvre que si `ACCES_DEMO` ET `DEMO_PUBLIQUE`
+ * sont allumés (coupés par défaut). Fermé, il répond « introuvable » (404), ne crée ni compte ni session, ne dit rien de plus.
  */
 @Controller("v1/public/demo")
 export class AccesDemoController {
@@ -25,7 +26,7 @@ export class AccesDemoController {
   @Public()
   @Get()
   etat() {
-    return { actif: this.config.accesDemo };
+    return { actif: this.config.demoPublique };
   }
 
   /** Crée l'espace fictif du visiteur et ouvre sa session (cookie posé par l'authentification, comme une connexion). */
@@ -34,7 +35,7 @@ export class AccesDemoController {
   @Post("session")
   @HttpCode(201)
   async session(@Req() req: Request, @Res({ passthrough: true }) res: ReponseExpress) {
-    if (!this.config.accesDemo) throw new DomainError("not_found", "Not found");
+    if (!this.config.demoPublique) throw new DomainError("not_found", "Not found");
     const { email, motDePasse } = await this.demo.ouvrir();
     // La réponse de l'authentification, décrite par ce qui sert (le type « Response » global n'existe pas dans la
     // compilation de Vercel).

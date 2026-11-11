@@ -12,7 +12,7 @@ import { runWithRequestContext } from "../src/platform/logging/request-context.j
 import { createTestApp, resetDatabase, signUpWithCompany, WEB_ORIGIN, type TestContext } from "./support/test-app.js";
 
 let ctx: TestContext | null = null;
-const avant = { ACCES_DEMO: process.env.ACCES_DEMO, INTERPRETE_IA: process.env.INTERPRETE_IA, MOTS_DE_PASSE_FUITES: process.env.MOTS_DE_PASSE_FUITES };
+const avant = { ACCES_DEMO: process.env.ACCES_DEMO, DEMO_PUBLIQUE: process.env.DEMO_PUBLIQUE, INTERPRETE_IA: process.env.INTERPRETE_IA, MOTS_DE_PASSE_FUITES: process.env.MOTS_DE_PASSE_FUITES };
 afterEach(async () => {
   await ctx?.app.close();
   ctx = null;
@@ -22,8 +22,10 @@ afterEach(async () => {
   }
 });
 
-async function app(acces: "on" | "off", interprete: "on" | "off" = "off") {
+/** `publique` : le point d'entrée public (retiré le 11 novembre 2026) ; les tests internes l'allument avec `ACCES_DEMO`. */
+async function app(acces: "on" | "off", interprete: "on" | "off" = "off", publique: "on" | "off" = acces) {
   process.env.ACCES_DEMO = acces;
+  process.env.DEMO_PUBLIQUE = publique;
   process.env.INTERPRETE_IA = interprete;
   // Comme en ligne (recette du 7 novembre 2026 : 500 sur test.mobiiz.fr) : le contrôle des mots de passe fuités allumé.
   process.env.MOTS_DE_PASSE_FUITES = "on";
@@ -47,6 +49,23 @@ describe("l'accès démo", () => {
     await request(c.app.getHttpServer()).post("/v1/public/demo/session").set("origin", WEB_ORIGIN).expect(404);
     expect(await c.prisma.user.count()).toBe(0);
     expect(() => loadConfig({ ...process.env, ACCES_DEMO: "on", VERCEL_ENV: "production" })).toThrow(/ACCES_DEMO/);
+  });
+
+  it("LA DÉMONSTRATION PUBLIQUE EST RETIRÉE (Greg, 11 novembre 2026) : `ACCES_DEMO` allumé comme sur test.mobiiz.fr mais `DEMO_PUBLIQUE` coupé (son défaut) : le point d'entrée est fermé, rien n'est créé", async () => {
+    const c = await app("on", "off", "off");
+    expect((await request(c.app.getHttpServer()).get("/v1/public/demo").expect(200)).body).toEqual({ actif: false });
+    const refus = await request(c.app.getHttpServer()).post("/v1/public/demo/session").set("origin", WEB_ORIGIN).expect(404);
+    // Une fonctionnalité indisponible, dite sans rien de technique : ni réglage, ni pile, ni cookie de session.
+    expect(refus.body.error.code).toBe("not_found");
+    expect(JSON.stringify(refus.body)).not.toMatch(/DEMO|ACCES|config|stack|prisma|visiteur/i);
+    expect(refus.headers["set-cookie"] ?? []).toEqual([]);
+    expect(await c.prisma.user.count()).toBe(0);
+    expect(await c.prisma.company.count()).toBe(0);
+    expect(await c.prisma.session.count()).toBe(0);
+    // Par défaut (aucun réglage) : coupée ; et jamais en production, même demandée.
+    expect(loadConfig({ ...process.env, ACCES_DEMO: "on", DEMO_PUBLIQUE: undefined }).demoPublique).toBe(false);
+    expect(loadConfig({ ...process.env, ACCES_DEMO: "off", DEMO_PUBLIQUE: "on" }).demoPublique).toBe(false);
+    expect(() => loadConfig({ ...process.env, ACCES_DEMO: "off", DEMO_PUBLIQUE: "on", VERCEL_ENV: "production" })).toThrow(/DEMO_PUBLIQUE/);
   });
 
   it("allumé : sans inscription, un espace fictif à lui seul, des données fictives, aucun e-mail parti", async () => {

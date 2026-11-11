@@ -11,9 +11,13 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("« Découvrir l'application » : un espace fictif sans inscription, le bandeau partout, puis Quitter", async ({ page }) => {
+// RETIRÉE DU PUBLIC (Greg, 11 novembre 2026) : la landing n'a plus de bouton « Découvrir l'application ». La session fictive
+// reste sous test, ouverte ici par son point d'entrée (allumé dans ces parcours seulement), le temps de l'inventaire.
+test("la session de démonstration (interne) : un espace fictif, le bandeau partout, puis Quitter ; la landing n'y mène plus", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Découvrir l'application" }).click();
+  await expect(page.getByRole("button", { name: "Découvrir l'application" })).toHaveCount(0);
+  expect(await page.evaluate(async () => (await fetch("/v1/public/demo/session", { method: "POST" })).status)).toBe(201);
+  await page.goto("/");
   const bandeau = page.getByTestId("bandeau-demo");
   await expect(bandeau).toBeVisible({ timeout: 20_000 });
   await expect(bandeau).toContainText("Mode démonstration");
@@ -26,5 +30,6 @@ test("« Découvrir l'application » : un espace fictif sans inscription, le ban
   await page.getByRole("button", { name: "Recommencer" }).click();
   await expect(page.getByTestId("bandeau-demo")).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: "Quitter" }).click();
-  await expect(page.getByRole("button", { name: "Découvrir l'application" })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: "Voir Mobiiz en images" })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: "Découvrir l'application" })).toHaveCount(0);
 });

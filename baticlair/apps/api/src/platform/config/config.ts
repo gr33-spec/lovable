@@ -144,6 +144,10 @@ const envSchema = z
      * espace fictif sans inscription. Coupé par défaut ; `on` l'allume ; refusé en production.
      */
     ACCES_DEMO: z.enum(["on", "off"]).default("off"),
+    // LA DÉMONSTRATION PUBLIQUE EST RETIRÉE (Greg, 11 novembre 2026) : un visiteur n'entre plus dans une fausse session. Le
+    // point d'entrée public (`POST /v1/public/demo/session`) ne s'ouvre que si ce réglage ET `ACCES_DEMO` sont allumés ;
+    // coupé par défaut, partout. Le code de la démonstration reste, pour les tests internes, le temps de l'inventaire.
+    DEMO_PUBLIQUE: z.enum(["on", "off"]).default("off"),
     /**
      * ACHATS GROUPÉS V1 (Greg, 7 novembre 2026, V5.2 validée) : le nouveau parcours (un produit précis par achat groupé).
      * Coupé par défaut : rien ne change en ligne tant qu'il n'est pas allumé ; développement local seulement.
@@ -384,6 +388,8 @@ export interface AppConfig {
   billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
   /** L'accès démo « Découvrir l'application » (visiteur fictif, sans inscription). */
   accesDemo: boolean;
+  /** Le point d'entrée PUBLIC de la démonstration (coupé par défaut ; il faut aussi `accesDemo`). */
+  demoPublique: boolean;
   achatsGroupesV1: boolean;
   missionsV1: boolean;
   /** L'abonnement artisan (`ABONNEMENT`, `PAIEMENT`). */
@@ -483,6 +489,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
   if (e.PAIEMENT === "simule" && e.ABONNEMENT === "on" && e.VERCEL_ENV === "production") {
     problemes.push("PAIEMENT : « simule » est réservé à la prévisualisation ; en production, PAIEMENT=stripe (ou ABONNEMENT=off)");
   }
+  if (e.DEMO_PUBLIQUE === "on" && e.VERCEL_ENV === "production") {
+    problemes.push("DEMO_PUBLIQUE : la démonstration publique est retirée, jamais en production");
+  }
   if (e.ACCES_DEMO === "on" && e.VERCEL_ENV === "production") {
     problemes.push("ACCES_DEMO : l'accès démo est réservé à la prévisualisation (test.mobiiz.fr), jamais en production");
   }
@@ -527,6 +536,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
     accesDemo: e.ACCES_DEMO === "on",
+    demoPublique: e.ACCES_DEMO === "on" && e.DEMO_PUBLIQUE === "on",
     achatsGroupesV1: e.ACHATS_GROUPES_V1 === "on",
     missionsV1: e.MISSIONS_V1 === "on",
     abonnement: {

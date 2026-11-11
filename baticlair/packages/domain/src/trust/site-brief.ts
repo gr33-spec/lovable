@@ -100,6 +100,25 @@ export function ouvrageEcrit(ref: Referential, ouvrage: string, emplacement: str
   return libelleEcrit(w.label, METIER_NAMES[tradeIdOf(ref.trade)] ?? ref.trade, norm(textes));
 }
 
+/**
+ * LES OUVRAGES QUI PEUVENT NOMMER LE CHANTIER : ceux dont une fourniture écrit la fourniture principale (la famille qui
+ * déclenche l'ouvrage), les couvertures d'abord (section « principal »), sans le support (un voligeage se dit « pose sur
+ * voligeage »). Dans l'ordre du tiroir, jamais celui des lignes.
+ */
+export function ouvragesCandidats(ref: Referential, places: readonly { ouvrage: string; emplacement: string }[]): Referential["workItems"] {
+  const nommes = new Set<Referential["workItems"][number]>();
+  for (const p of places) {
+    const w = ref.workItems.find((x) => x.id === baseOf(p.ouvrage));
+    const famille = w?.slots.find((x) => x.key === p.emplacement)?.family;
+    if (w && famille !== undefined && w.triggers.includes(famille)) nommes.add(w);
+  }
+  let candidats = ref.workItems.filter((w) => nommes.has(w));
+  if (candidats.some((w) => w.section === "principal")) candidats = candidats.filter((w) => w.section === "principal");
+  const duSupport = (w: Referential["workItems"][number]) => w.triggers.every((t) => t === "sheathing");
+  if (candidats.some((w) => !duSupport(w))) candidats = candidats.filter((w) => !duSupport(w));
+  return candidats;
+}
+
 export function siteBrief(input: {
   ref: Referential;
   plan: QuotePlan;
@@ -128,13 +147,38 @@ export function siteBrief(input: {
     const n = Number(l.quantity.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : -1;
   };
-  const main = planned.filter(principale).sort((a, b) => area(b.ref) - area(a.ref))[0];
-  const work = main ? ref.workItems.find((w) => w.id === baseOf(main.workItemId)) : undefined;
+  // PLUSIEURS OUVRAGES PRINCIPAUX ÉCRITS (ardoises ET tuiles ; Greg, 11 novembre 2026) : jamais « le premier de la liste ».
+  // Les ouvrages candidats sont ceux dont une ligne écrit la fourniture principale, les couvertures d'abord (section
+  // « principal »), sans le support (un voligeage se dit « pose sur voligeage », il ne nomme pas le chantier). Un seul :
+  // c'est lui. Plusieurs, tous mesurés : celui dont la surface écrite est strictement la plus grande (§45.2, « ouvrage
+  // principal, surface ») ; sans surface pour trancher, les deux sont nommés, dans l'ordre du tiroir, sans leur prêter un fait ; au-delà
+  // de deux, le bref reste neutre. L'ordre des lignes ne change jamais le résultat.
+  const ouvrageDe = (l: (typeof planned)[number]) => ref.workItems.find((x) => x.id === baseOf(l.workItemId))!;
+  const principales = planned.filter(principale);
+  const candidats = ouvragesCandidats(ref, principales.map((l) => ({ ouvrage: l.workItemId, emplacement: l.slot })));
+  const surface = (w: Referential["workItems"][number]) => principales.filter((l) => ouvrageDe(l) === w).reduce((t, l) => t + Math.max(0, area(l.ref)), 0);
+  const parSurface = [...candidats].sort((a, b) => surface(b) - surface(a));
+  // Une surface ne tranche que si CHAQUE ouvrage en écrit une (40 m² de zinc ne l'emportent pas sur 1200 ardoises à la pièce).
+  const mesures = candidats.every((w) => surface(w) > 0);
+  const work = candidats.length === 1 ? candidats[0] : candidats.length > 1 && mesures && surface(parSurface[0]!) > surface(parSurface[1]!) ? parSurface[0] : undefined;
+  // La ligne qui porte les faits de l'ouvrage : sa plus grande surface, sinon sa désignation la première dans l'alphabet
+  // (jamais « la première saisie »).
+  const main = work
+    ? principales.filter((l) => ouvrageDe(l) === work).sort((a, b) => area(b.ref) - area(a.ref) || (input.lines.find((x) => x.id === a.ref)?.designation ?? "").localeCompare(input.lines.find((x) => x.id === b.ref)?.designation ?? "", "fr"))[0]
+    : undefined;
   const metier = METIER_NAMES[tradeIdOf(ref.trade)] ?? ref.trade;
   const texts = norm([...input.lines.map((l) => l.designation), ...Object.values(input.context ?? {})].join(" \n "));
   // Le libellé de l'ouvrage, réduit aux mots que le document écrit (jamais « au crochet » sans crochet écrit).
-  const ecrit = work ? libelleEcrit(work.label, metier, texts) : null;
-  const label = ecrit ? (norm(ecrit).startsWith(norm(metier).slice(0, 6)) ? ecrit.toLowerCase() : `${metier} (${ecrit.toLowerCase()})`) : null;
+  const nomDe = (w: Referential["workItems"][number]) => {
+    const ecrit = libelleEcrit(w.label, metier, texts);
+    return ecrit ? (norm(ecrit).startsWith(norm(metier).slice(0, 6)) ? ecrit.toLowerCase() : `${metier} (${ecrit.toLowerCase()})`) : null;
+  };
+  let label: string | null = work ? nomDe(work) : null;
+  if (!work && candidats.length === 2) {
+    const [a, b] = candidats.map(nomDe);
+    // « Couverture en tuiles et en ardoises » : le mot commun n'est dit qu'une fois.
+    if (a && b) label = a.split(" ")[0] === b.split(" ")[0] && b.includes(" ") ? `${a} et ${b.slice(b.indexOf(" ") + 1)}` : `${a} et ${b}`;
+  }
 
   // Une donnée est un FAIT si l'artisan l'a répondue, ou si le devis, un document ou la note la donne.
   const fact = (key: string): { value: Decimal; unit: string } | null => {

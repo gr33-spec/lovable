@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { BoutonDecouvrir } from "@/components/acces-demo";
 import { CtaFixePremium, EntetePremium, PaliersCollectif } from "@/components/landing-premium";
 import { SiMissions } from "@/components/landing-missions";
+import { PresentationImages } from "@/components/presentation-images";
 import { HEBERGEUR, PAGES_LEGALES } from "@/lib/legal";
 import { ACCROCHE_APP, BLOC_LEGAL } from "@/lib/nom";
 import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
@@ -248,8 +248,9 @@ export function LandingPremium() {
                 <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/inscription">
                   {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
                 </Link>
-                {/* L'accès démo (Greg, 7 novembre 2026, test.mobiiz.fr seulement) : absent tant que le serveur ne l'allume pas. */}
-                <BoutonDecouvrir />
+                {/* « Voir Mobiiz en images » (Greg, 11 novembre 2026) : une présentation statique, de vraies captures ; la
+                    démonstration publique (une fausse session) est retirée. */}
+                <PresentationImages />
                 <a className="text-link" href="#fonctionnement">
                   <span className="circle-down" aria-hidden="true">
                     ↓

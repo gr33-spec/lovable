@@ -71,6 +71,20 @@ describe("le chantier en bref d'une liste saisie à la main", () => {
       expect(r.tout).not.toMatch(/Chantier à \d/);
       expect(r.texte).toBe("");
     }
+    // 5. Ardoises ET tuiles : jamais « la première de la liste » ; les deux, et le même bref dans tous les ordres.
+    const deux = await Promise.all([[ARDOISE, TUILE], [TUILE, ARDOISE], [LITEAU, TUILE, CROCHET, ARDOISE, ECRAN], [ARDOISE, CROCHET, ECRAN, TUILE, LITEAU]].map((l) => bref(l)));
+    expect(deux[0]!.texte).toBe("Couverture en tuiles et en ardoises.");
+    expect(deux[1]!.texte).toBe(deux[0]!.texte);
+    expect(deux[2]!.texte).toBe("Couverture en tuiles et en ardoises au crochet.");
+    expect(deux[3]!.texte).toBe(deux[2]!.texte);
+    for (const r of deux) expect(r.tout).not.toMatch(/embo[îi]tement|zinc|Chantier à \d/i);
+    // Avec des surfaces à égalité (lignes en m²), toujours les deux, dans les deux ordres.
+    const A60: L = ["Couverture en ardoises naturelles 32 × 22", "60", "m²"];
+    const T60: L = ["Couverture en tuiles terre cuite", "60", "m²"];
+    const egal = [await bref([A60, T60]), await bref([T60, A60])];
+    expect(egal[0]!.texte).toBe(egal[1]!.texte);
+    expect(egal[0]!.texte).toMatch(/tuiles/i);
+    expect(egal[0]!.texte).toMatch(/ardoises/i);
     const neutre = await bref([LITEAU, ECRAN], "Chantier exemple, 22300 Lannion");
     expect(neutre.tout).not.toMatch(AUCUN_TYPE);
     expect(neutre.texte).toBe("Lannion, bord de mer.");

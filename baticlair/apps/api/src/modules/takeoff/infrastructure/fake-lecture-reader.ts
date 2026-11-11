@@ -11,6 +11,7 @@ import {
   lignesDeLecture,
   normalizeText,
   ouvrageEcrit,
+  ouvragesCandidats,
   planDeLecture,
   readDimension,
   referentialFor,
@@ -330,7 +331,11 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
   // « couverture en tuiles à emboîtement » à une liste d'ardoises. Une fiche de calcul (sans tiroir) garde son ouvrage.
   const ecrits = lignes.map((l) => l.designation).join(" \n ");
   const nomme = (f: LectureFourniture) => (ref && ref.workItems.length > 0 ? ouvrageEcrit(ref, f.ouvrage!, f.emplacement ?? "", ecrits) : (ref?.workItems.find((w) => w.id === f.ouvrage)?.label ?? f.nom));
-  const principal = lignes.flatMap((l) => l.fournitures.filter((f) => f.ouvrage && f.quantite && /^(m²|m2|ml|m)$/i.test(f.unite ?? "") && nomme(f)).map((f) => ({ f, l }))).find(Boolean);
+  // Plusieurs ouvrages principaux écrits (ardoises ET tuiles) : la fiche n'en choisit aucun (jamais « le premier de la
+  // liste ») ; le bref les nomme alors tous les deux, ou reste neutre.
+  const candidats = ref && ref.workItems.length > 0 ? ouvragesCandidats(ref, lignes.flatMap((l) => l.fournitures.filter((f) => f.ouvrage).map((f) => ({ ouvrage: f.ouvrage!, emplacement: f.emplacement ?? "" })))) : null;
+  const seul = (f: LectureFourniture) => candidats === null || (candidats.length === 1 && candidats[0]!.id === f.ouvrage);
+  const principal = lignes.flatMap((l) => l.fournitures.filter((f) => f.ouvrage && f.quantite && /^(m²|m2|ml|m)$/i.test(f.unite ?? "") && seul(f) && nomme(f)).map((f) => ({ f, l }))).find(Boolean);
   if (principal && ref) {
     const label = nomme(principal.f)!;
     const preuve = `Devis, ligne ${principal.l.ref} : « ${principal.l.designation} »`;

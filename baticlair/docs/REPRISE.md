@@ -34,6 +34,9 @@ complètes seulement avant un déploiement important, et en le disant.
 
 ## En cours
 
+SUIVI 197 (11 novembre 2026) : candidat unique (démonstration publique retirée, « Voir Mobiiz en images », bref indépendant
+de l'ordre des lignes, téléphone de l'image d'ouverture). Pousser seulement après des suites vertes ; aucune production.
+
 SUIVI 196 (11 novembre 2026) : correction du bref (une liste d'ardoises disait « tuiles à emboîtement »), commit LOCAL distinct
 de 292e51bd. NE PAS POUSSER avant l'accord de Greg (il veut la cause, les fichiers et les résultats des tests d'abord).
 

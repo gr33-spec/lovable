@@ -35,6 +35,9 @@ export const apiEnv = {
   PAYWALL: "on",
   // L'accès démo « Découvrir l'application » (Greg, 7 novembre 2026) : allumé ici comme sur test.mobiiz.fr.
   ACCES_DEMO: "on",
+  // La démonstration publique est retirée (Greg, 11 novembre 2026) : la landing n'a plus de bouton. Le point d'entrée reste
+  // ouvert ICI seulement, pour le parcours interne qui garde la session fictive sous test (`acces-demo.spec.ts`).
+  DEMO_PUBLIQUE: "on",
   // Les parcours vérifient la limite de l'essai (3 chantiers), comme à l'ouverture ; en bêta, l'essai est sans limite.
   BILLING_PLANS: JSON.stringify([
     { key: "trial", label: "Essai gratuit", projectLimit: 3, period: "trial", priceEurMonth: null, offered: false },

@@ -455,3 +455,39 @@ test("guide d'accueil, missions ouvertes : trois écrans, un par usage (négoces
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Missions" })).toBeVisible();
 });
+
+test("« Voir Mobiiz en images », missions ouvertes : quatre écrans, le quatrième pour les missions ; rien n'est écrit", async ({ page, context }, info) => {
+  await page.goto("/decouvrir");
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator("#missions")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Découvrir l'application" })).toHaveCount(0);
+  const cookies = await context.cookies();
+  const ecrites: string[] = [];
+  page.on("request", (r) => {
+    const chemin = new URL(r.url()).pathname;
+    if (chemin.startsWith("/v1/") && (r.method() !== "GET" || chemin !== "/v1/health")) ecrites.push(`${r.method()} ${chemin}`);
+  });
+  await page.getByRole("button", { name: "Voir Mobiiz en images" }).click();
+  const dialogue = page.getByRole("dialog");
+  const titres = ["Prépare ton quantitatif", "Consulte tes négoces", "Achète à plusieurs", "Missions entre entreprises"];
+  for (const [i, titre] of titres.entries()) {
+    await expect(dialogue.getByRole("heading", { name: titre, exact: true })).toBeVisible();
+    await expect(dialogue.getByText(`${i + 1} sur 4`, { exact: true })).toBeVisible();
+    await expect(dialogue.getByText("Exemple", { exact: true })).toBeVisible();
+    await expect(dialogue.getByRole("button", { name: "Fermer la présentation" })).toBeInViewport();
+    const image = dialogue.locator("img");
+    await expect.poll(() => image.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    await page.waitForTimeout(250);
+    await page.screenshot({ path: `${CAPTURES}/${info.project.name}/presentation-${i + 1}.png` });
+    if (i < titres.length - 1) await dialogue.getByRole("button", { name: "Suivant" }).click();
+  }
+  await expect(dialogue.getByText(/Les coordonnées ne sont partagées qu'après l'accord des deux entreprises\./)).toBeVisible();
+  expect(await dialogue.innerText()).not.toMatch(/intérim|recrutement|€|garanti/i);
+  await expect(dialogue.getByRole("link", { name: "Commencer gratuitement" })).toHaveAttribute("href", "/inscription");
+  await dialogue.getByRole("button", { name: "Fermer", exact: true }).click();
+  await expect(dialogue).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Voir Mobiiz en images" })).toBeFocused();
+  expect(ecrites).toEqual([]);
+  expect(await context.cookies()).toEqual(cookies);
+});

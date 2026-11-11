@@ -87,8 +87,64 @@ describe("le chantier en bref ne dit que ce qui est écrit", () => {
     expect(bref([ARDOISE], "Lannion").texte).toBe("Couverture en ardoises, 1200 pièces, ardoise naturelle 32 × 22 Espagne 1er choix. Chantier à Lannion.");
   });
 
-  it("deux matériaux écrits (ardoises et tuiles) : le premier écrit, sans jamais les mêler", () => {
-    expect(bref([ARDOISE, TUILE]).faits[0]).toBe("Couverture en ardoises");
-    expect(bref([TUILE, ARDOISE]).faits[0]).toBe("Couverture en tuiles");
+  it("ardoises ET tuiles écrites : jamais « la première de la liste » ; les deux sont nommées, dans tous les ordres", () => {
+    const attendu = "Couverture en tuiles et en ardoises";
+    for (const lignes of [
+      [ARDOISE, TUILE],
+      [TUILE, ARDOISE],
+      [ARDOISE, CROCHET, LITEAU, TUILE, ECRAN],
+      [ECRAN, TUILE, LITEAU, CROCHET, ARDOISE],
+      [LITEAU, TUILE, POINTE, ARDOISE],
+    ]) {
+      const r = bref(lignes);
+      expect(r.faits[0], lignes.map((l) => l.designation).join(" + ")).toMatch(new RegExp(`^${attendu}`));
+      // Aucun fait d'une ligne n'est prêté au chantier (ni « 1200 pièces », ni « 900 pièces », ni un matériau).
+      expect(r.b.faits).toEqual([]);
+      expect(tout(r)).not.toMatch(/emboîtement|emboitement|zinc|joint debout/i);
+    }
+    // Les mêmes lignes, dans les deux ordres : exactement le même bref.
+    expect(tout(bref([ARDOISE, TUILE]))).toBe(tout(bref([TUILE, ARDOISE])));
+    expect(bref([ARDOISE, TUILE]).phrase).toBe("Je vous envoie la liste des fournitures pour un chantier de couverture en tuiles et en ardoises.");
+    // « Au crochet » reste dit quand un crochet est écrit.
+    expect(bref([TUILE, CROCHET, ARDOISE]).faits[0]).toBe("Couverture en tuiles et en ardoises au crochet");
+  });
+
+  it("deux autres fournitures principales contradictoires (zinc à joint debout et ardoises), dans les deux ordres : les deux, jamais une seule", () => {
+    const ZINC: Ligne = { designation: "Couverture zinc à joint debout prépatiné 0,65 mm", quantity: "40", unit: "m²", ouvrage: Z, emplacement: "couverture" };
+    const a = bref([ZINC, ARDOISE]);
+    const b = bref([ARDOISE, ZINC]);
+    expect(tout(a)).toBe(tout(b));
+    expect(a.faits[0]).toBe("Couverture en ardoises et zinc à joint debout");
+    expect(tout(a)).not.toMatch(/tuile|crochet/i);
+  });
+
+  it("une surface écrite tranche (§45.2, l'ouvrage principal et sa surface), quel que soit l'ordre ; à égalité, les deux", () => {
+    const A60: Ligne = { designation: "Couverture en ardoises naturelles 32 × 22", quantity: "60", unit: "m²", ouvrage: A, emplacement: "ardoise" };
+    const T20: Ligne = { designation: "Couverture en tuiles terre cuite", quantity: "20", unit: "m²", ouvrage: T, emplacement: "tuile" };
+    const T60: Ligne = { ...T20, quantity: "60" };
+    for (const lignes of [[A60, T20], [T20, A60]]) {
+      const r = bref(lignes);
+      expect(r.faits[0]).toBe("Couverture en ardoises");
+      expect(r.faits[1]).toBe("60 m²");
+    }
+    for (const lignes of [[A60, T60], [T60, A60]]) {
+      const r = bref(lignes);
+      expect(r.faits[0]).toBe("Couverture en tuiles et en ardoises");
+      expect(r.b.faits).toEqual([]);
+    }
+  });
+
+  it("trois systèmes écrits sans surface pour trancher : le bref reste neutre, dans tous les ordres", () => {
+    const ZINC: Ligne = { designation: "Couverture zinc à joint debout prépatiné 0,65 mm", quantity: "40", unit: "m²", ouvrage: Z, emplacement: "couverture" };
+    for (const lignes of [[ARDOISE, TUILE, ZINC], [ZINC, TUILE, ARDOISE], [TUILE, ZINC, ARDOISE]]) {
+      const r = bref(lignes);
+      expect(r.b.ouvrage).toBeNull();
+      expect(tout(r)).not.toMatch(/couverture en|emboîtement|ardoises au crochet/i);
+    }
+  });
+
+  it("deux lignes du même ouvrage : le bref ne dépend pas de leur ordre", () => {
+    const ARDOISE_B: Ligne = { ...ARDOISE, designation: "Ardoise naturelle 40 × 24 Angers", quantity: "300" };
+    expect(tout(bref([ARDOISE, ARDOISE_B]))).toBe(tout(bref([ARDOISE_B, ARDOISE])));
   });
 });
