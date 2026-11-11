@@ -276,6 +276,9 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
   // Sécurité (Greg, 26 octobre 2026) : le code à 6 chiffres de la session d'abord.
   await admin.goto("/admin/groupe");
   await admin.getByRole("button", { name: "Recevoir mon code" }).click();
+  // Le champ n'apparaît qu'une fois le code parti : lire la boîte avant, c'était parfois lire le code de la passe d'avant
+  // (« Ce code n'est pas bon », 11 novembre 2026).
+  await expect(admin.getByLabel("Code reçu par e-mail")).toBeVisible();
   const code = await admin.evaluate(async () => {
     const r = await fetch("/v1/internal/test/emails?to=admin-groupe%40example.fr", { headers: { authorization: "Bearer e2e-secret-de-la-tache" } });
     const { emails } = (await r.json()) as { emails: { subject: string; text: string }[] };

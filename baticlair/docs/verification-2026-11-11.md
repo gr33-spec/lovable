@@ -50,6 +50,11 @@ tombée sur le département de la passe « téléphone » (même base), a rejoin
 artisans du secteur » au lieu de « Inscriptions ouvertes ». Correction, dans les tests seulement :
 `apps/web/e2e/departement.ts` donne à chaque test et à chaque appareil sa propre plage de départements.
 
+Deuxième passe complète, sur `eac391b3` : encore 264 réussis, 1 échec, sur un autre test. Même nature : le test de
+l'écran d'administration lisait la boîte de test avant que le nouveau code à six chiffres soit parti, et prenait parfois
+celui de la passe précédente (« Ce code n'est pas bon »). Correction dans le test : attendre le champ du code, qui
+n'apparaît qu'une fois le code envoyé, comme le font déjà les trois autres tests qui lisent ce code.
+
 Tests de parcours ignorés (29) : 16 parcours de l'ancien regroupement par lot, joués dans leur passe à part
 (`E2E_COMMANDE_COMMUNE=lots --grep @lots`, rejouée ici) ; les autres ne valent que pour un appareil (clavier du
 téléphone, barre du bas, menu de gauche de l'ordinateur, largeurs d'écran) et tournent sur l'autre passe, plus une prise
