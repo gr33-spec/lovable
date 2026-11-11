@@ -264,3 +264,49 @@ rejoué le soir, car sa connexion envoie un code par e-mail. Réserve : dans un 
 l'admin sont aussi fermées par la règle de la démonstration ; le refus à un artisan ordinaire (403) avait été constaté à
 midi avec un compte normal. E-mails partis pendant ce contrôle : zéro (99 sur la journée, inchangé).
 
+## 9. Alignement « 5 négoces par demande », tarifs, CGU candidates, e-mails (11 novembre, accord de Greg)
+
+Les résultats chiffrés des suites sont dans le rapport remis à Greg (la version testée et la version déployée restent un
+seul commit).
+
+### Demandes existantes avant de ramener le plafond de 20 à 5 (lecture seule de la base de test)
+
+14 demandes, 26 destinataires : 8 demandes à 1 négoce, 6 demandes à 3 négoces. Aucune demande n'a plus de 5 négoces ;
+jamais plus de 3 négoces ajoutés d'un coup. Aucune demande ni aucune donnée n'a été modifiée : la limite ne vaut que pour
+les envois à venir.
+
+### Ce qui est aligné
+
+| Règle | Avant | Après | Fichiers |
+|---|---|---|---|
+| Gratuit, anciens modes `humain` et `mois` | 1 négoce | 5, comme tout le monde | `packages/domain/src/groupe/offre-artisan.ts` |
+| Refus au sixième négoce | paywall (402) « En gratuit, ta demande part chez un seul négoce. Abonne-toi pour comparer jusqu'à 5 négoces. » | limite (400) « Jusqu'à 5 négoces par demande. », pour tous | `offre-artisan.ts`, `apps/api/src/modules/recentrage/application/droits.service.ts` |
+| Envoi classique, création | jusqu'à 20 | jusqu'à 5 | `apps/api/src/modules/price-requests/application/price-requests.service.ts` |
+| Envoi classique, ajout d'un négoce à une demande | sans limite propre | 5 pour la demande entière | même fichier |
+| Feuille « À qui j'envoie ? » | tous les négoces du carnet cochés | cinq cochés au plus, le sixième grisé, « Jusqu'à 5 négoces par demande. Décoche un négoce pour en choisir un autre. » | `apps/web/src/components/project-price-requests.tsx` |
+| Formulaire « Envoyer à mes négoces » | « Ton négoce (un seul en gratuit) » | « Tes négoces (jusqu'à 5) » | `apps/web/src/components/demande-perso.tsx` |
+| Page Tarifs | « Le PDF et l'envoi à tous tes négoces » | « Le PDF et l'envoi jusqu'à 5 négoces par demande » | `packages/domain/src/groupe/tarifs.ts` |
+
+Les anciens modes ne sont pas supprimés. Le garde-fou technique de 20 identifiants par appel reste dans le contrôleur ;
+la règle de 5 est dite par le service, avec sa phrase.
+
+### Tarifs : le code et Stripe en mode test (lecture seule)
+
+| Formule | Code (`tarifs.ts`, réglages par défaut) | Stripe test |
+|---|---|---|
+| Découverte | gratuite | (aucun prix, normal) |
+| Essentiel | 19,90 € HT par mois | prix actif 19,90 €, mensuel, taxe en sus |
+| Pro | 39,90 € HT par mois | prix actif 39,90 €, mensuel, taxe en sus |
+| TVA | 20 % | taux « TVA FR » 20 %, en sus, actif |
+
+Contradictions relevées, rien de modifié : deux anciens prix encore ACTIFS dans Stripe test (49,00 € par mois, 348,00 €
+par an) ; les variables `STRIPE_PRICE_ID_MENSUEL` et `STRIPE_PRICE_ID_ANNUEL` encore posées sur l'hébergeur (le code ne
+les lit plus) ; le réglage `prixAnnuelHtCentimes` (348 €) et le champ « Prix à l'année » de l'administration ; les CGU
+publiées. Les identifiants de prix posés sur l'hébergeur sont chiffrés : je n'ai pas pu vérifier lequel des prix Stripe
+est branché sur Essentiel et sur Pro, seulement que les deux bons prix existent.
+
+### CGU et e-mails
+
+Version candidate des CGU, avec le relevé des passages modifiés : `docs/groupe/CGU-candidate-2026-11-11.md` (non
+publiée ; la page des CGU n'est pas touchée). Audit du plafond d'e-mails : `docs/audit-quota-email-2026-11-11.md`.
+

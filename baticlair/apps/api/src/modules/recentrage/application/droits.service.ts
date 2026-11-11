@@ -1,4 +1,4 @@
-import { droitsDe, formuleDuCompte, payantOffertDansLaZone, phrasePaywallQuota, phrasePreavis, quotasDe, verifierDroit, zoneDuCodePostal, MESSAGE_HORS_ZONE, NEGOCES_PAR_DEMANDE_PAYANT, OFFRES, PHRASE_LECTURES_EPUISEES, type Droits, type FormuleOffre, type Quotas } from "@baticlair/domain";
+import { droitsDe, formuleDuCompte, payantOffertDansLaZone, phrasePaywallQuota, phrasePreavis, quotasDe, verifierDroit, zoneDuCodePostal, MESSAGE_HORS_ZONE, OFFRES, PHRASE_LECTURES_EPUISEES, type Droits, type FormuleOffre, type Quotas } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import type { AbonnementService } from "../../abonnement/index.js";
@@ -108,8 +108,6 @@ export class DroitsService {
     const abonne = etat === null || etat.acces === "abonne" || etat.acces === "grace";
     const auto = await this.modeAuto();
     const d = droitsDe({ abonne, essai: !auto && etat?.acces === "essai", zoneOfferte: !auto && offre.offert, zoneActive: this.zoneActive(zone) }, { lecturesGratuites: this.reglages.lecturesGratuites });
-    // Gratuit, l'artisan envoie sa liste à ses négoces (point 23).
-    if (auto && d.formule === "gratuit") d.negocesParDemande = NEGOCES_PAR_DEMANDE_PAYANT;
     return { ...d, zone, zoneActive: this.zoneActive(zone), preavis: zone ? phrasePreavis(zone, offre.preavisJusquau) : null, lecturesCeMois: lectures };
   }
 
@@ -128,8 +126,8 @@ export class DroitsService {
     if (v.ok) return;
     const { refus, phrase } = v as Extract<typeof v, { ok: false }>;
     if (refus === "zone") throw new DomainError("forbidden", phrase, { reason: "zone_inactive", refus, phrase, message: MESSAGE_HORS_ZONE });
-    // Au-delà de 5 négoces en payant, c'est une limite, pas un paywall.
-    if (d.formule === "payant") throw new DomainError("validation_failed", phrase, { reason: refus, refus, phrase });
+    // Au-delà de 5 négoces, c'est une limite pour tous, jamais un paywall (Greg, 11 novembre 2026).
+    if (refus === "negoces" || d.formule === "payant") throw new DomainError("validation_failed", phrase, { reason: refus, refus, phrase });
     throw new DomainError("abonnement_requis", phrase, { reason: refus, refus, phrase });
   }
 

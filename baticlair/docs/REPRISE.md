@@ -107,6 +107,15 @@ Greg (corrigée le soir même, suivi 191) : jusqu'à 5 négoces par envoi pour T
 d'e-mails ; le plafond gratuit est de 100 par jour (99 partis le 11 novembre). Le plafond Neon de 10 branches est de
 nouveau atteint. Reste en attente de Greg : sa validation sur de vrais téléphones, puis la reprise graphique.
 
+SUIVI 191 et 192 (11 novembre 2026, soir) : NÉGOCES PAR DEMANDE, jusqu'à 5 pour toutes les formules et tous les parcours
+(`NEGOCES_PAR_DEMANDE`, phrase neutre au sixième, jamais de paywall ; envoi classique plafonné à 5, ajout compris ; page
+Tarifs). Tarifs : Découverte gratuite, Essentiel 19,90 €, Pro 39,90 € HT par mois, aucune formule annuelle. EN ATTENTE DE
+GREG : 1) relecture juridique de `docs/groupe/CGU-candidate-2026-11-11.md` (les CGU publiées citent encore 49 € et 348 €) ;
+2) la formule du compte Resend et le plafond des renvois de contact@ (`docs/audit-quota-email-2026-11-11.md`) ; 3) les
+anciens prix 49 € et 348 € encore actifs dans Stripe test, et le champ « Prix à l'année » de l'administration. À FAIRE dès
+que le quota d'e-mails est revenu : la recette en ligne des trois appareils (`achats-groupes-v1.mjs`), une douzaine
+d'e-mails par passe.
+
 ## À faire ensuite (dans cet ordre)
 
 2. FAIT (garder pour mémoire) : SUIVI 137, « Évolution de la landing, de l'expérience et du positionnement » (message de Greg du 30 octobre, soir) :

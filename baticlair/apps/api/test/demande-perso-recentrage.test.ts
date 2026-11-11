@@ -11,7 +11,7 @@ horlogeAu("2026-11-05T09:00:00.000Z");
 /**
  * LA DEMANDE PERSO (Greg, 25 octobre 2026, recentrage) : envoi immédiat à ses négoces, chiffrage en ligne sans compte,
  * comparaison livraison comprise, commande et suivi, relance à 48 h ouvrées, clôture à la date de besoin, « Mes prix »
- * qui ne montre que ses propres prix ; en gratuit un seul négoce, en payant cinq.
+ * qui ne montre que ses propres prix ; cinq négoces par demande pour toutes les formules (11 novembre 2026).
  */
 let ctx: TestContext;
 const avant = { MODE_REGROUPEMENT: process.env.MODE_REGROUPEMENT, CRON_SECRET: process.env.CRON_SECRET, ZONES_ACTIVES: process.env.ZONES_ACTIVES };
@@ -48,21 +48,23 @@ async function zoneSansOffre() {
 }
 
 describe("la demande perso", () => {
-  it("gratuit : un seul négoce par demande, le deuxième ouvre le paywall", async () => {
+  // RÈGLE CHANGÉE (Greg, 11 novembre 2026) : jusqu'à 5 négoces par demande pour toutes les formules, dans les anciens modes
+  // aussi ; le sixième est une limite dite d'une phrase neutre, plus jamais un paywall.
+  it("gratuit, ancien mode : cinq négoces par demande ; le sixième est une limite (400), jamais un paywall", async () => {
     await zoneSansOffre();
     const a = await couvreurAvecListe(ctx, "a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", LIGNES);
     await ctx.app.get(AbonnementService).finirEssai(a.companyId);
     const droits = (await a.agent.get("/v1/droits").expect(200)).body;
-    expect(droits).toMatchObject({ formule: "gratuit", negocesParDemande: 1, regroupements: false, zone: "22", zoneActive: true });
-    const deux = await a.agent
-      .post(`/v1/projects/${a.projectId}/demandes-perso`)
-      .send({ but: "chiffrer", accord: true, articles: a.articles, negoces: [{ nom: "Négoce Un", email: "un@negoce.fr" }, { nom: "Négoce Deux", email: "deux@negoce.fr" }] })
-      .expect(402);
-    expect(deux.body.error.details).toMatchObject({ refus: "negoces", phrase: expect.stringContaining("un seul négoce") });
-    await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "chiffrer", accord: true, articles: a.articles, negoces: [{ nom: "Négoce Un", email: "un@negoce.fr" }] }).expect(201);
-    expect(lien(mailsVers(ctx, "un@negoce.fr").at(-1)!.text)).toBeTruthy();
+    expect(droits).toMatchObject({ formule: "gratuit", negocesParDemande: 5, regroupements: false, zone: "22", zoneActive: true });
+    const n = (k: number) => Array.from({ length: k }, (_, i) => ({ nom: `Négoce ${i + 1}`, email: `n${i + 1}@negoce.fr` }));
+    const six = await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "chiffrer", accord: true, articles: a.articles, negoces: n(6) }).expect(400);
+    expect(six.body.error.code).toBe("validation_failed");
+    expect(six.body.error.details).toMatchObject({ refus: "negoces", phrase: "Jusqu'à 5 négoces par demande." });
+    expect(ctx.emails.sent.filter((m) => m.to.endsWith("@negoce.fr"))).toHaveLength(0);
+    await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "chiffrer", accord: true, articles: a.articles, negoces: n(5) }).expect(201);
+    expect(lien(mailsVers(ctx, "n5@negoce.fr").at(-1)!.text)).toBeTruthy();
     // Sans l'accord pour transmettre son identité, rien ne part.
-    await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "chiffrer", accord: false, articles: a.articles, negoces: [{ nom: "Négoce Un", email: "un@negoce.fr" }] }).expect(400);
+    await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "chiffrer", accord: false, articles: a.articles, negoces: n(1) }).expect(400);
   });
 
   it("payant : cinq négoces, chiffrage en ligne, comparaison livrée, commande, confirmation, livrée", { timeout: 60_000 }, async () => {

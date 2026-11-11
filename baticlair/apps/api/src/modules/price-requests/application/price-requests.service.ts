@@ -1,4 +1,4 @@
-import { briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere, COULEUR_PDF_DEFAUT, estCouleurPdf, estModelePdf, MODELE_PDF_DEFAUT, type CouleurPdf, type ModelePdf } from "@baticlair/domain";
+import { NEGOCES_PAR_DEMANDE, PHRASE_NEGOCES_PAR_DEMANDE, briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere, COULEUR_PDF_DEFAUT, estCouleurPdf, estModelePdf, MODELE_PDF_DEFAUT, type CouleurPdf, type ModelePdf } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { ExceptionSignalee } from "../../../platform/supervision/exceptions.js";
@@ -472,6 +472,7 @@ export class PriceRequestsService {
     },
   ): Promise<PriceRequestView> {
     assertCanWrite(tenant);
+    this.auPlusCinq(new Set(input.supplierIds).size);
     // Lot final, point 3 : toujours une date de réponse (« réponse souhaitée avant le … ») ; sans date choisie, trois jours.
     const dueDate = input.dueDate ?? dateLimiteParDefaut(this.clock());
     if (input.message?.trim() || input.tutoie !== undefined) await this.requests.saveModele(tenant, { message: input.message?.trim() || undefined, tutoie: input.tutoie ?? undefined });
@@ -492,12 +493,22 @@ export class PriceRequestsService {
     return this.view(tenant, created);
   }
 
+  /**
+   * JUSQU'À 5 NÉGOCES PAR DEMANDE (Greg, 11 novembre 2026) : pour toutes les formules et tous les parcours. Une limite
+   * dite d'une phrase, jamais un paywall ; elle ne vaut que pour les envois à venir.
+   */
+  private auPlusCinq(negoces: number): void {
+    if (negoces > NEGOCES_PAR_DEMANDE) throw validationFailed("Too many suppliers for one request", { reason: "negoces", refus: "negoces", phrase: PHRASE_NEGOCES_PAR_DEMANDE, max: NEGOCES_PAR_DEMANDE });
+  }
+
   async addSuppliers(tenant: TenantContext, requestId: string, supplierIds: string[]): Promise<PriceRequestView> {
     assertCanWrite(tenant);
     const request = await this.requests.findById(tenant, requestId);
     if (!request) throw notFound("PriceRequest");
     const already = new Set(request.recipients.map((r) => r.supplier.id));
     const ids = (await this.checkSuppliers(tenant, supplierIds)).filter((id) => !already.has(id));
+    // La limite vaut pour la demande entière : ceux qui l'ont déjà comptent (une ancienne demande n'est jamais modifiée).
+    if (ids.length > 0) this.auPlusCinq(already.size + new Set(ids).size);
     if (ids.length > 0) await this.requests.addRecipients(tenant, request.id, ids);
     return this.reload(tenant, request.id);
   }

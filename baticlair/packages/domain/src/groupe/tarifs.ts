@@ -128,7 +128,7 @@ export const TARIFS = {
     sous: "gratuit, sans limite de temps",
     points: [
       "Tes listes notées à la main, sans limite",
-      "Le PDF et l'envoi à tous tes négoces",
+      "Le PDF et l'envoi jusqu'à 5 négoces par demande",
       "Les achats groupés de ton secteur",
       `${D.analyses} analyse de devis et ${D.scans} scans de liste offerts`,
     ],

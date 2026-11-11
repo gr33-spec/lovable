@@ -157,7 +157,8 @@ test.describe("Recentrage du 25 octobre 2026", () => {
 
   test.setTimeout(180_000);
 
-  test("1. gratuit : la demande part chez un seul négoce ; au deuxième, le paywall", async ({ page }, info) => {
+  // RÈGLE CHANGÉE (Greg, 11 novembre 2026) : jusqu'à 5 négoces par demande pour toutes les formules, ancien mode compris.
+  test("1. gratuit : la demande part chez ses négoces, jusqu'à cinq ; au sixième, une phrase neutre, jamais le paywall", async ({ page }, info) => {
     const zone = zoneDuCas("gratuit", info.project.name);
     const a = await couvreur(page, zone, [
       { libelle: ARDOISE, quantite: "1000", unite: "pièces" },
@@ -165,12 +166,13 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     ]);
     await seuilFranchi(page, zone, ilYaLongtemps());
     await finEssai(page, a.email);
-    expect((await apiJson<{ formule: string }>(page, "GET", "/v1/droits")).body).toMatchObject({ formule: "gratuit", negocesParDemande: 1, regroupements: false });
+    expect((await apiJson<{ formule: string }>(page, "GET", "/v1/droits")).body).toMatchObject({ formule: "gratuit", negocesParDemande: 5, regroupements: false });
 
     await page.goto(`/chantiers/${a.projectId}`);
     await page.getByRole("button", { name: "Envoyer à mes négoces" }).click();
     const form = page.getByRole("region", { name: "Envoyer à mes négoces" }).or(page.getByLabel("Envoyer à mes négoces")).first();
-    await expect(form.getByText("Ton négoce (un seul en gratuit)")).toBeVisible();
+    await expect(form.getByText("Tes négoces (jusqu'à 5)")).toBeVisible();
+    await expect(form.getByText(/un seul en gratuit/)).toHaveCount(0);
     await form.getByLabel("Nom du négoce").fill("Négoce Gratuit");
     await form.getByLabel("E-mail").fill(`gratuit-${unique()}@negoce.example.com`);
     await form.getByRole("button", { name: "Ajouter ce négoce" }).click();
@@ -178,18 +180,16 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     await form.getByRole("button", { name: "Envoyer", exact: true }).click();
     await expect(page.getByRole("list", { name: "Négoces sollicités" }).getByText("Négoce Gratuit · Envoyée")).toBeVisible();
 
-    // Le deuxième négoce dans la même demande : refusé, avec la phrase de l'abonnement.
-    const deux = await apiJson<{ error: { code: string; details: { refus: string; phrase: string } } }>(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, {
+    // Six négoces dans la même demande : refusé d'une phrase neutre, sans écran d'abonnement.
+    const six = await apiJson<{ error: { code: string; details: { refus: string; phrase: string } } }>(page, "POST", `/v1/projects/${a.projectId}/demandes-perso`, {
       but: "chiffrer",
       accord: true,
-      negoces: [
-        { nom: "N1", email: `n1-${unique()}@negoce.example.com` },
-        { nom: "N2", email: `n2-${unique()}@negoce.example.com` },
-      ],
+      negoces: Array.from({ length: 6 }, (_, i) => ({ nom: `N${i + 1}`, email: `n${i + 1}-${unique()}@negoce.example.com` })),
     });
-    expect(deux.status).toBe(402);
-    expect(deux.body.error.details.refus).toBe("negoces");
-    expect(deux.body.error.details.phrase).toMatch(/abonne/i);
+    expect(six.status).toBe(400);
+    expect(six.body.error.code).toBe("validation_failed");
+    expect(six.body.error.details).toMatchObject({ refus: "negoces", phrase: "Jusqu'à 5 négoces par demande." });
+    await expect(page.getByRole("heading", { name: "Ton essai est terminé" })).toHaveCount(0);
   });
 
   test("2. payant : cinq négoces, chiffrage en ligne sans compte, comparaison livraison comprise, commande, confirmation, livrée", async ({ page, browser }, info) => {

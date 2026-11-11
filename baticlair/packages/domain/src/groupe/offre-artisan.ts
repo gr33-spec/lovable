@@ -1,6 +1,6 @@
 /**
  * GRATUIT ET PAYANT (Greg, 25 octobre 2026, recentrage) : « gratuit, tu gagnes du temps ; payant, tu gagnes de l'argent ».
- * - Gratuit : `LECTURES_GRATUITES_MOIS` lectures de devis par mois (2), envoi à UN seul négoce par demande, « Mes prix »
+ * - Gratuit : `LECTURES_GRATUITES_MOIS` lectures de devis par mois (2), « Mes prix »
  *   limité aux 3 derniers mois, pas de regroupement.
  * - Payant : lectures illimitées (usage raisonnable), jusqu'à 5 négoces par demande, regroupements, « Mes prix »
  *   complet. (Le prix de ce mode, 49 € HT par mois ou 348 € HT par an, a été remplacé le 30 octobre 2026 par Essentiel
@@ -14,16 +14,20 @@
  * celui en ligne), ce qui est gratuit et payant est dit par `tarifs.ts` (`TARIFS`) et appliqué par `DroitsService` :
  * 3 listes préparées offertes en tout, plusieurs négoces par demande, achats groupés sur abonnement (le premier offert).
  *
- * NÉGOCES PAR ENVOI (décision de Greg, 11 novembre 2026, pour le pilote) : jusqu'à 5 négoces par envoi pour TOUTES les
- * formules, Découverte gratuite comprise ; les abonnements tiennent aux quotas d'analyses et de scans, pas au nombre de
- * négoces. En mode `automatique` (celui en ligne), `DroitsService` donne déjà 5 au gratuit (test
- * `apps/api/test/negoces-par-envoi.test.ts`). La limite de 1 ci-dessous (`NEGOCES_PAR_DEMANDE_GRATUIT`) ne joue plus que
- * dans les deux anciens modes (`humain`, `mois`) : l'aligner est une modification du produit, en attente de l'accord de Greg.
+ * NÉGOCES PAR DEMANDE (décision de Greg, 11 novembre 2026, validée le 12) : jusqu'à `NEGOCES_PAR_DEMANDE` (5) négoces par
+ * demande, pour TOUTES les formules, Découverte gratuite comprise, dans TOUS les parcours et tous les modes. Les
+ * abonnements tiennent aux quotas d'analyses et de scans, pas au nombre de négoces. Au-delà, c'est une limite dite d'une
+ * phrase neutre (`PHRASE_NEGOCES_PAR_DEMANDE`), jamais un paywall. Le « un seul négoce en gratuit » du 25 octobre n'existe
+ * plus ; les anciens modes restent, avec la même règle.
  */
 
 export const LECTURES_GRATUITES_MOIS_DEFAUT = 2;
-export const NEGOCES_PAR_DEMANDE_GRATUIT = 1;
-export const NEGOCES_PAR_DEMANDE_PAYANT = 5;
+/** Le nombre de négoces d'une demande, pour tout le monde. */
+export const NEGOCES_PAR_DEMANDE = 5;
+export const NEGOCES_PAR_DEMANDE_GRATUIT = NEGOCES_PAR_DEMANDE;
+export const NEGOCES_PAR_DEMANDE_PAYANT = NEGOCES_PAR_DEMANDE;
+/** La phrase du refus au sixième négoce, la même partout. */
+export const PHRASE_NEGOCES_PAR_DEMANDE = `Jusqu'à ${NEGOCES_PAR_DEMANDE} négoces par demande.`;
 export const MOIS_PRIX_GRATUIT = 3;
 export const SEUIL_ZONE_ACTIVE_DEFAUT = 10;
 export const PREAVIS_ZONE_JOURS = 30;
@@ -95,9 +99,7 @@ export function verifierDroit(d: Droits, geste: { type: "lecture"; dejaCeMois: n
   }
   if (geste.type === "envoi") {
     if (geste.negoces <= d.negocesParDemande) return { ok: true };
-    return d.formule === "gratuit"
-      ? { ok: false, refus: "negoces", phrase: "En gratuit, ta demande part chez un seul négoce. Abonne-toi pour comparer jusqu'à 5 négoces." }
-      : { ok: false, refus: "negoces", phrase: `Jusqu'à ${d.negocesParDemande} négoces par demande.` };
+    return { ok: false, refus: "negoces", phrase: PHRASE_NEGOCES_PAR_DEMANDE };
   }
   if (!geste.zoneActive) return { ok: false, refus: "zone", phrase: MESSAGE_HORS_ZONE };
   if (d.regroupements) return { ok: true };

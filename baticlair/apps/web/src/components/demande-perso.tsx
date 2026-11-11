@@ -72,7 +72,7 @@ function EnvoiDemande({ projectId, articles, lots, proposes, onEnvoye, onFermer 
     ...proposes.zoneNegoces.map((n) => ({ cle: `n:${n.negoceId}`, libelle: `${n.nom}${n.generaliste ? " · généraliste" : ""}`, specialites: [...(n.generaliste ? ["generaliste"] : []), ...n.familles], corps: { negoceId: n.negoceId } })),
     ...nouveaux,
   ];
-  const basculer = (cle: string) => setChoisis((c) => (c.includes(cle) ? c.filter((x) => x !== cle) : c.length >= proposes.max ? (proposes.max === 1 ? [cle] : c) : [...c, cle]));
+  const basculer = (cle: string) => setChoisis((c) => (c.includes(cle) ? c.filter((x) => x !== cle) : c.length >= proposes.max ? c : [...c, cle]));
 
   // « QUI REÇOIT QUOI » (Greg, 1er novembre 2026) : chaque lot va aux négoces compatibles ; un envoi hors spécialité
   // n'existe que confirmé (`forces`). Une liste d'un seul lot garde l'envoi d'avant, avec les avertissements.
@@ -106,7 +106,7 @@ function EnvoiDemande({ projectId, articles, lots, proposes, onEnvoye, onFermer 
       const envoyee = derniere;
       onEnvoye(envoyee.id);
     } catch (e) {
-      setErreur(messageErreur(e, { negoces: "En gratuit, ta demande part chez un seul négoce.", accord_requis: "Coche l'accord pour transmettre ton identité." }));
+      setErreur(messageErreur(e, { negoces: "Jusqu'à 5 négoces par demande.", accord_requis: "Coche l'accord pour transmettre ton identité." }));
     } finally {
       setPending(false);
     }
@@ -128,11 +128,11 @@ function EnvoiDemande({ projectId, articles, lots, proposes, onEnvoye, onFermer 
         ))}
       </div>
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-[15px] font-semibold">{proposes.max === 1 ? "Ton négoce (un seul en gratuit)" : `Tes négoces (jusqu'à ${proposes.max})`}</legend>
+        <legend className="mb-1 text-[15px] font-semibold">{`Tes négoces (jusqu'à ${proposes.max})`}</legend>
         {options.length === 0 ? <p className="text-[14px] text-muted">Ajoute ton négoce ci-dessous.</p> : null}
         {options.map((o) => (
           <label key={o.cle} className="flex min-h-12 items-center gap-3 rounded-xl border border-line bg-surface px-3">
-            <input type={proposes.max === 1 ? "radio" : "checkbox"} name="negoce-perso" checked={choisis.includes(o.cle)} onChange={() => basculer(o.cle)} className="size-5 accent-accent" />
+            <input type="checkbox" name="negoce-perso" checked={choisis.includes(o.cle)} onChange={() => basculer(o.cle)} className="size-5 accent-accent" />
             <span className="text-[15px]">{o.libelle}</span>
           </label>
         ))}

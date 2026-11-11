@@ -22,6 +22,7 @@ import { useBrouillon } from "@/lib/brouillon";
 import { useAncienMode } from "@/components/negocie";
 import { useActionChantier } from "@/lib/actions-chantier";
 import { EtapeApercu, EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
+import { NEGOCES_PAR_DEMANDE } from "../../../../packages/domain/src/groupe/offre-artisan";
 import { TON, phraseRelanceArtisan } from "../../../../packages/domain/src/groupe/ton";
 import { euros, type DemandePerso, type OffrePerso } from "@/lib/recentrage";
 import { dateHeureCourte, premiereLigneDuMessage } from "../../../../packages/domain/src/groupe/reponse-negoce";
@@ -512,7 +513,10 @@ function SupplierPicker({
   dark,
   onNames,
   allByDefault = false,
+  max = NEGOCES_PAR_DEMANDE,
 }: {
+  /** Jusqu'à 5 négoces par demande (Greg, 11 novembre 2026) : ce qu'il reste à cocher pour cette demande. */
+  max?: number;
   /** Retour du fondateur (2026-10-10) : « les fournisseurs cochés par défaut » ; l'artisan décoche ceux qui ne reçoivent pas. */
   allByDefault?: boolean;
   exclude?: string[];
@@ -530,8 +534,9 @@ function SupplierPicker({
   useEffect(() => {
     if (!data || !allByDefault || defaulted.current) return;
     defaulted.current = true;
-    for (const s of data.items) if (!exclude.includes(s.id)) onToggle(s.id, true);
-  }, [data, allByDefault, exclude, onToggle]);
+    // Cochés par défaut, dans la limite d'une demande : au-delà, l'artisan choisit lesquels.
+    for (const s of data.items.filter((x) => !exclude.includes(x.id)).slice(0, Math.max(0, max))) onToggle(s.id, true);
+  }, [data, allByDefault, exclude, onToggle, max]);
   useEffect(() => {
     if (data && onNames) onNames(new Map(data.items.map((s) => [s.id, s.name])));
   }, [data, onNames]);
@@ -539,9 +544,14 @@ function SupplierPicker({
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
   const choices = data.items.filter((s) => !exclude.includes(s.id));
+  const plein = selected.size >= max;
 
   return (
     <div className="flex flex-col gap-2">
+      <p className={`text-[14px] ${dark ? "text-[#99844C]" : "text-muted"}`} role="note">
+        {max <= 0 ? `Cette demande a déjà ${NEGOCES_PAR_DEMANDE} négoces.` : `Jusqu'à ${NEGOCES_PAR_DEMANDE} négoces par demande.`}
+        {max > 0 && plein && choices.length > selected.size ? " Décoche un négoce pour en choisir un autre." : ""}
+      </p>
       {choices.length === 0 && !creating ? (
         <p className={`text-sm ${dark ? "text-[#99844C66]" : "text-muted"}`}>
           {data.items.length === 0 ? "Ton carnet de fournisseurs est vide. Ajoutes-en un :" : "Tous tes fournisseurs sont déjà dans cette demande."}
@@ -549,7 +559,7 @@ function SupplierPicker({
       ) : null}
       {choices.map((s) => (
         <label key={s.id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl bg-surface px-4 text-ink shadow-card">
-          <input type="checkbox" checked={selected.has(s.id)} onChange={(e) => onToggle(s.id, e.target.checked)} className="size-5 accent-accent" />
+          <input type="checkbox" checked={selected.has(s.id)} disabled={!selected.has(s.id) && plein} onChange={(e) => onToggle(s.id, e.target.checked)} className="size-5 accent-accent" />
           <span className="flex min-w-0 flex-col">
             <span className="font-bold">{s.name}</span>
             <span className="truncate text-[13px] text-muted">{s.email}</span>
@@ -648,8 +658,8 @@ function NewRequest({
   const toggle = (supplierId: string, on: boolean) =>
     b.modifier((d) => {
       const next = new Set(d.selected);
-      if (on) next.add(supplierId);
-      else next.delete(supplierId);
+      if (on && next.size < NEGOCES_PAR_DEMANDE) next.add(supplierId);
+      else if (!on) next.delete(supplierId);
       return { ...d, selected: [...next] };
     });
 
@@ -791,11 +801,12 @@ function AddRecipients({ request, open, onClose, onChange }: { request: PriceReq
         exclude={request.recipients.map((r) => r.supplier.id)}
         selected={selected}
         dark={false}
+        max={NEGOCES_PAR_DEMANDE - request.recipients.length}
         onToggle={(id, on) =>
           setSelected((prev) => {
             const next = new Set(prev);
-            if (on) next.add(id);
-            else next.delete(id);
+            if (on && next.size < NEGOCES_PAR_DEMANDE - request.recipients.length) next.add(id);
+            else if (!on) next.delete(id);
             return next;
           })
         }

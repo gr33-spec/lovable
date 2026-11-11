@@ -59,7 +59,7 @@ import { bonDeCommandePdf } from "../../../platform/pdf/bon-de-commande.js";
  * - la COMPARAISON livraison comprise, la RELANCE à 48 h ouvrées, la CLÔTURE à la date de besoin ;
  * - « COMMANDER » sur une réponse : bon de commande au négoce, suivi Reçue → Confirmée → Livrée ;
  * - « MES PRIX » : les prix reçus et payés par CET artisan, jamais ceux d'un autre.
- * En gratuit, un seul négoce par demande ; en payant, cinq (`DroitsService`).
+ * Jusqu'à cinq négoces par demande, pour toutes les formules (`DroitsService`, Greg, 11 novembre 2026).
  */
 
 const hacher = (jeton: string) => createHash("sha256").update(jeton).digest("hex");

@@ -121,17 +121,19 @@ describe("regroupement : volume minimum, anonymat, statuts, validité, cycles", 
 describe("gratuit et payant", () => {
   const gratuit = droitsDe({ abonne: false, essai: false, zoneOfferte: false, zoneActive: true });
   const payant = droitsDe({ abonne: true, essai: false, zoneOfferte: false, zoneActive: true });
-  it("gratuit : 2 lectures, un seul négoce, pas de regroupement, 3 mois de prix", () => {
-    expect(gratuit).toMatchObject({ formule: "gratuit", lecturesParMois: 2, negocesParDemande: 1, regroupements: false, historiqueMois: 3 });
-    expect(verifierDroit(gratuit, { type: "envoi", negoces: 1 })).toEqual({ ok: true });
-    expect(verifierDroit(gratuit, { type: "envoi", negoces: 2 })).toMatchObject({ ok: false, refus: "negoces" });
+  // RÈGLE CHANGÉE (Greg, 11 novembre 2026) : jusqu'à 5 négoces par demande pour toutes les formules ; plus de « un seul
+  // négoce en gratuit », et au sixième une phrase neutre, la même pour tous.
+  it("gratuit : 2 lectures, cinq négoces comme tout le monde, pas de regroupement, 3 mois de prix", () => {
+    expect(gratuit).toMatchObject({ formule: "gratuit", lecturesParMois: 2, negocesParDemande: 5, regroupements: false, historiqueMois: 3 });
+    expect(verifierDroit(gratuit, { type: "envoi", negoces: 5 })).toEqual({ ok: true });
+    expect(verifierDroit(gratuit, { type: "envoi", negoces: 6 })).toEqual({ ok: false, refus: "negoces", phrase: "Jusqu'à 5 négoces par demande." });
     expect(verifierDroit(gratuit, { type: "lecture", dejaCeMois: 2 })).toMatchObject({ ok: false, refus: "lectures" });
     expect(debutHistorique(gratuit, new Date("2026-10-25T00:00:00Z"))?.toISOString()).toBe("2026-07-25T00:00:00.000Z");
   });
   it("payant : 5 négoces, regroupements, tout l'historique", () => {
     expect(payant).toMatchObject({ formule: "payant", raison: "abonne", lecturesParMois: null, negocesParDemande: 5, regroupements: true, historiqueMois: null });
     expect(verifierDroit(payant, { type: "envoi", negoces: 5 })).toEqual({ ok: true });
-    expect(verifierDroit(payant, { type: "envoi", negoces: 6 })).toMatchObject({ ok: false });
+    expect(verifierDroit(payant, { type: "envoi", negoces: 6 })).toEqual({ ok: false, refus: "negoces", phrase: "Jusqu'à 5 négoces par demande." });
   });
   it("hors zone active : tout sauf les regroupements", () => {
     const hors = droitsDe({ abonne: true, essai: false, zoneOfferte: false, zoneActive: false });

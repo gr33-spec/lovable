@@ -87,7 +87,7 @@ séparés ».
    les missions sont coupées.
 8. Budget, tarif, niveau et expérience sont toujours dits « indicatifs » ou « déclarés ».
 9. « Jusqu'à 3 négoces » (prompt maître, capture 30) n'est pas appliqué. DÉCIDÉ par Greg le 11 novembre 2026 pour le pilote : jusqu'à 5 négoces par envoi pour TOUTES les formules, Découverte gratuite comprise ; les abonnements Essentiel et Pro tiennent aux quotas d'analyses de devis et de scans de liste, pas au nombre de négoces.
-   État du code et points à aligner : `docs/verification-2026-11-11.md`, partie 8. La capture 30, si elle est reprise, devra
+   Appliqué partout le 11 novembre (anciens modes, envoi classique, page Tarifs) : `docs/verification-2026-11-11.md`, partie 9. La capture 30, si elle est reprise, devra
    dire « jusqu'à 5 négoces ».
 
 ## 5. Migration et retour arrière
