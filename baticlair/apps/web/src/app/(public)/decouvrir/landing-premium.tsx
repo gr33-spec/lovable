@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BoutonDecouvrir } from "@/components/acces-demo";
 import { CtaFixePremium, EntetePremium, PaliersCollectif } from "@/components/landing-premium";
+import { SiMissions } from "@/components/landing-missions";
 import { HEBERGEUR, PAGES_LEGALES } from "@/lib/legal";
 import { ACCROCHE_APP, BLOC_LEGAL } from "@/lib/nom";
 import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
@@ -74,6 +75,14 @@ function Sprite() {
         <circle cx="12" cy="7.5" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <path d="M4.5 20.5v-1.6A5.9 5.9 0 0110.4 13h3.2a5.9 5.9 0 015.9 5.9v1.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </symbol>
+      <symbol id="i-case" viewBox="0 0 24 24">
+        <rect x="3" y="7.5" width="18" height="12.5" rx="2.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M9 7.5V6a2 2 0 012-2h2a2 2 0 012 2v1.5M3 13h18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </symbol>
+      <symbol id="i-inbox" viewBox="0 0 24 24">
+        <path d="M4 5.5h16v10H8.5L4 19.5z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
+        <path d="M8 9.5h8M8 12.5h5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      </symbol>
       <symbol id="i-check" viewBox="0 0 24 24">
         <path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
       </symbol>
@@ -100,6 +109,11 @@ const QUESTIONS = [
     r: "Dans Mobiiz, avec ton chantier. Un négoce qui répond par le lien donne ses prix ligne par ligne, et Mobiiz te montre le moins cher. Un devis envoyé à ton adresse Mobiiz est rangé au même endroit. Tu choisis ensuite le négoce que tu veux.",
     lien: null,
   },
+  {
+    q: "Combien de négoces je peux consulter ?",
+    r: "Jusqu’à 5 négoces par demande, quelle que soit ta formule, la gratuite comprise. Les abonnements n’ajoutent que des analyses de devis et des scans de liste.",
+    lien: null,
+  },
   { q: "Est-ce que Mobiiz est gratuit ?", r: TARIFS.question.r, lien: { href: "/tarifs", label: "Voir les tarifs détaillés" } },
   { q: "Est-ce que je dois obligatoirement commander ?", r: OBLIGE.r, lien: { href: "/cgu", label: "Lire les CGU" } },
   {
@@ -124,10 +138,30 @@ const ETAPES = [
   { titre: "Compare et choisis", texte: "Les réponses arrivent dans Mobiiz. Les prix donnés en ligne se comparent ligne par ligne." },
 ] as const;
 
+/**
+ * Les trois bénéfices (11 novembre 2026, après le tour de l'application) : ce que l'artisan gagne, dit avec ce qui existe
+ * vraiment. La boîte « Messages et réponses » remplace « plus de visibilité », trop vague.
+ */
 const BENEFICES = [
   { ico: "i-check", titre: "Simple et rapide", texte: "Une demande au lieu de cinq appels." },
-  { ico: "i-search", titre: "Plus de visibilité", texte: "Tu compares facilement les propositions." },
-  { ico: "i-people", titre: "Plus de poids", texte: "Le collectif négocie de meilleurs tarifs." },
+  { ico: "i-inbox", titre: "Tout au même endroit", texte: "Les réponses de tes négoces sont rangées avec ta demande." },
+  { ico: "i-people", titre: "Plus de poids", texte: "À plusieurs, le volume pèse dans la négociation." },
+] as const;
+
+/** La question des missions : seulement quand elles sont ouvertes (`SiMissions`). */
+const QUESTION_MISSIONS = {
+  q: "Les missions entre entreprises, c’est quoi ?",
+  r: "Une mise en relation entre entreprises du bâtiment : tu publies une mission quand tu cherches du renfort, ou tu proposes tes services quand tu as du temps. Mobiiz ne fait que vous mettre en relation ; vos coordonnées ne sont partagées que si vous êtes d’accord tous les deux.",
+} as const;
+
+/**
+ * Les trois formules, avec les mots de la page Tarifs (`TARIFS`, le domaine fait foi). AUCUN MONTANT ici : la règle de la
+ * page publique (Greg, 30 octobre 2026) tient, les prix se lisent sur la page Tarifs, à un lien.
+ */
+const FORMULES = [
+  { titre: TARIFS.gratuit.titre, sous: "Gratuit, sans limite de temps", points: TARIFS.gratuit.points, pastille: "Pour commencer" },
+  { titre: TARIFS.essentiel.titre, sous: "Sur abonnement, sans engagement", points: TARIFS.essentiel.points.filter((x) => x !== "Sans engagement"), pastille: null },
+  { titre: TARIFS.pro.titre, sous: "Sur abonnement, sans engagement", points: TARIFS.pro.points.filter((x) => x !== "Sans engagement"), pastille: null },
 ] as const;
 
 /** Les écrans de l'app mis en scène dans un téléphone : contenu d'exemple, jamais un vrai client ni un vrai prix. */
@@ -194,7 +228,7 @@ export function LandingPremium() {
               <h1 id="heroTitle">
                 <span className="l1">Compare les négoces.</span> Achète tes matériaux <span>au bon prix.</span>
               </h1>
-              <p className="mz2-lead">Une seule demande, envoyée jusqu’à 5 négoces. Compare leurs offres et, si tu le souhaites, regroupe tes achats pour négocier plus fort.</p>
+              <p className="mz2-lead">Prépare ta liste, envoie-la jusqu’à 5 négoces et retrouve leurs réponses au même endroit. Et si tu le souhaites, regroupe tes achats pour négocier plus fort.</p>
               <div className="hero-actions">
                 <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/inscription">
                   {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
@@ -283,6 +317,35 @@ export function LandingPremium() {
               <PaliersCollectif />
             </div>
             <p className="mz2-note">Gratuit, pour tous les artisans. Exemple fictif : les prix réels dépendent des offres reçues, aucune économie n’est garantie.</p>
+            {/* Les missions entre entreprises (11 novembre 2026) : la troisième activité, dite sans promesse. Mobiiz met en
+                relation, rien de plus ; la bande n'existe que si le serveur a ouvert les missions. */}
+            <SiMissions>
+              <div className="mz2-missions" id="missions" role="region" aria-labelledby="missionsTitle">
+                <span className="mz2-missions-ico" aria-hidden="true">
+                  <Icone id="i-case" />
+                </span>
+                <div className="mz2-missions-texte">
+                  <h2 id="missionsTitle">
+                    Missions entre entreprises <span className="mz2-pastille mz2-pastille-claire">nouveau</span>
+                  </h2>
+                  <p>Un chantier qui déborde, ou du temps devant toi ? Trouve du renfort, ou propose le tien, entre entreprises du bâtiment.</p>
+                </div>
+                <ul className="mz2-missions-points">
+                  <li>
+                    <strong>Tu cherches du renfort</strong>
+                    <span>Publie une mission : métier, dates, lieu, conditions indicatives.</span>
+                  </li>
+                  <li>
+                    <strong>Tu as du temps</strong>
+                    <span>Propose tes services et ton tarif indicatif, si tu veux le donner.</span>
+                  </li>
+                  <li>
+                    <strong>Vous vous arrangez entre vous</strong>
+                    <span>Mobiiz met en relation. Les coordonnées ne se partagent que d’un commun accord.</span>
+                  </li>
+                </ul>
+              </div>
+            </SiMissions>
           </div>
         </section>
 
@@ -318,6 +381,38 @@ export function LandingPremium() {
           </div>
         </section>
 
+        {/* Ce que ça coûte (11 novembre 2026) : la page disait « Gratuit » sans dire ce que l'abonnement ajoute. Trois
+            formules, les mots et les prix du domaine (`TARIFS`), et la règle qui lève le doute : les négoces et les achats
+            groupés sont les mêmes pour tous. */}
+        <section className="mz2-tarifs" id="tarifs" aria-labelledby="tarifsTitle">
+          <div className="wrap">
+            <span className="label">Ce que ça coûte</span>
+            <h2 id="tarifsTitle">
+              Gratuit pour commencer. <span>Un abonnement seulement si tu en as besoin.</span>
+            </h2>
+            <p className="mz2-tarifs-chapo">Tes listes, tes demandes jusqu’à 5 négoces et les achats groupés sont gratuits, sans limite de temps. Les abonnements ajoutent seulement des analyses de devis et des scans de liste chaque mois.</p>
+            <ul className="mz2-formules">
+              {FORMULES.map((f) => (
+                <li key={f.titre} className={f.pastille ? "mz2-formule mz2-formule-une" : "mz2-formule"}>
+                  {f.pastille ? <span className="mz2-formule-pastille">{f.pastille}</span> : null}
+                  <h3>{f.titre}</h3>
+                  <p className="mz2-formule-prix">{f.sous}</p>
+                  <ul>
+                    {f.points.map((p) => (
+                      <li key={p}>
+                        <Icone id="i-check" /> {p}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+            <p className="mz2-tarifs-suite">
+              Les abonnements sont au mois, sans engagement. <Link href="/tarifs">Voir les prix et le détail</Link>
+            </p>
+          </div>
+        </section>
+
         {/* « Le prochain bon prix » avant les questions (Greg, 31 octobre 2026, soir). */}
         <section className="final-section" id="commencer" aria-labelledby="finalTitle">
           <div className="wrap">
@@ -326,7 +421,7 @@ export function LandingPremium() {
               <h2 id="finalTitle">
                 Le prochain bon prix <span>commence ici.</span>
               </h2>
-              <p>Inscris-toi, prépare ta première demande et consulte tes négoces. Le collectif est là quand une commande s’y prête.</p>
+              <p>Inscris-toi, prépare ton premier quantitatif et consulte tes négoces. Le collectif est là quand une commande s’y prête.</p>
               <Link id="finalPrimaryCTA" className="btn btn-yellow" href="/inscription">
                 {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
               </Link>
@@ -357,6 +452,12 @@ export function LandingPremium() {
                   </p>
                 </details>
               ))}
+              <SiMissions>
+                <details>
+                  <summary>{QUESTION_MISSIONS.q}</summary>
+                  <p>{QUESTION_MISSIONS.r}</p>
+                </details>
+              </SiMissions>
             </div>
           </div>
         </section>

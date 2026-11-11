@@ -444,6 +444,36 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mz2-benefices h3{font-size:18px;font-weight:850;letter-spacing:-.02em;margin:0 0 4px}
 .mz2-benefices p{font-size:14px;line-height:1.45;color:#5E574D;margin:0}
 
+/* Les missions entre entreprises (11 novembre 2026) : une bande claire, sœur de celle du collectif, plus calme. */
+.mz2-missions{margin-top:22px;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.5fr);gap:26px;align-items:center;background:#fff;border:1px solid #E6DDCF;border-radius:30px;padding:28px 34px;color:#17130E;box-shadow:0 18px 44px rgba(37,22,7,.07)}
+.mz2-missions-ico{flex-shrink:0;display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:#17130E;color:var(--yellow)}
+.mz2-missions-ico svg{width:34px;height:34px}
+.mz2-missions h2{font-size:clamp(22px,2.2vw,28px);line-height:1.12;letter-spacing:-.035em;font-weight:900;margin:0}
+.mz2-missions-texte p{font-size:15px;line-height:1.5;color:#5E574D;margin:10px 0 0;max-width:340px}
+.mz2-pastille-claire{background:#17130E;color:var(--yellow)}
+.mz2-missions-points{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.mz2-missions-points li{padding:4px 18px;display:flex;flex-direction:column;gap:5px}
+.mz2-missions-points li+li{border-left:1px solid #E6DDCF}
+.mz2-missions-points strong{font-size:15px;font-weight:850;letter-spacing:-.015em}
+.mz2-missions-points span{font-size:13.5px;line-height:1.45;color:#5E574D}
+
+/* Ce que ça coûte : trois formules, la gratuite en premier. */
+.mz2-tarifs{background:#0C0A08;padding:96px 0 30px}
+.mz2-tarifs h2{font-size:clamp(32px,4.2vw,54px);line-height:1.04;letter-spacing:-.05em;font-weight:900;margin:18px 0 0;max-width:900px}
+.mz2-tarifs h2 span{color:var(--yellow)}
+.mz2-tarifs-chapo{color:#D9D0C2;font-size:17px;line-height:1.55;margin:18px 0 0;max-width:640px}
+.mz2-formules{list-style:none;margin:38px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.mz2-formule{position:relative;background:#17130E;border:1px solid rgba(255,255,255,.12);border-radius:26px;padding:28px 26px 26px}
+.mz2-formule-une{border-color:var(--yellow);box-shadow:0 22px 60px rgba(254,210,6,.1)}
+.mz2-formule-pastille{position:absolute;top:-13px;left:24px;background:var(--yellow);color:#15120E;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+.mz2-formule h3{font-size:22px;font-weight:900;letter-spacing:-.03em;margin:0}
+.mz2-formule-prix{font-size:16px;font-weight:750;color:var(--yellow);margin:6px 0 0}
+.mz2-formule ul{list-style:none;margin:18px 0 0;padding:18px 0 0;border-top:1px solid rgba(255,255,255,.12);display:grid;gap:11px}
+.mz2-formule ul li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.4;color:#EDE6DA}
+.mz2-formule ul svg{flex-shrink:0;width:17px;height:17px;margin-top:2px;color:var(--yellow)}
+.mz2-tarifs-suite{margin:22px 0 0;font-size:14px;color:var(--muted)}
+.mz2-tarifs-suite a{color:var(--ivory);font-weight:750;text-decoration:underline;text-underline-offset:4px}
+
 @media(max-width:900px){
 .mz2-hero{padding:26px 0 96px}
 .mz2-hero-grid{grid-template-columns:1fr;gap:26px}
@@ -476,6 +506,16 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mz2-palier-fleche{right:-11px;bottom:9px;font-size:14px}
 .mz2-collectif:after{width:170px;height:80px;right:-50px;bottom:-50px}
 .mz2-benefices{grid-template-columns:1fr;gap:14px}
+.mz2-missions{grid-template-columns:auto minmax(0,1fr);gap:16px;padding:22px 18px;border-radius:24px;align-items:start}
+.mz2-missions-ico{width:48px;height:48px;border-radius:15px}.mz2-missions-ico svg{width:26px;height:26px}
+.mz2-missions-texte p{font-size:14.5px;max-width:none}
+.mz2-missions-points{grid-column:1/-1;grid-template-columns:1fr;gap:12px;padding-top:14px;border-top:1px solid #E6DDCF}
+.mz2-missions-points li{padding:0}.mz2-missions-points li+li{border-left:0}
+.mz2-tarifs{padding:64px 0 14px}
+.mz2-tarifs h2{letter-spacing:-.035em;word-spacing:.08em;line-height:1.1}
+.mz2-tarifs-chapo{font-size:15.5px}
+.mz2-formules{grid-template-columns:1fr;gap:22px;margin-top:32px}
+.mz2-formule{padding:26px 20px 22px;border-radius:22px}
 .mz2-benefices li{padding:0}
 .mz2-benefices li+li{border-left:0}
 .mz2-benefices-wrap{padding:8px 0 44px;border-radius:0 0 30px 30px}

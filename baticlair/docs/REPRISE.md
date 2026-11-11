@@ -116,6 +116,12 @@ anciens prix 49 € et 348 € encore actifs dans Stripe test, et le champ « Pr
 que le quota d'e-mails est revenu : la recette en ligne des trois appareils (`achats-groupes-v1.mjs`), une douzaine
 d'e-mails par passe.
 
+SUIVI 193 (11 novembre 2026, fin de journée) : TOUR DE L'APPLICATION ET PAGE PUBLIQUE. Guide du premier lancement réécrit
+(un écran par activité, `guide-premier-lancement.tsx`). Page publique (`landing-premium.tsx`, `premium.css`,
+`landing-missions.tsx`) : accroche du parcours entier, bande « Missions entre entreprises » (seulement missions ouvertes),
+« Tout au même endroit », section « Gratuit pour commencer » sans montant, deux questions de plus. À DIRE par Greg :
+veut-il les prix sur la page publique ?
+
 ## À faire ensuite (dans cet ordre)
 
 2. FAIT (garder pour mémoire) : SUIVI 137, « Évolution de la landing, de l'expérience et du positionnement » (message de Greg du 30 octobre, soir) :

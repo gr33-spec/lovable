@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, FileUp, Truck, Users } from "lucide-react";
+import { CalendarClock, ClipboardList, Send, Users } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -23,12 +23,23 @@ const dejaVuIci = (userId: string) => {
   }
 };
 
-// Recentrage (Greg, 25 octobre 2026) : les trois étapes de la landing ; le groupe vient en plus.
-const ETAPES = [
-  { titre: "Dépose ton devis", texte: "Le PDF de ton devis client, tel quel : je remets chaque ligne au propre.", Icone: FileUp },
-  { titre: `${NOM_APP} prépare ton quantitatif`, texte: "Une ligne par fourniture, prête à commander. Tu corriges d'un tap si besoin.", Icone: Users },
-  { titre: "Envoie à tes négoces et compare", texte: "Leurs prix livraison comprise, côte à côte. Pour les gros matériaux, tente aussi un prix de groupe. Sans engagement.", Icone: Truck },
-] as const;
+/**
+ * Les trois écrans (Greg, 11 novembre 2026 : « la rendre plus intuitive », après le tour de l'application) : ils disaient
+ * encore « Dépose ton devis » (25 octobre), alors que l'application tient en trois activités. Un écran par activité, dans
+ * l'ordre du menu : le quantitatif, les négoces, puis acheter à plusieurs (et les missions quand elles sont ouvertes).
+ */
+const etapesDuGuide = (missions: boolean) =>
+  [
+    { titre: "Prépare ton quantitatif", texte: `Dis ton besoin à ${NOM_APP}, importe un devis, prends une photo ou saisis ta liste. Tu vérifies : c'est toujours toi qui valides.`, Icone: ClipboardList },
+    { titre: "Envoie-le à tes négoces", texte: "Une seule demande, jusqu'à 5 négoces. Leurs réponses arrivent dans « Messages et réponses », rangées avec ta demande : tu compares et tu choisis.", Icone: Send },
+    {
+      titre: "Achète à plusieurs",
+      texte: missions
+        ? "Les achats groupés de ton secteur sont gratuits et sans engagement. Et dans « Missions », publie une mission ou propose tes services à d'autres entreprises."
+        : "Les achats groupés de ton secteur sont gratuits et sans engagement : tu décides à la réception de l'offre.",
+      Icone: Users,
+    },
+  ] as const;
 
 /** « jeudi 31 octobre à 18 h », heure de Paris. */
 export function dateDeCloture(iso: string): string {
@@ -85,10 +96,11 @@ export function GuidePremierLancement() {
   }, [userId]);
 
   if (!ouvert) return null;
-  return <Fenetre etape={etape} setEtape={setEtape} fermer={fermer} cloture={prochaine?.clotureLe ?? null} />;
+  return <Fenetre etape={etape} setEtape={setEtape} fermer={fermer} cloture={prochaine?.clotureLe ?? null} missions={features.missions === true} />;
 }
 
-function Fenetre({ etape, setEtape, fermer, cloture }: { etape: number; setEtape: (n: number) => void; fermer: () => void; cloture: string | null }) {
+function Fenetre({ etape, setEtape, fermer, cloture, missions }: { etape: number; setEtape: (n: number) => void; fermer: () => void; cloture: string | null; missions: boolean }) {
+  const ETAPES = etapesDuGuide(missions);
   const cadre = useRef<HTMLDivElement>(null);
   useEffect(() => {
     // Une vraie fenêtre : la page derrière est figée et inerte.
@@ -152,7 +164,7 @@ function Fenetre({ etape, setEtape, fermer, cloture }: { etape: number; setEtape
           </ol>
           {derniere ? (
             <Link href="/chantiers/nouveau" onClick={fermer} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-[16px] font-semibold text-on-accent active:bg-accent-hover">
-              Déposer mon premier devis
+              Créer mon premier quantitatif
             </Link>
           ) : (
             <button type="button" onClick={() => setEtape(etape + 1)} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-6 text-[16px] font-semibold text-on-accent active:bg-accent-hover">

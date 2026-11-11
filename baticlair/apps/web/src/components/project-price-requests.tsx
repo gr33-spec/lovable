@@ -548,7 +548,7 @@ function SupplierPicker({
 
   return (
     <div className="flex flex-col gap-2">
-      <p className={`text-[14px] ${dark ? "text-[#99844C]" : "text-muted"}`} role="note">
+      <p className={`text-[14px] ${dark ? "text-[#99844C]" : "text-muted"}`}>
         {max <= 0 ? `Cette demande a déjà ${NEGOCES_PAR_DEMANDE} négoces.` : `Jusqu'à ${NEGOCES_PAR_DEMANDE} négoces par demande.`}
         {max > 0 && plein && choices.length > selected.size ? " Décoche un négoce pour en choisir un autre." : ""}
       </p>

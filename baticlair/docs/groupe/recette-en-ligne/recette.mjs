@@ -245,18 +245,18 @@ await etape("Inscription artisan", page, async () => {
   await voir(page.getByRole("dialog", { name: "Guide" }), 30000);
   return `${EMAIL} ; adresse ${adresse}`;
 });
-await etape("Guide : trois écrans, « Déposer mon premier devis »", page, async () => {
+await etape("Guide : trois écrans, « Créer mon premier quantitatif »", page, async () => {
   const guide = page.getByRole("dialog", { name: "Guide" });
-  await voir(guide.getByRole("heading", { name: "Dépose ton devis" }));
+  await voir(guide.getByRole("heading", { name: "Prépare ton quantitatif" }));
   // Mode humain (26 octobre 2026) : plus de « Prochaine clôture » dans le guide.
   verif(!(await guide.getByText(/^Prochaine clôture :/).count()), "« Prochaine clôture » dans le guide (ancien mode)");
   const cloture = "sans clôture (mode humain)";
   await zeroReste(page, "guide 1");
   await guide.getByRole("button", { name: "Suivant" }).click();
-  await voir(guide.getByRole("heading", { name: /prépare ton quantitatif$/ }));
+  await voir(guide.getByRole("heading", { name: "Envoie-le à tes négoces" }));
   await guide.getByRole("button", { name: "Suivant" }).click();
-  await voir(guide.getByRole("heading", { name: "Envoie à tes négoces et compare" }));
-  await guide.getByRole("link", { name: "Déposer mon premier devis" }).click();
+  await voir(guide.getByRole("heading", { name: "Achète à plusieurs" }));
+  await guide.getByRole("link", { name: "Créer mon premier quantitatif" }).click();
   await page.waitForURL(/\/chantiers\/nouveau/);
   return cloture.replace(/\s+/g, " ");
 });

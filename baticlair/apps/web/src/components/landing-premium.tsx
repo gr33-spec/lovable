@@ -21,7 +21,7 @@ function Fleche() {
 const ANCRES = [
   { href: "#fonctionnement", label: "Comment ça marche" },
   { href: "#collectif", label: "Achats groupés" },
-  { href: "/tarifs", label: "Tarifs" },
+  { href: "#tarifs", label: "Tarifs" },
   { href: "#questions", label: "Questions" },
 ] as const;
 

@@ -374,3 +374,25 @@ test("compte : le menu, « Profil et paramètres », notifications par catégori
   await expect(page.getByRole("button", { name: "Essayer avec un chantier fictif" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Revoir le guide" })).toBeVisible();
 });
+
+test("page publique, missions ouvertes : la bande « Missions entre entreprises », sa question, le guide qui les nomme ; rien ne déborde", async ({ page }, info) => {
+  await page.goto("/decouvrir");
+  const bande = page.getByRole("region", { name: /^Missions entre entreprises/ });
+  await expect(bande).toBeVisible();
+  for (const t of ["Tu cherches du renfort", "Tu as du temps", "Vous vous arrangez entre vous"]) await expect(bande.getByText(t, { exact: true })).toBeVisible();
+  await expect(bande.getByText("Mobiiz met en relation. Les coordonnées ne se partagent que d’un commun accord.")).toBeVisible();
+  // Les trois activités dans l'ordre : comparer ses négoces, acheter en collectif, les missions ; puis ce que ça coûte.
+  const ordre = await Promise.all(["Comment ça marche ?", /^Achète en collectif/, /^Missions entre entreprises/, /^Gratuit pour commencer/].map(async (t) => (await page.getByRole("heading", { name: t }).boundingBox())!.y));
+  expect([...ordre].sort((x, y) => x - y)).toEqual(ordre);
+  await expect(page.getByRole("region", { name: "Tu te poses des questions ?" }).locator("summary", { hasText: "Les missions entre entreprises, c’est quoi ?" })).toHaveCount(1);
+  // Aucun montant d'abonnement sur la page publique ; jamais « IA ».
+  await expect(page.getByText(/€ HT (par|\/) (mois|an)/)).toHaveCount(0);
+  expect(await page.locator("main").innerText()).not.toMatch(/\b(IA|automatiques?|automatisée?s?|précise?s?|exacte?s?)\b/i);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await bande.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `${CAPTURES}/${info.project.name}/landing-missions.png` });
+  await page.getByRole("heading", { name: /^Gratuit pour commencer/ }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `${CAPTURES}/${info.project.name}/landing-formules.png` });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: `${CAPTURES}/${info.project.name}/landing-entier.png`, fullPage: true });
+});
