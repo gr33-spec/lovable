@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import { confirmerEmail } from "./confirmer-email";
+import { departementReserve } from "./departement";
 
 /**
  * L'ACCUEIL ET « MES LISTES » (Greg, 1er novembre 2026, maquette « Bonjour Greg ») : 1) « À faire maintenant » (une action,
@@ -172,7 +173,9 @@ test("À faire : une demande envoyée sans réponse n'y est pas ; la réponse re
 
 test("Groupes : un achat groupé actif se suit dans « Mes groupes » (« Inscriptions ouvertes ») ; jamais « Seul jusqu'au… »", async ({ page }) => {
   await inscrire(page);
-  const dep = String(1 + Math.floor(Math.random() * 19)).padStart(2, "0");
+  // Tiré parmi 19 départements communs à tous, l'ordinateur tombait parfois sur celui du téléphone (même base), rejoignait
+  // son achat et lisait « Avec d'autres artisans du secteur » (11 novembre 2026).
+  const dep = departementReserve([13, 15], [16, 19]);
   expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: `Toitures ${unique()}`, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: "73282932000074", phone: null, email: null })).status).toBe(200);
   expect((await apiJson(page, "POST", "/v1/groupe/siret")).status).toBe(200);
   const cat = (await apiJson<{ articles?: { cle: string; libelle: string; unite: string }[] }>(page, "GET", "/v1/achats-groupes/catalogue")).body;

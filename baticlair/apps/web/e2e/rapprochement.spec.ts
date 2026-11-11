@@ -1,5 +1,6 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { confirmerEmail } from "./confirmer-email";
+import { departementReserve } from "./departement";
 
 /**
  * LE RAPPROCHEMENT CONTINU, À L'ÉCRAN (Greg, 6 novembre 2026, points 7 à 11) : sur une liste validée, « Rechercher des
@@ -75,7 +76,7 @@ async function autreArtisan(browser: Browser, baseURL: string | undefined, preno
 test("Rapprochement : la ligne cherche jusqu'à une date, la demande reste libre ; un besoin compatible arrive dans « Mes rapprochements » sans nom ni quantité ; « Pas intéressé »", async ({ page, browser }, info) => {
   test.setTimeout(180_000);
   // Un département à part (les autres parcours e2e partagent la base) ; tous les départements sont actifs en e2e.
-  const dep = String(40 + Math.floor(Math.random() * 40)).padStart(2, "0");
+  const dep = departementReserve([50, 54], [55, 59]);
   const entrepriseA = `Toitures A ${unique()}`;
   const entrepriseB = `Couvreurs B ${unique()}`;
   await inscrire(page, "Jean", entrepriseA);
@@ -157,7 +158,7 @@ test("Groupes › Découvrir : les filtres (produit, famille, secteur, clôture)
 
 test("Lot 3 : une collecte ouverte qui correspond se rejoint depuis la carte (négoce, engagement) ; la recherche garde retrait et date de besoin", async ({ page, browser }, info) => {
   test.setTimeout(180_000);
-  const dep = String(40 + Math.floor(Math.random() * 40)).padStart(2, "0");
+  const dep = departementReserve([60, 64], [65, 69]);
   const siret = async (p: Page) => {
     expect((await apiJson(p, "PATCH", "/v1/company/profile", { name: `Toitures ${unique()}`, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: "73282932000074", phone: null, email: null })).status).toBe(200);
     expect((await apiJson(p, "POST", "/v1/groupe/siret")).status).toBe(200);
@@ -214,7 +215,7 @@ test("Lot 3 : une collecte ouverte qui correspond se rejoint depuis la carte (n�
 
 test("Lot 5 : Découvrir par secteur, région, retrait au dépôt et sur la carte ; la recherche de besoins compatibles prend un rayon", async ({ page, browser }, info) => {
   test.setTimeout(180_000);
-  const dep = String(40 + Math.floor(Math.random() * 40)).padStart(2, "0");
+  const dep = departementReserve([70, 74], [75, 79]);
   const siret = async (p: Page) => {
     expect((await apiJson(p, "PATCH", "/v1/company/profile", { name: `Toitures ${unique()}`, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: "73282932000074", phone: null, email: null })).status).toBe(200);
     expect((await apiJson(p, "POST", "/v1/groupe/siret")).status).toBe(200);

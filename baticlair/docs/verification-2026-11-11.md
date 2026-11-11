@@ -42,6 +42,19 @@ Seul test ignoré de la suite API : `charge.test.ts` (200 artisans, 50 lots, 1 0
 (variable d'environnement), dure plusieurs minutes et mesure des temps de réponse. Il ne couvre aucune règle : sa
 désactivation ne masque pas un défaut de fonctionnement, seulement l'absence d'une mesure de charge récente.
 
+### Hasard dans les parcours de navigateur
+
+Première passe complète sur la version candidate `abfc77e9` : 264 réussis, 1 échec, 29 ignorés. L'échec n'était pas un
+défaut du produit : sept tests tiraient chacun un département au hasard dans les mêmes plages ; la passe « ordinateur » est
+tombée sur le département de la passe « téléphone » (même base), a rejoint son achat groupé et a lu « Avec d'autres
+artisans du secteur » au lieu de « Inscriptions ouvertes ». Correction, dans les tests seulement :
+`apps/web/e2e/departement.ts` donne à chaque test et à chaque appareil sa propre plage de départements.
+
+Tests de parcours ignorés (29) : 16 parcours de l'ancien regroupement par lot, joués dans leur passe à part
+(`E2E_COMMANDE_COMMUNE=lots --grep @lots`, rejouée ici) ; les autres ne valent que pour un appareil (clavier du
+téléphone, barre du bas, menu de gauche de l'ordinateur, largeurs d'écran) et tournent sur l'autre passe, plus une prise
+de captures qui ne vérifie rien.
+
 ## 3. Branches Neon (projet `royal-mountain-39478482`, plafond : 10 branches, atteint)
 
 | Nom exact | Créée le | Copie de | Environnement | Utilité connue | Données uniques | Si on la supprime |

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import { confirmerEmail } from "./confirmer-email";
+import { departementReserve } from "./departement";
 
 /**
  * LE CYCLE DE VIE, À L'ÉCRAN (Greg, 6 novembre 2026, §19) — en-tête repris de `rapprochement.spec.ts` :
@@ -71,7 +72,7 @@ async function listeValidee(page: Page, dep: string, designation: string, quanti
 
 test("Cycle de vie : retenir un négoce pour une ligne tenue par un achat groupé demande le geste explicite ; « Garder l'achat groupé » ne change rien", async ({ page }, info) => {
   test.setTimeout(180_000);
-  const dep = String(40 + Math.floor(Math.random() * 40)).padStart(2, "0");
+  const dep = departementReserve([40, 44], [45, 49]);
   await inscrire(page, "Jean", `Toitures ${unique()}`);
   expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: `Toitures ${unique()}`, address: `3 rue de la Gare, ${dep}100 Ville-${dep}`, siret: "73282932000074", phone: null, email: null })).status).toBe(200);
   expect((await apiJson(page, "POST", "/v1/groupe/siret")).status).toBe(200);

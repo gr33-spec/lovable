@@ -4,6 +4,7 @@ import path from "node:path";
 import { confirmerEmail } from "./confirmer-email";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
+import { departementReserve } from "./departement";
 
 test.beforeEach(async ({ page }) => {
   await confirmerAnalyseDoffice(page);
@@ -20,7 +21,6 @@ test.beforeEach(async ({ page }) => {
 
 const SECRET = "Bearer e2e-secret-de-la-tache";
 const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-const departement = () => String(1 + Math.floor(Math.random() * 19)).padStart(2, "0");
 
 test.beforeEach(async ({ page, request }) => {
   await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
@@ -181,7 +181,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
 
   test("les six cas : compte vide, liste depuis un devis et suggestion, 2e couvreur engagé, validation admin, publication et coordonnées, sortie", async ({ page, browser }, info) => {
     const projet = info.project.name;
-    const dep = departement();
+    const dep = departementReserve([1, 2], [3, 4]);
     const negoceX = { nom: `Négoce X ${unique()}`, email: `x-${unique()}@negoce.example`, tel: "02 96 00 00 01" };
     const negoceY = { nom: `Négoce Y ${unique()}`, email: `y-${unique()}@negoce.example`, tel: "02 96 00 00 02" };
 
@@ -440,7 +440,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
   }
 
   test("achat groupé : à chaque étape, puis le SIRET sur place, puis l'engagement", async ({ page }) => {
-    const dep = departement();
+    const dep = departementReserve([5, 6], [7, 8]);
     await inscrireSansSiret(page, dep);
     await page.goto("/achats-groupes/lancer");
     // Point 3 du 30 octobre : le catalogue en listes, famille › produit › format.
@@ -487,7 +487,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
   });
 
   test("liste écrite à la main : fermée, reprise telle quelle", async ({ page }) => {
-    await inscrireSansSiret(page, departement());
+    await inscrireSansSiret(page, departementReserve([9, 10], [11, 12]));
     await page.goto("/chantiers/nouveau");
     await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
     const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
