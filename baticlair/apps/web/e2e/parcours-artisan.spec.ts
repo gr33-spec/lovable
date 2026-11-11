@@ -2679,10 +2679,28 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
   // RÈGLE CHANGÉE (Greg, 11 novembre 2026) : un écran par grand usage, jamais deux pour le même parcours. Missions
   // coupées ici : deux écrans, les deux services d'achat ; aucun mot des missions ; « Accéder à Mobiiz » mène à l'accueil.
   await expect(guide.getByText("1 sur 2")).toBeVisible();
+  // Sur ordinateur (Greg, 11 novembre 2026), la fenêtre fait de 560 à 620 px de large ; sur téléphone, elle reste compacte.
+  const largeurGuide = (await guide.locator("section").boundingBox())!.width;
+  if (page.viewportSize()!.width >= 1024) {
+    expect(largeurGuide).toBeGreaterThanOrEqual(560);
+    expect(largeurGuide).toBeLessThanOrEqual(620);
+  } else expect(largeurGuide).toBeLessThanOrEqual(page.viewportSize()!.width);
+  const photoGuide = async (n: number) => {
+    if (!process.env.GUIDE_CAPTURES) return;
+    const nom = test.info().project.name, taille = page.viewportSize()!;
+    await page.screenshot({ path: `${process.env.GUIDE_CAPTURES}/${nom}/guide-sans-missions-${n}.png` });
+    if (taille.width < 900) {
+      await page.setViewportSize({ width: 320, height: 568 });
+      await page.screenshot({ path: `${process.env.GUIDE_CAPTURES}/petit-telephone/guide-sans-missions-${n}.png` });
+      await page.setViewportSize(taille);
+    }
+  };
+  await photoGuide(1);
   await expect(guide.getByText(/consulte jusqu'à 5 négoces et retrouve leurs réponses dans Mobiiz/)).toBeVisible();
   await guide.getByRole("button", { name: "Suivant" }).click();
   await expect(guide.getByRole("heading", { name: "Achète en collectif" })).toBeVisible();
   await expect(guide.getByText("2 sur 2")).toBeVisible();
+  await photoGuide(2);
   await expect(guide.getByText(/mission/i)).toHaveCount(0);
   await expect(guide.getByRole("button", { name: "Suivant" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
@@ -2725,8 +2743,29 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Le visuel du premier écran (Greg, 31 octobre 2026, soir) : la photo choisie, chargée, coins arrondis ; le cadrage serré
   // sur téléphone, le panoramique sur ordinateur.
   const visuel = page.locator(".mz2-hero-visuel img");
-  await expect(visuel).toHaveAttribute("alt", /matériaux/);
-  await expect.poll(() => visuel.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0 && e.currentSrc)).toMatch(page.viewportSize()!.width <= 900 ? /hero-materiaux-mobile-\d+\.webp$/ : /hero-materiaux-\d+\.webp$/);
+  // (Greg, 11 novembre 2026) : sa photo de référence, avec un vrai écran Quantitatif et un vrai PDF de demande de prix ;
+  // deux cadrages de la même composition, carrés tous les deux : le navigateur ne recadre rien.
+  await expect(visuel).toHaveAttribute("alt", /quantitatif Mobiiz.*demande de prix/);
+  await expect.poll(() => visuel.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0 && e.currentSrc)).toMatch(page.viewportSize()!.width <= 900 ? /hero-quantitatif-mobile-\d+\.webp$/ : /hero-quantitatif-\d+\.webp$/);
+  const cadre = await visuel.evaluate((e: HTMLImageElement) => ({ l: e.getBoundingClientRect().width, h: e.getBoundingClientRect().height, nl: e.naturalWidth, nh: e.naturalHeight, fit: getComputedStyle(e).objectFit }));
+  expect(Math.abs(cadre.l / cadre.h - cadre.nl / cadre.nh), "le visuel garde les proportions de son fichier").toBeLessThan(0.01);
+  // Le halo et le reflet flou restent dans la colonne du visuel : rien de photographique derrière le titre.
+  const titreHero = (await page.locator("#heroTitle").boundingBox())!;
+  const reflet = (await page.locator(".mz2-hero-reflet").boundingBox())!;
+  if (page.viewportSize()!.width > 900) expect(reflet.x, "le reflet commence après le titre").toBeGreaterThanOrEqual(titreHero.x + titreHero.width - 1);
+  else expect(reflet.y, "le reflet commence sous le texte").toBeGreaterThanOrEqual(titreHero.y + titreHero.height);
+  expect(Number.parseFloat(await page.locator(".mz2-hero-reflet").evaluate((e) => getComputedStyle(e).opacity))).toBeLessThanOrEqual(0.1);
+  // « Pourquoi Mobiiz ? » : le décor (charpente et casques) est en bas, jamais derrière un paragraphe ni le titre.
+  const decor = await page.locator("#pourquoi").evaluate((e) => {
+    const r = e.getBoundingClientRect(), c = getComputedStyle(e, "::after");
+    const l = Number.parseFloat(c.width), h = Number.parseFloat(c.height), droite = Number.parseFloat(c.right);
+    return { gauche: r.right - droite - l, haut: r.bottom - h, image: c.backgroundImage };
+  });
+  expect(decor.image).toContain("collectif-bas.svg");
+  for (const bloc of await page.locator("#pourquoi h2, #pourquoi p").all()) {
+    const b = await bloc.evaluate((e) => { const r = e.getBoundingClientRect(); return { droite: r.right, bas: r.bottom }; });
+    expect(b.bas <= decor.haut + 1 || b.droite <= decor.gauche + 1, "aucun texte devant le décor").toBe(true);
+  }
   expect(Number.parseFloat(await visuel.evaluate((e) => getComputedStyle(e).borderTopLeftRadius))).toBeGreaterThan(10);
   for (const etape of ["Prépare ta liste", "Consulte tes négoces", "Compare et choisis"]) await expect(page.getByRole("heading", { name: etape, exact: true })).toBeVisible();
   await expect(page.locator("#fonctionnement .mz2-etape")).toHaveCount(3);

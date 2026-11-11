@@ -123,7 +123,7 @@ function Fenetre({ etape, setEtape, fermer, cloture, missions }: { etape: number
   const derniere = etape === ETAPES.length - 1;
   return createPortal(
     <div ref={cadre} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Guide" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full justify-center overflow-y-auto overscroll-contain bg-ground px-4 py-4 outline-none sm:items-center sm:py-8">
-      <section aria-labelledby="guide-titre" className="flex min-h-[calc(100dvh-2rem)] w-full max-w-md flex-col gap-6 rounded-[20px] bg-surface p-5 text-ink shadow-card sm:min-h-0 sm:p-6">
+      <section aria-labelledby="guide-titre" className="flex min-h-[calc(100dvh-2rem)] w-full max-w-md flex-col gap-6 rounded-[20px] bg-surface p-5 text-ink shadow-card sm:min-h-0 sm:p-6 lg:min-h-[460px] lg:max-w-[600px] lg:gap-8 lg:rounded-[28px] lg:p-10">
         <div className="flex items-center justify-between gap-3">
           <span className="text-[13px] font-bold tracking-[0.04em] text-muted">
             {etape + 1} sur {ETAPES.length}
@@ -132,14 +132,14 @@ function Fenetre({ etape, setEtape, fermer, cloture, missions }: { etape: number
             Passer le guide
           </button>
         </div>
-        <span className="flex size-14 items-center justify-center rounded-[16px] bg-accent text-on-accent" aria-hidden="true">
+        <span className="flex size-14 items-center justify-center rounded-[16px] bg-accent text-on-accent lg:size-16 lg:rounded-[18px]" aria-hidden="true">
           <e.Icone size={28} />
         </span>
         <div className="flex flex-col gap-3">
-          <h2 id="guide-titre" className="text-[28px] leading-[1.08] font-extrabold tracking-[-0.03em]">
+          <h2 id="guide-titre" className="text-[28px] leading-[1.08] font-extrabold tracking-[-0.03em] lg:text-[38px]">
             {e.titre}
           </h2>
-          <p className="text-[16px] leading-relaxed text-muted">{e.texte}</p>
+          <p className="text-[16px] leading-relaxed text-muted lg:max-w-[46ch] lg:text-[18px]">{e.texte}</p>
         </div>
         {cloture ? (
           <p className="flex items-center gap-3 rounded-[16px] bg-ground px-4 py-3 text-[15px] font-semibold">
@@ -149,7 +149,7 @@ function Fenetre({ etape, setEtape, fermer, cloture, missions }: { etape: number
             </span>
           </p>
         ) : null}
-        <div className="mt-auto flex flex-col gap-4 pt-2">
+        <div className="mt-auto flex flex-col gap-4 pt-2 lg:gap-5">
           <ol aria-label="Étapes du guide" className="flex justify-center gap-1.5">
             {ETAPES.map((x, i) => (
               <li key={x.titre} aria-current={i === etape ? "step" : undefined} className={`size-2.5 rounded-full ${i === etape ? "bg-ink" : "bg-line"}`} />

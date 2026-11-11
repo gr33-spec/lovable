@@ -261,21 +261,23 @@ export function LandingPremium() {
                 {CTA_PRINCIPAL.sous} · <Link href="/tarifs">Voir les conditions</Link>
               </p>
             </div>
-            {/* Le visuel choisi par Greg (31 octobre 2026, soir, second choix) : les matériaux des métiers (parpaing, liteaux,
-                plaques, isolant, PVC, peinture) sur fond noir, lumière jaune, devant la bande jaune en diagonale de la
-                maquette. Panoramique sur ordinateur ; sur téléphone, un cadrage moins large où tous les matériaux restent.
-                WebP de 16 à 56 Ko, deux tailles chacun. */}
+            {/* Le visuel d'ouverture (Greg, 11 novembre 2026) : sa photo de référence (matériaux, téléphone, feuille), où l'écran du
+                téléphone est une vraie capture de l'écran Quantitatif et la feuille un vrai PDF de demande de prix produit par
+                Mobiiz, données d'exemple. Deux cadrages de la même composition : entier sur ordinateur, resserré sur téléphone
+                (le téléphone et le document ne sont jamais coupés). Derrière : un halo jaune et un reflet flou, très discrets. */}
             <div className="mz2-hero-visuel">
+              <span className="mz2-hero-halo" aria-hidden="true" />
+              <span className="mz2-hero-reflet" aria-hidden="true" />
               <span className="mz2-bande" aria-hidden="true" />
               <picture>
-                <source media="(max-width: 900px)" type="image/webp" srcSet="/landing/v3/hero-materiaux-mobile-640.webp 640w, /landing/v3/hero-materiaux-mobile-1000.webp 1000w" sizes="calc(100vw - 32px)" width={1000} height={498} />
+                <source media="(max-width: 900px)" type="image/webp" srcSet="/landing/v3/hero-quantitatif-mobile-700.webp 700w, /landing/v3/hero-quantitatif-mobile-1100.webp 1100w" sizes="calc(100vw - 32px)" width={1100} height={1100} />
                 <img
-                  src="/landing/v3/hero-materiaux-1600.webp"
-                  srcSet="/landing/v3/hero-materiaux-1000.webp 1000w, /landing/v3/hero-materiaux-1600.webp 1600w"
-                  sizes="(max-width: 1240px) 50vw, 600px"
-                  alt="Les matériaux du chantier : tuyau PVC, parpaing, plaques, liteaux, rouleau d'isolant, seau et rouleau de peinture"
-                  width={1600}
-                  height={689}
+                  src="/landing/v3/hero-quantitatif-1400.webp"
+                  srcSet="/landing/v3/hero-quantitatif-900.webp 900w, /landing/v3/hero-quantitatif-1400.webp 1400w"
+                  sizes="(max-width: 1240px) 44vw, 540px"
+                  alt="Sur un plan de travail, entre un chevron, un parpaing, de l'isolant et un mètre : un téléphone ouvert sur un quantitatif Mobiiz (ardoises, crochets, liteaux et leurs quantités) et, à côté, la demande de prix imprimée avec son tableau des fournitures à chiffrer"
+                  width={1400}
+                  height={1400}
                   fetchPriority="high"
                   decoding="async"
                 />

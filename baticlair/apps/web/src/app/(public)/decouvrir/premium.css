@@ -115,7 +115,10 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mzp .step-nudge{display:block;text-align:center;margin-top:29px;color:#665D52;font-size:13px}
 .mzp .step-nudge a{text-decoration:underline;text-underline-offset:3px;font-weight:800;color:#17130E}
 .mzp .bridge{position:relative;isolation:isolate;padding:125px 0;background:#17110C;overflow:hidden}
-.mzp .bridge:before{content:'';z-index:-1;position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,8,5,.83) 0%,rgba(11,8,5,.7) 55%,rgba(11,8,5,.46) 100%),url('/landing/v3/collectif.svg') center 48%/cover}
+/* Le décor (Greg, 11 novembre 2026) : la charpente jaune et les casques, atténués, à droite des paragraphes et en bas de la
+   section ; plus aucun trait ni casque derrière le texte. */
+.mzp .bridge:before{content:'';z-index:-1;position:absolute;inset:0;background:radial-gradient(60% 70% at 78% 100%,rgba(254,210,6,.07),transparent 70%),linear-gradient(180deg,#1B140D,#0C0A08)}
+.mzp .bridge:after{content:'';z-index:-1;position:absolute;right:max(20px,calc((100vw - 1240px)/2));bottom:0;width:min(540px,36vw);aspect-ratio:1080/380;background:url('/landing/v3/collectif-bas.svg') center bottom/contain no-repeat;pointer-events:none}
 .mzp .bridge-content{max-width:880px}
 .mzp .bridge h2{font-size:clamp(42px,6vw,86px);letter-spacing:-.075em;line-height:1.07;margin:19px 0 23px}
 .mzp .bridge p{font-size:19px;line-height:1.55;max-width:650px;color:#E6DED2;margin:0}
@@ -265,7 +268,8 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mzp .bridge{padding:91px 0}
 .mzp .bridge h2{font-size:clamp(45px,10.2vw,67px)}
 .mzp .bridge p{font-size:16px}
-.mzp .bridge:before{background:linear-gradient(90deg,rgba(11,8,5,.85),rgba(11,8,5,.68)),url('/landing/v3/collectif.svg') 57% center/cover}
+.mzp .bridge{padding-bottom:calc(64px + 35vw)}
+.mzp .bridge:after{right:0;left:0;width:100%}
 .mzp .collective-section{padding:80px 0}
 .mzp .collective-layout{grid-template-columns:1fr;gap:29px}
 .mzp .collective-copy h2{font-size:clamp(47px,10vw,61px);margin:19px 0}
@@ -370,7 +374,7 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 
 /* Le héros */
 .mz2-hero{padding:46px 0 120px;overflow-x:clip}
-.mz2-hero-grid{display:grid;grid-template-columns:1.18fr .82fr;gap:40px;align-items:center}
+.mz2-hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:40px;align-items:center}
 .mz2-kicker{display:block;color:var(--yellow);font-weight:850;letter-spacing:.06em;text-transform:uppercase;font-size:13px}
 .mz2-hero h1{font-size:clamp(40px,4.4vw,64px);line-height:1.02;letter-spacing:-.052em;color:#FBF8F3;margin:14px 0 18px;font-weight:900}
 .mz2-hero h1 span{color:var(--yellow);display:block}
@@ -378,6 +382,15 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mz2-lead{color:#E7DFD2;font-size:18px;line-height:1.55;max-width:520px;margin:0 0 26px}
 .mz2-hero-visuel{position:relative;padding:18px 0}
 .mz2-hero-visuel picture{position:relative;display:block}
+/* Profondeur (Greg, 11 novembre 2026) : un halo jaune chaud et un reflet très flou de la même image, à 9 % ; rien derrière le
+   titre (les deux restent dans la colonne du visuel). Aucune animation permanente ; au survol, sur ordinateur seulement, 4 px. */
+.mz2-hero-halo{position:absolute;inset:-9% -7%;border-radius:50%;background:radial-gradient(closest-side,rgba(254,210,6,.2),rgba(254,170,6,.08) 55%,transparent 100%);filter:blur(18px);pointer-events:none}
+.mz2-hero-reflet{position:absolute;inset:-7% -6%;background:url('/landing/v3/hero-quantitatif-flou.webp') center/cover;filter:blur(34px);opacity:.09;border-radius:40px;pointer-events:none;-webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent 100%);mask-image:radial-gradient(closest-side,#000 62%,transparent 100%)}
+.mz2-hero-visuel .mz2-bande{top:-3%;height:106%;width:30%}
+@media(hover:hover) and (min-width:901px) and (prefers-reduced-motion:no-preference){
+.mz2-hero-visuel picture{transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.mz2-hero-visuel:hover picture{transform:translateY(-4px)}
+}
 .mz2-bande{position:absolute;right:2%;top:-6%;width:34%;height:112%;background:var(--yellow);transform:skewX(-22deg);border-radius:18px;box-shadow:0 30px 80px rgba(254,210,6,.18)}
 .mz2-hero-visuel img{position:relative;display:block;width:100%;height:auto;border-radius:28px;border:1px solid rgba(255,255,255,.12);box-shadow:0 40px 85px rgba(0,0,0,.55)}
 
@@ -479,6 +492,7 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mz2-hero h1{font-size:clamp(34px,9.4vw,46px);margin:12px 0 14px}
 .mz2-lead{font-size:15.5px;margin-bottom:20px}
 .mz2-hero-visuel{padding:8px 0}
+.mz2-hero-halo{inset:-5% 0}.mz2-hero-reflet{inset:-4% 0}
 .mz2-hero-visuel img{border-radius:22px}
 .mz2-carte{border-radius:30px 30px 0 0;margin-top:-58px;padding:34px 0 18px}
 .mz2-etapes{gap:12px 8px;margin-top:22px}

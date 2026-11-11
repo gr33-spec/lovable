@@ -415,6 +415,8 @@ test("page publique, missions ouvertes : la section « Missions » à part enti�
   await section.scrollIntoViewIfNeeded();
   // Captures de section : l'en-tête collant et la barre du bas passeraient devant le bloc photographié.
   const sansBarres = await page.addStyleTag({ content: ".mzp .site-header{position:static!important}.mzp .sticky-cta{display:none!important}" });
+  await page.locator(".mz2-hero").screenshot({ path: `${CAPTURES}/${info.project.name}/landing-ouverture.png` });
+  await page.locator("#pourquoi").screenshot({ path: `${CAPTURES}/${info.project.name}/landing-pourquoi.png` });
   await page.locator("#missions").screenshot({ path: `${CAPTURES}/${info.project.name}/landing-section-missions.png` });
   await page.locator("#offres").screenshot({ path: `${CAPTURES}/${info.project.name}/landing-bloc-offres.png` });
   await page.evaluate(() => window.scrollTo(0, 0));

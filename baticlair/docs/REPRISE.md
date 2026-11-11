@@ -34,6 +34,9 @@ complètes seulement avant un déploiement important, et en le disant.
 
 ## En cours
 
+SUIVI 195 (11 novembre 2026) : nouvelle version candidate (image d'ouverture avec vrais écran et PDF Mobiiz, décor de
+« Pourquoi Mobiiz ? » en bas, guide élargi sur ordinateur), basée sur 5f346649. EN ATTENTE DE LA VALIDATION VISUELLE DE GREG.
+
 SUIVI 194 (11 novembre 2026) : nouvelle version de la page publique (section Missions à part, bloc compact « Commence
 gratuitement ») et du guide (un écran par grand usage). EN ATTENTE DE LA VALIDATION VISUELLE EXPLICITE DE GREG : ne rien
 pousser d'autre, aucune production, pas de reprise graphique des Quantitatifs ni des Achats groupés.
