@@ -329,8 +329,9 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
   // (Greg, 11 novembre 2026) Seule une ligne qui écrit la fourniture PRINCIPALE d'un ouvrage le nomme, avec ses seuls mots
   // écrits : « Liteau 18 × 40, 180 m », rangé dans le premier ouvrage du tiroir qui porte un liteau (la tuile), faisait dire
   // « couverture en tuiles à emboîtement » à une liste d'ardoises. Une fiche de calcul (sans tiroir) garde son ouvrage.
-  const ecrits = lignes.map((l) => l.designation).join(" \n ");
-  const nomme = (f: LectureFourniture) => (ref && ref.workItems.length > 0 ? ouvrageEcrit(ref, f.ouvrage!, f.emplacement ?? "", ecrits) : (ref?.workItems.find((w) => w.id === f.ouvrage)?.label ?? f.nom));
+  // Les mots se cherchent sur les lignes de cet ouvrage, jamais sur un autre article (« à emboîtement » d'une faîtière).
+  const ecritsDe = (ouvrage: string) => lignes.filter((l) => l.fournitures.some((x) => x.ouvrage === ouvrage)).map((l) => l.designation).join(" \n ");
+  const nomme = (f: LectureFourniture) => (ref && ref.workItems.length > 0 ? ouvrageEcrit(ref, f.ouvrage!, f.emplacement ?? "", ecritsDe(f.ouvrage!)) : (ref?.workItems.find((w) => w.id === f.ouvrage)?.label ?? f.nom));
   // Plusieurs ouvrages principaux écrits (ardoises ET tuiles) : la fiche n'en choisit aucun (jamais « le premier de la
   // liste ») ; le bref les nomme alors tous les deux, ou reste neutre.
   const candidats = ref && ref.workItems.length > 0 ? ouvragesCandidats(ref, lignes.flatMap((l) => l.fournitures.filter((f) => f.ouvrage).map((f) => ({ ouvrage: f.ouvrage!, emplacement: f.emplacement ?? "" })))) : null;

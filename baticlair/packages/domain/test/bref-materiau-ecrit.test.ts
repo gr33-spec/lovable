@@ -143,8 +143,27 @@ describe("le chantier en bref ne dit que ce qui est écrit", () => {
     }
   });
 
-  it("deux lignes du même ouvrage : le bref ne dépend pas de leur ordre", () => {
+  it("un mot écrit sur un AUTRE article ne qualifie pas l'ouvrage : « à emboîtement » d'une faîtière ne fait pas une tuile à emboîtement", () => {
+    // Le devis des parcours : une tuile romane canal, et une faîtière « à emboîtement » (un autre ouvrage).
+    const CANAL: Ligne = { designation: "Tuile romane canal rouge 12,5 u/m²", quantity: "1250", unit: "u", ouvrage: T, emplacement: "tuile" };
+    const FAITIERE: Ligne = { designation: "Faîtière ronde à emboîtement", quantity: "42", unit: "u", ouvrage: "faitage", emplacement: "faitiere" };
+    for (const lignes of [[CANAL, FAITIERE, LITEAU], [FAITIERE, LITEAU, CANAL]]) {
+      const r = bref(lignes);
+      expect(r.faits[0], lignes.map((l) => l.designation).join(" + ")).toBe("Couverture en tuiles");
+      expect(tout(r)).not.toMatch(/tuiles à embo[îi]tement/i);
+    }
+    // Écrit sur une ligne du même ouvrage (le liteau de la couverture en tuiles), le mot vaut.
+    expect(bref([TUILE, { ...LITEAU, designation: "Liteau pour tuiles à emboîtement" }]).faits[0]).toBe("Couverture en tuiles à emboîtement");
+  });
+
+  it("deux lignes du même ouvrage sans surface pour trancher : l'ouvrage est nommé, aucune des deux ne prête ses faits au chantier", () => {
     const ARDOISE_B: Ligne = { ...ARDOISE, designation: "Ardoise naturelle 40 × 24 Angers", quantity: "300" };
-    expect(tout(bref([ARDOISE, ARDOISE_B]))).toBe(tout(bref([ARDOISE_B, ARDOISE])));
+    const a = bref([ARDOISE, ARDOISE_B]);
+    expect(tout(a)).toBe(tout(bref([ARDOISE_B, ARDOISE])));
+    expect(a.faits).toEqual(["Couverture en ardoises"]);
+    expect(a.phrase).toBe("Je vous envoie la liste des fournitures pour un chantier de couverture en ardoises.");
+    // Une surface écrite désigne la ligne, dans les deux ordres.
+    const M2: Ligne = { designation: "Couverture en ardoises naturelles 32 × 22", quantity: "60", unit: "m²", ouvrage: A, emplacement: "ardoise" };
+    for (const lignes of [[M2, ARDOISE_B], [ARDOISE_B, M2]]) expect(bref(lignes).faits.slice(0, 2)).toEqual(["Couverture en ardoises", "60 m²"]);
   });
 });

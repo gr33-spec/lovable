@@ -161,16 +161,21 @@ export function siteBrief(input: {
   // Une surface ne tranche que si CHAQUE ouvrage en écrit une (40 m² de zinc ne l'emportent pas sur 1200 ardoises à la pièce).
   const mesures = candidats.every((w) => surface(w) > 0);
   const work = candidats.length === 1 ? candidats[0] : candidats.length > 1 && mesures && surface(parSurface[0]!) > surface(parSurface[1]!) ? parSurface[0] : undefined;
-  // La ligne qui porte les faits de l'ouvrage : sa plus grande surface, sinon sa désignation la première dans l'alphabet
-  // (jamais « la première saisie »).
-  const main = work
-    ? principales.filter((l) => ouvrageDe(l) === work).sort((a, b) => area(b.ref) - area(a.ref) || (input.lines.find((x) => x.id === a.ref)?.designation ?? "").localeCompare(input.lines.find((x) => x.id === b.ref)?.designation ?? "", "fr"))[0]
-    : undefined;
+  // La ligne qui porte les faits de l'ouvrage (sa quantité, son matériau) : sa seule ligne, sinon celle dont la surface
+  // écrite est strictement la plus grande. Plusieurs lignes sans surface pour trancher : aucune n'est « la » ligne, le
+  // bref nomme l'ouvrage sans prêter au chantier les faits de l'une d'elles (jamais « la première saisie », jamais un
+  // choix par l'alphabet).
+  const duMeme = work ? principales.filter((l) => ouvrageDe(l) === work).sort((a, b) => area(b.ref) - area(a.ref)) : [];
+  const main = duMeme.length === 1 || (duMeme.length > 1 && area(duMeme[0]!.ref) > area(duMeme[1]!.ref)) ? duMeme[0] : undefined;
   const metier = METIER_NAMES[tradeIdOf(ref.trade)] ?? ref.trade;
   const texts = norm([...input.lines.map((l) => l.designation), ...Object.values(input.context ?? {})].join(" \n "));
   // Le libellé de l'ouvrage, réduit aux mots que le document écrit (jamais « au crochet » sans crochet écrit).
+  // Les mots d'un libellé se cherchent sur les lignes DE CET OUVRAGE (et dans l'en-tête du devis), jamais sur un autre
+  // article : « à emboîtement », écrit sur la ligne d'une faîtière, ne dit rien d'une tuile romane canal.
+  const textesDe = (w: Referential["workItems"][number]) =>
+    norm([...planned.filter((l) => ouvrageDe(l) === w).map((l) => input.lines.find((x) => x.id === l.ref)?.designation ?? ""), ...Object.values(input.context ?? {})].join(" \n "));
   const nomDe = (w: Referential["workItems"][number]) => {
-    const ecrit = libelleEcrit(w.label, metier, texts);
+    const ecrit = libelleEcrit(w.label, metier, textesDe(w));
     return ecrit ? (norm(ecrit).startsWith(norm(metier).slice(0, 6)) ? ecrit.toLowerCase() : `${metier} (${ecrit.toLowerCase()})`) : null;
   };
   let label: string | null = work ? nomDe(work) : null;
