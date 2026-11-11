@@ -110,6 +110,8 @@ async function inscrire(page, email, entreprise, prenom) {
   await page.getByRole("button", { name: "Créer mon compte" }).click();
   await voir(page.getByRole("button", { name: "C'est compris" }), 60000);
   await page.getByRole("button", { name: "C'est compris" }).click();
+  const guide = page.getByRole("button", { name: "Passer le guide" });
+  if (await guide.waitFor({ state: "visible", timeout: 8000 }).then(() => true, () => false)) await guide.click();
   await voir(page.getByRole("heading", { name: new RegExp(`^Bonjour ${prenom}`) }));
   const p = await api(page, "PATCH", "/v1/company/profile", { name: entreprise, address: "3 rue des Ajoncs, 22300 Lannion", siret: "73282932000074", phone: null, email: null });
   verif(p.status === 200, `profil ${p.status}`);
@@ -170,7 +172,14 @@ const B = `delivered+rn-b-${ts}@resend.dev`;
 const ADMIN = "delivered+admin-recette@resend.dev";
 const N1 = `delivered+rn-n1-${ts}@resend.dev`;
 const N2 = `delivered+rn-n2-${ts}@resend.dev`;
-const nouveau = async () => (await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "fr-FR", timezoneId: "Europe/Paris" })).newPage();
+const nouveau = async () => {
+  const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "fr-FR", timezoneId: "Europe/Paris" })).newPage();
+  // Le guide du premier passage recouvre l'accueil : on le passe, comme dans les autres recettes.
+  await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
+    await page.getByRole("button", { name: "Passer le guide" }).click();
+  });
+  return page;
+};
 const a = await nouveau();
 const b = await nouveau();
 const adm = await nouveau();
@@ -292,7 +301,8 @@ await etape("6. Adresse que personne n'a : mis de côté pour l'admin, invisible
 
 if (process.env.GARDER !== "1")
   await etape("Nettoyage : comptes de test supprimés", a, async () => {
-    for (const p of [a, b, adm]) await supprimer(p).catch(() => {});
+    // Un compte resté (surtout celui de l'admin de test) bloque la passe suivante : on le dit au lieu de le taire.
+    for (const [p, qui] of [[a, "A"], [b, "B"], [adm, "admin"]]) await supprimer(p).catch((e) => console.log(`  · compte ${qui} non supprimé : ${String(e?.message ?? e).split("\n")[0].slice(0, 120)}`));
   });
 
 writeFileSync(path.join(OUT, "journal.json"), JSON.stringify({ quand: new Date().toISOString(), webhooks: webhooks.map((w) => w.endpoint), journal }, null, 2));

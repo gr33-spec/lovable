@@ -125,7 +125,7 @@ Complexité : S = moins d'une demi-journée, M = un à deux jours, L = plus de d
 | 27 Assistant, clarification | conversation de `nouveau-quantitatif.tsx` | bulles jaunes et claires, boutons de choix, encart « Pourquoi cette question ? » | questions, choix, réponse libre, dictée | reprise visuelle des bulles et de l'encart | faible | M |
 | 28 Assistant, liste prête | même écran | carte « Ta liste en cours » avec lot, « Ajouter un autre matériau », « Créer mon quantitatif » | la liste se construit et se valide | carte récapitulative dans la conversation | moyen : touche la validation | M |
 | 29 Fiche du quantitatif | `/chantiers/[id]`, `project-takeoff.tsx` | maquette : état, articles par lot, deux cartes d'action, « Modifier » ; ici une frise d'étapes, « Ouvrir l'assistant », « Ton chantier », les fournitures, une barre « Aperçu / Demander les prix », un bloc regroupement | tout le suivi et les deux actions | refonte de la fiche | ÉLEVÉ : écran le plus testé et régi par le référentiel (§48 à §50) | L |
-| 30 Choisir les négoces | feuille « À qui j'envoie ? », `project-price-requests.tsx` | page entière avec recherche et « jusqu'à 3 négoces » ; ici une feuille, limite de 1 ou 5 selon la formule | carnet, spécialités, envoi | page dédiée ; limite à trancher par Greg | moyen : droits des formules | M |
+| 30 Choisir les négoces | feuille « À qui j'envoie ? », `project-price-requests.tsx` | page entière avec recherche ; la maquette dit « jusqu'à 3 négoces », la règle retenue est 5 (1 en gratuit) ; ici une feuille | carnet, spécialités, envoi | page dédiée, à écrire avec « jusqu'à 5 négoces » (décision du 11 novembre) | moyen : droits des formules | M |
 | 31 Demande envoyée | `/chantiers/[id]`, onglet Suivi, `dossier-demande.tsx` | écran de confirmation dédié (coche, « Envoyée à », « Et maintenant ? ») ; ici on arrive sur le dossier de la demande | suivi, relance, écrire au négoce | écran de confirmation | faible | S |
 | 32 Comparer les propositions | onglet Offres, `project-offers.tsx` | cartes avec total, « Meilleur total », livraison, « 3/3 articles chiffrés » ; ici le devis reçu s'ouvre en PDF, la comparaison chiffrée n'existe que pour une réponse saisie par le lien | réponse par lien comparée article par article | cartes de totaux ; le total d'un PDF demande une lecture (IA payante ou saisie) | moyen ; dépend d'une décision sur la lecture des devis | L |
 | (hors maquette) | page « Page introuvable » | s'affiche sur fond clair même en thème sombre | fonctionne | suivre le thème | faible | S |
@@ -151,3 +151,53 @@ Complexité : S = moins d'une demi-journée, M = un à deux jours, L = plus de d
 
 Total estimé de la reprise graphique : environ huit à douze jours de travail, dont la fiche du quantitatif (29) et la
 comparaison (32) font la moitié. Ce chantier est séparé et n'a pas commencé.
+
+## 7. Suite du 11 novembre : sauvegarde Neon et recette réelle de réception (accord de Greg)
+
+### Sauvegarde
+
+Branche supprimée, la seule : `sauvegarde-avant-lots-prompt-maitre` (`br-noisy-frog-b2wy0xkl`), créée le 7 novembre 2026 à
+05 h 38 UTC depuis la base de test (`br-small-haze-b28xtqpf`), point de copie 05 h 38. Relevé juste avant : 92 tables,
+3 453 lignes, 1 058 colonnes, 232 index, 74 migrations, dernière `20261106090000_rapprochement_continu` ; 25 entreprises,
+25 utilisateurs, 18 chantiers, 10 demandes de prix, 18 destinataires, 9 négoces, 11 e-mails reçus, 19 documents.
+Supprimée le 11 novembre à 11 h 11 UTC ; les neuf autres branches sont restées (contrôle : zéro autre branche disparue).
+
+Nouvelle sauvegarde : `sauvegarde-test-2026-11-11-35d83f77` (`br-wild-violet-b2etltsm`), créée à 11 h 11 UTC depuis la
+base de test, alors que test.mobiiz.fr et api-test.mobiiz.fr servaient `35d83f77`. Comparée à la base de test, par son
+point d'accès en lecture seule : 112 tables des deux côtés, 5 428 lignes, 1 308 colonnes (empreinte identique), 284 index
+(identique), 1 065 contraintes (identique), 82 migrations (mêmes noms, mêmes sommes de contrôle), dernière
+`20261110200000_missions_messages_alertes`, aucune table dont le nombre de lignes diffère, les 13 tables des missions
+présentes. Elle est donc lisible et utilisable comme point de restauration. Aucun retour arrière n'a été fait.
+
+### Recette réelle de réception (`reception-negoce.mjs --envoyer`)
+
+Avant chaque passe : un seul webhook entrant chez Resend, vers `https://api-test.mobiiz.fr/v1/webhooks/resend`.
+Deux passes. La première a buté sur le script (il ne fermait pas le guide du premier passage : la deuxième entreprise
+n'était pas créée) ; le script a été corrigé, pas le produit. Deuxième passe :
+
+| Cas | Résultat |
+|---|---|
+| Vrai e-mail avec PDF à l'adresse de réponse du négoce 1 | reçu ; rattaché au bon quantitatif, au bon artisan, au négoce 1 |
+| Le PDF | gardé, ouvert en `application/pdf`, devenu le devis reçu du négoce 1 ; le négoce 2 n'a rien |
+| La cloche | une alerte courte au nom du négoce |
+| Une autre entreprise | 404 sur l'e-mail, 404 sur le fichier, liste vide |
+| Doublon (le même e-mail renvoyé) | deux e-mails gardés sur la même demande, un seul devis |
+| Repère dans l'objet, adresse sans étiquette | rattaché au négoce 2, sans devis |
+| E-mail sans repère | arrivé dans « Mes reçus », non rattaché |
+| Rattachement à la main | fait d'un geste, vers le négoce 2 |
+| Adresse que personne n'a | mis de côté pour l'admin (vérifié dans une suite du script, après reconnexion de l'admin de test) ; la liste de l'admin répond 403 à un artisan |
+| Production | aucun effet : aucun webhook vers elle, `main` (git et Neon) intacts |
+
+Aucun défaut du circuit réel n'est apparu. Trois remarques :
+- le cas « adresse inconnue » de la deuxième passe a échoué dans le script (le compte admin de test restait de la première
+  passe) ; il a été vérifié à part ; le contrôle « invisible pour A et B » n'a donc pas été rejoué en ligne sur ces deux
+  comptes (un e-mail mis de côté n'appartient à aucune entreprise ; le test `adresse-mobiiz.test.ts` le couvre) ;
+- dans la liste de l'admin, l'expéditeur s'affiche `recette@mobiiz.fr` sans le nom « Négoce Perdu » ;
+- restent en base de test : les deux e-mails mis de côté (un par passe).
+
+E-mails : 27 envoyés pour les deux passes et la suite (8 e-mails de test, 4 demandes aux boîtes de test, 5 confirmations
+de compte, 6 avis à l'artisan, 2 codes d'admin, 2 avis de connexion admin), 8 reçus ; aucun destinataire hors
+`resend.dev` et `mobiiz.fr`. L'estimation annoncée était d'une vingtaine pour une passe. Sur la journée du 11 novembre,
+99 e-mails sont partis au total (les neuf recettes en ligne comprises) : le plafond gratuit de 100 par jour est atteint,
+plus aucun envoi de recette ce jour-là. Coût : 0 €.
+

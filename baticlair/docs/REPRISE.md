@@ -88,7 +88,7 @@ EN LIGNE sur test.mobiiz.fr le 10 novembre : commit 81409636 (site dpl_FZUzof6me
 dpl_J2WwqxXo83Q9SVaD8mAWASDWBy16), recette en ligne 25/25 sur trois appareils, base conservée. Avant chaque poussée :
 `npx tsc -p tsconfig.vercel.json` dans `apps/api` (l'hébergeur compile en mode non strict ; un build en échec applique
 quand même la migration). Tests liés à l'heure : `relances-lot-final.test.ts` échoue s'il est lancé après 23 h UTC
-(échéance fabriquée à minuit) ; ce n'est pas un défaut du produit. En attente de Greg : validation, 3 ou 5 négoces,
+(échéance fabriquée à minuit) ; ce n'est pas un défaut du produit. En attente de Greg : validation,
 plafond de branches Neon, présentation des parcours Quantitatifs et Achats groupés.
 
 SUIVI 189 (11 novembre 2026) : VÉRIFICATION AVANT VALIDATION, voir `docs/verification-2026-11-11.md`. Greg ne valide ni
@@ -98,8 +98,14 @@ et le livrable de preuves, hors dépôt). Horloge des tests : `horlogeAu(...)` f
 avance tous les autres (`apps/api/test/support/horloge-decalee.ts`). EN ATTENTE DE L'ACCORD DE GREG : 1) supprimer une
 branche Neon (recommandée : `sauvegarde-avant-lots-prompt-maitre`), puis créer et vérifier
 `sauvegarde-avant-ux-complet-2026-11-11` ; 2) lancer `reception-negoce.mjs --envoyer` (une vingtaine d'e-mails, 0 €) ;
-3) la reprise graphique des Quantitatifs et des Achats groupés (chantier séparé, liste dans le document) ; 4) 3 ou 5
-négoces.
+3) la reprise graphique des Quantitatifs et des Achats groupés (chantier séparé, liste dans le document).
+
+SUIVI 190 (11 novembre 2026, après-midi) : FAIT, partie 7 du même document. Branche Neon
+`sauvegarde-avant-lots-prompt-maitre` supprimée (la seule) ; sauvegarde `sauvegarde-test-2026-11-11-35d83f77`
+(`br-wild-violet-b2etltsm`) créée et vérifiée. Recette réelle de réception passée (aucun défaut du circuit). Décision de
+Greg : jusqu'à 5 négoces par envoi en payant, 1 en gratuit. ATTENTION : chaque recette en ligne envoie une douzaine
+d'e-mails ; le plafond gratuit est de 100 par jour (99 partis le 11 novembre). Le plafond Neon de 10 branches est de
+nouveau atteint. Reste en attente de Greg : sa validation sur de vrais téléphones, puis la reprise graphique.
 
 ## À faire ensuite (dans cet ordre)
 
