@@ -11,9 +11,11 @@ describe("la couverture comprend la zinguerie", () => {
   it("la zinguerie n'est plus au sélecteur ; ses articles se lisent sous Couverture ; les clés ne changent pas", () => {
     expect(METIERS_DU_SELECTEUR).not.toContain("zinguerie");
     expect(METIERS_DU_SELECTEUR).toContain("couverture");
-    expect(metiersDuRayon("couverture")).toEqual(["couverture", "zinguerie"]);
+    // Règle changée (Greg, 12 novembre 2026, catalogues par métier) : l'étanchéité devient un rayon de Couverture.
+    expect(metiersDuRayon("couverture")).toEqual(["couverture", "zinguerie", "etancheite"]);
     expect(rayonDuMetierCatalogue("zinguerie")).toBe("couverture");
-    expect(rayonDuMetierCatalogue("etancheite")).toBe("etancheite");
+    expect(rayonDuMetierCatalogue("etancheite")).toBe("couverture");
+    expect(METIERS_DU_SELECTEUR).not.toContain("etancheite");
     expect(metiersCatalogueDuCompte(["roofing"])).not.toContain("zinguerie");
     // Une clé additionne les lignes de plusieurs artisans dans un achat groupé : elle ne se réécrit jamais.
     expect(AMORCE_CATALOGUE.zinguerie.every((a) => a.cle.startsWith("zinguerie/"))).toBe(true);

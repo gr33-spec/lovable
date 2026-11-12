@@ -93,6 +93,7 @@ export * from "./apprentissage/habitudes.js";
 export * from "./pilotage/tableau.js";
 export * from "./catalogue/catalogue.js";
 export * from "./catalogue/amorce.js";
+export * from "./catalogue/rayons.js";
 export * from "./catalogue/libelles-artisans.js";
 export * from "./catalogue/donnees/couverture-regions.js";
 export * from "./cycle/cycle-de-vie.js";

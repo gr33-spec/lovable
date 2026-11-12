@@ -53,9 +53,9 @@ describe("le catalogue complet", () => {
     const bois = arbre.find((f) => f.libelle === "Bois de charpente")!;
     const panne = bois.enfants.find((p) => p.libelle === "Panne")!;
     expect(panne.enfants.some((v) => v.libelle === "75×225 · 6 m · classe 2" && v.article?.unite === "pièces")).toBe(true);
-    expect(metiersCatalogueDuCompte(["roofing"])).toEqual(["couverture", "etancheite"]);
-    expect(metiersCatalogueDuCompte(["carpentry", "roofing"])).toEqual(["charpente", "couverture", "etancheite"]);
-    expect(metiersCatalogueDuCompte(["waterproofing"])).toEqual(["etancheite", "couverture"]);
+    expect(metiersCatalogueDuCompte(["roofing"])).toEqual(["couverture"]);
+    expect(metiersCatalogueDuCompte(["carpentry", "roofing"])).toEqual(["charpente", "couverture"]);
+    expect(metiersCatalogueDuCompte(["waterproofing"])).toEqual(["couverture"]);
   });
 
   it("écrit les fichiers de relecture (un par métier) dans docs/catalogue", () => {

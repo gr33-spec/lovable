@@ -56,7 +56,12 @@ export const FAMILLE_DU_METIER_CATALOGUE: Readonly<Record<MetierCatalogue, Famil
  * zinguerie »). Un métier rangé dans un autre n'a plus d'entrée au sélecteur : ses articles se lisent dans le rayon qui
  * le comprend (gouttières, descentes et zinc sous « Couverture »). Les clés des articles ne changent pas.
  */
-export const RAYON_DU_METIER_CATALOGUE: Readonly<Partial<Record<MetierCatalogue, MetierCatalogue>>> = { zinguerie: "couverture" };
+/**
+ * L'ÉTANCHÉITÉ AUSSI (Greg, 12 novembre 2026 : « dans l'interface artisan, Étanchéité doit apparaître comme un rayon du
+ * catalogue Couverture, même si le moteur conserve une classification technique distincte ») : le métier « etancheite »
+ * reste celui des articles, il n'a plus d'entrée au sélecteur.
+ */
+export const RAYON_DU_METIER_CATALOGUE: Readonly<Partial<Record<MetierCatalogue, MetierCatalogue>>> = { zinguerie: "couverture", etancheite: "couverture" };
 /** Le métier du sélecteur où se lit un métier du catalogue (« zinguerie » → « couverture »). */
 export const rayonDuMetierCatalogue = (m: MetierCatalogue): MetierCatalogue => RAYON_DU_METIER_CATALOGUE[m] ?? m;
 /** Les métiers du sélecteur « Métier : Couverture ▾ » : ceux qui ne sont pas rangés dans un autre. */
@@ -90,7 +95,8 @@ const METIERS_DU_COMPTE: Readonly<Record<string, readonly MetierCatalogue[]>> = 
 };
 
 export function metiersCatalogueDuCompte(trades: readonly string[]): MetierCatalogue[] {
-  return [...new Set(trades.flatMap((t) => METIERS_DU_COMPTE[t] ?? []))];
+  // Les catalogues du sélecteur : un métier rangé dans un autre (zinguerie, étanchéité) donne le catalogue qui le comprend.
+  return [...new Set(trades.flatMap((t) => METIERS_DU_COMPTE[t] ?? []).map(rayonDuMetierCatalogue))];
 }
 
 /** Un article de l'amorce : trois niveaux au plus, une unité, les mots du chantier en plus. */
@@ -231,7 +237,7 @@ function procheAuPlus(a: string, b: string, max: number): boolean {
  */
 const PRECISIONS = new Set([
   "rouge", "brun", "noir", "gris", "blanc", "beige", "vert", "bleu", "anthracite", "ardoise", "vieilli", "sable", "flamme", "nuance", "naturel", "terre",
-  "mat", "satin", "satine", "velours", "brillant", "lisse", "pro", "professionnel", "professionnelle", "qualite", "premium", "standard", "interieur", "exterieur",
+  "mat", "satin", "satine", "velours", "brillant", "lisse", "etanche", "encastre", "apparent", "pro", "professionnel", "professionnelle", "qualite", "premium", "standard", "interieur", "exterieur",
 ]);
 
 /** La qualité de la rencontre d'un mot tapé avec des mots : 3 le mot même, 2 son début, 1 ou 1,5 à une faute près, 0 rien. */
@@ -255,6 +261,40 @@ function rencontre(tape: string, mots: readonly string[]): number {
 }
 
 /**
+ * LES MOTS DU CHANTIER EN PLUS (Greg, 12 novembre 2026 : « prise 16 A étanche », « plaque hydro 13 », vocabulaire
+ * d'artisan, abréviations) : des mots de recherche ajoutés à un produit par son NOM, sans toucher à l'article (ni sa clé,
+ * ni sa désignation, ni ses synonymes en base). Ils ne servent qu'à trouver ; rien n'est renommé.
+ */
+const MOTS_EN_PLUS: readonly (readonly [RegExp, string])[] = [
+  [/^Prise de courant 2P\+T/, "16 a 16a prise electrique"],
+  [/^Plaque de plâtre hydrofuge/, "hydro 13 placo verte"],
+  [/^Plaque de plâtre/, "13 placo placoplatre"],
+  [/^Bobineau/, "bobinot bobino"],
+  [/^Gouttière/, "cheneau dalle"],
+  [/^Tuyau de descente/, "descente dep"],
+  [/^Tube multicouche/, "alpex"],
+  [/^Parpaing/, "agglo moellon"],
+  [/^Câble R2V/, "u1000 rvfv"],
+  [/^Gaine ICTA/, "gaine annelee"],
+  [/^Disjoncteur/, "disj"],
+  [/^Interrupteur différentiel/, "inter diff"],
+  [/^Écran sous-toiture/, "hpv"],
+  [/^Membrane EPDM/, "caoutchouc"],
+  [/^Laine de verre/, "ldv"],
+  [/^Laine de roche/, "ldr"],
+  [/^Peinture plafond/, "plafonds"],
+];
+const EN_PLUS = new Map<string, string>();
+export function motsEnPlus(produit: string): string {
+  let m = EN_PLUS.get(produit);
+  if (m === undefined) {
+    m = MOTS_EN_PLUS.filter(([motif]) => motif.test(produit)).map(([, mots]) => mots).join(" ");
+    if (EN_PLUS.size < 20_000) EN_PLUS.set(produit, m);
+  }
+  return m;
+}
+
+/**
  * Les mots « à plat » d'un article, calculés une fois par article et gardés tant que l'article vit (la recherche tourne à
  * chaque lettre tapée sur tout le catalogue : refaire `aPlat` sur chaque article à chaque fois coûtait l'essentiel du
  * temps ; CI du 31 octobre 2026, `catalogue-complet.test.ts` au-delà de 5 s). Mêmes mots, mêmes résultats.
@@ -264,7 +304,7 @@ function motsDeLArticle(a: Pick<ArticleCatalogue, "designation" | "famille" | "p
   const cle = `${a.designation}\u0000${a.famille}\u0000${a.produit}\u0000${a.synonymes.join("\u0001")}`;
   const garde = MOTS_DES_ARTICLES.get(a);
   if (garde && garde.cle === cle) return garde;
-  const mots = { duProduit: aPlat(a.produit).split(" "), tout: aPlat(`${a.designation} ${a.famille} ${a.produit} ${a.synonymes.join(" ")}`).split(" "), cle };
+  const mots = { duProduit: aPlat(a.produit).split(" "), tout: aPlat(`${a.designation} ${a.famille} ${a.produit} ${a.synonymes.join(" ")} ${motsEnPlus(a.produit)}`).split(" "), cle };
   MOTS_DES_ARTICLES.set(a, mots);
   return mots;
 }
@@ -319,8 +359,7 @@ export function rechercherAvecPrecisions<T extends Pick<ArticleCatalogue, "desig
   const originaux = new Map(q.split(/\s+/).filter(Boolean).map((w) => [aPlat(w), w] as const));
   const trouves: (Trouvaille<T> & { i: number })[] = [];
   articles.forEach((a, i) => {
-    const duProduit = aPlat(a.produit).split(" ");
-    const tout = aPlat(`${a.designation} ${a.famille} ${a.produit} ${a.synonymes.join(" ")}`).split(" ");
+    const { duProduit, tout } = motsDeLArticle(a);
     let score = 0;
     let designants = 0;
     const precisions: string[] = [];
