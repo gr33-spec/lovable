@@ -120,7 +120,10 @@ describe("Essentiel ou Pro", () => {
   });
   it("le paywall et /tarifs : Essentiel mis en avant, puis Pro, avec leurs quotas", () => {
     const [essentiel, pro] = offresAbonnement();
-    expect(essentiel).toEqual({ formule: "essentiel", titre: "Essentiel", badge: null, prix: "19,90 € HT par mois", details: ["3 analyses de devis par mois", "10 scans de liste par mois", "Sans engagement, résiliable quand tu veux"], enAvant: true });
+    // Le mensuel n'a pas bougé ; l'annuel s'y ajoute (Greg, 12 novembre 2026 : dix mois facturés pour douze, `abonnement-annuel.test.ts`).
+    const { annuel, ...mensuel } = essentiel!;
+    expect(mensuel).toEqual({ formule: "essentiel", titre: "Essentiel", badge: null, prix: "19,90 € HT par mois", details: ["3 analyses de devis par mois", "10 scans de liste par mois", "Sans engagement, résiliable quand tu veux"], enAvant: true });
+    expect(annuel).toMatchObject({ prix: "199 € HT par an", equivalent: "soit 16,58 € HT par mois" });
     expect(pro).toMatchObject({ formule: "pro", titre: "Pro", prix: "39,90 € HT par mois", details: ["8 analyses de devis par mois", "30 scans de liste par mois", "Sans engagement, résiliable quand tu veux"], enAvant: false });
   });
   it("l'argument de la landing : les achats groupés gratuits, « Dès 19,90 € par mois » pour plus d'analyses", () => {
