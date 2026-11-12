@@ -749,6 +749,10 @@ export interface Abonnement {
   prixHt: string;
   prixTtc: string;
   periode: string;
+  /** Au mois ou à l'année. */
+  periodicite?: Periodicite;
+  /** L'annuel peut-il être choisi au paiement ? (Avec Stripe : seulement si ses prix annuels sont configurés.) */
+  annuelDisponible?: boolean;
   /** Les deux formules, Essentiel d'abord. */
   offres: OffreAbonnement[];
   /** « 19,90 € » : le prix d'entrée, par mois. */
@@ -777,7 +781,12 @@ export interface OffreAbonnement {
   details: string[];
   enAvant: boolean;
   ttc?: string;
+  /** La même formule payée à l'année (dix mois facturés pour douze) : ce qui est facturé, l'équivalent par mois, l'économie. */
+  annuel?: { prix: string; equivalent: string; economie: string; details: string[]; ttc?: string };
 }
+
+/** Au mois, ou à l'année en une fois (Greg, 12 novembre 2026). */
+export type Periodicite = "mensuel" | "annuel";
 
 export interface FactureAbonnement {
   id: string;

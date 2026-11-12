@@ -191,6 +191,9 @@ const envSchema = z
     STRIPE_PRICE_ID_ESSENTIEL: z.string().min(4).optional(),
     /** Le prix PRO créé chez Stripe (« price_… »), 39,90 € HT, récurrent tous les mois. */
     STRIPE_PRICE_ID_PRO: z.string().min(4).optional(),
+    /** Les prix ANNUELS (Greg, 12 novembre 2026 : 199 € et 399 € HT par an) : facultatifs. Tant qu'ils manquent, l'annuel n'est pas proposé au paiement Stripe. */
+    STRIPE_PRICE_ID_ESSENTIEL_ANNUEL: z.string().min(4).optional(),
+    STRIPE_PRICE_ID_PRO_ANNUEL: z.string().min(4).optional(),
     /** Ancien prix mensuel (49 €, avant le 30 octobre 2026) : plus lu. */
     STRIPE_PRICE_ID_MENSUEL: z.string().min(4).optional(),
     /** Ancien prix annuel (348 €, avant le 30 octobre 2026) : plus lu. */
@@ -416,7 +419,7 @@ export interface AppConfig {
   abonnement: {
     actif: boolean;
     paiement: "simule" | "stripe";
-    stripe: { secretKey: string; webhookSecret: string; prix: { essentiel: string; pro: string }; taxRateId: string | null } | null;
+    stripe: { secretKey: string; webhookSecret: string; prix: { essentiel: string; pro: string }; prixAnnuel?: { essentiel: string | null; pro: string | null } | null; taxRateId: string | null } | null;
   };
   /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
   groupe: {
@@ -570,7 +573,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       paiement: e.PAIEMENT,
       stripe:
         e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID_ESSENTIEL && e.STRIPE_PRICE_ID_PRO
-          ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, prix: { essentiel: e.STRIPE_PRICE_ID_ESSENTIEL, pro: e.STRIPE_PRICE_ID_PRO }, taxRateId: e.STRIPE_TAX_RATE_ID ?? null }
+          ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, prix: { essentiel: e.STRIPE_PRICE_ID_ESSENTIEL, pro: e.STRIPE_PRICE_ID_PRO }, prixAnnuel: { essentiel: e.STRIPE_PRICE_ID_ESSENTIEL_ANNUEL ?? null, pro: e.STRIPE_PRICE_ID_PRO_ANNUEL ?? null }, taxRateId: e.STRIPE_TAX_RATE_ID ?? null }
           : null,
     },
     groupe: {

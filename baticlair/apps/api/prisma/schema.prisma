@@ -1663,6 +1663,8 @@ model Abonnement {
   fournisseur           String
   /// essentiel | pro (Greg, 30 octobre 2026 : 19,90 € et 39,90 € HT par mois) ; « mensuel » et « annuel » (avant) comptent comme Essentiel
   formule               String    @default("mensuel")
+  /// mensuel | annuel (Greg, 12 novembre 2026) : l'annuel est payé en une fois, dix mois facturés pour douze. Tout ce qui existait avant est mensuel.
+  periodicite           String    @default("mensuel")
   periodeDebut          DateTime?
   periodeFin            DateTime?
   echecLe               DateTime?

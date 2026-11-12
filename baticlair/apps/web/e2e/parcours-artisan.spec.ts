@@ -3803,11 +3803,35 @@ test("Abonnement (RÈGLE CHANGÉE le 30 octobre 2026) : « Tarifs » depuis la l
   await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
   await expect(page.getByText("Essai gratuit", { exact: true })).toBeVisible();
 
-  // Les deux formules, Essentiel coché d'office.
-  await expect(page.getByRole("radio", { name: /Essentiel/ })).toHaveAttribute("aria-checked", "true");
-  await expect(page.getByRole("radio", { name: /Pro/ })).toHaveAttribute("aria-checked", "false");
-  // « M'abonner » : la page de paiement simulée, au prix d'Essentiel, puis « Payer ».
-  await page.getByRole("button", { name: "M'abonner dès maintenant" }).click();
+  // Greg, 12 novembre 2026 (dossier de corrections UX, point 13) : un bouton par formule, rien de choisi d'office, et
+  // le choix « au mois » ou « à l'année ». Tant qu'aucune formule n'est choisie, on ne va pas au paiement.
+  const cartes = page.getByRole("list", { name: "Formules" });
+  const versPaiement = page.getByRole("button", { name: "Continuer vers le paiement" });
+  await expect(versPaiement).toBeDisabled();
+  await expect(cartes.getByRole("button", { name: "Choisir Essentiel" })).toHaveAttribute("aria-pressed", "false");
+  await expect(cartes.getByRole("button", { name: "Choisir Pro" })).toHaveAttribute("aria-pressed", "false");
+  await expect(cartes).toContainText("19,90 € HT par mois");
+  await expect(cartes).toContainText("39,90 € HT par mois");
+  // À l'année : le montant réellement facturé, son équivalent par mois, les deux mois offerts, sans autre remise.
+  const facturation = page.getByRole("radiogroup", { name: "Facturation" });
+  await expect(facturation.getByRole("radio", { name: "Au mois" })).toHaveAttribute("aria-checked", "true");
+  await facturation.getByRole("radio", { name: /À l'année/ }).click();
+  await expect(cartes).toContainText("199 € HT par an");
+  await expect(cartes).toContainText("soit 16,58 € HT par mois");
+  await expect(cartes).toContainText("399 € HT par an");
+  await expect(cartes).toContainText("soit 33,25 € HT par mois");
+  await expect(cartes).toContainText("2 mois offerts : 39,80 € HT de moins que douze mois payés au mois.");
+  await cartes.getByRole("button", { name: "Choisir Pro" }).click();
+  await expect(cartes.getByRole("button", { name: "Pro choisie" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("status").filter({ hasText: "Pro, à l'année" })).toContainText("399 € HT par an (478,80 € TTC), prélevés en une fois aujourd'hui pour douze mois");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  // Retour au mois, Essentiel : le récapitulatif suit, sans ambiguïté sur ce qui sera prélevé.
+  await facturation.getByRole("radio", { name: "Au mois" }).click();
+  await cartes.getByRole("button", { name: "Choisir Essentiel" }).click();
+  await expect(cartes.getByRole("button", { name: "Choisir Pro" })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByRole("status").filter({ hasText: "Essentiel, au mois" })).toContainText("19,90 € HT par mois (23,88 € TTC), prélevés aujourd'hui puis chaque mois. Sans engagement");
+  // La page de paiement simulée, au prix d'Essentiel, puis « Payer ».
+  await versPaiement.click();
   await expect(page).toHaveURL(/\/paiement-simule\?session=sim_/);
   await expect(page.getByRole("heading", { name: "Paiement (simulation)" })).toBeVisible();
   await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
@@ -3842,10 +3866,42 @@ test("Abonnement (RÈGLE CHANGÉE le 30 octobre 2026) : « Tarifs » depuis la l
   await expect(page.getByText(/^Résilié : ton accès reste jusqu'au/)).toBeVisible();
 });
 
+test("Abonnement annuel (Greg, 12 novembre 2026) : choisi à l'année, payé une fois en simulation, dix mois facturés pour douze, facture TEST, résiliation en fin d'année", async ({ page }) => {
+  await signUp(page);
+  await menuArtisan(page, "Mon abonnement");
+  await page.getByRole("radiogroup", { name: "Facturation" }).getByRole("radio", { name: /À l'année/ }).click();
+  await page.getByRole("button", { name: "Choisir Essentiel" }).click();
+  // Double appui : une seule session de paiement suit.
+  await page.getByRole("button", { name: "Continuer vers le paiement" }).dblclick();
+  await expect(page).toHaveURL(/\/paiement-simule\?session=sim_/);
+  await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
+  await expect(page.getByText("Abonnement Essentiel annuel : 199 € HT par an (238,80 € TTC), payés en une fois pour douze mois.")).toBeVisible();
+  await page.getByRole("button", { name: "Payer", exact: true }).click();
+  await expect(page).toHaveURL(/\/abonnement$/);
+  await expect(page.getByText("Abonné Essentiel", { exact: true })).toBeVisible();
+  await expect(page.getByText("199 € HT par an (238,80 € TTC), payés en une fois pour douze mois.")).toBeVisible();
+  // Le prochain renouvellement est dans un an ; un annuel ne propose pas le passage à Pro au prorata.
+  const dansUnAn = new Date();
+  dansUnAn.setFullYear(dansUnAn.getFullYear() + 1);
+  await expect(page.getByText(new RegExp(`Prochain renouvellement le \\d{1,2}(er)? \\S+ ${dansUnAn.getFullYear()}`))).toBeVisible();
+  await expect(page.getByRole("button", { name: "Passer à Pro" })).toHaveCount(0);
+  // Une seule facture TEST, du montant annuel.
+  await page.getByRole("tab", { name: "Mes factures" }).click();
+  const factures = page.getByRole("list", { name: "Mes factures" });
+  await expect(factures.getByText(/^TEST-\d{6}/)).toHaveCount(1);
+  await expect(factures.getByText(/ 238,80 € TTC/)).toBeVisible();
+  // Résilier : l'accès reste jusqu'au bout de l'année payée.
+  await page.getByRole("tab", { name: "Mon abonnement" }).click();
+  await page.getByRole("button", { name: "Résilier" }).click();
+  await page.getByRole("button", { name: "Oui, résilier" }).click();
+  await expect(page.getByText(new RegExp(`^Résilié : ton accès reste jusqu'au \\d{1,2}(er)? \\S+ ${dansUnAn.getFullYear()}`))).toBeVisible();
+});
+
 test("Abonnement : un paiement refusé met le bandeau rouge, avec la date limite", async ({ page }) => {
   await signUp(page);
   await menuArtisan(page, "Mon abonnement");
-  await page.getByRole("button", { name: "M'abonner dès maintenant" }).click();
+  await page.getByRole("button", { name: "Choisir Essentiel" }).click();
+  await page.getByRole("button", { name: "Continuer vers le paiement" }).click();
   await page.getByRole("button", { name: "Échec du paiement" }).click();
   await expect(page).toHaveURL(/\/abonnement$/);
   await expect(page.getByText("Paiement refusé")).toBeVisible();

@@ -15,7 +15,7 @@ en 5 lots. Ce fichier est LA première chose à lire à la reprise : vérifier l
 | 1 Blocages et fiabilité | FAIT (commits locaux) |
 | 2 Missions, aide, paramètres | FAIT (commit local) ; contrastes restants repris au lot 5 |
 | 3 Contenus, documents, MVP | FAIT (commit local) |
-| 4 Formules et facturation (test seulement) | non commencé |
+| 4 Formules et facturation (test seulement) | FAIT (commit local) ; annuel payable en simulé, fermé avec Stripe tant que ses prix annuels ne sont pas configurés |
 | 5 Passe visuelle | non commencé |
 
 ## Fait
@@ -71,6 +71,23 @@ en 5 lots. Ce fichier est LA première chose à lire à la reprise : vérifier l
   domaine `image-profil` 3/3, `relances-lot-final` 7/7 ; e2e `image-profil` 3/3, `achats-groupes-v1` + `missions` 33/33,
   aperçu du mail et relance 4/4.
 
+- Lot 4 (RÈGLE CHANGÉE : l'annuel revient, dix mois facturés pour douze) :
+  - Domaine `packages/domain/src/abonnement/abonnement.ts` : `Periodicite`, `MOIS_FACTURES_PAR_AN = 10`,
+    `prixAnnuelDeFormule` (Essentiel 19 900 centimes, Pro 39 900), `equivalentMensuelDeLAnnuel` (1 658, 3 325),
+    `economieDeLAnnuel` (deux mois), `finDePeriode(…, periodicite)`, `offresAbonnement().annuel`.
+  - Serveur : migration additive `20261112220000_abonnement_periodicite` (colonne `abonnement.periodicite`, défaut
+    « mensuel ») ; `abonnement.service.ts` (session, simulation, événements, facture « essentiel_annuel » / « pro_annuel »,
+    renouvellement annuel, rappel 30 jours avant au bon montant, refus du passage à Pro en cours d'année) ;
+    `stripe.ts` (prix annuels FACULTATIFS `STRIPE_PRICE_ID_ESSENTIEL_ANNUEL` / `STRIPE_PRICE_ID_PRO_ANNUEL` ; sans eux
+    l'annuel est refusé avant tout appel) ; `POST /v1/abonnement/payer { formule, periodicite }`.
+  - Écran : `apps/web/src/components/choix-formule.tsx` (au mois / à l'année, un bouton par formule, récapitulatif du
+    montant prélevé), `/abonnement`, `/paiement-simule`.
+  - L'environnement de test a `PAIEMENT` et des prix Stripe mensuels configurés (noms lus, jamais les valeurs) : l'annuel y
+    est AFFICHÉ mais non payable tant que Greg n'a pas autorisé la création des deux prix annuels en mode test.
+  - Rien n'a été créé, modifié ni appelé chez Stripe. CGU et page publique des tarifs non touchées (validation juridique).
+  Tests : domaine `abonnement-annuel` 5/5 ; serveur `abonnement-annuel` 8/8, `deux-formules` + `pilotage` +
+  `abonnement` verts (28/28 au total) ; e2e « Abonnement » 6/6 (téléphone, ordinateur).
+
 ## Rappels techniques
 - Les e2e tournent sur le site CONSTRUIT : `pnpm -s build` dans `apps/web` avant chaque passe, puis
   `fuser -k 3000/tcp 4000/tcp`.
@@ -82,6 +99,6 @@ Production, `main`, e-mail réel, paiement réel, appel IA payant, suppression d
 juridique validé, règles de facturation réelles : rien sans l'accord explicite de Greg.
 
 ## Prochain geste
-Lot 4 : capture 20 ; page des formules (Essentiel, Pro, un bouton par formule), choix mensuel/annuel (Essentiel
-199 € HT/an, Pro 399 € HT/an), UNIQUEMENT en mode test du prestataire de paiement : lire d'abord
-`apps/api/src/modules/billing` et `abonnement`, `packages/domain` (TARIFS), et la page `/abonnement`.
+Lot 5 : captures 21 et 22 (mode clair) ; passe visuelle transversale (jetons de `apps/web/src/app/globals.css`, composants
+partagés `ui.tsx` et `ux-kit.tsx`), sélecteur Automatique / Clair / Sombre dans l'en-tête, contrôle des contrastes et des
+débordements sur les écrans principaux en clair et en sombre, puis la chaîne complète sur le candidat exact.

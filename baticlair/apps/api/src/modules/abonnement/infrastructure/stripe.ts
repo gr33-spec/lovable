@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import type { Formule } from "@baticlair/domain";
+import type { Formule, Periodicite } from "@baticlair/domain";
 import type { StripeClient } from "../application/stripe.port.js";
 
 /**
@@ -22,7 +22,7 @@ function formulaire(params: Record<string, string | number | boolean | null | un
 
 export class HttpStripeClient implements StripeClient {
   constructor(
-    private readonly cfg: { secretKey: string; prix: { essentiel: string; pro: string }; taxRateId: string | null },
+    private readonly cfg: { secretKey: string; prix: { essentiel: string; pro: string }; /** Les prix annuels (Greg, 12 novembre 2026) : facultatifs ; absents, l'annuel n'est pas proposé. */ prixAnnuel?: { essentiel: string | null; pro: string | null } | null; taxRateId: string | null },
     private readonly fetcher: Fetch = fetch as unknown as Fetch,
   ) {}
 
@@ -40,13 +40,31 @@ export class HttpStripeClient implements StripeClient {
 
   formuleDuPrix(priceId: string | null): Formule | null {
     if (!priceId) return null;
-    return priceId === this.cfg.prix.pro ? "pro" : priceId === this.cfg.prix.essentiel ? "essentiel" : null;
+    const a = this.cfg.prixAnnuel;
+    return priceId === this.cfg.prix.pro || (!!a?.pro && priceId === a.pro) ? "pro" : priceId === this.cfg.prix.essentiel || (!!a?.essentiel && priceId === a.essentiel) ? "essentiel" : null;
   }
 
-  async checkout(c: { companyId: string; customerId: string | null; email: string | null; formule: Formule; succes: string; annulation: string }) {
+  periodiciteDuPrix(priceId: string | null): Periodicite | null {
+    if (!priceId) return null;
+    const a = this.cfg.prixAnnuel;
+    if ((!!a?.pro && priceId === a.pro) || (!!a?.essentiel && priceId === a.essentiel)) return "annuel";
+    return priceId === this.cfg.prix.pro || priceId === this.cfg.prix.essentiel ? "mensuel" : null;
+  }
+
+  annuelDisponible(): boolean {
+    return !!this.cfg.prixAnnuel?.essentiel && !!this.cfg.prixAnnuel?.pro;
+  }
+
+  async checkout(c: { companyId: string; customerId: string | null; email: string | null; formule: Formule; periodicite?: Periodicite; succes: string; annulation: string }) {
+    const annuel = c.periodicite === "annuel";
+    const prix = annuel ? this.cfg.prixAnnuel?.[c.formule] : this.cfg.prix[c.formule];
+    // Jamais un autre prix à la place : sans prix annuel configuré, rien n'est demandé à Stripe.
+    if (!prix) throw new Error("Stripe : prix annuel non configuré");
     const s = await this.appel<{ id: string; url: string }>("checkout/sessions", {
       mode: "subscription",
-      "line_items[0][price]": this.cfg.prix[c.formule],
+      "line_items[0][price]": prix,
+      "metadata[periodicite]": annuel ? "annuel" : "mensuel",
+      "subscription_data[metadata][periodicite]": annuel ? "annuel" : "mensuel",
       "line_items[0][quantity]": 1,
       ...(this.cfg.taxRateId ? { "line_items[0][tax_rates][0]": this.cfg.taxRateId } : {}),
       client_reference_id: c.companyId,

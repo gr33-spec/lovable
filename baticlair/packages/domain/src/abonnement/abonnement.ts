@@ -55,10 +55,33 @@ export const formuleDe = (v: unknown): Formule => (v === "pro" ? "pro" : "essent
 /** Le prix HT d'un mois de la formule, en centimes. */
 export const prixDeFormule = (f: Formule, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => (f === "pro" ? r.prixProHtCentimes : r.prixEssentielHtCentimes);
 
-/** La fin d'une période qui commence le `debut` : un mois plus tard (un ancien annuel : un an). */
-export function finDePeriode(debut: Date, f: Formule | "annuel"): Date {
+/**
+ * MENSUEL OU ANNUEL (RÈGLE CHANGÉE, Greg, 12 novembre 2026, dossier de corrections UX, point 13) : chaque formule se
+ * paie au mois ou à l'année. L'annuel est facturé DIX mois pour douze mois de service, payé en une fois : deux mois
+ * offerts, et aucune autre remise. Essentiel : 199 € HT par an (16,58 € HT par mois en équivalent arrondi) ; Pro : 399 €
+ * HT par an (33,25 €). Les quotas d'analyses et de scans restent ceux de la formule, chaque mois.
+ */
+export const PERIODICITES = ["mensuel", "annuel"] as const;
+export type Periodicite = (typeof PERIODICITES)[number];
+export const estPeriodicite = (v: unknown): v is Periodicite => v === "mensuel" || v === "annuel";
+/** La périodicité d'un abonnement enregistré : « annuel », sinon mensuel (tout ce qui existait avant). */
+export const periodiciteDe = (v: unknown): Periodicite => (v === "annuel" ? "annuel" : "mensuel");
+/** Le nombre de mois facturés pour une année de service. */
+export const MOIS_FACTURES_PAR_AN = 10;
+
+/** Le prix HT d'une ANNÉE de la formule, en centimes : dix mois. */
+export const prixAnnuelDeFormule = (f: Formule, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => prixDeFormule(f, r) * MOIS_FACTURES_PAR_AN;
+/** Ce qui est réellement facturé à chaque échéance (le mois, ou l'année en une fois), HT, en centimes. */
+export const prixDeLAbonnement = (f: Formule, p: Periodicite, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => (p === "annuel" ? prixAnnuelDeFormule(f, r) : prixDeFormule(f, r));
+/** L'équivalent par mois de l'annuel, arrondi au centime (information : il n'est jamais facturé tel quel). */
+export const equivalentMensuelDeLAnnuel = (f: Formule, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => Math.round(prixAnnuelDeFormule(f, r) / 12);
+/** Ce que l'annuel fait économiser sur douze mois payés au mois : exactement deux mois. */
+export const economieDeLAnnuel = (f: Formule, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => prixDeFormule(f, r) * 12 - prixAnnuelDeFormule(f, r);
+
+/** La fin d'une période qui commence le `debut` : un mois plus tard, ou un an pour l'annuel (et pour un ancien « annuel »). */
+export function finDePeriode(debut: Date, f: Formule | "annuel", periodicite: Periodicite = "mensuel"): Date {
   const n = new Date(debut);
-  if (f === "annuel") n.setUTCFullYear(n.getUTCFullYear() + 1);
+  if (f === "annuel" || periodicite === "annuel") n.setUTCFullYear(n.getUTCFullYear() + 1);
   else n.setUTCMonth(n.getUTCMonth() + 1);
   return n;
 }
@@ -75,6 +98,8 @@ export interface EtatPaiement {
   resiliationDemandeeLe: Date | null;
   /** La formule payée (Essentiel par défaut). */
   formule?: Formule;
+  /** Au mois ou à l'année (mensuel par défaut). */
+  periodicite?: Periodicite;
 }
 export const PAIEMENT_AUCUN: EtatPaiement = { statut: "aucun", periodeFin: null, echecLe: null, resiliationDemandeeLe: null, formule: "essentiel" };
 
@@ -165,6 +190,8 @@ export interface OffreAbonnement {
   details: string[];
   /** La formule mise en avant (Essentiel). */
   enAvant: boolean;
+  /** La même formule payée à l'année (Greg, 12 novembre 2026) : ce qui est facturé, son équivalent par mois, l'économie. */
+  annuel: { prix: string; equivalent: string; economie: string; details: string[] };
 }
 
 /**
@@ -173,9 +200,19 @@ export interface OffreAbonnement {
 export function offresAbonnement(r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): OffreAbonnement[] {
   return FORMULES.map((f) => {
     const o = OFFRES[f];
-    return { formule: f, titre: o.nom, badge: null, prix: `${eurosDeCentimes(prixDeFormule(f, r))} HT par mois`, details: [`${o.analyses} analyses de devis par mois`, `${o.scans} scans de liste par mois`, "Sans engagement, résiliable quand tu veux"], enAvant: f === "essentiel" };
+    return { formule: f, titre: o.nom, badge: null, prix: `${eurosDeCentimes(prixDeFormule(f, r))} HT par mois`, details: [`${o.analyses} analyses de devis par mois`, `${o.scans} scans de liste par mois`, "Sans engagement, résiliable quand tu veux"],
+      enAvant: f === "essentiel",
+      annuel: {
+        prix: `${eurosDeCentimes(prixAnnuelDeFormule(f, r))} HT par an`,
+        equivalent: `soit ${eurosDeCentimes(equivalentMensuelDeLAnnuel(f, r))} HT par mois`,
+        economie: `2 mois offerts : ${eurosDeCentimes(economieDeLAnnuel(f, r))} HT de moins que douze mois payés au mois`,
+        details: [`${o.analyses} analyses de devis par mois`, `${o.scans} scans de liste par mois`, PHRASE_ANNUEL],
+      },
+    };
   });
 }
+/** Ce que l'annuel engage, dit en une phrase partout où il se choisit. */
+export const PHRASE_ANNUEL = "Payé en une fois, renouvelé chaque année ; tu peux arrêter le renouvellement quand tu veux, l'année payée reste acquise.";
 export const BOUTON_CONTINUER = "Je continue";
 export const LIEN_PAS_MAINTENANT = "Pas maintenant";
 
@@ -282,10 +319,10 @@ export function rappelRenouvellementDu(p: { formule: string; statut: StatutPaiem
 }
 
 /** L'e-mail du rappel de renouvellement : la date, le montant, comment arrêter, sans remboursement au prorata. */
-export function emailRenouvellementAnnuel(c: { echeance: Date; reglages?: ReglagesAbonnement; lien: string; nomApp: string }): { objet: string; texte: string } {
+export function emailRenouvellementAnnuel(c: { echeance: Date; reglages?: ReglagesAbonnement; lien: string; nomApp: string; /** Le montant HT réellement prélevé (l'annuel de la formule) ; absent : l'ancien annuel. */ htCentimes?: number }): { objet: string; texte: string } {
   const r = c.reglages ?? REGLAGES_ABONNEMENT_DEFAUT;
   const le = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "long", year: "numeric" }).format(c.echeance);
-  const m = montantsFacture(r.prixAnnuelHtCentimes, r.tauxTva);
+  const m = montantsFacture(c.htCentimes ?? r.prixAnnuelHtCentimes, r.tauxTva);
   return {
     objet: `Ton abonnement annuel ${c.nomApp} se renouvelle le ${le}`,
     texte: [

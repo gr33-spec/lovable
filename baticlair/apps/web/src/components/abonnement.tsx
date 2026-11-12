@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { OffresAbonnement } from "@/components/offres-abonnement";
 import { Button, Card } from "@/components/ui";
-import { api, messageErreur, EVENEMENT_ABONNEMENT_REQUIS, type Abonnement, type Formule } from "@/lib/api";
+import { api, messageErreur, EVENEMENT_ABONNEMENT_REQUIS, type Abonnement, type Formule, type Periodicite } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 import { TARIFS } from "../../../../packages/domain/src/groupe/tarifs";
 
@@ -19,8 +19,8 @@ export function useAbonnement() {
 }
 
 /** « Je continue » : la page de paiement (simulée, ou Stripe Checkout) de la formule choisie. */
-export async function continuerAbonnement(formule: Formule = "essentiel"): Promise<void> {
-  const { url } = await api<{ url: string }>("/v1/abonnement/payer", { method: "POST", body: { formule } });
+export async function continuerAbonnement(formule: Formule = "essentiel", periodicite: Periodicite = "mensuel"): Promise<void> {
+  const { url } = await api<{ url: string }>("/v1/abonnement/payer", { method: "POST", body: { formule, periodicite } });
   window.location.assign(url);
 }
 

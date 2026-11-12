@@ -2,9 +2,9 @@
 
 import { useCallback, useState } from "react";
 import { ContenuPaywall, continuerAbonnement, useAbonnement } from "@/components/abonnement";
-import { OffresAbonnement } from "@/components/offres-abonnement";
+import { ChoixFormule } from "@/components/choix-formule";
 import { BackButton, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, type Abonnement, type FactureAbonnement, type Formule } from "@/lib/api";
+import { api, ApiError, type Abonnement, type FactureAbonnement } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
 
@@ -59,7 +59,6 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [tva, setTva] = useState(a.tvaIntra ?? "");
-  const [formule, setFormule] = useState<Formule>("essentiel");
   const [passer, setPasser] = useState(false);
   async function run(cle: string, f: () => Promise<Abonnement | void>) {
     setPending(cle);
@@ -89,10 +88,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
           <>
             <p className="text-[20px] font-extrabold">Gratuit</p>
             <p className="text-[16px]">{TARIFS.enUneLigne}</p>
-            <OffresAbonnement offres={a.offres} choisie={formule} onChoisir={setFormule} />
-            <Button variant="secondary" onClick={() => void run("payer", () => continuerAbonnement(formule))} pending={pending === "payer"} className="self-start">
-              M&apos;abonner
-            </Button>
+            <ChoixFormule abonnement={a} />
           </>
         ) : null}
         {a.acces === "essai" ? (
@@ -101,10 +97,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
             <p className="text-[16px]">
               {a.essaiFinLe ? `Jusqu'au ${date(a.essaiFinLe)}.` : "Jusqu'à 30 jours après les résultats de ton premier regroupement."} Ensuite, dès {a.prixDes} HT par mois.
             </p>
-            <OffresAbonnement offres={a.offres} choisie={formule} onChoisir={setFormule} />
-            <Button variant="secondary" onClick={() => void run("payer", () => continuerAbonnement(formule))} pending={pending === "payer"} className="self-start">
-              M&apos;abonner dès maintenant
-            </Button>
+            <ChoixFormule abonnement={a} />
           </>
         ) : null}
         {a.acces === "grace" ? (
@@ -119,7 +112,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
         {a.acces === "abonne" ? (
           <>
             <p className="text-[20px] font-extrabold">{a.formule === "pro" ? "Abonné Pro" : "Abonné Essentiel"}</p>
-            <p className="text-[16px]">{`${a.prixHt} HT par mois (${a.prixTtc} TTC), sans engagement.`}</p>
+            <p className="text-[16px]">{a.periodicite === "annuel" ? `${a.prixHt} HT par an (${a.prixTtc} TTC), payés en une fois pour douze mois.` : `${a.prixHt} HT par mois (${a.prixTtc} TTC), sans engagement.`}</p>
             {a.resiliationProgrammee || a.statut === "resilie" ? (
               <p className="text-[16px] font-semibold">Résilié : ton accès reste jusqu&apos;au {date(a.periodeFin)}. Rien ne sera plus prélevé.</p>
             ) : (

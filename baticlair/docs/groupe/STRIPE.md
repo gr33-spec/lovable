@@ -81,3 +81,16 @@ Puis **Redeploy**. Sans la clé, le secret du webhook et les deux prix, l'API re
 
 - Stripe envoie aussi ses propres reçus si tu l'actives (Réglages → E-mails clients). Ce n'est pas nécessaire : Mobiiz envoie la facture.
 - Les factures se gardent 10 ans (obligation comptable), même si l'artisan supprime son compte.
+
+## Abonnement annuel (12 novembre 2026)
+
+Chaque formule se paie au mois ou à l'année. L'annuel est facturé dix mois pour douze mois de service, en une fois :
+Essentiel 199 € HT par an, Pro 399 € HT par an.
+
+Deux variables FACULTATIVES portent les identifiants des prix annuels (récurrence « year ») :
+`STRIPE_PRICE_ID_ESSENTIEL_ANNUEL` et `STRIPE_PRICE_ID_PRO_ANNUEL`. Tant qu'elles manquent, l'annuel est affiché mais
+ne peut pas être payé avec Stripe (le serveur refuse avant tout appel) ; le mensuel n'est pas touché. En paiement simulé,
+l'annuel se paie toujours (facture de la série TEST).
+
+Créer ces deux prix (en mode test d'abord), puis poser les deux variables, demande l'accord de Greg : rien n'est créé ni
+modifié chez Stripe par le code ou par un script.

@@ -36,7 +36,7 @@ type Agent = Awaited<ReturnType<typeof signUpWithCompany>>["agent"];
 async function payer(agent: Agent, formule: "essentiel" | "pro" | undefined, m: string) {
   const { url } = (await agent.post("/v1/abonnement/payer").send(formule ? { formule } : {}).expect(200)).body;
   const session = new URL(url).searchParams.get("session")!;
-  expect((await agent.get(`/v1/abonnement/simulation/${session}`).expect(200)).body).toEqual({ formule: formule ?? "essentiel" });
+  expect((await agent.get(`/v1/abonnement/simulation/${session}`).expect(200)).body).toEqual({ formule: formule ?? "essentiel", periodicite: "mensuel" });
   return (await agent.post(`/v1/abonnement/simulation/${session}?${q(m)}`).send({ issue: "payer" }).expect(200)).body;
 }
 const factures = async (companyId: string) => ctx.prisma.factureAbonnement.findMany({ where: { companyId }, orderBy: { rang: "asc" } });
@@ -47,7 +47,8 @@ describe("Essentiel ou Pro", () => {
   it("l'écran montre les deux formules, Essentiel d'abord ; sans choix, c'est Essentiel ; l'ancien mensuel et l'ancien annuel au paiement sont refusés", async () => {
     const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
     const v = (await A.agent.get("/v1/abonnement").expect(200)).body;
-    expect(v.offres).toEqual([
+    // Le mensuel n'a pas changé (l'annuel de chaque formule a ses propres tests, `abonnement-annuel.test.ts`).
+    expect(v.offres.map((o: Record<string, unknown>) => ({ formule: o.formule, titre: o.titre, badge: o.badge, prix: o.prix, details: o.details, enAvant: o.enAvant, ttc: o.ttc }))).toEqual([
       { formule: "essentiel", titre: "Essentiel", badge: null, prix: "19,90 € HT par mois", details: ["3 analyses de devis par mois", "10 scans de liste par mois", "Sans engagement, résiliable quand tu veux"], enAvant: true, ttc: "23,88 €" },
       { formule: "pro", titre: "Pro", badge: null, prix: "39,90 € HT par mois", details: ["8 analyses de devis par mois", "30 scans de liste par mois", "Sans engagement, résiliable quand tu veux"], enAvant: false, ttc: "47,88 €" },
     ]);

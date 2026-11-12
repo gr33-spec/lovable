@@ -231,7 +231,8 @@ export class PilotageService {
         if (!x.companyId || vues.has(x.companyId)) return [];
         vues.add(x.companyId);
         // Un passage au prorata compte au prix plein de sa formule (Pro ; un ancien passage à l'annuel, l'annuel).
-        const formule = x.formule === "bascule" ? "annuel" : x.formule === "passage_pro" ? "pro" : x.formule;
+        // Une année payée en une fois (« essentiel_annuel », « pro_annuel », 12 novembre 2026) compte pour un douzième par mois.
+        const formule = x.formule === "bascule" || x.formule.endsWith("_annuel") ? "annuel" : x.formule === "passage_pro" ? "pro" : x.formule;
         return [{ formule, htCentimes: x.formule === "bascule" ? prix.annuel : x.formule === "passage_pro" ? prix.pro : x.montantHtCentimes }];
       });
       return revenuMensuelRecurrent(abonnes);

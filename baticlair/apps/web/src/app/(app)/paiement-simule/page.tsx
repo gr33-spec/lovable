@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
 import { useAbonnement } from "@/components/abonnement";
 import { Button, Card, ErrorNotice, PageTitle } from "@/components/ui";
-import { api, ApiError, type Formule } from "@/lib/api";
+import { api, ApiError, type Formule, type Periodicite } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -23,9 +23,11 @@ function Paiement() {
   const session = useSearchParams().get("session") ?? "";
   const router = useRouter();
   const { data } = useAbonnement();
-  const chargerSession = useCallback((signal: AbortSignal) => api<{ formule: Formule }>(`/v1/abonnement/simulation/${encodeURIComponent(session)}`, { signal }), [session]);
-  const formule = useResource(chargerSession).data?.formule;
+  const chargerSession = useCallback((signal: AbortSignal) => api<{ formule: Formule; periodicite?: Periodicite }>(`/v1/abonnement/simulation/${encodeURIComponent(session)}`, { signal }), [session]);
+  const choix = useResource(chargerSession).data;
+  const formule = choix?.formule;
   const offre = data?.offres.find((o) => o.formule === formule);
+  const annuel = choix?.periodicite === "annuel" ? (offre?.annuel ?? null) : null;
   const [pending, setPending] = useState<"payer" | "echec" | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   async function envoyer(issue: "payer" | "echec") {
@@ -47,9 +49,10 @@ function Paiement() {
       <PageTitle>Paiement (simulation)</PageTitle>
       <Card className="flex flex-col gap-4 p-5">
         <p className="text-[17px]">
-          {formule === "pro" ? "Abonnement Pro" : "Abonnement Essentiel"} : <strong>{offre?.prix ?? "\u00a0"}</strong>
-          {offre?.ttc ? ` (${offre.ttc} TTC)` : ""}
-          {formule ? ", sans engagement." : ""}
+          {formule === "pro" ? "Abonnement Pro" : "Abonnement Essentiel"}
+          {annuel ? " annuel" : ""} : <strong>{annuel ? annuel.prix : (offre?.prix ?? "\u00a0")}</strong>
+          {annuel ? (annuel.ttc ? ` (${annuel.ttc} TTC)` : "") : offre?.ttc ? ` (${offre.ttc} TTC)` : ""}
+          {formule ? (annuel ? ", payés en une fois pour douze mois." : ", sans engagement.") : ""}
         </p>
         {error ? <ErrorNotice error={error} /> : null}
         <Button onClick={() => void envoyer("payer")} pending={pending === "payer"} disabled={!!pending} className="w-full">
