@@ -81,6 +81,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   const [precisions, setPrecisions] = useState<Record<string, Record<string, string>>>({});
   const [ouvertPreciser, setOuvertPreciser] = useState<string | null>(null);
   const [pourquoi, setPourquoi] = useState<string | null>(null);
+  const [blocage, setBlocage] = useState<string | null>(null);
   const [etape, setEtape] = useState<"selection" | "confirmer">("selection");
   const [choisies, setChoisies] = useState<LigneChoisie[]>([]);
   const [reception, setReception] = useState<"livraison" | "retrait" | null>(null);
@@ -111,6 +112,24 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   const parLotGroupables = LOTS_PRINCIPAUX_V1.map((lot) => ({ lot, lignes: duLot(lot.id), sous: lot.sous.map((x) => ({ lot: x, lignes: duLot(x.id) })).filter((x) => x.lignes.length > 0) })).filter((g) => g.lignes.length > 0 || g.sous.length > 0);
   const nonGroupables = lignes.filter((l) => !groupables(l));
   const nb = lignes.filter((l) => coches.has(l.key) && l.selectionnable).length;
+
+  /** Coche ou décoche ; sur un article à préciser, ouvre la précision (ou la raison) au lieu de ne rien faire. */
+  function basculer(l: LigneQuantitatifV1, precisable: boolean) {
+    if (l.selectionnable) {
+      setCoches((s) => {
+        const n = new Set(s);
+        if (n.has(l.key)) n.delete(l.key);
+        else n.add(l.key);
+        return n;
+      });
+      return;
+    }
+    // L'intention est gardée : dès que la précision est complète, l'article est coché.
+    setCoches((s) => new Set(s).add(l.key));
+    setBlocage(l.key);
+    if (precisable) setOuvertPreciser(l.key);
+    else setPourquoi(l.key);
+  }
 
   async function changerLot(l: LigneQuantitatifV1, lot: string) {
     try {
@@ -185,14 +204,27 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
                 const produit = l.produit ? etat.produits.find((p) => p.type === l.produit!.type) : null;
                 return (
                   <li key={l.key} className="flex flex-col gap-2 border-b border-line p-3 last:border-b-0">
-                    <label className="flex items-start gap-3">
-                      <input type="checkbox" disabled={!l.selectionnable} checked={coches.has(l.key) && l.selectionnable} onChange={() => setCoches((s) => { const n = new Set(s); if (n.has(l.key)) n.delete(l.key); else n.add(l.key); return n; })} className="mt-1 size-5 shrink-0 accent-accent disabled:opacity-40" />
+                    {/* Greg, 12 novembre 2026 : « la case ne réagit pas ». Aucun appui n'est ignoré : un article à préciser
+                        ouvre ce qui manque, dit pourquoi, et se coche tout seul dès que la précision est donnée. */}
+                    <label className="flex min-h-12 cursor-pointer items-start gap-3">
+                      <input
+                        type="checkbox"
+                        aria-describedby={blocage === l.key ? `blocage-${l.key}` : undefined}
+                        checked={coches.has(l.key) && l.selectionnable}
+                        onChange={() => basculer(l, !!(produit && l.produit?.manquantes.length))}
+                        className="mt-0.5 size-6 shrink-0 accent-accent"
+                      />
                       <span className="flex min-w-0 flex-1 flex-col">
                         <span className="text-[16px] font-semibold break-words">{l.produit && l.selectionnable ? l.produit.nom : l.designation}</span>
                         <span className="text-[14px] text-muted">{l.quantiteListe !== null ? `${nf(l.quantiteListe)} ${l.unite}` : "Quantité à préciser"}</span>
                       </span>
                     </label>
-                    <div className="flex flex-wrap items-center gap-2 pl-8">
+                    {blocage === l.key && !l.selectionnable ? (
+                      <p id={`blocage-${l.key}`} role="status" className="ml-9 rounded-xl bg-warn-bg px-3 py-2 text-[14px] font-semibold text-warn">
+                        {produit && l.produit?.manquantes.length ? `Il manque : ${l.produit.manquantes.map((m) => m.libelle.toLowerCase()).join(", ")}. Choisis ci-dessous : l'article sera coché aussitôt.` : "Cet article ne peut pas encore être coché. La raison est juste en dessous."}
+                      </p>
+                    ) : null}
+                    <div className="flex flex-wrap items-center gap-2 pl-9">
                       <span className={`rounded-full px-3 py-1 text-[13px] font-bold ${TON[l.mention]}`}>{l.texte}</span>
                       <button type="button" onClick={() => setPourquoi(pourquoi === l.key ? null : l.key)} aria-expanded={pourquoi === l.key} className="min-h-11 text-[14px] font-semibold underline underline-offset-4">
                         Pourquoi ?

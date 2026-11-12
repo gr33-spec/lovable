@@ -362,7 +362,23 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   // Les liteaux tapés seuls ne disparaissent jamais : désactivés, avec la raison exacte.
   const liteaux = page.getByRole("listitem").filter({ has: page.getByText("Liteaux", { exact: true }) });
   await expect(liteaux.getByText("À préciser : section et essence manquantes")).toBeVisible();
-  await expect(liteaux.getByRole("checkbox")).toBeDisabled();
+  // Greg, 12 novembre 2026 : « la case ne réagit pas ». Aucun appui n'est ignoré : la case d'un article à préciser
+  // dit ce qui manque, ouvre la précision, et l'article se coche tout seul dès qu'elle est donnée.
+  const ardoise35 = page.getByRole("listitem").filter({ has: page.getByText("À préciser : choix et épaisseur manquants") });
+  await ardoise35.getByRole("checkbox").click();
+  await expect(ardoise35.getByRole("status")).toContainText("Il manque : choix, épaisseur.");
+  await expect(ardoise35.getByRole("checkbox")).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "Choisis des articles" })).toBeDisabled();
+  const precisee = page.getByRole("listitem").filter({ has: page.getByLabel("Épaisseur") });
+  await precisee.getByLabel("Choix").selectOption({ index: 1 });
+  await precisee.getByLabel("Épaisseur").selectOption({ index: 1 });
+  await expect(precisee.getByRole("checkbox")).toBeChecked();
+  await expect(page.getByRole("button", { name: "Continuer avec 1 article" })).toBeEnabled();
+  // Au clavier aussi : Espace décoche, et le bouton redevient inactif.
+  await precisee.getByRole("checkbox").focus();
+  await page.keyboard.press("Space");
+  await expect(precisee.getByRole("checkbox")).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "Choisis des articles" })).toBeDisabled();
   // Ce qui ne se groupe pas est replié en bas, avec sa raison en une phrase (rien n'est caché).
   await page.getByText(/ne peu(t|vent) pas être groupés?$/).click();
   await expect(page.getByRole("list", { name: "Articles qui ne peuvent pas être groupés" })).toContainText("Parpaing creux 20x20x50");
