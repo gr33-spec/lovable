@@ -109,7 +109,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Constante | `vis_par_m2` | 7 u/m2 | §8 | couverture-bac-acier | lot-couverture-4.test.ts (par §8) |
 | Constante | `vis_par_ml` | 4 u/m | §25.5 | bandes-zinc | regles-sans-test-audit.test.ts |
 | Constante | `vis_par_ml_rive` | 3 u/m | §8 | couverture-bac-acier | lot-couverture-4.test.ts (par §8) |
-| Constante | `vmc` | 0 mm | §25 | sortie-de-toit | carte-lots-reperes.test.ts, regles-sans-test-audit.test.ts |
+| Constante | `vmc` | 0 mm | §25 | sortie-de-toit | carte-lots-reperes.test.ts, catalogue-etancheite-zinguerie.test.ts, regles-sans-test-audit.test.ts |
 | Constante | `zone_littorale` | 3 u | §36.6, §15 | couverture-tuiles-emboitement, couverture-zinc-joint-debout, gouttiere, gouttiere-pvc-alu | document-d2026-018.test.ts (par §36.6, §15), lot-couverture-3.test.ts (par §36.6, §15) |
 | Table | `ardoises_m2` | Ardoises au m² | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts |
 | Table | `coulissantes_500` | Pattes coulissantes par m² (bobine 500) | §7, §36 | couverture-zinc-joint-debout | couverture-regions.test.ts (par §7, §36), dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36) |

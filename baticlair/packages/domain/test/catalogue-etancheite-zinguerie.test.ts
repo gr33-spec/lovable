@@ -21,6 +21,25 @@ describe("la couverture comprend la zinguerie", () => {
   });
 });
 
+describe("couverture et zinguerie : les compléments du 12 novembre 2026", () => {
+  const C = [...AMORCE_CATALOGUE.couverture, ...AMORCE_CATALOGUE.zinguerie];
+  const ici = (q: string) => rechercherArticles(C, q)[0];
+  it("les pièces que le comptoir vend et que le catalogue n'avait pas", () => {
+    expect(AMORCE_CATALOGUE.zinguerie.length).toBeGreaterThan(280);
+    expect(AMORCE_CATALOGUE.couverture.length).toBeGreaterThan(850);
+    expect(ici("chéneau")?.produit).toBe("Chéneau zinc");
+    expect(ici("gouttière cuivre")?.produit).toBe("Gouttière demi-ronde cuivre");
+    expect(ici("jambonneau")?.produit).toBe("Jambonneau");
+    expect(ici("besace")?.produit).toMatch(/^Besace/);
+    expect(ici("abergement cheminée")?.produit).toBe("Abergement de cheminée zinc");
+    expect(ici("shingle")?.produit).toBe("Bardeau bitumé");
+    expect(ici("faîtière bac acier")?.produit).toBe("Faîtière bac acier");
+    expect(ici("tuile de rive gauche")?.designation).toBe("Tuile de rive gauche");
+    expect(ici("anti-mousse")?.produit).toBe("Anti-mousse pour toiture");
+    expect(ici("sortie de toit vmc")?.produit).toBe("Sortie de toit pour ventilation");
+  });
+});
+
 describe("le catalogue étanchéité", () => {
   const E = AMORCE_CATALOGUE.etancheite;
   /** Dans tout le catalogue (un mot propre à l'étanchéité) ; dans le métier choisi (l'écran le met d'abord) pour un mot partagé. */
@@ -49,7 +68,7 @@ describe("le catalogue étanchéité", () => {
     expect(ici("sous-couche soudable")?.produit).toBe("Membrane bitume SBS sous-couche soudable");
     expect(premier("eif")?.produit).toBe("Enduit d'imprégnation à froid (EIF)");
     expect(ici("trop plein")?.produit).toBe("Trop-plein à platine");
-    expect(premier("crapaudine")?.produit).toBe("Crapaudine");
+    expect(ici("crapaudine")?.produit).toBe("Crapaudine");
     expect(ici("eep 100")?.produit).toBe("Entrée d'eau pluviale à platine");
     expect(premier("membrane pvc 1,5")?.designation).toBe("Membrane PVC armée 1,5 mm");
   });

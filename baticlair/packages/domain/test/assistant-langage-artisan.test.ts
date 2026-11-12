@@ -78,7 +78,7 @@ describe("fautes, sons et abréviations, tous métiers", () => {
     const desc = dire("15 m de descente zinc diam 80");
     expect(desc.c!.produits[desc.c!.choixProduit!]!.produit).toBe("Tuyau de descente zinc");
     expect(desc.c!.valeurs[0]).toBe("Ø 80");
-    expect(etape(desc.c!, desc.l)).toMatchObject({ question: "Quel aspect ?", choix: ["naturel", "prépatiné quartz"] });
+    expect(etape(desc.c!, desc.l)).toMatchObject({ question: "Quel aspect ?", choix: ["naturel", "prépatiné quartz", "prépatiné anthracite"] });
   });
 
   it("un mot écrit comme au catalogue n'a pas de confirmation : « 10 plaques osb 18 » → la question du format", () => {
