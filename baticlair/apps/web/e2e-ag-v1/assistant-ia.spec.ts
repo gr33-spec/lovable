@@ -1,3 +1,4 @@
+import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import { confirmerEmail } from "../e2e/confirmer-email";
 
@@ -55,4 +56,39 @@ test("la phrase dictée de la capture : deux articles, la question du comptoir, 
   await expect(compris).toContainText("52 m²");
   // Rien n'est dans la liste sans le bouton.
   await expect(chat.getByRole("button", { name: /^Ma liste/ })).toHaveCount(0);
+});
+
+test("une photo de chantier : ce que l'assistant voit, les matériaux à confirmer sans quantité, ses questions ; les mesures dites complètent", async ({ page }) => {
+  // Greg, 12 novembre 2026 (feuille « Ajouter ») : « un artisan doit pouvoir donner une photo pour aider l'IA à comprendre le
+  // contexte du chantier et analyser les matériaux […] et poser les questions nécessaires ».
+  await inscrire(page);
+  await page.goto("/chantiers/nouveau");
+  const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  await page.getByLabel("Choisir une photo").setInputFiles(path.join(__dirname, "fixtures", "toiture.jpg"));
+  await expect(chat.getByRole("img", { name: "Photo du chantier" })).toBeVisible();
+  await expect(chat.getByText("Je vois une couverture en ardoises et une gouttière en zinc.")).toBeVisible();
+  const compris = chat.getByRole("region", { name: "J'ai compris" });
+  await expect(compris).toContainText("J'ai compris 2 articles");
+  await expect(compris).toContainText(/Ardoise naturelle/);
+  await expect(compris).toContainText(/Gouttière/);
+  // Une photo ne mesure rien : ni la quantité ni le format inventés par le modèle ne passent.
+  await expect(compris).not.toContainText(/12\s?m\b/);
+  await expect(compris).not.toContainText(/32\s?×\s?22/);
+  await expect(chat.getByText("Quelle surface de couverture, en m² ?")).toBeVisible();
+  // L'artisan dit ses mesures : la carte se complète, toujours une seule.
+  await chat.getByRole("textbox", { name: "Ton message" }).fill("85 m² en 32 22 et 14 mètres de gouttière");
+  await chat.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(chat.getByRole("region", { name: "J'ai compris" })).toHaveCount(1);
+  await expect(compris).toContainText("85 m²");
+  await expect(compris).toContainText(/32\s?×\s?22/);
+  await expect(compris).toContainText("14 m");
+});
+
+test("une photo d'une liste écrite : l'assistant la reconnaît et propose la lecture du document, comme avant", async ({ page }) => {
+  await inscrire(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Choisir une photo").setInputFiles(path.join(__dirname, "fixtures", "liste-papier.jpg"));
+  // La confirmation habituelle avant l'analyse d'une liste (son coût est dit avant) ; rien n'est recopié par l'assistant.
+  await expect(page.getByRole("dialog", { name: "Nouveau quantitatif" }).getByRole("region", { name: "J'ai compris" })).toHaveCount(0);
+  await expect(page.getByRole("alertdialog", { name: "Analyser ce document ?" })).toBeVisible();
 });

@@ -48,6 +48,7 @@ describe("l'assistant connecté à l'IA", () => {
       { libelle: "Ardoise naturelle 32×22 Espagne 1er choix", quantite: "52", unite: "m²" },
       { libelle: "Gouttière havraise développé 25", quantite: null, unite: null },
     ]);
+    expect(r.nature).toBe("texte");
     expect(r.questions).toEqual([{ texte: "Gouttière de 25 : en zinc, en cuivre ou en PVC ?", choix: ["Zinc", "Cuivre", "PVC"] }]);
     const suite = (await agent.post("/v1/assistant/description").send(dit(DICTEE, r.questions[0].texte, "zinc")).expect(200)).body;
     expect(suite.lignes[1]).toEqual({ libelle: "Gouttière havraise zinc développé 25", quantite: null, unite: null });
@@ -70,6 +71,49 @@ describe("l'assistant connecté à l'IA", () => {
     expect((await agent.post("/v1/assistant/description").send(dit(DICTEE)).expect(200)).body.ia).toBe(true);
     expect((await agent.post("/v1/assistant/description").send(dit(DICTEE)).expect(200)).body.ia).toBe(false);
     expect(await appels()).toBe(1);
+  });
+
+  // Les premiers octets d'un JPEG : le double de test ne regarde que le nom du fichier.
+  const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 16, 0x4a, 0x46, 0x49, 0x46, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0xff, 0xd9]);
+
+  it("PHOTO DE CHANTIER : les matériaux vus, sans quantité ni format inventés, avec les questions ; la suite complète", async () => {
+    const agent = await artisan("on");
+    const r = (await agent.post("/v1/assistant/photo").attach("file", JPEG, { filename: "toiture.jpg", contentType: "image/jpeg" }).expect(200)).body;
+    expect(r).toMatchObject({ ia: true, nature: "chantier", vu: "Ardoise naturelle ; Gouttière zinc demi-ronde", message: expect.stringContaining("Je vois une couverture en ardoises") });
+    // Le double invente « 12 m » et « 32×22 » : la quantité tombe, la ligne au format inventé est écartée.
+    expect(r.lignes).toEqual([
+      { libelle: "Ardoise naturelle", quantite: null, unite: null, vuSurPhoto: true },
+      { libelle: "Gouttière zinc demi-ronde", quantite: null, unite: null, vuSurPhoto: true },
+    ]);
+    expect(r.questions.map((q: { texte: string }) => q.texte)).toEqual(["Tu refais toute la couverture ou une partie ?", "Quelle surface de couverture, en m² ?"]);
+    // La suite, sans renvoyer la photo : ce qui a été vu reste nommé, les mesures viennent de l'artisan.
+    const suite = (
+      await agent
+        .post("/v1/assistant/description")
+        .send({ echanges: [{ de: "artisan", texte: "Voici une photo." }, { de: "photo", texte: r.vu }, { de: "assistant", texte: "Quelle surface de couverture, en m² ?" }, { de: "artisan", texte: "85 m² en 32 22 et 14 mètres de gouttière" }] })
+        .expect(200)
+    ).body;
+    expect(suite.lignes).toEqual([
+      { libelle: "Ardoise naturelle 32×22", quantite: "85", unite: "m²", vuSurPhoto: true },
+      { libelle: "Gouttière zinc demi-ronde", quantite: "14", unite: "m" },
+    ]);
+  });
+
+  it("PHOTO d'une liste, d'un devis ou d'autre chose : rien n'est recopié, l'écran sait quoi en faire ; éteint : comme avant", async () => {
+    const agent = await artisan("on");
+    const photo = (nom: string) => agent.post("/v1/assistant/photo").attach("file", JPEG, { filename: nom, contentType: "image/jpeg" });
+    expect((await photo("liste-papier.jpg").expect(200)).body).toMatchObject({ ia: true, nature: "liste", lignes: [], questions: [] });
+    expect((await photo("devis.jpg").expect(200)).body).toMatchObject({ ia: true, nature: "devis", lignes: [] });
+    expect((await photo("chat.jpg").expect(200)).body).toMatchObject({ ia: true, nature: "autre", lignes: [], message: "Je ne vois ni chantier ni liste sur cette photo." });
+    // Un fichier qui n'est pas une image, ou aucune photo : refusé avant tout appel.
+    const avant = await appels();
+    expect((await agent.post("/v1/assistant/photo").attach("file", Buffer.from("%PDF-1.4"), { filename: "toiture.jpg", contentType: "image/jpeg" }).expect(400)).body.error.details.reason).toBe("photo_illisible");
+    await agent.post("/v1/assistant/photo").send({}).expect(400);
+    expect(await appels()).toBe(avant);
+    await ctx!.app.close();
+    const eteint = await artisan("off");
+    expect((await eteint.post("/v1/assistant/photo").attach("file", JPEG, { filename: "toiture.jpg", contentType: "image/jpeg" }).expect(200)).body).toEqual({ ia: false, nature: null, vu: null, lignes: [], questions: [], message: "" });
+    expect(await appels()).toBe(0);
   });
 
   it("le dernier message doit être celui de l'artisan ; sans session, refusé", async () => {

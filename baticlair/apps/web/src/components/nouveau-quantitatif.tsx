@@ -26,13 +26,42 @@ import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, TexteMobiiz, useChampDic
  * photos (plusieurs d'un coup), devis ou PDF, catalogue. Un document est lu par l'IA, son coût dit avant, comme avant ;
  * jamais une quantité ni une caractéristique inventée : ce qui manque reste à préciser sur la ligne.
  */
-type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean; choix?: string[] } | { de: "moi"; texte: string } | { de: "compris"; texte: string; lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige"; comprises?: (ArticleCompris | null)[] };
+type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean; choix?: string[] } | { de: "moi"; texte: string; apercu?: string } | { de: "compris"; texte: string; lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige"; comprises?: (ArticleCompris | null)[] };
 type Element = SansId & { id: number };
 
 const EXEMPLE = "Ex. : 1 000 ardoises 32×22 Espagne 1er choix et 950 crochets inox 100 mm";
 
 /** Une quantité dite sans unité devant le nom d'un article (« 1 000 ardoises ») se compte en pièces : c'est ce qui a été dit. */
 const avecUnite = (l: LigneDecrite): LigneDecrite => (l.quantite && !l.unite && /^\d+$/.test(l.quantite) ? { ...l, unite: "pièces" } : l);
+interface VuePhoto {
+  ia: boolean;
+  nature: "texte" | "chantier" | "liste" | "devis" | "autre" | null;
+  vu: string | null;
+  lignes: LigneDecrite[];
+  questions: { texte: string; choix: string[] }[];
+  message: string;
+}
+
+/** Une photo réduite sur le téléphone (1 568 px au plus, JPEG) : assez pour reconnaître un matériau, légère à envoyer. */
+async function reduirePhoto(f: File): Promise<Blob> {
+  const image = await createImageBitmap(f);
+  const echelle = Math.min(1, 1568 / Math.max(image.width, image.height));
+  const toile = document.createElement("canvas");
+  toile.width = Math.max(1, Math.round(image.width * echelle));
+  toile.height = Math.max(1, Math.round(image.height * echelle));
+  toile.getContext("2d")!.drawImage(image, 0, 0, toile.width, toile.height);
+  image.close();
+  return new Promise((ok, non) => toile.toBlob((b) => (b ? ok(b) : non(new Error("photo illisible"))), "image/jpeg", 0.82));
+}
+
+/** Les photos envoyées à l'assistant, avec la conversation en cours ; rien n'est gardé côté serveur. */
+async function voirLesPhotos(images: File[], echanges: { de: string; texte: string }[]): Promise<VuePhoto> {
+  const form = new FormData();
+  for (const f of images) form.append("file", await reduirePhoto(f), f.name.replace(/\.[^.]+$/, "") + ".jpg");
+  form.append("echanges", JSON.stringify(echanges.slice(-18)));
+  return api<VuePhoto>("/v1/assistant/photo", { method: "POST", body: form });
+}
+
 const nombreFr = (q: string) => (/^\d+$/.test(q) ? Number(q).toLocaleString("fr-FR") : q.replace(".", ","));
 
 export function NouveauQuantitatif() {
@@ -88,7 +117,7 @@ export function NouveauQuantitatif() {
    * le serveur revalide (aucune quantité, aucun article non dit). Éteint, plafond atteint ou sans réseau : le code lit la
    * phrase ici, comme avant.
    */
-  const conversation = useRef<{ echanges: { de: "artisan" | "assistant"; texte: string }[]; carte: number | null }>({ echanges: [], carte: null });
+  const conversation = useRef<{ echanges: { de: "artisan" | "assistant" | "photo"; texte: string }[]; carte: number | null }>({ echanges: [], carte: null });
 
   async function envoyer(dit?: string) {
     const texte = (dit ?? champ.saisie).trim();
@@ -177,7 +206,45 @@ export function NouveauQuantitatif() {
     if (pdfs.length > 1 || (pdfs.length === 1 && images.length > 0)) return dire("Un PDF à la fois, ou plusieurs photos ensemble.");
     if (fs.some((f) => f.size > MAX_DOCUMENT_BYTES)) return dire("C'est trop volumineux pour être envoyé. Envoie une photo plus légère ou un PDF de moins de pages.");
     const nature = fs.length === 1 ? natureDuDocument({ type: fs[0]!.type, nom: fs[0]!.name }, pdfs.length ? await texteDuPdf(fs[0]!) : null) : "liste";
+    // LA PHOTO (Greg, 12 novembre 2026 : « un artisan doit pouvoir donner une photo pour aider l'IA à comprendre le contexte du
+    // chantier […] aussi prendre en photo une liste de matériaux. L'IA devra s'adapter ») : jusqu'à trois photos partent
+    // d'abord à l'assistant, qui dit ce qu'elles montrent. Un chantier : ses matériaux sont proposés ici, à confirmer, avec
+    // les questions. Une liste ou un devis : la lecture de document, comme avant. Éteint ou en panne : comme avant.
+    if (!liste && pdfs.length === 0 && images.length <= 3) {
+      setOccupe(true);
+      const vue = await voirLesPhotos(images, conversation.current.echanges).catch(() => null);
+      setOccupe(false);
+      if (vue?.ia && vue.nature === "chantier") return montrerLeChantier(images, vue);
+      if (vue?.ia && vue.nature === "autre") {
+        ajouterElement({ de: "moi", texte: images.length > 1 ? `${images.length} photos` : "Photo", apercu: URL.createObjectURL(images[0]!) });
+        return dire(vue.message || "Je ne vois ni chantier ni liste de matériaux sur cette photo. Reprends-la, ou dis-moi ce qu'il te faut.");
+      }
+      if (vue?.ia && (vue.nature === "liste" || vue.nature === "devis")) return setAConfirmer({ fichiers: fs, nature: vue.nature });
+    }
     setAConfirmer({ fichiers: fs, nature });
+  }
+
+  /** Une photo de chantier : ce que l'assistant y voit, ses matériaux à confirmer (sans quantité), puis ses questions. */
+  function montrerLeChantier(images: File[], vue: VuePhoto) {
+    ajouterElement({ de: "moi", texte: images.length > 1 ? `${images.length} photos du chantier` : "Photo du chantier", apercu: URL.createObjectURL(images[0]!) });
+    const ancienne = conversation.current.carte;
+    if (ancienne !== null) setElements((xs) => xs.filter((x) => x.id !== ancienne));
+    const lignes = vue.lignes.map(avecUnite);
+    conversation.current = {
+      echanges: [
+        ...conversation.current.echanges,
+        { de: "artisan" as const, texte: "Voici une photo." },
+        ...(vue.vu ? [{ de: "photo" as const, texte: vue.vu }] : []),
+        ...vue.questions.map((q) => ({ de: "assistant" as const, texte: q.choix.length ? `${q.texte} (${q.choix.join(", ")})` : q.texte })),
+      ],
+      carte: null,
+    };
+    if (vue.message) dire(vue.message);
+    if (lignes.length) {
+      dire("Voici ce que je vois sur ta photo. Une photo ne donne pas les mesures : dis-moi les quantités et les formats, je complète.");
+      conversation.current.carte = ajouterElement({ de: "compris", texte: "", lignes, etat: "ouvert" });
+    }
+    for (const q of vue.questions) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
   }
 
   async function analyser(fs: File[], nature: "devis" | "liste") {
@@ -244,6 +311,8 @@ export function NouveauQuantitatif() {
           {elements.map((e) =>
             e.de === "moi" ? (
               <Bulle key={e.id} de="moi">
+                {/* eslint-disable-next-line @next/next/no-img-element -- la photo que l'artisan vient de prendre, lue sur son téléphone */}
+                {e.apercu ? <img src={e.apercu} alt={e.texte} className="mb-1 max-h-48 w-auto rounded-xl" /> : null}
                 {e.texte}
               </Bulle>
             ) : e.de === "mobiiz" ? (
