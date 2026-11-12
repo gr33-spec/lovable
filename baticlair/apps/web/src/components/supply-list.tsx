@@ -691,6 +691,32 @@ function Row({
 }) {
   const [open, setOpen] = useState(false);
   const [naming, setNaming] = useState(false);
+  /** Le glissement en cours sur le voile d'une ligne ouverte (voir plus bas). */
+  const voile = useRef<{ y: number; glisse: boolean } | null>(null);
+  // Retour de Greg (12 novembre 2026) : une ligne ouverte en bas de l'écran montrait son titre et cachait ses boutons sous
+  // la barre du navigateur. À l'ouverture (et quand son contenu grandit), la page défile pour montrer la ligne entière ; si
+  // elle est plus haute que l'écran, son haut passe sous l'en-tête et le reste se fait défiler.
+  useEffect(() => {
+    if (!open) return;
+    const montrer = () => {
+      const li = document.getElementById(`ligne-${row.key}`);
+      if (!li) return;
+      const r = li.getBoundingClientRect();
+      const hauteur = window.visualViewport?.height ?? window.innerHeight;
+      const haut = 96;
+      const bas = hauteur - 16;
+      if (r.bottom > bas) window.scrollBy({ top: Math.min(r.bottom - bas, r.top - haut), behavior: "smooth" });
+      else if (r.top < haut) window.scrollBy({ top: r.top - haut, behavior: "smooth" });
+    };
+    const t = setTimeout(montrer, 60);
+    const li = document.getElementById(`ligne-${row.key}`);
+    const obs = li && typeof ResizeObserver !== "undefined" ? new ResizeObserver(montrer) : null;
+    if (li && obs) obs.observe(li);
+    return () => {
+      clearTimeout(t);
+      obs?.disconnect();
+    };
+  }, [open, row.key]);
   const [precising, setPrecising] = useState(false);
   const [dx, setDx] = useState(0);
   // Une ligne orange réglée (« C'est bon », un choix) se referme d'elle-même : le flou derrière elle s'en va avec elle.
@@ -820,13 +846,32 @@ function Row({
           flou la referme. */}
       {open && typeof document !== "undefined"
         ? createPortal(
+            // Retour de Greg (12 novembre 2026, capture : la ligne ouverte en bas de l'écran, « je ne peux pas scroller pour
+            // modifier ») : un glissement sur le flou fait défiler la page (le navigateur du téléphone ne le faisait pas sur
+            // ce voile fixe) ; seul un appui sans glisser referme.
             <button
               type="button"
               aria-label="Fermer la ligne ouverte"
+              onPointerDown={(e) => (voile.current = { y: e.clientY, glisse: false })}
+              onPointerMove={(e) => {
+                const v = voile.current;
+                if (!v) return;
+                const dy = v.y - e.clientY;
+                if (!v.glisse && Math.abs(dy) < 6) return;
+                v.glisse = true;
+                v.y = e.clientY;
+                window.scrollBy(0, dy);
+              }}
+              onPointerCancel={() => (voile.current = null)}
+              onWheel={(e) => window.scrollBy(0, e.deltaY)}
               onClick={() => {
+                const glisse = voile.current?.glisse;
+                voile.current = null;
+                if (glisse) return;
                 setNaming(false);
                 setOpen(false);
               }}
+              style={{ touchAction: "none" }}
               className="fixed inset-0 z-50 cursor-default bg-[#130901]/35 backdrop-blur-[3px]"
             />,
             document.body,

@@ -1319,6 +1319,43 @@ test("§50.7 : une ligne ouverte passe au premier plan, le reste flouté ; un ta
   await expect(voile).toHaveCount(0);
 });
 
+test("une ligne ouverte en bas d'un petit écran se montre en entier, et un glissement sur le flou fait défiler la page", async ({ page }) => {
+  // Retour de Greg (12 novembre 2026, captures test.mobiiz.fr dans un navigateur à barres haute et basse) : la ligne ouverte
+  // ne montrait que « Modifier le nom », ses boutons sous l'écran ; « Ici je ne peux pas scroller pour modifier ».
+  await signUp(page);
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await passQuestions(page);
+  await openList(page);
+  await page.setViewportSize({ width: 375, height: 520 });
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  // La ligne est tout en bas de l'écran quand on l'ouvre : son crayon est à peine visible.
+  const crayon = list.getByRole("button", { name: /^Modifier la ligne : / }).first();
+  await crayon.evaluate((el) => window.scrollBy(0, el.getBoundingClientRect().top - (window.innerHeight - 50)));
+  await crayon.click();
+  const ouverte = list.getByRole("group", { name: /^Ligne ouverte : / });
+  await expect(ouverte).toHaveCount(1);
+  // La page a défilé d'elle-même : la ligne ouverte tient dans l'écran, boutons compris (ou son haut est sous l'en-tête).
+  await expect
+    .poll(async () => ouverte.evaluate((el) => {
+      const r = el.closest("li")!.getBoundingClientRect();
+      return r.bottom <= window.innerHeight || r.top <= 100;
+    }))
+    .toBe(true);
+  // Un glissement sur le flou fait défiler la page, sans refermer la ligne.
+  const avant = await page.evaluate(() => window.scrollY);
+  await page.mouse.move(8, 400);
+  await page.mouse.down();
+  await page.mouse.move(8, 340, { steps: 4 });
+  await page.mouse.move(8, 280, { steps: 4 });
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(avant + 60);
+  await expect(ouverte).toHaveCount(1);
+  // Un appui sans glisser referme toujours.
+  await page.getByRole("button", { name: "Fermer la ligne ouverte" }).click({ position: { x: 8, y: 8 } });
+  await expect(ouverte).toHaveCount(0);
+});
+
 test("§49.8 : une info qui manque se demande en clair sur la ligne qu'elle concerne, avec ses boutons", async ({ page }) => {
   // Retour du fondateur (2026-10-11, capture iPhone) : « Liteaux 27×40, Section à préciser : je ne sais pas quoi faire. On
   // doit comprendre sans réfléchir. » Ce qui manquait aux liteaux était dit aussi sur les tuiles, et sa question vivait sur
