@@ -104,7 +104,7 @@ for (const size of WIDTHS) {
     await expect(page.getByRole("heading", { name: /^(Bonjour|Paie tes matériaux moins cher)/ })).toBeVisible();
     await shoot(page, size.name, "03-accueil");
 
-    await page.goto("/chantiers/nouveau");
+    await page.goto("/chantiers/nouveau?mode=assistant");
     await expect(page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/)).toBeVisible();
     await shoot(page, size.name, "04-nouveau-chantier");
 

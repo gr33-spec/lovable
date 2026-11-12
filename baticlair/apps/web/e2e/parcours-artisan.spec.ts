@@ -221,7 +221,8 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   // Recentrage (25 octobre 2026) : plus de « + » au centre de la barre ; le gros bouton « Nouveau chantier » de l'accueil.
   await page.goto("/");
   await page.getByRole("link", { name: "Ma liste de matériaux" }).first().click();
-  await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
+  await expect(page).toHaveURL(/\/chantiers\/nouveau(\?mode=assistant)?$/);
+  await page.getByRole("link", { name: /Mobiiz m'aide/ }).click();
   // Deux parcours reliés (Greg, 7 novembre 2026) : une conversation ; le « + » ouvre « Ajouter » (photo, document,
   // catalogue), avec l'information de l'analyse en une phrase et son détail dans une fenêtre.
   await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click();
@@ -372,7 +373,7 @@ test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche 
   await signUp(page);
   for (const theme of ["sombre", "clair"]) {
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
-    await page.goto("/chantiers/nouveau");
+    await page.goto("/chantiers/nouveau?mode=assistant");
     const nav = page.getByRole("navigation", { name: "Navigation principale" });
     await expect(nav.getByRole("link").first()).toBeVisible();
     const ratios = await nav.getByRole("link").evaluateAll((liens) => {
@@ -929,7 +930,7 @@ test("accueil : la prochaine action de chaque chantier, puis l'essai et les form
   await expect(page.getByText("Chantier 2")).toBeVisible();
   await expect(page.getByText("Client non renseigné")).toHaveCount(0);
   await createProject(page, "Chantier 3", "", "");
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await expect(page.getByRole("heading", { name: "Ton essai est terminé" })).toBeVisible();
   await expect(page.getByText("Continue à utiliser Mobiiz pour lire tes devis et comparer tes fournisseurs.")).toBeVisible();
   const plans = page.getByRole("list", { name: "Formules" }).getByRole("listitem");
@@ -1504,7 +1505,7 @@ test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en
 
 test("rien ne part vide : un devis où je ne lis aucune ligne se dit en une phrase, avec « Réessayer », jamais un bouton d'envoi", async ({ page }) => {
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-vide.pdf"));
   // §50.1 : en cas d'échec, la raison en une phrase et « Réessayer », rien d'autre.
   const failure = page.getByRole("region", { name: "Lecture du devis" });
@@ -1527,7 +1528,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
     await expect(page.getByRole("button", { name: /^(Ouvrir|Supprimer) devis/ })).toHaveCount(0);
   };
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   // 1. Le document par le « + » de la conversation (Greg, 7 novembre 2026).
   await expect(page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" })).toBeVisible();
   await clean();
@@ -1600,7 +1601,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
 
 test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont repliés sous « lignes sans fourniture »", async ({ page }) => {
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-reparation.pdf"));
   await passQuestions(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -1621,7 +1622,7 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
   // Retour du fondateur (capture « Crochets … · Finition à préciser ») : la fiche proposait le nom, +/−, croquis, retirer,
   // mais rien pour répondre. Une ligne orange se règle là où on l'ouvre : sa question d'abord, ses boutons, « Autre ».
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
@@ -1694,7 +1695,7 @@ test("§50.2 : « Calculer ma liste » reste collé en bas de l'écran, même ap
 
 test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (une pente de 38°)", async ({ page }) => {
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
@@ -1723,7 +1724,7 @@ test("retour du fondateur (2026-10-12) : un refus du serveur se dit sur la carte
   // Capture iPhone : « Un champ n'est pas correctement rempli » en haut de l'écran, sans dire où. Le refus nomme la réponse
   // (`reponses.N.valeur`) : la carte de cette question passe au rouge avec sa phrase, l'écran l'amène, rien en haut.
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
@@ -1750,7 +1751,7 @@ test("retour du fondateur (2026-10-12) : une question qui ne sert pas se retire 
   // « Donne la possibilité de supprimer des questions avec une poubelle car parfois tout n'est pas pertinent. » La question
   // part sans réponse ; sa ligne reste orange dans la liste, où elle se règle (§51.6). Le façonnage, obligatoire, n'en a pas.
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
@@ -1775,7 +1776,7 @@ test("retour du fondateur (2026-10-12) : une question qui ne sert pas se retire 
 
 test("temps deux (2026-10-12) : « Autre » partout où il y a des boutons, consommables compris", async ({ page }) => {
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
@@ -2680,7 +2681,7 @@ test("Liste donnée en photo, chantier sans adresse : la barre de la commande de
   page.on("response", (r) => {
     if (r.status() === 400 && /\/commande-du-mois/.test(r.url())) refus.push(r.url());
   });
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -3012,7 +3013,8 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   // Recentrage (25 octobre 2026) : plus de « + » au centre de la barre ; le gros bouton « Nouveau chantier » de l'accueil.
   await page.goto("/");
   await page.getByRole("link", { name: "Ma liste de matériaux" }).first().click();
-  await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
+  await expect(page).toHaveURL(/\/chantiers\/nouveau(\?mode=assistant)?$/);
+  await page.getByRole("link", { name: /Mobiiz m'aide/ }).click();
   // Deux parcours reliés (Greg, 7 novembre 2026) : une seule porte, la conversation ; le « + » ouvre « Ajouter ».
   await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click();
   const feuille = page.getByRole("dialog", { name: "Ajouter" });
@@ -3105,7 +3107,7 @@ test("« J'ai déjà ma liste » : un bon de négoce (photo) et un tableau (PDF)
     { fichier: "liste-tableau.pdf", premiere: /^Modifier : Plaque de plâtre BA13 2,50x1,20/, lignes: 6 },
   ];
   for (const c of cas) {
-    await page.goto("/chantiers/nouveau");
+    await page.goto("/chantiers/nouveau?mode=assistant");
     await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", c.fichier));
     await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}$/, { timeout: 60_000 });
     const liste = page.getByRole("region", { name: "Liste des fournitures" });
@@ -3122,7 +3124,7 @@ test("« Importer un document » (Greg, 31 octobre 2026) : une capture d'écran 
   // Une photo passe par le scan de liste (lecture_liste), jamais par l'analyse de devis : la jauge des analyses ne bouge pas.
   const avant = (await apiJson(page, "GET", "/v1/ai-usage/jauge")).body;
   for (const champ of ["Choisir une photo", "Prendre une photo"]) {
-    await page.goto("/chantiers/nouveau");
+    await page.goto("/chantiers/nouveau?mode=assistant");
     // Le type n'est jamais demandé : le champ prend la photo telle quelle.
     await expect(page.getByText(/devis ou une liste \?|Quel type/)).toHaveCount(0);
     await page.getByLabel(champ).setInputFiles({ name: "Capture d'écran.png", mimeType: "image/png", buffer: fs.readFileSync(path.join(__dirname, "fixtures", "bon-negoce.png")) });
@@ -3141,7 +3143,7 @@ test("« Importer un document » (Greg, 1er novembre 2026) : avant toute analyse
   const chantiers = (await apiJson(page, "GET", "/v1/projects")).body;
   const fenetre = page.getByRole("alertdialog", { name: "Analyser ce document ?" });
   // Un PDF de devis : « devis », puis Annuler : rien de créé, rien de décompté.
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 analyse de devis.");
   await fenetre.getByRole("button", { name: "Annuler" }).click();
@@ -3157,7 +3159,7 @@ test("« Importer un document » (Greg, 1er novembre 2026) : avant toute analyse
   await fenetre.getByRole("button", { name: "C'est un devis ? L'analyser comme un devis" }).click();
   await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 analyse de devis.");
   await fenetre.getByRole("button", { name: "Annuler" }).click();
-  expect(page.url()).toMatch(/\/chantiers\/nouveau$/);
+  expect(page.url()).toMatch(/\/chantiers\/nouveau\?mode=assistant$/);
   expect((await apiJson(page, "GET", "/v1/projects")).body).toEqual(chantiers);
   expect((await apiJson(page, "GET", "/v1/ai-usage/jauge")).body).toEqual(jauge);
   // Une photo de devis (son nom le dit) : « devis », et elle part bien à l'analyse de devis (PDF d'image, devis client).
@@ -3173,27 +3175,27 @@ test("« Importer un document » (Greg, 1er novembre 2026) : avant toute analyse
 test("« Ma liste de matériaux » sur téléphone : rien sous la barre du bas, ni l'écran ni le bouton de « Saisir ma liste »", async ({ page }, info) => {
   test.skip(info.project.name !== "telephone", "la barre du bas n'existe que sur téléphone");
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   // Deux parcours reliés (Greg, 7 novembre 2026) : la conversation prend tout l'écran ; sa barre reste dans l'écran.
   const plus = page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" });
   const p = (await plus.boundingBox())!;
   expect(p.y + p.height).toBeLessThanOrEqual(page.viewportSize()!.height);
   await plus.click();
   await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
-  const bouton = page.getByRole("button", { name: "Sélectionne un matériau" });
+  const bouton = page.getByRole("button", { name: "Ajoute un matériau pour créer le quantitatif" }).filter({ visible: true });
   await expect(bouton).toBeVisible();
   const c = (await bouton.boundingBox())!;
   const dessus = await page.evaluate(([x, y]) => document.elementFromPoint(x!, y!)?.closest("button")?.textContent ?? "", [c.x + c.width / 2, c.y + c.height / 2]);
-  expect(dessus).toContain("Sélectionne un matériau");
+  expect(dessus).toContain("Ajoute un matériau pour créer le quantitatif");
   expect(c.y + c.height).toBeLessThanOrEqual(page.viewportSize()!.height);
 });
 
 test("« J'ai déjà ma liste » : un fichier qui n'est ni une photo ni un PDF se dit en clair, rien n'est créé", async ({ page }) => {
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles({ name: "liste.txt", mimeType: "text/plain", buffer: Buffer.from("du texte") });
   await expect(page.getByText(/ni une photo ni un PDF|rien lu/)).toBeVisible();
-  await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
+  await expect(page).toHaveURL(/\/chantiers\/nouveau(\?mode=assistant)?$/);
 });
 
 /**
@@ -3315,7 +3317,7 @@ test("Zéro bouton mort (artisan) : accueil, chantiers, nouvelle liste, Ton chan
   test.setTimeout(900_000);
   await compteAuGroupe(page, "Toitures Clics", "4 rue de Kerampont, 22300 Lannion");
   // Une liste lue (photo), avec une ligne vague et des lignes précises.
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
   const chantier = new URL(page.url()).pathname;
@@ -3346,7 +3348,7 @@ test("Zéro bouton mort (artisan) : accueil, chantiers, nouvelle liste, Ton chan
 
 test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau coupé, photo floue, un seul chantier malgré les essais, retour arrière, session expirée, liens expirés", { tag: "@ancien" }, async ({ page }) => {
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   const depot = page.getByLabel("Choisir un PDF ou un fichier");
   const photo = fs.readFileSync(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   // Conversation « Nouveau quantitatif » (Greg, 7 novembre 2026) : chaque document se confirme avant l'analyse.
@@ -3391,7 +3393,7 @@ test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau co
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
   expect(page.url()).toBe(chantier);
   // Session expirée en pleine action : la phrase, et un bouton pour se reconnecter qui ramène ici.
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   // Les lectures de l'écran (le bandeau de l'abonnement) finissent avant que la session expire.
   await page.waitForLoadState("networkidle");
   await page.context().clearCookies();
@@ -3919,15 +3921,15 @@ test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un e
 test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat groupé, sans sa logique ; une suggestion, un matériau absent, la désignation libre, quantité et unité, retour sans perte, bouton dynamique, puis l'éditeur ; aucun crédit, aucun achat groupé, aucun négoce", async ({ page }) => {
   await signUp(page);
   const jaugeAvant = (await apiJson<{ quotas?: unknown; jauge?: unknown }>(page, "GET", "/v1/ai-usage/jauge")).body;
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await expect(ecran.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" })).toBeVisible();
   // Rien de l'achat groupé : ni étapes, ni commune, ni négoces, ni engagement.
   await expect(ecran.getByText(/Achat groupé de ton métier|Commune de livraison|négoces|Je m'engage/)).toHaveCount(0);
   await expect(ecran.getByLabel("Métier")).toBeVisible();
-  const bouton = page.getByRole("button", { name: /^(Sélectionne un matériau|Créer ma liste avec \d+ matériaux?)$/ });
-  await expect(bouton).toHaveText("Sélectionne un matériau");
+  const bouton = page.getByRole("button", { name: /^(Ajoute un matériau pour créer le quantitatif|Créer le quantitatif · \d+ matériaux?)$/ }).filter({ visible: true });
+  await expect(bouton).toHaveText("Ajoute un matériau pour créer le quantitatif");
   await expect(bouton).toBeDisabled();
   // 1. Une suggestion du catalogue (familles › produit › format), sans quantité imposée.
   await ecran.getByRole("button", { name: "Ardoises", exact: true }).click();
@@ -3935,7 +3937,7 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   await ecran.getByRole("button", { name: "32×22 · Espagne 1er choix", exact: true }).click();
   await ecran.getByLabel("Quantité de Ardoise naturelle 32×22 · Espagne 1er choix").fill("900");
   await ecran.getByRole("button", { name: "Ajouter à la sélection" }).click();
-  await expect(bouton).toHaveText("Créer ma liste avec 1 matériau");
+  await expect(bouton).toHaveText("Créer le quantitatif · 1 matériau");
   // 2. Un autre métier n'est jamais bloqué : la recherche trouve ailleurs.
   await ecran.getByLabel("Métier").selectOption({ label: "Électricité" });
   // 3. Un matériau absent : ce qui est tapé s'ajoute tel quel, sans produit imposé, quantité et unité facultatives.
@@ -3943,7 +3945,7 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   await ecran.getByRole("button", { name: /Ajouter « Faîtière ventilée modèle ancien » tel que je l'écris/ }).click();
   await expect(ecran.getByLabel("Désignation", { exact: true }).first()).toHaveValue("Faîtière ventilée modèle ancien");
   await ecran.getByRole("button", { name: "Ajouter à la sélection" }).click();
-  await expect(bouton).toHaveText("Créer ma liste avec 2 matériaux");
+  await expect(bouton).toHaveText("Créer le quantitatif · 2 matériaux");
   // 4. Chaque ligne se modifie librement : désignation, caractéristiques, quantité, unité.
   const liste = ecran.getByRole("region", { name: "Ma liste en cours" });
   const desig = liste.getByLabel("Désignation").nth(1);
@@ -3957,7 +3959,7 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
   await page.goto("/chantiers/nouveau?liste=1");
   await expect(ecran.getByRole("region", { name: "Ma liste en cours" }).getByLabel("Désignation").nth(1)).toHaveValue("Faîtière ventilée terre cuite, modèle ancien");
-  await expect(bouton).toHaveText("Créer ma liste avec 2 matériaux");
+  await expect(bouton).toHaveText("Créer le quantitatif · 2 matériaux");
   // 6. Le même éditeur que les autres méthodes ; la précision part sur la ligne (PDF du négoce), jamais dans la désignation.
   const precisions: string[] = [];
   page.on("response", async (r) => {
@@ -3988,14 +3990,14 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
 test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan reviennent ; ceux d'autres artisans sont marqués, jamais leur entreprise", async ({ page }) => {
   await signUp(page);
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Crochet gouttière bandeau 25", quantite: "40", unite: "pièces" }] })).status).toBe(201);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
   await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25 (déjà écrit par toi)" })).toBeVisible();
   await page.context().clearCookies();
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
   await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
   await page.waitForTimeout(800);
@@ -4006,7 +4008,7 @@ test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan revien
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Tuile Zéphyr terre cuite, modèle ZX 12", quantite: "10", unite: "pièces" }] })).status).toBe(201);
   await page.context().clearCookies();
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
   await ecran.getByLabel("Rechercher un matériau").fill("zephyr zx12");
   await expect(ecran.getByRole("button", { name: /Zéphyr.*\(écrit par d'autres artisans\)$/i })).toBeVisible();
@@ -4015,7 +4017,7 @@ test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan revien
 
 test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèle → la question se répond avec le catalogue (« H14 »), la quantité du devis gardée", async ({ page }) => {
   await signUp(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-tuile-modele.pdf"));
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });

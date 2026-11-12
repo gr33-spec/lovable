@@ -203,6 +203,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
 
     // 2. La liste depuis un devis : trois choix, le bandeau, « à vérifier », la suggestion, « Tout cocher ».
     await vide.getByRole("link", { name: /^Créer un quantitatif/ }).click();
+    await page.getByRole("link", { name: /Mobiiz m'aide/ }).click();
     // Deux parcours reliés (Greg, 7 novembre 2026) : une conversation ; le « + » ouvre photo, document et catalogue.
     await expect(page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" })).toBeVisible();
     await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-achat-groupe.pdf"));
@@ -488,7 +489,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
 
   test("liste écrite à la main : fermée, reprise telle quelle", async ({ page }) => {
     await inscrireSansSiret(page, departementReserve([9, 10], [11, 12]));
-    await page.goto("/chantiers/nouveau");
+    await page.goto("/chantiers/nouveau?mode=assistant");
     await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
     const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
     await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
@@ -502,7 +503,8 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
     // Retour à la conversation « Nouveau quantitatif » (plein écran, par-dessus le menu) : on la ferme.
     await page.getByRole("dialog", { name: "Nouveau quantitatif" }).getByRole("button", { name: "Fermer l'assistant" }).click();
-    await page.waitForURL(/\/chantiers$/);
+    // Direction A : fermer l'assistant ramène au choix « Nouveau quantitatif ».
+    await page.waitForURL(/\/chantiers\/nouveau$/);
     await partirEtReprendre(page, "Terminer ta liste");
     await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByRole("textbox").first()).toHaveValue("Liteaux 27×38 maison");
   });

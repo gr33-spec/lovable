@@ -38,9 +38,9 @@ async function inscrire(page: Page) {
 
 test("une phrase, deux articles : « J'ai compris », ajouter, voir ma liste, puis la carte du regroupement", async ({ page }) => {
   await inscrire(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
-  await expect(chat.getByText("Bonjour Jean. Que veux-tu préparer ?")).toBeVisible();
+  await expect(chat.getByText("Bonjour Jean. Donne-moi ce que tu as : je prépare, tu vérifies.")).toBeVisible();
   // Le « + » : photo, document, catalogue.
   await chat.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click();
   const feuille = page.getByRole("dialog", { name: "Ajouter" });
@@ -86,9 +86,9 @@ test("une phrase, deux articles : « J'ai compris », ajouter, voir ma liste, pu
 
 test("le langage des artisans (Greg, 8 novembre 2026) : « 36 mètres de Lito » → « Tu veux dire 36 mètres linéaires de liteaux ? », la section, puis la validation finale", async ({ page }) => {
   await inscrire(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
-  await expect(chat.getByText("Bonjour Jean. Que veux-tu préparer ?")).toBeVisible();
+  await expect(chat.getByText("Bonjour Jean. Donne-moi ce que tu as : je prépare, tu vérifies.")).toBeVisible();
   // Le guide de première visite peut s'ouvrir par-dessus et vider la case en se fermant : on réécrit jusqu'à pouvoir envoyer.
   await expect(async () => {
     await chat.getByRole("textbox", { name: "Ton message" }).fill("36 mètres de Lito");

@@ -29,10 +29,10 @@ export function ChoixCreation() {
       </div>
       <div className="flex flex-col gap-3">
         {enCours > 0 ? (
-          <CarteLien href="/chantiers/nouveau?mode=manuel" icone={ClipboardList} titre={`Reprendre ma liste en cours · ${enCours} matériau${enCours > 1 ? "x" : ""}`} sous="Tu la retrouves comme tu l'as laissée." />
+          <CarteLien remplace href="/chantiers/nouveau?mode=manuel" icone={ClipboardList} titre={`Reprendre ma liste en cours · ${enCours} matériau${enCours > 1 ? "x" : ""}`} sous="Tu la retrouves comme tu l'as laissée." />
         ) : null}
-        <CarteLien jaune href="/chantiers/nouveau?mode=manuel" icone={PencilLine} titre="Je saisis ma liste" sous="Je choisis mes matériaux par métier et par famille, ou je les écris." />
-        <CarteLien href="/chantiers/nouveau?mode=assistant" icone={Sparkles} titre="Mobiiz m'aide" sous="À partir d'une photo, d'un devis, d'un PDF, d'une liste ou de ce que je dis. Je vérifie tout." />
+        <CarteLien remplace jaune href="/chantiers/nouveau?mode=manuel" icone={PencilLine} titre="Je saisis ma liste" sous="Je choisis mes matériaux par métier et par famille, ou je les écris." />
+        <CarteLien remplace href="/chantiers/nouveau?mode=assistant" icone={Sparkles} titre="Mobiiz m'aide" sous="À partir d'une photo, d'un devis, d'un PDF, d'une liste ou de ce que je dis. Je vérifie tout." />
       </div>
       <p className="text-[13px] leading-relaxed text-muted">Tu peux changer en cours de route : l&apos;aide de Mobiiz reste disponible depuis ta liste, et rien n&apos;est ajouté sans ton accord.</p>
     </div>

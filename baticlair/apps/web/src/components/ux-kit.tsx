@@ -55,7 +55,7 @@ export function Etiquette({ ton = "jaune", children }: { ton?: Ton; children: Re
 }
 
 /** Une grande carte cliquable : pastille d'icône, titre, sous-titre, chevron. `jaune` : l'action principale de l'écran. */
-export function CarteLien({ href, onClick, icone: Icone, titre, sous, jaune = false, pastille, etiquette, label }: { href?: string; onClick?: () => void; icone?: LucideIcon; titre: string; sous?: React.ReactNode; jaune?: boolean; pastille?: React.ReactNode; etiquette?: React.ReactNode; /** Le nom lu par un lecteur d'écran, quand il doit commencer par l'action et non par l'étiquette. */ label?: string }) {
+export function CarteLien({ href, onClick, icone: Icone, titre, sous, jaune = false, pastille, etiquette, label, remplace = false }: { /** Le lien remplace l'écran courant dans l'historique (un écran de choix ne se retrouve pas au retour arrière). */ remplace?: boolean; href?: string; onClick?: () => void; icone?: LucideIcon; titre: string; sous?: React.ReactNode; jaune?: boolean; pastille?: React.ReactNode; etiquette?: React.ReactNode; /** Le nom lu par un lecteur d'écran, quand il doit commencer par l'action et non par l'étiquette. */ label?: string }) {
   const classe = `pressable flex w-full items-center gap-3 rounded-[20px] p-4 text-left shadow-card ${jaune ? JAUNE : "bg-surface text-ink"}`;
   const contenu = (
     <>
@@ -74,7 +74,7 @@ export function CarteLien({ href, onClick, icone: Icone, titre, sous, jaune = fa
     </>
   );
   return href ? (
-    <Link href={href} className={classe} {...(label ? { "aria-label": label } : {})}>
+    <Link href={href} replace={remplace} className={classe} {...(label ? { "aria-label": label } : {})}>
       {contenu}
     </Link>
   ) : (

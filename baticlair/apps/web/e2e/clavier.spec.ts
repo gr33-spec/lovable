@@ -76,7 +76,7 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     expect(await apiJson(page, "POST", "/v1/groupe/siret")).toBe(200);
 
     // 2. « Saisir ma liste » (31 octobre 2026) : la recherche, la ligne libre, la quantité ; le bouton du bas reste visible.
-    await page.goto("/chantiers/nouveau");
+    await page.goto("/chantiers/nouveau?mode=assistant");
     await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
     const dialogue = page.getByRole("dialog", { name: "Saisir ma liste" });
     await champVisible(page, dialogue.getByLabel("Rechercher un matériau"));
@@ -85,7 +85,7 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     await champVisible(page, dialogue.getByLabel("Quantité de la ligne libre"));
     await dialogue.getByLabel("Quantité de la ligne libre").fill("90");
     await dialogue.getByRole("button", { name: "Ajouter à la sélection" }).click();
-    await champVisible(page, dialogue.getByLabel("Quantité de Crochets inox maison"));
+    await champVisible(page, dialogue.getByLabel("Quantité de Crochets inox maison").filter({ visible: true }));
     await dialogue.getByRole("button", { name: "Retour" }).click();
     await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
 

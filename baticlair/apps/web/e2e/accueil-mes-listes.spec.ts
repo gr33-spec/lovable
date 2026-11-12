@@ -107,7 +107,10 @@ test("À faire (Greg, 6 novembre 2026 ; UX simplifiée du 8 novembre) : un seul 
   else await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveAttribute("href", "/chantiers/nouveau");
   await vide.getByRole("link", { name: /^Créer un quantitatif/ }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
-  await expect(page.getByRole("dialog", { name: "Nouveau quantitatif" })).toBeVisible();
+  // Direction A (Greg, 12 novembre 2026) : le départ est le choix, « Je saisis ma liste » ou « Mobiiz m'aide ».
+  await expect(page.getByRole("heading", { name: "Nouveau quantitatif" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Je saisis ma liste/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Mobiiz m'aide/ })).toBeVisible();
   await page.goto("/chantiers");
   await expect(page.getByRole("link", { name: "Créer un quantitatif" }).first()).toHaveAttribute("href", "/chantiers/nouveau");
   // Téléphone : l'écran vide se lit au-dessus de la barre du menu.
@@ -127,7 +130,7 @@ test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre 
   expect((await apiJson(page, "PUT", "/v1/brouillons", { cle: "achat-groupe:test", type: "achat-groupe", titre: "Achat groupé couverture · 1 ligne", url: "/achats-groupes/lancer", etape: 1, donnees: { lignes: [] } })).status).toBe(200);
   await page.waitForTimeout(50);
   // Puis une liste commencée dans « Saisir ma liste » et quittée.
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");

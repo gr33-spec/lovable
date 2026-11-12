@@ -193,7 +193,7 @@ test("Contrôle de conformité : après la photo d'une liste, l'assistant s'ouvr
   // Les tests gardent l'écran de liste ; celui-ci active l'ouverture automatique de l'assistant (comme pour un artisan).
   await page.addInitScript(() => localStorage.setItem("mobiiz-assistant-auto", "oui"));
   await compteEtListe(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}$/, { timeout: 60_000 });
   const assistant = page.getByRole("dialog", { name: "Assistant Mobiiz" });
