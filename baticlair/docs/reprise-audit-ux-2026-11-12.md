@@ -115,8 +115,8 @@ Production, `main`, e-mail réel, paiement réel, appel IA payant, suppression d
 juridique validé, règles de facturation réelles : rien sans l'accord explicite de Greg.
 
 ## Prochain geste
-Les cinq lots sont commités sur la branche locale `audit-ux-2026-11-12`. Reste : régénérer le tableau d'audit du domaine
-(`npx vitest run -u test/audit-regles-uniques.test.ts` dans `packages/domain`), lancer la chaîne complète sur le commit
-candidat exact, et seulement si elle est verte : avance rapide de `claude/saas-achat-artisans-prompt-1lyihx`, push,
+Les cinq lots sont commités sur la branche locale `audit-ux-2026-11-12`. COMMANDE EN COURS : chaîne complète sur le commit
+candidat (le commit de ce fichier), résultats dans le dossier de travail `final20` (`etat.txt` : une ligne par étape,
+code 0 = vert, « FIN » à la fin). Ne modifier AUCUNE source pendant qu'elle tourne. Seulement si elle est verte : avance rapide de `claude/saas-achat-artisans-prompt-1lyihx`, push,
 attente des deux domaines de test, recette en ligne (sans e-mail, sans paiement, sans appel IA), compte rendu final.
 Si la chaîne échoue : ne rien pousser, corriger, relancer la chaîne ENTIÈRE.
