@@ -26,7 +26,7 @@ import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, TexteMobiiz, useChampDic
  * photos (plusieurs d'un coup), devis ou PDF, catalogue. Un document est lu par l'IA, son coût dit avant, comme avant ;
  * jamais une quantité ni une caractéristique inventée : ce qui manque reste à préciser sur la ligne.
  */
-type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean } | { de: "moi"; texte: string } | { de: "compris"; texte: string; lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige"; comprises?: (ArticleCompris | null)[] };
+type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean; choix?: string[] } | { de: "moi"; texte: string } | { de: "compris"; texte: string; lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige"; comprises?: (ArticleCompris | null)[] };
 type Element = SansId & { id: number };
 
 const EXEMPLE = "Ex. : 1 000 ardoises 32×22 Espagne 1er choix et 950 crochets inox 100 mm";
@@ -81,16 +81,50 @@ export function NouveauQuantitatif() {
   const dire = (texte: string) => ajouterElement({ de: "mobiiz", texte });
   const pathname = usePathname();
 
-  function envoyer() {
-    const texte = champ.saisie.trim();
+  /**
+   * L'ASSISTANT CONNECTÉ À L'IA (Greg, 12 novembre 2026 : « Ici, je veux une IA connectée […] l'IA doit poser des questions
+   * si besoin, comme un salarié de comptoir ») : ce qui est dit part au serveur avec la conversation en cours (les phrases
+   * de l'artisan et les questions posées depuis la dernière carte ajoutée). Le modèle découpe en articles et questionne ;
+   * le serveur revalide (aucune quantité, aucun article non dit). Éteint, plafond atteint ou sans réseau : le code lit la
+   * phrase ici, comme avant.
+   */
+  const conversation = useRef<{ echanges: { de: "artisan" | "assistant"; texte: string }[]; carte: number | null }>({ echanges: [], carte: null });
+
+  async function envoyer(dit?: string) {
+    const texte = (dit ?? champ.saisie).trim();
     if (!texte || occupe) return;
     dictee.arreter();
     champ.setSaisie("");
     ajouterElement({ de: "moi", texte });
-    const r = lireDescription(texte);
-    const lignes = [...r.lignes, ...r.aConfirmer].map(avecUnite);
-    if (lignes.length === 0) return dire("Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo, un document ou le catalogue.");
+    const echanges = [...conversation.current.echanges, { de: "artisan" as const, texte }];
+    setOccupe(true);
+    const ia = await api<{ ia: boolean; lignes: LigneDecrite[]; questions: { texte: string; choix: string[] }[]; message: string }>("/v1/assistant/description", { method: "POST", body: { echanges: echanges.slice(-20) } }).catch(() => null);
+    setOccupe(false);
+    let lignes: LigneDecrite[];
+    if (ia?.ia) {
+      // La carte en cours est remplacée par la liste à jour (la réponse à une question complète l'article).
+      const ancienne = conversation.current.carte;
+      if (ancienne !== null) setElements((xs) => xs.filter((x) => x.id !== ancienne));
+      lignes = ia.lignes.map(avecUnite);
+      conversation.current = { echanges: [...echanges, ...ia.questions.map((q) => ({ de: "assistant" as const, texte: q.choix.length ? `${q.texte} (${q.choix.join(", ")})` : q.texte }))], carte: null };
+      if (lignes.length === 0 && ia.questions.length === 0) return dire(ia.message || "Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo, un document ou le catalogue.");
+    } else {
+      conversation.current = { echanges: [], carte: null };
+      const r = lireDescription(texte);
+      lignes = [...r.lignes, ...r.aConfirmer].map(avecUnite);
+      if (lignes.length === 0) return dire("Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo, un document ou le catalogue.");
+    }
+    if (ia?.ia && ia.message) dire(ia.message);
+    if (lignes.length === 0) {
+      for (const q of ia?.questions ?? []) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
+      return;
+    }
     const id = ajouterElement({ de: "compris", texte, lignes, etat: "ouvert" });
+    if (ia?.ia) {
+      conversation.current.carte = id;
+      // Les questions du comptoir, après la carte : une réponse (bouton, écrit ou dicté) met la carte à jour.
+      for (const q of ia.questions) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
+    }
     // Greg, 8 novembre 2026 (« 36 mètres de Lito ») : chaque article est rapproché du catalogue métier, sans appel IA ; une
     // interprétation à confirmer et les questions utiles s'affichent dans la carte. Sans réponse du serveur : rien ne change.
     void api<{ articles: (ArticleCompris | null)[] }>("/v1/catalogue/comprendre", { method: "POST", body: { lignes: lignes.map((l) => ({ libelle: l.libelle, unite: l.unite })) } })
@@ -117,6 +151,8 @@ export function NouveauQuantitatif() {
         setListe({ ...liste, n });
       }
       setElements((xs) => xs.map((x) => (x.id === id && x.de === "compris" ? { ...x, etat: "ajoute" } : x)));
+      // Ces articles sont dans la liste : la conversation avec le modèle repart de zéro.
+      conversation.current = { echanges: [], carte: null };
       dire(`C'est ajouté. Ta liste compte ${n} article${n > 1 ? "s" : ""}. Autre chose ? Quand c'est complet, touche « Voir ma liste ».`);
     } catch (e) {
       dire(`Rien n'est ajouté : ${messageErreur(e)}`);
@@ -127,6 +163,7 @@ export function NouveauQuantitatif() {
 
   function corriger(id: number, texte: string) {
     setElements((xs) => xs.map((x) => (x.id === id && x.de === "compris" ? { ...x, etat: "corrige" } : x)));
+    conversation.current = { echanges: [], carte: null };
     champ.setSaisie(texte);
   }
 
@@ -212,6 +249,15 @@ export function NouveauQuantitatif() {
             ) : e.de === "mobiiz" ? (
               <Bulle key={e.id} de="mobiiz">
                 <TexteMobiiz>{e.texte}</TexteMobiiz>
+                {e.choix?.length ? (
+                  <div role="group" aria-label={`Réponses à : ${e.texte}`} className="mt-2 flex flex-wrap gap-2">
+                    {e.choix.map((c) => (
+                      <button key={c} type="button" disabled={occupe} onClick={() => void envoyer(c)} className="pressable min-h-11 rounded-full border-2 border-[#FED206] px-4 text-[15px] font-bold disabled:opacity-50">
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
                 {e.reconnecter ? (
                   <Link href={`/connexion?retour=${encodeURIComponent(pathname)}`} className="mt-2 inline-flex min-h-11 items-center rounded-full bg-[#FED206] px-4 font-semibold text-[#111111]">
                     Me reconnecter
@@ -237,7 +283,7 @@ export function NouveauQuantitatif() {
         <BarreSaisie
           valeur={champ.saisie}
           onChange={champ.setSaisie}
-          onEnvoyer={envoyer}
+          onEnvoyer={() => void envoyer()}
           occupe={occupe || lecture}
           ecoute={dictee.ecoute}
           probleme={dictee.probleme}

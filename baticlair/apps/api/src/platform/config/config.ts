@@ -125,6 +125,16 @@ const envSchema = z
     /** Le plafond TOTAL de l'interprète (Greg, 7 novembre 2026 : 1 $ ou 500 interprétations sur le test). */
     INTERPRETE_IA_PLAFOND_USD: z.coerce.number().min(0).max(100).default(1),
     INTERPRETE_IA_PLAFOND_APPELS: z.coerce.number().int().min(0).max(100_000).default(500),
+    /**
+     * L'assistant connecté à l'IA (Greg, 12 novembre 2026 : « Ici, je veux une IA connectée ») : la phrase dite ou écrite
+     * dans l'assistant est découpée en articles par le modèle, qui pose les questions du comptoir ; le code revalide.
+     * ÉTEINT par défaut : sans lui, le code seul lit la phrase. Plafond TOTAL (coût et nombre de messages) : au-delà, le
+     * code seul répond, rien n'est jamais acheté.
+     */
+    ASSISTANT_IA: z.enum(["on", "off"]).default("off"),
+    AI_ASSISTANT_MODEL: z.string().min(1).default("claude-sonnet-5-5"),
+    ASSISTANT_IA_PLAFOND_USD: z.coerce.number().min(0).max(1000).default(2),
+    ASSISTANT_IA_PLAFOND_APPELS: z.coerce.number().int().min(0).max(1_000_000).default(300),
     AI_EXTRACTION_EFFORT: z.enum(["low", "medium", "high", "xhigh", "max"]).default("high"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
@@ -438,6 +448,10 @@ export interface AppConfig {
     interprete: boolean;
     interpreteModel: string;
     interpretePlafond: { microUsd: number; appels: number };
+    /** L'assistant connecté à l'IA (éteint par défaut), son modèle et son plafond total. */
+    assistant: boolean;
+    assistantModel: string;
+    assistantPlafond: { microUsd: number; appels: number };
     effort: "low" | "medium" | "high" | "xhigh" | "max";
     /** Délai de réponse d'une lecture avant de passer en arrière-plan (ms). */
     answerWithinMs: number;
@@ -618,6 +632,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       interprete: e.INTERPRETE_IA === "on",
       interpreteModel: e.AI_INTERPRETE_MODEL,
       interpretePlafond: { microUsd: Math.round(e.INTERPRETE_IA_PLAFOND_USD * 1_000_000), appels: e.INTERPRETE_IA_PLAFOND_APPELS },
+      assistant: e.ASSISTANT_IA === "on",
+      assistantModel: e.AI_ASSISTANT_MODEL,
+      assistantPlafond: { microUsd: Math.round(e.ASSISTANT_IA_PLAFOND_USD * 1_000_000), appels: e.ASSISTANT_IA_PLAFOND_APPELS },
       effort: e.AI_EXTRACTION_EFFORT,
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },

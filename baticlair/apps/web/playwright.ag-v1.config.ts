@@ -15,5 +15,5 @@ export default defineConfig({
     { name: "android", use: { ...devices["Pixel 7"] } },
     { name: "ordinateur", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } } },
   ],
-  webServer: webServer.map((w, i) => (i === 0 ? { ...w, env: { ...apiEnv, ACHATS_GROUPES_V1: "on", MISSIONS_V1: "on" } } : w)),
+  webServer: webServer.map((w, i) => (i === 0 ? { ...w, env: { ...apiEnv, ACHATS_GROUPES_V1: "on", MISSIONS_V1: "on", ASSISTANT_IA: "on" } } : w)),
 });
