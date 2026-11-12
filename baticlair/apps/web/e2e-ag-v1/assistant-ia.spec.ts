@@ -32,10 +32,26 @@ async function inscrire(page: Page) {
   await confirmerEmail(page, email);
 }
 
+/**
+ * La conversation est prête : le bonjour est affiché et le guide de première visite, qui s'ouvre par-dessus un instant après
+ * l'arrivée, est refermé. Sans cette attente, une saisie faite AVANT l'ouverture du guide pouvait être perdue (chaîne du
+ * 12 novembre 2026, iPhone SE : « Envoyer le message » resté grisé).
+ */
+async function pret(page: Page) {
+  const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  await expect(chat.getByText(/Que veux-tu préparer/)).toBeVisible();
+  // Une action déclenche la fermeture du guide (gestionnaire plus haut), puis on vérifie qu'il n'est plus là.
+  await chat.getByText(/Que veux-tu préparer/).click();
+  await page.waitForTimeout(800);
+  await chat.getByText(/Que veux-tu préparer/).click();
+  await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
+}
+
 test("la phrase dictée de la capture : deux articles, la question du comptoir, la réponse complète la gouttière", async ({ page }) => {
   await inscrire(page);
   await page.goto("/chantiers/nouveau");
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  await pret(page);
   await chat.getByRole("textbox", { name: "Ton message" }).fill(DICTEE);
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
   const compris = chat.getByRole("region", { name: "J'ai compris" });
@@ -64,6 +80,7 @@ test("une photo de chantier : ce que l'assistant voit, les matériaux à confirm
   await inscrire(page);
   await page.goto("/chantiers/nouveau");
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  await pret(page);
   await page.getByLabel("Choisir une photo").setInputFiles(path.join(__dirname, "fixtures", "toiture.jpg"));
   await expect(chat.getByRole("img", { name: "Photo du chantier" })).toBeVisible();
   await expect(chat.getByText("Je vois une couverture en ardoises et une gouttière en zinc.")).toBeVisible();
@@ -87,6 +104,7 @@ test("une photo de chantier : ce que l'assistant voit, les matériaux à confirm
 test("une photo d'une liste écrite : l'assistant la reconnaît et propose la lecture du document, comme avant", async ({ page }) => {
   await inscrire(page);
   await page.goto("/chantiers/nouveau");
+  await pret(page);
   await page.getByLabel("Choisir une photo").setInputFiles(path.join(__dirname, "fixtures", "liste-papier.jpg"));
   // La confirmation habituelle avant l'analyse d'une liste (son coût est dit avant) ; rien n'est recopié par l'assistant.
   await expect(page.getByRole("dialog", { name: "Nouveau quantitatif" }).getByRole("region", { name: "J'ai compris" })).toHaveCount(0);
