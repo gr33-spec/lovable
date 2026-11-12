@@ -11,6 +11,8 @@ delete process.env.ANTHROPIC_API_KEY;
  */
 export const apiEnv = {
   NODE_ENV: "test",
+  // La base des parcours garde son catalogue d'une passe à l'autre : elle se remet à l'amorce au démarrage (jamais en ligne).
+  CATALOGUE_SYNCHRO_AUTO: "on",
   PORT: "4000",
   DATABASE_URL: process.env.E2E_DATABASE_URL ?? "postgresql://postgres@localhost:5432/baticlair_e2e",
   AUTH_SECRET: "e2e-secret-e2e-secret-e2e-secret-0000",

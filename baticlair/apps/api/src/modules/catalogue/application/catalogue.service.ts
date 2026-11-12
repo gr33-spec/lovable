@@ -24,6 +24,11 @@ import {
   referenceStricte,
   TOUT_LE_CATALOGUE,
   comprendreArticle,
+  cheminsDeLArticle,
+  indicationDuProduit,
+  LIBELLES_CATALOGUES,
+  vueDuCatalogue,
+  type ChoixDeVue,
   type ArticleCatalogue,
   type ArticleCompris,
   type MetierCatalogue,
@@ -57,6 +62,21 @@ const FICHES = new Map(TOUT_LE_CATALOGUE.map((a) => [a.cle, a]));
 export interface ArticleRegroupe extends ArticleVue {
   cleRegroupement: string;
   libelleRegroupement: string;
+}
+
+export interface EtatDeSynchronisation {
+  enBase: number;
+  dansLAmorce: number;
+  /** Les articles de l'amorce absents de la base : ce que la synchronisation ajouterait. */
+  aAjouter: number;
+  aAjouterParMetier: Record<string, number>;
+  /** Les articles de la base absents de l'amorce (ajouts de l'admin, anciennes clés) : jamais touchés. */
+  horsAmorce: number;
+}
+
+export interface ChoixVue {
+  nom: string;
+  options: { valeur: string; suite: ChoixVue | null; article: ArticleVue | null }[];
 }
 
 type Ligne = Awaited<ReturnType<PrismaService["catalogueArticle"]["findMany"]>>[number];
@@ -95,14 +115,47 @@ export class CatalogueService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  /** L'amorce : les articles du domaine absents de la base y entrent (jamais par-dessus une modification de l'admin). */
+  /**
+   * L'AMORCE N'EST PLUS UNE AFFAIRE DE LECTURE (Greg, 12 novembre 2026 : « ne conserve pas un système où l'ajout de centaines
+   * d'articles dépend silencieusement de la première ouverture du catalogue par un artisan »). Lire le catalogue n'y ajoute
+   * plus rien, sauf dans deux cas dits : une base VIDE (première installation, base de test remise à zéro) et le réglage
+   * `CATALOGUE_SYNCHRO_AUTO=on` (développement et tests). Partout ailleurs, les articles de l'amorce n'entrent que par la
+   * synchronisation explicite (`synchroniser`, route de l'admin ou `scripts/synchroniser-catalogue.ts`).
+   */
   async amorcer(): Promise<void> {
-    if (this.amorce && (await this.prisma.catalogueArticle.count()) > 0) return;
-    await this.prisma.catalogueArticle.createMany({
-      data: TOUT_LE_CATALOGUE.map((a, i) => ({ cle: a.cle, metier: a.metier, famille: a.famille, produit: a.produit, variante: a.variante, designation: a.designation, unite: a.unite, synonymes: [...a.synonymes], ordre: i })),
-      skipDuplicates: true,
-    });
+    const n = await this.prisma.catalogueArticle.count();
+    if (this.amorce && n > 0) return;
+    if (n === 0 || process.env.CATALOGUE_SYNCHRO_AUTO === "on") await this.synchroniser();
     this.amorce = true;
+  }
+
+  /** Ce que la synchronisation ferait, sans rien écrire : les articles de l'amorce absents de la base, par métier. */
+  async etatDeSynchronisation(): Promise<EtatDeSynchronisation> {
+    const enBase = new Set((await this.prisma.catalogueArticle.findMany({ select: { cle: true } })).map((a) => a.cle));
+    const manquants = TOUT_LE_CATALOGUE.filter((a) => !enBase.has(a.cle));
+    const parMetier: Record<string, number> = {};
+    for (const a of manquants) parMetier[a.metier] = (parMetier[a.metier] ?? 0) + 1;
+    return { enBase: enBase.size, dansLAmorce: TOUT_LE_CATALOGUE.length, aAjouter: manquants.length, aAjouterParMetier: parMetier, horsAmorce: [...enBase].filter((c) => !FICHES.has(c)).length };
+  }
+
+  /**
+   * LA SYNCHRONISATION EXPLICITE : les articles de l'amorce absents de la base y entrent, et rien d'autre. Idempotente
+   * (rejouée, elle n'ajoute rien), sans écrasement (un article déjà là, renommé ou masqué par l'admin, n'est jamais
+   * touché), sans suppression (un article de la base absent de l'amorce reste). Rend le relevé avant et après.
+   */
+  async synchroniser(): Promise<{ avant: EtatDeSynchronisation; apres: EtatDeSynchronisation; ajoutes: number }> {
+    const avant = await this.etatDeSynchronisation();
+    let ajoutes = 0;
+    if (avant.aAjouter > 0) {
+      const enBase = new Set((await this.prisma.catalogueArticle.findMany({ select: { cle: true } })).map((a) => a.cle));
+      const r = await this.prisma.catalogueArticle.createMany({
+        data: TOUT_LE_CATALOGUE.map((a, i) => ({ cle: a.cle, metier: a.metier, famille: a.famille, produit: a.produit, variante: a.variante, designation: a.designation, unite: a.unite, synonymes: [...a.synonymes], ordre: i })).filter((a) => !enBase.has(a.cle)),
+        skipDuplicates: true,
+      });
+      ajoutes = r.count;
+      this.regroupement = null;
+    }
+    return { avant, apres: ajoutes ? await this.etatDeSynchronisation() : avant, ajoutes };
   }
 
   private async articles(metier: string | null, avecMasques = false): Promise<Ligne[]> {
@@ -125,7 +178,7 @@ export class CatalogueService {
   private metiersDe(trades: string[]) {
     const miens = metiersCatalogueDuCompte(trades);
     const ordre = [...miens, ...METIERS_DU_SELECTEUR.filter((m) => !miens.includes(m))];
-    return ordre.map((m) => ({ code: m, libelle: LIBELLES_METIERS_CATALOGUE[m], mien: miens.includes(m), familleAchat: FAMILLE_DU_METIER_CATALOGUE[m] }));
+    return ordre.map((m) => ({ code: m, libelle: LIBELLES_CATALOGUES[m] ?? LIBELLES_METIERS_CATALOGUE[m], mien: miens.includes(m), familleAchat: FAMILLE_DU_METIER_CATALOGUE[m] }));
   }
 
   /**
@@ -161,7 +214,7 @@ export class CatalogueService {
       );
       const duRayon = (m: string) => estMetier(m) && rayonDuMetierCatalogue(m) === metier;
       const duMetier = trouves.filter((t) => duRayon(t.article.metier));
-      const resultats = [...duMetier, ...trouves.filter((t) => !duRayon(t.article.metier))].slice(0, 30).map((t) => ({ ...vue(t.article), precisions: t.precisions }));
+      const resultats = [...duMetier, ...trouves.filter((t) => !duRayon(t.article.metier))].slice(0, 30).map((t) => ({ ...vue(t.article), precisions: t.precisions, ...this.rangement(t.article) }));
       // Les intitulés écrits par l'entreprise elle-même, après le catalogue (Greg, 30 octobre 2026, nuit : rien n'est
       // diffusé aux autres ; un intitulé générique ne l'est qu'une fois ajouté au catalogue par l'admin).
       const vus = new Set(resultats.map((a) => cleDeLibelle(a.designation)));
@@ -169,14 +222,42 @@ export class CatalogueService {
       for (const l of ecrits) vus.add(cleDeLibelle(l.libelle));
       // Les références des artisans (Greg, 31 octobre 2026, soir) : écrites ou commandées par plusieurs entreprises.
       const communes = (await this.referencesDesArtisans(recherche)).filter((c) => !vus.has(c.cle) && ![c.libelle, ...c.variantes].some((l) => vus.has(cleDeLibelle(l))));
-      return { metiers, metier, resultats, ecrits: ecrits.map((l) => ({ designation: l.libelle, unite: l.unite })), communes: communes.map((c) => ({ designation: c.libelle, unite: c.unite, entreprises: c.entreprises })), arbre: null };
+      return { metiers, metier, resultats, ecrits: ecrits.map((l) => ({ designation: l.libelle, unite: l.unite })), communes: communes.map((c) => ({ designation: c.libelle, unite: c.unite, entreprises: c.entreprises })), rayons: null, arbre: null };
     }
     const articles = await this.articles(metier);
     const arbre = arbreArticles(articles.map(vue)).map((f) => ({
       libelle: f.libelle,
       produits: f.enfants.map((p) => ({ libelle: p.libelle, article: p.article, variantes: p.enfants.map((v) => ({ libelle: v.libelle, article: v.article! })) })),
     }));
-    return { metiers, metier, resultats: null, ecrits: null, communes: null, arbre };
+    return { metiers, metier, resultats: null, ecrits: null, communes: null, arbre, rayons: await this.rayons(metier) };
+  }
+
+  /** Où un article se lit (son catalogue d'abord, puis ceux qui le partagent) et ce que son format précise déjà. */
+  private rangement(a: Ligne) {
+    const chemins = estMetier(a.metier) ? cheminsDeLArticle({ ...a, metier: a.metier }) : [];
+    const c = chemins[0] ?? null;
+    return {
+      chemin: c ? { catalogue: c.libelleCatalogue, rayon: c.rayon, famille: c.famille, produit: c.produit } : null,
+      autresCatalogues: chemins.slice(1).map((x) => x.libelleCatalogue),
+      caracteristiques: a.variante ? a.variante.split(" · ") : [],
+    };
+  }
+
+  /**
+   * LE CATALOGUE D'UN MÉTIER EN RAYONS (Greg, 12 novembre 2026) : rayon › famille › produit › caractéristiques. Une vue
+   * sur les articles de la base (tous métiers : un produit partagé se lit dans chaque catalogue qui le prend) ; les
+   * articles, eux, ne changent pas.
+   */
+  private async rayons(metier: MetierCatalogue) {
+    const tous = (await this.articles(null)).filter((a): a is Ligne & { metier: MetierCatalogue } => estMetier(a.metier));
+    const choix = (n: ChoixDeVue<Ligne> | null): ChoixVue | null => (n ? { nom: n.nom, options: n.options.map((o) => ({ valeur: o.valeur, suite: choix(o.suite), article: o.article ? vue(o.article) : null })) } : null);
+    return vueDuCatalogue(metier, tous).map((r) => ({
+      libelle: r.libelle,
+      familles: r.familles.map((f) => ({
+        libelle: f.libelle,
+        produits: f.produits.map((p) => ({ libelle: p.libelle, indication: indicationDuProduit(p), nombre: p.nombre, precisions: p.precisions, article: p.article ? vue(p.article) : null, choix: choix(p.choix) })),
+      })),
+    }));
   }
 
   /**

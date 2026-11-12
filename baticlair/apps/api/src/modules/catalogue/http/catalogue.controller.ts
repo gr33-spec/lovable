@@ -99,6 +99,26 @@ export class AdminCatalogueController {
     return r;
   }
 
+  /** Ce que la synchronisation ajouterait (lecture seule) : les articles de l'amorce absents de la base. */
+  @Get("synchronisation")
+  async etatDeSynchronisation(@Tenant() tenant: TenantContext) {
+    await this.garde(tenant);
+    return this.catalogue.etatDeSynchronisation();
+  }
+
+  /**
+   * LA SYNCHRONISATION EXPLICITE DU CATALOGUE (Greg, 12 novembre 2026) : un geste de l'admin, jamais une conséquence de la
+   * lecture d'un artisan. N'ajoute que les articles absents ; ne modifie ni ne supprime rien ; rejouable sans doublon.
+   */
+  @Post("synchronisation")
+  @HttpCode(200)
+  async synchroniser(@Tenant() tenant: TenantContext) {
+    const email = await this.garde(tenant);
+    const r = await this.catalogue.synchroniser();
+    await this.journal(tenant, email, "synchronisation", `${r.ajoutes} ajoutés ; ${r.avant.enBase} → ${r.apres.enBase} articles`);
+    return r;
+  }
+
   @Get("lignes-libres")
   async lignesLibres(@Tenant() tenant: TenantContext) {
     await this.garde(tenant);
