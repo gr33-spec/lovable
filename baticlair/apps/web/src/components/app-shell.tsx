@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { SessionGate } from "@/lib/session";
 import { useTrackNavigation } from "@/lib/history";
 import { AppNav } from "./app-nav";
@@ -20,6 +21,11 @@ import { classeTheme, useTheme } from "@/lib/theme";
 export function AppShell({ children }: { children: React.ReactNode }) {
   useTrackNavigation();
   const theme = useTheme();
+  // Le thème affiché est aussi dit sur <html> (fond de page avant et pendant le chargement, `globals.css`) ; en
+  // « Automatique », il suit l'appareil quand celui-ci change.
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
   return (
     <SessionGate>
       {/* L'app en nuit chaude (Greg, 29 octobre 2026) : `app-nuit` dans globals.css ; ou claire, au choix dans Profil

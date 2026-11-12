@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BoutonTheme } from "@/components/bouton-theme";
 import { useRouter } from "next/navigation";
 import { ChevronRight, CreditCard, LayoutGrid, Sparkles, UserRound, X, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -85,6 +86,7 @@ export function MenuArtisan() {
       <span className="truncate text-[16px] font-extrabold tracking-[0.01em] uppercase">{company?.name}</span>
       <span className="ml-auto flex items-center gap-2 pl-2">
         <PastilleEssai />
+        <BoutonTheme />
         <Cloche />
       </span>
       <button ref={bouton} type="button" aria-label="Mon menu" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="pressable bouton-nuit ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-[14px] font-extrabold">

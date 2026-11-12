@@ -88,6 +88,22 @@ en 5 lots. Ce fichier est LA première chose à lire à la reprise : vérifier l
   Tests : domaine `abonnement-annuel` 5/5 ; serveur `abonnement-annuel` 8/8, `deux-formules` + `pilotage` +
   `abonnement` verts (28/28 au total) ; e2e « Abonnement » 6/6 (téléphone, ordinateur).
 
+- **Lot 5 (passe visuelle)** : FAIT.
+  - Thème clair renouvelé (`apps/web/src/app/globals.css`, bloc « PASSE VISUELLE ») : page ivoire #FBF8F3, cartes blanches
+    tenues par un liseré et une ombre courte, lueur jaune très douce, barre du bas blanche, onglet actif jaune #FED206.
+    Textes inchangés (contrastes AA). Le sombre n'est pas modifié.
+  - Sélecteur Automatique / Clair / Sombre dans l'en-tête, téléphone et ordinateur :
+    `apps/web/src/components/bouton-theme.tsx`, posé dans `menu-artisan.tsx` (même réglage que Profil › Apparence).
+  - Aucun flash : script en tête de page (`app/layout.tsx`, avec le nonce de la CSP) qui pose `data-theme` sur `<html>`
+    avant le premier affichage ; fond de page par `html[data-theme] body:has([data-zone-app])` ; pages publiques non
+    touchées (`data-zone-app` n'existe que dans `app/(app)/layout.tsx`).
+  - Focus au clavier visible sur les deux thèmes (anneau noir serti de jaune) ; survol discret des cartes cliquables.
+  - Choix « Au mois / À l'année » : tient sur une ligne sur iPhone SE (`choix-formule.tsx`).
+  - Contrôle : balayage automatique des contrastes (17 écrans, clair et sombre, téléphone et ordinateur) : aucun texte
+    sous le seuil AA. Captures de contrôle dans le dossier de travail (hors dépôt).
+  Tests : `e2e-ag-v1/theme.spec.ts` (choix, persistance, fond avant l'application, automatique, aucun débordement sur
+  8 écrans en clair et en sombre) 6/6 sur iPhone SE, Android, ordinateur.
+
 ## Rappels techniques
 - Les e2e tournent sur le site CONSTRUIT : `pnpm -s build` dans `apps/web` avant chaque passe, puis
   `fuser -k 3000/tcp 4000/tcp`.
@@ -99,6 +115,8 @@ Production, `main`, e-mail réel, paiement réel, appel IA payant, suppression d
 juridique validé, règles de facturation réelles : rien sans l'accord explicite de Greg.
 
 ## Prochain geste
-Lot 5 : captures 21 et 22 (mode clair) ; passe visuelle transversale (jetons de `apps/web/src/app/globals.css`, composants
-partagés `ui.tsx` et `ux-kit.tsx`), sélecteur Automatique / Clair / Sombre dans l'en-tête, contrôle des contrastes et des
-débordements sur les écrans principaux en clair et en sombre, puis la chaîne complète sur le candidat exact.
+Les cinq lots sont commités sur la branche locale `audit-ux-2026-11-12`. Reste : régénérer le tableau d'audit du domaine
+(`npx vitest run -u test/audit-regles-uniques.test.ts` dans `packages/domain`), lancer la chaîne complète sur le commit
+candidat exact, et seulement si elle est verte : avance rapide de `claude/saas-achat-artisans-prompt-1lyihx`, push,
+attente des deux domaines de test, recette en ligne (sans e-mail, sans paiement, sans appel IA), compte rendu final.
+Si la chaîne échoue : ne rien pousser, corriger, relancer la chaîne ENTIÈRE.

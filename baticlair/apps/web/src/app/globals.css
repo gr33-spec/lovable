@@ -392,3 +392,93 @@ body:has(.app-clair) {
     color: #130901;
   }
 }
+
+/*
+ * PASSE VISUELLE (Greg, 12 novembre 2026, dossier de corrections UX, point 14 : « le mode clair paraît uniforme et fade »).
+ * Une évolution, pas une nouvelle direction : le jaune #FED206, le noir, le blanc et l'ivoire #FBF8F3 de MOBIIZ.
+ *
+ * LE CLAIR. Avant : des cartes ivoire sur un fond presque ivoire, donc tout au même plan. Maintenant : la page est
+ * l'ivoire MOBIIZ, les cartes sont blanches, tenues par un liseré fin et une ombre courte ; une lueur jaune très douce en
+ * haut à droite, la même idée que la nuit ; l'onglet actif porte le jaune franc. Les textes ne changent pas (encre et
+ * brun, contrastes AA conservés).
+ */
+.app-clair {
+  --color-ground: #fbf8f3;
+  --color-surface: #ffffff;
+  --color-line: rgba(19, 9, 1, 0.14);
+  --menu-fond: #ffffff;
+}
+body:has(.app-clair) {
+  background: #fbf8f3;
+}
+.app-clair::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(64vmax 40vmax at 100% 0%, rgba(254, 210, 6, 0.13), transparent 70%),
+    #fbf8f3;
+}
+.app-clair .shadow-card {
+  box-shadow:
+    0 0 0 1px rgba(19, 9, 1, 0.07),
+    0 1px 2px rgba(19, 9, 1, 0.05),
+    0 12px 26px -16px rgba(19, 9, 1, 0.28);
+}
+.app-clair .shadow-float {
+  box-shadow:
+    0 0 0 1px rgba(19, 9, 1, 0.08),
+    0 18px 44px -14px rgba(19, 9, 1, 0.32);
+}
+/* La barre du bas en clair : un verre blanc net, et l'onglet actif sur le jaune de la marque (comme sur la nuit). */
+@media (max-width: 63.99rem) {
+  .app-clair nav[aria-label="Navigation principale"] > [class*="bg-glass"] {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow:
+      0 0 0 1px rgba(19, 9, 1, 0.09),
+      0 14px 34px -12px rgba(19, 9, 1, 0.3);
+  }
+  .app-clair nav[aria-label="Navigation principale"] [class*="max-lg:bg-accent-soft"] {
+    background: #fed206;
+    color: #130901;
+  }
+}
+
+/*
+ * AUCUN FLASH AU CHARGEMENT : le thème gardé sur l'appareil est posé sur <html> avant le premier affichage
+ * (`app/layout.tsx`) ; tant que l'écran de l'application n'est pas arrivé, le fond a déjà sa couleur. Les pages publiques
+ * (sans `data-zone-app`) ne sont pas touchées.
+ */
+html[data-theme="sombre"] body:has([data-zone-app]) {
+  background: #0b0b0c;
+  color-scheme: dark;
+}
+html[data-theme="clair"] body:has([data-zone-app]) {
+  background: #fbf8f3;
+  color-scheme: light;
+}
+
+/*
+ * LE FOCUS AU CLAVIER, lisible sur tous les fonds des deux thèmes : un anneau noir serti de jaune. Le jaune seul ne se
+ * voyait pas sur une carte claire, le noir seul pas sur la nuit.
+ */
+:focus-visible {
+  outline: 2px solid #130901;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px #fed206;
+}
+input.outline-none:focus-visible,
+textarea.outline-none:focus-visible {
+  box-shadow: none;
+}
+
+/* Une carte qui se touche se soulève à peine au survol (souris seulement) ; coupé par prefers-reduced-motion. */
+@media (hover: hover) {
+  a.pressable.shadow-card:hover,
+  button.pressable.shadow-card:hover,
+  .shadow-card > a.pressable:only-child:hover {
+    transform: translateY(-1px);
+  }
+}

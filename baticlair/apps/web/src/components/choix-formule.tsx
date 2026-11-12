@@ -37,7 +37,7 @@ export function ChoixFormule({ abonnement: a, bouton = "Continuer vers le paieme
   return (
     <div className="flex flex-col gap-4">
       {a.offres.some((o) => o.annuel) ? (
-        <div role="radiogroup" aria-label="Facturation" className="grid grid-cols-2 gap-1 self-stretch rounded-full bg-ground p-1 sm:self-start">
+        <div role="radiogroup" aria-label="Facturation" className="grid grid-cols-[1fr_auto] gap-1 self-stretch rounded-full bg-ground p-1 sm:grid-cols-2 sm:self-start">
           {(["mensuel", "annuel"] as const).map((p) => (
             <button
               key={p}
@@ -45,10 +45,10 @@ export function ChoixFormule({ abonnement: a, bouton = "Continuer vers le paieme
               role="radio"
               aria-checked={periodicite === p}
               onClick={() => setPeriodicite(p)}
-              className={`pressable flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-[15px] font-extrabold transition-colors duration-150 ${periodicite === p ? "bg-surface text-ink shadow-card" : "text-ink/75"}`}
+              className={`pressable flex min-h-11 items-center justify-center gap-1.5 rounded-full px-2.5 text-[15px] whitespace-nowrap sm:gap-2 sm:px-4 font-extrabold transition-colors duration-150 ${periodicite === p ? "bg-surface text-ink shadow-card" : "text-ink/75"}`}
             >
               {p === "mensuel" ? "Au mois" : "À l'année"}
-              {p === "annuel" ? <span className="rounded-full bg-accent px-2 py-0.5 text-[12px] font-extrabold text-on-accent">2 mois offerts</span> : null}
+              {p === "annuel" ? <span className="rounded-full bg-accent px-1.5 py-0.5 text-[11px] font-extrabold text-on-accent sm:px-2 sm:text-[12px]">2 mois offerts</span> : null}
             </button>
           ))}
         </div>

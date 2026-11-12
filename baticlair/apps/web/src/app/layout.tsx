@@ -1,4 +1,5 @@
 import { ChampVisible } from "@/components/champ-visible";
+import { headers } from "next/headers";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
@@ -66,11 +67,20 @@ export const viewport: Viewport = {
   themeColor: "#0B0B0C",
 };
 
+/** Le même calcul que `resoudre` de `src/lib/theme.ts` : sombre par défaut, « auto » suit l'appareil. */
+const SCRIPT_THEME = `try{var t=localStorage.getItem("mobiiz-theme");document.documentElement.dataset.theme=t==="clair"||(t==="auto"&&window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"clair":"sombre"}catch(e){document.documentElement.dataset.theme="sombre"}`;
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Rendu à la demande : le nonce de la Content-Security-Policy change à chaque requête (`src/proxy.ts`).
   await connection();
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <html lang="fr" className={`${jakarta.variable} ${bricolage.variable}`}>
+    <html lang="fr" className={`${jakarta.variable} ${bricolage.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Greg, 12 novembre 2026 : aucun flash clair ou sombre au chargement. Le thème gardé sur l'appareil est posé sur
+            <html> avant le premier affichage (script court, avec le nonce de la requête) ; `src/lib/theme.ts` fait foi ensuite. */}
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: SCRIPT_THEME }} />
+      </head>
       <body className="min-h-dvh antialiased">
         {children}
         <EnregistrementServiceWorker />
