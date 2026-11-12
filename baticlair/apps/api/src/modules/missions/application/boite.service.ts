@@ -85,7 +85,7 @@ export class BoiteService {
   /* --------------------------------------------------------------------------------------------- La cloche */
 
   async alertes(t: TenantContext) {
-    const liste = await this.prisma.alerteCourte.findMany({ where: { companyId: t.companyId }, orderBy: { createdAt: "desc" }, take: 60 });
+    const liste = await this.prisma.alerteCourte.findMany({ where: { companyId: t.companyId, supprimeeLe: null }, orderBy: { createdAt: "desc" }, take: 60 });
     return { nonLues: liste.filter((a) => !a.luLe).length, items: liste.map((a) => ({ id: a.id, categorie: a.categorie, genre: a.genre, titre: a.titre, detail: a.detail, action: a.action, href: a.href, lue: !!a.luLe, le: a.createdAt.toISOString() })) };
   }
 
@@ -99,6 +99,33 @@ export class BoiteService {
   async toutLire(t: TenantContext, avant: Date) {
     const r = await this.prisma.alerteCourte.updateMany({ where: { companyId: t.companyId, luLe: null, createdAt: { lte: avant } }, data: { luLe: new Date() } });
     return { lues: r.count };
+  }
+
+  /**
+   * Retirer une alerte de MA liste, ou la remettre (« Annuler »). Seule l'alerte disparaît : la demande, la liste ou la
+   * conversation qu'elle désigne ne bougent pas. L'alerte d'une autre entreprise répond 404.
+   */
+  async supprimerAlerte(t: TenantContext, id: string, supprimee: boolean) {
+    if (!isUuid(id)) throw notFound("Alerte");
+    const r = await this.prisma.alerteCourte.updateMany({ where: { id, companyId: t.companyId }, data: supprimee ? { supprimeeLe: new Date(), luLe: new Date() } : { supprimeeLe: null } });
+    if (r.count === 0) throw notFound("Alerte");
+    return { supprimee };
+  }
+
+  /** L'état des actions « À faire » de la cloche : celles déjà vues (pastille éteinte) et celles retirées de la liste. */
+  async etatsAFaire(t: TenantContext) {
+    const e = await this.prisma.etatAFaire.findMany({ where: { companyId: t.companyId }, orderBy: { createdAt: "desc" }, take: 500 });
+    return { vues: e.filter((x) => x.vuLe).map((x) => x.cle), masquees: e.filter((x) => x.masqueLe).map((x) => x.cle) };
+  }
+
+  /** Vu (la pastille s'éteint), retiré de la liste, ou remis. Rejouer la même demande ne change rien. */
+  async marquerAFaire(t: TenantContext, cles: string[], geste: "vu" | "masquer" | "restaurer") {
+    const maintenant = new Date();
+    for (const cle of [...new Set(cles)]) {
+      const data = geste === "vu" ? { vuLe: maintenant } : geste === "masquer" ? { masqueLe: maintenant, vuLe: maintenant } : { masqueLe: null };
+      await this.prisma.etatAFaire.upsert({ where: { companyId_cle: { companyId: t.companyId, cle } }, create: { companyId: t.companyId, cle, ...data }, update: geste === "vu" ? {} : data });
+    }
+    return this.etatsAFaire(t);
   }
 
   async reglages(t: TenantContext): Promise<ReglagesAlertes> {

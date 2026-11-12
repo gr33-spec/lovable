@@ -1,16 +1,14 @@
 "use client";
 
-import { ArrowUp, Bell, Briefcase, CreditCard, FileText, MoreHorizontal, Paperclip, Users } from "lucide-react";
+import { ArrowUp, Briefcase, CreditCard, FileText, MoreHorizontal, Paperclip } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FILTRES_BOITE, filtrerBoite, groupesBoite, MOTIFS_SIGNALEMENT, periodeLisible, PHRASE_FORMATS, quandBoite, type ElementBoite, type FiltreBoite } from "../../../../packages/domain/src/missions/missions";
-import { api, type EmailRecu, type NextAction } from "@/lib/api";
-import type { MesAchats } from "@/lib/achat-groupe";
-import { cleEnvoi, ouvrirFichierPro, phraseErreur, tailleLisible, type AlerteVue, type ConversationVue } from "@/lib/missions";
+import { api, type EmailRecu } from "@/lib/api";
+import { cleEnvoi, ouvrirFichierPro, phraseErreur, tailleLisible, type ConversationVue } from "@/lib/missions";
 import { openFile } from "@/lib/open-document";
 import { useResource } from "@/lib/use-resource";
-import { actionsEnAttente } from "./achat-groupe";
 import { Avatar, BoutonContour, BoutonJaune, CARTE, ChampChoix, ChampLong, Coche, EcranTitre, Encart, EtatEcran, Etiquette, GrandTitre, LienContour, LienJaune, Puces, Recherche, Refus, TitreSection } from "./ux-kit";
 
 /**
@@ -382,97 +380,6 @@ export function ReponseNegoce({ id }: { id: string }) {
         Répondre au négoce
       </a>
       <p className="text-center text-[13px] text-muted">Le message original et ses pièces jointes restent conservés{e.demande ? " dans la demande" : ""}.</p>
-    </>
-  );
-}
-
-type FiltreAlertes = "toutes" | "actions" | "informations";
-const ICONE: Record<string, typeof Bell> = { prix: CreditCard, missions: Briefcase, groupe: Users };
-
-/** Capture 26 : la cloche. Des alertes courtes qui ouvrent la bonne action ; les échanges complets restent dans la boîte. */
-export function CentreNotifications() {
-  const [filtre, setFiltre] = useState<FiltreAlertes>("toutes");
-  const fetcher = useCallback(
-    (signal: AbortSignal) =>
-      Promise.all([
-        api<{ items: AlerteVue[]; nonLues: number }>("/v1/alertes", { signal }),
-        api<MesAchats>("/v1/achats-groupes", { signal }).catch(() => null),
-        api<{ items: NextAction[] }>("/v1/next-actions", { signal }).catch(() => null),
-        api<{ items: { cle: string; texte: string; href: string }[] }>("/v1/rapprochements/actions", { signal }).catch(() => null),
-      ]).then(([alertes, mes, next, rap]) => ({
-        alertes: alertes.items,
-        // Ce qui attend l'artisan existe ici même si un e-mail ou un push n'est jamais parti (« À faire » fait foi).
-        aFaire: [...actionsEnAttente(mes?.achats ?? [], next?.items ?? []), ...(rap?.items ?? [])],
-      })),
-    [],
-  );
-  const { data, error, reload, setData } = useResource(fetcher);
-  const alertes = (data?.alertes ?? []).filter((a) => (filtre === "toutes" ? true : filtre === "actions" ? a.genre === "action" : a.genre === "information"));
-  const aFaire = filtre === "informations" ? [] : (data?.aFaire ?? []);
-  const lire = (a: AlerteVue) => {
-    if (!a.lue) void api(`/v1/alertes/${a.id}/lue`, { method: "POST", body: {} }).catch(() => undefined);
-  };
-  const nonLues = (data?.alertes ?? []).filter((a) => !a.lue).length;
-  return (
-    <>
-      <EcranTitre titre="Notifications" retour="/" />
-      <GrandTitre sous="Des alertes courtes qui ouvrent la bonne action.">À ne pas manquer</GrandTitre>
-      <Puces label="Filtrer les notifications" choix={[{ id: "toutes", libelle: "Toutes" }, { id: "actions", libelle: "Actions" }, { id: "informations", libelle: "Informations" }] as const} valeur={filtre} onChange={setFiltre} />
-      {data === null ? (
-        <EtatEcran erreur={error} onReessayer={reload} />
-      ) : alertes.length + aFaire.length === 0 ? (
-        <div className={`flex flex-col gap-1 p-5 ${CARTE}`}>
-          <p className="text-[16px] font-extrabold">Rien de nouveau</p>
-          <p className="text-[14px] text-[#5c5648]">On te prévient dès qu&apos;un négoce répond, qu&apos;un besoin est à reconfirmer ou qu&apos;un message arrive.</p>
-        </div>
-      ) : (
-        <ul aria-label="Notifications" className="flex flex-col gap-3">
-          {aFaire.map((a) => (
-            <li key={a.cle}>
-              <Link href={a.href} className={`pressable flex items-start gap-3 p-4 ${CARTE}`}>
-                <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent">
-                  <Bell size={20} />
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-[16px] leading-tight font-extrabold">{a.texte}</span>
-                  <span className="text-[13px] font-extrabold text-[#0b6b43]">Ouvrir</span>
-                </span>
-              </Link>
-            </li>
-          ))}
-          {alertes.map((a) => {
-            const Icone = ICONE[a.categorie] ?? Bell;
-            return (
-              <li key={a.id}>
-                <Link href={a.href} onClick={() => lire(a)} aria-label={`${a.titre}, ${a.detail}${a.lue ? "" : ", non lue"}`} className={`pressable flex items-start gap-3 p-4 ${CARTE}`}>
-                  <span aria-hidden="true" className={`flex size-12 shrink-0 items-center justify-center rounded-full ${a.lue ? "bg-[#efece6]" : "bg-accent text-on-accent"}`}>
-                    <Icone size={20} />
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="text-[16px] leading-tight font-extrabold">{a.titre}</span>
-                    <span className="truncate text-[13px] font-extrabold text-[#6b5300]">{a.detail}</span>
-                    <span className="text-[13px] font-extrabold text-[#0b6b43]">{a.action}</span>
-                  </span>
-                  {a.lue ? null : <span aria-hidden="true" className="size-3.5 shrink-0 rounded-full bg-accent" />}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-      {nonLues > 0 ? (
-        <BoutonContour onClick={() => void api("/v1/alertes/lues", { method: "POST", body: { avant: new Date().toISOString() } }).then(() => data && setData({ ...data, alertes: data.alertes.map((a) => ({ ...a, lue: true })) }), () => undefined)}>
-          Tout marquer comme lu
-        </BoutonContour>
-      ) : null}
-      <p className="text-center text-[13px] text-muted">
-        Les conversations complètes restent dans la boîte
-        <br />
-        <Link href="/messages" className="font-extrabold underline underline-offset-4">
-          « Messages et réponses »
-        </Link>
-        .
-      </p>
     </>
   );
 }

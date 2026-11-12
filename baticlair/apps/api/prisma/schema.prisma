@@ -227,6 +227,7 @@ model Company {
   annoncesEnregistrees      AnnonceEnregistree[]
   historiqueMission         HistoriqueMission[]
   alertesCourtes            AlerteCourte[]
+  etatsAFaire               EtatAFaire[]
   reglageAlertes            ReglageAlertes?
   profilPublic              ProfilPublic?
   lecturesBoite             LectureBoite[]
@@ -2888,23 +2889,41 @@ model HistoriqueMission {
 /// LA CLOCHE : une alerte courte qui ouvre la bonne action. Jamais le texte d'un message ni le contenu d'une proposition
 /// (ils se lisent dans « Messages et réponses »). `cle` : une alerte par fait et par entreprise.
 model AlerteCourte {
-  id        String    @id @default(uuid(7)) @db.Uuid
-  companyId String    @map("company_id") @db.Uuid
-  categorie String
-  genre     String
-  titre     String
-  detail    String
-  action    String
-  href      String
-  cle       String
-  luLe      DateTime? @map("lu_le") @db.Timestamptz(3)
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  id          String    @id @default(uuid(7)) @db.Uuid
+  companyId   String    @map("company_id") @db.Uuid
+  categorie   String
+  genre       String
+  titre       String
+  detail      String
+  action      String
+  href        String
+  cle         String
+  luLe        DateTime? @map("lu_le") @db.Timestamptz(3)
+  /// Retirée de la liste par l'artisan (Greg, 12 novembre 2026) : seule l'alerte disparaît, jamais ce qu'elle désigne.
+  supprimeeLe DateTime? @map("supprimee_le") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@unique([companyId, cle])
   @@index([companyId, createdAt])
   @@map("alerte_courte")
+}
+
+/// L'état d'une action « À faire » dans la cloche (Greg, 12 novembre 2026). L'action elle-même est calculée (elle existe
+/// tant que la chose reste à faire) ; ici seulement « déjà vue » (la pastille s'éteint) et « retirée de la liste ».
+model EtatAFaire {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  companyId String    @map("company_id") @db.Uuid
+  cle       String
+  vuLe      DateTime? @map("vu_le") @db.Timestamptz(3)
+  masqueLe  DateTime? @map("masque_le") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, cle])
+  @@map("etat_a_faire")
 }
 
 /// Les réglages de notification d'une entreprise : une case par catégorie, une par canal (e-mail, push). Les alertes dans

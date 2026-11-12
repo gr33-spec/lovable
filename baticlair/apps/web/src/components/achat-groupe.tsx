@@ -9,6 +9,7 @@ import { Button, ButtonLink, Card, Field, INPUT, Skeleton } from "@/components/u
 import { api, messageErreur, type NextAction } from "@/lib/api";
 import { dateFr, eurosHt, negocePourApi, quantite, type AchatOuvert, type CarteAchat, type Reunies, type DetailAchat, type Droit, type EngagementTexte, type LignesListe, type MesAchats, type Jauge, type Lance, type NegoceChoisi, type NegocesProposes, type Prevenir, type ResultatAchat } from "@/lib/achat-groupe";
 import { useResource } from "@/lib/use-resource";
+import { cleAFaire, EVENEMENT_CLOCHE, type AFaire } from "@/lib/notifications";
 import { useBrouillon } from "@/lib/brouillon";
 import { lireContexteAchat, oublierContexteAchat, retenirContexteAchat, type ContexteAchat } from "@/lib/contexte-achat";
 import { CatalogueListes } from "@/components/catalogue-listes";
@@ -1094,22 +1095,40 @@ export function actionsEnAttente(achats: CarteAchat[], next: NextAction[]): { cl
  * a, la liste en un appui.
  */
 export function Cloche() {
-  const fetchMes = useCallback((signal: AbortSignal) => api<MesAchats>("/v1/achats-groupes", { signal }).catch(() => null), []);
-  const fetchNext = useCallback((signal: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal }).catch(() => null), []);
-  const { data: mes } = useResource(fetchMes);
-  const { data: next } = useResource(fetchNext);
-  const fetchRap = useCallback((signal: AbortSignal) => api<{ items: { cle: string; texte: string; href: string }[] }>("/v1/rapprochements/actions", { signal }).catch(() => null), []);
-  const { data: rap } = useResource(fetchRap);
-  // Greg, 10 novembre 2026 (capture 26) : la cloche ouvre « Notifications », des alertes courtes qui mènent à la bonne
-  // action. Elle compte ce qui attend l'artisan (source : « À faire », même si un e-mail n'est jamais parti) et les alertes
-  // non lues (nouveau message, nouvelle proposition). Les conversations complètes se lisent dans « Messages et réponses ».
-  const fetchAlertes = useCallback((signal: AbortSignal) => api<{ nonLues: number }>("/v1/alertes", { signal }).catch(() => null), []);
-  const { data: alertes } = useResource(fetchAlertes);
-  const n = actionsEnAttente(mes?.achats ?? [], next?.items ?? []).length + (rap?.items ?? []).length + (alertes?.nonLues ?? 0);
+  const fetcher = useCallback(
+    (signal: AbortSignal) =>
+      Promise.all([
+        api<MesAchats>("/v1/achats-groupes", { signal }).catch(() => null),
+        api<{ items: NextAction[] }>("/v1/next-actions", { signal }).catch(() => null),
+        api<{ items: AFaire[] }>("/v1/rapprochements/actions", { signal }).catch(() => null),
+        api<{ nonLues: number }>("/v1/alertes", { signal }).catch(() => null),
+        api<{ vues: string[]; masquees: string[] }>("/v1/alertes/a-faire", { signal }).catch(() => null),
+      ]),
+    [],
+  );
+  const { data, reload } = useResource(fetcher);
+  // L'écran « Notifications » prévient quand tout a été vu ou qu'une ligne est retirée ; au retour sur l'onglet aussi.
+  useEffect(() => {
+    const voir = () => document.visibilityState === "visible" && reload();
+    window.addEventListener(EVENEMENT_CLOCHE, reload);
+    document.addEventListener("visibilitychange", voir);
+    return () => {
+      window.removeEventListener(EVENEMENT_CLOCHE, reload);
+      document.removeEventListener("visibilitychange", voir);
+    };
+  }, [reload]);
+  // Greg, 12 novembre 2026 (dossier de corrections UX, point 2) : la pastille signale UNIQUEMENT du nouveau pas encore
+  // vu. Une action « À faire » déjà vue ou retirée de la liste ne la rallume pas (elle reste dans la liste tant qu'elle
+  // est à faire) ; une alerte lue non plus. Le serveur retient l'état : il tient après actualisation et sur un autre
+  // appareil.
+  const [mes, next, rap, alertes, etats] = data ?? [null, null, null, null, null];
+  const connues = new Set([...(etats?.vues ?? []), ...(etats?.masquees ?? [])]);
+  const aFaire: AFaire[] = [...actionsEnAttente(mes?.achats ?? [], next?.items ?? []), ...(rap?.items ?? [])];
+  const n = aFaire.filter((a) => !connues.has(cleAFaire(a))).length + (alertes?.nonLues ?? 0);
   return (
-    <Link href="/notifications" aria-label={n ? `Notifications : ${n}` : "Notifications"} className="pressable bouton-nuit relative flex size-11 items-center justify-center rounded-full">
+    <Link href="/notifications" aria-label={n ? `Notifications : ${n} ${n > 1 ? "nouvelles" : "nouvelle"}` : "Notifications"} className="pressable bouton-nuit relative flex size-11 items-center justify-center rounded-full">
       <Bell size={20} aria-hidden="true" />
-      {n ? <span aria-hidden="true" className="absolute top-1.5 right-1.5 size-3 rounded-full bg-accent ring-2 ring-surface" /> : null}
+      {n ? <span aria-hidden="true" data-pastille="cloche" className="absolute top-1.5 right-1.5 size-3 rounded-full bg-accent ring-2 ring-surface" /> : null}
     </Link>
   );
 }

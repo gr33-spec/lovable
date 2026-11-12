@@ -75,6 +75,7 @@ const documentBody = z.object({ titre: court(120).nullable().optional(), surProf
 const profilBody = z.object({ visible: z.boolean(), presentation: court(1500).nullable(), metiers: z.array(court(60)).max(8), services: court(600).nullable(), equipe: court(60).nullable(), ville: court(80).nullable() });
 const luBody = z.object({ cle: z.string().min(8).max(80) });
 const toutLireBody = z.object({ avant: z.iso.datetime() });
+const aFaireBody = z.object({ cles: z.array(z.string().min(1).max(300)).min(1).max(60), geste: z.enum(["vu", "masquer", "restaurer"]) });
 const reglagesBody = z.object({ prix: z.boolean(), groupe: z.boolean(), missions: z.boolean(), conseils: z.boolean(), email: z.boolean(), push: z.boolean() });
 
 type Televerse = { buffer: Buffer; originalname: string; mimetype: string } | undefined;
@@ -320,6 +321,30 @@ export class BoiteController {
   @HttpCode(200)
   lire(@Tenant() t: TenantContext, @Param("id") id: string) {
     return this.b.lire(t, id);
+  }
+
+  /** Greg, 12 novembre 2026 : une notification se retire de la liste, et se remet avec « Annuler ». */
+  @Delete("alertes/:id")
+  @HttpCode(200)
+  supprimerAlerte(@Tenant() t: TenantContext, @Param("id") id: string) {
+    return this.b.supprimerAlerte(t, id, true);
+  }
+
+  @Post("alertes/:id/restaurer")
+  @HttpCode(200)
+  restaurerAlerte(@Tenant() t: TenantContext, @Param("id") id: string) {
+    return this.b.supprimerAlerte(t, id, false);
+  }
+
+  @Get("alertes/a-faire")
+  etatsAFaire(@Tenant() t: TenantContext) {
+    return this.b.etatsAFaire(t);
+  }
+
+  @Post("alertes/a-faire")
+  @HttpCode(200)
+  marquerAFaire(@Tenant() t: TenantContext, @Body(new ZodPipe(aFaireBody)) b: z.infer<typeof aFaireBody>) {
+    return this.b.marquerAFaire(t, b.cles, b.geste);
   }
 
   @Get("alertes/reglages")
