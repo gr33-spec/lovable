@@ -7,7 +7,7 @@ import { useCallback, useState } from "react";
 import { CARTE, LigneZone } from "@/components/ag-v1-commun";
 import { PageTitle, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
-import { FILTRES_V1, SIGNATURE, zoneLisible, type AchatV1, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
+import { FILTRES_V1, lotPrincipal, SIGNATURE, zoneLisible, type AchatV1, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -46,7 +46,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
   const mesBesoins = mes ? [...mes.aFaire, ...mes.enCours] : [];
   const ajoutes = useSearchParams().get("ajoutes");
   // Seuls les métiers qui ont des produits ouverts sont proposés.
-  const metiers = FILTRES_V1.filter((f) => etat.produits.some((p) => p.lot === f.id));
+  const metiers = FILTRES_V1.filter((f) => etat.produits.some((p) => lotPrincipal(p.lot) === f.id));
 
   return (
     <div className="flex flex-col gap-4 pb-24 lg:mx-auto lg:w-full lg:max-w-[48rem]">

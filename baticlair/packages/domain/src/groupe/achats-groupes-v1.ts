@@ -28,6 +28,14 @@ export const LOTS_V1 = [
 export type LotV1 = (typeof LOTS_V1)[number]["id"];
 export const estLotV1 = (v: string): v is LotV1 => LOTS_V1.some((l) => l.id === v);
 export const libelleLot = (lot: LotV1) => LOTS_V1.find((l) => l.id === lot)!.libelle;
+/**
+ * LA ZINGUERIE FAIT PARTIE DE LA COUVERTURE, PARTOUT (Greg, 12 novembre 2026 : « même en achat groupé ; ça doit faire
+ * partie des sous-menus de la couverture »). Le lot « zinguerie » reste rangé tel quel (aucune donnée réécrite) : il se
+ * lit SOUS la couverture, et le filtre « Couverture » le comprend.
+ */
+export const LOT_PARENT_V1: Readonly<Partial<Record<LotV1, LotV1>>> = { zinguerie: "couverture" };
+/** Les lots d'un filtre : lui, puis ses sous-lots (« couverture » → couverture, zinguerie). */
+export const lotsComprisV1 = (lot: LotV1): LotV1[] => [lot, ...LOTS_V1.map((l) => l.id).filter((id) => LOT_PARENT_V1[id] === lot)];
 
 /** Les mots qui rangent une ligne dans un lot ; l'ordre compte (« fenêtre de toit » est de la couverture, pas de la menuiserie). */
 const MOTS_DES_LOTS: readonly [LotV1, RegExp][] = [

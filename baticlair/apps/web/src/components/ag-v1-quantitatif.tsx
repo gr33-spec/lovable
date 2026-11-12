@@ -8,7 +8,7 @@ import { CARTE, LigneZone, Note, VerificationEntreprise } from "@/components/ag-
 import { ChoixCaracteristiques, ConfirmerConditionnement } from "@/components/ag-v1-direct";
 import { Button, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
-import { CASE_PLUSIEURS_LIGNES, CASE_UNE_LIGNE, dateCourte, dateLongue, jourDans, libelleLot, LOTS_V1, PHRASE_ADRESSE_PRIVEE, zoneLisible, type CompatibiliteV1, type EtatV1, type LigneQuantitatifV1 } from "@/lib/ag-v1";
+import { CASE_PLUSIEURS_LIGNES, CASE_UNE_LIGNE, dateCourte, dateLongue, jourDans, libelleLot, LOTS_PRINCIPAUX_V1, LOTS_V1, PHRASE_ADRESSE_PRIVEE, zoneLisible, type CompatibiliteV1, type EtatV1, type LigneQuantitatifV1 } from "@/lib/ag-v1";
 import { useResource } from "@/lib/use-resource";
 
 const nf = (n: number) => n.toLocaleString("fr-FR").replace(/ | /g, " ");
@@ -33,6 +33,7 @@ const RAISON_SIMPLE: Partial<Record<LigneQuantitatifV1["mention"], string>> = {
 /** « Depuis un quantitatif » sans liste choisie : les listes de l'entreprise. */
 export function ChoixDuQuantitatif() {
   const { data } = useResource(useCallback((s: AbortSignal) => api<{ items: { id: string; name: string }[] }>("/v1/projects?limit=30", { signal: s }), []));
+
   return (
     <div className="flex flex-col gap-4 lg:mx-auto lg:w-full lg:max-w-[40rem]">
       <PageTitle>Depuis un quantitatif</PageTitle>
@@ -106,7 +107,8 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   );
   // Les lignes qu'on ne peut pas grouper (déjà demandées, pas encore ouvertes…) sont repliées en bas : rien n'est caché.
   const groupables = (l: LigneQuantitatifV1) => l.selectionnable || l.mention === "a_preciser";
-  const parLotGroupables = LOTS_V1.map((lot) => ({ lot, lignes: lignes.filter((l) => l.lot === lot.id && groupables(l)) })).filter((g) => g.lignes.length > 0);
+  const duLot = (id: string) => lignes.filter((l) => l.lot === id && groupables(l));
+  const parLotGroupables = LOTS_PRINCIPAUX_V1.map((lot) => ({ lot, lignes: duLot(lot.id), sous: lot.sous.map((x) => ({ lot: x, lignes: duLot(x.id) })).filter((x) => x.lignes.length > 0) })).filter((g) => g.lignes.length > 0 || g.sous.length > 0);
   const nonGroupables = lignes.filter((l) => !groupables(l));
   const nb = lignes.filter((l) => coches.has(l.key) && l.selectionnable).length;
 
@@ -179,24 +181,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   if (error) return <p role="alert" className="text-[16px] font-semibold text-danger">{messageErreur(error)}</p>;
   if (!data) return <Skeleton card="h-56" lines={3} label="Chargement de ta liste…" />;
 
-  if (etape === "selection")
-    return (
-      <div className="flex flex-col gap-4 pb-44 lg:mx-auto lg:pb-0 lg:w-full lg:max-w-[44rem]">
-        <p className="text-[15px] font-semibold text-muted">{data.nom}</p>
-        <PageTitle>Quels articles grouper ?</PageTitle>
-        <p className="text-[16px] text-muted">Coche les articles à acheter avec d&apos;autres artisans. Les autres restent dans ton quantitatif, pour tes négoces.</p>
-        {lignes.some((l) => l.mention === "recommande") ? (
-          <Button variant="secondary" className="self-start" onClick={() => setCoches(new Set(lignes.filter((l) => l.mention === "recommande").map((l) => l.key)))}>
-            Cocher les articles conseillés
-          </Button>
-        ) : null}
-        {parLotGroupables.map(({ lot, lignes: ls }) => (
-          <section key={lot.id} aria-labelledby={`lot-${lot.id}`} className="flex flex-col gap-2">
-            <h2 id={`lot-${lot.id}`} className="text-[20px] font-extrabold">
-              {lot.libelle}
-            </h2>
-            <ul className={`${CARTE} flex flex-col`}>
-              {ls.map((l) => {
+  const rangee = (l: LigneQuantitatifV1) => {
                 const produit = l.produit ? etat.produits.find((p) => p.type === l.produit!.type) : null;
                 return (
                   <li key={l.key} className="flex flex-col gap-2 border-b border-line p-3 last:border-b-0">
@@ -227,7 +212,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
                         <select id={`lot-${l.key}`} value={l.lot} onChange={(e) => void changerLot(l, e.target.value)} className="min-h-11 self-start rounded-full border border-line bg-surface px-3 text-[14px] font-semibold">
                           {LOTS_V1.map((x) => (
                             <option key={x.id} value={x.id}>
-                              Lot : {x.libelle}
+                              Lot : {libelleLot(x.id)}
                             </option>
                           ))}
                         </select>
@@ -240,8 +225,33 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
                     ) : null}
                   </li>
                 );
-              })}
-            </ul>
+  };
+  if (etape === "selection")
+    return (
+      <div className="flex flex-col gap-4 pb-44 lg:mx-auto lg:pb-0 lg:w-full lg:max-w-[44rem]">
+        <p className="text-[15px] font-semibold text-muted">{data.nom}</p>
+        <PageTitle>Quels articles grouper ?</PageTitle>
+        <p className="text-[16px] text-muted">Coche les articles à acheter avec d&apos;autres artisans. Les autres restent dans ton quantitatif, pour tes négoces.</p>
+        {lignes.some((l) => l.mention === "recommande") ? (
+          <Button variant="secondary" className="self-start" onClick={() => setCoches(new Set(lignes.filter((l) => l.mention === "recommande").map((l) => l.key)))}>
+            Cocher les articles conseillés
+          </Button>
+        ) : null}
+        {parLotGroupables.map(({ lot, lignes: ls, sous }) => (
+          <section key={lot.id} aria-labelledby={`lot-${lot.id}`} className="flex flex-col gap-2">
+            <h2 id={`lot-${lot.id}`} className="text-[20px] font-extrabold">
+              {lot.libelle}
+            </h2>
+            {ls.length ? <ul className={`${CARTE} flex flex-col`}>{ls.map(rangee)}</ul> : null}
+            {/* La zinguerie fait partie de la couverture (Greg, 12 novembre 2026) : ses lignes en sous-partie du lot. */}
+            {sous.map((s) => (
+              <section key={s.lot.id} aria-labelledby={`lot-${s.lot.id}`} className="flex flex-col gap-2">
+                <h3 id={`lot-${s.lot.id}`} className="text-[16px] font-extrabold text-muted">
+                  {s.lot.libelle}
+                </h3>
+                <ul className={`${CARTE} flex flex-col`}>{s.lignes.map(rangee)}</ul>
+              </section>
+            ))}
           </section>
         ))}
         {nonGroupables.length ? (

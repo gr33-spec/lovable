@@ -111,9 +111,13 @@ export interface LigneQuantitatifV1 {
   selectionnable: boolean;
 }
 
-export const LOTS_V1: { id: string; libelle: string }[] = [
+/**
+ * La zinguerie fait partie de la couverture, partout (Greg, 12 novembre 2026) : `dans` range un lot SOUS un autre ; il se
+ * lit en sous-menu de la couverture et le filtre « Couverture » le comprend (même règle que le serveur).
+ */
+export const LOTS_V1: { id: string; libelle: string; dans?: string }[] = [
   { id: "couverture", libelle: "Couverture" },
-  { id: "zinguerie", libelle: "Zinguerie" },
+  { id: "zinguerie", libelle: "Zinguerie", dans: "couverture" },
   { id: "isolation", libelle: "Isolation" },
   { id: "bois", libelle: "Bois" },
   { id: "electricite", libelle: "Électricité" },
@@ -124,9 +128,18 @@ export const LOTS_V1: { id: string; libelle: string }[] = [
   { id: "peinture", libelle: "Peinture" },
   { id: "divers", libelle: "Divers" },
 ];
-/** Les filtres de l'accueil (V5.2) : Couverture · Zinguerie · Isolation · Bois · Électricité. */
-export const FILTRES_V1 = LOTS_V1.slice(0, 5);
-export const libelleLot = (id: string) => LOTS_V1.find((l) => l.id === id)?.libelle ?? id;
+/** Les lots de premier niveau, chacun avec ses sous-lots (« Couverture » › « Zinguerie »). */
+export const LOTS_PRINCIPAUX_V1 = LOTS_V1.filter((l) => !l.dans).map((l) => ({ ...l, sous: LOTS_V1.filter((s) => s.dans === l.id) }));
+/** Le lot de premier niveau d'un lot (« zinguerie » → « couverture »). */
+export const lotPrincipal = (id: string) => LOTS_V1.find((l) => l.id === id)?.dans ?? id;
+/** Les filtres de l'accueil (V5.2) : Couverture (zinguerie comprise) · Isolation · Bois · Électricité. */
+export const FILTRES_V1 = LOTS_PRINCIPAUX_V1.slice(0, 4);
+/** « Couverture », « Couverture › Zinguerie ». */
+export const libelleLot = (id: string) => {
+  const l = LOTS_V1.find((x) => x.id === id);
+  if (!l) return id;
+  return l.dans ? `${LOTS_V1.find((x) => x.id === l.dans)?.libelle ?? l.dans} › ${l.libelle}` : l.libelle;
+};
 
 export const CASE_UNE_LIGNE = (date: string) =>
   `Je confirme que cette quantité correspond à un besoin réel de mon entreprise. Je la maintiendrai à jour jusqu'au ${date}. Ce n'est pas encore une commande : je pourrai accepter ou refuser l'offre finale.`;

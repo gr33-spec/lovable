@@ -10,6 +10,7 @@ import {
   departement as departementConnu,
   differencesV1,
   estLotV1,
+  lotsComprisV1,
   HABILITATIONS_V1,
   LIBELLES_STATUT_V1,
   manquantesV1,
@@ -194,7 +195,7 @@ export class AchatsGroupesV1Service {
     this.exigerActif();
     const zone = await this.zone(tenant.companyId);
     if (!zone) return { zone: null, achats: [] };
-    const achats = await this.prisma.achatGroupeV1.findMany({ where: { departement: zone.code, statut: "ouvert", ouvertJusquau: { gt: this.now() }, ...(lot && estLotV1(lot) ? { lot } : {}) }, orderBy: { ouvertJusquau: "asc" }, take: 50 });
+    const achats = await this.prisma.achatGroupeV1.findMany({ where: { departement: zone.code, statut: "ouvert", ouvertJusquau: { gt: this.now() }, ...(lot && estLotV1(lot) ? { lot: { in: lotsComprisV1(lot) } } : {}) }, orderBy: { ouvertJusquau: "asc" }, take: 50 });
     return { zone, achats: await Promise.all(achats.map((a) => this.vuePublique(this.prisma, a))) };
   }
 

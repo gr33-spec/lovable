@@ -15,6 +15,8 @@ import {
   differencesV1,
   lireProduitV1,
   lotDeLaLigne,
+  LOT_PARENT_V1,
+  lotsComprisV1,
   manquesOffreV1,
   nomProduitV1,
   ouvertureV1,
@@ -111,6 +113,14 @@ describe("classement par lot d'une liste tapée à la main", () => {
     ["Truc inconnu", "divers"],
   ] as const;
   it.each(liste)("%s → %s", (d, lot) => expect(lotDeLaLigne(d)).toBe(lot));
+  it("la zinguerie fait partie de la couverture : le filtre Couverture comprend ses lignes (Greg, 12 novembre 2026)", () => {
+    expect(LOT_PARENT_V1.zinguerie).toBe("couverture");
+    expect(lotsComprisV1("couverture")).toEqual(["couverture", "zinguerie"]);
+    expect(lotsComprisV1("zinguerie")).toEqual(["zinguerie"]);
+    expect(lotsComprisV1("isolation")).toEqual(["isolation"]);
+    // Le lot rangé ne change pas : aucune donnée réécrite.
+    expect(lotDeLaLigne("Gouttière zinc demi-ronde de 33")).toBe("zinguerie");
+  });
   it("la correction de l'artisan s'applique à SA ligne, sans toucher les autres", () => {
     const corrigee = classerLigneV1({ designation: "Crochets inox 100 mm", quantite: 950, unite: "u", lotChoisi: "zinguerie", faits: libre });
     expect(corrigee.lot).toBe("zinguerie");

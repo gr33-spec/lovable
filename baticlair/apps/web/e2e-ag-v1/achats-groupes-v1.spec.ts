@@ -354,6 +354,8 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   await carteAg.getByRole("link", { name: "Ajouter aux achats groupés" }).click();
   await expect(page.getByRole("heading", { name: "Quels articles grouper ?" })).toBeVisible();
   for (const lot of ["Couverture", "Zinguerie", "Électricité"]) await expect(page.getByRole("heading", { name: lot, exact: true })).toBeVisible();
+  // La zinguerie fait partie de la couverture (Greg, 12 novembre 2026) : sa sous-partie se lit DANS le lot Couverture.
+  await expect(page.getByRole("region", { name: "Couverture" }).getByRole("region", { name: "Zinguerie" })).toBeVisible();
   await expect(page.getByText("Recommandé pour un achat groupé").first()).toBeVisible();
   await expect(page.getByText("Compatible avec un achat groupé").first()).toBeVisible();
   await expect(page.getByText("À préciser : choix et épaisseur manquants")).toBeVisible();
@@ -371,6 +373,7 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   // Correction du lot d'UNE ligne (le câble rangé en électricité passe en zinguerie, puis revient), sous « Pourquoi ? ».
   const cable = () => page.getByRole("listitem").filter({ has: page.getByText(/^Câble R2V/) });
   await cable().getByRole("button", { name: "Pourquoi ?" }).click();
+  await expect(page.getByLabel(/^Lot de la ligne Câble R2V/).getByRole("option", { name: "Lot : Couverture › Zinguerie" })).toBeAttached();
   await page.getByLabel(/^Lot de la ligne Câble R2V/).selectOption("zinguerie");
   await expect(page.getByRole("region", { name: "Zinguerie" }).getByText(/^Câble R2V/)).toBeVisible();
   await page.getByLabel(/^Lot de la ligne Câble R2V/).selectOption("electricite");
