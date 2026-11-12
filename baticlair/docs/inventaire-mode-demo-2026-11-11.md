@@ -20,14 +20,14 @@ Trois choses portent le mot « démo » dans le code. Une seule est retirée.
 - Nouveau réglage `DEMO_PUBLIQUE` (coupé par défaut, refusé en production). Le point d'entrée ne s'ouvre que si
   `DEMO_PUBLIQUE` **et** `ACCES_DEMO` sont allumés. Fermé, `POST /v1/public/demo/session` répond « introuvable » (404),
   sans créer d'utilisateur, d'entreprise ni de session, et `GET /v1/public/demo` répond `{ actif: false }`.
-- Sur test.mobiiz.fr, `ACCES_DEMO` est encore allumé dans les réglages de l'hébergeur (non modifié : c'est une
-  configuration). Comme `DEMO_PUBLIQUE` n'y est pas posé, le point d'entrée est fermé dès ce commit.
+- Sur test.mobiiz.fr, `ACCES_DEMO` a été passé à « off » chez l'hébergeur le 12 novembre 2026, avec l'accord de Greg
+  (aperçu, branche de test seulement). `DEMO_PUBLIQUE` n'y est pas posé.
 
 **Routes**
 
 | Route | Fichier | État |
 |---|---|---|
-| `GET /v1/public/demo` | `apps/api/src/modules/acces-demo/http/acces-demo.controller.ts` | répond `actif: false` |
+| `GET /v1/public/demo` | `apps/api/src/modules/acces-demo/http/acces-demo.controller.ts` | fermée (404), comme l'ouverture (12 novembre) |
 | `POST /v1/public/demo/session` | même fichier | fermée (404) sauf les deux réglages allumés |
 
 **Fichiers qui en dépendent encore (seulement désactivés)**

@@ -22,11 +22,12 @@ export class AccesDemoController {
     @Inject(AccesDemoService) private readonly demo: AccesDemoService,
   ) {}
 
-  /** La landing demande si le bouton existe. */
+  /** Fermée (le cas partout depuis le 11 novembre 2026), la route n'existe pas : « introuvable », comme l'ouverture. */
   @Public()
   @Get()
   etat() {
-    return { actif: this.config.demoPublique };
+    if (!this.config.demoPublique) throw new DomainError("not_found", "Not found");
+    return { actif: true };
   }
 
   /** Crée l'espace fictif du visiteur et ouvre sa session (cookie posé par l'authentification, comme une connexion). */

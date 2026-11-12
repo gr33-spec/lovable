@@ -109,37 +109,49 @@ describe("le chantier en bref ne dit que ce qui est écrit", () => {
     expect(bref([TUILE, CROCHET, ARDOISE]).faits[0]).toBe("Couverture en tuiles et en ardoises au crochet");
   });
 
-  it("deux autres fournitures principales contradictoires (zinc à joint debout et ardoises), dans les deux ordres : les deux, jamais une seule", () => {
+  it("deux autres fournitures principales (zinc à joint debout en m², ardoises à la pièce), dans les deux ordres : les deux, la surface écrite avec son ouvrage", () => {
     const ZINC: Ligne = { designation: "Couverture zinc à joint debout prépatiné 0,65 mm", quantity: "40", unit: "m²", ouvrage: Z, emplacement: "couverture" };
     const a = bref([ZINC, ARDOISE]);
     const b = bref([ARDOISE, ZINC]);
     expect(tout(a)).toBe(tout(b));
-    expect(a.faits[0]).toBe("Couverture en ardoises et zinc à joint debout");
+    // Les ardoises sont écrites à la pièce : pas de surface à dire pour elles ; le zinc garde la sienne.
+    expect(a.faits[0]).toBe("Couverture en ardoises et zinc à joint debout (40 m²)");
+    expect(a.b.faits).toEqual([]);
     expect(tout(a)).not.toMatch(/tuile|crochet/i);
   });
 
-  it("une surface écrite tranche (§45.2, l'ouvrage principal et sa surface), quel que soit l'ordre ; à égalité, les deux", () => {
-    const A60: Ligne = { designation: "Couverture en ardoises naturelles 32 × 22", quantity: "60", unit: "m²", ouvrage: A, emplacement: "ardoise" };
-    const T20: Ligne = { designation: "Couverture en tuiles terre cuite", quantity: "20", unit: "m²", ouvrage: T, emplacement: "tuile" };
-    const T60: Ligne = { ...T20, quantity: "60" };
-    for (const lignes of [[A60, T20], [T20, A60]]) {
-      const r = bref(lignes);
-      expect(r.faits[0]).toBe("Couverture en ardoises");
-      expect(r.faits[1]).toBe("60 m²");
+  it("JAMAIS UN OUVRAGE MASQUÉ par une plus grande surface (Greg, 12 novembre 2026) : tous sont cités avec leur surface écrite, dans les deux ordres", () => {
+    const ardoise = (m2: string): Ligne => ({ designation: "Couverture en ardoises naturelles 32 × 22", quantity: m2, unit: "m²", ouvrage: A, emplacement: "ardoise" });
+    const tuile = (m2: string): Ligne => ({ designation: "Couverture en tuiles terre cuite", quantity: m2, unit: "m²", ouvrage: T, emplacement: "tuile" });
+    const cas: [Ligne, Ligne, string][] = [
+      [ardoise("60"), tuile("20"), "Couverture en tuiles (20 m²) et en ardoises (60 m²)"],
+      // Des surfaces très différentes : la petite n'est jamais masquée par la grande, ni l'inverse.
+      [ardoise("600"), tuile("5"), "Couverture en tuiles (5 m²) et en ardoises (600 m²)"],
+      [ardoise("3"), tuile("1200"), "Couverture en tuiles (1200 m²) et en ardoises (3 m²)"],
+      [ardoise("12,5"), tuile("12,5"), "Couverture en tuiles (12,5 m²) et en ardoises (12,5 m²)"],
+    ];
+    for (const [a, t, attendu] of cas) {
+      const r1 = bref([a, t]);
+      const r2 = bref([t, a]);
+      expect(r1.faits[0], attendu).toBe(attendu);
+      expect(tout(r2)).toBe(tout(r1));
+      // Aucun fait d'une ligne n'est prêté au chantier entier : chaque surface reste avec son ouvrage.
+      expect(r1.b.faits).toEqual([]);
+      expect(r1.phrase).toBe(`Je vous envoie la liste des fournitures pour un chantier de ${attendu.charAt(0).toLowerCase()}${attendu.slice(1)}.`);
     }
-    for (const lignes of [[A60, T60], [T60, A60]]) {
-      const r = bref(lignes);
-      expect(r.faits[0]).toBe("Couverture en tuiles et en ardoises");
-      expect(r.b.faits).toEqual([]);
-    }
+    // Deux lignes du même ouvrage : leurs surfaces écrites s'ajoutent pour cet ouvrage.
+    expect(bref([ardoise("60"), tuile("20"), ardoise("15")]).faits[0]).toBe("Couverture en tuiles (20 m²) et en ardoises (75 m²)");
+    expect(tout(bref([ardoise("15"), ardoise("60"), tuile("20")]))).toBe(tout(bref([tuile("20"), ardoise("60"), ardoise("15")])));
   });
 
-  it("trois systèmes écrits sans surface pour trancher : le bref reste neutre, dans tous les ordres", () => {
+  it("trois systèmes écrits : les trois sont cités, dans tous les ordres, chacun avec sa surface quand il en écrit une", () => {
     const ZINC: Ligne = { designation: "Couverture zinc à joint debout prépatiné 0,65 mm", quantity: "40", unit: "m²", ouvrage: Z, emplacement: "couverture" };
+    const attendu = "Couverture en tuiles, en ardoises et zinc à joint debout (40 m²)";
     for (const lignes of [[ARDOISE, TUILE, ZINC], [ZINC, TUILE, ARDOISE], [TUILE, ZINC, ARDOISE]]) {
       const r = bref(lignes);
-      expect(r.b.ouvrage).toBeNull();
-      expect(tout(r)).not.toMatch(/couverture en|emboîtement|ardoises au crochet/i);
+      expect(r.faits[0], lignes.map((l) => l.designation).join(" + ")).toBe(attendu);
+      expect(r.b.faits).toEqual([]);
+      expect(tout(r)).not.toMatch(/emboîtement|ardoises au crochet/i);
     }
   });
 

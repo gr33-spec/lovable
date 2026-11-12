@@ -83,8 +83,13 @@ describe("le chantier en bref d'une liste saisie à la main", () => {
     const T60: L = ["Couverture en tuiles terre cuite", "60", "m²"];
     const egal = [await bref([A60, T60]), await bref([T60, A60])];
     expect(egal[0]!.texte).toBe(egal[1]!.texte);
-    expect(egal[0]!.texte).toMatch(/tuiles/i);
-    expect(egal[0]!.texte).toMatch(/ardoises/i);
+    expect(egal[0]!.texte).toBe("Couverture en tuiles (60 m²) et en ardoises (60 m²).");
+    // Jamais un ouvrage masqué par une plus grande surface (Greg, 12 novembre 2026) : 600 m² d'ardoises et 5 m² de tuiles.
+    const A600: L = ["Couverture en ardoises naturelles 32 × 22", "600", "m²"];
+    const T5: L = ["Couverture en tuiles terre cuite", "5", "m²"];
+    const inegal = [await bref([A600, T5]), await bref([T5, A600])];
+    expect(inegal[0]!.texte).toBe("Couverture en tuiles (5 m²) et en ardoises (600 m²).");
+    expect(inegal[1]!.texte).toBe(inegal[0]!.texte);
     const neutre = await bref([LITEAU, ECRAN], "Chantier exemple, 22300 Lannion");
     expect(neutre.tout).not.toMatch(AUCUN_TYPE);
     expect(neutre.texte).toBe("Lannion, bord de mer.");

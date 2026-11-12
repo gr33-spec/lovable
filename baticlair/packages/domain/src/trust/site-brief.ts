@@ -147,20 +147,17 @@ export function siteBrief(input: {
     const n = Number(l.quantity.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : -1;
   };
-  // PLUSIEURS OUVRAGES PRINCIPAUX ÉCRITS (ardoises ET tuiles ; Greg, 11 novembre 2026) : jamais « le premier de la liste ».
-  // Les ouvrages candidats sont ceux dont une ligne écrit la fourniture principale, les couvertures d'abord (section
-  // « principal »), sans le support (un voligeage se dit « pose sur voligeage », il ne nomme pas le chantier). Un seul :
-  // c'est lui. Plusieurs, tous mesurés : celui dont la surface écrite est strictement la plus grande (§45.2, « ouvrage
-  // principal, surface ») ; sans surface pour trancher, les deux sont nommés, dans l'ordre du tiroir, sans leur prêter un fait ; au-delà
-  // de deux, le bref reste neutre. L'ordre des lignes ne change jamais le résultat.
+  // PLUSIEURS OUVRAGES PRINCIPAUX ÉCRITS (ardoises ET tuiles ; Greg, 11 puis 12 novembre 2026) : jamais « le premier de la
+  // liste », et JAMAIS UN OUVRAGE MASQUÉ parce qu'un autre a une plus grande surface. Les ouvrages candidats sont ceux dont
+  // une ligne écrit la fourniture principale, les couvertures d'abord (section « principal »), sans le support (un
+  // voligeage se dit « pose sur voligeage », il ne nomme pas le chantier). Un seul : c'est lui. Plusieurs : TOUS sont
+  // cités, dans l'ordre du tiroir, chacun avec sa surface écrite quand il en a une (« couverture en tuiles (20 m²) et en
+  // ardoises (60 m²) »), sans prêter au chantier les faits d'une de leurs lignes. L'ordre des lignes ne change rien.
   const ouvrageDe = (l: (typeof planned)[number]) => ref.workItems.find((x) => x.id === baseOf(l.workItemId))!;
   const principales = planned.filter(principale);
   const candidats = ouvragesCandidats(ref, principales.map((l) => ({ ouvrage: l.workItemId, emplacement: l.slot })));
   const surface = (w: Referential["workItems"][number]) => principales.filter((l) => ouvrageDe(l) === w).reduce((t, l) => t + Math.max(0, area(l.ref)), 0);
-  const parSurface = [...candidats].sort((a, b) => surface(b) - surface(a));
-  // Une surface ne tranche que si CHAQUE ouvrage en écrit une (40 m² de zinc ne l'emportent pas sur 1200 ardoises à la pièce).
-  const mesures = candidats.every((w) => surface(w) > 0);
-  const work = candidats.length === 1 ? candidats[0] : candidats.length > 1 && mesures && surface(parSurface[0]!) > surface(parSurface[1]!) ? parSurface[0] : undefined;
+  const work = candidats.length === 1 ? candidats[0] : undefined;
   // La ligne qui porte les faits de l'ouvrage (sa quantité, son matériau) : sa seule ligne, sinon celle dont la surface
   // écrite est strictement la plus grande. Plusieurs lignes sans surface pour trancher : aucune n'est « la » ligne, le
   // bref nomme l'ouvrage sans prêter au chantier les faits de l'une d'elles (jamais « la première saisie », jamais un
@@ -179,10 +176,20 @@ export function siteBrief(input: {
     return ecrit ? (norm(ecrit).startsWith(norm(metier).slice(0, 6)) ? ecrit.toLowerCase() : `${metier} (${ecrit.toLowerCase()})`) : null;
   };
   let label: string | null = work ? nomDe(work) : null;
-  if (!work && candidats.length === 2) {
-    const [a, b] = candidats.map(nomDe);
-    // « Couverture en tuiles et en ardoises » : le mot commun n'est dit qu'une fois.
-    if (a && b) label = a.split(" ")[0] === b.split(" ")[0] && b.includes(" ") ? `${a} et ${b.slice(b.indexOf(" ") + 1)}` : `${a} et ${b}`;
+  if (!work && candidats.length > 1) {
+    const noms = candidats.map(nomDe);
+    // Un ouvrage dont le nom n'est pas écrit ne peut pas être cité : plutôt que de le masquer, le bref reste neutre.
+    if (noms.every((n): n is string => n !== null)) {
+      const premier = noms[0]!.split(" ")[0]!;
+      const parts = candidats.map((w, k) => {
+        const nom = noms[k]!;
+        // « Couverture en tuiles et en ardoises » : le mot commun n'est dit qu'une fois.
+        const court = k > 0 && nom.split(" ")[0] === premier && nom.includes(" ") ? nom.slice(nom.indexOf(" ") + 1) : nom;
+        const m2 = surface(w);
+        return m2 > 0 ? `${court} (${String(Math.round(m2 * 100) / 100).replace(".", ",")} m²)` : court;
+      });
+      label = parts.length === 2 ? parts.join(" et ") : `${parts.slice(0, -1).join(", ")} et ${parts[parts.length - 1]}`;
+    }
   }
 
   // Une donnée est un FAIT si l'artisan l'a répondue, ou si le devis, un document ou la note la donne.

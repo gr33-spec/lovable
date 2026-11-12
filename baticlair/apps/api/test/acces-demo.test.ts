@@ -45,7 +45,10 @@ async function visiteur(c: TestContext) {
 describe("l'accès démo", () => {
   it("coupé (par défaut) : pas de bouton, la route n'existe pas ; et jamais en production", async () => {
     const c = await app("off");
-    expect((await request(c.app.getHttpServer()).get("/v1/public/demo").expect(200)).body).toEqual({ actif: false });
+    // Les DEUX anciennes routes répondent « introuvable » (Greg, 12 novembre 2026), sans poser de cookie.
+    const lecture = await request(c.app.getHttpServer()).get("/v1/public/demo").expect(404);
+    expect(lecture.body.error.code).toBe("not_found");
+    expect(lecture.headers["set-cookie"] ?? []).toEqual([]);
     await request(c.app.getHttpServer()).post("/v1/public/demo/session").set("origin", WEB_ORIGIN).expect(404);
     expect(await c.prisma.user.count()).toBe(0);
     expect(() => loadConfig({ ...process.env, ACCES_DEMO: "on", VERCEL_ENV: "production" })).toThrow(/ACCES_DEMO/);
@@ -53,7 +56,10 @@ describe("l'accès démo", () => {
 
   it("LA DÉMONSTRATION PUBLIQUE EST RETIRÉE (Greg, 11 novembre 2026) : `ACCES_DEMO` allumé comme sur test.mobiiz.fr mais `DEMO_PUBLIQUE` coupé (son défaut) : le point d'entrée est fermé, rien n'est créé", async () => {
     const c = await app("on", "off", "off");
-    expect((await request(c.app.getHttpServer()).get("/v1/public/demo").expect(200)).body).toEqual({ actif: false });
+    // Les DEUX anciennes routes répondent « introuvable » (Greg, 12 novembre 2026), sans poser de cookie.
+    const lecture = await request(c.app.getHttpServer()).get("/v1/public/demo").expect(404);
+    expect(lecture.body.error.code).toBe("not_found");
+    expect(lecture.headers["set-cookie"] ?? []).toEqual([]);
     const refus = await request(c.app.getHttpServer()).post("/v1/public/demo/session").set("origin", WEB_ORIGIN).expect(404);
     // Une fonctionnalité indisponible, dite sans rien de technique : ni réglage, ni pile, ni cookie de session.
     expect(refus.body.error.code).toBe("not_found");
