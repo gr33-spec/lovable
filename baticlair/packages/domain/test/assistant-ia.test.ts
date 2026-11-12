@@ -27,7 +27,7 @@ describe("l'assistant connecté à l'IA : ce que le code accepte du modèle", ()
       { libelle: "Ardoise naturelle 32×22 Espagne 1er choix", quantite: "52", unite: "m²" },
       { libelle: "Gouttière havraise développé 25", quantite: null, unite: null },
     ]);
-    expect(r.questions).toEqual([{ texte: "Gouttière havraise de 25 : en zinc naturel ou prépatiné ?", choix: ["Zinc naturel", "Zinc prépatiné", "Cuivre"] }]);
+    expect(r.questions).toEqual([{ texte: "Gouttière havraise de 25 : en zinc naturel ou prépatiné ?", choix: ["Zinc naturel", "Zinc prépatiné", "Cuivre"], ligne: null }]);
     expect(r.ecartees).toBe(0);
   });
 
@@ -123,8 +123,31 @@ describe("l'assistant connecté à l'IA : ce que le code accepte du modèle", ()
     expect(validerAssistantIa(dit("voilà"), wire({ nature: "texte" }), { photo: true }).nature).toBe("autre");
   });
 
+  it("une question suit SA ligne : son rang est celui de la liste gardée ; la question d'une ligne écartée tombe avec elle (Greg, 12 novembre 2026)", () => {
+    const r = validerAssistantIa(
+      dit("52 m² d'ardoise et une gouttière"),
+      wire({
+        lignes: [
+          { designation: "Crochets inox", quantite: null, unite: null },
+          { designation: "Ardoise", quantite: "52", unite: "m²" },
+          { designation: "Gouttière", quantite: null, unite: null },
+        ],
+        questions: [
+          { texte: "Crochets : quelle longueur ?", choix: [], ligne: 0 },
+          { texte: "En quelle matière ?", choix: ["Zinc", "Cuivre"], ligne: 2 },
+          { texte: "Tu refais toute la couverture ?", choix: ["Oui", "Non"], ligne: null },
+        ],
+      }),
+    );
+    expect(r.lignes.map((l) => l.libelle)).toEqual(["Ardoise", "Gouttière"]);
+    expect(r.questions).toEqual([
+      { texte: "En quelle matière ?", choix: ["Zinc", "Cuivre"], ligne: 1 },
+      { texte: "Tu refais toute la couverture ?", choix: ["Oui", "Non"], ligne: null },
+    ]);
+  });
+
   it("la consigne tient les règles du comptoir ; la conversation part dans l'ordre", () => {
-    for (const regle of [/N'ajoute JAMAIS un article/, /N'invente JAMAIS une quantité/, /au plus trois questions/, /Ne la devine jamais/, /Ne demande jamais une adresse/, /une photo ne donne ni mesure ni quantité/, /« liste » ou « devis » : ne recopie rien/]) expect(ASSISTANT_IA_SYSTEM).toMatch(regle);
+    for (const regle of [/N'ajoute JAMAIS un article/, /N'invente JAMAIS une quantité/, /au plus trois questions/, /Ne la devine jamais/, /Ne demande jamais une adresse/, /Chaque question porte « ligne »/, /une photo ne donne ni mesure ni quantité/, /« liste » ou « devis » : ne recopie rien/]) expect(ASSISTANT_IA_SYSTEM).toMatch(regle);
     expect(assistantIaDossier([{ de: "artisan", texte: "12 m de gouttière" }, { de: "assistant", texte: "Quel développé ?" }, { de: "artisan", texte: "33" }])).toBe("ARTISAN : 12 m de gouttière\nVENDEUR : Quel développé ?\nARTISAN : 33");
   });
 });

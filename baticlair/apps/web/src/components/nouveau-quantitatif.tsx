@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, ChevronRight, ClipboardList, FileText, Layers, PencilLine, ShoppingCart, Tag, Package, X } from "lucide-react";
+import { Camera, ChevronRight, ClipboardList, FileText, Keyboard, Layers, Mic, PencilLine, ShoppingCart, Tag, Package, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
@@ -26,7 +26,43 @@ import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, TexteMobiiz, useChampDic
  * photos (plusieurs d'un coup), devis ou PDF, catalogue. Un document est lu par l'IA, son coût dit avant, comme avant ;
  * jamais une quantité ni une caractéristique inventée : ce qui manque reste à préciser sur la ligne.
  */
-type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean; choix?: string[] } | { de: "moi"; texte: string; apercu?: string } | { de: "compris"; texte: string; lignes: LigneDecrite[]; etat: "ouvert" | "ajoute" | "corrige"; comprises?: (ArticleCompris | null)[] };
+/** Une ligne de la carte : vue sur une photo de chantier (jamais dite), elle le dit. */
+type LigneCarte = LigneDecrite & {
+  vuSurPhoto?: boolean;
+  /** la ligne de la liste en cours qui lui ressemble (doublon possible) ; elle est alors décochée d'office. */
+  doublon?: string;
+  decochee?: boolean;
+  /** la question de CETTE ligne (jamais posée une seconde fois en bulle). */
+  question?: { texte: string; choix: string[] };
+};
+
+const aPlatCourt = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[×*]/g, "x")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+/** Un doublon possible : même premier mot (à ses 5 premières lettres) et mêmes nombres écrits. Jamais fusionné : signalé. */
+function doublonDe(libelle: string, existantes: readonly string[]): string | undefined {
+  const cle = (t: string) => {
+    const m = aPlatCourt(t).split(" ");
+    return `${(m.find((x) => /^[a-z]{3,}/.test(x)) ?? "").slice(0, 5)}|${m.filter((x) => /\d/.test(x)).sort().join(",")}`;
+  };
+  const c = cle(libelle);
+  return existantes.find((e) => cle(e) === c);
+}
+/** Les questions du modèle rangées avec leur ligne ; celles sans ligne restent pour la conversation. */
+function rangerLesQuestions(lignes: LigneCarte[], questions: { texte: string; choix: string[]; ligne?: number | null }[], existantes: readonly string[]) {
+  const avec = lignes.map((l, i) => {
+    const q = questions.find((x) => x.ligne === i);
+    const doublon = doublonDe(l.libelle, existantes);
+    return { ...l, ...(q ? { question: { texte: q.texte, choix: q.choix } } : {}), ...(doublon ? { doublon, decochee: true } : {}) };
+  });
+  return { lignes: avec, generales: questions.filter((q) => q.ligne === null || q.ligne === undefined || q.ligne >= lignes.length) };
+}
+type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean; choix?: string[]; lien?: { href: string; texte: string } } | { de: "moi"; texte: string; apercu?: string } | { de: "compris"; texte: string; lignes: LigneCarte[]; propose?: boolean; titre?: string; etat: "ouvert" | "ajoute" | "corrige"; comprises?: (ArticleCompris | null)[] };
 type Element = SansId & { id: number };
 
 const EXEMPLE = "Ex. : 1 000 ardoises 32×22 Espagne 1er choix et 950 crochets inox 100 mm";
@@ -62,9 +98,17 @@ async function voirLesPhotos(images: File[], echanges: { de: string; texte: stri
   return api<VuePhoto>("/v1/assistant/photo", { method: "POST", body: form });
 }
 
+const ENTREE = "pressable flex min-h-14 cursor-pointer items-center gap-2.5 rounded-2xl border border-white/15 bg-white/[0.06] px-3 text-left text-[15px] leading-tight font-bold text-[#FBF8F3] active:bg-white/10";
+const ENTREE_SOUS = "ml-auto hidden pl-2 text-right text-[13px] font-normal text-[#FBF8F3]/65 lg:block";
+
 const nombreFr = (q: string) => (/^\d+$/.test(q) ? Number(q).toLocaleString("fr-FR") : q.replace(".", ","));
 
-export function NouveauQuantitatif() {
+/**
+ * Direction A (Greg, 12 novembre 2026) : `surAjout` ouvre l'assistant DEPUIS une liste en cours de saisie : ce que l'artisan
+ * valide rejoint cette liste (rien n'est créé à part), et « Revenir à ma liste » le ramène où il était.
+ */
+export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { onFermer?: () => void; surAjout?: (lignes: LigneDecrite[]) => void; existantes?: readonly string[] } = {}) {
+  const [ajoutes, setAjoutes] = useState(0);
   const router = useRouter();
   const { me, company } = useSession();
   const reprise = useSearchParams().get("liste") === "1";
@@ -85,6 +129,8 @@ export function NouveauQuantitatif() {
   const cleDepot = useRef(newActionKey());
   // Plein écran par-dessus l'app : l'en-tête et le menu derrière deviennent inertes (ni touchés, ni lus) tant qu'elle est ouverte.
   useEffect(() => {
+    // ouvert à côté d'une liste (ordinateur), il ne fige pas la liste, qui reste lisible et modifiable.
+    if (surAjout) return;
     const inertes: HTMLElement[] = [];
     for (let el = zone.current as HTMLElement | null; el && el !== document.body; el = el.parentElement) {
       for (const frere of Array.from(el.parentElement?.children ?? [])) {
@@ -127,9 +173,9 @@ export function NouveauQuantitatif() {
     ajouterElement({ de: "moi", texte });
     const echanges = [...conversation.current.echanges, { de: "artisan" as const, texte }];
     setOccupe(true);
-    const ia = await api<{ ia: boolean; lignes: LigneDecrite[]; questions: { texte: string; choix: string[] }[]; message: string }>("/v1/assistant/description", { method: "POST", body: { echanges: echanges.slice(-20) } }).catch(() => null);
+    const ia = await api<{ ia: boolean; lignes: LigneDecrite[]; questions: { texte: string; choix: string[]; ligne?: number | null }[]; message: string }>("/v1/assistant/description", { method: "POST", body: { echanges: echanges.slice(-20) } }).catch(() => null);
     setOccupe(false);
-    let lignes: LigneDecrite[];
+    let lignes: LigneCarte[];
     if (ia?.ia) {
       // La carte en cours est remplacée par la liste à jour (la réponse à une question complète l'article).
       const ancienne = conversation.current.carte;
@@ -148,12 +194,15 @@ export function NouveauQuantitatif() {
       for (const q of ia?.questions ?? []) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
       return;
     }
-    const id = ajouterElement({ de: "compris", texte, lignes, etat: "ouvert" });
     if (ia?.ia) {
-      conversation.current.carte = id;
-      // Les questions du comptoir, après la carte : une réponse (bouton, écrit ou dicté) met la carte à jour.
-      for (const q of ia.questions) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
+      // chaque question va AVEC sa ligne, dans la carte ; la conversation dit seulement pourquoi il manque quelque
+      // chose. Les questions du catalogue ne sont pas reposées par-dessus (jamais deux fois la même information).
+      const r = rangerLesQuestions(lignes, ia.questions, existantes);
+      conversation.current.carte = ajouterElement({ de: "compris", texte, lignes: r.lignes, etat: "ouvert", propose: true });
+      for (const q of r.generales) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
+      return;
     }
+    const id = ajouterElement({ de: "compris", texte, lignes, etat: "ouvert" });
     // Greg, 8 novembre 2026 (« 36 mètres de Lito ») : chaque article est rapproché du catalogue métier, sans appel IA ; une
     // interprétation à confirmer et les questions utiles s'affichent dans la carte. Sans réponse du serveur : rien ne change.
     void api<{ articles: (ArticleCompris | null)[] }>("/v1/catalogue/comprendre", { method: "POST", body: { lignes: lignes.map((l) => ({ libelle: l.libelle, unite: l.unite })) } })
@@ -167,6 +216,14 @@ export function NouveauQuantitatif() {
 
   /** « Ajouter à ma liste » : la liste naît avec ces lignes, ou les reçoit. */
   async function ajouter(id: number, lignes: LigneDecrite[]) {
+    if (surAjout) {
+      surAjout(lignes.map(({ libelle, quantite, unite }) => ({ libelle, quantite, unite })));
+      setElements((xs) => xs.map((x) => (x.id === id && x.de === "compris" ? { ...x, etat: "ajoute" } : x)));
+      conversation.current = { echanges: [], carte: null };
+      setAjoutes((n) => n + lignes.length);
+      dire("C'est dans ta liste en cours. Autre chose ? Sinon, reviens à ta liste : tu peux encore tout modifier.");
+      return;
+    }
     setOccupe(true);
     try {
       let n = liste?.n ?? 0;
@@ -210,7 +267,7 @@ export function NouveauQuantitatif() {
     // chantier […] aussi prendre en photo une liste de matériaux. L'IA devra s'adapter ») : jusqu'à trois photos partent
     // d'abord à l'assistant, qui dit ce qu'elles montrent. Un chantier : ses matériaux sont proposés ici, à confirmer, avec
     // les questions. Une liste ou un devis : la lecture de document, comme avant. Éteint ou en panne : comme avant.
-    if (!liste && pdfs.length === 0 && images.length <= 3) {
+    if (!liste && pdfs.length === 0 && images.length > 0 && images.length <= 3) {
       setOccupe(true);
       const vue = await voirLesPhotos(images, conversation.current.echanges).catch(() => null);
       setOccupe(false);
@@ -240,14 +297,43 @@ export function NouveauQuantitatif() {
       carte: null,
     };
     if (vue.message) dire(vue.message);
+    const r = rangerLesQuestions(lignes, vue.questions, existantes);
     if (lignes.length) {
-      dire("Voici ce que je vois sur ta photo. Une photo ne donne pas les mesures : dis-moi les quantités et les formats, je complète.");
-      conversation.current.carte = ajouterElement({ de: "compris", texte: "", lignes, etat: "ouvert" });
+      dire("Une photo ne donne pas les mesures : donne-les sur chaque ligne, ou dis-les-moi. Ce qui manque reste « À préciser ».");
+      conversation.current.carte = ajouterElement({ de: "compris", texte: "", lignes: r.lignes, etat: "ouvert", propose: true, titre: "Vu sur ta photo" });
     }
-    for (const q of vue.questions) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
+    for (const q of r.generales) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
   }
 
   async function analyser(fs: File[], nature: "devis" | "liste") {
+    // depuis une liste en cours, le document est LU SANS RIEN CRÉER ; ses lignes sont proposées à part, les
+    // doublons possibles signalés et décochés ; rien n'écrase une ligne de la liste, rien n'entre sans accord.
+    if (surAjout) {
+      ajouterElement({ de: "moi", texte: fs.length > 1 ? `${fs.length} photos` : fs[0]!.name });
+      setOccupe(true);
+      try {
+        const form = new FormData();
+        if (fs.length === 1) await attachFile(form, fs[0]!);
+        else for (const f of fs) form.append("file", f);
+        // Une clé par document choisi : un double clic ou un nouvel essai ne relit pas et ne décompte pas deux fois.
+        const r = await api<{ nature: string; lignes: LigneDecrite[] }>("/v1/assistant/document", { method: "POST", body: form, idempotencyKey: newActionKey() });
+        const rangees = rangerLesQuestions(r.lignes.map(avecUnite), [], existantes);
+        const doublons = rangees.lignes.filter((l) => l.doublon).length;
+        dire(`J'ai lu ${r.lignes.length} lignes dans ton document.${doublons ? ` ${doublons > 1 ? `${doublons} ressemblent` : "Une ressemble"} à une ligne de ta liste : je l${doublons > 1 ? "es" : "a"} laisse décochée${doublons > 1 ? "s" : ""}, à toi de voir.` : ""} Rien n'est ajouté pour l'instant.`);
+        ajouterElement({ de: "compris", texte: "", lignes: rangees.lignes, etat: "ouvert", propose: true, titre: "Lu dans ton document" });
+      } catch (e) {
+        const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
+        // Le quota de scans est pris : rien n'a été lu ni dépensé ; la phrase de la formule est celle du serveur.
+        if (err.code === "abonnement_requis") ajouterElement({ de: "mobiiz", texte: `${err.phrase ?? "Tes scans de liste sont utilisés."} Ta liste en cours n'a pas bougé : tu peux continuer à la main.`, choix: [], lien: { href: "/formules", texte: "Voir les formules" } });
+        else if (err.reason === "nothing_read") dire("Je n'ai rien lu sur ce document. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF. Ta liste en cours n'a pas bougé.");
+        else if (err.code === "ai_unavailable" || err.code === "analysis_failed") dire("La lecture de document n'est pas disponible pour le moment. Ta liste en cours n'a pas bougé : continue à la main, ou réessaie plus tard. Rien n'a été décompté.");
+        else if (err.code === "unauthenticated") ajouterElement({ de: "mobiiz", texte: `Le document n'est pas lu : ${messageErreur(err)}`, reconnecter: true });
+        else dire(`Je n'ai pas pu lire ce document : ${messageErreur(err)} Ta liste en cours n'a pas bougé, et rien n'a été décompté.`);
+      } finally {
+        setOccupe(false);
+      }
+      return;
+    }
     setLecture(true);
     ajouterElement({ de: "moi", texte: fs.length > 1 ? `${fs.length} photos` : fs[0]!.name });
     try {
@@ -294,9 +380,9 @@ export function NouveauQuantitatif() {
   );
 
   return (
-    <div ref={zone} role="dialog" aria-modal="true" aria-label="Nouveau quantitatif" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[#FBF8F3]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+    <div ref={zone} role="dialog" aria-modal="true" aria-label="Nouveau quantitatif" className={`fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[#FBF8F3] ${surAjout ? "lg:left-1/2 lg:w-1/2 lg:border-l lg:border-white/15" : ""}`} style={{ backgroundColor: COULEURS_CHAT.fond }}>
       {champs}
-      <EnTeteChat onFermer={() => router.push("/chantiers")} />
+      <EnTeteChat onFermer={onFermer ?? (() => router.push("/chantiers/nouveau"))} />
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <div ref={fil} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
           {liste ? (
@@ -305,8 +391,40 @@ export function NouveauQuantitatif() {
             </button>
           ) : null}
           <Bulle de="mobiiz">
-            <TexteMobiiz>{`Bonjour${prenom ? ` ${prenom}` : ""}. Que veux-tu préparer ?`}</TexteMobiiz>
+            <TexteMobiiz>{surAjout ? "Je complète ta liste en cours. Donne-moi ce que tu as, tu vérifies avant d'ajouter." : `Bonjour${prenom ? ` ${prenom}` : ""}. Donne-moi ce que tu as : je prépare, tu vérifies.`}</TexteMobiiz>
           </Bulle>
+          {/* les façons d'entrer sont visibles tout de suite, avec leurs mots (jamais un écran vide ni une icône seule). */}
+          {elements.length === 0 && !liste ? (
+            <div role="group" aria-label="Donne à Mobiiz ce que tu as" className="ml-10 grid grid-cols-2 gap-2">
+              <label htmlFor={ids.photo} className={ENTREE}>
+                <Camera size={22} aria-hidden="true" className="shrink-0 text-[#FED206]" />
+                <span>Prendre une photo</span>
+                <span className={ENTREE_SOUS}>Chantier ou liste écrite</span>
+              </label>
+              <label htmlFor={ids.document} className={ENTREE}>
+                <FileText size={22} aria-hidden="true" className="shrink-0 text-[#FED206]" />
+                <span>Importer un document</span>
+                <span className={ENTREE_SOUS}>Devis, PDF, liste</span>
+              </label>
+              <button
+                type="button"
+                className={ENTREE}
+                onClick={() => {
+                  champ.avantDictee();
+                  dictee.demarrer();
+                }}
+              >
+                <Mic size={22} aria-hidden="true" className="shrink-0 text-[#FED206]" />
+                <span>Dicter</span>
+                <span className={ENTREE_SOUS}>Dis ce qu&apos;il te faut</span>
+              </button>
+              <button type="button" className={ENTREE} onClick={() => zone.current?.querySelector<HTMLElement>("textarea, input[type=text]")?.focus()}>
+                <Keyboard size={22} aria-hidden="true" className="shrink-0 text-[#FED206]" />
+                <span>Écrire</span>
+                <span className={ENTREE_SOUS}>Tape ta demande</span>
+              </button>
+            </div>
+          ) : null}
           <p className="pl-10 text-[14px] text-[#FBF8F3]/70">{EXEMPLE}</p>
           {elements.map((e) =>
             e.de === "moi" ? (
@@ -327,6 +445,11 @@ export function NouveauQuantitatif() {
                     ))}
                   </div>
                 ) : null}
+                {e.lien ? (
+                  <Link href={e.lien.href} className="mt-2 inline-flex min-h-11 items-center rounded-full bg-[#FED206] px-4 font-semibold text-[#111111]">
+                    {e.lien.texte}
+                  </Link>
+                ) : null}
                 {e.reconnecter ? (
                   <Link href={`/connexion?retour=${encodeURIComponent(pathname)}`} className="mt-2 inline-flex min-h-11 items-center rounded-full bg-[#FED206] px-4 font-semibold text-[#111111]">
                     Me reconnecter
@@ -341,9 +464,22 @@ export function NouveauQuantitatif() {
                 onCompris={(i, c) => changerCompris(e.id, i, c)}
                 etat={e.etat}
                 occupe={occupe}
-                onAjouter={() => void ajouter(e.id, lignesRetenues(e.lignes, e.comprises))}
+                onAjouter={() => void ajouter(e.id, lignesRetenues(e.lignes, e.comprises).filter((_, i) => !e.lignes[i]!.decochee))}
                 onCorriger={() => corriger(e.id, e.texte)}
-                onMoiMeme={liste ? undefined : () => setCatalogue(true)}
+                propose={e.propose === true}
+                titre={e.titre}
+                onBasculer={(i) => setElements((xs) => xs.map((x) => (x.id === e.id && x.de === "compris" ? { ...x, lignes: x.lignes.map((l, j) => (j === i ? { ...l, decochee: !l.decochee } : l)) } : x)))}
+                onRepondre={(i, valeur) => (valeur === null ? setElements((xs) => xs.map((x) => (x.id === e.id && x.de === "compris" ? { ...x, lignes: x.lignes.map((l, j) => (j === i ? { ...l, question: undefined } : l)) as LigneCarte[] } : x))) : void envoyer(valeur))}
+                onRetirer={(i) =>
+                  setElements((xs) =>
+                    xs.flatMap((x) => {
+                      if (x.id !== e.id || x.de !== "compris") return [x];
+                      const lignes = x.lignes.filter((_, j) => j !== i);
+                      return lignes.length ? [{ ...x, lignes, ...(x.comprises ? { comprises: x.comprises.filter((_, j) => j !== i) } : {}) }] : [];
+                    }),
+                  )
+                }
+                onMoiMeme={liste || surAjout ? undefined : () => setCatalogue(true)}
               />
             ),
           )}
@@ -368,7 +504,11 @@ export function NouveauQuantitatif() {
           onPlus={() => setFeuille(true)}
           invite={liste ? "Écris ou dicte…" : "Décris ton besoin…"}
           avant={
-            liste ? (
+            surAjout ? (
+              <button type="button" onClick={onFermer} className="pressable mb-2 flex min-h-12 w-full items-center justify-center rounded-2xl text-[16px] font-extrabold text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+                {ajoutes > 0 ? `Revenir à ma liste · ${ajoutes} ajouté${ajoutes > 1 ? "s" : ""}` : "Revenir à ma liste"}
+              </button>
+            ) : liste ? (
               <button type="button" onClick={() => router.push(`/chantiers/${liste.projetId}`)} className="pressable mb-2 flex min-h-12 w-full items-center justify-center rounded-2xl text-[16px] font-extrabold text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
                 Voir ma liste ({liste.n})
               </button>
@@ -399,13 +539,15 @@ const designationRetenue = (l: LigneDecrite, c: ArticleCompris | null | undefine
 const lignesRetenues = (lignes: LigneDecrite[], comprises?: (ArticleCompris | null)[]) => lignes.map((l, i) => ({ ...l, libelle: designationRetenue(l, comprises?.[i]) }));
 
 /** « J'ai compris » : chaque article lu, ses caractéristiques reconnues, sa quantité ; rien d'ajouté sans le bouton. */
-function CarteCompris({ lignes, comprises, onCompris, etat, occupe, onAjouter, onCorriger, onMoiMeme }: { lignes: LigneDecrite[]; comprises?: (ArticleCompris | null)[] | undefined; onCompris: (i: number, c: ArticleCompris | null) => void; etat: "ouvert" | "ajoute" | "corrige"; occupe: boolean; onAjouter: () => void; onCorriger: () => void; onMoiMeme?: (() => void) | undefined }) {
+function CarteCompris({ lignes, comprises, onCompris, etat, occupe, onAjouter, onCorriger, onMoiMeme, propose = false, onRetirer, titre, onBasculer, onRepondre }: { propose?: boolean; titre?: string | undefined; onBasculer?: (i: number) => void; onRepondre?: (i: number, valeur: string | null) => void; onRetirer?: (i: number) => void; lignes: LigneCarte[]; comprises?: (ArticleCompris | null)[] | undefined; onCompris: (i: number, c: ArticleCompris | null) => void; etat: "ouvert" | "ajoute" | "corrige"; occupe: boolean; onAjouter: () => void; onCorriger: () => void; onMoiMeme?: (() => void) | undefined }) {
   // Une question à la fois (Greg, 8 novembre 2026) : celle du premier article qui en a encore une.
   const enCours = etat === "ouvert" ? lignes.findIndex((l, i) => { const c = comprises?.[i]; return !!c && etapeSuivante(c, l.quantite, l.unite) !== null; }) : -1;
   return (
     <div className="flex flex-col gap-2">
       <section aria-label="J'ai compris" className="ml-10 flex flex-col gap-3 rounded-[22px] bg-[#FBF8F3] p-4 text-[#111111]">
-        <p className="text-[18px] font-extrabold">J&apos;ai compris{lignes.length > 1 ? ` ${lignes.length} articles` : ""}</p>
+        <p className="text-[18px] font-extrabold">{propose ? `${titre ?? "Mobiiz propose"} · ${lignes.length > 1 ? `${lignes.length} articles` : "1 article"}` : `J'ai compris${lignes.length > 1 ? ` ${lignes.length} articles` : ""}`}</p>
+        {/* une proposition n'est pas une information validée ; elle le dit, et rien n'entre sans le bouton. */}
+        {propose && etat === "ouvert" ? <p className="-mt-2 text-[14px] text-[#111111]/70">Vérifie chaque ligne. Rien n&apos;entre dans ta liste sans ton accord.</p> : null}
         <ul className="flex flex-col gap-3">
           {lignes.map((l0, i) => {
             const c = comprises?.[i];
@@ -414,8 +556,20 @@ function CarteCompris({ lignes, comprises, onCompris, etat, occupe, onAjouter, o
             return (
               <li key={i} className="flex flex-col gap-1 border-b border-[#111111]/10 pb-2 last:border-b-0 last:pb-0">
                 <span className="flex items-start gap-2 text-[16px] font-bold">
-                  <Layers size={18} aria-hidden="true" className="mt-0.5 shrink-0" /> {l.libelle}
+                  {propose && etat === "ouvert" && onBasculer ? (
+                    <input type="checkbox" checked={!l0.decochee} onChange={() => onBasculer(i)} aria-label={`Ajouter à ma liste : ${l.libelle}`} className="mt-0.5 size-5 shrink-0 accent-[#111111]" />
+                  ) : (
+                    <Layers size={18} aria-hidden="true" className="mt-0.5 shrink-0" />
+                  )}{" "}
+                  <span className="min-w-0 flex-1">{l.libelle}</span>
+                  {etat === "ouvert" && onRetirer ? (
+                    <button type="button" onClick={() => onRetirer(i)} aria-label={`Retirer : ${l.libelle}`} className="pressable -mt-2 -mr-2 grid size-11 shrink-0 place-items-center rounded-full text-[#111111]/60">
+                      <X size={18} aria-hidden="true" />
+                    </button>
+                  ) : null}
                 </span>
+                {l0.vuSurPhoto ? <span className="self-start rounded-full bg-[#FFE9D6] px-2.5 py-0.5 text-[13px] font-bold text-[#8A3D06]">Vu sur ta photo · à confirmer</span> : null}
+                {l0.doublon ? <span className="self-start rounded-xl bg-[#FFE9D6] px-2.5 py-1 text-[13px] font-bold text-[#8A3D06]">Peut-être déjà dans ta liste : « {l0.doublon} ». Coche pour l&apos;ajouter quand même.</span> : null}
                 {precisions.length ? (
                   <span className="flex items-center gap-2 text-[14px] text-[#111111]/75">
                     <Tag size={16} aria-hidden="true" className="shrink-0" />
@@ -426,6 +580,22 @@ function CarteCompris({ lignes, comprises, onCompris, etat, occupe, onAjouter, o
                   <Package size={16} aria-hidden="true" className="shrink-0" />
                   {l.quantite ? `${nombreFr(l.quantite)}${l.unite ? ` ${l.unite}` : ""}` : <span className="text-[#B5560F]">Quantité à préciser</span>}
                 </span>
+                {l0.question && etat === "ouvert" && onRepondre ? (
+                  <div role="group" aria-label={`Question de Mobiiz : ${l.libelle}`} className="mt-1 flex flex-col gap-2 rounded-2xl bg-[#111111]/5 p-3">
+                    <p className="text-[15px] font-bold">{l0.question.texte}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {l0.question.choix.map((x) => (
+                        <button key={x} type="button" disabled={occupe} onClick={() => onRepondre(i, x)} className="pressable min-h-11 rounded-full border border-[#111111]/25 bg-white px-4 text-[15px] font-semibold">
+                          {x}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[13px] text-[#111111]/70">Tu peux aussi l&apos;écrire ou le dicter en bas.</p>
+                    <button type="button" onClick={() => onRepondre(i, null)} className="min-h-11 self-start px-1 text-[15px] font-semibold underline underline-offset-4">
+                      Laisser « À préciser »
+                    </button>
+                  </div>
+                ) : null}
                 {i === enCours && c ? <QuestionArticle key={`${c.choixProduit}|${c.confirme}|${c.valeurs.join("|")}|${c.produits.length}`} c={c} ligne={l0} onCompris={(x) => onCompris(i, x)} /> : null}
               </li>
             );
@@ -433,8 +603,11 @@ function CarteCompris({ lignes, comprises, onCompris, etat, occupe, onAjouter, o
         </ul>
         {etat === "ouvert" ? (
           <>
-            <button type="button" disabled={occupe} onClick={onAjouter} className="pressable min-h-12 rounded-2xl text-[16px] font-extrabold disabled:opacity-60" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
-              {lignes.length > 1 ? `Ajouter les ${lignes.length} à ma liste` : "Ajouter à ma liste"}
+            <button type="button" disabled={occupe || lignes.every((l) => l.decochee)} onClick={onAjouter} className="pressable min-h-12 rounded-2xl text-[16px] font-extrabold disabled:opacity-60" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+              {(() => {
+                const n = lignes.filter((l) => !l.decochee).length;
+                return n === 0 ? "Coche au moins une ligne" : n > 1 ? `Ajouter les ${n} à ma liste` : "Ajouter à ma liste";
+              })()}
             </button>
             <button type="button" disabled={occupe} onClick={onCorriger} className="pressable min-h-12 rounded-2xl border-2 border-[#111111] text-[16px] font-bold">
               Corriger

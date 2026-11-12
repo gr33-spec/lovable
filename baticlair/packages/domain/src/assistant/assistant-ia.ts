@@ -22,7 +22,7 @@
  * confirmer. Une quantité ou un format ne viennent jamais que de ce que l'artisan dit.
  */
 
-export const ASSISTANT_IA_PROMPT = { id: "assistant_description", version: 1 } as const;
+export const ASSISTANT_IA_PROMPT = { id: "assistant_description", version: 2 } as const;
 
 /** La consigne système (envoyée telle quelle ; testée). */
 export const ASSISTANT_IA_SYSTEM = [
@@ -38,6 +38,7 @@ export const ASSISTANT_IA_SYSTEM = [
   "- Pose au plus trois questions, seulement celles sans lesquelles un vendeur ne peut pas chiffrer (matière, développé, diamètre, épaisseur, format, teinte). Chaque question tient en une phrase courte, au tutoiement, nomme l'article, et propose 2 à 5 choix courts quand ils existent.",
   "- Si l'artisan n'a pas dit la quantité d'un article, demande-la, avec son unité (« Gouttière : quelle longueur, en mètres ? »). Ne la devine jamais.",
   "- Ne demande jamais une adresse, une date de livraison ni un prix.",
+  "- Chaque question porte « ligne » : le rang (0 pour la première) de l'article de « lignes » qu'elle concerne, ou null si elle concerne tout le chantier. Quand il manque une information, dis dans « message », en une phrase, pourquoi le négoce en a besoin pour chiffrer.",
   "- Si l'artisan répond à une de tes questions, intègre sa réponse dans la désignation de l'article concerné et rends la liste complète, à jour.",
   "- Si rien de ce qu'il dit n'est un matériau, rends une liste vide et une phrase courte dans « message ».",
   "« nature » : « texte » quand l'artisan n'a joint aucune photo. Avec une photo, dis ce qu'elle montre : « liste » (liste de matériaux écrite, bon de commande, note manuscrite), « devis » (devis ou facture), « chantier » (toiture, façade, ouvrage, matériau en place ou posé au sol), « autre » (rien d'utile).",
@@ -53,7 +54,8 @@ export type NatureAssistant = (typeof NATURES_ASSISTANT)[number];
 export interface AssistantIaWire {
   nature: NatureAssistant;
   lignes: { designation: string; quantite: string | null; unite: string | null }[];
-  questions: { texte: string; choix: string[] }[];
+  /** `ligne` rattache la question à un article (son rang dans `lignes`) ; null : une question générale. */
+  questions: { texte: string; choix: string[]; ligne?: number | null }[];
   message: string;
 }
 
@@ -76,7 +78,7 @@ export interface ResultatAssistantIa {
   /** Ce que montre la photo jointe (« texte » sans photo). */
   nature: NatureAssistant;
   lignes: LigneAssistantIa[];
-  questions: { texte: string; choix: string[] }[];
+  questions: { texte: string; choix: string[]; ligne: number | null }[];
   message: string;
   /** Les lignes du modèle que le code a écartées (nombre non dit, aucun mot de l'artisan). */
   ecartees: number;
@@ -136,7 +138,9 @@ export function validerAssistantIa(echanges: readonly EchangeAssistant[], wire: 
   const mots = motsDe(dit);
   const lignes: LigneAssistantIa[] = [];
   let ecartees = 0;
-  for (const l of wire.lignes.slice(0, 40)) {
+  // Le rang d'une ligne du modèle dans les lignes gardées (une question suit sa ligne, ou tombe avec elle).
+  const rang = new Map<number, number>();
+  for (const [i0, l] of wire.lignes.slice(0, 40).entries()) {
     const libelle = l.designation.replace(/\s+/g, " ").trim().slice(0, 160);
     if (libelle.length < 2 || !/[a-zà-ü]/i.test(libelle)) {
       ecartees++;
@@ -159,10 +163,13 @@ export function validerAssistantIa(echanges: readonly EchangeAssistant[], wire: 
     const q = l.quantite === null ? NaN : Number(String(l.quantite).replace(/\s/g, "").replace(",", "."));
     const quantite = Number.isFinite(q) && q > 0 && nombres.has(q) ? String(q).replace(".", ",") : null;
     const unite = quantite && l.unite ? l.unite.trim().slice(0, 20) || null : null;
+    rang.set(i0, lignes.length);
     lignes.push({ libelle, quantite, unite, ...(vu ? { vuSurPhoto: true } : {}) });
   }
   const questions = wire.questions
-    .map((q) => ({ texte: q.texte.replace(/\s+/g, " ").trim().slice(0, 200), choix: q.choix.map((c) => c.replace(/\s+/g, " ").trim().slice(0, 60)).filter(Boolean).slice(0, 6) }))
+    // Une question rattachée à une ligne écartée tombe avec elle.
+    .filter((q) => q.ligne === undefined || q.ligne === null || rang.has(q.ligne))
+    .map((q) => ({ texte: q.texte.replace(/\s+/g, " ").trim().slice(0, 200), choix: q.choix.map((c) => c.replace(/\s+/g, " ").trim().slice(0, 60)).filter(Boolean).slice(0, 6), ligne: q.ligne === undefined || q.ligne === null ? null : rang.get(q.ligne)! }))
     // Jamais une question d'adresse, de date ou de prix : elles se règlent ailleurs.
     .filter((q) => q.texte.length >= 4 && !/\b(adresse|prix|tarif|livraison|livre|quand)\b/.test(aPlat(q.texte)))
     .slice(0, 3);

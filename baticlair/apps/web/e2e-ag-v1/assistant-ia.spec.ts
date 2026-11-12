@@ -39,32 +39,34 @@ async function inscrire(page: Page) {
  */
 async function pret(page: Page) {
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
-  await expect(chat.getByText(/Que veux-tu préparer/)).toBeVisible();
+  await expect(chat.getByText(/Donne-moi ce que tu as/)).toBeVisible();
   // Une action déclenche la fermeture du guide (gestionnaire plus haut), puis on vérifie qu'il n'est plus là.
-  await chat.getByText(/Que veux-tu préparer/).click();
+  await chat.getByText(/Donne-moi ce que tu as/).click();
   await page.waitForTimeout(800);
-  await chat.getByText(/Que veux-tu préparer/).click();
+  await chat.getByText(/Donne-moi ce que tu as/).click();
   await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
 }
 
 test("la phrase dictée de la capture : deux articles, la question du comptoir, la réponse complète la gouttière", async ({ page }) => {
   await inscrire(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
   await pret(page);
   await chat.getByRole("textbox", { name: "Ton message" }).fill(DICTEE);
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
   const compris = chat.getByRole("region", { name: "J'ai compris" });
-  await expect(compris).toContainText("J'ai compris 2 articles");
+  await expect(compris).toContainText("Mobiiz propose · 2 articles");
   await expect(compris).toContainText("52 m²");
   await expect(compris).toContainText(/Ardoise naturelle 32\s?×\s?22/);
   await expect(compris).toContainText(/Gouttière havraise/);
   // Jamais la phrase entière dans une désignation.
   await expect(compris).not.toContainText("j'ai besoin");
-  // La question du comptoir, avec ses boutons.
-  await expect(chat.getByText("Gouttière de 25 : en zinc, en cuivre ou en PVC ?")).toBeVisible();
-  const reponses = chat.getByRole("group", { name: /^Réponses à : Gouttière de 25/ });
-  await expect(reponses.getByRole("button")).toHaveText(["Zinc", "Cuivre", "PVC"]);
+  // La question du comptoir, AVEC SA LIGNE dans la carte, avec ses boutons (direction A : jamais reposée en bulle).
+  const reponses = compris.getByRole("group", { name: /^Question de Mobiiz/ });
+  await expect(reponses).toContainText("En quelle matière ?");
+  await expect(reponses.getByRole("button", { name: "Zinc" })).toBeVisible();
+  await expect(reponses.getByRole("button", { name: "Cuivre" })).toBeVisible();
+  await expect(reponses.getByRole("button", { name: "PVC" })).toBeVisible();
   await reponses.getByRole("button", { name: "Zinc" }).click();
   // Une seule carte, à jour : la gouttière est en zinc, la question n'est plus posée.
   await expect(chat.getByRole("region", { name: "J'ai compris" })).toHaveCount(1);
@@ -78,20 +80,20 @@ test("une photo de chantier : ce que l'assistant voit, les matériaux à confirm
   // Greg, 12 novembre 2026 (feuille « Ajouter ») : « un artisan doit pouvoir donner une photo pour aider l'IA à comprendre le
   // contexte du chantier et analyser les matériaux […] et poser les questions nécessaires ».
   await inscrire(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
   await pret(page);
   await page.getByLabel("Choisir une photo").setInputFiles(path.join(__dirname, "fixtures", "toiture.jpg"));
   await expect(chat.getByRole("img", { name: "Photo du chantier" })).toBeVisible();
   await expect(chat.getByText("Je vois une couverture en ardoises et une gouttière en zinc.")).toBeVisible();
   const compris = chat.getByRole("region", { name: "J'ai compris" });
-  await expect(compris).toContainText("J'ai compris 2 articles");
+  await expect(compris).toContainText("Vu sur ta photo · 2 articles");
   await expect(compris).toContainText(/Ardoise naturelle/);
   await expect(compris).toContainText(/Gouttière/);
   // Une photo ne mesure rien : ni la quantité ni le format inventés par le modèle ne passent.
   await expect(compris).not.toContainText(/12\s?m\b/);
   await expect(compris).not.toContainText(/32\s?×\s?22/);
-  await expect(chat.getByText("Quelle surface de couverture, en m² ?")).toBeVisible();
+  await expect(compris.getByText("Quelle surface de couverture, en m² ?")).toBeVisible();
   // L'artisan dit ses mesures : la carte se complète, toujours une seule.
   await chat.getByRole("textbox", { name: "Ton message" }).fill("85 m² en 32 22 et 14 mètres de gouttière");
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
@@ -103,7 +105,7 @@ test("une photo de chantier : ce que l'assistant voit, les matériaux à confirm
 
 test("une photo d'une liste écrite : l'assistant la reconnaît et propose la lecture du document, comme avant", async ({ page }) => {
   await inscrire(page);
-  await page.goto("/chantiers/nouveau");
+  await page.goto("/chantiers/nouveau?mode=assistant");
   await pret(page);
   await page.getByLabel("Choisir une photo").setInputFiles(path.join(__dirname, "fixtures", "liste-papier.jpg"));
   // La confirmation habituelle avant l'analyse d'une liste (son coût est dit avant) ; rien n'est recopié par l'assistant.

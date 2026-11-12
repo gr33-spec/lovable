@@ -143,6 +143,18 @@ export class QuantitatifsService {
     return this.view(row, reviewed, rendu);
   }
 
+  /**
+   * UN DOCUMENT DANS LA LISTE EN COURS (Greg, 12 novembre 2026) : la liste, le bon ou le devis de négoce est LU, ses lignes
+   * sont rendues à l'écran, qui les propose à part ; rien n'est créé ni gardé. Format générique (`nature`, `lignes`) : un
+   * devis client ou un plan pourront plus tard alimenter le même brouillon par la même route.
+   */
+  async lireDocument(tenant: TenantContext, file: { name: string; bytes: Uint8Array }) {
+    assertCanWrite(tenant);
+    const trade = tenant.trades.find((t) => referentialFor(t)) ?? tenant.trades[0] ?? "roofing";
+    const { lignes } = await this.takeoffs.lireListe(tenant, null, trade, file);
+    return { nature: "liste" as const, lignes: lignes.map((l) => ({ libelle: l.designation.slice(0, 160), quantite: l.quantite, unite: l.unite })) };
+  }
+
   /** Un devis déjà déposé sur le chantier (le chat de l'appli) : même quantitatif s'il existe, lecture sinon. */
   async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}, options: { confirmeGros?: boolean } = {}) {
     assertCanWrite(tenant);

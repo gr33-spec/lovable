@@ -39,7 +39,7 @@ export interface ReponseAssistantIa {
   /** Les matériaux retenus d'une photo de chantier, à renvoyer tels quels dans la suite de la conversation (`de: "photo"`). */
   vu: string | null;
   lignes: LigneAssistantIa[];
-  questions: { texte: string; choix: string[] }[];
+  questions: { texte: string; choix: string[]; ligne: number | null }[];
   message: string;
 }
 

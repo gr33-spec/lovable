@@ -29,7 +29,7 @@ export class FakeDecoupeur implements Decoupeur {
         ],
         questions: [
           { texte: "Tu refais toute la couverture ou une partie ?", choix: ["Toute la couverture", "Une partie"] },
-          { texte: "Quelle surface de couverture, en m² ?", choix: [] },
+          { texte: "Quelle surface de couverture, en m² ?", choix: [], ligne: 0 },
         ],
       });
     }
@@ -47,7 +47,7 @@ export class FakeDecoupeur implements Decoupeur {
         nature: "texte",
         message: "",
         lignes: vu.split(" ; ").map((d) => (/ardoise/i.test(d) ? { designation: `${d}${format ? ` ${format[1]}×${format[2]}` : ""}`, quantite: surface, unite: surface ? "m²" : null } : { designation: d, quantite: longueur, unite: longueur ? "m" : null })),
-        questions: surface ? [] : [{ texte: "Quelle surface de couverture, en m² ?", choix: [] }],
+        questions: surface ? [] : [{ texte: "Quelle surface de couverture, en m² ?", choix: [], ligne: 0 }],
       });
     }
     const lignes: AssistantIaWire["lignes"] = [];
@@ -58,9 +58,10 @@ export class FakeDecoupeur implements Decoupeur {
     if (gouttiere) {
       const matiere = /\b(zinc|cuivre|pvc)\b/i.exec(dit)?.[1]?.toLowerCase();
       lignes.push({ designation: `Gouttière ${/braise|havraise/i.test(dit) ? "havraise" : "demi-ronde"}${matiere ? ` ${matiere}` : ""} développé ${gouttiere[1]}`, quantite: null, unite: null });
-      if (!matiere) questions.push({ texte: `Gouttière de ${gouttiere[1]} : en zinc, en cuivre ou en PVC ?`, choix: ["Zinc", "Cuivre", "PVC"] });
+      if (!matiere) questions.push({ texte: "En quelle matière ?", choix: ["Zinc", "Cuivre", "PVC"], ligne: lignes.length - 1 });
+      else if (!/\d+\s*(m|mètres?)\b(?!²)/i.test(dit.replace(/\d+(?:[.,]\d+)?\s*m²/gi, ""))) questions.push({ texte: "Quelle longueur, en mètres ?", choix: [], ligne: lignes.length - 1 });
     }
     if (/invente/i.test(dit)) lignes.push({ designation: "Crochets inox 100 mm", quantite: "950", unite: "pièces" });
-    return rendre({ nature: "texte", lignes, questions, message: "" });
+    return rendre({ nature: "texte", lignes, questions, message: questions.length ? "Il me manque une information pour que le négoce puisse chiffrer. Tu peux la donner sur la ligne, ou la laisser à préciser." : "" });
   }
 }

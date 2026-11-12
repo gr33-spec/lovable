@@ -49,10 +49,11 @@ describe("l'assistant connecté à l'IA", () => {
       { libelle: "Gouttière havraise développé 25", quantite: null, unite: null },
     ]);
     expect(r.nature).toBe("texte");
-    expect(r.questions).toEqual([{ texte: "Gouttière de 25 : en zinc, en cuivre ou en PVC ?", choix: ["Zinc", "Cuivre", "PVC"] }]);
+    expect(r.questions).toEqual([{ texte: "En quelle matière ?", choix: ["Zinc", "Cuivre", "PVC"], ligne: 1 }]);
     const suite = (await agent.post("/v1/assistant/description").send(dit(DICTEE, r.questions[0].texte, "zinc")).expect(200)).body;
     expect(suite.lignes[1]).toEqual({ libelle: "Gouttière havraise zinc développé 25", quantite: null, unite: null });
-    expect(suite.questions).toEqual([]);
+    // La matière dite, il reste la longueur : elle se demande sur la ligne, jamais devinée.
+    expect(suite.questions).toEqual([{ texte: "Quelle longueur, en mètres ?", choix: [], ligne: 1 }]);
     // Chaque message est compté au journal des appels (plafond et coût).
     expect(await appels()).toBe(2);
   });

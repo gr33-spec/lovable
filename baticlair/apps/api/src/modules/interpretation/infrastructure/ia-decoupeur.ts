@@ -7,7 +7,7 @@ import { ETIQUETTE_ASSISTANT, type Decoupeur, type PhotoAssistant } from "../app
 export const assistantIaSchema = z.object({
   nature: z.enum(NATURES_ASSISTANT),
   lignes: z.array(z.object({ designation: z.string().max(300), quantite: z.string().max(20).nullable(), unite: z.string().max(30).nullable() })).max(60),
-  questions: z.array(z.object({ texte: z.string().max(400), choix: z.array(z.string().max(120)).max(12) })).max(10),
+  questions: z.array(z.object({ texte: z.string().max(400), choix: z.array(z.string().max(120)).max(12), ligne: z.number().int().min(0).max(60).nullable().optional() })).max(10),
   message: z.string().max(600),
 });
 

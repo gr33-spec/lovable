@@ -1,7 +1,10 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { ChoixCreation } from "@/components/choix-creation";
 import { NouveauQuantitatif } from "@/components/nouveau-quantitatif";
+import { SaisirMaListe } from "@/components/saisir-ma-liste";
 import { Paywall, useBilling } from "@/components/paywall";
 import { BackButton } from "@/components/ui";
 
@@ -24,11 +27,24 @@ export default function NouveauChantierPage() {
       </>
     );
   }
-  // Deux parcours reliés (Greg, 7 novembre 2026) : une seule porte, la conversation (écrire, dicter, photos, document, catalogue).
   return (
     <Suspense>
-      <NouveauQuantitatif />
+      <Porte />
     </Suspense>
   );
+}
+
+/**
+ * Direction A (Greg, 12 novembre 2026) : « Créer un quantitatif » n'ouvre plus l'assistant d'office. Sans mode : le choix
+ * (« Je crée ma liste » ou « Mobiiz m'aide »). `?mode=manuel` (et l'ancien `?liste=1`) : la saisie à la main.
+ * `?mode=assistant` : l'assistant, avec ses façons d'entrer visibles.
+ */
+function Porte() {
+  const params = useSearchParams();
+  const router = useRouter();
+  const mode = params.get("mode") ?? (params.get("liste") === "1" ? "manuel" : null);
+  if (mode === "manuel") return <SaisirMaListe onFermer={() => router.push("/chantiers/nouveau")} />;
+  if (mode === "assistant") return <NouveauQuantitatif />;
+  return <ChoixCreation />;
 }
 

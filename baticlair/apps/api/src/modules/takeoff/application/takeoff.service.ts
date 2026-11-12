@@ -69,7 +69,7 @@ import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
 import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader } from "./lecture-reader.js";
 import { lireLotParLot } from "./lecture-par-lots.js";
-import { LISTE_PROMPT, type ListeReader } from "./liste-reader.js";
+import { LISTE_PROMPT, type ListeLigne, type ListeReader } from "./liste-reader.js";
 import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
 /**
@@ -774,7 +774,12 @@ export class TakeoffService {
    * l'artisan a déjà compté. La liste arrive sur le même écran que celle d'un devis (modifier, supprimer, ajouter une ligne) ;
    * rien ne part sans sa validation. L'appel est enregistré (coût mesuré) mais ne compte pas comme une analyse de devis.
    */
-  async fromListe(tenant: TenantContext, projectId: string, trade: string, file: { name: string; bytes: Uint8Array }): Promise<ReviewedTakeoff> {
+  /**
+   * LA LECTURE SEULE d'une liste, d'un bon ou d'un devis de négoce (Greg, 12 novembre 2026 : « importer un document depuis
+   * une liste en cours ») : le quota vérifié, l'appel journalisé, les lignes RENDUES telles qu'écrites. Rien n'est créé ici :
+   * ni chantier, ni quantitatif, ni fichier. Un scan ne compte que s'il a réussi (`scansFaits` lit le journal).
+   */
+  async lireListe(tenant: TenantContext, projectId: string | null, trade: string, file: { name: string; bytes: Uint8Array }): Promise<{ lignes: ListeLigne[]; model: string }> {
     assertCanWrite(tenant);
     const listeur = this.reading.listeur;
     if (!listeur) throw new DomainError("ai_unavailable", "AI reading is not configured");
@@ -820,6 +825,11 @@ export class TakeoffService {
     }
     const lignes = attempt.output.lignes;
     if (lignes.length === 0) throw new DomainError("analysis_failed", "Nothing was read in this list", { reason: "nothing_read" });
+    return { lignes, model: attempt.model };
+  }
+
+  async fromListe(tenant: TenantContext, projectId: string, trade: string, file: { name: string; bytes: Uint8Array }): Promise<ReviewedTakeoff> {
+    const { lignes, model } = await this.lireListe(tenant, projectId, trade, file);
     const ref = referentialFor(trade);
     if (ref) await this.reading.referentials?.ensure(ref);
     const takeoff = await this.takeoffs.create(tenant, {
@@ -832,7 +842,7 @@ export class TakeoffService {
       calculated: true,
       promptId: LISTE_PROMPT.id,
       promptVersion: LISTE_PROMPT.version,
-      model: attempt.model,
+      model,
       notes: [],
       lines: lignes.map((l) => ({
         designation: l.designation,

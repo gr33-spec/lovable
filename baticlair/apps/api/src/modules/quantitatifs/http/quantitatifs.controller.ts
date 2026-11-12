@@ -6,6 +6,7 @@ import { memoryStorage } from "multer";
 import { z } from "zod";
 import { validationFailed } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
+import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import type { RequestWithUser } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
@@ -304,5 +305,40 @@ export class InfosChantierController {
     const r = await this.quantitatifs.addSketch(tenant, projetId, received, body.commentaire, body.article);
     res.status(201);
     return r;
+  }
+}
+
+/**
+ * `POST /v1/assistant/document` (Greg, 12 novembre 2026 : « l'artisan doit pouvoir commencer manuellement, puis transmettre
+ * un devis, un PDF ou une autre liste pour compléter son quantitatif en cours ») : LA LECTURE SANS CRÉATION. Une photo ou un
+ * PDF (plusieurs photos : un seul PDF, lu en une fois) ; les lignes reviennent à l'écran, rien n'est créé ni gardé. Même
+ * lecteur, même quota et même journal que « J'ai déjà ma liste ». `Idempotency-Key` : un double clic ou un nouvel essai
+ * avec la même clé rend la même réponse, sans seconde lecture ni second décompte.
+ */
+@Controller("v1/assistant/document")
+@UseGuards(TenantGuard)
+export class DocumentDansLaListeController {
+  constructor(
+    @Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService,
+    @Inject(UploadParts) private readonly uploads: UploadParts,
+  ) {}
+
+  @Throttle({ default: HOURLY(30) })
+  @Post()
+  @HttpCode(200)
+  @Idempotent()
+  @UseInterceptors(FilesInterceptor("file", MAX_PHOTOS_PAR_ENVOI, { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: MAX_PHOTOS_PAR_ENVOI } }))
+  async lire(
+    @Tenant() tenant: TenantContext,
+    @UploadedFiles() files: (UploadedPdf & { size: number })[] | undefined,
+    @Body(new ZodPipe(z.object({ ...chunkedFields }))) body: z.infer<z.ZodObject<typeof chunkedFields>>,
+  ) {
+    if ((files?.length ?? 0) > 1) {
+      const recus = await Promise.all(files!.map((f) => this.uploads.fileOf(tenant, f, {})));
+      const pdf = await assembleQuote(recus.map((r) => ({ fileName: r.name, bytes: r.bytes })));
+      return this.quantitatifs.lireDocument(tenant, { name: pdf.fileName, bytes: pdf.bytes });
+    }
+    const received = await this.uploads.fileOf(tenant, files?.[0], body);
+    return this.quantitatifs.lireDocument(tenant, { name: received.name, bytes: received.bytes });
   }
 }

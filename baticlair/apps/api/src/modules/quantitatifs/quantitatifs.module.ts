@@ -7,12 +7,12 @@ import { ProjectsModule, ProjectsService } from "../projects/index.js";
 import { TakeoffModule, TakeoffService } from "../takeoff/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { QuantitatifsService } from "./application/quantitatifs.service.js";
-import { InfosChantierController, ListeExistanteController, QuantitatifsController } from "./http/quantitatifs.controller.js";
+import { InfosChantierController, ListeExistanteController, DocumentDansLaListeController, QuantitatifsController } from "./http/quantitatifs.controller.js";
 
 /** La porte d'entrée unique /v1/quantitatifs (§38), au-dessus des modules existants. */
 @Module({
   imports: [TenancyModule, ProjectsModule, BillingModule, DocumentsModule, TakeoffModule, CatalogueModule],
-  controllers: [QuantitatifsController, InfosChantierController, ListeExistanteController],
+  controllers: [QuantitatifsController, InfosChantierController, ListeExistanteController, DocumentDansLaListeController],
   providers: [
     {
       provide: QuantitatifsService,
