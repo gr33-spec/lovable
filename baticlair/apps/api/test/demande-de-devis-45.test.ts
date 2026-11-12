@@ -6,7 +6,7 @@ import { createTestApp, resetDatabase, signUp, type Agent, type TestContext } fr
 /** Le lien « Répondre en ligne » est propre à chaque négoce : l'aperçu le montre « (votre lien personnel) » (lot final, point 3). */
 const sansJeton = (t: string) => t.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)");
 /** Le pied discret du mail (lot final, point 3) : le seul endroit où le nom de l'application apparaît. */
-const sansPied = (t: string) => t.replace(/\n\n--\nMobiiz, des artisans qui achètent ensemble\.$/, "");
+const sansPied = (t: string) => t.replace(/\n\n--\nDemande de prix envoyée avec Mobiiz\.$/, "");
 
 /**
  * §45 — LA DEMANDE DE DEVIS : un mail court (45.2), un PDF structuré avec le logo et les coordonnées du compte (45.3),
@@ -86,16 +86,18 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     // l'artisan, UNE phrase de pression, « Répondre en ligne », le portable (jamais l'e-mail personnel), la signature,
     // un pied discret ; aucune invitation à s'inscrire, aucune commission.
     expect(email.subject).toMatch(/^Bati invest : demande de prix( couverture)?, Brest$/);
-    expect(email.body.replace(/réponse souhaitée avant le \d{1,2}(er)? [a-zéû]+( \d{4})?\./, "réponse souhaitée avant le [date].")).toBe(
+    // Greg, 12 novembre 2026 (dossier de corrections UX, point 5) : cordial, sans pression. Aucune date n'a été choisie :
+    // aucune échéance n'est écrite. D'abord « répondre à cet e-mail avec votre devis », le lien en ligne ensuite.
+    expect(email.body).toBe(
       [
         "Bonjour,",
-        "Je vous envoie la liste des fournitures pour un chantier de couverture zinc à joint debout à Brest : 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage. Pouvez-vous me chiffrer l'ensemble ?",
-        "Je consulte plusieurs fournisseurs, réponse souhaitée avant le [date].",
-        "Répondre en ligne, sans inscription : (votre lien personnel)\nVous pouvez aussi répondre directement à ce mail, il m'arrive.\nLa liste est en pièce jointe (PDF), avec le détail du devis sans prix.\nUn doute ? Appelez-moi au 06 12 34 56 78.",
-        "Greg, Bati invest",
-        "--\nMobiiz, des artisans qui achètent ensemble.",
+        "Je vous envoie la liste des fournitures pour un chantier de couverture zinc à joint debout à Brest : 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage. Pourriez-vous m'adresser votre proposition tarifaire ?",
+        "Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec votre devis en pièce jointe.\nVous pouvez aussi chiffrer en ligne, sans inscription : (votre lien personnel)\nLa liste des fournitures à chiffrer est en pièce jointe (PDF).\nUne question ? Appelez-moi au 06 12 34 56 78.",
+        "Je vous remercie par avance.\nGreg, Bati invest",
+        "--\nDemande de prix envoyée avec Mobiiz.",
       ].join("\n\n"),
     );
+    expect(email.body).not.toMatch(/plusieurs (fournisseurs|négoces)|avant le|rapidement|achètent ensemble|détail du devis/i);
     expect(email.body).not.toContain("greg@batiinvest.fr");
     expect(sansPied(email.body)).not.toMatch(/command|référentiel|BatiClair|Mobiiz|inscri(re|vez)|commission/i);
     expect(forbiddenWord(sansPied(email.body))).toBeNull();
@@ -114,7 +116,7 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const pdf = (await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf?destinataire=${created.recipients[0].id}`).buffer(true)).body as Buffer;
     const text = await pdfText(pdf);
     if (process.env.SHOW_PDF) console.log(text);
-    const order = ["Demande de prix — Matériaux", "Point.P Brest", "Le chantier en bref", "1. Fournitures à chiffrer", "2. Détail du devis"].map((t) => text.indexOf(t));
+    const order = ["Demande de prix — Matériaux", "Point.P Brest", "Le chantier en bref", "1. Fournitures à chiffrer", "2. Informations complémentaires sur le chantier"].map((t) => text.indexOf(t));
     for (const i of order) expect(i).toBeGreaterThanOrEqual(0);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Rien à préciser sur ce chantier : le bloc « À préciser avec vous » est absent, les suivants se renumérotent.
@@ -126,7 +128,7 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     // Le logo est une image dans le PDF.
     expect(pdf.includes(Buffer.from("/Subtype /Image"))).toBe(true);
     // Aucun prix, et jamais « commande ».
-    expect(priceLeak(text.replace("Détail du devis", ""))).toBeNull();
+    expect(priceLeak(text)).toBeNull();
     // Retour du fondateur (2026-10-12) : « Pas besoin de noter « sans prix », c'est pour le négoce, pas d'info inutile. »
     expect(text).not.toMatch(/sans prix/i);
     // La référence « CH-xxxxxx » est tirée au hasard (hexadécimal) : elle peut contenir « 142 », ce n'est pas un prix.
@@ -147,7 +149,7 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const agent = await compteBatiInvest();
     const { projectId } = await chantierTest(agent);
     const sans = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
-    expect(sans.document.blocs.map((b: { titre: string }) => b.titre)).toEqual(["Le chantier en bref", "Fournitures à chiffrer", "Détail du devis"]);
+    expect(sans.document.blocs.map((b: { titre: string }) => b.titre)).toEqual(["Le chantier en bref", "Fournitures à chiffrer", "Informations complémentaires sur le chantier"]);
     const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "m²" }] })).body;
     await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
     let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
@@ -169,9 +171,9 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const { projectId, supplierId } = await chantierTest(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
     expect(created.recipients[0].email.body).not.toMatch(/détail du devis/);
-    expect(created.recipients[0].email.body).toContain("La liste est en pièce jointe (PDF).");
+    expect(created.recipients[0].email.body).toContain("La liste des fournitures à chiffrer est en pièce jointe (PDF).");
     const text = await pdfText((await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf`).buffer(true)).body as Buffer);
-    expect(text).not.toMatch(/Détail du devis/);
+    expect(text).not.toMatch(/Détail du devis|Informations complémentaires/);
   });
 
   it("5. gouttière 13 ml : « 4 longueurs de 4 m (13 ml à couvrir) », jamais « soit 13 ml »", async () => {

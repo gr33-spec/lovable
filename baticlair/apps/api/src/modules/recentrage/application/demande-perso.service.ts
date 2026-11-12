@@ -607,7 +607,7 @@ export class DemandePersoService {
         const jeton = randomBytes(24).toString("base64url");
         await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { relanceLe: maintenant, tokenHash: hacher(jeton) } });
         const via = await this.expediteurDe(d.companyId).catch(() => null);
-        const m = mailRelanceDemande({ entreprise: d.company.name, dateLimite: d.dueDate ?? new Date(dateLimite.getTime() - 86_400_000), lien: `${this.cfg.webAppUrl}/chiffrer/${jeton}`, prenomCommercial: r.supplier.contactName });
+        const m = mailRelanceDemande({ entreprise: d.company.name, dateLimite: d.dueDate ?? new Date(dateLimite.getTime() - 86_400_000), lien: `${this.cfg.webAppUrl}/chiffrer/${jeton}`, prenomCommercial: r.supplier.contactName, individuelle: true, sansDate: !d.dueDate });
         await this.mailer
           .send({ to: r.supplier.email, subject: m.objet, text: m.texte, html: mailEnHtml(m.texte, `${this.cfg.webAppUrl}/chiffrer/${jeton}`), ...(via ? { from: via.from, ...(r.etiquette ? { replyTo: via.replyTo(r.etiquette) } : {}) } : {}) })
           .catch(() => undefined);

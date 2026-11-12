@@ -84,8 +84,9 @@ describe("Missions : annonces et réponses", () => {
     expect(pourA[0]!.tarifJour).toBeNull();
     const pourB = (await b.agent.get("/v1/missions/annonces?type=mission").expect(200)).body.items as { id: string; entreprise: Record<string, unknown> }[];
     expect(pourB.map((x) => x.id)).toEqual([m.id]);
-    // Ce qu'on voit d'une autre entreprise : son nom, ses initiales, « vérifiée », son département. Jamais ses coordonnées.
-    expect(Object.keys(pourB[0]!.entreprise).sort()).toEqual(["departement", "id", "initiales", "nom", "verifiee"]);
+    // Ce qu'on voit d'une autre entreprise : son nom, ses initiales, « vérifiée », son département, et la version de son
+    // logo ou de sa photo s'il y en a une (Greg, 12 novembre 2026). Jamais ses coordonnées.
+    expect(Object.keys(pourB[0]!.entreprise).sort()).toEqual(["departement", "id", "image", "initiales", "nom", "verifiee"]);
     expect(JSON.stringify(pourB)).not.toMatch(/06 12|contact-|rue du Port/);
   });
 

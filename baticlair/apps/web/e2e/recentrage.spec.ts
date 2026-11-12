@@ -270,12 +270,16 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     expect(envoi.status).toBe(201);
     const tache = async (dans: number) => (await apiJson<{ relances: number }>(page, "GET", `/v1/internal/demandes-perso?maintenant=${encodeURIComponent(new Date(Date.now() + dans).toISOString())}`, undefined, SECRET)).body.relances;
     expect(await tache(3_600_000)).toBe(0);
-    // Réponse souhaitée trois jours après l'envoi par défaut : le rappel part à mi-délai, au nom du client.
-    expect(await tache(2.5 * 86_400_000)).toBeGreaterThanOrEqual(1);
-    expect((await emailsVers(page, email)).some((m) => / attend votre offre$/.test(m.subject))).toBe(true);
+    // Greg, 12 novembre 2026 : plus de date de réponse par défaut. Sans date choisie, le rappel au négoce part après
+    // 48 heures ouvrées (donc au plus tard six jours après, week-end compris), au nom du client, sans inventer de date.
+    expect(await tache(6 * 86_400_000)).toBeGreaterThanOrEqual(1);
+    expect((await emailsVers(page, email)).some((m) => / : votre proposition tarifaire$/.test(m.subject))).toBe(true);
     const avant = (await emailsVers(page, email)).length;
-    await tache(3.5 * 86_400_000);
+    await tache(7 * 86_400_000);
     expect((await emailsVers(page, email)).length).toBe(avant);
+    const rappel = (await emailsVers(page, email)).find((m) => / : votre proposition tarifaire$/.test(m.subject))!;
+    expect(rappel.text).toContain("restée sans réponse pour le moment");
+    expect(rappel.text).not.toMatch(/avant le|closes|achètent ensemble/);
   });
 
   test("4. « Mes prix » ne montre que ses propres prix", async ({ page, browser }, info) => {

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Put, Query, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ANNUAIRE_COMMUNES, type AnnuaireCommunes } from "../../../platform/communes/communes.js";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { FICHIER_MAX_OCTETS } from "@baticlair/domain";
+import { FICHIER_MAX_OCTETS, IMAGE_PROFIL_MAX_OCTETS } from "@baticlair/domain";
 import { memoryStorage } from "multer";
 import { z } from "zod";
 import { validationFailed } from "../../../platform/errors/domain-error.js";
@@ -80,6 +80,7 @@ const aFaireBody = z.object({ cles: z.array(z.string().min(1).max(300)).min(1).m
 const reglagesBody = z.object({ prix: z.boolean(), groupe: z.boolean(), missions: z.boolean(), conseils: z.boolean(), email: z.boolean(), push: z.boolean() });
 
 type Televerse = { buffer: Buffer; originalname: string; mimetype: string } | undefined;
+const TELEVERSEMENT_IMAGE = FileInterceptor("file", { storage: memoryStorage(), limits: { fileSize: IMAGE_PROFIL_MAX_OCTETS + 1, files: 1 } });
 const TELEVERSEMENT = FileInterceptor("file", { storage: memoryStorage(), limits: { fileSize: FICHIER_MAX_OCTETS + 1, files: 1 } });
 function fichierDe(file: Televerse) {
   if (!file) throw validationFailed("Missing file", { reason: "fichier_absent", phrase: "Choisis un fichier." });
@@ -282,6 +283,36 @@ export class DossierProController {
       equipe: b.equipe ?? null,
       ville: b.ville ?? null,
     });
+  }
+
+  /** Le logo ou la photo de MON entreprise : déposé (ou remplacé), puis retiré. */
+  @Put("profil-public/image")
+  @UseInterceptors(TELEVERSEMENT_IMAGE)
+  deposerImage(@Tenant() t: TenantContext, @UploadedFile() file: Televerse) {
+    return this.m.deposerImageProfil(t, file ? new Uint8Array(file.buffer) : new Uint8Array());
+  }
+
+  @Delete("profil-public/image")
+  @HttpCode(200)
+  retirerImage(@Tenant() t: TenantContext) {
+    return this.m.retirerImageProfil(t);
+  }
+
+  @Get("profil-public/:companyId/image")
+  async image(@Tenant() t: TenantContext, @Param("companyId") companyId: string, @Res({ passthrough: true }) res: { setHeader(n: string, v: string): void }) {
+    const i = await this.m.imageProfil(t, companyId);
+    res.setHeader("Content-Type", i.type);
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Content-Disposition", "inline");
+    // L'adresse porte la version de l'image : elle peut être gardée par le navigateur, jamais par un cache partagé.
+    res.setHeader("Cache-Control", "private, max-age=86400");
+    return new StreamableFile(i.contenu);
+  }
+
+  @Post("profil-public/:companyId/image/signalement")
+  @HttpCode(200)
+  signalerImage(@Tenant() t: TenantContext, @Param("companyId") companyId: string) {
+    return this.m.signalerImageProfil(t, companyId);
   }
 
   @Get("profil-public/:companyId")

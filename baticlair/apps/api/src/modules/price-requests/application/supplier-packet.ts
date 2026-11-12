@@ -103,8 +103,11 @@ export function packetSubject(p: SupplierPacket): string {
   return `${p.entreprise.trim() || "Demande de prix"}${p.entreprise.trim() ? ` : ${quoi}` : ""}${p.commune ? `, ${p.commune}` : ""}`;
 }
 
-/** Le pied du mail, discret (lot final, point 3). */
-export const PIED_MAIL_NEGOCE = `${NOM_APP}, des artisans qui achètent ensemble.`;
+/**
+ * Le pied du mail, discret. Greg, 12 novembre 2026 (dossier de corrections UX, point 5) : une demande de prix
+ * individuelle ne porte jamais la signature des achats groupés (« des artisans qui achètent ensemble »).
+ */
+export const PIED_MAIL_NEGOCE = `Demande de prix envoyée avec ${NOM_APP}.`;
 
 /** La signature : « Jean, Toitures Martin » (lot final, point 3). Jamais l'e-mail personnel de l'artisan. */
 export function packetSignature(p: SupplierPacket): string {
@@ -116,17 +119,19 @@ export function packetSignature(p: SupplierPacket): string {
 export function texteLibreParDefaut(p: SupplierPacket): string {
   const tu = !!p.tutoie;
   const phrase = (p.phrase ?? `Je vous envoie la liste des fournitures pour le ${chantierLabel(p.chantier)}${p.commune ? ` à ${p.commune}` : ""}.`).replace(/\bJe vous envoie\b/, tu ? "Je t'envoie" : "Je vous envoie");
-  return `${phrase} ${tu ? "Tu peux me chiffrer l'ensemble ?" : "Pouvez-vous me chiffrer l'ensemble ?"}`;
+  return `${phrase} ${tu ? "Peux-tu m'envoyer ta proposition tarifaire ?" : "Pourriez-vous m'adresser votre proposition tarifaire ?"}`;
 }
 
 /** Le lien de réponse tel que l'aperçu le montre (le vrai est propre à chaque négoce, créé à l'envoi). */
 export const LIEN_APERCU = "(votre lien personnel)";
 
 /**
- * LE MAIL AU NÉGOCE (lot final, point 3, Greg) : vouvoiement par défaut, adressé au prénom du commercial s'il est connu ;
- * le texte libre de l'artisan (modifiable), UNE phrase de pression (« Je consulte plusieurs fournisseurs, réponse
- * souhaitée avant le … »), « Répondre en ligne » sans inscription, « vous pouvez aussi répondre à ce mail », le
- * portable (jamais l'e-mail personnel), la signature et un pied discret. Aucune invitation à s'inscrire, aucune commission.
+ * LE MAIL AU NÉGOCE (lot final, point 3, puis Greg, 12 novembre 2026, dossier de corrections UX, point 5) : cordial et
+ * professionnel, vouvoiement par défaut, adressé au prénom du commercial s'il est connu. Le texte libre de l'artisan
+ * (modifiable) demande une proposition de prix. Jamais de pression : le nombre de négoces consultés n'est JAMAIS dit, et
+ * la date n'apparaît que si l'artisan en a choisi une, comme un souhait. Pour répondre : d'abord répondre à l'e-mail avec
+ * le devis ; le lien en ligne vient ensuite. Le portable (jamais l'e-mail personnel), la signature, un pied discret.
+ * Aucune invitation à s'inscrire, aucune commission.
  */
 export function packetMail(p: SupplierPacket, o: { prenomCommercial?: string | null; lien?: string | null } = {}): string {
   const tu = !!p.tutoie;
@@ -135,14 +140,14 @@ export function packetMail(p: SupplierPacket, o: { prenomCommercial?: string | n
   return [
     `${tu ? "Salut" : "Bonjour"}${prenom ? ` ${prenom}` : ""},`,
     p.message?.trim() || texteLibreParDefaut(p),
-    p.echeance ? `Je consulte plusieurs fournisseurs, réponse souhaitée avant le ${p.echeance}.` : "Je consulte plusieurs fournisseurs, réponse souhaitée rapidement.",
+    ...(p.echeance ? [tu ? `Si c'est possible pour toi, j'aimerais recevoir ta proposition avant le ${p.echeance}.` : `Dans la mesure du possible, je souhaiterais recevoir votre proposition avant le ${p.echeance}.`] : []),
     [
-      ...(o.lien ? [`${tu ? "Réponds" : "Répondre"} en ligne, sans inscription : ${o.lien}`] : []),
-      tu ? "Tu peux aussi répondre directement à ce mail, il m'arrive." : "Vous pouvez aussi répondre directement à ce mail, il m'arrive.",
-      `La liste est en pièce jointe (PDF)${p.joindre_detail ? ", avec le détail du devis sans prix" : ""}.`,
-      ...(tel ? [`Un doute ? ${tu ? "Appelle-moi" : "Appelez-moi"} au ${tel}.`] : []),
+      tu ? "Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec ton devis en pièce jointe." : "Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec votre devis en pièce jointe.",
+      ...(o.lien ? [`${tu ? "Tu peux aussi chiffrer" : "Vous pouvez aussi chiffrer"} en ligne, sans inscription : ${o.lien}`] : []),
+      "La liste des fournitures à chiffrer est en pièce jointe (PDF).",
+      ...(tel ? [`Une question ? ${tu ? "Appelle-moi" : "Appelez-moi"} au ${tel}.`] : []),
     ].join("\n"),
-    packetSignature(p),
+    `${tu ? "Merci d'avance," : "Je vous remercie par avance."}\n${packetSignature(p)}`,
     `--\n${PIED_MAIL_NEGOCE}`,
   ].join("\n\n");
 }
@@ -190,6 +195,15 @@ export interface PacketDocument {
 }
 
 const BREF = "Le chantier en bref";
+/** Le titre de la section de contexte (elle s'appelait « Détail du devis » et répétait le tableau). */
+export const TITRE_COMPLEMENTS = "Informations complémentaires sur le chantier";
+const cleLigne = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[×x]/g, "x").replace(/[^a-z0-9]+/g, " ").replace(/(\d) x (?=\d)/g, "$1x").trim();
+/** Deux textes qui désignent la même ligne : identiques une fois normalisés, ou l'un contenu dans l'autre. */
+function memeLigne(a: string, b: string): boolean {
+  const x = cleLigne(a);
+  const y = cleLigne(b);
+  return x.length > 0 && y.length > 0 && (x === y || x.includes(y) || y.includes(x));
+}
 
 export function packetDocument(p: SupplierPacket, options: { destinataire?: string | null; reponse?: string | null } = {}): PacketDocument {
   const s = p.expediteur;
@@ -208,8 +222,12 @@ export function packetDocument(p: SupplierPacket, options: { destinataire?: stri
   const ordered = [...rows.filter((r) => !r.consommable), ...rows.filter((r) => r.consommable)];
   if (ordered.length > 0) blocs.push({ numero: ++n, titre: "Fournitures à chiffrer", kind: "table", colonnes: ["Désignation", "Quantité", "Précision"], lignes: ordered });
   if (p.a_chiffrer.length > 0) blocs.push({ numero: ++n, titre: "À préciser avec vous", kind: "list", lignes: p.a_chiffrer });
-  if (p.joindre_detail && p.detail.length > 0)
-    blocs.push({ numero: ++n, titre: "Détail du devis", kind: "list", lignes: p.detail.map((d) => [d.libelle, ...(d.mesure ? [d.mesure] : []), ...d.precisions].join(" · ")) });
+  // Greg, 12 novembre 2026 (dossier de corrections UX, point 6) : cette section ne recopie JAMAIS le tableau. Une ligne
+  // qui redit une fourniture à chiffrer (même désignation) est retirée ; s'il ne reste rien, la section disparaît. Ce qui
+  // reste est du contexte fourni ou validé par l'artisan (l'ouvrage, sa mesure, ses précisions), jamais une invention.
+  const complements = p.joindre_detail ? p.detail.filter((d) => !ordered.some((r) => memeLigne(r.designation, d.libelle))) : [];
+  if (complements.length > 0)
+    blocs.push({ numero: ++n, titre: TITRE_COMPLEMENTS, kind: "list", lignes: complements.map((d) => [d.libelle, ...(d.mesure ? [d.mesure] : []), ...d.precisions].join(" · ")) });
   const contact = [s?.telephone, s?.email].filter(Boolean).join(" · ");
   return {
     entete: { entreprise: p.entreprise, coordonnees, titre: TITRE_PDF, chantier: chantierLabel(p.chantier), ville: p.commune, date: dateFr(p.date), reference: p.reference ?? null, mention: p.ratios_en_validation ? MENTION_RATIOS : null },

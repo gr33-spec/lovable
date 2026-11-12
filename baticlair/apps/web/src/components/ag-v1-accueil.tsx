@@ -7,7 +7,7 @@ import { useCallback, useState } from "react";
 import { CARTE, LigneZone } from "@/components/ag-v1-commun";
 import { PageTitle, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
-import { FILTRES_V1, lotPrincipal, SIGNATURE, zoneLisible, type AchatV1, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
+import { dateCourte, FILTRES_V1, libelleLot, lotPrincipal, SIGNATURE, zoneLisible, type AchatV1, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -116,18 +116,29 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
           <p className="text-[15px] text-muted">Aucun achat groupé ouvert{lot ? " pour ce métier" : ""} pour le moment. Les articles que tu ajoutes depuis ton quantitatif en ouvrent un.</p>
         </div>
       ) : (
-        <ul aria-label="Achats groupés ouverts" className={`${CARTE} flex flex-col`}>
+        // Greg, 12 novembre 2026 (dossier de corrections UX, point 8) : chaque achat groupé est une opportunité AUTONOME,
+        // donc une carte à elle, et non une ligne d'une même liste. Deux achats du même matériau se distinguent par ce
+        // que l'on sait vraiment : le métier, le secteur, la réception, la date de besoin, l'échéance. Aucun volume,
+        // aucun participant, aucune économie n'est annoncé.
+        <ul aria-label="Achats groupés ouverts" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {[...data.achats].sort((x, y) => x.ouvertJusquau.localeCompare(y.ouvertJusquau)).slice(0, tout ? undefined : ACHATS_VISIBLES).map((a) => (
-            <li key={a.id} className="border-b border-line last:border-b-0">
-              <Link href={lienAchat(a)} className="pressable flex min-h-14 items-center gap-3 px-4 py-2.5">
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-[16px] leading-snug font-semibold break-words">{a.nom}</span>
-                  <span className="flex items-center gap-1.5 text-[13px] text-muted">
+            <li key={a.id} className="flex">
+              <Link href={lienAchat(a)} className={`pressable flex w-full flex-col gap-1.5 p-4 ${CARTE}`}>
+                <span className="self-start rounded-md bg-[#ffe98a] px-2 py-0.5 text-[11px] font-extrabold tracking-[0.04em] text-[#130901] uppercase">{libelleLot(a.lot)}</span>
+                <span className="text-[16px] leading-snug font-extrabold break-words">{a.nom}</span>
+                <span className="text-[13px] leading-snug text-muted">
+                  {a.zone.nom} · {a.reception === "livraison" ? "Livraison sur chantier" : "Retrait au dépôt"} · besoin avant le {dateCourte(a.dateBesoin)}
+                </span>
+                <span className="mt-auto flex items-center justify-between gap-3 pt-1">
+                  <span className="flex items-center gap-1.5 text-[13px] font-semibold">
                     <Timer size={14} aria-hidden="true" className="shrink-0" />
-                    {finDans(a.ouvertJusquau)}
+                    <span>{finDans(a.ouvertJusquau)}</span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-0.5 text-[14px] font-extrabold">
+                    Voir
+                    <ChevronRight size={16} aria-hidden="true" />
                   </span>
                 </span>
-                <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
               </Link>
             </li>
           ))}

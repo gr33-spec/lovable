@@ -103,3 +103,4 @@ export * from "./supervision/supervision.js";
 export * from "./assistant/interpretation-ia.js";
 export * from "./assistant/assistant-ia.js";
 export * from "./missions/missions.js";
+export * from "./missions/image-profil.js";

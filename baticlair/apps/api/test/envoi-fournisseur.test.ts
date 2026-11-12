@@ -69,8 +69,10 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     // Lot final, point 4 : le message de l'artisan remplace le texte libre ; la date et la pièce jointe restent écrites.
     // Adressé au prénom du commercial (lot final, point 3).
     expect(email.body).toMatch(/^Bonjour Paul,\n\nLivraison sur chantier possible \?\n\n/);
-    expect(email.body).toContain("Je consulte plusieurs fournisseurs, réponse souhaitée avant le 15 octobre.");
-    expect(email.body).toContain("La liste est en pièce jointe (PDF), avec le détail du devis sans prix.");
+    expect(email.body).toContain("Dans la mesure du possible, je souhaiterais recevoir votre proposition avant le 15 octobre.");
+    expect(email.body).toContain("La liste des fournitures à chiffrer est en pièce jointe (PDF).");
+    // Greg, 12 novembre 2026 (dossier de corrections UX, point 5) : ces formulations ne reviennent pas.
+    expect(email.body).not.toMatch(/plusieurs (fournisseurs|négoces)|détail du devis sans prix|achètent ensemble|rapidement/i);
     // Sans message, le texte libre par défaut dit le chantier.
     const sans = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({ message: "Je vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest." }).expect(200)).body;
     expect(sans.mail).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest/);
@@ -94,8 +96,11 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     expect(mail.subject).toBe(recipient.email.subject);
     // Le lien de chiffrage est propre au négoce : l'aperçu le montre « …/chiffrer/… » (Greg, 28 octobre 2026, point 7).
     expect(mail.text.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)")).toBe(recipient.email.body);
-    // Lot final, point 5 : le texte en clair accompagne le HTML ; le lien « Répondre en ligne » y est un bouton.
-    expect(mail.html).toContain("Répondre en ligne</a>");
+    // Lot final, point 5 : le texte en clair accompagne le HTML. Greg, 12 novembre 2026 : répondre à l'e-mail vient
+    // d'abord ; la saisie en ligne est un bouton secondaire (contour), plus le bouton jaune « Répondre en ligne ».
+    expect(mail.html).toContain("Chiffrer en ligne</a>");
+    expect(mail.html).not.toContain("Répondre en ligne</a>");
+    expect(mail.html!.indexOf("répondre directement à cet e-mail")).toBeLessThan(mail.html!.indexOf("Chiffrer en ligne</a>"));
     expect(mail.html).not.toMatch(/bit\.ly|tinyurl|<img/i);
     expect(mail.attachments).toHaveLength(1);
     expect(mail.attachments![0]).toMatchObject({ filename: "demande-de-devis-dupont-refection-toiture.pdf", contentType: "application/pdf" });
@@ -179,7 +184,7 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     const { projectId, supplierId } = await chantierPret(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
     expect(created.packet.joindre_detail).toBe(false);
-    expect(created.document.blocs.map((b: { titre: string }) => b.titre)).not.toContain("Détail du devis");
+    expect(created.document.blocs.map((b: { titre: string }) => b.titre)).not.toContain("Informations complémentaires sur le chantier");
     expect(created.recipients[0].email.body).not.toMatch(/PS/);
     // L'autre entreprise garde la valeur par défaut.
     const other = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures Le Gall");

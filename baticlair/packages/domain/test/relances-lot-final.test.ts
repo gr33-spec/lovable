@@ -50,4 +50,15 @@ describe("relances : mi-délai, veille, et jamais au-delà", () => {
     expect(phraseCompteARebours(limite, new Date("2026-11-05T10:00:00Z"))).toBe("Dernier jour pour répondre");
     expect(phraseCompteARebours(limite, limite)).toBeNull();
   });
+
+  it("demande individuelle (Greg, 12 novembre 2026) : cordial, la date choisie comme un souhait, aucune date inventée, pas la signature des achats groupés", () => {
+    const avec = mailRelanceDemande({ entreprise: "Entreprise Dupont", dateLimite: new Date("2026-11-06T12:00:00Z"), lien: "https://mobiiz.fr/chiffrer/abc", prenomCommercial: "Paul", individuelle: true });
+    expect(avec.objet).toBe("Entreprise Dupont : votre proposition tarifaire");
+    expect(avec.texte).toContain("Bonjour Paul,\n\nJe me permets de revenir vers vous au sujet de la demande de prix de Entreprise Dupont. Dans la mesure du possible, une réponse avant le 6 novembre lui rendrait service.");
+    expect(avec.texte.indexOf("répondre directement à cet e-mail")).toBeLessThan(avec.texte.indexOf("chiffrer en ligne"));
+    const sans = mailRelanceDemande({ entreprise: "Entreprise Dupont", dateLimite: new Date("2026-12-06T12:00:00Z"), lien: null, individuelle: true, sansDate: true });
+    expect(sans.texte).toContain("restée sans réponse pour le moment.");
+    for (const t of [avec.texte, sans.texte]) expect(t).not.toMatch(/closes|achètent ensemble|plusieurs (négoces|fournisseurs)/);
+    expect(sans.texte).not.toMatch(/avant le|décembre/);
+  });
 });

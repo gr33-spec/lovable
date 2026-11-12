@@ -58,10 +58,12 @@ describe("les relances du lot final", { timeout: 60_000 }, () => {
     expect(artisan.text).toContain("Négoce B n'a pas encore répondu. Appelle ton commercial : ta demande est peut-être dans ses spams.");
     expect(artisan.text).toContain(`Renvoyer la demande : `);
     const negoce = mailsVers(ctx, "b@negoce.fr").at(-1)!;
-    expect(negoce.subject).toBe("Toitures A attend votre offre");
-    // La même date que la demande (« réponse souhaitée avant le … »).
-    expect(negoce.text).toContain(`Les réponses sont closes le ${new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(due).replace(/^1 /, "1er ")}.`);
-    expect(negoce.html).toContain(">Répondre en ligne</a>");
+    // Greg, 12 novembre 2026 : le rappel d'une demande individuelle est cordial, redit la date choisie comme un souhait,
+    // invite d'abord à répondre à l'e-mail, et ne porte pas la signature des achats groupés.
+    expect(negoce.subject).toBe("Toitures A : votre proposition tarifaire");
+    expect(negoce.text).toContain(`une réponse avant le ${new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(due).replace(/^1 /, "1er ")} lui rendrait service.`);
+    expect(negoce.text).not.toMatch(/closes|achètent ensemble/);
+    expect(negoce.html).toContain(">Chiffrer en ligne</a>");
     // Même jour : rien de plus.
     expect((await tache(new Date(mi.getTime() + 3_600_000))).body).toEqual({ relances: 0, rappels: 0 });
     // La veille : l'artisan seulement.

@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUp, Briefcase, CreditCard, FileText, MoreHorizontal, Paperclip } from "lucide-react";
+import { AvatarEntreprise } from "./image-profil";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -9,7 +10,7 @@ import { api, type EmailRecu } from "@/lib/api";
 import { cleEnvoi, ouvrirFichierPro, phraseErreur, tailleLisible, type ConversationVue } from "@/lib/missions";
 import { openFile } from "@/lib/open-document";
 import { useResource } from "@/lib/use-resource";
-import { Avatar, BoutonContour, BoutonJaune, CARTE, ChampChoix, ChampLong, Coche, EcranTitre, Encart, EtatEcran, Etiquette, GrandTitre, LienContour, LienJaune, Puces, Recherche, Refus, TitreSection } from "./ux-kit";
+import { BoutonContour, BoutonJaune, CARTE, ChampChoix, ChampLong, Coche, EcranTitre, Encart, EtatEcran, Etiquette, GrandTitre, LienContour, LienJaune, Puces, Recherche, Refus, TitreSection } from "./ux-kit";
 
 /**
  * « MESSAGES ET RÉPONSES » (Greg, 10 novembre 2026, captures 22, 23, 47, 11, 12, 46) et la cloche (26). L'interface est
@@ -188,7 +189,7 @@ export function Conversation({ id }: { id: string }) {
         <RetourPanneau titre="Échange des coordonnées" onRetour={() => setPanneau(null)} />
         <GrandTitre sous="Les deux entreprises doivent accepter.">Partager vos coordonnées ?</GrandTitre>
         <div className={`flex items-center gap-3 p-4 ${CARTE}`}>
-          <Avatar initiales={c.entreprise.initiales} />
+          <AvatarEntreprise entreprise={c.entreprise} />
           <div className="flex min-w-0 flex-col gap-1">
             <p className="truncate text-[17px] font-extrabold">{c.entreprise.nom}</p>
             <p className="truncate text-[13px] text-[#5c5648]">{c.annonce.titre}</p>

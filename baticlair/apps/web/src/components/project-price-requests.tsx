@@ -708,7 +708,7 @@ function NewRequest({
             className="rounded-2xl bg-surface p-3 text-base text-ink outline-none placeholder:text-muted"
           />
           <label htmlFor={`${id}-due`} className="font-bold">
-            Réponse souhaitée avant le
+            Réponse souhaitée avant le (facultatif)
           </label>
           <input
             id={`${id}-due`}

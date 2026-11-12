@@ -1,6 +1,7 @@
 "use client";
 
 import { FileText, Paperclip, Trash2 } from "lucide-react";
+import { AvatarEntreprise } from "./image-profil";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -20,9 +21,9 @@ import {
   TYPES_MISSION,
 } from "../../../../packages/domain/src/missions/missions";
 import { api } from "@/lib/api";
-import { ouvrirFichierPro, phraseErreur, tailleLisible, useMissionsActif, type AnnonceVue, type FichierVue, type ReponseVue } from "@/lib/missions";
+import { ouvrirFichierPro, phraseErreur, tailleLisible, useMissionsActif, type AnnonceVue, type FichierVue, type ReponseVue , type EntrepriseVue } from "@/lib/missions";
 import { useResource } from "@/lib/use-resource";
-import { Avatar, BoutonContour, BoutonJaune, CARTE, CarteLien, EcranTitre, Encart, EtatEcran, Etiquette, GrandTitre, LienContour, LienJaune, Ligne, Puces, Recherche, Refus, RondFait } from "./ux-kit";
+import { BoutonContour, BoutonJaune, CARTE, CarteLien, EcranTitre, Encart, EtatEcran, Etiquette, GrandTitre, LienContour, LienJaune, Ligne, Puces, Recherche, Refus, RondFait } from "./ux-kit";
 
 /** MISSIONS ENTRE ENTREPRISES (Greg, 10 novembre 2026) : les écrans de lecture. Mobiiz assure uniquement la mise en relation. */
 
@@ -122,10 +123,10 @@ export function MissionsAccueil() {
   );
 }
 
-function CarteEntreprise({ e, sous }: { e: { nom: string; initiales: string; verifiee: boolean; departement: string | null }; sous?: string }) {
+function CarteEntreprise({ e, sous }: { e: EntrepriseVue; sous?: string }) {
   return (
     <div className={`flex items-center gap-3 p-4 ${CARTE}`}>
-      <Avatar initiales={e.initiales} />
+      <AvatarEntreprise entreprise={e} />
       <div className="flex min-w-0 flex-col">
         <p className="truncate text-[17px] font-extrabold">{e.nom}</p>
         <p className="text-[13px] text-[#5c5648]">{sous ?? `${e.verifiee ? "Entreprise vérifiée" : "Entreprise non vérifiée"}${e.departement ? ` · secteur ${e.departement}` : ""}`}</p>
@@ -441,7 +442,7 @@ export function ReponsesRecues({ id }: { id: string }) {
           {items.map((r) => (
             <li key={r.id}>
               <Link href={`/missions/reponses/${r.id}`} className={`pressable flex items-start gap-3 p-4 ${CARTE}`}>
-                <Avatar initiales={r.entreprise.initiales} />
+                <AvatarEntreprise entreprise={r.entreprise} />
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="text-[17px] leading-tight font-extrabold">{r.entreprise.nom}</span>
                   <span className="text-[13px] font-extrabold text-[#6b5300]">

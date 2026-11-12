@@ -7,7 +7,8 @@ import { openFile } from "@/lib/open-document";
 import { useResource } from "@/lib/use-resource";
 
 /** MISSIONS, « MESSAGES ET RÉPONSES », CLOCHE (Greg, 10 novembre 2026) : les types rendus par l'API et les petits appels. */
-export interface EntrepriseVue { id: string; nom: string; initiales: string; verifiee: boolean; departement: string | null }
+/** `image` : la version du logo ou de la photo de l'entreprise ; absente : ses initiales. */
+export interface EntrepriseVue { id: string; nom: string; initiales: string; verifiee: boolean; departement: string | null; image?: string | null }
 export interface FichierVue { id: string; nom: string; type: string; taille: number; categorie?: string | null; titre?: string | null; surProfil?: boolean }
 export interface AnnonceVue {
   id: string;

@@ -1,6 +1,7 @@
 "use client";
 
 import { BellRing, CreditCard, FlaskConical, FolderOpen, Mail, Paperclip, RefreshCw } from "lucide-react";
+import { AvatarEntreprise, ImageProfilEditeur, SignalerImage } from "./image-profil";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -10,7 +11,7 @@ import { phraseErreur, useMissionsActif, type AnnonceVue, type EntrepriseVue, ty
 import { useResource } from "@/lib/use-resource";
 import { revoirLeGuide } from "./guide-premier-lancement";
 import { ListeFichiers } from "./missions";
-import { Avatar, BoutonContour, BoutonJaune, CARTE, CarteLien, ChampLong, ChampTexte, Coche, Encart, EtatEcran, Etiquette, Interrupteur, LienContour, Refus, TitreSection } from "./ux-kit";
+import { BoutonContour, BoutonJaune, CARTE, CarteLien, ChampLong, ChampTexte, Coche, Encart, EtatEcran, Etiquette, Interrupteur, LienContour, Refus, TitreSection } from "./ux-kit";
 
 /** LES RUBRIQUES DU COMPTE NÉES AVEC LES MISSIONS (Greg, 10 novembre 2026, captures 21, 24, 25, 44). */
 
@@ -142,7 +143,7 @@ export function ProfilPublicEditeur() {
   return (
     <>
       <div className={`flex items-center gap-3 p-4 ${CARTE}`}>
-        <Avatar initiales={data.entreprise.initiales} jaune />
+        <AvatarEntreprise entreprise={data.entreprise} jaune />
         <div className="flex min-w-0 flex-col gap-1">
           <p className="truncate text-[18px] font-extrabold">{data.entreprise.nom}</p>
           <p className="text-[13px] text-[#5c5648]">
@@ -152,6 +153,7 @@ export function ProfilPublicEditeur() {
           <Etiquette ton={data.visible ? "vert" : "gris"}>{data.visible ? "Public" : "Non visible"}</Etiquette>
         </div>
       </div>
+      <ImageProfilEditeur entreprise={data.entreprise} onChange={(entreprise) => setData({ ...data, entreprise })} />
       <TitreSection>Présentation</TitreSection>
       <Coche coche={s.visible} onChange={(v) => maj({ visible: v })} titre="Rendre mon profil visible des entreprises vérifiées" sous="Décoché, seules les entreprises avec qui tu échanges voient ton nom." />
       <ChampLong label="Présentation publique" value={s.presentation} onChange={(e) => maj({ presentation: e.target.value })} maxLength={1500} placeholder="Couvreur-zingueur, équipe de 3." />
@@ -184,7 +186,7 @@ export function ProfilPublicVu({ id }: { id: string }) {
   return (
     <>
       <div className={`flex items-center gap-3 p-4 ${CARTE}`}>
-        <Avatar initiales={p.entreprise.initiales} />
+        <AvatarEntreprise entreprise={p.entreprise} />
         <div className="flex min-w-0 flex-col gap-1">
           <h1 className="truncate text-[20px] font-extrabold">{p.entreprise.nom}</h1>
           <p className="text-[13px] text-[#5c5648]">
@@ -194,6 +196,7 @@ export function ProfilPublicVu({ id }: { id: string }) {
           {p.disponibilite ? <Etiquette ton="vert">Disponible</Etiquette> : null}
         </div>
       </div>
+      <SignalerImage entreprise={p.entreprise} />
       {p.presentation || p.metiers.length || p.equipe ? (
         <section aria-label="Présentation" className={`flex flex-col gap-2 p-4 ${CARTE}`}>
           <h2 className="text-[16px] font-extrabold">Présentation</h2>

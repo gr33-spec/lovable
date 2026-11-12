@@ -14,6 +14,9 @@ import {
   fautesReponse,
   FICHIERS_PAR_ANNONCE,
   initialesEntreprise,
+  MOTIF_IMAGE_PROFIL,
+  nettoyerImageProfil,
+  PHRASE_FAUTE_IMAGE_PROFIL,
   libelleDe,
   masquerCoordonnees,
   MOTIFS_SIGNALEMENT,
@@ -53,7 +56,8 @@ const LIEN_FICHIER_MS = 5 * 60_000;
 
 type Annonce = NonNullable<Awaited<ReturnType<PrismaService["annonceMission"]["findFirst"]>>>;
 type Conversation = NonNullable<Awaited<ReturnType<PrismaService["conversationMission"]["findFirst"]>>>;
-export interface EntrepriseVue { id: string; nom: string; initiales: string; verifiee: boolean; departement: string | null }
+/** `image` : la version de son logo ou de sa photo (pour l'adresse de l'image), `null` sans image : les initiales. */
+export interface EntrepriseVue { id: string; nom: string; initiales: string; verifiee: boolean; departement: string | null; image: string | null }
 
 /**
  * MISSIONS ENTRE ENTREPRISES (Greg, 10 novembre 2026). Chaque lecture et chaque écriture part de l'entreprise courante :
@@ -73,12 +77,12 @@ export class MissionsService {
     if (!this.reglage.actif) throw notFound("Missions");
   }
   private async entreprise(id: string): Promise<EntrepriseVue> {
-    const c = await this.prisma.company.findUniqueOrThrow({ where: { id }, select: { id: true, name: true, siretVerifieLe: true, address: true } });
-    return { id: c.id, nom: c.name, initiales: initialesEntreprise(c.name), verifiee: !!c.siretVerifieLe, departement: zoneDuCodePostal(c.address) };
+    const c = await this.prisma.company.findUniqueOrThrow({ where: { id }, select: { id: true, name: true, siretVerifieLe: true, address: true, imageProfil: { select: { updatedAt: true } } } });
+    return { id: c.id, nom: c.name, initiales: initialesEntreprise(c.name), verifiee: !!c.siretVerifieLe, departement: zoneDuCodePostal(c.address), image: c.imageProfil ? String(c.imageProfil.updatedAt.getTime()) : null };
   }
   private async entreprises(ids: string[]): Promise<Map<string, EntrepriseVue>> {
-    const liste = await this.prisma.company.findMany({ where: { id: { in: [...new Set(ids)] } }, select: { id: true, name: true, siretVerifieLe: true, address: true } });
-    return new Map(liste.map((c) => [c.id, { id: c.id, nom: c.name, initiales: initialesEntreprise(c.name), verifiee: !!c.siretVerifieLe, departement: zoneDuCodePostal(c.address) }]));
+    const liste = await this.prisma.company.findMany({ where: { id: { in: [...new Set(ids)] } }, select: { id: true, name: true, siretVerifieLe: true, address: true, imageProfil: { select: { updatedAt: true } } } });
+    return new Map(liste.map((c) => [c.id, { id: c.id, nom: c.name, initiales: initialesEntreprise(c.name), verifiee: !!c.siretVerifieLe, departement: zoneDuCodePostal(c.address), image: c.imageProfil ? String(c.imageProfil.updatedAt.getTime()) : null }]));
   }
   private async verifiee(companyId: string): Promise<boolean> {
     return !!(await this.prisma.company.findUnique({ where: { id: companyId }, select: { siretVerifieLe: true } }))?.siretVerifieLe;
@@ -588,7 +592,7 @@ export class MissionsService {
   async signalements() {
     const liste = await this.prisma.signalementMission.findMany({ where: { traiteLe: null }, orderBy: { createdAt: "desc" }, take: 100 });
     const es = await this.entreprises(liste.flatMap((s) => [s.companyId, s.cibleId]));
-    return { items: liste.map((s) => ({ id: s.id, de: es.get(s.companyId)?.nom ?? "?", cible: es.get(s.cibleId)?.nom ?? "?", motif: libelleDe(MOTIFS_SIGNALEMENT, s.motif) ?? s.motif, precision: s.precision, le: s.createdAt.toISOString() })) };
+    return { items: liste.map((s) => ({ id: s.id, de: es.get(s.companyId)?.nom ?? "?", cible: es.get(s.cibleId)?.nom ?? "?", motif: s.motif === MOTIF_IMAGE_PROFIL ? "Logo ou photo de profil à vérifier" : (libelleDe(MOTIFS_SIGNALEMENT, s.motif) ?? s.motif), precision: s.precision, le: s.createdAt.toISOString() })) };
   }
 
   /* --------------------------------------------------------------------------------------------- Fichiers */
@@ -736,5 +740,54 @@ export class MissionsService {
       p?.visible ? this.prisma.fichierPro.findMany({ where: { companyId, portee: "dossier", surProfil: true }, select: { id: true, categorie: true, titre: true, nom: true, type: true, taille: true }, take: 24 }) : [],
     ]);
     return { entreprise: e, visible: p?.visible ?? false, presentation: p?.visible ? p.presentation : null, metiers: p?.visible ? p.metiers : [], services: p?.visible ? p.services : null, equipe: p?.visible ? p.equipe : null, ville: p?.visible ? p.ville : null, disponibilite: dispo ? this.vueAnnonce(dispo, e, t.companyId) : null, realisations };
+  }
+
+  /* --------------------------------------------------------------------------------------------- Image du profil */
+
+  /**
+   * Le logo ou la photo de MON entreprise (Greg, 12 novembre 2026). Le fichier est contrôlé sur ses octets (jamais sur
+   * son nom), doit être carré et léger, et ses métadonnées (lieu, appareil, date, auteur) sont retirées avant qu'il soit
+   * gardé. Une seule image par entreprise : en déposer une autre la remplace.
+   */
+  async deposerImageProfil(t: TenantContext, octets: Uint8Array) {
+    this.exiger();
+    assertCanWrite(t);
+    const propre = nettoyerImageProfil(octets);
+    if ("faute" in propre) throw validationFailed("Invalid profile image", { reason: `image_${propre.faute}`, phrase: PHRASE_FAUTE_IMAGE_PROFIL[propre.faute] });
+    const d = { type: propre.type, contenu: new Uint8Array(propre.contenu), taille: propre.contenu.byteLength, cote: propre.cote };
+    await this.prisma.imageProfil.upsert({ where: { companyId: t.companyId }, create: { companyId: t.companyId, ...d }, update: d });
+    await this.tracer(t, "image_profil", {}, { geste: "deposee" });
+    return this.entreprise(t.companyId);
+  }
+
+  async retirerImageProfil(t: TenantContext) {
+    this.exiger();
+    assertCanWrite(t);
+    await this.prisma.imageProfil.deleteMany({ where: { companyId: t.companyId } });
+    await this.tracer(t, "image_profil", {}, { geste: "retiree" });
+    return this.entreprise(t.companyId);
+  }
+
+  /** L'image d'une entreprise, pour un compte connecté ; une entreprise bloquée (dans un sens ou dans l'autre) répond 404. */
+  async imageProfil(t: TenantContext, companyId: string): Promise<{ type: string; contenu: Uint8Array }> {
+    this.exiger();
+    if (!isUuid(companyId)) throw notFound("Image");
+    if (companyId !== t.companyId && (await this.bloquees(t.companyId)).has(companyId)) throw notFound("Image");
+    const i = await this.prisma.imageProfil.findUnique({ where: { companyId } });
+    if (!i) throw notFound("Image");
+    return { type: i.type, contenu: new Uint8Array(i.contenu) };
+  }
+
+  /** Signaler l'image d'une autre entreprise à l'équipe Mobiiz (un seul signalement par jour et par image). */
+  async signalerImageProfil(t: TenantContext, companyId: string) {
+    this.exiger();
+    assertCanWrite(t);
+    if (!isUuid(companyId) || companyId === t.companyId) throw notFound("Image");
+    if (!(await this.prisma.imageProfil.count({ where: { companyId } }))) throw notFound("Image");
+    const recent = await this.prisma.signalementMission.count({ where: { companyId: t.companyId, cibleId: companyId, motif: MOTIF_IMAGE_PROFIL, createdAt: { gte: new Date(this.now().getTime() - 86_400_000) } } });
+    if (recent > 0) return { signale: true, deja: true };
+    await this.prisma.signalementMission.create({ data: { companyId: t.companyId, cibleId: companyId, motif: MOTIF_IMAGE_PROFIL } });
+    await this.tracer(t, "signalement", {}, { motif: MOTIF_IMAGE_PROFIL });
+    return { signale: true, deja: false };
   }
 }

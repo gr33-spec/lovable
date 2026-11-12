@@ -736,10 +736,13 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   const mail = recoit.getByLabel("Le mail à ton négoce");
   await expect(mail).toContainText(/Objet : .+ : demande de prix/);
   await expect(mail).toContainText("Bonjour Paul,");
-  await expect(mail).toContainText("Je consulte plusieurs fournisseurs, réponse souhaitée avant le");
-  await expect(mail).toContainText("Vous pouvez aussi répondre directement à ce mail, il m'arrive.");
-  await expect(mail).toContainText("Un doute ? Appelez-moi au 06 12 34 56 78.");
-  await expect(mail).toContainText("Mobiiz, des artisans qui achètent ensemble.");
+  // Greg, 12 novembre 2026 : cordial, sans pression ; répondre à l'e-mail d'abord, le lien en ligne ensuite.
+  await expect(mail).toContainText("Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec votre devis en pièce jointe.");
+  await expect(mail).toContainText("La liste des fournitures à chiffrer est en pièce jointe (PDF).");
+  await expect(mail).toContainText("Une question ? Appelez-moi au 06 12 34 56 78.");
+  await expect(mail).toContainText("Demande de prix envoyée avec Mobiiz.");
+  await expect(mail).not.toContainText("plusieurs fournisseurs");
+  await expect(mail).not.toContainText("achètent ensemble");
   await recoit.getByRole("button", { name: "Modifier le message" }).click();
   await recoit.getByLabel("Ton message").fill("Pouvez-vous me chiffrer cette liste pour la semaine prochaine ?");
   await recoit.getByRole("button", { name: "Garder ce message" }).click();

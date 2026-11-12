@@ -130,8 +130,10 @@ describe("la demande perso", () => {
     // Quatre jours plus tard (au moins 48 h ouvrées, week-end compris) : une relance, au nom de son client (lot final, point 6).
     expect((await tache(new Date(envoyeLe.getTime() + 4 * 86_400_000))).body).toMatchObject({ relances: 1 });
     const rappel = mailsVers(ctx, "b@negoce.fr").at(-1)!;
-    expect(rappel.subject).toBe("Toitures A attend votre offre");
-    expect(rappel.text).toMatch(/^Bonjour,\n\nVotre client Toitures A attend votre offre\. Les réponses sont closes le \d+(er)? \S+\./);
+    expect(rappel.subject).toBe("Toitures A : votre proposition tarifaire");
+    // Greg, 12 novembre 2026 : le rappel d'une demande individuelle reste cordial et ne porte pas la signature des achats groupés.
+    expect(rappel.text).toMatch(/^Bonjour,\n\nJe me permets de revenir vers vous au sujet de la demande de prix de Toitures A\. Dans la mesure du possible, une réponse avant le \d+(er)? \S+ lui rendrait service\./);
+    expect(rappel.text).not.toMatch(/closes|achètent ensemble/);
     expect((await tache(new Date(envoyeLe.getTime() + 6 * 86_400_000))).body).toMatchObject({ relances: 0 });
     // La demande close, plus de chiffrage.
     await ctx.prisma.priceRequest.update({ where: { id: envoi.id }, data: { closLe: new Date(Date.now() - 1000) } });

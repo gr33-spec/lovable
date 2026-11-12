@@ -39,12 +39,34 @@ export function relancesDues(e: EtatRelance, maintenant: Date): RelancesDues {
   return { artisan, negoce };
 }
 
-/** Le rappel au négoce (vouvoiement), au nom de son client ; le lien de réponse reste le même mécanisme qu'à l'envoi. */
-export function mailRelanceDemande(m: { entreprise: string; dateLimite: Date; lien: string | null; prenomCommercial?: string | null }): { objet: string; texte: string } {
+/**
+ * Le rappel au négoce (vouvoiement), au nom de son client ; le lien de réponse reste le même mécanisme qu'à l'envoi.
+ * `individuelle` (Greg, 12 novembre 2026) : le rappel d'une demande de prix individuelle reste cordial, invite d'abord à
+ * répondre à l'e-mail, et ne porte jamais la signature des achats groupés.
+ */
+export function mailRelanceDemande(m: { entreprise: string; dateLimite: Date; lien: string | null; prenomCommercial?: string | null; individuelle?: boolean; /** Aucune date n'a été choisie par l'artisan : le rappel n'en invente pas. */ sansDate?: boolean }): { objet: string; texte: string } {
+  const bonjour = `Bonjour${m.prenomCommercial?.trim() ? ` ${m.prenomCommercial.trim()}` : ""},`;
+  if (m.individuelle)
+    return {
+      objet: `${m.entreprise} : votre proposition tarifaire`,
+      texte: [
+        bonjour,
+        "",
+        m.sansDate
+          ? `Je me permets de revenir vers vous au sujet de la demande de prix de ${m.entreprise}, restée sans réponse pour le moment.`
+          : `Je me permets de revenir vers vous au sujet de la demande de prix de ${m.entreprise}. Dans la mesure du possible, une réponse avant le ${jourFr(m.dateLimite)} lui rendrait service.`,
+        "",
+        "Le plus simple est de répondre directement à cet e-mail, avec votre devis en pièce jointe : il lui arrive.",
+        ...(m.lien ? [`Vous pouvez aussi chiffrer en ligne, sans inscription : ${m.lien}`] : []),
+        "",
+        "--",
+        `Demande de prix envoyée avec ${NOM_APP}.`,
+      ].join("\n"),
+    };
   return {
     objet: `${m.entreprise} attend votre offre`,
     texte: [
-      `Bonjour${m.prenomCommercial?.trim() ? ` ${m.prenomCommercial.trim()}` : ""},`,
+      bonjour,
       "",
       `Votre client ${m.entreprise} attend votre offre. Les réponses sont closes le ${jourFr(m.dateLimite)}.`,
       "",

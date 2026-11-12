@@ -14,7 +14,7 @@ en 5 lots. Ce fichier est LA première chose à lire à la reprise : vérifier l
 |---|---|
 | 1 Blocages et fiabilité | FAIT (commits locaux) |
 | 2 Missions, aide, paramètres | FAIT (commit local) ; contrastes restants repris au lot 5 |
-| 3 Contenus, documents, MVP | non commencé |
+| 3 Contenus, documents, MVP | FAIT (commit local) |
 | 4 Formules et facturation (test seulement) | non commencé |
 | 5 Passe visuelle | non commencé |
 
@@ -53,6 +53,24 @@ en 5 lots. Ce fichier est LA première chose à lire à la reprise : vérifier l
 - À dire à Greg : la formulation RGPD de la carte « Ce que Mobiiz a appris » est à faire valider ; l'annuaire des
   communes appelle un service de l'État (geo.api.gouv.fr) depuis le serveur, sans donnée d'artisan.
 
+- Lot 3 :
+  - E-mail au négoce (`supplier-packet.ts`, `mail-html.ts`) : cordial, jamais « plusieurs fournisseurs », date seulement
+    si l'artisan l'a choisie (plus de date par défaut à trois jours, `price-requests.service.ts`), « répondre à cet
+    e-mail » d'abord, lien « Chiffrer en ligne » ensuite (bouton contour), pied « Demande de prix envoyée avec Mobiiz. ».
+    Le garde-fou `priceLeak` (mot « prix » interdit hors « demande de prix ») est RESPECTÉ, pas modifié : d'où
+    « proposition tarifaire ». Rappel individuel (`relances.ts`, `individuelle`, `sansDate`) : cordial, aucune date inventée.
+  - PDF : la section « Détail du devis » devient « Informations complémentaires sur le chantier », ne redit jamais une
+    ligne du tableau, disparaît si rien ne reste.
+  - Achats groupés ouverts : une carte autonome par achat (métier, secteur, réception, date de besoin, échéance).
+  - Image du profil Missions : `packages/domain/src/missions/image-profil.ts` (type réel, carré, poids, métadonnées
+    retirées), migration additive `20261112210000_image_profil`, routes `PUT/DELETE /v1/profil-public/image`,
+    `GET /v1/profil-public/:id/image`, `POST …/image/signalement`, `apps/web/src/components/image-profil.tsx`
+    (avatar partout, recadrage, retrait, signalement).
+  - Mémoire de Mobiiz et Connexions : faits au lot 2 (réglages réversibles).
+  Tests : serveur `pdf-informations-complementaires` 5/5, `image-profil` 3/3, mails 38/38, `missions` 18/18 ;
+  domaine `image-profil` 3/3, `relances-lot-final` 7/7 ; e2e `image-profil` 3/3, `achats-groupes-v1` + `missions` 33/33,
+  aperçu du mail et relance 4/4.
+
 ## Rappels techniques
 - Les e2e tournent sur le site CONSTRUIT : `pnpm -s build` dans `apps/web` avant chaque passe, puis
   `fuser -k 3000/tcp 4000/tcp`.
@@ -64,5 +82,6 @@ Production, `main`, e-mail réel, paiement réel, appel IA payant, suppression d
 juridique validé, règles de facturation réelles : rien sans l'accord explicite de Greg.
 
 ## Prochain geste
-Lot 3 : captures 9, 10, 13, 18, 19 ; e-mail au négoce (ton, plus de « plusieurs fournisseurs »), PDF sans « Détail du
-devis » redondant, cartes autonomes des achats groupés ouverts, logo ou photo du profil public Missions.
+Lot 4 : capture 20 ; page des formules (Essentiel, Pro, un bouton par formule), choix mensuel/annuel (Essentiel
+199 € HT/an, Pro 399 € HT/an), UNIQUEMENT en mode test du prestataire de paiement : lire d'abord
+`apps/api/src/modules/billing` et `abonnement`, `packages/domain` (TARIFS), et la page `/abonnement`.

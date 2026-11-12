@@ -228,6 +228,7 @@ model Company {
   historiqueMission         HistoriqueMission[]
   alertesCourtes            AlerteCourte[]
   etatsAFaire               EtatAFaire[]
+  imageProfil               ImageProfil?
   reglageAlertes            ReglageAlertes?
   profilPublic              ProfilPublic?
   lecturesBoite             LectureBoite[]
@@ -2957,6 +2958,21 @@ model ProfilPublic {
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@map("profil_public")
+}
+
+/// L'image du profil Missions (Greg, 12 novembre 2026) : un logo ou une photo carrée, déjà nettoyée de ses métadonnées.
+/// Une seule par entreprise ; la remplacer écrase l'ancienne, la retirer la supprime.
+model ImageProfil {
+  companyId String   @id @map("company_id") @db.Uuid
+  type      String
+  contenu   Bytes
+  taille    Int
+  cote      Int
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("image_profil")
 }
 
 /// « Messages et réponses » : ce qui a été lu parmi les réponses des négoces saisies par le lien (les e-mails reçus ont

@@ -354,8 +354,8 @@ export class PriceRequestsService {
     input: { message: string | null; dueDate: Date | null; destinataire?: string | null; supplierId?: string | null; tutoie?: boolean | null },
   ): Promise<{ subject: string; mail: string; texteLibre: string; tutoie: boolean; document: PacketDocument; hasLogo: boolean }> {
     // §50.7 : l'aperçu s'ouvre aussi sur une liste en cours (lignes orange comprises) ; rien ne part d'ici.
-    // Lot final, point 3 : l'aperçu dit la même date que la demande (trois jours sans date choisie).
-    const { packet, logo } = await this.order(tenant, projectId, { ...input, dueDate: input.dueDate ?? dateLimiteParDefaut(this.clock()), apercu: true });
+    // Greg, 12 novembre 2026 : l'aperçu dit la même date que la demande, c'est-à-dire aucune si l'artisan n'en a pas choisi.
+    const { packet, logo } = await this.order(tenant, projectId, { ...input, apercu: true });
     // Lot final, point 4 : « Voici ce que ton négoce va recevoir », adressé au prénom de SON commercial.
     const fournisseur = input.supplierId ? await this.suppliers.findById(tenant, input.supplierId) : null;
     return {
@@ -473,8 +473,9 @@ export class PriceRequestsService {
   ): Promise<PriceRequestView> {
     assertCanWrite(tenant);
     this.auPlusCinq(new Set(input.supplierIds).size);
-    // Lot final, point 3 : toujours une date de réponse (« réponse souhaitée avant le … ») ; sans date choisie, trois jours.
-    const dueDate = input.dueDate ?? dateLimiteParDefaut(this.clock());
+    // Greg, 12 novembre 2026 (dossier de corrections UX, point 5) : la date de réponse n'existe que si l'artisan l'a
+    // réellement choisie ; plus de date par défaut à trois jours, donc plus d'échéance pressante non voulue.
+    const dueDate = input.dueDate;
     if (input.message?.trim() || input.tutoie !== undefined) await this.requests.saveModele(tenant, { message: input.message?.trim() || undefined, tutoie: input.tutoie ?? undefined });
     input = { ...input, dueDate };
     await this.gardeCircuit(tenant, projectId, input.articles && input.articles.length > 0 ? [...new Set(input.articles)] : null);
