@@ -176,7 +176,7 @@ export function ProfilPublicEditeur() {
   );
 }
 
-interface ProfilVu { entreprise: EntrepriseVue; visible: boolean; presentation: string | null; metiers: string[]; services: string | null; equipe: string | null; ville: string | null; disponibilite: AnnonceVue | null; realisations: FichierVue[] }
+interface ProfilVu { mienne?: boolean; entreprise: EntrepriseVue; visible: boolean; presentation: string | null; metiers: string[]; services: string | null; equipe: string | null; ville: string | null; disponibilite: AnnonceVue | null; realisations: FichierVue[] }
 
 /** Le profil d'une entreprise, tel que les autres le voient (jamais ses coordonnées). */
 export function ProfilPublicVu({ id }: { id: string }) {
@@ -196,7 +196,7 @@ export function ProfilPublicVu({ id }: { id: string }) {
           {p.disponibilite ? <Etiquette ton="vert">Disponible</Etiquette> : null}
         </div>
       </div>
-      <SignalerImage entreprise={p.entreprise} />
+      {p.mienne ? null : <SignalerImage entreprise={p.entreprise} />}
       {p.presentation || p.metiers.length || p.equipe ? (
         <section aria-label="Présentation" className={`flex flex-col gap-2 p-4 ${CARTE}`}>
           <h2 className="text-[16px] font-extrabold">Présentation</h2>

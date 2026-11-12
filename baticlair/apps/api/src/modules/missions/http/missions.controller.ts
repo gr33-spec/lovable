@@ -316,8 +316,9 @@ export class DossierProController {
   }
 
   @Get("profil-public/:companyId")
-  profil(@Tenant() t: TenantContext, @Param("companyId") companyId: string) {
-    return this.m.profil(t, companyId);
+  async profil(@Tenant() t: TenantContext, @Param("companyId") companyId: string) {
+    // `mienne` : dit par le serveur, pas deviné par le navigateur (une entreprise ne signale pas sa propre image).
+    return { ...(await this.m.profil(t, companyId)), mienne: companyId === t.companyId };
   }
 }
 

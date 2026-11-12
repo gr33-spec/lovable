@@ -442,7 +442,8 @@ test("Clair / Sombre (Greg, 31 octobre 2026) : sombre par défaut, Clair dans Pr
   await expect(page.locator(".app-clair")).toHaveCount(1);
   // Le fond de page est clair et le titre en encre foncée : jamais du clair sur clair.
   const fond = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  expect(fond).toBe("rgb(246, 243, 238)");
+  // L'ivoire MOBIIZ #FBF8F3 (passe visuelle du 12 novembre 2026 ; avant : #F6F3EE).
+  expect(fond).toBe("rgb(251, 248, 243)");
   const encre = await page.locator("main h1").first().evaluate((el) => getComputedStyle(el).color);
   expect(encre).toBe("rgb(19, 9, 1)");
   await page.goto("/compte/apparence");

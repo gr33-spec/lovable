@@ -338,6 +338,9 @@ describe("Missions : pièces jointes et dossier professionnel", () => {
     await b.agent.put("/v1/profil-public").send({ visible: true, presentation: "Couvreur-zingueur, équipe de 3.", metiers: ["Zinguerie"], services: null, equipe: "3 personnes", ville: "Lannion" }).expect(200);
     const profil = (await c.agent.get(`/v1/profil-public/${b.companyId}`).expect(200)).body;
     expect(profil).toMatchObject({ visible: true, presentation: "Couvreur-zingueur, équipe de 3.", entreprise: { nom: "Armor Littoral" } });
+    // Le serveur dit si le profil vu est celui de l'entreprise qui regarde (elle ne signale pas sa propre image).
+    expect(profil.mienne).toBe(false);
+    expect((await b.agent.get(`/v1/profil-public/${b.companyId}`).expect(200)).body.mienne).toBe(true);
     expect(profil.realisations.map((r: { id: string }) => r.id)).toEqual([photo.id]);
     expect(JSON.stringify(profil)).not.toMatch(/06 12|contact-|rue du Port/);
     await c.agent.get(`/v1/fichiers-pro/${photo.id}/lien`).expect(200);
