@@ -433,6 +433,8 @@ export interface ElementBoite {
   le: string;
   nonLu: boolean;
   href: string;
+  /** Réponse d'un négoce que Mobiiz n'a pas reconnue : elle attend d'être classée dans sa demande. */
+  aClasser?: boolean;
 }
 export const FILTRES_BOITE: Choix<FiltreBoite>[] = [
   { id: "tous", libelle: "Tous" },

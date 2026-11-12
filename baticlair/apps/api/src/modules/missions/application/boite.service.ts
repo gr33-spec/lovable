@@ -52,6 +52,8 @@ export class BoiteService {
           le: e.recuLe.toISOString(),
           nonLu: !e.luLe,
           href: `/messages/negoce/${e.id}`,
+          // Greg, 12 novembre 2026 : une réponse non reconnue se dit « à classer » ; une réponse reconnue est déjà dans son quantitatif.
+          aClasser: !e.recipient,
         };
       }),
       ...reponses.map((r) => ({

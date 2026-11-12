@@ -25,6 +25,7 @@ export function Boite() {
   const { data, error, reload } = useResource(fetcher);
   const tous = data?.items ?? [];
   const items = filtrerBoite(tous, filtre, q);
+  const aClasser = tous.filter((i) => i.aClasser).length;
   const maintenant = new Date();
   // Une réponse saisie par le lien s'ouvre dans son quantitatif : elle est marquée lue au passage.
   const marquer = (i: ElementBoite) => {
@@ -36,6 +37,18 @@ export function Boite() {
       <GrandTitre sous={tous.length ? "Conversations Missions et réponses des négoces." : "Tes échanges apparaîtront ici."}>{data && tous.length === 0 ? "Aucun message pour le moment" : "Tout retrouver au même endroit"}</GrandTitre>
       {tous.length > 0 ? <Recherche valeur={q} onChange={setQ} placeholder="Rechercher un message ou une demande" /> : null}
       <Puces label="Filtrer la boîte" choix={FILTRES_BOITE} valeur={filtre} onChange={setFiltre} />
+      {/* Greg, 12 novembre 2026 : ce qui demande une action se lit d'abord ; le reste est déjà dans son quantitatif. */}
+      {aClasser > 0 ? (
+        <Link href="/recus" className={`pressable flex items-center gap-3 border-2 border-accent p-4 ${CARTE}`}>
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="text-[16px] font-extrabold">
+              {aClasser} réponse{aClasser > 1 ? "s" : ""} à classer
+            </span>
+            <span className="text-[13px] text-[#5c5648]">Mobiiz n&apos;a pas reconnu la demande. Les autres réponses sont déjà dans leur quantitatif.</span>
+          </span>
+          <span className="shrink-0 text-[14px] font-extrabold text-[#0b6b43]">Classer</span>
+        </Link>
+      ) : null}
       {data === null ? (
         <EtatEcran erreur={error} onReessayer={reload} />
       ) : tous.length === 0 ? (
@@ -67,12 +80,12 @@ export function Boite() {
             <ul className="flex flex-col gap-3">
               {g.items.map((i) => (
                 <li key={i.cle}>
-                  <Link href={i.href} onClick={() => marquer(i)} aria-label={`${i.sorte === "mission" ? "Mission" : "Négoce"}, ${i.titre}${i.nonLu ? ", non lu" : ""}`} className={`pressable flex items-start gap-3 p-4 ${CARTE}`}>
+                  <Link href={i.href} onClick={() => marquer(i)} aria-label={`${i.sorte === "mission" ? "Mission" : "Négoce"}, ${i.titre}${i.sorte === "negoce" ? (i.aClasser ? ", à classer" : ", classée dans son quantitatif") : ""}${i.nonLu ? ", non lu" : ""}`} className={`pressable flex items-start gap-3 p-4 ${CARTE}`}>
                     <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#efece6]">
                       {i.sorte === "mission" ? <Briefcase size={20} /> : <CreditCard size={20} />}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <Etiquette ton={i.sorte === "mission" ? "jaune" : "vert"}>{i.sorte === "mission" ? "Mission" : "Négoce"}</Etiquette>
+                      <Etiquette ton={i.sorte === "mission" || i.aClasser ? "jaune" : "vert"}>{i.sorte === "mission" ? "Mission" : i.aClasser ? "Négoce · à classer" : "Négoce · classée"}</Etiquette>
                       <span className="truncate text-[17px] font-extrabold">{i.titre}</span>
                       {i.sujet ? <span className="truncate text-[13px] font-extrabold text-[#6b5300]">{i.sujet}</span> : null}
                       <span className="truncate text-[13px] text-[#5c5648]">{i.extrait}</span>
@@ -349,12 +362,12 @@ export function ReponseNegoce({ id }: { id: string }) {
           <p className="text-[12px] text-[#6b6557]">Reçue le {quand}</p>
           <p className="text-[18px] font-extrabold">{e.fichiers.length ? (e.fichiers.some((f) => f.devisRecu) ? "Devis reçu" : "E-mail avec pièce jointe") : "E-mail reçu"}</p>
         </div>
-        <Etiquette ton={e.demande ? "vert" : "jaune"}>{e.demande ? "Rattachée" : "À rattacher"}</Etiquette>
+        <Etiquette ton={e.demande ? "vert" : "jaune"}>{e.demande ? "Classée" : "À classer"}</Etiquette>
       </div>
       <section aria-label="Message du négoce" className={`flex flex-col gap-2 p-4 ${CARTE}`}>
         <h2 className="text-[16px] font-extrabold">Message du négoce</h2>
         <p className="text-[14px] leading-snug break-words whitespace-pre-line">{e.texte?.trim() || "Ce message n'a pas de texte."}</p>
-        <p className="text-[12px] text-[#6b6557]">{e.demande ? "Réponse reçue par e-mail et rattachée automatiquement." : "Réponse reçue par e-mail, pas encore rattachée à une demande."}</p>
+        <p className="text-[12px] text-[#6b6557]">{e.demande ? `Réponse reçue par e-mail, classée dans ${e.demande.chantier ? `« ${e.demande.chantier} »` : "son quantitatif"}.` : "Réponse reçue par e-mail. Mobiiz n'a pas reconnu la demande : classe-la pour la comparer."}</p>
       </section>
       {e.fichiers.length ? (
         <ul aria-label="Pièces jointes" className="flex flex-col gap-3">
@@ -375,7 +388,7 @@ export function ReponseNegoce({ id }: { id: string }) {
         </ul>
       ) : null}
       {e.tropLourdes.length ? <Encart titre="Pièces trop lourdes, non gardées">{e.tropLourdes.join(", ")}. Demande au négoce de te les renvoyer plus légères.</Encart> : null}
-      {e.demande ? <LienJaune href={`/chantiers/${e.demande.projectId}#fournisseurs`}>Voir et comparer la proposition</LienJaune> : <LienJaune href="/recus">Rattacher à une demande</LienJaune>}
+      {e.demande ? <LienJaune href={`/chantiers/${e.demande.projectId}#fournisseurs`}>Voir et comparer la proposition</LienJaune> : <LienJaune href="/recus">Classer cette réponse</LienJaune>}
       <a href={`mailto:${adresse}?subject=${encodeURIComponent(`Re: ${e.objet}`)}`} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-[18px] border-2 border-accent px-5 text-center text-[15px] font-extrabold text-accent-text">
         Répondre au négoce
       </a>

@@ -292,7 +292,7 @@ export function OuLireLesReponses() {
         ))}
       </div>
       <CarteLien href="/messages" icone={Mail} titre="Ouvrir « Messages et réponses »" sous="Conversations Missions et réponses des négoces" />
-      <CarteLien href="/recus" icone={FolderOpen} titre="E-mails reçus à rattacher" sous="Ranger à la main un e-mail arrivé sans repère" />
+      <CarteLien href="/recus" icone={FolderOpen} titre="Réponses à classer" sous="Les réponses de négoces que Mobiiz n'a pas reconnues" />
       <CarteLien href="/compte/notifications" icone={BellRing} titre="Régler les alertes" sous="Demandes de prix, achats groupés, missions" />
     </>
   );

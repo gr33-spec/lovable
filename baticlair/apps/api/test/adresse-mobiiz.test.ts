@@ -321,3 +321,109 @@ describe("relecture du 30 octobre 2026 : date illisible", () => {
     expect(dateLisible("2026-10-29T08:31:00Z", maintenant).toISOString()).toBe("2026-10-29T08:31:00.000Z");
   });
 });
+
+/**
+ * RATTACHEMENT DES RÉPONSES DES NÉGOCES (Greg, 12 novembre 2026, dossier de corrections UX, point 3). Une réponse qui
+ * porte le repère sécurisé se classe seule ; sinon Mobiiz PROPOSE la demande la plus probable, dit pourquoi, et
+ * l'artisan confirme. Jamais de classement sur une ressemblance incertaine ; un mauvais classement se corrige sans
+ * doublon de devis ; rien ne sort de l'entreprise connectée.
+ */
+describe("rattachement des réponses : proposition, confirmation, correction", () => {
+  const pdfDevis = async () => Buffer.from(await makePdf(["devis"], [], "Total HT 1 300,00", "DEVIS Négoce Dupont")).toString("base64");
+
+  it("réponse inconnue : rien n'est classé tout seul ; la demande du même expéditeur est proposée avec sa raison, son quantitatif, sa date et son état", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
+    const dupont = await demande(agent);
+    const legall = await demande(agent, "Négoce Le Gall", "devis@legall.example");
+    await agent.post(`/v1/price-request-recipients/${dupont.recipientId}/send`).expect(200);
+    await agent.post(`/v1/price-request-recipients/${legall.recipientId}/send`).expect(200);
+    recuSimule = { subject: "Notre offre" };
+    expect((await webhook("toitures-martin@mobiiz.fr", "Notre offre", "Service devis <devis@legall.example>")).body).toMatchObject({ traite: true, rattache: false });
+    const email = (await agent.get("/v1/recus")).body.items[0];
+    expect(email.demande).toBeNull();
+    const vue = (await agent.get(`/v1/recus/demandes?email=${email.id}`).expect(200)).body;
+    expect(vue.suggestion).toEqual({ recipientId: legall.recipientId, raison: "L'e-mail vient de l'adresse de Négoce Le Gall, à qui tu as envoyé cette demande." });
+    const proposee = vue.items.find((d: { recipientId: string }) => d.recipientId === legall.recipientId);
+    expect(proposee).toMatchObject({ negoce: "Négoce Le Gall", etat: "En attente de réponse", recue: false });
+    expect(proposee.chantier).toBeTruthy();
+    expect(proposee.envoyeeLe).toBeTruthy();
+    // Proposer n'est pas classer.
+    expect((await agent.get("/v1/recus")).body.items[0].demande).toBeNull();
+  });
+
+  it("expéditeur inconnu ou messagerie grand public : aucune proposition, l'artisan choisit", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
+    const { recipientId } = await demande(agent, "Négoce Dupont", "dupont.negoce@gmail.com");
+    await agent.post(`/v1/price-request-recipients/${recipientId}/send`).expect(200);
+    recuSimule = { subject: "Bonjour" };
+    await webhook("toitures-martin@mobiiz.fr", "Bonjour", "Quelqu'un <autre.personne@gmail.com>");
+    const email = (await agent.get("/v1/recus")).body.items[0];
+    const vue = (await agent.get(`/v1/recus/demandes?email=${email.id}`).expect(200)).body;
+    expect(vue.suggestion).toBeNull();
+    expect(vue.items).toHaveLength(1);
+  });
+
+  it("même société, autre personne : proposée seulement si le nom de domaine désigne un seul négoce", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
+    const { recipientId } = await demande(agent);
+    await agent.post(`/v1/price-request-recipients/${recipientId}/send`).expect(200);
+    recuSimule = { subject: "Offre" };
+    await webhook("toitures-martin@mobiiz.fr", "Offre", "Paul <paul@dupont.example>");
+    const email = (await agent.get("/v1/recus")).body.items[0];
+    expect((await agent.get(`/v1/recus/demandes?email=${email.id}`)).body.suggestion).toEqual({ recipientId, raison: "L'e-mail vient de la même société que Négoce Dupont (dupont.example), à qui tu as envoyé cette demande." });
+  });
+
+  it("mauvais classement : corrigé sans doublon de devis, le document reste, la demande redevient « envoyée »", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
+    const a = await demande(agent);
+    const b = await demande(agent, "Négoce Le Gall", "devis@legall.example");
+    await agent.post(`/v1/price-request-recipients/${a.recipientId}/send`).expect(200);
+    await agent.post(`/v1/price-request-recipients/${b.recipientId}/send`).expect(200);
+    recuSimule = { subject: "Notre offre", attachments: [{ filename: "offre.pdf", contentType: "application/pdf", contentBase64: await pdfDevis() }] };
+    await webhook("toitures-martin@mobiiz.fr", "Notre offre", "Inconnu <contact@ailleurs.example>");
+    const email = (await agent.get("/v1/recus")).body.items[0];
+    // Classé par erreur sur la demande A…
+    await agent.post(`/v1/recus/${email.id}/rattacher`).send({ recipientId: a.recipientId }).expect(200);
+    expect((await agent.get(`/v1/projects/${a.projectId}/price-requests`)).body.items[0].recipients[0].status).toBe("received");
+    const documents = await ctx.prisma.document.count();
+    // … puis corrigé : l'e-mail redevient « à classer », A redevient « envoyée », aucun document n'est supprimé.
+    const libre = (await agent.post(`/v1/recus/${email.id}/detacher`).send({}).expect(200)).body;
+    expect(libre.demande).toBeNull();
+    expect(libre.fichiers[0].devisRecu).toBe(false);
+    const apresA = (await agent.get(`/v1/projects/${a.projectId}/price-requests`)).body.items[0].recipients[0];
+    expect(apresA.status).toBe("sent");
+    expect(apresA.document).toBeNull();
+    expect(await ctx.prisma.document.count()).toBe(documents);
+    // Rejouer la correction ne change rien.
+    await agent.post(`/v1/recus/${email.id}/detacher`).send({}).expect(200);
+    // Reclassé sur B : B a le devis, A n'en a pas, et un seul devis existe pour cet e-mail.
+    await agent.post(`/v1/recus/${email.id}/rattacher`).send({ recipientId: b.recipientId }).expect(200);
+    const apresB = (await agent.get(`/v1/projects/${b.projectId}/price-requests`)).body.items[0].recipients[0];
+    expect(apresB.status).toBe("received");
+    expect(apresB.document.name).toBe("offre.pdf");
+    expect((await agent.get(`/v1/projects/${a.projectId}/price-requests`)).body.items[0].recipients[0].document).toBeNull();
+    expect(await ctx.prisma.priceRequestRecipient.count({ where: { documentId: { not: null } } })).toBe(1);
+    // Déjà classé : un second classement est refusé avec une phrase.
+    const refus = await agent.post(`/v1/recus/${email.id}/rattacher`).send({ recipientId: a.recipientId });
+    expect(refus.status).toBe(400);
+    expect(refus.body.error.details.phrase).toBe("Cet e-mail est déjà rattaché à une demande.");
+  });
+
+  it("séparation entre entreprises : ni les demandes, ni la proposition, ni la correction d'une autre entreprise", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Martin");
+    const autre = await signUpWithCompany(ctx.app, "autre@example.fr", "Couverture Lannion");
+    const { recipientId } = await demande(agent);
+    await agent.post(`/v1/price-request-recipients/${recipientId}/send`).expect(200);
+    const chezAutre = await demande(autre.agent);
+    await autre.agent.post(`/v1/price-request-recipients/${chezAutre.recipientId}/send`).expect(200);
+    recuSimule = { subject: "Offre" };
+    await webhook("toitures-martin@mobiiz.fr", "Offre");
+    const email = (await agent.get("/v1/recus")).body.items[0];
+    expect((await autre.agent.get(`/v1/recus/demandes?email=${email.id}`)).status).toBe(404);
+    expect((await autre.agent.post(`/v1/recus/${email.id}/detacher`).send({})).status).toBe(404);
+    expect((await agent.post(`/v1/recus/${email.id}/rattacher`).send({ recipientId: chezAutre.recipientId })).status).toBe(404);
+    const miennes = (await agent.get(`/v1/recus/demandes?email=${email.id}`)).body;
+    expect(miennes.items.map((d: { recipientId: string }) => d.recipientId)).toEqual([recipientId]);
+    expect(miennes.suggestion.recipientId).toBe(recipientId);
+  });
+});

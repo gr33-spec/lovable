@@ -10,6 +10,20 @@ import type { PriceRequestsService } from "../../price-requests/index.js";
 import type { TenantContext } from "../../tenancy/index.js";
 import type { AdresseMobiizService } from "./adresse-mobiiz.service.js";
 
+/** Une demande proposée pour classer un e-mail : le quantitatif, le négoce, la date et l'état, avant de confirmer. */
+export interface DemandePartieVue {
+  recipientId: string;
+  projectId: string;
+  chantier: string;
+  negoce: string;
+  envoyeeLe: string | null;
+  recue: boolean;
+  etat: string;
+}
+const DEMANDES_RECENTES_JOURS = 120;
+/** Une adresse de messagerie grand public ne dit rien de la société : jamais de proposition sur ce seul nom de domaine. */
+const MESSAGERIES_PUBLIQUES = new Set(["gmail.com", "googlemail.com", "orange.fr", "wanadoo.fr", "free.fr", "sfr.fr", "neuf.fr", "laposte.net", "hotmail.fr", "hotmail.com", "outlook.fr", "outlook.com", "live.fr", "yahoo.fr", "yahoo.com", "icloud.com", "me.com", "bbox.fr", "aol.com", "gmx.fr", "protonmail.com", "proton.me"]);
+
 /** Au-delà, les pièces jointes d'un e-mail reçu ne sont pas gardées (nommées « trop lourdes »). */
 export const RECU_MAX_OCTETS = 10 * 1024 * 1024;
 
@@ -23,7 +37,7 @@ export interface EmailRecuVue {
   recuLe: string;
   luLe: string | null;
   /** La demande à laquelle il est rattaché (le négoce et le chantier), sinon null : il est dans « Reçus ». */
-  demande: { recipientId: string; projectId: string; negoce: string } | null;
+  demande: { recipientId: string; projectId: string; negoce: string; chantier: string } | null;
   fichiers: { id: string; nom: string; type: string; taille: number; devisRecu: boolean }[];
   tropLourdes: string[];
 }
@@ -192,15 +206,40 @@ export class ReponsesRecuesService {
     return m ? { companyId, userId: m.userId, role: "owner", trades: m.company.trades } : null;
   }
 
-  /** Les demandes parties (à qui, quel chantier), pour rattacher un e-mail reçu sans repère. */
-  async demandesParties(tenant: TenantContext): Promise<{ recipientId: string; projectId: string; chantier: string; negoce: string; envoyeeLe: string | null; recue: boolean }[]> {
+  /**
+   * Les demandes RÉCENTES de l'entreprise (120 jours), pour classer un e-mail reçu sans repère. Avec `emailId`, Mobiiz
+   * propose la plus probable et dit pourquoi en une phrase (Greg, 12 novembre 2026, dossier de corrections UX, point 3).
+   * Ce n'est qu'une proposition : seule l'étiquette sécurisée de l'e-mail rattache toute seule ; ici l'artisan confirme.
+   */
+  async demandesParties(tenant: TenantContext, emailId?: string): Promise<{ items: DemandePartieVue[]; suggestion: { recipientId: string; raison: string } | null }> {
+    const depuis = new Date(this.now().getTime() - DEMANDES_RECENTES_JOURS * 86_400_000);
     const liste = await this.prisma.priceRequestRecipient.findMany({
-      where: { priceRequest: { companyId: tenant.companyId }, sentAt: { not: null } },
+      where: { priceRequest: { companyId: tenant.companyId }, sentAt: { gte: depuis } },
       orderBy: { sentAt: "desc" },
       take: 100,
-      include: { supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } },
+      include: { supplier: { select: { name: true, email: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } },
     });
-    return liste.map((r) => ({ recipientId: r.id, projectId: r.priceRequest.projectId, chantier: r.priceRequest.project.name, negoce: r.supplier.name, envoyeeLe: r.sentAt?.toISOString() ?? null, recue: !!r.documentId }));
+    const items = liste.map((r) => ({
+      recipientId: r.id,
+      projectId: r.priceRequest.projectId,
+      chantier: r.priceRequest.project.name,
+      negoce: r.supplier.name,
+      envoyeeLe: r.sentAt?.toISOString() ?? null,
+      recue: !!r.documentId || !!r.reponduLe,
+      etat: r.documentId || r.reponduLe ? "Réponse déjà reçue" : "En attente de réponse",
+    }));
+    if (!emailId) return { items, suggestion: null };
+    const e = await this.charger(tenant, emailId);
+    const expediteur = adresseNue(e.de);
+    const domaine = expediteur.split("@")[1] ?? "";
+    const enAttenteDAbord = [...liste].sort((x, y) => Number(!!(x.documentId || x.reponduLe)) - Number(!!(y.documentId || y.reponduLe)));
+    const memeAdresse = enAttenteDAbord.find((r) => r.supplier.email.trim().toLowerCase() === expediteur);
+    if (memeAdresse) return { items, suggestion: { recipientId: memeAdresse.id, raison: `L'e-mail vient de l'adresse de ${memeAdresse.supplier.name}, à qui tu as envoyé cette demande.` } };
+    const memeDomaine = domaine && !MESSAGERIES_PUBLIQUES.has(domaine) ? enAttenteDAbord.filter((r) => r.supplier.email.trim().toLowerCase().endsWith(`@${domaine}`)) : [];
+    // Un nom de domaine partagé ne suffit que s'il désigne un seul négoce : sinon rien n'est proposé.
+    if (memeDomaine.length && new Set(memeDomaine.map((r) => r.supplierId)).size === 1)
+      return { items, suggestion: { recipientId: memeDomaine[0]!.id, raison: `L'e-mail vient de la même société que ${memeDomaine[0]!.supplier.name} (${domaine}), à qui tu as envoyé cette demande.` } };
+    return { items, suggestion: null };
   }
 
   async lister(tenant: TenantContext, projectId?: string): Promise<EmailRecuVue[]> {
@@ -208,7 +247,7 @@ export class ReponsesRecuesService {
       where: { companyId: tenant.companyId, ...(projectId ? { projectId } : {}) },
       orderBy: [{ recuLe: "desc" }, { createdAt: "desc" }],
       take: 200,
-      include: { fichiers: { select: { id: true, nom: true, type: true, taille: true, documentId: true } }, recipient: { include: { supplier: { select: { name: true } }, priceRequest: { select: { projectId: true } } } } },
+      include: { fichiers: { select: { id: true, nom: true, type: true, taille: true, documentId: true } }, recipient: { include: { supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } } } },
     });
     return liste.map((e) => this.vue(e));
   }
@@ -238,11 +277,29 @@ export class ReponsesRecuesService {
     return this.un(tenant, id);
   }
 
+  /**
+   * « Ce n'est pas la bonne demande » : l'e-mail retourne dans « Réponses à classer ». Le devis qu'il avait apporté est
+   * retiré de la demande (elle redevient « envoyée ») ; le document reste rangé dans le quantitatif, rien n'est supprimé.
+   * Reclasser ensuite ne crée jamais un second devis : le même fichier est repris.
+   */
+  async detacher(tenant: TenantContext, id: string): Promise<EmailRecuVue> {
+    if (tenant.role === "viewer") throw new DomainError("forbidden", "Read-only membership");
+    const e = await this.charger(tenant, id);
+    if (!e.recipientId) return this.vue(e);
+    const documents = e.fichiers.map((f) => f.documentId).filter((d): d is string => !!d);
+    await this.prisma.$transaction([
+      ...(documents.length ? [this.prisma.priceRequestRecipient.updateMany({ where: { id: e.recipientId, documentId: { in: documents }, priceRequest: { companyId: tenant.companyId } }, data: { documentId: null, status: "sent" } })] : []),
+      this.prisma.emailRecuFichier.updateMany({ where: { emailId: id }, data: { documentId: null } }),
+      this.prisma.emailRecuArtisan.updateMany({ where: { id, companyId: tenant.companyId }, data: { recipientId: null, projectId: null } }),
+    ]);
+    return this.vue(await this.charger(tenant, id));
+  }
+
   private async charger(tenant: TenantContext, id: string) {
     if (!/^[0-9a-f-]{36}$/i.test(id)) throw notFound("Email");
     const e = await this.prisma.emailRecuArtisan.findFirst({
       where: { id, companyId: tenant.companyId },
-      include: { fichiers: { select: { id: true, nom: true, type: true, taille: true, documentId: true } }, recipient: { include: { supplier: { select: { name: true } }, priceRequest: { select: { projectId: true } } } } },
+      include: { fichiers: { select: { id: true, nom: true, type: true, taille: true, documentId: true } }, recipient: { include: { supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } } } },
     });
     if (!e) throw notFound("Email");
     return e;
@@ -257,7 +314,7 @@ export class ReponsesRecuesService {
     luLe: Date | null;
     tropLourdes: string[];
     fichiers: { id: string; nom: string; type: string; taille: number; documentId: string | null }[];
-    recipient: { id: string; supplier: { name: string }; priceRequest: { projectId: string } } | null;
+    recipient: { id: string; supplier: { name: string }; priceRequest: { projectId: string; project: { name: string } } } | null;
   }): EmailRecuVue {
     return {
       id: e.id,
@@ -267,7 +324,7 @@ export class ReponsesRecuesService {
       texte: e.texte,
       recuLe: e.recuLe.toISOString(),
       luLe: e.luLe?.toISOString() ?? null,
-      demande: e.recipient ? { recipientId: e.recipient.id, projectId: e.recipient.priceRequest.projectId, negoce: e.recipient.supplier.name } : null,
+      demande: e.recipient ? { recipientId: e.recipient.id, projectId: e.recipient.priceRequest.projectId, negoce: e.recipient.supplier.name, chantier: e.recipient.priceRequest.project.name } : null,
       fichiers: e.fichiers.map((f) => ({ id: f.id, nom: f.nom, type: f.type, taille: f.taille, devisRecu: !!f.documentId })),
       tropLourdes: e.tropLourdes,
     };

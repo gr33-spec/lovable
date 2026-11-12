@@ -12,7 +12,7 @@ en 5 lots. Ce fichier est LA première chose à lire à la reprise : vérifier l
 ## Lots
 | Lot | État |
 |---|---|
-| 1 Blocages et fiabilité | EN COURS (point 1 fait ; notifications, rattachement, reçus à faire) |
+| 1 Blocages et fiabilité | FAIT (commits locaux) |
 | 2 Missions, aide, paramètres | non commencé |
 | 3 Contenus, documents, MVP | non commencé |
 | 4 Formules et facturation (test seulement) | non commencé |
@@ -23,6 +23,20 @@ en 5 lots. Ce fichier est LA première chose à lire à la reprise : vérifier l
   était ignoré en silence. Maintenant : l'appui dit ce qui manque, ouvre « Préciser », garde l'intention ; l'article se
   coche dès que la précision est complète. Fichiers : `apps/web/src/components/ag-v1-quantitatif.tsx`,
   `apps/web/e2e-ag-v1/achats-groupes-v1.spec.ts`. Test : `-g "depuis un quantitatif tapé|un seul circuit"` 6/6 (3 appareils).
+
+- Point 2 (notifications) : cause = la pastille comptait toute action « À faire », impossible à lire ni à retirer.
+  Maintenant : pastille = seulement du nouveau pas encore vu (état gardé par le serveur), ligne retirable par glissement
+  ou bouton, « Annuler ». Migration additive `20261112200000_notifications_etat` (colonne `alerte_courte.supprimee_le`,
+  table `etat_a_faire`). Fichiers : `apps/api/src/modules/missions/{application/boite.service.ts,http/missions.controller.ts}`,
+  `apps/web/src/components/notifications.tsx` (nouveau), `apps/web/src/lib/notifications.ts`, `Cloche` dans
+  `achat-groupe.tsx`. Tests : `apps/api/test/notifications-cycle.test.ts` 3/3 ; `e2e-ag-v1/notifications.spec.ts` 3/3.
+- Point 3 (rattachement + « Mes reçus ») : l'étiquette sécurisée classe toujours seule. Sans repère : Mobiiz PROPOSE la
+  demande (même adresse, ou même nom de domaine s'il désigne un seul négoce, jamais une messagerie grand public), dit
+  pourquoi, l'artisan confirme ; « Ce n'est pas la bonne demande » corrige sans doublon de devis. `/recus` devient
+  « Réponses à classer » ; « Messages et réponses » montre « N réponses à classer » en tête et l'état de chaque réponse.
+  Fichiers : `reponses-recues.service.ts`, `adresse-mobiiz.controller.ts`, `recus.tsx`, `app/(app)/recus/page.tsx`,
+  `messages.tsx`. Tests : `apps/api/test/adresse-mobiiz.test.ts` 20/20 ; `e2e/adresse-mobiiz.spec.ts -g R7` 4/4 ;
+  `e2e-ag-v1/missions` 15/15.
 
 ## Rappels techniques
 - Les e2e tournent sur le site CONSTRUIT : `pnpm -s build` dans `apps/web` avant chaque passe, puis
@@ -35,4 +49,6 @@ Production, `main`, e-mail réel, paiement réel, appel IA payant, suppression d
 juridique validé, règles de facturation réelles : rien sans l'accord explicite de Greg.
 
 ## Prochain geste
-Lot 1, point 2 : notifications (lu, pastille, suppression par glissement avec « Annuler »), côté serveur et écran.
+Lot 2 : lire les captures 6, 7, 8, 11, 12, 14 à 17 du dossier (`scratchpad/dossier-ux/x/word/media/`), puis formulaires
+Missions (code postal ↔ commune, sélecteur de métier), filtres Missions sans défilement, fenêtre d'aide des
+quantitatifs, menu du compte et « Profil et paramètres » sans doublons.

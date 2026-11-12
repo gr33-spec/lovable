@@ -48,8 +48,8 @@ export class AdresseMobiizController {
 
   /** Les demandes parties, pour « Rattacher à une demande » (déclarée avant `recus/:id`). */
   @Get("recus/demandes")
-  async demandes(@Tenant() tenant: TenantContext) {
-    return { items: await this.recus.demandesParties(tenant) };
+  demandes(@Tenant() tenant: TenantContext, @Query("email") email?: string) {
+    return this.recus.demandesParties(tenant, email || undefined);
   }
 
   @Get("recus/:id")
@@ -70,5 +70,12 @@ export class AdresseMobiizController {
   @HttpCode(200)
   rattacher(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(rattacherBody)) body: z.infer<typeof rattacherBody>) {
     return this.recus.rattacher(tenant, id, body.recipientId);
+  }
+
+  /** « Ce n'est pas la bonne demande » : l'e-mail retourne dans les réponses à classer, sans rien supprimer. */
+  @Post("recus/:id/detacher")
+  @HttpCode(200)
+  detacher(@Tenant() tenant: TenantContext, @Param("id") id: string) {
+    return this.recus.detacher(tenant, id);
   }
 }

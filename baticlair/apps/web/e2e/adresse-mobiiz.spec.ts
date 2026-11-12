@@ -246,7 +246,7 @@ test("brouillon de l'envoi aux négoces (correction du 30 octobre, point 2) : qu
   await expect(page.getByRole("region", { name: "À reprendre" })).toHaveCount(0);
 });
 
-test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mail sans repère va dans « Mes reçus » et se rattache d'un tap", async ({ page }) => {
+test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mail sans repère va dans « Réponses à classer », Mobiiz propose la demande, l'artisan confirme ou corrige", async ({ page }) => {
   const { adresse } = await inscrire(page);
   const nom = adresse.replace(/@.*$/, "");
   const { projectId, recipientId, etiquette } = await demandeEnvoyee(page);
@@ -275,20 +275,39 @@ test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mai
   await carte.getByRole("button", { name: "Je retiens ce négoce" }).click();
   await expect(fournisseurs.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce Dupont.");
   await expect(fournisseurs.getByRole("button", { name: /^Voir les? devis reçus?$/ })).toHaveCount(0);
-  // Un e-mail sans étiquette ni repère : « Mes reçus », à rattacher.
+  // Un e-mail sans étiquette ni repère (Greg, 12 novembre 2026) : « Réponses à classer ». Mobiiz PROPOSE la demande du
+  // même expéditeur, dit pourquoi, montre le quantitatif, la date et l'état ; rien n'est classé avant la confirmation.
   const r2 = await emailRecu(page, `${nom}@mobiiz.test`, "Notre offre spéciale", { from: "Négoce Dupont <ventes@dupont.example>" });
   expect(r2).toMatchObject({ traite: true, rattache: false });
-  await page.goto("/recus");
-  await expect(page.getByRole("heading", { name: "Mes reçus" })).toBeVisible();
-  const aRattacher = page.getByRole("region", { name: "À rattacher" });
-  await expect(aRattacher.getByText("Notre offre spéciale")).toBeVisible();
-  await aRattacher.getByRole("button", { name: "Rattacher à une demande" }).click();
-  await aRattacher.getByRole("group", { name: "Rattacher à une demande" }).getByRole("button", { name: /Négoce Dupont/ }).click();
-  await expect(page.getByRole("region", { name: "À rattacher" })).toHaveCount(0);
-  const rattaches = page.getByRole("region", { name: "Rattachés" });
-  await expect(rattaches.getByText("Notre offre spéciale")).toBeVisible();
-  await expect(rattaches.getByText("Re: votre demande")).toBeVisible();
-  await expect(rattaches.getByRole("link", { name: "Voir le chantier" }).first()).toHaveAttribute("href", new RegExp(`/chantiers/${projectId}`));
+  await page.goto("/messages");
+  await expect(page.getByRole("link", { name: /1 réponse à classer/ })).toBeVisible();
+  await page.getByRole("link", { name: /1 réponse à classer/ }).click();
+  await expect(page.getByRole("heading", { name: "Réponses à classer" })).toBeVisible();
+  const aClasser = page.getByRole("region", { name: "À classer" });
+  await expect(aClasser.getByText("Notre offre spéciale")).toBeVisible();
+  const proposition = aClasser.getByRole("group", { name: "Classer cette réponse" });
+  await expect(proposition).toContainText("Mobiiz propose");
+  await expect(proposition).toContainText("L'e-mail vient de l'adresse de Négoce Dupont, à qui tu as envoyé cette demande.");
+  await expect(proposition).toContainText(/Envoyée le .+ · Réponse déjà reçue/);
+  // L'artisan peut choisir une autre demande, puis revenir à la proposition.
+  await proposition.getByRole("button", { name: "Choisir une autre demande" }).click();
+  await expect(proposition.getByRole("list", { name: "Demandes récentes" }).getByRole("button", { name: /Négoce Dupont/ })).toBeVisible();
+  await proposition.getByRole("button", { name: "Revenir à la proposition" }).click();
+  // Double appui : une seule réponse classée.
+  await proposition.getByRole("button", { name: "Oui, classer ici" }).dblclick();
+  await expect(page.getByRole("region", { name: "À classer" })).toHaveCount(0);
+  await expect(page.getByText("Rien à classer")).toBeVisible();
+  const classees = page.getByRole("region", { name: "Déjà classées" });
+  await expect(classees.getByText("Notre offre spéciale")).toBeVisible();
+  await expect(classees.getByText("Re: votre demande")).toBeVisible();
+  await expect(classees.getByText(/^Classée dans « .+ » · Négoce Dupont$/).first()).toBeVisible();
+  await expect(classees.getByRole("link", { name: "Voir la proposition" }).first()).toHaveAttribute("href", new RegExp(`/chantiers/${projectId}`));
+  // Mauvais classement : « Ce n'est pas la bonne demande » la remet à classer, puis elle se reclasse.
+  await classees.locator("div").filter({ hasText: "Notre offre spéciale" }).getByRole("button", { name: "Ce n'est pas la bonne demande" }).last().click();
+  await expect(page.getByRole("region", { name: "À classer" }).getByText("Notre offre spéciale")).toBeVisible();
+  await page.getByRole("region", { name: "À classer" }).getByRole("button", { name: "Oui, classer ici" }).click();
+  await expect(page.getByRole("region", { name: "À classer" })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   // L'artisan a été prévenu par e-mail, à son adresse personnelle.
   const avis = (await apiJson<{ emails: { to: string; subject: string }[] }>(page, "GET", `/v1/internal/test/emails?to=${encodeURIComponent("")}`, undefined, SECRET)).body.emails.filter((e) => e.subject === "Négoce Dupont t'a répondu par e-mail");
   expect(avis.length).toBeGreaterThanOrEqual(1);

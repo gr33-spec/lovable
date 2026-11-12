@@ -157,7 +157,7 @@ export function AdresseMobiizCard() {
             <BoutonCopier texte={adresseAffichee(data)} compact />
             <Link href="/recus" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-[14px] font-bold">
               <Inbox size={16} aria-hidden="true" />
-              Mes reçus
+              Réponses à classer
             </Link>
             {data.modifiable && !ouvert ? (
               <button type="button" onClick={() => setOuvert(true)} className="inline-flex min-h-11 items-center text-[14px] font-bold text-accent-text">

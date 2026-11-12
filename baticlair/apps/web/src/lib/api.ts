@@ -813,7 +813,7 @@ export interface EmailRecu {
   texte: string | null;
   recuLe: string;
   luLe: string | null;
-  demande: { recipientId: string; projectId: string; negoce: string } | null;
+  demande: { recipientId: string; projectId: string; negoce: string; chantier?: string } | null;
   fichiers: { id: string; nom: string; type: string; taille: number; devisRecu: boolean }[];
   tropLourdes: string[];
 }
@@ -826,4 +826,12 @@ export interface DemandePartie {
   negoce: string;
   envoyeeLe: string | null;
   recue: boolean;
+  /** « En attente de réponse » ou « Réponse déjà reçue ». */
+  etat?: string;
+}
+
+/** Les demandes récentes pour classer un e-mail, et celle que Mobiiz propose (avec sa raison), s'il y en a une. */
+export interface DemandesPourClasser {
+  items: DemandePartie[];
+  suggestion: { recipientId: string; raison: string } | null;
 }
