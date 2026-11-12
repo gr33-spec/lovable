@@ -3932,9 +3932,11 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   await expect(bouton).toHaveText("Ajoute un matériau pour créer le quantitatif");
   await expect(bouton).toBeDisabled();
   // 1. Une suggestion du catalogue (familles › produit › format), sans quantité imposée.
-  await ecran.getByRole("button", { name: "Ardoises", exact: true }).click();
+  await ecran.getByRole("button", { name: "Couverture", exact: true }).filter({ visible: true }).click();
+  await ecran.getByRole("button", { name: "Ardoises", exact: true }).filter({ visible: true }).click();
   await ecran.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
-  await ecran.getByRole("button", { name: "32×22 · Espagne 1er choix", exact: true }).click();
+  await ecran.getByRole("button", { name: "32×22", exact: true }).click();
+  await ecran.getByRole("button", { name: "Espagne 1er choix", exact: true }).click();
   await ecran.getByLabel("Quantité de Ardoise naturelle 32×22 · Espagne 1er choix").fill("900");
   await ecran.getByRole("button", { name: "Ajouter à la sélection" }).click();
   await expect(bouton).toHaveText("Créer le quantitatif · 1 matériau");

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, PenLine, Plus, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsUpDown, PenLine, Plus, Search } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button, INPUT } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -25,6 +25,11 @@ export interface ArticleCatalogueVue {
   designation: string;
   unite: string;
   familleAchat: string;
+  /** En recherche : où l'article se range, les autres catalogues qui le partagent, ce que son format précise déjà. */
+  chemin?: { catalogue: string; rayon: string; famille: string; produit: string } | null;
+  autresCatalogues?: string[];
+  caracteristiques?: string[];
+  precisions?: string[];
 }
 
 interface Metier {
@@ -42,7 +47,36 @@ interface Reponse {
   ecrits?: { designation: string; unite: string }[] | null;
   communes?: { designation: string; unite: string }[] | null;
   arbre: { libelle: string; produits: { libelle: string; article: ArticleCatalogueVue | null; variantes: { libelle: string; article: ArticleCatalogueVue }[] }[] }[] | null;
+  /** Le catalogue du métier en rayons (Greg, 12 novembre 2026) : rayon › famille › produit › caractéristiques. */
+  rayons?: RayonVue[] | null;
 }
+
+/** Un choix à faire pour arriver à un article : la caractéristique et ses valeurs, chacune avec la suite. */
+export interface ChoixVue {
+  nom: string;
+  options: { valeur: string; suite: ChoixVue | null; article: ArticleCatalogueVue | null }[];
+}
+export interface ProduitVue {
+  libelle: string;
+  /** Ce qu'il reste à choisir, en une ligne (« Matériau, finition, épaisseur »). */
+  indication: string;
+  nombre: number;
+  precisions: { nom: string; niveau: "utile" | "facultative"; exemple?: string }[];
+  article: ArticleCatalogueVue | null;
+  choix: ChoixVue | null;
+}
+export interface RayonVue {
+  libelle: string;
+  familles: { libelle: string; produits: ProduitVue[] }[];
+}
+interface Chemin {
+  rayon: string | null;
+  famille: string | null;
+  produit: string | null;
+  /** Les valeurs déjà choisies du produit, dans l'ordre (« zinc », « naturel »). */
+  choisis: string[];
+}
+const DEPART: Chemin = { rayon: null, famille: null, produit: null, choisis: [] };
 
 export interface LigneChoisie {
   designation: string;
@@ -79,8 +113,10 @@ export function CatalogueListes({
   const liste = mode === "liste";
   const [metier, setMetier] = useState<string | null>(null);
   const [q, setQ] = useState("");
-  const [chemin, setChemin] = useState<{ famille: string | null; produit: string | null }>({ famille: null, produit: null });
+  const [chemin, setChemin] = useState<Chemin>(DEPART);
   const [article, setArticle] = useState<ArticleCatalogueVue | null>(null);
+  /** Les précisions libres du produit choisi (teinte, gamme) : écrites, ajoutées à la désignation, jamais un article de plus. */
+  const [precisions, setPrecisions] = useState<{ defs: ProduitVue["precisions"]; valeurs: Record<string, string> }>({ defs: [], valeurs: {} });
   const [qte, setQte] = useState("");
   const [libre, setLibre] = useState(false);
   const [libreTexte, setLibreTexte] = useState("");
@@ -90,13 +126,21 @@ export function CatalogueListes({
   const recherche = q.trim();
   const charger = useCallback((signal: AbortSignal) => api<Reponse>(`/v1/catalogue?${new URLSearchParams({ ...(metier ? { metier } : {}), ...(recherche ? { q: recherche } : {}) })}`, { signal }), [metier, recherche]);
   const { data } = useResource(charger);
-  const metiers = data?.metiers ?? [];
-  const courant = metiers.find((m) => m.code === (metier ?? data?.metier)) ?? null;
+  // Les métiers une fois reçus restent affichés pendant qu'une recherche ou un changement de métier recharge : le
+  // sélecteur ne se vide jamais (Greg, 12 novembre 2026, iPhone : « pas réactif, parfois la liste ne se déroule pas »).
+  const [garde, setGarde] = useState<{ metiers: Metier[]; metier: string } | null>(null);
+  if (data?.metiers.length && (garde?.metiers !== data.metiers || garde.metier !== data.metier)) setGarde({ metiers: data.metiers, metier: data.metier });
+  const metiers = data?.metiers.length ? data.metiers : (garde?.metiers ?? []);
+  const courant = metiers.find((m) => m.code === (metier ?? data?.metier ?? garde?.metier)) ?? null;
 
-  const choisir = (a: ArticleCatalogueVue) => {
+  const choisir = (a: ArticleCatalogueVue, defs: ProduitVue["precisions"] = []) => {
     setArticle(a);
+    setPrecisions({ defs, valeurs: {} });
     setQte("");
   };
+  /** La désignation qui part : celle de l'article, suivie des précisions écrites (« … · teinte : RAL 7016 »). */
+  const designationDe = (a: ArticleCatalogueVue) =>
+    [a.designation, ...precisions.defs.map((d) => [d.nom, (precisions.valeurs[d.nom] ?? "").trim()] as const).filter(([, v]) => v).map(([n, v]) => `${n.toLowerCase()} : ${v}`)].join(" · ");
   const ajouter = (l: LigneChoisie) => {
     // Un achat groupé est organisé par métier : un produit d'un autre métier va dans le lot de son métier, sur accord.
     const m = metiers.find((x) => x.code === l.metier) ?? null;
@@ -106,7 +150,8 @@ export function CatalogueListes({
     }
     onAjouter(l);
     setArticle(null);
-    setChemin({ famille: null, produit: null });
+    // Le rayon et la famille restent ouverts : l'artisan ajoute souvent plusieurs produits de la même famille.
+    setChemin((c) => ({ ...c, produit: null, choisis: [] }));
     setQte("");
     // Mode liste : la recherche repart à zéro pour le matériau suivant.
     if (liste) setQ("");
@@ -141,17 +186,21 @@ export function CatalogueListes({
   return (
     <div className="flex flex-col gap-3">
       {/* Point 4 : le sélecteur visible, un toucher pour changer de métier ; les métiers du profil en premier. */}
-      <label className="flex min-h-13 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-[16px] font-semibold">
-        <span className="shrink-0 text-muted">Métier :</span>
+      {/* Le sélecteur prend TOUTE la surface de la carte : un toucher n'importe où ouvre la liste du téléphone (avant,
+          toucher « Métier : » ne faisait que poser le contour, sans rien dérouler). */}
+      <div className="relative flex min-h-13 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-[16px] font-semibold focus-within:border-accent">
+        <span className="shrink-0 text-muted">Catalogue :</span>
+        <span className="min-w-0 grow truncate font-bold">{courant?.libelle ?? "…"}</span>
+        <ChevronsUpDown size={18} aria-hidden="true" className="shrink-0 text-muted" />
         <select
           aria-label="Métier"
           value={courant?.code ?? ""}
           onChange={(e) => {
             setMetier(e.target.value);
-            setChemin({ famille: null, produit: null });
+            setChemin(DEPART);
             setArticle(null);
           }}
-          className="min-h-12 grow bg-transparent font-bold outline-none"
+          className="absolute top-0 left-0 size-full cursor-pointer appearance-none rounded-xl text-[16px] opacity-0"
         >
           {metiers.some((m) => m.mien) ? (
             <optgroup label="Tes métiers">
@@ -174,7 +223,7 @@ export function CatalogueListes({
               ))}
           </optgroup>
         </select>
-      </label>
+      </div>
 
       {article ? (
         <div className="flex flex-col gap-3 rounded-xl bg-ground p-4">
@@ -182,16 +231,38 @@ export function CatalogueListes({
             <button type="button" onClick={() => setArticle(null)} aria-label="Choix précédent" className="pressable grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface">
               <ChevronLeft size={20} aria-hidden="true" />
             </button>
-            <p className="text-[16px] font-semibold">{article.designation}</p>
+            <p className="text-[16px] font-semibold">{designationDe(article)}</p>
           </div>
+          {/* Les précisions utiles se proposent ; les facultatives se replient. Écrites, jamais un article de plus. */}
+          {liste && precisions.defs.length ? (
+            <div className="flex flex-col gap-2">
+              {precisions.defs
+                .filter((d) => d.niveau === "utile")
+                .map((d) => (
+                  <ChampPrecision key={d.nom} def={d} valeur={precisions.valeurs[d.nom] ?? ""} onChange={(v) => setPrecisions((p) => ({ ...p, valeurs: { ...p.valeurs, [d.nom]: v } }))} />
+                ))}
+              {precisions.defs.some((d) => d.niveau === "facultative") ? (
+                <details className="rounded-xl border border-line bg-surface px-4 py-2">
+                  <summary className="min-h-11 cursor-pointer py-2 text-[15px] font-semibold">Plus de précisions (facultatif)</summary>
+                  <div className="flex flex-col gap-2 pb-2">
+                    {precisions.defs
+                      .filter((d) => d.niveau === "facultative")
+                      .map((d) => (
+                        <ChampPrecision key={d.nom} def={d} valeur={precisions.valeurs[d.nom] ?? ""} onChange={(v) => setPrecisions((p) => ({ ...p, valeurs: { ...p.valeurs, [d.nom]: v } }))} />
+                      ))}
+                  </div>
+                </details>
+              ) : null}
+            </div>
+          ) : null}
           <label htmlFor="qte-article" className="text-[16px] font-semibold">
             Combien ?
           </label>
           <div className="flex items-center gap-3">
-            <input id="qte-article" aria-label={`Quantité de ${article.designation}`} inputMode="decimal" value={qte} onChange={(e) => setQte(e.target.value)} placeholder="Quantité" className={`${INPUT} max-w-40`} autoFocus onKeyDown={(e) => e.key === "Enter" && nombre(qte) > 0 && (e.preventDefault(), ajouter({ designation: article.designation, unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier }))} />
+            <input id="qte-article" aria-label={`Quantité de ${article.designation}`} inputMode="decimal" value={qte} onChange={(e) => setQte(e.target.value)} placeholder="Quantité" className={`${INPUT} max-w-40`} autoFocus onKeyDown={(e) => e.key === "Enter" && nombre(qte) > 0 && (e.preventDefault(), ajouter({ designation: designationDe(article), unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier }))} />
             <span className="text-[16px] text-muted">{article.unite}</span>
           </div>
-          <Button variant="ink" disabled={!liste && !(nombre(qte) > 0)} onClick={() => ajouter({ designation: article.designation, unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier })}>
+          <Button variant="ink" disabled={!liste && !(nombre(qte) > 0)} onClick={() => ajouter({ designation: designationDe(article), unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier })}>
             <Plus size={18} aria-hidden="true" /> {liste ? "Ajouter à la sélection" : "Ajouter à ma liste"}
           </Button>
           {liste ? <p className="text-[13px] text-muted">La quantité peut attendre : tu la mettras dans ta liste.</p> : null}
@@ -254,9 +325,18 @@ export function CatalogueListes({
               {(data.resultats ?? []).map((a) => (
                 <li key={a.cle}>
                   <button type="button" onClick={() => choisir(a)} className={BOUTON}>
-                    <span className="flex flex-col">
+                    <span className="flex min-w-0 flex-col">
                       <span>{a.designation}</span>
-                      {a.metier !== courant?.code ? <span className="text-[13px] font-normal text-muted">{metiers.find((m) => m.code === a.metier)?.libelle}</span> : null}
+                      {/* Où il se range : le catalogue, le rayon, la famille ; puis ce qui reste à préciser. */}
+                      {a.chemin ? (
+                        <span className="text-[13px] font-normal text-muted">
+                          {[a.chemin.catalogue, ...(a.chemin.rayon === a.chemin.catalogue ? [] : [a.chemin.rayon]), ...(a.chemin.famille === a.chemin.rayon ? [] : [a.chemin.famille])].join(" › ")}
+                          {a.autresCatalogues?.length ? ` · aussi en ${a.autresCatalogues.join(", ")}` : ""}
+                        </span>
+                      ) : a.metier !== courant?.code ? (
+                        <span className="text-[13px] font-normal text-muted">{metiers.find((m) => m.code === a.metier)?.libelle}</span>
+                      ) : null}
+                      {a.precisions?.length ? <span className="text-[13px] font-semibold text-accent-text">À préciser : {a.precisions.join(", ")}</span> : null}
                     </span>
                     <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
                   </button>
@@ -308,60 +388,150 @@ export function CatalogueListes({
   );
 }
 
-function Niveaux({ data, chemin, onChemin, onArticle }: { data: Reponse; chemin: { famille: string | null; produit: string | null }; onChemin: (c: { famille: string | null; produit: string | null }) => void; onArticle: (a: ArticleCatalogueVue) => void }) {
-  const familles = data.arbre ?? [];
-  const famille = familles.find((f) => f.libelle === chemin.famille) ?? null;
-  const produit = famille?.produits.find((p) => p.libelle === chemin.produit) ?? null;
-  const retour = (
-    <div className="flex items-center gap-2">
-      <button type="button" onClick={() => onChemin(produit ? { famille: chemin.famille, produit: null } : { famille: null, produit: null })} aria-label="Choix précédent" className="pressable grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface">
-        <ChevronLeft size={20} aria-hidden="true" />
-      </button>
-      <p className="text-[15px] font-semibold">{[chemin.famille, chemin.produit].filter(Boolean).join(" › ")}</p>
-    </div>
-  );
-  if (produit)
-    return (
-      <>
-        {retour}
-        <ul aria-label={produit.libelle} className="flex flex-col gap-2">
-          {produit.variantes.map((v) => (
-            <li key={v.libelle}>
-              <button type="button" onClick={() => onArticle(v.article)} className={BOUTON}>
-                {v.libelle}
-                <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </>
-    );
-  if (famille)
-    return (
-      <>
-        {retour}
-        <ul aria-label={famille.libelle} className="flex flex-col gap-2">
-          {famille.produits.map((p) => (
-            <li key={p.libelle}>
-              <button type="button" onClick={() => (p.article && p.variantes.length === 0 ? onArticle(p.article) : onChemin({ famille: famille.libelle, produit: p.libelle }))} className={BOUTON}>
-                {p.libelle}
-                <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </>
-    );
+/** Sur ordinateur, les rayons et les familles se choisissent dans la colonne de gauche : pas une seconde fois au centre. */
+const GAUCHE = "xl:hidden";
+
+function ChampPrecision({ def, valeur, onChange }: { def: ProduitVue["precisions"][number]; valeur: string; onChange: (v: string) => void }) {
   return (
-    <ul aria-label="Familles" className="flex flex-col gap-2">
-      {familles.map((f) => (
-        <li key={f.libelle}>
-          <button type="button" onClick={() => onChemin({ famille: f.libelle, produit: null })} className={BOUTON}>
-            {f.libelle}
-            <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
-          </button>
-        </li>
-      ))}
-    </ul>
+    <label className="flex flex-col gap-1 text-[15px] font-semibold">
+      {def.nom}
+      <input aria-label={def.nom} value={valeur} onChange={(e) => onChange(e.target.value)} maxLength={60} placeholder={def.exemple ?? ""} className={INPUT} autoComplete="off" />
+    </label>
+  );
+}
+
+/**
+ * LE CATALOGUE EN RAYONS (Greg, 12 novembre 2026 : « l'artisan doit naviguer comme dans un catalogue de négoce, sans voir
+ * immédiatement des centaines de références ») : rayon › famille › produit › caractéristiques, une à une, jusqu'à UN
+ * article. Un rayon d'une seule famille passe droit aux produits. Le fil d'Ariane dit toujours où l'on est ; « Choix
+ * précédent » remonte d'un niveau sans rien perdre. Sur ordinateur, les rayons et leurs familles restent à gauche.
+ */
+function Niveaux({ data, chemin, onChemin, onArticle }: { data: Reponse; chemin: Chemin; onChemin: (c: Chemin) => void; onArticle: (a: ArticleCatalogueVue, precisions: ProduitVue["precisions"]) => void }) {
+  const rayons = data.rayons ?? [];
+  const rayon = rayons.find((r) => r.libelle === chemin.rayon) ?? (rayons.length === 1 ? rayons[0]! : null);
+  const famille = rayon ? (rayon.familles.find((f) => f.libelle === chemin.famille) ?? (rayon.familles.length === 1 ? rayon.familles[0]! : null)) : null;
+  const produit = famille?.produits.find((p) => p.libelle === chemin.produit) ?? null;
+  // Le choix en cours : on descend dans les choix du produit en suivant les valeurs déjà prises.
+  let choix: ChoixVue | null = produit?.choix ?? null;
+  for (const v of chemin.choisis) choix = choix?.options.find((o) => o.valeur === v)?.suite ?? null;
+
+  const ouvrirProduit = (p: ProduitVue) => (p.article ? onArticle(p.article, p.precisions) : onChemin({ rayon: rayon!.libelle, famille: famille!.libelle, produit: p.libelle, choisis: [] }));
+  const remonter = () => {
+    if (chemin.choisis.length) onChemin({ ...chemin, choisis: chemin.choisis.slice(0, -1) });
+    else if (produit) onChemin({ ...chemin, produit: null });
+    else if (famille && rayon && rayon.familles.length > 1 && chemin.famille) onChemin({ ...chemin, famille: null });
+    else onChemin(DEPART);
+  };
+  const fil = [rayons.length > 1 ? rayon?.libelle : null, rayon && rayon.familles.length > 1 ? famille?.libelle : rayon?.libelle === famille?.libelle ? (rayons.length > 1 ? null : famille?.libelle) : famille?.libelle, produit?.libelle, ...chemin.choisis].filter((x, i, t): x is string => !!x && t.indexOf(x) === i);
+  const auDepart = !chemin.rayon && rayons.length > 1;
+  const retour = auDepart ? null : fil.length ? (
+    <div className="flex items-center gap-2">
+      {rayons.length > 1 || produit || (rayon && rayon.familles.length > 1 && chemin.famille) ? (
+        <button type="button" onClick={remonter} aria-label="Choix précédent" className="pressable grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface">
+          <ChevronLeft size={20} aria-hidden="true" />
+        </button>
+      ) : null}
+      <p aria-label="Tu es ici" className="min-w-0 text-[15px] leading-snug font-semibold">
+        {fil.join(" › ")}
+      </p>
+    </div>
+  ) : null;
+
+  let contenu: React.ReactNode;
+  if (produit && choix)
+    contenu = (
+      <>
+        <p className="text-[16px] font-bold">{choix.nom}</p>
+        <ul aria-label={`${produit.libelle} : ${choix.nom}`} className="flex flex-col gap-2">
+          {choix.options.map((o) => (
+            <li key={o.valeur}>
+              <button type="button" onClick={() => (o.article && !o.suite ? onArticle(o.article, produit.precisions) : onChemin({ ...chemin, rayon: rayon!.libelle, famille: famille!.libelle, choisis: [...chemin.choisis, o.valeur] }))} className={BOUTON}>
+                {o.valeur}
+                <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  else if (famille)
+    contenu = (
+      <ul aria-label={famille.libelle} className="flex flex-col gap-2">
+        {famille.produits.map((p) => (
+          <li key={p.libelle}>
+            <button type="button" onClick={() => ouvrirProduit(p)} aria-label={p.libelle} className={BOUTON}>
+              <span className="flex min-w-0 flex-col">
+                <span>{p.libelle}</span>
+                {p.indication ? <span className="text-[13px] font-normal text-muted">À choisir : {p.indication.toLowerCase()}</span> : null}
+              </span>
+              <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+  else if (rayon)
+    contenu = (
+      <ul aria-label={rayon.libelle} className={`flex flex-col gap-2 ${GAUCHE}`}>
+        {rayon.familles.map((f) => (
+          <li key={f.libelle}>
+            <button type="button" onClick={() => onChemin({ rayon: rayon.libelle, famille: f.libelle, produit: null, choisis: [] })} className={BOUTON}>
+              {f.libelle}
+              <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+  else
+    contenu = (
+      <ul aria-label="Rayons" className={`flex flex-col gap-2 ${rayons.length > 1 ? GAUCHE : ""}`}>
+        {rayons.map((r) => (
+          <li key={r.libelle}>
+            <button type="button" onClick={() => onChemin({ rayon: r.libelle, famille: null, produit: null, choisis: [] })} aria-label={r.libelle} className={BOUTON}>
+              <span className="flex min-w-0 flex-col">
+                <span>{r.libelle}</span>
+                <span className="text-[13px] font-normal text-muted">
+                  {r.familles.length > 1 ? `${r.familles.length} familles` : `${r.familles[0]?.produits.length ?? 0} produit${(r.familles[0]?.produits.length ?? 0) > 1 ? "s" : ""}`}
+                </span>
+              </span>
+              <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+
+  // Ordinateur : la navigation du catalogue reste à gauche (rayons, et les familles du rayon ouvert) ; le contenu au centre.
+  const lateral = rayons.length > 1 || (rayon?.familles.length ?? 0) > 1;
+  return (
+    <div className={lateral ? "flex flex-col gap-3 xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:items-start xl:gap-6" : "flex flex-col gap-3"}>
+      {lateral ? (
+        <nav aria-label="Rayons du catalogue" className="hidden flex-col gap-1 xl:flex">
+          {rayons.map((r) => {
+            const ouvert = r.libelle === rayon?.libelle;
+            return (
+              <div key={r.libelle} className="flex flex-col gap-0.5">
+                <button type="button" aria-current={ouvert ? "true" : undefined} onClick={() => onChemin({ rayon: r.libelle, famille: null, produit: null, choisis: [] })} className={`pressable min-h-11 rounded-lg px-3 text-left text-[15px] font-bold ${ouvert ? "bg-accent-soft" : ""}`}>
+                  {r.libelle}
+                </button>
+                {ouvert && r.familles.length > 1
+                  ? r.familles.map((f) => (
+                      <button key={f.libelle} type="button" aria-current={f.libelle === famille?.libelle ? "true" : undefined} onClick={() => onChemin({ rayon: r.libelle, famille: f.libelle, produit: null, choisis: [] })} className={`pressable min-h-10 rounded-lg py-1.5 pr-2 pl-6 text-left text-[14px] ${f.libelle === famille?.libelle ? "font-bold underline underline-offset-4" : "text-muted"}`}>
+                        {f.libelle}
+                      </button>
+                    ))
+                  : null}
+              </div>
+            );
+          })}
+        </nav>
+      ) : null}
+      <div className="flex min-w-0 flex-col gap-3">
+        {retour}
+        {contenu}
+        {lateral && !famille ? <p className="hidden rounded-xl border border-dashed border-line p-4 text-[15px] text-muted xl:block">{rayon ? "Choisis une famille à gauche." : "Choisis un rayon à gauche."}</p> : null}
+      </div>
+    </div>
   );
 }

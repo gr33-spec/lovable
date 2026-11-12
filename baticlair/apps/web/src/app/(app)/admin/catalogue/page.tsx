@@ -28,11 +28,74 @@ export default function AdminCataloguePage() {
       <BackButton fallback="/admin/pilotage" />
       <PageTitle>Catalogue</PageTitle>
       <PorteAdmin>
+        <Synchronisation />
         <Propositions />
         <LignesLibres />
         <Articles />
       </PorteAdmin>
     </div>
+  );
+}
+
+/**
+ * LA SYNCHRONISATION EXPLICITE (Greg, 12 novembre 2026 : « ne conserve pas un système où l'ajout de centaines d'articles
+ * dépend silencieusement de la première ouverture du catalogue par un artisan ») : le relevé d'abord, puis un geste de
+ * l'admin. Seuls les articles absents entrent ; rien n'est modifié ni supprimé ; rejouée, elle n'ajoute rien.
+ */
+function Synchronisation() {
+  type Etat = { enBase: number; dansLAmorce: number; aAjouter: number; aAjouterParMetier: Record<string, number>; horsAmorce: number };
+  const { data, reload } = useResource(useCallback((signal: AbortSignal) => api<Etat>("/v1/admin/catalogue/synchronisation", { signal }), []));
+  const [pending, setPending] = useState(false);
+  const [fait, setFait] = useState<string | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
+  if (!data) return null;
+  return (
+    <section aria-label="Synchronisation du catalogue" className="flex flex-col gap-2">
+      <SectionTitle>Synchronisation</SectionTitle>
+      <Card className="flex flex-col gap-3">
+        <p className="text-[15px]">
+          {data.enBase} articles en base, {data.dansLAmorce} dans le catalogue du code.{" "}
+          {data.aAjouter > 0
+            ? `${data.aAjouter} article${data.aAjouter > 1 ? "s" : ""} à ajouter (${Object.entries(data.aAjouterParMetier)
+                .map(([m, n]) => `${m} : ${n}`)
+                .join(", ")}).`
+            : "Rien à ajouter : la base est à jour."}
+          {data.horsAmorce > 0 ? ` ${data.horsAmorce} article${data.horsAmorce > 1 ? "s" : ""} de la base hors du code (ajouts, anciennes clés) : jamais touchés.` : ""}
+        </p>
+        <p className="text-[13px] text-muted">Seuls les articles absents sont ajoutés. Aucun article existant n&apos;est modifié ni supprimé.</p>
+        {data.aAjouter > 0 ? (
+          <Button
+            variant="ink"
+            disabled={pending}
+            onClick={async () => {
+              setPending(true);
+              setErreur(null);
+              try {
+                const r = await api<{ ajoutes: number; apres: Etat }>("/v1/admin/catalogue/synchronisation", { method: "POST" });
+                setFait(`${r.ajoutes} article${r.ajoutes > 1 ? "s" : ""} ajouté${r.ajoutes > 1 ? "s" : ""} : ${r.apres.enBase} articles en base.`);
+                reload();
+              } catch (e) {
+                setErreur(messageErreur(e));
+              } finally {
+                setPending(false);
+              }
+            }}
+          >
+            {pending ? "Synchronisation…" : `Ajouter les ${data.aAjouter} articles absents`}
+          </Button>
+        ) : null}
+        {fait ? (
+          <p role="status" className="text-[14px] font-semibold text-ok">
+            {fait}
+          </p>
+        ) : null}
+        {erreur ? (
+          <p role="alert" className="text-[15px] font-semibold text-danger">
+            {erreur}
+          </p>
+        ) : null}
+      </Card>
+    </section>
   );
 }
 

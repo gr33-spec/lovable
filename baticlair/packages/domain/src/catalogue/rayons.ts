@@ -224,9 +224,13 @@ const prise = (p: Prise, a: ArticleRange) => p[0] === a.metier && (p[1] === null
  * Où un catalogue range un article : la première famille qui le prend par le NOM du produit, sinon la première qui prend
  * son ancienne famille ; null quand ce catalogue ne le prend pas.
  */
-function placeDans(rayons: readonly RayonDef[], a: ArticleRange): { rayon: RayonDef; famille: FamilleDef } | null {
+function placeDans(rayons: readonly RayonDef[], a: ArticleRange): { rayon: RayonDef; famille: FamilleDef; rang: number } | null {
   for (const precis of [true, false])
-    for (const rayon of rayons) for (const famille of rayon.familles) if (famille.prend.some((p) => !!p[2] === precis && prise(p, a))) return { rayon, famille };
+    for (const rayon of rayons)
+      for (const famille of rayon.familles) {
+        const rang = famille.prend.findIndex((p) => !!p[2] === precis && prise(p, a));
+        if (rang >= 0) return { rayon, famille, rang };
+      }
   return null;
 }
 
@@ -373,7 +377,9 @@ function caracteriser<T extends ArticleRange>(lignes: readonly { article: T; fus
  */
 export function vueDuCatalogue<T extends ArticleRange>(catalogue: MetierCatalogue, articles: readonly T[]): RayonDeVue<T>[] {
   const defs = CATALOGUES[catalogue] ?? [];
-  type Ligne = { article: T; fusion: Fusion | null; valeur: string | null };
+  // `rang` : la prise qui a rangé l'article ; dans une famille, les produits de la première prise viennent d'abord (le
+  // zinc avant le plomb venu d'une autre ancienne famille).
+  type Ligne = { article: T; fusion: Fusion | null; valeur: string | null; rang: number };
   const parFamille = new Map<FamilleDef, Map<string, Ligne[]>>();
   const autres = new Map<string, Map<string, Ligne[]>>();
   for (const a of articles) {
@@ -386,9 +392,13 @@ export function vueDuCatalogue<T extends ArticleRange>(catalogue: MetierCatalogu
       if (place) parFamille.set(place.famille, produits);
       else autres.set(a.famille, produits);
     }
-    produits.set(nom, [...(produits.get(nom) ?? []), { article: a, fusion, valeur }]);
+    produits.set(nom, [...(produits.get(nom) ?? []), { article: a, fusion, valeur, rang: place?.rang ?? 0 }]);
   }
-  const produitsDe = (m: Map<string, Ligne[]>, precisions: readonly PrecisionLibre[]): ProduitDeVue<T>[] => [...m].map(([libelle, lignes]) => ({ libelle, precisions, ...caracteriser(lignes) }));
+  const produitsDe = (m: Map<string, Ligne[]>, precisions: readonly PrecisionLibre[]): ProduitDeVue<T>[] =>
+    [...m]
+      .map(([libelle, lignes], i) => ({ libelle, lignes, i, rang: Math.min(...lignes.map((l) => l.rang)) }))
+      .sort((x, y) => x.rang - y.rang || x.i - y.i)
+      .map(({ libelle, lignes }) => ({ libelle, precisions, ...caracteriser(lignes) }));
   const rayons: RayonDeVue<T>[] = defs
     .map((r) => ({ libelle: r.libelle, familles: r.familles.filter((fa) => parFamille.has(fa)).map((fa) => ({ libelle: fa.libelle, produits: produitsDe(parFamille.get(fa)!, fa.precisions ?? []) })) }))
     .filter((r) => r.familles.length > 0);

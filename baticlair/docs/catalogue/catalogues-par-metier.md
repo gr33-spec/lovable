@@ -28,7 +28,7 @@ Articles de l'amorce : 2142. Catalogues au sélecteur : 10.
 | Zinguerie | Accessoires de gouttière | 14 | 66 | Crochet de gouttière (26) | Développé, Modèle, Matériau, Diamètre |
 | Zinguerie | Descentes et eaux pluviales | 14 | 60 | Tuyau de descente (18) | Matériau, Diamètre, Finition, Angle, Modèle |
 | Zinguerie | Couverture métallique et joint debout | 6 | 8 | Patte de joint debout (2) | Modèle, Finition |
-| Zinguerie | Feuilles, bobines, bobineaux et bandes | 5 | 52 | Bobine (25) | Épaisseur, Largeur, Matériau, Finition |
+| Zinguerie | Feuilles, bobines, bobineaux et bandes | 5 | 52 | Bobine (25) | Matériau, Finition, Épaisseur, Largeur |
 | Zinguerie | Solins, bavettes et rives | 10 | 26 | Bande de rive zinc (6) | Développé, Finition |
 | Zinguerie | Habillages | 7 | 20 | Couvertine (12) | Développé, Finition, Modèle |
 | Zinguerie | Soudure et consommables | 9 | 13 | Étain à souder (3) | Modèle |
@@ -96,9 +96,9 @@ Variantes qui étaient des produits à part, lues comme un produit : Ardoise fib
 | Préparation des supports | Préparation des supports | 1 | 1 | Toile de verre à peindre (1) | aucune |
 | Enduits et rebouchage | Enduits et rebouchage | 2 | 3 | Enduit de rebouchage (2) | Conditionnement |
 | Impressions et sous-couches | Impressions et sous-couches | 6 | 14 | Primaire antirouille (4) | Conditionnement, Finition |
-| Peintures murs et plafonds | Peintures murs et plafonds | 9 | 64 | Peinture murs et plafonds acrylique (24) | Conditionnement, Finition |
+| Peintures murs et plafonds | Peintures murs et plafonds | 9 | 64 | Peinture murs et plafonds acrylique (24) | Finition, Conditionnement |
 | Façades | Façades | 7 | 29 | Peinture façade pliolite (8) | Finition, Conditionnement |
-| Bois | Bois | 7 | 75 | Laque boiseries acrylique (18) | Conditionnement, Finition, Modèle |
+| Bois | Bois | 7 | 75 | Laque boiseries acrylique (18) | Finition, Conditionnement, Modèle |
 | Métaux | Métaux | 1 | 16 | Peinture fer antirouille (16) | Finition, Conditionnement |
 | Sols | Sols | 3 | 12 | Peinture sol époxy (4) | Finition, Conditionnement |
 | Protection du chantier | Protection du chantier | 2 | 3 | Ruban de masquage (2) | Modèle |

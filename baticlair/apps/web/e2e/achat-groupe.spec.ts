@@ -267,9 +267,11 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(b.page.getByRole("heading", { name: "Ajouter mes quantités" })).toBeVisible();
     // Le choix guidé (Greg, 27 octobre, capture iPhone) : un bouton par matériau, format, choix, puis la quantité.
     // Point 3 du 30 octobre : le catalogue en listes, famille › produit › format.
-    await b.page.getByRole("button", { name: "Ardoises", exact: true }).click();
+    await b.page.getByRole("button", { name: "Couverture", exact: true }).filter({ visible: true }).click();
+    await b.page.getByRole("button", { name: "Ardoises", exact: true }).filter({ visible: true }).click();
     await b.page.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
-    await b.page.getByRole("button", { name: "32×22 · Espagne 1er choix", exact: true }).click();
+    await b.page.getByRole("button", { name: "32×22", exact: true }).click();
+    await b.page.getByRole("button", { name: "Espagne 1er choix", exact: true }).click();
     await b.page.getByLabel("Quantité de Ardoise naturelle 32×22 · Espagne 1er choix").fill("900");
     await b.page.getByRole("button", { name: "Ajouter à ma liste" }).click();
     await b.page.getByRole("button", { name: "Continuer" }).click();
@@ -445,9 +447,11 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await inscrireSansSiret(page, dep);
     await page.goto("/achats-groupes/lancer");
     // Point 3 du 30 octobre : le catalogue en listes, famille › produit › format.
-    await page.getByRole("button", { name: "Ardoises", exact: true }).click();
+    await page.getByRole("button", { name: "Couverture", exact: true }).filter({ visible: true }).click();
+    await page.getByRole("button", { name: "Ardoises", exact: true }).filter({ visible: true }).click();
     await page.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
-    await page.getByRole("button", { name: "32×22 · Espagne 1er choix", exact: true }).click();
+    await page.getByRole("button", { name: "32×22", exact: true }).click();
+    await page.getByRole("button", { name: "Espagne 1er choix", exact: true }).click();
     await page.getByLabel("Quantité de Ardoise naturelle 32×22 · Espagne 1er choix").fill("900");
     await page.getByRole("button", { name: "Ajouter à ma liste" }).click();
     // Étape 1 quittée, reprise : la ligne est là.
