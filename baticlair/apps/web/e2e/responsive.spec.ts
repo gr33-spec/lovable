@@ -110,7 +110,8 @@ for (const size of WIDTHS) {
 
     await page.goto("/");
     await page.getByRole("button", { name: "Mon menu" }).click();
-    await page.getByRole("menuitem", { name: "Aide, guide et démonstration" }).click();
+    await page.getByRole("menuitem", { name: "Profil et paramètres" }).click();
+    await page.getByRole("link", { name: /^Guide et chantier fictif/ }).click();
     await page.getByRole("button", { name: "Essayer avec un chantier fictif" }).click();
     await expect(page.getByRole("heading", { name: "Démo – Toiture Martin" })).toBeVisible();
     // §48 : la lecture part d'elle-même ; l'écran des questions (s'il y en a) passe par « Calculer ma liste ».

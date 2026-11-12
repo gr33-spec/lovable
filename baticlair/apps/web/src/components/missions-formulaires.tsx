@@ -11,7 +11,6 @@ import {
   fautesReponse,
   FICHIERS_PAR_ANNONCE,
   FRAIS,
-  METIERS_BATIMENT,
   MODES_CHIFFRAGE,
   NIVEAUX,
   periodeLisible,
@@ -29,6 +28,7 @@ import {
 import { api, ApiError } from "@/lib/api";
 import { phraseErreur, type AnnonceVue, type FichierVue, type ReponseVue } from "@/lib/missions";
 import { useResource } from "@/lib/use-resource";
+import { ChampMetier, ChampsCommune } from "./champs-missions";
 import { ReponseEnvoyee } from "./missions";
 import { BoutonContour, BoutonJaune, CARTE, ChampChoix, ChampLong, ChampTexte, Coche, EcranTitre, Encart, EtatEcran, Etiquette, GrandTitre, LienContour, Ligne, Refus } from "./ux-kit";
 
@@ -38,26 +38,16 @@ const aujourdHui = () => new Date().toISOString().slice(0, 10);
 const nombre = (v: string): number | null => (v.trim() === "" || Number.isNaN(Number(v.replace(",", "."))) ? null : Number(v.replace(",", ".")));
 const fautesDeLApi = (e: unknown): Faute[] => (e instanceof ApiError ? (e.fautes ?? []) : []);
 
-/** Le métier : une saisie libre aidée par la liste complète (tous les métiers restent accessibles par la recherche). */
-function ChampMetier({ label, valeur, onChange, erreur }: { label: string; valeur: string; onChange: (v: string) => void; erreur?: string | undefined }) {
-  const id = useId();
-  return (
-    <>
-      <ChampTexte label={label} value={valeur} onChange={(e) => onChange(e.target.value)} list={id} placeholder="Choisir ou écrire un métier" erreur={erreur} autoComplete="off" />
-      <datalist id={id}>
-        {METIERS_BATIMENT.map((m) => (
-          <option key={m} value={m} />
-        ))}
-      </datalist>
-    </>
-  );
-}
-
 /** Plusieurs choix à cocher en pastilles (type de mission, qualifications). */
 function ChoixMultiples({ label, choix, valeurs, onChange, erreur }: { label: string; choix: readonly { id: string; libelle: string }[]; valeurs: string[]; onChange: (v: string[]) => void; erreur?: string | undefined }) {
+  const id = useId();
+  // Greg, 12 novembre 2026 (capture) : le libellé sortait de la carte et se lisait mal. Il est dans la carte, comme pour
+  // les autres champs (un groupe nommé remplace la légende flottante, mal placée par Safari).
   return (
-    <fieldset className={`flex flex-col gap-2 p-4 ${CARTE} ${erreur ? "ring-2 ring-danger" : ""}`}>
-      <legend className="float-left pb-1 text-[12px] text-[#6b6557]">{label}</legend>
+    <div role="group" aria-labelledby={id} className={`flex flex-col gap-2 p-4 ${CARTE} ${erreur ? "ring-2 ring-danger" : ""}`}>
+      <p id={id} className="text-[12px] text-[#6b6557]">
+        {label}
+      </p>
       <div className="flex flex-wrap gap-2">
         {choix.map((c) => {
           const actif = valeurs.includes(c.id);
@@ -73,7 +63,7 @@ function ChoixMultiples({ label, choix, valeurs, onChange, erreur }: { label: st
           {erreur}
         </p>
       ) : null}
-    </fieldset>
+    </div>
   );
 }
 
@@ -163,10 +153,17 @@ export function MissionFormulaire() {
         <>
           <GrandTitre sous="Les coordonnées restent privées au départ.">De quelle aide as-tu besoin ?</GrandTitre>
           <ChampMetier label="Métier recherché" valeur={s.metier} onChange={(v) => maj("metier", v)} erreur={erreur("metier")} />
-          <div className="grid grid-cols-[1fr_7.5rem] gap-3">
-            <ChampTexte label="Lieu de la mission (commune)" value={s.lieu} onChange={(e) => maj("lieu", e.target.value)} placeholder="Plouha" erreur={erreur("lieu")} autoComplete="address-level2" />
-            <ChampTexte label="Code postal" value={s.codePostal} onChange={(e) => maj("codePostal", e.target.value.replace(/\D/g, "").slice(0, 5))} inputMode="numeric" placeholder="22580" erreur={erreur("codePostal")} autoComplete="postal-code" />
-          </div>
+          <ChampsCommune
+            labelCommune="Lieu de la mission (commune)"
+            commune={s.lieu}
+            codePostal={s.codePostal}
+            onChange={(v) => {
+              setS((x) => ({ ...x, lieu: v.commune, codePostal: v.codePostal }));
+              setFautes((f) => f.filter((x) => x.champ !== "lieu" && x.champ !== "codePostal"));
+            }}
+            erreurCommune={erreur("lieu")}
+            erreurCodePostal={erreur("codePostal")}
+          />
           <div className="grid grid-cols-2 gap-3">
             <ChampTexte label="Du" type="date" min={aujourdHui()} value={s.debut} onChange={(e) => { setS((x) => ({ ...x, debut: e.target.value, fin: x.fin && x.fin >= e.target.value ? x.fin : e.target.value })); setFautes((f) => f.filter((x) => x.champ !== "debut" && x.champ !== "fin")); }} erreur={erreur("debut")} />
             <ChampTexte label="Au" type="date" min={s.debut || aujourdHui()} value={s.fin} onChange={(e) => maj("fin", e.target.value)} erreur={erreur("fin")} />
@@ -348,10 +345,17 @@ export function ServicesFormulaire() {
           <GrandTitre sous="Tu pourras modifier ou masquer l'annonce.">Quand peux-tu intervenir ?</GrandTitre>
           <ChampMetier label="Métier principal" valeur={s.metier} onChange={(v) => maj("metier", v)} erreur={erreur("metier")} />
           <ChampMetier label="Autre métier (facultatif)" valeur={s.autreMetier ?? ""} onChange={(v) => maj("autreMetier", v)} erreur={erreur("autreMetier")} />
-          <div className="grid grid-cols-[1fr_7.5rem] gap-3">
-            <ChampTexte label="Zone d'intervention, autour de" value={s.ville} onChange={(e) => maj("ville", e.target.value)} placeholder="Lannion" erreur={erreur("ville")} autoComplete="address-level2" />
-            <ChampTexte label="Code postal" value={s.codePostal} onChange={(e) => maj("codePostal", e.target.value.replace(/\D/g, "").slice(0, 5))} inputMode="numeric" placeholder="22300" erreur={erreur("codePostal")} autoComplete="postal-code" />
-          </div>
+          <ChampsCommune
+            labelCommune="Zone d'intervention, autour de"
+            commune={s.ville}
+            codePostal={s.codePostal}
+            onChange={(v) => {
+              setS((x) => ({ ...x, ville: v.commune, codePostal: v.codePostal }));
+              setFautes((f) => f.filter((x) => x.champ !== "ville" && x.champ !== "codePostal"));
+            }}
+            erreurCommune={erreur("ville")}
+            erreurCodePostal={erreur("codePostal")}
+          />
           <ChampChoix label="Rayon" value={String(s.rayonKm)} onChange={(e) => maj("rayonKm", Number(e.target.value))} choix={[10, 20, 30, 40, 60, 80, 100, 150].map((k) => ({ id: String(k), libelle: `${k} km` }))} erreur={erreur("rayonKm")} />
           <div className="grid grid-cols-2 gap-3">
             <ChampTexte label="Disponible à partir du" type="date" value={s.debut} onChange={(e) => maj("debut", e.target.value)} erreur={erreur("debut")} />

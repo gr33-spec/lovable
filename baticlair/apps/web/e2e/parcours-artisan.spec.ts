@@ -165,14 +165,24 @@ async function openRow(row: Locator) {
  */
 /** Le menu derrière l'initiale de l'artisan (en haut à droite) : Mes fournisseurs, Mon compte, l'essai sur un chantier fictif. */
 async function menuArtisan(page: Page, entree: string) {
-  // Menu du compte refait (Greg, 10 novembre 2026, capture 17) : « Mon compte » s'appelle « Profil et paramètres », « Mon
-  // abonnement » « Abonnement, factures et reçus » ; l'essai sur un chantier fictif et le guide vivent dans « Aide, guide et
-  // démonstration ».
-  const dansAide = entree === "Essayer avec un chantier fictif" || entree === "Revoir le guide";
-  const nom = dansAide ? "Aide, guide et démonstration" : entree === "Mon compte" ? "Profil et paramètres" : entree === "Mon abonnement" ? "Abonnement, factures et reçus" : entree;
+  // Menu du compte raccourci (Greg, 12 novembre 2026, dossier de corrections UX, point 9) : il ne garde que « Profil et
+  // paramètres », l'abonnement, l'administration si autorisée et la déconnexion. « Mes négoces » s'ouvre depuis les
+  // quantitatifs ; le guide et le chantier fictif depuis « Profil et paramètres ».
+  if (entree === "Essayer avec un chantier fictif" || entree === "Revoir le guide") {
+    await page.getByRole("button", { name: "Mon menu" }).click();
+    await page.getByRole("menuitem", { name: "Profil et paramètres" }).click();
+    await page.getByRole("link", { name: /^Guide et chantier fictif/ }).click();
+    await page.getByRole("button", { name: entree }).click();
+    return;
+  }
+  if (entree === "Mes négoces") {
+    await page.goto("/chantiers");
+    await page.getByRole("navigation", { name: "Autour de mes quantitatifs" }).getByRole("link", { name: "Mes négoces" }).click();
+    return;
+  }
+  const nom = entree === "Mon compte" ? "Profil et paramètres" : entree === "Mon abonnement" ? "Abonnement, factures et reçus" : entree;
   await page.getByRole("button", { name: "Mon menu" }).click();
   await page.getByRole("menuitem", { name: nom }).click();
-  if (dansAide) await page.getByRole("button", { name: entree }).click();
 }
 
 async function createProject(page: Page, name: string, client: string, address: string) {
@@ -973,7 +983,7 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
   await page.goto("/negoce/opposition/faux");
   await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
-  await page.goto("/compte/preferences");
+  await page.goto("/compte/donnees");
 
   // Des essais au hasard ne restent pas des habitudes : on efface ce que BatiClair a appris, les chantiers restent.
   await page.getByRole("button", { name: "Effacer ce que Mobiiz a appris" }).click();
@@ -2581,7 +2591,7 @@ test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap
     ["/groupe", "Aide : Regroupement"],
     ["/fournisseurs", "Aide : Tes négoces"],
     ["/compte", "Aide : Ton compte"],
-    ["/chantiers", "Aide : Tes chantiers"],
+    ["/chantiers", "Aide : Tes quantitatifs"],
   ] as const) {
     await page.goto(chemin);
     const bouton = page.getByRole("button", { name: "Aide" });

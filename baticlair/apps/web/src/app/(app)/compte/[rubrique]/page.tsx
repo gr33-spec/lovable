@@ -23,6 +23,7 @@ import { AIDES } from "@/lib/aide";
 import { api, ApiError } from "@/lib/api";
 import { EDITEUR, PAGES_LEGALES } from "@/lib/legal";
 import { NOM_APP } from "@/lib/nom";
+import { useRubriquesMasquees } from "@/lib/missions";
 import { ligneProfil, type RubriqueProfil } from "@/lib/rubriques-profil";
 import { useResource } from "@/lib/use-resource";
 import { useSession } from "@/lib/session";
@@ -33,11 +34,15 @@ import { useSession } from "@/lib/session";
  */
 export default function RubriquePage() {
   const { rubrique } = useParams<{ rubrique: string }>();
-  const ligne = ligneProfil(rubrique);
+  const trouvee = ligneProfil(rubrique);
+  const masquees = useRubriquesMasquees();
+  // Une rubrique sortie du MVP (Greg, 12 novembre 2026) ne s'ouvre pas non plus par son ancienne adresse.
+  const ligne = trouvee?.masquable && masquees[trouvee.masquable] ? null : trouvee;
   if (!ligne) {
     return (
       <>
-        <EnTeteRubrique titre="Rubrique introuvable" />
+        <EnTeteRubrique titre={trouvee ? "Rubrique indisponible" : "Rubrique introuvable"} />
+        {trouvee ? <p className="text-[15px] text-muted">Cette rubrique n&apos;est pas proposée pour le moment.</p> : null}
         <Link href="/compte" className="text-[15px] font-semibold text-accent-text">
           Revenir à Profil et paramètres
         </Link>
@@ -122,7 +127,13 @@ function Contenu({ id }: { id: Exclude<RubriqueProfil, "apparence"> }) {
         <Card className="p-4 text-[15px] text-muted">Seul un membre qui peut modifier l&apos;entreprise peut effacer ce que {NOM_APP} a appris.</Card>
       );
     case "donnees":
-      return <MyData avecEmails={false} onDeleted={() => router.replace("/connexion?compte=supprime")} />;
+      return (
+        <>
+          <MyData avecEmails={false} onDeleted={() => router.replace("/connexion?compte=supprime")} />
+          {/* La remise à zéro de ce que Mobiiz a retenu reste toujours disponible ici, rubrique « Mémoire » affichée ou non. */}
+          {editeur ? <MemoryCard /> : null}
+        </>
+      );
     case "aide":
       return <Aide />;
   }

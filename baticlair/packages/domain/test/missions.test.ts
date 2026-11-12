@@ -73,6 +73,15 @@ describe("annonces", () => {
     expect(chercherMetier("etanch")).toEqual(["Étanchéité"]);
     expect(chercherMetier("PLAQU")).toEqual(["Plâtrerie - Plaquiste"]);
     expect(chercherMetier("")).toHaveLength(METIERS_BATIMENT.length);
+    // Greg, 12 novembre 2026 : les mots du chantier et les noms des catalogues trouvent leur métier.
+    expect(chercherMetier("couvreur")).toEqual(["Couverture - Toiture"]);
+    expect(chercherMetier("plaques de plâtre")).toEqual(["Plâtrerie - Plaquiste"]);
+    expect(chercherMetier("placo")).toEqual(["Plâtrerie - Plaquiste"]);
+    expect(chercherMetier("chauffagiste")).toEqual(["Plomberie - Chauffage"]);
+    expect(chercherMetier("chauff")).toEqual(["Plomberie - Chauffage"]);
+    expect(chercherMetier("élec")[0]).toBe("Électricité");
+    // Un métier réellement absent : aucune proposition (le formulaire garde alors ce qui est écrit).
+    expect(chercherMetier("scaphandrier")).toEqual([]);
     expect(new Set(METIERS_BATIMENT).size).toBe(METIERS_BATIMENT.length);
   });
 });

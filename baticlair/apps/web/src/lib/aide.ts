@@ -1,4 +1,4 @@
-import { nom, NOM, NOM_APP } from "@/lib/nom";
+import { nom, NOM } from "@/lib/nom";
 /**
  * L'AIDE DANS L'APP (plan du 20 octobre 2026, bloc 10) : un « ? » sur chaque écran, trois lignes au plus, tutoiement,
  * les mots de l'artisan. Pas de page d'aide : ce qui tient en trois lignes se dit ici, le reste se lit sur l'écran.
@@ -38,8 +38,13 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
       `Les notifications te préviennent quand une liste est prête ou que ta ${nom} avance.`,
     ],
   },
+  // Greg, 12 novembre 2026 : le texte suit le parcours actuel (deux façons de créer, puis la vérification par l'artisan).
   chantiers: {
-    titre: "Tes chantiers",
-    lignes: [`Un chantier = un devis déposé. Dépose ton PDF ou ta photo, ${NOM_APP} sort la liste des fournitures.`, `Tape un chantier pour reprendre où tu en étais : questions, liste, envoi, ${nom}.`],
+    titre: "Tes quantitatifs",
+    lignes: [
+      "« Créer un quantitatif » te laisse le choix : tu saisis ta liste toi-même, ou Mobiiz t'aide à partir de ce que tu dictes, écris ou importes.",
+      "Dans les deux cas, c'est toi qui vérifies et valides chaque ligne : rien ne part sans ton accord.",
+      "Touche un quantitatif pour le reprendre : le compléter, l'envoyer à tes négoces ou comparer leurs réponses.",
+    ],
   },
 };

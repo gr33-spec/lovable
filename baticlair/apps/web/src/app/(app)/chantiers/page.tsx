@@ -2,7 +2,8 @@
 
 import { AideBouton } from "@/components/aide";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ClipboardList, Search } from "lucide-react";
+import { ClipboardList, Mail, Search, Truck } from "lucide-react";
+import Link from "next/link";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ConfirmerSuppression, CarteListe, ListeNonSupprimable, type Refus } from "@/components/mes-listes";
 import { Button, ButtonLink, EmptyState, ErrorNotice, PageTitle, Skeleton, Spinner } from "@/components/ui";
@@ -167,6 +168,18 @@ function MesListes() {
           <AideBouton sujet="chantiers" />
         </span>
       </div>
+      {/* Greg, 12 novembre 2026 (dossier de corrections UX, point 9) : « Mes négoces » et les réponses des négoces se
+          trouvent ici, là où on s'en sert, et plus dans le menu du compte. */}
+      <nav aria-label="Autour de mes quantitatifs" className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        <Link href="/fournisseurs" className="pressable flex min-h-12 items-center justify-center gap-2 rounded-full border border-ink/35 px-4 text-center text-[14px] leading-tight font-extrabold text-ink">
+          <Truck size={18} aria-hidden="true" className="shrink-0" />
+          Mes négoces
+        </Link>
+        <Link href="/messages" className="pressable flex min-h-12 items-center justify-center gap-2 rounded-full border border-ink/35 px-4 text-center text-[14px] leading-tight font-extrabold text-ink">
+          <Mail size={18} aria-hidden="true" className="shrink-0" />
+          Réponses des négoces
+        </Link>
+      </nav>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-4">
         <div className="flex flex-col gap-1.5 lg:grow">
           <label htmlFor="search" className="sr-only">

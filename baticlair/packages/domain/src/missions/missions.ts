@@ -22,11 +22,45 @@ export const METIERS_BATIMENT_AUTRES = [
 ] as const;
 export const METIERS_BATIMENT: readonly string[] = [...METIERS_BATIMENT_PRINCIPAUX, ...METIERS_BATIMENT_AUTRES];
 
-const sansAccent = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-/** La recherche d'un métier : sans accent ni casse, sur n'importe quel mot. Vide : la liste entière. */
+/**
+ * Les mots du chantier et les noms des catalogues de matériaux qui désignent un métier de la liste (Greg, 12 novembre
+ * 2026 : un sélecteur avec recherche, cohérent avec le catalogue). « couvreur », « placo », « plaques de plâtre »,
+ * « chauffagiste » trouvent leur métier ; les libellés des annonces déjà publiées ne changent pas.
+ */
+export const MOTS_DU_METIER: Record<string, readonly string[]> = {
+  "Couverture - Toiture": ["couvreur", "ardoise", "tuile", "toit"],
+  Zinguerie: ["zingueur", "gouttiere", "zinc"],
+  Charpente: ["charpentier", "ossature bois"],
+  "Maçonnerie": ["macon", "parpaing", "beton"],
+  "Électricité": ["electricien", "courant fort"],
+  "Plomberie - Chauffage": ["plombier", "chauffagiste", "sanitaire", "chaudiere"],
+  Menuiserie: ["menuisier", "fenetre", "porte"],
+  Isolation: ["isolant", "laine de verre", "combles"],
+  Peinture: ["peintre", "revetement mural"],
+  "Carrelage - Sols": ["carreleur", "faience", "chape"],
+  Terrassement: ["terrassier", "pelle"],
+  "Étanchéité": ["etancheur", "toiture terrasse", "membrane"],
+  "Façade - Ravalement": ["facadier", "enduit", "crepi"],
+  Climatisation: ["clim", "pompe a chaleur"],
+  "Plâtrerie - Plaquiste": ["plaques de platre", "placo", "plaquiste", "platrier", "cloison"],
+  "Serrurerie - Métallerie": ["serrurier", "metallier", "garde corps"],
+  "Photovoltaïque": ["panneaux solaires", "solaire"],
+  "Gros œuvre": ["gros oeuvre"],
+  "VRD - Assainissement": ["voirie", "reseaux", "assainissement"],
+  "Paysage - Clôtures": ["paysagiste", "cloture", "jardin"],
+};
+
+const sansAccent = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+/**
+ * La recherche d'un métier : sans accent ni casse, sur n'importe quel mot du libellé ou de ses mots du chantier. Les
+ * métiers dont le libellé contient la saisie passent d'abord. Vide : la liste entière.
+ */
 export function chercherMetier(saisie: string, liste: readonly string[] = METIERS_BATIMENT): string[] {
   const q = sansAccent(saisie.trim());
-  return q ? liste.filter((m) => sansAccent(m).includes(q)) : [...liste];
+  if (!q) return [...liste];
+  const parLibelle = liste.filter((m) => sansAccent(m).includes(q));
+  const parMot = liste.filter((m) => !parLibelle.includes(m) && (MOTS_DU_METIER[m] ?? []).some((mot) => mot.includes(q) || q.includes(mot)));
+  return [...parLibelle, ...parMot];
 }
 
 export type TypeAnnonce = "mission" | "disponibilite";

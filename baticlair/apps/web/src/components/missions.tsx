@@ -92,7 +92,7 @@ export function MissionsAccueil() {
       <CarteLien jaune href="/missions/nouvelle" titre="Je propose une mission" sous="Je cherche une entreprise pour intervenir." />
       <CarteLien href="/missions/services" titre="Je propose mes services" sous="J'indique mon métier et mes disponibilités." />
       <Recherche valeur={q} onChange={setQ} placeholder="Rechercher un métier ou une ville" />
-      <Puces label="Type d'annonces" choix={VUES} valeur={vue} onChange={setVue} />
+      <Puces label="Type d'annonces" choix={VUES} valeur={vue} onChange={setVue} entieres />
       <div className="flex items-end justify-between gap-3">
         <h2 className="text-[22px] font-extrabold tracking-[-0.02em]">{vue === "miennes" ? "Mes annonces" : "Près de toi"}</h2>
         {vue === "miennes" ? (

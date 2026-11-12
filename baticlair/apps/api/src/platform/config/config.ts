@@ -169,6 +169,13 @@ const envSchema = z
      */
     MISSIONS_V1: z.enum(["on", "off"]).default("off"),
     /**
+     * DÉCISIONS MVP (Greg, 12 novembre 2026, dossier de corrections UX, points 10 et 11) : « Mémoire de Mobiiz » et
+     * « Brancher ton logiciel de devis » sortent de l'interface. Rien n'est supprimé (code, routes, données) : `on` les
+     * remet à l'écran. La remise à zéro de ce que Mobiiz a retenu reste toujours dans « Données et confidentialité ».
+     */
+    MEMOIRE_VISIBLE: z.enum(["on", "off"]).default("off"),
+    CONNEXIONS_LOGICIEL: z.enum(["on", "off"]).default("off"),
+    /**
      * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 348 € HT par an, essai, paywall sur déposer, voir les résultats,
      * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
      */
@@ -402,6 +409,9 @@ export interface AppConfig {
   demoPublique: boolean;
   achatsGroupesV1: boolean;
   missionsV1: boolean;
+  /** Rubriques sorties de l'interface du MVP, réactivables (`MEMOIRE_VISIBLE`, `CONNEXIONS_LOGICIEL`). */
+  memoireVisible: boolean;
+  connexionsLogiciel: boolean;
   /** L'abonnement artisan (`ABONNEMENT`, `PAIEMENT`). */
   abonnement: {
     actif: boolean;
@@ -553,6 +563,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     demoPublique: e.ACCES_DEMO === "on" && e.DEMO_PUBLIQUE === "on",
     achatsGroupesV1: e.ACHATS_GROUPES_V1 === "on",
     missionsV1: e.MISSIONS_V1 === "on",
+    memoireVisible: e.MEMOIRE_VISIBLE === "on",
+    connexionsLogiciel: e.CONNEXIONS_LOGICIEL === "on",
     abonnement: {
       actif: e.ABONNEMENT === "on",
       paiement: e.PAIEMENT,

@@ -8,7 +8,7 @@ import { BandeauAbonnement } from "@/components/abonnement";
 import { initials } from "@/components/menu-artisan";
 import { Badge, PageTitle } from "@/components/ui";
 import { GROUPES_PROFIL } from "@/lib/rubriques-profil";
-import { useMissionsActif } from "@/lib/missions";
+import { useMissionsActif, useRubriquesMasquees } from "@/lib/missions";
 import { useSession } from "@/lib/session";
 
 /**
@@ -19,6 +19,7 @@ import { useSession } from "@/lib/session";
 export default function ComptePage() {
   const { me } = useSession();
   const missions = useMissionsActif() === true;
+  const masquees = useRubriquesMasquees();
   return (
     <>
       <div className="flex items-start justify-between gap-3">
@@ -46,7 +47,7 @@ export default function ComptePage() {
           <section key={g.titre} aria-label={g.titre} className="flex min-w-0 flex-col gap-2">
             <h2 className="px-1 text-[12px] font-extrabold tracking-[0.06em] text-ink/80 uppercase">{g.titre}</h2>
             <ul className="flex flex-col gap-2.5">
-              {g.lignes.filter((l) => !l.missions || missions).map((l) => {
+              {g.lignes.filter((l) => (!l.missions || missions) && !(l.masquable && masquees[l.masquable])).map((l) => {
                 const Icone = l.icone;
                 return (
                   <li key={l.id}>

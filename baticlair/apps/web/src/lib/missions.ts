@@ -87,6 +87,16 @@ export function useMissionsActif(): boolean | undefined {
   return error ? false : data === null ? undefined : data.features.missions === true;
 }
 
+/**
+ * Les rubriques sorties de l'interface du MVP (Greg, 12 novembre 2026) : « Mémoire de Mobiiz » et « Connexions ».
+ * Vrai seulement si le réglage de l'API les rallume ; pendant le chargement et en cas d'erreur, elles restent cachées.
+ */
+export function useRubriquesMasquees(): { memoire: boolean; connexions: boolean } {
+  const fetcher = useCallback(() => santeUneFois(), []);
+  const { data } = useResource(fetcher);
+  return { memoire: data?.features.memoire !== true, connexions: data?.features.connexions !== true };
+}
+
 /** La phrase à montrer pour un refus : celle de l'API d'abord, sinon une phrase simple selon le cas. */
 export function phraseErreur(e: unknown): string {
   if (e instanceof ApiError) {

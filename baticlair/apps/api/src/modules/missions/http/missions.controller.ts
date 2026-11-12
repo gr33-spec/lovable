@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Put, Query, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { ANNUAIRE_COMMUNES, type AnnuaireCommunes } from "../../../platform/communes/communes.js";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { FICHIER_MAX_OCTETS } from "@baticlair/domain";
 import { memoryStorage } from "multer";
@@ -370,5 +371,21 @@ export class MissionsAdminController {
   async signalements(@CurrentUser() u: AuthenticatedUser) {
     await this.pilotage.exiger(u);
     return this.m.signalements();
+  }
+}
+
+/**
+ * Le code postal propose la commune, la commune propose son code postal (Greg, 12 novembre 2026). Réservé aux comptes
+ * connectés ; aucune donnée d'entreprise n'est lue ni écrite.
+ */
+@Controller("v1/communes")
+@UseGuards(TenantGuard)
+export class CommunesController {
+  constructor(@Inject(ANNUAIRE_COMMUNES) private readonly annuaire: AnnuaireCommunes) {}
+
+  @Get()
+  async chercher(@Query("codePostal") codePostal?: string, @Query("nom") nom?: string) {
+    if (codePostal !== undefined) return { items: /^\d{5}$/.test(codePostal) ? await this.annuaire.parCodePostal(codePostal) : [] };
+    return { items: await this.annuaire.parNom(String(nom ?? "").slice(0, 60)) };
   }
 }

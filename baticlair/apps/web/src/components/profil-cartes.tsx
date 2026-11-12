@@ -232,8 +232,8 @@ export function MemoryCard() {
         {`Ce que ${NOM_APP} a appris`}
       </h2>
       <p className="text-sm text-muted">
-        Tes habitudes (« je façonne », la qualité d&apos;ardoise…), les ajouts
-        refusés et tes corrections. Tes chantiers restent tels quels.
+        Pour t&apos;éviter de répondre deux fois aux mêmes questions, {NOM_APP} garde tes réponses habituelles et tes corrections. Ce ne sont jamais des règles techniques : tu vérifies toujours chaque liste. Tu peux tout remettre à zéro ; tes quantitatifs
+        restent tels quels.
       </p>
       {error ? <ErrorNotice error={error} /> : null}
       {done ? (

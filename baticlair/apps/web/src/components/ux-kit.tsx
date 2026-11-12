@@ -85,11 +85,11 @@ export function CarteLien({ href, onClick, icone: Icone, titre, sous, jaune = fa
 }
 
 /** Les filtres en pastilles (« Tous · Missions · Négoces · Non lus ») : des boutons à bascule, un seul actif. */
-export function Puces<T extends string>({ choix, valeur, onChange, label }: { choix: readonly { id: T; libelle: string }[]; valeur: T; onChange: (v: T) => void; label: string }) {
+export function Puces<T extends string>({ choix, valeur, onChange, label, entieres = false }: { choix: readonly { id: T; libelle: string }[]; valeur: T; onChange: (v: T) => void; label: string; /** Peu de choix qui doivent TOUS se voir : ils se partagent la largeur, sans défilement (le libellé passe sur deux lignes s'il le faut). */ entieres?: boolean }) {
   return (
-    <div role="group" aria-label={label} className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none]">
+    <div role="group" aria-label={label} className={entieres ? "grid gap-2 sm:max-w-[30rem]" : "-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none]"} style={entieres ? { gridTemplateColumns: `repeat(${choix.length}, minmax(0, 1fr))` } : undefined}>
       {choix.map((c) => (
-        <button key={c.id} type="button" aria-pressed={valeur === c.id} onClick={() => onChange(c.id)} className={`pressable min-h-11 shrink-0 rounded-full px-4 text-[14px] font-extrabold whitespace-nowrap ${valeur === c.id ? "bg-accent text-on-accent" : "border border-ink/35 text-ink"}`}>
+        <button key={c.id} type="button" aria-pressed={valeur === c.id} onClick={() => onChange(c.id)} className={`pressable min-h-11 rounded-full font-extrabold ${entieres ? "px-2 py-1 text-[13px] leading-tight sm:text-[14px]" : "shrink-0 px-4 text-[14px] whitespace-nowrap"} ${valeur === c.id ? "bg-accent text-on-accent" : "border border-ink/35 text-ink"}`}>
           {c.libelle}
         </button>
       ))}
@@ -150,7 +150,8 @@ export function LienContour({ href, children }: { href: string; children: React.
 }
 
 const CHAMP = `flex min-h-16 flex-col justify-center gap-0.5 px-4 py-2.5 ${CARTE} focus-within:ring-2 focus-within:ring-accent`;
-const SAISIE = "w-full min-w-0 bg-transparent text-[16px] font-extrabold text-ink outline-none placeholder:font-semibold placeholder:text-[#8a8474]";
+/** La saisie d'un champ en carte. Le texte d'exemple est plus léger et moins foncé qu'une valeur (jamais confondu avec elle), et reste lisible (contraste 4,9:1 sur l'ivoire). */
+export const SAISIE = "w-full min-w-0 bg-transparent text-[16px] font-extrabold text-ink outline-none placeholder:font-normal placeholder:text-[#6f695b]";
 /** Un champ en carte : le petit libellé au-dessus, la valeur en gras dessous (les lignes des captures 07, 08, 49 à 51). */
 export function Champ({ label, erreur, children }: { label: string; erreur?: string | undefined; children: React.ReactNode }) {
   return (

@@ -313,7 +313,9 @@ test("compte : le menu, « Profil et paramètres », notifications par catégori
   // LE MENU (capture 17).
   await page.getByRole("button", { name: "Mon menu" }).click();
   const menu = page.getByRole("menu", { name: "Mon menu" });
-  for (const ligne of ["Profil et paramètres", "Mon entreprise", "Documents et qualifications", "Mes négoces", "Messages et réponses", "Abonnement, factures et reçus", "Aide, guide et démonstration", "Se déconnecter"]) await expect(menu.getByRole("menuitem", { name: ligne, exact: true })).toBeVisible();
+  // Greg, 12 novembre 2026 : un panneau court, sans doublon avec « Profil et paramètres » ni avec les parcours métier.
+  await expect(menu.getByRole("menuitem")).toHaveText(["Profil et paramètres", "Abonnement, factures et reçus", "Se déconnecter"]);
+  for (const ligne of ["Profil et paramètres", "Abonnement, factures et reçus", "Se déconnecter"]) await expect(menu.getByRole("menuitem", { name: ligne, exact: true })).toBeVisible();
   // Réservé : ni l'administration ni les opportunités commerciales pour un compte qui n'y a pas droit.
   await expect(menu.getByRole("menuitem", { name: /Espace administration/ })).toHaveCount(0);
   await expect(menu.getByRole("menuitem", { name: /Opportunités commerciales/ })).toHaveCount(0);
@@ -327,7 +329,16 @@ test("compte : le menu, « Profil et paramètres », notifications par catégori
   // « PROFIL ET PARAMÈTRES » (captures 18 et 19).
   await expect(page.getByRole("heading", { name: "Profil et paramètres" })).toBeVisible();
   for (const groupe of ["Entreprise", "Préférences", "Compte et services", "Données et aide"]) await expect(page.getByRole("region", { name: groupe, exact: true })).toBeVisible();
-  for (const rubrique of ["Mon entreprise", "Profil public et missions", "Documents et qualifications", "Apparence", "Notifications", "Mémoire de Mobiiz", "Compte et sécurité", "Abonnement, factures et reçus", "E-mails Mobiiz et réponses", "Connexions", "Données et confidentialité", "Aide et contact", "Guide et chantier fictif"]) await expect(page.getByRole("region").getByRole("link", { name: new RegExp(`^${rubrique}`) })).toBeVisible();
+  for (const rubrique of ["Mon entreprise", "Profil public et missions", "Documents et qualifications", "Apparence", "Notifications", "Compte et sécurité", "Abonnement, factures et reçus", "E-mails Mobiiz et réponses", "Données et confidentialité", "Aide et contact", "Guide et chantier fictif"]) await expect(page.getByRole("region").getByRole("link", { name: new RegExp(`^${rubrique}`) })).toBeVisible();
+  // Décisions MVP (Greg, 12 novembre 2026) : « Mémoire de Mobiiz » et « Connexions » sortent de l'interface, y compris
+  // par leur ancienne adresse ; rien n'est supprimé (un réglage les rallume).
+  for (const cachee of [/^Mémoire de Mobiiz/, /^Connexions/]) await expect(page.getByRole("link", { name: cachee })).toHaveCount(0);
+  for (const adresse of ["/compte/preferences", "/compte/connexions"]) {
+    await page.goto(adresse);
+    await expect(page.getByRole("heading", { level: 1, name: "Rubrique indisponible" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Effacer ce que Mobiiz a appris|Créer une clé/ })).toHaveCount(0);
+  }
+  await page.goto("/compte");
   await expect(page.getByText("Mobiiz. Plus on est, moins on paie.")).toBeVisible();
   await capture(page, "18-profil-parametres");
 

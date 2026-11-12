@@ -31,6 +31,8 @@ export interface LigneProfil {
   enAvant?: boolean;
   /** Rubrique des missions : absente du sommaire tant que le réglage `MISSIONS_V1` est coupé. */
   missions?: boolean;
+  /** Rubrique sortie du MVP (Greg, 12 novembre 2026) : absente du sommaire et fermée par son adresse tant que son réglage est coupé. */
+  masquable?: "memoire" | "connexions";
 }
 
 export const GROUPES_PROFIL: { titre: string; lignes: LigneProfil[] }[] = [
@@ -47,22 +49,22 @@ export const GROUPES_PROFIL: { titre: string; lignes: LigneProfil[] }[] = [
     lignes: [
       { id: "apparence", titre: "Apparence", sousTitre: "Mode clair, sombre ou automatique", icone: Palette, enAvant: true },
       { id: "notifications", titre: "Notifications", sousTitre: "E-mails, alertes et rappels", icone: Bell },
-      { id: "preferences", titre: "Mémoire de Mobiiz", sousTitre: "Informations conservées pour t'aider", icone: Sparkles },
+      { id: "preferences", titre: "Mémoire de Mobiiz", sousTitre: "Informations conservées pour t'aider", icone: Sparkles, masquable: "memoire" },
     ],
   },
   {
     titre: "Compte et services",
     lignes: [
-      { id: "informations", titre: "Compte et sécurité", sousTitre: "Mot de passe, connexions et accès", icone: ShieldCheck },
-      { id: "abonnement", titre: "Abonnement, factures et reçus", sousTitre: "Offre, paiements et documents", icone: CreditCard },
-      { id: "adresse", titre: "E-mails Mobiiz et réponses", sousTitre: "Adresses d'envoi et messages reçus", icone: AtSign },
-      { id: "connexions", titre: "Connexions", sousTitre: "Logiciels de devis et intégrations", icone: Plug },
+      { id: "informations", titre: "Compte et sécurité", sousTitre: "Nom, e-mail, mot de passe et déconnexion", icone: ShieldCheck },
+      { id: "abonnement", titre: "Abonnement, factures et reçus", sousTitre: "Ta formule, tes paiements et tes factures", icone: CreditCard },
+      { id: "adresse", titre: "E-mails Mobiiz et réponses", sousTitre: "Ton adresse d'envoi et la réception des réponses", icone: AtSign },
+      { id: "connexions", titre: "Connexions", sousTitre: "Logiciels de devis et intégrations", icone: Plug, masquable: "connexions" },
     ],
   },
   {
     titre: "Données et aide",
     lignes: [
-      { id: "donnees", titre: "Données et confidentialité", sousTitre: "Exporter, corriger ou supprimer", icone: ShieldCheck },
+      { id: "donnees", titre: "Données et confidentialité", sousTitre: "Télécharger, remettre à zéro ou supprimer", icone: ShieldCheck },
       { id: "aide", titre: "Aide et contact", sousTitre: "Questions fréquentes et assistance", icone: LifeBuoy },
       { id: "guide", titre: "Guide et chantier fictif", sousTitre: "Revoir le parcours sans risque", icone: Sparkles },
     ],

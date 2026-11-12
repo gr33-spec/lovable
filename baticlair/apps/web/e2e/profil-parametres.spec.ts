@@ -97,13 +97,11 @@ test("1, 2, 12, 15 : le sommaire, ses quatre groupes, chaque rubrique s'ouvre et
       await expect(p.getByRole("button", { name: "Copier l'adresse" })).toBeVisible();
       await expect(p.getByRole("link", { name: "Mes prix" })).toBeVisible();
     }],
-    ["Connexions", /\/compte\/connexions$/, async () => {}],
-    ["Mémoire de Mobiiz", /\/compte\/preferences$/, async (p) => {
-      await expect(p.getByRole("button", { name: "Effacer ce que Mobiiz a appris" })).toBeVisible();
-    }],
     ["Données et confidentialité", /\/compte\/donnees$/, async (p) => {
       await expect(p.getByRole("button", { name: "Télécharger mes données" })).toBeVisible();
       await expect(p.getByRole("button", { name: "Supprimer mon compte" })).toBeVisible();
+      // Décision MVP (Greg, 12 novembre 2026) : la remise à zéro de ce que Mobiiz a retenu se fait ici.
+      await expect(p.getByRole("button", { name: "Effacer ce que Mobiiz a appris" })).toBeVisible();
     }],
     ["Aide et contact", /\/compte\/aide$/, async (p) => {
       await expect(p.getByRole("link", { name: /Nous écrire/ })).toHaveAttribute("href", "mailto:contact@mobiiz.fr");

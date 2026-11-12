@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Building2, ChevronRight, CircleHelp, CreditCard, FolderOpen, LayoutGrid, Mail, Sparkles, Truck, UserRound, X, type LucideIcon } from "lucide-react";
+import { ChevronRight, CreditCard, LayoutGrid, Sparkles, UserRound, X, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
-import { useMissionsActif } from "@/lib/missions";
 import { useSession } from "@/lib/session";
 import { Cloche } from "./achat-groupe";
 import { PastilleEssai } from "./abonnement";
@@ -35,7 +34,6 @@ export function MenuArtisan() {
   const bouton = useRef<HTMLButtonElement>(null);
   const [chasseur, setChasseur] = useState<{ aTraiter: number } | null>(null);
   const [admin, setAdmin] = useState(false);
-  const missions = useMissionsActif() === true;
   useEffect(() => {
     if (!open) return;
     let vivant = true;
@@ -116,9 +114,12 @@ export function MenuArtisan() {
               <span className="flex-1">Profil et paramètres</span>
               <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
             </Link>
+            {/* Greg, 12 novembre 2026 (dossier de corrections UX, point 9) : un panneau court. Tout le reste a UN chemin :
+                l'entreprise, les documents, l'aide et le guide dans « Profil et paramètres » ; « Mes négoces » et les réponses
+                des négoces depuis les quantitatifs ; les conversations depuis Missions. */}
             <div className="flex flex-col divide-y divide-black/10 border-t border-black/10">
-              {ligne("/compte/entreprise", Building2, "Mon entreprise")}
-              {missions ? ligne("/compte/documents", FolderOpen, "Documents et qualifications") : null}
+              {/* La page « Mon abonnement » réunit déjà l'offre, les factures et les reçus de paiement. */}
+              {ligne("/abonnement", CreditCard, "Abonnement, factures et reçus")}
               {chasseur
                 ? ligne(
                     "/admin/chasseur",
@@ -131,11 +132,6 @@ export function MenuArtisan() {
                     ) : undefined,
                   )
                 : null}
-              {ligne("/fournisseurs", Truck, "Mes négoces")}
-              {ligne("/messages", Mail, "Messages et réponses")}
-              {/* La page « Mon abonnement » réunit déjà l'offre, les factures et les reçus de paiement. */}
-              {ligne("/abonnement", CreditCard, "Abonnement, factures et reçus")}
-              {ligne("/compte/guide", CircleHelp, "Aide, guide et démonstration")}
             </div>
             {admin ? (
               <Link role="menuitem" href="/admin/pilotage" onClick={() => setOpen(false)} className="pressable mt-3 flex min-h-14 items-center gap-4 rounded-[18px] bg-[#0b0b0c] px-4 text-[16px] font-extrabold text-white">

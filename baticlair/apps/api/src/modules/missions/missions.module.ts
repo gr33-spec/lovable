@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { ANNUAIRE_COMMUNES, GeoApiCommunes, TableCommunes, type AnnuaireCommunes } from "../../platform/communes/communes.js";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
@@ -10,7 +11,7 @@ import { lienEmailsCoupes } from "../privacy/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { BoiteService } from "./application/boite.service.js";
 import { MissionsService } from "./application/missions.service.js";
-import { BoiteController, DossierProController, MissionsAdminController, MissionsController } from "./http/missions.controller.js";
+import { BoiteController, CommunesController, DossierProController, MissionsAdminController, MissionsController } from "./http/missions.controller.js";
 
 /**
  * MISSIONS ENTRE ENTREPRISES, « MESSAGES ET RÉPONSES » ET LA CLOCHE (Greg, 10 novembre 2026). Tables nouvelles, rien de
@@ -19,8 +20,10 @@ import { BoiteController, DossierProController, MissionsAdminController, Mission
  */
 @Module({
   imports: [TenancyModule, PilotageModule],
-  controllers: [BoiteController, DossierProController, MissionsController, MissionsAdminController],
+  controllers: [BoiteController, CommunesController, DossierProController, MissionsController, MissionsAdminController],
   providers: [
+    // En ligne, l'annuaire de l'État ; en développement et en test, une table fixe (aucun appel réseau), comme le géocodeur.
+    { provide: ANNUAIRE_COMMUNES, useFactory: (c: AppConfig): AnnuaireCommunes => (c.env === "production" || c.env === "staging" ? new GeoApiCommunes() : new TableCommunes()), inject: [CONFIG] },
     {
       provide: MissionsService,
       useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender, c: AppConfig) => {

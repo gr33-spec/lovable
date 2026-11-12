@@ -13,7 +13,7 @@ en 5 lots. Ce fichier est LA première chose à lire à la reprise : vérifier l
 | Lot | État |
 |---|---|
 | 1 Blocages et fiabilité | FAIT (commits locaux) |
-| 2 Missions, aide, paramètres | non commencé |
+| 2 Missions, aide, paramètres | FAIT (commit local) ; contrastes restants repris au lot 5 |
 | 3 Contenus, documents, MVP | non commencé |
 | 4 Formules et facturation (test seulement) | non commencé |
 | 5 Passe visuelle | non commencé |
@@ -38,6 +38,21 @@ en 5 lots. Ce fichier est LA première chose à lire à la reprise : vérifier l
   `messages.tsx`. Tests : `apps/api/test/adresse-mobiiz.test.ts` 20/20 ; `e2e/adresse-mobiiz.spec.ts -g R7` 4/4 ;
   `e2e-ag-v1/missions` 15/15.
 
+- Lot 2 : `ChampMetier` (sélecteur avec recherche, mots du chantier, métier absent gardé sur demande) et
+  `ChampsCommune` (code postal ↔ commune, choix explicite si plusieurs communes) dans
+  `apps/web/src/components/champs-missions.tsx` ; annuaire serveur `apps/api/src/platform/communes/communes.ts`
+  (geo.api.gouv.fr en ligne, table fixe en test), route `GET /v1/communes` ; « Type de mission » dans sa carte ;
+  filtres Missions entiers (`Puces entieres`) ; fenêtre d'aide fixe dans l'écran (`aide.tsx`) et texte à jour ; menu du
+  compte court (`menu-artisan.tsx`) ; « Mes négoces » et « Réponses des négoces » sur `/chantiers` ; réglages
+  `MEMOIRE_VISIBLE` et `CONNEXIONS_LOGICIEL` (défaut off, exposés par `/v1/health`) qui masquent « Mémoire de Mobiiz »
+  et « Connexions » du sommaire ET par l'adresse ; « Effacer ce que Mobiiz a appris » déplacé dans « Données et
+  confidentialité ». Base de test : 0 clé partenaire (vérifié en lecture seule), rien à préserver.
+  Tests : `apps/api/test/communes.test.ts` 2/2 ; domaine `missions.test.ts` 16/16 ;
+  `e2e-ag-v1/missions-formulaires.spec.ts` 6/6 ; `e2e-ag-v1/missions.spec.ts` 15/15 ; anciens parcours touchés 26
+  réussis, 12 ignorés (`@ancien` hors projet).
+- À dire à Greg : la formulation RGPD de la carte « Ce que Mobiiz a appris » est à faire valider ; l'annuaire des
+  communes appelle un service de l'État (geo.api.gouv.fr) depuis le serveur, sans donnée d'artisan.
+
 ## Rappels techniques
 - Les e2e tournent sur le site CONSTRUIT : `pnpm -s build` dans `apps/web` avant chaque passe, puis
   `fuser -k 3000/tcp 4000/tcp`.
@@ -49,6 +64,5 @@ Production, `main`, e-mail réel, paiement réel, appel IA payant, suppression d
 juridique validé, règles de facturation réelles : rien sans l'accord explicite de Greg.
 
 ## Prochain geste
-Lot 2 : lire les captures 6, 7, 8, 11, 12, 14 à 17 du dossier (`scratchpad/dossier-ux/x/word/media/`), puis formulaires
-Missions (code postal ↔ commune, sélecteur de métier), filtres Missions sans défilement, fenêtre d'aide des
-quantitatifs, menu du compte et « Profil et paramètres » sans doublons.
+Lot 3 : captures 9, 10, 13, 18, 19 ; e-mail au négoce (ton, plus de « plusieurs fournisseurs »), PDF sans « Détail du
+devis » redondant, cartes autonomes des achats groupés ouverts, logo ou photo du profil public Missions.
