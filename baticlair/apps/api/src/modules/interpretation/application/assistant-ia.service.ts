@@ -96,7 +96,8 @@ export class AssistantIaService {
       const code = this.parLeCode(echanges);
       return code.lignes.length > 0 ? code : { ...code, message: v.message };
     }
-    const message = v.ecartees > 0 ? [v.message, "Je n'ai pas tout retenu : redis ce qui manque, avec ses mesures."].filter(Boolean).join(" ") : v.message;
+    // Une ligne écartée d'une photo (un format que la photo ne peut pas donner) n'est pas à redire : l'artisan dira ses mesures.
+    const message = v.ecartees > 0 && !photo ? [v.message, "Je n'ai pas tout retenu : redis ce qui manque, avec ses mesures."].filter(Boolean).join(" ") : v.message;
     const vus = v.lignes.filter((l) => l.vuSurPhoto).map((l) => l.libelle);
     return { ia: true, nature: v.nature, vu: photo && vus.length ? vus.join(" ; ") : null, lignes: v.lignes, questions: v.questions, message };
   }
