@@ -12,8 +12,8 @@ import { AMORCE_CATALOGUE, arbreArticles, LIBELLES_METIERS_CATALOGUE, METIERS_CA
 const MARQUES = /\b(velux|placo(platre)?|isover|rockwool|ursa|knauf|siniat|eternit|cupa|samaca|vmzinc|rheinzink|elzinc|onduline|xylophene|siporex|monier|terreal|edilians|imerys|wakaflex|kvh|grohe|hansgrohe|legrand|schneider|hager|atlantic|thermor)\b/i;
 
 describe("le catalogue complet", () => {
-  it("onze métiers, chacun ses articles ; clés uniques ; jamais une marque dans une désignation ; trois niveaux au plus", () => {
-    expect(METIERS_CATALOGUE).toHaveLength(11);
+  it("douze métiers, chacun ses articles ; clés uniques ; jamais une marque dans une désignation ; trois niveaux au plus", () => {
+    expect(METIERS_CATALOGUE).toHaveLength(12);
     for (const m of METIERS_CATALOGUE) expect(AMORCE_CATALOGUE[m].length, m).toBeGreaterThan(10);
     const cles = TOUT_LE_CATALOGUE.map((a) => a.cle);
     expect(new Set(cles).size).toBe(cles.length);
@@ -53,8 +53,9 @@ describe("le catalogue complet", () => {
     const bois = arbre.find((f) => f.libelle === "Bois de charpente")!;
     const panne = bois.enfants.find((p) => p.libelle === "Panne")!;
     expect(panne.enfants.some((v) => v.libelle === "75×225 · 6 m · classe 2" && v.article?.unite === "pièces")).toBe(true);
-    expect(metiersCatalogueDuCompte(["roofing"])).toEqual(["couverture", "zinguerie"]);
-    expect(metiersCatalogueDuCompte(["carpentry", "roofing"])).toEqual(["charpente", "couverture", "zinguerie"]);
+    expect(metiersCatalogueDuCompte(["roofing"])).toEqual(["couverture", "etancheite"]);
+    expect(metiersCatalogueDuCompte(["carpentry", "roofing"])).toEqual(["charpente", "couverture", "etancheite"]);
+    expect(metiersCatalogueDuCompte(["waterproofing"])).toEqual(["etancheite", "couverture"]);
   });
 
   it("écrit les fichiers de relecture (un par métier) dans docs/catalogue", () => {

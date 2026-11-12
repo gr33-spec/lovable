@@ -13,12 +13,13 @@ import type { FamilleGroupe } from "../groupe/groupe.js";
  */
 
 /** Les métiers du catalogue (le sélecteur « Métier : Couverture ▾ »). */
-export const METIERS_CATALOGUE = ["couverture", "zinguerie", "charpente", "menuiserie", "maconnerie", "platrerie_isolation", "peinture", "carrelage", "plomberie", "electricite", "chauffage"] as const;
+export const METIERS_CATALOGUE = ["couverture", "zinguerie", "etancheite", "charpente", "menuiserie", "maconnerie", "platrerie_isolation", "peinture", "carrelage", "plomberie", "electricite", "chauffage"] as const;
 export type MetierCatalogue = (typeof METIERS_CATALOGUE)[number];
 
 export const LIBELLES_METIERS_CATALOGUE: Readonly<Record<MetierCatalogue, string>> = {
   couverture: "Couverture",
   zinguerie: "Zinguerie",
+  etancheite: "Étanchéité",
   charpente: "Charpente",
   menuiserie: "Menuiserie",
   maconnerie: "Maçonnerie",
@@ -38,6 +39,7 @@ export const LIBELLES_METIERS_CATALOGUE: Readonly<Record<MetierCatalogue, string
 export const FAMILLE_DU_METIER_CATALOGUE: Readonly<Record<MetierCatalogue, FamilleGroupe>> = {
   couverture: "couverture",
   zinguerie: "couverture",
+  etancheite: "couverture",
   charpente: "charpente",
   menuiserie: "menuiseries_fermetures",
   maconnerie: "maconnerie",
@@ -49,10 +51,23 @@ export const FAMILLE_DU_METIER_CATALOGUE: Readonly<Record<MetierCatalogue, Famil
   chauffage: "plomberie",
 };
 
+/**
+ * LA COUVERTURE COMPREND LA ZINGUERIE (Greg, 12 novembre 2026 : « la partie couverture doit comprendre la partie
+ * zinguerie »). Un métier rangé dans un autre n'a plus d'entrée au sélecteur : ses articles se lisent dans le rayon qui
+ * le comprend (gouttières, descentes et zinc sous « Couverture »). Les clés des articles ne changent pas.
+ */
+export const RAYON_DU_METIER_CATALOGUE: Readonly<Partial<Record<MetierCatalogue, MetierCatalogue>>> = { zinguerie: "couverture" };
+/** Le métier du sélecteur où se lit un métier du catalogue (« zinguerie » → « couverture »). */
+export const rayonDuMetierCatalogue = (m: MetierCatalogue): MetierCatalogue => RAYON_DU_METIER_CATALOGUE[m] ?? m;
+/** Les métiers du sélecteur « Métier : Couverture ▾ » : ceux qui ne sont pas rangés dans un autre. */
+export const METIERS_DU_SELECTEUR: readonly MetierCatalogue[] = METIERS_CATALOGUE.filter((m) => !RAYON_DU_METIER_CATALOGUE[m]);
+/** Les métiers dont les articles se lisent sous un métier du sélecteur, lui d'abord (« couverture » → couverture, zinguerie). */
+export const metiersDuRayon = (m: MetierCatalogue): MetierCatalogue[] => [m, ...METIERS_CATALOGUE.filter((x) => RAYON_DU_METIER_CATALOGUE[x] === m)];
+
 /** Les métiers du catalogue d'un métier du compte (`trades` : roofing, carpentry…), dans l'ordre. */
 const METIERS_DU_COMPTE: Readonly<Record<string, readonly MetierCatalogue[]>> = {
-  roofing: ["couverture", "zinguerie"],
-  waterproofing: ["couverture"],
+  roofing: ["couverture", "etancheite"],
+  waterproofing: ["etancheite", "couverture"],
   cladding: ["couverture"],
   carpentry: ["charpente"],
   joinery: ["menuiserie"],

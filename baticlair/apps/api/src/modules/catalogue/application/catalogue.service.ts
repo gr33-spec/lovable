@@ -13,6 +13,9 @@ import {
   FAMILLE_DU_METIER_CATALOGUE,
   LIBELLES_METIERS_CATALOGUE,
   METIERS_CATALOGUE,
+  METIERS_DU_SELECTEUR,
+  metiersDuRayon,
+  rayonDuMetierCatalogue,
   metiersCatalogueDuCompte,
   clesDeRegroupement,
   rechercherAvecPrecisions,
@@ -63,7 +66,8 @@ const vue = (a: Ligne): ArticleVue => {
   const f = FICHES.get(a.cle);
   return {
     cle: a.cle,
-    metier: a.metier,
+    // La couverture comprend la zinguerie (Greg, 12 novembre 2026) : un article se lit sous le métier de son rayon.
+    metier: estMetier(a.metier) ? rayonDuMetierCatalogue(a.metier) : a.metier,
     famille: a.famille,
     produit: a.produit,
     variante: a.variante,
@@ -103,7 +107,7 @@ export class CatalogueService {
 
   private async articles(metier: string | null, avecMasques = false): Promise<Ligne[]> {
     await this.amorcer();
-    return this.prisma.catalogueArticle.findMany({ where: { ...(metier ? { metier } : {}), ...(avecMasques ? {} : { masque: false }) }, orderBy: [{ ordre: "asc" }, { cle: "asc" }] });
+    return this.prisma.catalogueArticle.findMany({ where: { ...(metier ? { metier: estMetier(metier) ? { in: metiersDuRayon(metier) } : metier } : {}), ...(avecMasques ? {} : { masque: false }) }, orderBy: [{ ordre: "asc" }, { cle: "asc" }] });
   }
 
   /** Les métiers du sélecteur : ceux du profil d'abord (« Métier : Couverture ▾ »), puis les autres. */
@@ -120,7 +124,7 @@ export class CatalogueService {
 
   private metiersDe(trades: string[]) {
     const miens = metiersCatalogueDuCompte(trades);
-    const ordre = [...miens, ...METIERS_CATALOGUE.filter((m) => !miens.includes(m))];
+    const ordre = [...miens, ...METIERS_DU_SELECTEUR.filter((m) => !miens.includes(m))];
     return ordre.map((m) => ({ code: m, libelle: LIBELLES_METIERS_CATALOGUE[m], mien: miens.includes(m), familleAchat: FAMILLE_DU_METIER_CATALOGUE[m] }));
   }
 
@@ -140,7 +144,7 @@ export class CatalogueService {
   /** L'écran : le métier choisi (sinon le premier du profil), son arbre, ou les résultats d'une recherche (tous métiers). */
   async lire(tenant: TenantContext, metierDemande: string | undefined, q: string | undefined) {
     const metiers = await this.metiers(tenant);
-    const metier = metierDemande && estMetier(metierDemande) ? metierDemande : (metiers[0]?.code ?? "couverture");
+    const metier = metierDemande && estMetier(metierDemande) ? rayonDuMetierCatalogue(metierDemande) : (metiers[0]?.code ?? "couverture");
     const recherche = (q ?? "").trim();
     if (recherche) {
       const tous = await this.articles(null);
@@ -155,8 +159,9 @@ export class CatalogueService {
         60,
         dominants.size ? (a) => dominants.has(a.produit) : undefined,
       );
-      const duMetier = trouves.filter((t) => t.article.metier === metier);
-      const resultats = [...duMetier, ...trouves.filter((t) => t.article.metier !== metier)].slice(0, 30).map((t) => ({ ...vue(t.article), precisions: t.precisions }));
+      const duRayon = (m: string) => estMetier(m) && rayonDuMetierCatalogue(m) === metier;
+      const duMetier = trouves.filter((t) => duRayon(t.article.metier));
+      const resultats = [...duMetier, ...trouves.filter((t) => !duRayon(t.article.metier))].slice(0, 30).map((t) => ({ ...vue(t.article), precisions: t.precisions }));
       // Les intitulés écrits par l'entreprise elle-même, après le catalogue (Greg, 30 octobre 2026, nuit : rien n'est
       // diffusé aux autres ; un intitulé générique ne l'est qu'une fois ajouté au catalogue par l'admin).
       const vus = new Set(resultats.map((a) => cleDeLibelle(a.designation)));
@@ -282,8 +287,8 @@ export class CatalogueService {
   /* ------------------------------------------------------------------------------------------------- l'admin */
 
   async admin(metier: string | undefined) {
-    const m = metier && estMetier(metier) ? metier : "couverture";
-    return { metiers: METIERS_CATALOGUE.map((x) => ({ code: x, libelle: LIBELLES_METIERS_CATALOGUE[x] })), metier: m, articles: (await this.articles(m, true)).map((a) => ({ ...vue(a), masque: a.masque, ajoute: a.ajoute, synonymes: a.synonymes })) };
+    const m = metier && estMetier(metier) ? rayonDuMetierCatalogue(metier) : "couverture";
+    return { metiers: METIERS_DU_SELECTEUR.map((x) => ({ code: x, libelle: LIBELLES_METIERS_CATALOGUE[x] })), metier: m, articles: (await this.articles(m, true)).map((a) => ({ ...vue(a), masque: a.masque, ajoute: a.ajoute, synonymes: a.synonymes })) };
   }
 
   async ajouter(a: { metier: string; famille: string; produit: string; variante: string | null; designation: string | null; unite: string; synonymes: string[] }) {

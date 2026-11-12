@@ -358,9 +358,26 @@ describe("le catalogue complet et la ligne libre", { timeout: 240_000 }, () => {
   it("les listes du métier, puis la recherche ; « panne », « pane », les métiers du profil d'abord", async () => {
     const a = await artisan(1);
     const cat = (await a.agent.get("/v1/catalogue").expect(200)).body;
-    expect(cat.metiers.slice(0, 2).map((m: { code: string; mien: boolean }) => [m.code, m.mien])).toEqual([["couverture", true], ["zinguerie", true]]);
+    expect(cat.metiers.slice(0, 2).map((m: { code: string; mien: boolean }) => [m.code, m.mien])).toEqual([["couverture", true], ["etancheite", true]]);
     expect(cat.metier).toBe("couverture");
     expect(cat.arbre.map((f: { libelle: string }) => f.libelle)).toContain("Ardoises");
+    // La couverture comprend la zinguerie (Greg, 12 novembre 2026) : plus d'entrée « Zinguerie » au sélecteur, ses
+    // familles sous « Couverture », les clés inchangées ; l'ancien lien ?metier=zinguerie ouvre la couverture.
+    const familles = (c: { arbre: { libelle: string }[] }) => c.arbre.map((f) => f.libelle);
+    expect(cat.metiers.map((m: { code: string }) => m.code)).not.toContain("zinguerie");
+    expect(familles(cat)).toEqual(expect.arrayContaining(["Zinc", "Gouttières", "Descentes", "Bandes et pièces façonnées"]));
+    const zing = (await a.agent.get("/v1/catalogue?metier=zinguerie").expect(200)).body;
+    expect(zing.metier).toBe("couverture");
+    expect(familles(zing)).toEqual(familles(cat));
+    const gouttiere = (await a.agent.get("/v1/catalogue?q=gouttiere%20havraise").expect(200)).body.resultats[0];
+    expect(gouttiere).toMatchObject({ produit: "Gouttière havraise zinc", metier: "couverture", familleAchat: "couverture" });
+    expect(gouttiere.cle.startsWith("zinguerie/")).toBe(true);
+    // L'étanchéité a son métier : membranes, chape alu (« pax alu »), EPDM, isolants, pare-vapeur…
+    const et = (await a.agent.get("/v1/catalogue?metier=etancheite").expect(200)).body;
+    expect(et.metier).toBe("etancheite");
+    expect(familles(et)).toEqual(["Membranes bitume", "Étanchéité EPDM", "Membranes PVC et TPO", "Étanchéité liquide", "Isolants de toiture-terrasse", "Pare-vapeur et écrans", "Évacuations et relevés", "Protection et finition"]);
+    expect((await a.agent.get("/v1/catalogue?q=pax%20alu").expect(200)).body.resultats[0]).toMatchObject({ produit: "Chape bitume armée autoprotégée aluminium", metier: "etancheite", familleAchat: "couverture" });
+    expect((await a.agent.get("/v1/catalogue?metier=etancheite&q=pare%20vapeur").expect(200)).body.resultats[0].famille).toBe("Pare-vapeur et écrans");
     const ch = (await a.agent.get("/v1/catalogue?metier=charpente").expect(200)).body;
     const panne = ch.arbre.find((f: { libelle: string }) => f.libelle === "Bois de charpente").produits.find((p: { libelle: string }) => p.libelle === "Panne");
     expect(panne.variantes.some((v: { libelle: string; article: { cle: string } }) => v.libelle === "75×225 · 6 m · classe 2" && v.article.cle === PANNE)).toBe(true);
