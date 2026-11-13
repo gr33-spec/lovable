@@ -2993,3 +2993,40 @@ model LectureBoite {
   @@id([companyId, cle])
   @@map("lecture_boite")
 }
+
+/// SIGNALEMENT DE BUGS (Greg, 13 novembre 2026) : le bouton « Signaler un problème » de l'application et de l'espace
+/// négoce. La page concernée et la capture d'écran sont jointes ; l'utilisateur reçoit un accusé de réception, Greg une
+/// alerte, puis l'utilisateur un e-mail « C'est corrigé » quand le signalement passe à « corrigé ». Table nouvelle, rien
+/// de l'existant n'est modifié.
+model Signalement {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  createdAt         DateTime  @default(now())
+  /// nouveau | en_cours | corrige
+  statut            String    @default("nouveau")
+  /// artisan (compte connecté) | negoce | public
+  origine           String
+  /// La page concernée (chemin seul, sans paramètre d'adresse).
+  page              String
+  message           String
+  /// L'e-mail pour l'accusé de réception et « C'est corrigé » (celui du compte, ou celui écrit par le négoce).
+  email             String?
+  companyId         String?   @db.Uuid
+  userId            String?
+  /// Le navigateur et la taille de l'écran, pour reproduire.
+  contexte          String?
+  /// La capture d'écran jointe (image), au plus 2 Mo.
+  capture           Bytes?
+  captureType       String?
+  /// Le résumé de l'agent réparateur (ce qui se passe, pourquoi, la correction proposée) et sa gravité.
+  resume            String?
+  /// bloquant | genant | detail
+  gravite           String?
+  /// Greg a validé la correction proposée (rien n'est corrigé avant).
+  correctionValidee DateTime?
+  corrigeLe         DateTime?
+  /// L'e-mail « C'est corrigé » est parti (une seule fois).
+  mailCorrigeLe     DateTime?
+
+  @@index([statut, createdAt])
+  @@map("signalement")
+}

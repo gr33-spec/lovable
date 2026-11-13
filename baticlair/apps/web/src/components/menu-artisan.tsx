@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { BoutonTheme } from "@/components/bouton-theme";
+import { SignalerProbleme, type SignalementHandle } from "@/components/signaler-probleme";
 import { useRouter } from "next/navigation";
-import { ChevronRight, CreditCard, LayoutGrid, Sparkles, UserRound, X, type LucideIcon } from "lucide-react";
+import { ChevronRight, CreditCard, LayoutGrid, LifeBuoy, Sparkles, UserRound, X, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -30,6 +31,7 @@ export function MenuArtisan() {
   const { me, company } = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const signalement = useRef<SignalementHandle>(null);
   const [leaving, setLeaving] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const bouton = useRef<HTMLButtonElement>(null);
@@ -92,6 +94,8 @@ export function MenuArtisan() {
       <button ref={bouton} type="button" aria-label="Mon menu" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="pressable bouton-nuit ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-[14px] font-extrabold">
         {initials(me.user.name)}
       </button>
+      {/* La fenêtre de signalement vit hors du menu : elle reste ouverte quand il se referme. */}
+      <SignalerProbleme connecte sansBouton ref={signalement} />
       {open ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-3 lg:items-start lg:justify-end lg:p-6" onPointerDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
           <div ref={box} role="menu" aria-label="Mon menu" className="animate-rise flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col overflow-y-auto rounded-[28px] bg-surface p-4 text-[#130901] shadow-float lg:mt-14">
@@ -142,6 +146,18 @@ export function MenuArtisan() {
                 <ChevronRight size={18} aria-hidden="true" className="shrink-0 text-accent" />
               </Link>
             ) : null}
+            {/* Greg, 13 novembre 2026 : « Signaler un problème » sur chaque écran de l'application, par « Mon menu ». */}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                signalement.current?.ouvrir();
+              }}
+              className="pressable mt-3 flex min-h-13 items-center gap-3 self-center px-4 text-[15px] font-extrabold"
+            >
+              <LifeBuoy size={18} aria-hidden="true" className="shrink-0" /> Signaler un problème
+            </button>
             <button type="button" role="menuitem" onClick={() => void signOut()} disabled={leaving} className="mt-2 min-h-13 self-center px-4 text-[15px] font-extrabold text-[#a3261a] disabled:opacity-60">
               {leaving ? "Déconnexion…" : "Se déconnecter"}
             </button>

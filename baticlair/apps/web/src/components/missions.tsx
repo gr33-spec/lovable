@@ -17,6 +17,7 @@ import {
   PHRASE_DECLARATIF,
   PHRASE_FORMATS,
   PHRASE_MISE_EN_RELATION,
+  PHRASE_RESPONSABILITES_MISSION,
   PHRASE_TARIF_INDICATIF,
   TYPES_MISSION,
 } from "../../../../packages/domain/src/missions/missions";
@@ -344,6 +345,10 @@ export function AnnonceDetail({ id }: { id: string }) {
             {a.enregistree ? (mission ? "Mission enregistrée · retirer" : "Profil enregistré · retirer") : mission ? "Enregistrer la mission" : "Enregistrer le profil"}
           </BoutonContour>
           <p className="text-center text-[13px] text-muted">{mission ? "Mobiiz facilite uniquement la mise en relation." : "Coordonnées privées avant accord mutuel."}</p>
+          {/* Greg, 13 novembre 2026 : sur l'écran de mise en relation, qui fait quoi, en toutes lettres. */}
+          <p role="note" aria-label="Rôle de Mobiiz" className="rounded-xl border border-line px-3 py-2 text-[13px] text-muted">
+            {PHRASE_RESPONSABILITES_MISSION}
+          </p>
         </>
       )}
       <Refus>{refus}</Refus>

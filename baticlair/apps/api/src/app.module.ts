@@ -17,6 +17,7 @@ import { RecentrageModule } from "./modules/recentrage/index.js";
 import { AchatGroupeModule } from "./modules/achat-groupe/index.js";
 import { AchatsGroupesV1Module } from "./modules/achats-groupes-v1/index.js";
 import { MissionsModule } from "./modules/missions/missions.module.js";
+import { SignalementsModule } from "./modules/signalements/signalements.module.js";
 import { PriceRequestsModule } from "./modules/price-requests/index.js";
 import { PrivacyModule } from "./modules/privacy/index.js";
 import { ProjectsModule } from "./modules/projects/index.js";
@@ -69,6 +70,7 @@ import { PushModule } from "./platform/push/push.module.js";
     AchatGroupeModule,
     AchatsGroupesV1Module,
     MissionsModule,
+    SignalementsModule,
     ReprisesModule,
     BrouillonsModule,
     CatalogueModule,

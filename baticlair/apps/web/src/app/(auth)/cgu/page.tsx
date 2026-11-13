@@ -265,6 +265,21 @@ export default function CguPage() {
           . Pour toute question : {EDITEUR.contact}. Ces conditions sont soumises au droit français. En cas de litige, et après recherche d&apos;une solution amiable, le {TRIBUNAL} est seul compétent.
         </p>
       </section>
+      {/* Greg, 13 novembre 2026 : les missions. Ajout daté, à faire valider par un juriste avant toute mise en production ;
+          la version des CGU (`VERSION_CGU`) n'est pas changée tant que ce texte n'est pas validé. */}
+      <section className="flex flex-col gap-2" aria-label="Missions entre entreprises">
+        <h2 className={s.h2}>11. Les missions entre entreprises (ajout du 13/11/2026, en cours de validation)</h2>
+        <p className={s.p}>
+          Dans l&apos;espace « Missions », {NOM_APP} fait uniquement de la mise en relation entre une entreprise qui cherche du renfort et un professionnel indépendant
+          qui propose ses compétences. {NOM_APP} n&apos;est ni employeur, ni entreprise de travail temporaire, ni cabinet de recrutement, ni partie au contrat, et ne
+          garantit ni la conclusion d&apos;une mission, ni sa bonne exécution, ni l&apos;exactitude des compétences, diplômes et expériences déclarés.
+        </p>
+        <p className={s.p}>
+          Les deux entreprises gèrent elles-mêmes, sous leur seule responsabilité, le contrat qui les lie, le prix et son paiement, leurs assurances (notamment
+          responsabilité civile professionnelle et garantie décennale lorsqu&apos;elle s&apos;applique) et leurs obligations légales, sociales et fiscales, par exemple la
+          remise et la vérification de l&apos;attestation de vigilance URSSAF.
+        </p>
+      </section>
       <Link href="/" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text">
         Retour à l&apos;accueil
       </Link>

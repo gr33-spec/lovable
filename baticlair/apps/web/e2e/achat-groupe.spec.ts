@@ -517,6 +517,42 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
 
 test.describe("Lot 6 : la supervision de l'admin", () => {
   // Greg, 13 novembre 2026 (« cœur métier ») : les outils de l'admin du catalogue.
+  // Greg, 13 novembre 2026 : « Liste des signalements dans l'espace admin (statut : nouveau, en cours, corrigé) » ; rien
+  // n'est corrigé sans son accord, puis « C'est corrigé, merci » part à l'utilisateur.
+  test("signalements : la liste par statut, la capture jointe, le résumé du réparateur, « Valider la correction », puis « Marquer corrigé »", async ({ browser }) => {
+    test.setTimeout(120_000);
+    const { ctx, page } = await admin(browser, "/admin/signalements");
+    await expect(page.getByRole("heading", { name: "Signalements", level: 1 })).toBeVisible();
+    const probleme = `Le total ne se met pas à jour ${Date.now()}`;
+    await page.getByRole("button", { name: "Mon menu" }).click();
+    await page.getByRole("menuitem", { name: "Signaler un problème" }).click();
+    const fenetre = page.getByRole("dialog", { name: "Signaler un problème" });
+    await fenetre.getByLabel("Que se passe-t-il ?").fill(probleme);
+    await fenetre.getByRole("button", { name: "Envoyer" }).click();
+    await expect(fenetre.getByText("Merci, on regarde.")).toBeVisible();
+    await fenetre.getByRole("button", { name: "Fermer" }).click();
+    await page.reload();
+    const ligne = page.getByRole("list", { name: "Signalements" }).getByRole("listitem").filter({ hasText: probleme }).first();
+    await expect(ligne).toContainText("Nouveau");
+    await expect(ligne).toContainText("Page : /admin/signalements");
+    await ligne.getByRole("button", { name: "Voir la capture d'écran" }).click();
+    await expect(ligne.getByAltText("Capture d'écran du signalement")).toBeVisible();
+    // Rien n'est « corrigé » sans la validation de Greg.
+    await expect(ligne.getByRole("button", { name: "Marquer corrigé" })).toBeDisabled();
+    await ligne.getByLabel(/Résumé du réparateur/).fill("Le total n'est recalculé qu'au rechargement. Correction proposée : recalculer après chaque modification.");
+    await ligne.getByLabel("Gravité").selectOption("genant");
+    await ligne.getByRole("button", { name: "Enregistrer le résumé" }).click();
+    await expect(ligne).toContainText("En cours");
+    await ligne.getByRole("button", { name: "Valider la correction" }).click();
+    await expect(ligne).toContainText("Correction validée le");
+    await ligne.getByRole("button", { name: "Marquer corrigé" }).click();
+    await expect(ligne).toContainText("« C'est corrigé, merci » envoyé le");
+    // Le filtre par statut : il n'est plus dans « Nouveau ».
+    await page.getByRole("group", { name: "Filtrer par statut" }).getByRole("button", { name: /^Nouveau/ }).click();
+    await expect(page.getByText(probleme)).toHaveCount(0);
+    await ctx.close();
+  });
+
   test("catalogue : bilan par métier, recherche dans tous les métiers, détail (origine, date, où il se lit), « à vérifier », second métier sans copie", async ({ browser }) => {
     test.setTimeout(120_000);
     const { ctx, page } = await admin(browser, "/admin/catalogue");

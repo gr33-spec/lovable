@@ -1,4 +1,5 @@
 import { PiedLegal } from "@/components/legal";
+import { SignalerProbleme } from "@/components/signaler-probleme";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { NOM_APP } from "@/lib/nom";
@@ -10,6 +11,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <Logo hauteur={28} />
       </Link>
       {children}
+      {/* Greg, 13 novembre 2026 : « Signaler un problème » côté négoce et sur les pages sans compte. */}
+      <SignalerProbleme connecte={false} />
       <PiedLegal />
     </main>
   );

@@ -60,6 +60,12 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Ne jamais afficher une clé ni un secret. Pas de nouvelle dépendance sans accord.
 - Mettre ce fichier à jour à chaque décision importante.
 
+## Signalement de bugs
+
+- Bouton « Signaler un problème » : dans « Mon menu » sur chaque écran de l'application, et en bas des pages sans compte (espace négoce). La page et la capture d'écran sont jointes toutes seules.
+- L'utilisateur reçoit « Merci, on regarde » ; Greg reçoit une alerte, puis le résumé du réparateur avec un lien pour valider. Rien n'est corrigé sans l'accord de Greg. Une fois corrigé et en ligne, « Marquer corrigé » envoie « C'est corrigé, merci ».
+- Liste : espace admin › Signalements (`/admin/signalements`), statuts nouveau, en cours, corrigé.
+
 ## Équipe d'agents
 
 Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parle qu'à la session principale, qui délègue et résume. Les agents ne travaillent que quand Greg le demande.

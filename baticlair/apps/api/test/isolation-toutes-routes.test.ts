@@ -132,6 +132,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
       conversationMission: "",
       fichierPro: "",
       alerte: "",
+      signalement: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
     const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });
@@ -186,6 +187,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
     await ctx.prisma.messageMission.create({ data: { conversationId: conversation.id, companyId, userId: proprietaireA, texte: "Message de Toitures A", cle: "cle-isolation-0001" } });
     ids.fichierPro = (await ctx.prisma.fichierPro.create({ data: { companyId, portee: "dossier", categorie: "cv", nom: "devis-a.pdf", type: "application/pdf", taille: 9, contenu: Buffer.from("%PDF-1.4\n") } })).id;
     ids.alerte = (await ctx.prisma.alerteCourte.create({ data: { companyId, categorie: "missions", genre: "action", titre: "Nouveau message", detail: "Toitures A", action: "Ouvrir", href: "/messages", cle: "isolation-alerte" } })).id;
+    // Signalement de bugs : celui de A (avec sa capture) ; la liste et la capture sont réservées aux admins (B : 403).
+    ids.signalement = (await ctx.prisma.signalement.create({ data: { origine: "artisan", page: "/chantiers/nouveau", message: "Signalement de Toitures A", email: "a@example.com", companyId, capture: Buffer.from("capture-de-a"), captureType: "image/png" } })).id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -265,6 +268,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/fichiers-pro$/, ids.fichierPro],
         [/\/profil-public$/, companyId],
         [/\/alertes$/, ids.alerte],
+        [/\/admin\/signalements$/, ids.signalement],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

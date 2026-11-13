@@ -7,6 +7,13 @@
  */
 
 export const PHRASE_MISE_EN_RELATION = "Mobiiz assure uniquement la mise en relation.";
+/**
+ * Greg, 13 novembre 2026 : « ajoute dans les CGU et sur l'écran de mise en relation que Mobiiz fait uniquement de la mise
+ * en relation, et que les parties gèrent elles-mêmes contrat, assurances et obligations (ex. attestation de vigilance
+ * URSSAF) ». La même phrase partout où une mise en relation se décide.
+ */
+export const PHRASE_RESPONSABILITES_MISSION =
+  "Mobiiz fait uniquement la mise en relation. Les deux entreprises gèrent elles-mêmes le contrat, les assurances et leurs obligations (par exemple l'attestation de vigilance URSSAF).";
 export const PHRASE_TARIF_INDICATIF = "Il ne constitue ni un devis ni un engagement.";
 export const PHRASE_DECLARATIF = "Informations déclarées par l'entreprise.";
 

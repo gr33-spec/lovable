@@ -12,6 +12,14 @@ Mission de Greg du 13 novembre 2026. À lire en premier à chaque reprise ; ne p
 - Lots A à F : FAITS. Reste : les décisions de Greg (fin de ce fichier et compte rendu).
 - Prochaine commande : aucune ; attendre le retour de Greg. Ce fichier part avec le prochain candidat vérifié.
 
+## Suite du 13 novembre (2e message de Greg) : branche locale `coeur-metier-ecarts`
+- FAIT, commit `b101f8fa` : les six écarts (métiers partiels, tuiles par format, routage par métier déclaré, « Laisser à
+  préciser » dans l'assistant), la fiche projet à la racine (`CLAUDE.md`), 23 agents (`.claude/agents/`), les faux devis.
+- FAIT, commit suivant : signalement de bugs (table `signalement`, module `signalements`, bouton, `/admin/signalements`),
+  mention Mission (écran et section 11 des CGU).
+- RESTE : chaîne complète sur le commit candidat exact, puis livraison sur test, vérification des deux domaines et de la
+  migration `20261113180000_signalement`, compte rendu à Greg. Prochaine commande : `scratchpad/chaine26.sh`.
+
 ## Ce qui existait déjà (audit, lot A)
 - Modèle : table `catalogue_article` (clé stable `metier/famille/produit/variante`, métier, famille, produit, variante,
   désignation, unité, synonymes, masqué, ajouté par l'admin). Amorce dans `packages/domain/src/catalogue/donnees`.
