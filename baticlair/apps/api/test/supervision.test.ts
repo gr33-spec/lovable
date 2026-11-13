@@ -72,18 +72,19 @@ describe("la supervision (admin)", () => {
   it("les familles : la configuration recopiée à la première ouverture, puis l'admin règle libellé et activité ; Découvrir suit", async () => {
     const greg = await admin();
     const f = (await greg.agent.get("/v1/admin/pilotage/familles").expect(200)).body.familles as { code: string; active: boolean }[];
-    expect(f.filter((x) => x.active).map((x) => x.code).sort()).toEqual(["charpente", "couverture", "second_oeuvre"]);
-    expect(f.length).toBeGreaterThanOrEqual(9);
+    expect(f.filter((x) => x.active).map((x) => x.code).sort()).toEqual(["charpente", "couverture", "etancheite", "second_oeuvre", "zinguerie"]);
+    expect(f.length).toBeGreaterThanOrEqual(11);
     await greg.agent.put("/v1/admin/pilotage/familles/couverture").send({ libelle: "Couverture et zinguerie" }).expect(200);
     await greg.agent.put("/v1/admin/pilotage/familles/charpente").send({ active: false }).expect(200);
     const a = await couvreurAvecListe(ctx, "a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", LIGNES);
     const d = (await a.agent.get("/v1/achats-groupes/decouvrir").expect(200)).body;
-    expect(d.familles).toEqual(["couverture", "second_oeuvre"]);
+    // Greg, 13 novembre 2026 : zinguerie et étanchéité sont des familles à part, actives par défaut.
+    expect(d.familles).toEqual(["couverture", "zinguerie", "etancheite", "second_oeuvre"]);
     expect(d.libellesFamilles.couverture).toBe("Couverture et zinguerie");
     // Une famille ajoutée naît inactive ; un code mal formé est refusé ; on ne désactive pas la dernière.
     await greg.agent.post("/v1/admin/pilotage/familles").send({ code: "isolation", libelle: "Isolation" }).expect(201);
     expect((await greg.agent.post("/v1/admin/pilotage/familles").send({ code: "Isolation thermique", libelle: "Isolation" })).status).toBe(400);
-    await greg.agent.put("/v1/admin/pilotage/familles/couverture").send({ active: false }).expect(200);
+    for (const code of ["couverture", "zinguerie", "etancheite"]) await greg.agent.put(`/v1/admin/pilotage/familles/${code}`).send({ active: false }).expect(200);
     expect((await greg.agent.put("/v1/admin/pilotage/familles/second_oeuvre").send({ active: false })).status).toBe(409);
   });
 

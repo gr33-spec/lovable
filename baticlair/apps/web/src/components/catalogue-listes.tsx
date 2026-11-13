@@ -39,6 +39,8 @@ interface Metier {
   libelle: string;
   mien: boolean;
   familleAchat: string;
+  /** Greg, 13 novembre 2026 : un métier pas encore réellement fourni reste visible et se dit « en cours d'enrichissement ». */
+  enEnrichissement?: boolean;
 }
 
 interface Reponse {
@@ -227,6 +229,19 @@ export function CatalogueListes({
         </select>
       </div>
 
+      {/* Greg, 13 novembre 2026 : un métier partiel reste ouvert ; il dit que son catalogue grandit, et l'on peut toujours écrire son matériau. */}
+      {courant?.enEnrichissement ? (
+        <div role="note" className="flex flex-col gap-1 rounded-xl border border-line bg-ground px-4 py-3">
+          <p className="text-[15px] font-bold">Catalogue en cours d&apos;enrichissement</p>
+          <p className="text-[14px] text-muted">Tous les matériaux de ce métier n&apos;y sont pas encore. Si le tien manque, écris-le : il part quand même.</p>
+          {libre ? null : (
+            <button type="button" onClick={() => setLibre(true)} className="pressable mt-1 flex min-h-11 items-center gap-2 self-start rounded-lg text-left text-[15px] font-semibold text-accent-text">
+              <PenLine size={18} aria-hidden="true" /> Je saisis mon matériau
+            </button>
+          )}
+        </div>
+      ) : null}
+
       {article ? (
         <div className="flex flex-col gap-3 rounded-xl bg-ground p-4">
           <div className="flex items-center gap-2">
@@ -383,9 +398,9 @@ export function CatalogueListes({
             <Plus size={18} aria-hidden="true" /> {liste ? "Ajouter à la sélection" : "Ajouter cette ligne"}
           </Button>
         </div>
-      ) : (
+      ) : courant?.enEnrichissement ? null : (
         <button type="button" onClick={() => setLibre(true)} className="pressable flex min-h-13 items-center gap-3 rounded-xl px-1 text-left text-[15px] font-semibold text-accent-text">
-          <PenLine size={18} aria-hidden="true" /> {liste ? "Je ne trouve pas : je l'écris moi-même." : "Je ne trouve pas : je décris mon besoin."}
+          <PenLine size={18} aria-hidden="true" /> Je saisis mon matériau
         </button>
       )}
     </div>

@@ -368,15 +368,16 @@ describe("le catalogue complet et la ligne libre", { timeout: 240_000 }, () => {
     const zing = (await a.agent.get("/v1/catalogue?metier=zinguerie").expect(200)).body;
     expect(zing.metier).toBe("zinguerie");
     expect(familles(zing)).toEqual(expect.arrayContaining(["Zinc", "Gouttières", "Descentes", "Bandes et pièces façonnées"]));
-    // L'achat groupé, lui, reste celui des négoces de couverture (la famille d'achat ne change pas).
+    // RÈGLE CHANGÉE (Greg, 13 novembre 2026, derniers écarts) : la zinguerie et l'étanchéité ont chacune leur famille
+    // d'achat ; elles ne partent plus d'office chez les négoces de couverture.
     const gouttiere = (await a.agent.get("/v1/catalogue?q=gouttiere%20havraise").expect(200)).body.resultats[0];
-    expect(gouttiere).toMatchObject({ produit: "Gouttière havraise zinc", metier: "zinguerie", familleAchat: "couverture" });
+    expect(gouttiere).toMatchObject({ produit: "Gouttière havraise zinc", metier: "zinguerie", familleAchat: "zinguerie" });
     expect(gouttiere.cle.startsWith("zinguerie/")).toBe(true);
     const et = (await a.agent.get("/v1/catalogue?metier=etancheite").expect(200)).body;
     expect(et.metier).toBe("etancheite");
     expect(familles(et)).toEqual(expect.arrayContaining(["Membranes bitume", "Étanchéité EPDM", "Membranes PVC et TPO", "Étanchéité liquide", "Isolants de toiture-terrasse", "Pare-vapeur et écrans", "Évacuations et relevés", "Protection et finition"]));
     const pax = (await a.agent.get("/v1/catalogue?q=pax%20alu").expect(200)).body.resultats[0];
-    expect(pax).toMatchObject({ produit: "Chape bitume armée autoprotégée aluminium", metier: "etancheite", familleAchat: "couverture" });
+    expect(pax).toMatchObject({ produit: "Chape bitume armée autoprotégée aluminium", metier: "etancheite", familleAchat: "etancheite" });
     expect(pax.cle.startsWith("etancheite/")).toBe(true);
     expect((await a.agent.get("/v1/catalogue?metier=etancheite&q=pare%20vapeur%20bitume").expect(200)).body.resultats[0].famille).toBe("Pare-vapeur et écrans");
     const ch = (await a.agent.get("/v1/catalogue?metier=charpente").expect(200)).body;

@@ -63,7 +63,9 @@ test("catalogue par métier : Zinguerie › Feuilles, bobines et bandes › Bobi
   await cap("01-familles-couverture");
   // Une famille qui en a besoin a des sous-familles : les tuiles en terre cuite.
   await bouton(saisie, "Tuiles en terre cuite").click();
-  for (const r of ["Tuiles canal", "Tuiles plates", "Tuiles à emboîtement"]) await expect(bouton(saisie, r)).toHaveCount(1);
+  // Greg, 13 novembre 2026 : les tuiles à emboîtement se rangent par format relevé (tuiles au m²), jamais par fabricant.
+  for (const r of ["Tuiles canal", "Tuiles plates", "Emboîtement grand format (jusqu'à 12 au m²)", "Emboîtement format moyen (12 à 17 au m²)", "Emboîtement petit format (18 au m² et plus)", "Autres tuiles à emboîtement"]) await expect(bouton(saisie, r)).toHaveCount(1);
+  await expect(saisie.getByRole("button", { name: /Edilians|Huguenot|Poudenx/ }).filter({ visible: true })).toHaveCount(0);
   await expect(saisie.getByLabel("Tu es ici")).toHaveText("Couverture › Tuiles en terre cuite");
 
   // 2. Métier, famille, produit : chaque écran reste court.
@@ -173,4 +175,59 @@ test("catalogue par métier : Zinguerie › Feuilles, bobines et bandes › Bobi
     expect(bas.y + bas.height).toBeLessThanOrEqual(page.viewportSize()!.height);
   }
   await cap("09-electricite");
+});
+
+
+// Greg, 13 novembre 2026 (derniers écarts du cœur métier) : « Teste Couverture, Zinguerie et Étanchéité comme trois métiers
+// indépendants : navigation, recherche, ajout au brouillon » ; les sept métiers partiels restent visibles et disent
+// « Catalogue en cours d'enrichissement », avec toujours « Je saisis mon matériau ».
+test("trois métiers indépendants : navigation, recherche et ajout au brouillon pour Couverture, Zinguerie et Étanchéité ; un métier partiel se dit en cours d'enrichissement", async ({ page }) => {
+  test.setTimeout(180_000);
+  await inscrire(page);
+  await page.goto("/chantiers/nouveau?mode=manuel");
+  const saisie = page.getByRole("dialog", { name: "Saisir ma liste" });
+  await expect(saisie.getByText("Chargement du catalogue…")).toHaveCount(0);
+  await saisie.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" }).click();
+  await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
+  const enCours = saisie.getByRole("region", { name: "Ma liste en cours" }).filter({ visible: true });
+  const METIERS = [
+    { nom: "Couverture", siennes: ["Ardoises", "Tuiles en terre cuite"], pasSiennes: ["Gouttières et descentes", "Membranes bitumineuses"], cherche: "ardoise naturelle", contexte: /Couverture · Ardoises/ },
+    { nom: "Zinguerie", siennes: ["Gouttières et descentes", "Soudure et consommables"], pasSiennes: ["Ardoises", "Membranes bitumineuses"], cherche: "bobineau zinc", contexte: /Zinguerie · Feuilles, bobines et bandes/ },
+    { nom: "Étanchéité", siennes: ["Membranes bitumineuses", "Évacuation des eaux"], pasSiennes: ["Ardoises", "Gouttières et descentes"], cherche: "membrane epdm", contexte: /Étanchéité · Membranes synthétiques/ },
+  ];
+  let lignes = 0;
+  for (const m of METIERS) {
+    // Navigation : le métier s'ouvre sur SES familles, jamais celles d'un autre ; le fil d'Ariane commence par lui.
+    await saisie.getByLabel("Métier").selectOption({ label: m.nom });
+    for (const f of m.siennes) await expect(bouton(saisie, f), `${m.nom} : ${f}`).toHaveCount(1);
+    for (const f of m.pasSiennes) await expect(bouton(saisie, f), `${m.nom} sans ${f}`).toHaveCount(0);
+    await bouton(saisie, m.siennes[0]!).click();
+    await expect(saisie.getByLabel("Tu es ici")).toContainText(`${m.nom} › ${m.siennes[0]}`);
+    // Un métier réellement fourni ne se dit pas « en cours d'enrichissement ».
+    await expect(saisie.getByText("Catalogue en cours d'enrichissement")).toHaveCount(0);
+    // Recherche : le résultat dit son métier et sa famille.
+    await saisie.getByLabel("Rechercher un matériau").fill(m.cherche);
+    const resultat = saisie.getByRole("list", { name: "Résultats" }).getByRole("button").filter({ hasText: m.contexte }).first();
+    await expect(resultat, `recherche « ${m.cherche} »`).toBeVisible();
+    // Ajout au brouillon : la ligne rejoint la liste en cours, et y reste quand on change de métier.
+    await resultat.click();
+    await saisie.getByRole("button", { name: "Ajouter à la sélection" }).click();
+    lignes += 1;
+    await expect(enCours.getByLabel("Désignation")).toHaveCount(lignes);
+    await saisie.getByLabel("Rechercher un matériau").fill("");
+  }
+  await expect(saisie.getByRole("button", { name: /Créer le quantitatif · 3 matériaux/ }).filter({ visible: true }).first()).toBeVisible();
+
+  // Un métier partiel reste visible et ouvrable ; il dit que son catalogue grandit, et l'on peut toujours écrire son matériau.
+  await saisie.getByLabel("Métier").selectOption({ label: "Plomberie" });
+  const note = saisie.getByRole("note").filter({ hasText: "Catalogue en cours d'enrichissement" });
+  await expect(note).toBeVisible();
+  await expect(bouton(saisie, "Alimentation en eau")).toHaveCount(1);
+  await note.getByRole("button", { name: "Je saisis mon matériau" }).click();
+  await saisie.locator("#libre-texte").fill("Collecteur laiton 5 départs");
+  await saisie.getByRole("button", { name: "Ajouter à la sélection" }).click();
+  await expect(enCours.getByLabel("Désignation")).toHaveCount(4);
+  // L'action reste là pour un métier fourni aussi.
+  await saisie.getByLabel("Métier").selectOption({ label: "Couverture" });
+  await expect(saisie.getByRole("button", { name: "Je saisis mon matériau" }).filter({ visible: true })).toHaveCount(1);
 });

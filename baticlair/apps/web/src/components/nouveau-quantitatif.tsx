@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { lireDescription, type LigneDecrite } from "../../../../packages/domain/src/assistant/assistant";
-import { choisirProduit, choisirValeur, confirmer, designationFinale, etapeSuivante, refuser, type ArticleCompris } from "../../../../packages/domain/src/assistant/article-compris";
+import { choisirProduit, choisirValeur, confirmer, designationFinale, etapeSuivante, laisserAPreciser, refuser, type ArticleCompris } from "../../../../packages/domain/src/assistant/article-compris";
 import { precisionsLisibles } from "../../../../packages/domain/src/groupe/precisions-lisibles";
 import { natureDuDocument } from "../../../../packages/domain/src/documents/nature";
 import { texteDuPdf } from "@/components/pdf-pages";
@@ -704,8 +704,10 @@ function QuestionArticle({ c, ligne, onCompris }: { c: ArticleCompris; ligne: Li
               </button>
             </form>
           ) : null}
-          <button type="button" className={`${lien} self-start`} onClick={() => onCompris(choisirValeur(c, etape.index, ""))}>
-            Passer : le négoce précisera
+          {/* Greg, 13 novembre 2026 : « Laisser à préciser », comme en saisie manuelle : la ligne dit ce qui reste à préciser. */}
+          <button type="button" aria-label="Laisser à préciser" className={`${lien} flex flex-col items-start self-start text-left`} onClick={() => onCompris(laisserAPreciser(c, etape.index))}>
+            <span>Laisser à préciser</span>
+            <span className="text-[13px] font-normal">Ton négoce te le demandera.</span>
           </button>
         </>
       )}

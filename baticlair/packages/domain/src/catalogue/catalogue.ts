@@ -32,14 +32,15 @@ export const LIBELLES_METIERS_CATALOGUE: Readonly<Record<MetierCatalogue, string
 };
 
 /**
- * L'achat groupé d'un métier du catalogue : un achat groupé reste rattaché à UN métier (famille des négoces). La
- * zinguerie se commande avec la couverture ; plâtrerie, peinture et carrelage sont le second œuvre ; le chauffage
+ * L'achat groupé d'un métier du catalogue : un achat groupé reste rattaché à UN métier (famille des négoces). RÈGLE
+ * CHANGÉE (Greg, 13 novembre 2026) : la zinguerie et l'étanchéité ont chacune LEUR famille, elles ne partent plus
+ * d'office chez les négoces de couverture (seuls ceux qui les ont déclarées les reçoivent) ; plâtrerie, peinture et carrelage sont le second œuvre ; le chauffage
  * va chez le négoce de plomberie.
  */
 export const FAMILLE_DU_METIER_CATALOGUE: Readonly<Record<MetierCatalogue, FamilleGroupe>> = {
   couverture: "couverture",
-  zinguerie: "couverture",
-  etancheite: "couverture",
+  zinguerie: "zinguerie",
+  etancheite: "etancheite",
   charpente: "charpente",
   menuiserie: "menuiseries_fermetures",
   maconnerie: "maconnerie",
@@ -65,6 +66,17 @@ export const rayonDuMetierCatalogue = (m: MetierCatalogue): MetierCatalogue => R
 export const METIERS_DU_SELECTEUR: readonly MetierCatalogue[] = METIERS_CATALOGUE.filter((m) => !RAYON_DU_METIER_CATALOGUE[m]);
 /** Les métiers dont les articles se lisent sous un métier du sélecteur, lui d'abord (« couverture » → couverture, zinguerie). */
 export const metiersDuRayon = (m: MetierCatalogue): MetierCatalogue[] => [m, ...METIERS_CATALOGUE.filter((x) => RAYON_DU_METIER_CATALOGUE[x] === m)];
+
+/**
+ * LES MÉTIERS RÉELLEMENT FOURNIS (Greg, 13 novembre 2026 : « Laisse visibles les sept métiers partiels, mais affiche après
+ * leur ouverture « Catalogue en cours d'enrichissement » et conserve toujours l'action « Je saisis mon matériau » »).
+ * Un métier absent de cette liste reste visible et utilisable ; son catalogue se dit simplement incomplet. Un métier s'y
+ * ajoute quand son catalogue a été alimenté avec des données professionnelles fiables, jamais avant.
+ */
+export const METIERS_FOURNIS: readonly MetierCatalogue[] = ["couverture", "zinguerie", "etancheite", "charpente", "peinture"];
+export const catalogueEnEnrichissement = (m: MetierCatalogue): boolean => !METIERS_FOURNIS.includes(m);
+export const PHRASE_CATALOGUE_EN_ENRICHISSEMENT = "Catalogue en cours d'enrichissement";
+export const ACTION_SAISIR_MON_MATERIAU = "Je saisis mon matériau";
 
 /** Les métiers du catalogue d'un métier du compte (`trades` : roofing, carpentry…), dans l'ordre. */
 const METIERS_DU_COMPTE: Readonly<Record<string, readonly MetierCatalogue[]>> = {

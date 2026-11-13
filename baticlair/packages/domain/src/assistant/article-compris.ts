@@ -47,6 +47,8 @@ export interface ArticleCompris {
   precisions: string[];
   /** L'artisan a confirmé l'interprétation (« Oui ») ; d'office quand elle est sûre. */
   confirme: boolean;
+  /** Les caractéristiques laissées « à préciser » (leur rang) : écrites telles dans la désignation, jamais devinées. */
+  aPreciser?: number[];
 }
 
 export interface Axe {
@@ -186,6 +188,25 @@ export function choisirValeur(c: ArticleCompris, index: number, valeur: string):
 }
 
 /**
+ * « LAISSER À PRÉCISER » DANS L'ASSISTANT (Greg, 13 novembre 2026 : « avec le même comportement qu'en saisie manuelle ») :
+ * la ligne part avec ce qui est déjà choisi, et ce qui manque est ÉCRIT « à préciser » dans la désignation (« Liteau 27×40
+ * · traitement à préciser »), comme dans le catalogue parcouru à la main. Rien n'est deviné, la question n'est pas reposée.
+ */
+export function laisserAPreciser(c: ArticleCompris, index: number): ArticleCompris {
+  return { ...choisirValeur(c, index, ""), aPreciser: [...new Set([...(c.aPreciser ?? []), index])].sort((a, b) => a - b) };
+}
+
+/** Le nom d'une caractéristique d'après sa question (« Quelle section ? » → « section »), pour l'écrire « à préciser ». */
+export function nomDeLaCaracteristique(question: string): string {
+  const nom = question
+    .replace(/\s*\?\s*$/, "")
+    .replace(/^quel(?:le)?s?\s+/i, "")
+    .replace(/\s+et\s+quel(?:le)?s?\s+/gi, " et ")
+    .trim();
+  return !nom || /^lequel$/i.test(nom) ? "modèle" : nom;
+}
+
+/**
  * La désignation qui part dans la liste : celle du catalogue quand toutes les caractéristiques sont choisies parmi ses
  * valeurs ; sinon le nom du produit du catalogue suivi des choix (et des mots de l'artisan pour « Autre ») ; jamais rien
  * d'autre. Sans produit retenu : les mots de l'artisan tels quels.
@@ -197,9 +218,12 @@ export function designationFinale(c: ArticleCompris): string {
   const choisies = c.valeurs.slice(0, n);
   const exacte = p.variantes.find((v) => (v.variante === null ? choisies.every((x) => !x) : morceaux(v, n).every((m, j) => m === choisies[j])));
   const precisions = c.precisions.length ? ` ${c.precisions.join(" ")}` : "";
-  if (exacte) return `${exacte.designation}${precisions}`;
+  // Ce que l'artisan a laissé « à préciser » s'écrit en clair, comme en saisie manuelle ; une valeur choisie ensuite l'emporte.
+  const axes = axesDe(p);
+  const laisses = (c.aPreciser ?? []).filter((i) => i < n && !choisies[i]).map((i) => ` · ${nomDeLaCaracteristique(axes[i]!.question)} à préciser`).join("");
+  if (exacte) return `${exacte.designation}${precisions}${laisses}`;
   const dits = choisies.filter((x): x is string => !!x);
-  return `${p.produit}${dits.length ? ` ${dits.join(" · ")}` : ""}${precisions}`;
+  return `${p.produit}${dits.length ? ` ${dits.join(" · ")}` : ""}${precisions}${laisses}`;
 }
 
 const VOYELLE = /^[aeiouyhâàéèêîïôûœ]/i;

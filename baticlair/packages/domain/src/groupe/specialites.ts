@@ -6,12 +6,14 @@
  * reste possible, après un avertissement.
  */
 
-export const SPECIALITES = ["generaliste", "couverture", "charpente", "maconnerie", "isolation_platrerie", "plomberie", "electricite", "bois", "autre"] as const;
+export const SPECIALITES = ["generaliste", "couverture", "zinguerie", "etancheite", "charpente", "maconnerie", "isolation_platrerie", "plomberie", "electricite", "bois", "autre"] as const;
 export type Specialite = (typeof SPECIALITES)[number];
 
 export const LIBELLES_SPECIALITES: Readonly<Record<Specialite, string>> = {
   generaliste: "Généraliste",
   couverture: "Couverture",
+  zinguerie: "Zinguerie",
+  etancheite: "Étanchéité",
   charpente: "Charpente",
   maconnerie: "Maçonnerie",
   isolation_platrerie: "Isolation et plâtrerie",
@@ -26,7 +28,8 @@ export const estSpecialite = (v: unknown): v is Specialite => typeof v === "stri
 /** La spécialité qui chiffre un lot, d'après le métier de la liste (identifiants de `TRADES`). */
 const PAR_METIER: Readonly<Record<string, Specialite>> = {
   roofing: "couverture",
-  waterproofing: "couverture",
+  // Greg, 13 novembre 2026 : l'étanchéité est un métier à part, elle ne part plus d'office chez les négoces de couverture.
+  waterproofing: "etancheite",
   cladding: "couverture",
   carpentry: "charpente",
   masonry: "maconnerie",

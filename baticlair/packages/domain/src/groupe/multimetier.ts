@@ -20,6 +20,8 @@ const arrondi2 = (n: number) => Math.round(n * 100) / 100;
 /** Libellés courts des familles, pour une combinaison qui tient sur une ligne (« Couverture chez X, second œuvre chez Y »). */
 export const LIBELLES_COURTS_FAMILLES: Readonly<Record<FamilleGroupe, string>> = {
   couverture: "couverture",
+  zinguerie: "zinguerie",
+  etancheite: "étanchéité",
   charpente: "charpente",
   maconnerie: "maçonnerie",
   electricite: "électricité",
@@ -35,6 +37,10 @@ export const LIBELLES_COURTS_FAMILLES: Readonly<Record<FamilleGroupe, string>> =
  * l'emporte (« Mortier pour solin » est de la couverture, « Tube PVC de descente » aussi).
  */
 const MOTS_DES_FAMILLES: readonly [FamilleGroupe, RegExp][] = [
+  // Greg, 13 novembre 2026 : la zinguerie et l'étanchéité ont leur famille. Un solin ou une noue sans matière dite reste
+  // de la couverture (« Mortier pour solin ») : seul ce qui est sûrement de la zinguerie y va.
+  ["zinguerie", /\b(gouttieres?|zinc|descentes?|dauphins?|cheneaux?|naissances?|talons?|couvertines?|crochets? de gouttiere)\b/],
+  ["etancheite", /\b(membranes? (bitum\w*|epdm|pvc|tpo)|epdm|etancheite liquide|toitures? terrasses?|costieres?)\b/],
   ["couverture", /\b(tuiles?|ardoises?|faitieres?|faitage|zinc|gouttieres?|descentes?|naissances?|liteaux?|voliges?|ecran sous toiture|closoirs?|bac acier|cheneaux?|noues?|solins?|abergements?|fenetres? de toit|velux|chatieres?|rives?|egouts?|couvertines?|crochets? de gouttiere)\b/],
   ["plomberie", /\b(tubes? (per|multicouche|cuivre)|raccords?|robinets?|vannes?|wc|lavabos?|eviers?|siphons?|chauffe eau|ballons?|mitigeurs?|douches?|baignoires?|evacuation)\b/],
   ["electricite", /\b(cables?|gaines?|disjoncteurs?|interrupteurs?|prises?|tableaux? electriques?|boites? d encastrement|dcl|spots?|luminaires?|interrupteurs? differentiels?)\b/],

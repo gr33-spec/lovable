@@ -67,7 +67,7 @@ describe("un catalogue par métier : rayons, familles, produits", () => {
     const familles = (c: (typeof METIERS_DU_SELECTEUR)[number]) => vue(c).map((r) => r.libelle);
     const sous = (c: (typeof METIERS_DU_SELECTEUR)[number], r: string) => vue(c).find((x) => x.libelle === r)!.familles.map((f) => f.libelle);
     expect(familles("couverture")).toEqual(["Ardoises", "Tuiles en terre cuite", "Tuiles béton", "Accessoires de tuiles", "Bacs et plaques", "Bardeaux, pierre et bois", "Écrans et pare-vapeur", "Isolation de toiture", "Bois de couverture", "Faîtage et ventilation", "Fenêtres et sorties de toit", "Solins et raccords", "Fixations", "Sécurité, accès et entretien"]);
-    expect(sous("couverture", "Tuiles en terre cuite")).toEqual(["Tuiles canal", "Tuiles plates", "Tuiles à emboîtement"]);
+    expect(sous("couverture", "Tuiles en terre cuite")).toEqual(["Tuiles canal", "Tuiles plates", "Emboîtement grand format (jusqu'à 12 au m²)", "Emboîtement format moyen (12 à 17 au m²)", "Emboîtement petit format (18 au m² et plus)", "Autres tuiles à emboîtement"]);
     expect(familles("zinguerie")).toEqual(["Gouttières et descentes", "Feuilles, bobines et bandes", "Couverture métallique et joint debout", "Rives, solins et habillages", "Soudure et consommables"]);
     expect(sous("zinguerie", "Gouttières et descentes")).toEqual(["Gouttières et chéneaux", "Accessoires de gouttière", "Descentes d'eaux pluviales"]);
     expect(sous("zinguerie", "Rives, solins et habillages")).toEqual(["Solins, bavettes et rives", "Habillages"]);

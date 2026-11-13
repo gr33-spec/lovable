@@ -27,6 +27,8 @@ export interface OffreSaisie {
 
 const FAMILLES_NEGOCE: readonly { id: string; label: string }[] = [
   { id: "couverture", label: "Couverture" },
+  { id: "zinguerie", label: "Zinguerie" },
+  { id: "etancheite", label: "Étanchéité" },
   { id: "charpente", label: "Charpente" },
   { id: "maconnerie", label: "Maçonnerie" },
   { id: "electricite", label: "Électricité" },

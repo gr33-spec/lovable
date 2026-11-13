@@ -15,6 +15,8 @@ import { nom } from "@/lib/nom";
  */
 export const FAMILLES: readonly { id: string; label: string }[] = [
   { id: "couverture", label: "Couverture" },
+  { id: "zinguerie", label: "Zinguerie" },
+  { id: "etancheite", label: "Étanchéité" },
   { id: "charpente", label: "Charpente" },
   { id: "maconnerie", label: "Maçonnerie" },
   { id: "electricite", label: "Électricité" },

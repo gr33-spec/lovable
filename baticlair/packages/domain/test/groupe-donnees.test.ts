@@ -40,8 +40,12 @@ describe("groupé : zone, fenêtre, famille", () => {
     expect(fenetreValide({ tot: d("2026-11-10"), tard: d("2026-11-02") })).toBe(false);
   });
 
-  it("neuf familles (décision du 20 octobre) ; chaque métier du référentiel rattaché à au moins une", () => {
-    expect(FAMILLES_GROUPE).toHaveLength(9);
+  it("onze familles (neuf du 20 octobre, plus zinguerie et étanchéité le 13 novembre) ; chaque métier du référentiel rattaché à au moins une", () => {
+    expect(FAMILLES_GROUPE).toHaveLength(11);
+    // Greg, 13 novembre 2026 : zinguerie et étanchéité sont déclarées à part par chaque négoce.
+    expect(FAMILLES_GROUPE).toEqual(expect.arrayContaining(["zinguerie", "etancheite"]));
+    expect(famillesDuMetier("roofing")).toEqual(["couverture", "zinguerie", "etancheite"]);
+    expect(familleDuMetier("waterproofing")).toBe("etancheite");
     const metiers = new Set([...REFERENTIALS.map((r) => r.trade), ...FICHES.map((f) => f.metier), ...TRADES.map((t) => t.id).filter((id) => id !== "other")]);
     for (const m of metiers) expect(famillesDuMetier(m).length, m).toBeGreaterThan(0);
     expect(familleDuMetier("roofing")).toBe("couverture");

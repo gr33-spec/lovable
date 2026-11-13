@@ -109,9 +109,10 @@ test("le langage des artisans (Greg, 8 novembre 2026) : « 36 mètres de Lito »
   for (const s of ["18×40", "27×40", "Autre"]) await expect(question.getByRole("button", { name: s, exact: true })).toBeVisible();
   await question.getByRole("button", { name: "27×40", exact: true }).click();
   await expect(question).toContainText("Quel traitement ?");
-  await question.getByRole("button", { name: "Passer : le négoce précisera" }).click();
+  // Greg, 13 novembre 2026 : « Laisser à préciser » dans l'assistant, comme en saisie manuelle : la ligne dit ce qui manque.
+  await question.getByRole("button", { name: "Laisser à préciser" }).click();
   await expect(compris.getByRole("group", { name: "Question de Mobiiz" })).toHaveCount(0);
-  await expect(compris).toContainText("Liteau 27×40");
+  await expect(compris).toContainText("Liteau 27×40 · traitement à préciser");
   await expect(compris).toContainText("36 m");
   // La validation finale reste à l'artisan.
   await compris.getByRole("button", { name: "Ajouter à ma liste" }).click();

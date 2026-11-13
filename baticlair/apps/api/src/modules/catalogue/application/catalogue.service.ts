@@ -14,6 +14,7 @@ import {
   scoreArticle,
   type Candidate,
   FAMILLE_DU_METIER_CATALOGUE,
+  catalogueEnEnrichissement,
   LIBELLES_METIERS_CATALOGUE,
   METIERS_CATALOGUE,
   METIERS_DU_SELECTEUR,
@@ -211,7 +212,7 @@ export class CatalogueService {
   private metiersDe(trades: string[]) {
     const miens = metiersCatalogueDuCompte(trades);
     const ordre = [...miens, ...METIERS_DU_SELECTEUR.filter((m) => !miens.includes(m))];
-    return ordre.map((m) => ({ code: m, libelle: LIBELLES_CATALOGUES[m] ?? LIBELLES_METIERS_CATALOGUE[m], mien: miens.includes(m), familleAchat: FAMILLE_DU_METIER_CATALOGUE[m] }));
+    return ordre.map((m) => ({ code: m, libelle: LIBELLES_CATALOGUES[m] ?? LIBELLES_METIERS_CATALOGUE[m], mien: miens.includes(m), familleAchat: FAMILLE_DU_METIER_CATALOGUE[m], enEnrichissement: catalogueEnEnrichissement(m) }));
   }
 
   /**

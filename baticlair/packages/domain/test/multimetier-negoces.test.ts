@@ -29,6 +29,9 @@ describe("l'app range chaque ligne dans sa famille, sans rien demander à l'arti
     expect(familleDeLaLigne("Tuile Romane canal", { defaut: "second_oeuvre" })).toBe("couverture");
     expect(familleDeLaLigne("Mortier d'étanchéité pour solin, sac 25 kg", { defaut: "maconnerie" })).toBe("couverture");
     expect(familleDeLaLigne("Câble R2V 3G2,5 couronne 100 m", { defaut: "couverture" })).toBe("electricite");
+    // Greg, 13 novembre 2026 : zinguerie et étanchéité ont leur famille, elles ne sont plus de la « couverture ».
+    expect(familleDeLaLigne("Gouttière zinc demi-ronde dév. 25", { defaut: "couverture" })).toBe("zinguerie");
+    expect(familleDeLaLigne("Membrane EPDM 1,14 mm", { defaut: "couverture" })).toBe("etancheite");
   });
   it("le lot lu par le modèle passe avant les mots ; une ligne inconnue garde le métier de la liste", () => {
     expect(familleDeLaLigne("Plaque de plâtre BA13", { familleDuLot: "couverture", defaut: "couverture" })).toBe("couverture");

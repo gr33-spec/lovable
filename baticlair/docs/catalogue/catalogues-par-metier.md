@@ -12,7 +12,10 @@ Articles de l'amorce : 2142. Catalogues au sélecteur : 12.
 | Ardoises | Ardoises | 6 | 201 | Ardoise naturelle CUPA (Cupa Pizarras) (117) | Format, Modèle, Finition, Gamme, Sélection |
 | Tuiles en terre cuite | Tuiles canal | 15 | 67 | Tuile canal 50 Poudenx (14) | Modèle, Finition |
 | Tuiles en terre cuite | Tuiles plates | 10 | 41 | Tuile Plate 20×30 Huguenot (8) | Format, Finition, Modèle |
-| Tuiles en terre cuite | Tuiles à emboîtement | 47 | 223 | Tuile Oméga 10 Ste Foy (9) | Finition, Modèle |
+| Tuiles en terre cuite | Emboîtement grand format (jusqu'à 12 au m²) | 21 | 111 | Tuile Oméga 10 Ste Foy (9) | Finition, Modèle |
+| Tuiles en terre cuite | Emboîtement format moyen (12 à 17 au m²) | 10 | 46 | Tuile Romane Sans (9) | Finition, Modèle |
+| Tuiles en terre cuite | Emboîtement petit format (18 au m² et plus) | 9 | 42 | Tuile Monopole N°1 Huguenot (8) | Finition |
+| Tuiles en terre cuite | Autres tuiles à emboîtement | 7 | 24 | Tuile HP 10 Huguenot (7) | Finition |
 | Tuiles béton | Tuiles béton | 2 | 7 | Tuile béton à emboîtement (4) | Finition |
 | Accessoires de tuiles | Accessoires de tuiles | 23 | 47 | Faîtière à emboîtement (4) | Finition, Modèle, Diamètre |
 | Bacs et plaques | Bacs et plaques | 18 | 67 | Faîtière bac acier (12) | Épaisseur, Modèle, Longueur, Finition |

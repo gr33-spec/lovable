@@ -260,7 +260,7 @@ const envSchema = z
     /** Les prix repères HT par type et unité, pour estimer une ligne (« ardoise:pieces=1.2,zinc:m=18 ») ; vide : aucun. */
     PRIX_REPERES: z.string().optional(),
     /** Les familles dont les gros articles se regroupent (« couverture,charpente,second_oeuvre »). */
-    FAMILLES_GROUPABLES: z.string().default("couverture,charpente,second_oeuvre"),
+    FAMILLES_GROUPABLES: z.string().default("couverture,zinguerie,etancheite,charpente,second_oeuvre"),
     /** Gratuit : lectures de devis par mois. */
     LECTURES_GRATUITES_MOIS: z.coerce.number().int().min(0).default(2),
     /** Sous ce nombre d'artisans actifs dans une zone, le payant y est offert. */

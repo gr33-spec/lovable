@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { TOUT_LE_CATALOGUE } from "../src/catalogue/amorce.js";
 import { lireDescription } from "../src/assistant/assistant.js";
 import { comprendreArticle, auSon } from "../src/assistant/comprehension.js";
-import { choisirProduit, choisirValeur, confirmer, designationFinale, etapeSuivante, refuser, type ArticleCompris } from "../src/assistant/article-compris.js";
+import { axesDe, choisirProduit, choisirValeur, confirmer, designationFinale, etapeSuivante, laisserAPreciser, nomDeLaCaracteristique, refuser, type ArticleCompris } from "../src/assistant/article-compris.js";
 
 /**
  * L'ASSISTANT COMPREND LE LANGAGE DES ARTISANS (Greg, 8 novembre 2026) : « 36 mètres de Lito » doit conduire à « Tu veux
@@ -141,6 +141,17 @@ describe("rien d'inventé, l'artisan garde la main", () => {
     const { c } = dire("36 mètres de Lito");
     const fin = choisirValeur(choisirValeur(confirmer(c!), 0, "27×40"), 1, "");
     expect(designationFinale(fin)).toBe("Liteau 27×40");
+  });
+
+  it("« Laisser à préciser » (Greg, 13 novembre 2026) : comme en saisie manuelle, la ligne dit ce qui reste à préciser et la question ne revient pas", () => {
+    const { c } = dire("36 mètres de Lito");
+    const fin = laisserAPreciser(choisirValeur(confirmer(c!), 0, "27×40"), 1);
+    expect(designationFinale(fin)).toBe("Liteau 27×40 · traitement à préciser");
+    expect(etapeSuivante(fin, "36", "m")).toBeNull();
+    // Une valeur choisie ensuite l'emporte : plus rien « à préciser ».
+    expect(designationFinale(choisirValeur(fin, 1, axesDe(fin.produits[fin.choixProduit!]!, fin.valeurs)[1]!.valeurs[0]!))).not.toContain("à préciser");
+    expect(nomDeLaCaracteristique("Quelle origine et quel choix ?")).toBe("origine et choix");
+    expect(nomDeLaCaracteristique("Lequel ?")).toBe("modèle");
   });
 
   it("« Autre » : les mots de l'artisan, tels quels, à la place d'une valeur du catalogue", () => {

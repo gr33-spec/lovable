@@ -1,3 +1,4 @@
+import { TUILES_AU_M2 } from "./donnees/couverture-fabricants.js";
 import { LIBELLES_METIERS_CATALOGUE, METIERS_DU_SELECTEUR, rayonDuMetierCatalogue, type ArticleCatalogue, type MetierCatalogue } from "./catalogue.js";
 
 /**
@@ -60,6 +61,22 @@ const GAMME: PrecisionLibre = { nom: "Gamme", niveau: "facultative", exemple: "l
 /** Le nom d'un métal ou d'une matière, tel qu'il s'écrit dans les produits de zinguerie. */
 const MATIERE = "(zinc|cuivre|PVC|aluminium(?: laqué)?|acier laqué|acier galvanisé|inox(?: étamé)?|plomb)";
 
+/**
+ * LES TUILES À EMBOÎTEMENT SE RANGENT PAR FORMAT, JAMAIS PAR FABRICANT (Greg, 13 novembre 2026 : « uniquement des
+ * sous-familles fondées sur des caractéristiques professionnelles vérifiables : type, format, galbe ou mode de pose »).
+ * Le format est le nombre de tuiles au m² relevé sur la fiche du modèle (`TUILES_AU_M2`, borne basse de la fourchette) :
+ * jusqu'à 12, de 12 à 17, 18 et plus. Un produit générique qui dit son moule dans son nom (« grand moule », « petit
+ * moule ») suit son nom. Un modèle sans chiffre relevé reste sous « Autres tuiles à emboîtement » : rien n'est deviné
+ * (ni galbe, ni format). Les seuils rangent, ils ne décrivent pas la tuile : la fiche du modèle fait foi.
+ */
+const borneBasse = (texte: string): number => Number((texte.match(/\d+(?:[.,]\d+)?/)?.[0] ?? "").replace(",", "."));
+const nomsExacts = (noms: readonly string[], enPlus?: string): RegExp =>
+  new RegExp(`^(?:${[...noms.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), ...(enPlus ? [enPlus] : [])].join("|") || "(?!)"})$`);
+const tuilesEntre = (min: number, max: number): string[] => [...TUILES_AU_M2].filter(([, t]) => borneBasse(t) >= min && borneBasse(t) < max).map(([nom]) => nom);
+const TUILES_GRAND_FORMAT = nomsExacts(tuilesEntre(0, 12), ".*grand moule.*");
+const TUILES_FORMAT_MOYEN = nomsExacts(tuilesEntre(12, 18));
+const TUILES_PETIT_FORMAT = nomsExacts(tuilesEntre(18, Infinity), ".*petit moule.*");
+
 export const CATALOGUES: Readonly<Partial<Record<MetierCatalogue, readonly RayonDef[]>>> = {
   couverture: [
     seul("Ardoises", [["couverture", "Ardoises"]], {
@@ -73,7 +90,10 @@ export const CATALOGUES: Readonly<Partial<Record<MetierCatalogue, readonly Rayon
       familles: [
         f("Tuiles canal", [["couverture", "Tuiles terre cuite", /canal/i]]),
         f("Tuiles plates", [["couverture", "Tuiles terre cuite", /plate/i]]),
-        f("Tuiles à emboîtement", [["couverture", "Tuiles terre cuite"]]),
+        f("Emboîtement grand format (jusqu'à 12 au m²)", [["couverture", "Tuiles terre cuite", TUILES_GRAND_FORMAT]]),
+        f("Emboîtement format moyen (12 à 17 au m²)", [["couverture", "Tuiles terre cuite", TUILES_FORMAT_MOYEN]]),
+        f("Emboîtement petit format (18 au m² et plus)", [["couverture", "Tuiles terre cuite", TUILES_PETIT_FORMAT]]),
+        f("Autres tuiles à emboîtement", [["couverture", "Tuiles terre cuite"]]),
       ],
     },
     seul("Tuiles béton", [["couverture", "Tuiles béton"]]),

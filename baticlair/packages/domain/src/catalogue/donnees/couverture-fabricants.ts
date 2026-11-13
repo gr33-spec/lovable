@@ -17,8 +17,16 @@ import { croiser, produit, type ArticleCatalogue, type Fiche } from "../catalogu
 const M = "couverture" as const;
 const LE = "2026-10-31";
 
+/**
+ * Le nombre de tuiles au m² de chaque modèle, tel que sa fiche fabricant le donne (« De 10 à 11.2 », « 20 »), par nom de
+ * produit. C'est le FORMAT du modèle, une donnée relevée : elle range les tuiles à emboîtement en sous-familles
+ * (`rayons.ts`), jamais par fabricant (Greg, 13 novembre 2026). Un modèle sans chiffre relevé n'y figure pas.
+ */
+export const TUILES_AU_M2 = new Map<string, string>();
+
 /** Une tuile Edilians : sans coloris précisé (quand elle a une référence), puis chacun de ses coloris avec son EAN. */
-function edilians(nom: string, reference: string | null, url: string, coloris: readonly (readonly [string, string])[], _tuilesAuM2?: string): ArticleCatalogue[] {
+function edilians(nom: string, reference: string | null, url: string, coloris: readonly (readonly [string, string])[], tuilesAuM2?: string): ArticleCatalogue[] {
+  if (tuilesAuM2) TUILES_AU_M2.set(`Tuile ${nom}`, tuilesAuM2);
   const ean = new Map(coloris.map(([c, e]) => [c, e]));
   const mots = nom.toLowerCase().replace(/ (huguenot|ste foy|poudenx|gélis|jacob|phalempin)$/, "");
   return produit(M, "Tuiles terre cuite", `Tuile ${nom}`, "pièces", [...(reference ? [null] : []), ...coloris.map(([c]) => c)], {

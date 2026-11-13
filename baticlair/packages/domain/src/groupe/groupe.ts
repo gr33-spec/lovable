@@ -11,9 +11,16 @@ import { NOM_COMMANDE_COMMUNE } from "./nom.js";
 /**
  * Section 2, étape 3 : les familles qu'un négoce coche (« ce que chacun vend ») : les six du document, plus trois ajoutées
  * par le fondateur le 20 octobre 2026 (« menuiseries et fermetures », « second œuvre », « serrurerie et métallerie »).
+ *
+ * RÈGLE CHANGÉE (Greg, 13 novembre 2026, cœur métier : « Zinguerie et Étanchéité ne doivent plus partir automatiquement
+ * vers les négoces de Couverture. Utilise les métiers réellement déclarés par chaque négoce, tout en permettant à un
+ * négoce de couvrir plusieurs métiers ») : « zinguerie » et « étanchéité » sont deux familles à part, qu'un négoce coche
+ * ou non ; un négoce de couverture qui ne les a pas cochées ne les reçoit plus. Un généraliste reçoit toujours tout.
  */
 export const FAMILLES_GROUPE = [
   "couverture",
+  "zinguerie",
+  "etancheite",
   "charpente",
   "maconnerie",
   "electricite",
@@ -27,6 +34,8 @@ export type FamilleGroupe = (typeof FAMILLES_GROUPE)[number];
 
 export const LIBELLES_FAMILLES: Readonly<Record<FamilleGroupe, string>> = {
   couverture: "Couverture",
+  zinguerie: "Zinguerie",
+  etancheite: "Étanchéité",
   charpente: "Charpente",
   maconnerie: "Maçonnerie",
   electricite: "Électricité",
@@ -43,9 +52,9 @@ export const LIBELLES_FAMILLES: Readonly<Record<FamilleGroupe, string>> = {
  * référentiel, donc pas de famille.
  */
 const FAMILLES_DU_METIER: Readonly<Record<string, readonly FamilleGroupe[]>> = {
-  roofing: ["couverture"],
-  waterproofing: ["couverture"],
-  cladding: ["couverture"],
+  roofing: ["couverture", "zinguerie", "etancheite"],
+  waterproofing: ["etancheite", "couverture"],
+  cladding: ["couverture", "zinguerie"],
   solar: ["electricite", "couverture"],
   carpentry: ["charpente"],
   masonry: ["maconnerie"],
