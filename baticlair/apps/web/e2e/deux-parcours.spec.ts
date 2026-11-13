@@ -127,7 +127,12 @@ test("un article inconnu du catalogue : « Article à vérifier », gardé tel q
   await inscrire(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
-  await chat.getByRole("textbox", { name: "Ton message" }).fill("12 schmilblicks");
+  await expect(chat.getByText("Bonjour Jean. Donne-moi ce que tu as : je prépare, tu vérifies.")).toBeVisible();
+  // Le guide de première visite peut s'ouvrir par-dessus et vider la case en se fermant : on réécrit jusqu'à pouvoir envoyer.
+  await expect(async () => {
+    await chat.getByRole("textbox", { name: "Ton message" }).fill("12 schmilblicks");
+    await expect(chat.getByRole("button", { name: "Envoyer le message" })).toBeEnabled({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
   const compris = chat.getByRole("region", { name: "J'ai compris" });
   await expect(compris).toContainText(/schmilblicks/i);
