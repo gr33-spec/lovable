@@ -127,3 +127,11 @@ Chaîne complète sur le commit candidat (le commit de ce fichier) : script du d
 dans `final23/etat.txt`. Ne modifier AUCUNE source pendant qu'elle tourne. Verte : avance rapide de
 `claude/saas-achat-artisans-prompt-1lyihx`, push, attente des deux domaines, recette en ligne sans compte, compte rendu.
 Rouge : ne rien pousser, corriger, relancer la chaîne ENTIÈRE.
+
+## Livraison du 13 novembre 2026 (soir) : derniers écarts, fiche projet, agents, signalements
+
+- En ligne sur test.mobiiz.fr et api-test.mobiiz.fr : commit `9267661b` (vérifié sur les deux domaines). Aucune production.
+- Chaîne complète verte sur ce commit exact : moteur 1161, serveur 791 (+1 ignoré), parcours 287 (+29 ignorés), lots 16, parcours activés 69.
+- Migration `20261113180000_signalement` appliquée sur la base de test ; table `signalement` vide.
+- Non testé en ligne : l'envoi réel d'un signalement (il déclenche de vrais e-mails).
+- À décider par Greg : police (Plus Jakarta Sans ou Bricolage Grotesque), filtre « Couverture » des achats groupés V1 (comprend encore la zinguerie), bibliothèque de capture d'écran, réécritures juridiques des missions et avocat avant production, nouvelle acceptation des CGU, outils payants du studio, variable `ALERT_EMAIL`, filtre par fabricant pour les tuiles.
