@@ -29,12 +29,13 @@ export type LotV1 = (typeof LOTS_V1)[number]["id"];
 export const estLotV1 = (v: string): v is LotV1 => LOTS_V1.some((l) => l.id === v);
 export const libelleLot = (lot: LotV1) => LOTS_V1.find((l) => l.id === lot)!.libelle;
 /**
- * LA ZINGUERIE FAIT PARTIE DE LA COUVERTURE, PARTOUT (Greg, 12 novembre 2026 : « même en achat groupé ; ça doit faire
- * partie des sous-menus de la couverture »). Le lot « zinguerie » reste rangé tel quel (aucune donnée réécrite) : il se
- * lit SOUS la couverture, et le filtre « Couverture » le comprend.
+ * RÈGLE CHANGÉE (Greg, 13 novembre 2026 : « sépare aussi la zinguerie du filtre Couverture des achats groupés V1 ») :
+ * le 12 novembre, le lot « zinguerie » se lisait SOUS la couverture. Il est maintenant un lot à part, comme au catalogue
+ * et au routage des négoces. Aucune donnée réécrite : le lot rangé n'a jamais changé. La table reste, vide, pour un
+ * éventuel sous-lot futur.
  */
-export const LOT_PARENT_V1: Readonly<Partial<Record<LotV1, LotV1>>> = { zinguerie: "couverture" };
-/** Les lots d'un filtre : lui, puis ses sous-lots (« couverture » → couverture, zinguerie). */
+export const LOT_PARENT_V1: Readonly<Partial<Record<LotV1, LotV1>>> = {};
+/** Les lots d'un filtre : lui, puis ses sous-lots s'il en a (aucun à ce jour). */
 export const lotsComprisV1 = (lot: LotV1): LotV1[] => [lot, ...LOTS_V1.map((l) => l.id).filter((id) => LOT_PARENT_V1[id] === lot)];
 
 /** Les mots qui rangent une ligne dans un lot ; l'ordre compte (« fenêtre de toit » est de la couverture, pas de la menuiserie). */

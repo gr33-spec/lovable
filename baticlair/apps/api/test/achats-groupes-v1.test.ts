@@ -166,10 +166,10 @@ describe("entrée directe par produit", () => {
     const r2 = (await confirmer(a.agent, [besoin(), besoin({ type: "gouttiere", attributs: { matiere: "zinc", developpe: "33" }, quantite: 40, unite: "m", parUnite: null, conversionConfirmee: false })], k).expect(201)).body;
     expect(r2.besoins.map((x: { id: string }) => x.id)).toEqual(r1.besoins.map((x: { id: string }) => x.id));
     expect(await ctx.prisma.besoinGroupeV1.count()).toBe(2);
-    // La zinguerie fait partie de la couverture, même en achat groupé (Greg, 12 novembre 2026) : le filtre « Couverture »
-    // comprend la gouttière ; le sous-lot « Zinguerie » ne rend qu'elle.
+    // RÈGLE CHANGÉE (Greg, 13 novembre 2026) : la zinguerie est un lot à part ; le filtre « Couverture » ne rend plus la
+    // gouttière, le filtre « Zinguerie » ne rend qu'elle.
     const ouverts = async (lot: string) => ((await a.agent.get(`/v1/ag/achats?lot=${lot}`).expect(200)).body.achats as { lot: string }[]).map((x) => x.lot).sort();
-    expect(await ouverts("couverture")).toEqual(["couverture", "zinguerie"]);
+    expect(await ouverts("couverture")).toEqual(["couverture"]);
     expect(await ouverts("zinguerie")).toEqual(["zinguerie"]);
     expect(await ouverts("isolation")).toEqual([]);
     // Même clé d'action HTTP (double appui) : la réponse est rejouée.

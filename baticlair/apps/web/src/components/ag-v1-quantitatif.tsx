@@ -275,7 +275,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
               {lot.libelle}
             </h2>
             {ls.length ? <ul className={`${CARTE} flex flex-col`}>{ls.map(rangee)}</ul> : null}
-            {/* La zinguerie fait partie de la couverture (Greg, 12 novembre 2026) : ses lignes en sous-partie du lot. */}
+            {/* Les sous-lots éventuels d'un lot (aucun depuis le 13 novembre 2026 : la zinguerie est un lot à part). */}
             {sous.map((s) => (
               <section key={s.lot.id} aria-labelledby={`lot-${s.lot.id}`} className="flex flex-col gap-2">
                 <h3 id={`lot-${s.lot.id}`} className="text-[16px] font-extrabold text-muted">

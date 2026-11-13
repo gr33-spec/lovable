@@ -18,12 +18,13 @@ Fiche lue par chaque nouvelle session. Le détail des règles produit est dans `
 3. **Mission** : un artisan indépendant (qui se lance, ou dont un chantier est décalé) publie ses compétences et ses diplômes ; une entreprise surchargée cherche du renfort (compétences, nombre de personnes). Mobiiz fait UNIQUEMENT de la mise en relation : les deux parties s'arrangent entre elles, administratif compris (contrat, assurances, attestation de vigilance URSSAF). Jamais d'intérim, de recrutement ni de mission garantie.
 
 - Application multimétier (douze métiers au catalogue) ; la publicité et la communication ciblent d'abord les couvreurs en Bretagne.
+- Zinguerie et Étanchéité sont des métiers à part de la Couverture, partout : catalogue, routage des négoces, lots et filtre des achats groupés (13 novembre 2026).
 - Confidentialité : côté achats, les artisans ne se voient jamais entre eux ; un négoce ne voit jamais les prix d'un autre ; les négoces sont vérifiés.
 
 ## Charte
 
 - Jaune #FFC800 et noir profond ; thème clair ivoire #FBF8F3 ; aucun marron.
-- Police : le code charge **Plus Jakarta Sans** (décision du 29 octobre 2026) ; Bricolage Grotesque n'est plus chargée. À TRANCHER PAR GREG : sa fiche dit Bricolage Grotesque. Ne rien changer sans sa réponse.
+- Police : **Plus Jakarta Sans** (tranché par Greg le 13 novembre 2026). Bricolage Grotesque n'est plus utilisée.
 - Ton : `baticlair/docs/TON.md`. Page publique : jamais « IA », « automatique », « précis », « exact » ; aucun montant ; aucune économie garantie.
 
 ## État réel du code (13 novembre 2026)
@@ -59,6 +60,14 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Chaque règle changée se dit : « Règle changée : avant → après ».
 - Ne jamais afficher une clé ni un secret. Pas de nouvelle dépendance sans accord.
 - Mettre ce fichier à jour à chaque décision importante.
+
+## Décisions du 13 novembre 2026
+
+- Capture d'écran des signalements : pas de bibliothèque pour l'instant.
+- Mission reste coupée ; les propositions du juriste (`baticlair/docs/groupe/relecture-juridique-missions-2026-11-13.md`) sont à revoir avec un avocat avant la production.
+- Studio : aucun outil payant pour l'instant.
+- Alertes : `ALERT_EMAIL` = contact@mobiiz.fr.
+- Filtre par fabricant (tuiles) : plus tard, après retours terrain.
 
 ## Signalement de bugs
 

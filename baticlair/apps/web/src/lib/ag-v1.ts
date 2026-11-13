@@ -112,12 +112,12 @@ export interface LigneQuantitatifV1 {
 }
 
 /**
- * La zinguerie fait partie de la couverture, partout (Greg, 12 novembre 2026) : `dans` range un lot SOUS un autre ; il se
- * lit en sous-menu de la couverture et le filtre « Couverture » le comprend (même règle que le serveur).
+ * RÈGLE CHANGÉE (Greg, 13 novembre 2026) : la zinguerie est un lot à part, plus un sous-lot de la couverture (même règle
+ * que le serveur). `dans` reste possible pour ranger un lot SOUS un autre ; aucun ne l'utilise à ce jour.
  */
 export const LOTS_V1: { id: string; libelle: string; dans?: string }[] = [
   { id: "couverture", libelle: "Couverture" },
-  { id: "zinguerie", libelle: "Zinguerie", dans: "couverture" },
+  { id: "zinguerie", libelle: "Zinguerie" },
   { id: "isolation", libelle: "Isolation" },
   { id: "bois", libelle: "Bois" },
   { id: "electricite", libelle: "Électricité" },
@@ -128,13 +128,13 @@ export const LOTS_V1: { id: string; libelle: string; dans?: string }[] = [
   { id: "peinture", libelle: "Peinture" },
   { id: "divers", libelle: "Divers" },
 ];
-/** Les lots de premier niveau, chacun avec ses sous-lots (« Couverture » › « Zinguerie »). */
+/** Les lots de premier niveau, chacun avec ses sous-lots (aucun à ce jour). */
 export const LOTS_PRINCIPAUX_V1 = LOTS_V1.filter((l) => !l.dans).map((l) => ({ ...l, sous: LOTS_V1.filter((s) => s.dans === l.id) }));
-/** Le lot de premier niveau d'un lot (« zinguerie » → « couverture »). */
+/** Le lot de premier niveau d'un lot (lui-même tant qu'aucun sous-lot n'existe). */
 export const lotPrincipal = (id: string) => LOTS_V1.find((l) => l.id === id)?.dans ?? id;
-/** Les filtres de l'accueil (V5.2) : Couverture (zinguerie comprise) · Isolation · Bois · Électricité. */
-export const FILTRES_V1 = LOTS_PRINCIPAUX_V1.slice(0, 4);
-/** « Couverture », « Couverture › Zinguerie ». */
+/** Les filtres de l'accueil : Couverture · Zinguerie (à part depuis le 13 novembre 2026) · Isolation · Bois · Électricité. */
+export const FILTRES_V1 = LOTS_PRINCIPAUX_V1.slice(0, 5);
+/** « Couverture », « Zinguerie » (« Lot › Sous-lot » si un sous-lot existe un jour). */
 export const libelleLot = (id: string) => {
   const l = LOTS_V1.find((x) => x.id === id);
   if (!l) return id;
