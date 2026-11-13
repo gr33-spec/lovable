@@ -17,8 +17,10 @@ Mission de Greg du 13 novembre 2026. À lire en premier à chaque reprise ; ne p
   préciser » dans l'assistant), la fiche projet à la racine (`CLAUDE.md`), 23 agents (`.claude/agents/`), les faux devis.
 - FAIT, commit suivant : signalement de bugs (table `signalement`, module `signalements`, bouton, `/admin/signalements`),
   mention Mission (écran et section 11 des CGU).
+- Chaîne `final26` sur `764aeaca` : ROUGE au serveur (1 test, `boucle-negoce` : un négoce invité par un couvreur recevait
+  d'office zinguerie et étanchéité). Corrigé (`negoces.service.ts`), relecture juridique rangée dans `docs/groupe/`.
 - RESTE : chaîne complète sur le commit candidat exact, puis livraison sur test, vérification des deux domaines et de la
-  migration `20261113180000_signalement`, compte rendu à Greg. Prochaine commande : `scratchpad/chaine26.sh`.
+  migration `20261113180000_signalement`, compte rendu à Greg. Prochaine commande : `scratchpad/chaine27.sh`.
 
 ## Ce qui existait déjà (audit, lot A)
 - Modèle : table `catalogue_article` (clé stable `metier/famille/produit/variante`, métier, famille, produit, variante,
