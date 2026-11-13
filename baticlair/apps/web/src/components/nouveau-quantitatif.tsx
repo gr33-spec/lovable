@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, ChevronRight, ClipboardList, FileText, Keyboard, Layers, Mic, PencilLine, ShoppingCart, Tag, Package, X } from "lucide-react";
+import { Camera, ChevronRight, ClipboardList, FileText, Keyboard, Layers, Mic, PencilLine, Tag, Package, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
@@ -182,12 +182,12 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
       if (ancienne !== null) setElements((xs) => xs.filter((x) => x.id !== ancienne));
       lignes = ia.lignes.map(avecUnite);
       conversation.current = { echanges: [...echanges, ...ia.questions.map((q) => ({ de: "assistant" as const, texte: q.choix.length ? `${q.texte} (${q.choix.join(", ")})` : q.texte }))], carte: null };
-      if (lignes.length === 0 && ia.questions.length === 0) return dire(ia.message || "Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo, un document ou le catalogue.");
+      if (lignes.length === 0 && ia.questions.length === 0) return dire(ia.message || "Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo ou un document.");
     } else {
       conversation.current = { echanges: [], carte: null };
       const r = lireDescription(texte);
       lignes = [...r.lignes, ...r.aConfirmer].map(avecUnite);
-      if (lignes.length === 0) return dire("Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo, un document ou le catalogue.");
+      if (lignes.length === 0) return dire("Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo ou un document.");
     }
     if (ia?.ia && ia.message) dire(ia.message);
     if (lignes.length === 0) {
@@ -516,7 +516,7 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
           }
         />
       </div>
-      {feuille ? <FeuilleAjouter liste={liste !== null} ids={ids} onCatalogue={() => (setFeuille(false), setCatalogue(true))} onListe={liste ? () => router.push(`/chantiers/${liste.projetId}`) : undefined} onFermer={() => setFeuille(false)} /> : null}
+      {feuille ? <FeuilleAjouter liste={liste !== null} ids={ids} onListe={liste ? () => router.push(`/chantiers/${liste.projetId}`) : undefined} onFermer={() => setFeuille(false)} /> : null}
       {aConfirmer ? (
         <ConfirmerAnalyse
           nature={aConfirmer.nature}
@@ -704,8 +704,8 @@ function QuestionArticle({ c, ligne, onCompris }: { c: ArticleCompris; ligne: Li
   );
 }
 
-/** « Ajouter » : photos (plusieurs), document, catalogue ; les champs de fichier restent dans la page. */
-function FeuilleAjouter({ liste, ids, onCatalogue, onListe, onFermer }: { liste: boolean; ids: { photo: string; document: string }; onCatalogue: () => void; onListe?: (() => void) | undefined; onFermer: () => void }) {
+/** « Ajouter » : photos (plusieurs), document ; les champs de fichier restent dans la page. */
+function FeuilleAjouter({ liste, ids, onListe, onFermer }: { liste: boolean; ids: { photo: string; document: string }; onListe?: (() => void) | undefined; onFermer: () => void }) {
   const option = "pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border border-[#111111]/10 px-4 text-[17px] font-bold active:bg-black/5";
   return (
     <div className="fixed top-0 left-0 z-[60] flex h-[100dvh] w-full items-end justify-center bg-black/50 lg:items-center" onClick={onFermer}>
@@ -734,9 +734,8 @@ function FeuilleAjouter({ liste, ids, onCatalogue, onListe, onFermer }: { liste:
             <label htmlFor={ids.document} className={option} onClick={() => setTimeout(onFermer, 0)}>
               <FileText size={22} aria-hidden="true" /> <span className="flex-1">Choisir un document</span> <ChevronRight size={20} aria-hidden="true" />
             </label>
-            <button type="button" onClick={onCatalogue} className={option}>
-              <ShoppingCart size={22} aria-hidden="true" /> <span className="flex-1 text-left">Parcourir le catalogue</span> <ChevronRight size={20} aria-hidden="true" />
-            </button>
+            {/* Le catalogue n'est plus ici (Greg, 13 novembre 2026, « cœur métier » : « ne duplique pas le catalogue dans
+                l'assistant […] le bouton doit rester dans le parcours manuel prévu ») : il s'ouvre par « Je saisis ma liste ». */}
             {/* Photos et documents sont lus par l'IA : la phrase, le compteur et « Comment fonctionne l'analyse ? ». */}
             <InfoAnalyse />
           </>

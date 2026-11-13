@@ -76,8 +76,7 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     expect(await apiJson(page, "POST", "/v1/groupe/siret")).toBe(200);
 
     // 2. « Saisir ma liste » (31 octobre 2026) : la recherche, la ligne libre, la quantité ; le bouton du bas reste visible.
-    await page.goto("/chantiers/nouveau?mode=assistant");
-    await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
+    await page.goto("/chantiers/nouveau?mode=manuel");
     const dialogue = page.getByRole("dialog", { name: "Saisir ma liste" });
     await champVisible(page, dialogue.getByLabel("Rechercher un matériau"));
     await dialogue.getByLabel("Rechercher un matériau").fill("Crochets inox maison");
@@ -92,7 +91,6 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     // 3. L'achat groupé : la quantité, la commune, les négoces (e-mail, nom, téléphone).
     await page.goto("/achats-groupes/lancer");
     // Point 3 du 30 octobre : le catalogue en listes, famille › produit › format.
-    await page.getByRole("button", { name: "Couverture", exact: true }).filter({ visible: true }).click();
     await page.getByRole("button", { name: "Ardoises", exact: true }).filter({ visible: true }).click();
     await page.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
     await page.getByRole("button", { name: "32×22", exact: true }).click();

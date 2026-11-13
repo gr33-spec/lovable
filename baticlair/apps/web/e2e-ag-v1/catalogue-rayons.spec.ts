@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { confirmerEmail } from "../e2e/confirmer-email";
 
 /**
- * LE CATALOGUE EN RAYONS (Greg, 12 novembre 2026 : « Métier › Rayon › Famille › Produit › Caractéristiques › Quantité […]
+ * LE CATALOGUE PAR MÉTIER (Greg, 12 novembre 2026, puis 13 novembre : chaque métier est un catalogue de premier niveau : « Métier › Rayon › Famille › Produit › Caractéristiques › Quantité […]
  * l'artisan doit naviguer comme dans un catalogue de négoce […] Une catégorie « Zinc » ne doit jamais afficher du cuivre »),
  * et le sélecteur de métier qui ne se déroulait pas toujours sur iPhone (capture du même jour). Petit téléphone, Android,
  * ordinateur. Aucun appel payant.
@@ -33,7 +33,9 @@ async function inscrire(page: Page) {
 
 const bouton = (ou: Locator, nom: string) => ou.getByRole("button", { name: nom, exact: true }).filter({ visible: true });
 
-test("catalogue en rayons : Couverture › Zinguerie › Feuilles, bobines… › Bobine › zinc › finition › épaisseur › largeur ; retour sans perte ; précision libre ; recherche directe ; sélecteur", async ({ page }, info) => {
+// RÈGLE CHANGÉE (Greg, 13 novembre 2026, « cœur métier ») : Zinguerie et Étanchéité sont des métiers de premier niveau ;
+// métier › famille › sous-famille éventuelle › article › caractéristiques ; « Laisser à préciser » ; contexte des résultats.
+test("catalogue par métier : Zinguerie › Feuilles, bobines et bandes › Bobine › zinc › finition › épaisseur › largeur ; retour sans perte ; laisser à préciser ; précision libre ; recherche directe ; sélecteur", async ({ page }, info) => {
   test.setTimeout(180_000);
   const ordinateur = info.project.name === "ordinateur";
   const cap = async (nom: string) => {
@@ -47,25 +49,33 @@ test("catalogue en rayons : Couverture › Zinguerie › Feuilles, bobines… �
   await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
   const sansDebordement = async () => expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
 
-  // 1. Trois rayons, pas des centaines de références ; Étanchéité est un rayon de Couverture, plus un métier à part.
-  for (const r of ["Couverture", "Zinguerie", "Étanchéité et toitures-terrasses"]) await expect(bouton(saisie, r)).toHaveCount(1);
-  await expect(saisie.getByLabel("Métier").locator("option", { hasText: /^(Étanchéité|Zinguerie)$/ })).toHaveCount(0);
+  // 1. Couverture : ses familles seulement, pas des centaines de références ; ni zinguerie ni étanchéité dedans.
+  for (const r of ["Ardoises", "Tuiles en terre cuite", "Fixations"]) await expect(bouton(saisie, r)).toHaveCount(1);
+  for (const r of ["Zinguerie", "Étanchéité et toitures-terrasses", "Gouttières et descentes", "Membranes bitumineuses"]) await expect(bouton(saisie, r)).toHaveCount(0);
+  // Zinguerie et Étanchéité sont des métiers à part, parmi ceux du couvreur.
+  await expect(saisie.getByLabel("Métier").locator('optgroup[label="Tes métiers"] option')).toHaveText(["Couverture", "Zinguerie", "Étanchéité"]);
   if (ordinateur) {
     // Ordinateur : la navigation à gauche, le contenu au centre, la liste en cours à droite, en même temps.
-    await expect(saisie.getByRole("navigation", { name: "Rayons du catalogue" })).toBeVisible();
+    await expect(saisie.getByRole("navigation", { name: "Familles du catalogue" })).toBeVisible();
     await expect(saisie.getByRole("complementary", { name: "Ma liste" })).toBeVisible();
   }
   await sansDebordement();
-  await cap("01-rayons");
+  await cap("01-familles-couverture");
+  // Une famille qui en a besoin a des sous-familles : les tuiles en terre cuite.
+  await bouton(saisie, "Tuiles en terre cuite").click();
+  for (const r of ["Tuiles canal", "Tuiles plates", "Tuiles à emboîtement"]) await expect(bouton(saisie, r)).toHaveCount(1);
+  await expect(saisie.getByLabel("Tu es ici")).toHaveText("Couverture › Tuiles en terre cuite");
 
-  // 2. Rayon, famille, produit : chaque écran reste court.
-  await bouton(saisie, "Zinguerie").click();
-  await cap("02-familles");
-  await bouton(saisie, "Feuilles, bobines, bobineaux et bandes").click();
+  // 2. Métier, famille, produit : chaque écran reste court.
+  await saisie.getByLabel("Métier").selectOption({ label: "Zinguerie" });
+  for (const r of ["Gouttières et descentes", "Feuilles, bobines et bandes", "Rives, solins et habillages", "Soudure et consommables"]) await expect(bouton(saisie, r)).toHaveCount(1);
+  await cap("02-familles-zinguerie");
+  await bouton(saisie, "Feuilles, bobines et bandes").click();
+  await expect(saisie.getByLabel("Tu es ici")).toHaveText("Zinguerie › Feuilles, bobines et bandes");
   await expect(bouton(saisie, "Bobine")).toContainText("À choisir : matériau, finition, épaisseur, largeur");
   // Bobine et bobineau restent deux produits ; jamais « Bobine de cuivre » à côté de « Bobine de zinc ».
   await expect(bouton(saisie, "Bobineau")).toHaveCount(1);
-  const produits = saisie.getByRole("list", { name: "Feuilles, bobines, bobineaux et bandes" });
+  const produits = saisie.getByRole("list", { name: "Feuilles, bobines et bandes" });
   await expect(produits.getByRole("button", { name: /Bobine de (zinc|cuivre)/ })).toHaveCount(0);
   await expect(produits.getByRole("button", { name: /joint debout/i })).toHaveCount(0);
   await cap("03-produits");
@@ -83,7 +93,26 @@ test("catalogue en rayons : Couverture › Zinguerie › Feuilles, bobines… �
   // « Choix précédent » remonte d'un cran, sans rien perdre du chemin.
   await saisie.getByRole("button", { name: "Choix précédent" }).click();
   await expect(choix).toHaveAccessibleName("Bobine : Finition");
-  await expect(saisie.getByLabel("Tu es ici")).toHaveText(/Zinguerie › Feuilles, bobines, bobineaux et bandes › Bobine › zinc$/);
+  await expect(saisie.getByLabel("Tu es ici")).toHaveText("Zinguerie › Feuilles, bobines et bandes › Bobine › zinc");
+  await bouton(choix, "naturel").click();
+  // « Laisser à préciser » : la ligne part avec ce qui est choisi ; l'épaisseur est écrite « à préciser », jamais devinée.
+  await bouton(saisie, "Laisser à préciser").click();
+  await expect(saisie.getByLabel("Quantité de Bobine zinc naturel · épaisseur à préciser").first()).toBeVisible();
+  await saisie.getByRole("button", { name: "Ajouter à la sélection" }).click();
+  const enCours = saisie.getByRole("region", { name: "Ma liste en cours" }).filter({ visible: true });
+  await expect(enCours.getByLabel("Désignation").first()).toHaveValue("Bobine zinc naturel · épaisseur à préciser");
+  // Revenir en arrière ne perd pas la liste en cours : la ligne est toujours là après deux retours et un changement de métier.
+  await bouton(saisie, "Bobine").click();
+  await saisie.getByRole("button", { name: "Choix précédent" }).click();
+  await saisie.getByRole("button", { name: "Choix précédent" }).click();
+  await saisie.getByLabel("Métier").selectOption({ label: "Étanchéité" });
+  for (const r of ["Membranes bitumineuses", "Membranes synthétiques", "Évacuation des eaux"]) await expect(bouton(saisie, r)).toHaveCount(1);
+  await expect(bouton(saisie, "Ardoises")).toHaveCount(0);
+  await expect(enCours.getByLabel("Désignation").first()).toHaveValue("Bobine zinc naturel · épaisseur à préciser");
+  await saisie.getByLabel("Métier").selectOption({ label: "Zinguerie" });
+  await bouton(saisie, "Feuilles, bobines et bandes").click();
+  await bouton(saisie, "Bobine").click();
+  await bouton(choix, "zinc").click();
   await bouton(choix, "naturel").click();
   await bouton(choix, "0,65 mm").click();
   await expect(choix).toHaveAccessibleName("Bobine : Largeur");
@@ -95,7 +124,7 @@ test("catalogue en rayons : Couverture › Zinguerie › Feuilles, bobines… �
   await quantite.fill("40");
   await cap("06-quantite");
   await saisie.getByRole("button", { name: "Ajouter à la sélection" }).click();
-  await expect(saisie.getByRole("button", { name: /Créer le quantitatif · 1 matériau/ }).filter({ visible: true }).first()).toBeVisible();
+  await expect(saisie.getByRole("button", { name: /Créer le quantitatif · 2 matériaux/ }).filter({ visible: true }).first()).toBeVisible();
   // La famille reste ouverte pour le produit suivant.
   await expect(bouton(saisie, "Bobineau")).toHaveCount(1);
   await sansDebordement();
@@ -109,16 +138,19 @@ test("catalogue en rayons : Couverture › Zinguerie › Feuilles, bobines… �
   await saisie.getByLabel("Teinte").fill("RAL 9010");
   await cap("07-precision-teinte");
   await saisie.getByRole("button", { name: "Ajouter à la sélection" }).click();
-  await expect(saisie.getByRole("region", { name: "Ma liste en cours" }).filter({ visible: true }).getByLabel("Désignation").nth(1)).toHaveValue(/^Peinture murs et plafonds acrylique .* · teinte : RAL 9010$/);
+  await expect(saisie.getByRole("region", { name: "Ma liste en cours" }).filter({ visible: true }).getByLabel("Désignation").nth(2)).toHaveValue(/^Peinture murs et plafonds acrylique .* · teinte : RAL 9010$/);
 
   // 5. La recherche directe contourne l'arborescence et dit où l'article se range.
   await saisie.getByLabel("Rechercher un matériau").fill("bobinot zinc");
   const resultats = saisie.getByRole("list", { name: "Résultats" });
-  await expect(resultats.getByRole("button", { name: /^Bobineau de zinc/ }).first()).toContainText("Couverture › Zinguerie › Feuilles, bobines, bobineaux et bandes");
+  await expect(resultats.getByRole("button", { name: /^Bobineau de zinc/ }).first()).toContainText("Zinguerie · Feuilles, bobines et bandes · Bobineau");
+  // Jamais deux résultats que rien ne distingue : chaque ligne des résultats est unique.
+  const lignes = await resultats.getByRole("button").allInnerTexts();
+  expect(new Set(lignes).size).toBe(lignes.length);
   await cap("08-recherche");
   await saisie.getByLabel("Rechercher un matériau").fill("prise 16 A étanche");
   await expect(resultats.getByRole("button", { name: /^Prise de courant 2P\+T/ }).first()).toContainText("À préciser : étanche");
-  await expect(resultats.getByRole("button", { name: /^Prise de courant 2P\+T/ }).first()).toContainText("Électricité › Appareillage");
+  await expect(resultats.getByRole("button", { name: /^Prise de courant 2P\+T/ }).first()).toContainText("Électricité · Appareillage · Prise de courant 2P+T");
   await saisie.getByLabel("Rechercher un matériau").fill("");
 
   // 6. Le sélecteur : toute la carte ouvre la liste (le mot « Catalogue : » compris), et il garde ses métiers pendant un rechargement.
@@ -137,7 +169,7 @@ test("catalogue en rayons : Couverture › Zinguerie › Feuilles, bobines… �
   await page.unroute("**/v1/catalogue?*");
   if (!ordinateur) {
     // Téléphone : rien sous le bord de l'écran, le bouton du bas entier.
-    const bas = (await saisie.getByRole("button", { name: /Créer le quantitatif · 2 matériaux/ }).filter({ visible: true }).first().boundingBox())!;
+    const bas = (await saisie.getByRole("button", { name: /Créer le quantitatif · 3 matériaux/ }).filter({ visible: true }).first().boundingBox())!;
     expect(bas.y + bas.height).toBeLessThanOrEqual(page.viewportSize()!.height);
   }
   await cap("09-electricite");

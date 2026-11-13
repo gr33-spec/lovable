@@ -235,7 +235,7 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await page.getByRole("link", { name: /Mobiiz m'aide/ }).click();
   // Deux parcours reliés (Greg, 7 novembre 2026) : une conversation ; le « + » ouvre « Ajouter » (photo, document,
   // catalogue), avec l'information de l'analyse en une phrase et son détail dans une fenêtre.
-  await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click();
+  await page.getByRole("button", { name: "Ajouter : photo ou document" }).click();
   await expect(page.getByText("Choisir un document", { exact: true })).toBeVisible();
   await expect(page.getByText("MOBIIZ prépare une première liste. Tu pourras tout vérifier et modifier.")).toBeVisible();
   await expect(page.getByRole("region", { name: "Besoin d'un coup de main ?" })).toHaveCount(0);
@@ -1544,7 +1544,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   // 1. Le document par le « + » de la conversation (Greg, 7 novembre 2026).
-  await expect(page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Ajouter : photo ou document" })).toBeVisible();
   await clean();
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   // 2. Les questions : une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste ».
@@ -3030,9 +3030,11 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await expect(page).toHaveURL(/\/chantiers\/nouveau(\?mode=assistant)?$/);
   await page.getByRole("link", { name: /Mobiiz m'aide/ }).click();
   // Deux parcours reliés (Greg, 7 novembre 2026) : une seule porte, la conversation ; le « + » ouvre « Ajouter ».
-  await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click();
+  await page.getByRole("button", { name: "Ajouter : photo ou document" }).click();
   const feuille = page.getByRole("dialog", { name: "Ajouter" });
-  for (const o of ["Prendre une photo", "Choisir un document", "Parcourir le catalogue"]) await expect(feuille.getByText(o, { exact: true })).toBeVisible();
+  for (const o of ["Prendre une photo", "Choisir un document"]) await expect(feuille.getByText(o, { exact: true })).toBeVisible();
+  // Le catalogue n'est pas dans les pièces jointes de l'assistant (Greg, 13 novembre 2026) : il reste dans « Je saisis ma liste ».
+  await expect(feuille.getByText("Parcourir le catalogue")).toHaveCount(0);
   await feuille.getByRole("button", { name: "Fermer" }).click();
   await expect(page.getByLabel("Prendre une photo")).toHaveAttribute("capture", "environment");
   await expect(page.getByLabel("Choisir une photo")).toHaveAttribute("accept", /image\/jpeg/);
@@ -3191,11 +3193,11 @@ test("« Ma liste de matériaux » sur téléphone : rien sous la barre du bas, 
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   // Deux parcours reliés (Greg, 7 novembre 2026) : la conversation prend tout l'écran ; sa barre reste dans l'écran.
-  const plus = page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" });
+  const plus = page.getByRole("button", { name: "Ajouter : photo ou document" });
   const p = (await plus.boundingBox())!;
   expect(p.y + p.height).toBeLessThanOrEqual(page.viewportSize()!.height);
-  await plus.click();
-  await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
+  // La saisie à la main (le catalogue) : son bouton du bas reste entier, lui aussi.
+  await page.goto("/chantiers/nouveau?mode=manuel");
   const bouton = page.getByRole("button", { name: "Ajoute un matériau pour créer le quantitatif" }).filter({ visible: true });
   await expect(bouton).toBeVisible();
   const c = (await bouton.boundingBox())!;
@@ -3991,8 +3993,7 @@ test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un e
 test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat groupé, sans sa logique ; une suggestion, un matériau absent, la désignation libre, quantité et unité, retour sans perte, bouton dynamique, puis l'éditeur ; aucun crédit, aucun achat groupé, aucun négoce", async ({ page }) => {
   await signUp(page);
   const jaugeAvant = (await apiJson<{ quotas?: unknown; jauge?: unknown }>(page, "GET", "/v1/ai-usage/jauge")).body;
-  await page.goto("/chantiers/nouveau?mode=assistant");
-  await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
+  await page.goto("/chantiers/nouveau?mode=manuel");
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await expect(ecran.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" })).toBeVisible();
   // Rien de l'achat groupé : ni étapes, ni commune, ni négoces, ni engagement.
@@ -4002,7 +4003,6 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   await expect(bouton).toHaveText("Ajoute un matériau pour créer le quantitatif");
   await expect(bouton).toBeDisabled();
   // 1. Une suggestion du catalogue (familles › produit › format), sans quantité imposée.
-  await ecran.getByRole("button", { name: "Couverture", exact: true }).filter({ visible: true }).click();
   await ecran.getByRole("button", { name: "Ardoises", exact: true }).filter({ visible: true }).click();
   await ecran.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
   await ecran.getByRole("button", { name: "32×22", exact: true }).click();
@@ -4062,15 +4062,13 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
 test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan reviennent ; ceux d'autres artisans sont marqués, jamais leur entreprise", async ({ page }) => {
   await signUp(page);
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Crochet gouttière bandeau 25", quantite: "40", unite: "pièces" }] })).status).toBe(201);
-  await page.goto("/chantiers/nouveau?mode=assistant");
-  await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
+  await page.goto("/chantiers/nouveau?mode=manuel");
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
   await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25 (déjà écrit par toi)" })).toBeVisible();
   await page.context().clearCookies();
   await signUp(page);
-  await page.goto("/chantiers/nouveau?mode=assistant");
-  await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
+  await page.goto("/chantiers/nouveau?mode=manuel");
   await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
   await page.waitForTimeout(800);
   await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25 (déjà écrit par toi)" })).toHaveCount(0);
@@ -4080,8 +4078,7 @@ test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan revien
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Tuile Zéphyr terre cuite, modèle ZX 12", quantite: "10", unite: "pièces" }] })).status).toBe(201);
   await page.context().clearCookies();
   await signUp(page);
-  await page.goto("/chantiers/nouveau?mode=assistant");
-  await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
+  await page.goto("/chantiers/nouveau?mode=manuel");
   await ecran.getByLabel("Rechercher un matériau").fill("zephyr zx12");
   await expect(ecran.getByRole("button", { name: /Zéphyr.*\(écrit par d'autres artisans\)$/i })).toBeVisible();
   await expect(ecran.getByRole("list", { name: "Résultats" })).not.toContainText(/Toitures/);

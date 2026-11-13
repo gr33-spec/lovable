@@ -205,7 +205,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await vide.getByRole("link", { name: /^Créer un quantitatif/ }).click();
     await page.getByRole("link", { name: /Mobiiz m'aide/ }).click();
     // Deux parcours reliés (Greg, 7 novembre 2026) : une conversation ; le « + » ouvre photo, document et catalogue.
-    await expect(page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ajouter : photo ou document" })).toBeVisible();
     await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-achat-groupe.pdf"));
     await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
     const liste = page.getByRole("region", { name: "Liste des fournitures" });
@@ -267,7 +267,6 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(b.page.getByRole("heading", { name: "Ajouter mes quantités" })).toBeVisible();
     // Le choix guidé (Greg, 27 octobre, capture iPhone) : un bouton par matériau, format, choix, puis la quantité.
     // Point 3 du 30 octobre : le catalogue en listes, famille › produit › format.
-    await b.page.getByRole("button", { name: "Couverture", exact: true }).filter({ visible: true }).click();
     await b.page.getByRole("button", { name: "Ardoises", exact: true }).filter({ visible: true }).click();
     await b.page.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
     await b.page.getByRole("button", { name: "32×22", exact: true }).click();
@@ -447,7 +446,6 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await inscrireSansSiret(page, dep);
     await page.goto("/achats-groupes/lancer");
     // Point 3 du 30 octobre : le catalogue en listes, famille › produit › format.
-    await page.getByRole("button", { name: "Couverture", exact: true }).filter({ visible: true }).click();
     await page.getByRole("button", { name: "Ardoises", exact: true }).filter({ visible: true }).click();
     await page.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
     await page.getByRole("button", { name: "32×22", exact: true }).click();
@@ -493,8 +491,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
 
   test("liste écrite à la main : fermée, reprise telle quelle", async ({ page }) => {
     await inscrireSansSiret(page, departementReserve([9, 10], [11, 12]));
-    await page.goto("/chantiers/nouveau?mode=assistant");
-    await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
+    await page.goto("/chantiers/nouveau?mode=manuel");
     const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
     await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
     await ecran.getByRole("button", { name: /Ajouter « Liteaux 27×38 maison » tel que je l'écris/ }).click();
@@ -505,9 +502,8 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await page.waitForTimeout(700);
     await ecran.getByRole("button", { name: "Retour" }).click();
     await page.getByRole("alertdialog", { name: "Quitter la saisie ?" }).getByRole("button", { name: "Quitter" }).click();
-    // Retour à la conversation « Nouveau quantitatif » (plein écran, par-dessus le menu) : on la ferme.
-    await page.getByRole("dialog", { name: "Nouveau quantitatif" }).getByRole("button", { name: "Fermer l'assistant" }).click();
-    // Direction A : fermer l'assistant ramène au choix « Nouveau quantitatif ».
+    // La saisie à la main s'ouvre par « Je saisis ma liste » (plus par l'assistant, 13 novembre 2026) : la quitter ramène
+    // au choix « Nouveau quantitatif ».
     await page.waitForURL(/\/chantiers\/nouveau$/);
     await partirEtReprendre(page, "Terminer ta liste");
     await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByRole("textbox").first()).toHaveValue("Liteaux 27×38 maison");

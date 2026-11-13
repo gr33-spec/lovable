@@ -130,8 +130,7 @@ test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre 
   expect((await apiJson(page, "PUT", "/v1/brouillons", { cle: "achat-groupe:test", type: "achat-groupe", titre: "Achat groupé couverture · 1 ligne", url: "/achats-groupes/lancer", etape: 1, donnees: { lignes: [] } })).status).toBe(200);
   await page.waitForTimeout(50);
   // Puis une liste commencée dans « Saisir ma liste » et quittée.
-  await page.goto("/chantiers/nouveau?mode=assistant");
-  await page.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click(); await page.getByRole("button", { name: "Parcourir le catalogue" }).click();
+  await page.goto("/chantiers/nouveau?mode=manuel");
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
   await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
   await ecran.getByRole("button", { name: /Ajouter « Liteaux 27×38 maison » tel que je l'écris/ }).click();

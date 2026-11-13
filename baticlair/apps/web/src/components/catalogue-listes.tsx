@@ -30,6 +30,8 @@ export interface ArticleCatalogueVue {
   autresCatalogues?: string[];
   caracteristiques?: string[];
   precisions?: string[];
+  /** Marqué « à vérifier » par l'équipe Mobiiz : dit sur la ligne, rien n'est affirmé à la place de l'artisan. */
+  aVerifier?: boolean;
 }
 
 interface Metier {
@@ -262,7 +264,7 @@ export function CatalogueListes({
             <input id="qte-article" aria-label={`Quantité de ${article.designation}`} inputMode="decimal" value={qte} onChange={(e) => setQte(e.target.value)} placeholder="Quantité" className={`${INPUT} max-w-40`} autoFocus onKeyDown={(e) => e.key === "Enter" && nombre(qte) > 0 && (e.preventDefault(), ajouter({ designation: designationDe(article), unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier }))} />
             <span className="text-[16px] text-muted">{article.unite}</span>
           </div>
-          <Button variant="ink" disabled={!liste && !(nombre(qte) > 0)} onClick={() => ajouter({ designation: designationDe(article), unite: article.unite, qte, cle: article.cle, familleAchat: article.familleAchat, metier: article.metier })}>
+          <Button variant="ink" disabled={!liste && !(nombre(qte) > 0)} onClick={() => ajouter({ designation: designationDe(article), unite: article.unite, qte, ...(article.cle ? { cle: article.cle } : { libre: true }), familleAchat: article.familleAchat, metier: article.metier })}>
             <Plus size={18} aria-hidden="true" /> {liste ? "Ajouter à la sélection" : "Ajouter à ma liste"}
           </Button>
           {liste ? <p className="text-[13px] text-muted">La quantité peut attendre : tu la mettras dans ta liste.</p> : null}
@@ -327,16 +329,18 @@ export function CatalogueListes({
                   <button type="button" onClick={() => choisir(a)} className={BOUTON}>
                     <span className="flex min-w-0 flex-col">
                       <span>{a.designation}</span>
-                      {/* Où il se range : le catalogue, le rayon, la famille ; puis ce qui reste à préciser. */}
+                      {/* Son contexte (Greg, 13 novembre 2026) : « Métier · Famille · Article », la sous-famille quand elle
+                          existe ; puis les autres métiers qui le partagent, et ce qui reste à préciser. */}
                       {a.chemin ? (
                         <span className="text-[13px] font-normal text-muted">
-                          {[a.chemin.catalogue, ...(a.chemin.rayon === a.chemin.catalogue ? [] : [a.chemin.rayon]), ...(a.chemin.famille === a.chemin.rayon ? [] : [a.chemin.famille])].join(" › ")}
-                          {a.autresCatalogues?.length ? ` · aussi en ${a.autresCatalogues.join(", ")}` : ""}
+                          {[a.chemin.catalogue, a.chemin.rayon, ...(a.chemin.famille === a.chemin.rayon ? [] : [a.chemin.famille]), a.chemin.produit].join(" · ")}
+                          {a.autresCatalogues?.length ? ` (aussi en ${a.autresCatalogues.join(", ")})` : ""}
                         </span>
                       ) : a.metier !== courant?.code ? (
                         <span className="text-[13px] font-normal text-muted">{metiers.find((m) => m.code === a.metier)?.libelle}</span>
                       ) : null}
                       {a.precisions?.length ? <span className="text-[13px] font-semibold text-accent-text">À préciser : {a.precisions.join(", ")}</span> : null}
+                      {a.aVerifier ? <span className="text-[13px] font-semibold text-accent-text">À vérifier avec ton négoce</span> : null}
                     </span>
                     <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
                   </button>
@@ -345,7 +349,7 @@ export function CatalogueListes({
               {data.resultats?.length === 0 && !liste ? <li className="text-[15px] text-muted">Rien de ce nom. Décris-le ci-dessous, il partira quand même.</li> : null}
             </ul>
           ) : (
-            <Niveaux data={data} chemin={chemin} onChemin={setChemin} onArticle={choisir} />
+            <Niveaux data={data} metier={courant?.libelle ?? null} aPreciser={liste} chemin={chemin} onChemin={setChemin} onArticle={choisir} />
           )}
         </>
       )}
@@ -388,8 +392,14 @@ export function CatalogueListes({
   );
 }
 
-/** Sur ordinateur, les rayons et les familles se choisissent dans la colonne de gauche : pas une seconde fois au centre. */
+/** Sur ordinateur, les familles et les sous-familles se choisissent dans la colonne de gauche : pas une seconde fois au centre. */
 const GAUCHE = "xl:hidden";
+
+/** Le premier article sous un choix : il donne l'unité et le métier d'une ligne laissée « à préciser ». */
+function premierArticle(c: ChoixVue): ArticleCatalogueVue {
+  const o = c.options[0]!;
+  return o.suite ? premierArticle(o.suite) : o.article!;
+}
 
 function ChampPrecision({ def, valeur, onChange }: { def: ProduitVue["precisions"][number]; valeur: string; onChange: (v: string) => void }) {
   return (
@@ -406,7 +416,7 @@ function ChampPrecision({ def, valeur, onChange }: { def: ProduitVue["precisions
  * article. Un rayon d'une seule famille passe droit aux produits. Le fil d'Ariane dit toujours où l'on est ; « Choix
  * précédent » remonte d'un niveau sans rien perdre. Sur ordinateur, les rayons et leurs familles restent à gauche.
  */
-function Niveaux({ data, chemin, onChemin, onArticle }: { data: Reponse; chemin: Chemin; onChemin: (c: Chemin) => void; onArticle: (a: ArticleCatalogueVue, precisions: ProduitVue["precisions"]) => void }) {
+function Niveaux({ data, metier, aPreciser, chemin, onChemin, onArticle }: { data: Reponse; metier: string | null; aPreciser: boolean; chemin: Chemin; onChemin: (c: Chemin) => void; onArticle: (a: ArticleCatalogueVue, precisions: ProduitVue["precisions"]) => void }) {
   const rayons = data.rayons ?? [];
   const rayon = rayons.find((r) => r.libelle === chemin.rayon) ?? (rayons.length === 1 ? rayons[0]! : null);
   const famille = rayon ? (rayon.familles.find((f) => f.libelle === chemin.famille) ?? (rayon.familles.length === 1 ? rayon.familles[0]! : null)) : null;
@@ -422,7 +432,9 @@ function Niveaux({ data, chemin, onChemin, onArticle }: { data: Reponse; chemin:
     else if (famille && rayon && rayon.familles.length > 1 && chemin.famille) onChemin({ ...chemin, famille: null });
     else onChemin(DEPART);
   };
-  const fil = [rayons.length > 1 ? rayon?.libelle : null, rayon && rayon.familles.length > 1 ? famille?.libelle : rayon?.libelle === famille?.libelle ? (rayons.length > 1 ? null : famille?.libelle) : famille?.libelle, produit?.libelle, ...chemin.choisis].filter((x, i, t): x is string => !!x && t.indexOf(x) === i);
+  // Le fil d'Ariane (Greg, 13 novembre 2026 : « Zinguerie > Gouttières et descentes ») : le métier, la famille, la
+  // sous-famille quand la famille en a plusieurs, le produit, puis les caractéristiques déjà choisies.
+  const fil = [metier, rayon?.libelle, rayon && rayon.familles.length > 1 && chemin.famille ? famille?.libelle : null, produit?.libelle, ...chemin.choisis].filter((x): x is string => !!x);
   const auDepart = !chemin.rayon && rayons.length > 1;
   const retour = auDepart ? null : fil.length ? (
     <div className="flex items-center gap-2">
@@ -452,6 +464,17 @@ function Niveaux({ data, chemin, onChemin, onArticle }: { data: Reponse; chemin:
             </li>
           ))}
         </ul>
+        {/* « Laisser à préciser » (Greg, 13 novembre 2026) : la ligne part avec ce qui est déjà choisi ; ce qui manque
+            est écrit « à préciser », jamais deviné. En achat groupé, l'article exact est nécessaire pour additionner. */}
+        {aPreciser ? (
+          <button type="button" onClick={() => onArticle({ ...premierArticle(choix!), cle: "", variante: null, designation: `${[produit.libelle, ...chemin.choisis].join(" ")} · ${choix!.nom.toLowerCase()} à préciser` }, produit.precisions)} aria-label="Laisser à préciser" className={`${BOUTON} border-dashed`}>
+            <span className="flex min-w-0 flex-col">
+              <span>Laisser à préciser</span>
+              <span className="text-[13px] font-normal text-muted">Ton négoce te le demandera.</span>
+            </span>
+            <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
+          </button>
+        ) : null}
       </>
     );
   else if (famille)
@@ -485,14 +508,14 @@ function Niveaux({ data, chemin, onChemin, onArticle }: { data: Reponse; chemin:
     );
   else
     contenu = (
-      <ul aria-label="Rayons" className={`flex flex-col gap-2 ${rayons.length > 1 ? GAUCHE : ""}`}>
+      <ul aria-label="Familles" className={`flex flex-col gap-2 ${rayons.length > 1 ? GAUCHE : ""}`}>
         {rayons.map((r) => (
           <li key={r.libelle}>
             <button type="button" onClick={() => onChemin({ rayon: r.libelle, famille: null, produit: null, choisis: [] })} aria-label={r.libelle} className={BOUTON}>
               <span className="flex min-w-0 flex-col">
                 <span>{r.libelle}</span>
                 <span className="text-[13px] font-normal text-muted">
-                  {r.familles.length > 1 ? `${r.familles.length} familles` : `${r.familles[0]?.produits.length ?? 0} produit${(r.familles[0]?.produits.length ?? 0) > 1 ? "s" : ""}`}
+                  {r.familles.length > 1 ? `${r.familles.length} sous-familles` : `${r.familles[0]?.produits.length ?? 0} produit${(r.familles[0]?.produits.length ?? 0) > 1 ? "s" : ""}`}
                 </span>
               </span>
               <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
@@ -507,7 +530,7 @@ function Niveaux({ data, chemin, onChemin, onArticle }: { data: Reponse; chemin:
   return (
     <div className={lateral ? "flex flex-col gap-3 xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:items-start xl:gap-6" : "flex flex-col gap-3"}>
       {lateral ? (
-        <nav aria-label="Rayons du catalogue" className="hidden flex-col gap-1 xl:flex">
+        <nav aria-label="Familles du catalogue" className="hidden flex-col gap-1 xl:flex">
           {rayons.map((r) => {
             const ouvert = r.libelle === rayon?.libelle;
             return (
@@ -530,7 +553,7 @@ function Niveaux({ data, chemin, onChemin, onArticle }: { data: Reponse; chemin:
       <div className="flex min-w-0 flex-col gap-3">
         {retour}
         {contenu}
-        {lateral && !famille ? <p className="hidden rounded-xl border border-dashed border-line p-4 text-[15px] text-muted xl:block">{rayon ? "Choisis une famille à gauche." : "Choisis un rayon à gauche."}</p> : null}
+        {lateral && !famille ? <p className="hidden rounded-xl border border-dashed border-line p-4 text-[15px] text-muted xl:block">{rayon ? "Choisis une sous-famille à gauche." : "Choisis une famille à gauche."}</p> : null}
       </div>
     </div>
   );

@@ -54,7 +54,6 @@ test("nouveau quantitatif : deux choix entiers, la liste à la main, Mobiiz depu
   await page.getByRole("link", { name: /Je saisis ma liste/ }).click();
   const saisie = page.getByRole("dialog", { name: "Saisir ma liste" });
   await expect(saisie.getByText("Chargement du catalogue…")).toHaveCount(0);
-  await saisie.getByRole("button", { name: "Couverture", exact: true }).filter({ visible: true }).click();
   await saisie.getByRole("button", { name: "Ardoises", exact: true }).filter({ visible: true }).click();
   await saisie.getByRole("button", { name: "Ardoise naturelle", exact: true }).click();
   await saisie.getByRole("button", { name: "32×22", exact: true }).click();

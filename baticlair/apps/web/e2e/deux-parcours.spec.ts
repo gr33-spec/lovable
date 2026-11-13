@@ -42,9 +42,11 @@ test("une phrase, deux articles : « J'ai compris », ajouter, voir ma liste, pu
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
   await expect(chat.getByText("Bonjour Jean. Donne-moi ce que tu as : je prépare, tu vérifies.")).toBeVisible();
   // Le « + » : photo, document, catalogue.
-  await chat.getByRole("button", { name: "Ajouter : photo, document ou catalogue" }).click();
+  await chat.getByRole("button", { name: "Ajouter : photo ou document" }).click();
   const feuille = page.getByRole("dialog", { name: "Ajouter" });
-  for (const o of ["Prendre une photo", "Choisir un document", "Parcourir le catalogue"]) await expect(feuille.getByText(o, { exact: true })).toBeVisible();
+  for (const o of ["Prendre une photo", "Choisir un document"]) await expect(feuille.getByText(o, { exact: true })).toBeVisible();
+  // Le catalogue n'est pas dans les pièces jointes de l'assistant (Greg, 13 novembre 2026) : il reste dans « Je saisis ma liste ».
+  await expect(feuille.getByText("Parcourir le catalogue")).toHaveCount(0);
   await feuille.getByRole("button", { name: "Fermer" }).click();
   // Plusieurs articles dans une phrase, l'espace des milliers compris.
   await chat.getByRole("textbox", { name: "Ton message" }).fill("1 000 ardoises naturelles 32×22 Espagne 1er choix et 950 crochets inox 100 mm");

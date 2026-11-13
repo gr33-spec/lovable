@@ -158,7 +158,7 @@ export function BarreSaisie({
   onAnnulerDictee?: () => void;
   /** Ce qui se pose juste au-dessus de la barre (« Annuler la dernière modification »). */
   avant?: React.ReactNode;
-  /** Le « + » jaune à gauche (photos, document, catalogue ; Greg, 7 novembre 2026). */
+  /** Le « + » jaune à gauche (photos, document ; Greg, 7 novembre 2026 ; le catalogue en est sorti le 13 novembre). */
   onPlus?: () => void;
   /** Le texte d'attente de la case (« Décris ton besoin… »). */
   invite?: string;
@@ -200,7 +200,7 @@ export function BarreSaisie({
         }}
       >
         {onPlus ? (
-          <button type="button" aria-label="Ajouter : photo, document ou catalogue" onClick={onPlus} className="pressable flex size-11 shrink-0 items-center justify-center rounded-full text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+          <button type="button" aria-label="Ajouter : photo ou document" onClick={onPlus} className="pressable flex size-11 shrink-0 items-center justify-center rounded-full text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
             <Plus size={22} strokeWidth={2.4} aria-hidden="true" />
           </button>
         ) : null}
