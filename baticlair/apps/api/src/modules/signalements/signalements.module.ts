@@ -5,8 +5,8 @@ import type { TransactionalEmailSender } from "../../platform/email/email.port.j
 import type { AppLogger } from "../../platform/logging/logger.js";
 import { CONFIG, EMAIL_SENDER, LOGGER } from "../../platform/tokens.js";
 import { TenancyModule } from "../tenancy/index.js";
-import { SignalementsAdminController, SignalementsController, SignalementsPublicsController } from "./signalements.controller.js";
-import { SignalementsService } from "./signalements.service.js";
+import { SignalementsAdminController, SignalementsController, SignalementsPublicsController } from "./http/signalements.controller.js";
+import { SignalementsService } from "./application/signalements.service.js";
 
 /** SIGNALEMENT DE BUGS (Greg, 13 novembre 2026) : une table nouvelle, trois portes (compte, public, admin). */
 @Module({

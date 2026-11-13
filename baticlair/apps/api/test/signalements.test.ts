@@ -1,6 +1,6 @@
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { pageSure } from "../src/modules/signalements/signalements.service.js";
+import { pageSure } from "../src/modules/signalements/index.js";
 import { doubleAuthentification } from "./support/admin.js";
 import { couvreurAvecListe, mailsVers } from "./support/cycle.js";
 import { createTestApp, resetDatabase, type TestContext } from "./support/test-app.js";

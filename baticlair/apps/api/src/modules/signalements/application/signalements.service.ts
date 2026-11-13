@@ -1,8 +1,8 @@
-import type { AppConfig } from "../../platform/config/config.js";
-import type { PrismaService } from "../../platform/database/prisma.service.js";
-import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
-import { notFound, validationFailed } from "../../platform/errors/domain-error.js";
-import type { AppLogger } from "../../platform/logging/logger.js";
+import type { AppConfig } from "../../../platform/config/config.js";
+import type { PrismaService } from "../../../platform/database/prisma.service.js";
+import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
+import { notFound, validationFailed } from "../../../platform/errors/domain-error.js";
+import type { AppLogger } from "../../../platform/logging/logger.js";
 
 /**
  * SIGNALEMENT DE BUGS (Greg, 13 novembre 2026) : « Bouton « Signaler un problème » partout dans l'appli et côté négoce,

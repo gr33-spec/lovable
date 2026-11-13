@@ -2,16 +2,16 @@ import { Body, Controller, Get, Header, HttpCode, Inject, Param, Post, Put, Quer
 import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
 import { z } from "zod";
-import type { AppConfig } from "../../platform/config/config.js";
-import { PrismaService } from "../../platform/database/prisma.service.js";
-import { forbidden } from "../../platform/errors/domain-error.js";
-import { exigerDeuxFacteurs } from "../../platform/http/deux-facteurs.js";
-import { HOURLY } from "../../platform/http/rate-limit.module.js";
-import { ZodPipe } from "../../platform/http/zod.js";
-import { CONFIG } from "../../platform/tokens.js";
-import { Public } from "../identity/index.js";
-import { Tenant, TenantGuard, type TenantContext } from "../tenancy/index.js";
-import { GRAVITES_SIGNALEMENT, STATUTS_SIGNALEMENT, SignalementsService } from "./signalements.service.js";
+import type { AppConfig } from "../../../platform/config/config.js";
+import { PrismaService } from "../../../platform/database/prisma.service.js";
+import { forbidden } from "../../../platform/errors/domain-error.js";
+import { exigerDeuxFacteurs } from "../../../platform/http/deux-facteurs.js";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
+import { ZodPipe } from "../../../platform/http/zod.js";
+import { CONFIG } from "../../../platform/tokens.js";
+import { Public } from "../../identity/index.js";
+import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import { GRAVITES_SIGNALEMENT, STATUTS_SIGNALEMENT, SignalementsService } from "../application/signalements.service.js";
 
 const commun = {
   message: z.string().trim().min(3).max(3000),
