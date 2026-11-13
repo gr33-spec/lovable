@@ -115,8 +115,11 @@ Production, `main`, e-mail réel, paiement réel, appel IA payant, suppression d
 juridique validé, règles de facturation réelles : rien sans l'accord explicite de Greg.
 
 ## Prochain geste
-Les cinq lots sont commités sur la branche locale `audit-ux-2026-11-12`. COMMANDE EN COURS : chaîne complète sur le commit
-candidat (le commit de ce fichier), résultats dans le dossier de travail `final20` (`etat.txt` : une ligne par étape,
-code 0 = vert, « FIN » à la fin). Ne modifier AUCUNE source pendant qu'elle tourne. Seulement si elle est verte : avance rapide de `claude/saas-achat-artisans-prompt-1lyihx`, push,
-attente des deux domaines de test, recette en ligne (sans e-mail, sans paiement, sans appel IA), compte rendu final.
-Si la chaîne échoue : ne rien pousser, corriger, relancer la chaîne ENTIÈRE.
+LIVRÉ sur test le 13 novembre 2026 : commit `27eff0db` servi par `test.mobiiz.fr` et `api-test.mobiiz.fr` (branche
+`claude/saas-achat-artisans-prompt-1lyihx`). Chaîne complète verte sur ce commit exact : moteur 1141, serveur 781 (+1
+ignoré), parcours 277 (+29 ignorés), lots 16, activés 66. La série des parcours a demandé deux passes : à la première,
+`e2e/adresse-mobiiz.spec.ts:108` a dépassé son délai sur ordinateur (12 réussites sur 12 rejoué seul, vert à la seconde
+passe) ; test instable sous charge, à surveiller. Les trois migrations additives sont appliquées sur la base de test.
+Recette en ligne faite sans compte (santé, pages publiques, thème posé avant affichage, aucun débordement).
+Reste à Greg : prix annuels Stripe en mode test, passage à Pro en cours d'année payée, CGU et page Tarifs (annuel),
+formulation RGPD de « Ce que Mobiiz a appris ». Ce fichier part avec le prochain candidat vérifié.
