@@ -48,8 +48,8 @@ Métier → famille → sous-famille éventuelle → produit (article génériqu
 | Lot | État |
 | --- | --- |
 | A Audit et architecture | FAIT |
-| B Moteur (métiers, familles, connaissance, questions, recherche, alias) | à faire |
-| C Réorganisation Couverture, Zinguerie, Étanchéité | à faire |
+| B Moteur (métiers, familles, recherche sans doublon, anciens identifiants, rattachements) | FAIT ; connaissance et questions : lot E |
+| C Réorganisation Couverture, Zinguerie, Étanchéité | FAIT |
 | D Interface (navigation, fil d'Ariane, recherche avec contexte) | à faire |
 | E Assistant IA | à faire |
 | F Administration, synchronisation, chaîne complète, recette test | à faire |
@@ -59,11 +59,30 @@ Métier → famille → sous-famille éventuelle → produit (article génériqu
   `packages/domain/scripts/etat-des-lieux-catalogue.mjs`, rapports dans `docs/catalogue/`. Aucune donnée modifiée ; la
   base de test n'a été que LUE.
 
+- Lots B et C (domaine et serveur) :
+  - RÈGLE CHANGÉE : `RAYON_DU_METIER_CATALOGUE` est vide ; 12 métiers au sélecteur ; un couvreur a Couverture, Zinguerie
+    et Étanchéité. `CATALOGUES.couverture` (14 familles, sous-familles pour les tuiles), `.zinguerie` (5 familles, 2 avec
+    sous-familles), `.etancheite` (8 familles) dans `packages/domain/src/catalogue/rayons.ts`.
+  - Aucun article déplacé, renommé ni supprimé ; aucune clé changée. La famille d'achat groupé (`FAMILLE_DU_METIER_CATALOGUE`)
+    n'est PAS touchée : zinguerie et étanchéité restent chez les négoces de couverture (à décider par Greg).
+  - Anciens identifiants : `anciensIdentifiants` (`audit.ts`) ; le serveur ne les propose plus (`CatalogueService.articles`),
+    sans rien écrire : l'ancien reste en base et lisible par sa clé. PAS de colonne d'alias (décision : rien à migrer).
+  - Recherche : jamais deux résultats de même désignation et même unité ; l'autre métier est dit (`autresCatalogues`).
+  - Migration ADDITIVE `20261113100000_catalogue_coeur_metier` : `a_verifier`, `metiers_secondaires` (retour arrière en
+    commentaire). Appliquée en local seulement.
+  - Admin : `GET /v1/admin/catalogue?metier=&q=` (recherche tous métiers, origine, date, chemins, doublons),
+    `PATCH` accepte `metier`, `metiersSecondaires`, `aVerifier` (journal `catalogue:classement`, `catalogue:à vérifier`).
+  - Synchronisation : le relevé donne aussi `anciensIdentifiants`, `doublons` par nature, `bilanParMetier`.
+  Tests : domaine `catalogues-par-metier` 24/24, `catalogue-etancheite-zinguerie` 4/4, `catalogue-complet` ; serveur
+  `catalogues-par-metier` 7/7, `achat-groupe`, `assistant-comprendre`, `libelles-artisans`, `catalogue-regions` verts.
+
 ## Interdits (toujours)
 Production, `main`, données de production, paiements, e-mails réels, appels IA payants, documents juridiques, réglages des
 services : rien. Aucune suppression de données sans l'accord de Greg. La synchronisation du catalogue sur la base distante
 n'est jamais lancée sans son accord.
 
 ## Prochaine commande
-Lot B : dans `packages/domain`, vider `RAYON_DU_METIER_CATALOGUE`, séparer `CATALOGUES.couverture` / `zinguerie` /
-`etancheite`, puis `pnpm -s build && npx vitest run test/catalogues-par-metier.test.ts test/catalogue-etancheite-zinguerie.test.ts`.
+Lot D : `apps/web/src/components/catalogue-listes.tsx` (libellés « Familles », fil d'Ariane avec le métier, « Laisser à
+préciser », contexte « Métier · Famille · Article »), puis `pnpm -s build` dans `apps/web` et
+`npx playwright test -c playwright.ag-v1.config.ts --trace off e2e-ag-v1/catalogue-rayons.spec.ts`.
+Avant la chaîne : `npx vitest run -u test/audit-regles-uniques.test.ts` dans `packages/domain`.

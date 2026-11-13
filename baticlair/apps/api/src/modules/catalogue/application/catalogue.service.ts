@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 import {
   aPlat,
+  anciensIdentifiants,
+  doublonsDuCatalogue,
+  etatDesLieuxDuCatalogue,
   arbreArticles,
   cleDeLibelle,
   libelleAPartager,
@@ -54,9 +57,12 @@ export interface ArticleVue {
   ean: string | null;
   statut: "verifie" | "generique" | null;
   source: { libelle: string; url?: string; verifieLe: string } | null;
+  /** Marqué « à vérifier » par l'admin : l'artisan le lit, rien n'est affirmé à sa place. */
+  aVerifier: boolean;
 }
 
 const FICHES = new Map(TOUT_LE_CATALOGUE.map((a) => [a.cle, a]));
+const CLES_AMORCE: ReadonlySet<string> = new Set(FICHES.keys());
 
 /** Un article choisi pour l'achat groupé : sa clé de regroupement et le nom que lit le négoce. */
 export interface ArticleRegroupe extends ArticleVue {
@@ -72,6 +78,12 @@ export interface EtatDeSynchronisation {
   aAjouterParMetier: Record<string, number>;
   /** Les articles de la base absents de l'amorce (ajouts de l'admin, anciennes clés) : jamais touchés. */
   horsAmorce: number;
+  /** Les anciens identifiants (même article sous une clé d'avant) : gardés en base, plus proposés deux fois. */
+  anciensIdentifiants: number;
+  /** Les doublons à regarder, par nature (`doublonsDuCatalogue`) : jamais fusionnés d'office. */
+  doublons: Record<string, number>;
+  /** Le bilan par métier : les articles en base, ceux qui entreraient, ceux qu'aucune famille ne range. */
+  bilanParMetier: { metier: string; libelle: string; enBase: number; aAjouter: number; sansFamille: number }[];
 }
 
 export interface ChoixVue {
@@ -86,7 +98,7 @@ const vue = (a: Ligne): ArticleVue => {
   const f = FICHES.get(a.cle);
   return {
     cle: a.cle,
-    // La couverture comprend la zinguerie (Greg, 12 novembre 2026) : un article se lit sous le métier de son rayon.
+    // Chaque métier est un catalogue de premier niveau (Greg, 13 novembre 2026) : l'article se lit sous SON métier.
     metier: estMetier(a.metier) ? rayonDuMetierCatalogue(a.metier) : a.metier,
     famille: a.famille,
     produit: a.produit,
@@ -99,6 +111,7 @@ const vue = (a: Ligne): ArticleVue => {
     ean: f?.ean ?? null,
     statut: f?.statut ?? null,
     source: f?.source ?? null,
+    aVerifier: a.aVerifier,
   };
 };
 
@@ -131,11 +144,26 @@ export class CatalogueService {
 
   /** Ce que la synchronisation ferait, sans rien écrire : les articles de l'amorce absents de la base, par métier. */
   async etatDeSynchronisation(): Promise<EtatDeSynchronisation> {
-    const enBase = new Set((await this.prisma.catalogueArticle.findMany({ select: { cle: true } })).map((a) => a.cle));
+    const base = await this.prisma.catalogueArticle.findMany({ select: { cle: true, metier: true, famille: true, produit: true, variante: true, designation: true, unite: true, metiersSecondaires: true } });
+    const enBase = new Set(base.map((a) => a.cle));
     const manquants = TOUT_LE_CATALOGUE.filter((a) => !enBase.has(a.cle));
     const parMetier: Record<string, number> = {};
     for (const a of manquants) parMetier[a.metier] = (parMetier[a.metier] ?? 0) + 1;
-    return { enBase: enBase.size, dansLAmorce: TOUT_LE_CATALOGUE.length, aAjouter: manquants.length, aAjouterParMetier: parMetier, horsAmorce: [...enBase].filter((c) => !FICHES.has(c)).length };
+    const connus = base.filter((a): a is typeof a & { metier: MetierCatalogue } => estMetier(a.metier));
+    const anciens = anciensIdentifiants(base, CLES_AMORCE);
+    const doublons: Record<string, number> = {};
+    for (const g of doublonsDuCatalogue(connus, CLES_AMORCE)) doublons[g.nature] = (doublons[g.nature] ?? 0) + 1;
+    const sansFamille = etatDesLieuxDuCatalogue(connus.filter((a) => !anciens.has(a.cle)), CLES_AMORCE).nonClasses;
+    return {
+      enBase: enBase.size,
+      dansLAmorce: TOUT_LE_CATALOGUE.length,
+      aAjouter: manquants.length,
+      aAjouterParMetier: parMetier,
+      horsAmorce: [...enBase].filter((c) => !FICHES.has(c)).length,
+      anciensIdentifiants: anciens.size,
+      doublons,
+      bilanParMetier: METIERS_CATALOGUE.map((m) => ({ metier: m, libelle: LIBELLES_METIERS_CATALOGUE[m], enBase: base.filter((a) => a.metier === m).length, aAjouter: parMetier[m] ?? 0, sansFamille: sansFamille.filter((a) => a.metier === m).length })),
+    };
   }
 
   /**
@@ -160,7 +188,12 @@ export class CatalogueService {
 
   private async articles(metier: string | null, avecMasques = false): Promise<Ligne[]> {
     await this.amorcer();
-    return this.prisma.catalogueArticle.findMany({ where: { ...(metier ? { metier: estMetier(metier) ? { in: metiersDuRayon(metier) } : metier } : {}), ...(avecMasques ? {} : { masque: false }) }, orderBy: [{ ordre: "asc" }, { cle: "asc" }] });
+    const lignes = await this.prisma.catalogueArticle.findMany({ where: { ...(metier ? { metier: estMetier(metier) ? { in: metiersDuRayon(metier) } : metier } : {}), ...(avecMasques ? {} : { masque: false }) }, orderBy: [{ ordre: "asc" }, { cle: "asc" }] });
+    if (avecMasques) return lignes;
+    // Un même article écrit sous deux clés (un ancien identifiant) n'est proposé qu'une fois ; l'ancien reste en base,
+    // lisible par sa clé (`article`), jamais supprimé ni réécrit (Greg, 13 novembre 2026, « cœur métier »).
+    const anciens = anciensIdentifiants(lignes, CLES_AMORCE);
+    return anciens.size ? lignes.filter((a) => !anciens.has(a.cle)) : lignes;
   }
 
   /** Les métiers du sélecteur : ceux du profil d'abord (« Métier : Couverture ▾ »), puis les autres. */
@@ -214,7 +247,24 @@ export class CatalogueService {
       );
       const duRayon = (m: string) => estMetier(m) && rayonDuMetierCatalogue(m) === metier;
       const duMetier = trouves.filter((t) => duRayon(t.article.metier));
-      const resultats = [...duMetier, ...trouves.filter((t) => !duRayon(t.article.metier))].slice(0, 30).map((t) => ({ ...vue(t.article), precisions: t.precisions, ...this.rangement(t.article) }));
+      // Jamais deux résultats identiques (Greg, 13 novembre 2026) : la même désignation dans la même unité sous deux
+      // métiers ne sort qu'une fois, celle du métier choisi d'abord ; l'autre métier est dit sur la ligne (« aussi en … »).
+      const dits = new Map<string, { autres: Set<string> }>();
+      const uniques = [...duMetier, ...trouves.filter((t) => !duRayon(t.article.metier))].filter((t) => {
+        const k = `${aPlat(t.article.designation)}|${aPlat(t.article.unite)}`;
+        const deja = dits.get(k);
+        if (deja) {
+          if (estMetier(t.article.metier)) deja.autres.add(LIBELLES_CATALOGUES[t.article.metier] ?? t.article.metier);
+          return false;
+        }
+        dits.set(k, { autres: new Set() });
+        return true;
+      });
+      const resultats = uniques.slice(0, 30).map((t) => {
+        const r = this.rangement(t.article);
+        const autres = dits.get(`${aPlat(t.article.designation)}|${aPlat(t.article.unite)}`)!.autres;
+        return { ...vue(t.article), precisions: t.precisions, ...r, autresCatalogues: [...new Set([...r.autresCatalogues, ...autres])].filter((c) => c !== r.chemin?.catalogue) };
+      });
       // Les intitulés écrits par l'entreprise elle-même, après le catalogue (Greg, 30 octobre 2026, nuit : rien n'est
       // diffusé aux autres ; un intitulé générique ne l'est qu'une fois ajouté au catalogue par l'admin).
       const vus = new Set(resultats.map((a) => cleDeLibelle(a.designation)));
@@ -367,9 +417,42 @@ export class CatalogueService {
 
   /* ------------------------------------------------------------------------------------------------- l'admin */
 
-  async admin(metier: string | undefined) {
+  /**
+   * L'ADMIN DU CATALOGUE (Greg, 13 novembre 2026, « cœur métier ») : les articles d'un métier, ou ceux qu'une recherche
+   * trouve dans TOUS les métiers ; pour chacun son métier, sa famille d'origine, où il se lit, ses mots, s'il est masqué,
+   * à vérifier, d'où il vient (l'amorce et sa source, ou un ajout de l'admin) et sa dernière modification ; et les doublons
+   * à regarder. Les anciens identifiants y sont montrés (l'admin voit tout), avec la clé gardée.
+   */
+  async admin(metier: string | undefined, q?: string) {
     const m = metier && estMetier(metier) ? rayonDuMetierCatalogue(metier) : "couverture";
-    return { metiers: METIERS_DU_SELECTEUR.map((x) => ({ code: x, libelle: LIBELLES_METIERS_CATALOGUE[x] })), metier: m, articles: (await this.articles(m, true)).map((a) => ({ ...vue(a), masque: a.masque, ajoute: a.ajoute, synonymes: a.synonymes })) };
+    const recherche = (q ?? "").trim();
+    const tous = await this.articles(null, true);
+    const anciens = anciensIdentifiants(tous, CLES_AMORCE);
+    const choisis = recherche
+      ? tous.map((a, i) => ({ a, i, s: scoreArticle(a, recherche) })).filter((x) => x.s !== null).sort((x, y) => y.s! - x.s! || x.i - y.i).slice(0, 80).map((x) => x.a)
+      : tous.filter((a) => a.metier === m);
+    const connus = tous.filter((a): a is Ligne & { metier: MetierCatalogue } => estMetier(a.metier));
+    return {
+      metiers: METIERS_DU_SELECTEUR.map((x) => ({ code: x, libelle: LIBELLES_METIERS_CATALOGUE[x] })),
+      metier: m,
+      recherche,
+      articles: choisis.map((a) => {
+        const f = FICHES.get(a.cle);
+        return {
+          ...vue(a),
+          metier: a.metier,
+          masque: a.masque,
+          ajoute: a.ajoute,
+          synonymes: a.synonymes,
+          metiersSecondaires: a.metiersSecondaires,
+          aliasDe: anciens.get(a.cle) ?? null,
+          origine: a.ajoute ? "Ajout de l'admin" : f ? (f.source?.libelle ?? "Amorce du catalogue") : "Ancien identifiant",
+          modifieLe: a.updatedAt.toISOString(),
+          chemins: estMetier(a.metier) ? cheminsDeLArticle({ ...a, metier: a.metier }).map((c) => `${c.libelleCatalogue} · ${c.rayon}${c.famille === c.rayon ? "" : ` · ${c.famille}`}`) : [],
+        };
+      }),
+      doublons: doublonsDuCatalogue(connus, CLES_AMORCE).map((g) => ({ nature: g.nature, designation: g.designation, cles: g.cles, canonique: g.canonique })),
+    };
   }
 
   async ajouter(a: { metier: string; famille: string; produit: string; variante: string | null; designation: string | null; unite: string; synonymes: string[] }) {
@@ -411,12 +494,15 @@ export class CatalogueService {
   }
 
   /** Renommer (désignation, famille, produit, variante, unité, mots) ou masquer : la clé ne change jamais. */
-  async modifier(cle: string, m: Partial<{ famille: string; produit: string; variante: string | null; designation: string; unite: string; synonymes: string[]; masque: boolean }>) {
+  async modifier(cle: string, m: Partial<{ metier: string; famille: string; produit: string; variante: string | null; designation: string; unite: string; synonymes: string[]; masque: boolean; aVerifier: boolean; metiersSecondaires: string[] }>) {
+    // Le classement se corrige (métier principal, métiers secondaires) sans jamais toucher à la clé.
+    if (m.metier !== undefined && !estMetier(m.metier)) throw validationFailed("Unknown trade", { reason: "metier_inconnu", phrase: "Ce métier n'existe pas au catalogue." });
+    if (m.metiersSecondaires?.some((x) => !estMetier(x))) throw validationFailed("Unknown trade", { reason: "metier_inconnu", phrase: "Ce métier n'existe pas au catalogue." });
     await this.amorcer();
     const a = await this.prisma.catalogueArticle.findUnique({ where: { cle } });
     if (!a) throw notFound("Article");
     this.regroupement = null;
     const maj = await this.prisma.catalogueArticle.update({ where: { cle }, data: m });
-    return { ...vue(maj), masque: maj.masque };
+    return { ...vue(maj), metier: maj.metier, masque: maj.masque, metiersSecondaires: maj.metiersSecondaires };
   }
 }

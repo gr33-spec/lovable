@@ -358,28 +358,25 @@ describe("le catalogue complet et la ligne libre", { timeout: 240_000 }, () => {
   it("les listes du métier, puis la recherche ; « panne », « pane », les métiers du profil d'abord", async () => {
     const a = await artisan(1);
     const cat = (await a.agent.get("/v1/catalogue").expect(200)).body;
-    expect(cat.metiers.slice(0, 2).map((m: { code: string; mien: boolean }) => [m.code, m.mien])).toEqual([["couverture", true], ["charpente", false]]);
+    // RÈGLE CHANGÉE (Greg, 13 novembre 2026, « cœur métier ») : chaque métier est un catalogue de premier niveau. Un couvreur
+    // voit Couverture, Zinguerie et Étanchéité, les siens, puis les autres ; aucun n'est rangé dans un autre.
+    expect(cat.metiers.slice(0, 4).map((m: { code: string; mien: boolean }) => [m.code, m.mien])).toEqual([["couverture", true], ["zinguerie", true], ["etancheite", true], ["charpente", false]]);
     expect(cat.metier).toBe("couverture");
     expect(cat.arbre.map((f: { libelle: string }) => f.libelle)).toContain("Ardoises");
-    // La couverture comprend la zinguerie (Greg, 12 novembre 2026) : plus d'entrée « Zinguerie » au sélecteur, ses
-    // familles sous « Couverture », les clés inchangées ; l'ancien lien ?metier=zinguerie ouvre la couverture.
     const familles = (c: { arbre: { libelle: string }[] }) => c.arbre.map((f) => f.libelle);
-    expect(cat.metiers.map((m: { code: string }) => m.code)).not.toContain("zinguerie");
-    expect(familles(cat)).toEqual(expect.arrayContaining(["Zinc", "Gouttières", "Descentes", "Bandes et pièces façonnées"]));
+    expect(familles(cat)).not.toEqual(expect.arrayContaining(["Zinc"]));
     const zing = (await a.agent.get("/v1/catalogue?metier=zinguerie").expect(200)).body;
-    expect(zing.metier).toBe("couverture");
-    expect(familles(zing)).toEqual(familles(cat));
+    expect(zing.metier).toBe("zinguerie");
+    expect(familles(zing)).toEqual(expect.arrayContaining(["Zinc", "Gouttières", "Descentes", "Bandes et pièces façonnées"]));
+    // L'achat groupé, lui, reste celui des négoces de couverture (la famille d'achat ne change pas).
     const gouttiere = (await a.agent.get("/v1/catalogue?q=gouttiere%20havraise").expect(200)).body.resultats[0];
-    expect(gouttiere).toMatchObject({ produit: "Gouttière havraise zinc", metier: "couverture", familleAchat: "couverture" });
+    expect(gouttiere).toMatchObject({ produit: "Gouttière havraise zinc", metier: "zinguerie", familleAchat: "couverture" });
     expect(gouttiere.cle.startsWith("zinguerie/")).toBe(true);
-    // RÈGLE CHANGÉE (Greg, 12 novembre 2026, catalogues par métier) : l'étanchéité est un rayon de Couverture ; ses
-    // articles gardent leur métier, leurs familles et leurs clés ; l'ancien lien ?metier=etancheite ouvre la couverture.
-    expect(cat.metiers.map((m: { code: string }) => m.code)).not.toContain("etancheite");
     const et = (await a.agent.get("/v1/catalogue?metier=etancheite").expect(200)).body;
-    expect(et.metier).toBe("couverture");
+    expect(et.metier).toBe("etancheite");
     expect(familles(et)).toEqual(expect.arrayContaining(["Membranes bitume", "Étanchéité EPDM", "Membranes PVC et TPO", "Étanchéité liquide", "Isolants de toiture-terrasse", "Pare-vapeur et écrans", "Évacuations et relevés", "Protection et finition"]));
     const pax = (await a.agent.get("/v1/catalogue?q=pax%20alu").expect(200)).body.resultats[0];
-    expect(pax).toMatchObject({ produit: "Chape bitume armée autoprotégée aluminium", metier: "couverture", familleAchat: "couverture" });
+    expect(pax).toMatchObject({ produit: "Chape bitume armée autoprotégée aluminium", metier: "etancheite", familleAchat: "couverture" });
     expect(pax.cle.startsWith("etancheite/")).toBe(true);
     expect((await a.agent.get("/v1/catalogue?metier=etancheite&q=pare%20vapeur%20bitume").expect(200)).body.resultats[0].famille).toBe("Pare-vapeur et écrans");
     const ch = (await a.agent.get("/v1/catalogue?metier=charpente").expect(200)).body;

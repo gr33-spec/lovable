@@ -5,7 +5,7 @@
  * de l'aluminium ou de l'inox […] ne supprimer aucun article, ne changer aucun identifiant »).
  *
  * Un catalogue est une VUE : les articles ne bougent pas. Ce test tient l'arborescence de chaque métier, les
- * rattachements, les produits partagés sans duplication, l'absence de mélange de matières, l'étanchéité sous Couverture,
+ * rattachements, les produits partagés sans duplication, l'absence de mélange de matières, l'étanchéité et la zinguerie en métiers à part (13 novembre 2026),
  * la recherche directe, les catégories vides, les caractéristiques (obligatoires, utiles, facultatives), les performances,
  * et écrit le relevé d'audit `docs/catalogue/catalogues-par-metier.md`.
  */
@@ -37,9 +37,12 @@ const famille = (c: (typeof METIERS_DU_SELECTEUR)[number], rayon: string, f: str
 const METAUX = ["zinc", "cuivre", "aluminium", "acier", "inox", "plomb", "PVC"];
 
 describe("un catalogue par métier : rayons, familles, produits", () => {
-  it("le sélecteur : dix catalogues ; Zinguerie et Étanchéité sont des rayons de Couverture, dans l'ordre", () => {
-    expect(METIERS_DU_SELECTEUR).toEqual(["couverture", "charpente", "menuiserie", "maconnerie", "platrerie_isolation", "peinture", "carrelage", "plomberie", "electricite", "chauffage"]);
-    expect(vue("couverture").map((r) => r.libelle)).toEqual(["Couverture", "Zinguerie", "Étanchéité et toitures-terrasses"]);
+  // RÈGLE CHANGÉE (Greg, 13 novembre 2026, « cœur métier ») : chaque métier est un catalogue de premier niveau ; Zinguerie et
+  // Étanchéité ne sont plus des rayons de Couverture (décision du 12 novembre).
+  it("le sélecteur : douze catalogues de premier niveau ; Zinguerie et Étanchéité sont des métiers, jamais sous Couverture", () => {
+    expect(METIERS_DU_SELECTEUR).toEqual(["couverture", "zinguerie", "etancheite", "charpente", "menuiserie", "maconnerie", "platrerie_isolation", "peinture", "carrelage", "plomberie", "electricite", "chauffage"]);
+    expect(vue("couverture").map((r) => r.libelle)).not.toEqual(expect.arrayContaining(["Zinguerie"]));
+    expect(vue("couverture").some((r) => /zinguerie|étanchéité et toitures/i.test(r.libelle))).toBe(false);
     expect(LIBELLES_CATALOGUES.platrerie_isolation).toBe("Plaques de plâtre et isolation");
     for (const c of METIERS_DU_SELECTEUR) expect(vue(c).length, c).toBeGreaterThan(0);
   });
@@ -55,17 +58,27 @@ describe("un catalogue par métier : rayons, familles, produits", () => {
       expect(new Set(vus).size, c).toBe(vus.length);
       // L'article de la vue EST l'article du catalogue : même clé, même désignation, même unité (anciens quantitatifs intacts).
       for (const a of vus) expect(T).toContain(a);
-      for (const m of METIERS_CATALOGUE) if ((m === c || (c === "couverture" && (m === "zinguerie" || m === "etancheite"))) && T.some((a) => a.metier === m)) expect(T.filter((a) => a.metier === m).every((a) => vus.includes(a)), `${c}/${m}`).toBe(true);
+      for (const m of METIERS_CATALOGUE) if (m === c && T.some((a) => a.metier === m)) expect(T.filter((a) => a.metier === m).every((a) => vus.includes(a)), `${c}/${m}`).toBe(true);
     }
     expect(new Set(T.map((a) => a.cle)).size).toBe(T.length);
   });
 
-  it("les rayons de Couverture, Zinguerie et Étanchéité portent les familles attendues", () => {
-    const v = vue("couverture");
-    const noms = (r: string) => v.find((x) => x.libelle === r)!.familles.map((f) => f.libelle);
-    expect(noms("Couverture")).toEqual(expect.arrayContaining(["Ardoises", "Tuiles béton", "Bacs et plaques", "Écrans et pare-vapeur", "Isolation", "Bois de couverture", "Fixations et accessoires"]));
-    expect(noms("Zinguerie")).toEqual(["Gouttières et chéneaux", "Accessoires de gouttière", "Descentes et eaux pluviales", "Couverture métallique et joint debout", "Feuilles, bobines, bobineaux et bandes", "Solins, bavettes et rives", "Habillages", "Soudure et consommables"]);
-    expect(noms("Étanchéité et toitures-terrasses")).toEqual(expect.arrayContaining(["Membranes bitumineuses", "Membranes synthétiques", "Étanchéité liquide", "Pare-vapeur", "Isolation de toiture-terrasse", "Relevés et protections", "Évacuation des eaux", "Accessoires et fixations"]));
+  it("Couverture, Zinguerie et Étanchéité portent les familles attendues ; une sous-famille seulement là où la famille en a plusieurs", () => {
+    const familles = (c: (typeof METIERS_DU_SELECTEUR)[number]) => vue(c).map((r) => r.libelle);
+    const sous = (c: (typeof METIERS_DU_SELECTEUR)[number], r: string) => vue(c).find((x) => x.libelle === r)!.familles.map((f) => f.libelle);
+    expect(familles("couverture")).toEqual(["Ardoises", "Tuiles en terre cuite", "Tuiles béton", "Accessoires de tuiles", "Bacs et plaques", "Bardeaux, pierre et bois", "Écrans et pare-vapeur", "Isolation de toiture", "Bois de couverture", "Faîtage et ventilation", "Fenêtres et sorties de toit", "Solins et raccords", "Fixations", "Sécurité, accès et entretien"]);
+    expect(sous("couverture", "Tuiles en terre cuite")).toEqual(["Tuiles canal", "Tuiles plates", "Tuiles à emboîtement"]);
+    expect(familles("zinguerie")).toEqual(["Gouttières et descentes", "Feuilles, bobines et bandes", "Couverture métallique et joint debout", "Rives, solins et habillages", "Soudure et consommables"]);
+    expect(sous("zinguerie", "Gouttières et descentes")).toEqual(["Gouttières et chéneaux", "Accessoires de gouttière", "Descentes d'eaux pluviales"]);
+    expect(sous("zinguerie", "Rives, solins et habillages")).toEqual(["Solins, bavettes et rives", "Habillages"]);
+    expect(familles("etancheite")).toEqual(["Membranes bitumineuses", "Membranes synthétiques", "Étanchéité liquide", "Pare-vapeur", "Isolation de toiture-terrasse", "Relevés et protections", "Évacuation des eaux", "Accessoires et fixations"]);
+    // Deux ou trois choix au plus après le métier : une famille sans sous-famille passe droit aux produits.
+    for (const c of METIERS_DU_SELECTEUR) {
+      expect(vue(c).length, c).toBeLessThanOrEqual(15);
+      for (const r of vue(c)) if (r.familles.length === 1) expect(r.familles[0]!.libelle, `${c} › ${r.libelle}`).toBe(r.libelle);
+    }
+    // Aucun article d'étanchéité ni de zinguerie n'a Couverture pour métier principal, et inversement.
+    for (const a of T) expect(cheminsDeLArticle(a)[0]!.catalogue, a.cle).toBe(a.metier);
     // Une famille ne montre jamais des centaines de lignes : 50 produits au plus par famille, tous métiers.
     for (const c of METIERS_DU_SELECTEUR) for (const r of vue(c)) for (const f of r.familles) expect(f.produits.length, `${c} › ${r.libelle} › ${f.libelle}`).toBeLessThanOrEqual(50);
   });
@@ -85,8 +98,8 @@ describe("un catalogue par métier : rayons, familles, produits", () => {
 });
 
 describe("jamais de matières mélangées : la matière est une caractéristique", () => {
-  it("« Feuilles, bobines, bobineaux et bandes » : Bobine et Bobineau restent deux produits ; le zinc, le cuivre, l'aluminium et l'inox se choisissent", () => {
-    const f = famille("couverture", "Zinguerie", "Feuilles, bobines, bobineaux et bandes");
+  it("« Feuilles, bobines et bandes » : Bobine et Bobineau restent deux produits ; le zinc, le cuivre, l'aluminium et l'inox se choisissent", () => {
+    const f = famille("zinguerie", "Feuilles, bobines et bandes", "Feuilles, bobines et bandes");
     expect(f.produits.map((p) => p.libelle)).toEqual(expect.arrayContaining(["Feuille ou tôle 2 × 1 m", "Bobine", "Bobineau"]));
     const bobine = f.produits.find((p) => p.libelle === "Bobine")!;
     expect(bobine.choix!.nom).toBe("Matériau");
@@ -99,16 +112,16 @@ describe("jamais de matières mélangées : la matière est une caractéristique
     for (const p of [bobine, feuille]) for (const o of p.choix!.options) for (const a of o.suite ? feuilles(o.suite) : [o.article!]) expect(a.produit, `${p.libelle} › ${o.valeur}`).toContain(o.valeur);
     // Ce qui n'est pas une feuille ni une bobine n'y est pas (le joint debout a sa famille).
     expect(f.produits.some((p) => /joint debout|tasseau/i.test(p.libelle))).toBe(false);
-    expect(famille("couverture", "Zinguerie", "Couverture métallique et joint debout").produits.map((p) => p.libelle)).toContain("Patte de joint debout");
+    expect(famille("zinguerie", "Couverture métallique et joint debout", "Couverture métallique et joint debout").produits.map((p) => p.libelle)).toContain("Patte de joint debout");
   });
 
   it("aucun produit de zinguerie ne mêle deux matières sans les faire choisir ; une matière jamais sous le nom d'une autre", () => {
-    for (const f of vue("couverture").find((r) => r.libelle === "Zinguerie")!.familles)
+    for (const f of vue("zinguerie").flatMap((r) => r.familles))
       for (const p of f.produits) {
         const matieres = new Set(articlesDe(p).flatMap((a) => METAUX.filter((m) => new RegExp(`\\b${m}\\b`, "i").test(a.produit))));
         if (matieres.size > 1) expect(p.choix?.nom, `${f.libelle} › ${p.libelle}`).toBe("Matériau");
       }
-    const gouttiere = famille("couverture", "Zinguerie", "Gouttières et chéneaux").produits.find((p) => p.libelle === "Gouttière demi-ronde")!;
+    const gouttiere = famille("zinguerie", "Gouttières et descentes", "Gouttières et chéneaux").produits.find((p) => p.libelle === "Gouttière demi-ronde")!;
     expect(gouttiere.choix!.options.map((o) => o.valeur)).toEqual(["zinc", "PVC", "cuivre", "acier laqué", "acier galvanisé"]);
     expect(gouttiere.caracteristiques).toEqual(["Matériau", "Développé", "Finition"]);
   });
@@ -138,7 +151,7 @@ describe("jamais de matières mélangées : la matière est une caractéristique
     expect(indicationDuProduit(peinture)).toMatch(/teinte$/);
     const prise = vue("electricite").find((r) => r.libelle === "Appareillage")!.familles[0]!.produits.find((p) => /Prise/.test(p.libelle))!;
     expect(prise.precisions.map((x) => [x.nom, x.niveau])).toEqual([["Gamme", "facultative"], ["Couleur", "facultative"]]);
-    expect(famille("couverture", "Couverture", "Ardoises").produits[0]!.precisions).toEqual([]);
+    expect(famille("couverture", "Ardoises", "Ardoises").produits[0]!.precisions).toEqual([]);
   });
 });
 
@@ -146,9 +159,9 @@ describe("des produits partagés, une seule fiche", () => {
   it("un isolant se lit sous Plaques de plâtre ET sous Couverture ; un panneau sous Charpente ET Menuiserie ; même article, même clé", () => {
     const isolant = T.find((a) => a.metier === "platrerie_isolation" && a.produit === "Laine de verre en rouleau")!;
     const chemins = cheminsDeLArticle(isolant);
-    expect(chemins.map((c) => `${c.libelleCatalogue} › ${c.rayon}`)).toEqual(["Plaques de plâtre et isolation › Isolation", "Couverture › Couverture"]);
-    expect(chemins[1]!.famille).toBe("Isolation");
-    expect(articlesDe(famille("couverture", "Couverture", "Isolation").produits.find((p) => p.libelle === isolant.produit)!)).toContain(isolant);
+    expect(chemins.map((c) => `${c.libelleCatalogue} › ${c.rayon}`)).toEqual(["Plaques de plâtre et isolation › Isolation", "Couverture › Isolation de toiture"]);
+    expect(chemins[1]!.famille).toBe("Isolation de toiture");
+    expect(articlesDe(famille("couverture", "Isolation de toiture", "Isolation de toiture").produits.find((p) => p.libelle === isolant.produit)!)).toContain(isolant);
     expect(T.filter((a) => a.cle === isolant.cle)).toHaveLength(1);
     const osb = T.find((a) => a.metier === "charpente" && a.produit === "Panneau OSB 3")!;
     expect(cheminsDeLArticle(osb).map((c) => c.catalogue)).toEqual(["charpente", "menuiserie"]);
@@ -163,7 +176,7 @@ describe("catégories vides, articles de l'admin, anciennes familles", () => {
   it("un rayon ou une famille sans article ne sort pas ; un article d'une famille inconnue se lit sous « Autres produits », jamais perdu", () => {
     const seulementArdoises = T.filter((a) => a.metier === "couverture" && a.famille === "Ardoises");
     const v = vueDuCatalogue("couverture", seulementArdoises);
-    expect(v.map((r) => r.libelle)).toEqual(["Couverture"]);
+    expect(v.map((r) => r.libelle)).toEqual(["Ardoises"]);
     expect(v[0]!.familles.map((f) => f.libelle)).toEqual(["Ardoises"]);
     expect(vueDuCatalogue("electricite", [])).toEqual([]);
     const ajout = { cle: "couverture/ajout/1", metier: "couverture" as const, famille: "Paratonnerres", produit: "Paratonnerre à tige", variante: null };
@@ -187,16 +200,16 @@ describe("catégories vides, articles de l'admin, anciennes familles", () => {
 describe("la recherche directe contourne l'arborescence", () => {
   const premier = (q: string) => rechercherAvecPrecisions(T, q, 5)[0];
   it.each([
-    ["bobine zinc", "Bobine de zinc", "Zinguerie", "Feuilles, bobines, bobineaux et bandes"],
-    ["bobinot zinc", "Bobineau de zinc", "Zinguerie", "Feuilles, bobines, bobineaux et bandes"],
-    ["ardoise 32 22", /^Ardoise naturelle/, "Couverture", "Ardoises"],
+    ["bobine zinc", "Bobine de zinc", "Feuilles, bobines et bandes", "Feuilles, bobines et bandes"],
+    ["bobinot zinc", "Bobineau de zinc", "Feuilles, bobines et bandes", "Feuilles, bobines et bandes"],
+    ["ardoise 32 22", /^Ardoise naturelle/, "Ardoises", "Ardoises"],
     ["câble 3G2,5", "Câble R2V", "Câbles et fils", "Câbles et fils"],
     ["multicouche 20", "Tube multicouche", "Alimentation en eau", "Alimentation en eau"],
     ["peinture plafond mate", /^Peinture plafond/, "Peintures murs et plafonds", "Peintures murs et plafonds"],
     ["plaque hydro 13", "Plaque de plâtre hydrofuge BA13", "Plaques de plâtre", "Plaques de plâtre"],
     ["parpaing 20", "Parpaing creux", "Blocs et briques", "Blocs et briques"],
-    ["goutiere demi ronde 33", "Gouttière demi-ronde zinc", "Zinguerie", "Gouttières et chéneaux"],
-    ["membrane epdm", "Membrane EPDM", "Étanchéité et toitures-terrasses", "Membranes synthétiques"],
+    ["goutiere demi ronde 33", "Gouttière demi-ronde zinc", "Gouttières et descentes", "Gouttières et chéneaux"],
+    ["membrane epdm", "Membrane EPDM", "Membranes synthétiques", "Membranes synthétiques"],
   ] as const)("« %s » trouve %s, rangé sous %s › %s", (q, produit, rayon, fam) => {
     const t = premier(q)!;
     expect(t, q).toBeTruthy();
@@ -245,7 +258,7 @@ it("le relevé d'audit est écrit : docs/catalogue/catalogues-par-metier.md", ()
   for (const c of METIERS_DU_SELECTEUR) {
     const v = vue(c);
     const n = v.reduce((s, r) => s + r.familles.reduce((x, f) => x + f.produits.reduce((y, p) => y + p.nombre, 0), 0), 0);
-    l.push(`## ${LIBELLES_CATALOGUES[c]} (${n} articles)`, "", "| Rayon | Famille | Produits | Articles | Plus long produit | Caractéristiques à choisir |", "|---|---|---:|---:|---|---|");
+    l.push(`## ${LIBELLES_CATALOGUES[c]} (${n} articles)`, "", "| Famille | Sous-famille | Produits | Articles | Plus long produit | Caractéristiques à choisir |", "|---|---|---:|---:|---|---|");
     for (const r of v)
       for (const f of r.familles) {
         const long = [...f.produits].sort((x, y) => y.nombre - x.nombre)[0]!;

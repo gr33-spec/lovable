@@ -4,15 +4,39 @@ Fichier produit par `packages/domain/scripts/etat-des-lieux-catalogue.mjs` (lect
 
 ## L'amorce du dépôt (`packages/domain/src/catalogue/donnees`)
 
-2142 articles. 138 articles se lisent dans plus d'un métier (une seule fiche, plusieurs rattachements). 0 article(s) sans famille (« Autres produits »).
+2142 articles. 146 articles se lisent dans plus d'un métier (une seule fiche, plusieurs rattachements). 0 article(s) sans famille (« Autres produits »).
 
 ### Articles par métier et par famille
 
 | Métier | Articles du métier | Famille | Sous-familles | Produits | Articles lus dans la famille |
 | --- | ---: | --- | ---: | ---: | ---: |
-| Couverture | 868 | Couverture | 15 | 202 | 888 |
-|  |  | Zinguerie | 8 | 73 | 303 |
-|  |  | Étanchéité et toitures-terrasses | 8 | 72 | 172 |
+| Couverture | 868 | Ardoises | — | 6 | 201 |
+|  |  | Tuiles en terre cuite | 3 | 72 | 331 |
+|  |  | Tuiles béton | — | 2 | 7 |
+|  |  | Accessoires de tuiles | — | 23 | 47 |
+|  |  | Bacs et plaques | — | 18 | 67 |
+|  |  | Bardeaux, pierre et bois | — | 7 | 19 |
+|  |  | Écrans et pare-vapeur | — | 10 | 12 |
+|  |  | Isolation de toiture | — | 9 | 29 |
+|  |  | Bois de couverture | — | 8 | 70 |
+|  |  | Faîtage et ventilation | — | 5 | 8 |
+|  |  | Fenêtres et sorties de toit | — | 13 | 40 |
+|  |  | Solins et raccords | — | 4 | 8 |
+|  |  | Fixations | — | 17 | 37 |
+|  |  | Sécurité, accès et entretien | — | 12 | 20 |
+| Zinguerie | 295 | Gouttières et descentes | 3 | 36 | 184 |
+|  |  | Feuilles, bobines et bandes | — | 5 | 52 |
+|  |  | Couverture métallique et joint debout | — | 6 | 8 |
+|  |  | Rives, solins et habillages | 2 | 17 | 46 |
+|  |  | Soudure et consommables | — | 9 | 13 |
+| Étanchéité | 172 | Membranes bitumineuses | — | 9 | 25 |
+|  |  | Membranes synthétiques | — | 11 | 25 |
+|  |  | Étanchéité liquide | — | 5 | 8 |
+|  |  | Pare-vapeur | — | 6 | 7 |
+|  |  | Isolation de toiture-terrasse | — | 8 | 39 |
+|  |  | Relevés et protections | — | 12 | 15 |
+|  |  | Évacuation des eaux | — | 7 | 33 |
+|  |  | Accessoires et fixations | — | 14 | 20 |
 | Charpente | 277 | Bois de charpente | — | 8 | 196 |
 |  |  | Lamellé-collé et bois reconstitué | — | 2 | 26 |
 |  |  | Bois de couverture | — | 8 | 70 |
@@ -89,7 +113,7 @@ Fichier produit par `packages/domain/scripts/etat-des-lieux-catalogue.mjs` (lect
 
 ### Familles trop volumineuses (plus de 40 produits d'un coup)
 
-- couverture › Couverture › Tuiles terre cuite à emboîtement : 47 produits
+- couverture › Tuiles en terre cuite › Tuiles à emboîtement : 47 produits
 
 ### Désignations ambiguës (un même produit dans deux familles d'origine du même métier)
 
@@ -105,15 +129,39 @@ Aucun.
 
 ## La base fournie
 
-2188 articles. 140 articles se lisent dans plus d'un métier (une seule fiche, plusieurs rattachements). 0 article(s) sans famille (« Autres produits »).
+2188 articles. 148 articles se lisent dans plus d'un métier (une seule fiche, plusieurs rattachements). 0 article(s) sans famille (« Autres produits »).
 
 ### Articles par métier et par famille
 
 | Métier | Articles du métier | Famille | Sous-familles | Produits | Articles lus dans la famille |
 | --- | ---: | --- | ---: | ---: | ---: |
-| Couverture | 882 | Couverture | 15 | 202 | 904 |
-|  |  | Zinguerie | 8 | 73 | 311 |
-|  |  | Étanchéité et toitures-terrasses | 8 | 72 | 172 |
+| Couverture | 882 | Ardoises | — | 6 | 201 |
+|  |  | Tuiles en terre cuite | 3 | 72 | 331 |
+|  |  | Tuiles béton | — | 2 | 7 |
+|  |  | Accessoires de tuiles | — | 23 | 47 |
+|  |  | Bacs et plaques | — | 18 | 67 |
+|  |  | Bardeaux, pierre et bois | — | 7 | 19 |
+|  |  | Écrans et pare-vapeur | — | 10 | 18 |
+|  |  | Isolation de toiture | — | 9 | 30 |
+|  |  | Bois de couverture | — | 8 | 70 |
+|  |  | Faîtage et ventilation | — | 5 | 8 |
+|  |  | Fenêtres et sorties de toit | — | 13 | 40 |
+|  |  | Solins et raccords | — | 4 | 8 |
+|  |  | Fixations | — | 17 | 46 |
+|  |  | Sécurité, accès et entretien | — | 12 | 20 |
+| Zinguerie | 303 | Gouttières et descentes | 3 | 36 | 184 |
+|  |  | Feuilles, bobines et bandes | — | 5 | 60 |
+|  |  | Couverture métallique et joint debout | — | 6 | 8 |
+|  |  | Rives, solins et habillages | 2 | 17 | 46 |
+|  |  | Soudure et consommables | — | 9 | 13 |
+| Étanchéité | 172 | Membranes bitumineuses | — | 9 | 25 |
+|  |  | Membranes synthétiques | — | 11 | 25 |
+|  |  | Étanchéité liquide | — | 5 | 8 |
+|  |  | Pare-vapeur | — | 6 | 7 |
+|  |  | Isolation de toiture-terrasse | — | 8 | 39 |
+|  |  | Relevés et protections | — | 12 | 15 |
+|  |  | Évacuation des eaux | — | 7 | 33 |
+|  |  | Accessoires et fixations | — | 14 | 20 |
 | Charpente | 290 | Bois de charpente | — | 8 | 196 |
 |  |  | Lamellé-collé et bois reconstitué | — | 2 | 26 |
 |  |  | Bois de couverture | — | 8 | 70 |
@@ -196,7 +244,7 @@ Aucun.
 
 ### Familles trop volumineuses (plus de 40 produits d'un coup)
 
-- couverture › Couverture › Tuiles terre cuite à emboîtement : 47 produits
+- couverture › Tuiles en terre cuite › Tuiles à emboîtement : 47 produits
 
 ### Désignations ambiguës (un même produit dans deux familles d'origine du même métier)
 

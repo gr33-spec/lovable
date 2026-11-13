@@ -1,25 +1,26 @@
 /**
  * RETOUR DE GREG (12 novembre 2026) : « La partie couverture doit comprendre la partie zinguerie. Dans la partie
  * étanchéité, il manque énormément de choix (membrane, pax alu, EPDM, isolant, pare-vapeur…). »
- *  - la zinguerie n'a plus d'entrée au sélecteur : ses articles se lisent sous « Couverture », clés inchangées ;
+ *  - (règle du 12 novembre, CHANGÉE le 13 : la zinguerie et l'étanchéité sont des métiers de premier niveau) ;
  *  - l'étanchéité a son métier au catalogue, avec les mots du comptoir.
  */
 import { describe, expect, it } from "vitest";
 import { AMORCE_CATALOGUE, METIERS_DU_SELECTEUR, metiersCatalogueDuCompte, metiersDuRayon, rayonDuMetierCatalogue, rechercherArticles, TOUT_LE_CATALOGUE } from "../src/index.js";
 
-describe("la couverture comprend la zinguerie", () => {
-  it("la zinguerie n'est plus au sélecteur ; ses articles se lisent sous Couverture ; les clés ne changent pas", () => {
-    expect(METIERS_DU_SELECTEUR).not.toContain("zinguerie");
-    expect(METIERS_DU_SELECTEUR).toContain("couverture");
-    // Règle changée (Greg, 12 novembre 2026, catalogues par métier) : l'étanchéité devient un rayon de Couverture.
-    expect(metiersDuRayon("couverture")).toEqual(["couverture", "zinguerie", "etancheite"]);
-    expect(rayonDuMetierCatalogue("zinguerie")).toBe("couverture");
-    expect(rayonDuMetierCatalogue("etancheite")).toBe("couverture");
-    expect(METIERS_DU_SELECTEUR).not.toContain("etancheite");
-    expect(metiersCatalogueDuCompte(["roofing"])).not.toContain("zinguerie");
+// RÈGLE CHANGÉE (Greg, 13 novembre 2026, « cœur métier » : « Étanchéité doit rester un métier indépendant […] Zinguerie
+// doit également rester un métier indépendant ») : le 12 novembre, les deux se lisaient sous « Couverture ».
+describe("zinguerie et étanchéité : des métiers de premier niveau", () => {
+  it("les deux sont au sélecteur, aucun n'est rangé dans un autre ; un couvreur voit les trois ; les clés ne changent pas", () => {
+    expect(METIERS_DU_SELECTEUR.slice(0, 3)).toEqual(["couverture", "zinguerie", "etancheite"]);
+    expect(metiersDuRayon("couverture")).toEqual(["couverture"]);
+    expect(rayonDuMetierCatalogue("zinguerie")).toBe("zinguerie");
+    expect(rayonDuMetierCatalogue("etancheite")).toBe("etancheite");
+    expect(metiersCatalogueDuCompte(["roofing"])).toEqual(["couverture", "zinguerie", "etancheite"]);
+    expect(metiersCatalogueDuCompte(["waterproofing"])).toEqual(["etancheite", "couverture"]);
     // Une clé additionne les lignes de plusieurs artisans dans un achat groupé : elle ne se réécrit jamais.
     expect(AMORCE_CATALOGUE.zinguerie.every((a) => a.cle.startsWith("zinguerie/"))).toBe(true);
     expect(AMORCE_CATALOGUE.zinguerie.some((a) => a.cle === "zinguerie/gouttieres/gouttiere-demi-ronde-zinc/dev--33-naturel")).toBe(true);
+    expect(AMORCE_CATALOGUE.etancheite.every((a) => a.cle.startsWith("etancheite/"))).toBe(true);
   });
 });
 

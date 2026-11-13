@@ -53,9 +53,10 @@ describe("le catalogue complet", () => {
     const bois = arbre.find((f) => f.libelle === "Bois de charpente")!;
     const panne = bois.enfants.find((p) => p.libelle === "Panne")!;
     expect(panne.enfants.some((v) => v.libelle === "75×225 · 6 m · classe 2" && v.article?.unite === "pièces")).toBe(true);
-    expect(metiersCatalogueDuCompte(["roofing"])).toEqual(["couverture"]);
-    expect(metiersCatalogueDuCompte(["carpentry", "roofing"])).toEqual(["charpente", "couverture"]);
-    expect(metiersCatalogueDuCompte(["waterproofing"])).toEqual(["couverture"]);
+    // Règle changée (Greg, 13 novembre 2026) : zinguerie et étanchéité sont des métiers à part, proposés au couvreur.
+    expect(metiersCatalogueDuCompte(["roofing"])).toEqual(["couverture", "zinguerie", "etancheite"]);
+    expect(metiersCatalogueDuCompte(["carpentry", "roofing"])).toEqual(["charpente", "couverture", "zinguerie", "etancheite"]);
+    expect(metiersCatalogueDuCompte(["waterproofing"])).toEqual(["etancheite", "couverture"]);
   });
 
   it("écrit les fichiers de relecture (un par métier) dans docs/catalogue", () => {

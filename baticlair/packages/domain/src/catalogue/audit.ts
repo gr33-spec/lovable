@@ -131,3 +131,27 @@ export function etatDesLieuxDuCatalogue(articles: readonly ArticleAudite[], cano
     rattachementsMultiples,
   };
 }
+
+/**
+ * LES ANCIENS IDENTIFIANTS à ne plus proposer : pour chaque article écrit sous deux clés (« 2-x-1 » et « 2x1 »), les clés
+ * qui ne sont PAS celle gardée. Rien n'est supprimé ni réécrit : l'ancien identifiant reste en base et reste lisible par
+ * sa clé (une ligne d'achat groupé déjà saisie le retrouve) ; il n'est simplement plus montré deux fois à l'artisan.
+ * Une seule passe sur les articles (appelée à chaque lecture du catalogue).
+ */
+export function anciensIdentifiants(articles: readonly Pick<ArticleAudite, "cle" | "designation" | "unite">[], canoniques: ReadonlySet<string> = new Set()): Map<string, string> {
+  const groupes = new Map<string, Pick<ArticleAudite, "cle" | "designation" | "unite">[]>();
+  for (const a of articles) {
+    const k = cleNormalisee(a.cle);
+    const g = groupes.get(k);
+    if (g) g.push(a);
+    else groupes.set(k, [a]);
+  }
+  const anciens = new Map<string, string>();
+  for (const g of groupes.values()) {
+    if (g.length < 2) continue;
+    const garde = g.find((a) => canoniques.has(a.cle)) ?? g.find((a) => a.cle === cleNormalisee(a.cle)) ?? g[0]!;
+    // Deux clés proches ne sont le même article que si la désignation et l'unité sont les mêmes.
+    for (const a of g) if (a !== garde && aPlat(a.designation) === aPlat(garde.designation) && aPlat(a.unite) === aPlat(garde.unite)) anciens.set(a.cle, garde.cle);
+  }
+  return anciens;
+}

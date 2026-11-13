@@ -2371,20 +2371,24 @@ model Brouillon {
  * elle qui additionne les lignes de plusieurs artisans dans un achat groupé.
  */
 model CatalogueArticle {
-  cle         String   @id
-  metier      String
-  famille     String
-  produit     String
-  variante    String?
-  designation String
-  unite       String
-  synonymes   String[] @default([])
-  masque      Boolean  @default(false)
-  ordre       Int      @default(0)
+  cle                String   @id
+  metier             String
+  famille            String
+  produit            String
+  variante           String?
+  designation        String
+  unite              String
+  synonymes          String[] @default([])
+  masque             Boolean  @default(false)
+  ordre              Int      @default(0)
   /// Ajouté par l'admin (pas dans l'amorce).
-  ajoute      Boolean  @default(false)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  ajoute             Boolean  @default(false)
+  /// Donnée à vérifier (Greg, 13 novembre 2026, « cœur métier ») : l'admin la marque ; l'artisan lit « À vérifier ».
+  aVerifier          Boolean  @default(false) @map("a_verifier")
+  /// Les métiers où l'article se lit EN PLUS du sien (une seule fiche, plusieurs rattachements ; jamais une copie).
+  metiersSecondaires String[] @default([]) @map("metiers_secondaires")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@index([metier, masque])
   @@map("catalogue_article")

@@ -62,33 +62,36 @@ const MATIERE = "(zinc|cuivre|PVC|aluminium(?: laqué)?|acier laqué|acier galva
 
 export const CATALOGUES: Readonly<Partial<Record<MetierCatalogue, readonly RayonDef[]>>> = {
   couverture: [
+    seul("Ardoises", [["couverture", "Ardoises"]], {
+      fusions: [
+        { nom: "Ardoise naturelle CUPA (Cupa Pizarras)", motif: /^Ardoise naturelle (CUPA \d+) \(Cupa Pizarras\)$/, caracteristique: "Sélection" },
+        { nom: "Ardoise fibres-ciment Cedral", motif: /^Ardoise fibres-ciment (.+) \(Cedral\)$/, caracteristique: "Gamme" },
+      ],
+    }),
     {
-      libelle: "Couverture",
+      libelle: "Tuiles en terre cuite",
       familles: [
-        f("Ardoises", [["couverture", "Ardoises"]], {
-          fusions: [
-            { nom: "Ardoise naturelle CUPA (Cupa Pizarras)", motif: /^Ardoise naturelle (CUPA \d+) \(Cupa Pizarras\)$/, caracteristique: "Sélection" },
-            { nom: "Ardoise fibres-ciment Cedral", motif: /^Ardoise fibres-ciment (.+) \(Cedral\)$/, caracteristique: "Gamme" },
-          ],
-        }),
-        f("Tuiles terre cuite canal", [["couverture", "Tuiles terre cuite", /canal/i]]),
-        f("Tuiles terre cuite plates", [["couverture", "Tuiles terre cuite", /plate/i]]),
-        f("Tuiles terre cuite à emboîtement", [["couverture", "Tuiles terre cuite"]]),
-        f("Tuiles béton", [["couverture", "Tuiles béton"]]),
-        f("Accessoires de tuiles", [["couverture", "Accessoires de tuiles"]]),
-        f("Bacs et plaques", [["couverture", "Bacs et plaques"]]),
-        f("Bardeaux, pierre et bois", [["couverture", "Bardeaux bitumés"], ["couverture", "Couvertures de pierre et de bois"]]),
-        f("Écrans et pare-vapeur", [["couverture", "Écrans et pare-vapeur"], ["charpente", "Écrans et membranes"]]),
-        f("Isolation", [["couverture", "Isolation de toiture"], ["platrerie_isolation", "Isolants"]]),
-        f("Bois de couverture", [["couverture", "Bois de couverture"]]),
-        f("Faîtage et ventilation", [["couverture", "Faîtage et ventilation"]]),
-        f("Fenêtres et sorties de toit", [["couverture", "Fenêtres de toit"], ["couverture", "Sorties de toit"]]),
-        f("Fixations et accessoires", [["couverture", "Fixations"]]),
-        f("Sécurité, accès et entretien", [["couverture", "Sécurité et accès"], ["couverture", "Entretien de toiture"]]),
+        f("Tuiles canal", [["couverture", "Tuiles terre cuite", /canal/i]]),
+        f("Tuiles plates", [["couverture", "Tuiles terre cuite", /plate/i]]),
+        f("Tuiles à emboîtement", [["couverture", "Tuiles terre cuite"]]),
       ],
     },
+    seul("Tuiles béton", [["couverture", "Tuiles béton"]]),
+    seul("Accessoires de tuiles", [["couverture", "Accessoires de tuiles"]]),
+    seul("Bacs et plaques", [["couverture", "Bacs et plaques"]]),
+    seul("Bardeaux, pierre et bois", [["couverture", "Bardeaux bitumés"], ["couverture", "Couvertures de pierre et de bois"]]),
+    seul("Écrans et pare-vapeur", [["couverture", "Écrans et pare-vapeur"], ["charpente", "Écrans et membranes"]]),
+    seul("Isolation de toiture", [["couverture", "Isolation de toiture"], ["platrerie_isolation", "Isolants"]]),
+    seul("Bois de couverture", [["couverture", "Bois de couverture"]]),
+    seul("Faîtage et ventilation", [["couverture", "Faîtage et ventilation"]]),
+    seul("Fenêtres et sorties de toit", [["couverture", "Fenêtres de toit"], ["couverture", "Sorties de toit"]]),
+    seul("Solins et raccords", [["couverture", "Étanchéité"]]),
+    seul("Fixations", [["couverture", "Fixations"]]),
+    seul("Sécurité, accès et entretien", [["couverture", "Sécurité et accès"], ["couverture", "Entretien de toiture"]]),
+  ],
+  zinguerie: [
     {
-      libelle: "Zinguerie",
+      libelle: "Gouttières et descentes",
       familles: [
         f("Gouttières et chéneaux", [["zinguerie", "Gouttières", /^(Gouttière|Chéneau)/]], {
           fusions: [
@@ -99,38 +102,40 @@ export const CATALOGUES: Readonly<Partial<Record<MetierCatalogue, readonly Rayon
         f("Accessoires de gouttière", [["zinguerie", "Gouttières"]], {
           fusions: [{ nom: "Naissance de gouttière", motif: new RegExp(`^Naissance de gouttière ${MATIERE}$`), caracteristique: "Matériau" }],
         }),
-        f("Descentes et eaux pluviales", [["zinguerie", "Descentes"]], {
+        f("Descentes d'eaux pluviales", [["zinguerie", "Descentes"]], {
           fusions: [
             { nom: "Tuyau de descente", motif: new RegExp(`^Tuyau de descente ${MATIERE}$`), caracteristique: "Matériau" },
             { nom: "Coude de descente", motif: new RegExp(`^Coude de descente ${MATIERE}$`), caracteristique: "Matériau" },
           ],
         }),
-        f("Couverture métallique et joint debout", [["zinguerie", "Zinc", /joint debout|tasseau|couvre-joint|sous zinc/i]]),
-        f("Feuilles, bobines, bobineaux et bandes", [["zinguerie", "Zinc"], ["couverture", "Étanchéité", /plomb/i]], {
-          fusions: [
-            { nom: "Feuille ou tôle 2 × 1 m", motif: /^(?:Feuille de|Tôle) (.+) 2 × 1 m$/, caracteristique: "Matériau" },
-            { nom: "Bobine", motif: /^Bobine de (.+)$/, caracteristique: "Matériau" },
-            { nom: "Bobineau", motif: /^Bobineau de (.+)$/, caracteristique: "Matériau" },
-          ],
-        }),
+      ],
+    },
+    seul("Feuilles, bobines et bandes", [["zinguerie", "Zinc"], ["couverture", "Étanchéité", /plomb/i]], {
+      fusions: [
+        { nom: "Feuille ou tôle 2 × 1 m", motif: /^(?:Feuille de|Tôle) (.+) 2 × 1 m$/, caracteristique: "Matériau" },
+        { nom: "Bobine", motif: /^Bobine de (.+)$/, caracteristique: "Matériau" },
+        { nom: "Bobineau", motif: /^Bobineau de (.+)$/, caracteristique: "Matériau" },
+      ],
+    }),
+    seul("Couverture métallique et joint debout", [["zinguerie", "Zinc", /joint debout|tasseau|couvre-joint|sous zinc/i]]),
+    {
+      libelle: "Rives, solins et habillages",
+      familles: [
         f("Solins, bavettes et rives", [["zinguerie", "Bandes et pièces façonnées", /rive|égout|solin|noue|faîtage|ourlet|agrafe|noquet/i], ["couverture", "Étanchéité", /solin/i]]),
         f("Habillages", [["zinguerie", "Bandes et pièces façonnées"]]),
-        f("Soudure et consommables", [["zinguerie", "Soudure"], ["couverture", "Étanchéité"]]),
       ],
     },
-    {
-      libelle: "Étanchéité et toitures-terrasses",
-      familles: [
-        f("Accessoires et fixations", [["etancheite", null, /^(Fixation mécanique|Colle |Mastic |Primaire |Profil |Bouteille de gaz|Enduit d'imprégnation)/]]),
-        f("Membranes bitumineuses", [["etancheite", "Membranes bitume"]]),
-        f("Membranes synthétiques", [["etancheite", "Étanchéité EPDM"], ["etancheite", "Membranes PVC et TPO"]]),
-        f("Étanchéité liquide", [["etancheite", "Étanchéité liquide"]]),
-        f("Pare-vapeur", [["etancheite", "Pare-vapeur et écrans"]]),
-        f("Isolation de toiture-terrasse", [["etancheite", "Isolants de toiture-terrasse"]]),
-        f("Relevés et protections", [["etancheite", "Évacuations et relevés", /solin|rive|costière|lanterneau/i], ["etancheite", "Protection et finition"]]),
-        f("Évacuation des eaux", [["etancheite", "Évacuations et relevés"]]),
-      ],
-    },
+    seul("Soudure et consommables", [["zinguerie", "Soudure"], ["couverture", "Étanchéité"]]),
+  ],
+  etancheite: [
+    seul("Membranes bitumineuses", [["etancheite", "Membranes bitume"]]),
+    seul("Membranes synthétiques", [["etancheite", "Étanchéité EPDM"], ["etancheite", "Membranes PVC et TPO"]]),
+    seul("Étanchéité liquide", [["etancheite", "Étanchéité liquide"]]),
+    seul("Pare-vapeur", [["etancheite", "Pare-vapeur et écrans"]]),
+    seul("Isolation de toiture-terrasse", [["etancheite", "Isolants de toiture-terrasse"]]),
+    seul("Relevés et protections", [["etancheite", "Évacuations et relevés", /solin|rive|costière|lanterneau/i], ["etancheite", "Protection et finition"]]),
+    seul("Évacuation des eaux", [["etancheite", "Évacuations et relevés"]]),
+    seul("Accessoires et fixations", [["etancheite", null, /^(Fixation mécanique|Colle |Mastic |Primaire |Profil |Bouteille de gaz|Enduit d'imprégnation)/]]),
   ],
   charpente: [
     seul("Bois de charpente", [["charpente", "Bois de charpente"]]),
@@ -216,7 +221,12 @@ export const CATALOGUES: Readonly<Partial<Record<MetierCatalogue, readonly Rayon
 export const LIBELLES_CATALOGUES: Readonly<Record<string, string>> = { ...LIBELLES_METIERS_CATALOGUE, platrerie_isolation: "Plaques de plâtre et isolation" };
 export const RAYON_AUTRES = "Autres produits";
 
-type ArticleRange = Pick<ArticleCatalogue, "cle" | "metier" | "famille" | "produit" | "variante">;
+/**
+ * `metiersSecondaires` (Greg, 13 novembre 2026 : « un article peut être pertinent pour plusieurs métiers, sans le dupliquer
+ * physiquement ») : les métiers où l'admin a rattaché l'article EN PLUS de ceux que les règles ci-dessus lui donnent. Une
+ * seule fiche, une seule clé ; dans un métier secondaire que rien ne range, l'article se lit dans sa famille d'origine.
+ */
+type ArticleRange = Pick<ArticleCatalogue, "cle" | "metier" | "famille" | "produit" | "variante"> & { metiersSecondaires?: readonly string[] | null };
 
 const prise = (p: Prise, a: ArticleRange) => p[0] === a.metier && (p[1] === null || p[1] === a.famille) && (!p[2] || p[2].test(a.produit));
 
@@ -263,7 +273,7 @@ export function cheminsDeLArticle(a: ArticleRange): CheminCatalogue[] {
   for (const catalogue of [sien, ...METIERS_DU_SELECTEUR.filter((m) => m !== sien)]) {
     const place = placeDans(CATALOGUES[catalogue] ?? [], a);
     if (place) chemins.push({ catalogue, libelleCatalogue: LIBELLES_CATALOGUES[catalogue]!, rayon: place.rayon.libelle, famille: place.famille.libelle, produit: produitDeVue(place.famille, a).nom });
-    else if (catalogue === sien) chemins.push({ catalogue, libelleCatalogue: LIBELLES_CATALOGUES[catalogue] ?? catalogue, rayon: RAYON_AUTRES, famille: a.famille, produit: a.produit });
+    else if (catalogue === sien || a.metiersSecondaires?.includes(catalogue)) chemins.push({ catalogue, libelleCatalogue: LIBELLES_CATALOGUES[catalogue] ?? catalogue, rayon: RAYON_AUTRES, famille: a.famille, produit: a.produit });
   }
   return chemins;
 }
@@ -384,7 +394,7 @@ export function vueDuCatalogue<T extends ArticleRange>(catalogue: MetierCatalogu
   const autres = new Map<string, Map<string, Ligne[]>>();
   for (const a of articles) {
     const place = placeDans(defs, a);
-    if (!place && rayonDuMetierCatalogue(a.metier) !== catalogue) continue;
+    if (!place && rayonDuMetierCatalogue(a.metier) !== catalogue && !a.metiersSecondaires?.includes(catalogue)) continue;
     const { nom, fusion, valeur } = produitDeVue(place?.famille ?? null, a);
     let produits = place ? parFamille.get(place.famille) : autres.get(a.famille);
     if (!produits) {

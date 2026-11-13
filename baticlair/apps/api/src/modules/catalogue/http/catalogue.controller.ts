@@ -33,7 +33,7 @@ export class CatalogueController {
 
 const texte = (max: number) => z.string().trim().min(1).max(max);
 const ajoutBody = z.object({ metier: texte(40), famille: texte(80), produit: texte(120), variante: z.string().trim().max(120).nullable(), designation: z.string().trim().max(200).nullable(), unite: texte(40), synonymes: z.array(texte(60)).max(30).default([]) });
-const modifBody = z.object({ famille: texte(80), produit: texte(120), variante: z.string().trim().max(120).nullable(), designation: texte(200), unite: texte(40), synonymes: z.array(texte(60)).max(30), masque: z.boolean() }).partial();
+const modifBody = z.object({ metier: texte(40), famille: texte(80), produit: texte(120), variante: z.string().trim().max(120).nullable(), designation: texte(200), unite: texte(40), synonymes: z.array(texte(60)).max(30), masque: z.boolean(), aVerifier: z.boolean(), metiersSecondaires: z.array(texte(40)).max(11) }).partial();
 
 const rattacherBody = z.object({ ligneId: z.uuid(), cle: texte(200) });
 const accepterBody = z.object({ cle: texte(200), metier: texte(40), famille: texte(80) });
@@ -62,9 +62,9 @@ export class AdminCatalogueController {
   }
 
   @Get()
-  async lister(@Tenant() tenant: TenantContext, @Query("metier") metier?: string) {
+  async lister(@Tenant() tenant: TenantContext, @Query("metier") metier?: string, @Query("q") q?: string) {
     await this.garde(tenant);
-    return this.catalogue.admin(metier);
+    return this.catalogue.admin(metier, (q ?? "").slice(0, 120));
   }
 
   @Post()
@@ -137,7 +137,7 @@ export class AdminCatalogueController {
   async modifier(@Tenant() tenant: TenantContext, @Query("cle") cle: string | undefined, @Body(new ZodPipe(modifBody)) body: z.infer<typeof modifBody>) {
     const email = await this.garde(tenant);
     const r = await this.catalogue.modifier(cle ?? "", body);
-    await this.journal(tenant, email, body.masque === true ? "masque" : body.masque === false ? "affiche" : "modification", cle ?? "");
+    await this.journal(tenant, email, body.masque === true ? "masque" : body.masque === false ? "affiche" : body.aVerifier === true ? "à vérifier" : body.aVerifier === false ? "vérifié" : body.metier !== undefined || body.metiersSecondaires !== undefined ? "classement" : "modification", `${cle ?? ""}${body.metier ? ` → ${body.metier}` : ""}${body.metiersSecondaires ? ` + ${body.metiersSecondaires.join(", ") || "aucun métier secondaire"}` : ""}`);
     return r;
   }
 }

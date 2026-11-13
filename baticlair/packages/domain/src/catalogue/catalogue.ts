@@ -52,16 +52,13 @@ export const FAMILLE_DU_METIER_CATALOGUE: Readonly<Record<MetierCatalogue, Famil
 };
 
 /**
- * LA COUVERTURE COMPREND LA ZINGUERIE (Greg, 12 novembre 2026 : « la partie couverture doit comprendre la partie
- * zinguerie »). Un métier rangé dans un autre n'a plus d'entrée au sélecteur : ses articles se lisent dans le rayon qui
- * le comprend (gouttières, descentes et zinc sous « Couverture »). Les clés des articles ne changent pas.
+ * CHAQUE MÉTIER EST UN CATALOGUE DE PREMIER NIVEAU (Greg, 13 novembre 2026, « cœur métier » : « Étanchéité doit rester un
+ * métier indépendant. Elle ne doit jamais devenir un sous-menu de Couverture. Zinguerie doit également rester un métier
+ * indépendant »). RÈGLE CHANGÉE : le 12 novembre, zinguerie et étanchéité se lisaient sous « Couverture ». Plus aucun
+ * métier n'est rangé dans un autre ; la table reste (vide) pour que le mécanisme se lise et se teste. Un article utile à
+ * deux métiers n'est pas copié : il est RATTACHÉ aux deux (`rayons.ts`). Les clés des articles ne changent pas.
  */
-/**
- * L'ÉTANCHÉITÉ AUSSI (Greg, 12 novembre 2026 : « dans l'interface artisan, Étanchéité doit apparaître comme un rayon du
- * catalogue Couverture, même si le moteur conserve une classification technique distincte ») : le métier « etancheite »
- * reste celui des articles, il n'a plus d'entrée au sélecteur.
- */
-export const RAYON_DU_METIER_CATALOGUE: Readonly<Partial<Record<MetierCatalogue, MetierCatalogue>>> = { zinguerie: "couverture", etancheite: "couverture" };
+export const RAYON_DU_METIER_CATALOGUE: Readonly<Partial<Record<MetierCatalogue, MetierCatalogue>>> = {};
 /** Le métier du sélecteur où se lit un métier du catalogue (« zinguerie » → « couverture »). */
 export const rayonDuMetierCatalogue = (m: MetierCatalogue): MetierCatalogue => RAYON_DU_METIER_CATALOGUE[m] ?? m;
 /** Les métiers du sélecteur « Métier : Couverture ▾ » : ceux qui ne sont pas rangés dans un autre. */
@@ -71,9 +68,9 @@ export const metiersDuRayon = (m: MetierCatalogue): MetierCatalogue[] => [m, ...
 
 /** Les métiers du catalogue d'un métier du compte (`trades` : roofing, carpentry…), dans l'ordre. */
 const METIERS_DU_COMPTE: Readonly<Record<string, readonly MetierCatalogue[]>> = {
-  roofing: ["couverture", "etancheite"],
+  roofing: ["couverture", "zinguerie", "etancheite"],
   waterproofing: ["etancheite", "couverture"],
-  cladding: ["couverture"],
+  cladding: ["couverture", "zinguerie"],
   carpentry: ["charpente"],
   joinery: ["menuiserie"],
   interior_joinery: ["menuiserie"],
