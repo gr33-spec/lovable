@@ -493,6 +493,11 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await inscrireSansSiret(page, departementReserve([9, 10], [11, 12]));
     await page.goto("/chantiers/nouveau?mode=manuel");
     const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
+    // Le guide du premier passage s'ouvre par-dessus la saisie : on le laisse se fermer avant de taper (sinon la
+    // recherche se vide quand il se referme ; même précaution que `catalogue-rayons.spec.ts`).
+    await expect(ecran.getByText("Chargement du catalogue…")).toHaveCount(0);
+    await ecran.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" }).click();
+    await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
     await ecran.getByLabel("Rechercher un matériau").fill("Liteaux 27×38 maison");
     await ecran.getByRole("button", { name: /Ajouter « Liteaux 27×38 maison » tel que je l'écris/ }).click();
     await ecran.getByLabel("Quantité de la ligne libre").fill("400");

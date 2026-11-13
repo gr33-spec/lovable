@@ -3995,6 +3995,10 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   const jaugeAvant = (await apiJson<{ quotas?: unknown; jauge?: unknown }>(page, "GET", "/v1/ai-usage/jauge")).body;
   await page.goto("/chantiers/nouveau?mode=manuel");
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
+  // Le guide du premier passage se ferme avant qu'on tape (même précaution que `catalogue-rayons.spec.ts`).
+  await expect(ecran.getByText("Chargement du catalogue…")).toHaveCount(0);
+  await ecran.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" }).click();
+  await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
   await expect(ecran.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" })).toBeVisible();
   // Rien de l'achat groupé : ni étapes, ni commune, ni négoces, ni engagement.
   await expect(ecran.getByText(/Achat groupé de ton métier|Commune de livraison|négoces|Je m'engage/)).toHaveCount(0);
@@ -4064,6 +4068,10 @@ test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan revien
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Crochet gouttière bandeau 25", quantite: "40", unite: "pièces" }] })).status).toBe(201);
   await page.goto("/chantiers/nouveau?mode=manuel");
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
+  // Le guide du premier passage se ferme avant qu'on tape (même précaution que `catalogue-rayons.spec.ts`).
+  await expect(ecran.getByText("Chargement du catalogue…")).toHaveCount(0);
+  await ecran.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" }).click();
+  await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
   await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
   await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25 (déjà écrit par toi)" })).toBeVisible();
   await page.context().clearCookies();

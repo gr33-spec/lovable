@@ -78,6 +78,10 @@ test.describe("Le clavier ouvert sur iPhone SE", () => {
     // 2. « Saisir ma liste » (31 octobre 2026) : la recherche, la ligne libre, la quantité ; le bouton du bas reste visible.
     await page.goto("/chantiers/nouveau?mode=manuel");
     const dialogue = page.getByRole("dialog", { name: "Saisir ma liste" });
+    // Le guide du premier passage se ferme avant qu'on tape (même précaution que `catalogue-rayons.spec.ts`).
+    await expect(dialogue.getByText("Chargement du catalogue…")).toHaveCount(0);
+    await dialogue.getByRole("heading", { name: "Quels matériaux veux-tu ajouter ?" }).click();
+    await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
     await champVisible(page, dialogue.getByLabel("Rechercher un matériau"));
     await dialogue.getByLabel("Rechercher un matériau").fill("Crochets inox maison");
     await dialogue.getByRole("button", { name: /Ajouter « Crochets inox maison » tel que je l'écris/ }).click();
