@@ -2253,6 +2253,8 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
       await pageN.goto(lien);
       await pageN.waitForLoadState("networkidle");
     })).toEqual([]);
+    // Le dernier bouton touché (« Signaler un problème », 13 novembre 2026) laisse sa fenêtre ouverte : on rouvre la page.
+    await pageN.goto(lien);
     const form = pageN.getByRole("form", { name: "Déposer mon devis" });
     await expect(form.getByRole("link", { name: /Lire les conditions/ })).toHaveAttribute("href", /contrat\.pdf$/);
     await form.locator('input[type="file"]').setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));

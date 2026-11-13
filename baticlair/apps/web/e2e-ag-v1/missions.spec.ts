@@ -314,8 +314,9 @@ test("compte : le menu, « Profil et paramètres », notifications par catégori
   await page.getByRole("button", { name: "Mon menu" }).click();
   const menu = page.getByRole("menu", { name: "Mon menu" });
   // Greg, 12 novembre 2026 : un panneau court, sans doublon avec « Profil et paramètres » ni avec les parcours métier.
-  await expect(menu.getByRole("menuitem")).toHaveText(["Profil et paramètres", "Abonnement, factures et reçus", "Se déconnecter"]);
-  for (const ligne of ["Profil et paramètres", "Abonnement, factures et reçus", "Se déconnecter"]) await expect(menu.getByRole("menuitem", { name: ligne, exact: true })).toBeVisible();
+  // Greg, 13 novembre 2026 : « Signaler un problème » s'y ajoute, sur chaque écran.
+  await expect(menu.getByRole("menuitem")).toHaveText(["Profil et paramètres", "Abonnement, factures et reçus", "Signaler un problème", "Se déconnecter"]);
+  for (const ligne of ["Profil et paramètres", "Abonnement, factures et reçus", "Signaler un problème", "Se déconnecter"]) await expect(menu.getByRole("menuitem", { name: ligne, exact: true })).toBeVisible();
   // Réservé : ni l'administration ni les opportunités commerciales pour un compte qui n'y a pas droit.
   await expect(menu.getByRole("menuitem", { name: /Espace administration/ })).toHaveCount(0);
   await expect(menu.getByRole("menuitem", { name: /Opportunités commerciales/ })).toHaveCount(0);
