@@ -3,9 +3,14 @@
 Mission de Greg du 13 novembre 2026. À lire en premier à chaque reprise ; ne pas refaire un lot marqué FAIT.
 
 ## Où
-- Branche locale : `coeur-metier-catalogue` (partie de `claude/saas-achat-artisans-prompt-1lyihx`, commit `a65df6f5`).
-- En ligne sur test : `27eff0db` (dossier de corrections UX). Rien de cette mission n'est poussé.
-- Livraison : seulement après la chaîne complète verte sur le commit candidat exact (`docs/REPRISE.md`).
+- LIVRÉ sur test le 13 novembre 2026 : commit `cc9e6fe3` sur `claude/saas-achat-artisans-prompt-1lyihx` ; `test.mobiiz.fr`
+  et `api-test.mobiiz.fr` servent exactement ce commit (vérifié). Branche locale de travail : `coeur-metier-catalogue`.
+- Chaîne complète verte sur `cc9e6fe3` : moteur 1150, serveur 784 (+1 ignoré), parcours 281 (+29 ignorés), lots 16,
+  activés 66 ; types, lint et build à 0.
+- Migration `20261113100000_catalogue_coeur_metier` appliquée sur la base de test (colonnes `a_verifier`,
+  `metiers_secondaires`) ; 2 188 articles inchangés, aucun marqué « à vérifier ». Aucune synchronisation distante lancée.
+- Lots A à F : FAITS. Reste : les décisions de Greg (fin de ce fichier et compte rendu).
+- Prochaine commande : aucune ; attendre le retour de Greg. Ce fichier part avec le prochain candidat vérifié.
 
 ## Ce qui existait déjà (audit, lot A)
 - Modèle : table `catalogue_article` (clé stable `metier/famille/produit/variante`, métier, famille, produit, variante,
