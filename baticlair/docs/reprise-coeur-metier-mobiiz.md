@@ -50,9 +50,9 @@ Métier → famille → sous-famille éventuelle → produit (article génériqu
 | A Audit et architecture | FAIT |
 | B Moteur (métiers, familles, recherche sans doublon, anciens identifiants, rattachements) | FAIT ; connaissance et questions : lot E |
 | C Réorganisation Couverture, Zinguerie, Étanchéité | FAIT |
-| D Interface (navigation, fil d'Ariane, recherche avec contexte) | à faire |
-| E Assistant IA | à faire |
-| F Administration, synchronisation, chaîne complète, recette test | à faire |
+| D Interface (navigation, fil d'Ariane, recherche avec contexte) | FAIT |
+| E Assistant IA | FAIT |
+| F Administration, synchronisation, chaîne complète, recette test | admin et synchronisation FAITS ; chaîne complète et recette : voir « Prochaine commande » |
 
 ## Fait
 - Lot A : `packages/domain/src/catalogue/audit.ts` (`etatDesLieuxDuCatalogue`, `doublonsDuCatalogue`, fonctions pures),
@@ -76,13 +76,39 @@ Métier → famille → sous-famille éventuelle → produit (article génériqu
   Tests : domaine `catalogues-par-metier` 24/24, `catalogue-etancheite-zinguerie` 4/4, `catalogue-complet` ; serveur
   `catalogues-par-metier` 7/7, `achat-groupe`, `assistant-comprendre`, `libelles-artisans`, `catalogue-regions` verts.
 
+- Lot D (écran) : `apps/web/src/components/catalogue-listes.tsx` (familles sous le métier, sous-familles seulement où il y
+  en a, fil d'Ariane qui commence par le métier, résultats « Métier · Famille · Article », « À vérifier », « Laisser à
+  préciser » en saisie à la main). Le catalogue est RETIRÉ des pièces jointes de l'assistant (`nouveau-quantitatif.tsx`,
+  `chat-mobiiz.tsx`) : il s'ouvre par « Je saisis ma liste ». Connaissance métier et questions utiles :
+  `packages/domain/src/catalogue/connaissance.ts` (`ficheArticle`, `questionsUtiles`).
+  Tests : domaine `connaissance-metier` 9/9 ; e2e `catalogue-rayons` (3 appareils), `creation-quantitatif`,
+  `deux-parcours`, `clavier`, `achat-groupe` (brouillons) verts.
+- Lot E (assistant) : `CatalogueService.comprendre` dit la famille probable (`ProduitCompris.contexte`) ; la carte « J'ai
+  compris » l'affiche, et « Article à vérifier · gardé tel que tu l'as écrit » quand rien ne correspond. Aucun article
+  créé, rien d'ajouté sans le bouton. Tests : serveur `assistant-comprendre` 3/3 ; e2e `deux-parcours` 6/6.
+- Lot F (admin) : `apps/web/src/app/(app)/admin/catalogue/page.tsx` (bilan par métier, recherche tous métiers, détail :
+  origine, date, clé, où il se lit ; métier principal, second métier sans copie, synonyme, à vérifier, masquer ;
+  doublons possibles). Test e2e « catalogue : bilan par métier… » (téléphone, ordinateur) vert.
+- Performances mesurées (moteur, 2 142 articles) : une recherche 4 à 20 ms ; les 12 catalogues rangés en 35 ms.
+
 ## Interdits (toujours)
 Production, `main`, données de production, paiements, e-mails réels, appels IA payants, documents juridiques, réglages des
 services : rien. Aucune suppression de données sans l'accord de Greg. La synchronisation du catalogue sur la base distante
 n'est jamais lancée sans son accord.
 
+## Limites et décisions pour Greg
+- Seuls Couverture, Zinguerie, Étanchéité, Charpente et Peinture sont réellement fournis ; les sept autres métiers ont
+  31 à 55 articles : structure prête, contenu professionnel à compléter avec des sources fiables.
+- « Tuiles à emboîtement » reste une sous-famille de 47 produits (références de fabricants) : à découper avec un couvreur.
+- Famille d'achat groupé : zinguerie et étanchéité restent chez les négoces de couverture (`FAMILLE_DU_METIER_CATALOGUE`).
+- Les 46 anciens identifiants de la base de test restent en base (masqués à la lecture) : suppression seulement sur accord.
+- 2 doublons probables en peinture (« Peinture plafond blanc mat profond » 10 L et 15 L) : à trancher par Greg.
+- Aucune norme, compatibilité, rendement ni règle de calcul n'a été ajoutée : aucune source vérifiée ne les porte.
+- La synchronisation du catalogue sur la base de test n'est pas nécessaire (aucun article nouveau) ; la migration
+  `20261113100000_catalogue_coeur_metier` s'applique au déploiement.
+
 ## Prochaine commande
-Lot D : `apps/web/src/components/catalogue-listes.tsx` (libellés « Familles », fil d'Ariane avec le métier, « Laisser à
-préciser », contexte « Métier · Famille · Article »), puis `pnpm -s build` dans `apps/web` et
-`npx playwright test -c playwright.ag-v1.config.ts --trace off e2e-ag-v1/catalogue-rayons.spec.ts`.
-Avant la chaîne : `npx vitest run -u test/audit-regles-uniques.test.ts` dans `packages/domain`.
+Chaîne complète sur le commit candidat (le commit de ce fichier) : script du dossier de travail `chaine23.sh`, résultats
+dans `final23/etat.txt`. Ne modifier AUCUNE source pendant qu'elle tourne. Verte : avance rapide de
+`claude/saas-achat-artisans-prompt-1lyihx`, push, attente des deux domaines, recette en ligne sans compte, compte rendu.
+Rouge : ne rien pousser, corriger, relancer la chaîne ENTIÈRE.

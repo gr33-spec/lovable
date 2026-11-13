@@ -511,6 +511,41 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
 });
 
 test.describe("Lot 6 : la supervision de l'admin", () => {
+  // Greg, 13 novembre 2026 (« cœur métier ») : les outils de l'admin du catalogue.
+  test("catalogue : bilan par métier, recherche dans tous les métiers, détail (origine, date, où il se lit), « à vérifier », second métier sans copie", async ({ browser }) => {
+    test.setTimeout(120_000);
+    const { ctx, page } = await admin(browser, "/admin/catalogue");
+    await expect(page.getByRole("heading", { name: "Catalogue", level: 1 })).toBeVisible();
+    // Le bilan : douze métiers, Zinguerie et Étanchéité à part entière.
+    const bilan = page.getByRole("table", { name: "Bilan par métier" });
+    await expect(bilan.getByRole("rowheader")).toHaveCount(12);
+    for (const m of ["Couverture", "Zinguerie", "Étanchéité"]) await expect(bilan.getByRole("rowheader", { name: m, exact: true })).toBeVisible();
+    // La recherche trouve l'article quel que soit le métier ouvert, et dit où il se lit.
+    const articles = page.getByRole("region", { name: "Articles du catalogue" });
+    await articles.getByLabel("Chercher un article dans tous les métiers").fill("membrane epdm 1,52 6,10");
+    const ligne = articles.getByRole("list", { name: "Articles" }).getByRole("listitem").filter({ hasText: "Membrane EPDM 1,52 mm · largeur 6,10 m" }).first();
+    await expect(ligne).toContainText("Étanchéité · Membranes synthétiques");
+    await ligne.getByRole("button", { name: "Détail" }).click();
+    await expect(ligne).toContainText("Origine :");
+    await expect(ligne).toContainText("Modifié le");
+    await expect(ligne).toContainText("Clé : etancheite/");
+    // « À vérifier », puis retour : le geste se voit tout de suite.
+    await ligne.getByRole("button", { name: "Marquer à vérifier" }).click();
+    await expect(ligne.getByText("À vérifier", { exact: true })).toBeVisible();
+    await ligne.getByRole("button", { name: "Marquer vérifié" }).click();
+    await expect(ligne.getByText("À vérifier", { exact: true })).toHaveCount(0);
+    // Un second métier : la même fiche, lue aussi en Zinguerie ; puis on le retire.
+    // (La case suit la réponse du serveur : on la touche, puis on attend son état.)
+    await ligne.getByRole("checkbox", { name: "Zinguerie" }).click();
+    await expect(ligne.getByRole("checkbox", { name: "Zinguerie" })).toBeChecked();
+    await expect(ligne).toContainText("Zinguerie · Autres produits");
+    await ligne.getByRole("checkbox", { name: "Zinguerie" }).click();
+    await expect(ligne.getByRole("checkbox", { name: "Zinguerie" })).not.toBeChecked();
+    await expect(ligne).not.toContainText("Zinguerie · Autres produits");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+    await ctx.close();
+  });
+
   test("exceptions, familles (ajout, libellé, proposée) et fiabilité des négoces, sur téléphone et ordinateur", async ({ browser }, info) => {
     test.setTimeout(120_000);
     const { ctx, page } = await admin(browser, "/admin/supervision");
