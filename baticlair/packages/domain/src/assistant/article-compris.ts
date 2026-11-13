@@ -26,6 +26,8 @@ export interface ProduitCompris {
   /** L'unité de vente du catalogue (« m », « pièces », « sacs »…) : sert à dire la phrase, jamais à convertir. */
   unite: string;
   variantes: VarianteComprise[];
+  /** Où le produit se range au catalogue (« Zinguerie · Gouttières et descentes ») : la famille probable, dite à l'artisan. */
+  contexte?: string;
 }
 
 export interface ArticleCompris {

@@ -32,6 +32,26 @@ describe("POST /v1/catalogue/comprendre", () => {
     expect(etapeSuivante(confirmer(lito!), "36", "m")).toMatchObject({ type: "caracteristique", question: "Quelle section ?" });
   });
 
+  // Greg, 13 novembre 2026 (« cœur métier ») : l'assistant se sert du catalogue comme source ; il dit la famille probable,
+  // ne crée jamais un article inconnu et ne force jamais une correspondance.
+  it("la famille probable est dite, lue au catalogue ; un mot inconnu reste « à vérifier » ; rien n'est écrit en base", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "c@toitures.fr", "Toitures C");
+    await agent.get("/v1/catalogue").expect(200);
+    const avant = await ctx.prisma.catalogueArticle.count();
+    const r = await agent
+      .post("/v1/catalogue/comprendre")
+      .send({ lignes: [{ libelle: "bobine zinc naturel 0,65", unite: "m" }, { libelle: "membrane epdm", unite: null }, { libelle: "Schmilblick", unite: "pièces" }] })
+      .expect(200);
+    const [bobine, epdm, inconnu] = r.body.articles as (ArticleCompris | null)[];
+    expect(bobine!.produits[0]).toMatchObject({ metier: "zinguerie", produit: "Bobine de zinc", contexte: "Zinguerie · Feuilles, bobines et bandes" });
+    expect(epdm!.produits[0]).toMatchObject({ metier: "etancheite", contexte: "Étanchéité · Membranes synthétiques" });
+    // Aucune correspondance fiable : null, la ligne garde les mots de l'artisan ; aucun article n'est créé.
+    expect(inconnu).toBeNull();
+    expect(await ctx.prisma.catalogueArticle.count()).toBe(avant);
+    // Ni quantité ni unité inventée : la réponse ne porte que ce que le catalogue écrit.
+    expect(JSON.stringify(bobine)).not.toMatch(/"quantite"/);
+  });
+
   it("refuse une demande vide ou trop longue, et sans session", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "b@toitures.fr", "Toitures B");
     await agent.post("/v1/catalogue/comprendre").send({ lignes: [] }).expect(400);

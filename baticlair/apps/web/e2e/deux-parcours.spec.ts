@@ -56,6 +56,8 @@ test("une phrase, deux articles : « J'ai compris », ajouter, voir ma liste, pu
   await expect(compris).toContainText("1 000 pièces");
   await expect(compris).toContainText("950 pièces");
   await expect(compris).toContainText("Espagne · 1er choix");
+  // Le catalogue comme source (Greg, 13 novembre 2026, « cœur métier ») : la famille probable de l'article est dite.
+  await expect(compris).toContainText("Couverture · Ardoises");
   await compris.getByRole("button", { name: "Ajouter les 2 à ma liste" }).click();
   await expect(chat.getByRole("button", { name: "Ma liste · 2" })).toBeVisible();
   await chat.getByRole("button", { name: "Voir ma liste (2)" }).click();
@@ -117,4 +119,22 @@ test("le langage des artisans (Greg, 8 novembre 2026) : « 36 mètres de Lito »
   await chat.getByRole("button", { name: "Voir ma liste (1)" }).click();
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
   await expect(page.getByText("Liteau 27×40").first()).toBeVisible({ timeout: 20_000 });
+});
+
+// Greg, 13 novembre 2026 (« cœur métier ») : « lorsqu'aucune correspondance fiable n'existe, conserver le texte de l'artisan
+// dans une ligne Article à vérifier au lieu de forcer une mauvaise correspondance ; aucune ligne ajoutée sans accord ».
+test("un article inconnu du catalogue : « Article à vérifier », gardé tel qu'écrit, ajouté seulement sur le bouton", async ({ page }) => {
+  await inscrire(page);
+  await page.goto("/chantiers/nouveau?mode=assistant");
+  const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  await chat.getByRole("textbox", { name: "Ton message" }).fill("12 schmilblicks");
+  await chat.getByRole("button", { name: "Envoyer le message" }).click();
+  const compris = chat.getByRole("region", { name: "J'ai compris" });
+  await expect(compris).toContainText(/schmilblicks/i);
+  await expect(compris).toContainText("Article à vérifier · gardé tel que tu l'as écrit");
+  await expect(compris).toContainText("12");
+  // Rien n'est dans la liste tant que l'artisan n'a pas touché le bouton ; ensuite, ses mots à lui, sans rien d'inventé.
+  await expect(chat.getByRole("button", { name: /^Ma liste/ })).toHaveCount(0);
+  await compris.getByRole("button", { name: "Ajouter à ma liste" }).click();
+  await expect(chat.getByRole("button", { name: "Ma liste · 1" })).toBeVisible();
 });

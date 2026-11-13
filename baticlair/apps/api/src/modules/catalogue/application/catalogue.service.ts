@@ -224,7 +224,24 @@ export class CatalogueService {
       const f = FICHES.get(a.cle);
       return { cle: a.cle, metier: a.metier as MetierCatalogue, famille: a.famille, produit: a.produit, variante: a.variante, designation: a.designation, unite: a.unite, synonymes: a.synonymes, ...(f?.marque ? { marque: f.marque } : {}), ...(f?.statut ? { statut: f.statut } : {}) };
     });
-    return { articles: lignes.map((l) => comprendreArticle(l.libelle, tous, l.unite)) };
+    // La famille probable de chaque produit proposé (Greg, 13 novembre 2026, « cœur métier ») : lue dans le catalogue,
+    // jamais devinée. Un mot que rien ne rapproche rend `null` : la ligne reste « Article à vérifier », telle qu'écrite.
+    const contexte = (metier: string, produit: string) => {
+      const a = tous.find((x) => x.metier === metier && x.produit === produit);
+      const c = a ? cheminsDeLArticle(a)[0] : null;
+      return c ? `${c.libelleCatalogue} · ${c.rayon}${c.famille === c.rayon ? "" : ` · ${c.famille}`}` : null;
+    };
+    return {
+      articles: lignes.map((l) => {
+        const c = comprendreArticle(l.libelle, tous, l.unite);
+        if (!c) return null;
+        const avec = <P extends { metier: string; produit: string }>(p: P) => {
+          const x = contexte(p.metier, p.produit);
+          return x ? { ...p, contexte: x } : p;
+        };
+        return { ...c, produits: c.produits.map(avec), ...(c.autres ? { autres: c.autres.map(avec) } : {}) };
+      }),
+    };
   }
 
   /** L'écran : le métier choisi (sinon le premier du profil), son arbre, ou les résultats d'une recherche (tous métiers). */

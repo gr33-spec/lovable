@@ -568,6 +568,15 @@ function CarteCompris({ lignes, comprises, onCompris, etat, occupe, onAjouter, o
                     </button>
                   ) : null}
                 </span>
+                {/* Le catalogue comme source (Greg, 13 novembre 2026, « cœur métier ») : la famille probable de l'article
+                    proposé ; et, quand rien ne correspond, « Article à vérifier » : les mots de l'artisan sont gardés tels
+                    quels, jamais forcés vers un autre article. */}
+                {(() => {
+                  if (!comprises) return null;
+                  if (c === null) return <span className="self-start rounded-full bg-[#FFE9D6] px-2.5 py-0.5 text-[13px] font-bold text-[#8A3D06]">Article à vérifier · gardé tel que tu l&apos;as écrit</span>;
+                  const p = c ? (c.choixProduit !== null ? c.produits[c.choixProduit] : c.produits.length === 1 ? c.produits[0] : null) : null;
+                  return p?.contexte ? <span className="text-[13px] font-semibold text-[#111111]/65">{p.contexte}</span> : null;
+                })()}
                 {l0.vuSurPhoto ? <span className="self-start rounded-full bg-[#FFE9D6] px-2.5 py-0.5 text-[13px] font-bold text-[#8A3D06]">Vu sur ta photo · à confirmer</span> : null}
                 {l0.doublon ? <span className="self-start rounded-xl bg-[#FFE9D6] px-2.5 py-1 text-[13px] font-bold text-[#8A3D06]">Peut-être déjà dans ta liste : « {l0.doublon} ». Coche pour l&apos;ajouter quand même.</span> : null}
                 {precisions.length ? (
