@@ -279,7 +279,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await ajouterNegoce(b.page, negoceY);
     await b.page.getByRole("button", { name: "Continuer" }).click();
     const engagement = b.page.getByRole("region", { name: "Mon engagement" });
-    await expect(engagement.getByText("Deux sorties seulement, en un clic avec le motif", { exact: false })).toBeVisible();
+    await expect(engagement.getByText("Tu peux sortir en un clic, avec le motif", { exact: false })).toBeVisible();
     await engagement.getByRole("checkbox", { name: /^Je confirme que ces quantités correspondent à un besoin réel de mon entreprise\./ }).check();
     await capture(b.page, projet, "3-engagement-2e-couvreur");
     await b.page.getByRole("button", { name: "Je m'engage et j'ajoute ma liste" }).click();

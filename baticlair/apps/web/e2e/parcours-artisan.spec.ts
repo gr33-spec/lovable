@@ -1922,7 +1922,7 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   await bar.getByRole("button", { name: "Proposer" }).click();
   await expect(groupe.getByText("Devis en attente", { exact: true })).toBeVisible();
   await groupe.getByRole("button", { name: "Passer en signé" }).click();
-  await groupe.getByRole("checkbox", { name: /je m'engage/ }).check();
+  await groupe.getByRole("checkbox", { name: /je confirme que ces quantités sont un besoin réel/ }).check();
   await groupe.getByRole("button", { name: "Chantier signé" }).click();
   await expect(groupe.getByText("Devis en attente", { exact: true })).toHaveCount(0);
   await expect(groupe.getByText("Chantier signé", { exact: true })).toHaveCount(2);
@@ -2447,7 +2447,7 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   await list.getByRole("checkbox", { name: /^Ajouter au regroupement : / }).and(page.locator(":enabled")).first().check();
   const bar = page.getByRole("region", { name: "Ajouter au regroupement", exact: true });
   await bar.getByRole("radio", { name: "Chantier signé" }).click();
-  await bar.getByRole("checkbox", { name: /je m'engage/ }).check();
+  await bar.getByRole("checkbox", { name: /je confirme que ces quantités sont un besoin réel/ }).check();
   await bar.getByRole("button", { name: "Proposer" }).click();
   const groupe = page.getByRole("region", { name: "Dans le regroupement", exact: true });
   await expect(groupe.getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toHaveCount(2);
@@ -2488,7 +2488,7 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   await listC.getByRole("checkbox", { name: /^Ajouter au regroupement : Liteau/ }).check();
   const barC = pageC.getByRole("region", { name: "Ajouter au regroupement", exact: true });
   await barC.getByRole("radio", { name: "Chantier signé" }).click();
-  await barC.getByRole("checkbox", { name: /je m'engage/ }).check();
+  await barC.getByRole("checkbox", { name: /je confirme que ces quantités sont un besoin réel/ }).check();
   await barC.getByRole("button", { name: "Proposer" }).click();
   await expect(barC.getByRole("alert")).toContainText("Cette quantité dépasse trois fois ce que les autres artisans proposent");
   expect((await apiJson<{ besoins: Lot[] }>(pageC, "GET", "/v1/groupe/lots")).body.besoins).toHaveLength(0);
