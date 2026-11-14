@@ -57,7 +57,7 @@ export const RELAIS_EMAIL = Symbol("RELAIS_EMAIL");
       // Alertes de production (B5) : à côté des e-mails, qu'elles peuvent emprunter.
       provide: ALERTER,
       // L'adresse des alertes se règle dans l'admin (Greg, 14 novembre 2026) : lue en base à chaque alerte, sans redéploiement.
-      useFactory: (config: AppConfig, email: TransactionalEmailSender, logger: AppLogger, adresse: AdresseAlerte) => new ChannelAlerter({ ...config.alerts, env: config.env }, email, logger, fetch, () => Date.now(), () => adresse.actuelle()),
+      useFactory: (config: AppConfig, email: TransactionalEmailSender, logger: AppLogger, adresse: AdresseAlerte) => new ChannelAlerter({ ...config.alerts, env: config.env }, email, logger, fetch, () => Date.now(), () => adresse.actuelle(), () => adresse.connue()),
       inject: [CONFIG, EMAIL_SENDER, LOGGER, AdresseAlerte],
     },
     { provide: AdresseAlerte, useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender) => new AdresseAlerte(p, c, e), inject: [PrismaService, CONFIG, EMAIL_SENDER] },

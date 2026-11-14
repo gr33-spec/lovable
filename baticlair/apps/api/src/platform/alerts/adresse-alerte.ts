@@ -43,6 +43,11 @@ export class AdresseAlerte {
     return this.config.alerts.email ?? this.config.groupe.admins[0] ?? null;
   }
 
+  /** Sans attendre la base : une adresse est-elle connue (la dernière lue, sinon le repli) ? */
+  connue(): boolean {
+    return (this.cache ? this.cache.adresse : this.repli()) !== null;
+  }
+
   /** L'adresse qui reçoit les alertes maintenant : celle confirmée dans l'admin, sinon le repli. Jamais une erreur. */
   async actuelle(): Promise<string | null> {
     const t = this.now().getTime();

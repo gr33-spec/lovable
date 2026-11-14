@@ -44,14 +44,17 @@ export class ChannelAlerter implements Alerter {
     private readonly now: () => number = () => Date.now(),
     /** L'adresse réglée dans l'admin (Greg, 14 novembre 2026) ; absente : l'adresse fixe de la configuration. */
     private readonly adresse: (() => Promise<string | null>) | null = null,
+    /** Une adresse d'alerte est-elle connue (réglée dans l'admin, ou de repli) ? Dit par la route de santé. */
+    private readonly adresseConnue: () => boolean = () => false,
   ) {}
 
   get enabled(): boolean {
-    return Boolean(this.channels.webhookUrl || this.channels.email || this.adresse);
+    return Boolean(this.channels.webhookUrl || this.channels.email || this.adresseConnue());
   }
 
   alert(kind: AlertKind, message: string): void {
-    if (!this.enabled) return;
+    // Avec l'adresse réglée dans l'admin, on essaie toujours : elle se lit en base au moment de l'envoi.
+    if (!this.enabled && !this.adresse) return;
     const at = this.now();
     const previous = this.last.get(kind);
     if (previous !== undefined && at - previous < ALERT_QUIET_MS) {
