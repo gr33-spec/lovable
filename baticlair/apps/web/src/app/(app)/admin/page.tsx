@@ -56,7 +56,7 @@ function Tendance({ c }: { c: Carte }) {
     <span className={`flex items-center gap-1 text-[14px] font-semibold ${ecart > 0 ? "text-ok" : ecart < 0 ? "text-danger" : "text-muted"}`}>
       <Icone size={16} aria-hidden="true" />
       {texte}
-      <span className="font-normal text-muted">par rapport à {c.reference}</span>
+      <span className="font-normal text-muted">{c.reference}</span>
     </span>
   );
 }

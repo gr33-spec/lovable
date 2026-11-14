@@ -73,12 +73,12 @@ export class AdminVueService {
       p.compteNegoce.count({ where: { inscritLe: { not: null }, verification: "a_verifier" } }),
     ]);
     const cartes: CarteAccueil[] = [
-      { cle: "inscrits", valeur: inscrits, avant: inscritsAvant, reference: "au début du mois", lien: "/admin/artisans" },
-      { cle: "payants", valeur: payants, avant: payantsAvant, reference: "le mois dernier", lien: "/admin/artisans?formule=payant" },
-      { cle: "decouverte", valeur: Math.max(0, inscrits - payants), avant: Math.max(0, inscritsAvant - payantsAvant), reference: "au début du mois", lien: "/admin/artisans?formule=decouverte" },
-      { cle: "revenus", valeur: revenus, avant: revenusAvant, reference: "le mois dernier", lien: "/admin/artisans?formule=payant" },
-      { cle: "inscriptions_semaine", valeur: inscSemaine, avant: inscSemaineAvant, reference: "la semaine d'avant", lien: "/admin/artisans?recents=1" },
-      { cle: "negoces", valeur: negoces, avant: negocesAvant, reference: "au début du mois", lien: "/admin/negoces" },
+      { cle: "inscrits", valeur: inscrits, avant: inscritsAvant, reference: "depuis le début du mois", lien: "/admin/artisans" },
+      { cle: "payants", valeur: payants, avant: payantsAvant, reference: "par rapport au mois dernier", lien: "/admin/artisans?formule=payant" },
+      { cle: "decouverte", valeur: Math.max(0, inscrits - payants), avant: Math.max(0, inscritsAvant - payantsAvant), reference: "depuis le début du mois", lien: "/admin/artisans?formule=decouverte" },
+      { cle: "revenus", valeur: revenus, avant: revenusAvant, reference: "par rapport au mois dernier", lien: "/admin/artisans?formule=payant" },
+      { cle: "inscriptions_semaine", valeur: inscSemaine, avant: inscSemaineAvant, reference: "par rapport à la semaine d'avant", lien: "/admin/artisans?recents=1" },
+      { cle: "negoces", valeur: negoces, avant: negocesAvant, reference: "depuis le début du mois", lien: "/admin/negoces" },
     ];
     const problemes: Probleme[] = (
       [

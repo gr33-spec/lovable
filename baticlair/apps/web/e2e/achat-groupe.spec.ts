@@ -533,7 +533,7 @@ test.describe("Lot 6 : la supervision de l'admin", () => {
     const cartes = page.getByRole("list", { name: "Chiffres clés" });
     await expect(cartes.getByRole("listitem")).toHaveCount(6);
     for (const titre of ["Inscrits", "Abonnés payants", "En Découverte", "Revenus du mois", "Inscriptions de la semaine", "Négoces inscrits"]) await expect(cartes.getByText(titre, { exact: true })).toBeVisible();
-    await expect(cartes.getByText(/par rapport à/).first()).toBeVisible();
+    await expect(cartes.getByText(/depuis le début du mois/).first()).toBeVisible();
     await capture(page, "admin-1-accueil");
     // 1er clic : la liste. Une seule barre de recherche, des filtres simples.
     await cartes.getByRole("link", { name: /^Inscrits/ }).click();

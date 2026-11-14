@@ -104,6 +104,17 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Offre d'achat groupé : l'e-mail du fournisseur est obligatoire au dépôt ; sans lui, l'offre reste en vérification.
 - `SIRETS_DE_TEST` est posé sur l'environnement de test (le SIRET partagé par les comptes de test).
 
+## Décisions du 14 novembre 2026 (soir) : espace admin
+
+- L'espace admin s'ouvre sur `/admin` : six cartes (inscrits, abonnés payants, en Découverte, revenus du mois, inscriptions de la semaine, négoces inscrits) avec leur tendance, chacune mène à sa liste ; un bandeau rouge seulement s'il y a un problème. L'ancien tableau de bord reste (`/admin/pilotage`).
+- Listes artisans et négoces (une recherche, quelques filtres), fiche sur une page. Lecture seule. L'admin ne voit jamais le contenu d'un chantier ; chaque liste, fiche ou question consultée est au journal de l'admin (purgé à 1 an).
+- « Pose ta question » : le code calcule des chiffres d'ensemble, seuls eux et la question partent au modèle ; éteint ou au-delà du budget, le code répond seul. Ne jamais y écrire le nom d'une personne.
+- Adresse d'alerte : réglée dans l'admin (Réglages), double validation, appliquée sans redéploiement. Règle changée : avant, la variable fixe `ALERT_EMAIL` (elle ne sert plus que de repli). Les alertes, les signalements et les e-mails reçus sur contact@ y partent.
+- Alertes par e-mail : bug signalé, erreur serveur, paiement refusé, négoce en attente de vérification ; regroupées par sorte (une toutes les dix minutes au plus).
+- Code promo « FONDATEUR » (Stripe test seulement) : 6 mois offerts, puis 30 % de remise à vie posée par le serveur. Rien n'est créé en production sans l'accord de Greg.
+- La réponse d'un négoce reçue sur l'adresse Mobiiz est copiée (message et nom des pièces jointes) dans l'e-mail envoyé à la vraie adresse de l'artisan. Avant : seulement « X t'a répondu » et un lien.
+- Politique de confidentialité passée en version du 14/11/2026 (relue par l'agent juriste, à valider par l'avocat). À décider par Greg : la boîte qui reçoit les alertes (une boîte personnelle gratuite est un destinataire de données), la durée des signalements.
+
 ## Signalement de bugs
 
 - Bouton « Signaler un problème » : dans « Mon menu » sur chaque écran de l'application, et en bas des pages sans compte (espace négoce). La page et la capture d'écran sont jointes toutes seules.
