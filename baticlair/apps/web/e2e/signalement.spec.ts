@@ -68,7 +68,8 @@ test("côté négoce et sans compte : le bouton est en bas de page, l'e-mail est
   const fenetre = page.getByRole("dialog", { name: "Signaler un problème" });
   await expect(fenetre).toContainText("Page jointe : /conditions-negoce");
   await fenetre.getByLabel("Que se passe-t-il ?").fill("Je ne trouve pas où déposer mon offre.");
-  await fenetre.getByLabel(/Ton e-mail/).fill("vendeur@example.fr");
+  // Sur une page négoce, on vouvoie (recette du 13 novembre 2026).
+  await fenetre.getByLabel(/Votre e-mail/).fill("vendeur@example.fr");
   await fenetre.getByRole("button", { name: "Retirer la capture" }).click();
   await expect(fenetre.getByAltText("Capture de l'écran jointe")).toHaveCount(0);
   await fenetre.getByRole("button", { name: "Envoyer" }).click();

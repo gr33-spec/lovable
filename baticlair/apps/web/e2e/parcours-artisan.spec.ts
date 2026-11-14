@@ -561,9 +561,9 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
 
   // Compte : la formule en mots simples (essai, chantiers utilisés), jamais de coûts techniques.
   await page.goto("/compte/abonnement");
-  // L'abonnement (24 octobre 2026) et, l'ancien paywall allumé en e2e, la formule par chantiers.
+  // L'abonnement (24 octobre 2026). L'ancienne limite de chantiers ne s'affiche plus jamais (14 novembre 2026).
   await expect(page.getByText("Essai gratuit", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("1 chantier sur 3")).toBeVisible();
+  await expect(page.getByText(/chantiers? sur 3/)).toHaveCount(0);
   await expect(page.getByText(/Consommation IA|analyse|tokens/i)).toHaveCount(0);
 
   // Un devis déposé par erreur se retire depuis le menu du chantier (avec confirmation), puis se redépose.
@@ -2669,7 +2669,7 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   await expect(bloc.getByRole("list", { name: "Négoces dans la boucle" }).getByRole("listitem")).toHaveCount(1);
   // Il est dans « Mes négoces » (couverture, favori) et le bloc de l'onglet Regroupement le dit aussi.
   const negoces = (await apiJson<{ negoces: { email: string; familles: string[]; favori: boolean }[] }>(page, "GET", "/v1/groupe/negoces")).body.negoces;
-  expect(negoces).toEqual([expect.objectContaining({ email: email.toLowerCase(), familles: ["couverture"], favori: true })]);
+  expect(negoces).toEqual([expect.objectContaining({ email: email.toLowerCase(), familles: ["couverture", "zinguerie", "etancheite"], favori: true })]);
   await page.goto("/groupe");
   const blocOnglet = page.getByRole("region", { name: "Mets ton négoce dans la boucle" });
   await expect(blocOnglet.getByRole("list", { name: "Négoces dans la boucle" }).getByRole("listitem")).toContainText("Ton négoce negoce-du-ponant.fr est dans la boucle");
