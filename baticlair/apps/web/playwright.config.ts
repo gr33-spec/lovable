@@ -49,6 +49,8 @@ export const apiEnv = {
   LOG_LEVEL: "warn",
   // 26 parcours créent chacun un compte et une entreprise depuis la même adresse : la limite de débit (5 entreprises/h) les bloquerait ; elle a son propre test API.
   RATE_LIMIT: "off",
+  // Un seul compte par SIRET vérifié (14 novembre 2026) : les parcours partagent un SIRET fictif ; la vraie règle a son test serveur.
+  SIRETS_DE_TEST: "73282932000074",
   // BatiClair Groupé : allumé pour ses parcours ; une entreprise sans SIRET vérifié n'en voit rien (gratuit pour l'artisan).
   GROUPE: "on",
   // La commande commune du mois (par défaut) ; « lots » pour la passe de l'ancien regroupement (`--grep @lots`).

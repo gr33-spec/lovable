@@ -191,6 +191,14 @@ export class GroupeService {
     const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true } });
     const siret = (c.siret ?? "").replace(/\s/g, "");
     if (!siretBienForme(siret)) throw validationFailed("Invalid SIRET", { reason: "siret_invalide" });
+    // Greg, 14 novembre 2026 : UN SEUL COMPTE PAR SIRET VÉRIFIÉ. Un SIRET déjà vérifié sur un autre compte ne se vérifie
+    // pas une seconde fois (avant : deux comptes « Entreprise vérifiée » avec le même SIRET, qui n'était à aucun des deux).
+    // Les comptes déjà vérifiés ne sont pas touchés. `SIRETS_DE_TEST` : les SIRET fictifs des jeux de test, jamais en production.
+    const deTest = (process.env.SIRETS_DE_TEST ?? "").split(",").map((x) => x.replace(/\s/g, "")).filter(Boolean);
+    if (!deTest.includes(siret)) {
+      const autre = await this.prisma.company.findFirst({ where: { id: { not: tenant.companyId }, siret, siretVerifieLe: { not: null } }, select: { id: true } });
+      if (autre) return { verifie: false, statut: "deja_utilise", message: PHRASE_SIRET_DEJA_UTILISE };
+    }
     const r = await this.siret.verifier(siret);
     // Achat groupé (point 9, 27 octobre 2026) : le code d'activité lu fait foi ; un négoce (commerce de gros) ou une
     // entreprise hors bâtiment n'accède pas aux achats groupés. Sans code lu (INSEE muet), le SIRET actif suffit.
@@ -397,4 +405,7 @@ function vue(b: BesoinRow): BesoinVue {
     lotParti: lotParti(b.lot?.statut),
     offre: b.offre && b.lot ? offreVue({ ...b.offre, lot: b.lot }, b) : null,
   };
+
 }
+
+export const PHRASE_SIRET_DEJA_UTILISE = "Ce SIRET est déjà vérifié sur un autre compte Mobiiz. Si c'est bien ton entreprise, écris à contact@mobiiz.fr.";

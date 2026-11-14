@@ -242,20 +242,19 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     const prix = (await a.agent.get("/v1/mes-prix").expect(200)).body.articles;
     expect(prix.some((p: { dernier: { prixHt: number } }) => p.dernier.prixHt === 0.5)).toBe(true);
 
-    // B ne commande pas avant la date : commande pas passée, sans motif → exclusion de 3 mois (point 8).
+    // B ne commande pas avant la date : c'est noté (« non commandé »), mais B N'EST PLUS EXCLU. Règle changée le
+    // 14 novembre 2026 (Greg, recette n° 2) : l'artisan décide à la réception de l'offre ; avant, trois mois d'exclusion.
     const publie = await ctx.prisma.regroupementNegocie.findUniqueOrThrow({ where: { id: achat.id } });
     expect((await tache(new Date(publie.commandeAvantLe!.getTime() + 3_600_000).toISOString())).body.nonCommandes).toBe(1);
     expect((await b.agent.get(`/v1/achats-groupes/${lb.besoinId}`).expect(200)).body).toMatchObject({ etat: "non_commande" });
-    const exclu = (await b.agent.post("/v1/achats-groupes").send(engagement({ livraison: "22500 Paimpol", dateBesoin: jour(80) })).expect(403)).body.error.details;
-    expect(exclu.reason).toBe("exclu");
-    expect(exclu.message).toMatch(/^Tu ne peux pas rejoindre d'achat groupé avant le \d+(?:er)? \S+ \(règle des sorties\)\.$/);
+    await b.agent.post("/v1/achats-groupes").send(engagement({ livraison: "22500 Paimpol", dateBesoin: jour(80) })).expect(201);
 
     // L'admin : suivi de l'achat publié, IA suivie sans correction, sorties, exclus ; rien à facturer à 0 %.
     const adm = (await greg.agent.get("/v1/admin/pilotage/achats-groupes").expect(200)).body;
     expect(adm.achats.find((x: { id: string }) => x.id === achat.id).suivi).toMatchObject({ vus: 2, commandes: 1, participants: 2, sortis: 0 });
     expect(adm.iaSuivie).toEqual({ publies: 1, sansCorrection: 0, part: 0 });
     expect(adm.desistements[0]).toMatchObject({ entreprise: "Toitures 2", motif: "Commande pas passée, sans motif" });
-    expect(adm.exclus.map((e: { entreprise: string }) => e.entreprise)).toEqual(["Toitures 2"]);
+    expect(adm.exclus).toEqual([]);
     const premierDuMois = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1, 10, 15)).toISOString();
     expect((await tache(premierDuMois)).body.factures).toBe(0);
   });

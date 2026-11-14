@@ -13,9 +13,13 @@ export class PrismaCompanyRepository implements CompanyRepository {
   }
 
   async setProfile(companyId: string, p: Omit<CompanyProfile, "hasLogo">): Promise<void> {
+    // Greg, 14 novembre 2026 (un seul compte par SIRET vérifié) : un SIRET qui change n'est plus « vérifié » ; il se
+    // revérifie (avant : on pouvait vérifier son SIRET, puis en écrire un autre et rester « Entreprise vérifiée »).
+    const avant = await this.prisma.company.findUnique({ where: { id: companyId }, select: { siret: true } });
+    const change = (avant?.siret ?? null) !== (p.siret ?? null);
     await this.prisma.company.update({
       where: { id: companyId },
-      data: { name: p.name, address: p.address, siret: p.siret, phone: p.phone, contactEmail: p.email },
+      data: { name: p.name, address: p.address, siret: p.siret, phone: p.phone, contactEmail: p.email, ...(change ? { siretVerifieLe: null } : {}) },
     });
   }
 

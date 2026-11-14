@@ -20,6 +20,8 @@ export default defineConfig({
       LOG_LEVEL: process.env.TEST_LOG_LEVEL ?? "silent",
       // Les tests enchaînent des centaines de requêtes depuis une même adresse ; rate-limit.test.ts rétablit la vraie limite.
       RATE_LIMIT: "off",
+      // Un seul compte par SIRET vérifié (14 novembre 2026) : le SIRET fictif des jeux de test se partage ; siret-unique.test.ts vérifie la vraie règle.
+      SIRETS_DE_TEST: "73282932000074",
       // Recentrage (25 octobre 2026) : les tests d'avant ouvrent les regroupements partout ; recentrage.test.ts règle le 22.
       ZONES_ACTIVES: "*",
       API_PUBLIC_URL: "http://localhost:4000",
