@@ -239,15 +239,28 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await page.getByRole("button", { name: "Reconfirmer ma quantité" }).click();
   await expect(page.getByText("Quantité reconfirmée.", { exact: true })).toBeVisible();
 
-  // Clôture (test local), offre complète : « Offre à examiner », calcul détaillé, bouton final désactivé.
+  // Clôture (test local), offre complète : « Offre à examiner », calcul détaillé, puis « Commander à ce prix » ou « Non merci »
+  // (Greg, 14 novembre 2026 : l'artisan décide à la réception de l'offre ; avant, un bouton grisé).
   expect((await g.page.request.post(`/v1/admin/ag/achats/${achatId}/cloture`, { data: { avantLHeure: true } })).status()).toBe(200);
-  expect((await g.page.request.put(`/v1/admin/ag/achats/${achatId}/offre`, { data: { fournisseur: "Négoce de l'Armor", prixUnitaireHt: 0.98, livraisonHt: 45, delai: "10 jours ouvrés", lieu: "Livraison sur chantier, Lannion", paiement: "30 jours fin de mois", validite: "72 heures", annulation: "Sans frais jusqu'à 48 h avant la livraison" } })).status()).toBe(200);
+  expect((await g.page.request.put(`/v1/admin/ag/achats/${achatId}/offre`, { data: { fournisseur: "Négoce de l'Armor", fournisseurEmail: "ventes-armor@negoce.example", prixUnitaireHt: 0.98, livraisonHt: 45, delai: "10 jours ouvrés", lieu: "Livraison sur chantier, Lannion", paiement: "30 jours fin de mois", validite: "72 heures", annulation: "Sans frais jusqu'à 48 h avant la livraison" } })).status()).toBe(200);
   await page.goto(besoinUrl);
   await expect(page.getByRole("heading", { name: "Offre à examiner" })).toBeVisible();
   await expect(page.getByText("5 760 × 0,98 € = 5 644,80 €")).toBeVisible();
   await expect(page.getByText("5 644,80 € + 45,00 € = 5 689,80 € HT")).toBeVisible();
-  await expect(page.getByRole("button", { name: "[bouton final : texte à fixer]" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Non merci" })).toBeEnabled();
   await capture(page, "15-offre-a-examiner");
+  // Rien ne part sur un seul appui : la confirmation dit ce qui est commandé et où part le bon.
+  await page.getByRole("button", { name: "Commander à ce prix" }).click();
+  const confirmation = page.getByRole("group", { name: "Confirmer la commande" });
+  await expect(confirmation).toContainText("5 689,80 € HT livré");
+  await expect(page.getByRole("status", { name: "Commandé" })).toHaveCount(0);
+  await confirmation.getByRole("button", { name: "Confirmer la commande" }).click();
+  await expect(page.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce de l'Armor");
+  await expect(page.getByRole("button", { name: "Commander à ce prix" })).toHaveCount(0);
+  // Le bon de commande est réellement parti au fournisseur.
+  const bons = (await (await g.page.request.get("/v1/internal/test/emails?to=ventes-armor%40negoce.example", { headers: { authorization: "Bearer e2e-secret-de-la-tache" } })).json()) as { emails: { subject: string }[] };
+  expect(bons.emails.some((m) => m.subject.startsWith("Bon de commande de"))).toBe(true);
+  await capture(page, "16-offre-commandee");
   // L'autre entreprise, non reconfirmée : indicatif, jamais transmis.
   await b.page.goto("/achats-groupes/mes-besoins");
   await expect(b.page.getByText("Besoin indicatif").first()).toBeVisible();

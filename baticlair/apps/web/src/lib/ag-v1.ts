@@ -67,7 +67,8 @@ export interface OffreVueV1 {
   complete: boolean;
   manques: string[];
   calcul: { produits: number; ht: number; tva: number; ttc: number; lignes: string[] } | null;
-  acceptable: false;
+  /** Greg, 14 novembre 2026 : « Commander à ce prix » est ouvert (offre complète, à examiner, adresse du fournisseur connue). */
+  acceptable: boolean;
 }
 export interface BesoinV1 {
   id: string;
@@ -83,7 +84,9 @@ export interface BesoinV1 {
   achat: AchatV1;
   reconfirmerAvant: string | null;
   offreAvant: string | null;
-  actions: { modifier: boolean; retirer: boolean; reconfirmer: boolean; confirmer: boolean };
+  actions: { modifier: boolean; retirer: boolean; reconfirmer: boolean; confirmer: boolean; commander?: boolean; refuser?: boolean };
+  /** La décision de l'artisan sur l'offre : commandée (bon parti au fournisseur) ou refusée. */
+  decision?: { choix: "commandee" | "refusee"; le: string | null } | null;
   avertissements: { modification: string; retrait: string } | null;
   offre: OffreVueV1 | null;
   retrait: { le: string; motif: string; precision: string | null } | null;

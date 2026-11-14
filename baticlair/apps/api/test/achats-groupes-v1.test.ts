@@ -390,7 +390,7 @@ describe("modifier, reconfirmer, retirer", () => {
 });
 
 describe("l'offre, jusqu'à « Offre à examiner »", () => {
-  it("incomplète : vérification en cours ; complète : à examiner, calcul exact ; jamais acceptable en V1", async () => {
+  it("incomplète : vérification en cours ; complète : à examiner, calcul exact ; sans adresse du fournisseur, « Commander » reste fermé", async () => {
     const a = await entreprise("a@toitures.fr");
     const ba = (await confirmer(a.agent, [besoin()]).expect(201)).body.besoins[0];
     const g = await admin();
@@ -410,6 +410,68 @@ describe("l'offre, jusqu'à « Offre à examiner »", () => {
     expect(actions[0].cle).toBe(`ag-offre:${ba.id}`);
     // Pas d'« Offre acceptée » : aucune transition ne l'atteint.
     expect((await g.post(`/v1/admin/ag/achats/${ba.achat.id}/preparation`).send({})).status).toBe(409);
+    // Sans adresse du fournisseur : on peut dire « Non merci », pas encore commander.
+    expect(vue.actions).toMatchObject({ commander: false, refuser: true });
+    expect((await a.agent.post(`/v1/ag/besoins/${ba.id}/offre/commande`).expect(409)).body.error.details.reason).toBe("fournisseur_sans_email");
+  });
+
+  /** Greg, 14 novembre 2026 (recette n° 2) : « Commander à ce prix » et « Non merci » ; l'e-mail d'offre dès qu'elle arrive. */
+  async function offreAExaminer(emails: string[]) {
+    const artisans = [];
+    for (const [i, e] of emails.entries()) artisans.push(await entreprise(e, `Toitures ${i + 1}`));
+    // Le premier ouvre l'achat, les autres le rejoignent.
+    const besoins: { id: string; achat: { id: string } }[] = [];
+    for (const x of artisans) besoins.push((await confirmer(x.agent, [besoin(besoins[0] ? { achatId: besoins[0].achat.id } : {})]).expect(201)).body.besoins[0]);
+    const g = await admin();
+    const achatId = besoins[0]!.achat.id;
+    await g.post(`/v1/admin/ag/achats/${achatId}/preparation`).send({}).expect(200);
+    for (const [i, x] of artisans.entries()) await x.agent.post(`/v1/ag/besoins/${besoins[i]!.id}/reconfirmation`).expect(200);
+    await g.post(`/v1/admin/ag/achats/${achatId}/cloture`).send({ avantLHeure: true }).expect(200);
+    ctx.emails.sent.length = 0;
+    await g.put(`/v1/admin/ag/achats/${achatId}/offre`).send({ fournisseur: "Négoce de l'Armor", fournisseurEmail: "ventes@armor.example", prixUnitaireHt: 0.98, livraisonHt: 45, delai: "10 jours ouvrés", lieu: "Livraison sur chantier, Lannion", paiement: "30 jours fin de mois", validite: "72 heures", annulation: "Sans frais jusqu'à 48 h avant livraison" }).expect(200);
+    return { artisans, besoins, achatId };
+  }
+
+  it("l'offre arrive : chaque artisan reçoit son e-mail aussitôt ; « Commander à ce prix » envoie le bon au fournisseur, une seule fois", async () => {
+    const { artisans, besoins } = await offreAExaminer(["a@toitures.fr"]);
+    const a = artisans[0]!;
+    const id = besoins[0]!.id;
+    // L'e-mail d'offre est parti sans attendre la tâche horaire.
+    const offreMail = ctx.emails.sent.filter((m) => m.to === "a@toitures.fr");
+    expect(offreMail.map((m) => m.subject)).toEqual([expect.stringMatching(/^Offre à examiner : /)]);
+    expect(offreMail[0]!.text).toContain("Tu n'es jamais obligé de commander.");
+    let vue = (await a.agent.get(`/v1/ag/besoins/${id}`).expect(200)).body;
+    expect(vue).toMatchObject({ actions: { commander: true, refuser: true }, decision: null, offre: { acceptable: true } });
+    // Le prestataire d'e-mail refuse : rien n'est « commandé ».
+    ctx.emails.failNext = 1;
+    expect((await a.agent.post(`/v1/ag/besoins/${id}/offre/commande`)).status).toBeGreaterThanOrEqual(500);
+    expect((await a.agent.get(`/v1/ag/besoins/${id}`).expect(200)).body.decision).toBeNull();
+    // Le bon part : la commande est notée, le fournisseur a le bon en pièce jointe, l'artisan sa copie.
+    vue = (await a.agent.post(`/v1/ag/besoins/${id}/offre/commande`).expect(200)).body;
+    expect(vue).toMatchObject({ decision: { choix: "commandee" }, actions: { commander: false, refuser: false } });
+    const bon = ctx.emails.sent.filter((m) => m.to === "ventes@armor.example");
+    expect(bon).toHaveLength(1);
+    expect(bon[0]!.subject).toMatch(/^Bon de commande de Toitures 1 \(achat groupé Mobiiz n° \d+, 4 749,00 € HT\)$/);
+    expect(bon[0]!.text).toContain("4 800 pièces × 0,98 € HT");
+    expect(bon[0]!.attachments?.[0]?.filename).toMatch(/^bon-de-commande-AG.*\.pdf$/);
+    expect(ctx.emails.sent.some((m) => m.to === "a@toitures.fr" && /^Ta commande groupée : /.test(m.subject))).toBe(true);
+    // Jamais deux fois, ni un refus après coup.
+    expect((await a.agent.post(`/v1/ag/besoins/${id}/offre/commande`).expect(409)).body.error.details.reason).toBe("offre_deja_decidee");
+    expect((await a.agent.post(`/v1/ag/besoins/${id}/offre/refus`).expect(409)).body.error.details.reason).toBe("offre_deja_decidee");
+    expect(ctx.emails.sent.filter((m) => m.to === "ventes@armor.example")).toHaveLength(1);
+  });
+
+  it("« Non merci » : l'offre est refusée, rien ne part chez le fournisseur ; une autre entreprise ne décide pas à ma place", async () => {
+    const { artisans, besoins } = await offreAExaminer(["a@toitures.fr", "b@toitures.fr"]);
+    const [a, b] = artisans as [typeof artisans[number], typeof artisans[number]];
+    // B ne peut ni commander ni refuser sur le besoin de A (isolation : 404).
+    await b.agent.post(`/v1/ag/besoins/${besoins[0]!.id}/offre/refus`).expect(404);
+    await b.agent.post(`/v1/ag/besoins/${besoins[0]!.id}/offre/commande`).expect(404);
+    const vue = (await a.agent.post(`/v1/ag/besoins/${besoins[0]!.id}/offre/refus`).expect(200)).body;
+    expect(vue).toMatchObject({ decision: { choix: "refusee" }, actions: { commander: false, refuser: false } });
+    expect(ctx.emails.sent.filter((m) => m.to === "ventes@armor.example")).toHaveLength(0);
+    // Le refus de A ne change rien pour B, qui peut toujours commander.
+    expect((await b.agent.get(`/v1/ag/besoins/${besoins[1]!.id}`).expect(200)).body).toMatchObject({ decision: null, actions: { commander: true, refuser: true } });
   });
 });
 

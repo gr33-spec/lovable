@@ -40,6 +40,8 @@ const clotureBody = z.object({ avantLHeure: z.boolean().optional() });
 const texte = z.string().trim().max(300).nullable();
 const offreBody = z.object({
   fournisseur: texte,
+  /** Où part le bon de commande d'une entreprise qui commande (14 novembre 2026). */
+  fournisseurEmail: z.string().trim().email().max(200).nullish(),
   prixUnitaireHt: z.number().positive().max(1_000_000).nullable(),
   livraisonHt: z.number().min(0).max(1_000_000).nullable(),
   tvaPct: z.number().min(0).max(30).optional(),
@@ -133,6 +135,20 @@ export class AchatsGroupesV1Controller {
     return this.ag.reconfirmer(t, id);
   }
 
+  /** Greg, 14 novembre 2026 : « Commander à ce prix » ; le bon de commande part au fournisseur. */
+  @Post("besoins/:id/offre/commande")
+  @HttpCode(200)
+  commanderOffre(@Tenant() t: TenantContext, @Param("id") id: string) {
+    return this.ag.commanderOffre(t, id);
+  }
+
+  /** « Non merci » : l'artisan refuse l'offre, sans conséquence. */
+  @Post("besoins/:id/offre/refus")
+  @HttpCode(200)
+  refuserOffre(@Tenant() t: TenantContext, @Param("id") id: string) {
+    return this.ag.refuserOffre(t, id);
+  }
+
   @Post("besoins/:id/confirmation")
   @HttpCode(200)
   @Idempotent()
@@ -187,6 +203,7 @@ export class AchatsGroupesV1AdminController {
     await this.pilotage.journal(u, "ag_offre", id);
     return this.ag.saisirOffre(id, {
       fournisseur: b.fournisseur ?? null,
+      fournisseurEmail: b.fournisseurEmail ?? null,
       prixUnitaireHt: b.prixUnitaireHt ?? null,
       livraisonHt: b.livraisonHt ?? null,
       ...(b.tvaPct !== undefined ? { tvaPct: b.tvaPct } : {}),

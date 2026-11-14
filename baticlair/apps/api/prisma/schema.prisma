@@ -2607,6 +2607,9 @@ model BesoinGroupeV1 {
   /// Les e-mails de rappel (complémentaires : l'action reste dans « À faire » même si l'e-mail échoue).
   rappelEnvoyeLe        DateTime? @map("rappel_envoye_le") @db.Timestamptz(3)
   offreSignaleeLe       DateTime? @map("offre_signalee_le") @db.Timestamptz(3)
+  /// Greg, 14 novembre 2026 : la décision de l'artisan sur l'offre (« commandee » ou « refusee ») et sa date.
+  offreDecision         String?   @map("offre_decision")
+  offreDecideeLe        DateTime? @map("offre_decidee_le") @db.Timestamptz(3)
   cleIdempotence        String?   @map("cle_idempotence")
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -2642,19 +2645,21 @@ model HistoriqueBesoinGroupeV1 {
 /// L'offre d'un achat groupé V1, saisie par Mobiiz (aucun envoi réel aux négoces en V1 locale). Complète : « Offre à
 /// examiner » ; incomplète : « Offre reçue — vérification en cours ». Jamais acceptable en V1.
 model OffreAchatGroupeV1 {
-  id             String   @id @default(uuid(7)) @db.Uuid
-  achatId        String   @unique @map("achat_id") @db.Uuid
-  fournisseur    String?
-  prixUnitaireHt Decimal? @map("prix_unitaire_ht") @db.Decimal(14, 4)
-  livraisonHt    Decimal? @map("livraison_ht") @db.Decimal(14, 2)
-  tvaPct         Decimal  @default(20) @map("tva_pct") @db.Decimal(5, 2)
-  delai          String?
-  lieu           String?
-  paiement       String?
-  validite       String?
-  annulation     String?
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id               String   @id @default(uuid(7)) @db.Uuid
+  achatId          String   @unique @map("achat_id") @db.Uuid
+  fournisseur      String?
+  /// Où part le bon de commande d'une entreprise qui commande ; sans lui, « Commander à ce prix » reste fermé.
+  fournisseurEmail String?  @map("fournisseur_email")
+  prixUnitaireHt   Decimal? @map("prix_unitaire_ht") @db.Decimal(14, 4)
+  livraisonHt      Decimal? @map("livraison_ht") @db.Decimal(14, 2)
+  tvaPct           Decimal  @default(20) @map("tva_pct") @db.Decimal(5, 2)
+  delai            String?
+  lieu             String?
+  paiement         String?
+  validite         String?
+  annulation       String?
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   achat AchatGroupeV1 @relation(fields: [achatId], references: [id], onDelete: Cascade)
 

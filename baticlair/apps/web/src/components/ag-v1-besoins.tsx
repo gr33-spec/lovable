@@ -156,6 +156,8 @@ export function BesoinV1Detail({ id, etat }: { id: string; etat: EtatV1 }) {
   const [date, setDate] = useState("");
   const [precision, setPrecision] = useState("");
   const [pending, setPending] = useState(false);
+  // « Commander à ce prix » ouvre d'abord la confirmation : rien ne part sur un seul appui.
+  const [aCommander, setACommander] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(params.get("nouveau") ? "Ton besoin est confirmé. Ce n'est pas encore une commande : tu décideras après réception d'une offre complète." : null);
 
@@ -259,11 +261,47 @@ export function BesoinV1Detail({ id, etat }: { id: string; etat: EtatV1 }) {
                 <dt className="text-muted">Annulation</dt>
                 <dd>{b.offre.annulation}</dd>
               </dl>
-              {b.offreAvant ? <p className="text-[14px] text-muted">Réponse avant le {heureCourte(b.offreAvant)}</p> : null}
-              <button type="button" disabled aria-disabled="true" className="inline-flex min-h-13 w-full cursor-not-allowed items-center justify-center rounded-full border border-dashed border-line px-6 text-[16px] font-extrabold text-muted">
-                [bouton final : texte à fixer]
-              </button>
-              <Note>L&apos;acceptation n&apos;est pas encore ouverte : le cadre juridique est en cours de validation. Aucune commande ne part d&apos;ici.</Note>
+              {/* Greg, 14 novembre 2026 (recette n° 2) : l'artisan décide à la réception de l'offre. Deux boutons, « Commander à
+                  ce prix » (avec confirmation : le bon de commande part au fournisseur) et « Non merci ». Avant : un bouton grisé. */}
+              {b.decision?.choix === "commandee" ? (
+                <p role="status" aria-label="Commandé" className="rounded-xl bg-ok-bg p-3 text-[15px] font-bold text-ok">
+                  Commandé chez {b.offre.fournisseur}{b.decision.le ? ` le ${heureCourte(b.decision.le)}` : ""}. Le bon de commande lui est parti par e-mail.
+                </p>
+              ) : b.decision?.choix === "refusee" ? (
+                <p role="status" aria-label="Offre refusée" className="rounded-xl bg-surface p-3 text-[15px] font-semibold">
+                  Tu as dit non merci à cette offre{b.decision.le ? ` le ${heureCourte(b.decision.le)}` : ""}. Rien n&apos;est commandé.
+                </p>
+              ) : (
+                <>
+                  {b.offreAvant ? <p className="text-[14px] text-muted">Réponse avant le {heureCourte(b.offreAvant)}</p> : null}
+                  {aCommander ? (
+                    <div role="group" aria-label="Confirmer la commande" className="flex flex-col gap-3 rounded-xl border border-line p-3">
+                      <p className="text-[15px] font-semibold">
+                        Tu commandes {b.quantite.lisible} chez {b.offre.fournisseur}, {euros(b.offre.calcul!.ht)} HT livré. Le bon de commande part tout de suite par e-mail au fournisseur.
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button variant="secondary" disabled={pending} onClick={() => setACommander(false)}>
+                          Annuler
+                        </Button>
+                        <Button variant="accent" pending={pending} onClick={() => void agir("offre/commande", {}, "C'est commandé : le bon de commande est parti.").then(() => setACommander(false))}>
+                          Confirmer la commande
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {!b.actions.commander && b.actions.refuser ? <p className="text-[14px] text-muted">Mobiiz complète l&apos;offre : tu pourras commander dès que l&apos;adresse du fournisseur est là.</p> : null}
+                      <Button variant="accent" disabled={!b.actions.commander || pending} onClick={() => setACommander(true)} className="w-full">
+                        Commander à ce prix
+                      </Button>
+                      <Button variant="secondary" disabled={!b.actions.refuser} pending={pending} onClick={() => void agir("offre/refus", {}, "C'est noté : tu as refusé cette offre.")} className="w-full">
+                        Non merci
+                      </Button>
+                      <Note>Tu n&apos;es jamais obligé de commander. La vente se fait directement entre toi et le fournisseur.</Note>
+                    </>
+                  )}
+                </>
+              )}
             </>
           )}
         </section>

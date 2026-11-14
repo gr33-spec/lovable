@@ -3,6 +3,7 @@ import {
   apresCloture,
   BESOIN_ACTIF_V1,
   calculOffreV1,
+  euros,
   CASE_PLUSIEURS_LIGNES,
   CASE_UNE_LIGNE,
   classerLigneV1,
@@ -47,6 +48,7 @@ import {
 } from "@baticlair/domain";
 import { cleVerrouCircuit, faitsDesLignes } from "../../../platform/cycle/lignes.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
+import { bonDeCommandePdf } from "../../../platform/pdf/bon-de-commande.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import { isUuid } from "../../../platform/validation/ids.js";
@@ -90,7 +92,8 @@ const conflit = (reason: string, message: string, extra: Record<string, unknown>
  * ACHATS GROUPÉS V1 (Greg, 7 novembre 2026, V5.2 validée). Un achat = un produit précis (clé stricte), le département de
  * l'entreprise, un mode de réception, une période. Isolation : chaque lecture et chaque geste d'un besoin passent par
  * `companyId` ; les autres entreprises ne voient que des totaux (rien sous 5 entreprises), jamais un lieu, un nom ni une
- * quantité individuelle. Aucune commande, aucune acceptation, aucun envoi réel aux négoces.
+ * quantité individuelle. RÈGLE CHANGÉE le 14 novembre 2026 (Greg, recette n° 2) : à l'offre, l'artisan décide, « Commander à
+ * ce prix » (son bon de commande part au fournisseur) ou « Non merci ». Avant : aucune commande, aucune acceptation.
  */
 export class AchatsGroupesV1Service {
   constructor(
@@ -403,7 +406,11 @@ export class AchatsGroupesV1Service {
         retirer: peut("retirer"),
         reconfirmer: etatB !== "reconfirme" && peut("reconfirmer"),
         confirmer: peut("confirmer"),
+        // Greg, 14 novembre 2026 : « Commander à ce prix » et « Non merci », tant que l'artisan n'a pas décidé.
+        commander: !b.offreDecision && etatB === "reconfirme" && !!offre?.acceptable && !(a.offreAvant && a.offreAvant <= maintenant),
+        refuser: !b.offreDecision && etatB === "reconfirme" && etatA === "offre_a_examiner" && !!offre?.complete && !(a.offreAvant && a.offreAvant <= maintenant),
       },
+      decision: b.offreDecision ? { choix: b.offreDecision as "commandee" | "refusee", le: b.offreDecideeLe?.toISOString() ?? null } : null,
       avertissements: transmis ? { modification: PHRASE_MODIFICATION_TRANSMISE, retrait: PHRASE_RETRAIT_TRANSMIS } : null,
       offre,
       retrait: b.retireLe ? { le: b.retireLe.toISOString(), motif: MOTIFS_V1.find((m) => m.id === b.motifRetrait)?.libelle ?? b.motifRetrait, precision: b.precisionRetrait } : null,
@@ -419,10 +426,102 @@ export class AchatsGroupesV1Service {
       complete: manques.length === 0,
       manques,
       calcul: manques.length === 0 ? calculOffreV1(quantite, offre) : null,
-      // V1 : l'acceptation finale est désactivée (cadre juridique à décider) ; jamais active, quel que soit l'état.
-      acceptable: false,
+      // Greg, 14 novembre 2026 : l'artisan décide à la réception de l'offre. « Commander à ce prix » s'ouvre sur une offre
+      // complète, à examiner, dont on sait où envoyer le bon de commande. (Avant : jamais ouvert en V1.)
+      acceptable: manques.length === 0 && etat === "offre_a_examiner" && !!o.fournisseurEmail,
       etat,
     };
+  }
+
+  /* --------------------------------------------------------------------- la décision sur l'offre */
+
+  /** Le besoin dont l'offre attend la décision de l'artisan, avec son offre ; sinon un refus clair. */
+  private async offreADecider(tenant: TenantContext, id: string) {
+    const b = await this.besoinDe(this.prisma, tenant, id);
+    if (b.offreDecision) throw conflit("offre_deja_decidee", b.offreDecision === "commandee" ? "Tu as déjà commandé sur cette offre." : "Tu as déjà refusé cette offre.");
+    if (b.achat.statut !== "offre_a_examiner" || b.statut !== "reconfirme") throw conflit("sans_offre", "Il n'y a pas d'offre à examiner sur ce besoin.");
+    const maintenant = this.now();
+    if (b.achat.offreAvant && b.achat.offreAvant <= maintenant) throw conflit("offre_expiree", "Le délai pour répondre à cette offre est passé.");
+    const o = await this.prisma.offreAchatGroupeV1.findUnique({ where: { achatId: b.achatId } });
+    if (!o) throw conflit("sans_offre", "Il n'y a pas d'offre à examiner sur ce besoin.");
+    return { b, o, maintenant };
+  }
+
+  /**
+   * « Commander à ce prix » (Greg, 14 novembre 2026) : le bon de commande part au fournisseur, et la commande n'est notée
+   * qu'une fois le mail parti (jamais « commandé » sans envoi réel). Mobiiz ne vend ni n'achète rien : la vente se fait
+   * entre l'entreprise et le fournisseur.
+   */
+  async commanderOffre(tenant: TenantContext, id: string) {
+    this.exigerActif();
+    assertCanWrite(tenant);
+    const { b, o, maintenant } = await this.offreADecider(tenant, id);
+    const vue = this.vueOffre(o, n(b.quantite)!, b.achat.statut as EtatAchatV1);
+    if (!vue.complete || !vue.calcul) throw conflit("offre_incomplete", "L'offre n'est pas complète : elle ne peut pas être acceptée en l'état.");
+    if (!o.fournisseurEmail) throw conflit("fournisseur_sans_email", "Mobiiz complète l'offre : l'adresse du fournisseur manque encore. Tu pourras commander dès qu'elle est là.");
+    const company = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, address: true, phone: true, contactEmail: true, memberships: { take: 1, orderBy: { createdAt: "asc" }, select: { user: { select: { email: true } } } } } });
+    const emailArtisan = company.contactEmail ?? company.memberships[0]?.user.email ?? null;
+    const p = produitV1(b.achat.type)!;
+    const quantite = n(b.quantite)!;
+    const unite = Math.abs(quantite) >= 2 ? p.unite.pluriel : p.unite.singulier;
+    // Dans un e-mail en texte, les espaces fines des nombres deviennent des espaces simples (lisibles partout).
+    const nombre = quantite.toLocaleString("fr-FR").replace(/\u202f|\u00a0/g, " ");
+    const numero = `AG${b.achat.numero}-${b.id.slice(-6).toUpperCase()}`;
+    const prix = n(o.prixUnitaireHt)!;
+    const prixUnitaire = `${prix.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 4 }).replace(/\u202f|\u00a0/g, " ")} €`;
+    const pdf = await bonDeCommandePdf({
+      numero,
+      date: maintenant.toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" }),
+      acheteur: { nom: company.name, adresse: company.address, telephone: company.phone, email: emailArtisan },
+      vendeur: { nom: o.fournisseur ?? "", email: o.fournisseurEmail },
+      livraison: b.lieu ?? o.lieu ?? null,
+      lignes: [{ designation: b.designation, quantite: nombre, unite, prixHt: prixUnitaire, totalHt: euros(vue.calcul.produits) }],
+      livraisonHt: (n(o.livraisonHt) ?? 0) > 0 ? euros(n(o.livraisonHt)!) : "offerte",
+      totalHt: euros(vue.calcul.ht),
+      mentions: [`Achat groupé Mobiiz n° ${b.achat.numero}. Délai : ${o.delai}. Paiement : ${o.paiement}.`, "Vente conclue directement entre l'acheteur et le vendeur. Mobiiz met en relation, ne vend ni n'achète rien et n'encaisse aucun paiement."],
+    });
+    const piece = { filename: `bon-de-commande-${numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") };
+    await this.email.send({
+      to: o.fournisseurEmail,
+      subject: `Bon de commande de ${company.name} (achat groupé Mobiiz n° ${b.achat.numero}, ${euros(vue.calcul.ht)} HT)`,
+      text: [
+        "Bonjour,",
+        "",
+        `${company.name} commande sur votre offre de l'achat groupé Mobiiz n° ${b.achat.numero} :`,
+        "",
+        `- ${b.designation} : ${nombre} ${unite} × ${prixUnitaire} HT`,
+        `- Livraison : ${(n(o.livraisonHt) ?? 0) > 0 ? `${euros(n(o.livraisonHt)!)} HT` : "offerte"}`,
+        "",
+        `Total : ${euros(vue.calcul.ht)} HT.`,
+        b.lieu ? `Livraison ou retrait : ${b.lieu}.` : "",
+        company.phone ? `Contact : ${company.phone}${emailArtisan ? `, ${emailArtisan}` : ""}.` : emailArtisan ? `Contact : ${emailArtisan}.` : "",
+        "",
+        "Le bon de commande est joint. La facturation et le paiement se font directement entre vous.",
+        "",
+        "Mobiiz",
+      ]
+        .filter((l, i, t) => !(l === "" && (i === 0 || t[i - 1] === "")))
+        .join("\n"),
+      attachments: [piece],
+      ...(emailArtisan ? { replyTo: emailArtisan } : {}),
+      mustDeliver: true,
+    });
+    // Le mail est parti : la commande est notée (une seule fois, même sur deux appuis).
+    const fait = await this.prisma.besoinGroupeV1.updateMany({ where: { id: b.id, companyId: tenant.companyId, offreDecision: null }, data: { offreDecision: "commandee", offreDecideeLe: maintenant } });
+    if (fait.count > 0) await this.prisma.historiqueBesoinGroupeV1.create({ data: { besoinId: b.id, companyId: tenant.companyId, type: "offre_commandee", detail: { fournisseur: o.fournisseur, totalHt: vue.calcul.ht } } });
+    // La copie pour l'artisan : complémentaire, jamais bloquante.
+    await this.envoyer(tenant.companyId, `Ta commande groupée : ${b.designation}`, [`C'est commandé chez ${o.fournisseur} : ${nombre} ${unite}, ${euros(vue.calcul.ht)} HT.`, `Le bon de commande est parti à ${o.fournisseurEmail}.`, "La facturation et le paiement se font directement entre vous."]);
+    return this.vueBesoin(tenant, id);
+  }
+
+  /** « Non merci » : l'artisan refuse l'offre ; rien ne part chez le fournisseur, et ne pas commander n'a aucune conséquence. */
+  async refuserOffre(tenant: TenantContext, id: string) {
+    this.exigerActif();
+    assertCanWrite(tenant);
+    const { b, maintenant } = await this.offreADecider(tenant, id);
+    const fait = await this.prisma.besoinGroupeV1.updateMany({ where: { id: b.id, companyId: tenant.companyId, offreDecision: null }, data: { offreDecision: "refusee", offreDecideeLe: maintenant } });
+    if (fait.count > 0) await this.prisma.historiqueBesoinGroupeV1.create({ data: { besoinId: b.id, companyId: tenant.companyId, type: "offre_refusee" } });
+    return this.vueBesoin(tenant, id);
   }
 
   async mesBesoins(tenant: TenantContext) {
@@ -626,12 +725,12 @@ export class AchatsGroupesV1Service {
   }
 
   /** L'offre saisie par Mobiiz : complète → « Offre à examiner » (72 h) ; incomplète → « Offre reçue — vérification en cours ». */
-  async saisirOffre(id: string, o: Omit<OffreV1, "tvaPct"> & { tvaPct?: number }) {
+  async saisirOffre(id: string, o: Omit<OffreV1, "tvaPct"> & { tvaPct?: number; fournisseurEmail?: string | null }) {
     this.exigerActif();
     if (!isUuid(id)) throw notFound("AchatGroupeV1");
     const a = await this.prisma.achatGroupeV1.findUnique({ where: { id } });
     if (!a) throw notFound("AchatGroupeV1");
-    const offre: OffreV1 = { ...o, tvaPct: o.tvaPct ?? 20 };
+    const offre: OffreV1 = { fournisseur: o.fournisseur, prixUnitaireHt: o.prixUnitaireHt, livraisonHt: o.livraisonHt, delai: o.delai, lieu: o.lieu, paiement: o.paiement, validite: o.validite, annulation: o.annulation, tvaPct: o.tvaPct ?? 20 };
     const complete = manquesOffreV1(offre).length === 0;
     const vers: EtatAchatV1 = complete ? "offre_a_examiner" : "offre_verification";
     // consultation → vérification → à examiner ; une offre complète saisie d'un coup passe par la vérification.
@@ -642,11 +741,13 @@ export class AchatsGroupesV1Service {
       if (!transitionV1("achat", de, etape)) throw conflit("transition_refusee", `Impossible de saisir une offre dans l'état « ${a.statut} ».`);
       de = etape;
     }
-    const data = { fournisseur: offre.fournisseur, prixUnitaireHt: offre.prixUnitaireHt, livraisonHt: offre.livraisonHt, tvaPct: offre.tvaPct, delai: offre.delai, lieu: offre.lieu, paiement: offre.paiement, validite: offre.validite, annulation: offre.annulation };
+    const data = { fournisseurEmail: o.fournisseurEmail ?? null, fournisseur: offre.fournisseur, prixUnitaireHt: offre.prixUnitaireHt, livraisonHt: offre.livraisonHt, tvaPct: offre.tvaPct, delai: offre.delai, lieu: offre.lieu, paiement: offre.paiement, validite: offre.validite, annulation: offre.annulation };
     await this.prisma.$transaction([
       this.prisma.offreAchatGroupeV1.upsert({ where: { achatId: a.id }, create: { achatId: a.id, ...data }, update: data }),
       this.prisma.achatGroupeV1.update({ where: { id: a.id }, data: { statut: de, offreAvant: complete ? new Date(this.now().getTime() + 72 * 3_600_000) : null } }),
     ]);
+    // Greg, 14 novembre 2026 : l'e-mail d'offre part à l'artisan DÈS qu'elle arrive (avant : au passage de la tâche horaire).
+    if (complete) await this.signalerLesOffres().catch(() => undefined);
     return { id: a.id, statut: de, complete };
   }
 
@@ -684,15 +785,34 @@ export class AchatsGroupesV1Service {
         rappels++;
       } else echecs++;
     }
+    const signalees = await this.signalerLesOffres();
+    offres += signalees.offres;
+    echecs += signalees.echecs;
+    return { rappels, offres, echecs };
+  }
+
+  /**
+   * L'e-mail « Offre à examiner » à chaque entreprise concernée, une seule fois : à l'arrivée de l'offre (Greg,
+   * 14 novembre 2026), et repris par la tâche pour un e-mail qui n'était pas parti.
+   */
+  private async signalerLesOffres(): Promise<{ offres: number; echecs: number }> {
+    const maintenant = this.now();
+    let offres = 0;
+    let echecs = 0;
     const aSignaler = await this.prisma.besoinGroupeV1.findMany({ where: { statut: "reconfirme", offreSignaleeLe: null, achat: { statut: "offre_a_examiner" } }, include: { achat: true } });
     for (const b of aSignaler) {
-      const ok = await this.envoyer(b.companyId, `Offre à examiner : ${b.designation}`, [`Une offre complète est arrivée pour « ${b.designation} ».`, b.achat.offreAvant ? `Examine-la avant le ${heureLisible(b.achat.offreAvant)}.` : "", "", `${this.options.webAppUrl}/achats-groupes/besoins/${b.id}`]);
+      const ok = await this.envoyer(b.companyId, `Offre à examiner : ${b.designation}`, [
+        `Une offre complète est arrivée pour « ${b.designation} ».`,
+        b.achat.offreAvant ? `Tu as jusqu'au ${heureLisible(b.achat.offreAvant)} pour commander à ce prix, ou dire non merci. Tu n'es jamais obligé de commander.` : "",
+        "",
+        `${this.options.webAppUrl}/achats-groupes/besoins/${b.id}`,
+      ]);
       if (ok) {
         await this.prisma.besoinGroupeV1.update({ where: { id: b.id }, data: { offreSignaleeLe: maintenant } });
         offres++;
       } else echecs++;
     }
-    return { rappels, offres, echecs };
+    return { offres, echecs };
   }
 
   /** Un e-mail à l'entreprise ; false s'il n'est pas parti (jamais une exception qui casserait le parcours). */

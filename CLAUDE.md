@@ -81,6 +81,19 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Mission : un numéro, un e-mail ou une adresse de site écrits dans une annonce, un profil ou une réponse sont masqués pour les autres entreprises.
 - Rapport de la recette : `baticlair/docs/recette/recette-complete-2026-11-13.md`.
 
+## Décisions du 14 novembre 2026 (après la recette n° 2, `baticlair/docs/recette/recette-complete-2026-11-14.md`)
+
+- « Commander » est une vraie commande : écran de confirmation, puis le bon de commande part par e-mail au négoce. Jamais « commandé » sans envoi réel (la commande n'est notée qu'une fois le mail parti). « Je retiens ce négoce » n'existe plus.
+- Offre d'achat groupé : deux boutons, « Commander à ce prix » (confirmation, bon de commande au fournisseur) et « Non merci ». L'e-mail d'offre part à l'artisan dès que l'offre arrive. Règle changée : avant, aucune commande ni acceptation en achats groupés V1.
+- « Tu décides à la réception de l'offre » partout, conditions négoces comprises (à faire relire par l'avocat). Ne pas commander n'exclut plus des achats groupés.
+- Un seul compte par SIRET vérifié ; un SIRET qui change n'est plus vérifié. Les comptes déjà vérifiés ne sont pas touchés. `SIRETS_DE_TEST` : SIRET fictifs des jeux de test, jamais en production.
+- « Deux fois moins cher » est retiré partout ; « au prix des gros » reste.
+- Une demande triée par métier part en plusieurs demandes d'un même lot : chacune a son suivi, ses offres, « Comparer », « Commander ».
+- Une ligne écrite sans quantité est orange « Quantité à préciser » et ne part pas chez un négoce.
+- Mission : tous les champs libres d'une annonce, d'une réponse et d'un profil sont masqués pour une autre entreprise (pas seulement les grands textes).
+- Recette en ligne : de vrais e-mails seulement vers les adresses de Greg.
+- Testeurs : ne jamais afficher l'environnement d'un processus (des clés s'y trouvent).
+
 ## Signalement de bugs
 
 - Bouton « Signaler un problème » : dans « Mon menu » sur chaque écran de l'application, et en bas des pages sans compte (espace négoce). La page et la capture d'écran sont jointes toutes seules.
