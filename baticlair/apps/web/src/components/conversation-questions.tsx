@@ -109,7 +109,7 @@ export function ConversationQuestions({
           ),
         )}
         {etape ? (
-          <p role="status" className="self-start pl-10 text-[14px] font-semibold text-[#FBF8F3]/75">
+          <p role="status" className="self-start pl-10 text-[14px] font-semibold text-[var(--chat-texte)]/75">
             {etape}
           </p>
         ) : null}
@@ -131,7 +131,7 @@ export function ConversationQuestions({
           champ.rendre();
         }}
       />
-      <p className="px-4 pb-3 text-[13px] text-[#FBF8F3]/70">Ou réponds avec les boutons ci-dessous.</p>
+      <p className="px-4 pb-3 text-[13px] text-[var(--chat-texte)]/70">Ou réponds avec les boutons ci-dessous.</p>
     </section>
   );
 }

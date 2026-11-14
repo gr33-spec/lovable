@@ -426,7 +426,7 @@ export function AssistantMobiiz({
       role="dialog"
       aria-modal="true"
       aria-label="Assistant Mobiiz"
-      className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[#FBF8F3]"
+      className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]"
       style={{ backgroundColor: COULEURS_CHAT.fond }}
     >
       <EnTeteChat onFermer={onClose} onVoirPdf={ordinateur ? undefined : () => setVoirPdf(true)} />
@@ -434,7 +434,7 @@ export function AssistantMobiiz({
         <section aria-label="Conversation" className="flex min-h-0 flex-col">
           <div ref={fil} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4 lg:px-6">
             {aide ? (
-              <div role="note" className="flex items-center gap-2 self-center rounded-full px-3 py-1 text-[13px] text-[#FBF8F3]/70" style={{ backgroundColor: "rgba(251,248,243,0.06)" }}>
+              <div role="note" className="flex items-center gap-2 self-center rounded-full px-3 py-1 text-[13px] text-[var(--chat-texte)]/70" style={{ backgroundColor: "var(--chat-voile)" }}>
                 <span>{AIDE}</span>
                 <button
                   type="button"
@@ -442,7 +442,7 @@ export function AssistantMobiiz({
                     setAide(false);
                     ecrireStockage("mobiiz-assistant-aide", "vue");
                   }}
-                  className="min-h-11 shrink-0 rounded-full px-3 font-semibold text-[#FED206]"
+                  className="min-h-11 shrink-0 rounded-full px-3 font-semibold text-[var(--chat-jaune-texte)]"
                 >
                   Compris
                 </button>
@@ -504,7 +504,7 @@ export function AssistantMobiiz({
                 </Puce>
               </div>
             )}
-            {occupe ? <p className="pl-10 text-[14px] text-[#FBF8F3]/60">Je mets ta liste à jour…</p> : null}
+            {occupe ? <p className="pl-10 text-[14px] text-[var(--chat-texte)]/60">Je mets ta liste à jour…</p> : null}
           </div>
           <BarreSaisie
             valeur={saisie}
@@ -525,7 +525,7 @@ export function AssistantMobiiz({
             avant={
               retours.length > 0 ? (
                 <div className="flex pb-2">
-                  <button type="button" disabled={occupe} onClick={() => void annuler()} className="pressable flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-semibold text-[#FBF8F3]/75" style={{ backgroundColor: "rgba(251,248,243,0.06)" }}>
+                  <button type="button" disabled={occupe} onClick={() => void annuler()} className="pressable flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-semibold text-[var(--chat-texte)]/75" style={{ backgroundColor: "var(--chat-voile)" }}>
                     <Undo2 size={14} aria-hidden="true" />
                     Annuler la dernière modification
                   </button>
@@ -542,10 +542,10 @@ export function AssistantMobiiz({
       </div>
       {/* « Voir PDF » : par-dessus la conversation, qui reste montée (messages, brouillon, position gardés). */}
       {voirPdf && !ordinateur ? (
-        <div role="dialog" aria-modal="true" aria-label="Le PDF de ta demande" className="absolute inset-x-0 top-0 z-10 flex h-full w-full flex-col bg-[#111111]">
+        <div role="dialog" aria-modal="true" aria-label="Le PDF de ta demande" className="absolute inset-x-0 top-0 z-10 flex h-full w-full flex-col bg-[var(--chat-fond)]">
           <div className="flex items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),8px)] pb-2 text-white">
             <span className="text-[16px] font-bold">Ta demande de prix</span>
-            <button type="button" onClick={() => setVoirPdf(false)} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-white/10 px-4 text-[14px] font-semibold text-white">
+            <button type="button" onClick={() => setVoirPdf(false)} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-[var(--chat-texte)]/10 px-4 text-[14px] font-semibold text-white">
               <X size={16} aria-hidden="true" />
               Retour à l&apos;assistant
             </button>
@@ -606,8 +606,8 @@ function ApercuPdf({ projectId, version, onLigne, onAjouter }: { projectId: stri
     <>
       <div className="flex items-center justify-between gap-3 px-4 py-2.5 lg:px-6">
         {/* Le panneau de l'aperçu est toujours sombre (#1A1918), quel que soit le thème : texte ivoire (audit UX, contraste 2,05:1). */}
-        <span className="text-[13px] font-semibold text-[#FBF8F3]/75">Touche une ligne pour la modifier.</span>
-        <button type="button" onClick={onAjouter} className="pressable flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-line px-3.5 text-[14px] font-semibold whitespace-nowrap max-lg:border-white/30 max-lg:text-white">
+        <span className="text-[13px] font-semibold text-[var(--chat-texte)]/75">Touche une ligne pour la modifier.</span>
+        <button type="button" onClick={onAjouter} className="pressable flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-line px-3.5 text-[14px] font-semibold whitespace-nowrap max-lg:border-[var(--chat-texte)]/30 max-lg:text-white">
           <Plus size={16} aria-hidden="true" />
           Ajouter une ligne
         </button>

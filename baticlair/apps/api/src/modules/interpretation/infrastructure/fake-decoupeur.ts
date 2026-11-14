@@ -50,6 +50,16 @@ export class FakeDecoupeur implements Decoupeur {
         questions: surface ? [] : [{ texte: "Quelle surface de couverture, en m² ?", choix: [], ligne: 0 }],
       });
     }
+    // Greg, 14 novembre 2026 (« Ardoise 5 et fruitier ») : un article flou ou inconnu n'entre pas avant sa réponse, et les
+    // questions viennent UNE à la fois : l'ardoise d'abord, puis le mot inconnu.
+    if (/fruitier/i.test(dit)) {
+      const format = /(\d{2})\s*[x× ]\s*(\d{2})/.exec(dit);
+      if (!format) return rendre({ nature: "texte", lignes: [], questions: [{ texte: "Quelle ardoise : format, origine, choix ?", choix: ["32×22 Espagne 1er choix", "40×22 Espagne 1er choix"] }], message: "Je préfère te demander avant d'ajouter quoi que ce soit." });
+      const ardoise = { designation: `Ardoise naturelle ${format[1]}×${format[2]}${/espagne/i.test(dit) ? " Espagne" : ""}${/1er choix|premier choix/i.test(dit) ? " 1er choix" : ""}`, quantite: null, unite: null };
+      const demande = echanges.some((e) => e.de === "assistant" && /fruitier/i.test(e.texte));
+      if (!demande) return rendre({ nature: "texte", lignes: [ardoise], questions: [{ texte: "« fruitier », tu veux dire quoi ?", choix: [] }], message: "" });
+      return rendre({ nature: "texte", lignes: [ardoise], questions: [{ texte: "Ardoise : quelle quantité, en m² ou en pièces ?", choix: [], ligne: 0 }], message: "" });
+    }
     const lignes: AssistantIaWire["lignes"] = [];
     const questions: AssistantIaWire["questions"] = [];
     const ardoise = /(\d+(?:[.,]\d+)?)\s*m²\s*d'ardoises?\s+(\d{2})\s*[x× ]\s*(\d{2})/i.exec(dit);

@@ -113,7 +113,7 @@ function DecrireMonChantier({ onFermer }: { onFermer: () => void }) {
       role="dialog"
       aria-modal="true"
       aria-label="Décris ton chantier"
-      className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[#FBF8F3]"
+      className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]"
       style={{ backgroundColor: COULEURS_CHAT.fond }}
     >
       <EnTeteChat onFermer={onFermer} />
@@ -139,7 +139,7 @@ function DecrireMonChantier({ onFermer }: { onFermer: () => void }) {
               ))}
             </div>
           ) : null}
-          {occupe ? <p className="pl-10 text-[14px] text-[#FBF8F3]/60">Je prépare ta liste…</p> : null}
+          {occupe ? <p className="pl-10 text-[14px] text-[var(--chat-texte)]/60">Je prépare ta liste…</p> : null}
         </div>
         <BarreSaisie
           valeur={champDicte.saisie}

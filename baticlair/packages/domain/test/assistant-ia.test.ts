@@ -66,7 +66,7 @@ describe("l'assistant connecté à l'IA : ce que le code accepte du modèle", ()
     expect(validerAssistantIa(dit("deux rouleaux d'écran sous-toiture"), wire({ lignes: [{ designation: "Écran sous-toiture", quantite: "2", unite: "rouleaux" }] })).lignes[0]!.quantite).toBe("2");
   });
 
-  it("les questions : trois au plus ; la quantité qui manque se demande ; jamais l'adresse, la date ni le prix", () => {
+  it("les questions : UNE à la fois (Greg, 14 novembre 2026 ; avant : trois au plus) ; la quantité qui manque se demande ; jamais l'adresse, la date ni le prix", () => {
     const r = validerAssistantIa(
       dit("de la gouttière zinc et des descentes"),
       wire({
@@ -82,8 +82,10 @@ describe("l'assistant connecté à l'IA : ce que le code accepte du modèle", ()
         ],
       }),
     );
-    expect(r.questions.map((q) => q.texte)).toEqual(["Gouttière : quelle longueur, en mètres ?", "Gouttière zinc : quel développé ?", "Descente : quel diamètre ?"]);
-    expect(r.questions[1]!.choix).toEqual(["25", "33", "40", "50", "60", "80"]);
+    expect(r.questions.map((q) => q.texte)).toEqual(["Gouttière : quelle longueur, en mètres ?"]);
+    // Les choix d'une question gardée : six au plus, jamais un choix vide.
+    const choix = validerAssistantIa(dit("de la gouttière zinc"), wire({ lignes: [{ designation: "Gouttière zinc", quantite: null, unite: null }], questions: [{ texte: "Gouttière zinc : quel développé ?", choix: ["25", "33", "40", "", "50", "60", "80", "100"] }] }));
+    expect(choix.questions[0]!.choix).toEqual(["25", "33", "40", "50", "60", "80"]);
   });
 
   it("PHOTO DE CHANTIER : les matériaux vus sont proposés « vus sur la photo », sans quantité ni dimension, jamais inventées", () => {
@@ -105,7 +107,7 @@ describe("l'assistant connecté à l'IA : ce que le code accepte du modèle", ()
       { libelle: "Gouttière zinc demi-ronde", quantite: null, unite: null, vuSurPhoto: true },
     ]);
     expect(r.ecartees).toBe(1);
-    expect(r.questions.map((q) => q.texte)).toEqual(["Tu refais toute la couverture ou une partie ?", "Quelle surface de couverture ?"]);
+    expect(r.questions.map((q) => q.texte)).toEqual(["Tu refais toute la couverture ou une partie ?"]);
     // La suite de la conversation, sans renvoyer la photo : ce qui a été vu reste nommé, les mesures viennent de l'artisan.
     const suite: EchangeAssistant[] = [{ de: "artisan", texte: "regarde cette toiture" }, { de: "photo", texte: "Ardoise naturelle ; Gouttière zinc demi-ronde" }, { de: "assistant", texte: "Quelle surface de couverture ?" }, { de: "artisan", texte: "85 m² en 32 22 et 14 mètres de gouttière" }];
     const r2 = validerAssistantIa(suite, wire({ lignes: [{ designation: "Ardoise naturelle 32×22", quantite: "85", unite: "m²" }, { designation: "Gouttière zinc demi-ronde", quantite: "14", unite: "m" }, { designation: "Crochets inox", quantite: null, unite: null }] }));
@@ -142,12 +144,11 @@ describe("l'assistant connecté à l'IA : ce que le code accepte du modèle", ()
     expect(r.lignes.map((l) => l.libelle)).toEqual(["Ardoise", "Gouttière"]);
     expect(r.questions).toEqual([
       { texte: "En quelle matière ?", choix: ["Zinc", "Cuivre"], ligne: 1 },
-      { texte: "Tu refais toute la couverture ?", choix: ["Oui", "Non"], ligne: null },
     ]);
   });
 
   it("la consigne tient les règles du comptoir ; la conversation part dans l'ordre", () => {
-    for (const regle of [/N'ajoute JAMAIS un article/, /N'invente JAMAIS une quantité/, /au plus trois questions/, /Ne la devine jamais/, /Ne demande jamais une adresse/, /Chaque question porte « ligne »/, /une photo ne donne ni mesure ni quantité/, /« liste » ou « devis » : ne recopie rien/]) expect(ASSISTANT_IA_SYSTEM).toMatch(regle);
+    for (const regle of [/N'ajoute JAMAIS un article/, /N'invente JAMAIS une quantité/, /UNE SEULE question à la fois/, /FLOU, INCOMPLET ou que tu ne reconnais pas/, /Ne la devine jamais/, /Ne demande jamais une adresse/, /Chaque question porte « ligne »/, /une photo ne donne ni mesure ni quantité/, /« liste » ou « devis » : ne recopie rien/]) expect(ASSISTANT_IA_SYSTEM).toMatch(regle);
     expect(assistantIaDossier([{ de: "artisan", texte: "12 m de gouttière" }, { de: "assistant", texte: "Quel développé ?" }, { de: "artisan", texte: "33" }])).toBe("ARTISAN : 12 m de gouttière\nVENDEUR : Quel développé ?\nARTISAN : 33");
   });
 });

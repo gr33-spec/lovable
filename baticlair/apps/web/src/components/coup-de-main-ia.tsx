@@ -93,7 +93,8 @@ export function CompteursAnalyses({ quotas }: { quotas: Quotas }) {
   );
 }
 
-export function InfoAnalyse() {
+/** `sansCompteurs` (Greg, 14 novembre 2026) : dans l'assistant, plus de bloc de compteurs ; la phrase et son détail restent. */
+export function InfoAnalyse({ sansCompteurs = false }: { sansCompteurs?: boolean } = {}) {
   const lire = useCallback((signal: AbortSignal) => api<{ jauge: Jauge | null; quotas?: Quotas | null }>("/v1/ai-usage/jauge", { signal }), []);
   const { data } = useResource(lire);
   const [ouvert, setOuvert] = useState(false);
@@ -103,8 +104,8 @@ export function InfoAnalyse() {
   return (
     <div className="flex flex-col gap-1 text-[14px] leading-snug">
       <p className="text-ink">MOBIIZ prépare une première liste. Tu pourras tout vérifier et modifier.</p>
-      {quotas ? <CompteursAnalyses quotas={quotas} /> : null}
-      {compteur ? (
+      {quotas && !sansCompteurs ? <CompteursAnalyses quotas={quotas} /> : null}
+      {compteur && !sansCompteurs ? (
         <p role="status" className="text-muted">
           {compteur}
         </p>

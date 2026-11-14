@@ -37,12 +37,27 @@ export function budgetInterpretation(
     cle: "credit-ia-interprete",
     titre: "Crédit IA indisponible : l'interprète des réponses libres est coupé",
   },
+  /**
+   * Greg, 14 novembre 2026 (« Respecte BUDGET_IA_JOUR ») : le plafond se compte AU JOUR (UTC), et tous les appels IA du jour,
+   * toutes tâches confondues, ne dépassent pas `BUDGET_IA_JOUR`. RÈGLE CHANGÉE pour l'assistant : avant, 300 appels et
+   * 2 $ cumulés depuis toujours (l'assistant se serait coupé pour de bon).
+   */
+  jour?: { budgetEur: number; usdToEur: number },
 ): BudgetInterpretation {
   let creditEpuise = false;
   return {
     async autorise() {
       // Accès démo (Greg, 7 novembre 2026) : un visiteur fictif ne consomme jamais d'IA ; le code seul répond.
       if (creditEpuise || estRequeteDemo()) return false;
+      if (jour) {
+        const debut = new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00Z`);
+        const [tout, tacheDuJour] = await Promise.all([
+          prisma.aiExecution.aggregate({ where: { createdAt: { gte: debut } }, _sum: { costMicroUsd: true } }),
+          prisma.aiExecution.aggregate({ where: { task: tache.nom, createdAt: { gte: debut } }, _count: { _all: true }, _sum: { costMicroUsd: true } }),
+        ]);
+        const eurDuJour = (Number(tout._sum.costMicroUsd ?? 0) / 1_000_000) * jour.usdToEur;
+        return eurDuJour < jour.budgetEur && tacheDuJour._count._all < plafond.appels && Number(tacheDuJour._sum.costMicroUsd ?? 0) < plafond.microUsd;
+      }
       const agg = await prisma.aiExecution.aggregate({ where: { task: tache.nom }, _count: { _all: true }, _sum: { costMicroUsd: true } });
       return agg._count._all < plafond.appels && Number(agg._sum.costMicroUsd ?? 0) < plafond.microUsd;
     },
@@ -108,7 +123,7 @@ export function budgetInterpretation(
             modele: config.ai.assistantModel,
             cle: "credit-ia-assistant",
             titre: "Crédit IA indisponible : l'assistant connecté à l'IA est coupé",
-          }),
+          }, { budgetEur: config.groupe.negocie.budgetIaJourEur, usdToEur: Number(config.aiCost.usdToEur) }),
         );
       },
       inject: [CONFIG, LOGGER, PrismaService, AiUsageRecorder],

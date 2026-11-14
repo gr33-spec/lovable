@@ -64,7 +64,7 @@ export function ConversationAchatGroupeV1({ etat }: { etat: EtatV1 }) {
   }
 
   return (
-    <div ref={zone} role="dialog" aria-modal="true" aria-label="Ajouter un matériau en achat groupé" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[#FBF8F3]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+    <div ref={zone} role="dialog" aria-modal="true" aria-label="Ajouter un matériau en achat groupé" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
       <EnTeteChat onFermer={() => router.push("/achats-groupes")} />
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <div ref={fil} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
@@ -112,7 +112,7 @@ export function ConversationAchatGroupeV1({ etat }: { etat: EtatV1 }) {
           invite={complet ? "Corrige ou précise…" : "Décris ton besoin…"}
           avant={
             autocompletion.length ? (
-              <ul aria-label="Suggestions" className="mb-2 flex max-h-[40dvh] flex-col overflow-y-auto rounded-2xl bg-[#FBF8F3] text-[#111111]">
+              <ul aria-label="Suggestions" className="mb-2 flex max-h-[40dvh] flex-col overflow-y-auto rounded-2xl bg-[var(--chat-carte)] text-[#111111]">
                 {autocompletion.map((x) => (
                   <li key={x.libelle} className="border-b border-[#111111]/10 last:border-b-0">
                     <button type="button" onClick={() => champ.setSaisie(`${x.libelle} `)} className="flex min-h-12 w-full items-center px-4 py-2 text-left text-[16px] font-semibold">

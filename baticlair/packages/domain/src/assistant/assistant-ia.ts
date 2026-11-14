@@ -8,7 +8,8 @@
  *  - une quantité n'existe que si son nombre a été DIT par l'artisan (sinon la ligne sort sans quantité) ;
  *  - un nombre écrit dans une désignation (format, développé, épaisseur) doit avoir été DIT (sinon la ligne est écartée) ;
  *  - une désignation doit reprendre au moins un mot de l'artisan (sinon la ligne est écartée) ;
- *  - trois questions au plus, courtes, avec leurs choix ; la quantité qui manque se demande (elle n'est jamais devinée) ;
+ *  - UNE question à la fois (Greg, 14 novembre 2026 ; avant : trois au plus), courte, avec ses choix ; un article flou ou
+ *    inconnu n'entre pas dans la liste avant sa réponse ; la quantité qui manque se demande (elle n'est jamais devinée) ;
  *    jamais l'adresse, la date ni le prix (ils se règlent ailleurs).
  * Éteint (`ASSISTANT_IA=off`), en panne ou au-delà du plafond : le code seul lit la phrase (`lireDescription`).
  *
@@ -22,7 +23,7 @@
  * confirmer. Une quantité ou un format ne viennent jamais que de ce que l'artisan dit.
  */
 
-export const ASSISTANT_IA_PROMPT = { id: "assistant_description", version: 2 } as const;
+export const ASSISTANT_IA_PROMPT = { id: "assistant_description", version: 3 } as const;
 
 /** La consigne système (envoyée telle quelle ; testée). */
 export const ASSISTANT_IA_SYSTEM = [
@@ -35,7 +36,9 @@ export const ASSISTANT_IA_SYSTEM = [
   "- Corrige seulement un mot visiblement mal transcrit, quand le métier ne laisse aucun doute ; garde les autres mots de l'artisan.",
   "- La désignation est courte, comme sur un bon de commande : le produit, puis ses caractéristiques dites (« Ardoise naturelle 32×22 Espagne 1er choix »). Jamais de phrase (« j'ai besoin de… »).",
   "- L'unité est celle que l'artisan a dite (m², m, pièces, sacs, rouleaux…), sinon null.",
-  "- Pose au plus trois questions, seulement celles sans lesquelles un vendeur ne peut pas chiffrer (matière, développé, diamètre, épaisseur, format, teinte). Chaque question tient en une phrase courte, au tutoiement, nomme l'article, et propose 2 à 5 choix courts quand ils existent.",
+  "- UNE SEULE question à la fois : la plus utile pour chiffrer (matière, développé, diamètre, épaisseur, format, teinte). Elle tient en une phrase courte, au tutoiement, nomme l'article, et propose 2 à 5 choix courts quand ils existent. Les autres questions viendront après sa réponse.",
+  "- L'objectif est un quantitatif parfait. Un article FLOU, INCOMPLET ou que tu ne reconnais pas ne va PAS dans « lignes » tant qu'il n'est pas clair : pose d'abord la question, courte. Exemple : « Ardoise 5 et fruitier » → aucune ligne, et la question « Quelle ardoise : format, origine, choix ? » ; quand il a répondu, la question suivante « “fruitier”, tu veux dire quoi ? ». Un nombre dont tu ne sais pas s'il est une quantité, un format ou un choix (« ardoise 5 ») se demande, il ne se devine pas.",
+  "- Un mot que tu ne connais pas n'est jamais remplacé par un article qui lui ressemble : demande ce que l'artisan veut dire, avec ses mots entre guillemets.",
   "- Si l'artisan n'a pas dit la quantité d'un article, demande-la, avec son unité (« Gouttière : quelle longueur, en mètres ? »). Ne la devine jamais.",
   "- Ne demande jamais une adresse, une date de livraison ni un prix.",
   "- Chaque question porte « ligne » : le rang (0 pour la première) de l'article de « lignes » qu'elle concerne, ou null si elle concerne tout le chantier. Quand il manque une information, dis dans « message », en une phrase, pourquoi le négoce en a besoin pour chiffrer.",
@@ -44,7 +47,7 @@ export const ASSISTANT_IA_SYSTEM = [
   "« nature » : « texte » quand l'artisan n'a joint aucune photo. Avec une photo, dis ce qu'elle montre : « liste » (liste de matériaux écrite, bon de commande, note manuscrite), « devis » (devis ou facture), « chantier » (toiture, façade, ouvrage, matériau en place ou posé au sol), « autre » (rien d'utile).",
   "- Photo « liste » ou « devis » : ne recopie rien ; rends « lignes » et « questions » vides : le document sera lu à part.",
   "- Photo « chantier » : nomme seulement les matériaux que tu reconnais avec certitude (ardoise, tuile, bac acier, zinc, gouttière, descente, solin, fenêtre de toit…), un par ligne, SANS quantité et SANS dimension : une photo ne donne ni mesure ni quantité. Si tu hésites entre deux matériaux, ne le nomme pas : pose la question. Dans « message », dis en une phrase ce que tu vois.",
-  "- Après une photo « chantier », tes questions (trois au plus) demandent d'abord ce que l'artisan veut faire (refaire, réparer, quelle partie), puis les formats et les mesures qu'il connaît (surface de couverture, longueur de gouttière, format de l'ardoise).",
+  "- Après une photo « chantier », ta question (une à la fois) demande d'abord ce que l'artisan veut faire (refaire, réparer, quelle partie), puis, aux tours suivants, les formats et les mesures qu'il connaît (surface de couverture, longueur de gouttière, format de l'ardoise).",
   "« message » : une phrase courte au tutoiement, ou une chaîne vide. Réponds seulement avec le JSON demandé.",
 ].join("\n");
 
@@ -172,7 +175,8 @@ export function validerAssistantIa(echanges: readonly EchangeAssistant[], wire: 
     .map((q) => ({ texte: q.texte.replace(/\s+/g, " ").trim().slice(0, 200), choix: q.choix.map((c) => c.replace(/\s+/g, " ").trim().slice(0, 60)).filter(Boolean).slice(0, 6), ligne: q.ligne === undefined || q.ligne === null ? null : rang.get(q.ligne)! }))
     // Jamais une question d'adresse, de date ou de prix : elles se règlent ailleurs.
     .filter((q) => q.texte.length >= 4 && !/\b(adresse|prix|tarif|livraison|livre|quand)\b/.test(aPlat(q.texte)))
-    .slice(0, 3);
+    // Greg, 14 novembre 2026 : UNE question à la fois (avant : trois au plus).
+    .slice(0, 1);
   return { nature, lignes, questions, message: wire.message.replace(/\s+/g, " ").trim().slice(0, 300), ecartees };
 }
 

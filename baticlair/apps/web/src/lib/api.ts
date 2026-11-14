@@ -135,6 +135,51 @@ const CHAMPS: Record<string, string> = {
 };
 const nomDuChamp = (chemin: string) => CHAMPS[chemin.split(".").pop() ?? chemin] ?? chemin;
 
+/**
+ * UN APPEL EN DIRECT (Greg, 14 novembre 2026, étapes de l'assistant) : le serveur écrit une ligne JSON par événement ;
+ * chacune est rendue dès qu'elle arrive. Rend le dernier événement, ou null si la réponse n'est pas un flux lisible.
+ */
+export async function apiEnDirect<T>(path: string, body: unknown, surEvenement: (e: T) => void): Promise<T | null> {
+  const headers: Record<string, string> = { accept: "application/x-ndjson", "content-type": "application/json" };
+  const companyId = getActiveCompanyId();
+  if (companyId) headers["x-company-id"] = companyId;
+  let res: Response;
+  try {
+    res = await fetch(path, { method: "POST", headers, credentials: "same-origin", body: JSON.stringify(body) });
+  } catch {
+    throw new ApiError("network", 0);
+  }
+  if (!res.ok || !res.body) return null;
+  const lecteur = res.body.getReader();
+  const decodeur = new TextDecoder();
+  let reste = "";
+  let dernier: T | null = null;
+  const rendre = (ligne: string) => {
+    const t = ligne.trim();
+    if (!t) return;
+    try {
+      dernier = JSON.parse(t) as T;
+      surEvenement(dernier);
+    } catch {
+      // Une ligne illisible est ignorée : la réponse finale fait foi.
+    }
+  };
+  try {
+    for (;;) {
+      const { done, value } = await lecteur.read();
+      if (done) break;
+      reste += decodeur.decode(value, { stream: true });
+      const lignes = reste.split("\n");
+      reste = lignes.pop() ?? "";
+      lignes.forEach(rendre);
+    }
+  } catch {
+    throw new ApiError("network", 0);
+  }
+  rendre(reste);
+  return dernier;
+}
+
 export function messageErreur(e: unknown, precis: Record<string, string> = {}, o: { vous?: boolean } = {}): string {
   const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
   if (err.reason && precis[err.reason]) return precis[err.reason]!;

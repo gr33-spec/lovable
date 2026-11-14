@@ -70,7 +70,8 @@ test("nouveau quantitatif : deux choix entiers, la liste à la main, Mobiiz depu
   // 3. Mobiiz depuis la liste : il propose, rien n'entre sans accord ; la question va avec sa ligne, une seule fois.
   await saisie.getByRole("button", { name: "Mobiiz m'aide" }).click();
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
-  await expect(chat.getByRole("group", { name: "Donne à Mobiiz ce que tu as" })).toBeVisible();
+  // Greg, 14 novembre 2026 : plus de gros boutons dans le fil ; la barre du bas porte le « + » et le micro.
+  await expect(chat.getByRole("button", { name: "Ajouter : photo ou document" })).toBeVisible();
   await chat.getByRole("textbox", { name: "Ton message" }).fill(DICTEE);
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
   const carte = chat.getByRole("region", { name: "J'ai compris" }).last();

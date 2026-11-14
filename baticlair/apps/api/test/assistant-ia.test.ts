@@ -30,6 +30,37 @@ async function artisan(assistant: "on" | "off") {
 const appels = () => ctx!.prisma.aiExecution.count({ where: { task: "assistant_description" } });
 
 describe("l'assistant connecté à l'IA", () => {
+  it("EN DIRECT (Greg, 14 novembre 2026) : les étapes arrivent une à une, puis la réponse relue par le code ; un article flou ou inconnu se demande avant d'entrer, une question à la fois", async () => {
+    const agent = await artisan("on");
+    const lire = async (...phrases: string[]) => {
+      const r = await agent.post("/v1/assistant/description/flux").send(dit(...phrases)).buffer(true).parse((res, fin) => { let t = ""; res.setEncoding("utf8"); res.on("data", (c: string) => (t += c)); res.on("end", () => fin(null, t)); }).expect(200);
+      expect(r.headers["content-type"]).toMatch(/application\/x-ndjson/);
+      return (r.body as string).trim().split("\n").map((l) => JSON.parse(l) as { etape?: { cle: string; titre: string; detail: string }; fin?: { ia: boolean; lignes: { libelle: string }[]; questions: { texte: string; choix: string[] }[] } });
+    };
+    const un = await lire("Ardoise 5 et fruitier");
+    expect(un.filter((e) => e.etape).map((e) => e.etape!.titre)).toEqual(["Réflexion…", "Lecture de ta demande…", "Vérification des quantités…", "Terminé"]);
+    for (const e of un.filter((x) => x.etape)) expect(e.etape!.detail.length).toBeGreaterThan(10);
+    const fin1 = un.at(-1)!.fin!;
+    // Rien n'entre dans la liste : la question d'abord, une seule.
+    expect(fin1).toMatchObject({ ia: true, lignes: [] });
+    expect(fin1.questions).toEqual([{ texte: "Quelle ardoise : format, origine, choix ?", choix: ["32×22 Espagne 1er choix", "40×22 Espagne 1er choix"], ligne: null }]);
+    const fin2 = (await lire("Ardoise 5 et fruitier", fin1.questions[0]!.texte, "32×22 Espagne 1er choix")).at(-1)!.fin!;
+    expect(fin2.lignes.map((l) => l.libelle)).toEqual(["Ardoise naturelle 32×22 Espagne 1er choix"]);
+    // Le mot inconnu n'est jamais remplacé par un article : il se demande, avec les mots de l'artisan.
+    expect(fin2.questions.map((q) => q.texte)).toEqual(["« fruitier », tu veux dire quoi ?"]);
+    expect(JSON.stringify(fin2.lignes)).not.toMatch(/fruit/i);
+    expect(await appels()).toBe(2);
+  });
+
+  it("EN DIRECT, éteint : les étapes disent que le code lit seul, aucun appel", async () => {
+    const agent = await artisan("off");
+    const r = await agent.post("/v1/assistant/description/flux").send(dit("10 sacs de colle")).buffer(true).parse((res, fin) => { let t = ""; res.setEncoding("utf8"); res.on("data", (c: string) => (t += c)); res.on("end", () => fin(null, t)); }).expect(200);
+    const lignes = (r.body as string).trim().split("\n").map((l) => JSON.parse(l));
+    expect(lignes.map((e: { etape?: { cle: string } }) => e.etape?.cle ?? "fin")).toEqual(["reflexion", "lecture", "termine", "fin"]);
+    expect(lignes.at(-1).fin.ia).toBe(false);
+    expect(await appels()).toBe(0);
+  });
+
   it("éteint (par défaut) : le code seul lit la phrase, aucun appel", async () => {
     const agent = await artisan("off");
     const r = (await agent.post("/v1/assistant/description").send(dit(DICTEE)).expect(200)).body;
@@ -86,7 +117,8 @@ describe("l'assistant connecté à l'IA", () => {
       { libelle: "Ardoise naturelle", quantite: null, unite: null, vuSurPhoto: true },
       { libelle: "Gouttière zinc demi-ronde", quantite: null, unite: null, vuSurPhoto: true },
     ]);
-    expect(r.questions.map((q: { texte: string }) => q.texte)).toEqual(["Tu refais toute la couverture ou une partie ?", "Quelle surface de couverture, en m² ?"]);
+    // UNE question à la fois (Greg, 14 novembre 2026 ; avant : toutes ensemble).
+    expect(r.questions.map((q: { texte: string }) => q.texte)).toEqual(["Tu refais toute la couverture ou une partie ?"]);
     // La suite, sans renvoyer la photo : ce qui a été vu reste nommé, les mesures viennent de l'artisan.
     const suite = (
       await agent

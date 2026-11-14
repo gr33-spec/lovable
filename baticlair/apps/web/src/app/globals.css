@@ -482,3 +482,29 @@ textarea.outline-none:focus-visible {
     transform: translateY(-1px);
   }
 }
+
+/*
+ * LA CONVERSATION MOBIIZ SUIT LE THÈME (Greg, 14 novembre 2026 : « l'assistant suit le mode jour ou nuit choisi dans
+ * l'app. En mode jour, fond blanc »). Avant : noir profond dans les deux thèmes. Les écrans de conversation ne portent
+ * plus de couleur en dur : ils lisent ces variables.
+ */
+:root {
+  --chat-fond: #111111;
+  --chat-texte: #fbf8f3;
+  --chat-bulle: #1f1e1c;
+  --chat-carte: #fbf8f3;
+  --chat-trait: rgba(251, 248, 243, 0.12);
+  --chat-trait-fort: rgba(251, 248, 243, 0.28);
+  --chat-voile: rgba(251, 248, 243, 0.06);
+  --chat-jaune-texte: #fed206;
+}
+html[data-theme="clair"] {
+  --chat-fond: #ffffff;
+  --chat-texte: #130901;
+  --chat-bulle: #f4f1eb;
+  --chat-carte: #f6f3ee;
+  --chat-trait: rgba(19, 9, 1, 0.14);
+  --chat-trait-fort: rgba(19, 9, 1, 0.32);
+  --chat-voile: rgba(19, 9, 1, 0.05);
+  --chat-jaune-texte: #130901;
+}

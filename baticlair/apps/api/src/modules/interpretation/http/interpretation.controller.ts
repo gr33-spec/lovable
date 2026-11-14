@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Inject, Post, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, HttpCode, Inject, Post, Res, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
 import { Throttle } from "@nestjs/throttler";
@@ -57,6 +57,29 @@ export class InterpretationController {
   @HttpCode(200)
   decrire(@Tenant() tenant: TenantContext, @Body(new ZodPipe(description)) b: z.infer<typeof description>) {
     return this.assistant.decrire(b.echanges, { companyId: tenant.companyId, userId: tenant.userId ?? null });
+  }
+
+  /**
+   * `POST /v1/assistant/description/flux` (Greg, 14 novembre 2026 : « affiche des étapes en direct […] Réponse affichée au
+   * fil de l'eau ») : la même réponse que `description`, précédée de ses étapes, une ligne JSON par événement
+   * (`{ etape }` puis `{ fin }`). La réponse n'est écrite qu'après la relecture du code : rien du modèle n'est montré avant.
+   */
+  @Throttle({ default: HOURLY(120) })
+  @Post("description/flux")
+  @HttpCode(200)
+  async decrireEnDirect(@Tenant() tenant: TenantContext, @Body(new ZodPipe(description)) b: z.infer<typeof description>, @Res() res: { setHeader(n: string, v: string): void; write(c: string): boolean; end(): void; flushHeaders?: () => void }) {
+    res.setHeader("content-type", "application/x-ndjson; charset=utf-8");
+    res.setHeader("cache-control", "no-cache, no-transform");
+    res.setHeader("x-accel-buffering", "no");
+    res.flushHeaders?.();
+    const ecrire = (o: unknown) => void res.write(`${JSON.stringify(o)}\n`);
+    try {
+      const fin = await this.assistant.decrire(b.echanges, { companyId: tenant.companyId, userId: tenant.userId ?? null }, [], (etape) => ecrire({ etape }));
+      ecrire({ fin });
+    } catch {
+      ecrire({ erreur: true });
+    }
+    res.end();
   }
 
   /**

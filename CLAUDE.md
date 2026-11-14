@@ -94,6 +94,16 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Recette en ligne : de vrais e-mails seulement vers les adresses de Greg.
 - Testeurs : ne jamais afficher l'environnement d'un processus (des clés s'y trouvent).
 
+## Décisions du 14 novembre 2026 (soir) : assistant Mobiiz
+
+- L'assistant est branché sur l'IA réelle sur le site de test (`ASSISTANT_IA=on` sur l'environnement de test seulement ; coupé par défaut ailleurs). Son plafond se compte au jour et tous les appels IA du jour respectent `BUDGET_IA_JOUR`. Règle changée : avant, 300 appels et 2 $ cumulés depuis toujours.
+- Une question à la fois (avant : trois au plus). Un article flou, incomplet ou inconnu ne rentre pas dans la liste avant sa réponse ; un mot inconnu n'est jamais remplacé par un article qui lui ressemble.
+- Interface : une conversation et la barre du bas (« + » pour photo et document, micro) ; plus de gros boutons dans le fil ni de bloc de compteurs ; les analyses restantes se disent seulement dans la fenêtre « Analyser ce document ? ».
+- Les étapes du travail se voient en direct (« Réflexion… », « Lecture… », « Vérification des quantités… », « Terminé ») et se déplient. Ce sont les vraies étapes du serveur. La réponse s'affiche au fil de l'eau, mais seulement après la relecture par le code : rien du modèle n'est montré avant.
+- La conversation suit le thème de l'app : fond blanc en mode jour. Avant : noir dans les deux thèmes.
+- Offre d'achat groupé : l'e-mail du fournisseur est obligatoire au dépôt ; sans lui, l'offre reste en vérification.
+- `SIRETS_DE_TEST` est posé sur l'environnement de test (le SIRET partagé par les comptes de test).
+
 ## Signalement de bugs
 
 - Bouton « Signaler un problème » : dans « Mon menu » sur chaque écran de l'application, et en bas des pages sans compte (espace négoce). La page et la capture d'écran sont jointes toutes seules.

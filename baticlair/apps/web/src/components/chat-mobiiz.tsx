@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowLeft, ArrowUp, Eye, Mic, Plus, Sparkles, Square, X } from "lucide-react";
+import { ArrowLeft, ArrowUp, Check, ChevronDown, Eye, Mic, Plus, Sparkles, Square, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Logo } from "./logo";
 import { aideMicro, PHRASES_DICTEE } from "@/lib/dictee";
+import { useTheme } from "@/lib/theme";
 
 /**
  * LA CONVERSATION MOBIIZ (Greg, 31 octobre 2026, capture « Assistant Mobiiz » : « une véritable interface de discussion,
@@ -12,7 +13,7 @@ import { aideMicro, PHRASES_DICTEE } from "@/lib/dictee";
  * dans des bulles jaunes #FED206 à texte #111111 ; un en-tête compact ; une barre de saisie fixe en bas, micro intégré,
  * envoi rond jaune ; le clavier natif ne la masque jamais.
  */
-export const COULEURS_CHAT = { fond: "#111111", ivoire: "#FBF8F3", jaune: "#FED206", bulle: "#1F1E1C", trait: "rgba(251,248,243,0.12)" };
+export const COULEURS_CHAT = { fond: "var(--chat-fond)", ivoire: "var(--chat-texte)", jaune: "#FED206", bulle: "var(--chat-bulle)", trait: "var(--chat-trait)" };
 
 /**
  * LE CLAVIER NATIF : l'écran prend la zone VISIBLE (`visualViewport`, qui rétrécit quand le clavier s'ouvre sur iPhone comme
@@ -57,14 +58,15 @@ export function useZoneVisible(surChangement?: () => void) {
 
 /** L'en-tête compact : retour, le vrai logo et « Assistant Mobiiz », « Voir PDF » (téléphone) quand un PDF existe. */
 export function EnTeteChat({ onFermer, onVoirPdf, croix = false }: { onFermer: () => void; onVoirPdf?: (() => void) | undefined; croix?: boolean }) {
+  const theme = useTheme();
   return (
     <header className="flex shrink-0 items-center gap-2.5 border-b px-3 pt-[max(env(safe-area-inset-top),8px)] pb-2 lg:px-6" style={{ borderColor: COULEURS_CHAT.trait }}>
-      <button type="button" onClick={onFermer} aria-label="Fermer l'assistant" className="pressable -ml-1.5 flex size-11 shrink-0 items-center justify-center rounded-full text-[#FBF8F3] active:bg-white/10">
+      <button type="button" onClick={onFermer} aria-label="Fermer l'assistant" className="pressable -ml-1.5 flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--chat-texte)] active:bg-[var(--chat-texte)]/10">
         {croix ? <X size={20} aria-hidden="true" /> : <ArrowLeft size={20} aria-hidden="true" />}
       </button>
-      <Logo fond="sombre" hauteur={19} className="shrink-0" />
-      <span className="h-4 w-px shrink-0 bg-white/25" aria-hidden="true" />
-      <h2 className="min-w-0 truncate text-[14px] font-semibold text-[#FBF8F3]">
+      <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={19} className="shrink-0" />
+      <span className="h-4 w-px shrink-0 bg-[var(--chat-texte)]/25" aria-hidden="true" />
+      <h2 className="min-w-0 truncate text-[14px] font-semibold text-[var(--chat-texte)]">
         Assistant<span className="max-[399px]:hidden"> Mobiiz</span>
       </h2>
       <span className="flex-1" />
@@ -72,10 +74,10 @@ export function EnTeteChat({ onFermer, onVoirPdf, croix = false }: { onFermer: (
         <button
           type="button"
           onClick={onVoirPdf}
-          className="pressable flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold whitespace-nowrap text-[#FBF8F3] lg:hidden"
-          style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: "rgba(251,248,243,0.06)" }}
+          className="pressable flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold whitespace-nowrap text-[var(--chat-texte)] lg:hidden"
+          style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: "var(--chat-voile)" }}
         >
-          <Eye size={16} aria-hidden="true" className="text-[#FED206]" />
+          <Eye size={16} aria-hidden="true" className="text-[var(--chat-jaune-texte)]" />
           Voir PDF
         </button>
       ) : null}
@@ -104,9 +106,72 @@ export function Bulle({ de, children, label }: { de: "mobiiz" | "moi"; children:
 /** Le texte d'une bulle de l'assistant. */
 export function TexteMobiiz({ children }: { children: React.ReactNode }) {
   return (
-    <p className="rounded-[22px] rounded-bl-md px-4 py-2.5 text-[16px] leading-snug whitespace-pre-line text-[#FBF8F3]" style={{ backgroundColor: COULEURS_CHAT.bulle }}>
+    <p className="rounded-[22px] rounded-bl-md px-4 py-2.5 text-[16px] leading-snug whitespace-pre-line text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.bulle }}>
       {children}
     </p>
+  );
+}
+
+export interface EtapeIa {
+  cle: string;
+  titre: string;
+  detail: string;
+}
+
+/**
+ * CE QUI SE PASSE, EN DIRECT (Greg, 14 novembre 2026 : « affiche des étapes en direct comme dans Claude […] dépliables pour
+ * voir le détail »). Repliée : l'étape en cours (ou « Terminé ») ; dépliée : chaque étape et ce qu'elle a fait. Les étapes
+ * sont celles du serveur, jamais une animation qui ferait semblant.
+ */
+export function EtapesIa({ etapes, fini }: { etapes: readonly EtapeIa[]; fini: boolean }) {
+  const [ouvert, setOuvert] = useState(false);
+  const courante = etapes.at(-1);
+  const titre = courante?.titre ?? "Réflexion…";
+  return (
+    <div className="ml-10 flex max-w-[90%] flex-col gap-1 self-start text-[14px] text-[var(--chat-texte)]/75">
+      <button type="button" aria-expanded={ouvert} onClick={() => setOuvert((o) => !o)} className="pressable flex min-h-11 items-center gap-2 self-start rounded-full px-3 font-semibold" style={{ backgroundColor: "var(--chat-voile)" }}>
+        {fini ? <Check size={16} aria-hidden="true" /> : <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none" />}
+        <span aria-live="polite">{titre}</span>
+        <ChevronDown size={16} aria-hidden="true" className={ouvert ? "rotate-180" : ""} />
+        <span className="sr-only">{ouvert ? "Masquer le détail" : "Voir le détail"}</span>
+      </button>
+      {ouvert ? (
+        <ol aria-label="Ce que Mobiiz a fait" className="flex flex-col gap-1.5 border-l-2 py-1 pl-3" style={{ borderColor: "var(--chat-trait-fort)" }}>
+          {etapes.map((e, i) => (
+            <li key={`${e.cle}-${i}`}>
+              <span className="font-semibold text-[var(--chat-texte)]">{e.titre}</span>
+              <span className="block">{e.detail}</span>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * La réponse s'écrit au fil de l'eau. Elle est déjà relue par le code quand elle arrive (rien du modèle n'est montré avant
+ * sa vérification) : c'est son affichage qui avance, mot après mot. Sous « réduire les animations » : tout d'un coup.
+ */
+export function AuFil({ texte, surAvance }: { texte: string; surAvance?: () => void }) {
+  const [n, setN] = useState(() => (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? texte.length : 0));
+  const rappel = useRef(surAvance);
+  useEffect(() => {
+    rappel.current = surAvance;
+  }, [surAvance]);
+  useEffect(() => {
+    if (n >= texte.length) return;
+    const t = setTimeout(() => {
+      setN((x) => Math.min(texte.length, x + 3));
+      rappel.current?.();
+    }, 16);
+    return () => clearTimeout(t);
+  }, [n, texte]);
+  return (
+    <>
+      <span aria-hidden={n < texte.length ? "true" : undefined}>{texte.slice(0, n)}</span>
+      {n < texte.length ? <span className="sr-only">{texte}</span> : null}
+    </>
   );
 }
 
@@ -117,8 +182,8 @@ export function Puce({ children, onClick, disabled, discret = false }: { childre
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`pressable min-h-11 rounded-full border px-4 text-[15px] font-semibold disabled:opacity-50 ${discret ? "text-[#FBF8F3]/70" : "text-[#FBF8F3]"}`}
-      style={{ borderColor: discret ? "transparent" : "rgba(251,248,243,0.28)" }}
+      className={`pressable min-h-11 rounded-full border px-4 text-[15px] font-semibold disabled:opacity-50 ${discret ? "text-[var(--chat-texte)]/70" : "text-[var(--chat-texte)]"}`}
+      style={{ borderColor: discret ? "transparent" : "var(--chat-trait-fort)" }}
     >
       {children}
     </button>
@@ -193,7 +258,7 @@ export function BarreSaisie({
       ) : null}
       <form
         className="flex items-end gap-2 rounded-[28px] p-1.5"
-        style={{ backgroundColor: COULEURS_CHAT.ivoire }}
+        style={{ backgroundColor: "var(--chat-carte)" }}
         onSubmit={(e) => {
           e.preventDefault();
           if (plein && !occupe) onEnvoyer();
@@ -283,7 +348,7 @@ export function useChampDicte() {
 function AideMicroBloque({ onReessayer }: { onReessayer: () => void }) {
   const [aide] = useState(() => aideMicro(typeof navigator === "undefined" ? "" : navigator.userAgent));
   return (
-    <div role="alert" className="mx-1 mb-2 flex flex-col gap-2 rounded-2xl p-3 text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.ivoire }}>
+    <div role="alert" className="mx-1 mb-2 flex flex-col gap-2 rounded-2xl p-3 text-[#111111]" style={{ backgroundColor: "var(--chat-carte)" }}>
       <p className="text-[15px] font-bold">Le micro est bloqué. {aide.titre} :</p>
       <ol className="flex list-decimal flex-col gap-1 pl-5 text-[15px]">
         {aide.etapes.map((e) => (

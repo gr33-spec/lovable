@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, ChevronRight, ClipboardList, FileText, Keyboard, Layers, Mic, PencilLine, Tag, Package, X } from "lucide-react";
+import { Camera, ChevronRight, ClipboardList, FileText, Layers, PencilLine, Tag, Package, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
@@ -11,12 +11,12 @@ import { natureDuDocument } from "../../../../packages/domain/src/documents/natu
 import { texteDuPdf } from "@/components/pdf-pages";
 import { SaisirMaListe } from "@/components/saisir-ma-liste";
 import { InfoAnalyse } from "@/components/coup-de-main-ia";
-import { api, ApiError, MAX_DOCUMENT_BYTES, messageErreur, newActionKey, type Project, type Quantitatif } from "@/lib/api";
+import { api, ApiError, apiEnDirect, MAX_DOCUMENT_BYTES, messageErreur, newActionKey, type Project, type Quantitatif } from "@/lib/api";
 import { useDictee } from "@/lib/dictee";
 import { NEW_PROJECT_NAME } from "@/lib/project-name";
 import { useSession } from "@/lib/session";
 import { attachFile } from "@/lib/upload";
-import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, TexteMobiiz, useChampDicte, useFil, useZoneVisible } from "./chat-mobiiz";
+import { AuFil, BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, EtapesIa, TexteMobiiz, useChampDicte, useFil, useZoneVisible, type EtapeIa } from "./chat-mobiiz";
 
 /**
  * NOUVEAU QUANTITATIF, UNE SEULE PORTE (Greg, 7 novembre 2026, captures « Mobiiz | Assistant » : « deux parcours distincts
@@ -62,7 +62,7 @@ function rangerLesQuestions(lignes: LigneCarte[], questions: { texte: string; ch
   });
   return { lignes: avec, generales: questions.filter((q) => q.ligne === null || q.ligne === undefined || q.ligne >= lignes.length) };
 }
-type SansId = { de: "mobiiz"; texte: string; reconnecter?: boolean; choix?: string[]; lien?: { href: string; texte: string } } | { de: "moi"; texte: string; apercu?: string } | { de: "compris"; texte: string; lignes: LigneCarte[]; propose?: boolean; titre?: string; etat: "ouvert" | "ajoute" | "corrige"; comprises?: (ArticleCompris | null)[] };
+type SansId = { de: "etapes"; etapes: EtapeIa[]; fini: boolean } | { de: "mobiiz"; texte: string; reconnecter?: boolean; choix?: string[]; lien?: { href: string; texte: string }; fil?: boolean } | { de: "moi"; texte: string; apercu?: string } | { de: "compris"; texte: string; lignes: LigneCarte[]; propose?: boolean; titre?: string; etat: "ouvert" | "ajoute" | "corrige"; comprises?: (ArticleCompris | null)[] };
 type Element = SansId & { id: number };
 
 const EXEMPLE = "Ex. : 1 000 ardoises 32×22 Espagne 1er choix et 950 crochets inox 100 mm";
@@ -98,8 +98,6 @@ async function voirLesPhotos(images: File[], echanges: { de: string; texte: stri
   return api<VuePhoto>("/v1/assistant/photo", { method: "POST", body: form });
 }
 
-const ENTREE = "pressable flex min-h-14 cursor-pointer items-center gap-2.5 rounded-2xl border border-white/15 bg-white/[0.06] px-3 text-left text-[15px] leading-tight font-bold text-[#FBF8F3] active:bg-white/10";
-const ENTREE_SOUS = "ml-auto hidden pl-2 text-right text-[13px] font-normal text-[#FBF8F3]/65 lg:block";
 
 const nombreFr = (q: string) => (/^\d+$/.test(q) ? Number(q).toLocaleString("fr-FR") : q.replace(".", ","));
 
@@ -156,6 +154,8 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
     return id;
   };
   const dire = (texte: string) => ajouterElement({ de: "mobiiz", texte });
+  /** Une réponse de l'assistant : elle s'écrit au fil de l'eau. */
+  const direAuFil = (texte: string) => ajouterElement({ de: "mobiiz", texte, fil: true });
   /** Une phrase d'état (« Pas de réseau ») ne se répète pas à chaque appui. */
   const direUneFois = (texte: string) => {
     const id = ++compteur.current;
@@ -186,7 +186,20 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
     ajouterElement({ de: "moi", texte });
     const echanges = [...conversation.current.echanges, { de: "artisan" as const, texte }];
     setOccupe(true);
-    const ia = await api<{ ia: boolean; lignes: LigneDecrite[]; questions: { texte: string; choix: string[]; ligne?: number | null }[]; message: string }>("/v1/assistant/description", { method: "POST", body: { echanges: echanges.slice(-20) } }).catch((e: unknown) => (e instanceof ApiError && e.status === 0 ? ("reseau" as const) : null));
+    // Greg, 14 novembre 2026 : ce qui se passe se voit EN DIRECT (« Réflexion… », « Lecture de ta demande… », « Vérification des
+    // quantités… », « Terminé »), dépliable. Les étapes viennent du serveur, une à une ; si le flux ne passe pas, l'appel
+    // simple répond comme avant.
+    type ReponseIa = { ia: boolean; lignes: LigneDecrite[]; questions: { texte: string; choix: string[]; ligne?: number | null }[]; message: string };
+    const idEtapes = ajouterElement({ de: "etapes", etapes: [], fini: false });
+    const corps = { echanges: echanges.slice(-20) };
+    let ia: ReponseIa | "reseau" | null = await apiEnDirect<{ etape?: EtapeIa; fin?: ReponseIa }>("/v1/assistant/description/flux", corps, (e) => {
+      if (e.etape) setElements((xs) => xs.map((x) => (x.id === idEtapes && x.de === "etapes" ? { ...x, etapes: [...x.etapes, e.etape!] } : x)));
+    })
+      .then((dernier) => dernier?.fin ?? null)
+      .catch((e: unknown) => (e instanceof ApiError && e.status === 0 ? ("reseau" as const) : null));
+    if (ia === null) ia = await api<ReponseIa>("/v1/assistant/description", { method: "POST", body: corps }).catch((e: unknown) => (e instanceof ApiError && e.status === 0 ? ("reseau" as const) : null));
+    // Les étapes restent dans le fil, repliées ; sans aucune étape reçue, rien ne reste.
+    setElements((xs) => xs.flatMap((x) => (x.id === idEtapes && x.de === "etapes" ? (x.etapes.length ? [{ ...x, fini: true }] : []) : [x])));
     setOccupe(false);
     // Le réseau a lâché en route : le message revient dans la case, et on le dit.
     if (ia === "reseau") {
@@ -200,16 +213,16 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
       if (ancienne !== null) setElements((xs) => xs.filter((x) => x.id !== ancienne));
       lignes = ia.lignes.map(avecUnite);
       conversation.current = { echanges: [...echanges, ...ia.questions.map((q) => ({ de: "assistant" as const, texte: q.choix.length ? `${q.texte} (${q.choix.join(", ")})` : q.texte }))], carte: null };
-      if (lignes.length === 0 && ia.questions.length === 0) return dire(ia.message || "Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo ou un document.");
+      if (lignes.length === 0 && ia.questions.length === 0) return direAuFil(ia.message || "Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo ou un document.");
     } else {
       conversation.current = { echanges: [], carte: null };
       const r = lireDescription(texte);
       lignes = [...r.lignes, ...r.aConfirmer].map(avecUnite);
       if (lignes.length === 0) return dire("Je n'ai pas trouvé de matériau. Dis-le avec sa quantité, par exemple « 10 sacs de colle », ou touche + pour une photo ou un document.");
     }
-    if (ia?.ia && ia.message) dire(ia.message);
+    if (ia?.ia && ia.message) direAuFil(ia.message);
     if (lignes.length === 0) {
-      for (const q of ia?.questions ?? []) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
+      for (const q of ia?.questions ?? []) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix, fil: true });
       return;
     }
     if (ia?.ia) {
@@ -217,7 +230,7 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
       // chose. Les questions du catalogue ne sont pas reposées par-dessus (jamais deux fois la même information).
       const r = rangerLesQuestions(lignes, ia.questions, existantes);
       conversation.current.carte = ajouterElement({ de: "compris", texte, lignes: r.lignes, etat: "ouvert", propose: true });
-      for (const q of r.generales) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix });
+      for (const q of r.generales) ajouterElement({ de: "mobiiz", texte: q.texte, choix: q.choix, fil: true });
       return;
     }
     const id = ajouterElement({ de: "compris", texte, lignes, etat: "ouvert" });
@@ -398,52 +411,22 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
   );
 
   return (
-    <div ref={zone} role="dialog" aria-modal="true" aria-label="Nouveau quantitatif" className={`fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[#FBF8F3] ${surAjout ? "lg:left-1/2 lg:w-1/2 lg:border-l lg:border-white/15" : ""}`} style={{ backgroundColor: COULEURS_CHAT.fond }}>
+    <div ref={zone} role="dialog" aria-modal="true" aria-label="Nouveau quantitatif" className={`fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)] ${surAjout ? "lg:left-1/2 lg:w-1/2 lg:border-l lg:border-[var(--chat-texte)]/15" : ""}`} style={{ backgroundColor: COULEURS_CHAT.fond }}>
       {champs}
       <EnTeteChat onFermer={onFermer ?? (() => router.push("/chantiers/nouveau"))} />
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <div ref={fil} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
           {liste ? (
             <button type="button" onClick={() => router.push(`/chantiers/${liste.projetId}`)} className="pressable flex min-h-11 items-center gap-2 self-end rounded-full border-2 px-4 text-[15px] font-bold" style={{ borderColor: COULEURS_CHAT.jaune }}>
-              <ClipboardList size={18} aria-hidden="true" style={{ color: COULEURS_CHAT.jaune }} /> Ma liste · {liste.n}
+              <ClipboardList size={18} aria-hidden="true" style={{ color: "var(--chat-jaune-texte)" }} /> Ma liste · {liste.n}
             </button>
           ) : null}
           <Bulle de="mobiiz">
             <TexteMobiiz>{surAjout ? "Je complète ta liste en cours. Donne-moi ce que tu as, tu vérifies avant d'ajouter." : `Bonjour${prenom ? ` ${prenom}` : ""}. Donne-moi ce que tu as : je prépare, tu vérifies.`}</TexteMobiiz>
           </Bulle>
-          {/* les façons d'entrer sont visibles tout de suite, avec leurs mots (jamais un écran vide ni une icône seule). */}
-          {elements.length === 0 && !liste ? (
-            <div role="group" aria-label="Donne à Mobiiz ce que tu as" className="ml-10 grid grid-cols-2 gap-2">
-              <label htmlFor={ids.photo} className={ENTREE}>
-                <Camera size={22} aria-hidden="true" className="shrink-0 text-[#FED206]" />
-                <span>Prendre une photo</span>
-                <span className={ENTREE_SOUS}>Chantier ou liste écrite</span>
-              </label>
-              <label htmlFor={ids.document} className={ENTREE}>
-                <FileText size={22} aria-hidden="true" className="shrink-0 text-[#FED206]" />
-                <span>Importer un document</span>
-                <span className={ENTREE_SOUS}>Devis, PDF, liste</span>
-              </label>
-              <button
-                type="button"
-                className={ENTREE}
-                onClick={() => {
-                  champ.avantDictee();
-                  dictee.demarrer();
-                }}
-              >
-                <Mic size={22} aria-hidden="true" className="shrink-0 text-[#FED206]" />
-                <span>Dicter</span>
-                <span className={ENTREE_SOUS}>Dis ce qu&apos;il te faut</span>
-              </button>
-              <button type="button" className={ENTREE} onClick={() => zone.current?.querySelector<HTMLElement>("textarea, input[type=text]")?.focus()}>
-                <Keyboard size={22} aria-hidden="true" className="shrink-0 text-[#FED206]" />
-                <span>Écrire</span>
-                <span className={ENTREE_SOUS}>Tape ta demande</span>
-              </button>
-            </div>
-          ) : null}
-          <p className="pl-10 text-[14px] text-[#FBF8F3]/70">{EXEMPLE}</p>
+          {/* Greg, 14 novembre 2026 : plus de gros boutons en vrac ; comme dans Claude ou ChatGPT, tout passe par la barre du
+              bas : le « + » (photo, document), le micro, le clavier. (Avant : quatre grands boutons sous le bonjour.) */}
+          <p className="pl-10 text-[14px] text-[var(--chat-texte)]/70">{EXEMPLE}</p>
           {elements.map((e) =>
             e.de === "moi" ? (
               <Bulle key={e.id} de="moi">
@@ -451,9 +434,11 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
                 {e.apercu ? <img src={e.apercu} alt={e.texte} className="mb-1 max-h-48 w-auto rounded-xl" /> : null}
                 {e.texte}
               </Bulle>
+            ) : e.de === "etapes" ? (
+              <EtapesIa key={e.id} etapes={e.etapes} fini={e.fini} />
             ) : e.de === "mobiiz" ? (
               <Bulle key={e.id} de="mobiiz">
-                <TexteMobiiz>{e.texte}</TexteMobiiz>
+                <TexteMobiiz>{e.fil ? <AuFil texte={e.texte} surAvance={enBas} /> : e.texte}</TexteMobiiz>
                 {e.choix?.length ? (
                   <div role="group" aria-label={`Réponses à : ${e.texte}`} className="mt-2 flex flex-wrap gap-2">
                     {e.choix.map((c) => (
@@ -501,7 +486,7 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
               />
             ),
           )}
-          {lecture ? <p className="pl-10 text-[14px] text-[#FBF8F3]/70">J&apos;envoie ton document… la lecture continue sur ta liste.</p> : null}
+          {lecture ? <p className="pl-10 text-[14px] text-[var(--chat-texte)]/70">J&apos;envoie ton document… la lecture continue sur ta liste.</p> : null}
         </div>
         <BarreSaisie
           valeur={champ.saisie}
@@ -562,7 +547,7 @@ function CarteCompris({ lignes, comprises, onCompris, etat, occupe, onAjouter, o
   const enCours = etat === "ouvert" ? lignes.findIndex((l, i) => { const c = comprises?.[i]; return !!c && etapeSuivante(c, l.quantite, l.unite) !== null; }) : -1;
   return (
     <div className="flex flex-col gap-2">
-      <section aria-label="J'ai compris" className="ml-10 flex flex-col gap-3 rounded-[22px] bg-[#FBF8F3] p-4 text-[#111111]">
+      <section aria-label="J'ai compris" className="ml-10 flex flex-col gap-3 rounded-[22px] bg-[var(--chat-carte)] p-4 text-[#111111]">
         <p className="text-[18px] font-extrabold">{propose ? `${titre ?? "Mobiiz propose"} · ${lignes.length > 1 ? `${lignes.length} articles` : "1 article"}` : `J'ai compris${lignes.length > 1 ? ` ${lignes.length} articles` : ""}`}</p>
         {/* une proposition n'est pas une information validée ; elle le dit, et rien n'entre sans le bouton. */}
         {propose && etat === "ouvert" ? <p className="-mt-2 text-[14px] text-[#111111]/70">Vérifie chaque ligne. Rien n&apos;entre dans ta liste sans ton accord.</p> : null}
@@ -645,7 +630,7 @@ function CarteCompris({ lignes, comprises, onCompris, etat, occupe, onAjouter, o
         )}
       </section>
       {etat === "ouvert" && onMoiMeme ? (
-        <button type="button" onClick={onMoiMeme} className="ml-10 flex min-h-11 items-center gap-2 self-start text-[15px] font-semibold" style={{ color: COULEURS_CHAT.jaune }}>
+        <button type="button" onClick={onMoiMeme} className="ml-10 flex min-h-11 items-center gap-2 self-start text-[15px] font-semibold" style={{ color: "var(--chat-jaune-texte)" }}>
           <PencilLine size={18} aria-hidden="true" /> Ce n&apos;est pas ça : je l&apos;écris moi-même
         </button>
       ) : null}
@@ -765,8 +750,9 @@ function FeuilleAjouter({ liste, ids, onListe, onFermer }: { liste: boolean; ids
             </label>
             {/* Le catalogue n'est plus ici (Greg, 13 novembre 2026, « cœur métier » : « ne duplique pas le catalogue dans
                 l'assistant […] le bouton doit rester dans le parcours manuel prévu ») : il s'ouvre par « Je saisis ma liste ». */}
-            {/* Photos et documents sont lus par l'IA : la phrase, le compteur et « Comment fonctionne l'analyse ? ». */}
-            <InfoAnalyse />
+            {/* Greg, 14 novembre 2026 : plus de bloc de compteurs ici ; les analyses restantes se disent au moment où une
+                analyse va être utilisée (fenêtre « Analyser ce document ? »). La phrase et « Comment fonctionne l'analyse ? » restent. */}
+            <InfoAnalyse sansCompteurs />
           </>
         )}
         <p className="pt-1 text-center text-[14px] text-[#111111]/75">Tu peux aussi écrire directement dans la conversation.</p>
@@ -778,15 +764,32 @@ function FeuilleAjouter({ liste, ids, onListe, onFermer }: { liste: boolean; ids
 /** Avant de consommer une analyse (Greg, 1er novembre 2026) : le type reconnu et son coût ; « Annuler » ne décompte rien. */
 function ConfirmerAnalyse({ nature, nombre, onChanger, onAnnuler, onAnalyser }: { nature: "devis" | "liste"; nombre: number; onChanger: () => void; onAnnuler: () => void; onAnalyser: () => void }) {
   const devis = nature === "devis";
+  // Les analyses restantes, discrètes, seulement ici : au moment où l'une d'elles va servir.
+  const [quotas, setQuotas] = useState<{ analyses: { restantes: number }; scans: { restantes: number } } | null>(null);
+  useEffect(() => {
+    let vivant = true;
+    api<{ quotas?: { analyses: { restantes: number }; scans: { restantes: number } } | null }>("/v1/ai-usage/jauge")
+      .then((r) => (vivant ? setQuotas(r.quotas ?? null) : undefined))
+      .catch(() => undefined);
+    return () => {
+      vivant = false;
+    };
+  }, []);
+  const restantes = quotas ? (devis ? quotas.analyses.restantes : quotas.scans.restantes) : null;
   return (
     <div className="fixed top-0 left-0 z-[60] flex h-[100dvh] w-full items-end justify-center bg-black/50 p-4 lg:items-center" onClick={onAnnuler}>
-      <div role="alertdialog" aria-modal="true" aria-label="Analyser ce document ?" onClick={(e) => e.stopPropagation()} className="flex w-full max-w-md flex-col gap-3 rounded-3xl bg-[#FBF8F3] p-5 pb-[max(env(safe-area-inset-bottom),20px)] text-[#111111]">
+      <div role="alertdialog" aria-modal="true" aria-label="Analyser ce document ?" onClick={(e) => e.stopPropagation()} className="flex w-full max-w-md flex-col gap-3 rounded-3xl bg-[var(--chat-carte)] p-5 pb-[max(env(safe-area-inset-bottom),20px)] text-[#111111]">
         <h2 className="text-[18px] font-extrabold">{nombre > 1 ? `Analyser ces ${nombre} photos ?` : "Analyser ce document ?"}</h2>
         <p className="text-[16px] leading-snug">
           {devis
             ? `${nombre > 1 ? "Ces photos semblent être un devis" : "Ce document semble être un devis"}. Son analyse utilisera 1 analyse de devis.`
             : `${nombre > 1 ? "Ces photos semblent être une liste" : "Ce document semble être une liste"}. Son analyse utilisera 1 analyse de photo ou de liste.`}
         </p>
+        {restantes !== null ? (
+          <p role="status" className="-mt-1 text-[14px] text-[#111111]/70">
+            {restantes > 0 ? `Il t'en reste ${restantes}.` : "Tu n'en as plus ce mois-ci."}
+          </p>
+        ) : null}
         <button type="button" onClick={onChanger} className="min-h-10 self-start text-[14px] font-semibold underline underline-offset-4">
           {devis ? "C'est une liste ? L'analyser comme une liste" : "C'est un devis ? L'analyser comme un devis"}
         </button>

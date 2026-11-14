@@ -93,7 +93,9 @@ test("une photo de chantier : ce que l'assistant voit, les matériaux à confirm
   // Une photo ne mesure rien : ni la quantité ni le format inventés par le modèle ne passent.
   await expect(compris).not.toContainText(/12\s?m\b/);
   await expect(compris).not.toContainText(/32\s?×\s?22/);
-  await expect(compris.getByText("Quelle surface de couverture, en m² ?")).toBeVisible();
+  // UNE question à la fois (Greg, 14 novembre 2026) : d'abord ce qu'il veut faire ; la surface viendra ensuite.
+  await expect(chat.getByText("Tu refais toute la couverture ou une partie ?")).toBeVisible();
+  await expect(chat.getByText("Quelle surface de couverture, en m² ?")).toHaveCount(0);
   // L'artisan dit ses mesures : la carte se complète, toujours une seule.
   await chat.getByRole("textbox", { name: "Ton message" }).fill("85 m² en 32 22 et 14 mètres de gouttière");
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
@@ -111,4 +113,53 @@ test("une photo d'une liste écrite : l'assistant la reconnaît et propose la le
   // La confirmation habituelle avant l'analyse d'une liste (son coût est dit avant) ; rien n'est recopié par l'assistant.
   await expect(page.getByRole("dialog", { name: "Nouveau quantitatif" }).getByRole("region", { name: "J'ai compris" })).toHaveCount(0);
   await expect(page.getByRole("alertdialog", { name: "Analyser ce document ?" })).toBeVisible();
+});
+
+/**
+ * « ARDOISE 5 ET FRUITIER » (Greg, 14 novembre 2026) : l'objectif est un quantitatif parfait. Un article flou ou inconnu se
+ * demande AVANT d'entrer dans la liste, une question à la fois, avec des choix à toucher ; les étapes du travail se voient
+ * en direct et se déplient ; plus de gros boutons en vrac : la barre du bas, son « + » et le micro ; l'écran suit le thème.
+ */
+test("« Ardoise 5 et fruitier » : une question avant d'ajouter, une à la fois ; les étapes en direct, dépliables ; fond blanc en mode jour", async ({ page }) => {
+  await inscrire(page);
+  await page.goto("/chantiers/nouveau?mode=assistant");
+  const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  await pret(page);
+  // Comme dans Claude ou ChatGPT : aucun gros bouton dans le fil, tout est dans la barre du bas.
+  await expect(chat.getByRole("group", { name: "Donne à Mobiiz ce que tu as" })).toHaveCount(0);
+  await expect(chat.getByRole("button", { name: "Ajouter : photo ou document" })).toBeVisible();
+  await expect(chat.getByRole("button", { name: "Dicter" })).toBeVisible();
+  await expect(chat.getByText(/Analyses disponibles/)).toHaveCount(0);
+  const dossier = process.env.CAPTURES_ASSISTANT;
+  if (dossier) await page.screenshot({ path: path.join(dossier, `${test.info().project.name}-1-accueil-nuit.png`) });
+
+  await chat.getByRole("textbox", { name: "Ton message" }).fill("Ardoise 5 et fruitier");
+  await chat.getByRole("button", { name: "Envoyer le message" }).click();
+  // Rien n'entre dans la liste : la question d'abord, avec ses choix.
+  await expect(chat.getByText("Quelle ardoise : format, origine, choix ?")).toBeVisible();
+  await expect(chat.getByRole("region", { name: "J'ai compris" })).toHaveCount(0);
+  // Les étapes : repliées sur « Terminé », dépliables pour voir ce qui a été fait.
+  const etapes = chat.getByRole("button", { name: /Terminé/ });
+  await expect(etapes).toBeVisible();
+  await etapes.click();
+  const detail = chat.getByRole("list", { name: "Ce que Mobiiz a fait" });
+  for (const t of ["Réflexion…", "Lecture de ta demande…", "Vérification des quantités…", "Terminé"]) await expect(detail).toContainText(t);
+  if (dossier) await page.screenshot({ path: path.join(dossier, `${test.info().project.name}-2-question-etapes-nuit.png`) });
+
+  // Un choix à toucher ; l'ardoise est proposée, et le mot inconnu se demande, avec les mots de l'artisan.
+  await chat.getByRole("button", { name: "32×22 Espagne 1er choix", exact: true }).click();
+  const compris = chat.getByRole("region", { name: "J'ai compris" });
+  await expect(compris).toContainText(/Ardoise naturelle 32\s?×\s?22/);
+  await expect(chat.getByText("« fruitier », tu veux dire quoi ?")).toBeVisible();
+  await expect(compris).not.toContainText(/fruit/i);
+
+  // MODE JOUR : l'assistant suit le thème de l'app, fond blanc.
+  await page.evaluate(() => {
+    window.localStorage.setItem("mobiiz-theme", "clair");
+    document.documentElement.dataset.theme = "clair";
+    window.dispatchEvent(new Event("mobiiz-theme"));
+  });
+  await expect(chat.getByText("« fruitier », tu veux dire quoi ?")).toBeVisible();
+  await expect.poll(() => chat.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(255, 255, 255)");
+  if (dossier) await page.screenshot({ path: path.join(dossier, `${test.info().project.name}-3-suite-jour.png`) });
 });
