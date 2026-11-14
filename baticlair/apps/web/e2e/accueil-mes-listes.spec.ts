@@ -126,6 +126,8 @@ test("À faire (Greg, 6 novembre 2026 ; UX simplifiée du 8 novembre) : un seul 
 
 test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre brouillon » ; « Continuer » reprend exactement la saisie", async ({ page }) => {
   await inscrire(page);
+  // Le guide de première visite s'ouvrait parfois PENDANT la saisie (chaîne du 14 novembre) : il est marqué vu d'abord.
+  await apiJson(page, "POST", "/v1/me/guide/vu");
   // Un brouillon d'achat groupé, plus ancien.
   expect((await apiJson(page, "PUT", "/v1/brouillons", { cle: "achat-groupe:test", type: "achat-groupe", titre: "Achat groupé couverture · 1 ligne", url: "/achats-groupes/lancer", etape: 1, donnees: { lignes: [] } })).status).toBe(200);
   await page.waitForTimeout(50);

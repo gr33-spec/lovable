@@ -4064,6 +4064,8 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
 
 test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan reviennent ; ceux d'autres artisans sont marqués, jamais leur entreprise", async ({ page }) => {
   await signUp(page);
+  // Le guide de première visite s'ouvrait parfois PENDANT la saisie (chaînes des 14 novembre) : il est marqué vu d'abord.
+  await apiJson(page, "POST", "/v1/me/guide/vu");
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Crochet gouttière bandeau 25", quantite: "40", unite: "pièces" }] })).status).toBe(201);
   await page.goto("/chantiers/nouveau?mode=manuel");
   const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
@@ -4075,6 +4077,8 @@ test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan revien
   await expect(ecran.getByRole("button", { name: "Crochet gouttière bandeau 25 (déjà écrit par toi)" })).toBeVisible();
   await page.context().clearCookies();
   await signUp(page);
+  // Le guide de première visite s'ouvrait parfois PENDANT la saisie (chaînes des 14 novembre) : il est marqué vu d'abord.
+  await apiJson(page, "POST", "/v1/me/guide/vu");
   await page.goto("/chantiers/nouveau?mode=manuel");
   await ecran.getByLabel("Rechercher un matériau").fill("crochet band");
   await page.waitForTimeout(800);
@@ -4082,9 +4086,13 @@ test("« Saisir ma liste » : les intitulés déjà écrits par l'artisan revien
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "tuile zephyr terre cuite modele zx12", quantite: "40", unite: "pièces" }] })).status).toBe(201);
   await page.context().clearCookies();
   await signUp(page);
+  // Le guide de première visite s'ouvrait parfois PENDANT la saisie (chaînes des 14 novembre) : il est marqué vu d'abord.
+  await apiJson(page, "POST", "/v1/me/guide/vu");
   expect((await apiJson(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Tuile Zéphyr terre cuite, modèle ZX 12", quantite: "10", unite: "pièces" }] })).status).toBe(201);
   await page.context().clearCookies();
   await signUp(page);
+  // Le guide de première visite s'ouvrait parfois PENDANT la saisie (chaînes des 14 novembre) : il est marqué vu d'abord.
+  await apiJson(page, "POST", "/v1/me/guide/vu");
   await page.goto("/chantiers/nouveau?mode=manuel");
   await ecran.getByLabel("Rechercher un matériau").fill("zephyr zx12");
   await expect(ecran.getByRole("button", { name: /Zéphyr.*\(écrit par d'autres artisans\)$/i })).toBeVisible();
