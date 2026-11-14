@@ -174,7 +174,7 @@ export function SaisirMaListe({ onFermer }: { onFermer: () => void }) {
   return (
     <div role="dialog" aria-modal="true" aria-label="Saisir ma liste" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col bg-ground text-ink">
       <header className="flex shrink-0 items-center gap-3 border-b border-line px-4 pt-[max(env(safe-area-inset-top),10px)] pb-2.5">
-        <button type="button" onClick={sortir} aria-label="Retour" className="pressable grid size-10 shrink-0 place-items-center rounded-full border border-line bg-surface">
+        <button type="button" onClick={sortir} aria-label="Retour" className="pressable grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface">
           <ArrowLeft size={19} aria-hidden="true" />
         </button>
         <h2 className="min-w-0 flex-1 truncate text-[19px] font-extrabold">Ma liste</h2>

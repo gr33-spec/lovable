@@ -101,7 +101,7 @@ export function Recherche({ valeur, onChange, placeholder }: { valeur: string; o
   return (
     <label className={`flex min-h-13 items-center gap-3 px-4 ${CARTE}`}>
       <Search size={20} aria-hidden="true" className="shrink-0" />
-      <input type="search" value={valeur} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} aria-label={placeholder} className="min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-[#7a7466]" />
+      <input type="search" value={valeur} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} aria-label={placeholder} className="min-h-11 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-[#7a7466]" />
     </label>
   );
 }

@@ -20,6 +20,7 @@ import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { useBrouillon } from "@/lib/brouillon";
 import { useAncienMode } from "@/components/negocie";
+import { useAgV1 } from "@/lib/ag-v1";
 import { useActionChantier } from "@/lib/actions-chantier";
 import { EtapeApercu, EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
 import { NEGOCES_PAR_DEMANDE } from "../../../../packages/domain/src/groupe/offre-artisan";
@@ -683,6 +684,8 @@ function NewRequest({
   const setDueDate = (v: string) => b.modifier((d) => ({ ...d, dueDate: v }));
   // Lot final, points 1 et 4 : « Avant d'envoyer » la première fois, puis « À qui j'envoie ? », puis l'aperçu du mail.
   const identite = useIdentite();
+  // Recette du 13 novembre (G17) : avant l'envoi, dire qu'un article parti chez les négoces ne se groupe plus.
+  const agV1 = !!useAgV1().etat;
   const [enregistre, setEnregistre] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
@@ -801,6 +804,7 @@ function NewRequest({
             <RappelAdresseMobiiz />
             <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
             {selected.size > 0 ? <QuiRecoitQuoi projectId={projectId} ids={[...selected].sort().join(",")} /> : null}
+            {agV1 ? <p className="text-[14px] text-muted">Une fois envoyés à tes négoces, ces articles ne pourront plus partir en achat groupé.</p> : null}
           </SendSheet>
         ) : (
           // Lot final, point 4 : « Voici ce que ton négoce va recevoir », l'aperçu fidèle ; un seul bouton, « Envoyer ».

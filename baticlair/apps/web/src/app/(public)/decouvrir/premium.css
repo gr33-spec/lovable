@@ -204,8 +204,8 @@ html:has(.mzp){scroll-behavior:smooth;scroll-padding-top:90px}
 .mzp .site-footer{border-top:1px solid var(--line);background:#0A0907;padding:33px 0 40px}
 .mzp .footer-flex{display:flex;align-items:center;justify-content:space-between;gap:30px}
 .mzp .site-footer .brand img{width:115px}
-.mzp .footer-links{display:flex;flex-wrap:wrap;gap:17px 24px}
-.mzp .footer-links a{font-size:12px;color:#AFA69A}
+.mzp .footer-links{display:flex;flex-wrap:wrap;gap:0 24px}
+.mzp .footer-links a{display:inline-flex;align-items:center;min-height:44px;font-size:12px;color:#AFA69A}
 .mzp .footer-links a:hover{color:white}
 .mzp .footer-bottom{display:flex;justify-content:space-between;color:#746C61;font-size:11px;margin-top:27px}
 .mzp .sticky-cta{display:none;position:fixed;z-index:85;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(12,10,8,.98) 0%,rgba(12,10,8,.96) 68%,transparent 100%);padding:20px max(19px,env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) max(19px,env(safe-area-inset-left));transform:translateY(120%);opacity:0;pointer-events:none;transition:opacity .23s,transform .23s}

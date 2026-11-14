@@ -145,7 +145,7 @@ const ETAPES = [
 const BENEFICES = [
   { ico: "i-check", titre: "Simple et rapide", texte: "Une demande au lieu de cinq appels." },
   { ico: "i-search", titre: "Plus de visibilité", texte: "Tu compares facilement les propositions." },
-  { ico: "i-people", titre: "Plus de poids", texte: "Le collectif négocie de meilleurs tarifs." },
+  { ico: "i-people", titre: "Plus de poids", texte: "À plusieurs, on pèse plus face aux négoces." },
 ] as const;
 
 /** La question des missions : seulement quand elles sont ouvertes (`SiMissions`). */
