@@ -3963,6 +3963,10 @@ test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un e
   const mail = (await emailsVers(page, "admin-groupe@example.fr")).filter((m) => /code d'accès au pilotage/.test(m.subject)).at(-1)!;
   await page.getByLabel("Code reçu par e-mail").fill(/(\d{6})/.exec(mail.text)![1]!);
   await page.getByRole("button", { name: "Ouvrir l'espace admin" }).click();
+  // Greg, 14 novembre 2026 : le menu ouvre le NOUVEL accueil (six cartes) ; l'ancien tableau de bord est à un clic.
+  await expect(page.getByRole("list", { name: "Chiffres clés" }).getByRole("listitem")).toHaveCount(6);
+  await page.getByRole("link", { name: "Tableau de bord détaillé" }).click();
+  await expect(page).toHaveURL(/\/admin\/pilotage$/);
   const bref = page.getByRole("region", { name: "En bref" });
   for (const titre of ["Artisans actifs", "Artisans qui paient", "Argent par mois", "Coût de l'IA ce mois"]) await expect(bref.getByText(titre, { exact: true })).toBeVisible();
   const onglets = page.getByRole("tablist", { name: "Parties de l'espace admin" });
