@@ -541,8 +541,10 @@ export class DemandePersoService {
     const inscrit = await this.prisma.compteNegoce.findFirst({ where: { email, inscritLe: { not: null } }, select: { id: true } });
     if (inscrit) return null;
     const negoce = (await this.prisma.negoce.findUnique({ where: { email_departement: { email, departement } } })) ?? (await this.prisma.negoce.create({ data: { nom: s.name, email, departement } }));
-    const jeton = await this.inviter({ id: negoce.id, email: negoce.email, siret: negoce.siret, nom: negoce.nom, compteId: negoce.compteId });
-    return { phrase: PHRASE_COMPTE_APRES_REPONSE, lien: `${this.cfg.webAppUrl}/negoce/rejoindre/${jeton}` };
+    // Recette du 13 novembre 2026 (B8) : l'invitation rend déjà le lien COMPLET ; le remettre derrière l'adresse du site
+    // donnait « Page introuvable ». Un simple jeton (anciens branchements) reçoit toujours son adresse.
+    const invitation = await this.inviter({ id: negoce.id, email: negoce.email, siret: negoce.siret, nom: negoce.nom, compteId: negoce.compteId });
+    return { phrase: PHRASE_COMPTE_APRES_REPONSE, lien: /^https?:\/\//.test(invitation) ? invitation : `${this.cfg.webAppUrl}/negoce/rejoindre/${invitation}` };
   }
 
   /** « Je ne peux pas chiffrer » : le motif (facultatif) va à l'artisan ; plus de relance. */

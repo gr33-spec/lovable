@@ -19,6 +19,7 @@ Fiche lue par chaque nouvelle session. Le détail des règles produit est dans `
 
 - Application multimétier (douze métiers au catalogue) ; la publicité et la communication ciblent d'abord les couvreurs en Bretagne.
 - Zinguerie et Étanchéité sont des métiers à part de la Couverture, partout : catalogue, routage des négoces, lots et filtre des achats groupés (13 novembre 2026).
+- Un « négoce couverture » a Couverture, Zinguerie et Étanchéité cochées d'office ; il décoche ce qu'il ne vend pas. La demande de prix classique trie ses lignes par métier de chaque négoce ; une ligne que personne ne couvre part chez tous (14 novembre 2026).
 - Confidentialité : côté achats, les artisans ne se voient jamais entre eux ; un négoce ne voit jamais les prix d'un autre ; les négoces sont vérifiés.
 
 ## Charte
@@ -35,7 +36,7 @@ Fiche lue par chaque nouvelle session. Le détail des règles produit est dans `
   - `apps/web` : Next 16, React 19, Tailwind 4, tests Playwright (`e2e/`, `e2e-ag-v1/`).
   - `referentiels/`, `docs/` : référentiels métier et documents de suivi.
 - Outils : Vercel (site et API), Neon (base), Resend (e-mails), Stripe (compte « Mobiiz »), Anthropic (lecture des devis, clé `BATICLAIR_ANTHROPIC_KEY`).
-- Tarifs (décision de Greg du 13 novembre 2026, conforme au code `packages/domain/src/abonnement/abonnement.ts`) : deux formules payantes, Essentiel et Pro ; à l'année, deux mois offerts (dix mois facturés pour douze). Essentiel 19,90 € HT par mois ou 199 € HT par an ; Pro 39,90 € HT par mois ou 399 € HT par an. La formule Découverte gratuite reste, en plus des deux payantes (confirmé par Greg le 13 novembre 2026). Achats groupés gratuits. Rien n'est facturé aux négoces. L'annuel n'est payable que si ses prix Stripe existent (pas créés à ce jour). Le paywall est en pause (`PAYWALL=off`).
+- Tarifs (décision de Greg du 13 novembre 2026, conforme au code `packages/domain/src/abonnement/abonnement.ts`) : deux formules payantes, Essentiel et Pro ; à l'année, deux mois offerts (dix mois facturés pour douze). Essentiel 19,90 € HT par mois ou 199 € HT par an ; Pro 39,90 € HT par mois ou 399 € HT par an. La formule Découverte gratuite reste, en plus des deux payantes (confirmé par Greg le 13 novembre 2026). Achats groupés gratuits. Rien n'est facturé aux négoces. L'annuel n'est payable que si ses prix Stripe existent (pas créés à ce jour). L'ancienne limite de chantiers (essai 3, Solo, Pro à 39 et 79 €) ne s'applique plus jamais, même avec `PAYWALL=on` (14 novembre 2026) : listes sans limite pour tous.
 - Réglages coupés par défaut : `MISSIONS_V1`, `ASSISTANT_IA`, `ACHATS_GROUPES_V1`, `ACCES_DEMO`, `DEMO_PUBLIQUE`.
 - Budget IA : `BUDGET_IA_JOUR` (2 € par défaut dans le code ; alerte e-mail au-delà), `AI_MONTHLY_BUDGET_EUR`, plafonds de l'assistant.
 - Branche de test : `claude/saas-achat-artisans-prompt-1lyihx` (déployée sur test.mobiiz.fr). Aucune production à ce jour.
@@ -69,6 +70,16 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Alertes : `ALERT_EMAIL` = contact@mobiiz.fr.
 - Filtre par fabricant (tuiles) : plus tard, après retours terrain.
 - Tarifs : Découverte gratuite, plus deux formules payantes (Essentiel, Pro) ; deux mois offerts à l'année.
+
+## Décisions du 14 novembre 2026 (après la recette complète du 13)
+
+- L'artisan n'est jamais obligé de commander : il décide à la réception de l'offre. La FAQ dit comme l'application.
+- Négoces gratuits au lancement : plus aucune commission écrite dans les conditions négoces (version 2026-11-14).
+- Les montants d'exemple de la page publique restent.
+- CGU : une version à jour est préparée pour l'avocat (`baticlair/docs/groupe/CGU-candidate-2026-11-14.md`). Rien n'est publié : la page `/cgu` affiche encore la version du 27/10/2026, avec ses anciens prix.
+- Un abonnement en cours refuse un second paiement. Les envois de demandes passent par une file (trois à la fois).
+- Mission : un numéro, un e-mail ou une adresse de site écrits dans une annonce, un profil ou une réponse sont masqués pour les autres entreprises.
+- Rapport de la recette : `baticlair/docs/recette/recette-complete-2026-11-13.md`.
 
 ## Signalement de bugs
 

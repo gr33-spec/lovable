@@ -148,10 +148,9 @@ export class NegocesService {
     try {
       // Multimétier (23 octobre au soir) : le négoce entre dans les familles du métier de l'entreprise (couverture pour un couvreur…).
       const company = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { trades: true } });
-      // Greg, 13 novembre 2026 : la zinguerie et l'étanchéité ne se prêtent pas d'office. Un négoce invité par un couvreur
-      // entre en « couverture » ; il ne reçoit la zinguerie ou l'étanchéité que s'il les déclare lui-même (ou si c'est le
-      // métier principal de l'artisan qui l'invite, un étancheur par exemple).
-      const familles = famillesDuMetier(company?.trades[0]).filter((f, i) => i === 0 || (f !== "zinguerie" && f !== "etancheite"));
+      // RÈGLE CHANGÉE (Greg, 14 novembre 2026) : un négoce invité par un couvreur entre avec Couverture, Zinguerie et
+      // Étanchéité cochées d'office ; il décoche ce qu'il ne vend pas. (Le 13 novembre : couverture seule.)
+      const familles = famillesDuMetier(company?.trades[0]);
       await this.ajouter(tenant, { nom, email, siret, departement: b.departement ?? sirene?.departement ?? null, familles: familles.length ? [...familles] : ["couverture"] }, maintenant);
     } catch (e) {
       if (!(e instanceof DomainError && (e.details as { reason?: string } | undefined)?.reason === "deja_ajoute")) throw e;

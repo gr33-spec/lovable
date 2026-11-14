@@ -233,6 +233,7 @@ export class AbonnementService {
     assertCanWrite(tenant);
     if (!this.actif) throw notFound("Route");
     const web = this.config.webAppUrl.replace(/\/$/, "");
+    await this.refuserSiDejaAbonne(tenant.companyId);
     if (this.config.abonnement.paiement === "stripe") {
       if (!this.stripe) throw new DomainError("internal_error", "Stripe not configured");
       // Aucun prix annuel n'est créé ni deviné : sans ses identifiants de prix, l'annuel est refusé avec une phrase.
@@ -246,6 +247,17 @@ export class AbonnementService {
     return { url: `${web}/paiement-simule?session=${session}` };
   }
 
+  /**
+   * JAMAIS DEUX PAIEMENTS POUR LA MÊME PÉRIODE (recette du 13 novembre 2026, B4) : tant qu'un abonnement payé court (actif,
+   * période non finie, résilié ou non), un nouveau paiement est refusé avec une phrase. Un paiement refusé (grâce) ou une
+   * période finie laissent payer. Le passage d'Essentiel à Pro garde son propre chemin, au prorata.
+   */
+  private async refuserSiDejaAbonne(companyId: string, maintenant = this.now()): Promise<void> {
+    const a = await this.prisma.abonnement.findUnique({ where: { companyId }, select: { statut: true, periodeFin: true } });
+    if (a?.statut === "actif" && a.periodeFin && a.periodeFin.getTime() > maintenant.getTime())
+      throw validationFailed("Already subscribed", { reason: "deja_abonne", phrase: `Tu es déjà abonné jusqu'au ${dateFr(a.periodeFin)}. Rien n'a été prélevé.` });
+  }
+
   /** La page « Paiement (simulation) » : « Payer » ou « Échec du paiement ». Les mêmes événements que Stripe. */
   async simuler(tenant: TenantContext, session: string, issue: "payer" | "echec", maintenant = this.now()) {
     assertCanWrite(tenant);
@@ -253,6 +265,9 @@ export class AbonnementService {
     const s = await this.prisma.evenementAbonnement.findUnique({ where: { refExterne: session } });
     if (!s || s.type !== "session" || s.companyId !== tenant.companyId) throw notFound("Session");
     if (issue === "payer") {
+      // Un double appui sur « Payer » de la MÊME session reste sans effet (une seule facture) ; seul un AUTRE paiement est refusé.
+      const dejaPayee = await this.prisma.evenementAbonnement.findUnique({ where: { refExterne: `${session}:paye` }, select: { id: true } });
+      if (!dejaPayee) await this.refuserSiDejaAbonne(tenant.companyId, maintenant);
       const d = s.donnees as { formule?: unknown; periodicite?: unknown } | null;
       const formule: Formule = formuleEnregistree(d?.formule);
       const periodicite = periodiciteDe(d?.periodicite);
@@ -633,9 +648,17 @@ export class AbonnementService {
     const a = await this.prisma.abonnement.findUnique({ where: { companyId } });
     const reglages = await this.reglages();
     const test = a?.fournisseur !== "stripe" ? " (mode test : aucun paiement réel)" : "";
-    const annuel = a?.formule === "annuel";
-    const nom = formuleEnregistree(a?.formule) === "pro" ? "Pro" : "Essentiel";
-    const offre = annuel ? `${eurosDeCentimes(reglages.prixAnnuelHtCentimes)} HT par an, payé en une fois, renouvelé chaque année (rappel 30 jours avant)` : `${nom}, ${eurosDeCentimes(prixDeFormule(formuleEnregistree(a?.formule), reglages))} HT par mois, sans engagement`;
+    // Recette du 13 novembre 2026 (B5) : l'e-mail lit la PÉRIODICITÉ. Avant, il ne reconnaissait que l'ancienne formule
+    // « annuel » et annonçait le prix au mois à un abonné à l'année.
+    const ancienAnnuel = a?.formule === "annuel";
+    const formule = formuleEnregistree(a?.formule);
+    const annuel = !ancienAnnuel && periodiciteDe(a?.periodicite) === "annuel";
+    const nom = formule === "pro" ? "Pro" : "Essentiel";
+    const offre = ancienAnnuel
+      ? `${eurosDeCentimes(reglages.prixAnnuelHtCentimes)} HT par an, payé en une fois, renouvelé chaque année (rappel 30 jours avant)`
+      : annuel
+        ? `${nom}, ${eurosDeCentimes(prixDeLAbonnement(formule, "annuel", reglages))} HT par an, payé en une fois, renouvelé chaque année (rappel 30 jours avant)`
+        : `${nom}, ${eurosDeCentimes(prixDeFormule(formule, reglages))} HT par mois, sans engagement`;
     if (e.type === "actif") {
       await this.email.send({ to, subject: `Ton abonnement ${NOM_APP} est actif`, text: ["Bonjour,", "", `Ton abonnement ${NOM_APP} est actif${test} : ${offre}.`, a?.periodeFin ? `Prochain renouvellement le ${dateFr(a.periodeFin)}.` : "", "Ta facture est dans « Mes factures ».", "", lien].filter((l) => l !== "").join("\n") });
     } else if (e.type === "passage_pro") {

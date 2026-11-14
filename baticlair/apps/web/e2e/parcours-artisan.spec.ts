@@ -922,7 +922,7 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await expect(page.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce Breizh (démo).");
 });
 
-test("accueil : la prochaine action de chaque chantier, puis l'essai et les formules", async ({ page }) => {
+test("accueil : la prochaine action de chaque chantier ; plus de limite de chantiers ni d'anciennes formules", async ({ page }) => {
   await signUp(page);
   const todo = page.getByRole("region", { name: /à faire|Tout est à jour/i });
   await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, 56000 Vannes");
@@ -937,7 +937,8 @@ test("accueil : la prochaine action de chaque chantier, puis l'essai et les form
   await expect(page.getByRole("link", { name: "Ma liste de matériaux" })).toHaveAttribute("href", "/chantiers/nouveau");
   await expect(page.getByRole("region", { name: /^Commande d/ })).toHaveCount(0);
 
-  // Essai : 3 chantiers. Au 4e, l'écran des formules, sans jargon ni crédits.
+  // RÈGLE CHANGÉE (Greg, 14 novembre 2026, recette B2 et B3) : plus de limite de chantiers ni d'écran « Ton essai est
+  // terminé » : le 4e chantier se crée, et l'ancienne page des formules mène à « Mon abonnement ».
   await createProject(page, "Chantier 2", "", "");
   // « Client non renseigné » n'existe plus : un chantier sans client ni adresse n'a rien sous son nom.
   await page.goto("/chantiers");
@@ -945,22 +946,10 @@ test("accueil : la prochaine action de chaque chantier, puis l'essai et les form
   await expect(page.getByText("Client non renseigné")).toHaveCount(0);
   await createProject(page, "Chantier 3", "", "");
   await page.goto("/chantiers/nouveau?mode=assistant");
-  await expect(page.getByRole("heading", { name: "Ton essai est terminé" })).toBeVisible();
-  await expect(page.getByText("Continue à utiliser Mobiiz pour lire tes devis et comparer tes fournisseurs.")).toBeVisible();
-  const plans = page.getByRole("list", { name: "Formules" }).getByRole("listitem");
-  await expect(plans).toHaveCount(2);
-  await expect(plans.first()).toContainText("chantiers / mois");
-  await plans.first().getByRole("button", { name: "Choisir cette formule" }).click();
-  await expect(page.getByText(/Merci ! On te contacte très vite/)).toBeVisible();
-  await page.goto("/");
-  await expect(page.getByText("Ton essai est terminé")).toBeVisible();
-
-  // Activation manuelle (tests, premiers clients) : un code, et c'est reparti.
+  await expect(page.getByRole("heading", { name: "Ton essai est terminé" })).toHaveCount(0);
   await page.goto("/formules");
-  await page.getByRole("button", { name: "J'ai un code d'activation" }).click();
-  await page.getByLabel("Code d'activation").fill("E2E-SOLO-CODE");
-  await page.getByRole("button", { name: "Activer" }).click();
-  await expect(page.getByText("Ta formule actuelle")).toBeVisible();
+  await expect(page).toHaveURL(/\/abonnement$/);
+  await expect(page.getByText(/Solo|79 €/)).toHaveCount(0);
   await createProject(page, "Chantier 4", "", "");
 });
 
@@ -2395,8 +2384,9 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   // RGPD et concurrence (24 octobre 2026) : la formule unique, et les prix d'un négoce jamais montrés à un autre.
   await expect(page.getByText(/^Aucun frais pour l'instant\. BATI INVEST pourra introduire une commission ultérieurement, avec un préavis de 60 jours et l'accord du négoce\./)).toBeVisible();
   await expect(page.getByText(/Les prix d'un négoce ne sont jamais communiqués à un autre négoce/)).toBeVisible();
-  // Greg, 26 octobre 2026 (point D) : une commission de 1 à 2 % sur les seuls regroupements négociés, et la non-sollicitation.
-  await expect(page.getByText(/commission de 1 à 2 % du montant HT/)).toBeVisible();
+  // RÈGLE CHANGÉE (Greg, 14 novembre 2026) : plus de commission écrite, négoces gratuits au lancement ; la non-sollicitation reste.
+  await expect(page.getByText(/commission de 1 à 2 %/)).toHaveCount(0);
+  await expect(page.getByText(/ne vous facture aucune commission/)).toBeVisible();
   await expect(page.getByText(/(?<!à )2 %/)).toHaveCount(0);
   await expect(page.getByText("Non-sollicitation")).toBeVisible();
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Confidentialité" }).click();
@@ -2870,7 +2860,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(faq.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
   await expect(faq.getByText("Oui : tes listes, l'envoi à tes négoces et les achats groupés sont gratuits, sans limite de temps.", { exact: false })).toBeVisible();
   await expect(faq.getByText(/1 analyse de devis et 3 scans de liste/)).toBeVisible();
-  await expect(faq.getByText("Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel.", { exact: false })).toBeVisible();
+  // RÈGLE CHANGÉE (Greg, 14 novembre 2026) : jamais obligé de commander, la FAQ dit comme l'application.
+  await expect(faq.getByText("Non. Tu demandes des prix, tu compares, et tu commandes seulement si ça te va.", { exact: false })).toBeVisible();
+  await expect(faq.getByText(/Oui, mais seulement ce que tu as coché/)).toHaveCount(0);
   await expect(faq.getByText(/^Non, aucun prix ni niveau d’économie n’est garanti\./)).toBeVisible();
   // Jamais les mots « IA », « automatique », « précis », « exact » ; aucun montant d'abonnement.
   expect(await page.locator("main").innerText()).not.toMatch(/\b(IA|automatiques?|automatisée?s?|précise?s?|exacte?s?)\b/i);

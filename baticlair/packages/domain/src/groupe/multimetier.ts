@@ -2,6 +2,7 @@ import { normalizeText } from "../trades/trade-profile.js";
 import type { CommandeDArtisan, GrilleChiffree, LigneDeGrille } from "./commande-du-mois.js";
 import { fraisDeLivraisonPaliers } from "./espace-negoce.js";
 import { FAMILLES_GROUPE, type FamilleGroupe } from "./groupe.js";
+import { estSpecialite, specialiteDuMetier, type Specialite } from "./specialites.js";
 
 /**
  * LISTES MULTIMÉTIERS, NÉGOCES GÉNÉRALISTES OU SPÉCIALISTES (Greg, 25 octobre 2026). Du code pur, zéro IA :
@@ -245,3 +246,12 @@ export function rangSurSonPerimetre(
 
 /** Les familles connues, dans l'ordre du formulaire du négoce. */
 export const FAMILLES_A_COCHER: readonly FamilleGroupe[] = FAMILLES_GROUPE;
+
+/**
+ * La spécialité d'une ligne pour la demande de prix classique (Greg, 14 novembre 2026) : celle que ses mots désignent
+ * (« gouttière zinc » → zinguerie, « membrane EPDM » → étanchéité), sinon celle du métier de la liste.
+ */
+export function specialiteDeLaLigne(designation: string, metierDeLaListe: string | null | undefined): Specialite {
+  const famille = familleDeLaLigne(designation, { defaut: "" });
+  return estSpecialite(famille) && famille !== "generaliste" && famille !== "autre" ? famille : specialiteDuMetier(metierDeLaListe);
+}

@@ -194,12 +194,41 @@ export const cleVerrouCircuit = (projectId: string) => `circuit:${projectId}`;
  * groupé le prend au début de sa transaction. L'un attend l'autre, puis voit son résultat validé et refuse.
  */
 export async function avecVerrouCircuit<T>(prisma: PrismaService, companyId: string, projectId: string, keys: string[] | null, engager: () => Promise<T>): Promise<T> {
-  return prisma.$transaction(
-    async (tx) => {
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${cleVerrouCircuit(projectId)}))`;
-      await gardeDemandeIndividuelle(tx, companyId, projectId, keys);
-      return engager();
-    },
-    { maxWait: 20_000, timeout: 120_000 },
-  );
+  await prendrePlace();
+  try {
+    return await prisma.$transaction(
+      async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${cleVerrouCircuit(projectId)}))`;
+        await gardeDemandeIndividuelle(tx, companyId, projectId, keys);
+        return engager();
+      },
+      { maxWait: 20_000, timeout: 120_000 },
+    );
+  } finally {
+    rendrePlace();
+  }
+}
+
+/**
+ * JAMAIS TOUTES LES CONNEXIONS PRISES PAR LE VERROU (recette du 13 novembre 2026, B6) : le verrou garde UNE connexion à la
+ * base pendant tout l'envoi, et l'envoi (`engager`) en demande d'autres pour écrire. Une douzaine d'envois au même instant
+ * prenaient toutes les connexions : chacun attendait l'autre, le serveur ne répondait plus à personne pendant deux minutes.
+ * Les envois passent donc par une file : `VERROUS_SIMULTANES` à la fois, les suivants attendent leur tour (quelques
+ * dixièmes de seconde), le reste des connexions sert aux écritures et aux autres écrans.
+ */
+export const VERROUS_SIMULTANES = 3;
+let placesPrises = 0;
+const fileDAttente: (() => void)[] = [];
+function prendrePlace(): Promise<void> {
+  if (placesPrises < VERROUS_SIMULTANES) {
+    placesPrises += 1;
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => fileDAttente.push(resolve));
+}
+function rendrePlace(): void {
+  const suivant = fileDAttente.shift();
+  // La place passe directement au suivant : le compte ne bouge pas.
+  if (suivant) suivant();
+  else placesPrises -= 1;
 }

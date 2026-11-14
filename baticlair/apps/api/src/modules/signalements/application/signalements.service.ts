@@ -98,7 +98,8 @@ export class SignalementsService {
       select: { id: true },
     });
     // 1. L'accusé de réception, tout de suite.
-    if (email) await this.envoyer({ to: email, subject: OBJET_ACCUSE, text: `Bonjour,\n\nMerci, on regarde. Ton signalement est bien arrivé :\n\n« ${n.message.trim().slice(0, 500)} »\n\nOn te prévient dès que c'est corrigé.\n\nL'équipe Mobiiz` });
+    // Un négoce est vouvoyé (recette du 13 novembre 2026).
+    if (email) await this.envoyer({ to: email, subject: OBJET_ACCUSE, text: `Bonjour,\n\nMerci, on regarde. ${n.origine === "negoce" ? "Votre" : "Ton"} signalement est bien arrivé :\n\n« ${n.message.trim().slice(0, 500)} »\n\nOn ${n.origine === "negoce" ? "vous" : "te"} prévient dès que c'est corrigé.\n\nL'équipe Mobiiz` });
     // 2. L'alerte à Greg : ce qui est signalé, où, et le lien vers l'espace admin.
     const greg = this.destinataireDesAlertes();
     if (greg)
@@ -161,7 +162,7 @@ export class SignalementsService {
     if (apres.statut === "corrige" && apres.email && !apres.mailCorrigeLe) {
       const pris = await this.prisma.signalement.updateMany({ where: { id, mailCorrigeLe: null }, data: { mailCorrigeLe: maintenant } });
       if (pris.count === 1) {
-        await this.envoyer({ to: apres.email, subject: OBJET_CORRIGE, text: `Bonjour,\n\nC'est corrigé, merci. Le problème que tu nous as signalé est réglé :\n\n« ${apres.message.slice(0, 500)} »\n\nSi tu le vois encore, signale-le de nouveau depuis l'application.\n\nL'équipe Mobiiz` });
+        await this.envoyer({ to: apres.email, subject: OBJET_CORRIGE, text: apres.origine === "negoce" ? `Bonjour,\n\nC'est corrigé, merci. Le problème que vous nous avez signalé est réglé :\n\n« ${apres.message.slice(0, 500)} »\n\nSi vous le voyez encore, signalez-le de nouveau depuis la page.\n\nL'équipe Mobiiz` : `Bonjour,\n\nC'est corrigé, merci. Le problème que tu nous as signalé est réglé :\n\n« ${apres.message.slice(0, 500)} »\n\nSi tu le vois encore, signale-le de nouveau depuis l'application.\n\nL'équipe Mobiiz` });
         mailCorrige = true;
       }
     }

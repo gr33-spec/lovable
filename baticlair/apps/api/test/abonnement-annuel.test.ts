@@ -205,3 +205,25 @@ describe("abonnement annuel (faux Stripe, aucun appel réel)", () => {
     }
   });
 });
+
+describe("jamais deux paiements pour la même période (recette du 13 novembre 2026, B4)", () => {
+  it("l'e-mail de confirmation d'un abonnement à l'année dit le prix à l'année, jamais le prix au mois (B5)", async () => {
+    const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
+    const s = await session(A.agent, { formule: "pro", periodicite: "annuel" });
+    await A.agent.post(`/v1/abonnement/simulation/${s}?${q(T)}`).send({ issue: "payer" }).expect(200);
+    const mail = ctx.emails.sent.filter((m) => m.to === "a@toitures.fr" && m.subject === "Ton abonnement Mobiiz est actif").at(-1)!;
+    expect(mail.text).toContain("Pro, 399 € HT par an, payé en une fois");
+    expect(mail.text).not.toContain("39,90 € HT par mois");
+  });
+
+  it("abonné au mois, un second paiement est refusé d'une phrase, sans facture ; après la fin de la période, payer redevient possible", async () => {
+    const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
+    const s = await session(A.agent, { formule: "essentiel", periodicite: "mensuel" });
+    await A.agent.post(`/v1/abonnement/simulation/${s}?${q(T)}`).send({ issue: "payer" }).expect(200);
+    // Une nouvelle session de paiement n'est même pas ouverte.
+    const refus = await A.agent.post(`/v1/abonnement/payer?${q(T)}`).send({ formule: "essentiel", periodicite: "annuel" }).expect(400);
+    expect(refus.body.error.details).toMatchObject({ reason: "deja_abonne" });
+    expect(refus.body.error.details.phrase).toMatch(/^Tu es déjà abonné jusqu'au /);
+    expect(await factures(A.companyId)).toHaveLength(1);
+  });
+});

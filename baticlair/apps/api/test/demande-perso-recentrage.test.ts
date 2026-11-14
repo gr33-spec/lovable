@@ -95,6 +95,8 @@ describe("la demande perso", () => {
     const b = (await publique().post(`/v1/public/chiffrer/${jetonPour("b@negoce.fr")}`).send({ prix: { [cles[0]!]: 1, [cles[1]!]: 1 }, livraisonHt: 80, delaiJours: 3, validiteJours: 7 }).expect(200)).body;
     // Première réponse sans compte : l'invitation à créer son compte négoce.
     expect(b.compte).toMatchObject({ lien: expect.stringMatching(/\/negoce\/rejoindre\//) });
+    // Recette du 13 novembre 2026 (B8) : le lien est une seule adresse, jamais « …/rejoindre/http… ».
+    expect(b.compte.lien).toMatch(/^https?:\/\/[^/]+\/negoce\/rejoindre\/[^/:]+$/);
     await publique().post(`/v1/public/chiffrer/${jetonPour("c@negoce.fr")}`).send({ prix: { [cles[0]!]: 1.05, [cles[1]!]: 1 }, livraisonHt: 0, delaiJours: 2, validiteJours: 14 }).expect(200);
     await publique().post(`/v1/public/chiffrer/${jetonPour("d@negoce.fr")}`).send({ prix: { [cles[0]!]: 0.5 }, livraisonHt: 0, delaiJours: null, validiteJours: 7 }).expect(200);
     await publique().post(`/v1/public/chiffrer/${jetonPour("e@negoce.fr")}/refuser`).expect(200);

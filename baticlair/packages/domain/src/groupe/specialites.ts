@@ -123,3 +123,61 @@ export function articlesPour(qrq: QuiRecoitQuoi, lots: readonly LotAEnvoyer[], n
   const ses = new Set(qrq.negoces.find((n) => n.id === negoceId)?.lots ?? []);
   return lots.filter((l) => ses.has(l.cle)).flatMap((l) => [...l.articles]);
 }
+
+/* ------------------------------------------------------------------------------------------- la demande classique */
+
+/**
+ * LA DEMANDE DE PRIX CLASSIQUE TRIE SES LIGNES PAR MÉTIER DU NÉGOCE (Greg, 14 novembre 2026, recette du 13, B7 : « oui, la
+ * demande classique trie les lignes par métier du négoce »). Avant, chaque négoce choisi recevait toute la liste : un
+ * zingueur recevait les ardoises. Chaque ligne a sa spécialité (ses mots, sinon le métier de la liste) ; un négoce reçoit
+ * les lignes de ses spécialités, tout s'il est généraliste ou s'il n'a rien déclaré.
+ *
+ * AUCUNE LIGNE N'EST PERDUE : une ligne que personne ne couvre parmi les négoces choisis part chez TOUS, et se dit
+ * (`sansSpecialiste`). Un négoce qui ne recevrait rien se dit aussi (`sansLigne`), il ne reçoit pas de demande vide.
+ */
+export interface LigneARepartir {
+  cle: string;
+  libelle: string;
+  specialite: Specialite;
+}
+export interface RepartitionDemande {
+  /** Les négoces qui reçoivent exactement les mêmes lignes partent dans la même demande. */
+  groupes: { negoces: string[]; lignes: string[] }[];
+  /** Les lignes qu'aucun négoce choisi ne couvre : elles partent chez tous. */
+  sansSpecialiste: { cle: string; libelle: string; specialite: Specialite }[];
+  /** Les négoces choisis dont aucune ligne ne relève. */
+  sansLigne: string[];
+  /** Vrai si tous les négoces reçoivent toute la liste (rien à trier). */
+  toutPourTous: boolean;
+}
+
+export function repartirLaDemande(lignes: readonly LigneARepartir[], negoces: readonly NegoceDestinataire[]): RepartitionDemande {
+  const couvre = (n: NegoceDestinataire, s: Specialite) => compatibilite(n, s) !== "non";
+  const sansSpecialiste = lignes.filter((l) => !negoces.some((n) => couvre(n, l.specialite)));
+  const orphelines = new Set(sansSpecialiste.map((l) => l.cle));
+  const parNegoce = negoces.map((n) => ({ id: n.id, lignes: lignes.filter((l) => orphelines.has(l.cle) || couvre(n, l.specialite)).map((l) => l.cle) }));
+  const sansLigne = parNegoce.filter((p) => p.lignes.length === 0).map((p) => p.id);
+  const groupes = new Map<string, { negoces: string[]; lignes: string[] }>();
+  for (const p of parNegoce) {
+    if (p.lignes.length === 0) continue;
+    const signature = p.lignes.join("\u0000");
+    const g = groupes.get(signature) ?? { negoces: [], lignes: p.lignes };
+    g.negoces.push(p.id);
+    groupes.set(signature, g);
+  }
+  const liste = [...groupes.values()];
+  return { groupes: liste, sansSpecialiste: sansSpecialiste.map((l) => ({ cle: l.cle, libelle: l.libelle, specialite: l.specialite })), sansLigne, toutPourTous: sansLigne.length === 0 && liste.length <= 1 && (liste[0]?.lignes.length ?? 0) === lignes.length };
+}
+
+/**
+ * « NÉGOCE COUVERTURE » COCHE D'OFFICE COUVERTURE, ZINGUERIE ET ÉTANCHÉITÉ (Greg, 14 novembre 2026 : « il décoche ce qu'il ne
+ * vend pas »). RÈGLE CHANGÉE : le 13 novembre, un négoce de couverture ne recevait la zinguerie et l'étanchéité que s'il
+ * les avait cochées. Les trois restent des métiers à part : on peut en décocher.
+ */
+export const SPECIALITES_AVEC_LA_COUVERTURE: readonly Specialite[] = ["couverture", "zinguerie", "etancheite"];
+/** Cocher « Couverture » coche aussi les deux autres ; décocher l'une d'elles ne touche pas aux autres. */
+export function cocherSpecialite(actuelles: readonly string[], specialite: string, cochee: boolean): string[] {
+  if (!cochee) return actuelles.filter((s) => s !== specialite);
+  const ajout = specialite === "couverture" ? SPECIALITES_AVEC_LA_COUVERTURE : [specialite];
+  return [...new Set([...actuelles, ...ajout])];
+}

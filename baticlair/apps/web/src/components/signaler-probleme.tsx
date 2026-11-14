@@ -21,6 +21,10 @@ export interface SignalementHandle {
 /** `sansBouton` : la fenêtre seule, ouverte par `ref.current.ouvrir()` (le bouton vit dans un menu qui se referme). */
 export function SignalerProbleme({ connecte, className = "", sansBouton = false, ref }: { connecte: boolean; className?: string; sansBouton?: boolean; ref?: Ref<SignalementHandle> }) {
   const pathname = usePathname();
+  // Recette du 13 novembre 2026 : un négoce est vouvoyé ; la page affichée ne montre jamais son lien personnel (le serveur
+  // l'écarte de toute façon avant d'enregistrer).
+  const vous = !connecte && PAGES_NEGOCE.test(pathname);
+  const pageAffichee = pathname.split("/").map((m) => (m.length >= 20 && /^[A-Za-z0-9_-]+$/.test(m) ? "…" : m)).join("/");
   const [ouvert, setOuvert] = useState(false);
   const [capture, setCapture] = useState<string | null>(null);
   const [captureEnCours, setCaptureEnCours] = useState(false);
@@ -89,7 +93,7 @@ export function SignalerProbleme({ connecte, className = "", sansBouton = false,
             {fait ? (
               <>
                 <p className="text-[20px] font-extrabold">Merci, on regarde.</p>
-                <p className="text-[16px]">{fait.accuse ? "Tu reçois un e-mail de confirmation, puis un autre dès que c'est corrigé." : "Ton signalement est bien arrivé."}</p>
+                <p className="text-[16px]">{fait.accuse ? (vous ? "Vous recevez un e-mail de confirmation, puis un autre dès que c'est corrigé." : "Tu reçois un e-mail de confirmation, puis un autre dès que c'est corrigé.") : vous ? "Votre signalement est bien arrivé." : "Ton signalement est bien arrivé."}</p>
                 <Button variant="ink" onClick={fermer}>
                   Fermer
                 </Button>
@@ -104,14 +108,14 @@ export function SignalerProbleme({ connecte, className = "", sansBouton = false,
                 {connecte ? null : (
                   <>
                     <label htmlFor="signalement-email" className="text-[16px] font-semibold">
-                      Ton e-mail, pour te répondre (facultatif)
+                      {vous ? "Votre e-mail, pour vous répondre (facultatif)" : "Ton e-mail, pour te répondre (facultatif)"}
                     </label>
                     <input id="signalement-email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT} />
                   </>
                 )}
                 <div className="flex flex-col gap-2 rounded-xl bg-ground p-3 text-[14px]">
                   <p>
-                    <span className="font-semibold">Page jointe :</span> {pathname}
+                    <span className="font-semibold">Page jointe :</span> {pageAffichee}
                   </p>
                   {capture ? (
                     <div className="flex items-center gap-3">
@@ -126,7 +130,7 @@ export function SignalerProbleme({ connecte, className = "", sansBouton = false,
                     </div>
                   ) : (
                     <label className="flex flex-col gap-1">
-                      <span>La capture automatique n&apos;a pas pu se faire sur cet appareil. Tu peux joindre une capture d&apos;écran (facultatif).</span>
+                      <span>La capture automatique n&apos;a pas pu se faire sur cet appareil. {vous ? "Vous pouvez" : "Tu peux"} joindre une capture d&apos;écran (facultatif).</span>
                       <input type="file" accept="image/*" aria-label="Joindre une capture d'écran" onChange={(e) => void (async () => setCapture(e.target.files?.[0] ? await reduireImage(e.target.files[0]) : null))()} className="text-[14px]" />
                     </label>
                   )}

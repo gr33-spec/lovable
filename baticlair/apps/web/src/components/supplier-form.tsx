@@ -6,6 +6,7 @@ import { Button, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey, type Supplier } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { PHRASE_ADRESSE_GENERIQUE, PHRASE_EMAIL_COMMERCIAL, estAdresseGenerique } from "../../../../packages/domain/src/groupe/contact-negoce";
+import { cocherSpecialite } from "../../../../packages/domain/src/groupe/specialites";
 
 const FIELD_ERRORS: Record<string, string> = {
   name: "Indique le nom de la société.",
@@ -124,7 +125,7 @@ export function SupplierForm({
                 key={sp}
                 type="button"
                 aria-pressed={choisie}
-                onClick={() => setSpecialites((l) => (choisie ? l.filter((x) => x !== sp) : [...l, sp]))}
+                onClick={() => setSpecialites((l) => cocherSpecialite(l, sp, !choisie))}
                 className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${choisie ? "bg-accent text-on-accent shadow-card" : "border border-line bg-transparent text-ink active:bg-ground"}`}
               >
                 {LIBELLES_SPECIALITES[sp]}

@@ -189,7 +189,7 @@ export function PlanSummary() {
           {plan.period === "month" ? " ce mois-ci" : ""}
         </span>
       ) : null}
-      <Link href="/formules" className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">
+      <Link href="/abonnement" className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">
         Voir les formules
       </Link>
     </Card>

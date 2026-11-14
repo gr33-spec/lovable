@@ -358,12 +358,16 @@ export type EtatCoordonnees = "privees" | "proposees_par_moi" | "proposees_par_l
 export function etatCoordonnees(moi: boolean, autre: boolean): EtatCoordonnees {
   return moi && autre ? "partagees" : moi ? "proposees_par_moi" : autre ? "proposees_par_l_autre" : "privees";
 }
-const TELEPHONE = /(?:\+33[\s.-]?|\b0)[1-9](?:[\s.-]?\d{2}){4}\b/g;
+// Recette du 13 novembre 2026 (G25) : un numéro reste un numéro quelle que soit sa mise en forme. Tout ce qui commence par
+// « + », « 00 » ou « 0 » et compte au moins dix chiffres, avec ou sans espaces, points ou tirets entre eux (« 0 6 1 2… »,
+// « 0033 6… », « +32 470… ») ; puis une adresse de site. Limite connue et assumée : un numéro écrit en toutes lettres.
+const TELEPHONE = /(?:\+|\b00|\b0)(?:[\s.-]{0,2}\d){9,14}\b/g;
+const SITE = /\b(?:https?:\/\/|www\.)[^\s]+/gi;
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 export const COORDONNEES_MASQUEES = "[coordonnées masquées jusqu'à l'accord des deux entreprises]";
 /** Tant que les deux entreprises n'ont pas accepté, un numéro ou un e-mail écrit dans un message est masqué à l'affichage. */
 export function masquerCoordonnees(texteMessage: string): string {
-  return texteMessage.replace(EMAIL, COORDONNEES_MASQUEES).replace(TELEPHONE, COORDONNEES_MASQUEES);
+  return texteMessage.replace(EMAIL, COORDONNEES_MASQUEES).replace(SITE, COORDONNEES_MASQUEES).replace(TELEPHONE, COORDONNEES_MASQUEES);
 }
 export function fauteMessage(t: unknown): string | null {
   if (typeof t !== "string" || t.trim().length === 0) return "Écris ton message.";

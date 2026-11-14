@@ -397,3 +397,34 @@ describe("« Messages et réponses » et la cloche : deux circuits séparés", (
     await b.agent.put("/v1/alertes/reglages").send({ missions: "oui" }).expect(400);
   });
 });
+
+describe("Missions : coordonnées écrites hors de la conversation (recette du 13 novembre 2026, B10)", () => {
+  const NUMERO = "06 11 22 33 44";
+  const MAIL = "ines@exemple.fr";
+  const sansCoordonnees = (o: unknown) => {
+    const texte = JSON.stringify(o);
+    expect(texte).not.toContain(NUMERO);
+    expect(texte).not.toContain(MAIL);
+  };
+
+  it("un numéro ou un e-mail écrit dans une annonce, une réponse ou un profil est masqué pour les autres, lisible pour son auteur", async () => {
+    const a = await entreprise("a@exemple.fr", "Toitures Martin");
+    const b = await entreprise("b@exemple.fr", "Armor Littoral");
+    // L'annonce (mission et disponibilité).
+    const mission = (await a.agent.post("/v1/missions/annonces").send({ ...MISSION, description: `Pose d'ardoises naturelles sur une maison. Appelez-moi au ${NUMERO} ou ${MAIL}.` }).expect(201)).body as { id: string };
+    const dispo = (await b.agent.post("/v1/missions/annonces").send({ ...DISPO, presentation: `Équipe de 2 personnes disponible pour zinguerie. Joignable au ${NUMERO}, ${MAIL}.` }).expect(201)).body as { id: string };
+    sansCoordonnees((await b.agent.get(`/v1/missions/annonces/${mission.id}`).expect(200)).body);
+    sansCoordonnees((await a.agent.get(`/v1/missions/annonces/${dispo.id}`).expect(200)).body);
+    expect(JSON.stringify((await a.agent.get(`/v1/missions/annonces/${mission.id}`).expect(200)).body)).toContain(NUMERO);
+    // La réponse à la mission.
+    await b.agent.put(`/v1/missions/annonces/${mission.id}/reponse`).send({ ...REPONSE, message: `Disponibles les 15 et 16. Mon portable : ${NUMERO}, ${MAIL}.` }).expect(200);
+    const recues = (await a.agent.get(`/v1/missions/annonces/${mission.id}/reponses`).expect(200)).body.items as { id: string }[];
+    sansCoordonnees(recues);
+    // Le détail d'une réponse rappelle l'annonce de son lecteur (la sienne, lisible) : on regarde le message.
+    sansCoordonnees((await a.agent.get(`/v1/missions/reponses/${recues[0]!.id}`).expect(200)).body.message);
+    expect(JSON.stringify((await b.agent.get(`/v1/missions/reponses/${recues[0]!.id}`).expect(200)).body)).toContain(NUMERO);
+    // Le profil public.
+    await b.agent.put("/v1/profil-public").send({ visible: true, presentation: `Couvreur-zingueur. Joignable au ${NUMERO}.`, metiers: ["Zinguerie"], services: `Devis par e-mail : ${MAIL}`, equipe: "3 personnes", ville: "Lannion" }).expect(200);
+    sansCoordonnees((await a.agent.get(`/v1/profil-public/${b.companyId}`).expect(200)).body);
+  });
+});

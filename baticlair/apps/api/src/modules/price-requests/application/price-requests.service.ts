@@ -1,4 +1,4 @@
-import { NEGOCES_PAR_DEMANDE, PHRASE_NEGOCES_PAR_DEMANDE, briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere, COULEUR_PDF_DEFAUT, estCouleurPdf, estModelePdf, MODELE_PDF_DEFAUT, type CouleurPdf, type ModelePdf } from "@baticlair/domain";
+import { repartirLaDemande, specialiteDeLaLigne, LIBELLES_SPECIALITES, NEGOCES_PAR_DEMANDE, PHRASE_NEGOCES_PAR_DEMANDE, briefResume, briefSentence, briefTexte, communeOf, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine, objetAvecRepere, COULEUR_PDF_DEFAUT, estCouleurPdf, estModelePdf, MODELE_PDF_DEFAUT, type CouleurPdf, type ModelePdf } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { ExceptionSignalee } from "../../../platform/supervision/exceptions.js";
@@ -305,6 +305,10 @@ export class PriceRequestsService {
     const corps = packetMail(request.packet, { prenomCommercial: recipient.supplier.contactName, lien });
     const texte = complement && "bloc" in complement ? `${corps}\n\n${complement.bloc}` : corps;
     await this.verrouCircuit(tenant, request.projectId, request.itemKeys.length ? request.itemKeys : null, async () => {
+      // Recette du 13 novembre 2026 (G10) : un double appui ou deux onglets attendent ici leur tour ; le second relit l'état
+      // et ne renvoie rien si le premier a déjà fait partir le mail.
+      const relu = (await this.requests.findByRecipient(tenant, recipientId))?.recipients.find((r) => r.id === recipientId);
+      if (relu && relu.status !== "to_send") return;
       await this.envoyerSupervise(tenant, recipient.supplier, {
         to: recipient.supplier.email,
         subject: via ? objetAvecRepere(packetSubject(packet), via.etiquette) : packetSubject(packet),
@@ -456,6 +460,31 @@ export class PriceRequestsService {
       await this.requests.itemSketches(tenant, projectId),
     );
     return { takeoff, lines, packet, logo: sender?.logo ?? null };
+  }
+
+  /**
+   * QUI REÇOIT QUOI, AVANT L'ENVOI (Greg, 14 novembre 2026, recette du 13, B7) : les lignes de la liste triées par métier de
+   * chaque négoce choisi (`repartirLaDemande`). Rien n'est créé ni envoyé : l'écran montre le tri, puis crée une demande
+   * par groupe de négoces qui reçoivent les mêmes lignes. Les lignes « à faire chiffrer » suivent chaque groupe.
+   */
+  async repartition(tenant: TenantContext, projectId: string, input: { supplierIds: string[]; articles?: string[] }) {
+    const ids = await this.checkSuppliers(tenant, input.supplierIds);
+    const selection = input.articles && input.articles.length > 0 ? new Set(input.articles) : null;
+    const takeoff = await this.requests.validatedTakeoff(tenant, projectId, { anyStatus: true });
+    if (!takeoff) throw validationFailed("Validate the materials list first", { reason: "takeoff_not_validated" });
+    const purchase = (await this.reviewedTakeoff(tenant, takeoff.id)).purchase;
+    const lignes = purchase.toBuy.filter((b) => !selection || selection.has(b.key)).map((b) => ({ cle: b.key, libelle: b.label, specialite: specialiteDeLaLigne(b.label, takeoff.trade) }));
+    const aChiffrer = purchase.toQuote.map((q) => `quote:${q.key}`).filter((k) => !selection || selection.has(k));
+    const negoces = await this.suppliers.findByIds(tenant, ids);
+    const r = repartirLaDemande(lignes, negoces.map((n) => ({ id: n.id, nom: n.name, specialites: n.specialites })));
+    const nom = new Map(negoces.map((n) => [n.id, n.name]));
+    const libelle = new Map(lignes.map((l) => [l.cle, l.libelle]));
+    return {
+      toutPourTous: r.toutPourTous,
+      groupes: r.groupes.map((g) => ({ supplierIds: g.negoces, negoces: g.negoces.map((id) => nom.get(id) ?? ""), articles: [...g.lignes, ...aChiffrer], lignes: g.lignes.map((k) => libelle.get(k) ?? k) })),
+      sansSpecialiste: r.sansSpecialiste.map((l) => ({ libelle: l.libelle, metier: LIBELLES_SPECIALITES[l.specialite] })),
+      sansLigne: r.sansLigne.map((id) => nom.get(id) ?? ""),
+    };
   }
 
   async create(

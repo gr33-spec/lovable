@@ -324,7 +324,7 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
       } catch (e) {
         const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
         // Le quota de scans est pris : rien n'a été lu ni dépensé ; la phrase de la formule est celle du serveur.
-        if (err.code === "abonnement_requis") ajouterElement({ de: "mobiiz", texte: `${err.phrase ?? "Tes scans de liste sont utilisés."} Ta liste en cours n'a pas bougé : tu peux continuer à la main.`, choix: [], lien: { href: "/formules", texte: "Voir les formules" } });
+        if (err.code === "abonnement_requis") ajouterElement({ de: "mobiiz", texte: `${err.phrase ?? "Tes scans de liste sont utilisés."} Ta liste en cours n'a pas bougé : tu peux continuer à la main.`, choix: [], lien: { href: "/abonnement", texte: "Voir les formules" } });
         else if (err.reason === "nothing_read") dire("Je n'ai rien lu sur ce document. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF. Ta liste en cours n'a pas bougé.");
         else if (err.code === "ai_unavailable" || err.code === "analysis_failed") dire("La lecture de document n'est pas disponible pour le moment. Ta liste en cours n'a pas bougé : continue à la main, ou réessaie plus tard. Rien n'a été décompté.");
         else if (err.code === "unauthenticated") ajouterElement({ de: "mobiiz", texte: `Le document n'est pas lu : ${messageErreur(err)}`, reconnecter: true });

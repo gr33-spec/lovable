@@ -29,10 +29,10 @@ beforeEach(async () => {
 });
 
 describe("paywall en pause (fondateur, 2026-10-11)", () => {
-  it("par défaut, le paywall est éteint ; PAYWALL=on le rallume", () => {
+  it("la limite de chantiers ne s'applique plus, même avec PAYWALL=on (règle changée, 14 novembre 2026)", () => {
     const base = { ...process.env };
     expect(loadConfig({ ...base, PAYWALL: undefined }).billing.enforced).toBe(false);
-    expect(loadConfig({ ...base, PAYWALL: "on" }).billing.enforced).toBe(true);
+    expect(loadConfig({ ...base, PAYWALL: "on" }).billing.enforced).toBe(false);
   });
 
   it("au-delà de la limite, le chantier se crée quand même, et l'écran de limite ne s'affiche pas", async () => {

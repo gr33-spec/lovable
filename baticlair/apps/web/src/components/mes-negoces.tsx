@@ -7,6 +7,7 @@ import { Badge, Button, Card, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey, type Supplier } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 import { nom } from "@/lib/nom";
+import { cocherSpecialite } from "../../../../packages/domain/src/groupe/specialites";
 
 /**
  * BATICLAIR GROUPÉ, ÉTAPE 3 (document du fondateur, 2026-10-19, section 2 étape 3) : « Mes négoces ». L'artisan saisit
@@ -221,10 +222,8 @@ function NegoceForm({ premier, prerempli, onDone }: { premier: boolean; prerempl
   const [error, setError] = useState<ApiError | null>(null);
   const toggle = (f: string) =>
     setFamilles((prev) => {
-      const next = new Set(prev);
-      if (next.has(f)) next.delete(f);
-      else next.add(f);
-      return next;
+      // Greg, 14 novembre 2026 : « Couverture » coche aussi Zinguerie et Étanchéité ; on décoche ce que le négoce ne vend pas.
+      return new Set(cocherSpecialite([...prev], f, !prev.has(f)));
     });
   const submit = async () => {
     setPending(true);

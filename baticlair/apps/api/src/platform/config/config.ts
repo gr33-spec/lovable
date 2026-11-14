@@ -561,7 +561,10 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .split(",")
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
-    billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
+    // RÈGLE CHANGÉE (Greg, 14 novembre 2026, recette B2 et B3) : l'ancienne limite de chantiers (essai 3, Solo 10, Pro 30)
+    // ne s'applique plus jamais, même avec `PAYWALL=on` : elle bloquait un abonné Pro au 4e chantier et montrait d'anciens
+    // prix. Les listes sont sans limite pour tous (page Tarifs) ; seules les formules Découverte, Essentiel et Pro comptent.
+    billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: false },
     accesDemo: e.ACCES_DEMO === "on",
     demoPublique: e.ACCES_DEMO === "on" && e.DEMO_PUBLIQUE === "on",
     achatsGroupesV1: e.ACHATS_GROUPES_V1 === "on",

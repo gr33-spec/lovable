@@ -110,6 +110,10 @@ describe("conversations : jamais de contact libre", () => {
     expect([etatCoordonnees(false, false), etatCoordonnees(true, false), etatCoordonnees(false, true), etatCoordonnees(true, true)]).toEqual(["privees", "proposees_par_moi", "proposees_par_l_autre", "partagees"]);
     for (const t of ["06 12 34 56 78", "0612345678", "+33 6 12 34 56 78", "06.12.34.56.78", "martin@toitures.fr"]) expect(masquerCoordonnees(`Écris-moi : ${t} merci`)).toBe(`Écris-moi : ${COORDONNEES_MASQUEES} merci`);
     expect(masquerCoordonnees("Rendez-vous le 14 à 8 h, 36 m de liteaux 27 × 40")).toBe("Rendez-vous le 14 à 8 h, 36 m de liteaux 27 × 40");
+    // Recette du 13 novembre 2026 (G25) : les contournements relevés par le saboteur et le testeur Mission.
+    for (const t of ["0033612345678", "0 6 1 2 3 4 5 6 7 8", "+32 470 12 34 56", "06-12-34-56-78", "www.toitures-martin.fr", "https://toitures-martin.fr/contact"]) expect(masquerCoordonnees(`Joins-moi : ${t} merci`)).toBe(`Joins-moi : ${COORDONNEES_MASQUEES} merci`);
+    // Ce qui n'est pas un numéro reste lisible : dates, dimensions, quantités, code postal.
+    for (const t of ["Du 01/03/2026 au 15/03/2026", "Ardoise 32 × 22, 1 000 pièces, 22300 Lannion", "Pente 45°, 120 m² en 2 jours", "Liteaux 27 × 40 en 4,00 m"]) expect(masquerCoordonnees(t)).toBe(t);
     expect(fauteMessage("  ")).not.toBeNull();
     expect(fauteMessage("x".repeat(2001))).not.toBeNull();
     expect(fauteMessage("Bonjour")).toBeNull();

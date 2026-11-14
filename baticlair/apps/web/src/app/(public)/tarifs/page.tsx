@@ -30,7 +30,7 @@ const FAQ = [
   { q: "Un gros devis compte double ?", r: "Un devis de plus de 150 lignes compte pour 2 analyses. Tu le vois avant que l'analyse parte." },
   { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin du mois payé, puis rien n'est plus prélevé." },
   { q: "Est-ce que j'ai des factures ?", r: "Oui, une à chaque paiement, émise par BATI INVEST, avec la TVA. Elles sont toutes dans « Mes factures »." },
-  { q: "Un achat groupé, ça m'engage à quoi ?", r: "À commander tes quantités chez le moins cher entre la meilleure offre du groupe et ton négoce habituel. Deux sorties seulement : chantier annulé, ou aucune offre livrable." },
+  { q: "Un achat groupé, ça m'engage à quoi ?", r: "À rien tant que tu n'as pas accepté l'offre. Tu confirmes ton besoin, tu reçois l'offre du groupe, et tu décides à ce moment-là : tu commandes, ou non." },
 ] as const;
 
 /** Le prix en grand, le reste en petit : « 19,90 € » · « HT par mois » ; « Gratuit » · « sans limite de temps ». */

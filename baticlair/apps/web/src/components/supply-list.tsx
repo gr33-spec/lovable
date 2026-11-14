@@ -529,6 +529,30 @@ function Stepper({ label, value, unit, pending, onChange }: { label: string; val
   );
 }
 
+/** La quantité d'une ligne qui n'en a pas encore : un nombre, une unité, « OK ». */
+function QuantiteManquante({ label, unite, pending, onSave }: { label: string; unite: string; pending: boolean; onSave: (quantite: string, unite: string) => Promise<void> }) {
+  const [q, setQ] = useState("");
+  const [u, setU] = useState(unite);
+  const nombre = q.trim().replace(/\s/g, "").replace(",", ".");
+  const valide = /^\d+(\.\d+)?$/.test(nombre) && Number(nombre) > 0;
+  return (
+    <form
+      aria-label={`Quantité : ${label}`}
+      className="flex flex-wrap items-center gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (valide) void onSave(nombre, u.trim());
+      }}
+    >
+      <input aria-label={`Quantité à ajouter : ${label}`} inputMode="decimal" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Quantité" className="min-h-11 w-28 min-w-0 rounded-xl border-2 border-line bg-surface px-3 text-[16px] outline-none focus:border-accent" />
+      <input aria-label={`Unité : ${label}`} value={u} onChange={(e) => setU(e.target.value)} placeholder="Unité" maxLength={20} className="min-h-11 w-24 min-w-0 rounded-xl border-2 border-line bg-surface px-3 text-[16px] outline-none focus:border-accent" />
+      <button type="submit" disabled={pending || !valide} className="pressable inline-flex min-h-11 items-center rounded-full bg-accent px-4 text-[14px] font-extrabold text-ink disabled:opacity-50">
+        OK
+      </button>
+    </form>
+  );
+}
+
 /**
  * Le repère dit l'état d'un coup d'œil (§50.3) : une coche verte franche, prête à commander ; un point orange vif, à
  * préciser (retour du fondateur, 2026-10-12 : « vert franc, pas pâle », « orange vif, pas marron »).
@@ -971,6 +995,11 @@ function Row({
           ) : null}
           {stepper ? (
             <Stepper label={label} value={stepper.value} unit={stepper.unit} pending={pending} onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })} />
+          ) : null}
+          {/* Recette du 13 novembre 2026 (B9) : une ligne ajoutée SANS quantité la reçoit ici ; avant, rien ne permettait
+              de l'écrire et la demande partait chez le négoce sans quantité. */}
+          {!stepper && editable && !sentTo && item ? (
+            <QuantiteManquante label={label} unite={parsed?.unit ?? ""} pending={pending} onSave={(q, u) => onEdit(item, { libelle: item.label, quantite: q, unite: u || null })} />
           ) : null}
           {sketches.length > 0 ? (
             <ul aria-label={`Croquis joints : ${label}`} className="flex flex-wrap gap-2">

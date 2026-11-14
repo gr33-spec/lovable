@@ -2,6 +2,7 @@
 
 import { INPUT } from "@/components/ui";
 import type { Paliers } from "@/lib/negoce";
+import { cocherSpecialite } from "../../../../../packages/domain/src/groupe/specialites";
 
 /**
  * LES PALIERS DE LIVRAISON (espace négoce, point 2), communs à tous les dépôts : « Gratuite jusqu'à X km », jusqu'à deux
@@ -64,7 +65,7 @@ export function OffreForm({ valeur, onChange }: { valeur: OffreSaisie; onChange:
               <input
                 type="checkbox"
                 checked={valeur.familles.includes(f.id)}
-                onChange={(e) => onChange({ ...valeur, familles: e.currentTarget.checked ? [...valeur.familles, f.id] : valeur.familles.filter((x) => x !== f.id) })}
+                onChange={(e) => onChange({ ...valeur, familles: cocherSpecialite(valeur.familles, f.id, e.currentTarget.checked) })}
                 className="size-5 shrink-0 accent-accent"
               />
               {f.label}

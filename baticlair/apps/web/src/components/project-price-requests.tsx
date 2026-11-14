@@ -605,6 +605,47 @@ interface SaisieEnvoi extends Record<string, unknown> {
   dueDate: string;
 }
 
+/** Le tri de la demande par métier de chaque négoce (`POST …/price-requests/repartition`). */
+interface Repartition {
+  toutPourTous: boolean;
+  groupes: { supplierIds: string[]; negoces: string[]; articles: string[]; lignes: string[] }[];
+  sansSpecialiste: { libelle: string; metier: string }[];
+  sansLigne: string[];
+}
+
+/**
+ * « QUI REÇOIT QUOI » (Greg, 14 novembre 2026) : sous les négoces cochés, ce que chacun recevra. Rien ne s'affiche quand
+ * tous reçoivent toute la liste. Une ligne que personne ne couvre part chez tous, et c'est dit.
+ */
+function QuiRecoitQuoi({ projectId, ids }: { projectId: string; ids: string }) {
+  const charger = useCallback(
+    (signal: AbortSignal) => api<Repartition>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests/repartition`, { method: "POST", body: { supplierIds: ids.split(",") }, signal }),
+    [projectId, ids],
+  );
+  const { data } = useResource(charger);
+  if (!data || data.toutPourTous) return null;
+  return (
+    <section aria-label="Qui reçoit quoi" className="flex flex-col gap-2 rounded-2xl border border-line bg-surface p-3 text-[14px]">
+      <h3 className="text-[15px] font-extrabold">Qui reçoit quoi</h3>
+      <p className="text-muted">Chaque négoce reçoit les lignes de son métier.</p>
+      <ul className="flex flex-col gap-1.5">
+        {data.groupes.map((g) => (
+          <li key={g.supplierIds.join(",")}>
+            <span className="font-bold">{g.negoces.join(", ")}</span> : {g.lignes.length} ligne{g.lignes.length > 1 ? "s" : ""} ({g.lignes.slice(0, 3).join(", ")}
+            {g.lignes.length > 3 ? "…" : ""})
+          </li>
+        ))}
+      </ul>
+      {data.sansLigne.length > 0 ? <p className="font-semibold text-warn">{data.sansLigne.join(", ")} : aucune ligne de son métier dans cette liste. Rien ne lui est envoyé.</p> : null}
+      {data.sansSpecialiste.length > 0 ? (
+        <p className="font-semibold text-warn">
+          Aucun négoce coché ne fait {[...new Set(data.sansSpecialiste.map((l) => l.metier.toLowerCase()))].join(", ")} : {data.sansSpecialiste.length > 1 ? `ces ${data.sansSpecialiste.length} lignes partent` : "cette ligne part"} chez tous.
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
 function NewRequest({
   openAtStart,
   projectId,
@@ -668,18 +709,24 @@ function NewRequest({
     setPending(true);
     setError(null);
     try {
-      let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
-        method: "POST",
-        body: { supplierIds: [...selected], message: messageLibre ?? (message || null), dueDate: dueDate || null, ...(tutoie === null ? {} : { tutoie }) },
-        idempotencyKey: key.current,
-      });
-      if (deliversEmail) {
-        for (const r of request.recipients) request = await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" });
-        onSent();
+      // Greg, 14 novembre 2026 (recette du 13, B7) : la demande trie ses lignes par métier de chaque négoce. Les négoces
+      // qui reçoivent les mêmes lignes partent dans la même demande ; sans tri à faire, une seule demande, comme avant.
+      const tri = await api<Repartition>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests/repartition`, { method: "POST", body: { supplierIds: [...selected] } });
+      const groupes: { supplierIds: string[]; articles?: string[] }[] = tri.toutPourTous || tri.groupes.length === 0 ? [{ supplierIds: [...selected] }] : tri.groupes;
+      const creees: PriceRequest[] = [];
+      for (const [i, g] of groupes.entries()) {
+        let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
+          method: "POST",
+          body: { supplierIds: g.supplierIds, ...(g.articles ? { articles: g.articles } : {}), message: messageLibre ?? (message || null), dueDate: dueDate || null, ...(tutoie === null ? {} : { tutoie }) },
+          idempotencyKey: i === 0 ? key.current : `${key.current}-${i}`,
+        });
+        if (deliversEmail) for (const r of request.recipients) request = await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" });
+        creees.push(request);
       }
+      if (deliversEmail) onSent();
       b.effacer();
       setPreviewing(false);
-      onCreated(request);
+      for (const request of creees) onCreated(request);
     } catch (e) {
       setError(toError(e));
       setPending(false);
@@ -689,6 +736,7 @@ function NewRequest({
   return (
     <div className="flex flex-col gap-3">
       <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
+      {selected.size > 0 ? <QuiRecoitQuoi projectId={projectId} ids={[...selected].sort().join(",")} /> : null}
       <details className="rounded-2xl bg-surface p-3 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Ajouter un message ou une date de réponse (facultatif)</summary>
         <label className="flex min-h-11 items-center gap-3 text-sm">
@@ -752,6 +800,7 @@ function NewRequest({
             {/* R7 : le rappel en une ligne au premier envoi (Greg, 27 octobre 2026). */}
             <RappelAdresseMobiiz />
             <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
+            {selected.size > 0 ? <QuiRecoitQuoi projectId={projectId} ids={[...selected].sort().join(",")} /> : null}
           </SendSheet>
         ) : (
           // Lot final, point 4 : « Voici ce que ton négoce va recevoir », l'aperçu fidèle ; un seul bouton, « Envoyer ».

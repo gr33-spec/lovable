@@ -51,6 +51,7 @@ const createBody = z.object({
   tutoie: z.boolean().nullish(),
 });
 const addBody = z.object({ supplierIds });
+const repartitionBody = createBody.pick({ supplierIds: true, articles: true });
 const previewBody = createBody.omit({ supplierIds: true }).extend({ destinataire: z.string().trim().max(200).nullish(), supplierId: z.string().max(60).nullish() });
 const statusBody = z.object({
   status: z.enum(["to_send", "sent", "declined"]),
@@ -201,6 +202,13 @@ export class PriceRequestsController {
   @HttpCode(200)
   async preview(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(previewBody)) body: z.infer<typeof previewBody>) {
     return this.requests.preview(tenant, projectId, { message: body.message ?? null, dueDate: body.dueDate ?? null, destinataire: body.destinataire ?? null, supplierId: body.supplierId ?? null, tutoie: body.tutoie ?? null });
+  }
+
+  /** Qui reçoit quoi, avant l'envoi : les lignes triées par métier de chaque négoce choisi. Rien n'est créé. */
+  @Post("projects/:projectId/price-requests/repartition")
+  @HttpCode(200)
+  async repartition(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(repartitionBody)) body: z.infer<typeof repartitionBody>) {
+    return this.requests.repartition(tenant, projectId, { supplierIds: body.supplierIds, ...(body.articles ? { articles: body.articles } : {}) });
   }
 
   @Post("projects/:projectId/price-requests")

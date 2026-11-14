@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ContenuPaywall, continuerAbonnement, useAbonnement } from "@/components/abonnement";
 import { ChoixFormule } from "@/components/choix-formule";
 import { BackButton, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
@@ -20,6 +20,19 @@ const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("inter
 export default function AbonnementPage() {
   const { data, setData, error, reload } = useAbonnement();
   const [onglet, setOnglet] = useState<"abonnement" | "factures">("abonnement");
+  // Recette du 13 novembre 2026 (B4) : au retour du paiement (`?paiement=ok`), la confirmation du prestataire peut avoir
+  // quelques secondes de retard. On le dit, on relit l'état, et le bouton de paiement ne revient pas pendant ce temps.
+  const [attente, setAttente] = useState(() => (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("paiement") === "ok" ? 1 : 0));
+  const active = data?.acces === "abonne";
+  useEffect(() => {
+    if (attente === 0 || active || attente > 10) return;
+    const t = setTimeout(() => {
+      reload();
+      setAttente((n) => n + 1);
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [attente, active, reload]);
+  const enActivation = attente > 0 && attente <= 10 && !active;
   return (
     <div className="flex flex-col gap-4">
       {/* Audit UX (1er novembre 2026) : le retour rond à côté du titre, comme dans les rubriques de Profil. */}
@@ -48,7 +61,12 @@ export default function AbonnementPage() {
       </div>
       {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
       {!data && !error ? <Spinner /> : null}
-      {data && onglet === "abonnement" ? <Etat abonnement={data} onChange={setData} /> : null}
+      {data && enActivation && onglet === "abonnement" ? (
+        <p role="status" className="rounded-xl border border-line bg-surface px-4 py-3 text-[16px] font-semibold">
+          Paiement reçu. On active ton abonnement, ça prend quelques secondes. Ne paie pas une seconde fois.
+        </p>
+      ) : null}
+      {data && onglet === "abonnement" && !enActivation ? <Etat abonnement={data} onChange={setData} /> : null}
       {onglet === "factures" ? <Factures /> : null}
     </div>
   );

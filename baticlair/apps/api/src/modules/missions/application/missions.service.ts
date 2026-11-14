@@ -128,12 +128,14 @@ export class MissionsService {
       debut: jour(a.debut),
       fin: a.fin ? jour(a.fin) : null,
       types: a.types,
-      description: a.description,
+      // Recette du 13 novembre 2026 (B10) : les textes libres d'une annonce ne montrent jamais un numéro ni un e-mail à
+      // une autre entreprise (les coordonnées ne se partagent qu'après l'accord des deux, dans la conversation).
+      description: masquerSi(!mienne, a.description),
       niveau: a.niveau,
       experience: a.experience,
       qualifications: a.qualifications,
       equipe: a.equipe,
-      contexte: a.contexte,
+      contexte: masquerSi(!mienne, a.contexte),
       modeChiffrage: a.modeChiffrage,
       budgetMin: nombre(a.budgetMin),
       budgetMax: nombre(a.budgetMax),
@@ -324,7 +326,7 @@ export class MissionsService {
     await this.tracer(t, "reponse_envoyee", { annonceId });
     const moi = await this.entreprise(t.companyId);
     await this.alerter(a.companyId, alerteReponseMission({ missionId: a.id, entreprise: moi.nom, sujet: titreMission(a.metier, a.lieu), reponseId: r.id }), false);
-    return this.vueReponse(r, moi, await this.documentsPartages(t.companyId, ids), null);
+    return this.vueReponse(r, moi, await this.documentsPartages(t.companyId, ids), null, t.companyId);
   }
 
   async retirerReponse(t: TenantContext, annonceId: string) {
@@ -338,7 +340,7 @@ export class MissionsService {
     return { retiree: true };
   }
 
-  private vueReponse(r: NonNullable<Awaited<ReturnType<PrismaService["reponseMission"]["findFirst"]>>>, e: EntrepriseVue, documents: { id: string; categorie: string | null; titre: string | null; nom: string; type: string; taille: number }[], conversationId: string | null) {
+  private vueReponse(r: NonNullable<Awaited<ReturnType<PrismaService["reponseMission"]["findFirst"]>>>, e: EntrepriseVue, documents: { id: string; categorie: string | null; titre: string | null; nom: string; type: string; taille: number }[], conversationId: string | null, lecteur: string) {
     return {
       id: r.id,
       annonceId: r.annonceId,
@@ -348,7 +350,8 @@ export class MissionsService {
       niveauLibelle: libelleDe(NIVEAUX, r.niveau),
       experienceAns: r.experienceAns,
       equipe: r.equipe,
-      message: r.message,
+      // Recette du 13 novembre 2026 (B10) : hors de son auteur, un numéro ou un e-mail écrit dans la réponse est masqué.
+      message: r.companyId === lecteur ? r.message : masquerCoordonnees(r.message),
       tarifJour: nombre(r.tarifJour),
       tarif: r.tarifJour !== null ? tarifLisible(nombre(r.tarifJour)!, r.tarifUnite) : null,
       tarifUnite: r.tarifUnite,
@@ -368,7 +371,7 @@ export class MissionsService {
     const liste = (await this.prisma.reponseMission.findMany({ where: { annonceId, statut: "envoyee" }, orderBy: { createdAt: "asc" } })).filter((r) => !bloquees.has(r.companyId));
     const [es, convs] = await Promise.all([this.entreprises(liste.map((r) => r.companyId)), this.prisma.conversationMission.findMany({ where: { annonceId, annonceurId: t.companyId }, select: { id: true, autreId: true } })]);
     const items = [];
-    for (const r of liste) items.push(this.vueReponse(r, es.get(r.companyId)!, await this.documentsPartages(r.companyId, r.documentIds), convs.find((c) => c.autreId === r.companyId)?.id ?? null));
+    for (const r of liste) items.push(this.vueReponse(r, es.get(r.companyId)!, await this.documentsPartages(r.companyId, r.documentIds), convs.find((c) => c.autreId === r.companyId)?.id ?? null, t.companyId));
     return { annonce: this.vueAnnonce(a, undefined, t.companyId), items };
   }
 
@@ -381,7 +384,7 @@ export class MissionsService {
     if (r.companyId !== t.companyId && (r.statut !== "envoyee" || (await this.bloquees(t.companyId)).has(r.companyId))) throw notFound("Réponse");
     const conv = await this.prisma.conversationMission.findUnique({ where: { annonceId_annonceurId_autreId: { annonceId: r.annonceId, annonceurId: r.annonce.companyId, autreId: r.companyId } }, select: { id: true } });
     const auteurs = await this.entreprises([r.companyId, r.annonce.companyId]);
-    return { ...this.vueReponse(r, auteurs.get(r.companyId)!, await this.documentsPartages(r.companyId, r.documentIds), conv?.id ?? null), annonce: this.vueAnnonce(r.annonce, auteurs.get(r.annonce.companyId), t.companyId) };
+    return { ...this.vueReponse(r, auteurs.get(r.companyId)!, await this.documentsPartages(r.companyId, r.documentIds), conv?.id ?? null, t.companyId), annonce: this.vueAnnonce(r.annonce, auteurs.get(r.annonce.companyId), t.companyId) };
   }
 
   /* --------------------------------------------------------------------------------------------- Conversations */
@@ -739,7 +742,7 @@ export class MissionsService {
       this.prisma.annonceMission.findFirst({ where: { companyId, type: "disponibilite", statut: "publiee" }, orderBy: { createdAt: "desc" } }),
       p?.visible ? this.prisma.fichierPro.findMany({ where: { companyId, portee: "dossier", surProfil: true }, select: { id: true, categorie: true, titre: true, nom: true, type: true, taille: true }, take: 24 }) : [],
     ]);
-    return { entreprise: e, visible: p?.visible ?? false, presentation: p?.visible ? p.presentation : null, metiers: p?.visible ? p.metiers : [], services: p?.visible ? p.services : null, equipe: p?.visible ? p.equipe : null, ville: p?.visible ? p.ville : null, disponibilite: dispo ? this.vueAnnonce(dispo, e, t.companyId) : null, realisations };
+    return { entreprise: e, visible: p?.visible ?? false, presentation: p?.visible ? masquerSi(companyId !== t.companyId, p.presentation) : null, metiers: p?.visible ? p.metiers : [], services: p?.visible ? masquerSi(companyId !== t.companyId, p.services) : null, equipe: p?.visible ? p.equipe : null, ville: p?.visible ? p.ville : null, disponibilite: dispo ? this.vueAnnonce(dispo, e, t.companyId) : null, realisations };
   }
 
   /* --------------------------------------------------------------------------------------------- Image du profil */
@@ -790,4 +793,9 @@ export class MissionsService {
     await this.tracer(t, "signalement", {}, { motif: MOTIF_IMAGE_PROFIL });
     return { signale: true, deja: false };
   }
+}
+
+/** Un texte libre vu par une AUTRE entreprise : numéro, e-mail et adresse de site masqués. */
+function masquerSi(autre: boolean, texte: string | null): string | null {
+  return autre && texte ? masquerCoordonnees(texte) : texte;
 }

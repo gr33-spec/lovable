@@ -174,7 +174,9 @@ export function BoutonInscription() {
 export const TROIS_QUESTIONS = [
   {
     q: "Je suis obligé de commander ?",
-    r: "Oui, mais seulement ce que tu as coché, et au moins cher entre l'offre du groupe et ton négoce habituel. Tu ne paies jamais plus cher qu'aujourd'hui. Deux sorties possibles : chantier annulé ou aucune offre livrable à temps.",
+    // RÈGLE CHANGÉE (Greg, 14 novembre 2026, recette du 13) : avant, « Oui, mais seulement ce que tu as coché… ». L'artisan
+    // n'est jamais obligé de commander : il décide à la réception de l'offre, comme le dit l'application.
+    r: "Non. Tu demandes des prix, tu compares, et tu commandes seulement si ça te va. En achat groupé aussi : tu décides quand tu reçois l'offre.",
   },
   { q: "Je garde mes négoces ?", r: "Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part." },
   // Greg, 29 octobre 2026 (« on dit que c'est gratuit alors qu'il y a une partie payante ») : la réponse dit les deux.
