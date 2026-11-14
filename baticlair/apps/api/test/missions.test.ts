@@ -427,4 +427,27 @@ describe("Missions : coordonnées écrites hors de la conversation (recette du 1
     await b.agent.put("/v1/profil-public").send({ visible: true, presentation: `Couvreur-zingueur. Joignable au ${NUMERO}.`, metiers: ["Zinguerie"], services: `Devis par e-mail : ${MAIL}`, equipe: "3 personnes", ville: "Lannion" }).expect(200);
     sansCoordonnees((await a.agent.get(`/v1/profil-public/${b.companyId}`).expect(200)).body);
   });
+
+  it("recette n° 2 du 14 novembre 2026 : un numéro écrit dans la commune, « autre métier », les conditions, les jours ou le profil est masqué aussi, dans la liste comme dans la fiche", async () => {
+    const a = await entreprise("a@exemple.fr", "Toitures Martin");
+    const b = await entreprise("b@exemple.fr", "Armor Littoral");
+    const cree = await a.agent.post("/v1/missions/annonces").send({ ...MISSION, lieu: `Plouha (tel ${NUMERO})`, conditions: `Appeler le ${NUMERO} ou ${MAIL}` });
+    expect(JSON.stringify(cree.body)).toContain("\"id\"");
+    const mission = cree.body as { id: string };
+    const dispo = (await b.agent.post("/v1/missions/annonces").send({ ...DISPO, ville: `Lannion ${NUMERO}`, autreMetier: `Couverture ${MAIL}` }).expect(201)).body as { id: string };
+    // La fiche et la liste (le titre reprend la commune).
+    sansCoordonnees((await b.agent.get(`/v1/missions/annonces/${mission.id}`).expect(200)).body);
+    sansCoordonnees((await a.agent.get(`/v1/missions/annonces/${dispo.id}`).expect(200)).body);
+    sansCoordonnees((await b.agent.get("/v1/missions/annonces").expect(200)).body);
+    sansCoordonnees((await a.agent.get("/v1/missions/annonces").expect(200)).body);
+    // Son auteur lit toujours ce qu'il a écrit.
+    expect(JSON.stringify((await a.agent.get(`/v1/missions/annonces/${mission.id}`).expect(200)).body)).toContain(NUMERO);
+    // La réponse : jours et déplacement.
+    await b.agent.put(`/v1/missions/annonces/${mission.id}/reponse`).send({ ...REPONSE, jours: `Lundi et mardi, ${NUMERO}, ${MAIL}` }).expect(200);
+    sansCoordonnees((await a.agent.get(`/v1/missions/annonces/${mission.id}/reponses`).expect(200)).body.items);
+    // Le profil public : métiers, équipe, commune.
+    await b.agent.put("/v1/profil-public").send({ visible: true, presentation: "Couvreur-zingueur.", metiers: ["Zinguerie", `appelle ${NUMERO}`], services: "Devis", equipe: `3 personnes ${NUMERO}`, ville: `Lannion ${NUMERO}` }).expect(200);
+    sansCoordonnees((await a.agent.get(`/v1/profil-public/${b.companyId}`).expect(200)).body);
+    expect(JSON.stringify((await b.agent.get(`/v1/profil-public/${b.companyId}`).expect(200)).body)).toContain(NUMERO);
+  });
 });

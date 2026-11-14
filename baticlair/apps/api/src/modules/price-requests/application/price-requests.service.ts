@@ -418,6 +418,17 @@ export class PriceRequestsService {
         const line = b.lineIds[0] ? byId.get(b.lineIds[0]) : undefined;
         return { designation: line?.designation ?? b.label, quantity: line?.quantity ? writtenNumber(line.quantity) : null, unit: line?.unit ?? null, reference: line?.reference ?? null, section: line?.section ?? [] };
       });
+    // Recette n° 2 du 14 novembre 2026 (B9) : une ligne écrite par l'artisan SANS quantité ne part jamais chez un négoce
+    // (elle partait avec « 0 »). L'aperçu, lui, reste lisible. Une ligne « à faire chiffrer » n'est pas concernée.
+    const sansQuantite = direct.filter((l) => l.quantity === null || Number(String(l.quantity).replace(",", ".")) === 0).map((l) => l.designation);
+    if (sansQuantite.length > 0 && input.apercu !== true) {
+      const noms = sansQuantite.slice(0, 3).map((d) => `« ${d} »`).join(", ");
+      throw validationFailed("A line has no quantity", {
+        reason: "ligne_sans_quantite",
+        lignes: sansQuantite,
+        message: `Donne d'abord une quantité à ${noms}${sansQuantite.length > 3 ? ` et ${sansQuantite.length - 3} autre${sansQuantite.length > 4 ? "s" : ""}` : ""} : rien n'est parti.`,
+      });
+    }
     const toQuote: RequestedLine[] = purchase.toQuote.map((q) => {
       const line = q.lineIds[0] ? byId.get(q.lineIds[0]) : undefined;
       return { designation: line?.designation ?? q.label, quantity: line?.quantity ? writtenNumber(line.quantity) : null, unit: line?.unit ?? null, reference: line?.reference ?? null, basis: "work" as const };

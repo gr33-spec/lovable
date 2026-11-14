@@ -361,13 +361,40 @@ export function etatCoordonnees(moi: boolean, autre: boolean): EtatCoordonnees {
 // Recette du 13 novembre 2026 (G25) : un numéro reste un numéro quelle que soit sa mise en forme. Tout ce qui commence par
 // « + », « 00 » ou « 0 » et compte au moins dix chiffres, avec ou sans espaces, points ou tirets entre eux (« 0 6 1 2… »,
 // « 0033 6… », « +32 470… ») ; puis une adresse de site. Limite connue et assumée : un numéro écrit en toutes lettres.
-const TELEPHONE = /(?:\+|\b00|\b0)(?:[\s.-]{0,2}\d){9,14}\b/g;
-const SITE = /\b(?:https?:\/\/|www\.)[^\s]+/gi;
+// Recette n° 2 du 14 novembre 2026 : s'ajoutent « +33 (0)6… », « (06) 12… », « 06/12/34/56/78 », le tiret long, la virgule
+// et le tiret bas entre les chiffres, jusqu'à trois séparateurs de suite, un mobile sans son 0 (« 6 12 34 56 78 »), et un
+// site écrit sans « www » (« toitures-martin.fr », « wa.me/… »). Une date (« 01/03/2026 ») n'est jamais prise pour un numéro.
+// Limites connues et assumées : un numéro en toutes lettres, ou coupé sur deux messages.
+const SEP = "[\\s./,_()–—-]{0,3}";
+const TELEPHONE = new RegExp(`(?:\\+|\\b00|\\(?\\b0)(?:${SEP}\\d){8,14}\\b|\\b[67](?:[\\s.-]?\\d\\d){4}\\b`, "g");
+const SITE = /\b(?:https?:\/\/|www\.)[^\s]+|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:fr|com|net|org|bzh|eu|io|me|be|ch|info|pro)\b(?:\/[^\s]*)?/gi;
+const DATE = /\b\d{1,2}[/.-]\d{1,2}[/.-](?:19|20)\d{2}\b/g;
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 export const COORDONNEES_MASQUEES = "[coordonnées masquées jusqu'à l'accord des deux entreprises]";
 /** Tant que les deux entreprises n'ont pas accepté, un numéro ou un e-mail écrit dans un message est masqué à l'affichage. */
 export function masquerCoordonnees(texteMessage: string): string {
-  return texteMessage.replace(EMAIL, COORDONNEES_MASQUEES).replace(SITE, COORDONNEES_MASQUEES).replace(TELEPHONE, COORDONNEES_MASQUEES);
+  // Les dates écrites en entier (« 01/03/2026 ») sont mises de côté le temps du masquage, puis remises telles quelles.
+  const dates: string[] = [];
+  const sansDates = texteMessage.replace(DATE, (d) => `\uE000${dates.push(d) - 1}\uE001`);
+  return sansDates
+    .replace(EMAIL, COORDONNEES_MASQUEES)
+    .replace(SITE, COORDONNEES_MASQUEES)
+    .replace(TELEPHONE, COORDONNEES_MASQUEES)
+    .replace(/\uE000(\d+)\uE001/g, (_, i: string) => dates[Number(i)] ?? "");
+}
+/**
+ * Recette n° 2 du 14 novembre 2026 (B10) : TOUS les champs libres d'une annonce, d'une réponse ou d'un profil sont masqués
+ * pour une autre entreprise, pas seulement les grands textes (un numéro écrit dans la commune, « autre métier », les jours
+ * disponibles ou le nom d'une pièce jointe passait). Les valeurs qui ne sont pas du texte ne bougent pas.
+ */
+export function masquerChamps<T extends object>(vue: T, champs: readonly (keyof T)[]): T {
+  const copie = { ...vue };
+  for (const c of champs) {
+    const v = copie[c];
+    if (typeof v === "string") copie[c] = masquerCoordonnees(v) as T[keyof T];
+    else if (Array.isArray(v)) copie[c] = v.map((x: unknown) => (typeof x === "string" ? masquerCoordonnees(x) : x)) as T[keyof T];
+  }
+  return copie;
 }
 export function fauteMessage(t: unknown): string | null {
   if (typeof t !== "string" || t.trim().length === 0) return "Écris ton message.";

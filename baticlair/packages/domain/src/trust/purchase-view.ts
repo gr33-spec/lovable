@@ -208,7 +208,11 @@ function supplyScreen(
     const waits = (item.waitsOn ?? []).map((k) => decisions.find((d) => d.question?.key === k || d.key === `engine:${k}` || d.key === k)).filter((d): d is Decision => !!d);
     // Une décision qui vise la ligne (doublon, article inconnu) la met orange, avec son geste (§49.1, §49.8).
     const lineDecision = decisionFor(item.lineIds);
-    const check = item.state === "to_confirm" || precise !== undefined || (item.waitsOn?.length ?? 0) > 0 || lineDecision !== undefined;
+    // Recette n° 2 du 14 novembre 2026 (B9) : une ligne écrite SANS quantité est orange « Quantité à préciser » tant que
+    // l'artisan ne l'a pas donnée (§49.2 : jamais verte sur une donnée qui manque) ; avant, elle était verte et partait à « 0 ».
+    const sansQuantite = item.kind === "direct" && !/[1-9]/.test(item.quantity ?? "");
+    const dejaOrange = item.state === "to_confirm" || precise !== undefined || (item.waitsOn?.length ?? 0) > 0 || lineDecision !== undefined;
+    const check = dejaOrange || sansQuantite;
     const decision = waits[0] ?? lineDecision ?? precise;
     // Une ligne déjà orange pour une donnée qui manque ne ressort pas une 2e fois pour son doute de lecture (§49.8).
     for (const d of [decision, precise, ...waits, item.state === "to_confirm" ? decisionFor(item.lineIds) : undefined]) if (d) used.add(d.key);
@@ -218,7 +222,7 @@ function supplyScreen(
       status: check ? "check" : "ok",
       itemKey: item.key,
       ...(decision ? { decisionKey: decision.key } : {}),
-      ...(item.waitsOn?.length && missing ? { reason: missing.text } : {}),
+      ...(item.waitsOn?.length && missing ? { reason: missing.text } : sansQuantite && !dejaOrange ? { reason: "Quantité à préciser" } : {}),
       lineIds: item.lineIds,
     });
   }

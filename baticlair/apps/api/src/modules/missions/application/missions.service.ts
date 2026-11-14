@@ -18,6 +18,7 @@ import {
   nettoyerImageProfil,
   PHRASE_FAUTE_IMAGE_PROFIL,
   libelleDe,
+  masquerChamps,
   masquerCoordonnees,
   MOTIFS_SIGNALEMENT,
   NIVEAUX,
@@ -114,7 +115,7 @@ export class MissionsService {
   private vueAnnonce(a: Annonce, auteur: EntrepriseVue | undefined, moi: string) {
     const mienne = a.companyId === moi;
     const tarifMontre = a.type === "disponibilite" && a.tarifJour !== null && (a.tarifVisible || mienne);
-    return {
+    const vue = {
       id: a.id,
       type: a.type as TypeAnnonce,
       statut: a.statut as StatutAnnonce,
@@ -152,6 +153,9 @@ export class MissionsService {
       ...(mienne ? { consultations: a.consultations } : {}),
       creeLe: a.createdAt.toISOString(),
     };
+    // Recette n° 2 du 14 novembre 2026 (B10) : pour une autre entreprise, AUCUN champ libre ne montre un numéro, un e-mail
+    // ou un site (la commune, « autre métier », les conditions, les frais… passaient encore).
+    return mienne ? vue : masquerChamps(vue, ["titre", "autreMetier", "lieu", "description", "experience", "qualifications", "equipe", "contexte", "frais", "conditions", "budget"]);
   }
 
   /** Les annonces publiées des AUTRES entreprises (jamais d'une entreprise bloquée), les plus proches d'abord. */
@@ -355,9 +359,9 @@ export class MissionsService {
       tarifJour: nombre(r.tarifJour),
       tarif: r.tarifJour !== null ? tarifLisible(nombre(r.tarifJour)!, r.tarifUnite) : null,
       tarifUnite: r.tarifUnite,
-      jours: r.jours,
-      deplacement: r.deplacement,
-      documents,
+      jours: r.companyId === lecteur ? r.jours : masquerSi(true, r.jours),
+      deplacement: r.companyId === lecteur ? r.deplacement : masquerSi(true, r.deplacement),
+      documents: r.companyId === lecteur ? documents : documents.map((d) => masquerChamps(d, ["titre", "nom"])),
       conversationId,
       envoyeeLe: r.createdAt.toISOString(),
     };
@@ -496,7 +500,7 @@ export class MissionsService {
       bloquee: !!c.bloqueeLe,
       bloqueeParMoi: c.bloqueePar === t.companyId,
       archivee: !!(cote === "annonceur" ? c.archiveeAnnonceurLe : c.archiveeAutreLe),
-      messages: messages.map((m) => ({ id: m.id, deMoi: m.companyId === t.companyId, texte: etat === "partagees" || m.companyId === t.companyId ? m.texte : masquerCoordonnees(m.texte), le: m.createdAt.toISOString(), fichiers: m.fichiers })),
+      messages: messages.map((m) => ({ id: m.id, deMoi: m.companyId === t.companyId, texte: etat === "partagees" || m.companyId === t.companyId ? m.texte : masquerCoordonnees(m.texte), le: m.createdAt.toISOString(), fichiers: etat === "partagees" || m.companyId === t.companyId ? m.fichiers : m.fichiers.map((f) => masquerChamps(f, ["nom"])) })),
     };
   }
 
@@ -742,7 +746,8 @@ export class MissionsService {
       this.prisma.annonceMission.findFirst({ where: { companyId, type: "disponibilite", statut: "publiee" }, orderBy: { createdAt: "desc" } }),
       p?.visible ? this.prisma.fichierPro.findMany({ where: { companyId, portee: "dossier", surProfil: true }, select: { id: true, categorie: true, titre: true, nom: true, type: true, taille: true }, take: 24 }) : [],
     ]);
-    return { entreprise: e, visible: p?.visible ?? false, presentation: p?.visible ? masquerSi(companyId !== t.companyId, p.presentation) : null, metiers: p?.visible ? p.metiers : [], services: p?.visible ? masquerSi(companyId !== t.companyId, p.services) : null, equipe: p?.visible ? p.equipe : null, ville: p?.visible ? p.ville : null, disponibilite: dispo ? this.vueAnnonce(dispo, e, t.companyId) : null, realisations };
+    const autre = companyId !== t.companyId;
+    return { entreprise: e, visible: p?.visible ?? false, presentation: p?.visible ? masquerSi(companyId !== t.companyId, p.presentation) : null, metiers: p?.visible ? (autre ? p.metiers.map((m) => masquerCoordonnees(m)) : p.metiers) : [], services: p?.visible ? masquerSi(autre, p.services) : null, equipe: p?.visible ? (typeof p.equipe === "string" ? masquerSi(autre, p.equipe) : p.equipe) : null, ville: p?.visible ? masquerSi(autre, p.ville) : null, disponibilite: dispo ? this.vueAnnonce(dispo, e, t.companyId) : null, realisations: autre ? realisations.map((d) => masquerChamps(d, ["titre", "nom"])) : realisations };
   }
 
   /* --------------------------------------------------------------------------------------------- Image du profil */

@@ -1094,9 +1094,13 @@ function finishPurchase(
     // Une donnée qui manque encore (question ouverte, ou close sans réponse) : orange.
     // Une décision qui vise la ligne (doublon : « garder les deux ? », « à préciser ») la met orange, avec son geste (§49.1, §49.8).
     const lineDecision = decisions.find((d) => !d.question && d.lineIds.some((id) => item.lineIds.includes(id)));
-    const check = item.state === "to_confirm" || (item.waitsOn ?? []).length > 0 || lineDecision !== undefined;
+    // Recette n° 2 du 14 novembre 2026 (B9) : une ligne écrite SANS quantité est orange « Quantité à préciser » (§49.2 :
+    // jamais verte sur une donnée qui manque) ; avant, elle était verte et partait chez le négoce avec « 0 ».
+    const sansQuantite = item.kind === "direct" && !/[1-9]/.test(item.quantity ?? "");
+    const dejaOrange = item.state === "to_confirm" || (item.waitsOn ?? []).length > 0 || lineDecision !== undefined;
+    const check = dejaOrange || sansQuantite;
     const decision = waits[0] ?? lineDecision;
-    return { key: `item:${item.key}`, status: check ? "check" : "ok", itemKey: item.key, ...(decision ? { decisionKey: decision.key } : {}), lineIds: item.lineIds };
+    return { key: `item:${item.key}`, status: check ? "check" : "ok", itemKey: item.key, ...(decision ? { decisionKey: decision.key } : {}), ...(sansQuantite && !dejaOrange ? { reason: "Quantité à préciser" } : {}), lineIds: item.lineIds };
   });
   for (const q of raw.toQuote) rows.push({ key: `quote:${q.key}`, status: "supplier", quoteKey: q.key, lineIds: q.lineIds });
   // Une décision sans article (la quantité d'un modèle écrit) : sa ligne orange, réglée dans sa carte (§49.8).

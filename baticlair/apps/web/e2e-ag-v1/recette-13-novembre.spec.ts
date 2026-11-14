@@ -46,6 +46,15 @@ test("une ligne sans quantité reçoit sa quantité dans la liste ; l'ancienne p
   expect(q.status).toBe(201);
   await page.goto(`/chantiers/${q.body.projetId}`);
   const ligne = "Bande de rive alu maison";
+  // Recette n° 2 du 14 novembre 2026 : sans quantité, la ligne est orange « Quantité à préciser » et ne part pas chez un négoce.
+  await expect(page.getByText("Quantité à préciser").first()).toBeVisible();
+  const liste = (await apiJson<{ takeoff: { purchase: { toBuy: { key: string; label: string }[] } } }>(page, "GET", `/v1/projects/${q.body.projetId}/takeoff`)).body.takeoff.purchase.toBuy;
+  const cle = liste.find((b) => b.label.includes("Bande de rive"))!.key;
+  const negoce = (await apiJson<{ id: string }>(page, "POST", "/v1/suppliers", { name: "Négoce Test", email: `n-${unique()}@negoce.example` })).body.id;
+  const refus = await apiJson<{ error: { details: { reason: string; message: string } } }>(page, "POST", `/v1/projects/${q.body.projetId}/price-requests`, { supplierIds: [negoce], articles: [cle] });
+  expect(refus.status).toBe(400);
+  expect(refus.body.error.details.reason).toBe("ligne_sans_quantite");
+  expect(refus.body.error.details.message).toContain("Donne d'abord une quantité à « Bande de rive alu maison »");
   await page.getByRole("button", { name: new RegExp(`^Modifier la ligne : ${ligne}`) }).click();
   const ouverte = page.getByRole("group", { name: new RegExp(`^Ligne ouverte : ${ligne}`) });
   const form = ouverte.getByRole("form", { name: new RegExp(`^Quantité : ${ligne}`) });
@@ -59,6 +68,12 @@ test("une ligne sans quantité reçoit sa quantité dans la liste ; l'ancienne p
   const relue = JSON.stringify((await apiJson(page, "GET", `/v1/projects/${q.body.projetId}/takeoff`)).body);
   expect(relue).toMatch(/12[.,]5/);
   await expect(page.getByRole("form", { name: new RegExp(`^Quantité : ${ligne}`) })).toHaveCount(0);
+  // Avec sa quantité, la ligne n'est plus orange et peut partir.
+  await expect(page.getByText("Quantité à préciser")).toHaveCount(0);
+  // Avec « 12,5 m », cette bande de métal devient une ligne « à faire chiffrer » (mètre de métal sans largeur) : elle part.
+  const apres = (await apiJson<{ takeoff: { purchase: { toQuote: { key: string; measure: string | null }[] } } }>(page, "GET", `/v1/projects/${q.body.projetId}/takeoff`)).body.takeoff.purchase.toQuote;
+  const envoi = await apiJson(page, "POST", `/v1/projects/${q.body.projetId}/price-requests`, { supplierIds: [negoce], articles: [`quote:${apres.find((b) => /12[.,]5/.test(b.measure ?? ""))!.key}`] });
+  expect(JSON.stringify(envoi)).toContain('"status":201');
 
   await page.goto("/formules");
   await expect(page).toHaveURL(/\/abonnement$/);
