@@ -21,6 +21,8 @@ export interface RecipientRecord {
   etiquette: string | null;
   /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu (mi-délai ou veille). */
   rappelLe?: Date | null;
+  /** Le bon de commande est parti à ce négoce. */
+  commandeLe?: Date | null;
   /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », le motif d'un refus, une précision demandée. */
   negoce?: {
     intentionLe: Date | null;
@@ -60,6 +62,8 @@ export interface PriceRequestRecord {
   retainedSupplierIds: string[];
   /** §48.5 : les articles envoyés à part (clés de la liste) ; vide = toute la liste. */
   itemKeys: string[];
+  /** Les demandes parties ensemble par le tri par métier ; null = demande seule. */
+  lot: string | null;
   /** §47.5 : le retour du fournisseur retenu (null tant que l'artisan n'a rien dit). */
   orderFeedback: OrderFeedback | null;
   recipients: RecipientRecord[];
@@ -115,6 +119,7 @@ export interface PriceRequestRepository {
       supplierIds: string[];
       packet: SupplierPacket;
       itemKeys?: string[];
+      lot?: string;
     },
   ): Promise<PriceRequestRecord>;
   /** Case « Joindre le détail du chantier » (§42.2), mémorisée par entreprise. */

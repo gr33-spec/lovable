@@ -584,6 +584,8 @@ export interface PriceRequestRecipient {
   etiquette: string | null;
   /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu. */
   rappelLe?: string | null;
+  /** Recette n° 2 du 14 novembre 2026 : le bon de commande est parti à ce négoce (date). */
+  commandeLe?: string | null;
   document: { id: string; name: string; status: string } | null;
   /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », motif d'un refus, précision demandée. */
   negoce?: {
@@ -629,6 +631,8 @@ export interface PriceRequest {
   retainedSupplierIds: string[];
   /** §48.5 : les articles de la liste envoyés à part (« Envoyer une sélection… ») ; vide = toute la liste. */
   articles?: string[];
+  /** Les demandes parties ensemble par le tri par métier portent le même lot ; absent = demande seule. */
+  lot?: string | null;
   /** §47.5 retour fournisseur : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
   orderFeedback?: OrderFeedback | null;
   recipients: PriceRequestRecipient[];

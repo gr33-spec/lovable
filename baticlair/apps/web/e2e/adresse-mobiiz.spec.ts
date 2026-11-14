@@ -274,8 +274,9 @@ test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mai
   await carte.getByRole("button", { name: "Ouvrir le devis (PDF)" }).click();
   await expect(page.getByRole("dialog", { name: /^Devis Négoce Dupont/ })).toBeVisible();
   await page.getByRole("button", { name: "Fermer le document" }).click();
-  // « Je retiens ce négoce » : la demande passe à « Commandé », sans bouton principal.
-  await carte.getByRole("button", { name: "Je retiens ce négoce" }).click();
+  // « Commander », puis la confirmation : la demande passe à « Commandé », sans bouton principal.
+  await carte.getByRole("button", { name: "Commander" }).click();
+  await page.getByRole("dialog", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
   await expect(fournisseurs.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce Dupont.");
   await expect(fournisseurs.getByRole("button", { name: /^Voir les? devis reçus?$/ })).toHaveCount(0);
   // Un e-mail sans étiquette ni repère (Greg, 12 novembre 2026) : « Réponses à classer ». Mobiiz PROPOSE la demande du

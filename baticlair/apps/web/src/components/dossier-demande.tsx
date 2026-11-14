@@ -120,7 +120,13 @@ function useDossier(projectId: string) {
           signal,
         }),
       ]);
-      return { demandes: demandes.items, perso, documents: documents.items };
+      // Recette n° 2 du 14 novembre 2026 : une demande classique chiffrée par le lien a aussi ses offres (avant, l'onglet
+      // « Offres » ne lisait que les demandes « avant commande » et disait « Aucune offre reçue »).
+      const parLien = demandes.items.filter((d) => d.recipients.some((r) => r.status === "received" && !r.document));
+      const chiffrees = await Promise.all(parLien.map((d) => api<DemandePerso>(`/v1/demandes-perso/${encodeURIComponent(d.id)}`, { signal }).catch(() => null)));
+      const dejaLa = new Set(perso.map((d) => d.id));
+      // Gardées à part : le suivi liste déjà leurs négoces par `demandes` (jamais deux fois le même négoce).
+      return { demandes: demandes.items, perso, chiffrees: chiffrees.filter((d): d is DemandePerso => d !== null && !dejaLa.has(d.id)), documents: documents.items };
     },
     [id],
   );
@@ -298,7 +304,8 @@ export function OngletOffres({
       .filter((r) => r.document)
       .map((r) => ({ id: r.id, nom: r.supplier.name, document: r.document! })),
   );
-  const prix = data.perso.flatMap((d) => d.offres);
+  // « Le moins cher » ne se dit que s'il y a au moins deux offres à comparer dans la même demande.
+  const prix = [...data.perso, ...data.chiffrees].flatMap((d) => d.offres.map((o) => ({ ...o, seule: d.offres.length < 2 })));
   if (pdfs.length === 0 && prix.length === 0) {
     const parti =
       data.demandes.some((d) => d.recipients.some((r) => r.sentAt)) ||
@@ -325,7 +332,7 @@ export function OngletOffres({
           >
             <div className="flex items-start justify-between gap-2">
               <p className="text-[16px] font-extrabold">{o.nom}</p>
-              {o.complete && o.valide && o.ecartHt === 0 ? (
+              {!o.seule && o.complete && o.valide && o.ecartHt === 0 ? (
                 <Badge tone="ok">Le moins cher</Badge>
               ) : null}
             </div>

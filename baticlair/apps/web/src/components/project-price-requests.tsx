@@ -115,7 +115,70 @@ export function ProjectPriceRequests({
   useEffect(() => {
     if (refreshSignal > 0) reload();
   }, [refreshSignal, reload]);
+  // Recette n° 2 du 14 novembre 2026 (bloquant N1) : la demande du chantier est celle de TOUTE la liste, ou, depuis le tri
+  // par métier, les demandes parties ensemble (même lot). Chacune a son suivi : ses offres, « Comparer », « Commander ».
+  // Avant : une demande triée était prise pour une « sélection envoyée à part » et ses offres ne s'affichaient plus.
+  const principales = demandesPrincipales(data?.items ?? []);
+  const sent = principales.length > 0;
+  useEffect(() => {
+    if (data) onSentChange?.(sent);
+  }, [data, sent, onSentChange]);
+  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
+  if (!data) return <Spinner />;
+  const commun = { projectId, archived, canCreate, quantitatifId: quantitatifId ?? null, openSignal, data, setData, reload, principales, ...(onPreviewClosed ? { onPreviewClosed } : {}) };
+  if (principales.length <= 1) return <SuiviDemande {...commun} focus={principales[0] ?? null} premier seul />;
+  return (
+    <div className="flex flex-col gap-6">
+      {principales.map((r, i) => (
+        <SuiviDemande key={r.id} {...commun} focus={r} premier={i === 0} seul={false} titre={`Demande ${i + 1} sur ${principales.length} · ${r.lines.length} ligne${r.lines.length > 1 ? "s" : ""} · ${r.recipients.map((x) => x.supplier.name).join(", ")}`} />
+      ))}
+    </div>
+  );
+}
 
+/** La demande de toute la liste, sinon les demandes du dernier envoi trié par métier (même lot), dans l'ordre de l'envoi. */
+export function demandesPrincipales(items: PriceRequest[]): PriceRequest[] {
+  const entiere = items.find((r) => !r.articles?.length);
+  if (entiere) return [entiere];
+  const dernier = [...items].filter((r) => r.lot).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]?.lot;
+  return dernier ? items.filter((r) => r.lot === dernier).sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id)) : [];
+}
+
+/** Le suivi d'UNE demande : ses négoces, leurs devis, « Comparer », « Commander ». */
+function SuiviDemande({
+  projectId,
+  archived,
+  canCreate,
+  quantitatifId,
+  openSignal,
+  onPreviewClosed,
+  data,
+  setData,
+  reload,
+  principales,
+  focus,
+  premier,
+  seul,
+  titre,
+}: {
+  projectId: string;
+  archived: boolean;
+  canCreate: boolean;
+  quantitatifId: string | null;
+  openSignal: number;
+  onPreviewClosed?: () => void;
+  data: { items: PriceRequest[] };
+  setData: (d: { items: PriceRequest[] }) => void;
+  reload: () => void;
+  principales: PriceRequest[];
+  /** La demande suivie par ce bloc ; null : rien n'est encore parti (« À qui j'envoie la liste ? »). */
+  focus: PriceRequest | null;
+  /** Le premier bloc porte l'ancre « fournisseurs » et les sélections envoyées à part. */
+  premier: boolean;
+  /** Une seule demande : les actions du menu « ··· » du chantier portent sur elle. */
+  seul: boolean;
+  titre?: string;
+}) {
   const refreshProgress = useProgressRefresh();
   // Commande du mois (Greg, 23 octobre) : plus de « X offres reçues / Comparer les offres » par chantier ; le prix vient de
   // le regroupement, le chantier garde seulement l'envoi aux négoces.
@@ -127,7 +190,7 @@ export function ProjectPriceRequests({
   // § 43.4 : après un envoi (jamais avant), l'écran « Active tes notifications » peut se proposer.
   const [sentCount, setSentCount] = useState(0);
   // §48.5 : la demande du chantier est celle de TOUTE la liste ; les sélections envoyées à part se suivent à côté.
-  const requestId = data?.items.find((r) => !r.articles?.length)?.id ?? null;
+  const requestId = focus?.id ?? null;
   // Devis déjà lus, par destinataire ; `version` fait suivre la comparaison.
   const [version, setVersion] = useState(0);
   const fetchOffers = useCallback(
@@ -143,7 +206,7 @@ export function ProjectPriceRequests({
   const recus = useResource(fetchRecus);
   // Point 7 (Greg, 28 octobre 2026) : un négoce qui a répondu par le lien (prix ligne par ligne ou Excel) se compare
   // automatiquement, livraison comprise ; les autres devis s'ouvrent, sans lecture.
-  const parLien = Boolean(data?.items.find((r) => r.id === requestId)?.recipients.some((r) => r.status === "received" && !r.document));
+  const parLien = Boolean(focus?.recipients.some((r) => r.status === "received" && !r.document));
   const fetchChiffrages = useCallback(
     (signal: AbortSignal) => (requestId && parLien ? api<DemandePerso>(`/v1/demandes-perso/${requestId}`, { signal }).then((d) => d.offres) : Promise.resolve([] as OffrePerso[])),
     [requestId, parLien],
@@ -155,17 +218,16 @@ export function ProjectPriceRequests({
   const [renvoi, setRenvoi] = useState(false);
   const [suppression, setSuppression] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
-  const [conflit, setConflit] = useState<{ phrase: string; retenus: string[] } | null>(null);
+  const [conflit, setConflit] = useState<{ phrase: string; retenus: string[]; recipientId?: string } | null>(null);
   const [retrait, setRetrait] = useState(false);
-  const whole = (data?.items ?? []).filter((r) => !r.articles?.length);
-  const parts = (data?.items ?? []).filter((r) => (r.articles?.length ?? 0) > 0);
-  const sent = Boolean(whole[0]);
-  useEffect(() => {
-    if (data) onSentChange?.(sent);
-  }, [data, sent, onSentChange]);
+  const whole = focus ? [focus] : [];
+  // Les sélections envoyées à part (§48.5) : tout ce qui n'est pas une demande principale, montré une fois.
+  const parts = premier ? data.items.filter((r) => (r.articles?.length ?? 0) > 0 && !principales.some((p) => p.id === r.id)) : [];
   const enCours = whole[0] ?? null;
   const retenue = Boolean(enCours?.retainedSupplierIds.length);
-  const actif = Boolean(enCours) && !archived;
+  // Une vraie commande (bon parti au négoce) ne se défait pas depuis le menu.
+  const commandee = Boolean(enCours?.recipients.some((r) => r.commandeLe));
+  const actif = Boolean(enCours) && !archived && seul;
   const montrer = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
   async function classer(retenus: string[], retirerDesGroupes = false) {
     if (!enCours) return;
@@ -173,7 +235,7 @@ export function ProjectPriceRequests({
     setConflit(null);
     try {
       const r = await api<PriceRequest>(`/v1/price-requests/${enCours.id}/classification`, { method: "PATCH", body: retenus.length ? { classified: true, retainedSupplierIds: retenus, ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } : { classified: false } });
-      setData({ items: [r, ...(data?.items ?? []).filter((x) => x.id !== r.id)] });
+      setData({ items: [r, ...data.items.filter((x) => x.id !== r.id)] });
       setFeuille(false);
       refreshProgress();
     } catch (e) {
@@ -185,6 +247,31 @@ export function ProjectPriceRequests({
         setConflit({ phrase, retenus });
         montrer("conflit-groupe");
       } else setActionError(toError(e));
+    }
+  }
+  /**
+   * Greg, 14 novembre 2026 (recette n° 2) : « Commander » est une vraie commande. Le serveur envoie le bon de commande au
+   * négoce, et ne note la commande qu'une fois le mail parti. Rend la phrase d'erreur à montrer, ou null si c'est fait.
+   */
+  async function commander(recipientId: string, retirerDesGroupes = false): Promise<ApiError | null> {
+    if (!enCours) return null;
+    setConflit(null);
+    try {
+      await api(`/v1/demandes-perso/${encodeURIComponent(enCours.id)}/commander`, { method: "POST", body: { recipientId, ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } });
+      setFeuille(false);
+      reload();
+      refreshProgress();
+      return null;
+    } catch (e) {
+      // §19 : une ligne tenue par un achat groupé ouvert attend le geste explicite de l'artisan.
+      const phrase = conflitGroupe(e);
+      if (phrase) {
+        setFeuille(false);
+        setConflit({ phrase, retenus: [], recipientId });
+        montrer("conflit-groupe");
+        return null;
+      }
+      return toError(e);
     }
   }
   async function supprimer() {
@@ -201,11 +288,8 @@ export function ProjectPriceRequests({
   }
   useActionChantier("ajouter-negoce", "Ajouter un négoce", () => (setAjout(true), montrer("ajouter-negoce")), actif && !retenue);
   useActionChantier("renvoyer", "Renvoyer à un négoce", () => (setRenvoi(true), montrer("renvoyer")), actif && !retenue && Boolean(enCours?.recipients.some((r) => r.status === "sent")));
-  useActionChantier("changer-negoce", "Changer de négoce", () => void classer([]), actif && retenue);
+  useActionChantier("changer-negoce", "Changer de négoce", () => void classer([]), actif && retenue && !commandee);
   useActionChantier("supprimer-demande", "Supprimer la demande", () => (setSuppression(true), montrer("supprimer-demande")), actif);
-
-  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
-  if (!data) return <Spinner />;
 
   const request = whole[0] ?? null;
   if (request && openSignal > 0) requestAnimationFrame(() => document.getElementById("fournisseurs")?.scrollIntoView({ behavior: "smooth", block: "start" }));
@@ -297,13 +381,19 @@ export function ProjectPriceRequests({
   const hasOffers = (offers.data?.items.length ?? 0) > 0;
 
   return (
-    <section id="fournisseurs" aria-label="Fournisseurs" className="flex scroll-mt-4 flex-col gap-3">
+    <section {...(premier ? { id: "fournisseurs" } : {})} aria-label={titre ?? "Fournisseurs"} className="flex scroll-mt-4 flex-col gap-3">
+      {titre ? <h2 className="text-[15px] font-extrabold">{titre}</h2> : null}
       {retenus.length > 0 ? (
         <div role="status" aria-label="Commandé" className="flex flex-col gap-2 rounded-xl bg-ok-bg p-4 text-ok">
           <p className="text-[16px] font-extrabold">Commandé chez {retenus.map((r) => r.supplier.name).join(", ")}.</p>
           <p className="text-[14px]">
             {request.lines.length} ligne{request.lines.length > 1 ? "s" : ""}
-            {request.classifiedAt ? ` · retenu le ${dateHeureCourte(new Date(request.classifiedAt))}` : ""}
+            {/* Greg, 14 novembre 2026 : « commandé » ne se dit que quand le bon de commande est réellement parti. */}
+            {retenus.some((r) => r.commandeLe)
+              ? ` · bon de commande envoyé le ${dateHeureCourte(new Date(retenus.find((r) => r.commandeLe)!.commandeLe!))}`
+              : request.classifiedAt
+                ? ` · retenu le ${dateHeureCourte(new Date(request.classifiedAt))}`
+                : ""}
           </p>
           {retenus
             .filter((r) => r.document)
@@ -352,7 +442,12 @@ export function ProjectPriceRequests({
           onAnnuler={() => setConflit(null)}
           onRetirer={() => {
             setRetrait(true);
-            void classer(conflit.retenus, true).finally(() => setRetrait(false));
+            const suite = conflit.recipientId
+              ? commander(conflit.recipientId, true).then((e) => {
+                  if (e) setActionError(e);
+                })
+              : classer(conflit.retenus, true);
+            void suite.finally(() => setRetrait(false));
           }}
         />
         </div>
@@ -407,7 +502,7 @@ export function ProjectPriceRequests({
         ))}
       </ul>
       {partsBlock}
-      {feuille ? <DevisRecus request={request} repondus={repondus} emailDe={emailDe} offreDe={offreDe} onRetenir={(supplierId) => void classer([supplierId])} onFermer={() => setFeuille(false)} /> : null}
+      {feuille ? <DevisRecus request={request} repondus={repondus} emailDe={emailDe} offreDe={offreDe} onCommander={commander} onFermer={() => setFeuille(false)} /> : null}
     </section>
   );
 }
@@ -423,16 +518,21 @@ function DevisRecus({
   repondus,
   emailDe,
   offreDe,
-  onRetenir,
+  onCommander,
   onFermer,
 }: {
   request: PriceRequest;
   repondus: PriceRequestRecipient[];
   emailDe: (id: string) => EmailRecu | null;
   offreDe: (id: string) => OffrePerso | null;
-  onRetenir: (supplierId: string) => void;
+  /** Envoie le bon de commande au négoce ; rend l'erreur à montrer, ou null. */
+  onCommander: (recipientId: string) => Promise<ApiError | null>;
   onFermer: () => void;
 }) {
+  // « Commander » ouvre d'abord la confirmation : rien ne part sur un seul appui.
+  const [choisi, setChoisi] = useState<PriceRequestRecipient | null>(null);
+  const [envoi, setEnvoi] = useState(false);
+  const [erreur, setErreur] = useState<ApiError | null>(null);
   useEffect(() => {
     const avant = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -440,6 +540,62 @@ function DevisRecus({
       document.body.style.overflow = avant;
     };
   }, []);
+  if (choisi) {
+    const o = offreDe(choisi.id);
+    return (
+      <div role="dialog" aria-modal="true" aria-label="Confirmer la commande" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
+        <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
+          <h2 className="font-display text-[20px] font-extrabold">Confirmer la commande</h2>
+          <button type="button" onClick={() => (setChoisi(null), setErreur(null))} aria-label="Revenir aux devis" className="inline-flex size-11 items-center justify-center rounded-xl">
+            <X size={20} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="mx-auto flex w-full max-w-2xl min-h-0 grow flex-col gap-3 overflow-y-auto px-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+          <Card className="flex flex-col gap-2.5 p-4">
+            <p className="text-[17px] font-extrabold">Tu commandes chez {choisi.supplier.name}.</p>
+            {o ? (
+              <>
+                <p className="text-[18px] font-extrabold tabular-nums">{euros(o.totalLivreHt)} HT livré</p>
+                <p className="text-[14px] text-muted">
+                  {o.lignesChiffrees} ligne{o.lignesChiffrees > 1 ? "s" : ""} chiffrée{o.lignesChiffrees > 1 ? "s" : ""}
+                  {o.livraisonHt > 0 ? ` · dont livraison ${euros(o.livraisonHt)}` : ""}
+                </p>
+                {o.lignesManquantes.length > 0 ? (
+                  <p className="text-[14px] font-semibold text-warn">
+                    {o.lignesManquantes.length} ligne{o.lignesManquantes.length > 1 ? "s" : ""} non chiffrée{o.lignesManquantes.length > 1 ? "s" : ""} : {o.lignesManquantes.length > 1 ? "elles ne sont" : "elle n'est"} pas dans la commande.
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <p className="text-[15px] text-muted">
+                {request.lines.length} ligne{request.lines.length > 1 ? "s" : ""}, aux prix de son devis.
+              </p>
+            )}
+            <p className="text-[15px]">
+              Le bon de commande part tout de suite par e-mail à {choisi.supplier.name} ({choisi.supplier.email}).
+            </p>
+          </Card>
+          {erreur ? <ErrorNotice error={erreur} /> : null}
+          <Button
+            variant="accent"
+            pending={envoi}
+            onClick={() => {
+              setEnvoi(true);
+              setErreur(null);
+              void onCommander(choisi.id)
+                .then((e) => setErreur(e))
+                .finally(() => setEnvoi(false));
+            }}
+          >
+            Confirmer la commande
+          </Button>
+          <Button variant="secondary" disabled={envoi} onClick={() => (setChoisi(null), setErreur(null))}>
+            Annuler
+          </Button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div role="dialog" aria-modal="true" aria-label="Devis reçus" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
       <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
@@ -462,7 +618,7 @@ function DevisRecus({
                   <p className="text-[16px] font-extrabold">
                     {r.supplier.name} t&apos;a répondu{quand ? ` · ${dateHeureCourte(quand)}` : ""}
                   </p>
-                  {o && o.complete && o.valide && o.ecartHt === 0 ? <Badge tone="ok">Le moins cher</Badge> : r.document ? <Badge tone="ok">Devis reçu</Badge> : null}
+                  {o && o.complete && o.valide && o.ecartHt === 0 && repondus.filter((x) => offreDe(x.id)).length >= 2 ? <Badge tone="ok">Le moins cher</Badge> : r.document ? <Badge tone="ok">Devis reçu</Badge> : null}
                 </div>
                 {ligne ? <p className="text-[15px] text-muted">{ligne}</p> : null}
                 {o ? (
@@ -494,8 +650,8 @@ function DevisRecus({
                     ))
                   : null}
                 {request.retainedSupplierIds.length === 0 ? (
-                  <Button variant="ink" onClick={() => onRetenir(r.supplier.id)}>
-                    Je retiens ce négoce
+                  <Button variant="ink" onClick={() => setChoisi(r)}>
+                    Commander
                   </Button>
                 ) : null}
               </Card>
@@ -717,10 +873,12 @@ function NewRequest({
       const tri = await api<Repartition>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests/repartition`, { method: "POST", body: { supplierIds: [...selected] } });
       const groupes: { supplierIds: string[]; articles?: string[] }[] = tri.toutPourTous || tri.groupes.length === 0 ? [{ supplierIds: [...selected] }] : tri.groupes;
       const creees: PriceRequest[] = [];
+      // Les demandes d'un envoi trié portent le même lot : l'écran les suit ensemble (offres, « Comparer », « Commander »).
+      const lot = groupes.some((g) => g.articles) ? key.current : null;
       for (const [i, g] of groupes.entries()) {
         let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
           method: "POST",
-          body: { supplierIds: g.supplierIds, ...(g.articles ? { articles: g.articles } : {}), message: messageLibre ?? (message || null), dueDate: dueDate || null, ...(tutoie === null ? {} : { tutoie }) },
+          body: { supplierIds: g.supplierIds, ...(g.articles ? { articles: g.articles } : {}), ...(lot ? { lot } : {}), message: messageLibre ?? (message || null), dueDate: dueDate || null, ...(tutoie === null ? {} : { tutoie }) },
           idempotencyKey: i === 0 ? key.current : `${key.current}-${i}`,
         });
         if (deliversEmail) for (const r of request.recipients) request = await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" });

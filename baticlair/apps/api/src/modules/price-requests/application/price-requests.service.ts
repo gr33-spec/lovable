@@ -300,15 +300,17 @@ export class PriceRequestsService {
     const via = await this.expediteur(tenant.companyId);
     if (via) await this.requests.setEtiquette(tenant, recipientId, via.etiquette);
     const pdf = await this.pdf(tenant, request.id, recipientId);
-    const complement = await this.complement(request.id, recipientId);
-    const lien = complement && "lien" in complement ? complement.lien : null;
-    const corps = packetMail(request.packet, { prenomCommercial: recipient.supplier.contactName, lien });
-    const texte = complement && "bloc" in complement ? `${corps}\n\n${complement.bloc}` : corps;
     await this.verrouCircuit(tenant, request.projectId, request.itemKeys.length ? request.itemKeys : null, async () => {
       // Recette du 13 novembre 2026 (G10) : un double appui ou deux onglets attendent ici leur tour ; le second relit l'état
       // et ne renvoie rien si le premier a déjà fait partir le mail.
       const relu = (await this.requests.findByRecipient(tenant, recipientId))?.recipients.find((r) => r.id === recipientId);
       if (relu && relu.status !== "to_send") return;
+      // Recette n° 2 du 14 novembre 2026 (lien mort) : le lien « Répondre en ligne » est fabriqué ICI, sous le verrou et
+      // juste avant le mail. Fabriqué avant la file, un second appel écrasait le jeton du mail déjà parti (« Introuvable »).
+      const complement = await this.complement(request.id, recipientId);
+      const lien = complement && "lien" in complement ? complement.lien : null;
+      const corps = packetMail(packet, { prenomCommercial: recipient.supplier.contactName, lien });
+      const texte = complement && "bloc" in complement ? `${corps}\n\n${complement.bloc}` : corps;
       await this.envoyerSupervise(tenant, recipient.supplier, {
         to: recipient.supplier.email,
         subject: via ? objetAvecRepere(packetSubject(packet), via.etiquette) : packetSubject(packet),
@@ -498,6 +500,8 @@ export class PriceRequestsService {
       articles?: string[];
       /** Lot final, point 4 : tutoiement choisi dans l'aperçu ; gardé avec le message comme modèle personnel. */
       tutoie?: boolean | null;
+      /** Tri par métier : le lot commun des demandes d'un même envoi. */
+      lot?: string;
     },
   ): Promise<PriceRequestView> {
     assertCanWrite(tenant);
@@ -519,6 +523,7 @@ export class PriceRequestsService {
       supplierIds,
       packet,
       ...(input.articles && input.articles.length > 0 ? { itemKeys: [...new Set(input.articles)] } : {}),
+      ...(input.lot ? { lot: input.lot } : {}),
     });
     return this.view(tenant, created);
   }
@@ -706,6 +711,8 @@ export class PriceRequestsService {
     assertCanWrite(tenant);
     const request = await this.requests.findById(tenant, requestId);
     if (!request) throw notFound("PriceRequest");
+    // Recette n° 2 du 14 novembre 2026 : une vraie commande (bon parti au négoce) ne se défait pas d'un geste.
+    if (request.recipients.some((r) => r.commandeLe)) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
     const known = new Set(request.recipients.map((r) => r.supplier.id));
     if (retainedSupplierIds.some((id) => !known.has(id))) throw validationFailed("Unknown supplier", { reason: "not_a_recipient" });
     // Retenir un négoce = commander seul ces lignes : jamais une ligne déjà commandée ou tenue par un achat groupé.

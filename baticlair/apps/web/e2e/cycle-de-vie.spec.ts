@@ -96,7 +96,8 @@ test("Cycle de vie : retenir un négoce pour une ligne tenue par un achat group�
   await page.goto(`/chantiers/${projet}`);
   const retenir = async () => {
     await page.getByRole("button", { name: /^Voir (le|les) devis reçus?$/ }).click();
-    await page.getByRole("button", { name: "Je retiens ce négoce" }).first().click();
+    await page.getByRole("button", { name: "Commander", exact: true }).first().click();
+    await page.getByRole("dialog", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
   };
   await retenir();
   const conflit = page.getByRole("alertdialog", { name: "Ligne dans un achat groupé" });

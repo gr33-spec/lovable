@@ -306,48 +306,61 @@ export class DemandePersoService {
     const d = await this.demandeDe(tenant, requestId);
     if (d.recipients.some((r) => r.commandeLe)) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
     const r = d.recipients.find((x) => x.id === recipientId);
-    if (!r?.reponduLe || !r.prix) throw validationFailed("No offer from this supplier", { reason: "sans_offre" });
+    // Greg, 14 novembre 2026 (recette n° 2) : « Commander » est une vraie commande. Le négoce a chiffré par le lien (ses prix
+    // sont sur le bon), ou il a répondu par un devis (le bon reprend les lignes et renvoie à son devis, sans prix inventé).
+    const chiffre = Boolean(r?.reponduLe && r.prix);
+    if (!r || (!chiffre && r.status !== "received")) throw validationFailed("No offer from this supplier", { reason: "sans_offre" });
     const maintenant = this.now();
-    if (!offreValide(r.reponduLe, r.validiteJours ?? VALIDITE_MIN_JOURS, maintenant)) throw new DomainError("conflict", "Offer expired", { reason: "offre_expiree" });
+    if (chiffre && !offreValide(r.reponduLe!, r.validiteJours ?? VALIDITE_MIN_JOURS, maintenant)) throw new DomainError("conflict", "Offer expired", { reason: "offre_expiree" });
     // Le cycle de vie (§19) : pas de double commande avec un achat groupé ; une ligne tenue par un achat groupé ouvert
     // n'en sort que sur le geste explicite de l'artisan.
     await gardeCommandeSeule(this.prisma, tenant.companyId, d.projectId, d.itemKeys.length ? d.itemKeys : null, { retirerDesGroupes: options.retirerDesGroupes }, maintenant);
-    const prix = r.prix as Record<string, number>;
-    const lignes = this.lignes(d.lines).filter((l) => prix[l.cle] !== undefined && l.quantite > 0);
-    const totalLignes = lignes.reduce((s, l) => s + prix[l.cle]! * l.quantite, 0);
+    const prix = (chiffre ? r.prix : {}) as Record<string, number>;
+    const toutes = this.lignes(d.lines).filter((l) => l.quantite > 0);
+    const lignes = chiffre ? toutes.filter((l) => prix[l.cle] !== undefined) : toutes;
+    const totalLignes = lignes.reduce((s, l) => s + (prix[l.cle] ?? 0) * l.quantite, 0);
     const livraison = Number(r.livraisonHt ?? 0);
     const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true, phone: true, address: true } });
     const company = c ? { ...c, email: await this.emailDe(tenant.companyId) } : null;
     const project = await this.prisma.project.findUnique({ where: { id: d.projectId }, select: { address: true } });
-    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { commandeLe: maintenant, suivi: "recue" } });
-    // Le bon de commande part au négoce (vouvoiement), avec le lien pour confirmer ; « Répondre » écrit à l'artisan.
-    const jeton = randomBytes(24).toString("base64url");
-    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { tokenHash: hacher(jeton) } });
+    const numero = d.id.slice(0, 8).toUpperCase();
+    const reference = chiffre ? `votre offre du ${jourFr(r.reponduLe!)}` : "votre devis";
+    const total = chiffre ? `${euros(totalLignes + livraison)} HT livré` : null;
     // Le bon de commande en PDF : le seul document où des champs restent remplissables (compte client, date, contact).
     const pdf = await bonDeCommandePdf({
-      numero: d.id.slice(0, 8).toUpperCase(),
+      numero,
       date: jourFr(maintenant),
       acheteur: { nom: company?.name ?? "", adresse: company?.address ?? null, telephone: company?.phone ?? null, email: company?.email ?? null },
       vendeur: { nom: r.supplier.name, email: r.supplier.email },
       livraison: project?.address ?? null,
-      lignes: lignes.map((l) => ({ designation: l.designation, quantite: String(l.quantite).replace(".", ","), unite: l.unite, prixHt: euros(prix[l.cle]!), totalHt: euros(prix[l.cle]! * l.quantite) })),
-      livraisonHt: livraison > 0 ? euros(livraison) : "offerte",
-      totalHt: euros(totalLignes + livraison),
-      mentions: [`Sur votre offre du ${jourFr(r.reponduLe)}. Facturation et paiement comme d'habitude, sur le compte du client chez vous.`],
+      lignes: lignes.map((l) => ({
+        designation: l.designation,
+        quantite: String(l.quantite).replace(".", ","),
+        unite: l.unite,
+        prixHt: chiffre ? euros(prix[l.cle]!) : "selon devis",
+        totalHt: chiffre ? euros(prix[l.cle]! * l.quantite) : "",
+      })),
+      livraisonHt: chiffre ? (livraison > 0 ? euros(livraison) : "offerte") : "selon devis",
+      totalHt: chiffre ? euros(totalLignes + livraison) : "selon devis",
+      mentions: [`Sur ${reference}. Facturation et paiement comme d'habitude, sur le compte du client chez vous.`],
     });
+    // Le lien pour confirmer : écrit avant le mail (le mail le porte). La commande, elle, n'est notée qu'UNE FOIS LE MAIL
+    // PARTI : jamais « commandé » sans bon de commande réellement envoyé au négoce.
+    const jeton = randomBytes(24).toString("base64url");
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { tokenHash: hacher(jeton) } });
     await this.mailer.send({
-      attachments: [{ filename: `bon-de-commande-${d.id.slice(0, 8).toUpperCase()}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
+      attachments: [{ filename: `bon-de-commande-${numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
       to: r.supplier.email,
-      subject: `Bon de commande de ${company?.name ?? "votre client"} (${euros(totalLignes + livraison)} HT livré)`,
+      subject: `Bon de commande de ${company?.name ?? "votre client"}${total ? ` (${total})` : ""}`,
       text: [
         "Bonjour,",
         "",
-        `${company?.name ?? "Votre client"} commande sur votre offre du ${jourFr(r.reponduLe)} :`,
+        `${company?.name ?? "Votre client"} commande sur ${reference} :`,
         "",
-        ...lignes.map((l) => `- ${l.designation} : ${String(l.quantite).replace(".", ",")} ${l.unite} × ${euros(prix[l.cle]!)} HT`),
-        `- Livraison : ${livraison > 0 ? `${euros(livraison)} HT` : "offerte"}`,
+        ...lignes.map((l) => `- ${l.designation} : ${String(l.quantite).replace(".", ",")} ${l.unite}${chiffre ? ` × ${euros(prix[l.cle]!)} HT` : ""}`),
+        chiffre ? `- Livraison : ${livraison > 0 ? `${euros(livraison)} HT` : "offerte"}` : "",
         "",
-        `Total : ${euros(totalLignes + livraison)} HT livré.`,
+        total ? `Total : ${total}.` : "Prix et livraison : ceux de votre devis.",
         project?.address ? `Livraison : ${project.address}.` : "",
         company?.phone ? `Contact : ${company.phone}${company.email ? `, ${company.email}` : ""}.` : company?.email ? `Contact : ${company.email}.` : "",
         "",
@@ -356,11 +369,16 @@ export class DemandePersoService {
         "",
         `Facturation et paiement comme d'habitude, sur le compte du client chez vous. Envoyé avec ${NOM_APP}.`,
       ]
-        .filter((l, i, t) => !(l === "" && t[i - 1] === ""))
+        .filter((l, i, t) => !(l === "" && (i === 0 || t[i - 1] === "")))
         .join("\n"),
       ...(company?.email ? { replyTo: company.email } : {}),
       mustDeliver: true,
     });
+    // Le mail est parti : la commande est notée, et la demande passe « Commandé » chez ce négoce (suivi du chantier).
+    await this.prisma.$transaction([
+      this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { commandeLe: maintenant, suivi: "recue" } }),
+      this.prisma.priceRequest.update({ where: { id: d.id }, data: { classifiedAt: maintenant, retainedSupplierIds: [r.supplier.id] } }),
+    ]);
     return this.vue(tenant, requestId);
   }
 

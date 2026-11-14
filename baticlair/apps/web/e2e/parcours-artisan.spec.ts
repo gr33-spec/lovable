@@ -832,23 +832,27 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   await tuiles.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-2.pdf"));
   await expect(tuiles.getByText("Devis reçu")).toBeVisible();
 
-  // L'action de l'étape : « Voir les devis reçus », puis « Je retiens ce négoce ».
+  // L'action de l'étape : « Voir les devis reçus », puis « Commander » et sa confirmation (Greg, 14 novembre 2026).
   await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("2 devis reçus sur 2 demandes.");
   await page.getByRole("button", { name: "Voir les devis reçus" }).click();
   const feuille = page.getByRole("dialog", { name: "Devis reçus" });
   await expect(feuille.getByLabel(/^Devis de /)).toHaveCount(2);
-  await feuille.getByLabel("Devis de Point.P Vannes").getByRole("button", { name: "Je retiens ce négoce" }).click();
+  await feuille.getByLabel("Devis de Point.P Vannes").getByRole("button", { name: "Commander" }).click();
+  // Rien ne part sur un seul appui : l'écran de confirmation dit à qui part le bon de commande.
+  await expect(page.getByRole("dialog", { name: "Confirmer la commande" })).toContainText("Le bon de commande part tout de suite par e-mail à Point.P Vannes");
+  await expect(page.getByRole("status", { name: "Commandé" })).toHaveCount(0);
+  await page.getByRole("dialog", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
   await expect(feuille).toHaveCount(0);
   const commande = page.getByRole("status", { name: "Commandé" });
   await expect(commande).toContainText("Commandé chez Point.P Vannes.");
   await expect(page.getByRole("button", { name: /^Voir les devis reçus$/ })).toHaveCount(0);
 
-  // Tout est conservé ; « Changer de négoce » rouvre le choix.
+  // Tout est conservé ; le bon de commande est parti : la commande ne se défait plus d'un geste depuis le menu.
   await page.reload();
   await expect(commande).toContainText("Commandé chez Point.P Vannes.");
+  await expect(commande).toContainText("bon de commande envoyé le");
   await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
-  await page.getByRole("menuitem", { name: "Changer de négoce" }).click();
-  await expect(page.getByRole("button", { name: "Voir les devis reçus" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "Changer de négoce" })).toHaveCount(0);
 });
 
 test("plusieurs articles ajoutés à la main, sans unité : gardés tels qu'écrits, la liste part", async ({ page }) => {
@@ -918,7 +922,8 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await page.getByRole("button", { name: "Voir les devis reçus" }).click();
   const feuille = page.getByRole("dialog", { name: "Devis reçus" });
   await expect(feuille.getByRole("button", { name: "Ouvrir le devis (PDF)" })).toHaveCount(3);
-  await feuille.getByLabel("Devis de Négoce Breizh (démo)").getByRole("button", { name: "Je retiens ce négoce" }).click();
+  await feuille.getByLabel("Devis de Négoce Breizh (démo)").getByRole("button", { name: "Commander" }).click();
+  await page.getByRole("dialog", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
   await expect(page.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce Breizh (démo).");
 });
 

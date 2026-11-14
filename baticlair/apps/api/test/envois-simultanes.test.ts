@@ -52,5 +52,9 @@ describe("envois simultanés", () => {
     const reponses = await Promise.all([1, 2, 3].map(() => a.agent.post(`/v1/price-request-recipients/${a.destinataire}/send`)));
     expect(reponses.map((r) => r.status)).toEqual([200, 200, 200]);
     expect(mailsVers(ctx, a.emailNegoce)).toHaveLength(1);
+    // Recette n° 2 du 14 novembre 2026 : le lien du mail parti doit s'ouvrir (avant : écrasé par l'appel suivant, « Introuvable »).
+    const jeton = /\/chiffrer\/([\w-]+)/.exec(mailsVers(ctx, a.emailNegoce)[0]!.text ?? "")?.[1];
+    expect(jeton).toBeTruthy();
+    await a.agent.get(`/v1/public/chiffrer/${jeton}`).expect(200);
   }, 60_000);
 });

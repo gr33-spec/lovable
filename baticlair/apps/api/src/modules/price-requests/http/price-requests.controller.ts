@@ -49,6 +49,8 @@ const createBody = z.object({
   articles: z.array(z.string().min(1).max(300)).min(1).max(500).optional(),
   /** Lot final, point 4 : tutoyer le négoce (vouvoiement par défaut). */
   tutoie: z.boolean().nullish(),
+  /** Tri par métier : les demandes d'un même envoi portent le même lot (l'écran les suit ensemble). */
+  lot: z.string().min(8).max(64).regex(/^[\w-]+$/).optional(),
 });
 const addBody = z.object({ supplierIds });
 const repartitionBody = createBody.pick({ supplierIds: true, articles: true });
@@ -78,6 +80,8 @@ export function toDto(r: PriceRequestView) {
     retainedSupplierIds: r.retainedSupplierIds,
     /** §48.5 : les articles de la liste envoyés à part ; vide = toute la liste. */
     articles: r.itemKeys,
+    /** Les demandes parties ensemble par le tri par métier ; null = demande seule. */
+    lot: r.lot,
     /** §47.5 : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
     orderFeedback: r.orderFeedback,
     packet: r.packet
@@ -102,6 +106,8 @@ export function toDto(r: PriceRequestView) {
       sentAt: x.sentAt?.toISOString() ?? null,
       etiquette: x.etiquette,
       rappelLe: x.rappelLe?.toISOString() ?? null,
+      /** Le bon de commande est parti à ce négoce (date), sinon null. */
+      commandeLe: x.commandeLe?.toISOString() ?? null,
       negoce: x.negoce
         ? {
             vaRepondreLe: x.negoce.intentionLe?.toISOString() ?? null,
@@ -219,7 +225,7 @@ export class PriceRequestsController {
     @Param("projectId") projectId: string,
     @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>,
   ) {
-    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null, ...(body.articles ? { articles: body.articles } : {}), ...(typeof body.tutoie === "boolean" ? { tutoie: body.tutoie } : {}) };
+    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null, ...(body.articles ? { articles: body.articles } : {}), ...(typeof body.tutoie === "boolean" ? { tutoie: body.tutoie } : {}), ...(body.lot ? { lot: body.lot } : {}) };
     return toDto(await this.requests.create(tenant, projectId, input));
   }
 

@@ -44,6 +44,7 @@ interface Row {
   classifiedAt: Date | null;
   retainedSupplierIds: string[];
   itemKeys: string[];
+  lot: string | null;
   orderFeedback?: unknown;
   recipients: {
     id: string;
@@ -51,6 +52,7 @@ interface Row {
     sentAt: Date | null;
     etiquette?: string | null;
     reponduLe?: Date | null;
+    commandeLe?: Date | null;
     refuseLe?: Date | null;
     intention?: string | null;
     intentionLe?: Date | null;
@@ -165,6 +167,7 @@ function toRecord(row: Row): PriceRequestRecord {
     classifiedAt: row.classifiedAt,
     retainedSupplierIds: row.retainedSupplierIds,
     itemKeys: row.itemKeys,
+    lot: row.lot,
     orderFeedback: (row.orderFeedback ?? null) as OrderFeedback | null,
     recipients: row.recipients.map((r) => ({
       id: r.id,
@@ -175,6 +178,8 @@ function toRecord(row: Row): PriceRequestRecord {
       sentAt: r.sentAt,
       etiquette: r.etiquette ?? null,
       rappelLe: r.rappelVeilleLe ?? r.rappelMiLe ?? null,
+      // Recette n° 2 du 14 novembre 2026 : la vraie commande (bon de commande parti au négoce).
+      commandeLe: r.commandeLe ?? null,
       negoce: {
         intentionLe: r.intention === "repondra" ? (r.intentionLe ?? null) : null,
         refusMotif: r.refuseLe ? (r.refusMotif ?? null) : null,
@@ -293,6 +298,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
       supplierIds: string[];
       packet: SupplierPacket;
       itemKeys?: string[];
+      lot?: string;
     },
   ): Promise<PriceRequestRecord> {
     const row = await this.prisma.$transaction(async (tx) => {
@@ -306,6 +312,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
           message: data.message,
           dueDate: data.dueDate,
           itemKeys: data.itemKeys ?? [],
+          lot: data.lot ?? null,
           createdById: tenant.userId,
           recipients: {
             create: data.supplierIds.map((supplierId) => ({ supplierId })),

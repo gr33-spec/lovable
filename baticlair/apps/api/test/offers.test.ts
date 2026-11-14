@@ -115,6 +115,35 @@ describe("devis reçus des négoces de l'artisan : plus de lecture IA (Greg, 28 
     expect(reopened.body).toMatchObject({ classifiedAt: null, retainedSupplierIds: [] });
   });
 
+  it("« Commander » sur un devis reçu en PDF : le bon de commande part au négoce, sans prix inventé ; rien n'est « commandé » si le mail ne part pas", async () => {
+    // Greg, 14 novembre 2026 (recette n° 2) : « Plus jamais "C'est commandé" sans envoi réel. »
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const { requestId, rb, supplierB } = await withTwoQuotes(agent);
+    ctx.emails.sent.length = 0;
+    // Le prestataire d'e-mail refuse : la commande n'est pas notée, la demande n'est pas « commandée ».
+    ctx.emails.failNext = 1;
+    const rate = await agent.post(`/v1/demandes-perso/${requestId}/commander`).send({ recipientId: rb });
+    expect(rate.status).toBeGreaterThanOrEqual(500);
+    const lire = () => ctx.prisma.priceRequest.findUniqueOrThrow({ where: { id: requestId }, include: { recipients: true } });
+    let demande = await lire();
+    expect(demande.retainedSupplierIds).toEqual([]);
+    expect(demande.recipients.every((r) => r.commandeLe === null)).toBe(true);
+    // Le mail part : le bon de commande est en pièce jointe, renvoie au devis du négoce, et la demande passe « commandée ».
+    await agent.post(`/v1/demandes-perso/${requestId}/commander`).send({ recipientId: rb }).expect(200);
+    const bon = ctx.emails.sent.filter((m) => m.to === "b@tuiles.fr").at(-1)!;
+    expect(bon.subject).toBe("Bon de commande de Toitures Martin");
+    expect(bon.text).toContain("commande sur votre devis");
+    expect(bon.text).toContain("Prix et livraison : ceux de votre devis.");
+    expect(bon.text).not.toMatch(/\d € HT/);
+    expect(bon.attachments?.[0]?.filename).toMatch(/^bon-de-commande-.*\.pdf$/);
+    demande = await lire();
+    expect(demande.retainedSupplierIds).toEqual([supplierB]);
+    expect(demande.recipients.find((r) => r.id === rb)!.commandeLe).not.toBeNull();
+    // Une commande partie ne se défait pas d'un geste, et ne se passe pas deux fois.
+    expect((await agent.patch(`/v1/price-requests/${requestId}/classification`).send({ classified: false })).status).toBe(409);
+    expect((await agent.post(`/v1/demandes-perso/${requestId}/commander`).send({ recipientId: rb })).status).toBe(409);
+  });
+
   it("isole les entreprises", async () => {
     const a = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const b = await signUpWithCompany(ctx.app, "b@example.fr", "Couverture Leroy");
