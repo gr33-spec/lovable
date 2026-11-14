@@ -152,7 +152,10 @@ const qte = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 3 
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u202f/g, "\u00a0")} €`;
 const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d).replace(/^1 /, "1er ");
 const jourIso = (d: Date) => d.toISOString().slice(0, 10);
-const arrondi = (n: number) => Math.round(n * 100) / 100;
+// Recette n° 2 du 14 novembre 2026 (G7) : 7 × 1,275 fait 8,93 et non 8,92 (le calcul binaire donnait 8,9249999).
+const arrondi = (n: number) => Math.round(Number((n * 100).toPrecision(12))) / 100;
+/** Un prix unitaire s'écrit avec ses décimales (1,275 €), sinon « 7 × 1,28 = 8,93 » ne tombe pas juste. */
+const prixUnitaire = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 4 }).replace(/\u202f/g, "\u00a0")} €`;
 const nombre = (s: string | null | undefined): number | null => {
   if (!s) return null;
   const n = Number(s.replace(/[\s\u00a0\u202f€]/g, "").replace(",", "."));
@@ -1849,7 +1852,8 @@ export class AchatGroupeService {
       });
     if (a.commandeAvantLe && a.commandeAvantLe <= maintenant) throw new DomainError("conflict", "Too late", { reason: "commande_trop_tard", message: "La date de commande est passée." });
     const chiffrees = offre.lignes.filter((l) => l.prixHt !== null);
-    const total = arrondi(chiffrees.reduce((s, l) => s + l.prixHt! * l.quantite, 0));
+    // Le total du bon est la somme de ses lignes arrondies (avant : un total qui n'était pas la somme des lignes).
+    const total = arrondi(chiffrees.reduce((s, l) => s + arrondi(l.prixHt! * l.quantite), 0));
     const rang = (await this.prisma.besoinNegocie.count({ where: { regroupementId: a.id, bonNumero: { not: null } } })) + 1;
     const bonNumero = a.numero * 1000 + rang;
     const jeton = randomBytes(24).toString("base64url");
@@ -1879,7 +1883,7 @@ export class AchatGroupeService {
       acheteur: { nom: company.name, adresse: company.address, telephone: company.phone, email: company.contactEmail },
       vendeur: { nom: c.nom, email: c.email },
       livraison,
-      lignes: lignes.map((l) => ({ designation: l.libelle, quantite: qte(l.quantite), unite: l.unite, prixHt: euros(l.prixHt ?? 0), totalHt: euros(arrondi((l.prixHt ?? 0) * l.quantite)) })),
+      lignes: lignes.map((l) => ({ designation: l.libelle, quantite: qte(l.quantite), unite: l.unite, prixHt: prixUnitaire(l.prixHt ?? 0), totalHt: euros(arrondi((l.prixHt ?? 0) * l.quantite)) })),
       livraisonHt: "comprise",
       totalHt: euros(total),
       mentions: [`Achat groupé ${NOM_APP} n° ${achatNumero} : prix ferme livraison comprise.`, `Paiement directement au vendeur, sur le compte habituel de l'acheteur. ${NOM_APP} ne vend ni n'achète rien et ne touche jamais l'argent.`],

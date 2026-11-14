@@ -22,7 +22,7 @@ seul endroit : `packages/domain/src/groupe/ton.ts` (`TON`, `phraseCarteGroupe`, 
 |---|---|
 | « Mets tes négoces en concurrence. Un négoce sérieux répond, et tu sauras vite qui tient la route. » | « Ne te fais plus avoir par ton négoce ! » |
 | « Seul, tu pèses une palette. À plusieurs, on pèse un camion. » | « Rejoignez la révolution de l'achat groupé ! » |
-| « D'autres artisans du secteur comptent sur ta commande pour peser. Si tu t'engages, tu commandes. » | « Engagez-vous maintenant, offre limitée ! » |
+| « D'autres artisans du secteur comptent sur ton besoin pour peser. Tu décides à la réception de l'offre. » | « Engagez-vous maintenant, offre limitée ! » |
 | « 7 artisans du secteur · 3 200 pièces au total » (7 ≥ seuil) | « Des dizaines d'artisans » (sans chiffre réel) |
 | « Ensemble, vous avez payé 412 € HT de moins. » (économie calculée) | « Jusqu'à 30 % d'économie » |
 | Au négoce : « D'autres négoces du secteur sont consultés sur ce même volume. » | Au négoce : « Si vous ne baissez pas, on part ailleurs. » |

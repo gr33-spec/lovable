@@ -73,8 +73,8 @@ function useMesNegocesCount(): number | null {
   return liste.data ? liste.data.negoces.length : null;
 }
 
-/** La phrase d'engagement, mot pour mot (section 7, étape 2 du document). */
-export const PHRASE_ENGAGEMENT = `En cochant Chantier signé, je m'engage à commander ces quantités au prix obtenu par le ${nom}, chez le négoce retenu.`;
+/** Greg, 14 novembre 2026 (recette n° 2) : jamais obligé de commander ; la case confirme un besoin réel. Avant : « je m'engage à commander ». */
+export const PHRASE_ENGAGEMENT = `En cochant Chantier signé, je confirme que ces quantités sont un besoin réel de mon entreprise. Je décide de commander à la réception de l'offre du ${nom}.`;
 
 /** Le groupé pour ce chantier, ou null quand il n'existe pas pour l'entreprise (drapeau éteint, SIRET non vérifié). */
 /**

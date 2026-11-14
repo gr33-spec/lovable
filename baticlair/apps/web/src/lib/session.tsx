@@ -95,16 +95,23 @@ export function SessionGate({ children, requireCompany = true }: { children: Rea
 
   if (failure) {
     return (
-      <div className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
-        <p className="text-lg font-bold">{failure.message}</p>
-        {failure.supportId ? <p className="text-sm text-muted">Code support : {failure.supportId}</p> : null}
+      // Recette n° 2 du 14 novembre 2026 (G38) : couleurs fixes, lisibles dans les deux thèmes. Avant : en thème sombre, la
+      // phrase s'écrivait en encre sur fond noir (contraste 1,00) quand le serveur ne répondait pas.
+      <div className="fixed top-0 left-0 flex h-dvh w-full flex-col items-center justify-center gap-4 p-6 text-center" style={{ background: "#FBF8F3", color: "#130901" }}>
+        <p className="max-w-md text-lg font-bold">{failure.message}</p>
+        {failure.supportId ? (
+          <p className="text-sm" style={{ color: "#614822" }}>
+            Code support : {failure.supportId}
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={() => {
             setFailure(null);
             refresh();
           }}
-          className="min-h-12 rounded-2xl bg-ink px-6 font-bold text-white">
+          className="min-h-12 rounded-2xl px-6 font-bold"
+          style={{ background: "#FFC800", color: "#130901" }}>
           Réessayer
         </button>
       </div>

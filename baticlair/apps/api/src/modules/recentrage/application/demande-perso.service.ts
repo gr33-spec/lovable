@@ -318,7 +318,10 @@ export class DemandePersoService {
     const prix = (chiffre ? r.prix : {}) as Record<string, number>;
     const toutes = this.lignes(d.lines).filter((l) => l.quantite > 0);
     const lignes = chiffre ? toutes.filter((l) => prix[l.cle] !== undefined) : toutes;
-    const totalLignes = lignes.reduce((s, l) => s + (prix[l.cle] ?? 0) * l.quantite, 0);
+    // Le total est la somme des lignes arrondies au centime, comme à l'écran de comparaison.
+    const centimes = (n: number) => Math.round(Number((n * 100).toPrecision(12))) / 100;
+    const prixUnitaire = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 4 }).replace(/\u202f|\u00a0/g, " ")} €`;
+    const totalLignes = centimes(lignes.reduce((s, l) => s + centimes((prix[l.cle] ?? 0) * l.quantite), 0));
     const livraison = Number(r.livraisonHt ?? 0);
     const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true, phone: true, address: true } });
     const company = c ? { ...c, email: await this.emailDe(tenant.companyId) } : null;
@@ -337,8 +340,8 @@ export class DemandePersoService {
         designation: l.designation,
         quantite: String(l.quantite).replace(".", ","),
         unite: l.unite,
-        prixHt: chiffre ? euros(prix[l.cle]!) : "selon devis",
-        totalHt: chiffre ? euros(prix[l.cle]! * l.quantite) : "",
+        prixHt: chiffre ? prixUnitaire(prix[l.cle]!) : "selon devis",
+        totalHt: chiffre ? euros(centimes(prix[l.cle]! * l.quantite)) : "",
       })),
       livraisonHt: chiffre ? (livraison > 0 ? euros(livraison) : "offerte") : "selon devis",
       totalHt: chiffre ? euros(totalLignes + livraison) : "selon devis",
@@ -357,7 +360,7 @@ export class DemandePersoService {
         "",
         `${company?.name ?? "Votre client"} commande sur ${reference} :`,
         "",
-        ...lignes.map((l) => `- ${l.designation} : ${String(l.quantite).replace(".", ",")} ${l.unite}${chiffre ? ` × ${euros(prix[l.cle]!)} HT` : ""}`),
+        ...lignes.map((l) => `- ${l.designation} : ${String(l.quantite).replace(".", ",")} ${l.unite}${chiffre ? ` × ${prixUnitaire(prix[l.cle]!)} HT` : ""}`),
         chiffre ? `- Livraison : ${livraison > 0 ? `${euros(livraison)} HT` : "offerte"}` : "",
         "",
         total ? `Total : ${total}.` : "Prix et livraison : ceux de votre devis.",

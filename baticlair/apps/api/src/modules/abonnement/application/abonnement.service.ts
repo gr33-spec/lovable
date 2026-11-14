@@ -220,8 +220,9 @@ export class AbonnementService {
       resiliationProgrammee: etat.resiliationProgrammee,
       statut: p.statut,
       tvaIntra: p.ligne?.tvaIntra ?? null,
-      bandeau: this.actif ? (bandeauGrace(etat) ?? (gratuit ? null : bandeauEssai(etat))) : null,
-      bandeauRouge: this.actif && etat.acces === "grace",
+      // Recette n° 2 du 14 novembre 2026 (G4) : une fois la résiliation demandée, plus de bandeau rouge « Paiement refusé ».
+      bandeau: this.actif ? ((etat.resiliationProgrammee && etat.acces === "grace" ? null : bandeauGrace(etat)) ?? (gratuit ? null : bandeauEssai(etat))) : null,
+      bandeauRouge: this.actif && etat.acces === "grace" && !etat.resiliationProgrammee,
       paywall: { phrase: gratuit ? TARIFS.paywallAchatGroupe : phrasePaywall(reglages), economie: gratuit ? null : phraseEconomiePremierCycle(ecart) },
     };
   }

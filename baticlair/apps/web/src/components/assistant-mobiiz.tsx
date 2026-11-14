@@ -363,6 +363,7 @@ export function AssistantMobiiz({
       const faites: Consigne[] = [];
       const nouveaux: Retour[] = [];
       let probleme = false;
+      let reseau = false;
       let passeesApres = passees;
       for (const r of libres.reponses) {
         try {
@@ -372,7 +373,9 @@ export function AssistantMobiiz({
           repondues.push(r);
         } catch (e) {
           probleme = true;
-          ratees.push(`« ${r.libelle} » n'est pas passé${e instanceof ApiError && e.message ? ` (${e.message})` : ""}`);
+          // Recette n° 2 du 14 novembre 2026 (G21) : une coupure de réseau n'est pas une réponse mal comprise.
+          if (e instanceof ApiError && e.status === 0) reseau = true;
+          else ratees.push(`« ${r.libelle} » n'est pas passé${e instanceof ApiError && e.message ? ` (${e.message})` : ""}`);
         }
       }
       for (const c of consignes) {
@@ -390,6 +393,10 @@ export function AssistantMobiiz({
           faites.push(c);
         } catch (e) {
           probleme = true;
+          if (e instanceof ApiError && e.status === 0) {
+            reseau = true;
+            continue;
+          }
           faites.push({ type: "incompris", texte: e instanceof ApiError && e.message ? `${"libelle" in c ? c.libelle : propre} (${e.message})` : "libelle" in c ? c.libelle : propre });
         }
       }
@@ -398,6 +405,12 @@ export function AssistantMobiiz({
       setVersion((v) => v + 1);
       const passe = libres.reponses.length === 0 && consignes.length > 0 && consignes.every((c) => c.type === "passer" || c.type === "ne_sait_pas");
       const phrases = [repondues.length ? `C'est noté : ${resumeReponses(repondues)}.` : "", ratees.length ? `${ratees.join(", ")}.` : "", faites.length ? resumeConsignes(faites) : ""].filter(Boolean).join(" ");
+      if (reseau) {
+        // Le réseau a lâché en route : ce qui est passé se dit, le message revient dans la case si rien n'est passé.
+        if (repondues.length === 0 && faites.length === 0) setSaisie(propre);
+        setMessages((m) => [...m, { de: "mobiiz", texte: [phrases, PAS_DE_RESEAU].filter(Boolean).join(" ") }]);
+        return;
+      }
       setMessages((m) => [...m, { de: "mobiiz", texte: `${passe ? "Pas de souci, on passe." : phrases || "C'est noté."}${probleme ? "" : suite(t, passeesApres)}` }]);
     },
      

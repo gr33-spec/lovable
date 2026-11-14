@@ -9,7 +9,7 @@ export const TON = {
   /** Avant un achat groupé. */
   avantAchatGroupe: "Seul, tu pèses une palette. À plusieurs, on pèse un camion.",
   /** À l'engagement dans un achat groupé. */
-  engagement: "D'autres artisans du secteur comptent sur ta commande pour peser. Si tu t'engages, tu commandes.",
+  engagement: "D'autres artisans du secteur comptent sur ton besoin pour peser. Tu décides à la réception de l'offre.",
   /** Relance d'un artisan dans un achat groupé, pour ses propres négoces. */
   relanceGroupe: "Plus il y a de négoces qui répondent, meilleur est le prix pour tout le groupe.",
 } as const;

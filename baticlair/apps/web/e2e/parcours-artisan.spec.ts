@@ -1908,7 +1908,7 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   // « Chantier signé » : « Proposer » attend la phrase d'engagement.
   await bar.getByRole("radio", { name: "Chantier signé" }).click();
   await expect(bar.getByRole("button", { name: "Proposer" })).toBeDisabled();
-  await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix obtenu par le regroupement, chez le négoce retenu/ }).check();
+  await bar.getByRole("checkbox", { name: /je confirme que ces quantités sont un besoin réel de mon entreprise/ }).check();
   await bar.getByRole("button", { name: "Proposer" }).click();
 
   const groupe = page.getByRole("region", { name: "Dans le regroupement", exact: true });
@@ -2146,7 +2146,7 @@ async function proposerLaPremiereLigne(page: Page, statut: "Chantier signé" | "
   await boxes.first().check();
   const bar = page.getByRole("region", { name: "Ajouter au regroupement", exact: true });
   await bar.getByRole("radio", { name: statut }).click();
-  if (statut === "Chantier signé") await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix obtenu par le regroupement, chez le négoce retenu/ }).check();
+  if (statut === "Chantier signé") await bar.getByRole("checkbox", { name: /je confirme que ces quantités sont un besoin réel de mon entreprise/ }).check();
   await bar.getByRole("button", { name: "Proposer" }).click();
 }
 

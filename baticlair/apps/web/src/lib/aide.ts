@@ -18,7 +18,7 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
     titre: NOM,
     lignes: [
       "Tes commandes se regroupent avec celles des artisans de ton département : un seul négoce, un seul prix.",
-      "« Chantier signé » t'engage à commander au prix obtenu ; « Devis en attente » ne t'engage pas.",
+      "« Chantier signé » annonce une quantité sûre ; « Devis en attente », une quantité probable. Dans les deux cas, tu décides de commander à la réception de l'offre.",
       "Gratuit pour toi, et aucun frais pour le négoce pour l'instant.",
     ],
   },

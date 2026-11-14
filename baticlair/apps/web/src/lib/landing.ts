@@ -42,7 +42,8 @@ export const DEVIS_EXEMPLE = {
  * matin, dont les prix n'avaient pas été donnés.
  */
 export const ECART_PEINTURE = {
-  titre: "Le même pot, deux fois moins cher.",
+  // Greg, 14 novembre 2026 : « deux fois moins cher » est retiré partout (aucune économie garantie) ; l'exemple chiffré reste.
+  titre: "Le même pot, seul ou en palette.",
   article: "Blanc mat professionnel, pot de 15 L",
   seul: { prix: "6 à 7 €", unite: "HT le litre" },
   palette: { prix: "moins de 3 €", unite: "HT le litre" },

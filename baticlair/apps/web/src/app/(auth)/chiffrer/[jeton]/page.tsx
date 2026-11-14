@@ -25,6 +25,10 @@ const lireNombre = (s: string) =>
  * Trois gestes (6 novembre 2026) : « Je vais répondre », « J'ai besoin d'une précision », « Je ne peux pas chiffrer ». Après la première réponse, l'invitation à créer son compte. Une commande reçue se
  * confirme ici. Vouvoiement ; jamais le prix d'un autre négoce.
  */
+const centimes = (n: number) => Math.round(Number((n * 100).toPrecision(12))) / 100;
+/** Un prix unitaire s'écrit avec ses décimales (1,275 €) : le négoce relit ce qu'il a saisi, pas un arrondi. */
+const prixUnitaire = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} €`;
+
 export default function ChiffrerPage() {
   const { jeton } = useParams<{ jeton: string }>();
   const [page, setPage] = useState<PageChiffrage | null>(null);
@@ -177,13 +181,14 @@ export default function ChiffrerPage() {
     const n = lireNombre(s);
     return n != null && Number.isFinite(n) && n > 0 ? n : 0;
   };
+  // Recette n° 2 du 14 novembre 2026 : la somme des lignes arrondies au centime, comme chez l'artisan et sur le bon.
   const total =
-    page.lignes.reduce((s, l) => s + fini(prix[l.cle] ?? "") * l.quantite, 0) +
+    centimes(page.lignes.reduce((s, l) => s + centimes(fini(prix[l.cle] ?? "") * l.quantite), 0)) +
     fini(livraison);
   // Recette du 13 novembre 2026 (G12) : après l'envoi, le négoce relit ce qu'il a envoyé (total, livraison, délai).
   const envoye = page.reponse
     ? {
-        articles: page.lignes.reduce((s, l) => s + (page.reponse!.prix[l.cle] ?? 0) * l.quantite, 0),
+        articles: centimes(page.lignes.reduce((s, l) => s + centimes((page.reponse!.prix[l.cle] ?? 0) * l.quantite), 0)),
         chiffres: page.lignes.filter((l) => page.reponse!.prix[l.cle] != null).length,
       }
     : null;
@@ -425,7 +430,7 @@ export default function ChiffrerPage() {
                 ) : (
                   <span className="shrink-0 text-[15px] font-semibold">
                     {page.reponse?.prix[l.cle] != null
-                      ? euros(page.reponse.prix[l.cle]!)
+                      ? prixUnitaire(page.reponse.prix[l.cle]!)
                       : "Non chiffré"}
                   </span>
                 )}

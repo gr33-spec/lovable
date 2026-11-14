@@ -138,7 +138,9 @@ export function comparerLesReponses(lignes: readonly LigneDemandee[], reponses: 
     for (const l of lignes) {
       const pu = r.prix[l.cle];
       if (pu === undefined) manquantes.push(l.designation);
-      else total += pu * l.quantite;
+      // Recette n° 2 du 14 novembre 2026 : le total est la somme des lignes ARRONDIES au centime, comme sur le bon de
+      // commande et la facture du négoce (avant : somme puis arrondi, un centime d'écart possible ligne à ligne).
+      else total += arrondi2(pu * l.quantite);
     }
     const valideJusquau = new Date(r.deposeLe.getTime() + r.validiteJours * 86_400_000);
     return {

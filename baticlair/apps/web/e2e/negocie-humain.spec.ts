@@ -244,14 +244,14 @@ test.describe("Business model final : le regroupement négocié par un humain", 
     await expect(page.getByText("Des demandes prêtes à chiffrer, des volumes groupés.")).toBeVisible();
     await expect(page.getByRole("region", { name: "Les mêmes ardoises, dans le même département." })).toBeVisible();
     // L'exemple de la peinture reste sur l'accueil : il ne parle pas au couvreur.
-    await expect(page.getByRole("region", { name: "Le même pot, deux fois moins cher." })).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Le même pot, seul ou en palette." })).toHaveCount(0);
   });
 
   test("/peintres (Greg, 26 octobre 2026) : le bloc peinture en pleine place, juste sous l'accroche ; pas d'ardoise", async ({ page }) => {
     await page.goto("/peintres");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Achète tes matériaux au prix des gros.");
     await expect(page.getByText("Pour les peintres")).toBeVisible();
-    const peinture = page.getByRole("region", { name: "Le même pot, deux fois moins cher." });
+    const peinture = page.getByRole("region", { name: "Le même pot, seul ou en palette." });
     await expect(peinture.getByText("6 à 7 €")).toBeVisible();
     await expect(peinture.getByText("moins de 3 €")).toBeVisible();
     // La première section après l'accroche.

@@ -107,6 +107,8 @@ const nombreFr = (q: string) => (/^\d+$/.test(q) ? Number(q).toLocaleString("fr-
  * Direction A (Greg, 12 novembre 2026) : `surAjout` ouvre l'assistant DEPUIS une liste en cours de saisie : ce que l'artisan
  * valide rejoint cette liste (rien n'est créé à part), et « Revenir à ma liste » le ramène où il était.
  */
+const PAS_DE_RESEAU = "Pas de réseau : ton message reste dans la case. Renvoie-le dès que le réseau revient.";
+
 export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { onFermer?: () => void; surAjout?: (lignes: LigneDecrite[]) => void; existantes?: readonly string[] } = {}) {
   const [ajoutes, setAjoutes] = useState(0);
   const router = useRouter();
@@ -154,6 +156,14 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
     return id;
   };
   const dire = (texte: string) => ajouterElement({ de: "mobiiz", texte });
+  /** Une phrase d'état (« Pas de réseau ») ne se répète pas à chaque appui. */
+  const direUneFois = (texte: string) => {
+    const id = ++compteur.current;
+    setElements((xs) => {
+      const dernier = xs.at(-1);
+      return dernier?.de === "mobiiz" && dernier.texte === texte ? xs : [...xs, { de: "mobiiz" as const, texte, id }];
+    });
+  };
   const pathname = usePathname();
 
   /**
@@ -169,12 +179,20 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
     const texte = (dit ?? champ.saisie).trim();
     if (!texte || occupe) return;
     dictee.arreter();
+    // Recette n° 2 du 14 novembre 2026 (G21) : sans réseau, on le dit et la case garde ce qui est écrit ; rien n'est
+    // répondu à l'aveugle (avant : une réponse fausse, la case vidée, pas un mot sur la coupure).
+    if (typeof navigator !== "undefined" && navigator.onLine === false) return void direUneFois(PAS_DE_RESEAU);
     champ.setSaisie("");
     ajouterElement({ de: "moi", texte });
     const echanges = [...conversation.current.echanges, { de: "artisan" as const, texte }];
     setOccupe(true);
-    const ia = await api<{ ia: boolean; lignes: LigneDecrite[]; questions: { texte: string; choix: string[]; ligne?: number | null }[]; message: string }>("/v1/assistant/description", { method: "POST", body: { echanges: echanges.slice(-20) } }).catch(() => null);
+    const ia = await api<{ ia: boolean; lignes: LigneDecrite[]; questions: { texte: string; choix: string[]; ligne?: number | null }[]; message: string }>("/v1/assistant/description", { method: "POST", body: { echanges: echanges.slice(-20) } }).catch((e: unknown) => (e instanceof ApiError && e.status === 0 ? ("reseau" as const) : null));
     setOccupe(false);
+    // Le réseau a lâché en route : le message revient dans la case, et on le dit.
+    if (ia === "reseau") {
+      champ.setSaisie(texte);
+      return void direUneFois(PAS_DE_RESEAU);
+    }
     let lignes: LigneCarte[];
     if (ia?.ia) {
       // La carte en cours est remplacée par la liste à jour (la réponse à une question complète l'article).

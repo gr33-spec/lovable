@@ -120,11 +120,20 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
         ) : null}
         {a.acces === "grace" ? (
           <>
-            <p className="text-[20px] font-extrabold text-danger">Paiement refusé</p>
-            <p className="text-[16px]">{a.bandeau}</p>
-            <Button onClick={() => void run("payer", a.paiement === "stripe" ? async () => window.location.assign((await api<{ url: string }>("/v1/abonnement/portail", { method: "POST" })).url) : () => continuerAbonnement(a.formule))} pending={pending === "payer"} className="self-start">
-              Mettre à jour ma carte
-            </Button>
+            {/* Recette n° 2 du 14 novembre 2026 (G4) : une fois résilié, l'écran ne dit plus « Paiement refusé » en rouge. */}
+            {a.resiliationProgrammee || a.statut === "resilie" ? (
+              <p className="text-[20px] font-extrabold">Abonnement résilié</p>
+            ) : (
+              <>
+                <p className="text-[20px] font-extrabold text-danger">Paiement refusé</p>
+                <p className="text-[16px]">{a.bandeau}</p>
+              </>
+            )}
+            {a.resiliationProgrammee || a.statut === "resilie" ? null : (
+              <Button onClick={() => void run("payer", a.paiement === "stripe" ? async () => window.location.assign((await api<{ url: string }>("/v1/abonnement/portail", { method: "POST" })).url) : () => continuerAbonnement(a.formule))} pending={pending === "payer"} className="self-start">
+                Mettre à jour ma carte
+              </Button>
+            )}
             {/* Recette du 13 novembre 2026 (G4) : on peut résilier même quand le paiement est refusé, et l'écran le dit. */}
             {a.resiliationProgrammee || a.statut === "resilie" ? (
               <p className="text-[16px] font-semibold">Résiliation enregistrée : rien ne sera plus prélevé.</p>

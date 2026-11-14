@@ -929,7 +929,7 @@ export function DetailAchatGroupe({ id }: { id: string }) {
       ) : confirmer ? (
         <Card role="alertdialog" aria-label="Sortir de l'achat groupé" className="flex flex-col gap-3 p-4">
           <p className="text-[16px] font-bold">Tu sors de l&apos;achat groupé : « {d.motifsSortie.find((m) => m.valeur === confirmer)?.libelle} » ?</p>
-          <p className="text-[14px] text-muted">Deux sorties en trois mois, ou une commande pas passée sans motif : plus d&apos;achat groupé pendant 3 mois.</p>
+          <p className="text-[14px] text-muted">Deux sorties en trois mois : plus d&apos;achat groupé pendant 3 mois.</p>
           <div className="grid grid-cols-2 gap-2">
             <Button variant="secondary" onClick={() => setConfirmer(null)}>
               Annuler

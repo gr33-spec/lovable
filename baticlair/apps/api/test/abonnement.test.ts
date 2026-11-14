@@ -156,6 +156,17 @@ describe("le paiement simulé", () => {
     expect(await ctx.prisma.factureAbonnement.count()).toBe(0);
   });
 
+  it("recette n° 2 du 14 novembre 2026 (G4) : résilier pendant un paiement refusé se voit, et le bandeau rouge s'en va", async () => {
+    const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
+    await inscritLe(A.companyId, "2026-07-01T10:00:00.000Z");
+    expect(await payer(A.agent, "echec")).toMatchObject({ acces: "grace", bandeauRouge: true, resiliationProgrammee: false });
+    const m = new Date(new Date(T).getTime() + 3_600_000).toISOString();
+    const r = (await A.agent.post(`/v1/abonnement/resilier?${q(m)}`).expect(200)).body;
+    expect(r).toMatchObject({ acces: "grace", resiliationProgrammee: true, bandeauRouge: false, bandeau: null });
+    // Relu plus tard (après rechargement de l'écran) : la résiliation est toujours là.
+    expect((await A.agent.get(`/v1/abonnement?${q(m)}`).expect(200)).body).toMatchObject({ resiliationProgrammee: true, bandeauRouge: false });
+  });
+
   it("résiliation : effet en fin de période, e-mail de confirmation, puis le paywall", async () => {
     const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
     await inscritLe(A.companyId, "2026-07-01T10:00:00.000Z");

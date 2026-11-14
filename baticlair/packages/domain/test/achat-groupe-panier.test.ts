@@ -77,7 +77,8 @@ describe("B. l'engagement et ses deux sorties", () => {
     expect(exclu(fin, new Date("2027-01-01"))).toBe(true);
     expect(exclu(fin, new Date("2027-03-01"))).toBe(false);
     expect(exclusionJusquau({ sorties: [new Date("2026-01-01"), new Date("2026-06-01")], nonCommandesSansMotif: [] })).toBeNull();
-    expect(exclusionJusquau({ sorties: [], nonCommandesSansMotif: [new Date("2026-12-01")] })!.toISOString().slice(0, 10)).toBe("2027-03-01");
+    // Greg, 14 novembre 2026 (recette n° 2) : ne pas commander n'exclut plus (avant : trois mois d'exclusion).
+    expect(exclusionJusquau({ sorties: [], nonCommandesSansMotif: [new Date("2026-12-01")] })).toBeNull();
   });
 });
 

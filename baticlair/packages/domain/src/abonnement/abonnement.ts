@@ -140,7 +140,9 @@ const joursAvant = (fin: Date, maintenant: Date) => Math.max(0, Math.ceil((fin.g
 /** L'état de l'abonnement à un instant : abonné, en grâce, en essai, ou bloqué par le paywall. */
 export function etatAbonnement(dates: DatesEssai, paiement: EtatPaiement, maintenant: Date, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): EtatAbonnement {
   const essaiFinLe = finDEssai(dates, r);
-  const base = { essaiFinLe, joursEssai: null, graceFinLe: null, joursGrace: null, periodeFin: paiement.periodeFin, resiliationProgrammee: paiement.statut === "actif" && !!paiement.resiliationDemandeeLe, accesJusquau: null };
+  const base = { essaiFinLe, joursEssai: null, graceFinLe: null, joursGrace: null, periodeFin: paiement.periodeFin, // Recette n° 2 du 14 novembre 2026 (G4) : une résiliation demandée pendant un paiement refusé se voit aussi (avant :
+    // seulement sur un abonnement actif, donc l'écran restait sur « Paiement refusé » avec son bouton « Résilier »).
+    resiliationProgrammee: (paiement.statut === "actif" || paiement.statut === "echec") && !!paiement.resiliationDemandeeLe, accesJusquau: null };
   const periodeEnCours = !!paiement.periodeFin && paiement.periodeFin > maintenant;
   if ((paiement.statut === "actif" || paiement.statut === "resilie") && periodeEnCours) return { ...base, acces: "abonne" };
   // Un paiement refusé, ou un renouvellement qui n'est pas arrivé : la grâce, puis le paywall.

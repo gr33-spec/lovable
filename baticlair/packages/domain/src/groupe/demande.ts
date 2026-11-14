@@ -73,7 +73,7 @@ export function objetDemande(lots: readonly LotADemander[], departement: string)
 function paragraphesDemande(lots: readonly LotADemander[]): { intro: string[]; parLot: { titre: string; lignes: string[]; lien: string }[]; fin: string[] } {
   const intro = [
     "Bonjour,",
-    `Des artisans de votre département regroupent leurs besoins fermes pour vous demander un prix de volume : chacun commande ensuite sur son propre compte chez vous, est livré sur son chantier et vous paie comme d'habitude. Le volume ferme est engagé ; le volume probable vous est donné à titre indicatif.`,
+    `Des artisans de votre département regroupent leurs besoins confirmés pour vous demander un prix de volume : chacun commande ensuite sur son propre compte chez vous, est livré sur son chantier et vous paie comme d'habitude. Le volume confirmé est annoncé ; le volume probable vous est donné à titre indicatif. Chaque artisan décide de commander à la réception de votre offre.`,
   ];
   const parLot = lots.map((lot) => {
     const v = volumesDuLot(lot);

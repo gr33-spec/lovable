@@ -86,10 +86,11 @@ export const PHRASE_EMAIL_A_CONFIRMER = "Confirme ton adresse e-mail pour ajoute
 
 /** Les règles dites en clair au moment de rejoindre (point 9), au-dessus de la case obligatoire. */
 export const REGLES_ENGAGEMENT: readonly string[] = [
-  "Tes quantités sont annoncées aux négoces : seul le volume engagé compte.",
-  "À la publication, tu commandes chez le moins cher : la meilleure offre du groupe ou ton négoce habituel, tel qu'il a répondu. Il n'y a pas de deuxième tour.",
-  "Deux sorties seulement, en un clic avec le motif : chantier annulé par ton client, ou aucune offre livrable dans les délais.",
-  "Plus d'une sortie par trimestre, ou une commande pas passée sans motif : pas d'achat groupé pendant 3 mois.",
+  // Greg, 14 novembre 2026 (recette n° 2) : l'artisan n'est jamais obligé de commander ; il décide à la réception de l'offre.
+  "Tes quantités sont annoncées aux négoces : seul le volume confirmé compte.",
+  "À la publication, tu vois la meilleure offre du groupe et celle de ton négoce habituel, et tu décides : tu commandes, ou non. Il n'y a pas de deuxième tour.",
+  "Tu peux sortir en un clic, avec le motif : chantier annulé par ton client, ou aucune offre livrable dans les délais.",
+  "Plus d'une sortie par trimestre : pas d'achat groupé pendant 3 mois. Ne pas commander n'a aucune conséquence.",
 ];
 
 export const MOTIFS_SORTIE = ["chantier_annule", "aucune_offre_livrable"] as const;
@@ -100,12 +101,15 @@ export const LIBELLES_MOTIFS_SORTIE: Readonly<Record<MotifSortie, string>> = {
 };
 
 /**
- * L'exclusion (point 8) : plus d'une sortie sur 3 mois glissants, ou une commande pas passée sans motif, exclut des achats
- * groupés pendant `mois` mois, à compter du dernier manquement. Rend la date de fin, ou null.
+ * L'exclusion (point 8) : plus d'une sortie sur 3 mois glissants exclut des achats groupés pendant `mois` mois, à compter
+ * du dernier manquement. Rend la date de fin, ou null. RÈGLE CHANGÉE le 14 novembre 2026 : une commande pas passée
+ * n'exclut plus (avant : elle excluait trois mois).
  */
 export function exclusionJusquau(manquements: { sorties: readonly Date[]; nonCommandesSansMotif: readonly Date[] }, mois = EXCLUSION_MOIS_DEFAUT): Date | null {
   const plus = (d: Date) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + mois, d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes()));
-  const fins: Date[] = manquements.nonCommandesSansMotif.map(plus);
+  // Greg, 14 novembre 2026 (recette n° 2) : ne pas commander n'exclut plus jamais (l'artisan décide à la réception de
+  // l'offre) ; `nonCommandesSansMotif` reste dans la signature pour les appels existants, sans effet.
+  const fins: Date[] = [];
   const sorties = [...manquements.sorties].sort((a, b) => a.getTime() - b.getTime());
   for (let i = 1; i < sorties.length; i++) if (sorties[i]!.getTime() - sorties[i - 1]!.getTime() <= 92 * JOUR) fins.push(plus(sorties[i]!));
   return fins.length ? new Date(Math.max(...fins.map((d) => d.getTime()))) : null;
