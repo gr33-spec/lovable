@@ -26,14 +26,14 @@ beforeEach(async () => {
   await resetDatabase(ctx.prisma);
 });
 
-const profil = (siret: string) => ({ name: "Toitures", address: "3 rue des Ajoncs, 22300 Lannion", siret, phone: null, email: null });
+const ficheEntreprise = (siret: string) => ({ name: "Toitures", address: "3 rue des Ajoncs, 22300 Lannion", siret, phone: null, email: null });
 
 describe("un seul compte par SIRET vérifié", () => {
   it("le premier compte vérifie son SIRET ; un second compte avec le même SIRET est refusé, avec une phrase claire", async () => {
     const a = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
     const b = await signUpWithCompany(ctx.app, "b@toitures.fr", "Toitures B", ["roofing"]);
-    await a.agent.patch("/v1/company/profile").send(profil(SIRET)).expect(200);
-    await b.agent.patch("/v1/company/profile").send(profil(SIRET)).expect(200);
+    await a.agent.patch("/v1/company/profile").send(ficheEntreprise(SIRET)).expect(200);
+    await b.agent.patch("/v1/company/profile").send(ficheEntreprise(SIRET)).expect(200);
     expect((await a.agent.post("/v1/groupe/siret").expect(200)).body).toMatchObject({ verifie: true });
     const refus = (await b.agent.post("/v1/groupe/siret").expect(200)).body;
     expect(refus).toMatchObject({ verifie: false, statut: "deja_utilise" });
@@ -45,13 +45,13 @@ describe("un seul compte par SIRET vérifié", () => {
 
   it("un SIRET qui change n'est plus « vérifié » : pas de vérification empruntée", async () => {
     const a = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
-    await a.agent.patch("/v1/company/profile").send(profil(SIRET)).expect(200);
+    await a.agent.patch("/v1/company/profile").send(ficheEntreprise(SIRET)).expect(200);
     await a.agent.post("/v1/groupe/siret").expect(200);
     expect((await ctx.prisma.company.findUniqueOrThrow({ where: { id: a.companyId } })).siretVerifieLe).not.toBeNull();
     // Le même SIRET réenregistré ne change rien.
-    await a.agent.patch("/v1/company/profile").send(profil(SIRET)).expect(200);
+    await a.agent.patch("/v1/company/profile").send(ficheEntreprise(SIRET)).expect(200);
     expect((await ctx.prisma.company.findUniqueOrThrow({ where: { id: a.companyId } })).siretVerifieLe).not.toBeNull();
-    await a.agent.patch("/v1/company/profile").send(profil(AUTRE)).expect(200);
+    await a.agent.patch("/v1/company/profile").send(ficheEntreprise(AUTRE)).expect(200);
     expect((await ctx.prisma.company.findUniqueOrThrow({ where: { id: a.companyId } })).siretVerifieLe).toBeNull();
   });
 });
