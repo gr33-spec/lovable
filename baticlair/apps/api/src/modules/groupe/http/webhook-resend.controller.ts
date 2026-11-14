@@ -1,3 +1,4 @@
+import { AdresseAlerte } from "../../../platform/alerts/adresse-alerte.js";
 import { Controller, Headers, HttpCode, Inject, Post, Req } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -47,6 +48,7 @@ export class WebhookResendController {
     @Inject(LOGGER) private readonly logger: AppLogger,
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(ReponsesRecuesService) private readonly reponses: ReponsesRecuesService,
+    @Inject(AdresseAlerte) private readonly adresse: AdresseAlerte,
   ) {}
 
   @Public()
@@ -70,7 +72,10 @@ export class WebhookResendController {
   private async traiter(req: { body?: unknown }) {
     const evenement = (req.body ?? {}) as { type?: string; data?: { email_id?: string; from?: string; to?: string[] | string; subject?: string; created_at?: string } };
     if (evenement.type !== "email.received" || !evenement.data?.from) return { traite: false, raison: "ignore" };
-    const contact = await renvoyerContact(this.config.contact, evenement.data, this.lecteur, this.envoi, this.logger);
+    // Greg, 14 novembre 2026 : ce qui arrive sur contact@ est transféré vers l'adresse d'alerte réglée dans l'admin
+    // (avant : une adresse fixe de la configuration).
+    const vers = this.config.contact ? await this.adresse.actuelle().catch(() => null) : null;
+    const contact = await renvoyerContact(this.config.contact && vers ? { ...this.config.contact, vers } : this.config.contact, evenement.data, this.lecteur, this.envoi, this.logger);
     if (contact) return contact;
     // R7 : un e-mail à l'adresse Mobiiz d'un artisan (réponse d'un négoce) arrive dans Mobiiz.
     const artisan = await this.reponses.recevoir(evenement.data, this.lecteur);

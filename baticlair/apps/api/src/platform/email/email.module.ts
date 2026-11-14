@@ -1,7 +1,9 @@
 import { Global, Module } from "@nestjs/common";
 import type { AppConfig } from "../config/config.js";
 import type { AppLogger } from "../logging/logger.js";
+import { AdresseAlerte } from "../alerts/adresse-alerte.js";
 import { ChannelAlerter } from "../alerts/alerter.js";
+import { PrismaService } from "../database/prisma.service.js";
 import { ALERTER, CONFIG, EMAIL_RECU, EMAIL_SENDER, LOGGER } from "../tokens.js";
 import { EnveloppeSeule, LecteurEmailRecuDeTest, ResendLecteurEmailRecu } from "./contact-entrant.js";
 import type { TransactionalEmailSender } from "./email.port.js";
@@ -54,10 +56,12 @@ export const RELAIS_EMAIL = Symbol("RELAIS_EMAIL");
     {
       // Alertes de production (B5) : à côté des e-mails, qu'elles peuvent emprunter.
       provide: ALERTER,
-      useFactory: (config: AppConfig, email: TransactionalEmailSender, logger: AppLogger) => new ChannelAlerter({ ...config.alerts, env: config.env }, email, logger),
-      inject: [CONFIG, EMAIL_SENDER, LOGGER],
+      // L'adresse des alertes se règle dans l'admin (Greg, 14 novembre 2026) : lue en base à chaque alerte, sans redéploiement.
+      useFactory: (config: AppConfig, email: TransactionalEmailSender, logger: AppLogger, adresse: AdresseAlerte) => new ChannelAlerter({ ...config.alerts, env: config.env }, email, logger, fetch, () => Date.now(), () => adresse.actuelle()),
+      inject: [CONFIG, EMAIL_SENDER, LOGGER, AdresseAlerte],
     },
+    { provide: AdresseAlerte, useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender) => new AdresseAlerte(p, c, e), inject: [PrismaService, CONFIG, EMAIL_SENDER] },
   ],
-  exports: [EMAIL_SENDER, ALERTER, EMAIL_RECU, RELAIS_EMAIL],
+  exports: [EMAIL_SENDER, ALERTER, EMAIL_RECU, RELAIS_EMAIL, AdresseAlerte],
 })
 export class EmailModule {}

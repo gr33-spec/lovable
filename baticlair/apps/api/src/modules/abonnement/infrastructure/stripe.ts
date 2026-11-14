@@ -79,6 +79,8 @@ export class HttpStripeClient implements StripeClient {
       // Toujours en euros, le prix des CGU (recette en ligne du 25 octobre 2026 : la conversion automatique de Stripe
       // affichait des dollars à un navigateur situé hors de France).
       "adaptive_pricing[enabled]": false,
+      // Greg, 14 novembre 2026 : la case « Ajouter un code promotionnel » du paiement (code « FONDATEUR »).
+      allow_promotion_codes: true,
       locale: "fr",
       success_url: c.succes,
       cancel_url: c.annulation,
@@ -104,6 +106,19 @@ export class HttpStripeClient implements StripeClient {
       payment_behavior: "error_if_incomplete",
       "metadata[formule]": "pro",
     });
+  }
+
+  async couponsDe(subscriptionId: string): Promise<string[]> {
+    type Remise = { coupon?: { id?: string } | string | null; source?: { coupon?: { id?: string } | string | null } | null } | string | null;
+    const abo = await this.appel<{ discounts?: Remise[] | null; discount?: Remise }>(`subscriptions/${encodeURIComponent(subscriptionId)}`, { "expand[0]": "discounts" }, "GET");
+    const id = (x: { id?: string } | string | null | undefined) => (typeof x === "string" ? x : (x?.id ?? null));
+    return [...(abo.discounts ?? []), abo.discount ?? null]
+      .map((d) => (d && typeof d === "object" ? (id(d.coupon) ?? id(d.source?.coupon)) : null))
+      .filter((x): x is string => !!x);
+  }
+
+  async appliquerCoupon(subscriptionId: string, coupon: string) {
+    await this.appel(`subscriptions/${encodeURIComponent(subscriptionId)}`, { "discounts[0][coupon]": coupon });
   }
 
   async resilierEnFinDePeriode(subscriptionId: string) {

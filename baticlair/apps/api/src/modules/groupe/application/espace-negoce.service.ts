@@ -162,6 +162,10 @@ export class EspaceNegoceService {
    * Business model final (Greg, 25 octobre 2026) : la vérification du négoce (SIRET par l'API Recherche d'entreprises, NAF,
    * domaine de l'e-mail), branchée par le module recentrage. Elle refuse (exception) ou rend le statut à enregistrer.
    */
+  private alerte: (message: string) => void = () => undefined;
+  brancherAlerte(f: (message: string) => void): void {
+    this.alerte = f;
+  }
   private verification: ((i: { siret: string | null; email: string; enseigne: string }) => Promise<{ verification: "valide" | "a_verifier"; naf: string | null; raisonSociale: string | null }>) | null = null;
   brancherVerification(fn: NonNullable<EspaceNegoceService["verification"]>): void {
     this.verification = fn;
@@ -201,6 +205,8 @@ export class EspaceNegoceService {
       await tx.depotNegoce.createMany({ data: depots.map((d) => ({ compteId: compte.id, ...d })) });
       await this.alignerAbonnements(tx, compte.id, { email, siret, enseigne }, departements, maintenant, profil);
     });
+    // Greg, 14 novembre 2026 : un négoce inscrit qui attend sa vérification prévient l'admin.
+    if (verification === "a_verifier") this.alerte("un négoce vient de s'inscrire et attend sa vérification. À valider dans l'espace admin, Négoces.");
     const prochaine = await this.prochaineCloture(departements, maintenant);
     return { compteId: compte.id, phrase: phraseApresInscription(prochaine.clotureLe), departements };
   }

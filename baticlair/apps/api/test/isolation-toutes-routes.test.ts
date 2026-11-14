@@ -214,6 +214,9 @@ describe("isolation entre entreprises, toutes les routes", () => {
         // Étape 9 : l'admin (B n'est pas admin : 403, jamais une donnée de A).
         [/\/admin\/groupe\/lots$/, ids.lot],
         [/\/admin\/groupe\/factures$/, ids.lot],
+        // L'espace admin, vue globale (14 novembre 2026) : la fiche de l'entreprise A (B n'est pas admin : 403).
+        [/\/admin\/vue\/artisans$/, companyId],
+        [/\/admin\/vue\/negoces$/, companyId],
         // La commande du mois : la ligne et la commande de A ; la grille du négoce est un jeton.
         [/\/commande-du-mois\/lignes$/, ids.besoin],
         [/\/commande-du-mois$/, ids.cycle],

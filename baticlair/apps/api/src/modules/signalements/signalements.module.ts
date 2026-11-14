@@ -1,3 +1,4 @@
+import { AdresseAlerte } from "../../platform/alerts/adresse-alerte.js";
 import { Module } from "@nestjs/common";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
@@ -12,6 +13,6 @@ import { SignalementsService } from "./application/signalements.service.js";
 @Module({
   imports: [TenancyModule],
   controllers: [SignalementsController, SignalementsPublicsController, SignalementsAdminController],
-  providers: [{ provide: SignalementsService, useFactory: (p: PrismaService, e: TransactionalEmailSender, c: AppConfig, l: AppLogger) => new SignalementsService(p, e, c, l), inject: [PrismaService, EMAIL_SENDER, CONFIG, LOGGER] }],
+  providers: [{ provide: SignalementsService, useFactory: (p: PrismaService, e: TransactionalEmailSender, c: AppConfig, l: AppLogger, a: AdresseAlerte) => new SignalementsService(p, e, c, l, a), inject: [PrismaService, EMAIL_SENDER, CONFIG, LOGGER, AdresseAlerte] }],
 })
 export class SignalementsModule {}

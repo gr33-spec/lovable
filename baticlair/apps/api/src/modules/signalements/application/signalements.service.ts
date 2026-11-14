@@ -1,3 +1,4 @@
+import type { AdresseAlerte } from "../../../platform/alerts/adresse-alerte.js";
 import type { AppConfig } from "../../../platform/config/config.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
@@ -62,11 +63,13 @@ export class SignalementsService {
     private readonly emails: TransactionalEmailSender,
     private readonly config: AppConfig,
     private readonly logger: AppLogger,
+    private readonly adresse: AdresseAlerte | null = null,
   ) {}
 
   /** Qui reçoit l'alerte : l'adresse des alertes, sinon le premier admin. Sans l'un ni l'autre, rien ne part. */
-  private destinataireDesAlertes(): string | null {
-    return this.config.alerts.email ?? this.config.groupe.admins[0] ?? null;
+  private async destinataireDesAlertes(): Promise<string | null> {
+    // L'adresse réglée dans l'admin (Greg, 14 novembre 2026), sinon l'adresse fixe, sinon le premier admin.
+    return this.adresse ? this.adresse.actuelle() : (this.config.alerts.email ?? this.config.groupe.admins[0] ?? null);
   }
   private lienAdmin(id: string): string {
     return `${this.config.webAppUrl}/admin/signalements?id=${id}`;
@@ -101,7 +104,7 @@ export class SignalementsService {
     // Un négoce est vouvoyé (recette du 13 novembre 2026).
     if (email) await this.envoyer({ to: email, subject: OBJET_ACCUSE, text: `Bonjour,\n\nMerci, on regarde. ${n.origine === "negoce" ? "Votre" : "Ton"} signalement est bien arrivé :\n\n« ${n.message.trim().slice(0, 500)} »\n\nOn ${n.origine === "negoce" ? "vous" : "te"} prévient dès que c'est corrigé.\n\nL'équipe Mobiiz` });
     // 2. L'alerte à Greg : ce qui est signalé, où, et le lien vers l'espace admin.
-    const greg = this.destinataireDesAlertes();
+    const greg = (await this.destinataireDesAlertes());
     if (greg)
       await this.envoyer({
         to: greg,
@@ -152,7 +155,7 @@ export class SignalementsService {
       },
     });
     // Le résumé du réparateur, nouveau ou changé : Greg reçoit l'e-mail avec le lien pour valider la correction.
-    const greg = this.destinataireDesAlertes();
+    const greg = (await this.destinataireDesAlertes());
     if (resume && resume !== avant.resume && greg) {
       const gravite = apres.gravite ? LIBELLES_GRAVITE[apres.gravite as keyof typeof LIBELLES_GRAVITE] : "à estimer";
       await this.envoyer({ to: greg, subject: `Signalement analysé (${gravite}) : ${apres.page}`, text: `Le réparateur a analysé le signalement.\n\nPage : ${apres.page}\nGravité : ${gravite}\n\n${resume.slice(0, 3000)}\n\nValider la correction : ${this.lienAdmin(id)}\n\nRien n'est corrigé tant que tu n'as pas validé.` });

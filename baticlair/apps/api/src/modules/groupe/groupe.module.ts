@@ -109,9 +109,12 @@ import { ALERTER } from "../../platform/tokens.js";
     {
       // L'espace négoce autonome (Greg, 23 octobre 2026).
       provide: EspaceNegoceService,
-      useFactory: (p: PrismaService, e: TransactionalEmailSender, g: Geocodeur, s: SiretVerifier, c: AppConfig) =>
-        new EspaceNegoceService(p, e, g, s, { authSecret: c.authSecret, webAppUrl: c.webAppUrl }, async () => ({ ...CONFIG_CYCLE_DEFAUT, ...(((await p.parametreGroupe.findUnique({ where: { cle: "cycle:config" } }))?.valeur as object | null) ?? {}) })),
-      inject: [PrismaService, EMAIL_SENDER, GEOCODEUR, SIRET_VERIFIER, CONFIG],
+      useFactory: (p: PrismaService, e: TransactionalEmailSender, g: Geocodeur, s: SiretVerifier, c: AppConfig, alerter: Alerter) => {
+        const espace = new EspaceNegoceService(p, e, g, s, { authSecret: c.authSecret, webAppUrl: c.webAppUrl }, async () => ({ ...CONFIG_CYCLE_DEFAUT, ...(((await p.parametreGroupe.findUnique({ where: { cle: "cycle:config" } }))?.valeur as object | null) ?? {}) }));
+        espace.brancherAlerte((m) => alerter.alert("negoce_a_verifier", m));
+        return espace;
+      },
+      inject: [PrismaService, EMAIL_SENDER, GEOCODEUR, SIRET_VERIFIER, CONFIG, ALERTER],
     },
     { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender, espace: EspaceNegoceService) => new NegocesService(p, c.authSecret, e, c.webAppUrl, espace), inject: [PrismaService, CONFIG, EMAIL_SENDER, EspaceNegoceService] },
     { provide: SIRENE_HTTP, useValue: fetch as unknown as SireneHttp },

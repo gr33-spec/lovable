@@ -1675,6 +1675,8 @@ model Abonnement {
   stripeCustomerId      String?   @unique
   stripeSubscriptionId  String?   @unique
   /// Le n° de TVA intracommunautaire de l'artisan (facultatif), écrit sur ses factures.
+  /// Le code promo utilisé au paiement (Greg, 14 novembre 2026 : « FONDATEUR », 6 mois offerts puis -30 % à vie).
+  codePromo             String?   @map("code_promo")
   tvaIntra              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
