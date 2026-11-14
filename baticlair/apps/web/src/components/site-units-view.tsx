@@ -80,7 +80,7 @@ function Block({
   return (
     <article
       aria-label={title}
-      className="flex flex-col overflow-hidden rounded-[20px] bg-surface shadow-card"
+      className="flex flex-col overflow-hidden rounded-xl bg-surface shadow-card"
     >
       <header className="flex items-start gap-3 border-b border-ink/15 px-4 py-3">
         <Building2

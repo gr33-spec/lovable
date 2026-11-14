@@ -136,6 +136,9 @@ export interface ScreenRow {
   reason?: string;
   /** Lignes du devis d'où vient la ligne (le croquis, le devis lu). */
   lineIds: string[];
+  /** Greg, 7 novembre 2026 : la famille (le lot) de la ligne n'est pas sûre (aucun lot ne la citait, rangée au lot
+   * principal) ; l'écran dit « Famille à vérifier », seulement sur ces lignes. */
+  familleIncertaine?: boolean;
 }
 
 export interface ScreenGroup {

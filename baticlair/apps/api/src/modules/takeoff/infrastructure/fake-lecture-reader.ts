@@ -10,6 +10,8 @@ import {
   LABOR_ONLY,
   lignesDeLecture,
   normalizeText,
+  ouvrageEcrit,
+  ouvragesCandidats,
   planDeLecture,
   readDimension,
   referentialFor,
@@ -43,10 +45,13 @@ export class FakeLectureReader implements LectureReader {
   async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null> {
     const text = request.document.numberedText;
     const hit = this.recorded.find((r) => r.marker.test(text));
-    const lecture = hit ? structuredClone(hit.lecture) : lectureSimulee(request);
+    const lue = hit ? structuredClone(hit.lecture) : lectureSimulee(request);
+    // Comme le vrai lecteur : une tranche ne rend que ses lignes (modèle rapide), la synthèse tout sauf les lignes.
+    const lecture: LectureDevis =
+      request.etape === "lignes" ? { ...lue, metier: null, lots: [], fiche: { donnees: [] }, bref: [], questions: [], contexte: null, notes: [] } : request.etape === "synthese" ? { ...lue, lignes: [] } : lue;
     return {
       provider: this.provider,
-      model: "claude-opus-5-5",
+      model: request.etape === "lignes" ? "claude-sonnet-5-5" : "claude-opus-5-5",
       usage: { inputTokens: Math.ceil(text.length / 3) + 16000, outputTokens: 1200 },
       status: "success",
       output: lecture,
@@ -321,9 +326,19 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
     }
   }
   // La fiche nomme l'ouvrage principal et sa surface (§51), comme le modèle : la première ligne mesurée (m², ml) d'un ouvrage.
-  const principal = lignes.flatMap((l) => l.fournitures.filter((f) => f.ouvrage && f.quantite && /^(m²|m2|ml|m)$/i.test(f.unite ?? "")).map((f) => ({ f, l }))).find(Boolean);
+  // (Greg, 11 novembre 2026) Seule une ligne qui écrit la fourniture PRINCIPALE d'un ouvrage le nomme, avec ses seuls mots
+  // écrits : « Liteau 18 × 40, 180 m », rangé dans le premier ouvrage du tiroir qui porte un liteau (la tuile), faisait dire
+  // « couverture en tuiles à emboîtement » à une liste d'ardoises. Une fiche de calcul (sans tiroir) garde son ouvrage.
+  // Les mots se cherchent sur les lignes de cet ouvrage, jamais sur un autre article (« à emboîtement » d'une faîtière).
+  const ecritsDe = (ouvrage: string) => lignes.filter((l) => l.fournitures.some((x) => x.ouvrage === ouvrage)).map((l) => l.designation).join(" \n ");
+  const nomme = (f: LectureFourniture) => (ref && ref.workItems.length > 0 ? ouvrageEcrit(ref, f.ouvrage!, f.emplacement ?? "", ecritsDe(f.ouvrage!)) : (ref?.workItems.find((w) => w.id === f.ouvrage)?.label ?? f.nom));
+  // Plusieurs ouvrages principaux écrits (ardoises ET tuiles) : la fiche n'en choisit aucun (jamais « le premier de la
+  // liste ») ; le bref les nomme alors tous les deux, ou reste neutre.
+  const candidats = ref && ref.workItems.length > 0 ? ouvragesCandidats(ref, lignes.flatMap((l) => l.fournitures.filter((f) => f.ouvrage).map((f) => ({ ouvrage: f.ouvrage!, emplacement: f.emplacement ?? "" })))) : null;
+  const seul = (f: LectureFourniture) => candidats === null || (candidats.length === 1 && candidats[0]!.id === f.ouvrage);
+  const principal = lignes.flatMap((l) => l.fournitures.filter((f) => f.ouvrage && f.quantite && /^(m²|m2|ml|m)$/i.test(f.unite ?? "") && seul(f) && nomme(f)).map((f) => ({ f, l }))).find(Boolean);
   if (principal && ref) {
-    const label = ref.workItems.find((w) => w.id === principal.f.ouvrage)?.label ?? principal.f.nom;
+    const label = nomme(principal.f)!;
     const preuve = `Devis, ligne ${principal.l.ref} : « ${principal.l.designation} »`;
     fiche.unshift({ cle: "ouvrage", libelle: "Ouvrage", valeur: label.charAt(0).toLowerCase() + label.slice(1), origine: "devis", preuve });
     if (/^(m²|m2)$/i.test(principal.f.unite ?? "")) fiche.splice(1, 0, { cle: "surface", libelle: "Surface", valeur: `${principal.f.quantite} m²`, origine: "devis", preuve });

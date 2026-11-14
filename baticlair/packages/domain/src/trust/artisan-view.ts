@@ -6,6 +6,7 @@ import type { QuotePlan } from "../referential/plan.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
 import { withoutLabour, writtenNumber } from "./marchandise.js";
 import { assessNeed, assessTakeoffLine, type Assessment, type TrustState } from "./assessment.js";
+import { NOM_APP } from "../groupe/marque.js";
 
 /**
  * CE QUE VOIT L'ARTISAN : des DÉCISIONS, pas des lignes en erreur.
@@ -227,10 +228,10 @@ function groupDecision(kind: "unknown" | "units", lines: ViewLine[], unitlessIds
     return {
       key: "group:unknown",
       state: "to_confirm",
-      title: one ?? "Articles que BatiClair ne connaît pas encore",
+      title: one ?? `Articles que ${NOM_APP} ne connaît pas encore`,
       text: one
-        ? `BatiClair ne connaît pas encore cet article. Le demander tel qu'écrit${pieces ? ", à la pièce" : ""} ?`
-        : `${n} articles que BatiClair ne connaît pas encore${unitless > 0 ? `, dont ${unitless} sans unité` : ""}. Les demander aux fournisseurs tels qu'écrits${pieces ? (unitless === n ? ", à la pièce" : ", à la pièce quand l'unité manque") : ""} ?`,
+        ? `${NOM_APP} ne connaît pas encore cet article. Le demander tel qu'écrit${pieces ? ", à la pièce" : ""} ?`
+        : `${n} articles que ${NOM_APP} ne connaît pas encore${unitless > 0 ? `, dont ${unitless} sans unité` : ""}. Les demander aux fournisseurs tels qu'écrits${pieces ? (unitless === n ? ", à la pièce" : ", à la pièce quand l'unité manque") : ""} ?`,
       lineIds: ids,
       ...(pieces ? { pieceLineIds } : {}),
       primary: pieces ? { action: "pieces", label: one ? "Oui, à la pièce" : "Oui, tels qu'écrits" } : { action: "keep", label: one ? "Oui, tel qu'écrit" : "Oui, tels qu'écrits" },
@@ -437,7 +438,7 @@ export function artisanView(
         v.basis === "work" && needs.length === 0 && !counted
           ? planned && planned.status === "not_covered"
             ? planned.reason
-            : "BatiClair ne sait pas encore calculer les matériaux de cet ouvrage."
+            : `${NOM_APP} ne sait pas encore calculer les matériaux de cet ouvrage.`
           : null;
       ouvrages.push({
         lineId: item.id,

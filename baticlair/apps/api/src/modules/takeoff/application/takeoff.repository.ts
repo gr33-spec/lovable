@@ -2,7 +2,7 @@ import type { CompletionRecord, FicheChantier, LectureDevis, LineRole, QuoteLine
 import type { TenantContext } from "../../tenancy/index.js";
 
 export type TakeoffStatus = "draft" | "validated";
-export type LineOrigin = "ai" | "manual" | "partner";
+export type LineOrigin = "ai" | "manual" | "partner" | "liste";
 
 export interface LineFields {
   designation: string;

@@ -1,0 +1,710 @@
+import { createHash, randomBytes } from "node:crypto";
+import { filtreVisiteurs } from "../../../platform/demo-domaine.js";
+import { gardeCommandeSeule } from "../../../platform/cycle/lignes.js";
+import {
+  ACCORD_IDENTITE,
+  BUTS_DEMANDE,
+  NOM_APP,
+  PHRASE_COMPTE_APRES_REPONSE,
+  blocLienChiffrage,
+  clotureDeLaDemande,
+  comparerLesReponses,
+  debutHistorique,
+  finDeValidite,
+  HEURES_OUVREES_RELANCE,
+  mailRelanceDemande,
+  phraseRelanceArtisan,
+  plusHeuresOuvrees,
+  relancesDues,
+  mesPrix,
+  cleDeMesPrix,
+  offreValide,
+  phraseDernierPrix,
+  phrasePrixRepere,
+  afficherPreviens,
+  lienSms,
+  lienTel,
+  PREVIENS_TITRE,
+  previensSms,
+  prixIncoherent,
+  resultatsNegoce,
+  validiteAcceptee,
+  zoneDuCodePostal,
+  VALIDITE_MIN_JOURS,
+  type ButDemande,
+  type LigneDemandee,
+  type PrixRecu,
+  type ReponseNegocePerso,
+} from "@baticlair/domain";
+import type { PrismaService } from "../../../platform/database/prisma.service.js";
+import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
+import { signalerException } from "../../../platform/supervision/exceptions.js";
+import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
+import { mailEnHtml } from "../../../platform/email/mail-html.js";
+import type { PriceRequestsService } from "../../price-requests/index.js";
+import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
+import { isUuid } from "../../../platform/validation/ids.js";
+import type { DroitsService } from "./droits.service.js";
+import type { ObservatoireService } from "./observatoire.service.js";
+import { bonDeCommandePdf } from "../../../platform/pdf/bon-de-commande.js";
+
+/**
+ * LA DEMANDE PERSO (Greg, 25 octobre 2026, recentrage : « le cœur, immédiat, sans cycle »), côté serveur. Elle s'appuie
+ * sur la demande de devis existante (§43, §45 : le même mail, le même PDF, l'envoi fiable) et y ajoute :
+ * - le BUT (« Chiffrer un chantier » ou « Commander ») et l'ACCORD de l'artisan pour transmettre son identité ;
+ * - le choix des négoces : ses habituels (carnet), ceux de la zone (inscrits), ou un nouveau par e-mail ;
+ * - un lien de CHIFFRAGE EN LIGNE SANS COMPTE par destinataire (haché en base) : prix par ligne, livraison, délai,
+ *   validité fixée par le négoce (7 jours au moins), ou « Je ne chiffre pas » ; après la première réponse, l'invitation
+ *   à créer son compte (le parcours d'inscription existant) ;
+ * - la COMPARAISON livraison comprise, la RELANCE à 48 h ouvrées, la CLÔTURE à la date de besoin ;
+ * - « COMMANDER » sur une réponse : bon de commande au négoce, suivi Reçue → Confirmée → Livrée ;
+ * - « MES PRIX » : les prix reçus et payés par CET artisan, jamais ceux d'un autre.
+ * Jusqu'à cinq négoces par demande, pour toutes les formules (`DroitsService`, Greg, 11 novembre 2026).
+ */
+
+const hacher = (jeton: string) => createHash("sha256").update(jeton).digest("hex");
+const nombre = (q: unknown): number | null => {
+  if (q === null || q === undefined) return null;
+  const n = Number(String(q).replace(/[\s\u00a0\u202f]/g, "").replace(",", "."));
+  return Number.isFinite(n) && n > 0 ? n : null;
+};
+const euros = (n: number) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n).replace(/\u202f|\u00a0/g, " ");
+const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d).replace(/^1 /, "1er ");
+
+export type NegoceChoisi = { supplierId: string } | { negoceId: string } | { nom: string; email: string };
+
+export interface EnvoiDemandePerso {
+  but: ButDemande;
+  accord: boolean;
+  negoces: NegoceChoisi[];
+  dateBesoin: Date | null;
+  message: string | null;
+  articles?: string[];
+}
+
+interface LigneDeDemande {
+  designation: string;
+  quantity: string | null;
+  unit: string | null;
+}
+
+export class DemandePersoService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly demandes: Pick<PriceRequestsService, "create" | "send" | "deliversEmail">,
+    private readonly droits: Pick<DroitsService, "exiger" | "droits">,
+    private readonly inviter: (negoce: { id: string; email: string; siret: string | null; nom: string; compteId: string | null }) => Promise<string>,
+    private readonly mailer: TransactionalEmailSender,
+    private readonly cfg: { webAppUrl: string },
+    private readonly now: () => Date = () => new Date(),
+  ) {}
+
+  /* ------------------------------------------------------------------- branchements (business model final, 25 octobre 2026) */
+
+  /** R7 : l'adresse Mobiiz de l'entreprise (celle qui envoie), pour le SMS « Préviens ton négoce » ; branchée par le module de l'adresse. */
+  private adresseEnvoi: (companyId: string) => Promise<string | null> = async () => null;
+  brancherAdresseEnvoi(f: (companyId: string) => Promise<string | null>): void {
+    this.adresseEnvoi = f;
+  }
+
+  /** Lot final, point 6 : l'expéditeur « Entreprise via Mobiiz » et l'adresse de réponse de la demande (étiquette). */
+  private expediteurDe: (companyId: string) => Promise<{ from: string; replyTo: (etiquette: string) => string } | null> = async () => null;
+  brancherExpediteur(f: (companyId: string) => Promise<{ from: string; replyTo: (etiquette: string) => string } | null>): void {
+    this.expediteurDe = f;
+  }
+  /** Lot final, point 6 : prévenir l'artisan (notification sur le téléphone, et e-mail). */
+  private prevenir: ((companyId: string, m: { titre: string; corps: string; url: string; etiquette: string }, courriel: { objet: string; texte: string }) => Promise<unknown>) | null = null;
+  brancherPrevenir(f: (companyId: string, m: { titre: string; corps: string; url: string; etiquette: string }, courriel: { objet: string; texte: string }) => Promise<unknown>): void {
+    this.prevenir = f;
+  }
+
+  /** Après l'envoi : les lignes groupables partent en veille (regroupement négocié, `NegocieService`). */
+  private apresEnvoi: ((companyId: string, requestId: string) => Promise<unknown>) | null = null;
+  brancherApresEnvoi(fn: (companyId: string, requestId: string) => Promise<unknown>): void {
+    this.apresEnvoi = fn;
+  }
+  /** L'observatoire des prix : chaque réponse est notée sans identifiant ; la moyenne du secteur s'affiche en repère. */
+  private obs: Pick<ObservatoireService, "enregistrer" | "observe"> | null = null;
+  brancherObservatoire(o: Pick<ObservatoireService, "enregistrer" | "observe">): void {
+    this.obs = o;
+  }
+
+  /* ------------------------------------------------------------------------------------------------- l'envoi (artisan) */
+
+  /** Les négoces qu'on lui propose : ses habituels (carnet) et les négoces inscrits de la zone du chantier. */
+  async negocesProposes(tenant: TenantContext, projectId: string) {
+    const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { address: true, company: { select: { address: true } } } });
+    if (!project) throw notFound("Project");
+    const zone = zoneDuCodePostal(project.address) ?? zoneDuCodePostal(project.company.address);
+    const [habituels, droits] = await Promise.all([
+      this.prisma.supplier.findMany({ where: { companyId: tenant.companyId, archivedAt: null }, select: { id: true, name: true, email: true, negoceId: true, specialites: true }, orderBy: { name: "asc" } }),
+      this.droits.droits(tenant.companyId),
+    ]);
+    const deja = new Set(habituels.map((h) => h.email.toLowerCase()));
+    const zoneNegoces = zone
+      ? (await this.prisma.negoce.findMany({ where: { departement: zone, stopLe: null, compteId: { not: null }, compte: { inscritLe: { not: null } } }, select: { id: true, nom: true, email: true, generaliste: true, familles: true }, orderBy: { nom: "asc" } })).filter((n) => !deja.has(n.email.toLowerCase()))
+      : [];
+    return {
+      zone,
+      max: droits.negocesParDemande,
+      formule: droits.formule,
+      accord: ACCORD_IDENTITE,
+      // Greg, 1er novembre 2026 : les spécialités déclarées par l'artisan, pour « Qui reçoit quoi » avant l'envoi.
+      habituels: habituels.map((h) => ({ supplierId: h.id, nom: h.name, email: h.email, specialites: h.specialites })),
+      // Le négoce ne se catégorise que lui-même (généraliste, spécialiste de ses familles) ; on n'affiche jamais son e-mail.
+      zoneNegoces: zoneNegoces.map((n) => ({ negoceId: n.id, nom: n.nom, generaliste: n.generaliste, familles: n.familles })),
+    };
+  }
+
+  async envoyer(tenant: TenantContext, projectId: string, input: EnvoiDemandePerso) {
+    assertCanWrite(tenant);
+    if (!input.accord) throw validationFailed("Identity consent required", { reason: "accord_requis" });
+    if (!BUTS_DEMANDE.includes(input.but)) throw validationFailed("Unknown goal", { reason: "but_inconnu" });
+    if (input.negoces.length === 0) throw validationFailed("Choose at least one supplier", { reason: "aucun_negoce" });
+    await this.droits.exiger(tenant.companyId, { type: "envoi", negoces: input.negoces.length });
+    const supplierIds = [...new Set(await Promise.all(input.negoces.map((n) => this.fournisseurDe(tenant, n))))];
+    const maintenant = this.now();
+    const vue = await this.demandes.create(tenant, projectId, { supplierIds, message: input.message, dueDate: input.dateBesoin, ...(input.articles?.length ? { articles: input.articles } : {}) });
+    await this.prisma.priceRequest.update({ where: { id: vue.id }, data: { but: input.but, accordIdentiteLe: maintenant, closLe: clotureDeLaDemande(maintenant, input.dateBesoin) } });
+    if (this.demandes.deliversEmail) for (const r of vue.recipients) await this.demandes.send(tenant, r.id);
+    await this.apresEnvoi?.(tenant.companyId, vue.id).catch(() => undefined);
+    return this.vue(tenant, vue.id);
+  }
+
+  /** Un négoce choisi devient un fournisseur du carnet (une seule fois par e-mail). */
+  private async fournisseurDe(tenant: TenantContext, n: NegoceChoisi): Promise<string> {
+    if ("supplierId" in n) {
+      const s = await this.prisma.supplier.findFirst({ where: { id: n.supplierId, companyId: tenant.companyId, archivedAt: null }, select: { id: true } });
+      if (!s) throw notFound("Supplier");
+      return s.id;
+    }
+    const cible = "negoceId" in n ? await this.prisma.negoce.findFirst({ where: { id: n.negoceId, stopLe: null }, select: { id: true, nom: true, email: true } }) : { id: null, nom: n.nom.trim(), email: n.email.trim().toLowerCase() };
+    if (!cible) throw notFound("Negoce");
+    const existant = await this.prisma.supplier.findFirst({ where: { companyId: tenant.companyId, archivedAt: null, email: { equals: cible.email, mode: "insensitive" } }, select: { id: true, negoceId: true } });
+    if (existant) {
+      if (cible.id && !existant.negoceId) await this.prisma.supplier.update({ where: { id: existant.id }, data: { negoceId: cible.id } });
+      return existant.id;
+    }
+    const cree = await this.prisma.supplier.create({ data: { companyId: tenant.companyId, name: cible.nom, email: cible.email, ...(cible.id ? { negoceId: cible.id } : {}) }, select: { id: true } });
+    return cree.id;
+  }
+
+  /**
+   * Branché sur l'envoi du mail (§43) : le but et le lien de chiffrage propre au destinataire. Une liste envoyée par
+   * « Demander les prix à mes négoces » (sans but) chiffre un chantier : le lien y est aussi, pour que la comparaison
+   * automatique reste quand le négoce répond par le lien (Greg, 28 octobre 2026, points 7 et 8).
+   */
+  async complement(requestId: string, recipientId: string): Promise<{ bloc: string } | { lien: string } | null> {
+    const r = await this.prisma.priceRequest.findUnique({ where: { id: requestId }, select: { but: true } });
+    if (!r) return null;
+    const jeton = randomBytes(24).toString("base64url");
+    const dest = await this.prisma.priceRequestRecipient.update({ where: { id: recipientId }, data: { tokenHash: hacher(jeton) }, select: { supplier: { select: { negoceId: true } } } });
+    if (dest.supplier.negoceId) await this.prisma.priceRequestRecipient.update({ where: { id: recipientId }, data: { negoceId: dest.supplier.negoceId } });
+    const lien = `${this.cfg.webAppUrl}/chiffrer/${jeton}`;
+    // Lot final, point 3 : la demande de la liste porte son lien dans le mail (« Répondre en ligne ») ; la demande perso
+    // (avec un but) garde son bloc d'avant.
+    return r.but ? { bloc: blocLienChiffrage({ but: r.but as ButDemande, lien, nomApp: NOM_APP }) } : { lien };
+  }
+
+
+  /* --------------------------------------------------------------------------------------- la vue et la comparaison */
+
+  private lignes(lines: unknown): LigneDemandee[] {
+    return ((lines as LigneDeDemande[] | null) ?? []).map((l, i) => ({ cle: String(i), designation: l.designation, quantite: nombre(l.quantity) ?? 0, unite: l.unit ?? "" }));
+  }
+
+  private async demandeDe(tenant: TenantContext, requestId: string) {
+    const d = await this.prisma.priceRequest.findFirst({
+      where: { id: requestId, companyId: tenant.companyId },
+      include: { recipients: { include: { supplier: { select: { id: true, name: true, email: true, phone: true, prevenuLe: true } } }, orderBy: { createdAt: "asc" } }, project: { select: { name: true, address: true } } },
+    });
+    if (!d) throw notFound("PriceRequest");
+    return d;
+  }
+
+  /** La demande, ses réponses comparées livraison comprise, et le repère « Ton dernier prix » sur chaque ligne. */
+  async vue(tenant: TenantContext, requestId: string) {
+    const d = await this.demandeDe(tenant, requestId);
+    const maintenant = this.now();
+    const lignes = this.lignes(d.lines);
+    const reponses: ReponseNegocePerso[] = d.recipients
+      .filter((r) => r.reponduLe && r.prix)
+      .map((r) => ({ negoceId: r.id, nom: r.supplier.name, prix: r.prix as Record<string, number>, livraisonHt: Number(r.livraisonHt ?? 0), delaiJours: r.delaiJours, validiteJours: r.validiteJours ?? VALIDITE_MIN_JOURS, deposeLe: r.reponduLe! }));
+    const comparees = comparerLesReponses(lignes.filter((l) => l.quantite > 0), reponses, maintenant);
+    const reperes = await this.reperesDeMesPrix(tenant.companyId);
+    const commande = d.recipients.find((r) => r.commandeLe);
+    const departement = zoneDuCodePostal(d.project.address);
+    const observes = new Map<string, number | null>();
+    if (this.obs) for (const l of lignes) observes.set(l.cle, await this.obs.observe(l.designation, l.unite, departement).catch(() => null));
+    const repereDe = (l: LigneDemandee) => {
+      const observe = phrasePrixRepere(null, observes.get(l.cle) ?? null, departement);
+      const mien = reperes.get(cleDeMesPrix(l.designation, l.unite)) ?? null;
+      return [mien, observe].filter(Boolean).join(" ") || null;
+    };
+    return {
+      id: d.id,
+      chantier: d.project.name,
+      but: d.but,
+      dateBesoin: d.dueDate,
+      closLe: d.closLe,
+      close: !!d.closLe && maintenant >= d.closLe,
+      lignes: lignes.map((l) => ({ ...l, repere: repereDe(l) })),
+      destinataires: d.recipients.map((r) => ({
+        id: r.id,
+        nom: r.supplier.name,
+        statut: r.refuseLe ? "refuse" : r.reponduLe ? "repondu" : r.relanceLe ? "relance" : r.status === "sent" ? "envoye" : "a_envoyer",
+        suivi: r.suivi,
+        // Le parcours du négoce (6 novembre 2026).
+        vaRepondre: r.intention === "repondra" && !r.reponduLe && !r.refuseLe,
+        refusMotif: r.refuseLe ? r.refusMotif : null,
+        precision: r.precisionQuestion ? { question: r.precisionQuestion, reponse: r.precisionReponse } : null,
+      })),
+      offres: comparees.map((o) => ({ ...o, recipientId: o.negoceId, valideJusquau: o.valideJusquau.toISOString() })),
+      commande: commande ? { recipientId: commande.id, nom: commande.supplier.name, suivi: commande.suivi, commandeLe: commande.commandeLe } : null,
+    };
+  }
+
+  /** Les demandes perso d'un chantier. */
+  async duChantier(tenant: TenantContext, projectId: string) {
+    const ids = await this.prisma.priceRequest.findMany({ where: { companyId: tenant.companyId, projectId, but: { not: null } }, select: { id: true }, orderBy: { createdAt: "desc" } });
+    return Promise.all(ids.map((i) => this.vue(tenant, i.id)));
+  }
+
+  /* ----------------------------------------------------------------------------------- « Préviens ton négoce » */
+
+  /**
+   * Les négoces de cette demande qui n'ont jamais répondu sur Mobiiz et que l'artisan n'a pas déjà prévenus : l'écran
+   * « Préviens ton négoce » (appeler, SMS prérempli, « Je l'ai déjà prévenu »). Il disparaît dès que le négoce a répondu.
+   */
+  async aPrevenir(tenant: TenantContext, requestId: string) {
+    const d = await this.demandeDe(tenant, requestId);
+    const sms = previensSms(await this.adresseEnvoi(tenant.companyId).catch(() => null));
+    const sortie = [];
+    for (const r of d.recipients) {
+      const email = r.supplier.email.toLowerCase();
+      const dejaRepondu =
+        !!(await this.prisma.priceRequestRecipient.findFirst({ where: { reponduLe: { not: null }, supplier: { email: { equals: email, mode: "insensitive" } } }, select: { id: true } })) ||
+        !!(await this.prisma.compteNegoce.findFirst({ where: { email, inscritLe: { not: null } }, select: { id: true } }));
+      if (afficherPreviens({ aDejaReponduSurMobiiz: dejaRepondu, prevenuLe: r.supplier.prevenuLe })) sortie.push({ supplierId: r.supplier.id, nom: r.supplier.name, telephone: r.supplier.phone, tel: r.supplier.phone ? lienTel(r.supplier.phone) : null, sms: lienSms(r.supplier.phone, sms) });
+    }
+    return { titre: PREVIENS_TITRE, sms, negoces: sortie };
+  }
+
+  /** « Je l'ai déjà prévenu » : l'écran ne revient plus pour ce négoce. */
+  async marquerPrevenu(tenant: TenantContext, supplierId: string) {
+    assertCanWrite(tenant);
+    const s = await this.prisma.supplier.findFirst({ where: { id: supplierId, companyId: tenant.companyId }, select: { id: true } });
+    if (!s) throw notFound("Supplier");
+    await this.prisma.supplier.update({ where: { id: s.id }, data: { prevenuLe: this.now() } });
+    return { fait: true };
+  }
+
+  /* ---------------------------------------------------------------------------------------------- la commande (artisan) */
+
+  async commander(tenant: TenantContext, requestId: string, recipientId: string, options: { retirerDesGroupes?: boolean } = {}) {
+    assertCanWrite(tenant);
+    const d = await this.demandeDe(tenant, requestId);
+    if (d.recipients.some((r) => r.commandeLe)) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
+    const r = d.recipients.find((x) => x.id === recipientId);
+    if (!r?.reponduLe || !r.prix) throw validationFailed("No offer from this supplier", { reason: "sans_offre" });
+    const maintenant = this.now();
+    if (!offreValide(r.reponduLe, r.validiteJours ?? VALIDITE_MIN_JOURS, maintenant)) throw new DomainError("conflict", "Offer expired", { reason: "offre_expiree" });
+    // Le cycle de vie (§19) : pas de double commande avec un achat groupé ; une ligne tenue par un achat groupé ouvert
+    // n'en sort que sur le geste explicite de l'artisan.
+    await gardeCommandeSeule(this.prisma, tenant.companyId, d.projectId, d.itemKeys.length ? d.itemKeys : null, { retirerDesGroupes: options.retirerDesGroupes }, maintenant);
+    const prix = r.prix as Record<string, number>;
+    const lignes = this.lignes(d.lines).filter((l) => prix[l.cle] !== undefined && l.quantite > 0);
+    const totalLignes = lignes.reduce((s, l) => s + prix[l.cle]! * l.quantite, 0);
+    const livraison = Number(r.livraisonHt ?? 0);
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true, phone: true, address: true } });
+    const company = c ? { ...c, email: await this.emailDe(tenant.companyId) } : null;
+    const project = await this.prisma.project.findUnique({ where: { id: d.projectId }, select: { address: true } });
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { commandeLe: maintenant, suivi: "recue" } });
+    // Le bon de commande part au négoce (vouvoiement), avec le lien pour confirmer ; « Répondre » écrit à l'artisan.
+    const jeton = randomBytes(24).toString("base64url");
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { tokenHash: hacher(jeton) } });
+    // Le bon de commande en PDF : le seul document où des champs restent remplissables (compte client, date, contact).
+    const pdf = await bonDeCommandePdf({
+      numero: d.id.slice(0, 8).toUpperCase(),
+      date: jourFr(maintenant),
+      acheteur: { nom: company?.name ?? "", adresse: company?.address ?? null, telephone: company?.phone ?? null, email: company?.email ?? null },
+      vendeur: { nom: r.supplier.name, email: r.supplier.email },
+      livraison: project?.address ?? null,
+      lignes: lignes.map((l) => ({ designation: l.designation, quantite: String(l.quantite).replace(".", ","), unite: l.unite, prixHt: euros(prix[l.cle]!), totalHt: euros(prix[l.cle]! * l.quantite) })),
+      livraisonHt: livraison > 0 ? euros(livraison) : "offerte",
+      totalHt: euros(totalLignes + livraison),
+      mentions: [`Sur votre offre du ${jourFr(r.reponduLe)}. Facturation et paiement comme d'habitude, sur le compte du client chez vous.`],
+    });
+    await this.mailer.send({
+      attachments: [{ filename: `bon-de-commande-${d.id.slice(0, 8).toUpperCase()}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
+      to: r.supplier.email,
+      subject: `Bon de commande de ${company?.name ?? "votre client"} (${euros(totalLignes + livraison)} HT livré)`,
+      text: [
+        "Bonjour,",
+        "",
+        `${company?.name ?? "Votre client"} commande sur votre offre du ${jourFr(r.reponduLe)} :`,
+        "",
+        ...lignes.map((l) => `- ${l.designation} : ${String(l.quantite).replace(".", ",")} ${l.unite} × ${euros(prix[l.cle]!)} HT`),
+        `- Livraison : ${livraison > 0 ? `${euros(livraison)} HT` : "offerte"}`,
+        "",
+        `Total : ${euros(totalLignes + livraison)} HT livré.`,
+        project?.address ? `Livraison : ${project.address}.` : "",
+        company?.phone ? `Contact : ${company.phone}${company.email ? `, ${company.email}` : ""}.` : company?.email ? `Contact : ${company.email}.` : "",
+        "",
+        "Confirmez la commande d'un clic :",
+        `${this.cfg.webAppUrl}/chiffrer/${jeton}`,
+        "",
+        `Facturation et paiement comme d'habitude, sur le compte du client chez vous. Envoyé avec ${NOM_APP}.`,
+      ]
+        .filter((l, i, t) => !(l === "" && t[i - 1] === ""))
+        .join("\n"),
+      ...(company?.email ? { replyTo: company.email } : {}),
+      mustDeliver: true,
+    });
+    return this.vue(tenant, requestId);
+  }
+
+  /** L'artisan dit « Livrée ». */
+  async livree(tenant: TenantContext, requestId: string, recipientId: string) {
+    assertCanWrite(tenant);
+    const d = await this.demandeDe(tenant, requestId);
+    const r = d.recipients.find((x) => x.id === recipientId && x.commandeLe);
+    if (!r) throw notFound("Order");
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { suivi: "livree", livreLe: this.now() } });
+    return this.vue(tenant, requestId);
+  }
+
+  /* --------------------------------------------------------------------------------- le chiffrage en ligne (négoce) */
+
+  private async parJeton(jeton: string) {
+    if (typeof jeton !== "string" || jeton.length < 20 || jeton.length > 100) throw notFound("Link");
+    const r = await this.prisma.priceRequestRecipient.findUnique({
+      where: { tokenHash: hacher(jeton) },
+      include: { supplier: { select: { name: true, email: true } }, priceRequest: { include: { company: { select: { id: true, name: true, address: true } }, project: { select: { address: true } } } } },
+    });
+    if (!r) throw notFound("Link");
+    return r;
+  }
+
+  /** Ce que voit le négoce : le nom de l'artisan (il a donné son accord), la liste, la ville de livraison ; jamais un prix d'un autre. */
+  async page(jeton: string) {
+    const r = await this.parJeton(jeton);
+    const d = r.priceRequest;
+    const maintenant = this.now();
+    const ville = (d.project.address ?? "").replace(/^.*\b\d{5}\s*/, "").trim() || null;
+    return {
+      artisan: d.company.name,
+      negoce: r.supplier.name,
+      but: d.but ?? "chiffrer",
+      dateBesoin: d.dueDate,
+      ville,
+      close: !!d.closLe && maintenant >= d.closLe,
+      lignes: this.lignes(d.lines),
+      validiteMin: VALIDITE_MIN_JOURS,
+      etat: r.commandeLe ? "commande" : r.refuseLe ? "refuse" : r.reponduLe ? "repondu" : "a_chiffrer",
+      reponse: r.reponduLe ? { prix: r.prix, livraisonHt: Number(r.livraisonHt ?? 0), delaiJours: r.delaiJours, validiteJours: r.validiteJours, valideJusquau: finDeValidite(r.reponduLe, r.validiteJours ?? VALIDITE_MIN_JOURS), ...this.conditions(r, this.lignes(r.priceRequest.lines).length) } : null,
+      commande: r.commandeLe ? { le: r.commandeLe, suivi: r.suivi } : null,
+      // Le parcours du négoce (6 novembre 2026, point 13).
+      vaRepondre: r.intention === "repondra" && !r.reponduLe && !r.refuseLe,
+      refusMotif: r.refuseLe ? r.refusMotif : null,
+      precision: r.precisionQuestion ? { question: r.precisionQuestion, reponse: r.precisionReponse, repondueLe: r.precisionRepondueLe } : null,
+    };
+  }
+
+  /** « Je vais répondre » : l'artisan le voit dans son suivi ; aucun e-mail (pas de bruit), la relance garde sa date. */
+  async annoncer(jeton: string) {
+    const r = await this.parJeton(jeton);
+    if (r.commandeLe || r.reponduLe || r.refuseLe) return { fait: true };
+    if (r.priceRequest.closLe && this.now() >= r.priceRequest.closLe) throw new DomainError("conflict", "Request closed", { reason: "demande_close" });
+    if (r.intention !== "repondra") await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { intention: "repondra", intentionLe: this.now() } });
+    return { fait: true };
+  }
+
+  /** « J'ai besoin d'une précision » : la question part à l'artisan (e-mail), qui répond depuis son suivi. */
+  async demanderPrecision(jeton: string, question: string) {
+    const r = await this.parJeton(jeton);
+    const d = r.priceRequest;
+    if (r.commandeLe) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
+    if (d.closLe && this.now() >= d.closLe) throw new DomainError("conflict", "Request closed", { reason: "demande_close" });
+    const texte = question.trim();
+    if (texte.length < 3) throw validationFailed("Question required", { reason: "question_requise", message: "Écrivez votre question." });
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { precisionQuestion: texte, precisionDemandeeLe: this.now(), precisionReponse: null, precisionRepondueLe: null } });
+    const emailArtisan = await this.emailDe(d.company.id);
+    if (emailArtisan)
+      await this.mailer
+        .send({
+          to: emailArtisan,
+          subject: `${r.supplier.name} a besoin d'une précision`,
+          text: ["Bonjour,", "", `${r.supplier.name} a besoin d'une précision pour chiffrer ta demande :`, "", `« ${texte} »`, "", "Réponds-lui depuis le suivi de ta demande :", `${this.cfg.webAppUrl}/chantiers/${d.projectId}?onglet=suivi`, "", NOM_APP].join("\n"),
+        })
+        .catch(() => undefined);
+    return { fait: true };
+  }
+
+  /** La réponse de l'artisan à une précision : enregistrée, envoyée au négoce (vouvoiement), visible sur sa page. */
+  async repondrePrecision(tenant: TenantContext, recipientId: string, reponse: string) {
+    assertCanWrite(tenant);
+    if (!isUuid(recipientId)) throw notFound("Recipient");
+    const r = await this.prisma.priceRequestRecipient.findFirst({
+      where: { id: recipientId, priceRequest: { companyId: tenant.companyId } },
+      include: { supplier: { select: { name: true, email: true } }, priceRequest: { select: { company: { select: { name: true } } } } },
+    });
+    if (!r) throw notFound("Recipient");
+    if (!r.precisionQuestion) throw validationFailed("No question", { reason: "pas_de_question" });
+    const texte = reponse.trim();
+    if (texte.length < 1) throw validationFailed("Answer required", { reason: "reponse_requise", message: "Écris ta réponse." });
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { precisionReponse: texte, precisionRepondueLe: this.now() } });
+    await this.mailer.send({
+      to: r.supplier.email,
+      subject: `Réponse à votre question : ${r.priceRequest.company.name}`,
+      text: ["Bonjour,", "", `Vous demandiez : « ${r.precisionQuestion} »`, "", `Réponse de ${r.priceRequest.company.name} : « ${texte} »`, "", "Vous pouvez reprendre votre chiffrage avec le lien de la demande reçue.", "", NOM_APP].join("\n"),
+    });
+    return { fait: true };
+  }
+
+  /**
+   * Le coût réellement livré (Greg, 7 novembre 2026) : la disponibilité se DÉDUIT des lignes chiffrées (jamais
+   * redemandée), puis ce que le négoce a dit (livraison unique ou plusieurs, minimum de commande, déchargement).
+   */
+  private conditions(r: { prix: unknown; livraisons: string | null; minimumCommandeHt: unknown; dechargement: string | null }, nbLignes: number) {
+    const chiffrees = r.prix && typeof r.prix === "object" ? Object.values(r.prix as Record<string, unknown>).filter((v) => typeof v === "number").length : 0;
+    return {
+      disponibilite: chiffrees === 0 ? null : chiffrees >= nbLignes ? ("complete" as const) : ("partielle" as const),
+      lignesChiffrees: chiffrees,
+      lignesDemandees: nbLignes,
+      livraisons: r.livraisons === "plusieurs" ? ("plusieurs" as const) : r.livraisons === "unique" ? ("unique" as const) : null,
+      minimumCommandeHt: r.minimumCommandeHt == null ? null : Number(r.minimumCommandeHt),
+      dechargement: r.dechargement,
+    };
+  }
+
+  private async superviserOffre(recipientId: string, priceRequestId: string, nom: string, companyId: string, lignes: { cle: string; designation: string }[], prix: Record<string, number>) {
+    const chiffrees = lignes.filter((l) => prix[l.cle] !== undefined).length;
+    if (chiffrees < lignes.length)
+      await signalerException(this.prisma, { type: "offre_incomplete", cle: recipientId, titre: `${nom} a chiffré ${chiffrees} ligne${chiffrees > 1 ? "s" : ""} sur ${lignes.length}`, detail: `Lignes sans prix : ${lignes.filter((l) => prix[l.cle] === undefined).map((l) => l.designation).slice(0, 10).join(" ; ")}`, companyId });
+    const autres = (await this.prisma.priceRequestRecipient.findMany({ where: { priceRequestId, id: { not: recipientId }, reponduLe: { not: null } }, select: { prix: true } })).filter((a) => a.prix && typeof a.prix === "object");
+    const ecarts = lignes.filter((l) => {
+      const v = prix[l.cle];
+      if (v === undefined) return false;
+      const ailleurs = autres.map((a) => (a.prix as Record<string, unknown>)[l.cle]).filter((x): x is number => typeof x === "number");
+      return prixIncoherent(v, ailleurs);
+    });
+    if (ecarts.length)
+      await signalerException(this.prisma, { type: "prix_incoherent", cle: recipientId, titre: `Prix très éloignés des autres offres chez ${nom}`, detail: ecarts.map((l) => `${l.designation} : ${prix[l.cle]} € HT`).slice(0, 10).join(" ; "), companyId });
+  }
+
+  async chiffrer(jeton: string, body: { prix: Record<string, number>; livraisonHt: number; delaiJours: number | null; validiteJours: number; livraisons?: "unique" | "plusieurs" | null; minimumCommandeHt?: number | null; dechargement?: string | null }) {
+    const r = await this.parJeton(jeton);
+    const d = r.priceRequest;
+    const maintenant = this.now();
+    if (d.closLe && maintenant >= d.closLe) throw new DomainError("conflict", "Request closed", { reason: "demande_close" });
+    if (r.commandeLe) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
+    if (!validiteAcceptee(body.validiteJours)) throw validationFailed("Validity of at least 7 days", { reason: "validite_trop_courte", min: VALIDITE_MIN_JOURS });
+    const cles = new Set(this.lignes(d.lines).map((l) => l.cle));
+    const prix = Object.fromEntries(Object.entries(body.prix).filter(([k, v]) => cles.has(k) && Number.isFinite(v) && v >= 0));
+    // Une grille partielle est acceptée ; une réponse vide, non.
+    if (Object.keys(prix).length === 0) throw validationFailed("At least one price", { reason: "aucun_prix" });
+    const premiere = !r.reponduLe;
+    await this.prisma.priceRequestRecipient.update({
+      where: { id: r.id },
+      data: { prix, livraisonHt: body.livraisonHt, delaiJours: body.delaiJours, validiteJours: body.validiteJours, livraisons: body.livraisons ?? null, minimumCommandeHt: body.minimumCommandeHt ?? null, dechargement: body.dechargement ?? null, reponduLe: maintenant, refuseLe: null, status: "received" },
+    });
+    // Lot 6 : la file d'exceptions (offre incomplète, prix incohérent face aux autres négoces de la même demande).
+    await this.superviserOffre(r.id, r.priceRequestId, r.supplier.name, d.company.id, this.lignes(d.lines), prix);
+    // L'observatoire : le prix de chaque ligne chiffrée, sans le négoce ni l'artisan.
+    await this.obs
+      ?.enregistrer({
+        type: "perso",
+        sourceId: r.id,
+        departement: zoneDuCodePostal(d.project.address) ?? zoneDuCodePostal(d.company.address),
+        lignes: this.lignes(d.lines)
+          .filter((l) => prix[l.cle] !== undefined)
+          .map((l) => ({ designation: l.designation, unite: l.unite, quantite: l.quantite || null, prixHt: prix[l.cle]! })),
+      })
+      .catch(() => undefined);
+    // L'artisan est prévenu (tutoiement) ; un e-mail, jamais le prix d'un autre négoce.
+    const emailArtisan = await this.emailDe(d.company.id);
+    if (emailArtisan)
+      await this.mailer.send({
+        to: emailArtisan,
+        subject: `${r.supplier.name} a chiffré ta demande`,
+        text: ["Bonjour,", "", `${r.supplier.name} vient de chiffrer ta demande. Compare les offres livraison comprise et commande d'un clic :`, `${this.cfg.webAppUrl}/chantiers/${d.projectId}`, "", NOM_APP].join("\n"),
+      }).catch(() => undefined);
+    return { fait: true, compte: premiere ? await this.invitationCompte(r.supplier, d.company.address, d.project.address).catch(() => null) : null };
+  }
+
+  /** Après la première réponse : le lien d'inscription de l'espace négoce (le parcours existant), sauf compte déjà inscrit. */
+  private async invitationCompte(s: { name: string; email: string }, adresseEntreprise: string | null, adresseChantier: string | null): Promise<{ phrase: string; lien: string } | null> {
+    const departement = zoneDuCodePostal(adresseChantier) ?? zoneDuCodePostal(adresseEntreprise);
+    if (!departement) return null;
+    const email = s.email.toLowerCase();
+    const inscrit = await this.prisma.compteNegoce.findFirst({ where: { email, inscritLe: { not: null } }, select: { id: true } });
+    if (inscrit) return null;
+    const negoce = (await this.prisma.negoce.findUnique({ where: { email_departement: { email, departement } } })) ?? (await this.prisma.negoce.create({ data: { nom: s.name, email, departement } }));
+    // Recette du 13 novembre 2026 (B8) : l'invitation rend déjà le lien COMPLET ; le remettre derrière l'adresse du site
+    // donnait « Page introuvable ». Un simple jeton (anciens branchements) reçoit toujours son adresse.
+    const invitation = await this.inviter({ id: negoce.id, email: negoce.email, siret: negoce.siret, nom: negoce.nom, compteId: negoce.compteId });
+    return { phrase: PHRASE_COMPTE_APRES_REPONSE, lien: /^https?:\/\//.test(invitation) ? invitation : `${this.cfg.webAppUrl}/negoce/rejoindre/${invitation}` };
+  }
+
+  /** « Je ne peux pas chiffrer » : le motif (facultatif) va à l'artisan ; plus de relance. */
+  async refuser(jeton: string, motif?: string | null) {
+    const r = await this.parJeton(jeton);
+    if (r.commandeLe) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
+    const deja = !!r.refuseLe;
+    const texte = motif?.trim() || null;
+    await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { refuseLe: this.now(), status: "declined", refusMotif: texte } });
+    const emailArtisan = deja ? null : await this.emailDe(r.priceRequest.company.id);
+    if (emailArtisan)
+      await this.mailer
+        .send({
+          to: emailArtisan,
+          subject: `${r.supplier.name} ne peut pas chiffrer ta demande`,
+          text: ["Bonjour,", "", `${r.supplier.name} ne peut pas chiffrer ta demande${texte ? ` : « ${texte} »` : "."}`, "Tu peux l'envoyer à un autre négoce depuis ta demande :", `${this.cfg.webAppUrl}/chantiers/${r.priceRequest.projectId}?onglet=suivi`, "", NOM_APP].join("\n"),
+        })
+        .catch(() => undefined);
+    return { fait: true };
+  }
+
+  /** Le négoce confirme la commande reçue. */
+  async confirmer(jeton: string) {
+    const r = await this.parJeton(jeton);
+    if (!r.commandeLe) throw validationFailed("No order", { reason: "pas_de_commande" });
+    if (r.suivi === "recue") await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { suivi: "confirmee", confirmeLe: this.now() } });
+    return { fait: true };
+  }
+
+  /** L'e-mail de l'entreprise : celui du profil, sinon celui du propriétaire du compte (comme la demande de devis). */
+  private async emailDe(companyId: string): Promise<string | null> {
+    const c = await this.prisma.company.findUnique({ where: { id: companyId }, select: { contactEmail: true, memberships: { where: { role: "owner" }, select: { user: { select: { email: true } } }, take: 1 } } });
+    return c?.contactEmail ?? c?.memberships[0]?.user.email ?? null;
+  }
+
+  /* ----------------------------------------------------------------------------------- la tâche (relances, clôtures) */
+
+  /**
+   * LES RELANCES (lot final, point 6) : à mi-délai, l'artisan est prévenu que son négoce n'a pas répondu (« Appelle ton
+   * commercial ») et le négoce reçoit un rappel à son nom (au plus tard à 48 h ouvrées) ; la veille de la date limite,
+   * l'artisan est prévenu encore. Jamais après une réponse, un refus ou la date limite ; deux messages au plus par négoce.
+   */
+  async tache(maintenant = this.now()): Promise<{ relances: number; rappels: number }> {
+    const attente = await this.prisma.priceRequestRecipient.findMany({
+      where: { reponduLe: null, refuseLe: null, status: "sent", OR: [{ relanceLe: null }, { rappelVeilleLe: null }], priceRequest: { OR: [{ closLe: null }, { closLe: { gt: maintenant } }], company: { memberships: { none: { user: filtreVisiteurs() } } } } },
+      include: { supplier: { select: { name: true, email: true, contactName: true, phone: true } }, priceRequest: { select: { id: true, but: true, dueDate: true, closLe: true, projectId: true, companyId: true, company: { select: { name: true } } } } },
+      take: 500,
+    });
+    let relances = 0;
+    let rappels = 0;
+    for (const r of attente) {
+      const d = r.priceRequest;
+      const envoyeLe = r.sentAt ?? r.createdAt;
+      // La date limite : « réponse avant le X » (fin de journée), sinon la clôture de la demande perso, sinon 30 jours.
+      const dateLimite = d.dueDate ? new Date(d.dueDate.getTime() + 86_400_000) : (d.closLe ?? clotureDeLaDemande(envoyeLe, null));
+      const dues = relancesDues(
+        { envoyeLe, dateLimite, reponduLe: null, refuseLe: null, rappelMiLe: r.rappelMiLe, rappelVeilleLe: r.rappelVeilleLe, relanceNegoceLe: r.relanceLe, relanceNegoceAuPlusTard: plusHeuresOuvrees(envoyeLe, HEURES_OUVREES_RELANCE) },
+        maintenant,
+      );
+      if (dues.negoce) {
+        // Un nouveau lien : l'ancien n'est connu que haché.
+        const jeton = randomBytes(24).toString("base64url");
+        await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { relanceLe: maintenant, tokenHash: hacher(jeton) } });
+        const via = await this.expediteurDe(d.companyId).catch(() => null);
+        const m = mailRelanceDemande({ entreprise: d.company.name, dateLimite: d.dueDate ?? new Date(dateLimite.getTime() - 86_400_000), lien: `${this.cfg.webAppUrl}/chiffrer/${jeton}`, prenomCommercial: r.supplier.contactName, individuelle: true, sansDate: !d.dueDate });
+        await this.mailer
+          .send({ to: r.supplier.email, subject: m.objet, text: m.texte, html: mailEnHtml(m.texte, `${this.cfg.webAppUrl}/chiffrer/${jeton}`), ...(via ? { from: via.from, ...(r.etiquette ? { replyTo: via.replyTo(r.etiquette) } : {}) } : {}) })
+          .catch(() => undefined);
+        relances++;
+      }
+      if (dues.artisan && this.prevenir) {
+        await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: dues.artisan === "mi" ? { rappelMiLe: maintenant } : { rappelMiLe: r.rappelMiLe ?? maintenant, rappelVeilleLe: maintenant } });
+        const phrase = phraseRelanceArtisan(r.supplier.name);
+        const url = d.projectId ? `/chantiers/${d.projectId}` : "/";
+        const appeler = r.supplier.phone ? `Appeler ${r.supplier.contactName?.trim() || r.supplier.name} : ${r.supplier.phone}` : null;
+        await this.prevenir(
+          d.companyId,
+          { titre: `${r.supplier.name} n'a pas encore répondu`, corps: phrase, url, etiquette: `relance-${r.id}` },
+          { objet: `${r.supplier.name} n'a pas encore répondu`, texte: [phrase, ...(appeler ? ["", appeler] : []), "", `Renvoyer la demande : ${this.cfg.webAppUrl}${url}`, "", NOM_APP].join("\n") },
+        ).catch(() => undefined);
+        rappels++;
+      }
+    }
+    return { relances, rappels };
+  }
+
+  /* ---------------------------------------------------------------------------------------------------- « Mes prix » */
+
+  /** Les prix reçus (réponses) et payés (commandes) par CETTE entreprise. */
+  private async prixDe(companyId: string): Promise<PrixRecu[]> {
+    const recus = await this.prisma.priceRequestRecipient.findMany({
+      where: { reponduLe: { not: null }, priceRequest: { companyId } },
+      select: { prix: true, reponduLe: true, commandeLe: true, supplier: { select: { name: true } }, priceRequest: { select: { lines: true } } },
+    });
+    const prix: PrixRecu[] = [];
+    for (const r of recus) {
+      const lignes = this.lignes(r.priceRequest.lines);
+      for (const [cle, pu] of Object.entries((r.prix as Record<string, number> | null) ?? {})) {
+        const l = lignes.find((x) => x.cle === cle);
+        if (l) prix.push({ designation: l.designation, unite: l.unite, prixHt: pu, negoce: r.supplier.name, date: r.commandeLe ?? r.reponduLe!, source: r.commandeLe ? "paye" : "recu" });
+      }
+    }
+    // Achat groupé par métier (27 octobre 2026, point 20) : le prix de chaque ligne commandée va dans « Mes prix ».
+    const groupes = await this.prisma.besoinNegocie.findMany({ where: { companyId, statut: "accepte", consultationCommandeId: { not: null } }, select: { accepteLe: true, consultationCommandeId: true, lignes: { select: { cle: true, libelle: true, unite: true } } } });
+    for (const g of groupes) {
+      const c = await this.prisma.consultationAchatGroupe.findUnique({ where: { id: g.consultationCommandeId! }, select: { nom: true, prixLignes: true, prixCorriges: true } });
+      const effectifs = { ...((c?.prixLignes as Record<string, number | null> | null) ?? {}), ...((c?.prixCorriges as Record<string, number | null> | null) ?? {}) };
+      for (const l of g.lignes) {
+        const p = effectifs[l.cle];
+        if (typeof p === "number") prix.push({ designation: l.libelle, unite: l.unite, prixHt: p, negoce: c?.nom ?? "", date: g.accepteLe ?? new Date(0), source: "paye" });
+      }
+    }
+    return prix;
+  }
+
+  async mesPrix(tenant: TenantContext) {
+    const [prix, d] = await Promise.all([this.prixDe(tenant.companyId), this.droits.droits(tenant.companyId)]);
+    const depuis = debutHistorique(d, this.now());
+    return { formule: d.formule, depuis, articles: mesPrix(prix, depuis).map((a) => ({ ...a, repere: phraseDernierPrix(a) })) };
+  }
+
+  /** Le repère « Ton dernier prix pour cet article » par clé (tout l'historique : c'est son propre prix). */
+  private async reperesDeMesPrix(companyId: string): Promise<Map<string, string>> {
+    return new Map(mesPrix(await this.prixDe(companyId)).map((a) => [a.cle, phraseDernierPrix(a)]));
+  }
+
+  /** Le dernier prix unitaire HT payé ou reçu pour une clé de référence stricte (estimation des lignes groupables). */
+  async dernierPrixPour(companyId: string): Promise<(cle: string, unite: string) => number | null> {
+    const articles = mesPrix(await this.prixDe(companyId));
+    return (cle, unite) => articles.find((a) => a.cle === `${cle}#${unite}`)?.dernier.prixHt ?? null;
+  }
+
+  /* ---------------------------------------------------------------------------------- « Vos résultats » (négoce) */
+
+  async resultatsNegoce(compteId: string) {
+    const compte = await this.prisma.compteNegoce.findUnique({ where: { id: compteId }, select: { email: true } });
+    if (!compte) throw notFound("Account");
+    const negoces = await this.prisma.negoce.findMany({ where: { compteId }, select: { id: true } });
+    const ids = negoces.map((n) => n.id);
+    const [perso, grilles, choix] = await Promise.all([
+      this.prisma.priceRequestRecipient.findMany({
+        where: { OR: [{ negoceId: { in: ids } }, { supplier: { email: { equals: compte.email, mode: "insensitive" } } }], status: { not: "to_send" } },
+        select: { reponduLe: true, commandeLe: true, prix: true, livraisonHt: true, priceRequest: { select: { lines: true } } },
+      }),
+      this.prisma.grilleNegoce.findMany({ where: { negoceId: { in: ids } }, select: { deposeLe: true } }),
+      this.prisma.choixArtisan.findMany({ where: { commandeLe: { not: null } }, select: { negoceId: true, totalHt: true, parts: true } }),
+    ]);
+    let ca = 0;
+    let gagnees = 0;
+    for (const r of perso.filter((p) => p.commandeLe)) {
+      gagnees++;
+      const prix = (r.prix as Record<string, number> | null) ?? {};
+      ca += this.lignes(r.priceRequest.lines).reduce((s, l) => s + (prix[l.cle] ?? 0) * l.quantite, 0) + Number(r.livraisonHt ?? 0);
+    }
+    for (const c of choix) {
+      const parts = (c.parts as { negoceId: string; totalHt: number }[] | null) ?? null;
+      const miennes: number[] = parts ? parts.filter((p) => ids.includes(p.negoceId)).map((p) => Number(p.totalHt)) : ids.includes(c.negoceId) ? [Number(c.totalHt)] : [];
+      if (miennes.length) gagnees++;
+      ca += miennes.reduce((s, n) => s + n, 0);
+    }
+    return resultatsNegoce({ demandesRecues: perso.length + grilles.length, reponses: perso.filter((p) => p.reponduLe).length + grilles.filter((g) => g.deposeLe).length, commandesGagnees: gagnees, caHt: ca });
+  }
+}

@@ -1,39 +1,60 @@
 "use client";
 
+import { AideBouton } from "@/components/aide";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Search, Warehouse } from "lucide-react";
+import { ClipboardList, Mail, Search, Truck } from "lucide-react";
+import Link from "next/link";
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { ProjectList } from "@/components/project-row";
-import { Button, ButtonLink, EmptyState, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
+import { ConfirmerSuppression, CarteListe, ListeNonSupprimable, type Refus } from "@/components/mes-listes";
+import { Button, ButtonLink, EmptyState, ErrorNotice, PageTitle, Skeleton, Spinner } from "@/components/ui";
 import { api, ApiError, type Project, type ProjectPage } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
 
-type Filter = "en-cours" | "termines" | "tous";
+type Filter = "toutes" | "a-preparer" | "envoyees" | "reponses" | "terminees";
+/** « MES DEMANDES » (Greg, 1er novembre 2026) : les étapes d'un dossier. Pas d'« Archivées » : l'archivage, c'est « Terminées ». */
 const FILTERS: { value: Filter; label: string }[] = [
-  { value: "en-cours", label: "En cours" },
-  { value: "termines", label: "Terminés" },
-  { value: "tous", label: "Tous" },
+  { value: "toutes", label: "Toutes" },
+  { value: "a-preparer", label: "À préparer" },
+  { value: "envoyees", label: "Envoyées" },
+  { value: "reponses", label: "Réponses reçues" },
+  { value: "terminees", label: "Terminées" },
 ];
-const API_STATUS: Record<Filter, string> = { "en-cours": "active", termines: "archived", tous: "all" };
+/** Les anciens liens (« ?statut=tous », « termines », « en-cours ») restent valables. */
+const ANCIENS: Record<string, Filter> = { tous: "toutes", termines: "terminees", "en-cours": "toutes", toutes: "toutes", terminees: "terminees", "a-preparer": "a-preparer", envoyees: "envoyees", reponses: "reponses" };
+const VIDES: Record<Filter, string> = {
+  toutes: "Aucune demande pour l'instant",
+  "a-preparer": "Rien à préparer",
+  envoyees: "Aucune demande en attente de réponse",
+  reponses: "Aucune réponse à lire",
+  terminees: "Aucune demande terminée",
+};
 
 /**
- * La recherche et le filtre vivent dans l'adresse (?q=…&statut=…) : le
- * bouton Retour, un rafraîchissement ou un lien partagé les restituent.
+ * « MES LISTES » (Greg, 1er novembre 2026 ; avant : « Chantiers », alors que le menu disait « Mes listes ») : le titre,
+ * « Nouvelle liste » (le même départ que le « + » et l'accueil), la recherche, les filtres Toutes / En cours / Terminées (pas
+ * d'« Archivées » : l'archivage, c'est « Terminée »), des cartes compactes avec leur « … », et la suppression définitive :
+ * une liste, ou plusieurs avec « Sélectionner » (filtre « Toutes ») ; toujours confirmée, toujours décidée par le serveur.
+ * La recherche et le filtre vivent dans l'adresse (?q=…&statut=…).
  */
-function ChantiersList() {
+function MesListes() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
   const q = params.get("q") ?? "";
-  const filterParam = params.get("statut") as Filter | null;
-  const searching = q.trim().length > 0;
-  const filter: Filter = filterParam ?? (searching ? "tous" : "en-cours");
+  const filter: Filter = ANCIENS[params.get("statut") ?? ""] ?? "toutes";
 
   const [draft, setDraft] = useState(q);
   const [more, setMore] = useState<{ items: Project[]; cursor: string | null; key: string } | null>(null);
   const [moreError, setMoreError] = useState<ApiError | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [retirees, setRetirees] = useState<Set<string>>(new Set());
+  const [selection, setSelection] = useState<Set<string> | null>(null);
+  const [aSupprimer, setASupprimer] = useState<Project[] | null>(null);
+  const [refus, setRefus] = useState<{ refus: Refus[]; autres: Project[] } | null>(null);
+  const [verif, setVerif] = useState(false);
+  const [annonce, setAnnonce] = useState<string | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
 
   const updateUrl = useCallback(
     (next: { q?: string; statut?: Filter | null }) => {
@@ -43,7 +64,7 @@ function ChantiersList() {
         else sp.delete("q");
       }
       if (next.statut !== undefined) {
-        if (next.statut) sp.set("statut", next.statut);
+        if (next.statut && next.statut !== "toutes") sp.set("statut", next.statut);
         else sp.delete("statut");
       }
       const qs = sp.toString();
@@ -52,19 +73,17 @@ function ChantiersList() {
     [params, pathname, router],
   );
 
-  // Recherche au fil de la frappe (léger délai pour ne pas surcharger).
   useEffect(() => {
     if (draft === q) return;
-    // Une nouvelle recherche porte sur tous les chantiers (PD-022) : un filtre
-    // choisi avant de taper ne doit pas cacher un chantier terminé.
+    // Une recherche porte sur toutes les listes (PD-022) : un filtre choisi avant de taper ne cache pas une liste terminée.
     const t = setTimeout(() => updateUrl({ q: draft.trim(), statut: null }), 250);
     return () => clearTimeout(t);
   }, [draft, q, updateUrl]);
 
-  const queryKey = `${API_STATUS[filter]}|${q.trim()}`;
+  const queryKey = `${filter}|${q.trim()}`;
   const fetchPage = useCallback(
     (signal: AbortSignal | undefined, after: string | null) => {
-      const sp = new URLSearchParams({ status: API_STATUS[filter], limit: "30" });
+      const sp = new URLSearchParams(filter === "toutes" ? { status: "all", limit: "30", resume: "1" } : { etape: filter, limit: "30", resume: "1" });
       if (q.trim()) sp.set("q", q.trim());
       if (after) sp.set("cursor", after);
       return api<ProjectPage>(`/v1/projects?${sp.toString()}`, signal ? { signal } : {});
@@ -74,9 +93,8 @@ function ChantiersList() {
   const fetchFirst = useCallback((signal: AbortSignal) => fetchPage(signal, null), [fetchPage]);
   const { data: first, error: firstError, reload } = useResource(fetchFirst);
 
-  // Pages supplémentaires chargées pour la recherche en cours uniquement.
   const extra = more && more.key === queryKey ? more : null;
-  const items = first ? [...first.items, ...(extra?.items ?? [])] : null;
+  const items = first ? [...first.items, ...(extra?.items ?? [])].filter((p) => !retirees.has(p.id)) : null;
   const cursor = extra ? extra.cursor : (first?.nextCursor ?? null);
   const error = firstError ?? moreError;
 
@@ -94,48 +112,158 @@ function ChantiersList() {
     }
   }
 
+  /** Avant toute confirmation, le serveur dit ce qui peut partir : rien n'est supprimé en silence. */
+  async function demanderSuppression(listes: Project[]) {
+    if (verif || listes.length === 0) return;
+    setVerif(true);
+    setErreur(null);
+    setAnnonce(null);
+    try {
+      const r = await api<{ listes: { id: string; nom: string; supprimable: boolean; phrase: string | null }[] }>("/v1/listes/suppression/verifier", { method: "POST", body: { ids: listes.map((l) => l.id) } });
+      const non = r.listes.filter((l) => !l.supprimable).map((l) => ({ id: l.id, nom: l.nom, phrase: l.phrase ?? "" }));
+      if (non.length > 0) setRefus({ refus: non, autres: listes.filter((l) => !non.some((n) => n.id === l.id)) });
+      else setASupprimer(listes);
+    } catch (e) {
+      setErreur(e instanceof ApiError ? (e.phrase ?? "La vérification n'a pas abouti. Réessaie dans un instant.") : "La vérification n'a pas abouti. Réessaie dans un instant.");
+    } finally {
+      setVerif(false);
+    }
+  }
+
+  function supprimees(ids: string[]) {
+    setRetirees((r) => new Set([...r, ...ids]));
+    setASupprimer(null);
+    setSelection(null);
+    setAnnonce(ids.length > 1 ? `${ids.length} listes supprimées définitivement` : "Liste supprimée définitivement");
+  }
+
+  async function basculerTerminee(p: Project) {
+    setErreur(null);
+    try {
+      await api(`/v1/projects/${encodeURIComponent(p.id)}`, { method: "PATCH", body: { status: p.status === "archived" ? "active" : "archived" } });
+      setRefus(null);
+      // Le statut change : la liste se relit (seule une liste supprimée disparaît pour de bon de l'écran).
+      setMore(null);
+      reload();
+    } catch {
+      setErreur("Le changement n'est pas passé. Réessaie dans un instant.");
+    }
+  }
+
+  const choisies = items && selection ? items.filter((p) => selection.has(p.id)) : [];
   return (
     <>
-      <PageTitle>Chantiers</PageTitle>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="search" className="text-xs font-bold text-muted">
-          Chercher un chantier, un client ou une adresse
-        </label>
-        <div className="flex min-h-13 items-center gap-2.5 rounded-2xl bg-surface px-4 shadow-card focus-within:ring-2 focus-within:ring-ink">
-          <Search size={20} className="text-muted" aria-hidden="true" />
-          <input
-            id="search"
-            type="search"
-            enterKeyHint="search"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="ex. Dupont, Vannes…"
-            className="min-h-12 grow bg-transparent text-base outline-none placeholder:text-subtle"
-          />
+      {/* « Mes demandes » + « Créer un quantitatif » + Aide débordaient d'un iPhone SE : les actions passent à la ligne.
+          Revue UX (8 novembre 2026) : une action, un nom partout (« Créer un quantitatif », jamais « Nouvelle demande »). */}
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+        {/* Prompt maître (Greg, 10 novembre 2026, capture 02 ; RÈGLE CHANGÉE : « Mes demandes » devient « Mes quantitatifs »). */}
+        <span className="flex flex-col gap-1">
+          <PageTitle>Mes quantitatifs</PageTitle>
+          <span className="text-[14px] text-muted">Prépare et envoie tes listes de matériaux.</span>
+        </span>
+        <span className="flex items-center gap-3">
+          <ButtonLink href="/chantiers/nouveau" className="min-h-11 shrink-0 px-4 text-[15px] whitespace-nowrap">
+            Créer un quantitatif
+          </ButtonLink>
+          <AideBouton sujet="chantiers" />
+        </span>
+      </div>
+      {/* Greg, 12 novembre 2026 (dossier de corrections UX, point 9) : « Mes négoces » et les réponses des négoces se
+          trouvent ici, là où on s'en sert, et plus dans le menu du compte. */}
+      <nav aria-label="Autour de mes quantitatifs" className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        <Link href="/fournisseurs" className="pressable flex min-h-12 items-center justify-center gap-2 rounded-full border border-ink/35 px-4 text-center text-[14px] leading-tight font-extrabold text-ink">
+          <Truck size={18} aria-hidden="true" className="shrink-0" />
+          Mes négoces
+        </Link>
+        <Link href="/messages" className="pressable flex min-h-12 items-center justify-center gap-2 rounded-full border border-ink/35 px-4 text-center text-[14px] leading-tight font-extrabold text-ink">
+          <Mail size={18} aria-hidden="true" className="shrink-0" />
+          Réponses des négoces
+        </Link>
+      </nav>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-4">
+        <div className="flex flex-col gap-1.5 lg:grow">
+          <label htmlFor="search" className="sr-only">
+            Rechercher un quantitatif ou un chantier
+          </label>
+          <div className="flex min-h-12 items-center gap-3 rounded-xl border border-line bg-surface px-4 text-ink transition-[border-color] duration-150 focus-within:border-accent">
+            <Search size={20} className="text-muted" aria-hidden="true" />
+            <input
+              id="search"
+              type="search"
+              enterKeyHint="search"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Rechercher un quantitatif"
+              className="min-h-11 grow bg-transparent text-[16px] outline-none placeholder:text-muted"
+            />
+          </div>
+        </div>
+        {/* Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » chevauchait « Terminées » ; il passe à la ligne
+            seulement quand la place manque. Sans marge négative : elle élargissait la page sur téléphone (barre du menu décalée). */}
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+          {/* Cinq étapes, toutes visibles : elles passent à la ligne sur téléphone (jamais un filtre caché hors de l'écran). */}
+          <div role="group" aria-label="Filtrer" className="flex min-w-0 grow flex-wrap gap-1.5 pb-1">
+            {FILTERS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                aria-pressed={filter === f.value}
+                onClick={() => {
+                  setSelection(null);
+                  updateUrl({ statut: f.value });
+                }}
+                className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${filter === f.value ? "bg-accent text-on-accent shadow-card" : "border border-line bg-transparent text-ink active:bg-ground"}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          {filter === "toutes" && items && items.length > 0 && !selection ? (
+            <button type="button" onClick={() => setSelection(new Set())} className="ml-auto min-h-11 shrink-0 px-1 text-[15px] font-bold whitespace-nowrap text-accent-text">
+              Sélectionner
+            </button>
+          ) : null}
         </div>
       </div>
-      <div role="group" aria-label="Filtrer" className="flex gap-2">
-        {FILTERS.map((f) => (
-          <button
-            key={f.value}
-            type="button"
-            aria-pressed={filter === f.value}
-            onClick={() => updateUrl({ statut: f.value })}
-            className={`min-h-10 rounded-full px-3.5 text-sm font-bold ${filter === f.value ? "bg-ink text-white" : "bg-surface text-[#3a414b] shadow-card"}`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
 
-      {error ? <ErrorNotice error={error} onRetry={() => { setMoreError(null); reload(); }} /> : null}
-      {items === null && !error ? <Spinner /> : null}
+      {annonce ? (
+        <p role="status" className="rounded-xl bg-ok-bg px-4 py-3 text-[15px] font-semibold text-ok">
+          {annonce}
+        </p>
+      ) : null}
+      {erreur ? (
+        <p role="alert" className="rounded-xl bg-danger-bg px-4 py-3 text-[15px] font-semibold text-danger">
+          {erreur}
+        </p>
+      ) : null}
+      {error ? (
+        <ErrorNotice
+          error={error}
+          onRetry={() => {
+            setMoreError(null);
+            reload();
+          }}
+        />
+      ) : null}
+      {items === null && !error ? <Skeleton lines={4} label="Chargement des listes…" /> : null}
       {items && items.length > 0 ? (
         <>
-          <p className="text-[13px] text-muted" aria-live="polite">
-            {searching ? `Résultats pour « ${q} »${filter === "tous" ? " (en cours et terminés)" : ""}` : "Le dernier travaillé en premier"}
+          <p className="sr-only" aria-live="polite">
+            {items.length > 1 ? `${items.length} demandes` : "1 demande"}
           </p>
-          <ProjectList projects={items} show={API_STATUS[filter] as "active" | "archived" | "all"} />
+          <ul className={`grid grid-cols-1 gap-2.5 lg:grid-cols-2 ${selection ? "pb-24" : ""}`}>
+            {items.map((p) => (
+              <li key={p.id}>
+                <CarteListe
+                  projet={p}
+                  selection={selection ? { coche: selection.has(p.id), basculer: () => setSelection((s) => { const n = new Set(s); if (n.has(p.id)) n.delete(p.id); else n.add(p.id); return n; }) } : null}
+                  occupe={verif}
+                  onSupprimer={() => void demanderSuppression([p])}
+                  onTerminer={() => void basculerTerminee(p)}
+                />
+              </li>
+            ))}
+          </ul>
           {cursor ? (
             <Button variant="secondary" pending={loadingMore} onClick={() => void loadMore()}>
               {fr.actions.loadMore}
@@ -144,15 +272,48 @@ function ChantiersList() {
         </>
       ) : null}
       {items && items.length === 0 ? (
-        searching ? (
-          <EmptyState icon={<Search size={40} />} title="Aucun chantier trouvé">
-            <p className="max-w-xs text-[15px] text-muted">Essaie le nom du client, une ville ou une partie de l&apos;adresse.</p>
+        q.trim() ? (
+          <EmptyState icon={<Search size={40} />} title="Aucune demande trouvée">
+            <p className="max-w-xs text-[16px] text-muted">Essaie un nom de liste, un client, une ville ou une partie de l&apos;adresse.</p>
           </EmptyState>
         ) : (
-          <EmptyState icon={<Warehouse size={40} />} title={filter === "termines" ? "Aucun chantier terminé" : "Aucun chantier en cours"}>
-            {filter !== "termines" ? <ButtonLink href="/chantiers/nouveau">Créer un chantier</ButtonLink> : null}
+          <EmptyState icon={<ClipboardList size={40} />} title={VIDES[filter]}>
+            {filter === "toutes" || filter === "a-preparer" ? <ButtonLink href="/chantiers/nouveau">Créer un quantitatif</ButtonLink> : null}
           </EmptyState>
         )
+      ) : null}
+
+      {/* La barre de la sélection : au-dessus de la barre du menu sur téléphone, jamais dessous. */}
+      {selection ? (
+        <div role="region" aria-label="Sélection" className="fixed inset-x-0 bottom-[calc(var(--nav-space,0px))] z-40 flex justify-center px-4 pb-3 lg:bottom-0 lg:left-64 lg:pb-5">
+          <div className="flex w-full max-w-xl items-center gap-2 rounded-2xl bg-surface p-2.5 text-ink shadow-float ring-1 ring-ink/10">
+            <span className="grow pl-2 text-[15px] font-semibold">{choisies.length > 1 ? `${choisies.length} listes choisies` : choisies.length === 1 ? "1 liste choisie" : "Choisis des listes"}</span>
+            <button type="button" onClick={() => setSelection(null)} className="pressable min-h-11 rounded-xl border border-line px-4 text-[15px] font-semibold">
+              Annuler
+            </button>
+            <button type="button" disabled={choisies.length === 0 || verif} onClick={() => void demanderSuppression(choisies)} className="pressable min-h-11 rounded-xl bg-danger px-4 text-[15px] font-bold text-white disabled:opacity-50">
+              Supprimer ({choisies.length})
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {aSupprimer ? <ConfirmerSuppression listes={aSupprimer} onAnnuler={() => setASupprimer(null)} onFait={supprimees} /> : null}
+      {refus ? (
+        <ListeNonSupprimable
+          refus={refus.refus}
+          autres={refus.autres}
+          onFermer={() => setRefus(null)}
+          onTerminer={(() => {
+            const seule = refus.refus.length === 1 && refus.autres.length === 0 ? items?.find((p) => p.id === refus.refus[0]!.id) : undefined;
+            return seule && seule.status !== "archived" ? () => void basculerTerminee(seule) : undefined;
+          })()}
+          onSupprimerAutres={() => {
+            const autres = refus.autres;
+            setRefus(null);
+            setASupprimer(autres);
+          }}
+        />
       ) : null}
     </>
   );
@@ -161,7 +322,7 @@ function ChantiersList() {
 export default function ChantiersPage() {
   return (
     <Suspense fallback={<Spinner />}>
-      <ChantiersList />
+      <MesListes />
     </Suspense>
   );
 }

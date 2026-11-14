@@ -18,8 +18,17 @@ export type ProjectPatch = Partial<Omit<NewProject, "demo"> & { status: ProjectS
 /** Filtre de statut ; « all » = en cours et archivés (utile en recherche). */
 export type ProjectStatusFilter = ProjectStatus | "all";
 
+/**
+ * « MES DEMANDES » (Greg, 1er novembre 2026) : l'étape du dossier, d'après ses demandes de prix.
+ * À préparer : rien n'est encore parti ; Envoyées : partie, sans réponse ; Réponses reçues : au moins une réponse, aucun
+ * négoce retenu ; Terminées : marquée terminée ou un négoce retenu.
+ */
+export type EtapeDemande = "a-preparer" | "envoyees" | "reponses" | "terminees";
+
 export interface ProjectListQuery {
   status: ProjectStatusFilter;
+  /** L'étape du dossier (« Mes demandes ») ; prime sur `status`. */
+  etape?: EtapeDemande;
   /** Mots recherchés dans le nom, le client et l'adresse (tous doivent figurer). */
   search?: string[];
   limit: number;

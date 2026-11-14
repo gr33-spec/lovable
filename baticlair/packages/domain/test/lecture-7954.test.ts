@@ -44,17 +44,28 @@ describe("temps un, devis 7954 : le contrôle d'après le §6 du référentiel �
     expect(ecarts).toEqual(expect.arrayContaining([expect.stringMatching(/^Sans fourniture attendue : PLAN ELECTRIQUE/), expect.stringMatching(/^Fourniture attendue : PRISE TV/)]));
   });
 
-  it("une question sur une donnée écrite (la marque, une contenance) : écart, et le compte passe à 8 au lieu de 7", () => {
+  it("une question sur une donnée écrite (la marque, une contenance) : écart, et le compte passe à 9 au lieu de 8", () => {
     const l = copie(lectureAttendue7954());
     l.questions.push({ cle: "marque_appareillage", texte: "Quelle marque d'appareillage ?", boutons: [], unite: null, donnee: "marque", ligne: null });
     const ecarts = controleLecture7954(l, DEVIS_7954);
-    expect(ecarts).toEqual(expect.arrayContaining([expect.stringMatching(/^Question sur une donnée écrite : Quelle marque/), expect.stringMatching(/^Questions : 8 au lieu de 7/)]));
+    expect(ecarts).toEqual(expect.arrayContaining([expect.stringMatching(/^Question sur une donnée écrite : Quelle marque/), expect.stringMatching(/^Questions : 9 au lieu de 8/)]));
   });
 
   /**
    * Correction du fondateur (2026-10-12) : le tableau fait l'objet d'une question (section 4 du référentiel électricité :
-   * composition déduite, ligne orange avec « C'est bon / Modifier » ; 51.6 : tout orange a sa question). Sept questions.
+   * composition déduite, ligne orange avec « C'est bon / Modifier » ; 51.6 : tout orange a sa question). Huit questions avec la pose (24 octobre 2026).
    */
+  // Décision du fondateur (24 octobre 2026, vraie lecture) : la question des 59 alimentations pour 49 radiateurs cite
+  // « Atoll », mais porte sur une donnée qui manque : elle n'est pas une question sur une donnée écrite.
+  it("la question des alimentations en trop peut citer « Atoll » sans écart ; la pose absente est un écart", () => {
+    const l = copie(lectureAttendue7954());
+    const alim = l.questions.find((q) => q.cle === "usage_alimentations_radiateur")!;
+    alim.texte = "Tu as 59 alimentations radiateur pour 49 appareils (39 Atoll et 10 sèche-serviettes) : les 10 en plus, c'est quoi ?";
+    expect(controleLecture7954(l, DEVIS_7954)).toEqual([]);
+    l.questions = l.questions.filter((q) => q.cle !== "mode_pose");
+    expect(controleLecture7954(l, DEVIS_7954)).toEqual(expect.arrayContaining([expect.stringMatching(/^Question absente : pose encastrée ou en saillie/)]));
+  });
+
   it("la composition des tableaux est une question (déduite, C'est bon / Modifier) : son absence est un écart", () => {
     const attendue = lectureAttendue7954();
     const composition = attendue.questions.find((q) => /composition/i.test(q.texte))!;
@@ -65,7 +76,7 @@ describe("temps un, devis 7954 : le contrôle d'après le §6 du référentiel �
     const l = copie(attendue);
     l.questions = l.questions.filter((q) => q !== l.questions.find((x) => /composition/i.test(x.texte)));
     const ecarts = controleLecture7954(l, DEVIS_7954);
-    expect(ecarts).toEqual(expect.arrayContaining([expect.stringMatching(/^Question absente : composition des tableaux/), expect.stringMatching(/^Questions : 6 au lieu de 7/)]));
+    expect(ecarts).toEqual(expect.arrayContaining([expect.stringMatching(/^Question absente : composition des tableaux/), expect.stringMatching(/^Questions : 7 au lieu de 8/)]));
   });
 });
 
@@ -80,4 +91,5 @@ describe("temps un, DE00000071 : le même contrôle d'après le §51.5 du réfé
     l.questions.push({ cle: "velux", texte: "Quelle taille pour les Velux ?", boutons: [], unite: null, donnee: "taille des Velux", ligne: null });
     expect(controleLectureDe00000071(l, DE00000071_LINES)).toEqual(expect.arrayContaining([expect.stringMatching(/^Question sur une donnée écrite : Quelle taille pour les Velux/)]));
   });
+
 });

@@ -12,12 +12,21 @@ import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 let ctx: TestContext;
+const avantV1 = process.env.ACHATS_GROUPES_V1;
+const avantMissions = process.env.MISSIONS_V1;
 beforeAll(async () => {
+  // Achats groupés V1 (7 novembre 2026) : allumés ici pour que leurs routes soient réellement essayées par B.
+  process.env.ACHATS_GROUPES_V1 = "on";
+  process.env.MISSIONS_V1 = "on";
   ctx = await createTestApp();
   await resetDatabase(ctx.prisma);
 });
 afterAll(async () => {
   await ctx.app.close();
+  if (avantMissions === undefined) delete process.env.MISSIONS_V1;
+  else process.env.MISSIONS_V1 = avantMissions;
+  if (avantV1 === undefined) delete process.env.ACHATS_GROUPES_V1;
+  else process.env.ACHATS_GROUPES_V1 = avantV1;
 });
 
 interface Route {
@@ -33,7 +42,7 @@ function routes(): Route[] {
 }
 
 describe("isolation entre entreprises, toutes les routes", () => {
-  it("B ne lit, ne modifie, ne supprime et ne déclenche rien chez A", async () => {
+  it("B ne lit, ne modifie, ne supprime et ne déclenche rien chez A", { timeout: 30_000 }, async () => {
     const a = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures A");
     const b = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures B");
 
@@ -47,8 +56,18 @@ describe("isolation entre entreprises, toutes les routes", () => {
     await a.agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
     const suppliers = (await a.agent.get("/v1/suppliers")).body.items as { id: string }[];
     const request = (await a.agent.post(`/v1/projects/${demo.projectId}/price-requests`).send({ supplierIds: suppliers.map((x) => x.id) }).expect(201)).body as { recipients: { id: string }[] };
-    await a.agent.post(`/v1/demo/recipients/${request.recipients[0]!.id}/quote`).expect(201);
-    await a.agent.post(`/v1/price-request-recipients/${request.recipients[0]!.id}/analysis`).expect(201);
+    const recu = (await a.agent.post(`/v1/demo/recipients/${request.recipients[0]!.id}/quote`).expect(201)).body as { recipients: { id: string; document: { id: string } | null }[] };
+    // Une lecture d'avant le 28 octobre 2026 (point 7 : plus de nouvelle lecture IA), toujours visible et corrigeable.
+    await ctx.prisma.supplierOffer.create({
+      data: {
+        companyId: a.companyId,
+        documentId: recu.recipients.find((r) => r.id === request.recipients[0]!.id)!.document!.id,
+        promptId: "offre",
+        promptVersion: 1,
+        model: "ancien",
+        lines: { create: [{ position: 1, kind: "main", designation: "Ardoise", requestIndex: 0 }] },
+      },
+    });
     const q = (
       await a.agent
         .post("/v1/quantitatifs")
@@ -80,7 +99,96 @@ describe("isolation entre entreprises, toutes les routes", () => {
       offerLine: (await first(ctx.prisma.supplierOfferLine.findFirst({ where: { offer: { companyId } } }), "ligne d'offre")).id,
       takeoff: (await first(ctx.prisma.takeoff.findFirst({ where: { companyId } }), "lecture")).id,
       takeoffLine: (await first(ctx.prisma.takeoffLine.findFirst({ where: { takeoff: { companyId } } }), "ligne lue")).id,
+      // BatiClair Groupé : un besoin de A (le drapeau éteint, ses routes répondent 404 ; allumé, l'appartenance refuse).
+      besoin: (
+        await ctx.prisma.besoin.create({
+          data: { companyId, projectId: demo.projectId, takeoffId: takeoff.id, articleKey: "a", designation: "Besoin de A", cle: "lib:a||", famille: "couverture", quantite: "1", unite: "u", zone: "29", adresseLivraison: "29200 Brest", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "en_attente" },
+        })
+      ).id,
+      // Étape 3 : un négoce dans la liste de A (le lien artisan-négoce est à A ; le négoce, lui, est à la base du département).
+      negoce: (
+        await ctx.prisma.negoce.create({
+          data: { nom: "Négoce de A", email: "negoce-a@example.com", departement: "29", familles: ["couverture"], ajouteParId: companyId, artisans: { create: { companyId, rang: 1, numeroCompte: "A-1" } } },
+        })
+      ).id,
+      offre: "",
+      bon: "",
+      lot: "",
+      cycle: "",
+      besoinNegocie: "",
+      recu: "",
+      recuFichier: "",
+      regroupementNegocie: "",
+      achatGroupe: "",
+      besoinAchat: "",
+      participantAchat: "",
+      consultationAchat: "",
+      ligneRapprochement: "",
+      propositionRapprochement: "",
+      achatV1: "",
+      besoinV1: "",
+      annonceMission: "",
+      reponseMission: "",
+      conversationMission: "",
+      fichierPro: "",
+      alerte: "",
+      signalement: "",
     };
+    // Étape 6 : une offre de A, sur un lot choisi.
+    const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });
+    const offreA = await ctx.prisma.offreArtisan.create({ data: { lotId: lotA.id, besoinId: ids.besoin, prixUnitaire: 10 } });
+    ids.offre = offreA.id;
+    ids.lot = lotA.id;
+    // Étape 7 : le bon de commande de A, et sa livraison.
+    const bonA = await ctx.prisma.bonCommande.create({ data: { offreId: offreA.id, negoceId: ids.negoce, livraison: { create: {} } } });
+    ids.bon = bonA.id;
+    // Le regroupement du mois (Greg, 22 octobre 2026) : une commande de A, son besoin dedans.
+    const cycleA = await ctx.prisma.cycleCommande.create({ data: { mois: "2026-10", famille: "couverture", zone: "29", clotureLe: new Date("2026-10-25T11:00:00Z"), reponseAvant: new Date("2026-11-08T17:00:00Z"), relanceLe: new Date("2026-11-07T17:00:00Z"), phase: "resultats" } });
+    await ctx.prisma.besoin.update({ where: { id: ids.besoin }, data: { cycleId: cycleA.id } });
+    ids.cycle = cycleA.id;
+    // Business model final (25 octobre 2026) : un regroupement négocié et le besoin de A dedans.
+    const negocieA = await ctx.prisma.regroupementNegocie.create({ data: { cle: "ardoise:32x22", libelle: "Ardoise 32×22", famille: "couverture", departement: "29" } });
+    ids.besoinNegocie = (await ctx.prisma.besoinNegocie.create({ data: { companyId, designation: "Ardoise 32×22", cle: "ardoise:32x22", famille: "couverture", quantite: 100, unite: "pièces", departement: "29", livraison: "29200 Brest", dateBesoin: new Date("2026-11-20"), statut: "declare", regroupementId: negocieA.id } })).id;
+    ids.regroupementNegocie = negocieA.id;
+    // L'achat groupé automatique (27 octobre 2026) : la participation de A, son négoce, la demande envoyée à ce négoce.
+    const achatA = await ctx.prisma.regroupementNegocie.create({ data: { mode: "automatique", cle: "ardoise:32x22", libelle: "Ardoise 32×22", famille: "couverture", departement: "29", clotureLe: new Date(Date.now() + 10 * 86_400_000), reponseAvantLe: new Date(Date.now() + 13 * 86_400_000) } });
+    const besoinAchatA = await ctx.prisma.besoinNegocie.create({ data: { companyId, designation: "Ardoise 32×22", cle: "ardoise:32x22", famille: "couverture", quantite: 100, unite: "pièces", departement: "29", livraison: "29200 Brest", dateBesoin: new Date(Date.now() + 30 * 86_400_000), statut: "declare", regroupementId: achatA.id } });
+    ids.achatGroupe = achatA.id;
+    ids.besoinAchat = besoinAchatA.id;
+    ids.participantAchat = (await ctx.prisma.negoceParticipant.create({ data: { besoinId: besoinAchatA.id, regroupementId: achatA.id, companyId, nom: "Négoce de A", email: "negoce-a@example.com" } })).id;
+    ids.consultationAchat = (await ctx.prisma.consultationAchatGroupe.create({ data: { regroupementId: achatA.id, email: "negoce-a@example.com", nom: "Négoce de A", clients: ["Toitures A"], quantite: 100, tokenHash: "empreinte-de-a", commissionPct: 0 } })).id;
+    // R7 (27 octobre 2026) : un e-mail reçu sur l'adresse Mobiiz de A, avec son fichier.
+    const recuA = await ctx.prisma.emailRecuArtisan.create({ data: { companyId, adresse: "toitures-a", de: "Négoce A <a@example.org>", objet: "Devis Toitures A", texte: "Toitures A", recuLe: new Date(), fichiers: { create: [{ nom: "devis-a.pdf", type: "application/pdf", taille: 4, contenu: new Uint8Array([37, 80, 68, 70]) }] } }, include: { fichiers: true } });
+    ids.recu = recuA.id;
+    ids.recuFichier = recuA.fichiers[0]!.id;
+    // L'abonnement (24 octobre 2026) : une session de paiement simulé et une facture de A.
+    await ctx.prisma.evenementAbonnement.create({ data: { companyId, type: "session", source: "simule", refExterne: "sim_session_de_a_000000" } });
+    const factureA = await ctx.prisma.factureAbonnement.create({ data: { numero: "TEST-000001", serie: "TEST", rang: 1, companyId, raisonSociale: "Toitures A", periodeDebut: new Date(), periodeFin: new Date(), montantHtCentimes: 2900, tvaCentimes: 580, ttcCentimes: 3480, tauxTva: 20, emiseLe: new Date() } });
+    const abonnementDeA = { session: "sim_session_de_a_000000", facture: factureA.id };
+    // Le rapprochement continu (6 novembre 2026) : une ligne de A en recherche et sa proposition.
+    const ligneRapA = await ctx.prisma.ligneRapprochement.create({ data: { companyId, projectId: ids.project, articleKey: "art-a", designation: "Ardoise 32×22", cle: "ardoise|format=32x22", type: "ardoise", libelle: "Ardoise 32×22", famille: "couverture", quantite: 100, unite: "pièces", departement: "29", jusquau: new Date(Date.now() + 5 * 86_400_000) } });
+    ids.ligneRapprochement = ligneRapA.id;
+    ids.propositionRapprochement = (await ctx.prisma.propositionRapprochement.create({ data: { ligneId: ligneRapA.id, companyId, cible: `collecte:${achatA.id}`, niveau: "exacte", score: 100 } })).id;
+    // Achats groupés V1 : un achat et le besoin de A (lieu et quantité privés), son lot corrigé.
+    const achatV1 = await ctx.prisma.achatGroupeV1.create({ data: { type: "ardoise", cle: "v1:ardoise|format=32x22|origine=espagne|qualite=1|epaisseur=5", nom: "Ardoise naturelle 32 × 22 · Espagne · 1er choix · 5 mm", lot: "couverture", departement: "22", reception: "livraison", dateBesoin: new Date(Date.now() + 40 * 86_400_000), ouvertJusquau: new Date(Date.now() + 22 * 86_400_000) } });
+    ids.achatV1 = achatV1.id;
+    ids.besoinV1 = (await ctx.prisma.besoinGroupeV1.create({ data: { achatId: achatV1.id, companyId, projectId: ids.project, articleKey: "art-v1-a", designation: "Ardoise de A", attributs: {}, quantite: 4800, quantiteSaisie: 10, uniteSaisie: "palette", parUnite: 480, reception: "livraison", lieu: "Lieu privé de A", dateBesoin: new Date(Date.now() + 40 * 86_400_000), statut: "confirme" } })).id;
+    await ctx.prisma.lotLigneV1.create({ data: { projectId: ids.project, articleKey: "art-v1-a", companyId, lot: "zinguerie" } });
+    // Missions (10 novembre 2026) : une annonce SUSPENDUE de A (donc privée), sa réponse à la mission d'un tiers, sa
+    // conversation avec ce tiers, un document de son dossier, une alerte de sa cloche.
+    const tiers = await ctx.prisma.company.create({ data: { name: "Tiers Missions", siretVerifieLe: new Date() } });
+    const proprietaireA = (await ctx.prisma.membership.findFirstOrThrow({ where: { companyId } })).userId;
+    const annonce = (d: Record<string, unknown>) => ({ userId: proprietaireA, type: "mission", metier: "Couverture", lieu: "Plouha", departement: "22", debut: new Date(Date.now() + 10 * 86_400_000), fin: new Date(Date.now() + 12 * 86_400_000), types: ["renfort"], description: "Mission de Toitures A", ...d });
+    ids.annonceMission = (await ctx.prisma.annonceMission.create({ data: annonce({ companyId, statut: "suspendue" }) as never })).id;
+    const annonceTiers = await ctx.prisma.annonceMission.create({ data: annonce({ companyId: tiers.id, statut: "suspendue", description: "Mission du tiers" }) as never });
+    ids.reponseMission = (await ctx.prisma.reponseMission.create({ data: { annonceId: annonceTiers.id, companyId, userId: proprietaireA, niveau: "confirme", experienceAns: 8, equipe: 2, message: "Réponse de Toitures A" } })).id;
+    const conversation = await ctx.prisma.conversationMission.create({ data: { annonceId: annonceTiers.id, annonceurId: tiers.id, autreId: companyId, ouvertePar: tiers.id, dernierMessageLe: new Date() } });
+    ids.conversationMission = conversation.id;
+    await ctx.prisma.messageMission.create({ data: { conversationId: conversation.id, companyId, userId: proprietaireA, texte: "Message de Toitures A", cle: "cle-isolation-0001" } });
+    ids.fichierPro = (await ctx.prisma.fichierPro.create({ data: { companyId, portee: "dossier", categorie: "cv", nom: "devis-a.pdf", type: "application/pdf", taille: 9, contenu: Buffer.from("%PDF-1.4\n") } })).id;
+    ids.alerte = (await ctx.prisma.alerteCourte.create({ data: { companyId, categorie: "missions", genre: "action", titre: "Nouveau message", detail: "Toitures A", action: "Ouvrir", href: "/messages", cle: "isolation-alerte" } })).id;
+    // Signalement de bugs : celui de A (avec sa capture) ; la liste et la capture sont réservées aux admins (B : 403).
+    ids.signalement = (await ctx.prisma.signalement.create({ data: { origine: "artisan", page: "/chantiers/nouveau", message: "Signalement de Toitures A", email: "a@example.com", companyId, capture: Buffer.from("capture-de-a"), captureType: "image/png" } })).id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -97,6 +205,70 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/offer-lines$/, ids.offerLine],
         [/\/takeoffs$/, ids.takeoff],
         [/\/takeoff-lines$/, ids.takeoffLine],
+        [/\/groupe\/besoins$/, ids.besoin],
+        [/\/groupe\/negoces$/, ids.negoce],
+        // Étape 5 : le lien de réponse d'un négoce est un jeton, jamais un identifiant ; un jeton inconnu répond 404.
+        [/\/reponse$/, "jeton-inconnu-de-b-0000000000000000"],
+        [/\/groupe\/offres$/, ids.offre],
+        [/\/groupe\/bons$/, ids.bon],
+        // Étape 9 : l'admin (B n'est pas admin : 403, jamais une donnée de A).
+        [/\/admin\/groupe\/lots$/, ids.lot],
+        [/\/admin\/groupe\/factures$/, ids.lot],
+        // La commande du mois : la ligne et la commande de A ; la grille du négoce est un jeton.
+        [/\/commande-du-mois\/lignes$/, ids.besoin],
+        [/\/commande-du-mois$/, ids.cycle],
+        [/\/admin\/commande-du-mois\/cycles$/, ids.cycle],
+        [/\/grille$/, "jeton-inconnu-de-b-0000000000000000"],
+        // L'espace négoce (23 octobre 2026) : invitation, connexion et désabonnement sont des jetons signés.
+        [/\/negoce\/(invitation|connexion|desabonner|opposition)$/, "jeton-inconnu-de-b.0000000000000000"],
+        // RGPD (24 octobre 2026) : « Ne plus recevoir ces e-mails » est un jeton signé, comme l'opposition du négoce.
+        [/\/emails\/stop$/, "jeton-inconnu-de-b.0000000000000000"],
+        // L'abonnement : la session de paiement simulé et la facture de A.
+        [/\/abonnement\/simulation$/, abonnementDeA.session],
+        [/\/abonnement\/factures$/, abonnementDeA.facture],
+        // Le pilotage admin : B n'est pas admin (403), quel que soit le détail demandé.
+        [/\/admin\/pilotage\/detail$/, "a_risque"],
+        [/\/admin\/pilotage\/apprentissage$/, abonnementDeA.facture],
+        // La démo admin : B n'est pas admin (403), quel que soit le geste.
+        [/\/admin\/pilotage\/demo$/, "jeu"],
+        // Lot 6 : la supervision (familles, file d'exceptions) : B n'est pas admin (403).
+        [/\/admin\/pilotage\/familles$/, "couverture"],
+        [/\/admin\/pilotage\/exceptions$/, ids.project],
+        // Recentrage (25 octobre 2026) : la demande perso de A, le regroupement (cycle) de A ; le chiffrage en ligne est un jeton.
+        [/\/demandes-perso$/, ids.priceRequest],
+        [/\/regroupements$/, ids.cycle],
+        [/\/public\/chiffrer$/, "jeton-inconnu-de-b-0000000000000000"],
+        // Business model final : le besoin négocié de A ; B n'est pas chasseur (403) ; l'admin non plus.
+        [/\/negocie\/besoins$/, ids.besoinNegocie],
+        // R7 : l'e-mail reçu de A et son fichier.
+        [/\/recus$/, ids.recu],
+        // Correction après test de Greg (30 octobre 2026) : les e-mails mis de côté ; B n'est pas admin (403).
+        [/\/admin\/emails-mis-de-cote$/, ids.recu],
+        [/\/fichiers$/, ids.recuFichier],
+        [/\/chasseur\/regroupements$/, ids.regroupementNegocie],
+        [/\/admin\/pilotage\/negoces$/, ids.negoce],
+        // L'achat groupé : la participation de A, son négoce, l'achat ouvert (l'admin de l'achat : 403) ; la
+        // réponse du négoce est un jeton ; l'admin (403).
+        [/\/achats-groupes\/negoces$/, ids.participantAchat],
+        [/\/achats-groupes$/, ids.besoinAchat],
+        [/\/public\/achat-groupe$/, "jeton-inconnu-de-b-0000000000000000"],
+        [/\/public\/achat-groupe\/commande$/, "jeton-inconnu-de-b-0000000000000000"],
+        [/\/admin\/pilotage\/achats-groupes\/consultations$/, ids.consultationAchat],
+        [/\/rapprochements\/propositions$/, ids.propositionRapprochement],
+        [/\/rapprochements\/lignes$/, ids.ligneRapprochement],
+        // Achats groupés V1 : le besoin de A ; l'admin (B n'est pas admin : 403).
+        [/\/ag\/besoins$/, ids.besoinV1],
+        [/\/admin\/ag\/achats$/, ids.achatV1],
+        // Missions : l'annonce privée, la réponse, la conversation, le document et l'alerte de A ; son profil (invisible).
+        [/\/missions\/annonces$/, ids.annonceMission],
+        [/\/missions\/reponses$/, ids.reponseMission],
+        [/\/missions\/conversations$/, ids.conversationMission],
+        [/\/dossier-pro$/, ids.fichierPro],
+        [/\/fichiers-pro\/ouvrir$/, `${ids.fichierPro}.9999999999999.signature-inconnue-de-b`],
+        [/\/fichiers-pro$/, ids.fichierPro],
+        [/\/profil-public$/, companyId],
+        [/\/alertes$/, ids.alerte],
+        [/\/admin\/signalements$/, ids.signalement],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);
@@ -189,8 +361,10 @@ describe("isolation entre entreprises, toutes les routes", () => {
         open.push(`${r.method.toUpperCase()} ${r.path} → ${(e as Error).message}`);
       }
     }
-    // Ce qui répond sans session : la santé du service, et les demandes d'accès elles-mêmes (inscription, connexion…).
-    expect(open.filter((o) => !/\/v1\/health|\/api\/auth|\/v1\/auth/.test(o))).toEqual([]);
+    // Ce qui répond sans session : la santé du service, le compteur et l'argument des tarifs de la page publique (un nombre, rien d'une
+    // entreprise), et les demandes d'accès elles-mêmes (inscription, connexion…).
+    // Les conditions négoce et la déconnexion de l'espace négoce se lisent sans compte (23 octobre 2026) : aucune donnée.
+    expect(open.filter((o) => !/\/v1\/health|\/v1\/public\/(compteur|tarif|visite|demo)|\/api\/auth|\/v1\/auth|\/v1\/negoce\/(conditions|deconnexion)/.test(o))).toEqual([]);
   });
 });
 

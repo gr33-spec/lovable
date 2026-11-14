@@ -11,7 +11,8 @@ import { OFFER_EXTRACTOR, type OfferExtractor } from "./application/offer-extrac
 import { OFFER_REPOSITORY, type OfferRepository } from "./application/offer.repository.js";
 import { OffersService } from "./application/offers.service.js";
 import { OffersController } from "./http/offers.controller.js";
-import { AnthropicOfferExtractor } from "./infrastructure/anthropic-offer-extractor.js";
+import { IaOfferExtractor } from "./infrastructure/ia-offer-extractor.js";
+import { fabriqueIa } from "../../platform/ai/fabrique-ia.js";
 import { FakeOfferExtractor } from "./infrastructure/fake-offer-extractor.js";
 import { PrismaOfferRepository } from "./infrastructure/prisma-offer.repository.js";
 
@@ -23,14 +24,9 @@ import { PrismaOfferRepository } from "./infrastructure/prisma-offer.repository.
     {
       provide: OFFER_EXTRACTOR,
       useFactory: (config: AppConfig): OfferExtractor | null => {
-        switch (config.ai.provider) {
-          case "anthropic":
-            return new AnthropicOfferExtractor(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort);
-          case "fake":
-            return new FakeOfferExtractor();
-          case "disabled":
-            return null;
-        }
+        const ia = fabriqueIa(config);
+        if (ia) return new IaOfferExtractor(ia, config.ai.extractionModel, config.ai.effort);
+        return config.ai.provider === "fake" ? new FakeOfferExtractor() : null;
       },
       inject: [CONFIG],
     },
