@@ -88,6 +88,9 @@ const dateLisible = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric",
 const heureLisible = (d: Date) => `${d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" })}, ${d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }).replace(":", " h ").replace(/ h 00$/, " h")}`;
 const conflit = (reason: string, message: string, extra: Record<string, unknown> = {}) => new DomainError("conflict", message, { reason, message, ...extra });
 
+/** Ce qui manque à une offre sans adresse où envoyer le bon de commande (Greg, 14 novembre 2026). */
+const MANQUE_EMAIL_FOURNISSEUR = "adresse e-mail du fournisseur";
+
 /**
  * ACHATS GROUPÉS V1 (Greg, 7 novembre 2026, V5.2 validée). Un achat = un produit précis (clé stricte), le département de
  * l'entreprise, un mode de réception, une période. Isolation : chaque lecture et chaque geste d'un besoin passent par
@@ -420,12 +423,15 @@ export class AchatsGroupesV1Service {
 
   private vueOffre(o: NonNullable<Awaited<ReturnType<PrismaService["offreAchatGroupeV1"]["findUnique"]>>>, quantite: number, etat: EtatAchatV1) {
     const offre: OffreV1 = { fournisseur: o.fournisseur, prixUnitaireHt: n(o.prixUnitaireHt), livraisonHt: n(o.livraisonHt), tvaPct: Number(o.tvaPct), delai: o.delai, lieu: o.lieu, paiement: o.paiement, validite: o.validite, annulation: o.annulation };
-    const manques = manquesOffreV1(offre);
+    const manquesDuPrix = manquesOffreV1(offre);
+    // Greg, 14 novembre 2026 : l'adresse e-mail du fournisseur est OBLIGATOIRE au dépôt de l'offre, pour que « Commander à
+    // ce prix » marche toujours. Sans elle, l'offre reste « en vérification ». (Avant : facultative.)
+    const manques = o.fournisseurEmail ? manquesDuPrix : [...manquesDuPrix, MANQUE_EMAIL_FOURNISSEUR];
     return {
       ...offre,
       complete: manques.length === 0,
       manques,
-      calcul: manques.length === 0 ? calculOffreV1(quantite, offre) : null,
+      calcul: manquesDuPrix.length === 0 ? calculOffreV1(quantite, offre) : null,
       // Greg, 14 novembre 2026 : l'artisan décide à la réception de l'offre. « Commander à ce prix » s'ouvre sur une offre
       // complète, à examiner, dont on sait où envoyer le bon de commande. (Avant : jamais ouvert en V1.)
       acceptable: manques.length === 0 && etat === "offre_a_examiner" && !!o.fournisseurEmail,
@@ -668,7 +674,7 @@ export class AchatsGroupesV1Service {
         reconfirmerAvant: a.reconfirmerAvant?.toISOString() ?? null,
         volumes: volumesV1(a.besoins.map((b) => ({ companyId: b.companyId, statut: b.statut as EtatBesoinV1, quantite: Number(b.quantite) })), { statut: a.statut as EtatAchatV1 }),
         volumeTransmis: n(a.volumeTransmis),
-        offre: a.offre ? { complete: manquesOffreV1({ fournisseur: a.offre.fournisseur, prixUnitaireHt: n(a.offre.prixUnitaireHt), livraisonHt: n(a.offre.livraisonHt), tvaPct: Number(a.offre.tvaPct), delai: a.offre.delai, lieu: a.offre.lieu, paiement: a.offre.paiement, validite: a.offre.validite, annulation: a.offre.annulation }).length === 0 } : null,
+        offre: a.offre ? { complete: manquesOffreV1({ fournisseur: a.offre.fournisseur, prixUnitaireHt: n(a.offre.prixUnitaireHt), livraisonHt: n(a.offre.livraisonHt), tvaPct: Number(a.offre.tvaPct), delai: a.offre.delai, lieu: a.offre.lieu, paiement: a.offre.paiement, validite: a.offre.validite, annulation: a.offre.annulation }).length === 0 && !!a.offre.fournisseurEmail } : null,
       })),
       // Bêta : 3 retraits tardifs → rappel ; au-delà → vérification manuelle ; jamais de suspension.
       retraitsTardifs: tardifs.map((t) => ({ companyId: t.companyId, nombre: t._count._all, suivi: suiviRetraitsTardifs(t._count._all) })).filter((t) => t.suivi !== "aucun"),
@@ -731,7 +737,7 @@ export class AchatsGroupesV1Service {
     const a = await this.prisma.achatGroupeV1.findUnique({ where: { id } });
     if (!a) throw notFound("AchatGroupeV1");
     const offre: OffreV1 = { fournisseur: o.fournisseur, prixUnitaireHt: o.prixUnitaireHt, livraisonHt: o.livraisonHt, delai: o.delai, lieu: o.lieu, paiement: o.paiement, validite: o.validite, annulation: o.annulation, tvaPct: o.tvaPct ?? 20 };
-    const complete = manquesOffreV1(offre).length === 0;
+    const complete = manquesOffreV1(offre).length === 0 && !!o.fournisseurEmail;
     const vers: EtatAchatV1 = complete ? "offre_a_examiner" : "offre_verification";
     // consultation → vérification → à examiner ; une offre complète saisie d'un coup passe par la vérification.
     const chemin: EtatAchatV1[] = a.statut === "offre_verification" ? [vers] : [ "offre_verification", ...(complete ? (["offre_a_examiner"] as EtatAchatV1[]) : []) ];

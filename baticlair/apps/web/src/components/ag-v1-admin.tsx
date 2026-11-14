@@ -21,7 +21,7 @@ interface AchatAdmin {
   volumeTransmis: number | null;
 }
 
-const OFFRE_VIDE = { fournisseur: "", prixUnitaireHt: "", livraisonHt: "", delai: "", lieu: "", paiement: "", validite: "", annulation: "" };
+const OFFRE_VIDE = { fournisseur: "", fournisseurEmail: "", prixUnitaireHt: "", livraisonHt: "", delai: "", lieu: "", paiement: "", validite: "", annulation: "" };
 
 /**
  * L'ADMIN DES ACHATS GROUPÉS V1 (local) : préparer la consultation, clôturer après l'heure, saisir l'offre. Aucun envoi

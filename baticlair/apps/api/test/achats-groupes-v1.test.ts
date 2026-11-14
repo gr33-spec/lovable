@@ -397,22 +397,27 @@ describe("l'offre, jusqu'à « Offre à examiner »", () => {
     await g.post(`/v1/admin/ag/achats/${ba.achat.id}/preparation`).send({}).expect(200);
     await a.agent.post(`/v1/ag/besoins/${ba.id}/reconfirmation`).expect(200);
     await g.post(`/v1/admin/ag/achats/${ba.achat.id}/cloture`).send({ avantLHeure: true }).expect(200);
-    const offre = { fournisseur: "Négoce de l'Armor", prixUnitaireHt: 0.98, livraisonHt: 45, delai: "10 jours ouvrés", lieu: "Livraison sur chantier, Lannion", paiement: "30 jours fin de mois", validite: "72 heures", annulation: null };
+    const offre = { fournisseur: "Négoce de l'Armor", fournisseurEmail: "ventes@armor.example", prixUnitaireHt: 0.98, livraisonHt: 45, delai: "10 jours ouvrés", lieu: "Livraison sur chantier, Lannion", paiement: "30 jours fin de mois", validite: "72 heures", annulation: null };
     expect((await g.put(`/v1/admin/ag/achats/${ba.achat.id}/offre`).send(offre).expect(200)).body).toMatchObject({ statut: "offre_verification", complete: false });
     let vue = (await a.agent.get(`/v1/ag/besoins/${ba.id}`).expect(200)).body;
     expect(vue).toMatchObject({ statut: { libelle: "Offre reçue — vérification en cours" }, offre: { complete: false, acceptable: false, manques: ["conditions d'annulation"], calcul: null } });
+    // Greg, 14 novembre 2026 : l'adresse e-mail du fournisseur est obligatoire au dépôt. Sans elle, l'offre reste en
+    // vérification, même si tout le reste est dit : « Commander à ce prix » marche donc toujours sur une offre à examiner.
+    const sansEmail = { ...offre, fournisseurEmail: null, annulation: "Sans frais jusqu'à 48 h avant livraison" };
+    expect((await g.put(`/v1/admin/ag/achats/${ba.achat.id}/offre`).send(sansEmail).expect(200)).body).toMatchObject({ statut: "offre_verification", complete: false });
+    vue = (await a.agent.get(`/v1/ag/besoins/${ba.id}`).expect(200)).body;
+    expect(vue).toMatchObject({ statut: { libelle: "Offre reçue — vérification en cours" }, offre: { complete: false, acceptable: false, manques: ["adresse e-mail du fournisseur"] } });
+    expect(vue.actions).toMatchObject({ commander: false });
     await g.put(`/v1/admin/ag/achats/${ba.achat.id}/offre`).send({ ...offre, annulation: "Sans frais jusqu'à 48 h avant livraison" }).expect(200);
     vue = (await a.agent.get(`/v1/ag/besoins/${ba.id}`).expect(200)).body;
-    expect(vue).toMatchObject({ statut: { libelle: "Offre à examiner" }, offre: { complete: true, acceptable: false, calcul: { ht: 4749, tva: 949.8, ttc: 5698.8 } } });
+    expect(vue).toMatchObject({ statut: { libelle: "Offre à examiner" }, offre: { complete: true, acceptable: true, calcul: { ht: 4749, tva: 949.8, ttc: 5698.8 } } });
     expect(vue.offre.calcul.lignes[0]).toBe("4 800 × 0,98 € = 4 704,00 €");
     expect(vue.actions.modifier).toBe(false);
     const actions = (await a.agent.get("/v1/ag/actions").expect(200)).body.items;
     expect(actions[0].cle).toBe(`ag-offre:${ba.id}`);
     // Pas d'« Offre acceptée » : aucune transition ne l'atteint.
     expect((await g.post(`/v1/admin/ag/achats/${ba.achat.id}/preparation`).send({})).status).toBe(409);
-    // Sans adresse du fournisseur : on peut dire « Non merci », pas encore commander.
-    expect(vue.actions).toMatchObject({ commander: false, refuser: true });
-    expect((await a.agent.post(`/v1/ag/besoins/${ba.id}/offre/commande`).expect(409)).body.error.details.reason).toBe("fournisseur_sans_email");
+    expect(vue.actions).toMatchObject({ commander: true, refuser: true });
   });
 
   /** Greg, 14 novembre 2026 (recette n° 2) : « Commander à ce prix » et « Non merci » ; l'e-mail d'offre dès qu'elle arrive. */
