@@ -1,3 +1,4 @@
+import { PROMO_FONDATEUR } from "./stripe.port.js";
 import { randomBytes } from "node:crypto";
 import {
   TARIFS,
@@ -97,6 +98,12 @@ export class AbonnementService {
     private readonly stripe: StripeClient | null,
     private readonly now: () => Date = () => new Date(),
   ) {}
+
+  /** Greg, 14 novembre 2026 : un paiement refusé prévient l'admin (adresse d'alerte). Sans branchement : rien. */
+  private alerte: (message: string) => void = () => undefined;
+  brancherAlerte(f: (message: string) => void): void {
+    this.alerte = f;
+  }
 
   brancherEcart(f: (companyId: string) => Promise<number | null>): void {
     this.ecart = f;
@@ -385,6 +392,8 @@ export class AbonnementService {
     // Recette du 13 novembre 2026 (G5) : un échec ou une résiliation déjà connus ne renvoient pas le même e-mail.
     const dejaDit = (e.type === "resiliation_demandee" && avant?.resiliationDemandeeLe != null) || (e.type === "echec" && avant?.statut === "echec");
     if (!dejaDit) await this.prevenir(companyId, e, maintenant).catch(() => undefined);
+    // L'admin est prévenu d'un paiement refusé, une fois par échec (jamais un nom de client dans l'alerte).
+    if (e.type === "echec" && !dejaDit) this.alerte("un paiement d'abonnement n'est pas passé. Détail dans l'espace admin, Artisans, filtre « Paiement refusé ».");
     return true;
   }
 
@@ -497,6 +506,7 @@ export class AbonnementService {
           facture: { ref: str(o.id) ?? evt.id, ...(ht !== undefined ? { htCentimes: ht } : {}), ...(ttc !== undefined ? { ttcCentimes: ttc, ...(ht !== undefined ? { tvaCentimes: ttc - ht } : {}) } : {}) },
           stripe,
         });
+        await this.suivrePromo(companyId, stripe.subscriptionId).catch(() => undefined);
         return { traite: true };
       }
       case "invoice.payment_failed": {
@@ -529,6 +539,27 @@ export class AbonnementService {
       }
       default:
         return { traite: false };
+    }
+  }
+
+  /**
+   * LE CODE « FONDATEUR » (Greg, 14 novembre 2026) : à chaque facture payée, on regarde les coupons de l'abonnement chez
+   * Stripe. Le coupon des 6 mois offerts est là : le code est noté sur l'abonnement (l'admin voit qui l'utilise). Il n'y est
+   * plus et le code avait été utilisé : la remise à vie est posée, une seule fois. Sans Stripe, ou en cas d'erreur : rien.
+   */
+  private async suivrePromo(companyId: string, subscriptionId: string | null): Promise<void> {
+    if (!this.stripe?.couponsDe) return;
+    const a = await this.prisma.abonnement.findUnique({ where: { companyId }, select: { codePromo: true, stripeSubscriptionId: true } });
+    const abo = subscriptionId ?? a?.stripeSubscriptionId ?? null;
+    if (!a || !abo) return;
+    const coupons = await this.stripe.couponsDe(abo);
+    if (coupons.includes(PROMO_FONDATEUR.offert) || coupons.includes(PROMO_FONDATEUR.aVie)) {
+      if (a.codePromo !== PROMO_FONDATEUR.code) await this.prisma.abonnement.update({ where: { companyId }, data: { codePromo: PROMO_FONDATEUR.code } });
+      return;
+    }
+    if (a.codePromo === PROMO_FONDATEUR.code && coupons.length === 0 && this.stripe.appliquerCoupon) {
+      await this.stripe.appliquerCoupon(abo, PROMO_FONDATEUR.aVie);
+      await this.prisma.evenementAbonnement.create({ data: { companyId, type: "promo_a_vie", source: "stripe", refExterne: `promo-a-vie:${abo}` } }).catch(() => undefined);
     }
   }
 

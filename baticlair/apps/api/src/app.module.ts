@@ -13,6 +13,7 @@ import { IdentityModule } from "./modules/identity/index.js";
 import { OffersModule } from "./modules/offers/index.js";
 import { PartnersModule } from "./modules/partners/partners.module.js";
 import { PilotageModule } from "./modules/pilotage/pilotage.module.js";
+import { AdminVueModule } from "./modules/admin-vue/admin-vue.module.js";
 import { RecentrageModule } from "./modules/recentrage/index.js";
 import { AchatGroupeModule } from "./modules/achat-groupe/index.js";
 import { AchatsGroupesV1Module } from "./modules/achats-groupes-v1/index.js";
@@ -66,6 +67,7 @@ import { PushModule } from "./platform/push/push.module.js";
     AdresseMobiizModule,
     GroupeModule,
     PilotageModule,
+    AdminVueModule,
     RecentrageModule,
     AchatGroupeModule,
     AchatsGroupesV1Module,

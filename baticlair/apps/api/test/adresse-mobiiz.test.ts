@@ -227,6 +227,9 @@ describe("l'adresse Mobiiz de l'artisan", () => {
     expect(avis.to).toBe("greg@example.fr");
     expect(avis.subject).toBe("Négoce Dupont t'a répondu par e-mail");
     expect(avis.text).toContain(`/chantiers/${projectId}`);
+    // Greg, 14 novembre 2026 : la réponse est copiée sur sa vraie adresse (le message, le nom des pièces jointes).
+    expect(avis.text).toContain("Son message :\nBonjour, voici notre devis. 1 200 € HT livré.");
+    expect(avis.text).toContain("devis-dupont.pdf");
   });
 
   it("sans étiquette, le repère de l'objet suffit ; sans rien, l'e-mail va dans « Reçus » et se rattache d'un tap", async () => {

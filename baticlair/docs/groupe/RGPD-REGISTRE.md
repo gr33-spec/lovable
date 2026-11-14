@@ -57,3 +57,15 @@ La liste d'exclusion est vérifiée à chaque ajout de négoce par un artisan et
 
 1. **Bons de commande 10 ans** : BATI INVEST n'est ni vendeur ni acheteur ; l'obligation de conservation (Code de commerce, art. L123-22) vaut pour les parties. Garder 10 ans une archive sans nom est prudent ; à valider par l'avocat (sinon : 5 ans, prescription commerciale).
 2. **Rétention chez Resend et Vercel** : à régler dans leurs comptes (journaux ≤ 12 mois).
+
+## Ajouts du 14 novembre 2026 (relus par l'agent juriste le 14 novembre ; à faire valider par l'avocat avec le reste)
+
+- Espace d'administration, vue globale. Personnes : artisans, personnes rattachées au compte, négoces inscrits. Données vues : coordonnées de l'entreprise (nom, prénom, adresse, SIRET, téléphone, e-mail), nom et e-mail de chaque membre, formule, état du paiement, code promo, 12 dernières factures, date d'inscription, 15 dernières connexions (date et heure, sans IP), activité en nombres. Négoces : coordonnées, familles, zone, dernière connexion, demandes reçues, taux de réponse. Le contenu des chantiers n'est pas affiché. Accès : admins seulement, double authentification. Journal (`journal_admin`) : qui, action, cible ou mot cherché, IP, date ; purgé à 12 mois. Base : intérêt légitime.
+- Pesée des intérêts : l'équipe a besoin de ces données pour répondre aux demandes, suivre les paiements et vérifier les négoces ; les personnes sont des professionnels, les données sont celles qu'elles ont données ; pas de contenu de chantier, accès restreint et tracé, droit d'opposition par e-mail. À valider par l'avocat.
+- « Pose ta question » (admin) : le code calcule des chiffres d'ensemble ; ces chiffres et le texte de la question partent chez Anthropic (États-Unis, clauses contractuelles types). Le nom des négoces sans aucune réponse (au moins 2 demandes) en fait partie ; un négoce en nom propre est une personne. Règle d'usage : ne jamais écrire le nom d'une personne dans la question. La question est gardée 12 mois au journal (200 caractères).
+- Assistant des artisans : messages et photos envoyés sans anonymisation à Anthropic ; rien n'est gardé par Mobiiz hors le coût de l'appel (`ai_execution`, durée du compte, utilisateur retiré à 12 mois) ; durée chez Anthropic : celle de son contrat, à relever.
+- Adresse d'alerte : adresse e-mail de l'équipe en base (`parametre_groupe`), changée par double validation, ancienne adresse prévenue. Y arrivent : e-mails de contact@ (avec pièces jointes), signalements, alertes. Le fournisseur de cette boîte est un destinataire : à inscrire dans RGPD-SOUS-TRAITANTS.md avec son pays et sa garantie (décision de Greg).
+- Réponse d'un négoce reçue sur l'adresse Mobiiz d'un artisan : son message (4 000 caractères au plus) et le nom de ses pièces jointes sont copiés dans l'e-mail envoyé à la vraie adresse de l'artisan.
+- Signalements (message, e-mail, capture d'écran) : traitement à inscrire, durée à fixer par Greg, purge à écrire.
+- Sessions (date, IP, navigateur) : durée à vérifier et à inscrire.
+- Taux de réponse des négoces : à faire dire par l'avocat si c'est une évaluation (analyse d'impact, conditions négoces).

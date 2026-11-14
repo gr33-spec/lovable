@@ -8,7 +8,7 @@ import { NOM_APP, nom } from "@/lib/nom";
 export const metadata: Metadata = { title: `Confidentialité — ${NOM_APP}` };
 
 /** La version de cette page (une date, comme les CGU). */
-const VERSION = "26/10/2026";
+const VERSION = "14/11/2026";
 
 /**
  * La politique de confidentialité (RGPD, Greg, 24 octobre 2026) : en tableau, chaque traitement avec ses données, sa base
@@ -83,6 +83,19 @@ const TRAITEMENTS: readonly { finalite: string; donnees: string; base: string; d
     duree: "1 an",
   },
   {
+    // Greg, 14 novembre 2026 : l'espace d'administration (vue globale) et son journal des consultations.
+    finalite: "Le suivi du service par l'équipe (espace d'administration)",
+    donnees: "Ce que l'équipe voit de ton compte : entreprise, prénom, adresse, SIRET, téléphone, e-mail, nom et e-mail de chaque personne du compte, métier, département, formule, état du paiement, code promo, tes 12 dernières factures d'abonnement, date d'inscription, date et heure de tes 15 dernières connexions, nombre de listes, de demandes, d'achats groupés et de négoces dans ton carnet. Pour un négoce : enseigne, raison sociale, e-mail, téléphone, SIRET, familles, départements, dernière connexion, nombre de demandes reçues et part de celles où il a répondu. Dans cet espace, le contenu de tes chantiers (lignes, clients, prix) n'est pas affiché. Chaque liste ou fiche ouverte par l'équipe est notée : qui, quoi, quand, depuis quelle adresse IP",
+    base: "Intérêt légitime (faire fonctionner, sécuriser et améliorer le service)",
+    duree: "Tant que le compte existe ; le journal des consultations : 1 an",
+  },
+  {
+    finalite: "L'assistant (ce que tu écris, dictes ou photographies pour préparer ta liste)",
+    donnees: "Tes messages à l'assistant et les photos que tu lui joins. Ils sont envoyés tels quels à notre prestataire Anthropic (États-Unis) pour préparer la réponse : n'y mets pas le nom, l'adresse ni le téléphone d'un client. Mobiiz ne les enregistre pas : seule la liste que tu valides est enregistrée",
+    base: "Contrat (les CGU)",
+    duree: "Chez Mobiiz : le temps de la réponse. Chez Anthropic : une durée limitée, fixée par son contrat. Le nombre d'appels et leur coût : tant que le compte existe, sans le nom de l'utilisateur après 1 an",
+  },
+  {
     finalite: "La liste d'exclusion (« ne plus jamais être contacté »)",
     donnees: "Empreinte de l'e-mail et du SIRET, jamais en clair",
     base: "Obligation légale (respecter ton opposition)",
@@ -93,7 +106,7 @@ const TRAITEMENTS: readonly { finalite: string; donnees: string; base: string; d
 const SOUS_TRAITANTS: readonly { nom: string; role: string; pays: string; garantie: string }[] = [
   { nom: "Vercel Inc.", role: "Hébergement du site et de l'application", pays: "Serveurs à Francfort (UE) ; société aux États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
   { nom: HEBERGEUR_BASE.nom, role: "Base de données", pays: "Serveurs à Francfort (UE) ; société aux États-Unis", garantie: "Clauses contractuelles types" },
-  { nom: "Anthropic", role: "Lecture des listes et des devis par l'IA (texte anonymisé)", pays: "États-Unis", garantie: "Clauses contractuelles types ; API commerciale : aucune donnée utilisée pour entraîner les modèles" },
+  { nom: "Anthropic", role: "Lecture des listes et des devis (texte anonymisé) ; réponses de l'assistant à tes messages et à tes photos (envoyés tels quels) ; réponses aux questions de l'équipe sur l'activité du service, à partir de chiffres d'ensemble (le nom d'un négoce qui ne répond pas aux demandes peut y figurer)", pays: "États-Unis", garantie: "Clauses contractuelles types ; API commerciale : aucune donnée utilisée pour entraîner les modèles" },
   { nom: "Stripe", role: "Paiement de l'abonnement (carte bancaire, prélèvements, portail client)", pays: "Irlande (UE) ; société mère aux États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
   { nom: "Resend", role: "Envoi des e-mails, et réception des e-mails écrits à contact@mobiiz.fr", pays: "Serveurs en Irlande (UE) ; société aux États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
   { nom: "Cloudflare (Turnstile)", role: "Vérification anti-robots à l'inscription et sur les pages négoce, quand elle est activée (adresse IP et signaux du navigateur, sans cookie publicitaire)", pays: "UE et États-Unis", garantie: "Clauses contractuelles types, Data Privacy Framework" },
@@ -216,7 +229,9 @@ export default function ConfidentialitePage() {
           </li>
           <li>
             <strong>Opposition</strong> : « Ne plus recevoir ces e-mails » en bas de chaque e-mail, en un clic. Un négoce invité peut demander à ne plus jamais être
-            contacté : il est mis sur une liste d&apos;exclusion, respectée même si un autre artisan le rajoute.
+            contacté : il est mis sur une liste d&apos;exclusion, respectée même si un autre artisan le rajoute. Tu peux aussi t&apos;opposer à un traitement
+            fondé sur notre intérêt légitime (par exemple le suivi du service par l&apos;équipe) en écrivant à contact@mobiiz.fr : on te répond dans un délai
+            d&apos;un mois.
           </li>
         </ul>
         <p className={s.p}>

@@ -140,7 +140,7 @@ export function MenuArtisan() {
                 : null}
             </div>
             {admin ? (
-              <Link role="menuitem" href="/admin/pilotage" onClick={() => setOpen(false)} className="pressable mt-3 flex min-h-14 items-center gap-4 rounded-[18px] bg-[#0b0b0c] px-4 text-[16px] font-extrabold text-white">
+              <Link role="menuitem" href="/admin" onClick={() => setOpen(false)} className="pressable mt-3 flex min-h-14 items-center gap-4 rounded-[18px] bg-[#0b0b0c] px-4 text-[16px] font-extrabold text-white">
                 <LayoutGrid size={22} aria-hidden="true" className="shrink-0 text-accent" />
                 <span className="flex-1">Espace administration</span>
                 <ChevronRight size={18} aria-hidden="true" className="shrink-0 text-accent" />

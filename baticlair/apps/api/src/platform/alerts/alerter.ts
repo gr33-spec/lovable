@@ -8,7 +8,7 @@ import { NOM_APP } from "@baticlair/domain";
  * Au plus une alerte par sorte toutes les 10 minutes (une panne ne noie pas la messagerie) ;
  * jamais de donnée de client dans le message (pas de devis, pas de nom de chantier).
  */
-export type AlertKind = "server_error" | "ai_reading_failed" | "client_error" | "commande_commune" | "reprise_echouee" | "stockage";
+export type AlertKind = "server_error" | "ai_reading_failed" | "client_error" | "commande_commune" | "reprise_echouee" | "stockage" | "paiement_refuse" | "negoce_a_verifier";
 
 export interface Alerter {
   readonly enabled: boolean;
@@ -25,6 +25,9 @@ const TITLES: Record<AlertKind, string> = {
   reprise_echouee: "Action abandonnée après 3 essais",
   /** Revue du 26 octobre 2026 : la base approche de la limite du plan Neon. */
   stockage: "Espace de la base",
+  /** Greg, 14 novembre 2026 : un paiement d'abonnement refusé, un négoce inscrit qui attend sa vérification. */
+  paiement_refuse: "Paiement refusé",
+  negoce_a_verifier: "Négoce en attente de vérification",
 };
 
 export const ALERT_QUIET_MS = 10 * 60 * 1000;
@@ -39,10 +42,12 @@ export class ChannelAlerter implements Alerter {
     private readonly logger: AppLogger,
     private readonly fetchImpl: typeof fetch = fetch,
     private readonly now: () => number = () => Date.now(),
+    /** L'adresse réglée dans l'admin (Greg, 14 novembre 2026) ; absente : l'adresse fixe de la configuration. */
+    private readonly adresse: (() => Promise<string | null>) | null = null,
   ) {}
 
   get enabled(): boolean {
-    return Boolean(this.channels.webhookUrl || this.channels.email);
+    return Boolean(this.channels.webhookUrl || this.channels.email || this.adresse);
   }
 
   alert(kind: AlertKind, message: string): void {
@@ -69,7 +74,8 @@ export class ChannelAlerter implements Alerter {
         this.fetchImpl(this.channels.webhookUrl, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, content: text }) }),
       );
     }
-    if (this.channels.email) jobs.push(this.emailSender.send({ to: this.channels.email, subject: text.slice(0, 120), text }));
+    const email = this.adresse ? await this.adresse().catch(() => this.channels.email ?? null) : (this.channels.email ?? null);
+    if (email) jobs.push(this.emailSender.send({ to: email, subject: text.slice(0, 120), text }));
     await Promise.all(jobs);
   }
 }

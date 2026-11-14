@@ -162,13 +162,17 @@ export class ReponsesRecuesService {
     if (destinataire) rattache = await this.devisDepuisPdf(companyId, destinataire.id, email.id);
     const negoce = destinataire?.supplier.name ?? nomExpediteur(from);
     const url = destinataire ? `/chantiers/${destinataire.priceRequest.projectId}#fournisseurs` : "/recus";
+    const copie = (recu.text ?? "").trim().slice(0, 4000);
+    const pieces = email.fichiers.map((f) => f.nom);
     // LA CLOCHE (Greg, 10 novembre 2026) : une alerte courte, une seule par e-mail (un webhook rejoué n'en écrit pas deux).
     await ecrireAlerte(this.prisma, companyId, alertePropositionNegoce({ emailId: email.id, negoce, chantier: null })).catch(() => false);
     await this.notifications
       .prevenir(
         companyId,
         { titre: `${negoce} t'a répondu`, corps: destinataire ? "Sa réponse est sur ton chantier, dans Mobiiz." : "Son e-mail est dans tes reçus, dans Mobiiz.", url, etiquette: `recu-${email.id}` },
-        { objet: `${negoce} t'a répondu par e-mail`, texte: `${negoce} t'a écrit à ton adresse ${NOM_APP} (objet : ${recu.subject || "sans objet"}).\n\n${destinataire ? "Sa réponse est sur ton chantier" : "Son e-mail est dans tes reçus"} : ${this.notifications.lienVers(url)}\n\n${NOM_APP}` },
+        // Greg, 14 novembre 2026 : la réponse du négoce est COPIÉE sur la vraie adresse de l'artisan (son message en entier,
+        // le nom de ses pièces jointes), plus le lien. Avant : seulement « X t'a répondu » et un lien.
+        { objet: `${negoce} t'a répondu par e-mail`, texte: [`${negoce} t'a écrit à ton adresse ${NOM_APP} (objet : ${recu.subject || "sans objet"}).`, "", ...(copie ? ["Son message :", copie, ""] : []), ...(pieces.length ? [`Pièce${pieces.length > 1 ? "s" : ""} jointe${pieces.length > 1 ? "s" : ""} (à ouvrir dans ${NOM_APP}) : ${pieces.join(", ")}`, ""] : []), `${destinataire ? "Sa réponse est sur ton chantier" : "Son e-mail est dans tes reçus"} : ${this.notifications.lienVers(url)}`, "", NOM_APP].join("\n") },
       )
       .catch((err: unknown) => this.logger.warn({ err }, "adresse mobiiz: artisan non prévenu"));
     this.logger.info({ adresse: cible.adresse, rattache }, "adresse mobiiz: e-mail reçu");

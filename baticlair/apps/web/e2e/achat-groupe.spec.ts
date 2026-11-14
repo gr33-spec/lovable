@@ -519,6 +519,76 @@ test.describe("Lot 6 : la supervision de l'admin", () => {
   // Greg, 13 novembre 2026 (« cœur métier ») : les outils de l'admin du catalogue.
   // Greg, 13 novembre 2026 : « Liste des signalements dans l'espace admin (statut : nouveau, en cours, corrigé) » ; rien
   // n'est corrigé sans son accord, puis « C'est corrigé, merci » part à l'utilisateur.
+  test("espace admin, vue globale (Greg, 14 novembre 2026) : six cartes qui mènent aux listes, la fiche sur une page, « Pose ta question », l'adresse d'alerte à double validation", async ({ browser }, info) => {
+    test.setTimeout(180_000);
+    const dossier = process.env.CAPTURES_ADMIN;
+    const capture = async (page: Page, nom: string) => {
+      if (dossier) await page.screenshot({ path: path.join(dossier, `${info.project.name}-${nom}.png`), fullPage: true });
+    };
+    const artisan = await nouvelArtisan(browser, departementReserve([80, 84], [85, 89]), "Yann");
+    await artisan.ctx.close();
+    const { ctx, page } = await admin(browser, "/admin");
+    await expect(page.getByRole("heading", { name: "Espace admin", level: 1 })).toBeVisible();
+    // L'accueil : six grosses cartes, chacune mène à sa liste.
+    const cartes = page.getByRole("list", { name: "Chiffres clés" });
+    await expect(cartes.getByRole("listitem")).toHaveCount(6);
+    for (const titre of ["Inscrits", "Abonnés payants", "En Découverte", "Revenus du mois", "Inscriptions de la semaine", "Négoces inscrits"]) await expect(cartes.getByText(titre, { exact: true })).toBeVisible();
+    await expect(cartes.getByText(/par rapport à/).first()).toBeVisible();
+    await capture(page, "admin-1-accueil");
+    // 1er clic : la liste. Une seule barre de recherche, des filtres simples.
+    await cartes.getByRole("link", { name: /^Inscrits/ }).click();
+    await expect(page).toHaveURL(/\/admin\/artisans$/);
+    await expect(page.getByRole("searchbox")).toHaveCount(1);
+    await page.getByRole("searchbox", { name: "Rechercher un artisan" }).fill(artisan.entreprise);
+    const lignes = page.getByRole("list", { name: "Artisans" });
+    await expect(lignes.getByRole("listitem")).toHaveCount(1);
+    await expect(lignes).toContainText("Découverte");
+    await expect(lignes).toContainText("Couverture");
+    await expect(lignes).toContainText(/Inscrit le .* Dernière connexion/);
+    await capture(page, "admin-2-artisans");
+    // 2e clic : la fiche, tout sur une page ; l'activité en nombres, jamais le contenu d'un chantier.
+    await lignes.getByRole("link").click();
+    await expect(page.getByRole("heading", { name: artisan.entreprise, level: 1 })).toBeVisible();
+    for (const bloc of ["Infos", "Abonnement", "Activité", "Historique de connexions"]) await expect(page.getByRole("heading", { name: bloc, exact: true })).toBeVisible();
+    await expect(page.getByText("Le contenu des chantiers ne s'affiche pas ici.")).toBeVisible();
+    await capture(page, "admin-3-fiche");
+    // Les négoces.
+    await page.goto("/admin/negoces");
+    await expect(page.getByRole("heading", { name: "Négoces", level: 1 })).toBeVisible();
+    await expect(page.getByRole("searchbox", { name: "Rechercher un négoce" })).toBeVisible();
+    await expect(page.getByRole("group", { name: "Filtrer par vérification" }).getByRole("button", { name: "À vérifier" })).toBeVisible();
+    // « Pose ta question » : la même conversation que l'assistant des artisans ; des chiffres, en lecture seule.
+    await page.goto("/admin/question");
+    const chat = page.getByRole("dialog", { name: "Pose ta question" });
+    await chat.getByRole("button", { name: "Combien d'inscrits ce mois ?" }).click();
+    await expect(chat.getByText(/inscriptions? ce mois/)).toBeVisible();
+    await chat.getByRole("button", { name: /Terminé/ }).click();
+    await expect(chat.getByRole("list", { name: "Ce que Mobiiz a fait" })).toContainText("Aucun détail de chantier");
+    await capture(page, "admin-4-question");
+    await chat.getByRole("button", { name: "Fermer l'assistant" }).click();
+    // Les réglages : l'adresse d'alerte ne change qu'après le clic du lien reçu sur la nouvelle adresse.
+    await page.goto("/admin/reglages");
+    await expect(page.getByRole("heading", { name: "Adresse d'alerte" })).toBeVisible();
+    await page.getByLabel("Nouvelle adresse").fill(ADMIN);
+    await page.getByRole("button", { name: "Envoyer l'e-mail de confirmation" }).click();
+    await expect(page.getByText(`Un e-mail de confirmation est parti vers ${ADMIN}.`, { exact: false })).toBeVisible();
+    await expect(page.getByText(`En attente de confirmation : ${ADMIN}.`, { exact: false })).toBeVisible();
+    await capture(page, "admin-5-reglages");
+    const mail = (await emailsVers(page, ADMIN)).filter((m) => m.subject === "Mobiiz : confirme ta nouvelle adresse d'alerte").at(-1)!;
+    const lien = /(\/admin\/alerte\/confirmer\?jeton=[A-Za-z0-9_-]+)/.exec(mail.text)![1]!;
+    await page.goto(lien);
+    await expect(page.getByText("C'est fait : les alertes de Mobiiz partent maintenant vers")).toBeVisible();
+    await page.goto(lien);
+    await expect(page.getByText("Ce lien ne marche plus")).toBeVisible();
+    await page.goto("/admin/reglages");
+    await expect(page.getByText("En attente de confirmation")).toHaveCount(0);
+    // Les codes promo : « FONDATEUR » et qui l'utilise.
+    await page.goto("/admin/promos");
+    await expect(page.getByRole("heading", { name: "FONDATEUR" })).toBeVisible();
+    await expect(page.getByText("6 mois offerts, puis 30 % de remise à vie.", { exact: false })).toBeVisible();
+    await ctx.close();
+  });
+
   test("signalements : la liste par statut, la capture jointe, le résumé du réparateur, « Valider la correction », puis « Marquer corrigé »", async ({ browser }) => {
     test.setTimeout(120_000);
     const { ctx, page } = await admin(browser, "/admin/signalements");
