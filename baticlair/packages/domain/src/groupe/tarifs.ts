@@ -53,6 +53,13 @@ export function formuleDuCompte(abonnement: { actif: boolean; formule: string | 
   return abonnement.formule === "pro" ? "pro" : "essentiel";
 }
 
+/** À l'année, dix mois facturés pour douze (Greg, 13 novembre 2026) : la même règle que `abonnement.ts`. */
+export const MOIS_FACTURES_A_L_ANNEE = 10;
+/** « 199 € HT par an » : le prix d'une offre payée à l'année. */
+export function prixAnnuelDeLOffre(o: Offre): string {
+  return `${(o.prixHt * MOIS_FACTURES_A_L_ANNEE).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} € HT par an`;
+}
+
 /** « 19,90 € HT par mois » ; « Gratuit » pour Découverte. */
 export function prixDeLOffre(o: Offre): string {
   if (o.prixHt === 0) return "Gratuit";
@@ -135,6 +142,11 @@ export const TARIFS = {
   },
   essentiel: { titre: E.nom, sous: prixDeLOffre(E), points: pointsPayants(E) },
   pro: { titre: P.nom, sous: prixDeLOffre(P), points: pointsPayants(P) },
+  /** Recette du 13 novembre 2026 (G1) : l'année se dit sur la page Tarifs comme dans « Mon abonnement ». */
+  annee: {
+    q: "Et si je paie à l'année ?",
+    r: `Deux mois offerts : tu paies dix mois pour douze. ${E.nom} : ${prixAnnuelDeLOffre(E)} ; ${P.nom} : ${prixAnnuelDeLOffre(P)}. Payé en une fois, renouvelé chaque année ; tu peux arrêter le renouvellement quand tu veux, l'année payée reste acquise.`,
+  },
   /** « C'est gratuit ? » : la réponse de la landing. */
   question: {
     q: "C'est gratuit ?",

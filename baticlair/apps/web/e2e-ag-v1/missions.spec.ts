@@ -396,7 +396,7 @@ test("page publique, missions ouvertes : la section « Missions » à part enti�
   await expect(section.getByText("Métier, lieu, dates et conditions indicatives.")).toBeVisible();
   await expect(section.getByText("Secteur, disponibilités, profil professionnel et tarif HT/jour indicatif.")).toBeVisible();
   await expect(section.getByText("Les échanges restent liés à une mission. Les coordonnées ne sont partagées qu’après l’accord des deux entreprises.")).toBeVisible();
-  await expect(section.getByRole("link", { name: "Découvrir les missions" })).toHaveAttribute("href", "/inscription");
+  await expect(section.getByRole("link", { name: "Créer mon compte", exact: true })).toHaveAttribute("href", "/inscription");
   // Deux vrais écrans de l'app, chargés, dans le cadre sans marque ; l'exemple est dit.
   const ecrans = section.locator(".mz2-tel img");
   await expect(ecrans).toHaveCount(2);

@@ -87,7 +87,8 @@ export function rejointLeRegroupement(
 }
 
 const arrondi = (n: number, pas: number) => Math.round(n / pas) * pas;
-const centimes = (n: number) => Math.round(n * 100) / 100;
+// Recette du 13 novembre 2026 (G7) : 7 × 1,275 fait 8,93 et non 8,92 (le calcul binaire donnait 8,9249999).
+const centimes = (n: number) => Math.round(Number((n * 100).toPrecision(12))) / 100;
 
 /** Le prix affiché à l'artisan : prix négocié + commission Mobiiz, au centime (4 décimales sous 1 €). */
 export function prixAffiche(prixNegocieHt: number, commissionPct: number): number {

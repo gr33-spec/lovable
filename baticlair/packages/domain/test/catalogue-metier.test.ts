@@ -9,6 +9,18 @@ const chercher = (q: string, max = 8) => rechercherAvecPrecisions(TOUT_LE_CATALO
 const noms = (q: string, max = 8) => chercher(q, max).map((t) => t.article.designation);
 
 describe("le moteur de recherche métier", () => {
+  it("recette du 13 novembre 2026 (G23) : un conditionnement en trop ne vide plus la recherche ; la bonne contenance passe devant, une autre garde « 15L » en précision", () => {
+    const r = chercher("peinture facade 15L", 30);
+    expect(r[0]).toMatchObject({ article: { designation: "Peinture façade acrylique mat blanc · 15 L" }, precisions: [] });
+    // Les « 15 L » d'abord, sans précision ; une autre contenance garde « 15L » à côté, jamais remplacé.
+    const autre = r.find((t) => t.article.designation.endsWith("10 L"));
+    expect(autre?.precisions).toEqual(["15L"]);
+    expect(r.indexOf(autre!)).toBeGreaterThan(r.findLastIndex((t) => t.article.designation.endsWith("15 L")));
+    // Une dimension reste exacte : jamais une section à la place d'une autre.
+    expect(noms("liteau 18x40 15L")).toEqual(["Liteau 18×40 · sapin traité classe 2"]);
+    expect(noms("liteau 18x50 15L")).not.toContain("Liteau 18×40 · sapin traité classe 2");
+  });
+
   it("les dimensions s'écrivent de toutes les façons", () => {
     for (const q of ["liteau 18x40", "liteau 18 x 40", "liteau 18/40", "liteau 18*40", "liteau 18×40", "liteau 18 40", "18 40"]) expect(requeteAPlat(q).split(" ")).toContain("18x40");
   });

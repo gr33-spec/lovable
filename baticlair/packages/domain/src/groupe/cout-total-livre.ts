@@ -37,7 +37,8 @@ const norme = (s: string) =>
     .replace(/\s+/g, " ")
     .trim();
 const uniteNorme = (u: string) => (norme(u) === "ml" ? "m" : norme(u));
-const arrondi2 = (n: number) => Math.round(n * 100) / 100;
+// Recette du 13 novembre 2026 (G7) : 7 × 1,275 fait 8,93 et non 8,92 (le calcul binaire donnait 8,9249999).
+const arrondi2 = (n: number) => Math.round(Number((n * 100).toPrecision(12))) / 100;
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/[\u202f\u00a0]/g, " ")} €`;
 
 /** Le total d'une offre individuelle pour ces lignes (prix × quantité du groupe, plus SA livraison entière). */

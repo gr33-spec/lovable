@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OFFRES } from "../groupe/tarifs.js";
+import { MOIS_FACTURES_A_L_ANNEE, OFFRES } from "../groupe/tarifs.js";
 
 /**
  * RÈGLE CHANGÉE (Greg, 30 octobre 2026, réponses aux six décisions) : DEUX FORMULES MENSUELLES, sans engagement, ESSENTIEL
@@ -67,7 +67,7 @@ export const estPeriodicite = (v: unknown): v is Periodicite => v === "mensuel" 
 /** La périodicité d'un abonnement enregistré : « annuel », sinon mensuel (tout ce qui existait avant). */
 export const periodiciteDe = (v: unknown): Periodicite => (v === "annuel" ? "annuel" : "mensuel");
 /** Le nombre de mois facturés pour une année de service. */
-export const MOIS_FACTURES_PAR_AN = 10;
+export const MOIS_FACTURES_PAR_AN = MOIS_FACTURES_A_L_ANNEE;
 
 /** Le prix HT d'une ANNÉE de la formule, en centimes : dix mois. */
 export const prixAnnuelDeFormule = (f: Formule, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => prixDeFormule(f, r) * MOIS_FACTURES_PAR_AN;

@@ -91,6 +91,8 @@ function lignesDe(t: Takeoff): LigneAssistant[] {
   return [...t.purchase.toBuy.map((b) => ({ cle: b.key, libelle: b.label })), ...t.purchase.toQuote.map((q) => ({ cle: q.key, libelle: q.label }))];
 }
 
+const PAS_DE_RESEAU = "Pas de réseau : ton message reste dans la case. Renvoie-le dès que le réseau revient.";
+
 export function AssistantMobiiz({
   takeoff,
   projectId,
@@ -330,6 +332,11 @@ export function AssistantMobiiz({
       const propre = texte.trim();
       if (!propre || occupe) return;
       dictee.arreter();
+      // Recette du 13 novembre 2026 (G21) : sans réseau, on le dit et la case garde ce qui est écrit ; rien n'est répondu à l'aveugle.
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        setMessages((m) => (m.at(-1)?.texte === PAS_DE_RESEAU ? m : [...m, { de: "mobiiz", texte: PAS_DE_RESEAU }]));
+        return;
+      }
       setSaisie("");
       setMessages((m) => [...m, { de: "moi", texte: propre }]);
       const premiere = questions[0] ?? null;

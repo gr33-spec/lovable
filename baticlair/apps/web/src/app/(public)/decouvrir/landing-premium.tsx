@@ -259,7 +259,7 @@ export function LandingPremium() {
                 </a>
               </div>
               <p className="under-cta">
-                {CTA_PRINCIPAL.sous} · <Link href="/tarifs">Voir les conditions</Link>
+                {CTA_PRINCIPAL.sous} · <Link href="/tarifs">Voir les tarifs</Link>
               </p>
             </div>
             {/* Le visuel d'ouverture (Greg, 11 novembre 2026) : sa photo de référence (matériaux, téléphone, feuille), où l'écran du
@@ -383,7 +383,7 @@ export function LandingPremium() {
                   <span>Les échanges restent liés à une mission. Les coordonnées ne sont partagées qu’après l’accord des deux entreprises.</span>
                 </p>
                 <Link id="missionsCTA" className="btn btn-yellow" href="/inscription">
-                  Découvrir les missions <Icone id="i-arrow" className="arrow" />
+                  Créer mon compte <Icone id="i-arrow" className="arrow" />
                 </Link>
               </div>
               <div className="mz2-ms-visuel">

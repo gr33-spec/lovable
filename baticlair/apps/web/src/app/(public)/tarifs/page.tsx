@@ -27,6 +27,10 @@ const ETAPES = [
 const FAQ = [
   { q: "Qu'est-ce qui est gratuit ?", r: TARIFS.question.r },
   { q: "Qu'est-ce qui est payant ?", r: "Seulement l'aide à la lecture au-delà des crédits offerts : les analyses de devis et les scans de liste chaque mois, avec Essentiel ou Pro. Rien n'est jamais facturé au-delà d'un quota : tu notes ta liste à la main, c'est gratuit." },
+  // Recette du 13 novembre 2026 (G1) : l'année (deux mois offerts), aux prix du domaine.
+  TARIFS.annee,
+  // G8 : « Mes prix » en Découverte ne garde que trois mois, la page Tarifs le dit.
+  { q: "Je retrouve mes anciens prix ?", r: "Oui, dans « Mes prix ». En Découverte, tu vois les prix reçus sur les trois derniers mois ; avec Essentiel ou Pro, tu vois tout ton historique." },
   { q: "Un gros devis compte double ?", r: "Un devis de plus de 150 lignes compte pour 2 analyses. Tu le vois avant que l'analyse parte." },
   { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin du mois payé, puis rien n'est plus prélevé." },
   { q: "Est-ce que j'ai des factures ?", r: "Oui, une à chaque paiement, émise par BATI INVEST, avec la TVA. Elles sont toutes dans « Mes factures »." },

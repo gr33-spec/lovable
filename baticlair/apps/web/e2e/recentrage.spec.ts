@@ -221,12 +221,27 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const npage = await nctx.newPage();
     await npage.goto(`/chiffrer/${jetonDe(mailA.text)}`);
     await expect(npage.getByRole("heading", { name: "Demande de prix avant commande" })).toBeVisible();
+    // Recette du 13 novembre 2026 (G11) : « abc » ou « -5 » ne partent pas ; la ligne est nommée, jamais « NaN ».
+    await npage.getByLabel(`Prix unitaire HT de ${ARDOISE}`).fill("abc");
+    await expect(npage.getByText(/NaN/)).toHaveCount(0);
+    await npage.getByRole("button", { name: "Envoyer mon offre" }).click();
+    await expect(npage.getByRole("alert").filter({ hasText: `Le prix de « ${ARDOISE} » doit être un nombre plus grand que 0.` })).toBeVisible();
+    await npage.getByLabel(`Prix unitaire HT de ${ARDOISE}`).fill("-5");
+    await npage.getByRole("button", { name: "Envoyer mon offre" }).click();
+    await expect(npage.getByRole("alert").filter({ hasText: "doit être un nombre plus grand que 0" })).toBeVisible();
+    await expect(npage.getByText(/NaN/)).toHaveCount(0);
     await npage.getByLabel(`Prix unitaire HT de ${ARDOISE}`).fill("1,10");
     await npage.getByLabel(/^Prix unitaire HT de Liteau/).fill("0,50");
     await npage.getByLabel("Livraison HT (€)").fill("80");
     await npage.getByLabel("Délai (jours)").fill("3");
     await npage.getByRole("button", { name: "Envoyer mon offre" }).click();
     await expect(npage.getByText(/^Votre offre est envoyée, valable jusqu'au/)).toBeVisible();
+    // G12 : après l'envoi, le négoce relit son total, sa livraison et son délai.
+    const recap = npage.getByLabel("Votre offre", { exact: true });
+    await expect(recap).toContainText("Livraison HT");
+    await expect(recap).toContainText("80,00 €");
+    await expect(recap).toContainText("Total livré HT");
+    await expect(recap).toContainText("3 jours");
     // Première réponse sans compte : l'invitation à créer son compte négoce.
     await expect(npage.getByRole("link", { name: "Créer mon compte négoce" })).toBeVisible();
 

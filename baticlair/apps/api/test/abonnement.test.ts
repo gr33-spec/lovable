@@ -163,6 +163,9 @@ describe("le paiement simulé", () => {
     const r = (await A.agent.post(`/v1/abonnement/resilier?${q("2026-11-01T08:00:00.000Z")}`).expect(200)).body;
     expect(r).toMatchObject({ acces: "abonne", resiliationProgrammee: true });
     expect(mailsVers(ctx, "a@toitures.fr").map((m) => m.subject)).toContain("Ta résiliation Mobiiz est enregistrée");
+    // Recette du 13 novembre 2026 (G5) : résilier une seconde fois ne renvoie pas le même e-mail.
+    await A.agent.post(`/v1/abonnement/resilier?${q("2026-11-02T08:00:00.000Z")}`).expect(200);
+    expect(mailsVers(ctx, "a@toitures.fr").filter((m) => m.subject === "Ta résiliation Mobiiz est enregistrée")).toHaveLength(1);
     await tacheAbonnement("2026-11-24T09:00:00.000Z");
     expect(await ctx.prisma.factureAbonnement.count()).toBe(1);
     expect((await A.agent.get(`/v1/abonnement?${q("2026-11-24T10:00:00.000Z")}`).expect(200)).body).toMatchObject({ acces: "bloque", statut: "resilie" });

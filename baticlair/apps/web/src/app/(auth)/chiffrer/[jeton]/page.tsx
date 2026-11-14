@@ -93,6 +93,19 @@ export default function ChiffrerPage() {
     const v = lireNombre(validite) ?? 0;
     if (v < page.validiteMin)
       return setErreur(`Validité de ${page.validiteMin} jours au moins.`);
+    // Recette du 13 novembre 2026 (G11) : « abc » ou « -5 » ne partent pas, et se disent en clair, ligne nommée.
+    const faux = page.lignes.find((l) => {
+      const n = lireNombre(prix[l.cle] ?? "");
+      return n != null && !(Number.isFinite(n) && n > 0);
+    });
+    if (faux)
+      return setErreur(`Le prix de « ${faux.designation} » doit être un nombre plus grand que 0. Laissez la case vide si vous ne fournissez pas cet article.`);
+    for (const [nom, saisi] of [["La livraison", livraison], ["Le délai", delai], ["Le minimum de commande", minimum]] as const) {
+      const n = lireNombre(saisi);
+      if (n != null && !(Number.isFinite(n) && n >= 0))
+        return setErreur(`${nom} doit être un nombre, 0 ou plus.`);
+    }
+    if (!Number.isFinite(v)) return setErreur(`Validité de ${page.validiteMin} jours au moins.`);
     const corps = Object.fromEntries(
       Object.entries(prix)
         .map(([k, s]) => [k, lireNombre(s)])
@@ -160,11 +173,20 @@ export default function ChiffrerPage() {
   if (!page)
     return <Skeleton card="h-72" lines={4} label="Chargement de la demande…" />;
 
+  const fini = (s: string) => {
+    const n = lireNombre(s);
+    return n != null && Number.isFinite(n) && n > 0 ? n : 0;
+  };
   const total =
-    page.lignes.reduce(
-      (s, l) => s + (lireNombre(prix[l.cle] ?? "") ?? 0) * l.quantite,
-      0,
-    ) + (lireNombre(livraison) ?? 0);
+    page.lignes.reduce((s, l) => s + fini(prix[l.cle] ?? "") * l.quantite, 0) +
+    fini(livraison);
+  // Recette du 13 novembre 2026 (G12) : après l'envoi, le négoce relit ce qu'il a envoyé (total, livraison, délai).
+  const envoye = page.reponse
+    ? {
+        articles: page.lignes.reduce((s, l) => s + (page.reponse!.prix[l.cle] ?? 0) * l.quantite, 0),
+        chiffres: page.lignes.filter((l) => page.reponse!.prix[l.cle] != null).length,
+      }
+    : null;
   const formulaire =
     (page.etat === "a_chiffrer" || page.etat === "refuse" || modifier) &&
     !page.close;
@@ -345,6 +367,20 @@ export default function ChiffrerPage() {
             Votre offre est envoyée, valable jusqu&apos;au{" "}
             {jourFr(page.reponse.valideJusquau)}.
           </p>
+          {envoye ? (
+            <dl aria-label="Votre offre" className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-[15px]">
+              <dt className="text-muted">Articles chiffrés</dt>
+              <dd className="text-right font-semibold">{envoye.chiffres} sur {page.lignes.length}</dd>
+              <dt className="text-muted">Articles HT</dt>
+              <dd className="text-right font-semibold">{euros(envoye.articles)}</dd>
+              <dt className="text-muted">Livraison HT</dt>
+              <dd className="text-right font-semibold">{euros(page.reponse.livraisonHt)}</dd>
+              <dt className="font-bold">Total livré HT</dt>
+              <dd className="text-right font-bold">{euros(envoye.articles + page.reponse.livraisonHt)}</dd>
+              <dt className="text-muted">Délai</dt>
+              <dd className="text-right font-semibold">{page.reponse.delaiJours != null ? `${page.reponse.delaiJours} jour${page.reponse.delaiJours > 1 ? "s" : ""}` : "Non précisé"}</dd>
+            </dl>
+          ) : null}
           {!page.close ? (
             <Button variant="secondary" onClick={() => setModifier(true)}>
               Modifier mon offre

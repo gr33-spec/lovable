@@ -72,4 +72,12 @@ describe("abonnement annuel : dix mois facturés pour douze", () => {
     expect(m.texte).toContain("399 € HT (478,80 € TTC) pour un an");
     expect(m.texte).toContain("résilie avant cette date");
   });
+
+  it("recette du 13 novembre 2026 (G1) : la page Tarifs dit les mêmes prix à l'année que « Mon abonnement »", async () => {
+    const { TARIFS, MOIS_FACTURES_A_L_ANNEE } = await import("../src/groupe/tarifs.js");
+    const { offresAbonnement, MOIS_FACTURES_PAR_AN } = await import("../src/abonnement/abonnement.js");
+    expect(MOIS_FACTURES_PAR_AN).toBe(MOIS_FACTURES_A_L_ANNEE);
+    for (const o of offresAbonnement()) expect(TARIFS.annee.r.replace(/\s/g, " ")).toContain(`${o.titre} : ${o.annuel.prix}`.replace(/\s/g, " "));
+    expect(TARIFS.annee.r).toContain("Deux mois offerts");
+  });
 });

@@ -343,6 +343,9 @@ export function scoreArticle(a: Pick<ArticleCatalogue, "designation" | "famille"
  */
 export const requeteAPlat = (q: string) => aPlat(q.replace(/(\d)\s*[/x×*]\s*(\d)/gi, "$1x$2")).replace(/\b(\d{1,3}) (\d{2,3})\b/g, "$1x$2");
 
+/** Un conditionnement écrit en un mot : « 15l », « 2,5l », « 25kg ». */
+const CONDITIONNEMENT = /^\d+(?:[.,]\d+)?(?:l|cl|kg|g)$/;
+
 /** Un article trouvé, avec les mots de l'artisan qui le précisent sans être au catalogue (« rouge » pour « H14 rouge »). */
 export interface Trouvaille<T> {
   article: T;
@@ -366,13 +369,28 @@ export function rechercherAvecPrecisions<T extends Pick<ArticleCatalogue, "desig
   const tapes = requeteAPlat(q).split(" ").filter(Boolean);
   if (!tapes.length) return [];
   const originaux = new Map(q.split(/\s+/).filter(Boolean).map((w) => [aPlat(w), w] as const));
-  const trouves: (Trouvaille<T> & { i: number })[] = [];
-  articles.forEach((a, i) => {
+  let trouves = chercher(false);
+  // Recette du 13 novembre 2026 (G23) : « peinture façade 15L » ne rendait plus rien quand aucun article ne porte « 15L ».
+  // Seulement quand la recherche stricte est vide, un conditionnement (15L, 25kg) devient une précision gardée telle
+  // qu'écrite : l'article sort, « 15L » reste à côté, jamais remplacé par une autre contenance.
+  if (!trouves.length && tapes.some((t) => CONDITIONNEMENT.test(t))) trouves = chercher(true);
+  function chercher(souple: boolean): (Trouvaille<T> & { i: number })[] {
+   const trouves: (Trouvaille<T> & { i: number })[] = [];
+   articles.forEach((a, i) => {
     const { duProduit, tout } = motsDeLArticle(a);
     let score = 0;
     let designants = 0;
     const precisions: string[] = [];
     for (const t of tapes) {
+      // « 15l » tapé collé : l'article qui porte « 15 L » est le bon, il passe devant et « 15L » n'est plus une précision.
+      if (souple && CONDITIONNEMENT.test(t)) {
+        if (` ${aPlat(a.designation)} `.includes(` ${t.replace(/^([\d.]+)/, "$1 ")} `)) score += 6;
+        else {
+          precisions.push(originaux.get(t) ?? t);
+          score -= 0.5;
+        }
+        continue;
+      }
       const precision = PRECISIONS.has(forme(t));
       const r = rencontre(t, tout);
       // Un mot qui précise ne compte que s'il est écrit tel quel (« pro » ne choisit pas « plafond profond »).
@@ -387,7 +405,9 @@ export function rechercherAvecPrecisions<T extends Pick<ArticleCatalogue, "desig
     if (designants === 0) return;
     score += rencontre(tapes[0]!, duProduit.slice(0, 1));
     trouves.push({ article: a, precisions, score, i });
-  });
+   });
+   return trouves;
+  }
   return trouves
     // À score égal : moins de précisions laissées, puis un article sourcé (référentiel, fabricant), puis l'ordre du catalogue.
     .sort(

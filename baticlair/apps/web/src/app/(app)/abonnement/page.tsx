@@ -125,6 +125,26 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
             <Button onClick={() => void run("payer", a.paiement === "stripe" ? async () => window.location.assign((await api<{ url: string }>("/v1/abonnement/portail", { method: "POST" })).url) : () => continuerAbonnement(a.formule))} pending={pending === "payer"} className="self-start">
               Mettre à jour ma carte
             </Button>
+            {/* Recette du 13 novembre 2026 (G4) : on peut résilier même quand le paiement est refusé, et l'écran le dit. */}
+            {a.resiliationProgrammee || a.statut === "resilie" ? (
+              <p className="text-[16px] font-semibold">Résiliation enregistrée : rien ne sera plus prélevé.</p>
+            ) : !confirmer ? (
+              <button type="button" onClick={() => setConfirmer(true)} className="min-h-11 self-start text-[15px] font-semibold text-muted underline">
+                Résilier
+              </button>
+            ) : (
+              <div className="flex flex-col gap-3 rounded-xl bg-ground p-4">
+                <p className="text-[15px]">Résilier ? Rien ne sera plus prélevé.</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="ink" onClick={() => void run("resilier", () => api<Abonnement>("/v1/abonnement/resilier", { method: "POST" }))} pending={pending === "resilier"}>
+                    Oui, résilier
+                  </Button>
+                  <Button variant="secondary" onClick={() => setConfirmer(false)}>
+                    Garder mon abonnement
+                  </Button>
+                </div>
+              </div>
+            )}
           </>
         ) : null}
         {a.acces === "abonne" ? (
@@ -132,7 +152,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
             <p className="text-[20px] font-extrabold">{a.formule === "pro" ? "Abonné Pro" : "Abonné Essentiel"}</p>
             <p className="text-[16px]">{a.periodicite === "annuel" ? `${a.prixHt} HT par an (${a.prixTtc} TTC), payés en une fois pour douze mois.` : `${a.prixHt} HT par mois (${a.prixTtc} TTC), sans engagement.`}</p>
             {a.resiliationProgrammee || a.statut === "resilie" ? (
-              <p className="text-[16px] font-semibold">Résilié : ton accès reste jusqu&apos;au {date(a.periodeFin)}. Rien ne sera plus prélevé.</p>
+              <p className="text-[16px] font-semibold">Résilié : ton accès reste jusqu&apos;au {date(a.periodeFin)}. Rien ne sera plus prélevé. Pour reprendre un abonnement, reviens ici après cette date et choisis ta formule.</p>
             ) : (
               <>
                 <p className="text-[16px] text-muted">
@@ -160,6 +180,10 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
                     )}
                   </div>
                 ) : null}
+                {/* G3 : changer de formule ou de rythme (mois, année) se fait à la fin de la période payée ; on le dit. */}
+                <p className="text-[15px] text-muted">
+                  {a.formule === "pro" ? "Pour revenir à Essentiel" : "Pour changer de formule"} ou changer de rythme (au mois, à l&apos;année) : résilie, garde ton accès jusqu&apos;au {date(a.periodeFin)}, puis choisis ta nouvelle formule ici.
+                </p>
                 {a.paiement === "stripe" ? (
                   <Button variant="secondary" onClick={() => void run("portail", async () => window.location.assign((await api<{ url: string }>("/v1/abonnement/portail", { method: "POST" })).url))} className="self-start">
                     Changer de carte

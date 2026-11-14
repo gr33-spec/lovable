@@ -789,7 +789,8 @@ export function manquesOffreV1(o: OffreV1): string[] {
   }).map(([, l]) => l);
 }
 
-const centimes = (n: number) => Math.round(n * 100) / 100;
+// Recette du 13 novembre 2026 (G7) : 7 × 1,275 fait 8,93 et non 8,92 (le calcul binaire donnait 8,9249999).
+const centimes = (n: number) => Math.round(Number((n * 100).toPrecision(12))) / 100;
 export const euros = (n: number) => `${nf(centimes(n), 2)} €`;
 
 /** Le détail calculé pour UNE entreprise (sa quantité) : 4 800 × 0,98 € = 4 704,00 € + 45,00 € = 4 749,00 € HT. */
@@ -806,7 +807,8 @@ export function calculOffreV1(quantite: number, o: Pick<OffreV1, "prixUnitaireHt
     tva,
     ttc,
     lignes: [
-      `${nf(quantite)} × ${euros(prix)} = ${euros(produits)}`,
+      // Le prix unitaire s'écrit avec ses décimales (0,335 €), sinon « 3 × 0,34 = 1,01 » ne tombe pas juste.
+      `${nf(quantite)} × ${nf(prix, 2)} € = ${euros(produits)}`,
       `${euros(produits)} + ${euros(livraison)} = ${euros(ht)} HT`,
       `TVA ${nf(o.tvaPct)} % ${euros(tva)}`,
       `${euros(ttc)} TTC`,

@@ -115,6 +115,26 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
  * la panne : le code support, ou le numéro d'erreur quand le serveur n'a rien répondu de lisible. `vous` : les pages des
  * négoces (vouvoiement) ne disent que leur propre texte et le code.
  */
+/** Recette du 13 novembre 2026 (G24) : le nom d'un champ refusé se dit en français, jamais « siret » ou « postalCode ». */
+const CHAMPS: Record<string, string> = {
+  siret: "le SIRET (14 chiffres)",
+  email: "l'adresse e-mail",
+  phone: "le numéro de téléphone",
+  telephone: "le numéro de téléphone",
+  portable: "le numéro de portable",
+  postalCode: "le code postal",
+  codePostal: "le code postal",
+  city: "la ville",
+  ville: "la ville",
+  name: "le nom",
+  nom: "le nom",
+  prenom: "le prénom",
+  password: "le mot de passe",
+  quantity: "la quantité",
+  quantite: "la quantité",
+};
+const nomDuChamp = (chemin: string) => CHAMPS[chemin.split(".").pop() ?? chemin] ?? chemin;
+
 export function messageErreur(e: unknown, precis: Record<string, string> = {}, o: { vous?: boolean } = {}): string {
   const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
   if (err.reason && precis[err.reason]) return precis[err.reason]!;
@@ -128,11 +148,11 @@ export function messageErreur(e: unknown, precis: Record<string, string> = {}, o
     if (err.status === 429) return "Trop d'essais en peu de temps : attendez quelques minutes, puis réessayez.";
     if (err.status >= 500) return `Un problème est survenu de notre côté ; vos saisies sont gardées, réessayez dans un instant.${trace}`;
     const champ = err.details?.[0]?.path;
-    return `Cette demande n'est pas acceptée${err.reason ? ` (motif : ${err.reason})` : champ ? ` (champ à vérifier : ${champ})` : ""}.${trace}`;
+    return `Cette demande n'est pas acceptée${err.reason ? ` (motif : ${err.reason})` : champ ? ` (à vérifier : ${nomDuChamp(champ)})` : ""}.${trace}`;
   }
   // Un refus sans motif connu de l'écran : le message du code, et le motif brut ou le champ fautif pour savoir quoi faire.
   const generique = ["validation_failed", "conflict", "forbidden", "not_found"].includes(err.code) && !(err.reason && err.message !== errorMessage(err.code));
-  const detail = generique ? (err.reason ? ` (motif : ${err.reason})` : err.details?.[0]?.path ? ` (champ à vérifier : ${err.details[0].path})` : "") : "";
+  const detail = generique ? (err.reason ? ` (motif : ${err.reason})` : err.details?.[0]?.path ? ` (à vérifier : ${nomDuChamp(err.details[0].path)})` : "") : "";
   return `${err.message.replace(/\.$/, "")}${detail}.${trace}`;
 }
 

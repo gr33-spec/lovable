@@ -381,7 +381,9 @@ export class AbonnementService {
       await tx.abonnement.upsert({ where: { companyId }, create: { ...data, companyId, fournisseur }, update: { ...data, fournisseur } });
       if (e.facture && (e.type === "actif" || e.type === "renouvele" || e.type === "passage_pro")) await this.emettreFacture(tx, companyId, { ...e, formule, periodicite }, maintenant, fournisseur === "stripe" ? "F" : "TEST");
     });
-    await this.prevenir(companyId, e, maintenant).catch(() => undefined);
+    // Recette du 13 novembre 2026 (G5) : un échec ou une résiliation déjà connus ne renvoient pas le même e-mail.
+    const dejaDit = (e.type === "resiliation_demandee" && avant?.resiliationDemandeeLe != null) || (e.type === "echec" && avant?.statut === "echec");
+    if (!dejaDit) await this.prevenir(companyId, e, maintenant).catch(() => undefined);
     return true;
   }
 

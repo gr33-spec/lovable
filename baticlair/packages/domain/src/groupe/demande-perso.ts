@@ -124,7 +124,8 @@ export interface OffreComparee {
   ecartHt: number | null;
 }
 
-const arrondi2 = (n: number) => Math.round(n * 100) / 100;
+// Recette du 13 novembre 2026 (G7) : 7 × 1,275 fait 8,93 et non 8,92 (le calcul binaire donnait 8,9249999).
+const arrondi2 = (n: number) => Math.round(Number((n * 100).toPrecision(12))) / 100;
 
 /**
  * Les réponses comparées LIVRAISON COMPRISE : d'abord les offres complètes et encore valides, de la moins chère à la plus

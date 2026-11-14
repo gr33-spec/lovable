@@ -304,4 +304,11 @@ describe("aucune ligne ne disparaît (Greg, 7 novembre 2026)", () => {
     for (const [designation, quantite, unite, texte, selectionnable] of cas)
       expect(classerLigneV1({ designation, quantite, unite, faits: libre }), designation).toMatchObject({ texte, selectionnable });
   });
+
+  it("recette du 13 novembre 2026 (G7) : l'arrondi au centime est commercial, et le prix unitaire garde ses décimales", () => {
+    expect(calculOffreV1(7, { prixUnitaireHt: 1.275, livraisonHt: 0, tvaPct: 20 })).toMatchObject({ produits: 8.93, ht: 8.93, tva: 1.79, ttc: 10.72 });
+    expect(calculOffreV1(1, { prixUnitaireHt: 1.005, livraisonHt: 0, tvaPct: 20 }).produits).toBe(1.01);
+    expect(calculOffreV1(3, { prixUnitaireHt: 0.335, livraisonHt: 0, tvaPct: 20 }).lignes[0]).toBe("3 × 0,335 € = 1,01 €");
+    expect(calculOffreV1(4800, { prixUnitaireHt: 0.98, livraisonHt: 45, tvaPct: 20 }).lignes[0]).toBe("4 800 × 0,98 € = 4 704,00 €");
+  });
 });

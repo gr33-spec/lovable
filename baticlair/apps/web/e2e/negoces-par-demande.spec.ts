@@ -68,6 +68,9 @@ test("Tarifs : « l'envoi jusqu'à 5 négoces par demande », plus jamais « à 
   await expect(page.getByText("Le PDF et l'envoi jusqu'à 5 négoces par demande")).toBeVisible();
   await expect(page.getByText(/tous tes négoces/)).toHaveCount(0);
   await expect(page.getByText(/un seul négoce/)).toHaveCount(0);
+  // Recette du 13 novembre 2026 (G1, G8) : l'année (deux mois offerts) et la limite de « Mes prix » se lisent ici.
+  await expect(page.getByText("Deux mois offerts : tu paies dix mois pour douze. Essentiel : 199 € HT par an ; Pro : 399 € HT par an.", { exact: false })).toBeVisible();
+  await expect(page.getByText("En Découverte, tu vois les prix reçus sur les trois derniers mois", { exact: false })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
   await page.getByText("Le PDF et l'envoi jusqu'à 5 négoces par demande").scrollIntoViewIfNeeded();
   await page.screenshot({ path: `${CAPTURES}/${info.project.name}-tarifs.png` });

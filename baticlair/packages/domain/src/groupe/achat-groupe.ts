@@ -393,7 +393,8 @@ export function jugerOffres(offres: readonly OffreACompare[], demande: { cle: st
   return { jugees, meilleure: valides[0] ?? null };
 }
 
-const centimes = (n: number) => Math.round(n * 100) / 100;
+// Recette du 13 novembre 2026 (G7) : 7 × 1,275 fait 8,93 et non 8,92 (le calcul binaire donnait 8,9249999).
+const centimes = (n: number) => Math.round(Number((n * 100).toPrecision(12))) / 100;
 
 /**
  * Ce que voit l'artisan (point 5) : l'offre de son ou ses négoces, la meilleure du groupe, l'économie en euros sur SA
