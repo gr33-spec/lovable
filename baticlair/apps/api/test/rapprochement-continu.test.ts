@@ -99,7 +99,8 @@ describe("le rapprochement continu", () => {
     expect(vueA.lignes).toHaveLength(1);
     expect(vueA.lignes[0]).toMatchObject({ statut: "proposee", libelle: "Ardoise 32×22 Espagne 1er choix" });
     expect(vueA.lignes[0].propositions).toEqual([expect.objectContaining({ niveau: "exacte", libelleNiveau: "Correspondance exacte", differences: [], zone: "Département 22", entreprises: "moins de 5 entreprises", total: null, reponse: null })]);
-    expect(JSON.stringify(vueA)).not.toMatch(/Trégor|450|b@toitures/);
+    // « 450 » en nombre entier : un identifiant tiré au hasard peut contenir ces trois chiffres (chaîne du 16 novembre 2026).
+    expect(JSON.stringify(vueA)).not.toMatch(/Trégor|[^0-9a-f-]450[^0-9a-f-]|b@toitures/);
     // À faire : l'action à examiner.
     expect((await a.agent.get("/v1/rapprochements/actions").expect(200)).body.items).toEqual([expect.objectContaining({ texte: "Correspondance exacte pour « Ardoise 32×22 Espagne 1er choix » : à examiner" })]);
     // Rien n'a rejoint d'achat groupé tout seul.

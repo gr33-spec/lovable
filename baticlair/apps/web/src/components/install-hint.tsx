@@ -54,7 +54,7 @@ export function InstallHint() {
           <Smartphone size={18} aria-hidden="true" className="text-accent-on-dark" />
           Mets {NOM_APP} sur ton écran d&apos;accueil
         </p>
-        <button type="button" onClick={fermer} aria-label="Fermer" className="-mt-1 -mr-1 flex size-9 shrink-0 items-center justify-center rounded-full text-white/70">
+        <button type="button" onClick={fermer} aria-label="Fermer" className="-mt-1 -mr-1 flex size-11 shrink-0 items-center justify-center rounded-full text-white/70">
           <X size={18} aria-hidden="true" />
         </button>
       </div>

@@ -173,12 +173,12 @@ function SupplierCard({ supplier: s, onEdit }: { supplier: Supplier; onEdit: () 
           <span className="rounded-full bg-warn-bg px-2.5 py-1 text-warn">Spécialités à préciser</span>
         )}
       </span>
-      <a href={`mailto:${s.email}`} className="inline-flex min-h-9 items-center gap-2 self-start text-sm font-bold text-accent-text">
+      <a href={`mailto:${s.email}`} className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-bold text-accent-text">
         <Mail size={16} aria-hidden="true" />
         {s.email}
       </a>
       {s.phone ? (
-        <a href={`tel:${s.phone.replace(/\s+/g, "")}`} className="inline-flex min-h-9 items-center gap-2 self-start text-sm font-bold text-accent-text">
+        <a href={`tel:${s.phone.replace(/\s+/g, "")}`} className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-bold text-accent-text">
           <Phone size={16} aria-hidden="true" />
           {s.phone}
         </a>

@@ -47,7 +47,7 @@ export function PastilleEssai() {
   const { data } = useAbonnement();
   if (!data?.actif || data.acces !== "essai" || data.joursEssai === null) return null;
   return (
-    <Link href="/abonnement" aria-label={`Essai gratuit : encore ${data.joursEssai} jours`} className="pressable flex h-8 shrink-0 items-center rounded-full bg-accent-soft px-3 text-[13px] font-extrabold whitespace-nowrap text-ink">
+    <Link href="/abonnement" aria-label={`Essai gratuit : encore ${data.joursEssai} jours`} className="pressable flex min-h-11 shrink-0 items-center rounded-full bg-accent-soft px-3 text-[13px] font-extrabold whitespace-nowrap text-ink">
       {data.joursEssai} j
     </Link>
   );

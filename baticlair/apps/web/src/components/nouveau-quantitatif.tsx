@@ -727,7 +727,7 @@ function FeuilleAjouter({ liste, ids, onListe, onFermer }: { liste: boolean; ids
         <span className="mx-auto mb-1 h-1.5 w-12 rounded-full bg-[#111111]/80" aria-hidden="true" />
         <div className="flex items-center justify-between">
           <h2 className="text-[22px] font-extrabold">Ajouter</h2>
-          <button type="button" onClick={onFermer} aria-label="Fermer" className="grid size-10 place-items-center rounded-full">
+          <button type="button" onClick={onFermer} aria-label="Fermer" className="grid size-11 place-items-center rounded-full">
             <X size={20} aria-hidden="true" />
           </button>
         </div>
@@ -790,7 +790,7 @@ function ConfirmerAnalyse({ nature, nombre, onChanger, onAnnuler, onAnalyser }: 
             {restantes > 0 ? `Il t'en reste ${restantes}.` : "Tu n'en as plus ce mois-ci."}
           </p>
         ) : null}
-        <button type="button" onClick={onChanger} className="min-h-10 self-start text-[14px] font-semibold underline underline-offset-4">
+        <button type="button" onClick={onChanger} className="min-h-11 self-start text-[14px] font-semibold underline underline-offset-4">
           {devis ? "C'est une liste ? L'analyser comme une liste" : "C'est un devis ? L'analyser comme un devis"}
         </button>
         <div className="mt-1 grid grid-cols-2 gap-2">

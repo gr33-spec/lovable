@@ -347,7 +347,7 @@ export default function AdminGroupePage() {
 
       {onglet === "factures" ? (
         <Card className="flex flex-col gap-2 p-3">
-          <a href="/v1/admin/groupe/factures.csv" className="min-h-10 self-start py-2 text-sm font-bold text-accent-text underline decoration-dotted underline-offset-4">
+          <a href="/v1/admin/groupe/factures.csv" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text underline decoration-dotted underline-offset-4">
             Export CSV (mois, négoce, lot, HT, TVA, TTC, statut)
           </a>
           <ul aria-label="Factures" className="flex flex-col gap-2">

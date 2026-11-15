@@ -144,7 +144,7 @@ function packet(value: unknown): SupplierPacket | null {
       ? (() => {
           const e = p.expediteur as Record<string, unknown>;
           const str = (v: unknown) => (typeof v === "string" ? v : null);
-          return { expediteur: { nom: str(e.nom) ?? "", adresse: str(e.adresse), siret: str(e.siret), telephone: str(e.telephone), email: str(e.email) } };
+          return { expediteur: { nom: str(e.nom) ?? "", adresse: str(e.adresse), siret: str(e.siret), telephone: str(e.telephone), email: str(e.email), ...(str(e.emailReponse) ? { emailReponse: str(e.emailReponse) } : {}) } };
         })()
       : {}),
     ...(typeof p.reference === "string" ? { reference: p.reference } : {}),

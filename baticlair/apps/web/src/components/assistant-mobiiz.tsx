@@ -607,7 +607,7 @@ function ApercuPdf({ projectId, version, onLigne, onAjouter }: { projectId: stri
       <div className="flex items-center justify-between gap-3 px-4 py-2.5 lg:px-6">
         {/* Le panneau de l'aperçu est toujours sombre (#1A1918), quel que soit le thème : texte ivoire (audit UX, contraste 2,05:1). */}
         <span className="text-[13px] font-semibold text-[var(--chat-texte)]/75">Touche une ligne pour la modifier.</span>
-        <button type="button" onClick={onAjouter} className="pressable flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-line px-3.5 text-[14px] font-semibold whitespace-nowrap max-lg:border-[var(--chat-texte)]/30 max-lg:text-white">
+        <button type="button" onClick={onAjouter} className="pressable flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-line px-3.5 text-[14px] font-semibold whitespace-nowrap max-lg:border-[var(--chat-texte)]/30 max-lg:text-white">
           <Plus size={16} aria-hidden="true" />
           Ajouter une ligne
         </button>
@@ -737,7 +737,7 @@ function FeuilleLigne({
       <div role="dialog" aria-modal="true" aria-label={titre} onClick={(e) => e.stopPropagation()} className="flex w-full max-w-lg flex-col gap-3 rounded-t-3xl bg-surface p-5 pb-[max(env(safe-area-inset-bottom),20px)] text-ink shadow-card lg:rounded-3xl">
         <div className="flex items-center justify-between">
           <h3 className="text-[18px] font-extrabold">{titre}</h3>
-          <button type="button" onClick={onClose} aria-label="Fermer" className="flex size-10 items-center justify-center rounded-full">
+          <button type="button" onClick={onClose} aria-label="Fermer" className="flex size-11 items-center justify-center rounded-full">
             <X size={19} aria-hidden="true" />
           </button>
         </div>

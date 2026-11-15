@@ -571,7 +571,7 @@ function QuestionCard({
           {q.text}
         </span>
         {onRetire ? (
-          <button type="button" onClick={onRetire} aria-label="Retirer cette question" className="-mt-1.5 -mr-1.5 flex size-10 shrink-0 items-center justify-center rounded-full text-muted active:scale-95">
+          <button type="button" onClick={onRetire} aria-label="Retirer cette question" className="-mt-1.5 -mr-1.5 flex size-11 shrink-0 items-center justify-center rounded-full text-muted active:scale-95">
             <Trash2 size={17} aria-hidden="true" />
           </button>
         ) : null}
