@@ -143,12 +143,18 @@ describe("Stripe : deux prix", () => {
     await c.checkout({ companyId: "co", customerId: null, email: "a@b.fr", formule: "promax", succes: "https://x/ok", annulation: "https://x" });
     expect(decodeURIComponent(appels[0]!.body!)).toContain("line_items[0][price]=price_4900");
     expect(decodeURIComponent(appels[0]!.body!)).toContain("subscription_data[metadata][formule]=promax");
+    // Greg, 15 novembre 2026 : le code « FONDATEUR » vaut pour le Pro seulement ; Pro Max n'a pas la case du code promo.
+    expect(appels[0]!.body!).not.toContain("allow_promotion_codes");
     await c.passerProMax("sub_1");
     expect(appels[1]).toEqual({ url: "https://api.stripe.com/v1/subscriptions/sub_1", method: "GET" });
     const maj = decodeURIComponent(appels[2]!.body!);
     expect(maj).toContain("items[0][id]=si_1");
     expect(maj).toContain("items[0][price]=price_4900");
     expect(maj).toContain("proration_behavior=always_invoice");
+    // En passant à Pro Max, la remise du code s'arrête.
+    expect(maj).toMatch(/(^|&)discounts=(&|$)/);
+    await c.checkout({ companyId: "co", customerId: null, email: "a@b.fr", formule: "pro", succes: "https://x/ok", annulation: "https://x" });
+    expect(appels[3]!.body!).toContain("allow_promotion_codes=true");
     expect([c.formuleDuPrix("price_2900"), c.formuleDuPrix("price_4900"), c.formuleDuPrix("price_autre")]).toEqual(["pro", "promax", null]);
   });
 

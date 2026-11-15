@@ -79,8 +79,10 @@ export class HttpStripeClient implements StripeClient {
       // Toujours en euros, le prix des CGU (recette en ligne du 25 octobre 2026 : la conversion automatique de Stripe
       // affichait des dollars à un navigateur situé hors de France).
       "adaptive_pricing[enabled]": false,
-      // Greg, 14 novembre 2026 : la case « Ajouter un code promotionnel » du paiement (code « FONDATEUR »).
-      allow_promotion_codes: true,
+      // Greg, 15 novembre 2026 : le code « FONDATEUR » vaut pour le Pro au mois seulement (6 mois offerts, puis 30 % à vie).
+      // La case « Ajouter un code promotionnel » n'est donc pas montrée pour Pro Max ni pour l'année (100 % d'une facture
+      // annuelle offrirait douze mois).
+      ...(c.formule === "pro" && !annuel ? { allow_promotion_codes: true } : {}),
       locale: "fr",
       success_url: c.succes,
       cancel_url: c.annulation,
@@ -105,6 +107,8 @@ export class HttpStripeClient implements StripeClient {
       billing_cycle_anchor: "now",
       payment_behavior: "error_if_incomplete",
       "metadata[formule]": "promax",
+      // Greg, 15 novembre 2026 : la remise du code « FONDATEUR » ne vaut que pour le Pro ; elle s'arrête ici.
+      discounts: "",
     });
   }
 

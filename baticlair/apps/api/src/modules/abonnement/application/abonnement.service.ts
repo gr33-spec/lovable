@@ -337,7 +337,8 @@ export class AbonnementService {
       if (!this.stripe || !a.stripeSubscriptionId) throw new DomainError("internal_error", "Stripe not configured");
       await this.stripe.passerProMax(a.stripeSubscriptionId);
       // L'accès et la facture suivent les webhooks (customer.subscription.updated, invoice.paid) ; la formule, tout de suite.
-      await this.prisma.abonnement.update({ where: { companyId: tenant.companyId }, data: { formule: "promax" } });
+      // Le code « FONDATEUR » ne vaut que pour le Pro : Stripe a retiré la remise, on n'en garde pas la trace active.
+      await this.prisma.abonnement.update({ where: { companyId: tenant.companyId }, data: { formule: "promax", codePromo: null } });
       await this.prisma.evenementAbonnement.create({ data: { companyId: tenant.companyId, type: "passage_promax_demande", source: "artisan" } });
       return this.vue(tenant, maintenant);
     }
@@ -571,15 +572,18 @@ export class AbonnementService {
   }
 
   /**
-   * LE CODE « FONDATEUR » (Greg, 14 novembre 2026) : à chaque facture payée, on regarde les coupons de l'abonnement chez
+   * LE CODE « FONDATEUR » (Greg, 14 puis 15 novembre 2026 : Pro seulement) : à chaque facture payée, on regarde les coupons de l'abonnement chez
    * Stripe. Le coupon des 6 mois offerts est là : le code est noté sur l'abonnement (l'admin voit qui l'utilise). Il n'y est
    * plus et le code avait été utilisé : la remise à vie est posée, une seule fois. Sans Stripe, ou en cas d'erreur : rien.
    */
   private async suivrePromo(companyId: string, subscriptionId: string | null): Promise<void> {
     if (!this.stripe?.couponsDe) return;
-    const a = await this.prisma.abonnement.findUnique({ where: { companyId }, select: { codePromo: true, stripeSubscriptionId: true } });
+    const a = await this.prisma.abonnement.findUnique({ where: { companyId }, select: { codePromo: true, stripeSubscriptionId: true, formule: true } });
     const abo = subscriptionId ?? a?.stripeSubscriptionId ?? null;
     if (!a || !abo) return;
+    // Greg, 15 novembre 2026 : 6 mois de Pro offerts, puis 30 % à vie SUR LE PRO SEULEMENT. Un abonné Pro Max n'a ni l'un
+    // ni l'autre : le code n'est pas noté et la remise à vie n'est jamais posée.
+    if (formuleEnregistree(a.formule) !== "pro") return;
     const coupons = await this.stripe.couponsDe(abo);
     if (coupons.includes(PROMO_FONDATEUR.offert) || coupons.includes(PROMO_FONDATEUR.aVie)) {
       if (a.codePromo !== PROMO_FONDATEUR.code) await this.prisma.abonnement.update({ where: { companyId }, data: { codePromo: PROMO_FONDATEUR.code } });

@@ -92,7 +92,24 @@ export interface CaracteristiqueV1 {
   options: readonly OptionV1[];
   /** Comment la valeur s'écrit dans le nom du produit (par défaut : le libellé de l'option, ou la valeur). */
   ecrire?: (valeur: string) => string;
+  /**
+   * Greg, 15 novembre 2026 (lot D) : une caractéristique « recommandée » améliore la précision mais ne bloque jamais ;
+   * sans elle, l'article se coche et se publie « à préciser ». Absent : obligatoire (elle identifie le produit).
+   */
+  importance?: "recommandee";
 }
+
+/**
+ * Les deux réponses d'une caractéristique recommandée qui ne sont pas une valeur : jamais une valeur « standard »
+ * inventée, seulement ce que l'artisan choisit de laisser au fabricant ou de dire plus tard.
+ */
+export const VALEUR_STANDARD = "standard";
+export const VALEUR_A_PRECISER = "apreciser";
+const VALEURS_OUVERTES: readonly OptionV1[] = [
+  { valeur: VALEUR_STANDARD, libelle: "Standard fabricant" },
+  { valeur: VALEUR_A_PRECISER, libelle: "À préciser" },
+];
+export const estValeurOuverte = (v: string | undefined | null) => v === VALEUR_STANDARD || v === VALEUR_A_PRECISER;
 export interface ConditionnementV1 {
   unite: UniteV1;
   /** Une valeur proposée, jamais garantie : l'artisan la confirme ou la corrige (« Confirmer 480 pièces par palette »). */
@@ -114,10 +131,18 @@ export interface ProduitV1 {
 const mm = (v: string) => `${v.replace(".", ",")} mm`;
 const fois = (v: string) => v.replace(/x/g, " × ");
 const opt = (valeurs: readonly (readonly [string, string])[]): OptionV1[] => valeurs.map(([valeur, libelle]) => ({ valeur, libelle }));
+/** Les options d'une caractéristique recommandée : ses valeurs, puis « Standard fabricant » et « À préciser ». */
+const optRecommandee = (valeurs: readonly (readonly [string, string])[]): OptionV1[] => [...opt(valeurs), ...VALEURS_OUVERTES];
 
 /**
  * La LISTE BLANCHE de la V1 : seules ces familles entrent dans un achat groupé ; les autres restent dans le quantitatif
  * (« Pas encore ouvert aux achats groupés »). Chaque famille a ses caractéristiques indispensables, et seulement elles.
+ *
+ * LOT D (Greg, 15 novembre 2026) : obligatoire = sans elle, on ne sait pas quel produit c'est (format, origine et choix
+ * d'une ardoise ; marque, modèle et teinte d'une tuile ; matière et développé d'une gouttière ; matière et épaisseur d'un
+ * isolant ; épaisseur et format d'un OSB ; section d'un liteau ou d'un câble). Recommandée = le négoce peut la confirmer :
+ * l'épaisseur d'une ardoise (elle suit le format et le choix chez le fabricant), l'essence d'un liteau. Aucune valeur
+ * « standard » n'est écrite par Mobiiz : l'artisan choisit une valeur, « Standard fabricant » ou « À préciser ».
  */
 export const PRODUITS_V1: readonly ProduitV1[] = [
   {
@@ -130,7 +155,7 @@ export const PRODUITS_V1: readonly ProduitV1[] = [
       { attribut: "format", libelle: "Format", feminin: false, options: opt([["32x22", "32 × 22"], ["35x25", "35 × 25"], ["40x25", "40 × 25"], ["30x20", "30 × 20"], ["50x25", "50 × 25"]]), ecrire: fois },
       { attribut: "origine", libelle: "Origine", feminin: true, options: opt([["espagne", "Espagne"], ["france", "France"], ["galles", "Pays de Galles"], ["bresil", "Brésil"], ["portugal", "Portugal"]]) },
       { attribut: "qualite", libelle: "Choix", feminin: false, options: opt([["1", "1er choix"], ["2", "2e choix"], ["3", "3e choix"], ["extra", "Extra"]]) },
-      { attribut: "epaisseur", libelle: "Épaisseur", feminin: true, options: opt([["3.5", "3,5 mm"], ["4.5", "4,5 mm"], ["5", "5 mm"], ["5.5", "5,5 mm"], ["7", "7 mm"]]), ecrire: mm },
+      { attribut: "epaisseur", libelle: "Épaisseur", feminin: true, options: optRecommandee([["3.5", "3,5 mm"], ["4.5", "4,5 mm"], ["5", "5 mm"], ["5.5", "5,5 mm"], ["7", "7 mm"]]), ecrire: mm, importance: "recommandee" },
     ],
     seuilRecommande: 2000,
     nom: (v) => `Ardoise naturelle ${v("format")} · ${v("origine")} · ${v("qualite")} · ${v("epaisseur")}`,
@@ -206,7 +231,7 @@ export const PRODUITS_V1: readonly ProduitV1[] = [
     conditionnements: [{ unite: U.botte, parDefaut: null }],
     caracteristiques: [
       { attribut: "format", libelle: "Section", feminin: true, options: opt([["27x40", "27 × 40"], ["25x38", "25 × 38"], ["30x40", "30 × 40"], ["38x38", "38 × 38"]]), ecrire: fois },
-      { attribut: "essence", libelle: "Essence", feminin: true, options: opt([["sapin", "sapin"], ["epicea", "épicéa"], ["douglas", "douglas"], ["pin", "pin"]]) },
+      { attribut: "essence", libelle: "Essence", feminin: true, options: optRecommandee([["sapin", "sapin"], ["epicea", "épicéa"], ["douglas", "douglas"], ["pin", "pin"]]), importance: "recommandee" },
     ],
     seuilRecommande: 600,
     nom: (v) => `Liteaux ${v("format")} · ${v("essence")}`,
@@ -241,6 +266,8 @@ export const produitV1 = (type: string) => PRODUITS_V1.find((p) => p.type === ty
 /** Le libellé d'une valeur de caractéristique (option connue, sinon la valeur écrite mise en forme). */
 function libelleValeur(c: CaracteristiqueV1, valeur: string): string {
   const o = c.options.find((x) => x.valeur === valeur);
+  if (valeur === VALEUR_STANDARD) return `${c.libelle.toLowerCase()} standard fabricant`;
+  if (valeur === VALEUR_A_PRECISER) return `${c.libelle.toLowerCase()} à préciser`;
   if (c.ecrire) return c.ecrire(valeur);
   return o?.libelle ?? valeur;
 }
@@ -251,7 +278,7 @@ export function nomProduitV1(type: string, attributs: Readonly<Record<string, st
   if (!p) return type;
   return p.nom((a) => {
     const c = p.caracteristiques.find((x) => x.attribut === a)!;
-    const v = attributs[a];
+    const v = attributs[a] || (c.importance === "recommandee" ? VALEUR_A_PRECISER : "");
     return v ? libelleValeur(c, v) : "…";
   });
 }
@@ -267,8 +294,8 @@ export function cleProduitV1(type: string, attributs: Readonly<Record<string, st
   if (!p) return null;
   const parts: string[] = [];
   for (const c of p.caracteristiques) {
-    const v = attributs[c.attribut];
-    if (!v?.trim()) return null;
+    const v = attributs[c.attribut]?.trim() || (c.importance === "recommandee" ? VALEUR_A_PRECISER : "");
+    if (!v) return null;
     parts.push(`${c.attribut}=${normaliserValeur(v)}`);
   }
   return `v1:${p.type}|${parts.join("|")}`;
@@ -277,7 +304,22 @@ export function cleProduitV1(type: string, attributs: Readonly<Record<string, st
 /** Les caractéristiques indispensables qui manquent, dans l'ordre du produit. */
 export function manquantesV1(type: string, attributs: Readonly<Record<string, string | undefined>>): CaracteristiqueV1[] {
   const p = produitV1(type);
-  return p ? p.caracteristiques.filter((c) => !attributs[c.attribut]?.trim()) : [];
+  return p ? p.caracteristiques.filter((c) => c.importance !== "recommandee" && !attributs[c.attribut]?.trim()) : [];
+}
+
+/** Une caractéristique recommandée non dite vaut « À préciser » : l'article n'est jamais bloqué pour elle. */
+export function completerV1(type: string, attributs: Readonly<Record<string, string | undefined>>): Record<string, string> {
+  const p = produitV1(type);
+  const propres: Record<string, string> = {};
+  for (const [k, v] of Object.entries(attributs)) if (v?.trim()) propres[k] = v.trim();
+  if (p) for (const c of p.caracteristiques) if (c.importance === "recommandee" && !propres[c.attribut]) propres[c.attribut] = VALEUR_A_PRECISER;
+  return propres;
+}
+
+/** Ce qui reste « à préciser » sur un produit publiable : à demander au plus tard avant la commande. */
+export function aPreciserPlusTardV1(type: string, attributs: Readonly<Record<string, string | undefined>>): { attribut: string; libelle: string }[] {
+  const p = produitV1(type);
+  return p ? p.caracteristiques.filter((c) => c.importance === "recommandee" && (!attributs[c.attribut]?.trim() || attributs[c.attribut] === VALEUR_A_PRECISER)).map((c) => ({ attribut: c.attribut, libelle: c.libelle })) : [];
 }
 
 /** « À préciser : section et essence manquantes » ; « À préciser : épaisseur manquante ». */
@@ -457,7 +499,7 @@ export const TEXTES_MENTION: Readonly<Record<MentionLigneV1, string>> = {
 export interface LigneClasseeV1 {
   lot: LotV1;
   lotLu: LotV1;
-  produit: { type: string; nom: string; cle: string | null; attributs: Record<string, string>; manquantes: { attribut: string; libelle: string }[] } | null;
+  produit: { type: string; nom: string; cle: string | null; attributs: Record<string, string>; manquantes: { attribut: string; libelle: string }[]; /** Recommandé, pas encore dit : jamais bloquant. */ aPreciser: { attribut: string; libelle: string }[] } | null;
   /** La quantité comprise : dans l'unité de référence, ou un conditionnement (conversion à confirmer). Null : à préciser. */
   quantite: { valeur: number; unite: string; conditionnement: { unite: string; parDefaut: number | null } | null } | null;
   mention: MentionLigneV1;
@@ -481,7 +523,8 @@ export function classerLigneV1(l: { designation: string; quantite: number; unite
   const lu = lireProduitV1(l.designation);
   const p = lu ? produitV1(lu.type) : null;
   const manquantes = p && lu ? manquantesV1(p.type, lu.attributs) : [];
-  const produit = p && lu ? { type: p.type, nom: nomProduitV1(p.type, lu.attributs), cle: cleProduitV1(p.type, lu.attributs), attributs: lu.attributs, manquantes: manquantes.map((m) => ({ attribut: m.attribut, libelle: m.libelle })) } : null;
+  const attributs = p && lu ? (manquantes.length ? lu.attributs : completerV1(p.type, lu.attributs)) : {};
+  const produit = p && lu ? { type: p.type, nom: nomProduitV1(p.type, attributs), cle: cleProduitV1(p.type, attributs), attributs, manquantes: manquantes.map((m) => ({ attribut: m.attribut, libelle: m.libelle })), aPreciser: aPreciserPlusTardV1(p.type, attributs) } : null;
   const u = p ? uniteDuProduit(p, l.unite) : null;
   const contenu = lireUnite(l.unite)?.contenu ?? null;
   const quantite = p && u && l.quantite > 0 ? { valeur: l.quantite, unite: codeUnite(l.unite)!, conditionnement: u.sorte === "conditionnement" ? { unite: u.conditionnement.unite.code, parDefaut: contenu ?? u.conditionnement.parDefaut } : null } : null;
@@ -626,7 +669,9 @@ export function statutAfficheV1(a: { statut: EtatAchatV1 }, b: { statut: EtatBes
 
 /* -------------------------------------------------------------------------------------------- les volumes */
 
-export const SEUIL_ENTREPRISES_VOLUMES = 5;
+// RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot H) : avant, 5 entreprises ; maintenant les volumes et le nombre d'entreprises
+// (créateur compris) se voient dès la première publication, toujours sans aucun nom.
+export const SEUIL_ENTREPRISES_VOLUMES = 1;
 
 export interface VolumesV1 {
   entreprises: number;
@@ -655,6 +700,7 @@ export function volumesV1(besoins: readonly { companyId: string; statut: EtatBes
   };
 }
 
+/** Gardée pour les anciens écrans ; plus jamais affichée : les volumes se voient dès la première entreprise (lot H). */
 export const PHRASE_SOUS_5 = "D'autres entreprises se positionnent. Les volumes seront visibles à partir de 5 entreprises.";
 
 /** L'unité d'affichage d'un achat : son conditionnement confirmé (« palettes »), sinon l'unité de référence. */
@@ -671,12 +717,12 @@ const enAffichage = (q: number, aff: AffichageV1) => Math.round((q / aff.parUnit
  * « 86 palettes confirmées pour la consultation » ; en second, « 34 palettes supplémentaires encore indicatives ».
  */
 export function phrasesVolumesV1(v: VolumesV1, achat: { statut: EtatAchatV1 }, aff: AffichageV1): { principale: string; sous: string | null; indicatif: string | null } {
-  if (!v.visibles) return { principale: PHRASE_SOUS_5, sous: null, indicatif: null };
+  if (!v.visibles) return { principale: "Aucune quantité confirmée pour le moment.", sous: null, indicatif: null };
   const q = (n: number) => `${nf(enAffichage(n, aff))} ${uniteEcrite(aff.unite, enAffichage(n, aff))}`;
   const e = aff.unite.feminin ? "es" : "s";
   const indicatif = v.indicatifs > 0 ? `${q(v.indicatifs)} supplémentaire${enAffichage(v.indicatifs, aff) >= 2 ? "s" : ""} encore indicati${aff.unite.feminin ? "ve" : "f"}${enAffichage(v.indicatifs, aff) >= 2 ? "s" : ""}` : null;
   if (achat.statut === "ouvert" || achat.statut === "preparation")
-    return { principale: `${q(v.confirmes)} de besoins confirmés par ${v.entreprises} entreprises`, sous: "À reconfirmer avant consultation", indicatif };
+    return { principale: `${q(v.confirmes)} de besoins confirmés par ${v.entreprises} entreprise${v.entreprises > 1 ? "s" : ""}`, sous: "À reconfirmer avant consultation", indicatif };
   return { principale: `${q(v.reconfirmes)} confirmé${e} pour la consultation`, sous: null, indicatif };
 }
 
@@ -684,10 +730,20 @@ export function phrasesVolumesV1(v: VolumesV1, achat: { statut: EtatAchatV1 }, a
 
 /** L'écart de date toléré entre un besoin et la date de l'achat groupé. */
 export const TOLERANCE_DATE_JOURS = 14;
-/** Le délai minimal entre aujourd'hui et la date de besoin pour ouvrir un achat (préparation, consultation, offre). */
-export const DELAI_MIN_JOURS = 21;
-/** L'achat reste ouvert jusqu'à 18 jours avant la date de besoin (le 2 janvier pour un besoin du 20 janvier). */
+/**
+ * Le délai minimal entre aujourd'hui et la date de besoin pour ouvrir un achat. RÈGLE CHANGÉE (Greg, 15 novembre 2026,
+ * lot E) : avant, 21 jours fixes ; maintenant 7 jours, le temps réel du circuit : 3 jours ouverts aux autres entreprises,
+ * 1 jour pour reconfirmer (`PREPARATION_HEURES.min`), puis la consultation des négoces et l'offre. En dessous de
+ * `DELAI_CONSEILLE_JOURS`, la demande est dite « urgente », sans promesse.
+ */
+export const DELAI_MIN_JOURS = 7;
+export const DELAI_CONSEILLE_JOURS = 21;
+/** L'achat reste ouvert jusqu'à 18 jours avant la date de besoin (le 2 janvier pour un besoin du 20 janvier) ; pour une date plus proche, 3 jours. */
 export const OUVERT_AVANT_BESOIN_JOURS = 18;
+export const OUVERT_MIN_JOURS = 3;
+export const PHRASE_BESOIN_URGENT = "Date proche : les autres entreprises auront peu de temps pour te rejoindre, et une offre n'est pas garantie.";
+/** La date de besoin est-elle proche (moins de 21 jours) ? L'achat s'ouvre quand même. */
+export const besoinUrgentV1 = (dateBesoin: Date, maintenant: Date) => jour(dateBesoin) - jour(maintenant) < DELAI_CONSEILLE_JOURS;
 
 const JOUR = 86_400_000;
 const jour = (d: Date) => Math.floor(d.getTime() / JOUR);
@@ -717,10 +773,12 @@ export function differencesV1(
 
 /** Jusqu'à quand un nouvel achat reste ouvert, ou la raison du refus (date trop proche). */
 export function ouvertureV1(dateBesoin: Date, maintenant: Date): { ok: true; ouvertJusquau: Date } | { ok: false; message: string } {
-  if (jour(dateBesoin) - jour(maintenant) < DELAI_MIN_JOURS)
-    return { ok: false, message: `Pour un achat groupé, la date de besoin doit être au moins ${DELAI_MIN_JOURS} jours après aujourd'hui (préparation, consultation des négoces, offre).` };
-  // 18 h, heure de Paris (17 h UTC en hiver), 18 jours avant la date de besoin.
-  const fin = new Date((jour(dateBesoin) - OUVERT_AVANT_BESOIN_JOURS) * JOUR + 17 * 3_600_000);
+  const delai = jour(dateBesoin) - jour(maintenant);
+  if (delai < DELAI_MIN_JOURS)
+    return { ok: false, message: `Pour un achat groupé, choisis une date de besoin au moins ${DELAI_MIN_JOURS} jours après aujourd'hui : il faut le temps de consulter les négoces.` };
+  // 18 h, heure de Paris (17 h UTC en hiver), 18 jours avant la date de besoin ; pour une date proche, 3 jours ouverts.
+  const avant = Math.min(OUVERT_AVANT_BESOIN_JOURS, delai - OUVERT_MIN_JOURS);
+  const fin = new Date((jour(dateBesoin) - avant) * JOUR + 17 * 3_600_000);
   return { ok: true, ouvertJusquau: fin };
 }
 

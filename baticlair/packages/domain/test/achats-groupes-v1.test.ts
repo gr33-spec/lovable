@@ -20,6 +20,8 @@ import {
   manquesOffreV1,
   nomProduitV1,
   ouvertureV1,
+  besoinUrgentV1,
+  DELAI_MIN_JOURS,
   peutBesoinV1,
   peutCircuit,
   phraseAPreciser,
@@ -67,14 +69,24 @@ describe("une ligne, un seul circuit", () => {
 });
 
 describe("produits autorisés et caractéristiques indispensables", () => {
-  it("l'ardoise naturelle exige format, origine, choix et épaisseur ; sa clé ignore la façon d'écrire", () => {
+  // RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot D) : avant, l'épaisseur était exigée ; elle est recommandée, jamais bloquante.
+  it("l'ardoise naturelle exige format, origine et choix ; l'épaisseur est recommandée ; sa clé ignore la façon d'écrire", () => {
     const lu = lireProduitV1("Ardoise naturelle 32x22 Espagne 1er choix 5 mm")!;
     expect(lu.type).toBe("ardoise");
     expect(cleProduitV1("ardoise", lu.attributs)).toBe("v1:ardoise|format=32x22|origine=espagne|qualite=1|epaisseur=5");
     expect(nomProduitV1("ardoise", lu.attributs)).toBe("Ardoise naturelle 32 × 22 · Espagne · 1er choix · 5 mm");
     expect(cleProduitV1("ardoise", lireProduitV1("ARDOISE 32 x 22 espagnole 1ère choix 5mm")!.attributs)).toBe(cleProduitV1("ardoise", lu.attributs));
     const sans = lireProduitV1("Ardoise naturelle 32x22 Espagne 1er choix")!;
-    expect(cleProduitV1("ardoise", sans.attributs)).toBeNull();
+    expect(cleProduitV1("ardoise", sans.attributs)).toBe("v1:ardoise|format=32x22|origine=espagne|qualite=1|epaisseur=apreciser");
+    expect(nomProduitV1("ardoise", sans.attributs)).toBe("Ardoise naturelle 32 × 22 · Espagne · 1er choix · épaisseur à préciser");
+    expect(nomProduitV1("ardoise", { ...sans.attributs, epaisseur: "standard" })).toBe("Ardoise naturelle 32 × 22 · Espagne · 1er choix · épaisseur standard fabricant");
+    // Jamais une valeur inventée : sans épaisseur dite, c'est « à préciser », pas un chiffre.
+    const ligne = classerLigneV1({ designation: "Ardoise naturelle 32x22 Espagne 1er choix", quantite: 1000, unite: "pièces", faits: libre });
+    expect(ligne).toMatchObject({ selectionnable: true, mention: "compatible" });
+    expect(ligne.produit).toMatchObject({ manquantes: [], aPreciser: [{ attribut: "epaisseur", libelle: "Épaisseur" }], attributs: { epaisseur: "apreciser" } });
+    // Une caractéristique obligatoire, elle, bloque toujours.
+    expect(cleProduitV1("ardoise", { format: "32x22", origine: "espagne" })).toBeNull();
+    expect(classerLigneV1({ designation: "Ardoise naturelle 32x22", quantite: 1000, unite: "pièces", faits: libre })).toMatchObject({ selectionnable: false, mention: "a_preciser" });
   });
   it("un produit différent (format, épaisseur, origine) a une autre clé", () => {
     const a = cleProduitV1("ardoise", { format: "32x22", origine: "espagne", qualite: "1", epaisseur: "5" });
@@ -85,7 +97,7 @@ describe("produits autorisés et caractéristiques indispensables", () => {
   it("« À préciser » dit exactement ce qui manque, accordé", () => {
     const liteau = classerLigneV1({ designation: "Liteaux", quantite: 300, unite: "m", faits: libre });
     expect(liteau.mention).toBe("a_preciser");
-    expect(liteau.texte).toBe("À préciser : section et essence manquantes");
+    expect(liteau.texte).toBe("À préciser : section manquante");
     expect(liteau.selectionnable).toBe(false);
     expect(phraseAPreciser([{ libelle: "Épaisseur", feminin: true }])).toBe("À préciser : épaisseur manquante");
   });
@@ -181,10 +193,19 @@ describe("compatibilité : un achat par produit, zone, réception et période", 
     expect(RAISONS_NE_CONVIENT_PAS.map((r) => r.libelle)).not.toContain("Ma zone est différente");
     expect(RAISONS_NE_CONVIENT_PAS).toHaveLength(3);
   });
-  it("ouverture : jusqu'à 18 jours avant le besoin, refusée sous 21 jours", () => {
+  // RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot E) : avant, refusée sous 21 jours ; maintenant sous 7 jours seulement.
+  it("ouverture : jusqu'à 18 jours avant le besoin ; une date proche s'ouvre 3 jours, dite urgente ; refusée sous 7 jours", () => {
     const o = ouvertureV1(new Date("2027-01-20T00:00:00Z"), NOW);
     expect(o.ok && o.ouvertJusquau.toISOString()).toBe("2027-01-02T17:00:00.000Z");
-    expect(ouvertureV1(new Date("2026-11-20T00:00:00Z"), NOW).ok).toBe(false);
+    const jours = (n: number) => new Date(Math.floor(NOW.getTime() / 86_400_000) * 86_400_000 + n * 86_400_000);
+    expect(ouvertureV1(jours(6), NOW)).toMatchObject({ ok: false, message: expect.stringContaining("au moins 7 jours") });
+    for (const n of [7, 10, 20]) {
+      const proche = ouvertureV1(jours(n), NOW);
+      expect(proche.ok && proche.ouvertJusquau.toISOString(), `${n} jours`).toBe(new Date(jours(3).getTime() + 17 * 3_600_000).toISOString());
+      expect(besoinUrgentV1(jours(n), NOW)).toBe(true);
+    }
+    expect(besoinUrgentV1(jours(21), NOW)).toBe(false);
+    expect(DELAI_MIN_JOURS).toBe(7);
   });
 });
 
@@ -241,8 +262,12 @@ describe("volumes", () => {
     expect(v.confirmes).toBe(5760);
     expect(v.indicatifs).toBe(1440);
   });
-  it("sous 5 entreprises, aucun volume ; au-delà, des totaux seulement", () => {
-    expect(phrasesVolumesV1(volumesV1(besoins, { statut: "ouvert" }), { statut: "ouvert" }, { unite: { singulier: "palette", pluriel: "palettes", feminin: true }, parUnite: 480 }).principale).toBe(PHRASE_SOUS_5);
+  // RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot H) : avant, rien sous 5 entreprises ; maintenant dès la première.
+  it("les volumes se voient dès la première entreprise, créateur compris : des totaux seulement, jamais un nom", () => {
+    const seul = volumesV1([{ companyId: "a", statut: "confirme", quantite: 1000 }], { statut: "ouvert" });
+    expect(seul).toMatchObject({ entreprises: 1, confirmes: 1000, visibles: true });
+    expect(phrasesVolumesV1(seul, { statut: "ouvert" }, { unite: { singulier: "pièce", pluriel: "pièces", feminin: true }, parUnite: 1 }).principale).toBe("1 000 pièces de besoins confirmés par 1 entreprise");
+    expect(phrasesVolumesV1(volumesV1(besoins, { statut: "ouvert" }), { statut: "ouvert" }, { unite: { singulier: "palette", pluriel: "palettes", feminin: true }, parUnite: 480 }).principale).not.toBe(PHRASE_SOUS_5);
     const beaucoup = Array.from({ length: 12 }, (_, i) => ({ companyId: `c${i}`, statut: "confirme" as const, quantite: 3440 }));
     const aff = { unite: { singulier: "palette", pluriel: "palettes", feminin: true }, parUnite: 480 };
     const p = phrasesVolumesV1(volumesV1([...beaucoup, { companyId: "z", statut: "indicatif", quantite: 16320 }], { statut: "ouvert" }), { statut: "ouvert" }, aff);
@@ -304,7 +329,8 @@ describe("unités écrites par le moteur de liste", () => {
 describe("aucune ligne ne disparaît (Greg, 7 novembre 2026)", () => {
   it("chaque ligne d'une liste tapée reçoit une mention et une raison, même sans quantité", () => {
     const cas: [string, number, string, string, boolean][] = [
-      ["Liteaux", 300, "m", "À préciser : section et essence manquantes", false],
+      ["Liteaux", 300, "m", "À préciser : section manquante", false],
+      ["Liteaux 27x40", 300, "m", "Compatible avec un achat groupé", true],
       ["Liteaux sapin", 300, "m", "À préciser : section manquante", false],
       ["Liteaux 27x40 sapin", 300, "m", "Compatible avec un achat groupé", true],
       ["Liteaux 27x40 sapin", 0, "", "À préciser : quantité en m", false],

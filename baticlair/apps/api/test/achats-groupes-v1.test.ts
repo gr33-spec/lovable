@@ -109,9 +109,18 @@ describe("entrée directe par produit", () => {
 
   it("caractéristique manquante : refus qui dit quoi préciser ; conversion non confirmée : refus", async () => {
     const a = await entreprise("a@toitures.fr");
-    const manque = await a.agent.post("/v1/ag/compatibilite").send({ type: "ardoise", attributs: { format: "32x22", origine: "espagne", qualite: "1" }, reception: "livraison", dateBesoin: jour(40) });
+    // RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot D) : l'épaisseur d'une ardoise est recommandée, elle ne bloque plus ; sans
+    // elle, le produit est « à préciser », jamais avec une valeur inventée. Une caractéristique obligatoire bloque toujours.
+    const sansEpaisseur = await a.agent.post("/v1/ag/compatibilite").send({ type: "ardoise", attributs: { format: "32x22", origine: "espagne", qualite: "1" }, reception: "livraison", dateBesoin: jour(40) });
+    expect(sansEpaisseur.status).toBe(200);
+    expect(sansEpaisseur.body.produit.nom).toBe("Ardoise naturelle 32 × 22 · Espagne · 1er choix · épaisseur à préciser");
+    const manque = await a.agent.post("/v1/ag/compatibilite").send({ type: "ardoise", attributs: { format: "32x22", origine: "espagne" }, reception: "livraison", dateBesoin: jour(40) });
     expect(manque.status).toBe(400);
-    expect(manque.body.error.details.message).toBe("À préciser : épaisseur manquante. Précise-les pour rejoindre un achat groupé.");
+    expect(manque.body.error.details.message).toBe("À préciser : choix manquant. Précise-les pour rejoindre un achat groupé.");
+    // Lot E : une date à 10 jours s'ouvre, dite urgente ; à 5 jours, refusée avec la raison.
+    const proche = (await a.agent.post("/v1/ag/compatibilite").send({ ...ARDOISE, reception: "livraison", dateBesoin: jour(10) }).expect(200)).body;
+    expect(proche).toMatchObject({ ouverture: { possible: true }, urgent: expect.stringContaining("Date proche") });
+    expect((await a.agent.post("/v1/ag/compatibilite").send({ ...ARDOISE, reception: "livraison", dateBesoin: jour(5) }).expect(200)).body.ouverture).toMatchObject({ possible: false, message: expect.stringContaining("au moins 7 jours") });
     const conv = await confirmer(a.agent, [besoin({ conversionConfirmee: false })]);
     expect(conv.status).toBe(400);
     expect(conv.body.error.details.reason).toBe("conversion_non_confirmee");
@@ -197,25 +206,37 @@ describe("isolation entre entreprises", () => {
     }
     expect((await b.agent.get("/v1/ag/besoins").expect(200)).body.enCours).toEqual([]);
     expect(Number((await ctx.prisma.besoinGroupeV1.findUniqueOrThrow({ where: { id: ra.id } })).quantiteSaisie)).toBe(7);
-    // Ce que B voit de l'achat : produit, zone, période ; sous 5 entreprises, aucun volume.
+    // Ce que B voit de l'achat : produit, zone, période. RÈGLE CHANGÉE (Greg, 15 novembre 2026, lots F et H) : le volume total
+    // et le nombre d'entreprises se voient dès la première publication ; toujours aucun nom, aucune adresse, aucun e-mail.
     const vu = (await b.agent.get("/v1/ag/achats").expect(200)).body;
     const texte = JSON.stringify(vu) + JSON.stringify((await b.agent.post("/v1/ag/compatibilite").send({ ...ARDOISE, reception: "livraison", dateBesoin: jour(40) })).body);
-    expect(texte).not.toMatch(/Lannion|12 rue du Port|Camion|3360|3 360|"A"|a@toitures/);
-    expect(vu.achats[0].volumes.principale).toBe("D'autres entreprises se positionnent. Les volumes seront visibles à partir de 5 entreprises.");
+    expect(texte).not.toMatch(/Lannion|12 rue du Port|Camion|"A"|a@toitures|Toitures|companyId|"lieu"/);
+    expect(vu.achats[0].volumes.principale).toBe("7 palettes de besoins confirmés par 1 entreprise");
+    expect(vu.achats[0].resume).toMatchObject({ entreprises: 1, volume: "3 360 pièces", verifiees: true });
     // Le lot d'une ligne ne se corrige que dans ses chantiers.
     const { projectId } = await liste(a.agent, [{ libelle: "Liteaux sapin 27x40", quantite: "300", unite: "m" }]);
     expect((await b.agent.get(`/v1/ag/projects/${projectId}/lignes`)).status).toBe(404);
     expect((await b.agent.put(`/v1/ag/projects/${projectId}/lignes/x/lot`).send({ lot: "bois" })).status).toBe(404);
   });
 
-  it("à partir de 5 entreprises : des totaux seulement (palettes), jamais une quantité par entreprise", async () => {
+  it("plusieurs entreprises : des totaux seulement (palettes), jamais un nom ; les autres participants sont prévenus dans la cloche", async () => {
     const agents = [];
     for (const i of [1, 2, 3, 4, 5]) agents.push(await entreprise(`e${i}@toitures.fr`, `Toitures E${i}`));
     const premier = (await confirmer(agents[0]!.agent, [besoin()]).expect(201)).body.besoins[0];
     for (const e of agents.slice(1)) await confirmer(e.agent, [besoin({ quantite: 4, achatId: premier.achat.id })]).expect(201);
     const vu = (await agents[1]!.agent.get("/v1/ag/achats").expect(200)).body.achats[0];
     expect(vu.volumes).toMatchObject({ principale: "26 palettes de besoins confirmés par 5 entreprises", sous: "À reconfirmer avant consultation" });
-    expect(JSON.stringify(vu)).not.toMatch(/"quantite"|companyId|"lieu"/);
+    expect(JSON.stringify(vu)).not.toMatch(/"quantite"|companyId|"lieu"|Toitures E/);
+    expect(vu.resume).toMatchObject({ entreprises: 5, volume: "12 480 pièces" });
+    // Lot H : « +… depuis ta publication » pour le créateur, et une alerte courte, réelle, sans nom, une seule par tranche.
+    const mien = (await agents[0]!.agent.get(`/v1/ag/besoins/${premier.id}`).expect(200)).body;
+    expect(mien.depuisPublication).toEqual({ entreprises: 4, quantite: "+7 680 pièces" });
+    const alertes = await ctx.prisma.alerteCourte.findMany({ where: { companyId: agents[0]!.companyId, cle: { startsWith: "ag-rejoint:" } } });
+    expect(alertes).toHaveLength(1);
+    expect(alertes[0]).toMatchObject({ titre: "Une entreprise vient de rejoindre ton besoin", href: `/achats-groupes/besoins/${premier.id}`, categorie: "groupe" });
+    expect(alertes[0]!.detail).not.toMatch(/Toitures E/);
+    // Celui qui rejoint n'est pas prévenu de sa propre arrivée.
+    expect(await ctx.prisma.alerteCourte.count({ where: { companyId: agents[4]!.companyId, cle: { startsWith: "ag-rejoint:" } } })).toBe(0);
   });
 });
 
@@ -231,7 +252,7 @@ describe("depuis un quantitatif : une ligne, un seul circuit", () => {
     ]);
     const par = (re: RegExp) => lignes.find((l) => re.test(l.designation))!;
     expect(par(/Ardoise/)).toMatchObject({ lot: "couverture", mention: "recommande", texte: "Recommandé pour un achat groupé", selectionnable: true });
-    expect(par(/35x25/)).toMatchObject({ lot: "couverture", mention: "a_preciser", texte: "À préciser : choix et épaisseur manquants", selectionnable: false });
+    expect(par(/35x25/)).toMatchObject({ lot: "couverture", mention: "a_preciser", texte: "À préciser : choix manquant", selectionnable: false });
     // Le moteur de liste écrit « 10 longueurs de 4 m » : conditionnement proposé, à confirmer à l'étape suivante.
     expect(par(/Gouttière/)).toMatchObject({ lot: "zinguerie", mention: "recommande", quantite: { conditionnement: { unite: "longueur", parDefaut: 4 } } });
     expect(par(/Câble/)).toMatchObject({ lot: "electricite", mention: "compatible" });
@@ -255,7 +276,7 @@ describe("depuis un quantitatif : une ligne, un seul circuit", () => {
       expect(t, `${re} doit apparaître une fois`).toHaveLength(1);
       return t[0]!;
     };
-    expect(seule(/^Liteaux$/)).toMatchObject({ mention: "a_preciser", texte: "À préciser : section et essence manquantes", selectionnable: false });
+    expect(seule(/^Liteaux$/)).toMatchObject({ mention: "a_preciser", texte: "À préciser : section manquante", selectionnable: false });
     expect(seule(/^Liteaux sapin$/)).toMatchObject({ mention: "a_preciser", texte: "À préciser : section manquante", selectionnable: false });
     expect(seule(/^Liteaux 27x40 sapin$/)).toMatchObject({ mention: "compatible", texte: "Compatible avec un achat groupé", selectionnable: true });
     expect(seule(/^Parpaing creux/)).toMatchObject({ mention: "non_ouvert", texte: "Pas encore ouvert aux achats groupés", selectionnable: false });

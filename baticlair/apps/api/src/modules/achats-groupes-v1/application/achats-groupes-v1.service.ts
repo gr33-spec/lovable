@@ -15,6 +15,10 @@ import {
   HABILITATIONS_V1,
   LIBELLES_STATUT_V1,
   manquantesV1,
+  completerV1,
+  aPreciserPlusTardV1,
+  besoinUrgentV1,
+  PHRASE_BESOIN_URGENT,
   manquesOffreV1,
   MOTIFS_V1,
   nomProduitV1,
@@ -50,6 +54,7 @@ import {
 import { cleVerrouCircuit, faitsDesLignes } from "../../../platform/cycle/lignes.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { bonDeCommandePdf } from "../../../platform/pdf/bon-de-commande.js";
+import { ecrireAlerte } from "../../../platform/notifications/alertes.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import { isUuid } from "../../../platform/validation/ids.js";
@@ -178,9 +183,14 @@ export class AchatsGroupesV1Service {
     return c && par ? { unite: c.unite, parUnite: par } : { unite: p.unite, parUnite: 1 };
   }
 
-  /** Ce que TOUTE entreprise voit d'un achat : le produit, la zone, la période, des totaux (rien sous 5 entreprises). */
+  /**
+   * Ce que TOUTE entreprise voit d'un achat : le produit, la zone, la période et des totaux. Greg, 15 novembre 2026 (lots F
+   * et H) : le volume total et le nombre d'entreprises (créateur compris) dès la première publication, la date de la
+   * dernière évolution réelle, le badge « entreprises vérifiées » ; JAMAIS un nom d'entreprise, ni avant ni après avoir
+   * participé (seul l'admin voit l'identité et l'historique).
+   */
   private async vuePublique(db: Db, a: AchatRow) {
-    const besoins = await db.besoinGroupeV1.findMany({ where: { achatId: a.id }, select: { companyId: true, statut: true, quantite: true } });
+    const besoins = await db.besoinGroupeV1.findMany({ where: { achatId: a.id }, select: { companyId: true, statut: true, quantite: true, createdAt: true, updatedAt: true } });
     const v = volumesV1(besoins.map((b) => ({ companyId: b.companyId, statut: b.statut as EtatBesoinV1, quantite: Number(b.quantite) })), { statut: a.statut as EtatAchatV1 });
     const p = produitV1(a.type)!;
     return {
@@ -198,7 +208,24 @@ export class AchatsGroupesV1Service {
       statut: a.statut,
       conditionnement: a.conditionnementUnite && a.conditionnementParUnite ? { unite: a.conditionnementUnite, parUnite: Number(a.conditionnementParUnite), libelle: `1 ${p.conditionnements.find((c) => c.unite.code === a.conditionnementUnite)?.unite.singulier ?? a.conditionnementUnite} = ${quantiteLisible(Number(a.conditionnementParUnite), p.unite)}` } : null,
       volumes: phrasesVolumesV1(v, { statut: a.statut as EtatAchatV1 }, this.affichage(a)),
+      resume: {
+        entreprises: v.entreprises,
+        volume: v.confirmes > 0 ? quantiteLisible(v.confirmes, p.unite) : null,
+        // La dernière évolution RÉELLE : le dernier besoin ajouté, modifié ou retiré ; jamais une date fabriquée.
+        derniereEvolution: besoins.length ? new Date(Math.max(...besoins.map((b) => b.updatedAt.getTime()))).toISOString() : null,
+        // Un besoin n'entre dans un achat qu'après la vérification de l'entreprise (SIRET, e-mail, qualité).
+        verifiees: true,
+      },
+      urgent: a.statut === "ouvert" && besoinUrgentV1(a.dateBesoin, this.now()) ? PHRASE_BESOIN_URGENT : null,
+      aPreciser: aPreciserPlusTardV1(a.type, Object.fromEntries(a.cle.split("|").slice(1).map((kv) => kv.split("=") as [string, string]))).map((x) => x.libelle),
     };
+  }
+
+  /** « +750 pièces depuis ta publication » : ce que les AUTRES entreprises ont confirmé après ce besoin. Des totaux seulement. */
+  private async depuisMaPublication(b: { id: string; achatId: string; companyId: string; createdAt: Date }, p: ProduitV1) {
+    const autres = await this.prisma.besoinGroupeV1.findMany({ where: { achatId: b.achatId, companyId: { not: b.companyId }, createdAt: { gt: b.createdAt }, statut: { in: ["confirme", "reconfirme"] } }, select: { companyId: true, quantite: true } });
+    const total = Math.round(autres.reduce((t, x) => t + Number(x.quantite), 0) * 1000) / 1000;
+    return { entreprises: new Set(autres.map((x) => x.companyId)).size, quantite: total > 0 ? `+${quantiteLisible(total, p.unite)}` : null };
   }
 
   /** Les achats ouverts du département de l'entreprise (accueil, filtres par lot). */
@@ -215,7 +242,8 @@ export class AchatsGroupesV1Service {
   private produitValide(type: string, attributs: Record<string, string>): { p: ProduitV1; cle: string; nom: string } {
     const p = produitV1(type);
     if (!p) throw validationFailed("Product not open to group purchases", { reason: "non_ouvert", message: "Ce produit n'est pas encore ouvert aux achats groupés : il reste dans ton quantitatif." });
-    const propres = Object.fromEntries(p.caracteristiques.map((c) => [c.attribut, (attributs[c.attribut] ?? "").trim()]).filter(([, v]) => v));
+    // Lot D (15 novembre 2026) : une caractéristique recommandée non dite vaut « à préciser », elle ne bloque jamais.
+    const propres = completerV1(type, Object.fromEntries(p.caracteristiques.map((c) => [c.attribut, (attributs[c.attribut] ?? "").trim()]).filter(([, v]) => v)));
     const manquantes = manquantesV1(type, propres);
     if (manquantes.length) throw validationFailed("Missing characteristics", { reason: "a_preciser", manquantes: manquantes.map((m) => m.attribut), message: `${phraseAPreciser(manquantes)}. Précise-les pour rejoindre un achat groupé.` });
     return { p, cle: cleProduitV1(type, propres)!, nom: nomProduitV1(type, propres) };
@@ -239,6 +267,8 @@ export class AchatsGroupesV1Service {
       produit: { cle, nom },
       zone,
       compatible: compatible ? await this.vuePublique(this.prisma, compatible) : null,
+      // Lot E : une date proche s'ouvre quand même ; elle est dite urgente, sans promesse.
+      urgent: besoinUrgentV1(b.dateBesoin, this.now()) ? PHRASE_BESOIN_URGENT : null,
       ouverture: ouverture.ok ? { possible: true, ouvertJusquau: ouverture.ouvertJusquau.toISOString() } : { possible: false, message: (ouverture as { message: string }).message },
       phraseIdentique: PHRASE_BESOIN_IDENTIQUE,
     };
@@ -366,6 +396,7 @@ export class AchatsGroupesV1Service {
     }
     // Le récapitulatif par e-mail (complémentaire : un échec ne change rien au besoin, ni à « À faire »).
     await this.envoyer(tenant.companyId, `Ton besoin est confirmé dans un achat groupé`, [`${ids.length > 1 ? `${ids.length} besoins confirmés` : "Besoin confirmé"}.`, "Ce n'est pas encore une commande : tu décideras après réception d'une offre complète.", "", `Suivi : ${this.options.webAppUrl}/achats-groupes/mes-besoins`]).catch(() => undefined);
+    await this.prevenirLesParticipants(tenant.companyId, ids).catch(() => undefined);
     return { besoins: await Promise.all(ids.map((id) => this.vueBesoin(tenant, id))) };
   }
 
@@ -410,6 +441,7 @@ export class AchatsGroupesV1Service {
       projectId: b.projectId,
       articleKey: b.articleKey,
       achat: await this.vuePublique(this.prisma, a),
+      depuisPublication: await this.depuisMaPublication(b, p),
       reconfirmerAvant: a.reconfirmerAvant?.toISOString() ?? null,
       offreAvant: a.offreAvant?.toISOString() ?? null,
       actions: {
@@ -792,6 +824,59 @@ export class AchatsGroupesV1Service {
     return { id: a.id, statut: "annule" };
   }
 
+  /* ------------------------------------------------------------------- les alertes des participants */
+
+  /**
+   * LOT H (Greg, 15 novembre 2026) : quand une entreprise rejoint un achat, les AUTRES participants le lisent dans la
+   * cloche : « Une entreprise vient de rejoindre ton besoin », avec le volume atteint. Un fait réel, jamais un nom. Pas
+   * d'e-mail ni de notification poussée (pas de harcèlement) ; une alerte au plus par achat et par tranche de six heures :
+   * le volume à jour se lit de toute façon sur le besoin.
+   */
+  private async prevenirLesParticipants(auteur: string, besoinIds: string[]) {
+    const nouveaux = await this.prisma.besoinGroupeV1.findMany({ where: { id: { in: besoinIds } }, include: { achat: true } });
+    const maintenant = this.now();
+    for (const nv of nouveaux) {
+      const tous = await this.prisma.besoinGroupeV1.findMany({ where: { achatId: nv.achatId, statut: { in: ["confirme", "reconfirme"] } }, select: { id: true, companyId: true, statut: true, quantite: true } });
+      const v = volumesV1(tous.map((b) => ({ companyId: b.companyId, statut: b.statut as EtatBesoinV1, quantite: Number(b.quantite) })), { statut: nv.achat.statut as EtatAchatV1 });
+      const p = produitV1(nv.achat.type)!;
+      const tranche = Math.floor(maintenant.getTime() / (6 * 3_600_000));
+      const vus = new Set<string>([auteur]);
+      for (const b of tous) {
+        if (vus.has(b.companyId)) continue;
+        vus.add(b.companyId);
+        await ecrireAlerte(this.prisma, b.companyId, {
+          categorie: "groupe",
+          genre: "information",
+          titre: "Une entreprise vient de rejoindre ton besoin",
+          detail: `${nv.achat.nom} · ${v.entreprises} entreprises · ${quantiteLisible(v.confirmes, p.unite)}`.slice(0, 120),
+          action: "Voir mon besoin",
+          href: `/achats-groupes/besoins/${b.id}`,
+          cle: `ag-rejoint:${nv.achatId}:${tranche}`,
+        });
+      }
+    }
+  }
+
+  /** « Plus que 3 jours avant la clôture » : une fois par besoin, seulement quand c'est vrai. */
+  private async alertesDeCloture(maintenant: Date) {
+    const bientot = await this.prisma.besoinGroupeV1.findMany({ where: { statut: { in: ["confirme", "reconfirme"] }, achat: { statut: "ouvert", ouvertJusquau: { gt: maintenant, lte: new Date(maintenant.getTime() + 3 * 86_400_000) } } }, include: { achat: true } });
+    let n = 0;
+    for (const b of bientot) {
+      const jours = Math.max(1, Math.ceil((b.achat.ouvertJusquau.getTime() - maintenant.getTime()) / 86_400_000));
+      const ecrite = await ecrireAlerte(this.prisma, b.companyId, {
+        categorie: "groupe",
+        genre: "information",
+        titre: jours > 1 ? `Plus que ${jours} jours avant la clôture` : "Dernier jour avant la clôture",
+        detail: b.achat.nom.slice(0, 120),
+        action: "Voir mon besoin",
+        href: `/achats-groupes/besoins/${b.id}`,
+        cle: `ag-cloture:${b.achatId}`,
+      });
+      if (ecrite) n++;
+    }
+    return n;
+  }
+
   /* ------------------------------------------------------------------------ les rappels (tâche) */
 
   /**
@@ -812,6 +897,7 @@ export class AchatsGroupesV1Service {
         rappels++;
       } else echecs++;
     }
+    await this.alertesDeCloture(maintenant).catch(() => 0);
     const signalees = await this.signalerLesOffres();
     offres += signalees.offres;
     echecs += signalees.echecs;
