@@ -15,6 +15,8 @@ export const DUREES = {
   fichierDevisJours: 30,
   /** Les journaux techniques en base : 12 mois. */
   journauxMois: 12,
+  /** Les signalements de bugs : 12 mois, puis suppression automatique (Greg, 15 novembre 2026). */
+  signalementsMois: 12,
   /** Les commandes archivées sans nom : 10 ans. */
   archivesAns: 10,
   /** Les preuves d'acceptation : 5 ans après la fin du compte. */
@@ -55,6 +57,7 @@ export interface BilanPurge {
   fichiersDevis: number;
   documentsAnciens: number;
   journaux: number;
+  signalements: number;
   archives: number;
   preuves: number;
   reprises: number;
@@ -90,6 +93,8 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
   const j3 = await prisma.aiExecution.updateMany({ where: { createdAt: { lt: limiteJournaux }, userId: { not: null } }, data: { userId: null } });
   // Le journal du pilotage admin (24 octobre 2026) : 12 mois, comme les autres journaux.
   const j5 = await prisma.journalAdmin.deleteMany({ where: { createdAt: { lt: limiteJournaux } } });
+  // Les signalements de bugs (message, e-mail, capture d'écran) : 12 mois, puis suppression (Greg, 15 novembre 2026).
+  const signalements = await prisma.signalement.deleteMany({ where: { createdAt: { lt: ilYa(maintenant, { mois: DUREES.signalementsMois }) } } });
   const j4 = await prisma.parametreGroupe.deleteMany({ where: { misAJourLe: { lt: limiteJournaux }, OR: ["ajouts:", "reponses:", "rappels-cloture:", "alerte:", "report:"].map((p) => ({ cle: { startsWith: p } })) } });
 
   // Les factures d'abonnement (obligation comptable) : 10 ans après leur émission.
@@ -108,6 +113,7 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
     reprises: reprises.count,
     evenementsWebhook: evenements.count,
     journaux: j1.count + j2.count + j3.count + j4.count + j5.count,
+    signalements: signalements.count,
     archives: archives.count + factures.count,
     preuves: preuves.count,
   };

@@ -107,7 +107,7 @@ export class EspaceNegoceService {
    * Un artisan vient d'ajouter ce négoce : son compte existe (SIRET, sinon e-mail), la ligne `negoce` lui est reliée, le
    * lien d'invitation est régénéré et envoyé (au plus une fois par semaine tant que l'accès n'est pas créé). Rend le lien.
    */
-  async inviter(negoce: { id: string; email: string; siret: string | null; nom: string; compteId: string | null }, maintenant = new Date()): Promise<string> {
+  async inviter(negoce: { id: string; email: string; siret: string | null; nom: string; compteId: string | null }, maintenant = new Date(), o: { /** Le lien part dans un autre e-mail (la demande de prix) : aucun e-mail d'invitation à part. */ sansEmail?: boolean } = {}): Promise<string> {
     // DROIT D'OPPOSITION (24 octobre 2026) : un négoce qui a demandé à ne plus jamais être contacté n'est jamais réinvité,
     // même quand un artisan le rajoute ; la ligne reste dans la liste de l'artisan, arrêtée.
     if (await estExclu(this.prisma, { email: negoce.email, siret: negoce.siret })) {
@@ -129,7 +129,7 @@ export class EspaceNegoceService {
     if (c.inscritLe) return lien;
     const deja = c.invitationLe && maintenant.getTime() - c.invitationLe.getTime() < INVITATION_RELANCE_MS;
     await this.prisma.compteNegoce.update({ where: { id: c.id }, data: { invitationLe: maintenant } });
-    if (!deja && this.email) {
+    if (!deja && this.email && !o.sansEmail) {
       const departement = (await this.prisma.negoce.findUnique({ where: { id: negoce.id }, select: { departement: true } }))?.departement ?? null;
       const mail = mailInvitationNegoce({ lien, departement, conditions: this.lienConditions(), opposition: this.lienOpposition(c.id, maintenant) });
       await this.email.send({ to: c.email, subject: mail.objet, text: mail.texte }).catch(() => undefined);

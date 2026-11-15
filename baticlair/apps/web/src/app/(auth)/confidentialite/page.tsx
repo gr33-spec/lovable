@@ -8,7 +8,7 @@ import { NOM_APP, nom } from "@/lib/nom";
 export const metadata: Metadata = { title: `Confidentialité — ${NOM_APP}` };
 
 /** La version de cette page (une date, comme les CGU). */
-const VERSION = "14/11/2026";
+const VERSION = "15/11/2026";
 
 /**
  * La politique de confidentialité (RGPD, Greg, 24 octobre 2026) : en tableau, chaque traitement avec ses données, sa base
@@ -94,6 +94,13 @@ const TRAITEMENTS: readonly { finalite: string; donnees: string; base: string; d
     donnees: "Tes messages à l'assistant et les photos que tu lui joins. Ils sont envoyés tels quels à notre prestataire Anthropic (États-Unis) pour préparer la réponse : n'y mets pas le nom, l'adresse ni le téléphone d'un client. Mobiiz ne les enregistre pas : seule la liste que tu valides est enregistrée",
     base: "Contrat (les CGU)",
     duree: "Chez Mobiiz : le temps de la réponse. Chez Anthropic : une durée limitée, fixée par son contrat. Le nombre d'appels et leur coût : tant que le compte existe, sans le nom de l'utilisateur après 1 an",
+  },
+  {
+    // Greg, 15 novembre 2026 : 12 mois, puis suppression automatique.
+    finalite: "Les problèmes que tu signales",
+    donnees: "Ton message, la page, ton e-mail, ton navigateur, la capture d'écran jointe",
+    base: "Intérêt légitime (corriger le service)",
+    duree: "12 mois, puis suppression automatique",
   },
   {
     finalite: "La liste d'exclusion (« ne plus jamais être contacté »)",

@@ -95,7 +95,10 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     const mail = ctx.emails.lastTo("devis@pointp.fr")!;
     expect(mail.subject).toBe(recipient.email.subject);
     // Le lien de chiffrage est propre au négoce : l'aperçu le montre « …/chiffrer/… » (Greg, 28 octobre 2026, point 7).
-    expect(mail.text.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)")).toBe(recipient.email.body);
+    // Greg, 15 novembre 2026 : le lien pour créer son accès négoce part dans CE mail (plus de second e-mail « créez votre accès »).
+    expect(mail.text).toMatch(/Vous pouvez aussi créer votre accès négoce, gratuit et sans engagement, pour retrouver vos demandes au même endroit : http\S+\/negoce\/rejoindre\/\S+/);
+    expect(mail.text.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)").replace(/https?:\/\/\S+\/negoce\/rejoindre\/\S+/, "(son lien pour créer son accès)")).toBe(recipient.email.body);
+    expect(ctx.emails.sent.filter((m) => /créez votre accès/.test(m.subject))).toHaveLength(0);
     // Lot final, point 5 : le texte en clair accompagne le HTML. Greg, 12 novembre 2026 : répondre à l'e-mail vient
     // d'abord ; la saisie en ligne est un bouton secondaire (contour), plus le bouton jaune « Répondre en ligne ».
     expect(mail.html).toContain("Chiffrer en ligne</a>");

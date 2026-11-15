@@ -272,3 +272,18 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 - Reste à faire : gênants du rapport (`docs/recette/recette-complete-2026-11-14.md`) ; CGU après l'avocat ; recette en ligne avec les adresses de Greg.
 - 14/11 (soir), chantier 1, assistant Mobiiz : IA réelle allumée sur le test, une question à la fois, question avant un article flou (« Ardoise 5 et fruitier »), étapes en direct (`POST /v1/assistant/description/flux`), réponse au fil de l'eau, thème jour / nuit pour tous les écrans de conversation, plus de gros boutons ni de bloc de compteurs. Tests : domaine et serveur `assistant-ia`, e2e `e2e-ag-v1/assistant-ia.spec.ts`. E-mail du fournisseur obligatoire au dépôt d'une offre d'achat groupé (`achats-groupes-v1.test.ts`).
 - 14/11 (soir), chantier 2, espace admin : `/admin` (six cartes, bandeau), `/admin/artisans`, `/admin/negoces`, fiches, `/admin/question`, `/admin/reglages` (adresse d'alerte à double validation), `/admin/promos` ; module `admin-vue`, `platform/alerts/adresse-alerte.ts`, migration `20261114200000_abonnement_code_promo`. Tests : serveur `admin-vue`, e2e « espace admin, vue globale » (`e2e/achat-groupe.spec.ts`). Relecture du juriste faite ; reste à décider : boîte des alertes, durée des signalements, taux de réponse des négoces (avocat).
+- 15/11, décisions de Greg après la recette en ligne : un seul e-mail au négoce (le lien « créer votre accès » est dans la demande de prix, plus de second e-mail) ; signalements supprimés après 12 mois ; taux de réponse des négoces visible seulement dans l'admin ; testeurs en local seulement ; FONDATEUR testé juste avant le lancement ; boîte des alertes : adresse professionnelle de Greg, réglée par lui dans Admin › Réglages.
+
+## POINT DE REPRISE : lot UX mobile (dossier du 14 novembre, demandé le 15)
+
+Branche locale `lot-ux-mobile` (part de la branche de test, `3844146f` en ligne). Rien n'est poussé tant que la chaîne complète n'est pas verte. Ordre et état :
+
+1. Décisions ci-dessus : FAIT sur la branche locale (tests `envoi-fournisseur`, `demande-de-devis-45`, `signalements`).
+2. Entrée Quantitatifs en deux choix (« Créer un quantitatif », « Suivre mes demandes ») : À FAIRE.
+3. Achats groupés : bouton flottant « Publier un besoin » (téléphone), bouton d'en-tête (ordinateur), deux chemins : À FAIRE. La règle « un article déjà envoyé aux négoces ne se groupe pas » RESTE (décision de Greg, on la changera après les retours terrain).
+4. Missions réordonnée sur mobile : À FAIRE.
+5. Accueil en tableau de bord (à faire, achats groupés, missions, activité) : À FAIRE.
+6. Passe mobile, chaîne complète, mise en ligne, compte rendu : À FAIRE.
+
+À signaler à Greg : le jaune du code est #FED206 (son message dit #FFC800) : rien changé. Mission est ALLUMÉE sur le site de test (`MISSIONS_V1`), alors que son message dit « reste coupée » : rien changé.
+

@@ -66,6 +66,8 @@ La liste d'exclusion est vérifiée à chaque ajout de négoce par un artisan et
 - Assistant des artisans : messages et photos envoyés sans anonymisation à Anthropic ; rien n'est gardé par Mobiiz hors le coût de l'appel (`ai_execution`, durée du compte, utilisateur retiré à 12 mois) ; durée chez Anthropic : celle de son contrat, à relever.
 - Adresse d'alerte : adresse e-mail de l'équipe en base (`parametre_groupe`), changée par double validation, ancienne adresse prévenue. Y arrivent : e-mails de contact@ (avec pièces jointes), signalements, alertes. Le fournisseur de cette boîte est un destinataire : à inscrire dans RGPD-SOUS-TRAITANTS.md avec son pays et sa garantie (décision de Greg).
 - Réponse d'un négoce reçue sur l'adresse Mobiiz d'un artisan : son message (4 000 caractères au plus) et le nom de ses pièces jointes sont copiés dans l'e-mail envoyé à la vraie adresse de l'artisan.
-- Signalements (message, e-mail, capture d'écran) : traitement à inscrire, durée à fixer par Greg, purge à écrire.
+- Signalements (message, e-mail, capture d'écran) : gardés 12 mois puis supprimés automatiquement (décision de Greg du 15 novembre 2026 ; purge nocturne, `purges.ts`). Base : intérêt légitime (corriger le service).
+- Adresse d'alerte choisie par Greg le 15 novembre 2026 : une boîte professionnelle (domaine investisseurdugoelo.fr), réglée dans Admin › Réglages. Son hébergeur reste à inscrire dans RGPD-SOUS-TRAITANTS.md.
+- Taux de réponse des négoces : visible seulement dans l'espace admin (décision de Greg du 15 novembre 2026) ; à faire relire par l'avocat.
 - Sessions (date, IP, navigateur) : durée à vérifier et à inscrire.
 - Taux de réponse des négoces : à faire dire par l'avocat si c'est une évaluation (analyse d'impact, conditions négoces).

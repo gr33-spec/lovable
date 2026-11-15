@@ -41,7 +41,7 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
     {
       provide: DemandePersoService,
       useFactory: (p: PrismaService, pr: PriceRequestsService, d: DroitsService, espace: EspaceNegoceService, e: TransactionalEmailSender, push: PushSender, c: AppConfig) => {
-        const s = new DemandePersoService(p, pr, d, (n) => espace.inviter(n), e, { webAppUrl: c.webAppUrl });
+        const s = new DemandePersoService(p, pr, d, (n, o) => espace.inviter(n, undefined, o), e, { webAppUrl: c.webAppUrl });
         // Lot final, point 6 : les relances préviennent l'artisan comme les achats groupés (notification, puis e-mail).
         const notifs = new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl);
         s.brancherPrevenir((companyId, m, courriel) => notifs.prevenir(companyId, m, courriel));

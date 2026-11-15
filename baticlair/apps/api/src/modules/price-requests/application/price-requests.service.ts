@@ -9,7 +9,7 @@ import type { RequestedLine } from "./price-request-email.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { priceRequestEmail, requestedQuantityText, supplierLineLabel } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
-import { LIEN_APERCU, mailEnHtml, texteLibreParDefaut, packetDocument, packetMail, packetPdf, packetSubject, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket, type ZonePdf } from "./supplier-packet.js";
+import { LIEN_ACCES_APERCU, LIEN_APERCU, mailEnHtml, texteLibreParDefaut, packetDocument, packetMail, packetPdf, packetSubject, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket, type ZonePdf } from "./supplier-packet.js";
 
 /** §47.5 : une commande passée chez le fournisseur retenu, telle qu'elle part au journal. */
 export interface SupplierOrder {
@@ -185,8 +185,8 @@ export class PriceRequestsService {
    */
   // Lot final, point 3 : une demande de la liste reçoit son lien « Répondre en ligne » (`lien`), dans le mail ; une demande
   // perso (avec un but) garde son bloc d'avant (`bloc`), ajouté sous la signature.
-  private complement: (requestId: string, recipientId: string) => Promise<{ bloc: string } | { lien: string } | null> = async () => null;
-  brancherComplement(f: (requestId: string, recipientId: string) => Promise<{ bloc: string } | { lien: string } | null>): void {
+  private complement: (requestId: string, recipientId: string) => Promise<{ bloc: string } | { lien: string; acces?: string | null } | null> = async () => null;
+  brancherComplement(f: (requestId: string, recipientId: string) => Promise<{ bloc: string } | { lien: string; acces?: string | null } | null>): void {
     this.complement = f;
   }
 
@@ -309,7 +309,8 @@ export class PriceRequestsService {
       // juste avant le mail. Fabriqué avant la file, un second appel écrasait le jeton du mail déjà parti (« Introuvable »).
       const complement = await this.complement(request.id, recipientId);
       const lien = complement && "lien" in complement ? complement.lien : null;
-      const corps = packetMail(packet, { prenomCommercial: recipient.supplier.contactName, lien });
+      const acces = complement && "lien" in complement ? (complement.acces ?? null) : null;
+      const corps = packetMail(packet, { prenomCommercial: recipient.supplier.contactName, lien, acces });
       const texte = complement && "bloc" in complement ? `${corps}\n\n${complement.bloc}` : corps;
       await this.envoyerSupervise(tenant, recipient.supplier, {
         to: recipient.supplier.email,
@@ -347,7 +348,7 @@ export class PriceRequestsService {
 
   /** Le mail tel qu'il partira : le lien de réponse quand le serveur envoie (le vrai, propre au négoce, est créé à l'envoi). */
   private mailApercu(packet: SupplierPacket, prenomCommercial: string | null = null): string {
-    return packetMail(packet, { prenomCommercial, lien: this.mailer.deliversEmail ? LIEN_APERCU : null });
+    return packetMail(packet, { prenomCommercial, lien: this.mailer.deliversEmail ? LIEN_APERCU : null, acces: this.mailer.deliversEmail ? LIEN_ACCES_APERCU : null });
   }
 
   /**

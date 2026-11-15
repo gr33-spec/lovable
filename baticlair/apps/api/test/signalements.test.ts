@@ -1,6 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { pageSure } from "../src/modules/signalements/index.js";
+import { purgerSelonLeRegistre } from "../src/modules/privacy/application/purges.js";
 import { doubleAuthentification } from "./support/admin.js";
 import { couvreurAvecListe, mailsVers } from "./support/cycle.js";
 import { createTestApp, resetDatabase, type TestContext } from "./support/test-app.js";
@@ -44,6 +45,18 @@ async function admin() {
 }
 
 describe("signaler un problème", { timeout: 120_000 }, () => {
+  it("conservation (Greg, 15 novembre 2026) : un signalement est supprimé tout seul après 12 mois, pas avant", async () => {
+    const publier = async (message: string) => (await publique().post("/v1/public/signalements").send({ message, page: "/espace-negoce", email: "negoce@example.fr" }).expect(201)).body.id as string;
+    const vieux = await publier("Un vieux problème, réglé depuis longtemps.");
+    const recent = await publier("Un problème de cette semaine.");
+    const maintenant = new Date();
+    await ctx.prisma.signalement.update({ where: { id: vieux }, data: { createdAt: new Date(maintenant.getTime() - 380 * 86_400_000) } });
+    await ctx.prisma.signalement.update({ where: { id: recent }, data: { createdAt: new Date(maintenant.getTime() - 300 * 86_400_000) } });
+    const bilan = await purgerSelonLeRegistre(ctx.prisma, maintenant);
+    expect(bilan.signalements).toBe(1);
+    expect((await ctx.prisma.signalement.findMany({ select: { id: true } })).map((x) => x.id)).toEqual([recent]);
+  });
+
   it("un artisan connecté : page et capture jointes, accusé de réception immédiat, alerte à Greg avec le lien de l'espace admin", async () => {
     const a = await couvreurAvecListe(ctx, "artisan@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", LIGNES);
     ctx.emails.sent.length = 0;

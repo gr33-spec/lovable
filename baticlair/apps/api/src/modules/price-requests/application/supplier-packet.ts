@@ -124,6 +124,8 @@ export function texteLibreParDefaut(p: SupplierPacket): string {
 
 /** Le lien de réponse tel que l'aperçu le montre (le vrai est propre à chaque négoce, créé à l'envoi). */
 export const LIEN_APERCU = "(votre lien personnel)";
+/** Le lien pour créer son accès négoce, tel que l'aperçu le montre (le vrai est propre à chaque négoce ; absent s'il a déjà son accès). */
+export const LIEN_ACCES_APERCU = "(son lien pour créer son accès)";
 
 /**
  * LE MAIL AU NÉGOCE (lot final, point 3, puis Greg, 12 novembre 2026, dossier de corrections UX, point 5) : cordial et
@@ -131,9 +133,11 @@ export const LIEN_APERCU = "(votre lien personnel)";
  * (modifiable) demande une proposition de prix. Jamais de pression : le nombre de négoces consultés n'est JAMAIS dit, et
  * la date n'apparaît que si l'artisan en a choisi une, comme un souhait. Pour répondre : d'abord répondre à l'e-mail avec
  * le devis ; le lien en ligne vient ensuite. Le portable (jamais l'e-mail personnel), la signature, un pied discret.
- * Aucune invitation à s'inscrire, aucune commission.
+ * Aucune commission. RÈGLE CHANGÉE (Greg, 15 novembre 2026 : « Un négoce reçoit un seul e-mail, avec la demande et le lien
+ * pour créer son accès ») : avant, aucune invitation ici et un second e-mail « créez votre accès » après la réponse ;
+ * maintenant, une ligne facultative en fin de message, et plus de second e-mail.
  */
-export function packetMail(p: SupplierPacket, o: { prenomCommercial?: string | null; lien?: string | null } = {}): string {
+export function packetMail(p: SupplierPacket, o: { prenomCommercial?: string | null; lien?: string | null; acces?: string | null } = {}): string {
   const tu = !!p.tutoie;
   const prenom = o.prenomCommercial?.trim();
   const tel = p.expediteur?.telephone?.trim();
@@ -147,6 +151,7 @@ export function packetMail(p: SupplierPacket, o: { prenomCommercial?: string | n
       "La liste des fournitures à chiffrer est en pièce jointe (PDF).",
       ...(tel ? [`Une question ? ${tu ? "Appelle-moi" : "Appelez-moi"} au ${tel}.`] : []),
     ].join("\n"),
+    ...(o.acces ? [`${tu ? "Tu peux aussi créer ton" : "Vous pouvez aussi créer votre"} accès négoce, gratuit et sans engagement, pour retrouver ${tu ? "tes" : "vos"} demandes au même endroit : ${o.acces}`] : []),
     `${tu ? "Merci d'avance," : "Je vous remercie par avance."}\n${packetSignature(p)}`,
     `--\n${PIED_MAIL_NEGOCE}`,
   ].join("\n\n");

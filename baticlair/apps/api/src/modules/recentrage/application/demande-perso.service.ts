@@ -93,7 +93,7 @@ export class DemandePersoService {
     private readonly prisma: PrismaService,
     private readonly demandes: Pick<PriceRequestsService, "create" | "send" | "deliversEmail">,
     private readonly droits: Pick<DroitsService, "exiger" | "droits">,
-    private readonly inviter: (negoce: { id: string; email: string; siret: string | null; nom: string; compteId: string | null }) => Promise<string>,
+    private readonly inviter: (negoce: { id: string; email: string; siret: string | null; nom: string; compteId: string | null }, o?: { sansEmail?: boolean }) => Promise<string>,
     private readonly mailer: TransactionalEmailSender,
     private readonly cfg: { webAppUrl: string },
     private readonly now: () => Date = () => new Date(),
@@ -194,16 +194,20 @@ export class DemandePersoService {
    * « Demander les prix à mes négoces » (sans but) chiffre un chantier : le lien y est aussi, pour que la comparaison
    * automatique reste quand le négoce répond par le lien (Greg, 28 octobre 2026, points 7 et 8).
    */
-  async complement(requestId: string, recipientId: string): Promise<{ bloc: string } | { lien: string } | null> {
-    const r = await this.prisma.priceRequest.findUnique({ where: { id: requestId }, select: { but: true } });
+  async complement(requestId: string, recipientId: string): Promise<{ bloc: string } | { lien: string; acces?: string | null } | null> {
+    const r = await this.prisma.priceRequest.findUnique({ where: { id: requestId }, select: { but: true, company: { select: { address: true } }, project: { select: { address: true } } } });
     if (!r) return null;
     const jeton = randomBytes(24).toString("base64url");
-    const dest = await this.prisma.priceRequestRecipient.update({ where: { id: recipientId }, data: { tokenHash: hacher(jeton) }, select: { supplier: { select: { negoceId: true } } } });
+    const dest = await this.prisma.priceRequestRecipient.update({ where: { id: recipientId }, data: { tokenHash: hacher(jeton) }, select: { supplier: { select: { negoceId: true, name: true, email: true } } } });
     if (dest.supplier.negoceId) await this.prisma.priceRequestRecipient.update({ where: { id: recipientId }, data: { negoceId: dest.supplier.negoceId } });
     const lien = `${this.cfg.webAppUrl}/chiffrer/${jeton}`;
     // Lot final, point 3 : la demande de la liste porte son lien dans le mail (« Répondre en ligne ») ; la demande perso
     // (avec un but) garde son bloc d'avant.
-    return r.but ? { bloc: blocLienChiffrage({ but: r.but as ButDemande, lien, nomApp: NOM_APP }) } : { lien };
+    if (r.but) return { bloc: blocLienChiffrage({ but: r.but as ButDemande, lien, nomApp: NOM_APP }) };
+    // Le lien pour créer son accès voyage dans le MÊME e-mail (Greg, 15 novembre 2026) ; rien pour un négoce déjà inscrit,
+    // exclu, ou sans département connu. Une panne ici ne retient jamais la demande.
+    const acces = await this.invitationCompte(dest.supplier, r.company.address, r.project.address).catch(() => null);
+    return { lien, acces: acces?.lien ?? null };
   }
 
 
@@ -564,7 +568,9 @@ export class DemandePersoService {
     const negoce = (await this.prisma.negoce.findUnique({ where: { email_departement: { email, departement } } })) ?? (await this.prisma.negoce.create({ data: { nom: s.name, email, departement } }));
     // Recette du 13 novembre 2026 (B8) : l'invitation rend déjà le lien COMPLET ; le remettre derrière l'adresse du site
     // donnait « Page introuvable ». Un simple jeton (anciens branchements) reçoit toujours son adresse.
-    const invitation = await this.inviter({ id: negoce.id, email: negoce.email, siret: negoce.siret, nom: negoce.nom, compteId: negoce.compteId });
+    // Greg, 15 novembre 2026 : « Un négoce reçoit un seul e-mail, avec la demande et le lien pour créer son accès. » Le lien
+    // part dans la demande de prix et s'affiche après la réponse ; plus d'e-mail « créez votre accès » à part.
+    const invitation = await this.inviter({ id: negoce.id, email: negoce.email, siret: negoce.siret, nom: negoce.nom, compteId: negoce.compteId }, { sansEmail: true });
     return { phrase: PHRASE_COMPTE_APRES_REPONSE, lien: /^https?:\/\//.test(invitation) ? invitation : `${this.cfg.webAppUrl}/negoce/rejoindre/${invitation}` };
   }
 

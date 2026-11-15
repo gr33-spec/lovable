@@ -4,7 +4,8 @@ import { forbiddenWord, priceLeak } from "../src/modules/price-requests/applicat
 import { createTestApp, resetDatabase, signUp, type Agent, type TestContext } from "./support/test-app.js";
 
 /** Le lien « Répondre en ligne » est propre à chaque négoce : l'aperçu le montre « (votre lien personnel) » (lot final, point 3). */
-const sansJeton = (t: string) => t.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)");
+// Les deux liens propres au négoce : répondre en ligne, et (Greg, 15 novembre 2026) créer son accès, dans le MÊME e-mail.
+const sansJeton = (t: string) => t.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)").replace(/https?:\/\/\S+\/negoce\/rejoindre\/\S+/, "(son lien pour créer son accès)");
 /** Le pied discret du mail (lot final, point 3) : le seul endroit où le nom de l'application apparaît. */
 const sansPied = (t: string) => t.replace(/\n\n--\nDemande de prix envoyée avec Mobiiz\.$/, "");
 
@@ -93,6 +94,9 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
         "Bonjour,",
         "Je vous envoie la liste des fournitures pour un chantier de couverture zinc à joint debout à Brest : 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage. Pourriez-vous m'adresser votre proposition tarifaire ?",
         "Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec votre devis en pièce jointe.\nVous pouvez aussi chiffrer en ligne, sans inscription : (votre lien personnel)\nLa liste des fournitures à chiffrer est en pièce jointe (PDF).\nUne question ? Appelez-moi au 06 12 34 56 78.",
+        // RÈGLE CHANGÉE (Greg, 15 novembre 2026) : le lien pour créer son accès négoce part dans CE mail, en une ligne
+        // facultative ; plus de second e-mail « créez votre accès ». Avant : aucune invitation ici.
+        "Vous pouvez aussi créer votre accès négoce, gratuit et sans engagement, pour retrouver vos demandes au même endroit : (son lien pour créer son accès)",
         "Je vous remercie par avance.\nGreg, Bati invest",
         "--\nDemande de prix envoyée avec Mobiiz.",
       ].join("\n\n"),
