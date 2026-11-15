@@ -1053,7 +1053,8 @@ function NewRequest({
         // §50.7 : l'écran « Ton chantier » EST le document ; l'envoi ne montre plus d'aperçu, seulement à qui il part.
         identite.data && !identite.data.complete ? (
           // Lot final, point 1 : la première fois, « Avant d'envoyer » (SIRET, prénom, portable), une seule fois.
-          <SendSheet
+          <SendSheet // Chaque étape a sa propre fenêtre : un bouton « Continuer » ne passe jamais d'une étape à l'autre sous le doigt.
+            key="identite"
             titre="Avant d'envoyer"
             principal={{ label: "Continuer", form: FORMULAIRE_IDENTITE, pending: enregistre }}
             onClose={() => {
@@ -1064,7 +1065,7 @@ function NewRequest({
             <EtapeIdentite identite={identite.data} onFait={(i) => identite.setData(i)} onPending={setEnregistre} />
           </SendSheet>
         ) : etape === "negoces" ? (
-          <SendSheet
+          <SendSheet key="negoces"
             titre="À qui j'envoie ?"
             principal={{ label: selected.size === 0 ? "Choisis un négoce" : "Continuer", disabled: selected.size === 0 || !identite.data, onClick: () => setEtape("apercu") }}
             onClose={() => {
@@ -1081,7 +1082,7 @@ function NewRequest({
           </SendSheet>
         ) : (
           // Lot final, point 4 : « Voici ce que ton négoce va recevoir », l'aperçu fidèle ; un seul bouton, « Envoyer ».
-          <SendSheet
+          <SendSheet key="apercu"
             titre="Voici ce que ton négoce va recevoir"
             principal={{ label: "Envoyer", disabled: selected.size === 0, pending, onClick: () => void create() }}
             onClose={() => setEtape("negoces")}

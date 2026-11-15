@@ -904,7 +904,7 @@
 }
 .mz-pied a {
   display: inline-flex;
-  min-height: 32px;
+  min-height: 44px;
   align-items: center;
   color: var(--mz-encre);
   font-weight: 600;
