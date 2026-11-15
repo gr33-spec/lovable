@@ -284,7 +284,7 @@ Branche locale `lot-ux-mobile` (part de la branche de test, `3844146f` en ligne)
 4. Missions réordonnée (recherche, trois filtres, deux actions compactes, « Près de toi ») : FAIT.
 5. Accueil en tableau de bord (`components/accueil.tsx` : À faire maintenant, achats groupés qui peuvent t'intéresser, missions près de toi, activité récente ; trois cartes au plus, aucune section vide, aucun nom d'une autre entreprise) : FAIT.
 6. Passe mobile : parcours `e2e-ag-v1/ux-mobile.spec.ts` (iPhone SE, Android, ordinateur) : FAIT.
-7. Chaîne complète (`final41`), mise en ligne, vérification du commit servi, compte rendu : EN COURS. Si la session s'arrête ici : relancer `scratchpad/chaine41.sh` sur le dernier commit de `lot-ux-mobile`, ne pousser que si tout est à 0.
+7. Chaîne complète, mise en ligne, vérification : FAIT le 15 novembre 2026. Commit `d2d055cf` en ligne sur test.mobiiz.fr et api-test.mobiiz.fr (chaîne `final42` : 1170 moteur, 816 serveur, 291 + 16 + 78 parcours, tout à 0). Vérifié en ligne avec le compte de recette, sur iPhone SE, Android et ordinateur : accueil en tableau de bord, deux choix Quantitatifs, suivi, « Publier un besoin » (deux chemins, Échap), page Missions ; aucun débordement horizontal. Reste : rejouer l'assistant réel quand Greg aura refait la clé IA.
 
 À signaler à Greg : le jaune du code est #FED206 (son message dit #FFC800) : rien changé. Mission est ALLUMÉE sur le site de test (`MISSIONS_V1`), alors que son message dit « reste coupée » : rien changé.
 
