@@ -1,3 +1,4 @@
+import { ReglageMissions } from "../../platform/reglages/reglage-missions.js";
 import { Module } from "@nestjs/common";
 import { ANNUAIRE_COMMUNES, GeoApiCommunes, TableCommunes, type AnnuaireCommunes } from "../../platform/communes/communes.js";
 import type { AppConfig } from "../../platform/config/config.js";
@@ -26,7 +27,7 @@ import { BoiteController, CommunesController, DossierProController, MissionsAdmi
     { provide: ANNUAIRE_COMMUNES, useFactory: (c: AppConfig): AnnuaireCommunes => (c.env === "production" || c.env === "staging" ? new GeoApiCommunes() : new TableCommunes()), inject: [CONFIG] },
     {
       provide: MissionsService,
-      useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender, c: AppConfig) => {
+      useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender, c: AppConfig, r: ReglageMissions) => {
         const notifications = new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl);
         return new MissionsService(
           p,
@@ -37,12 +38,12 @@ import { BoiteController, CommunesController, DossierProController, MissionsAdmi
               await notifications.prevenir(companyId, { titre: a.titre, corps: a.detail, url: a.href, etiquette: a.cle }, { objet: `${a.titre} : ${a.detail}`, texte: `${a.titre}\n${a.detail}\n\n${a.action} : ${notifications.lienVers(a.href)}` }, { sansEmail: o.sansEmail });
             },
           },
-          { actif: c.missionsV1, secret: c.authSecret },
+          { actif: () => r.actif(), secret: c.authSecret },
         );
       },
-      inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER, CONFIG],
+      inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER, CONFIG, ReglageMissions],
     },
-    { provide: BoiteService, useFactory: (p: PrismaService, m: MissionsService, c: AppConfig) => new BoiteService(p, m, c.missionsV1), inject: [PrismaService, MissionsService, CONFIG] },
+    { provide: BoiteService, useFactory: (p: PrismaService, m: MissionsService, r: ReglageMissions) => new BoiteService(p, m, () => r.actif()), inject: [PrismaService, MissionsService, ReglageMissions] },
   ],
   exports: [MissionsService, BoiteService],
 })

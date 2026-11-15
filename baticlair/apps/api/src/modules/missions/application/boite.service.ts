@@ -17,12 +17,13 @@ export class BoiteService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly missions: MissionsService,
-    private readonly missionsActives: boolean,
+    private readonly missionsActives: () => Promise<boolean>,
   ) {}
 
   async boite(t: TenantContext): Promise<{ items: ElementBoite[]; missions: boolean }> {
+    const missions = await this.missionsActives();
     const [conversations, emails, reponses, lues] = await Promise.all([
-      this.missionsActives ? this.missions.conversations(t, "toutes").then((r) => r.items) : [],
+      missions ? this.missions.conversations(t, "toutes").then((r) => r.items) : [],
       this.prisma.emailRecuArtisan.findMany({
         where: { companyId: t.companyId },
         orderBy: { recuLe: "desc" },
@@ -67,7 +68,7 @@ export class BoiteService {
         href: `/chantiers/${r.priceRequest.projectId}#fournisseurs`,
       })),
     ];
-    return { items, missions: this.missionsActives };
+    return { items, missions };
   }
 
   /** Marquer lu un élément de MA boîte. La clé dit le circuit ; un identifiant d'une autre entreprise répond 404. */

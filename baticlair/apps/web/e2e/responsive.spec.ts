@@ -223,8 +223,9 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
   }
 
   // Espace négoce (23 octobre) : l'invitation, la page « Créez votre accès », puis le compte (dépôt, paliers) par l'API.
-  const invitations = (await appel<{ emails: { text: string }[] }>(page, "GET", `/v1/internal/test/emails?to=${encodeURIComponent(ponant)}`)).body.emails;
-  const lienInvitation = invitations.map((m) => /https?:\/\/[^\s]+(\/negoce\/rejoindre\/[A-Za-z0-9_.-]+)/.exec(m.text)?.[1]).filter(Boolean).at(-1)!;
+  // Plus d'e-mail « créez votre accès » à part (16 novembre 2026) : le lien est celui que l'application donne à l'artisan.
+  const boucle = await appel<{ lienInvitation: string }>(page, "POST", "/v1/groupe/negoces/boucle", { email: ponant });
+  const lienInvitation = /https?:\/\/[^\s]+(\/negoce\/rejoindre\/[A-Za-z0-9_.-]+)/.exec(boucle.body.lienInvitation)![1]!;
   const negoce = await passeGuide(await (await browser.newContext()).newPage());
   for (const size of WIDTHS) {
     await negoce.setViewportSize({ width: size.width, height: size.height });

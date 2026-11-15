@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, Inject, Param, Post, Query } from "@ne
 import { Throttle } from "@nestjs/throttler";
 import { z } from "zod";
 import { AdresseAlerte } from "../../../platform/alerts/adresse-alerte.js";
+import { ReglageMissions } from "../../../platform/reglages/reglage-missions.js";
 import { notFound } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
@@ -15,6 +16,7 @@ const court = z.string().trim().max(80).optional();
 const filtresArtisans = z.object({ q: court, metier: court, departement: court, formule: z.enum(["payant", "decouverte", "essentiel", "pro", "echec"]).optional(), promo: court, recents: z.enum(["1"]).optional() });
 const filtresNegoces = z.object({ q: court, verifie: z.enum(["oui", "non"]).optional(), famille: court });
 const questionBody = z.object({ question: z.string().trim().min(2).max(400) });
+const missionsBody = z.object({ actif: z.boolean() });
 const alerteBody = z.object({ adresse: z.string().trim().email().max(200) });
 const jetonBody = z.object({ jeton: z.string().min(10).max(200) });
 
@@ -30,6 +32,7 @@ export class AdminVueController {
     @Inject(PilotageService) private readonly pilotage: PilotageService,
     @Inject(QuestionAdminService) private readonly questions: QuestionAdminService,
     @Inject(AdresseAlerte) private readonly adresse: AdresseAlerte,
+    @Inject(ReglageMissions) private readonly missions: ReglageMissions,
   ) {}
 
   @Get("accueil")
@@ -101,6 +104,23 @@ export class AdminVueController {
     await this.pilotage.exiger(user);
     await this.pilotage.journal(user, "alerte_adresse_demandee", b.adresse);
     return this.adresse.demander(b.adresse, user.email);
+  }
+
+  /** L'interrupteur des missions (Greg, 16 novembre 2026) : coupées, l'application affiche « Bientôt ». */
+  @Get("reglages/missions")
+  async etatMissions(@CurrentUser() user: AuthenticatedUser) {
+    await this.pilotage.exiger(user);
+    return this.missions.etat();
+  }
+
+  /** Un clic : ouvre ou coupe les missions pour tout le monde, sans redéploiement. Noté au journal de l'admin. */
+  @Throttle({ default: HOURLY(30) })
+  @Post("reglages/missions")
+  @HttpCode(200)
+  async reglerMissions(@CurrentUser() user: AuthenticatedUser, @Body(new ZodPipe(missionsBody)) b: z.infer<typeof missionsBody>) {
+    await this.pilotage.exiger(user);
+    await this.pilotage.journal(user, b.actif ? "missions_ouvertes" : "missions_coupees", null);
+    return this.missions.regler(b.actif);
   }
 }
 

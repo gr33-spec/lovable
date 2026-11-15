@@ -432,3 +432,28 @@ test("Dossier d'une demande (Greg, 6 novembre 2026) : Suivi, Offres, Documents ;
     await expect(page.getByRole("navigation", { name: "Mes demandes" }).getByRole("link", { name: /Toiture Le Goff/ })).toHaveAttribute("aria-current", "page");
   }
 });
+
+test("Missions coupées : l'onglet reste dans le menu, l'écran dit « Bientôt » et explique le principe, aucune fonction n'est proposée", async ({ page }) => {
+  // Greg, 16 novembre 2026 : « affiche "Bientôt" avec une courte explication du concept […]. Fonctions désactivées. »
+  await inscrire(page);
+  const nav = page.getByRole("navigation", { name: "Navigation principale" });
+  await nav.getByRole("link", { name: "Missions", exact: true }).click();
+  await expect(page).toHaveURL(/\/missions$/);
+  const bientot = page.getByRole("region", { name: "Missions : bientôt" });
+  await expect(bientot.getByText("Bientôt", { exact: true })).toBeVisible();
+  await expect(bientot).toContainText("tu proposes tes services");
+  await expect(bientot).toContainText("tu trouves du renfort");
+  await expect(bientot).toContainText("Mobiiz fait uniquement la mise en relation.");
+  // Jamais d'intérim, de recrutement ni de mission garantie ; aucune action des missions.
+  await expect(page.getByRole("main")).not.toContainText(/intérim|recrutement|garanti/i);
+  await expect(page.getByText(/Je propose une mission|Je propose mes services/)).toHaveCount(0);
+  await expect(page.getByPlaceholder("Rechercher un métier ou une ville")).toHaveCount(0);
+  // Les écrans profonds ne s'ouvrent pas non plus, et le serveur refuse.
+  await page.goto("/missions/nouvelle");
+  await expect(page.getByRole("region", { name: "Missions : bientôt" })).toBeVisible();
+  expect((await apiJson(page, "GET", "/v1/missions/annonces?type=mission")).status).toBe(404);
+  // Pas de débordement, et l'accueil ne montre aucune section Missions.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+  await page.goto("/");
+  await expect(page.getByRole("region", { name: "Missions près de toi" })).toHaveCount(0);
+});

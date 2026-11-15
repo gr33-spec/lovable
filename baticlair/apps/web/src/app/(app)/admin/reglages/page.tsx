@@ -83,6 +83,70 @@ function Reglages() {
           </p>
         ) : null}
       </Card>
+      <ReglageMissions />
     </>
+  );
+}
+
+/**
+ * L'INTERRUPTEUR DES MISSIONS (Greg, 16 novembre 2026) : coupées, l'application affiche « Bientôt » ; un clic les ouvre pour
+ * tout le monde, sans redéploiement. Rien n'est supprimé quand on les recoupe.
+ */
+function ReglageMissions() {
+  const charger = useCallback((signal: AbortSignal) => api<{ actif: boolean; source: "admin" | "defaut" }>("/v1/admin/vue/reglages/missions", { signal }), []);
+  const { data, error, reload } = useResource(charger);
+  const [occupe, setOccupe] = useState(false);
+  const [confirmer, setConfirmer] = useState(false);
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  async function regler(actif: boolean) {
+    if (occupe) return;
+    setOccupe(true);
+    setMessage(null);
+    try {
+      await api("/v1/admin/vue/reglages/missions", { method: "POST", body: { actif } });
+      setMessage({ ok: true, texte: actif ? "Les missions sont ouvertes. Les artisans les voient dans la minute." : "Les missions sont coupées : l'application affiche « Bientôt »." });
+      setConfirmer(false);
+      reload();
+    } catch (x) {
+      setMessage({ ok: false, texte: `Rien n'est changé : ${messageErreur(x)}` });
+    } finally {
+      setOccupe(false);
+    }
+  }
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <SectionTitle>Missions</SectionTitle>
+      {error ? <ErrorNotice error={error} onRetry={reload} /> : !data ? <Spinner /> : (
+        <>
+          <p className="text-[16px]">
+            Les missions sont <strong>{data.actif ? "ouvertes" : "coupées"}</strong>
+            {data.actif ? "." : " : les artisans voient « Bientôt » et le principe."}
+          </p>
+          <p className="text-[15px] text-muted">Ouvre-les quand il y a assez d&apos;artisans inscrits. Tu peux les recouper à tout moment : rien n&apos;est supprimé.</p>
+          {confirmer ? (
+            <div role="alertdialog" aria-label={data.actif ? "Couper les missions ?" : "Ouvrir les missions ?"} className="flex flex-col gap-2 rounded-xl bg-warn-bg p-3">
+              <p className="text-[15px] font-semibold text-warn">{data.actif ? "Couper les missions pour tous les artisans ?" : "Ouvrir les missions pour tous les artisans ?"}</p>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => void regler(!data.actif)} disabled={occupe}>
+                  {data.actif ? "Oui, couper" : "Oui, ouvrir"}
+                </Button>
+                <Button variant="secondary" onClick={() => setConfirmer(false)} disabled={occupe}>
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button variant={data.actif ? "secondary" : "primary"} onClick={() => setConfirmer(true)}>
+              {data.actif ? "Couper les missions" : "Ouvrir les missions"}
+            </Button>
+          )}
+        </>
+      )}
+      {message ? (
+        <p role={message.ok ? "status" : "alert"} className={`text-[15px] font-semibold ${message.ok ? "text-ok" : "text-danger"}`}>
+          {message.texte}
+        </p>
+      ) : null}
+    </Card>
   );
 }

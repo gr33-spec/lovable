@@ -34,7 +34,7 @@ const listesItem: NavItem = {
   match: (p: string) => p.startsWith("/chantiers"),
 };
 const groupeItem: NavItem = { href: "/achats-groupes", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/achats-groupes") || p.startsWith("/regroupements") || p.startsWith("/groupe") };
-/** Missions entre entreprises (Greg, 10 novembre 2026) : le quatrième onglet, allumé par le réglage `MISSIONS_V1` ; les messages y vivent. */
+/** Missions entre entreprises (Greg, 10 novembre 2026) : le quatrième onglet, toujours présent ; les messages y vivent quand les missions sont ouvertes. */
 const missionsItem: NavItem = { href: "/missions", label: fr.nav.missions, icon: Briefcase, match: (p: string) => p.startsWith("/missions") || (p.startsWith("/messages") && !p.startsWith("/messages/negoce")) };
 /** Ordinateur seulement (Greg, 31 octobre 2026, soir : « on a de la place sur l'écran ») : « Mes négoces » à portée de clic. */
 const negocesItem: NavItem = { href: "/fournisseurs", label: "Mes négoces", icon: Truck, match: (p: string) => p.startsWith("/fournisseurs") };
@@ -55,7 +55,9 @@ export function AppNav() {
   const pathname = usePathname();
   const theme = useTheme();
   const groupe = useGroupeActif();
-  const missions = useMissionsActif() === true;
+  // Greg, 16 novembre 2026 : l'onglet Missions reste toujours là ; tant que l'admin n'a pas ouvert les missions, il porte
+  // « Bientôt » et mène à l'écran qui explique le principe.
+  const missionsBientot = useMissionsActif() === false;
   // Le chat d'un chantier se lit en plein écran sur téléphone (référentiel §21) : le menu laisse la place à la barre de message.
   const inChat = /^\/chantiers\/(?!nouveau$)[^/]+$/.test(pathname);
   // Profil, Apparence (Greg, 1er novembre 2026) : un écran d'édition, l'aperçu du PDF et « Enregistrer » ont besoin de la
@@ -83,10 +85,20 @@ export function AppNav() {
           active ? "max-lg:text-accent-text" : "max-lg:text-muted max-lg:active:text-ink"
         } ${activeOrdinateur ? "lg:bg-(--voile-3) lg:text-ink" : "lg:text-ink/65 lg:hover:bg-(--voile-1) lg:hover:text-ink"}`}
       >
-        <span className={`flex h-8 w-11 items-center justify-center rounded-full transition-[background-color] duration-150 lg:h-auto lg:w-auto lg:bg-transparent ${active ? "max-lg:bg-accent-soft" : ""} ${activeOrdinateur ? "lg:text-accent-text" : ""}`}>
+        <span className={`relative flex h-8 w-11 items-center justify-center rounded-full transition-[background-color] duration-150 lg:h-auto lg:w-auto lg:bg-transparent ${active ? "max-lg:bg-accent-soft" : ""} ${activeOrdinateur ? "lg:text-accent-text" : ""}`}>
           <Icon size={22} aria-hidden="true" strokeWidth={active ? 2.4 : 2} />
+          {item === missionsItem && missionsBientot ? (
+            <span aria-hidden="true" className="absolute -top-1.5 left-1/2 -translate-x-1/2 rounded-full bg-accent px-1.5 text-[9px] leading-[14px] font-extrabold whitespace-nowrap text-on-accent lg:hidden">
+              Bientôt
+            </span>
+          ) : null}
         </span>
         <span className="text-center leading-[1.1] text-balance max-lg:text-[11px] lg:whitespace-nowrap">{item.label}</span>
+        {item === missionsItem && missionsBientot ? (
+          <span aria-hidden="true" className="ml-auto hidden rounded-full bg-accent px-2 text-[11px] leading-5 font-extrabold text-on-accent lg:inline">
+            Bientôt
+          </span>
+        ) : null}
       </Link>
     );
   };
@@ -99,7 +111,7 @@ export function AppNav() {
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
           colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}
-      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${["grid-cols-2", "grid-cols-3", "grid-cols-4"][Number(groupe) + Number(missions)]} rounded-[26px] bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
+      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-4" : "grid-cols-3"} rounded-[26px] bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
         <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
           <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
         </span>
@@ -120,7 +132,7 @@ export function AppNav() {
         {link(listesItem)}
         {groupe ? link(groupeItem) : null}
         {/* Prompt maître (Greg, 10 novembre 2026) : quatre entrées fixes, Accueil, Quantitatifs, Achats groupés, Missions. */}
-        {missions ? link(missionsItem) : null}
+        {link(missionsItem)}
         {link(negocesItem, true)}
         <span aria-hidden="true" className="hidden grow lg:block" />
         {link(profilItem, true)}

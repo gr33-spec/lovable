@@ -31,15 +31,33 @@ import { BoutonContour, BoutonJaune, CARTE, CarteLien, EcranTitre, Encart, EtatE
 const typesLisibles = (types: string[]) => types.map((t) => libelleDe(TYPES_MISSION, t)).filter(Boolean).join(" · ");
 const quand = (a: AnnonceVue) => (a.type === "mission" ? `du ${periodeLisible(a.debut, a.fin)}` : `à partir du ${jourLisible(a.debut)}`);
 
-/** Missions coupées (réglage serveur) : un écran clair, jamais une page cassée. */
+/**
+ * Missions coupées (interrupteur de l'admin) : « Bientôt », avec le principe en trois lignes (Greg, 16 novembre 2026 : « un
+ * artisan indépendant propose ses services, une entreprise surchargée trouve du renfort ; Mobiiz fait uniquement la mise
+ * en relation »). Aucune fonction n'est proposée ici ; jamais une page cassée.
+ */
 export function MissionsIndisponibles() {
   return (
     <>
       <GrandTitre sous="Mise en relation entre entreprises du bâtiment.">Missions</GrandTitre>
-      <div className={`flex flex-col gap-2 p-5 ${CARTE}`}>
-        <p className="text-[18px] font-extrabold">Bientôt disponible</p>
-        <p className="text-[14px] text-[#5c5648]">Les missions entre entreprises ne sont pas encore ouvertes sur cet espace. Tes quantitatifs et tes achats groupés restent là.</p>
-      </div>
+      <section aria-label="Missions : bientôt" className={`flex flex-col gap-4 p-5 ${CARTE}`}>
+        <p className="flex items-center gap-2">
+          <Etiquette ton="jaune">Bientôt</Etiquette>
+        </p>
+        <p className="text-[18px] leading-snug font-extrabold">Du renfort entre artisans, quand le planning déborde.</p>
+        <ul className="flex flex-col gap-3 text-[15px] leading-snug text-[#5c5648]">
+          <li>
+            <strong className="text-[#16140f]">Tu es indépendant</strong> (tu te lances, ou un chantier est décalé) : tu proposes tes services, avec tes compétences et tes diplômes.
+          </li>
+          <li>
+            <strong className="text-[#16140f]">Ton entreprise est surchargée</strong> : tu trouves du renfort près de chez toi, pour le métier et le nombre de personnes qu&apos;il te faut.
+          </li>
+          <li>
+            <strong className="text-[#16140f]">Mobiiz fait uniquement la mise en relation.</strong> Vous vous arrangez entre vous : contrat, assurances, attestations.
+          </li>
+        </ul>
+        <p className="text-[14px] text-[#5c5648]">On ouvre les missions dès qu&apos;il y a assez d&apos;artisans inscrits près de chez toi. Tes quantitatifs et tes achats groupés, eux, marchent déjà.</p>
+      </section>
       <LienContour href="/">Revenir à l&apos;accueil</LienContour>
     </>
   );

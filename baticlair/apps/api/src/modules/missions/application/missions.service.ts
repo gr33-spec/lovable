@@ -70,12 +70,12 @@ export class MissionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ports: PortsMissions,
-    private readonly reglage: { actif: boolean; secret: string },
+    private readonly reglage: { actif: () => Promise<boolean>; secret: string },
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  private exiger(): void {
-    if (!this.reglage.actif) throw notFound("Missions");
+  private async exiger(): Promise<void> {
+    if (!(await this.reglage.actif())) throw notFound("Missions");
   }
   private async entreprise(id: string): Promise<EntrepriseVue> {
     const c = await this.prisma.company.findUniqueOrThrow({ where: { id }, select: { id: true, name: true, siretVerifieLe: true, address: true, imageProfil: { select: { updatedAt: true } } } });
@@ -107,7 +107,7 @@ export class MissionsService {
   /* --------------------------------------------------------------------------------------------- État et annonces */
 
   async etat(t: TenantContext) {
-    this.exiger();
+    await this.exiger();
     const [e, nonLus] = await Promise.all([this.entreprise(t.companyId), this.nonLus(t)]);
     return { actif: true, entreprise: e, nonLus };
   }
@@ -160,7 +160,7 @@ export class MissionsService {
 
   /** Les annonces publiées des AUTRES entreprises (jamais d'une entreprise bloquée), les plus proches d'abord. */
   async annonces(t: TenantContext, filtre: { type?: string; q?: string; departement?: string }) {
-    this.exiger();
+    await this.exiger();
     const [moi, bloquees] = await Promise.all([this.entreprise(t.companyId), this.bloquees(t.companyId)]);
     const q = filtre.q?.trim();
     const liste = await this.prisma.annonceMission.findMany({
@@ -184,7 +184,7 @@ export class MissionsService {
 
   /** « Mes missions » : mes annonces (avec le nombre de réponses et de messages) et mes réponses. */
   async miennes(t: TenantContext) {
-    this.exiger();
+    await this.exiger();
     const [annonces, reponses] = await Promise.all([
       this.prisma.annonceMission.findMany({ where: { companyId: t.companyId }, orderBy: { createdAt: "desc" }, take: 100, include: { _count: { select: { reponses: { where: { statut: "envoyee" } }, conversations: true } } } }),
       this.prisma.reponseMission.findMany({ where: { companyId: t.companyId }, orderBy: { createdAt: "desc" }, take: 100, include: { annonce: true } }),
@@ -210,7 +210,7 @@ export class MissionsService {
   }
 
   async publier(t: TenantContext, type: TypeAnnonce, s: SaisieMission | SaisieDisponibilite) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     this.controler(type, s);
     if (!(await this.verifiee(t.companyId))) throw new DomainError("forbidden", "Company not verified", { reason: "non_verifie", phrase: "Vérifie d'abord ton entreprise (SIRET) pour publier une annonce." });
@@ -229,7 +229,7 @@ export class MissionsService {
   }
 
   async modifier(t: TenantContext, id: string, s: SaisieMission | SaisieDisponibilite) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const a = await this.mienne(t, id);
     if (!peutAnnonce(a.statut as StatutAnnonce, "modifier")) throw validationFailed("Closed ad", { reason: "annonce_fermee", phrase: "Une annonce fermée ne se modifie plus." });
@@ -240,7 +240,7 @@ export class MissionsService {
   }
 
   async changerStatut(t: TenantContext, id: string, action: Exclude<ActionAnnonce, "modifier">) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const a = await this.mienne(t, id);
     if (!peutAnnonce(a.statut as StatutAnnonce, action)) throw validationFailed("Impossible transition", { reason: "action_impossible", phrase: a.statut === "fermee" ? "Cette annonce est déjà fermée." : "Cette action n'est pas possible pour l'instant." });
@@ -264,7 +264,7 @@ export class MissionsService {
   }
 
   async annonce(t: TenantContext, id: string) {
-    this.exiger();
+    await this.exiger();
     const a = await this.lisible(t, id);
     const mienne = a.companyId === t.companyId;
     if (!mienne) await this.prisma.annonceMission.update({ where: { id }, data: { consultations: { increment: 1 } } }).catch(() => undefined);
@@ -287,7 +287,7 @@ export class MissionsService {
   }
 
   async enregistrer(t: TenantContext, id: string, garder: boolean) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const a = await this.lisible(t, id);
     if (a.companyId === t.companyId) throw validationFailed("Own ad", { reason: "soi_meme", phrase: "C'est ta propre annonce." });
@@ -297,7 +297,7 @@ export class MissionsService {
   }
 
   async enregistrees(t: TenantContext) {
-    this.exiger();
+    await this.exiger();
     const liste = await this.prisma.annonceEnregistree.findMany({ where: { companyId: t.companyId }, include: { annonce: true }, orderBy: { createdAt: "desc" }, take: 100 });
     const bloquees = await this.bloquees(t.companyId);
     const visibles = liste.filter((e) => !bloquees.has(e.annonce.companyId));
@@ -313,7 +313,7 @@ export class MissionsService {
   }
 
   async repondre(t: TenantContext, annonceId: string, s: SaisieReponse) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const a = await this.lisible(t, annonceId);
     if (a.type !== "mission") throw validationFailed("Not a mission", { reason: "pas_une_mission", phrase: "On répond seulement à une mission." });
@@ -334,7 +334,7 @@ export class MissionsService {
   }
 
   async retirerReponse(t: TenantContext, annonceId: string) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     if (!isUuid(annonceId)) throw notFound("Réponse");
     const r = await this.prisma.reponseMission.findUnique({ where: { annonceId_companyId: { annonceId, companyId: t.companyId } } });
@@ -369,7 +369,7 @@ export class MissionsService {
 
   /** Les réponses reçues à MA mission (jamais celles d'une entreprise bloquée ni une réponse retirée). */
   async reponses(t: TenantContext, annonceId: string) {
-    this.exiger();
+    await this.exiger();
     const a = await this.mienne(t, annonceId);
     const bloquees = await this.bloquees(t.companyId);
     const liste = (await this.prisma.reponseMission.findMany({ where: { annonceId, statut: "envoyee" }, orderBy: { createdAt: "asc" } })).filter((r) => !bloquees.has(r.companyId));
@@ -381,7 +381,7 @@ export class MissionsService {
 
   /** Une réponse : lue par son auteur ou par l'auteur de la mission, personne d'autre. */
   async reponse(t: TenantContext, id: string) {
-    this.exiger();
+    await this.exiger();
     if (!isUuid(id)) throw notFound("Réponse");
     const r = await this.prisma.reponseMission.findUnique({ where: { id }, include: { annonce: true } });
     if (!r || (r.companyId !== t.companyId && r.annonce.companyId !== t.companyId)) throw notFound("Réponse");
@@ -408,7 +408,7 @@ export class MissionsService {
    * répondu. Disponibilité : une entreprise vérifiée, avec l'auteur de l'annonce publiée. Rappelée, elle rend la même.
    */
   async ouvrir(t: TenantContext, annonceId: string, autreIdDemande: string | null) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const a = await this.lisible(t, annonceId);
     const estAuteur = a.companyId === t.companyId;
@@ -442,12 +442,12 @@ export class MissionsService {
   }
   /** Le nombre de conversations où le dernier message vient de l'autre et n'a pas été lu. */
   async nonLus(t: TenantContext): Promise<number> {
-    if (!this.reglage.actif) return 0;
+    if (!(await this.reglage.actif())) return 0;
     return (await this.conversations(t, "non-lues")).items.length;
   }
 
   async conversations(t: TenantContext, filtre: "toutes" | "non-lues" | "archivees") {
-    this.exiger();
+    await this.exiger();
     const liste = await this.prisma.conversationMission.findMany({
       where: { OR: [{ annonceurId: t.companyId }, { autreId: t.companyId }] },
       orderBy: [{ dernierMessageLe: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
@@ -478,7 +478,7 @@ export class MissionsService {
 
   /** Lire une conversation la marque lue pour MON côté ; les coordonnées n'apparaissent qu'après l'accord des deux. */
   async conversation(t: TenantContext, id: string) {
-    this.exiger();
+    await this.exiger();
     const c = await this.conversationDe(t, id);
     const cote = this.cote(c, t.companyId);
     await this.prisma.conversationMission.update({ where: { id }, data: cote === "annonceur" ? { luAnnonceurLe: this.now() } : { luAutreLe: this.now() } });
@@ -506,7 +506,7 @@ export class MissionsService {
 
   /** Écrire : idempotent par `cle` (un envoi rejoué n'écrit qu'un message). Rend le message et dit s'il est nouveau. */
   async ecrire(t: TenantContext, id: string, texteBrut: string, cle: string, fichier?: { nom: string; type: string; contenu: Uint8Array }) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const c = await this.conversationDe(t, id);
     if (c.bloqueeLe) throw new DomainError("forbidden", "Blocked conversation", { reason: "bloquee", phrase: "Cette conversation est fermée." });
@@ -541,7 +541,7 @@ export class MissionsService {
 
   /** « Proposer l'échange des coordonnées » : chacun accepte de son côté ; rien n'est montré avant les DEUX accords. */
   async coordonnees(t: TenantContext, id: string, accepte: boolean) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const c = await this.conversationDe(t, id);
     if (c.bloqueeLe) throw new DomainError("forbidden", "Blocked conversation", { reason: "bloquee", phrase: "Cette conversation est fermée." });
@@ -561,7 +561,7 @@ export class MissionsService {
   }
 
   async archiver(t: TenantContext, id: string, archive: boolean) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const c = await this.conversationDe(t, id);
     const valeur = archive ? this.now() : null;
@@ -571,7 +571,7 @@ export class MissionsService {
 
   /** Bloquer l'autre entreprise : la conversation se ferme, plus aucun échange ni annonce entre les deux. */
   async bloquer(t: TenantContext, id: string) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const c = await this.conversationDe(t, id);
     const cibleId = c.annonceurId === t.companyId ? c.autreId : c.annonceurId;
@@ -584,7 +584,7 @@ export class MissionsService {
   }
 
   async signaler(t: TenantContext, id: string, motif: string, precision: string | null) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const c = await this.conversationDe(t, id);
     if (!MOTIFS_SIGNALEMENT.some((m) => m.id === motif)) throw validationFailed("Unknown reason", { reason: "motif", phrase: "Choisis un motif." });
@@ -610,7 +610,7 @@ export class MissionsService {
   }
 
   async joindreAAnnonce(t: TenantContext, annonceId: string, f: { nom: string; type: string; contenu: Uint8Array }) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const a = await this.mienne(t, annonceId);
     if (a.statut === "fermee") throw validationFailed("Closed ad", { reason: "annonce_fermee", phrase: "Une annonce fermée ne se modifie plus." });
@@ -621,13 +621,13 @@ export class MissionsService {
   }
 
   async dossier(t: TenantContext) {
-    this.exiger();
+    await this.exiger();
     const liste = await this.prisma.fichierPro.findMany({ where: { companyId: t.companyId, portee: "dossier" }, select: { id: true, categorie: true, titre: true, nom: true, type: true, taille: true, surProfil: true, createdAt: true }, orderBy: { createdAt: "desc" } });
     return { categories: CATEGORIES_DOCUMENT, items: liste.map((d) => ({ ...d, createdAt: d.createdAt.toISOString() })) };
   }
 
   async ajouterAuDossier(t: TenantContext, categorie: string, titre: string | null, f: { nom: string; type: string; contenu: Uint8Array }) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     if (!CATEGORIES_DOCUMENT.some((c) => c.id === (categorie as CategorieDocument))) throw validationFailed("Unknown category", { reason: "categorie", phrase: "Rubrique inconnue." });
     this.controlerFichier(f);
@@ -637,7 +637,7 @@ export class MissionsService {
   }
 
   async modifierDocument(t: TenantContext, id: string, maj: { titre?: string | null; surProfil?: boolean }) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     if (!isUuid(id)) throw notFound("Document");
     const r = await this.prisma.fichierPro.updateMany({ where: { id, companyId: t.companyId, portee: "dossier" }, data: { ...(maj.titre !== undefined ? { titre: maj.titre?.trim().slice(0, 120) || null } : {}), ...(maj.surProfil !== undefined ? { surProfil: maj.surProfil } : {}) } });
@@ -647,7 +647,7 @@ export class MissionsService {
 
   /** Supprimer un de MES fichiers : il disparaît aussi des réponses où il était partagé. */
   async supprimerFichier(t: TenantContext, id: string) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     if (!isUuid(id)) throw notFound("Fichier");
     const f = await this.prisma.fichierPro.findFirst({ where: { id, companyId: t.companyId, portee: { in: ["dossier", "annonce"] } }, select: { id: true } });
@@ -683,7 +683,7 @@ export class MissionsService {
 
   /** Un lien PRIVÉ ET TEMPORAIRE (5 minutes), lié à l'entreprise qui le demande : il ne sert à personne d'autre. */
   async lienFichier(t: TenantContext, id: string) {
-    this.exiger();
+    await this.exiger();
     if (!isUuid(id)) throw notFound("Fichier");
     const f = await this.prisma.fichierPro.findUnique({ where: { id }, select: { id: true, companyId: true, portee: true, annonceId: true, messageId: true, surProfil: true } });
     if (!f || !(await this.peutOuvrir(t, f))) throw notFound("Fichier");
@@ -693,7 +693,7 @@ export class MissionsService {
 
   /** Ouvre le fichier d'un lien : signature, échéance ET droit d'accès revérifiés (un droit retiré entre-temps ferme le lien). */
   async ouvrirFichier(t: TenantContext, jeton: string) {
-    this.exiger();
+    await this.exiger();
     const [id, expireTexte, signature] = jeton.split(".");
     const expire = Number(expireTexte);
     if (!id || !signature || !isUuid(id) || !Number.isFinite(expire)) throw notFound("Fichier");
@@ -709,7 +709,7 @@ export class MissionsService {
   /* --------------------------------------------------------------------------------------------- Profil public */
 
   async monProfil(t: TenantContext) {
-    this.exiger();
+    await this.exiger();
     const [e, p, dispo, docs] = await Promise.all([
       this.entreprise(t.companyId),
       this.prisma.profilPublic.findUnique({ where: { companyId: t.companyId } }),
@@ -720,7 +720,7 @@ export class MissionsService {
   }
 
   async enregistrerProfil(t: TenantContext, s: { visible: boolean; presentation: string | null; metiers: string[]; services: string | null; equipe: string | null; ville: string | null }) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     if (s.visible && !(await this.verifiee(t.companyId))) throw new DomainError("forbidden", "Company not verified", { reason: "non_verifie", phrase: "Vérifie d'abord ton entreprise (SIRET) pour rendre ton profil visible." });
     const d = { visible: s.visible, presentation: s.presentation?.trim() || null, metiers: s.metiers.map((m) => m.trim()).filter(Boolean).slice(0, 8), services: s.services?.trim() || null, equipe: s.equipe?.trim() || null, ville: s.ville?.trim() || null };
@@ -731,7 +731,7 @@ export class MissionsService {
 
   /** Le profil d'une AUTRE entreprise : seulement s'il est visible, ou si une annonce, une réponse ou une conversation nous lie. */
   async profil(t: TenantContext, companyId: string) {
-    this.exiger();
+    await this.exiger();
     if (!isUuid(companyId)) throw notFound("Profil");
     if (companyId === t.companyId) return { ...(await this.monProfil(t)), realisations: [] };
     if ((await this.bloquees(t.companyId)).has(companyId)) throw notFound("Profil");
@@ -758,7 +758,7 @@ export class MissionsService {
    * gardé. Une seule image par entreprise : en déposer une autre la remplace.
    */
   async deposerImageProfil(t: TenantContext, octets: Uint8Array) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     const propre = nettoyerImageProfil(octets);
     if ("faute" in propre) throw validationFailed("Invalid profile image", { reason: `image_${propre.faute}`, phrase: PHRASE_FAUTE_IMAGE_PROFIL[propre.faute] });
@@ -769,7 +769,7 @@ export class MissionsService {
   }
 
   async retirerImageProfil(t: TenantContext) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     await this.prisma.imageProfil.deleteMany({ where: { companyId: t.companyId } });
     await this.tracer(t, "image_profil", {}, { geste: "retiree" });
@@ -778,7 +778,7 @@ export class MissionsService {
 
   /** L'image d'une entreprise, pour un compte connecté ; une entreprise bloquée (dans un sens ou dans l'autre) répond 404. */
   async imageProfil(t: TenantContext, companyId: string): Promise<{ type: string; contenu: Uint8Array }> {
-    this.exiger();
+    await this.exiger();
     if (!isUuid(companyId)) throw notFound("Image");
     if (companyId !== t.companyId && (await this.bloquees(t.companyId)).has(companyId)) throw notFound("Image");
     const i = await this.prisma.imageProfil.findUnique({ where: { companyId } });
@@ -788,7 +788,7 @@ export class MissionsService {
 
   /** Signaler l'image d'une autre entreprise à l'équipe Mobiiz (un seul signalement par jour et par image). */
   async signalerImageProfil(t: TenantContext, companyId: string) {
-    this.exiger();
+    await this.exiger();
     assertCanWrite(t);
     if (!isUuid(companyId) || companyId === t.companyId) throw notFound("Image");
     if (!(await this.prisma.imageProfil.count({ where: { companyId } }))) throw notFound("Image");

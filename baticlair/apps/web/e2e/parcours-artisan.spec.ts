@@ -3482,12 +3482,18 @@ async function tacheDuMois(page: Page, maintenant: string): Promise<Record<strin
  * (`/negoce/rejoindre/<jeton>`) : e-mail prérempli, enseigne, un dépôt, ses paliers (gratuite jusqu'à X km, Y € jusqu'à
  * 1 000 km), le 22 coché d'office, les conditions. Puis son espace : « Prochaine clôture dans », jamais un nom d'artisan.
  */
+/** Le lien « créer son accès » d'un négoce de ma liste, tel que l'application le donne à l'artisan (plus aucun e-mail à part). */
+async function lienAccesNegoce(page: Page, email: string): Promise<string> {
+  const r = await apiJson<{ lienInvitation: string | null }>(page, "POST", "/v1/groupe/negoces/boucle", { email });
+  expect(r.status).toBe(200);
+  expect(r.body.lienInvitation).toMatch(/\/negoce\/rejoindre\//);
+  return r.body.lienInvitation!;
+}
+
 async function accesNegoceCree(browser: Browser, page: Page, email: string, enseigne: string, depot: string, livraison: [string, string]) {
-  const mail = (await emailsVers(page, email)).filter((m) => /\/negoce\/rejoindre\//.test(m.text)).at(-1)!;
-  expect(mail.subject).toBe("Des artisans de votre secteur vous ont ajouté au regroupement : créez votre accès");
-  expect(mail.text).toContain("Un artisan de votre secteur (22) vous a ajouté");
-  expect(mail.text).not.toMatch(/Toitures [ABC]/);
-  const lien = /https?:\/\/[^\s]+\/negoce\/rejoindre\/[A-Za-z0-9_.-]+/.exec(mail.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
+  // Un seul e-mail au négoce (Greg, 16 novembre 2026) : l'ajout dans « Mes négoces » n'envoie plus « créez votre accès » ; le
+  // lien (jamais le nom de l'artisan) est celui que l'artisan peut donner lui-même, et il part avec la première demande de prix.
+  const lien = (await lienAccesNegoce(page, email)).replace(/^https?:\/\/[^/]+/, "");
   const contexte = await browser.newContext({ ...(test.info().project.use as object) });
   const pageN = await passeGuide(await contexte.newPage());
   await pageN.goto(lien);
@@ -3709,8 +3715,7 @@ test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le
   await compteAuGroupe(page, "Toitures S", adresse);
   for (const i of [1, 2, 3]) {
     expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: `Négoce S${i}`, email: n(i), familles: ["couverture"] })).toBe(201);
-    const mail = (await emailsVers(page, n(i))).filter((m) => /\/negoce\/rejoindre\//.test(m.text)).at(-1)!;
-    const jeton = /\/negoce\/rejoindre\/([A-Za-z0-9_.-]+)/.exec(mail.text)![1]!;
+    const jeton = /\/negoce\/rejoindre\/([A-Za-z0-9_.-]+)/.exec(await lienAccesNegoce(page, n(i)))![1]!;
     const r = await page.request.post("/v1/negoce/inscription", {
       data: { jeton, email: n(i), siret: null, enseigne: `Négoce S${i}`, telephone: "02 98 00 00 00", depots: [{ adresse: `ZA du Port, ${ville}` }], livraison: { gratuiteJusquaKm: 30, paliers: [{ jusquaKm: 1000, prixHt: 50 }], maxKm: 1000 }, departements: [dep], conditions: true },
     });
