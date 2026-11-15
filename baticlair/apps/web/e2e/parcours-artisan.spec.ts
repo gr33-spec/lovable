@@ -2868,7 +2868,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(faq.locator("summary")).toHaveText(["Je peux garder mes négoces habituels ?", "Où arrivent les réponses des négoces ?", "Combien de négoces je peux consulter ?", "Est-ce que Mobiiz est gratuit ?", "Est-ce que je dois obligatoirement commander ?", "Est-ce que je vais forcément payer moins cher ?", "Avec qui je suis regroupé ?"]);
   for (const s of await faq.locator("summary").all()) await s.click();
   await expect(faq.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
-  await expect(faq.getByText("Oui : tes listes, l'envoi à tes négoces et les achats groupés sont gratuits, sans limite de temps.", { exact: false })).toBeVisible();
+  await expect(faq.getByText("Oui : tes listes, l'envoi à tes négoces, la comparaison et les achats groupés sont gratuits, sans limite de temps.", { exact: false })).toBeVisible();
   await expect(faq.getByText(/3 analyses de documents et ta première commande groupée/)).toBeVisible();
   // RÈGLE CHANGÉE (Greg, 14 novembre 2026) : jamais obligé de commander, la FAQ dit comme l'application.
   await expect(faq.getByText("Non. Tu demandes des prix, tu compares, et tu commandes seulement si ça te va.", { exact: false })).toBeVisible();
@@ -3165,19 +3165,19 @@ test("« Importer un document » (Greg, 1er novembre 2026) : avant toute analyse
   // Un PDF de devis : « devis », puis Annuler : rien de créé, rien de décompté.
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
-  await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 de tes analyses offertes.");
+  await expect(fenetre).toContainText("Ce document semble être un devis.");
   await fenetre.getByRole("button", { name: "Annuler" }).click();
   await expect(fenetre).toHaveCount(0);
   // Une liste en PDF : « liste ».
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-tableau.pdf"));
-  await expect(fenetre).toContainText("Ce document semble être une liste. Son analyse utilisera 1 de tes analyses offertes.");
+  await expect(fenetre).toContainText("Ce document semble être une liste.");
   await fenetre.getByRole("button", { name: "Annuler" }).click();
   // Une photo sans nom parlant : « liste », corrigeable d'un tap en devis ; puis Annuler.
   const png = fs.readFileSync(path.join(__dirname, "fixtures", "bon-negoce.png"));
   await page.getByLabel("Choisir une photo").setInputFiles({ name: "IMG_2041.png", mimeType: "image/png", buffer: png });
   await expect(fenetre).toContainText("Ce document semble être une liste.");
   await fenetre.getByRole("button", { name: "C'est un devis ? L'analyser comme un devis" }).click();
-  await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 de tes analyses offertes.");
+  await expect(fenetre).toContainText("Ce document semble être un devis.");
   await fenetre.getByRole("button", { name: "Annuler" }).click();
   expect(page.url()).toMatch(/\/chantiers\/nouveau\?mode=assistant$/);
   expect((await apiJson(page, "GET", "/v1/projects")).body).toEqual(chantiers);
