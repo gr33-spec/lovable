@@ -513,7 +513,8 @@ test("le menu : cinq onglets (recentrage du 25 octobre 2026) ; fournisseurs et c
   // le profil passe par l'avatar.
   // Revue UX (8 novembre 2026) : sur téléphone, trois onglets égaux, plus de bouton de création dans la barre ; sur
   // ordinateur, « Créer un quantitatif » reste en tête de la colonne.
-  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Créer un quantitatif", "Accueil", "Quantitatifs", "Achats groupés", "Mes négoces", "Profil"] : ["Accueil", "Quantitatifs", "Achats groupés"]);
+  // 16 novembre 2026 : l'onglet Missions est toujours là ; fonctions coupées, il porte la pastille « Bientôt ».
+  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Créer un quantitatif", "Accueil", "Quantitatifs", "Achats groupés", /Missions/, "Mes négoces", "Profil"] : ["Accueil", "Quantitatifs", "Achats groupés", /Missions/]);
   if (ordinateur) await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveAttribute("href", "/chantiers/nouveau");
   await menuArtisan(page, "Mon compte");
   await expect(page.getByRole("heading", { name: "Profil et paramètres" })).toBeVisible();
@@ -2668,9 +2669,8 @@ test("Mets ton négoce dans la boucle (Greg, 23 octobre) : un e-mail, un bouton,
   expect(message).not.toContain("Toitures Martin");
   await expect(prevenir.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", `https://wa.me/?text=${encodeURIComponent(message!)}`);
   await expect(prevenir.getByRole("link", { name: "Envoyer par SMS" })).toHaveAttribute("href", `sms:?&body=${encodeURIComponent(message!)}`);
-  // Le négoce a reçu son invitation, vouvoyée, sans le nom de l'artisan.
-  await expect.poll(async () => (await emailsVers(page, email.toLowerCase())).map((m) => m.subject)).toContainEqual("Des artisans de votre secteur vous ont ajouté au regroupement : créez votre accès");
-  expect((await emailsVers(page, email.toLowerCase())).map((m) => m.text).join("\n")).not.toContain("Toitures Martin");
+  // 16 novembre 2026 : plus d'e-mail « créez votre accès » ; le négoce n'est invité qu'avec sa première demande de prix.
+  expect(await emailsVers(page, email.toLowerCase())).toEqual([]);
   await expect(prevenir.getByRole("button", { name: "Copier le message" })).toBeVisible();
   // Rappuyer avec le même e-mail (autre casse) : toujours un seul négoce.
   await bloc.getByRole("button", { name: "Ajouter un autre négoce" }).click();
@@ -2726,7 +2726,7 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
   const guide = page.getByRole("dialog", { name: "Guide" });
   await expect(guide).toBeVisible();
   await expect(guide.getByRole("heading", { name: "Compare tes négoces" })).toBeVisible();
-  await expect(guide.getByText(/^Prochaine clôture : \w+ \d{1,2} \w+ à \d{1,2} h/)).toBeVisible();
+  await expect(guide.getByText(/^Prochaine clôture : \p{L}+ \d{1,2}(er)? \p{L}+ à \d{1,2} h/u)).toBeVisible();
   await expect(guide.getByRole("button", { name: "Passer le guide" })).toBeVisible();
   // La page derrière est inerte.
   await expect(page.getByRole("button", { name: "Mon menu" })).toHaveCount(0);
