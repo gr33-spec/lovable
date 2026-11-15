@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUp, Briefcase, CreditCard, FileText, MoreHorizontal, Paperclip } from "lucide-react";
+import { ArrowUp, Bell, Briefcase, CreditCard, FileText, MoreHorizontal, Paperclip } from "lucide-react";
 import { AvatarEntreprise } from "./image-profil";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,12 +30,12 @@ export function Boite() {
   const maintenant = new Date();
   // Une réponse saisie par le lien s'ouvre dans son quantitatif : elle est marquée lue au passage.
   const marquer = (i: ElementBoite) => {
-    if (i.nonLu && i.cle.startsWith("reponse:")) void api("/v1/boite/lu", { method: "POST", body: { cle: i.cle } }).catch(() => undefined);
+    if (i.nonLu && (i.cle.startsWith("reponse:") || i.cle.startsWith("alerte:"))) void api("/v1/boite/lu", { method: "POST", body: { cle: i.cle } }).catch(() => undefined);
   };
   return (
     <>
       <EcranTitre titre="Messages et réponses" retour="/" />
-      <GrandTitre sous={tous.length ? "Conversations Missions et réponses des négoces." : "Tes échanges apparaîtront ici."}>{data && tous.length === 0 ? "Aucun message pour le moment" : "Tout retrouver au même endroit"}</GrandTitre>
+      <GrandTitre sous={tous.length ? "Réponses des négoces, messages Mobiiz et conversations Missions." : "Tes échanges apparaîtront ici."}>{data && tous.length === 0 ? "Aucun message pour le moment" : "Tout retrouver au même endroit"}</GrandTitre>
       {tous.length > 0 ? <Recherche valeur={q} onChange={setQ} placeholder="Rechercher un message ou une demande" /> : null}
       <Puces label="Filtrer la boîte" choix={FILTRES_BOITE} valeur={filtre} onChange={setFiltre} />
       {/* Greg, 12 novembre 2026 : ce qui demande une action se lit d'abord ; le reste est déjà dans son quantitatif. */}
@@ -81,12 +81,12 @@ export function Boite() {
             <ul className="flex flex-col gap-3">
               {g.items.map((i) => (
                 <li key={i.cle}>
-                  <Link href={i.href} onClick={() => marquer(i)} aria-label={`${i.sorte === "mission" ? "Mission" : "Négoce"}, ${i.titre}${i.sorte === "negoce" ? (i.aClasser ? ", à classer" : ", classée dans son quantitatif") : ""}${i.nonLu ? ", non lu" : ""}`} className={`pressable flex items-start gap-3 p-4 ${CARTE}`}>
+                  <Link href={i.href} onClick={() => marquer(i)} aria-label={`${i.sorte === "mission" ? "Mission" : i.sorte === "mobiiz" ? "Mobiiz" : "Négoce"}, ${i.titre}${i.sorte === "negoce" ? (i.aClasser ? ", à classer" : ", classée dans son quantitatif") : ""}${i.nonLu ? ", non lu" : ""}`} className={`pressable flex items-start gap-3 p-4 ${CARTE}`}>
                     <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#efece6]">
-                      {i.sorte === "mission" ? <Briefcase size={20} /> : <CreditCard size={20} />}
+                      {i.sorte === "mission" ? <Briefcase size={20} /> : i.sorte === "mobiiz" ? <Bell size={20} /> : <CreditCard size={20} />}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <Etiquette ton={i.sorte === "mission" || i.aClasser ? "jaune" : "vert"}>{i.sorte === "mission" ? "Mission" : i.aClasser ? "Négoce · à classer" : "Négoce · classée"}</Etiquette>
+                      <Etiquette ton={i.sorte === "mobiiz" ? "gris" : i.sorte === "mission" || i.aClasser ? "jaune" : "vert"}>{i.sorte === "mission" ? "Mission" : i.sorte === "mobiiz" ? "Mobiiz" : i.aClasser ? "Négoce · à classer" : "Négoce · classée"}</Etiquette>
                       <span className="truncate text-[17px] font-extrabold">{i.titre}</span>
                       {i.sujet ? <span className="truncate text-[13px] font-extrabold text-[#6b5300]">{i.sujet}</span> : null}
                       <span className="truncate text-[13px] text-[#5c5648]">{i.extrait}</span>

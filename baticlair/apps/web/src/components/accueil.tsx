@@ -1,6 +1,7 @@
 "use client";
 
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, MessagesSquare } from "lucide-react";
+import type { ElementBoite } from "../../../../packages/domain/src/missions/missions";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { actionPrioritaire, lienAutres, type ActionCandidate } from "../../../../packages/domain/src/accueil/accueil";
@@ -10,7 +11,7 @@ import { Skeleton } from "@/components/ui";
 import { CarteLien, Etiquette } from "@/components/ux-kit";
 import { useGroupeActif } from "@/components/app-nav";
 import { useMissionsActif, type AnnonceVue } from "@/lib/missions";
-import { libelleLot, type AchatV1, type BesoinV1 } from "@/lib/ag-v1";
+import { dateCourte, libelleLot, type AchatV1, type BesoinV1 } from "@/lib/ag-v1";
 import { finDans, lienAchat } from "@/components/ag-v1-accueil";
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import type { Brouillon } from "@/lib/brouillon";
@@ -145,6 +146,10 @@ export function AccueilMaquette() {
   const { data: besoins } = useResource(useCallback((s: AbortSignal) => (groupe ? api<{ aFaire: BesoinV1[]; enCours: BesoinV1[] }>("/v1/ag/besoins", { signal: s }).catch(() => ({ aFaire: [], enCours: [] })) : Promise.resolve({ aFaire: [] as BesoinV1[], enCours: [] as BesoinV1[] })), [groupe]));
   const { data: annonces } = useResource(useCallback((s: AbortSignal) => (missions ? api<{ departement: string | null; items: AnnonceVue[] }>("/v1/missions/annonces?type=mission", { signal: s }).catch(() => ({ departement: null, items: [] })) : Promise.resolve({ departement: null, items: [] as AnnonceVue[] })), [missions]));
 
+  // Lot G (Greg, 15 novembre 2026) : la boîte unique « Messages et réponses » (réponses des négoces, messages Mobiiz,
+  // conversations Missions), avec le même état lu que la cloche. En panne : le bloc n'existe pas, l'accueil tient.
+  const { data: boite } = useResource(useCallback((s: AbortSignal) => api<{ items: ElementBoite[] }>("/v1/boite", { signal: s }).catch(() => null), []));
+
   const charge = brouillons !== null && next !== null && projets !== null;
   const achats = mes?.achats ?? [];
   const parProjet = new Map(projets?.items.map((p) => [p.id, p]) ?? []);
@@ -161,7 +166,32 @@ export function AccueilMaquette() {
   const pres = (annonces?.items ?? []).filter((a) => !a.mienne && annonces?.departement && a.departement === annonces.departement);
   // Activité récente : ses dernières listes, sauf celles déjà dites dans « À faire maintenant ».
   const dites = new Set(candidats.map((a) => projetDeUrl(a.href)).filter((x): x is string => x !== null));
-  const recentes = (projets?.items ?? []).filter((p) => !dites.has(p.id)).sort((x, y) => y.lastActivityAt.localeCompare(x.lastActivityAt));
+  // « Mes demandes en cours » (lot G) : les deux activités, jamais mêlées, chacune avec son type écrit. Une demande de
+  // prix partie et pas encore commandée ni réglée ; un besoin groupé encore vivant. D'abord ce qui a bougé (réponses,
+  // action attendue), puis le plus récent. Un besoin groupé qui vient d'être publié y figure aussitôt.
+  const demandesDePrix: Demande[] = (projets?.items ?? [])
+    .filter((p) => p.resume?.demande && !p.resume.demande.choisi && !p.resume.demande.regle)
+    .map((p) => {
+      const d = p.resume!.demande!;
+      return { cle: `d-${p.id}`, type: "Demande de prix" as const, nom: p.name, statut: p.resume!.statut, detail: [pluriel(p.resume!.lignes, "ligne", "lignes"), d.reponses > 0 ? `${d.reponses} réponse${d.reponses > 1 ? "s" : ""} sur ${d.negoces}` : `${pluriel(d.negoces, "négoce consulté", "négoces consultés")}, pas encore de réponse`].join(" · "), href: `/chantiers/${p.id}`, action: d.reponses > 0, le: p.lastActivityAt };
+    });
+  const besoinsGroupes: Demande[] = [...(besoins?.aFaire ?? []).map((b) => ({ b, action: true })), ...(besoins?.enCours ?? []).map((b) => ({ b, action: false }))]
+    .filter(({ b }) => b.etat !== "retire")
+    .map(({ b, action }) => ({
+      cle: `g-${b.id}`,
+      type: "Achat groupé" as const,
+      nom: b.nom,
+      statut: b.statut.libelle,
+      detail: [b.quantite.lisible, b.achat.resume ? `${b.achat.resume.entreprises} entreprise${b.achat.resume.entreprises > 1 ? "s" : ""}${b.achat.resume.volume ? ` · ${b.achat.resume.volume} au total` : ""}` : null, b.achat.statut === "ouvert" ? `clôture le ${dateCourte(b.achat.ouvertJusquau)}` : null].filter(Boolean).join(" · "),
+      href: `/achats-groupes/besoins/${b.id}`,
+      action,
+      le: b.achat.resume?.derniereEvolution ?? b.achat.ouvertJusquau,
+    }));
+  const trier = (l: Demande[]) => [...l].sort((x, y) => Number(y.action) - Number(x.action) || y.le.localeCompare(x.le));
+  const enCours = new Set(demandesDePrix.map((d) => d.href));
+  const recentes = (projets?.items ?? []).filter((p) => !dites.has(p.id) && !enCours.has(`/chantiers/${p.id}`)).sort((x, y) => y.lastActivityAt.localeCompare(x.lastActivityAt));
+  const nonLus = (boite?.items ?? []).filter((i) => i.nonLu);
+  const dernier = [...nonLus].sort((x, y) => y.le.localeCompare(x.le))[0] ?? null;
   const aucuneListe = charge && projets.items.length === 0 && candidats.length === 0;
 
   return (
@@ -200,6 +230,49 @@ export function AccueilMaquette() {
       {/* Le compte sans aucune liste : le seul départ utile. Dès la première liste, le « + » du menu suffit. */}
       {aucuneListe ? <CarteLien jaune href="/chantiers/nouveau" icone={ClipboardList} titre="Créer un quantitatif" sous="Prépare ta liste de matériaux." /> : null}
 
+      {demandesDePrix.length + besoinsGroupes.length > 0 ? (
+        <section aria-labelledby="accueil-demandes" className="flex flex-col gap-3 pt-2">
+          <h2 id="accueil-demandes" className="text-[20px] leading-tight font-extrabold tracking-[-0.02em]">
+            Mes demandes en cours
+          </h2>
+          {/* Deux activités, deux groupes : une demande de prix et un achat groupé ne se confondent jamais. */}
+          {(
+            [
+              ["Demandes de prix", trier(demandesDePrix), "/chantiers?vue=suivi", "Voir toutes mes demandes de prix"],
+              ["Achats groupés", trier(besoinsGroupes), "/achats-groupes/mes-besoins", "Voir tous mes besoins groupés"],
+            ] as const
+          ).map(([titre, liste, href, lienNom]) =>
+            liste.length > 0 ? (
+              <div key={titre} role="group" aria-label={titre} className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-3">
+                  {liste.slice(0, MAX_CARTES).map((d) => (
+                    <li key={d.cle}>
+                      <CarteLien href={d.href} titre={d.nom} sous={`${d.statut} · ${d.detail}`} etiquette={<Etiquette ton={d.type === "Achat groupé" ? "jaune" : "vert"}>{d.type}</Etiquette>} label={`${d.type} : ${d.nom}, ${d.statut}, ${d.detail}`} />
+                    </li>
+                  ))}
+                </ul>
+                {liste.length > MAX_CARTES ? (
+                  <Link href={href} aria-label={lienNom} className="flex min-h-11 items-center self-start text-[14px] font-extrabold text-accent-text">
+                    Voir toutes ({liste.length})
+                  </Link>
+                ) : null}
+              </div>
+            ) : null,
+          )}
+        </section>
+      ) : null}
+
+      {boite && boite.items.length > 0 ? (
+        <CarteLien
+          href="/messages"
+          icone={MessagesSquare}
+          titre="Messages et réponses"
+          sous={dernier ? `${dernier.sorte === "negoce" ? "Négoce" : dernier.sorte === "mission" ? "Mission" : "Mobiiz"} · ${dernier.sorte === "mobiiz" ? (dernier.sujet ?? dernier.titre) : dernier.titre}` : "Tout est lu"}
+          pastille={nonLus.length > 0 ? <span className="flex min-w-7 shrink-0 items-center justify-center rounded-full bg-accent px-2 py-0.5 text-[13px] font-extrabold text-on-accent">{nonLus.length}</span> : undefined}
+          label={`Messages et réponses : ${nonLus.length > 0 ? pluriel(nonLus.length, "non lu", "non lus") : "tout est lu"}`}
+        />
+      ) : null}
+
       {suggestions.length > 0 ? (
         <Section id="accueil-achats" titre="Achats groupés qui peuvent t'intéresser" href="/achats-groupes" lienNom="Voir tous les achats groupés">
           {suggestions.slice(0, MAX_CARTES).map((a) => (
@@ -232,6 +305,18 @@ export function AccueilMaquette() {
       <InstallHint />
     </div>
   );
+}
+
+/** Une ligne de « Mes demandes en cours » : son type écrit (jamais la couleur seule), son état, ce qui compte, son lien. */
+interface Demande {
+  cle: string;
+  type: "Demande de prix" | "Achat groupé";
+  nom: string;
+  statut: string;
+  detail: string;
+  href: string;
+  action: boolean;
+  le: string;
 }
 
 /** Une carte de « À faire » : son état en étiquette, ce qu'il y a à faire, de quoi il s'agit ; entièrement cliquable. */

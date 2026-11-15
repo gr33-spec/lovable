@@ -22,7 +22,7 @@ export class BoiteService {
 
   async boite(t: TenantContext): Promise<{ items: ElementBoite[]; missions: boolean }> {
     const missions = await this.missionsActives();
-    const [conversations, emails, reponses, lues] = await Promise.all([
+    const [conversations, emails, reponses, lues, alertes] = await Promise.all([
       missions ? this.missions.conversations(t, "toutes").then((r) => r.items) : [],
       this.prisma.emailRecuArtisan.findMany({
         where: { companyId: t.companyId },
@@ -37,6 +37,10 @@ export class BoiteService {
         select: { id: true, reponduLe: true, supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } },
       }),
       this.prisma.lectureBoite.findMany({ where: { companyId: t.companyId }, select: { cle: true } }),
+      // Lot G (Greg, 15 novembre 2026) : les messages de Mobiiz (achats groupés, conseils) entrent dans la même boîte, avec
+      // le MÊME état lu que la cloche (`lu_le`). Les alertes « prix » et « missions » n'y sont pas : leur réponse ou leur
+      // conversation y figure déjà, on ne la montre pas deux fois.
+      this.prisma.alerteCourte.findMany({ where: { companyId: t.companyId, supprimeeLe: null, categorie: { in: ["groupe", "conseils"] } }, orderBy: { createdAt: "desc" }, take: 60 }),
     ]);
     const dejaLues = new Set(lues.map((l) => l.cle));
     const items: ElementBoite[] = [
@@ -67,6 +71,7 @@ export class BoiteService {
         nonLu: !dejaLues.has(`reponse:${r.id}`),
         href: `/chantiers/${r.priceRequest.projectId}#fournisseurs`,
       })),
+      ...alertes.map((a) => ({ cle: `alerte:${a.id}`, sorte: "mobiiz" as const, titre: "Mobiiz", sujet: a.titre, extrait: a.detail, le: a.createdAt.toISOString(), nonLu: !a.luLe, href: a.href })),
     ];
     return { items, missions };
   }
@@ -81,6 +86,9 @@ export class BoiteService {
     } else if (sorte === "reponse") {
       if (!(await this.prisma.priceRequestRecipient.count({ where: { id, priceRequest: { companyId: t.companyId } } }))) throw notFound("Élément");
       await this.prisma.lectureBoite.createMany({ data: [{ companyId: t.companyId, cle }], skipDuplicates: true });
+    } else if (sorte === "alerte") {
+      const r = await this.prisma.alerteCourte.updateMany({ where: { id, companyId: t.companyId, luLe: null }, data: { luLe: new Date() } });
+      if (r.count === 0 && !(await this.prisma.alerteCourte.count({ where: { id, companyId: t.companyId } }))) throw notFound("Élément");
     } else throw notFound("Élément");
     return { lu: true };
   }

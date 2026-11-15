@@ -235,6 +235,16 @@ describe("isolation entre entreprises", () => {
     expect(alertes).toHaveLength(1);
     expect(alertes[0]).toMatchObject({ titre: "Une entreprise vient de rejoindre ton besoin", href: `/achats-groupes/besoins/${premier.id}`, categorie: "groupe" });
     expect(alertes[0]!.detail).not.toMatch(/Toitures E/);
+    // Lot G : le message de Mobiiz est aussi dans la boîte unique ; le lire là le marque lu dans la cloche (un seul état).
+    const boite = (await agents[0]!.agent.get("/v1/boite").expect(200)).body.items as { cle: string; sorte: string; titre: string; sujet: string; nonLu: boolean; href: string }[];
+    const message = boite.find((i) => i.sorte === "mobiiz")!;
+    expect(message).toMatchObject({ titre: "Mobiiz", sujet: "Une entreprise vient de rejoindre ton besoin", nonLu: true, href: `/achats-groupes/besoins/${premier.id}` });
+    expect((await agents[0]!.agent.get("/v1/alertes").expect(200)).body.nonLues).toBe(1);
+    await agents[0]!.agent.post("/v1/boite/lu").send({ cle: message.cle }).expect(200);
+    expect((await agents[0]!.agent.get("/v1/alertes").expect(200)).body.nonLues).toBe(0);
+    // Isolation : une autre entreprise ne peut ni voir ni marquer ce message.
+    expect((await agents[1]!.agent.post("/v1/boite/lu").send({ cle: message.cle })).status).toBe(404);
+    expect(JSON.stringify((await agents[1]!.agent.get("/v1/boite").expect(200)).body)).not.toContain(message.cle);
     // Celui qui rejoint n'est pas prévenu de sa propre arrivée.
     expect(await ctx.prisma.alerteCourte.count({ where: { companyId: agents[4]!.companyId, cle: { startsWith: "ag-rejoint:" } } })).toBe(0);
   });

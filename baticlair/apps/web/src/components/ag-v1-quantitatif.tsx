@@ -108,12 +108,11 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           return { ...l, produit: { ...l.produit, attributs, nom: nomProduitV1(l.produit.type, attributs), aPreciser: (l.produit.aPreciser ?? []).filter((x) => !attributs[x.attribut] || attributs[x.attribut] === VALEUR_A_PRECISER) } };
         }
         if (!p || l.mention !== "a_preciser" || !l.produit || !l.quantite) return l;
-        const produit = etat.produits.find((x) => x.type === l.produit!.type)!;
         const attributs = { ...l.produit.attributs, ...p };
         if (manquantesV1(l.produit.type, attributs).length) return l;
         return { ...l, produit: { ...l.produit, attributs, nom: nomProduitV1(l.produit.type, attributs), manquantes: [] }, mention: "compatible" as const, texte: "Compatible avec un achat groupé", pourquoi: "Produit précisé par toi.", selectionnable: true };
       }),
-    [data, precisions, etat.produits],
+    [data, precisions],
   );
   // Les lignes qu'on ne peut pas grouper (déjà demandées, pas encore ouvertes…) sont repliées en bas : rien n'est caché.
   const groupables = (l: LigneQuantitatifV1) => l.selectionnable || l.mention === "a_preciser";
