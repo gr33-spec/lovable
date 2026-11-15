@@ -1,3 +1,4 @@
+import { formuleDe } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 
 /**
@@ -18,7 +19,7 @@ export function departementDe(adresse: string | null | undefined): string | null
 }
 
 export interface CarteAccueil {
-  cle: "inscrits" | "payants" | "decouverte" | "revenus" | "inscriptions_semaine" | "negoces";
+  cle: "inscrits" | "payants" | "gratuit" | "revenus" | "inscriptions_semaine" | "negoces";
   valeur: number;
   /** La valeur de comparaison (début du mois, mois dernier ou semaine dernière) et ce qu'elle est. */
   avant: number;
@@ -75,7 +76,7 @@ export class AdminVueService {
     const cartes: CarteAccueil[] = [
       { cle: "inscrits", valeur: inscrits, avant: inscritsAvant, reference: "depuis le début du mois", lien: "/admin/artisans" },
       { cle: "payants", valeur: payants, avant: payantsAvant, reference: "par rapport au mois dernier", lien: "/admin/artisans?formule=payant" },
-      { cle: "decouverte", valeur: Math.max(0, inscrits - payants), avant: Math.max(0, inscritsAvant - payantsAvant), reference: "depuis le début du mois", lien: "/admin/artisans?formule=decouverte" },
+      { cle: "gratuit", valeur: Math.max(0, inscrits - payants), avant: Math.max(0, inscritsAvant - payantsAvant), reference: "depuis le début du mois", lien: "/admin/artisans?formule=gratuit" },
       { cle: "revenus", valeur: revenus, avant: revenusAvant, reference: "par rapport au mois dernier", lien: "/admin/artisans?formule=payant" },
       { cle: "inscriptions_semaine", valeur: inscSemaine, avant: inscSemaineAvant, reference: "par rapport à la semaine d'avant", lien: "/admin/artisans?recents=1" },
       { cle: "negoces", valeur: negoces, avant: negocesAvant, reference: "depuis le début du mois", lien: "/admin/negoces" },
@@ -121,7 +122,7 @@ export class AdminVueService {
           entreprise: c.name,
           metiers: c.trades,
           departement: departementDe(c.address),
-          formule: payant ? c.abonnement!.formule : "decouverte",
+          formule: payant ? formuleDe(c.abonnement!.formule) : "gratuit",
           paiementRefuse: c.abonnement?.statut === "echec",
           codePromo: c.abonnement?.codePromo ?? null,
           inscritLe: c.createdAt.toISOString(),
@@ -133,7 +134,7 @@ export class AdminVueService {
       .filter((c) => !f.metier || c.metiers.includes(f.metier))
       .filter((c) => !f.departement || c.departement === f.departement)
       .filter((c) => !f.promo || (c.codePromo ?? "").toLowerCase() === f.promo.toLowerCase())
-      .filter((c) => !f.formule || (f.formule === "payant" ? c.formule !== "decouverte" : f.formule === "echec" ? c.paiementRefuse : c.formule === f.formule));
+      .filter((c) => !f.formule || (f.formule === "payant" ? c.formule !== "gratuit" : f.formule === "echec" ? c.paiementRefuse : c.formule === f.formule));
     return { total: items.length, items: items.slice(0, 500) };
   }
 
@@ -201,7 +202,7 @@ export class AdminVueService {
       id: c.id,
       infos: { entreprise: c.name, metiers: c.trades, departement: departementDe(c.address), adresse: c.address, siret: c.siret, verifie: c.siretVerifieLe !== null, telephone: c.phone, email: c.contactEmail ?? c.memberships[0]?.user.email ?? null, prenom: c.prenom, inscritLe: c.createdAt.toISOString(), comptes: c.memberships.map((m) => ({ nom: m.user.name, email: m.user.email, role: m.role })) },
       abonnement: {
-        formule: payant ? c.abonnement!.formule : "decouverte",
+        formule: payant ? formuleDe(c.abonnement!.formule) : "gratuit",
         periodicite: payant ? c.abonnement!.periodicite : null,
         statut: c.abonnement?.statut ?? "aucun",
         periodeFin: c.abonnement?.periodeFin?.toISOString() ?? null,
@@ -270,7 +271,7 @@ export class AdminVueService {
     return {
       date: maintenant.toISOString().slice(0, 10),
       artisans: { inscrits: v("inscrits").valeur, inscritsAuDebutDuMois: v("inscrits").avant, inscritsCeMois: v("inscrits").valeur - v("inscrits").avant, croissanceDuMoisPct: croissance, inscriptions7Jours: v("inscriptions_semaine").valeur, inscriptions7JoursDAvant: v("inscriptions_semaine").avant, inscriptionsParMois: mois },
-      abonnements: { payants: v("payants").valeur, payantsLeMoisDernier: v("payants").avant, enDecouverte: v("decouverte").valeur, parFormule: Object.fromEntries(parFormule.map((x) => [x.formule, x._count._all])), revenusDuMoisHt: v("revenus").valeur, revenusDuMoisDernierHt: v("revenus").avant, paiementsRefuses: problemes.find((x) => x.type === "paiement_refuse")?.nombre ?? 0 },
+      abonnements: { payants: v("payants").valeur, payantsLeMoisDernier: v("payants").avant, enGratuit: v("gratuit").valeur, parFormule: parFormule.reduce<Record<string, number>>((t, x) => ({ ...t, [formuleDe(x.formule)]: (t[formuleDe(x.formule)] ?? 0) + x._count._all }), {}), revenusDuMoisHt: v("revenus").valeur, revenusDuMoisDernierHt: v("revenus").avant, paiementsRefuses: problemes.find((x) => x.type === "paiement_refuse")?.nombre ?? 0 },
       negoces: { inscrits: v("negoces").valeur, aVerifier: problemes.find((x) => x.type === "negoce_a_verifier")?.nombre ?? 0, demandesRecues: recues, tauxDeReponsePct: recues > 0 ? Math.round((repondues / recues) * 100) : null, quiNeRepondentJamais: muets },
       activiteDuMois: { listesCreees: listes, demandesDePrix: demandes, besoinsEnAchatGroupe: besoinsGroupes },
       aTraiter: { bugsSignales: problemes.find((x) => x.type === "signalement")?.nombre ?? 0, erreursServeur24h: problemes.find((x) => x.type === "erreur_serveur")?.nombre ?? 0 },
@@ -295,7 +296,7 @@ export function repondreParLeCode(question: string, c: ChiffresAdmin): string {
   } else if (/negoc/.test(q)) morceaux.push(`${n(c.negoces.inscrits)} négoce${c.negoces.inscrits > 1 ? "s" : ""} inscrit${c.negoces.inscrits > 1 ? "s" : ""}, dont ${n(c.negoces.aVerifier)} à vérifier. ${n(c.negoces.demandesRecues)} demandes reçues${c.negoces.tauxDeReponsePct !== null ? `, ${c.negoces.tauxDeReponsePct} % de réponses` : ""}.`);
   if (/croissan|evolu|progress/.test(q)) morceaux.push(c.artisans.croissanceDuMoisPct === null ? `Pas de croissance calculable : aucun inscrit au début du mois. ${n(c.artisans.inscritsCeMois)} inscription${c.artisans.inscritsCeMois > 1 ? "s" : ""} ce mois.` : `Croissance des inscrits ce mois : ${c.artisans.croissanceDuMoisPct.toLocaleString("fr-FR")} % (${n(c.artisans.inscritsAuDebutDuMois)} au début du mois, ${n(c.artisans.inscrits)} aujourd'hui).`);
   if (/inscri|artisan|compte/.test(q) && !/negoc/.test(q)) morceaux.push(`${n(c.artisans.inscritsCeMois)} inscription${c.artisans.inscritsCeMois > 1 ? "s" : ""} ce mois, ${n(c.artisans.inscriptions7Jours)} sur 7 jours. ${n(c.artisans.inscrits)} artisans inscrits en tout.`);
-  if (/payant|abonn|formule|decouverte|essentiel|\bpro\b/.test(q)) morceaux.push(`${n(c.abonnements.payants)} abonné${c.abonnements.payants > 1 ? "s" : ""} payant${c.abonnements.payants > 1 ? "s" : ""} (${Object.entries(c.abonnements.parFormule).map(([f, x]) => `${f} : ${x}`).join(", ") || "aucun"}), ${n(c.abonnements.enDecouverte)} en Découverte.`);
+  if (/payant|abonn|formule|gratuit|\bpro\b|pro max/.test(q)) morceaux.push(`${n(c.abonnements.payants)} abonné${c.abonnements.payants > 1 ? "s" : ""} payant${c.abonnements.payants > 1 ? "s" : ""} (${Object.entries(c.abonnements.parFormule).map(([f, x]) => `${f} : ${x}`).join(", ") || "aucun"}), ${n(c.abonnements.enGratuit)} en Gratuit.`);
   if (/revenu|argent|chiffre d'affaires|\bca\b|gagn|euro/.test(q)) morceaux.push(`Revenus du mois : ${n(c.abonnements.revenusDuMoisHt)} € HT (mois dernier : ${n(c.abonnements.revenusDuMoisDernierHt)} € HT).`);
   if (/paiement|refus|impay/.test(q)) morceaux.push(`${n(c.abonnements.paiementsRefuses)} paiement${c.abonnements.paiementsRefuses > 1 ? "s" : ""} refusé${c.abonnements.paiementsRefuses > 1 ? "s" : ""} en cours.`);
   if (/bug|signal|erreur|probleme/.test(q)) morceaux.push(`${n(c.aTraiter.bugsSignales)} bug${c.aTraiter.bugsSignales > 1 ? "s" : ""} signalé${c.aTraiter.bugsSignales > 1 ? "s" : ""} à traiter, ${n(c.aTraiter.erreursServeur24h)} erreur${c.aTraiter.erreursServeur24h > 1 ? "s" : ""} serveur sur 24 heures.`);

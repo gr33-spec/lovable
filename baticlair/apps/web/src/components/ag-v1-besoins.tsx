@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { CARTE, Note, PastilleStatut, Volumes } from "@/components/ag-v1-commun";
-import { Button, INPUT, PageTitle, Skeleton } from "@/components/ui";
+import { Button, ButtonLink, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, messageErreur, newActionKey } from "@/lib/api";
 import { dateCourte, dateLongue, heureCourte, jourDans, zoneLisible, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
 import { useResource } from "@/lib/use-resource";
@@ -239,7 +239,7 @@ export function BesoinV1Detail({ id, etat }: { id: string; etat: EtatV1 }) {
             </>
           ) : (
             <>
-              <h2 className="text-[18px] font-extrabold">{b.offre.fournisseur}</h2>
+              <h2 className="text-[18px] font-extrabold">{b.offre.paywall ? "Une offre est arrivée" : b.offre.fournisseur}</h2>
               <p className="text-[15px] font-semibold">{b.quantite.lisible}</p>
               <ul className="flex flex-col gap-1 text-[15px]">
                 {b.offre.calcul!.lignes.map((l) => (
@@ -249,11 +249,11 @@ export function BesoinV1Detail({ id, etat }: { id: string; etat: EtatV1 }) {
               <p className="text-[20px] font-extrabold">{euros(b.offre.calcul!.ht)} HT livré</p>
               <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[15px]">
                 <dt className="text-muted">Fournisseur</dt>
-                <dd>{b.offre.fournisseur}</dd>
+                <dd>{b.offre.paywall ? "Visible avec Pro" : b.offre.fournisseur}</dd>
                 <dt className="text-muted">Délai</dt>
                 <dd>{b.offre.delai}</dd>
                 <dt className="text-muted">Lieu</dt>
-                <dd>{b.offre.lieu}</dd>
+                <dd>{b.offre.paywall ? "Visible avec Pro" : b.offre.lieu}</dd>
                 <dt className="text-muted">Paiement</dt>
                 <dd>{b.offre.paiement}</dd>
                 <dt className="text-muted">Validité</dt>
@@ -288,8 +288,23 @@ export function BesoinV1Detail({ id, etat }: { id: string; etat: EtatV1 }) {
                         </Button>
                       </div>
                     </div>
+                  ) : b.offre.paywall ? (
+                    <>
+                      {/* Greg, 15 novembre 2026 : la première commande groupée est offerte ; ensuite, voir le négoce et commander demande Pro. */}
+                      <div role="group" aria-label="Réservé à Pro" className="flex flex-col gap-3 rounded-xl bg-accent-soft p-3">
+                        <p className="text-[15px] font-semibold">{b.offre.paywall}</p>
+                        <ButtonLink href="/abonnement" variant="accent" className="w-full">
+                          Voir Pro
+                        </ButtonLink>
+                      </div>
+                      <Button variant="secondary" disabled={!b.actions.refuser} pending={pending} onClick={() => void agir("offre/refus", {}, "C'est noté : tu as refusé cette offre.")} className="w-full">
+                        Non merci
+                      </Button>
+                      <Note>Tu n&apos;es jamais obligé de commander.</Note>
+                    </>
                   ) : (
                     <>
+                      {b.offre.premiereOfferte ? <p className="text-[14px] font-semibold text-ok">Ta première commande groupée est offerte.</p> : null}
                       {!b.actions.commander && b.actions.refuser ? <p className="text-[14px] text-muted">Mobiiz complète l&apos;offre : tu pourras commander dès que l&apos;adresse du fournisseur est là.</p> : null}
                       <Button variant="accent" disabled={!b.actions.commander || pending} onClick={() => setACommander(true)} className="w-full">
                         Commander à ce prix

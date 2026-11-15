@@ -11,33 +11,35 @@ export const metadata: Metadata = {
 };
 
 /**
- * LA PAGE TARIFS (Greg, 27 octobre 2026, 2e message, point 34 ; RÈGLE CHANGÉE le 30 octobre 2026, réponses aux six
- * décisions) : les achats groupés sont GRATUITS pour tous ; trois formules, Découverte (gratuit), Essentiel et Pro (les
- * outils IA chaque mois). Les mots et les prix viennent de `TARIFS` et `OFFRES` (domaine), les mêmes que la landing et l'app.
+ * LA PAGE TARIFS (Greg, 27 octobre 2026, 2e message, point 34 ; RÈGLE CHANGÉE le 15 novembre 2026) : trois formules,
+ * Gratuit (tout l'outil, 3 analyses offertes, première commande groupée offerte), Pro (29 € HT par mois) et Pro Max (49 €).
+ * Aucun nombre d'analyses par mois n'est dit : la limite d'usage est dite en une phrase, sans chiffre. Les mots et les prix
+ * viennent de `TARIFS` et `OFFRES` (domaine), les mêmes que la landing et l'app. Avant : Découverte, Essentiel, Pro.
  */
 const PHRASE_TARIFS = TARIFS.enUneLigne;
-const FORMULES = [TARIFS.gratuit, TARIFS.essentiel, TARIFS.pro] as const;
+const FORMULES = [TARIFS.gratuit, TARIFS.pro, TARIFS.promax] as const;
 
 const ETAPES = [
   { titre: "Commence gratuitement", texte: "Inscription en deux minutes, sans carte bancaire." },
-  { titre: "Rejoins les achats groupés", texte: "Ta liste rejoint celles des artisans de ton métier dans ton département. C'est gratuit, à chaque fois." },
-  { titre: "Abonne-toi si l'aide à la lecture te sert", texte: "Essentiel ou Pro, au mois, sans engagement. Sinon, tu restes en Découverte : tes listes, tes négoces et les achats groupés restent à toi." },
+  { titre: "Rejoins les achats groupés", texte: "Ton besoin rejoint ceux des artisans de ton métier dans ton département. Publier et rejoindre, c'est gratuit ; ta première commande groupée est offerte." },
+  { titre: "Passe à Pro quand ça te sert", texte: "Pro ou Pro Max, au mois ou à l'année, sans engagement. Sinon, tu restes en Gratuit : tes listes, tes négoces et la comparaison restent à toi." },
 ] as const;
 
 const FAQ = [
   { q: "Qu'est-ce qui est gratuit ?", r: TARIFS.question.r },
-  { q: "Qu'est-ce qui est payant ?", r: "Seulement l'aide à la lecture au-delà des crédits offerts : les analyses de devis et les scans de liste chaque mois, avec Essentiel ou Pro. Rien n'est jamais facturé au-delà d'un quota : tu notes ta liste à la main, c'est gratuit." },
+  { q: "Qu'est-ce qui est payant ?", r: "Deux choses, avec Pro ou Pro Max : l'analyse de tes devis, photos et listes au-delà des 3 offertes, et, dans les achats groupés, voir le négoce retenu et commander après ta première commande offerte. Rien n'est jamais facturé en plus de l'abonnement." },
+  TARIFS.limite,
   // Recette du 13 novembre 2026 (G1) : l'année (deux mois offerts), aux prix du domaine.
   TARIFS.annee,
-  // G8 : « Mes prix » en Découverte ne garde que trois mois, la page Tarifs le dit.
-  { q: "Je retrouve mes anciens prix ?", r: "Oui, dans « Mes prix ». En Découverte, tu vois les prix reçus sur les trois derniers mois ; avec Essentiel ou Pro, tu vois tout ton historique." },
-  { q: "Un gros devis compte double ?", r: "Un devis de plus de 150 lignes compte pour 2 analyses. Tu le vois avant que l'analyse parte." },
+  // G8 : « Mes prix » en Gratuit ne garde que trois mois, la page Tarifs le dit.
+  { q: "Je retrouve mes anciens prix ?", r: "Oui, dans « Mes prix ». En Gratuit, tu vois les prix reçus sur les trois derniers mois ; avec Pro ou Pro Max, tu vois tout ton historique." },
+  { q: "Un gros devis compte double ?", r: "Parmi tes 3 analyses offertes, un devis de plus de 150 lignes compte pour 2 ; tu le vois avant que l'analyse parte. Un devis de plus de 20 pages n'est pas analysé." },
   { q: "Comment je résilie ?", r: "En deux clics dans « Mon abonnement ». Tu gardes l'accès jusqu'à la fin du mois payé, puis rien n'est plus prélevé." },
   { q: "Est-ce que j'ai des factures ?", r: "Oui, une à chaque paiement, émise par BATI INVEST, avec la TVA. Elles sont toutes dans « Mes factures »." },
   { q: "Un achat groupé, ça m'engage à quoi ?", r: "À rien tant que tu n'as pas accepté l'offre. Tu confirmes ton besoin, tu reçois l'offre du groupe, et tu décides à ce moment-là : tu commandes, ou non." },
 ] as const;
 
-/** Le prix en grand, le reste en petit : « 19,90 € » · « HT par mois » ; « Gratuit » · « sans limite de temps ». */
+/** Le prix en grand, le reste en petit : « 29 € » · « HT par mois » ; « Gratuit » · « sans limite de temps ». */
 function prixEnDeux(sous: string): [string, string] {
   const euros = /^(.+?€)\s+(.+)$/.exec(sous);
   if (euros) return [euros[1]!, euros[2]!];
@@ -92,7 +94,7 @@ export default function TarifsPage() {
                 </h2>
                 <div aria-hidden="true" className="h-px bg-white/[0.08]" />
                 <ul className="flex flex-col gap-3 text-[15.5px] leading-snug text-[#FBF8F3]/80">
-                  {f.points.map((p) => (
+                  {f.points.map((p: string) => (
                     <li key={p} className="flex gap-3">
                       <Coche />
                       <span>{p}</span>

@@ -49,7 +49,7 @@ function Paiement() {
       <PageTitle>Paiement (simulation)</PageTitle>
       <Card className="flex flex-col gap-4 p-5">
         <p className="text-[17px]">
-          {formule === "pro" ? "Abonnement Pro" : "Abonnement Essentiel"}
+          {formule === "promax" ? "Abonnement Pro Max" : "Abonnement Pro"}
           {annuel ? " annuel" : ""} : <strong>{annuel ? annuel.prix : (offre?.prix ?? "\u00a0")}</strong>
           {annuel ? (annuel.ttc ? ` (${annuel.ttc} TTC)` : "") : offre?.ttc ? ` (${offre.ttc} TTC)` : ""}
           {formule ? (annuel ? ", payés en une fois pour douze mois." : ", sans engagement.") : ""}

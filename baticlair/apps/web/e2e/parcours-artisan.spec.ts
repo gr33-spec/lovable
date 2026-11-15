@@ -2845,8 +2845,8 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // « Commence gratuitement » (Greg, 11 novembre 2026) : un bloc compact, sans prix ni cartes de formules ; un seul bouton,
   // vers la page Tarifs. Missions coupées ici : ni section, ni entrée de menu, ni ligne « Missions », ni question.
   const offre = page.getByRole("region", { name: "Commence gratuitement" });
-  for (const t of ["Quantitatifs et listes saisies à la main", "Demandes jusqu’à 5 négoces", "Achats groupés de ton secteur"]) await expect(offre.getByText(t, { exact: true })).toBeVisible();
-  await expect(offre.getByText("Analyses de devis et scans de liste supplémentaires avec Essentiel ou Pro.")).toBeVisible();
+  for (const t of ["Quantitatifs et listes saisies à la main", "Demandes jusqu’à 5 négoces, et la comparaison des réponses", "Publier et rejoindre des achats groupés", "3 analyses de documents offertes", "Ta première commande groupée offerte"]) await expect(offre.getByText(t, { exact: true })).toBeVisible();
+  await expect(offre.getByText("Les analyses de tes devis et la commande en achat groupé sont incluses avec Pro.")).toBeVisible();
   await expect(offre.getByRole("link")).toHaveCount(1);
   await expect(offre.getByRole("link", { name: "Voir les offres et les tarifs" })).toHaveAttribute("href", "/tarifs");
   await expect(page.locator(".mz2-formule")).toHaveCount(0);
@@ -2869,7 +2869,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   for (const s of await faq.locator("summary").all()) await s.click();
   await expect(faq.getByText("Oui. C'est toi qui les ajoutes, et Mobiiz leur demande un prix de ta part.")).toBeVisible();
   await expect(faq.getByText("Oui : tes listes, l'envoi à tes négoces et les achats groupés sont gratuits, sans limite de temps.", { exact: false })).toBeVisible();
-  await expect(faq.getByText(/1 analyse de devis et 3 scans de liste/)).toBeVisible();
+  await expect(faq.getByText(/3 analyses de documents et ta première commande groupée/)).toBeVisible();
   // RÈGLE CHANGÉE (Greg, 14 novembre 2026) : jamais obligé de commander, la FAQ dit comme l'application.
   await expect(faq.getByText("Non. Tu demandes des prix, tu compares, et tu commandes seulement si ça te va.", { exact: false })).toBeVisible();
   await expect(faq.getByText(/Oui, mais seulement ce que tu as coché/)).toHaveCount(0);
@@ -3165,19 +3165,19 @@ test("« Importer un document » (Greg, 1er novembre 2026) : avant toute analyse
   // Un PDF de devis : « devis », puis Annuler : rien de créé, rien de décompté.
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
-  await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 analyse de devis.");
+  await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 de tes analyses offertes.");
   await fenetre.getByRole("button", { name: "Annuler" }).click();
   await expect(fenetre).toHaveCount(0);
   // Une liste en PDF : « liste ».
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(__dirname, "fixtures", "liste-tableau.pdf"));
-  await expect(fenetre).toContainText("Ce document semble être une liste. Son analyse utilisera 1 analyse de photo ou de liste.");
+  await expect(fenetre).toContainText("Ce document semble être une liste. Son analyse utilisera 1 de tes analyses offertes.");
   await fenetre.getByRole("button", { name: "Annuler" }).click();
   // Une photo sans nom parlant : « liste », corrigeable d'un tap en devis ; puis Annuler.
   const png = fs.readFileSync(path.join(__dirname, "fixtures", "bon-negoce.png"));
   await page.getByLabel("Choisir une photo").setInputFiles({ name: "IMG_2041.png", mimeType: "image/png", buffer: png });
   await expect(fenetre).toContainText("Ce document semble être une liste.");
   await fenetre.getByRole("button", { name: "C'est un devis ? L'analyser comme un devis" }).click();
-  await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 analyse de devis.");
+  await expect(fenetre).toContainText("Ce document semble être un devis. Son analyse utilisera 1 de tes analyses offertes.");
   await fenetre.getByRole("button", { name: "Annuler" }).click();
   expect(page.url()).toMatch(/\/chantiers\/nouveau\?mode=assistant$/);
   expect((await apiJson(page, "GET", "/v1/projects")).body).toEqual(chantiers);
@@ -3783,27 +3783,32 @@ test("Suivi des demandes de prix : 0, 1, plusieurs puis toutes les réponses, le
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
-test("Abonnement (RÈGLE CHANGÉE le 30 octobre 2026) : « Tarifs » depuis la landing, Découverte, Essentiel et Pro, paiement simulé d'Essentiel, passage à Pro au prorata, factures TEST, résiliation en deux clics", async ({ page }) => {
+test("Abonnement (RÈGLE CHANGÉE le 15 novembre 2026) : « Tarifs » depuis la landing, Gratuit, Pro et Pro Max, paiement simulé de Pro, passage à Pro Max au prorata, factures TEST, résiliation en deux clics", async ({ page }) => {
   // La landing mène aux tarifs : la phrase, les trois formules et leurs prix, trois étapes, gratuit pour les négoces, la FAQ.
   await page.goto("/");
   // Landing premium V3 (30 octobre 2026) : « Tarifs » dans le pied de page.
   await page.getByRole("navigation", { name: "Informations et liens légaux" }).getByRole("link", { name: "Tarifs" }).click();
   await expect(page).toHaveURL(/\/tarifs$/);
   await expect(page.getByRole("heading", { level: 1, name: "Tarifs" })).toBeVisible();
-  // Greg, 30 octobre 2026 (décisions 1 et 2) : les achats groupés gratuits ; seuls les outils IA sont sur abonnement.
-  await expect(page.getByText("Gratuit : tes listes, tes négoces et les achats groupés. Les abonnements ajoutent des analyses de devis et des scans de liste chaque mois.", { exact: true })).toBeVisible();
+  // Greg, 15 novembre 2026 : Gratuit, Pro (29 €) et Pro Max (49 €) ; aucun nombre d'analyses par mois n'est dit.
+  await expect(page.getByText("Gratuit : tes listes, tes négoces, la comparaison et les achats groupés. Pro ajoute l'analyse de tes devis et la commande en achat groupé.", { exact: true })).toBeVisible();
   // Greg, 31 octobre 2026, soir : plus de marron, la DA de la landing (noir profond, ivoire, jaune).
   for (const carte of await page.getByRole("region", { name: "Les formules" }).locator(":scope > div").all()) expect(await carte.evaluate((e) => getComputedStyle(e).backgroundColor)).not.toBe("rgb(46, 27, 5)");
-  for (const etape of ["Commence gratuitement", "Rejoins les achats groupés", "Abonne-toi si l'aide à la lecture te sert"]) {
+  for (const etape of ["Commence gratuitement", "Rejoins les achats groupés", "Passe à Pro quand ça te sert"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   const formules = page.getByRole("region", { name: "Les formules" });
-  await expect(formules.getByRole("heading")).toHaveText([/^Découverte/, /^Essentiel 19,90 € HT par mois$/, /^Pro 39,90 € HT par mois$/]);
-  await expect(formules.getByText("Les achats groupés de ton secteur", { exact: true })).toBeVisible();
-  await expect(formules.getByText("1 analyse de devis et 3 scans de liste offerts", { exact: true })).toBeVisible();
-  await expect(formules.getByText("8 analyses de devis par mois", { exact: true })).toBeVisible();
+  await expect(formules.getByRole("heading")).toHaveText([/^Gratuit/, /^Pro 29 € HT par mois$/, /^Pro Max 49 € HT par mois$/]);
+  await expect(formules.getByText("Publier et rejoindre des achats groupés", { exact: true })).toBeVisible();
+  await expect(formules.getByText("3 analyses offertes (devis, photo ou liste)", { exact: true })).toBeVisible();
+  await expect(formules.getByText("Ta première commande groupée offerte", { exact: true })).toBeVisible();
+  await expect(formules.getByText("Achats groupés : tu vois le négoce retenu et tu commandes", { exact: true })).toBeVisible();
+  // Ni compteur ni nombre d'analyses par mois ; la limite d'usage se dit en une phrase, sans chiffre, jamais « illimité ».
+  await expect(formules.getByText(/\d+ analyses de devis par mois|scans de liste par mois/)).toHaveCount(0);
+  await expect(page.getByText("Les analyses sont-elles illimitées ?")).toBeVisible();
+  await expect(page.getByText(/^Non : elles sont incluses pour un usage normal de chantier/)).toBeVisible();
   await expect(page.getByText("Un gros devis compte double ?")).toBeVisible();
-  await expect(page.getByText(/49 €|348 €|29 €/)).toHaveCount(0);
+  await expect(page.getByText(/19,90|39,90|199 €|399 €|348 €|Essentiel|Découverte/)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Gratuit pour les négoces" })).toBeVisible();
   await expect(page.getByText("Comment je résilie ?")).toBeVisible();
 
@@ -3820,52 +3825,52 @@ test("Abonnement (RÈGLE CHANGÉE le 30 octobre 2026) : « Tarifs » depuis la l
   const cartes = page.getByRole("list", { name: "Formules" });
   const versPaiement = page.getByRole("button", { name: "Continuer vers le paiement" });
   await expect(versPaiement).toBeDisabled();
-  await expect(cartes.getByRole("button", { name: "Choisir Essentiel" })).toHaveAttribute("aria-pressed", "false");
-  await expect(cartes.getByRole("button", { name: "Choisir Pro" })).toHaveAttribute("aria-pressed", "false");
-  await expect(cartes).toContainText("19,90 € HT par mois");
-  await expect(cartes).toContainText("39,90 € HT par mois");
+  await expect(cartes.getByRole("button", { name: "Choisir Pro", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await expect(cartes.getByRole("button", { name: "Choisir Pro Max" })).toHaveAttribute("aria-pressed", "false");
+  await expect(cartes).toContainText("29 € HT par mois");
+  await expect(cartes).toContainText("49 € HT par mois");
   // À l'année : le montant réellement facturé, son équivalent par mois, les deux mois offerts, sans autre remise.
   const facturation = page.getByRole("radiogroup", { name: "Facturation" });
   await expect(facturation.getByRole("radio", { name: "Au mois" })).toHaveAttribute("aria-checked", "true");
   await facturation.getByRole("radio", { name: /À l'année/ }).click();
-  await expect(cartes).toContainText("199 € HT par an");
-  await expect(cartes).toContainText("soit 16,58 € HT par mois");
-  await expect(cartes).toContainText("399 € HT par an");
-  await expect(cartes).toContainText("soit 33,25 € HT par mois");
-  await expect(cartes).toContainText("2 mois offerts : 39,80 € HT de moins que douze mois payés au mois.");
-  await cartes.getByRole("button", { name: "Choisir Pro" }).click();
-  await expect(cartes.getByRole("button", { name: "Pro choisie" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("status").filter({ hasText: "Pro, à l'année" })).toContainText("399 € HT par an (478,80 € TTC), prélevés en une fois aujourd'hui pour douze mois");
+  await expect(cartes).toContainText("290 € HT par an");
+  await expect(cartes).toContainText("soit 24,17 € HT par mois");
+  await expect(cartes).toContainText("490 € HT par an");
+  await expect(cartes).toContainText("soit 40,83 € HT par mois");
+  await expect(cartes).toContainText("2 mois offerts : 58 € HT de moins que douze mois payés au mois.");
+  await cartes.getByRole("button", { name: "Choisir Pro Max" }).click();
+  await expect(cartes.getByRole("button", { name: "Pro Max choisie" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("status").filter({ hasText: "Pro Max, à l'année" })).toContainText("490 € HT par an (588 € TTC), prélevés en une fois aujourd'hui pour douze mois");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  // Retour au mois, Essentiel : le récapitulatif suit, sans ambiguïté sur ce qui sera prélevé.
+  // Retour au mois, Pro : le récapitulatif suit, sans ambiguïté sur ce qui sera prélevé.
   await facturation.getByRole("radio", { name: "Au mois" }).click();
-  await cartes.getByRole("button", { name: "Choisir Essentiel" }).click();
-  await expect(cartes.getByRole("button", { name: "Choisir Pro" })).toHaveAttribute("aria-pressed", "false");
-  await expect(page.getByRole("status").filter({ hasText: "Essentiel, au mois" })).toContainText("19,90 € HT par mois (23,88 € TTC), prélevés aujourd'hui puis chaque mois. Sans engagement");
-  // La page de paiement simulée, au prix d'Essentiel, puis « Payer ».
+  await cartes.getByRole("button", { name: "Choisir Pro", exact: true }).click();
+  await expect(cartes.getByRole("button", { name: "Choisir Pro Max" })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByRole("status").filter({ hasText: "Pro, au mois" })).toContainText("29 € HT par mois (34,80 € TTC), prélevés aujourd'hui puis chaque mois. Sans engagement");
+  // La page de paiement simulée, au prix de Pro, puis « Payer ».
   await versPaiement.click();
   await expect(page).toHaveURL(/\/paiement-simule\?session=sim_/);
   await expect(page.getByRole("heading", { name: "Paiement (simulation)" })).toBeVisible();
   await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
-  await expect(page.getByText("Abonnement Essentiel : 19,90 € HT par mois (23,88 € TTC), sans engagement.")).toBeVisible();
+  await expect(page.getByText("Abonnement Pro : 29 € HT par mois (34,80 € TTC), sans engagement.")).toBeVisible();
   await page.getByRole("button", { name: "Payer", exact: true }).click();
   await expect(page).toHaveURL(/\/abonnement$/);
-  await expect(page.getByText("Abonné Essentiel", { exact: true })).toBeVisible();
-  await expect(page.getByText("19,90 € HT par mois (23,88 € TTC), sans engagement.")).toBeVisible();
-
-  // D'Essentiel à Pro, au prorata : ce qui reste du mois est déduit, le mois de Pro est payé tout de suite.
-  await expect(page.getByText("Passe à Pro : 8 analyses de devis par mois, 30 scans de liste par mois")).toBeVisible();
-  await expect(page.getByText(/^39,90 € HT par mois\. Ce qui reste de ton mois \([\d,]+ €\) est déduit : tu paies [\d\s\u202f,]+ € HT/)).toBeVisible();
-  await page.getByRole("button", { name: "Passer à Pro" }).click();
-  await page.getByRole("button", { name: /^Oui, payer [\d\s\u202f,]+ € TTC$/ }).click();
   await expect(page.getByText("Abonné Pro", { exact: true })).toBeVisible();
-  await expect(page.getByText("39,90 € HT par mois (47,88 € TTC), sans engagement.")).toBeVisible();
+  await expect(page.getByText("29 € HT par mois (34,80 € TTC), sans engagement.")).toBeVisible();
 
-  // « Mes factures » : les deux factures TEST (le mois d'Essentiel, puis le passage à Pro), téléchargeables.
+  // D'Pro à Pro, au prorata : ce qui reste du mois est déduit, le mois de Pro est payé tout de suite.
+  await expect(page.getByText("Passe à Pro Max : une limite d'usage bien plus haute pour tes analyses.")).toBeVisible();
+  await expect(page.getByText(/^49 € HT par mois\. Ce qui reste de ton mois \([\d,]+ €\) est déduit : tu paies [\d\s\u202f,]+ € HT/)).toBeVisible();
+  await page.getByRole("button", { name: "Passer à Pro Max" }).click();
+  await page.getByRole("button", { name: /^Oui, payer [\d\s\u202f,]+ € TTC$/ }).click();
+  await expect(page.getByText("Abonné Pro Max", { exact: true })).toBeVisible();
+  await expect(page.getByText("49 € HT par mois (58,80 € TTC), sans engagement.")).toBeVisible();
+
+  // « Mes factures » : les deux factures TEST (le mois de Pro, puis le passage à Pro), téléchargeables.
   await page.getByRole("tab", { name: "Mes factures" }).click();
   const factures = page.getByRole("list", { name: "Mes factures" });
   await expect(factures.getByText(/^TEST-\d{6}/)).toHaveCount(2);
-  await expect(factures.getByText(/ 23,88 € TTC/)).toBeVisible();
+  await expect(factures.getByText(/ 34,80 € TTC/)).toBeVisible();
   const download = page.waitForEvent("download");
   await factures.getByRole("link", { name: "Télécharger" }).first().click();
   expect((await download).suggestedFilename()).toMatch(/^TEST-\d{6}\.pdf$/);
@@ -3882,26 +3887,26 @@ test("Abonnement annuel (Greg, 12 novembre 2026) : choisi à l'année, payé une
   await signUp(page);
   await menuArtisan(page, "Mon abonnement");
   await page.getByRole("radiogroup", { name: "Facturation" }).getByRole("radio", { name: /À l'année/ }).click();
-  await page.getByRole("button", { name: "Choisir Essentiel" }).click();
+  await page.getByRole("button", { name: "Choisir Pro", exact: true }).click();
   // Double appui : une seule session de paiement suit.
   await page.getByRole("button", { name: "Continuer vers le paiement" }).dblclick();
   await expect(page).toHaveURL(/\/paiement-simule\?session=sim_/);
   await expect(page.getByText("Mode test : aucun paiement réel")).toBeVisible();
-  await expect(page.getByText("Abonnement Essentiel annuel : 199 € HT par an (238,80 € TTC), payés en une fois pour douze mois.")).toBeVisible();
+  await expect(page.getByText("Abonnement Pro annuel : 290 € HT par an (348 € TTC), payés en une fois pour douze mois.")).toBeVisible();
   await page.getByRole("button", { name: "Payer", exact: true }).click();
   await expect(page).toHaveURL(/\/abonnement$/);
-  await expect(page.getByText("Abonné Essentiel", { exact: true })).toBeVisible();
-  await expect(page.getByText("199 € HT par an (238,80 € TTC), payés en une fois pour douze mois.")).toBeVisible();
+  await expect(page.getByText("Abonné Pro", { exact: true })).toBeVisible();
+  await expect(page.getByText("290 € HT par an (348 € TTC), payés en une fois pour douze mois.")).toBeVisible();
   // Le prochain renouvellement est dans un an ; un annuel ne propose pas le passage à Pro au prorata.
   const dansUnAn = new Date();
   dansUnAn.setFullYear(dansUnAn.getFullYear() + 1);
   await expect(page.getByText(new RegExp(`Prochain renouvellement le \\d{1,2}(er)? \\S+ ${dansUnAn.getFullYear()}`))).toBeVisible();
-  await expect(page.getByRole("button", { name: "Passer à Pro" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Passer à Pro Max" })).toHaveCount(0);
   // Une seule facture TEST, du montant annuel.
   await page.getByRole("tab", { name: "Mes factures" }).click();
   const factures = page.getByRole("list", { name: "Mes factures" });
   await expect(factures.getByText(/^TEST-\d{6}/)).toHaveCount(1);
-  await expect(factures.getByText(/ 238,80 € TTC/)).toBeVisible();
+  await expect(factures.getByText(/ 348 € TTC/)).toBeVisible();
   // Résilier : l'accès reste jusqu'au bout de l'année payée.
   await page.getByRole("tab", { name: "Mon abonnement" }).click();
   await page.getByRole("button", { name: "Résilier" }).click();
@@ -3912,7 +3917,7 @@ test("Abonnement annuel (Greg, 12 novembre 2026) : choisi à l'année, payé une
 test("Abonnement : un paiement refusé met le bandeau rouge, avec la date limite", async ({ page }) => {
   await signUp(page);
   await menuArtisan(page, "Mon abonnement");
-  await page.getByRole("button", { name: "Choisir Essentiel" }).click();
+  await page.getByRole("button", { name: "Choisir Pro", exact: true }).click();
   await page.getByRole("button", { name: "Continuer vers le paiement" }).click();
   await page.getByRole("button", { name: "Échec du paiement" }).click();
   await expect(page).toHaveURL(/\/abonnement$/);

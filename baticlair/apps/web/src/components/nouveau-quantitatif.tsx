@@ -355,7 +355,7 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
       } catch (e) {
         const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
         // Le quota de scans est pris : rien n'a été lu ni dépensé ; la phrase de la formule est celle du serveur.
-        if (err.code === "abonnement_requis") ajouterElement({ de: "mobiiz", texte: `${err.phrase ?? "Tes scans de liste sont utilisés."} Ta liste en cours n'a pas bougé : tu peux continuer à la main.`, choix: [], lien: { href: "/abonnement", texte: "Voir les formules" } });
+        if (err.code === "abonnement_requis") ajouterElement({ de: "mobiiz", texte: `${err.phrase ?? "Tes analyses offertes sont utilisées."} Ta liste en cours n'a pas bougé : tu peux continuer à la main.`, choix: [], lien: { href: "/abonnement", texte: "Voir les formules" } });
         else if (err.reason === "nothing_read") dire("Je n'ai rien lu sur ce document. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF. Ta liste en cours n'a pas bougé.");
         else if (err.code === "ai_unavailable" || err.code === "analysis_failed") dire("La lecture de document n'est pas disponible pour le moment. Ta liste en cours n'a pas bougé : continue à la main, ou réessaie plus tard. Rien n'a été décompté.");
         else if (err.code === "unauthenticated") ajouterElement({ de: "mobiiz", texte: `Le document n'est pas lu : ${messageErreur(err)}`, reconnecter: true });
@@ -752,7 +752,7 @@ function FeuilleAjouter({ liste, ids, onListe, onFermer }: { liste: boolean; ids
                 l'assistant […] le bouton doit rester dans le parcours manuel prévu ») : il s'ouvre par « Je saisis ma liste ». */}
             {/* Greg, 14 novembre 2026 : plus de bloc de compteurs ici ; les analyses restantes se disent au moment où une
                 analyse va être utilisée (fenêtre « Analyser ce document ? »). La phrase et « Comment fonctionne l'analyse ? » restent. */}
-            <InfoAnalyse sansCompteurs />
+            <InfoAnalyse />
           </>
         )}
         <p className="pt-1 text-center text-[14px] text-[#111111]/75">Tu peux aussi écrire directement dans la conversation.</p>
@@ -764,30 +764,30 @@ function FeuilleAjouter({ liste, ids, onListe, onFermer }: { liste: boolean; ids
 /** Avant de consommer une analyse (Greg, 1er novembre 2026) : le type reconnu et son coût ; « Annuler » ne décompte rien. */
 function ConfirmerAnalyse({ nature, nombre, onChanger, onAnnuler, onAnalyser }: { nature: "devis" | "liste"; nombre: number; onChanger: () => void; onAnnuler: () => void; onAnalyser: () => void }) {
   const devis = nature === "devis";
-  // Les analyses restantes, discrètes, seulement ici : au moment où l'une d'elles va servir.
-  const [quotas, setQuotas] = useState<{ analyses: { restantes: number }; scans: { restantes: number } } | null>(null);
+  // Greg, 15 novembre 2026 : ni compteur ni barre. Seul un compte GRATUIT lit ici ce qui reste de ses analyses offertes,
+  // au moment où l'une d'elles va servir ; un abonné n'a aucun nombre (`jauge` nulle).
+  const [jauge, setJauge] = useState<{ restantes: number } | null>(null);
   useEffect(() => {
     let vivant = true;
-    api<{ quotas?: { analyses: { restantes: number }; scans: { restantes: number } } | null }>("/v1/ai-usage/jauge")
-      .then((r) => (vivant ? setQuotas(r.quotas ?? null) : undefined))
+    api<{ jauge?: { restantes: number } | null }>("/v1/ai-usage/jauge")
+      .then((r) => (vivant ? setJauge(r.jauge ?? null) : undefined))
       .catch(() => undefined);
     return () => {
       vivant = false;
     };
   }, []);
-  const restantes = quotas ? (devis ? quotas.analyses.restantes : quotas.scans.restantes) : null;
+  const restantes = jauge ? jauge.restantes : null;
+  const cout = restantes !== null ? " Son analyse utilisera 1 de tes analyses offertes." : "";
   return (
     <div className="fixed top-0 left-0 z-[60] flex h-[100dvh] w-full items-end justify-center bg-black/50 p-4 lg:items-center" onClick={onAnnuler}>
       <div role="alertdialog" aria-modal="true" aria-label="Analyser ce document ?" onClick={(e) => e.stopPropagation()} className="flex w-full max-w-md flex-col gap-3 rounded-3xl bg-[var(--chat-carte)] p-5 pb-[max(env(safe-area-inset-bottom),20px)] text-[#111111]">
         <h2 className="text-[18px] font-extrabold">{nombre > 1 ? `Analyser ces ${nombre} photos ?` : "Analyser ce document ?"}</h2>
         <p className="text-[16px] leading-snug">
-          {devis
-            ? `${nombre > 1 ? "Ces photos semblent être un devis" : "Ce document semble être un devis"}. Son analyse utilisera 1 analyse de devis.`
-            : `${nombre > 1 ? "Ces photos semblent être une liste" : "Ce document semble être une liste"}. Son analyse utilisera 1 analyse de photo ou de liste.`}
+          {devis ? `${nombre > 1 ? "Ces photos semblent être un devis" : "Ce document semble être un devis"}.${cout}` : `${nombre > 1 ? "Ces photos semblent être une liste" : "Ce document semble être une liste"}.${cout}`}
         </p>
         {restantes !== null ? (
           <p role="status" className="-mt-1 text-[14px] text-[#111111]/70">
-            {restantes > 0 ? `Il t'en reste ${restantes}.` : "Tu n'en as plus ce mois-ci."}
+            {restantes > 0 ? `Il t'en reste ${restantes}.` : "Tu n'en as plus : note ta liste à la main, c'est gratuit, ou passe à Pro."}
           </p>
         ) : null}
         <button type="button" onClick={onChanger} className="min-h-11 self-start text-[14px] font-semibold underline underline-offset-4">

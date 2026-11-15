@@ -2,20 +2,20 @@
 
 import { useEffect, useState } from "react";
 import type { Formule, OffreAbonnement } from "@/lib/api";
-import { FORMULES_PAYANTES, OFFRES, prixDeLOffre } from "../../../../packages/domain/src/groupe/tarifs";
+import { FORMULES_PAYANTES, OFFRES, TARIFS, prixDeLOffre } from "../../../../packages/domain/src/groupe/tarifs";
 
 /**
- * LES DEUX FORMULES (Greg, 30 octobre 2026) : Essentiel mis en avant, puis Pro ; les textes viennent de l'API (les prix se
- * règlent dans l'admin) et du domaine (`offresAbonnement`) en attendant sa réponse.
+ * LES DEUX FORMULES (Greg, 15 novembre 2026) : Pro mis en avant, puis Pro Max ; les textes viennent de l'API (les prix se
+ * règlent dans l'admin) et du domaine (`offresAbonnement`) en attendant sa réponse. Aucun nombre d'analyses : plafond caché.
  */
-/** Les mêmes mots que `offresAbonnement` du domaine, tirés de `OFFRES` (le web n'importe que des fichiers sans import). */
+/** Les mêmes mots que `offresAbonnement` du domaine, tirés de `OFFRES` et `TARIFS` (le web n'importe que des fichiers sans import). */
 export const OFFRES_PAR_DEFAUT: OffreAbonnement[] = FORMULES_PAYANTES.map((f) => {
   const o = OFFRES[f];
-  return { formule: f, titre: o.nom, badge: null, prix: prixDeLOffre(o), details: [`${o.analyses} analyses de devis par mois`, `${o.scans} scans de liste par mois`, "Sans engagement, résiliable quand tu veux"], enAvant: f === "essentiel" };
+  return { formule: f, titre: o.nom, badge: null, prix: prixDeLOffre(o), details: [...TARIFS[f].points.filter((p: string) => p !== "Sans engagement"), "Sans engagement, résiliable quand tu veux"], enAvant: f === "pro" };
 });
 
 /**
- * Les deux cartes côte à côte (l'une sous l'autre sur un petit téléphone), Essentiel d'abord. Avec `onChoisir`, chaque
+ * Les deux cartes côte à côte (l'une sous l'autre sur un petit téléphone), Pro d'abord. Avec `onChoisir`, chaque
  * carte est un bouton et la carte choisie est cochée ; sans, elles s'affichent seulement (page /tarifs).
  */
 export function OffresAbonnement({ offres, choisie, onChoisir, sombre = false }: { offres: OffreAbonnement[]; choisie?: Formule; onChoisir?: (f: Formule) => void; sombre?: boolean }) {

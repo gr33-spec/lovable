@@ -69,6 +69,13 @@ export interface OffreVueV1 {
   calcul: { produits: number; ht: number; tva: number; ttc: number; lignes: string[] } | null;
   /** Greg, 14 novembre 2026 : « Commander à ce prix » est ouvert (offre complète, à examiner, adresse du fournisseur connue). */
   acceptable: boolean;
+  /**
+   * Greg, 15 novembre 2026 : voir le négoce retenu et commander demande Pro, après la première commande groupée (offerte).
+   * Une phrase : le nom du négoce et le lieu sont masqués, « Commander » renvoie vers l'abonnement. Null : rien n'est bloqué.
+   */
+  paywall?: string | null;
+  /** Compte gratuit qui n'a encore rien commandé en achat groupé : cette commande est offerte. */
+  premiereOfferte?: boolean;
 }
 export interface BesoinV1 {
   id: string;

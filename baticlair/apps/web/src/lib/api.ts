@@ -817,7 +817,7 @@ export interface Abonnement {
   paiement: "simule" | "stripe";
   modeTest: string | null;
   acces: "essai" | "abonne" | "grace" | "bloque" | "gratuit";
-  /** La formule payée (Essentiel tant qu'il n'y en a pas). */
+  /** La formule payée (Pro tant qu'il n'y en a pas). */
   formule: Formule;
   /** Le prix HT de la formule et sa période (« par mois », « par an »). */
   prixHt: string;
@@ -827,11 +827,11 @@ export interface Abonnement {
   periodicite?: Periodicite;
   /** L'annuel peut-il être choisi au paiement ? (Avec Stripe : seulement si ses prix annuels sont configurés.) */
   annuelDisponible?: boolean;
-  /** Les deux formules, Essentiel d'abord. */
+  /** Les deux formules, Pro d'abord. */
   offres: OffreAbonnement[];
   /** « 19,90 € » : le prix d'entrée, par mois. */
   prixDes: string;
-  /** Le passage d'Essentiel à Pro, au prorata ; null quand il n'est pas possible. */
+  /** Le passage de Pro à Pro Max, au prorata ; null quand il n'est pas possible. */
   bascule: { credit: string; aPayerHt: string; aPayerTtc: string; jusquau: string } | null;
   essaiFinLe: string | null;
   joursEssai: number | null;
@@ -847,8 +847,8 @@ export interface Abonnement {
   paywall: { phrase: string; economie: string | null };
 }
 
-/** Les deux formules de l'abonnement (Greg, 30 octobre 2026) : Essentiel 19,90 € HT et Pro 39,90 € HT par mois. */
-export type Formule = "essentiel" | "pro";
+/** Les deux formules de l'abonnement (Greg, 15 novembre 2026) : Pro 29 € HT et Pro Max 49 € HT par mois. */
+export type Formule = "pro" | "promax";
 export interface OffreAbonnement {
   formule: Formule;
   titre: string;

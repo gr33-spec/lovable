@@ -1,7 +1,12 @@
 import { z } from "zod";
-import { MOIS_FACTURES_A_L_ANNEE, OFFRES } from "../groupe/tarifs.js";
+import { MOIS_FACTURES_A_L_ANNEE, OFFRES, TARIFS } from "../groupe/tarifs.js";
 
 /**
+ * RÈGLE CHANGÉE (Greg, 15 novembre 2026) : les deux formules payantes sont PRO (29 € HT par mois, 290 € HT par an) et
+ * PRO MAX (49 € HT par mois, 490 € HT par an) ; de Pro, l'artisan passe à Pro Max à tout moment, au prorata
+ * (`prorataVersProMax`). Les anciens abonnements « essentiel », « mensuel » et « annuel » de la prévisualisation comptent
+ * comme Pro (`formuleDe`). Avant : Essentiel 19,90 € et Pro 39,90 €. Ce qui suit est l'historique.
+ *
  * RÈGLE CHANGÉE (Greg, 30 octobre 2026, réponses aux six décisions) : DEUX FORMULES MENSUELLES, sans engagement, ESSENTIEL
  * (19,90 € HT par mois) et PRO (39,90 € HT par mois), qui ne donnent que des outils IA de plus (les achats groupés sont
  * gratuits, `offres.ts`) ; plus d'annuel. D'Essentiel, l'artisan passe à Pro à tout moment, au prorata (`prorataVersPro`).
@@ -19,10 +24,13 @@ import { MOIS_FACTURES_A_L_ANNEE, OFFRES } from "../groupe/tarifs.js";
  */
 
 export const reglagesAbonnementSchema = z.object({
-  /** Le prix d'ESSENTIEL HT, en centimes par mois (1 990 = 19,90 €). */
-  prixEssentielHtCentimes: z.number().int().min(100).max(100_000).default(Math.round(OFFRES.essentiel.prixHt * 100)),
-  /** Le prix de PRO HT, en centimes par mois (3 990 = 39,90 €). */
-  prixProHtCentimes: z.number().int().min(100).max(100_000).default(Math.round(OFFRES.pro.prixHt * 100)),
+  /** Le prix de PRO HT, en centimes par mois (2 900 = 29 €). */
+  prixMensuelProHtCentimes: z.number().int().min(100).max(100_000).default(Math.round(OFFRES.pro.prixHt * 100)),
+  /** Le prix de PRO MAX HT, en centimes par mois (4 900 = 49 €). */
+  prixMensuelProMaxHtCentimes: z.number().int().min(100).max(100_000).default(Math.round(OFFRES.promax.prixHt * 100)),
+  /** Anciens prix d'Essentiel et de Pro (avant le 15 novembre 2026), gardés pour les réglages déjà enregistrés ; plus lus. */
+  prixEssentielHtCentimes: z.number().int().min(100).max(100_000).optional(),
+  prixProHtCentimes: z.number().int().min(100).max(100_000).optional(),
   /** Ancien prix du mensuel (avant le 30 octobre 2026), gardé pour les réglages déjà enregistrés ; plus lu. */
   prixHtCentimes: z.number().int().min(100).max(100_000).optional(),
   /** Ancien prix de l'annuel : lu seulement pour le rappel d'un ancien abonnement annuel. */
@@ -40,26 +48,26 @@ export const reglagesAbonnementSchema = z.object({
 });
 export type ReglagesAbonnement = z.infer<typeof reglagesAbonnementSchema>;
 
-export const REGLAGES_ABONNEMENT_DEFAUT: ReglagesAbonnement = { prixEssentielHtCentimes: 1990, prixProHtCentimes: 3990, prixAnnuelHtCentimes: 34800, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 60, joursGrace: 7, joursRappelAnnuel: 30 };
+export const REGLAGES_ABONNEMENT_DEFAUT: ReglagesAbonnement = { prixMensuelProHtCentimes: 2900, prixMensuelProMaxHtCentimes: 4900, prixAnnuelHtCentimes: 34800, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 60, joursGrace: 7, joursRappelAnnuel: 30 };
 
 const JOUR = 86_400_000;
 const plusJours = (d: Date, n: number) => new Date(d.getTime() + n * JOUR);
 
-/** Les deux formules payantes (30 octobre 2026). */
-export const FORMULES = ["essentiel", "pro"] as const;
+/** Les deux formules payantes (15 novembre 2026). */
+export const FORMULES = ["pro", "promax"] as const;
 export type Formule = (typeof FORMULES)[number];
-export const estFormule = (v: unknown): v is Formule => v === "essentiel" || v === "pro";
-/** La formule d'un abonnement enregistré : « pro », sinon Essentiel (les anciens « mensuel » et « annuel » compris). */
-export const formuleDe = (v: unknown): Formule => (v === "pro" ? "pro" : "essentiel");
+export const estFormule = (v: unknown): v is Formule => v === "pro" || v === "promax";
+/** La formule d'un abonnement enregistré : « promax », sinon Pro (les anciens « essentiel », « mensuel » et « annuel » compris). */
+export const formuleDe = (v: unknown): Formule => (v === "promax" ? "promax" : "pro");
 
 /** Le prix HT d'un mois de la formule, en centimes. */
-export const prixDeFormule = (f: Formule, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => (f === "pro" ? r.prixProHtCentimes : r.prixEssentielHtCentimes);
+export const prixDeFormule = (f: Formule, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => (f === "promax" ? r.prixMensuelProMaxHtCentimes : r.prixMensuelProHtCentimes);
 
 /**
  * MENSUEL OU ANNUEL (RÈGLE CHANGÉE, Greg, 12 novembre 2026, dossier de corrections UX, point 13) : chaque formule se
  * paie au mois ou à l'année. L'annuel est facturé DIX mois pour douze mois de service, payé en une fois : deux mois
- * offerts, et aucune autre remise. Essentiel : 199 € HT par an (16,58 € HT par mois en équivalent arrondi) ; Pro : 399 €
- * HT par an (33,25 €). Les quotas d'analyses et de scans restent ceux de la formule, chaque mois.
+ * offerts, et aucune autre remise. Pro : 290 € HT par an (24,17 € HT par mois en équivalent arrondi) ; Pro Max : 490 €
+ * HT par an (40,83 €). Le plafond caché reste celui de la formule, chaque mois.
  */
 export const PERIODICITES = ["mensuel", "annuel"] as const;
 export type Periodicite = (typeof PERIODICITES)[number];
@@ -96,12 +104,12 @@ export interface EtatPaiement {
   echecLe: Date | null;
   /** La résiliation demandée : l'accès reste jusqu'à `periodeFin`, rien n'est plus prélevé. */
   resiliationDemandeeLe: Date | null;
-  /** La formule payée (Essentiel par défaut). */
+  /** La formule payée (Pro par défaut). */
   formule?: Formule;
   /** Au mois ou à l'année (mensuel par défaut). */
   periodicite?: Periodicite;
 }
-export const PAIEMENT_AUCUN: EtatPaiement = { statut: "aucun", periodeFin: null, echecLe: null, resiliationDemandeeLe: null, formule: "essentiel" };
+export const PAIEMENT_AUCUN: EtatPaiement = { statut: "aucun", periodeFin: null, echecLe: null, resiliationDemandeeLe: null, formule: "pro" };
 
 /** Les dates qui font l'essai : l'inscription, le premier dépôt dans un regroupement, les résultats de ce cycle. */
 export interface DatesEssai {
@@ -180,8 +188,8 @@ export function eurosDeCentimes(c: number): string {
   return `${e.toLocaleString("fr-FR", { minimumFractionDigits: Number.isInteger(e) ? 0 : 2, maximumFractionDigits: 2 })} €`;
 }
 
-/** « 19,90 € » : le prix d'entrée (Essentiel), par mois. */
-export const prixDes = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => eurosDeCentimes(r.prixEssentielHtCentimes);
+/** « 29 € » : le prix d'entrée (Pro), par mois. */
+export const prixDes = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => eurosDeCentimes(r.prixMensuelProHtCentimes);
 
 /** L'écran du paywall, mot pour mot. */
 export const phrasePaywall = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) => `Ton essai est terminé. Continue dès ${prixDes(r)} HT par mois.`;
@@ -196,25 +204,26 @@ export interface OffreAbonnement {
   prix: string;
   /** Ce qui suit, en petit. */
   details: string[];
-  /** La formule mise en avant (Essentiel). */
+  /** La formule mise en avant (Pro). */
   enAvant: boolean;
   /** La même formule payée à l'année (Greg, 12 novembre 2026) : ce qui est facturé, son équivalent par mois, l'économie. */
   annuel: { prix: string; equivalent: string; economie: string; details: string[] };
 }
 
 /**
- * LES DEUX FORMULES (Greg, 30 octobre 2026) : Essentiel, mis en avant, puis Pro ; leurs quotas viennent de `OFFRES`.
+ * LES DEUX FORMULES (Greg, 15 novembre 2026) : Pro, mis en avant, puis Pro Max ; leurs points viennent de `TARIFS`. Aucun
+ * nombre d'analyses n'est dit : le plafond est caché.
  */
 export function offresAbonnement(r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): OffreAbonnement[] {
   return FORMULES.map((f) => {
-    const o = OFFRES[f];
-    return { formule: f, titre: o.nom, badge: null, prix: `${eurosDeCentimes(prixDeFormule(f, r))} HT par mois`, details: [`${o.analyses} analyses de devis par mois`, `${o.scans} scans de liste par mois`, "Sans engagement, résiliable quand tu veux"],
-      enAvant: f === "essentiel",
+    const points = TARIFS[f].points.filter((p) => p !== "Sans engagement");
+    return { formule: f, titre: OFFRES[f].nom, badge: null, prix: `${eurosDeCentimes(prixDeFormule(f, r))} HT par mois`, details: [...points, "Sans engagement, résiliable quand tu veux"],
+      enAvant: f === "pro",
       annuel: {
         prix: `${eurosDeCentimes(prixAnnuelDeFormule(f, r))} HT par an`,
         equivalent: `soit ${eurosDeCentimes(equivalentMensuelDeLAnnuel(f, r))} HT par mois`,
         economie: `2 mois offerts : ${eurosDeCentimes(economieDeLAnnuel(f, r))} HT de moins que douze mois payés au mois`,
-        details: [`${o.analyses} analyses de devis par mois`, `${o.scans} scans de liste par mois`, PHRASE_ANNUEL],
+        details: [...points, PHRASE_ANNUEL],
       },
     };
   });
@@ -301,20 +310,20 @@ export function emailRappelEssai(rappel: RappelEssai, c: { ecart: number | null;
   return { objet, texte };
 }
 
-/** « Essentiel à 19,90 € HT par mois, ou Pro à 39,90 € HT par mois, sans engagement. » */
+/** « Pro à 29 € HT par mois, ou Pro Max à 49 € HT par mois, sans engagement. » */
 export const phraseDeuxFormules = (r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT) =>
-  `${OFFRES.essentiel.nom} à ${eurosDeCentimes(r.prixEssentielHtCentimes)} HT par mois, ou ${OFFRES.pro.nom} à ${eurosDeCentimes(r.prixProHtCentimes)} HT par mois, sans engagement.`;
+  `${OFFRES.pro.nom} à ${eurosDeCentimes(r.prixMensuelProHtCentimes)} HT par mois, ou ${OFFRES.promax.nom} à ${eurosDeCentimes(r.prixMensuelProMaxHtCentimes)} HT par mois, sans engagement.`;
 
 /**
- * LE PASSAGE D'ESSENTIEL À PRO, À TOUT MOMENT, AU PRORATA (30 octobre 2026, sur le modèle du passage à l'annuel du 24
- * octobre) : comme Stripe le fait, le mois de Pro commence le jour du passage ; ce qui reste du mois d'Essentiel déjà payé
- * est déduit (au jour près, arrondi au centime), et l'artisan paie la différence tout de suite.
+ * LE PASSAGE DE PRO À PRO MAX, À TOUT MOMENT, AU PRORATA (15 novembre 2026 ; avant : d'Essentiel à Pro, 30 octobre) : comme
+ * Stripe le fait, le mois de Pro Max commence le jour du passage ; ce qui reste du mois de Pro déjà payé est déduit (au
+ * jour près, arrondi au centime), et l'artisan paie la différence tout de suite.
  */
-export function prorataVersPro(periode: { debut: Date; fin: Date }, maintenant: Date, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT, payeCentimes = r.prixEssentielHtCentimes): { creditCentimes: number; aPayerHtCentimes: number; debut: Date; fin: Date } {
+export function prorataVersProMax(periode: { debut: Date; fin: Date }, maintenant: Date, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT, payeCentimes = r.prixMensuelProHtCentimes): { creditCentimes: number; aPayerHtCentimes: number; debut: Date; fin: Date } {
   const total = periode.fin.getTime() - periode.debut.getTime();
   const reste = Math.min(total, Math.max(0, periode.fin.getTime() - maintenant.getTime()));
   const creditCentimes = total > 0 ? Math.round((payeCentimes * reste) / total) : 0;
-  return { creditCentimes, aPayerHtCentimes: Math.max(0, r.prixProHtCentimes - creditCentimes), debut: maintenant, fin: finDePeriode(maintenant, "pro") };
+  return { creditCentimes, aPayerHtCentimes: Math.max(0, r.prixMensuelProMaxHtCentimes - creditCentimes), debut: maintenant, fin: finDePeriode(maintenant, "promax") };
 }
 
 /**
@@ -352,10 +361,10 @@ export function emailRenouvellementAnnuel(c: { echeance: Date; reglages?: Reglag
 export const SEUIL_CYCLES_ECONOMIE = 3;
 export function argumentTarif(moyenne: { cycles: number; parCommande: number | null }, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): string {
   if (moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && moyenne.parCommande && moyenne.parCommande > 0) {
-    return `Gratuit, achats groupés compris : en moyenne, nos artisans ont économisé ${eurosRonds(moyenne.parCommande)} par regroupement.`;
+    return `Gratuit pour publier et rejoindre un achat groupé : en moyenne, nos artisans ont économisé ${eurosRonds(moyenne.parCommande)} par regroupement.`;
   }
-  // Greg, 30 octobre 2026 (décision 1) : les achats groupés sont gratuits ; l'abonnement n'ajoute que l'aide à la lecture.
-  return `Gratuit pour tes listes, tes négoces et les achats groupés. Dès ${prixDes(r)} HT par mois pour plus d'analyses de devis.`;
+  // Greg, 15 novembre 2026 : publier et rejoindre restent gratuits ; Pro inclut les analyses et la commande groupée.
+  return `Gratuit pour tes listes, tes négoces et les achats groupés. Dès ${prixDes(r)} HT par mois pour l'analyse de tes devis et la commande en achat groupé.`;
 }
 
 /**

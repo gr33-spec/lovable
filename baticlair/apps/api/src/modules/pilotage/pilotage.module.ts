@@ -32,7 +32,7 @@ import { SupervisionController } from "./http/supervision.controller.js";
           economies: () => cmd.economieMoyenne(),
           prixFormules: async () => {
             const r = await abo.reglages();
-            return { essentiel: r.prixEssentielHtCentimes, pro: r.prixProHtCentimes, annuel: r.prixAnnuelHtCentimes };
+            return { pro: r.prixMensuelProHtCentimes, promax: r.prixMensuelProMaxHtCentimes, annuel: r.prixAnnuelHtCentimes };
           },
           paiementSimule: c.abonnement.paiement === "simule",
           stripeDeTest: c.abonnement.paiement === "stripe" && !!c.abonnement.stripe?.secretKey.startsWith("sk_test_"),

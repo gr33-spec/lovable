@@ -23,7 +23,8 @@ import "./premium.css";
  * pas lu ; jamais « IA » sur la landing (règle du 27 octobre), la préparation depuis un devis est dite « on t'aide ».
  *
  * Vérifié contre les conditions en vigueur (`TARIFS`, réponses validées par Greg le 28 octobre) : depuis le 30 octobre
- * (décisions de Greg), les achats groupés sont GRATUITS ; seuls les outils IA ont des quotas. Le bouton reste « Rejoindre
+ * (décisions de Greg), les achats groupés sont GRATUITS ; depuis le 15 novembre, publier et rejoindre restent gratuits,
+ * la commande demande Pro après la première (offerte), et les analyses sont incluses dans Pro. Le bouton reste « Rejoindre
  * le collectif », avec « Gratuit · Sans carte bancaire » dessous (décision 4). Le pied garde l'éditeur,
  * l'hébergeur, les quatre documents, le contact et l'accès négoce. L'ancienne page (`Landing`) reste pour /couvreurs et
  * /peintres.
@@ -115,7 +116,7 @@ const QUESTIONS = [
   },
   {
     q: "Combien de négoces je peux consulter ?",
-    r: "Jusqu’à 5 négoces par demande, quelle que soit ta formule, la gratuite comprise. Les abonnements n’ajoutent que des analyses de devis et des scans de liste.",
+    r: "Jusqu’à 5 négoces par demande, quelle que soit ta formule, la gratuite comprise. L’abonnement ajoute l’analyse de tes devis et la commande en achat groupé.",
     lien: null,
   },
   { q: "Est-ce que Mobiiz est gratuit ?", r: TARIFS.question.r, lien: { href: "/tarifs", label: "Voir les tarifs détaillés" } },
@@ -159,7 +160,7 @@ const QUESTION_MISSIONS = {
  * l'impression qu'une information manquait. Un bloc compact dit ce qui est gratuit et renvoie à la page Tarifs, seul
  * endroit où les trois formules et leurs prix sont détaillés. AUCUN montant ici (règle du 30 octobre 2026).
  */
-const GRATUIT = ["Quantitatifs et listes saisies à la main", "Demandes jusqu’à 5 négoces", "Achats groupés de ton secteur"] as const;
+const GRATUIT = ["Quantitatifs et listes saisies à la main", "Demandes jusqu’à 5 négoces, et la comparaison des réponses", "Publier et rejoindre des achats groupés", "3 analyses de documents offertes", "Ta première commande groupée offerte"] as const;
 
 /**
  * Les deux écrans de l'app de la section Missions : de VRAIES captures (données fictives, entreprises « Exemple »), dans
@@ -434,7 +435,7 @@ export function LandingPremium() {
                     </li>
                   </SiMissions>
                 </ul>
-                <p>Analyses de devis et scans de liste supplémentaires avec Essentiel ou Pro.</p>
+                <p>Les analyses de tes devis et la commande en achat groupé sont incluses avec Pro.</p>
               </div>
               <Link id="offresCTA" className="btn btn-outline" href="/tarifs">
                 Voir les offres et les tarifs <Icone id="i-arrow" className="arrow" />

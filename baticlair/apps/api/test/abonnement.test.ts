@@ -48,10 +48,10 @@ describe("l'essai et le paywall", () => {
     const A = await couvreurAvecListe(ctx, "a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2400", unite: "pièces" }]);
     await inscritLe(A.companyId, "2026-08-01T10:00:00.000Z");
     const pendant = (await A.agent.get(`/v1/abonnement?${q("2026-09-18T10:00:00.000Z")}`).expect(200)).body;
-    expect(pendant).toMatchObject({ acces: "essai", joursEssai: 12, bandeau: "Essai gratuit : encore 12 jours", prixHt: "19,90 €", modeTest: "Mode test : aucun paiement réel" });
+    expect(pendant).toMatchObject({ acces: "essai", joursEssai: 12, bandeau: "Essai gratuit : encore 12 jours", prixHt: "29 €", modeTest: "Mode test : aucun paiement réel" });
     const fini = (await A.agent.get(`/v1/abonnement?${q("2026-10-10T08:00:00.000Z")}`).expect(200)).body;
     expect(fini.acces).toBe("bloque");
-    expect(fini.paywall.phrase).toBe("Ton essai est terminé. Continue dès 19,90 € HT par mois.");
+    expect(fini.paywall.phrase).toBe("Ton essai est terminé. Continue dès 29 € HT par mois.");
     const refus = await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?${q("2026-10-10T08:00:00.000Z")}`).send({ articles: A.articles, nature: "chantier" });
     expect(refus.status).toBe(402);
     expect(refus.body.error.code).toBe("abonnement_requis");
@@ -135,14 +135,14 @@ describe("le paiement simulé", () => {
     expect(fb).toHaveLength(2);
     expect(fa.at(-1).numero).toBe("TEST-000001");
     expect([...fa, ...fb].map((f: { numero: string }) => f.numero).sort()).toEqual(["TEST-000001", "TEST-000002", "TEST-000003", "TEST-000004"]);
-    expect(fa[1]).toMatchObject({ test: true, ht: "19,90 €", ttc: "23,88 €" });
+    expect(fa[1]).toMatchObject({ test: true, ht: "29 €", ttc: "34,80 €" });
     const pdf = await A.agent.get(`/v1/abonnement/factures/${fa[1].id}/pdf`).buffer(true).parse((res, cb) => { const c: Buffer[] = []; res.on("data", (d: Buffer) => c.push(d)); res.on("end", () => cb(null, Buffer.concat(c))); }).expect(200);
     expect(pdf.headers["content-type"]).toBe("application/pdf");
     // La facture d'une autre entreprise n'existe pas pour elle.
     await B.agent.get(`/v1/abonnement/factures/${fa[1].id}/pdf`).expect(404);
     const rangs = await ctx.prisma.factureAbonnement.findMany({ orderBy: { rang: "asc" }, select: { rang: true, ttcCentimes: true, tvaCentimes: true, montantHtCentimes: true, raisonSociale: true } });
     expect(rangs.map((r) => r.rang)).toEqual([1, 2, 3, 4]);
-    expect(rangs[0]).toMatchObject({ montantHtCentimes: 1990, tvaCentimes: 398, ttcCentimes: 2388, raisonSociale: "Toitures A" });
+    expect(rangs[0]).toMatchObject({ montantHtCentimes: 2900, tvaCentimes: 580, ttcCentimes: 3480, raisonSociale: "Toitures A" });
   });
 
   it("échec : 7 jours de grâce avec bandeau et e-mail, puis le paywall ; la session ne se rejoue pas", async () => {
@@ -184,14 +184,14 @@ describe("le paiement simulé", () => {
     expect((await A.agent.get("/v1/abonnement/factures").expect(200)).body.factures).toHaveLength(1);
   });
 
-  it("recette n° 2 du 14 novembre 2026 : j'ai choisi Pro à l'année, carte refusée ; « Mettre à jour ma carte » repart de Pro à l'année, pas d'Essentiel", async () => {
+  it("recette n° 2 du 14 novembre 2026 : j'ai choisi Pro à l'année, carte refusée ; « Mettre à jour ma carte » repart de Pro à l'année, pas de Pro", async () => {
     const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
-    const { url } = (await A.agent.post("/v1/abonnement/payer").send({ formule: "pro", periodicite: "annuel" }).expect(200)).body;
+    const { url } = (await A.agent.post("/v1/abonnement/payer").send({ formule: "promax", periodicite: "annuel" }).expect(200)).body;
     const session = new URL(url).searchParams.get("session")!;
     const vue = (await A.agent.post(`/v1/abonnement/simulation/${session}?${q(T)}`).send({ issue: "echec" }).expect(200)).body;
-    expect(vue).toMatchObject({ acces: "grace", statut: "echec", bandeauRouge: true, renouvellementEnCours: false, formule: "pro", periodicite: "annuel", periode: "par an" });
-    // Le prix affiché est celui de Pro à l'année, jamais 19,90 €.
-    expect(vue.prixHt).toBe(vue.offres.find((o: { formule: string }) => o.formule === "pro").annuel.ht ?? vue.prixHt);
+    expect(vue).toMatchObject({ acces: "grace", statut: "echec", bandeauRouge: true, renouvellementEnCours: false, formule: "promax", periodicite: "annuel", periode: "par an" });
+    // Le prix affiché est celui de Pro à l'année, jamais 29 €.
+    expect(vue.prixHt).toBe(vue.offres.find((o: { formule: string }) => o.formule === "promax").annuel.ht ?? vue.prixHt);
     expect(String(vue.prixHt)).not.toMatch(/19[,.]9/);
   });
 
@@ -231,8 +231,8 @@ describe("Stripe, prêt mais éteint", () => {
   });
 
   it("allumé : signature obligatoire, checkout puis invoice.paid → abonné et facture F-000001, un événement rejoué ne compte pas", async () => {
-    const env = { PAIEMENT: process.env.PAIEMENT, STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID_ESSENTIEL: process.env.STRIPE_PRICE_ID_ESSENTIEL, STRIPE_PRICE_ID_PRO: process.env.STRIPE_PRICE_ID_PRO };
-    Object.assign(process.env, { PAIEMENT: "stripe", STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: "whsec_test_secret", STRIPE_PRICE_ID_ESSENTIEL: "price_1990", STRIPE_PRICE_ID_PRO: "price_3990" });
+    const env = { PAIEMENT: process.env.PAIEMENT, STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET, STRIPE_PRIX_PRO: process.env.STRIPE_PRIX_PRO, STRIPE_PRIX_PROMAX: process.env.STRIPE_PRIX_PROMAX };
+    Object.assign(process.env, { PAIEMENT: "stripe", STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: "whsec_test_secret", STRIPE_PRIX_PRO: "price_2900", STRIPE_PRIX_PROMAX: "price_4900" });
     const s = await createTestApp();
     try {
       const A = await signUpWithCompany(s.app, "s@toitures.fr", "Toitures S", ["roofing"]);
@@ -243,7 +243,7 @@ describe("Stripe, prêt mais éteint", () => {
       const checkout = { id: "evt_1", type: "checkout.session.completed", data: { object: { client_reference_id: A.companyId, customer: "cus_1", subscription: "sub_1" } } };
       await envoyer(checkout, "t=1,v1=00").expect(403);
       await envoyer(checkout).expect(200);
-      const paid = { id: "evt_2", type: "invoice.paid", data: { object: { id: "in_1", customer: "cus_1", billing_reason: "subscription_create", subtotal: 1990, total: 2388, lines: { data: [{ period: { start: 1793000000, end: 1795600000 } }] } } } };
+      const paid = { id: "evt_2", type: "invoice.paid", data: { object: { id: "in_1", customer: "cus_1", billing_reason: "subscription_create", subtotal: 2900, total: 2388, lines: { data: [{ period: { start: 1793000000, end: 1795600000 } }] } } } };
       await envoyer(paid).expect(200);
       await envoyer(paid).expect(200);
       expect((await A.agent.get("/v1/abonnement").expect(200)).body).toMatchObject({ acces: "abonne", paiement: "stripe", modeTest: null });

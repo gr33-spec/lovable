@@ -3,14 +3,13 @@
 import { ChevronRight, Mail } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { ResumeAbonnement } from "@/components/abonnement";
 import { AdresseMobiizCard } from "@/components/adresse-mobiiz";
 import { EditeurApparence } from "@/components/apparence-editeur";
 import { DossierProfessionnel, GuideEtChantierFictif, OuLireLesReponses, ProfilPublicEditeur, ReglagesNotifications } from "@/components/compte-missions";
 import { ButtonLink } from "@/components/ui";
 import { EnTeteRubrique } from "@/components/en-tete-rubrique";
-import { CompteursAnalyses } from "@/components/coup-de-main-ia";
 import { CarteIdentite } from "@/components/envoi-negoces";
 import { NotificationsCard } from "@/components/notifications-card";
 import { PartnerKeysCard } from "@/components/partner-keys-card";
@@ -25,7 +24,6 @@ import { EDITEUR, PAGES_LEGALES } from "@/lib/legal";
 import { NOM_APP } from "@/lib/nom";
 import { useRubriquesMasquees } from "@/lib/missions";
 import { ligneProfil, type RubriqueProfil } from "@/lib/rubriques-profil";
-import { useResource } from "@/lib/use-resource";
 import { useSession } from "@/lib/session";
 
 /**
@@ -102,7 +100,6 @@ function Contenu({ id }: { id: Exclude<RubriqueProfil, "apparence"> }) {
       return (
         <>
           <ResumeAbonnement />
-          <Analyses />
           <PlanSummary />
           {/* Greg, 10 novembre 2026 : l'abonnement, les factures et les reçus de paiement au même endroit. */}
           <ButtonLink href="/abonnement" variant="secondary">
@@ -239,20 +236,6 @@ function ChoixEntreprise() {
       ) : (
         <span className="text-[15px] font-bold">{company?.name}</span>
       )}
-    </Card>
-  );
-}
-
-type Quotas = Parameters<typeof CompteursAnalyses>[0]["quotas"];
-
-/** Les analyses restantes de l'offre (les mêmes compteurs que « Ma liste de matériaux »), quand l'offre en a. */
-function Analyses() {
-  const lire = useCallback((signal: AbortSignal) => api<{ quotas?: Quotas | null }>("/v1/ai-usage/jauge", { signal }).catch(() => null), []);
-  const { data } = useResource(lire);
-  if (!data?.quotas) return null;
-  return (
-    <Card className="p-4">
-      <CompteursAnalyses quotas={data.quotas} />
     </Card>
   );
 }

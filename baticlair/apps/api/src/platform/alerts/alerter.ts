@@ -8,7 +8,7 @@ import { NOM_APP } from "@baticlair/domain";
  * Au plus une alerte par sorte toutes les 10 minutes (une panne ne noie pas la messagerie) ;
  * jamais de donnée de client dans le message (pas de devis, pas de nom de chantier).
  */
-export type AlertKind = "server_error" | "ai_reading_failed" | "client_error" | "commande_commune" | "reprise_echouee" | "stockage" | "paiement_refuse" | "negoce_a_verifier";
+export type AlertKind = "server_error" | "ai_reading_failed" | "client_error" | "commande_commune" | "reprise_echouee" | "stockage" | "paiement_refuse" | "negoce_a_verifier" | "conso_ia";
 
 export interface Alerter {
   readonly enabled: boolean;
@@ -25,6 +25,8 @@ const TITLES: Record<AlertKind, string> = {
   reprise_echouee: "Action abandonnée après 3 essais",
   /** Revue du 26 octobre 2026 : la base approche de la limite du plan Neon. */
   stockage: "Espace de la base",
+  /** Greg, 15 novembre 2026 : un compte consomme anormalement des analyses, ou un abonné a atteint son plafond du mois. */
+  conso_ia: "Consommation d'analyses à surveiller",
   /** Greg, 14 novembre 2026 : un paiement d'abonnement refusé, un négoce inscrit qui attend sa vérification. */
   paiement_refuse: "Paiement refusé",
   negoce_a_verifier: "Négoce en attente de vérification",

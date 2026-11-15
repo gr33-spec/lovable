@@ -14,7 +14,7 @@ const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("inter
 /**
  * « MON ABONNEMENT » ET « MES FACTURES » (Greg, 24 octobre 2026) : l'état (essai, abonné, paiement refusé, terminé), « Je
  * continue », la résiliation en deux clics (effet en fin de période), le n° de TVA, et les factures émises par BATI INVEST.
- * Deux formules (Greg, 30 octobre 2026) : Essentiel et Pro au choix, et le passage d'Essentiel à Pro à tout moment, au
+ * Deux formules (Greg, 15 novembre 2026) : Pro et Pro Max au choix, et le passage de Pro à Pro Max à tout moment, au
  * prorata.
  */
 export default function AbonnementPage() {
@@ -139,7 +139,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
               )
             )}
             {a.resiliationProgrammee || a.statut === "resilie" || a.renouvellementEnCours ? null : (
-              // « Mettre à jour ma carte » repart de la formule ET de la périodicité choisies (avant : Essentiel au mois).
+              // « Mettre à jour ma carte » repart de la formule ET de la périodicité choisies (avant : la première formule, au mois).
               <Button onClick={() => void run("payer", a.paiement === "stripe" ? async () => window.location.assign((await api<{ url: string }>("/v1/abonnement/portail", { method: "POST" })).url) : () => continuerAbonnement(a.formule, a.periodicite))} pending={pending === "payer"} className="self-start">
                 Mettre à jour ma carte
               </Button>
@@ -168,7 +168,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
         ) : null}
         {a.acces === "abonne" ? (
           <>
-            <p className="text-[20px] font-extrabold">{a.formule === "pro" ? "Abonné Pro" : "Abonné Essentiel"}</p>
+            <p className="text-[20px] font-extrabold">{a.formule === "promax" ? "Abonné Pro Max" : "Abonné Pro"}</p>
             <p className="text-[16px]">{a.periodicite === "annuel" ? `${a.prixHt} HT par an (${a.prixTtc} TTC), payés en une fois pour douze mois.` : `${a.prixHt} HT par mois (${a.prixTtc} TTC), sans engagement.`}</p>
             {a.resiliationProgrammee || a.statut === "resilie" ? (
               <p className="text-[16px] font-semibold">Résilié : ton accès reste jusqu&apos;au {date(a.periodeFin)}. Rien ne sera plus prélevé. Pour reprendre un abonnement, reviens ici après cette date et choisis ta formule.</p>
@@ -179,21 +179,21 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
                 </p>
                 {a.bascule ? (
                   <div className="flex flex-col gap-3 rounded-xl bg-accent-soft p-4">
-                    <p className="text-[16px] font-bold">Passe à Pro : {a.offres.find((o) => o.formule === "pro")?.details.slice(0, 2).join(", ")}</p>
+                    <p className="text-[16px] font-bold">Passe à Pro Max : une limite d&apos;usage bien plus haute pour tes analyses.</p>
                     <p className="text-[15px]">
-                      {a.offres.find((o) => o.formule === "pro")?.prix}. Ce qui reste de ton mois ({a.bascule.credit}) est déduit : tu paies {a.bascule.aPayerHt} HT ({a.bascule.aPayerTtc} TTC) aujourd&apos;hui, pour un mois de Pro jusqu&apos;au {date(a.bascule.jusquau)}.
+                      {a.offres.find((o) => o.formule === "promax")?.prix}. Ce qui reste de ton mois ({a.bascule.credit}) est déduit : tu paies {a.bascule.aPayerHt} HT ({a.bascule.aPayerTtc} TTC) aujourd&apos;hui, pour un mois de Pro Max jusqu&apos;au {date(a.bascule.jusquau)}.
                     </p>
                     {!passer ? (
                       <Button variant="secondary" onClick={() => setPasser(true)} className="self-start">
-                        Passer à Pro
+                        Passer à Pro Max
                       </Button>
                     ) : (
                       <div className="flex flex-wrap gap-2">
-                        <Button onClick={() => void run("pro", () => api<Abonnement>("/v1/abonnement/pro", { method: "POST" }))} pending={pending === "pro"}>
+                        <Button onClick={() => void run("promax", () => api<Abonnement>("/v1/abonnement/promax", { method: "POST" }))} pending={pending === "promax"}>
                           Oui, payer {a.bascule.aPayerTtc} TTC
                         </Button>
                         <Button variant="secondary" onClick={() => setPasser(false)}>
-                          Rester en Essentiel
+                          Rester en Pro
                         </Button>
                       </div>
                     )}
@@ -201,7 +201,7 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
                 ) : null}
                 {/* G3 : changer de formule ou de rythme (mois, année) se fait à la fin de la période payée ; on le dit. */}
                 <p className="text-[15px] text-muted">
-                  {a.formule === "pro" ? "Pour revenir à Essentiel" : "Pour changer de formule"} ou changer de rythme (au mois, à l&apos;année) : résilie, garde ton accès jusqu&apos;au {date(a.periodeFin)}, puis choisis ta nouvelle formule ici.
+                  {a.formule === "promax" ? "Pour revenir à Pro" : "Pour changer de formule"} ou changer de rythme (au mois, à l&apos;année) : résilie, garde ton accès jusqu&apos;au {date(a.periodeFin)}, puis choisis ta nouvelle formule ici.
                 </p>
                 {a.paiement === "stripe" ? (
                   <Button variant="secondary" onClick={() => void run("portail", async () => window.location.assign((await api<{ url: string }>("/v1/abonnement/portail", { method: "POST" })).url))} className="self-start">

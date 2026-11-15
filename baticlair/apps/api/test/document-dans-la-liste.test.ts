@@ -75,7 +75,8 @@ describe("un document lu dans la liste en cours", () => {
   it("ÉCHEC D'ANALYSE : la panne se dit, AUCUN scan n'est décompté, et le nouvel essai relit", async () => {
     const a = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
     await a.agent.patch("/v1/company/profile").send({ name: "Toitures A", address: "3 rue de la Gare, 22300 Lannion", siret: null, phone: null, email: null }).expect(200);
-    const jauge = async () => (await a.agent.get("/v1/ai-usage/jauge").expect(200)).body.quotas.scans as { utilisees: number };
+    // Un scan décompté fait baisser ce qui reste des 3 analyses offertes (15 novembre 2026 : scans compris).
+    const jauge = async () => ({ utilisees: 3 - ((await a.agent.get("/v1/ai-usage/jauge").expect(200)).body.jauge.restantes as number) });
     const cle = randomUUID();
     const r = await lire(a.agent, "panne-liste.png").set("Idempotency-Key", cle);
     expect(r.status).toBeGreaterThanOrEqual(400);

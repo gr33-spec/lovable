@@ -3,6 +3,7 @@ import type { AppConfig } from "../config/config.js";
 import type { AppLogger } from "../logging/logger.js";
 import { AdresseAlerte } from "../alerts/adresse-alerte.js";
 import { ReglageMissions } from "../reglages/reglage-missions.js";
+import { ReglagePlafondsIa } from "../reglages/reglage-plafonds-ia.js";
 import { ChannelAlerter } from "../alerts/alerter.js";
 import { PrismaService } from "../database/prisma.service.js";
 import { ALERTER, CONFIG, EMAIL_RECU, EMAIL_SENDER, LOGGER } from "../tokens.js";
@@ -63,8 +64,10 @@ export const RELAIS_EMAIL = Symbol("RELAIS_EMAIL");
     },
     // L'interrupteur des missions (admin › Réglages) : lu par la route de santé, les missions et la boîte.
     { provide: ReglageMissions, useFactory: (p: PrismaService, c: AppConfig) => new ReglageMissions(p, c.missionsV1), inject: [PrismaService, CONFIG] },
+    // Les plafonds cachés des abonnés (Greg, 15 novembre 2026), réglés dans l'admin.
+    { provide: ReglagePlafondsIa, useFactory: (p: PrismaService) => new ReglagePlafondsIa(p), inject: [PrismaService] },
     { provide: AdresseAlerte, useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender) => new AdresseAlerte(p, c, e), inject: [PrismaService, CONFIG, EMAIL_SENDER] },
   ],
-  exports: [EMAIL_SENDER, ALERTER, EMAIL_RECU, RELAIS_EMAIL, AdresseAlerte, ReglageMissions],
+  exports: [EMAIL_SENDER, ALERTER, EMAIL_RECU, RELAIS_EMAIL, AdresseAlerte, ReglageMissions, ReglagePlafondsIa],
 })
 export class EmailModule {}

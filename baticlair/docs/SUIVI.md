@@ -307,3 +307,22 @@ Branche locale `lot-16-novembre` (part de `d2d055cf`, en ligne). Un commit par �
 12. Chaîne complète, mise en ligne, vérification, compte rendu. À FAIRE.
 
 En attente de Greg : la clé IA (puis 2 ou 3 vrais devis à passer, avec le coût de chaque analyse). Après le lancement : lots C et E, /couvreurs et /peintres, document source, lots Étanchéité et Peinture, recherche lente.
+
+## POINT DE REPRISE : nouveaux tarifs (message de Greg du 15 novembre, après la mise en ligne du lot du 16 novembre)
+
+Le lot du 16 novembre est en ligne sur le site de test (commit `3e3ab996`, chaîne complète verte, Mission coupée, clé IA
+refaite posée sur l'environnement de test, assistant vérifié avec l'IA réelle).
+
+| Étape | État |
+|---|---|
+| 1. Règles du moteur (`tarifs.ts`, `abonnement.ts`) : Gratuit, Pro 29 €, Pro Max 49 €, annuel dix mois, plafond caché, mois d'abonnement, droit de commande groupée | FAIT |
+| 2. Serveur : formules, analyses offertes (scans compris), plafond caché et réglage admin, alertes, e-mail vérifié, assistant, achats groupés (négoce masqué, commande Pro), Stripe (nouveaux noms de prix) | FAIT |
+| 3. Site : page Tarifs, landing (sans montant), « Mon abonnement », compteurs retirés, offre d'achat groupé, admin (libellés, plafonds) | FAIT |
+| 4. Tests du moteur, du serveur et parcours mis à jour | FAIT, chaîne complète à passer |
+| 5. CGU candidates (`docs/groupe/CGU-candidate-2026-11-15.md`), fiche projet, décisions | FAIT |
+| 6. Chaîne complète verte sur le commit exact, puis mise en ligne sur le site de test et vérification | À FAIRE |
+| 7. Prix Stripe de test (quatre prix : Pro et Pro Max, au mois et à l'année) | ATTEND l'accord de Greg |
+| 8. Test des coûts : 2 ou 3 vrais devis de Greg, liste obtenue et coût de chaque analyse | ATTEND les devis |
+
+Questions ouvertes pour Greg : FONDATEUR (30 % à vie maintenu ou non, Pro seulement ou Pro Max aussi) ; « Mes prix » trois
+mois en Gratuit ; clés Turnstile (anti-robot) à poser si elles ne le sont pas.

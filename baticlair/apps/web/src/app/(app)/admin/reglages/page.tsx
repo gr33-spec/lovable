@@ -84,6 +84,7 @@ function Reglages() {
         ) : null}
       </Card>
       <ReglageMissions />
+      <ReglagePlafonds />
     </>
   );
 }
@@ -141,6 +142,75 @@ function ReglageMissions() {
             </Button>
           )}
         </>
+      )}
+      {message ? (
+        <p role={message.ok ? "status" : "alert"} className={`text-[15px] font-semibold ${message.ok ? "text-ok" : "text-danger"}`}>
+          {message.texte}
+        </p>
+      ) : null}
+    </Card>
+  );
+}
+
+
+/**
+ * LES PLAFONDS CACHÉS DES ABONNÉS (Greg, 15 novembre 2026) : en euros de consommation par mois d'abonnement et par abonné,
+ * 5 € pour Pro et 20 € pour Pro Max au départ. Jamais montrés à un artisan : il ne lit qu'un message le jour où il atteint
+ * son plafond. Appliqué tout de suite, sans redéploiement.
+ */
+function ReglagePlafonds() {
+  const charger = useCallback((signal: AbortSignal) => api<{ pro: number; promax: number; source: "admin" | "defaut" }>("/v1/admin/vue/reglages/plafonds-ia", { signal }), []);
+  const { data, error, reload } = useResource(charger);
+  const [saisie, setSaisie] = useState<{ pro: string; promax: string } | null>(null);
+  const [occupe, setOccupe] = useState(false);
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  const valeurs = saisie ?? (data ? { pro: String(data.pro).replace(".", ","), promax: String(data.promax).replace(".", ",") } : null);
+  const nombre = (v: string) => Number(v.trim().replace(",", "."));
+  async function enregistrer(e: React.FormEvent) {
+    e.preventDefault();
+    if (occupe || !valeurs) return;
+    const pro = nombre(valeurs.pro);
+    const promax = nombre(valeurs.promax);
+    if (!Number.isFinite(pro) || !Number.isFinite(promax) || pro < 0 || promax < pro) {
+      setMessage({ ok: false, texte: "Écris deux montants en euros ; celui de Pro Max ne peut pas être plus bas que celui de Pro." });
+      return;
+    }
+    setOccupe(true);
+    setMessage(null);
+    try {
+      await api("/v1/admin/vue/reglages/plafonds-ia", { method: "POST", body: { pro, promax } });
+      setMessage({ ok: true, texte: "C'est enregistré : les nouveaux plafonds s'appliquent tout de suite." });
+      setSaisie(null);
+      reload();
+    } catch (x) {
+      setMessage({ ok: false, texte: `Rien n'est changé : ${messageErreur(x)}` });
+    } finally {
+      setOccupe(false);
+    }
+  }
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <SectionTitle>Plafond des analyses par abonné</SectionTitle>
+      {error ? <ErrorNotice error={error} onRetry={reload} /> : !valeurs ? <Spinner /> : (
+        <form onSubmit={(e) => void enregistrer(e)} className="flex flex-col gap-3">
+          <p className="text-[15px] text-muted">
+            Ce que les analyses d&apos;un abonné peuvent coûter par mois d&apos;abonnement, en euros. L&apos;artisan ne voit jamais ce chiffre : au plafond, il lit seulement « Passe au Pro Max ou attends le renouvellement ».
+            {data?.source === "defaut" ? " Ce sont les valeurs de départ." : ""}
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1 text-[15px] font-semibold">
+              Pro (€ par mois)
+              <input inputMode="decimal" required value={valeurs.pro} onChange={(e) => setSaisie({ ...valeurs, pro: e.target.value })} className={INPUT} />
+            </label>
+            <label className="flex flex-col gap-1 text-[15px] font-semibold">
+              Pro Max (€ par mois)
+              <input inputMode="decimal" required value={valeurs.promax} onChange={(e) => setSaisie({ ...valeurs, promax: e.target.value })} className={INPUT} />
+            </label>
+          </div>
+          <Button type="submit" disabled={occupe || !saisie}>
+            Enregistrer les plafonds
+          </Button>
+        </form>
       )}
       {message ? (
         <p role={message.ok ? "status" : "alert"} className={`text-[15px] font-semibold ${message.ok ? "text-ok" : "text-danger"}`}>

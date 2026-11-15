@@ -55,7 +55,7 @@ describe("l'espace admin, vue globale", { timeout: 120_000 }, () => {
     const g = await admin();
     const a = await couvreurAvecListe(ctx, "artisan@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", LIGNES);
     let r = (await g.agent.get("/v1/admin/vue/accueil").expect(200)).body;
-    expect(r.cartes.map((c: { cle: string }) => c.cle)).toEqual(["inscrits", "payants", "decouverte", "revenus", "inscriptions_semaine", "negoces"]);
+    expect(r.cartes.map((c: { cle: string }) => c.cle)).toEqual(["inscrits", "payants", "gratuit", "revenus", "inscriptions_semaine", "negoces"]);
     expect(r.cartes[0]).toMatchObject({ valeur: 2, avant: 0, lien: "/admin/artisans" });
     expect(r.cartes[2]).toMatchObject({ valeur: 2 });
     for (const c of r.cartes) expect(c.lien).toMatch(/^\/admin\/(artisans|negoces)/);
@@ -83,7 +83,7 @@ describe("l'espace admin, vue globale", { timeout: 120_000 }, () => {
     expect(armor.derniereConnexion).toMatch(/^\d{4}-/);
     expect((await g.agent.get("/v1/admin/vue/artisans?q=brest").expect(200)).body.items.map((x: { entreprise: string }) => x.entreprise)).toEqual(["Peinture Brestoise"]);
     expect((await g.agent.get("/v1/admin/vue/artisans?departement=22&formule=payant").expect(200)).body.items.map((x: { entreprise: string }) => x.entreprise)).toEqual(["Toitures de l'Armor"]);
-    expect((await g.agent.get("/v1/admin/vue/artisans?formule=decouverte").expect(200)).body.total).toBe(2);
+    expect((await g.agent.get("/v1/admin/vue/artisans?formule=gratuit").expect(200)).body.total).toBe(2);
     expect((await g.agent.get("/v1/admin/vue/artisans?promo=fondateur").expect(200)).body.total).toBe(1);
 
     const fiche = (await g.agent.get(`/v1/admin/vue/artisans/${a.companyId}`).expect(200)).body;
@@ -138,10 +138,10 @@ describe("l'espace admin, vue globale", { timeout: 120_000 }, () => {
   });
 
   it("le code répond avec les chiffres, jamais avec un nom d'artisan", () => {
-    const c = { date: "2026-11-14", artisans: { inscrits: 56, inscritsAuDebutDuMois: 50, inscritsCeMois: 6, croissanceDuMoisPct: 12, inscriptions7Jours: 3, inscriptions7JoursDAvant: 1, inscriptionsParMois: [] }, abonnements: { payants: 8, payantsLeMoisDernier: 6, enDecouverte: 48, parFormule: { essentiel: 5, pro: 3 }, revenusDuMoisHt: 219.2, revenusDuMoisDernierHt: 159.4, paiementsRefuses: 1 }, negoces: { inscrits: 4, aVerifier: 1, demandesRecues: 20, tauxDeReponsePct: 55, quiNeRepondentJamais: [{ nom: "Négoce Muet", demandesRecues: 4 }] }, activiteDuMois: { listesCreees: 30, demandesDePrix: 12, besoinsEnAchatGroupe: 5 }, aTraiter: { bugsSignales: 2, erreursServeur24h: 0 } };
+    const c = { date: "2026-11-14", artisans: { inscrits: 56, inscritsAuDebutDuMois: 50, inscritsCeMois: 6, croissanceDuMoisPct: 12, inscriptions7Jours: 3, inscriptions7JoursDAvant: 1, inscriptionsParMois: [] }, abonnements: { payants: 8, payantsLeMoisDernier: 6, enGratuit: 48, parFormule: { pro: 5, promax: 3 }, revenusDuMoisHt: 219.2, revenusDuMoisDernierHt: 159.4, paiementsRefuses: 1 }, negoces: { inscrits: 4, aVerifier: 1, demandesRecues: 20, tauxDeReponsePct: 55, quiNeRepondentJamais: [{ nom: "Négoce Muet", demandesRecues: 4 }] }, activiteDuMois: { listesCreees: 30, demandesDePrix: 12, besoinsEnAchatGroupe: 5 }, aTraiter: { bugsSignales: 2, erreursServeur24h: 0 } };
     expect(repondreParLeCode("quelle croissance ?", c)).toBe("Croissance des inscrits ce mois : 12 % (50 au début du mois, 56 aujourd'hui).");
     expect(repondreParLeCode("quels négoces ne répondent jamais ?", c)).toContain("Négoce Muet (4 demandes)");
-    expect(repondreParLeCode("combien d'abonnés payants ?", c)).toContain("8 abonnés payants (essentiel : 5, pro : 3), 48 en Découverte.");
+    expect(repondreParLeCode("combien d'abonnés payants ?", c)).toContain("8 abonnés payants (pro : 5, promax : 3), 48 en Gratuit.");
     expect(repondreParLeCode("les revenus ?", c)).toContain("219,2 € HT");
   });
 

@@ -1,8 +1,10 @@
-// Crée (ou retrouve) chez Stripe les DEUX PRIX de l'abonnement Mobiiz (Greg, 24 octobre 2026) :
-//   - Essentiel : 19,90 € HT, récurrent tous les mois (clé de recherche « mobiiz_essentiel ») ;
-//   - Pro : 39,90 € HT, récurrent tous les mois (clé de recherche « mobiiz_pro »).
-// (Greg, 30 octobre 2026 ; avant : mensuel 49 € et annuel 348 €, prix laissés tels quels chez Stripe.)
-// Puis affiche les deux identifiants à mettre dans Vercel (STRIPE_PRICE_ID_MENSUEL, STRIPE_PRICE_ID_ANNUEL).
+// Crée (ou retrouve) chez Stripe les QUATRE PRIX de l'abonnement Mobiiz (Greg, 15 novembre 2026) :
+//   - Pro : 29 € HT par mois (« mobiiz_pro_29_mois ») et 290 € HT par an (« mobiiz_pro_290_an ») ;
+//   - Pro Max : 49 € HT par mois (« mobiiz_promax_49_mois ») et 490 € HT par an (« mobiiz_promax_490_an »).
+// Des clés de recherche NEUVES : les anciens prix (Essentiel 19,90 €, Pro 39,90 €, mensuel 49 €, annuel 348 €) restent
+// tels quels chez Stripe et ne sont plus lus par l'application.
+// Puis affiche les quatre identifiants à mettre dans Vercel (STRIPE_PRIX_PRO, STRIPE_PRIX_PROMAX et leurs « _ANNUEL »).
+// À NE LANCER QU'AVEC L'ACCORD DE GREG (rien n'est créé chez Stripe sans lui).
 //
 // Lancer : STRIPE_SECRET_KEY=sk_test_… node scripts/stripe-creer-prix.mjs
 // La clé se lit dans l'environnement, jamais dans un fichier ni une conversation. Mode TEST seulement, sauf --reel.
@@ -16,8 +18,10 @@ if (!cle.startsWith("sk_test_") && !(reel && cle.startsWith("sk_live_"))) {
 }
 
 const PRIX = [
-  { cle: "mobiiz_essentiel", centimes: 1990, intervalle: "month", variable: "STRIPE_PRICE_ID_ESSENTIEL", nom: "Essentiel, 19,90 € HT par mois" },
-  { cle: "mobiiz_pro", centimes: 3990, intervalle: "month", variable: "STRIPE_PRICE_ID_PRO", nom: "Pro, 39,90 € HT par mois" },
+  { cle: "mobiiz_pro_29_mois", centimes: 2900, intervalle: "month", variable: "STRIPE_PRIX_PRO", nom: "Pro, 29 € HT par mois" },
+  { cle: "mobiiz_promax_49_mois", centimes: 4900, intervalle: "month", variable: "STRIPE_PRIX_PROMAX", nom: "Pro Max, 49 € HT par mois" },
+  { cle: "mobiiz_pro_290_an", centimes: 29000, intervalle: "year", variable: "STRIPE_PRIX_PRO_ANNUEL", nom: "Pro, 290 € HT par an" },
+  { cle: "mobiiz_promax_490_an", centimes: 49000, intervalle: "year", variable: "STRIPE_PRIX_PROMAX_ANNUEL", nom: "Pro Max, 490 € HT par an" },
 ];
 
 const formulaire = (p) =>
@@ -37,7 +41,7 @@ async function stripe(methode, chemin, params = {}) {
   return json;
 }
 
-const existants = await stripe("GET", "prices", { "lookup_keys[0]": PRIX[0].cle, "lookup_keys[1]": PRIX[1].cle, active: true });
+const existants = await stripe("GET", "prices", { ...Object.fromEntries(PRIX.map((p, i) => [`lookup_keys[${i}]`, p.cle])), active: true });
 let produit = existants.data[0]?.product ?? null;
 if (!produit) produit = (await stripe("POST", "products", { name: "Abonnement Mobiiz", "metadata[app]": "mobiiz" })).id;
 

@@ -7,7 +7,7 @@ import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { AppLogger } from "../../platform/logging/logger.js";
 import { signalerException } from "../../platform/supervision/exceptions.js";
 import { CONFIG, LOGGER } from "../../platform/tokens.js";
-import { AiUsageModule, AiUsageRecorder } from "../ai-usage/index.js";
+import { AiUsageModule, AiUsageRecorder, AnalysisMeter } from "../ai-usage/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { InterpretationService, type BudgetInterpretation } from "./application/interpretation.service.js";
 import { AssistantIaService, TACHE_ASSISTANT } from "./application/assistant-ia.service.js";
@@ -110,7 +110,7 @@ export function budgetInterpretation(
     {
       // L'assistant connecté à l'IA (Greg, 12 novembre 2026) : éteint par défaut (`ASSISTANT_IA`), plafonné, journalisé.
       provide: AssistantIaService,
-      useFactory: (config: AppConfig, logger: AppLogger, prisma: PrismaService, recorder: AiUsageRecorder) => {
+      useFactory: (config: AppConfig, logger: AppLogger, prisma: PrismaService, recorder: AiUsageRecorder, meter: AnalysisMeter) => {
         if (!config.ai.assistant) return new AssistantIaService(null);
         const ia = fabriqueIa(config);
         const decoupeur = ia ? new IaDecoupeur(ia, config.ai.assistantModel) : config.ai.provider === "fake" ? new FakeDecoupeur() : null;
@@ -124,9 +124,11 @@ export function budgetInterpretation(
             cle: "credit-ia-assistant",
             titre: "Crédit IA indisponible : l'assistant connecté à l'IA est coupé",
           }, { budgetEur: config.groupe.negocie.budgetIaJourEur, usdToEur: Number(config.aiCost.usdToEur) }),
+          // Greg, 15 novembre 2026 : analyses offertes prises, plafond de l'abonné atteint ou e-mail non vérifié : le code seul.
+          (qui) => meter.iaPermise(qui.companyId, qui.userId),
         );
       },
-      inject: [CONFIG, LOGGER, PrismaService, AiUsageRecorder],
+      inject: [CONFIG, LOGGER, PrismaService, AiUsageRecorder, AnalysisMeter],
     },
   ],
 })

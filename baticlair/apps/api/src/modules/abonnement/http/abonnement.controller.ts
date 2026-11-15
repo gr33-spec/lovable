@@ -15,8 +15,8 @@ import { AbonnementService } from "../application/abonnement.service.js";
 import { signatureStripeValide } from "../infrastructure/stripe.js";
 
 const simulationBody = z.object({ issue: z.enum(["payer", "echec"]) });
-/** La formule choisie ; sans corps (anciens écrans), Essentiel. */
-const payerBody = z.object({ formule: z.enum(["essentiel", "pro"]).optional(), periodicite: z.enum(["mensuel", "annuel"]).optional() }).optional();
+/** La formule choisie ; sans corps (anciens écrans), Pro. */
+const payerBody = z.object({ formule: z.enum(["pro", "promax"]).optional(), periodicite: z.enum(["mensuel", "annuel"]).optional() }).optional();
 const tvaBody = z.object({ tvaIntra: z.string().trim().max(20).nullable() });
 
 /** L'instant de la requête ; `?maintenant=` seulement en test. */
@@ -39,14 +39,14 @@ export class AbonnementController {
   @Post("payer")
   @HttpCode(200)
   payer(@Tenant() tenant: TenantContext, @Body(new ZodPipe(payerBody)) body: z.infer<typeof payerBody>) {
-    return this.abonnement.commencerPaiement(tenant, body?.formule ?? "essentiel", body?.periodicite ?? "mensuel");
+    return this.abonnement.commencerPaiement(tenant, body?.formule ?? "pro", body?.periodicite ?? "mensuel");
   }
 
-  /** D'Essentiel à Pro, au prorata (30 octobre 2026 ; remplace le passage à l'annuel). */
-  @Post("pro")
+  /** De Pro à Pro Max, au prorata (15 novembre 2026 ; avant : d'Essentiel à Pro). */
+  @Post("promax")
   @HttpCode(200)
   pro(@Tenant() tenant: TenantContext, @Query("maintenant") m?: string) {
-    return this.abonnement.passerPro(tenant, instant(this.config, m));
+    return this.abonnement.passerProMax(tenant, instant(this.config, m));
   }
 
   /** La formule d'une session simulée : la page « Paiement (simulation) » dit le bon prix. */

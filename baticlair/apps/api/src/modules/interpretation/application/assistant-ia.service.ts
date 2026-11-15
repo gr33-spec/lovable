@@ -65,6 +65,8 @@ export class AssistantIaService {
     private readonly decoupeur: Decoupeur | null,
     private readonly journal: (e: { provider: string; model: string; status: string; microUsd: number | null; lignes: number; ecartees: number }) => void = () => undefined,
     private readonly budget: BudgetInterpretation | null = null,
+    /** Le compte a-t-il encore droit au modèle (analyses offertes, plafond caché, e-mail vérifié) ? Sinon le code seul répond. */
+    private readonly droit: (qui: { companyId: string; userId: string | null }) => Promise<boolean> = async () => true,
   ) {}
 
   get actif(): boolean {
@@ -96,6 +98,7 @@ export class AssistantIaService {
     if (!this.decoupeur) return sansModele("L'assistant connecté n'est pas allumé : je lis ta phrase sans lui.");
     // Le plafond d'abord : au-delà, aucun appel (le code seul répond).
     if (this.budget && !(await this.budget.autorise().catch(() => false))) return sansModele("Le budget du jour est atteint : je lis ta phrase sans l'assistant connecté.");
+    if (!(await this.droit(qui).catch(() => false))) return sansModele("Je lis ta phrase sans l'assistant connecté.");
     surEtape({ cle: "lecture", titre: photo ? "Lecture de la photo…" : "Lecture de ta demande…", detail: "Je découpe ce que tu demandes en articles, un par ligne, et je cherche ce qui manque pour chiffrer." });
     const r = await this.decoupeur.decouper(echanges, photos).catch(() => null);
     let microUsd: number | null = null;

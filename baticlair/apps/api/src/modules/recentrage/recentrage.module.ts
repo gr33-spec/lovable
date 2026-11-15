@@ -2,7 +2,8 @@ import { Inject, Module, type OnModuleInit } from "@nestjs/common";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
-import { CONFIG, EMAIL_SENDER, PUSH_SENDER } from "../../platform/tokens.js";
+import type { Alerter } from "../../platform/alerts/alerter.js";
+import { ALERTER, CONFIG, EMAIL_SENDER, PUSH_SENDER } from "../../platform/tokens.js";
 import type { PushSender } from "../../platform/push/push.port.js";
 import { NotificationsGroupeService } from "../../platform/notifications/notifications-artisan.js";
 import { lienEmailsCoupes } from "../privacy/index.js";
@@ -35,7 +36,7 @@ import { ChiffrageController, RecentrageController, RecentrageNegoceController, 
   providers: [
     {
       provide: DroitsService,
-      useFactory: (p: PrismaService, a: AbonnementService, c: AppConfig) => new DroitsService(p, a, { zonesActives: c.groupe.departements, seuilZoneActive: c.groupe.recentrage.seuilZoneActive, lecturesGratuites: c.groupe.recentrage.lecturesGratuites, lecturesIaGratuitTotal: c.groupe.negocie.lecturesIaGratuitTotal }),
+      useFactory: (p: PrismaService, a: AbonnementService, c: AppConfig) => new DroitsService(p, a, { zonesActives: c.groupe.departements, seuilZoneActive: c.groupe.recentrage.seuilZoneActive, lecturesGratuites: c.groupe.recentrage.lecturesGratuites, lecturesIaGratuitTotal: c.groupe.negocie.lecturesIaGratuitTotal, usdToEur: Number(c.aiCost.usdToEur), emailVerifieExige: c.ai.provider === "anthropic" || c.ai.provider === "openai" }),
       inject: [PrismaService, AbonnementService, CONFIG],
     },
     {
@@ -100,6 +101,7 @@ export class RecentrageModule implements OnModuleInit {
     @Inject(ObservatoireService) private readonly observatoire: ObservatoireService,
     @Inject(VerificationNegoceService) private readonly verification: VerificationNegoceService,
     @Inject(EspaceNegoceService) private readonly espace: EspaceNegoceService,
+    @Inject(ALERTER) private readonly alerter: Alerter,
   ) {}
 
   onModuleInit(): void {
@@ -109,8 +111,12 @@ export class RecentrageModule implements OnModuleInit {
     this.priceRequests.brancherComplement((requestId, recipientId) => this.demandes.complement(requestId, recipientId));
     this.abonnement.brancherOffert((companyId) => this.droits.offertPour(companyId));
     this.meter.brancherLimiteGratuite((companyId) => this.droits.limiteGratuite(companyId));
-    // Greg, 30 octobre 2026 (décisions 2 et 3) : les quotas d'IA de la formule, pour la jauge et le scan d'une liste.
-    this.meter.brancherQuotas((companyId) => this.droits.quotas(companyId, (parMois) => this.meter.compter(companyId, parMois)));
+    // Greg, 15 novembre 2026 : 3 analyses offertes en tout (scans compris) pour un compte gratuit ; plafond caché pour un abonné.
+    this.droits.brancherAnalysesFaites((companyId) => this.meter.compter(companyId, false));
+    this.meter.brancherPlafond((companyId) => this.droits.verifierPlafond(companyId));
+    this.droits.brancherAlerte((m) => this.alerter.alert("conso_ia", m));
+    this.meter.brancherEmail((userId) => this.droits.verifierEmail(userId));
+    this.meter.brancherDroitIa((companyId, userId) => this.droits.assistantPermis(companyId, userId));
     this.meter.brancherScan((companyId) => this.droits.verifierScan(companyId));
     this.commande.brancherVolume((c) => this.regroupements.volume(c));
     // Business model final (25 octobre 2026) : veille, observatoire, vérification des négoces, mode des regroupements.

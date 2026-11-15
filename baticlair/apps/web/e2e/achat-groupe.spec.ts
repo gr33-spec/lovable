@@ -532,7 +532,7 @@ test.describe("Lot 6 : la supervision de l'admin", () => {
     // L'accueil : six grosses cartes, chacune mène à sa liste.
     const cartes = page.getByRole("list", { name: "Chiffres clés" });
     await expect(cartes.getByRole("listitem")).toHaveCount(6);
-    for (const titre of ["Inscrits", "Abonnés payants", "En Découverte", "Revenus du mois", "Inscriptions de la semaine", "Négoces inscrits"]) await expect(cartes.getByText(titre, { exact: true })).toBeVisible();
+    for (const titre of ["Inscrits", "Abonnés payants", "En Gratuit", "Revenus du mois", "Inscriptions de la semaine", "Négoces inscrits"]) await expect(cartes.getByText(titre, { exact: true })).toBeVisible();
     await expect(cartes.getByText(/depuis le début du mois/).first()).toBeVisible();
     await capture(page, "admin-1-accueil");
     // 1er clic : la liste. Une seule barre de recherche, des filtres simples.
@@ -542,7 +542,7 @@ test.describe("Lot 6 : la supervision de l'admin", () => {
     await page.getByRole("searchbox", { name: "Rechercher un artisan" }).fill(artisan.entreprise);
     const lignes = page.getByRole("list", { name: "Artisans" });
     await expect(lignes.getByRole("listitem")).toHaveCount(1);
-    await expect(lignes).toContainText("Découverte");
+    await expect(lignes).toContainText("Gratuit");
     await expect(lignes).toContainText("Couverture");
     await expect(lignes).toContainText(/Inscrit le .* Dernière connexion/);
     await capture(page, "admin-2-artisans");

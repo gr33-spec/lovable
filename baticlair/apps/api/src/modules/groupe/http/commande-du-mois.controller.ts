@@ -230,7 +230,7 @@ export class EconomiePubliqueController {
   @Get("tarif")
   async tarif() {
     const [moyenne, reglages] = await Promise.all([this.commande.economieMoyenne().catch(() => ({ cycles: 0, parCommande: null, total: 0 })), this.abonnement.reglages()]);
-    // Les deux formules (Greg, 30 octobre 2026) : Essentiel puis Pro ; « dès 19,90 € » pour la landing.
-    return { argument: argumentTarif(moyenne, reglages), prixHt: eurosDeCentimes(reglages.prixEssentielHtCentimes), prixProHt: eurosDeCentimes(reglages.prixProHtCentimes), prixDes: prixDes(reglages), offres: offresAbonnement(reglages), moyenneReelle: moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && !!moyenne.parCommande };
+    // Les deux formules (Greg, 15 novembre 2026) : Pro puis Pro Max ; « dès 29 € » pour la landing.
+    return { argument: argumentTarif(moyenne, reglages), prixHt: eurosDeCentimes(reglages.prixMensuelProHtCentimes), prixProMaxHt: eurosDeCentimes(reglages.prixMensuelProMaxHtCentimes), prixDes: prixDes(reglages), offres: offresAbonnement(reglages), moyenneReelle: moyenne.cycles >= SEUIL_CYCLES_ECONOMIE && !!moyenne.parCommande };
   }
 }

@@ -234,10 +234,11 @@ export class PilotageService {
       const abonnes = f.flatMap((x) => {
         if (!x.companyId || vues.has(x.companyId)) return [];
         vues.add(x.companyId);
-        // Un passage au prorata compte au prix plein de sa formule (Pro ; un ancien passage à l'annuel, l'annuel).
-        // Une année payée en une fois (« essentiel_annuel », « pro_annuel », 12 novembre 2026) compte pour un douzième par mois.
-        const formule = x.formule === "bascule" || x.formule.endsWith("_annuel") ? "annuel" : x.formule === "passage_pro" ? "pro" : x.formule;
-        return [{ formule, htCentimes: x.formule === "bascule" ? prix.annuel : x.formule === "passage_pro" ? prix.pro : x.montantHtCentimes }];
+        // Un passage au prorata compte au prix plein de sa formule (Pro Max ; un ancien passage à l'annuel, l'annuel ; un
+        // ancien passage à Pro d'avant le 15 novembre 2026, le Pro d'aujourd'hui).
+        // Une année payée en une fois (« pro_annuel », « promax_annuel ») compte pour un douzième par mois.
+        const formule = x.formule === "bascule" || x.formule.endsWith("_annuel") ? "annuel" : x.formule === "passage_promax" ? "promax" : x.formule === "passage_pro" ? "pro" : x.formule;
+        return [{ formule, htCentimes: x.formule === "bascule" ? prix.annuel : x.formule === "passage_promax" ? prix.promax : x.formule === "passage_pro" ? prix.pro : x.montantHtCentimes }];
       });
       return revenuMensuelRecurrent(abonnes);
     };
@@ -288,7 +289,7 @@ export class PilotageService {
       chiffres: [
         { cle: "actifs", titre: "Utilisateurs actifs", valeur: String(act), detail: "sur 30 jours", fleche: flecheDe(act, actP) },
         { cle: "payants", titre: "Abonnés payants", valeur: String(pay), detail: this.sources.paiementSimule ? "paiements de test" : "sur 30 jours", fleche: flecheDe(pay, payP) },
-        { cle: "revenu", titre: "Revenu mensuel récurrent", valeur: eurosEntiers(mrr.centimes / 100), detail: mrr.annuels > 0 ? `HT, annuel ÷ 12 · ${mrr.partAnnuels} % en annuel` : "HT, Essentiel et Pro", fleche: flecheDe(mrr.centimes, mrrAvant.centimes) },
+        { cle: "revenu", titre: "Revenu mensuel récurrent", valeur: eurosEntiers(mrr.centimes / 100), detail: mrr.annuels > 0 ? `HT, annuel ÷ 12 · ${mrr.partAnnuels} % en annuel` : "HT, Pro et Pro Max", fleche: flecheDe(mrr.centimes, mrrAvant.centimes) },
         { cle: "ia", titre: "Coût IA du mois", valeur: eurosEntiers(ia), detail: "", fleche: flecheDe(Math.round(ia), Math.round(iaP), "bas") },
       ],
       croissance: { visites: await this.compteur("visite", mois, new Date(maintenant.getTime() + JOUR)), inscriptions: await inscriptions(mois, maintenant), inscriptionsAvant: await inscriptions(moisPrec, mois), installations: await this.compteur("installation", mois, new Date(maintenant.getTime() + JOUR)), essais: enEssai, conversion: taux(dejaPaye.size, essaiFini) },

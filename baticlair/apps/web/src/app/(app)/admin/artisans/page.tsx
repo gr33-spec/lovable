@@ -23,7 +23,7 @@ interface Artisan {
 const FILTRES = [
   { id: "", texte: "Tous" },
   { id: "payant", texte: "Payants" },
-  { id: "decouverte", texte: "Découverte" },
+  { id: "gratuit", texte: "Gratuit" },
   { id: "echec", texte: "Paiement refusé" },
 ];
 

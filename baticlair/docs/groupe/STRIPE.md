@@ -1,5 +1,13 @@
 # Brancher Stripe (le vrai paiement)
 
+> **À JOUR AU 15 NOVEMBRE 2026 (nouveaux tarifs de Greg).** Les formules sont maintenant **Pro** (29 € HT par mois, 290 € HT
+> par an) et **Pro Max** (49 € HT par mois, 490 € HT par an). Quatre prix sont à créer chez Stripe (aucun ne l'est sans
+> l'accord de Greg) et à poser dans ces variables, aux noms NEUFS : `STRIPE_PRIX_PRO`, `STRIPE_PRIX_PROMAX`,
+> `STRIPE_PRIX_PRO_ANNUEL`, `STRIPE_PRIX_PROMAX_ANNUEL`. Les anciennes variables `STRIPE_PRICE_ID_ESSENTIEL`,
+> `STRIPE_PRICE_ID_PRO` et leurs versions `_ANNUEL` ne sont plus lues : un ancien prix (19,90 € ou 39,90 €) ne peut plus
+> être facturé. Le passage au prorata va de Pro à Pro Max. Le reste de ce document décrit la mise en place d'origine
+> (Essentiel et Pro) : remplacer « Essentiel » par « Pro » et « Pro » par « Pro Max », avec les nouveaux montants.
+
 Aujourd'hui, le paiement est **simulé** (`PAIEMENT=simule`) : la page « Paiement (simulation) » remplace Stripe, les factures portent le préfixe `TEST`, aucun argent ne bouge. Tout est prêt pour Stripe : il n'y a rien à reprogrammer, seulement des réglages chez Stripe et dans Vercel.
 
 **Deux formules** (Greg, 30 octobre 2026) : **Essentiel** 19,90 € HT par mois et **Pro** 39,90 € HT par mois, sans engagement (avant : mensuel 49 € et annuel 348 €). Il faut donc **deux prix** chez Stripe. Les achats groupés sont gratuits : l'abonnement n'ajoute que des analyses de devis et des scans de liste (`OFFRES`, `packages/domain/src/groupe/offres.ts`).

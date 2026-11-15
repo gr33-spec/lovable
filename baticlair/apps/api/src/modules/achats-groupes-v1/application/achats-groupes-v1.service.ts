@@ -45,6 +45,7 @@ import {
   type MotifV1,
   type OffreV1,
   type ProduitV1,
+  droitCommandeGroupee,
 } from "@baticlair/domain";
 import { cleVerrouCircuit, faitsDesLignes } from "../../../platform/cycle/lignes.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -56,6 +57,8 @@ import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 
 /** Ce dont le service a besoin hors de son module : les lignes d'une liste (clé, désignation, quantité, unité). */
 export interface PortsAchatsV1 {
+  /** L'entreprise a-t-elle un abonnement payé en cours (Pro ou Pro Max) ? Absent : tout est ouvert (abonnement éteint). */
+  abonne?(companyId: string): Promise<boolean>;
   lignesDeListe(tenant: TenantContext, projectId: string): Promise<{ nom: string; lignes: { key: string; designation: string; quantite: number | null; unite: string; aRegler: boolean }[] }>;
 }
 
@@ -388,7 +391,10 @@ export class AchatsGroupesV1Service {
     const quantite = n(b.quantite)!;
     const historique = await this.prisma.historiqueBesoinGroupeV1.findMany({ where: { besoinId: b.id, companyId: tenant.companyId }, orderBy: { le: "asc" } });
     const offreRow = ["offre_verification", "offre_a_examiner", "renegociation"].includes(a.statut) ? await this.prisma.offreAchatGroupeV1.findUnique({ where: { achatId: a.id } }) : null;
-    const offre = offreRow ? this.vueOffre(offreRow, quantite, etatA) : null;
+    const offreComplete = offreRow ? this.vueOffre(offreRow, quantite, etatA) : null;
+    // Une offre déjà commandée reste visible en entier ; sinon, sans droit, le nom du négoce est masqué et rien ne se commande.
+    const droit = offreComplete && b.offreDecision !== "commandee" ? await this.droitCommande(tenant.companyId) : null;
+    const offre = offreComplete ? (droit && !droit.ok ? { ...offreComplete, fournisseur: null, lieu: null, acceptable: false, paywall: droit.phrase, premiereOfferte: false } : { ...offreComplete, paywall: null, premiereOfferte: !!droit?.offerte }) : null;
     const transmis = ["consultation", "offre_verification", "offre_a_examiner", "renegociation"].includes(a.statut) && etatB === "reconfirme";
     return {
       id: b.id,
@@ -421,6 +427,17 @@ export class AchatsGroupesV1Service {
       retrait: b.retireLe ? { le: b.retireLe.toISOString(), motif: MOTIFS_V1.find((m) => m.id === b.motifRetrait)?.libelle ?? b.motifRetrait, precision: b.precisionRetrait } : null,
       historique: historique.map((h) => ({ type: h.type, le: h.le.toISOString(), transmis: h.transmis, detail: h.detail })),
     };
+  }
+
+  /**
+   * VOIR LE NÉGOCE RETENU ET COMMANDER (Greg, 15 novembre 2026) : inclus dans Pro et Pro Max ; pour un compte gratuit, la
+   * PREMIÈRE commande groupée est offerte. Ensuite, le prix reste visible, mais le nom du négoce est masqué et « Commander
+   * à ce prix » demande Pro. Publier et rejoindre un achat groupé restent gratuits. Avant : tout était gratuit.
+   */
+  private async droitCommande(companyId: string) {
+    const abonne = this.ports.abonne ? await this.ports.abonne(companyId) : true;
+    const commandesPassees = abonne ? 0 : await this.prisma.besoinGroupeV1.count({ where: { companyId, offreDecision: "commandee" } });
+    return droitCommandeGroupee({ abonne, commandesPassees });
   }
 
   private vueOffre(o: NonNullable<Awaited<ReturnType<PrismaService["offreAchatGroupeV1"]["findUnique"]>>>, quantite: number, etat: EtatAchatV1) {
@@ -464,6 +481,8 @@ export class AchatsGroupesV1Service {
     this.exigerActif();
     assertCanWrite(tenant);
     const { b, o, maintenant } = await this.offreADecider(tenant, id);
+    const droit = await this.droitCommande(tenant.companyId);
+    if (!droit.ok) throw new DomainError("abonnement_requis", "Group order needs a paid plan", { action: "commande_groupee", refus: "commande_groupee", phrase: droit.phrase });
     const vue = this.vueOffre(o, n(b.quantite)!, b.achat.statut as EtatAchatV1);
     if (!vue.complete || !vue.calcul) throw conflit("offre_incomplete", "L'offre n'est pas complète : elle ne peut pas être acceptée en l'état.");
     if (!o.fournisseurEmail) throw conflit("fournisseur_sans_email", "Mobiiz complète l'offre : l'adresse du fournisseur manque encore. Tu pourras commander dès qu'elle est là.");

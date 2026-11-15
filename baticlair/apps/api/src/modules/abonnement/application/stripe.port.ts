@@ -4,8 +4,8 @@ import type { Formule, Periodicite } from "@baticlair/domain";
 export interface StripeClient {
   checkout(c: { companyId: string; customerId: string | null; email: string | null; formule: Formule; periodicite?: Periodicite; succes: string; annulation: string }): Promise<{ id: string; url: string }>;
   portail(customerId: string, retour: string): Promise<{ url: string }>;
-  /** Le passage d'Essentiel à Pro : le prix de l'abonnement change, Stripe facture tout de suite Pro moins ce qui reste du mois. */
-  passerPro(subscriptionId: string): Promise<void>;
+  /** Le passage de Pro à Pro Max : le prix de l'abonnement change, Stripe facture tout de suite Pro Max moins ce qui reste du mois. */
+  passerProMax(subscriptionId: string): Promise<void>;
   resilierEnFinDePeriode(subscriptionId: string): Promise<void>;
   /** La formule d'un identifiant de prix Stripe (webhooks) ; null pour un prix inconnu. */
   formuleDuPrix(priceId: string | null): Formule | null;

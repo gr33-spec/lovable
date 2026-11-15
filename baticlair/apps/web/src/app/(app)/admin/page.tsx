@@ -21,7 +21,7 @@ interface Probleme {
   nombre: number;
   lien: string;
 }
-const TITRES: Record<string, string> = { inscrits: "Inscrits", payants: "Abonnés payants", decouverte: "En Découverte", revenus: "Revenus du mois", inscriptions_semaine: "Inscriptions de la semaine", negoces: "Négoces inscrits" };
+const TITRES: Record<string, string> = { inscrits: "Inscrits", payants: "Abonnés payants", gratuit: "En Gratuit", revenus: "Revenus du mois", inscriptions_semaine: "Inscriptions de la semaine", negoces: "Négoces inscrits" };
 const PROBLEMES: Record<string, (n: number) => string> = {
   signalement: (n) => `${n} bug${n > 1 ? "s" : ""} signalé${n > 1 ? "s" : ""} à regarder`,
   paiement_refuse: (n) => `${n} paiement${n > 1 ? "s" : ""} refusé${n > 1 ? "s" : ""}`,

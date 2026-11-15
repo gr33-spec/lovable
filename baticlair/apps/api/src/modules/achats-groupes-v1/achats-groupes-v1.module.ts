@@ -5,6 +5,7 @@ import type { TransactionalEmailSender } from "../../platform/email/email.port.j
 import { CONFIG, EMAIL_SENDER } from "../../platform/tokens.js";
 import { AchatGroupeModule, RapprochementService } from "../achat-groupe/index.js";
 import { CommandeDuMoisService, GroupeModule } from "../groupe/index.js";
+import { DroitsService, RecentrageModule } from "../recentrage/index.js";
 import { PilotageModule } from "../pilotage/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { AchatsGroupesV1Service } from "./application/achats-groupes-v1.service.js";
@@ -15,15 +16,17 @@ import { AchatsGroupesV1AdminController, AchatsGroupesV1Controller, AchatsGroupe
  * groupé (tables séparées, rien de l'existant n'est modifié). Coupé par défaut (ACHATS_GROUPES_V1=off) : routes en 404.
  */
 @Module({
-  imports: [TenancyModule, GroupeModule, PilotageModule, AchatGroupeModule],
+  imports: [TenancyModule, GroupeModule, PilotageModule, AchatGroupeModule, RecentrageModule],
   controllers: [AchatsGroupesV1Controller, AchatsGroupesV1AdminController, AchatsGroupesV1TacheController],
   providers: [
     {
       provide: AchatsGroupesV1Service,
-      useFactory: (p: PrismaService, commande: CommandeDuMoisService, e: TransactionalEmailSender, c: AppConfig) =>
+      useFactory: (p: PrismaService, commande: CommandeDuMoisService, e: TransactionalEmailSender, c: AppConfig, droits: DroitsService) =>
         new AchatsGroupesV1Service(
           p,
           {
+            // Greg, 15 novembre 2026 : voir le négoce retenu et commander demande Pro (la première commande est offerte).
+            abonne: (companyId) => droits.abonnePayant(companyId),
             lignesDeListe: async (tenant, projectId) => {
               const lignes = await commande.toutesLesLignes(tenant, projectId);
               const projet = await p.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { name: true } });
@@ -35,7 +38,7 @@ import { AchatsGroupesV1AdminController, AchatsGroupesV1Controller, AchatsGroupe
           // (recette en ligne, Greg, 7 novembre 2026) ; la vraie production la refuse toujours.
           { actif: c.achatsGroupesV1, webAppUrl: c.webAppUrl, env: c.previewOriginPattern ? "preview" : c.env },
         ),
-      inject: [PrismaService, CommandeDuMoisService, EMAIL_SENDER, CONFIG],
+      inject: [PrismaService, CommandeDuMoisService, EMAIL_SENDER, CONFIG, DroitsService],
     },
   ],
   exports: [AchatsGroupesV1Service],

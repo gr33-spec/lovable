@@ -1,4 +1,6 @@
-import { droitsDe, formuleDuCompte, payantOffertDansLaZone, phrasePaywallQuota, phrasePreavis, quotasDe, verifierDroit, zoneDuCodePostal, MESSAGE_HORS_ZONE, OFFRES, PHRASE_LECTURES_EPUISEES, type Droits, type FormuleOffre, type Quotas } from "@baticlair/domain";
+import { droitsDe, formuleDuCompte, moisDAbonnement, payantOffertDansLaZone, phrasePlafondAtteint, phrasePreavis, verifierDroit, zoneDuCodePostal, MESSAGE_HORS_ZONE, PHRASE_ANALYSES_OFFERTES_UTILISEES, PLAFOND_IA_EUR_DEFAUT, type Droits, type FormuleOffre, type FormulePayante } from "@baticlair/domain";
+import { CLE_PLAFONDS_IA } from "../../../platform/reglages/reglage-plafonds-ia.js";
+import { signalerException } from "../../../platform/supervision/exceptions.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import type { AbonnementService } from "../../abonnement/index.js";
@@ -14,9 +16,19 @@ export interface ReglagesDroits {
   zonesActives: string[] | null;
   seuilZoneActive: number;
   lecturesGratuites: number;
-  /** Achat groupé par métier (27 octobre 2026, point 24) : les lectures IA offertes en tout, sans abonnement. */
+  /** Les analyses offertes en tout à un compte gratuit (devis, photo et liste confondus ; 3, Greg, 15 novembre 2026). */
   lecturesIaGratuitTotal: number;
+  /** Le taux de conversion des coûts (les appels sont comptés en dollars, le plafond se règle en euros). */
+  usdToEur?: number;
+  /** Au-delà de ce coût en un jour (euros), le compte est signalé à l'admin comme consommant anormalement. */
+  alerteCompteJourEur?: number;
+  /** Une analyse demande une adresse e-mail vérifiée (allumé quand un vrai fournisseur d'IA est branché : chaque appel coûte). */
+  emailVerifieExige?: boolean;
 }
+
+export const PHRASE_EMAIL_A_VERIFIER = "Confirme d'abord ton adresse e-mail : on t'a envoyé un lien à l'inscription. Ensuite, tu pourras faire analyser tes documents.";
+
+
 
 /** Un artisan actif : une entreprise de la zone qui a ouvert un chantier (hors démonstration) dans les 30 derniers jours. */
 const FENETRE_ACTIF_MS = 30 * 86_400_000;
@@ -132,55 +144,133 @@ export class DroitsService {
   }
 
   /**
-   * LA FORMULE DU COMPTE (Greg, 30 octobre 2026, décision 2) : Découverte sans abonnement payé ; Essentiel ou Pro selon
-   * l'abonnement en cours (en grâce compris). Null quand l'abonnement artisan est éteint (rien n'est limité).
+   * LA FORMULE DU COMPTE (Greg, 15 novembre 2026) : Gratuit sans abonnement payé ; Pro ou Pro Max selon l'abonnement en
+   * cours (en grâce compris). Null quand l'abonnement artisan est éteint (rien n'est limité).
    */
   async formule(companyId: string, maintenant = this.now()): Promise<FormuleOffre | null> {
     if (!this.abonnement.actif) return null;
-    if (!(await this.abonnePayant(companyId, maintenant))) return "decouverte";
+    if (!(await this.abonnePayant(companyId, maintenant))) return "gratuit";
     const a = await this.prisma.abonnement.findUnique({ where: { companyId }, select: { formule: true } });
     return formuleDuCompte({ actif: true, formule: a?.formule ?? null });
   }
 
-  /** Les crédits de la formule : la limite, et ce qui est déjà pris (le mois en cours pour Essentiel et Pro, tout pour Découverte). */
-  private limites(formule: FormuleOffre): { analyses: number; scans: number } {
-    return formule === "decouverte" ? { analyses: this.reglages.lecturesIaGratuitTotal, scans: OFFRES.decouverte.scans } : { analyses: OFFRES[formule].analyses, scans: OFFRES[formule].scans };
+  /** Les scans de liste réussis (journal des appels IA), depuis toujours : ils comptent dans les analyses offertes. */
+  private scansFaits(companyId: string): Promise<number> {
+    return this.prisma.aiExecution.count({ where: { companyId, task: "lecture_liste", status: "success" } });
   }
 
-  /** Les scans de liste réussis (journal des appels IA), depuis le début du mois ou depuis toujours. */
-  private async scansFaits(companyId: string, parMois: boolean, maintenant: Date): Promise<number> {
-    const debut = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), 1));
-    return this.prisma.aiExecution.count({ where: { companyId, task: "lecture_liste", status: "success", ...(parMois ? { createdAt: { gte: debut } } : {}) } });
+  /** Les plafonds cachés (euros par mois d'abonnement) : ceux réglés dans l'admin, sinon 5 € et 20 €. */
+  async plafonds(): Promise<Record<FormulePayante, number>> {
+    const garde = await this.prisma.parametreGroupe.findUnique({ where: { cle: CLE_PLAFONDS_IA } });
+    const v = (garde?.valeur ?? {}) as Partial<Record<FormulePayante, unknown>>;
+    const ok = (x: unknown, defaut: number) => (typeof x === "number" && Number.isFinite(x) && x >= 0 ? x : defaut);
+    return { pro: ok(v.pro, PLAFOND_IA_EUR_DEFAUT.pro), promax: ok(v.promax, PLAFOND_IA_EUR_DEFAUT.promax) };
   }
 
-  /** Les quotas d'IA du compte (mode automatique), pour la jauge ; null quand rien n'est limité. */
-  async quotas(companyId: string, analysesFaites: (parMois: boolean) => Promise<number>, maintenant = this.now()): Promise<Quotas | null> {
+  /** L'alerte par e-mail à l'admin (branchée par le module) ; sans branchement, seule la file d'exceptions est écrite. */
+  private alerte: (message: string) => void = () => undefined;
+  brancherAlerte(f: (message: string) => void): void {
+    this.alerte = f;
+  }
+
+  /** Un cas remonte à l'admin UNE fois : la file d'exceptions, et un e-mail d'alerte la première fois seulement. Jamais bloquant. */
+  private async signaler(cle: string, titre: string, detail: string, companyId: string): Promise<void> {
+    try {
+      const deja = await this.prisma.exceptionSupervision.findUnique({ where: { cle: `autre:${cle}` }, select: { cle: true } });
+      await signalerException(this.prisma, { type: "autre", cle, titre, detail, companyId, lien: `/admin/artisans/${companyId}` });
+      // Jamais le nom d'une personne ni d'une entreprise dans l'e-mail : la fiche se retrouve dans l'admin.
+      if (!deja) this.alerte(`${titre}. ${detail} Fiche : admin › Artisans.`);
+    } catch {
+      // La supervision ne bloque jamais le parcours.
+    }
+  }
+
+  /** Ce que les appels IA du compte ont coûté depuis `depuis`, en euros. */
+  private async coutEur(companyId: string, depuis: Date): Promise<number> {
+    const agg = await this.prisma.aiExecution.aggregate({ where: { companyId, createdAt: { gte: depuis } }, _sum: { costMicroUsd: true } });
+    return (Number(agg._sum.costMicroUsd ?? 0) / 1_000_000) * (this.reglages.usdToEur ?? 0.92);
+  }
+
+  /**
+   * LE PLAFOND CACHÉ D'UN ABONNÉ (Greg, 15 novembre 2026) : en euros, par mois d'abonnement. Rien n'est dit avant ;
+   * atteint, l'analyse est refusée AVANT tout appel (rien n'est dépensé) avec le seul message prévu, et l'admin est
+   * prévenu une fois par mois et par compte. Rend null quand rien n'est plafonné (compte gratuit, abonnement éteint).
+   */
+  async etatPlafond(companyId: string, maintenant = this.now()): Promise<{ atteint: boolean; phrase: string; renouvellement: Date } | null> {
     if (!(await this.modeAuto())) return null;
     const f = await this.formule(companyId, maintenant);
-    if (!f) return null;
-    const parMois = OFFRES[f].parMois;
-    const q = quotasDe(f, { analyses: await analysesFaites(parMois), scans: await this.scansFaits(companyId, parMois, maintenant) });
-    const l = this.limites(f);
-    const recale = (c: Quotas["analyses"], limite: number) => ({ limite, utilisees: c.utilisees, restantes: Math.max(0, limite - c.utilisees) });
-    return { ...q, analyses: recale(q.analyses, l.analyses), scans: recale(q.scans, l.scans) };
+    if (!f || f === "gratuit") return null;
+    const a = await this.prisma.abonnement.findUnique({ where: { companyId }, select: { periodeDebut: true } });
+    const mois = moisDAbonnement(a?.periodeDebut ?? null, maintenant);
+    const [cout, plafonds] = await Promise.all([this.coutEur(companyId, mois.debut), this.plafonds()]);
+    return { atteint: cout >= plafonds[f], phrase: phrasePlafondAtteint(f, mois.fin), renouvellement: mois.fin };
   }
 
-  /** Le scan d'une liste est-il permis ? Refusé quand le quota de la formule est pris (rien n'est dépensé). */
+  /** Refuse l'analyse d'un abonné dont le plafond du mois est atteint ; signale aussi un compte qui consomme anormalement. */
+  async verifierPlafond(companyId: string, maintenant = this.now()): Promise<void> {
+    await this.surveiller(companyId, maintenant);
+    const e = await this.etatPlafond(companyId, maintenant);
+    if (!e?.atteint) return;
+    await this.signaler(`plafond-ia:${companyId}:${e.renouvellement.toISOString().slice(0, 10)}`, "Un abonné a atteint son plafond d'analyses du mois", `Ses analyses sont refusées jusqu'au ${e.renouvellement.toISOString().slice(0, 10)} ; rien n'est dépensé au-delà. Le plafond se règle dans Réglages.`, companyId);
+    throw new DomainError("abonnement_requis", "Monthly AI cap reached", { action: "lecture", refus: "plafond", phrase: e.phrase });
+  }
+
+  /** Un compte qui dépense en un jour plus que le seuil (1 € par défaut) remonte à l'admin, une fois par jour. Ne bloque jamais. */
+  private async surveiller(companyId: string, maintenant: Date): Promise<void> {
+    const seuil = this.reglages.alerteCompteJourEur ?? 1;
+    const jour = maintenant.toISOString().slice(0, 10);
+    const cout = await this.coutEur(companyId, new Date(`${jour}T00:00:00Z`)).catch(() => 0);
+    if (cout < seuil) return;
+    await this.signaler(`conso-ia:${companyId}:${jour}`, "Un compte consomme anormalement des analyses", `${cout.toFixed(2).replace(".", ",")} € d'analyses le ${jour} (seuil : ${String(seuil).replace(".", ",")} € par jour et par compte).`, companyId);
+  }
+
+  /** Garde-fou : pas d'analyse payante pour une adresse e-mail jamais vérifiée (comptes créés à la chaîne). */
+  async verifierEmail(userId: string | null): Promise<void> {
+    if (!this.reglages.emailVerifieExige || !userId) return;
+    const u = await this.prisma.user.findUnique({ where: { id: userId }, select: { emailVerified: true } });
+    if (u && !u.emailVerified) throw new DomainError("validation_failed", "Email not verified", { reason: "email_non_verifie", phrase: PHRASE_EMAIL_A_VERIFIER });
+  }
+
+  /** L'assistant connecté appelle-t-il le modèle pour ce compte ? Sinon le code seul répond (rien n'est refusé à l'écran). */
+  async assistantPermis(companyId: string, userId: string | null, maintenant = this.now()): Promise<boolean> {
+    try {
+      await this.verifierEmail(userId);
+    } catch {
+      return false;
+    }
+    if (!(await this.modeAuto())) return true;
+    const f = await this.formule(companyId, maintenant);
+    if (!f) return true;
+    if (f !== "gratuit") return !(await this.etatPlafond(companyId, maintenant))?.atteint;
+    const l = await this.limiteGratuite(companyId);
+    return !l || (await this.analysesFaites(companyId)) < l.limite;
+  }
+
+  /** Le scan d'une liste est-il permis ? Compte gratuit : il compte dans les analyses offertes ; abonné : le plafond caché. */
   async verifierScan(companyId: string, maintenant = this.now()): Promise<void> {
     if (!(await this.modeAuto())) return;
     const f = await this.formule(companyId, maintenant);
     if (!f) return;
-    const faits = await this.scansFaits(companyId, OFFRES[f].parMois, maintenant);
-    if (faits >= this.limites(f).scans) throw new DomainError("abonnement_requis", "Scan quota reached", { action: "scan", refus: "scans", phrase: phrasePaywallQuota(f, "scans") });
+    if (f !== "gratuit") return this.verifierPlafond(companyId, maintenant);
+    const l = await this.limiteGratuite(companyId);
+    if (l && (await this.analysesFaites(companyId)) >= l.limite) throw new DomainError("abonnement_requis", "Free analyses used", { action: "scan", refus: "scans", phrase: PHRASE_ANALYSES_OFFERTES_UTILISEES });
   }
 
-  /** Pour le compteur des analyses : la limite de la formule (Découverte en tout, Essentiel et Pro par mois), ou null. */
+  /** Branché par le compteur : les analyses de documents déjà décomptées, depuis toujours. */
+  private analysesFaites: (companyId: string) => Promise<number> = async () => 0;
+  brancherAnalysesFaites(f: (companyId: string) => Promise<number>): void {
+    this.analysesFaites = f;
+  }
+
+  /**
+   * Pour le compteur des analyses : un compte gratuit a `lecturesIaGratuitTotal` analyses EN TOUT, scans de liste compris
+   * (la limite rendue est ce qui reste aux analyses de documents) ; un abonné n'a pas de nombre (plafond caché) : null.
+   */
   async limiteGratuite(companyId: string): Promise<{ limite: number; phrase: (n: number) => string; total?: boolean } | null> {
     if (await this.modeAuto()) {
       const f = await this.formule(companyId);
-      if (!f) return null;
-      if (f === "decouverte") return { limite: this.limites(f).analyses, total: true, phrase: () => PHRASE_LECTURES_EPUISEES };
-      return { limite: this.limites(f).analyses, total: false, phrase: () => phrasePaywallQuota(f, "analyses") };
+      if (f !== "gratuit") return null;
+      return { limite: Math.max(0, this.reglages.lecturesIaGratuitTotal - (await this.scansFaits(companyId))), total: true, phrase: () => PHRASE_ANALYSES_OFFERTES_UTILISEES };
     }
     const d = await this.droits(companyId);
     if (d.lecturesParMois === null) return null;

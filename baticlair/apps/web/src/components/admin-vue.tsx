@@ -19,7 +19,7 @@ export const METIERS_ADMIN: Record<string, string> = {
   facade: "Façade",
 };
 export const metier = (id: string) => METIERS_ADMIN[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
-export const FORMULES_ADMIN: Record<string, string> = { decouverte: "Découverte", essentiel: "Essentiel", pro: "Pro", gratuit: "Gratuit" };
+export const FORMULES_ADMIN: Record<string, string> = { gratuit: "Gratuit", pro: "Pro", promax: "Pro Max" };
 export const formule = (f: string) => FORMULES_ADMIN[f] ?? f;
 export const famille = (f: string) => (f === "generaliste" ? "Généraliste" : f.charAt(0).toUpperCase() + f.slice(1));
 export const jour = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "jamais");

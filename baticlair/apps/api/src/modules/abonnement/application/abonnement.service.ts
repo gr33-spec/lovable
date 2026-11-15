@@ -29,7 +29,7 @@ import {
   estPeriodicite,
   formuleDe as formuleEnregistree,
   prixDes,
-  prorataVersPro,
+  prorataVersProMax,
   rappelEssaiDu,
   rappelRenouvellementDu,
   reglagesAbonnementSchema,
@@ -62,9 +62,9 @@ const JOUR = 86_400_000;
 
 /** Un événement de paiement, le même pour le paiement simulé et pour Stripe (Greg, point 4). */
 export interface EvenementPaiement {
-  type: "actif" | "renouvele" | "passage_pro" | "echec" | "resiliation_demandee" | "resilie";
+  type: "actif" | "renouvele" | "passage_promax" | "echec" | "resiliation_demandee" | "resilie";
   source: "simule" | "stripe" | "tache" | "artisan" | "admin";
-  /** La formule payée par cet événement ; absente : celle de l'abonnement (Essentiel par défaut). */
+  /** La formule payée par cet événement ; absente : celle de l'abonnement (Pro par défaut). */
   formule?: Formule;
   /** Au mois ou à l'année ; absente : celle de l'abonnement (mensuel par défaut). */
   periodicite?: Periodicite;
@@ -83,9 +83,10 @@ const dateFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe
  * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026). Tient l'état du paiement (table `abonnement`) à partir des événements, simulés
  * ou Stripe ; dit l'état de l'essai et du paywall (`etatAbonnement` du domaine) ; émet les factures (BATI INVEST, numéros
  * continus, série TEST en simulé) ; envoie les e-mails (échec, résiliation, rappels de fin d'essai avec l'économie réelle).
- * DEUX FORMULES (RÈGLE CHANGÉE, Greg, 30 octobre 2026) : Essentiel (19,90 € HT par mois) et Pro (39,90 € HT par mois),
- * sans engagement ; d'Essentiel à Pro à tout moment, au prorata ; une résiliation prend effet à la fin du mois payé. Les
- * anciens « mensuel » et « annuel » comptent comme Essentiel (`formuleDe`) ; un ancien annuel garde son rappel.
+ * DEUX FORMULES (RÈGLE CHANGÉE, Greg, 15 novembre 2026) : Pro (29 € HT par mois) et Pro Max (49 € HT par mois), sans
+ * engagement ; de Pro à Pro Max à tout moment, au prorata ; une résiliation prend effet à la fin du mois payé. Les anciens
+ * « essentiel », « mensuel » et « annuel » comptent comme Pro (`formuleDe`) ; un ancien annuel garde son rappel. Avant
+ * (30 octobre 2026) : Essentiel 19,90 € et Pro 39,90 €.
  */
 export class AbonnementService {
   /** L'écart du premier cycle de l'entreprise (prix le plus cher reçu − prix choisi), branché par le regroupement. */
@@ -190,18 +191,18 @@ export class AbonnementService {
     const [etat, reglages, p] = await Promise.all([this.etat(tenant.companyId, maintenant), this.reglages(), this.paiement(tenant.companyId)]);
     const ecart = this.actif ? await this.ecart(tenant.companyId).catch(() => null) : null;
     const gratuit = this.actif && (etat.acces === "essai" || etat.acces === "bloque") && (await this.sansEssai());
-    const formule: Formule = p.formule ?? "essentiel";
+    const formule: Formule = p.formule ?? "pro";
     const periodicite: Periodicite = p.periodicite ?? "mensuel";
     const abonne = p.statut === "actif" || p.statut === "echec" || (p.statut === "resilie" && !!p.periodeFin && p.periodeFin > maintenant);
     const prix = eurosDeCentimes(prixDeLAbonnement(formule, periodicite, reglages));
-    // Le passage à Pro au prorata ne vaut que pour un abonnement au mois (un annuel change de formule à son échéance).
-    const bascule = this.actif && abonne && formule === "essentiel" && periodicite === "mensuel" && p.statut === "actif" && !p.resiliationDemandeeLe && p.ligne?.periodeDebut && p.ligne.periodeFin ? prorataVersPro({ debut: p.ligne.periodeDebut, fin: p.ligne.periodeFin }, maintenant, reglages) : null;
+    // Le passage à Pro Max au prorata ne vaut que pour un abonnement au mois (un annuel change de formule à son échéance).
+    const bascule = this.actif && abonne && formule === "pro" && periodicite === "mensuel" && p.statut === "actif" && !p.resiliationDemandeeLe && p.ligne?.periodeDebut && p.ligne.periodeFin ? prorataVersProMax({ debut: p.ligne.periodeDebut, fin: p.ligne.periodeFin }, maintenant, reglages) : null;
     return {
       actif: this.actif,
       paiement: this.config.abonnement.paiement,
       modeTest: this.config.abonnement.paiement === "simule" ? BANDEAU_MODE_TEST : null,
       acces: !this.actif ? "abonne" : gratuit ? "gratuit" : etat.acces,
-      /** La formule de l'abonnement (Essentiel tant qu'il n'y en a pas). */
+      /** La formule de l'abonnement (Pro tant qu'il n'y en a pas). */
       formule,
       /** Le prix HT de la formule, et sa période (« par mois », « par an »). */
       prixHt: prix,
@@ -211,14 +212,14 @@ export class AbonnementService {
       periodicite,
       /** L'annuel peut-il être choisi ici ? Toujours en paiement simulé ; avec Stripe, seulement si ses deux prix annuels sont configurés. */
       annuelDisponible: this.config.abonnement.paiement !== "stripe" || this.stripe?.annuelDisponible() === true,
-      /** Les deux formules, Essentiel d'abord (paywall, « Mon abonnement »). */
+      /** Les deux formules, Pro d'abord (paywall, « Mon abonnement »). */
       offres: offresAbonnement(reglages).map((o) => ({
         ...o,
         ttc: eurosDeCentimes(montantsFacture(prixDeFormule(o.formule, reglages), reglages.tauxTva).ttc),
         annuel: { ...o.annuel, ttc: eurosDeCentimes(montantsFacture(prixAnnuelDeFormule(o.formule, reglages), reglages.tauxTva).ttc) },
       })),
       prixDes: prixDes(reglages),
-      /** Le passage à Pro, au prorata : ce qui est déduit du mois en cours et ce qui sera payé tout de suite. */
+      /** Le passage à Pro Max, au prorata : ce qui est déduit du mois en cours et ce qui sera payé tout de suite. */
       bascule: bascule ? { credit: eurosDeCentimes(bascule.creditCentimes), aPayerHt: eurosDeCentimes(bascule.aPayerHtCentimes), aPayerTtc: eurosDeCentimes(montantsFacture(bascule.aPayerHtCentimes, reglages.tauxTva).ttc), jusquau: bascule.fin.toISOString() } : null,
       essaiFinLe: etat.essaiFinLe?.toISOString() ?? null,
       joursEssai: gratuit ? null : etat.joursEssai,
@@ -240,13 +241,14 @@ export class AbonnementService {
   // ---------------------------------------------------------------- le paiement
 
   /** « Je continue » : la page de paiement (simulée, ou Stripe Checkout) de la formule choisie. */
-  async commencerPaiement(tenant: TenantContext, formule: Formule = "essentiel", periodicite: Periodicite = "mensuel"): Promise<{ url: string }> {
+  async commencerPaiement(tenant: TenantContext, formule: Formule = "pro", periodicite: Periodicite = "mensuel"): Promise<{ url: string }> {
     assertCanWrite(tenant);
     if (!this.actif) throw notFound("Route");
     const web = this.config.webAppUrl.replace(/\/$/, "");
     await this.refuserSiDejaAbonne(tenant.companyId);
     if (this.config.abonnement.paiement === "stripe") {
-      if (!this.stripe) throw new DomainError("internal_error", "Stripe not configured");
+      // Les prix Pro et Pro Max ne sont pas encore créés chez Stripe (site de test) : rien n'est demandé, la phrase le dit.
+      if (!this.stripe) throw validationFailed("Stripe prices not configured", { reason: "paiement_indisponible", phrase: "Le paiement n'est pas encore ouvert. Reviens un peu plus tard." });
       // Aucun prix annuel n'est créé ni deviné : sans ses identifiants de prix, l'annuel est refusé avec une phrase.
       if (periodicite === "annuel" && !this.stripe.annuelDisponible()) throw validationFailed("Annual plan not available", { reason: "annuel_indisponible", phrase: "L'abonnement annuel n'est pas encore ouvert au paiement. Choisis le mensuel pour l'instant." });
       const a = await this.prisma.abonnement.findUnique({ where: { companyId: tenant.companyId } });
@@ -261,7 +263,7 @@ export class AbonnementService {
   /**
    * JAMAIS DEUX PAIEMENTS POUR LA MÊME PÉRIODE (recette du 13 novembre 2026, B4) : tant qu'un abonnement payé court (actif,
    * période non finie, résilié ou non), un nouveau paiement est refusé avec une phrase. Un paiement refusé (grâce) ou une
-   * période finie laissent payer. Le passage d'Essentiel à Pro garde son propre chemin, au prorata.
+   * période finie laissent payer. Le passage de Pro à Pro Max garde son propre chemin, au prorata.
    */
   private async refuserSiDejaAbonne(companyId: string, maintenant = this.now()): Promise<void> {
     const a = await this.prisma.abonnement.findUnique({ where: { companyId }, select: { statut: true, periodeFin: true } });
@@ -319,31 +321,31 @@ export class AbonnementService {
   }
 
   /**
-   * PASSER À PRO, À TOUT MOMENT, AU PRORATA (30 octobre 2026, sur le modèle du passage à l'annuel du 24 octobre) : le mois
-   * de Pro commence aujourd'hui ; ce qui reste du mois d'Essentiel payé est déduit de la première facture de Pro. Stripe fait
+   * PASSER À PRO MAX, À TOUT MOMENT, AU PRORATA (15 novembre 2026 ; avant : d'Essentiel à Pro) : le mois de Pro Max
+   * commence aujourd'hui ; ce qui reste du mois de Pro payé est déduit de la première facture de Pro Max. Stripe fait
    * le même calcul (`proration_behavior`), et sa facture arrive par le webhook ; en simulé, le passage est payé tout de suite.
    */
-  async passerPro(tenant: TenantContext, maintenant = this.now()) {
+  async passerProMax(tenant: TenantContext, maintenant = this.now()) {
     assertCanWrite(tenant);
     if (!this.actif) throw notFound("Route");
     const a = await this.prisma.abonnement.findUnique({ where: { companyId: tenant.companyId } });
     if (!a || a.statut !== "actif") throw validationFailed("No active subscription", { reason: "pas_d_abonnement" });
-    if (formuleEnregistree(a.formule) === "pro") throw validationFailed("Already Pro", { reason: "deja_pro" });
+    if (formuleEnregistree(a.formule) === "promax") throw validationFailed("Already Pro Max", { reason: "deja_promax" });
     if (a.resiliationDemandeeLe) throw validationFailed("Cancellation pending", { reason: "resiliation_programmee" });
-    if (periodiciteDe(a.periodicite) === "annuel") throw validationFailed("Annual plan", { reason: "abonnement_annuel", phrase: "Ton abonnement est annuel : le passage à Pro se fait à son échéance. Écris-nous si tu en as besoin avant." });
+    if (periodiciteDe(a.periodicite) === "annuel") throw validationFailed("Annual plan", { reason: "abonnement_annuel", phrase: "Ton abonnement est annuel : le passage à Pro Max se fait à son échéance. Écris-nous si tu en as besoin avant." });
     if (a.fournisseur === "stripe") {
       if (!this.stripe || !a.stripeSubscriptionId) throw new DomainError("internal_error", "Stripe not configured");
-      await this.stripe.passerPro(a.stripeSubscriptionId);
+      await this.stripe.passerProMax(a.stripeSubscriptionId);
       // L'accès et la facture suivent les webhooks (customer.subscription.updated, invoice.paid) ; la formule, tout de suite.
-      await this.prisma.abonnement.update({ where: { companyId: tenant.companyId }, data: { formule: "pro" } });
-      await this.prisma.evenementAbonnement.create({ data: { companyId: tenant.companyId, type: "passage_pro_demande", source: "artisan" } });
+      await this.prisma.abonnement.update({ where: { companyId: tenant.companyId }, data: { formule: "promax" } });
+      await this.prisma.evenementAbonnement.create({ data: { companyId: tenant.companyId, type: "passage_promax_demande", source: "artisan" } });
       return this.vue(tenant, maintenant);
     }
     const reglages = await this.reglages();
     const dernier = await this.prisma.factureAbonnement.findFirst({ where: { companyId: tenant.companyId, periodeFin: a.periodeFin ?? undefined }, orderBy: { rang: "desc" } });
-    const p = prorataVersPro({ debut: a.periodeDebut ?? maintenant, fin: a.periodeFin ?? maintenant }, maintenant, reglages, dernier?.montantHtCentimes ?? reglages.prixEssentielHtCentimes);
-    const ref = `passage-pro:${tenant.companyId}:${maintenant.toISOString()}`;
-    await this.appliquer(tenant.companyId, { type: "passage_pro", source: "simule", formule: "pro", ref, periodeDebut: p.debut, periodeFin: p.fin, facture: { ref, htCentimes: p.aPayerHtCentimes } }, maintenant);
+    const p = prorataVersProMax({ debut: a.periodeDebut ?? maintenant, fin: a.periodeFin ?? maintenant }, maintenant, reglages, dernier?.montantHtCentimes ?? reglages.prixMensuelProHtCentimes);
+    const ref = `passage-promax:${tenant.companyId}:${maintenant.toISOString()}`;
+    await this.appliquer(tenant.companyId, { type: "passage_promax", source: "simule", formule: "promax", ref, periodeDebut: p.debut, periodeFin: p.fin, facture: { ref, htCentimes: p.aPayerHtCentimes } }, maintenant);
     return this.vue(tenant, maintenant);
   }
 
@@ -388,12 +390,12 @@ export class AbonnementService {
     const avant = await this.prisma.abonnement.findUnique({ where: { companyId } });
     const formule: Formule = e.formule ?? formuleEnregistree(avant?.formule);
     // Un passage à Pro repart au mois ; sinon la périodicité de l'événement, à défaut celle de l'abonnement.
-    const periodicite: Periodicite = e.type === "passage_pro" ? "mensuel" : (e.periodicite ?? periodiciteDe(avant?.periodicite));
+    const periodicite: Periodicite = e.type === "passage_promax" ? "mensuel" : (e.periodicite ?? periodiciteDe(avant?.periodicite));
     let data: MajAbonnement = {};
     switch (e.type) {
       case "actif":
       case "renouvele":
-      case "passage_pro":
+      case "passage_promax":
         data = { statut: "actif", formule, periodicite, periodeDebut: e.periodeDebut ?? maintenant, periodeFin: e.periodeFin ?? finDePeriode(e.periodeDebut ?? maintenant, formule, periodicite), echecLe: null, ...(e.type === "actif" ? { resiliationDemandeeLe: null, resilieLe: null } : {}) };
         break;
       case "echec":
@@ -413,7 +415,7 @@ export class AbonnementService {
     await this.prisma.$transaction(async (tx) => {
       await tx.evenementAbonnement.create({ data: { companyId, type: e.type, source: e.source, refExterne: e.ref, donnees: { periodeFin: e.periodeFin?.toISOString() ?? null, formule, periodicite } } });
       await tx.abonnement.upsert({ where: { companyId }, create: { ...data, companyId, fournisseur }, update: { ...data, fournisseur } });
-      if (e.facture && (e.type === "actif" || e.type === "renouvele" || e.type === "passage_pro")) await this.emettreFacture(tx, companyId, { ...e, formule, periodicite }, maintenant, fournisseur === "stripe" ? "F" : "TEST");
+      if (e.facture && (e.type === "actif" || e.type === "renouvele" || e.type === "passage_promax")) await this.emettreFacture(tx, companyId, { ...e, formule, periodicite }, maintenant, fournisseur === "stripe" ? "F" : "TEST");
     });
     // Recette du 13 novembre 2026 (G5) : un échec ou une résiliation déjà connus ne renvoient pas le même e-mail.
     const dejaDit = (e.type === "resiliation_demandee" && avant?.resiliationDemandeeLe != null) || (e.type === "echec" && avant?.statut === "echec");
@@ -427,7 +429,7 @@ export class AbonnementService {
   private async emettreFacture(tx: Tx, companyId: string, e: EvenementPaiement, maintenant: Date, serie: SerieFacture) {
     if (e.facture?.ref && (await tx.factureAbonnement.findUnique({ where: { refExterne: e.facture.ref } }))) return;
     const reglages = await this.reglages();
-    const formule: Formule = e.formule ?? "essentiel";
+    const formule: Formule = e.formule ?? "pro";
     const periodicite: Periodicite = e.periodicite ?? "mensuel";
     const calcul = montantsFacture(prixDeLAbonnement(formule, periodicite, reglages), reglages.tauxTva);
     const ht = e.facture?.htCentimes ?? calcul.ht;
@@ -448,8 +450,8 @@ export class AbonnementService {
         tvaIntra: c.abonnement?.tvaIntra ?? null,
         periodeDebut: debut,
         periodeFin: e.periodeFin ?? finDePeriode(debut, formule, periodicite),
-        // « essentiel », « pro », « passage_pro », et pour une année payée en une fois « essentiel_annuel » ou « pro_annuel ».
-        formule: e.type === "passage_pro" ? "passage_pro" : periodicite === "annuel" ? `${formule}_annuel` : formule,
+        // « pro », « promax », « passage_promax », et pour une année payée en une fois « pro_annuel » ou « promax_annuel ».
+        formule: e.type === "passage_promax" ? "passage_promax" : periodicite === "annuel" ? `${formule}_annuel` : formule,
         montantHtCentimes: ht,
         tvaCentimes: tva,
         ttcCentimes: ttc,
@@ -515,14 +517,14 @@ export class AbonnementService {
         const companyId = (await parClient(stripe.customerId)) ?? meta((o.parent as { subscription_details?: unknown } | undefined)?.subscription_details) ?? meta(o.subscription_details);
         if (!companyId) return { traite: false };
         const lignes = (o.lines as { data?: { period?: { start?: number; end?: number }; amount?: number }[] } | undefined)?.data ?? [];
-        // Un passage à Pro : une ligne de crédit (négative) pour le mois d'Essentiel non utilisé, puis le mois de Pro.
+        // Un passage à Pro Max : une ligne de crédit (négative) pour le mois de Pro non utilisé, puis le mois de Pro Max.
         const ligne = lignes.find((l) => (l.amount ?? 0) > 0) ?? lignes[0];
         const formule = formuleDe(prixDe(ligne));
         const periodicite = this.stripe?.periodiciteDuPrix(prixDe(ligne)) ?? undefined;
         const ht = typeof o.subtotal === "number" ? o.subtotal : undefined;
         const ttc = typeof o.total === "number" ? o.total : undefined;
         await this.appliquer(companyId, {
-          type: o.billing_reason === "subscription_create" ? "actif" : o.billing_reason === "subscription_update" ? "passage_pro" : "renouvele",
+          type: o.billing_reason === "subscription_create" ? "actif" : o.billing_reason === "subscription_update" ? "passage_promax" : "renouvele",
           source: "stripe",
           ref: evt.id,
           ...(formule ? { formule } : {}),
@@ -713,7 +715,7 @@ export class AbonnementService {
     const ancienAnnuel = a?.formule === "annuel";
     const formule = formuleEnregistree(a?.formule);
     const annuel = !ancienAnnuel && periodiciteDe(a?.periodicite) === "annuel";
-    const nom = formule === "pro" ? "Pro" : "Essentiel";
+    const nom = formule === "promax" ? "Pro Max" : "Pro";
     const offre = ancienAnnuel
       ? `${eurosDeCentimes(reglages.prixAnnuelHtCentimes)} HT par an, payé en une fois, renouvelé chaque année (rappel 30 jours avant)`
       : annuel
@@ -721,8 +723,8 @@ export class AbonnementService {
         : `${nom}, ${eurosDeCentimes(prixDeFormule(formule, reglages))} HT par mois, sans engagement`;
     if (e.type === "actif") {
       await this.email.send({ to, subject: `Ton abonnement ${NOM_APP} est actif`, text: ["Bonjour,", "", `Ton abonnement ${NOM_APP} est actif${test} : ${offre}.`, a?.periodeFin ? `Prochain renouvellement le ${dateFr(a.periodeFin)}.` : "", "Ta facture est dans « Mes factures ».", "", lien].filter((l) => l !== "").join("\n") });
-    } else if (e.type === "passage_pro") {
-      await this.email.send({ to, subject: `Tu es passé à ${NOM_APP} Pro`, text: ["Bonjour,", "", `Tu es passé à l'abonnement Pro${test} : ${offre}.`, "Ce qui restait de ton mois d'Essentiel est déduit de ta première facture Pro.", a?.periodeFin ? `Prochain renouvellement le ${dateFr(a.periodeFin)}.` : "", "Ta facture est dans « Mes factures ».", "", lien].filter((l) => l !== "").join("\n") });
+    } else if (e.type === "passage_promax") {
+      await this.email.send({ to, subject: `Tu es passé à ${NOM_APP} Pro Max`, text: ["Bonjour,", "", `Tu es passé à l'abonnement Pro Max${test} : ${offre}.`, "Ce qui restait de ton mois de Pro est déduit de ta première facture Pro Max.", a?.periodeFin ? `Prochain renouvellement le ${dateFr(a.periodeFin)}.` : "", "Ta facture est dans « Mes factures ».", "", lien].filter((l) => l !== "").join("\n") });
     } else if (e.type === "echec") {
       const fin = new Date((a?.echecLe ?? maintenant).getTime() + reglages.joursGrace * JOUR);
       await this.email.send({ to, subject: `Ton paiement ${NOM_APP} n'est pas passé`, text: ["Bonjour,", "", `Ton paiement n'est pas passé${test}.`, `Tu gardes l'accès jusqu'au ${dateFr(fin)}. Mets à jour ta carte avant cette date pour continuer.`, "", lien].join("\n") });
@@ -736,13 +738,16 @@ export class AbonnementService {
 /** La ligne de la facture : la formule et sa période. */
 function designationFacture(f: { formule: string; periodeDebut: Date; periodeFin: Date }): string {
   const periode = `du ${dateFr(f.periodeDebut)} au ${dateFr(f.periodeFin)}`;
+  if (f.formule === "passage_promax") return `Passage à l'abonnement ${NOM_APP} Pro Max, ${periode}, moins la part non utilisée du mois de Pro`;
+  // Les factures d'avant le 15 novembre 2026 gardent leur libellé (Essentiel, ancien Pro) : une facture émise ne change jamais.
   if (f.formule === "passage_pro") return `Passage à l'abonnement ${NOM_APP} Pro, ${periode}, moins la part non utilisée du mois d'Essentiel`;
   // Les factures d'avant le 30 octobre 2026 gardent leur libellé (mensuel, annuel, passage à l'annuel).
   if (f.formule === "bascule") return `Passage à l'abonnement annuel ${NOM_APP}, ${periode}, moins la part non utilisée du mois en cours`;
   if (f.formule === "annuel" || f.formule === "mensuel") return `Abonnement ${f.formule} ${NOM_APP}, ${periode}`;
   // Greg, 12 novembre 2026 : l'année payée en une fois le dit (dix mois facturés pour douze mois de service).
-  if (f.formule === "pro_annuel" || f.formule === "essentiel_annuel") return `Abonnement annuel ${NOM_APP} ${f.formule === "pro_annuel" ? "Pro" : "Essentiel"}, ${periode} (douze mois de service, dix mois facturés)`;
-  return `Abonnement ${NOM_APP} ${f.formule === "pro" ? "Pro" : "Essentiel"}, ${periode}`;
+  const nom = (x: string) => (x === "promax" ? "Pro Max" : x === "essentiel" ? "Essentiel" : "Pro");
+  if (f.formule.endsWith("_annuel")) return `Abonnement annuel ${NOM_APP} ${nom(f.formule.replace(/_annuel$/, ""))}, ${periode} (douze mois de service, dix mois facturés)`;
+  return `Abonnement ${NOM_APP} ${nom(f.formule)}, ${periode}`;
 }
 
 /** La mention de bas de facture, selon la formule (CGU, partie Abonnement). */

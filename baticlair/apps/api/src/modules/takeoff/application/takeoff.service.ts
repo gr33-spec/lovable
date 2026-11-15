@@ -464,9 +464,10 @@ export class TakeoffService {
     }
     const lignes = lignesDuTexte(prepared.input.numberedText);
     const poids = poidsAnalyse(lignes);
-    if (poids === 2 && options.confirmeGros === false) {
-      const quotas = await this.meter.quotas(tenant.companyId);
-      throw new DomainError("conflict", "Large quote: counts as two analyses", { reason: "gros_devis", lignes, poids, restantes: quotas?.analyses.restantes ?? null, message: phraseGrosDevis(lignes, quotas?.analyses.restantes ?? null) });
+    // Un gros devis compte pour deux analyses OFFERTES : la question ne se pose qu'à un compte gratuit (un abonné n'a pas de nombre).
+    const jauge = poids === 2 && options.confirmeGros === false ? await this.meter.jauge(tenant.companyId) : null;
+    if (jauge) {
+      throw new DomainError("conflict", "Large quote: counts as two analyses", { reason: "gros_devis", lignes, poids, restantes: jauge.restantes, message: phraseGrosDevis(lignes, jauge.restantes) });
     }
     const begin = await this.meter.begin({
       companyId: tenant.companyId,
@@ -783,8 +784,9 @@ export class TakeoffService {
     assertCanWrite(tenant);
     const listeur = this.reading.listeur;
     if (!listeur) throw new DomainError("ai_unavailable", "AI reading is not configured");
-    // Greg, 30 octobre 2026 (décision 2) : les scans de liste ont leur quota ; au-delà, rien n'est lu ni dépensé.
-    await this.meter.verifierScan(tenant.companyId);
+    // Greg, 15 novembre 2026 : un scan compte dans les analyses offertes (compte gratuit) ou dans le plafond caché (abonné) ;
+    // au-delà, rien n'est lu ni dépensé.
+    await this.meter.verifierScan(tenant.companyId, tenant.userId);
     if (file.bytes.byteLength === 0) throw new DomainError("unreadable_document", "Empty file", { reason: "empty" });
     const mediaType = imageMimeType(file.bytes);
     if (!mediaType && !looksLikePdf(file.bytes)) throw new DomainError("unreadable_document", "Not an image or a PDF", { reason: "not_pdf" });

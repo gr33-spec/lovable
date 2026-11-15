@@ -3,6 +3,7 @@ import { Throttle } from "@nestjs/throttler";
 import { z } from "zod";
 import { AdresseAlerte } from "../../../platform/alerts/adresse-alerte.js";
 import { ReglageMissions } from "../../../platform/reglages/reglage-missions.js";
+import { ReglagePlafondsIa } from "../../../platform/reglages/reglage-plafonds-ia.js";
 import { notFound } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
@@ -13,10 +14,13 @@ import { QuestionAdminService } from "../application/question-admin.service.js";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const court = z.string().trim().max(80).optional();
-const filtresArtisans = z.object({ q: court, metier: court, departement: court, formule: z.enum(["payant", "decouverte", "essentiel", "pro", "echec"]).optional(), promo: court, recents: z.enum(["1"]).optional() });
+const filtresArtisans = z.object({ q: court, metier: court, departement: court, formule: z.enum(["payant", "gratuit", "pro", "promax", "echec"]).optional(), promo: court, recents: z.enum(["1"]).optional() });
 const filtresNegoces = z.object({ q: court, verifie: z.enum(["oui", "non"]).optional(), famille: court });
 const questionBody = z.object({ question: z.string().trim().min(2).max(400) });
 const missionsBody = z.object({ actif: z.boolean() });
+/** Les plafonds cachés, en euros par mois d'abonnement : de 0 (tout refuser) à 500 €, au centime. */
+const euros = z.number().min(0).max(500).multipleOf(0.01);
+const plafondsBody = z.object({ pro: euros, promax: euros }).refine((p) => p.promax >= p.pro, { message: "Le plafond de Pro Max ne peut pas être plus bas que celui de Pro." });
 const alerteBody = z.object({ adresse: z.string().trim().email().max(200) });
 const jetonBody = z.object({ jeton: z.string().min(10).max(200) });
 
@@ -33,6 +37,7 @@ export class AdminVueController {
     @Inject(QuestionAdminService) private readonly questions: QuestionAdminService,
     @Inject(AdresseAlerte) private readonly adresse: AdresseAlerte,
     @Inject(ReglageMissions) private readonly missions: ReglageMissions,
+    @Inject(ReglagePlafondsIa) private readonly plafonds: ReglagePlafondsIa,
   ) {}
 
   @Get("accueil")
@@ -121,6 +126,23 @@ export class AdminVueController {
     await this.pilotage.exiger(user);
     await this.pilotage.journal(user, b.actif ? "missions_ouvertes" : "missions_coupees", null);
     return this.missions.regler(b.actif);
+  }
+
+  /** Les plafonds cachés des abonnés (Greg, 15 novembre 2026) : euros de consommation par mois d'abonnement, Pro et Pro Max. */
+  @Get("reglages/plafonds-ia")
+  async etatPlafonds(@CurrentUser() user: AuthenticatedUser) {
+    await this.pilotage.exiger(user);
+    return this.plafonds.etat();
+  }
+
+  /** Régler les plafonds : appliqué tout de suite, sans redéploiement. Noté au journal de l'admin. */
+  @Throttle({ default: HOURLY(30) })
+  @Post("reglages/plafonds-ia")
+  @HttpCode(200)
+  async reglerPlafonds(@CurrentUser() user: AuthenticatedUser, @Body(new ZodPipe(plafondsBody)) b: z.infer<typeof plafondsBody>) {
+    await this.pilotage.exiger(user);
+    await this.pilotage.journal(user, "plafonds_ia_regles", `Pro ${b.pro} €, Pro Max ${b.promax} €`);
+    return this.plafonds.regler(b);
   }
 }
 

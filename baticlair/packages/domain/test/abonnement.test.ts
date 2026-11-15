@@ -19,7 +19,7 @@ import {
   finDePeriode,
   offresAbonnement,
   prixDeFormule,
-  prorataVersPro,
+  prorataVersProMax,
   formuleDe,
   prixDes,
   rappelRenouvellementDu,
@@ -83,7 +83,7 @@ describe("le paywall", () => {
     expect(actionPermise(bloque, "voir_resultats", d("2027-01-02"))).toBe(false);
   });
   it("l'écran dit le prix et l'économie réelle du premier cycle", () => {
-    expect(phrasePaywall()).toBe("Ton essai est terminé. Continue dès 19,90 € HT par mois.");
+    expect(phrasePaywall()).toBe("Ton essai est terminé. Continue dès 29 € HT par mois.");
     expect(phraseEconomiePremierCycle(ecartDuCycle([1200, 1540, 1310], 1200))).toBe("Sur ton premier cycle : 340 € d'écart avec le prix le plus cher reçu");
     expect(ecartDuCycle([1200], null)).toBeNull();
   });
@@ -105,49 +105,49 @@ describe("les factures et les rappels", () => {
     const m = emailRappelEssai("j7", { ecart: 340, lien: "https://exemple.fr/abonnement", nomApp: "Mobiiz" });
     expect(m.objet).toBe("Ton essai Mobiiz se termine dans 7 jours");
     expect(m.texte).toContain("Sur ton premier cycle : 340 € d'écart avec le prix le plus cher reçu.");
-    expect(m.texte).toContain("Essentiel à 19,90 € HT par mois, ou Pro à 39,90 € HT par mois, sans engagement.");
+    expect(m.texte).toContain("Pro à 29 € HT par mois, ou Pro Max à 49 € HT par mois, sans engagement.");
   });
 });
 
-/** LES DEUX FORMULES (RÈGLE CHANGÉE, Greg, 30 octobre 2026) : Essentiel 19,90 € HT et Pro 39,90 € HT par mois, sans engagement ; plus d'annuel. */
-describe("Essentiel ou Pro", () => {
-  it("les prix par défaut : 19,90 € et 39,90 € par mois ; les anciens mensuel et annuel comptent comme Essentiel", () => {
-    expect(REGLAGES_ABONNEMENT_DEFAUT).toMatchObject({ prixEssentielHtCentimes: 1990, prixProHtCentimes: 3990 });
-    expect(prixDeFormule("essentiel")).toBe(1990);
-    expect(prixDeFormule("pro")).toBe(3990);
-    expect(prixDes()).toBe("19,90 €");
-    expect(["pro", "essentiel", "mensuel", "annuel", null].map(formuleDe)).toEqual(["pro", "essentiel", "essentiel", "essentiel", "essentiel"]);
+/** LES DEUX FORMULES (RÈGLE CHANGÉE, Greg, 15 novembre 2026) : Pro 29 € HT et Pro Max 49 € HT par mois, sans engagement. Avant : Essentiel 19,90 € et Pro 39,90 €. */
+describe("Pro ou Pro Max", () => {
+  it("les prix par défaut : 29 € et 49 € par mois ; les anciens essentiel, mensuel et annuel comptent comme Pro", () => {
+    expect(REGLAGES_ABONNEMENT_DEFAUT).toMatchObject({ prixMensuelProHtCentimes: 2900, prixMensuelProMaxHtCentimes: 4900 });
+    expect(prixDeFormule("pro")).toBe(2900);
+    expect(prixDeFormule("promax")).toBe(4900);
+    expect(prixDes()).toBe("29 €");
+    expect(["promax", "pro", "essentiel", "mensuel", "annuel", null].map(formuleDe)).toEqual(["promax", "pro", "pro", "pro", "pro", "pro"]);
   });
-  it("le paywall et /tarifs : Essentiel mis en avant, puis Pro, avec leurs quotas", () => {
+  it("le paywall et /tarifs : Pro mis en avant, puis Pro Max ; aucun nombre d'analyses (plafond caché)", () => {
     const [essentiel, pro] = offresAbonnement();
     // Le mensuel n'a pas bougé ; l'annuel s'y ajoute (Greg, 12 novembre 2026 : dix mois facturés pour douze, `abonnement-annuel.test.ts`).
     const { annuel, ...mensuel } = essentiel!;
-    expect(mensuel).toEqual({ formule: "essentiel", titre: "Essentiel", badge: null, prix: "19,90 € HT par mois", details: ["3 analyses de devis par mois", "10 scans de liste par mois", "Sans engagement, résiliable quand tu veux"], enAvant: true });
-    expect(annuel).toMatchObject({ prix: "199 € HT par an", equivalent: "soit 16,58 € HT par mois" });
-    expect(pro).toMatchObject({ formule: "pro", titre: "Pro", prix: "39,90 € HT par mois", details: ["8 analyses de devis par mois", "30 scans de liste par mois", "Sans engagement, résiliable quand tu veux"], enAvant: false });
+    expect(mensuel).toEqual({ formule: "pro", titre: "Pro", badge: null, prix: "29 € HT par mois", details: ["Tout le Gratuit", "L'analyse de tes devis, photos et listes incluse", "Achats groupés : tu vois le négoce retenu et tu commandes", "Sans engagement, résiliable quand tu veux"], enAvant: true });
+    expect(annuel).toMatchObject({ prix: "290 € HT par an", equivalent: "soit 24,17 € HT par mois" });
+    expect(pro).toMatchObject({ formule: "promax", titre: "Pro Max", prix: "49 € HT par mois", details: ["Tout le Pro", "Pour ceux qui font analyser beaucoup de documents : une limite d'usage bien plus haute", "Sans engagement, résiliable quand tu veux"], enAvant: false });
   });
-  it("l'argument de la landing : les achats groupés gratuits, « Dès 19,90 € par mois » pour plus d'analyses", () => {
-    expect(argumentTarif({ cycles: 0, parCommande: null })).toBe("Gratuit pour tes listes, tes négoces et les achats groupés. Dès 19,90 € HT par mois pour plus d'analyses de devis.");
-    expect(argumentTarif({ cycles: 3, parCommande: 412 })).toBe("Gratuit, achats groupés compris : en moyenne, nos artisans ont économisé 412 € par regroupement.");
+  it("l'argument de la landing : ce qui est gratuit, « Dès 29 € par mois » pour les analyses et la commande groupée", () => {
+    expect(argumentTarif({ cycles: 0, parCommande: null })).toBe("Gratuit pour tes listes, tes négoces et les achats groupés. Dès 29 € HT par mois pour l'analyse de tes devis et la commande en achat groupé.");
+    expect(argumentTarif({ cycles: 3, parCommande: 412 })).toBe("Gratuit pour publier et rejoindre un achat groupé : en moyenne, nos artisans ont économisé 412 € par regroupement.");
   });
   it("une période : un mois (un ancien annuel : un an)", () => {
     expect(finDePeriode(d("2027-01-31"), "annuel").toISOString().slice(0, 10)).toBe("2028-01-31");
     expect(finDePeriode(d("2027-01-15"), "pro").toISOString().slice(0, 10)).toBe("2027-02-15");
   });
-  it("le passage à Pro au prorata : ce qui reste du mois d'Essentiel est déduit, le mois de Pro commence le jour même", () => {
-    // Mois du 1er au 31 janvier (30 jours), passage le 16 : 15 jours sur 30 restent, 9,95 € déduits.
-    const p = prorataVersPro({ debut: d("2027-01-01"), fin: d("2027-01-31") }, d("2027-01-16"));
-    expect(p).toMatchObject({ creditCentimes: 995, aPayerHtCentimes: 3990 - 995 });
+  it("le passage à Pro Max au prorata : ce qui reste du mois de Pro est déduit, le mois de Pro Max commence le jour même", () => {
+    // Mois du 1er au 31 janvier (30 jours), passage le 16 : 15 jours sur 30 restent, 14,50 € déduits.
+    const p = prorataVersProMax({ debut: d("2027-01-01"), fin: d("2027-01-31") }, d("2027-01-16"));
+    expect(p).toMatchObject({ creditCentimes: 1450, aPayerHtCentimes: 4900 - 1450 });
     expect(p.debut).toEqual(d("2027-01-16"));
     expect(p.fin.toISOString().slice(0, 10)).toBe("2027-02-16");
-    expect(prorataVersPro({ debut: d("2027-01-01"), fin: d("2027-01-31") }, d("2027-02-02")).creditCentimes).toBe(0);
+    expect(prorataVersProMax({ debut: d("2027-01-01"), fin: d("2027-01-31") }, d("2027-02-02")).creditCentimes).toBe(0);
   });
   it("le rappel de renouvellement : 30 jours avant l'échéance de l'annuel, jamais après une résiliation", () => {
     const base = { formule: "annuel" as const, statut: "actif" as const, periodeFin: d("2028-01-16"), resiliationDemandeeLe: null };
     expect(rappelRenouvellementDu(base, d("2027-12-16"))).toBe(false);
     expect(rappelRenouvellementDu(base, d("2027-12-17"))).toBe(true);
     expect(rappelRenouvellementDu({ ...base, resiliationDemandeeLe: d("2027-06-01") }, d("2027-12-20"))).toBe(false);
-    expect(rappelRenouvellementDu({ ...base, formule: "essentiel" }, d("2027-12-20"))).toBe(false);
+    expect(rappelRenouvellementDu({ ...base, formule: "pro" }, d("2027-12-20"))).toBe(false);
     const m = emailRenouvellementAnnuel({ echeance: d("2028-01-16"), lien: "https://exemple.fr/abonnement", nomApp: "Mobiiz" });
     expect(m.objet).toBe("Ton abonnement annuel Mobiiz se renouvelle le 16 janvier 2028");
     expect(m.texte).toContain("348 € HT (417,60 € TTC) pour un an");

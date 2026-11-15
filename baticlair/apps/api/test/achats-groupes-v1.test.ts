@@ -478,6 +478,47 @@ describe("l'offre, jusqu'à « Offre à examiner »", () => {
     expect(ctx.emails.sent.filter((m) => m.to === "ventes@armor.example")).toHaveLength(1);
   });
 
+  it("voir le négoce retenu et commander : la PREMIÈRE commande groupée est offerte ; ensuite, un compte gratuit lit le prix sans le nom du négoce, et commander demande Pro (Greg, 15 novembre 2026)", async () => {
+    const { artisans, besoins } = await offreAExaminer(["a@toitures.fr"]);
+    const a = artisans[0]!;
+    // Première offre : tout est visible, et la commande est offerte.
+    let vue = (await a.agent.get(`/v1/ag/besoins/${besoins[0]!.id}`).expect(200)).body;
+    expect(vue.offre).toMatchObject({ fournisseur: "Négoce de l'Armor", acceptable: true, paywall: null, premiereOfferte: true });
+    await a.agent.post(`/v1/ag/besoins/${besoins[0]!.id}/offre/commande`).expect(200);
+    // Une commande passée reste lisible en entier.
+    expect((await a.agent.get(`/v1/ag/besoins/${besoins[0]!.id}`).expect(200)).body.offre).toMatchObject({ fournisseur: "Négoce de l'Armor", paywall: null });
+
+    // Un second achat groupé, une seconde offre : publier et rejoindre restent gratuits.
+    const second = (await confirmer(a.agent, [besoin({ dateBesoin: jour(90) })]).expect(201)).body.besoins[0] as { id: string; achat: { id: string } };
+    const g = await admin();
+    const achatId = second.achat.id;
+    expect(achatId).not.toBe(besoins[0]!.achat.id);
+    await g.post(`/v1/admin/ag/achats/${achatId}/preparation`).send({}).expect(200);
+    await a.agent.post(`/v1/ag/besoins/${second.id}/reconfirmation`).expect(200);
+    await g.post(`/v1/admin/ag/achats/${achatId}/cloture`).send({ avantLHeure: true }).expect(200);
+    ctx.emails.sent.length = 0;
+    await g.put(`/v1/admin/ag/achats/${achatId}/offre`).send({ fournisseur: "Négoce de l'Armor", fournisseurEmail: "ventes@armor.example", prixUnitaireHt: 0.98, livraisonHt: 45, delai: "10 jours ouvrés", lieu: "Livraison sur chantier, Lannion", paiement: "30 jours fin de mois", validite: "72 heures", annulation: "Sans frais jusqu'à 48 h avant livraison" }).expect(200);
+    // Le prix se lit, pas le négoce ni le lieu ; « Commander » est fermé, « Non merci » reste.
+    vue = (await a.agent.get(`/v1/ag/besoins/${second.id}`).expect(200)).body;
+    expect(vue.offre).toMatchObject({ fournisseur: null, lieu: null, acceptable: false, premiereOfferte: false, paywall: "Ta première commande groupée était offerte. Pour voir le négoce retenu et commander, passe à Pro." });
+    expect(vue.offre.calcul.ht).toBeGreaterThan(0);
+    expect(vue.actions).toMatchObject({ commander: false, refuser: true });
+    expect(JSON.stringify(vue)).not.toContain("Négoce de l'Armor");
+    // L'e-mail d'offre ne nomme pas le négoce non plus.
+    expect(ctx.emails.sent.filter((m) => m.to === "a@toitures.fr").map((m) => m.text).join(" ")).not.toContain("Négoce de l'Armor");
+    const refus = await a.agent.post(`/v1/ag/besoins/${second.id}/offre/commande`);
+    expect(refus.status).toBe(402);
+    expect(refus.body.error).toMatchObject({ code: "abonnement_requis", details: { refus: "commande_groupee", phrase: "Ta première commande groupée était offerte. Pour voir le négoce retenu et commander, passe à Pro." } });
+    expect(ctx.emails.sent.filter((m) => m.to === "ventes@armor.example")).toHaveLength(0);
+
+    // Abonné Pro : le négoce se voit, la commande part.
+    await ctx.prisma.abonnement.create({ data: { companyId: a.companyId, statut: "actif", fournisseur: "simule", formule: "pro", periodeDebut: new Date(), periodeFin: new Date(Date.now() + 30 * 86_400_000) } });
+    vue = (await a.agent.get(`/v1/ag/besoins/${second.id}`).expect(200)).body;
+    expect(vue.offre).toMatchObject({ fournisseur: "Négoce de l'Armor", acceptable: true, paywall: null, premiereOfferte: false });
+    await a.agent.post(`/v1/ag/besoins/${second.id}/offre/commande`).expect(200);
+    expect(ctx.emails.sent.filter((m) => m.to === "ventes@armor.example")).toHaveLength(1);
+  });
+
   it("« Non merci » : l'offre est refusée, rien ne part chez le fournisseur ; une autre entreprise ne décide pas à ma place", async () => {
     const { artisans, besoins } = await offreAExaminer(["a@toitures.fr", "b@toitures.fr"]);
     const [a, b] = artisans as [typeof artisans[number], typeof artisans[number]];

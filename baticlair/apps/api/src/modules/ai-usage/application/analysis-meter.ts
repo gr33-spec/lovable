@@ -1,4 +1,3 @@
-import type { Quotas } from "@baticlair/domain";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import type { AnalysisKind, AnalysisRecord, AnalysisRepository } from "./analysis.repository.js";
 import { currentMonth } from "./usage-month.js";
@@ -51,21 +50,35 @@ export class AnalysisMeter {
     this.limiteGratuite = f;
   }
 
-  /** Les quotas d'IA du compte (formule, analyses, scans), branchés par le module des droits ; null : rien de limité. */
-  private quotasDuCompte: (companyId: string) => Promise<Quotas | null> = async () => null;
-  brancherQuotas(f: (companyId: string) => Promise<Quotas | null>): void {
-    this.quotasDuCompte = f;
+  /** Le plafond caché d'un abonné (Greg, 15 novembre 2026), branché par le module des droits : refuse avant tout appel. */
+  private plafondPermis: (companyId: string) => Promise<void> = async () => undefined;
+  brancherPlafond(f: (companyId: string) => Promise<void>): void {
+    this.plafondPermis = f;
   }
-  /** Le scan d'une liste : refusé (rien n'est dépensé) quand le quota de la formule est pris. */
+  /** Le scan d'une liste : refusé (rien n'est dépensé) quand les analyses offertes sont prises ou le plafond atteint. */
   private scanPermis: (companyId: string) => Promise<void> = async () => undefined;
   brancherScan(f: (companyId: string) => Promise<void>): void {
     this.scanPermis = f;
   }
-  verifierScan(companyId: string): Promise<void> {
+  async verifierScan(companyId: string, userId: string | null = null): Promise<void> {
+    await this.emailPermis(userId);
     return this.scanPermis(companyId);
   }
-  quotas(companyId: string): Promise<Quotas | null> {
-    return this.quotasDuCompte(companyId);
+  /** Garde-fou (Greg, 15 novembre 2026) : une analyse demande une adresse e-mail vérifiée ; branché par le module des droits. */
+  private emailPermis: (userId: string | null) => Promise<void> = async () => undefined;
+  brancherEmail(f: (userId: string | null) => Promise<void>): void {
+    this.emailPermis = f;
+  }
+  /**
+   * L'assistant connecté peut-il appeler le modèle pour ce compte ? Non quand les analyses offertes sont prises, le plafond
+   * de l'abonné atteint ou l'e-mail pas vérifié : le code seul répond alors, sans rien dépenser. Jamais bloquant.
+   */
+  private droitIa: (companyId: string, userId: string | null) => Promise<boolean> = async () => true;
+  brancherDroitIa(f: (companyId: string, userId: string | null) => Promise<boolean>): void {
+    this.droitIa = f;
+  }
+  iaPermise(companyId: string, userId: string | null): Promise<boolean> {
+    return this.droitIa(companyId, userId).catch(() => false);
   }
   /** Les analyses déjà décomptées (poids compris) : le mois en cours, ou toutes. */
   compter(companyId: string, parMois: boolean): Promise<number> {
@@ -77,6 +90,8 @@ export class AnalysisMeter {
     if (existing?.status === "completed") return { status: "already_done", analysis: existing };
 
     const month = currentMonth(this.now());
+    await this.emailPermis(input.userId);
+    await this.plafondPermis(input.companyId);
     const gratuit = await this.limiteGratuite(input.companyId);
     const poids = input.poids ?? 1;
     if (gratuit) {

@@ -36,7 +36,7 @@ Fiche lue par chaque nouvelle session. Le détail des règles produit est dans `
   - `apps/web` : Next 16, React 19, Tailwind 4, tests Playwright (`e2e/`, `e2e-ag-v1/`).
   - `referentiels/`, `docs/` : référentiels métier et documents de suivi.
 - Outils : Vercel (site et API), Neon (base), Resend (e-mails), Stripe (compte « Mobiiz »), Anthropic (lecture des devis, clé `BATICLAIR_ANTHROPIC_KEY`).
-- Tarifs (décision de Greg du 13 novembre 2026, conforme au code `packages/domain/src/abonnement/abonnement.ts`) : deux formules payantes, Essentiel et Pro ; à l'année, deux mois offerts (dix mois facturés pour douze). Essentiel 19,90 € HT par mois ou 199 € HT par an ; Pro 39,90 € HT par mois ou 399 € HT par an. La formule Découverte gratuite reste, en plus des deux payantes (confirmé par Greg le 13 novembre 2026). Achats groupés gratuits. Rien n'est facturé aux négoces. L'annuel n'est payable que si ses prix Stripe existent (pas créés à ce jour). L'ancienne limite de chantiers (essai 3, Solo, Pro à 39 et 79 €) ne s'applique plus jamais, même avec `PAYWALL=on` (14 novembre 2026) : listes sans limite pour tous.
+- Tarifs (RÈGLE CHANGÉE par Greg le 15 novembre 2026, code `packages/domain/src/groupe/tarifs.ts` et `abonnement/abonnement.ts` ; détail dans « Nouveaux tarifs » plus bas) : Gratuit, Pro (29 € HT par mois ou 290 € HT par an), Pro Max (49 € HT par mois ou 490 € HT par an) ; à l'année, deux mois offerts. Rien n'est facturé aux négoces. Avant : Découverte, Essentiel 19,90 €, Pro 39,90 €. L'ancienne limite de chantiers ne s'applique plus jamais : listes sans limite pour tous.
 - Réglages coupés par défaut : `MISSIONS_V1`, `ASSISTANT_IA`, `ACHATS_GROUPES_V1`, `ACCES_DEMO`, `DEMO_PUBLIQUE`.
 - Budget IA : `BUDGET_IA_JOUR` (2 € par défaut dans le code ; alerte e-mail au-delà), `AI_MONTHLY_BUDGET_EUR`, plafonds de l'assistant.
 - Branche de test : `claude/saas-achat-artisans-prompt-1lyihx` (déployée sur test.mobiiz.fr). Aucune production à ce jour.
@@ -106,7 +106,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 
 ## Décisions du 14 novembre 2026 (soir) : espace admin
 
-- L'espace admin s'ouvre sur `/admin` : six cartes (inscrits, abonnés payants, en Découverte, revenus du mois, inscriptions de la semaine, négoces inscrits) avec leur tendance, chacune mène à sa liste ; un bandeau rouge seulement s'il y a un problème. L'ancien tableau de bord reste (`/admin/pilotage`).
+- L'espace admin s'ouvre sur `/admin` : six cartes (inscrits, abonnés payants, en Gratuit, revenus du mois, inscriptions de la semaine, négoces inscrits) avec leur tendance, chacune mène à sa liste ; un bandeau rouge seulement s'il y a un problème. L'ancien tableau de bord reste (`/admin/pilotage`).
 - Listes artisans et négoces (une recherche, quelques filtres), fiche sur une page. Lecture seule. L'admin ne voit jamais le contenu d'un chantier ; chaque liste, fiche ou question consultée est au journal de l'admin (purgé à 1 an).
 - « Pose ta question » : le code calcule des chiffres d'ensemble, seuls eux et la question partent au modèle ; éteint ou au-delà du budget, le code répond seul. Ne jamais y écrire le nom d'une personne.
 - Adresse d'alerte : réglée dans l'admin (Réglages), double validation, appliquée sans redéploiement. Règle changée : avant, la variable fixe `ALERT_EMAIL` (elle ne sert plus que de repli). Les alertes, les signalements et les e-mails reçus sur contact@ y partent.
@@ -136,6 +136,21 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Rappel de suivi : 7 jours après les réponses à une demande directe, sans commande dans Mobiiz, « Où en es-tu avec cette demande ? », un seul bouton « C'est réglé » ; sans clic, la demande reste dans « À faire maintenant ». Pas de fil de discussion artisan-négoce pour une demande individuelle : ils s'appellent. L'offre d'un achat groupé, elle, passe obligatoirement par Mobiiz.
 - Ordre des anciennes demandes : gênants côté demandes, gênants côté abonnement, lot B, lot D. Le reste attend l'après-lancement.
 - Lot B : le chiffrement des fichiers est branché (`platform/database/prisma.service.ts`), éteint tant que `CHIFFREMENT_CLE` n'est pas posée par Greg dans Vercel ; fichiers déjà là : `scripts/fichiers-chiffrement.ts`. Dépôt limité à 10 Mo (avant : 20). Alerte quand la base dépasse 70 % de `BASE_TAILLE_MAX_MO` (512 Mo).
+
+## Nouveaux tarifs (Greg, 15 novembre 2026 ; remplace Découverte, Essentiel et Pro)
+
+- Gratuit : tout l'outil (listes à la main, envoi aux négoces, comparaison, publier et rejoindre des achats groupés), 3 analyses offertes en tout (devis, photo et liste confondus), première commande groupée offerte.
+- Pro : 29 € HT par mois ou 290 € HT par an. Analyses incluses ; dans les achats groupés, voir le négoce retenu et commander.
+- Pro Max : 49 € HT par mois ou 490 € HT par an. Même chose, avec un plafond bien plus haut. De Pro à Pro Max à tout moment, au prorata.
+- Règle changée : avant, les achats groupés étaient gratuits en entier. Maintenant, publier et rejoindre restent gratuits ; après sa première commande (offerte), un compte gratuit voit le prix de l'offre, mais ni le nom du négoce ni le lieu, et « Commander » demande Pro.
+- Aucun compteur ni barre à l'écran. Plafond caché par mois d'abonnement et par abonné, en euros de consommation : 5 € pour Pro, 20 € pour Pro Max, réglables dans Admin › Réglages (sans redéploiement). Un seul message, au plafond : « Passe au Pro Max ou attends le renouvellement le [date]. » Un compte gratuit lit ce qui lui reste seulement dans la fenêtre « Analyser ce document ? ».
+- Garde-fous : 20 pages au plus par devis (`DOCUMENT_MAX_PAGES`) ; `BUDGET_IA_JOUR` avec alerte ; une analyse demande un e-mail vérifié (dès qu'un vrai fournisseur d'IA est branché) ; anti-robot à l'inscription (Turnstile, actif quand ses deux clés sont posées) ; alerte admin quand un compte dépense plus de 1 € d'analyses en un jour ou atteint son plafond.
+- Assistant : au-delà des droits du compte (analyses offertes prises, plafond atteint, e-mail non vérifié), le code seul répond, sans rien dépenser.
+- Page publique : jamais « illimité » ; la limite d'usage se dit en une phrase, sans chiffre. La landing ne montre toujours aucun montant ; les prix sont sur la page Tarifs.
+- Stripe : nouvelles variables `STRIPE_PRIX_PRO`, `STRIPE_PRIX_PROMAX`, `STRIPE_PRIX_PRO_ANNUEL`, `STRIPE_PRIX_PROMAX_ANNUEL` ; les anciennes (`STRIPE_PRICE_ID_…`) ne sont plus lues, pour qu'un ancien prix ne soit jamais facturé. Tant que les nouveaux prix ne sont pas créés (accord de Greg), le paiement répond « pas encore ouvert » sur le site de test.
+- CGU : version à faire relire par l'avocat, `baticlair/docs/groupe/CGU-candidate-2026-11-15.md`. Rien n'est publié : `/cgu` reste la version du 27/10/2026.
+- En attente de Greg : création des quatre prix Stripe de test ; code FONDATEUR (« 6 mois de Pro offerts » : la remise de 30 % à vie est-elle retirée, et le code vaut-il pour Pro Max ?) ; « Mes prix » limité à trois mois en Gratuit (gardé tel quel).
+- Clé IA refaite et posée le 15 novembre 2026 sur l'environnement de test seulement (variable de la branche de test).
 
 ## Signalement de bugs
 

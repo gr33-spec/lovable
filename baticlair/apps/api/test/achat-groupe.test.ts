@@ -282,7 +282,7 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(adm.desistements.map((d: { motif: string }) => d.motif).sort()).toEqual(["Aucune offre livrable dans les délais", "Mon client a annulé le chantier", "Retiré avant la clôture"]);
   });
 
-  it("depuis une liste : la question de rattachement, la suggestion des grosses quantités, l'engagement ; 1 analyse offerte, puis 3 par mois en Essentiel", async () => {
+  it("depuis une liste : la question de rattachement, la suggestion des grosses quantités, l'engagement ; 3 analyses offertes, puis aucun nombre pour un abonné", async () => {
     const c = await couvreurAvecListe(ctx, "artisan3@toitures.fr", "Toitures 3", "3 rue des Ajoncs, 22300 Lannion", [
       { libelle: A3222, quantite: "1200", unite: "pièces" },
       { libelle: "Crochet inox 100 mm", quantite: "1300", unite: "pièces" },
@@ -300,15 +300,15 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect(r.perso).toHaveLength(1);
     expect(r.offert).toBe(false);
 
-    // Point 24, RÈGLE CHANGÉE le 30 octobre 2026 (décision 2) : Découverte a 1 analyse de devis offerte en tout, puis la
-    // phrase de `TARIFS.paywallListes` ; abonné Essentiel, 3 par mois. La jauge le dit avant le dépôt.
-    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body.quotas).toMatchObject({ formule: "decouverte", analyses: { limite: 1, utilisees: 0, restantes: 1 } });
-    await ctx.prisma.aiAnalysis.create({ data: { companyId: c.companyId, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote", status: "completed", billable: true, billingMonth: "2026-07" } });
+    // Point 24, RÈGLE CHANGÉE le 15 novembre 2026 : un compte gratuit a 3 analyses offertes en tout, puis la phrase de
+    // `TARIFS.paywallListes` ; un abonné n'a aucun nombre (plafond caché). La jauge le dit avant le dépôt.
+    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body).toEqual({ jauge: { limite: 3, utilisees: 0, restantes: 3, parMois: false }, quotas: null });
+    for (let i = 0; i < 3; i++) await ctx.prisma.aiAnalysis.create({ data: { companyId: c.companyId, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote", status: "completed", billable: true, billingMonth: "2026-07" } });
     const meter = ctx.app.get(AnalysisMeter);
     await expect(meter.begin({ companyId: c.companyId, userId: null, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote" })).rejects.toMatchObject({ details: { refus: "lectures", phrase: PHRASE_LECTURES_EPUISEES } });
-    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body.quotas).toMatchObject({ formule: "decouverte", analyses: { limite: 1, utilisees: 1, restantes: 0 } });
+    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body.jauge).toMatchObject({ limite: 3, utilisees: 3, restantes: 0 });
     await abonner(c.companyId);
-    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body.quotas).toMatchObject({ formule: "essentiel", analyses: { limite: 3, restantes: 3 }, parMois: true });
+    expect((await c.agent.get("/v1/ai-usage/jauge").expect(200)).body).toEqual({ jauge: null, quotas: null });
     expect((await meter.begin({ companyId: c.companyId, userId: null, projectId: c.projectId, documentId: randomUUID(), kind: "client_quote" })).status).toBe("go");
   });
 

@@ -107,10 +107,10 @@ test("nouveau quantitatif : deux choix entiers, la liste à la main, Mobiiz depu
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(FIXTURES, "panne-liste.pdf"));
   await accord.getByRole("button", { name: "Analyser le document" }).click();
   await expect(chat.getByText(/n'est pas disponible pour le moment/)).toBeVisible();
-  await page.route("**/v1/assistant/document", (r) => r.fulfill({ status: 402, contentType: "application/json", body: JSON.stringify({ error: { code: "abonnement_requis", message: "Scan quota reached", details: { action: "scan", refus: "scans", phrase: "Tes scans de liste offerts sont utilisés." } } }) }));
+  await page.route("**/v1/assistant/document", (r) => r.fulfill({ status: 402, contentType: "application/json", body: JSON.stringify({ error: { code: "abonnement_requis", message: "Scan quota reached", details: { action: "scan", refus: "scans", phrase: "Tes 3 analyses offertes sont utilisées. Note ta liste à la main, c'est gratuit, ou passe à Pro : les analyses sont incluses." } } }) }));
   await page.getByLabel("Choisir un PDF ou un fichier").setInputFiles(path.join(FIXTURES, "bon-du-negoce.pdf"));
   await accord.getByRole("button", { name: "Analyser le document" }).click();
-  await expect(chat.getByText(/Tes scans de liste offerts sont utilisés\. Ta liste en cours n'a pas bougé/)).toBeVisible();
+  await expect(chat.getByText(/Tes 3 analyses offertes sont utilisées\. .* Ta liste en cours n'a pas bougé/)).toBeVisible();
   await page.unroute("**/v1/assistant/document");
 
   // 6. Le retour dans LA MÊME liste : ses 2 lignes, la gouttière proposée et les 3 lignes du document ; un seul quantitatif.

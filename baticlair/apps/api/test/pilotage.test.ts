@@ -75,12 +75,12 @@ describe("le tableau de bord admin", () => {
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     const a = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
     await signUpWithCompany(ctx.app, "faux@demo.baticlair.fr", "Faux artisan", ["roofing"]);
-    // A paie Essentiel (simulé) : 19,90 € HT de revenu mensuel récurrent.
+    // A paie Pro (simulé) : 29 € HT de revenu mensuel récurrent.
     const { url } = (await a.agent.post("/v1/abonnement/payer").expect(200)).body;
     await a.agent.post(`/v1/abonnement/simulation/${new URL(url).searchParams.get("session")}`).send({ issue: "payer" }).expect(200);
-    // B paie Pro : 39,90 € par mois ; le revenu récurrent fait 59,80 € (60 € arrondi), aucun abonné en annuel (30 octobre 2026).
+    // B paie Pro Max : 49 € par mois ; le revenu récurrent fait 78 € (29 € de Pro et 49 € de Pro Max), aucun abonné en annuel (15 novembre 2026).
     const b = await signUpWithCompany(ctx.app, "b@toitures.fr", "Toitures B", ["roofing"]);
-    const annuel = (await b.agent.post("/v1/abonnement/payer").send({ formule: "pro" }).expect(200)).body.url;
+    const annuel = (await b.agent.post("/v1/abonnement/payer").send({ formule: "promax" }).expect(200)).body.url;
     await b.agent.post(`/v1/abonnement/simulation/${new URL(annuel).searchParams.get("session")}`).send({ issue: "payer" }).expect(200);
     // Des visites comptées sans cookie, une installation.
     for (let i = 0; i < 3; i++) await request(ctx.app.getHttpServer()).post("/v1/public/visite").expect(204);
@@ -89,10 +89,10 @@ describe("le tableau de bord admin", () => {
     const t = (await greg.agent.get("/v1/admin/pilotage").expect(200)).body;
     expect(t.chiffres.map((c: { titre: string }) => c.titre)).toEqual(["Utilisateurs actifs", "Abonnés payants", "Revenu mensuel récurrent", "Coût IA du mois"]);
     expect(t.chiffres[1]).toMatchObject({ valeur: "2", fleche: { couleur: "vert", texte: "nouveau" } });
-    expect(t.chiffres[2]).toMatchObject({ valeur: "60 €", detail: "HT, Essentiel et Pro" });
-    expect(t.abonnes).toEqual({ mensuels: 2, annuels: 0, partAnnuels: 0, revenuMensuelRecurrent: 59.8, encaisseCeMois: 59.8 });
+    expect(t.chiffres[2]).toMatchObject({ valeur: "78 €", detail: "HT, Pro et Pro Max" });
+    expect(t.abonnes).toEqual({ mensuels: 2, annuels: 0, partAnnuels: 0, revenuMensuelRecurrent: 78, encaisseCeMois: 78 });
     expect(t.croissance).toMatchObject({ visites: 3, installations: 1, inscriptions: 3 });
-    expect(t.rentabilite).toMatchObject({ revenu: 59.8 });
+    expect(t.rentabilite).toMatchObject({ revenu: 78 });
     expect(t.mode).toBe("test");
     // Agrégé : aucun nom d'entreprise dans le tableau.
     expect(JSON.stringify(t)).not.toMatch(/Toitures A|Toitures B|Faux artisan/);
@@ -105,8 +105,8 @@ describe("le tableau de bord admin", () => {
   it("les réglages (seuil IA, services, prix de l'abonnement) et l'alerte de coût IA une fois par jour", async () => {
     const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "Bati Invest", ["roofing"]);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
-    const r = (await greg.agent.put("/v1/admin/pilotage/reglages").send({ seuilIaJourEur: 0, coutServicesMensuelEur: 40, abonnement: { prixEssentielHtCentimes: 2500, prixProHtCentimes: 3500, prixAnnuelHtCentimes: 29900, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 45, joursGrace: 7, joursRappelAnnuel: 30 } }).expect(200)).body;
-    expect(r).toMatchObject({ seuilIaJourEur: 0, coutServicesMensuelEur: 40, abonnement: { prixEssentielHtCentimes: 2500, prixProHtCentimes: 3500, joursEssaiSansDepot: 45 } });
+    const r = (await greg.agent.put("/v1/admin/pilotage/reglages").send({ seuilIaJourEur: 0, coutServicesMensuelEur: 40, abonnement: { prixMensuelProHtCentimes: 2500, prixMensuelProMaxHtCentimes: 3500, prixAnnuelHtCentimes: 29900, tauxTva: 20, joursEssaiApresResultats: 30, joursEssaiSansDepot: 45, joursGrace: 7, joursRappelAnnuel: 30 } }).expect(200)).body;
+    expect(r).toMatchObject({ seuilIaJourEur: 0, coutServicesMensuelEur: 40, abonnement: { prixMensuelProHtCentimes: 2500, prixMensuelProMaxHtCentimes: 3500, joursEssaiSansDepot: 45 } });
     const a = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
     expect((await a.agent.get("/v1/abonnement").expect(200)).body).toMatchObject({ prixHt: "25 €", joursEssai: 45 });
     expect((await a.agent.get("/v1/abonnement").expect(200)).body.offres.map((o: { prix: string }) => o.prix)).toEqual(["25 € HT par mois", "35 € HT par mois"]);

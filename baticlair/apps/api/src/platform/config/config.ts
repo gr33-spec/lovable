@@ -74,7 +74,7 @@ const envSchema = z
      * une requête vers une fonction Vercel ne dépasse pas 4,5 Mo.
      */
     DOCUMENT_MAX_BYTES: z.coerce.number().int().positive().max(50_000_000).default(10_000_000),
-    DOCUMENT_MAX_PAGES: z.coerce.number().int().positive().max(600).default(60),
+    DOCUMENT_MAX_PAGES: z.coerce.number().int().positive().max(600).default(20),
     /** Taux de conversion utilisé pour AFFICHER les coûts IA en euros (les coûts sont stockés en dollars). */
     AI_USD_TO_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("0.92"),
     /** Budget IA mensuel par entreprise en usage normal (prévision interne, PD-027). */
@@ -187,11 +187,19 @@ const envSchema = z
     PAIEMENT: z.enum(["simule", "stripe"]).default("simule"),
     STRIPE_SECRET_KEY: z.string().min(8).optional(),
     STRIPE_WEBHOOK_SECRET: z.string().min(8).optional(),
-    /** Le prix ESSENTIEL créé chez Stripe (« price_… »), 19,90 € HT, récurrent tous les mois (Greg, 30 octobre 2026). */
+    /**
+     * Les prix créés chez Stripe (« price_… ») pour les formules du 15 novembre 2026 : PRO 29 € HT par mois, PRO MAX 49 € HT
+     * par mois. Des noms NEUFS, exprès : les anciennes variables `STRIPE_PRICE_ID_ESSENTIEL` (19,90 €) et
+     * `STRIPE_PRICE_ID_PRO` (39,90 €) ne sont plus lues, pour qu'un ancien prix ne soit jamais facturé à la place du nouveau.
+     */
+    STRIPE_PRIX_PRO: z.string().min(4).optional(),
+    STRIPE_PRIX_PROMAX: z.string().min(4).optional(),
+    /** Les prix ANNUELS (290 € et 490 € HT par an) : facultatifs. Tant qu'ils manquent, l'annuel n'est pas proposé au paiement Stripe. */
+    STRIPE_PRIX_PRO_ANNUEL: z.string().min(4).optional(),
+    STRIPE_PRIX_PROMAX_ANNUEL: z.string().min(4).optional(),
+    /** Anciennes variables (Essentiel 19,90 €, Pro 39,90 €) : acceptées pour ne pas casser un environnement, plus jamais lues. */
     STRIPE_PRICE_ID_ESSENTIEL: z.string().min(4).optional(),
-    /** Le prix PRO créé chez Stripe (« price_… »), 39,90 € HT, récurrent tous les mois. */
     STRIPE_PRICE_ID_PRO: z.string().min(4).optional(),
-    /** Les prix ANNUELS (Greg, 12 novembre 2026 : 199 € et 399 € HT par an) : facultatifs. Tant qu'ils manquent, l'annuel n'est pas proposé au paiement Stripe. */
     STRIPE_PRICE_ID_ESSENTIEL_ANNUEL: z.string().min(4).optional(),
     STRIPE_PRICE_ID_PRO_ANNUEL: z.string().min(4).optional(),
     /** Ancien prix mensuel (49 €, avant le 30 octobre 2026) : plus lu. */
@@ -291,8 +299,8 @@ const envSchema = z
     EXCLUSION_MOIS: z.coerce.number().int().min(0).max(24).default(3),
     /** Lot 4 (6 novembre 2026) : la reconfirmation avant clôture écarte une liste non reconfirmée ; « on » partout sauf les tests (où chaque test l'allume). */
     RECONFIRMATION_GROUPE: z.enum(["on", "off"]).optional(),
-    /** Les analyses de devis offertes en tout à Découverte (point 24 ; 1 depuis le 30 octobre 2026, `OFFRES`). */
-    LECTURES_IA_GRATUIT_TOTAL: z.coerce.number().int().min(0).max(1000).default(1),
+    /** Les analyses offertes en tout à un compte gratuit, scans de liste compris (3 depuis le 15 novembre 2026 ; avant : 1). */
+    LECTURES_IA_GRATUIT_TOTAL: z.coerce.number().int().min(0).max(1000).default(3),
     /** Le seuil de la suggestion « mets-les en achat groupé » par famille (« couverture=300,charpente=100 »). */
     SEUIL_SUGGESTION: z.string().optional(),
     /** Point 4 bis : l'adresse des alertes du chasseur (défaut : le premier admin) et le délai de livraison avant la date de besoin. */
@@ -423,7 +431,7 @@ export interface AppConfig {
   abonnement: {
     actif: boolean;
     paiement: "simule" | "stripe";
-    stripe: { secretKey: string; webhookSecret: string; prix: { essentiel: string; pro: string }; prixAnnuel?: { essentiel: string | null; pro: string | null } | null; taxRateId: string | null } | null;
+    stripe: { secretKey: string; webhookSecret: string; prix: { pro: string; promax: string }; prixAnnuel?: { pro: string | null; promax: string | null } | null; taxRateId: string | null } | null;
   };
   /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
   groupe: {
@@ -511,8 +519,12 @@ export function loadConfig(source: Record<string, string | undefined> = process.
   }
   const isDeployed = e.NODE_ENV === "production" || e.NODE_ENV === "staging";
   const problemes: string[] = [];
-  if (e.PAIEMENT === "stripe" && !(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID_ESSENTIEL && e.STRIPE_PRICE_ID_PRO)) {
-    problemes.push("PAIEMENT : « stripe » demande STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID_ESSENTIEL et STRIPE_PRICE_ID_PRO");
+  // En production, Stripe sans ses prix est une erreur de démarrage. En prévisualisation (site de test), des prix encore
+  // absents ne coupent pas le site : le paiement répond « pas encore ouvert » (15 novembre 2026, nouveaux prix à créer).
+  if (e.PAIEMENT === "stripe" && !(e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET)) {
+    problemes.push("PAIEMENT : « stripe » demande STRIPE_SECRET_KEY et STRIPE_WEBHOOK_SECRET");
+  } else if (e.PAIEMENT === "stripe" && e.VERCEL_ENV === "production" && !(e.STRIPE_PRIX_PRO && e.STRIPE_PRIX_PROMAX)) {
+    problemes.push("PAIEMENT : « stripe » demande STRIPE_PRIX_PRO et STRIPE_PRIX_PROMAX (les prix des formules Pro et Pro Max)");
   }
   // La prévisualisation ne touche jamais la base de production (Greg, 24 octobre 2026).
   if (e.VERCEL_ENV === "preview" && e.BASE_PRODUCTION_HOTE && e.DATABASE_URL.includes(e.BASE_PRODUCTION_HOTE)) {
@@ -569,7 +581,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .filter((x) => x.length > 0),
     // RÈGLE CHANGÉE (Greg, 14 novembre 2026, recette B2 et B3) : l'ancienne limite de chantiers (essai 3, Solo 10, Pro 30)
     // ne s'applique plus jamais, même avec `PAYWALL=on` : elle bloquait un abonné Pro au 4e chantier et montrait d'anciens
-    // prix. Les listes sont sans limite pour tous (page Tarifs) ; seules les formules Découverte, Essentiel et Pro comptent.
+    // prix. Les listes sont sans limite pour tous (page Tarifs) ; seules les formules Gratuit, Pro et Pro Max comptent.
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: false },
     accesDemo: e.ACCES_DEMO === "on",
     demoPublique: e.ACCES_DEMO === "on" && e.DEMO_PUBLIQUE === "on",
@@ -581,8 +593,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       actif: e.ABONNEMENT === "on",
       paiement: e.PAIEMENT,
       stripe:
-        e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRICE_ID_ESSENTIEL && e.STRIPE_PRICE_ID_PRO
-          ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, prix: { essentiel: e.STRIPE_PRICE_ID_ESSENTIEL, pro: e.STRIPE_PRICE_ID_PRO }, prixAnnuel: { essentiel: e.STRIPE_PRICE_ID_ESSENTIEL_ANNUEL ?? null, pro: e.STRIPE_PRICE_ID_PRO_ANNUEL ?? null }, taxRateId: e.STRIPE_TAX_RATE_ID ?? null }
+        e.STRIPE_SECRET_KEY && e.STRIPE_WEBHOOK_SECRET && e.STRIPE_PRIX_PRO && e.STRIPE_PRIX_PROMAX
+          ? { secretKey: e.STRIPE_SECRET_KEY, webhookSecret: e.STRIPE_WEBHOOK_SECRET, prix: { pro: e.STRIPE_PRIX_PRO, promax: e.STRIPE_PRIX_PROMAX }, prixAnnuel: { pro: e.STRIPE_PRIX_PRO_ANNUEL ?? null, promax: e.STRIPE_PRIX_PROMAX_ANNUEL ?? null }, taxRateId: e.STRIPE_TAX_RATE_ID ?? null }
           : null,
     },
     groupe: {

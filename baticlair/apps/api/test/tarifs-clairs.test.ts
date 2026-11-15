@@ -12,17 +12,19 @@ describe("les tarifs, dits clairement", () => {
     expect(c.groupe.negocie.lecturesIaGratuitTotal).toBe(LISTES_PREPAREES_OFFERTES);
   });
 
-  it("chaque phrase qui dit « gratuit » dit aussi ce qui est payant (30 octobre 2026 : les achats groupés sont gratuits)", () => {
+  it("chaque phrase qui dit « gratuit » dit aussi ce qui est payant (15 novembre 2026 : publier et rejoindre un achat groupé restent gratuits, Pro pour commander)", () => {
     for (const p of [TARIFS.enUneLigne, `${TARIFS.question.q} ${TARIFS.question.r}`, argumentTarif({ cycles: 0, parCommande: null })]) {
       expect(p).toMatch(/gratuit/i);
       expect(p).toMatch(/achats groupés/);
-      expect(p).toMatch(/abonnement|Essentiel|HT par mois/);
+      expect(p).toMatch(/abonnement|Pro|HT par mois/);
     }
-    expect(TARIFS.question.r).toContain(`${LISTES_PREPAREES_OFFERTES} analyse de devis`);
+    expect(TARIFS.question.r).toContain(`${LISTES_PREPAREES_OFFERTES} analyses de documents`);
+    expect(LISTES_PREPAREES_OFFERTES).toBe(3);
   });
 
   it("le paywall dit ce qui reste gratuit", () => {
     expect(PHRASE_LECTURES_EPUISEES).toContain("c'est gratuit");
-    expect(TARIFS.paywallAchatGroupe).toContain("Les achats groupés sont gratuits");
+    // Achats groupés : la première commande est offerte ; ensuite, la phrase dit ce qui demande Pro.
+    expect(TARIFS.paywallAchatGroupe).toBe("Ta première commande groupée était offerte. Pour voir le négoce retenu et commander, passe à Pro.");
   });
 });

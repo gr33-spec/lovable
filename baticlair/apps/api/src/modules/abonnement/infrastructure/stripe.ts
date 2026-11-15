@@ -4,7 +4,7 @@ import type { StripeClient } from "../application/stripe.port.js";
 
 /**
  * STRIPE, PRÊT MAIS ÉTEINT (Greg, 24 octobre 2026 : « Stripe branché à la fin sans rien refaire ») : les appels de
- * l'API REST (Checkout en abonnement, Essentiel ou Pro ; portail client ; passage à Pro au prorata ; résiliation en
+ * l'API REST (Checkout en abonnement, Pro ou Pro Max ; portail client ; passage à Pro Max au prorata ; résiliation en
  * fin de période) et la vérification de la signature
  * des webhooks, sans dépendance (aucune nouvelle bibliothèque sans l'accord du fondateur). Allumé par `PAIEMENT=stripe`
  * et les variables de `docs/groupe/STRIPE.md`.
@@ -22,7 +22,7 @@ function formulaire(params: Record<string, string | number | boolean | null | un
 
 export class HttpStripeClient implements StripeClient {
   constructor(
-    private readonly cfg: { secretKey: string; prix: { essentiel: string; pro: string }; /** Les prix annuels (Greg, 12 novembre 2026) : facultatifs ; absents, l'annuel n'est pas proposé. */ prixAnnuel?: { essentiel: string | null; pro: string | null } | null; taxRateId: string | null },
+    private readonly cfg: { secretKey: string; prix: { pro: string; promax: string }; /** Les prix annuels (Greg, 12 novembre 2026) : facultatifs ; absents, l'annuel n'est pas proposé. */ prixAnnuel?: { pro: string | null; promax: string | null } | null; taxRateId: string | null },
     private readonly fetcher: Fetch = fetch as unknown as Fetch,
   ) {}
 
@@ -41,18 +41,18 @@ export class HttpStripeClient implements StripeClient {
   formuleDuPrix(priceId: string | null): Formule | null {
     if (!priceId) return null;
     const a = this.cfg.prixAnnuel;
-    return priceId === this.cfg.prix.pro || (!!a?.pro && priceId === a.pro) ? "pro" : priceId === this.cfg.prix.essentiel || (!!a?.essentiel && priceId === a.essentiel) ? "essentiel" : null;
+    return priceId === this.cfg.prix.promax || (!!a?.promax && priceId === a.promax) ? "promax" : priceId === this.cfg.prix.pro || (!!a?.pro && priceId === a.pro) ? "pro" : null;
   }
 
   periodiciteDuPrix(priceId: string | null): Periodicite | null {
     if (!priceId) return null;
     const a = this.cfg.prixAnnuel;
-    if ((!!a?.pro && priceId === a.pro) || (!!a?.essentiel && priceId === a.essentiel)) return "annuel";
-    return priceId === this.cfg.prix.pro || priceId === this.cfg.prix.essentiel ? "mensuel" : null;
+    if ((!!a?.promax && priceId === a.promax) || (!!a?.pro && priceId === a.pro)) return "annuel";
+    return priceId === this.cfg.prix.promax || priceId === this.cfg.prix.pro ? "mensuel" : null;
   }
 
   annuelDisponible(): boolean {
-    return !!this.cfg.prixAnnuel?.essentiel && !!this.cfg.prixAnnuel?.pro;
+    return !!this.cfg.prixAnnuel?.pro && !!this.cfg.prixAnnuel?.promax;
   }
 
   async checkout(c: { companyId: string; customerId: string | null; email: string | null; formule: Formule; periodicite?: Periodicite; succes: string; annulation: string }) {
@@ -93,18 +93,18 @@ export class HttpStripeClient implements StripeClient {
     return { url: s.url };
   }
 
-  async passerPro(subscriptionId: string) {
+  async passerProMax(subscriptionId: string) {
     const abo = await this.appel<{ items?: { data?: { id: string }[] } }>(`subscriptions/${encodeURIComponent(subscriptionId)}`, {}, "GET");
     const item = abo.items?.data?.[0]?.id;
     if (!item) throw new Error("Stripe : abonnement sans ligne de prix");
-    // D'Essentiel à Pro : Stripe recommence la période le jour même, déduit ce qui reste du mois et facture tout de suite.
+    // De Pro à Pro Max : Stripe recommence la période le jour même, déduit ce qui reste du mois et facture tout de suite.
     await this.appel(`subscriptions/${encodeURIComponent(subscriptionId)}`, {
       "items[0][id]": item,
-      "items[0][price]": this.cfg.prix.pro,
+      "items[0][price]": this.cfg.prix.promax,
       proration_behavior: "always_invoice",
       billing_cycle_anchor: "now",
       payment_behavior: "error_if_incomplete",
-      "metadata[formule]": "pro",
+      "metadata[formule]": "promax",
     });
   }
 
