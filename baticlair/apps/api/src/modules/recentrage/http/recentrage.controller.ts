@@ -37,7 +37,8 @@ const refusBody = z.object({ motif: z.string().trim().max(300).nullable().option
 const precisionBody = z.object({ question: z.string().trim().min(3).max(1000) });
 const reponsePrecisionBody = z.object({ reponse: z.string().trim().min(1).max(1000) });
 /** « Commander » : `retirerDesGroupes` est le geste explicite qui retire de l'achat groupé les lignes commandées ici. */
-const commanderBody = destinataireBody.extend({ retirerDesGroupes: z.boolean().optional() });
+const commanderBody = destinataireBody.extend({ retirerDesGroupes: z.boolean().optional(), livraisonSouhaitee: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((j) => !Number.isNaN(Date.parse(`${j}T00:00:00Z`))).nullable().optional() });
+const prevenirBody = z.object({ prevenir: z.boolean() });
 const finEssaiBody = z.object({ email: z.email().max(254) });
 const modeTestBody = z.object({ mode: z.enum(MODES_REGROUPEMENT) });
 const zoneTestBody = z.object({ zone: z.string().regex(/^\d[\dAB]$/), franchiLe: z.iso.datetime().nullable() });
@@ -100,7 +101,21 @@ export class RecentrageController {
   @Post("demandes-perso/:id/commander")
   @HttpCode(200)
   commander(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(commanderBody)) body: z.infer<typeof commanderBody>) {
-    return this.demandes.commander(tenant, id, body.recipientId, { retirerDesGroupes: body.retirerDesGroupes === true });
+    return this.demandes.commander(tenant, id, body.recipientId, { retirerDesGroupes: body.retirerDesGroupes === true, livraisonSouhaitee: body.livraisonSouhaitee ?? null });
+  }
+
+  /** « C'est réglé » : le seul bouton du rappel de suivi à 7 jours (16 novembre 2026). */
+  @Post("demandes-perso/:id/regle")
+  @HttpCode(200)
+  regler(@Tenant() tenant: TenantContext, @Param("id") id: string) {
+    return this.demandes.regler(tenant, id);
+  }
+
+  /** « Prévenir les autres négoces consultés ? » (16 novembre 2026) : oui ou non, une seule fois. */
+  @Post("demandes-perso/:id/prevenir-autres")
+  @HttpCode(200)
+  prevenirAutres(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(prevenirBody)) body: z.infer<typeof prevenirBody>) {
+    return this.demandes.prevenirAutres(tenant, id, body.prevenir);
   }
 
   @Post("demandes-perso/:id/livree")

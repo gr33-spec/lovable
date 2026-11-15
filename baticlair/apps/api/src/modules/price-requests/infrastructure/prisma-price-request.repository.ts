@@ -46,6 +46,9 @@ interface Row {
   itemKeys: string[];
   lot: string | null;
   orderFeedback?: unknown;
+  autresNegocesChoix?: string | null;
+  suiviRappelLe?: Date | null;
+  regleLe?: Date | null;
   recipients: {
     id: string;
     status: RecipientStatus;
@@ -53,6 +56,7 @@ interface Row {
     etiquette?: string | null;
     reponduLe?: Date | null;
     commandeLe?: Date | null;
+    livraisonSouhaitee?: Date | null;
     refuseLe?: Date | null;
     intention?: string | null;
     intentionLe?: Date | null;
@@ -169,6 +173,16 @@ function toRecord(row: Row): PriceRequestRecord {
     itemKeys: row.itemKeys,
     lot: row.lot,
     orderFeedback: (row.orderFeedback ?? null) as OrderFeedback | null,
+    // Greg, 16 novembre 2026 : après la commande, la date souhaitée et « Prévenir les autres négoces consultés ? » ;
+    // le rappel de suivi à 7 jours et « C'est réglé ».
+    apresCommande: row.recipients.some((r) => r.commandeLe)
+      ? {
+          livraisonSouhaitee: row.recipients.find((r) => r.commandeLe)?.livraisonSouhaitee ?? null,
+          autres: row.recipients.filter((r) => !r.commandeLe && r.sentAt && !r.refuseLe).length,
+          autresChoix: row.autresNegocesChoix === "oui" || row.autresNegocesChoix === "non" ? row.autresNegocesChoix : null,
+        }
+      : null,
+    suivi: { rappelLe: row.suiviRappelLe ?? null, regleLe: row.regleLe ?? null },
     recipients: row.recipients.map((r) => ({
       id: r.id,
       supplier: r.supplier,

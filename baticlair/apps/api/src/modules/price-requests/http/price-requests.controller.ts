@@ -84,6 +84,10 @@ export function toDto(r: PriceRequestView) {
     lot: r.lot,
     /** §47.5 : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
     orderFeedback: r.orderFeedback,
+    /** Après la commande : la date de livraison souhaitée, combien d'autres négoces ont été consultés, et le choix pris. */
+    apresCommande: r.apresCommande ? { livraisonSouhaitee: r.apresCommande.livraisonSouhaitee?.toISOString().slice(0, 10) ?? null, autres: r.apresCommande.autres, autresChoix: r.apresCommande.autresChoix } : null,
+    /** Le rappel de suivi à 7 jours et « C'est réglé ». */
+    suivi: { rappelLe: r.suivi?.rappelLe?.toISOString() ?? null, regleLe: r.suivi?.regleLe?.toISOString() ?? null },
     packet: r.packet
       ? {
           entreprise: r.packet.entreprise,

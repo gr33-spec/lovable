@@ -255,7 +255,8 @@ export interface ResumeListe {
   lignes: number;
   origine: "Devis" | "Photo ou document" | "Saisie" | null;
   statut: string;
-  demande: { negoces: number; reponses: number; choisi: boolean } | null;
+  /** `aSuivre` : le rappel de suivi à 7 jours attend « C'est réglé » ; `regle` : l'artisan l'a dit. */
+  demande: { negoces: number; reponses: number; choisi: boolean; aSuivre?: boolean; regle?: boolean } | null;
   achatGroupe: boolean;
   supprimable: boolean;
   raison: "demande" | "reponse" | "offre" | "achat_groupe" | null;
@@ -680,6 +681,10 @@ export interface PriceRequest {
   lot?: string | null;
   /** §47.5 retour fournisseur : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
   orderFeedback?: OrderFeedback | null;
+  /** Après la commande (16 novembre 2026) : la date de livraison souhaitée, les autres négoces consultés, le choix pris. */
+  apresCommande?: { livraisonSouhaitee: string | null; autres: number; autresChoix: "oui" | "non" | null } | null;
+  /** Le rappel de suivi à 7 jours et « C'est réglé ». */
+  suivi?: { rappelLe: string | null; regleLe: string | null };
   recipients: PriceRequestRecipient[];
   /** §43 : les trois blocs envoyés au fournisseur (mail et PDF) ; absent pour une demande d'avant. */
   packet: { entreprise: string; chantier: string; articles: string[]; a_chiffrer: string[]; resume: string[]; joindre_detail: boolean } | null;

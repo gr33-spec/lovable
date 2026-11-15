@@ -132,6 +132,8 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Mission : l'application affiche « Bientôt » avec le principe ; fonctions désactivées ; un interrupteur dans l'admin (Réglages) les ouvre d'un clic, sans redéploiement. `MISSIONS_V1` ne sert plus que de valeur par défaut tant que l'admin n'a rien choisi.
 - Un seul outil de saisie : « Saisir un nouveau besoin » (achats groupés) ouvre l'écran « Nouveau quantitatif » (« Je saisis ma liste » ou « Mobiiz m'aide »), puis l'écran où l'on coche les lignes à grouper. Règle changée : avant, une conversation propre aux achats groupés.
 - Article déjà envoyé aux négoces : cochable en achat groupé après « Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ? » (Oui / Non). Il reste dans sa demande individuelle. Règle changée : avant, jamais.
+- Commander chez un négoce : l'artisan choisit une date de livraison souhaitée ; le négoce retenu lit « C'est OK pour moi, livraison souhaitée le [date], on s'appelle pour caler les détails. » Juste après : « Prévenir les autres négoces consultés ? Oui / Non » ; « Oui » envoie un e-mail poli, jamais le prix ni le nom du négoce retenu (un négoce qui n'avait pas répondu lit que la demande est close).
+- Rappel de suivi : 7 jours après les réponses à une demande directe, sans commande dans Mobiiz, « Où en es-tu avec cette demande ? », un seul bouton « C'est réglé » ; sans clic, la demande reste dans « À faire maintenant ». Pas de fil de discussion artisan-négoce pour une demande individuelle : ils s'appellent. L'offre d'un achat groupé, elle, passe obligatoirement par Mobiiz.
 - Ordre des anciennes demandes : gênants côté demandes, gênants côté abonnement, lot B, lot D. Le reste attend l'après-lancement.
 
 ## Signalement de bugs

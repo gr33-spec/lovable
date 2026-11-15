@@ -841,6 +841,8 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   // Rien ne part sur un seul appui : l'écran de confirmation dit à qui part le bon de commande.
   await expect(page.getByRole("dialog", { name: "Confirmer la commande" })).toContainText("Le bon de commande part tout de suite par e-mail à Point.P Vannes");
   await expect(page.getByRole("status", { name: "Commandé" })).toHaveCount(0);
+  // Greg, 16 novembre 2026 : la date de livraison souhaitée se choisit avant de confirmer.
+  await page.getByRole("dialog", { name: "Confirmer la commande" }).getByLabel("Date de livraison souhaitée").fill(new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10));
   await page.getByRole("dialog", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
   await expect(feuille).toHaveCount(0);
   const commande = page.getByRole("status", { name: "Commandé" });
@@ -923,6 +925,8 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   const feuille = page.getByRole("dialog", { name: "Devis reçus" });
   await expect(feuille.getByRole("button", { name: "Ouvrir le devis (PDF)" })).toHaveCount(3);
   await feuille.getByLabel("Devis de Négoce Breizh (démo)").getByRole("button", { name: "Commander" }).click();
+  // Greg, 16 novembre 2026 : la date de livraison souhaitée se choisit avant de confirmer.
+  await page.getByRole("dialog", { name: "Confirmer la commande" }).getByLabel("Date de livraison souhaitée").fill(new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10));
   await page.getByRole("dialog", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
   await expect(page.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce Breizh (démo).");
 });

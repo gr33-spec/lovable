@@ -276,6 +276,8 @@ test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mai
   await page.getByRole("button", { name: "Fermer le document" }).click();
   // « Commander », puis la confirmation : la demande passe à « Commandé », sans bouton principal.
   await carte.getByRole("button", { name: "Commander" }).click();
+  // Greg, 16 novembre 2026 : la date de livraison souhaitée se choisit avant de confirmer.
+  await page.getByRole("dialog", { name: "Confirmer la commande" }).getByLabel("Date de livraison souhaitée").fill(new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10));
   await page.getByRole("dialog", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
   await expect(fournisseurs.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce Dupont.");
   await expect(fournisseurs.getByRole("button", { name: /^Voir les? devis reçus?$/ })).toHaveCount(0);

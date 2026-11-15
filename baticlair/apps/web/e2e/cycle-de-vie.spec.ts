@@ -97,6 +97,8 @@ test("Cycle de vie : retenir un négoce pour une ligne tenue par un achat group�
   const retenir = async () => {
     await page.getByRole("button", { name: /^Voir (le|les) devis reçus?$/ }).click();
     await page.getByRole("button", { name: "Commander", exact: true }).first().click();
+    // Greg, 16 novembre 2026 : la date de livraison souhaitée se choisit avant de confirmer.
+    await page.getByRole("dialog", { name: "Confirmer la commande" }).getByLabel("Date de livraison souhaitée").fill(new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10));
     await page.getByRole("dialog", { name: "Confirmer la commande" }).getByRole("button", { name: "Confirmer la commande" }).click();
   };
   await retenir();

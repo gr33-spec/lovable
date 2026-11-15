@@ -9,7 +9,7 @@ import { NotificationsPrompt } from "@/components/notifications-prompt";
 import { RappelAdresseMobiiz } from "@/components/adresse-mobiiz";
 import { OfferLines, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
-import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { Badge, Button, Card, ErrorNotice, Spinner, INPUT } from "@/components/ui";
 import { attachFile } from "@/lib/upload";
 import { fetchWhole } from "@/components/file-viewer";
 import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, type EmailRecu, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
@@ -217,7 +217,7 @@ function SuiviDemande({
   const [renvoi, setRenvoi] = useState(false);
   const [suppression, setSuppression] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
-  const [conflit, setConflit] = useState<{ phrase: string; retenus: string[]; recipientId?: string } | null>(null);
+  const [conflit, setConflit] = useState<{ phrase: string; retenus: string[]; recipientId?: string; livraisonSouhaitee?: string | null } | null>(null);
   const [retrait, setRetrait] = useState(false);
   const whole = focus ? [focus] : [];
   // Les sélections envoyées à part (§48.5) : tout ce qui n'est pas une demande principale, montré une fois.
@@ -252,11 +252,11 @@ function SuiviDemande({
    * Greg, 14 novembre 2026 (recette n° 2) : « Commander » est une vraie commande. Le serveur envoie le bon de commande au
    * négoce, et ne note la commande qu'une fois le mail parti. Rend la phrase d'erreur à montrer, ou null si c'est fait.
    */
-  async function commander(recipientId: string, retirerDesGroupes = false): Promise<ApiError | null> {
+  async function commander(recipientId: string, livraisonSouhaitee: string | null, retirerDesGroupes = false): Promise<ApiError | null> {
     if (!enCours) return null;
     setConflit(null);
     try {
-      await api(`/v1/demandes-perso/${encodeURIComponent(enCours.id)}/commander`, { method: "POST", body: { recipientId, ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } });
+      await api(`/v1/demandes-perso/${encodeURIComponent(enCours.id)}/commander`, { method: "POST", body: { recipientId, ...(livraisonSouhaitee ? { livraisonSouhaitee } : {}), ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } });
       setFeuille(false);
       reload();
       refreshProgress();
@@ -266,7 +266,7 @@ function SuiviDemande({
       const phrase = conflitGroupe(e);
       if (phrase) {
         setFeuille(false);
-        setConflit({ phrase, retenus: [], recipientId });
+        setConflit({ phrase, retenus: [], recipientId, livraisonSouhaitee });
         montrer("conflit-groupe");
         return null;
       }
@@ -394,6 +394,9 @@ function SuiviDemande({
                 ? ` · retenu le ${dateHeureCourte(new Date(request.classifiedAt))}`
                 : ""}
           </p>
+          {request.apresCommande?.livraisonSouhaitee ? (
+            <p className="text-[14px]">Livraison souhaitée le {new Date(`${request.apresCommande.livraisonSouhaitee}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}. Vous vous appelez pour caler les détails.</p>
+          ) : null}
           {retenus
             .filter((r) => r.document)
             .map((r) => (
@@ -401,6 +404,7 @@ function SuiviDemande({
                 Ouvrir le devis (PDF)
               </button>
             ))}
+          <PrevenirAutres request={request} onFait={reloadAll} />
         </div>
       ) : aEnvoyer.length > 0 ? (
         <AssistantMessage>
@@ -411,6 +415,12 @@ function SuiviDemande({
         <Button onClick={() => setFeuille(true)} className="w-full">
           {comparer ? "Comparer" : repondus.length > 1 ? "Voir les devis reçus" : "Voir le devis reçu"}
         </Button>
+      ) : null}
+      {retenus.length === 0 ? <RappelDeSuivi request={request} onFait={reloadAll} /> : null}
+      {retenus.length === 0 && request.suivi?.regleLe ? (
+        <p role="status" aria-label="Demande réglée" className="rounded-xl bg-ground p-3 text-[15px] font-semibold">
+          Demande réglée le {dateHeureCourte(new Date(request.suivi.regleLe))}.
+        </p>
       ) : null}
       {retenus.length === 0
         ? request.recipients
@@ -442,7 +452,7 @@ function SuiviDemande({
           onRetirer={() => {
             setRetrait(true);
             const suite = conflit.recipientId
-              ? commander(conflit.recipientId, true).then((e) => {
+              ? commander(conflit.recipientId, conflit.livraisonSouhaitee ?? null, true).then((e) => {
                   if (e) setActionError(e);
                 })
               : classer(conflit.retenus, true);
@@ -507,6 +517,76 @@ function SuiviDemande({
 }
 
 /**
+ * LE RAPPEL DE SUIVI (Greg, 16 novembre 2026) : 7 jours après les réponses, sans commande, « Où en es-tu avec cette
+ * demande ? ». Un seul bouton, « C'est réglé ». Sans clic, la question reste. Pas de fil de discussion avec le négoce :
+ * pour une demande individuelle, l'artisan et son négoce s'appellent.
+ */
+function RappelDeSuivi({ request, onFait }: { request: PriceRequest; onFait: () => void }) {
+  const [pending, setPending] = useState(false);
+  const [erreur, setErreur] = useState<ApiError | null>(null);
+  if (!request.suivi?.rappelLe || request.suivi.regleLe) return null;
+  return (
+    <div role="group" aria-label="Où en es-tu avec cette demande ?" className="flex flex-col gap-2 rounded-xl border-2 border-[var(--color-warn)] bg-surface p-4">
+      <p className="text-[17px] font-extrabold">Où en es-tu avec cette demande ?</p>
+      <p className="text-[14px] text-muted">Tes négoces ont répondu il y a plus d&apos;une semaine. Si c&apos;est commandé ou abandonné, dis-le : la demande sort de tes choses à faire.</p>
+      <Button
+        pending={pending}
+        onClick={() => {
+          setPending(true);
+          setErreur(null);
+          void api(`/v1/demandes-perso/${encodeURIComponent(request.id)}/regle`, { method: "POST" })
+            .then(onFait)
+            .catch((e: unknown) => setErreur(e instanceof ApiError ? e : new ApiError("internal_error", 500)))
+            .finally(() => setPending(false));
+        }}
+      >
+        C&apos;est réglé
+      </Button>
+      {erreur ? <ErrorNotice error={erreur} /> : null}
+    </div>
+  );
+}
+
+/**
+ * « PRÉVENIR LES AUTRES NÉGOCES CONSULTÉS ? OUI / NON » (Greg, 16 novembre 2026), juste après la commande. « Oui » : un
+ * e-mail poli part aux autres (« Merci pour votre offre, elle n'a pas été retenue cette fois. Je vous recontacte pour mes
+ * prochains chantiers. »), jamais le prix ni le nom du négoce retenu. La question se pose une fois ; le choix reste écrit.
+ */
+function PrevenirAutres({ request, onFait }: { request: PriceRequest; onFait: () => void }) {
+  const [pending, setPending] = useState<"oui" | "non" | null>(null);
+  const [erreur, setErreur] = useState<ApiError | null>(null);
+  const a = request.apresCommande;
+  if (!a || a.autres === 0 || !request.recipients.some((r) => r.commandeLe)) return null;
+  if (a.autresChoix === "oui") return <p className="text-[14px] font-semibold">Les autres négoces consultés sont prévenus.</p>;
+  if (a.autresChoix === "non") return null;
+  const repondre = (prevenir: boolean) => {
+    setPending(prevenir ? "oui" : "non");
+    setErreur(null);
+    void api(`/v1/demandes-perso/${encodeURIComponent(request.id)}/prevenir-autres`, { method: "POST", body: { prevenir } })
+      .then(onFait)
+      .catch((e: unknown) => setErreur(e instanceof ApiError ? e : new ApiError("internal_error", 500)))
+      .finally(() => setPending(null));
+  };
+  return (
+    <div role="group" aria-label="Prévenir les autres négoces consultés ?" className="flex flex-col gap-2 rounded-xl bg-surface p-3 text-ink">
+      <p className="text-[16px] font-extrabold">Prévenir les autres négoces consultés ?</p>
+      <p className="text-[14px] text-muted">
+        {a.autres > 1 ? `Les ${a.autres} autres reçoivent` : "L'autre reçoit"} un e-mail poli : « Merci pour votre offre, elle n&apos;a pas été retenue cette fois. Je vous recontacte pour mes prochains chantiers. » Ni le prix ni le nom du négoce retenu n&apos;y figurent.
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        <Button pending={pending === "oui"} disabled={pending !== null} onClick={() => repondre(true)}>
+          Oui
+        </Button>
+        <Button variant="secondary" pending={pending === "non"} disabled={pending !== null} onClick={() => repondre(false)}>
+          Non
+        </Button>
+      </div>
+      {erreur ? <ErrorNotice error={erreur} /> : null}
+    </div>
+  );
+}
+
+/**
  * « Voir les devis reçus » (Greg, 28 octobre 2026, points 7 et 8) : en plein écran, une carte par négoce qui a répondu :
  * « X t'a répondu · 28 oct. à 8 h 31 », la première ligne de son message, « Ouvrir le devis (PDF) » et « Je retiens ce
  * négoce » (la demande passe à « Commandé »). Aucune lecture IA, aucun nom de fichier. Un négoce qui a répondu par le
@@ -524,12 +604,16 @@ function DevisRecus({
   repondus: PriceRequestRecipient[];
   emailDe: (id: string) => EmailRecu | null;
   offreDe: (id: string) => OffrePerso | null;
-  /** Envoie le bon de commande au négoce ; rend l'erreur à montrer, ou null. */
-  onCommander: (recipientId: string) => Promise<ApiError | null>;
+  /** Envoie le bon de commande au négoce, avec la date de livraison souhaitée ; rend l'erreur à montrer, ou null. */
+  onCommander: (recipientId: string, livraisonSouhaitee: string | null) => Promise<ApiError | null>;
   onFermer: () => void;
 }) {
   // « Commander » ouvre d'abord la confirmation : rien ne part sur un seul appui.
   const [choisi, setChoisi] = useState<PriceRequestRecipient | null>(null);
+  // Greg, 16 novembre 2026 : l'artisan choisit une date de livraison souhaitée ; elle part dans le mail et sur le bon.
+  const [livraison, setLivraison] = useState("");
+  const aujourdhui = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+  const livraisonValable = /^\d{4}-\d{2}-\d{2}$/.test(livraison) && livraison >= aujourdhui;
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<ApiError | null>(null);
   useEffect(() => {
@@ -570,18 +654,28 @@ function DevisRecus({
                 {request.lines.length} ligne{request.lines.length > 1 ? "s" : ""}, aux prix de son devis.
               </p>
             )}
+            <label className="flex flex-col gap-1 text-[15px] font-semibold">
+              Date de livraison souhaitée
+              <input type="date" required min={aujourdhui} value={livraison} onChange={(e) => setLivraison(e.target.value)} className={INPUT} />
+            </label>
+            {livraison && !livraisonValable ? (
+              <p role="alert" className="text-[14px] font-semibold text-danger">
+                Cette date est déjà passée. Choisis une date à venir.
+              </p>
+            ) : null}
             <p className="text-[15px]">
-              Le bon de commande part tout de suite par e-mail à {choisi.supplier.name} ({choisi.supplier.email}).
+              Le bon de commande part tout de suite par e-mail à {choisi.supplier.name} ({choisi.supplier.email}){livraisonValable ? `, avec ce mot : « C'est OK pour moi, livraison souhaitée le ${new Date(`${livraison}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}, on s'appelle pour caler les détails. »` : "."}
             </p>
           </Card>
           {erreur ? <ErrorNotice error={erreur} /> : null}
           <Button
             variant="accent"
             pending={envoi}
+            disabled={!livraisonValable}
             onClick={() => {
               setEnvoi(true);
               setErreur(null);
-              void onCommander(choisi.id)
+              void onCommander(choisi.id, livraison)
                 .then((e) => setErreur(e))
                 .finally(() => setEnvoi(false));
             }}

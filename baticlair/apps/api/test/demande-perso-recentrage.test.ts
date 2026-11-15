@@ -113,14 +113,90 @@ describe("la demande perso", () => {
 
     // Commander chez C : le bon part au négoce, une seule commande par demande.
     const c = vue.offres[0].recipientId as string;
-    await a.agent.post(`/v1/demandes-perso/${envoi.id}/commander`).send({ recipientId: c }).expect(200);
+    // Greg, 16 novembre 2026 : l'artisan choisit une date de livraison souhaitée (jamais passée) ; avant toute commande,
+    // « prévenir les autres » n'a pas de sens.
+    expect((await a.agent.post(`/v1/demandes-perso/${envoi.id}/prevenir-autres`).send({ prevenir: true }).expect(409)).body.error.details.reason).toBe("sans_commande");
+    expect((await a.agent.post(`/v1/demandes-perso/${envoi.id}/commander`).send({ recipientId: c, livraisonSouhaitee: "2020-01-15" }).expect(400)).body.error.details.reason).toBe("date_passee");
+    await a.agent.post(`/v1/demandes-perso/${envoi.id}/commander`).send({ recipientId: c, livraisonSouhaitee: "31/12/2099" }).expect(400);
+    expect(mailsVers(ctx, "c@negoce.fr").some((m) => /^Bon de commande/.test(m.subject))).toBe(false);
+    await a.agent.post(`/v1/demandes-perso/${envoi.id}/commander`).send({ recipientId: c, livraisonSouhaitee: "2099-12-03" }).expect(200);
     const bon = mailsVers(ctx, "c@negoce.fr").at(-1)!;
     expect(bon.subject).toMatch(/^Bon de commande de Toitures A \(1 150,00 € HT livré\)$/);
+    expect(bon.text).toContain("C'est OK pour moi, livraison souhaitée le 3 décembre 2099, on s'appelle pour caler les détails.");
     await a.agent.post(`/v1/demandes-perso/${envoi.id}/commander`).send({ recipientId: vue.offres[1].recipientId }).expect(409);
+    // « Prévenir les autres négoces consultés ? » : B, D et le négoce de la zone (E a décliné, C est retenu). « Oui » : un e-mail poli à chacun,
+    // jamais le prix ni le nom du retenu ; rappuyer (ou changer d'avis) ne renvoie rien.
+    const apres = (await a.agent.get(`/v1/demandes-perso/${envoi.id}`).expect(200)).body.commande;
+    expect(apres).toMatchObject({ livraisonSouhaitee: "2099-12-03", autres: { nombre: 3, choix: null } });
+    const polis = () => ["b", "c", "d", "e", "zone"].map((x) => mailsVers(ctx, `${x}@negoce.fr`).filter((m) => /suite à ma demande de prix/.test(m.subject)));
+    expect(polis().flat()).toHaveLength(0);
+    expect((await a.agent.post(`/v1/demandes-perso/${envoi.id}/prevenir-autres`).send({ prevenir: true }).expect(200)).body.commande.autres).toEqual({ nombre: 3, choix: "oui" });
+    expect(polis().map((m) => m.length)).toEqual([1, 0, 1, 0, 1]);
+    // Celui qui n'a jamais répondu n'est pas remercié pour une offre qu'il n'a pas faite : sa demande est close.
+    expect(polis()[4]![0]!.text).toContain("ma demande de prix est close");
+    expect(polis()[4]![0]!.text).not.toContain("Merci pour votre offre");
+    for (const m of polis().flat()) {
+      if (m !== polis()[4]![0]) expect(m.text).toContain("Merci pour votre offre, elle n'a pas été retenue cette fois. Je vous recontacte pour mes prochains chantiers.");
+      expect(m.text + m.subject).not.toMatch(/Négoce C|1 150|1,05|€/);
+      expect(m.replyTo).toBeTruthy();
+    }
+    await a.agent.post(`/v1/demandes-perso/${envoi.id}/prevenir-autres`).send({ prevenir: true }).expect(200);
+    expect((await a.agent.post(`/v1/demandes-perso/${envoi.id}/prevenir-autres`).send({ prevenir: false }).expect(200)).body.commande.autres.choix).toBe("oui");
+    expect(polis().flat()).toHaveLength(3);
     await publique().post(`/v1/public/chiffrer/${lien(bon.text)}/confirmer`).expect(200);
     expect((await a.agent.get(`/v1/demandes-perso/${envoi.id}`).expect(200)).body.commande).toMatchObject({ nom: "Négoce C", suivi: "confirmee" });
     await a.agent.post(`/v1/demandes-perso/${envoi.id}/livree`).send({ recipientId: c }).expect(200);
     expect((await a.agent.get(`/v1/demandes-perso/${envoi.id}`).expect(200)).body.commande.suivi).toBe("livree");
+  });
+
+  it("rappel de suivi : 7 jours après les réponses, sans commande, « Où en es-tu avec cette demande ? » une seule fois ; « C'est réglé » la sort de « À faire »", async () => {
+    // Greg, 16 novembre 2026. Jamais avant 7 jours, jamais pour une demande commandée, un seul message par demande.
+    const a = await couvreurAvecListe(ctx, "a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", LIGNES);
+    const autre = await couvreurAvecListe(ctx, "z@toitures.fr", "Toitures Z", "8 rue du Port, 22500 Paimpol", LIGNES);
+    const envoi = (await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "chiffrer", accord: true, articles: a.articles, dateBesoin: "2099-12-01", negoces: [{ nom: "Négoce B", email: "b@negoce.fr" }, { nom: "Négoce C", email: "c@negoce.fr" }] }).expect(201)).body;
+    const jetonDe = (email: string) => lien(mailsVers(ctx, email).at(-1)!.text);
+    const cles = ((await publique().get(`/v1/public/chiffrer/${jetonDe("b@negoce.fr")}`).expect(200)).body.lignes as { cle: string }[]).map((l) => l.cle);
+    const tache = (quand: Date) => publique().get(`/v1/internal/demandes-perso?maintenant=${encodeURIComponent(quand.toISOString())}`).set("authorization", "Bearer secret-de-la-tache").expect(200);
+    const rappels = () => mailsVers(ctx, "a@toitures.fr").filter((m) => m.subject.startsWith("Où en es-tu avec cette demande ?"));
+    const resume = async () => ((await a.agent.get("/v1/projects?limit=30&resume=1").expect(200)).body.items as { id: string; resume: { statut: string; demande: { aSuivre: boolean; regle: boolean; choisi: boolean } } }[]).find((p) => p.id === a.projectId)!.resume;
+    // Aucune réponse : jamais de rappel de suivi, même longtemps après.
+    expect((await tache(new Date(Date.now() + 20 * 86_400_000))).body.suivis).toBe(0);
+    await publique().post(`/v1/public/chiffrer/${jetonDe("b@negoce.fr")}`).send({ prix: Object.fromEntries(cles.map((k) => [k, 1])), livraisonHt: 0, delaiJours: 2, validiteJours: 30 }).expect(200);
+    const reponduLe = (await ctx.prisma.priceRequestRecipient.findFirstOrThrow({ where: { priceRequestId: envoi.id, reponduLe: { not: null } } })).reponduLe!;
+    // Six jours après la réponse : rien. Sept jours : un rappel, à l'artisan seul ; le lendemain : pas de second.
+    expect((await tache(new Date(reponduLe.getTime() + 6 * 86_400_000))).body.suivis).toBe(0);
+    expect(rappels()).toHaveLength(0);
+    expect((await resume()).demande).toMatchObject({ aSuivre: false, regle: false });
+    expect((await tache(new Date(reponduLe.getTime() + 7 * 86_400_000 + 60_000))).body.suivis).toBe(1);
+    expect(rappels()).toHaveLength(1);
+    expect(rappels()[0]!.text).toContain("C'est réglé");
+    expect(mailsVers(ctx, "b@negoce.fr").concat(mailsVers(ctx, "c@negoce.fr"), mailsVers(ctx, "z@toitures.fr")).some((m) => /Où en es-tu/.test(m.subject + m.text))).toBe(false);
+    expect((await tache(new Date(reponduLe.getTime() + 8 * 86_400_000))).body.suivis).toBe(0);
+    expect(rappels()).toHaveLength(1);
+    // Sans clic, la demande reste en rappel ; une autre entreprise ne peut pas la régler.
+    expect((await resume()).demande).toMatchObject({ aSuivre: true, regle: false });
+    expect((await a.agent.get(`/v1/projects/${a.projectId}/price-requests`).expect(200)).body.items[0].suivi).toMatchObject({ rappelLe: expect.any(String), regleLe: null });
+    await autre.agent.post(`/v1/demandes-perso/${envoi.id}/regle`).expect(404);
+    // « C'est réglé » : un seul bouton, rien ne part à personne, la demande sort de « À faire ».
+    const avant = ctx.emails.sent.length;
+    expect((await a.agent.post(`/v1/demandes-perso/${envoi.id}/regle`).expect(200)).body).toEqual({ regle: true });
+    await a.agent.post(`/v1/demandes-perso/${envoi.id}/regle`).expect(200);
+    expect(ctx.emails.sent.length).toBe(avant);
+    expect(await resume()).toMatchObject({ statut: "Réglée", demande: { aSuivre: false, regle: true, choisi: false } });
+    expect((await tache(new Date(reponduLe.getTime() + 30 * 86_400_000))).body.suivis).toBe(0);
+  });
+
+  it("rappel de suivi : jamais pour une demande déjà commandée", async () => {
+    const a = await couvreurAvecListe(ctx, "a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", LIGNES);
+    const envoi = (await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "commander", accord: true, articles: a.articles, dateBesoin: "2099-12-01", negoces: [{ nom: "Négoce B", email: "b@negoce.fr" }] }).expect(201)).body;
+    const jeton = lien(mailsVers(ctx, "b@negoce.fr").at(-1)!.text);
+    const cles = ((await publique().get(`/v1/public/chiffrer/${jeton}`).expect(200)).body.lignes as { cle: string }[]).map((l) => l.cle);
+    await publique().post(`/v1/public/chiffrer/${jeton}`).send({ prix: Object.fromEntries(cles.map((k) => [k, 1])), livraisonHt: 0, delaiJours: 2, validiteJours: 30 }).expect(200);
+    const vue = (await a.agent.get(`/v1/demandes-perso/${envoi.id}`).expect(200)).body;
+    await a.agent.post(`/v1/demandes-perso/${envoi.id}/commander`).send({ recipientId: vue.offres[0].recipientId, livraisonSouhaitee: "2099-12-03" }).expect(200);
+    const r = await publique().get(`/v1/internal/demandes-perso?maintenant=${encodeURIComponent(new Date(Date.now() + 15 * 86_400_000).toISOString())}`).set("authorization", "Bearer secret-de-la-tache").expect(200);
+    expect(r.body.suivis).toBe(0);
+    expect(mailsVers(ctx, "a@toitures.fr").some((m) => /Où en es-tu/.test(m.subject))).toBe(false);
   });
 
   it("relance à 48 h ouvrées, une seule fois ; clôture à la date de besoin", async () => {

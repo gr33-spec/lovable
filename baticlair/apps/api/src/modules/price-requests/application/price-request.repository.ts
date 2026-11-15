@@ -64,6 +64,10 @@ export interface PriceRequestRecord {
   itemKeys: string[];
   /** Les demandes parties ensemble par le tri par métier ; null = demande seule. */
   lot: string | null;
+  /** Après la commande (16 novembre 2026) : la date de livraison souhaitée, et le choix de prévenir les autres négoces. */
+  apresCommande?: { livraisonSouhaitee: Date | null; autres: number; autresChoix: "oui" | "non" | null } | null;
+  /** Le rappel de suivi à 7 jours (envoyé le), et « C'est réglé » (le). */
+  suivi?: { rappelLe: Date | null; regleLe: Date | null };
   /** §47.5 : le retour du fournisseur retenu (null tant que l'artisan n'a rien dit). */
   orderFeedback: OrderFeedback | null;
   recipients: RecipientRecord[];

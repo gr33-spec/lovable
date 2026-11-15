@@ -69,6 +69,13 @@ const nombre = (q: unknown): number | null => {
   return Number.isFinite(n) && n > 0 ? n : null;
 };
 const euros = (n: number) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n).replace(/\u202f|\u00a0/g, " ");
+/** Le rappel de suivi d'une demande directe (Greg, 16 novembre 2026) : la question, mot pour mot, et son délai. */
+export const QUESTION_SUIVI = "Où en es-tu avec cette demande ?";
+const JOURS_AVANT_SUIVI = 7;
+/** Un jour de calendrier (une date sans heure, gardée en UTC) : « 3 décembre ». */
+const jourFrUtc = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(d).replace(/^1 /, "1er ");
+/** Les autres négoces consultés : la demande leur est réellement partie, ils n'ont pas décliné, et ce n'est pas le retenu. */
+const autresConsultes = <T extends { commandeLe: Date | null; sentAt: Date | null; refuseLe: Date | null }>(rs: readonly T[]): T[] => rs.filter((r) => !r.commandeLe && r.sentAt && !r.refuseLe);
 const jourFr = (d: Date) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d).replace(/^1 /, "1er ");
 
 export type NegoceChoisi = { supplierId: string } | { negoceId: string } | { nom: string; email: string };
@@ -264,7 +271,17 @@ export class DemandePersoService {
         precision: r.precisionQuestion ? { question: r.precisionQuestion, reponse: r.precisionReponse } : null,
       })),
       offres: comparees.map((o) => ({ ...o, recipientId: o.negoceId, valideJusquau: o.valideJusquau.toISOString() })),
-      commande: commande ? { recipientId: commande.id, nom: commande.supplier.name, suivi: commande.suivi, commandeLe: commande.commandeLe } : null,
+      commande: commande
+        ? {
+            recipientId: commande.id,
+            nom: commande.supplier.name,
+            suivi: commande.suivi,
+            commandeLe: commande.commandeLe,
+            livraisonSouhaitee: commande.livraisonSouhaitee ? commande.livraisonSouhaitee.toISOString().slice(0, 10) : null,
+            // « Prévenir les autres négoces consultés ? » : combien ils sont, et le choix une fois pris.
+            autres: { nombre: autresConsultes(d.recipients).length, choix: (d.autresNegocesChoix as "oui" | "non" | null) ?? null },
+          }
+        : null,
     };
   }
 
@@ -305,9 +322,14 @@ export class DemandePersoService {
 
   /* ---------------------------------------------------------------------------------------------- la commande (artisan) */
 
-  async commander(tenant: TenantContext, requestId: string, recipientId: string, options: { retirerDesGroupes?: boolean } = {}) {
+  async commander(tenant: TenantContext, requestId: string, recipientId: string, options: { retirerDesGroupes?: boolean; /** La date de livraison souhaitée (AAAA-MM-JJ), choisie par l'artisan (16 novembre 2026). */ livraisonSouhaitee?: string | null } = {}) {
     assertCanWrite(tenant);
     const d = await this.demandeDe(tenant, requestId);
+    // Une date de livraison souhaitée ne peut pas être passée (jour de Paris).
+    const souhaitee = options.livraisonSouhaitee ? new Date(`${options.livraisonSouhaitee}T00:00:00.000Z`) : null;
+    if (souhaitee && options.livraisonSouhaitee! < new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(this.now()))
+      throw validationFailed("Delivery date in the past", { reason: "date_passee", message: "La date de livraison souhaitée est déjà passée. Choisis une date à venir." });
+    const livraisonLe = souhaitee ? jourFrUtc(souhaitee) : null;
     if (d.recipients.some((r) => r.commandeLe)) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
     const r = d.recipients.find((x) => x.id === recipientId);
     // Greg, 14 novembre 2026 (recette n° 2) : « Commander » est une vraie commande. Le négoce a chiffré par le lien (ses prix
@@ -349,7 +371,7 @@ export class DemandePersoService {
       })),
       livraisonHt: chiffre ? (livraison > 0 ? euros(livraison) : "offerte") : "selon devis",
       totalHt: chiffre ? euros(totalLignes + livraison) : "selon devis",
-      mentions: [`Sur ${reference}. Facturation et paiement comme d'habitude, sur le compte du client chez vous.`],
+      mentions: [...(livraisonLe ? [`Livraison souhaitée le ${livraisonLe}. On s'appelle pour caler les détails.`] : []), `Sur ${reference}. Facturation et paiement comme d'habitude, sur le compte du client chez vous.`],
     });
     // Le lien pour confirmer : écrit avant le mail (le mail le porte). La commande, elle, n'est notée qu'UNE FOIS LE MAIL
     // PARTI : jamais « commandé » sans bon de commande réellement envoyé au négoce.
@@ -369,6 +391,8 @@ export class DemandePersoService {
         "",
         total ? `Total : ${total}.` : "Prix et livraison : ceux de votre devis.",
         project?.address ? `Livraison : ${project.address}.` : "",
+        // Greg, 16 novembre 2026, mot pour mot : le négoce retenu sait quand livrer, et que l'artisan l'appelle.
+        livraisonLe ? `C'est OK pour moi, livraison souhaitée le ${livraisonLe}, on s'appelle pour caler les détails.` : "",
         company?.phone ? `Contact : ${company.phone}${company.email ? `, ${company.email}` : ""}.` : company?.email ? `Contact : ${company.email}.` : "",
         "",
         "Confirmez la commande d'un clic :",
@@ -383,9 +407,48 @@ export class DemandePersoService {
     });
     // Le mail est parti : la commande est notée, et la demande passe « Commandé » chez ce négoce (suivi du chantier).
     await this.prisma.$transaction([
-      this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { commandeLe: maintenant, suivi: "recue" } }),
+      this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { commandeLe: maintenant, suivi: "recue", livraisonSouhaitee: souhaitee } }),
       this.prisma.priceRequest.update({ where: { id: d.id }, data: { classifiedAt: maintenant, retainedSupplierIds: [r.supplier.id] } }),
     ]);
+    return this.vue(tenant, requestId);
+  }
+
+  /**
+   * « PRÉVENIR LES AUTRES NÉGOCES CONSULTÉS ? » (Greg, 16 novembre 2026), juste après la commande. « Oui » : un e-mail poli
+   * part à chacun des autres négoces à qui la demande a été envoyée (« Merci pour votre offre, elle n'a pas été retenue
+   * cette fois. Je vous recontacte pour mes prochains chantiers. »). JAMAIS le prix ni le nom du négoce retenu. « Non » :
+   * rien ne part. Le choix est noté une seule fois : rappuyer ne renvoie rien.
+   */
+  async prevenirAutres(tenant: TenantContext, requestId: string, prevenir: boolean) {
+    assertCanWrite(tenant);
+    const d = await this.demandeDe(tenant, requestId);
+    const retenu = d.recipients.find((r) => r.commandeLe);
+    if (!retenu) throw new DomainError("conflict", "No order yet", { reason: "sans_commande", message: "Cette demande n'a pas encore de commande." });
+    // Le choix se prend une fois (verrou en base : deux appuis ne font jamais deux envois).
+    const pris = await this.prisma.priceRequest.updateMany({ where: { id: d.id, autresNegocesChoix: null }, data: { autresNegocesChoix: prevenir ? "oui" : "non", autresNegocesLe: this.now() } });
+    if (pris.count === 0 || !prevenir) return this.vue(tenant, requestId);
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } });
+    const email = await this.emailDe(tenant.companyId);
+    for (const r of autresConsultes(d.recipients)) {
+      const aRepondu = Boolean(r.reponduLe) || r.status === "received";
+      await this.mailer
+        .send({
+          to: r.supplier.email,
+          subject: `${c?.name ?? "Votre client"} : suite à ma demande de prix`,
+          text: [
+            "Bonjour,",
+            "",
+            aRepondu ? "Merci pour votre offre, elle n'a pas été retenue cette fois. Je vous recontacte pour mes prochains chantiers." : "Merci, ma demande de prix est close : ce n'est plus la peine de la chiffrer. Je vous recontacte pour mes prochains chantiers.",
+            "",
+            "Cordialement,",
+            c?.name ?? "",
+            "",
+            `Envoyé avec ${NOM_APP}.`,
+          ].join("\n"),
+          ...(email ? { replyTo: email } : {}),
+        })
+        .catch(() => undefined);
+    }
     return this.vue(tenant, requestId);
   }
 
@@ -614,7 +677,7 @@ export class DemandePersoService {
    * commercial ») et le négoce reçoit un rappel à son nom (au plus tard à 48 h ouvrées) ; la veille de la date limite,
    * l'artisan est prévenu encore. Jamais après une réponse, un refus ou la date limite ; deux messages au plus par négoce.
    */
-  async tache(maintenant = this.now()): Promise<{ relances: number; rappels: number }> {
+  async tache(maintenant = this.now()): Promise<{ relances: number; rappels: number; suivis: number }> {
     const attente = await this.prisma.priceRequestRecipient.findMany({
       where: { reponduLe: null, refuseLe: null, status: "sent", OR: [{ relanceLe: null }, { rappelVeilleLe: null }], priceRequest: { OR: [{ closLe: null }, { closLe: { gt: maintenant } }], company: { memberships: { none: { user: filtreVisiteurs() } } } } },
       include: { supplier: { select: { name: true, email: true, contactName: true, phone: true } }, priceRequest: { select: { id: true, but: true, dueDate: true, closLe: true, projectId: true, companyId: true, company: { select: { name: true } } } } },
@@ -655,7 +718,56 @@ export class DemandePersoService {
         rappels++;
       }
     }
-    return { relances, rappels };
+    return { relances, rappels, suivis: await this.rappelsDeSuivi(maintenant) };
+  }
+
+  /**
+   * LE RAPPEL DE SUIVI (Greg, 16 novembre 2026) : « 7 jours après réception des réponses à une demande directe, si rien n'a
+   * été commandé dans Mobiiz, rappel à l'artisan : "Où en es-tu avec cette demande ?" Un seul bouton "C'est réglé". Sans
+   * clic, la demande reste en rappel. » Un seul message par demande (e-mail et notification) ; ensuite la demande reste
+   * dans « À faire maintenant » jusqu'au clic. Jamais pour une demande commandée, retenue ou déjà réglée.
+   */
+  private async rappelsDeSuivi(maintenant: Date): Promise<number> {
+    if (!this.prevenir) return 0;
+    const demandes = await this.prisma.priceRequest.findMany({
+      where: {
+        suiviRappelLe: null,
+        regleLe: null,
+        classifiedAt: null,
+        retainedSupplierIds: { isEmpty: true },
+        recipients: { some: { OR: [{ reponduLe: { not: null } }, { status: "received" }] }, none: { commandeLe: { not: null } } },
+        company: { memberships: { none: { user: filtreVisiteurs() } } },
+        project: { status: { not: "archived" } },
+      },
+      select: { id: true, projectId: true, companyId: true, project: { select: { name: true } }, recipients: { select: { status: true, reponduLe: true, updatedAt: true } } },
+      take: 500,
+    });
+    let suivis = 0;
+    for (const d of demandes) {
+      // La dernière réponse reçue (par le lien, ou un devis déposé ou reçu par e-mail).
+      const dates = d.recipients.filter((r) => r.reponduLe || r.status === "received").map((r) => (r.reponduLe ?? r.updatedAt).getTime());
+      if (dates.length === 0 || maintenant.getTime() - Math.max(...dates) < JOURS_AVANT_SUIVI * 86_400_000) continue;
+      // Pris une seule fois, même si deux passages de la tâche se croisent.
+      const pris = await this.prisma.priceRequest.updateMany({ where: { id: d.id, suiviRappelLe: null }, data: { suiviRappelLe: maintenant } });
+      if (pris.count === 0) continue;
+      const url = `/chantiers/${d.projectId}#fournisseurs`;
+      const corps = `Tes négoces ont répondu pour « ${d.project.name} » il y a plus d'une semaine. Si c'est commandé ou abandonné, dis-le d'un clic : « C'est réglé ».`;
+      await this.prevenir(
+        d.companyId,
+        { titre: QUESTION_SUIVI, corps, url, etiquette: `suivi-${d.id}` },
+        { objet: `${QUESTION_SUIVI} (${d.project.name})`, texte: [QUESTION_SUIVI, "", corps, "", `Ouvrir la demande : ${this.cfg.webAppUrl}${url}`, "", NOM_APP].join("\n") },
+      ).catch(() => undefined);
+      suivis++;
+    }
+    return suivis;
+  }
+
+  /** « C'est réglé » : le seul bouton du rappel de suivi. La demande sort de « À faire » ; rien n'est envoyé à personne. */
+  async regler(tenant: TenantContext, requestId: string) {
+    assertCanWrite(tenant);
+    const d = await this.demandeDe(tenant, requestId);
+    if (!d.regleLe) await this.prisma.priceRequest.update({ where: { id: d.id }, data: { regleLe: this.now() } });
+    return { regle: true };
   }
 
   /* ---------------------------------------------------------------------------------------------------- « Mes prix » */

@@ -40,7 +40,8 @@ export interface ResumeListe {
   lignes: number;
   origine: "Devis" | "Photo ou document" | "Saisie" | null;
   statut: string;
-  demande: { negoces: number; reponses: number; choisi: boolean } | null;
+  /** `aSuivre` : le rappel de suivi à 7 jours est parti et l'artisan n'a pas encore dit « C'est réglé » (16 novembre 2026). `regle` : il l'a dit. */
+  demande: { negoces: number; reponses: number; choisi: boolean; aSuivre: boolean; regle: boolean } | null;
   achatGroupe: boolean;
   supprimable: boolean;
   raison: RaisonRefus | null;
@@ -76,7 +77,7 @@ export class ListesService {
       this.prisma.priceRequest.findMany({
         where: { companyId, projectId: { in: ids } },
         orderBy: { createdAt: "desc" },
-        select: { projectId: true, classifiedAt: true, retainedSupplierIds: true, recipients: { select: { status: true, sentAt: true, reponduLe: true, documentId: true } } },
+        select: { projectId: true, classifiedAt: true, retainedSupplierIds: true, suiviRappelLe: true, regleLe: true, recipients: { select: { status: true, sentAt: true, reponduLe: true, documentId: true } } },
       }),
       this.raisons(companyId, ids),
     ]);
@@ -89,6 +90,9 @@ export class ListesService {
             negoces: recipients.filter((r) => r.status !== "to_send" || r.sentAt !== null).length,
             reponses: recipients.filter((r) => r.status === "received" || r.reponduLe !== null || r.documentId !== null).length,
             choisi: ds.some((d) => d.classifiedAt !== null || d.retainedSupplierIds.length > 0),
+            aSuivre: ds.some((d) => d.suiviRappelLe !== null && d.regleLe === null && d.classifiedAt === null && d.retainedSupplierIds.length === 0),
+            // Réglé : chaque demande qui a reçu une réponse est tranchée (retenue) ou dite « réglée ».
+            regle: ds.some((d) => d.regleLe !== null) && ds.every((d) => d.regleLe !== null || d.classifiedAt !== null || d.retainedSupplierIds.length > 0 || !d.recipients.some((r) => r.status === "received" || r.reponduLe !== null || r.documentId !== null)),
           }
         : null;
       const raison = raisons.get(p.id) ?? null;
@@ -99,7 +103,9 @@ export class ListesService {
           ? "Terminée"
           : demande?.choisi
             ? "Négoce retenu"
-            : demande && demande.reponses > 0
+            : demande?.regle
+              ? "Réglée"
+              : demande && demande.reponses > 0
               ? demande.reponses > 1
                 ? `${demande.reponses} réponses reçues`
                 : "1 réponse reçue"

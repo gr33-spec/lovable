@@ -119,7 +119,9 @@ function actionsDesListes(next: NextAction[], projets: Map<string, { lastActivit
 function actionsDesReponses(projets: ProjectPage["items"]): Action[] {
   return projets.flatMap((p) => {
     const d = p.resume?.demande;
-    if (!d || d.choisi || d.reponses === 0) return [];
+    // « C'est réglé » (16 novembre 2026) sort la demande de « À faire » ; le rappel à 7 jours y pose sa question.
+    if (!d || d.choisi || d.regle || d.reponses === 0) return [];
+    if (d.aSuivre) return [{ cle: `r-${p.id}`, sorte: "demande-reponses" as const, immediate: true, echeance: null, modifieLe: p.lastActivityAt, statut: "Rappel", titre: "Où en es-tu avec cette demande ?", sousTitre: `${p.name} · ${d.reponses > 1 ? `${d.reponses} réponses reçues` : "1 réponse reçue"}`, bouton: "Ouvrir", href: `/chantiers/${p.id}#fournisseurs` }];
     return [{ cle: `r-${p.id}`, sorte: "demande-reponses" as const, immediate: true, echeance: null, modifieLe: p.lastActivityAt, statut: d.reponses > 1 ? `${d.reponses} réponses reçues` : "1 réponse reçue", titre: "Voir les réponses de tes négoces", sousTitre: `${p.name} · ${pluriel(d.negoces, "négoce consulté", "négoces consultés")}`, bouton: "Voir les réponses", href: `/chantiers/${p.id}#fournisseurs` }];
   });
 }

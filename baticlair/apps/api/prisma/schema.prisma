@@ -693,9 +693,15 @@ model PriceRequest {
 
   /// Recentrage (Greg, 25 octobre 2026) : la DEMANDE PERSO. Le but (« chiffrer » un chantier ou « commander »), l'accord
   /// de l'artisan pour transmettre son identité, la clôture (date de besoin), et la commande passée sur une réponse.
-  but              String?
-  accordIdentiteLe DateTime?
-  closLe           DateTime?
+  but                String?
+  accordIdentiteLe   DateTime?
+  closLe             DateTime?
+  /// Greg, 16 novembre 2026. Après la commande : « Prévenir les autres négoces consultés ? » (`oui` : l'e-mail poli est
+  /// parti, `non` : rien). 7 jours après les réponses, sans commande : le rappel de suivi, jusqu'à « C'est réglé ».
+  autresNegocesChoix String?   @map("autres_negoces_choix")
+  autresNegocesLe    DateTime? @map("autres_negoces_le") @db.Timestamptz(3)
+  suiviRappelLe      DateTime? @map("suivi_rappel_le") @db.Timestamptz(3)
+  regleLe            DateTime? @map("regle_le") @db.Timestamptz(3)
 
   company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
   project    Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -760,6 +766,8 @@ model PriceRequestRecipient {
   livraisons          String?   @map("livraisons")
   minimumCommandeHt   Decimal?  @map("minimum_commande_ht") @db.Decimal(14, 2)
   dechargement        String?   @map("dechargement")
+  /// La date de livraison souhaitée, choisie par l'artisan au moment de commander (Greg, 16 novembre 2026).
+  livraisonSouhaitee  DateTime? @map("livraison_souhaitee") @db.Date
 
   priceRequest PriceRequest       @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
   emailsRecus  EmailRecuArtisan[]
