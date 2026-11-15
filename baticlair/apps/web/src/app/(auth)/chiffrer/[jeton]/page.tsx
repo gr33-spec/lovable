@@ -34,7 +34,7 @@ export default function ChiffrerPage() {
   const [page, setPage] = useState<PageChiffrage | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [prix, setPrix] = useState<Record<string, string>>({});
-  const [livraison, setLivraison] = useState("0");
+  const [livraison, setLivraison] = useState("");
   const [delai, setDelai] = useState("");
   const [validite, setValidite] = useState("30");
   // Greg, 7 novembre 2026 : le coût réellement livré, sans formulaire compliqué (tout facultatif).
@@ -104,6 +104,11 @@ export default function ChiffrerPage() {
     });
     if (faux)
       return setErreur(`Le prix de « ${faux.designation} » doit être un nombre plus grand que 0. Laissez la case vide si vous ne fournissez pas cet article.`);
+    // La livraison se dit toujours : vide, elle était comptée « offerte » sans que le négoce l'ait écrit.
+    if (lireNombre(livraison) == null) return setErreur("Indiquez le prix de la livraison (0 si elle est offerte).");
+    // Un délai « 2,5 » donnait un message technique : il se donne en jours entiers.
+    const d = lireNombre(delai);
+    if (d != null && !Number.isInteger(d)) return setErreur("Le délai se donne en jours entiers (par exemple 3).");
     for (const [nom, saisi] of [["La livraison", livraison], ["Le délai", delai], ["Le minimum de commande", minimum]] as const) {
       const n = lireNombre(saisi);
       if (n != null && !(Number.isFinite(n) && n >= 0))
@@ -181,6 +186,8 @@ export default function ChiffrerPage() {
     const n = lireNombre(s);
     return n != null && Number.isFinite(n) && n > 0 ? n : 0;
   };
+  /** Le total HT d'une ligne pendant la saisie (null tant qu'aucun prix valable n'y est tapé). */
+  const totalLigne = (l: { cle: string; quantite: number }) => (fini(prix[l.cle] ?? "") > 0 && l.quantite > 0 ? centimes(fini(prix[l.cle] ?? "") * l.quantite) : null);
   // Recette n° 2 du 14 novembre 2026 : la somme des lignes arrondies au centime, comme chez l'artisan et sur le bon.
   const total =
     centimes(page.lignes.reduce((s, l) => s + centimes(fini(prix[l.cle] ?? "") * l.quantite), 0)) +
@@ -410,6 +417,14 @@ export default function ChiffrerPage() {
                   <span className="text-[13px] text-muted">
                     {l.quantite.toLocaleString("fr-FR")} {unite(l.unite)}
                   </span>
+                  {/* Recette n° 2 du 14 novembre 2026 (« 620 € la pièce part sans alerte ») : le total de la ligne se lit
+                      pendant la saisie. Un prix tapé pour le lot au lieu de l'unité saute aux yeux, sans rien montrer
+                      des autres négoces. */}
+                  {formulaire && totalLigne(l) != null ? (
+                    <span role="status" aria-label={`Total de ${l.designation}`} className="text-[13px] font-semibold tabular-nums">
+                      {l.quantite.toLocaleString("fr-FR")} × {prixUnitaire(lireNombre(prix[l.cle] ?? "")!)} = {euros(totalLigne(l)!)} HT
+                    </span>
+                  ) : null}
                 </span>
                 {formulaire ? (
                   <label className="flex shrink-0 items-center gap-1">
@@ -450,6 +465,7 @@ export default function ChiffrerPage() {
               <Field
                 id="livraison"
                 label="Livraison HT (€)"
+                hint="0 si elle est offerte."
                 inputMode="decimal"
                 value={livraison}
                 onChange={(e) => setLivraison(e.target.value)}

@@ -3,7 +3,7 @@
  * de fiabilité d'un négoce (faits objectifs, jamais sur trop peu) et la taxonomie des familles configurable.
  */
 import { describe, expect, it } from "vitest";
-import { GRAVITE_EXCEPTION, LIBELLES_EXCEPTION, TYPES_EXCEPTION, estTypeException, famillesActives, codeFamilleValide, prixIncoherent, scoreFiabilite } from "../src/index.js";
+import { GRAVITE_EXCEPTION, LIBELLES_EXCEPTION, TYPES_EXCEPTION, estTypeException, famillesActives, codeFamilleValide, prixAVerifier, prixIncoherent, scoreFiabilite } from "../src/index.js";
 
 describe("la supervision", () => {
   it("les onze types d'exceptions du prompt maître ont un libellé et une gravité", () => {
@@ -58,5 +58,24 @@ describe("le doublon incertain", () => {
     expect(doublonIncertain({ nom: "Kerbrat Matériaux", email: "devis@kerbrat.fr" }, connus)).toBeNull();
     // Même e-mail : ce n'est pas « incertain » (refusé ailleurs).
     expect(doublonIncertain({ nom: "Point P", email: "lannion@pointp.fr" }, connus)).toBeNull();
+  });
+});
+
+describe("un prix « à vérifier » pour l'artisan (recette n° 2 du 14 novembre 2026)", () => {
+  it("jamais sans repère réel ; un seul repère : seulement cinq fois plus haut ; deux repères ou plus : trois fois la médiane, dans les deux sens", () => {
+    // 620 € la pièce face à un autre négoce à 1,10 € : à vérifier ; l'autre, lui, ne l'est pas (on ne sait pas lequel est faux).
+    expect(prixAVerifier(620, [1.1])).toBe(true);
+    expect(prixAVerifier(1.1, [620])).toBe(false);
+    // Aucun repère : rien n'est dit, même pour un prix énorme.
+    expect(prixAVerifier(620, [])).toBe(false);
+    expect(prixAVerifier(620, [0, Number.NaN])).toBe(false);
+    // Un écart de marché normal ne déclenche rien.
+    expect(prixAVerifier(1.3, [1.1])).toBe(false);
+    expect(prixAVerifier(5.4, [1.1])).toBe(false);
+    expect(prixAVerifier(5.5, [1.1])).toBe(true);
+    // Deux repères ou plus : dans les deux sens.
+    expect(prixAVerifier(620, [1.1, 1.2])).toBe(true);
+    expect(prixAVerifier(0.01, [1.1, 1.2])).toBe(true);
+    expect(prixAVerifier(1.15, [1.1, 1.2])).toBe(false);
   });
 });

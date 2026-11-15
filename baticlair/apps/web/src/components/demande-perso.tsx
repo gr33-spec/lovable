@@ -156,7 +156,7 @@ function EnvoiDemande({ projectId, articles, lots, proposes, onEnvoye, onFermer 
         </Button>
       </div>
       {qrq && choisies.length > 0 ? <QuiRecoitQuoiPanneau qrq={qrq} lots={lots ?? []} forcer={(cle) => setForces((f) => new Set([...f, cle]))} /> : null}
-      <Field id="perso-date" label="Date de besoin (facultatif)" type="date" value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} />
+      <Field id="perso-date" label="Date de besoin (facultatif)" type="date" min={new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date())} value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} />
       <label className="flex items-start gap-3 text-[14px] leading-snug">
         <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-accent" />
         {proposes.accord}

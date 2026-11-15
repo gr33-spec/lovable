@@ -238,7 +238,8 @@ test("rappel de suivi à 7 jours : « Où en es-tu avec cette demande ? » sur l
   expect(tache.body.suivis).toBeGreaterThanOrEqual(1);
   await page.goto("/");
   const afaire = page.getByRole("region", { name: "À faire maintenant", exact: true });
-  await expect(afaire).toContainText("Où en es-tu avec cette demande ?");
+  // L'accueil charge plusieurs listes : on lui laisse le temps (la série complète tourne sur une machine chargée).
+  await expect(afaire).toContainText("Où en es-tu avec cette demande ?", { timeout: 20_000 });
   await afaire.getByRole("link").filter({ hasText: "Où en es-tu avec cette demande ?" }).first().click();
   await expect(question).toBeVisible();
   // Un seul bouton ; pas de fil de discussion avec le négoce.

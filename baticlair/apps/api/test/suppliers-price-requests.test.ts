@@ -177,7 +177,7 @@ describe("demandes de prix", () => {
     const created = await agent.post(`/v1/projects/${projectId}/price-requests`).send({
       supplierIds: [p.body.id, t.body.id],
       message: "Livraison sur chantier possible ?",
-      dueDate: "2026-10-15",
+      dueDate: "2099-10-15",
     });
     expect(created.status).toBe(201);
     // Les six lignes du devis, plus les naissances que la gouttière à 2 descentes appelle (§49.1, point 3).

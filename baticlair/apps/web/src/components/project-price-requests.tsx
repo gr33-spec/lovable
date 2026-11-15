@@ -517,6 +517,26 @@ function SuiviDemande({
 }
 
 /**
+ * UN PRIX « À VÉRIFIER » (recette n° 2 du 14 novembre 2026 : « 620 € la pièce part sans alerte ») : le prix d'une ligne très
+ * éloigné des autres prix reçus pour la même ligne. Il reste affiché tel que le négoce l'a écrit ; l'artisan est prévenu
+ * avant de comparer et avant de commander. Aucun prix n'est corrigé ni inventé.
+ */
+function PrixAVerifier({ offre }: { offre: OffrePerso }) {
+  const p = offre.prixAVerifier ?? [];
+  if (p.length === 0) return null;
+  return (
+    <div role="note" aria-label="Prix à vérifier" className="flex flex-col gap-0.5 rounded-xl bg-warn-bg p-3 text-[14px] text-warn">
+      <p className="font-extrabold">Prix à vérifier avec ton négoce</p>
+      {p.map((x) => (
+        <p key={x.designation} className="break-words">
+          {x.designation} : {x.prixHt.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} € {x.unite ? `par ${x.unite.replace(/s$/, "")}` : "l'unité"}, très loin des autres prix reçus.
+        </p>
+      ))}
+    </div>
+  );
+}
+
+/**
  * LE RAPPEL DE SUIVI (Greg, 16 novembre 2026) : 7 jours après les réponses, sans commande, « Où en es-tu avec cette
  * demande ? ». Un seul bouton, « C'est réglé ». Sans clic, la question reste. Pas de fil de discussion avec le négoce :
  * pour une demande individuelle, l'artisan et son négoce s'appellent.
@@ -648,6 +668,7 @@ function DevisRecus({
                     {o.lignesManquantes.length} ligne{o.lignesManquantes.length > 1 ? "s" : ""} non chiffrée{o.lignesManquantes.length > 1 ? "s" : ""} : {o.lignesManquantes.length > 1 ? "elles ne sont" : "elle n'est"} pas dans la commande.
                   </p>
                 ) : null}
+                <PrixAVerifier offre={o} />
               </>
             ) : (
               <p className="text-[15px] text-muted">
@@ -711,7 +732,8 @@ function DevisRecus({
                   <p className="text-[16px] font-extrabold">
                     {r.supplier.name} t&apos;a répondu{quand ? ` · ${dateHeureCourte(quand)}` : ""}
                   </p>
-                  {o && o.complete && o.valide && o.ecartHt === 0 && repondus.filter((x) => offreDe(x.id)).length >= 2 ? <Badge tone="ok">Le moins cher</Badge> : r.document ? <Badge tone="ok">Devis reçu</Badge> : null}
+                  {/* « Le moins cher » ne se dit qu'entre au moins deux offres réellement comparables : complètes et encore valables. */}
+                  {o && o.complete && o.valide && o.ecartHt === 0 && repondus.map((x) => offreDe(x.id)).filter((x) => x && x.complete && x.valide).length >= 2 ? <Badge tone="ok">Le moins cher</Badge> : r.document ? <Badge tone="ok">Devis reçu</Badge> : null}
                 </div>
                 {ligne ? <p className="text-[15px] text-muted">{ligne}</p> : null}
                 {o ? (
@@ -728,6 +750,7 @@ function DevisRecus({
                       </p>
                     ) : null}
                     {!o.valide ? <p className="text-[14px] font-semibold text-warn">Offre échue</p> : null}
+                    <PrixAVerifier offre={o} />
                   </div>
                 ) : null}
                 {r.document ? (
@@ -1013,6 +1036,8 @@ function NewRequest({
           <input
             id={`${id}-due`}
             type="date"
+            // Recette n° 2 du 14 novembre 2026 : une date déjà passée ne se choisit pas (le serveur la refuse aussi).
+            min={new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date())}
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
             className="min-h-12 rounded-2xl bg-surface px-3 text-base text-ink outline-none"

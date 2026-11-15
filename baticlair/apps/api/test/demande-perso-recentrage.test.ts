@@ -78,7 +78,7 @@ describe("la demande perso", () => {
 
     const negoces = [{ negoceId: zone.id }, ...["b", "c", "d", "e"].map((x) => ({ nom: `Négoce ${x.toUpperCase()}`, email: `${x}@negoce.fr` }))];
     await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "commander", accord: true, articles: a.articles, negoces: [...negoces, { nom: "Six", email: "f@negoce.fr" }] }).expect(400);
-    const envoi = (await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "commander", accord: true, articles: a.articles, dateBesoin: "2026-12-01", negoces }).expect(201)).body;
+    const envoi = (await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "commander", accord: true, articles: a.articles, dateBesoin: "2099-12-01", negoces }).expect(201)).body;
     expect(envoi.destinataires).toHaveLength(5);
     const mail = mailsVers(ctx, "b@negoce.fr").at(-1)!;
     expect(mail.text).toContain("Je compte commander");
@@ -147,6 +147,36 @@ describe("la demande perso", () => {
     expect((await a.agent.get(`/v1/demandes-perso/${envoi.id}`).expect(200)).body.commande).toMatchObject({ nom: "Négoce C", suivi: "confirmee" });
     await a.agent.post(`/v1/demandes-perso/${envoi.id}/livree`).send({ recipientId: c }).expect(200);
     expect((await a.agent.get(`/v1/demandes-perso/${envoi.id}`).expect(200)).body.commande.suivi).toBe("livree");
+  });
+
+  it("prix à vérifier : 620 € la pièce face à 1,10 € est signalé à l'artisan, n'entre pas dans « Mes prix », et rien n'est montré aux négoces", async () => {
+    // Recette n° 2 du 14 novembre 2026 : « 620 € la pièce part sans alerte, s'affiche chez l'artisan et entre dans "Mes prix". »
+    const a = await couvreurAvecListe(ctx, "a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", LIGNES);
+    const envoi = (await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "chiffrer", accord: true, articles: a.articles, dateBesoin: "2099-12-01", negoces: [{ nom: "Négoce B", email: "b@negoce.fr" }, { nom: "Négoce C", email: "c@negoce.fr" }] }).expect(201)).body;
+    const jetonDe = (email: string) => lien(mailsVers(ctx, email).at(-1)!.text);
+    const pageB = (await publique().get(`/v1/public/chiffrer/${jetonDe("b@negoce.fr")}`).expect(200)).body as { lignes: { cle: string; designation: string }[] };
+    const cles = pageB.lignes.map((l) => l.cle);
+    const chiffrer = (email: string, pu: number) => publique().post(`/v1/public/chiffrer/${jetonDe(email)}`).send({ prix: Object.fromEntries(cles.map((k) => [k, pu])), livraisonHt: 0, delaiJours: 2, validiteJours: 30 });
+    // Un seul prix reçu : aucun repère, rien n'est dit (on ne juge jamais sans repère réel).
+    await chiffrer("c@negoce.fr", 620).expect(200);
+    let vue = (await a.agent.get(`/v1/demandes-perso/${envoi.id}`).expect(200)).body as { offres: { nom: string; prixAVerifier: { designation: string; prixHt: number }[] }[] };
+    expect(vue.offres.find((o) => o.nom === "Négoce C")!.prixAVerifier).toEqual([]);
+    // Le second négoce répond à 1,10 € : le 620 € est « à vérifier », le 1,10 € ne l'est pas ; le prix reste tel qu'écrit.
+    await chiffrer("b@negoce.fr", 1.1).expect(200);
+    vue = (await a.agent.get(`/v1/demandes-perso/${envoi.id}`).expect(200)).body;
+    const c = vue.offres.find((o) => o.nom === "Négoce C")!;
+    expect(c.prixAVerifier).toHaveLength(cles.length);
+    expect(c.prixAVerifier[0]).toMatchObject({ designation: pageB.lignes[0]!.designation, prixHt: 620 });
+    expect(vue.offres.find((o) => o.nom === "Négoce B")!.prixAVerifier).toEqual([]);
+    // « Mes prix » : seul le prix cohérent y entre.
+    const mesPrix = JSON.stringify((await a.agent.get("/v1/mes-prix").expect(200)).body);
+    expect(mesPrix).toContain("Négoce B");
+    expect(mesPrix).not.toContain("Négoce C");
+    expect(mesPrix).not.toMatch(/\b620\b/);
+    // Aucun négoce n'apprend quoi que ce soit : ni sa page, ni un e-mail ne parlent du prix de l'autre ou d'un écart.
+    const pageC = JSON.stringify((await publique().get(`/v1/public/chiffrer/${jetonDe("c@negoce.fr")}`).expect(200)).body);
+    expect(pageC).not.toMatch(/1[.,]1\b|vérifier|éloigné|Négoce B/);
+    expect(mailsVers(ctx, "c@negoce.fr").map((m) => m.subject + m.text).join("\n")).not.toMatch(/vérifier|éloigné|Négoce B/);
   });
 
   it("rappel de suivi : 7 jours après les réponses, sans commande, « Où en es-tu avec cette demande ? » une seule fois ; « C'est réglé » la sort de « À faire »", async () => {

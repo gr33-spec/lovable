@@ -38,6 +38,8 @@ export interface OffrePerso {
   valideJusquau: string;
   valide: boolean;
   ecartHt: number | null;
+  /** Les prix très éloignés des autres prix reçus pour la même ligne (recette n° 2 du 14 novembre 2026). */
+  prixAVerifier?: { designation: string; unite: string; prixHt: number }[];
 }
 
 export interface DemandePerso {

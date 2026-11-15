@@ -305,7 +305,8 @@ export function OngletOffres({
       .map((r) => ({ id: r.id, nom: r.supplier.name, document: r.document! })),
   );
   // « Le moins cher » ne se dit que s'il y a au moins deux offres à comparer dans la même demande.
-  const prix = [...data.perso, ...data.chiffrees].flatMap((d) => d.offres.map((o) => ({ ...o, seule: d.offres.length < 2 })));
+  // Recette n° 2 du 14 novembre 2026 : et ces deux offres doivent être comparables (complètes, encore valables).
+  const prix = [...data.perso, ...data.chiffrees].flatMap((d) => d.offres.map((o) => ({ ...o, seule: d.offres.filter((x) => x.complete && x.valide).length < 2 })));
   if (pdfs.length === 0 && prix.length === 0) {
     const parti =
       data.demandes.some((d) => d.recipients.some((r) => r.sentAt)) ||

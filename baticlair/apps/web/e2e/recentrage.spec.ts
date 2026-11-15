@@ -230,9 +230,20 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     await npage.getByRole("button", { name: "Envoyer mon offre" }).click();
     await expect(npage.getByRole("alert").filter({ hasText: "doit être un nombre plus grand que 0" })).toBeVisible();
     await expect(npage.getByText(/NaN/)).toHaveCount(0);
+    // Recette n° 2 du 14 novembre 2026 (« 620 € la pièce part sans alerte ») : le total de la ligne se lit pendant la
+    // saisie ; un prix tapé pour le lot au lieu de l'unité saute aux yeux.
+    await npage.getByLabel(`Prix unitaire HT de ${ARDOISE}`).fill("620");
+    await expect(npage.getByRole("status", { name: `Total de ${ARDOISE}` })).toHaveText(/× 620,00 € = 620\s000,00\s€ HT$/);
     await npage.getByLabel(`Prix unitaire HT de ${ARDOISE}`).fill("1,10");
+    await expect(npage.getByRole("status", { name: `Total de ${ARDOISE}` })).toHaveText(/× 1,10 € = 1\s100,00\s€ HT$/);
     await npage.getByLabel(/^Prix unitaire HT de Liteau/).fill("0,50");
+    // La livraison se dit toujours (jamais « offerte » par défaut) ; un délai « 2,5 » se refuse avec des mots simples.
+    await npage.getByRole("button", { name: "Envoyer mon offre" }).click();
+    await expect(npage.getByRole("alert").filter({ hasText: "Indiquez le prix de la livraison (0 si elle est offerte)." })).toBeVisible();
     await npage.getByLabel("Livraison HT (€)").fill("80");
+    await npage.getByLabel("Délai (jours)").fill("2,5");
+    await npage.getByRole("button", { name: "Envoyer mon offre" }).click();
+    await expect(npage.getByRole("alert").filter({ hasText: "Le délai se donne en jours entiers (par exemple 3)." })).toBeVisible();
     await npage.getByLabel("Délai (jours)").fill("3");
     await npage.getByRole("button", { name: "Envoyer mon offre" }).click();
     await expect(npage.getByText(/^Votre offre est envoyée, valable jusqu'au/)).toBeVisible();
@@ -450,6 +461,7 @@ test.describe("Recentrage du 25 octobre 2026", () => {
     const npage = await nctx.newPage();
     await npage.goto(`/chiffrer/${jetonDe((await emailsVers(page, email)).at(-1)!.text)}`);
     await npage.getByLabel(`Prix unitaire HT de ${ARDOISE}`).fill("1,10");
+    await npage.getByLabel("Livraison HT (€)").fill("0");
     await npage.getByLabel(/^Validité/).fill("5");
     await npage.getByRole("button", { name: "Envoyer mon offre" }).click();
     await expect(npage.getByRole("alert").filter({ hasText: "Validité de 7 jours au moins." })).toBeVisible();

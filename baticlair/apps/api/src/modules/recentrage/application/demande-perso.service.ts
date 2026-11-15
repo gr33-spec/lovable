@@ -26,6 +26,7 @@ import {
   lienTel,
   PREVIENS_TITRE,
   previensSms,
+  prixAVerifier,
   prixIncoherent,
   resultatsNegoce,
   validiteAcceptee,
@@ -69,6 +70,11 @@ const nombre = (q: unknown): number | null => {
   return Number.isFinite(n) && n > 0 ? n : null;
 };
 const euros = (n: number) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n).replace(/\u202f|\u00a0/g, " ");
+/** Les repères d'un prix : les autres prix reçus pour la même ligne de la même demande, et le prix constaté s'il existe. */
+const reperesDeLigne = (cle: string, negoceId: string, reponses: readonly { negoceId: string; prix: Record<string, number> }[], observe: number | null): number[] => [
+  ...reponses.filter((r) => r.negoceId !== negoceId).map((r) => r.prix[cle]).filter((x): x is number => typeof x === "number"),
+  ...(observe !== null ? [observe] : []),
+];
 /** Le rappel de suivi d'une demande directe (Greg, 16 novembre 2026) : la question, mot pour mot, et son délai. */
 export const QUESTION_SUIVI = "Où en es-tu avec cette demande ?";
 const JOURS_AVANT_SUIVI = 7;
@@ -270,7 +276,19 @@ export class DemandePersoService {
         refusMotif: r.refuseLe ? r.refusMotif : null,
         precision: r.precisionQuestion ? { question: r.precisionQuestion, reponse: r.precisionReponse } : null,
       })),
-      offres: comparees.map((o) => ({ ...o, recipientId: o.negoceId, valideJusquau: o.valideJusquau.toISOString() })),
+      // Recette n° 2 du 14 novembre 2026 : un prix très éloigné des autres prix reçus pour la même ligne se dit « à
+      // vérifier » à l'artisan (jamais corrigé, jamais refusé, jamais montré à un autre négoce).
+      offres: comparees.map((o) => ({
+        ...o,
+        recipientId: o.negoceId,
+        valideJusquau: o.valideJusquau.toISOString(),
+        prixAVerifier: lignes
+          .filter((l) => {
+            const pu = reponses.find((r) => r.negoceId === o.negoceId)?.prix[l.cle];
+            return typeof pu === "number" && prixAVerifier(pu, reperesDeLigne(l.cle, o.negoceId, reponses, observes.get(l.cle) ?? null));
+          })
+          .map((l) => ({ designation: l.designation, unite: l.unite, prixHt: reponses.find((r) => r.negoceId === o.negoceId)!.prix[l.cle]! })),
+      })),
       commande: commande
         ? {
             recipientId: commande.id,
@@ -607,14 +625,16 @@ export class DemandePersoService {
     });
     // Lot 6 : la file d'exceptions (offre incomplète, prix incohérent face aux autres négoces de la même demande).
     await this.superviserOffre(r.id, r.priceRequestId, r.supplier.name, d.company.id, this.lignes(d.lines), prix);
+    const autresReponses = (await this.prisma.priceRequestRecipient.findMany({ where: { priceRequestId: r.priceRequestId, id: { not: r.id }, reponduLe: { not: null } }, select: { id: true, prix: true } })).map((a) => ({ negoceId: a.id, prix: (a.prix as Record<string, number> | null) ?? {} }));
     // L'observatoire : le prix de chaque ligne chiffrée, sans le négoce ni l'artisan.
     await this.obs
       ?.enregistrer({
         type: "perso",
         sourceId: r.id,
         departement: zoneDuCodePostal(d.project.address) ?? zoneDuCodePostal(d.company.address),
+        // Un prix « à vérifier » face aux autres réponses de la demande n'alimente pas les prix constatés.
         lignes: this.lignes(d.lines)
-          .filter((l) => prix[l.cle] !== undefined)
+          .filter((l) => prix[l.cle] !== undefined && !prixAVerifier(prix[l.cle]!, reperesDeLigne(l.cle, r.id, autresReponses, null)))
           .map((l) => ({ designation: l.designation, unite: l.unite, quantite: l.quantite || null, prixHt: prix[l.cle]! })),
       })
       .catch(() => undefined);
@@ -784,13 +804,17 @@ export class DemandePersoService {
   private async prixDe(companyId: string): Promise<PrixRecu[]> {
     const recus = await this.prisma.priceRequestRecipient.findMany({
       where: { reponduLe: { not: null }, priceRequest: { companyId } },
-      select: { prix: true, reponduLe: true, commandeLe: true, supplier: { select: { name: true } }, priceRequest: { select: { lines: true } } },
+      select: { id: true, priceRequestId: true, prix: true, reponduLe: true, commandeLe: true, supplier: { select: { name: true } }, priceRequest: { select: { lines: true } } },
     });
     const prix: PrixRecu[] = [];
+    const tous = recus.map((r) => ({ negoceId: r.id, demande: r.priceRequestId, prix: (r.prix as Record<string, number> | null) ?? {} }));
     for (const r of recus) {
       const lignes = this.lignes(r.priceRequest.lines);
+      const memeDemande = tous.filter((x) => x.demande === r.priceRequestId);
       for (const [cle, pu] of Object.entries((r.prix as Record<string, number> | null) ?? {})) {
         const l = lignes.find((x) => x.cle === cle);
+        // Un prix « à vérifier » (620 € la pièce face à 1,10 €) n'entre pas dans « Mes prix », sauf s'il a été commandé.
+        if (!r.commandeLe && prixAVerifier(pu, reperesDeLigne(cle, r.id, memeDemande, null))) continue;
         if (l) prix.push({ designation: l.designation, unite: l.unite, prixHt: pu, negoce: r.supplier.name, date: r.commandeLe ?? r.reponduLe!, source: r.commandeLe ? "paye" : "recu" });
       }
     }

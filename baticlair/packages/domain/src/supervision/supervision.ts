@@ -70,6 +70,21 @@ export function prixIncoherent(prix: number, autres: readonly number[], facteur 
   return prix > m * facteur || prix < m / facteur;
 }
 
+/**
+ * UN PRIX « À VÉRIFIER » POUR L'ARTISAN (recette n° 2 du 14 novembre 2026 : « 620 € la pièce part sans alerte, s'affiche
+ * chez l'artisan et entre dans "Mes prix" »). On ne juge jamais sans repère réel : les autres prix reçus pour la MÊME ligne
+ * (les autres négoces de la demande, un prix déjà constaté). Deux repères ou plus : la règle de `prixIncoherent` (trois
+ * fois la médiane, dans les deux sens). Un seul repère : seulement un prix au moins cinq fois plus HAUT (avec un seul
+ * autre prix, on ne sait pas lequel des deux est faux ; le plus cher est celui qui coûte une erreur à l'artisan).
+ * Aucun repère : rien n'est dit. Le prix reste affiché tel que le négoce l'a écrit : il n'est ni corrigé ni refusé.
+ */
+export function prixAVerifier(prix: number, reperes: readonly number[]): boolean {
+  const valides = reperes.filter((x) => Number.isFinite(x) && x > 0);
+  if (!(prix > 0) || valides.length === 0) return false;
+  if (valides.length === 1) return prix >= valides[0]! * 5;
+  return prixIncoherent(prix, valides);
+}
+
 /* ---------------------------------------------------------------------------------- le score de fiabilité */
 
 export interface FaitsNegoce {

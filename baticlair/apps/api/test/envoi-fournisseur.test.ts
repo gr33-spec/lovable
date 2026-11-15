@@ -48,7 +48,12 @@ describe("envoi fournisseur : un document, aucun prix", () => {
   it("la demande porte les blocs du §45.3 ; le mail court n'en contient aucun prix", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const { projectId, supplierId } = await chantierPret(agent);
-    const res = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId], message: "Livraison sur chantier possible ?", dueDate: "2026-10-15" });
+    // Recette n° 2 du 14 novembre 2026 : une date de réponse déjà passée est refusée, avec une phrase ; rien n'est créé.
+    const passee = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId], dueDate: "2020-01-15" });
+    expect(passee.status).toBe(400);
+    expect(passee.body.error.details).toMatchObject({ reason: "date_passee", phrase: "La date de réponse est déjà passée. Choisis une date à venir, ou n'en mets pas." });
+    expect(await ctx.prisma.priceRequest.count()).toBe(0);
+    const res = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId], message: "Livraison sur chantier possible ?", dueDate: "2099-10-15" });
     expect(res.status).toBe(201);
     const { packet } = res.body;
     expect(packet).toMatchObject({ entreprise: "Toitures Martin", chantier: "Dupont — réfection toiture", joindre_detail: true });

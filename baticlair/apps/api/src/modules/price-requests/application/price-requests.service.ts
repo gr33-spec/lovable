@@ -522,6 +522,10 @@ export class PriceRequestsService {
     // Greg, 12 novembre 2026 (dossier de corrections UX, point 5) : la date de réponse n'existe que si l'artisan l'a
     // réellement choisie ; plus de date par défaut à trois jours, donc plus d'échéance pressante non voulue.
     const dueDate = input.dueDate;
+    // Recette n° 2 du 14 novembre 2026 : « une date de réponse passée est acceptée ». Elle est refusée, avec une phrase ;
+    // sans date, la demande part toujours (la date reste facultative).
+    if (dueDate && dueDate.toISOString().slice(0, 10) < today(this.clock()))
+      throw validationFailed("Due date in the past", { reason: "date_passee", phrase: "La date de réponse est déjà passée. Choisis une date à venir, ou n'en mets pas.", message: "La date de réponse est déjà passée. Choisis une date à venir, ou n'en mets pas." });
     if (input.message?.trim() || input.tutoie !== undefined) await this.requests.saveModele(tenant, { message: input.message?.trim() || undefined, tutoie: input.tutoie ?? undefined });
     input = { ...input, dueDate };
     await this.gardeCircuit(tenant, projectId, input.articles && input.articles.length > 0 ? [...new Set(input.articles)] : null);
