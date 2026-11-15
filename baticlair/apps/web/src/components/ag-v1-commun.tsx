@@ -24,7 +24,10 @@ export function PastilleStatut({ code, libelle }: { code: string; libelle: strin
   return <span className={`inline-flex shrink-0 items-center rounded-full px-3 py-1 text-[13px] font-bold ${ton}`}>{libelle}</span>;
 }
 
-/** Les volumes d'un achat : d'abord le confirmé, puis l'indicatif ; sous 5 entreprises, la phrase seule. */
+/**
+ * Les volumes d'un achat : d'abord le confirmé, puis l'indicatif. Greg, 15 novembre 2026 : visibles dès la première
+ * entreprise, avec le badge « Entreprises vérifiées » et la date de la dernière évolution ; jamais un nom.
+ */
 export function Volumes({ achat, comprendre = false }: { achat: AchatV1; comprendre?: boolean }) {
   const [ouvert, setOuvert] = useState(false);
   return (
@@ -32,6 +35,17 @@ export function Volumes({ achat, comprendre = false }: { achat: AchatV1; compren
       <p className="text-[16px] font-bold">{achat.volumes.principale}</p>
       {achat.volumes.sous ? <p className="text-[15px] text-muted">{achat.volumes.sous}</p> : null}
       {achat.volumes.indicatif ? <p className="text-[14px] text-muted">{achat.volumes.indicatif}</p> : null}
+      {achat.resume ? (
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-muted">
+          {achat.resume.verifiees ? (
+            <span className="inline-flex items-center gap-1 font-semibold text-ink">
+              <BadgeCheck size={16} aria-hidden="true" /> Entreprises vérifiées
+            </span>
+          ) : null}
+          {achat.resume.derniereEvolution ? <span>Dernière évolution le {dateCourte(achat.resume.derniereEvolution)}</span> : null}
+        </p>
+      ) : null}
+      {achat.urgent ? <p className="text-[14px] font-semibold text-warn">{achat.urgent}</p> : null}
       {comprendre ? (
         <>
           <button type="button" onClick={() => setOuvert((o) => !o)} aria-expanded={ouvert} className="min-h-11 self-start text-[15px] font-semibold underline underline-offset-4">
@@ -45,7 +59,7 @@ export function Volumes({ achat, comprendre = false }: { achat: AchatV1; compren
               <p>
                 <strong>Besoins confirmés</strong> : chaque entreprise les reconfirme avant la consultation. Seul ce volume reconfirmé est transmis aux négoces.
               </p>
-              <p>Sous 5 entreprises, les volumes ne sont pas affichés. Jamais un nom, une adresse exacte ni une quantité individuelle d&apos;une autre entreprise.</p>
+              <p>Tu vois le volume total et le nombre d&apos;entreprises, la tienne comprise. Jamais le nom ni l&apos;adresse d&apos;une autre entreprise : seul Mobiiz les connaît.</p>
             </div>
           ) : null}
         </>

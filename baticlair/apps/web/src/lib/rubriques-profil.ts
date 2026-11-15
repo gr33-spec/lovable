@@ -47,7 +47,8 @@ export const GROUPES_PROFIL: { titre: string; lignes: LigneProfil[] }[] = [
   {
     titre: "Préférences",
     lignes: [
-      { id: "apparence", titre: "Apparence", sousTitre: "Mode clair, sombre ou automatique", icone: Palette, enAvant: true },
+      // Lot A (Greg, 15 novembre 2026) : plus de fond jaune permanent ; le sous-texte dit le réglage en cours.
+      { id: "apparence", titre: "Apparence", sousTitre: "Mode clair, sombre ou automatique", icone: Palette },
       { id: "notifications", titre: "Notifications", sousTitre: "E-mails, alertes et rappels", icone: Bell },
       { id: "preferences", titre: "Mémoire de Mobiiz", sousTitre: "Informations conservées pour t'aider", icone: Sparkles, masquable: "memoire" },
     ],
@@ -66,7 +67,8 @@ export const GROUPES_PROFIL: { titre: string; lignes: LigneProfil[] }[] = [
     lignes: [
       { id: "donnees", titre: "Données et confidentialité", sousTitre: "Télécharger, remettre à zéro ou supprimer", icone: ShieldCheck },
       { id: "aide", titre: "Aide et contact", sousTitre: "Questions fréquentes et assistance", icone: LifeBuoy },
-      { id: "guide", titre: "Guide et chantier fictif", sousTitre: "Revoir le parcours sans risque", icone: Sparkles },
+      // Lot B (Greg, 15 novembre 2026) : le chantier fictif est retiré ; le titre d'avant ne revient qu'avec son réglage.
+      { id: "guide", titre: "Guide de démarrage", sousTitre: "Revoir la présentation de Mobiiz", icone: Sparkles },
     ],
   },
 ];

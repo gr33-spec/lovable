@@ -53,6 +53,15 @@ export interface AchatV1 {
   statut: string;
   conditionnement: { unite: string; parUnite: number; libelle: string } | null;
   volumes: VolumesV1;
+  /**
+   * Greg, 15 novembre 2026 (lots F et H) : dès la première publication, le nombre d'entreprises (créateur compris), le
+   * volume total et la dernière évolution réelle. Jamais un nom d'entreprise.
+   */
+  resume?: { entreprises: number; volume: string | null; derniereEvolution: string | null; verifiees: boolean };
+  /** Une date de besoin proche : dite, sans promesse. */
+  urgent?: string | null;
+  /** Les caractéristiques recommandées laissées « à préciser » (jamais bloquantes). */
+  aPreciser?: string[];
 }
 export interface OffreVueV1 {
   fournisseur: string | null;
@@ -89,6 +98,8 @@ export interface BesoinV1 {
   contraintes: string | null;
   dateBesoin: string;
   achat: AchatV1;
+  /** Ce que les autres entreprises ont confirmé après ce besoin : « +750 pièces ». */
+  depuisPublication?: { entreprises: number; quantite: string | null };
   reconfirmerAvant: string | null;
   offreAvant: string | null;
   actions: { modifier: boolean; retirer: boolean; reconfirmer: boolean; confirmer: boolean; commander?: boolean; refuser?: boolean };
@@ -103,6 +114,7 @@ export interface CompatibiliteV1 {
   produit: { cle: string; nom: string };
   zone: { code: string; nom: string };
   compatible: AchatV1 | null;
+  urgent?: string | null;
   ouverture: { possible: true; ouvertJusquau: string } | { possible: false; message: string };
   phraseIdentique: string;
 }
@@ -113,7 +125,7 @@ export interface LigneQuantitatifV1 {
   unite: string;
   lot: string;
   lotLu: string;
-  produit: { type: string; nom: string; cle: string | null; attributs: Record<string, string>; manquantes: { attribut: string; libelle: string }[] } | null;
+  produit: { type: string; nom: string; cle: string | null; attributs: Record<string, string>; manquantes: { attribut: string; libelle: string }[]; aPreciser?: { attribut: string; libelle: string }[] } | null;
   quantite: { valeur: number; unite: string; conditionnement: { unite: string; parDefaut: number | null } | null } | null;
   mention: "recommande" | "compatible" | "a_preciser" | "demande_individuelle" | "deja_groupe" | "commandee" | "non_ouvert";
   texte: string;
@@ -166,6 +178,8 @@ export const heureCourte = (iso: string) => {
   return `${d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}, ${d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }).replace(":", " h ").replace(/ h 00$/, " h")}`;
 };
 export const zoneLisible = (z: { code: string; nom: string }) => `${z.nom} (${z.code})`;
+/** Le délai minimal d'un achat groupé (même valeur que le serveur, qui tranche) : 7 jours. Avant le 15 novembre 2026 : 21. */
+export const DELAI_MIN_JOURS_AG = 7;
 export const jourDans = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
 
 /** L'état du parcours V1 : `undefined` pendant le chargement, `null` quand le réglage est coupé (404). */

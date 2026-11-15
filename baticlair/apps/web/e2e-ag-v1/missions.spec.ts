@@ -352,7 +352,7 @@ test("compte : le menu, « Profil et paramètres », notifications par catégori
   // « PROFIL ET PARAMÈTRES » (captures 18 et 19).
   await expect(page.getByRole("heading", { name: "Profil et paramètres" })).toBeVisible();
   for (const groupe of ["Entreprise", "Préférences", "Compte et services", "Données et aide"]) await expect(page.getByRole("region", { name: groupe, exact: true })).toBeVisible();
-  for (const rubrique of ["Mon entreprise", "Profil public et missions", "Documents et qualifications", "Apparence", "Notifications", "Compte et sécurité", "Abonnement, factures et reçus", "E-mails Mobiiz et réponses", "Données et confidentialité", "Aide et contact", "Guide et chantier fictif"]) await expect(page.getByRole("region").getByRole("link", { name: new RegExp(`^${rubrique}`) })).toBeVisible();
+  for (const rubrique of ["Mon entreprise", "Profil public et missions", "Documents et qualifications", "Apparence", "Notifications", "Compte et sécurité", "Abonnement, factures et reçus", "E-mails Mobiiz et réponses", "Données et confidentialité", "Aide et contact", "Guide de démarrage"]) await expect(page.getByRole("region").getByRole("link", { name: new RegExp(`^${rubrique}`) })).toBeVisible();
   // Décisions MVP (Greg, 12 novembre 2026) : « Mémoire de Mobiiz » et « Connexions » sortent de l'interface, y compris
   // par leur ancienne adresse ; rien n'est supprimé (un réglage les rallume).
   for (const cachee of [/^Mémoire de Mobiiz/, /^Connexions/]) await expect(page.getByRole("link", { name: cachee })).toHaveCount(0);
@@ -403,9 +403,12 @@ test("compte : le menu, « Profil et paramètres », notifications par catégori
   await theme.getByRole("button", { name: "Sombre", exact: true }).click();
   await expect(page.locator(".app-nuit")).toHaveCount(1);
 
-  // « GUIDE ET CHANTIER FICTIF » : l'ancien geste du menu est toujours là.
+  // RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot B) : le chantier fictif est retiré (on essaie sur de vrais parcours) ; le
+  // guide reste. Avant : « Guide et chantier fictif » et le bouton « Essayer avec un chantier fictif ».
+  await expect(page.getByRole("link", { name: /chantier fictif/i })).toHaveCount(0);
   await page.goto("/compte/guide");
-  await expect(page.getByRole("button", { name: "Essayer avec un chantier fictif" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Guide de démarrage" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /chantier fictif/i })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Revoir le guide" })).toBeVisible();
 });
 

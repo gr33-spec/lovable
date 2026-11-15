@@ -116,7 +116,10 @@ export function EditeurApparence() {
   return (
     <div className="flex flex-col gap-4">
       <EnTeteRubrique titre="Apparence" onRetour={retour} />
-      <div role="tablist" aria-label="Apparence" className="grid grid-cols-2 gap-1 rounded-full bg-ground p-1 lg:max-w-md">
+      {/* Lot A (Greg, 15 novembre 2026, capture 1 : « Application ressemble à un libellé statique ») : un vrai contrôle à deux
+          options de même taille. L'onglet inactif a un contour et un fond : il se voit cliquable ; l'actif est plein ET
+          coché (jamais la couleur seule). États pressé (`pressable`) et focus clavier (anneau jaune). */}
+      <div role="tablist" aria-label="Apparence" className="grid grid-cols-2 gap-2 lg:max-w-md">
         {(
           [
             ["application", "Application"],
@@ -131,8 +134,9 @@ export function EditeurApparence() {
             aria-selected={onglet === id}
             aria-controls={`panneau-${id}`}
             onClick={() => setOnglet(id)}
-            className={`min-h-11 rounded-full px-3 text-[15px] font-semibold whitespace-nowrap transition-[background-color,color] duration-150 ${onglet === id ? "bg-ink text-white" : "text-muted"}`}
+            className={`pressable flex min-h-12 items-center justify-center gap-1.5 rounded-full border-2 px-3 text-[15px] font-bold whitespace-nowrap outline-none transition-[background-color,color,border-color] duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ground ${onglet === id ? "border-ink bg-ink text-ground" : "border-ink/40 bg-surface text-ink"}`}
           >
+            {onglet === id ? <Check size={16} aria-hidden="true" className="shrink-0" /> : null}
             {libelle}
           </button>
         ))}

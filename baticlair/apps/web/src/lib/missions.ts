@@ -92,10 +92,10 @@ export function useMissionsActif(): boolean | undefined {
  * Les rubriques sorties de l'interface du MVP (Greg, 12 novembre 2026) : « Mémoire de Mobiiz » et « Connexions ».
  * Vrai seulement si le réglage de l'API les rallume ; pendant le chargement et en cas d'erreur, elles restent cachées.
  */
-export function useRubriquesMasquees(): { memoire: boolean; connexions: boolean } {
+export function useRubriquesMasquees(): { memoire: boolean; connexions: boolean; /** Lot B (15 novembre 2026) : le chantier fictif est retiré de l'interface tant que `CHANTIER_FICTIF` est coupé. */ chantierFictif: boolean } {
   const fetcher = useCallback(() => santeUneFois(), []);
   const { data } = useResource(fetcher);
-  return { memoire: data?.features.memoire !== true, connexions: data?.features.connexions !== true };
+  return { memoire: data?.features.memoire !== true, connexions: data?.features.connexions !== true, chantierFictif: data?.features.chantierFictif !== true };
 }
 
 /** La phrase à montrer pour un refus : celle de l'API d'abord, sinon une phrase simple selon le cas. */

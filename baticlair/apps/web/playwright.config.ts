@@ -37,6 +37,9 @@ export const apiEnv = {
   PAYWALL: "on",
   // L'accès démo « Découvrir l'application » (Greg, 7 novembre 2026) : allumé ici comme sur test.mobiiz.fr.
   ACCES_DEMO: "on",
+  // Le chantier fictif d'un vrai compte est retiré de l'interface (Greg, 15 novembre 2026) : coupé par défaut. Il reste
+  // allumé ICI pour les parcours qui gardent son code sous test ; les parcours activés (`ag-v1`) vérifient son absence.
+  CHANTIER_FICTIF: "on",
   // La démonstration publique est retirée (Greg, 11 novembre 2026) : la landing n'a plus de bouton. Le point d'entrée reste
   // ouvert ICI seulement, pour le parcours interne qui garde la session fictive sous test (`acces-demo.spec.ts`).
   DEMO_PUBLIQUE: "on",

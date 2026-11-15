@@ -1,10 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { ChoixCreation } from "@/components/choix-creation";
-import { NouveauQuantitatif } from "@/components/nouveau-quantitatif";
-import { SaisirMaListe } from "@/components/saisir-ma-liste";
+import { PorteCreation } from "@/components/porte-creation";
 import { Paywall, useBilling } from "@/components/paywall";
 import { BackButton } from "@/components/ui";
 
@@ -29,27 +26,7 @@ export default function NouveauChantierPage() {
   }
   return (
     <Suspense>
-      <Porte />
+      <PorteCreation />
     </Suspense>
   );
 }
-
-/**
- * Direction A (Greg, 12 novembre 2026) : « Créer un quantitatif » n'ouvre plus l'assistant d'office. Sans mode : le choix
- * (« Je crée ma liste » ou « Mobiiz m'aide »). `?mode=manuel` (et l'ancien `?liste=1`) : la saisie à la main.
- * `?mode=assistant` : l'assistant, avec ses façons d'entrer visibles.
- */
-function Porte() {
-  const params = useSearchParams();
-  const router = useRouter();
-  const mode = params.get("mode") ?? (params.get("liste") === "1" ? "manuel" : null);
-  // UN SEUL OUTIL DE SAISIE (Greg, 16 novembre 2026) : « Saisir un nouveau besoin » (achats groupés) ouvre exactement cet
-  // écran (`?pour=achat-groupe`) ; la liste créée mène alors à l'écran où l'on coche les lignes à grouper.
-  const pour = params.get("pour") === "achat-groupe" ? "achat-groupe" : null;
-  const retour = pour ? "/chantiers/nouveau?pour=achat-groupe" : "/chantiers/nouveau";
-  const versListe = pour ? (id: string) => `/achats-groupes/quantitatif/${id}` : undefined;
-  if (mode === "manuel") return <SaisirMaListe onFermer={() => router.push(retour)} versListe={versListe} />;
-  if (mode === "assistant") return <NouveauQuantitatif onFermer={() => router.push(retour)} versListe={versListe} />;
-  return <ChoixCreation pour={pour} />;
-}
-

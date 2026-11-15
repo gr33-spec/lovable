@@ -1,11 +1,12 @@
 "use client";
 
-import { Plus, ChevronRight, Package, Sparkles, Timer, X } from "lucide-react";
+import { Check, Plus, ChevronRight, Package, Sparkles, Timer, X } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CARTE, LigneZone } from "@/components/ag-v1-commun";
 import { PageTitle, Skeleton } from "@/components/ui";
+import { CarteAction } from "@/components/ux-kit";
 import { api } from "@/lib/api";
 import { dateCourte, FILTRES_V1, libelleLot, lotPrincipal, SIGNATURE, zoneLisible, type AchatV1, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
 import { useResource } from "@/lib/use-resource";
@@ -45,6 +46,12 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
   const { data: mes } = useResource(useCallback((s: AbortSignal) => api<{ aFaire: BesoinV1[]; enCours: BesoinV1[] }>("/v1/ag/besoins", { signal: s }).catch(() => ({ aFaire: [], enCours: [] })), []));
   const mesBesoins = mes ? [...mes.aFaire, ...mes.enCours] : [];
   const ajoutes = useSearchParams().get("ajoutes");
+  const [confirmation, setConfirmation] = useState(true);
+  useEffect(() => {
+    if (!ajoutes) return;
+    const t = window.setTimeout(() => setConfirmation(false), 6000);
+    return () => window.clearTimeout(t);
+  }, [ajoutes]);
   // Seuls les métiers qui ont des produits ouverts sont proposés.
   const metiers = FILTRES_V1.filter((f) => etat.produits.some((p) => lotPrincipal(p.lot) === f.id));
   const fermerChoix = useCallback(() => setChoix(false), []);
@@ -61,9 +68,11 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         </div>
         <p className="text-[15px] leading-relaxed text-muted">Achète avec d&apos;autres artisans de ton secteur{etat.zone ? ` · ${zoneLisible(etat.zone)}` : ""}, pour payer moins cher. Tu décides à la réception de l&apos;offre.</p>
       </div>
-      {ajoutes ? (
-        <p role="status" className="rounded-xl bg-ok-bg p-3 text-[15px] font-semibold text-ok">
-          {Number(ajoutes) > 1 ? `C'est fait : tes ${ajoutes} articles sont dans les achats groupés.` : "C'est fait : ton article est dans les achats groupés."} Ce n&apos;est pas une commande : tu décideras à la réception de l&apos;offre.
+      {/* Lot E (Greg, 15 novembre 2026, capture 11) : une confirmation compacte, qui s'efface seule ; le besoin publié est
+          juste dessous, dans « Mes besoins ». Avant : un grand bandeau vert qui restait. */}
+      {ajoutes && confirmation ? (
+        <p role="status" className="inline-flex items-center gap-2 self-start rounded-full bg-ok-bg px-3 py-1.5 text-[14px] font-semibold text-ok">
+          <Check size={16} aria-hidden="true" /> {Number(ajoutes) > 1 ? `${ajoutes} besoins publiés` : "Besoin publié"} · tu décides à la réception de l&apos;offre
         </p>
       ) : null}
       {/* UX SIMPLIFIÉE (Greg, 8 novembre 2026) : l'onglet montre seulement « Mes besoins » puis « Achats ouverts ». */}
@@ -92,6 +101,13 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
                     <span className="text-[13px] text-muted">
                       {b.quantite.lisible} · {b.statut.libelle}
                     </span>
+                    {/* Lot H : la dynamique réelle, dès la première entreprise ; jamais un nom. */}
+                    {b.achat.resume?.volume ? (
+                      <span className="text-[13px] font-semibold">
+                        {b.achat.resume.entreprises} entreprise{b.achat.resume.entreprises > 1 ? "s" : ""} · {b.achat.resume.volume}
+                        {b.depuisPublication?.quantite ? ` · ${b.depuisPublication.quantite} depuis ta publication` : ""}
+                      </span>
+                    ) : null}
                   </span>
                   <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
                 </Link>
@@ -125,8 +141,9 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
       ) : (
         // Greg, 12 novembre 2026 (dossier de corrections UX, point 8) : chaque achat groupé est une opportunité AUTONOME,
         // donc une carte à elle, et non une ligne d'une même liste. Deux achats du même matériau se distinguent par ce
-        // que l'on sait vraiment : le métier, le secteur, la réception, la date de besoin, l'échéance. Aucun volume,
-        // aucun participant, aucune économie n'est annoncé.
+        // que l'on sait vraiment : le métier, le secteur, la réception, la date de besoin, l'échéance. RÈGLE CHANGÉE (Greg,
+        // 15 novembre 2026, lot H) : le volume total et le nombre d'entreprises se lisent dès la première ; toujours aucun
+        // nom d'entreprise, aucune économie annoncée.
         <ul aria-label="Achats groupés ouverts" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {[...data.achats].sort((x, y) => x.ouvertJusquau.localeCompare(y.ouvertJusquau)).slice(0, tout ? undefined : ACHATS_VISIBLES).map((a) => (
             <li key={a.id} className="flex">
@@ -136,6 +153,11 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
                 <span className="text-[13px] leading-snug text-muted">
                   {a.zone.nom} · {a.reception === "livraison" ? "Livraison sur chantier" : "Retrait au dépôt"} · besoin avant le {dateCourte(a.dateBesoin)}
                 </span>
+                {a.resume?.volume ? (
+                  <span className="text-[13px] font-semibold">
+                    {a.resume.entreprises} entreprise{a.resume.entreprises > 1 ? "s" : ""} · {a.resume.volume}
+                  </span>
+                ) : null}
                 <span className="mt-auto flex items-center justify-between gap-3 pt-1">
                   <span className="flex items-center gap-1.5 text-[13px] font-semibold">
                     <Timer size={14} aria-hidden="true" className="shrink-0" />
@@ -176,7 +198,6 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
 
 /** Les deux façons d'ajouter un matériau (Greg, 8 novembre 2026 : « soit par la liste, soit par l'IA » ; le catalogue est retiré, il y manquera toujours des produits). */
 function ChoixAjout({ onFermer }: { onFermer: () => void }) {
-  const option = "pressable flex min-h-16 items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 text-left";
   // Au clavier (passe mobile, 15 novembre 2026) : « Échap » ferme, le premier bouton prend le focus à l'ouverture.
   const fermer = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -196,20 +217,9 @@ function ChoixAjout({ onFermer }: { onFermer: () => void }) {
             <X size={20} aria-hidden="true" />
           </button>
         </div>
-        <Link href="/achats-groupes/quantitatif" className={option}>
-          <Package size={22} aria-hidden="true" className="shrink-0" />
-          <span className="flex flex-col">
-            <span className="text-[16px] font-bold">Choisir dans un quantitatif</span>
-            <span className="text-[14px] text-muted">Coche une ou plusieurs lignes d&apos;une liste que tu as déjà.</span>
-          </span>
-        </Link>
-        <Link href="/chantiers/nouveau?pour=achat-groupe" className={option}>
-          <Sparkles size={22} aria-hidden="true" className="shrink-0" />
-          <span className="flex flex-col">
-            <span className="text-[16px] font-bold">Saisir un nouveau besoin</span>
-            <span className="text-[14px] text-muted">Tu prépares ta liste comme d&apos;habitude, puis tu coches ce que tu veux grouper. Rien n&apos;est publié avant ta confirmation.</span>
-          </span>
-        </Link>
+        {/* Lot A : deux actions de même poids, deux à quatre mots chacune, une ligne d'explication au plus. */}
+        <CarteAction href="/achats-groupes/quantitatif" icone={Package} titre="Choisir une liste" sous="Dans un quantitatif que tu as déjà." />
+        <CarteAction href="/achats-groupes/publier" icone={Sparkles} titre="Créer mon besoin" sous="À la main ou avec l'aide de Mobiiz." />
       </div>
     </div>
   );

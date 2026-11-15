@@ -51,7 +51,7 @@ export default function RubriquePage() {
   if (ligne.id === "apparence") return <EditeurApparence />;
   return (
     <>
-      <EnTeteRubrique titre={ligne.titre} />
+      <EnTeteRubrique titre={ligne.id === "guide" && !masquees.chantierFictif ? "Guide et chantier fictif" : ligne.titre} />
       <div className="grid grid-cols-1 gap-4 lg:max-w-3xl">
         <Contenu id={ligne.id} />
       </div>

@@ -36,7 +36,7 @@ function NouveauV1({ etat }: { etat: EtatV1 }) {
   const router = useRouter();
   const type = params.get("type");
   useEffect(() => {
-    if (!type) router.replace("/chantiers/nouveau?pour=achat-groupe");
+    if (!type) router.replace("/achats-groupes/publier");
   }, [type, router]);
   return type ? <ParcoursDirectV1 etat={etat} /> : null;
 }

@@ -97,7 +97,7 @@ export function MesBesoinsV1() {
           <p className="text-[17px] font-bold">Aucun besoin groupé pour le moment</p>
           <p className="text-[15px] text-muted">Les premiers achats groupés se forment avec les premiers besoins ouverts.</p>
           {/* Revue UX (8 novembre 2026) : un écran vide propose l'action qui le remplit. */}
-          <Link href="/chantiers/nouveau?pour=achat-groupe" className="pressable inline-flex min-h-12 items-center gap-2 self-start rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent shadow-card">
+          <Link href="/achats-groupes/publier" className="pressable inline-flex min-h-12 items-center gap-2 self-start rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent shadow-card">
             <Plus size={20} aria-hidden="true" /> Saisir un nouveau besoin
           </Link>
           <Link href="/achats-groupes" className="min-h-11 py-2 text-[15px] font-semibold underline underline-offset-4">
@@ -328,6 +328,11 @@ export function BesoinV1Detail({ id, etat }: { id: string; etat: EtatV1 }) {
           Zone {zoneLisible(b.achat.zone)} · ouvert jusqu&apos;au {dateCourte(b.achat.ouvertJusquau)}
         </p>
         <Volumes achat={b.achat} comprendre />
+        {b.depuisPublication?.quantite ? (
+          <p className="text-[15px] font-semibold">
+            {b.depuisPublication.quantite} depuis ta publication · {b.depuisPublication.entreprises} entreprise{b.depuisPublication.entreprises > 1 ? "s" : ""} t&apos;{b.depuisPublication.entreprises > 1 ? "ont" : "a"} rejoint
+          </p>
+        ) : null}
       </section>
 
       {b.actions.modifier || b.actions.retirer ? (

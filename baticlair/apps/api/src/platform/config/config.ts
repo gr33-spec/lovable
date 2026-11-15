@@ -176,6 +176,12 @@ const envSchema = z
     MEMOIRE_VISIBLE: z.enum(["on", "off"]).default("off"),
     CONNEXIONS_LOGICIEL: z.enum(["on", "off"]).default("off"),
     /**
+     * Le « chantier fictif » d'un vrai compte (Greg, 15 novembre 2026, lot B : « les utilisateurs essaient gratuitement
+     * sur de vrais parcours »). Coupé par défaut : l'entrée, le bouton et les renvois ne s'affichent plus. Le code et les
+     * chantiers fictifs déjà créés restent ; « on » les remet à l'écran, sans redéploiement de code.
+     */
+    CHANTIER_FICTIF: z.enum(["on", "off"]).default("off"),
+    /**
      * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 348 € HT par an, essai, paywall sur déposer, voir les résultats,
      * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
      */
@@ -427,6 +433,8 @@ export interface AppConfig {
   /** Rubriques sorties de l'interface du MVP, réactivables (`MEMOIRE_VISIBLE`, `CONNEXIONS_LOGICIEL`). */
   memoireVisible: boolean;
   connexionsLogiciel: boolean;
+  /** Le chantier fictif d'un vrai compte (`CHANTIER_FICTIF`), retiré de l'interface par défaut. */
+  chantierFictif: boolean;
   /** L'abonnement artisan (`ABONNEMENT`, `PAIEMENT`). */
   abonnement: {
     actif: boolean;
@@ -589,6 +597,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     missionsV1: e.MISSIONS_V1 === "on",
     memoireVisible: e.MEMOIRE_VISIBLE === "on",
     connexionsLogiciel: e.CONNEXIONS_LOGICIEL === "on",
+    chantierFictif: e.CHANTIER_FICTIF === "on",
     abonnement: {
       actif: e.ABONNEMENT === "on",
       paiement: e.PAIEMENT,

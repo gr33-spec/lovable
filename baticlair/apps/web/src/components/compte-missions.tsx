@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { CATEGORIES_ALERTE, CATEGORIES_DOCUMENT, PHRASE_FORMATS, type CategorieDocument, type ReglagesAlertes } from "../../../../packages/domain/src/missions/missions";
 import { api } from "@/lib/api";
-import { phraseErreur, useMissionsActif, type AnnonceVue, type EntrepriseVue, type FichierVue } from "@/lib/missions";
+import { phraseErreur, useMissionsActif, useRubriquesMasquees, type AnnonceVue, type EntrepriseVue, type FichierVue } from "@/lib/missions";
 import { useResource } from "@/lib/use-resource";
 import { revoirLeGuide } from "./guide-premier-lancement";
 import { ListeFichiers } from "./missions";
@@ -317,8 +317,12 @@ export function GuideEtChantierFictif() {
       setPending(false);
     }
   }
+  // Lot B (Greg, 15 novembre 2026) : le chantier fictif n'est plus proposé (on essaie sur de vrais parcours, gratuitement).
+  // Retrait réversible : le réglage `CHANTIER_FICTIF` du serveur le remet ; rien n'est supprimé.
+  const fictif = !useRubriquesMasquees().chantierFictif;
   return (
     <>
+      {fictif ? (
       <div className={`flex flex-col gap-3 p-4 ${CARTE}`}>
         <div className="flex items-center gap-3">
           <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#efece6]">
@@ -334,6 +338,9 @@ export function GuideEtChantierFictif() {
         </BoutonJaune>
         <Refus>{refus}</Refus>
       </div>
+      ) : (
+        <p className={`p-4 text-[15px] leading-relaxed text-muted ${CARTE}`}>Le guide présente Mobiiz en quelques écrans. Pour essayer, crée un vrai quantitatif : c&apos;est gratuit, et rien ne part chez un négoce sans ton accord.</p>
+      )}
       <BoutonContour onClick={() => { router.push("/"); revoirLeGuide(); }}>Revoir le guide</BoutonContour>
       <p className="text-center text-[13px] text-muted">
         Une question ? <Link href="/compte/aide" className="font-extrabold underline underline-offset-4">Aide et contact</Link>

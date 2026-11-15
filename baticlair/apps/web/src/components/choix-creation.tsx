@@ -14,7 +14,8 @@ import { BackButton } from "./ui";
  * non terminée se reprend d'ici. Aucun quota sur cet écran : il se dit au moment d'analyser un document.
  */
 export function ChoixCreation({ pour = null }: { /** Venu de « Publier un besoin » (achats groupés) : le même outil, puis l'écran où l'on coche les lignes à grouper. */ pour?: "achat-groupe" | null } = {}) {
-  const suite = pour ? `&pour=${pour}` : "";
+  // Lot E : venu des achats groupés, tout le parcours reste sous « Achats groupés » (`/achats-groupes/publier`).
+  const base = pour ? "/achats-groupes/publier" : "/chantiers/nouveau";
   // Le brouillon de la saisie à la main (gardé sur le serveur) : s'il existe, il se reprend en premier.
   const { data } = useResource(
     useCallback((s: AbortSignal) => api<{ brouillon: { donnees: { lignes?: unknown[] } } | null }>(`/v1/brouillons/un?cle=${encodeURIComponent("liste:saisie")}`, { signal: s }).catch(() => ({ brouillon: null })), []),
@@ -25,15 +26,15 @@ export function ChoixCreation({ pour = null }: { /** Venu de « Publier un besoi
       <BackButton fallback={pour ? "/achats-groupes" : "/chantiers"} />
       <div className="flex flex-col gap-1">
         {/* Sur petit téléphone, le titre tient sur une ligne : les deux choix restent entiers au-dessus du menu. */}
-        <h1 className="font-display text-[28px] leading-[1.05] font-extrabold tracking-[-0.03em] min-[400px]:text-[36px]">Nouveau quantitatif</h1>
-        <p className="text-[15px] text-muted">{pour ? "Prépare ta liste comme d'habitude. Ensuite, tu coches ce que tu veux mettre en achat groupé." : "Comment veux-tu le préparer ?"}</p>
+        <h1 className="font-display text-[28px] leading-[1.05] font-extrabold tracking-[-0.03em] min-[400px]:text-[36px]">{pour ? "Publier un besoin groupé" : "Nouveau quantitatif"}</h1>
+        <p className="text-[15px] text-muted">{pour ? "Prépare les matériaux que tu souhaites acheter avec d'autres artisans. Tu vérifieras tout avant la publication." : "Comment veux-tu le préparer ?"}</p>
       </div>
       <div className="flex flex-col gap-3">
         {enCours > 0 ? (
-          <CarteLien remplace href={`/chantiers/nouveau?mode=manuel${suite}`} icone={ClipboardList} titre={`Reprendre ma liste en cours · ${enCours} matériau${enCours > 1 ? "x" : ""}`} sous="Tu la retrouves comme tu l'as laissée." />
+          <CarteLien remplace href={`${base}?mode=manuel`} icone={ClipboardList} titre={`Reprendre ma liste en cours · ${enCours} matériau${enCours > 1 ? "x" : ""}`} sous="Tu la retrouves comme tu l'as laissée." />
         ) : null}
-        <CarteLien remplace jaune href={`/chantiers/nouveau?mode=manuel${suite}`} icone={PencilLine} titre="Je saisis ma liste" sous="Je choisis mes matériaux par métier et par famille, ou je les écris." />
-        <CarteLien remplace href={`/chantiers/nouveau?mode=assistant${suite}`} icone={Sparkles} titre="Mobiiz m'aide" sous="À partir d'une photo, d'un devis, d'un PDF, d'une liste ou de ce que je dis. Je vérifie tout." />
+        <CarteLien remplace jaune href={`${base}?mode=manuel`} icone={PencilLine} titre="Je saisis ma liste" sous="Je choisis mes matériaux par métier et par famille, ou je les écris." />
+        <CarteLien remplace href={`${base}?mode=assistant`} icone={Sparkles} titre="Mobiiz m'aide" sous="À partir d'une photo, d'un devis, d'un PDF, d'une liste ou de ce que je dis. Je vérifie tout." />
       </div>
       <p className="text-[13px] leading-relaxed text-muted">Tu peux changer en cours de route : l&apos;aide de Mobiiz reste disponible depuis ta liste, et rien n&apos;est ajouté sans ton accord.</p>
     </div>

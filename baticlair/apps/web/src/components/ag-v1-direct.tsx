@@ -7,7 +7,7 @@ import { useState } from "react";
 import { CARTE, LigneZone, Note, VerificationEntreprise, Volumes } from "@/components/ag-v1-commun";
 import { Button, INPUT, PageTitle } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
-import { CASE_UNE_LIGNE, dateCourte, dateLongue, jourDans, libelleLot, PHRASE_ADRESSE_PRIVEE, zoneLisible, type BesoinV1, type CompatibiliteV1, type EtatV1, type ProduitV1 } from "@/lib/ag-v1";
+import { CASE_UNE_LIGNE, dateCourte, dateLongue, DELAI_MIN_JOURS_AG, jourDans, libelleLot, PHRASE_ADRESSE_PRIVEE, zoneLisible, type BesoinV1, type CompatibiliteV1, type EtatV1, type ProduitV1 } from "@/lib/ag-v1";
 
 type Etape = "produit" | "quantite" | "resultat" | "raison" | "verification" | "confirmer";
 
@@ -235,7 +235,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
             // Greg, 8 novembre 2026 : plus de catalogue ; un produit inconnu renvoie à Mobiiz.
             <p className={`${CARTE} p-4 text-[15px]`}>
               Ce produit n&apos;est pas reconnu.{" "}
-              <Link href="/chantiers/nouveau?pour=achat-groupe" className="font-semibold underline underline-offset-4">
+              <Link href="/achats-groupes/publier" className="font-semibold underline underline-offset-4">
                 Saisis ton besoin
               </Link>
               .
@@ -263,7 +263,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
             </>
           )}
           {verrouille ? (
-            <Link href="/chantiers/nouveau?pour=achat-groupe" className="min-h-11 self-center py-2 text-center text-[15px] font-semibold underline underline-offset-4">
+            <Link href="/achats-groupes/publier" className="min-h-11 self-center py-2 text-center text-[15px] font-semibold underline underline-offset-4">
               Pas exactement ton produit ? Saisis ton besoin
             </Link>
           ) : (
@@ -305,7 +305,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
               <label htmlFor="ag-date" className="text-[14px] font-semibold">
                 J&apos;ai besoin de ces matériaux avant le
               </label>
-              <input id="ag-date" type="date" min={jourDans(21)} value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} className={INPUT} />
+              <input id="ag-date" type="date" min={jourDans(DELAI_MIN_JOURS_AG)} value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} className={INPUT} />
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="ag-contraintes" className="text-[14px] font-semibold">
@@ -337,6 +337,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
             </p>
             {compat.ouverture.possible ? (
               <p className="text-[16px] leading-relaxed">
+                {compat.urgent ? <span className="mb-2 block text-[15px] font-semibold text-warn">{compat.urgent}</span> : null}
                 Tu peux ouvrir ce besoin jusqu&apos;au {dateCourte(compat.ouverture.ouvertJusquau)}. D&apos;autres entreprises de {compat.zone.nom} pourront le rejoindre. Ce n&apos;est pas une commande : tu décideras après réception d&apos;une offre complète.
               </p>
             ) : (

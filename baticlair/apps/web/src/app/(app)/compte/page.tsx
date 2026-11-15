@@ -10,6 +10,9 @@ import { Badge, PageTitle } from "@/components/ui";
 import { GROUPES_PROFIL } from "@/lib/rubriques-profil";
 import { useMissionsActif, useRubriquesMasquees } from "@/lib/missions";
 import { useSession } from "@/lib/session";
+import { useChoixTheme, type ChoixTheme } from "@/lib/theme";
+
+const LIBELLE_THEME: Record<ChoixTheme, string> = { clair: "clair", sombre: "sombre", auto: "automatique" };
 
 /**
  * « PROFIL ET PARAMÈTRES » (Greg, 1er novembre 2026) : un sommaire, plus aucun formulaire ici. Une carte compacte (nom,
@@ -20,6 +23,7 @@ export default function ComptePage() {
   const { me } = useSession();
   const missions = useMissionsActif() === true;
   const masquees = useRubriquesMasquees();
+  const theme = useChoixTheme();
   return (
     <>
       <div className="flex items-start justify-between gap-3">
@@ -49,6 +53,9 @@ export default function ComptePage() {
             <ul className="flex flex-col gap-2.5">
               {g.lignes.filter((l) => (!l.missions || missions) && !(l.masquable && masquees[l.masquable])).map((l) => {
                 const Icone = l.icone;
+                // Lot A : la carte Apparence dit le réglage en cours ; lot B : l'ancien titre ne revient qu'avec son réglage.
+                const titre = l.id === "guide" && !masquees.chantierFictif ? "Guide et chantier fictif" : l.titre;
+                const sousTitre = l.id === "apparence" ? `Mode ${LIBELLE_THEME[theme]}` : l.id === "guide" && !masquees.chantierFictif ? "Revoir le parcours sans risque" : l.sousTitre;
                 return (
                   <li key={l.id}>
                     <Link
@@ -59,8 +66,8 @@ export default function ComptePage() {
                         <Icone size={20} />
                       </span>
                       <span className="flex min-w-0 grow flex-col">
-                        <span className="text-[16px] leading-tight font-semibold">{l.titre}</span>
-                        <span className={`text-[13px] leading-snug ${l.enAvant ? "text-on-accent/85" : "text-[#5c5648]"}`}>{l.sousTitre}</span>
+                        <span className="text-[16px] leading-tight font-semibold">{titre}</span>
+                        <span className={`text-[13px] leading-snug ${l.enAvant ? "text-on-accent/85" : "text-[#5c5648]"}`}>{sousTitre}</span>
                       </span>
                       <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
                     </Link>

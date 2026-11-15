@@ -314,3 +314,35 @@ export function RondFait() {
     </span>
   );
 }
+
+/**
+ * LA CARTE D'ACTION SOMBRE (Greg, 15 novembre 2026, lot A, capture 9 : « les cartes blanches manquent de hiérarchie et
+ * contiennent trop de texte ») : fond anthracite, titre blanc de deux à quatre mots, une ligne grise au plus, pictogramme
+ * dans un disque jaune, chevron. Les choix de même niveau ont le même poids. États : pressé (`pressable`), focus clavier
+ * (anneau jaune visible sur l'ivoire comme sur le noir), désactivé (`aria-disabled`, atténué, non cliquable). Mêmes
+ * couleurs dans les deux thèmes : la carte est sombre par nature, la feuille derrière suit le thème.
+ */
+export function CarteAction({ href, icone: Icone, titre, sous, desactive = false }: { href: string; icone: LucideIcon; titre: string; sous?: string; desactive?: boolean }) {
+  const classe = `flex min-h-[4.5rem] w-full items-center gap-3 rounded-[20px] border border-white/10 bg-[#1b1a17] p-4 text-left text-white outline-none focus-visible:ring-2 focus-visible:ring-[#FED206] focus-visible:ring-offset-2 focus-visible:ring-offset-ground ${desactive ? "pointer-events-none opacity-50" : "pressable"}`;
+  const contenu = (
+    <>
+      <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#FED206] text-[#130901]">
+        <Icone size={22} />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="text-[17px] leading-tight font-extrabold">{titre}</span>
+        {sous ? <span className="text-[13px] leading-snug text-[#d4d0c7]">{sous}</span> : null}
+      </span>
+      <ChevronRight size={20} aria-hidden="true" className="shrink-0 text-white" />
+    </>
+  );
+  return desactive ? (
+    <span aria-disabled="true" className={classe}>
+      {contenu}
+    </span>
+  ) : (
+    <Link href={href} className={classe}>
+      {contenu}
+    </Link>
+  );
+}

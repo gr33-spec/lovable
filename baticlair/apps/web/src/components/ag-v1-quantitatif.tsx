@@ -8,8 +8,9 @@ import { CARTE, LigneZone, Note, VerificationEntreprise } from "@/components/ag-
 import { ChoixCaracteristiques, ConfirmerConditionnement } from "@/components/ag-v1-direct";
 import { Button, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
-import { CASE_PLUSIEURS_LIGNES, CASE_UNE_LIGNE, dateCourte, dateLongue, jourDans, libelleLot, LOTS_PRINCIPAUX_V1, LOTS_V1, PHRASE_ADRESSE_PRIVEE, zoneLisible, type CompatibiliteV1, type EtatV1, type LigneQuantitatifV1 } from "@/lib/ag-v1";
+import { CASE_PLUSIEURS_LIGNES, CASE_UNE_LIGNE, dateCourte, dateLongue, DELAI_MIN_JOURS_AG, jourDans, libelleLot, LOTS_PRINCIPAUX_V1, LOTS_V1, PHRASE_ADRESSE_PRIVEE, zoneLisible, type CompatibiliteV1, type EtatV1, type LigneQuantitatifV1 } from "@/lib/ag-v1";
 import { useResource } from "@/lib/use-resource";
+import { manquantesV1, nomProduitV1, VALEUR_A_PRECISER } from "../../../../packages/domain/src/groupe/achats-groupes-v1";
 
 const nf = (n: number) => n.toLocaleString("fr-FR").replace(/ | /g, " ");
 const TON: Record<LigneQuantitatifV1["mention"], string> = {
@@ -101,11 +102,16 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
     () =>
       (data?.lignes ?? []).map((l) => {
         const p = precisions[l.key];
+        // Lot D : une caractéristique recommandée précisée ici met à jour le produit, sans jamais avoir bloqué la ligne.
+        if (p && l.selectionnable && l.produit) {
+          const attributs = { ...l.produit.attributs, ...p };
+          return { ...l, produit: { ...l.produit, attributs, nom: nomProduitV1(l.produit.type, attributs), aPreciser: (l.produit.aPreciser ?? []).filter((x) => !attributs[x.attribut] || attributs[x.attribut] === VALEUR_A_PRECISER) } };
+        }
         if (!p || l.mention !== "a_preciser" || !l.produit || !l.quantite) return l;
         const produit = etat.produits.find((x) => x.type === l.produit!.type)!;
         const attributs = { ...l.produit.attributs, ...p };
-        if (!produit.caracteristiques.every((c) => attributs[c.attribut])) return l;
-        return { ...l, produit: { ...l.produit, attributs, manquantes: [] }, mention: "compatible" as const, texte: "Compatible avec un achat groupé", pourquoi: "Produit précisé par toi.", selectionnable: true };
+        if (manquantesV1(l.produit.type, attributs).length) return l;
+        return { ...l, produit: { ...l.produit, attributs, nom: nomProduitV1(l.produit.type, attributs), manquantes: [] }, mention: "compatible" as const, texte: "Compatible avec un achat groupé", pourquoi: "Produit précisé par toi.", selectionnable: true };
       }),
     [data, precisions, etat.produits],
   );
@@ -159,6 +165,10 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   }
 
   // « Rejoindra » ou « Ouvrira » : la compatibilité de chaque ligne, dès que réception et date sont choisies.
+  // Lot E (Greg, 15 novembre 2026) : une vérification ne dépend que du PRODUIT, de la réception et de la date ; taper une
+  // quantité ne la relance plus. L'ancienne réponse est retirée À L'INSTANT où la date change (`changerDate`) : une
+  // erreur devenue fausse ne reste jamais affichée pendant que le serveur répond.
+  const produitsChoisis = useMemo(() => JSON.stringify(choisies.map((c) => [c.ligne.key, c.ligne.produit!.type, c.attributs])), [choisies]);
   useEffect(() => {
     if (etape !== "confirmer" || !reception || !dateBesoin) return;
     let annule = false;
@@ -176,9 +186,25 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
     return () => {
       annule = true;
     };
-  }, [etape, choisies, reception, dateBesoin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `produitsChoisis` résume `choisies` sans les quantités.
+  }, [etape, produitsChoisis, reception, dateBesoin]);
 
-  const pret = choisies.length > 0 && !!reception && lieu.trim().length >= 3 && !!dateBesoin && choisies.every((c) => Number(c.quantite.replace(",", ".")) > 0 && (!c.parUnite || c.conversionConfirmee) && compat[c.ligne.key] && compat[c.ligne.key] !== "erreur");
+  const changerDate = (v: string) => {
+    setCompat({});
+    setErreur(null);
+    setDateBesoin(v);
+  };
+  const changerReception = (r: "livraison" | "retrait") => {
+    setCompat({});
+    setReception(r);
+  };
+  const verification = !!reception && !!dateBesoin && choisies.some((c) => !compat[c.ligne.key]);
+  const dateTropProche = !!dateBesoin && dateBesoin < jourDans(DELAI_MIN_JOURS_AG);
+
+  const pret = choisies.length > 0 && !!reception && lieu.trim().length >= 3 && !!dateBesoin && choisies.every((c) => Number(c.quantite.replace(",", ".")) > 0 && (!c.parUnite || c.conversionConfirmee) && (() => {
+    const k = compat[c.ligne.key];
+    return !!k && k !== "erreur" && (!!k.compatible || k.ouverture.possible);
+  })());
 
   async function confirmer() {
     setPending(true);
@@ -237,12 +263,18 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
                       <button type="button" onClick={() => setPourquoi(pourquoi === l.key ? null : l.key)} aria-expanded={pourquoi === l.key} className="min-h-11 text-[14px] font-semibold underline underline-offset-4">
                         Pourquoi ?
                       </button>
-                      {l.mention === "a_preciser" && produit && l.produit?.manquantes.length ? (
+                      {produit && l.produit && (l.mention === "a_preciser" ? l.produit.manquantes.length : l.produit.aPreciser?.length) ? (
                         <button type="button" onClick={() => setOuvertPreciser(ouvertPreciser === l.key ? null : l.key)} className="min-h-11 text-[14px] font-semibold underline underline-offset-4">
                           Préciser
                         </button>
                       ) : null}
                     </div>
+                    {l.selectionnable && l.produit?.aPreciser?.length ? (
+                      // Lot D : un détail que le négoce peut confirmer n'empêche jamais de cocher ; il se dit en petit.
+                      <p className="pl-9 text-[14px] text-muted">
+                        {l.produit.aPreciser.map((x) => x.libelle).join(", ")} à préciser : facultatif, tu peux le dire maintenant ou plus tard.
+                      </p>
+                    ) : null}
                     {pourquoi === l.key ? (
                       <div className="flex flex-col gap-2 pl-8">
                         <p className="text-[14px] text-muted">{l.pourquoi}</p>
@@ -364,7 +396,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           <legend className="mb-1 text-[14px] font-semibold">Réception (obligatoire)</legend>
           {(["livraison", "retrait"] as const).map((r) => (
             <label key={r} className={`flex min-h-12 items-center gap-3 rounded-xl border px-3 ${reception === r ? "border-ink" : "border-line"}`}>
-              <input type="radio" name="reception" checked={reception === r} onChange={() => setReception(r)} className="size-5 accent-accent" />
+              <input type="radio" name="reception" checked={reception === r} onChange={() => changerReception(r)} className="size-5 accent-accent" />
               <span className="text-[16px]">{r === "livraison" ? "Livraison sur chantier" : "Retrait au dépôt"}</span>
             </label>
           ))}
@@ -381,7 +413,14 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           <label htmlFor="agq-date" className="text-[14px] font-semibold">
             J&apos;ai besoin de ces matériaux avant le
           </label>
-          <input id="agq-date" type="date" min={jourDans(21)} value={dateBesoin} onChange={(e) => setDateBesoin(e.target.value)} className={INPUT} />
+          <input id="agq-date" type="date" min={jourDans(DELAI_MIN_JOURS_AG)} value={dateBesoin} onChange={(e) => changerDate(e.target.value)} aria-describedby="agq-date-aide" className={INPUT} />
+          <p id="agq-date-aide" role="status" className={`text-[14px] ${dateTropProche ? "font-semibold text-danger" : "text-muted"}`}>
+            {dateTropProche
+              ? `Choisis une date au moins ${DELAI_MIN_JOURS_AG} jours après aujourd'hui : il faut le temps de consulter les négoces.`
+              : dateBesoin && dateBesoin < jourDans(21)
+                ? "Date proche : les autres entreprises auront peu de temps pour te rejoindre, et une offre n'est pas garantie."
+                : "C'est la date où il te faut les matériaux. La fin des participations est fixée avant, pour laisser le temps de consulter les négoces."}
+          </p>
         </div>
       </div>
       <ul aria-label="Besoins à confirmer" className="flex flex-col gap-3">
@@ -419,6 +458,13 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
                 )
               ) : k === "erreur" ? (
                 <p className="text-[15px] font-semibold text-danger">Vérification impossible pour cette ligne.</p>
+              ) : reception && dateBesoin ? (
+                <p role="status" className="text-[15px] text-muted">
+                  Vérification…
+                </p>
+              ) : null}
+              {k && k !== "erreur" && (k.compatible || k.ouverture.possible) ? (
+                <p className="text-[14px] text-muted">Fin des participations le {dateCourte(k.compatible ? k.compatible.ouvertJusquau : (k.ouverture as { ouvertJusquau: string }).ouvertJusquau)}</p>
               ) : null}
               {k && k !== "erreur" && !k.compatible ? (
                 <button type="button" onClick={() => setChoisies((cs) => cs.filter((_, j) => j !== i))} className="min-h-11 self-start text-[15px] font-semibold underline underline-offset-4">
@@ -445,15 +491,23 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           <p role="status" className="text-center text-[14px] font-semibold text-ink">
             {!reception || lieu.trim().length < 3 || !dateBesoin
               ? `Il manque ${[!reception ? "livraison ou retrait" : null, lieu.trim().length < 3 ? "le lieu" : null, !dateBesoin ? "la date de besoin" : null].filter(Boolean).join(", ")}.`
-              : !pret
-                ? "Vérifie la quantité et le conditionnement de chaque ligne."
+              : verification
+                ? "Vérification en cours…"
+                : !pret
+                  ? (() => {
+                      // L'erreur qui reste nomme la ligne et le champ (lot E).
+                      const f = choisies.find((c) => !(Number(c.quantite.replace(",", ".")) > 0) || (c.parUnite && !c.conversionConfirmee) || compat[c.ligne.key] === "erreur");
+                      if (!f) return "Vérifie chaque ligne.";
+                      const nom = f.ligne.produit!.nom;
+                      return !(Number(f.quantite.replace(",", ".")) > 0) ? `« ${nom} » : indique la quantité.` : f.parUnite && !f.conversionConfirmee ? `« ${nom} » : confirme le conditionnement.` : `« ${nom} » : vérification impossible, réessaie.`;
+                    })()
                 : !etat.verification.complete
                   ? "Complète la vérification ci-dessus : SIRET, e-mail, qualité."
                   : "Coche la case pour confirmer."}
           </p>
         ) : null}
         <Button className="w-full" pending={pending} disabled={!coche || !pret || !etat.verification.complete} onClick={() => void confirmer()}>
-          {plusieurs ? `Valider mes ${choisies.length} articles` : "Valider"}
+          {pending ? "Publication en cours…" : plusieurs ? `Publier mes ${choisies.length} articles` : "Publier mon besoin"}
         </Button>
         <button type="button" onClick={() => setEtape("selection")} className="min-h-11 self-center text-[15px] font-semibold underline underline-offset-4">
           Revenir à la sélection
