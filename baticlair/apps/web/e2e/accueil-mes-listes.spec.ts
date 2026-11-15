@@ -282,8 +282,8 @@ test("Mes listes : une liste envoyée ne se supprime pas (raison dite) ; « Sél
 test("Accueil et Mes listes, thèmes clair et sombre : le titre et le texte des cartes se lisent (contraste AA)", async ({ page }) => {
   await inscrire(page);
   // « À faire » vide d'abord (« Créer un quantitatif »), puis la liste créée pour « Mes demandes ».
-  for (const [url, texte, theme] of [["/", "Créer un quantitatif", "sombre"], ["/", "Créer un quantitatif", "clair"], ["/chantiers", "Liste du thème", "sombre"], ["/chantiers", "Liste du thème", "clair"]] as const) {
-    if (url === "/chantiers" && theme === "sombre") await liste(page, "Liste du thème");
+  for (const [url, texte, theme] of [["/", "Créer un quantitatif", "sombre"], ["/", "Créer un quantitatif", "clair"], ["/chantiers?vue=suivi", "Liste du thème", "sombre"], ["/chantiers?vue=suivi", "Liste du thème", "clair"]] as const) {
+    if (url !== "/" && theme === "sombre") await liste(page, "Liste du thème");
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     {
       await page.goto(url);

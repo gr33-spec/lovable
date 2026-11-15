@@ -2592,7 +2592,8 @@ test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap
     ["/groupe", "Aide : Regroupement"],
     ["/fournisseurs", "Aide : Tes négoces"],
     ["/compte", "Aide : Ton compte"],
-    ["/chantiers", "Aide : Tes quantitatifs"],
+    // Lot UX mobile (15 novembre 2026) : l'onglet ouvre deux choix ; l'aide est dans le suivi.
+    ["/chantiers?vue=suivi", "Aide : Tes quantitatifs"],
   ] as const) {
     await page.goto(chemin);
     const bouton = page.getByRole("button", { name: "Aide" });

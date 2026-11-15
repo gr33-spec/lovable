@@ -73,13 +73,14 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
   const ville = `Plouha${unique().slice(-4)}`;
 
   // ACCUEIL (lot UX mobile, 15 novembre 2026) : un tableau de bord, plus les trois cartes qui doublonnaient le menu. Compte
-  // vide : le seul départ utile, aucune section vide ; le menu a quatre entrées.
+  // vide : le seul départ utile, aucune activité ; le menu a quatre entrées. (La base des parcours est partagée : un achat
+  // groupé ou une mission d'un autre parcours du même département peut s'afficher, c'est voulu.)
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Bonjour Greg" })).toBeVisible();
   await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: /^Créer un quantitatif/ })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: /^Voir les achats groupés|^Missions entre entreprises/ })).toHaveCount(0);
-  await expect(page.getByRole("region", { name: /Missions près de toi|Achats groupés qui peuvent|Activité récente/ })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Activité récente" })).toHaveCount(0);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
   for (const onglet of ["Accueil", "Quantitatifs", "Achats groupés", "Missions"]) await expect(nav.getByRole("link", { name: onglet, exact: true })).toBeVisible();
   await capture(page, "01-accueil");
