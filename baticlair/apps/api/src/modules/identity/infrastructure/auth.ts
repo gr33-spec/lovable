@@ -9,6 +9,9 @@ import type { PrismaService } from "../../../platform/database/prisma.service.js
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { resetPasswordEmail, verificationEmail } from "./emails.js";
 import { NOM_APP } from "@baticlair/domain";
+import { Logger } from "@nestjs/common";
+
+const journal = new Logger("Securite");
 
 export const AUTH_BASE_PATH = "/v1/auth";
 
@@ -42,6 +45,14 @@ export function createAuth(config: AppConfig, prisma: PrismaService, email: Tran
     // Recentrage (Greg, 25 octobre 2026) : l'admin peut couper temporairement les inscriptions gratuites (coût IA) ;
     // un nouveau compte est alors refusé avec une phrase claire. Les comptes existants ne changent pas.
     databaseHooks: {
+      // Journal de sécurité : un mot de passe changé ou réinitialisé laisse une trace (qui, quand), jamais le mot de passe.
+      account: {
+        update: {
+          after: async (compte) => {
+            if (compte.providerId === "credential") journal.log(`mot_de_passe_modifie user=${compte.userId}`);
+          },
+        },
+      },
       user: {
         create: {
           before: async () => {
@@ -93,6 +104,8 @@ export function createAuth(config: AppConfig, prisma: PrismaService, email: Tran
         "/request-password-reset": { window: 3600, max: 3 },
         "/forget-password": { window: 3600, max: 3 },
         "/send-verification-email": { window: 3600, max: 3 },
+        // Lot B (Greg, 15 novembre 2026) : le changement de mot de passe depuis le compte, cinq essais par heure.
+        "/change-password": { window: 3600, max: 5 },
       },
     },
     advanced: {

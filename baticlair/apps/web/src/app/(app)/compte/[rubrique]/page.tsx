@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ResumeAbonnement } from "@/components/abonnement";
 import { AdresseMobiizCard } from "@/components/adresse-mobiiz";
 import { EditeurApparence } from "@/components/apparence-editeur";
+import { ChangerMotDePasse } from "@/components/changer-mot-de-passe";
 import { DossierProfessionnel, GuideEtChantierFictif, OuLireLesReponses, ProfilPublicEditeur, ReglagesNotifications } from "@/components/compte-missions";
 import { ButtonLink } from "@/components/ui";
 import { EnTeteRubrique } from "@/components/en-tete-rubrique";
@@ -199,12 +200,7 @@ function Informations() {
           <p className="text-sm text-muted">La confirmation par e-mail sera activée prochainement.</p>
         )}
       </Card>
-      <Card className="flex flex-col gap-1 p-4">
-        <h2 className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">Sécurité</h2>
-        <p className="text-[14px] text-muted">
-          Ton mot de passe se change depuis l&apos;écran de connexion, avec « Mot de passe oublié ? » : un lien t&apos;arrive par e-mail.
-        </p>
-      </Card>
+      <ChangerMotDePasse />
       <Button variant="secondary" pending={leaving} onClick={() => void signOut()}>
         Se déconnecter
       </Button>
