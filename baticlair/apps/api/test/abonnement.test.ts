@@ -167,6 +167,46 @@ describe("le paiement simulé", () => {
     expect((await A.agent.get(`/v1/abonnement?${q(m)}`).expect(200)).body).toMatchObject({ resiliationProgrammee: true, bandeauRouge: false });
   });
 
+  it("recette n° 2 du 14 novembre 2026 : deux « Payer » au même instant (deux sessions) ne font qu'un abonnement et une seule facture", async () => {
+    const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
+    const session = async () => new URL((await A.agent.post("/v1/abonnement/payer").expect(200)).body.url).searchParams.get("session")!;
+    // Deux pages de paiement ouvertes avant de payer (deux onglets), puis « Payer » sur les deux au même instant.
+    const [s1, s2] = [await session(), await session()];
+    const [r1, r2] = await Promise.all([s1, s2].map((s) => A.agent.post(`/v1/abonnement/simulation/${s}?${q(T)}`).send({ issue: "payer" })));
+    expect([r1!.status, r2!.status].sort()).toEqual([200, 400]);
+    const refus = r1!.status === 400 ? r1! : r2!;
+    expect(refus.body.error.details).toMatchObject({ reason: "deja_abonne" });
+    expect(refus.body.error.details.phrase).toMatch(/^Tu es déjà abonné jusqu'au .* Rien n'a été prélevé\.$/);
+    expect((await A.agent.get("/v1/abonnement/factures").expect(200)).body.factures).toHaveLength(1);
+    expect(mailsVers(ctx, "a@toitures.fr").filter((m) => m.subject === "Ton abonnement Mobiiz est actif")).toHaveLength(1);
+    // Le double appui sur la MÊME session reste sans effet : toujours une facture.
+    await Promise.all([0, 1].map(() => A.agent.post(`/v1/abonnement/simulation/${r1!.status === 200 ? s1 : s2}?${q(T)}`).send({ issue: "payer" })));
+    expect((await A.agent.get("/v1/abonnement/factures").expect(200)).body.factures).toHaveLength(1);
+  });
+
+  it("recette n° 2 du 14 novembre 2026 : j'ai choisi Pro à l'année, carte refusée ; « Mettre à jour ma carte » repart de Pro à l'année, pas d'Essentiel", async () => {
+    const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
+    const { url } = (await A.agent.post("/v1/abonnement/payer").send({ formule: "pro", periodicite: "annuel" }).expect(200)).body;
+    const session = new URL(url).searchParams.get("session")!;
+    const vue = (await A.agent.post(`/v1/abonnement/simulation/${session}?${q(T)}`).send({ issue: "echec" }).expect(200)).body;
+    expect(vue).toMatchObject({ acces: "grace", statut: "echec", bandeauRouge: true, renouvellementEnCours: false, formule: "pro", periodicite: "annuel", periode: "par an" });
+    // Le prix affiché est celui de Pro à l'année, jamais 19,90 €.
+    expect(vue.prixHt).toBe(vue.offres.find((o: { formule: string }) => o.formule === "pro").annuel.ht ?? vue.prixHt);
+    expect(String(vue.prixHt)).not.toMatch(/19[,.]9/);
+  });
+
+  it("recette n° 2 du 14 novembre 2026 : entre la fin du mois et le renouvellement, l'accès continue sans « Paiement refusé »", async () => {
+    const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
+    await payer(A.agent, "payer");
+    // Un mois et un jour plus tard, avant que le renouvellement ne soit passé : rien n'a été refusé.
+    const entreDeux = (await A.agent.get(`/v1/abonnement?${q("2026-11-25T08:00:00.000Z")}`).expect(200)).body;
+    expect(entreDeux).toMatchObject({ acces: "grace", statut: "actif", bandeauRouge: false, renouvellementEnCours: true, bandeau: null });
+    expect(mailsVers(ctx, "a@toitures.fr").some((m) => /paiement n'est pas passé|refusé/i.test(m.subject + m.text))).toBe(false);
+    // Un vrai refus, lui, garde son bandeau rouge.
+    const B = await signUpWithCompany(ctx.app, "b@toitures.fr", "Toitures B", ["roofing"]);
+    expect(await payer(B.agent, "echec")).toMatchObject({ acces: "grace", bandeauRouge: true, renouvellementEnCours: false });
+  });
+
   it("résiliation : effet en fin de période, e-mail de confirmation, puis le paywall", async () => {
     const A = await signUpWithCompany(ctx.app, "a@toitures.fr", "Toitures A", ["roofing"]);
     await inscritLe(A.companyId, "2026-07-01T10:00:00.000Z");

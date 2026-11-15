@@ -842,6 +842,8 @@ export interface Abonnement {
   tvaIntra: string | null;
   bandeau: string | null;
   bandeauRouge: boolean;
+  /** La période payée est finie et le renouvellement arrive : rien n'a été refusé (recette n° 2 du 14 novembre 2026). */
+  renouvellementEnCours?: boolean;
   paywall: { phrase: string; economie: string | null };
 }
 

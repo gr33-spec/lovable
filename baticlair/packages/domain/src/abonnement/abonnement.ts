@@ -128,6 +128,12 @@ export interface EtatAbonnement {
   joursEssai: number | null;
   graceFinLe: Date | null;
   joursGrace: number | null;
+  /**
+   * La grâce vient d'un paiement réellement REFUSÉ (recette n° 2 du 14 novembre 2026 : « "Paiement refusé" en rouge alors
+   * que rien n'a été refusé, entre la fin du mois et le renouvellement »). Faux pendant qu'un renouvellement arrive :
+   * l'accès est le même, mais rien ne se dit « refusé ».
+   */
+  paiementRefuse: boolean;
   /** La fin de la période payée. */
   periodeFin: Date | null;
   resiliationProgrammee: boolean;
@@ -140,7 +146,7 @@ const joursAvant = (fin: Date, maintenant: Date) => Math.max(0, Math.ceil((fin.g
 /** L'état de l'abonnement à un instant : abonné, en grâce, en essai, ou bloqué par le paywall. */
 export function etatAbonnement(dates: DatesEssai, paiement: EtatPaiement, maintenant: Date, r: ReglagesAbonnement = REGLAGES_ABONNEMENT_DEFAUT): EtatAbonnement {
   const essaiFinLe = finDEssai(dates, r);
-  const base = { essaiFinLe, joursEssai: null, graceFinLe: null, joursGrace: null, periodeFin: paiement.periodeFin, // Recette n° 2 du 14 novembre 2026 (G4) : une résiliation demandée pendant un paiement refusé se voit aussi (avant :
+  const base = { essaiFinLe, joursEssai: null, graceFinLe: null, joursGrace: null, paiementRefuse: false, periodeFin: paiement.periodeFin, // Recette n° 2 du 14 novembre 2026 (G4) : une résiliation demandée pendant un paiement refusé se voit aussi (avant :
     // seulement sur un abonnement actif, donc l'écran restait sur « Paiement refusé » avec son bouton « Résilier »).
     resiliationProgrammee: (paiement.statut === "actif" || paiement.statut === "echec") && !!paiement.resiliationDemandeeLe, accesJusquau: null };
   const periodeEnCours = !!paiement.periodeFin && paiement.periodeFin > maintenant;
@@ -149,7 +155,7 @@ export function etatAbonnement(dates: DatesEssai, paiement: EtatPaiement, mainte
   let graceFinLe: Date | null = null;
   if (paiement.statut === "echec") graceFinLe = plusJours(paiement.echecLe ?? paiement.periodeFin ?? maintenant, r.joursGrace);
   else if (paiement.statut === "actif" && paiement.periodeFin && !paiement.resiliationDemandeeLe) graceFinLe = plusJours(paiement.periodeFin, r.joursGrace);
-  if (graceFinLe && graceFinLe > maintenant) return { ...base, acces: "grace", graceFinLe, joursGrace: joursAvant(graceFinLe, maintenant) };
+  if (graceFinLe && graceFinLe > maintenant) return { ...base, acces: "grace", graceFinLe, joursGrace: joursAvant(graceFinLe, maintenant), paiementRefuse: paiement.statut === "echec" };
   if (essaiFinLe === null || essaiFinLe > maintenant) return { ...base, acces: "essai", joursEssai: essaiFinLe ? joursAvant(essaiFinLe, maintenant) : null };
   const fins = [essaiFinLe, graceFinLe, paiement.periodeFin].filter((d): d is Date => !!d);
   return { ...base, acces: "bloque", graceFinLe, accesJusquau: new Date(Math.max(...fins.map((d) => d.getTime()))) };
@@ -245,7 +251,8 @@ const dateCourte = (d: Date) => new Intl.DateTimeFormat("fr-FR", { timeZone: "Eu
 
 /** Le bandeau de la grâce (paiement refusé). */
 export function bandeauGrace(etat: EtatAbonnement): string | null {
-  if (etat.acces !== "grace" || !etat.graceFinLe) return null;
+  // Un renouvellement en cours (aucun refus) ne dit rien : seul un paiement réellement refusé a son bandeau.
+  if (etat.acces !== "grace" || !etat.graceFinLe || !etat.paiementRefuse) return null;
   return `Ton paiement n'est pas passé. Mets à jour ta carte avant le ${dateCourte(etat.graceFinLe)} pour garder l'accès.`;
 }
 

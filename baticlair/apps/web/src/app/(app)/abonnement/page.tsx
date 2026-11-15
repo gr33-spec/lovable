@@ -124,13 +124,23 @@ function Etat({ abonnement: a, onChange }: { abonnement: Abonnement; onChange: (
             {a.resiliationProgrammee || a.statut === "resilie" ? (
               <p className="text-[20px] font-extrabold">Abonnement résilié</p>
             ) : (
+              // Recette n° 2 du 14 novembre 2026 : entre la fin du mois et le renouvellement, rien n'a été refusé ; l'écran le
+              // dit calmement, sans rouge ni « Mettre à jour ma carte ».
+              a.renouvellementEnCours ? (
+                <>
+                  <p className="text-[20px] font-extrabold">Abonnement en cours de renouvellement</p>
+                  <p className="text-[16px]">Ton accès continue. Rien à faire de ton côté.</p>
+                </>
+              ) : (
               <>
                 <p className="text-[20px] font-extrabold text-danger">Paiement refusé</p>
                 <p className="text-[16px]">{a.bandeau}</p>
               </>
+              )
             )}
-            {a.resiliationProgrammee || a.statut === "resilie" ? null : (
-              <Button onClick={() => void run("payer", a.paiement === "stripe" ? async () => window.location.assign((await api<{ url: string }>("/v1/abonnement/portail", { method: "POST" })).url) : () => continuerAbonnement(a.formule))} pending={pending === "payer"} className="self-start">
+            {a.resiliationProgrammee || a.statut === "resilie" || a.renouvellementEnCours ? null : (
+              // « Mettre à jour ma carte » repart de la formule ET de la périodicité choisies (avant : Essentiel au mois).
+              <Button onClick={() => void run("payer", a.paiement === "stripe" ? async () => window.location.assign((await api<{ url: string }>("/v1/abonnement/portail", { method: "POST" })).url) : () => continuerAbonnement(a.formule, a.periodicite))} pending={pending === "payer"} className="self-start">
                 Mettre à jour ma carte
               </Button>
             )}

@@ -229,7 +229,10 @@ export class AbonnementService {
       tvaIntra: p.ligne?.tvaIntra ?? null,
       // Recette n° 2 du 14 novembre 2026 (G4) : une fois la résiliation demandée, plus de bandeau rouge « Paiement refusé ».
       bandeau: this.actif ? ((etat.resiliationProgrammee && etat.acces === "grace" ? null : bandeauGrace(etat)) ?? (gratuit ? null : bandeauEssai(etat))) : null,
-      bandeauRouge: this.actif && etat.acces === "grace" && !etat.resiliationProgrammee,
+      // Recette n° 2 du 14 novembre 2026 : rouge seulement pour un paiement réellement refusé, jamais pendant un renouvellement.
+      bandeauRouge: this.actif && etat.acces === "grace" && etat.paiementRefuse && !etat.resiliationProgrammee,
+      /** La période payée est finie et le renouvellement arrive (rien n'a été refusé) : l'accès continue, sans alerte. */
+      renouvellementEnCours: this.actif && etat.acces === "grace" && !etat.paiementRefuse && !etat.resiliationProgrammee,
       paywall: { phrase: gratuit ? TARIFS.paywallAchatGroupe : phrasePaywall(reglages), economie: gratuit ? null : phraseEconomiePremierCycle(ecart) },
     };
   }
@@ -266,22 +269,43 @@ export class AbonnementService {
       throw validationFailed("Already subscribed", { reason: "deja_abonne", phrase: `Tu es déjà abonné jusqu'au ${dateFr(a.periodeFin)}. Rien n'a été prélevé.` });
   }
 
+  /**
+   * Un seul paiement à la fois par entreprise : le verrou tient une connexion le temps de vérifier puis d'appliquer (les
+   * écritures passent par d'autres connexions). Deux onglets, deux appareils ou deux appuis au même instant se suivent.
+   */
+  private sousVerrouPaiement<T>(companyId: string, f: () => Promise<T>): Promise<T> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`abonnement-paiement:${companyId}`}))`;
+        return f();
+      },
+      { maxWait: 20_000, timeout: 60_000 },
+    );
+  }
+
   /** La page « Paiement (simulation) » : « Payer » ou « Échec du paiement ». Les mêmes événements que Stripe. */
   async simuler(tenant: TenantContext, session: string, issue: "payer" | "echec", maintenant = this.now()) {
     assertCanWrite(tenant);
     if (!this.actif || this.config.abonnement.paiement !== "simule") throw notFound("Route");
     const s = await this.prisma.evenementAbonnement.findUnique({ where: { refExterne: session } });
     if (!s || s.type !== "session" || s.companyId !== tenant.companyId) throw notFound("Session");
+    const d = s.donnees as { formule?: unknown; periodicite?: unknown } | null;
+    const formule: Formule = formuleEnregistree(d?.formule);
+    const periodicite = periodiciteDe(d?.periodicite);
     if (issue === "payer") {
-      // Un double appui sur « Payer » de la MÊME session reste sans effet (une seule facture) ; seul un AUTRE paiement est refusé.
-      const dejaPayee = await this.prisma.evenementAbonnement.findUnique({ where: { refExterne: `${session}:paye` }, select: { id: true } });
-      if (!dejaPayee) await this.refuserSiDejaAbonne(tenant.companyId, maintenant);
-      const d = s.donnees as { formule?: unknown; periodicite?: unknown } | null;
-      const formule: Formule = formuleEnregistree(d?.formule);
-      const periodicite = periodiciteDe(d?.periodicite);
-      await this.appliquer(tenant.companyId, { type: "actif", source: "simule", formule, periodicite, ref: `${session}:paye`, periodeDebut: maintenant, periodeFin: finDePeriode(maintenant, formule, periodicite), facture: { ref: `${session}:paye` } }, maintenant);
+      // Recette n° 2 du 14 novembre 2026 : « deux "Payer" au même instant passent tous les deux : 2 factures ». La
+      // vérification et le paiement se font d'un seul tenant, sous un verrou propre à l'entreprise : le second paiement
+      // attend la fin du premier, relit l'abonnement, et est refusé (« Tu es déjà abonné »). Rien n'est prélevé deux fois.
+      await this.sousVerrouPaiement(tenant.companyId, async () => {
+        // Un double appui sur « Payer » de la MÊME session reste sans effet (une seule facture) ; seul un AUTRE paiement est refusé.
+        const dejaPayee = await this.prisma.evenementAbonnement.findUnique({ where: { refExterne: `${session}:paye` }, select: { id: true } });
+        if (!dejaPayee) await this.refuserSiDejaAbonne(tenant.companyId, maintenant);
+        await this.appliquer(tenant.companyId, { type: "actif", source: "simule", formule, periodicite, ref: `${session}:paye`, periodeDebut: maintenant, periodeFin: finDePeriode(maintenant, formule, periodicite), facture: { ref: `${session}:paye` } }, maintenant);
+      });
     } else {
-      await this.appliquer(tenant.companyId, { type: "echec", source: "simule", ref: `${session}:echec` }, maintenant);
+      // « J'ai choisi Pro, carte refusée : "Mettre à jour ma carte" vend Essentiel » : la formule et la périodicité
+      // choisies sont gardées avec l'échec (avant, un premier paiement refusé ne retenait rien, donc Essentiel au mois).
+      await this.appliquer(tenant.companyId, { type: "echec", source: "simule", formule, periodicite, ref: `${session}:echec` }, maintenant);
     }
     return this.vue(tenant, maintenant);
   }
@@ -373,7 +397,9 @@ export class AbonnementService {
         data = { statut: "actif", formule, periodicite, periodeDebut: e.periodeDebut ?? maintenant, periodeFin: e.periodeFin ?? finDePeriode(e.periodeDebut ?? maintenant, formule, periodicite), echecLe: null, ...(e.type === "actif" ? { resiliationDemandeeLe: null, resilieLe: null } : {}) };
         break;
       case "echec":
-        data = { statut: "echec", echecLe: avant?.echecLe ?? maintenant };
+        // Un PREMIER paiement refusé retient la formule et la périodicité choisies (« Mettre à jour ma carte » repart de
+        // là) ; un abonnement qui a déjà sa formule la garde : un échec ne change jamais de formule.
+        data = { statut: "echec", echecLe: avant?.echecLe ?? maintenant, ...(avant?.periodeDebut == null && e.formule ? { formule: e.formule, periodicite } : {}) };
         break;
       case "resiliation_demandee":
         data = { resiliationDemandeeLe: avant?.resiliationDemandeeLe ?? maintenant };
