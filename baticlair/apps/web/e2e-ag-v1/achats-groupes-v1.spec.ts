@@ -456,7 +456,7 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   expect(lignes.body.lignes.filter((l) => l.texte === "Déjà dans un achat groupé")).toHaveLength(2);
 });
 
-test("une ligne, un seul circuit (Greg, 8 novembre 2026) : un article déjà envoyé à un négoce ne se groupe pas, et la raison est dite simplement", async ({ page }) => {
+test("article déjà envoyé aux négoces (Greg, 16 novembre 2026) : il reste cochable, la question est posée, « Non » ne change rien, « Oui » l'ajoute au besoin groupé", async ({ page }) => {
   test.setTimeout(180_000);
   await inscrire(page);
   const q = await apiJson<{ id: string; projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Ardoise naturelle 32x22 Espagne 1er choix 5 mm", quantite: "10", unite: "palettes" }] });
@@ -467,31 +467,52 @@ test("une ligne, un seul circuit (Greg, 8 novembre 2026) : un article déjà env
     courant = (await apiJson<typeof courant>(page, "POST", `/v1/quantitatifs/${q.body.id}/reponses`, { reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
   }
   expect((await apiJson(page, "POST", `/v1/quantitatifs/${q.body.id}/validation`)).status).toBe(200);
-  const negoce = (await apiJson<{ id: string }>(page, "POST", "/v1/suppliers", { name: `Négoce ${unique()}`, email: `ventes-${unique()}@negoce.example` })).body;
+  const negoceNom = `Négoce ${unique()}`;
+  const negoce = (await apiJson<{ id: string }>(page, "POST", "/v1/suppliers", { name: negoceNom, email: `ventes-${unique()}@negoce.example` })).body;
   const demande = await apiJson<{ recipients: { id: string }[] }>(page, "POST", `/v1/projects/${q.body.projetId}/price-requests`, { supplierIds: [negoce.id] });
   expect(demande.status).toBe(201);
   expect((await apiJson(page, "POST", `/v1/price-request-recipients/${demande.body.recipients[0]!.id}/send`)).status).toBe(200);
-  // La fiche le dit, puis l'écran de sélection : l'article ne se coche pas, la raison en une phrase.
+  // RÈGLE CHANGÉE : avant, un article déjà envoyé à un négoce ne se groupait jamais ; maintenant, après un « oui ».
   await page.goto(`/chantiers/${q.body.projetId}`);
-  await expect(page.getByRole("list", { name: "Articles déjà engagés" })).toContainText("1 article déjà envoyé à tes négoces : il ne peut pas être groupé.");
+  await expect(page.getByRole("list", { name: "Articles déjà engagés" })).toContainText("1 article déjà envoyé à tes négoces : tu peux quand même le mettre en achat groupé.");
   await page.getByRole("region", { name: "Achats groupés" }).getByRole("link", { name: "Ajouter aux achats groupés" }).click();
   await expect(page.getByRole("heading", { name: "Quels articles grouper ?" })).toBeVisible();
-  const bloques = page.getByRole("list", { name: "Articles qui ne peuvent pas être groupés" });
-  await expect(bloques).toBeVisible();
-  await expect(bloques).toContainText("Déjà envoyé à tes négoces en demande de prix.");
-  await expect(page.getByText("Un article part soit chez tes négoces, soit en achat groupé, jamais les deux.")).toBeVisible();
-  await expect(page.getByRole("checkbox")).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "Articles qui ne peuvent pas être groupés" })).toHaveCount(0);
+  await expect(page.getByText("Déjà envoyé à tes négoces", { exact: true })).toBeVisible();
+  const caseArticle = page.getByRole("checkbox");
+  await expect(caseArticle).toHaveCount(1);
+  // La question, mot pour mot ; « Non » : rien n'est coché.
+  await caseArticle.click();
+  const question = page.getByRole("alertdialog", { name: "Déjà envoyé à tes négoces" });
+  await expect(question).toContainText("Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ?");
+  await capture(page, "22-deja-envoye-question");
+  await question.getByRole("button", { name: "Non", exact: true }).click();
+  await expect(question).toHaveCount(0);
+  await expect(caseArticle).not.toBeChecked();
   await expect(page.getByRole("button", { name: "Choisis des articles" })).toBeDisabled();
-  await capture(page, "22-un-seul-circuit");
-  // Et le serveur refuse quand même, quoi qu'envoie l'écran.
-  const etat = (await apiJson<{ produits: unknown[] }>(page, "GET", "/v1/ag/etat")).body;
-  expect(etat.produits.length).toBeGreaterThan(0);
-  const lignes = (await apiJson<{ lignes: { key: string; texte: string }[] }>(page, "GET", `/v1/ag/projects/${q.body.projetId}/lignes`)).body.lignes;
-  expect(lignes[0]!.texte).toBe("Déjà dans une demande individuelle");
-  const refus = await apiJson<{ error: { details?: { message?: string } } }>(page, "POST", "/v1/ag/besoins", {
-    confirmation: true,
-    cleIdempotence: unique(),
-    besoins: [{ type: "ardoise", attributs: { format: "32x22", origine: "espagne", choix: "1", epaisseur: "5" }, quantite: 10, unite: "palette", parUnite: 480, conversionConfirmee: true, reception: "livraison", lieu: `3 rue des Ajoncs, ${zone().cp} ${zone().ville}`, dateBesoin: jourDans(40), achatId: null, projectId: q.body.projetId, articleKey: lignes[0]!.key }],
-  });
+  // Sans le « oui », le serveur refuse et pose la même question, quoi qu'envoie l'écran.
+  const corps = { type: "ardoise", attributs: { format: "32x22", origine: "espagne", choix: "1", epaisseur: "5" }, quantite: 10, unite: "palette", parUnite: 480, conversionConfirmee: true, reception: "livraison", lieu: `3 rue des Ajoncs, ${zone().cp} ${zone().ville}`, dateBesoin: jourDans(40), projectId: q.body.projetId, articleKey: (await apiJson<{ lignes: { key: string }[] }>(page, "GET", `/v1/ag/projects/${q.body.projetId}/lignes`)).body.lignes[0]!.key };
+  const refus = await apiJson<{ error: { details?: { reason?: string; message?: string; aConfirmer?: boolean; verification?: unknown } } }>(page, "POST", "/v1/ag/besoins", { confirmation: true, cleIdempotence: unique(), besoins: [corps] });
   expect(refus.status).toBeGreaterThanOrEqual(400);
+  // « Oui » : l'article est coché, puis le parcours habituel jusqu'à la validation.
+  await caseArticle.click();
+  await question.getByRole("button", { name: "Oui", exact: true }).click();
+  await expect(caseArticle).toBeChecked();
+  await page.getByRole("button", { name: "Continuer avec 1 article" }).click();
+  await expect(page.getByRole("heading", { name: "Vérifie et valide" })).toBeVisible();
+  await page.getByText("Livraison sur chantier").click();
+  await page.getByLabel("Lieu de livraison (privé)").fill(`3 rue des Ajoncs, ${zone().cp} ${zone().ville}`);
+  await page.getByLabel("J'ai besoin de ces matériaux avant le").fill(jourDans(40));
+  await page.getByRole("button", { name: /^Confirmer \d+ pièces par palette$/ }).click();
+  await page.getByText("Ton entreprise").waitFor();
+  await page.getByText("Dirigeant", { exact: true }).click();
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("checkbox", { name: /Je confirme/ }).check();
+  await page.getByRole("button", { name: "Valider", exact: true }).click();
+  await expect(page).toHaveURL(/\/achats-groupes\?ajoutes=1$/);
+  // La ligne reste dans sa demande individuelle (toujours envoyée), et elle est dans le besoin groupé.
+  const apres = (await apiJson<{ lignes: { texte: string }[] }>(page, "GET", `/v1/ag/projects/${q.body.projetId}/lignes`)).body.lignes;
+  expect(apres[0]!.texte).toBe("Déjà dans un achat groupé");
+  await page.goto(`/chantiers/${q.body.projetId}`);
+  await expect(page.getByText(negoceNom).first()).toBeVisible();
 });

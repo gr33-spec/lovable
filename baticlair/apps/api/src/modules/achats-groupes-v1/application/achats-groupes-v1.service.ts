@@ -74,6 +74,8 @@ export interface BesoinSaisi {
   achatId: string | null;
   projectId: string | null;
   articleKey: string | null;
+  /** La ligne est déjà partie en demande de prix et l'artisan a répondu « oui » à la question (16 novembre 2026). */
+  dejaEnvoyeConfirme?: boolean;
 }
 
 type Tx = Parameters<Extract<Parameters<PrismaService["$transaction"]>[0], (...a: never[]) => unknown>>[0];
@@ -294,10 +296,10 @@ export class AchatsGroupesV1Service {
             // Le verrou de la ligne : deux confirmations simultanées ne la font jamais entrer deux fois.
             await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`ag-ligne:${b.projectId}:${b.articleKey}`}))`;
             const f = (await faitsDesLignes(tx as unknown as PrismaService, tenant.companyId, b.projectId, maintenant))(b.articleKey);
-            const v = peutCircuit({ demandeEnvoyee: f.demandeEnvoyee, commandee: f.commandeeSeule || f.groupe?.statut === "accepte", enRecherche: f.enRecherche, dansUnAchatGroupe: !!f.groupe }, "rejoindre_achat_groupe", nom);
+            const v = peutCircuit({ demandeEnvoyee: f.demandeEnvoyee, commandee: f.commandeeSeule || f.groupe?.statut === "accepte", enRecherche: f.enRecherche, dansUnAchatGroupe: !!f.groupe }, "rejoindre_achat_groupe", nom, { dejaEnvoyeConfirme: b.dejaEnvoyeConfirme === true });
             if (!v.permis) {
-              const r = v as { raison: string; message: string };
-              throw conflit(`circuit_${r.raison}`, r.message, { articleKey: b.articleKey });
+              const r = v as { raison: string; message: string; aConfirmer?: boolean };
+              throw conflit(`circuit_${r.raison}`, r.message, { articleKey: b.articleKey, ...(r.aConfirmer ? { aConfirmer: true } : {}) });
             }
             arreterSurveillance = !!v.arreterSurveillance;
           }

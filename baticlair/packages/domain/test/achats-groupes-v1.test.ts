@@ -41,10 +41,15 @@ const libre = { demandeEnvoyee: false, commandee: false, enRecherche: false, dan
 const NOW = new Date("2026-11-07T10:00:00Z");
 
 describe("une ligne, un seul circuit", () => {
-  it("une ligne en demande individuelle ne rejoint jamais un achat groupé, et inversement", () => {
+  it("une ligne déjà envoyée aux négoces rejoint un achat groupé seulement après un « oui » ; une ligne groupée ne part pas en demande individuelle", () => {
+    // RÈGLE CHANGÉE (Greg, 16 novembre 2026) : avant, jamais ; maintenant, après confirmation, la question mot pour mot.
     const enDemande = { ...libre, demandeEnvoyee: true };
     expect(circuitDeLigne(enDemande)).toBe("demande_individuelle");
-    expect(peutCircuit(enDemande, "rejoindre_achat_groupe").permis).toBe(false);
+    expect(peutCircuit(enDemande, "rejoindre_achat_groupe")).toEqual({ permis: false, raison: "demande_individuelle", message: "Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ?", aConfirmer: true });
+    expect(peutCircuit(enDemande, "rejoindre_achat_groupe", "Ardoise", { dejaEnvoyeConfirme: true })).toEqual({ permis: true });
+    // Le « oui » ne lève que ce refus-là : ni une ligne commandée, ni une ligne déjà groupée.
+    expect(peutCircuit({ ...enDemande, commandee: true }, "rejoindre_achat_groupe", "Ardoise", { dejaEnvoyeConfirme: true }).permis).toBe(false);
+    expect(peutCircuit({ ...enDemande, dansUnAchatGroupe: true }, "rejoindre_achat_groupe", "Ardoise", { dejaEnvoyeConfirme: true }).permis).toBe(false);
     const enGroupe = { ...libre, dansUnAchatGroupe: true };
     expect(circuitDeLigne(enGroupe)).toBe("achat_groupe");
     const v = peutCircuit(enGroupe, "envoyer_demande_individuelle", "Ardoise");
@@ -130,15 +135,20 @@ describe("classement par lot d'une liste tapée à la main", () => {
 });
 
 describe("mentions de la sélection", () => {
-  it("recommandé (quantité adaptée), compatible (modeste), déjà en demande individuelle", () => {
+  it("recommandé (quantité adaptée), compatible (modeste), déjà envoyé aux négoces (cochable, avec sa question)", () => {
     const reco = classerLigneV1({ designation: "Ardoise naturelle 32x22 Espagne 1er choix 5 mm", quantite: 10, unite: "palettes", faits: libre });
     expect(reco.mention).toBe("recommande");
     expect(reco.quantite).toEqual({ valeur: 10, unite: "palette", conditionnement: { unite: "palette", parDefaut: 480 } });
     const cable = classerLigneV1({ designation: "Câble R2V 3G2,5", quantite: 6, unite: "couronnes", faits: libre });
     expect(cable.mention).toBe("compatible");
     const ecran = classerLigneV1({ designation: "Écran sous toiture HPV rouleau 75 m2", quantite: 3, unite: "rouleaux", faits: { ...libre, demandeEnvoyee: true } });
-    expect(ecran.texte).toBe("Déjà dans une demande individuelle");
-    expect(ecran.selectionnable).toBe(false);
+    expect(ecran.texte).toBe("Déjà envoyé à tes négoces");
+    expect(ecran.selectionnable).toBe(true);
+    expect(ecran.confirmation).toBe("Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ?");
+    // Une ligne libre n'a pas de question ; une ligne envoyée mais imprécise reste « à préciser », avec la question.
+    expect(reco.confirmation).toBeUndefined();
+    const floue = classerLigneV1({ designation: "Ardoise naturelle 35x25 Espagne", quantite: 3000, unite: "pièces", faits: { ...libre, demandeEnvoyee: true } });
+    expect(floue).toMatchObject({ mention: "a_preciser", selectionnable: false, confirmation: ecran.confirmation });
   });
   it("une quantité dans une unité étrangère au produit est à préciser (jamais convertie en douce)", () => {
     const c = classerLigneV1({ designation: "Ardoise naturelle 32x22 Espagne 1er choix 5 mm", quantite: 120, unite: "m²", faits: libre });

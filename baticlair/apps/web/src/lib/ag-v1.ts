@@ -112,6 +112,8 @@ export interface LigneQuantitatifV1 {
   texte: string;
   pourquoi: string;
   selectionnable: boolean;
+  /** Déjà envoyé aux négoces : la question à laquelle répondre « oui » avant de cocher (16 novembre 2026). */
+  confirmation?: string;
 }
 
 /**

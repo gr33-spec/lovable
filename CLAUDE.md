@@ -121,10 +121,18 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Signalements : gardés 12 mois, puis supprimés tout seuls. Taux de réponse des négoces : visible seulement dans l'admin.
 - L'onglet Quantitatifs ouvre deux choix : « Créer un quantitatif » et « Suivre mes demandes » (le suivi : `/chantiers?vue=suivi`, avec négoces, réponses, recherche et filtres). Règle changée : avant, la liste directement.
 - L'accueil est un tableau de bord : « À faire maintenant », « Achats groupés qui peuvent t'intéresser », « Missions près de toi » (si Mission est active), « Activité récente ». Trois cartes au plus par section, aucune section vide, aucune donnée inventée, aucun nom d'une autre entreprise. Règle changée : avant, trois grandes cartes.
-- Achats groupés : « Publier un besoin », bouton flottant au-dessus du menu sur téléphone, bouton d'en-tête sur ordinateur ; deux chemins (« Choisir dans un quantitatif », « Saisir un nouveau besoin »). Un article déjà envoyé aux négoces ne se groupe toujours pas (à revoir après les retours terrain).
+- Achats groupés : « Publier un besoin », bouton flottant au-dessus du menu sur téléphone, bouton d'en-tête sur ordinateur ; deux chemins (« Choisir dans un quantitatif », « Saisir un nouveau besoin »). (Règle changée le 16 novembre : un article déjà envoyé aux négoces se groupe après confirmation, voir plus bas.)
 - Missions : recherche, trois filtres (Missions, Entreprises, Mes annonces), deux actions compactes, puis « Près de toi ».
 - Les neuf testeurs restent en local. Le paiement du code FONDATEUR se teste juste avant le lancement. L'assistant reste allumé sur le site de test.
 - Le jaune du code est #FED206 : gardé (tranché le 16 novembre 2026).
+
+## Décisions du 16 novembre 2026
+
+- Jaune : #FED206, celui du code. Négoce invité seulement avec sa première demande de prix : plus d'e-mail « créez votre accès » depuis « Mes négoces ».
+- Mission : l'application affiche « Bientôt » avec le principe ; fonctions désactivées ; un interrupteur dans l'admin (Réglages) les ouvre d'un clic, sans redéploiement. `MISSIONS_V1` ne sert plus que de valeur par défaut tant que l'admin n'a rien choisi.
+- Un seul outil de saisie : « Saisir un nouveau besoin » (achats groupés) ouvre l'écran « Nouveau quantitatif » (« Je saisis ma liste » ou « Mobiiz m'aide »), puis l'écran où l'on coche les lignes à grouper. Règle changée : avant, une conversation propre aux achats groupés.
+- Article déjà envoyé aux négoces : cochable en achat groupé après « Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ? » (Oui / Non). Il reste dans sa demande individuelle. Règle changée : avant, jamais.
+- Ordre des anciennes demandes : gênants côté demandes, gênants côté abonnement, lot B, lot D. Le reste attend l'après-lancement.
 
 ## Signalement de bugs
 

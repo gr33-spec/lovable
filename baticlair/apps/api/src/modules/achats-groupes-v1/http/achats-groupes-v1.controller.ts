@@ -28,6 +28,7 @@ const besoinBody = z.object({
   achatId: z.uuid().nullable().optional(),
   projectId: z.uuid().nullable().optional(),
   articleKey: z.string().min(1).max(200).nullable().optional(),
+  dejaEnvoyeConfirme: z.boolean().optional(),
 });
 const confirmerBody = z.object({ besoins: z.array(besoinBody).min(1).max(30), confirmation: z.boolean(), cleIdempotence: z.string().min(8).max(80) });
 const quantiteBody = z.object({ quantite: z.number().positive().max(10_000_000), parUnite: z.number().positive().max(1_000_000).nullable().optional(), conversionConfirmee: z.boolean().optional() });

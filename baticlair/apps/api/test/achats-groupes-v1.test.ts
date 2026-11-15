@@ -278,7 +278,7 @@ describe("depuis un quantitatif : une ligne, un seul circuit", () => {
     expect(apres.find((l) => /Ardoise/.test(l.designation))!.lot).toBe("couverture");
   });
 
-  it("une ligne d'achat groupé ne part pas en demande individuelle, et une ligne envoyée ne rejoint pas d'achat groupé", async () => {
+  it("une ligne d'achat groupé ne part pas en demande individuelle ; une ligne envoyée rejoint un achat groupé seulement après un « oui »", async () => {
     const a = await entreprise("a@toitures.fr");
     const { projectId, lignes } = await liste(a.agent, [
       { libelle: "Ardoise naturelle 32x22 Espagne 1er choix 5 mm", quantite: "10", unite: "palettes" },
@@ -295,15 +295,27 @@ describe("depuis un quantitatif : une ligne, un seul circuit", () => {
     expect(seule.body.error.details.message).toMatch(/ne part pas en même temps en demande individuelle/);
     expect((await a.agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.id] })).status).toBe(409);
     expect(await ctx.prisma.priceRequest.count()).toBe(0);
-    // La gouttière part en demande individuelle (envoyée) : elle ne rejoint plus d'achat groupé.
+    // La gouttière part en demande individuelle (envoyée). RÈGLE CHANGÉE (Greg, 16 novembre 2026) : elle reste cochable
+    // en achat groupé, après un « oui » à la question ; sans ce « oui », le serveur refuse et pose la question.
     const demande = (await a.agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.id], articles: [gouttiere.key] }).expect(201)).body;
     await a.agent.post(`/v1/price-request-recipients/${demande.recipients[0].id}/send`).expect(200);
     const vue = (await a.agent.get(`/v1/ag/projects/${projectId}/lignes`).expect(200)).body.lignes as { key: string; texte: string; selectionnable: boolean }[];
-    expect(vue.find((l) => l.key === gouttiere.key)).toMatchObject({ texte: "Déjà dans une demande individuelle", selectionnable: false });
+    expect(vue.find((l) => l.key === gouttiere.key)).toMatchObject({ texte: "Déjà envoyé à tes négoces", selectionnable: true, confirmation: "Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ?" });
     expect(vue.find((l) => l.key === ardoise.key)).toMatchObject({ texte: "Déjà dans un achat groupé", selectionnable: false });
     const refus = await confirmer(a.agent, [besoin({ type: "gouttiere", attributs: { matiere: "zinc", developpe: "33" }, quantite: 40, unite: "m", parUnite: null, projectId, articleKey: gouttiere.key })]);
     expect(refus.status).toBe(409);
-    expect(refus.body.error.details.reason).toBe("circuit_demande_individuelle");
+    expect(refus.body.error.details).toMatchObject({ reason: "circuit_demande_individuelle", aConfirmer: true, message: "Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ?" });
+    expect(await ctx.prisma.besoinGroupeV1.count({ where: { articleKey: gouttiere.key } })).toBe(0);
+    // Avec le « oui » : le besoin groupé est créé, et la ligne RESTE dans sa demande individuelle (rien n'y est touché).
+    const oui = await confirmer(a.agent, [{ ...besoin({ type: "gouttiere", attributs: { matiere: "zinc", developpe: "33" }, quantite: 40, unite: "m", parUnite: null, projectId, articleKey: gouttiere.key }), dejaEnvoyeConfirme: true }]);
+    expect(oui.status).toBe(201);
+    expect(await ctx.prisma.besoinGroupeV1.count({ where: { articleKey: gouttiere.key, statut: { not: "retire" } } })).toBe(1);
+    const apres = await ctx.prisma.priceRequestRecipient.findUniqueOrThrow({ where: { id: demande.recipients[0].id } });
+    expect(apres.sentAt).not.toBeNull();
+    expect((await a.agent.get(`/v1/projects/${projectId}/price-requests`).expect(200)).body.requests ?? []).toBeDefined();
+    // Elle ne rejoint pas un second achat groupé pour autant.
+    const second = await confirmer(a.agent, [{ ...besoin({ type: "gouttiere", attributs: { matiere: "zinc", developpe: "33" }, quantite: 40, unite: "m", parUnite: null, projectId, articleKey: gouttiere.key, dateBesoin: jour(80) }), dejaEnvoyeConfirme: true }]);
+    expect(second.status).toBe(409);
     // Une ligne ne rejoint qu'un seul achat groupé, même en double clic.
     const [d1, d2] = await Promise.all([confirmer(a.agent, [besoin({ dateBesoin: jour(80), projectId, articleKey: ardoise.key })]), confirmer(a.agent, [besoin({ dateBesoin: jour(80), projectId, articleKey: ardoise.key })])]);
     expect([d1.status, d2.status]).toEqual([409, 409]);

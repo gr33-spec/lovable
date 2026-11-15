@@ -414,20 +414,26 @@ export function circuitDeLigne(f: FaitsCircuit): CircuitLigne {
 }
 
 export type ActionCircuit = "rejoindre_achat_groupe" | "envoyer_demande_individuelle";
-export type VerdictCircuit = { permis: true; arreterSurveillance?: boolean } | { permis: false; raison: CircuitLigne; message: string };
+export type VerdictCircuit = { permis: true; arreterSurveillance?: boolean } | { permis: false; raison: CircuitLigne; message: string; /** Un « oui » de l'artisan suffit à lever ce refus. */ aConfirmer?: boolean };
+
+/** La question posée avant de grouper un article déjà parti en demande de prix (Greg, 16 novembre 2026, mot pour mot). */
+export const QUESTION_DEJA_ENVOYE = "Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ?";
 
 /**
- * Le tableau « Une ligne, un seul circuit » de la V5.2 : une ligne engagée dans une demande individuelle n'entre jamais en
- * même temps dans un achat groupé, et inversement ; une ligne commandée n'a plus aucun autre circuit ; la surveillance
+ * Le tableau « Une ligne, un seul circuit » de la V5.2 : une ligne déjà dans un achat groupé n'en rejoint pas un second et
+ * ne part pas en même temps en demande individuelle ; une ligne commandée n'a plus aucun autre circuit ; la surveillance
  * est une simple veille (elle s'arrête, expliquée, quand la ligne rejoint un achat groupé).
+ * RÈGLE CHANGÉE (Greg, 16 novembre 2026) : avant, une ligne déjà envoyée aux négoces n'entrait jamais dans un achat groupé ;
+ * maintenant, elle y entre si l'artisan le confirme (« Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat
+ * groupé ? »). Elle reste dans sa demande individuelle et s'ajoute simplement au besoin groupé.
  */
-export function peutCircuit(f: FaitsCircuit, action: ActionCircuit, designation = "Cette ligne"): VerdictCircuit {
+export function peutCircuit(f: FaitsCircuit, action: ActionCircuit, designation = "Cette ligne", o: { /** L'artisan a répondu « oui » à la question ci-dessus. */ dejaEnvoyeConfirme?: boolean } = {}): VerdictCircuit {
   const c = circuitDeLigne(f);
   const nom = `« ${designation} »`;
   if (c === "commandee") return { permis: false, raison: c, message: `${nom} est déjà commandée : plus aucun autre circuit.` };
   if (action === "rejoindre_achat_groupe") {
     if (c === "achat_groupe") return { permis: false, raison: c, message: `${nom} est déjà dans un achat groupé : une ligne ne rejoint qu'un seul achat groupé.` };
-    if (c === "demande_individuelle") return { permis: false, raison: c, message: `${nom} est déjà dans une demande individuelle envoyée aux négoces : elle ne peut pas entrer en même temps dans un achat groupé.` };
+    if (c === "demande_individuelle") return o.dejaEnvoyeConfirme ? { permis: true } : { permis: false, raison: c, message: QUESTION_DEJA_ENVOYE, aConfirmer: true };
     return c === "surveillee" ? { permis: true, arreterSurveillance: true } : { permis: true };
   }
   if (c === "achat_groupe") return { permis: false, raison: c, message: `${nom} est dans un achat groupé : elle ne part pas en même temps en demande individuelle. Retire d'abord ton besoin de l'achat groupé.` };
@@ -442,7 +448,7 @@ export const TEXTES_MENTION: Readonly<Record<MentionLigneV1, string>> = {
   recommande: "Recommandé pour un achat groupé",
   compatible: "Compatible avec un achat groupé",
   a_preciser: "À préciser",
-  demande_individuelle: "Déjà dans une demande individuelle",
+  demande_individuelle: "Déjà envoyé à tes négoces",
   deja_groupe: "Déjà dans un achat groupé",
   commandee: "Déjà commandée",
   non_ouvert: "Pas encore ouvert aux achats groupés",
@@ -458,6 +464,8 @@ export interface LigneClasseeV1 {
   texte: string;
   pourquoi: string;
   selectionnable: boolean;
+  /** La question à laquelle l'artisan doit répondre « oui » avant que la ligne ne se coche (déjà envoyée aux négoces). */
+  confirmation?: string;
 }
 
 /**
@@ -467,8 +475,9 @@ export interface LigneClasseeV1 {
 export function classerLigneV1(l: { designation: string; quantite: number; unite: string; lotChoisi?: LotV1 | null; faits: FaitsCircuit }): LigneClasseeV1 {
   const lotLu = lotDeLaLigne(l.designation);
   const lot = l.lotChoisi ?? lotLu;
-  const base = { lot, lotLu };
   const circuit = circuitDeLigne(l.faits);
+  // Déjà envoyée aux négoces (16 novembre 2026) : quelle que soit sa mention, la question est posée avant de la cocher.
+  const base = { lot, lotLu, ...(circuit === "demande_individuelle" ? { confirmation: QUESTION_DEJA_ENVOYE } : {}) };
   const lu = lireProduitV1(l.designation);
   const p = lu ? produitV1(lu.type) : null;
   const manquantes = p && lu ? manquantesV1(p.type, lu.attributs) : [];
@@ -479,10 +488,12 @@ export function classerLigneV1(l: { designation: string; quantite: number; unite
   const non = (mention: MentionLigneV1, pourquoi: string, texte = TEXTES_MENTION[mention]): LigneClasseeV1 => ({ ...base, produit, quantite, mention, texte, pourquoi, selectionnable: false });
   if (circuit === "commandee") return non("commandee", "Cette ligne est déjà commandée.");
   if (circuit === "achat_groupe") return non("deja_groupe", "Une ligne ne rejoint qu'un seul achat groupé.");
-  if (circuit === "demande_individuelle") return non("demande_individuelle", "Une ligne déjà envoyée aux négoces en demande individuelle n'entre pas en même temps dans un achat groupé.");
   if (!p || !produit) return non("non_ouvert", "Cette famille n'a pas encore ses caractéristiques indispensables définies : la ligne reste dans ton quantitatif.");
   if (manquantes.length) return non("a_preciser", "Tant qu'une caractéristique indispensable manque, le produit ne peut rejoindre aucun achat groupé.", phraseAPreciser(manquantes));
   if (!quantite) return non("a_preciser", `La quantité doit être en ${p.unite.pluriel}${p.conditionnements.length ? ` ou en ${p.conditionnements.map((c) => c.unite.pluriel).join(", ")}` : ""}.`, `À préciser : quantité en ${p.unite.pluriel}`);
+  // Déjà envoyée aux négoces (16 novembre 2026) : elle se coche, après un « oui » à la question ; elle garde sa mention.
+  if (circuit === "demande_individuelle")
+    return { ...base, produit, quantite, mention: "demande_individuelle", texte: TEXTES_MENTION.demande_individuelle, pourquoi: "Elle reste dans ta demande de prix et s'ajoute simplement à ton besoin groupé.", selectionnable: true };
   const enReference = quantiteReference(quantite.valeur, quantite.conditionnement ? (quantite.conditionnement.parDefaut ?? 0) : 1);
   const recommande = enReference >= p.seuilRecommande;
   return {

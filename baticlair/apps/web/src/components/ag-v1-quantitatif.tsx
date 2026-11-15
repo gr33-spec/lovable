@@ -16,7 +16,7 @@ const TON: Record<LigneQuantitatifV1["mention"], string> = {
   recommande: "bg-ok-bg text-ok",
   compatible: "bg-ground text-ink",
   a_preciser: "bg-warn-bg text-warn",
-  demande_individuelle: "bg-ground text-muted",
+  demande_individuelle: "bg-warn-bg text-warn",
   deja_groupe: "bg-ground text-muted",
   commandee: "bg-ground text-muted",
   non_ouvert: "bg-ground text-muted",
@@ -82,6 +82,9 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   const [ouvertPreciser, setOuvertPreciser] = useState<string | null>(null);
   const [pourquoi, setPourquoi] = useState<string | null>(null);
   const [blocage, setBlocage] = useState<string | null>(null);
+  // Greg, 16 novembre 2026 : un article déjà envoyé aux négoces reste cochable, après un « oui » à la question.
+  const [ouiDejaEnvoye, setOuiDejaEnvoye] = useState<Set<string>>(new Set());
+  const [question, setQuestion] = useState<{ ligne: LigneQuantitatifV1; precisable: boolean } | null>(null);
   const [etape, setEtape] = useState<"selection" | "confirmer">("selection");
   const [choisies, setChoisies] = useState<LigneChoisie[]>([]);
   const [reception, setReception] = useState<"livraison" | "retrait" | null>(null);
@@ -114,7 +117,12 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   const nb = lignes.filter((l) => coches.has(l.key) && l.selectionnable).length;
 
   /** Coche ou décoche ; sur un article à préciser, ouvre la précision (ou la raison) au lieu de ne rien faire. */
-  function basculer(l: LigneQuantitatifV1, precisable: boolean) {
+  function basculer(l: LigneQuantitatifV1, precisable: boolean, oui = false) {
+    // Déjà envoyé aux négoces : la question d'abord (« Oui » coche, « Non » ne change rien). Décocher ne demande rien.
+    if (l.confirmation && !oui && !ouiDejaEnvoye.has(l.key) && !coches.has(l.key)) {
+      setQuestion({ ligne: l, precisable });
+      return;
+    }
     if (l.selectionnable) {
       setCoches((s) => {
         const n = new Set(s);
@@ -184,7 +192,7 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           cleIdempotence,
           besoins: choisies.map((c) => {
             const k = compat[c.ligne.key] as CompatibiliteV1;
-            return { type: c.ligne.produit!.type, attributs: c.attributs, quantite: Number(c.quantite.replace(",", ".")), unite: c.unite, parUnite: c.parUnite, conversionConfirmee: c.conversionConfirmee, reception, lieu, dateBesoin, achatId: k.compatible?.id ?? null, projectId, articleKey: c.ligne.key };
+            return { type: c.ligne.produit!.type, attributs: c.attributs, quantite: Number(c.quantite.replace(",", ".")), unite: c.unite, parUnite: c.parUnite, conversionConfirmee: c.conversionConfirmee, ...(c.ligne.confirmation && ouiDejaEnvoye.has(c.ligne.key) ? { dejaEnvoyeConfirme: true } : {}), reception, lieu, dateBesoin, achatId: k.compatible?.id ?? null, projectId, articleKey: c.ligne.key };
           }),
         },
       });
@@ -287,15 +295,13 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
           </section>
         ))}
         {nonGroupables.length ? (
-          // « UNE LIGNE, UN SEUL CIRCUIT » (V5.2, Greg, 8 novembre 2026 : « explique simplement le blocage ») : un article
-          // déjà envoyé à ses négoces ne se coche pas, et la raison se lit en une phrase. Le serveur refuse de toute façon.
+          // Les articles qu'on ne peut pas grouper (déjà groupés, déjà commandés, pas encore ouverts) : la raison se lit en
+          // une phrase. Un article déjà envoyé aux négoces n'est plus ici : il se coche, après confirmation (16 novembre 2026).
           <details open={parLotGroupables.length === 0} className={`${CARTE} p-4`}>
             <summary className="min-h-11 cursor-pointer text-[15px] font-semibold">
               {nonGroupables.length} article{nonGroupables.length > 1 ? "s" : ""} ne peu{nonGroupables.length > 1 ? "vent" : "t"} pas être groupé{nonGroupables.length > 1 ? "s" : ""}
             </summary>
-            {nonGroupables.some((l) => l.mention === "demande_individuelle" || l.mention === "deja_groupe") ? (
-              <p className="mt-2 text-[14px] text-muted">Un article part soit chez tes négoces, soit en achat groupé, jamais les deux.</p>
-            ) : null}
+            {nonGroupables.some((l) => l.mention === "deja_groupe") ? <p className="mt-2 text-[14px] text-muted">Un article ne rejoint qu&apos;un seul achat groupé.</p> : null}
             <ul aria-label="Articles qui ne peuvent pas être groupés" className="mt-2 flex flex-col gap-2">
               {nonGroupables.map((l) => (
                 <li key={l.key} className="flex flex-col">
@@ -317,6 +323,33 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
             {nb === 0 ? "Choisis des articles" : `Continuer avec ${nb} article${nb > 1 ? "s" : ""}`}
           </Button>
         </div>
+        {question ? (
+          // Greg, 16 novembre 2026, mot pour mot : « Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat
+          // groupé ? » Oui ou non. La ligne reste dans sa demande individuelle ; elle s'ajoute simplement au besoin groupé.
+          <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/60 p-4 lg:items-center" onClick={() => setQuestion(null)}>
+            <div role="alertdialog" aria-modal="true" aria-label="Déjà envoyé à tes négoces" className={`${CARTE} flex w-full max-w-[26rem] flex-col gap-3 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]`} onClick={(e) => e.stopPropagation()}>
+              <p className="text-[15px] font-semibold break-words text-muted">{question.ligne.designation}</p>
+              <p className="text-[18px] leading-snug font-extrabold">{question.ligne.confirmation}</p>
+              <p className="text-[14px] text-muted">Il reste dans ta demande de prix : tes négoces peuvent toujours te répondre.</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  autoFocus
+                  onClick={() => {
+                    const q = question;
+                    setOuiDejaEnvoye((o) => new Set(o).add(q.ligne.key));
+                    setQuestion(null);
+                    basculer(q.ligne, q.precisable, true);
+                  }}
+                >
+                  Oui
+                </Button>
+                <Button variant="secondary" onClick={() => setQuestion(null)}>
+                  Non
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     );
 

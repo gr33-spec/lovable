@@ -760,18 +760,19 @@ function GrosDevis({ phrase, pending, disabled, onLancer, onAnnuler }: { phrase:
 
 /**
  * « UNE LIGNE, UN SEUL CIRCUIT » dit sur la fiche (Greg, 8 novembre 2026) : combien d'articles sont déjà dans les achats
- * groupés (ils ne partent pas chez les négoces) et combien sont déjà partis chez les négoces (ils ne se groupent pas).
+ * groupés (ils ne partent pas chez les négoces) et combien sont déjà partis chez les négoces. RÈGLE CHANGÉE (Greg, 16 novembre
+ * 2026) : ces derniers peuvent quand même être groupés, après confirmation.
  */
 function CircuitsDeLaListe({ projectId }: { projectId: string }) {
-  const { data } = useResource(useCallback((s: AbortSignal) => api<{ lignes: { mention: string }[] }>(`/v1/ag/projects/${projectId}/lignes`, { signal: s }).catch(() => null), [projectId]));
+  const { data } = useResource(useCallback((s: AbortSignal) => api<{ lignes: { mention: string; confirmation?: string }[] }>(`/v1/ag/projects/${projectId}/lignes`, { signal: s }).catch(() => null), [projectId]));
   const groupes = data?.lignes.filter((l) => l.mention === "deja_groupe").length ?? 0;
-  const envoyes = data?.lignes.filter((l) => l.mention === "demande_individuelle").length ?? 0;
+  const envoyes = data?.lignes.filter((l) => !!l.confirmation).length ?? 0;
   if (!groupes && !envoyes) return null;
   const s = (n: number) => (n > 1 ? "s" : "");
   return (
     <ul aria-label="Articles déjà engagés" className="flex flex-col gap-1 rounded-xl bg-ground p-3 text-[14px]">
       {groupes ? <li>{`${groupes} article${s(groupes)} dans les achats groupés : il${s(groupes)} ne part${groupes > 1 ? "ent" : ""} pas chez tes négoces.`}</li> : null}
-      {envoyes ? <li>{`${envoyes} article${s(envoyes)} déjà envoyé${s(envoyes)} à tes négoces : il${s(envoyes)} ne peu${envoyes > 1 ? "vent" : "t"} pas être groupé${s(envoyes)}.`}</li> : null}
+      {envoyes ? <li>{`${envoyes} article${s(envoyes)} déjà envoyé${s(envoyes)} à tes négoces : tu peux quand même le${s(envoyes)} mettre en achat groupé.`}</li> : null}
     </ul>
   );
 }
