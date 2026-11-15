@@ -277,7 +277,10 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
       modeleMessage: company.modeleMessage,
       tutoie: company.tutoieNegoces,
       project: { id: project.id, name: project.name, address: project.address, siteNotes: project.siteNotes },
-      company: { address: company.address, siret: company.siret, phone: company.phone, email: company.contactEmail ?? user?.email ?? null },
+      // Recette n° 2 (14 novembre 2026) : l'e-mail IMPRIMÉ (PDF, bon) n'est jamais l'e-mail de connexion de l'artisan (« Ton
+      // e-mail, lui, n'est jamais donné ») : seulement l'e-mail de contact de l'entreprise, s'il l'a rempli. `emailReponse`
+      // ne sert que d'adresse de réponse de secours (en-tête du mail), quand l'adresse Mobiiz n'existe pas.
+      company: { address: company.address, siret: company.siret, phone: company.phone, email: company.contactEmail ?? null, emailReponse: company.contactEmail ?? user?.email ?? null },
       logo: company.logo && company.logoType ? { bytes: new Uint8Array(company.logo), type: company.logoType } : null,
     };
   }
@@ -291,7 +294,10 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
     return {
       companyName: company.name,
       senderName: user?.name ?? "",
-      company: { address: company.address, siret: company.siret, phone: company.phone, email: company.contactEmail ?? user?.email ?? null },
+      // Recette n° 2 (14 novembre 2026) : l'e-mail IMPRIMÉ (PDF, bon) n'est jamais l'e-mail de connexion de l'artisan (« Ton
+      // e-mail, lui, n'est jamais donné ») : seulement l'e-mail de contact de l'entreprise, s'il l'a rempli. `emailReponse`
+      // ne sert que d'adresse de réponse de secours (en-tête du mail), quand l'adresse Mobiiz n'existe pas.
+      company: { address: company.address, siret: company.siret, phone: company.phone, email: company.contactEmail ?? null, emailReponse: company.contactEmail ?? user?.email ?? null },
       logo: company.logo && company.logoType ? { bytes: new Uint8Array(company.logo), type: company.logoType } : null,
     };
   }

@@ -92,7 +92,7 @@ export interface Sender {
   tutoie?: boolean;
   project: { id: string; name: string; address: string | null; siteNotes: string | null };
   /** Coordonnées du compte (§45.2, §45.3) ; e-mail de l'artisan à défaut d'un e-mail d'entreprise. */
-  company: { address: string | null; siret: string | null; phone: string | null; email: string | null };
+  company: { address: string | null; siret: string | null; phone: string | null; email: string | null; emailReponse?: string | null };
   /** Logo du compte (PNG ou JPEG), lu au rendu du PDF. */
   logo: { bytes: Uint8Array; type: string } | null;
 }

@@ -320,7 +320,7 @@ export class PriceRequestsService {
         html: mailEnHtml(texte, lien),
         // La réponse du fournisseur revient dans Mobiiz (adresse étiquetée, R7), sinon à l'artisan ; et le mail doit
         // partir, sinon la demande ne passe pas « envoyée ».
-        ...(via ? { from: via.from, replyTo: via.replyTo } : packet.expediteur?.email ? { replyTo: packet.expediteur.email } : {}),
+        ...(via ? { from: via.from, replyTo: via.replyTo } : (packet.expediteur?.emailReponse ?? packet.expediteur?.email) ? { replyTo: (packet.expediteur?.emailReponse ?? packet.expediteur?.email)! } : {}),
         mustDeliver: true,
         // Le PDF « Demande de devis » (les blocs + les croquis en pages), puis chaque croquis d'origine, pour le zoom.
         attachments: [
@@ -466,6 +466,7 @@ export class PriceRequestsService {
           siret: sender?.company.siret ?? null,
           telephone: sender?.company.phone ?? null,
           email: sender?.company.email ?? null,
+          emailReponse: sender?.company.emailReponse ?? null,
         },
       },
       // Lot final, point 4 : le message modifié devient le modèle de l'artisan ; sans message, son modèle s'applique.
@@ -792,7 +793,7 @@ export class PriceRequestsService {
  * L'exemple de l'aperçu (aucune demande encore préparée) : les vraies coordonnées de l'entreprise, des matériaux
  * d'exemple, et « Exemple » écrit dans le chantier et sa référence, pour qu'il ne passe jamais pour une vraie demande.
  */
-function exemplePacket(entreprise: { companyName: string; senderName: string; company: { address: string | null; siret: string | null; phone: string | null; email: string | null } } | null, date: string): SupplierPacket {
+function exemplePacket(entreprise: { companyName: string; senderName: string; company: { address: string | null; siret: string | null; phone: string | null; email: string | null; emailReponse?: string | null } } | null, date: string): SupplierPacket {
   return {
     entreprise: entreprise?.companyName ?? "",
     chantier: "Exemple · Rénovation toiture",

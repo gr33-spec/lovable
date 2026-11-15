@@ -349,8 +349,14 @@ export class DemandePersoService {
     const prixUnitaire = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 4 }).replace(/\u202f|\u00a0/g, " ")} €`;
     const totalLignes = centimes(lignes.reduce((s, l) => s + centimes((prix[l.cle] ?? 0) * l.quantite), 0));
     const livraison = Number(r.livraisonHt ?? 0);
-    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true, phone: true, address: true } });
-    const company = c ? { ...c, email: await this.emailDe(tenant.companyId) } : null;
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true, phone: true, address: true, contactEmail: true } });
+    // Recette n° 2 (14 novembre 2026) : l'e-mail IMPRIMÉ sur le bon et dans le message n'est jamais l'e-mail de connexion
+    // de l'artisan, seulement l'e-mail de contact de l'entreprise s'il l'a rempli. La réponse du négoce revient par
+    // l'adresse Mobiiz de l'artisan quand elle existe (sinon, en secours, par l'en-tête de réponse).
+    const company = c ? { name: c.name, phone: c.phone, address: c.address, email: c.contactEmail } : null;
+    const via = await this.expediteurDe(tenant.companyId).catch(() => null);
+    const secoursBon = via && r?.etiquette ? null : await this.emailDe(tenant.companyId);
+    const repondreA: { from?: string; replyTo?: string } = via && r?.etiquette ? { from: via.from, replyTo: via.replyTo(r.etiquette) } : secoursBon ? { replyTo: secoursBon } : {};
     const project = await this.prisma.project.findUnique({ where: { id: d.projectId }, select: { address: true } });
     const numero = d.id.slice(0, 8).toUpperCase();
     const reference = chiffre ? `votre offre du ${jourFr(r.reponduLe!)}` : "votre devis";
@@ -402,7 +408,7 @@ export class DemandePersoService {
       ]
         .filter((l, i, t) => !(l === "" && (i === 0 || t[i - 1] === "")))
         .join("\n"),
-      ...(company?.email ? { replyTo: company.email } : {}),
+      ...repondreA,
       mustDeliver: true,
     });
     // Le mail est parti : la commande est notée, et la demande passe « Commandé » chez ce négoce (suivi du chantier).
@@ -428,7 +434,8 @@ export class DemandePersoService {
     const pris = await this.prisma.priceRequest.updateMany({ where: { id: d.id, autresNegocesChoix: null }, data: { autresNegocesChoix: prevenir ? "oui" : "non", autresNegocesLe: this.now() } });
     if (pris.count === 0 || !prevenir) return this.vue(tenant, requestId);
     const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } });
-    const email = await this.emailDe(tenant.companyId);
+    const via = await this.expediteurDe(tenant.companyId).catch(() => null);
+    const secours = await this.emailDe(tenant.companyId);
     for (const r of autresConsultes(d.recipients)) {
       const aRepondu = Boolean(r.reponduLe) || r.status === "received";
       await this.mailer
@@ -445,7 +452,8 @@ export class DemandePersoService {
             "",
             `Envoyé avec ${NOM_APP}.`,
           ].join("\n"),
-          ...(email ? { replyTo: email } : {}),
+          // La réponse revient par l'adresse Mobiiz de l'artisan quand elle existe ; jamais son e-mail imprimé dans le texte.
+          ...(via && r.etiquette ? { from: via.from, replyTo: via.replyTo(r.etiquette) } : secours ? { replyTo: secours } : {}),
         })
         .catch(() => undefined);
     }

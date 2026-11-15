@@ -29,7 +29,10 @@ export interface PacketSender {
   adresse: string | null;
   siret: string | null;
   telephone: string | null;
+  /** L'e-mail de contact de l'entreprise, IMPRIMÉ sur le document ; jamais l'e-mail de connexion de l'artisan. */
   email: string | null;
+  /** L'adresse de réponse de secours (en-tête du mail seulement, jamais imprimée) quand l'adresse Mobiiz n'existe pas. */
+  emailReponse?: string | null;
 }
 
 export interface SupplierPacket {
