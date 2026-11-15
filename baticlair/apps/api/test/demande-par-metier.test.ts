@@ -1,5 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { couvreurAvecListe, mailsVers } from "./support/cycle.js";
+import { specialiteDeLaLigne } from "@baticlair/domain";
+import { CatalogueService } from "../src/modules/catalogue/index.js";
 import { createTestApp, resetDatabase, type TestContext } from "./support/test-app.js";
 
 /**
@@ -92,4 +94,33 @@ describe("demande de prix classique : tri par métier du négoce", () => {
     await a.agent.post(`/v1/projects/${a.projectId}/price-requests/repartition`).send({ supplierIds: [negoceDeB] }).expect(404);
     await a.agent.post(`/v1/projects/${a.projectId}/price-requests/repartition`).send({ supplierIds: [negoceDeA] }).expect(200);
   }, 60_000);
+
+  it("un article pris au catalogue Étanchéité part chez l'étancheur, même quand ses mots ne le disent pas (recette n° 2 du 14 novembre 2026)", async () => {
+    // « Un article pris au catalogue Étanchéité part chez le négoce Couverture. Le métier est deviné par les mots :
+    // 118 articles d'étanchéité sur 172 ne sont pas reconnus. » Le métier vient maintenant du catalogue.
+    const catalogue = ctx.app.get(CatalogueService);
+    const tous = await ctx.prisma.catalogueArticle.findMany({ where: { metier: "etancheite", masque: false }, orderBy: { cle: "asc" } }).then(async (l) => (l.length ? l : (await catalogue.metiersDesDesignations(["x"]), ctx.prisma.catalogueArticle.findMany({ where: { metier: "etancheite", masque: false }, orderBy: { cle: "asc" } }))));
+    // Des articles que leurs mots seuls rangeaient ailleurs que dans l'étanchéité, et dont la désignation n'existe que là.
+    const uniques = await catalogue.metiersDesDesignations(tous.map((x) => x.designation));
+    const nonReconnus = tous.filter((x) => uniques.get(x.designation) === "etancheite" && specialiteDeLaLigne(x.designation, "roofing") !== "etancheite");
+    expect(nonReconnus.length).toBeGreaterThan(20);
+    const article = nonReconnus[0]!;
+    const a = await couvreurAvecListe(ctx, "a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [
+      { libelle: "Ardoise naturelle 32×22", quantite: "1000", unite: "pièces" },
+      { libelle: article.designation, quantite: "10", unite: article.unite || "pièces" },
+      // La même désignation, modifiée à la main : elle ne vient plus du catalogue, ses mots décident (jamais deviné).
+      { libelle: `${article.designation} modèle maison`, quantite: "2", unite: article.unite || "pièces" },
+    ]);
+    const { takeoff } = (await a.agent.get(`/v1/projects/${a.projectId}/takeoff`).expect(200)).body as { takeoff: { id: string } };
+    await a.agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
+    const creer = async (nom: string, specialites: string[]) => (await a.agent.post("/v1/suppliers").send({ name: nom, email: `${nom.toLowerCase()}@negoce.fr`, specialites }).expect(201)).body.id as string;
+    const couv = await creer("Couv", ["couverture"]);
+    const etan = await creer("Etan", ["etancheite"]);
+    const tri = (await a.agent.post(`/v1/projects/${a.projectId}/price-requests/repartition`).send({ supplierIds: [couv, etan] }).expect(200)).body as { groupes: { negoces: string[]; lignes: string[] }[] };
+    const de = (nom: string) => tri.groupes.find((g) => g.negoces.includes(nom))?.lignes ?? [];
+    expect(de("Etan").some((l) => l.includes(article.designation) && !l.includes("modèle maison"))).toBe(true);
+    expect(de("Couv").some((l) => l === article.designation)).toBe(false);
+    expect(de("Couv").some((l) => l.includes("Ardoise naturelle"))).toBe(true);
+    expect(de("Etan").some((l) => l.includes("Ardoise naturelle"))).toBe(false);
+  });
 });

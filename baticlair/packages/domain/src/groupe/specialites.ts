@@ -54,6 +54,27 @@ const PAR_METIER: Readonly<Record<string, Specialite>> = {
 
 export const specialiteDuMetier = (metier: string | null | undefined): Specialite => (metier ? (PAR_METIER[metier] ?? "autre") : "autre");
 
+/**
+ * La spécialité qui chiffre un article PRIS AU CATALOGUE, d'après le métier du catalogue où il est rangé (recette n° 2 du
+ * 14 novembre 2026 : « un article pris au catalogue Étanchéité part chez le négoce Couverture ; 118 articles d'étanchéité
+ * sur 172 ne sont pas reconnus par leurs mots »). Les mêmes rapprochements que `PAR_METIER`. `null` : métier inconnu.
+ */
+const PAR_METIER_CATALOGUE: Readonly<Record<string, Specialite>> = {
+  couverture: "couverture",
+  zinguerie: "zinguerie",
+  etancheite: "etancheite",
+  charpente: "charpente",
+  menuiserie: "bois",
+  maconnerie: "maconnerie",
+  carrelage: "maconnerie",
+  platrerie_isolation: "isolation_platrerie",
+  peinture: "isolation_platrerie",
+  plomberie: "plomberie",
+  chauffage: "plomberie",
+  electricite: "electricite",
+};
+export const specialiteDuMetierCatalogue = (metier: string | null | undefined): Specialite | null => (metier ? (PAR_METIER_CATALOGUE[metier] ?? null) : null);
+
 export interface LotAEnvoyer {
   /** La clé du lot (le métier, ou « liste » pour une liste d'un seul lot). */
   cle: string;

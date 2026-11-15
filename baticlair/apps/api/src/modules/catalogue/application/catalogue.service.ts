@@ -121,6 +121,17 @@ const vue = (a: Ligne): ArticleVue => {
  * première fois (un article manquant est ajouté, un article de l'admin n'est jamais écrasé), lu en listes (famille ›
  * produit › variante) ou par recherche tolérante, modifié par l'admin (ajouter, renommer, masquer).
  */
+/** Une désignation comparée sans ses accents, sa casse ni ses espaces en trop (« 32 × 22 » et « 32x22 » se valent). */
+const cleDesignation = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[×x]/g, "x")
+    .replace(/\s+/g, " ")
+    .replace(/ ?x ?(?=\d)/g, "x")
+    .trim();
+
 export class CatalogueService {
   private amorce = false;
   private regroupement: Map<string, string> | null = null;
@@ -243,6 +254,28 @@ export class CatalogueService {
         return { ...c, produits: c.produits.map(avec), ...(c.autres ? { autres: c.autres.map(avec) } : {}) };
       }),
     };
+  }
+
+  /**
+   * LE MÉTIER DU CATALOGUE D'UNE LIGNE (recette n° 2 du 14 novembre 2026 : le tri par métier devinait par les mots, et
+   * 118 articles d'étanchéité sur 172 partaient chez le négoce de couverture). Une ligne dont la désignation est EXACTEMENT
+   * celle d'un article du catalogue (accents, majuscules et espaces près) prend le métier de ce catalogue. Rien n'est
+   * deviné : une désignation absente, modifiée, ou rangée dans deux métiers ne rend rien (le tri par les mots s'applique).
+   */
+  async metiersDesDesignations(designations: readonly string[]): Promise<Map<string, string>> {
+    const out = new Map<string, string>();
+    if (designations.length === 0) return out;
+    const parCle = new Map<string, Set<string>>();
+    for (const a of await this.articles(null)) {
+      const k = cleDesignation(a.designation);
+      if (!k) continue;
+      (parCle.get(k) ?? parCle.set(k, new Set()).get(k)!).add(a.metier);
+    }
+    for (const d of designations) {
+      const metiers = parCle.get(cleDesignation(d));
+      if (metiers?.size === 1) out.set(d, [...metiers][0]!);
+    }
+    return out;
   }
 
   /** L'écran : le métier choisi (sinon le premier du profil), son arbre, ou les résultats d'une recherche (tous métiers). */

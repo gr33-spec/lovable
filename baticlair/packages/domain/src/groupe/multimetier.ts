@@ -2,7 +2,7 @@ import { normalizeText } from "../trades/trade-profile.js";
 import type { CommandeDArtisan, GrilleChiffree, LigneDeGrille } from "./commande-du-mois.js";
 import { fraisDeLivraisonPaliers } from "./espace-negoce.js";
 import { FAMILLES_GROUPE, type FamilleGroupe } from "./groupe.js";
-import { estSpecialite, specialiteDuMetier, type Specialite } from "./specialites.js";
+import { estSpecialite, specialiteDuMetier, specialiteDuMetierCatalogue, type Specialite } from "./specialites.js";
 
 /**
  * LISTES MULTIMÉTIERS, NÉGOCES GÉNÉRALISTES OU SPÉCIALISTES (Greg, 25 octobre 2026). Du code pur, zéro IA :
@@ -249,9 +249,14 @@ export const FAMILLES_A_COCHER: readonly FamilleGroupe[] = FAMILLES_GROUPE;
 
 /**
  * La spécialité d'une ligne pour la demande de prix classique (Greg, 14 novembre 2026) : celle que ses mots désignent
- * (« gouttière zinc » → zinguerie, « membrane EPDM » → étanchéité), sinon celle du métier de la liste.
+ * (« gouttière zinc » → zinguerie, « membrane EPDM » → étanchéité), sinon celle du métier de la liste. Un article pris au
+ * catalogue prend d'abord le métier de son catalogue (`metierDuCatalogue`).
  */
-export function specialiteDeLaLigne(designation: string, metierDeLaListe: string | null | undefined): Specialite {
+export function specialiteDeLaLigne(designation: string, metierDeLaListe: string | null | undefined, metierDuCatalogue?: string | null): Specialite {
+  // RÈGLE CHANGÉE (16 novembre 2026, recette n° 2) : avant, le métier d'une ligne était toujours deviné par ses mots ;
+  // maintenant, un article qui vient du catalogue prend d'abord le métier du catalogue où il est rangé.
+  const duCatalogue = specialiteDuMetierCatalogue(metierDuCatalogue);
+  if (duCatalogue) return duCatalogue;
   const famille = familleDeLaLigne(designation, { defaut: "" });
   return estSpecialite(famille) && famille !== "generaliste" && famille !== "autre" ? famille : specialiteDuMetier(metierDeLaListe);
 }

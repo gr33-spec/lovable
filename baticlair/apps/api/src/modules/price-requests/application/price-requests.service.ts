@@ -226,6 +226,12 @@ export class PriceRequestsService {
    * l'adresse Mobiiz de l'entreprise (la réponse arrive dans « Reçus »). Sans domaine : l'e-mail de l'entreprise. Jamais
    * une adresse inventée ; rien ne change à l'envoi du mail.
    */
+  /** Le métier du catalogue de chaque désignation qui en vient exactement (branché par le module ; vide sinon). */
+  private metiersDuCatalogue: (designations: readonly string[]) => Promise<Map<string, string>> = async () => new Map();
+  brancherCatalogue(f: (designations: readonly string[]) => Promise<Map<string, string>>): void {
+    this.metiersDuCatalogue = f;
+  }
+
   private adresseReponse: (companyId: string, etiquette: string | null) => Promise<string | null> = async () => null;
   brancherAdresseReponse(f: (companyId: string, etiquette: string | null) => Promise<string | null>): void {
     this.adresseReponse = f;
@@ -488,7 +494,10 @@ export class PriceRequestsService {
     const takeoff = await this.requests.validatedTakeoff(tenant, projectId, { anyStatus: true });
     if (!takeoff) throw validationFailed("Validate the materials list first", { reason: "takeoff_not_validated" });
     const purchase = (await this.reviewedTakeoff(tenant, takeoff.id)).purchase;
-    const lignes = purchase.toBuy.filter((b) => !selection || selection.has(b.key)).map((b) => ({ cle: b.key, libelle: b.label, specialite: specialiteDeLaLigne(b.label, takeoff.trade) }));
+    const aTrier = purchase.toBuy.filter((b) => !selection || selection.has(b.key));
+    // Un article pris au catalogue prend le métier de son catalogue (jamais deviné) ; sinon, ses mots, puis le métier de la liste.
+    const duCatalogue = await this.metiersDuCatalogue(aTrier.map((b) => b.label)).catch(() => new Map<string, string>());
+    const lignes = aTrier.map((b) => ({ cle: b.key, libelle: b.label, specialite: specialiteDeLaLigne(b.label, takeoff.trade, duCatalogue.get(b.label) ?? null) }));
     const aChiffrer = purchase.toQuote.map((q) => `quote:${q.key}`).filter((k) => !selection || selection.has(k));
     const negoces = await this.suppliers.findByIds(tenant, ids);
     const r = repartirLaDemande(lignes, negoces.map((n) => ({ id: n.id, nom: n.name, specialites: n.specialites })));

@@ -4,6 +4,7 @@ import { avecVerrouCircuit, gardeCommandeSeule, gardeDemandeIndividuelle } from 
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { EmailCapability, TransactionalEmailSender } from "../../platform/email/email.port.js";
 import { EMAIL_SENDER } from "../../platform/tokens.js";
+import { CatalogueModule, CatalogueService } from "../catalogue/index.js";
 import { DocumentsModule, DocumentsService } from "../documents/index.js";
 import { SUPPLIER_REPOSITORY, SuppliersModule, type SupplierRepository } from "../suppliers/index.js";
 import { TakeoffModule, TakeoffService } from "../takeoff/index.js";
@@ -14,7 +15,7 @@ import { PriceRequestsController } from "./http/price-requests.controller.js";
 import { PrismaPriceRequestRepository } from "./infrastructure/prisma-price-request.repository.js";
 
 @Module({
-  imports: [TenancyModule, DocumentsModule, SuppliersModule, TakeoffModule],
+  imports: [TenancyModule, DocumentsModule, SuppliersModule, TakeoffModule, CatalogueModule],
   controllers: [PriceRequestsController],
   providers: [
     {
@@ -24,7 +25,7 @@ import { PrismaPriceRequestRepository } from "./infrastructure/prisma-price-requ
     },
     {
       provide: PriceRequestsService,
-      useFactory: (r: PriceRequestRepository, s: SupplierRepository, d: DocumentsService, t: TakeoffService, mailer: TransactionalEmailSender & EmailCapability, prisma: PrismaService) => {
+      useFactory: (r: PriceRequestRepository, s: SupplierRepository, d: DocumentsService, t: TakeoffService, mailer: TransactionalEmailSender & EmailCapability, prisma: PrismaService, catalogue: CatalogueService) => {
         const service = new PriceRequestsService(
           r,
           s,
@@ -40,9 +41,11 @@ import { PrismaPriceRequestRepository } from "./infrastructure/prisma-price-requ
         service.brancherGardeCommande((tenant, projectId, keys, retirerDesGroupes) => gardeCommandeSeule(prisma, tenant.companyId, projectId, keys, { retirerDesGroupes }).then(() => undefined));
         // Lot 6 : un e-mail au négoce qui ne part pas remonte dans la file d'exceptions de l'admin.
         service.brancherSupervision((e) => signalerException(prisma, e));
+        // Le tri par métier : un article pris au catalogue prend le métier de son catalogue (recette n° 2 du 14 novembre 2026).
+        service.brancherCatalogue((designations) => catalogue.metiersDesDesignations(designations));
         return service;
       },
-      inject: [PRICE_REQUEST_REPOSITORY, SUPPLIER_REPOSITORY, DocumentsService, TakeoffService, EMAIL_SENDER, PrismaService],
+      inject: [PRICE_REQUEST_REPOSITORY, SUPPLIER_REPOSITORY, DocumentsService, TakeoffService, EMAIL_SENDER, PrismaService, CatalogueService],
     },
   ],
   exports: [PRICE_REQUEST_REPOSITORY, PriceRequestsService],
