@@ -41,7 +41,7 @@ export function boutonSaisie(n: number): string {
   return n === 0 ? "Ajoute un matériau pour créer le quantitatif" : n === 1 ? "Créer le quantitatif · 1 matériau" : `Créer le quantitatif · ${n} matériaux`;
 }
 
-export function SaisirMaListe({ onFermer }: { onFermer: () => void }) {
+export function SaisirMaListe({ onFermer, versListe = (id) => `/chantiers/${id}` }: { onFermer: () => void; /** Où mène la liste une fois créée (par défaut, sa fiche). */ versListe?: (projetId: string) => string }) {
   const router = useRouter();
   const b = useBrouillon<{ lignes: LigneSaisie[] }>(
     "liste:saisie",
@@ -113,7 +113,7 @@ export function SaisirMaListe({ onFermer }: { onFermer: () => void }) {
         }
       }
       b.effacer();
-      router.push(`/chantiers/${q.projetId}`);
+      router.push(versListe(q.projetId));
     } catch (e) {
       setErreur(e instanceof ApiError && e.message ? e.message : "La liste n'est pas créée. Réessaie dans un instant.");
       setPending(false);

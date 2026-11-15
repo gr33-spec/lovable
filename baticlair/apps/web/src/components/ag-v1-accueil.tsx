@@ -203,11 +203,11 @@ function ChoixAjout({ onFermer }: { onFermer: () => void }) {
             <span className="text-[14px] text-muted">Coche une ou plusieurs lignes d&apos;une liste que tu as déjà.</span>
           </span>
         </Link>
-        <Link href="/achats-groupes/nouveau" className={option}>
+        <Link href="/chantiers/nouveau?pour=achat-groupe" className={option}>
           <Sparkles size={22} aria-hidden="true" className="shrink-0" />
           <span className="flex flex-col">
             <span className="text-[16px] font-bold">Saisir un nouveau besoin</span>
-            <span className="text-[14px] text-muted">Dis ton besoin comme au comptoir, sans quantitatif. Rien n&apos;est publié avant ta confirmation.</span>
+            <span className="text-[14px] text-muted">Tu prépares ta liste comme d&apos;habitude, puis tu coches ce que tu veux grouper. Rien n&apos;est publié avant ta confirmation.</span>
           </span>
         </Link>
       </div>

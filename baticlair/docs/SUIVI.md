@@ -296,7 +296,7 @@ Branche locale `lot-16-novembre` (part de `d2d055cf`, en ligne). Un commit par �
 1. Jaune : on garde #FED206 (fiche CLAUDE.md à jour). FAIT.
 2. Invitation « créez votre accès » depuis « Mes négoces » : supprimée ; le négoce n'est invité qu'avec sa première demande de prix. FAIT (tests et parcours adaptés : le lien ne se lit plus dans un e-mail).
 3. Mission : « Bientôt » avec l'explication du concept ; fonctions désactivées ; interrupteur dans l'admin (Réglages) pour l'activer d'un clic. FAIT (`platform/reglages/reglage-missions.ts`, routes `/v1/admin/vue/reglages/missions`, test `reglage-missions.test.ts`). RESTE à la mise en ligne : passer `MISSIONS_V1` à off sur l'environnement de test (ou couper dans l'admin).
-4. Un seul outil de saisie : « Saisir un nouveau besoin » (achats groupés) ouvre le même choix que « Nouveau quantitatif » (« Je saisis ma liste » ou « Mobiiz m'aide »). À FAIRE.
+4. Un seul outil de saisie : « Saisir un nouveau besoin » (achats groupés) ouvre le même choix que « Nouveau quantitatif » (« Je saisis ma liste » ou « Mobiiz m'aide »). FAIT (`/chantiers/nouveau?pour=achat-groupe`, puis `/achats-groupes/quantitatif/<id>` ; l'ancienne conversation `ag-v1-conversation` est retirée).
 5. Article déjà envoyé aux négoces : cochable en achat groupé après confirmation (« Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ? »). Règle changée. À FAIRE.
 6. Commande chez un négoce : date de livraison souhaitée dans l'e-mail au négoce retenu ; puis « Prévenir les autres négoces consultés ? » (e-mail poli, jamais le prix ni le nom du retenu). À FAIRE.
 7. Rappel à 7 jours après les réponses si rien n'est commandé : « Où en es-tu avec cette demande ? », bouton « C'est réglé ». À FAIRE.

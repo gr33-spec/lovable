@@ -123,7 +123,10 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(ajout.getByRole("link")).toHaveCount(2);
   // Ouvrir la saisie puis revenir sans rien confirmer : aucun brouillon fantôme, aucun besoin créé.
   await ajout.getByRole("link", { name: /^Saisir un nouveau besoin/ }).click();
-  await expect(page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" })).toBeVisible();
+  // UN SEUL OUTIL (Greg, 16 novembre 2026) : exactement l'écran de « Nouveau quantitatif », ses deux mêmes choix.
+  await expect(page).toHaveURL(/\/chantiers\/nouveau\?pour=achat-groupe$/);
+  await expect(page.getByRole("heading", { name: "Nouveau quantitatif", level: 1 })).toBeVisible();
+  for (const nom of [/^Je saisis ma liste/, /^Mobiiz m'aide/]) await expect(page.getByRole("main").getByRole("link", { name: nom })).toBeVisible();
   await page.goBack();
   await expect(page.getByRole("heading", { name: "Achats groupés", level: 1 })).toBeVisible();
   expect(await page.evaluate(async () => (await (await fetch("/v1/brouillons", { headers: { "x-company-id": localStorage.getItem("baticlair.companyId") ?? "" } })).text()))).toBe(brouillonsAvant);
@@ -300,59 +303,36 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await g.ctx.close();
 });
 
-test("« Ajouter un matériau » avec Mobiiz (Greg, 8 novembre) : une phrase de comptoir, une question à la fois, réponses rapides, puis le besoin prérempli", async ({ page }) => {
+test("« Saisir un nouveau besoin » (Greg, 16 novembre 2026) : le même outil que « Nouveau quantitatif », puis les lignes à cocher ; l'ancienne adresse y mène aussi", async ({ page }) => {
   test.setTimeout(120_000);
   await inscrire(page);
+  await apiJson(page, "POST", "/v1/me/guide/vu");
   await page.goto("/achats-groupes");
   await page.getByRole("button", { name: "Publier un besoin" }).click();
   await page.getByRole("dialog", { name: "Publier un besoin" }).getByRole("link", { name: /^Saisir un nouveau besoin/ }).click();
-  const chat = page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" });
-  await expect(chat.getByText(/Quel matériau veux-tu acheter en groupe \?/).first()).toBeVisible();
-  // Une réponse rapide, puis une phrase : Mobiiz garde ce qui est dit et demande ce qui manque, une chose à la fois.
-  await chat.getByRole("group", { name: "Réponses rapides" }).getByRole("button", { name: "Ardoise naturelle" }).click();
-  await expect(chat.getByText("Ardoise naturelle : c'est noté. Format ?")).toBeVisible();
-  await capture(page, "22-conversation-question");
-  await chat.getByRole("textbox", { name: "Ton message" }).fill("32 22 Espagne 1er choix 5 mm, 10 palettes livrées sur chantier pour le 15/03");
-  await chat.getByRole("button", { name: "Envoyer le message" }).click();
-  await expect(chat.getByText(/^C'est complet : Ardoise naturelle · 32 × 22 · Espagne · 1er choix · 5 mm, 10 palettes, livraison sur chantier, avant le 15 mars/)).toBeVisible();
-  await capture(page, "23-conversation-complete");
-  await chat.getByRole("button", { name: "Continuer : vérifier et confirmer" }).click();
-  // Le parcours habituel, prérempli : il ne reste que le conditionnement et le lieu privé.
-  await expect(page.getByRole("heading", { name: "Choisis précisément le produit" })).toBeVisible();
-  await page.getByRole("button", { name: "Confirmer 480 pièces par palette" }).click();
-  await page.getByRole("button", { name: "Continuer" }).click();
-  await expect(page.getByLabel("Quantité (palettes)")).toHaveValue("10");
-  await expect(page.getByLabel("J'ai besoin de ces matériaux avant le")).toHaveValue(/-03-15$/);
-  await expect(page.getByText("10 palettes = 4 800 pièces")).toBeVisible();
-  await page.getByLabel("Lieu de livraison (privé)").fill(`12 rue du Port, ${zone().cp} ${zone().ville}`);
-  await page.getByRole("button", { name: "Continuer" }).click();
-  await expect(page.getByRole("heading", { name: /Aucun achat groupé compatible|Un achat groupé correspond/ })).toBeVisible();
-});
-
-test("l'autocomplétion (Greg, 8 novembre) : « ardoise 3 » propose les formats, chaque choix affine, rien ne correspond : on continue d'écrire", async ({ page }) => {
-  await inscrire(page);
+  await expect(page.getByRole("heading", { name: "Nouveau quantitatif", level: 1 })).toBeVisible();
+  await capture(page, "22-meme-outil");
+  // « Je saisis ma liste » : l'écran de saisie habituel, rien de propre aux achats groupés.
+  await page.getByRole("main").getByRole("link", { name: /^Je saisis ma liste/ }).click();
+  await expect(page).toHaveURL(/mode=manuel&pour=achat-groupe$/);
+  const ecran = page.getByRole("dialog", { name: "Saisir ma liste" });
+  await ecran.getByLabel("Rechercher un matériau").fill("Ardoise naturelle 32x22 Espagne 1er choix 5 mm");
+  await ecran.getByRole("button", { name: /^Ajouter « Ardoise naturelle 32x22 Espagne 1er choix 5 mm » tel que je l'écris/ }).click();
+  await ecran.getByRole("button", { name: "Ajouter à la sélection" }).click();
+  const maListe = ecran.getByRole("region", { name: "Ma liste en cours" });
+  await maListe.getByLabel("Quantité de Ardoise naturelle 32x22 Espagne 1er choix 5 mm").fill("10");
+  await maListe.getByLabel("Unité de Ardoise naturelle 32x22 Espagne 1er choix 5 mm").selectOption("palettes");
+  await page.getByRole("button", { name: /^Créer le quantitatif · 1 matériau$/ }).filter({ visible: true }).click();
+  // La liste créée mène à l'écran où l'on coche ce que l'on groupe (et elle existe comme un quantitatif normal).
+  await expect(page).toHaveURL(/\/achats-groupes\/quantitatif\/[0-9a-f-]{36}$/);
+  await expect(page.getByRole("heading", { name: "Quels articles grouper ?" })).toBeVisible();
+  await expect(page.getByText(/Ardoise naturelle/).first()).toBeVisible();
+  await capture(page, "23-lignes-a-cocher");
+  // Les anciennes adresses du parcours à part ouvrent le même outil ; « Mobiiz m'aide » garde la destination.
   await page.goto("/achats-groupes/nouveau");
-  const chat = page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" });
-  const champ = chat.getByRole("textbox", { name: "Ton message" });
-  const suggestions = chat.getByRole("list", { name: "Suggestions" });
-  await champ.fill("ardoise 3");
-  await expect(suggestions.getByRole("button")).toHaveText(["Ardoise naturelle · 32 × 22", "Ardoise naturelle · 35 × 25", "Ardoise naturelle · 30 × 20"]);
-  await capture(page, "24-autocompletion");
-  await suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22" }).click();
-  await expect(champ).toHaveValue("Ardoise naturelle · 32 × 22 ");
-  await expect(suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22 · Espagne" })).toBeVisible();
-  await suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22 · Espagne" }).click();
-  await champ.pressSequentially("1");
-  await suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22 · Espagne · 1er choix" }).click();
-  await champ.pressSequentially("5");
-  await suggestions.getByRole("button", { name: "Ardoise naturelle · 32 × 22 · Espagne · 1er choix · 5 mm" }).click();
-  await champ.pressSequentially("10 palettes");
-  await expect(suggestions).toHaveCount(0);
-  await chat.getByRole("button", { name: "Envoyer le message" }).click();
-  await expect(chat.getByText("Livraison sur chantier ou retrait au dépôt ?")).toBeVisible();
-  // Rien ne correspond : aucune liste, on écrit librement.
-  await champ.fill("parpaing");
-  await expect(suggestions).toHaveCount(0);
+  await expect(page).toHaveURL(/\/chantiers\/nouveau\?pour=achat-groupe$/);
+  await expect(page.getByRole("main").getByRole("link", { name: /^Mobiiz m'aide/ })).toHaveAttribute("href", "/chantiers/nouveau?mode=assistant&pour=achat-groupe");
+  await expect(page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" })).toHaveCount(0);
 });
 
 test("retirer un besoin : « Garder mon besoin » d'abord, puis « Confirmer le retrait »", async ({ page }) => {

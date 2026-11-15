@@ -235,8 +235,8 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
             // Greg, 8 novembre 2026 : plus de catalogue ; un produit inconnu renvoie à Mobiiz.
             <p className={`${CARTE} p-4 text-[15px]`}>
               Ce produit n&apos;est pas reconnu.{" "}
-              <Link href="/achats-groupes/nouveau" className="font-semibold underline underline-offset-4">
-                Dis ton besoin à Mobiiz
+              <Link href="/chantiers/nouveau?pour=achat-groupe" className="font-semibold underline underline-offset-4">
+                Saisis ton besoin
               </Link>
               .
             </p>
@@ -263,8 +263,8 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
             </>
           )}
           {verrouille ? (
-            <Link href="/achats-groupes/nouveau" className="min-h-11 self-center py-2 text-center text-[15px] font-semibold underline underline-offset-4">
-              Pas exactement ton produit ? Dis-le à Mobiiz
+            <Link href="/chantiers/nouveau?pour=achat-groupe" className="min-h-11 self-center py-2 text-center text-[15px] font-semibold underline underline-offset-4">
+              Pas exactement ton produit ? Saisis ton besoin
             </Link>
           ) : (
             <Link href="/achats-groupes" className="min-h-11 self-center py-2 text-[15px] font-semibold underline underline-offset-4">

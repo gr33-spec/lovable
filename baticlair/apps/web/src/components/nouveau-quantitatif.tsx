@@ -107,7 +107,7 @@ const nombreFr = (q: string) => (/^\d+$/.test(q) ? Number(q).toLocaleString("fr-
  */
 const PAS_DE_RESEAU = "Pas de réseau : ton message reste dans la case. Renvoie-le dès que le réseau revient.";
 
-export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { onFermer?: () => void; surAjout?: (lignes: LigneDecrite[]) => void; existantes?: readonly string[] } = {}) {
+export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versListe = (id) => `/chantiers/${id}` }: { onFermer?: () => void; surAjout?: (lignes: LigneDecrite[]) => void; existantes?: readonly string[]; /** Où mène la liste une fois créée (16 novembre 2026 : depuis « Publier un besoin », l'écran où l'on coche les lignes à grouper). */ versListe?: (projetId: string) => string } = {}) {
   const [ajoutes, setAjoutes] = useState(0);
   const router = useRouter();
   const { me, company } = useSession();
@@ -417,7 +417,7 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <div ref={fil} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
           {liste ? (
-            <button type="button" onClick={() => router.push(`/chantiers/${liste.projetId}`)} className="pressable flex min-h-11 items-center gap-2 self-end rounded-full border-2 px-4 text-[15px] font-bold" style={{ borderColor: COULEURS_CHAT.jaune }}>
+            <button type="button" onClick={() => router.push(versListe(liste.projetId))} className="pressable flex min-h-11 items-center gap-2 self-end rounded-full border-2 px-4 text-[15px] font-bold" style={{ borderColor: COULEURS_CHAT.jaune }}>
               <ClipboardList size={18} aria-hidden="true" style={{ color: "var(--chat-jaune-texte)" }} /> Ma liste · {liste.n}
             </button>
           ) : null}
@@ -512,14 +512,14 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [] }: { on
                 {ajoutes > 0 ? `Revenir à ma liste · ${ajoutes} ajouté${ajoutes > 1 ? "s" : ""}` : "Revenir à ma liste"}
               </button>
             ) : liste ? (
-              <button type="button" onClick={() => router.push(`/chantiers/${liste.projetId}`)} className="pressable mb-2 flex min-h-12 w-full items-center justify-center rounded-2xl text-[16px] font-extrabold text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+              <button type="button" onClick={() => router.push(versListe(liste.projetId))} className="pressable mb-2 flex min-h-12 w-full items-center justify-center rounded-2xl text-[16px] font-extrabold text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
                 Voir ma liste ({liste.n})
               </button>
             ) : undefined
           }
         />
       </div>
-      {feuille ? <FeuilleAjouter liste={liste !== null} ids={ids} onListe={liste ? () => router.push(`/chantiers/${liste.projetId}`) : undefined} onFermer={() => setFeuille(false)} /> : null}
+      {feuille ? <FeuilleAjouter liste={liste !== null} ids={ids} onListe={liste ? () => router.push(versListe(liste.projetId)) : undefined} onFermer={() => setFeuille(false)} /> : null}
       {aConfirmer ? (
         <ConfirmerAnalyse
           nature={aConfirmer.nature}

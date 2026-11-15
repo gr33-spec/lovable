@@ -43,8 +43,13 @@ function Porte() {
   const params = useSearchParams();
   const router = useRouter();
   const mode = params.get("mode") ?? (params.get("liste") === "1" ? "manuel" : null);
-  if (mode === "manuel") return <SaisirMaListe onFermer={() => router.push("/chantiers/nouveau")} />;
-  if (mode === "assistant") return <NouveauQuantitatif />;
-  return <ChoixCreation />;
+  // UN SEUL OUTIL DE SAISIE (Greg, 16 novembre 2026) : « Saisir un nouveau besoin » (achats groupés) ouvre exactement cet
+  // écran (`?pour=achat-groupe`) ; la liste créée mène alors à l'écran où l'on coche les lignes à grouper.
+  const pour = params.get("pour") === "achat-groupe" ? "achat-groupe" : null;
+  const retour = pour ? "/chantiers/nouveau?pour=achat-groupe" : "/chantiers/nouveau";
+  const versListe = pour ? (id: string) => `/achats-groupes/quantitatif/${id}` : undefined;
+  if (mode === "manuel") return <SaisirMaListe onFermer={() => router.push(retour)} versListe={versListe} />;
+  if (mode === "assistant") return <NouveauQuantitatif onFermer={() => router.push(retour)} versListe={versListe} />;
+  return <ChoixCreation pour={pour} />;
 }
 

@@ -1,9 +1,8 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
 import { BesoinV1Detail, MesBesoinsV1 } from "@/components/ag-v1-besoins";
-import { ConversationAchatGroupeV1 } from "@/components/ag-v1-conversation";
 import { ParcoursDirectV1 } from "@/components/ag-v1-direct";
 import { ChoixDuQuantitatif, DepuisQuantitatifV1 } from "@/components/ag-v1-quantitatif";
 import { BackButton, EmptyState, Skeleton } from "@/components/ui";
@@ -26,12 +25,20 @@ export function PageNouveauV1() {
   );
 }
 
-/** Greg, 8 novembre 2026 : « Ajouter un matériau » s'ouvre sur la conversation Mobiiz ; seul un produit déjà choisi (carte
- *  d'un achat, besoin dit dans la conversation) ouvre le parcours habituel. Plus de catalogue (« il manquera toujours des
- *  produits »). */
+/**
+ * UN SEUL OUTIL DE SAISIE (Greg, 16 novembre 2026 : « "Saisir un nouveau besoin" doit ouvrir exactement le même outil que
+ * "Nouveau quantitatif", pas un parcours à part »). RÈGLE CHANGÉE : avant, sans produit choisi, une conversation propre aux
+ * achats groupés ; maintenant, l'outil commun (« Je saisis ma liste » ou « Mobiiz m'aide »), puis l'écran où l'on coche les
+ * lignes à grouper. Un produit déjà choisi (la carte d'un achat ouvert) ouvre toujours son parcours : rejoindre cet achat.
+ */
 function NouveauV1({ etat }: { etat: EtatV1 }) {
   const params = useSearchParams();
-  return params.get("type") ? <ParcoursDirectV1 etat={etat} /> : <ConversationAchatGroupeV1 etat={etat} />;
+  const router = useRouter();
+  const type = params.get("type");
+  useEffect(() => {
+    if (!type) router.replace("/chantiers/nouveau?pour=achat-groupe");
+  }, [type, router]);
+  return type ? <ParcoursDirectV1 etat={etat} /> : null;
 }
 
 export function PageMesBesoinsV1() {

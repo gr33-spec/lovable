@@ -110,7 +110,7 @@ test("passe mobile : Quantitatifs à deux choix, tableau de bord, Publier un bes
   await page.keyboard.press("Enter");
   const feuille = page.getByRole("dialog", { name: "Publier un besoin" });
   await expect(feuille.getByRole("link", { name: /Choisir dans un quantitatif/ })).toHaveAttribute("href", "/achats-groupes/quantitatif");
-  await expect(feuille.getByRole("link", { name: /Saisir un nouveau besoin/ })).toHaveAttribute("href", "/achats-groupes/nouveau");
+  await expect(feuille.getByRole("link", { name: /Saisir un nouveau besoin/ })).toHaveAttribute("href", "/chantiers/nouveau?pour=achat-groupe");
   await page.keyboard.press("Escape");
   await expect(feuille).toHaveCount(0);
 
