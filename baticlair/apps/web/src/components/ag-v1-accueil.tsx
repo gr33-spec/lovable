@@ -52,8 +52,9 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
     const t = window.setTimeout(() => setConfirmation(false), 6000);
     return () => window.clearTimeout(t);
   }, [ajoutes]);
-  // Seuls les métiers qui ont des produits ouverts sont proposés.
-  const metiers = FILTRES_V1.filter((f) => etat.produits.some((p) => lotPrincipal(p.lot) === f.id));
+  // Lot C (Greg, 15 novembre 2026) : la liste vient du serveur (un seul réglage) : les métiers ouverts d'abord, les autres
+  // visibles et marqués « Bientôt », non sélectionnables. Avant : seulement les métiers qui avaient des produits.
+  const metiers = etat.filtres ?? FILTRES_V1.filter((f) => etat.produits.some((p) => lotPrincipal(p.lot) === f.id)).map((f) => ({ ...f, ouvert: true }));
   const fermerChoix = useCallback(() => setChoix(false), []);
 
   return (
@@ -124,8 +125,8 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
           <select aria-label="Filtrer par métier" value={lot} onChange={(e) => setLot(e.target.value)} className="min-h-11 max-w-[11rem] min-w-0 truncate rounded-full border border-line bg-surface px-3 text-[15px] font-semibold">
             <option value="">Tous</option>
             {metiers.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.libelle}
+              <option key={f.id} value={f.id} disabled={!f.ouvert}>
+                {f.ouvert ? f.libelle : `${f.libelle} · Bientôt`}
               </option>
             ))}
           </select>

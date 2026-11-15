@@ -41,6 +41,8 @@ interface Metier {
   familleAchat: string;
   /** Greg, 13 novembre 2026 : un métier pas encore réellement fourni reste visible et se dit « en cours d'enrichissement ». */
   enEnrichissement?: boolean;
+  /** Lot C (Greg, 15 novembre 2026) : un métier pas encore ouvert reste visible, « Bientôt », et ne se choisit pas. */
+  ouvert?: boolean;
 }
 
 interface Reponse {
@@ -211,8 +213,8 @@ export function CatalogueListes({
               {metiers
                 .filter((m) => m.mien)
                 .map((m) => (
-                  <option key={m.code} value={m.code}>
-                    {m.libelle}
+                  <option key={m.code} value={m.code} disabled={m.ouvert === false}>
+                    {m.ouvert === false ? `${m.libelle} · Bientôt` : m.libelle}
                   </option>
                 ))}
             </optgroup>
@@ -221,13 +223,14 @@ export function CatalogueListes({
             {metiers
               .filter((m) => !m.mien)
               .map((m) => (
-                <option key={m.code} value={m.code}>
-                  {m.libelle}
+                <option key={m.code} value={m.code} disabled={m.ouvert === false}>
+                  {m.ouvert === false ? `${m.libelle} · Bientôt` : m.libelle}
                 </option>
               ))}
           </optgroup>
         </select>
       </div>
+      {metiers.some((m) => m.ouvert === false) ? <p className="text-[13px] text-muted">Les métiers marqués « Bientôt » arrivent prochainement. En attendant, tu peux toujours écrire ton matériau à la main.</p> : null}
 
       {/* Greg, 13 novembre 2026 : un métier partiel reste ouvert ; il dit que son catalogue grandit, et l'on peut toujours écrire son matériau. */}
       {courant?.enEnrichissement ? (

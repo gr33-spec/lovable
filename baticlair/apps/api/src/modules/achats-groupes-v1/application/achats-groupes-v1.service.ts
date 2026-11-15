@@ -15,6 +15,12 @@ import {
   HABILITATIONS_V1,
   LIBELLES_STATUT_V1,
   manquantesV1,
+  lotOuvertV1,
+  libelleLot,
+  METIER_DU_LOT_V1,
+  LIBELLES_METIERS_CATALOGUE,
+  ouvertsDAbord,
+  type MetiersOuverts,
   completerV1,
   aPreciserPlusTardV1,
   besoinUrgentV1,
@@ -113,7 +119,7 @@ export class AchatsGroupesV1Service {
     private readonly prisma: PrismaService,
     private readonly ports: PortsAchatsV1,
     private readonly email: TransactionalEmailSender,
-    private readonly options: { actif: boolean; webAppUrl: string; env: string },
+    private readonly options: { actif: boolean; webAppUrl: string; env: string; /** Lot C : les métiers utilisables. */ metiersOuverts?: MetiersOuverts },
     private readonly now: () => Date = () => new Date(),
   ) {}
 
@@ -162,8 +168,19 @@ export class AchatsGroupesV1Service {
       habilitations: HABILITATIONS_V1,
       raisons: RAISONS_NE_CONVIENT_PAS,
       motifs: MOTIFS_V1,
-      produits: PRODUITS_V1.map((p) => ({ type: p.type, libelle: p.libelle, lot: p.lot, unite: p.unite, conditionnements: p.conditionnements, caracteristiques: p.caracteristiques.map((c) => ({ attribut: c.attribut, libelle: c.libelle, options: c.options })) })),
+      // Lot C : seuls les produits d'un métier ouvert se publient ; les filtres disent « Bientôt » pour les autres.
+      produits: PRODUITS_V1.filter((p) => this.lotOuvert(p.lot)).map((p) => ({ type: p.type, libelle: p.libelle, lot: p.lot, unite: p.unite, conditionnements: p.conditionnements, caracteristiques: p.caracteristiques.map((c) => ({ attribut: c.attribut, libelle: c.libelle, options: c.options, importance: c.importance ?? "obligatoire" })) })),
+      filtres: ouvertsDAbord([...new Set(PRODUITS_V1.map((p) => p.lot))].map((lot) => ({ id: lot, libelle: this.libelleDuLot(lot), ouvert: this.lotOuvert(lot) }))),
     };
+  }
+
+  private lotOuvert(lot: string): boolean {
+    return lotOuvertV1(lot, this.options.metiersOuverts ?? "tous");
+  }
+  /** Le nom du métier derrière un lot (« Plâtrerie et isolation », « Charpente ») : jamais « Isolation » ni « Bois » seuls. */
+  private libelleDuLot(lot: string): string {
+    const m = METIER_DU_LOT_V1[lot];
+    return m ? LIBELLES_METIERS_CATALOGUE[m] : estLotV1(lot) ? libelleLot(lot) : lot;
   }
 
   async declarerHabilitation(tenant: TenantContext, role: string) {
@@ -234,7 +251,8 @@ export class AchatsGroupesV1Service {
     const zone = await this.zone(tenant.companyId);
     if (!zone) return { zone: null, achats: [] };
     const achats = await this.prisma.achatGroupeV1.findMany({ where: { departement: zone.code, statut: "ouvert", ouvertJusquau: { gt: this.now() }, ...(lot && estLotV1(lot) ? { lot: { in: lotsComprisV1(lot) } } : {}) }, orderBy: { ouvertJusquau: "asc" }, take: 50 });
-    return { zone, achats: await Promise.all(achats.map((a) => this.vuePublique(this.prisma, a))) };
+    // « Tous » ne montre que les achats des métiers ouverts ; un métier « Bientôt » n'a pas de contenu à l'écran.
+    return { zone, achats: await Promise.all(achats.filter((a) => this.lotOuvert(a.lot)).map((a) => this.vuePublique(this.prisma, a))) };
   }
 
   /* ------------------------------------------------------------------------- la compatibilité */
@@ -242,6 +260,7 @@ export class AchatsGroupesV1Service {
   private produitValide(type: string, attributs: Record<string, string>): { p: ProduitV1; cle: string; nom: string } {
     const p = produitV1(type);
     if (!p) throw validationFailed("Product not open to group purchases", { reason: "non_ouvert", message: "Ce produit n'est pas encore ouvert aux achats groupés : il reste dans ton quantitatif." });
+    if (!this.lotOuvert(p.lot)) throw validationFailed("Trade not open yet", { reason: "metier_bientot", message: `${this.libelleDuLot(p.lot)} : bientôt en achat groupé. Ce produit reste dans ton quantitatif.` });
     // Lot D (15 novembre 2026) : une caractéristique recommandée non dite vaut « à préciser », elle ne bloque jamais.
     const propres = completerV1(type, Object.fromEntries(p.caracteristiques.map((c) => [c.attribut, (attributs[c.attribut] ?? "").trim()]).filter(([, v]) => v)));
     const manquantes = manquantesV1(type, propres);
@@ -693,7 +712,9 @@ export class AchatsGroupesV1Service {
         const c = classerLigneV1({ designation: l.designation, quantite: l.quantite ?? 0, unite: l.unite, lotChoisi: lotDe.get(l.key) ?? null, faits: { demandeEnvoyee: f.demandeEnvoyee, commandee: f.commandeeSeule || f.groupe?.statut === "accepte", enRecherche: f.enRecherche, dansUnAchatGroupe: !!f.groupe } });
         // Une ligne encore à régler dans la liste (question, quantité à vérifier) : à préciser d'abord, jamais cachée.
         const aRegler = l.aRegler && c.selectionnable ? { mention: "a_preciser" as const, texte: "À préciser : ligne à régler dans ta liste", pourquoi: "Réponds d'abord à la question de cette ligne dans ta liste.", selectionnable: false } : {};
-        return { key: l.key, designation: l.designation, quantiteListe: l.quantite, unite: l.unite, ...c, ...aRegler };
+        // Lot C : le produit d'un métier « Bientôt » reste dans le quantitatif, avec sa raison.
+        const bientot = c.produit && !this.lotOuvert(produitV1(c.produit.type)?.lot ?? "divers") ? { mention: "non_ouvert" as const, texte: "Bientôt en achat groupé", pourquoi: `${this.libelleDuLot(produitV1(c.produit.type)?.lot ?? "divers")} n'est pas encore ouvert aux achats groupés : la ligne reste dans ton quantitatif.`, selectionnable: false } : {};
+        return { key: l.key, designation: l.designation, quantiteListe: l.quantite, unite: l.unite, ...c, ...aRegler, ...bientot };
       }),
     };
   }

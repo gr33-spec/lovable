@@ -36,7 +36,7 @@ import { AchatsGroupesV1AdminController, AchatsGroupesV1Controller, AchatsGroupe
           e,
           // La prévisualisation (test.mobiiz.fr) tourne en NODE_ENV=production : la clôture anticipée de test y reste permise
           // (recette en ligne, Greg, 7 novembre 2026) ; la vraie production la refuse toujours.
-          { actif: c.achatsGroupesV1, webAppUrl: c.webAppUrl, env: c.previewOriginPattern ? "preview" : c.env },
+          { actif: c.achatsGroupesV1, webAppUrl: c.webAppUrl, env: c.previewOriginPattern ? "preview" : c.env, metiersOuverts: c.metiersOuverts },
         ),
       inject: [PrismaService, CommandeDuMoisService, EMAIL_SENDER, CONFIG, DroitsService],
     },

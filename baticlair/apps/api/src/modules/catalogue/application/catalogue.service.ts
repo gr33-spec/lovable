@@ -15,6 +15,9 @@ import {
   type Candidate,
   FAMILLE_DU_METIER_CATALOGUE,
   catalogueEnEnrichissement,
+  metierOuvert,
+  ouvertsDAbord,
+  type MetiersOuverts,
   LIBELLES_METIERS_CATALOGUE,
   METIERS_CATALOGUE,
   METIERS_DU_SELECTEUR,
@@ -138,7 +141,11 @@ export class CatalogueService {
   /** Les propositions et références des artisans, recalculées au plus toutes les minutes (ou dès qu'un intitulé arrive). */
   private communaute: { quand: number; items: (Candidate & { publiee: boolean })[] } | null = null;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    /** Lot C (15 novembre 2026) : les métiers utilisables ; les autres restent visibles, « Bientôt ». */
+    private readonly ouverts: MetiersOuverts = "tous",
+  ) {}
 
   /**
    * L'AMORCE N'EST PLUS UNE AFFAIRE DE LECTURE (Greg, 12 novembre 2026 : « ne conserve pas un système où l'ajout de centaines
@@ -223,7 +230,8 @@ export class CatalogueService {
   private metiersDe(trades: string[]) {
     const miens = metiersCatalogueDuCompte(trades);
     const ordre = [...miens, ...METIERS_DU_SELECTEUR.filter((m) => !miens.includes(m))];
-    return ordre.map((m) => ({ code: m, libelle: LIBELLES_CATALOGUES[m] ?? LIBELLES_METIERS_CATALOGUE[m], mien: miens.includes(m), familleAchat: FAMILLE_DU_METIER_CATALOGUE[m], enEnrichissement: catalogueEnEnrichissement(m) }));
+    // Les métiers ouverts d'abord : un métier « Bientôt » reste visible, jamais devant un métier utilisable.
+    return ouvertsDAbord(ordre.map((m) => ({ code: m, libelle: LIBELLES_CATALOGUES[m] ?? LIBELLES_METIERS_CATALOGUE[m], mien: miens.includes(m), familleAchat: FAMILLE_DU_METIER_CATALOGUE[m], enEnrichissement: catalogueEnEnrichissement(m), ouvert: metierOuvert(m, this.ouverts) })));
   }
 
   /**
@@ -281,7 +289,9 @@ export class CatalogueService {
   /** L'écran : le métier choisi (sinon le premier du profil), son arbre, ou les résultats d'une recherche (tous métiers). */
   async lire(tenant: TenantContext, metierDemande: string | undefined, q: string | undefined) {
     const metiers = await this.metiers(tenant);
-    const metier = metierDemande && estMetier(metierDemande) ? rayonDuMetierCatalogue(metierDemande) : (metiers[0]?.code ?? "couverture");
+    // Un métier « Bientôt » ne s'ouvre pas, même demandé par son adresse : on revient au premier métier utilisable.
+    const voulu = metierDemande && estMetier(metierDemande) ? rayonDuMetierCatalogue(metierDemande) : null;
+    const metier = voulu && metierOuvert(voulu, this.ouverts) ? voulu : (metiers[0]?.code ?? "couverture");
     const recherche = (q ?? "").trim();
     if (recherche) {
       const tous = await this.articles(null);

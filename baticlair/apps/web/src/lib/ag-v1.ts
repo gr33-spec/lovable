@@ -23,7 +23,7 @@ export interface ProduitV1 {
   lot: string;
   unite: UniteV1;
   conditionnements: { unite: UniteV1; parDefaut: number | null }[];
-  caracteristiques: { attribut: string; libelle: string; options: OptionV1[] }[];
+  caracteristiques: { attribut: string; libelle: string; options: OptionV1[]; importance?: "obligatoire" | "recommandee" }[];
 }
 export interface EtatV1 {
   actif: true;
@@ -33,6 +33,8 @@ export interface EtatV1 {
   raisons: { id: string; libelle: string }[];
   motifs: { id: string; libelle: string; geste: "modifier" | "retirer" }[];
   produits: ProduitV1[];
+  /** Lot C (Greg, 15 novembre 2026) : les métiers du filtre, les ouverts d'abord ; les autres se lisent « Bientôt ». */
+  filtres?: { id: string; libelle: string; ouvert: boolean }[];
 }
 export interface VolumesV1 {
   principale: string;

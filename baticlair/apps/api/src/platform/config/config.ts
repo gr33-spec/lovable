@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NOM_APP, lireTableNombres, lireZonesActives } from "@baticlair/domain";
+import { NOM_APP, lireMetiersOuverts, lireTableNombres, lireZonesActives, type MetiersOuverts } from "@baticlair/domain";
 import { parseActivationCodes, parsePlans, type Plan } from "./plans.js";
 
 /**
@@ -181,6 +181,12 @@ const envSchema = z
      * chantiers fictifs déjà créés restent ; « on » les remet à l'écran, sans redéploiement de code.
      */
     CHANTIER_FICTIF: z.enum(["on", "off"]).default("off"),
+    /**
+     * Les métiers ouverts (Greg, 15 novembre 2026, lot C) : « tous », ou des codes séparés par des virgules
+     * (« couverture,peinture,zinguerie »). Sans réglage : Couverture et Peinture en production, tout ailleurs. Les
+     * autres métiers restent visibles avec le badge « Bientôt ». Ouvrir un métier = changer cette seule variable.
+     */
+    METIERS_OUVERTS: z.string().optional(),
     /**
      * L'ABONNEMENT ARTISAN (Greg, 24 octobre 2026 : 49 € HT par mois ou 348 € HT par an, essai, paywall sur déposer, voir les résultats,
      * commander, recommander) : `on` par défaut ; `off` ouvre tout (aucun paywall, aucune facture).
@@ -435,6 +441,8 @@ export interface AppConfig {
   connexionsLogiciel: boolean;
   /** Le chantier fictif d'un vrai compte (`CHANTIER_FICTIF`), retiré de l'interface par défaut. */
   chantierFictif: boolean;
+  /** Les métiers utilisables (`METIERS_OUVERTS`) ; les autres se lisent « Bientôt ». */
+  metiersOuverts: MetiersOuverts;
   /** L'abonnement artisan (`ABONNEMENT`, `PAIEMENT`). */
   abonnement: {
     actif: boolean;
@@ -598,6 +606,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     memoireVisible: e.MEMOIRE_VISIBLE === "on",
     connexionsLogiciel: e.CONNEXIONS_LOGICIEL === "on",
     chantierFictif: e.CHANTIER_FICTIF === "on",
+    metiersOuverts: lireMetiersOuverts(e.METIERS_OUVERTS, e.NODE_ENV === "production"),
     abonnement: {
       actif: e.ABONNEMENT === "on",
       paiement: e.PAIEMENT,

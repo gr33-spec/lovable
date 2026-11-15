@@ -20,14 +20,17 @@ export function ChoixCaracteristiques({ produit, attributs, onChange }: { produi
     <div className={`${CARTE} flex flex-col`}>
       {produit.caracteristiques.map((c) => {
         const id = `ag-${c.attribut}`;
-        const manque = !attributs[c.attribut];
+        // Lot D (Greg, 15 novembre 2026) : une caractéristique recommandée ne bloque rien ; sans réponse, « À préciser ».
+        const recommandee = c.importance === "recommandee";
+        const manque = !recommandee && !attributs[c.attribut];
         return (
           <div key={c.attribut} className="flex flex-col gap-1 border-b border-line px-4 py-3 last:border-b-0">
             <label htmlFor={id} className="text-[14px] font-semibold text-muted">
               {c.libelle}
+              {recommandee ? <span className="font-normal"> · facultatif</span> : null}
             </label>
-            <select id={id} value={attributs[c.attribut] ?? ""} onChange={(e) => onChange({ ...attributs, [c.attribut]: e.target.value })} className={`${INPUT} ${manque ? "border-warn" : ""}`}>
-              <option value="">À préciser</option>
+            <select id={id} value={attributs[c.attribut] ?? (recommandee ? "apreciser" : "")} onChange={(e) => onChange({ ...attributs, [c.attribut]: e.target.value })} className={`${INPUT} ${manque ? "border-warn" : ""}`}>
+              {recommandee ? null : <option value="">À préciser</option>}
               {c.options.map((o) => (
                 <option key={o.valeur} value={o.valeur}>
                   {o.libelle}
@@ -129,7 +132,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
   });
   const [etape, setEtape] = useState<Etape>("produit");
   // Venu de la carte d'un achat ouvert : le produit des autres entreprises ne se modifie pas, on ajoute sa quantité.
-  const verrouille = !!params.get("achat") && !!produit && produit.caracteristiques.every((c) => attributs[c.attribut]);
+  const verrouille = !!params.get("achat") && !!produit && produit.caracteristiques.every((c) => c.importance === "recommandee" || attributs[c.attribut]);
   // Le besoin dit dans la conversation Mobiiz arrive prérempli (quantité, unité, réception, date) ; tout reste modifiable.
   const uniteDite = params.get("unite");
   const [unite, setUnite] = useState<string>(() => (uniteDite && produit && [produit.unite.code, ...produit.conditionnements.map((c) => c.unite.code)].includes(uniteDite) ? uniteDite : (produit?.conditionnements[0]?.unite.code ?? produit?.unite.code ?? "")));
@@ -150,7 +153,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
   const [erreur, setErreur] = useState<string | null>(null);
   const [cleIdempotence] = useState(newActionKey);
 
-  const complet = !!produit && produit.caracteristiques.every((c) => attributs[c.attribut]);
+  const complet = !!produit && produit.caracteristiques.every((c) => c.importance === "recommandee" || attributs[c.attribut]);
   const cond = produit?.conditionnements.find((c) => c.unite.code === unite) ?? null;
   const q = Number(quantite.replace(",", "."));
   const qOk = Number.isFinite(q) && q > 0;
