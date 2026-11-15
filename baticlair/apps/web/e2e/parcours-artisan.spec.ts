@@ -3377,8 +3377,8 @@ test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau co
     const bouton = page.getByRole("alertdialog", { name: "Analyser ce document ?" }).getByRole("button", { name: "Analyser le document" });
     if (await bouton.waitFor({ timeout: 3000 }).then(() => true, () => false)) await bouton.click();
   };
-  // Un fichier de plus de 20 Mo : refusé avant l'envoi, en clair.
-  await depot.setInputFiles({ name: "liste.png", mimeType: "image/png", buffer: Buffer.alloc(21_000_000, 1) });
+  // Un fichier de plus de 10 Mo (lot B, 16 novembre 2026 ; avant : 20 Mo) : refusé avant l'envoi, en clair.
+  await depot.setInputFiles({ name: "liste.png", mimeType: "image/png", buffer: Buffer.alloc(11_000_000, 1) });
   await expect(page.getByText("C'est trop volumineux pour être envoyé.")).toBeVisible();
   // Réseau coupé : rien n'est perdu, l'écran le dit.
   await page.context().setOffline(true);

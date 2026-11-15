@@ -69,11 +69,11 @@ const envSchema = z
     EMAILS_AUTORISES: z.string().optional(),
     EMAIL_REDIRECTION: z.email().optional(),
     /**
-     * Taille maximale d'un document déposé : 20 Mo par défaut (un devis scanné).
+     * Taille maximale d'un document déposé : 10 Mo par défaut (lot B, 16 novembre 2026 ; avant : 20 Mo).
      * Au-delà de 4 Mo, le navigateur l'envoie en morceaux (`UploadParts`) :
      * une requête vers une fonction Vercel ne dépasse pas 4,5 Mo.
      */
-    DOCUMENT_MAX_BYTES: z.coerce.number().int().positive().max(50_000_000).default(20_000_000),
+    DOCUMENT_MAX_BYTES: z.coerce.number().int().positive().max(50_000_000).default(10_000_000),
     DOCUMENT_MAX_PAGES: z.coerce.number().int().positive().max(600).default(60),
     /** Taux de conversion utilisé pour AFFICHER les coûts IA en euros (les coûts sont stockés en dollars). */
     AI_USD_TO_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("0.92"),
@@ -329,6 +329,10 @@ const envSchema = z
     ALERT_EMAIL: z.email().optional(),
     /** Secret des tâches planifiées Vercel (purge des comptes inactifs) : Vercel l'envoie en « Bearer ». */
     CRON_SECRET: z.string().min(16).optional(),
+    /** Lot B : clé des fichiers chiffrés au repos (32 octets en base64). Vide : rien n'est chiffré. Posée par Greg seulement. */
+    CHIFFREMENT_CLE: z.string().optional(),
+    /** Lot B : place accordée à la base (Neon gratuit : 0,5 Go) ; au-delà de 70 %, une alerte part. 0 : pas d'alerte. */
+    BASE_TAILLE_MAX_MO: z.coerce.number().int().min(0).default(512),
     READING_ANSWER_WITHIN_MS: z.coerce.number().int().positive().max(60_000).default(8000),
   })
   .superRefine((env, ctx) => {
@@ -447,6 +451,8 @@ export interface AppConfig {
   turnstileSecret: string | null;
   alerts: { webhookUrl?: string; email?: string };
   cronSecret?: string;
+  chiffrementCle?: string;
+  baseTailleMaxMo: number;
   ai: {
     provider: "anthropic" | "openai" | "enregistre" | "disabled" | "fake";
     apiKey?: string;
@@ -638,6 +644,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     motsDePasseFuites: (e.MOTS_DE_PASSE_FUITES ?? (isDeployed ? "on" : "off")) === "on",
     turnstileSecret: e.TURNSTILE_SECRET_KEY ?? null,
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
+    ...(e.CHIFFREMENT_CLE?.trim() ? { chiffrementCle: e.CHIFFREMENT_CLE } : {}),
+    baseTailleMaxMo: e.BASE_TAILLE_MAX_MO,
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
     ai: {
       provider: e.AI_PROVIDER ?? (apiKey ? "anthropic" : "disabled"),

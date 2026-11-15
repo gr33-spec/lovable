@@ -2,7 +2,8 @@ import { Module } from "@nestjs/common";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
-import { CONFIG, EMAIL_SENDER } from "../../platform/tokens.js";
+import type { Alerter } from "../../platform/alerts/alerter.js";
+import { ALERTER, CONFIG, EMAIL_SENDER } from "../../platform/tokens.js";
 import { AbonnementModule, AbonnementService } from "../abonnement/index.js";
 import { CommandeDuMoisService, DOMAINE_DEMO, GroupeModule, JeuDemonstrationService } from "../groupe/index.js";
 import { HabitudesService, LearningModule } from "../learning/index.js";
@@ -24,7 +25,7 @@ import { SupervisionController } from "./http/supervision.controller.js";
     },
     {
       provide: PilotageService,
-      useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender, abo: AbonnementService, h: HabitudesService, cmd: CommandeDuMoisService) =>
+      useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender, abo: AbonnementService, h: HabitudesService, cmd: CommandeDuMoisService, alerter: Alerter) =>
         new PilotageService(p, c, e, {
           etatAbonnement: (companyId, maintenant) => abo.etat(companyId, maintenant),
           apprentissage: () => h.admin(),
@@ -36,8 +37,8 @@ import { SupervisionController } from "./http/supervision.controller.js";
           paiementSimule: c.abonnement.paiement === "simule",
           stripeDeTest: c.abonnement.paiement === "stripe" && !!c.abonnement.stripe?.secretKey.startsWith("sk_test_"),
           demoPermise: !(c.env === "production" && !c.previewOriginPattern),
-        }),
-      inject: [PrismaService, CONFIG, EMAIL_SENDER, AbonnementService, HabitudesService, CommandeDuMoisService],
+        }, undefined, alerter),
+      inject: [PrismaService, CONFIG, EMAIL_SENDER, AbonnementService, HabitudesService, CommandeDuMoisService, ALERTER],
     },
     {
       provide: DemoService,

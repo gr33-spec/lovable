@@ -140,6 +140,22 @@ Test permanent : `apps/api/test/admin-securite.test.ts` (routes, liste blanche, 
 - La copie ne bouge plus : aucune application n'y écrit, elle n'a pas de point d'accès ouvert.
 - La production (branche `main`) n'est pas touchée par le lot B. Elle a sa propre copie, `sauvegarde-prod-2026-10-24`.
 
+### État au 16 novembre 2026 : branché, éteint sans la clé
+
+- Le chiffrement est branché dans `apps/api/src/platform/database/prisma.service.ts` : avec `CHIFFREMENT_CLE`, tout fichier
+  écrit en base (les douze colonnes d'octets, liste dans `platform/chiffrement/fichiers.ts`) est chiffré à l'écriture et
+  déchiffré à la lecture. Sans la clé : rien n'est chiffré, rien ne change. Un fichier chiffré relu sans la clé est une
+  erreur, jamais un contenu illisible servi. Tests : `chiffrement-cle.test.ts`, `chiffrement-fichiers.test.ts`.
+- Mise en route (par Greg seulement) : créer la clé (`openssl rand -base64 32`), la poser dans Vercel (projet de l'API,
+  environnement de test), la garder aussi en lieu sûr hors de Vercel (sans elle, les fichiers chiffrés sont perdus),
+  redéployer. Puis, pour les fichiers déjà là : `pnpm exec tsx scripts/fichiers-chiffrement.ts` (relevé seul), puis
+  `... chiffrer`. La clé n'est jamais affichée ni écrite dans le dépôt.
+- Dépôt limité à 10 Mo (`DOCUMENT_MAX_BYTES`, avant 20 Mo). Les photos sont allégées dans le navigateur avant l'envoi.
+- Espace : la tâche horaire du pilotage alerte (une fois par jour) quand la base dépasse 70 % de `BASE_TAILLE_MAX_MO`
+  (512 Mo par défaut, la place du plan gratuit de Neon). Rien n'est supprimé.
+- Liens publics : tous signés (jeton HMAC à durée limitée) ou gardés sous forme d'empreinte ; aucun fichier ne se lit par
+  une adresse devinable. Stockage des fichiers hors de la base : dette, à décider si la base grossit.
+
 ### Retour arrière, dans cet ordre
 
 1. **Fichiers chiffrés d'abord.** Si `CHIFFREMENT_CLE` a déjà servi, les fichiers déposés depuis portent l'en-tête `MZC1`

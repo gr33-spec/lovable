@@ -47,7 +47,7 @@ index.ts       seule porte d'entrée du module pour les autres
 | `identity` | Better Auth (e-mail + mot de passe, Google, Microsoft), session par cookie `better-auth.session_token`, `@Public()` pour les routes sans session, limite de débit des routes d'auth (`rate_limit`). |
 | `tenancy` | Entreprises, membres, rôles ; le `TenantContext { userId, companyId, role }` posé par le `TenantGuard` depuis l'en-tête `x-company-id`. Toute table métier porte `companyId` ; un id d'une autre entreprise répond 404. |
 | `projects` | Chantiers, « prochaine action » de l'accueil. |
-| `documents` | Dépôt des PDF (octets magiques, 20 Mo, 60 pages, envoi en morceaux `upload_part` au-delà de 4 Mo), texte par page (pdf.js), stockage en base (`document_blob`). |
+| `documents` | Dépôt des PDF (octets magiques, 10 Mo, 60 pages, envoi en morceaux `upload_part` au-delà de 4 Mo), texte par page (pdf.js), stockage en base (`document_blob`). |
 | `takeoff` | La lecture du devis (prompt A §41.1, modèle le plus capable), la relecture (prompt B), la fiche de chantier, les questions de comptoir, la liste d'achats ; version du référentiel figée par chantier (`referential_snapshot`). |
 | `quantitatifs` | Porte d'entrée `/v1/quantitatifs` (PDF ou lignes) pour l'app et les partenaires ; `POST /v1/projects/:id/liste` pour « J'ai déjà ma liste » (photo ou PDF d'une liste déjà comptée, lue sans calcul : `ListeReader`, faux lecteur à trois listes enregistrées en test). |
 | `suppliers`, `price-requests`, `offers` | Carnet de fournisseurs, demandes de prix (copie figée de la liste, PDF joint, e-mail), devis fournisseurs reçus et lus, comparaison. |
@@ -134,7 +134,7 @@ Routes de l'achat groupé par métier (27 octobre 2026, 2e message) : `GET /v1/a
 | Socle | `NODE_ENV`, `PORT`, `DATABASE_URL` (+ `DATABASE_URL_UNPOOLED` pour les migrations), `AUTH_SECRET`, `WEB_APP_URL`, `API_PUBLIC_URL`, `LOG_LEVEL`, `RATE_LIMIT`, `VERCEL_ENV` | `AUTH_SECRET` signe les sessions, les liens des négoces et les clés VAPID. |
 | OAuth | `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET` | Facultatifs. |
 | IA | `AI_PROVIDER` (anthropic | fake), `ANTHROPIC_API_KEY` ou `BATICLAIR_ANTHROPIC_KEY`, `AI_EXTRACTION_MODEL`, `AI_EXTRACTION_EFFORT`, `AI_QUANTITATIF` (on/off), `AI_QUANTITATIF_MODEL`, `AI_MONTHLY_BUDGET_EUR`, `AI_ANALYSIS_MAX_EUR`, `AI_USD_TO_EUR`, `READING_ANSWER_WITHIN_MS` | `fake` en test et en e2e : aucun appel. |
-| Documents | `DOCUMENT_MAX_BYTES` (20 Mo), `DOCUMENT_MAX_PAGES` (60) | |
+| Documents | `DOCUMENT_MAX_BYTES` (10 Mo), `DOCUMENT_MAX_PAGES` (60) | |
 | E-mail | `EMAIL_PROVIDER` (resend | console | capture | disabled), `RESEND_API_KEY`, `EMAIL_DOMAINE`, `EMAIL_EXPEDITEUR` (ou `EMAIL_FROM`), `EMAILS_AUTORISES` et `EMAIL_REDIRECTION` (liste blanche de la prévisualisation, `docs/groupe/EMAILS.md`), `REPONSES_DOMAINE`, `RESEND_WEBHOOK_SECRET` | `REPONSES_DOMAINE` donne l'adresse `lot-<n°>@…` en `Reply-To` ; le webhook reçoit `email.received`. |
 | Alertes | `ALERT_EMAIL`, `ALERT_WEBHOOK_URL` | Erreurs serveur et dépassements de budget IA. |
 | Formules | `PAYWALL`, `BILLING_PLANS`, `PLAN_ACTIVATION_CODES`, `REFERENTIAL_VALIDATORS` | |

@@ -1,6 +1,7 @@
 import { DOMAINE_DEMO, emailsDemo } from "../../../platform/demo-domaine.js";
 import { createHash, randomInt } from "node:crypto";
 import { NOM_APP, REGLAGES_PILOTAGE_DEFAUT, eurosEntiers, flecheDe, rentabilite, revenuMensuelRecurrent, taux, type Formule, type ReglagesPilotage } from "@baticlair/domain";
+import { NO_ALERTS, type Alerter } from "../../../platform/alerts/alerter.js";
 import type { AppConfig } from "../../../platform/config/config.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
@@ -10,6 +11,8 @@ import { deuxFacteursValides } from "../../../platform/http/deux-facteurs.js";
 import type { AuthenticatedUser } from "../../identity/index.js";
 
 const JOUR = 86_400_000;
+/** Lot B : la base alerte à 70 % de sa place. */
+export const SEUIL_STOCKAGE = 0.7;
 const CLE_REGLAGES = "pilotage:reglages";
 /** Le domaine des comptes de démonstration et des faux comptes du jeu de test : jamais comptés. */
 export const DOMAINE_FACTICE = `@${DOMAINE_DEMO}`;
@@ -46,10 +49,11 @@ type AppelHttp = (url: string, init: { headers: Record<string, string>; signal: 
 export class PilotageService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: Pick<AppConfig, "groupe" | "aiCost" | "authSecret"> & { ai?: Pick<AppConfig["ai"], "provider" | "apiKey" | "keySource"> },
+    private readonly config: Pick<AppConfig, "groupe" | "aiCost" | "authSecret"> & { ai?: Pick<AppConfig["ai"], "provider" | "apiKey" | "keySource">; baseTailleMaxMo?: number },
     private readonly email: TransactionalEmailSender,
     private readonly sources: SourcesPilotage,
     private readonly now: () => Date = () => new Date(),
+    private readonly alerter: Alerter = NO_ALERTS,
   ) {}
 
   /**
@@ -339,5 +343,21 @@ export class PilotageService {
       await this.email.send({ to, subject: `${NOM_APP} : coût IA du jour au-dessus de ${eurosEntiers(seuilIaJourEur)}`, text: [`Le coût de l'IA aujourd'hui atteint ${cout.toFixed(2).replace(".", ",")} €, au-dessus du seuil de ${eurosEntiers(seuilIaJourEur)}.`, "", "Le détail jour par jour est dans le tableau de bord."].join("\n") }).catch(() => undefined);
     }
     return true;
+  }
+
+  /**
+   * Chaque heure (lot B, 16 novembre 2026) : la base dépasse 70 % de la place accordée (`BASE_TAILLE_MAX_MO`, 512 Mo sur le
+   * plan gratuit de Neon) → une alerte, une fois par jour. Rien n'est supprimé : l'alerte laisse le temps de décider.
+   */
+  async alerteStockage(): Promise<{ mo: number; maxMo: number; alerte: boolean }> {
+    const maxMo = this.config.baseTailleMaxMo ?? 0;
+    const [{ octets }] = await this.prisma.$queryRaw<[{ octets: bigint }]>`SELECT pg_database_size(current_database()) AS octets`;
+    const mo = Math.round(Number(octets) / 1_048_576);
+    if (!maxMo || mo < maxMo * SEUIL_STOCKAGE) return { mo, maxMo, alerte: false };
+    const cle = `pilotage:alerte-stockage:${jourIso(this.now())}`;
+    if (await this.prisma.parametreGroupe.findUnique({ where: { cle } })) return { mo, maxMo, alerte: false };
+    await this.prisma.parametreGroupe.create({ data: { cle, valeur: { mo, maxMo } } });
+    this.alerter.alert("stockage", `La base occupe ${mo} Mo sur ${maxMo} Mo (${Math.round((mo / maxMo) * 100)} %). Au-delà de ${maxMo} Mo, plus rien ne s'enregistre : il faut faire de la place ou changer de formule Neon.`);
+    return { mo, maxMo, alerte: true };
   }
 }

@@ -293,7 +293,7 @@ export interface ProjectDocument {
 }
 
 /** Taille maximale d'un document (même valeur par défaut que l'API) ; au-delà de 3 Mo, il part en morceaux (`lib/upload.ts`). */
-export const MAX_DOCUMENT_BYTES = 20_000_000;
+export const MAX_DOCUMENT_BYTES = 10_000_000;
 /** Une requête vers l'API ne dépasse pas 4,5 Mo chez l'hébergeur : les photos allégées tiennent dans 4 Mo. */
 export const MAX_REQUEST_BYTES = 4_000_000;
 

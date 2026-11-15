@@ -135,6 +135,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Commander chez un négoce : l'artisan choisit une date de livraison souhaitée ; le négoce retenu lit « C'est OK pour moi, livraison souhaitée le [date], on s'appelle pour caler les détails. » Juste après : « Prévenir les autres négoces consultés ? Oui / Non » ; « Oui » envoie un e-mail poli, jamais le prix ni le nom du négoce retenu (un négoce qui n'avait pas répondu lit que la demande est close).
 - Rappel de suivi : 7 jours après les réponses à une demande directe, sans commande dans Mobiiz, « Où en es-tu avec cette demande ? », un seul bouton « C'est réglé » ; sans clic, la demande reste dans « À faire maintenant ». Pas de fil de discussion artisan-négoce pour une demande individuelle : ils s'appellent. L'offre d'un achat groupé, elle, passe obligatoirement par Mobiiz.
 - Ordre des anciennes demandes : gênants côté demandes, gênants côté abonnement, lot B, lot D. Le reste attend l'après-lancement.
+- Lot B : le chiffrement des fichiers est branché (`platform/database/prisma.service.ts`), éteint tant que `CHIFFREMENT_CLE` n'est pas posée par Greg dans Vercel ; fichiers déjà là : `scripts/fichiers-chiffrement.ts`. Dépôt limité à 10 Mo (avant : 20). Alerte quand la base dépasse 70 % de `BASE_TAILLE_MAX_MO` (512 Mo).
 
 ## Signalement de bugs
 

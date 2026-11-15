@@ -170,6 +170,6 @@ export class PilotagePublicController {
   async tache(@Headers("authorization") authorization: string | undefined) {
     const secret = this.config.cronSecret;
     if (!secret || authorization !== `Bearer ${secret}`) throw forbidden("Scheduled task only");
-    return { alerteIa: await this.pilotage.alerteIa() };
+    return { alerteIa: await this.pilotage.alerteIa(), stockage: await this.pilotage.alerteStockage().catch(() => null) };
   }
 }

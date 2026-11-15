@@ -113,8 +113,26 @@ describe("le tableau de bord admin", () => {
     // Un coût IA aujourd'hui au-dessus du seuil : un e-mail, une seule fois.
     await ctx.prisma.aiExecution.create({ data: { companyId: a.companyId, task: "lecture_devis", route: "text", provider: "anthropic", model: "m", promptId: "p", promptVersion: 1, costMicroUsd: 2_000_000n, priceTableVersion: "v", status: "success", durationMs: 1 } });
     const tache = () => request(ctx.app.getHttpServer()).get("/v1/internal/pilotage").set("authorization", "Bearer secret-de-la-tache").expect(200);
-    expect((await tache()).body).toEqual({ alerteIa: true });
-    expect((await tache()).body).toEqual({ alerteIa: false });
+    expect((await tache()).body).toMatchObject({ alerteIa: true, stockage: { alerte: false, maxMo: 512 } });
+    expect((await tache()).body).toMatchObject({ alerteIa: false });
     expect(ctx.emails.sent.filter((m) => /coût IA du jour/.test(m.subject))).toHaveLength(1);
+  });
+
+  it("lot B (16 novembre 2026) : la base au-dessus de 70 % de sa place alerte une fois par jour, jamais en dessous", async () => {
+    const { PilotageService } = await import("../src/modules/pilotage/application/pilotage.service.js");
+    const alertes: string[] = [];
+    const alerter = { enabled: true, alert: (sorte: string, message: string) => void alertes.push(`${sorte} : ${message}`) };
+    const service = (maxMo: number) => new PilotageService(ctx.prisma, { groupe: { admins: [] }, aiCost: {}, authSecret: "x", baseTailleMaxMo: maxMo } as never, ctx.emails as never, {} as never, undefined, alerter as never);
+    // Une base de test pèse quelques Mo : loin de 70 % de 512 Mo.
+    expect(await service(512).alerteStockage()).toMatchObject({ maxMo: 512, alerte: false });
+    // 0 : pas d'alerte du tout.
+    expect((await service(0).alerteStockage()).alerte).toBe(false);
+    expect(alertes).toEqual([]);
+    // Une place d'1 Mo est dépassée : une alerte, puis plus rien le même jour.
+    const r = await service(1).alerteStockage();
+    expect(r.alerte).toBe(true);
+    expect((await service(1).alerteStockage()).alerte).toBe(false);
+    expect(alertes).toHaveLength(1);
+    expect(alertes[0]).toMatch(/^stockage : La base occupe \d+ Mo sur 1 Mo/);
   });
 });
