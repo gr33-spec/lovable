@@ -137,6 +137,25 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Ordre des anciennes demandes : gênants côté demandes, gênants côté abonnement, lot B, lot D. Le reste attend l'après-lancement.
 - Lot B : le chiffrement des fichiers est branché (`platform/database/prisma.service.ts`), éteint tant que `CHIFFREMENT_CLE` n'est pas posée par Greg dans Vercel ; fichiers déjà là : `scripts/fichiers-chiffrement.ts`. Dépôt limité à 10 Mo (avant : 20). Alerte quand la base dépasse 70 % de `BASE_TAILLE_MAX_MO` (512 Mo).
 
+## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg
+
+- Stripe (test) : les quatre prix sont créés et posés sur la branche de test (`STRIPE_PRIX_PRO`, `_PROMAX`, `_PRO_ANNUEL`, `_PROMAX_ANNUEL`).
+- Code FONDATEUR : 6 mois de Pro offerts, puis 30 % à vie, sur le Pro seulement. La case du code n'existe que pour le Pro au mois ; passer à Pro Max arrête la remise.
+- « Mes prix » : 3 mois d'historique en Gratuit, tout en Pro et Pro Max (déjà le cas).
+- CGU : version candidate complète `baticlair/docs/groupe/CGU-candidate-2026-11-16.md` (agent juriste, points pour l'avocat à la fin). Rien n'est publié.
+- Anti-robot : à activer avant la production (deux clés Cloudflare Turnstile à créer par Greg).
+- Achats groupés, visibilité : les artisans ne voient JAMAIS le nom d'une autre entreprise, ni avant ni après avoir participé ; ils voient le volume total, le nombre d'entreprises (créateur compris), la zone et « Entreprises vérifiées ». Seul l'admin voit l'identité et l'historique.
+- Règle changée : volumes visibles dès la première publication (avant : à partir de 5 entreprises).
+- Règle changée : date de besoin d'un achat groupé à 7 jours au moins (avant : 21) ; sous 21 jours, « Date proche », sans promesse. La fin des participations se dit à part.
+- Règle changée : l'épaisseur d'une ardoise et l'essence d'un liteau sont facultatives (valeur, « Standard fabricant » ou « À préciser ») ; jamais une valeur inventée. Les autres caractéristiques restent obligatoires.
+- « Publier un besoin groupé » vit sous Achats groupés (`/achats-groupes/publier`) : onglet, titre et Retour le disent ; l'ancienne adresse y renvoie. Feuille : « Choisir une liste », « Créer mon besoin ».
+- Métiers : un seul réglage, `METIERS_OUVERTS` (« tous » ou des codes). Sans réglage : Couverture et Peinture en production, tout ailleurs ; posé à « tous » sur la branche de test. Les autres métiers restent visibles, « Bientôt ».
+- Chantier fictif : retiré de l'interface par le réglage `CHANTIER_FICTIF` (coupé par défaut) ; rien n'est supprimé.
+- Compte et sécurité : « Modifier mon mot de passe » (actuel, nouveau, confirmation, « Déconnecter mes autres appareils », 5 essais par heure).
+- Accueil : « Mes demandes en cours » (demandes de prix et achats groupés séparés) et « Messages et réponses ». La boîte regroupe réponses des négoces, messages Mobiiz et Missions ; pas de fil artisan-négoce pour une demande directe.
+- Alertes des achats groupés : dans la cloche seulement (« Une entreprise vient de rejoindre ton besoin », « Plus que 3 jours avant la clôture »), une par achat et par tranche de six heures.
+- L'assistant branché sur le site de test reste allumé. La routine qui surveillait le crédit IA est coupée.
+
 ## Nouveaux tarifs (Greg, 15 novembre 2026 ; remplace Découverte, Essentiel et Pro)
 
 - Gratuit : tout l'outil (listes à la main, envoi aux négoces, comparaison, publier et rejoindre des achats groupés), 3 analyses offertes en tout (devis, photo et liste confondus), première commande groupée offerte.

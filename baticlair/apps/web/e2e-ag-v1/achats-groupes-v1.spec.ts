@@ -151,8 +151,12 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await page.getByLabel("Format").selectOption("32x22");
   await page.getByLabel("Origine").selectOption("espagne");
   await page.getByLabel("Choix").selectOption("1");
-  await expect(page.getByText("Précise l'épaisseur pour rejoindre un achat groupé.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Continuer" })).toBeDisabled();
+  // RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot D) : l'épaisseur est facultative, elle ne bloque plus ; sans réponse, « À
+  // préciser », jamais une valeur inventée. Avant : « Précise l'épaisseur pour rejoindre un achat groupé. »
+  await expect(page.getByText("· facultatif")).toBeVisible();
+  await expect(page.getByText("Précise l'épaisseur pour rejoindre un achat groupé.")).toHaveCount(0);
+  await expect(page.getByLabel("Épaisseur")).toHaveValue("apreciser");
+  await expect(page.getByLabel("Épaisseur").getByRole("option", { name: "Standard fabricant" })).toBeAttached();
   await capture(page, "02-produit-a-preciser");
   await page.getByLabel("Épaisseur").selectOption("5");
   await expect(page.getByText("1 palette = 480 pièces · non garanti par une référence")).toBeVisible();
@@ -396,20 +400,21 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   await expect(page.getByRole("region", { name: "Zinguerie", exact: true })).toBeVisible();
   await expect(page.getByText("Recommandé pour un achat groupé").first()).toBeVisible();
   await expect(page.getByText("Compatible avec un achat groupé").first()).toBeVisible();
-  await expect(page.getByText("À préciser : choix et épaisseur manquants")).toBeVisible();
+  await expect(page.getByText("À préciser : choix manquant")).toBeVisible();
   // Les liteaux tapés seuls ne disparaissent jamais : désactivés, avec la raison exacte.
   const liteaux = page.getByRole("listitem").filter({ has: page.getByText("Liteaux", { exact: true }) });
-  await expect(liteaux.getByText("À préciser : section et essence manquantes")).toBeVisible();
+  await expect(liteaux.getByText("À préciser : section manquante")).toBeVisible();
   // Greg, 12 novembre 2026 : « la case ne réagit pas ». Aucun appui n'est ignoré : la case d'un article à préciser
   // dit ce qui manque, ouvre la précision, et l'article se coche tout seul dès qu'elle est donnée.
-  const ardoise35 = page.getByRole("listitem").filter({ has: page.getByText("À préciser : choix et épaisseur manquants") });
+  const ardoise35 = page.getByRole("listitem").filter({ has: page.getByText("À préciser : choix manquant") });
   await ardoise35.getByRole("checkbox").click();
-  await expect(ardoise35.getByRole("status")).toContainText("Il manque : choix, épaisseur.");
+  await expect(ardoise35.getByRole("status")).toContainText("Il manque : choix.");
   await expect(ardoise35.getByRole("checkbox")).not.toBeChecked();
   await expect(page.getByRole("button", { name: "Choisis des articles" })).toBeDisabled();
-  const precisee = page.getByRole("listitem").filter({ has: page.getByLabel("Épaisseur") });
+  // Le nom de l'article dit aussi « épaisseur à préciser » : on vise le champ, dont le libellé COMMENCE par « Épaisseur ».
+  const precisee = page.getByRole("listitem").filter({ has: page.getByLabel(/^Épaisseur/) });
   await precisee.getByLabel("Choix").selectOption({ index: 1 });
-  await precisee.getByLabel("Épaisseur").selectOption({ index: 1 });
+  await precisee.getByLabel(/^Épaisseur/).selectOption({ index: 1 });
   await expect(precisee.getByRole("checkbox")).toBeChecked();
   await expect(page.getByRole("button", { name: "Continuer avec 1 article" })).toBeEnabled();
   // Au clavier aussi : Espace décoche, et le bouton redevient inactif.

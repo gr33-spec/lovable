@@ -386,6 +386,8 @@ test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche 
     await page.goto("/chantiers/nouveau?mode=assistant");
     const nav = page.getByRole("navigation", { name: "Navigation principale" });
     await expect(nav.getByRole("link").first()).toBeVisible();
+    // Le menu doit être réellement affiché avant la mesure (un relevé pris trop tôt ne trouvait aucun lien visible).
+    await expect.poll(() => nav.getByRole("link").evaluateAll((liens) => liens.filter((l) => (l as HTMLElement).offsetParent !== null).length)).toBeGreaterThan(2);
     const ratios = await nav.getByRole("link").evaluateAll((liens) => {
       // N'importe quelle couleur CSS (rgb, oklab, color-mix) ramenée en [r, g, b, a] par un pixel de canevas.
       const toile = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;

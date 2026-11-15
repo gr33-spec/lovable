@@ -326,3 +326,21 @@ refaite posée sur l'environnement de test, assistant vérifié avec l'IA réell
 
 Questions ouvertes pour Greg : FONDATEUR (30 % à vie maintenu ou non, Pro seulement ou Pro Max aussi) ; « Mes prix » trois
 mois en Gratuit ; clés Turnstile (anti-robot) à poser si elles ne le sont pas.
+
+## 15 novembre 2026 (soir) : réponses de Greg et dossier UX
+
+| Demande | État |
+|---|---|
+| Quatre prix Stripe de test | faits, posés sur la branche de test |
+| Code FONDATEUR : Pro seulement | codé et testé |
+| CGU renforcées par l'agent juriste | `docs/groupe/CGU-candidate-2026-11-16.md`, non publiées |
+| Routine du crédit IA | coupée |
+| Lot A (onglets, carte Apparence, cartes d'action) | codé ; audit des autres écrans non fait |
+| Lot B (mot de passe, chantier fictif retiré) | codé et testé |
+| Lot C (métiers ouverts, « Bientôt ») | codé pour le catalogue et les achats groupés ; profil et missions à faire |
+| Lot D (caractéristiques facultatives) | codé ; précision non redemandée à la commande |
+| Lot E (parcours groupé, dates, réactivité) | codé et testé |
+| Lots F et H (volumes, jamais de nom, alertes) | codé ; pas de bouton « Signaler » propre, alertes dans la cloche seulement |
+| Lot G (accueil, boîte unique) | codé et testé |
+
+Reprise : lancer la chaîne complète sur le dernier commit local, pousser si elle est verte, vérifier en ligne ; puis les restes ci-dessus et le test des coûts (devis de Greg).
