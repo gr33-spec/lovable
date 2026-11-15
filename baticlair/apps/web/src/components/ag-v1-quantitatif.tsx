@@ -10,7 +10,9 @@ import { Button, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
 import { CASE_PLUSIEURS_LIGNES, CASE_UNE_LIGNE, dateCourte, dateLongue, DELAI_MIN_JOURS_AG, jourDans, libelleLot, LOTS_PRINCIPAUX_V1, LOTS_V1, PHRASE_ADRESSE_PRIVEE, zoneLisible, type CompatibiliteV1, type EtatV1, type LigneQuantitatifV1 } from "@/lib/ag-v1";
 import { useResource } from "@/lib/use-resource";
-import { manquantesV1, nomProduitV1, VALEUR_A_PRECISER } from "../../../../packages/domain/src/groupe/achats-groupes-v1";
+
+/** La valeur d'une caractéristique recommandée laissée « à préciser » (même valeur que le serveur). */
+const VALEUR_A_PRECISER = "apreciser";
 
 const nf = (n: number) => n.toLocaleString("fr-FR").replace(/ | /g, " ");
 const TON: Record<LigneQuantitatifV1["mention"], string> = {
@@ -105,14 +107,23 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
         // Lot D : une caractéristique recommandée précisée ici met à jour le produit, sans jamais avoir bloqué la ligne.
         if (p && l.selectionnable && l.produit) {
           const attributs = { ...l.produit.attributs, ...p };
-          return { ...l, produit: { ...l.produit, attributs, nom: nomProduitV1(l.produit.type, attributs), aPreciser: (l.produit.aPreciser ?? []).filter((x) => !attributs[x.attribut] || attributs[x.attribut] === VALEUR_A_PRECISER) } };
+          // Le nom suit la précision donnée : « épaisseur à préciser » devient la valeur choisie (le serveur recalcule tout).
+          const def = etat.produits.find((x) => x.type === l.produit!.type);
+          let nom = l.produit.nom;
+          for (const x of l.produit.aPreciser ?? []) {
+            const v = attributs[x.attribut];
+            const o = def?.caracteristiques.find((c) => c.attribut === x.attribut)?.options.find((y) => y.valeur === v);
+            if (v && v !== VALEUR_A_PRECISER && o) nom = nom.replace(`${x.libelle.toLowerCase()} à préciser`, v === "standard" ? `${x.libelle.toLowerCase()} standard fabricant` : o.libelle);
+          }
+          return { ...l, produit: { ...l.produit, attributs, nom, aPreciser: (l.produit.aPreciser ?? []).filter((x) => !attributs[x.attribut] || attributs[x.attribut] === VALEUR_A_PRECISER) } };
         }
         if (!p || l.mention !== "a_preciser" || !l.produit || !l.quantite) return l;
         const attributs = { ...l.produit.attributs, ...p };
-        if (manquantesV1(l.produit.type, attributs).length) return l;
-        return { ...l, produit: { ...l.produit, attributs, nom: nomProduitV1(l.produit.type, attributs), manquantes: [] }, mention: "compatible" as const, texte: "Compatible avec un achat groupé", pourquoi: "Produit précisé par toi.", selectionnable: true };
+        const def = etat.produits.find((x) => x.type === l.produit!.type)!;
+        if (!def.caracteristiques.every((c) => c.importance === "recommandee" || attributs[c.attribut])) return l;
+        return { ...l, produit: { ...l.produit, attributs, manquantes: [] }, mention: "compatible" as const, texte: "Compatible avec un achat groupé", pourquoi: "Produit précisé par toi.", selectionnable: true };
       }),
-    [data, precisions],
+    [data, precisions, etat.produits],
   );
   // Les lignes qu'on ne peut pas grouper (déjà demandées, pas encore ouvertes…) sont repliées en bas : rien n'est caché.
   const groupables = (l: LigneQuantitatifV1) => l.selectionnable || l.mention === "a_preciser";
