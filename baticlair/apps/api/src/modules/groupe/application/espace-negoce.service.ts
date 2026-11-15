@@ -7,7 +7,6 @@ import {
   datesDuCycle,
   deMois,
   lirePaliers,
-  mailInvitationNegoce,
   mailLienDeConnexion,
   PALIERS_DEFAUT,
   phraseApresInscription,
@@ -49,7 +48,6 @@ export interface ModificationCompte {
   familles?: readonly string[];
 }
 
-const JOUR_MS = 86_400_000;
 
 /**
  * Le profil choisi par le négoce : généraliste (toute la liste), ou spécialiste de ses familles cochées (au moins une).
@@ -62,8 +60,6 @@ function profilChoisi(offre: OffreNegoce | undefined, familles: readonly string[
   if (f.length === 0) throw validationFailed("At least one family", { reason: "familles_requises" });
   return { generaliste: false, familles: f };
 }
-/** L'e-mail d'invitation ne repart pas à chaque ajout par un artisan : au plus un par semaine tant que l'accès n'est pas créé. */
-const INVITATION_RELANCE_MS = 7 * JOUR_MS;
 
 /**
  * L'ESPACE NÉGOCE AUTONOME (Greg, 23 octobre 2026) : « que Greg n'intervienne jamais entre un artisan et un négoce ». Un
@@ -107,7 +103,7 @@ export class EspaceNegoceService {
    * Un artisan vient d'ajouter ce négoce : son compte existe (SIRET, sinon e-mail), la ligne `negoce` lui est reliée, le
    * lien d'invitation est régénéré et envoyé (au plus une fois par semaine tant que l'accès n'est pas créé). Rend le lien.
    */
-  async inviter(negoce: { id: string; email: string; siret: string | null; nom: string; compteId: string | null }, maintenant = new Date(), o: { /** Le lien part dans un autre e-mail (la demande de prix) : aucun e-mail d'invitation à part. */ sansEmail?: boolean } = {}): Promise<string> {
+  async inviter(negoce: { id: string; email: string; siret: string | null; nom: string; compteId: string | null }, maintenant = new Date()): Promise<string> {
     // DROIT D'OPPOSITION (24 octobre 2026) : un négoce qui a demandé à ne plus jamais être contacté n'est jamais réinvité,
     // même quand un artisan le rajoute ; la ligne reste dans la liste de l'artisan, arrêtée.
     if (await estExclu(this.prisma, { email: negoce.email, siret: negoce.siret })) {
@@ -127,13 +123,9 @@ export class EspaceNegoceService {
     if (negoce.compteId !== c.id) await this.prisma.negoce.update({ where: { id: negoce.id }, data: { compteId: c.id } });
     const lien = this.lienInvitation(c.id, maintenant);
     if (c.inscritLe) return lien;
-    const deja = c.invitationLe && maintenant.getTime() - c.invitationLe.getTime() < INVITATION_RELANCE_MS;
+    // UN SEUL E-MAIL AU NÉGOCE (Greg, 15 puis 16 novembre 2026) : aucun e-mail « créez votre accès » à part, ni à l'ajout dans
+    // « Mes négoces », ni ailleurs. Le lien part dans la première demande de prix (ou dans l'e-mail de clôture d'un groupe).
     await this.prisma.compteNegoce.update({ where: { id: c.id }, data: { invitationLe: maintenant } });
-    if (!deja && this.email && !o.sansEmail) {
-      const departement = (await this.prisma.negoce.findUnique({ where: { id: negoce.id }, select: { departement: true } }))?.departement ?? null;
-      const mail = mailInvitationNegoce({ lien, departement, conditions: this.lienConditions(), opposition: this.lienOpposition(c.id, maintenant) });
-      await this.email.send({ to: c.email, subject: mail.objet, text: mail.texte }).catch(() => undefined);
-    }
     return lien;
   }
 

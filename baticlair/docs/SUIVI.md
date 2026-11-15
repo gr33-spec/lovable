@@ -288,3 +288,22 @@ Branche locale `lot-ux-mobile` (part de la branche de test, `3844146f` en ligne)
 
 À signaler à Greg : le jaune du code est #FED206 (son message dit #FFC800) : rien changé. Mission est ALLUMÉE sur le site de test (`MISSIONS_V1`), alors que son message dit « reste coupée » : rien changé.
 
+
+## POINT DE REPRISE : lot du 16 novembre (réponses de Greg au rapport du lot UX mobile)
+
+Branche locale `lot-16-novembre` (part de `d2d055cf`, en ligne). Un commit par étape ; rien n'est poussé tant que la chaîne complète n'est pas verte sur le commit exact. Ordre et état :
+
+1. Jaune : on garde #FED206 (fiche CLAUDE.md à jour). À FAIRE.
+2. Invitation « créez votre accès » depuis « Mes négoces » : supprimée ; le négoce n'est invité qu'avec sa première demande de prix. À FAIRE.
+3. Mission : « Bientôt » avec l'explication du concept ; fonctions désactivées ; interrupteur dans l'admin (Réglages) pour l'activer d'un clic. À FAIRE.
+4. Un seul outil de saisie : « Saisir un nouveau besoin » (achats groupés) ouvre le même choix que « Nouveau quantitatif » (« Je saisis ma liste » ou « Mobiiz m'aide »). À FAIRE.
+5. Article déjà envoyé aux négoces : cochable en achat groupé après confirmation (« Déjà envoyé à tes négoces. Tu veux quand même le mettre en achat groupé ? »). Règle changée. À FAIRE.
+6. Commande chez un négoce : date de livraison souhaitée dans l'e-mail au négoce retenu ; puis « Prévenir les autres négoces consultés ? » (e-mail poli, jamais le prix ni le nom du retenu). À FAIRE.
+7. Rappel à 7 jours après les réponses si rien n'est commandé : « Où en es-tu avec cette demande ? », bouton « C'est réglé ». À FAIRE.
+8. Gênants côté demandes : e-mail personnel de l'artisan dans le PDF, prix aberrant, date de réponse passée, « Le moins cher » à tort, tri des articles d'étanchéité. À FAIRE.
+9. Gênants côté abonnement : deux « Payer » en même temps, « Mettre à jour ma carte » qui vend Essentiel, « Paiement refusé » à tort. À FAIRE.
+10. Lot B (chiffrement, liens signés, stockage des fichiers). À FAIRE.
+11. Lot D (cinq tailles d'écran, messages d'erreur, boutons assez gros). À FAIRE.
+12. Chaîne complète, mise en ligne, vérification, compte rendu. À FAIRE.
+
+En attente de Greg : la clé IA (puis 2 ou 3 vrais devis à passer, avec le coût de chaque analyse). Après le lancement : lots C et E, /couvreurs et /peintres, document source, lots Étanchéité et Peinture, recherche lente.

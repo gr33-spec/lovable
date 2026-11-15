@@ -1,15 +1,20 @@
 import request from "supertest";
 import type { TestContext } from "./test-app.js";
+import { signerJetonNegoce } from "../../src/modules/groupe/application/jetons-negoce.js";
+import type { AppConfig } from "../../src/platform/config/config.js";
+import { CONFIG } from "../../src/platform/tokens.js";
 
 /**
  * L'ESPACE NÉGOCE EN TEST (Greg, 23 octobre 2026) : un négoce ajouté par un artisan reçoit son lien d'invitation par
  * e-mail ; il crée son accès (dépôt, paliers de livraison, départements). Les paliers « gratuite jusqu'à X km, Y € au-delà »
  * d'avant deviennent « gratuite jusqu'à X km, Y € jusqu'à 1 000 km ».
  */
-export const lienInvitation = (ctx: TestContext, email: string): string => {
-  const m = ctx.emails.sent.filter((x) => x.to.toLowerCase() === email.toLowerCase() && /\/negoce\/rejoindre\//.test(x.text)).at(-1);
-  if (!m) throw new Error(`Aucune invitation reçue par ${email}`);
-  return /\/negoce\/rejoindre\/([A-Za-z0-9_.-]+)/.exec(m.text)![1]!;
+export const lienInvitation = async (ctx: TestContext, email: string, maintenant?: string): Promise<string> => {
+  // UN SEUL E-MAIL AU NÉGOCE (16 novembre 2026) : plus d'e-mail « créez votre accès » à part. Le lien arrive dans la première
+  // demande de prix ; ici, on signe le même jeton que le serveur, pour le compte créé à l'ajout du négoce.
+  const compte = await ctx.prisma.compteNegoce.findFirst({ where: { email: { equals: email, mode: "insensitive" } } });
+  if (!compte) throw new Error(`Aucun compte négoce pour ${email}`);
+  return signerJetonNegoce(ctx.app.get<AppConfig>(CONFIG).authSecret, { sorte: "invitation", compteId: compte.id }, maintenant ? new Date(maintenant) : new Date());
 };
 
 export interface InscriptionTest {
@@ -28,7 +33,7 @@ export interface InscriptionTest {
 
 /** Inscrit le négoce depuis son invitation ; rend son cookie de session et la réponse. */
 export async function inscrireNegoce(ctx: TestContext, email: string, i: InscriptionTest) {
-  const jeton = lienInvitation(ctx, email);
+  const jeton = await lienInvitation(ctx, email, i.maintenant);
   const res = await request(ctx.app.getHttpServer())
     .post(`/v1/negoce/inscription${i.maintenant ? `?maintenant=${encodeURIComponent(i.maintenant)}` : ""}`)
     .send({

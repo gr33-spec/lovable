@@ -40,18 +40,17 @@ async function artisan(email: string, nom: string, adresse = "3 rue des Ajoncs, 
 const PALIERS = { gratuiteJusquaKm: 30, paliers: [{ jusquaKm: 60, prixHt: 80 }], maxKm: 100 };
 
 describe("1. le lien d'invitation unique par négoce", { timeout: 60_000 }, () => {
-  it("le même négoce ajouté par deux artisans : un seul compte, un seul e-mail d'invitation (une semaine), jamais le nom de l'artisan, lien valable 90 jours", async () => {
+  it("le même négoce ajouté par deux artisans : un seul compte, aucun e-mail d'invitation à part, jamais le nom de l'artisan, lien valable 90 jours", async () => {
     const a = await artisan("a@example.fr", "Toitures A");
     const b = await artisan("b@example.fr", "Toitures B", "8 rue du Port, 22500 Paimpol");
     await ajouter(a.agent, "contact@negoce-ponant.fr", "Négoce du Ponant");
     await ajouter(b.agent, "contact@negoce-ponant.fr", "Ponant");
     expect(await ctx.prisma.compteNegoce.count()).toBe(1);
     expect(await ctx.prisma.negoce.count({ where: { compteId: { not: null } } })).toBe(1);
-    const mails = mailsVers(ctx, "contact@negoce-ponant.fr");
-    expect(mails).toHaveLength(1);
-    expect(mails[0]!.text).toContain("Un artisan de votre secteur (22) vous a ajouté");
-    expect(mails[0]!.text).not.toMatch(/Toitures A|Toitures B/);
-    const jeton = lienInvitation(ctx, "contact@negoce-ponant.fr");
+    // Un seul e-mail au négoce (Greg, 16 novembre 2026) : l'ajout dans « Mes négoces » n'envoie plus rien ; le lien part avec
+    // la première demande de prix.
+    expect(mailsVers(ctx, "contact@negoce-ponant.fr")).toHaveLength(0);
+    const jeton = await lienInvitation(ctx, "contact@negoce-ponant.fr", T0);
     // La page d'inscription : préremplie, sans artisan.
     const page = (await srv().get(`/v1/negoce/invitation/${jeton}?maintenant=${T0}`).expect(200)).body;
     expect(page).toMatchObject({ email: "contact@negoce-ponant.fr", enseigne: "Négoce du Ponant", inscrit: false, departements: ["22"], paliersDefaut: PALIERS });
@@ -60,10 +59,10 @@ describe("1. le lien d'invitation unique par négoce", { timeout: 60_000 }, () =
     await srv().get(`/v1/negoce/invitation/${jeton}?maintenant=2027-01-07T07:00:00.000Z`).expect(200);
     await srv().get(`/v1/negoce/invitation/${jeton}?maintenant=2027-01-09T07:00:00.000Z`).expect(404);
     await srv().get(`/v1/negoce/invitation/jeton-bidon.signature`).expect(404);
-    // Un nouvel ajout huit jours plus tard : nouvel e-mail, lien régénéré.
+    // Un nouvel ajout huit jours plus tard : toujours aucun e-mail.
     const c = await artisan("c@example.fr", "Toitures C");
     await ajouter(c.agent, "contact@negoce-ponant.fr", "Ponant", "2026-10-18T07:00:00.000Z");
-    expect(mailsVers(ctx, "contact@negoce-ponant.fr")).toHaveLength(2);
+    expect(mailsVers(ctx, "contact@negoce-ponant.fr")).toHaveLength(0);
   });
 
   it("dédoublonné par SIRET : deux e-mails pour le même SIRET font un seul compte", async () => {
@@ -74,7 +73,7 @@ describe("1. le lien d'invitation unique par négoce", { timeout: 60_000 }, () =
     const r = await b.agent.post(`/v1/groupe/negoces/boucle?maintenant=${T0}`).send({ email: "vendeur@pointdepreuve.fr", siret: "12345678900011" }).expect(200);
     expect(await ctx.prisma.compteNegoce.count()).toBe(1);
     expect(r.body.lienInvitation).toBe((await ctx.prisma.compteNegoce.findFirstOrThrow()).id && r.body.lienInvitation);
-    expect(lienInvitation(ctx, "lannion@pointdepreuve.fr")).toBe(/\/negoce\/rejoindre\/(.+)$/.exec(r.body.lienInvitation)![1]);
+    expect(await lienInvitation(ctx, "lannion@pointdepreuve.fr", T0)).toBe(/\/negoce\/rejoindre\/(.+)$/.exec(r.body.lienInvitation)![1]);
   });
 });
 
@@ -82,7 +81,7 @@ describe("2. l'inscription en une page", { timeout: 60_000 }, () => {
   it("dépôts géocodés, paliers, départements cochés d'après les dépôts, conditions obligatoires ; ensuite la phrase de la prochaine clôture et une session", async () => {
     const a = await artisan("a@example.fr", "Toitures A");
     await ajouter(a.agent, "contact@negoce-ponant.fr", "Négoce du Ponant");
-    const jeton = lienInvitation(ctx, "contact@negoce-ponant.fr");
+    const jeton = await lienInvitation(ctx, "contact@negoce-ponant.fr");
     const corps = { jeton, email: "contact@negoce-ponant.fr", siret: null, enseigne: "Négoce du Ponant", telephone: "02 96 00 00 00", depots: [{ adresse: "ZA de Kerfolic, 22500 Paimpol" }, { adresse: "2 rue de Siam, 29200 Brest" }], livraison: PALIERS, departements: null, conditions: true };
     expect((await srv().post(`/v1/negoce/inscription?maintenant=${T0}`).send({ ...corps, conditions: false }).expect(400)).body.error.details).toMatchObject({ reason: "conditions_requises" });
     expect((await srv().post(`/v1/negoce/inscription?maintenant=${T0}`).send({ ...corps, livraison: { gratuiteJusquaKm: 50, paliers: [{ jusquaKm: 40, prixHt: 10 }], maxKm: 100 } }).expect(400)).body.error.details).toMatchObject({ reason: "paliers_invalides" });

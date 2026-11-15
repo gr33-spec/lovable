@@ -2,6 +2,9 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ARDOISE, couvreurAvecListe, deposerGrille, jetonDeGrille, mailsVers, tacheDuMois } from "./support/cycle.js";
 import { inscrireNegoce } from "./support/negoce.js";
+import { signerJetonNegoce } from "../src/modules/groupe/application/jetons-negoce.js";
+import type { AppConfig } from "../src/platform/config/config.js";
+import { CONFIG } from "../src/platform/tokens.js";
 import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
@@ -114,11 +117,11 @@ describe("négoce : opposition, liste d'exclusion, export, suppression", { timeo
   it("« Ne plus jamais être contacté » : un autre artisan qui rajoute le même e-mail n'envoie aucune invitation", async () => {
     const A = await artisan("oppo-a@toitures.fr", "Toitures Oppo A");
     await A.agent.post(`/v1/groupe/negoces?maintenant=${AVANT}`).send({ nom: "Négoce Refus", email: "refus@negoce.fr", familles: ["couverture"] }).expect(201);
-    const invitation = mailsVers(ctx, "refus@negoce.fr").at(-1)!;
-    expect(invitation.text).toMatch(/Ce message vous est envoyé par BATI INVEST/);
-    expect(invitation.text).toMatch(/Pourquoi ce message \?/);
-    const jeton = lien(invitation.text, /\/negoce\/opposition\/([A-Za-z0-9_.-]+)/)!;
-    expect(jeton).toBeTruthy();
+    // Un seul e-mail au négoce (16 novembre 2026) : l'ajout n'envoie plus d'invitation. Le lien d'opposition (le même jeton
+    // que celui des e-mails de clôture) reste valable.
+    expect(mailsVers(ctx, "refus@negoce.fr")).toHaveLength(0);
+    const compte = await ctx.prisma.compteNegoce.findFirstOrThrow({ where: { email: "refus@negoce.fr" } });
+    const jeton = signerJetonNegoce(ctx.app.get<AppConfig>(CONFIG).authSecret, { sorte: "opposition", compteId: compte.id }, new Date(AVANT));
     const page = (await serveur().get(`/v1/negoce/opposition/${jeton}?maintenant=${AVANT}`).expect(200)).body;
     expect(JSON.stringify(page)).not.toMatch(/Toitures Oppo A/);
     await serveur().post(`/v1/negoce/opposition/${jeton}?maintenant=${AVANT}`).expect(200);

@@ -73,7 +73,7 @@ export default function ConnexionNegocePage() {
               </form>
             )}
             <p className="mz-gris" style={{ marginTop: 18, fontSize: 14 }}>
-              Pas encore d&apos;accès ? Il se crée depuis le lien d&apos;invitation reçu par e-mail quand un artisan vous ajoute.
+              Pas encore d&apos;accès ? Il se crée depuis le lien reçu avec votre première demande de prix.
             </p>
           </section>
         </main>

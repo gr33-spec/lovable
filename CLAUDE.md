@@ -24,7 +24,7 @@ Fiche lue par chaque nouvelle session. Le détail des règles produit est dans `
 
 ## Charte
 
-- Jaune #FFC800 et noir profond ; thème clair ivoire #FBF8F3 ; aucun marron.
+- Jaune #FED206 (tranché par Greg le 16 novembre 2026 : celui du code, déjà partout ; #FFC800 n'est plus la référence) et noir profond ; thème clair ivoire #FBF8F3 ; aucun marron.
 - Police : **Plus Jakarta Sans** (tranché par Greg le 13 novembre 2026). Bricolage Grotesque n'est plus utilisée.
 - Ton : `baticlair/docs/TON.md`. Page publique : jamais « IA », « automatique », « précis », « exact » ; aucun montant ; aucune économie garantie.
 
@@ -124,7 +124,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Achats groupés : « Publier un besoin », bouton flottant au-dessus du menu sur téléphone, bouton d'en-tête sur ordinateur ; deux chemins (« Choisir dans un quantitatif », « Saisir un nouveau besoin »). Un article déjà envoyé aux négoces ne se groupe toujours pas (à revoir après les retours terrain).
 - Missions : recherche, trois filtres (Missions, Entreprises, Mes annonces), deux actions compactes, puis « Près de toi ».
 - Les neuf testeurs restent en local. Le paiement du code FONDATEUR se teste juste avant le lancement. L'assistant reste allumé sur le site de test.
-- Le jaune du code est #FED206 (le message de Greg dit #FFC800) : rien changé, à trancher par Greg.
+- Le jaune du code est #FED206 : gardé (tranché le 16 novembre 2026).
 
 ## Signalement de bugs
 

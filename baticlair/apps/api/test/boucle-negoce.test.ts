@@ -62,11 +62,10 @@ describe("mets ton négoce dans la boucle", { timeout: 60_000 }, () => {
     const liste = (await agent.get("/v1/groupe/negoces").expect(200)).body.negoces;
     expect(liste).toHaveLength(1);
     expect(liste[0]).toMatchObject({ email: "agence.lannion@negoce-ardoises.fr", familles: ["couverture", "zinguerie", "etancheite"], favori: true });
-    // L'invitation à créer son accès part au négoce (espace négoce, 23 octobre) ; la réponse porte le même lien.
-    expect(mailsVers("agence.lannion@negoce-ardoises.fr")).toHaveLength(1);
-    expect(mailsVers("agence.lannion@negoce-ardoises.fr")[0]!.text).toContain("Créez votre accès en une minute");
+    // Un seul e-mail au négoce (Greg, 16 novembre 2026) : l'ajout n'envoie plus « créez votre accès » ; la réponse porte le
+    // lien (l'artisan peut le donner lui-même), et il partira avec la première demande de prix.
+    expect(mailsVers("agence.lannion@negoce-ardoises.fr")).toHaveLength(0);
     expect(r.body.lienInvitation).toMatch(/\/negoce\/rejoindre\//);
-    expect(mailsVers("agence.lannion@negoce-ardoises.fr")[0]!.text).toContain(r.body.lienInvitation);
     // Rappuyer : rien ne change, la réponse le dit quand même.
     const r2 = await boucle(agent, { email: "agence.lannion@negoce-ardoises.fr" }).expect(200);
     expect(r2.body).toMatchObject({ negoce: { email: "agence.lannion@negoce-ardoises.fr" }, dejaLa: true });

@@ -217,13 +217,14 @@ describe("business model final : le regroupement négocié par un humain", { tim
   it("la vérification des négoces : SIRET fermé ou hors matériaux refusé ; e-mail grand public « à vérifier » ; l'admin valide ou bloque ; badge « Nouveau négoce »", async () => {
     const a = await artisan(1);
     for (const email of ["ferme@negoce.fr", "resto@negoce.fr", "pointp.lannion@gmail.com", "agence@pointp.fr"]) await a.agent.post("/v1/groupe/negoces").send({ nom: "Négoce", email, familles: ["couverture"] }).expect(201);
-    const essai = (email: string, siret: string) =>
+    const essai = async (email: string, siret: string, statut: number) =>
       publique()
         .post("/v1/negoce/inscription")
-        .send({ jeton: lienInvitation(ctx, email), email, siret, enseigne: "POINT P", telephone: "02 96 00 00 00", depots: [{ adresse: "ZA de Kerverzot, 22300 Lannion" }], livraison: { gratuiteJusquaKm: 30, paliers: [{ jusquaKm: 1000, prixHt: 80 }], maxKm: 1000 }, departements: ["22"], conditions: true });
-    expect((await essai("ferme@negoce.fr", SIRET_TEST_FERME).expect(400)).body.error.details.reason).toBe("siret_fermee");
-    expect((await essai("resto@negoce.fr", SIRET_TEST_HORS_MATERIAUX).expect(400)).body.error.details.reason).toBe("siret_activite");
-    await essai("pointp.lannion@gmail.com", "33333333300008").expect(201);
+        .send({ jeton: await lienInvitation(ctx, email), email, siret, enseigne: "POINT P", telephone: "02 96 00 00 00", depots: [{ adresse: "ZA de Kerverzot, 22300 Lannion" }], livraison: { gratuiteJusquaKm: 30, paliers: [{ jusquaKm: 1000, prixHt: 80 }], maxKm: 1000 }, departements: ["22"], conditions: true })
+        .expect(statut);
+    expect((await essai("ferme@negoce.fr", SIRET_TEST_FERME, 400)).body.error.details.reason).toBe("siret_fermee");
+    expect((await essai("resto@negoce.fr", SIRET_TEST_HORS_MATERIAUX, 400)).body.error.details.reason).toBe("siret_activite");
+    await essai("pointp.lannion@gmail.com", "33333333300008", 201);
     await inscrireNegoce(ctx, "agence@pointp.fr", { depot: "ZA de Kerverzot, 22300 Lannion", departements: ["22"], siret: "44444444400004" });
     expect((await ctx.prisma.compteNegoce.findUniqueOrThrow({ where: { email: "pointp.lannion@gmail.com" } })).verification).toBe("a_verifier");
     expect((await ctx.prisma.compteNegoce.findUniqueOrThrow({ where: { email: "agence@pointp.fr" } })).verification).toBe("valide");
