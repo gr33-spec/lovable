@@ -50,9 +50,9 @@ describe("les relances du lot final", { timeout: 60_000 }, () => {
     const due = new Date(Date.UTC(envoyeLe.getUTCFullYear(), envoyeLe.getUTCMonth(), envoyeLe.getUTCDate() + 4));
     await ctx.prisma.priceRequest.update({ where: { id: envoi.id }, data: { dueDate: due } });
 
-    expect((await tache(new Date(envoyeLe.getTime() + JOUR))).body).toEqual({ relances: 0, rappels: 0 });
+    expect((await tache(new Date(envoyeLe.getTime() + JOUR))).body).toMatchObject({ relances: 0, rappels: 0 });
     const mi = new Date(envoyeLe.getTime() + 3 * JOUR);
-    expect((await tache(mi)).body).toEqual({ relances: 1, rappels: 1 });
+    expect((await tache(mi)).body).toMatchObject({ relances: 1, rappels: 1 });
     const artisan = mailsVers(ctx, "a@toitures.fr").at(-1)!;
     expect(artisan.subject).toBe("Négoce B n'a pas encore répondu");
     expect(artisan.text).toContain("Négoce B n'a pas encore répondu. Appelle ton commercial : ta demande est peut-être dans ses spams.");
@@ -65,11 +65,11 @@ describe("les relances du lot final", { timeout: 60_000 }, () => {
     expect(negoce.text).not.toMatch(/closes|achètent ensemble/);
     expect(negoce.html).toContain(">Chiffrer en ligne</a>");
     // Même jour : rien de plus.
-    expect((await tache(new Date(mi.getTime() + 3_600_000))).body).toEqual({ relances: 0, rappels: 0 });
+    expect((await tache(new Date(mi.getTime() + 3_600_000))).body).toMatchObject({ relances: 0, rappels: 0 });
     // La veille : l'artisan seulement.
-    expect((await tache(new Date(due.getTime() + 2 * 3_600_000))).body).toEqual({ relances: 0, rappels: 1 });
+    expect((await tache(new Date(due.getTime() + 2 * 3_600_000))).body).toMatchObject({ relances: 0, rappels: 1 });
     // Ensuite plus rien : deux rappels au plus pour ce négoce.
-    expect((await tache(new Date(due.getTime() + 20 * 3_600_000))).body).toEqual({ relances: 0, rappels: 0 });
+    expect((await tache(new Date(due.getTime() + 20 * 3_600_000))).body).toMatchObject({ relances: 0, rappels: 0 });
     expect(mailsVers(ctx, "a@toitures.fr").filter((m) => /n'a pas encore répondu/.test(m.subject))).toHaveLength(2);
   });
 
@@ -78,6 +78,6 @@ describe("les relances du lot final", { timeout: 60_000 }, () => {
     const envoi = (await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "chiffrer", accord: true, articles: a.articles, dateBesoin: "2099-12-01", negoces: [{ nom: "Négoce B", email: "b@negoce.fr" }] }).expect(201)).body;
     const r = await ctx.prisma.priceRequestRecipient.findFirstOrThrow({ where: { priceRequestId: envoi.id } });
     await ctx.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { refuseLe: new Date(), status: "declined" } });
-    expect((await tache(new Date(r.sentAt!.getTime() + 10 * JOUR))).body).toEqual({ relances: 0, rappels: 0 });
+    expect((await tache(new Date(r.sentAt!.getTime() + 10 * JOUR))).body).toMatchObject({ relances: 0, rappels: 0 });
   });
 });

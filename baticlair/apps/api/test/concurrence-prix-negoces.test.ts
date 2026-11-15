@@ -60,7 +60,8 @@ it("rien du prix ni du nom d'un négoce n'atteint un autre négoce, pendant ni a
   const apres = await vuB("2026-10-23T08:00:00.000Z");
   expect(apres.join("\n")).not.toMatch(PRIX_A);
   const mailsB = mailsVers(ctx, "beta@negoce.fr").map((m) => `${m.subject}\n${m.text}\n${m.html ?? ""}\n${(m.attachments ?? []).map((p) => Buffer.from(p.contentBase64, "base64").toString("latin1")).join("\n")}`);
-  expect(mailsB.length).toBeGreaterThanOrEqual(3);
+  // Deux e-mails au moins (la grille, les résultats) : l'invitation « créez votre accès » n'existe plus (16 novembre 2026).
+  expect(mailsB.length).toBeGreaterThanOrEqual(2);
   expect(mailsB.join("\n")).not.toMatch(PRIX_A);
   // Et l'inverse : A ne voit pas le prix de B.
   expect(JSON.stringify((await srv().get(`/v1/grille/${jetonDeGrille(ctx, "alpha@negoce.fr")}?maintenant=2026-10-23T08:00:00.000Z`).expect(200)).body)).not.toMatch(/0,95|0\.95|2\s?280|Négoce Beta/);

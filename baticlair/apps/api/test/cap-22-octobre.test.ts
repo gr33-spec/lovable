@@ -73,18 +73,17 @@ async function deposer(jeton: string, rows: FixtureRow[], titre: string, livrais
 }
 
 describe("nouveau cap du 22 octobre : regroupement, alertes, livraison au kilomètre, suivi", { timeout: 120_000 }, () => {
-  it("un négoce ajouté est invité à créer son accès, une seule fois, sans le nom de l'artisan (espace négoce, 23 octobre)", async () => {
+  it("un négoce ajouté ne reçoit plus d'e-mail « créez votre accès » : il est invité avec sa première demande de prix (16 novembre 2026)", async () => {
+    // RÈGLE CHANGÉE (Greg, 16 novembre 2026) : avant, une invitation partait à l'ajout dans « Mes négoces ».
     const a = await carreleur("a@example.fr", "Carrelages A", "3 rue des Ajoncs, 22300 Lannion");
     await negoce(a.agent, "Négoce Carrelage", "carrelage@example.com", ["second_oeuvre"]);
-    const [info] = mailsVers("carrelage@example.com");
-    expect(info!.subject).toBe("Des artisans de votre secteur vous ont ajouté au regroupement : créez votre accès");
-    expect(info!.text).toContain("Un artisan de votre secteur (22) vous a ajouté");
-    expect(info!.text).not.toContain("Carrelages A");
-    expect(info!.text).toMatch(/http.*\/negoce\/rejoindre\//);
-    // Le même négoce ajouté par un autre artisan : déjà dans la base, pas de second mail.
+    expect(mailsVers("carrelage@example.com")).toHaveLength(0);
+    // Son compte existe quand même (le lien partira avec la demande) ; un second artisan ne change rien.
+    expect(await ctx.prisma.compteNegoce.count({ where: { email: "carrelage@example.com" } })).toBe(1);
     const b = await carreleur("b@example.fr", "Carrelages B", "12 rue de Kerampont, 22300 Lannion");
     await negoce(b.agent, "Négoce Carrelage", "carrelage@example.com", ["second_oeuvre"]);
-    expect(mailsVers("carrelage@example.com")).toHaveLength(1);
+    expect(mailsVers("carrelage@example.com")).toHaveLength(0);
+    expect(await ctx.prisma.compteNegoce.count({ where: { email: "carrelage@example.com" } })).toBe(1);
   });
 
   it("chaque devis lu prévient les artisans du lot ; le compteur ; le prix de livraison par zone ; le prix livré ; le suivi", async () => {
