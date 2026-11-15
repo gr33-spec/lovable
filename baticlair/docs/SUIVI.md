@@ -278,12 +278,13 @@ Ce message fait foi sur le précédent. Rapport en 10 lignes envoyé le 27/10, p
 
 Branche locale `lot-ux-mobile` (part de la branche de test, `3844146f` en ligne). Rien n'est poussé tant que la chaîne complète n'est pas verte. Ordre et état :
 
-1. Décisions ci-dessus : FAIT sur la branche locale (tests `envoi-fournisseur`, `demande-de-devis-45`, `signalements`).
-2. Entrée Quantitatifs en deux choix (« Créer un quantitatif », « Suivre mes demandes ») : À FAIRE.
-3. Achats groupés : bouton flottant « Publier un besoin » (téléphone), bouton d'en-tête (ordinateur), deux chemins : À FAIRE. La règle « un article déjà envoyé aux négoces ne se groupe pas » RESTE (décision de Greg, on la changera après les retours terrain).
-4. Missions réordonnée sur mobile : À FAIRE.
-5. Accueil en tableau de bord (à faire, achats groupés, missions, activité) : À FAIRE.
-6. Passe mobile, chaîne complète, mise en ligne, compte rendu : À FAIRE.
+1. Décisions du 15 novembre (un seul e-mail au négoce, signalements 12 mois) : FAIT.
+2. Entrée Quantitatifs en deux choix (« Créer un quantitatif », « Suivre mes demandes » ; le suivi s'appelle « Mes demandes », `/chantiers?vue=suivi`) : FAIT.
+3. Achats groupés : bouton flottant « Publier un besoin » (téléphone), bouton d'en-tête (ordinateur), deux chemins, fermeture par Échap : FAIT. La règle « un article déjà envoyé aux négoces ne se groupe pas » RESTE (décision de Greg, on la changera après les retours terrain).
+4. Missions réordonnée (recherche, trois filtres, deux actions compactes, « Près de toi ») : FAIT.
+5. Accueil en tableau de bord (`components/accueil.tsx` : À faire maintenant, achats groupés qui peuvent t'intéresser, missions près de toi, activité récente ; trois cartes au plus, aucune section vide, aucun nom d'une autre entreprise) : FAIT.
+6. Passe mobile : parcours `e2e-ag-v1/ux-mobile.spec.ts` (iPhone SE, Android, ordinateur) : FAIT.
+7. Chaîne complète (`final41`), mise en ligne, vérification du commit servi, compte rendu : EN COURS. Si la session s'arrête ici : relancer `scratchpad/chaine41.sh` sur le dernier commit de `lot-ux-mobile`, ne pousser que si tout est à 0.
 
 À signaler à Greg : le jaune du code est #FED206 (son message dit #FFC800) : rien changé. Mission est ALLUMÉE sur le site de test (`MISSIONS_V1`), alors que son message dit « reste coupée » : rien changé.
 

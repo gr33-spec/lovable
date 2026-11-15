@@ -146,7 +146,7 @@ for (const size of WIDTHS) {
     // Greg (23 octobre) : plus de « Comparer les offres » par chantier en mode mois ; les prix viennent du regroupement.
     await expect(page.getByRole("button", { name: "Comparer les offres" })).toHaveCount(0);
 
-    await page.goto("/chantiers");
+    await page.goto("/chantiers?vue=suivi");
     await expect(page.getByText("Démo – Toiture Martin").first()).toBeVisible();
     await shoot(page, size.name, "09-chantiers");
     await page.goto("/fournisseurs");

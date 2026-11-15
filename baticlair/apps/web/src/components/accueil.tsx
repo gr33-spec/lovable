@@ -1,6 +1,7 @@
 "use client";
 
-import { Briefcase, ClipboardList, Users } from "lucide-react";
+import { ClipboardList } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useState } from "react";
 import { actionPrioritaire, lienAutres, type ActionCandidate } from "../../../../packages/domain/src/accueil/accueil";
 import { InstallHint } from "@/components/install-hint";
@@ -8,7 +9,9 @@ import { BandeauReprises } from "@/components/reprises";
 import { Skeleton } from "@/components/ui";
 import { CarteLien, Etiquette } from "@/components/ux-kit";
 import { useGroupeActif } from "@/components/app-nav";
-import { useMissionsActif } from "@/lib/missions";
+import { useMissionsActif, type AnnonceVue } from "@/lib/missions";
+import { libelleLot, type AchatV1, type BesoinV1 } from "@/lib/ag-v1";
+import { finDans, lienAchat } from "@/components/ag-v1-accueil";
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import type { Brouillon } from "@/lib/brouillon";
 import { useSession } from "@/lib/session";
@@ -16,13 +19,38 @@ import { useResource } from "@/lib/use-resource";
 import type { CarteAchat, MesAchats } from "@/lib/achat-groupe";
 
 /**
- * L'ACCUEIL (Greg, 1er novembre 2026, maquette « Bonjour Greg », qui remplace les précédentes) : « Bonjour [prénom] », puis
- * trois sections dans cet ordre. 1) « À faire maintenant » : UNE action, la plus pressante (`actionPrioritaire`), avec
- * « Voir N autres brouillons » ; masquée quand rien n'est à reprendre. 2) « Commencer » : « Créer une liste » (jaune, le même
- * départ que le « + ») et « Rejoindre un achat groupé ». 3) « Suivi en cours » : deux dossiers au plus, « Voir tout ».
- * Les listes récentes vivent dans « Mes listes ». Rien ici n'envoie quoi que ce soit à un négoce : chaque carte ouvre son
- * dossier.
+ * L'ACCUEIL EN TABLEAU DE BORD (Greg, 15 novembre 2026, lot UX mobile ; RÈGLE CHANGÉE pour les trois grandes cartes du
+ * 10 novembre, qui doublonnaient le menu du bas). « Bonjour [prénom] », puis seulement ce qui existe vraiment :
+ * 1) « À faire maintenant » : ce qui attend l'artisan, le plus pressant d'abord (`actionPrioritaire` : action requise,
+ *    échéance, récence) ; 2) « Achats groupés qui peuvent t'intéresser » : trois au plus, ouverts dans SON département,
+ *    ceux de son métier d'abord, puis ceux qui se terminent le plus tôt ; jamais ceux où il est déjà ; 3) « Missions près
+ *    de toi » : trois au plus, dans son département, seulement si Mission est active ; 4) « Activité récente » : ses
+ *    dernières listes. Une section sans rien à montrer n'existe pas. Rien n'est inventé : chaque carte vient d'une donnée
+ *    de l'API, et aucun nom d'une autre entreprise ne paraît ici (un achat groupé se dit par son produit, une mission par
+ *    son métier et sa ville). Rien ici n'envoie quoi que ce soit : chaque carte ouvre son écran.
  */
+
+/** Trois cartes au plus par section, puis « Voir tout ». */
+const MAX_CARTES = 3;
+/** Les lots d'achat groupé d'un métier de l'entreprise : sert seulement à classer, jamais à cacher. */
+const LOTS_DU_METIER: Record<string, string[]> = {
+  roofing: ["couverture", "zinguerie"],
+  waterproofing: ["couverture"],
+  carpentry: ["bois"],
+  decking: ["bois"],
+  cladding: ["bois"],
+  drywall: ["platrerie", "isolation"],
+  ceiling: ["platrerie"],
+  electrical: ["electricite"],
+  solar: ["electricite"],
+  plumbing: ["plomberie"],
+  hvac: ["plomberie"],
+  masonry: ["maconnerie"],
+  facade: ["maconnerie"],
+  joinery: ["menuiserie"],
+  interior_joinery: ["menuiserie"],
+  painting: ["peinture"],
+};
 
 interface Action extends ActionCandidate {
   statut: string;
@@ -110,6 +138,10 @@ export function AccueilMaquette() {
   const [tout, setTout] = useState(false);
   const groupe = useGroupeActif();
   const missions = useMissionsActif() === true;
+  // Les suggestions : coupé (404) ou en panne, la section n'existe pas ; l'accueil ne casse jamais pour elles.
+  const { data: ouverts } = useResource(useCallback((s: AbortSignal) => (groupe ? api<{ achats: AchatV1[] }>("/v1/ag/achats", { signal: s }).catch(() => ({ achats: [] })) : Promise.resolve({ achats: [] as AchatV1[] })), [groupe]));
+  const { data: besoins } = useResource(useCallback((s: AbortSignal) => (groupe ? api<{ aFaire: BesoinV1[]; enCours: BesoinV1[] }>("/v1/ag/besoins", { signal: s }).catch(() => ({ aFaire: [], enCours: [] })) : Promise.resolve({ aFaire: [] as BesoinV1[], enCours: [] as BesoinV1[] })), [groupe]));
+  const { data: annonces } = useResource(useCallback((s: AbortSignal) => (missions ? api<{ departement: string | null; items: AnnonceVue[] }>("/v1/missions/annonces?type=mission", { signal: s }).catch(() => ({ departement: null, items: [] })) : Promise.resolve({ departement: null, items: [] as AnnonceVue[] })), [missions]));
 
   const charge = brouillons !== null && next !== null && projets !== null;
   const achats = mes?.achats ?? [];
@@ -119,26 +151,29 @@ export function AccueilMaquette() {
   const { premiere, autres } = actionPrioritaire(candidats);
   const lien = lienAutres(autres);
 
+  // Achats groupés : pas ceux où il est déjà ; son métier d'abord, puis la fin la plus proche.
+  const mesLots = new Set((me.companies[0]?.trades ?? []).flatMap((t) => LOTS_DU_METIER[t] ?? []));
+  const dejaDedans = new Set([...(besoins?.aFaire ?? []), ...(besoins?.enCours ?? [])].map((b) => b.achat.id));
+  const suggestions = besoins === null ? [] : (ouverts?.achats ?? []).filter((a) => !dejaDedans.has(a.id)).sort((x, y) => Number(mesLots.has(y.lot)) - Number(mesLots.has(x.lot)) || x.ouvertJusquau.localeCompare(y.ouvertJusquau));
+  // Missions : celles de son département, pas les siennes ; l'API les rend déjà par date de début.
+  const pres = (annonces?.items ?? []).filter((a) => !a.mienne && annonces?.departement && a.departement === annonces.departement);
+  // Activité récente : ses dernières listes, sauf celles déjà dites dans « À faire maintenant ».
+  const dites = new Set(candidats.map((a) => projetDeUrl(a.href)).filter((x): x is string => x !== null));
+  const recentes = (projets?.items ?? []).filter((p) => !dites.has(p.id)).sort((x, y) => y.lastActivityAt.localeCompare(x.lastActivityAt));
+  const aucuneListe = charge && projets.items.length === 0 && candidats.length === 0;
+
   return (
     <div className="flex flex-col gap-4 lg:mx-auto lg:w-full lg:max-w-[56rem] lg:gap-5">
-      {/* PROMPT MAÎTRE (Greg, 10 novembre 2026, capture 01 ; RÈGLE CHANGÉE pour « un seul bouton » du 8 novembre) : « Bonjour
-          [prénom], que veux-tu faire ? », puis les trois activités, chacune indépendante : créer un quantitatif (jaune, la
-          seule action dominante), voir les achats groupés, les missions entre entreprises ; puis « À faire ». Rien ici
-          n'envoie quoi que ce soit : chaque carte ouvre son espace. */}
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em] lg:text-[40px]">Bonjour {prenom}</h1>
-        <p className="text-[16px] text-muted">Que veux-tu faire ?</p>
       </header>
       <BandeauReprises />
-      <CarteLien jaune href="/chantiers/nouveau" icone={ClipboardList} titre="Créer un quantitatif" sous="Prépare ta liste de matériaux." />
-      {groupe ? <CarteLien href="/achats-groupes" icone={Users} titre="Voir les achats groupés" sous="Découvre les achats ouverts près de toi." /> : null}
-      {missions ? <CarteLien href="/missions" icone={Briefcase} titre="Missions entre entreprises" sous="Propose une mission ou tes services." /> : null}
 
       {!charge ? <Skeleton card="h-24" lines={1} label="Chargement de l'accueil…" /> : null}
       {premiere ? (
-        <section aria-labelledby="a-faire-titre" className="flex flex-col gap-3 pt-2">
+        <section aria-labelledby="a-faire-titre" className="flex flex-col gap-3">
           <h2 id="a-faire-titre" className="text-[22px] font-extrabold tracking-[-0.02em]">
-            À faire
+            À faire maintenant
           </h2>
           <CarteAction a={premiere} />
           {lien ? (
@@ -158,7 +193,39 @@ export function AccueilMaquette() {
           ) : null}
         </section>
       ) : charge ? (
-        <p className="pt-2 text-[15px] text-muted">Rien à faire pour le moment.</p>
+        <p className="text-[15px] text-muted">Rien à faire pour le moment.</p>
+      ) : null}
+      {/* Le compte sans aucune liste : le seul départ utile. Dès la première liste, le « + » du menu suffit. */}
+      {aucuneListe ? <CarteLien jaune href="/chantiers/nouveau" icone={ClipboardList} titre="Créer un quantitatif" sous="Prépare ta liste de matériaux." /> : null}
+
+      {suggestions.length > 0 ? (
+        <Section id="accueil-achats" titre="Achats groupés qui peuvent t'intéresser" href="/achats-groupes" lienNom="Voir tous les achats groupés">
+          {suggestions.slice(0, MAX_CARTES).map((a) => (
+            <li key={a.id}>
+              <CarteLien href={lienAchat(a)} titre={a.nom} sous={`${libelleLot(a.lot)} · ${finDans(a.ouvertJusquau)}`} label={`${a.nom} : ${libelleLot(a.lot)}, ${finDans(a.ouvertJusquau)}`} />
+            </li>
+          ))}
+        </Section>
+      ) : null}
+
+      {pres.length > 0 ? (
+        <Section id="accueil-missions" titre="Missions près de toi" href="/missions" lienNom="Voir toutes les missions">
+          {pres.slice(0, MAX_CARTES).map((a) => (
+            <li key={a.id}>
+              <CarteLien href={`/missions/${a.id}`} titre={`${a.metier} · ${a.lieu}`} sous={`À partir du ${jourCourt(a.debut)}`} label={`Mission : ${a.metier} à ${a.lieu}, à partir du ${jourCourt(a.debut)}`} />
+            </li>
+          ))}
+        </Section>
+      ) : null}
+
+      {recentes.length > 0 ? (
+        <Section id="accueil-recent" titre="Activité récente" href="/chantiers?vue=suivi" lienNom="Voir toutes mes demandes">
+          {recentes.slice(0, MAX_CARTES).map((p) => (
+            <li key={p.id}>
+              <CarteLien href={`/chantiers/${p.id}`} titre={p.name} sous={[p.resume?.statut, jourCourt(p.lastActivityAt)].filter(Boolean).join(" · ")} />
+            </li>
+          ))}
+        </Section>
       ) : null}
       <InstallHint />
     </div>
@@ -168,4 +235,21 @@ export function AccueilMaquette() {
 /** Une carte de « À faire » : son état en étiquette, ce qu'il y a à faire, de quoi il s'agit ; entièrement cliquable. */
 function CarteAction({ a }: { a: Action }) {
   return <CarteLien href={a.href} titre={a.titre} sous={a.sousTitre} etiquette={<Etiquette>{a.statut}</Etiquette>} label={`${a.titre} : ${a.sousTitre} (${a.statut})`} />;
+}
+
+/** Une section du tableau de bord : son titre, « Voir tout » à droite (44 px), ses cartes. Elle n'existe que remplie. */
+function Section({ id, titre, href, lienNom, children }: { id: string; titre: string; href: string; lienNom: string; children: React.ReactNode }) {
+  return (
+    <section aria-labelledby={id} className="flex flex-col gap-3 pt-2">
+      <div className="flex items-end justify-between gap-3">
+        <h2 id={id} className="min-w-0 text-[20px] leading-tight font-extrabold tracking-[-0.02em] text-balance">
+          {titre}
+        </h2>
+        <Link href={href} aria-label={lienNom} className="flex min-h-11 shrink-0 items-center text-[14px] font-extrabold text-accent-text">
+          Voir tout
+        </Link>
+      </div>
+      <ul className="flex flex-col gap-3">{children}</ul>
+    </section>
+  );
 }

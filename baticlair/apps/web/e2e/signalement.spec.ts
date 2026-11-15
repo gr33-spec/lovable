@@ -31,7 +31,7 @@ async function inscrire(page: Page) {
 test("un artisan signale un problème depuis « Mon menu » : la page et la capture d'écran sont jointes toutes seules, puis « Merci, on regarde »", async ({ page }) => {
   test.setTimeout(120_000);
   await inscrire(page);
-  await page.goto("/chantiers");
+  await page.goto("/chantiers?vue=suivi");
   await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
   const envoye = page.waitForRequest((r) => r.url().endsWith("/v1/signalements") && r.method() === "POST");
   await page.getByRole("button", { name: "Mon menu" }).click();

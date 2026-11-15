@@ -189,7 +189,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await inscrire(page, dep);
     await page.goto("/");
     // « À faire » (Greg, 6 novembre 2026) : rien à faire, donc « Aucun besoin en cours » et « Nouveau besoin ».
-    await expect(page.getByRole("region", { name: "À faire", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "À faire maintenant", exact: true })).toHaveCount(0);
     // Greg, 7 novembre 2026 : des actions écrites en toutes lettres, l'achat individuel à part.
     // UX simplifiée (Greg, 8 novembre 2026) : UN bouton principal, « Créer un quantitatif » ; rien d'autre que ce qui attend.
     await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
@@ -437,7 +437,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await nav.getByRole("link", { name: "Accueil", exact: true }).click();
     await page.waitForURL(/\/$/);
     // L'accueil (1er novembre 2026) : le parcours quitté est « À faire maintenant », sa carte le reprend tel quel.
-    const afaire = page.getByRole("region", { name: "À faire", exact: true });
+    const afaire = page.getByRole("region", { name: "À faire maintenant", exact: true });
     await afaire.getByRole("link", { name: new RegExp(`^${carte}`) }).first().click();
   }
 

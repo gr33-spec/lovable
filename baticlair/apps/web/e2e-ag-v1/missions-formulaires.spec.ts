@@ -39,7 +39,7 @@ test("missions : code postal et commune se proposent, métier avec recherche, fi
   // Les trois filtres sont entiers dans l'écran, sans défilement latéral, avec une cible d'au moins 44 px.
   const filtres = page.getByRole("group", { name: "Type d'annonces" });
   const largeur = page.viewportSize()!.width;
-  for (const nom of ["Missions", "Entreprises dispo", "Mes annonces"]) {
+  for (const nom of ["Missions", "Entreprises", "Mes annonces"]) {
     const boite = (await filtres.getByRole("button", { name: nom, exact: true }).boundingBox())!;
     expect(boite.x).toBeGreaterThanOrEqual(0);
     expect(boite.x + boite.width).toBeLessThanOrEqual(largeur);
@@ -126,7 +126,7 @@ test("missions : code postal et commune se proposent, métier avec recherche, fi
 test("quantitatifs : la fenêtre d'aide tient dans l'écran, dit le parcours actuel, se ferme à Échap ; « Mes négoces » et les réponses s'ouvrent d'ici", async ({ page }) => {
   test.setTimeout(120_000);
   await inscrire(page);
-  await page.goto("/chantiers");
+  await page.goto("/chantiers?vue=suivi");
   const bouton = page.getByRole("button", { name: "Aide", exact: true });
   await bouton.click();
   const aide = page.getByRole("dialog", { name: "Aide : Tes quantitatifs" });

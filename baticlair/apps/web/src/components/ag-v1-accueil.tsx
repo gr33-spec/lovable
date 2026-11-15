@@ -1,9 +1,9 @@
 "use client";
 
-import { ChevronRight, Package, Sparkles, Timer, X } from "lucide-react";
+import { Plus, ChevronRight, Package, Sparkles, Timer, X } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CARTE, LigneZone } from "@/components/ag-v1-commun";
 import { PageTitle, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -47,11 +47,18 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
   const ajoutes = useSearchParams().get("ajoutes");
   // Seuls les métiers qui ont des produits ouverts sont proposés.
   const metiers = FILTRES_V1.filter((f) => etat.produits.some((p) => lotPrincipal(p.lot) === f.id));
+  const fermerChoix = useCallback(() => setChoix(false), []);
 
   return (
-    <div className="flex flex-col gap-4 pb-24 lg:mx-auto lg:w-full lg:max-w-[48rem]">
+    <div className="flex flex-col gap-4 pb-32 lg:mx-auto lg:w-full lg:max-w-[48rem] lg:pb-24">
       <div className="flex flex-col gap-1">
-        <PageTitle>Achats groupés</PageTitle>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <PageTitle>Achats groupés</PageTitle>
+          {/* Sur ordinateur : un bouton normal dans l'en-tête (Greg, 15 novembre 2026). */}
+          <button type="button" onClick={() => setChoix(true)} className="pressable hidden min-h-12 items-center gap-2 rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent lg:inline-flex">
+            <Plus size={20} aria-hidden="true" /> Publier un besoin
+          </button>
+        </div>
         <p className="text-[15px] leading-relaxed text-muted">Achète avec d&apos;autres artisans de ton secteur{etat.zone ? ` · ${zoneLisible(etat.zone)}` : ""}, pour payer moins cher. Tu décides à la réception de l&apos;offre.</p>
       </div>
       {ajoutes ? (
@@ -74,7 +81,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         {mes === null ? (
           <Skeleton card="h-16" lines={0} label="Chargement de tes besoins…" />
         ) : mesBesoins.length === 0 ? (
-          <p className={`${CARTE} p-4 text-[15px] text-muted`}>Aucun pour le moment. Ouvre un de tes quantitatifs et touche « Ajouter aux achats groupés ».</p>
+          <p className={`${CARTE} p-4 text-[15px] text-muted`}>Aucun pour le moment. Touche « Publier un besoin » : tu peux être le premier, d&apos;autres artisans te rejoindront.</p>
         ) : (
           <ul aria-label="Mes besoins" className={`${CARTE} flex flex-col`}>
             {mesBesoins.slice(0, 5).map((b) => (
@@ -150,12 +157,19 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         </button>
       ) : null}
       <p className="pt-2 text-center text-[13px] text-muted">{SIGNATURE}</p>
-      {/* Les autres façons d'ajouter (Mobiiz, un quantitatif choisi ici) restent, en option discrète : le chemin principal
-          part du quantitatif (« Ajouter aux achats groupés »). */}
-      <button type="button" onClick={() => setChoix(true)} className="min-h-11 self-center py-2 text-[15px] font-semibold underline underline-offset-4">
-        Ajouter un matériau sans quantitatif
+      {/* PUBLIER UN BESOIN (Greg, 15 novembre 2026, dossier UX mobile : « aucun point d'entrée évident pour être le premier à
+          publier un besoin »). Sur téléphone : un bouton flottant jaune, juste au-dessus de la barre du bas, visible au
+          défilement ; la page garde sa place en bas (`pb-32`) pour qu'il ne masque rien. RÈGLE CHANGÉE : avant, un lien
+          discret « Ajouter un matériau sans quantitatif » en bas de page. */}
+      <button
+        type="button"
+        onClick={() => setChoix(true)}
+        className="pressable fixed right-4 z-40 flex min-h-14 items-center gap-2 rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent shadow-float lg:hidden"
+        style={{ bottom: "calc(var(--nav-space) + 4px)" }}
+      >
+        <Plus size={22} aria-hidden="true" /> Publier un besoin
       </button>
-      {choix ? <ChoixAjout onFermer={() => setChoix(false)} /> : null}
+      {choix ? <ChoixAjout onFermer={fermerChoix} /> : null}
     </div>
   );
 }
@@ -163,27 +177,37 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
 /** Les deux façons d'ajouter un matériau (Greg, 8 novembre 2026 : « soit par la liste, soit par l'IA » ; le catalogue est retiré, il y manquera toujours des produits). */
 function ChoixAjout({ onFermer }: { onFermer: () => void }) {
   const option = "pressable flex min-h-16 items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 text-left";
+  // Au clavier (passe mobile, 15 novembre 2026) : « Échap » ferme, le premier bouton prend le focus à l'ouverture.
+  const fermer = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    fermer.current?.focus();
+    const touche = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onFermer();
+    };
+    window.addEventListener("keydown", touche);
+    return () => window.removeEventListener("keydown", touche);
+  }, [onFermer]);
   return (
     <div className="fixed top-0 left-0 z-[60] flex h-[100dvh] w-full items-end justify-center bg-black/50 lg:items-center" onClick={onFermer}>
-      <div role="dialog" aria-modal="true" aria-label="Ajouter un matériau" onClick={(e) => e.stopPropagation()} className="flex w-full max-w-lg flex-col gap-3 rounded-t-[24px] bg-ground p-4 pb-[calc(16px+env(safe-area-inset-bottom))] text-ink lg:rounded-[24px]">
+      <div role="dialog" aria-modal="true" aria-label="Publier un besoin" onClick={(e) => e.stopPropagation()} className="flex w-full max-w-lg flex-col gap-3 rounded-t-[24px] bg-ground p-4 pb-[calc(16px+env(safe-area-inset-bottom))] text-ink lg:rounded-[24px]">
         <div className="flex items-center justify-between">
-          <p className="text-[18px] font-extrabold">Ajouter un matériau</p>
-          <button type="button" onClick={onFermer} aria-label="Fermer" className="grid size-11 place-items-center rounded-full">
+          <p className="text-[18px] font-extrabold">Publier un besoin</p>
+          <button ref={fermer} type="button" onClick={onFermer} aria-label="Fermer" className="grid size-11 place-items-center rounded-full">
             <X size={20} aria-hidden="true" />
           </button>
         </div>
-        <Link href="/achats-groupes/nouveau" className={option}>
-          <Sparkles size={22} aria-hidden="true" className="shrink-0" />
-          <span className="flex flex-col">
-            <span className="text-[16px] font-bold">Parler à Mobiiz</span>
-            <span className="text-[14px] text-muted">Dis ton besoin comme au comptoir, Mobiiz complète avec toi.</span>
-          </span>
-        </Link>
         <Link href="/achats-groupes/quantitatif" className={option}>
           <Package size={22} aria-hidden="true" className="shrink-0" />
           <span className="flex flex-col">
-            <span className="text-[16px] font-bold">Depuis un quantitatif</span>
-            <span className="text-[14px] text-muted">Plusieurs articles déjà calculés, chacun dans son achat groupé.</span>
+            <span className="text-[16px] font-bold">Choisir dans un quantitatif</span>
+            <span className="text-[14px] text-muted">Coche une ou plusieurs lignes d&apos;une liste que tu as déjà.</span>
+          </span>
+        </Link>
+        <Link href="/achats-groupes/nouveau" className={option}>
+          <Sparkles size={22} aria-hidden="true" className="shrink-0" />
+          <span className="flex flex-col">
+            <span className="text-[16px] font-bold">Saisir un nouveau besoin</span>
+            <span className="text-[14px] text-muted">Dis ton besoin comme au comptoir, sans quantitatif. Rien n&apos;est publié avant ta confirmation.</span>
           </span>
         </Link>
       </div>

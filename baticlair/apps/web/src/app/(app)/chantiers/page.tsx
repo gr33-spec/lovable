@@ -2,11 +2,11 @@
 
 import { AideBouton } from "@/components/aide";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ClipboardList, Mail, Search, Truck } from "lucide-react";
+import { ChevronRight, ClipboardList, FolderOpen, Mail, Plus, Search, Truck } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ConfirmerSuppression, CarteListe, ListeNonSupprimable, type Refus } from "@/components/mes-listes";
-import { Button, ButtonLink, EmptyState, ErrorNotice, PageTitle, Skeleton, Spinner } from "@/components/ui";
+import { BackButton, Button, ButtonLink, EmptyState, ErrorNotice, PageTitle, Skeleton, Spinner } from "@/components/ui";
 import { api, ApiError, type Project, type ProjectPage } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
@@ -67,8 +67,10 @@ function MesListes() {
         if (next.statut && next.statut !== "toutes") sp.set("statut", next.statut);
         else sp.delete("statut");
       }
+      // Le suivi reste le suivi quand la recherche et le filtre se vident (sans cela, on retombait sur l'entrée).
+      sp.set("vue", "suivi");
       const qs = sp.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      router.replace(`${pathname}?${qs}`, { scroll: false });
     },
     [params, pathname, router],
   );
@@ -158,8 +160,9 @@ function MesListes() {
       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
         {/* Prompt maître (Greg, 10 novembre 2026, capture 02 ; RÈGLE CHANGÉE : « Mes demandes » devient « Mes quantitatifs »). */}
         <span className="flex flex-col gap-1">
-          <PageTitle>Mes quantitatifs</PageTitle>
-          <span className="text-[14px] text-muted">Prépare et envoie tes listes de matériaux.</span>
+          <BackButton fallback="/chantiers" compact />
+          <PageTitle>Mes demandes</PageTitle>
+          <span className="text-[14px] text-muted">Tes brouillons, tes demandes envoyées, les réponses reçues et ce qui est terminé.</span>
         </span>
         <span className="flex items-center gap-3">
           <ButtonLink href="/chantiers/nouveau" className="min-h-11 shrink-0 px-4 text-[15px] whitespace-nowrap">
@@ -319,10 +322,52 @@ function MesListes() {
   );
 }
 
+/**
+ * L'ENTRÉE QUANTITATIFS, SIMPLIFIÉE (Greg, 15 novembre 2026, dossier UX mobile : « la page mélange création, négoces,
+ * réponses, recherche, cinq états et liste […] l'intention principale n'est pas évidente »). Deux choix, un tap chacun :
+ * « Créer un quantitatif » ouvre directement la création ; « Suivre mes demandes » ouvre le suivi, où vivent maintenant
+ * Mes négoces, les réponses, la recherche et les filtres. RÈGLE CHANGÉE : avant, tout était sur cette page.
+ */
+function EntreeQuantitatifs() {
+  const carte = "pressable flex min-h-[88px] items-center gap-4 rounded-[20px] p-5 text-left shadow-card";
+  return (
+    <div className="flex flex-col gap-4">
+      <span className="flex flex-col gap-1">
+        <PageTitle>Quantitatifs</PageTitle>
+        <span className="text-[14px] text-muted">Tes listes de matériaux et tes demandes de prix.</span>
+      </span>
+      <nav aria-label="Quantitatifs" className="flex flex-col gap-3">
+        <Link href="/chantiers/nouveau" className={`${carte} bg-accent text-on-accent`}>
+          <Plus size={26} aria-hidden="true" className="shrink-0" />
+          <span className="flex min-w-0 grow flex-col">
+            <span className="text-[19px] leading-tight font-extrabold">Créer un quantitatif</span>
+            <span className="text-[14px] leading-snug">Prépare une nouvelle liste de matériaux.</span>
+          </span>
+          <ChevronRight size={22} aria-hidden="true" className="shrink-0" />
+        </Link>
+        <Link href="/chantiers?vue=suivi" className={`${carte} bg-surface text-ink`}>
+          <FolderOpen size={26} aria-hidden="true" className="shrink-0" />
+          <span className="flex min-w-0 grow flex-col">
+            <span className="text-[19px] leading-tight font-extrabold">Suivre mes demandes</span>
+            <span className="text-[14px] leading-snug text-muted">Brouillons, demandes envoyées, réponses reçues, terminées.</span>
+          </span>
+          <ChevronRight size={22} aria-hidden="true" className="shrink-0" />
+        </Link>
+      </nav>
+    </div>
+  );
+}
+
+/** Sans rien dans l'adresse : l'entrée simple. « ?vue=suivi », une recherche ou un filtre (anciens liens compris) : le suivi. */
+function Aiguillage() {
+  const params = useSearchParams();
+  return params.get("vue") === "suivi" || params.has("q") || params.has("statut") ? <MesListes /> : <EntreeQuantitatifs />;
+}
+
 export default function ChantiersPage() {
   return (
     <Suspense fallback={<Spinner />}>
-      <MesListes />
+      <Aiguillage />
     </Suspense>
   );
 }

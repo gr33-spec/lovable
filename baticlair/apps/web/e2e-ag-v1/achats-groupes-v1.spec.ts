@@ -100,12 +100,34 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(page.getByRole("combobox", { name: "Filtrer par métier" })).toBeVisible();
   for (const f of ["Couverture", "Zinguerie", "Isolation", "Bois", "Électricité"]) await expect(page.getByRole("button", { name: f, exact: true })).toHaveCount(0);
   await expect(page.getByText("Mobiiz. Plus on est, moins on paie.")).toBeVisible();
-  // UX simplifiée : plus de bouton flottant ; les autres façons d'ajouter restent derrière un lien discret.
-  await expect(page.getByRole("button", { name: "Ajouter un matériau", exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: "Ajouter un matériau sans quantitatif" }).click();
-  const ajout = page.getByRole("dialog", { name: "Ajouter un matériau" });
-  for (const nom of [/^Parler à Mobiiz/, /^Depuis un quantitatif/]) await expect(ajout.getByRole("link", { name: nom })).toBeVisible();
+  // PUBLIER UN BESOIN (Greg, 15 novembre 2026 ; RÈGLE CHANGÉE : avant, un lien discret « Ajouter un matériau sans
+  // quantitatif ») : UN bouton visible (flottant au-dessus de la barre du bas sur téléphone, dans l'en-tête sur ordinateur),
+  // qui ne recouvre ni la barre ni la dernière ligne ; deux chemins.
+  const publier = page.getByRole("button", { name: "Publier un besoin" });
+  await expect(publier).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Ajouter un matériau sans quantitatif" })).toHaveCount(0);
+  const nav = page.getByRole("navigation", { name: "Navigation principale" });
+  if ((page.viewportSize()?.width ?? 0) < 1024) {
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    const [b, n, fin] = [await publier.boundingBox(), await nav.boundingBox(), await page.getByText("Mobiiz. Plus on est, moins on paie.").boundingBox()];
+    // Juste au-dessus de la barre du bas, dans l'écran, sans masquer la fin de la page.
+    expect(b!.y + b!.height).toBeLessThanOrEqual(n!.y);
+    expect(b!.x + b!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+    expect(fin!.y + fin!.height).toBeLessThanOrEqual(b!.y);
+    await page.evaluate(() => window.scrollTo(0, 0));
+  }
+  const brouillonsAvant = await page.evaluate(async () => (await (await fetch("/v1/brouillons", { headers: { "x-company-id": localStorage.getItem("baticlair.companyId") ?? "" } })).text()));
+  await publier.click();
+  const ajout = page.getByRole("dialog", { name: "Publier un besoin" });
+  for (const nom of [/^Choisir dans un quantitatif/, /^Saisir un nouveau besoin/]) await expect(ajout.getByRole("link", { name: nom })).toBeVisible();
   await expect(ajout.getByRole("link")).toHaveCount(2);
+  // Ouvrir la saisie puis revenir sans rien confirmer : aucun brouillon fantôme, aucun besoin créé.
+  await ajout.getByRole("link", { name: /^Saisir un nouveau besoin/ }).click();
+  await expect(page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "Achats groupés", level: 1 })).toBeVisible();
+  expect(await page.evaluate(async () => (await (await fetch("/v1/brouillons", { headers: { "x-company-id": localStorage.getItem("baticlair.companyId") ?? "" } })).text()))).toBe(brouillonsAvant);
+  await publier.click();
   await capture(page, "01b-ajouter-un-materiau");
   await ajout.getByRole("button", { name: "Fermer" }).click();
   const menu = page.getByRole("navigation", { name: "Navigation principale" });
@@ -166,6 +188,16 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
 
   // Une autre entreprise : l'achat correspond ; « ne me convient pas » ne propose pas la zone ; elle rejoint.
   const b = await nouvelArtisan(browser, "Paul");
+  // L'accueil de B (lot UX mobile, 15 novembre 2026) : l'achat ouvert dans son département lui est proposé, par son produit
+  // et le temps qui reste ; aucune entreprise n'est nommée. Celui qui y est déjà (A) ne se le voit pas proposer.
+  await b.page.goto("/");
+  // (La base des parcours est partagée : d'autres achats du département peuvent occuper les trois places.)
+  const idees = b.page.getByRole("region", { name: "Achats groupés qui peuvent t'intéresser" });
+  await expect(idees.getByRole("listitem").first()).toBeVisible();
+  expect(await idees.getByRole("listitem").count()).toBeLessThanOrEqual(3);
+  for (const lien of await idees.getByRole("listitem").getByRole("link").all()) await expect(lien).toHaveAccessibleName(/ : .+, Se termine (dans \d+ jours|demain|aujourd'hui)$/);
+  await expect(idees.getByRole("link", { name: "Voir tous les achats groupés" })).toHaveAttribute("href", "/achats-groupes");
+  expect(await b.page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await b.page.goto("/achats-groupes");
   // Greg, 8 novembre 2026 : une ligne par achat, le nom du produit et le temps qui reste, rien d'autre.
   await expect(b.page.getByRole("list", { name: "Achats groupés ouverts" }).getByText(/^Se termine dans \d+ jours$/).first()).toBeVisible();
@@ -232,7 +264,7 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(page.getByText(/Reconfirme ta quantité : Ardoise naturelle 32 × 22/).first()).toBeVisible();
   await capture(page, "12-a-faire-accueil");
   await page.goto("/achats-groupes/mes-besoins");
-  await expect(page.getByRole("region", { name: "À faire", exact: true }).getByText("Préparation de la consultation")).toBeVisible();
+  await expect(page.getByRole("region", { name: "À faire maintenant", exact: true }).getByText("Préparation de la consultation")).toBeVisible();
   await capture(page, "13-mes-besoins");
   await page.getByRole("link", { name: "Reconfirmer ma quantité" }).click();
   await capture(page, "14-preparation");
@@ -272,8 +304,8 @@ test("« Ajouter un matériau » avec Mobiiz (Greg, 8 novembre) : une phrase de 
   test.setTimeout(120_000);
   await inscrire(page);
   await page.goto("/achats-groupes");
-  await page.getByRole("button", { name: "Ajouter un matériau sans quantitatif" }).click();
-  await page.getByRole("dialog", { name: "Ajouter un matériau" }).getByRole("link", { name: /^Parler à Mobiiz/ }).click();
+  await page.getByRole("button", { name: "Publier un besoin" }).click();
+  await page.getByRole("dialog", { name: "Publier un besoin" }).getByRole("link", { name: /^Saisir un nouveau besoin/ }).click();
   const chat = page.getByRole("dialog", { name: "Ajouter un matériau en achat groupé" });
   await expect(chat.getByText(/Quel matériau veux-tu acheter en groupe \?/).first()).toBeVisible();
   // Une réponse rapide, puis une phrase : Mobiiz garde ce qui est dit et demande ce qui manque, une chose à la fois.

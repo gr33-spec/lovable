@@ -144,7 +144,7 @@ export function AnalysisScreen() {
       <div className="flex shrink-0 px-4 pt-[max(14px,env(safe-area-inset-top))]">
         <button
           type="button"
-          onClick={() => router.push("/chantiers")}
+          onClick={() => router.push("/chantiers?vue=suivi")}
           aria-label="Revenir à mes listes"
           className="inline-flex size-11 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
         >

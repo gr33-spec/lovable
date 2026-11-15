@@ -176,7 +176,7 @@ async function menuArtisan(page: Page, entree: string) {
     return;
   }
   if (entree === "Mes négoces") {
-    await page.goto("/chantiers");
+    await page.goto("/chantiers?vue=suivi");
     await page.getByRole("navigation", { name: "Autour de mes quantitatifs" }).getByRole("link", { name: "Mes négoces" }).click();
     return;
   }
@@ -271,7 +271,7 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   // Retour depuis la fiche : jamais vers le dépôt (il a été remplacé par le chantier).
   await page.getByRole("button", { name: "Retour" }).click();
   await expect(page).not.toHaveURL(/\/chantiers\/nouveau/);
-  await page.goto("/chantiers");
+  await page.goto("/chantiers?vue=suivi");
   await expect(page.getByRole("link", { name: /Toiture Dupont/ })).toBeVisible();
 });
 
@@ -313,7 +313,7 @@ test("marquer terminé retire le chantier des « En cours » sans le perdre", as
 
   // « Mes demandes » (Greg, 1er novembre 2026) : Toutes / À préparer / Envoyées / Réponses reçues / Terminées.
   await page.goto("/chantiers?statut=a-preparer");
-  await expect(page.getByRole("heading", { name: "Mes quantitatifs" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Mes demandes" })).toBeVisible();
   await expect(page.getByText("Rien à préparer")).toBeVisible();
   await page.getByRole("button", { name: "Terminées" }).click();
   await expect(page.getByRole("link", { name: /Bardage Lefèvre/ })).toBeVisible();
@@ -946,7 +946,7 @@ test("accueil : la prochaine action de chaque chantier ; plus de limite de chant
   // terminé » : le 4e chantier se crée, et l'ancienne page des formules mène à « Mon abonnement ».
   await createProject(page, "Chantier 2", "", "");
   // « Client non renseigné » n'existe plus : un chantier sans client ni adresse n'a rien sous son nom.
-  await page.goto("/chantiers");
+  await page.goto("/chantiers?vue=suivi");
   await expect(page.getByText("Chantier 2")).toBeVisible();
   await expect(page.getByText("Client non renseigné")).toHaveCount(0);
   await createProject(page, "Chantier 3", "", "");

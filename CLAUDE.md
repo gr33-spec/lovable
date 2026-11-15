@@ -115,6 +115,17 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - La réponse d'un négoce reçue sur l'adresse Mobiiz est copiée (message et nom des pièces jointes) dans l'e-mail envoyé à la vraie adresse de l'artisan. Avant : seulement « X t'a répondu » et un lien.
 - Politique de confidentialité passée en version du 14/11/2026 (relue par l'agent juriste, à valider par l'avocat). À décider par Greg : la boîte qui reçoit les alertes (une boîte personnelle gratuite est un destinataire de données), la durée des signalements.
 
+## Décisions du 15 novembre 2026 (lot UX mobile)
+
+- Un négoce reçoit un seul e-mail : la demande de prix, avec le lien pour créer son accès. Règle changée : avant, deux e-mails.
+- Signalements : gardés 12 mois, puis supprimés tout seuls. Taux de réponse des négoces : visible seulement dans l'admin.
+- L'onglet Quantitatifs ouvre deux choix : « Créer un quantitatif » et « Suivre mes demandes » (le suivi : `/chantiers?vue=suivi`, avec négoces, réponses, recherche et filtres). Règle changée : avant, la liste directement.
+- L'accueil est un tableau de bord : « À faire maintenant », « Achats groupés qui peuvent t'intéresser », « Missions près de toi » (si Mission est active), « Activité récente ». Trois cartes au plus par section, aucune section vide, aucune donnée inventée, aucun nom d'une autre entreprise. Règle changée : avant, trois grandes cartes.
+- Achats groupés : « Publier un besoin », bouton flottant au-dessus du menu sur téléphone, bouton d'en-tête sur ordinateur ; deux chemins (« Choisir dans un quantitatif », « Saisir un nouveau besoin »). Un article déjà envoyé aux négoces ne se groupe toujours pas (à revoir après les retours terrain).
+- Missions : recherche, trois filtres (Missions, Entreprises, Mes annonces), deux actions compactes, puis « Près de toi ».
+- Les neuf testeurs restent en local. Le paiement du code FONDATEUR se teste juste avant le lancement. L'assistant reste allumé sur le site de test.
+- Le jaune du code est #FED206 (le message de Greg dit #FFC800) : rien changé, à trancher par Greg.
+
 ## Signalement de bugs
 
 - Bouton « Signaler un problème » : dans « Mon menu » sur chaque écran de l'application, et en bas des pages sans compte (espace négoce). La page et la capture d'écran sont jointes toutes seules.

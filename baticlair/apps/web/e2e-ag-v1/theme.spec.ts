@@ -40,7 +40,7 @@ test("le thème se change depuis l'en-tête, reste gardé, et le fond est posé 
     if (m.type() === "error" && /Content Security Policy|hydrat/i.test(m.text())) erreurs.push(m.text());
   });
   await inscrire(page);
-  await page.goto("/chantiers");
+  await page.goto("/chantiers?vue=suivi");
 
   // Sombre tant que rien n'est choisi ; le bouton dit le choix en cours.
   const bouton = page.getByRole("button", { name: /^Apparence : / });

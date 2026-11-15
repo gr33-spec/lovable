@@ -128,7 +128,7 @@ function AccueilAncien() {
         onSubmit={(e) => {
           e.preventDefault();
           const q = String(new FormData(e.currentTarget).get("q") ?? "").trim();
-          router.push(q ? `/chantiers?q=${encodeURIComponent(q)}` : "/chantiers");
+          router.push(q ? `/chantiers?q=${encodeURIComponent(q)}` : "/chantiers?vue=suivi");
         }}
       >
         <label htmlFor="home-search" className="sr-only">
@@ -161,7 +161,7 @@ function AccueilAncien() {
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
           <SectionTitle>Mes demandes</SectionTitle>
-          <Link href="/chantiers" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
+          <Link href="/chantiers?vue=suivi" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-accent-text">
             Voir tout
           </Link>
         </div>

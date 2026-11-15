@@ -66,7 +66,7 @@ export function CarteAnnonce({ a, href }: { a: AnnonceVue; href?: string }) {
 type Vue = "missions" | "dispos" | "miennes";
 const VUES: { id: Vue; libelle: string }[] = [
   { id: "missions", libelle: "Missions" },
-  { id: "dispos", libelle: "Entreprises dispo" },
+  { id: "dispos", libelle: "Entreprises" },
   { id: "miennes", libelle: "Mes annonces" },
 ];
 
@@ -91,10 +91,20 @@ export function MissionsAccueil() {
           Messages
         </Link>
       </div>
-      <CarteLien jaune href="/missions/nouvelle" titre="Je propose une mission" sous="Je cherche une entreprise pour intervenir." />
-      <CarteLien href="/missions/services" titre="Je propose mes services" sous="J'indique mon métier et mes disponibilités." />
+      {/* DOSSIER UX MOBILE (Greg, 15 novembre 2026) : l'usage fréquent est de chercher et de consulter. L'ordre devient :
+          recherche, filtres, puis les deux actions de publication, compactes, puis les résultats. RÈGLE CHANGÉE : avant, deux
+          grandes cartes en tête repoussaient la recherche et les résultats vers le bas. « Entreprises dispo » devient
+          « Entreprises » pour que les trois filtres tiennent sans défilement horizontal. */}
       <Recherche valeur={q} onChange={setQ} placeholder="Rechercher un métier ou une ville" />
       <Puces label="Type d'annonces" choix={VUES} valeur={vue} onChange={setVue} entieres />
+      <nav aria-label="Publier une annonce" className="grid grid-cols-2 gap-2">
+        <Link href="/missions/nouvelle" className="pressable flex min-h-12 items-center justify-center rounded-full bg-accent px-3 py-1.5 text-center text-[14px] leading-tight font-extrabold text-on-accent">
+          Je propose une mission
+        </Link>
+        <Link href="/missions/services" className="pressable flex min-h-12 items-center justify-center rounded-full border border-ink/35 px-3 py-1.5 text-center text-[14px] leading-tight font-extrabold text-ink">
+          Je propose mes services
+        </Link>
+      </nav>
       <div className="flex items-end justify-between gap-3">
         <h2 className="text-[22px] font-extrabold tracking-[-0.02em]">{vue === "miennes" ? "Mes annonces" : "Près de toi"}</h2>
         {vue === "miennes" ? (

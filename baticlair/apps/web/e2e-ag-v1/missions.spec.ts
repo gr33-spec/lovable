@@ -72,11 +72,14 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
   const a = await inscrire(page, "Greg", "Toitures Martin");
   const ville = `Plouha${unique().slice(-4)}`;
 
-  // ACCUEIL (capture 01) : trois activités, « À faire » ; le menu a quatre entrées.
+  // ACCUEIL (lot UX mobile, 15 novembre 2026) : un tableau de bord, plus les trois cartes qui doublonnaient le menu. Compte
+  // vide : le seul départ utile, aucune section vide ; le menu a quatre entrées.
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Bonjour Greg" })).toBeVisible();
-  await expect(page.getByText("Que veux-tu faire ?")).toBeVisible();
-  for (const carte of [/^Créer un quantitatif/, /^Voir les achats groupés/, /^Missions entre entreprises/]) await expect(page.getByRole("main").getByRole("link", { name: carte })).toBeVisible();
+  await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: /^Créer un quantitatif/ })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: /^Voir les achats groupés|^Missions entre entreprises/ })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: /Missions près de toi|Achats groupés qui peuvent|Activité récente/ })).toHaveCount(0);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
   for (const onglet of ["Accueil", "Quantitatifs", "Achats groupés", "Missions"]) await expect(nav.getByRole("link", { name: onglet, exact: true })).toBeVisible();
   await capture(page, "01-accueil");
@@ -132,6 +135,24 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
 
   // B : son dossier professionnel (capture 24), puis la mission (09), sa réponse (14, 51) et « Réponse envoyée » (45).
   const b = await nouvelArtisan(browser, "Bruno", "Armor Littoral");
+  // L'accueil de B (lot UX mobile) : « Missions près de toi », la mission du même département par son métier et sa ville,
+  // jamais le nom de l'entreprise qui publie ; A ne voit pas sa propre mission dans cette section.
+  await b.page.goto("/");
+  // (La base des parcours est partagée : d'autres missions du département peuvent occuper les trois places.)
+  const pres = b.page.getByRole("region", { name: "Missions près de toi" });
+  await expect(pres.getByRole("listitem").first()).toBeVisible();
+  expect(await pres.getByRole("listitem").count()).toBeLessThanOrEqual(3);
+  for (const lien of await pres.getByRole("listitem").getByRole("link").all()) {
+    await expect(lien).toHaveAttribute("href", /^\/missions\/[0-9a-f-]{36}$/);
+    await expect(lien).toHaveAccessibleName(/^Mission : .+ à .+, à partir du \d/);
+  }
+  await expect(pres.getByRole("link", { name: "Voir toutes les missions" })).toHaveAttribute("href", "/missions");
+  await expect(b.page.getByRole("main")).not.toContainText("Toitures Martin");
+  expect(await b.page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Bonjour Greg" })).toBeVisible();
+  await expect(page.getByText("Rien à faire pour le moment.").or(page.getByRole("region", { name: "À faire maintenant" })).first()).toBeVisible();
+  await expect(page.getByRole("main")).not.toContainText(ville);
   await b.page.goto("/compte/documents");
   await expect(b.page.getByRole("heading", { name: "Ton dossier professionnel" })).toBeVisible();
   await b.page.getByLabel("Ajouter : cv ou dossier professionnel").setInputFiles({ name: "CV-couvreur.pdf", mimeType: "application/pdf", buffer: PDF });
@@ -281,7 +302,7 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
   await c.page.getByRole("button", { name: "Publier ma disponibilité" }).click();
   await expect(c.page).toHaveURL(/\/missions\/[0-9a-f-]{36}$/);
   await page.goto("/missions");
-  await page.getByRole("group", { name: "Type d'annonces" }).getByRole("button", { name: "Entreprises dispo" }).click();
+  await page.getByRole("group", { name: "Type d'annonces" }).getByRole("button", { name: "Entreprises" }).click();
   await page.getByPlaceholder("Rechercher un métier ou une ville").fill(ville);
   await page.getByRole("list", { name: "Annonces près de toi" }).getByRole("link", { name: new RegExp(`Zinguerie disponible.*${ville}`) }).click();
   await expect(page.getByRole("region", { name: "Tarif indicatif" })).toContainText("420 € HT / jour / personne");

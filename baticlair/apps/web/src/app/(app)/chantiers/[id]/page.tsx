@@ -63,7 +63,7 @@ function Chantier() {
   if (error && !project) {
     return (
       <>
-        <BackButton fallback="/chantiers" />
+        <BackButton fallback="/chantiers?vue=suivi" />
         <ErrorNotice error={error} onRetry={reload} />
       </>
     );
@@ -178,7 +178,7 @@ function Header({
     // En-tête d'une conversation : retour, nom du chantier, menu ; le client et l'adresse en petit dessous.
     <header className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
-        <BackButton fallback="/chantiers" compact />
+        <BackButton fallback="/chantiers?vue=suivi" compact />
         {/* Le nom lu dans le devis ; un tap rouvre le devis (§50.4). Il se renomme par « Modifier le chantier ». */}
         <h1 className="flex min-w-0 grow text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
           {quote ? (
@@ -281,7 +281,7 @@ function EditForm({ project, onDone }: { project: Project; onDone: (p: Project |
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
-      <BackButton fallback="/chantiers" />
+      <BackButton fallback="/chantiers?vue=suivi" />
       {error ? <ErrorNotice error={error} /> : null}
       <Field id="name" label="Nom du chantier" value={values.name} onChange={(e) => setValues({ ...values, name: e.target.value })} required autoFocus />
       <Field id="clientName" label="Client" value={values.clientName} onChange={(e) => setValues({ ...values, clientName: e.target.value })} />

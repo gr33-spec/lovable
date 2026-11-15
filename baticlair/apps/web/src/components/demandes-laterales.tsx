@@ -15,7 +15,7 @@ export function DemandesLaterales({ courant }: { courant: string }) {
   const items = (data?.items ?? []).filter((p) => p.status !== "archived");
   return (
     <nav aria-label="Mes demandes" className="hidden 2xl:sticky 2xl:top-8 2xl:flex 2xl:max-h-[calc(100dvh-4rem)] 2xl:flex-col 2xl:gap-2 2xl:overflow-y-auto">
-      <Link href="/chantiers" className="px-2 text-[13px] font-bold tracking-wide text-muted uppercase">
+      <Link href="/chantiers?vue=suivi" className="px-2 text-[13px] font-bold tracking-wide text-muted uppercase">
         Mes demandes
       </Link>
       <ul className="flex flex-col gap-1">

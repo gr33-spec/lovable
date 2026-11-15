@@ -23,7 +23,7 @@ test("la session de démonstration (interne) : un espace fictif, le bandeau part
   await expect(bandeau).toContainText("Mode démonstration");
   await expect(bandeau).toContainText("ni paiement");
   // Les données fictives de la démo : la demande déjà chiffrée par trois négoces fictifs.
-  await page.goto("/chantiers");
+  await page.goto("/chantiers?vue=suivi");
   await expect(page.getByText("Chantier Lannion (démo)").first()).toBeVisible({ timeout: 15_000 });
   await expect(page.getByTestId("bandeau-demo")).toBeVisible();
   // Recommencer : un espace neuf, toujours fictif.

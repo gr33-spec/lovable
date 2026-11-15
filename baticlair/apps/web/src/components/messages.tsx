@@ -67,7 +67,7 @@ export function Boite() {
             <p className="pt-2 text-[12px] text-[#6b6557]">La cloche reste réservée aux alertes courtes.</p>
           </div>
           {data.missions ? <LienJaune href="/missions">Découvrir les missions</LienJaune> : null}
-          <LienContour href="/chantiers">Voir mes quantitatifs envoyés</LienContour>
+          <LienContour href="/chantiers?vue=suivi">Voir mes quantitatifs envoyés</LienContour>
         </>
       ) : items.length === 0 ? (
         <div className={`flex flex-col gap-1 p-5 ${CARTE}`}>
