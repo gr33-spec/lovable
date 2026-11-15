@@ -60,5 +60,16 @@ describe("l'interrupteur des missions dans l'admin", { timeout: 120_000 }, () =>
     expect(await sante()).toBe(false);
     await artisan.agent.get("/v1/missions/annonces?type=mission").expect(404);
     expect((await greg.agent.get("/v1/admin/vue/reglages/missions").expect(200)).body).toEqual({ actif: false, source: "admin" });
+
+    // Les plafonds cachés des abonnés (Greg, 15 novembre 2026) : 5 € et 20 € au départ ; l'admin seul les lit et les règle.
+    expect((await artisan.agent.get("/v1/admin/vue/reglages/plafonds-ia")).status).toBeGreaterThanOrEqual(401);
+    expect((await artisan.agent.post("/v1/admin/vue/reglages/plafonds-ia").send({ pro: 50, promax: 50 })).status).toBeGreaterThanOrEqual(401);
+    expect((await greg.agent.get("/v1/admin/vue/reglages/plafonds-ia").expect(200)).body).toEqual({ pro: 5, promax: 20, source: "defaut" });
+    // Pro Max ne peut pas être plus bas que Pro ; jamais un montant négatif.
+    await greg.agent.post("/v1/admin/vue/reglages/plafonds-ia").send({ pro: 8, promax: 6 }).expect(400);
+    await greg.agent.post("/v1/admin/vue/reglages/plafonds-ia").send({ pro: -1, promax: 6 }).expect(400);
+    expect((await greg.agent.post("/v1/admin/vue/reglages/plafonds-ia").send({ pro: 7.5, promax: 25 }).expect(200)).body).toEqual({ pro: 7.5, promax: 25, source: "admin" });
+    expect((await greg.agent.get("/v1/admin/vue/reglages/plafonds-ia").expect(200)).body).toEqual({ pro: 7.5, promax: 25, source: "admin" });
+    expect(await ctx.prisma.journalAdmin.count({ where: { action: "plafonds_ia_regles" } })).toBe(1);
   });
 });
