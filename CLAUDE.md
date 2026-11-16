@@ -165,6 +165,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - `BUDGET_IA_JOUR` = 10 € sur le site de test pendant cette mission (variable de la branche de test ; 2 € par défaut ailleurs).
 - Analyses offertes : 50 sur le site de test pendant cette mission (`LECTURES_IA_GRATUIT_TOTAL`, variable de la branche de test, choisi par Greg le 16 novembre soir) ; 3 partout ailleurs, et l'écran dit toujours « 3 ».
 - Une question du modèle écrite sous une clé à lui (« faconnage_rive ») est la donnée du référentiel quand la ligne visée n'a qu'un ouvrage qui la porte : elle n'est plus posée deux fois.
+- Règle changée (site de test seulement, pendant cette mission) : la lecture d'un devis se fait avec Sonnet 5.5, effort moyen (`AI_EXTRACTION_MODEL`, `AI_EXTRACTION_EFFORT`, variables de la branche de test). Avant : Opus 5.5, effort haut, qui reste la valeur par défaut du code. Sur le devis zinc : 34 s au lieu de 72, 0,13 $ au lieu de 0,33 $, même liste. À trancher pour de bon sur les vrais devis de Greg.
 - Chaque ligne dit son origine quand la liste mêle les deux : « Dit par toi », « Calculé », « À vérifier ».
 - Admin › « Corrections les plus fréquentes » : la ligne proposée et la ligne corrigée, sur 90 jours, sans nom d'entreprise ni de chantier.
 

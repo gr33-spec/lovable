@@ -166,3 +166,28 @@ Ce que cette passe montre :
   modèle qui prolonge une donnée du référentiel est cette donnée quand la ligne visée n'a qu'un ouvrage qui la porte
   (test `question-du-modele-rattachee.test.ts`).
 - 72 s de lecture et 0,33 $ : toujours trop. Essai de Sonnet 5.5 à faire sur le jeu de test.
+
+## Passe 5 : un modèle plus rapide pour lire le devis (16 novembre 2026, soir, site de test au commit `3124ef06`)
+
+Même devis, petit iPhone, vraie IA, prompt de lecture version 6. Seuls le modèle et l'effort de la lecture changent
+(`AI_EXTRACTION_MODEL`, `AI_EXTRACTION_EFFORT`, variables de la branche de test).
+
+| Lecture | Temps à l'écran | Temps d'appel | Coût de la lecture | Lignes lues | Questions du modèle |
+|---|---|---|---|---|---|
+| Opus 5.5, effort haut (avant) | 72 s | 65 s | 0,328 $ | 5 | 5 |
+| Sonnet 5.5, effort haut | 61 s | 53 s | 0,171 $ | 5 | 7 |
+| Sonnet 5.5, effort moyen | 34 s | 27 s | 0,134 $ (0,051 $ quand le texte commun est encore en mémoire) | 5 | 7 |
+
+Ce que cette passe montre :
+
+- Les trois lectures trouvent les mêmes 5 lignes du devis, les mêmes quantités, et la même liste calculée (39 bacs de
+  5,65 m, 4 longueurs de gouttière, 1 naissance, 96 m² de voliges, les feuilles des deux bandes).
+- Le temps vient de la longueur de la réponse du modèle (8 300 jetons en effort haut, 4 700 en effort moyen), pas du
+  devis. Baisser l'effort divise le temps par deux.
+- Le texte commun (prompt et référentiel, 34 600 jetons) est mis en mémoire 5 minutes à chaque lecture. Deux lectures
+  à moins de 5 minutes : la seconde coûte 0,05 $. Seule, la mise en mémoire est payée sans servir.
+- Sonnet pose deux questions de plus qu'Opus sur ce devis : le façonnage de la bande de ventilation (Opus ne posait que
+  celui de la rive) et les consommables. Les deux sont des questions du référentiel, rattachées par le code.
+- La correction de la passe 4 tient en ligne : le façonnage de la rive n'est plus posé deux fois.
+- Réglage gardé sur le site de test : Sonnet 5.5, effort moyen. Un seul devis ne suffit pas à trancher pour de bon :
+  le choix final se fera sur les vrais devis de Greg et leurs listes attendues.
