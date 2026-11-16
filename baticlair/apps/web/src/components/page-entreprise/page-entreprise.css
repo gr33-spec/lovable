@@ -903,3 +903,12 @@ body:has(.pe:not(.pe-apercu)) {
     aspect-ratio: 16 / 8;
   }
 }
+/* Barre du haut et visionneuse opaques : rien ne transparaît dessous. */
+.pe-entete {
+  background: var(--ivoire);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.pe-visionneuse {
+  background: #0c0a08;
+}
