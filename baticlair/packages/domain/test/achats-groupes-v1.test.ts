@@ -32,6 +32,8 @@ import {
   preparationV1,
   quantiteAvecConversion,
   produitV1,
+  uniteDuProduit,
+  lireUnite,
   statutAfficheV1,
   suiviRetraitsTardifs,
   transitionV1,
@@ -303,6 +305,34 @@ describe("volumes", () => {
     expect(p.indicatif).toBe("34 palettes supplémentaires encore indicatives");
     const rec = beaucoup.map((b) => ({ ...b, statut: "reconfirme" as const }));
     expect(phrasesVolumesV1(volumesV1(rec, { statut: "consultation" }), { statut: "consultation" }, aff).principale).toBe("86 palettes confirmées pour la consultation");
+  });
+});
+
+describe("la peinture en achat groupé (Greg, 16 novembre 2026)", () => {
+  it("murs et plafonds, façade : lues comme au comptoir, sans marque ; rien n'est inventé", () => {
+    expect(lireProduitV1("Peinture murs et plafonds acrylique mat blanc 15 L")).toEqual({ type: "peinture-murs", attributs: { liant: "acrylique", finition: "mat", teinte: "blanc" } });
+    expect(lireProduitV1("Peinture plafond mat profond")).toEqual({ type: "peinture-murs", attributs: { finition: "mat-profond" } });
+    expect(lireProduitV1("Peinture façade pliolite ton pierre")).toEqual({ type: "peinture-facade", attributs: { liant: "pliolite", teinte: "ton-pierre" } });
+    // Le produit dit son nom entier, caractéristiques comprises.
+    const p = lireProduitV1("Peinture murs et plafonds alkyde velours à teinter")!;
+    expect(nomProduitV1(p.type, p.attributs)).toBe("Peinture murs et plafonds alkyde en phase aqueuse · velours · à teinter");
+    expect(nomProduitV1("peinture-facade", { liant: "siloxane", teinte: "blanc" })).toBe("Peinture façade siloxane mat · blanc");
+    // Deux peintures différentes ne se regroupent jamais.
+    expect(cleProduitV1("peinture-murs", { liant: "acrylique", finition: "mat", teinte: "blanc" })).not.toBe(cleProduitV1("peinture-murs", { liant: "acrylique", finition: "satin", teinte: "blanc" }));
+    // Ce qui n'est pas encore ouvert reste dans le quantitatif : laque, sol, fer, pièces humides, « peinture » seule.
+    for (const d of ["Laque boiseries acrylique satin blanc", "Peinture sol époxy gris", "Peinture fer antirouille noir", "Peinture pièces humides acrylique satin", "Peinture"]) expect(lireProduitV1(d), d).toBeNull();
+  });
+
+  it("une ligne de peinture incomplète est « à préciser » ; complète et libre, elle se coche ; litres ou pots", () => {
+    expect(classerLigneV1({ designation: "Peinture murs et plafonds acrylique", quantite: 60, unite: "L", faits: libre })).toMatchObject({ lot: "peinture", selectionnable: false, mention: "a_preciser" });
+    const complete = classerLigneV1({ designation: "Peinture murs et plafonds acrylique mat blanc", quantite: 12, unite: "pots", faits: libre });
+    expect(complete).toMatchObject({ lot: "peinture", selectionnable: true });
+    const produit = produitV1("peinture-murs")!;
+    expect(uniteDuProduit(produit, "L")).toEqual({ sorte: "reference" });
+    expect(uniteDuProduit(produit, "pots")).toMatchObject({ sorte: "conditionnement" });
+    // Le contenu du pot est une proposition que l'artisan confirme : « 12 pots = 180 L ».
+    expect(lireUnite("pots de 15 L")).toEqual({ code: "pot", contenu: 15 });
+    expect(quantiteAvecConversion(produit, 12, { unite: "pot", parUnite: 15 })).toBe("12 pots = 180 L");
   });
 });
 

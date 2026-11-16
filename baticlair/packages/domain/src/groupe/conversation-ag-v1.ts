@@ -66,6 +66,8 @@ const SYNONYMES: Record<string, string[]> = {
   liteau: ["liteau", "liteaux", "litteau", "litteaux"],
   osb: ["osb", "panneau osb", "panneaux osb"],
   "cable-r2v": ["cable", "cables", "r2v", "ro2v"],
+  "peinture-murs": ["peinture murs et plafonds", "peinture mur", "peinture murs", "peinture plafond", "peinture plafonds", "peinture interieure"],
+  "peinture-facade": ["peinture facade", "peinture de facade", "peinture facades"],
 };
 const NON_OUVERTS = /\b(parpaing|parpaings|ciment|beton|placo|plaque de platre|carrelage|peinture|brique|briques|sable|gravier|enduit|mortier|colle|vis|clou|clous|crochet|crochets|tube|tubes|cuivre|pvc)\b/;
 

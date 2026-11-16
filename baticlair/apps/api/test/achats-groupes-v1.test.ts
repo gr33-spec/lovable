@@ -265,6 +265,32 @@ describe("isolation entre entreprises", () => {
   });
 });
 
+describe("la peinture en achat groupé (Greg, 16 novembre 2026)", () => {
+  it("un peintre publie 12 pots de peinture murs et plafonds : comptés en litres, lot Peinture, rejoint par un autre", async () => {
+    const a = await entreprise("a@peinture.fr", "Peinture A");
+    const b = await entreprise("b@peinture.fr", "Peinture B");
+    const PEINTURE = { type: "peinture-murs", attributs: { liant: "acrylique", finition: "mat", teinte: "blanc" } };
+    // Le produit est proposé avec ses trois caractéristiques, toutes obligatoires.
+    const etat = (await a.agent.get("/v1/ag/etat").expect(200)).body;
+    const produit = etat.produits.find((p: { type: string }) => p.type === "peinture-murs");
+    expect(produit).toMatchObject({ libelle: "Peinture murs et plafonds", lot: "peinture" });
+    expect(etat.produits.some((p: { type: string }) => p.type === "peinture-facade")).toBe(true);
+    const ra = (await confirmer(a.agent, [besoin({ ...PEINTURE, quantite: 12, unite: "pot", parUnite: 15 })]).expect(201)).body.besoins[0];
+    expect(ra).toMatchObject({ nom: "Peinture murs et plafonds acrylique · mat · blanc", lot: "peinture" });
+    expect(ra.quantite.lisible).toBe("12 pots = 180 L");
+    // Une caractéristique manquante : refusé, rien n'est deviné.
+    expect((await confirmer(a.agent, [besoin({ type: "peinture-murs", attributs: { liant: "acrylique" }, quantite: 2, unite: "pot", parUnite: 15 })])).status).toBe(400);
+    // Une autre finition n'entre pas dans le même achat ; la même, si.
+    const compat = (await b.agent.post("/v1/ag/compatibilite").send({ ...PEINTURE, reception: "livraison", dateBesoin: jour(40) }).expect(200)).body;
+    expect(compat.compatible?.id).toBe(ra.achat.id);
+    const autre = (await b.agent.post("/v1/ag/compatibilite").send({ ...PEINTURE, attributs: { ...PEINTURE.attributs, finition: "satin" }, reception: "livraison", dateBesoin: jour(40) }).expect(200)).body;
+    expect(autre.compatible).toBeNull();
+    const rb = (await confirmer(b.agent, [besoin({ ...PEINTURE, quantite: 60, unite: "l", parUnite: null, conversionConfirmee: false, achatId: ra.achat.id })]).expect(201)).body.besoins[0];
+    expect(rb.achat.id).toBe(ra.achat.id);
+    expect(rb.quantite.lisible).toBe("60 L");
+  });
+});
+
 describe("depuis un quantitatif : une ligne, un seul circuit", () => {
   it("liste tapée : classée par lot, famille non autorisée gardée, mentions et raisons", async () => {
     const a = await entreprise("a@toitures.fr");

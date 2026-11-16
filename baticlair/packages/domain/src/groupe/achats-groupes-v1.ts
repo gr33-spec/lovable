@@ -79,6 +79,8 @@ const U = {
   botte: { code: "botte", singulier: "botte", pluriel: "bottes", feminin: true },
   paquet: { code: "paquet", singulier: "paquet", pluriel: "paquets", feminin: false },
   longueur: { code: "longueur", singulier: "longueur", pluriel: "longueurs", feminin: true },
+  litre: { code: "l", singulier: "L", pluriel: "L", feminin: false },
+  pot: { code: "pot", singulier: "pot", pluriel: "pots", feminin: false },
 } as const satisfies Record<string, UniteV1>;
 
 export interface OptionV1 {
@@ -259,6 +261,37 @@ export const PRODUITS_V1: readonly ProduitV1[] = [
     seuilRecommande: 1000,
     nom: (v) => `Câble R2V ${v("section")}`,
   },
+  // LA PEINTURE (Greg, 16 novembre 2026 : « les produits peinture en achat groupé ») : les deux familles les plus
+  // courantes du catalogue générique par attributs (`catalogue/donnees/peinture-attributs.ts`), décrites comme au comptoir,
+  // sans marque : l'usage, le liant, la finition, la teinte. Rien d'autre que les valeurs du catalogue. La quantité se
+  // compte en litres ; le pot (15 L proposé, celui du catalogue) se confirme ou se corrige, jamais garanti.
+  {
+    type: "peinture-murs",
+    libelle: "Peinture murs et plafonds",
+    lot: "peinture",
+    unite: U.litre,
+    conditionnements: [{ unite: U.pot, parDefaut: 15 }],
+    caracteristiques: [
+      { attribut: "liant", libelle: "Liant", feminin: false, options: opt([["acrylique", "acrylique"], ["alkyde", "alkyde en phase aqueuse"]]) },
+      { attribut: "finition", libelle: "Finition", feminin: true, options: opt([["mat", "mat"], ["mat-profond", "mat profond"], ["velours", "velours"], ["satin", "satin"]]) },
+      { attribut: "teinte", libelle: "Teinte", feminin: true, options: opt([["blanc", "blanc"], ["a-teinter", "à teinter"]]) },
+    ],
+    seuilRecommande: 150,
+    nom: (v) => `Peinture murs et plafonds ${v("liant")} · ${v("finition")} · ${v("teinte")}`,
+  },
+  {
+    type: "peinture-facade",
+    libelle: "Peinture façade",
+    lot: "peinture",
+    unite: U.litre,
+    conditionnements: [{ unite: U.pot, parDefaut: 15 }],
+    caracteristiques: [
+      { attribut: "liant", libelle: "Liant", feminin: false, options: opt([["acrylique", "acrylique"], ["pliolite", "pliolite"], ["siloxane", "siloxane"]]) },
+      { attribut: "teinte", libelle: "Teinte", feminin: true, options: opt([["blanc", "blanc"], ["ton-pierre", "ton pierre"], ["a-teinter", "à teinter"]]) },
+    ],
+    seuilRecommande: 150,
+    nom: (v) => `Peinture façade ${v("liant")} mat · ${v("teinte")}`,
+  },
 ];
 
 export const produitV1 = (type: string) => PRODUITS_V1.find((p) => p.type === type) ?? null;
@@ -356,6 +389,21 @@ export function lireProduitV1(designation: string): { type: string; attributs: R
     const s = /\b([35]) ?g ?(\d{1,2}(?:[.,]\d)?)\b/.exec(t);
     return { type: "cable-r2v", attributs: s ? { section: `${s[1]}g${s[2]!.replace(",", ".")}` } : {} };
   }
+  // La peinture : murs et plafonds, ou façade ; une laque, une peinture de sol ou une lasure ne sont pas encore ouvertes.
+  if (/\bpeintures?\b/.test(t) && !/\b(laques?|sols?|fer|antirouille|toiture|lasures?|vernis)\b/.test(t)) {
+    const dit = (paires: readonly (readonly [RegExp, string])[]) => paires.find(([re]) => re.test(t))?.[1];
+    const teinte = dit([[/\bton pierre\b/, "ton-pierre"], [/\ba teinter\b/, "a-teinter"], [/\bblanc(he)?s?\b/, "blanc"]]);
+    if (/\bfacades?\b/.test(t)) {
+      const liant = dit([[/\bpliolite\b/, "pliolite"], [/\bsiloxane\b/, "siloxane"], [/\bacrylique\b/, "acrylique"]]);
+      return { type: "peinture-facade", attributs: { ...(liant ? { liant } : {}), ...(teinte ? { teinte } : {}) } };
+    }
+    if (/\b(murs?|plafonds?)\b/.test(t) && !/\b(humides?|cuisine|salle)\b/.test(t)) {
+      const liant = dit([[/\balkyde\b/, "alkyde"], [/\bacrylique\b/, "acrylique"]]);
+      const finition = dit([[/\bmat profond\b/, "mat-profond"], [/\bvelours\b/, "velours"], [/\bsatin(e|ee)?\b/, "satin"], [/\bmat(e)?\b/, "mat"]]);
+      return { type: "peinture-murs", attributs: { ...(liant ? { liant } : {}), ...(finition ? { finition } : {}), ...(teinte && teinte !== "ton-pierre" ? { teinte } : {}) } };
+    }
+    return null;
+  }
   const lu = lireReference(designation);
   if (!lu.ok) return null;
   const p = produitV1(lu.type);
@@ -388,6 +436,8 @@ const UNITES_LUES: readonly [RegExp, string][] = [
   [/^(couronne|couronnes|cour)$/, "couronne"],
   [/^(botte|bottes)$/, "botte"],
   [/^(paquet|paquets|pqt)$/, "paquet"],
+  [/^(l|litre|litres)$/, "l"],
+  [/^(pot|pots|seau|seaux|bidon|bidons)$/, "pot"],
 ];
 /** Le code d'une unité écrite (« Palettes » → palette, « ml » → m, « m² » → m2) ; null si inconnue. */
 export function codeUnite(unite: string): string | null {
@@ -400,7 +450,7 @@ export function codeUnite(unite: string): string | null {
  */
 export function lireUnite(unite: string): { code: string; contenu: number | null } | null {
   const u = normalizeText(unite.replace(/m²/g, "m2")).replace(/\.$/, "").trim();
-  const avec = /^(longueurs?|couronnes?|bottes?|rouleaux?|palettes?) de (\d+(?:[.,]\d+)?) ?(m|m2|ml|pieces?|u)?$/.exec(u);
+  const avec = /^(longueurs?|couronnes?|bottes?|rouleaux?|palettes?|pots?|seaux?|bidons?) de (\d+(?:[.,]\d+)?) ?(m|m2|ml|pieces?|u|l|litres?)?$/.exec(u);
   if (avec) {
     const code = UNITES_LUES.find(([re]) => re.test(avec[1]!))?.[1] ?? (avec[1]!.startsWith("longueur") ? "longueur" : null);
     return code ? { code, contenu: Number(avec[2]!.replace(",", ".")) } : null;
