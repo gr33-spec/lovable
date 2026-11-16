@@ -86,7 +86,10 @@ export function ContactPage({ adresse, nom, apercu = false }: { adresse: string;
       <button type="submit" className="pe-btn pe-btn-plein" disabled={etat === "envoi" || apercu} aria-busy={etat === "envoi" || undefined}>
         <Send size={18} aria-hidden="true" /> {etat === "envoi" ? "Envoi…" : "Envoyer ma demande"}
       </button>
-      <p className="pe-note">Vos coordonnées sont transmises uniquement à {nom} pour vous répondre. Mobiiz ne les garde pas.</p>
+      <p className="pe-note">
+        Votre message et vos coordonnées sont envoyés par e-mail à {nom} seulement, pour vous répondre. Mobiiz ne les garde pas ; notre prestataire d&apos;e-mails en garde une copie technique quelques jours. Pour bloquer les abus, nous gardons 30 jours l&apos;heure de l&apos;envoi et une empreinte chiffrée de votre adresse IP.{" "}
+        {apercu ? "En savoir plus" : <a href="/confidentialite">En savoir plus</a>}.
+      </p>
     </form>
   );
 }

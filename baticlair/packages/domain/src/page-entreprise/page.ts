@@ -24,8 +24,8 @@ export function estModele(v: unknown): v is ModelePage {
 /* ------------------------------------------------------------------------------------------------------------ Adresse */
 
 /** `mobiiz.fr/e/<adresse>` : 3 à 50 caractères, minuscules, chiffres et tirets. */
-export const ADRESSE_MIN = 3;
-export const ADRESSE_MAX = 50;
+export const ADRESSE_PAGE_MIN = 3;
+export const ADRESSE_PAGE_MAX = 50;
 const MOTS_RESERVES = new Set(["admin", "api", "v1", "mobiiz", "aide", "nouveau", "nouvelle", "compte", "connexion", "inscription", "page", "pages", "e", "test", "contact", "support", "negoce", "negoces", "missions", "www"]);
 
 /** « Toits Martin & Fils (SARL) » → « toits-martin-fils-sarl ». */
@@ -36,14 +36,14 @@ export function adresseDepuis(texte: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, ADRESSE_MAX)
+    .slice(0, ADRESSE_PAGE_MAX)
     .replace(/-+$/g, "");
 }
 
 /** La raison d'un refus d'adresse (une phrase pour l'artisan), ou null si elle est valable. */
 export function refusAdresse(adresse: string): string | null {
-  if (adresse.length < ADRESSE_MIN) return `Au moins ${ADRESSE_MIN} caractères.`;
-  if (adresse.length > ADRESSE_MAX) return `${ADRESSE_MAX} caractères au plus.`;
+  if (adresse.length < ADRESSE_PAGE_MIN) return `Au moins ${ADRESSE_PAGE_MIN} caractères.`;
+  if (adresse.length > ADRESSE_PAGE_MAX) return `${ADRESSE_PAGE_MAX} caractères au plus.`;
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(adresse)) return "Seulement des lettres sans accent, des chiffres et des tirets.";
   if (MOTS_RESERVES.has(adresse)) return "Cette adresse est réservée.";
   return null;
@@ -52,17 +52,21 @@ export function refusAdresse(adresse: string): string | null {
 /** Les adresses à essayer dans l'ordre pour une entreprise : son nom, son nom et sa ville, puis numérotées. */
 export function adressesCandidates(nom: string, ville: string | null | undefined): string[] {
   const base = adresseDepuis(nom);
-  const sure = refusAdresse(base) ? `entreprise-${base}`.replace(/-$/, "").slice(0, ADRESSE_MAX) : base;
+  const sure = refusAdresse(base) ? `entreprise-${base}`.replace(/-$/, "").slice(0, ADRESSE_PAGE_MAX) : base;
   const avecVille = ville ? adresseDepuis(`${nom} ${ville}`) : null;
   const liste = [sure, ...(avecVille && avecVille !== sure && !refusAdresse(avecVille) ? [avecVille] : [])];
-  for (let i = 2; i <= 99; i++) liste.push(`${sure.slice(0, ADRESSE_MAX - 3)}-${i}`);
+  for (let i = 2; i <= 99; i++) liste.push(`${sure.slice(0, ADRESSE_PAGE_MAX - 3)}-${i}`);
   return liste.filter((a) => !refusAdresse(a));
 }
 
 /* ------------------------------------------------------------------------------------------------------------ Contenu */
 
 /** Les certifications et assurances les plus déclarées (pastilles à toucher) ; l'artisan peut en écrire d'autres. */
-export const CERTIFICATIONS_SUGGEREES = ["Assurance décennale", "Responsabilité civile pro", "RGE", "Qualibat", "Qualifelec", "QualiPV", "QualiPAC", "Qualigaz", "Artisan certifié CMA", "Garantie de parfait achèvement"] as const;
+/**
+ * Relecture du juriste (16 novembre 2026) : pas de « Garantie de parfait achèvement » (une garantie que la loi impose à
+ * tous, présentée comme un avantage propre : pratique trompeuse) ni d'« Artisan certifié CMA » (pas un label reconnu).
+ */
+export const CERTIFICATIONS_SUGGEREES = ["Assurance décennale", "Responsabilité civile pro", "RGE", "Qualibat", "Qualifelec", "QualiPV", "QualiPAC", "Qualigaz"] as const;
 
 export const LIMITES_PAGE = {
   accroche: 90,
@@ -106,6 +110,8 @@ export interface ContenuPage {
   creeeEn: number | null;
   certifications: string[];
   verifiee: boolean;
+  /** Le SIRET de l'entreprise (mentions légales de la page, LCEN) ; null s'il n'est pas renseigné. */
+  siret: string | null;
   modele: ModelePage;
   couleur: string | null;
   fond: Fond | null;

@@ -8,4 +8,6 @@ export interface StockagePhotos {
   deposer(cle: string, octets: Buffer, type: string): Promise<string>;
   /** Supprime des fichiers (un fichier déjà absent n'est pas une erreur). */
   supprimer(cles: string[]): Promise<void>;
+  /** Les fichiers rangés sous un préfixe (« pages/ ») : leur nom et l'adresse à passer à `supprimer`. */
+  lister(prefixe: string): Promise<{ cle: string; url: string }[]>;
 }

@@ -3084,6 +3084,8 @@ model PageEntreprise {
   certifications   String[]  @default([])
   /// Choix EXPLICITE de l'artisan : montrer l'adresse postale de l'entreprise (jamais par défaut).
   afficherAdresse  Boolean   @default(false) @map("afficher_adresse")
+  /// Relecture du juriste : « J'ai pris ces photos ou j'ai le droit de les utiliser… », coché avant la première photo.
+  photosAccordLe   DateTime? @map("photos_accord_le") @db.Timestamptz(3)
   couvertureId     String?   @map("couverture_id") @db.Uuid
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)

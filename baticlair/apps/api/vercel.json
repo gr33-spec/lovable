@@ -48,6 +48,10 @@
     {
       "path": "/v1/internal/achats-groupes",
       "schedule": "23 10 * * *"
+    },
+    {
+      "path": "/v1/internal/pages-entreprises/menage",
+      "schedule": "41 3 * * *"
     }
   ],
   "git": {

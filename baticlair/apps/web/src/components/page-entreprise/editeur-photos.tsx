@@ -36,7 +36,7 @@ const vignette = (p: PhotoEditeur) => p.variantes[0]?.webp ?? null;
  * souris, par la poignée), légende facultative, retirer. Les flèches du clavier déplacent aussi une photo (poignée
  * active), pour qui ne peut pas glisser.
  */
-export function GaleriePhotos({ photos, max, actif, onChange, onErreur }: { photos: PhotoEditeur[]; max: number; actif: boolean; onChange: () => void; onErreur: (m: string | null) => void }) {
+export function GaleriePhotos({ photos, max, actif, stockage = true, onChange, onErreur }: { photos: PhotoEditeur[]; max: number; actif: boolean; stockage?: boolean; onChange: () => void; onErreur: (m: string | null) => void }) {
   const galerie = photos.filter((p) => p.role === "galerie" && p.statut !== "erreur");
   const [ordre, setOrdre] = useState<string[] | null>(null);
   const [envoi, setEnvoi] = useState(0);
@@ -176,7 +176,7 @@ export function GaleriePhotos({ photos, max, actif, onChange, onErreur }: { phot
           <p className="text-[14px] text-muted">{max} photos au plus : retire une photo pour en ajouter une.</p>
         )
       ) : (
-        <p className="text-[14px] text-muted">L&apos;envoi de photos n&apos;est pas encore ouvert sur ce site.</p>
+        <p className="text-[14px] text-muted">{stockage ? "Coche la case ci-dessus pour ajouter tes photos." : "L'envoi de photos n'est pas encore ouvert sur ce site."}</p>
       )}
     </div>
   );

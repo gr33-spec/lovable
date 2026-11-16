@@ -147,6 +147,7 @@ describe("Ma page : photos", () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
     const brute = await photoDeTelephone();
     expect(brute.toString("latin1")).toMatch(/Dupont/);
+    await a.agent.post("/v1/ma-page/accord-photos").expect(200);
     const p = (await a.agent.post("/v1/ma-page/photos").field("legende", "Toiture ardoise à Lannion").attach("file", brute, "IMG_0001.jpg").expect(202)).body;
     expect(p).toMatchObject({ statut: "traitement", legende: "Toiture ardoise à Lannion", role: "galerie" });
     await service.traitementsTermines();
@@ -179,6 +180,13 @@ describe("Ma page : photos", () => {
   it("refus dits : pas une image (même renommée), trop petite, trop lourde ; 20 photos au plus", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
     const refus = async (o: Buffer, nom = "photo.jpg") => (await a.agent.post("/v1/ma-page/photos").attach("file", o, nom)).body.error?.details;
+    // Relecture du juriste : rien n'entre avant « J'ai le droit de publier ces photos », coché une fois et daté.
+    expect(await refus(await photoDeTelephone(800, 600))).toMatchObject({ reason: "accord_photos" });
+    expect((await a.agent.get("/v1/ma-page")).body.reglages.photosAccord).toBe(false);
+    expect((await a.agent.post("/v1/ma-page/accord-photos").expect(200)).body.reglages.photosAccord).toBe(true);
+    const le = (await ctx.prisma.pageEntreprise.findUniqueOrThrow({ where: { companyId: a.companyId } })).photosAccordLe;
+    await a.agent.post("/v1/ma-page/accord-photos").expect(200);
+    expect((await ctx.prisma.pageEntreprise.findUniqueOrThrow({ where: { companyId: a.companyId } })).photosAccordLe).toEqual(le);
     expect(await refus(Buffer.from("%PDF-1.4 pas une image"))).toMatchObject({ reason: "photo_type" });
     expect(await refus(Buffer.from("<svg xmlns='http://www.w3.org/2000/svg' onload='alert(1)'/>"), "x.png")).toMatchObject({ reason: "photo_type" });
     expect(await refus(await sharp({ create: { width: 200, height: 150, channels: 3, background: "#fff" } }).png().toBuffer())).toMatchObject({ reason: "photo_trop_petite" });
@@ -191,6 +199,7 @@ describe("Ma page : photos", () => {
   it("réordonner, légender ; la couverture remplace l'ancienne (fichiers supprimés) et se retire", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
     const ids: string[] = [];
+    await a.agent.post("/v1/ma-page/accord-photos").expect(200);
     for (let i = 0; i < 3; i++) ids.push((await a.agent.post("/v1/ma-page/photos").attach("file", await photoDeTelephone(900, 600), `p${i}.jpg`).expect(202)).body.id);
     await service.traitementsTermines();
     await a.agent.put("/v1/ma-page/photos/ordre").send({ ids: [ids[2], ids[0], ids[1]] }).expect(200);
@@ -268,6 +277,10 @@ describe("Ma page : visiteurs", () => {
     expect(liste.pages).toEqual([expect.objectContaining({ adresse: "toits-martin", nom: "Toits Martin", metier: "Couvreur", visible: true, masquee: false, signalements: 1 })]);
     expect(liste.signalements[0]).toMatchObject({ adresse: "toits-martin", motif: "Cette page usurpe une entreprise", precision: "Ce n'est pas lui" });
     expect((await admin.agent.put("/v1/admin/pages-publiques/toits-martin/masquage").send({ masquer: true, motif: "Usurpation" }).expect(200)).body.adresses).toEqual(["toits-martin"]);
+    // DSA, art. 17 : l'artisan est prévenu du masquage, avec le motif et le moyen de contester.
+    const prevenu = ctx.emails.sent.find((m) => m.to === "a@exemple.fr" && m.subject === "Votre page Mobiiz a été masquée")!;
+    expect(prevenu.text).toContain("Motif : Usurpation.");
+    expect(prevenu.text).toContain("contact@mobiiz.fr");
     await anon().get("/v1/public/pages/toits-martin").expect(404);
     // L'artisan voit que sa page est masquée ; la rendre visible n'y change rien.
     expect((await rendrePublique(a.agent)).reglages).toMatchObject({ visible: true, masquee: true });
@@ -284,6 +297,7 @@ describe("Ma page : isolation entre deux comptes", () => {
   it("B ne lit ni ne change rien de A : réglages, photos, adresse ; un visiteur ne voit que la page visible", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
     const b = await signUpWithCompany(ctx.app, "b@exemple.fr", "Peinture Le Gall", ["painting"]);
+    await a.agent.post("/v1/ma-page/accord-photos").expect(200);
     const pa = (await a.agent.post("/v1/ma-page/photos").attach("file", await photoDeTelephone(900, 600), "a.jpg").expect(202)).body.id as string;
     await service.traitementsTermines();
     await a.agent.patch("/v1/ma-page").send({ accroche: "Accroche secrète de A" }).expect(200);
@@ -352,6 +366,34 @@ describe("Mobiiz m'aide à l'écrire", () => {
     expect(p.source).toBe("profil");
     expect(p.accroche.length).toBeGreaterThan(5);
     expect((await a.agent.get("/v1/ma-page")).body.reglages.accroche).toBeNull();
+  });
+});
+
+describe("le ménage de la nuit", () => {
+  it("traces de contact à 30 jours, empreintes IP à 30 jours, signalements à 12 mois, fichiers sans photo ; seulement avec le secret", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
+    await a.agent.post("/v1/ma-page/accord-photos").expect(200);
+    const gardee = (await a.agent.post("/v1/ma-page/photos").attach("file", await photoDeTelephone(900, 600), "a.jpg").expect(202)).body.id as string;
+    const partie = (await a.agent.post("/v1/ma-page/photos").attach("file", await photoDeTelephone(900, 600), "b.jpg").expect(202)).body.id as string;
+    await service.traitementsTermines();
+    // Une photo dont la ligne a disparu (entreprise supprimée) : ses fichiers restent dans le stockage jusqu'au ménage.
+    await ctx.prisma.photoPage.delete({ where: { id: partie } });
+    const fichiersDeLaPartie = (await readdir(`${DOSSIER}/pages/${a.companyId}/${partie}`)).length;
+    // 900 px de large : 480 et 900 (jamais agrandie), en AVIF et WebP, et le JPEG de partage.
+    expect(fichiersDeLaPartie).toBe(5);
+    const vieux = new Date(Date.now() - 40 * 86_400_000);
+    const tresVieux = new Date(Date.now() - 400 * 86_400_000);
+    await ctx.prisma.contactPage.createMany({ data: [{ companyId: a.companyId, ipHash: "x", createdAt: vieux }, { companyId: a.companyId, ipHash: "y" }] });
+    await ctx.prisma.signalementPage.createMany({ data: [{ companyId: a.companyId, motif: "autre", ipHash: "x", createdAt: vieux }, { companyId: a.companyId, motif: "autre", ipHash: "y", createdAt: tresVieux }, { companyId: a.companyId, motif: "autre", ipHash: "z" }] });
+    await anon().get("/v1/internal/pages-entreprises/menage").expect(403);
+    const bilan = await service.menage();
+    expect(bilan).toMatchObject({ contacts: 1, signalements: 1 });
+    // Au moins ceux de la photo partie (les tests précédents laissent aussi des fichiers sans ligne : ils partent avec).
+    expect(bilan.fichiers).toBeGreaterThanOrEqual(fichiersDeLaPartie);
+    expect(await ctx.prisma.contactPage.count()).toBe(1);
+    expect((await ctx.prisma.signalementPage.findMany({ orderBy: { createdAt: "asc" } })).map((s) => s.ipHash)).toEqual([null, "z"]);
+    expect(await readdir(`${DOSSIER}/pages/${a.companyId}/${partie}`).catch(() => [])).toEqual([]);
+    expect((await readdir(`${DOSSIER}/pages/${a.companyId}/${gardee}`)).length).toBe(5);
   });
 });
 

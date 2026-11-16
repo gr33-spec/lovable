@@ -173,6 +173,7 @@ export class PageEntrepriseService {
       creeeEn: page.creeeEn,
       certifications: page.certifications,
       verifiee: !!e.siretVerifieLe,
+      siret: e.siret?.replace(/\s/g, "") || null,
       modele: estModele(page.modele) ? page.modele : "photo",
       couleur: page.couleur,
       fond: page.fond === "clair" || page.fond === "sombre" ? page.fond : null,
@@ -216,6 +217,7 @@ export class PageEntrepriseService {
         creeeEn: page.creeeEn,
         certifications: page.certifications,
         afficherAdresse: page.afficherAdresse,
+        photosAccord: !!page.photosAccordLe,
         couvertureId: page.couvertureId,
       },
       profil: { nom: e.name, metiers: contenu.metiers, telephone: telephonePropre(e.phone), zone: e.profilPublic?.ville ?? villeDeLAdresse(e.address), adressePostale: e.address, siret: e.siret, verifiee: !!e.siretVerifieLe, logo: !!e.logoType },
@@ -310,10 +312,22 @@ export class PageEntrepriseService {
 
   /* --------------------------------------------------------------------------------------------- Photos */
 
+  /**
+   * Relecture du juriste (16 novembre 2026) : avant la première photo, l'artisan déclare avoir le droit de les publier
+   * (accord des clients et des personnes reconnaissables, retrait sur demande). La date est gardée comme preuve.
+   */
+  async accorderPhotos(t: TenantContext) {
+    assertCanWrite(t);
+    const page = await this.pageDe(t.companyId);
+    if (!page.photosAccordLe) await this.prisma.pageEntreprise.update({ where: { companyId: t.companyId }, data: { photosAccordLe: this.now() } });
+    return this.maPage(t);
+  }
+
   async ajouterPhoto(t: TenantContext, octets: Buffer, role: "galerie" | "couverture", legende: string | null) {
     assertCanWrite(t);
     if (!this.stockage.actif) throw new DomainError("forbidden", "Photo storage off", { reason: "stockage_coupe", phrase: "L'envoi de photos n'est pas encore ouvert." });
-    await this.pageDe(t.companyId);
+    const page = await this.pageDe(t.companyId);
+    if (!page.photosAccordLe) throw new DomainError("forbidden", "Photo rights not confirmed", { reason: "accord_photos", phrase: "Coche d'abord que tu as le droit de publier ces photos." });
     if (role === "galerie") {
       const n = await this.prisma.photoPage.count({ where: { companyId: t.companyId, role: "galerie", statut: { not: "erreur" } } });
       if (n >= LIMITES_PAGE.photos) throw refus("photos_max", `${LIMITES_PAGE.photos} photos au plus. Retire une photo pour en ajouter une.`);
@@ -523,7 +537,48 @@ export class PageEntrepriseService {
     const p = await this.prisma.pageEntreprise.findUnique({ where: { adresse } });
     if (!p) throw notFound("Page");
     await this.prisma.pageEntreprise.update({ where: { adresse }, data: masquer ? { masqueeLe: this.now(), masqueeMotif: nettoyer(motif, 300) } : { masqueeLe: null, masqueeMotif: null } });
+    // DSA, art. 17 (relecture du juriste) : l'artisan est prévenu, avec le motif et le moyen de contester. Jamais bloquant.
+    if (masquer && !p.masqueeLe) {
+      const dest = await this.destinataire(p.companyId);
+      if (dest) {
+        await this.emails
+          .send({
+            to: dest,
+            subject: "Votre page Mobiiz a été masquée",
+            text: [
+              "Bonjour,",
+              "",
+              `Votre page ${this.config.webAppUrl}/e/${p.adresse} a été masquée par l'équipe Mobiiz : elle n'est plus visible du public.`,
+              `Motif : ${nettoyer(motif, 300) ?? "non respect des conditions d'utilisation"}.`,
+              "",
+              "Si vous pensez que c'est une erreur, répondez à cet e-mail ou écrivez à contact@mobiiz.fr : nous réexaminerons la décision.",
+              "",
+              "L'équipe Mobiiz",
+            ].join("\n"),
+          })
+          .catch((err) => this.logger.warn({ err: String(err) }, "page_masquee_email"));
+      }
+    }
     return { companyId: p.companyId, adresses: await this.adressesARafraichir(p.companyId) };
+  }
+
+  /**
+   * LE MÉNAGE DE LA NUIT (relecture du juriste, 16 novembre 2026) : traces du formulaire de contact après 30 jours,
+   * empreintes d'IP des signalements après 30 jours, signalements après 12 mois ; et les fichiers du stockage dont la photo
+   * n'existe plus (compte supprimé : ses lignes partent avec l'entreprise, ses fichiers ici, la nuit suivante).
+   */
+  async menage(maintenant = this.now()): Promise<{ contacts: number; signalements: number; empreintes: number; fichiers: number }> {
+    const jours = (n: number) => new Date(maintenant.getTime() - n * 86_400_000);
+    const contacts = await this.prisma.contactPage.deleteMany({ where: { createdAt: { lt: jours(30) } } });
+    const empreintes = await this.prisma.signalementPage.updateMany({ where: { createdAt: { lt: jours(30) }, ipHash: { not: null } }, data: { ipHash: null } });
+    const signalements = await this.prisma.signalementPage.deleteMany({ where: { createdAt: { lt: jours(365) } } });
+    const fichiers = await this.stockage.lister("pages/");
+    const ids = [...new Set(fichiers.map((f) => f.cle.split("/")[2]).filter((x): x is string => !!x && isUuid(x)))];
+    const vivantes = new Set((await this.prisma.photoPage.findMany({ where: { id: { in: ids } }, select: { id: true } })).map((p) => p.id));
+    // Une photo à peine créée peut être en cours de dépôt : on ne touche qu'aux dossiers sans ligne.
+    const orphelins = fichiers.filter((f) => !vivantes.has(f.cle.split("/")[2] ?? ""));
+    for (let i = 0; i < orphelins.length; i += 500) await this.stockage.supprimer(orphelins.slice(i, i + 500).map((f) => f.url));
+    return { contacts: contacts.count, signalements: signalements.count, empreintes: empreintes.count, fichiers: orphelins.length };
   }
 
   async traiterSignalement(id: string) {

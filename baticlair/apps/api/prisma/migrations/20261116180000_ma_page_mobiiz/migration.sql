@@ -24,6 +24,7 @@ CREATE TABLE "page_entreprise" (
     "creee_en" INTEGER,
     "certifications" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "afficher_adresse" BOOLEAN NOT NULL DEFAULT false,
+    "photos_accord_le" TIMESTAMPTZ(3),
     "couverture_id" UUID,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(3) NOT NULL,

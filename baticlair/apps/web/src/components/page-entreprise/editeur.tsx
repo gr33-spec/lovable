@@ -35,6 +35,7 @@ interface Reglages {
   creeeEn: number | null;
   certifications: string[];
   afficherAdresse: boolean;
+  photosAccord: boolean;
   couvertureId: string | null;
 }
 interface MaPage {
@@ -429,8 +430,25 @@ export function EditeurMaPage() {
         <Card className="grid gap-4 p-4">
           <h2 className="text-[18px] font-extrabold">Photos</h2>
           <p className="rounded-xl bg-accent/15 px-3 py-2 text-[13px]">
-            Mets seulement tes propres photos de chantiers. Avant de publier une photo prise chez un client, demande-lui son accord ; évite les personnes reconnaissables, les plaques d&apos;immatriculation et les numéros de rue.
+            Mets seulement tes propres photos de chantiers. Avant de publier une photo prise chez un client, demande-lui son accord ; évite les personnes reconnaissables, les plaques d&apos;immatriculation, les numéros de rue et les intérieurs qui permettent de situer un domicile.
           </p>
+          {data.choix.stockagePhotos && !data.reglages.photosAccord ? (
+            <label className="flex items-start gap-3 rounded-2xl border-2 border-line p-3 text-[14px]">
+              <input
+                type="checkbox"
+                className="mt-0.5 size-6 shrink-0 accent-[#FED206]"
+                onChange={async (e) => {
+                  if (!e.target.checked) return;
+                  const d = await api<MaPage>("/v1/ma-page/accord-photos", { method: "POST" }).catch(() => null);
+                  if (d) setData(d);
+                  else setErreur("Ton accord n'a pas été enregistré. Réessaie.");
+                }}
+              />
+              <span>
+                J&apos;ai pris ces photos ou j&apos;ai le droit de les utiliser. Les clients concernés sont d&apos;accord, et les personnes reconnaissables aussi (salariés compris). Je retire une photo dès qu&apos;on me le demande.
+              </span>
+            </label>
+          ) : null}
           <div className="grid gap-2">
             <span className="text-[15px] font-bold">Logo</span>
             <div className="flex flex-wrap items-center gap-3">
@@ -496,7 +514,7 @@ export function EditeurMaPage() {
               {couvertureEnCours ? <Loader2 size={20} className="absolute top-3 right-3 motion-safe:animate-spin" aria-hidden="true" /> : null}
             </div>
             <div className="flex flex-wrap gap-2">
-              {data.choix.stockagePhotos ? (
+              {data.choix.stockagePhotos && data.reglages.photosAccord ? (
                 <label className="pressable inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border border-line px-3 text-[14px] font-bold">
                   <ImageIcon size={16} aria-hidden="true" /> {couverture ? "Changer la photo" : "Choisir une photo"}
                   <input
@@ -538,7 +556,8 @@ export function EditeurMaPage() {
             <GaleriePhotos
               photos={data.photos}
               max={data.choix.limites.photos}
-              actif={data.choix.stockagePhotos}
+              actif={data.choix.stockagePhotos && data.reglages.photosAccord}
+              stockage={data.choix.stockagePhotos}
               onErreur={setErreur}
               onChange={() => {
                 void charger().then(() => rafraichirPagePublique());
@@ -567,6 +586,7 @@ export function EditeurMaPage() {
           >
             <Sparkles size={18} aria-hidden="true" /> Mobiiz m&apos;aide à l&apos;écrire
           </Button>
+          <p className="text-[13px] text-muted">Relis la proposition : n&apos;écris rien que tu ne peux pas prouver.</p>
           {proposition ? (
             <div className="grid gap-2 rounded-2xl border-2 border-accent p-3" data-testid="proposition">
               <p className="text-[13px] text-muted">{proposition.phrase ?? (proposition.source === "ia" ? "Proposition de Mobiiz (compte comme une analyse). Modifie-la à ta guise." : "Proposition tirée de ton profil. Modifie-la à ta guise.")}</p>

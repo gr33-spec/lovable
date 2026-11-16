@@ -9,6 +9,7 @@ import {
   type PhotoPublique,
   type Rubrique,
 } from "@baticlair/domain/page-entreprise";
+import { EDITEUR, HEBERGEUR } from "@/lib/legal";
 import { TRADES } from "@/lib/trades";
 import { ContactPage, SignalerPage } from "./interactions";
 import { ICONES, motifCss, VisuelMetier } from "./decor";
@@ -140,7 +141,8 @@ export function VuePage({ contenu: c, apercu = false }: VuePageProps) {
                 </li>
               ) : null}
             </ul>
-            {c.certifications.length ? <p className="pe-note">Certifications et assurances déclarées par l&apos;entreprise.</p> : null}
+            {c.certifications.length ? <p className="pe-note">Certifications et assurances déclarées par l&apos;entreprise, non vérifiées par Mobiiz.</p> : null}
+            {c.verifiee ? <p className="pe-note">« Entreprise vérifiée » : SIRET actif contrôlé à l&apos;INSEE. Ce n&apos;est pas un label de qualité.</p> : null}
           </section>
         );
       case "presentation":
@@ -335,10 +337,18 @@ export function VuePage({ contenu: c, apercu = false }: VuePageProps) {
         </p>
         <SignalerPage adresse={c.adresse} apercu={apercu} />
         <details className="pe-mentions">
-          <summary>Mentions</summary>
+          <summary>Mentions légales</summary>
           <p>
-            Page éditée par {c.nom}, qui est responsable de son contenu, de ses photos et des informations déclarées (certifications, assurances). Hébergée par Mobiiz :{" "}
-            <a href={apercu ? undefined : "/mentions-legales"}>mentions légales</a> · <a href={apercu ? undefined : "/confidentialite"}>confidentialité</a>.
+            Page éditée par {c.nom}
+            {c.siret ? ` (SIRET ${c.siret.replace(/(\d{3})(\d{3})(\d{3})(\d{5})/, "$1 $2 $3 $4")})` : ""}, responsable de son contenu, de ses photos et des informations déclarées.{" "}
+            {c.adressePostale ? `Adresse : ${c.adressePostale}. ` : c.zone ? `Zone : ${c.zone}. ` : ""}Contact : le formulaire ci-dessus{c.telephone ? ` ou le ${c.telephone}` : ""}. Responsable de la publication : le représentant légal de {c.nom}.
+          </p>
+          <p>
+            Hébergement : {EDITEUR.nom} ({EDITEUR.produit}), {EDITEUR.forme}, {EDITEUR.adresse}, {EDITEUR.contact} ; serveurs {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
+          </p>
+          <p>
+            Certifications et assurances : déclarées par l&apos;entreprise, non vérifiées par Mobiiz. « Entreprise vérifiée » : SIRET actif contrôlé à l&apos;INSEE, ce n&apos;est pas un label de qualité. Données personnelles :{" "}
+            <a href={apercu ? undefined : "/confidentialite"}>politique de confidentialité</a> · <a href={apercu ? undefined : "/mentions-legales"}>mentions légales de Mobiiz</a>.
           </p>
         </details>
       </footer>

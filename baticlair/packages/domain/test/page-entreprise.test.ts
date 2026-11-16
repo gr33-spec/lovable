@@ -50,6 +50,7 @@ function contenu(partiel: Partial<ContenuPage> = {}): ContenuPage {
     creeeEn: null,
     certifications: [],
     verifiee: false,
+    siret: null,
     modele: "photo",
     couleur: null,
     fond: null,

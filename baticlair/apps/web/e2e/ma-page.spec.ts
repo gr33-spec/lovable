@@ -87,6 +87,7 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await page.getByRole("button", { name: "Garder les miens" }).click();
   await expect(page.getByRole("textbox", { name: /^Accroche/ })).toHaveValue("Ardoise, zinc et tuile autour de Lannion");
   // Une photo de chantier : envoyée telle quelle, préparée par Mobiiz en arrière-plan.
+  await page.getByRole("checkbox", { name: /J'ai pris ces photos ou j'ai le droit de les utiliser/ }).check();
   await page.locator('input[type=file][multiple]').setInputFiles(PHOTO);
   await expect(page.getByRole("list", { name: "Photos de chantiers" }).locator("img")).toHaveCount(1, { timeout: 30_000 });
   // Publier.
@@ -180,7 +181,7 @@ test("Ma page : l'éditeur dans les thèmes clair et sombre de l'application, sa
 test.describe("petit iPhone (375 px)", () => {
   test.use({ viewport: { width: 375, height: 667 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
 
-  test("Ma page : les trois modèles, couvreur et peintre, tiennent sur un petit écran (captures du rapport)", async ({ page, browser }, info) => {
+  test("Ma page : les trois modèles, couvreur et peintre, tiennent sur un petit écran (captures du rapport)", async ({ browser }, info) => {
     test.skip(info.project.name !== "telephone", "une seule passe suffit");
     test.setTimeout(300_000);
     const dossier = process.env.CAPTURES_MA_PAGE;
@@ -203,6 +204,7 @@ test.describe("petit iPhone (375 px)", () => {
       await p.getByRole("button", { name: "Assurance décennale" }).click();
       await p.getByRole("button", { name: "RGE" }).click();
       await enregistre(p);
+      await p.getByRole("checkbox", { name: /J'ai pris ces photos ou j'ai le droit de les utiliser/ }).check();
       await p.locator('input[type=file]:not([multiple])').nth(1).setInputFiles(c.photo);
       await expect(p.getByAltText("Photo de couverture")).toBeVisible({ timeout: 30_000 });
       const galerie = (c.galerie ?? PHOTO).split(",");

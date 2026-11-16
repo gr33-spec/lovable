@@ -98,3 +98,21 @@ Aussi dans `docs/DECISIONS.md` (16/11).
 7. « Proposer une mission » n'apparaît qu'avec une disponibilité publiée (jamais de contact libre, règle Missions).
 8. Aperçu de la branche : pas de déploiement Vercel de la branche (une prévisualisation de l'API appliquerait la migration
    à une base Neon de test, et le plafond de branches Neon est atteint) ; aperçu statique et captures à la place.
+
+## Relecture du juriste (16 novembre 2026, `docs/groupe/ma-page-juridique-2026-11-16.md`)
+
+Fait dans le code (points « indispensables ») : bloc « Mentions légales » (éditeur = l'entreprise, SIRET, contact,
+responsable de la publication, hébergeur BATI INVEST et serveurs Vercel) ; case datée « J'ai pris ces photos ou j'ai le
+droit de les utiliser… » avant la première photo (`photosAccordLe`, refus `accord_photos` sinon) ; phrase RGPD du
+formulaire corrigée (copie technique chez le prestataire d'e-mails, trace 30 jours) ; « déclarées par l'entreprise, non
+vérifiées par Mobiiz » ; explication du badge (SIRET actif, pas un label) ; « Garantie de parfait achèvement » et « Artisan
+certifié CMA » retirées des pastilles ; e-mail à l'artisan quand sa page est masquée (motif, contestation) ; ménage de la
+nuit (`/v1/internal/pages-entreprises/menage`, 3 h 41 UTC) : traces de contact 30 jours, empreintes IP des signalements
+30 jours, signalements 12 mois, fichiers du stockage sans photo (compte supprimé) effacés.
+
+À DÉCIDER PAR GREG / L'AVOCAT, non fait : adresse d'établissement obligatoire (LCEN) contre « jamais d'adresse exacte » pour
+un artisan à domicile ; forme juridique, RCS/RNE, capital (champs absents du profil) ; téléphone de BATI INVEST (un
+`[A COMPLETER]` bloquerait la construction de production) ; assureur et zone couverte de la décennale ; e-mail facultatif
+dans le signalement ; « Membre Mobiiz » (texte demandé par Greg) que le juriste propose de remplacer par « Page créée avec
+Mobiiz » ; paragraphes candidats de la politique de confidentialité, du registre (n° 23 à 26) et de l'article 15 bis des
+CGU (non publiés) ; région UE du store Blob ; durée de conservation chez Resend.

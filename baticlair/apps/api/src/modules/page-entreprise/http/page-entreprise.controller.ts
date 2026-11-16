@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, Inject, NotFoundException, Param, Patch, Post, Put, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Headers, HttpCode, Inject, NotFoundException, Param, Patch, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
@@ -112,6 +112,13 @@ export class MaPageController {
     return { adresses: await this.pages.adressesARafraichir(t.companyId) };
   }
 
+  /** « J'ai le droit de publier ces photos » : une fois, daté. */
+  @Post("accord-photos")
+  @HttpCode(200)
+  accordPhotos(@Tenant() t: TenantContext) {
+    return this.pages.accorderPhotos(t);
+  }
+
   /** Une photo (multipart, champ `file`), `role` galerie ou couverture ; traitée en arrière-plan (statut « traitement »). */
   @Throttle({ default: HOURLY(120) })
   @Post("photos")
@@ -208,6 +215,25 @@ export class PagesPubliquesController {
     res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.send(octets);
+  }
+}
+
+/** Le ménage de la nuit (tâche planifiée, Bearer CRON_SECRET) : traces anciennes et fichiers orphelins. */
+@Controller("v1/internal/pages-entreprises")
+export class PagesEntreprisesTacheController {
+  constructor(
+    @Inject(PageEntrepriseService) private readonly pages: PageEntrepriseService,
+    @Inject(CONFIG) private readonly config: AppConfig,
+  ) {}
+
+  @Public()
+  @Throttle({ default: HOURLY(30) })
+  @Get("menage")
+  async menage(@Headers("authorization") authorization: string | undefined, @Query("maintenant") demande?: string) {
+    const secret = this.config.cronSecret;
+    if (!secret || authorization !== `Bearer ${secret}`) throw forbidden("Scheduled task only");
+    const maintenant = this.config.env === "test" && demande && !Number.isNaN(Date.parse(demande)) ? new Date(demande) : new Date();
+    return this.pages.menage(maintenant);
   }
 }
 
