@@ -72,7 +72,7 @@ export async function produireVariantes(octets: Buffer, role: "galerie" | "couve
   const fichiers: FichierProduit[] = [];
   for (const l of largeurs) {
     const taille = base.clone().resize({ width: l, withoutEnlargement: true });
-    const [avif, webp] = await Promise.all([taille.clone().avif({ quality: 50, effort: 3 }).toBuffer(), taille.clone().webp({ quality: 78 }).toBuffer()]);
+    const [avif, webp] = await Promise.all([taille.clone().avif({ quality: role === "couverture" ? 45 : 50, effort: 3 }).toBuffer(), taille.clone().webp({ quality: 78 }).toBuffer()]);
     fichiers.push({ nom: `${l}.avif`, type: "image/avif", octets: avif, largeur: l }, { nom: `${l}.webp`, type: "image/webp", octets: webp, largeur: l });
   }
   const partage = await base.clone().resize({ width: 1200, height: 630, fit: "cover", position: "attention" }).jpeg({ quality: 80, mozjpeg: true }).toBuffer();

@@ -100,6 +100,8 @@ export class PageEntrepriseService {
     private readonly logger: AppLogger,
     /** Garde un travail en vie après la réponse (Vercel : waitUntil). */
     private readonly garderEnVie: (travail: Promise<unknown>) => void = () => undefined,
+    /** Missions ouvertes ? L'interrupteur de l'admin (`ReglageMissions`), sinon `MISSIONS_V1`. */
+    private readonly missionsActives: () => Promise<boolean> = async () => this.config.missionsV1,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
@@ -149,10 +151,11 @@ export class PageEntrepriseService {
   /** Le contenu tel que la page l'affiche (tout ce qui vient du profil y est relu). */
   private async contenu(page: PageRow): Promise<ContenuPage> {
     const e = await this.entreprise(page.companyId);
+    const missions = await this.missionsActives().catch(() => false);
     const [photos, couverture, dispo] = await Promise.all([
       this.prisma.photoPage.findMany({ where: { companyId: page.companyId, role: "galerie", statut: "prete" }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }] }),
       page.couvertureId ? this.prisma.photoPage.findFirst({ where: { id: page.couvertureId, companyId: page.companyId, statut: "prete" } }) : null,
-      this.config.missionsV1 ? this.prisma.annonceMission.findFirst({ where: { companyId: page.companyId, type: "disponibilite", statut: "publiee" }, orderBy: { createdAt: "desc" }, select: { id: true, debut: true, fin: true } }) : null,
+      missions ? this.prisma.annonceMission.findFirst({ where: { companyId: page.companyId, type: "disponibilite", statut: "publiee" }, orderBy: { createdAt: "desc" }, select: { id: true, debut: true, fin: true } }) : null,
     ]);
     const metiers = e.trades.filter((t) => LIBELLES_METIERS[t]);
     return {
@@ -225,7 +228,7 @@ export class PageEntrepriseService {
         theme: themeDuMetier(contenu.metierPrincipal),
         limites: LIMITES_PAGE,
         stockagePhotos: this.stockage.actif,
-        missions: this.config.missionsV1,
+        missions: await this.missionsActives().catch(() => false),
       },
     };
   }

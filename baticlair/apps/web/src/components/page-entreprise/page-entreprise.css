@@ -35,6 +35,7 @@
 .pe h1 {
   font-size: clamp(30px, 9cqi, 56px);
   font-weight: 800;
+  overflow-wrap: anywhere;
 }
 .pe h2 {
   font-size: 22px;
@@ -139,6 +140,11 @@
   background: var(--pe-surface);
   color: var(--pe-accent) !important;
   border-color: var(--pe-accent);
+}
+/* Sur fond sombre, le contour prend la couleur du texte (la teinte claire de la couleur paraissait éteinte). */
+.pe-fond-sombre .pe-btn-contour {
+  color: var(--pe-texte) !important;
+  border-color: var(--pe-texte);
 }
 .pe-btn[disabled] {
   opacity: 0.6;

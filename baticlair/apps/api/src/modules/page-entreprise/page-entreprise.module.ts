@@ -3,6 +3,7 @@ import { waitUntil } from "@vercel/functions";
 import { fabriqueIa } from "../../platform/ai/fabrique-ia.js";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
+import { ReglageMissions } from "../../platform/reglages/reglage-missions.js";
 import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
 import type { AppLogger } from "../../platform/logging/logger.js";
 import { CONFIG, EMAIL_SENDER, LOGGER } from "../../platform/tokens.js";
@@ -31,8 +32,8 @@ import { STOCKAGE_PAGES } from "./tokens.js";
     },
     {
       provide: PageEntrepriseService,
-      useFactory: (p: PrismaService, s: StockagePhotos, e: TransactionalEmailSender, c: AppConfig, l: AppLogger) => new PageEntrepriseService(p, s, e, c, l, (travail) => waitUntil(travail)),
-      inject: [PrismaService, STOCKAGE_PAGES, EMAIL_SENDER, CONFIG, LOGGER],
+      useFactory: (p: PrismaService, s: StockagePhotos, e: TransactionalEmailSender, c: AppConfig, l: AppLogger, m: ReglageMissions) => new PageEntrepriseService(p, s, e, c, l, (travail) => waitUntil(travail), () => m.actif()),
+      inject: [PrismaService, STOCKAGE_PAGES, EMAIL_SENDER, CONFIG, LOGGER, ReglageMissions],
     },
     {
       provide: AideEcriture,

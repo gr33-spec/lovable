@@ -185,8 +185,8 @@ test.describe("petit iPhone (375 px)", () => {
     test.setTimeout(300_000);
     const dossier = process.env.CAPTURES_MA_PAGE;
     const cas = [
-      { nom: `Toits Martin ${unique()}`.slice(0, 32), metier: "Couverture, charpente, zinguerie", court: "couvreur", accroche: "Ardoise, zinc et tuile autour de Lannion", zone: "Lannion", presentation: "Couvreur depuis 2008 : réfection de toitures en ardoise naturelle, zinguerie et réparations après tempête. Devis clair, chantier propre et bâché chaque soir.", photo: process.env.PHOTO_COUVREUR ?? PHOTO, galerie: process.env.GALERIE_COUVREUR },
-      { nom: `Couleurs Le Gall ${unique()}`.slice(0, 32), metier: "Peinture", court: "peintre", accroche: "Peinture intérieure et façades à Saint-Brieuc", zone: "Saint-Brieuc", presentation: "Peintres en bâtiment : murs, plafonds, boiseries et ravalements. Protection des meubles et nettoyage compris.", photo: process.env.PHOTO_PEINTRE ?? PHOTO, galerie: process.env.GALERIE_PEINTRE },
+      { nom: process.env.CAPTURES_MA_PAGE ? "Toits Martin" : `Toits Martin ${unique()}`.slice(0, 32), metier: "Couverture, charpente, zinguerie", court: "couvreur", accroche: "Ardoise, zinc et tuile autour de Lannion", zone: "Lannion", presentation: "Couvreur depuis 2008 : réfection de toitures en ardoise naturelle, zinguerie et réparations après tempête. Devis clair, chantier propre et bâché chaque soir.", photo: process.env.PHOTO_COUVREUR ?? PHOTO, galerie: process.env.GALERIE_COUVREUR },
+      { nom: process.env.CAPTURES_MA_PAGE ? "Couleurs Le Gall" : `Couleurs Le Gall ${unique()}`.slice(0, 32), metier: "Peinture", court: "peintre", accroche: "Peinture intérieure et façades à Saint-Brieuc", zone: "Saint-Brieuc", presentation: "Peintres en bâtiment : murs, plafonds, boiseries et ravalements. Protection des meubles et nettoyage compris.", photo: process.env.PHOTO_PEINTRE ?? PHOTO, galerie: process.env.GALERIE_PEINTRE },
     ];
     for (const c of cas) {
       const ctx = await browser.newContext({ baseURL: "http://localhost:3000", viewport: { width: 375, height: 667 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
