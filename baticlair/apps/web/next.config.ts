@@ -12,6 +12,8 @@ const API_URL = (process.env.API_URL ?? "http://localhost:4000").replace(/\/$/, 
  * `PAGES_ENTREPRISES_INDEXEES=on` (le site de test reste hors des moteurs) ; elles disent alors elles-mêmes leur règle.
  */
 const PAGES_INDEXEES = process.env.PAGES_ENTREPRISES_INDEXEES === "on";
+/** L'adresse publique du store Vercel Blob des photos (« https://<id>.public.blob.vercel-storage.com »), côté site. */
+const PHOTOS_BLOB_URL = (process.env.PHOTOS_BLOB_URL ?? "").replace(/\/$/, "");
 
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
@@ -27,7 +29,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async rewrites() {
-    return [{ source: "/v1/:path*", destination: `${API_URL}/v1/:path*` }];
+    return [
+      { source: "/v1/:path*", destination: `${API_URL}/v1/:path*` },
+      // Ma page Mobiiz : les photos (Vercel Blob) se lisent sur le domaine du site ; la CSP reste « rien d'ailleurs ».
+      ...(PHOTOS_BLOB_URL ? [{ source: "/photos/:path*", destination: `${PHOTOS_BLOB_URL}/pages/:path*` }] : []),
+    ];
   },
   async headers() {
     const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];

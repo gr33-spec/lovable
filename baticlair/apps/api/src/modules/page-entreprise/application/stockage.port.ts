@@ -4,8 +4,11 @@
  */
 export interface StockagePhotos {
   readonly actif: boolean;
-  /** Enregistre un fichier et rend son adresse publique. */
-  deposer(cle: string, octets: Buffer, type: string): Promise<string>;
+  /**
+   * Enregistre un fichier. `adresse` : l'adresse publique, TOUJOURS sur le domaine du site (aucune ressource d'ailleurs,
+   * règle de sécurité du 26 octobre 2026) ; `cle` : ce qu'il faut passer à `supprimer`.
+   */
+  deposer(cle: string, octets: Buffer, type: string): Promise<{ adresse: string; cle: string }>;
   /** Supprime des fichiers (un fichier déjà absent n'est pas une erreur). */
   supprimer(cles: string[]): Promise<void>;
   /** Les fichiers rangés sous un préfixe (« pages/ ») : leur nom et l'adresse à passer à `supprimer`. */

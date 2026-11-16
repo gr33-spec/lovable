@@ -11,9 +11,13 @@ export class StockageBlob implements StockagePhotos {
   readonly actif = true;
   constructor(private readonly jeton: string) {}
 
-  async deposer(cle: string, octets: Buffer, type: string): Promise<string> {
+  /**
+   * Le fichier vit sur le CDN de Vercel Blob, mais la page le lit sur SON domaine : `/photos/<chemin>` est réécrit par le
+   * site vers le store (`PHOTOS_BLOB_URL` du projet web, `next.config.ts`). La CSP reste « rien d'ailleurs ».
+   */
+  async deposer(cle: string, octets: Buffer, type: string): Promise<{ adresse: string; cle: string }> {
     const r = await put(cle, octets, { access: "public", contentType: type, addRandomSuffix: false, allowOverwrite: true, cacheControlMaxAge: 31_536_000, token: this.jeton });
-    return r.url;
+    return { adresse: `/photos/${cle.replace(/^pages\//, "")}`, cle: r.url };
   }
 
   async supprimer(cles: string[]): Promise<void> {
@@ -48,11 +52,12 @@ export class StockageLocal implements StockagePhotos {
     return path.join(this.dossier, propre);
   }
 
-  async deposer(cle: string, octets: Buffer): Promise<string> {
+  async deposer(cle: string, octets: Buffer): Promise<{ adresse: string; cle: string }> {
     const f = this.chemin(cle);
     await mkdir(path.dirname(f), { recursive: true });
     await writeFile(f, octets);
-    return `${this.adressePublique.replace(/\/$/, "")}/v1/public/fichiers-pages/${cle}`;
+    const adresse = `${this.adressePublique.replace(/\/$/, "")}/v1/public/fichiers-pages/${cle}`;
+    return { adresse, cle: adresse };
   }
 
   async supprimer(cles: string[]): Promise<void> {
@@ -77,7 +82,7 @@ export class StockageLocal implements StockagePhotos {
 
 export class StockageCoupe implements StockagePhotos {
   readonly actif = false;
-  deposer(): Promise<string> {
+  deposer(): Promise<{ adresse: string; cle: string }> {
     return Promise.reject(new Error("stockage des photos coupé"));
   }
   async supprimer(): Promise<void> {}

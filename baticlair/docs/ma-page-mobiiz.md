@@ -21,8 +21,9 @@ Reprendre à la première case non cochée.
 - [x] 5. Relecture du juriste (`docs/groupe/ma-page-juridique-2026-11-16.md`), captures, coût mensuel.
 - [ ] 6. Intégrer les derniers commits de la branche de test, rejouer la chaîne complète (domaine, API, web, e2e), pousser
       SUR `claude/company-public-page-htnc6f` seulement si tout est vert. Rien sur la branche de test sans l'accord de Greg.
-- [ ] 7. Après l'accord de Greg : store Vercel Blob relié au projet API (`BLOB_READ_WRITE_TOKEN`), fusion dans la branche
-      de test, migration appliquée par le déploiement (additive).
+- [ ] 7. Après l'accord de Greg : store Vercel Blob relié au projet API (`BLOB_READ_WRITE_TOKEN`) et son adresse publique
+      posée sur le projet web (`PHOTOS_BLOB_URL` : les photos sont servies sous `/photos/…`, même domaine, la CSP reste
+      « rien d'ailleurs »), fusion dans la branche de test, migration appliquée par le déploiement (additive).
 
 ## Ce qui existe
 

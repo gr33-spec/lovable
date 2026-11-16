@@ -348,8 +348,13 @@ export class PageEntrepriseService {
     const deposees: string[] = [];
     try {
       const { fichiers, largeur, hauteur } = await produireVariantes(octets, role);
-      const urls = await Promise.all(fichiers.map(async (f) => ({ f, url: await this.stockage.deposer(`pages/${companyId}/${photoId}/${f.nom}`, f.octets, f.type) })));
-      deposees.push(...urls.map((u) => u.url));
+      const urls = await Promise.all(
+        fichiers.map(async (f) => {
+          const d = await this.stockage.deposer(`pages/${companyId}/${photoId}/${f.nom}`, f.octets, f.type);
+          deposees.push(d.cle);
+          return { f, url: d.adresse };
+        }),
+      );
       const variantes = [...new Set(urls.filter((u) => u.f.nom !== "partage.jpg").map((u) => u.f.largeur))].map((l) => ({
         largeur: l,
         avif: urls.find((u) => u.f.largeur === l && u.f.type === "image/avif")!.url,
