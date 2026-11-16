@@ -113,13 +113,32 @@ Un devis réel en ligne (zinc à joint debout, D-2026-018 anonymisé, petit iPho
 Coût d'un quantitatif : **0,32 $ depuis un devis** (la lecture fait 99 % du coût), **environ 0,01 $ depuis un texte
 ou une dictée**, 0 $ à la main.
 
-Ce que cette passe a appris, sur le devis réel :
+Ce que cette passe a appris, sur le devis réel (corrigé dans la passe 3) :
 
-- La phrase de Greg a rangé 4 réponses d'un coup. Le « 1 » (descentes) a été perdu : la question des descentes n'est
-  arrivée qu'après « Calculer ma liste ». Une réponse donnée en avance doit être gardée pour la question qui vient.
-- Sur ce devis, Mobiiz a encore posé des questions après « Calculer ma liste » (5 de plus). Elles doivent toutes
-  arriver avant.
-- Deux questions groupent deux sujets (« de 25, 28, 33 ou 40, et combien de descentes (sous Autre) ? »). Une question,
-  un sujet.
-- La ligne des bacs sort « Bobine… 221 m » alors que la réponse est « Je commande façonné (bacs) » : à corriger.
+- « Calculer ma liste » n'aboutissait pas : le serveur refusait, l'écran reposait la même question en boucle. Cause : la
+  question du façonnage écrite par le modèle de lecture avait sa propre clé, pas celle du calcul.
+- Les dernières questions du calcul (descentes, diamètre, consommables, développé) n'arrivaient qu'après « Calculer ».
+- Deux questions du modèle groupent deux sujets (« de 25, 28, 33 ou 40, et combien de descentes ? »). Une question,
+  un sujet : cela demande de toucher au prompt de lecture (§41.1), donc l'accord de Greg.
 - 59 s de lecture, c'est long : essai de Sonnet 5.5 à faire sur le jeu de test.
+
+## Passe 3 : le devis réel va au bout (16 novembre 2026, site de test au commit `eeed3433`)
+
+Même devis, petit iPhone, vraie IA : lecture 57 s, la phrase de Greg, 3 questions de plus dans le fil (développé de la
+bande, diamètre des descentes, consommables), « Calculer ma liste », récapitulatif « 8 articles », la liste. Les bacs
+sortent bien en « Bacs joint debout » (commandés façonnés), plus en bobine.
+
+Ce qui a changé :
+
+- La question du façonnage du modèle est rattachée à celle du calcul : elle n'est plus posée deux fois.
+- Dès que tout est répondu, les réponses partent au serveur ; ce qui manque encore arrive dans le fil, avant
+  « Calculer ma liste ». Une réponse déjà partie reste modifiable.
+- Une question née d'une réponse ramène aux questions, sans message de refus.
+
+Ce que cette passe a appris :
+
+- Sur cet essai, l'épaisseur était déjà connue (« comme d'habitude ») et les descentes pas encore demandées. La phrase
+  de Greg, écrite pour six autres questions, a rangé « 0,65 » comme un rampant de 0,65 m et « 1 » comme une gouttière
+  de 1 cm. Corrigé au lot suivant : un nombre nu rangé par l'ordre n'est jamais pris pour une question à boutons dont
+  il n'est aucun bouton ; cette question est reposée, seule (test `nombre-nu-hors-bouton.test.ts`).
+- Le nombre de descentes reste « à préciser » sur la liste quand il n'a pas été demandé dans le fil : à poser.

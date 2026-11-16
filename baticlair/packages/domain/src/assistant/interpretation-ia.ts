@@ -1,5 +1,5 @@
 import { PROMPT_REPONSES, PROMPT_REPONSES_SYSTEME } from "../ia/prompts/index.js";
-import type { QuestionNumerotee, ReponseInterpretee } from "./reponses-libres-numerotees.js";
+import { sansNombreNuHorsBouton, type QuestionNumerotee, type ReponseInterpretee } from "./reponses-libres-numerotees.js";
 
 /**
  * L'INTERPRÉTATION DES RÉPONSES LIBRES PAR L'IA (Greg, 6 novembre 2026, prompt maître point 3 et point 15 ; lot 7).
@@ -94,7 +94,7 @@ export function validerInterpretation(questions: readonly QuestionNumerotee[], t
     }
     out.push(reposer("Choisis un des boutons."));
   }
-  return out;
+  return sansNombreNuHorsBouton(questions, texte, out);
 }
 
 /** Ce que le code a compris l'emporte ; l'IA ne complète que les questions restées ambiguës ou sans réponse. */

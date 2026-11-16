@@ -258,7 +258,31 @@ export function interpreterReponsesNumerotees(questions: readonly QuestionNumero
   // Un seul morceau que nul bouton ne reconnaît : c'est la réponse à la question posée (la première).
   if (morceaux.length === 1 && pris.size === 0) pris.set(questions[0]!.numero, morceaux[0]!);
   const parSens = questions.map((q) => interpreterUne(q, pris.get(q.numero)));
-  return parOrdre && compris(parOrdre) >= compris(parSens) ? parOrdre : parSens;
+  return sansNombreNuHorsBouton(questions, texte, parOrdre && compris(parOrdre) >= compris(parSens) ? parOrdre : parSens);
+}
+
+/**
+ * PLUSIEURS RÉPONSES D'UN COUP (recette en ligne du 16 novembre 2026 : « 0,65 » rangé comme un rampant de 0,65 m, « 1 » comme
+ * une gouttière de 1 cm). Un nombre nu, rangé par l'ordre, n'est pas pris pour une question À BOUTONS dont il n'est aucun
+ * bouton : cette question est reposée, seule. Il est pris si l'artisan a écrit l'unité (« 6,2 m »), s'il a numéroté ses
+ * réponses, ou s'il ne répond qu'à une question. Vaut pour la lecture du code comme pour celle du modèle.
+ */
+export function sansNombreNuHorsBouton(questions: readonly QuestionNumerotee[], texte: string, reponses: readonly ReponseInterpretee[]): ReponseInterpretee[] {
+  const morceaux = texte.split(/\n|;|,(?!\d)|\bet\b/).map((l) => l.trim()).filter(Boolean);
+  if (questions.length < 2 || morceaux.length < 2 || morceauxNumerotes(texte, Math.max(...questions.map((q) => q.numero)))) return [...reponses];
+  const dits = nombres(texte).filter((n) => n.unite);
+  return reponses.map((r) => {
+    const q = questions.find((x) => x.numero === r.numero);
+    if (!q || r.statut !== "compris" || !r.libreEcrite || q.options.length === 0 || !(q.numerique || q.libre === "number")) return r;
+    const u = uniteDeQuestion(q.unite);
+    const avecUnite = dits.some((n) => {
+      const de = LONGUEURS[n.unite!];
+      const vers = u ? LONGUEURS[u] : undefined;
+      const v = n.unite === u || de === undefined || vers === undefined ? n.valeur : (n.valeur * de) / vers;
+      return Math.abs(v - Number(r.valeur)) < 1e-9;
+    });
+    return avecUnite ? r : { ...r, statut: "ambigu", valeur: null, libelle: null, libreEcrite: false, raison: `Je n'ai pas reconnu ta réponse : ${q.options.map((o) => `« ${o.label} »`).join(", ")} ?` };
+  });
 }
 
 /** « Noté : … » en UNE ligne (Greg, 16 novembre 2026 : elle confirme ce qu'elle a compris, elle ne reliste jamais tout). */
