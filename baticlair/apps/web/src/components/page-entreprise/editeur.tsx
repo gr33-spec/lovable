@@ -262,7 +262,7 @@ function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: b
           void apres(api<{ page: MaPage }>("/v1/ma-page/realisations", { method: "POST", body: { titre } })).then(() => setTitre(""));
         }}
       >
-        <input aria-label="Titre du nouveau chantier" value={titre} onChange={(e) => setTitre(e.target.value)} maxLength={80} placeholder="Toiture ardoise · Paimpol" className="min-h-12 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[16px]" />
+        <input aria-label="Titre du nouveau chantier" value={titre} onChange={(e) => setTitre(e.target.value)} maxLength={80} placeholder="Toiture ardoise · Paimpol" className="min-h-12 min-w-0 basis-full rounded-xl border border-line bg-surface px-3 text-[16px]" />
         <Button type="submit" variant="secondary" disabled={!titre.trim()}>
           <Plus size={18} aria-hidden="true" /> Nouveau chantier
         </Button>

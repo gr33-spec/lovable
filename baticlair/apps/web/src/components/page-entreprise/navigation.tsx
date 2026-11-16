@@ -107,7 +107,7 @@ export function ChantierRealise({ realisation: r, nom }: { realisation: Realisat
   return (
     <>
       <button type="button" className="pe-chantier" onClick={() => setOuvert(0)} aria-label={`${r.titre} : voir ${r.photos.length > 1 ? `les ${r.photos.length} photos` : "la photo"}`}>
-        <Photo photo={premiere} alt={r.titre} sizes="(min-width: 900px) 50vw, 100vw" />
+        <Photo photo={premiere} alt="" sizes="(min-width: 900px) 50vw, 100vw" />
         <span className="pe-chantier-legende">
           <span className="pe-chantier-titre">{r.titre}</span>
           {r.photos.length > 1 ? (

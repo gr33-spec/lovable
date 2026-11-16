@@ -6,6 +6,38 @@ travail : `claude/company-public-page-htnc6f` (partie de `claude/saas-achat-arti
 Hors périmètre, à ne pas toucher : l'assistant IA, le quantitatif, les achats groupés (le chantier « quantitatif IA » tourne
 en parallèle dans une autre session).
 
+## REFONTE DU RENDU (Greg, 16 novembre 2026, 2e message ; RÈGLE CHANGÉE)
+
+« Ce que tu as fait ressemble à un écran d'application sombre, pas à un site d'artisan. » La mécanique est gardée (éditeur,
+photos, sécurité, tests) ; le rendu public est refait : UN SEUL MODÈLE (les trois modèles, le nuancier, le fond sombre, les
+pictogrammes, les motifs et les visuels dessinés sont retirés), fond ivoire et typographie / boutons de la landing de
+Mobiiz, « Appeler » jaune #FED206 texte noir, quatre teintes sobres (ardoise, anthracite, bleu nuit, vert sapin), de vraies
+photos en grand. Structure d'un site d'artisan : barre du haut fixe (logo ou initiales, menu Prestations / Réalisations /
+À propos / Contact, téléphone ; sur téléphone : « Appeler » et menu déroulant), accueil plein écran sur la photo (grand
+titre « Couvreur à Lannion », le nom dessous, la ligne de preuves, « Appeler » et « Demander un devis »), prestations
+(titre + phrase, proposées d'après le métier à la création de la page), réalisations PAR CHANTIER (titre sur la photo,
+visionneuse au toucher, deux colonnes sur ordinateur, le premier en grand quand ils sont en nombre impair), à propos (photo
+de l'équipe si elle existe), zone, contact foncé « Un projet ? Parlons-en », pied de page (nom, SIRET, mentions légales,
+« Voir mon site », « Page créée avec Mobiiz »). Sur téléphone, « Appeler » fixé en bas une fois l'accueil passé, et alors
+retiré de la barre du haut (jamais en double). Aucune rubrique vide, ni dans la page ni dans le menu. Données : colonne
+`prestations` (JSON), table `realisation_page`, `photo_page.realisation_id`, photo de rôle `equipe` ; colonnes `modele`,
+`fond`, `pictos`, `motif` retirées (la migration n'a jamais été déployée : régénérée en une seule).
+
+Comparée (captures) à la landing de Mobiiz et à trois sites de couvreurs (la-couverture.fr, couverture-jmc.fr,
+couvreur-insulaire.fr). Lighthouse mobile : 93 à 94 en performance, 100 en bonnes pratiques.
+
+## Pas-à-pas Vercel Blob (à donner à Greg après sa validation, rien n'est fait sans lui)
+
+1. vercel.com › l'équipe gr33-spec › projet de l'API (« baticlair-api ») › onglet Storage › Create Database › Blob.
+2. Nom : `mobiiz-photos` ; région : Francfort (fra1), la plus proche ; Create.
+3. Écran suivant : Connect Project › projet de l'API ; environnements : Preview (pour test.mobiiz.fr) et, plus tard,
+   Production ; Connect. Vercel ajoute seul la variable `BLOB_READ_WRITE_TOKEN` à l'API.
+4. Dans le store (Storage › mobiiz-photos › Settings), copier « Base URL » (`https://<id>.public.blob.vercel-storage.com`).
+5. Projet du site (« baticlair ») › Settings › Environment Variables › Add : nom `PHOTOS_BLOB_URL`, valeur la Base URL,
+   environnements Preview (et Production plus tard) ; Save.
+6. Redéployer les deux projets (Deployments › ⋯ › Redeploy) pour que les variables soient prises.
+7. Vérifier : Ma page › ajouter une photo ; elle passe « prête » en quelques secondes et s'affiche sur `/e/<adresse>`.
+
 ## Point de reprise (à tenir à jour à chaque étape)
 
 Reprendre à la première case non cochée.

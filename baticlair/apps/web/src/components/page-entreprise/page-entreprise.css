@@ -841,3 +841,65 @@ body:has(.pe:not(.pe-apercu)) {
   background: #fbf8f3;
   color-scheme: light;
 }
+
+/* ------------------------------------------------------------------------------------------------ Retouches (relecture des captures) */
+.pe-accueil h1 {
+  letter-spacing: -0.045em;
+  word-spacing: 0.06em;
+}
+.pe h2 {
+  letter-spacing: -0.045em;
+  word-spacing: 0.05em;
+}
+/* Le nom de l'entreprise sur deux lignes au plus, jamais coupé par « … » au milieu d'un mot. */
+.pe-marque-nom {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.15;
+  font-size: 16px;
+}
+/* Téléphone : les deux boutons de l'accueil pleine largeur, l'un sous l'autre. */
+.pe-accueil .pe-actions .pe-btn {
+  flex: 1 1 100%;
+}
+@container pe (min-width: 560px) {
+  .pe-accueil .pe-actions .pe-btn {
+    flex: 0 0 auto;
+  }
+}
+@container pe (min-width: 960px) {
+  .pe-marque-nom {
+    font-size: 17px;
+  }
+  /* Quatre prestations : deux colonnes (jamais une orpheline sous trois). */
+  .pe-prestations:has(> li:nth-child(4):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 920px;
+  }
+  /* « À propos » sans photo : le titre et le chapeau à gauche, le texte et les garanties à droite. */
+  .pe-apropos:not(.pe-apropos-photo) {
+    grid-template-columns: 5fr 7fr;
+    gap: 72px;
+    align-items: start;
+  }
+  .pe-apropos:not(.pe-apropos-photo) .pe-apropos-texte {
+    display: contents;
+  }
+  .pe-apropos:not(.pe-apropos-photo) .pe-apropos-tete {
+    grid-column: 1;
+  }
+  .pe-apropos:not(.pe-apropos-photo) .pe-apropos-corps {
+    grid-column: 2;
+  }
+}
+/* Un nombre impair de chantiers : le premier en grand sur toute la largeur. */
+@container pe (min-width: 760px) {
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) {
+    grid-column: 1 / -1;
+  }
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) img {
+    aspect-ratio: 16 / 8;
+  }
+}

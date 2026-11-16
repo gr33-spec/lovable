@@ -134,35 +134,39 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
                 </div>
               ) : null}
               <div className="pe-apropos-texte">
-                <h2 id="pe-t-apropos">À propos</h2>
-                {c.accroche ? <p className="pe-chapeau">{c.accroche}</p> : null}
-                {c.presentation
-                  ? c.presentation.split(/\n{2,}/).map((para, i) => (
-                      <p key={i} className="pe-texte">
-                        {para}
-                      </p>
-                    ))
-                  : null}
-                {c.verifiee || c.certifications.length || c.creeeEn ? (
-                  <ul className="pe-qualifs">
-                    {c.verifiee ? (
-                      <li>
-                        <BadgeCheck size={20} aria-hidden="true" /> Entreprise vérifiée
-                      </li>
-                    ) : null}
-                    {c.certifications.map((x) => (
-                      <li key={x}>
-                        <ShieldCheck size={20} aria-hidden="true" /> {x}
-                      </li>
-                    ))}
-                    {c.creeeEn ? (
-                      <li>
-                        <CalendarDays size={20} aria-hidden="true" /> Depuis {c.creeeEn}
-                      </li>
-                    ) : null}
-                  </ul>
-                ) : null}
-                {c.certifications.length ? <p className="pe-note">Certifications et assurances déclarées par l&apos;entreprise.</p> : null}
+                <div className="pe-apropos-tete">
+                  <h2 id="pe-t-apropos">À propos</h2>
+                  {c.accroche ? <p className="pe-chapeau">{c.accroche}</p> : null}
+                </div>
+                <div className="pe-apropos-corps">
+                  {c.presentation
+                    ? c.presentation.split(/\n{2,}/).map((para, i) => (
+                        <p key={i} className="pe-texte">
+                          {para}
+                        </p>
+                      ))
+                    : null}
+                  {c.verifiee || c.certifications.length || c.creeeEn ? (
+                    <ul className="pe-qualifs">
+                      {c.verifiee ? (
+                        <li>
+                          <BadgeCheck size={20} aria-hidden="true" /> Entreprise vérifiée
+                        </li>
+                      ) : null}
+                      {c.certifications.map((x) => (
+                        <li key={x}>
+                          <ShieldCheck size={20} aria-hidden="true" /> {x}
+                        </li>
+                      ))}
+                      {c.creeeEn ? (
+                        <li>
+                          <CalendarDays size={20} aria-hidden="true" /> Depuis {c.creeeEn}
+                        </li>
+                      ) : null}
+                    </ul>
+                  ) : null}
+                  {c.certifications.length ? <p className="pe-note">Certifications et assurances déclarées par l&apos;entreprise.</p> : null}
+                </div>
               </div>
             </div>
           </section>

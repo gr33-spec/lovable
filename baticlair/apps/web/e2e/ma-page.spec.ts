@@ -228,7 +228,7 @@ test.describe("captures du rapport", () => {
       expect(res.status()).toBe(202);
     };
     await envoyer(fichier("PHOTO_ACCUEIL")[0]!, { role: "couverture" });
-    for (const [titre, cle] of [["Réfection en ardoise · Paimpol", "CHANTIER_1"], ["Longère rénovée · Pleumeur-Bodou", "CHANTIER_2"], ["Zinguerie et faîtage · Perros-Guirec", "CHANTIER_3"]] as const) {
+    for (const [titre, cle] of [["Réfection en ardoise · Paimpol", "CHANTIER_1"], ["Longère rénovée · Pleumeur-Bodou", "CHANTIER_2"], ["Couvertures de bourg · Tréguier", "CHANTIER_3"]] as const) {
       const r = (await (await appel("post", "/v1/ma-page/realisations", { titre })).json()) as { realisation: { id: string } };
       for (const f of fichier(cle)) await envoyer(f, { realisationId: r.realisation.id });
     }
@@ -253,7 +253,11 @@ test.describe("captures du rapport", () => {
         });
         await v.waitForTimeout(600);
         await v.screenshot({ path: `${dossier}/${nomAppareil}-accueil.png` });
+        // Capture pleine page : la barre « Appeler » fixe (téléphone) n'a pas de place fixe sur une image géante ; elle est
+        // montrée à part (capture « défilé »).
+        const cache = await v.addStyleTag({ content: ".pe-barre-appel{display:none!important}" });
         await v.screenshot({ path: `${dossier}/${nomAppareil}-page-entiere.png`, fullPage: true });
+        await cache.evaluate((el) => (el as Element).remove());
         if (nomAppareil === "telephone") {
           await v.locator("#realisations").scrollIntoViewIfNeeded();
           await v.waitForTimeout(400);
