@@ -388,7 +388,17 @@ test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche 
     const nav = page.getByRole("navigation", { name: "Navigation principale" });
     await expect(nav.getByRole("link").first()).toBeVisible();
     // Le menu doit être réellement affiché avant la mesure (un relevé pris trop tôt ne trouvait aucun lien visible).
-    await expect.poll(() => nav.getByRole("link").evaluateAll((liens) => liens.filter((l) => (l as HTMLElement).offsetParent !== null).length)).toBeGreaterThan(2);
+    // « Affiché » se lit à la boîte du lien (largeur et hauteur réelles), pas à `offsetParent`, qui vaut null dès qu'un
+    // parent est en position fixe selon le navigateur : deux séries complètes ont trouvé « 0 lien » ainsi, le menu étant
+    // pourtant à l'écran. En cas d'échec, l'état exact des liens est dit.
+    const affiches = () =>
+      nav.getByRole("link").evaluateAll((liens) =>
+        liens.map((l) => {
+          const b = l.getBoundingClientRect();
+          return { nom: (l.textContent ?? "").trim().slice(0, 20), affiche: b.width > 0 && b.height > 0 && getComputedStyle(l).visibility !== "hidden", sansParent: (l as HTMLElement).offsetParent === null };
+        }),
+      );
+    await expect.poll(async () => (await affiches()).filter((l) => l.affiche).length, { message: `liens du menu : ${JSON.stringify(await affiches())}` }).toBeGreaterThan(2);
     const ratios = await nav.getByRole("link").evaluateAll((liens) => {
       // N'importe quelle couleur CSS (rgb, oklab, color-mix) ramenée en [r, g, b, a] par un pixel de canevas.
       const toile = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
@@ -415,7 +425,10 @@ test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche 
         return [255, 255, 255];
       };
       return liens
-        .filter((l) => (l as HTMLElement).offsetParent !== null)
+        .filter((l) => {
+          const b = l.getBoundingClientRect();
+          return b.width > 0 && b.height > 0 && getComputedStyle(l).visibility !== "hidden";
+        })
         .map((l) => {
           const texte = rgb(getComputedStyle(l).color);
           const a = texte[3] ?? 1;
