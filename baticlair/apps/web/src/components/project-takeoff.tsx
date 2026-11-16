@@ -249,11 +249,20 @@ export function ProjectTakeoff({
 
   // §48 ÉTAPE 3 : les questions de comptoir, toutes d'un coup, AVANT le calcul. Puis ÉTAPE 4 : le calcul.
   const qid0 = encodeURIComponent(quantitatif!.id);
+  // Un refus du serveur (une réponse qui ne passe pas) : l'écran reprend l'état enregistré, pour ne jamais renvoyer une
+  // réponse déjà prise ni reposer une question déjà réglée (recette en ligne du 16 novembre 2026).
+  const relu = <T,>(appel: Promise<T>) =>
+    appel.catch((e: unknown) => {
+      reload();
+      throw e;
+    });
+  const repondre = (reponses: NonNullable<CounterAnswers["reponses"]>) => run(() => relu(api<Quantitatif>(`/v1/quantitatifs/${qid0}/reponses?ecran=1`, { method: "POST", body: { reponses } })), update);
   const calculate = (answers: CounterAnswers) =>
-    run(() => api<Quantitatif>(`/v1/quantitatifs/${qid0}/calcul?ecran=1`, { method: "POST", body: answers }), (q) => {
+    run(() => relu(api<Quantitatif>(`/v1/quantitatifs/${qid0}/calcul?ecran=1`, { method: "POST", body: answers })), (q) => {
       update(q);
       // Greg, 16 novembre 2026 : après le calcul, un récapitulatif court DANS la discussion, puis « Voir ma liste ». La
       // discussion a déjà posé ses questions : l'assistant de la liste ne se rouvre pas tout seul derrière.
+      if (q.phase === "questions") return;
       setRecap(true);
       marquerAssistantOuvert(projectId);
     });
@@ -267,7 +276,7 @@ export function ProjectTakeoff({
         );
       return <LotsCard takeoff={takeoff} pending={pending} error={actionError} onConfirm={(m) => void confirmLots(m)} />;
     }
-    return <QuestionsStep takeoff={takeoff} pending={pending} error={actionError} onSubmit={calculate} />;
+    return <QuestionsStep takeoff={takeoff} pending={pending} error={actionError} onSubmit={calculate} onReponses={(r) => void repondre(r)} />;
   }
   if (phase === "calcul") return <CalculScreen />;
   if (recap && takeoff.purchase.toBuy.length > 0) return <RecapScreen takeoff={takeoff} onVoir={() => setRecap(false)} />;

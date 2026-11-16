@@ -464,7 +464,7 @@ const morceauxDe = (texte: string) => texte.split(/\n|;|,(?!\d)|\bet\b/).map((m)
  * serveur et son IA pour ce qui reste) ; Mobiiz confirme en UNE ligne et ne pose que ce qui manque. Quand tout est
  * répondu, « Calculer ma liste » est proposé dans le fil. Le serveur revalide tout au calcul.
  */
-export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
+export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
   const router = useRouter();
   const questions = useMemo(() => counterQuestions(takeoff), [takeoff]);
   // §50.2 : dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
@@ -579,6 +579,29 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
     setSent(answers.reponses.map((r) => r.question));
     onSubmit(answers);
   };
+  // « Quand tout est répondu, elle réfléchit, pose d'éventuelles dernières questions de la même façon, puis propose
+  // "Calculer ma liste" » (Greg, 16 novembre 2026). Recette en ligne du même jour : une réponse peut faire naître une
+  // question du calcul (le nombre de descentes, le façonnage d'une autre pièce). Dès que tout est répondu, les réponses
+  // partent donc au serveur ; ce qu'il lui manque encore arrive dans le fil, AVANT « Calculer ma liste ». Chaque réponse
+  // ne part qu'une fois ; « Je ne sais pas » ne part qu'au calcul.
+  const parties = useRef<Set<string>>(new Set());
+  const [verification, setVerification] = useState(false);
+  const toutRepondu = restantes.length === 0;
+  useEffect(() => {
+    if (!onReponses || !toutRepondu || pending || reflexion) return;
+    const nouvelles = counterAnswers(questions, given, retired).reponses.filter((r) => r.valeur !== null && !parties.current.has(`${r.question}=${r.valeur}`));
+    if (nouvelles.length === 0) return;
+    for (const r of nouvelles) parties.current.add(`${r.question}=${r.valeur}`);
+    setSent(nouvelles.map((r) => r.question));
+    setVerification(true);
+    onReponses(nouvelles);
+  }, [onReponses, toutRepondu, pending, reflexion, questions, given, retired]);
+  // La vérification finie : s'il reste une question, elle se dit en une ligne ; sinon « Calculer ma liste » arrive.
+  if (verification && !pending) {
+    setVerification(false);
+    if (!error && courante) setMessages((m) => [...m, { de: "mobiiz", texte: restantes.length > 1 ? "Encore quelques précisions avant de calculer." : "Encore une précision avant de calculer." }]);
+  }
+  const encorePosee = new Set(ordonnees.map((q) => q.key));
   const invite = courante ? (autre ? "Écris ta réponse…" : courante.options.length === 0 ? `Écris ta réponse${courante.unit && courante.unit !== "u" ? ` (${courante.unit === "m2" ? "m²" : courante.unit})` : ""}…` : "Réponds ici…") : "Réponds ici…";
 
   return (
@@ -630,7 +653,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
               <Bulle key={i} de="mobiiz" label="Message de MOBIIZ">
                 <TexteMobiiz>{m.texte}</TexteMobiiz>
               </Bulle>
-            ) : m.cle && (given[m.cle] || retired.has(m.cle)) && !pending && messages.findLastIndex((x) => x.cle === m.cle) === i ? (
+            ) : m.cle && encorePosee.has(m.cle) && (given[m.cle] || retired.has(m.cle)) && !pending && messages.findLastIndex((x) => x.cle === m.cle) === i ? (
               <button key={i} type="button" onClick={() => reprendre(m.cle!)} aria-label={`Modifier ma réponse : ${m.texte}`} className="pressable max-w-[82%] self-end rounded-[22px] rounded-br-md px-4 py-2.5 text-left text-[16px] leading-snug whitespace-pre-line text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
                 {m.texte}
               </button>
@@ -640,9 +663,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
               </Bulle>
             ),
           )}
-          {reflexion ? (
+          {reflexion || verification ? (
             <p role="status" className="self-start pl-10 text-[14px] font-semibold text-[var(--chat-texte)]/75">
-              Réflexion…
+              {verification ? "Vérification de tes réponses…" : "Réflexion…"}
             </p>
           ) : courante ? (
             <>
@@ -853,8 +876,10 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
 }
 
 /** L'étape des questions : sans aucune question à poser, le calcul part tout seul (rien à valider pour rien). */
-export function QuestionsStep({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
-  const none = counterQuestions(takeoff).length === 0;
+export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
+  // Décidé à l'ouverture : une discussion commencée reste ouverte quand ses réponses, enregistrées, ne laissent plus de
+  // question (« Calculer ma liste » y est proposé, jamais lancé tout seul).
+  const [none] = useState(() => counterQuestions(takeoff).length === 0);
   const started = useRef(false);
   useEffect(() => {
     if (!none || started.current) return;
@@ -862,5 +887,5 @@ export function QuestionsStep({ takeoff, pending, error, onSubmit }: { takeoff: 
     onSubmit({ reponses: [], ajouts: [], retraits: [] });
   }, [none, onSubmit]);
   if (none) return error ? <ErrorNotice error={error} /> : <CalculScreen />;
-  return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} />;
+  return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} {...(onReponses ? { onReponses } : {})} />;
 }
