@@ -1,73 +1,167 @@
 /**
- * MA PAGE MOBIIZ (Greg, 16 novembre 2026) : la page publique de chaque entreprise. Même structure pour tous, ambiance
- * adaptée au MÉTIER PRINCIPAL : couleur et fond par défaut, pictogramme, motif de fond, visuel de couverture par défaut et
- * textes d'exemple. Un thème par métier du catalogue (`TRADES`), « Autre métier » compris. Rien ici n'est publié tel quel
- * sans l'artisan : les textes d'exemple ne sont que des suggestions dans l'éditeur (jamais affichés sur la page publique).
+ * MA PAGE MOBIIZ (Greg, 16 novembre 2026, RÈGLE CHANGÉE le même jour : « le design est à refaire, un vrai site d'artisan »).
+ * Un seul modèle, fond ivoire, de vraies photos ; plus de visuel dessiné, de pictogramme ni de motif. Le métier principal
+ * donne : le nom du métier dans le grand titre (« Couvreur à Lannion »), la teinte par défaut (une des quatre teintes
+ * sobres) et les prestations proposées à la création de la page (titre + une phrase), que l'artisan garde, corrige ou retire.
+ * La page est privée par défaut : rien n'est publié sans que l'artisan l'ait vu.
  */
 
-/** Les visuels de couverture par défaut (fichiers `apps/web/public/pages/couvertures/<id>.svg`), un par famille de métiers. */
-export const VISUELS = ["toiture", "peinture", "electricite", "plomberie", "bois", "maconnerie", "carrelage", "exterieur", "metal", "solaire", "interieur", "general"] as const;
-export type Visuel = (typeof VISUELS)[number];
+/** Les quatre teintes sobres au choix (Greg, 16 novembre 2026). Le bouton « Appeler » reste jaune Mobiiz. */
+export const TEINTES = [
+  { id: "ardoise", nom: "Ardoise", hex: "#3E5163" },
+  { id: "anthracite", nom: "Anthracite", hex: "#2E3338" },
+  { id: "bleu-nuit", nom: "Bleu nuit", hex: "#1D3557" },
+  { id: "vert-sapin", nom: "Vert sapin", hex: "#1F4D3A" },
+] as const;
+export type TeinteId = (typeof TEINTES)[number]["id"];
 
-/** Les pictogrammes (traduits en icônes par l'écran) et motifs de fond discrets, liés au métier. */
-export const PICTOS = ["toit", "pinceau", "eclair", "goutte", "marteau", "brique", "carreau", "feuille", "cle", "soleil", "flamme", "regle", "maison"] as const;
-export type Picto = (typeof PICTOS)[number];
-
-export type Fond = "clair" | "sombre";
+export interface Prestation {
+  titre: string;
+  texte: string;
+}
 
 export interface ThemeMetier {
   metier: string;
-  /** Le nom court du métier sur la page (« Couvreur », « Peintre »). */
+  /** Le nom du métier dans le grand titre (« Couvreur », « Peintre »). */
   nom: string;
-  couleur: string;
-  fond: Fond;
-  visuel: Visuel;
-  picto: Picto;
-  /** Accroche d'exemple : « {zone} » est remplacé par la zone, sinon la phrase sans lieu. */
+  teinte: TeinteId;
+  /** Accroche d'exemple pour « Mobiiz m'aide à l'écrire » (jamais publiée sans l'artisan) : « {zone} » remplacé par la zone. */
   accroche: string;
   presentation: string;
-  services: string[];
+  /** Les prestations proposées à la création de la page (3 ou 4). */
+  prestations: Prestation[];
 }
 
-const t = (metier: string, nom: string, couleur: string, fond: Fond, visuel: Visuel, picto: Picto, accroche: string, presentation: string, services: string[]): ThemeMetier => ({
-  metier,
-  nom,
-  couleur,
-  fond,
-  visuel,
-  picto,
-  accroche,
-  presentation,
-  services,
-});
+const p = (titre: string, texte: string): Prestation => ({ titre, texte });
+const t = (metier: string, nom: string, teinte: TeinteId, accroche: string, presentation: string, prestations: Prestation[]): ThemeMetier => ({ metier, nom, teinte, accroche, presentation, prestations });
 
 /** Un thème par métier du catalogue (`TRADES`, `packages/domain/src/trades/index.ts`). */
 export const THEMES_METIER: Readonly<Record<string, ThemeMetier>> = {
-  roofing: t("roofing", "Couvreur", "#3E5163", "sombre", "toiture", "toit", "Votre toiture entre de bonnes mains{zone}", "Couverture, zinguerie et réparation de toitures : ardoise, tuile et zinc, en neuf comme en rénovation. Devis clair, chantier propre.", ["Réfection de toiture", "Zinguerie et gouttières", "Recherche de fuite", "Démoussage et entretien"]),
-  masonry: t("masonry", "Maçon", "#8C5A3C", "clair", "maconnerie", "brique", "Des murs solides, faits pour durer{zone}", "Maçonnerie générale, extensions, ouvertures de murs et petits ouvrages : du terrassement à la finition.", ["Extension et agrandissement", "Ouverture de mur porteur", "Dalle et fondations", "Murets et clôtures"]),
-  drywall: t("drywall", "Plaquiste", "#5C6B7A", "clair", "interieur", "regle", "Cloisons, isolation, plafonds : du propre{zone}", "Plâtrerie et isolation intérieure : cloisons, doublages, plafonds et combles, pour un intérieur plus confortable.", ["Cloisons et doublages", "Isolation des combles", "Faux plafonds", "Bandes et finitions"]),
-  painting: t("painting", "Peintre", "#2F7D6D", "clair", "peinture", "pinceau", "Des finitions nettes, du sol au plafond{zone}", "Peinture intérieure et extérieure, revêtements muraux et finitions soignées. Protection du chantier et nettoyage compris.", ["Peinture intérieure", "Ravalement et façades", "Papier peint et revêtements", "Laques et boiseries"]),
-  tiling: t("tiling", "Carreleur", "#2D6A8E", "clair", "carrelage", "carreau", "Carrelage et faïence posés au millimètre{zone}", "Pose de carrelage, faïence et mosaïque : salles de bains, cuisines, terrasses. Coupes nettes et joints réguliers.", ["Carrelage de sol", "Faïence murale", "Salle de bains", "Terrasse extérieure"]),
-  flooring: t("flooring", "Poseur de sols", "#8A6A3F", "clair", "bois", "regle", "Des sols beaux et durables{zone}", "Pose de parquets, sols souples et stratifiés, ponçage et vitrification.", ["Parquet massif et contrecollé", "Sols souples", "Ponçage et vitrification", "Ragréage"]),
-  electrical: t("electrical", "Électricien", "#1F5FA8", "sombre", "electricite", "eclair", "Une installation électrique sûre et aux normes{zone}", "Installation, rénovation et mise en conformité électrique, tableaux, éclairage et dépannage.", ["Rénovation électrique", "Tableau et mise aux normes", "Éclairage", "Dépannage"]),
-  plumbing: t("plumbing", "Plombier", "#1B7FA3", "clair", "plomberie", "goutte", "Plomberie et chauffage sans mauvaise surprise{zone}", "Plomberie, sanitaires et chauffage : installation, rénovation de salles de bains et dépannage.", ["Salle de bains", "Chauffe-eau", "Recherche de fuite", "Dépannage"]),
-  joinery: t("joinery", "Menuisier", "#7A5230", "clair", "bois", "marteau", "Menuiseries sur mesure, posées avec soin{zone}", "Fenêtres, portes, volets et menuiseries sur mesure, en bois, PVC ou aluminium.", ["Fenêtres et portes", "Volets", "Portes de garage", "Sur mesure"]),
-  hvac: t("hvac", "Chauffagiste", "#B4532A", "clair", "plomberie", "flamme", "Chauffage et ventilation bien réglés{zone}", "Installation et entretien de chauffage, pompes à chaleur et ventilation.", ["Pompe à chaleur", "Chaudière", "VMC", "Entretien"]),
-  carpentry: t("carpentry", "Charpentier", "#6E4B2A", "sombre", "toiture", "marteau", "Charpentes solides, du traditionnel au moderne{zone}", "Charpente traditionnelle et industrielle, ossature bois, extensions et réparations.", ["Charpente traditionnelle", "Ossature bois", "Extension", "Traitement des bois"]),
-  waterproofing: t("waterproofing", "Étancheur", "#37474F", "sombre", "toiture", "goutte", "Toits-terrasses étanches, durablement{zone}", "Étanchéité des toitures-terrasses, balcons et ouvrages enterrés.", ["Toiture-terrasse", "Balcons et terrasses", "Végétalisation", "Réparation de fuite"]),
-  cladding: t("cladding", "Bardeur", "#4E5D52", "sombre", "bois", "regle", "Des façades habillées avec soin{zone}", "Bardage bois, composite et métallique, isolation par l'extérieur.", ["Bardage bois", "Bardage composite", "Isolation par l'extérieur", "Rénovation de façade"]),
-  facade: t("facade", "Façadier", "#9A6B4F", "clair", "maconnerie", "pinceau", "Façades refaites à neuf{zone}", "Ravalement, enduits, nettoyage et isolation des façades.", ["Ravalement", "Enduits", "Nettoyage de façade", "Isolation par l'extérieur"]),
-  ceiling: t("ceiling", "Plafonnier", "#5A6878", "clair", "interieur", "regle", "Plafonds suspendus, nets et réguliers{zone}", "Plafonds suspendus, dalles acoustiques et faux plafonds.", ["Plafonds suspendus", "Dalles acoustiques", "Faux plafonds", "Éclairage intégré"]),
-  interior_joinery: t("interior_joinery", "Agenceur", "#8B6440", "clair", "bois", "marteau", "Agencements intérieurs sur mesure{zone}", "Menuiserie intérieure et agencement : placards, dressings, escaliers et meubles sur mesure.", ["Placards et dressings", "Escaliers", "Meubles sur mesure", "Portes intérieures"]),
-  kitchen: t("kitchen", "Cuisiniste", "#A04A3B", "clair", "interieur", "maison", "Votre cuisine, pensée et posée sur mesure{zone}", "Conception et pose de cuisines, plans de travail et électroménager.", ["Conception de cuisine", "Pose", "Plans de travail", "Rénovation"]),
-  solar: t("solar", "Installateur solaire", "#C27C0E", "clair", "solaire", "soleil", "Produisez votre propre électricité{zone}", "Installation de panneaux photovoltaïques, raccordement et suivi de production.", ["Panneaux photovoltaïques", "Autoconsommation", "Bornes de recharge", "Maintenance"]),
-  decking: t("decking", "Poseur de terrasses", "#7D5A3A", "clair", "exterieur", "feuille", "Des terrasses bois qui durent{zone}", "Terrasses en bois et composite, pergolas et aménagements extérieurs.", ["Terrasse bois", "Terrasse composite", "Pergola", "Entretien"]),
-  paving: t("paving", "Paveur", "#6B6156", "clair", "exterieur", "brique", "Allées et cours pavées avec soin{zone}", "Pavage, dallage extérieur, allées et cours.", ["Allées", "Cours et parkings", "Dallage", "Bordures"]),
-  earthworks: t("earthworks", "Terrassier", "#6D5B3B", "clair", "exterieur", "brique", "Terrassement et VRD, chantier propre{zone}", "Terrassement, réseaux, assainissement et voirie.", ["Terrassement", "Assainissement", "Réseaux", "Voirie"]),
-  irrigation: t("irrigation", "Installateur d'arrosage", "#3F7D4E", "clair", "exterieur", "goutte", "L'arrosage automatique, bien pensé{zone}", "Arrosage automatique des jardins et espaces verts, programmation et entretien.", ["Arrosage automatique", "Goutte-à-goutte", "Programmation", "Entretien"]),
-  metalwork: t("metalwork", "Serrurier-métallier", "#4A4F57", "sombre", "metal", "cle", "Métallerie et serrurerie sur mesure{zone}", "Serrurerie, garde-corps, portails et ouvrages métalliques sur mesure.", ["Garde-corps", "Portails", "Escaliers métalliques", "Serrurerie"]),
-  general: t("general", "Entreprise générale", "#2E3A46", "sombre", "general", "maison", "Votre projet de A à Z{zone}", "Entreprise générale du bâtiment : construction, rénovation et coordination de tous les corps de métier.", ["Construction", "Rénovation", "Extension", "Coordination"]),
-  other: t("other", "Artisan du bâtiment", "#33414E", "clair", "general", "maison", "Un artisan à votre écoute{zone}", "Artisan du bâtiment : travaux de rénovation et d'entretien, devis clair et chantier propre.", []),
+  roofing: t("roofing", "Couvreur", "ardoise", "Votre toiture entre de bonnes mains{zone}", "Couverture, zinguerie et réparation de toitures : ardoise, tuile et zinc, en neuf comme en rénovation. Devis clair, chantier propre.", [
+    p("Couverture ardoise et tuile", "Réfection complète ou partielle, en ardoise naturelle ou en tuile, dans les règles de l'art."),
+    p("Zinguerie", "Gouttières, descentes, noues et habillages en zinc, posés et façonnés sur mesure."),
+    p("Réparation de toiture", "Ardoises ou tuiles cassées, fuites, dégâts après une tempête : nous intervenons rapidement."),
+    p("Entretien et démoussage", "Nettoyage, traitement et vérification de la toiture pour la faire durer."),
+  ]),
+  masonry: t("masonry", "Maçon", "anthracite", "Des murs solides, faits pour durer{zone}", "Maçonnerie générale, extensions, ouvertures de murs et petits ouvrages : du terrassement à la finition.", [
+    p("Extension et agrandissement", "Une pièce de plus, du gros œuvre jusqu'à la mise hors d'eau."),
+    p("Ouverture de mur", "Création ou agrandissement d'ouvertures, mur porteur compris, avec les renforts nécessaires."),
+    p("Dalles et fondations", "Dalles, fondations et chapes pour vos projets de construction."),
+    p("Murets et clôtures", "Murs de clôture, murets et piliers en parpaing, brique ou pierre."),
+  ]),
+  drywall: t("drywall", "Plaquiste", "ardoise", "Cloisons, isolation, plafonds : du propre{zone}", "Plâtrerie et isolation intérieure : cloisons, doublages, plafonds et combles, pour un intérieur plus confortable.", [
+    p("Cloisons et doublages", "Redistribuer les pièces ou isoler les murs, avec des finitions prêtes à peindre."),
+    p("Isolation des combles", "Combles perdus ou aménagés, pour moins de pertes de chaleur."),
+    p("Faux plafonds", "Plafonds suspendus ou rampants, avec spots intégrés si besoin."),
+  ]),
+  painting: t("painting", "Peintre", "vert-sapin", "Des finitions nettes, du sol au plafond{zone}", "Peinture intérieure et extérieure, revêtements muraux et finitions soignées. Protection du chantier et nettoyage compris.", [
+    p("Peinture intérieure", "Murs, plafonds et boiseries, avec la préparation des supports et la protection des meubles."),
+    p("Façades et ravalement", "Nettoyage, réparation et peinture des façades pour protéger la maison."),
+    p("Papiers peints et revêtements", "Pose de papiers peints, toiles de verre et revêtements muraux."),
+    p("Boiseries et ferronneries", "Volets, portes, portails et garde-corps remis en peinture."),
+  ]),
+  tiling: t("tiling", "Carreleur", "bleu-nuit", "Carrelage et faïence posés au millimètre{zone}", "Pose de carrelage, faïence et mosaïque : salles de bains, cuisines, terrasses. Coupes nettes et joints réguliers.", [
+    p("Carrelage de sol", "Pose de carrelage grand format ou traditionnel, intérieur et extérieur."),
+    p("Faïence et crédence", "Murs de salle de bains et crédences de cuisine, coupes nettes."),
+    p("Salle de bains complète", "Douche à l'italienne, faïence et sol, du support à la finition."),
+  ]),
+  flooring: t("flooring", "Poseur de sols", "anthracite", "Des sols beaux et durables{zone}", "Pose de parquets, sols souples et stratifiés, ponçage et vitrification.", [
+    p("Parquet", "Pose de parquet massif ou contrecollé, collé ou flottant."),
+    p("Sols souples", "Vinyle, lino et moquette posés sur un support préparé."),
+    p("Ponçage et vitrification", "Votre ancien parquet remis à neuf."),
+  ]),
+  electrical: t("electrical", "Électricien", "bleu-nuit", "Une installation électrique sûre et aux normes{zone}", "Installation, rénovation et mise en conformité électrique, tableaux, éclairage et dépannage.", [
+    p("Rénovation électrique", "Remise à neuf de l'installation, pièce par pièce ou toute la maison."),
+    p("Tableau et mise aux normes", "Remplacement du tableau et mise en sécurité de l'installation."),
+    p("Éclairage", "Éclairage intérieur et extérieur, spots, variateurs."),
+    p("Dépannage", "Panne, disjonction, prise qui chauffe : nous intervenons rapidement."),
+  ]),
+  plumbing: t("plumbing", "Plombier", "bleu-nuit", "Plomberie et chauffage sans mauvaise surprise{zone}", "Plomberie, sanitaires et chauffage : installation, rénovation de salles de bains et dépannage.", [
+    p("Salle de bains", "Création ou rénovation complète, douche, baignoire et meubles."),
+    p("Chauffe-eau", "Remplacement et entretien de chauffe-eau et ballons."),
+    p("Recherche de fuite", "Diagnostic et réparation des fuites, visibles ou encastrées."),
+    p("Dépannage", "Robinetterie, évacuation bouchée, chasse d'eau : intervention rapide."),
+  ]),
+  joinery: t("joinery", "Menuisier", "vert-sapin", "Menuiseries sur mesure, posées avec soin{zone}", "Fenêtres, portes, volets et menuiseries sur mesure, en bois, PVC ou aluminium.", [
+    p("Fenêtres et portes", "Remplacement et pose de fenêtres, portes-fenêtres et portes d'entrée."),
+    p("Volets", "Volets battants ou roulants, manuels ou motorisés."),
+    p("Sur mesure", "Menuiseries fabriquées aux cotes exactes de votre maison."),
+  ]),
+  hvac: t("hvac", "Chauffagiste", "bleu-nuit", "Chauffage et ventilation bien réglés{zone}", "Installation et entretien de chauffage, pompes à chaleur et ventilation.", [
+    p("Pompe à chaleur", "Étude, installation et mise en service de pompes à chaleur."),
+    p("Chaudière", "Remplacement et entretien annuel de chaudières."),
+    p("Ventilation", "Installation de VMC simple ou double flux."),
+  ]),
+  carpentry: t("carpentry", "Charpentier", "anthracite", "Des charpentes solides, du traditionnel au moderne{zone}", "Charpente traditionnelle et industrielle, ossature bois, extensions et réparations.", [
+    p("Charpente traditionnelle", "Fabrication et pose de charpentes en bois massif."),
+    p("Ossature bois", "Extensions et maisons à ossature bois."),
+    p("Réparation et traitement", "Remplacement de pièces abîmées et traitement des bois."),
+  ]),
+  waterproofing: t("waterproofing", "Étancheur", "anthracite", "Des toits-terrasses étanches, durablement{zone}", "Étanchéité des toitures-terrasses, balcons et ouvrages enterrés.", [
+    p("Toiture-terrasse", "Étanchéité neuve ou réfection, avec isolation si besoin."),
+    p("Balcons et terrasses", "Étanchéité sous carrelage ou en résine."),
+    p("Réparation de fuite", "Recherche et traitement des infiltrations."),
+  ]),
+  cladding: t("cladding", "Bardeur", "vert-sapin", "Des façades habillées avec soin{zone}", "Bardage bois, composite et métallique, isolation par l'extérieur.", [
+    p("Bardage bois", "Pose de bardage en bois naturel ou prégrisé."),
+    p("Bardage composite", "Un habillage sans entretien, en lames composites."),
+    p("Isolation par l'extérieur", "Isoler la maison sans perdre de place à l'intérieur."),
+  ]),
+  facade: t("facade", "Façadier", "ardoise", "Des façades refaites à neuf{zone}", "Ravalement, enduits, nettoyage et isolation des façades.", [
+    p("Ravalement", "Nettoyage, réparation des fissures et finition de la façade."),
+    p("Enduits", "Enduits traditionnels ou monocouches, à la chaux ou au ciment."),
+    p("Isolation par l'extérieur", "Une façade neuve et une maison mieux isolée."),
+  ]),
+  ceiling: t("ceiling", "Plafonnier", "ardoise", "Des plafonds suspendus nets et réguliers{zone}", "Plafonds suspendus, dalles acoustiques et faux plafonds.", [
+    p("Plafonds suspendus", "Faux plafonds en plaques ou en dalles, avec éclairage intégré."),
+    p("Dalles acoustiques", "Moins de bruit dans les bureaux, commerces et salles."),
+  ]),
+  interior_joinery: t("interior_joinery", "Agenceur", "vert-sapin", "Des agencements intérieurs sur mesure{zone}", "Menuiserie intérieure et agencement : placards, dressings, escaliers et meubles sur mesure.", [
+    p("Placards et dressings", "Rangements sur mesure, du sol au plafond."),
+    p("Escaliers", "Escaliers en bois fabriqués et posés sur mesure."),
+    p("Meubles sur mesure", "Bibliothèques, meubles TV et aménagements de combles."),
+  ]),
+  kitchen: t("kitchen", "Cuisiniste", "anthracite", "Votre cuisine, pensée et posée sur mesure{zone}", "Conception et pose de cuisines, plans de travail et électroménager.", [
+    p("Conception", "Plans et choix des matériaux selon votre pièce et votre budget."),
+    p("Pose", "Montage, raccordements et finitions."),
+    p("Plans de travail", "Stratifié, bois, quartz ou céramique."),
+  ]),
+  solar: t("solar", "Installateur solaire", "bleu-nuit", "Produisez votre propre électricité{zone}", "Installation de panneaux photovoltaïques, raccordement et suivi de production.", [
+    p("Panneaux photovoltaïques", "Étude du toit, pose et raccordement."),
+    p("Autoconsommation", "Une installation dimensionnée pour votre consommation."),
+    p("Bornes de recharge", "Recharge de véhicule électrique à la maison."),
+  ]),
+  decking: t("decking", "Poseur de terrasses", "vert-sapin", "Des terrasses bois qui durent{zone}", "Terrasses en bois et composite, pergolas et aménagements extérieurs.", [
+    p("Terrasse bois", "Lames en pin, mélèze ou bois exotique, sur plots ou lambourdes."),
+    p("Terrasse composite", "Une terrasse sans entretien."),
+    p("Pergolas", "Pergolas en bois ou en aluminium."),
+  ]),
+  paving: t("paving", "Paveur", "anthracite", "Des allées et des cours pavées avec soin{zone}", "Pavage, dallage extérieur, allées et cours.", [
+    p("Allées", "Allées pavées ou dallées, drainantes si besoin."),
+    p("Cours et stationnements", "Des surfaces solides, faites pour durer."),
+    p("Bordures", "Bordures et caniveaux posés au cordeau."),
+  ]),
+  earthworks: t("earthworks", "Terrassier", "anthracite", "Terrassement et VRD, chantier propre{zone}", "Terrassement, réseaux, assainissement et voirie.", [
+    p("Terrassement", "Préparation de terrain avant construction."),
+    p("Assainissement", "Installation et mise aux normes d'assainissement individuel."),
+    p("Réseaux", "Tranchées et raccordements eau, électricité et télécoms."),
+  ]),
+  irrigation: t("irrigation", "Installateur d'arrosage", "vert-sapin", "L'arrosage automatique, bien pensé{zone}", "Arrosage automatique des jardins et espaces verts, programmation et entretien.", [
+    p("Arrosage automatique", "Étude et installation adaptées à votre jardin."),
+    p("Goutte-à-goutte", "Massifs et potagers arrosés sans gaspillage."),
+    p("Entretien", "Mise en route au printemps et hivernage."),
+  ]),
+  metalwork: t("metalwork", "Serrurier-métallier", "anthracite", "Métallerie et serrurerie sur mesure{zone}", "Serrurerie, garde-corps, portails et ouvrages métalliques sur mesure.", [
+    p("Garde-corps", "Garde-corps et rampes en acier ou aluminium."),
+    p("Portails", "Portails et clôtures fabriqués sur mesure."),
+    p("Serrurerie", "Ouverture de porte, changement de serrure et blindage."),
+  ]),
+  general: t("general", "Entreprise générale", "anthracite", "Votre projet de A à Z{zone}", "Entreprise générale du bâtiment : construction, rénovation et coordination de tous les corps de métier.", [
+    p("Construction", "Maisons et extensions, du terrassement aux finitions."),
+    p("Rénovation", "Rénovation complète, un seul interlocuteur."),
+    p("Coordination", "Tous les corps de métier organisés pour vous."),
+  ]),
+  other: t("other", "Artisan du bâtiment", "ardoise", "Un artisan à votre écoute{zone}", "Artisan du bâtiment : travaux de rénovation et d'entretien, devis clair et chantier propre.", []),
 };
 
 /** Le thème d'un métier ; un métier inconnu ou absent prend celui d'« Autre métier ». */
@@ -79,4 +173,9 @@ export function themeDuMetier(metier: string | null | undefined): ThemeMetier {
 export function accrocheParDefaut(theme: ThemeMetier, zone: string | null | undefined): string {
   const z = zone?.trim();
   return theme.accroche.replace("{zone}", z ? ` à ${z}` : "");
+}
+
+/** La teinte d'une page : celle choisie si elle fait partie des quatre, sinon celle du métier. */
+export function teinteDeLaPage(couleur: string | null | undefined, metier: string | null | undefined): (typeof TEINTES)[number] {
+  return TEINTES.find((x) => x.hex.toLowerCase() === couleur?.toLowerCase() || x.id === couleur) ?? TEINTES.find((x) => x.id === themeDuMetier(metier).teinte)!;
 }

@@ -1,25 +1,10 @@
-import { paletteDeLaPage, type Palette } from "./couleurs.js";
-import { themeDuMetier, type Fond, type Picto, type ThemeMetier, type Visuel } from "./themes.js";
+import { teinteDeLaPage, themeDuMetier, type Prestation, type ThemeMetier } from "./themes.js";
 
 /**
  * MA PAGE MOBIIZ (Greg, 16 novembre 2026) : ce qui se décide sans base ni écran. L'adresse de la page, les trois modèles,
  * les rubriques qui s'affichent (JAMAIS une rubrique vide), les données structurées pour Google (LocalBusiness), et ce que
  * « Mobiiz m'aide à l'écrire » propose quand l'IA ne répond pas (le code seul, à partir du profil).
  */
-
-/* ------------------------------------------------------------------------------------------------------------ Modèles */
-
-/** Trois architectures vraiment différentes (pas trois couleurs) : l'ordre et la forme des rubriques changent. */
-export const MODELES_PAGE = [
-  { id: "photo", nom: "Plein écran photo", phrase: "Une grande photo de chantier en ouverture, puis vos réalisations." },
-  { id: "colonnes", nom: "Classique en colonnes", phrase: "Une fiche claire : vos infos à gauche, vos réalisations à droite." },
-  { id: "sobre", nom: "Sobre et direct", phrase: "L'essentiel d'abord : qui vous êtes, où, et le bouton pour appeler." },
-] as const;
-export type ModelePage = (typeof MODELES_PAGE)[number]["id"];
-export const MODELE_PAR_DEFAUT: ModelePage = "photo";
-export function estModele(v: unknown): v is ModelePage {
-  return MODELES_PAGE.some((m) => m.id === v);
-}
 
 /* ------------------------------------------------------------------------------------------------------------ Adresse */
 
@@ -79,6 +64,10 @@ export const LIMITES_PAGE = {
   certifications: 10,
   legende: 120,
   photos: 20,
+  prestations: 6,
+  prestationTitre: 60,
+  prestationTexte: 200,
+  realisationTitre: 80,
   creeeEn: { min: 1900 },
 } as const;
 
@@ -91,6 +80,13 @@ export interface PhotoPublique {
   variantes: { largeur: number; avif: string; webp: string }[];
   /** Version JPEG 1200 px, pour l'image d'aperçu des réseaux (WhatsApp, Facebook). */
   partage: string | null;
+}
+
+/** Un chantier réalisé : son titre (« Toiture ardoise · Paimpol ») et ses photos, la première en grand. */
+export interface RealisationPublique {
+  id: string;
+  titre: string;
+  photos: PhotoPublique[];
 }
 
 /** Ce que la page publique reçoit de l'API : tout est déjà filtré (rien de personnel sans le choix de l'artisan). */
@@ -112,65 +108,80 @@ export interface ContenuPage {
   verifiee: boolean;
   /** Le SIRET de l'entreprise (mentions légales de la page, LCEN) ; null s'il n'est pas renseigné. */
   siret: string | null;
-  modele: ModelePage;
+  /** La teinte choisie (une des quatre), sinon null : celle du métier. */
   couleur: string | null;
-  fond: Fond | null;
-  pictos: boolean;
-  motif: boolean;
   logo: string | null;
   couverture: PhotoPublique | null;
-  photos: PhotoPublique[];
-  /** Missions ouvertes (réglage MISSIONS_V1) : la disponibilité publiée, sinon null ; absent quand Missions est coupé. */
+  prestations: Prestation[];
+  realisations: RealisationPublique[];
+  /** La photo de l'artisan ou de l'équipe (« À propos »), si elle existe. */
+  photoEquipe: PhotoPublique | null;
+  /** Missions ouvertes ET une disponibilité publiée ; sinon null. */
   missions: { disponibleDu: string | null; disponibleAu: string | null; lien: string } | null;
   majLe: string;
 }
 
-export interface Ambiance {
-  theme: ThemeMetier;
-  palette: Palette;
-  visuel: Visuel;
-  picto: Picto;
+/** La ville de la zone (« Lannion, Perros-Guirec et le Trégor » → « Lannion »). */
+export function villeDeLaZone(zone: string | null | undefined): string | null {
+  const v = zone?.split(/[,;/(]| et | - /)[0]?.trim();
+  return v ? v : null;
 }
 
-/** L'ambiance de la page : le thème du métier principal, sauf ce que l'artisan a choisi lui-même (couleur, fond). */
-export function ambianceDe(c: Pick<ContenuPage, "metierPrincipal" | "couleur" | "fond">): Ambiance {
+/** Le GRAND TITRE de l'accueil : le métier et la ville (« Couvreur à Lannion ») ; le nom de l'entreprise vient dessous. */
+export function titreAccueil(c: Pick<ContenuPage, "metierPrincipal" | "zone">): string {
   const theme = themeDuMetier(c.metierPrincipal);
-  const fond = c.fond ?? theme.fond;
-  return { theme, palette: paletteDeLaPage(c.couleur, fond, theme.couleur), visuel: theme.visuel, picto: theme.picto };
+  const ville = villeDeLaZone(c.zone);
+  return ville ? `${theme.nom} à ${ville}` : theme.nom;
 }
 
-/** Le sous-titre : l'accroche de l'artisan, sinon « Couvreur à Lannion » (jamais un texte inventé sur la page). */
-export function sousTitre(c: Pick<ContenuPage, "accroche" | "metierPrincipal" | "zone">): string {
-  if (c.accroche?.trim()) return c.accroche.trim();
-  const theme = themeDuMetier(c.metierPrincipal);
-  return c.zone?.trim() ? `${theme.nom} · ${c.zone.trim()}` : theme.nom;
+/**
+ * La ligne de preuves sous le titre (« Entreprise vérifiée · Décennale · 15 ans d'expérience ») : seulement ce qui est
+ * vrai (SIRET vérifié, déclarations de l'artisan, année de création) ; trois au plus.
+ */
+export function preuvesCourtes(c: Pick<ContenuPage, "verifiee" | "certifications" | "creeeEn">, annee: number): string[] {
+  const r: string[] = [];
+  if (c.verifiee) r.push("Entreprise vérifiée");
+  const decennale = c.certifications.find((x) => /d[ée]cennale/i.test(x));
+  if (decennale) r.push("Décennale");
+  if (c.creeeEn && annee - c.creeeEn >= 2) r.push(`${annee - c.creeeEn} ans d'expérience`);
+  for (const x of c.certifications) if (r.length < 3 && x !== decennale && !/responsabilit/i.test(x)) r.push(x);
+  return r.slice(0, 3);
 }
 
-export const RUBRIQUES = ["presentation", "metiers", "zone", "galerie", "preuves", "horaires", "missions", "contact"] as const;
-export type Rubrique = (typeof RUBRIQUES)[number];
+/** La teinte de la page (une des quatre) : celle de l'artisan, sinon celle de son métier. */
+export function teinteDe(c: Pick<ContenuPage, "couleur" | "metierPrincipal">): string {
+  return teinteDeLaPage(c.couleur, c.metierPrincipal).hex;
+}
 
-/** Les rubriques qui ont un contenu : une rubrique vide n'apparaît JAMAIS. Le contact (formulaire) est toujours là. */
+/** La photo d'accueil : la couverture choisie, sinon la première photo du premier chantier, sinon aucune. */
+export function photoAccueil(c: Pick<ContenuPage, "couverture" | "realisations">): PhotoPublique | null {
+  return c.couverture ?? c.realisations[0]?.photos[0] ?? null;
+}
+
+export const RUBRIQUES = [
+  { id: "prestations", menu: "Prestations" },
+  { id: "realisations", menu: "Réalisations" },
+  { id: "a-propos", menu: "À propos" },
+  { id: "zone", menu: "Zone" },
+  { id: "contact", menu: "Contact" },
+] as const;
+export type Rubrique = (typeof RUBRIQUES)[number]["id"];
+
+/** Les rubriques qui ont un contenu, dans l'ordre : une rubrique vide n'apparaît JAMAIS (ni dans la page ni dans le menu). */
 export function rubriquesVisibles(c: ContenuPage): Rubrique[] {
   const r: Rubrique[] = [];
-  if (c.presentation?.trim()) r.push("presentation");
-  if (c.metiers.length > 0) r.push("metiers");
+  if (c.prestations.length > 0) r.push("prestations");
+  if (c.realisations.length > 0) r.push("realisations");
+  if (c.presentation?.trim() || c.accroche?.trim() || c.photoEquipe || c.certifications.length > 0 || c.verifiee || c.creeeEn) r.push("a-propos");
   if (c.zone?.trim() || c.adressePostale?.trim()) r.push("zone");
-  if (c.photos.length > 0) r.push("galerie");
-  if (c.verifiee || c.certifications.length > 0 || c.creeeEn) r.push("preuves");
-  if (c.horaires?.trim()) r.push("horaires");
-  if (c.missions) r.push("missions");
   r.push("contact");
   return r;
 }
 
-/** L'ordre des rubriques selon le modèle : la même structure, trois architectures. */
-export function ordreDesRubriques(modele: ModelePage, visibles: readonly Rubrique[]): Rubrique[] {
-  const ordre: Record<ModelePage, Rubrique[]> = {
-    photo: ["preuves", "galerie", "presentation", "metiers", "zone", "horaires", "missions", "contact"],
-    colonnes: ["presentation", "metiers", "preuves", "zone", "horaires", "galerie", "missions", "contact"],
-    sobre: ["metiers", "zone", "preuves", "presentation", "horaires", "galerie", "missions", "contact"],
-  };
-  return ordre[modele].filter((x) => visibles.includes(x));
+/** Le menu du haut : Prestations, Réalisations, À propos, Contact (la zone n'y est pas : elle suit « À propos »). */
+export function menuDeLaPage(c: ContenuPage): { id: Rubrique; libelle: string }[] {
+  const v = rubriquesVisibles(c);
+  return RUBRIQUES.filter((r) => r.id !== "zone" && v.includes(r.id)).map((r) => ({ id: r.id, libelle: r.menu }));
 }
 
 /** Le type schema.org le plus précis connu pour le métier (sinon LocalBusiness du bâtiment). */
@@ -212,12 +223,13 @@ export function donneesStructurees(c: ContenuPage, url: string, libelles: Record
   if (c.zone) d.areaServed = c.zone;
   if (c.adressePostale) d.address = { "@type": "PostalAddress", streetAddress: c.adressePostale, addressCountry: "FR" };
   if (c.logo) d.logo = c.logo;
-  const image = c.couverture?.partage ?? c.photos[0]?.partage ?? null;
+  const image = photoAccueil(c)?.partage ?? null;
   if (image) d.image = image;
   if (c.siteWeb) d.sameAs = [c.siteWeb];
   if (c.creeeEn) d.foundingDate = String(c.creeeEn);
   if (c.metiers.length) d.knowsAbout = c.metiers.map((m) => libelles[m] ?? m);
   if (c.horaires) d.openingHours = c.horaires;
+  if (c.prestations.length) d.makesOffer = c.prestations.map((x) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: x.titre, description: x.texte } }));
   return d;
 }
 
@@ -317,4 +329,4 @@ export function dossierEcriture(p: ProfilPourEcrire, libelles: Record<string, st
     .join("\n");
 }
 
-export type { Fond, Picto, Visuel, ThemeMetier, Palette };
+export type { ThemeMetier, Prestation };

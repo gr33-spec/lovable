@@ -1,6 +1,6 @@
--- MA PAGE MOBIIZ (Greg, 16 novembre 2026) : la page publique de chaque entreprise. Cinq tables NOUVELLES, aucune
+-- MA PAGE MOBIIZ (Greg, 16 novembre 2026) : la page publique de chaque entreprise. Six tables NOUVELLES, aucune
 -- donnée existante modifiée. Retour arrière :
---   DROP TABLE "contact_page", "signalement_page", "ancienne_adresse_page", "photo_page", "page_entreprise";
+--   DROP TABLE "contact_page", "signalement_page", "ancienne_adresse_page", "photo_page", "realisation_page", "page_entreprise";
 
 -- CreateTable
 CREATE TABLE "page_entreprise" (
@@ -10,11 +10,7 @@ CREATE TABLE "page_entreprise" (
     "visible" BOOLEAN NOT NULL DEFAULT false,
     "masquee_le" TIMESTAMPTZ(3),
     "masquee_motif" TEXT,
-    "modele" TEXT NOT NULL DEFAULT 'photo',
     "couleur" TEXT,
-    "fond" TEXT,
-    "pictos" BOOLEAN NOT NULL DEFAULT true,
-    "motif" BOOLEAN NOT NULL DEFAULT true,
     "accroche" TEXT,
     "presentation" TEXT,
     "telephone" TEXT,
@@ -23,6 +19,7 @@ CREATE TABLE "page_entreprise" (
     "site_web" TEXT,
     "creee_en" INTEGER,
     "certifications" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "prestations" JSONB NOT NULL DEFAULT '[]',
     "afficher_adresse" BOOLEAN NOT NULL DEFAULT false,
     "photos_accord_le" TIMESTAMPTZ(3),
     "couverture_id" UUID,
@@ -37,6 +34,7 @@ CREATE TABLE "photo_page" (
     "id" UUID NOT NULL,
     "company_id" UUID NOT NULL,
     "role" TEXT NOT NULL DEFAULT 'galerie',
+    "realisation_id" UUID,
     "ordre" INTEGER NOT NULL DEFAULT 0,
     "legende" TEXT,
     "statut" TEXT NOT NULL DEFAULT 'traitement',
@@ -49,6 +47,17 @@ CREATE TABLE "photo_page" (
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "photo_page_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "realisation_page" (
+    "id" UUID NOT NULL,
+    "company_id" UUID NOT NULL,
+    "titre" TEXT NOT NULL,
+    "ordre" INTEGER NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "realisation_page_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -93,6 +102,12 @@ CREATE INDEX "page_entreprise_visible_masquee_le_idx" ON "page_entreprise"("visi
 CREATE INDEX "photo_page_company_id_role_ordre_idx" ON "photo_page"("company_id", "role", "ordre");
 
 -- CreateIndex
+CREATE INDEX "photo_page_realisation_id_idx" ON "photo_page"("realisation_id");
+
+-- CreateIndex
+CREATE INDEX "realisation_page_company_id_ordre_idx" ON "realisation_page"("company_id", "ordre");
+
+-- CreateIndex
 CREATE INDEX "ancienne_adresse_page_company_id_idx" ON "ancienne_adresse_page"("company_id");
 
 -- CreateIndex
@@ -112,6 +127,12 @@ ALTER TABLE "page_entreprise" ADD CONSTRAINT "page_entreprise_company_id_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "photo_page" ADD CONSTRAINT "photo_page_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "photo_page" ADD CONSTRAINT "photo_page_realisation_id_fkey" FOREIGN KEY ("realisation_id") REFERENCES "realisation_page"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "realisation_page" ADD CONSTRAINT "realisation_page_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ancienne_adresse_page" ADD CONSTRAINT "ancienne_adresse_page_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE;

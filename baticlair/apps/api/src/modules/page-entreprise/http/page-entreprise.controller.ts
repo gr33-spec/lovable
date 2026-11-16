@@ -25,11 +25,8 @@ import { STOCKAGE_PAGES } from "../tokens.js";
 const texte = (max: number) => z.string().max(max * 2).nullable().optional();
 const corpsReglages = z.object({
   visible: z.boolean().optional(),
-  modele: z.string().max(20).optional(),
-  couleur: z.string().max(7).nullable().optional(),
-  fond: z.enum(["clair", "sombre"]).nullable().optional(),
-  pictos: z.boolean().optional(),
-  motif: z.boolean().optional(),
+  couleur: z.string().max(20).nullable().optional(),
+  prestations: z.array(z.object({ titre: z.string().max(200), texte: z.string().max(600).nullish() })).max(12).optional(),
   accroche: texte(90),
   presentation: texte(900),
   telephone: texte(25),
@@ -41,6 +38,7 @@ const corpsReglages = z.object({
   afficherAdresse: z.boolean().optional(),
 });
 const corpsAdresse = z.object({ adresse: z.string().trim().min(1).max(80) });
+const corpsTitre = z.object({ titre: z.string().max(200) });
 const corpsLegende = z.object({ legende: z.string().max(240).nullable() });
 const corpsOrdre = z.object({ ids: z.array(z.string().max(40)).max(40) });
 const corpsAide = z.object({ accroche: z.string().max(400).nullish(), presentation: z.string().max(4000).nullish() });
@@ -74,11 +72,8 @@ export class MaPageController {
     // Champ par champ (l'hébergeur compile en mode non strict, cf. CLAUDE.md).
     return this.pages.modifier(t, {
       ...(b.visible !== undefined ? { visible: b.visible } : {}),
-      ...(b.modele !== undefined ? { modele: b.modele } : {}),
       ...(b.couleur !== undefined ? { couleur: b.couleur } : {}),
-      ...(b.fond !== undefined ? { fond: b.fond } : {}),
-      ...(b.pictos !== undefined ? { pictos: b.pictos } : {}),
-      ...(b.motif !== undefined ? { motif: b.motif } : {}),
+      ...(b.prestations !== undefined ? { prestations: b.prestations.map((x) => ({ titre: x.titre, texte: x.texte ?? "" })) } : {}),
       ...(b.accroche !== undefined ? { accroche: b.accroche } : {}),
       ...(b.presentation !== undefined ? { presentation: b.presentation } : {}),
       ...(b.telephone !== undefined ? { telephone: b.telephone } : {}),
@@ -124,8 +119,36 @@ export class MaPageController {
   @Post("photos")
   @HttpCode(202)
   @UseInterceptors(FileInterceptor("file", { storage: memoryStorage(), limits: { fileSize: PHOTO_MAX_OCTETS + 1, files: 1 } }))
-  ajouterPhoto(@Tenant() t: TenantContext, @UploadedFile() file: { buffer: Buffer } | undefined, @Body() b: { role?: string; legende?: string }) {
-    return this.pages.ajouterPhoto(t, file?.buffer ?? Buffer.alloc(0), b?.role === "couverture" ? "couverture" : "galerie", typeof b?.legende === "string" ? b.legende : null);
+  ajouterPhoto(@Tenant() t: TenantContext, @UploadedFile() file: { buffer: Buffer } | undefined, @Body() b: { role?: string; legende?: string; realisationId?: string }) {
+    const role = b?.role === "couverture" ? "couverture" : b?.role === "equipe" ? "equipe" : "galerie";
+    return this.pages.ajouterPhoto(t, file?.buffer ?? Buffer.alloc(0), role, typeof b?.legende === "string" ? b.legende : null, typeof b?.realisationId === "string" && b.realisationId ? b.realisationId : null);
+  }
+
+  @Delete("equipe")
+  retirerEquipe(@Tenant() t: TenantContext) {
+    return this.pages.retirerPhotoEquipe(t);
+  }
+
+  /** Les chantiers réalisés : créer (titre), renommer, réordonner, retirer (ses photos avec). */
+  @Post("realisations")
+  @HttpCode(201)
+  creerRealisation(@Tenant() t: TenantContext, @Body(new ZodPipe(corpsTitre)) b: z.infer<typeof corpsTitre>) {
+    return this.pages.creerRealisation(t, b.titre);
+  }
+
+  @Put("realisations/ordre")
+  ordonnerRealisations(@Tenant() t: TenantContext, @Body(new ZodPipe(corpsOrdre)) b: z.infer<typeof corpsOrdre>) {
+    return this.pages.ordonnerRealisations(t, b.ids);
+  }
+
+  @Patch("realisations/:id")
+  renommerRealisation(@Tenant() t: TenantContext, @Param("id") id: string, @Body(new ZodPipe(corpsTitre)) b: z.infer<typeof corpsTitre>) {
+    return this.pages.renommerRealisation(t, id, b.titre);
+  }
+
+  @Delete("realisations/:id")
+  supprimerRealisation(@Tenant() t: TenantContext, @Param("id") id: string) {
+    return this.pages.supprimerRealisation(t, id);
   }
 
   @Put("photos/ordre")

@@ -135,6 +135,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
       signalement: "",
       photoPage: "",
       signalementPage: "",
+      realisationPage: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
     const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });
@@ -194,6 +195,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
     // Ma page Mobiiz (16 novembre 2026) : la page PRIVÉE de A (un visiteur ne la voit pas), une photo, un signalement.
     const pageA = await ctx.prisma.pageEntreprise.create({ data: { companyId, adresse: "page-de-toitures-a", accroche: "Accroche de Toitures A" } });
     ids.photoPage = (await ctx.prisma.photoPage.create({ data: { companyId, legende: "Photo de Toitures A", statut: "prete" } })).id;
+    ids.realisationPage = (await ctx.prisma.realisationPage.create({ data: { companyId, titre: "Chantier de Toitures A" } })).id;
     ids.signalementPage = (await ctx.prisma.signalementPage.create({ data: { companyId, motif: "autre", precision: "Signalement de la page de Toitures A" } })).id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
@@ -279,6 +281,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/alertes$/, ids.alerte],
         [/\/admin\/signalements$/, ids.signalement],
         [/\/ma-page\/photos$/, ids.photoPage],
+        [/\/ma-page\/realisations$/, ids.realisationPage],
         [/\/public\/pages$/, pageA.adresse],
         [/\/admin\/pages-publiques$/, pageA.adresse],
         [/\/admin\/pages-publiques\/signalements$/, ids.signalementPage],

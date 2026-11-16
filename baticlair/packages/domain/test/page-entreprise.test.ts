@@ -1,35 +1,37 @@
 /**
- * MA PAGE MOBIIZ (Greg, 16 novembre 2026) : le moteur. Un thème par métier du catalogue ; le contraste reste lisible quelle
- * que soit la couleur ; l'adresse de la page ; jamais une rubrique vide ; trois architectures ; données structurées sans
- * adresse exacte ni note inventée ; textes proposés sans coordonnées inventées.
+ * MA PAGE MOBIIZ (Greg, 16 novembre 2026 ; refonte du même jour : un seul modèle, un vrai site d'artisan) : le moteur. Un
+ * thème par métier du catalogue (quatre teintes, prestations proposées) ; contraste garanti ; l'adresse de la page ; jamais
+ * une rubrique vide ; le grand titre « métier à ville » ; données structurées sans adresse exacte ni note inventée.
  */
 import { describe, expect, it } from "vitest";
 import {
   accrocheParDefaut,
   adresseDepuis,
   adressesCandidates,
-  ambianceDe,
+  COULEURS_PAGE,
   contraste,
-  donneesStructurees,
   descriptionDeLaPage,
+  donneesStructurees,
   lienAppel,
-  MODELES_PAGE,
-  NUANCIER,
-  ordreDesRubriques,
-  paletteDeLaPage,
+  menuDeLaPage,
+  photoAccueil,
+  preuvesCourtes,
   proposerTextes,
   refusAdresse,
   rubriquesVisibles,
   siteWebPropre,
-  sousTitre,
+  teinteDe,
+  TEINTES,
   telephonePropre,
   texteSur,
   THEMES_METIER,
   themeDuMetier,
+  titreAccueil,
   titreDeLaPage,
   TRADES,
-  VISUELS,
+  villeDeLaZone,
   type ContenuPage,
+  type PhotoPublique,
 } from "../src/index.js";
 
 const libelles = Object.fromEntries(TRADES.map((t) => [t.id, t.label]));
@@ -51,80 +53,66 @@ function contenu(partiel: Partial<ContenuPage> = {}): ContenuPage {
     certifications: [],
     verifiee: false,
     siret: null,
-    modele: "photo",
     couleur: null,
-    fond: null,
-    pictos: true,
-    motif: true,
     logo: null,
     couverture: null,
-    photos: [],
+    prestations: [],
+    realisations: [],
+    photoEquipe: null,
     missions: null,
     majLe: "2026-11-16T10:00:00.000Z",
     ...partiel,
   };
 }
 
-describe("thèmes par métier", () => {
-  it("chaque métier du catalogue a son thème, avec un visuel et une couleur valables", () => {
+const photo = (id: string): PhotoPublique => ({ id, legende: null, largeur: 1600, hauteur: 1000, variantes: [], partage: `/photos/${id}/partage.jpg` });
+
+describe("thèmes par métier (un seul modèle, quatre teintes, prestations proposées)", () => {
+  it("chaque métier du catalogue a son thème, une des quatre teintes, et (sauf « Autre ») des prestations avec une phrase", () => {
     for (const t of TRADES) {
       const th = THEMES_METIER[t.id];
       expect(th, t.id).toBeDefined();
-      expect(VISUELS).toContain(th!.visuel);
-      expect(th!.couleur).toMatch(/^#[0-9A-F]{6}$/i);
-      expect(th!.accroche).toContain("{zone}");
-    }
-  });
-
-  it("couvreur : tons ardoise et visuel de toiture ; peintre : fond clair et visuel de finitions ; inconnu : Autre métier", () => {
-    expect(themeDuMetier("roofing")).toMatchObject({ nom: "Couvreur", visuel: "toiture", picto: "toit", fond: "sombre" });
-    expect(themeDuMetier("painting")).toMatchObject({ nom: "Peintre", visuel: "peinture", picto: "pinceau", fond: "clair" });
-    expect(themeDuMetier("inconnu").metier).toBe("other");
-    expect(themeDuMetier(null).metier).toBe("other");
-    expect(accrocheParDefaut(themeDuMetier("roofing"), "Lannion")).toBe("Votre toiture entre de bonnes mains à Lannion");
-    expect(accrocheParDefaut(themeDuMetier("roofing"), null)).toBe("Votre toiture entre de bonnes mains");
-  });
-
-  it("changer de métier principal change l'ambiance, sauf ce que l'artisan a choisi (couleur, fond)", () => {
-    const a = ambianceDe({ metierPrincipal: "roofing", couleur: null, fond: null });
-    const b = ambianceDe({ metierPrincipal: "painting", couleur: null, fond: null });
-    expect(a.visuel).not.toBe(b.visuel);
-    expect(a.palette.principale).not.toBe(b.palette.principale);
-    const choisi = ambianceDe({ metierPrincipal: "painting", couleur: "#7A2E3A", fond: "sombre" });
-    expect(choisi.palette.principale).toBe("#7A2E3A");
-    expect(choisi.palette.fond).toBe("sombre");
-    expect(choisi.visuel).toBe("peinture");
-  });
-});
-
-describe("nuancier et contraste", () => {
-  it("une vingtaine de teintes, toutes différentes", () => {
-    expect(NUANCIER.length).toBeGreaterThanOrEqual(18);
-    expect(new Set(NUANCIER.map((c) => c.hex)).size).toBe(NUANCIER.length);
-  });
-
-  it("contraste WCAG : noir sur blanc = 21, blanc sur blanc = 1", () => {
-    expect(contraste("#000000", "#FFFFFF")).toBeCloseTo(21, 5);
-    expect(contraste("#FFFFFF", "#FFFFFF")).toBeCloseTo(1, 5);
-  });
-
-  it("TOUJOURS LISIBLE : chaque teinte du nuancier, plus des couleurs libres extrêmes, sur fond clair et sombre", () => {
-    const libres = ["#FFFFFF", "#000000", "#FFFF00", "#00FFFF", "#777777", "#FED206", "#F0F0F0", "#101010"];
-    for (const hex of [...NUANCIER.map((c) => c.hex), ...libres]) {
-      for (const fond of ["clair", "sombre"] as const) {
-        const p = paletteDeLaPage(hex, fond, "#3E5163");
-        expect(contraste(p.surPrincipale, p.bouton), `${hex} bouton ${fond}`).toBeGreaterThanOrEqual(4.5);
-        expect(contraste(p.accent, p.page), `${hex} accent ${fond}`).toBeGreaterThanOrEqual(4.5);
-        expect(contraste(p.accent, p.surface), `${hex} accent surface ${fond}`).toBeGreaterThanOrEqual(4.5);
-        expect(contraste(p.texte, p.page)).toBeGreaterThanOrEqual(7);
-        expect(contraste(p.texteDoux, p.surface)).toBeGreaterThanOrEqual(4.5);
+      expect(TEINTES.map((x) => x.id)).toContain(th!.teinte);
+      if (t.id !== "other") expect(th!.prestations.length, t.id).toBeGreaterThanOrEqual(2);
+      for (const p of th!.prestations) {
+        expect(p.titre.length).toBeLessThanOrEqual(60);
+        expect(p.texte.length).toBeLessThanOrEqual(200);
+        expect(p.texte).toMatch(/\.$/);
       }
     }
   });
 
-  it("une couleur invalide prend celle du métier", () => {
-    expect(paletteDeLaPage("rouge", "clair", "#3E5163").principale).toBe("#3E5163");
-    expect(paletteDeLaPage("#12", "clair", "#3E5163").principale).toBe("#3E5163");
+  it("quatre teintes sobres, toutes lisibles en texte blanc et sur l'ivoire ; « Appeler » jaune à texte noir", () => {
+    expect(TEINTES.map((t) => t.nom)).toEqual(["Ardoise", "Anthracite", "Bleu nuit", "Vert sapin"]);
+    for (const t of TEINTES) {
+      expect(contraste("#FFFFFF", t.hex), t.nom).toBeGreaterThanOrEqual(7);
+      expect(contraste(t.hex, COULEURS_PAGE.ivoire), t.nom).toBeGreaterThanOrEqual(7);
+    }
+    expect(contraste(COULEURS_PAGE.encre, COULEURS_PAGE.jaune)).toBeGreaterThanOrEqual(10);
+    expect(contraste(COULEURS_PAGE.doux, COULEURS_PAGE.ivoire)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("la teinte : celle choisie si elle fait partie des quatre, sinon celle du métier (changer de métier la change)", () => {
+    expect(teinteDe(contenu())).toBe("#3E5163");
+    expect(teinteDe(contenu({ metierPrincipal: "painting" }))).toBe("#1F4D3A");
+    expect(teinteDe(contenu({ metierPrincipal: "painting", couleur: "#1D3557" }))).toBe("#1D3557");
+    expect(teinteDe(contenu({ couleur: "#FF00FF" }))).toBe("#3E5163");
+  });
+
+  it("le grand titre : le métier et la ville de la zone ; l'accroche d'exemple reste une suggestion", () => {
+    expect(titreAccueil(contenu({ zone: "Lannion" }))).toBe("Couvreur à Lannion");
+    expect(titreAccueil(contenu({ zone: "Lannion, Perros-Guirec et le Trégor" }))).toBe("Couvreur à Lannion");
+    expect(titreAccueil(contenu())).toBe("Couvreur");
+    expect(titreAccueil(contenu({ metierPrincipal: "painting", zone: "Saint-Brieuc" }))).toBe("Peintre à Saint-Brieuc");
+    expect(villeDeLaZone("Brest (29)")).toBe("Brest");
+    expect(accrocheParDefaut(themeDuMetier("roofing"), "Lannion")).toBe("Votre toiture entre de bonnes mains à Lannion");
+    expect(themeDuMetier("inconnu").metier).toBe("other");
+  });
+
+  it("la ligne de preuves : seulement ce qui est vrai, trois au plus", () => {
+    expect(preuvesCourtes(contenu({ verifiee: true, certifications: ["Assurance décennale", "RGE"], creeeEn: 2011 }), 2026)).toEqual(["Entreprise vérifiée", "Décennale", "15 ans d'expérience"]);
+    expect(preuvesCourtes(contenu({ certifications: ["RGE", "Responsabilité civile pro"] }), 2026)).toEqual(["RGE"]);
+    expect(preuvesCourtes(contenu({ creeeEn: 2026 }), 2026)).toEqual([]);
   });
 });
 
@@ -152,40 +140,31 @@ describe("adresse de la page", () => {
   });
 });
 
-describe("rubriques : jamais une rubrique vide", () => {
+describe("rubriques : jamais une rubrique vide, ni dans la page ni dans le menu", () => {
   it("une page sans rien n'a que le contact", () => {
-    expect(rubriquesVisibles(contenu({ metiers: [] }))).toEqual(["contact"]);
+    expect(rubriquesVisibles(contenu())).toEqual(["contact"]);
+    expect(menuDeLaPage(contenu()).map((m) => m.libelle)).toEqual(["Contact"]);
   });
 
-  it("chaque rubrique apparaît avec son contenu seulement", () => {
-    const plein = contenu({
-      presentation: "Bonjour",
-      zone: "Lannion",
-      horaires: "Lun-Ven 8h-18h",
-      verifiee: true,
-      photos: [{ id: "p", legende: null, largeur: 10, hauteur: 10, variantes: [], partage: null }],
-      missions: { disponibleDu: null, disponibleAu: null, lien: "/missions" },
-    });
-    expect(rubriquesVisibles(plein)).toEqual(["presentation", "metiers", "zone", "galerie", "preuves", "horaires", "missions", "contact"]);
-    expect(rubriquesVisibles(contenu({ presentation: "   " }))).not.toContain("presentation");
-    expect(rubriquesVisibles(contenu({ certifications: ["RGE"] }))).toContain("preuves");
+  it("chaque rubrique apparaît avec son contenu seulement ; la zone n'est pas dans le menu", () => {
+    const plein = contenu({ presentation: "Bonjour", zone: "Lannion", prestations: [{ titre: "Zinguerie", texte: "Gouttières." }], realisations: [{ id: "r", titre: "Toiture · Paimpol", photos: [photo("a")] }] });
+    expect(rubriquesVisibles(plein)).toEqual(["prestations", "realisations", "a-propos", "zone", "contact"]);
+    expect(menuDeLaPage(plein).map((m) => m.libelle)).toEqual(["Prestations", "Réalisations", "À propos", "Contact"]);
+    expect(rubriquesVisibles(contenu({ presentation: "   " }))).not.toContain("a-propos");
+    expect(rubriquesVisibles(contenu({ certifications: ["RGE"] }))).toContain("a-propos");
   });
 
-  it("trois architectures : l'ordre change, le contenu reste le même", () => {
-    expect(MODELES_PAGE.map((m) => m.id)).toEqual(["photo", "colonnes", "sobre"]);
-    const v = rubriquesVisibles(contenu({ presentation: "x", zone: "Brest", verifiee: true, photos: [{ id: "p", legende: null, largeur: 1, hauteur: 1, variantes: [], partage: null }] }));
-    const ordres = MODELES_PAGE.map((m) => ordreDesRubriques(m.id, v).join(","));
-    expect(new Set(ordres).size).toBe(3);
-    for (const m of MODELES_PAGE) expect([...ordreDesRubriques(m.id, v)].sort()).toEqual([...v].sort());
+  it("la photo d'accueil : la couverture, sinon le premier chantier, sinon aucune (jamais un dessin)", () => {
+    expect(photoAccueil(contenu())).toBeNull();
+    expect(photoAccueil(contenu({ realisations: [{ id: "r", titre: "x", photos: [photo("a"), photo("b")] }] }))?.id).toBe("a");
+    expect(photoAccueil(contenu({ couverture: photo("c"), realisations: [{ id: "r", titre: "x", photos: [photo("a")] }] }))?.id).toBe("c");
   });
 });
 
 describe("Google et partage", () => {
-  it("titre « métier à ville – nom », sous-titre sans texte inventé", () => {
+  it("titre « métier à ville – nom »", () => {
     expect(titreDeLaPage(contenu({ zone: "Lannion" }))).toBe("Couvreur à Lannion – Toits Martin");
     expect(titreDeLaPage(contenu())).toBe("Couvreur – Toits Martin");
-    expect(sousTitre(contenu({ zone: "Lannion" }))).toBe("Couvreur · Lannion");
-    expect(sousTitre(contenu({ accroche: " Ma toiture " }))).toBe("Ma toiture");
   });
 
   it("description coupée proprement à 160 caractères", () => {
@@ -199,6 +178,9 @@ describe("Google et partage", () => {
     expect(sans).toMatchObject({ "@type": "RoofingContractor", name: "Toits Martin", areaServed: "Lannion", telephone: "02 96 00 00 00" });
     expect(sans).not.toHaveProperty("address");
     expect(sans).not.toHaveProperty("aggregateRating");
+    const offres = donneesStructurees(contenu({ prestations: [{ titre: "Zinguerie", texte: "Gouttières." }], realisations: [{ id: "r", titre: "x", photos: [photo("a")] }] }), "u", libelles);
+    expect(offres.makesOffer).toEqual([{ "@type": "Offer", itemOffered: { "@type": "Service", name: "Zinguerie", description: "Gouttières." } }]);
+    expect(offres.image).toBe("/photos/a/partage.jpg");
     const avec = donneesStructurees(contenu({ adressePostale: "3 rue des Ardoises, 22300 Lannion" }), "u", libelles);
     expect(avec.address).toMatchObject({ streetAddress: "3 rue des Ardoises, 22300 Lannion" });
     expect(donneesStructurees(contenu({ metierPrincipal: "painting", metiers: ["painting"] }), "u", libelles)["@type"]).toBe("HousePainter");

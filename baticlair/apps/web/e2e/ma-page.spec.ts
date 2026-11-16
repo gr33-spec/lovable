@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type Browser, type Page } from "@playwright/test";
 
 /**
@@ -52,9 +53,11 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await page.getByRole("link", { name: /Ma page/ }).first().click();
   await expect(page.getByRole("heading", { name: "Ma page", level: 1 })).toBeVisible();
   await expect(page.getByRole("switch", { name: /Page visible/ })).toHaveAttribute("aria-checked", "false");
-  // L'aperçu est déjà là, prérempli depuis le profil (le nom, le métier).
-  await expect(apercu(page).locator("h1")).toHaveText(nom);
-  await expect(apercu(page).getByText("Couvreur").first()).toBeVisible();
+  // L'aperçu est déjà là, prérempli depuis le profil : le grand titre est le métier, le nom dessous ; les prestations du
+  // métier sont proposées.
+  await expect(apercu(page).locator("h1")).toHaveText("Couvreur");
+  await expect(apercu(page).locator(".pe-accueil-nom")).toHaveText(nom);
+  await expect(apercu(page).getByText("Zinguerie").first()).toBeVisible();
   const adresse = ((await page.getByText(/\/e\/[a-z0-9-]+$/).first().textContent()) ?? "").split("/e/")[1]!.trim();
   expect(adresse).toMatch(/^toits-martin-/);
 
@@ -63,15 +66,13 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await v.goto(`/e/${adresse}`);
   await expect(v.getByRole("heading", { name: "Page introuvable" })).toBeVisible();
 
-  // Le modèle se voit en direct dans l'aperçu (trois architectures).
-  await page.getByRole("radio", { name: "Classique en colonnes" }).click();
-  await expect(apercu(page).locator(".pe-grille")).toBeVisible();
-  await page.getByRole("radio", { name: "Sobre et direct" }).click();
-  await expect(apercu(page).locator(".pe-sobre-tete")).toBeVisible();
-  await enregistre(page);
-  // Couleur du nuancier, fond sombre.
+  // Un seul modèle ; une des quatre teintes.
+  await expect(page.getByRole("radio", { name: "Classique en colonnes" })).toHaveCount(0);
+  await expect(page.getByRole("radio", { name: "Fond sombre" })).toHaveCount(0);
   await page.getByRole("radio", { name: "Bleu nuit" }).click();
-  await page.getByRole("radio", { name: "Fond sombre" }).click();
+  await enregistre(page);
+  // Une prestation se retire.
+  await page.getByRole("button", { name: "Retirer la prestation Entretien et démoussage" }).click();
   await enregistre(page);
   // Textes, téléphone, zone, certification.
   await page.getByRole("textbox", { name: /^Accroche/ }).fill("Ardoise, zinc et tuile autour de Lannion");
@@ -80,16 +81,20 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await page.getByRole("textbox", { name: /^Zone d'intervention/ }).fill("Lannion");
   await page.getByRole("button", { name: "Assurance décennale" }).click();
   await enregistre(page);
+  await expect(apercu(page).locator("h1")).toHaveText("Couvreur à Lannion");
   await expect(apercu(page).getByText("Ardoise, zinc et tuile autour de Lannion")).toBeVisible();
   // « Mobiiz m'aide à l'écrire » propose, rien n'est remplacé sans l'artisan.
   await page.getByRole("button", { name: "Mobiiz m'aide à l'écrire" }).click();
   await expect(page.getByTestId("proposition")).toBeVisible();
   await page.getByRole("button", { name: "Garder les miens" }).click();
   await expect(page.getByRole("textbox", { name: /^Accroche/ })).toHaveValue("Ardoise, zinc et tuile autour de Lannion");
-  // Une photo de chantier : envoyée telle quelle, préparée par Mobiiz en arrière-plan.
+  // Un chantier et sa photo : envoyée telle quelle, préparée par Mobiiz en arrière-plan.
   await page.getByRole("checkbox", { name: /J'ai pris ces photos ou j'ai le droit de les utiliser/ }).check();
-  await page.locator('input[type=file][multiple]').setInputFiles(PHOTO);
-  await expect(page.getByRole("list", { name: "Photos de chantiers" }).locator("img")).toHaveCount(1, { timeout: 30_000 });
+  await page.getByRole("textbox", { name: "Titre du nouveau chantier" }).fill("Toiture ardoise · Paimpol");
+  await page.getByRole("button", { name: "Nouveau chantier" }).click();
+  await expect(page.getByRole("textbox", { name: "Titre du chantier" })).toHaveValue("Toiture ardoise · Paimpol");
+  await page.locator('input[type=file][multiple]').first().setInputFiles(PHOTO);
+  await expect(page.getByRole("list", { name: "Photos du chantier" }).locator("img")).toHaveCount(1, { timeout: 30_000 });
   // Publier.
   await page.getByRole("switch", { name: /Page visible/ }).click();
   await enregistre(page);
@@ -101,23 +106,36 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
 
   // Le visiteur : la page tout de suite à jour (cache régénéré), rien d'autre de Mobiiz.
   await v.goto(`/e/${adresse}`);
-  await expect(v.getByRole("heading", { name: nom, level: 1 })).toBeVisible();
+  await expect(v.getByRole("heading", { name: "Couvreur à Lannion", level: 1 })).toBeVisible();
+  await expect(v.locator(".pe-accueil-nom")).toHaveText(nom);
+  await expect(v.getByRole("navigation", { name: "Menu de la page" }).or(v.getByRole("button", { name: "Ouvrir le menu" })).first()).toBeVisible();
   await expect(v.getByText("Ardoise, zinc et tuile autour de Lannion")).toBeVisible();
-  await expect(v.getByText("Assurance décennale")).toBeVisible();
+  await expect(v.getByText("Décennale", { exact: true })).toBeVisible();
   await expect(v.getByRole("navigation", { name: "Navigation principale" })).toHaveCount(0);
   await expect(v).toHaveTitle(`Couvreur à Lannion – ${nom}`);
   const ld = JSON.parse((await v.locator('script[type="application/ld+json"]').textContent())!);
   expect(ld).toMatchObject({ "@type": "RoofingContractor", name: nom, telephone: "02 96 11 22 33", areaServed: "Lannion" });
   expect(ld).not.toHaveProperty("address");
   expect(await v.locator('meta[property="og:image"]').getAttribute("content")).toMatch(/partage\.jpg|apercu\.png/);
-  await expect(v.locator(".pe-galerie img")).toHaveCount(1);
+  // Le chantier : sa photo en grand, son titre dessus ; on le touche pour voir ses photos.
+  await v.getByRole("button", { name: /Toiture ardoise · Paimpol/ }).click();
+  await expect(v.getByRole("dialog", { name: /Toiture ardoise · Paimpol/ })).toBeVisible();
+  await v.getByRole("button", { name: "Fermer" }).click();
+  // Plus aucun visuel dessiné ni fond sombre : la page est claire.
+  await expect(v.locator(".pe svg[viewBox='0 0 800 600']")).toHaveCount(0);
+  expect(await v.locator(".pe").evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(251, 248, 243)");
   if (info.project.name === "telephone") {
-    // Le bouton « Appeler » reste visible en bas, même après avoir fait défiler.
-    await v.mouse.wheel(0, 3000);
-    await expect(v.getByRole("navigation", { name: "Contacter l'entreprise" }).getByRole("link", { name: "Appeler" })).toBeInViewport();
-    await expect(v.getByRole("navigation", { name: "Contacter l'entreprise" }).getByRole("link", { name: "Appeler" })).toHaveAttribute("href", "tel:0296112233");
-  } else {
+    // « Appeler » dans la barre du haut ; une fois l'accueil passé, le bouton fixé en bas prend le relais (pas en double).
+    await v.evaluate(() => window.scrollTo(0, 0));
     await expect(v.locator(".pe-entete-appel")).toBeVisible();
+    await expect(v.locator(".pe-barre-appel")).not.toBeInViewport();
+    await v.locator("#contact").scrollIntoViewIfNeeded();
+    await expect(v.locator(".pe-barre-appel a")).toBeInViewport();
+    await expect(v.locator(".pe-barre-appel a")).toHaveAttribute("href", "tel:0296112233");
+    await expect(v.locator(".pe-entete-appel")).toHaveCSS("opacity", "0");
+  } else {
+    await expect(v.locator(".pe-entete-appel")).toContainText("02 96 11 22 33");
+    await expect(v.locator(".pe-barre-appel")).toBeHidden();
   }
   await sansDefilementHorizontal(v);
 
@@ -157,11 +175,12 @@ test("Ma page : deux comptes, chacun ne voit et ne règle que la sienne", async 
   const nomB = `Peinture Le Gall ${unique()}`;
   await inscrire(b, nomB, "Peinture");
   await b.goto("/compte/ma-page");
-  await expect(apercu(b).locator("h1")).toHaveText(nomB);
+  await expect(apercu(b).locator(".pe-accueil-nom")).toHaveText(nomB);
+  await expect(apercu(b).locator("h1")).toHaveText("Peintre");
   await expect(b.getByText("Accroche privée de A")).toHaveCount(0);
   await expect(b.getByText(a)).toHaveCount(0);
-  // Le peintre a l'ambiance de son métier (visuel de finitions), le couvreur la sienne.
-  await expect(b.getByText("Sans photo : un visuel « peintre » à tes couleurs.")).toBeVisible();
+  // Le peintre a les prestations de son métier.
+  await expect(apercu(b).getByText("Peinture intérieure").first()).toBeVisible();
   await ctxB.close();
 });
 
@@ -178,58 +197,77 @@ test("Ma page : l'éditeur dans les thèmes clair et sombre de l'application, sa
   }
 });
 
-test.describe("petit iPhone (375 px)", () => {
-  test.use({ viewport: { width: 375, height: 667 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
-
-  test("Ma page : les trois modèles, couvreur et peintre, tiennent sur un petit écran (captures du rapport)", async ({ browser }, info) => {
+test.describe("captures du rapport", () => {
+  test("Ma page : un couvreur avec 3 chantiers, téléphone et ordinateur (captures pleine page)", async ({ browser }, info) => {
     test.skip(info.project.name !== "telephone", "une seule passe suffit");
     test.setTimeout(300_000);
     const dossier = process.env.CAPTURES_MA_PAGE;
-    const cas = [
-      { nom: process.env.CAPTURES_MA_PAGE ? "Toits Martin" : `Toits Martin ${unique()}`.slice(0, 32), metier: "Couverture, charpente, zinguerie", court: "couvreur", accroche: "Ardoise, zinc et tuile autour de Lannion", zone: "Lannion", presentation: "Couvreur depuis 2008 : réfection de toitures en ardoise naturelle, zinguerie et réparations après tempête. Devis clair, chantier propre et bâché chaque soir.", photo: process.env.PHOTO_COUVREUR ?? PHOTO, galerie: process.env.GALERIE_COUVREUR },
-      { nom: process.env.CAPTURES_MA_PAGE ? "Couleurs Le Gall" : `Couleurs Le Gall ${unique()}`.slice(0, 32), metier: "Peinture", court: "peintre", accroche: "Peinture intérieure et façades à Saint-Brieuc", zone: "Saint-Brieuc", presentation: "Peintres en bâtiment : murs, plafonds, boiseries et ravalements. Protection des meubles et nettoyage compris.", photo: process.env.PHOTO_PEINTRE ?? PHOTO, galerie: process.env.GALERIE_PEINTRE },
-    ];
-    for (const c of cas) {
-      const ctx = await browser.newContext({ baseURL: "http://localhost:3000", viewport: { width: 375, height: 667 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
-      const p = await ctx.newPage();
-      await p.addLocatorHandler(p.getByRole("dialog", { name: "Guide" }), async () => {
-        await p.getByRole("button", { name: "Passer le guide" }).click();
-      });
-      await inscrire(p, c.nom, c.metier);
-      await p.goto("/compte/ma-page");
-      await p.getByRole("textbox", { name: /^Accroche/ }).fill(c.accroche);
-      await p.getByRole("textbox", { name: /^Présentation/ }).fill(c.presentation);
-      await p.getByRole("textbox", { name: /^Téléphone/ }).fill("02 96 11 22 33");
-      await p.getByRole("textbox", { name: /^Zone d'intervention/ }).fill(c.zone);
-      await p.getByRole("button", { name: "Assurance décennale" }).click();
-      await p.getByRole("button", { name: "RGE" }).click();
-      await enregistre(p);
-      await p.getByRole("checkbox", { name: /J'ai pris ces photos ou j'ai le droit de les utiliser/ }).check();
-      await p.locator('input[type=file]:not([multiple])').nth(1).setInputFiles(c.photo);
-      await expect(p.getByAltText("Photo de couverture")).toBeVisible({ timeout: 30_000 });
-      const galerie = (c.galerie ?? PHOTO).split(",");
-      await p.locator('input[type=file][multiple]').setInputFiles(galerie);
-      await expect(p.getByRole("list", { name: "Photos de chantiers" }).locator("img")).toHaveCount(galerie.length, { timeout: 60_000 });
-      await p.getByRole("switch", { name: /Page visible/ }).click();
-      await enregistre(p);
-      const adresse = ((await p.getByText(/\/e\/[a-z0-9-]+$/).first().textContent()) ?? "").split("/e/")[1]!.trim();
-      for (const modele of ["Plein écran photo", "Classique en colonnes", "Sobre et direct"]) {
-        await p.getByRole("radio", { name: modele }).click();
-        await enregistre(p);
-        const v = await ctx.newPage();
-        await v.goto(`/e/${adresse}`);
-        await expect(v.getByRole("heading", { level: 1 })).toBeVisible();
-        await sansDefilementHorizontal(v);
-        if (dossier) {
-          await v.waitForTimeout(500);
-          const id = modele.startsWith("Plein") ? "1-plein-ecran-photo" : modele.startsWith("Classique") ? "2-classique-colonnes" : "3-sobre-direct";
-          await v.screenshot({ path: `${dossier}/${c.court}-${id}.png` });
-          await v.screenshot({ path: `${dossier}/${c.court}-${id}-page-entiere.png`, fullPage: true });
-        }
-        await v.close();
-      }
-      if (dossier) await p.screenshot({ path: `${dossier}/${c.court}-editeur.png` });
-      await ctx.close();
+    const fichier = (cle: string, defaut = PHOTO) => (process.env[cle] ?? defaut).split(",");
+    const ctx = await browser.newContext({ baseURL: "http://localhost:3000", viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+    const p = await ctx.newPage();
+    await p.addLocatorHandler(p.getByRole("dialog", { name: "Guide" }), async () => {
+      await p.getByRole("button", { name: "Passer le guide" }).click();
+    });
+    await inscrire(p, dossier ? "Toitures Le Bihan" : `Toitures Le Bihan ${unique()}`);
+    await p.goto("/compte/ma-page");
+    const companyId = await p.evaluate(() => localStorage.getItem("baticlair.companyId"));
+    const appel = (methode: "post" | "patch" | "put", url: string, data: Record<string, unknown>) => p.request[methode](url, { data, headers: { "x-company-id": companyId ?? "" } });
+    await appel("patch", "/v1/ma-page", {
+      accroche: "Ardoise naturelle, zinc et réparations, du Trégor au Goëlo.",
+      presentation: "Entreprise familiale de couverture, nous refaisons et entretenons les toitures de la région depuis 2011. Chaque chantier est bâché chaque soir et laissé propre.\n\nDevis gratuit sous 48 heures, interventions rapides après tempête.",
+      telephone: "02 96 11 22 33",
+      zone: "Lannion",
+      horaires: "Du lundi au vendredi, 8 h à 18 h",
+      creeeEn: 2011,
+      certifications: ["Assurance décennale", "RGE", "Qualibat"],
+      visible: true,
+    });
+    await appel("post", "/v1/ma-page/accord-photos", {});
+    const envoyer = async (chemin: string, champs: Record<string, string>) => {
+      const res = await p.request.post("/v1/ma-page/photos", { headers: { "x-company-id": companyId ?? "" }, multipart: { ...champs, file: { name: "photo.jpg", mimeType: "image/jpeg", buffer: readFileSync(chemin) } } });
+      expect(res.status()).toBe(202);
+    };
+    await envoyer(fichier("PHOTO_ACCUEIL")[0]!, { role: "couverture" });
+    for (const [titre, cle] of [["Réfection en ardoise · Paimpol", "CHANTIER_1"], ["Longère rénovée · Pleumeur-Bodou", "CHANTIER_2"], ["Zinguerie et faîtage · Perros-Guirec", "CHANTIER_3"]] as const) {
+      const r = (await (await appel("post", "/v1/ma-page/realisations", { titre })).json()) as { realisation: { id: string } };
+      for (const f of fichier(cle)) await envoyer(f, { realisationId: r.realisation.id });
     }
+    await expect.poll(async () => ((await (await p.request.get("/v1/ma-page", { headers: { "x-company-id": companyId ?? "" } })).json()) as { photos: { statut: string }[] }).photos.every((x) => x.statut === "prete"), { timeout: 90_000 }).toBe(true);
+    await p.request.post("/api/pages-entreprises/rafraichir", { headers: { "x-company-id": companyId ?? "" }, data: {} });
+    const adresse = ((await (await p.request.get("/v1/ma-page", { headers: { "x-company-id": companyId ?? "" } })).json()) as { reglages: { adresse: string } }).reglages.adresse;
+    for (const [nomAppareil, taille, mobile] of [["telephone", { width: 390, height: 844 }, true], ["ordinateur", { width: 1440, height: 900 }, false]] as const) {
+      const vctx = await browser.newContext({ baseURL: "http://localhost:3000", viewport: taille, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 2 });
+      const v = await vctx.newPage();
+      await v.goto(`/e/${adresse}`);
+      await expect(v.getByRole("heading", { level: 1 })).toHaveText("Couvreur à Lannion");
+      await expect(v.locator(".pe-chantier")).toHaveCount(3);
+      await sansDefilementHorizontal(v);
+      if (dossier) {
+        // Les photos sont chargées à la demande : on descend une fois pour les faire venir, puis on remonte.
+        await v.evaluate(async () => {
+          for (let y = 0; y < document.body.scrollHeight; y += 500) {
+            window.scrollTo(0, y);
+            await new Promise((r) => setTimeout(r, 120));
+          }
+          window.scrollTo(0, 0);
+        });
+        await v.waitForTimeout(600);
+        await v.screenshot({ path: `${dossier}/${nomAppareil}-accueil.png` });
+        await v.screenshot({ path: `${dossier}/${nomAppareil}-page-entiere.png`, fullPage: true });
+        if (nomAppareil === "telephone") {
+          await v.locator("#realisations").scrollIntoViewIfNeeded();
+          await v.waitForTimeout(400);
+          await v.screenshot({ path: `${dossier}/${nomAppareil}-defile.png` });
+          await v.getByRole("button", { name: "Ouvrir le menu" }).click();
+          await v.screenshot({ path: `${dossier}/${nomAppareil}-menu.png` });
+        }
+        await v.getByRole("button", { name: /Réfection en ardoise/ }).click();
+        await v.waitForTimeout(500);
+        await v.screenshot({ path: `${dossier}/${nomAppareil}-visionneuse.png` });
+      }
+      await vctx.close();
+    }
+    if (dossier) await p.screenshot({ path: `${dossier}/telephone-editeur.png` });
+    await ctx.close();
   });
 });

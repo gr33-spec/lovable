@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
-import { descriptionDeLaPage, donneesStructurees, titreDeLaPage } from "@baticlair/domain/page-entreprise";
+import { descriptionDeLaPage, donneesStructurees, photoAccueil, titreDeLaPage } from "@baticlair/domain/page-entreprise";
 import { LIBELLES, VuePage } from "@/components/page-entreprise/vue-page";
 import { origineDuSite } from "@/lib/origine";
 import { absolue, lirePage } from "@/lib/page-entreprise";
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const titre = titreDeLaPage(c);
   const description = descriptionDeLaPage(c, LIBELLES);
   const url = `${origine}/e/${c.adresse}`;
-  const image = c.couverture?.partage ?? c.photos[0]?.partage;
+  const image = photoAccueil(c)?.partage;
   const images = [{ url: image ? absolue(image, origine) : `${url}/apercu.png`, width: 1200, height: 630, alt: `${c.nom}, ${titre}` }];
   return {
     title: { absolute: titre },
@@ -50,12 +50,12 @@ export default async function PageEntreprise({ params }: Props) {
   const c = await charger(adresse);
   const origine = await origineDuSite();
   const nonce = (await headers()).get("x-nonce") ?? undefined;
-  const absolu = { ...c, logo: c.logo ? absolue(c.logo, origine) : null, couverture: c.couverture ? { ...c.couverture, partage: c.couverture.partage ? absolue(c.couverture.partage, origine) : null } : null, photos: c.photos.map((p) => ({ ...p, partage: p.partage ? absolue(p.partage, origine) : null })) };
+  const absolu = { ...c, logo: c.logo ? absolue(c.logo, origine) : null, couverture: c.couverture ? { ...c.couverture, partage: c.couverture.partage ? absolue(c.couverture.partage, origine) : null } : null, realisations: c.realisations.map((r) => ({ ...r, photos: r.photos.map((p) => ({ ...p, partage: p.partage ? absolue(p.partage, origine) : null })) })) };
   const jsonLd = JSON.stringify(donneesStructurees(absolu, `${origine}/e/${c.adresse}`, LIBELLES)).replace(/</g, "\\u003c");
   return (
     <>
       <script type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: jsonLd }} />
-      <VuePage contenu={c} url={`${origine}/e/${c.adresse}`} />
+      <VuePage contenu={c} />
     </>
   );
 }

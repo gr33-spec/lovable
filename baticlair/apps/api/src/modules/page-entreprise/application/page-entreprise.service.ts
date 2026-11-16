@@ -2,12 +2,9 @@ import { createHash } from "node:crypto";
 import {
   adressesCandidates,
   CERTIFICATIONS_SUGGEREES,
-  estCouleur,
-  estModele,
   LIMITES_PAGE,
-  NUANCIER,
-  MODELES_PAGE,
   refusAdresse,
+  TEINTES,
   siteWebPropre,
   telephonePropre,
   THEMES_METIER,
@@ -15,6 +12,8 @@ import {
   TRADES,
   type ContenuPage,
   type PhotoPublique,
+  type Prestation,
+  type RealisationPublique,
 } from "@baticlair/domain";
 import type { AppConfig } from "../../../platform/config/config.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -48,11 +47,8 @@ export const LIMITES_CONTACT = { parIpParHeure: 5, parPageParJour: 30 } as const
 
 export interface ModificationPage {
   visible?: boolean;
-  modele?: string;
   couleur?: string | null;
-  fond?: "clair" | "sombre" | null;
-  pictos?: boolean;
-  motif?: boolean;
+  prestations?: Prestation[];
   accroche?: string | null;
   presentation?: string | null;
   telephone?: string | null;
@@ -86,6 +82,13 @@ export function villeDeLAdresse(adresse: string | null | undefined): string | nu
 function nettoyer(v: string | null | undefined, max: number): string | null {
   const t = v?.replace(/\r/g, "").replace(/[ \t]+/g, " ").trim();
   return t ? t.slice(0, max) : null;
+}
+
+export type RolePhoto = "galerie" | "couverture" | "equipe";
+
+/** Les prestations gardées en base (JSON) : seulement des objets bien formés. */
+export function prestationsDe(v: unknown): Prestation[] {
+  return Array.isArray(v) ? v.filter((x): x is Prestation => !!x && typeof x === "object" && typeof (x as Prestation).titre === "string").map((x) => ({ titre: x.titre, texte: typeof x.texte === "string" ? x.texte : "" })) : [];
 }
 
 export class PageEntrepriseService {
@@ -128,7 +131,9 @@ export class PageEntrepriseService {
     for (const adresse of adressesCandidates(e.name, villeDeLAdresse(e.address) ?? e.profilPublic?.ville ?? null)) {
       if (await this.adressePrise(adresse)) continue;
       try {
-        return await this.prisma.pageEntreprise.create({ data: { companyId, adresse } });
+        // La page se fabrique toute seule : les prestations du métier sont proposées (l'artisan les garde, corrige ou
+        // retire ; la page reste privée tant qu'il ne l'a pas rendue visible).
+        return await this.prisma.pageEntreprise.create({ data: { companyId, adresse, prestations: themeDuMetier(e.trades[0]).prestations.map((x) => ({ ...x })) } });
       } catch (err) {
         // Deux ouvertures simultanées : la page existe déjà, ou l'adresse vient d'être prise par une autre.
         const p = await this.prisma.pageEntreprise.findUnique({ where: { companyId } });
@@ -152,12 +157,19 @@ export class PageEntrepriseService {
   private async contenu(page: PageRow): Promise<ContenuPage> {
     const e = await this.entreprise(page.companyId);
     const missions = await this.missionsActives().catch(() => false);
-    const [photos, couverture, dispo] = await Promise.all([
+    const [photos, realisations, couverture, equipe, dispo] = await Promise.all([
       this.prisma.photoPage.findMany({ where: { companyId: page.companyId, role: "galerie", statut: "prete" }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }] }),
+      this.prisma.realisationPage.findMany({ where: { companyId: page.companyId }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }] }),
       page.couvertureId ? this.prisma.photoPage.findFirst({ where: { id: page.couvertureId, companyId: page.companyId, statut: "prete" } }) : null,
+      this.prisma.photoPage.findFirst({ where: { companyId: page.companyId, role: "equipe", statut: "prete" }, orderBy: { createdAt: "desc" } }),
       missions ? this.prisma.annonceMission.findFirst({ where: { companyId: page.companyId, type: "disponibilite", statut: "publiee" }, orderBy: { createdAt: "desc" }, select: { id: true, debut: true, fin: true } }) : null,
     ]);
     const metiers = e.trades.filter((t) => LIBELLES_METIERS[t]);
+    // Les chantiers dans leur ordre, chacun avec ses photos prêtes ; une photo sans chantier est un chantier à elle seule.
+    const chantiers: RealisationPublique[] = realisations
+      .map((r) => ({ id: r.id, titre: r.titre, photos: photos.filter((ph) => ph.realisationId === r.id).map((ph) => this.vuePhoto(ph)) }))
+      .filter((r) => r.photos.length > 0);
+    for (const ph of photos.filter((x) => !x.realisationId || !realisations.some((r) => r.id === x.realisationId))) chantiers.push({ id: ph.id, titre: ph.legende ?? "Réalisation", photos: [this.vuePhoto(ph)] });
     return {
       adresse: page.adresse,
       nom: e.name,
@@ -174,14 +186,12 @@ export class PageEntrepriseService {
       certifications: page.certifications,
       verifiee: !!e.siretVerifieLe,
       siret: e.siret?.replace(/\s/g, "") || null,
-      modele: estModele(page.modele) ? page.modele : "photo",
       couleur: page.couleur,
-      fond: page.fond === "clair" || page.fond === "sombre" ? page.fond : null,
-      pictos: page.pictos,
-      motif: page.motif,
       logo: e.logoType ? `/v1/public/pages/${page.adresse}/logo?v=${e.updatedAt.getTime().toString(36)}` : null,
       couverture: couverture ? this.vuePhoto(couverture) : null,
-      photos: photos.map((p) => this.vuePhoto(p)),
+      prestations: prestationsDe(page.prestations),
+      realisations: chantiers,
+      photoEquipe: equipe ? this.vuePhoto(equipe) : null,
       missions: dispo ? { disponibleDu: dispo.debut.toISOString().slice(0, 10), disponibleAu: dispo.fin?.toISOString().slice(0, 10) ?? null, lien: `/missions/${dispo.id}` } : null,
       majLe: new Date(Math.max(page.updatedAt.getTime(), e.updatedAt.getTime())).toISOString(),
     };
@@ -197,17 +207,15 @@ export class PageEntrepriseService {
       this.contenu(page),
       this.prisma.photoPage.findMany({ where: { companyId: t.companyId }, orderBy: [{ role: "asc" }, { ordre: "asc" }, { createdAt: "asc" }] }),
     ]);
+    const realisations = await this.prisma.realisationPage.findMany({ where: { companyId: t.companyId }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }], select: { id: true, titre: true } });
     return {
       reglages: {
         visible: page.visible,
         masquee: !!page.masqueeLe,
         adresse: page.adresse,
         adresseModifiable: !page.adresseChangeeLe,
-        modele: contenu.modele,
         couleur: page.couleur,
-        fond: page.fond,
-        pictos: page.pictos,
-        motif: page.motif,
+        prestations: prestationsDe(page.prestations),
         accroche: page.accroche,
         presentation: page.presentation,
         telephone: page.telephone,
@@ -222,10 +230,10 @@ export class PageEntrepriseService {
       },
       profil: { nom: e.name, metiers: contenu.metiers, telephone: telephonePropre(e.phone), zone: e.profilPublic?.ville ?? villeDeLAdresse(e.address), adressePostale: e.address, siret: e.siret, verifiee: !!e.siretVerifieLe, logo: !!e.logoType },
       contenu,
-      photos: photos.map((p) => ({ ...this.vuePhoto(p), role: p.role, statut: p.statut })),
+      photos: photos.map((p) => ({ ...this.vuePhoto(p), role: p.role, statut: p.statut, realisationId: p.realisationId })),
+      realisations,
       choix: {
-        modeles: MODELES_PAGE,
-        nuancier: NUANCIER,
+        teintes: TEINTES,
         certifications: CERTIFICATIONS_SUGGEREES,
         theme: themeDuMetier(contenu.metierPrincipal),
         limites: LIMITES_PAGE,
@@ -241,17 +249,17 @@ export class PageEntrepriseService {
     const page = await this.pageDe(t.companyId);
     const d: Record<string, unknown> = {};
     if (m.visible !== undefined) d.visible = m.visible;
-    if (m.modele !== undefined) {
-      if (!estModele(m.modele)) throw refus("modele", "Modèle inconnu.", "modele");
-      d.modele = m.modele;
-    }
     if (m.couleur !== undefined) {
-      if (m.couleur !== null && !estCouleur(m.couleur)) throw refus("couleur", "Couleur invalide.", "couleur");
-      d.couleur = m.couleur?.toUpperCase() ?? null;
+      const teinte = m.couleur === null ? null : TEINTES.find((x) => x.hex.toLowerCase() === m.couleur!.toLowerCase() || x.id === m.couleur);
+      if (m.couleur !== null && !teinte) throw refus("couleur", "Choisis une des quatre teintes.", "couleur");
+      d.couleur = teinte?.hex ?? null;
     }
-    if (m.fond !== undefined) d.fond = m.fond;
-    if (m.pictos !== undefined) d.pictos = m.pictos;
-    if (m.motif !== undefined) d.motif = m.motif;
+    if (m.prestations !== undefined) {
+      d.prestations = m.prestations
+        .map((x) => ({ titre: nettoyer(x.titre?.replace(/\n/g, " "), LIMITES_PAGE.prestationTitre), texte: nettoyer(x.texte?.replace(/\n/g, " "), LIMITES_PAGE.prestationTexte) ?? "" }))
+        .filter((x): x is Prestation => !!x.titre)
+        .slice(0, LIMITES_PAGE.prestations);
+    }
     if (m.accroche !== undefined) d.accroche = nettoyer(m.accroche?.replace(/\n/g, " "), LIMITES_PAGE.accroche);
     if (m.presentation !== undefined) d.presentation = nettoyer(m.presentation, LIMITES_PAGE.presentation);
     if (m.telephone !== undefined) {
@@ -323,7 +331,7 @@ export class PageEntrepriseService {
     return this.maPage(t);
   }
 
-  async ajouterPhoto(t: TenantContext, octets: Buffer, role: "galerie" | "couverture", legende: string | null) {
+  async ajouterPhoto(t: TenantContext, octets: Buffer, role: RolePhoto, legende: string | null, realisationId: string | null = null) {
     assertCanWrite(t);
     if (!this.stockage.actif) throw new DomainError("forbidden", "Photo storage off", { reason: "stockage_coupe", phrase: "L'envoi de photos n'est pas encore ouvert." });
     const page = await this.pageDe(t.companyId);
@@ -332,10 +340,12 @@ export class PageEntrepriseService {
       const n = await this.prisma.photoPage.count({ where: { companyId: t.companyId, role: "galerie", statut: { not: "erreur" } } });
       if (n >= LIMITES_PAGE.photos) throw refus("photos_max", `${LIMITES_PAGE.photos} photos au plus. Retire une photo pour en ajouter une.`);
     }
+    // Le chantier : seulement un des siens (jamais celui d'une autre entreprise).
+    if (realisationId && (role !== "galerie" || !isUuid(realisationId) || !(await this.prisma.realisationPage.count({ where: { id: realisationId, companyId: t.companyId } })))) throw notFound("Réalisation");
     const { largeur, hauteur } = await controlerPhoto(octets);
     const dernier = await this.prisma.photoPage.aggregate({ where: { companyId: t.companyId, role }, _max: { ordre: true } });
     const photo = await this.prisma.photoPage.create({
-      data: { companyId: t.companyId, role, legende: nettoyer(legende, LIMITES_PAGE.legende), ordre: (dernier._max.ordre ?? -1) + 1, largeur, hauteur, octets: octets.length },
+      data: { companyId: t.companyId, role, realisationId: realisationId ?? null, legende: nettoyer(legende, LIMITES_PAGE.legende), ordre: (dernier._max.ordre ?? -1) + 1, largeur, hauteur, octets: octets.length },
     });
     const travail = this.traiter(photo.id, t.companyId, role, octets).finally(() => this.enCours.delete(travail));
     this.enCours.add(travail);
@@ -344,7 +354,7 @@ export class PageEntrepriseService {
   }
 
   /** En arrière-plan : les tailles, le dépôt, puis la photo passe « prête » (ou « erreur », sans rien laisser derrière). */
-  private async traiter(photoId: string, companyId: string, role: "galerie" | "couverture", octets: Buffer): Promise<void> {
+  private async traiter(photoId: string, companyId: string, role: RolePhoto, octets: Buffer): Promise<void> {
     const deposees: string[] = [];
     try {
       const { fichiers, largeur, hauteur } = await produireVariantes(octets, role);
@@ -368,6 +378,7 @@ export class PageEntrepriseService {
         return;
       }
       if (role === "couverture") await this.remplacerCouverture(companyId, photoId);
+      if (role === "equipe") for (const a of await this.prisma.photoPage.findMany({ where: { companyId, role: "equipe", id: { not: photoId } } })) await this.effacer(a);
     } catch (err) {
       this.logger.warn({ err: String(err), photoId }, "photo_page_traitement_echoue");
       await this.stockage.supprimer(deposees).catch(() => undefined);
@@ -423,6 +434,58 @@ export class PageEntrepriseService {
     const page = await this.pageDe(t.companyId);
     const cov = page.couvertureId ? await this.prisma.photoPage.findFirst({ where: { id: page.couvertureId, companyId: t.companyId } }) : null;
     if (cov) await this.effacer(cov);
+    return this.maPage(t);
+  }
+
+  /** Retirer la photo « À propos » (artisan ou équipe). */
+  async retirerPhotoEquipe(t: TenantContext) {
+    assertCanWrite(t);
+    for (const a of await this.prisma.photoPage.findMany({ where: { companyId: t.companyId, role: "equipe" } })) await this.effacer(a);
+    return this.maPage(t);
+  }
+
+  /* --------------------------------------------------------------------------------------------- Réalisations */
+
+  /** Un chantier réalisé (« Toiture ardoise · Paimpol ») : ses photos s'y ajoutent ensuite. */
+  async creerRealisation(t: TenantContext, titre: string) {
+    assertCanWrite(t);
+    await this.pageDe(t.companyId);
+    const propre = nettoyer(titre.replace(/\n/g, " "), LIMITES_PAGE.realisationTitre);
+    if (!propre) throw refus("titre", "Donne un titre au chantier (par exemple « Toiture ardoise · Paimpol »).", "titre");
+    const dernier = await this.prisma.realisationPage.aggregate({ where: { companyId: t.companyId }, _max: { ordre: true } });
+    const r = await this.prisma.realisationPage.create({ data: { companyId: t.companyId, titre: propre, ordre: (dernier._max.ordre ?? -1) + 1 }, select: { id: true, titre: true } });
+    return { realisation: r, page: await this.maPage(t) };
+  }
+
+  private async maRealisation(t: TenantContext, id: string) {
+    const r = isUuid(id) ? await this.prisma.realisationPage.findFirst({ where: { id, companyId: t.companyId } }) : null;
+    if (!r) throw notFound("Réalisation");
+    return r;
+  }
+
+  async renommerRealisation(t: TenantContext, id: string, titre: string) {
+    assertCanWrite(t);
+    await this.maRealisation(t, id);
+    const propre = nettoyer(titre.replace(/\n/g, " "), LIMITES_PAGE.realisationTitre);
+    if (!propre) throw refus("titre", "Donne un titre au chantier.", "titre");
+    await this.prisma.realisationPage.update({ where: { id }, data: { titre: propre } });
+    return this.maPage(t);
+  }
+
+  /** Retirer un chantier retire ses photos (fichiers d'abord). */
+  async supprimerRealisation(t: TenantContext, id: string) {
+    assertCanWrite(t);
+    await this.maRealisation(t, id);
+    for (const ph of await this.prisma.photoPage.findMany({ where: { companyId: t.companyId, realisationId: id } })) await this.effacer(ph);
+    await this.prisma.realisationPage.deleteMany({ where: { id, companyId: t.companyId } });
+    return this.maPage(t);
+  }
+
+  async ordonnerRealisations(t: TenantContext, ids: string[]) {
+    assertCanWrite(t);
+    const siennes = new Set((await this.prisma.realisationPage.findMany({ where: { companyId: t.companyId }, select: { id: true } })).map((r) => r.id));
+    if (ids.some((id) => !siennes.has(id)) || new Set(ids).size !== ids.length) throw notFound("Réalisation");
+    await this.prisma.$transaction(ids.map((id, ordre) => this.prisma.realisationPage.update({ where: { id }, data: { ordre } })));
     return this.maPage(t);
   }
 

@@ -61,10 +61,13 @@ describe("Ma page : réglages", () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing", "carpentry"]);
     await a.agent.patch("/v1/company/profile").send({ phone: "0296000000", address: "3 rue des Ardoises, 22300 Lannion" }).expect(200);
     const p = (await a.agent.get("/v1/ma-page").expect(200)).body;
-    expect(p.reglages).toMatchObject({ visible: false, adresse: "toits-martin", adresseModifiable: true, modele: "photo", couleur: null, telephone: null, zone: null, afficherAdresse: false });
+    expect(p.reglages).toMatchObject({ visible: false, adresse: "toits-martin", adresseModifiable: true, couleur: null, telephone: null, zone: null, afficherAdresse: false });
     expect(p.profil).toMatchObject({ nom: "Toits Martin", metiers: ["roofing", "carpentry"], telephone: "02 96 00 00 00", zone: "Lannion", verifiee: false });
     expect(p.contenu).toMatchObject({ telephone: "02 96 00 00 00", zone: "Lannion", metierPrincipal: "roofing", adressePostale: null });
     expect(p.choix.theme.nom).toBe("Couvreur");
+    // La page se fabrique toute seule : les prestations du métier sont proposées, modifiables.
+    expect(p.reglages.prestations.map((x: { titre: string }) => x.titre)).toEqual(["Couverture ardoise et tuile", "Zinguerie", "Réparation de toiture", "Entretien et démoussage"]);
+    expect(p.choix.teintes.map((x: { nom: string }) => x.nom)).toEqual(["Ardoise", "Anthracite", "Bleu nuit", "Vert sapin"]);
     // Privée : un visiteur ne la voit pas (404, comme une page qui n'existe pas).
     await anon().get("/v1/public/pages/toits-martin").expect(404);
     // Une deuxième entreprise au même nom prend une autre adresse.
@@ -80,10 +83,10 @@ describe("Ma page : réglages", () => {
     await a.agent.patch("/v1/company/profile").send({ phone: "0622222222" }).expect(200);
     expect((await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu.telephone).toBe("06 22 22 22 22");
     // Le métier principal change : l'ambiance suit (métier), la couleur choisie reste.
-    await a.agent.patch("/v1/ma-page").send({ couleur: "#7a2e3a" }).expect(200);
+    await a.agent.patch("/v1/ma-page").send({ couleur: "#1d3557" }).expect(200);
     await a.agent.patch("/v1/company/trades").send({ trades: ["painting"] }).expect(200);
     const c = (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
-    expect(c).toMatchObject({ metierPrincipal: "painting", couleur: "#7A2E3A" });
+    expect(c).toMatchObject({ metierPrincipal: "painting", couleur: "#1D3557" });
     // Un téléphone propre à la page l'emporte ; vide, il revient à celui du profil.
     await a.agent.patch("/v1/ma-page").send({ telephone: "02 98 00 00 00" }).expect(200);
     expect((await anon().get("/v1/public/pages/toits-martin")).body.contenu.telephone).toBe("02 98 00 00 00");
@@ -94,13 +97,15 @@ describe("Ma page : réglages", () => {
   it("chaque champ validé, refus en une phrase ; certifications sans doublon, plafonnées", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
     const refus = async (corps: object) => (await a.agent.patch("/v1/ma-page").send(corps).expect(400)).body.error.details;
-    expect(await refus({ modele: "magazine" })).toMatchObject({ reason: "modele" });
     expect(await refus({ couleur: "rouge" })).toMatchObject({ reason: "couleur" });
+    expect(await refus({ couleur: "#FF00FF" })).toMatchObject({ reason: "couleur", phrase: "Choisis une des quatre teintes." });
     expect(await refus({ telephone: "12" })).toMatchObject({ reason: "telephone", phrase: "Ce numéro n'est pas valable." });
     expect(await refus({ siteWeb: "javascript:alert(1)" })).toMatchObject({ reason: "site_web" });
     expect(await refus({ creeeEn: 1850 })).toMatchObject({ reason: "creee_en" });
-    const p = (await a.agent.patch("/v1/ma-page").send({ modele: "sobre", fond: "sombre", siteWeb: "toits-martin.fr", accroche: "  Ligne 1\nligne 2 ", certifications: ["RGE", "rge", "Qualibat", "", ...Array.from({ length: 12 }, (_, i) => `Label ${i}`)] }).expect(200)).body;
-    expect(p.reglages).toMatchObject({ modele: "sobre", fond: "sombre", siteWeb: "https://toits-martin.fr", accroche: "Ligne 1 ligne 2" });
+    const p = (await a.agent.patch("/v1/ma-page").send({ couleur: "vert-sapin", siteWeb: "toits-martin.fr", prestations: [{ titre: " Zinguerie\n", texte: "Gouttières et noues." }, { titre: "", texte: "sans titre" }, ...Array.from({ length: 8 }, (_, i) => ({ titre: `P${i}`, texte: "x" }))], accroche: "  Ligne 1\nligne 2 ", certifications: ["RGE", "rge", "Qualibat", "", ...Array.from({ length: 12 }, (_, i) => `Label ${i}`)] }).expect(200)).body;
+    expect(p.reglages).toMatchObject({ couleur: "#1F4D3A", siteWeb: "https://toits-martin.fr", accroche: "Ligne 1 ligne 2" });
+    expect(p.reglages.prestations[0]).toEqual({ titre: "Zinguerie", texte: "Gouttières et noues." });
+    expect(p.reglages.prestations).toHaveLength(6);
     expect(p.reglages.certifications.slice(0, 2)).toEqual(["RGE", "Qualibat"]);
     expect(p.reglages.certifications).toHaveLength(10);
   });
@@ -155,7 +160,8 @@ describe("Ma page : photos", () => {
     expect(lue.statut).toBe("prete");
     // Redressée (EXIF orientation 6 : 2400 × 1800 devient 1800 × 2400).
     expect([lue.largeur, lue.hauteur]).toEqual([1800, 2400]);
-    expect(lue.variantes.map((v: { largeur: number }) => v.largeur)).toEqual([480, 960, 1600]);
+    // Deux grandes colonnes sur ordinateur : 640, 1280, puis la largeur d'origine (1800), jamais agrandie.
+    expect(lue.variantes.map((v: { largeur: number }) => v.largeur)).toEqual([640, 1280, 1800]);
     for (const v of lue.variantes) {
       const avif = (await anon().get(v.avif).buffer(true).expect(200)).body as Buffer;
       const webp = (await anon().get(v.webp).buffer(true).expect(200)).body as Buffer;
@@ -169,7 +175,7 @@ describe("Ma page : photos", () => {
     const meta = await sharp(res.body as Buffer).metadata();
     expect([meta.format, meta.width, meta.height]).toEqual(["jpeg", 1200, 630]);
     const fichiers = await readdir(`${DOSSIER}/pages/${a.companyId}/${p.id}`);
-    expect(fichiers.sort()).toEqual(["1600.avif", "1600.webp", "480.avif", "480.webp", "960.avif", "960.webp", "partage.jpg"]);
+    expect(fichiers.sort()).toEqual(["1280.avif", "1280.webp", "1800.avif", "1800.webp", "640.avif", "640.webp", "partage.jpg"]);
     // Supprimée : les fichiers d'abord, puis la ligne.
     await a.agent.delete(`/v1/ma-page/photos/${p.id}`).expect(200);
     expect(await readdir(`${DOSSIER}/pages/${a.companyId}/${p.id}`).catch(() => [])).toEqual([]);
@@ -206,8 +212,9 @@ describe("Ma page : photos", () => {
     await a.agent.patch(`/v1/ma-page/photos/${ids[0]}`).send({ legende: "Zinguerie" }).expect(200);
     await rendrePublique(a.agent);
     const c = (await anon().get("/v1/public/pages/toits-martin")).body.contenu;
-    expect(c.photos.map((p: { id: string }) => p.id)).toEqual([ids[2], ids[0], ids[1]]);
-    expect(c.photos[1].legende).toBe("Zinguerie");
+    // Sans chantier, chaque photo se montre comme un chantier à elle seule, titrée par sa légende.
+    expect(c.realisations.map((r: { id: string }) => r.id)).toEqual([ids[2], ids[0], ids[1]]);
+    expect(c.realisations[1].titre).toBe("Zinguerie");
     // Un ordre qui cite une photo inconnue est refusé.
     await a.agent.put("/v1/ma-page/photos/ordre").send({ ids: [ids[0], "0193a0a0-0000-7000-8000-000000000000"] }).expect(404);
     const c1 = (await a.agent.post("/v1/ma-page/photos").field("role", "couverture").attach("file", await photoDeTelephone(2000, 1200), "c1.jpg").expect(202)).body.id;
@@ -222,6 +229,50 @@ describe("Ma page : photos", () => {
     expect(await readdir(`${DOSSIER}/pages/${a.companyId}/${c1}`).catch(() => [])).toEqual([]);
     expect((await a.agent.delete("/v1/ma-page/couverture").expect(200)).body.reglages.couvertureId).toBeNull();
     expect(await ctx.prisma.photoPage.count({ where: { role: "couverture" } })).toBe(0);
+  });
+});
+
+describe("Ma page : chantiers et photo « À propos »", () => {
+  it("un chantier a un titre et ses photos ; réordonner, renommer ; le retirer retire ses photos et leurs fichiers", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
+    const b = await signUpWithCompany(ctx.app, "b@exemple.fr", "Zinc Le Gall");
+    await a.agent.post("/v1/ma-page/accord-photos").expect(200);
+    await a.agent.post("/v1/ma-page/realisations").send({ titre: "  " }).expect(400);
+    const r1 = (await a.agent.post("/v1/ma-page/realisations").send({ titre: "Toiture ardoise · Paimpol" }).expect(201)).body.realisation.id as string;
+    const r2 = (await a.agent.post("/v1/ma-page/realisations").send({ titre: "Zinguerie · Lannion" }).expect(201)).body.realisation.id as string;
+    for (let i = 0; i < 2; i++) await a.agent.post("/v1/ma-page/photos").field("realisationId", r1).attach("file", await photoDeTelephone(900, 600), `r1-${i}.jpg`).expect(202);
+    await a.agent.post("/v1/ma-page/photos").field("realisationId", r2).attach("file", await photoDeTelephone(900, 600), "r2.jpg").expect(202);
+    // Le chantier d'une autre entreprise : refusé, rien n'est créé.
+    await b.agent.post("/v1/ma-page/accord-photos").expect(200);
+    await b.agent.post("/v1/ma-page/photos").field("realisationId", r1).attach("file", await photoDeTelephone(900, 600), "vol.jpg").expect(404);
+    await b.agent.patch(`/v1/ma-page/realisations/${r1}`).send({ titre: "Volé" }).expect(404);
+    await b.agent.delete(`/v1/ma-page/realisations/${r1}`).expect(404);
+    await service.traitementsTermines();
+    await a.agent.put("/v1/ma-page/realisations/ordre").send({ ids: [r2, r1] }).expect(200);
+    await a.agent.patch(`/v1/ma-page/realisations/${r1}`).send({ titre: "Toiture ardoise · Paimpol (22)" }).expect(200);
+    await rendrePublique(a.agent);
+    const c = (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
+    expect(c.realisations.map((r: { titre: string; photos: unknown[] }) => [r.titre, r.photos.length])).toEqual([["Zinguerie · Lannion", 1], ["Toiture ardoise · Paimpol (22)", 2]]);
+    // Un chantier sans photo prête n'apparaît pas.
+    await a.agent.post("/v1/ma-page/realisations").send({ titre: "Vide" }).expect(201);
+    expect((await anon().get("/v1/public/pages/toits-martin")).body.contenu.realisations).toHaveLength(2);
+    const fichiers = (await ctx.prisma.photoPage.findMany({ where: { realisationId: r1 } })).map((ph) => ph.id);
+    await a.agent.delete(`/v1/ma-page/realisations/${r1}`).expect(200);
+    expect(await ctx.prisma.photoPage.count({ where: { id: { in: fichiers } } })).toBe(0);
+    for (const id of fichiers) expect(await readdir(`${DOSSIER}/pages/${a.companyId}/${id}`).catch(() => [])).toEqual([]);
+  });
+
+  it("la photo « À propos » : une seule, remplacée par la suivante, retirée proprement", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
+    await a.agent.post("/v1/ma-page/accord-photos").expect(200);
+    await a.agent.post("/v1/ma-page/photos").field("role", "equipe").attach("file", await photoDeTelephone(1200, 900), "equipe.jpg").expect(202);
+    await service.traitementsTermines();
+    await a.agent.post("/v1/ma-page/photos").field("role", "equipe").attach("file", await photoDeTelephone(1200, 900), "equipe2.jpg").expect(202);
+    await service.traitementsTermines();
+    expect(await ctx.prisma.photoPage.count({ where: { role: "equipe" } })).toBe(1);
+    expect((await a.agent.get("/v1/ma-page")).body.contenu.photoEquipe).not.toBeNull();
+    await a.agent.delete("/v1/ma-page/equipe").expect(200);
+    expect(await ctx.prisma.photoPage.count({ where: { role: "equipe" } })).toBe(0);
   });
 });
 
@@ -379,8 +430,8 @@ describe("le ménage de la nuit", () => {
     // Une photo dont la ligne a disparu (entreprise supprimée) : ses fichiers restent dans le stockage jusqu'au ménage.
     await ctx.prisma.photoPage.delete({ where: { id: partie } });
     const fichiersDeLaPartie = (await readdir(`${DOSSIER}/pages/${a.companyId}/${partie}`)).length;
-    // 900 px de large : 480 et 900 (jamais agrandie), en AVIF et WebP, et le JPEG de partage.
-    expect(fichiersDeLaPartie).toBe(5);
+    // 900 × 600 tournée (EXIF) : 600 px de large, une seule taille (jamais agrandie), en AVIF et WebP, et le JPEG de partage.
+    expect(fichiersDeLaPartie).toBe(3);
     const vieux = new Date(Date.now() - 40 * 86_400_000);
     const tresVieux = new Date(Date.now() - 400 * 86_400_000);
     await ctx.prisma.contactPage.createMany({ data: [{ companyId: a.companyId, ipHash: "x", createdAt: vieux }, { companyId: a.companyId, ipHash: "y" }] });
@@ -393,7 +444,7 @@ describe("le ménage de la nuit", () => {
     expect(await ctx.prisma.contactPage.count()).toBe(1);
     expect((await ctx.prisma.signalementPage.findMany({ orderBy: { createdAt: "asc" } })).map((s) => s.ipHash)).toEqual([null, "z"]);
     expect(await readdir(`${DOSSIER}/pages/${a.companyId}/${partie}`).catch(() => [])).toEqual([]);
-    expect((await readdir(`${DOSSIER}/pages/${a.companyId}/${gardee}`)).length).toBe(5);
+    expect((await readdir(`${DOSSIER}/pages/${a.companyId}/${gardee}`)).length).toBe(3);
   });
 });
 

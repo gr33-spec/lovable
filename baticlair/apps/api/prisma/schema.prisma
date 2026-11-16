@@ -235,6 +235,7 @@ model Company {
   // Ma page Mobiiz (16 novembre 2026)
   pageEntreprise            PageEntreprise?
   photosPage                PhotoPage[]
+  realisationsPage          RealisationPage[]
   anciennesAdressesPage     AncienneAdressePage[]
   signalementsPage          SignalementPage[]
   contactsPage              ContactPage[]
@@ -3069,11 +3070,8 @@ model PageEntreprise {
   /// Masquée par l'admin (modération) : plus visible, quel que soit le choix de l'artisan.
   masqueeLe        DateTime? @map("masquee_le") @db.Timestamptz(3)
   masqueeMotif     String?   @map("masquee_motif")
-  modele           String    @default("photo")
+  /// Une des quatre teintes (`TEINTES`), sinon nul : celle du métier.
   couleur          String?
-  fond             String?
-  pictos           Boolean   @default(true)
-  motif            Boolean   @default(true)
   accroche         String?
   presentation     String?
   telephone        String?
@@ -3082,6 +3080,8 @@ model PageEntreprise {
   siteWeb          String?   @map("site_web")
   creeeEn          Int?      @map("creee_en")
   certifications   String[]  @default([])
+  /// Les prestations ({ titre, texte }[], 6 au plus), proposées d'après le métier à la création de la page.
+  prestations      Json      @default("[]")
   /// Choix EXPLICITE de l'artisan : montrer l'adresse postale de l'entreprise (jamais par défaut).
   afficherAdresse  Boolean   @default(false) @map("afficher_adresse")
   /// Relecture du juriste : « J'ai pris ces photos ou j'ai le droit de les utiliser… », coché avant la première photo.
@@ -3101,8 +3101,10 @@ model PageEntreprise {
 model PhotoPage {
   id         String   @id @default(uuid(7)) @db.Uuid
   companyId  String   @map("company_id") @db.Uuid
-  /// galerie | couverture
+  /// galerie | couverture | equipe (la photo de l'artisan ou de l'équipe, « À propos »)
   role       String   @default("galerie")
+  /// Le chantier de la photo (galerie) ; nul : une photo seule, montrée comme un chantier à elle seule.
+  realisationId String? @map("realisation_id") @db.Uuid
   ordre      Int      @default(0)
   legende    String?
   /// traitement | prete | erreur
@@ -3115,10 +3117,27 @@ model PhotoPage {
   cles       String[] @default([])
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  realisation RealisationPage? @relation(fields: [realisationId], references: [id], onDelete: SetNull)
 
   @@index([companyId, role, ordre])
+  @@index([realisationId])
   @@map("photo_page")
+}
+
+/// Un chantier réalisé de la page (« Toiture ardoise · Paimpol ») : ses photos, la première en grand.
+model RealisationPage {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  titre     String
+  ordre     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  photos  PhotoPage[]
+
+  @@index([companyId, ordre])
+  @@map("realisation_page")
 }
 
 /// Une ancienne adresse de page : jamais réattribuée, elle redirige vers l'adresse courante de son entreprise.

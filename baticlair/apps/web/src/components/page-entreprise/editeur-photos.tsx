@@ -7,18 +7,20 @@ import { PhotoRefusee, reduireImage } from "@/lib/reduire-image";
 
 export interface PhotoEditeur {
   id: string;
-  role: "galerie" | "couverture";
+  role: "galerie" | "couverture" | "equipe";
+  realisationId?: string | null;
   statut: "traitement" | "prete" | "erreur";
   legende: string | null;
   variantes: { largeur: number; avif: string; webp: string }[];
 }
 
 /** Envoie une photo (réduite dans le navigateur) ; rend la phrase d'erreur, ou null. */
-export async function envoyerPhoto(fichier: File, role: "galerie" | "couverture"): Promise<string | null> {
+export async function envoyerPhoto(fichier: File, role: "galerie" | "couverture" | "equipe", realisationId: string | null = null): Promise<string | null> {
   try {
     const blob = await reduireImage(fichier);
     const form = new FormData();
     form.append("role", role);
+    if (realisationId) form.append("realisationId", realisationId);
     form.append("file", blob, "photo.jpg");
     await api("/v1/ma-page/photos", { method: "POST", body: form });
     return null;
@@ -36,8 +38,8 @@ const vignette = (p: PhotoEditeur) => p.variantes[0]?.webp ?? null;
  * souris, par la poignée), légende facultative, retirer. Les flèches du clavier déplacent aussi une photo (poignée
  * active), pour qui ne peut pas glisser.
  */
-export function GaleriePhotos({ photos, max, actif, stockage = true, onChange, onErreur }: { photos: PhotoEditeur[]; max: number; actif: boolean; stockage?: boolean; onChange: () => void; onErreur: (m: string | null) => void }) {
-  const galerie = photos.filter((p) => p.role === "galerie" && p.statut !== "erreur");
+export function GaleriePhotos({ photos, max, actif, stockage = true, realisationId = null, total, libelle = "Ajouter des photos de ce chantier", onChange, onErreur }: { photos: PhotoEditeur[]; max: number; actif: boolean; stockage?: boolean; realisationId?: string | null; total: number; libelle?: string; onChange: () => void; onErreur: (m: string | null) => void }) {
+  const galerie = photos.filter((p) => p.role === "galerie" && p.statut !== "erreur" && (p.realisationId ?? null) === realisationId);
   const [ordre, setOrdre] = useState<string[] | null>(null);
   const [envoi, setEnvoi] = useState(0);
   const glisse = useRef<{ id: string; pointeur: number } | null>(null);
@@ -65,12 +67,12 @@ export function GaleriePhotos({ photos, max, actif, stockage = true, onChange, o
   const ajouter = async (fichiers: FileList | null) => {
     if (!fichiers?.length) return;
     onErreur(null);
-    const place = Math.max(0, max - galerie.length);
+    const place = Math.max(0, max - total);
     const choisis = Array.from(fichiers).slice(0, place);
     if (fichiers.length > place) onErreur(`${max} photos au plus : ${fichiers.length - place} photo(s) non ajoutée(s).`);
     setEnvoi((n) => n + choisis.length);
     for (const f of choisis) {
-      const err = await envoyerPhoto(f, "galerie");
+      const err = await envoyerPhoto(f, "galerie", realisationId);
       setEnvoi((n) => n - 1);
       if (err) onErreur(err);
       onChange();
@@ -79,7 +81,7 @@ export function GaleriePhotos({ photos, max, actif, stockage = true, onChange, o
 
   return (
     <div className="grid gap-3">
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Photos de chantiers">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Photos du chantier">
         {liste.map((p, i) => (
           <li key={p.id} data-photo={p.id} className={`relative overflow-hidden rounded-2xl border border-line bg-surface ${enMain === p.id ? "ring-2 ring-accent" : ""}`}>
             <div className="relative aspect-[4/3] bg-black/10">
@@ -167,9 +169,9 @@ export function GaleriePhotos({ photos, max, actif, stockage = true, onChange, o
         ))}
       </ul>
       {actif ? (
-        galerie.length < max ? (
+        total < max ? (
           <label className="pressable flex min-h-13 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line px-4 text-[15px] font-bold">
-            <ImagePlus size={20} aria-hidden="true" /> Ajouter des photos de chantiers ({galerie.length}/{max})
+            <ImagePlus size={20} aria-hidden="true" /> {libelle} ({total}/{max})
             <input type="file" accept="image/*" multiple className="sr-only" onChange={(e) => { void ajouter(e.target.files); e.target.value = ""; }} />
           </label>
         ) : (

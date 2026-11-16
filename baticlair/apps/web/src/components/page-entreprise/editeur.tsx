@@ -1,9 +1,9 @@
 "use client";
 
-import { Check, Copy, ExternalLink, Eye, Image as ImageIcon, Loader2, Monitor, Share2, Smartphone, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Copy, ExternalLink, Eye, Image as ImageIcon, Loader2, Monitor, Plus, Share2, Smartphone, Sparkles, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ambianceDe, type ContenuPage, type ModelePage } from "@baticlair/domain/page-entreprise";
+import { type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
 import { EnTeteRubrique } from "@/components/en-tete-rubrique";
 import { Button, Card, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -21,11 +21,8 @@ interface Reglages {
   masquee: boolean;
   adresse: string;
   adresseModifiable: boolean;
-  modele: ModelePage;
   couleur: string | null;
-  fond: "clair" | "sombre" | null;
-  pictos: boolean;
-  motif: boolean;
+  prestations: Prestation[];
   accroche: string | null;
   presentation: string | null;
   telephone: string | null;
@@ -43,19 +40,19 @@ interface MaPage {
   profil: { nom: string; metiers: string[]; telephone: string | null; zone: string | null; adressePostale: string | null; siret: string | null; verifiee: boolean; logo: boolean };
   contenu: ContenuPage;
   photos: (PhotoEditeur & { largeur: number; hauteur: number; partage: string | null })[];
+  realisations: { id: string; titre: string }[];
   choix: {
-    modeles: readonly { id: ModelePage; nom: string; phrase: string }[];
-    nuancier: readonly { id: string; nom: string; hex: string }[];
+    teintes: readonly { id: string; nom: string; hex: string }[];
     certifications: readonly string[];
-    theme: { nom: string; couleur: string; fond: "clair" | "sombre"; accroche: string; presentation: string };
-    limites: { accroche: number; presentation: number; photos: number };
+    theme: { nom: string; teinte: string; accroche: string; presentation: string; prestations: Prestation[] };
+    limites: { accroche: number; presentation: number; photos: number; prestations: number };
     stockagePhotos: boolean;
     missions: boolean;
   };
 }
 
 type Etat = "pret" | "enregistrement" | "enregistre" | "erreur";
-const CHAMPS_TEXTE = new Set<keyof Reglages>(["accroche", "presentation", "telephone", "zone", "horaires", "siteWeb"]);
+const CHAMPS_TEXTE = new Set<keyof Reglages>(["accroche", "presentation", "telephone", "zone", "horaires", "siteWeb", "prestations"]);
 
 function Interrupteur({ actif, onChange, label, aide }: { actif: boolean; onChange: (v: boolean) => void; label: string; aide?: string }) {
   return (
@@ -108,45 +105,6 @@ function AnneeChamp({ valeur, onChange }: { valeur: number | null; onChange: (n:
         else if (t.length === 4 && n >= 1900 && n <= new Date().getFullYear()) onChange(n);
       }}
     />
-  );
-}
-
-/** La miniature d'un modèle : trois architectures, dessinées en blocs. */
-function MiniModele({ id }: { id: ModelePage }) {
-  const b = "rounded-[3px] bg-current";
-  return (
-    <span aria-hidden="true" className="flex h-20 w-full flex-col gap-1 overflow-hidden rounded-lg bg-black/5 p-1.5 text-black/30">
-      {id === "photo" ? (
-        <>
-          <span className={`${b} h-10 opacity-70`} />
-          <span className="flex gap-1">
-            <span className={`${b} h-4 flex-1`} />
-            <span className={`${b} h-4 flex-1`} />
-          </span>
-          <span className={`${b} h-2 w-2/3`} />
-        </>
-      ) : id === "colonnes" ? (
-        <>
-          <span className={`${b} h-4 opacity-70`} />
-          <span className="flex flex-1 gap-1">
-            <span className={`${b} w-1/3`} />
-            <span className="flex flex-1 flex-col gap-1">
-              <span className={`${b} h-3`} />
-              <span className={`${b} h-3`} />
-              <span className={`${b} h-3`} />
-            </span>
-          </span>
-        </>
-      ) : (
-        <>
-          <span className={`${b} h-3 w-1/2`} />
-          <span className={`${b} h-2 w-3/4`} />
-          <span className={`${b} mt-1 h-5 opacity-70`} />
-          <span className={`${b} h-2 w-2/3`} />
-          <span className={`${b} h-2 w-1/2`} />
-        </>
-      )}
-    </span>
   );
 }
 
@@ -227,6 +185,136 @@ function Partager({ url, nom, onFermer }: { url: string; nom: string; onFermer: 
           <img src="/v1/ma-page/qr.svg" alt={`QR code de l'adresse ${url}`} width={180} height={180} className="rounded-xl bg-white p-2" />
           <figcaption className="text-[13px] text-muted">À imprimer sur un devis, un véhicule ou une carte.</figcaption>
         </figure>
+      </div>
+    </div>
+  );
+}
+
+/** Les chantiers : un titre (« Toiture ardoise · Paimpol ») et leurs photos ; on les crée, renomme, range et retire. */
+function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: boolean; onErreur: (m: string | null) => void; onChange: (d?: MaPage) => void }) {
+  const [titre, setTitre] = useState("");
+  const total = data.photos.filter((p) => p.role === "galerie" && p.statut !== "erreur").length;
+  const sansChantier = data.photos.filter((p) => p.role === "galerie" && !p.realisationId);
+  const apres = async (appel: Promise<MaPage | { page: MaPage }>) => {
+    try {
+      const d = await appel;
+      onChange("page" in d ? d.page : d);
+      void rafraichirPagePublique();
+    } catch (e) {
+      onErreur((e as ApiError).phrase ?? "Ce changement n'a pas été enregistré.");
+    }
+  };
+  const ordre = (i: number, pas: number) => {
+    const ids = data.realisations.map((x) => x.id);
+    const j = i + pas;
+    if (j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j]!, ids[i]!];
+    void apres(api<MaPage>("/v1/ma-page/realisations/ordre", { method: "PUT", body: { ids } }));
+  };
+  return (
+    <div className="grid gap-4">
+      <span className="text-[15px] font-bold">Mes chantiers</span>
+      <p className="text-[13px] text-muted">Un chantier = un titre et quelques photos. Sur ta page, la première photo s&apos;affiche en grand ; on la touche pour voir les autres.</p>
+      {data.realisations.map((r, i) => (
+        <div key={r.id} className="grid gap-3 rounded-2xl border border-line p-3">
+          <div className="flex items-center gap-1">
+            <input
+              aria-label="Titre du chantier"
+              defaultValue={r.titre}
+              maxLength={80}
+              onBlur={(e) => {
+                const v = e.target.value.trim();
+                if (v && v !== r.titre) void apres(api<MaPage>(`/v1/ma-page/realisations/${r.id}`, { method: "PATCH", body: { titre: v } }));
+              }}
+              className="min-h-12 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[16px] font-bold"
+            />
+            <button type="button" aria-label={`Monter « ${r.titre} »`} disabled={i === 0} onClick={() => ordre(i, -1)} className="flex size-11 items-center justify-center rounded-full disabled:opacity-30">
+              <ArrowUp size={18} aria-hidden="true" />
+            </button>
+            <button type="button" aria-label={`Descendre « ${r.titre} »`} disabled={i === data.realisations.length - 1} onClick={() => ordre(i, 1)} className="flex size-11 items-center justify-center rounded-full disabled:opacity-30">
+              <ArrowDown size={18} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label={`Retirer le chantier « ${r.titre} »`}
+              onClick={() => {
+                if (window.confirm(`Retirer « ${r.titre} » et ses photos ?`)) void apres(api<MaPage>(`/v1/ma-page/realisations/${r.id}`, { method: "DELETE" }));
+              }}
+              className="flex size-11 items-center justify-center rounded-full"
+            >
+              <Trash2 size={18} aria-hidden="true" />
+            </button>
+          </div>
+          <GaleriePhotos photos={data.photos} realisationId={r.id} total={total} max={data.choix.limites.photos} actif={actif} stockage={data.choix.stockagePhotos} onErreur={onErreur} onChange={() => onChange()} />
+        </div>
+      ))}
+      {sansChantier.length ? (
+        <div className="grid gap-3 rounded-2xl border border-dashed border-line p-3">
+          <span className="text-[14px] font-bold">Photos sans chantier</span>
+          <GaleriePhotos photos={data.photos} realisationId={null} total={total} max={data.choix.limites.photos} actif={false} stockage={data.choix.stockagePhotos} onErreur={onErreur} onChange={() => onChange()} />
+        </div>
+      ) : null}
+      <form
+        className="flex flex-wrap gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!titre.trim()) return;
+          void apres(api<{ page: MaPage }>("/v1/ma-page/realisations", { method: "POST", body: { titre } })).then(() => setTitre(""));
+        }}
+      >
+        <input aria-label="Titre du nouveau chantier" value={titre} onChange={(e) => setTitre(e.target.value)} maxLength={80} placeholder="Toiture ardoise · Paimpol" className="min-h-12 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[16px]" />
+        <Button type="submit" variant="secondary" disabled={!titre.trim()}>
+          <Plus size={18} aria-hidden="true" /> Nouveau chantier
+        </Button>
+      </form>
+    </div>
+  );
+}
+
+/** La photo « À propos » : l'artisan ou son équipe, facultative. */
+function PhotoEquipe({ data, actif, onErreur, recharger }: { data: MaPage; actif: boolean; onErreur: (m: string | null) => void; recharger: () => Promise<void> }) {
+  const photo = data.photos.find((p) => p.role === "equipe");
+  return (
+    <div className="grid gap-2">
+      <span className="text-[15px] font-bold">Photo de toi ou de ton équipe (facultatif)</span>
+      <div className="flex flex-wrap items-center gap-3">
+        {photo?.variantes[0] ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photo.variantes[0].webp} alt="Photo de l'équipe" className="h-20 w-28 rounded-xl object-cover" />
+        ) : photo ? (
+          <Loader2 size={18} className="motion-safe:animate-spin" aria-label="Préparation…" />
+        ) : null}
+        {actif ? (
+          <label className="pressable inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border border-line px-3 text-[14px] font-bold">
+            <ImageIcon size={16} aria-hidden="true" /> {photo ? "Changer" : "Ajouter une photo"}
+            <input
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (!f) return;
+                const err = await envoyerPhoto(f, "equipe");
+                if (err) onErreur(err);
+                await recharger();
+              }}
+            />
+          </label>
+        ) : null}
+        {photo ? (
+          <button
+            type="button"
+            className="text-[14px] font-bold text-muted underline"
+            onClick={async () => {
+              await api("/v1/ma-page/equipe", { method: "DELETE" }).catch(() => undefined);
+              await recharger();
+              void rafraichirPagePublique();
+            }}
+          >
+            Retirer
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -314,11 +402,8 @@ export function EditeurMaPage() {
     const vide = (s: string | null) => (s?.trim() ? s.trim() : null);
     return {
       ...data.contenu,
-      modele: r.modele,
       couleur: r.couleur,
-      fond: r.fond,
-      pictos: r.pictos,
-      motif: r.motif,
+      prestations: r.prestations.filter((x) => x.titre.trim()),
       accroche: vide(r.accroche),
       presentation: vide(r.presentation),
       telephone: vide(r.telephone) ?? data.profil.telephone,
@@ -339,7 +424,7 @@ export function EditeurMaPage() {
   const url = `${window.location.origin}/e/${r.adresse}`;
   const theme = data.choix.theme;
   const couleurActive = r.couleur ?? null;
-  const { palette } = ambianceDe(contenu);
+  const teinteMetier = data.choix.teintes.find((x) => x.id === theme.teinte)!;
   const couverture = data.photos.find((p) => p.role === "couverture" && p.id === data.reglages.couvertureId);
   const couvertureEnCours = data.photos.some((p) => p.role === "couverture" && p.statut === "traitement");
 
@@ -386,45 +471,63 @@ export function EditeurMaPage() {
         </div>
 
         <Card className="grid gap-3 p-4">
-          <h2 className="text-[18px] font-extrabold">Modèle</h2>
-          <div role="radiogroup" aria-label="Modèle de page" className="grid grid-cols-3 gap-2">
-            {data.choix.modeles.map((m) => (
-              <button key={m.id} type="button" role="radio" aria-checked={r.modele === m.id} onClick={() => changer("modele", m.id)} className={`pressable grid gap-1.5 rounded-2xl border-2 p-2 text-left ${r.modele === m.id ? "border-accent bg-accent/15" : "border-line"}`}>
-                <MiniModele id={m.id} />
-                <span className="text-[13px] leading-tight font-bold">{m.nom}</span>
+          <h2 className="text-[18px] font-extrabold">Teinte</h2>
+          <p className="text-[14px] text-muted">Pour les détails de ta page. Le bouton « Appeler » reste jaune.</p>
+          <div role="radiogroup" aria-label="Teinte de la page" className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <button type="button" role="radio" aria-checked={couleurActive === null} onClick={() => changer("couleur", null)} className={`pressable flex min-h-12 items-center gap-2 rounded-2xl border-2 px-3 text-left text-[14px] font-bold ${couleurActive === null ? "border-accent bg-accent/15" : "border-line"}`}>
+              <span className="size-6 shrink-0 rounded-full" style={{ background: teinteMetier.hex }} aria-hidden="true" /> Selon le métier
+            </button>
+            {data.choix.teintes.map((c) => (
+              <button key={c.id} type="button" role="radio" aria-checked={couleurActive === c.hex} onClick={() => changer("couleur", c.hex)} className={`pressable flex min-h-12 items-center gap-2 rounded-2xl border-2 px-3 text-left text-[14px] font-bold ${couleurActive === c.hex ? "border-accent bg-accent/15" : "border-line"}`}>
+                <span className="size-6 shrink-0 rounded-full" style={{ background: c.hex }} aria-hidden="true" /> {c.nom}
               </button>
             ))}
           </div>
-          <p className="text-[14px] text-muted">{data.choix.modeles.find((m) => m.id === r.modele)?.phrase}</p>
         </Card>
 
-        <Card className="grid gap-3 p-4">
-          <h2 className="text-[18px] font-extrabold">Couleurs</h2>
-          <div role="radiogroup" aria-label="Couleur principale" className="flex flex-wrap gap-2">
-            <button type="button" role="radio" aria-checked={couleurActive === null} onClick={() => changer("couleur", null)} className={`pressable flex min-h-11 items-center gap-2 rounded-full border-2 px-3 text-[13px] font-bold ${couleurActive === null ? "border-accent" : "border-line"}`}>
-              <span className="size-6 rounded-full border border-black/10" style={{ background: theme.couleur }} aria-hidden="true" /> Couleur du métier
-            </button>
-            {data.choix.nuancier.map((c) => (
-              <button key={c.id} type="button" role="radio" aria-checked={couleurActive === c.hex} aria-label={c.nom} title={c.nom} onClick={() => changer("couleur", c.hex)} className={`pressable size-11 rounded-full border-2 ${couleurActive === c.hex ? "border-accent ring-2 ring-accent ring-offset-2" : "border-black/10"}`} style={{ background: c.hex }}>
-                {couleurActive === c.hex ? <Check size={18} className="mx-auto" color={palette.surPrincipale} aria-hidden="true" /> : null}
+        <Card className="grid gap-4 p-4">
+          <h2 className="text-[18px] font-extrabold">Prestations</h2>
+          <p className="text-[14px] text-muted">Ce que tu fais, en quelques blocs : un titre et une phrase. {data.choix.limites.prestations} au plus.</p>
+          {r.prestations.map((x, i) => (
+            <div key={i} className="grid gap-2 rounded-2xl bg-black/5 p-3">
+              <div className="flex items-center gap-2">
+                <input
+                  aria-label={`Titre de la prestation ${i + 1}`}
+                  value={x.titre}
+                  maxLength={60}
+                  placeholder="Couverture ardoise"
+                  onChange={(e) => changer("prestations", r.prestations.map((y, k) => (k === i ? { ...y, titre: e.target.value } : y)))}
+                  className="min-h-12 flex-1 rounded-xl border border-line bg-surface px-3 text-[16px] font-bold"
+                />
+                <button type="button" aria-label={`Retirer la prestation ${x.titre || i + 1}`} onClick={() => changer("prestations", r.prestations.filter((_, k) => k !== i))} className="flex size-11 shrink-0 items-center justify-center rounded-full">
+                  <Trash2 size={18} aria-hidden="true" />
+                </button>
+              </div>
+              <textarea
+                aria-label={`Phrase de la prestation ${i + 1}`}
+                value={x.texte}
+                maxLength={200}
+                rows={2}
+                placeholder="Une phrase pour dire ce que tu fais."
+                onChange={(e) => changer("prestations", r.prestations.map((y, k) => (k === i ? { ...y, texte: e.target.value } : y)))}
+                className="rounded-xl border border-line bg-surface px-3 py-2 text-[15px]"
+              />
+            </div>
+          ))}
+          {r.prestations.length < data.choix.limites.prestations ? (
+            <div className="flex flex-wrap gap-2">
+              {theme.prestations
+                .filter((x) => !r.prestations.some((y) => y.titre === x.titre))
+                .map((x) => (
+                  <button key={x.titre} type="button" onClick={() => changer("prestations", [...r.prestations, x])} className="pressable inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-line px-3 text-[14px] font-bold">
+                    <Plus size={16} aria-hidden="true" /> {x.titre}
+                  </button>
+                ))}
+              <button type="button" onClick={() => changer("prestations", [...r.prestations, { titre: "", texte: "" }])} className="pressable inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-line px-3 text-[14px] font-bold">
+                <Plus size={16} aria-hidden="true" /> Autre prestation
               </button>
-            ))}
-            <label className="pressable relative flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-2 border-line px-3 text-[13px] font-bold">
-              <span className="size-6 rounded-full border border-black/10" style={{ background: "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)" }} aria-hidden="true" />
-              Autre
-              <input type="color" value={couleurActive ?? theme.couleur} onChange={(e) => changer("couleur", e.target.value.toUpperCase())} className="absolute inset-0 cursor-pointer opacity-0" aria-label="Choisir une autre couleur" />
-            </label>
-          </div>
-          <p className="text-[13px] text-muted">Le texte reste toujours lisible : Mobiiz ajuste les nuances si une couleur est trop claire ou trop foncée.</p>
-          <div role="radiogroup" aria-label="Fond" className="flex gap-2">
-            {([null, "clair", "sombre"] as const).map((f) => (
-              <button key={String(f)} type="button" role="radio" aria-checked={r.fond === f} onClick={() => changer("fond", f)} className={`pressable min-h-11 flex-1 rounded-2xl border-2 px-2 text-[14px] font-bold ${r.fond === f ? "border-accent bg-accent/15" : "border-line"}`}>
-                {f === null ? `Selon le métier (${theme.fond})` : f === "clair" ? "Fond clair" : "Fond sombre"}
-              </button>
-            ))}
-          </div>
-          <Interrupteur actif={r.pictos} onChange={(v) => changer("pictos", v)} label="Pictogrammes du métier" aide={`Une petite icône devant chaque métier (${theme.nom.toLowerCase()}).`} />
-          <Interrupteur actif={r.motif} onChange={(v) => changer("motif", v)} label="Motif de fond discret" aide="Un motif léger, lié à ton métier, derrière la page." />
+            </div>
+          ) : null}
         </Card>
 
         <Card className="grid gap-4 p-4">
@@ -509,7 +612,7 @@ export function EditeurMaPage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={(couverture.variantes[1] ?? couverture.variantes[0])!.webp} alt="Photo de couverture" className="size-full object-cover" />
               ) : (
-                <span className="flex size-full items-center justify-center p-4 text-center text-[13px] text-muted">{couvertureEnCours ? "Préparation de la photo…" : `Sans photo : un visuel « ${theme.nom.toLowerCase()} » à tes couleurs.`}</span>
+                <span className="flex size-full items-center justify-center p-4 text-center text-[13px] text-muted">{couvertureEnCours ? "Préparation de la photo…" : "Sans photo choisie : la première photo de tes chantiers ouvre ta page. Prends une vue large de la maison terminée."}</span>
               )}
               {couvertureEnCours ? <Loader2 size={20} className="absolute top-3 right-3 motion-safe:animate-spin" aria-hidden="true" /> : null}
             </div>
@@ -545,25 +648,15 @@ export function EditeurMaPage() {
                     }
                   }}
                 >
-                  <Trash2 size={14} aria-hidden="true" /> Revenir au visuel du métier
+                  <Trash2 size={14} aria-hidden="true" /> Retirer cette photo
                 </button>
               ) : null}
             </div>
           </div>
 
-          <div className="grid gap-2">
-            <span className="text-[15px] font-bold">Mes chantiers</span>
-            <GaleriePhotos
-              photos={data.photos}
-              max={data.choix.limites.photos}
-              actif={data.choix.stockagePhotos && data.reglages.photosAccord}
-              stockage={data.choix.stockagePhotos}
-              onErreur={setErreur}
-              onChange={() => {
-                void charger().then(() => rafraichirPagePublique());
-              }}
-            />
-          </div>
+          <Chantiers data={data} actif={data.choix.stockagePhotos && data.reglages.photosAccord} onErreur={setErreur} onChange={(d) => (d ? setData(d) : void charger())} />
+
+          <PhotoEquipe data={data} actif={data.choix.stockagePhotos && data.reglages.photosAccord} onErreur={setErreur} recharger={charger} />
         </Card>
 
         <Card className="grid gap-4 p-4">

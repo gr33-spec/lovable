@@ -11,9 +11,10 @@ export const PHOTO_MAX_OCTETS = 10 * 1024 * 1024;
 export const PHOTO_MIN_COTE = 300;
 const PIXELS_MAX = 100_000_000;
 
-export const LARGEURS: Record<"galerie" | "couverture", number[]> = {
-  galerie: [480, 960, 1600],
-  couverture: [640, 1280, 1920],
+export const LARGEURS: Record<"galerie" | "couverture" | "equipe", number[]> = {
+  galerie: [640, 1280, 1920],
+  couverture: [640, 1280, 1920, 2560],
+  equipe: [480, 960, 1440],
 };
 
 export type TypeImage = "image/jpeg" | "image/png" | "image/webp" | "image/avif" | "image/heic";
@@ -63,7 +64,7 @@ export interface FichierProduit {
 }
 
 /** Les fichiers à déposer : AVIF et WebP à chaque largeur (jamais plus grand que l'original), et le JPEG de partage. */
-export async function produireVariantes(octets: Buffer, role: "galerie" | "couverture"): Promise<{ fichiers: FichierProduit[]; largeur: number; hauteur: number }> {
+export async function produireVariantes(octets: Buffer, role: "galerie" | "couverture" | "equipe"): Promise<{ fichiers: FichierProduit[]; largeur: number; hauteur: number }> {
   const base = sharp(octets, { limitInputPixels: PIXELS_MAX }).rotate();
   const meta = await sharp(octets, { limitInputPixels: PIXELS_MAX }).metadata();
   const tourne = (meta.orientation ?? 1) >= 5;
