@@ -79,7 +79,9 @@ export function validerInterpretation(questions: readonly QuestionNumerotee[], t
     if (q.numerique || q.libre === "number") {
       const n = Number(v.replace(",", "."));
       // Le nombre doit avoir été dit par l'artisan (aucun chiffre inventé ni converti).
-      const nombresDits = (texte.match(/\d+(?:[.,]\d+)?/g) ?? []).map((x) => Number(x.replace(",", ".")));
+      // En chiffres, ou en lettres jusqu'à dix (« une seule descente », « deux descentes ») : toujours un nombre DIT.
+      const enLettres: Record<string, number> = { un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6, sept: 7, huit: 8, neuf: 9, dix: 10 };
+      const nombresDits = [...(texte.match(/\d+(?:[.,]\d+)?/g) ?? []).map((x) => Number(x.replace(",", "."))), ...norm(texte).split(" ").flatMap((m) => (m in enLettres ? [enLettres[m]!] : []))];
       if (Number.isFinite(n) && n > 0 && nombresDits.includes(n)) {
         out.push({ ...base, statut: "compris", valeur: String(n), libelle: `${String(n).replace(".", ",")}${q.unite ? ` ${q.unite}` : ""}`, libreEcrite: true, raison: null });
       } else out.push(reposer("Je n'ai pas trouvé ce nombre dans ta réponse : redis-le."));

@@ -183,10 +183,13 @@ function boutonsNommes(q: QuestionNumerotee, morceau: string): { label: string; 
   const racine = (m: string) => m.replace(/[sx]$/, "");
   const motsDe = (o: { label: string }) => norm(o.label.replace(/[()]/g, " ")).split(" ").filter((m) => m.length >= 4).map(racine);
   const dits = new Set(t.split(/[^a-z0-9]+/).filter(Boolean).map(racine));
-  // Un mot du SUJET de la question (« ardoise » dans « Quelle ardoise ? ») ne désigne aucun bouton : « Ardoise d'Angers »
-  // n'est pas « Ardoise NF », c'est une réponse écrite.
-  const sujet = new Set(norm(q.texte).split(/[^a-z0-9]+/).filter(Boolean).map(racine));
-  const propres = q.options.filter((o) => motsDe(o).some((m) => dits.has(m) && !sujet.has(m) && q.options.filter((p) => motsDe(p).includes(m)).length === 1));
+  // « Ardoise d'Angers » n'est pas « Ardoise NF » : un mot propre à un bouton ne le désigne que si le morceau ne dit rien
+  // d'autre d'important (un mot de cinq lettres ou plus qui n'est ni dans ce bouton ni dans la question). Sinon c'est une
+  // réponse écrite, ou une phrase à faire relire. « chevron » seul désigne bien « Sur les chevrons », même quand la
+  // question dit déjà « sur les chevrons ou en façade » (jeu de test du 16 novembre 2026).
+  const question = new Set(norm(q.texte).split(/[^a-z0-9]+/).filter(Boolean).map(racine));
+  const autreChose = (o: { label: string }) => [...dits].some((m) => m.length >= 5 && !motsDe(o).includes(m) && !question.has(m));
+  const propres = q.options.filter((o) => !autreChose(o) && motsDe(o).some((m) => dits.has(m) && q.options.filter((p) => motsDe(p).includes(m)).length === 1));
   return propres;
 }
 

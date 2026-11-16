@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { interpreterReponsesNumerotees, phraseNotee, questionEnMotsSimples, type QuestionNumerotee } from "../src/index.js";
 
@@ -17,7 +18,7 @@ const QUESTIONS: QuestionNumerotee[] = [
   { numero: 1, cle: "param:faconnage@joint-debout", texte: "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?", options: [{ label: "Je façonne (bobines)", value: "1" }, { label: "Je commande façonné (bacs)", value: "2" }], unite: null, libre: "written" },
   { numero: 2, cle: "param:epaisseur_zinc", texte: "Épaisseur du zinc ?", options: [{ label: "0,65 mm", value: "0.65" }, { label: "0,70 mm", value: "0.7" }, { label: "0,80 mm", value: "0.8" }], unite: "mm", libre: "number" },
   { numero: 3, cle: "param:nb_descentes", texte: "Combien de descentes pour cette gouttière ?", options: [], unite: "u", numerique: true },
-  { numero: 4, cle: "param:pose_crochets", texte: "Tes crochets de gouttière, tu les poses où ?", options: [{ label: "Sur les chevrons", value: "1" }, { label: "En façade (bandeau)", value: "2" }], unite: null, libre: "written" },
+  { numero: 4, cle: "param:pose_crochets", texte: "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?", options: [{ label: "Sur les chevrons", value: "1" }, { label: "En façade (bandeau)", value: "2" }], unite: null, libre: "written" },
   { numero: 5, cle: "param:faconnage@bandes-zinc__12", texte: "Bande de rive zinc : tu façonnes toi-même ou tu commandes façonné ?", options: [{ label: "Je façonne", value: "1" }, { label: "Je commande façonné", value: "2" }], unite: null, libre: "written" },
   { numero: 6, cle: "param:zone", texte: zone.texte, options: zone.options, unite: "u" },
 ];
@@ -68,5 +69,30 @@ describe("la discussion des questions comprend les réponses brèves", () => {
   it("la confirmation tient en une ligne", () => {
     expect(phraseNotee(["Je commande façonné (bacs)", "0,65 mm"])).toBe("Noté : Je commande façonné (bacs), 0,65 mm.");
     expect(phraseNotee([])).toBe("");
+  });
+});
+
+/**
+ * LE JEU DE TEST (`apps/web/scripts/jeu-quantitatif/cas.json`), joué ici contre le CODE SEUL, sans IA : le code ne rend
+ * JAMAIS une réponse fausse (mieux vaut reposer la question), et il range seul les cas brefs. Le 16 novembre 2026, la
+ * passe en ligne a montré un défaut que des questions écrites à la main n'avaient pas vu (« chevron » non reconnu avec la
+ * vraie phrase de la question) : ce test joue donc les mêmes cas que le jeu en ligne.
+ */
+describe("le jeu de test, contre le code seul", () => {
+  const cas = JSON.parse(readFileSync(new URL("../../../apps/web/scripts/jeu-quantitatif/cas.json", import.meta.url), "utf8")) as { questions: Record<string, QuestionNumerotee[]>; reponses: { nom: string; questions: string; texte: string; attendu: (string | null)[] }[] };
+  const meme = (attendu: string | null, recu: string | null) => (attendu === null ? recu === null : recu !== null && (/^\d+(?:[.,]\d+)?$/.test(attendu) ? Number(attendu.replace(",", ".")) === Number(recu.replace(",", ".")) : attendu.toLowerCase() === recu.toLowerCase()));
+  const jouer = (c: (typeof cas.reponses)[number]) => interpreterReponsesNumerotees(cas.questions[c.questions]!, c.texte).map((r) => (r.statut === "compris" ? r.valeur : null));
+
+  it("aucune réponse fausse, sur aucun cas", () => {
+    for (const c of cas.reponses) {
+      const recues = jouer(c);
+      expect(c.attendu.filter((a, i) => recues[i] !== null && !meme(a, recues[i]!)), c.nom).toEqual([]);
+    }
+  });
+
+  it("les réponses brèves sont rangées par le code seul, sans appel à l'IA", () => {
+    const brefs = cas.reponses.filter((c) => !/Phrases de chantier|Dictée sans ponctuation|dit autrement/.test(c.nom));
+    expect(brefs.length).toBeGreaterThanOrEqual(9);
+    for (const c of brefs) expect(jouer(c), c.nom).toEqual(c.attendu.map((a) => (a === null ? null : expect.stringMatching(new RegExp(`^${a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace("\\.", "[.,]")}0?$`, "i")))));
   });
 });
