@@ -42,7 +42,8 @@ describe("métiers ouverts au lancement : Couverture et Peinture", () => {
     await agent.patch("/v1/company/profile").send({ name: "Toitures B", address: "3 rue du Port, 22500 Paimpol", siret: null, phone: null, email: null }).expect(200);
     const etat = (await agent.get("/v1/ag/etat").expect(200)).body;
     const lots = new Set((etat.produits as { lot: string }[]).map((p) => p.lot));
-    expect([...lots]).toEqual(["couverture"]);
+    // Greg, 16 novembre 2026 : la peinture a ses produits en achat groupé (murs et plafonds, façade) ; métier ouvert, ils se publient.
+    expect([...lots].sort()).toEqual(["couverture", "peinture"]);
     const filtres = etat.filtres as { id: string; libelle: string; ouvert: boolean }[];
     expect(filtres[0]).toEqual({ id: "couverture", libelle: "Couverture", ouvert: true });
     expect(filtres.find((f) => f.id === "zinguerie")).toEqual({ id: "zinguerie", libelle: "Zinguerie", ouvert: false });
