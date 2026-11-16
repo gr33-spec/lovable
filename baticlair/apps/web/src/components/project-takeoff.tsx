@@ -8,7 +8,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
 import { useGroupe, useGroupeFerme } from "@/components/groupe";
-import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
+import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, RecapScreen, type CounterAnswers } from "@/components/journey";
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
 import { RechercheRapprochement } from "@/components/rapprochement";
 import { ListePrete } from "@/components/liste-prete";
@@ -103,6 +103,7 @@ export function ProjectTakeoff({
   // Assistant Mobiiz (Greg, 31 octobre 2026) : la conversation et le PDF, par-dessus « Ton chantier ».
   const [assistant, setAssistant] = useState(false);
   const [autoFermee, setAutoFermee] = useState(false);
+  const [recap, setRecap] = useState(false);
   // La liste a sa page (`?vue=fournitures`) ; sur le chantier, elle tient en une ligne. Après l'envoi, les réponses des
   // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
   const [page, setPage] = useListPage();
@@ -251,6 +252,10 @@ export function ProjectTakeoff({
   const calculate = (answers: CounterAnswers) =>
     run(() => api<Quantitatif>(`/v1/quantitatifs/${qid0}/calcul?ecran=1`, { method: "POST", body: answers }), (q) => {
       update(q);
+      // Greg, 16 novembre 2026 : après le calcul, un récapitulatif court DANS la discussion, puis « Voir ma liste ». La
+      // discussion a déjà posé ses questions : l'assistant de la liste ne se rouvre pas tout seul derrière.
+      setRecap(true);
+      marquerAssistantOuvert(projectId);
     });
   if (phase === "questions" && takeoff.status === "draft" && !archived) {
     // §52 : un devis de plus d'un lot passe d'abord par la carte « Lots repérés » ; « C'est bon » ouvre les questions.
@@ -265,6 +270,7 @@ export function ProjectTakeoff({
     return <QuestionsStep takeoff={takeoff} pending={pending} error={actionError} onSubmit={calculate} />;
   }
   if (phase === "calcul") return <CalculScreen />;
+  if (recap && takeoff.purchase.toBuy.length > 0) return <RecapScreen takeoff={takeoff} onVoir={() => setRecap(false)} />;
 
   // Une liste lue avant la règle « rien ne part vide » et restée sans ligne : jamais de bouton d'envoi ; on repart du dépôt.
   if (takeoff.purchase.toBuy.length + takeoff.purchase.toQuote.length === 0 && takeoff.lines.length === 0) {

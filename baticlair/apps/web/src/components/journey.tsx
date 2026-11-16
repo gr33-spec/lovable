@@ -1,18 +1,18 @@
 "use client";
 
-import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, Puce, TexteMobiiz, useChampDicte, useFil, useZoneVisible } from "@/components/chat-mobiiz";
+import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, EtapesIa, Puce, TexteMobiiz, useChampDicte, useFil, useZoneVisible } from "@/components/chat-mobiiz";
 import { api } from "@/lib/api";
 import { useDictee } from "@/lib/dictee";
 import { interpreterReponsesNumerotees, phraseNotee, type ReponseInterpretee } from "../../../../packages/domain/src/assistant/reponses-libres-numerotees";
 import { questionEnMotsSimples } from "../../../../packages/domain/src/assistant/questions-simples";
-import { Check, ChevronLeft, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
+import { Check, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ListScene, ReadingStage } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
 import type { ApiError, Takeoff } from "@/lib/api";
 import { NOM_APP } from "@/lib/nom";
+import { origineDeLaLigne } from "@/lib/origine-ligne";
 
 /*
  * §50 « Ce que voit l'artisan » (fondateur, 2026-10-09) : TROIS ÉCRANS, rien d'autre.
@@ -118,23 +118,15 @@ export function DropZone({
 // ——— 2. L'analyse ———
 
 /**
- * §50.1 : pendant la lecture, une seule phrase : « Je lis ton devis ». Retour du fondateur (2026-10-11) : « une animation
- * plus fun qui prend tout l'écran » : le devis en grand, lu au surligneur et balayé par le scanner, d'où sortent les
- * fournitures (`ReadingStage`). Plein écran, par-dessus le menu ; « Revenir à mes listes » (Greg, 1er novembre 2026 : « Mes listes » partout) laisse la lecture continuer
- * (le serveur prévient quand c'est prêt), on n'y reste jamais coincé.
+ * LE TRAVAIL SE VOIT DANS LA DISCUSSION (Greg, 16 novembre 2026 ; RÈGLE CHANGÉE pour §50.1 : avant, une animation plein
+ * écran, le devis au surligneur et des fournitures qui en sortaient) : « N'hésite pas à revoir l'animation, quelque chose
+ * de plus neutre et plus moderne », « Étapes visibles pendant le travail (« Lecture… », « Vérification… ») ». Le même
+ * écran que les questions : la discussion Mobiiz, une phrase dans une bulle, et l'étape en cours, dépliable. Ce sont les
+ * vraies phases du serveur (la lecture, puis le calcul), jamais une barre qui ferait semblant d'avancer. Plein écran,
+ * par-dessus le menu ; le retour laisse le travail continuer (le serveur prévient quand c'est prêt).
  */
-/** Au-delà, « Je lis ton devis » devient « Gros devis, j'y suis encore… » (décision du fondateur, 2026-10-13). */
-export const LECTURE_LONGUE_MS = 30_000;
-
-export function AnalysisScreen() {
+function DiscussionEnCours({ region, phrase, etape, detail }: { region: string; phrase: string; etape: string; detail: string }) {
   const router = useRouter();
-  // Décision du fondateur (2026-10-13, « Je lis ton devis » longtemps, « plus rien ne se passe ») : passé 30 s, la phrase
-  // dit que la lecture continue ; toujours une seule phrase (§50.1).
-  const [longue, setLongue] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setLongue(true), LECTURE_LONGUE_MS);
-    return () => clearTimeout(t);
-  }, []);
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -143,27 +135,32 @@ export function AnalysisScreen() {
     };
   }, []);
   return (
-    <section aria-label="Analyse du devis" className="fixed top-0 left-0 z-[45] flex h-dvh w-full flex-col overflow-hidden bg-chantier text-white">
-      <div className="flex shrink-0 px-4 pt-[max(14px,env(safe-area-inset-top))]">
-        <button
-          type="button"
-          onClick={() => router.push("/chantiers?vue=suivi")}
-          aria-label="Revenir à mes listes"
-          className="inline-flex size-11 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
-        >
-          <ChevronLeft size={22} aria-hidden="true" />
-        </button>
-      </div>
-      <div className="flex min-h-0 grow flex-col items-center justify-center gap-6 pb-[max(28px,env(safe-area-inset-bottom))]">
-        <div className="origin-center scale-[0.92] min-[400px]:scale-100 sm:scale-[1.15]">
-          <ReadingStage />
-        </div>
-        <h2 aria-live="polite" className="font-display text-[30px] leading-tight font-extrabold tracking-[-0.02em]">
-          {longue ? "Gros devis, j'y suis encore…" : "Je lis ton devis"}
-        </h2>
+    <section aria-label={region} className="fixed top-0 left-0 z-[45] flex h-dvh w-full flex-col overflow-hidden text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+      <EnTeteChat onFermer={() => router.push("/chantiers?vue=suivi")} libelleFermer="Revenir à mes listes" titreEnTexte />
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-3 overflow-y-auto px-3 py-4">
+        <Bulle de="mobiiz">
+          <h2 aria-live="polite" className="rounded-[22px] rounded-bl-md px-4 py-2.5 text-[16px] leading-snug font-semibold text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.bulle }}>
+            {phrase}
+          </h2>
+        </Bulle>
+        <EtapesIa etapes={[{ cle: etape, titre: etape, detail }]} fini={false} />
       </div>
     </section>
   );
+}
+
+/** Au-delà, « Je lis ton devis » devient « Gros devis, j'y suis encore… » (décision du fondateur, 2026-10-13). */
+export const LECTURE_LONGUE_MS = 30_000;
+
+export function AnalysisScreen() {
+  // Décision du fondateur (2026-10-13, « Je lis ton devis » longtemps, « plus rien ne se passe ») : passé 30 s, la phrase
+  // dit que la lecture continue ; toujours une seule phrase (§50.1).
+  const [longue, setLongue] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setLongue(true), LECTURE_LONGUE_MS);
+    return () => clearTimeout(t);
+  }, []);
+  return <DiscussionEnCours region="Analyse du devis" phrase={longue ? "Gros devis, j'y suis encore…" : "Je lis ton devis"} etape="Lecture…" detail="Je lis ton document ligne par ligne. Tu peux revenir à tes listes : je te préviens quand c'est prêt." />;
 }
 
 // ——— Prévenir l'artisan quand c'est prêt ———
@@ -194,14 +191,44 @@ export function notifyReady(title: string, body: string, tag: string): void {
 
 // ——— 4. Le calcul ———
 
-/** Après « Calculer ma liste » : une seule phrase, le temps du calcul ; les lignes du devis se posent une à une dans la liste (`ListScene`), pour tous les métiers. */
+/** Après « Calculer ma liste » : la même discussion, une phrase et l'étape du calcul (les quantités sont calculées par le code, avec les règles du métier). */
 export function CalculScreen() {
+  return <DiscussionEnCours region="Calcul de la liste" phrase="Je prépare ta liste" etape="Vérification des quantités…" detail="Chaque quantité est calculée avec les règles du métier, à partir de ton document et de tes réponses." />;
+}
+
+/**
+ * LE RÉCAPITULATIF (Greg, 16 novembre 2026 : « À la fin : récapitulatif court dans la discussion, puis un bouton "Voir ma
+ * liste" qui ouvre l'écran de liste habituel (le même que la saisie à la main) »). Toujours la même discussion : combien
+ * d'articles, d'où ils viennent (dits, calculés, à vérifier), et un seul bouton. Rien n'est envoyé d'ici.
+ */
+export function RecapScreen({ takeoff, onVoir }: { takeoff: Takeoff; onVoir: () => void }) {
+  const router = useRouter();
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+  const articles = takeoff.purchase.toBuy;
+  const compte = (o: ReturnType<typeof origineDeLaLigne>) => articles.filter((a) => origineDeLaLigne(a) === o).length;
+  const [dits, calcules, aVerifier] = [compte("Dit par toi"), compte("Calculé"), compte("À vérifier")];
+  const detail = [dits ? `${dits} dit${dits > 1 ? "s" : ""} par toi` : null, calcules ? `${calcules} calculé${calcules > 1 ? "s" : ""}` : null, aVerifier ? `${aVerifier} à vérifier` : null].filter(Boolean).join(", ");
   return (
-    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-5 rounded-xl bg-chantier px-5 pt-8 pb-8 text-white shadow-card">
-      <ListScene />
-      <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
-        Je prépare ta liste
-      </h2>
+    <section aria-label="Récapitulatif" className="fixed top-0 left-0 z-[45] flex h-dvh w-full flex-col overflow-hidden text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+      <EnTeteChat onFermer={() => router.push("/chantiers?vue=suivi")} libelleFermer="Revenir à mes listes" titreEnTexte />
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-3 overflow-y-auto px-3 py-4">
+        <Bulle de="mobiiz" label="Message de MOBIIZ">
+          <TexteMobiiz>
+            {`Ta liste est prête : ${articles.length} article${articles.length > 1 ? "s" : ""}${detail ? ` (${detail})` : ""}.\n${aVerifier ? "Les lignes à vérifier sont en haut de ta liste." : "Vérifie-la, corrige ce que tu veux, puis envoie-la à tes négoces."}`}
+          </TexteMobiiz>
+        </Bulle>
+        <div className="pl-10">
+          <Button className="shadow-card!" onClick={onVoir}>
+            Voir ma liste
+          </Button>
+        </div>
+      </div>
     </section>
   );
 }
@@ -464,6 +491,10 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
   });
   const [reflexion, setReflexion] = useState(false);
   const [autre, setAutre] = useState(false);
+  // « Ma liste · 5 articles » (Greg, 16 novembre 2026) : la liste se construit sous les yeux de l'artisan ; le bandeau
+  // l'ouvre à tout moment, chaque article avec son origine.
+  const [listeOuverte, setListeOuverte] = useState(false);
+  const articles = takeoff.purchase.toBuy;
   const champ = useChampDicte();
   const dictee = useDictee(champ.surVoix);
   const restantes = ordonnees.filter((q) => !given[q.key] && !retired.has(q.key));
@@ -552,7 +583,46 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
 
   return (
     <div ref={zone} role="dialog" aria-modal="true" aria-label="Questions de Mobiiz" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
-      <EnTeteChat onFermer={() => router.push("/chantiers")} />
+      <EnTeteChat
+        onFermer={() => router.push("/chantiers")}
+        apres={
+          articles.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setListeOuverte(true)}
+              className="pressable flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold whitespace-nowrap text-[var(--chat-texte)]"
+              style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: "var(--chat-voile)" }}
+            >
+              <ListChecks size={16} aria-hidden="true" className="text-[var(--chat-jaune-texte)]" />
+              Ma liste · {articles.length} article{articles.length > 1 ? "s" : ""}
+            </button>
+          ) : null
+        }
+      />
+      {listeOuverte ? (
+        <div role="dialog" aria-modal="true" aria-label="Ma liste" className="absolute top-0 left-0 z-10 flex h-full w-full flex-col" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+          <div className="flex shrink-0 items-center gap-2 border-b px-3 pt-[max(env(safe-area-inset-top),8px)] pb-2" style={{ borderColor: COULEURS_CHAT.trait }}>
+            <p className="min-w-0 grow truncate pl-1 text-[16px] font-bold">
+              Ma liste · {articles.length} article{articles.length > 1 ? "s" : ""}
+            </p>
+            <button type="button" onClick={() => setListeOuverte(false)} aria-label="Fermer ma liste" className="pressable flex size-11 shrink-0 items-center justify-center rounded-full active:bg-[var(--chat-texte)]/10">
+              <X size={20} aria-hidden="true" />
+            </button>
+          </div>
+          <p className="shrink-0 px-4 pt-3 text-[14px] text-[var(--chat-texte)]/75">Elle se complète avec tes réponses. Tu pourras tout corriger à la fin.</p>
+          <ul aria-label="Articles de ma liste" className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-3 py-3">
+            {articles.map((a) => (
+              <li key={a.key} className="flex items-start gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor: COULEURS_CHAT.bulle }}>
+                <span className="flex min-w-0 grow flex-col">
+                  <span className="text-[15px] leading-snug font-semibold break-words">{a.label}</span>
+                  <span className={`text-[13px] ${a.state === "to_confirm" ? "font-bold text-[#FF8A6B]" : "text-[var(--chat-texte)]/70"}`}>{origineDeLaLigne(a)}</span>
+                </span>
+                <span className="shrink-0 text-[15px] font-extrabold tabular-nums">{a.quantity ?? ""}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <section ref={fil} aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
           {messages.map((m, i) =>

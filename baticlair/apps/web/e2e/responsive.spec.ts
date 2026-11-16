@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { calculerMaListe, repondreAuxQuestions } from "./discussion";
+import { calculerEtVoirMaListe, repondreAuxQuestions } from "./discussion";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -118,11 +118,14 @@ for (const size of WIDTHS) {
     // §48 : la lecture part d'elle-même ; l'écran des questions (s'il y en a) passe par « Calculer ma liste ».
     const questions = page.getByRole("region", { name: "Les questions" });
     const list = page.getByRole("region", { name: "Liste des fournitures" });
-    await expect(list.or(questions).first()).toBeVisible({ timeout: 60_000 });
-    if (await questions.isVisible()) {
+    // Sans question, le calcul part seul et finit lui aussi par le récapitulatif et « Voir ma liste ».
+    const voir = page.getByRole("button", { name: "Voir ma liste", exact: true });
+    await expect(list.or(questions).or(voir).first()).toBeVisible({ timeout: 60_000 });
+    if (await voir.isVisible()) await voir.click();
+    else if (await questions.isVisible()) {
       await shoot(page, size.name, "05a-questions");
       await repondreAuxQuestions(page);
-      await calculerMaListe(page).click();
+      await calculerEtVoirMaListe(page);
     }
     await expect(list.getByRole("button", { name: "Demander les prix à mes négoces" })).toBeVisible();
     // Plan « finition », bloc 5 (capture iPhone SE) : le suivi suit la liste tout de suite, jamais « Ta liste se prépare » au-dessus d'elle.

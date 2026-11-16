@@ -13,6 +13,7 @@ import { GroupeBar, GroupeSection, type Groupe } from "@/components/groupe";
 import { CommandeDuMoisBar, CommandeDuMoisBloc, MesLignesDuMois } from "@/components/commande-du-mois";
 import { Button, ButtonLink, ErrorNotice } from "@/components/ui";
 import type { ApiError, ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
+import { origineDeLaLigne } from "@/lib/origine-ligne";
 import { enMetres, parseQuantity, shortName } from "@/lib/labels";
 import { NOM, nom } from "@/lib/nom";
 
@@ -823,6 +824,10 @@ function Row({
             {item.precision}
           </span>
         ) : null}
+        {/* L'ORIGINE DE LA LIGNE (Greg, 16 novembre 2026 : « dit par toi », « calculé » (avec la règle) ou « à vérifier ») :
+            dite seulement quand la liste mêle des lignes écrites et des lignes calculées ; la règle du calcul est la
+            précision au-dessus ; « À vérifier » reste l'étiquette orange de la ligne. */}
+        {dot.ok && item && !sentTo && takeoff.purchase.toBuy.some((x) => x.kind === "computed") ? <span className="text-[12px] leading-snug text-muted">{origineDeLaLigne(item)}</span> : null}
         {/* Greg, 7 novembre 2026 : la famille est le titre de la section ; un badge seulement quand elle est incertaine. */}
         {row.familleIncertaine ? <span className="self-start rounded-full bg-warn-bg px-2 py-0.5 text-[12px] font-bold text-warn">Famille à vérifier</span> : null}
         {quantity || sub ? (

@@ -57,19 +57,38 @@ export function useZoneVisible(surChangement?: () => void) {
 }
 
 /** L'en-tête compact : retour, le vrai logo et « Assistant Mobiiz », « Voir PDF » (téléphone) quand un PDF existe. */
-export function EnTeteChat({ onFermer, onVoirPdf, croix = false }: { onFermer: () => void; onVoirPdf?: (() => void) | undefined; croix?: boolean }) {
+export function EnTeteChat({
+  onFermer,
+  onVoirPdf,
+  croix = false,
+  libelleFermer = "Fermer l'assistant",
+  titreEnTexte = false,
+  apres,
+}: {
+  onFermer: () => void;
+  onVoirPdf?: (() => void) | undefined;
+  croix?: boolean;
+  /** Ce que dit le bouton de retour aux lecteurs d'écran (« Revenir à mes listes » pendant une lecture). */
+  libelleFermer?: string;
+  /** « Assistant Mobiiz » en simple texte : l'écran porte déjà son propre titre. */
+  titreEnTexte?: boolean;
+  /** Ce qui se pose à droite de l'en-tête (le bandeau « Ma liste · 5 articles »). */
+  apres?: React.ReactNode;
+}) {
+  const Titre = titreEnTexte ? "p" : "h2";
   const theme = useTheme();
   return (
     <header className="flex shrink-0 items-center gap-2.5 border-b px-3 pt-[max(env(safe-area-inset-top),8px)] pb-2 lg:px-6" style={{ borderColor: COULEURS_CHAT.trait }}>
-      <button type="button" onClick={onFermer} aria-label="Fermer l'assistant" className="pressable -ml-1.5 flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--chat-texte)] active:bg-[var(--chat-texte)]/10">
+      <button type="button" onClick={onFermer} aria-label={libelleFermer} className="pressable -ml-1.5 flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--chat-texte)] active:bg-[var(--chat-texte)]/10">
         {croix ? <X size={20} aria-hidden="true" /> : <ArrowLeft size={20} aria-hidden="true" />}
       </button>
       <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={19} className="shrink-0" />
       <span className="h-4 w-px shrink-0 bg-[var(--chat-texte)]/25" aria-hidden="true" />
-      <h2 className="min-w-0 truncate text-[14px] font-semibold text-[var(--chat-texte)]">
+      <Titre className="min-w-0 truncate text-[14px] font-semibold text-[var(--chat-texte)]">
         Assistant<span className="max-[399px]:hidden"> Mobiiz</span>
-      </h2>
+      </Titre>
       <span className="flex-1" />
+      {apres}
       {onVoirPdf ? (
         <button
           type="button"

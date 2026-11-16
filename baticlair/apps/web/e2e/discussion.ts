@@ -47,3 +47,19 @@ export async function ecrireDansLaDiscussion(page: Page, texte: string) {
   await barre.getByRole("textbox").fill(texte);
   await barre.getByRole("button", { name: "Envoyer le message" }).click();
 }
+
+/**
+ * « Calculer ma liste », puis le récapitulatif de la discussion et « Voir ma liste » (Greg, 16 novembre 2026). Si le calcul
+ * rouvre une question (deuxième vague) ou est refusé, rien n'est touché : l'appelant continue la discussion.
+ */
+export async function calculerEtVoirMaListe(page: Page) {
+  await calculerMaListe(page).click();
+  await voirMaListe(page);
+}
+
+/** Le récapitulatif, quand il arrive : « Voir ma liste ». */
+export async function voirMaListe(page: Page) {
+  const voir = page.getByRole("button", { name: "Voir ma liste", exact: true });
+  await expect(voir.or(boutonsDeLaQuestion(page)).or(page.getByRole("region", { name: "Page des fournitures" })).first()).toBeVisible({ timeout: 60_000 });
+  if (await voir.isVisible()) await voir.click();
+}

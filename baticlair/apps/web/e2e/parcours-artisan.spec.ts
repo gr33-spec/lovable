@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerMaListe, ecrireDansLaDiscussion, repondreAuxQuestions, zoneDesQuestions } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, ecrireDansLaDiscussion, repondreAuxQuestions, voirMaListe, zoneDesQuestions } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -213,12 +213,13 @@ async function passQuestions(page: Page) {
   // La page des fournitures : la liste, ou d'abord « par logement » pour un chantier de plusieurs logements.
   const list = page.getByRole("region", { name: "Page des fournitures" });
   const questions = page.getByRole("region", { name: "Les questions" });
-  await expect(list.or(questions).first()).toBeVisible({ timeout: 60_000 });
+  const voir = page.getByRole("button", { name: "Voir ma liste", exact: true });
+  await expect(list.or(questions).or(voir).first()).toBeVisible({ timeout: 60_000 });
   if (await questions.isVisible()) {
     // Une question à la fois (Greg, 16 novembre 2026) : « Je façonne » sur un façonnage, sinon la valeur par défaut.
     await repondreAuxQuestions(page);
-    await calculerMaListe(page).click();
-  }
+    await calculerEtVoirMaListe(page);
+  } else if (await voir.isVisible()) await voir.click();
   await expect(list).toBeVisible({ timeout: 60_000 });
 }
 
@@ -1066,7 +1067,7 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   expect(posees.filter((q) => /^Consommables de pose/.test(q))).toHaveLength(1);
   // Jamais deux fois la même question.
   expect(new Set(posees).size).toBe(posees.length);
-  await calculerMaListe(page).click();
+  await calculerEtVoirMaListe(page);
 
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
@@ -1377,7 +1378,7 @@ test("§49.8 : une info qui manque se demande en clair sur la ligne qu'elle conc
   // Les questions au premier bouton, sauf le traitement des liteaux : laissé sans réponse, il revient sur la ligne, orange.
   await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
   await repondreAuxQuestions(page, (q, boutons) => (/traitement/i.test(q) ? "Je ne sais pas" : boutons.getByRole("button").first()));
-  await calculerMaListe(page).click();
+  await calculerEtVoirMaListe(page);
   await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible({ timeout: 60_000 });
   await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -1496,7 +1497,7 @@ test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en
   expect(posees.filter((q) => /Bandes zinc \(solin/.test(q))).toHaveLength(0);
   // « Dév. 200 » est écrit : jamais redemandé.
   expect(posees.filter((q) => /^Bande de rive .*développé/.test(q))).toHaveLength(0);
-  await calculerMaListe(page).click();
+  await calculerEtVoirMaListe(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   // Plus de bulle flottante : une barre fine, collée en haut de l'écran quand on descend dans la liste.
@@ -1546,7 +1547,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   await expect(page.getByRole("textbox")).toHaveCount(1);
   // Le façonnage est obligatoire (48.6) ; le reste peut rester sans réponse.
   await repondreAuxQuestions(page, (q) => (/façonn/i.test(q) ? /^Je commande façonné/ : null));
-  await calculerMaListe(page).click();
+  await calculerEtVoirMaListe(page);
   // 3. Ma liste : les oranges d'abord, chaque raison en cinq mots au plus ; un seul bouton d'envoi, deux liens dessous.
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
@@ -1630,7 +1631,7 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
   await repondreAuxQuestions(page, (q) => (/façonn/i.test(q) ? /^Je commande façonné/ : null));
-  await calculerMaListe(page).click();
+  await calculerEtVoirMaListe(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   // Greg, 28 octobre 2026 (point 2) : plus de légende ; l'état est sur la ligne (bordure orange, « Valider » à droite).
@@ -1712,7 +1713,7 @@ test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit 
     }
     return null;
   });
-  await calculerMaListe(page).click();
+  await calculerEtVoirMaListe(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   await expect(list.getByText(/Ardoise d'Angers/).first()).toBeVisible();
@@ -1773,6 +1774,7 @@ test("« Je ne sais pas » (RÈGLE CHANGÉE le 16 novembre 2026, avant : la poub
   await calculerMaListe(page).click();
   const body = (await sent).postDataJSON() as { reponses: { question: string; valeur: string | null }[] };
   expect(body.reponses.filter((r) => r.valeur === null).length).toBeGreaterThanOrEqual(1);
+  await voirMaListe(page);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
 });
 
@@ -4125,7 +4127,7 @@ test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèl
     await refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)", exact: true }).click();
     return true;
   });
-  await calculerMaListe(page).click();
+  await calculerEtVoirMaListe(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   // La quantité du devis est gardée ; la réponse entre dans la fiche du chantier, qui part au négoce (le bref).
@@ -4152,6 +4154,6 @@ test("la discussion (Greg, 16 novembre 2026) : une question à la fois, une rép
   const posees = await repondreAuxQuestions(page);
   expect(posees.filter((q) => /façonn/i.test(q))).toHaveLength(0);
   expect(new Set(posees).size).toBe(posees.length);
-  await calculerMaListe(page).click();
+  await calculerEtVoirMaListe(page);
   await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0, { timeout: 60_000 });
 });

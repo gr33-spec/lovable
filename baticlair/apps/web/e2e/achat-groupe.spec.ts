@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { confirmerEmail } from "./confirmer-email";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { calculerMaListe, repondreAuxQuestions } from "./discussion";
+import { calculerEtVoirMaListe, repondreAuxQuestions } from "./discussion";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
 import { departementReserve } from "./departement";
 
@@ -211,10 +211,13 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
     const liste = page.getByRole("region", { name: "Liste des fournitures" });
     const questions = page.getByRole("region", { name: "Les questions" });
-    await expect(liste.or(questions).first()).toBeVisible({ timeout: 60_000 });
-    if (await questions.isVisible()) {
+    // Sans question, le calcul part seul et finit lui aussi par le récapitulatif et « Voir ma liste ».
+    const voir = page.getByRole("button", { name: "Voir ma liste", exact: true });
+    await expect(liste.or(questions).or(voir).first()).toBeVisible({ timeout: 60_000 });
+    if (await voir.isVisible()) await voir.click();
+    else if (await questions.isVisible()) {
       await repondreAuxQuestions(page);
-      await calculerMaListe(page).click();
+      await calculerEtVoirMaListe(page);
     }
     await expect(liste).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("Liste préparée à partir de ton devis. Vérifie les quantités avant d'envoyer.")).toBeVisible();
