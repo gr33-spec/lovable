@@ -145,7 +145,21 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Mots simples : « Ton chantier est où ? » (« Bord de mer », « Intérieur des terres », « Montagne », « Entre les deux »), jamais « Zone climatique ». Seuls les mots changent, pas le calcul.
 - FONDATEUR sur le Pro au mois seulement, date de besoin à 7 jours, essence du liteau facultative : confirmés par Greg.
 - Tarifs : « Y a-t-il une limite d'analyses ? » (plus le mot « illimitées »).
-- Achats groupés, visibilité (RÈGLE CHANGÉE par Greg, à coder) : les noms des entreprises sont visibles, jamais la quantité de chacune, seulement le total ; chaque artisan peut cocher « rester anonyme » ; à moins de 3 entreprises, « en cours de regroupement » à la place du volume. Avant : jamais de nom, volumes dès la première publication.
+- Achats groupés, visibilité (RÈGLE CHANGÉE par Greg) : les noms des entreprises sont visibles, jamais la quantité de chacune, seulement le total ; chaque artisan peut cocher « rester anonyme » ; à moins de 3 entreprises, « en cours de regroupement » à la place du volume. Avant : jamais de nom, volumes dès la première publication.
+
+- Les besoins déjà publiés avant ce changement restent anonymes ; seuls les nouveaux montrent le nom de l'entreprise. « +N depuis ta publication » ne dit une quantité qu'à partir de deux nouvelles entreprises.
+- Peinture en achat groupé : deux produits, « Peinture murs et plafonds » et « Peinture façade », tirés du catalogue, sans marque. Comptés en litres ; le pot de 15 L est proposé, l'artisan le confirme. Seuil « recommandé » posé à 150 L : à valider par Greg.
+
+## Mission de fond : le quantitatif par l'IA (Greg, 16 novembre 2026)
+
+- La solution retenue tient en une page : `baticlair/docs/quantitatif-ia.md`. Les mesures : `baticlair/docs/quantitatif-ia-mesures.md`.
+- Cinq étapes : comprendre (IA, schéma strict), rapprocher du catalogue (code), questions (règles du catalogue et du référentiel, par le code), lire les réponses (code, puis IA), calculer (code, règles écrites). L'IA n'invente ni article, ni quantité, ni caractéristique, et ne formule pas les questions.
+- Prompts versionnés : `baticlair/packages/domain/src/ia/prompts/` (socle commun, puis couverture, zinguerie, peinture).
+- Modèles : Haiku 5.5 pour lire les réponses (avant : Haiku 4.5, dont chaque appel échouait). Le choix se fait sur les chiffres du jeu de test.
+- Jeu de test rejouable : `baticlair/apps/web/scripts/jeu-quantitatif.mjs` (site de test seulement). À rejouer à chaque changement de prompt ou de modèle.
+- Écran : une seule discussion. Les étapes (« Lecture… », « Vérification des quantités… ») remplacent l'animation plein écran. Règle changée : avant, le devis au surligneur et les fournitures qui en sortaient. Bandeau « Ma liste · N articles », récapitulatif, puis « Voir ma liste ». L'assistant de la liste ne s'ouvre plus tout seul après un devis.
+- Chaque ligne dit son origine quand la liste mêle les deux : « Dit par toi », « Calculé », « À vérifier ».
+- Admin › « Corrections les plus fréquentes » : la ligne proposée et la ligne corrigée, sur 90 jours, sans nom d'entreprise ni de chantier.
 
 ## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg
 

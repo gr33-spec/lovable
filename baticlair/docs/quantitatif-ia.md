@@ -87,7 +87,15 @@ On ajoute dans l'admin la liste des corrections les plus fréquentes, pour corri
 | Lot | Contenu | État |
 |---|---|---|
 | 1 | Questions en une seule discussion ; réponses brèves par le sens et par l'ordre ; modèle de secours réparé | Fait le 16 novembre |
-| 2 | Jeu de test et mesure de départ | À faire |
-| 3 | Prompts versionnés par métier ; choix du modèle sur les chiffres | À faire |
-| 4 | Écran unique de bout en bout : bandeau « Ma liste », récapitulatif, « Voir ma liste », étapes à la place de l'animation ; origine sur chaque ligne | À faire |
-| 5 | Corrections les plus fréquentes dans l'admin | À faire |
+| 2 | Jeu de test et mesure de départ | Fait (passe 0 dans `quantitatif-ia-mesures.md`) |
+| 3 | Prompts versionnés par métier ; choix du modèle sur les chiffres | Prompt des réponses fait (version 3) ; texte dicté et devis à faire |
+| 4 | Écran unique : étapes à la place de l'animation, bandeau « Ma liste », récapitulatif, « Voir ma liste », origine sur chaque ligne | Fait pour le devis ; l'entrée par texte ou voix reste à raccorder à la même discussion |
+| 5 | Corrections les plus fréquentes dans l'admin | Fait |
+
+## 8. Ce qui reste, dans l'ordre
+
+1. Texte et voix : garder chaque ligne dite dans la liste dès le premier message, marquée « à vérifier » si elle attend
+   une réponse (aujourd'hui elle disparaît tant que la question est ouverte), et tirer ses questions du catalogue.
+2. Devis : essayer Sonnet 5.5 à la place d'Opus 5.5 sur le jeu de test (objectif : moins de 30 secondes et moins de
+   0,15 $ par devis, sans perdre une ligne).
+3. Les vrais devis de Greg dans le jeu de test.
