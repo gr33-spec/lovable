@@ -418,23 +418,30 @@ export function planDeLecture(ref: Referential, lecture: LectureDevis, lignes: r
  * Recette en ligne du 16 novembre 2026 (zinc à joint debout, vraie lecture) : le modèle a demandé le façonnage sous une clé
  * à lui (« faconnage_joint_debout »). Sa réponse n'allait pas au calcul, qui reposait ensuite la même question, et le
  * calcul était refusé. RÈGLE PERMANENTE : une clé du modèle qui prolonge une donnée à boutons du référentiel
- * (« faconnage_… ») et dont la suite nomme UN SEUL ouvrage du devis EST cette donnée, pour cet ouvrage. Dans tous les
+ * (« faconnage_… ») et dont la suite, ou à défaut la ligne visée, nomme UN SEUL ouvrage du devis EST cette donnée, pour cet ouvrage. Dans tous les
  * autres cas la question reste telle quelle : jamais rattachée au hasard.
  */
-export function rattacherQuestion(ref: Referential, plan: QuotePlan, q: LectureQuestion): LectureQuestion {
+export function rattacherQuestion(ref: Referential, plan: QuotePlan, q: LectureQuestion, lignes?: readonly LigneLecture[]): LectureQuestion {
   if (q.cle.startsWith("produit_") || q.cle === CONSUMABLES_KEY || ref.workItems.some((w) => w.params.some((p) => p.key === q.cle))) return q;
   const param = [...new Set(ref.workItems.flatMap((w) => w.params.filter((p) => (p.choices?.length ?? 0) > 0 && q.cle.startsWith(`${p.key}_`)).map((p) => p.key)))].sort((a, b) => b.length - a.length)[0];
   if (!param) return q;
   const suite = q.cle.slice(param.length + 1).replace(/_/g, "-");
   const visees = plan.lines.filter((l) => l.status === "planned" && baseOf(l.workItemId).includes(suite) && ref.workItems.find((w) => w.id === baseOf(l.workItemId))?.params.some((p) => p.key === param));
   const ouvrages = new Set(visees.flatMap((l) => (l.status === "planned" ? [l.workItemId] : [])));
-  if (ouvrages.size !== 1) return q;
-  return { ...q, cle: param, ligne: q.ligne ?? visees[0]!.ref.split(".")[0]! };
+  if (ouvrages.size === 1) return { ...q, cle: param, ligne: q.ligne ?? visees[0]!.ref.split(".")[0]! };
+  // Essai en ligne du 16 novembre 2026 (soir) : « faconnage_rive » visait la ligne de l'habillage de rive, une pièce de
+  // l'ouvrage « bandes zinc ». La suite ne nomme aucun ouvrage, mais la LIGNE visée n'en a qu'un qui porte cette donnée :
+  // c'est elle. Sans ligne, ou si la ligne en a plusieurs, la question reste telle quelle.
+  if (ouvrages.size > 1 || !q.ligne) return q;
+  // La ligne visée dans le plan : son repère, ou l'identifiant enregistré de cette ligne (comme `cleDeQuestion`).
+  const ids = [q.ligne, ...(lignes ?? []).filter((l) => l.ligne.ref === q.ligne).map((l) => l.id)];
+  const deLaLigne = new Set(plan.lines.flatMap((l) => (l.status === "planned" && ids.some((id) => l.ref === id || l.ref.startsWith(`${id}.`)) && ref.workItems.find((w) => w.id === baseOf(l.workItemId))?.params.some((p) => p.key === param) ? [l.workItemId] : [])));
+  return deLaLigne.size === 1 ? { ...q, cle: param } : q;
 }
 
 /** La clé de réponse d'une question de la lecture : celle de la donnée du référentiel (par pièce quand elle vise une ligne), sinon « fiche:<clé> ». */
 export function cleDeQuestion(ref: Referential, plan: QuotePlan, q0: LectureQuestion, lignes?: readonly LigneLecture[]): string {
-  const q = rattacherQuestion(ref, plan, q0);
+  const q = rattacherQuestion(ref, plan, q0, lignes);
   // Le modèle de l'emplacement (« quelle tuile ? ») : la réponse est le produit, pour tout le chantier.
   if (q.cle.startsWith("produit_") && ref.workItems.some((w) => w.slots.some((s) => s.key === q.cle.slice("produit_".length)))) return `product:${q.cle.slice("produit_".length)}`;
   if (q.cle === CONSUMABLES_KEY) return `param:${CONSUMABLES_KEY}`;
@@ -453,7 +460,7 @@ export function cleDeQuestion(ref: Referential, plan: QuotePlan, q0: LectureQues
 
 /** La question du calcul (boutons, unité) telle que l'écran la pose : celle du modèle, mot pour mot. */
 export function questionDeLecture(ref: Referential, plan: QuotePlan, q0: LectureQuestion, lignes?: readonly LigneLecture[]): Question {
-  const q = rattacherQuestion(ref, plan, q0);
+  const q = rattacherQuestion(ref, plan, q0, lignes);
   const key = cleDeQuestion(ref, plan, q, lignes);
   // La donnée de l'ouvrage de la question (le façonnage du joint debout n'a pas les boutons de celui d'une noue).
   const ouvrage = /^param:[^@]+@([^_]+?)(?:__|$)/.exec(key)?.[1];
@@ -665,7 +672,7 @@ export function ecranDeLecture(input: {
   const engine = plan.inputs.length > 0 ? computeWithAnswers(ref, plan, answers, input.preferences ?? {}, options, given) : { needs: [], questions: [], declined: [], checks: [], unknowns: [], customProducts: {} };
   // §51.2 : les questions sont celles du modèle, et seulement elles (le moteur ne demande rien de lui-même).
   const asked: Asked[] = lecture.questions.flatMap((q0) => {
-    const q = rattacherQuestion(ref, plan, q0);
+    const q = rattacherQuestion(ref, plan, q0, lignes);
     const question = questionDeLecture(ref, plan, q, lignes);
     // L'habitude de l'entreprise (« je façonne », apprise sur deux chantiers) répond d'avance à la question du modèle :
     // elle ne se pose plus, la réponse est dite dans le calcul et reste modifiable d'un tap.

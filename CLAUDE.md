@@ -170,6 +170,8 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Règle changée (Greg, 16 novembre soir) : une réponse qui correspond à un bouton est prise (« 1 » → 1 descente), l'ordre aide ; une question n'est reposée, avec ses boutons, que s'il y a un vrai doute. Ce que le code a rangé sur un bouton passe avant la lecture du modèle.
 - Règle changée : dans la lecture d'un devis, une question = un seul sujet, jamais deux (prompt `lecture_devis` version 6). Avant : une seule question par article, qui nommait toutes ses données. Seule exception gardée : « modèle et teinte » d'un élément à remplacer à l'identique.
 - `BUDGET_IA_JOUR` = 10 € sur le site de test pendant cette mission (variable de la branche de test ; 2 € par défaut ailleurs).
+- Analyses offertes : 50 sur le site de test pendant cette mission (`LECTURES_IA_GRATUIT_TOTAL`, variable de la branche de test, choisi par Greg le 16 novembre soir) ; 3 partout ailleurs, et l'écran dit toujours « 3 ».
+- Une question du modèle écrite sous une clé à lui (« faconnage_rive ») est la donnée du référentiel quand la ligne visée n'a qu'un ouvrage qui la porte : elle n'est plus posée deux fois.
 - Chaque ligne dit son origine quand la liste mêle les deux : « Dit par toi », « Calculé », « À vérifier ».
 - Admin › « Corrections les plus fréquentes » : la ligne proposée et la ligne corrigée, sur 90 jours, sans nom d'entreprise ni de chantier.
 

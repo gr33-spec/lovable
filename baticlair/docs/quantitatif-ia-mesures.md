@@ -142,3 +142,27 @@ Ce que cette passe a appris :
   de 1 cm. Corrigé au lot suivant : un nombre nu rangé par l'ordre n'est jamais pris pour une question à boutons dont
   il n'est aucun bouton ; cette question est reposée, seule (test `nombre-nu-hors-bouton.test.ts`).
 - Le nombre de descentes reste « à préciser » sur la liste quand il n'a pas été demandé dans le fil : à poser.
+
+## Passe 4 : une question, un sujet (16 novembre 2026, soir, site de test au commit `37691909`)
+
+Même devis, petit iPhone, vraie IA, prompt de lecture version 6.
+
+| Mesure | Valeur |
+|---|---|
+| Lecture | 72 s à l'écran (64 s d'appel) |
+| Coût total du quantitatif | 0,37 $ (lecture 0,328 ; relecture 0,033 ; repérage 0,004 ; réponses 0,001) |
+| Questions du modèle | 5, une par sujet (façonnage des bacs, rampant, développé de gouttière, nombre de descentes, façonnage de la rive) |
+| Phrase de Greg | 4 réponses rangées sur 4 possibles : bacs commandés façonnés, 1 descente, rive pliée par lui, bord de mer |
+| Reste demandé dans le fil | rampant, développé de gouttière, Ø des descentes, développé de la bande |
+| Liste | 8 articles |
+
+Ce que cette passe montre :
+
+- « La gouttière et ses descentes » ne font plus une seule question : deux questions, deux jeux de boutons.
+- « 0,65 » : l'épaisseur est connue (« Comme d'habitude : 0,65 mm »), aucune question. « chevron » : aucune question de
+  crochets sur ce devis, le mot n'est rangé nulle part. « 1 » va bien au nombre de descentes, plus au rampant.
+- Défaut trouvé : le façonnage de la rive a été posé deux fois. Le modèle l'avait écrit sous une clé à lui
+  (« faconnage_rive ») en visant la ligne de la rive ; le calcul l'a reposé pour cette pièce. Corrigé : une clé du
+  modèle qui prolonge une donnée du référentiel est cette donnée quand la ligne visée n'a qu'un ouvrage qui la porte
+  (test `question-du-modele-rattachee.test.ts`).
+- 72 s de lecture et 0,33 $ : toujours trop. Essai de Sonnet 5.5 à faire sur le jeu de test.

@@ -57,4 +57,26 @@ describe("une question du modèle qui prolonge une donnée du référentiel est 
     expect(rattacherQuestion(ref, plan, { ...duModele, cle: "teinte_de_la_tuile" }).cle).toBe("teinte_de_la_tuile");
     expect(rattacherQuestion(ref, plan, { ...duModele, cle: "faconnage" }).cle).toBe("faconnage");
   });
+
+  // Essai en ligne du 16 novembre 2026 (soir, prompt version 6) : le modèle a demandé « Habillage de rive zinc : tu le façonnes
+  // toi-même ou tu le commandes façonné ? » sous la clé « faconnage_rive », en visant sa ligne. Greg y a répondu ; le calcul a
+  // reposé la même question pour cette pièce. La suite (« rive ») ne nomme aucun ouvrage, mais la LIGNE visée en nomme un seul.
+  it("« faconnage_rive » qui vise la ligne d'une pièce de zinc est le façonnage de CETTE pièce, et ne se repose plus", () => {
+    const l = lecture();
+    const plan = planDeLecture(ref, l, lignesDeLecture(l));
+    const piece = plan.lines.find((x) => x.status === "planned" && x.workItemId.startsWith("bandes-zinc__"))!;
+    expect(piece.status).toBe("planned");
+    const ligne = piece.ref.split(".")[0]!;
+    const rive: LectureQuestion = { cle: "faconnage_rive", texte: "Habillage de rive zinc : tu le façonnes toi-même ou tu le commandes façonné ?", boutons: [{ label: "Je façonne (feuilles ou bobineau)", valeur: "1" }, { label: "Je commande façonné", valeur: "2" }], unite: null, donnee: "façonnage de l'habillage de rive", ligne };
+    expect(rattacherQuestion(ref, plan, rive)).toMatchObject({ cle: "faconnage", ligne });
+    // Sans ligne visée, ou sur une ligne dont l'ouvrage n'a pas cette donnée : jamais rattachée au hasard.
+    expect(rattacherQuestion(ref, plan, { ...rive, ligne: null }).cle).toBe("faconnage_rive");
+    expect(rattacherQuestion(ref, plan, { ...rive, ligne: "9:999" }).cle).toBe("faconnage_rive");
+    const avec = { ...l, questions: [rive, ...l.questions.filter((q) => !(q.cle === "faconnage" && q.ligne === ligne))] };
+    const e0 = ecranDeLecture({ ref, lecture: avec, answers: {}, preferences: {} });
+    const q = e0.questions.find((x) => x.text === rive.texte)!;
+    expect(q.key.startsWith("param:faconnage@bandes-zinc__")).toBe(true);
+    const e1 = ecranDeLecture({ ref, lecture: avec, answers: { [q.key]: { value: "1", unit: "u" } }, preferences: {} });
+    expect(e1.questions.filter((x) => x.key === q.key || x.key === "fiche:faconnage_rive")).toEqual([]);
+  });
 });
