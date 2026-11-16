@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./page-entreprise": {
+      "types": "./dist/page-entreprise/index.d.ts",
+      "default": "./dist/page-entreprise/index.js"
     }
   },
   "files": [

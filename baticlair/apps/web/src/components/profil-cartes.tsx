@@ -1,5 +1,7 @@
 "use client";
 
+import { rafraichirPagePublique } from "@/components/page-entreprise/rafraichir";
+
 /**
  * LES CARTES DU PROFIL (déplacées telles quelles de `app/(app)/compte/page.tsx`, Greg, 1er novembre 2026 : « Profil et
  * paramètres » devient un sommaire ; chaque carte vit dans sa rubrique, `app/(app)/compte/[rubrique]/page.tsx`).
@@ -427,6 +429,8 @@ export function CompanyProfileCard({ signatureName, avecLogo = true }: { signatu
       });
       setSaved(true);
       refresh();
+      // Ma page Mobiiz : le téléphone et le nom du profil s'y lisent ; la page publique est régénérée tout de suite.
+      void rafraichirPagePublique();
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
     } finally {

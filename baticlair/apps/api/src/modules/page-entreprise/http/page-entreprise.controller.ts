@@ -11,6 +11,7 @@ import { exigerDeuxFacteurs } from "../../../platform/http/deux-facteurs.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { exigerTurnstile } from "../../../platform/http/turnstile.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
+import { qrSvg } from "../../../platform/qr/qr.js";
 import { currentRequestContext } from "../../../platform/logging/request-context.js";
 import { CONFIG } from "../../../platform/tokens.js";
 import { Public } from "../../identity/index.js";
@@ -60,6 +61,7 @@ export class MaPageController {
   constructor(
     @Inject(PageEntrepriseService) private readonly pages: PageEntrepriseService,
     @Inject(AideEcriture) private readonly aide: AideEcriture,
+    @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
   @Get()
@@ -92,6 +94,16 @@ export class MaPageController {
   @Put("adresse")
   changerAdresse(@Tenant() t: TenantContext, @Body(new ZodPipe(corpsAdresse)) b: z.infer<typeof corpsAdresse>) {
     return this.pages.changerAdresse(t, b.adresse);
+  }
+
+  /** « Partager » : le QR code de l'adresse de la page (SVG, généré par le code, aucun service tiers). */
+  @Get("qr.svg")
+  async qr(@Tenant() t: TenantContext, @Res() res: Response) {
+    const [adresse] = await this.pages.adressesARafraichir(t.companyId);
+    if (!adresse) throw new NotFoundException();
+    res.setHeader("Content-Type", "image/svg+xml");
+    res.setHeader("Cache-Control", "private, max-age=300");
+    res.send(qrSvg(`${this.config.webAppUrl.replace(/\/$/, "")}/e/${adresse}`, 240));
   }
 
   /** Pour le site : les adresses dont le cache est à régénérer après un changement. */
@@ -220,6 +232,14 @@ export class PagesPubliquesAdminController {
   async liste(@Tenant() t: TenantContext) {
     await this.garde(t);
     return this.pages.listeAdmin();
+  }
+
+  /** Pour le site : les adresses d'une page à régénérer après un geste de l'admin. */
+  @Get(":adresse/adresses")
+  async adresses(@Tenant() t: TenantContext, @Param("adresse") adresse: string) {
+    await this.garde(t);
+    const p = await this.prisma.pageEntreprise.findUnique({ where: { adresse }, select: { companyId: true } });
+    return { adresses: p ? await this.pages.adressesARafraichir(p.companyId) : [] };
   }
 
   @Put(":adresse/masquage")

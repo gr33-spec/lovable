@@ -14,7 +14,7 @@ en parallèle dans une autre session).
       données structurées, textes proposés ; tests `packages/domain/test/page-entreprise.test.ts`.
 - [x] 2. API, module `apps/api/src/modules/page-entreprise/` : migration additive, réglages, photos (sharp + stockage
       objet), page publique, contact, signalement, admin ; tests `apps/api/test/page-entreprise.test.ts`.
-- [ ] 3. Web : page publique `app/(public)/e/[adresse]`, éditeur `app/(app)/compte/ma-page`, admin
+- [x] 3. Web : page publique `app/(public)/e/[adresse]`, éditeur `app/(app)/compte/ma-page`, admin
       `app/(app)/admin/pages-publiques`, rafraîchissement du cache.
 - [ ] 4. e2e (petit iPhone, Android, ordinateur, clair et sombre, deux comptes), Lighthouse mobile.
 - [ ] 5. Relecture du juriste, captures des 3 modèles (couvreur, peintre), coût mensuel, compte rendu.

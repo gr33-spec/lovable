@@ -12,7 +12,8 @@ export function cspDe(nonce: string, dev = false, turnstile = false): string {
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob:",
+    // Ma page Mobiiz (16 novembre 2026) : les photos des pages publiques viennent du CDN du stockage objet (Vercel Blob).
+    "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
     "font-src 'self' data:",
     "connect-src 'self' blob:",
     "worker-src 'self' blob:",

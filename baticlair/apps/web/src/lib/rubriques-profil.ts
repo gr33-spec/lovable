@@ -1,4 +1,4 @@
-import { AtSign, Bell, Building2, CreditCard, FolderOpen, LifeBuoy, Palette, Plug, ShieldCheck, Sparkles, UserRound, type LucideIcon } from "lucide-react";
+import { AtSign, Globe, Bell, Building2, CreditCard, FolderOpen, LifeBuoy, Palette, Plug, ShieldCheck, Sparkles, UserRound, type LucideIcon } from "lucide-react";
 
 /**
  * « PROFIL ET PARAMÈTRES » (Greg, 1er novembre 2026, puis 10 novembre : captures 18 et 19) : le sommaire, en quatre groupes,
@@ -10,6 +10,7 @@ import { AtSign, Bell, Building2, CreditCard, FolderOpen, LifeBuoy, Palette, Plu
 export type RubriqueProfil =
   | "informations"
   | "entreprise"
+  | "ma-page"
   | "profil-public"
   | "documents"
   | "apparence"
@@ -40,6 +41,8 @@ export const GROUPES_PROFIL: { titre: string; lignes: LigneProfil[] }[] = [
     titre: "Entreprise",
     lignes: [
       { id: "entreprise", titre: "Mon entreprise", sousTitre: "Coordonnées, SIRET, métiers et zones", icone: Building2 },
+      // Ma page Mobiiz (Greg, 16 novembre 2026) : son propre écran, `app/(app)/compte/ma-page`.
+      { id: "ma-page", titre: "Ma page", sousTitre: "Ta page publique à partager : photos, couleurs, contact", icone: Globe },
       { id: "profil-public", titre: "Profil public et missions", sousTitre: "Présentation, services et disponibilités", icone: UserRound, missions: true },
       { id: "documents", titre: "Documents et qualifications", sousTitre: "Dossier, assurances, CV et références", icone: FolderOpen, missions: true },
     ],

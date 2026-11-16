@@ -7,11 +7,16 @@ import type { NextConfig } from "next";
  */
 const API_URL = (process.env.API_URL ?? "http://localhost:4000").replace(/\/$/, "");
 
+/**
+ * Ma page Mobiiz (16 novembre 2026) : les pages publiques des entreprises (`/e/…`) ne sont indexées par Google que quand
+ * `PAGES_ENTREPRISES_INDEXEES=on` (le site de test reste hors des moteurs) ; elles disent alors elles-mêmes leur règle.
+ */
+const PAGES_INDEXEES = process.env.PAGES_ENTREPRISES_INDEXEES === "on";
+
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "X-Robots-Tag", value: "noindex, nofollow" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
   // L'appareil photo sert au croquis d'une ligne ; plus de micro depuis le retrait de la voix (§50.7).
   { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
@@ -25,7 +30,11 @@ const nextConfig: NextConfig = {
     return [{ source: "/v1/:path*", destination: `${API_URL}/v1/:path*` }];
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      PAGES_INDEXEES ? { source: "/:path((?!e/).*)", headers: noindex } : { source: "/:path*", headers: noindex },
+    ];
   },
 };
 
