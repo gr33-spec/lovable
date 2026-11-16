@@ -61,7 +61,7 @@ couvreur-insulaire.fr). Lighthouse mobile : 93 à 94 en performance, 100 en bonn
 5. Projet du site (« baticlair ») › Settings › Environment Variables › Add : nom `PHOTOS_BLOB_URL`, valeur la Base URL,
    environnements Preview (et Production plus tard) ; Save.
 6. Redéployer les deux projets (Deployments › ⋯ › Redeploy) pour que les variables soient prises.
-7. Vérifier : Ma page › ajouter une photo ; elle passe « prête » en quelques secondes et s'affiche sur `/e/<adresse>`.
+7. Vérifier : onglet « Mon site » › ajouter une photo ; elle passe « prête » en quelques secondes et s'affiche sur `/e/<adresse>`.
 
 ## Point de reprise (à tenir à jour à chaque étape)
 
@@ -84,8 +84,9 @@ Reprendre à la première case non cochée.
       poussée ; RIEN sur la branche de test (attend Greg).
 - [x] 7. Onglet « Mon site », « Entre pros », lien Mission (3e message de Greg) : codé et testé (API 43 ciblés, e2e
       ma-page 9/9, e2e-ag-v1 entre-pros 3/3).
-- [ ] 8. Chaîne complète sur le commit final (domaine, API, web, e2e « mois », « @lots », ag-v1), puis poussée sur la
-      branche de test et vérification que le site et l'API servent ce commit.
+- [x] 8. Chaîne complète sur le commit final (branche de test intégrée, 3 fusions sans conflit) : domaine 1 217/1 217,
+      API 860/860 (+1 ignoré), lint, types, builds ; e2e « mois » 304/304, « @lots » 16/16, ag-v1 88/88. Restent rouges, hors
+      chantier : les 3 tests unitaires du site déjà rouges sur la branche de test. Poussé sur la branche de test.
 - [ ] 9. Après l'accord de Greg : store Vercel Blob relié au projet API (`BLOB_READ_WRITE_TOKEN`) et son adresse publique
       posée sur le projet web (`PHOTOS_BLOB_URL` : les photos sont servies sous `/photos/…`, même domaine, la CSP reste
       « rien d'ailleurs »), fusion dans la branche de test, migration appliquée par le déploiement (additive).
