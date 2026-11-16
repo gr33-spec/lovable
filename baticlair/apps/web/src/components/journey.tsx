@@ -1,14 +1,17 @@
 "use client";
 
-import { ConversationQuestions, type QuestionDeConversation } from "@/components/conversation-questions";
-import { Check, ChevronLeft, FileUp, ListChecks, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, Puce, TexteMobiiz, useChampDicte, useFil, useZoneVisible } from "@/components/chat-mobiiz";
+import { api } from "@/lib/api";
+import { useDictee } from "@/lib/dictee";
+import { interpreterReponsesNumerotees, phraseNotee, type ReponseInterpretee } from "../../../../packages/domain/src/assistant/reponses-libres-numerotees";
+import { questionEnMotsSimples } from "../../../../packages/domain/src/assistant/questions-simples";
+import { Check, ChevronLeft, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListScene, ReadingStage } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
-import type { ApiError, Takeoff } from "@/lib/api";
 import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
-import { useTyping } from "@/lib/typing";
+import type { ApiError, Takeoff } from "@/lib/api";
 import { NOM_APP } from "@/lib/nom";
 
 /*
@@ -420,11 +423,30 @@ function cardErrors(error: ApiError | null, sent: readonly string[]): Map<string
   return out;
 }
 
+type MessageQuestions = { de: "mobiiz" | "moi"; texte: string; cle?: string };
+
+/** Les morceaux d'une réponse écrite (même découpe que le moteur) : pour savoir s'il reste du texte que le code n'a pas rangé. */
+const morceauxDe = (texte: string) => texte.split(/\n|;|,(?!\d)|\bet\b/).map((m) => m.trim()).filter(Boolean).length;
+
+/**
+ * UN SEUL ÉCRAN, LA DISCUSSION (Greg, 16 novembre 2026 ; RÈGLE CHANGÉE : avant, une conversation en haut et les mêmes
+ * questions en cartes dessous, « réponds avec les numéros »). Tout se passe dans le fil, comme l'assistant : UNE question à
+ * la fois dans une bulle de Mobiiz, ses boutons juste dessous ; l'artisan touche un bouton OU répond au clavier ou à la
+ * voix dans la barre du bas, toujours. Sa réponse s'affiche comme son message, les boutons disparaissent, la question
+ * suivante arrive. Une réponse brève, ou plusieurs d'un coup, est lue par le sens et par l'ordre (le code d'abord, puis le
+ * serveur et son IA pour ce qui reste) ; Mobiiz confirme en UNE ligne et ne pose que ce qui manque. Quand tout est
+ * répondu, « Calculer ma liste » est proposé dans le fil. Le serveur revalide tout au calcul.
+ */
 export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
+  const router = useRouter();
   const questions = useMemo(() => counterQuestions(takeoff), [takeoff]);
-  const typing = useTyping();
+  // §50.2 : dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
+  const ordonnees = useMemo(() => {
+    const order = [...new Set(questions.map((q) => q.group))].sort((a, b) => Number(a === SITE_GROUP || a === CONSUMABLES_GROUP) - Number(b === SITE_GROUP || b === CONSUMABLES_GROUP) || Number(a === CONSUMABLES_GROUP) - Number(b === CONSUMABLES_GROUP));
+    return order.flatMap((group) => questions.filter((q) => q.group === group)).map((q) => ({ ...q, simple: questionEnMotsSimples(q.key, q.text, q.options) }));
+  }, [questions]);
   const [given, setGiven] = useState<Record<string, Given>>(() => {
-    // « Comme d'habitude » : la réponse habituelle est déjà cochée, un tap la change.
+    // « Comme d'habitude » : la réponse habituelle est déjà prise, elle se dit en une ligne et se change d'un tap.
     const start: Record<string, Given> = {};
     for (const q of questions) {
       if (q.kind !== "habit" || q.usual === null) continue;
@@ -433,255 +455,201 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
     }
     return start;
   });
-  const set = (key: string, g: Given | null) =>
-    setGiven((prev) => {
-      const next = { ...prev };
-      if (g) next[key] = g;
-      else delete next[key];
-      return next;
-    });
   const [retired, setRetired] = useState<ReadonlySet<string>>(() => new Set());
-  const retire = (key: string, out: boolean) =>
-    setRetired((prev) => {
-      const next = new Set(prev);
-      if (out) next.add(key);
-      else next.delete(key);
-      return next;
-    });
-  // Les clés des réponses parties, dans l'ordre : un refus du serveur (`reponses.N`) retrouve sa carte.
-  const [sent, setSent] = useState<readonly string[]>([]);
-  const errors = useMemo(() => cardErrors(error, sent), [error, sent]);
-  const firstError = [...errors.keys()][0];
-  useEffect(() => {
-    if (firstError) document.getElementById(`question-${firstError}`)?.scrollIntoView?.({ block: "center" });
-  }, [firstError, error]);
-  const toForm = questions.filter((q) => mandatory(q) && !given[q.key]);
-  const [nudge, setNudge] = useState(false);
-  // §50.2 : groupées par ouvrage, dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
-  const order = [...new Set(questions.map((q) => q.group))].sort((a, b) => Number(a === SITE_GROUP || a === CONSUMABLES_GROUP) - Number(b === SITE_GROUP || b === CONSUMABLES_GROUP) || Number(a === CONSUMABLES_GROUP) - Number(b === CONSUMABLES_GROUP));
+  const [messages, setMessages] = useState<MessageQuestions[]>(() => {
+    const habitudes = questions.filter((q) => q.kind === "habit" && q.usual !== null).map((q) => q.options.find((o) => o.value === q.usual)?.label).filter(Boolean);
+    const aPoser = questions.length - habitudes.length;
+    const tete = aPoser > 1 ? "J'ai lu ton devis. Il me manque quelques réponses pour calculer ta liste." : aPoser === 1 ? "J'ai lu ton devis. Il me manque une réponse pour calculer ta liste." : "J'ai lu ton devis.";
+    return [{ de: "mobiiz", texte: habitudes.length ? `${tete}\nComme d'habitude : ${habitudes.join(", ")}.` : tete }];
+  });
+  const [reflexion, setReflexion] = useState(false);
+  const [autre, setAutre] = useState(false);
+  const champ = useChampDicte();
+  const dictee = useDictee(champ.surVoix);
+  const restantes = ordonnees.filter((q) => !given[q.key] && !retired.has(q.key));
+  const courante = restantes[0] ?? null;
+  // Catalogue métier (Greg, 31 octobre 2026) : sur une question de modèle, ce qui se tape propose ses références.
+  const references = useReferencesCatalogue(champ.saisie, Boolean(courante && QUESTION_DE_MODELE.test(courante.text)));
+  const { fil, enBas } = useFil([messages.length, reflexion, courante?.key, pending]);
+  const zone = useZoneVisible(enBas);
 
-  // La conversation (Greg, 1er novembre 2026) : les mêmes questions, numérotées dans l'ordre des cartes ; ses réponses
-  // remplissent les cartes, qui restent la référence.
-  const numerotees = order.flatMap((group) => questions.filter((q) => q.group === group));
-  const conversation: QuestionDeConversation[] = numerotees.map((q, i) => ({ numero: i + 1, cle: q.key, texte: q.text, options: q.options, unite: q.unit, libre: q.free, numerique: q.numeric, retirable: !mandatory(q) }));
-  const aRepondre = new Set(conversation.filter((q) => !given[q.cle] && !retired.has(q.cle)).map((q) => q.numero));
+  // Un refus du serveur nomme la réponse fautive (`reponses.N`) : sa question revient dans le fil, avec la phrase.
+  const [sent, setSent] = useState<readonly string[]>([]);
+  const [vu, setVu] = useState<ApiError | null>(null);
+  if (error && vu !== error) {
+    setVu(error);
+    const fautes = cardErrors(error, sent);
+    if (fautes.size === 0) setMessages((m) => [...m, { de: "mobiiz", texte: error.message || "Le calcul n'est pas parti. Réessaie dans un instant." }]);
+    else {
+      setGiven((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => !fautes.has(k))));
+      setMessages((m) => [...m, ...[...fautes.values()].map((texte) => ({ de: "mobiiz" as const, texte }))]);
+    }
+  }
+
+  const noter = (q: (typeof ordonnees)[number], g: Given) => {
+    setAutre(false);
+    setGiven((prev) => ({ ...prev, [q.key]: g }));
+    setMessages((m) => [...m, { de: "moi", texte: g.label, cle: q.key }]);
+  };
+  const sansReponse = (q: (typeof ordonnees)[number]) => {
+    setAutre(false);
+    setRetired((prev) => new Set(prev).add(q.key));
+    setMessages((m) => [...m, { de: "moi", texte: "Je ne sais pas", cle: q.key }, { de: "mobiiz", texte: "Pas de souci : la ligne restera à vérifier dans ta liste." }]);
+  };
+  /** Toucher une de ses réponses la rouvre : la question revient dans le fil. */
+  const reprendre = (cle: string) => {
+    setGiven((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== cle)));
+    setRetired((prev) => new Set([...prev].filter((k) => k !== cle)));
+    setMessages((m) => [...m, { de: "mobiiz", texte: "D'accord, on reprend cette question." }]);
+  };
+
+  const envoyer = async () => {
+    const texte = champ.saisie.trim();
+    if (!texte || reflexion || pending || restantes.length === 0) return;
+    dictee.arreter();
+    champ.setSaisie("");
+    setAutre(false);
+    setMessages((m) => [...m, { de: "moi", texte }]);
+    const posees = restantes.map((q, i) => ({ numero: i + 1, cle: q.key, texte: q.simple.texte, options: q.simple.options, unite: q.unit, libre: q.options.length === 0 && !q.free ? (q.numeric || (q.unit && q.unit !== "u") ? ("number" as const) : ("written" as const)) : q.free, numerique: q.numeric }));
+    let lues: ReponseInterpretee[] = interpreterReponsesNumerotees(posees, texte);
+    const compris = (rs: readonly ReponseInterpretee[]) => rs.filter((r) => r.statut === "compris").length;
+    // Ce que le code n'a pas rangé passe au serveur (son IA, si elle est allumée, puis la revalidation par le code).
+    if (compris(lues) < Math.min(morceauxDe(texte), posees.length)) {
+      setReflexion(true);
+      const r = await api<{ ia: boolean; reponses: ReponseInterpretee[] }>("/v1/assistant/interpretation", {
+        method: "POST",
+        body: { questions: posees.map((q) => ({ numero: q.numero, cle: q.cle, texte: q.texte, options: q.options, unite: q.unite, ...(q.libre ? { libre: q.libre } : {}), ...(q.numerique ? { numerique: true } : {}) })), texte: texte.slice(0, 2000) },
+      }).catch(() => null);
+      if (r?.ia && r.reponses.length === lues.length && compris(r.reponses) >= compris(lues)) lues = r.reponses;
+      setReflexion(false);
+    }
+    const prises: Record<string, Given> = {};
+    const laissees: string[] = [];
+    for (const r of lues) {
+      const q = restantes[r.numero - 1]!;
+      if (r.statut === "compris" && r.valeur !== null) prises[q.key] = { value: r.valeur, label: r.libelle ?? r.valeur, ...(r.libreEcrite ? { custom: true } : {}) };
+      else if (r.statut === "sans_reponse" && r.raison && !mandatory(q)) laissees.push(q.key);
+    }
+    if (Object.keys(prises).length) setGiven((prev) => ({ ...prev, ...prises }));
+    if (laissees.length) setRetired((prev) => new Set([...prev, ...laissees]));
+    // UNE ligne : ce qui est compris ; sinon, pourquoi la question posée revient. Jamais la liste de tout.
+    const notee = phraseNotee(Object.values(prises).map((g) => g.label));
+    const premiere = lues[0];
+    const suite = notee
+      ? notee
+      : laissees.length
+        ? "Pas de souci : la ligne restera à vérifier dans ta liste."
+        : (premiere?.raison ?? "Je n'ai pas compris. Touche un bouton ou redis-le autrement.");
+    setMessages((m) => [...m, { de: "mobiiz", texte: suite }]);
+  };
+
+  const calculer = () => {
+    const answers = counterAnswers(questions, given, retired);
+    setSent(answers.reponses.map((r) => r.question));
+    onSubmit(answers);
+  };
+  const invite = courante ? (autre ? "Écris ta réponse…" : courante.options.length === 0 ? `Écris ta réponse${courante.unit && courante.unit !== "u" ? ` (${courante.unit === "m2" ? "m²" : courante.unit})` : ""}…` : "Réponds ici…") : "Réponds ici…";
 
   return (
-    // Un seul conteneur : sur ordinateur, « Calculer ma liste » colle au bas de l'écran dès le haut de page, conversation comprise.
-    <div className="flex flex-col gap-3">
-    {/* Au-dessus des cartes, hors de leur région : le message reprend leurs textes, les cartes restent la référence. */}
-    {conversation.length > 0 ? <ConversationQuestions questions={conversation} aRepondre={aRepondre} onReponse={(cle, g) => set(cle, g)} onSansReponse={(cle) => retire(cle, true)} /> : null}
-    <section aria-label="Les questions" className="flex flex-col gap-3">
-      {error && errors.size === 0 ? <ErrorNotice error={error} /> : null}
-      {order.map((group) => (
-        <section key={group} aria-label={group} className="flex flex-col gap-2.5">
-          <h3 className="px-1 pt-2 font-display text-[17px] font-extrabold tracking-[-0.01em]">{group}</h3>
-          <ol className="flex flex-col gap-2.5">
-            {questions
-              .filter((q) => q.group === group)
-              .map((q) =>
-                retired.has(q.key) ? (
-                  <RetiredCard key={q.key} question={q} onRestore={() => retire(q.key, false)} />
-                ) : (
-                  <QuestionCard
-                    key={q.key}
-                    question={q}
-                    given={given[q.key] ?? null}
-                    flagged={nudge && toForm.some((x) => x.key === q.key)}
-                    problem={errors.get(q.key) ?? null}
-                    onChange={(g) => set(q.key, g)}
-                    {...(mandatory(q) ? {} : { onRetire: () => retire(q.key, true) })}
-                  />
-                ),
-              )}
-          </ol>
+    <div ref={zone} role="dialog" aria-modal="true" aria-label="Questions de Mobiiz" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+      <EnTeteChat onFermer={() => router.push("/chantiers")} />
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
+        <section ref={fil} aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
+          {messages.map((m, i) =>
+            m.de === "mobiiz" ? (
+              <Bulle key={i} de="mobiiz" label="Message de MOBIIZ">
+                <TexteMobiiz>{m.texte}</TexteMobiiz>
+              </Bulle>
+            ) : m.cle && (given[m.cle] || retired.has(m.cle)) && !pending && messages.findLastIndex((x) => x.cle === m.cle) === i ? (
+              <button key={i} type="button" onClick={() => reprendre(m.cle!)} aria-label={`Modifier ma réponse : ${m.texte}`} className="pressable max-w-[82%] self-end rounded-[22px] rounded-br-md px-4 py-2.5 text-left text-[16px] leading-snug whitespace-pre-line text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+                {m.texte}
+              </button>
+            ) : (
+              <Bulle key={i} de="moi">
+                {m.texte}
+              </Bulle>
+            ),
+          )}
+          {reflexion ? (
+            <p role="status" className="self-start pl-10 text-[14px] font-semibold text-[var(--chat-texte)]/75">
+              Réflexion…
+            </p>
+          ) : courante ? (
+            <>
+              <Bulle de="mobiiz" label="Question de MOBIIZ">
+                <TexteMobiiz>{courante.simple.texte}</TexteMobiiz>
+              </Bulle>
+              <div role="group" aria-label={courante.simple.texte} className="flex flex-wrap gap-2 pl-10">
+                {courante.simple.options.map((o) => (
+                  <Puce key={`${o.value}:${o.label}`} onClick={() => noter(courante, { value: o.value, label: o.label })}>
+                    {o.label}
+                    {courante.usual === o.value && courante.simple.options.filter((x) => x.value === o.value).length === 1 ? <span className="pl-1.5 text-[12px] font-bold text-[var(--chat-texte)]/70">par défaut</span> : null}
+                  </Puce>
+                ))}
+                {courante.free && courante.options.length > 0 ? (
+                  <Puce
+                    onClick={() => {
+                      setAutre(true);
+                      document.querySelector<HTMLTextAreaElement>("[data-barre-questions] textarea")?.focus();
+                    }}
+                  >
+                    Autre
+                  </Puce>
+                ) : null}
+                {mandatory(courante) ? null : (
+                  <Puce discret onClick={() => sansReponse(courante)}>
+                    Je ne sais pas
+                  </Puce>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <Bulle de="mobiiz" label="Message de MOBIIZ">
+                <TexteMobiiz>{pending ? "Je calcule ta liste…" : "J'ai tout ce qu'il me faut. Touche une de tes réponses pour la changer, sinon on y va."}</TexteMobiiz>
+              </Bulle>
+              <div className="pl-10">
+                <Button className="shadow-card!" pending={pending} onClick={calculer}>
+                  Calculer ma liste
+                </Button>
+              </div>
+            </>
+          )}
         </section>
-      ))}
-    </section>
-      {/* Retour du fondateur (2026-10-12, capture iPhone) : le bouton restait accroché au milieu de l'écran une fois le clavier
-          refermé (case « Autre »). Sur téléphone : `position: fixed; bottom: 0`, la zone du geste en marge intérieure, caché
-          pendant la saisie (`useTyping`, qui fait aussi recalculer l'écran à Safari), et la place gardée sous la dernière carte. */}
-      <div aria-hidden="true" className="h-(--calc-space) lg:hidden" />
-      <div
-        role="group"
-        aria-label="Calculer ma liste"
-        data-typing={typing || undefined}
-        className={`${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}z-30 fade-ground pt-6 transition-[translate,opacity] duration-200 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:px-4.5 max-lg:pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:bottom-0 lg:pb-4`}
-      >
-        <div className="mx-auto max-w-2xl">
-          <Button
-            className="w-full shadow-card!"
-            pending={pending}
-            onClick={() => {
-              // §48.6 : le façonnage de chaque pièce de zinc est obligatoire ; la première carte sans réponse se montre.
-              if (toForm.length > 0) {
-                setNudge(true);
-                document.getElementById(`question-${toForm[0]!.key}`)?.scrollIntoView?.({ block: "center", behavior: "smooth" });
-                return;
-              }
-              const answers = counterAnswers(questions, given, retired);
-              setSent(answers.reponses.map((r) => r.question));
-              onSubmit(answers);
+        <div data-barre-questions>
+          <BarreSaisie
+            valeur={champ.saisie}
+            onChange={champ.setSaisie}
+            onEnvoyer={() => void envoyer()}
+            occupe={reflexion || pending}
+            ecoute={dictee.ecoute}
+            probleme={dictee.probleme}
+            invite={invite}
+            avant={
+              courante ? (
+                <ReferencesCatalogue
+                  question={courante.text}
+                  references={references}
+                  onChoisir={(r) => {
+                    champ.setSaisie("");
+                    noter(courante, { value: r, label: r, custom: true });
+                  }}
+                />
+              ) : null
+            }
+            onDicter={() => {
+              champ.avantDictee();
+              dictee.demarrer();
             }}
-          >
-            Calculer ma liste
-          </Button>
+            onArreter={dictee.arreter}
+            onAnnulerDictee={() => {
+              dictee.annuler();
+              champ.rendre();
+            }}
+          />
         </div>
       </div>
     </div>
-  );
-}
-
-/** Une question retirée : sa phrase en une ligne, et « Remettre ». */
-function RetiredCard({ question: q, onRestore }: { question: CounterQuestion; onRestore: () => void }) {
-  return (
-    <li className="flex items-center gap-3 rounded-xl bg-surface px-4 py-3 shadow-card">
-      <span className="min-w-0 grow text-[14px] leading-snug text-muted">
-        Question retirée : <span className="font-bold">{q.text}</span>
-      </span>
-      <Button variant="secondary" className="shrink-0" onClick={onRestore}>
-        Remettre
-      </Button>
-    </li>
-  );
-}
-
-function QuestionCard({
-  question: q,
-  given,
-  flagged,
-  problem,
-  onChange,
-  onRetire,
-}: {
-  question: CounterQuestion;
-  given: Given | null;
-  flagged: boolean;
-  /** La phrase d'un refus du serveur sur cette réponse : voyant rouge sur la carte. */
-  problem: string | null;
-  onChange: (g: Given | null) => void;
-  /** La poubelle (absente sur une question obligatoire). */
-  onRetire?: () => void;
-}) {
-  const id = useId();
-  return (
-    <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-xl bg-surface p-4 shadow-card transition ${problem ? "ring-2 ring-danger" : given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
-      <div className="flex items-start gap-2">
-        <span id={`${id}-q`} className="grow text-[16px] leading-snug font-extrabold">
-          {q.text}
-        </span>
-        {onRetire ? (
-          <button type="button" onClick={onRetire} aria-label="Retirer cette question" className="-mt-1.5 -mr-1.5 flex size-11 shrink-0 items-center justify-center rounded-full text-muted active:scale-95">
-            <Trash2 size={17} aria-hidden="true" />
-          </button>
-        ) : null}
-      </div>
-      {problem ? (
-        <p role="alert" className="flex items-center gap-2 text-[14px] font-bold text-danger">
-          <span aria-hidden="true" className="size-2.5 shrink-0 rounded-full bg-danger" />
-          {problem}
-        </p>
-      ) : null}
-      {q.options.length === 0 ? (
-        // Temps deux : une valeur se tape dans une case, avec son unité (« 60 cm ») ; une réponse sans boutons s'écrit.
-        <OtherAnswer question={{ ...q, free: q.numeric || (q.unit && q.unit !== "u") ? "number" : (q.free ?? "written") }} given={given} onChange={onChange} startOpen />
-      ) : (
-        <div role="group" aria-labelledby={`${id}-q`} className={`grid gap-2 ${q.options.length <= 2 || q.options.every((o) => o.label.length <= 14) ? "grid-cols-2" : "grid-cols-1"}`}>
-          {q.options.map((o) => {
-            const on = given?.value === o.value && !given.custom;
-            const usual = !given && q.usual === o.value;
-            return (
-              <button
-                key={o.value || "aucun"}
-                type="button"
-                aria-pressed={on}
-                onClick={() => onChange(on ? null : { value: o.value, label: o.label })}
-                className={`inline-flex min-h-12 flex-col items-center justify-center rounded-2xl border-2 px-3 py-1.5 text-center text-[15px] leading-tight font-extrabold transition active:scale-[0.98] ${
-                  on ? "border-accent bg-accent text-on-accent" : usual ? "border-accent/50 bg-[#F2F1EE] text-ink" : "border-line bg-surface text-ink"
-                }`}
-              >
-                {o.label}
-                {usual ? <span className="text-[11px] font-bold text-accent-text">par défaut</span> : null}
-              </button>
-            );
-          })}
-          {q.free ? <OtherAnswer question={q} given={given} onChange={onChange} /> : null}
-        </div>
-      )}
-    </li>
-  );
-}
-
-/**
- * « Autre » : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (un modèle de tuile, une pente de 38°). Un
- * appui sur « Autre » ouvre la case ; « OK » la garde comme réponse.
- *
- * CATALOGUE MÉTIER (Greg, 31 octobre 2026 : « Tuile rouge, 250 unités » → « Quel modèle de tuile ? », l'artisan tape
- * « H14 » et choisit la référence) : sur une question de modèle ou de référence, le même moteur que « Écris ta liste »
- * propose ses références pendant la frappe ; un tap les prend, ce qui s'écrit librement reste possible.
- */
-function OtherAnswer({ question: q, given, onChange, startOpen = false }: { question: CounterQuestion; given: Given | null; onChange: (g: Given | null) => void; startOpen?: boolean }) {
-  const id = useId();
-  const [open, setOpen] = useState(startOpen || Boolean(given?.custom));
-  const [value, setValue] = useState(given?.custom ? given.value : "");
-  const numeric = q.free === "number";
-  const references = useReferencesCatalogue(value, open && !numeric && QUESTION_DE_MODELE.test(q.text));
-  const unitLabel = q.unit && q.unit !== "u" ? (q.unit === "m2" ? "m²" : q.unit) : "";
-  const clean = value.trim().replace(",", ".");
-  const valid = numeric ? /^\d+(?:\.\d+)?$/.test(clean) && Number(clean) > 0 : value.trim().length >= 2;
-  const save = () => {
-    if (!valid) return;
-    const v = numeric ? clean : value.trim();
-    onChange({ value: v, label: numeric ? `${v.replace(".", ",")}${unitLabel ? (unitLabel === "°" ? "°" : ` ${unitLabel}`) : ""}` : v, custom: true });
-  };
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex min-h-12 items-center justify-center rounded-2xl border-2 border-dashed border-line bg-surface px-3 py-1.5 text-[15px] font-extrabold text-ink active:scale-[0.98]"
-      >
-        Autre
-      </button>
-    );
-  }
-  return (
-    <form
-      className="col-span-full flex flex-wrap items-center gap-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        save();
-      }}
-    >
-      <label htmlFor={id} className="sr-only">
-        {numeric ? `Autre valeur : ${q.text}` : `Autre : ${q.text}`}
-      </label>
-      <span className={`flex min-w-0 grow items-center gap-1 rounded-2xl border-2 bg-surface px-3 ${given?.custom ? "border-accent" : "border-line"} focus-within:border-accent`}>
-        <input
-          id={id}
-          autoFocus
-          inputMode={numeric ? "decimal" : "text"}
-          maxLength={numeric ? 8 : q.free === "written" ? 300 : 100}
-          placeholder={numeric ? "Ta valeur" : q.free === "written" ? "Écris ta réponse" : "Écris le modèle"}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onBlur={save}
-          className="min-h-12 w-full min-w-0 bg-transparent text-[16px] font-extrabold outline-none"
-        />
-        {numeric && unitLabel ? <span className="shrink-0 text-[14px] font-bold text-muted">{unitLabel}</span> : null}
-      </span>
-      <Button type="submit" className="shrink-0" disabled={!valid}>
-        OK
-      </Button>
-      <ReferencesCatalogue
-        question={q.text}
-        references={references}
-        onChoisir={(r) => {
-          setValue(r);
-          onChange({ value: r, label: r, custom: true });
-        }}
-      />
-    </form>
   );
 }
 

@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { confirmerEmail } from "./confirmer-email";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { calculerMaListe, repondreAuxQuestions } from "./discussion";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
 import { departementReserve } from "./departement";
 
@@ -211,7 +212,10 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     const liste = page.getByRole("region", { name: "Liste des fournitures" });
     const questions = page.getByRole("region", { name: "Les questions" });
     await expect(liste.or(questions).first()).toBeVisible({ timeout: 60_000 });
-    if (await questions.isVisible()) await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+    if (await questions.isVisible()) {
+      await repondreAuxQuestions(page);
+      await calculerMaListe(page).click();
+    }
     await expect(liste).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("Liste préparée à partir de ton devis. Vérifie les quantités avant d'envoyer.")).toBeVisible();
     await expect(liste.getByText("à vérifier").first()).toBeVisible();

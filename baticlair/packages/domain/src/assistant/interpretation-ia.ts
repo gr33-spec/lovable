@@ -13,12 +13,14 @@ import type { QuestionNumerotee, ReponseInterpretee } from "./reponses-libres-nu
  * Ce que le code a compris n'est jamais remplacé par l'IA.
  */
 
-export const INTERPRETATION_PROMPT = { id: "interpretation_reponses", version: 1 } as const;
+export const INTERPRETATION_PROMPT = { id: "interpretation_reponses", version: 2 } as const;
 
 /** La consigne système (envoyée telle quelle ; testée). Pas de raisonnement rendu, seulement le rattachement. */
 export const INTERPRETATION_SYSTEM = [
   "Tu aides un artisan du bâtiment qui a répondu en une seule fois, à l'écrit ou à la voix, à des questions numérotées sur sa liste de matériaux.",
   "Ta seule tâche : rattacher chaque morceau de sa réponse à la question qu'il concerne.",
+  "L'artisan répond court, avec ses mots, souvent à plusieurs questions d'un coup et sans numéro : rattache par le sens, et par l'ordre des questions quand le sens ne suffit pas (le premier morceau pour la première question encore ouverte, et ainsi de suite).",
+  "Comprends le langage du chantier : « j'achète tout fait », « tout prêt » = commandé façonné ; « je plie », « je le fais » = je façonne ; « chevron » = pose sur chevrons ; un nombre seul répond à la question chiffrée ou au bouton qui porte ce nombre.",
   "Règles absolues :",
   "- N'invente jamais une quantité, une dimension, une qualité, une référence ou une compatibilité. Ce que l'artisan n'a pas dit reste sans réponse.",
   "- Pour une question à boutons, rends la VALEUR exacte d'un bouton, ou rien.",

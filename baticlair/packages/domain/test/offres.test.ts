@@ -72,7 +72,9 @@ describe("les offres", () => {
     expect(TARIFS.promax.sous).toBe("49 € HT par mois");
     expect(TARIFS.annee.r).toContain("Pro : 290 € HT par an ; Pro Max : 490 € HT par an");
     // La limite d'usage existe et se dit, sans chiffre.
-    expect(TARIFS.limite.r).toMatch(/^Non : /);
+    expect(TARIFS.limite.q).toBe("Y a-t-il une limite d'analyses ?");
+    expect(TARIFS.limite.r).toMatch(/^Oui, mais tu n'as rien à compter : /);
+    expect(JSON.stringify(TARIFS)).not.toMatch(/illimit/i);
     // Plus aucun ancien prix ni ancienne formule ; jamais les mots interdits de la page publique.
     expect(JSON.stringify(TARIFS)).not.toMatch(/19,90|39,90|199 €|399 €|348 €|Essentiel|Découverte|\bIA\b|automatique|précis|exact/);
   });

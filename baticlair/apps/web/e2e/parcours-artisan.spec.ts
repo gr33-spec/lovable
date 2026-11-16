@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { boutonsDeLaQuestion, calculerMaListe, ecrireDansLaDiscussion, repondreAuxQuestions, zoneDesQuestions } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -214,10 +215,9 @@ async function passQuestions(page: Page) {
   const questions = page.getByRole("region", { name: "Les questions" });
   await expect(list.or(questions).first()).toBeVisible({ timeout: 60_000 });
   if (await questions.isVisible()) {
-    // §49.4 : le façonnage de chaque pièce de zinc est obligatoire avant le calcul.
-    const faconne = questions.getByRole("button", { name: /^Je façonne/ });
-    for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
-    await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+    // Une question à la fois (Greg, 16 novembre 2026) : « Je façonne » sur un façonnage, sinon la valeur par défaut.
+    await repondreAuxQuestions(page);
+    await calculerMaListe(page).click();
   }
   await expect(list).toBeVisible({ timeout: 60_000 });
 }
@@ -1053,25 +1053,20 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await createProject(page, "Toiture Kervella", "M. Kervella", "2 rue du Port, Lorient");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
 
-  // ÉTAPE 3 : un seul écran. RÈGLE CHANGÉE (Greg, 1er novembre 2026) : une conversation en tête (questions numérotées, une
-  // réponse libre au clavier ou à la voix) ; les cartes restent au bouton, sans zone de texte à elles.
-  const questions = page.getByRole("region", { name: "Les questions" });
+  // ÉTAPE 3 : UN SEUL ÉCRAN, LA DISCUSSION. RÈGLE CHANGÉE (Greg, 16 novembre 2026) : plus de cartes sous la conversation ;
+  // une question à la fois dans une bulle, ses boutons dessous, et la barre du bas pour répondre au clavier ou à la voix.
+  const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByRole("button", { name: /voix/ })).toHaveCount(0);
   await expect(page.getByRole("textbox")).toHaveCount(1);
-  await expect(page.getByRole("region", { name: "Conversation avec MOBIIZ" }).getByRole("textbox", { name: "Ton message" })).toBeVisible();
-  // §50.2 : une question par carte, groupées par ouvrage, sans explication ; la valeur prise par défaut est marquée. §49.4 :
-  // les consommables ne sont jamais une liste d'articles proposés, seulement UNE question oui / non ; ici, non.
-  await expect(questions.getByRole("heading", { level: 3 }).first()).toBeVisible();
-  await expect(page.getByText(/Tout se règle ici|allers-retours|renseignée/)).toHaveCount(0);
-  await expect(page.getByText("par défaut").first()).toBeVisible();
-  const consommables = page.getByRole("region", { name: "Consommables" });
-  await expect(consommables.getByText(/^Consommables de pose/)).toHaveCount(1);
-  await consommables.getByRole("button", { name: "Non", exact: true }).click();
-  await questions.getByRole("button", { name: "Espagne 1er choix" }).click();
-  await expect(questions.getByRole("button", { name: "Espagne 1er choix" })).toHaveAttribute("aria-pressed", "true");
-  await questions.getByRole("button", { name: /Je commande façonné/ }).click();
-  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  await expect(questions.getByRole("listitem")).toHaveCount(0);
+  await expect(page.getByText(/Tout se règle ici|allers-retours|renseignée|avec les numéros/)).toHaveCount(0);
+  await expect(calculerMaListe(page)).toHaveCount(0);
+  // §49.4 : les consommables ne sont jamais une liste d'articles proposés, seulement UNE question oui / non ; ici, non.
+  const posees = await repondreAuxQuestions(page, (q) => (/^Consommables de pose/.test(q) ? "Non" : /ardoise/i.test(q) ? "Espagne 1er choix" : /façonn/i.test(q) ? /Je commande façonné/ : null));
+  expect(posees.filter((q) => /^Consommables de pose/.test(q))).toHaveLength(1);
+  // Jamais deux fois la même question.
+  expect(new Set(posees).size).toBe(posees.length);
+  await calculerMaListe(page).click();
 
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
@@ -1380,16 +1375,9 @@ test("§49.8 : une info qui manque se demande en clair sur la ligne qu'elle conc
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-canal-manque.pdf"));
   // Les questions au premier bouton, sauf le traitement des liteaux : laissé sans réponse, il revient sur la ligne, orange.
-  const questions = page.getByRole("region", { name: "Les questions" });
-  await expect(questions).toBeVisible({ timeout: 60_000 });
-  const cards = questions.getByRole("listitem");
-  for (let i = 0; i < (await cards.count()); i++) {
-    const card = cards.nth(i);
-    if (/traitement/i.test((await card.textContent()) ?? "")) continue;
-    // Les boutons de réponse (la poubelle de la carte n'en est pas un).
-    await card.getByRole("group").getByRole("button").filter({ hasNotText: /^Autre$/ }).first().click();
-  }
-  await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+  await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+  await repondreAuxQuestions(page, (q, boutons) => (/traitement/i.test(q) ? "Je ne sais pas" : boutons.getByRole("button").first()));
+  await calculerMaListe(page).click();
   await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible({ timeout: 60_000 });
   await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -1492,21 +1480,23 @@ test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en
   await signUp(page);
   await createProject(page, "Toiture Le Goff", "M. Le Goff", "4 rue du Port, Paimpol");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
-  const questions = page.getByRole("region", { name: "Les questions" });
+  const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
-  // Une question par pièce écrite, à son nom ; jamais « Bandes zinc (solin, rive, égout…) : tu façonnes ? ».
-  await expect(questions.getByText("Bande de ventilation en Z en zinc quartz : tu façonnes toi-même ou tu commandes façonné ?")).toBeVisible();
-  await expect(questions.getByText("Bande de rive zinc quartz dév. 200 : tu façonnes toi-même ou tu commandes façonné ?")).toBeVisible();
-  await expect(questions.getByText(/Bandes zinc \(solin/)).toHaveCount(0);
-  // « Dév. 200 » est écrit : jamais redemandé.
-  await expect(questions.getByText(/^Bande de rive .*développé/)).toHaveCount(0);
-  // §49.4 : le façonnage de chaque pièce est obligatoire ici ; sans lui, pas de calcul (jamais une pièce sans réponse dans la liste).
-  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
-  await expect(questions).toBeVisible();
+  // §49.4 : le façonnage de chaque pièce est obligatoire ; tant qu'une question est posée, pas de « Calculer ma liste »,
+  // et un façonnage n'a pas de « Je ne sais pas » (jamais une pièce sans réponse dans la liste).
+  await expect(calculerMaListe(page)).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toHaveCount(0);
-  const faconne = questions.getByRole("button", { name: /^Je façonne/ });
-  for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
-  await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+  const posees = await repondreAuxQuestions(page, async (q, boutons) => {
+    if (/façonnes/.test(q)) await expect(boutons.getByRole("button", { name: "Je ne sais pas" })).toHaveCount(0);
+    return null;
+  });
+  // Une question par pièce écrite, à son nom ; jamais « Bandes zinc (solin, rive, égout…) : tu façonnes ? ».
+  expect(posees).toContain("Bande de ventilation en Z en zinc quartz : tu façonnes toi-même ou tu commandes façonné ?");
+  expect(posees).toContain("Bande de rive zinc quartz dév. 200 : tu façonnes toi-même ou tu commandes façonné ?");
+  expect(posees.filter((q) => /Bandes zinc \(solin/.test(q))).toHaveLength(0);
+  // « Dév. 200 » est écrit : jamais redemandé.
+  expect(posees.filter((q) => /^Bande de rive .*développé/.test(q))).toHaveLength(0);
+  await calculerMaListe(page).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   // Plus de bulle flottante : une barre fine, collée en haut de l'écran quand on descend dans la liste.
@@ -1548,16 +1538,15 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   await expect(page.getByRole("button", { name: "Ajouter : photo ou document" })).toBeVisible();
   await clean();
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
-  // 2. Les questions : une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste ».
-  const questions = page.getByRole("region", { name: "Les questions" });
+  // 2. Les questions : une discussion, une question à la fois avec ses boutons, puis « Calculer ma liste » dans le fil.
+  const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await clean();
-  await expect(questions.getByRole("heading", { level: 3 }).first()).toBeVisible();
-  // Une seule case : celle de la conversation (Greg, 1er novembre 2026) ; les cartes restent au bouton.
+  // Une seule case : la barre du bas de la discussion.
   await expect(page.getByRole("textbox")).toHaveCount(1);
   // Le façonnage est obligatoire (48.6) ; le reste peut rester sans réponse.
-  await questions.getByRole("button", { name: /^Je commande façonné/ }).click();
-  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  await repondreAuxQuestions(page, (q) => (/façonn/i.test(q) ? /^Je commande façonné/ : null));
+  await calculerMaListe(page).click();
   // 3. Ma liste : les oranges d'abord, chaque raison en cinq mots au plus ; un seul bouton d'envoi, deux liens dessous.
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
@@ -1639,10 +1628,9 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
-  const questions = page.getByRole("region", { name: "Les questions" });
-  await expect(questions).toBeVisible({ timeout: 60_000 });
-  await questions.getByRole("button", { name: /^Je commande façonné/ }).click();
-  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+  await repondreAuxQuestions(page, (q) => (/façonn/i.test(q) ? /^Je commande façonné/ : null));
+  await calculerMaListe(page).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   // Greg, 28 octobre 2026 (point 2) : plus de légende ; l'état est sur la ligne (bordure orange, « Valider » à droite).
@@ -1667,125 +1655,124 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
   }
 });
 
-test("§50.2 : « Calculer ma liste » reste collé en bas de l'écran, même après avoir écrit sous « Autre »", async ({ page }, info) => {
-  // Retours du fondateur (2026-10-10 puis 2026-10-12, captures iPhone) : le bouton flottait au milieu de l'écran une fois le
-  // clavier refermé. Sur téléphone : « position: fixed; bottom: 0 », la zone du geste en marge intérieure, caché pendant la
-  // saisie ; la place est gardée sous la dernière carte. Sur ordinateur : collé en bas de la colonne (sticky).
-  await signUp(page);
-  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
-  const questions = page.getByRole("region", { name: "Les questions" });
-  await expect(questions).toBeVisible({ timeout: 60_000 });
-  const pente = questions.getByRole("group", { name: "Pente du toit ?" });
-  await pente.getByRole("button", { name: "Autre", exact: true }).click();
-  await pente.getByLabel("Autre valeur : Pente du toit ?").fill("38");
-  await pente.getByRole("button", { name: "OK" }).click();
-  const calculer = page.getByRole("button", { name: "Calculer ma liste", exact: true });
-  const bar = page.getByRole("group", { name: "Calculer ma liste" });
-  const phone = info.project.name === "telephone";
-  await expect(bar).toHaveCSS("position", phone ? "fixed" : "sticky");
-  // Pendant la saisie, la barre laisse la place au clavier ; le champ refermé, elle revient.
-  if (phone) {
-    await pente.getByLabel("Autre valeur : Pente du toit ?").focus();
-    await expect(bar).toHaveAttribute("data-typing", "true");
-    await pente.getByLabel("Autre valeur : Pente du toit ?").blur();
-    await expect(bar).not.toHaveAttribute("data-typing");
-  }
-  const height = page.viewportSize()!.height;
-  for (const to of ["haut", "bas"] as const) {
-    await page.evaluate((t) => window.scrollTo(0, t === "bas" ? document.documentElement.scrollHeight : 0), to);
-    await page.waitForTimeout(300);
-    await expect(calculer).toBeInViewport();
-    const box = (await bar.boundingBox())!;
-    // Collée au bas de l'écran, jamais au milieu (sur ordinateur, en bas de page elle se pose sous la dernière carte).
-    if (phone || to === "haut") expect(Math.abs(box.y + box.height - height), `${to} de page : la barre est à ${Math.round(box.y)} px`).toBeLessThan(2);
-    if (to === "bas") {
-      // La dernière question s'arrête au-dessus du bouton.
-      const lastCard = (await questions.locator("li").last().boundingBox())!;
-      const button = (await calculer.boundingBox())!;
-      expect(lastCard.y + lastCard.height).toBeLessThanOrEqual(button.y);
-    }
-  }
-});
-
-test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (une pente de 38°)", async ({ page }) => {
+test("la discussion des questions tient dans l'écran (Greg, 16 novembre 2026) : la barre en bas, la question et ses boutons visibles, rien de caché", async ({ page }) => {
+  // Retour de Greg sur petit iPhone : défilement, bouton fixe qui cachait le contenu. Maintenant : un écran plein, la barre
+  // de saisie collée en bas, le fil qui défile seul ; la question posée et tous ses boutons restent au-dessus de la barre.
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
-  const questions = page.getByRole("region", { name: "Les questions" });
+  const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
-  // Retour du fondateur (2026-10-10) : une valeur à boutons a aussi « Autre », qui laisse écrire.
-  const pente = questions.getByRole("group", { name: "Pente du toit ?" });
-  await pente.getByRole("button", { name: "Autre", exact: true }).click();
-  await pente.getByLabel("Autre valeur : Pente du toit ?").fill("38");
-  await pente.getByRole("button", { name: "OK" }).click();
-  await expect(pente.getByLabel("Autre valeur : Pente du toit ?")).toHaveValue("38");
-  // §51.4 : le façonnage a aussi « Autre » ; ce qui s'y écrit est relu (§51.2). Les consommables (oui / non), non.
-  const faconnage = questions.getByRole("group", { name: /façonnes/i }).first();
-  await expect(faconnage.getByRole("button", { name: "Autre", exact: true })).toHaveCount(1);
-  await faconnage.getByRole("button", { name: /^Je commande façonné/ }).click();
-  // Une qualité qui se nomme (l'ardoise) : « Autre » laisse écrire la sienne, qui part telle quelle dans la désignation.
-  const ardoise = questions.getByRole("group", { name: /^Quelle ardoise/ });
-  await ardoise.getByRole("button", { name: "Autre", exact: true }).click();
-  await ardoise.getByLabel(/^Autre : Quelle ardoise/).fill("Ardoise d'Angers");
-  await ardoise.getByRole("button", { name: "OK" }).click();
-  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  const dialogue = page.getByRole("dialog", { name: "Questions de Mobiiz" });
+  const hauteur = page.viewportSize()!.height;
+  const barre = (await dialogue.getByRole("textbox").boundingBox())!;
+  expect(barre.y + barre.height).toBeLessThanOrEqual(hauteur);
+  expect(barre.y).toBeGreaterThan(hauteur / 2);
+  // Plus de bouton fixe par-dessus le contenu, ni de menu du bas sur cet écran.
+  await expect(page.getByRole("group", { name: "Calculer ma liste" })).toHaveCount(0);
+  await repondreAuxQuestions(page, async (_q, boutons) => {
+    const tous = boutons.getByRole("button");
+    for (let i = 0; i < (await tous.count()); i++) {
+      await expect(tous.nth(i)).toBeInViewport({ ratio: 1 });
+      const b = (await tous.nth(i).boundingBox())!;
+      expect(b.y + b.height, "un bouton de réponse passe sous la barre de saisie").toBeLessThanOrEqual((await dialogue.getByRole("textbox").boundingBox())!.y);
+      expect(b.x + b.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+    }
+    return null;
+  });
+  // « Calculer ma liste » arrive DANS le fil, visible, au-dessus de la barre.
+  await expect(calculerMaListe(page)).toBeInViewport({ ratio: 1 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit dans la barre (une pente de 38°)", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/chantiers/nouveau?mode=assistant");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const questions = zoneDesQuestions(page);
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  await repondreAuxQuestions(page, async (q, boutons) => {
+    // Retour du fondateur (2026-10-10) : une valeur à boutons a aussi « Autre », qui laisse écrire.
+    if (q === "Pente du toit ?") {
+      await boutons.getByRole("button", { name: "Autre", exact: true }).click();
+      await ecrireDansLaDiscussion(page, "38");
+      await expect(questions.getByText("Noté : 38°.")).toBeVisible();
+      return true;
+    }
+    // §51.4 : le façonnage a aussi « Autre ».
+    if (/façonnes/i.test(q)) {
+      await expect(boutons.getByRole("button", { name: "Autre", exact: true })).toHaveCount(1);
+      return /^Je commande façonné/;
+    }
+    // Une qualité qui se nomme (l'ardoise) : la sienne s'écrit, et part telle quelle dans la désignation.
+    if (/^Quelle ardoise/.test(q)) {
+      await ecrireDansLaDiscussion(page, "Ardoise d'Angers");
+      await expect(questions.getByText("Noté : Ardoise d'Angers.")).toBeVisible();
+      return true;
+    }
+    return null;
+  });
+  await calculerMaListe(page).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   await expect(list.getByText(/Ardoise d'Angers/).first()).toBeVisible();
 });
 
-test("retour du fondateur (2026-10-12) : un refus du serveur se dit sur la carte fautive, voyant rouge et phrase", async ({ page }) => {
+test("retour du fondateur (2026-10-12) : un refus du serveur se dit dans la discussion, et la question fautive revient", async ({ page }) => {
   // Capture iPhone : « Un champ n'est pas correctement rempli » en haut de l'écran, sans dire où. Le refus nomme la réponse
-  // (`reponses.N.valeur`) : la carte de cette question passe au rouge avec sa phrase, l'écran l'amène, rien en haut.
+  // (`reponses.N.valeur`) : Mobiiz dit la phrase et repose CETTE question, rien d'autre.
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
-  const questions = page.getByRole("region", { name: "Les questions" });
+  const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await page.route("**/calcul?**", async (route) => {
     const body = route.request().postDataJSON() as { reponses: { question: string }[] };
     const n = body.reponses.findIndex((r) => r.question.includes("pente"));
     await route.fulfill({ status: 400, json: { error: { code: "validation_failed", message: "Invalid request", supportId: "TEST-0001", retryable: false, details: [{ path: `reponses.${n}.valeur`, message: "Too big: expected string to have <=300 characters" }] } } });
   });
-  const pente = questions.getByRole("group", { name: "Pente du toit ?" });
-  await pente.getByRole("button", { name: "Autre", exact: true }).click();
-  await pente.getByLabel("Autre valeur : Pente du toit ?").fill("38");
-  await pente.getByRole("button", { name: "OK" }).click();
-  await questions.getByRole("group", { name: /façonnes/i }).first().getByRole("button", { name: /^Je commande façonné/ }).click();
-  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
-  const carte = questions.getByRole("listitem").filter({ has: page.getByRole("group", { name: "Pente du toit ?" }) });
-  await expect(carte.getByRole("alert")).toHaveText("Réponse trop longue : 300 caractères au plus.");
-  await expect(carte).toBeInViewport();
+  await repondreAuxQuestions(page, async (q, boutons) => {
+    if (q !== "Pente du toit ?") return /façonnes/i.test(q) ? /^Je commande façonné/ : null;
+    await boutons.getByRole("button", { name: "Autre", exact: true }).click();
+    await ecrireDansLaDiscussion(page, "38");
+    return true;
+  });
+  await calculerMaListe(page).click();
+  await expect(questions.getByText("Réponse trop longue : 300 caractères au plus.")).toBeVisible();
+  await expect(boutonsDeLaQuestion(page)).toHaveAttribute("aria-label", "Pente du toit ?");
   await expect(page.getByText("Un champ n'est pas correctement rempli.")).toHaveCount(0);
-  // Une seule carte en rouge : celle de la réponse refusée.
-  await expect(questions.getByRole("alert")).toHaveCount(1);
+  await expect(calculerMaListe(page)).toHaveCount(0);
 });
 
-test("retour du fondateur (2026-10-12) : une question qui ne sert pas se retire d'un tap (poubelle), et se remet", async ({ page }) => {
-  // « Donne la possibilité de supprimer des questions avec une poubelle car parfois tout n'est pas pertinent. » La question
-  // part sans réponse ; sa ligne reste orange dans la liste, où elle se règle (§51.6). Le façonnage, obligatoire, n'en a pas.
+test("« Je ne sais pas » (RÈGLE CHANGÉE le 16 novembre 2026, avant : la poubelle) : la question part sans réponse, et se reprend d'un tap", async ({ page }) => {
+  // « Donne la possibilité de supprimer des questions […] car parfois tout n'est pas pertinent. » La question part sans
+  // réponse ; sa ligne reste orange dans la liste, où elle se règle (§51.6). Le façonnage, obligatoire, n'en a pas.
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
-  const questions = page.getByRole("region", { name: "Les questions" });
+  const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
-  const ardoise = () => questions.getByRole("listitem").filter({ has: page.getByRole("group", { name: /^Quelle ardoise/ }) });
-  const faconnage = questions.getByRole("listitem").filter({ has: page.getByRole("group", { name: /façonnes/i }) }).first();
-  await expect(faconnage.getByRole("button", { name: "Retirer cette question" })).toHaveCount(0);
-  await ardoise().getByRole("button", { name: "Retirer cette question" }).click();
-  const retiree = questions.getByRole("listitem").filter({ hasText: /^Question retirée/ });
-  await expect(retiree).toContainText("Quelle ardoise");
-  await expect(questions.getByRole("group", { name: /^Quelle ardoise/ })).toHaveCount(0);
-  // « Remettre » la ramène telle quelle ; on la retire de nouveau pour le calcul.
-  await retiree.getByRole("button", { name: "Remettre" }).click();
-  await expect(questions.getByRole("group", { name: /^Quelle ardoise/ })).toBeVisible();
-  await ardoise().getByRole("button", { name: "Retirer cette question" }).click();
-  await faconnage.getByRole("button", { name: /^Je commande façonné/ }).click();
+  let reprise = false;
+  await repondreAuxQuestions(page, async (q, boutons) => {
+    if (/façonnes/i.test(q)) {
+      await expect(boutons.getByRole("button", { name: "Je ne sais pas" })).toHaveCount(0);
+      return /^Je commande façonné/;
+    }
+    if (/^Quelle ardoise/.test(q) && !reprise) {
+      // Toucher sa réponse la rouvre : la même question revient, telle quelle.
+      reprise = true;
+      await boutons.getByRole("button", { name: "Je ne sais pas", exact: true }).click();
+      await questions.getByRole("button", { name: "Modifier ma réponse : Je ne sais pas" }).last().click();
+      await expect(boutons).toHaveAttribute("aria-label", /^Quelle ardoise/);
+      return "Je ne sais pas";
+    }
+    return null;
+  });
+  expect(reprise).toBe(true);
   const sent = page.waitForRequest((r) => r.url().includes("/calcul") && r.method() === "POST");
-  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  await calculerMaListe(page).click();
   const body = (await sent).postDataJSON() as { reponses: { question: string; valeur: string | null }[] };
-  expect(body.reponses.filter((r) => r.valeur === null)).toHaveLength(1);
+  expect(body.reponses.filter((r) => r.valeur === null).length).toBeGreaterThanOrEqual(1);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
 });
 
@@ -1793,16 +1780,18 @@ test("temps deux (2026-10-12) : « Autre » partout où il y a des boutons, cons
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
-  const questions = page.getByRole("region", { name: "Les questions" });
+  const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
-  const cards = questions.getByRole("listitem").filter({ has: page.getByRole("group") });
-  const n = await cards.count();
-  expect(n).toBeGreaterThan(0);
-  for (let i = 0; i < n; i++) {
-    const card = cards.nth(i);
-    const answers = card.getByRole("group").getByRole("button").filter({ hasNotText: /^Autre$/ });
-    if ((await answers.count()) > 0) await expect(card.getByRole("button", { name: "Autre", exact: true })).toHaveCount(1);
-  }
+  let avecBoutons = 0;
+  await repondreAuxQuestions(page, async (_q, boutons) => {
+    const reponses = boutons.getByRole("button").filter({ hasNotText: /^(Autre|Je ne sais pas)$/ });
+    if ((await reponses.count()) > 0) {
+      avecBoutons++;
+      await expect(boutons.getByRole("button", { name: "Autre", exact: true })).toHaveCount(1);
+    }
+    return null;
+  });
+  expect(avecBoutons).toBeGreaterThan(0);
 });
 
 test("une adresse inconnue : une page en français, avec le chemin du retour (audit avant commercialisation)", async ({ page }) => {
@@ -3807,8 +3796,8 @@ test("Abonnement (RÈGLE CHANGÉE le 15 novembre 2026) : « Tarifs » depuis la 
   await expect(formules.getByText("Achats groupés : tu vois le négoce retenu et tu commandes", { exact: true })).toBeVisible();
   // Ni compteur ni nombre d'analyses par mois ; la limite d'usage se dit en une phrase, sans chiffre, jamais « illimité ».
   await expect(formules.getByText(/\d+ analyses de devis par mois|scans de liste par mois/)).toHaveCount(0);
-  await expect(page.getByText("Les analyses sont-elles illimitées ?")).toBeVisible();
-  await expect(page.getByText(/^Non : elles sont incluses pour un usage normal de chantier/)).toBeVisible();
+  await expect(page.getByText("Y a-t-il une limite d'analyses ?")).toBeVisible();
+  await expect(page.getByText(/^Oui, mais tu n'as rien à compter : les analyses sont incluses pour un usage normal de chantier/)).toBeVisible();
   await expect(page.getByText("Un gros devis compte double ?")).toBeVisible();
   await expect(page.getByText(/19,90|39,90|199 €|399 €|348 €|Essentiel|Découverte/)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Gratuit pour les négoces" })).toBeVisible();
@@ -4124,15 +4113,19 @@ test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèl
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-tuile-modele.pdf"));
-  const questions = page.getByRole("region", { name: "Les questions" });
-  await expect(questions).toBeVisible({ timeout: 60_000 });
-  // Mobiiz ne choisit pas le modèle : il le demande ; l'artisan tape « H14 », le catalogue propose la référence.
-  await questions.getByRole("textbox", { name: "Autre : Modele de la tuile ?" }).fill("H14");
-  const refs = questions.getByRole("list", { name: "Références du catalogue : Modele de la tuile ?" });
-  await expect(refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)", exact: true })).toBeVisible();
-  await expect(refs.getByRole("button", { name: /HP 10/ })).toHaveCount(0);
-  await refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)", exact: true }).click();
-  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+  // Mobiiz ne choisit pas le modèle : il le demande ; l'artisan tape « H14 » dans la barre, le catalogue propose la référence.
+  const dialogue = page.getByRole("dialog", { name: "Questions de Mobiiz" });
+  await repondreAuxQuestions(page, async (q) => {
+    if (q !== "Modele de la tuile ?") return null;
+    await dialogue.getByRole("textbox").fill("H14");
+    const refs = dialogue.getByRole("list", { name: "Références du catalogue : Modele de la tuile ?" });
+    await expect(refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)", exact: true })).toBeVisible();
+    await expect(refs.getByRole("button", { name: /HP 10/ })).toHaveCount(0);
+    await refs.getByRole("button", { name: "Tuile H 14 Huguenot, réf. 204 (Edilians)", exact: true }).click();
+    return true;
+  });
+  await calculerMaListe(page).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   // La quantité du devis est gardée ; la réponse entre dans la fiche du chantier, qui part au négoce (le bref).
@@ -4142,32 +4135,23 @@ test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèl
   expect(q0.fiche.find((f) => f.cle === "modele_de_la_tuile")).toMatchObject({ valeur: "Tuile H 14 Huguenot, réf. 204 (Edilians)", origine: "reponse" });
 });
 
-test("conversation après l'analyse (Greg, 1er novembre 2026) : questions numérotées, une réponse libre, chaque réponse à sa carte, seules les autres reposées", async ({ page }) => {
+test("la discussion (Greg, 16 novembre 2026) : une question à la fois, une réponse écrite va à SA question, confirmée en une ligne, jamais reposée", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Kervella", "M. Kervella", "2 rue du Port, Lorient");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
-  const questions = page.getByRole("region", { name: "Les questions" });
+  const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
-  const conversation = page.getByRole("region", { name: "Conversation avec MOBIIZ" });
-  const premier = conversation.getByRole("group", { name: "Message de MOBIIZ" }).first();
-  await expect(premier).toContainText("Réponds à tout en une fois, avec les numéros");
-  // Le numéro de la question du façonnage, lu dans le message (jamais deviné).
-  const texte = (await premier.innerText()).split("\n");
-  const ligne = texte.find((l) => /^\d+\. .*façonn/i.test(l));
-  expect(ligne, "une question de façonnage numérotée").toBeTruthy();
-  const n = Number(/^(\d+)\./.exec(ligne!)![1]);
-  await conversation.getByRole("textbox", { name: "Ton message" }).fill(`${n}. je commande façonné`);
-  await conversation.getByRole("button", { name: "Envoyer le message" }).click();
-  // Les lignes d'état, puis la réponse : notée, et la carte du dessous prend le bouton.
-  const reponse = conversation.getByRole("group", { name: "Message de MOBIIZ" }).nth(1);
-  await expect(reponse).toContainText("Noté :");
-  await expect(reponse).toContainText(`${n}. Je commande façonné`);
-  await expect(questions.getByRole("button", { name: /^Je commande façonné/ }).first()).toHaveAttribute("aria-pressed", "true");
-  // Les questions sans réponse sont reposées, celle du façonnage non.
-  await expect(reponse).toContainText("Il me manque encore ces réponses :");
-  const relance = (await reponse.innerText()).split("Il me manque encore ces réponses :")[1]!;
-  expect(relance).not.toMatch(new RegExp(`^${n}\\. `, "m"));
-  expect(relance).toMatch(/^\d+\. /m);
-  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  // Une seule question posée, dans une bulle, avec ses boutons ; plus jamais « réponds avec les numéros ».
+  await expect(questions.getByRole("group", { name: "Question de MOBIIZ" })).toHaveCount(1);
+  await expect(boutonsDeLaQuestion(page)).toHaveCount(1);
+  await expect(page.getByText(/avec les numéros|^\d+\. /)).toHaveCount(0);
+  // Une réponse brève, avec les mots du chantier : elle va à la question du façonnage, où qu'elle soit dans la liste.
+  await ecrireDansLaDiscussion(page, "j'achète tout fait");
+  await expect(questions.getByText(/^Noté : Je commande façonné/)).toBeVisible();
+  // La suite : chaque question une fois, celle du façonnage n'est plus posée.
+  const posees = await repondreAuxQuestions(page);
+  expect(posees.filter((q) => /façonn/i.test(q))).toHaveLength(0);
+  expect(new Set(posees).size).toBe(posees.length);
+  await calculerMaListe(page).click();
   await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0, { timeout: 60_000 });
 });

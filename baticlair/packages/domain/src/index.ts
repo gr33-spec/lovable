@@ -21,6 +21,7 @@ export * from "./assistant/assistant.js";
 export * from "./assistant/article-compris.js";
 export * from "./assistant/comprehension.js";
 export * from "./assistant/reponses-libres-numerotees.js";
+export * from "./assistant/questions-simples.js";
 export * from "./groupe/rapprochement.js";
 export * from "./groupe/opportunites.js";
 export * from "./groupe/precisions-lisibles.js";

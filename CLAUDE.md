@@ -137,6 +137,16 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Ordre des anciennes demandes : gênants côté demandes, gênants côté abonnement, lot B, lot D. Le reste attend l'après-lancement.
 - Lot B : le chiffrement des fichiers est branché (`platform/database/prisma.service.ts`), éteint tant que `CHIFFREMENT_CLE` n'est pas posée par Greg dans Vercel ; fichiers déjà là : `scripts/fichiers-chiffrement.ts`. Dépôt limité à 10 Mo (avant : 20). Alerte quand la base dépasse 70 % de `BASE_TAILLE_MAX_MO` (512 Mo).
 
+## Décisions du 16 novembre 2026 (après le test de Greg)
+
+- Questions après la lecture d'un devis : UN SEUL ÉCRAN, la discussion Mobiiz. Une question à la fois dans une bulle, ses boutons dessous ; on touche un bouton OU on répond au clavier ou à la voix. La réponse s'affiche comme un message, la question suivante arrive ; « Calculer ma liste » est proposé dans le fil. Règle changée : avant, une conversation en haut et les mêmes questions en cartes dessous, « réponds avec les numéros ».
+- Les réponses brèves et plusieurs réponses d'un coup sont comprises par le sens et par l'ordre (« J'achète tout fait, 0,65, 1, chevron, ou je pli, bord de mer »). Mobiiz confirme en une ligne et ne repose que ce qui manque. Rien n'est inventé.
+- « Je ne sais pas » remplace la poubelle des cartes (sauf pour le façonnage, obligatoire). Toucher une de ses réponses la rouvre.
+- Mots simples : « Ton chantier est où ? » (« Bord de mer », « Intérieur des terres », « Montagne », « Entre les deux »), jamais « Zone climatique ». Seuls les mots changent, pas le calcul.
+- FONDATEUR sur le Pro au mois seulement, date de besoin à 7 jours, essence du liteau facultative : confirmés par Greg.
+- Tarifs : « Y a-t-il une limite d'analyses ? » (plus le mot « illimitées »).
+- Achats groupés, visibilité (RÈGLE CHANGÉE par Greg, à coder) : les noms des entreprises sont visibles, jamais la quantité de chacune, seulement le total ; chaque artisan peut cocher « rester anonyme » ; à moins de 3 entreprises, « en cours de regroupement » à la place du volume. Avant : jamais de nom, volumes dès la première publication.
+
 ## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg
 
 - Stripe (test) : les quatre prix sont créés et posés sur la branche de test (`STRIPE_PRIX_PRO`, `_PROMAX`, `_PRO_ANNUEL`, `_PROMAX_ANNUEL`).

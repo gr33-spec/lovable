@@ -1,0 +1,49 @@
+import { expect, type Locator, type Page } from "@playwright/test";
+
+/**
+ * LA DISCUSSION DES QUESTIONS (Greg, 16 novembre 2026) : un seul écran, une question à la fois, ses boutons sous la bulle.
+ * `choisir` reçoit le texte de la question posée et rend le nom du bouton à toucher ; sans choix : « Je façonne » sur un
+ * façonnage (obligatoire), sinon la valeur marquée « par défaut », sinon « Je ne sais pas ». S'arrête quand « Calculer ma
+ * liste » est proposé dans le fil (sans le toucher).
+ */
+export const zoneDesQuestions = (page: Page) => page.getByRole("region", { name: "Les questions" });
+/** Les boutons de la question posée (le groupe porte le texte de la question). */
+export const boutonsDeLaQuestion = (page: Page) => zoneDesQuestions(page).locator('[role="group"]:not([aria-label$="MOBIIZ"])');
+export const calculerMaListe = (page: Page) => page.getByRole("button", { name: "Calculer ma liste", exact: true });
+
+/** Le nom du bouton à toucher ; `true` : la fonction a répondu elle-même (au clavier) ; rien : le choix par défaut. */
+type Choix = string | RegExp | Locator | true | null | undefined;
+
+export async function repondreAuxQuestions(page: Page, choisir: (question: string, boutons: Locator) => Choix | Promise<Choix> = () => null): Promise<string[]> {
+  const boutons = boutonsDeLaQuestion(page);
+  const calculer = calculerMaListe(page);
+  const posees: string[] = [];
+  for (let i = 0; i < 60; i++) {
+    await expect(calculer.or(boutons).first()).toBeVisible({ timeout: 15_000 });
+    if (await calculer.isVisible()) return posees;
+    const question = (await boutons.getAttribute("aria-label")) ?? "";
+    posees.push(question);
+    const reponses = zoneDesQuestions(page).getByRole("button", { name: /^Modifier ma réponse/ });
+    const avant = await reponses.count();
+    const voulu = await choisir(question, boutons);
+    if (voulu === true) {
+      // La question suivante arrive, ou « Calculer ma liste » quand c'était la dernière.
+      await expect.poll(async () => ((await boutons.count()) === 0 ? null : await boutons.getAttribute("aria-label"))).not.toBe(question);
+      continue;
+    }
+    const faconne = boutons.getByRole("button", { name: /^Je façonne/ });
+    const defaut = boutons.getByRole("button", { name: /par défaut$/ });
+    const bouton = voulu && typeof voulu === "object" && "click" in voulu ? voulu : voulu ? boutons.getByRole("button", { name: voulu as string | RegExp }).first() : (await faconne.count()) > 0 ? faconne.first() : (await defaut.count()) > 0 ? defaut.first() : boutons.getByRole("button", { name: "Je ne sais pas", exact: true });
+    await bouton.click();
+    // La réponse devient un message de l'artisan ; la question suivante (ou « Calculer ma liste ») arrive.
+    await expect(reponses).toHaveCount(avant + 1);
+  }
+  throw new Error("La discussion ne finit pas : plus de 60 questions.");
+}
+
+/** Écrit une réponse dans la barre du bas et l'envoie. */
+export async function ecrireDansLaDiscussion(page: Page, texte: string) {
+  const barre = page.getByRole("dialog", { name: "Questions de Mobiiz" });
+  await barre.getByRole("textbox").fill(texte);
+  await barre.getByRole("button", { name: "Envoyer le message" }).click();
+}

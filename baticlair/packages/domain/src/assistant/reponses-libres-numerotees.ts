@@ -149,9 +149,17 @@ const contient = (texte: string, mot: string) => {
 
 /** Les boutons nommés par le morceau : libellé entier, valeur, nombre seul, ou libellé sans sa parenthèse. */
 function boutonsNommes(q: QuestionNumerotee, morceau: string): { label: string; value: string }[] {
-  const t = norm(morceau);
-  const exacts = q.options.filter((o) => norm(o.label) === t || norm(o.value) === t);
+  const t = norm(morceau).replace(/-/g, " ").replace(/^(?:ou|et|puis|alors|donc)\s+/, "");
+  // Une valeur nue (« 1 ») ne désigne un bouton que si elle n'est pas un simple rang caché (« 1 » = « Je façonne »).
+  const exacts = q.options.filter((o) => norm(o.label) === t || (norm(o.value) === t && (!/^\d+$/.test(t) || contient(norm(o.label), t))));
   if (exacts.length) return exacts;
+  // LE SENS (Greg, 16 novembre 2026 : « J'achète tout fait », « je pli ») : les mots de l'artisan pour le façonnage.
+  const faconne = q.options.filter((o) => /^je faconne/.test(norm(o.label)));
+  const commande = q.options.filter((o) => /commande/.test(norm(o.label)));
+  if (faconne.length === 1 && commande.length === 1) {
+    if (/\b(?:tout(?:e|es)? fait(?:e|es|s)?|tout(?:e|es)? prets?|achete|j achete|deja faconne(?:e|es|s)?|commande(?:e|es|s)?)\b/.test(t) && !/\bje (?:le |les |la )?(?:faconne|pli|plie|plis)\b/.test(t)) return commande;
+    if (/\b(?:pli|plie|plis|plies|plier|pliage|moi meme|je (?:le |les |la )?fais|je (?:le |les |la )?faconne)\b/.test(t)) return faconne;
+  }
   const parLibelle = q.options.filter((o) => contient(t, o.label) || contient(t, o.label.replace(/\s*\(.*?\)\s*/g, " ")));
   if (parLibelle.length) {
     // « Je façonne (bobine) » et « Je façonne » : le plus long libellé dit l'emporte.
@@ -166,12 +174,19 @@ function boutonsNommes(q: QuestionNumerotee, morceau: string): { label: string; 
     const de = n.unite ? LONGUEURS[n.unite] : undefined;
     const vers = u ? LONGUEURS[u] : undefined;
     const v = de !== undefined && vers !== undefined ? (n.valeur * de) / vers : n.valeur;
-    const parNombre = q.options.filter((o) => /^\d+(?:[.,]\d+)?$/.test(o.value) && Number(o.value.replace(",", ".")) === v);
+    // Le nombre doit se lire sur le bouton (« 0,65 mm », « Ø 80 ») : jamais le rang caché d'un bouton en mots.
+    const parNombre = q.options.filter((o) => /^\d+(?:[.,]\d+)?$/.test(o.value) && Number(o.value.replace(",", ".")) === v && nombres(o.label).some((x) => x.valeur === Number(o.value.replace(",", "."))));
     if (parNombre.length) return parNombre;
   }
   // Les mots propres à un seul bouton (« bobine », « façonné »), jamais un mot commun à tous.
-  const motsDe = (o: { label: string }) => norm(o.label.replace(/[()]/g, " ")).split(" ").filter((m) => m.length >= 4);
-  const propres = q.options.filter((o) => motsDe(o).some((m) => contient(t, m) && q.options.filter((p) => motsDe(p).includes(m)).length === 1));
+  // Singulier ou pluriel (« chevron » pour « Sur chevrons »).
+  const racine = (m: string) => m.replace(/[sx]$/, "");
+  const motsDe = (o: { label: string }) => norm(o.label.replace(/[()]/g, " ")).split(" ").filter((m) => m.length >= 4).map(racine);
+  const dits = new Set(t.split(/[^a-z0-9]+/).filter(Boolean).map(racine));
+  // Un mot du SUJET de la question (« ardoise » dans « Quelle ardoise ? ») ne désigne aucun bouton : « Ardoise d'Angers »
+  // n'est pas « Ardoise NF », c'est une réponse écrite.
+  const sujet = new Set(norm(q.texte).split(/[^a-z0-9]+/).filter(Boolean).map(racine));
+  const propres = q.options.filter((o) => motsDe(o).some((m) => dits.has(m) && !sujet.has(m) && q.options.filter((p) => motsDe(p).includes(m)).length === 1));
   return propres;
 }
 
@@ -212,13 +227,40 @@ export function interpreterReponsesNumerotees(questions: readonly QuestionNumero
   if (questions.length === 1) return [interpreterUne(questions[0]!, texte)];
   const lignes = texte.split(/\n|;/).map((l) => l.trim()).filter(Boolean);
   if (lignes.length === questions.length) return questions.map((q, i) => interpreterUne(q, lignes[i]));
+  // PAR L'ORDRE ET PAR LE SENS (Greg, 16 novembre 2026 : « J'achète tout fait, 0,65, 1, chevron, ou je pli, bord de mer »).
   const morceaux = texte.split(/\n|;|,(?!\d)|\bet\b/).map((l) => l.trim()).filter(Boolean);
+  const compris = (rs: readonly ReponseInterpretee[]) => rs.filter((r) => r.statut === "compris").length;
+  // Autant de morceaux que de questions : chacun répond à la sienne, dans l'ordre.
+  // Une réponse ÉCRITE (teinte, modèle) n'est prise par l'ordre que si elle est brève : une phrase entière (« et les tuiles
+  // rouge vieilli ») est laissée à la relecture du serveur, qui n'en garde que les mots utiles, ou reposée.
+  const breve = (m: string) => m.split(/\s+/).length <= 3;
+  const parOrdre =
+    morceaux.length === questions.length
+      ? questions.map((q, i): ReponseInterpretee => {
+          const r = interpreterUne(q, morceaux[i]);
+          return r.statut === "compris" && r.libreEcrite && (q.libre === "text" || q.libre === "written") && !breve(morceaux[i]!) ? { ...r, statut: "ambigu", valeur: null, libelle: null, libreEcrite: false, raison: "Redis-le en quelques mots." } : r;
+        })
+      : null;
+  // Sinon, ou si l'ordre ne donne rien : chaque morceau va à la question dont il nomme un bouton ; quand plusieurs
+  // questions le reconnaissent, la première qui suit la dernière réponse rangée.
   const pris = new Map<number, string>();
+  let suivant = 0;
   for (const m of morceaux) {
-    const cibles = questions.filter((q) => q.options.length > 0 && boutonsNommes(q, m).length > 0);
-    if (cibles.length === 1 && !pris.has(cibles[0]!.numero)) pris.set(cibles[0]!.numero, m);
+    const cibles = questions.map((q, i) => ({ q, i })).filter(({ q }) => !pris.has(q.numero) && (q.options.length > 0 ? new Set(boutonsNommes(q, m).map((o) => o.value)).size === 1 : Boolean(q.numerique || q.libre === "number") && /^\D{0,12}\d+(?:[.,]\d+)?\D{0,14}$/.test(m)));
+    const cible = cibles.length === 1 ? cibles[0] : (cibles.find((c) => c.i >= suivant) ?? cibles[0]);
+    if (!cible) continue;
+    pris.set(cible.q.numero, m);
+    suivant = cible.i + 1;
   }
-  return questions.map((q) => interpreterUne(q, pris.get(q.numero)));
+  // Un seul morceau que nul bouton ne reconnaît : c'est la réponse à la question posée (la première).
+  if (morceaux.length === 1 && pris.size === 0) pris.set(questions[0]!.numero, morceaux[0]!);
+  const parSens = questions.map((q) => interpreterUne(q, pris.get(q.numero)));
+  return parOrdre && compris(parOrdre) >= compris(parSens) ? parOrdre : parSens;
+}
+
+/** « Noté : … » en UNE ligne (Greg, 16 novembre 2026 : elle confirme ce qu'elle a compris, elle ne reliste jamais tout). */
+export function phraseNotee(libelles: readonly string[]): string {
+  return libelles.length ? `Noté : ${libelles.join(", ")}.` : "";
 }
 
 /** Le message de l'assistant : les questions numérotées, en un seul message. */

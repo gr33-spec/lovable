@@ -179,8 +179,8 @@ export const TARIFS = {
   },
   /** L'usage normal : dit sans chiffre, et honnêtement (il y a bien une limite). */
   limite: {
-    q: "Les analyses sont-elles illimitées ?",
-    r: `Non : elles sont incluses pour un usage normal de chantier, avec une limite par mois, bien plus haute en ${M.nom}. Tu n'as rien à compter. Si tu l'atteins un jour, on te le dit, avec la date à laquelle elle repart.`,
+    q: "Y a-t-il une limite d'analyses ?",
+    r: `Oui, mais tu n'as rien à compter : les analyses sont incluses pour un usage normal de chantier, avec une limite par mois, bien plus haute en ${M.nom}. Si tu l'atteins un jour, on te le dit, avec la date à laquelle elle repart.`,
   },
   /** « C'est gratuit ? » : la réponse de la landing (aucun montant sur la landing : les prix sont sur la page Tarifs). */
   question: {

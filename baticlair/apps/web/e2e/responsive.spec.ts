@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { calculerMaListe, repondreAuxQuestions } from "./discussion";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -120,9 +121,8 @@ for (const size of WIDTHS) {
     await expect(list.or(questions).first()).toBeVisible({ timeout: 60_000 });
     if (await questions.isVisible()) {
       await shoot(page, size.name, "05a-questions");
-      const faconne = questions.getByRole("button", { name: /^Je façonne/ });
-      for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
-      await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+      await repondreAuxQuestions(page);
+      await calculerMaListe(page).click();
     }
     await expect(list.getByRole("button", { name: "Demander les prix à mes négoces" })).toBeVisible();
     // Plan « finition », bloc 5 (capture iPhone SE) : le suivi suit la liste tout de suite, jamais « Ta liste se prépare » au-dessus d'elle.
