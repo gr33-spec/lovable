@@ -117,7 +117,6 @@ export interface ContenuPage {
   /** La photo de l'artisan ou de l'équipe (« À propos »), si elle existe. */
   photoEquipe: PhotoPublique | null;
   /** Missions ouvertes ET une disponibilité publiée ; sinon null. */
-  missions: { disponibleDu: string | null; disponibleAu: string | null; lien: string } | null;
   majLe: string;
 }
 

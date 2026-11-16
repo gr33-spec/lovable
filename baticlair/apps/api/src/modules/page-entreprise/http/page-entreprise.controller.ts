@@ -241,6 +241,27 @@ export class PagesPubliquesController {
   }
 }
 
+/**
+ * « Entre pros » (Greg, 16 novembre 2026) : réservé à une entreprise CONNECTÉE, missions ouvertes. Le bloc pros d'un site,
+ * et, depuis Mission, l'adresse du site d'une entreprise. Jamais en cache partagé.
+ */
+@Controller("v1/pages-entreprises")
+@UseGuards(TenantGuard)
+export class PagesEntreprisesProsController {
+  constructor(@Inject(PageEntrepriseService) private readonly pages: PageEntrepriseService) {}
+
+  @Get("entreprise/:companyId")
+  site(@Tenant() t: TenantContext, @Param("companyId") companyId: string) {
+    return this.pages.siteDeLEntreprise(t, companyId);
+  }
+
+  @Get(":adresse/entre-pros")
+  entrePros(@Tenant() t: TenantContext, @Param("adresse") adresse: string, @Res({ passthrough: true }) res: Response) {
+    res.setHeader("Cache-Control", "private, no-store");
+    return this.pages.entrePros(t, adresse);
+  }
+}
+
 /** Le ménage de la nuit (tâche planifiée, Bearer CRON_SECRET) : traces anciennes et fichiers orphelins. */
 @Controller("v1/internal/pages-entreprises")
 export class PagesEntreprisesTacheController {

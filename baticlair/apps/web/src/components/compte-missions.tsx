@@ -50,20 +50,11 @@ export function DossierProfessionnel() {
       setRefus(phraseErreur(e));
     }
   }
-  async function surProfil(f: FichierVue, v: boolean) {
-    setRefus(null);
-    try {
-      await api(`/v1/dossier-pro/${f.id}`, { method: "PATCH", body: { surProfil: v } });
-      setData({ items: data!.items.map((x) => (x.id === f.id ? { ...x, surProfil: v } : x)) });
-    } catch (e) {
-      setRefus(phraseErreur(e));
-    }
-  }
   return (
     <>
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">Ton dossier professionnel</h2>
-        <p className="text-[14px] text-muted">Utilisé uniquement quand tu choisis de répondre. Rien n&apos;est montré sans ton accord.</p>
+        <p className="text-[14px] text-muted">Facultatif. Rien n&apos;est affiché sur ton profil ni sur ton site : un document part seulement quand tu l&apos;envoies toi-même, dans une discussion de Mission (par exemple quand une entreprise te le demande).</p>
       </header>
       <Refus>{refus}</Refus>
       {GROUPES.map((g) => (
@@ -83,14 +74,6 @@ export function DossierProfessionnel() {
                   </div>
                 </div>
                 <ListeFichiers fichiers={docs} onSupprimer={(f) => void supprimer(f)} />
-                {c.id === "realisation"
-                  ? docs.map((d) => (
-                      <label key={d.id} className="flex min-h-11 cursor-pointer items-center gap-3 text-[13px] font-semibold">
-                        <input type="checkbox" checked={!!d.surProfil} onChange={(e) => void surProfil(d, e.target.checked)} className="size-5 accent-[#fed206]" />
-                        Montrer « {d.titre || d.nom} » sur mon profil public
-                      </label>
-                    ))
-                  : null}
                 <label className="pressable flex min-h-11 cursor-pointer items-center gap-2 text-[14px] font-extrabold">
                   <Paperclip size={18} aria-hidden="true" />
                   {pending === c.id ? "Envoi…" : `Ajouter : ${c.libelle.toLowerCase()}`}

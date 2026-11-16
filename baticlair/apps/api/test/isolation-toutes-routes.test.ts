@@ -283,6 +283,9 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/ma-page\/photos$/, ids.photoPage],
         [/\/ma-page\/realisations$/, ids.realisationPage],
         [/\/public\/pages$/, pageA.adresse],
+        // « Entre pros » (16 novembre 2026) : le bloc pros et l'adresse du site de A (page privée : rien).
+        [/\/pages-entreprises$/, pageA.adresse],
+        [/\/pages-entreprises\/entreprise$/, companyId],
         [/\/admin\/pages-publiques$/, pageA.adresse],
         [/\/admin\/pages-publiques\/signalements$/, ids.signalementPage],
       ];

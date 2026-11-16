@@ -26,6 +26,31 @@ retiré de la barre du haut (jamais en double). Aucune rubrique vide, ni dans la
 Comparée (captures) à la landing de Mobiiz et à trois sites de couvreurs (la-couverture.fr, couverture-jmc.fr,
 couvreur-insulaire.fr). Lighthouse mobile : 93 à 94 en performance, 100 en bonnes pratiques.
 
+## « MON SITE » ET « ENTRE PROS » (Greg, 16 novembre 2026, 3e message ; RÈGLES CHANGÉES)
+
+- Validé par Greg. Onglet « Mon site » dans la navigation principale (5e onglet, téléphone et ordinateur) : il ouvre
+  l'éditeur (`app/(app)/mon-site`), aperçu en haut, puis Teinte, Prestations, Chantiers, À propos, « Page visible »,
+  « Partager », « Voir mon site » (puis Coordonnées et Adresse du site). Règle changée : avant, Profil › Ma page ; l'entrée
+  du Profil est retirée, « Mon entreprise » renvoie à l'onglet, l'ancienne adresse `/compte/ma-page` y redirige. Partout
+  dans l'app : « Mon site ». Cinq onglets tiennent à 375 px (11 px) et à 320 px (10 px, un rien plus serrés), sans texte
+  coupé (e2e « cinq onglets »).
+- Une seule page, deux niveaux. Règle changée : avant, la disponibilité Mission et « Proposer une mission » étaient sur
+  la page publique (bloc Contact) ; maintenant la page publique (mise en cache, la même pour tous) ne dit RIEN de Mission.
+  Une entreprise CONNECTÉE (missions ouvertes) voit en plus le bloc « Entre pros » sous l'accueil (îlot client
+  `entre-pros.tsx`, `GET /v1/pages-entreprises/:adresse/entre-pros`, privé, sans cache) : disponibilités, compétences
+  (profil Mission, champs masqués comme dans Mission ; sinon les métiers), « Proposer une mission » (vers la disponibilité
+  publiée : jamais de contact libre, règle Mission) ; sans disponibilité, « Publier une mission ». Un visiteur non connecté
+  ne le voit jamais (401) ; un blocage, un site privé ou masqué, Mission coupée : rien.
+- Dans Mission, le profil d'une entreprise ouvre son site (`GET /v1/pages-entreprises/entreprise/:companyId`, puis
+  `/e/<adresse>#entre-pros`) ; sans site en ligne, la fiche Mission d'avant.
+- CV, diplômes, attestations : ni affichés ni obligatoires. Règle changée : avant, un document du dossier coché « sur mon
+  profil public » s'y montrait et s'ouvrait par toute entreprise vérifiée ; maintenant plus jamais (case retirée, lien
+  refusé). Ils partent seulement quand l'artisan les envoie lui-même dans une discussion de Mission. Reste à trancher par
+  Greg : un document joint à une RÉPONSE à une mission (déjà possible avant) est-il gardé ?
+- Mission sur le site de test : l'interrupteur existe (Admin › Réglages › Missions › « Ouvrir les missions »). Il demande
+  le compte admin de Greg (code à 6 chiffres) : à faire par lui. C'est un réglage de la base : la production n'est pas
+  touchée.
+
 ## Pas-à-pas Vercel Blob (à donner à Greg après sa validation, rien n'est fait sans lui)
 
 1. vercel.com › l'équipe gr33-spec › projet de l'API (« baticlair-api ») › onglet Storage › Create Database › Blob.
@@ -57,7 +82,11 @@ Reprendre à la première case non cochée.
       (`erreurs-precises`, `nom-app` « trois choix… Tarifs sans montant », « Analyses disponibles ») ; 1 parcours instable
       (`parcours-artisan.spec.ts:1639`, ordinateur, 1 échec sur 3 : mesure prise pendant une animation). Ma branche est
       poussée ; RIEN sur la branche de test (attend Greg).
-- [ ] 7. Après l'accord de Greg : store Vercel Blob relié au projet API (`BLOB_READ_WRITE_TOKEN`) et son adresse publique
+- [x] 7. Onglet « Mon site », « Entre pros », lien Mission (3e message de Greg) : codé et testé (API 43 ciblés, e2e
+      ma-page 9/9, e2e-ag-v1 entre-pros 3/3).
+- [ ] 8. Chaîne complète sur le commit final (domaine, API, web, e2e « mois », « @lots », ag-v1), puis poussée sur la
+      branche de test et vérification que le site et l'API servent ce commit.
+- [ ] 9. Après l'accord de Greg : store Vercel Blob relié au projet API (`BLOB_READ_WRITE_TOKEN`) et son adresse publique
       posée sur le projet web (`PHOTOS_BLOB_URL` : les photos sont servies sous `/photos/…`, même domaine, la CSP reste
       « rien d'ailleurs »), fusion dans la branche de test, migration appliquée par le déploiement (additive).
 

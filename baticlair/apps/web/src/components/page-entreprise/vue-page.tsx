@@ -16,6 +16,7 @@ import { Photo } from "./photo";
 
 export { Photo };
 import { ContactPage, SignalerPage } from "./interactions";
+import { EntrePros } from "./entre-pros";
 import "./page-entreprise.css";
 
 /**
@@ -35,10 +36,6 @@ export const initiales = (nom: string) =>
     .slice(0, 2)
     .map((m) => m[0]!.toUpperCase())
     .join("") || "•";
-
-function dateCourte(iso: string): string {
-  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" }).format(new Date(`${iso}T12:00:00Z`));
-}
 
 export interface VuePageProps {
   contenu: ContenuPage;
@@ -93,6 +90,9 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
             </div>
           </div>
         </section>
+
+        {/* Le niveau « pros » : rien pour un visiteur, rien dans l'aperçu ; une entreprise connectée le voit ici. */}
+        {apercu ? null : <EntrePros adresse={c.adresse} />}
 
         {visibles.includes("prestations") ? (
           <section id="prestations" className="pe-section" aria-labelledby="pe-t-prestations">
@@ -199,13 +199,6 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
               {c.horaires ? (
                 <p className="pe-contact-ligne">
                   <Clock size={19} aria-hidden="true" /> {c.horaires}
-                </p>
-              ) : null}
-              {c.missions ? (
-                <p className="pe-contact-ligne">
-                  Disponible pour des missions entre entreprises
-                  {c.missions.disponibleDu ? ` du ${dateCourte(c.missions.disponibleDu)}${c.missions.disponibleAu ? ` au ${dateCourte(c.missions.disponibleAu)}` : ""}` : ""}.{" "}
-                  <a href={lien(c.missions.lien)}>Proposer une mission</a>
                 </p>
               ) : null}
             </div>

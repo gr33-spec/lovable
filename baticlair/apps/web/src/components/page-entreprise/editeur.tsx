@@ -4,7 +4,6 @@ import { ArrowDown, ArrowUp, Check, Copy, ExternalLink, Eye, Image as ImageIcon,
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
-import { EnTeteRubrique } from "@/components/en-tete-rubrique";
 import { Button, Card, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { envoyerPhoto, GaleriePhotos, type PhotoEditeur } from "./editeur-photos";
@@ -12,7 +11,7 @@ import { rafraichirPagePublique } from "./rafraichir";
 import { LIBELLES, VuePage } from "./vue-page";
 
 /**
- * « MA PAGE » (Greg, 16 novembre 2026), depuis Profil › Mon entreprise. Réglée en 5 minutes au téléphone : chaque
+ * « MON SITE » (Greg, 16 novembre 2026), onglet de la navigation principale (avant : Profil › Ma page). Réglée en 5 minutes au téléphone : chaque
  * changement s'enregistre tout seul et s'applique tout de suite (page publique régénérée), l'aperçu se dessine en direct
  * pendant qu'on touche. Interface dans la charte Mobiiz ; la page, elle, prend les couleurs de l'artisan.
  */
@@ -71,7 +70,7 @@ function Interrupteur({ actif, onChange, label, aide }: { actif: boolean; onChan
 function Champ({ label, valeur, onChange, placeholder, max, multi = false, type = "text", aide, inputMode }: { label: string; valeur: string; onChange: (v: string) => void; placeholder?: string; max: number; multi?: boolean; type?: string; aide?: string; inputMode?: "tel" | "url" | "numeric" }) {
   const cls = "w-full rounded-xl border border-line bg-surface px-4 py-3 text-[16px] outline-none placeholder:text-muted focus-visible:border-accent";
   return (
-    <label className="grid gap-1.5">
+    <label className="grid grid-cols-[minmax(0,1fr)] gap-1.5">
       <span className="flex items-baseline justify-between gap-2 text-[14px] font-bold">
         {label}
         {multi || max <= 120 ? (
@@ -151,18 +150,18 @@ function Apercu({ contenu, plein, onFermer }: { contenu: ContenuPage; plein?: bo
 
 function Partager({ url, nom, onFermer }: { url: string; nom: string; onFermer: () => void }) {
   const [copie, setCopie] = useState(false);
-  const texte = `${nom} : notre page, nos réalisations et nos coordonnées ${url}`;
+  const texte = `${nom} : notre site, nos réalisations et nos coordonnées ${url}`;
   return (
-    <div role="dialog" aria-modal="true" aria-label="Partager ma page" className="fixed top-0 left-0 z-50 flex h-dvh w-full items-end justify-center bg-black/60 sm:items-center" onClick={onFermer}>
+    <div role="dialog" aria-modal="true" aria-label="Partager mon site" className="fixed top-0 left-0 z-50 flex h-dvh w-full items-end justify-center bg-black/60 sm:items-center" onClick={onFermer}>
       <div className="w-full max-w-md rounded-t-[24px] bg-surface p-5 sm:rounded-[24px]" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-[20px] font-extrabold">Partager ma page</h2>
+          <h2 className="text-[20px] font-extrabold">Partager mon site</h2>
           <button type="button" onClick={onFermer} aria-label="Fermer" className="flex size-11 items-center justify-center rounded-full bg-black/10">
             <X size={20} aria-hidden="true" />
           </button>
         </div>
         <p className="mb-3 rounded-xl bg-black/5 px-3 py-2 text-[14px] break-all">{url}</p>
-        <div className="grid gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
           <Button
             onClick={async () => {
               await navigator.clipboard?.writeText(url).catch(() => undefined);
@@ -212,11 +211,11 @@ function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: b
     void apres(api<MaPage>("/v1/ma-page/realisations/ordre", { method: "PUT", body: { ids } }));
   };
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
       <span className="text-[15px] font-bold">Mes chantiers</span>
-      <p className="text-[13px] text-muted">Un chantier = un titre et quelques photos. Sur ta page, la première photo s&apos;affiche en grand ; on la touche pour voir les autres.</p>
+      <p className="text-[13px] text-muted">Un chantier = un titre et quelques photos. Sur ton site, la première photo s&apos;affiche en grand ; on la touche pour voir les autres.</p>
       {data.realisations.map((r, i) => (
-        <div key={r.id} className="grid gap-3 rounded-2xl border border-line p-3">
+        <div key={r.id} className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded-2xl border border-line p-3">
           <div className="flex items-center gap-1">
             <input
               aria-label="Titre du chantier"
@@ -228,10 +227,10 @@ function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: b
               }}
               className="min-h-12 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[16px] font-bold"
             />
-            <button type="button" aria-label={`Monter « ${r.titre} »`} disabled={i === 0} onClick={() => ordre(i, -1)} className="flex size-11 items-center justify-center rounded-full disabled:opacity-30">
+            <button type="button" aria-label={`Monter « ${r.titre} »`} disabled={i === 0} onClick={() => ordre(i, -1)} className="flex size-11 shrink-0 items-center justify-center rounded-full disabled:opacity-30">
               <ArrowUp size={18} aria-hidden="true" />
             </button>
-            <button type="button" aria-label={`Descendre « ${r.titre} »`} disabled={i === data.realisations.length - 1} onClick={() => ordre(i, 1)} className="flex size-11 items-center justify-center rounded-full disabled:opacity-30">
+            <button type="button" aria-label={`Descendre « ${r.titre} »`} disabled={i === data.realisations.length - 1} onClick={() => ordre(i, 1)} className="flex size-11 shrink-0 items-center justify-center rounded-full disabled:opacity-30">
               <ArrowDown size={18} aria-hidden="true" />
             </button>
             <button
@@ -240,7 +239,7 @@ function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: b
               onClick={() => {
                 if (window.confirm(`Retirer « ${r.titre} » et ses photos ?`)) void apres(api<MaPage>(`/v1/ma-page/realisations/${r.id}`, { method: "DELETE" }));
               }}
-              className="flex size-11 items-center justify-center rounded-full"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full"
             >
               <Trash2 size={18} aria-hidden="true" />
             </button>
@@ -249,7 +248,7 @@ function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: b
         </div>
       ))}
       {sansChantier.length ? (
-        <div className="grid gap-3 rounded-2xl border border-dashed border-line p-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded-2xl border border-dashed border-line p-3">
           <span className="text-[14px] font-bold">Photos sans chantier</span>
           <GaleriePhotos photos={data.photos} realisationId={null} total={total} max={data.choix.limites.photos} actif={false} stockage={data.choix.stockagePhotos} onErreur={onErreur} onChange={() => onChange()} />
         </div>
@@ -275,7 +274,7 @@ function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: b
 function PhotoEquipe({ data, actif, onErreur, recharger }: { data: MaPage; actif: boolean; onErreur: (m: string | null) => void; recharger: () => Promise<void> }) {
   const photo = data.photos.find((p) => p.role === "equipe");
   return (
-    <div className="grid gap-2">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
       <span className="text-[15px] font-bold">Photo de toi ou de ton équipe (facultatif)</span>
       <div className="flex flex-wrap items-center gap-3">
         {photo?.variantes[0] ? (
@@ -418,8 +417,8 @@ export function EditeurMaPage() {
     };
   }, [data, r, versionLogo]);
 
-  if (chargement && !data) return <p className="text-[15px] text-muted">Ta page ne s&apos;est pas chargée. Vérifie ta connexion et réessaie.</p>;
-  if (!data || !r || !contenu) return <Skeleton lines={6} label="Chargement de ta page…" />;
+  if (chargement && !data) return <p className="text-[15px] text-muted">Ton site ne s&apos;est pas chargé. Vérifie ta connexion et réessaie.</p>;
+  if (!data || !r || !contenu) return <Skeleton lines={6} label="Chargement de ton site…" />;
 
   const url = `${window.location.origin}/e/${r.adresse}`;
   const theme = data.choix.theme;
@@ -429,50 +428,36 @@ export function EditeurMaPage() {
   const couvertureEnCours = data.photos.some((p) => p.role === "couverture" && p.statut === "traitement");
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
-      <div className="grid gap-4">
-        <EnTeteRubrique titre="Ma page" />
-        <p className="text-[15px] text-muted">Une vraie page pour ton entreprise, à partager avec tes clients. Remplis quelques champs, ajoute tes photos de chantiers : elle se fabrique toute seule.</p>
-
-        <Card className="grid gap-3 p-4">
-          <Interrupteur actif={r.visible} onChange={(v) => changer("visible", v)} label="Page visible" aide={r.visible ? "En ligne : tout le monde peut la voir avec le lien." : "Privée : personne ne la voit pour l'instant."} />
-          {r.masquee ? <p className="rounded-xl bg-red-500/10 px-3 py-2 text-[14px] font-bold text-red-700 dark:text-red-300">Ta page a été masquée par l&apos;équipe Mobiiz après un signalement. Écris-nous à contact@mobiiz.fr.</p> : null}
-          <p className="text-[14px] break-all">
-            <span className="text-muted">Adresse : </span>
-            <span className="font-bold">{url.replace(/^https?:\/\//, "")}</span>
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {r.visible && !r.masquee ? (
-              <a href={`/e/${r.adresse}`} target="_blank" rel="noopener" className="pressable inline-flex min-h-12 items-center gap-2 rounded-2xl bg-accent px-4 font-bold text-on-accent">
-                <ExternalLink size={18} aria-hidden="true" /> Voir ma page
-              </a>
-            ) : (
-              <Button onClick={() => setApercuPlein(true)}>
-                <Eye size={18} aria-hidden="true" /> Voir ma page
-              </Button>
-            )}
-            <Button variant="secondary" onClick={() => setPartage(true)} disabled={!r.visible}>
-              <Share2 size={18} aria-hidden="true" /> Partager
-            </Button>
-          </div>
-          {!r.visible ? <p className="text-[13px] text-muted">Rends ta page visible pour la partager.</p> : null}
-          <p className="text-[13px] text-muted" role="status" aria-live="polite">
-            {etat === "enregistrement" ? "Enregistrement…" : etat === "enregistre" ? "Enregistré : ta page est à jour." : null}
-          </p>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
+        <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Mon site</h1>
+        <p className="text-[15px] text-muted">Un vrai site pour ton entreprise, à partager avec tes clients. Chaque changement s&apos;enregistre tout seul.</p>
+        {!r.visible ? (
+          <a href="#visibilite" className="text-[14px] font-bold underline">
+            Ton site est privé pour l&apos;instant : le rendre visible
+          </a>
+        ) : null}
+        {/* L'état de l'enregistrement reste en vue pendant qu'on descend dans l'éditeur. */}
+        <div className="pointer-events-none sticky top-2 z-10 grid gap-1 empty:hidden">
+          {etat === "enregistrement" || etat === "enregistre" ? (
+            <p className="justify-self-start rounded-full bg-surface px-3 py-1 text-[13px] text-muted shadow-card" role="status" aria-live="polite">
+              {etat === "enregistrement" ? "Enregistrement…" : "Enregistré : ton site est à jour."}
+            </p>
+          ) : null}
           {erreur ? (
-            <p className="text-[14px] font-bold text-red-700 dark:text-red-300" role="alert">
+            <p className="rounded-xl bg-surface px-3 py-2 text-[14px] font-bold text-red-700 shadow-card dark:text-red-300" role="alert">
               {erreur}
             </p>
           ) : null}
-        </Card>
+        </div>
 
         <div className="lg:hidden">
           <Apercu contenu={contenu} />
         </div>
 
-        <Card className="grid gap-3 p-4">
+        <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4">
           <h2 className="text-[18px] font-extrabold">Teinte</h2>
-          <p className="text-[14px] text-muted">Pour les détails de ta page. Le bouton « Appeler » reste jaune.</p>
+          <p className="text-[14px] text-muted">Pour les détails de ton site. Le bouton « Appeler » reste jaune.</p>
           <div role="radiogroup" aria-label="Teinte de la page" className="grid grid-cols-2 gap-2 sm:grid-cols-5">
             <button type="button" role="radio" aria-checked={couleurActive === null} onClick={() => changer("couleur", null)} className={`pressable flex min-h-12 items-center gap-2 rounded-2xl border-2 px-3 text-left text-[14px] font-bold ${couleurActive === null ? "border-accent bg-accent/15" : "border-line"}`}>
               <span className="size-6 shrink-0 rounded-full" style={{ background: teinteMetier.hex }} aria-hidden="true" /> Selon le métier
@@ -485,11 +470,11 @@ export function EditeurMaPage() {
           </div>
         </Card>
 
-        <Card className="grid gap-4 p-4">
+        <Card className="grid grid-cols-[minmax(0,1fr)] gap-4 p-4">
           <h2 className="text-[18px] font-extrabold">Prestations</h2>
           <p className="text-[14px] text-muted">Ce que tu fais, en quelques blocs : un titre et une phrase. {data.choix.limites.prestations} au plus.</p>
           {r.prestations.map((x, i) => (
-            <div key={i} className="grid gap-2 rounded-2xl bg-black/5 p-3">
+            <div key={i} className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-2xl bg-black/5 p-3">
               <div className="flex items-center gap-2">
                 <input
                   aria-label={`Titre de la prestation ${i + 1}`}
@@ -497,7 +482,7 @@ export function EditeurMaPage() {
                   maxLength={60}
                   placeholder="Couverture ardoise"
                   onChange={(e) => changer("prestations", r.prestations.map((y, k) => (k === i ? { ...y, titre: e.target.value } : y)))}
-                  className="min-h-12 flex-1 rounded-xl border border-line bg-surface px-3 text-[16px] font-bold"
+                  className="min-h-12 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[16px] font-bold"
                 />
                 <button type="button" aria-label={`Retirer la prestation ${x.titre || i + 1}`} onClick={() => changer("prestations", r.prestations.filter((_, k) => k !== i))} className="flex size-11 shrink-0 items-center justify-center rounded-full">
                   <Trash2 size={18} aria-hidden="true" />
@@ -510,7 +495,7 @@ export function EditeurMaPage() {
                 rows={2}
                 placeholder="Une phrase pour dire ce que tu fais."
                 onChange={(e) => changer("prestations", r.prestations.map((y, k) => (k === i ? { ...y, texte: e.target.value } : y)))}
-                className="rounded-xl border border-line bg-surface px-3 py-2 text-[15px]"
+                className="w-full min-w-0 rounded-xl border border-line bg-surface px-3 py-2 text-[15px]"
               />
             </div>
           ))}
@@ -530,8 +515,8 @@ export function EditeurMaPage() {
           ) : null}
         </Card>
 
-        <Card className="grid gap-4 p-4">
-          <h2 className="text-[18px] font-extrabold">Photos</h2>
+        <Card className="grid grid-cols-[minmax(0,1fr)] gap-4 p-4">
+          <h2 className="text-[18px] font-extrabold">Chantiers</h2>
           <p className="rounded-xl bg-accent/15 px-3 py-2 text-[13px]">
             Mets seulement tes propres photos de chantiers. Avant de publier une photo prise chez un client, demande-lui son accord ; évite les personnes reconnaissables, les plaques d&apos;immatriculation, les numéros de rue et les intérieurs qui permettent de situer un domicile.
           </p>
@@ -552,7 +537,173 @@ export function EditeurMaPage() {
               </span>
             </label>
           ) : null}
-          <div className="grid gap-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
+            <span className="text-[15px] font-bold">Photo de couverture</span>
+            <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-line bg-black/5">
+              {couverture?.variantes[1] ?? couverture?.variantes[0] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={(couverture.variantes[1] ?? couverture.variantes[0])!.webp} alt="Photo de couverture" className="size-full object-cover" />
+              ) : (
+                <span className="flex size-full items-center justify-center p-4 text-center text-[13px] text-muted">{couvertureEnCours ? "Préparation de la photo…" : "Sans photo choisie : la première photo de tes chantiers ouvre ton site. Prends une vue large de la maison terminée."}</span>
+              )}
+              {couvertureEnCours ? <Loader2 size={20} className="absolute top-3 right-3 motion-safe:animate-spin" aria-hidden="true" /> : null}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {data.choix.stockagePhotos && data.reglages.photosAccord ? (
+                <label className="pressable inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border border-line px-3 text-[14px] font-bold">
+                  <ImageIcon size={16} aria-hidden="true" /> {couverture ? "Changer la photo" : "Choisir une photo"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={async (e) => {
+                      const f = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!f) return;
+                      setErreur(null);
+                      const err = await envoyerPhoto(f, "couverture");
+                      if (err) setErreur(err);
+                      await charger();
+                    }}
+                  />
+                </label>
+              ) : null}
+              {couverture ? (
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center gap-1 text-[14px] font-bold text-muted underline"
+                  onClick={async () => {
+                    const d = await api<MaPage>("/v1/ma-page/couverture", { method: "DELETE" }).catch(() => null);
+                    if (d) {
+                      setData(d);
+                      void rafraichirPagePublique();
+                    }
+                  }}
+                >
+                  <Trash2 size={14} aria-hidden="true" /> Retirer cette photo
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          <Chantiers data={data} actif={data.choix.stockagePhotos && data.reglages.photosAccord} onErreur={setErreur} onChange={(d) => (d ? setData(d) : void charger())} />
+        </Card>
+
+        <Card className="grid grid-cols-[minmax(0,1fr)] gap-4 p-4">
+          <h2 className="text-[18px] font-extrabold">À propos</h2>
+          <Champ label="Accroche" valeur={r.accroche ?? ""} onChange={(v) => changer("accroche", v || null)} max={data.choix.limites.accroche} placeholder={theme.accroche.replace("{zone}", contenu.zone ? ` à ${contenu.zone}` : "")} aide="Une phrase sous ton nom. Vide : ton métier et ta ville." />
+          <Champ label="Présentation" multi valeur={r.presentation ?? ""} onChange={(v) => changer("presentation", v || null)} max={data.choix.limites.presentation} placeholder={theme.presentation} />
+          <Button
+            variant="secondary"
+            pending={aide}
+            onClick={async () => {
+              setAide(true);
+              try {
+                setProposition(await api("/v1/ma-page/aide-ecriture", { method: "POST", body: { accroche: r.accroche, presentation: r.presentation } }));
+              } catch (e) {
+                setErreur((e as ApiError).phrase ?? "Mobiiz n'a pas pu écrire pour l'instant.");
+              } finally {
+                setAide(false);
+              }
+            }}
+          >
+            <Sparkles size={18} aria-hidden="true" /> Mobiiz m&apos;aide à l&apos;écrire
+          </Button>
+          <p className="text-[13px] text-muted">Relis la proposition : n&apos;écris rien que tu ne peux pas prouver.</p>
+          {proposition ? (
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-2xl border-2 border-accent p-3" data-testid="proposition">
+              <p className="text-[13px] text-muted">{proposition.phrase ?? (proposition.source === "ia" ? "Proposition de Mobiiz (compte comme une analyse). Modifie-la à ta guise." : "Proposition tirée de ton profil. Modifie-la à ta guise.")}</p>
+              <p className="font-bold">{proposition.accroche}</p>
+              <p className="text-[15px] whitespace-pre-line">{proposition.presentation}</p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={() => {
+                    changer("accroche", proposition.accroche);
+                    changer("presentation", proposition.presentation);
+                    setProposition(null);
+                  }}
+                >
+                  Utiliser ces textes
+                </Button>
+                <Button variant="secondary" onClick={() => setProposition(null)}>
+                  Garder les miens
+                </Button>
+              </div>
+            </div>
+          ) : null}
+          <PhotoEquipe data={data} actif={data.choix.stockagePhotos && data.reglages.photosAccord} onErreur={setErreur} recharger={charger} />
+        </Card>
+
+        <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4" id="visibilite" data-testid="visibilite">
+          <Interrupteur actif={r.visible} onChange={(v) => changer("visible", v)} label="Page visible" aide={r.visible ? "En ligne : tout le monde peut voir ton site avec le lien." : "Privé : personne ne le voit pour l'instant."} />
+          {r.masquee ? <p className="rounded-xl bg-red-500/10 px-3 py-2 text-[14px] font-bold text-red-700 dark:text-red-300">Ton site a été masqué par l&apos;équipe Mobiiz après un signalement. Écris-nous à contact@mobiiz.fr.</p> : null}
+          <p className="text-[14px] break-all">
+            <span className="text-muted">Adresse : </span>
+            <span className="font-bold">{url.replace(/^https?:\/\//, "")}</span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {r.visible && !r.masquee ? (
+              <a href={`/e/${r.adresse}`} target="_blank" rel="noopener" className="pressable inline-flex min-h-12 items-center gap-2 rounded-2xl bg-accent px-4 font-bold text-on-accent">
+                <ExternalLink size={18} aria-hidden="true" /> Voir mon site
+              </a>
+            ) : (
+              <Button onClick={() => setApercuPlein(true)}>
+                <Eye size={18} aria-hidden="true" /> Voir mon site
+              </Button>
+            )}
+            <Button variant="secondary" onClick={() => setPartage(true)} disabled={!r.visible}>
+              <Share2 size={18} aria-hidden="true" /> Partager
+            </Button>
+          </div>
+          {!r.visible ? <p className="text-[13px] text-muted">Rends ton site visible pour le partager.</p> : null}
+        </Card>
+
+        <Card className="grid grid-cols-[minmax(0,1fr)] gap-4 p-4">
+          <h2 className="text-[18px] font-extrabold">Coordonnées</h2>
+          <div className="rounded-2xl bg-black/5 p-3 text-[14px]">
+            <p>
+              <span className="font-bold">{data.profil.nom}</span> · {data.profil.metiers.map((m) => LIBELLES[m] ?? m).join(", ") || "métier à choisir"}
+            </p>
+            <p className="text-muted">
+              Repris de ton profil et synchronisés. <Link href="/compte/entreprise" className="font-bold underline">Modifier dans Mon entreprise</Link>
+            </p>
+          </div>
+          <Champ label="Téléphone" type="tel" inputMode="tel" valeur={r.telephone ?? ""} onChange={(v) => changer("telephone", v || null)} max={25} placeholder={data.profil.telephone ?? "06 12 34 56 78"} aide={data.profil.telephone ? "Vide : celui de ton profil, mis à jour tout seul." : "Le bouton « Appeler » apparaît avec un numéro."} />
+          <Champ label="Zone d'intervention" valeur={r.zone ?? ""} onChange={(v) => changer("zone", v || null)} max={120} placeholder={data.profil.zone ?? "Lannion, Perros-Guirec, Trégor"} aide={data.profil.zone ? `Vide : ${data.profil.zone}, d'après ton profil.` : undefined} />
+          <Champ label="Horaires" valeur={r.horaires ?? ""} onChange={(v) => changer("horaires", v || null)} max={200} placeholder="Du lundi au vendredi, 8 h – 18 h" />
+          <Champ label="Ton autre site internet" type="url" inputMode="url" valeur={r.siteWeb ?? ""} onChange={(v) => changer("siteWeb", v || null)} max={200} placeholder="www.mon-entreprise.fr" aide="Si tu en as déjà un : un lien « Voir mon site » apparaît en bas de ton site Mobiiz." />
+          <AnneeChamp valeur={r.creeeEn} onChange={(n) => changer("creeeEn", n)} />
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
+            <span className="text-[14px] font-bold">Certifications et assurances</span>
+            <div className="flex flex-wrap gap-2">
+              {[...new Set([...data.choix.certifications, ...r.certifications])].map((c) => {
+                const actif = r.certifications.includes(c);
+                return (
+                  <button key={c} type="button" aria-pressed={actif} onClick={() => changer("certifications", actif ? r.certifications.filter((x) => x !== c) : [...r.certifications, c].slice(0, 10))} className={`pressable min-h-11 rounded-full border-2 px-3 text-[14px] font-bold ${actif ? "border-accent bg-accent/20" : "border-line"}`}>
+                    {actif ? "✓ " : ""}
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+            <input
+              placeholder="Autre (ex. : Handibat), puis Entrée"
+              maxLength={60}
+              className="min-h-12 rounded-xl border border-line bg-surface px-4 text-[16px]"
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                const v = e.currentTarget.value.trim();
+                if (v && !r.certifications.includes(v)) changer("certifications", [...r.certifications, v].slice(0, 10));
+                e.currentTarget.value = "";
+              }}
+            />
+            <span className="text-[13px] text-muted">Seulement ce que tu as vraiment, à jour : tu en es responsable. « Entreprise vérifiée » s&apos;ajoute tout seul quand ton SIRET est vérifié{data.profil.verifiee ? " (c'est le cas)" : ""}.</span>
+          </div>
+          {data.profil.adressePostale ? (
+            <Interrupteur actif={r.afficherAdresse} onChange={(v) => changer("afficherAdresse", v)} label="Afficher mon adresse" aide={`${data.profil.adressePostale}. Désactivé : seule ta zone s'affiche.`} />
+          ) : null}
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
             <span className="text-[15px] font-bold">Logo</span>
             <div className="flex flex-wrap items-center gap-3">
               {data.profil.logo ? (
@@ -605,153 +756,10 @@ export function EditeurMaPage() {
             <span className="text-[13px] text-muted">Le même logo que sur tes demandes de prix. Sans logo, tes initiales s&apos;affichent.</span>
           </div>
 
-          <div className="grid gap-2">
-            <span className="text-[15px] font-bold">Photo de couverture</span>
-            <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-line bg-black/5">
-              {couverture?.variantes[1] ?? couverture?.variantes[0] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={(couverture.variantes[1] ?? couverture.variantes[0])!.webp} alt="Photo de couverture" className="size-full object-cover" />
-              ) : (
-                <span className="flex size-full items-center justify-center p-4 text-center text-[13px] text-muted">{couvertureEnCours ? "Préparation de la photo…" : "Sans photo choisie : la première photo de tes chantiers ouvre ta page. Prends une vue large de la maison terminée."}</span>
-              )}
-              {couvertureEnCours ? <Loader2 size={20} className="absolute top-3 right-3 motion-safe:animate-spin" aria-hidden="true" /> : null}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {data.choix.stockagePhotos && data.reglages.photosAccord ? (
-                <label className="pressable inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border border-line px-3 text-[14px] font-bold">
-                  <ImageIcon size={16} aria-hidden="true" /> {couverture ? "Changer la photo" : "Choisir une photo"}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={async (e) => {
-                      const f = e.target.files?.[0];
-                      e.target.value = "";
-                      if (!f) return;
-                      setErreur(null);
-                      const err = await envoyerPhoto(f, "couverture");
-                      if (err) setErreur(err);
-                      await charger();
-                    }}
-                  />
-                </label>
-              ) : null}
-              {couverture ? (
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center gap-1 text-[14px] font-bold text-muted underline"
-                  onClick={async () => {
-                    const d = await api<MaPage>("/v1/ma-page/couverture", { method: "DELETE" }).catch(() => null);
-                    if (d) {
-                      setData(d);
-                      void rafraichirPagePublique();
-                    }
-                  }}
-                >
-                  <Trash2 size={14} aria-hidden="true" /> Retirer cette photo
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <Chantiers data={data} actif={data.choix.stockagePhotos && data.reglages.photosAccord} onErreur={setErreur} onChange={(d) => (d ? setData(d) : void charger())} />
-
-          <PhotoEquipe data={data} actif={data.choix.stockagePhotos && data.reglages.photosAccord} onErreur={setErreur} recharger={charger} />
         </Card>
 
-        <Card className="grid gap-4 p-4">
-          <h2 className="text-[18px] font-extrabold">Ce que tu dis de toi</h2>
-          <Champ label="Accroche" valeur={r.accroche ?? ""} onChange={(v) => changer("accroche", v || null)} max={data.choix.limites.accroche} placeholder={theme.accroche.replace("{zone}", contenu.zone ? ` à ${contenu.zone}` : "")} aide="Une phrase sous ton nom. Vide : ton métier et ta ville." />
-          <Champ label="Présentation" multi valeur={r.presentation ?? ""} onChange={(v) => changer("presentation", v || null)} max={data.choix.limites.presentation} placeholder={theme.presentation} />
-          <Button
-            variant="secondary"
-            pending={aide}
-            onClick={async () => {
-              setAide(true);
-              try {
-                setProposition(await api("/v1/ma-page/aide-ecriture", { method: "POST", body: { accroche: r.accroche, presentation: r.presentation } }));
-              } catch (e) {
-                setErreur((e as ApiError).phrase ?? "Mobiiz n'a pas pu écrire pour l'instant.");
-              } finally {
-                setAide(false);
-              }
-            }}
-          >
-            <Sparkles size={18} aria-hidden="true" /> Mobiiz m&apos;aide à l&apos;écrire
-          </Button>
-          <p className="text-[13px] text-muted">Relis la proposition : n&apos;écris rien que tu ne peux pas prouver.</p>
-          {proposition ? (
-            <div className="grid gap-2 rounded-2xl border-2 border-accent p-3" data-testid="proposition">
-              <p className="text-[13px] text-muted">{proposition.phrase ?? (proposition.source === "ia" ? "Proposition de Mobiiz (compte comme une analyse). Modifie-la à ta guise." : "Proposition tirée de ton profil. Modifie-la à ta guise.")}</p>
-              <p className="font-bold">{proposition.accroche}</p>
-              <p className="text-[15px] whitespace-pre-line">{proposition.presentation}</p>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={() => {
-                    changer("accroche", proposition.accroche);
-                    changer("presentation", proposition.presentation);
-                    setProposition(null);
-                  }}
-                >
-                  Utiliser ces textes
-                </Button>
-                <Button variant="secondary" onClick={() => setProposition(null)}>
-                  Garder les miens
-                </Button>
-              </div>
-            </div>
-          ) : null}
-        </Card>
-
-        <Card className="grid gap-4 p-4">
-          <h2 className="text-[18px] font-extrabold">Coordonnées</h2>
-          <div className="rounded-2xl bg-black/5 p-3 text-[14px]">
-            <p>
-              <span className="font-bold">{data.profil.nom}</span> · {data.profil.metiers.map((m) => LIBELLES[m] ?? m).join(", ") || "métier à choisir"}
-            </p>
-            <p className="text-muted">
-              Repris de ton profil et synchronisés. <Link href="/compte/entreprise" className="font-bold underline">Modifier dans Mon entreprise</Link>
-            </p>
-          </div>
-          <Champ label="Téléphone" type="tel" inputMode="tel" valeur={r.telephone ?? ""} onChange={(v) => changer("telephone", v || null)} max={25} placeholder={data.profil.telephone ?? "06 12 34 56 78"} aide={data.profil.telephone ? "Vide : celui de ton profil, mis à jour tout seul." : "Le bouton « Appeler » apparaît avec un numéro."} />
-          <Champ label="Zone d'intervention" valeur={r.zone ?? ""} onChange={(v) => changer("zone", v || null)} max={120} placeholder={data.profil.zone ?? "Lannion, Perros-Guirec, Trégor"} aide={data.profil.zone ? `Vide : ${data.profil.zone}, d'après ton profil.` : undefined} />
-          <Champ label="Horaires" valeur={r.horaires ?? ""} onChange={(v) => changer("horaires", v || null)} max={200} placeholder="Du lundi au vendredi, 8 h – 18 h" />
-          <Champ label="Mon site web" type="url" inputMode="url" valeur={r.siteWeb ?? ""} onChange={(v) => changer("siteWeb", v || null)} max={200} placeholder="www.mon-entreprise.fr" aide="Un bouton « Voir mon site » apparaît sur ta page." />
-          <AnneeChamp valeur={r.creeeEn} onChange={(n) => changer("creeeEn", n)} />
-          <div className="grid gap-2">
-            <span className="text-[14px] font-bold">Certifications et assurances</span>
-            <div className="flex flex-wrap gap-2">
-              {[...new Set([...data.choix.certifications, ...r.certifications])].map((c) => {
-                const actif = r.certifications.includes(c);
-                return (
-                  <button key={c} type="button" aria-pressed={actif} onClick={() => changer("certifications", actif ? r.certifications.filter((x) => x !== c) : [...r.certifications, c].slice(0, 10))} className={`pressable min-h-11 rounded-full border-2 px-3 text-[14px] font-bold ${actif ? "border-accent bg-accent/20" : "border-line"}`}>
-                    {actif ? "✓ " : ""}
-                    {c}
-                  </button>
-                );
-              })}
-            </div>
-            <input
-              placeholder="Autre (ex. : Handibat), puis Entrée"
-              maxLength={60}
-              className="min-h-12 rounded-xl border border-line bg-surface px-4 text-[16px]"
-              onKeyDown={(e) => {
-                if (e.key !== "Enter") return;
-                e.preventDefault();
-                const v = e.currentTarget.value.trim();
-                if (v && !r.certifications.includes(v)) changer("certifications", [...r.certifications, v].slice(0, 10));
-                e.currentTarget.value = "";
-              }}
-            />
-            <span className="text-[13px] text-muted">Seulement ce que tu as vraiment, à jour : tu en es responsable. « Entreprise vérifiée » s&apos;ajoute tout seul quand ton SIRET est vérifié{data.profil.verifiee ? " (c'est le cas)" : ""}.</span>
-          </div>
-          {data.profil.adressePostale ? (
-            <Interrupteur actif={r.afficherAdresse} onChange={(v) => changer("afficherAdresse", v)} label="Afficher mon adresse" aide={`${data.profil.adressePostale}. Désactivé : seule ta zone s'affiche.`} />
-          ) : null}
-        </Card>
-
-        <Card className="grid gap-3 p-4">
-          <h2 className="text-[18px] font-extrabold">Adresse de la page</h2>
+        <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4">
+          <h2 className="text-[18px] font-extrabold">Adresse du site</h2>
           <p className="text-[15px] break-all">{url.replace(/^https?:\/\//, "")}</p>
           {r.adresseModifiable ? (
             nouvelleAdresse === null ? (
@@ -759,15 +767,15 @@ export function EditeurMaPage() {
                 Modifier l&apos;adresse (une seule fois)
               </Button>
             ) : (
-              <div className="grid gap-2">
-                <label className="grid gap-1 text-[14px] font-bold">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
+                <label className="grid grid-cols-[minmax(0,1fr)] gap-1 text-[14px] font-bold">
                   Nouvelle adresse
                   <span className="flex items-center rounded-xl border border-line bg-surface px-3">
                     <span className="text-muted">/e/</span>
-                    <input value={nouvelleAdresse} maxLength={50} onChange={(e) => setNouvelleAdresse(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))} className="min-h-12 flex-1 bg-transparent px-1 text-[16px] outline-none" />
+                    <input value={nouvelleAdresse} maxLength={50} onChange={(e) => setNouvelleAdresse(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))} className="min-h-12 min-w-0 flex-1 bg-transparent px-1 text-[16px] outline-none" />
                   </span>
                 </label>
-                <p className="text-[13px] text-muted">Tu ne pourras plus la changer ensuite. L&apos;ancienne adresse continuera de mener à ta page.</p>
+                <p className="text-[13px] text-muted">Tu ne pourras plus la changer ensuite. L&apos;ancienne adresse continuera de mener à ton site.</p>
                 <div className="flex gap-2">
                   <Button
                     onClick={async () => {

@@ -327,7 +327,7 @@ describe("Missions : pièces jointes et dossier professionnel", () => {
     await a.agent.get(`/v1/fichiers-pro/${cv.id}/lien`).expect(404);
   });
 
-  it("profil public : invisible par défaut ; une réalisation ne se montre que profil visible, à une entreprise vérifiée", async () => {
+  it("profil public : invisible par défaut ; aucun document du dossier ne s'y montre, même coché (Greg, 16 novembre 2026)", async () => {
     const b = await entreprise("b@exemple.fr", "Armor Littoral");
     const c = await entreprise("c@exemple.fr", "Couverture Bretagne");
     const n = await entreprise("n@exemple.fr", "Sans SIRET", { verifiee: false });
@@ -341,9 +341,9 @@ describe("Missions : pièces jointes et dossier professionnel", () => {
     // Le serveur dit si le profil vu est celui de l'entreprise qui regarde (elle ne signale pas sa propre image).
     expect(profil.mienne).toBe(false);
     expect((await b.agent.get(`/v1/profil-public/${b.companyId}`).expect(200)).body.mienne).toBe(true);
-    expect(profil.realisations.map((r: { id: string }) => r.id)).toEqual([photo.id]);
+    expect(profil.realisations).toEqual([]);
     expect(JSON.stringify(profil)).not.toMatch(/06 12|contact-|rue du Port/);
-    await c.agent.get(`/v1/fichiers-pro/${photo.id}/lien`).expect(200);
+    await c.agent.get(`/v1/fichiers-pro/${photo.id}/lien`).expect(404);
     await n.agent.get(`/v1/fichiers-pro/${photo.id}/lien`).expect(404);
     await n.agent.put("/v1/profil-public").send({ visible: true, presentation: null, metiers: [], services: null, equipe: null, ville: null }).expect(403);
   });

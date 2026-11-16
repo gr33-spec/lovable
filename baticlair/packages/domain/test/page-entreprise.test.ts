@@ -59,7 +59,6 @@ function contenu(partiel: Partial<ContenuPage> = {}): ContenuPage {
     prestations: [],
     realisations: [],
     photoEquipe: null,
-    missions: null,
     majLe: "2026-11-16T10:00:00.000Z",
     ...partiel,
   };

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, ClipboardList, House, Plus, Truck, UserRound, Users, type LucideIcon } from "lucide-react";
+import { Briefcase, ClipboardList, Globe, House, Plus, Truck, UserRound, Users, type LucideIcon } from "lucide-react";
 import { useCallback } from "react";
 import { santeUneFois } from "@/lib/sante";
 import { fr } from "@/lib/fr";
@@ -36,6 +36,8 @@ const listesItem: NavItem = {
 const groupeItem: NavItem = { href: "/achats-groupes", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/achats-groupes") || p.startsWith("/regroupements") || p.startsWith("/groupe") };
 /** Missions entre entreprises (Greg, 10 novembre 2026) : le quatrième onglet, toujours présent ; les messages y vivent quand les missions sont ouvertes. */
 const missionsItem: NavItem = { href: "/missions", label: fr.nav.missions, icon: Briefcase, match: (p: string) => p.startsWith("/missions") || (p.startsWith("/messages") && !p.startsWith("/messages/negoce")) };
+/** « Mon site » (Greg, 16 novembre 2026) : le site de l'entreprise, cinquième onglet ; seul chemin vers son éditeur. */
+const siteItem: NavItem = { href: "/mon-site", label: "Mon site", icon: Globe, match: (p: string) => p.startsWith("/mon-site") };
 /** Ordinateur seulement (Greg, 31 octobre 2026, soir : « on a de la place sur l'écran ») : « Mes négoces » à portée de clic. */
 const negocesItem: NavItem = { href: "/fournisseurs", label: "Mes négoces", icon: Truck, match: (p: string) => p.startsWith("/fournisseurs") };
 const profilItem: NavItem = { href: "/compte", label: fr.nav.profil, icon: UserRound, match: (p: string) => p.startsWith("/compte") || p.startsWith("/abonnement") || p.startsWith("/fournisseurs") || p.startsWith("/mes-prix") };
@@ -93,7 +95,8 @@ export function AppNav() {
             </span>
           ) : null}
         </span>
-        <span className="text-center leading-[1.1] text-balance max-lg:text-[11px] lg:whitespace-nowrap">{item.label}</span>
+        {/* Cinq onglets (16 novembre 2026) : sur un très petit écran (moins de 360 px), un rien plus serré pour que rien ne déborde. */}
+        <span className="text-center leading-[1.1] text-balance max-lg:text-[11px] max-[359px]:text-[10px] max-[359px]:tracking-[-0.02em] lg:whitespace-nowrap">{item.label}</span>
         {item === missionsItem && missionsBientot ? (
           <span aria-hidden="true" className="ml-auto hidden rounded-full bg-accent px-2 text-[11px] leading-5 font-extrabold text-on-accent lg:inline">
             Bientôt
@@ -111,7 +114,7 @@ export function AppNav() {
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
           colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}
-      <div className={`mx-2.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-4" : "grid-cols-3"} rounded-[26px] bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
+      <div className={`mx-2.5 max-[359px]:mx-1.5 max-[359px]:px-0.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-5" : "grid-cols-4"} rounded-[26px] bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
         <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
           <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
         </span>
@@ -133,6 +136,7 @@ export function AppNav() {
         {groupe ? link(groupeItem) : null}
         {/* Prompt maître (Greg, 10 novembre 2026) : quatre entrées fixes, Accueil, Quantitatifs, Achats groupés, Missions. */}
         {link(missionsItem)}
+        {link(siteItem)}
         {link(negocesItem, true)}
         <span aria-hidden="true" className="hidden grow lg:block" />
         {link(profilItem, true)}

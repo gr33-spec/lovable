@@ -80,7 +80,7 @@ export function GaleriePhotos({ photos, max, actif, stockage = true, realisation
   };
 
   return (
-    <div className="grid gap-3">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Photos du chantier">
         {liste.map((p, i) => (
           <li key={p.id} data-photo={p.id} className={`relative overflow-hidden rounded-2xl border border-line bg-surface ${enMain === p.id ? "ring-2 ring-accent" : ""}`}>
@@ -137,7 +137,7 @@ export function GaleriePhotos({ photos, max, actif, stockage = true, realisation
                 aria-label={`Retirer la photo ${i + 1}`}
                 className="absolute top-1.5 right-1.5 flex size-10 items-center justify-center rounded-xl bg-black/60 text-white"
                 onClick={async () => {
-                  if (!window.confirm("Retirer cette photo de ta page ?")) return;
+                  if (!window.confirm("Retirer cette photo de ton site ?")) return;
                   await api(`/v1/ma-page/photos/${p.id}`, { method: "DELETE" }).catch(() => onErreur("La photo n'a pas été retirée. Réessaie."));
                   onChange();
                 }}

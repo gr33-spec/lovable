@@ -912,3 +912,80 @@ body:has(.pe:not(.pe-apercu)) {
 .pe-visionneuse {
   background: #0c0a08;
 }
+
+/* ------------------------------------------------------------------------------------------------ Entre pros */
+/* Greg, 16 novembre 2026 : le niveau « pros » du site, seulement pour une entreprise connectée (îlot client). */
+.pe-entre-pros {
+  padding: 48px 0 8px;
+}
+.pe-ep-carte {
+  border: 2px solid var(--encre);
+  border-radius: 20px;
+  background: #fff;
+  padding: 24px 20px;
+  display: grid;
+  gap: 14px;
+}
+.pe-ep-etiquette {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--jaune);
+  color: var(--encre);
+  padding: 4px 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.pe .pe-entre-pros h2 {
+  font-size: 26px;
+  margin: 0;
+}
+.pe-ep-note {
+  color: var(--doux);
+  font-size: 15px;
+}
+.pe-ep-grille {
+  display: grid;
+  gap: 18px;
+}
+.pe-ep-grille h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.pe-ep-competences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+.pe-ep-competences li {
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.pe-ep-services {
+  margin-top: 8px;
+  white-space: pre-line;
+}
+.pe-ep-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@container pe (min-width: 760px) {
+  .pe-ep-carte {
+    padding: 32px;
+  }
+  .pe-ep-grille {
+    grid-template-columns: 1fr 1fr;
+  }
+}

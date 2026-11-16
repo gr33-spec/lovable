@@ -137,13 +137,58 @@ describe("Ma page : réglages", () => {
     expect((await a.agent.get("/v1/ma-page/adresses").expect(200)).body.adresses).toEqual(["couvreur-lannion", "toits-martin"]);
   });
 
-  it("Missions ouvertes : la disponibilité publiée apparaît avec « Proposer une mission » ; sans elle, rien", async () => {
-    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
+  it("ENTRE PROS : le site public ne dit rien de Mission ; une entreprise connectée lit la disponibilité et les compétences, jamais un document", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
+    const b = await signUpWithCompany(ctx.app, "b@exemple.fr", "Zinc Le Gall", ["roofing"]);
     await rendrePublique(a.agent);
-    expect((await anon().get("/v1/public/pages/toits-martin")).body.contenu.missions).toBeNull();
     const userId = (await ctx.prisma.membership.findFirstOrThrow({ where: { companyId: a.companyId } })).userId;
     const dispo = await ctx.prisma.annonceMission.create({ data: { companyId: a.companyId, userId, type: "disponibilite", metier: "Couverture", lieu: "Lannion", departement: "22", debut: new Date("2026-12-01"), fin: new Date("2026-12-20"), description: "Dispo" } });
-    expect((await anon().get("/v1/public/pages/toits-martin")).body.contenu.missions).toEqual({ disponibleDu: "2026-12-01", disponibleAu: "2026-12-20", lien: `/missions/${dispo.id}` });
+    await ctx.prisma.profilPublic.create({ data: { companyId: a.companyId, visible: true, metiers: ["Ardoise naturelle", "Zinc joint debout, appeler le 06 12 34 56 78"], services: "Renfort sur toiture" } });
+    await ctx.prisma.fichierPro.create({ data: { companyId: a.companyId, portee: "dossier", categorie: "cv", nom: "cv-jean.pdf", type: "application/pdf", taille: 3, contenu: Buffer.from("cv!"), surProfil: true } });
+    // Le site public (le même pour tous, mis en cache) ne porte rien de Mission.
+    const publique = (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
+    expect(publique).not.toHaveProperty("missions");
+    expect(JSON.stringify(publique)).not.toMatch(/Dispo|Ardoise naturelle|Renfort|cv-jean/);
+    // Un visiteur non connecté : jamais le bloc.
+    await anon().get("/v1/pages-entreprises/toits-martin/entre-pros").expect(401);
+    await anon().get(`/v1/pages-entreprises/entreprise/${a.companyId}`).expect(401);
+    // Une entreprise connectée : disponibilité, compétences (coordonnées masquées), le lien de la disponibilité.
+    const vu = await b.agent.get("/v1/pages-entreprises/toits-martin/entre-pros").expect(200);
+    expect(vu.headers["cache-control"]).toMatch(/no-store/);
+    expect(vu.body).toMatchObject({ mienne: false, entrepriseId: a.companyId, services: "Renfort sur toiture", disponibilite: { annonceId: dispo.id, du: "2026-12-01", au: "2026-12-20" } });
+    expect(vu.body.competences[0]).toBe("Ardoise naturelle");
+    expect(vu.body.competences[1]).not.toMatch(/06 12/);
+    expect(JSON.stringify(vu.body)).not.toMatch(/cv-jean|cv!/);
+    // L'artisan voit son propre bloc tel que le voient les autres, sans masquage.
+    expect((await a.agent.get("/v1/pages-entreprises/toits-martin/entre-pros").expect(200)).body.mienne).toBe(true);
+    // Depuis Mission, le profil ouvre le site.
+    expect((await b.agent.get(`/v1/pages-entreprises/entreprise/${a.companyId}`).expect(200)).body).toEqual({ adresse: "toits-martin" });
+    expect((await a.agent.get(`/v1/pages-entreprises/entreprise/${b.companyId}`).expect(200)).body).toEqual({ adresse: null });
+    // Un blocage posé ou subi : rien.
+    await ctx.prisma.blocageEntreprise.create({ data: { companyId: a.companyId, cibleId: b.companyId } });
+    await b.agent.get("/v1/pages-entreprises/toits-martin/entre-pros").expect(404);
+    expect((await b.agent.get(`/v1/pages-entreprises/entreprise/${a.companyId}`).expect(200)).body).toEqual({ adresse: null });
+    await ctx.prisma.blocageEntreprise.deleteMany({});
+    // Site privé : rien non plus.
+    await a.agent.patch("/v1/ma-page").send({ visible: false }).expect(200);
+    await b.agent.get("/v1/pages-entreprises/toits-martin/entre-pros").expect(404);
+    expect((await b.agent.get(`/v1/pages-entreprises/entreprise/${a.companyId}`).expect(200)).body).toEqual({ adresse: null });
+  });
+
+  it("ENTRE PROS : missions coupées dans l'admin, le bloc n'existe pas", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
+    const b = await signUpWithCompany(ctx.app, "b@exemple.fr", "Zinc Le Gall", ["roofing"]);
+    await rendrePublique(a.agent);
+    const { ReglageMissions } = await import("../src/platform/reglages/reglage-missions.js");
+    const reglage = ctx.app.get(ReglageMissions);
+    await reglage.regler(false);
+    try {
+      await b.agent.get("/v1/pages-entreprises/toits-martin/entre-pros").expect(404);
+      await b.agent.get(`/v1/pages-entreprises/entreprise/${a.companyId}`).expect(404);
+    } finally {
+      await reglage.regler(true);
+    }
+    expect((await b.agent.get("/v1/pages-entreprises/toits-martin/entre-pros").expect(200)).body.competences).toEqual(["Couverture, charpente, zinguerie"]);
   });
 });
 

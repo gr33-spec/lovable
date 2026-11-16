@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 
 /**
  * MA PAGE MOBIIZ (Greg, 16 novembre 2026) : le parcours complet, sur téléphone (Pixel 7, et petit iPhone 375 px plus bas)
- * et sur ordinateur. L'artisan règle sa page depuis Profil › Ma page (modèle, couleur, textes, photo), la rend visible ;
+ * et sur ordinateur. L'artisan règle son site depuis l'onglet « Mon site » (modèle, couleur, textes, photo), la rend visible ;
  * un visiteur sans compte la voit (bouton « Appeler » toujours visible sur téléphone, données structurées, image
  * d'aperçu), écrit à l'entreprise et peut la signaler. Une page privée n'existe pas pour un visiteur ; un autre compte ne
  * voit rien de la page d'un autre. Thèmes clair et sombre de l'application.
@@ -32,7 +32,13 @@ async function inscrire(page: Page, entreprise: string, metier = "Couverture, ch
   await expect(page.getByRole("navigation", { name: "Navigation principale" })).toBeVisible();
 }
 
-const enregistre = (page: Page) => expect(page.getByText("Enregistré : ta page est à jour.")).toBeVisible();
+/** Toucher un réglage du bas de l'éditeur : centré à l'écran d'abord (la barre du menu est figée en bas du téléphone). */
+async function toucher(l: Locator) {
+  await l.evaluate((e) => e.scrollIntoView({ block: "center" }));
+  await l.click();
+}
+
+const enregistre = (page: Page) => expect(page.getByText("Enregistré : ton site est à jour.")).toBeVisible();
 const apercu = (page: Page) => page.locator("[data-testid=apercu-page]:visible").first();
 
 async function sansDefilementHorizontal(page: Page) {
@@ -49,9 +55,10 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   test.setTimeout(240_000);
   const nom = `Toits Martin ${unique()}`;
   await inscrire(page, nom);
-  await page.goto("/compte");
-  await page.getByRole("link", { name: /Ma page/ }).first().click();
-  await expect(page.getByRole("heading", { name: "Ma page", level: 1 })).toBeVisible();
+  // Onglet « Mon site » de la navigation principale (Greg, 16 novembre 2026) ; plus d'entrée « Ma page » dans le Profil.
+  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Mon site" }).click();
+  await expect(page).toHaveURL(/\/mon-site$/);
+  await expect(page.getByRole("heading", { name: "Mon site", level: 1 })).toBeVisible();
   await expect(page.getByRole("switch", { name: /Page visible/ })).toHaveAttribute("aria-checked", "false");
   // L'aperçu est déjà là, prérempli depuis le profil : le grand titre est le métier, le nom dessous ; les prestations du
   // métier sont proposées.
@@ -96,11 +103,11 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await page.locator('input[type=file][multiple]').first().setInputFiles(PHOTO);
   await expect(page.getByRole("list", { name: "Photos du chantier" }).locator("img")).toHaveCount(1, { timeout: 30_000 });
   // Publier.
-  await page.getByRole("switch", { name: /Page visible/ }).click();
+  await toucher(page.getByRole("switch", { name: /Page visible/ }));
   await enregistre(page);
-  await expect(page.getByRole("link", { name: "Voir ma page" })).toHaveAttribute("href", `/e/${adresse}`);
-  await page.getByRole("button", { name: "Partager" }).click();
-  await expect(page.getByRole("dialog", { name: "Partager ma page" }).getByRole("img", { name: /QR code/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Voir mon site" })).toHaveAttribute("href", `/e/${adresse}`);
+  await toucher(page.getByRole("button", { name: "Partager" }));
+  await expect(page.getByRole("dialog", { name: "Partager mon site" }).getByRole("img", { name: /QR code/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", /wa\.me/);
   await page.getByRole("button", { name: "Fermer" }).click();
 
@@ -153,7 +160,7 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await expect(v.getByText("Merci, l'équipe Mobiiz va regarder cette page.")).toBeVisible();
 
   // Repasser en privée : la page disparaît tout de suite pour le visiteur.
-  await page.getByRole("switch", { name: /Page visible/ }).click();
+  await toucher(page.getByRole("switch", { name: /Page visible/ }));
   await enregistre(page);
   await v.goto(`/e/${adresse}`);
   await expect(v.getByRole("heading", { name: "Page introuvable" })).toBeVisible();
@@ -164,7 +171,7 @@ test("Ma page : deux comptes, chacun ne voit et ne règle que la sienne", async 
   test.setTimeout(180_000);
   const a = `Toits Martin ${unique()}`;
   await inscrire(page, a);
-  await page.goto("/compte/ma-page");
+  await page.goto("/mon-site");
   await page.getByRole("textbox", { name: /^Accroche/ }).fill("Accroche privée de A");
   await enregistre(page);
   const ctxB = await browser.newContext({ baseURL: "http://localhost:3000", viewport: page.viewportSize()! });
@@ -174,7 +181,7 @@ test("Ma page : deux comptes, chacun ne voit et ne règle que la sienne", async 
   });
   const nomB = `Peinture Le Gall ${unique()}`;
   await inscrire(b, nomB, "Peinture");
-  await b.goto("/compte/ma-page");
+  await b.goto("/mon-site");
   await expect(apercu(b).locator(".pe-accueil-nom")).toHaveText(nomB);
   await expect(apercu(b).locator("h1")).toHaveText("Peintre");
   await expect(b.getByText("Accroche privée de A")).toHaveCount(0);
@@ -189,9 +196,9 @@ test("Ma page : l'éditeur dans les thèmes clair et sombre de l'application, sa
   await inscrire(page, `Toits Martin ${unique()}`);
   for (const theme of ["clair", "sombre"]) {
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
-    await page.goto("/compte/ma-page");
+    await page.goto("/mon-site");
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    await expect(page.getByRole("heading", { name: "Ma page", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Mon site", level: 1 })).toBeVisible();
     await expect(page.getByRole("button", { name: "Mobiiz m'aide à l'écrire" })).toBeVisible();
     await sansDefilementHorizontal(page);
   }
@@ -209,7 +216,7 @@ test.describe("captures du rapport", () => {
       await p.getByRole("button", { name: "Passer le guide" }).click();
     });
     await inscrire(p, dossier ? "Toitures Le Bihan" : `Toitures Le Bihan ${unique()}`);
-    await p.goto("/compte/ma-page");
+    await p.goto("/mon-site");
     const companyId = await p.evaluate(() => localStorage.getItem("baticlair.companyId"));
     const appel = (methode: "post" | "patch" | "put", url: string, data: Record<string, unknown>) => p.request[methode](url, { data, headers: { "x-company-id": companyId ?? "" } });
     await appel("patch", "/v1/ma-page", {
@@ -274,4 +281,63 @@ test.describe("captures du rapport", () => {
     if (dossier) await p.screenshot({ path: `${dossier}/telephone-editeur.png` });
     await ctx.close();
   });
+});
+
+test("Mon site : cinq onglets tiennent sur un petit iPhone, sans texte coupé ; un seul chemin vers l'éditeur", async ({ browser }) => {
+  test.setTimeout(120_000);
+  for (const largeur of [375, 320]) {
+    const ctx = await browser.newContext({ baseURL: "http://localhost:3000", viewport: { width: largeur, height: 667 }, isMobile: true, hasTouch: true });
+    const p = await ctx.newPage();
+    await p.addLocatorHandler(p.getByRole("dialog", { name: "Guide" }), async () => {
+      await p.getByRole("button", { name: "Passer le guide" }).click();
+    });
+    await inscrire(p, `Toits Martin ${unique()}`);
+    const nav = p.getByRole("navigation", { name: "Navigation principale" });
+    await expect(nav.getByRole("link")).toHaveText(["Accueil", "Quantitatifs", "Achats groupés", /Missions/, "Mon site"]);
+    // Chaque libellé tient dans son onglet : rien ne dépasse, rien n'est rogné, au plus deux lignes, assez grand. Les lettres
+    // elles-mêmes sont mesurées (une plage sur le texte) ; moins d'un demi-pixel (arrondi du rendu) ne se voit pas.
+    const mesures = await nav.evaluate((n) =>
+      [...n.querySelectorAll("a")]
+        .filter((a) => a.getClientRects().length)
+        .map((a) => {
+          const texte = a.querySelector(":scope > span.text-center") as HTMLElement;
+          const plage = document.createRange();
+          plage.selectNodeContents(texte);
+          const r = a.getBoundingClientRect();
+          const t = plage.getBoundingClientRect();
+          return { nom: texte.textContent ?? "", gauche: t.left - r.left, droite: r.right - t.right, lignes: plage.getClientRects().length, taille: parseFloat(getComputedStyle(texte).fontSize), x: r.left, fin: r.right };
+        }),
+    );
+    expect(mesures.map((m) => m.nom)).toEqual(["Accueil", "Quantitatifs", "Achats groupés", "Missions", "Mon site"]);
+    for (const m of mesures) {
+      expect(m.gauche, m.nom).toBeGreaterThanOrEqual(-0.5);
+      expect(m.droite, m.nom).toBeGreaterThanOrEqual(-0.5);
+      expect(m.lignes, m.nom).toBeLessThanOrEqual(2);
+      // 11 px dès 375 px (iPhone SE, mini) ; 10 px sur un écran de 320 px.
+      expect(m.taille, m.nom).toBeGreaterThanOrEqual(largeur >= 360 ? 11 : 10);
+      expect(m.x, m.nom).toBeGreaterThanOrEqual(0);
+      expect(m.fin, m.nom).toBeLessThanOrEqual(largeur);
+    }
+    await p.screenshot({ path: `test-results/mon-site-onglets-${largeur}.png` });
+    // L'onglet ouvre l'éditeur : l'aperçu d'abord, puis Teinte, Prestations, Chantiers, À propos, la visibilité et le partage.
+    await nav.getByRole("link", { name: "Mon site" }).click();
+    await expect(nav.getByRole("link", { name: "Mon site" })).toHaveAttribute("aria-current", "page");
+    await expect(p.getByRole("heading", { name: "Teinte" })).toBeVisible();
+    // Les titres de l'éditeur seulement (l'aperçu, lui, a ses propres rubriques).
+    const titres = await p.evaluate(() => [...document.querySelectorAll("h2")].filter((h) => !h.closest(".pe") && h.getClientRects().length).map((h) => h.textContent?.trim() ?? ""));
+    const ordre = ["Teinte", "Prestations", "Chantiers", "À propos"].map((t) => titres.indexOf(t));
+    expect(ordre.every((i, k) => i >= 0 && (k === 0 || i > ordre[k - 1]!))).toBe(true);
+    const yApercu = (await apercu(p).boundingBox())!.y;
+    expect(yApercu).toBeLessThan((await p.getByRole("heading", { name: "Teinte" }).boundingBox())!.y);
+    expect((await p.getByRole("switch", { name: /Page visible/ }).boundingBox())!.y).toBeGreaterThan((await p.getByRole("heading", { name: "À propos" }).boundingBox())!.y);
+    await expect(p.getByRole("button", { name: "Partager" })).toBeVisible();
+    await expect(p.getByRole("button", { name: "Voir mon site" })).toBeVisible();
+    await sansDefilementHorizontal(p);
+    // Un seul chemin : plus d'entrée « Ma page » au Profil ; l'ancienne adresse mène à l'onglet.
+    await p.goto("/compte");
+    await expect(p.getByRole("link", { name: /Ma page/ })).toHaveCount(0);
+    await p.goto("/compte/ma-page");
+    await expect(p).toHaveURL(/\/mon-site$/);
+    await ctx.close();
+  }
 });

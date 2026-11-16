@@ -78,11 +78,11 @@ function Contenu({ id }: { id: Exclude<RubriqueProfil, "apparence"> }) {
           <MetiersCard />
           <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
             <span>
-              <span className="block text-[16px] font-bold">Ma page</span>
-              <span className="block text-[14px] text-muted">Ta page publique : photos de chantiers, couleurs, bouton d&apos;appel.</span>
+              <span className="block text-[16px] font-bold">Mon site</span>
+              <span className="block text-[14px] text-muted">Ton site à partager se règle dans l&apos;onglet « Mon site ».</span>
             </span>
-            <ButtonLink href="/compte/ma-page" variant="secondary">
-              Régler ma page
+            <ButtonLink href="/mon-site" variant="secondary">
+              Ouvrir Mon site
             </ButtonLink>
           </Card>
         </>

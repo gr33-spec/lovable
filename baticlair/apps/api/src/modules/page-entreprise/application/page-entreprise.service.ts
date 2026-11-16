@@ -3,6 +3,7 @@ import {
   adressesCandidates,
   CERTIFICATIONS_SUGGEREES,
   LIMITES_PAGE,
+  masquerCoordonnees,
   refusAdresse,
   TEINTES,
   siteWebPropre,
@@ -156,13 +157,11 @@ export class PageEntrepriseService {
   /** Le contenu tel que la page l'affiche (tout ce qui vient du profil y est relu). */
   private async contenu(page: PageRow): Promise<ContenuPage> {
     const e = await this.entreprise(page.companyId);
-    const missions = await this.missionsActives().catch(() => false);
-    const [photos, realisations, couverture, equipe, dispo] = await Promise.all([
+    const [photos, realisations, couverture, equipe] = await Promise.all([
       this.prisma.photoPage.findMany({ where: { companyId: page.companyId, role: "galerie", statut: "prete" }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }] }),
       this.prisma.realisationPage.findMany({ where: { companyId: page.companyId }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }] }),
       page.couvertureId ? this.prisma.photoPage.findFirst({ where: { id: page.couvertureId, companyId: page.companyId, statut: "prete" } }) : null,
       this.prisma.photoPage.findFirst({ where: { companyId: page.companyId, role: "equipe", statut: "prete" }, orderBy: { createdAt: "desc" } }),
-      missions ? this.prisma.annonceMission.findFirst({ where: { companyId: page.companyId, type: "disponibilite", statut: "publiee" }, orderBy: { createdAt: "desc" }, select: { id: true, debut: true, fin: true } }) : null,
     ]);
     const metiers = e.trades.filter((t) => LIBELLES_METIERS[t]);
     // Les chantiers dans leur ordre, chacun avec ses photos prêtes ; une photo sans chantier est un chantier à elle seule.
@@ -192,7 +191,6 @@ export class PageEntrepriseService {
       prestations: prestationsDe(page.prestations),
       realisations: chantiers,
       photoEquipe: equipe ? this.vuePhoto(equipe) : null,
-      missions: dispo ? { disponibleDu: dispo.debut.toISOString().slice(0, 10), disponibleAu: dispo.fin?.toISOString().slice(0, 10) ?? null, lien: `/missions/${dispo.id}` } : null,
       majLe: new Date(Math.max(page.updatedAt.getTime(), e.updatedAt.getTime())).toISOString(),
     };
   }
@@ -511,6 +509,51 @@ export class PageEntrepriseService {
     const p = await this.pagePublique(adresse);
     if ("redirection" in p) return p;
     return { contenu: await this.contenu(p) };
+  }
+
+  /* --------------------------------------------------------------------------------------------- Entre pros */
+
+  /**
+   * « ENTRE PROS » (Greg, 16 novembre 2026) : une seule page, deux niveaux. Le site public ne dit rien de Mission ; une
+   * entreprise CONNECTÉE (missions ouvertes) y lit en plus la disponibilité publiée et les compétences, et « Proposer une
+   * mission » passe par la disponibilité (jamais de contact libre). Ni CV, ni diplôme, ni attestation : ils ne partent
+   * que dans une discussion de Mission, envoyés par l'artisan lui-même. Un blocage posé ou subi : rien.
+   */
+  async entrePros(t: TenantContext, adresse: string) {
+    if (!(await this.missionsActives().catch(() => false))) throw notFound("Page");
+    const p = await this.pagePublique(adresse);
+    if ("redirection" in p) throw notFound("Page");
+    const mienne = p.companyId === t.companyId;
+    if (!mienne && (await this.bloquee(t.companyId, p.companyId))) throw notFound("Page");
+    const [e, profil, dispo] = await Promise.all([
+      this.entreprise(p.companyId),
+      this.prisma.profilPublic.findUnique({ where: { companyId: p.companyId }, select: { visible: true, metiers: true, services: true } }),
+      this.prisma.annonceMission.findFirst({ where: { companyId: p.companyId, type: "disponibilite", statut: "publiee" }, orderBy: { createdAt: "desc" }, select: { id: true, debut: true, fin: true } }),
+    ]);
+    // Les champs libres d'un profil sont masqués pour une autre entreprise (règle Mission du 14 novembre 2026).
+    const libre = (x: string) => (mienne ? x : masquerCoordonnees(x));
+    const declarees = profil?.visible ? profil.metiers.map((m) => libre(m).trim()).filter(Boolean) : [];
+    const competences = declarees.length ? declarees : e.trades.map((x) => LIBELLES_METIERS[x]).filter((x): x is string => !!x);
+    return {
+      mienne,
+      entrepriseId: p.companyId,
+      competences,
+      services: profil?.visible && profil.services?.trim() ? libre(profil.services.trim()) : null,
+      disponibilite: dispo ? { annonceId: dispo.id, du: dispo.debut.toISOString().slice(0, 10), au: dispo.fin?.toISOString().slice(0, 10) ?? null } : null,
+    };
+  }
+
+  /** Dans Mission, le profil d'une entreprise ouvre son site : son adresse s'il est en ligne, sinon rien. */
+  async siteDeLEntreprise(t: TenantContext, companyId: string): Promise<{ adresse: string | null }> {
+    if (!(await this.missionsActives().catch(() => false))) throw notFound("Entreprise");
+    if (!isUuid(companyId)) throw notFound("Entreprise");
+    if (companyId !== t.companyId && (await this.bloquee(t.companyId, companyId))) return { adresse: null };
+    const page = await this.prisma.pageEntreprise.findUnique({ where: { companyId }, select: { adresse: true, visible: true, masqueeLe: true } });
+    return { adresse: page?.visible && !page.masqueeLe ? page.adresse : null };
+  }
+
+  private async bloquee(a: string, b: string): Promise<boolean> {
+    return (await this.prisma.blocageEntreprise.count({ where: { OR: [{ companyId: a, cibleId: b }, { companyId: b, cibleId: a }] } })) > 0;
   }
 
   async logoPublic(adresse: string): Promise<{ type: string; octets: Uint8Array }> {

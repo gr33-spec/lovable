@@ -1,8 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { EditeurMaPage } from "@/components/page-entreprise/editeur";
-
-/** Profil › Mon entreprise › Ma page (Greg, 16 novembre 2026) : l'éditeur de la page publique de l'entreprise. */
-export default function MaPage() {
-  return <EditeurMaPage />;
+/** Ancienne adresse (Profil › Ma page) : le site se règle dans l'onglet « Mon site » (Greg, 16 novembre 2026). */
+export default function AncienneAdresseMaPage() {
+  redirect("/mon-site");
 }

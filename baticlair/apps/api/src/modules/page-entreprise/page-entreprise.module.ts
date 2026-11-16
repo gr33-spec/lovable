@@ -11,14 +11,14 @@ import { AiUsageModule, AiUsageRecorder, AnalysisMeter } from "../ai-usage/index
 import { TenancyModule } from "../tenancy/index.js";
 import { AideEcriture } from "./application/aide-ecriture.js";
 import { PageEntrepriseService } from "./application/page-entreprise.service.js";
-import { MaPageController, PagesEntreprisesTacheController, PagesPubliquesAdminController, PagesPubliquesController } from "./http/page-entreprise.controller.js";
+import { MaPageController, PagesEntreprisesProsController, PagesEntreprisesTacheController, PagesPubliquesAdminController, PagesPubliquesController } from "./http/page-entreprise.controller.js";
 import { StockageBlob, StockageCoupe, StockageLocal, type StockagePhotos } from "./infrastructure/stockage-photos.js";
 import { STOCKAGE_PAGES } from "./tokens.js";
 
 /** MA PAGE MOBIIZ (Greg, 16 novembre 2026) : tables nouvelles, trois portes (l'artisan, les visiteurs, l'admin). */
 @Module({
   imports: [TenancyModule, AiUsageModule],
-  controllers: [MaPageController, PagesPubliquesController, PagesPubliquesAdminController, PagesEntreprisesTacheController],
+  controllers: [MaPageController, PagesPubliquesController, PagesPubliquesAdminController, PagesEntreprisesTacheController, PagesEntreprisesProsController],
   providers: [
     {
       provide: STOCKAGE_PAGES,
