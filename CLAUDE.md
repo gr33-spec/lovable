@@ -158,6 +158,8 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Modèles : Haiku 5.5 pour lire les réponses (avant : Haiku 4.5, dont chaque appel échouait). Le choix se fait sur les chiffres du jeu de test.
 - Jeu de test rejouable : `baticlair/apps/web/scripts/jeu-quantitatif.mjs` (site de test seulement). À rejouer à chaque changement de prompt ou de modèle.
 - Écran : une seule discussion. Les étapes (« Lecture… », « Vérification des quantités… ») remplacent l'animation plein écran. Règle changée : avant, le devis au surligneur et les fournitures qui en sortaient. Bandeau « Ma liste · N articles », récapitulatif, puis « Voir ma liste ». L'assistant de la liste ne s'ouvre plus tout seul après un devis.
+- Règle changée : dès que tout est répondu, les réponses partent au serveur et les dernières questions du calcul arrivent dans le fil, avant « Calculer ma liste » (avant : après, avec un refus). Une réponse reste modifiable jusqu'au calcul.
+- Plusieurs réponses d'un coup : un nombre sans unité n'est jamais pris pour une question à boutons dont il n'est aucun bouton ; elle est reposée, seule.
 - Chaque ligne dit son origine quand la liste mêle les deux : « Dit par toi », « Calculé », « À vérifier ».
 - Admin › « Corrections les plus fréquentes » : la ligne proposée et la ligne corrigée, sur 90 jours, sans nom d'entreprise ni de chantier.
 

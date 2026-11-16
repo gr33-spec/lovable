@@ -69,6 +69,10 @@ Interdits inchangés : jamais un article absent, jamais une quantité ni une car
 - Un bandeau discret en haut, « Ma liste · 5 articles », s'ouvre à tout moment.
 - À la fin : un récapitulatif court, puis « Voir ma liste », qui ouvre l'écran de liste habituel.
 - Si l'IA échoue ou si le budget est atteint : ce qui est compris est gardé, on continue à la main.
+- Dès que tout est répondu, les réponses partent au serveur : ce qui manque encore pour calculer arrive dans le même
+  fil, avant « Calculer ma liste ». Une réponse reste modifiable d'un tap jusqu'au calcul.
+- Plusieurs réponses d'un coup : un nombre sans unité n'est jamais pris pour une question à boutons dont il n'est
+  aucun bouton. Cette question est reposée, seule.
 
 ## 5. La mesure
 
