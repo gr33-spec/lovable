@@ -19,8 +19,12 @@ Reprendre à la première case non cochée.
 - [x] 4. e2e `apps/web/e2e/ma-page.spec.ts` (téléphone, ordinateur, petit iPhone 375 px, thèmes clair et sombre, deux
       comptes) ; Lighthouse mobile 91 à 93 (performance), 100 (accessibilité, bonnes pratiques).
 - [x] 5. Relecture du juriste (`docs/groupe/ma-page-juridique-2026-11-16.md`), captures, coût mensuel.
-- [ ] 6. Intégrer les derniers commits de la branche de test, rejouer la chaîne complète (domaine, API, web, e2e), pousser
-      SUR `claude/company-public-page-htnc6f` seulement si tout est vert. Rien sur la branche de test sans l'accord de Greg.
+- [x] 6. Chaîne complète rejouée le 16 novembre sur le dernier commit (branche de test : aucun commit nouveau à intégrer) :
+      domaine 1 213/1 213, API 856/856 (+1 ignoré), lint et types partout, builds ; e2e « mois » 301/302, e2e « @lots » 16/16.
+      Restent rouges, HORS de ce chantier et déjà rouges sur la branche de test sans lui : 3 tests unitaires du site
+      (`erreurs-precises`, `nom-app` « trois choix… Tarifs sans montant », « Analyses disponibles ») ; 1 parcours instable
+      (`parcours-artisan.spec.ts:1639`, ordinateur, 1 échec sur 3 : mesure prise pendant une animation). Ma branche est
+      poussée ; RIEN sur la branche de test (attend Greg).
 - [ ] 7. Après l'accord de Greg : store Vercel Blob relié au projet API (`BLOB_READ_WRITE_TOKEN`) et son adresse publique
       posée sur le projet web (`PHOTOS_BLOB_URL` : les photos sont servies sous `/photos/…`, même domaine, la CSP reste
       « rien d'ailleurs »), fusion dans la branche de test, migration appliquée par le déploiement (additive).
