@@ -37,6 +37,8 @@ import { RateLimitModule } from "./platform/http/rate-limit.module.js";
 import { LoggingModule } from "./platform/logging/logging.module.js";
 import { PushModule } from "./platform/push/push.module.js";
 
+import { PageEntrepriseModule } from "./modules/page-entreprise/page-entreprise.module.js";
+
 @Module({
   imports: [
     ConfigModule,
@@ -76,6 +78,7 @@ import { PushModule } from "./platform/push/push.module.js";
     ReprisesModule,
     BrouillonsModule,
     CatalogueModule,
+    PageEntrepriseModule,
   ],
 })
 export class AppModule {}

@@ -12,7 +12,7 @@ en parallèle dans une autre session).
 
 - [x] 1. Domaine `packages/domain/src/page-entreprise/` : thèmes par métier, nuancier et contraste, adresse, sections,
       données structurées, textes proposés ; tests `packages/domain/test/page-entreprise.test.ts`.
-- [ ] 2. API, module `apps/api/src/modules/page-entreprise/` : migration additive, réglages, photos (sharp + stockage
+- [x] 2. API, module `apps/api/src/modules/page-entreprise/` : migration additive, réglages, photos (sharp + stockage
       objet), page publique, contact, signalement, admin ; tests `apps/api/test/page-entreprise.test.ts`.
 - [ ] 3. Web : page publique `app/(public)/e/[adresse]`, éditeur `app/(app)/compte/ma-page`, admin
       `app/(app)/admin/pages-publiques`, rafraîchissement du cache.

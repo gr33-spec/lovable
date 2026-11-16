@@ -154,9 +154,12 @@ export class DroitsService {
     return formuleDuCompte({ actif: true, formule: a?.formule ?? null });
   }
 
-  /** Les scans de liste réussis (journal des appels IA), depuis toujours : ils comptent dans les analyses offertes. */
+  /**
+   * Les scans de liste réussis (journal des appels IA), depuis toujours : ils comptent dans les analyses offertes. « Mobiiz
+   * m'aide à l'écrire » (Ma page, Greg, 16 novembre 2026 : « compte comme une analyse IA ») aussi, quand l'IA a écrit.
+   */
   private scansFaits(companyId: string): Promise<number> {
-    return this.prisma.aiExecution.count({ where: { companyId, task: "lecture_liste", status: "success" } });
+    return this.prisma.aiExecution.count({ where: { companyId, task: { in: ["lecture_liste", "aide_ecriture_page"] }, status: "success" } });
   }
 
   /** Les plafonds cachés (euros par mois d'abonnement) : ceux réglés dans l'admin, sinon 5 € et 20 €. */
