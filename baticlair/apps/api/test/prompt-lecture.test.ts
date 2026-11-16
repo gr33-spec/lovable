@@ -15,7 +15,7 @@ const plain = (t: string) => t.replace(/\*\*/g, "").split("\n").map((l) => l.tri
 
 describe("le prompt de lecture (§51.5, v2)", () => {
   it("cite le §49.1, le §49.4 (points 2, 3, 5), le §51.1 et le §51.5 du référentiel mot pour mot, puis l'export du tiroir", () => {
-    expect(LECTURE_PROMPT).toEqual({ id: "lecture_devis", version: 5 });
+    expect(LECTURE_PROMPT).toEqual({ id: "lecture_devis", version: 6 });
     const s491 = plain(section("### 49.1", "### 49.2")).split("\n").slice(1).join("\n");
     expect(RULE_49_1.split("\n").slice(1).join("\n")).toBe(s491);
     const s494 = plain(section("### 49.4", "### 49.5")).split("\n");
@@ -26,6 +26,9 @@ describe("le prompt de lecture (§51.5, v2)", () => {
     expect(RULE_51_5.split("\n").slice(1).join(" ")).toBe(s515);
     const prompt = lectureSystemPrompt({ tradeLabel: "Couverture", referentiel: exportPourLecture(ROOFING_REFERENTIAL) });
     for (const rule of [RULE_51_5, RULE_49_1, RULE_49_4, RULE_51_1]) expect(prompt).toContain(rule);
+    // Greg, 16 novembre 2026 : « une question = un seul sujet, jamais deux » (vraie lecture : « de 25, 28, 33 ou 40, et combien de descentes ? »).
+    expect(prompt).toContain("UNE question = UN SEUL SUJET, jamais deux");
+    expect(prompt).not.toContain("elles font UNE seule question");
     expect(prompt).toContain("OUVRAGE gouttiere : Gouttière (profil, crochets, naissances)");
     expect(prompt).toContain("- developpe_gouttiere (Développé de la gouttière)");
     expect(prompt.indexOf("RÉFÉRENTIEL DU MÉTIER (export)")).toBeGreaterThan(prompt.indexOf("CE QUE TU RENVOIES"));

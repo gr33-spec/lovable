@@ -160,6 +160,9 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Écran : une seule discussion. Les étapes (« Lecture… », « Vérification des quantités… ») remplacent l'animation plein écran. Règle changée : avant, le devis au surligneur et les fournitures qui en sortaient. Bandeau « Ma liste · N articles », récapitulatif, puis « Voir ma liste ». L'assistant de la liste ne s'ouvre plus tout seul après un devis.
 - Règle changée : dès que tout est répondu, les réponses partent au serveur et les dernières questions du calcul arrivent dans le fil, avant « Calculer ma liste » (avant : après, avec un refus). Une réponse reste modifiable jusqu'au calcul.
 - Plusieurs réponses d'un coup : un nombre sans unité n'est jamais pris pour une question à boutons dont il n'est aucun bouton ; elle est reposée, seule.
+- Règle changée (Greg, 16 novembre soir) : une réponse qui correspond à un bouton est prise (« 1 » → 1 descente), l'ordre aide ; une question n'est reposée, avec ses boutons, que s'il y a un vrai doute. Ce que le code a rangé sur un bouton passe avant la lecture du modèle.
+- Règle changée : dans la lecture d'un devis, une question = un seul sujet, jamais deux (prompt `lecture_devis` version 6). Avant : une seule question par article, qui nommait toutes ses données. Seule exception gardée : « modèle et teinte » d'un élément à remplacer à l'identique.
+- `BUDGET_IA_JOUR` = 10 € sur le site de test pendant cette mission (variable de la branche de test ; 2 € par défaut ailleurs).
 - Chaque ligne dit son origine quand la liste mêle les deux : « Dit par toi », « Calculé », « À vérifier ».
 - Admin › « Corrections les plus fréquentes » : la ligne proposée et la ligne corrigée, sur 90 jours, sans nom d'entreprise ni de chantier.
 

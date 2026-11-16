@@ -74,6 +74,10 @@ Interdits inchangés : jamais un article absent, jamais une quantité ni une car
 - Plusieurs réponses d'un coup : un nombre sans unité n'est jamais pris pour une question à boutons dont il n'est
   aucun bouton. Cette question est reposée, seule.
 
+- Plusieurs réponses d'un coup : une réponse qui correspond à un bouton est prise, l'ordre aide ; une question ne
+  revient, avec ses boutons, que s'il y a un vrai doute.
+- Lecture d'un devis : une question = un seul sujet (prompt `lecture_devis` version 6).
+
 ## 5. La mesure
 
 Un jeu de test rejouable (`apps/api/scripts/jeu-quantitatif.ts`) : pour chaque cas, le résultat attendu, le taux de
