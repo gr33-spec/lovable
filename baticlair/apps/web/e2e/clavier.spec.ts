@@ -22,15 +22,18 @@ async function champVisible(page: Page, champ: Locator) {
     return !(dessus === el || el.contains(dessus) || (dessus instanceof HTMLLabelElement && dessus.contains(el)));
   });
   expect(recouvert, "un élément recouvre le champ").toBe(false);
+  // La barre s'efface et le champ se recale juste APRÈS le focus (un rendu plus tard) : on relit les deux positions
+  // ensemble jusqu'à ce que l'écran soit posé, au lieu d'une seule lecture prise au vol.
   const barre = page.getByRole("navigation", { name: "Navigation principale" });
-  const rect = await champ.boundingBox();
-  if (rect && (await barre.count())) {
+  await expect(async () => {
+    const rect = await champ.boundingBox();
+    if (!rect || !(await barre.count())) return;
     const chevauche = await barre.evaluate((n, r) => {
       const b = n.getBoundingClientRect();
       return b.bottom > 0 && b.top < window.innerHeight && b.top < r.y + r.height && b.bottom > r.y;
     }, rect);
     expect(chevauche, "la barre du bas recouvre le champ").toBe(false);
-  }
+  }).toPass({ timeout: 3_000 });
 }
 
 async function apiJson(page: Page, method: string, url: string, body?: unknown) {
