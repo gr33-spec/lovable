@@ -63,7 +63,7 @@ describe("enregistrement des appels IA", () => {
     expect(costMicroUsd).toBe(50_000);
 
     const row = await ctx.prisma.aiExecution.findFirstOrThrow();
-    expect(row).toMatchObject({ model: "claude-sonnet-5-5", inputTokens: 10_000, outputTokens: 3_000, priceTableVersion: "anthropic-2026-09-30" });
+    expect(row).toMatchObject({ model: "claude-sonnet-5-5", inputTokens: 10_000, outputTokens: 3_000, priceTableVersion: "anthropic-2026-11-16" });
     expect(row.costMicroUsd).toBe(50_000n);
 
     const doc = await agent.get(`/v1/documents/${documentId}`);
@@ -100,7 +100,7 @@ describe("rapport mensuel de consommation", () => {
       actual: { calls: 3, retries: 1, failedCalls: 1, pagesText: 2, pagesVision: 1, inputTokens: 24_000, outputTokens: 7_000, cacheReadTokens: 2000 },
       byProject: [{ projectId, projectName: "Toiture Dupont", documents: 1, calls: 3 }],
       reading: { documents: 1, pagesTotal: 2, pagesText: 1, pagesVision: 1, pagesSkipped: 0 },
-      priceTableVersions: ["anthropic-2026-09-30"],
+      priceTableVersions: ["anthropic-2026-11-16"],
     });
     // 2 × 50 000 + (4 000 + 5 000 + 200) = 109 200 µ$ → 0,100464 €
     expect(res.body.actual.costEur).toBe("0.1005");

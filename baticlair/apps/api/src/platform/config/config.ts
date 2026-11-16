@@ -121,7 +121,7 @@ const envSchema = z
     /** Lot 7 (6 novembre 2026) : l'IA qui rattache les réponses libres que le code n'a pas comprises. ÉTEINTE par défaut :
      * Greg l'allume après avoir vu le coût estimé (docs/parcours-produit-lots.md, lot 7). */
     INTERPRETE_IA: z.enum(["on", "off"]).default("off"),
-    AI_INTERPRETE_MODEL: z.string().min(1).default("claude-haiku-4-5"),
+    AI_INTERPRETE_MODEL: z.string().min(1).default("claude-haiku-5-5"),
     /** Le plafond TOTAL de l'interprète (Greg, 7 novembre 2026 : 1 $ ou 500 interprétations sur le test). */
     INTERPRETE_IA_PLAFOND_USD: z.coerce.number().min(0).max(100).default(1),
     INTERPRETE_IA_PLAFOND_APPELS: z.coerce.number().int().min(0).max(100_000).default(500),

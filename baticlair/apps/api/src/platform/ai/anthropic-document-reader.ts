@@ -21,6 +21,9 @@ function toUsage(usage: Anthropic.Usage): AiUsage {
   };
 }
 
+/** Les modèles qui refusent le réglage `effort` (400). */
+const SANS_EFFORT = /^claude-(?:haiku|sonnet)-4-5/;
+
 /**
  * Lecture structurée d'un document par Claude (API Anthropic), commune à
  * toutes les lectures (devis client, devis fournisseur). Sortie imposée par
@@ -74,7 +77,9 @@ export class AnthropicDocumentReader implements LecteurIa {
         max_tokens: 16000,
         system: [{ type: "text", text: request.system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content }],
-        output_config: { effort: this.effort, format: zodOutputFormat(request.format ?? request.schema) },
+        // Greg, 16 novembre 2026 (essai des réponses brèves : « This model does not support the effort parameter ») : les
+        // modèles d'avant la génération 5 (Haiku 4.5, Sonnet 4.5) refusent `effort` ; il ne leur est jamais envoyé.
+        output_config: { ...(SANS_EFFORT.test(this.model) ? {} : { effort: this.effort }), format: zodOutputFormat(request.format ?? request.schema) },
         metadata: { user_id: request.tag },
       });
       const usage = toUsage(response.usage);

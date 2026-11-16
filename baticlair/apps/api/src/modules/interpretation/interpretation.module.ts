@@ -33,7 +33,7 @@ export function budgetInterpretation(
   tache: { nom: string; prompt: { id: string; version: number }; modele: string; cle: string; titre: string } = {
     nom: TACHE_INTERPRETATION,
     prompt: INTERPRETATION_PROMPT,
-    modele: "claude-haiku-4-5",
+    modele: "claude-haiku-5-5",
     cle: "credit-ia-interprete",
     titre: "Crédit IA indisponible : l'interprète des réponses libres est coupé",
   },
