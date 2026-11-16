@@ -76,3 +76,50 @@ Ce que cette passe a appris :
 - L'IA répond, mais n'apporte rien sur les phrases longues (2/6) : le prompt d'alors (version 2) n'avait ni vocabulaire
   ni exemples, et un nombre dit en lettres (« une seule descente ») était refusé à la relecture. Le prompt version 3
   (socle et blocs métier) et les nombres en lettres partent avec le lot suivant : à mesurer en passe 2.
+
+## Passe 2 : après le deuxième lot (16 novembre 2026, site de test au commit `f7361378`)
+
+Réponses à des questions, mêmes 12 cas : **49/54 (91 %)**, **0 fausse**, 7 appels à l'IA (Haiku 5.5, prompt
+version 3), aucun en échec, 0,0023 $ pour toute la passe. 0,2 s quand le code suffit, 1,3 à 6 s quand l'IA relit.
+
+| Cas | Justes | Fausses | IA |
+|---|---|---|---|
+| Greg, zinc joint debout : six réponses d'un coup | 6/6 | 0 | non |
+| Six réponses brèves, autre sens | 6/6 | 0 | non |
+| Six réponses, une par ligne (dictée) | 6/6 | 0 | non |
+| Deux réponses dans le désordre | 6/6 | 0 | oui |
+| Phrases de chantier, sans les mots des boutons | 3/6 | 0 | oui |
+| Dictée sans ponctuation | 5/6 | 0 | oui |
+| Descente : trois réponses courtes | 3/3 | 0 | non |
+| Descente : dit autrement | 2/3 | 0 | oui |
+| Ardoise : bouton, valeur hors boutons, nombre | 3/3 | 0 | non |
+| Ardoise écrite hors boutons | 3/3 | 0 | oui |
+| Pente en pour cent | 3/3 | 0 | oui |
+| Je ne sais pas | 3/3 | 0 | oui |
+
+Texte dicté, 7 cas : **7/10 lignes** (avant : 6/10), aucune ligne en trop, 6 questions, 2 à 6 s, 0,024 $ en tout
+(0,003 $ par message en moyenne, Sonnet 5.5). Les 3 lignes manquantes viennent du même défaut : une ligne qui attend
+sa réponse n'est pas encore dans la liste.
+
+Un devis réel en ligne (zinc à joint debout, D-2026-018 anonymisé, petit iPhone) :
+
+| Étape | Modèle | Temps | Coût |
+|---|---|---|---|
+| Repérage du métier | Sonnet 5.5 | 2 s | 0,004 $ |
+| Lecture du devis | Opus 5.5 | 59 s | 0,312 $ |
+| Lecture de la réponse brève | Haiku 5.5 | 5 s | 0,0004 $ |
+| Calcul | code | immédiat | 0 |
+
+Coût d'un quantitatif : **0,32 $ depuis un devis** (la lecture fait 99 % du coût), **environ 0,01 $ depuis un texte
+ou une dictée**, 0 $ à la main.
+
+Ce que cette passe a appris, sur le devis réel :
+
+- La phrase de Greg a rangé 4 réponses d'un coup. Le « 1 » (descentes) a été perdu : la question des descentes n'est
+  arrivée qu'après « Calculer ma liste ». Une réponse donnée en avance doit être gardée pour la question qui vient.
+- Sur ce devis, Mobiiz a encore posé des questions après « Calculer ma liste » (5 de plus). Elles doivent toutes
+  arriver avant.
+- Deux questions groupent deux sujets (« de 25, 28, 33 ou 40, et combien de descentes (sous Autre) ? »). Une question,
+  un sujet.
+- La ligne des bacs sort « Bobine… 221 m » alors que la réponse est « Je commande façonné (bacs) » : à corriger.
+- 59 s de lecture, c'est long : essai de Sonnet 5.5 à faire sur le jeu de test.
