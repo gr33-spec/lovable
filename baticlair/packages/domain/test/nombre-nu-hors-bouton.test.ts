@@ -18,6 +18,35 @@ const questions: QuestionNumerotee[] = [
 ];
 const PHRASE = "J'achète tout fait, 0,65, 1, chevron, ou je pli, bord de mer";
 
+/** Les six questions posées en ligne le 16 novembre 2026 sur le devis zinc (relevées en base de test), dans leur ordre. */
+const enLigne: QuestionNumerotee[] = [
+  questions[0]!,
+  questions[1]!,
+  { ...questions[2]!, numero: 3 },
+  { numero: 4, cle: "param:nb_descentes", texte: "Combien de descentes sur cette gouttière ?", options: [{ value: "1", label: "1" }, { value: "2", label: "2" }, { value: "3", label: "3" }, { value: "4", label: "4" }], unite: "u", libre: "written" },
+  questions[4]!,
+  questions[5]!,
+];
+
+describe("plusieurs réponses d'un coup : une réponse qui nomme un bouton est prise (Greg, 16 novembre 2026, soir)", () => {
+  it("la phrase de Greg sur les questions réellement posées en ligne : « 1 » est le nombre de descentes", () => {
+    const lues = interpreterReponsesNumerotees(enLigne, PHRASE);
+    const de = (n: number) => lues.find((r) => r.numero === n)!;
+    expect(de(1)).toMatchObject({ statut: "compris", valeur: "2" });
+    expect(de(4)).toMatchObject({ statut: "compris", valeur: "1", libreEcrite: false });
+    expect(de(5)).toMatchObject({ statut: "compris", valeur: "1" });
+    expect(de(6)).toMatchObject({ statut: "compris", valeur: "3" });
+    // Ni rampant de 0,65 m ni gouttière de 1 cm : ces deux questions reviennent, avec leurs boutons.
+    expect(de(2).statut).not.toBe("compris");
+    expect(de(3).statut).not.toBe("compris");
+  });
+
+  it("« chevron » n'est jamais un nombre de descentes, même rendu par le modèle", () => {
+    const lues = validerInterpretation(enLigne, PHRASE, { reponses: [{ numero: 4, statut: "compris", valeur: "chevron" }] });
+    expect(lues.find((r) => r.numero === 4)!.statut).not.toBe("compris");
+  });
+});
+
 describe("plusieurs réponses d'un coup : un nombre nu n'est jamais pris pour une question à boutons dont il n'est aucun bouton", () => {
   it("la phrase de Greg, quand l'épaisseur et les descentes ne sont pas posées : ni rampant de 0,65 m, ni gouttière de 1 cm", () => {
     const lues = interpreterReponsesNumerotees(questions, PHRASE);

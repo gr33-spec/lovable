@@ -258,7 +258,13 @@ export function interpreterReponsesNumerotees(questions: readonly QuestionNumero
   // Un seul morceau que nul bouton ne reconnaît : c'est la réponse à la question posée (la première).
   if (morceaux.length === 1 && pris.size === 0) pris.set(questions[0]!.numero, morceaux[0]!);
   const parSens = questions.map((q) => interpreterUne(q, pris.get(q.numero)));
-  return sansNombreNuHorsBouton(questions, texte, parOrdre && compris(parOrdre) >= compris(parSens) ? parOrdre : parSens);
+  // Greg, 16 novembre 2026 (soir) : « si ma réponse correspond à un bouton de la question, prends-la ». Les deux lectures
+  // passent d'abord la garde du nombre nu, puis on garde celle qui range le plus de réponses SUR UN BOUTON (un bouton
+  // reconnu vaut plus qu'un mot recopié par l'ordre) : « 1 » va au nombre de descentes, pas à la gouttière « de 1 cm ».
+  const poids = (rs: readonly ReponseInterpretee[]) => rs.reduce((n, r) => n + (r.statut !== "compris" ? 0 : r.libreEcrite ? 1 : 2), 0);
+  const ordre = parOrdre ? sansNombreNuHorsBouton(questions, texte, parOrdre) : null;
+  const sens = sansNombreNuHorsBouton(questions, texte, parSens);
+  return ordre && poids(ordre) >= poids(sens) ? ordre : sens;
 }
 
 /**
@@ -273,7 +279,11 @@ export function sansNombreNuHorsBouton(questions: readonly QuestionNumerotee[], 
   const dits = nombres(texte).filter((n) => n.unite);
   return reponses.map((r) => {
     const q = questions.find((x) => x.numero === r.numero);
-    if (!q || r.statut !== "compris" || !r.libreEcrite || q.options.length === 0 || !(q.numerique || q.libre === "number")) return r;
+    if (!q || r.statut !== "compris" || !r.libreEcrite || q.options.length === 0) return r;
+    const reposee = { ...r, statut: "ambigu" as const, valeur: null, libelle: null, libreEcrite: false, raison: `Je n'ai pas reconnu ta réponse : ${q.options.map((o) => `« ${o.label} »`).join(", ")} ?` };
+    // Des boutons tous chiffrés (« 1 », « 2 », « 3 ») : un mot sans chiffre rangé par l'ordre (« chevron ») n'y répond pas.
+    if (q.options.every((o) => /^\d+(?:[.,]\d+)?$/.test(o.value) && /\d/.test(o.label)) && !/\d/.test(r.valeur ?? "")) return reposee;
+    if (!(q.numerique || q.libre === "number")) return r;
     const u = uniteDeQuestion(q.unite);
     const avecUnite = dits.some((n) => {
       const de = LONGUEURS[n.unite!];
@@ -281,7 +291,7 @@ export function sansNombreNuHorsBouton(questions: readonly QuestionNumerotee[], 
       const v = n.unite === u || de === undefined || vers === undefined ? n.valeur : (n.valeur * de) / vers;
       return Math.abs(v - Number(r.valeur)) < 1e-9;
     });
-    return avecUnite ? r : { ...r, statut: "ambigu", valeur: null, libelle: null, libreEcrite: false, raison: `Je n'ai pas reconnu ta réponse : ${q.options.map((o) => `« ${o.label} »`).join(", ")} ?` };
+    return avecUnite ? r : reposee;
   });
 }
 

@@ -564,7 +564,8 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
         method: "POST",
         body: { questions: posees.map((q) => ({ numero: q.numero, cle: q.cle, texte: q.texte, options: q.options, unite: q.unite, ...(q.libre ? { libre: q.libre } : {}), ...(q.numerique ? { numerique: true } : {}) })), texte: texte.slice(0, 2000) },
       }).catch(() => null);
-      if (r?.ia && r.reponses.length === lues.length && compris(r.reponses) >= compris(lues)) lues = r.reponses;
+      // Ce que le code a rangé sur un bouton reste ; le serveur ne complète que les questions encore ouvertes.
+      if (r?.ia && r.reponses.length === lues.length) lues = lues.map((c) => (c.statut === "compris" ? c : (r.reponses.find((x) => x.numero === c.numero && x.statut === "compris") ?? c)));
       setReflexion(false);
     }
     const prises: Record<string, Given> = {};
