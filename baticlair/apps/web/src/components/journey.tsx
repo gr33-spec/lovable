@@ -466,7 +466,20 @@ const morceauxDe = (texte: string) => texte.split(/\n|;|,(?!\d)|\bet\b/).map((m)
  */
 export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
   const router = useRouter();
-  const questions = useMemo(() => counterQuestions(takeoff), [takeoff]);
+  const duServeur = useMemo(() => counterQuestions(takeoff), [takeoff]);
+  // Une question déjà répondue et partie au serveur n'est plus dans sa liste : on la garde ici, pour que « toucher une de
+  // ses réponses la rouvre » marche jusqu'au calcul (Greg, 16 novembre 2026).
+  const [memoire, setMemoire] = useState<readonly CounterQuestion[]>(duServeur);
+  const [vues, setVues] = useState(duServeur);
+  if (vues !== duServeur) {
+    setVues(duServeur);
+    const cles = new Set(duServeur.map((q) => q.key));
+    setMemoire((m) => [...m.filter((q) => !cles.has(q.key)), ...duServeur]);
+  }
+  const questions = useMemo(() => {
+    const cles = new Set(duServeur.map((q) => q.key));
+    return [...memoire.filter((q) => !cles.has(q.key)), ...duServeur];
+  }, [memoire, duServeur]);
   // §50.2 : dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
   const ordonnees = useMemo(() => {
     const order = [...new Set(questions.map((q) => q.group))].sort((a, b) => Number(a === SITE_GROUP || a === CONSUMABLES_GROUP) - Number(b === SITE_GROUP || b === CONSUMABLES_GROUP) || Number(a === CONSUMABLES_GROUP) - Number(b === CONSUMABLES_GROUP));
@@ -575,7 +588,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   };
 
   const calculer = () => {
-    const answers = counterAnswers(questions, given, retired);
+    // Ce qui est déjà parti au serveur ne repart pas.
+    const tout = counterAnswers(questions, given, retired);
+    const answers = { ...tout, reponses: tout.reponses.filter((r) => r.valeur === null || !parties.current.has(`${r.question}=${r.valeur}`)) };
     setSent(answers.reponses.map((r) => r.question));
     onSubmit(answers);
   };
@@ -585,6 +600,13 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   // partent donc au serveur ; ce qu'il lui manque encore arrive dans le fil, AVANT « Calculer ma liste ». Chaque réponse
   // ne part qu'une fois ; « Je ne sais pas » ne part qu'au calcul.
   const parties = useRef<Set<string>>(new Set());
+  const dernierEnvoi = useRef<readonly string[]>([]);
+  // Un envoi refusé n'a rien enregistré : ses réponses repartiront avec la réponse corrigée.
+  useEffect(() => {
+    if (!error) return;
+    for (const k of dernierEnvoi.current) parties.current.delete(k);
+    dernierEnvoi.current = [];
+  }, [error]);
   const [verification, setVerification] = useState(false);
   const toutRepondu = restantes.length === 0;
   useEffect(() => {
@@ -592,6 +614,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     const nouvelles = counterAnswers(questions, given, retired).reponses.filter((r) => r.valeur !== null && !parties.current.has(`${r.question}=${r.valeur}`));
     if (nouvelles.length === 0) return;
     for (const r of nouvelles) parties.current.add(`${r.question}=${r.valeur}`);
+    dernierEnvoi.current = nouvelles.map((r) => `${r.question}=${r.valeur}`);
     setSent(nouvelles.map((r) => r.question));
     setVerification(true);
     onReponses(nouvelles);
@@ -601,7 +624,6 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     setVerification(false);
     if (!error && courante) setMessages((m) => [...m, { de: "mobiiz", texte: restantes.length > 1 ? "Encore quelques précisions avant de calculer." : "Encore une précision avant de calculer." }]);
   }
-  const encorePosee = new Set(ordonnees.map((q) => q.key));
   const invite = courante ? (autre ? "Écris ta réponse…" : courante.options.length === 0 ? `Écris ta réponse${courante.unit && courante.unit !== "u" ? ` (${courante.unit === "m2" ? "m²" : courante.unit})` : ""}…` : "Réponds ici…") : "Réponds ici…";
 
   return (
@@ -653,7 +675,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
               <Bulle key={i} de="mobiiz" label="Message de MOBIIZ">
                 <TexteMobiiz>{m.texte}</TexteMobiiz>
               </Bulle>
-            ) : m.cle && encorePosee.has(m.cle) && (given[m.cle] || retired.has(m.cle)) && !pending && messages.findLastIndex((x) => x.cle === m.cle) === i ? (
+            ) : m.cle && (given[m.cle] || retired.has(m.cle)) && !pending && messages.findLastIndex((x) => x.cle === m.cle) === i ? (
               <button key={i} type="button" onClick={() => reprendre(m.cle!)} aria-label={`Modifier ma réponse : ${m.texte}`} className="pressable max-w-[82%] self-end rounded-[22px] rounded-br-md px-4 py-2.5 text-left text-[16px] leading-snug whitespace-pre-line text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
                 {m.texte}
               </button>
