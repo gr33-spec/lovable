@@ -151,13 +151,13 @@ test("un besoin groupé publié : la date réagit tout de suite, puis l'accueil 
   await expect(page).toHaveURL(/\/achats-groupes\?ajoutes=1/);
   await expect(page.getByRole("status").filter({ hasText: "Besoin publié" })).toBeVisible();
   test.info().annotations.push({ type: "latence-publication-ms", description: String(Date.now() - clic) });
-  // « Mes besoins » : le volume et le nombre d'entreprises, créateur compris, dès la première publication.
-  await expect(page.getByRole("list", { name: "Mes besoins" }).getByText(/^\d+ entreprises? · [\d\s]+ pièces/)).toBeVisible();
+  // « Mes besoins » : le nombre d'entreprises, créateur compris ; le volume à partir de 3 (Greg, 16 novembre 2026).
+  await expect(page.getByRole("list", { name: "Mes besoins" }).getByText(/^\d+ entreprises? · (en cours de regroupement|[\d\s]+ pièces)/)).toBeVisible();
   // L'accueil : le besoin y est aussitôt, avec son type écrit ; jamais le nom d'une entreprise.
   await page.goto("/");
   const demandes = page.getByRole("region", { name: "Mes demandes en cours" });
   await expect(demandes.getByRole("link", { name: /^Achat groupé : Ardoise naturelle/ })).toBeVisible();
-  await expect(demandes).toContainText(/\d+ entreprises? · [\d\s]+ pièces au total/);
+  await expect(demandes).toContainText(/\d+ entreprises? · ([\d\s]+ pièces au total|en cours de regroupement)/);
   await expect(demandes).not.toContainText("Toitures");
   await demandes.getByRole("link", { name: /^Achat groupé : Ardoise naturelle/ }).click();
   await expect(page).toHaveURL(/\/achats-groupes\/besoins\/[0-9a-f-]{36}/);

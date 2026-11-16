@@ -28,6 +28,38 @@ export function PastilleStatut({ code, libelle }: { code: string; libelle: strin
  * Les volumes d'un achat : d'abord le confirmé, puis l'indicatif. Greg, 15 novembre 2026 : visibles dès la première
  * entreprise, avec le badge « Entreprises vérifiées » et la date de la dernière évolution ; jamais un nom.
  */
+/** « 2 entreprises · en cours de regroupement » ou « 5 entreprises · 12 480 pièces » : le total seulement, jamais une quantité individuelle. */
+export function ligneRegroupement(resume: NonNullable<AchatV1["resume"]>): string {
+  return `${resume.entreprises} entreprise${resume.entreprises > 1 ? "s" : ""} · ${resume.volume ?? "en cours de regroupement"}`;
+}
+
+/** Qui participe : les noms (ordre alphabétique), puis le nombre d'entreprises qui restent anonymes. Jamais une quantité. */
+export function Participants({ resume }: { resume: NonNullable<AchatV1["resume"]> }) {
+  const noms = resume.noms ?? [];
+  const anonymes = resume.anonymes ?? 0;
+  if (noms.length === 0 && anonymes === 0) return null;
+  const anonymesDits = anonymes > 0 ? `${anonymes} entreprise${anonymes > 1 ? "s" : ""} anonyme${anonymes > 1 ? "s" : ""}` : null;
+  return (
+    <p className="text-[14px] leading-relaxed break-words">
+      <span className="font-semibold">Avec : </span>
+      {[...noms, anonymesDits].filter(Boolean).join(", ")}
+    </p>
+  );
+}
+
+/** La case « Rester anonyme » (Greg, 16 novembre 2026) : une vraie action, expliquée en une phrase. */
+export function CaseAnonyme({ coche, onChange, disabled }: { coche: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
+  return (
+    <label className="flex items-start gap-3 rounded-xl border border-line bg-surface p-3">
+      <input type="checkbox" checked={coche} disabled={disabled} onChange={(e) => onChange(e.target.checked)} className="mt-1 size-5 shrink-0 accent-accent" />
+      <span className="text-[15px] leading-relaxed">
+        <span className="font-semibold">Rester anonyme</span>
+        <span className="block text-[14px] text-muted">Les autres entreprises voient le nom des participants, jamais la quantité de chacun. Coche pour que ton nom n&apos;apparaisse pas.</span>
+      </span>
+    </label>
+  );
+}
+
 export function Volumes({ achat, comprendre = false }: { achat: AchatV1; comprendre?: boolean }) {
   const [ouvert, setOuvert] = useState(false);
   return (
@@ -35,6 +67,7 @@ export function Volumes({ achat, comprendre = false }: { achat: AchatV1; compren
       <p className="text-[16px] font-bold">{achat.volumes.principale}</p>
       {achat.volumes.sous ? <p className="text-[15px] text-muted">{achat.volumes.sous}</p> : null}
       {achat.volumes.indicatif ? <p className="text-[14px] text-muted">{achat.volumes.indicatif}</p> : null}
+      {achat.resume ? <Participants resume={achat.resume} /> : null}
       {achat.resume ? (
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-muted">
           {achat.resume.verifiees ? (

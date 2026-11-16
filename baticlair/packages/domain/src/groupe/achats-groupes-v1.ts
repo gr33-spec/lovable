@@ -669,9 +669,25 @@ export function statutAfficheV1(a: { statut: EtatAchatV1 }, b: { statut: EtatBes
 
 /* -------------------------------------------------------------------------------------------- les volumes */
 
-// RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot H) : avant, 5 entreprises ; maintenant les volumes et le nombre d'entreprises
-// (créateur compris) se voient dès la première publication, toujours sans aucun nom.
-export const SEUIL_ENTREPRISES_VOLUMES = 1;
+// RÈGLE CHANGÉE (Greg, 16 novembre 2026) : tant qu'il y a moins de 3 entreprises, « En cours de regroupement » à la
+// place du volume (à une ou deux, le total laisserait deviner la quantité de l'autre). Avant (15 novembre) : dès la
+// première publication ; avant encore : 5 entreprises. Le nombre d'entreprises et leurs noms se voient toujours.
+export const SEUIL_ENTREPRISES_VOLUMES = 3;
+export const PHRASE_REGROUPEMENT = "En cours de regroupement";
+
+/**
+ * QUI PARTICIPE (Greg, 16 novembre 2026 ; RÈGLE CHANGÉE : avant, jamais un nom entre artisans) : les noms des entreprises
+ * sont visibles, JAMAIS la quantité de chacune (seulement le total) ; une entreprise qui a coché « rester anonyme » n'est
+ * que comptée. Les noms sont rangés par ordre alphabétique : ni l'ordre d'arrivée ni la quantité ne se devinent.
+ */
+export function participantsVisiblesV1(participants: readonly { companyId: string; nom: string; anonyme: boolean }[]): { noms: string[]; anonymes: number } {
+  const parEntreprise = new Map<string, { nom: string; anonyme: boolean }>();
+  // Une entreprise anonyme sur un seul de ses besoins l'est pour tout l'achat.
+  for (const p of participants) parEntreprise.set(p.companyId, { nom: p.nom.trim(), anonyme: p.anonyme || parEntreprise.get(p.companyId)?.anonyme === true });
+  const tous = [...parEntreprise.values()];
+  const noms = tous.filter((p) => !p.anonyme && p.nom).map((p) => p.nom).sort((a, b) => a.localeCompare(b, "fr"));
+  return { noms, anonymes: tous.length - noms.length };
+}
 
 export interface VolumesV1 {
   entreprises: number;
@@ -717,7 +733,9 @@ const enAffichage = (q: number, aff: AffichageV1) => Math.round((q / aff.parUnit
  * « 86 palettes confirmées pour la consultation » ; en second, « 34 palettes supplémentaires encore indicatives ».
  */
 export function phrasesVolumesV1(v: VolumesV1, achat: { statut: EtatAchatV1 }, aff: AffichageV1): { principale: string; sous: string | null; indicatif: string | null } {
-  if (!v.visibles) return { principale: "Aucune quantité confirmée pour le moment.", sous: null, indicatif: null };
+  if (v.entreprises === 0) return { principale: "Aucune quantité confirmée pour le moment.", sous: null, indicatif: null };
+  // Moins de 3 entreprises : jamais un volume (ni confirmé, ni indicatif), il laisserait deviner la quantité d'une autre.
+  if (!v.visibles) return { principale: PHRASE_REGROUPEMENT, sous: `${v.entreprises} entreprise${v.entreprises > 1 ? "s" : ""} pour l'instant. Le volume s'affiche à partir de ${SEUIL_ENTREPRISES_VOLUMES}.`, indicatif: null };
   const q = (n: number) => `${nf(enAffichage(n, aff))} ${uniteEcrite(aff.unite, enAffichage(n, aff))}`;
   const e = aff.unite.feminin ? "es" : "s";
   const indicatif = v.indicatifs > 0 ? `${q(v.indicatifs)} supplémentaire${enAffichage(v.indicatifs, aff) >= 2 ? "s" : ""} encore indicati${aff.unite.feminin ? "ve" : "f"}${enAffichage(v.indicatifs, aff) >= 2 ? "s" : ""}` : null;

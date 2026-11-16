@@ -27,6 +27,8 @@ import {
   phraseAPreciser,
   phrasesVolumesV1,
   PHRASE_SOUS_5,
+  PHRASE_REGROUPEMENT,
+  participantsVisiblesV1,
   preparationV1,
   quantiteAvecConversion,
   produitV1,
@@ -36,8 +38,7 @@ import {
   volumesV1,
   RAISONS_NE_CONVIENT_PAS,
   LIBELLES_STATUT_V1,
-  referenceStricte,
-} from "../src/index.js";
+  referenceStricte, } from "../src/index.js";
 
 const libre = { demandeEnvoyee: false, commandee: false, enRecherche: false, dansUnAchatGroupe: false };
 const NOW = new Date("2026-11-07T10:00:00Z");
@@ -263,11 +264,37 @@ describe("volumes", () => {
     expect(v.indicatifs).toBe(1440);
   });
   // RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot H) : avant, rien sous 5 entreprises ; maintenant dès la première.
-  it("les volumes se voient dès la première entreprise, créateur compris : des totaux seulement, jamais un nom", () => {
+  it("RÈGLE CHANGÉE (Greg, 16 novembre 2026) : sous 3 entreprises, « En cours de regroupement » à la place du volume ; à 3, le total", () => {
+    const aff1 = { unite: { singulier: "pièce", pluriel: "pièces", feminin: true }, parUnite: 1 };
     const seul = volumesV1([{ companyId: "a", statut: "confirme", quantite: 1000 }], { statut: "ouvert" });
-    expect(seul).toMatchObject({ entreprises: 1, confirmes: 1000, visibles: true });
-    expect(phrasesVolumesV1(seul, { statut: "ouvert" }, { unite: { singulier: "pièce", pluriel: "pièces", feminin: true }, parUnite: 1 }).principale).toBe("1 000 pièces de besoins confirmés par 1 entreprise");
+    expect(seul).toMatchObject({ entreprises: 1, confirmes: 1000, visibles: false });
+    expect(phrasesVolumesV1(seul, { statut: "ouvert" }, aff1)).toEqual({ principale: "En cours de regroupement", sous: "1 entreprise pour l'instant. Le volume s'affiche à partir de 3.", indicatif: null });
+    // À deux, le total laisserait deviner la quantité de l'autre : toujours rien, pas même l'indicatif.
+    const deux = volumesV1([{ companyId: "a", statut: "confirme", quantite: 1000 }, { companyId: "b", statut: "confirme", quantite: 400 }, { companyId: "c", statut: "indicatif", quantite: 50 }], { statut: "ouvert" });
+    expect(JSON.stringify(phrasesVolumesV1(deux, { statut: "ouvert" }, aff1))).not.toMatch(/1 000|1 400|400|50 /);
+    expect(phrasesVolumesV1(deux, { statut: "ouvert" }, aff1).principale).toBe(PHRASE_REGROUPEMENT);
+    const trois = volumesV1([{ companyId: "a", statut: "confirme", quantite: 1000 }, { companyId: "b", statut: "confirme", quantite: 400 }, { companyId: "c", statut: "confirme", quantite: 600 }], { statut: "ouvert" });
+    expect(phrasesVolumesV1(trois, { statut: "ouvert" }, aff1).principale).toBe("2 000 pièces de besoins confirmés par 3 entreprises");
     expect(phrasesVolumesV1(volumesV1(besoins, { statut: "ouvert" }), { statut: "ouvert" }, { unite: { singulier: "palette", pluriel: "palettes", feminin: true }, parUnite: 480 }).principale).not.toBe(PHRASE_SOUS_5);
+    // Personne encore : la phrase d'avant.
+    expect(phrasesVolumesV1(volumesV1([], { statut: "ouvert" }), { statut: "ouvert" }, aff1).principale).toBe("Aucune quantité confirmée pour le moment.");
+  });
+
+  it("qui participe (Greg, 16 novembre 2026) : les noms par ordre alphabétique, jamais une quantité ; « rester anonyme » n'est que compté", () => {
+    const qui = participantsVisiblesV1([
+      { companyId: "c", nom: "Zinguerie Morvan", anonyme: false },
+      { companyId: "a", nom: "Toitures Le Goff", anonyme: false },
+      { companyId: "b", nom: "Couverture Riou", anonyme: true },
+      // Deux besoins de la même entreprise : comptée une fois ; anonyme sur l'un, anonyme pour l'achat.
+      { companyId: "a", nom: "Toitures Le Goff", anonyme: false },
+      { companyId: "d", nom: "Ardoises Kerdoncuff", anonyme: false },
+      { companyId: "d", nom: "Ardoises Kerdoncuff", anonyme: true },
+    ]);
+    expect(qui).toEqual({ noms: ["Toitures Le Goff", "Zinguerie Morvan"], anonymes: 2 });
+    expect(participantsVisiblesV1([])).toEqual({ noms: [], anonymes: 0 });
+  });
+
+  it("à partir de 3 entreprises : des totaux seulement, en conditionnement, avec l'indicatif à part", () => {
     const beaucoup = Array.from({ length: 12 }, (_, i) => ({ companyId: `c${i}`, statut: "confirme" as const, quantite: 3440 }));
     const aff = { unite: { singulier: "palette", pluriel: "palettes", feminin: true }, parUnite: 480 };
     const p = phrasesVolumesV1(volumesV1([...beaucoup, { companyId: "z", statut: "indicatif", quantite: 16320 }], { statut: "ouvert" }), { statut: "ouvert" }, aff);

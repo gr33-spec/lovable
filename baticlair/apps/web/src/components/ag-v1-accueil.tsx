@@ -4,7 +4,7 @@ import { Check, Plus, ChevronRight, Package, Sparkles, Timer, X } from "lucide-r
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CARTE, LigneZone } from "@/components/ag-v1-commun";
+import { CARTE, LigneZone, ligneRegroupement } from "@/components/ag-v1-commun";
 import { PageTitle, Skeleton } from "@/components/ui";
 import { CarteAction } from "@/components/ux-kit";
 import { api } from "@/lib/api";
@@ -102,10 +102,10 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
                     <span className="text-[13px] text-muted">
                       {b.quantite.lisible} · {b.statut.libelle}
                     </span>
-                    {/* Lot H : la dynamique réelle, dès la première entreprise ; jamais un nom. */}
-                    {b.achat.resume?.volume ? (
+                    {/* Le total seulement, à partir de 3 entreprises ; avant, « en cours de regroupement ». */}
+                    {b.achat.resume && b.achat.resume.entreprises > 0 ? (
                       <span className="text-[13px] font-semibold">
-                        {b.achat.resume.entreprises} entreprise{b.achat.resume.entreprises > 1 ? "s" : ""} · {b.achat.resume.volume}
+                        {ligneRegroupement(b.achat.resume)}
                         {b.depuisPublication?.quantite ? ` · ${b.depuisPublication.quantite} depuis ta publication` : ""}
                       </span>
                     ) : null}
@@ -154,9 +154,9 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
                 <span className="text-[13px] leading-snug text-muted">
                   {a.zone.nom} · {a.reception === "livraison" ? "Livraison sur chantier" : "Retrait au dépôt"} · besoin avant le {dateCourte(a.dateBesoin)}
                 </span>
-                {a.resume?.volume ? (
+                {a.resume && a.resume.entreprises > 0 ? (
                   <span className="text-[13px] font-semibold">
-                    {a.resume.entreprises} entreprise{a.resume.entreprises > 1 ? "s" : ""} · {a.resume.volume}
+                    {ligneRegroupement(a.resume)}
                   </span>
                 ) : null}
                 <span className="mt-auto flex items-center justify-between gap-3 pt-1">

@@ -2621,6 +2621,8 @@ model BesoinGroupeV1 {
   offreDecision         String?   @map("offre_decision")
   offreDecideeLe        DateTime? @map("offre_decidee_le") @db.Timestamptz(3)
   cleIdempotence        String?   @map("cle_idempotence")
+  /// Greg, 16 novembre 2026 : « rester anonyme » : le nom de l'entreprise n'est pas montré aux autres participants.
+  anonyme               Boolean   @default(false)
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 

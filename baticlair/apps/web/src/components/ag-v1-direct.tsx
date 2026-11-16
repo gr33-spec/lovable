@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { CARTE, LigneZone, Note, VerificationEntreprise, Volumes } from "@/components/ag-v1-commun";
+import { CARTE, CaseAnonyme, LigneZone, Note, VerificationEntreprise, Volumes } from "@/components/ag-v1-commun";
 import { Button, INPUT, PageTitle } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
 import { CASE_UNE_LIGNE, dateCourte, dateLongue, DELAI_MIN_JOURS_AG, jourDans, libelleLot, PHRASE_ADRESSE_PRIVEE, zoneLisible, type BesoinV1, type CompatibiliteV1, type EtatV1, type ProduitV1 } from "@/lib/ag-v1";
@@ -149,6 +149,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
   const [raison, setRaison] = useState<string | null>(null);
   const [apresRaison, setApresRaison] = useState(false);
   const [coche, setCoche] = useState(false);
+  const [anonyme, setAnonyme] = useState(false);
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [cleIdempotence] = useState(newActionKey);
@@ -194,7 +195,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
       const r = await api<{ besoins: BesoinV1[] }>("/v1/ag/besoins", {
         method: "POST",
         idempotencyKey: cleIdempotence,
-        body: { confirmation: true, cleIdempotence, besoins: [{ type: produit.type, attributs, quantite: q, unite, parUnite: cond ? parUnite : null, conversionConfirmee: cond ? conversionConfirmee : false, reception, lieu, contraintes: contraintes || null, dateBesoin, achatId: rejoindre }] },
+        body: { confirmation: true, cleIdempotence, anonyme, besoins: [{ type: produit.type, attributs, quantite: q, unite, parUnite: cond ? parUnite : null, conversionConfirmee: cond ? conversionConfirmee : false, reception, lieu, contraintes: contraintes || null, dateBesoin, achatId: rejoindre }] },
       });
       router.push(`/achats-groupes/besoins/${r.besoins[0]!.id}?nouveau=1`);
     } catch (e) {
@@ -384,6 +385,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
             <input type="checkbox" checked={coche} onChange={(e) => setCoche(e.target.checked)} className="mt-1 size-5 shrink-0 accent-accent" />
             <span className="text-[15px] leading-relaxed">{CASE_UNE_LIGNE(dateLongue(dateBesoin))}</span>
           </label>
+          <CaseAnonyme coche={anonyme} onChange={setAnonyme} />
         </>
       ) : null}
 

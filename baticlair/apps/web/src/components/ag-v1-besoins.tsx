@@ -4,7 +4,7 @@ import { MoreHorizontal, Plus } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
-import { CARTE, Note, PastilleStatut, Volumes } from "@/components/ag-v1-commun";
+import { CARTE, CaseAnonyme, Note, PastilleStatut, Volumes } from "@/components/ag-v1-commun";
 import { Button, ButtonLink, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, messageErreur, newActionKey } from "@/lib/api";
 import { dateCourte, dateLongue, heureCourte, jourDans, zoneLisible, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
@@ -328,10 +328,22 @@ export function BesoinV1Detail({ id, etat }: { id: string; etat: EtatV1 }) {
           Zone {zoneLisible(b.achat.zone)} · ouvert jusqu&apos;au {dateCourte(b.achat.ouvertJusquau)}
         </p>
         <Volumes achat={b.achat} comprendre />
-        {b.depuisPublication?.quantite ? (
+        {b.depuisPublication && b.depuisPublication.entreprises > 0 ? (
           <p className="text-[15px] font-semibold">
-            {b.depuisPublication.quantite} depuis ta publication · {b.depuisPublication.entreprises} entreprise{b.depuisPublication.entreprises > 1 ? "s" : ""} t&apos;{b.depuisPublication.entreprises > 1 ? "ont" : "a"} rejoint
+            {b.depuisPublication.quantite ? `${b.depuisPublication.quantite} depuis ta publication · ` : ""}
+            {b.depuisPublication.entreprises} entreprise{b.depuisPublication.entreprises > 1 ? "s" : ""} t&apos;{b.depuisPublication.entreprises > 1 ? "ont" : "a"} rejoint
           </p>
+        ) : null}
+        {/* « Rester anonyme » se coche et se décoche à tout moment (tant que le besoin n'est pas retiré). */}
+        {b.etat !== "retire" ? (
+          <CaseAnonyme
+            coche={b.anonyme === true}
+            onChange={(anonyme) => {
+              void api<BesoinV1>(`/v1/ag/besoins/${b.id}/anonymat`, { method: "POST", body: { anonyme } })
+                .then((maj) => setData(maj))
+                .catch(() => undefined);
+            }}
+          />
         ) : null}
       </section>
 

@@ -182,7 +182,7 @@ export function AccueilMaquette() {
       type: "Achat groupé" as const,
       nom: b.nom,
       statut: b.statut.libelle,
-      detail: [b.quantite.lisible, b.achat.resume ? `${b.achat.resume.entreprises} entreprise${b.achat.resume.entreprises > 1 ? "s" : ""}${b.achat.resume.volume ? ` · ${b.achat.resume.volume} au total` : ""}` : null, b.achat.statut === "ouvert" ? `clôture le ${dateCourte(b.achat.ouvertJusquau)}` : null].filter(Boolean).join(" · "),
+      detail: [b.quantite.lisible, b.achat.resume ? `${b.achat.resume.entreprises} entreprise${b.achat.resume.entreprises > 1 ? "s" : ""}${b.achat.resume.volume ? ` · ${b.achat.resume.volume} au total` : b.achat.resume.regroupement ? " · en cours de regroupement" : ""}` : null, b.achat.statut === "ouvert" ? `clôture le ${dateCourte(b.achat.ouvertJusquau)}` : null].filter(Boolean).join(" · "),
       href: `/achats-groupes/besoins/${b.id}`,
       action,
       le: b.achat.resume?.derniereEvolution ?? b.achat.ouvertJusquau,

@@ -59,7 +59,8 @@ export interface AchatV1 {
    * Greg, 15 novembre 2026 (lots F et H) : dès la première publication, le nombre d'entreprises (créateur compris), le
    * volume total et la dernière évolution réelle. Jamais un nom d'entreprise.
    */
-  resume?: { entreprises: number; volume: string | null; derniereEvolution: string | null; verifiees: boolean };
+  /** Greg, 16 novembre 2026 : les noms des entreprises (sauf celles qui restent anonymes), jamais la quantité de chacune ; sous 3 entreprises, pas de volume (« En cours de regroupement »). */
+  resume?: { entreprises: number; volume: string | null; regroupement?: boolean; noms?: string[]; anonymes?: number; derniereEvolution: string | null; verifiees: boolean };
   /** Une date de besoin proche : dite, sans promesse. */
   urgent?: string | null;
   /** Les caractéristiques recommandées laissées « à préciser » (jamais bloquantes). */
@@ -98,6 +99,8 @@ export interface BesoinV1 {
   reception: "livraison" | "retrait";
   lieu: string;
   contraintes: string | null;
+  /** « Rester anonyme » : mon nom n'est pas montré aux autres entreprises de cet achat. */
+  anonyme?: boolean;
   dateBesoin: string;
   achat: AchatV1;
   /** Ce que les autres entreprises ont confirmé après ce besoin : « +750 pièces ». */

@@ -189,12 +189,22 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(page.getByText("Ouvrira un nouvel achat groupé après confirmation")).toBeVisible();
   await expect(page.getByRole("button", { name: "Confirmer mon besoin" })).toBeDisabled();
   await page.getByRole("checkbox", { name: /Je confirme que cette quantité correspond à un besoin réel de mon entreprise/ }).check();
+  // Greg, 16 novembre 2026 : « Rester anonyme » se propose à la confirmation, décoché d'office.
+  await expect(page.getByRole("checkbox", { name: /^Rester anonyme/ })).not.toBeChecked();
   await capture(page, "07-confirmer");
   await page.getByRole("button", { name: "Confirmer mon besoin" }).click();
   await expect(page).toHaveURL(/\/achats-groupes\/besoins\/[0-9a-f-]{36}/);
   await expect(page.getByText("Besoin confirmé", { exact: true })).toBeVisible();
-  // RÈGLE CHANGÉE (Greg, 15 novembre 2026, lot H) : le volume et le nombre d'entreprises se voient dès la première.
-  await expect(page.getByText(/de besoins confirmés par 1 entreprise$/)).toBeVisible();
+  // RÈGLE CHANGÉE (Greg, 16 novembre 2026) : sous 3 entreprises, « En cours de regroupement » à la place du volume (les
+  // trois appareils partagent la base : à la troisième entreprise, le total s'affiche) ; les noms des participants se
+  // voient, jamais la quantité de chacun ; « Rester anonyme » retire le sien, et se décoche.
+  await expect(page.getByText(/^En cours de regroupement$|de besoins confirmés par \d+ entreprises$/)).toBeVisible();
+  await expect(page.getByText(/^Avec : /)).toBeVisible();
+  const anonyme = page.getByRole("checkbox", { name: /^Rester anonyme/ });
+  await anonyme.check();
+  await expect(page.getByText(/entreprises? anonymes?$/)).toBeVisible();
+  await anonyme.uncheck();
+  await expect(page.getByText(/^Avec : /)).not.toContainText("anonyme");
   await expect(page.getByText("Entreprises vérifiées")).toBeVisible();
   await expect(page.getByText(/à partir de 5 entreprises/)).toHaveCount(0);
   await capture(page, "08-besoin-confirme");
