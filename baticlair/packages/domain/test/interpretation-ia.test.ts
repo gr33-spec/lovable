@@ -25,7 +25,7 @@ const TEXTE = "pour la descente on part sur du métal gris pas le plastique, le 
 
 describe("l'interprétation IA des réponses libres", () => {
   it("la consigne interdit d'inventer ; le dossier donne les questions, les boutons et la réponse", () => {
-    expect(INTERPRETATION_SYSTEM).toMatch(/N'invente jamais une quantité, une dimension, une qualité, une référence ou une compatibilité/);
+    expect(INTERPRETATION_SYSTEM).toMatch(/N'invente jamais une quantité, une dimension, une qualité, une teinte, une marque, une référence ou une compatibilité/);
     const d = interpretationDossier(QUESTIONS, TEXTE);
     expect(d).toContain("1. Ta descente, en PVC, en zinc ou en alu ? Boutons (valeur = libellé) : pvc = PVC ; zinc = Zinc ; alu = Alu.");
     expect(d).toContain("2. Quel diamètre ? Valeur chiffrée en mm.");
