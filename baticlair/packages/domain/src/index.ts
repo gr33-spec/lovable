@@ -109,3 +109,4 @@ export * from "./ia/prompts/index.js";
 export * from "./assistant/assistant-ia.js";
 export * from "./missions/missions.js";
 export * from "./missions/image-profil.js";
+export * from "./page-entreprise/index.js";
