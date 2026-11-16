@@ -228,13 +228,10 @@ export function siteWebPropre(v: string | null | undefined): string | null {
   const brut = v?.trim();
   if (!brut) return null;
   const avec = /^https?:\/\//i.test(brut) ? brut : `https://${brut}`;
-  try {
-    const u = new URL(avec);
-    if (!/^https?:$/.test(u.protocol) || !u.hostname.includes(".") || u.username || u.password) return null;
-    return u.toString().replace(/\/$/, "");
-  } catch {
-    return null;
-  }
+  // Le moteur n'a pas `URL` (ni navigateur ni Node) : protocole web, hôte à point, ni identifiant ni espace.
+  const m = /^(https?):\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)+)(:\d{1,5})?(\/[^\s]*)?$/i.exec(avec);
+  if (!m) return null;
+  return `${m[1]!.toLowerCase()}://${m[2]!.toLowerCase()}${m[3] ?? ""}${m[4] ?? ""}`.replace(/\/$/, "");
 }
 
 /** Un numéro de téléphone français ou international lisible, ou null. Garde le « + », retire le reste. */
