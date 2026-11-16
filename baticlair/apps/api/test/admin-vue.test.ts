@@ -117,6 +117,31 @@ describe("l'espace admin, vue globale", { timeout: 120_000 }, () => {
     expect((await g.agent.get("/v1/admin/vue/accueil").expect(200)).body.problemes).toContainEqual({ type: "negoce_a_verifier", nombre: 1, lien: "/admin/negoces?verifie=non" });
   });
 
+  it("les corrections les plus fréquentes (Greg, 16 novembre 2026) : la ligne proposée et la ligne corrigée, comptées, sans nom d'entreprise ni de chantier", async () => {
+    const g = await admin();
+    const a = await couvreurAvecListe(ctx, "artisan@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", LIGNES);
+    await a.agent.get("/v1/admin/vue/corrections").expect(403);
+    const avantL = { designation: "Gouttière zinc dév. 25", quantity: "40", unit: "m", reference: null };
+    const apresL = { designation: "Gouttière zinc dév. 33", quantity: "40", unit: "m", reference: null };
+    const geste = (companyId: string, action: string, before: object | null, after: object | null, patternKey: string, createdAt = new Date()) =>
+      ctx.prisma.correctionEvent.create({ data: { companyId, action, cause: "wrong_designation", before: before ?? undefined, after: after ?? undefined, context: { metier: "roofing" }, patternKey, createdAt } });
+    // La même correction chez deux entreprises (trois fois), une suppression, une confirmation (non comptée), une ancienne.
+    await geste(a.companyId, "edit", avantL, apresL, "forme-gouttiere");
+    await geste(a.companyId, "edit", avantL, apresL, "forme-gouttiere");
+    await geste(g.companyId, "edit", avantL, { ...apresL, quantity: "42" }, "forme-gouttiere");
+    await geste(a.companyId, "delete", { designation: "Échafaudage", quantity: "1", unit: "forfait", reference: null }, null, "forme-echafaudage");
+    await geste(a.companyId, "confirm", avantL, avantL, "forme-confirmation");
+    await geste(a.companyId, "edit", avantL, apresL, "forme-ancienne", new Date(Date.now() - 120 * 86_400_000));
+    const r = (await g.agent.get("/v1/admin/vue/corrections").expect(200)).body;
+    expect(r.total).toBe(4);
+    expect(r.corrections).toHaveLength(2);
+    expect(r.corrections[0]).toMatchObject({ geste: "edit", cause: "wrong_designation", metier: "roofing", fois: 3, entreprises: 2, proposee: "Gouttière zinc dév. 25 · 40 m", corrigee: "Gouttière zinc dév. 33 · 40 m" });
+    expect(r.corrections[1]).toMatchObject({ geste: "delete", fois: 1, entreprises: 1, proposee: "Échafaudage · 1 forfait", corrigee: null });
+    // RGPD : des matériaux seulement ; la consultation est au journal de l'admin.
+    expect(JSON.stringify(r)).not.toMatch(/Toitures A|Bati Invest|Lannion|Ajoncs|companyId|artisan@/);
+    expect(await ctx.prisma.journalAdmin.count({ where: { action: "vue_corrections_frequentes" } })).toBe(1);
+  });
+
   it("« Pose ta question » : des chiffres, en lecture seule ; hors sujet, il le dit ; la question est au journal", async () => {
     const g = await admin();
     await couvreurAvecListe(ctx, "artisan@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", LIGNES);

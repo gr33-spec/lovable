@@ -78,6 +78,13 @@ export class AdminVueController {
     return fiche;
   }
 
+  @Get("corrections")
+  async corrections(@CurrentUser() user: AuthenticatedUser) {
+    await this.pilotage.exiger(user);
+    await this.pilotage.journal(user, "vue_corrections_frequentes");
+    return this.vue.correctionsFrequentes();
+  }
+
   @Get("promos")
   async promos(@CurrentUser() user: AuthenticatedUser) {
     await this.pilotage.exiger(user);

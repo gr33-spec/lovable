@@ -104,6 +104,7 @@ function Accueil() {
             { href: "/admin/signalements", texte: "Signalements" },
             { href: "/admin/supervision", texte: "Supervision" },
             { href: "/admin/promos", texte: "Codes promo" },
+            { href: "/admin/corrections", texte: "Corrections les plus fréquentes" },
             { href: "/admin/catalogue", texte: "Catalogue" },
             { href: "/admin/emails", texte: "E-mails mis de côté" },
           ].map((l) => (

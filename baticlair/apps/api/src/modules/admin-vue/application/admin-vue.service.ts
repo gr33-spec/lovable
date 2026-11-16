@@ -40,6 +40,18 @@ export interface FiltresArtisans {
   promo?: string | undefined;
 }
 
+/** Une forme de correction : le geste, la ligne proposée et la ligne corrigée les plus vues, combien de fois, chez combien d'entreprises. */
+export interface CorrectionFrequente {
+  geste: string;
+  cause: string | null;
+  metier: string | null;
+  fois: number;
+  entreprises: number;
+  proposee: string | null;
+  corrigee: string | null;
+  dernierLe: string;
+}
+
 export class AdminVueService {
   constructor(
     private readonly prisma: PrismaService,
@@ -48,6 +60,49 @@ export class AdminVueService {
 
   /** Les comptes de visite de la démonstration ne comptent jamais. */
   private readonly vrais = { NOT: { memberships: { some: { user: { email: { endsWith: "@demo.mobiiz.fr" } } } } } };
+
+  /**
+   * LES CORRECTIONS LES PLUS FRÉQUENTES (Greg, 16 novembre 2026 : « enregistre les corrections que les artisans font sur
+   * les listes (ligne proposée, ligne corrigée), pour améliorer les règles et le prompt. Montre-moi les corrections les
+   * plus fréquentes dans l'admin »). Le journal existe déjà (`correction_event`, jamais réécrit) ; ici, ses gestes des 90
+   * derniers jours sont rangés par forme (`patternKey` : le geste, sa cause, la famille, les premiers mots), avec la ligne
+   * proposée et la ligne corrigée les plus souvent vues. Des matériaux seulement : jamais le nom d'une entreprise, d'un
+   * chantier ni d'un client (les lignes sont anonymisées à la lecture). Les confirmations (« C'est bon ») ne comptent pas.
+   */
+  async correctionsFrequentes(maintenant = new Date()): Promise<{ depuis: string; total: number; corrections: CorrectionFrequente[] }> {
+    const depuis = new Date(maintenant.getTime() - 90 * 86_400_000);
+    const gestes = await this.prisma.correctionEvent.findMany({
+      where: { createdAt: { gte: depuis }, action: { in: ["edit", "delete", "add"] } },
+      select: { companyId: true, action: true, cause: true, before: true, after: true, context: true, patternKey: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+      take: 5000,
+    });
+    const ligne = (x: unknown): string | null => {
+      const l = x as { designation?: string; quantity?: string | null; unit?: string | null } | null;
+      if (!l?.designation) return null;
+      return [l.designation.slice(0, 120), [l.quantity, l.unit].filter(Boolean).join(" ")].filter(Boolean).join(" · ");
+    };
+    const formes = new Map<string, { action: string; cause: string | null; metier: string | null; fois: number; entreprises: Set<string>; paires: Map<string, { proposee: string | null; corrigee: string | null; fois: number }>; dernierLe: Date }>();
+    for (const g of gestes) {
+      const f = formes.get(g.patternKey) ?? { action: g.action, cause: g.cause, metier: ((g.context as { metier?: string } | null)?.metier ?? null) as string | null, fois: 0, entreprises: new Set<string>(), paires: new Map(), dernierLe: g.createdAt };
+      f.fois++;
+      f.entreprises.add(g.companyId);
+      const [proposee, corrigee] = [ligne(g.before), ligne(g.after)];
+      const cle = `${proposee ?? ""}→${corrigee ?? ""}`;
+      const paire = f.paires.get(cle) ?? { proposee, corrigee, fois: 0 };
+      paire.fois++;
+      f.paires.set(cle, paire);
+      formes.set(g.patternKey, f);
+    }
+    const corrections = [...formes.values()]
+      .sort((a, b) => b.fois - a.fois || b.entreprises.size - a.entreprises.size)
+      .slice(0, 40)
+      .map((f) => {
+        const exemple = [...f.paires.values()].sort((a, b) => b.fois - a.fois)[0]!;
+        return { geste: f.action, cause: f.cause, metier: f.metier, fois: f.fois, entreprises: f.entreprises.size, proposee: exemple.proposee, corrigee: exemple.corrigee, dernierLe: f.dernierLe.toISOString() };
+      });
+    return { depuis: depuis.toISOString(), total: gestes.length, corrections };
+  }
 
   async accueil(): Promise<{ cartes: CarteAccueil[]; problemes: Probleme[] }> {
     const maintenant = this.now();
