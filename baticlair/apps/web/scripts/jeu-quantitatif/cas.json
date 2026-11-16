@@ -1,0 +1,46 @@
+{
+  "_lire": "JEU DE TEST DU QUANTITATIF PAR L'IA (Greg, 16 novembre 2026). Des cas réels, rejoués à chaque changement de prompt ou de modèle. « reponses » : l'étape D (relier des réponses à leurs questions) ; « attendu » donne la valeur du bouton, le nombre ou le texte attendus, null quand rien ne doit être compris. « textes » : l'étape A (une phrase dite ou dictée devient des lignes) ; chaque ligne attendue a sa quantité, son unité (ou null) et les mots que sa désignation doit porter.",
+  "questions": {
+    "zinc": [
+      { "numero": 1, "cle": "param:faconnage@joint-debout", "texte": "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?", "options": [{ "label": "Je façonne (bobines)", "value": "1" }, { "label": "Je commande façonné (bacs)", "value": "2" }], "unite": null, "libre": "written" },
+      { "numero": 2, "cle": "param:epaisseur_zinc", "texte": "Épaisseur du zinc ?", "options": [{ "label": "0,65 mm", "value": "0.65" }, { "label": "0,70 mm", "value": "0.7" }, { "label": "0,80 mm", "value": "0.8" }], "unite": "mm", "libre": "number" },
+      { "numero": 3, "cle": "param:nb_descentes", "texte": "Combien de descentes pour cette gouttière ?", "options": [], "unite": "u", "numerique": true },
+      { "numero": 4, "cle": "param:pose_crochets", "texte": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?", "options": [{ "label": "Sur les chevrons", "value": "1" }, { "label": "En façade (bandeau)", "value": "2" }], "unite": null, "libre": "written" },
+      { "numero": 5, "cle": "param:faconnage@bandes-zinc__12", "texte": "Bande de rive zinc : tu façonnes toi-même ou tu commandes façonné ?", "options": [{ "label": "Je façonne", "value": "1" }, { "label": "Je commande façonné", "value": "2" }], "unite": null, "libre": "written" },
+      { "numero": 6, "cle": "param:zone", "texte": "Ton chantier est où ?", "options": [{ "label": "Bord de mer", "value": "3" }, { "label": "Intérieur des terres", "value": "1" }, { "label": "Montagne", "value": "3" }, { "label": "Entre les deux", "value": "2" }], "unite": "u" }
+    ],
+    "descente": [
+      { "numero": 1, "cle": "param:matiere", "texte": "Ta descente, en PVC, en zinc ou en alu ?", "options": [{ "label": "PVC", "value": "pvc" }, { "label": "Zinc", "value": "zinc" }, { "label": "Alu", "value": "alu" }], "unite": null },
+      { "numero": 2, "cle": "param:diametre", "texte": "Quel diamètre ?", "options": [], "unite": "mm", "numerique": true, "libre": "number" },
+      { "numero": 3, "cle": "fiche:teinte", "texte": "Quelle teinte pour les tuiles ?", "options": [], "unite": null, "libre": "written" }
+    ],
+    "ardoise": [
+      { "numero": 1, "cle": "product:ardoise", "texte": "Quelle ardoise : origine et choix ?", "options": [{ "label": "Espagne 1er choix", "value": "es1" }, { "label": "Ardoise NF (type Cupa)", "value": "nf" }], "unite": null, "libre": "text" },
+      { "numero": 2, "cle": "param:pente", "texte": "Pente du toit ?", "options": [{ "label": "30°", "value": "30" }, { "label": "35°", "value": "35" }, { "label": "45°", "value": "45" }], "unite": "°", "libre": "number" },
+      { "numero": 3, "cle": "param:developpe", "texte": "Gouttière de 25, de 28, de 33 ou de 40 ?", "options": [{ "label": "25", "value": "25" }, { "label": "28", "value": "28" }, { "label": "33", "value": "33" }, { "label": "40", "value": "40" }], "unite": "cm", "libre": "number" }
+    ]
+  },
+  "reponses": [
+    { "nom": "Greg, zinc joint debout : six réponses d'un coup", "questions": "zinc", "texte": "J'achète tout fait, 0,65, 1, chevron, ou je pli, bord de mer", "attendu": ["2", "0.65", "1", "1", "1", "3"] },
+    { "nom": "Six réponses brèves, autre sens", "questions": "zinc", "texte": "je plie, 0,70, 2, bandeau, tout fait, montagne", "attendu": ["1", "0.7", "2", "2", "2", "3"] },
+    { "nom": "Six réponses, une par ligne (dictée)", "questions": "zinc", "texte": "tout prêt\n0,8\n3\nsur chevrons\nmoi-même\nintérieur des terres", "attendu": ["2", "0.8", "3", "1", "1", "1"] },
+    { "nom": "Deux réponses dans le désordre, le reste non dit", "questions": "zinc", "texte": "bord de mer et chevron", "attendu": [null, null, null, "1", null, "3"] },
+    { "nom": "Phrases de chantier, sans les mots des boutons", "questions": "zinc", "texte": "les bacs je les prends tout prêts chez le négoce, du zinc de 0,65, une seule descente, les crochets sur la planche de rive, la rive c'est moi qui la fais, et on est sur le port à Paimpol", "attendu": ["2", "0.65", "1", "2", "1", "3"] },
+    { "nom": "Dictée sans ponctuation", "questions": "zinc", "texte": "alors je façonne moi même en 0,70 il y a deux descentes crochets sur chevrons et la rive je la commande façonnée on est à la montagne", "attendu": ["1", "0.7", "2", "1", "2", "3"] },
+    { "nom": "Descente : trois réponses courtes", "questions": "descente", "texte": "zinc, 80, rouge vieilli", "attendu": ["zinc", "80", "rouge vieilli"] },
+    { "nom": "Descente : dit autrement", "questions": "descente", "texte": "pour la descente on part sur du métal gris pas le plastique, le tuyau fait 80, et les tuiles rouge vieilli", "attendu": ["zinc", "80", "rouge vieilli"] },
+    { "nom": "Ardoise : bouton, valeur hors boutons, nombre", "questions": "ardoise", "texte": "espagne, 38 degrés, de 33", "attendu": ["es1", "38", "33"] },
+    { "nom": "Ardoise écrite hors boutons : jamais rabattue sur un bouton", "questions": "ardoise", "texte": "Ardoise d'Angers", "attendu": ["Ardoise d'Angers", null, null] },
+    { "nom": "Une pente en pour cent n'est jamais convertie en silence", "questions": "ardoise", "texte": "espagne 1er choix, 35 %, 33", "attendu": ["es1", null, "33"] },
+    { "nom": "Je ne sais pas : rien n'est inventé", "questions": "descente", "texte": "je sais pas trop", "attendu": [null, null, null] }
+  ],
+  "textes": [
+    { "nom": "Ardoises et crochets, dictés", "texte": "1000 ardoises 32 22 espagne premier choix et 950 crochets inox de 100", "lignes": [{ "quantite": 1000, "mots": ["ardoise", "32", "22"] }, { "quantite": 950, "mots": ["crochet", "inox"] }] },
+    { "nom": "Le langage du chantier : « lito »", "texte": "36 mètres de lito 27 40", "lignes": [{ "quantite": 36, "mots": ["27", "40"] }] },
+    { "nom": "Flou : rien n'entre dans la liste avant la réponse", "texte": "Ardoise 5 et fruitier", "lignes": [], "questionAttendue": true },
+    { "nom": "Gouttière et descentes", "texte": "40 m de gouttière zinc de 33 avec 2 descentes de 80", "lignes": [{ "quantite": 40, "mots": ["gouttiere", "zinc", "33"] }, { "quantite": 2, "mots": ["descente", "80"] }] },
+    { "nom": "Peinture", "texte": "12 pots de peinture murs et plafonds acrylique mat blanc en 15 litres et 3 pots de sous-couche", "lignes": [{ "quantite": 12, "mots": ["peinture", "mat", "blanc"] }, { "quantite": 3, "mots": ["sous", "couche"] }] },
+    { "nom": "Sans quantité : elle se demande, jamais devinée", "texte": "il me faut de la gouttière zinc de 33", "lignes": [], "questionAttendue": true },
+    { "nom": "Zinc joint debout, dit en une phrase", "texte": "45 m2 de zinc joint debout quartz en 0,65, 12 m de bande de rive zinc dev 200 et 10 m de gouttière havraise de 33", "lignes": [{ "quantite": 45, "mots": ["zinc", "joint", "debout"] }, { "quantite": 12, "mots": ["rive", "200"] }, { "quantite": 10, "mots": ["gouttiere", "33"] }] }
+  ]
+}
