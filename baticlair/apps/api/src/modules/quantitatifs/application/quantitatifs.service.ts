@@ -367,10 +367,17 @@ export class QuantitatifsService {
     retraits: readonly string[] = [],
   ) {
     const row = await this.row(tenant, id);
+    const obligatoires = (r: ReviewedTakeoff) => r.purchase.questions.filter((d) => d.question && isMandatoryQuestion(d.question.key));
+    const dejaPosees = new Set(reponses.length > 0 ? obligatoires(await this.ready(tenant, row)).map((d) => d.question!.key) : []);
     if (reponses.length > 0) await this.answer(tenant, id, reponses);
     // §49.4 : le façonnage d'une pièce de zinguerie écrite se répond à l'écran des questions, jamais clos en silence.
-    const mandatory = (await this.ready(tenant, row)).purchase.questions.filter((d) => d.question && isMandatoryQuestion(d.question.key));
+    const apres = await this.ready(tenant, row);
+    const mandatory = obligatoires(apres);
     if (mandatory.length > 0) {
+      // Recette en ligne du 16 novembre 2026 (zinc à joint debout) : une réponse tout juste donnée peut faire naître le
+      // façonnage d'une autre pièce. Ce n'est pas un refus : l'écran des questions revient avec elle, AVANT le calcul, et
+      // les réponses déjà enregistrées ne se renvoient pas. Une question obligatoire déjà posée et sautée reste refusée.
+      if (reponses.length > 0 && mandatory.every((d) => !dejaPosees.has(d.question!.key))) return this.view(row, apres, rendu);
       throw validationFailed("Answer the forming questions first", { reason: "faconnage_required", questions: mandatory.map((d) => d.question!.key) });
     }
     // §51.2 : une réponse « Autre » relue qui ouvre une donnée manquante pose UNE question de plus, AVANT de calculer :
@@ -383,7 +390,8 @@ export class QuantitatifsService {
     if (opened.length > 0) return this.view(row, before, rendu);
     // Temps deux (directive du fondateur, 2026-10-12) : quand tout est répondu, un deuxième appel relit la fiche avec les
     // réponses et peut poser UNE question de plus, avant le calcul ; une seule fois par devis.
-    if (reponses.some((r) => r.valeur !== null)) {
+    // Les réponses sont maintenant enregistrées au fil de la discussion : le calcul peut arriver sans en porter une seule.
+    if (reponses.some((r) => r.valeur !== null) || Object.entries(before.takeoff.answers).some(([k, v]) => v !== null && v !== undefined && /^(param|product|fiche):/.test(k))) {
       const relu = await this.takeoffs.bilan(tenant, before.takeoff.id);
       if (relu?.opened) return this.view(row, relu.reviewed, rendu);
     }

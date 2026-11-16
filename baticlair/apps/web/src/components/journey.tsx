@@ -464,9 +464,22 @@ const morceauxDe = (texte: string) => texte.split(/\n|;|,(?!\d)|\bet\b/).map((m)
  * serveur et son IA pour ce qui reste) ; Mobiiz confirme en UNE ligne et ne pose que ce qui manque. Quand tout est
  * répondu, « Calculer ma liste » est proposé dans le fil. Le serveur revalide tout au calcul.
  */
-export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
+export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
   const router = useRouter();
-  const questions = useMemo(() => counterQuestions(takeoff), [takeoff]);
+  const duServeur = useMemo(() => counterQuestions(takeoff), [takeoff]);
+  // Une question déjà répondue et partie au serveur n'est plus dans sa liste : on la garde ici, pour que « toucher une de
+  // ses réponses la rouvre » marche jusqu'au calcul (Greg, 16 novembre 2026).
+  const [memoire, setMemoire] = useState<readonly CounterQuestion[]>(duServeur);
+  const [vues, setVues] = useState(duServeur);
+  if (vues !== duServeur) {
+    setVues(duServeur);
+    const cles = new Set(duServeur.map((q) => q.key));
+    setMemoire((m) => [...m.filter((q) => !cles.has(q.key)), ...duServeur]);
+  }
+  const questions = useMemo(() => {
+    const cles = new Set(duServeur.map((q) => q.key));
+    return [...memoire.filter((q) => !cles.has(q.key)), ...duServeur];
+  }, [memoire, duServeur]);
   // §50.2 : dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
   const ordonnees = useMemo(() => {
     const order = [...new Set(questions.map((q) => q.group))].sort((a, b) => Number(a === SITE_GROUP || a === CONSUMABLES_GROUP) - Number(b === SITE_GROUP || b === CONSUMABLES_GROUP) || Number(a === CONSUMABLES_GROUP) - Number(b === CONSUMABLES_GROUP));
@@ -575,10 +588,42 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
   };
 
   const calculer = () => {
-    const answers = counterAnswers(questions, given, retired);
+    // Ce qui est déjà parti au serveur ne repart pas.
+    const tout = counterAnswers(questions, given, retired);
+    const answers = { ...tout, reponses: tout.reponses.filter((r) => r.valeur === null || !parties.current.has(`${r.question}=${r.valeur}`)) };
     setSent(answers.reponses.map((r) => r.question));
     onSubmit(answers);
   };
+  // « Quand tout est répondu, elle réfléchit, pose d'éventuelles dernières questions de la même façon, puis propose
+  // "Calculer ma liste" » (Greg, 16 novembre 2026). Recette en ligne du même jour : une réponse peut faire naître une
+  // question du calcul (le nombre de descentes, le façonnage d'une autre pièce). Dès que tout est répondu, les réponses
+  // partent donc au serveur ; ce qu'il lui manque encore arrive dans le fil, AVANT « Calculer ma liste ». Chaque réponse
+  // ne part qu'une fois ; « Je ne sais pas » ne part qu'au calcul.
+  const parties = useRef<Set<string>>(new Set());
+  const dernierEnvoi = useRef<readonly string[]>([]);
+  // Un envoi refusé n'a rien enregistré : ses réponses repartiront avec la réponse corrigée.
+  useEffect(() => {
+    if (!error) return;
+    for (const k of dernierEnvoi.current) parties.current.delete(k);
+    dernierEnvoi.current = [];
+  }, [error]);
+  const [verification, setVerification] = useState(false);
+  const toutRepondu = restantes.length === 0;
+  useEffect(() => {
+    if (!onReponses || !toutRepondu || pending || reflexion) return;
+    const nouvelles = counterAnswers(questions, given, retired).reponses.filter((r) => r.valeur !== null && !parties.current.has(`${r.question}=${r.valeur}`));
+    if (nouvelles.length === 0) return;
+    for (const r of nouvelles) parties.current.add(`${r.question}=${r.valeur}`);
+    dernierEnvoi.current = nouvelles.map((r) => `${r.question}=${r.valeur}`);
+    setSent(nouvelles.map((r) => r.question));
+    setVerification(true);
+    onReponses(nouvelles);
+  }, [onReponses, toutRepondu, pending, reflexion, questions, given, retired]);
+  // La vérification finie : s'il reste une question, elle se dit en une ligne ; sinon « Calculer ma liste » arrive.
+  if (verification && !pending) {
+    setVerification(false);
+    if (!error && courante) setMessages((m) => [...m, { de: "mobiiz", texte: restantes.length > 1 ? "Encore quelques précisions avant de calculer." : "Encore une précision avant de calculer." }]);
+  }
   const invite = courante ? (autre ? "Écris ta réponse…" : courante.options.length === 0 ? `Écris ta réponse${courante.unit && courante.unit !== "u" ? ` (${courante.unit === "m2" ? "m²" : courante.unit})` : ""}…` : "Réponds ici…") : "Réponds ici…";
 
   return (
@@ -640,9 +685,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
               </Bulle>
             ),
           )}
-          {reflexion ? (
+          {reflexion || verification ? (
             <p role="status" className="self-start pl-10 text-[14px] font-semibold text-[var(--chat-texte)]/75">
-              Réflexion…
+              {verification ? "Vérification de tes réponses…" : "Réflexion…"}
             </p>
           ) : courante ? (
             <>
@@ -853,8 +898,10 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
 }
 
 /** L'étape des questions : sans aucune question à poser, le calcul part tout seul (rien à valider pour rien). */
-export function QuestionsStep({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
-  const none = counterQuestions(takeoff).length === 0;
+export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
+  // Décidé à l'ouverture : une discussion commencée reste ouverte quand ses réponses, enregistrées, ne laissent plus de
+  // question (« Calculer ma liste » y est proposé, jamais lancé tout seul).
+  const [none] = useState(() => counterQuestions(takeoff).length === 0);
   const started = useRef(false);
   useEffect(() => {
     if (!none || started.current) return;
@@ -862,5 +909,5 @@ export function QuestionsStep({ takeoff, pending, error, onSubmit }: { takeoff: 
     onSubmit({ reponses: [], ajouts: [], retraits: [] });
   }, [none, onSubmit]);
   if (none) return error ? <ErrorNotice error={error} /> : <CalculScreen />;
-  return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} />;
+  return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} {...(onReponses ? { onReponses } : {})} />;
 }

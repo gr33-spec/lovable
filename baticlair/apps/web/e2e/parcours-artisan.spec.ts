@@ -1740,22 +1740,31 @@ test("retour du fondateur (2026-10-12) : un refus du serveur se dit dans la disc
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
-  await page.route("**/calcul?**", async (route) => {
+  // Depuis le 16 novembre 2026, les réponses partent dès que tout est répondu : c'est là que le serveur refuse (une fois).
+  let refuse = false;
+  await page.route("**/reponses?**", async (route) => {
     const body = route.request().postDataJSON() as { reponses: { question: string }[] };
     const n = body.reponses.findIndex((r) => r.question.includes("pente"));
+    if (refuse || n < 0) return route.continue();
+    refuse = true;
     await route.fulfill({ status: 400, json: { error: { code: "validation_failed", message: "Invalid request", supportId: "TEST-0001", retryable: false, details: [{ path: `reponses.${n}.valeur`, message: "Too big: expected string to have <=300 characters" }] } } });
   });
+  let pente = 0;
   await repondreAuxQuestions(page, async (q, boutons) => {
     if (q !== "Pente du toit ?") return /façonnes/i.test(q) ? /^Je commande façonné/ : null;
+    if (++pente === 2) {
+      // Le refus : Mobiiz dit la phrase et repose CETTE question, rien d'autre ; « Calculer ma liste » n'est pas proposé.
+      await expect(questions.getByText("Réponse trop longue : 300 caractères au plus.")).toBeVisible();
+      await expect(page.getByText("Un champ n'est pas correctement rempli.")).toHaveCount(0);
+      await expect(calculerMaListe(page)).toHaveCount(0);
+    }
     await boutons.getByRole("button", { name: "Autre", exact: true }).click();
     await ecrireDansLaDiscussion(page, "38");
     return true;
   });
-  await calculerMaListe(page).click();
-  await expect(questions.getByText("Réponse trop longue : 300 caractères au plus.")).toBeVisible();
-  await expect(boutonsDeLaQuestion(page)).toHaveAttribute("aria-label", "Pente du toit ?");
-  await expect(page.getByText("Un champ n'est pas correctement rempli.")).toHaveCount(0);
-  await expect(calculerMaListe(page)).toHaveCount(0);
+  expect(pente).toBe(2);
+  // La réponse corrigée repart avec les autres : « Calculer ma liste » arrive.
+  await expect(calculerMaListe(page)).toBeVisible();
 });
 
 test("« Je ne sais pas » (RÈGLE CHANGÉE le 16 novembre 2026, avant : la poubelle) : la question part sans réponse, et se reprend d'un tap", async ({ page }) => {
