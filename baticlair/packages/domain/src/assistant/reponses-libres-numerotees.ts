@@ -23,6 +23,13 @@ export interface QuestionNumerotee {
   libre?: "number" | "text" | "written" | undefined;
   /** Une valeur chiffrée sans boutons. */
   numerique?: boolean;
+  /**
+   * Une donnée DÉJÀ CONNUE (l'habitude de l'entreprise, dite dans le fil : « Comme d'habitude : 0,65 mm ») ou que ce devis
+   * ne demande pas (la pose des crochets quand ils ne sont pas écrits). Greg, 17 novembre 2026 : « Mon cas zinc : il manque
+   * "0,65 mm" et "crochets sur chevrons". Je veux les 6 comprises et confirmées en une ligne. » Elle n'est jamais posée ni
+   * reposée ; elle est confirmée (ou changée) seulement quand l'artisan en nomme un bouton.
+   */
+  connue?: boolean;
 }
 
 export type StatutReponse = "compris" | "ambigu" | "sans_reponse";
@@ -222,7 +229,43 @@ function interpreterUne(q: QuestionNumerotee, morceau: string | undefined): Repo
  * une seule question : tout le texte. Sans numéro et plusieurs questions : une ligne par question dans l'ordre quand le
  * nombre de lignes est celui des questions, sinon chaque morceau va à la SEULE question dont il nomme un bouton.
  */
-export function interpreterReponsesNumerotees(questions: readonly QuestionNumerotee[], texte: string): ReponseInterpretee[] {
+export function interpreterReponsesNumerotees(toutes: readonly QuestionNumerotee[], texte: string): ReponseInterpretee[] {
+  const connues = toutes.filter((q) => q.connue);
+  if (connues.length === 0) return interpreterLesOuvertes(toutes, texte);
+  const ouvertes = toutes.filter((q) => !q.connue);
+  const rien = (q: QuestionNumerotee): ReponseInterpretee => ({ numero: q.numero, cle: q.cle, statut: "sans_reponse", valeur: null, libelle: null, libreEcrite: false, raison: null });
+  // Des réponses numérotées (« 1. … 2. … ») visent les questions posées : rien n'est cherché ailleurs.
+  if (ouvertes.length > 0 && morceauxNumerotes(texte, Math.max(...ouvertes.map((q) => q.numero)))) {
+    const lues = interpreterLesOuvertes(ouvertes, texte);
+    return toutes.map((q) => lues.find((r) => r.numero === q.numero) ?? rien(q));
+  }
+  // Un morceau va à une donnée connue quand il nomme UN bouton d'UNE SEULE d'entre elles et qu'aucune question posée ne
+  // reconnaît ce bouton. Un nombre seul (« 1 ») ne vaut que pour une mesure (« 0,65 » → « 0,65 mm »), jamais pour un compte.
+  const morceaux = texte.split(/\n|;|,(?!\d)|\bet\b/).map((l) => l.trim()).filter(Boolean);
+  const nomme = (q: QuestionNumerotee, m: string) => {
+    const b = boutonsNommes(q, m);
+    return new Set(b.map((o) => o.value)).size === 1 ? b[0]! : null;
+  };
+  const mesure = (q: QuestionNumerotee) => Boolean(q.unite) && q.unite !== "u";
+  const prises = new Map<number, { label: string; value: string }>();
+  const restent: string[] = [];
+  for (const m of morceaux) {
+    const nu = /^\d+(?:[.,]\d+)?$/.test(m.trim());
+    const cibles = ouvertes.some((q) => q.options.length > 0 && nomme(q, m)) ? [] : connues.filter((q) => !prises.has(q.numero) && q.options.length > 0 && (!nu || mesure(q)) && nomme(q, m));
+    if (cibles.length === 1) prises.set(cibles[0]!.numero, nomme(cibles[0]!, m)!);
+    else restent.push(m);
+  }
+  // Le reste se lit comme avant, sur les seules questions posées (le même découpage : l'ordre des réponses est gardé).
+  const lues = prises.size === 0 ? interpreterLesOuvertes(ouvertes, texte) : restent.length ? interpreterLesOuvertes(ouvertes, restent.join(", ")) : ouvertes.map(rien);
+  return toutes.map((q) => {
+    const b = prises.get(q.numero);
+    if (b) return { numero: q.numero, cle: q.cle, statut: "compris", valeur: b.value, libelle: b.label, libreEcrite: false, raison: null };
+    return lues.find((r) => r.numero === q.numero) ?? rien(q);
+  });
+}
+
+/** La lecture des questions posées (voir `interpreterReponsesNumerotees`, qui écarte d'abord ce qui vise une donnée connue). */
+function interpreterLesOuvertes(questions: readonly QuestionNumerotee[], texte: string): ReponseInterpretee[] {
   if (questions.length === 0) return [];
   const parNumero = morceauxNumerotes(texte, Math.max(...questions.map((q) => q.numero)));
   if (parNumero) return questions.map((q) => interpreterUne(q, parNumero.get(q.numero)));

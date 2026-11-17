@@ -12,7 +12,7 @@ import { NOM_APP } from "@baticlair/domain";
  * bref, les questions (une par donnée manquante, aucune sur une donnée lue), et pour chaque ligne du devis la fourniture
  * nommée ou « sans fourniture ». Le code calcule ensuite (ratios, conversions) : jamais une règle de mots.
  */
-export const LECTURE_PROMPT = { id: "lecture_devis", version: 6 } as const;
+export const LECTURE_PROMPT = { id: "lecture_devis", version: 7 } as const;
 
 /** §49.1 du référentiel (6 octobre 2026), mot pour mot : d'où vient chaque ligne de la liste. */
 export const RULE_49_1 = `RÈGLE §49.1 DU RÉFÉRENTIEL : d'où vient chaque ligne de la liste.
@@ -79,7 +79,7 @@ const FORMAT = `CE QUE TU RENVOIES : un seul objet JSON, rien d'autre.
   1. UNE question = UN SEUL SUJET, jamais deux (Greg, 16 novembre 2026). Quand il manque plusieurs données au même article (le développé d'une gouttière et son nombre de descentes ; la membrane et la largeur d'un chéneau), chacune a SA question, avec sa clé, sa donnée et ses boutons. Jamais deux données reliées par « et » dans la même question. Seule exception : le modèle et la teinte d'un élément à remplacer à l'identique (point 3), que le comptoir demande ensemble.
   2. Une quantité écrite sans unité dont l'unité suit de l'ouvrage n'est pas une question : une gouttière, un chéneau, une descente, une rive, un faîtage se mesurent en mètres (« 11,70 » de chéneau = 11,70 m, origine "deduite"). L'unité ne se demande que si deux unités sont plausibles pour le même article (« 10 » de tôles : 10 tôles ou 10 m²), et alors c'est une question à elle seule, avec les deux unités en boutons.
   3. Ce qui se choisit avec le vendeur au comptoir sans changer la quantité (teinte, profil, simple peau ou panneau sandwich d'un bac, finition d'un accessoire) n'est pas une question : mets-le dans a_preciser de la fourniture.
-     SAUF le modèle d'un élément de couverture à remplacer à l'identique (« tuile neuve identique », « identique à l'existant », ardoise de remplacement) : sans son modèle et sa teinte, le comptoir ne peut pas le servir. C'est UNE question de l'article (« Quelle tuile : modèle et teinte ? »), réponse écrite (boutons []), et la fourniture l'attend (attend).
+     SAUF le modèle d'un élément de couverture à remplacer à l'identique (« tuile neuve identique », « identique à l'existant », ardoise de remplacement) : sans son modèle et sa teinte, le comptoir ne peut pas le servir. C'est UNE SEULE question de l'article, écrite « Quelle tuile ? » (« Quelle ardoise ? » pour une ardoise) : le modèle et la teinte ensemble (donnee : « modèle et teinte »), l'artisan répond d'un coup (Greg, 17 novembre 2026). Réponse écrite (boutons []), et la fourniture l'attend (attend).
   4. Les questions portent sur les articles ÉCRITS au devis : aucune sur un accessoire que le code ajoute d'office (le Ø d'une naissance), aucune sur des consommables (étain, décapant, vis, mastic) que le devis ne cite pas. Le nombre de descentes d'une gouttière, lui, se demande quand le devis ne l'écrit pas : il compte les naissances et les descentes à commander.
   5. Une donnée écrite, même dans une autre ligne (une ligne de pose, un titre), n'est jamais une question.
   Ce qui manque ne disparaît jamais : une donnée qu'il faut au comptoir et que le devis n'écrit pas est soit une question (et la fourniture l'attend), soit dans a_preciser de la fourniture ; jamais ni l'un ni l'autre.

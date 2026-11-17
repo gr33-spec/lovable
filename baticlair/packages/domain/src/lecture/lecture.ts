@@ -8,7 +8,7 @@ import { baseOf, INSTANCE_SEP, type Referential, type Slot, type WorkItemType } 
 import { readDimension, type LinePlan, type QuotePlan } from "../referential/plan.js";
 import { parseRefUnit, sameDim } from "../referential/units.js";
 import type { LineValidation, TakeoffIssue, TakeoffValidation } from "../takeoff/validation.js";
-import { artisanView, computeWithAnswers, piecewiseParams, slotsGivenByQuote, scopedKey, scopedParam, type ArtisanView, type Decision, type EngineAnswer } from "../trust/artisan-view.js";
+import { artisanView, computeWithAnswers, groupeDe, piecewiseParams, slotsGivenByQuote, scopedKey, scopedParam, type ArtisanView, type Decision, type EngineAnswer } from "../trust/artisan-view.js";
 import { applyPurchaseOverrides, applyRuleConfirmations, purchaseView, type PurchaseItem, type PurchaseView, type ScreenRow } from "../trust/purchase-view.js";
 import { applyOrangeFlags } from "../trust/orange.js";
 import { forbiddenFlags } from "../trust/forbidden.js";
@@ -453,6 +453,10 @@ export function cleDeQuestion(ref: Referential, plan: QuotePlan, q0: LectureQues
     const instance = plan.lines.find((l) => l.status === "planned" && [...ids].some((id) => l.ref === id || l.ref.startsWith(`${id}.`)) && ref.workItems.find((w) => w.id === baseOf(l.workItemId))?.params.some((p) => p.key === q.cle));
     // La question d'une pièce (une instance par ligne), ou d'un lot quand plusieurs ouvrages demandent la même donnée
     // (le façonnage de la noue et des bandes) : sa réponse ne vaut que pour lui, comme le calcul la lit.
+    // Une seule réponse pour tout le devis (`groupe`, dans la fiche du métier) : la question d'une pièce du groupe est
+    // celle du groupe, quelle que soit la pièce que le modèle a visée.
+    const groupe = instance?.status === "planned" ? groupeDe(ref, instance.workItemId, q.cle) : undefined;
+    if (groupe) return scopedKey(q.cle, groupe.id);
     if (instance?.status === "planned" && (instance.workItemId.includes(INSTANCE_SEP) || piecewiseParams(ref, plan).includes(`param:${q.cle}`))) return scopedKey(q.cle, instance.workItemId);
   }
   return `param:${q.cle}`;
@@ -465,7 +469,14 @@ export function questionDeLecture(ref: Referential, plan: QuotePlan, q0: Lecture
   // La donnée de l'ouvrage de la question (le façonnage du joint debout n'a pas les boutons de celui d'une noue).
   const ouvrage = /^param:[^@]+@([^_]+?)(?:__|$)/.exec(key)?.[1];
   const defs = ref.workItems.flatMap((w) => w.params.filter((p) => p.key === q.cle).map((p) => ({ w, p })));
-  const def = (defs.find((x) => x.w.id === ouvrage) ?? defs.find((x) => (x.p.choices?.length ?? 0) > 0) ?? defs[0])?.p;
+  // La question d'un groupe (« param:faconnage@pieces-pliees ») : la donnée, les mots et les boutons du groupe.
+  const portee = scopedParam(key)?.workItemId;
+  const duGroupe = defs.find((x) => x.p.groupe && x.p.groupe.id === portee)?.p;
+  const def = duGroupe ?? (defs.find((x) => x.w.id === ouvrage) ?? defs.find((x) => (x.p.choices?.length ?? 0) > 0) ?? defs[0])?.p;
+  if (duGroupe?.groupe) {
+    const g = duGroupe.groupe;
+    return { key, kind: "param", text: g.question, unit: duGroupe.unit, ...(g.hint ? { hint: g.hint } : {}), ...(duGroupe.choices ? { options: duGroupe.choices.map((c) => ({ label: c.label, value: c.value, ...(c.dit ? { dit: c.dit } : {}) })) } : {}) };
+  }
   // Retour du fondateur (2026-10-12, « Un champ n'est pas correctement rempli » après « En façade (bandeau) ») : un bouton
   // du modèle dont la valeur est en mots (« bandeau ») prend la valeur du référentiel (« 2 ») quand la donnée en a une.
   const ditDe = (value: string) => {
@@ -689,6 +700,8 @@ export function ecranDeLecture(input: {
     if (habit !== undefined && answers[question.key] === undefined) return [];
     return [{ q, key: question.key, question }];
   });
+  // Deux questions du modèle pour deux pièces d'un même groupe (la bande de ventilation, la rive) : une seule question.
+  for (let i = asked.length - 1; i >= 0; i--) if (asked.findIndex((a) => a.key === asked[i]!.key) !== i && scopedParam(asked[i]!.key)) asked.splice(i, 1);
   // §51.3, §51.6 (retour du fondateur, 2026-10-12, D.2026.105 : « la teinte et la réf répondues n'apparaissent ni dans la
   // désignation ni dans la précision ») : le temps trois reçoit TOUTES les réponses du temps deux comme données écrites.
   // Une question de la deuxième vague (`fiche:<donnée>`, ouverte par la relecture) est dans la fiche, pas dans la

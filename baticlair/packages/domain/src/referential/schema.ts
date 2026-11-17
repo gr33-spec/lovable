@@ -73,6 +73,7 @@ const param = z.object({
   fromWorks: z.array(z.object({ value: str, workItems: z.array(str).min(1) })).optional(),
   onlyFromPrincipal: z.literal(true).optional(),
   ownOnly: z.literal(true).optional(),
+  groupe: z.object({ id: z.string().regex(/^[a-z0-9-]+$/), question: str, hint: z.string().optional() }).optional(),
 });
 const derived = z.object({ ...provenance, key: str, label: str, unit: str, formula: str, shown: z.boolean().optional() });
 const table = z.object({ ...provenance, label: str, unit: str, axes: z.array(z.object({ param: str, thresholds: z.array(str).min(1) })).min(1), values: z.array(z.array(str).min(1)).min(1) });

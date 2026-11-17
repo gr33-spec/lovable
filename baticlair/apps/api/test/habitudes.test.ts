@@ -74,8 +74,8 @@ describe("« Effacer ce que BatiClair a appris » : des essais au hasard ne rest
   });
 });
 
-describe("§48.2 « zinc, lot par lot » : chaque lot de zinguerie a sa carte « Comme d'habitude ? »", () => {
-  it("noue + abergement de cheminée : deux cartes nommées ; « commandé » pour l'un, « je façonne » pour l'autre", async () => {
+describe("le pliage : une seule carte « Comme d'habitude ? » pour tout le devis (Greg, 17 novembre 2026 ; avant, §48.2 : une par lot)", () => {
+  it("noue + abergement de cheminée : UNE carte, avec la question de la fiche ; une pièce se change sans toucher aux autres", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Zinguerie Le Goff");
     for (const n of [1, 2]) {
       const q = (await agent.post("/v1/quantitatifs").send({ ...JOINT_DEBOUT, reference: `Chantier ${n}` })).body as Q;
@@ -89,17 +89,15 @@ describe("§48.2 « zinc, lot par lot » : chaque lot de zinguerie a sa carte «
     };
     const q = (await agent.post("/v1/quantitatifs?ecran=1").send({ ...ZINGUERIE, reference: "Chantier 3" })).body as { id: string; ecran: { habits: { key: string; question: string; value: string }[] } };
     const cards = q.ecran.habits.filter((h) => h.key.startsWith("param:faconnage"));
-    expect(cards.map((h) => h.key).sort()).toEqual(["param:faconnage@abergement-cheminee", "param:faconnage@noue"]);
-    expect(cards.map((h) => h.question).sort()).toEqual([
-      "Abergement de cheminée : tu façonnes toi-même ou tu commandes façonné ?",
-      "Noue zinc : tu façonnes toi-même ou tu commandes façonné ?",
-    ]);
-    // L'abergement est commandé façonné sur ce chantier ; la noue reste « comme d'habitude » (je façonne).
+    expect(cards.map((h) => h.key)).toEqual(["param:faconnage@pieces-pliees"]);
+    expect(cards.map((h) => h.question)).toEqual(["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"]);
+    // L'abergement est commandé façonné sur ce chantier (le choix d'UNE pièce) ; la noue reste « comme d'habitude » (je façonne).
     const res = await agent
       .post(`/v1/quantitatifs/${q.id}/reponses?ecran=1`)
       .send({ reponses: [{ question: "param:faconnage@abergement-cheminee", valeur: "2", unite: "u" }] });
     expect(res.status).toBe(201);
-    const after = res.body as { ecran: { habits: { key: string }[]; purchase: { toBuy: { label: string; lineIds: string[] }[] } } };
-    expect(after.ecran.habits.map((h) => h.key)).toEqual(["param:faconnage@noue"]);
+    const after = res.body as { ecran: { habits: { key: string }[]; choixPieces: { key: string; value: string }[]; purchase: { toBuy: { label: string; lineIds: string[] }[] } } };
+    expect(after.ecran.habits.map((h) => h.key)).toEqual(["param:faconnage@pieces-pliees"]);
+    expect(after.ecran.choixPieces.find((c) => c.key === "param:faconnage@abergement-cheminee")?.value).toBe("2");
   });
 });

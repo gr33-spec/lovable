@@ -150,9 +150,9 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(plan.inputs.find((i) => i.workItemId === "bandes-zinc")?.params.faconnage?.value).toBe("1");
   });
 
-  it("faîtage dév. 25 cm et porte-solin : une question façonnage chacun ; façonnés, des feuilles chacun (jamais fusionnées)", () => {
-    expect(row(v.toBuy[6]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@faitage-zinc" });
-    expect(row(v.toBuy[7]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@bande-porte-solin" });
+  it("faîtage dév. 25 cm et porte-solin : la même question de pliage pour les deux (Greg, 17 novembre 2026) ; pliés, des feuilles chacun (jamais fusionnées)", () => {
+    expect(row(v.toBuy[6]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@pieces-pliees" });
+    expect(row(v.toBuy[7]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@pieces-pliees" });
     expect(repondu.toBuy.filter((b) => b.label.startsWith("Feuilles")).map((b) => [b.lineIds, b.quantity, b.precision?.split(" :")[0]])).toEqual([
       [["6"], "1 pièce", "pour 4 ml de bande"],
       [["8"], "1 pièce", "pour 8 ml de faîtage"],

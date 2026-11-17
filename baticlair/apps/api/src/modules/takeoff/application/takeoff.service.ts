@@ -52,7 +52,11 @@ import {
   lectureDepuisLignes,
   lignesDeLecture,
   lotLabel,
+  choixParPiece,
+  donneesDicibles,
   piecewiseParams,
+  type ChoixDePiece,
+  type DonneeDicible,
   scopedKey,
   type LectureDevis,
   valeurApprise,
@@ -311,6 +315,10 @@ export interface ReviewedTakeoff {
    * l'écran des questions en « Comme d'habitude ? » ; un tap les confirme ou les change pour ce chantier.
    */
   habits: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  /** Les pièces d'un groupe « une seule réponse pour tout le devis », chacune avec son choix (modifiable pour elle seule). */
+  choixPieces?: ChoixDePiece[];
+  /** Les données à boutons que ce devis ne demande pas, mais que l'artisan peut dire de lui-même (jamais posées). */
+  dicibles?: DonneeDicible[];
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation) : hors de la liste, repliées à part. */
   withoutSupply?: { lineId: string; label: string; measure: string | null }[];
   /** La note de l'artisan sur le chantier (§44), pour le bref de l'écran et de l'envoi (§50.7). */
@@ -1495,12 +1503,15 @@ export class TakeoffService {
         ref.workItems
           .filter((w) => used.has(w.id))
           .flatMap((w) => w.params.map((d) => ({ w, d })))
-          .filter(({ w, d }) => d.kind === "artisan_preference" && d.question && (d.choices?.length ?? 0) > 0 && (preferences.params?.[`${d.key}@${w.id}`] ?? preferences.params?.[d.key]) !== undefined && takeoff.answers[`param:${d.key}`] === undefined)
+          .filter(({ w, d }) => d.kind === "artisan_preference" && d.question && (d.choices?.length ?? 0) > 0 && (preferences.params?.[`${d.key}@${w.id}`] ?? (d.groupe ? preferences.params?.[`${d.key}@${d.groupe.id}`] : undefined) ?? preferences.params?.[d.key]) !== undefined && takeoff.answers[`param:${d.key}`] === undefined)
           .map(({ w, d }) => {
-            const perLot = piecewise.has(`param:${d.key}`);
-            const usual = (perLot ? preferences.params?.[`${d.key}@${w.id}`] : undefined) ?? preferences.params![d.key]!;
-            const key = perLot ? scopedKey(d.key, w.id) : `param:${d.key}`;
-            const question = perLot ? `${lotLabel(w.label)} : tu façonnes toi-même ou tu commandes façonné ?` : d.question!;
+            // Une seule réponse pour tout le devis (`groupe`, dans la fiche du métier) : l'habitude se confirme une fois, avec
+            // la question du groupe ; sinon lot par lot quand plusieurs ouvrages en dépendent.
+            const g = d.groupe;
+            const perLot = !g && piecewise.has(`param:${d.key}`);
+            const usual = (g ? (preferences.params?.[`${d.key}@${g.id}`] ?? preferences.params?.[`${d.key}@${w.id}`]) : perLot ? preferences.params?.[`${d.key}@${w.id}`] : undefined) ?? preferences.params![d.key]!;
+            const key = g ? scopedKey(d.key, g.id) : perLot ? scopedKey(d.key, w.id) : `param:${d.key}`;
+            const question = g ? g.question : perLot ? `${lotLabel(w.label)} : tu façonnes toi-même ou tu commandes façonné ?` : d.question!;
             return [key, { key, question, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: usual }] as const;
           })
           .filter(([key]) => takeoff.answers[key] === undefined),
@@ -1517,6 +1528,10 @@ export class TakeoffService {
       brief,
       fiche,
       habits,
+      // « Il peut modifier ce choix pour une pièce dans le récapitulatif » (Greg, 17 novembre 2026).
+      choixPieces: choixParPiece(ref, e.plan, takeoff.answers),
+      // « Je veux les 6 comprises » (Greg, 17 novembre 2026) : ce que l'artisan peut dire sans qu'on le lui demande.
+      dicibles: donneesDicibles(ref, e.plan, takeoff.answers, [...purchase.questions.map((q) => q.question?.key ?? q.key), ...habits.map((h) => h.key)]),
       aiSuggestions: [],
       withoutSupply: e.sansFourniture,
       siteNotes: notes,

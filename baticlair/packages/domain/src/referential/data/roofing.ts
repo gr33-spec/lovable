@@ -551,6 +551,14 @@ const QUALITE_ARDOISE_PARAM: ParamDef = {
 };
 const FACONNAGE_BANDES_PARAM: ParamDef = {
   ...FACONNAGE_PARAM,
+  // Greg, 17 novembre 2026 : « une seule réponse pour tout le devis, plus jamais pièce par pièce ». S'il plie : des
+  // feuilles, comptées d'après les développés et les longueurs. S'il achète tout fait : des longueurs de pièces façonnées.
+  // Il peut ensuite changer ce choix pour une pièce.
+  groupe: {
+    id: "pieces-pliees",
+    question: "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+    hint: "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés.",
+  },
   question: "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
   hint: "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
   choices: [
@@ -1109,7 +1117,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.17-52",
+  version: "roofing-2026.11.17-53",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],

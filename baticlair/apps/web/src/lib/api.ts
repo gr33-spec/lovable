@@ -367,6 +367,10 @@ export interface Takeoff {
   phrasePrecision?: string;
   /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
   habits?: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  /** Les pièces d'un choix commun au devis (le pliage), chacune avec son choix : il se change pour une pièce au récapitulatif. */
+  choixPieces?: { key: string; piece: string; value: string; unit: string; options: { label: string; value: string }[] }[];
+  /** Les données à boutons que ce devis ne demande pas, mais que l'artisan peut dire de lui-même : jamais posées, confirmées s'il les dit. */
+  dicibles?: { key: string; text: string; unit: string; options: { label: string; value: string; dit?: string[] }[] }[];
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation), repliées sous la liste. */
   /** §50.7 : « Le chantier en bref », le même que chez le fournisseur ; chaque ligne se corrige ou se retire. */
   bref?: { cle: string; texte: string }[];

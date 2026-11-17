@@ -1491,7 +1491,7 @@ test("une lecture refusée au départ se dit, avec sa raison et « Réessayer »
   expect(refused).toBe(1);
 });
 
-test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en haut sans rien cacher", async ({ page }) => {
+test("zinguerie : une seule question de pliage pour le devis, une pièce se change au récapitulatif, et la barre des lignes orange reste en haut sans rien cacher", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Le Goff", "M. Le Goff", "4 rue du Port, Paimpol");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
@@ -1502,22 +1502,38 @@ test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en
   await expect(calculerMaListe(page)).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toHaveCount(0);
   const posees = await repondreAuxQuestions(page, async (q, boutons) => {
-    if (/façonnes/.test(q)) await expect(boutons.getByRole("button", { name: "Je ne sais pas" })).toHaveCount(0);
+    if (/façonnes|plies/.test(q)) await expect(boutons.getByRole("button", { name: "Je ne sais pas" })).toHaveCount(0);
     return null;
   });
-  // Une question par pièce écrite, à son nom ; jamais « Bandes zinc (solin, rive, égout…) : tu façonnes ? ».
-  expect(posees).toContain("Bande de ventilation en Z en zinc quartz : tu façonnes toi-même ou tu commandes façonné ?");
-  expect(posees).toContain("Bande de rive zinc quartz dév. 200 : tu façonnes toi-même ou tu commandes façonné ?");
+  // Greg, 17 novembre 2026 : « "Je plie" : une seule réponse pour tout le devis, plus jamais pièce par pièce ». La bande de
+  // ventilation et la rive partagent UNE question (avant : une par pièce écrite, à son nom).
+  expect(posees.filter((q) => /^Tes pièces pliées/.test(q))).toEqual(["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"]);
+  expect(posees.filter((q) => /^Bande de (ventilation|rive).*façonnes/.test(q))).toEqual([]);
   expect(posees.filter((q) => /Bandes zinc \(solin/.test(q))).toHaveLength(0);
   // « Dév. 200 » est écrit : jamais redemandé.
   expect(posees.filter((q) => /^Bande de rive .*développé/.test(q))).toHaveLength(0);
-  await calculerEtVoirMaListe(page);
+  await calculerMaListe(page).click();
+  // « Il peut modifier ce choix pour une pièce dans le récapitulatif » : chaque pièce avec son choix (« Je façonne », la
+  // réponse donnée pour tout le devis) ; la rive passe « commandé façonné », l'autre pièce ne bouge pas.
+  const recap = page.getByRole("region", { name: "Récapitulatif" });
+  const pieces = recap.getByRole("list", { name: "Ton choix, pièce par pièce" });
+  await expect(pieces).toBeVisible({ timeout: 60_000 });
+  const rive = pieces.getByRole("group", { name: /^Bande de rive/ });
+  const ventilation = pieces.getByRole("group", { name: /^Bande de ventilation/ });
+  await expect(rive.getByRole("button", { name: /^Je façonne/ })).toHaveAttribute("aria-pressed", "true");
+  await rive.getByRole("button", { name: /^Je commande façonné/ }).click();
+  await expect(rive.getByRole("button", { name: /^Je commande façonné/ })).toHaveAttribute("aria-pressed", "true", { timeout: 30_000 });
+  await expect(ventilation.getByRole("button", { name: /^Je façonne/ })).toHaveAttribute("aria-pressed", "true");
+  await voirMaListe(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   // Plus de bulle flottante : une barre fine, collée en haut de l'écran quand on descend dans la liste.
   // Point 2 (Greg, 28 octobre 2026) : « N lignes à vérifier », un bouton qui amène à la première ; rien d'autre.
   const bar = list.getByRole("button", { name: /^\d+ lignes? à vérifier$/ });
   await expect(bar).toBeVisible();
+  // La rive, changée au récapitulatif, n'est plus en feuilles : elle part en longueurs façonnées, à son nom.
+  await expect(list.getByText(/^Feuilles .*rive/i)).toHaveCount(0);
+  await expect(list.getByText("Bande de rive zinc quartz dév. 200, Quartz-Zinc 0,65 mm", { exact: true }).first()).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
   await expect.poll(async () => (await bar.boundingBox())?.y ?? 999).toBeLessThan(40);
   expect((await bar.boundingBox())!.height).toBeLessThan(64);
@@ -1715,7 +1731,7 @@ test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit 
       return true;
     }
     // §51.4 : le façonnage a aussi « Autre ».
-    if (/façonnes/i.test(q)) {
+    if (/façonnes|plies/i.test(q)) {
       await expect(boutons.getByRole("button", { name: "Autre", exact: true })).toHaveCount(1);
       return /^Je commande façonné/;
     }
@@ -1752,7 +1768,7 @@ test("retour du fondateur (2026-10-12) : un refus du serveur se dit dans la disc
   });
   let pente = 0;
   await repondreAuxQuestions(page, async (q, boutons) => {
-    if (q !== "Pente du toit ?") return /façonnes/i.test(q) ? /^Je commande façonné/ : null;
+    if (q !== "Pente du toit ?") return /façonnes|plies/i.test(q) ? /^Je commande façonné/ : null;
     if (++pente === 2) {
       // Le refus : Mobiiz dit la phrase et repose CETTE question, rien d'autre ; « Calculer ma liste » n'est pas proposé.
       await expect(questions.getByText("Réponse trop longue : 300 caractères au plus.")).toBeVisible();
@@ -1778,7 +1794,7 @@ test("« Je ne sais pas » (RÈGLE CHANGÉE le 16 novembre 2026, avant : la poub
   await expect(questions).toBeVisible({ timeout: 60_000 });
   let reprise = false;
   await repondreAuxQuestions(page, async (q, boutons) => {
-    if (/façonnes/i.test(q)) {
+    if (/façonnes|plies/i.test(q)) {
       await expect(boutons.getByRole("button", { name: "Je ne sais pas" })).toHaveCount(0);
       return /^Je commande façonné/;
     }

@@ -1,5 +1,12 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.17-53 — Le pliage : une seule réponse pour tout le devis (Greg, 2026-11-17)
+
+- **§48.6 Règle changée** : « Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ? » se pose UNE fois pour tout le devis (`groupe` « pieces-pliees » : bandes zinc, abergement, porte-solin, noue, faîtage zinc, bandes cuivre). Avant : une question par pièce de zinguerie écrite au devis (retour du 2026-10-07).
+- S'il plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs (§48.6, inchangé). S'il achète tout fait : des longueurs de pièces façonnées (§1, inchangé). Gouttières, descentes, naissances, crochets : articles normaux dans les deux cas (§48.7, inchangé).
+- L'artisan peut changer ce choix pour une pièce : la réponse de la pièce (« param:faconnage@bandes-zinc__3 ») passe devant celle du devis.
+- Ce qui ne change pas : une pièce dont le devis dit le façonnage (« pliée en Z », « comprend le pliage ») n'a pas de question et garde ce que sa ligne écrit ; les bacs d'une couverture à joint debout gardent leur propre question. Aucun ratio ne change.
+
 ## roofing-2026.11.17-52 — Les mots de l'artisan sont sur le bouton (Greg, 2026-11-17 : « le cœur doit s'adapter à n'importe quel métier »)
 
 - **Façonnage** (bacs, bandes zinc, noue, faîtage, cuivre) : chaque bouton porte les mots que l'artisan dit au clavier ou à la voix (`dit`) : « je plie », « moi-même », « je façonne » pour « Je façonne » ; « tout fait », « tout prêt », « j'achète », « commandé » pour « Je commande façonné ». Avant : ces mots étaient écrits dans le lecteur des réponses, commun à tous les métiers.
