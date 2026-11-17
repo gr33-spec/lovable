@@ -220,7 +220,7 @@ describe("champs et textes", () => {
 
 describe("la ville du grand titre se lit (Greg, 17 novembre 2026 : « PLOUBAZLANEC » criait)", () => {
   it("une ville en capitales passe en minuscules avec ses majuscules ; une ville déjà écrite reste telle quelle", async () => {
-    const { villeLisible, titreAccueil } = await import("../src/page-entreprise/page");
+    const { villeLisible, titreAccueil } = await import("../src/page-entreprise/page.js");
     expect(villeLisible("PLOUBAZLANEC")).toBe("Ploubazlanec");
     expect(villeLisible("SAINT-QUAY-PORTRIEUX")).toBe("Saint-Quay-Portrieux");
     expect(villeLisible("BOURG-EN-BRESSE")).toBe("Bourg-en-Bresse");
@@ -232,7 +232,7 @@ describe("la ville du grand titre se lit (Greg, 17 novembre 2026 : « PLOUBAZLAN
 
 describe("la couleur des boutons (Greg, 17 novembre 2026 : « pouvoir changer la couleur des boutons »)", () => {
   it("le jaune Mobiiz par défaut ; chaque couleur garde un texte lisible et une ville lisible sur la photo", async () => {
-    const { COULEURS_BOUTONS, couleurBoutonsDe, texteSurCouleur, couleurSurSombre, contraste } = await import("../src/page-entreprise/index");
+    const { COULEURS_BOUTONS, couleurBoutonsDe, texteSurCouleur, couleurSurSombre, contraste } = await import("../src/page-entreprise/index.js");
     expect(couleurBoutonsDe(null).hex).toBe("#FED206");
     expect(couleurBoutonsDe("#ff00ff").hex).toBe("#FED206");
     expect(couleurBoutonsDe("#1971c2").nom).toBe("Bleu");
