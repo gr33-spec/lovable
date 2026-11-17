@@ -191,3 +191,66 @@ Ce que cette passe montre :
 - La correction de la passe 4 tient en ligne : le façonnage de la rive n'est plus posé deux fois.
 - Réglage gardé sur le site de test : Sonnet 5.5, effort moyen. Un seul devis ne suffit pas à trancher pour de bon :
   le choix final se fera sur les vrais devis de Greg et leurs listes attendues.
+
+## Passe 6 : où part le temps de la lecture (17 novembre 2026, site de test au commit `d0f6ac3f`)
+
+Greg : « Lecture du devis : 24 secondes, c'est trop long. Mesure où part le temps et descends sous 10 secondes. »
+Même devis zinc, petit iPhone, vraie IA, chronomètre du clic « Analyser » à la première question
+(`scratchpad/chrono-lecture.mjs`). Trois réglages, le même jour.
+
+| Lecture | Du clic à la première question | Appel de lecture | Mots-jetons écrits | Coût de la lecture |
+|---|---|---|---|---|
+| Sonnet 5.5, effort moyen (réglage gardé) | 24 s | 15,1 s | 2 913 | 0,117 $ |
+| Haiku 5.5, effort moyen | 49 s | 39,6 s | 9 902 | 0,009 $ |
+| Haiku 5.5, effort bas | 36 s | 28,2 s | 7 247 | 0,004 $ |
+
+Où partent les 24 secondes du réglage gardé :
+
+| Étape | Durée |
+|---|---|
+| Envoi du devis et ouverture de l'écran de lecture | 2,8 s |
+| Repérage des métiers (un petit appel avant la lecture) | 1,8 à 3,8 s |
+| Lecture du devis (le modèle écrit la fiche, le bref, les questions, les lignes) | 15,1 s |
+| Attente de l'écran (il regardait toutes les 3 secondes) | 0 à 3 s |
+
+Ce que cette passe montre :
+
+- Le temps de la lecture est celui des mots que le modèle ÉCRIT, pas celui du devis. La réponse utile pèse environ
+  7 000 caractères (fiche 2 400, questions 2 100, lignes 2 500, bref 300), soit 2 300 mots-jetons : 12 secondes à la
+  vitesse de Sonnet. Le reste est de la réflexion.
+- Haiku est dix fois moins cher mais plus lent ici : il réfléchit trois fois plus longtemps avant d'écrire, même à
+  l'effort le plus bas. Sans changement de code, il ne fait pas gagner de temps.
+- Le mode rapide du fournisseur n'existe que pour Opus 5.5, au double de son prix : écarté.
+- Aucun réglage ne passe sous 10 secondes. Le plancher, avec une seule lecture qui écrit tout, est d'environ
+  12 secondes d'écriture, plus l'envoi et le repérage.
+
+Ce qui est fait (lot « vitesse ») :
+
+- L'écran regarde où en est la lecture chaque seconde (avant : toutes les 3 secondes).
+- Réglage `AI_EXTRACTION_REFLEXION` (`auto` par défaut, `minimale` : le modèle écrit sans réfléchir d'abord, pour la
+  lecture et pour le repérage). Éteint par défaut : à mesurer en ligne, puis à juger sur le jeu de test.
+
+Ce qu'il faut pour passer sous 10 secondes (à faire avec les vrais devis de Greg comme jeu de test, parce que la
+qualité de la lecture passe avant la vitesse) :
+
+1. Faire écrire moins au modèle d'un seul tenant : deux lectures en même temps (les questions et les lignes d'un côté,
+   la fiche et le bref de l'autre). Le temps devient celui de la plus longue, environ 6 à 8 secondes.
+2. Montrer la première question dès qu'elle est écrite, pendant que le reste de la lecture se termine.
+3. Lancer le repérage des métiers en même temps que la lecture, au lieu d'avant.
+
+## Passe 7 : les deux réglages allumés en ligne (17 novembre 2026, commit 2dc78660)
+
+Site de test, devis zinc, Sonnet 5.5 effort moyen, `AI_EXTRACTION_REFLEXION=minimale` et
+`LECTURE_ET_REPERAGE_ENSEMBLE=on` (variables de la branche de test), du clic « Analyser » à la première question :
+
+| Essai | Total | Envoi | Repérage | Lecture | Mots-jetons écrits | Coût de la lecture |
+|---|---|---|---|---|---|---|
+| 1 (rien en mémoire chez le fournisseur) | 27,8 s | 2,8 s | 3,0 s | 18,6 s | 2 899 | 0,117 $ |
+| 2 (prompt déjà en mémoire) | 18,8 s | 2,8 s | 2,2 s | 13,9 s | 2 538 | 0,030 $ |
+
+- Le repérage ne s'ajoute plus : il part avec la lecture. Gain : 2 à 3 secondes.
+- « Écrire sans réfléchir d'abord » ne change presque rien au nombre de mots écrits (2 500 à 2 900, comme avant).
+- Le cas de Greg, rejoué sur ce commit : six réponses sur six, « Noté : Je commande façonné (bacs), Je façonne
+  (feuilles ou bobineau), 1, Bord de mer, 0,65 mm, Sur les chevrons. »
+- Toujours au-dessus de 10 secondes : le plancher reste le temps d'écriture d'une seule lecture (14 secondes ici).
+  La suite est le point 1 ci-dessus : couper la lecture en deux appels simultanés.

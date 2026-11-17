@@ -698,6 +698,16 @@ export function ecranDeLecture(input: {
     const sp = scopedParam(question.key);
     const habit = def?.kind === "artisan_preference" ? (input.preferences?.params?.[`${q.cle}@${sp ? baseOf(sp.workItemId) : ""}`] ?? input.preferences?.params?.[q.cle]) : undefined;
     if (habit !== undefined && answers[question.key] === undefined) return [];
+    // Recette en ligne du 17 novembre 2026 (devis zinc) : le modèle a posé UNE question de façonnage sans viser de ligne,
+    // pour les bacs et pour les pièces pliées à la fois ; « tout fait » valait alors pour tout, et « je plie » était perdu.
+    // Une question sans ligne sur une donnée que le calcul demande ouvrage par ouvrage (ou par groupe) EST les questions
+    // du calcul, avec leurs clés et leurs mots : les bacs d'un côté, les pièces pliées de l'autre.
+    if (question.key === `param:${q.cle}` && !q.ligne) {
+      const duCalcul = engine.questions.filter((e) => scopedParam(e.key)?.name === q.cle);
+      if (duCalcul.length > 0) {
+        return duCalcul.map((e) => ({ q: { ...q, texte: e.text, boutons: (e.options ?? []).map((o) => ({ label: o.label, valeur: o.value })) }, key: e.key, question: e }));
+      }
+    }
     return [{ q, key: question.key, question }];
   });
   // Deux questions du modèle pour deux pièces d'un même groupe (la bande de ventilation, la rive) : une seule question.

@@ -42,7 +42,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
       provide: LECTURE_READER,
       useFactory: (config: AppConfig): LectureReader | null => {
         const ia = fabriqueIa(config);
-        return ia ? new IaLectureReader(ia, config.ai.extractionModel, config.ai.effort, config.ai.quantitatifModel) : config.ai.provider === "fake" ? new FakeLectureReader() : null;
+        return ia ? new IaLectureReader(ia, config.ai.extractionModel, config.ai.effort, config.ai.quantitatifModel, config.ai.reflexion) : config.ai.provider === "fake" ? new FakeLectureReader() : null;
       },
       inject: [CONFIG],
     },
@@ -122,6 +122,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             // Sur Vercel, la lecture d'un gros devis continue après la réponse (sinon la fonction s'arrête).
             keepAlive: (work) => waitUntil(work),
             answerWithinMs: config.ai.answerWithinMs,
+            lectureEtReperageEnsemble: config.ai.lectureEtReperageEnsemble,
             onReadingFailed: (reason) => alerter.alert("ai_reading_failed", `raison : ${reason}.`),
             // Revue du 26 octobre 2026 : une panne passagère de l'IA repart seule (file de reprise, 2 nouveaux essais).
             onEchecPassager: (tenant, documentId, reason) => {

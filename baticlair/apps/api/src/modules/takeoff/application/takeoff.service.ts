@@ -87,6 +87,8 @@ import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.rep
  *   avant tout appel, et le nombre d'appels est plafonné.
  */
 export interface ReadingOptions {
+  /** La lecture part en même temps que le repérage des métiers (`LECTURE_ET_REPERAGE_ENSEMBLE`) ; éteint sans réglage. */
+  lectureEtReperageEnsemble?: boolean;
   /**
    * L'apprentissage des corrections (Greg, 24 octobre 2026) : une correction répétée sur 2 chantiers (ou validée par l'admin
    * après 3 artisans) s'applique d'elle-même à la liste, « Ajusté selon tes habitudes », annulable en un clic.
@@ -531,8 +533,23 @@ export class TakeoffService {
       return lecteur.lire({ document, trade: t, tradeLabel: tradeProfile(t).label, referentiel, siteNotes });
     };
     const donne = referentialFor(trade)?.trade ?? tradeIdOf(trade.split(",")[0] ?? "");
+    // VITESSE (Greg, 17 novembre 2026 : « 24 secondes, c'est trop long ») : avec `LECTURE_ET_REPERAGE_ENSEMBLE`, la lecture
+    // part avec le métier du compte EN MÊME TEMPS que le repérage, au lieu d'attendre sa réponse (2 à 4 secondes). Si le
+    // repérage confirme ce seul métier (le cas d'un artisan qui lit un devis de son métier), cette lecture est gardée.
+    // Sinon elle est comptée (elle a coûté) puis écartée, et la lecture repart comme avant avec les bons référentiels.
+    const ensemble = this.reading.lectureEtReperageEnsemble === true && donne !== "general" && referentialFor(trade) !== null;
+    const pari = ensemble ? lire(trade, [donne]) : null;
+    pari?.catch(() => null);
     const reperage = donne === "general" ? { metiers: [], sections: [] } : await this.reperer(lecteur, document.numberedText, compter);
     const vus = reperage.metiers;
+    if (pari) {
+      const confirme = (vus.length === 0 || (vus.length === 1 && vus[0] === donne)) && !lectureParLots([donne], document.numberedText);
+      const lu = await pari.catch(() => null);
+      const garde = confirme && lu !== null && lu.status === "success" && lu.output !== null && metiersDesLots(lu.output, trade).length === 0 && metierAutre(lu.output, trade) === null;
+      // Gardée : c'est LA lecture (essai n° 1). Écartée : elle est comptée à part (essai n° 0), elle a coûté.
+      if (lu) await compter(garde ? 1 : 0, lu, LECTURE_PROMPT);
+      if (garde && lu) return { result: lu, trade };
+    }
     // Un devis d'un autre métier que le compte : ce métier ; un devis à plusieurs lots sans le métier du compte : le principal.
     if (vus.length > 0 && !vus.includes(donne)) trade = vus[0]!;
     const principal = referentialFor(trade)?.trade ?? trade;

@@ -28,7 +28,7 @@ const CAS: Metier[] = [
     ref: ROOFING_REFERENTIAL,
     metier: "couverture",
     bench: [{ ref: "1", designation: "Bande cuivre dév. 33", quantity: "12", unit: "ml" }],
-    questions: ["Bandes cuivre : tu les façonnes toi-même ou tu les commandes façonnées ?"],
+    questions: ["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"],
     couleurs: { vert: 0, orange: 1, gris: 0 },
   },
 ];

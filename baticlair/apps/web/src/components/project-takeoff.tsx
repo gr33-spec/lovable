@@ -162,20 +162,21 @@ export function ProjectTakeoff({
     );
   }, [clientQuote, run, update]);
 
-  // Lecture en cours sur le serveur : on regarde toutes les 3 secondes où elle en est.
+  // Lecture en cours sur le serveur : on regarde chaque seconde où elle en est (Greg, 17 novembre 2026 : « 24 secondes,
+  // c'est trop long » ; avant : toutes les 3 secondes, soit jusqu'à 3 secondes d'attente pour rien après la fin).
   const readingNow = data?.takeoff === null && data.reading?.status === "reading";
   useEffect(() => {
     if (!readingNow) return;
-    const t = setInterval(reload, 3000);
+    const t = setInterval(reload, 1000);
     return () => clearInterval(t);
   }, [readingNow, reload]);
 
-  // §48 : le calcul (appel IA n° 2) tourne sur le serveur : on regarde toutes les 3 secondes s'il a fini.
+  // §48 : le calcul (appel IA n° 2) tourne sur le serveur : on regarde chaque seconde s'il a fini (avant : toutes les 3).
   const phase = quantitatif?.phase ?? "resultat";
   const calculating = Boolean(data?.takeoff) && phase === "calcul";
   useEffect(() => {
     if (!calculating) return;
-    const t = setInterval(reload, 3000);
+    const t = setInterval(reload, 1000);
     return () => clearInterval(t);
   }, [calculating, reload]);
   // Les étapes qui finissent pendant que l'artisan est ailleurs : on le prévient (et le nom lu du devis s'affiche).

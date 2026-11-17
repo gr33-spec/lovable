@@ -23,7 +23,7 @@ Devis de test :
 **À l'ouverture : 1 verte · 2 orange · 0 grise.**
 
 Questions du comptoir :
-- Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ? (Je façonne (feuilles ou bobineau) / Je commande façonné)
+- Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ? (Je façonne (feuilles ou bobineau) / Je commande façonné)
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ? (Oui / Modifier)
 
 | Ligne orange | Chiffre | Sous-ligne |
@@ -53,7 +53,7 @@ Devis de test :
 
 Questions du comptoir :
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
-- Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ? (Je façonne (feuilles ou bobineau) / Je commande façonné)
+- Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ? (Je façonne (feuilles ou bobineau) / Je commande façonné)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |

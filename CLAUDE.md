@@ -189,6 +189,8 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Tuile à remplacer : une seule question, « Quelle tuile ? » (modèle et teinte ensemble), prompt `lecture_devis` version 7.
 - Six réponses sur six (Greg, 17 novembre 2026) : une donnée déjà connue (l'habitude dite dans le fil) ou que le devis ne demande pas (la pose des crochets) est confirmée, ou changée, quand l'artisan la dit ; jamais posée ni reposée. Test `six-reponses-sur-six.test.ts`.
 - Sécurité : Next 16.4.6 (faille GHSA-mfr8-8qww-v76h de 16.4.2), accord de Greg du 17 novembre 2026.
+- Vitesse de lecture (mesures du 17 novembre 2026, `baticlair/docs/quantitatif-ia-mesures.md`, passe 6) : le temps est celui des mots que le modèle écrit ; Haiku 5.5 est plus lent ici que Sonnet 5.5 (il réfléchit plus). L'écran regarde chaque seconde (avant : 3). Deux réglages éteints par défaut : `AI_EXTRACTION_REFLEXION=minimale` (écrire sans réfléchir d'abord) et `LECTURE_ET_REPERAGE_ENSEMBLE=on` (la lecture part avec le repérage ; une lecture de plus quand le devis est d'un autre métier). Sous 10 secondes : il faudra couper la lecture en deux appels simultanés, à juger sur les vrais devis de Greg.
+- Une question de façonnage du modèle sans ligne visée devient les questions du calcul (les bacs, les pièces pliées) : jamais la clé commune, qui vaudrait pour tout.
 - Chaque ligne dit son origine quand la liste mêle les deux : « Dit par toi », « Calculé », « À vérifier ».
 - Admin › « Corrections les plus fréquentes » : la ligne proposée et la ligne corrigée, sur 90 jours, sans nom d'entreprise ni de chantier.
 

@@ -16,10 +16,11 @@ export class IaLectureReader implements LectureReader {
   private readonly tranches: LecteurIa | null;
 
   /** `fastModel` : le modèle rapide du repérage des métiers (texte seul, quelques secondes). */
-  constructor(ia: FabriqueIa, model: string, effort: "low" | "medium" | "high" | "xhigh" | "max", fastModel?: string) {
-    this.reader = ia({ model, effort });
+  constructor(ia: FabriqueIa, model: string, effort: "low" | "medium" | "high" | "xhigh" | "max", fastModel?: string, reflexion: "auto" | "minimale" = "auto") {
+    this.reader = ia({ model, effort, reflexion });
     this.provider = this.reader.provider;
-    this.rapide = fastModel ? ia({ model: fastModel, effort: "low" }) : null;
+    // Le repérage des métiers rend une liste de quelques mots : il n'a rien à réfléchir, et l'artisan attend derrière.
+    this.rapide = fastModel ? ia({ model: fastModel, effort: "low", reflexion }) : null;
     this.tranches = fastModel ? ia({ model: fastModel, effort: "medium" }) : null;
   }
 

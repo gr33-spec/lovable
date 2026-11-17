@@ -243,7 +243,7 @@ export function RecapScreen({ takeoff, onVoir, onChoix, pending = false }: { tak
                         disabled={pending}
                         onClick={() => (o.value === c.value ? undefined : onChoix(c.key, o.value, c.unit))}
                         className="pressable min-h-11 rounded-full border px-4 text-[15px] font-semibold disabled:opacity-60"
-                        style={o.value === c.value ? { backgroundColor: COULEURS_CHAT.jaune, borderColor: COULEURS_CHAT.jaune, color: "#111111" } : { borderColor: COULEURS_CHAT.trait, backgroundColor: "var(--chat-carte)" }}
+                        style={o.value === c.value ? { backgroundColor: COULEURS_CHAT.jaune, borderColor: COULEURS_CHAT.jaune, color: "#111111" } : { borderColor: COULEURS_CHAT.trait, backgroundColor: "transparent", color: COULEURS_CHAT.ivoire }}
                       >
                         {o.label}
                       </button>

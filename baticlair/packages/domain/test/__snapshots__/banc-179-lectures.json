@@ -909,7 +909,7 @@
    }
   ],
   "questions": [
-   "param:faconnage",
+   "param:faconnage@pieces-pliees",
    "product:tuile"
   ],
   "aChiffrer": []
@@ -962,7 +962,7 @@
    }
   ],
   "questions": [
-   "param:faconnage",
+   "param:faconnage@pieces-pliees",
    "param:perimetre_cheminee"
   ],
   "aChiffrer": []
@@ -1235,7 +1235,7 @@
    }
   ],
   "questions": [
-   "param:faconnage",
+   "param:faconnage@pieces-pliees",
    "param:developpe",
    "param:consommables"
   ],
@@ -1305,7 +1305,7 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -1364,7 +1364,7 @@
    }
   ],
   "questions": [
-   "param:faconnage",
+   "param:faconnage@pieces-pliees",
    "param:perimetre_cheminee"
   ],
   "aChiffrer": []
@@ -1618,7 +1618,7 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -1659,7 +1659,7 @@
    }
   ],
   "questions": [
-   "param:faconnage",
+   "param:faconnage@pieces-pliees",
    "param:developpe",
    "param:consommables"
   ],
@@ -1810,7 +1810,7 @@
    }
   ],
   "questions": [
-   "param:faconnage",
+   "param:faconnage@pieces-pliees",
    "param:perimetre_cheminee"
   ],
   "aChiffrer": []
@@ -2244,7 +2244,7 @@
    }
   ],
   "questions": [
-   "param:faconnage",
+   "param:faconnage@pieces-pliees",
    "param:developpe",
    "param:consommables"
   ],
@@ -2298,7 +2298,7 @@
    }
   ],
   "questions": [
-   "param:faconnage",
+   "param:faconnage@pieces-pliees",
    "param:perimetre_cheminee"
   ],
   "aChiffrer": []
@@ -3571,7 +3571,7 @@
    }
   ],
   "questions": [
-   "param:faconnage",
+   "param:faconnage@pieces-pliees",
    "param:developpe",
    "param:consommables"
   ],
@@ -4019,7 +4019,7 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -4982,7 +4982,7 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -5310,7 +5310,7 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -5769,7 +5769,7 @@
   ],
   "questions": [
    "param:qualite_ardoise",
-   "param:faconnage"
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": [
    "Arêtiers (Arêtier zinc dév. 33)"

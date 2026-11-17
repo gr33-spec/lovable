@@ -808,7 +808,8 @@ export function choixParPiece(ref: Referential, plan: QuotePlan, answers: Readon
     const work = ref.workItems.find((w) => w.id === baseOf(i.workItemId));
     return (work?.params ?? []).flatMap((def) => {
       if (!def.groupe || !def.choices?.length || i.params[def.key]?.origin === "devis") return [];
-      const v = [answers[scopedKey(def.key, i.workItemId)], answers[scopedKey(def.key, def.groupe.id)]].find((x) => x && typeof x !== "string");
+      // Le choix de la pièce, sinon celui du groupe, sinon une réponse donnée pour tout le chantier (« param:faconnage »).
+      const v = [answers[scopedKey(def.key, i.workItemId)], answers[scopedKey(def.key, def.groupe.id)], answers[`param:${def.key}`]].find((x) => x && typeof x !== "string");
       if (!v || typeof v === "string") return [];
       return [{ key: scopedKey(def.key, i.workItemId), piece: i.label ?? lotLabel(work!.label), value: v.value, unit: def.unit, options: def.choices.map((c) => ({ label: c.label, value: c.value })) }];
     });

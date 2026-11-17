@@ -33,7 +33,7 @@ function fabriqueDuFournisseur(config: AppConfig, options: { fetchImpl?: typeof 
   const ai = config.ai;
   switch (ai.provider) {
     case "anthropic":
-      return ({ model, effort }) => new AnthropicDocumentReader(ai.apiKey!, model, effort, options.fetchImpl, ai.timeoutMs);
+      return ({ model, effort, reflexion }) => new AnthropicDocumentReader(ai.apiKey!, model, effort, options.fetchImpl, ai.timeoutMs, reflexion ?? "auto");
     case "openai":
       return ({ model, effort }) => new OpenAiDocumentReader(ai.apiKey!, model, effort, options.fetchImpl as never, ai.timeoutMs);
     case "enregistre":

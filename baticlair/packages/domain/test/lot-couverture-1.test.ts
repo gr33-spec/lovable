@@ -21,7 +21,7 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Arêtiers, toit à 4 pans", quantity: "24", unit: "ml" },
       { ref: "3", designation: "Noue zinc", quantity: "8", unit: "ml" },
     ],
-    questions: ["Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ?", "J'ai identifié : Tuiles HP10. C'est bien ce modèle ?"],
+    questions: ["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "J'ai identifié : Tuiles HP10. C'est bien ce modèle ?"],
     couleurs: { vert: 1, orange: 2, gris: 0 },
   },
   {
@@ -33,7 +33,7 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Arêtier zinc dév. 33", quantity: "10", unit: "ml" },
       { ref: "3", designation: "Noue encaissée zinc", quantity: "4", unit: "ml" },
     ],
-    questions: ["Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ?"],
+    questions: ["Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"],
     couleurs: { vert: 0, orange: 3, gris: 1 },
   },
 ];
