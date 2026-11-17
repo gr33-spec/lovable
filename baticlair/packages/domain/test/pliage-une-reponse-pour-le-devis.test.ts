@@ -105,6 +105,8 @@ describe("le pliage : une seule réponse pour tout le devis", () => {
     const rive = plie.find((c) => /rive/.test(c.piece))!;
     const change = choixParPiece(ROOFING_REFERENTIAL, plan, { [PLIAGE]: { value: "1", unit: "u" }, [rive.key]: { value: "2", unit: "u" } });
     expect(change.map((c) => c.value)).toEqual(["1", "1", "2", "1"]);
+    // Une réponse donnée pour tout le chantier (l'ancienne clé commune) se change aussi pièce par pièce.
+    expect(choixParPiece(ROOFING_REFERENTIAL, plan, { "param:faconnage": { value: "2", unit: "u" } }).map((c) => c.value)).toEqual(["2", "2", "2", "2"]);
   });
 
   it("recette en ligne du 17 novembre 2026 : UNE question de façonnage du modèle, sans ligne, devient les deux questions du calcul (les bacs, les pièces pliées)", () => {
