@@ -387,6 +387,9 @@ const RAMPANT_PARAM: ParamDef = {
  * Métal façonné (§40.2, §41.2) : « tu façonnes toi-même ou tu commandes façonné ? ». La réponse change
  * tout : bobines au mètre linéaire d'un côté, pièces aux dimensions de l'autre. Pas de défaut : on demande.
  */
+/** Les mots de l'artisan pour le façonnage (Greg, 16 novembre 2026 : « J'achète tout fait », « ou je pli »). */
+const DIT_JE_FACONNE = ["pli", "plie", "plis", "plies", "plier", "pliage", "je plie", "je le plie", "je les plie", "je la plie", "moi meme", "je fais", "je le fais", "je les fais", "je la fais", "je faconne", "je le faconne", "je les faconne", "je la faconne"];
+const DIT_JE_COMMANDE = ["tout fait", "tout faits", "toute faite", "toutes faites", "tout pret", "tout prets", "toute prete", "toutes pretes", "achete", "deja faconne", "deja faconnes", "deja faconnee", "deja faconnees", "commande", "commandes", "commandee", "commandees"];
 const FACONNAGE_PARAM: ParamDef = {
   key: "faconnage",
   // §48.6 : une question par ouvrage, jamais une réponse prêtée d'une pièce à l'autre.
@@ -397,8 +400,8 @@ const FACONNAGE_PARAM: ParamDef = {
   question: "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?",
   hint: "Bobine de zinc au mètre linéaire si tu façonnes ; bacs à la longueur du rampant sinon.",
   choices: [
-    { label: "Je façonne (bobines)", value: "1" },
-    { label: "Je commande façonné (bacs)", value: "2" },
+    { label: "Je façonne (bobines)", value: "1", dit: DIT_JE_FACONNE },
+    { label: "Je commande façonné (bacs)", value: "2", dit: DIT_JE_COMMANDE },
   ],
   display: { "1": "je façonne", "2": "commandé façonné" },
 };
@@ -551,8 +554,8 @@ const FACONNAGE_BANDES_PARAM: ParamDef = {
   question: "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
   hint: "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
   choices: [
-    { label: "Je façonne (feuilles ou bobineau)", value: "1" },
-    { label: "Je commande façonné", value: "2" },
+    { label: "Je façonne (feuilles ou bobineau)", value: "1", dit: DIT_JE_FACONNE },
+    { label: "Je commande façonné", value: "2", dit: DIT_JE_COMMANDE },
   ],
   // « Façonnage et pose des bandes de rive » (D-2026-020), « comprend le pliage » (D-2026-018) : l'artisan les façonne
   // lui-même. « Bandes de ventilation perforées pliées en Z » (D-2026-018) : la pièce s'achète déjà pliée. §48.6 : une
@@ -952,8 +955,8 @@ const FACONNAGE_CUIVRE_PARAM: ParamDef = {
   ...FACONNAGE_BANDES_PARAM,
   question: "Bandes cuivre : tu les façonnes toi-même ou tu les commandes façonnées ?",
   choices: [
-    { label: "Je façonne (feuilles ou bobine)", value: "1" },
-    { label: "Je commande façonné", value: "2" },
+    { label: "Je façonne (feuilles ou bobine)", value: "1", dit: DIT_JE_FACONNE },
+    { label: "Je commande façonné", value: "2", dit: DIT_JE_COMMANDE },
   ],
   hint: "Je façonne : feuilles de cuivre 2 × 1 m, bobine au mètre au-delà de 6 ml. Commandées façonnées : longueurs de 2 m.",
 };
@@ -1106,7 +1109,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.11-51",
+  version: "roofing-2026.11.17-52",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],

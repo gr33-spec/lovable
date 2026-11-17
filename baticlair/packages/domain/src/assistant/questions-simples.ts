@@ -6,12 +6,12 @@
  */
 export interface QuestionAffichee {
   texte: string;
-  options: { label: string; value: string }[];
+  options: { label: string; value: string; dit?: string[] }[];
 }
 
 const ZONE = /^(?:engine:)?param:zone(?:@|$)/;
 
-export function questionEnMotsSimples(cle: string, texte: string, options: readonly { label: string; value: string }[]): QuestionAffichee {
+export function questionEnMotsSimples(cle: string, texte: string, options: readonly { label: string; value: string; dit?: string[] }[]): QuestionAffichee {
   if (ZONE.test(cle) && options.some((o) => o.value === "3") && options.some((o) => o.value === "1")) {
     const autres = options.filter((o) => !["1", "2", "3"].includes(o.value));
     return {

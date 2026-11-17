@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { interpreterReponsesNumerotees, phraseNotee, questionEnMotsSimples, type QuestionNumerotee } from "../src/index.js";
+import { interpreterReponsesNumerotees, phraseNotee, questionEnMotsSimples, ROOFING_REFERENTIAL, type QuestionNumerotee } from "../src/index.js";
+import { avecMotsDits } from "./support/mots-dits.js";
 
 /**
  * LA DISCUSSION DES QUESTIONS (Greg, 16 novembre 2026, retour de test sur le zinc à joint debout) : « L'IA comprend les
@@ -14,14 +15,14 @@ const zone = questionEnMotsSimples("param:zone", "Zone climatique ?", [
   { label: "Bord de mer, ou plus de 500 m", value: "3" },
 ]);
 
-const QUESTIONS: QuestionNumerotee[] = [
+const QUESTIONS: QuestionNumerotee[] = avecMotsDits([
   { numero: 1, cle: "param:faconnage@joint-debout", texte: "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?", options: [{ label: "Je façonne (bobines)", value: "1" }, { label: "Je commande façonné (bacs)", value: "2" }], unite: null, libre: "written" },
   { numero: 2, cle: "param:epaisseur_zinc", texte: "Épaisseur du zinc ?", options: [{ label: "0,65 mm", value: "0.65" }, { label: "0,70 mm", value: "0.7" }, { label: "0,80 mm", value: "0.8" }], unite: "mm", libre: "number" },
   { numero: 3, cle: "param:nb_descentes", texte: "Combien de descentes pour cette gouttière ?", options: [], unite: "u", numerique: true },
   { numero: 4, cle: "param:pose_crochets", texte: "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?", options: [{ label: "Sur les chevrons", value: "1" }, { label: "En façade (bandeau)", value: "2" }], unite: null, libre: "written" },
   { numero: 5, cle: "param:faconnage@bandes-zinc__12", texte: "Bande de rive zinc : tu façonnes toi-même ou tu commandes façonné ?", options: [{ label: "Je façonne", value: "1" }, { label: "Je commande façonné", value: "2" }], unite: null, libre: "written" },
   { numero: 6, cle: "param:zone", texte: zone.texte, options: zone.options, unite: "u" },
-];
+]);
 
 const lus = (texte: string, questions = QUESTIONS) => interpreterReponsesNumerotees(questions, texte).map((r) => (r.statut === "compris" ? r.libelle : null));
 
@@ -82,6 +83,13 @@ describe("le jeu de test, contre le code seul", () => {
   const cas = JSON.parse(readFileSync(new URL("../../../apps/web/scripts/jeu-quantitatif/cas.json", import.meta.url), "utf8")) as { questions: Record<string, QuestionNumerotee[]>; reponses: { nom: string; questions: string; texte: string; attendu: (string | null)[] }[] };
   const meme = (attendu: string | null, recu: string | null) => (attendu === null ? recu === null : recu !== null && (/^\d+(?:[.,]\d+)?$/.test(attendu) ? Number(attendu.replace(",", ".")) === Number(recu.replace(",", ".")) : attendu.toLowerCase() === recu.toLowerCase()));
   const jouer = (c: (typeof cas.reponses)[number]) => interpreterReponsesNumerotees(cas.questions[c.questions]!, c.texte).map((r) => (r.statut === "compris" ? r.valeur : null));
+
+  it("les mots dits du jeu de test sont ceux de la fiche du métier, jamais une copie qui dérive", () => {
+    const fiche = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.params).filter((p) => p.key === "faconnage").flatMap((p) => p.choices ?? []);
+    const dits = Object.values(cas.questions).flat().flatMap((q) => q.options.filter((o) => o.dit).map((o) => ({ value: o.value, dit: o.dit })));
+    expect(dits.length).toBeGreaterThan(0);
+    for (const d of dits) expect(d.dit).toEqual(fiche.find((c) => c.value === d.value)?.dit);
+  });
 
   it("aucune réponse fausse, sur aucun cas", () => {
     for (const c of cas.reponses) {

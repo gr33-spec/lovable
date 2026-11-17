@@ -158,7 +158,7 @@ export interface Question {
   text: string;
   hint?: string;
   unit?: string;
-  options?: { label: string; value: string }[];
+  options?: { label: string; value: string; dit?: string[] }[];
   /** Une qualité qui se nomme : « Autre » laisse l'écrire en texte. */
   named?: boolean;
   /** Pourquoi elle compte : « De 1 191 à 1 445 pièces selon la réponse ». */

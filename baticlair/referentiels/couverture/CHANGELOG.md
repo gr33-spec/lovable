@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.17-52 — Les mots de l'artisan sont sur le bouton (Greg, 2026-11-17 : « le cœur doit s'adapter à n'importe quel métier »)
+
+- **Façonnage** (bacs, bandes zinc, noue, faîtage, cuivre) : chaque bouton porte les mots que l'artisan dit au clavier ou à la voix (`dit`) : « je plie », « moi-même », « je façonne » pour « Je façonne » ; « tout fait », « tout prêt », « j'achète », « commandé » pour « Je commande façonné ». Avant : ces mots étaient écrits dans le lecteur des réponses, commun à tous les métiers.
+- Aucune question, aucun bouton, aucun ratio ne change : s'il plie, des feuilles de zinc 2 × 1 m (§48.6) ; sinon des longueurs toutes prêtes (§1).
+- Deux boutons dits dans la même réponse (« je commande… et je plie ») : la question est reposée avec ses boutons. Avant : « je plie » l'emportait.
+
 ## roofing-2026.10.11-51 — Deux fenêtres de toit, deux tailles (retour du fondateur, 2026-10-11)
 
 - **§11 Fenêtres de toit** : l'ouvrage se prend ligne par ligne (`perLine`), comme les pièces de zinc (§48.6). Deux fenêtres écrites sur deux lignes (« Fenêtre de toit 114x118 », « Fenêtre de toit Velux MK04 ») gardent chacune leur taille, leur nombre et leur raccord. Avant : une seule fenêtre pour tout le devis, et une fausse question « Taille de la fenêtre de toit : 114118 u (…), ou 7898 u (…) ? ». Aucun ratio ne change.

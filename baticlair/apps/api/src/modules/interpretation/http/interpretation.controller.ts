@@ -15,7 +15,7 @@ const question = z.object({
   numero: z.number().int().min(1).max(50),
   cle: z.string().min(1).max(200),
   texte: z.string().min(1).max(400),
-  options: z.array(z.object({ label: z.string().max(120), value: z.string().max(120) })).max(20),
+  options: z.array(z.object({ label: z.string().max(120), value: z.string().max(120), dit: z.array(z.string().max(60)).max(40).optional() })).max(20),
   unite: z.string().max(20).nullable(),
   libre: z.enum(["number", "text", "written"]).optional(),
   numerique: z.boolean().optional(),

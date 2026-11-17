@@ -15,7 +15,8 @@ export interface QuestionNumerotee {
   numero: number;
   cle: string;
   texte: string;
-  options: readonly { label: string; value: string }[];
+  /** `dit` : les mots de l'artisan pour ce bouton, donnés par la fiche du métier (jamais écrits dans ce module). */
+  options: readonly { label: string; value: string; dit?: readonly string[] }[];
   /** L'unité de la valeur (« mm », « ° », « m2 », « u »), ou null. */
   unite: string | null;
   /** Ce qui peut s'écrire hors des boutons : une valeur chiffrée, un nom (modèle, teinte), une réponse écrite. */
@@ -153,13 +154,11 @@ function boutonsNommes(q: QuestionNumerotee, morceau: string): { label: string; 
   // Une valeur nue (« 1 ») ne désigne un bouton que si elle n'est pas un simple rang caché (« 1 » = « Je façonne »).
   const exacts = q.options.filter((o) => norm(o.label) === t || (norm(o.value) === t && (!/^\d+$/.test(t) || contient(norm(o.label), t))));
   if (exacts.length) return exacts;
-  // LE SENS (Greg, 16 novembre 2026 : « J'achète tout fait », « je pli ») : les mots de l'artisan pour le façonnage.
-  const faconne = q.options.filter((o) => /^je faconne/.test(norm(o.label)));
-  const commande = q.options.filter((o) => /commande/.test(norm(o.label)));
-  if (faconne.length === 1 && commande.length === 1) {
-    if (/\b(?:tout(?:e|es)? fait(?:e|es|s)?|tout(?:e|es)? prets?|achete|j achete|deja faconne(?:e|es|s)?|commande(?:e|es|s)?)\b/.test(t) && !/\bje (?:le |les |la )?(?:faconne|pli|plie|plis)\b/.test(t)) return commande;
-    if (/\b(?:pli|plie|plis|plies|plier|pliage|moi meme|je (?:le |les |la )?fais|je (?:le |les |la )?faconne)\b/.test(t)) return faconne;
-  }
+  // LE SENS (Greg, 16 novembre 2026 : « J'achète tout fait », « je pli ») : les mots de l'artisan viennent du bouton
+  // (`dit`, écrit dans la fiche du métier). Ce module ne connaît aucun métier. Deux boutons dits à la fois : c'est un vrai
+  // doute, la question est reposée avec ses boutons.
+  const parMotsDits = q.options.filter((o) => (o.dit ?? []).some((m) => contient(t, m)));
+  if (parMotsDits.length) return parMotsDits;
   const parLibelle = q.options.filter((o) => contient(t, o.label) || contient(t, o.label.replace(/\s*\(.*?\)\s*/g, " ")));
   if (parLibelle.length) {
     // « Je façonne (bobine) » et « Je façonne » : le plus long libellé dit l'emporte.
