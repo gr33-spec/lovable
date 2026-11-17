@@ -39,6 +39,8 @@ export interface LecteurIa {
 export interface ChoixModele {
   model: string;
   effort: EffortIa;
+  /** `minimale` : écrire sans réfléchir d'abord, quand le modèle le permet. Sans valeur : le modèle décide. */
+  reflexion?: "auto" | "minimale";
 }
 
 /** Fabrique un lecteur pour un usage ; la seule chose que les modules reçoivent. */

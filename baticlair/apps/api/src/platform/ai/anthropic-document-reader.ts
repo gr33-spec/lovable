@@ -21,6 +21,18 @@ function toUsage(usage: Anthropic.Usage): AiUsage {
   };
 }
 
+/**
+ * Écrire sans réfléchir d'abord (documentation Anthropic, « Effort », lue le 17 novembre 2026) : Haiku 5.5 accepte
+ * `thinking: disabled` jusqu'à l'effort « high » ; Sonnet 5.5 accepte `between_tools` aux efforts « low », « medium » et
+ * « high ». Les autres modèles (Opus 5.5 : la réflexion ne se coupe pas) et les efforts plus hauts gardent leur réglage.
+ */
+export function sansReflexion(model: string, effort: EffortIa): { thinking?: Anthropic.ThinkingConfigParam } {
+  if (effort === "xhigh" || effort === "max") return {};
+  if (/^claude-haiku-5-5/.test(model)) return { thinking: { type: "disabled" } };
+  if (/^claude-sonnet-5-5/.test(model)) return { thinking: { type: "between_tools" } };
+  return {};
+}
+
 /** Les modèles qui refusent le réglage `effort` (400). */
 const SANS_EFFORT = /^claude-(?:haiku|sonnet)-4-5/;
 
@@ -41,6 +53,8 @@ export class AnthropicDocumentReader implements LecteurIa {
     fetchImpl?: typeof fetch,
     /** Délai maximal d'une lecture (`AI_TIMEOUT_MS`). */
     timeoutMs = 170_000,
+    /** `minimale` : le modèle écrit sa réponse sans réfléchir d'abord, quand il le permet (voir `sansReflexion`). */
+    private readonly reflexion: "auto" | "minimale" = "auto",
   ) {
     // Une lecture de devis dure de quelques secondes à une minute ; au-delà de 170 s, on arrête. Aucune relance cachée
     // du SDK (elle doublerait l'attente) : la lecture relance elle-même, dans son échéance (READING_BUDGET_MS).
@@ -80,6 +94,7 @@ export class AnthropicDocumentReader implements LecteurIa {
         // Greg, 16 novembre 2026 (essai des réponses brèves : « This model does not support the effort parameter ») : les
         // modèles d'avant la génération 5 (Haiku 4.5, Sonnet 4.5) refusent `effort` ; il ne leur est jamais envoyé.
         output_config: { ...(SANS_EFFORT.test(this.model) ? {} : { effort: this.effort }), format: zodOutputFormat(request.format ?? request.schema) },
+        ...(this.reflexion === "minimale" ? sansReflexion(this.model, this.effort) : {}),
         metadata: { user_id: request.tag },
       });
       const usage = toUsage(response.usage);

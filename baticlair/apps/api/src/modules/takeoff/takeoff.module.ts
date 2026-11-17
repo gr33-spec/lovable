@@ -42,7 +42,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
       provide: LECTURE_READER,
       useFactory: (config: AppConfig): LectureReader | null => {
         const ia = fabriqueIa(config);
-        return ia ? new IaLectureReader(ia, config.ai.extractionModel, config.ai.effort, config.ai.quantitatifModel) : config.ai.provider === "fake" ? new FakeLectureReader() : null;
+        return ia ? new IaLectureReader(ia, config.ai.extractionModel, config.ai.effort, config.ai.quantitatifModel, config.ai.reflexion) : config.ai.provider === "fake" ? new FakeLectureReader() : null;
       },
       inject: [CONFIG],
     },

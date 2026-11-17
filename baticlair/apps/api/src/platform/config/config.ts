@@ -136,6 +136,13 @@ const envSchema = z
     ASSISTANT_IA_PLAFOND_USD: z.coerce.number().min(0).max(1000).default(2),
     ASSISTANT_IA_PLAFOND_APPELS: z.coerce.number().int().min(0).max(1_000_000).default(300),
     AI_EXTRACTION_EFFORT: z.enum(["low", "medium", "high", "xhigh", "max"]).default("high"),
+    /**
+     * La réflexion du modèle avant d'écrire la lecture d'un devis (Greg, 17 novembre 2026 : « 24 secondes, c'est trop long.
+     * Mesure où part le temps »). Mesure : le temps est celui des mots écrits par le modèle, réflexion comprise.
+     * `auto` (défaut) : le modèle décide. `minimale` : il écrit sa réponse sans réfléchir d'abord (modèles qui le permettent).
+     * À ne changer qu'après le jeu de test : la qualité de la lecture passe avant la vitesse.
+     */
+    AI_EXTRACTION_REFLEXION: z.enum(["auto", "minimale"]).default("auto"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     MICROSOFT_CLIENT_ID: z.string().min(1).optional(),
@@ -506,6 +513,8 @@ export interface AppConfig {
     assistantModel: string;
     assistantPlafond: { microUsd: number; appels: number };
     effort: "low" | "medium" | "high" | "xhigh" | "max";
+    /** `minimale` : la lecture s'écrit sans réflexion préalable du modèle (`AI_EXTRACTION_REFLEXION`). */
+    reflexion: "auto" | "minimale";
     /** Délai de réponse d'une lecture avant de passer en arrière-plan (ms). */
     answerWithinMs: number;
   };
@@ -707,6 +716,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       assistantModel: e.AI_ASSISTANT_MODEL,
       assistantPlafond: { microUsd: Math.round(e.ASSISTANT_IA_PLAFOND_USD * 1_000_000), appels: e.ASSISTANT_IA_PLAFOND_APPELS },
       effort: e.AI_EXTRACTION_EFFORT,
+      reflexion: e.AI_EXTRACTION_REFLEXION,
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },
   };
