@@ -171,7 +171,8 @@ export function rubriquesVisibles(c: ContenuPage): Rubrique[] {
   const r: Rubrique[] = [];
   if (c.prestations.length > 0) r.push("prestations");
   if (c.realisations.length > 0) r.push("realisations");
-  if (c.presentation?.trim() || c.accroche?.trim() || c.photoEquipe || c.certifications.length > 0 || c.verifiee || c.creeeEn) r.push("a-propos");
+  // L'accroche se lit sous le grand titre de l'accueil (maquette de Greg, 17 novembre 2026) : seule, elle ne fait pas « À propos ».
+  if (c.presentation?.trim() || c.photoEquipe || c.certifications.length > 0 || c.verifiee || c.creeeEn) r.push("a-propos");
   if (c.zone?.trim() || c.adressePostale?.trim()) r.push("zone");
   r.push("contact");
   return r;

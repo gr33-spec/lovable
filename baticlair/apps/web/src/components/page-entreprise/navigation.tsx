@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Images, Menu, Phone, X } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Images, Mail, Menu, Phone, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { lienAppel, type RealisationPublique } from "@baticlair/domain/page-entreprise";
 import { Photo } from "./photo";
@@ -27,7 +27,7 @@ export function SuiviDefilement() {
   return <span ref={repere} hidden />;
 }
 
-export function EnTeteSite({ nom, logo, initiales, telephone, menu }: { nom: string; logo: string | null; initiales: string; telephone: string | null; menu: { id: string; libelle: string }[] }) {
+export function EnTeteSite({ nom, activite, logo, initiales, telephone, menu }: { nom: string; activite: string | null; logo: string | null; initiales: string; telephone: string | null; menu: { id: string; libelle: string }[] }) {
   const [ouvert, setOuvert] = useState(false);
   return (
     <header className="pe-entete">
@@ -41,7 +41,10 @@ export function EnTeteSite({ nom, logo, initiales, telephone, menu }: { nom: str
               {initiales}
             </span>
           )}
-          <span className="pe-marque-nom">{nom}</span>
+          <span className="pe-marque-texte">
+            <span className="pe-marque-nom">{nom}</span>
+            {activite ? <span className="pe-marque-activite">{activite}</span> : null}
+          </span>
         </a>
         <nav className="pe-nav" aria-label="Menu de la page">
           {menu.map((m) => (
@@ -57,6 +60,9 @@ export function EnTeteSite({ nom, logo, initiales, telephone, menu }: { nom: str
             <span className="pe-entete-appel-long">{telephone}</span>
           </a>
         ) : null}
+        <a href="#contact" className="pe-btn pe-btn-appel pe-entete-devis">
+          <Mail size={17} strokeWidth={2.4} aria-hidden="true" /> Demander un devis
+        </a>
         <button type="button" className="pe-menu-bouton" aria-expanded={ouvert} aria-controls="pe-menu-tel" aria-label={ouvert ? "Fermer le menu" : "Ouvrir le menu"} onClick={() => setOuvert((v) => !v)}>
           {ouvert ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
         </button>
@@ -145,6 +151,36 @@ export function ChantierRealise({ realisation: r, nom }: { realisation: Realisat
           ) : null}
         </div>
       ) : null}
+    </>
+  );
+}
+
+/**
+ * Les chantiers (maquette de Greg, 17 novembre 2026) : trois sur une ligne, puis « Voir plus de réalisations » quand il y
+ * en a davantage ; le bouton n'existe que s'il montre vraiment quelque chose de plus.
+ */
+export const CHANTIERS_VISIBLES = 3;
+export function ListeChantiers({ realisations, nom, titre }: { realisations: RealisationPublique[]; nom: string; titre: React.ReactNode }) {
+  const [tout, setTout] = useState(false);
+  const montres = tout ? realisations : realisations.slice(0, CHANTIERS_VISIBLES);
+  const reste = realisations.length - CHANTIERS_VISIBLES;
+  return (
+    <>
+      <div className="pe-section-tete">
+        {titre}
+        {reste > 0 && !tout ? (
+          <button type="button" className="pe-voir-plus" onClick={() => setTout(true)}>
+            Voir plus de réalisations <ArrowRight size={17} strokeWidth={2.4} aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
+      <ul className="pe-chantiers">
+        {montres.map((r) => (
+          <li key={r.id}>
+            <ChantierRealise realisation={r} nom={nom} />
+          </li>
+        ))}
+      </ul>
     </>
   );
 }

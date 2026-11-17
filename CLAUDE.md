@@ -156,6 +156,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Une page, deux niveaux. Règle changée : avant, la disponibilité Mission était sur la page publique. Maintenant un visiteur ne voit que le site ; une entreprise connectée voit en plus « Entre pros » (disponibilités, compétences, « Proposer une mission »). Dans Mission, le profil d'une entreprise ouvre son site.
 - CV, diplômes, attestations : ni affichés ni obligatoires ; envoyés seulement par l'artisan dans une discussion de Mission. Règle changée : avant, un document coché « sur mon profil public » s'y montrait.
 - Mission sur le site de test : à ouvrir par Greg dans Admin › Réglages › Missions ; reste coupée en production tant que les CGU ne sont pas relues.
+- Site d'artisan d'après la maquette de Greg (17 novembre 2026) : barre du haut noire (nom, métier, menu, « Demander un devis » jaune), accueil sombre sur la photo (« Couvreur » en blanc, « à Lannion » en jaune, l'accroche, « Demander un devis » et le numéro), prestations en cartes avec une icône jaune choisie par le code d'après le titre, trois chantiers puis « Voir plus de réalisations », bande noire (zone, horaires), pied de page « Créé avec MOBIIZ ». Règle changée : avant, page claire de bout en bout, sans pictogramme. Pas d'« Avis clients » : la règle « ni avis, ni note » reste. À valider par Greg avant la branche de test.
 
 ## Mission de fond : le quantitatif par l'IA (Greg, 16 novembre 2026)
 

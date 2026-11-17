@@ -1,4 +1,4 @@
-import { BadgeCheck, CalendarDays, Clock, Globe, MapPin, Phone, ShieldCheck } from "lucide-react";
+import { BadgeCheck, CalendarDays, Clock, Globe, Heart, Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
 import {
   lienAppel,
   menuDeLaPage,
@@ -11,7 +11,8 @@ import {
 } from "@baticlair/domain/page-entreprise";
 import { EDITEUR, HEBERGEUR } from "@/lib/legal";
 import { TRADES } from "@/lib/trades";
-import { ChantierRealise, EnTeteSite, SuiviDefilement } from "./navigation";
+import { EnTeteSite, ListeChantiers, SuiviDefilement } from "./navigation";
+import { iconeDePrestation } from "./icones";
 import { Photo } from "./photo";
 
 export { Photo };
@@ -51,13 +52,18 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
   const accueil = photoAccueil(c);
   const preuves = preuvesCourtes(c, annee);
   const titre = titreAccueil(c);
+  // « Couvreur à Lannion » : le métier en blanc, « à Lannion » en jaune dessous (maquette de Greg, 17 novembre 2026).
+  const coupure = titre.indexOf(" à ");
+  const titreHaut = coupure > 0 ? titre.slice(0, coupure) : titre;
+  const titreBas = coupure > 0 ? titre.slice(coupure + 1) : null;
+  const activite = LIBELLES[c.metierPrincipal] ?? null;
   const style = { "--pe-teinte": teinteDe(c) } as React.CSSProperties;
   const lien = (href: string) => (apercu ? undefined : href);
 
   return (
     <div className={`pe${accueil ? " pe-avec-photo" : ""}${apercu ? " pe-apercu" : ""}`} style={style}>
       <SuiviDefilement />
-      <EnTeteSite nom={c.nom} logo={c.logo} initiales={initiales(c.nom)} telephone={c.telephone} menu={menu} />
+      <EnTeteSite nom={c.nom} activite={activite} logo={c.logo} initiales={initiales(c.nom)} telephone={c.telephone} menu={menu} />
 
       <main id="contenu">
         <section id="accueil" className="pe-accueil" aria-labelledby="pe-titre">
@@ -67,8 +73,27 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
             </div>
           ) : null}
           <div className="pe-cadre pe-accueil-texte">
-            <h1 id="pe-titre">{titre}</h1>
             <p className="pe-accueil-nom">{c.nom}</p>
+            <h1 id="pe-titre">
+              {titreHaut}
+              {titreBas ? (
+                <>
+                  {" "}
+                  <span className="pe-accueil-ville">{titreBas}</span>
+                </>
+              ) : null}
+            </h1>
+            {c.accroche ? <p className="pe-accueil-accroche">{c.accroche}</p> : null}
+            <div className="pe-actions">
+              <a href="#contact" className="pe-btn pe-btn-appel">
+                <Mail size={19} strokeWidth={2.2} aria-hidden="true" /> Demander un devis
+              </a>
+              {c.telephone ? (
+                <a href={lienAppel(c.telephone)} className="pe-btn pe-btn-second">
+                  <Phone size={19} strokeWidth={2.2} aria-hidden="true" /> {c.telephone}
+                </a>
+              ) : null}
+            </div>
             {preuves.length ? (
               <ul className="pe-preuves" aria-label="Garanties">
                 {preuves.map((x) => (
@@ -78,16 +103,6 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
                 ))}
               </ul>
             ) : null}
-            <div className="pe-actions">
-              {c.telephone ? (
-                <a href={lienAppel(c.telephone)} className="pe-btn pe-btn-appel">
-                  <Phone size={19} strokeWidth={2.2} aria-hidden="true" /> Appeler
-                </a>
-              ) : null}
-              <a href="#contact" className="pe-btn pe-btn-second">
-                Demander un devis
-              </a>
-            </div>
           </div>
         </section>
 
@@ -99,28 +114,53 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
             <div className="pe-cadre">
               <h2 id="pe-t-prestations">Nos prestations</h2>
               <ul className="pe-prestations">
-                {c.prestations.map((x) => (
-                  <li key={x.titre}>
-                    <h3>{x.titre}</h3>
-                    {x.texte ? <p>{x.texte}</p> : null}
-                  </li>
-                ))}
+                {c.prestations.map((x) => {
+                  const Icone = iconeDePrestation(x.titre, c.metierPrincipal);
+                  return (
+                    <li key={x.titre}>
+                      <Icone className="pe-prestation-icone" size={40} strokeWidth={1.7} aria-hidden="true" />
+                      <div>
+                        <h3>{x.titre}</h3>
+                        {x.texte ? <p>{x.texte}</p> : null}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </section>
         ) : null}
 
         {visibles.includes("realisations") ? (
-          <section id="realisations" className="pe-section pe-section-os" aria-labelledby="pe-t-realisations">
+          <section id="realisations" className="pe-section pe-section-realisations" aria-labelledby="pe-t-realisations">
             <div className="pe-cadre">
-              <h2 id="pe-t-realisations">Nos réalisations</h2>
-              <ul className="pe-chantiers">
-                {c.realisations.map((r) => (
-                  <li key={r.id}>
-                    <ChantierRealise realisation={r} nom={c.nom} />
-                  </li>
-                ))}
-              </ul>
+              <ListeChantiers realisations={c.realisations} nom={c.nom} titre={<h2 id="pe-t-realisations">Nos réalisations</h2>} />
+            </div>
+          </section>
+        ) : null}
+
+        {visibles.includes("zone") || c.horaires ? (
+          <section id="zone" className="pe-bande" aria-label="Zone d'intervention et horaires">
+            <div className="pe-cadre pe-bande-grille">
+              {c.zone || c.adressePostale ? (
+                <div className="pe-bande-bloc">
+                  <MapPin size={34} strokeWidth={2} aria-hidden="true" />
+                  <div>
+                    <h2 className="pe-bande-etiquette">Zone d&apos;intervention</h2>
+                    {c.zone ? <p className="pe-bande-valeur">{c.zone} et alentours</p> : null}
+                    {c.adressePostale ? <p className="pe-bande-detail">{c.adressePostale}</p> : null}
+                  </div>
+                </div>
+              ) : null}
+              {c.horaires ? (
+                <div className="pe-bande-bloc">
+                  <Clock size={34} strokeWidth={2} aria-hidden="true" />
+                  <div>
+                    <h2 className="pe-bande-etiquette">Horaires</h2>
+                    <p className="pe-bande-valeur pe-bande-horaires">{c.horaires}</p>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </section>
         ) : null}
@@ -136,7 +176,6 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
               <div className="pe-apropos-texte">
                 <div className="pe-apropos-tete">
                   <h2 id="pe-t-apropos">À propos</h2>
-                  {c.accroche ? <p className="pe-chapeau">{c.accroche}</p> : null}
                 </div>
                 <div className="pe-apropos-corps">
                   {c.presentation
@@ -172,20 +211,6 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
           </section>
         ) : null}
 
-        {visibles.includes("zone") ? (
-          <section id="zone" className="pe-section pe-zone" aria-labelledby="pe-t-zone">
-            <div className="pe-cadre">
-              <h2 id="pe-t-zone">Zone d&apos;intervention</h2>
-              {c.zone ? (
-                <p className="pe-zone-ville">
-                  <MapPin size={26} strokeWidth={2.2} aria-hidden="true" /> {c.zone} et alentours
-                </p>
-              ) : null}
-              {c.adressePostale ? <p className="pe-texte">{c.adressePostale}</p> : null}
-            </div>
-          </section>
-        ) : null}
-
         <section id="contact" className="pe-contact" aria-labelledby="pe-t-contact">
           <div className="pe-cadre pe-contact-grille">
             <div className="pe-contact-gauche">
@@ -195,11 +220,6 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
                 <a href={lienAppel(c.telephone)} className="pe-btn pe-btn-appel pe-btn-grand">
                   <Phone size={21} strokeWidth={2.2} aria-hidden="true" /> {c.telephone}
                 </a>
-              ) : null}
-              {c.horaires ? (
-                <p className="pe-contact-ligne">
-                  <Clock size={19} aria-hidden="true" /> {c.horaires}
-                </p>
               ) : null}
             </div>
             <div className="pe-contact-form">
@@ -211,18 +231,29 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
 
       <footer className="pe-pied">
         <div className="pe-cadre pe-pied-grille">
-          <div>
-            <p className="pe-pied-nom">{c.nom}</p>
-            {c.siret ? <p>SIRET {c.siret.replace(/(\d{3})(\d{3})(\d{3})(\d{5})/, "$1 $2 $3 $4")}</p> : null}
-            {c.siteWeb ? (
-              <p>
-                <a href={lien(c.siteWeb)} rel="noopener nofollow" target="_blank" className="pe-pied-site">
-                  <Globe size={16} aria-hidden="true" /> Voir mon site
-                </a>
-              </p>
-            ) : null}
+          <div className="pe-pied-marque">
+            {c.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={c.logo} alt="" className="pe-logo" width={40} height={40} />
+            ) : (
+              <span className="pe-initiales" aria-hidden="true">
+                {initiales(c.nom)}
+              </span>
+            )}
+            <div>
+              <p className="pe-pied-nom">{c.nom}</p>
+              {activite ? <p className="pe-pied-activite">{activite}</p> : null}
+              {c.siret ? <p>SIRET {c.siret.replace(/(\d{3})(\d{3})(\d{3})(\d{5})/, "$1 $2 $3 $4")}</p> : null}
+              {c.siteWeb ? (
+                <p>
+                  <a href={lien(c.siteWeb)} rel="noopener nofollow" target="_blank" className="pe-pied-site">
+                    <Globe size={16} aria-hidden="true" /> Voir mon site
+                  </a>
+                </p>
+              ) : null}
+            </div>
           </div>
-          <div className="pe-pied-droite">
+          <div className="pe-pied-liens">
             <details className="pe-mentions">
               <summary>Mentions légales</summary>
               <p>
@@ -234,14 +265,19 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
                 Hébergement : {EDITEUR.nom} ({EDITEUR.produit}), {EDITEUR.forme}, {EDITEUR.adresse}, {EDITEUR.contact} ; serveurs {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
               </p>
               <p>
-                Certifications et assurances : déclarées par l&apos;entreprise, non vérifiées par Mobiiz. « Entreprise vérifiée » : SIRET actif contrôlé à l&apos;INSEE, ce n&apos;est pas un label de qualité. Données personnelles : <a href={lien("/confidentialite")}>politique de confidentialité</a>.
+                Certifications et assurances : déclarées par l&apos;entreprise, non vérifiées par Mobiiz. « Entreprise vérifiée » : SIRET actif contrôlé à l&apos;INSEE, ce n&apos;est pas un label de qualité.
               </p>
             </details>
-            <SignalerPage adresse={c.adresse} apercu={apercu} />
-            <a href={lien("/")} className="pe-mobiiz">
-              Page créée avec Mobiiz
+            <span className="pe-pied-sep" aria-hidden="true">|</span>
+            <a href={lien("/confidentialite")} className="pe-pied-lien">
+              Politique de confidentialité
             </a>
+            <span className="pe-pied-sep" aria-hidden="true">|</span>
+            <SignalerPage adresse={c.adresse} apercu={apercu} />
           </div>
+          <a href={lien("/")} className="pe-mobiiz">
+            Créé avec <strong>MOBIIZ</strong> <Heart size={15} strokeWidth={0} fill="currentColor" className="pe-coeur" aria-hidden="true" />
+          </a>
         </div>
       </footer>
 
