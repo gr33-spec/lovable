@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.17-52",
+  "version": "roofing-2026.11.17-53",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -8503,6 +8503,11 @@
             "1": "je façonne",
             "2": "commandé façonné"
           },
+          "groupe": {
+            "id": "pieces-pliees",
+            "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+            "hint": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+          },
           "textValues": [
             {
               "value": "1",
@@ -9133,6 +9138,11 @@
           "display": {
             "1": "je façonne",
             "2": "commandé façonné"
+          },
+          "groupe": {
+            "id": "pieces-pliees",
+            "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+            "hint": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
           },
           "textValues": [
             {
@@ -10585,6 +10595,11 @@
             "1": "je façonne",
             "2": "commandé façonné"
           },
+          "groupe": {
+            "id": "pieces-pliees",
+            "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+            "hint": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+          },
           "textValues": [
             {
               "value": "1",
@@ -11360,6 +11375,11 @@
           "display": {
             "1": "je façonne",
             "2": "commandé façonné"
+          },
+          "groupe": {
+            "id": "pieces-pliees",
+            "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+            "hint": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
           },
           "textValues": [
             {
@@ -12227,6 +12247,11 @@
             "1": "je façonne",
             "2": "commandé façonné"
           },
+          "groupe": {
+            "id": "pieces-pliees",
+            "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+            "hint": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+          },
           "textValues": [
             {
               "value": "1",
@@ -12651,6 +12676,11 @@
           "display": {
             "1": "je façonne",
             "2": "commandé façonné"
+          },
+          "groupe": {
+            "id": "pieces-pliees",
+            "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+            "hint": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
           },
           "textValues": [
             {

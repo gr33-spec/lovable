@@ -270,8 +270,15 @@ export interface ParamDef {
   fromWorks?: { value: string; workItems: string[] }[];
   /** Lue sur un autre ouvrage seulement si c'est un ouvrage principal (l'aspect du zinc de la couverture, pas d'une bande). */
   onlyFromPrincipal?: true;
-  /** Jamais prêtée par un autre ouvrage : « tu façonnes ? » se demande pièce par pièce (§48.6). */
+  /** Jamais prêtée par un autre ouvrage : ce que le devis écrit pour une pièce ne vaut pas pour sa voisine (§48.6). */
   ownOnly?: true;
+  /**
+   * UNE SEULE RÉPONSE POUR TOUT LE DEVIS (Greg, 17 novembre 2026 : « je plie : une seule réponse pour tout le devis, plus
+   * jamais pièce par pièce »). Les ouvrages dont la donnée porte le même groupe partagent UNE question (celle du groupe,
+   * avec ses mots) et sa réponse ; l'artisan peut ensuite changer ce choix pour une pièce (la clé de la pièce passe devant).
+   * Écrit dans la fiche du métier : le moteur ne connaît aucun groupe.
+   */
+  groupe?: { id: string; question: string; hint?: string };
 }
 
 /**

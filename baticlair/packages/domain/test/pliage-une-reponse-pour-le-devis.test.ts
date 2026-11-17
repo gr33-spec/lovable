@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { normalizeText, type QuoteLineReading } from "../src/index.js";
+import { choixParPiece, lignesDeLecture, planDeLecture, ROOFING_REFERENTIAL, type QuoteLineReading } from "../src/index.js";
+import { HABITUDES_BANC } from "./support/habitudes.js";
+import { lectureEnregistree } from "./support/lectures.js";
 import { ARDOISES_LUCARNES_LINES } from "./devis-reels/ardoises-lucarnes.js";
 import { D2026_011_LINES } from "./devis-reels/d2026-011.js";
 import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
@@ -8,13 +10,16 @@ import { D2026_020_LINES } from "./devis-reels/d2026-020.js";
 import { readQuote, type QuoteLineInput } from "./support/read-quote.js";
 
 /**
- * §48.6, retour du fondateur du 2026-10-07 (« c'est la troisième fois ») : UNE QUESTION PAR PIÈCE DE ZINGUERIE ÉCRITE AU
- * DEVIS, chacune à son nom avec ses deux boutons, aucune pour une pièce dont le devis dit le façonnage. Jamais une
- * question « Bandes zinc (solin, rive, égout, ventilation, couvre-joint) : tu façonnes ? » qui regroupe plusieurs pièces.
+ * RÈGLE CHANGÉE (Greg, 17 novembre 2026) : « "Je plie" : une seule réponse pour tout le devis, plus jamais pièce par pièce.
+ * S'il plie lui-même : des feuilles de zinc, comptées d'après les développés et les longueurs. S'il achète tout fait : des
+ * longueurs de pièces façonnées. Les pièces qu'on ne plie pas (crochets, descentes, naissances, accessoires) restent des
+ * articles normaux dans les deux cas. Il peut modifier ce choix pour une pièce. »
+ * Avant (§48.6, 2026-10-07) : une question par pièce de zinguerie écrite au devis.
+ * Ce qui ne change pas : aucune question pour une pièce dont le devis dit le façonnage ; chaque pièce garde SES données
+ * (son développé) ; les bacs d'une couverture à joint debout gardent leur question à eux.
  */
-const PIECES = ["solin", "rive", "egout", "ventilation", "couvre-joint", "bavette", "couvertine", "noue", "abergement", "faitage", "joint debout", "bandes zinc"];
-const piecesNamed = (text: string) => PIECES.filter((p) => normalizeText(text).includes(p));
 const faconnage = (v: ReturnType<typeof readQuote>) => v.questions.filter((d) => /^(engine:)?param:faconnage\b/.test(d.key));
+const PLIAGE = "param:faconnage@pieces-pliees";
 
 const SEVERAL_PIECES: QuoteLineInput[] = [
   { ref: "1", designation: "Bande de solin zinc naturel dév. 25", quantity: "5", unit: "ml" },
@@ -23,7 +28,7 @@ const SEVERAL_PIECES: QuoteLineInput[] = [
   { ref: "4", designation: "Faîtage zinc dév. 33", quantity: "8", unit: "ml" },
 ];
 
-describe("§48.6 : le façonnage se demande pièce par pièce", () => {
+describe("le pliage : une seule réponse pour tout le devis", () => {
   const BANC: [string, readonly QuoteLineInput[]][] = [
     ["plusieurs bandes", SEVERAL_PIECES],
     ["D-2026-018", D2026_018_LINES],
@@ -33,28 +38,37 @@ describe("§48.6 : le façonnage se demande pièce par pièce", () => {
     ["ardoises et lucarnes", ARDOISES_LUCARNES_LINES],
   ];
   for (const [name, lines] of BANC) {
-    it(`${name} : aucune question de façonnage ne regroupe plusieurs pièces`, () => {
-      for (const d of faconnage(readQuote(lines))) {
-        expect(piecesNamed(d.question?.text ?? d.text), d.question?.text ?? d.text).toHaveLength(1);
-        expect(d.question?.options).toHaveLength(2);
-      }
+    it(`${name} : une question de pliage au plus pour toutes les pièces, avec ses deux boutons ; jamais une par pièce`, () => {
+      const posees = faconnage(readQuote(lines));
+      expect(posees.filter((d) => d.key.replace(/^engine:/, "") === PLIAGE).length).toBeLessThanOrEqual(1);
+      // Aucune question de façonnage au nom d'une pièce (« …@bandes-zinc__3 », « …@noue », « …@faitage-zinc »).
+      expect(posees.map((d) => d.key.replace(/^engine:/, "")).filter((k) => k !== PLIAGE && !/@couverture-/.test(k) && k !== "param:faconnage")).toEqual([]);
+      for (const d of posees) expect(d.question?.options).toHaveLength(2);
     });
   }
 
-  it("trois bandes écrites = trois questions, chacune au nom de sa pièce, avec ses deux boutons", () => {
+  it("quatre pièces écrites = UNE question, avec les mots de la fiche", () => {
     const v = readQuote(SEVERAL_PIECES);
-    const texts = faconnage(v).map((d) => d.question!.text);
-    expect(texts).toEqual(
-      expect.arrayContaining([
-        "Bande de solin zinc naturel dév. 25 : tu façonnes toi-même ou tu commandes façonné ?",
-        "Bande de ventilation en Z en zinc quartz : tu façonnes toi-même ou tu commandes façonné ?",
-        "Bande de rive zinc dév. 33 : tu façonnes toi-même ou tu commandes façonné ?",
-        "Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ?",
-      ]),
-    );
-    expect(texts).toHaveLength(4);
+    expect(faconnage(v).map((d) => d.question!.text)).toEqual(["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"]);
     // Chaque pièce garde ce que SA ligne écrit : le développé de 25 n'est pas celui de 33, ni une question.
     expect(v.questions.some((d) => /developpe@bandes-zinc__(1|3)$/.test(d.key))).toBe(false);
+  });
+
+  it("« je plie » : chaque pièce sort en feuilles 2 × 1 m, jamais fusionnées ; plus aucune question de pliage", () => {
+    // La bande de ventilation n'écrit pas son développé : sa réponse est donnée ici pour que ses feuilles se comptent.
+    const v = readQuote(SEVERAL_PIECES, { [PLIAGE]: { value: "1", unit: "u" }, "param:developpe@bandes-zinc__2": { value: "100", unit: "mm" } });
+    expect(faconnage(v)).toEqual([]);
+    const labels = v.toBuy.map((b) => b.label);
+    for (const piece of [/solin/i, /ventilation/i, /rive/i]) expect(labels.some((l) => /^Feuilles .*2 × 1 m/.test(l) && piece.test(l)), `${piece} : ${labels.join(" | ")}`).toBe(true);
+    // Le solin, la ventilation, la rive et le faîtage : quatre lignes de feuilles.
+    expect(labels.filter((l) => /^Feuilles .*2 × 1 m/.test(l))).toHaveLength(4);
+  });
+
+  it("« tout fait » : chaque pièce sort en longueurs façonnées, aucune feuille", () => {
+    const v = readQuote(SEVERAL_PIECES, { [PLIAGE]: { value: "2", unit: "u" } });
+    expect(faconnage(v)).toEqual([]);
+    expect(v.toBuy.some((b) => /^Feuilles/.test(b.label)), v.toBuy.map((b) => b.label).join(" | ")).toBe(false);
+    expect(v.toBuy.some((b) => /^Bande de rive/i.test(b.label)), v.toBuy.map((b) => b.label).join(" | ")).toBe(true);
   });
 
   it("une dimension lue par l'IA sur une pièce (« développé 20 cm » de la rive) ne passe jamais à une autre (la ventilation)", () => {
@@ -67,11 +81,30 @@ describe("§48.6 : le façonnage se demande pièce par pièce", () => {
     expect(v.questions.some((d) => d.key === "engine:param:developpe@bandes-zinc__b")).toBe(false);
   });
 
-  it("la réponse d'une pièce ne vaut que pour elle", () => {
-    const v = readQuote(SEVERAL_PIECES, { "param:faconnage@bandes-zinc__1": { value: "1", unit: "u" } });
-    const keys = faconnage(v).map((d) => d.key);
-    expect(keys.some((k) => k.endsWith("@bandes-zinc__1"))).toBe(false);
-    expect(keys.some((k) => k.endsWith("@bandes-zinc__3"))).toBe(true);
+  it("il change ce choix pour UNE pièce : la rive toute faite, le reste plié", () => {
+    const v = readQuote(SEVERAL_PIECES, { [PLIAGE]: { value: "1", unit: "u" }, "param:faconnage@bandes-zinc__3": { value: "2", unit: "u" } });
+    expect(faconnage(v)).toEqual([]);
+    const labels = v.toBuy.map((b) => b.label);
+    expect(labels.some((l) => /^Feuilles .*rive/i.test(l)), labels.join(" | ")).toBe(false);
+    expect(labels.some((l) => /^Bande de rive/i.test(l)), labels.join(" | ")).toBe(true);
+    expect(labels.some((l) => /^Feuilles .*solin/i.test(l)), labels.join(" | ")).toBe(true);
+  });
+
+  it("au récapitulatif : chaque pièce avec son choix, modifiable pour elle seule", () => {
+    const l = lectureEnregistree(ROOFING_REFERENTIAL, SEVERAL_PIECES, [], HABITUDES_BANC);
+    const plan = planDeLecture(ROOFING_REFERENTIAL, l, lignesDeLecture(l));
+    expect(choixParPiece(ROOFING_REFERENTIAL, plan, {})).toEqual([]);
+    const plie = choixParPiece(ROOFING_REFERENTIAL, plan, { [PLIAGE]: { value: "1", unit: "u" } });
+    expect(plie.map((c) => [c.piece, c.value])).toEqual([
+      ["Bande de solin zinc naturel dév. 25", "1"],
+      ["Bande de ventilation en Z en zinc quartz", "1"],
+      ["Bande de rive zinc dév. 33", "1"],
+      ["Faîtage en bande zinc", "1"],
+    ]);
+    for (const c of plie) expect(c.options.map((o) => o.value)).toEqual(["1", "2"]);
+    const rive = plie.find((c) => /rive/.test(c.piece))!;
+    const change = choixParPiece(ROOFING_REFERENTIAL, plan, { [PLIAGE]: { value: "1", unit: "u" }, [rive.key]: { value: "2", unit: "u" } });
+    expect(change.map((c) => c.value)).toEqual(["1", "1", "2", "1"]);
   });
 
   it("D-2026-018 : aucune question pour une pièce dont le devis dit le façonnage (« pliées en Z », « comprend le pliage »)", () => {

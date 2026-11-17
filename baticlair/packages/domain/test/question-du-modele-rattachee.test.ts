@@ -61,7 +61,7 @@ describe("une question du modèle qui prolonge une donnée du référentiel est 
   // Essai en ligne du 16 novembre 2026 (soir, prompt version 6) : le modèle a demandé « Habillage de rive zinc : tu le façonnes
   // toi-même ou tu le commandes façonné ? » sous la clé « faconnage_rive », en visant sa ligne. Greg y a répondu ; le calcul a
   // reposé la même question pour cette pièce. La suite (« rive ») ne nomme aucun ouvrage, mais la LIGNE visée en nomme un seul.
-  it("« faconnage_rive » qui vise la ligne d'une pièce de zinc est le façonnage de CETTE pièce, et ne se repose plus", () => {
+  it("« faconnage_rive » qui vise la ligne d'une pièce de zinc est la question de pliage du devis, et ne se repose plus", () => {
     const l = lecture();
     const plan = planDeLecture(ref, l, lignesDeLecture(l));
     const piece = plan.lines.find((x) => x.status === "planned" && x.workItemId.startsWith("bandes-zinc__"))!;
@@ -74,8 +74,11 @@ describe("une question du modèle qui prolonge une donnée du référentiel est 
     expect(rattacherQuestion(ref, plan, { ...rive, ligne: "9:999" }).cle).toBe("faconnage_rive");
     const avec = { ...l, questions: [rive, ...l.questions.filter((q) => !(q.cle === "faconnage" && q.ligne === ligne))] };
     const e0 = ecranDeLecture({ ref, lecture: avec, answers: {}, preferences: {} });
-    const q = e0.questions.find((x) => x.text === rive.texte)!;
-    expect(q.key.startsWith("param:faconnage@bandes-zinc__")).toBe(true);
+    // Une seule réponse pour tout le devis (Greg, 17 novembre 2026) : la question de la rive est celle du groupe, avec ses mots.
+    expect(e0.questions.some((x) => x.text === rive.texte)).toBe(false);
+    const q = e0.questions.find((x) => x.key === "param:faconnage@pieces-pliees")!;
+    expect(q.text).toMatch(/^Tes pièces pliées/);
+    expect(e0.questions.filter((x) => /^param:faconnage@bandes-zinc__/.test(x.key))).toEqual([]);
     const e1 = ecranDeLecture({ ref, lecture: avec, answers: { [q.key]: { value: "1", unit: "u" } }, preferences: {} });
     expect(e1.questions.filter((x) => x.key === q.key || x.key === "fiche:faconnage_rive")).toEqual([]);
   });

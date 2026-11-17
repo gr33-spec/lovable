@@ -27,7 +27,8 @@ export function exportPourLecture(ref: Referential): string {
           p.default && typeof p.default.value === "string" ? `défaut ${p.default.value}` : null,
           choices ? `choix : ${choices}` : null,
           written ? `valeurs écrites : ${written}` : null,
-          p.question ? `question : « ${p.question} »` : null,
+          // Une seule réponse pour tout le devis (`groupe`) : la question du groupe, posée une fois, jamais une par pièce.
+          p.groupe ? `UNE SEULE question pour tout le devis, jamais une par pièce ni par ligne : « ${p.groupe.question} »` : p.question ? `question : « ${p.question} »` : null,
         ].filter(Boolean);
         out.push(`    - ${p.key} (${p.label}) : ${bits.join(" ; ")}`);
       }

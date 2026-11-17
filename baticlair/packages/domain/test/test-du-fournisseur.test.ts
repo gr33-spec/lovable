@@ -29,14 +29,14 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     const labels = v.toBuy.map((b) => b.label);
     expect(labels).not.toContain("Couverture zinc joint debout");
     expect(labels).not.toContain("Voligeage en sapin traité 18×200 mm");
-    // La bande garde son nom écrit (§48.6, pièce par pièce), mais elle attend son façonnage : orange, jamais commandée telle quelle.
+    // La bande garde son nom écrit (§48.6), mais elle attend la réponse de pliage du devis : orange, jamais commandée telle quelle.
     const bande = v.toBuy.find((b) => b.label === "Bande de ventilation en Z en zinc quartz");
     expect(bande?.key).toMatch(/^manque:/);
-    expect(bande?.waitsOn).toContain("param:faconnage@bandes-zinc");
+    expect(bande?.waitsOn).toContain("param:faconnage@pieces-pliees");
     // La bande zinc au ml n'est plus « à chiffrer » : le moteur tente d'abord (développé ? façonnage ?), ce sont des questions.
     expect(v.toQuote).toEqual([]);
     // §48.2 « zinc, pièce par pièce » : le joint debout et la bande zinc ont chacun leur question de façonnage.
-    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(expect.arrayContaining(["param:faconnage@couverture-zinc-joint-debout", "param:faconnage@bandes-zinc"]));
+    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(expect.arrayContaining(["param:faconnage@couverture-zinc-joint-debout", "param:faconnage@pieces-pliees"]));
     // Le voligeage est un composant du joint debout : calculé (91 m² × 1,05), vendu au m² de planche.
     expect(v.toBuy.find((b) => b.label === "Voliges sapin 18 mm")?.quantity).toBe("96 m²");
     // La gouttière, elle, a une règle : des longueurs de 4 m et sa naissance (indissociable, §48.7) ; le comptoir demande
@@ -51,16 +51,16 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
 
   it("une ligne qui échoue au test ne part pas, mais elle n'empêche pas d'envoyer le reste", () => {
     const v = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" } });
-    // Restent, posées d'un coup : la question de façonnage de chaque pièce (§48.2, pièce par pièce), le développé (une bande commandée
+    // Restent, posées d'un coup : la question des bacs et la question de pliage des pièces (une seule pour tout le devis, Greg, 17 novembre 2026), le développé (une bande commandée
     // façonnée se fabrique à son développé ; façonnée sur place au-delà de 6 ml, un bobineau de 500 mm suffit et la
     // réponse est simplement ignorée), et ce que le comptoir demande pour la gouttière (§47.8). Plus « égout et
     // faîtage ? » (proposés dans « On ajoute ? »). Le voligeage est reconnu (§7), plus « article inconnu ».
-    expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["param:consommables", "param:developpe", "param:developpe_gouttiere", "param:diametre_descente", "param:faconnage@bandes-zinc", "param:faconnage@couverture-zinc-joint-debout"]);
-    // Une réponse pièce par pièce ne vaut que pour sa pièce : la bande est réglée, le joint debout reste à demander.
-    const parPiece = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage@bandes-zinc": { value: "1", unit: "u" } });
+    expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["param:consommables", "param:developpe", "param:developpe_gouttiere", "param:diametre_descente", "param:faconnage@couverture-zinc-joint-debout", "param:faconnage@pieces-pliees"]);
+    // La réponse de pliage vaut pour les pièces pliées, pas pour les bacs : le joint debout reste à demander.
+    const parPiece = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage@pieces-pliees": { value: "1", unit: "u" } });
     const restantes = parPiece.questions.map((q) => q.question?.key ?? q.key);
     expect(restantes).toContain("param:faconnage@couverture-zinc-joint-debout");
-    expect(restantes).not.toContain("param:faconnage@bandes-zinc");
+    expect(restantes).not.toContain("param:faconnage@pieces-pliees");
     const surPlaceLong = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" } });
     // Façonnée sur place, la bande se compte en feuilles 2 × 1 m d'après son développé (§48.6) : le devis ne le dit pas, on le demande.
     expect(surPlaceLong.questions.map((q) => q.question?.key ?? q.key)).toContain("param:developpe");

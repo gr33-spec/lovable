@@ -55,7 +55,7 @@ describe("les mots de l'artisan vivent dans la fiche du métier, pas dans le lec
  * 2 × 1 m quand l'artisan la façonne, en longueurs de 2 m quand il la commande façonnée.
  */
 describe("s'il plie, des feuilles de zinc ; sinon des longueurs toutes prêtes", () => {
-  // Le même banc que `zinguerie-piece-par-piece.test.ts` (sa lecture est enregistrée).
+  // Le même banc que `pliage-une-reponse-pour-le-devis.test.ts` (sa lecture est enregistrée).
   const PIECES: QuoteLineInput[] = [
     { ref: "1", designation: "Bande de solin zinc naturel dév. 25", quantity: "5", unit: "ml" },
     { ref: "2", designation: "Bande de ventilation en Z en zinc quartz", quantity: "13", unit: "m" },

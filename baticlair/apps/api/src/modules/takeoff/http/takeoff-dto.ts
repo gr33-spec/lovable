@@ -111,7 +111,7 @@ function viewDto(view: ArtisanView) {
   };
 }
 
-export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, aiSuggestions, withoutSupply, brief, siteNotes, fiche, ajustements }: ReviewedTakeoff) {
+export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, choixPieces, dicibles, aiSuggestions, withoutSupply, brief, siteNotes, fiche, ajustements }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
@@ -123,6 +123,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     purchase: purchaseDto(purchase),
     // §48 : « Comme d'habitude ? » sur l'écran des questions.
     habits: habits ?? [],
+    choixPieces: choixPieces ?? [],
+    dicibles: dicibles ?? [],
     // §49.9 : « N lignes sans fourniture », repliées sous la liste.
     sansFourniture: withoutSupply ?? [],
     // §50.7 : « Le chantier en bref », le même que chez le fournisseur ; chaque ligne se corrige ou se retire (`bref:<clé>`).

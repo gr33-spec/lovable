@@ -201,7 +201,7 @@ export function CalculScreen() {
  * liste" qui ouvre l'écran de liste habituel (le même que la saisie à la main) »). Toujours la même discussion : combien
  * d'articles, d'où ils viennent (dits, calculés, à vérifier), et un seul bouton. Rien n'est envoyé d'ici.
  */
-export function RecapScreen({ takeoff, onVoir }: { takeoff: Takeoff; onVoir: () => void }) {
+export function RecapScreen({ takeoff, onVoir, onChoix, pending = false }: { takeoff: Takeoff; onVoir: () => void; onChoix?: (key: string, value: string, unit: string) => void; pending?: boolean }) {
   const router = useRouter();
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -223,6 +223,37 @@ export function RecapScreen({ takeoff, onVoir }: { takeoff: Takeoff; onVoir: () 
             {`Ta liste est prête : ${articles.length} article${articles.length > 1 ? "s" : ""}${detail ? ` (${detail})` : ""}.\n${aVerifier ? "Les lignes à vérifier sont en haut de ta liste." : "Vérifie-la, corrige ce que tu veux, puis envoie-la à tes négoces."}`}
           </TexteMobiiz>
         </Bulle>
+        {/* Greg, 17 novembre 2026 : « une seule réponse pour tout le devis ; il peut modifier ce choix pour une pièce dans le
+            récapitulatif ». Les pièces et leurs boutons viennent du serveur (la fiche du métier) : aucun mot de métier ici. */}
+        {onChoix && (takeoff.choixPieces?.length ?? 0) > 0 ? (
+          <>
+            <Bulle de="mobiiz" label="Message de MOBIIZ">
+              <TexteMobiiz>Ton choix vaut pour tout le devis. Tu peux le changer pour une pièce :</TexteMobiiz>
+            </Bulle>
+            <ul aria-label="Ton choix, pièce par pièce" className="flex flex-col gap-3 pl-10">
+              {(takeoff.choixPieces ?? []).map((c) => (
+                <li key={c.key} className="flex flex-col gap-1.5">
+                  <span className="text-[15px] font-semibold">{c.piece}</span>
+                  <div role="group" aria-label={c.piece} className="flex flex-wrap gap-2">
+                    {c.options.map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        aria-pressed={o.value === c.value}
+                        disabled={pending}
+                        onClick={() => (o.value === c.value ? undefined : onChoix(c.key, o.value, c.unit))}
+                        className="pressable min-h-11 rounded-full border px-4 text-[15px] font-semibold disabled:opacity-60"
+                        style={o.value === c.value ? { backgroundColor: COULEURS_CHAT.jaune, borderColor: COULEURS_CHAT.jaune, color: "#111111" } : { borderColor: COULEURS_CHAT.trait, backgroundColor: "var(--chat-carte)" }}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
         <div className="pl-10">
           <Button className="shadow-card!" onClick={onVoir}>
             Voir ma liste
@@ -555,31 +586,55 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     setAutre(false);
     setMessages((m) => [...m, { de: "moi", texte }]);
     const posees = restantes.map((q, i) => ({ numero: i + 1, cle: q.key, texte: q.simple.texte, options: q.simple.options, unite: q.unit, libre: q.options.length === 0 && !q.free ? (q.numeric || (q.unit && q.unit !== "u") ? ("number" as const) : ("written" as const)) : q.free, numerique: q.numeric }));
-    let lues: ReponseInterpretee[] = interpreterReponsesNumerotees(posees, texte);
+    // Greg, 17 novembre 2026 : « Je veux les 6 comprises ». Ce qui est DÉJÀ CONNU (l'habitude dite dans le fil : « Comme
+    // d'habitude : 0,65 mm ») et ce que ce devis ne demande pas (la pose des crochets) : jamais posé, mais confirmé, ou
+    // changé, si l'artisan le dit. Les données et leurs boutons viennent du serveur (la fiche du métier).
+    const habitudes = ordonnees.filter((q) => q.kind === "habit" && given[q.key] && !retired.has(q.key) && q.options.length > 0);
+    const dejaLa = new Set(ordonnees.map((q) => q.key.replace(/^engine:/, "")));
+    const dicibles: CounterQuestion[] = (takeoff.dicibles ?? [])
+      .filter((d) => !dejaLa.has(d.key))
+      .map((d) => ({ key: d.key, kind: "habit", text: d.text, options: d.options, unit: d.unit, about: null, hint: null, numeric: false, usual: null, group: SITE_GROUP }));
+    const connues = [...habitudes.map((q) => ({ q, texte: q.simple.texte, options: q.simple.options })), ...dicibles.map((q) => ({ q, texte: q.text, options: q.options }))];
+    const toutes = [...posees, ...connues.map((c, i) => ({ numero: posees.length + i + 1, cle: c.q.key, texte: c.texte, options: c.options, unite: c.q.unit, libre: undefined, numerique: false, connue: true as const }))];
+    let lues: ReponseInterpretee[] = interpreterReponsesNumerotees(toutes, texte);
     const compris = (rs: readonly ReponseInterpretee[]) => rs.filter((r) => r.statut === "compris").length;
+    const desPosees = (rs: readonly ReponseInterpretee[]) => rs.filter((r) => r.numero <= posees.length);
+    const desConnues = lues.filter((r) => r.numero > posees.length && r.statut === "compris");
     // Ce que le code n'a pas rangé passe au serveur (son IA, si elle est allumée, puis la revalidation par le code).
-    if (compris(lues) < Math.min(morceauxDe(texte), posees.length)) {
+    if (posees.length > 0 && compris(desPosees(lues)) < Math.min(morceauxDe(texte) - desConnues.length, posees.length)) {
       setReflexion(true);
       const r = await api<{ ia: boolean; reponses: ReponseInterpretee[] }>("/v1/assistant/interpretation", {
         method: "POST",
         body: { questions: posees.map((q) => ({ numero: q.numero, cle: q.cle, texte: q.texte, options: q.options, unite: q.unite, ...(q.libre ? { libre: q.libre } : {}), ...(q.numerique ? { numerique: true } : {}) })), texte: texte.slice(0, 2000) },
       }).catch(() => null);
       // Ce que le code a rangé sur un bouton reste ; le serveur ne complète que les questions encore ouvertes.
-      if (r?.ia && r.reponses.length === lues.length) lues = lues.map((c) => (c.statut === "compris" ? c : (r.reponses.find((x) => x.numero === c.numero && x.statut === "compris") ?? c)));
+      if (r?.ia && r.reponses.length === posees.length) lues = lues.map((c) => (c.statut === "compris" || c.numero > posees.length ? c : (r.reponses.find((x) => x.numero === c.numero && x.statut === "compris") ?? c)));
       setReflexion(false);
     }
     const prises: Record<string, Given> = {};
     const laissees: string[] = [];
+    const dites: CounterQuestion[] = [];
     for (const r of lues) {
+      if (r.numero > posees.length) {
+        // Une donnée connue : notée seulement si l'artisan l'a dite ; une donnée que le devis ne demandait pas rejoint
+        // alors les réponses du chantier (elle part au serveur avec les autres).
+        const c = connues[r.numero - posees.length - 1]!;
+        if (r.statut !== "compris" || r.valeur === null) continue;
+        prises[c.q.key] = { value: r.valeur, label: r.libelle ?? r.valeur };
+        if (!dejaLa.has(c.q.key.replace(/^engine:/, ""))) dites.push(c.q);
+        continue;
+      }
       const q = restantes[r.numero - 1]!;
       if (r.statut === "compris" && r.valeur !== null) prises[q.key] = { value: r.valeur, label: r.libelle ?? r.valeur, ...(r.libreEcrite ? { custom: true } : {}) };
       else if (r.statut === "sans_reponse" && r.raison && !mandatory(q)) laissees.push(q.key);
     }
+    if (dites.length) setMemoire((m) => [...m.filter((q) => !dites.some((d) => d.key === q.key)), ...dites]);
     if (Object.keys(prises).length) setGiven((prev) => ({ ...prev, ...prises }));
     if (laissees.length) setRetired((prev) => new Set([...prev, ...laissees]));
     // UNE ligne : ce qui est compris ; sinon, pourquoi la question posée revient. Jamais la liste de tout.
+    // Dans l'ordre où l'artisan les a dites, autant que possible : les questions posées, puis ce qu'il a ajouté.
     const notee = phraseNotee(Object.values(prises).map((g) => g.label));
-    const premiere = lues[0];
+    const premiere = desPosees(lues)[0];
     const suite = notee
       ? notee
       : laissees.length

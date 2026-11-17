@@ -89,8 +89,8 @@ describe("la règle du comptoir (§47.8)", () => {
       "param:developpe",
       "param:developpe_gouttiere",
       "param:diametre_descente",
-      "param:faconnage@bandes-zinc",
       "param:faconnage@couverture-zinc-joint-debout",
+      "param:faconnage@pieces-pliees",
       "param:fixation_crochet",
       "param:nb_descentes",
     ]);
