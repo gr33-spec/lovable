@@ -43,7 +43,7 @@ Devis de test :
 **À l'ouverture : 0 verte · 1 orange · 0 grise.**
 
 Questions du comptoir :
-- Bandes cuivre : tu les façonnes toi-même ou tu les commandes façonnées ? (Je façonne (feuilles ou bobine) / Je commande façonné)
+- Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ? (Je façonne (feuilles ou bobine) / Je commande façonné)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
