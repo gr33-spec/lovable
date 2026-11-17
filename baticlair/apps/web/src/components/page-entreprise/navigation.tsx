@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, ChevronLeft, ChevronRight, Images, Mail, Menu, Phone, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Images, Mail, Menu, Phone, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { lienAppel, type RealisationPublique } from "@baticlair/domain/page-entreprise";
 import { Photo } from "./photo";
@@ -25,6 +25,25 @@ export function SuiviDefilement() {
     return () => io.disconnect();
   }, []);
   return <span ref={repere} hidden />;
+}
+
+/**
+ * « Retour à Mon site » (Greg, 17 novembre 2026 : « une fois sur le site, un bouton pour revenir en arrière ») : seulement
+ * quand l'artisan ouvre sa page depuis l'onglet « Mon site » (`?depuis=mon-site`) ; un visiteur ne le voit jamais.
+ */
+export function RetourMonSite() {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    // Lu après l'affichage : la page est rendue par le serveur, le paramètre ne change rien pour un visiteur.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVisible(new URLSearchParams(window.location.search).get("depuis") === "mon-site");
+  }, []);
+  if (!visible) return null;
+  return (
+    <a href="/mon-site" className="pe-retour-app">
+      <ArrowLeft size={18} strokeWidth={2.4} aria-hidden="true" /> Retour à Mon site
+    </a>
+  );
 }
 
 export function EnTeteSite({ nom, activite, logo, initiales, telephone, menu }: { nom: string; activite: string | null; logo: string | null; initiales: string; telephone: string | null; menu: { id: string; libelle: string }[] }) {

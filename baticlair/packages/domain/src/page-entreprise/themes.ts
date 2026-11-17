@@ -1,17 +1,26 @@
 /**
  * MA PAGE MOBIIZ (Greg, 16 novembre 2026, RÈGLE CHANGÉE le même jour : « le design est à refaire, un vrai site d'artisan »).
  * Un seul modèle, fond ivoire, de vraies photos ; plus de visuel dessiné, de pictogramme ni de motif. Le métier principal
- * donne : le nom du métier dans le grand titre (« Couvreur à Lannion »), la teinte par défaut (une des quatre teintes
- * sobres) et les prestations proposées à la création de la page (titre + une phrase), que l'artisan garde, corrige ou retire.
+ * donne : le nom du métier dans le grand titre (« Couvreur à Lannion »), la teinte par défaut (une des teintes) et les prestations proposées à la création de la page (titre + une phrase), que l'artisan garde, corrige ou retire.
  * La page est privée par défaut : rien n'est publié sans que l'artisan l'ait vu.
  */
 
-/** Les quatre teintes sobres au choix (Greg, 16 novembre 2026). Le bouton « Appeler » reste jaune Mobiiz. */
+/**
+ * Les teintes au choix. Le bouton « Appeler » reste jaune Mobiiz. RÈGLE CHANGÉE (Greg, 17 novembre 2026 : « des couleurs
+ * bien différentes dans le nuancier ») : avant, quatre teintes sombres proches (ardoise, anthracite, bleu nuit, vert sapin) ;
+ * maintenant neuf teintes de familles différentes, toutes assez profondes pour un texte blanc (contraste 7 au moins). La
+ * teinte colore la barre du haut, l'accueil, la bande et le contact. Les quatre premières gardent leur code (pages déjà réglées).
+ */
 export const TEINTES = [
   { id: "ardoise", nom: "Ardoise", hex: "#3E5163" },
   { id: "anthracite", nom: "Anthracite", hex: "#2E3338" },
   { id: "bleu-nuit", nom: "Bleu nuit", hex: "#1D3557" },
   { id: "vert-sapin", nom: "Vert sapin", hex: "#1F4D3A" },
+  { id: "bleu-roi", nom: "Bleu roi", hex: "#1E4BA0" },
+  { id: "petrole", nom: "Pétrole", hex: "#0E5A5E" },
+  { id: "bordeaux", nom: "Bordeaux", hex: "#7A1F33" },
+  { id: "rouge-brique", nom: "Rouge brique", hex: "#A0281E" },
+  { id: "prune", nom: "Prune", hex: "#6B2D7A" },
 ] as const;
 export type TeinteId = (typeof TEINTES)[number]["id"];
 
@@ -175,7 +184,7 @@ export function accrocheParDefaut(theme: ThemeMetier, zone: string | null | unde
   return theme.accroche.replace("{zone}", z ? ` à ${z}` : "");
 }
 
-/** La teinte d'une page : celle choisie si elle fait partie des quatre, sinon celle du métier. */
+/** La teinte d'une page : celle choisie si elle fait partie des teintes proposées, sinon celle du métier. */
 export function teinteDeLaPage(couleur: string | null | undefined, metier: string | null | undefined): (typeof TEINTES)[number] {
   return TEINTES.find((x) => x.hex.toLowerCase() === couleur?.toLowerCase() || x.id === couleur) ?? TEINTES.find((x) => x.id === themeDuMetier(metier).teinte)!;
 }

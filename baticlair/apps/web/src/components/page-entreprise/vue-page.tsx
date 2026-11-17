@@ -11,7 +11,7 @@ import {
 } from "@baticlair/domain/page-entreprise";
 import { EDITEUR, HEBERGEUR } from "@/lib/legal";
 import { TRADES } from "@/lib/trades";
-import { EnTeteSite, ListeChantiers, SuiviDefilement } from "./navigation";
+import { EnTeteSite, ListeChantiers, RetourMonSite, SuiviDefilement } from "./navigation";
 import { iconeDePrestation } from "./icones";
 import { Photo } from "./photo";
 
@@ -55,7 +55,8 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
   // « Couvreur à Lannion » : le métier en blanc, « à Lannion » en jaune dessous (maquette de Greg, 17 novembre 2026).
   const coupure = titre.indexOf(" à ");
   const titreHaut = coupure > 0 ? titre.slice(0, coupure) : titre;
-  const titreBas = coupure > 0 ? titre.slice(coupure + 1) : null;
+  // « à » jamais seul sur sa ligne : il reste collé à la ville.
+  const titreBas = coupure > 0 ? titre.slice(coupure + 1).replace(" ", "\u00a0") : null;
   const activite = LIBELLES[c.metierPrincipal] ?? null;
   const style = { "--pe-teinte": teinteDe(c) } as React.CSSProperties;
   const lien = (href: string) => (apercu ? undefined : href);
@@ -63,6 +64,7 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
   return (
     <div className={`pe${accueil ? " pe-avec-photo" : ""}${apercu ? " pe-apercu" : ""}`} style={style}>
       <SuiviDefilement />
+      {apercu ? null : <RetourMonSite />}
       <EnTeteSite nom={c.nom} activite={activite} logo={c.logo} initiales={initiales(c.nom)} telephone={c.telephone} menu={menu} />
 
       <main id="contenu">

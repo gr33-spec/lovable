@@ -81,8 +81,10 @@ describe("thèmes par métier (un seul modèle, quatre teintes, prestations prop
     }
   });
 
-  it("quatre teintes sobres, toutes lisibles en texte blanc et sur l'ivoire ; « Appeler » jaune à texte noir", () => {
-    expect(TEINTES.map((t) => t.nom)).toEqual(["Ardoise", "Anthracite", "Bleu nuit", "Vert sapin"]);
+  it("neuf teintes bien différentes, toutes lisibles en texte blanc et sur l'ivoire ; « Appeler » jaune à texte noir", () => {
+    expect(TEINTES.map((t) => t.nom)).toEqual(["Ardoise", "Anthracite", "Bleu nuit", "Vert sapin", "Bleu roi", "Pétrole", "Bordeaux", "Rouge brique", "Prune"]);
+    // Bien différentes (Greg, 17 novembre 2026) : jamais deux teintes du même code.
+    expect(new Set(TEINTES.map((t) => t.hex.toLowerCase())).size).toBe(TEINTES.length);
     for (const t of TEINTES) {
       expect(contraste("#FFFFFF", t.hex), t.nom).toBeGreaterThanOrEqual(7);
       expect(contraste(t.hex, COULEURS_PAGE.ivoire), t.nom).toBeGreaterThanOrEqual(7);
@@ -212,5 +214,17 @@ describe("champs et textes", () => {
     expect(p.presentation).toContain("Toits Martin intervient en couverture, charpente, zinguerie à Lannion");
     expect(p.presentation).toContain("2008");
     expect(p.presentation).not.toMatch(/\d{2} \d{2} \d{2}|@/);
+  });
+});
+
+describe("la ville du grand titre se lit (Greg, 17 novembre 2026 : « PLOUBAZLANEC » criait)", () => {
+  it("une ville en capitales passe en minuscules avec ses majuscules ; une ville déjà écrite reste telle quelle", async () => {
+    const { villeLisible, titreAccueil } = await import("../src/page-entreprise/page");
+    expect(villeLisible("PLOUBAZLANEC")).toBe("Ploubazlanec");
+    expect(villeLisible("SAINT-QUAY-PORTRIEUX")).toBe("Saint-Quay-Portrieux");
+    expect(villeLisible("BOURG-EN-BRESSE")).toBe("Bourg-en-Bresse");
+    expect(villeLisible("LE MANS")).toBe("Le Mans");
+    expect(villeLisible("Perros-Guirec")).toBe("Perros-Guirec");
+    expect(titreAccueil({ metierPrincipal: "roofing", zone: "PLOUBAZLANEC" })).toBe("Couvreur à Ploubazlanec");
   });
 });

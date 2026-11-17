@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Check, Copy, ExternalLink, Eye, Image as ImageIcon, Loader2, Monitor, Plus, Share2, Smartphone, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink, Eye, Image as ImageIcon, Loader2, Monitor, Plus, Share2, Smartphone, Sparkles, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
@@ -110,6 +110,7 @@ function AnneeChamp({ valeur, onChange }: { valeur: number | null; onChange: (n:
 function Apercu({ contenu, plein, onFermer }: { contenu: ContenuPage; plein?: boolean; onFermer?: () => void }) {
   const [ecran, setEcran] = useState<"telephone" | "ordinateur">("telephone");
   const cadre = useRef<HTMLDivElement>(null);
+  const defile = useRef<HTMLDivElement>(null);
   const [largeur, setLargeur] = useState(360);
   useEffect(() => {
     const el = cadre.current;
@@ -118,28 +119,58 @@ function Apercu({ contenu, plein, onFermer }: { contenu: ContenuPage; plein?: bo
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+  // Plein écran : la page derrière ne bouge plus, « Échap » ramène à l'édition.
+  useEffect(() => {
+    if (!plein) return;
+    const avant = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const touche = (e: KeyboardEvent) => e.key === "Escape" && onFermer?.();
+    window.addEventListener("keydown", touche);
+    return () => {
+      document.body.style.overflow = avant;
+      window.removeEventListener("keydown", touche);
+    };
+  }, [plein, onFermer]);
   const ordinateur = ecran === "ordinateur";
   const echelle = ordinateur ? Math.min(1, largeur / 1200) : 1;
+  /** En plein écran le site se parcourt comme en vrai (menu, « Voir plus ») ; un lien interne défile dans l'aperçu, rien ne part. */
+  const clic = (e: React.MouseEvent) => {
+    const a = (e.target as HTMLElement).closest("a");
+    if (!a) return;
+    e.preventDefault();
+    const cible = a.getAttribute("href");
+    if (cible?.startsWith("#") && cible.length > 1) defile.current?.querySelector(cible)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const choixEcran = (
+    <div role="radiogroup" aria-label="Taille de l'aperçu" className={`flex gap-1 rounded-full p-1 ${plein ? "bg-white/12" : "bg-black/10"}`}>
+      {(["telephone", "ordinateur"] as const).map((e) => (
+        <button key={e} type="button" role="radio" aria-checked={ecran === e} onClick={() => setEcran(e)} className={`flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-bold ${ecran === e ? "bg-surface text-ink shadow" : plein ? "text-white" : ""}`}>
+          {e === "telephone" ? <Smartphone size={15} aria-hidden="true" /> : <Monitor size={15} aria-hidden="true" />} {e === "telephone" ? "Téléphone" : "Ordinateur"}
+        </button>
+      ))}
+    </div>
+  );
   return (
-    <div className={plein ? "fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-black/80 p-3" : "grid gap-2"}>
+    <div
+      className={plein ? "fixed top-0 left-0 z-[70] flex h-dvh w-full flex-col gap-3 bg-[#0b0b0c]/95 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur" : "grid gap-2"}
+      {...(plein ? { role: "dialog", "aria-modal": true, "aria-label": "Aperçu de mon site" } : {})}
+    >
       <div className="flex items-center justify-between gap-2">
-        <div role="radiogroup" aria-label="Taille de l'aperçu" className="flex gap-1 rounded-full bg-black/10 p-1">
-          {(["telephone", "ordinateur"] as const).map((e) => (
-            <button key={e} type="button" role="radio" aria-checked={ecran === e} onClick={() => setEcran(e)} className={`flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-bold ${ecran === e ? "bg-surface shadow" : plein ? "text-white" : ""}`}>
-              {e === "telephone" ? <Smartphone size={15} aria-hidden="true" /> : <Monitor size={15} aria-hidden="true" />} {e === "telephone" ? "Téléphone" : "Ordinateur"}
-            </button>
-          ))}
-        </div>
         {plein ? (
-          <button type="button" onClick={onFermer} aria-label="Fermer l'aperçu" className="flex size-11 items-center justify-center rounded-full bg-white text-black">
-            <X size={20} aria-hidden="true" />
+          <button type="button" onClick={onFermer} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-white pr-4 pl-3 text-[15px] font-extrabold text-black">
+            <ArrowLeft size={18} aria-hidden="true" /> Retour
           </button>
         ) : null}
+        {choixEcran}
       </div>
-      <div ref={cadre} className={`mx-auto w-full overflow-hidden rounded-[28px] border-[6px] border-black/80 bg-black/80 ${ordinateur ? "" : "max-w-[390px]"} ${plein ? "flex-1" : ""}`}>
-        {/* Le `transform` fait du cadre le repère de la barre d'appel (position fixe) : elle reste dans l'aperçu. */}
-        <div className="overflow-y-auto bg-white" style={{ height: plein ? "100%" : ordinateur ? 640 * echelle : 620, transform: "translateZ(0)" }} data-testid="apercu-page" inert aria-hidden="true">
-          <div style={ordinateur ? { width: 1200, transform: `scale(${echelle})`, transformOrigin: "top left", height: `${100 / echelle}%` } : undefined}>
+      <div ref={cadre} className={`mx-auto w-full overflow-hidden rounded-[28px] border-[6px] border-black/80 bg-black/80 ${ordinateur ? "" : "max-w-[390px]"} ${plein ? "min-h-0 flex-1" : ""}`}>
+        {/* Le `transform` fait du cadre le repère de la barre d'appel (position fixe) : elle reste dans l'aperçu.
+            Le défilement est sur ce cadre, jamais rendu inerte : le doigt fait défiler le site (Greg, 17 novembre 2026). */}
+        <div ref={defile} className="overscroll-contain overflow-y-auto bg-white" style={{ height: plein ? "100%" : ordinateur ? 640 * echelle : 620, transform: "translateZ(0)", WebkitOverflowScrolling: "touch" }} data-testid="apercu-page" onClickCapture={plein ? clic : undefined}>
+          <div
+            style={ordinateur ? { width: 1200, transform: `scale(${echelle})`, transformOrigin: "top left", height: `${100 / echelle}%` } : undefined}
+            {...(plein ? {} : { inert: true, "aria-hidden": true })}
+          >
             <VuePage contenu={contenu} apercu />
           </div>
         </div>
@@ -326,6 +357,7 @@ export function EditeurMaPage() {
   const [chargement, setChargement] = useState<ApiError | null>(null);
   const [etat, setEtat] = useState<Etat>("pret");
   const [apercuPlein, setApercuPlein] = useState(false);
+  const fermerApercu = useCallback(() => setApercuPlein(false), []);
   const [partage, setPartage] = useState(false);
   const [proposition, setProposition] = useState<{ accroche: string; presentation: string; source: string; phrase: string | null } | null>(null);
   const [aide, setAide] = useState(false);
@@ -428,7 +460,7 @@ export function EditeurMaPage() {
   const couvertureEnCours = data.photos.some((p) => p.role === "couverture" && p.statut === "traitement");
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 pb-20 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start lg:pb-24">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
         <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Mon site</h1>
         <p className="text-[15px] text-muted">Un vrai site pour ton entreprise, à partager avec tes clients. Chaque changement s&apos;enregistre tout seul.</p>
@@ -457,16 +489,21 @@ export function EditeurMaPage() {
 
         <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4">
           <h2 className="text-[18px] font-extrabold">Teinte</h2>
-          <p className="text-[14px] text-muted">Pour les détails de ton site. Le bouton « Appeler » reste jaune.</p>
-          <div role="radiogroup" aria-label="Teinte de la page" className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-            <button type="button" role="radio" aria-checked={couleurActive === null} onClick={() => changer("couleur", null)} className={`pressable flex min-h-12 items-center gap-2 rounded-2xl border-2 px-3 text-left text-[14px] font-bold ${couleurActive === null ? "border-accent bg-accent/15" : "border-line"}`}>
-              <span className="size-6 shrink-0 rounded-full" style={{ background: teinteMetier.hex }} aria-hidden="true" /> Selon le métier
-            </button>
-            {data.choix.teintes.map((c) => (
-              <button key={c.id} type="button" role="radio" aria-checked={couleurActive === c.hex} onClick={() => changer("couleur", c.hex)} className={`pressable flex min-h-12 items-center gap-2 rounded-2xl border-2 px-3 text-left text-[14px] font-bold ${couleurActive === c.hex ? "border-accent bg-accent/15" : "border-line"}`}>
-                <span className="size-6 shrink-0 rounded-full" style={{ background: c.hex }} aria-hidden="true" /> {c.nom}
-              </button>
-            ))}
+          <p className="text-[14px] text-muted">La couleur de ta barre, de ton accueil et de tes bandes. Les boutons restent jaunes.</p>
+          <div role="radiogroup" aria-label="Teinte de la page" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {[{ id: "metier", nom: "Selon le métier", hex: teinteMetier.hex, valeur: null as string | null }, ...data.choix.teintes.map((c) => ({ ...c, valeur: c.hex as string | null }))].map((c) => {
+              const actif = couleurActive === c.valeur;
+              return (
+                <button key={c.id} type="button" role="radio" aria-checked={actif} onClick={() => changer("couleur", c.valeur)} className={`pressable flex min-h-14 items-center gap-2.5 rounded-2xl border-2 p-2 pr-3 text-left text-[14px] font-bold ${actif ? "border-accent bg-accent/15" : "border-line"}`}>
+                  {/* La pastille montre le rendu : la teinte et le jaune des boutons. */}
+                  <span className="relative grid size-10 shrink-0 place-items-end overflow-hidden rounded-xl p-1.5" style={{ background: `radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, ${c.hex} 85%, white 10%), ${c.hex} 70%)` }} aria-hidden="true">
+                    <span className="h-1.5 w-4 rounded-full bg-[#FED206]" />
+                  </span>
+                  <span className="min-w-0">{c.nom}</span>
+                  {actif ? <Check size={16} className="ml-auto shrink-0" aria-hidden="true" /> : null}
+                </button>
+              );
+            })}
           </div>
         </Card>
 
@@ -643,14 +680,10 @@ export function EditeurMaPage() {
           </p>
           <div className="flex flex-wrap gap-2">
             {r.visible && !r.masquee ? (
-              <a href={`/e/${r.adresse}`} target="_blank" rel="noopener" className="pressable inline-flex min-h-12 items-center gap-2 rounded-2xl bg-accent px-4 font-bold text-on-accent">
-                <ExternalLink size={18} aria-hidden="true" /> Voir mon site
+              <a href={`/e/${r.adresse}?depuis=mon-site`} className="pressable inline-flex min-h-12 items-center gap-2 rounded-2xl border-2 border-line px-4 font-bold">
+                <ExternalLink size={18} aria-hidden="true" /> Ouvrir en ligne
               </a>
-            ) : (
-              <Button onClick={() => setApercuPlein(true)}>
-                <Eye size={18} aria-hidden="true" /> Voir mon site
-              </Button>
-            )}
+            ) : null}
             <Button variant="secondary" onClick={() => setPartage(true)} disabled={!r.visible}>
               <Share2 size={18} aria-hidden="true" /> Partager
             </Button>
@@ -807,7 +840,19 @@ export function EditeurMaPage() {
       <div className="sticky top-4 hidden lg:block">
         <Apercu contenu={contenu} />
       </div>
-      {apercuPlein ? <Apercu contenu={contenu} plein onFermer={() => setApercuPlein(false)} /> : null}
+      {/* « Voir mon site » flottant (Greg, 17 novembre 2026) : toujours à portée de pouce, au-dessus du menu sur téléphone.
+          Il ouvre le site en plein écran, qui défile, avec « Retour » en haut. RÈGLE CHANGÉE : avant, un bouton en bas de l'éditeur. */}
+      {apercuPlein ? null : (
+        <button
+          type="button"
+          onClick={() => setApercuPlein(true)}
+          className="pressable fixed right-4 z-40 flex min-h-14 items-center gap-2 rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent shadow-float lg:right-8 lg:bottom-8!"
+          style={{ bottom: "calc(var(--nav-space) + 4px)" }}
+        >
+          <Eye size={20} aria-hidden="true" /> Voir mon site
+        </button>
+      )}
+      {apercuPlein ? <Apercu contenu={contenu} plein onFermer={fermerApercu} /> : null}
       {partage ? <Partager url={url} nom={data.profil.nom} onFermer={() => setPartage(false)} /> : null}
     </div>
   );

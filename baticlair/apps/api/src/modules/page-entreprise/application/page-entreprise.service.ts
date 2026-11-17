@@ -249,7 +249,7 @@ export class PageEntrepriseService {
     if (m.visible !== undefined) d.visible = m.visible;
     if (m.couleur !== undefined) {
       const teinte = m.couleur === null ? null : TEINTES.find((x) => x.hex.toLowerCase() === m.couleur!.toLowerCase() || x.id === m.couleur);
-      if (m.couleur !== null && !teinte) throw refus("couleur", "Choisis une des quatre teintes.", "couleur");
+      if (m.couleur !== null && !teinte) throw refus("couleur", "Choisis une des teintes proposées.", "couleur");
       d.couleur = teinte?.hex ?? null;
     }
     if (m.prestations !== undefined) {

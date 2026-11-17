@@ -98,7 +98,7 @@ describe("Ma page : réglages", () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
     const refus = async (corps: object) => (await a.agent.patch("/v1/ma-page").send(corps).expect(400)).body.error.details;
     expect(await refus({ couleur: "rouge" })).toMatchObject({ reason: "couleur" });
-    expect(await refus({ couleur: "#FF00FF" })).toMatchObject({ reason: "couleur", phrase: "Choisis une des quatre teintes." });
+    expect(await refus({ couleur: "#FF00FF" })).toMatchObject({ reason: "couleur", phrase: "Choisis une des teintes proposées." });
     expect(await refus({ telephone: "12" })).toMatchObject({ reason: "telephone", phrase: "Ce numéro n'est pas valable." });
     expect(await refus({ siteWeb: "javascript:alert(1)" })).toMatchObject({ reason: "site_web" });
     expect(await refus({ creeeEn: 1850 })).toMatchObject({ reason: "creee_en" });
