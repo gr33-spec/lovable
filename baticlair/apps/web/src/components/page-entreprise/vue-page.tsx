@@ -1,12 +1,17 @@
-import { BadgeCheck, CalendarDays, Clock, Globe, Heart, Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
+import { ArrowRight, Award, BadgeCheck, CalendarDays, Clock, Globe, Heart, Leaf, Mail, MapPin, Phone, ShieldCheck, type LucideIcon } from "lucide-react";
 import {
   lienAppel,
   menuDeLaPage,
   photoAccueil,
   preuvesCourtes,
   rubriquesVisibles,
+  couleurBoutonsDe,
+  couleurSurSombre,
+  melange,
   teinteDe,
+  texteSurCouleur,
   titreAccueil,
+  villeDeLaZone,
   type ContenuPage,
 } from "@baticlair/domain/page-entreprise";
 import { EDITEUR, HEBERGEUR } from "@/lib/legal";
@@ -24,10 +29,19 @@ import "./page-entreprise.css";
  * MA PAGE MOBIIZ (Greg, 16 novembre 2026, REFONTE du même jour : « quand un client ouvre le lien, il doit croire qu'il est
  * sur le site web de l'artisan »). UN SEUL MODÈLE, le site vitrine d'une page d'un bon artisan : barre du haut, accueil
  * plein écran sur une vraie photo, prestations, réalisations par chantier, à propos, zone, contact, pied de page. Fond
- * ivoire et typographie de la landing de Mobiiz ; « Appeler » en jaune Mobiiz ; la teinte de l'artisan (une des quatre)
- * pour les détails. Aucune rubrique vide, ni dans la page ni dans le menu. Mise en page par requêtes de CONTENEUR :
+ * ivoire et typographie de la landing de Mobiiz ; les boutons de la couleur choisie (jaune Mobiiz par défaut) ; la teinte
+ * de l'artisan pour les fonds sombres. Aucune rubrique vide, ni dans la page ni dans le menu. Mise en page par requêtes de CONTENEUR :
  * l'aperçu de l'éditeur se dessine comme un vrai téléphone, même sur un ordinateur.
  */
+/** L'icône d'une garantie, d'après ses mots (jamais un label inventé). */
+function iconeDePreuve(texte: string): LucideIcon {
+  if (/v[ée]rifi/i.test(texte)) return BadgeCheck;
+  if (/d[ée]cennale|assurance|garantie/i.test(texte)) return ShieldCheck;
+  if (/rge|[ée]co|environnement/i.test(texte)) return Leaf;
+  if (/ans d'exp/i.test(texte)) return Award;
+  return Award;
+}
+
 export const LIBELLES: Record<string, string> = Object.fromEntries(TRADES.map((t) => [t.id, t.label]));
 
 export const initiales = (nom: string) =>
@@ -58,7 +72,26 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
   // « à » jamais seul sur sa ligne : il reste collé à la ville.
   const titreBas = coupure > 0 ? titre.slice(coupure + 1).replace(" ", "\u00a0") : null;
   const activite = LIBELLES[c.metierPrincipal] ?? null;
-  const style = { "--pe-teinte": teinteDe(c) } as React.CSSProperties;
+  // La couleur des boutons choisie par l'artisan (jaune Mobiiz par défaut) : boutons, traits, icônes, ville du titre.
+  const bouton = couleurBoutonsDe(c.couleurBoutons).hex;
+  const style = {
+    "--pe-teinte": teinteDe(c),
+    "--jaune": bouton,
+    "--jaune2": melange(bouton, "#FFFFFF", 0.18),
+    "--sur-jaune": texteSurCouleur(bouton),
+    "--jaune-sombre": couleurSurSombre(bouton),
+  } as React.CSSProperties;
+  const ville = villeDeLaZone(c.zone);
+  // Le bandeau de garanties de l'accueil : seulement du vrai (preuves déclarées ou vérifiées, la zone écrite).
+  const garanties: { texte: string; Icone: LucideIcon }[] = preuves.map((x) => ({ texte: x, Icone: iconeDePreuve(x) }));
+  if (garanties.length < 3 && ville) garanties.push({ texte: `${ville} et alentours`, Icone: MapPin });
+  const premierePhrase = c.presentation?.split(/(?<=[.!?])\s+/)[0]?.trim() ?? null;
+  // La barre de confiance sous les prestations : la zone, les horaires et les certifications déclarées (quatre au plus).
+  const confiance: { etiquette: string; valeur: string; Icone: LucideIcon }[] = [];
+  if (c.zone) confiance.push({ etiquette: "Zone d'intervention", valeur: `${c.zone} et alentours`, Icone: MapPin });
+  if (c.horaires) confiance.push({ etiquette: "Horaires", valeur: c.horaires, Icone: Clock });
+  for (const x of c.certifications) if (confiance.length < 4) confiance.push({ etiquette: "Certification déclarée", valeur: x, Icone: iconeDePreuve(x) });
+  if (confiance.length < 4 && c.creeeEn) confiance.push({ etiquette: "Expérience", valeur: `Depuis ${c.creeeEn}`, Icone: CalendarDays });
   const lien = (href: string) => (apercu ? undefined : href);
 
   return (
@@ -96,11 +129,14 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
                 </a>
               ) : null}
             </div>
-            {preuves.length ? (
+            {garanties.length ? (
               <ul className="pe-preuves" aria-label="Garanties">
-                {preuves.map((x) => (
-                  <li key={x}>
-                    <BadgeCheck size={17} strokeWidth={2.2} aria-hidden="true" /> {x}
+                {garanties.map(({ texte, Icone }) => (
+                  <li key={texte}>
+                    <span className="pe-preuve-icone" aria-hidden="true">
+                      <Icone size={20} strokeWidth={2} />
+                    </span>
+                    {texte}
                   </li>
                 ))}
               </ul>
@@ -112,22 +148,72 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
         {apercu ? null : <EntrePros adresse={c.adresse} />}
 
         {visibles.includes("prestations") ? (
-          <section id="prestations" className="pe-section" aria-labelledby="pe-t-prestations">
-            <div className="pe-cadre">
-              <h2 id="pe-t-prestations">Nos prestations</h2>
+          <section id="prestations" className="pe-section pe-section-prestations" aria-labelledby="pe-t-prestations">
+            <div className="pe-cadre pe-prestations-grille">
+              <div className="pe-prestations-tete">
+                <h2 id="pe-t-prestations">Nos prestations</h2>
+                <p className="pe-sous-titre">Ce que {c.nom} réalise pour vous{ville ? `, à ${ville} et alentours` : ""}.</p>
+              </div>
               <ul className="pe-prestations">
                 {c.prestations.map((x) => {
                   const Icone = iconeDePrestation(x.titre, c.metierPrincipal);
                   return (
                     <li key={x.titre}>
-                      <Icone className="pe-prestation-icone" size={40} strokeWidth={1.7} aria-hidden="true" />
+                      <Icone className="pe-prestation-icone" size={34} strokeWidth={1.6} aria-hidden="true" />
                       <div>
                         <h3>{x.titre}</h3>
-                        {x.texte ? <p>{x.texte}</p> : null}
+                        {x.texte ? <p className="pe-prestation-texte">{x.texte}</p> : null}
                       </div>
                     </li>
                   );
                 })}
+              </ul>
+              {premierePhrase && visibles.includes("a-propos") ? (
+                <a href={lien("#a-propos")} className={`pe-carte-apropos${c.photoEquipe ?? accueil ? " pe-carte-apropos-photo" : ""}`}>
+                  {c.photoEquipe ?? accueil ? (
+                    <span className="pe-carte-apropos-image" aria-hidden="true">
+                      <Photo photo={(c.photoEquipe ?? accueil)!} alt="" sizes="(min-width: 960px) 30vw, 100vw" />
+                    </span>
+                  ) : null}
+                  <span className="pe-carte-apropos-texte">
+                    <span className="pe-carte-apropos-titre">{c.nom}</span>
+                    <span className="pe-carte-apropos-phrase">{premierePhrase}</span>
+                    <span className="pe-carte-apropos-lien">
+                      En savoir plus <ArrowRight size={16} strokeWidth={2.4} aria-hidden="true" />
+                    </span>
+                  </span>
+                </a>
+              ) : null}
+            </div>
+            {confiance.length ? (
+              <div className="pe-cadre">
+                <ul id="zone" className="pe-confiance" aria-label="Zone d'intervention, horaires et certifications">
+                  {confiance.map(({ etiquette, valeur, Icone }) => (
+                    <li key={etiquette + valeur}>
+                      <Icone size={30} strokeWidth={1.6} aria-hidden="true" />
+                      <span>
+                        <span className="pe-confiance-etiquette">{etiquette}</span>
+                        <span className="pe-confiance-valeur">{valeur}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </section>
+        ) : confiance.length ? (
+          <section id="zone" className="pe-section pe-section-confiance" aria-label="Zone d'intervention et horaires">
+            <div className="pe-cadre">
+              <ul className="pe-confiance">
+                {confiance.map(({ etiquette, valeur, Icone }) => (
+                  <li key={etiquette + valeur}>
+                    <Icone size={30} strokeWidth={1.6} aria-hidden="true" />
+                    <span>
+                      <span className="pe-confiance-etiquette">{etiquette}</span>
+                      <span className="pe-confiance-valeur">{valeur}</span>
+                    </span>
+                  </li>
+                ))}
               </ul>
             </div>
           </section>
@@ -137,32 +223,6 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
           <section id="realisations" className="pe-section pe-section-realisations" aria-labelledby="pe-t-realisations">
             <div className="pe-cadre">
               <ListeChantiers realisations={c.realisations} nom={c.nom} titre={<h2 id="pe-t-realisations">Nos réalisations</h2>} />
-            </div>
-          </section>
-        ) : null}
-
-        {visibles.includes("zone") || c.horaires ? (
-          <section id="zone" className="pe-bande" aria-label="Zone d'intervention et horaires">
-            <div className="pe-cadre pe-bande-grille">
-              {c.zone || c.adressePostale ? (
-                <div className="pe-bande-bloc">
-                  <MapPin size={34} strokeWidth={2} aria-hidden="true" />
-                  <div>
-                    <h2 className="pe-bande-etiquette">Zone d&apos;intervention</h2>
-                    {c.zone ? <p className="pe-bande-valeur">{c.zone} et alentours</p> : null}
-                    {c.adressePostale ? <p className="pe-bande-detail">{c.adressePostale}</p> : null}
-                  </div>
-                </div>
-              ) : null}
-              {c.horaires ? (
-                <div className="pe-bande-bloc">
-                  <Clock size={34} strokeWidth={2} aria-hidden="true" />
-                  <div>
-                    <h2 className="pe-bande-etiquette">Horaires</h2>
-                    <p className="pe-bande-valeur pe-bande-horaires">{c.horaires}</p>
-                  </div>
-                </div>
-              ) : null}
             </div>
           </section>
         ) : null}

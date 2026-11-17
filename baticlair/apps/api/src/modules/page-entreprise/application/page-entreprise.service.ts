@@ -6,6 +6,7 @@ import {
   masquerCoordonnees,
   refusAdresse,
   TEINTES,
+  COULEURS_BOUTONS,
   siteWebPropre,
   telephonePropre,
   THEMES_METIER,
@@ -49,6 +50,7 @@ export const LIMITES_CONTACT = { parIpParHeure: 5, parPageParJour: 30 } as const
 export interface ModificationPage {
   visible?: boolean;
   couleur?: string | null;
+  couleurBoutons?: string | null;
   prestations?: Prestation[];
   accroche?: string | null;
   presentation?: string | null;
@@ -186,6 +188,7 @@ export class PageEntrepriseService {
       verifiee: !!e.siretVerifieLe,
       siret: e.siret?.replace(/\s/g, "") || null,
       couleur: page.couleur,
+      couleurBoutons: page.couleurBoutons,
       logo: e.logoType ? `/v1/public/pages/${page.adresse}/logo?v=${e.updatedAt.getTime().toString(36)}` : null,
       couverture: couverture ? this.vuePhoto(couverture) : null,
       prestations: prestationsDe(page.prestations),
@@ -213,6 +216,7 @@ export class PageEntrepriseService {
         adresse: page.adresse,
         adresseModifiable: !page.adresseChangeeLe,
         couleur: page.couleur,
+        couleurBoutons: page.couleurBoutons,
         prestations: prestationsDe(page.prestations),
         accroche: page.accroche,
         presentation: page.presentation,
@@ -232,6 +236,7 @@ export class PageEntrepriseService {
       realisations,
       choix: {
         teintes: TEINTES,
+        couleursBoutons: COULEURS_BOUTONS,
         certifications: CERTIFICATIONS_SUGGEREES,
         theme: themeDuMetier(contenu.metierPrincipal),
         limites: LIMITES_PAGE,
@@ -251,6 +256,11 @@ export class PageEntrepriseService {
       const teinte = m.couleur === null ? null : TEINTES.find((x) => x.hex.toLowerCase() === m.couleur!.toLowerCase() || x.id === m.couleur);
       if (m.couleur !== null && !teinte) throw refus("couleur", "Choisis une des teintes proposées.", "couleur");
       d.couleur = teinte?.hex ?? null;
+    }
+    if (m.couleurBoutons !== undefined) {
+      const choix = m.couleurBoutons === null ? null : COULEURS_BOUTONS.find((x) => x.hex.toLowerCase() === m.couleurBoutons!.toLowerCase() || x.id === m.couleurBoutons);
+      if (m.couleurBoutons !== null && !choix) throw refus("couleurBoutons", "Choisis une des couleurs proposées.", "couleurBoutons");
+      d.couleurBoutons = choix?.hex ?? null;
     }
     if (m.prestations !== undefined) {
       d.prestations = m.prestations

@@ -78,6 +78,13 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await expect(page.getByRole("radio", { name: "Fond sombre" })).toHaveCount(0);
   await page.getByRole("radio", { name: "Bleu nuit" }).click();
   await enregistre(page);
+  // La couleur des boutons se choisit (Greg, 17 novembre 2026) ; le texte du bouton reste lisible.
+  await page.getByRole("radiogroup", { name: "Couleur des boutons" }).getByRole("radio", { name: "Bleu", exact: true }).click();
+  await enregistre(page);
+  await expect(apercu(page).locator(".pe-accueil .pe-btn-appel").first()).toHaveCSS("background-color", "rgb(25, 113, 194)");
+  await expect(apercu(page).locator(".pe-accueil .pe-btn-appel").first()).toHaveCSS("color", "rgb(255, 255, 255)");
+  await page.getByRole("radiogroup", { name: "Couleur des boutons" }).getByRole("radio", { name: "Jaune Mobiiz" }).click();
+  await enregistre(page);
   // Une prestation se retire.
   await page.getByRole("button", { name: "Retirer la prestation Entretien et démoussage" }).click();
   await enregistre(page);
@@ -311,13 +318,16 @@ test.describe("captures du rapport", () => {
       await plein.getByTestId("apercu-page").evaluate((el) => el.scrollTo(0, 900));
       await p.waitForTimeout(600);
       await p.screenshot({ path: `${dossier}/telephone-apercu-defile.png` });
-      for (const [id, hex] of [["bordeaux", "#7A1F33"], ["bleu-roi", "#1E4BA0"]] as const) {
-        await appel("patch", "/v1/ma-page", { couleur: hex });
+      for (const [id, hex] of [["bleu", "#1971C2"], ["orange", "#F7931E"]] as const) {
+        await appel("patch", "/v1/ma-page", { couleurBoutons: hex });
         await p.reload();
         await p.getByRole("button", { name: "Voir mon site" }).click();
         await p.waitForTimeout(600);
-        await p.screenshot({ path: `${dossier}/telephone-teinte-${id}.png` });
+        await p.screenshot({ path: `${dossier}/telephone-boutons-${id}.png` });
       }
+      await p.getByRole("button", { name: "Retour" }).click();
+      await p.getByRole("heading", { name: "Couleur des boutons" }).scrollIntoViewIfNeeded();
+      await p.screenshot({ path: `${dossier}/telephone-couleur-boutons.png` });
     }
     await ctx.close();
   });

@@ -110,6 +110,8 @@ export interface ContenuPage {
   siret: string | null;
   /** La teinte choisie (une des quatre), sinon null : celle du métier. */
   couleur: string | null;
+  /** La couleur des boutons choisie (une de `COULEURS_BOUTONS`), sinon null : le jaune Mobiiz. */
+  couleurBoutons: string | null;
   logo: string | null;
   couverture: PhotoPublique | null;
   prestations: Prestation[];

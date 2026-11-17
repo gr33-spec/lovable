@@ -24,6 +24,29 @@ export const TEINTES = [
 ] as const;
 export type TeinteId = (typeof TEINTES)[number]["id"];
 
+/**
+ * LA COULEUR DES BOUTONS (Greg, 17 novembre 2026 : « fais en sorte de pouvoir changer la couleur des boutons »). RÈGLE
+ * CHANGÉE : avant, « Appeler » et « Demander un devis » toujours jaune Mobiiz. Maintenant l'artisan choisit : le jaune
+ * reste par défaut. La couleur sert aussi aux traits, aux icônes et à la ville du grand titre. Le texte d'un bouton
+ * (noir ou blanc) est choisi par le code pour rester lisible (`texteSurCouleur`).
+ */
+export const COULEURS_BOUTONS = [
+  { id: "jaune", nom: "Jaune Mobiiz", hex: "#FED206" },
+  { id: "orange", nom: "Orange", hex: "#F7931E" },
+  { id: "rouge", nom: "Rouge", hex: "#E03131" },
+  { id: "rose", nom: "Rose", hex: "#E64980" },
+  { id: "violet", nom: "Violet", hex: "#7048E8" },
+  { id: "bleu", nom: "Bleu", hex: "#1971C2" },
+  { id: "turquoise", nom: "Turquoise", hex: "#15AABF" },
+  { id: "vert", nom: "Vert", hex: "#2F9E44" },
+  { id: "noir", nom: "Noir", hex: "#15120E" },
+] as const;
+
+/** La couleur des boutons d'une page : celle choisie si elle est proposée, sinon le jaune Mobiiz. */
+export function couleurBoutonsDe(couleur: string | null | undefined): (typeof COULEURS_BOUTONS)[number] {
+  return COULEURS_BOUTONS.find((x) => x.hex.toLowerCase() === couleur?.toLowerCase() || x.id === couleur) ?? COULEURS_BOUTONS[0];
+}
+
 export interface Prestation {
   titre: string;
   texte: string;

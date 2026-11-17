@@ -3,7 +3,7 @@
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink, Eye, Image as ImageIcon, Loader2, Monitor, Plus, Share2, Smartphone, Sparkles, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
+import { texteSurCouleur, type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
 import { Button, Card, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { envoyerPhoto, GaleriePhotos, type PhotoEditeur } from "./editeur-photos";
@@ -21,6 +21,7 @@ interface Reglages {
   adresse: string;
   adresseModifiable: boolean;
   couleur: string | null;
+  couleurBoutons: string | null;
   prestations: Prestation[];
   accroche: string | null;
   presentation: string | null;
@@ -42,6 +43,7 @@ interface MaPage {
   realisations: { id: string; titre: string }[];
   choix: {
     teintes: readonly { id: string; nom: string; hex: string }[];
+    couleursBoutons: readonly { id: string; nom: string; hex: string }[];
     certifications: readonly string[];
     theme: { nom: string; teinte: string; accroche: string; presentation: string; prestations: Prestation[] };
     limites: { accroche: number; presentation: number; photos: number; prestations: number };
@@ -434,6 +436,7 @@ export function EditeurMaPage() {
     return {
       ...data.contenu,
       couleur: r.couleur,
+      couleurBoutons: r.couleurBoutons,
       prestations: r.prestations.filter((x) => x.titre.trim()),
       accroche: vide(r.accroche),
       presentation: vide(r.presentation),
@@ -488,16 +491,36 @@ export function EditeurMaPage() {
         </div>
 
         <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4">
+          <h2 className="text-[18px] font-extrabold">Couleur des boutons</h2>
+          <p className="text-[14px] text-muted">« Appeler », « Demander un devis », les petits traits et la ville du titre.</p>
+          <div role="radiogroup" aria-label="Couleur des boutons" className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+            {data.choix.couleursBoutons.map((c, i) => {
+              // Le jaune Mobiiz est la valeur par défaut : choisi, rien n'est enregistré (null).
+              const actif = (r.couleurBoutons?.toLowerCase() ?? "#fed206") === c.hex.toLowerCase();
+              return (
+                <button key={c.id} type="button" role="radio" aria-checked={actif} aria-label={c.nom} onClick={() => changer("couleurBoutons", i === 0 ? null : c.hex)} className={`pressable grid justify-items-center gap-1.5 rounded-2xl border-2 px-1 py-2.5 text-[12.5px] font-bold ${actif ? "border-accent bg-accent/15" : "border-line"}`}>
+                  {/* Un vrai petit bouton, dans sa couleur. */}
+                  <span className="flex h-8 w-full max-w-[84px] items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: c.hex, color: texteSurCouleur(c.hex) }} aria-hidden="true">
+                    Appeler
+                  </span>
+                  <span className="text-center leading-tight">{c.nom}</span>
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+
+        <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4">
           <h2 className="text-[18px] font-extrabold">Teinte</h2>
-          <p className="text-[14px] text-muted">La couleur de ta barre, de ton accueil et de tes bandes. Les boutons restent jaunes.</p>
+          <p className="text-[14px] text-muted">La couleur des fonds sombres : l&apos;accueil sans photo, le contact, ton logo.</p>
           <div role="radiogroup" aria-label="Teinte de la page" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {[{ id: "metier", nom: "Selon le métier", hex: teinteMetier.hex, valeur: null as string | null }, ...data.choix.teintes.map((c) => ({ ...c, valeur: c.hex as string | null }))].map((c) => {
               const actif = couleurActive === c.valeur;
               return (
                 <button key={c.id} type="button" role="radio" aria-checked={actif} onClick={() => changer("couleur", c.valeur)} className={`pressable flex min-h-14 items-center gap-2.5 rounded-2xl border-2 p-2 pr-3 text-left text-[14px] font-bold ${actif ? "border-accent bg-accent/15" : "border-line"}`}>
-                  {/* La pastille montre le rendu : la teinte et le jaune des boutons. */}
+                  {/* La pastille montre le rendu : la teinte et la couleur des boutons. */}
                   <span className="relative grid size-10 shrink-0 place-items-end overflow-hidden rounded-xl p-1.5" style={{ background: `radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, ${c.hex} 85%, white 10%), ${c.hex} 70%)` }} aria-hidden="true">
-                    <span className="h-1.5 w-4 rounded-full bg-[#FED206]" />
+                    <span className="h-1.5 w-4 rounded-full" style={{ background: r.couleurBoutons ?? "#FED206" }} />
                   </span>
                   <span className="min-w-0">{c.nom}</span>
                   {actif ? <Check size={16} className="ml-auto shrink-0" aria-hidden="true" /> : null}

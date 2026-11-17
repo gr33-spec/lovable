@@ -175,10 +175,10 @@ export function ChantierRealise({ realisation: r, nom }: { realisation: Realisat
 }
 
 /**
- * Les chantiers (maquette de Greg, 17 novembre 2026) : trois sur une ligne, puis « Voir plus de réalisations » quand il y
+ * Les chantiers (modèle de Greg, 17 novembre 2026) : quatre sur une ligne, puis « Voir toutes nos réalisations » quand il y
  * en a davantage ; le bouton n'existe que s'il montre vraiment quelque chose de plus.
  */
-export const CHANTIERS_VISIBLES = 3;
+export const CHANTIERS_VISIBLES = 4;
 export function ListeChantiers({ realisations, nom, titre }: { realisations: RealisationPublique[]; nom: string; titre: React.ReactNode }) {
   const [tout, setTout] = useState(false);
   const montres = tout ? realisations : realisations.slice(0, CHANTIERS_VISIBLES);
@@ -189,7 +189,7 @@ export function ListeChantiers({ realisations, nom, titre }: { realisations: Rea
         {titre}
         {reste > 0 && !tout ? (
           <button type="button" className="pe-voir-plus" onClick={() => setTout(true)}>
-            Voir plus de réalisations <ArrowRight size={17} strokeWidth={2.4} aria-hidden="true" />
+            Voir toutes nos réalisations <ArrowRight size={17} strokeWidth={2.4} aria-hidden="true" />
           </button>
         ) : null}
       </div>

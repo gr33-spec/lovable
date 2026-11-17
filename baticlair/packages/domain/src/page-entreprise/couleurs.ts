@@ -28,6 +28,34 @@ export function contraste(a: string, b: string): number {
   return (l1 + 0.05) / (l2 + 0.05);
 }
 
+function hex2(n: number): string {
+  return Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, "0");
+}
+
+/** Le mélange de deux couleurs (`part` de la seconde, 0 à 1). */
+export function melange(a: string, b: string, part: number): string {
+  const x = rgb(a);
+  const y = rgb(b);
+  return `#${x.map((v, i) => hex2(v + (y[i]! - v) * part)).join("")}`.toUpperCase();
+}
+
+/** Le texte d'un bouton de cette couleur : l'encre ou le blanc, celui qui se lit le mieux. */
+export function texteSurCouleur(fond: string): string {
+  return contraste(fond, "#15120E") >= contraste(fond, "#FFFFFF") ? "#15120E" : "#FFFFFF";
+}
+
+/**
+ * La couleur lisible SUR UN FOND SOMBRE (la ville du grand titre, sur la photo) : la couleur elle-même si elle se lit
+ * (4,5:1 sur le noir), sinon éclaircie juste assez ; une couleur trop sombre (noir) devient le blanc.
+ */
+export function couleurSurSombre(c: string, sombre = "#141414"): string {
+  for (let part = 0; part <= 0.6; part += 0.05) {
+    const m = melange(c, "#FFFFFF", part);
+    if (contraste(m, sombre) >= 4.5) return m;
+  }
+  return "#FFFFFF";
+}
+
 /** Les couleurs fixes de la page publique (celles de la landing de Mobiiz). */
 export const COULEURS_PAGE = {
   ivoire: "#FBF8F3",
