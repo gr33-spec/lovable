@@ -38,8 +38,8 @@ describe("une question du modèle qui prolonge une donnée du référentiel est 
     const q = ecran().questions.find((x) => x.text === duModele.texte)!;
     expect(q.key).toMatch(/^param:faconnage(@couverture-zinc-joint-debout)?$/);
     expect(q.options).toEqual([
-      { label: "Je façonne (bobines)", value: "1" },
-      { label: "Je commande façonné (bacs)", value: "2" },
+      { label: "Je façonne (bobines)", value: "1", dit: expect.arrayContaining(["je plie"]) },
+      { label: "Je commande façonné (bacs)", value: "2", dit: expect.arrayContaining(["tout fait"]) },
     ]);
   });
 

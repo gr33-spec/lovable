@@ -48,7 +48,7 @@ const product = z.object({
   sellingUnits: z.array(sellingUnit),
   note: z.string().optional(),
 });
-const choice = z.object({ label: str, value: str });
+const choice = z.object({ label: str, value: str, dit: z.array(str).optional() });
 const param = z.object({
   key: str,
   label: str,

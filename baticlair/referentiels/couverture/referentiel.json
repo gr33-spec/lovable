@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.11-51",
+  "version": "roofing-2026.11.17-52",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -8452,11 +8452,51 @@
           "choices": [
             {
               "label": "Je façonne (feuilles ou bobineau)",
-              "value": "1"
+              "value": "1",
+              "dit": [
+                "pli",
+                "plie",
+                "plis",
+                "plies",
+                "plier",
+                "pliage",
+                "je plie",
+                "je le plie",
+                "je les plie",
+                "je la plie",
+                "moi meme",
+                "je fais",
+                "je le fais",
+                "je les fais",
+                "je la fais",
+                "je faconne",
+                "je le faconne",
+                "je les faconne",
+                "je la faconne"
+              ]
             },
             {
               "label": "Je commande façonné",
-              "value": "2"
+              "value": "2",
+              "dit": [
+                "tout fait",
+                "tout faits",
+                "toute faite",
+                "toutes faites",
+                "tout pret",
+                "tout prets",
+                "toute prete",
+                "toutes pretes",
+                "achete",
+                "deja faconne",
+                "deja faconnes",
+                "deja faconnee",
+                "deja faconnees",
+                "commande",
+                "commandes",
+                "commandee",
+                "commandees"
+              ]
             }
           ],
           "display": {
@@ -9043,11 +9083,51 @@
           "choices": [
             {
               "label": "Je façonne (feuilles ou bobineau)",
-              "value": "1"
+              "value": "1",
+              "dit": [
+                "pli",
+                "plie",
+                "plis",
+                "plies",
+                "plier",
+                "pliage",
+                "je plie",
+                "je le plie",
+                "je les plie",
+                "je la plie",
+                "moi meme",
+                "je fais",
+                "je le fais",
+                "je les fais",
+                "je la fais",
+                "je faconne",
+                "je le faconne",
+                "je les faconne",
+                "je la faconne"
+              ]
             },
             {
               "label": "Je commande façonné",
-              "value": "2"
+              "value": "2",
+              "dit": [
+                "tout fait",
+                "tout faits",
+                "toute faite",
+                "toutes faites",
+                "tout pret",
+                "tout prets",
+                "toute prete",
+                "toutes pretes",
+                "achete",
+                "deja faconne",
+                "deja faconnes",
+                "deja faconnee",
+                "deja faconnees",
+                "commande",
+                "commandes",
+                "commandee",
+                "commandees"
+              ]
             }
           ],
           "display": {
@@ -10454,11 +10534,51 @@
           "choices": [
             {
               "label": "Je façonne (feuilles ou bobineau)",
-              "value": "1"
+              "value": "1",
+              "dit": [
+                "pli",
+                "plie",
+                "plis",
+                "plies",
+                "plier",
+                "pliage",
+                "je plie",
+                "je le plie",
+                "je les plie",
+                "je la plie",
+                "moi meme",
+                "je fais",
+                "je le fais",
+                "je les fais",
+                "je la fais",
+                "je faconne",
+                "je le faconne",
+                "je les faconne",
+                "je la faconne"
+              ]
             },
             {
               "label": "Je commande façonné",
-              "value": "2"
+              "value": "2",
+              "dit": [
+                "tout fait",
+                "tout faits",
+                "toute faite",
+                "toutes faites",
+                "tout pret",
+                "tout prets",
+                "toute prete",
+                "toutes pretes",
+                "achete",
+                "deja faconne",
+                "deja faconnes",
+                "deja faconnee",
+                "deja faconnees",
+                "commande",
+                "commandes",
+                "commandee",
+                "commandees"
+              ]
             }
           ],
           "display": {
@@ -11190,11 +11310,51 @@
           "choices": [
             {
               "label": "Je façonne (feuilles ou bobineau)",
-              "value": "1"
+              "value": "1",
+              "dit": [
+                "pli",
+                "plie",
+                "plis",
+                "plies",
+                "plier",
+                "pliage",
+                "je plie",
+                "je le plie",
+                "je les plie",
+                "je la plie",
+                "moi meme",
+                "je fais",
+                "je le fais",
+                "je les fais",
+                "je la fais",
+                "je faconne",
+                "je le faconne",
+                "je les faconne",
+                "je la faconne"
+              ]
             },
             {
               "label": "Je commande façonné",
-              "value": "2"
+              "value": "2",
+              "dit": [
+                "tout fait",
+                "tout faits",
+                "toute faite",
+                "toutes faites",
+                "tout pret",
+                "tout prets",
+                "toute prete",
+                "toutes pretes",
+                "achete",
+                "deja faconne",
+                "deja faconnes",
+                "deja faconnee",
+                "deja faconnees",
+                "commande",
+                "commandes",
+                "commandee",
+                "commandees"
+              ]
             }
           ],
           "display": {
@@ -12016,11 +12176,51 @@
           "choices": [
             {
               "label": "Je façonne (feuilles ou bobine)",
-              "value": "1"
+              "value": "1",
+              "dit": [
+                "pli",
+                "plie",
+                "plis",
+                "plies",
+                "plier",
+                "pliage",
+                "je plie",
+                "je le plie",
+                "je les plie",
+                "je la plie",
+                "moi meme",
+                "je fais",
+                "je le fais",
+                "je les fais",
+                "je la fais",
+                "je faconne",
+                "je le faconne",
+                "je les faconne",
+                "je la faconne"
+              ]
             },
             {
               "label": "Je commande façonné",
-              "value": "2"
+              "value": "2",
+              "dit": [
+                "tout fait",
+                "tout faits",
+                "toute faite",
+                "toutes faites",
+                "tout pret",
+                "tout prets",
+                "toute prete",
+                "toutes pretes",
+                "achete",
+                "deja faconne",
+                "deja faconnes",
+                "deja faconnee",
+                "deja faconnees",
+                "commande",
+                "commandes",
+                "commandee",
+                "commandees"
+              ]
             }
           ],
           "display": {
@@ -12401,11 +12601,51 @@
           "choices": [
             {
               "label": "Je façonne (feuilles ou bobineau)",
-              "value": "1"
+              "value": "1",
+              "dit": [
+                "pli",
+                "plie",
+                "plis",
+                "plies",
+                "plier",
+                "pliage",
+                "je plie",
+                "je le plie",
+                "je les plie",
+                "je la plie",
+                "moi meme",
+                "je fais",
+                "je le fais",
+                "je les fais",
+                "je la fais",
+                "je faconne",
+                "je le faconne",
+                "je les faconne",
+                "je la faconne"
+              ]
             },
             {
               "label": "Je commande façonné",
-              "value": "2"
+              "value": "2",
+              "dit": [
+                "tout fait",
+                "tout faits",
+                "toute faite",
+                "toutes faites",
+                "tout pret",
+                "tout prets",
+                "toute prete",
+                "toutes pretes",
+                "achete",
+                "deja faconne",
+                "deja faconnes",
+                "deja faconnee",
+                "deja faconnees",
+                "commande",
+                "commandes",
+                "commandee",
+                "commandees"
+              ]
             }
           ],
           "display": {
@@ -13360,11 +13600,51 @@
           "choices": [
             {
               "label": "Je façonne (bobines)",
-              "value": "1"
+              "value": "1",
+              "dit": [
+                "pli",
+                "plie",
+                "plis",
+                "plies",
+                "plier",
+                "pliage",
+                "je plie",
+                "je le plie",
+                "je les plie",
+                "je la plie",
+                "moi meme",
+                "je fais",
+                "je le fais",
+                "je les fais",
+                "je la fais",
+                "je faconne",
+                "je le faconne",
+                "je les faconne",
+                "je la faconne"
+              ]
             },
             {
               "label": "Je commande façonné (bacs)",
-              "value": "2"
+              "value": "2",
+              "dit": [
+                "tout fait",
+                "tout faits",
+                "toute faite",
+                "toutes faites",
+                "tout pret",
+                "tout prets",
+                "toute prete",
+                "toutes pretes",
+                "achete",
+                "deja faconne",
+                "deja faconnes",
+                "deja faconnee",
+                "deja faconnees",
+                "commande",
+                "commandes",
+                "commandee",
+                "commandees"
+              ]
             }
           ],
           "display": {

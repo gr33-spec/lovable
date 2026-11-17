@@ -237,7 +237,12 @@ export interface ParamDef {
   /** Sans valeur lue ni répondue : cette hypothèse, dite et modifiable. Sans hypothèse : une question. */
   default?: ParamDefault;
   /** Réponses proposées en boutons (l'artisan ne tape rien) : « Faible (30 %) », « Moyenne (45 %) »… */
-  choices?: { label: string; value: string }[];
+  /**
+   * `dit` : les mots de l'artisan pour ce bouton quand il répond au clavier ou à la voix (« je plie », « tout fait »).
+   * Ils vivent ICI, dans la fiche du métier : le lecteur des réponses est le même pour tous les métiers (Greg, 17 novembre
+   * 2026 : « le cœur de Mobiiz doit s'adapter à n'importe quel métier »).
+   */
+  choices?: { label: string; value: string; dit?: string[] }[];
   /**
    * Valeur approchée faute de table officielle (la région ardoise prise égale à la zone climatique
    * du département) : dite « estimation » à l'artisan, avec cette raison.

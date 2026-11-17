@@ -468,7 +468,14 @@ export function questionDeLecture(ref: Referential, plan: QuotePlan, q0: Lecture
   const def = (defs.find((x) => x.w.id === ouvrage) ?? defs.find((x) => (x.p.choices?.length ?? 0) > 0) ?? defs[0])?.p;
   // Retour du fondateur (2026-10-12, « Un champ n'est pas correctement rempli » après « En façade (bandeau) ») : un bouton
   // du modèle dont la valeur est en mots (« bandeau ») prend la valeur du référentiel (« 2 ») quand la donnée en a une.
-  let options = q.boutons.map((b) => ({ label: b.label, value: def ? valeurDuReferentiel(def, b) : b.valeur }));
+  const ditDe = (value: string) => {
+    const dit = def?.choices?.find((c) => c.value === value)?.dit;
+    return dit ? { dit } : {};
+  };
+  let options: { label: string; value: string; dit?: string[] }[] = q.boutons.map((b) => {
+    const value = def ? valeurDuReferentiel(def, b) : b.valeur;
+    return { label: b.label, value, ...ditDe(value) };
+  });
   // Garde-fou (retour du fondateur, 2026-10-13 : « Cette réponse ne passe pas » sur « Je façonne (bobine) ») : un bouton qui
   // ne se rattache à aucun choix du référentiel ne s'affiche jamais ; la question prend alors les boutons du référentiel.
   // Sur une donnée chiffrée, le serveur n'accepte qu'un nombre : un bouton en mots prend le nombre qu'il dit seul, sinon il
@@ -477,7 +484,7 @@ export function questionDeLecture(ref: Referential, plan: QuotePlan, q0: Lecture
   const choix = def?.choices ?? [];
   const aValeur = def !== undefined && !def.named && !(def.unit === "u" && choix.length === 0) && key.startsWith("param:");
   if (aValeur && options.some((o) => !chiffre(o.value))) {
-    if (choix.length > 0) options = choix.map((c) => ({ label: c.label, value: c.value }));
+    if (choix.length > 0) options = choix.map((c) => ({ label: c.label, value: c.value, ...(c.dit ? { dit: c.dit } : {}) }));
     else
       options = options.flatMap((o) => {
         if (chiffre(o.value)) return [o];

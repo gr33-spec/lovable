@@ -1,6 +1,6 @@
 # Audit du référentiel couverture : une règle, une section, un test
 
-Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.10.11-51`.
+Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.17-52`.
 
 186 règles de calcul : 73 constantes, 6 tables, 25 valeurs intermédiaires, 82 besoins. Règles sans test qui les cite : 0.
 
