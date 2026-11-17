@@ -8,7 +8,7 @@ import { NOM_APP, nom } from "@/lib/nom";
 export const metadata: Metadata = { title: `Confidentialité — ${NOM_APP}` };
 
 /** La version de cette page (une date, comme les CGU). */
-const VERSION = "15/11/2026";
+const VERSION = "17/11/2026";
 
 /**
  * La politique de confidentialité (RGPD, Greg, 24 octobre 2026) : en tableau, chaque traitement avec ses données, sa base
@@ -101,6 +101,13 @@ const TRAITEMENTS: readonly { finalite: string; donnees: string; base: string; d
     donnees: "Ton message, la page, ton e-mail, ton navigateur, la capture d'écran jointe",
     base: "Intérêt légitime (corriger le service)",
     duree: "12 mois, puis suppression automatique",
+  },
+  {
+    // Greg, 17 novembre 2026 : la copie dans « Messages et réponses » de l'artisan.
+    finalite: "Les demandes envoyées depuis le site d'un artisan (« Demander un devis »)",
+    donnees: "Le nom, le téléphone ou l'e-mail, la commune du chantier et le message du visiteur ; l'heure de l'envoi et une empreinte chiffrée de son adresse IP (contre les abus)",
+    base: "Mesures précontractuelles à la demande du visiteur (transmettre sa demande à l'artisan)",
+    duree: "12 mois dans l'espace de l'artisan, puis suppression automatique ; l'heure et l'empreinte : 30 jours",
   },
   {
     finalite: "La liste d'exclusion (« ne plus jamais être contacté »)",

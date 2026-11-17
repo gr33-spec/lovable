@@ -55,6 +55,8 @@ function contenu(partiel: Partial<ContenuPage> = {}): ContenuPage {
     siret: null,
     couleur: null,
     couleurBoutons: null,
+    photoDefaut: null,
+    creditPhoto: null,
     logo: null,
     couverture: null,
     prestations: [],
@@ -242,5 +244,24 @@ describe("la couleur des boutons (Greg, 17 novembre 2026 : « pouvoir changer la
       expect(contraste(c.hex, texteSurCouleur(c.hex)), c.nom).toBeGreaterThanOrEqual(4.5);
       expect(contraste(couleurSurSombre(c.hex), "#141414"), c.nom).toBeGreaterThanOrEqual(4.5);
     }
+  });
+});
+
+describe("finitions téléphone (Greg, 17 novembre 2026)", () => {
+  it("la ville et la zone avec une majuscule initiale seulement", async () => {
+    const { villeLisible, zoneLisible } = await import("../src/page-entreprise/page.js");
+    expect(villeLisible("ploubazlanec")).toBe("Ploubazlanec");
+    expect(zoneLisible("PLOUBAZLANEC")).toBe("Ploubazlanec");
+    expect(zoneLisible("PAIMPOL, PLOUBAZLANEC et le Goëlo")).toBe("Paimpol, Ploubazlanec et le Goëlo");
+    expect(zoneLisible("Lannion, Perros-Guirec")).toBe("Lannion, Perros-Guirec");
+    expect(zoneLisible("  ")).toBeNull();
+  });
+  it("la présentation n'apparaît jamais deux fois : la première phrase dans la carte, la suite dans « À propos »", async () => {
+    const { decouperPresentation } = await import("../src/page-entreprise/page.js");
+    expect(decouperPresentation("Couvreur depuis 2011. Chantiers bâchés chaque soir.\n\nInterventions rapides.")).toEqual({ carte: "Couvreur depuis 2011.", suite: "Chantiers bâchés chaque soir.\n\nInterventions rapides." });
+    // Une seule phrase : pas de carte.
+    expect(decouperPresentation("Couvreur depuis 2011.")).toEqual({ carte: null, suite: "Couvreur depuis 2011." });
+    expect(decouperPresentation("Couvreur depuis 2011")).toEqual({ carte: null, suite: "Couvreur depuis 2011" });
+    expect(decouperPresentation(null)).toEqual({ carte: null, suite: null });
   });
 });

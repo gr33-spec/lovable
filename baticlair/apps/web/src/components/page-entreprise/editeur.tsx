@@ -1,19 +1,52 @@
 "use client";
 
-import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink, Eye, Image as ImageIcon, Loader2, Monitor, Plus, Share2, Smartphone, Sparkles, Trash2, X } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowUp,
+  Check,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  Eye,
+  Hammer,
+  Image as ImageIcon,
+  ImagePlus,
+  Images,
+  Loader2,
+  Maximize2,
+  Monitor,
+  Palette,
+  Phone,
+  Plus,
+  Send,
+  Share2,
+  Smartphone,
+  Sparkles,
+  Trash2,
+  UserRound,
+  Wrench,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { texteSurCouleur, type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
-import { Button, Card, Skeleton } from "@/components/ui";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { photoDefautDe, photoPubliqueDefaut, texteSurCouleur, type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
+import { Button, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
+import { useTyping } from "@/lib/typing";
 import { envoyerPhoto, GaleriePhotos, type PhotoEditeur } from "./editeur-photos";
 import { rafraichirPagePublique } from "./rafraichir";
-import { LIBELLES, VuePage } from "./vue-page";
+import { LIBELLES, VuePage, initiales } from "./vue-page";
 
 /**
- * « MON SITE » (Greg, 16 novembre 2026), onglet de la navigation principale (avant : Profil › Ma page). Réglée en 5 minutes au téléphone : chaque
- * changement s'enregistre tout seul et s'applique tout de suite (page publique régénérée), l'aperçu se dessine en direct
- * pendant qu'on touche. Interface dans la charte Mobiiz ; la page, elle, prend les couleurs de l'artisan.
+ * « MON SITE » (Greg, 16 novembre 2026), onglet de la navigation principale. RÈGLE CHANGÉE (Greg, 17 novembre 2026 :
+ * « plus intuitif, style Lovable ») : avant, une longue colonne de cartes et l'aperçu à côté ; maintenant le site est
+ * TOUJOURS visible et se met à jour à chaque changement, les réglages sont rangés en sept onglets (Couleurs, Photos,
+ * Prestations, Chantiers, À propos, Contact, Publier). Ordinateur : le panneau des réglages à gauche (un quart de la
+ * largeur), le site en grand à droite. Téléphone : le site en haut (réduit, « Voir mon site » l'agrandit), la barre des
+ * onglets en bas, qui ouvre le tiroir des réglages. Rien ne recouvre un champ : l'état « Enregistré » vit au-dessus du
+ * site, jamais par-dessus le texte. Chaque changement s'enregistre tout seul.
  */
 interface Reglages {
   visible: boolean;
@@ -22,6 +55,7 @@ interface Reglages {
   adresseModifiable: boolean;
   couleur: string | null;
   couleurBoutons: string | null;
+  photoDefaut: string | null;
   prestations: Prestation[];
   accroche: string | null;
   presentation: string | null;
@@ -35,6 +69,12 @@ interface Reglages {
   photosAccord: boolean;
   couvertureId: string | null;
 }
+interface PhotoGalerie {
+  id: string;
+  nom: string;
+  metier: string | null;
+  vignette: string;
+}
 interface MaPage {
   reglages: Reglages;
   profil: { nom: string; metiers: string[]; telephone: string | null; zone: string | null; adressePostale: string | null; siret: string | null; verifiee: boolean; logo: boolean };
@@ -44,6 +84,7 @@ interface MaPage {
   choix: {
     teintes: readonly { id: string; nom: string; hex: string }[];
     couleursBoutons: readonly { id: string; nom: string; hex: string }[];
+    photosDefaut: readonly PhotoGalerie[];
     certifications: readonly string[];
     theme: { nom: string; teinte: string; accroche: string; presentation: string; prestations: Prestation[] };
     limites: { accroche: number; presentation: number; photos: number; prestations: number };
@@ -54,6 +95,33 @@ interface MaPage {
 
 type Etat = "pret" | "enregistrement" | "enregistre" | "erreur";
 const CHAMPS_TEXTE = new Set<keyof Reglages>(["accroche", "presentation", "telephone", "zone", "horaires", "siteWeb", "prestations"]);
+
+type Onglet = "couleurs" | "photos" | "prestations" | "chantiers" | "apropos" | "contact" | "publier";
+const ONGLETS: { id: Onglet; libelle: string; Icone: LucideIcon }[] = [
+  { id: "couleurs", libelle: "Couleurs", Icone: Palette },
+  { id: "photos", libelle: "Photos", Icone: ImageIcon },
+  { id: "prestations", libelle: "Prestations", Icone: Wrench },
+  { id: "chantiers", libelle: "Chantiers", Icone: Hammer },
+  { id: "apropos", libelle: "À propos", Icone: UserRound },
+  { id: "contact", libelle: "Contact", Icone: Phone },
+  { id: "publier", libelle: "Publier", Icone: Send },
+];
+
+/** Écran d'ordinateur (1024 px et plus) : le panneau à gauche, le site en grand à droite. */
+function useOrdinateur(): boolean {
+  return useSyncExternalStore(
+    (rappel) => {
+      const m = window.matchMedia("(min-width: 1024px)");
+      m.addEventListener("change", rappel);
+      return () => m.removeEventListener("change", rappel);
+    },
+    () => window.matchMedia("(min-width: 1024px)").matches,
+    () => false,
+  );
+}
+
+/** Le message quand l'envoi de photos n'est pas ouvert sur ce site (stockage pas encore créé) : jamais un échec muet. */
+const PHRASE_STOCKAGE = "L'envoi de tes propres photos n'est pas encore ouvert sur ce site. En attendant, choisis une photo dans la galerie : ton site reste beau.";
 
 function Interrupteur({ actif, onChange, label, aide }: { actif: boolean; onChange: (v: boolean) => void; label: string; aide?: string }) {
   return (
@@ -109,8 +177,50 @@ function AnneeChamp({ valeur, onChange }: { valeur: number | null; onChange: (n:
   );
 }
 
-function Apercu({ contenu, plein, onFermer }: { contenu: ContenuPage; plein?: boolean; onFermer?: () => void }) {
-  const [ecran, setEcran] = useState<"telephone" | "ordinateur">("telephone");
+/** Un titre de bloc dans un onglet. */
+function Bloc({ titre, aide, children }: { titre: string; aide?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section className="grid grid-cols-[minmax(0,1fr)] gap-3" aria-label={titre}>
+      <h3 className="text-[17px] font-extrabold">{titre}</h3>
+      {aide ? <p className="-mt-1 text-[14px] text-muted">{aide}</p> : null}
+      {children}
+    </section>
+  );
+}
+
+/**
+ * Un VRAI bouton d'envoi de fichier (Greg, 17 novembre 2026 : « visiblement cliquable ») : plein, avec son icône. Sans
+ * stockage, il reste visible mais grisé, et la raison se lit dessous.
+ */
+function BoutonFichier({ libelle, actif, onFichier, multiple = false }: { libelle: string; actif: boolean; onFichier: (f: File) => void | Promise<void>; multiple?: boolean }) {
+  const [envoi, setEnvoi] = useState(false);
+  return (
+    <label className={`pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-extrabold ${actif ? "cursor-pointer bg-ink text-ground" : "cursor-not-allowed bg-black/10 text-muted"}`} aria-disabled={!actif || undefined}>
+      {envoi ? <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden="true" /> : <ImagePlus size={18} aria-hidden="true" />} {libelle}
+      <input
+        type="file"
+        accept="image/*"
+        multiple={multiple}
+        disabled={!actif || envoi}
+        className="sr-only"
+        onChange={async (e) => {
+          const fichiers = Array.from(e.target.files ?? []);
+          e.target.value = "";
+          if (!fichiers.length) return;
+          setEnvoi(true);
+          try {
+            for (const f of fichiers) await onFichier(f);
+          } finally {
+            setEnvoi(false);
+          }
+        }}
+      />
+    </label>
+  );
+}
+
+/** Le site dans son cadre : il défile au doigt, il se dessine à la taille choisie (téléphone ou ordinateur). */
+function CadreApercu({ contenu, ecran, hauteur, interactif = false, testid = "apercu-page" }: { contenu: ContenuPage; ecran: "telephone" | "ordinateur"; hauteur: string; interactif?: boolean; testid?: string }) {
   const cadre = useRef<HTMLDivElement>(null);
   const defile = useRef<HTMLDivElement>(null);
   const [largeur, setLargeur] = useState(360);
@@ -121,21 +231,9 @@ function Apercu({ contenu, plein, onFermer }: { contenu: ContenuPage; plein?: bo
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  // Plein écran : la page derrière ne bouge plus, « Échap » ramène à l'édition.
-  useEffect(() => {
-    if (!plein) return;
-    const avant = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const touche = (e: KeyboardEvent) => e.key === "Escape" && onFermer?.();
-    window.addEventListener("keydown", touche);
-    return () => {
-      document.body.style.overflow = avant;
-      window.removeEventListener("keydown", touche);
-    };
-  }, [plein, onFermer]);
   const ordinateur = ecran === "ordinateur";
   const echelle = ordinateur ? Math.min(1, largeur / 1200) : 1;
-  /** En plein écran le site se parcourt comme en vrai (menu, « Voir plus ») ; un lien interne défile dans l'aperçu, rien ne part. */
+  /** Un lien interne défile dans l'aperçu ; rien ne part. */
   const clic = (e: React.MouseEvent) => {
     const a = (e.target as HTMLElement).closest("a");
     if (!a) return;
@@ -143,40 +241,75 @@ function Apercu({ contenu, plein, onFermer }: { contenu: ContenuPage; plein?: bo
     const cible = a.getAttribute("href");
     if (cible?.startsWith("#") && cible.length > 1) defile.current?.querySelector(cible)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-  const choixEcran = (
-    <div role="radiogroup" aria-label="Taille de l'aperçu" className={`flex gap-1 rounded-full p-1 ${plein ? "bg-white/12" : "bg-black/10"}`}>
+  return (
+    <div ref={cadre} className={`mx-auto w-full overflow-hidden rounded-[22px] border-[5px] border-black/85 bg-black/85 ${ordinateur ? "" : "max-w-[430px]"}`}>
+      {/* Le `transform` fait du cadre le repère de la barre d'appel (position fixe) : elle reste dans l'aperçu. Le défilement
+          est sur ce cadre, jamais rendu inerte : le doigt fait défiler le site (Greg, 17 novembre 2026). */}
+      <div ref={defile} className="overscroll-contain overflow-y-auto bg-white" style={{ height: hauteur, transform: "translateZ(0)", WebkitOverflowScrolling: "touch" }} data-testid={testid} onClickCapture={clic}>
+        <div style={ordinateur ? { width: 1200, transform: `scale(${echelle})`, transformOrigin: "top left", height: `${100 / echelle}%` } : undefined} {...(interactif ? {} : { inert: true, "aria-hidden": true })}>
+          <VuePage contenu={contenu} apercu />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChoixEcran({ ecran, onChange, sombre = false }: { ecran: "telephone" | "ordinateur"; onChange: (e: "telephone" | "ordinateur") => void; sombre?: boolean }) {
+  return (
+    <div role="radiogroup" aria-label="Taille de l'aperçu" className={`flex gap-1 rounded-full p-1 ${sombre ? "bg-white/12" : "bg-black/10"}`}>
       {(["telephone", "ordinateur"] as const).map((e) => (
-        <button key={e} type="button" role="radio" aria-checked={ecran === e} onClick={() => setEcran(e)} className={`flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-bold ${ecran === e ? "bg-surface text-ink shadow" : plein ? "text-white" : ""}`}>
+        <button key={e} type="button" role="radio" aria-checked={ecran === e} onClick={() => onChange(e)} className={`flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-bold ${ecran === e ? "bg-surface text-ink shadow" : sombre ? "text-white" : ""}`}>
           {e === "telephone" ? <Smartphone size={15} aria-hidden="true" /> : <Monitor size={15} aria-hidden="true" />} {e === "telephone" ? "Téléphone" : "Ordinateur"}
         </button>
       ))}
     </div>
   );
+}
+
+/** Le site en plein écran : il défile, on le parcourt (menu, « Voir plus ») ; « Retour » ou Échap ramène aux réglages. */
+function ApercuPlein({ contenu, onFermer }: { contenu: ContenuPage; onFermer: () => void }) {
+  const [ecran, setEcran] = useState<"telephone" | "ordinateur">("telephone");
+  useEffect(() => {
+    const avant = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const touche = (e: KeyboardEvent) => e.key === "Escape" && onFermer();
+    window.addEventListener("keydown", touche);
+    return () => {
+      document.body.style.overflow = avant;
+      window.removeEventListener("keydown", touche);
+    };
+  }, [onFermer]);
   return (
-    <div
-      className={plein ? "fixed top-0 left-0 z-[70] flex h-dvh w-full flex-col gap-3 bg-[#0b0b0c]/95 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur" : "grid gap-2"}
-      {...(plein ? { role: "dialog", "aria-modal": true, "aria-label": "Aperçu de mon site" } : {})}
-    >
+    <div className="fixed top-0 left-0 z-[70] flex h-dvh w-full flex-col gap-3 bg-[#0b0b0c]/95 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur" role="dialog" aria-modal="true" aria-label="Aperçu de mon site">
       <div className="flex items-center justify-between gap-2">
-        {plein ? (
-          <button type="button" onClick={onFermer} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-white pr-4 pl-3 text-[15px] font-extrabold text-black">
-            <ArrowLeft size={18} aria-hidden="true" /> Retour
-          </button>
-        ) : null}
-        {choixEcran}
+        <button type="button" onClick={onFermer} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-white pr-4 pl-3 text-[15px] font-extrabold text-black">
+          <ArrowLeft size={18} aria-hidden="true" /> Retour
+        </button>
+        <ChoixEcran ecran={ecran} onChange={setEcran} sombre />
       </div>
-      <div ref={cadre} className={`mx-auto w-full overflow-hidden rounded-[28px] border-[6px] border-black/80 bg-black/80 ${ordinateur ? "" : "max-w-[390px]"} ${plein ? "min-h-0 flex-1" : ""}`}>
-        {/* Le `transform` fait du cadre le repère de la barre d'appel (position fixe) : elle reste dans l'aperçu.
-            Le défilement est sur ce cadre, jamais rendu inerte : le doigt fait défiler le site (Greg, 17 novembre 2026). */}
-        <div ref={defile} className="overscroll-contain overflow-y-auto bg-white" style={{ height: plein ? "100%" : ordinateur ? 640 * echelle : 620, transform: "translateZ(0)", WebkitOverflowScrolling: "touch" }} data-testid="apercu-page" onClickCapture={plein ? clic : undefined}>
-          <div
-            style={ordinateur ? { width: 1200, transform: `scale(${echelle})`, transformOrigin: "top left", height: `${100 / echelle}%` } : undefined}
-            {...(plein ? {} : { inert: true, "aria-hidden": true })}
-          >
-            <VuePage contenu={contenu} apercu />
-          </div>
-        </div>
+      <div className="min-h-0 flex-1">
+        <CadreApercu contenu={contenu} ecran={ecran} hauteur="calc(100dvh - 90px)" interactif />
       </div>
+    </div>
+  );
+}
+
+/** « Enregistrement… » / « Enregistré » : au-dessus du site, jamais par-dessus un champ ou un texte. */
+function Statut({ etat, erreur }: { etat: Etat; erreur: string | null }) {
+  return (
+    <div className="min-w-0 flex-1" aria-live="polite">
+      {erreur ? (
+        <p className="text-[13px] leading-tight font-bold text-red-700 dark:text-red-300" role="alert">
+          {erreur}
+        </p>
+      ) : etat === "enregistrement" || etat === "enregistre" ? (
+        <p className="flex items-center gap-1.5 text-[13px] leading-tight text-muted" role="status">
+          {etat === "enregistrement" ? <Loader2 size={14} className="shrink-0 motion-safe:animate-spin" aria-hidden="true" /> : <Check size={14} className="shrink-0 text-ok" aria-hidden="true" />}
+          {etat === "enregistrement" ? "Enregistrement…" : "Enregistré : ton site est à jour."}
+        </p>
+      ) : (
+        <p className="text-[13px] leading-tight text-muted">Chaque changement s&apos;enregistre tout seul.</p>
+      )}
     </div>
   );
 }
@@ -185,7 +318,7 @@ function Partager({ url, nom, onFermer }: { url: string; nom: string; onFermer: 
   const [copie, setCopie] = useState(false);
   const texte = `${nom} : notre site, nos réalisations et nos coordonnées ${url}`;
   return (
-    <div role="dialog" aria-modal="true" aria-label="Partager mon site" className="fixed top-0 left-0 z-50 flex h-dvh w-full items-end justify-center bg-black/60 sm:items-center" onClick={onFermer}>
+    <div role="dialog" aria-modal="true" aria-label="Partager mon site" className="fixed top-0 left-0 z-[80] flex h-dvh w-full items-end justify-center bg-black/60 sm:items-center" onClick={onFermer}>
       <div className="w-full max-w-md rounded-t-[24px] bg-surface p-5 sm:rounded-[24px]" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-[20px] font-extrabold">Partager mon site</h2>
@@ -222,6 +355,65 @@ function Partager({ url, nom, onFermer }: { url: string; nom: string; onFermer: 
   );
 }
 
+/** L'accord avant d'envoyer ses propres photos (droits, personnes reconnaissables). */
+function AccordPhotos({ onAccord }: { onAccord: () => void }) {
+  return (
+    <label className="flex items-start gap-3 rounded-2xl border-2 border-line p-3 text-[14px]">
+      <input
+        type="checkbox"
+        className="mt-0.5 size-6 shrink-0 accent-[#FED206]"
+        onChange={(e) => {
+          if (e.target.checked) onAccord();
+        }}
+      />
+      <span>J&apos;ai pris ces photos ou j&apos;ai le droit de les utiliser. Les clients concernés sont d&apos;accord, et les personnes reconnaissables aussi (salariés compris). Je retire une photo dès qu&apos;on me le demande.</span>
+    </label>
+  );
+}
+
+/**
+ * LA GALERIE DES PHOTOS PAR DÉFAUT (Greg, 17 novembre 2026) : « Selon mon métier » (elle suit le métier principal), puis
+ * les photos des métiers et les photos neutres du bâtiment. Un toucher la met en couverture.
+ */
+function GalerieDefaut({ photos, choisie, onChoisir, metierPhoto }: { photos: readonly PhotoGalerie[]; choisie: string | null; onChoisir: (id: string | null) => void; metierPhoto: PhotoGalerie | null }) {
+  const neutres = photos.filter((p) => p.metier === null);
+  const metiers = photos.filter((p) => p.metier !== null);
+  const vignette = (p: PhotoGalerie | null, id: string | null, libelle: string) => {
+    const actif = choisie === id;
+    return (
+      <li key={id ?? "metier"}>
+        <button type="button" role="radio" aria-checked={actif} aria-label={libelle} onClick={() => onChoisir(id)} className={`pressable grid w-full gap-1 rounded-2xl border-2 p-1 text-left ${actif ? "border-accent bg-accent/15" : "border-transparent"}`}>
+          <span className="relative block aspect-[4/3] overflow-hidden rounded-xl bg-black/10">
+            {p ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={p.vignette} alt="" loading="lazy" className="size-full object-cover" />
+            ) : null}
+            {actif ? (
+              <span className="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-accent text-on-accent">
+                <Check size={15} aria-hidden="true" />
+              </span>
+            ) : null}
+          </span>
+          <span className="px-1 pb-0.5 text-[12.5px] leading-tight font-bold">{libelle}</span>
+        </button>
+      </li>
+    );
+  };
+  return (
+    <div role="radiogroup" aria-label="Galerie de photos" className="grid grid-cols-[minmax(0,1fr)] gap-3">
+      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">{vignette(metierPhoto, null, "Selon mon métier")}</ul>
+      {neutres.length ? (
+        <>
+          <p className="text-[13px] font-bold text-muted">Bâtiment (tous métiers)</p>
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">{neutres.map((p) => vignette(p, p.id, p.nom))}</ul>
+        </>
+      ) : null}
+      <p className="text-[13px] font-bold text-muted">Par métier</p>
+      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">{metiers.map((p) => vignette(p, p.id, `${LIBELLES[p.metier!] ?? p.nom}`))}</ul>
+    </div>
+  );
+}
+
 /** Les chantiers : un titre (« Toiture ardoise · Paimpol ») et leurs photos ; on les crée, renomme, range et retire. */
 function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: boolean; onErreur: (m: string | null) => void; onChange: (d?: MaPage) => void }) {
   const [titre, setTitre] = useState("");
@@ -245,8 +437,6 @@ function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: b
   };
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
-      <span className="text-[15px] font-bold">Mes chantiers</span>
-      <p className="text-[13px] text-muted">Un chantier = un titre et quelques photos. Sur ton site, la première photo s&apos;affiche en grand ; on la touche pour voir les autres.</p>
       {data.realisations.map((r, i) => (
         <div key={r.id} className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded-2xl border border-line p-3">
           <div className="flex items-center gap-1">
@@ -307,8 +497,7 @@ function Chantiers({ data, actif, onErreur, onChange }: { data: MaPage; actif: b
 function PhotoEquipe({ data, actif, onErreur, recharger }: { data: MaPage; actif: boolean; onErreur: (m: string | null) => void; recharger: () => Promise<void> }) {
   const photo = data.photos.find((p) => p.role === "equipe");
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
-      <span className="text-[15px] font-bold">Photo de toi ou de ton équipe (facultatif)</span>
+    <Bloc titre="Photo de toi ou de ton équipe" aide="Facultatif. Elle s'affiche dans « À propos ».">
       <div className="flex flex-wrap items-center gap-3">
         {photo?.variantes[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -316,28 +505,19 @@ function PhotoEquipe({ data, actif, onErreur, recharger }: { data: MaPage; actif
         ) : photo ? (
           <Loader2 size={18} className="motion-safe:animate-spin" aria-label="Préparation…" />
         ) : null}
-        {actif ? (
-          <label className="pressable inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border border-line px-3 text-[14px] font-bold">
-            <ImageIcon size={16} aria-hidden="true" /> {photo ? "Changer" : "Ajouter une photo"}
-            <input
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={async (e) => {
-                const f = e.target.files?.[0];
-                e.target.value = "";
-                if (!f) return;
-                const err = await envoyerPhoto(f, "equipe");
-                if (err) onErreur(err);
-                await recharger();
-              }}
-            />
-          </label>
-        ) : null}
+        <BoutonFichier
+          libelle={photo ? "Changer la photo" : "Ajouter une photo"}
+          actif={actif}
+          onFichier={async (f) => {
+            const err = await envoyerPhoto(f, "equipe");
+            if (err) onErreur(err);
+            await recharger();
+          }}
+        />
         {photo ? (
           <button
             type="button"
-            className="text-[14px] font-bold text-muted underline"
+            className="min-h-11 text-[14px] font-bold text-muted underline"
             onClick={async () => {
               await api("/v1/ma-page/equipe", { method: "DELETE" }).catch(() => undefined);
               await recharger();
@@ -348,7 +528,8 @@ function PhotoEquipe({ data, actif, onErreur, recharger }: { data: MaPage; actif
           </button>
         ) : null}
       </div>
-    </div>
+      {!data.choix.stockagePhotos ? <p className="text-[13px] text-muted">L&apos;envoi de tes propres photos n&apos;est pas encore ouvert sur ce site.</p> : null}
+    </Bloc>
   );
 }
 
@@ -365,8 +546,15 @@ export function EditeurMaPage() {
   const [aide, setAide] = useState(false);
   const [nouvelleAdresse, setNouvelleAdresse] = useState<string | null>(null);
   const [versionLogo, setVersionLogo] = useState(0);
+  const [galerie, setGalerie] = useState(false);
+  const [ecran, setEcran] = useState<"telephone" | "ordinateur">("ordinateur");
+  // Téléphone : aucun onglet ouvert au départ (le site en grand) ; ordinateur : « Couleurs ».
+  const [onglet, setOnglet] = useState<Onglet | null>(null);
+  const ordinateur = useOrdinateur();
+  const typing = useTyping();
   const enAttente = useRef<Partial<Reglages>>({});
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tiroir = useRef<HTMLElement>(null);
 
   const charger = useCallback(async () => {
     try {
@@ -408,8 +596,8 @@ export function EditeurMaPage() {
       const d = await api<MaPage>("/v1/ma-page", { method: "PATCH", body: corps });
       setData(d);
       // Les valeurs nettoyées par le serveur (site web, téléphone) reviennent, sauf un champ qu'on est en train de taper.
-      setR((avant) => (avant ? { ...d.reglages, ...Object.fromEntries(Object.keys(avant).filter((k) => CHAMPS_TEXTE.has(k as keyof Reglages) && k in enAttente.current).map((k) => [k, avant[k as keyof Reglages]])) } as Reglages : d.reglages));
-      // « Enregistré : ta page est à jour » seulement quand la page publique est régénérée.
+      setR((avant) => (avant ? ({ ...d.reglages, ...Object.fromEntries(Object.keys(avant).filter((k) => CHAMPS_TEXTE.has(k as keyof Reglages) && k in enAttente.current).map((k) => [k, avant[k as keyof Reglages]])) } as Reglages) : d.reglages));
+      // « Enregistré : ton site est à jour » seulement quand la page publique est régénérée.
       await rafraichirPagePublique();
       if (!Object.keys(enAttente.current).length) setEtat("enregistre");
       setErreur(null);
@@ -430,13 +618,19 @@ export function EditeurMaPage() {
     [enregistrer],
   );
 
+  const couverture = data?.photos.find((p) => p.role === "couverture" && p.id === data.reglages.couvertureId) ?? null;
+
+  // L'aperçu se dessine avec ce qui est à l'écran, à chaque toucher (une couleur change : le site change aussitôt).
   const contenu = useMemo<ContenuPage | null>(() => {
     if (!data || !r) return null;
     const vide = (s: string | null) => (s?.trim() ? s.trim() : null);
+    const defaut = photoDefautDe(r.photoDefaut, data.contenu.metiers);
     return {
       ...data.contenu,
       couleur: r.couleur,
       couleurBoutons: r.couleurBoutons,
+      photoDefaut: defaut ? photoPubliqueDefaut(defaut) : null,
+      creditPhoto: !data.contenu.couverture && defaut ? defaut.credit : null,
       prestations: r.prestations.filter((x) => x.titre.trim()),
       accroche: vide(r.accroche),
       presentation: vide(r.presentation),
@@ -452,6 +646,13 @@ export function EditeurMaPage() {
     };
   }, [data, r, versionLogo]);
 
+  const ouvrir = (o: Onglet) => {
+    // Téléphone : toucher l'onglet ouvert referme le tiroir.
+    setOnglet((avant) => (!ordinateur && avant === o ? null : o));
+    setGalerie(false);
+    if (!ordinateur) requestAnimationFrame(() => tiroir.current?.scrollIntoView({ block: "start" }));
+  };
+
   if (chargement && !data) return <p className="text-[15px] text-muted">Ton site ne s&apos;est pas chargé. Vérifie ta connexion et réessaie.</p>;
   if (!data || !r || !contenu) return <Skeleton lines={6} label="Chargement de ton site…" />;
 
@@ -459,46 +660,38 @@ export function EditeurMaPage() {
   const theme = data.choix.theme;
   const couleurActive = r.couleur ?? null;
   const teinteMetier = data.choix.teintes.find((x) => x.id === theme.teinte)!;
-  const couverture = data.photos.find((p) => p.role === "couverture" && p.id === data.reglages.couvertureId);
   const couvertureEnCours = data.photos.some((p) => p.role === "couverture" && p.statut === "traitement");
+  const actif = ordinateur ? (onglet ?? "couleurs") : onglet;
+  const photosOk = data.choix.stockagePhotos && data.reglages.photosAccord;
+  const photoMetier = (() => {
+    const p = photoDefautDe(null, data.contenu.metiers);
+    return p ? (data.choix.photosDefaut.find((x) => x.id === p.id) ?? null) : null;
+  })();
+  const photoEnCouverture = couverture?.variantes[1]?.webp ?? couverture?.variantes[0]?.webp ?? (contenu.photoDefaut ? contenu.photoDefaut.variantes[0]!.webp : null);
+  const accord = async () => {
+    const d = await api<MaPage>("/v1/ma-page/accord-photos", { method: "POST" }).catch(() => null);
+    if (d) setData(d);
+    else setErreur("Ton accord n'a pas été enregistré. Réessaie.");
+  };
+  const choisirPhotoDefaut = async (id: string | null) => {
+    // Choisir dans la galerie remplace la couverture envoyée : la photo de la galerie prend sa place.
+    if (couverture) {
+      const d = await api<MaPage>("/v1/ma-page/couverture", { method: "DELETE" }).catch(() => null);
+      if (d) setData(d);
+    }
+    changer("photoDefaut", id);
+  };
 
-  return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 pb-20 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start lg:pb-24">
-      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
-        <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Mon site</h1>
-        <p className="text-[15px] text-muted">Un vrai site pour ton entreprise, à partager avec tes clients. Chaque changement s&apos;enregistre tout seul.</p>
-        {!r.visible ? (
-          <a href="#visibilite" className="text-[14px] font-bold underline">
-            Ton site est privé pour l&apos;instant : le rendre visible
-          </a>
-        ) : null}
-        {/* L'état de l'enregistrement reste en vue pendant qu'on descend dans l'éditeur. */}
-        <div className="pointer-events-none sticky top-2 z-10 grid gap-1 empty:hidden">
-          {etat === "enregistrement" || etat === "enregistre" ? (
-            <p className="justify-self-start rounded-full bg-surface px-3 py-1 text-[13px] text-muted shadow-card" role="status" aria-live="polite">
-              {etat === "enregistrement" ? "Enregistrement…" : "Enregistré : ton site est à jour."}
-            </p>
-          ) : null}
-          {erreur ? (
-            <p className="rounded-xl bg-surface px-3 py-2 text-[14px] font-bold text-red-700 shadow-card dark:text-red-300" role="alert">
-              {erreur}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="lg:hidden">
-          <Apercu contenu={contenu} />
-        </div>
-
-        <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4">
-          <h2 className="text-[18px] font-extrabold">Couleur des boutons</h2>
-          <p className="text-[14px] text-muted">« Appeler », « Demander un devis », les petits traits et la ville du titre.</p>
-          <div role="radiogroup" aria-label="Couleur des boutons" className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+  const panneaux: Record<Onglet, React.ReactNode> = {
+    couleurs: (
+      <>
+        <Bloc titre="Couleur des boutons" aide="« Appeler », « Demander un devis », les petits traits et la ville du titre.">
+          <div role="radiogroup" aria-label="Couleur des boutons" className="grid grid-cols-3 gap-2">
             {data.choix.couleursBoutons.map((c, i) => {
               // Le jaune Mobiiz est la valeur par défaut : choisi, rien n'est enregistré (null).
-              const actif = (r.couleurBoutons?.toLowerCase() ?? "#fed206") === c.hex.toLowerCase();
+              const choisi = (r.couleurBoutons?.toLowerCase() ?? "#fed206") === c.hex.toLowerCase();
               return (
-                <button key={c.id} type="button" role="radio" aria-checked={actif} aria-label={c.nom} onClick={() => changer("couleurBoutons", i === 0 ? null : c.hex)} className={`pressable grid justify-items-center gap-1.5 rounded-2xl border-2 px-1 py-2.5 text-[12.5px] font-bold ${actif ? "border-accent bg-accent/15" : "border-line"}`}>
+                <button key={c.id} type="button" role="radio" aria-checked={choisi} aria-label={c.nom} onClick={() => changer("couleurBoutons", i === 0 ? null : c.hex)} className={`pressable grid justify-items-center gap-1.5 rounded-2xl border-2 px-1 py-2.5 text-[12.5px] font-bold ${choisi ? "border-accent bg-accent/15" : "border-line"}`}>
                   {/* Un vrai petit bouton, dans sa couleur. */}
                   <span className="flex h-8 w-full max-w-[84px] items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: c.hex, color: texteSurCouleur(c.hex) }} aria-hidden="true">
                     Appeler
@@ -508,151 +701,180 @@ export function EditeurMaPage() {
               );
             })}
           </div>
-        </Card>
-
-        <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4">
-          <h2 className="text-[18px] font-extrabold">Teinte</h2>
-          <p className="text-[14px] text-muted">La couleur des fonds sombres : l&apos;accueil sans photo, le contact, ton logo.</p>
-          <div role="radiogroup" aria-label="Teinte de la page" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        </Bloc>
+        <Bloc titre="Teinte" aide="La couleur des fonds sombres : le contact, ton logo, l'accueil sans photo.">
+          <div role="radiogroup" aria-label="Teinte de la page" className="grid grid-cols-2 gap-2">
             {[{ id: "metier", nom: "Selon le métier", hex: teinteMetier.hex, valeur: null as string | null }, ...data.choix.teintes.map((c) => ({ ...c, valeur: c.hex as string | null }))].map((c) => {
-              const actif = couleurActive === c.valeur;
+              const choisi = couleurActive === c.valeur;
               return (
-                <button key={c.id} type="button" role="radio" aria-checked={actif} onClick={() => changer("couleur", c.valeur)} className={`pressable flex min-h-14 items-center gap-2.5 rounded-2xl border-2 p-2 pr-3 text-left text-[14px] font-bold ${actif ? "border-accent bg-accent/15" : "border-line"}`}>
+                <button key={c.id} type="button" role="radio" aria-checked={choisi} onClick={() => changer("couleur", c.valeur)} className={`pressable flex min-h-14 items-center gap-2.5 rounded-2xl border-2 p-2 pr-3 text-left text-[14px] font-bold ${choisi ? "border-accent bg-accent/15" : "border-line"}`}>
                   {/* La pastille montre le rendu : la teinte et la couleur des boutons. */}
                   <span className="relative grid size-10 shrink-0 place-items-end overflow-hidden rounded-xl p-1.5" style={{ background: `radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, ${c.hex} 85%, white 10%), ${c.hex} 70%)` }} aria-hidden="true">
                     <span className="h-1.5 w-4 rounded-full" style={{ background: r.couleurBoutons ?? "#FED206" }} />
                   </span>
                   <span className="min-w-0">{c.nom}</span>
-                  {actif ? <Check size={16} className="ml-auto shrink-0" aria-hidden="true" /> : null}
+                  {choisi ? <Check size={16} className="ml-auto shrink-0" aria-hidden="true" /> : null}
                 </button>
               );
             })}
           </div>
-        </Card>
-
-        <Card className="grid grid-cols-[minmax(0,1fr)] gap-4 p-4">
-          <h2 className="text-[18px] font-extrabold">Prestations</h2>
-          <p className="text-[14px] text-muted">Ce que tu fais, en quelques blocs : un titre et une phrase. {data.choix.limites.prestations} au plus.</p>
-          {r.prestations.map((x, i) => (
-            <div key={i} className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-2xl bg-black/5 p-3">
-              <div className="flex items-center gap-2">
-                <input
-                  aria-label={`Titre de la prestation ${i + 1}`}
-                  value={x.titre}
-                  maxLength={60}
-                  placeholder="Couverture ardoise"
-                  onChange={(e) => changer("prestations", r.prestations.map((y, k) => (k === i ? { ...y, titre: e.target.value } : y)))}
-                  className="min-h-12 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[16px] font-bold"
-                />
-                <button type="button" aria-label={`Retirer la prestation ${x.titre || i + 1}`} onClick={() => changer("prestations", r.prestations.filter((_, k) => k !== i))} className="flex size-11 shrink-0 items-center justify-center rounded-full">
-                  <Trash2 size={18} aria-hidden="true" />
-                </button>
-              </div>
-              <textarea
-                aria-label={`Phrase de la prestation ${i + 1}`}
-                value={x.texte}
-                maxLength={200}
-                rows={2}
-                placeholder="Une phrase pour dire ce que tu fais."
-                onChange={(e) => changer("prestations", r.prestations.map((y, k) => (k === i ? { ...y, texte: e.target.value } : y)))}
-                className="w-full min-w-0 rounded-xl border border-line bg-surface px-3 py-2 text-[15px]"
+        </Bloc>
+      </>
+    ),
+    photos: (
+      <>
+        <Bloc titre="Photo de couverture" aide="La grande photo en haut de ton site. Sans photo à toi, une belle photo de ton métier s'affiche.">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-line bg-black/5">
+            {photoEnCouverture ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={photoEnCouverture} alt="Photo de couverture" className="size-full object-cover" />
+            ) : (
+              <span className="flex size-full items-center justify-center p-4 text-center text-[13px] text-muted">{couvertureEnCours ? "Préparation de la photo…" : "Pas encore de photo."}</span>
+            )}
+            {couvertureEnCours ? <Loader2 size={20} className="absolute top-3 right-3 motion-safe:animate-spin" aria-hidden="true" /> : null}
+            <span className="absolute bottom-2 left-2 rounded-full bg-black/65 px-2.5 py-1 text-[12px] font-bold text-white">{couverture ? "Ta photo" : "Photo de la galerie"}</span>
+          </div>
+          {data.choix.stockagePhotos && !data.reglages.photosAccord ? <AccordPhotos onAccord={() => void accord()} /> : null}
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">
+            <BoutonFichier
+              libelle={couverture ? "Changer ma photo" : "Ajouter une photo"}
+              actif={photosOk}
+              onFichier={async (f) => {
+                setErreur(null);
+                const err = await envoyerPhoto(f, "couverture");
+                if (err) setErreur(err);
+                await charger();
+              }}
+            />
+            <button type="button" onClick={() => setGalerie((v) => !v)} aria-expanded={galerie} className="pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border-2 border-ink/80 px-4 text-[15px] font-extrabold">
+              <Images size={18} aria-hidden="true" /> Choisir dans la galerie <ChevronDown size={16} aria-hidden="true" className={galerie ? "rotate-180" : ""} />
+            </button>
+          </div>
+          {!data.choix.stockagePhotos ? <p className="rounded-xl bg-accent/15 px-3 py-2 text-[13px]">{PHRASE_STOCKAGE}</p> : data.choix.stockagePhotos && !data.reglages.photosAccord ? <p className="text-[13px] text-muted">Coche la case ci-dessus pour envoyer tes photos.</p> : null}
+          {galerie ? <GalerieDefaut photos={data.choix.photosDefaut} choisie={couverture ? "__aucune__" : r.photoDefaut} metierPhoto={photoMetier} onChoisir={(id) => void choisirPhotoDefaut(id)} /> : null}
+          {couverture ? (
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center gap-1 justify-self-start text-[14px] font-bold text-muted underline"
+              onClick={async () => {
+                const d = await api<MaPage>("/v1/ma-page/couverture", { method: "DELETE" }).catch(() => null);
+                if (d) {
+                  setData(d);
+                  void rafraichirPagePublique();
+                }
+              }}
+            >
+              <Trash2 size={14} aria-hidden="true" /> Retirer ma photo (la galerie reprend sa place)
+            </button>
+          ) : null}
+        </Bloc>
+        <Bloc titre="Logo" aide="Le même que sur tes demandes de prix. Sans logo, tes initiales s'affichent.">
+          <div className="flex flex-wrap items-center gap-3">
+            {data.profil.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/v1/company/logo?v=${versionLogo}`} alt="Logo actuel" className="size-16 rounded-xl border border-line bg-white object-contain" />
+            ) : (
+              <span className="flex size-16 items-center justify-center rounded-xl bg-[#1b2229] text-[18px] font-extrabold text-accent" aria-label="Sans logo : tes initiales">
+                {initiales(data.profil.nom)}
+              </span>
+            )}
+            <BoutonFichier
+              libelle={data.profil.logo ? "Changer le logo" : "Ajouter un logo"}
+              actif
+              onFichier={async (f) => {
+                try {
+                  const { reduireImage } = await import("@/lib/reduire-image");
+                  const blob = await reduireImage(f, 512, 0.9);
+                  if (blob.size > 500_000) throw new Error("Logo trop lourd (500 Ko au plus).");
+                  const form = new FormData();
+                  form.append("file", blob, "logo.jpg");
+                  await api("/v1/company/logo", { method: "PUT", body: form });
+                  setVersionLogo((v) => v + 1);
+                  setErreur(null);
+                  await charger();
+                  void rafraichirPagePublique();
+                } catch (err) {
+                  setErreur((err as ApiError).phrase ?? (err as Error).message ?? "Le logo n'a pas été enregistré.");
+                }
+              }}
+            />
+            {data.profil.logo ? (
+              <button
+                type="button"
+                className="min-h-11 text-[14px] font-bold text-muted underline"
+                onClick={async () => {
+                  if (!window.confirm("Retirer le logo ? Il disparaît aussi de tes demandes de prix.")) return;
+                  await api("/v1/company/logo", { method: "DELETE" }).catch(() => undefined);
+                  await charger();
+                  void rafraichirPagePublique();
+                }}
+              >
+                Retirer le logo
+              </button>
+            ) : null}
+          </div>
+        </Bloc>
+      </>
+    ),
+    prestations: (
+      <Bloc titre="Prestations" aide={`Ce que tu fais, en quelques blocs : un titre et une phrase. ${data.choix.limites.prestations} au plus.`}>
+        {r.prestations.map((x, i) => (
+          <div key={i} className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-2xl bg-black/5 p-3">
+            <div className="flex items-center gap-2">
+              <input
+                aria-label={`Titre de la prestation ${i + 1}`}
+                value={x.titre}
+                maxLength={60}
+                placeholder="Couverture ardoise"
+                onChange={(e) => changer("prestations", r.prestations.map((y, k) => (k === i ? { ...y, titre: e.target.value } : y)))}
+                className="min-h-12 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-[16px] font-bold"
               />
-            </div>
-          ))}
-          {r.prestations.length < data.choix.limites.prestations ? (
-            <div className="flex flex-wrap gap-2">
-              {theme.prestations
-                .filter((x) => !r.prestations.some((y) => y.titre === x.titre))
-                .map((x) => (
-                  <button key={x.titre} type="button" onClick={() => changer("prestations", [...r.prestations, x])} className="pressable inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-line px-3 text-[14px] font-bold">
-                    <Plus size={16} aria-hidden="true" /> {x.titre}
-                  </button>
-                ))}
-              <button type="button" onClick={() => changer("prestations", [...r.prestations, { titre: "", texte: "" }])} className="pressable inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-line px-3 text-[14px] font-bold">
-                <Plus size={16} aria-hidden="true" /> Autre prestation
+              <button type="button" aria-label={`Retirer la prestation ${x.titre || i + 1}`} onClick={() => changer("prestations", r.prestations.filter((_, k) => k !== i))} className="flex size-11 shrink-0 items-center justify-center rounded-full">
+                <Trash2 size={18} aria-hidden="true" />
               </button>
             </div>
-          ) : null}
-        </Card>
-
-        <Card className="grid grid-cols-[minmax(0,1fr)] gap-4 p-4">
-          <h2 className="text-[18px] font-extrabold">Chantiers</h2>
-          <p className="rounded-xl bg-accent/15 px-3 py-2 text-[13px]">
-            Mets seulement tes propres photos de chantiers. Avant de publier une photo prise chez un client, demande-lui son accord ; évite les personnes reconnaissables, les plaques d&apos;immatriculation, les numéros de rue et les intérieurs qui permettent de situer un domicile.
-          </p>
-          {data.choix.stockagePhotos && !data.reglages.photosAccord ? (
-            <label className="flex items-start gap-3 rounded-2xl border-2 border-line p-3 text-[14px]">
-              <input
-                type="checkbox"
-                className="mt-0.5 size-6 shrink-0 accent-[#FED206]"
-                onChange={async (e) => {
-                  if (!e.target.checked) return;
-                  const d = await api<MaPage>("/v1/ma-page/accord-photos", { method: "POST" }).catch(() => null);
-                  if (d) setData(d);
-                  else setErreur("Ton accord n'a pas été enregistré. Réessaie.");
-                }}
-              />
-              <span>
-                J&apos;ai pris ces photos ou j&apos;ai le droit de les utiliser. Les clients concernés sont d&apos;accord, et les personnes reconnaissables aussi (salariés compris). Je retire une photo dès qu&apos;on me le demande.
-              </span>
-            </label>
-          ) : null}
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
-            <span className="text-[15px] font-bold">Photo de couverture</span>
-            <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-line bg-black/5">
-              {couverture?.variantes[1] ?? couverture?.variantes[0] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={(couverture.variantes[1] ?? couverture.variantes[0])!.webp} alt="Photo de couverture" className="size-full object-cover" />
-              ) : (
-                <span className="flex size-full items-center justify-center p-4 text-center text-[13px] text-muted">{couvertureEnCours ? "Préparation de la photo…" : "Sans photo choisie : la première photo de tes chantiers ouvre ton site. Prends une vue large de la maison terminée."}</span>
-              )}
-              {couvertureEnCours ? <Loader2 size={20} className="absolute top-3 right-3 motion-safe:animate-spin" aria-hidden="true" /> : null}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {data.choix.stockagePhotos && data.reglages.photosAccord ? (
-                <label className="pressable inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border border-line px-3 text-[14px] font-bold">
-                  <ImageIcon size={16} aria-hidden="true" /> {couverture ? "Changer la photo" : "Choisir une photo"}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={async (e) => {
-                      const f = e.target.files?.[0];
-                      e.target.value = "";
-                      if (!f) return;
-                      setErreur(null);
-                      const err = await envoyerPhoto(f, "couverture");
-                      if (err) setErreur(err);
-                      await charger();
-                    }}
-                  />
-                </label>
-              ) : null}
-              {couverture ? (
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center gap-1 text-[14px] font-bold text-muted underline"
-                  onClick={async () => {
-                    const d = await api<MaPage>("/v1/ma-page/couverture", { method: "DELETE" }).catch(() => null);
-                    if (d) {
-                      setData(d);
-                      void rafraichirPagePublique();
-                    }
-                  }}
-                >
-                  <Trash2 size={14} aria-hidden="true" /> Retirer cette photo
-                </button>
-              ) : null}
-            </div>
+            <textarea
+              aria-label={`Phrase de la prestation ${i + 1}`}
+              value={x.texte}
+              maxLength={200}
+              rows={2}
+              placeholder="Une phrase pour dire ce que tu fais."
+              onChange={(e) => changer("prestations", r.prestations.map((y, k) => (k === i ? { ...y, texte: e.target.value } : y)))}
+              className="w-full min-w-0 rounded-xl border border-line bg-surface px-3 py-2 text-[15px]"
+            />
           </div>
-
-          <Chantiers data={data} actif={data.choix.stockagePhotos && data.reglages.photosAccord} onErreur={setErreur} onChange={(d) => (d ? setData(d) : void charger())} />
-        </Card>
-
-        <Card className="grid grid-cols-[minmax(0,1fr)] gap-4 p-4">
-          <h2 className="text-[18px] font-extrabold">À propos</h2>
+        ))}
+        {r.prestations.length < data.choix.limites.prestations ? (
+          <div className="flex flex-wrap gap-2">
+            {theme.prestations
+              .filter((x) => !r.prestations.some((y) => y.titre === x.titre))
+              .map((x) => (
+                <button key={x.titre} type="button" onClick={() => changer("prestations", [...r.prestations, x])} className="pressable inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-line px-3 text-[14px] font-bold">
+                  <Plus size={16} aria-hidden="true" /> {x.titre}
+                </button>
+              ))}
+            <button type="button" onClick={() => changer("prestations", [...r.prestations, { titre: "", texte: "" }])} className="pressable inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-line px-3 text-[14px] font-bold">
+              <Plus size={16} aria-hidden="true" /> Autre prestation
+            </button>
+          </div>
+        ) : null}
+      </Bloc>
+    ),
+    chantiers: (
+      <Bloc titre="Mes chantiers" aide="Un chantier = un titre et quelques photos. Sur ton site, la première photo s'affiche en grand ; on la touche pour voir les autres.">
+        <p className="rounded-xl bg-accent/15 px-3 py-2 text-[13px]">
+          Mets seulement tes propres photos de chantiers. Avant de publier une photo prise chez un client, demande-lui son accord ; évite les personnes reconnaissables, les plaques d&apos;immatriculation, les numéros de rue et les intérieurs qui permettent de situer un domicile.
+        </p>
+        {!data.choix.stockagePhotos ? <p className="rounded-xl bg-black/5 px-3 py-2 text-[13px]">L&apos;envoi de tes propres photos n&apos;est pas encore ouvert sur ce site. Tes chantiers s&apos;afficheront dès qu&apos;il le sera.</p> : null}
+        {data.choix.stockagePhotos && !data.reglages.photosAccord ? <AccordPhotos onAccord={() => void accord()} /> : null}
+        <Chantiers data={data} actif={photosOk} onErreur={setErreur} onChange={(d) => (d ? setData(d) : void charger())} />
+      </Bloc>
+    ),
+    apropos: (
+      <>
+        <Bloc titre="Tes textes">
           <Champ label="Accroche" valeur={r.accroche ?? ""} onChange={(v) => changer("accroche", v || null)} max={data.choix.limites.accroche} placeholder={theme.accroche.replace("{zone}", contenu.zone ? ` à ${contenu.zone}` : "")} aide="Une phrase sous ton nom. Vide : ton métier et ta ville." />
-          <Champ label="Présentation" multi valeur={r.presentation ?? ""} onChange={(v) => changer("presentation", v || null)} max={data.choix.limites.presentation} placeholder={theme.presentation} />
+          <Champ label="Présentation" multi valeur={r.presentation ?? ""} onChange={(v) => changer("presentation", v || null)} max={data.choix.limites.presentation} placeholder={theme.presentation} aide="Ta première phrase s'affiche dans une carte sous tes prestations, la suite dans « À propos »." />
           <Button
             variant="secondary"
             pending={aide}
@@ -691,132 +913,81 @@ export function EditeurMaPage() {
               </div>
             </div>
           ) : null}
-          <PhotoEquipe data={data} actif={data.choix.stockagePhotos && data.reglages.photosAccord} onErreur={setErreur} recharger={charger} />
-        </Card>
-
-        <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4" id="visibilite" data-testid="visibilite">
-          <Interrupteur actif={r.visible} onChange={(v) => changer("visible", v)} label="Page visible" aide={r.visible ? "En ligne : tout le monde peut voir ton site avec le lien." : "Privé : personne ne le voit pour l'instant."} />
-          {r.masquee ? <p className="rounded-xl bg-red-500/10 px-3 py-2 text-[14px] font-bold text-red-700 dark:text-red-300">Ton site a été masqué par l&apos;équipe Mobiiz après un signalement. Écris-nous à contact@mobiiz.fr.</p> : null}
-          <p className="text-[14px] break-all">
-            <span className="text-muted">Adresse : </span>
-            <span className="font-bold">{url.replace(/^https?:\/\//, "")}</span>
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {r.visible && !r.masquee ? (
-              <a href={`/e/${r.adresse}?depuis=mon-site`} className="pressable inline-flex min-h-12 items-center gap-2 rounded-2xl border-2 border-line px-4 font-bold">
-                <ExternalLink size={18} aria-hidden="true" /> Ouvrir en ligne
-              </a>
-            ) : null}
-            <Button variant="secondary" onClick={() => setPartage(true)} disabled={!r.visible}>
-              <Share2 size={18} aria-hidden="true" /> Partager
-            </Button>
-          </div>
-          {!r.visible ? <p className="text-[13px] text-muted">Rends ton site visible pour le partager.</p> : null}
-        </Card>
-
-        <Card className="grid grid-cols-[minmax(0,1fr)] gap-4 p-4">
-          <h2 className="text-[18px] font-extrabold">Coordonnées</h2>
-          <div className="rounded-2xl bg-black/5 p-3 text-[14px]">
-            <p>
-              <span className="font-bold">{data.profil.nom}</span> · {data.profil.metiers.map((m) => LIBELLES[m] ?? m).join(", ") || "métier à choisir"}
-            </p>
-            <p className="text-muted">
-              Repris de ton profil et synchronisés. <Link href="/compte/entreprise" className="font-bold underline">Modifier dans Mon entreprise</Link>
-            </p>
-          </div>
-          <Champ label="Téléphone" type="tel" inputMode="tel" valeur={r.telephone ?? ""} onChange={(v) => changer("telephone", v || null)} max={25} placeholder={data.profil.telephone ?? "06 12 34 56 78"} aide={data.profil.telephone ? "Vide : celui de ton profil, mis à jour tout seul." : "Le bouton « Appeler » apparaît avec un numéro."} />
-          <Champ label="Zone d'intervention" valeur={r.zone ?? ""} onChange={(v) => changer("zone", v || null)} max={120} placeholder={data.profil.zone ?? "Lannion, Perros-Guirec, Trégor"} aide={data.profil.zone ? `Vide : ${data.profil.zone}, d'après ton profil.` : undefined} />
-          <Champ label="Horaires" valeur={r.horaires ?? ""} onChange={(v) => changer("horaires", v || null)} max={200} placeholder="Du lundi au vendredi, 8 h – 18 h" />
-          <Champ label="Ton autre site internet" type="url" inputMode="url" valeur={r.siteWeb ?? ""} onChange={(v) => changer("siteWeb", v || null)} max={200} placeholder="www.mon-entreprise.fr" aide="Si tu en as déjà un : un lien « Voir mon site » apparaît en bas de ton site Mobiiz." />
+        </Bloc>
+        <PhotoEquipe data={data} actif={photosOk} onErreur={setErreur} recharger={charger} />
+        <Bloc titre="Tes garanties">
           <AnneeChamp valeur={r.creeeEn} onChange={(n) => changer("creeeEn", n)} />
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
-            <span className="text-[14px] font-bold">Certifications et assurances</span>
-            <div className="flex flex-wrap gap-2">
-              {[...new Set([...data.choix.certifications, ...r.certifications])].map((c) => {
-                const actif = r.certifications.includes(c);
-                return (
-                  <button key={c} type="button" aria-pressed={actif} onClick={() => changer("certifications", actif ? r.certifications.filter((x) => x !== c) : [...r.certifications, c].slice(0, 10))} className={`pressable min-h-11 rounded-full border-2 px-3 text-[14px] font-bold ${actif ? "border-accent bg-accent/20" : "border-line"}`}>
-                    {actif ? "✓ " : ""}
-                    {c}
-                  </button>
-                );
-              })}
-            </div>
-            <input
-              placeholder="Autre (ex. : Handibat), puis Entrée"
-              maxLength={60}
-              className="min-h-12 rounded-xl border border-line bg-surface px-4 text-[16px]"
-              onKeyDown={(e) => {
-                if (e.key !== "Enter") return;
-                e.preventDefault();
-                const v = e.currentTarget.value.trim();
-                if (v && !r.certifications.includes(v)) changer("certifications", [...r.certifications, v].slice(0, 10));
-                e.currentTarget.value = "";
-              }}
-            />
-            <span className="text-[13px] text-muted">Seulement ce que tu as vraiment, à jour : tu en es responsable. « Entreprise vérifiée » s&apos;ajoute tout seul quand ton SIRET est vérifié{data.profil.verifiee ? " (c'est le cas)" : ""}.</span>
-          </div>
-          {data.profil.adressePostale ? (
-            <Interrupteur actif={r.afficherAdresse} onChange={(v) => changer("afficherAdresse", v)} label="Afficher mon adresse" aide={`${data.profil.adressePostale}. Désactivé : seule ta zone s'affiche.`} />
-          ) : null}
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
-            <span className="text-[15px] font-bold">Logo</span>
-            <div className="flex flex-wrap items-center gap-3">
-              {data.profil.logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={`/v1/company/logo?v=${versionLogo}`} alt="Logo actuel" className="size-16 rounded-xl border border-line bg-white object-contain" />
-              ) : (
-                <span className="flex size-16 items-center justify-center rounded-xl border border-dashed border-line text-[12px] text-muted">Initiales</span>
-              )}
-              <label className="pressable inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border border-line px-3 text-[14px] font-bold">
-                <ImageIcon size={16} aria-hidden="true" /> {data.profil.logo ? "Remplacer" : "Ajouter un logo"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={async (e) => {
-                    const f = e.target.files?.[0];
-                    e.target.value = "";
-                    if (!f) return;
-                    try {
-                      const { reduireImage } = await import("@/lib/reduire-image");
-                      const blob = await reduireImage(f, 512, 0.9);
-                      if (blob.size > 500_000) throw new Error("Logo trop lourd (500 Ko au plus).");
-                      const form = new FormData();
-                      form.append("file", blob, "logo.jpg");
-                      await api("/v1/company/logo", { method: "PUT", body: form });
-                      setVersionLogo((v) => v + 1);
-                      await charger();
-                      void rafraichirPagePublique();
-                    } catch (err) {
-                      setErreur((err as ApiError).phrase ?? (err as Error).message ?? "Le logo n'a pas été enregistré.");
-                    }
-                  }}
-                />
-              </label>
-              {data.profil.logo ? (
-                <button
-                  type="button"
-                  className="text-[14px] font-bold text-muted underline"
-                  onClick={async () => {
-                    if (!window.confirm("Retirer le logo ? Il disparaît aussi de tes demandes de prix.")) return;
-                    await api("/v1/company/logo", { method: "DELETE" }).catch(() => undefined);
-                    await charger();
-                    void rafraichirPagePublique();
-                  }}
-                >
-                  Retirer
+          <span className="text-[14px] font-bold">Certifications et assurances</span>
+          <div className="flex flex-wrap gap-2">
+            {[...new Set([...data.choix.certifications, ...r.certifications])].map((c) => {
+              const coche = r.certifications.includes(c);
+              return (
+                <button key={c} type="button" aria-pressed={coche} onClick={() => changer("certifications", coche ? r.certifications.filter((x) => x !== c) : [...r.certifications, c].slice(0, 10))} className={`pressable min-h-11 rounded-full border-2 px-3 text-[14px] font-bold ${coche ? "border-accent bg-accent/20" : "border-line"}`}>
+                  {coche ? "✓ " : ""}
+                  {c}
                 </button>
-              ) : null}
-            </div>
-            <span className="text-[13px] text-muted">Le même logo que sur tes demandes de prix. Sans logo, tes initiales s&apos;affichent.</span>
+              );
+            })}
           </div>
-
-        </Card>
-
-        <Card className="grid grid-cols-[minmax(0,1fr)] gap-3 p-4">
-          <h2 className="text-[18px] font-extrabold">Adresse du site</h2>
-          <p className="text-[15px] break-all">{url.replace(/^https?:\/\//, "")}</p>
+          <input
+            placeholder="Autre (ex. : Handibat), puis Entrée"
+            aria-label="Autre certification"
+            maxLength={60}
+            className="min-h-12 rounded-xl border border-line bg-surface px-4 text-[16px]"
+            onKeyDown={(e) => {
+              if (e.key !== "Enter") return;
+              e.preventDefault();
+              const v = e.currentTarget.value.trim();
+              if (v && !r.certifications.includes(v)) changer("certifications", [...r.certifications, v].slice(0, 10));
+              e.currentTarget.value = "";
+            }}
+          />
+          <span className="text-[13px] text-muted">Seulement ce que tu as vraiment, à jour : tu en es responsable. « Entreprise vérifiée » s&apos;ajoute tout seul quand ton SIRET est vérifié{data.profil.verifiee ? " (c'est le cas)" : ""}.</span>
+        </Bloc>
+      </>
+    ),
+    contact: (
+      <Bloc titre="Coordonnées">
+        <div className="rounded-2xl bg-black/5 p-3 text-[14px]">
+          <p>
+            <span className="font-bold">{data.profil.nom}</span> · {data.profil.metiers.map((m) => LIBELLES[m] ?? m).join(", ") || "métier à choisir"}
+          </p>
+          <p className="text-muted">
+            Repris de ton profil et synchronisés. <Link href="/compte/entreprise" className="font-bold underline">Modifier dans Mon entreprise</Link>
+          </p>
+        </div>
+        <Champ label="Téléphone" type="tel" inputMode="tel" valeur={r.telephone ?? ""} onChange={(v) => changer("telephone", v || null)} max={25} placeholder={data.profil.telephone ?? "06 12 34 56 78"} aide={data.profil.telephone ? "Vide : celui de ton profil, mis à jour tout seul." : "Le bouton « Appeler » apparaît avec un numéro."} />
+        <Champ label="Zone d'intervention" valeur={r.zone ?? ""} onChange={(v) => changer("zone", v || null)} max={120} placeholder={data.profil.zone ?? "Lannion, Perros-Guirec, Trégor"} aide={data.profil.zone ? `Vide : ${data.profil.zone}, d'après ton profil.` : undefined} />
+        <Champ label="Horaires" valeur={r.horaires ?? ""} onChange={(v) => changer("horaires", v || null)} max={200} placeholder="Du lundi au vendredi, 8 h – 18 h" />
+        <Champ label="Ton autre site internet" type="url" inputMode="url" valeur={r.siteWeb ?? ""} onChange={(v) => changer("siteWeb", v || null)} max={200} placeholder="www.mon-entreprise.fr" aide="Si tu en as déjà un : un lien « Voir mon site » apparaît en bas de ton site Mobiiz." />
+        {data.profil.adressePostale ? <Interrupteur actif={r.afficherAdresse} onChange={(v) => changer("afficherAdresse", v)} label="Afficher mon adresse" aide={`${data.profil.adressePostale}. Désactivé : seule ta zone s'affiche.`} /> : null}
+        <p className="text-[13px] text-muted">« Demander un devis » : le message du client t&apos;arrive par e-mail et dans « Messages et réponses ». Ton e-mail n&apos;est jamais montré.</p>
+      </Bloc>
+    ),
+    publier: (
+      <>
+        <Bloc titre="Mettre en ligne">
+          <div id="visibilite" data-testid="visibilite" className="grid grid-cols-[minmax(0,1fr)] gap-3">
+            <Interrupteur actif={r.visible} onChange={(v) => changer("visible", v)} label="Page visible" aide={r.visible ? "En ligne : tout le monde peut voir ton site avec le lien." : "Privé : personne ne le voit pour l'instant."} />
+            {r.masquee ? <p className="rounded-xl bg-red-500/10 px-3 py-2 text-[14px] font-bold text-red-700 dark:text-red-300">Ton site a été masqué par l&apos;équipe Mobiiz après un signalement. Écris-nous à contact@mobiiz.fr.</p> : null}
+            <p className="text-[14px] break-all">
+              <span className="text-muted">Adresse : </span>
+              <span className="font-bold">{url.replace(/^https?:\/\//, "")}</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {r.visible && !r.masquee ? (
+                <a href={`/e/${r.adresse}?depuis=mon-site`} className="pressable inline-flex min-h-12 items-center gap-2 rounded-2xl border-2 border-line px-4 font-bold">
+                  <ExternalLink size={18} aria-hidden="true" /> Ouvrir en ligne
+                </a>
+              ) : null}
+              <Button variant="secondary" onClick={() => setPartage(true)} disabled={!r.visible}>
+                <Share2 size={18} aria-hidden="true" /> Partager
+              </Button>
+            </div>
+            {!r.visible ? <p className="text-[13px] text-muted">Rends ton site visible pour le partager.</p> : null}
+          </div>
+        </Bloc>
+        <Bloc titre="Adresse du site">
           {r.adresseModifiable ? (
             nouvelleAdresse === null ? (
               <Button variant="secondary" onClick={() => setNouvelleAdresse(r.adresse)}>
@@ -857,26 +1028,105 @@ export function EditeurMaPage() {
           ) : (
             <p className="text-[13px] text-muted">Adresse déjà modifiée une fois.</p>
           )}
-        </Card>
-      </div>
+        </Bloc>
+      </>
+    ),
+  };
 
-      <div className="sticky top-4 hidden lg:block">
-        <Apercu contenu={contenu} />
-      </div>
-      {/* « Voir mon site » flottant (Greg, 17 novembre 2026) : toujours à portée de pouce, au-dessus du menu sur téléphone.
-          Il ouvre le site en plein écran, qui défile, avec « Retour » en haut. RÈGLE CHANGÉE : avant, un bouton en bas de l'éditeur. */}
-      {apercuPlein ? null : (
-        <button
-          type="button"
-          onClick={() => setApercuPlein(true)}
-          className="pressable fixed right-4 z-40 flex min-h-14 items-center gap-2 rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent shadow-float lg:right-8 lg:bottom-8!"
-          style={{ bottom: "calc(var(--nav-space) + 4px)" }}
-        >
-          <Eye size={20} aria-hidden="true" /> Voir mon site
-        </button>
-      )}
-      {apercuPlein ? <Apercu contenu={contenu} plein onFermer={fermerApercu} /> : null}
-      {partage ? <Partager url={url} nom={data.profil.nom} onFermer={() => setPartage(false)} /> : null}
+  const libelleActif = ONGLETS.find((o) => o.id === actif)?.libelle ?? "";
+  const barreOnglets = (
+    <div role="tablist" aria-label="Réglages du site" className={ordinateur ? "grid grid-cols-4 gap-1.5" : "flex snap-x gap-0.5 overflow-x-auto pr-8 pl-1 [mask-image:linear-gradient(90deg,#000_88%,transparent)] [scrollbar-width:none]"}>
+      {ONGLETS.map(({ id, libelle, Icone }) => {
+        const choisi = actif === id;
+        return (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={choisi}
+            aria-controls="reglages-site"
+            onClick={(e) => {
+              ouvrir(id);
+              e.currentTarget.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+            }}
+            className={
+              ordinateur
+                ? `pressable flex min-h-15 flex-col items-center justify-center gap-1 rounded-2xl text-[12.5px] font-bold ${choisi ? "bg-ink text-ground" : "bg-black/5 hover:bg-black/10"}`
+                : `pressable flex min-h-14 min-w-[62px] flex-1 snap-start flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-[11px] font-bold whitespace-nowrap ${choisi ? "bg-ink text-ground" : "text-muted"}`
+            }
+          >
+            <Icone size={ordinateur ? 19 : 20} aria-hidden="true" strokeWidth={choisi ? 2.4 : 2} />
+            {libelle}
+          </button>
+        );
+      })}
     </div>
+  );
+  const reglages = actif ? (
+    <section ref={tiroir} id="reglages-site" role="tabpanel" aria-label={libelleActif} className={`grid grid-cols-[minmax(0,1fr)] gap-6 ${ordinateur ? "" : "scroll-mt-[calc(36dvh+84px)] rounded-[24px] bg-surface p-4 shadow-card"}`}>
+      {ordinateur ? null : (
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-[20px] font-extrabold">{libelleActif}</h2>
+          <button type="button" onClick={() => setOnglet(null)} aria-label={`Fermer les réglages ${libelleActif}`} className="pressable flex min-h-11 items-center gap-1 rounded-full bg-black/5 px-3 text-[14px] font-bold">
+            <ChevronDown size={18} aria-hidden="true" /> Fermer
+          </button>
+        </div>
+      )}
+      {panneaux[actif]}
+    </section>
+  ) : null;
+
+  return (
+    <>
+      {ordinateur ? (
+        <div className="grid grid-cols-[minmax(340px,27%)_minmax(0,1fr)] items-start gap-6">
+          <aside className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4" aria-label="Réglages">
+            <div>
+              <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Mon site</h1>
+              <p className="text-[14px] text-muted">Un vrai site pour ton entreprise. Touche un onglet, ton site change à droite.</p>
+            </div>
+            {barreOnglets}
+            {reglages}
+          </aside>
+          <section className="sticky top-4 grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2" aria-label="Aperçu de mon site">
+            <div className="flex min-h-11 items-center gap-3">
+              <Statut etat={etat} erreur={erreur} />
+              <ChoixEcran ecran={ecran} onChange={setEcran} />
+              <button type="button" onClick={() => setApercuPlein(true)} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-accent px-4 text-[14px] font-extrabold text-on-accent">
+                <Maximize2 size={16} aria-hidden="true" /> Voir mon site
+              </button>
+            </div>
+            <CadreApercu contenu={contenu} ecran={ecran} hauteur="calc(100dvh - 6.5rem)" />
+          </section>
+        </div>
+      ) : (
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 pb-[76px]">
+          <h1 className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">Mon site</h1>
+          {!r.visible && actif !== "publier" ? (
+            <button type="button" onClick={() => ouvrir("publier")} className="justify-self-start text-left text-[14px] font-bold underline">
+              Ton site est privé pour l&apos;instant : le rendre visible
+            </button>
+          ) : null}
+          {/* Le site toujours visible en haut (Greg, 17 novembre 2026) : réduit quand le tiroir est ouvert, plus petit encore
+              pendant la saisie ; « Voir mon site » l'agrandit en plein écran. L'état d'enregistrement est AU-DESSUS du site. */}
+          <section className="sticky top-0 z-20 -mx-4 grid grid-cols-[minmax(0,1fr)] gap-1.5 bg-ground px-4 pt-2 pb-2" aria-label="Aperçu de mon site">
+            <div className="flex min-h-10 items-center gap-2">
+              <Statut etat={etat} erreur={erreur} />
+              <button type="button" onClick={() => setApercuPlein(true)} className="pressable flex min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-accent px-3.5 text-[14px] font-extrabold text-on-accent">
+                <Eye size={17} aria-hidden="true" /> Voir mon site
+              </button>
+            </div>
+            <CadreApercu contenu={contenu} ecran="telephone" hauteur={actif ? (typing ? "22dvh" : "36dvh") : "calc(100dvh - var(--nav-space) - 230px)"} />
+          </section>
+          {reglages ?? <p className="text-center text-[14px] text-muted">Touche un onglet en bas pour changer tes couleurs, tes photos, tes textes…</p>}
+          {/* La barre des onglets, juste au-dessus du menu de l'app ; cachée pendant la saisie (clavier ouvert). */}
+          <nav aria-label="Onglets des réglages" className={`fixed inset-x-0 z-30 px-2.5 transition-[translate,opacity] duration-200 ${typing ? "pointer-events-none translate-y-4 opacity-0" : ""}`} style={{ bottom: "calc(var(--nav-space) - 8px)" }}>
+            <div className="mx-auto max-w-2xl rounded-[22px] bg-surface p-1 shadow-float ring-1 ring-ink/5">{barreOnglets}</div>
+          </nav>
+        </div>
+      )}
+      {apercuPlein ? <ApercuPlein contenu={contenu} onFermer={fermerApercu} /> : null}
+      {partage ? <Partager url={url} nom={data.profil.nom} onFermer={() => setPartage(false)} /> : null}
+    </>
   );
 }

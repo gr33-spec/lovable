@@ -239,6 +239,7 @@ model Company {
   anciennesAdressesPage     AncienneAdressePage[]
   signalementsPage          SignalementPage[]
   contactsPage              ContactPage[]
+  messagesSite              MessageSite[]
 
   @@map("company")
 }
@@ -3074,6 +3075,8 @@ model PageEntreprise {
   couleur          String?
   /// La couleur des boutons (`COULEURS_BOUTONS`, Greg, 17 novembre 2026), sinon nul : le jaune Mobiiz.
   couleurBoutons   String?   @map("couleur_boutons")
+  /// La photo par défaut choisie dans la galerie (Greg, 17 novembre 2026) ; null : celle du métier principal.
+  photoDefaut      String?   @map("photo_defaut")
   accroche         String?
   presentation     String?
   telephone        String?
@@ -3184,4 +3187,23 @@ model ContactPage {
   @@index([companyId, createdAt])
   @@index([ipHash, createdAt])
   @@map("contact_page")
+}
+
+/// « Demander un devis » depuis le site de l'artisan (Greg, 17 novembre 2026) : la copie du message, lue dans « Messages et
+/// réponses ». RÈGLE CHANGÉE : avant, Mobiiz ne gardait que la trace anti-abus (`contact_page`). Supprimée après 12 mois.
+model MessageSite {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  companyId String    @map("company_id") @db.Uuid
+  nom       String
+  telephone String?
+  email     String?
+  commune   String?
+  message   String
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  luLe      DateTime? @map("lu_le") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt])
+  @@map("message_site")
 }

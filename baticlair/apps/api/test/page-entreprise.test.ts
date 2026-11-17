@@ -334,9 +334,23 @@ describe("Ma page : visiteurs", () => {
     expect(mail.subject).toContain("Paul Client");
     expect(mail.text).toContain("une fuite sur mon toit");
     expect(mail.text).toContain("Perros");
-    // On ne garde que la trace (limites), jamais le texte ni les coordonnées du visiteur.
+    // La trace anti-abus ne garde ni le texte ni les coordonnées du visiteur.
     expect(JSON.stringify(await ctx.prisma.contactPage.findMany())).not.toMatch(/Paul|fuite|client\.fr/);
+    // Greg, 17 novembre 2026 : la copie du message est dans « Messages et réponses » (RÈGLE CHANGÉE : avant, rien n'était gardé).
+    const boite = (await a.agent.get("/v1/boite").expect(200)).body.items as { cle: string; sorte: string; titre: string; sujet: string; nonLu: boolean; href: string }[];
+    const recu = boite.find((i) => i.sorte === "site")!;
+    expect(recu).toMatchObject({ titre: "Paul Client", sujet: "Demande de devis · Perros", nonLu: true });
+    expect(mail.text).toContain(recu.href);
+    const detail = (await a.agent.get(`/v1/boite/site/${recu.cle.split(":")[1]}`).expect(200)).body;
+    expect(detail).toMatchObject({ nom: "Paul Client", email: "paul@client.fr", commune: "Perros", message: "Bonjour, une fuite sur mon toit." });
+    expect(((await a.agent.get("/v1/boite").expect(200)).body.items as { sorte: string; nonLu: boolean }[]).find((i) => i.sorte === "site")!.nonLu).toBe(false);
+    // Une autre entreprise ne lit jamais ce message.
+    const b = await signUpWithCompany(ctx.app, "b@exemple.fr", "Autre Toit");
+    await b.agent.get(`/v1/boite/site/${recu.cle.split(":")[1]}`).expect(404);
+    // Un e-mail en panne ne perd pas la demande : le visiteur lit « envoyé », elle est dans l'app.
+    ctx.emails.failNext = 1;
     for (let i = 1; i < LIMITES_CONTACT.parIpParHeure; i++) await anon().post("/v1/public/pages/toits-martin/contact").send({ nom: "Paul", telephone: "0600000000", message: `Message ${i} pour vous` }).expect(200);
+    expect(await ctx.prisma.messageSite.count({ where: { companyId: a.companyId } })).toBe(LIMITES_CONTACT.parIpParHeure);
     expect((await anon().post("/v1/public/pages/toits-martin/contact").send({ nom: "Robot", telephone: "0600000000", message: "Encore un message" }).expect(429)).body.error.details.reason).toBe("trop_de_messages");
     // Page privée ou masquée : pas de contact.
     await a.agent.patch("/v1/ma-page").send({ visible: false }).expect(200);

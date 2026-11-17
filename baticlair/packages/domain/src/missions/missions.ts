@@ -494,8 +494,9 @@ export const alertePropositionNegoce = (p: { emailId: string; negoce: string; ch
 });
 
 /** Greg, 15 novembre 2026 (lot G) : la boîte regroupe aussi les messages de Mobiiz (alertes des achats groupés, conseils). */
-export type SorteBoite = "mission" | "negoce" | "mobiiz";
-export type FiltreBoite = "tous" | "missions" | "negoces" | "mobiiz" | "non-lus";
+/** Greg, 17 novembre 2026 : les demandes de devis reçues sur « Mon site » y entrent aussi (sorte « site »). */
+export type SorteBoite = "mission" | "negoce" | "mobiiz" | "site";
+export type FiltreBoite = "tous" | "missions" | "negoces" | "site" | "mobiiz" | "non-lus";
 export interface ElementBoite {
   /** Les deux circuits restent séparés : la clé dit d'où vient l'élément (« mission:<id> », « negoce:<id> »). */
   cle: string;
@@ -513,13 +514,14 @@ export const FILTRES_BOITE: Choix<FiltreBoite>[] = [
   { id: "tous", libelle: "Tous" },
   { id: "missions", libelle: "Missions" },
   { id: "negoces", libelle: "Négoces" },
+  { id: "site", libelle: "Mon site" },
   { id: "mobiiz", libelle: "Mobiiz" },
   { id: "non-lus", libelle: "Non lus" },
 ];
 export function filtrerBoite(items: ElementBoite[], filtre: FiltreBoite, recherche = ""): ElementBoite[] {
   const q = sansAccent(recherche.trim());
   return items
-    .filter((i) => (filtre === "tous" ? true : filtre === "missions" ? i.sorte === "mission" : filtre === "negoces" ? i.sorte === "negoce" : filtre === "mobiiz" ? i.sorte === "mobiiz" : i.nonLu))
+    .filter((i) => (filtre === "tous" ? true : filtre === "missions" ? i.sorte === "mission" : filtre === "negoces" ? i.sorte === "negoce" : filtre === "site" ? i.sorte === "site" : filtre === "mobiiz" ? i.sorte === "mobiiz" : i.nonLu))
     .filter((i) => !q || sansAccent(`${i.titre} ${i.sujet ?? ""} ${i.extrait}`).includes(q))
     .sort((a, b) => b.le.localeCompare(a.le) || a.cle.localeCompare(b.cle));
 }

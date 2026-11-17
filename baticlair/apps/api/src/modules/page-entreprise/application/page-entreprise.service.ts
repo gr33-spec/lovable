@@ -7,6 +7,10 @@ import {
   refusAdresse,
   TEINTES,
   COULEURS_BOUTONS,
+  PHOTOS_DEFAUT,
+  photoDefautDe,
+  photoPubliqueDefaut,
+  vignetteDefaut,
   siteWebPropre,
   telephonePropre,
   THEMES_METIER,
@@ -51,6 +55,7 @@ export interface ModificationPage {
   visible?: boolean;
   couleur?: string | null;
   couleurBoutons?: string | null;
+  photoDefaut?: string | null;
   prestations?: Prestation[];
   accroche?: string | null;
   presentation?: string | null;
@@ -166,6 +171,7 @@ export class PageEntrepriseService {
       this.prisma.photoPage.findFirst({ where: { companyId: page.companyId, role: "equipe", statut: "prete" }, orderBy: { createdAt: "desc" } }),
     ]);
     const metiers = e.trades.filter((t) => LIBELLES_METIERS[t]);
+    const defaut = photoDefautDe(page.photoDefaut, metiers);
     // Les chantiers dans leur ordre, chacun avec ses photos prêtes ; une photo sans chantier est un chantier à elle seule.
     const chantiers: RealisationPublique[] = realisations
       .map((r) => ({ id: r.id, titre: r.titre, photos: photos.filter((ph) => ph.realisationId === r.id).map((ph) => this.vuePhoto(ph)) }))
@@ -189,6 +195,9 @@ export class PageEntrepriseService {
       siret: e.siret?.replace(/\s/g, "") || null,
       couleur: page.couleur,
       couleurBoutons: page.couleurBoutons,
+      photoDefaut: defaut ? photoPubliqueDefaut(defaut) : null,
+      // Le crédit seulement quand la photo par défaut est à l'écran (pas de couverture à lui) et que la licence le demande.
+      creditPhoto: !couverture && defaut ? defaut.credit : null,
       logo: e.logoType ? `/v1/public/pages/${page.adresse}/logo?v=${e.updatedAt.getTime().toString(36)}` : null,
       couverture: couverture ? this.vuePhoto(couverture) : null,
       prestations: prestationsDe(page.prestations),
@@ -217,6 +226,7 @@ export class PageEntrepriseService {
         adresseModifiable: !page.adresseChangeeLe,
         couleur: page.couleur,
         couleurBoutons: page.couleurBoutons,
+        photoDefaut: page.photoDefaut,
         prestations: prestationsDe(page.prestations),
         accroche: page.accroche,
         presentation: page.presentation,
@@ -237,6 +247,7 @@ export class PageEntrepriseService {
       choix: {
         teintes: TEINTES,
         couleursBoutons: COULEURS_BOUTONS,
+        photosDefaut: PHOTOS_DEFAUT.map((p) => ({ id: p.id, nom: p.nom, metier: p.metier, vignette: vignetteDefaut(p) })),
         certifications: CERTIFICATIONS_SUGGEREES,
         theme: themeDuMetier(contenu.metierPrincipal),
         limites: LIMITES_PAGE,
@@ -256,6 +267,10 @@ export class PageEntrepriseService {
       const teinte = m.couleur === null ? null : TEINTES.find((x) => x.hex.toLowerCase() === m.couleur!.toLowerCase() || x.id === m.couleur);
       if (m.couleur !== null && !teinte) throw refus("couleur", "Choisis une des teintes proposées.", "couleur");
       d.couleur = teinte?.hex ?? null;
+    }
+    if (m.photoDefaut !== undefined) {
+      if (m.photoDefaut !== null && !PHOTOS_DEFAUT.some((p) => p.id === m.photoDefaut)) throw refus("photoDefaut", "Choisis une des photos de la galerie.", "photoDefaut");
+      d.photoDefaut = m.photoDefaut;
     }
     if (m.couleurBoutons !== undefined) {
       const choix = m.couleurBoutons === null ? null : COULEURS_BOUTONS.find((x) => x.hex.toLowerCase() === m.couleurBoutons!.toLowerCase() || x.id === m.couleurBoutons);
@@ -596,6 +611,9 @@ export class PageEntrepriseService {
     const dest = await this.destinataire(p.companyId);
     if (!dest) throw new DomainError("conflict", "No recipient", { reason: "sans_destinataire", phrase: "Ce message ne peut pas partir pour l'instant. Appelez directement." });
     const e = await this.entreprise(p.companyId);
+    // Greg, 17 novembre 2026 : la copie du message va dans « Messages et réponses » AVANT l'e-mail ; un e-mail en panne ne
+    // perd donc jamais la demande (elle reste dans l'app).
+    const copie = await this.prisma.messageSite.create({ data: { companyId: p.companyId, nom: m.nom, telephone: m.telephone, email: m.email, commune: m.commune, message: m.message } });
     await this.emails.send({
       to: dest,
       subject: `Nouveau message depuis votre page Mobiiz : ${m.nom}`,
@@ -611,12 +629,17 @@ export class PageEntrepriseService {
         m.email ? `E-mail : ${m.email} (ou répondez simplement à ce message)` : null,
         m.commune ? `Commune du projet : ${m.commune}` : null,
         ``,
+        `Retrouvez ce message dans Mobiiz, « Messages et réponses » : ${this.config.webAppUrl}/messages/site/${copie.id}`,
+        ``,
         `Ce message vous est transmis par Mobiiz pour ${e.name}. Votre adresse e-mail n'a pas été montrée au visiteur.`,
       ]
         .filter((l) => l !== null)
         .join("\n"),
       ...(m.email ? { replyTo: m.email } : {}),
       mustDeliver: true,
+    }).catch((err: unknown) => {
+      // La demande est déjà dans l'app : le visiteur n'a pas à recommencer ; le journal du serveur note la panne.
+      console.error(JSON.stringify({ evenement: "contact_site_email_echec", companyId: p.companyId, erreur: (err as Error).message?.slice(0, 200) }));
     });
     await this.prisma.contactPage.create({ data: { companyId: p.companyId, ipHash } });
     return { envoye: true };
@@ -691,6 +714,8 @@ export class PageEntrepriseService {
   async menage(maintenant = this.now()): Promise<{ contacts: number; signalements: number; empreintes: number; fichiers: number }> {
     const jours = (n: number) => new Date(maintenant.getTime() - n * 86_400_000);
     const contacts = await this.prisma.contactPage.deleteMany({ where: { createdAt: { lt: jours(30) } } });
+    // Les copies des messages du site (Greg, 17 novembre 2026) : 12 mois, puis supprimées.
+    await this.prisma.messageSite.deleteMany({ where: { createdAt: { lt: jours(365) } } });
     const empreintes = await this.prisma.signalementPage.updateMany({ where: { createdAt: { lt: jours(30) }, ipHash: { not: null } }, data: { ipHash: null } });
     const signalements = await this.prisma.signalementPage.deleteMany({ where: { createdAt: { lt: jours(365) } } });
     const fichiers = await this.stockage.lister("pages/");

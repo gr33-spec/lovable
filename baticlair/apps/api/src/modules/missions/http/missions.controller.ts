@@ -333,6 +333,11 @@ export class BoiteController {
     return this.b.boite(t);
   }
 
+  @Get("boite/site/:id")
+  messageSite(@Tenant() t: TenantContext, @Param("id") id: string) {
+    return this.b.messageSite(t, id);
+  }
+
   @Post("boite/lu")
   @HttpCode(200)
   lu(@Tenant() t: TenantContext, @Body(new ZodPipe(luBody)) b: z.infer<typeof luBody>) {

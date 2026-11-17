@@ -135,6 +135,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
       signalement: "",
       photoPage: "",
       signalementPage: "",
+      messageSite: "",
       realisationPage: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
@@ -197,6 +198,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
     ids.photoPage = (await ctx.prisma.photoPage.create({ data: { companyId, legende: "Photo de Toitures A", statut: "prete" } })).id;
     ids.realisationPage = (await ctx.prisma.realisationPage.create({ data: { companyId, titre: "Chantier de Toitures A" } })).id;
     ids.signalementPage = (await ctx.prisma.signalementPage.create({ data: { companyId, motif: "autre", precision: "Signalement de la page de Toitures A" } })).id;
+    // « Demander un devis » (17 novembre 2026) : la copie du message reçu par A.
+    ids.messageSite = (await ctx.prisma.messageSite.create({ data: { companyId, nom: "Client de Toitures A", message: "Message pour Toitures A" } })).id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -253,6 +256,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/negocie\/besoins$/, ids.besoinNegocie],
         // R7 : l'e-mail reçu de A et son fichier.
         [/\/recus$/, ids.recu],
+        [/\/boite\/site$/, ids.messageSite],
         // Correction après test de Greg (30 octobre 2026) : les e-mails mis de côté ; B n'est pas admin (403).
         [/\/admin\/emails-mis-de-cote$/, ids.recu],
         [/\/fichiers$/, ids.recuFichier],

@@ -114,6 +114,12 @@ export interface ContenuPage {
   couleurBoutons: string | null;
   logo: string | null;
   couverture: PhotoPublique | null;
+  /**
+   * La photo par défaut du métier (ou choisie dans la galerie), qui ouvre la page tant que l'artisan n'a pas mis sa
+   * propre couverture (Greg, 17 novembre 2026), et son crédit quand la licence l'exige.
+   */
+  photoDefaut: PhotoPublique | null;
+  creditPhoto: string | null;
   prestations: Prestation[];
   realisations: RealisationPublique[];
   /** La photo de l'artisan ou de l'équipe (« À propos »), si elle existe. */
@@ -136,13 +142,39 @@ const PETITS_MOTS = new Set(["en", "sur", "sous", "de", "du", "des", "la", "le",
  * Une ville déjà écrite avec des minuscules reste telle quelle.
  */
 export function villeLisible(ville: string): string {
-  if (ville !== ville.toUpperCase() || !/[A-ZÀ-Ý]/.test(ville)) return ville;
+  // Greg, 17 novembre 2026 : « majuscule initiale seulement » ; une ville tapée tout en minuscules prend aussi sa majuscule.
+  const tout = ville === ville.toUpperCase() && /[A-ZÀ-Ý]/.test(ville);
+  const rien = ville === ville.toLowerCase() && /[a-zà-ÿ]/.test(ville);
+  if (!tout && !rien) return ville;
   let premier = true;
   return ville.toLowerCase().replace(/[a-zà-ÿœæ]+/g, (mot) => {
     const garder = !premier && PETITS_MOTS.has(mot);
     premier = false;
     return garder ? mot : mot[0]!.toUpperCase() + mot.slice(1);
   });
+}
+
+/** La zone telle qu'on l'écrit sur la page : chaque ville lisible (« PLOUBAZLANEC, PAIMPOL » → « Ploubazlanec, Paimpol »). */
+export function zoneLisible(zone: string | null | undefined): string | null {
+  const z = zone?.trim();
+  if (!z) return null;
+  // Chaque morceau entre virgules, « et », parenthèses : une ville à elle seule.
+  return z.replace(/(?:(?! et )[^,;/()])+/gi, (morceau) => {
+    const t = morceau.trim();
+    return t ? morceau.replace(t, villeLisible(t)) : morceau;
+  });
+}
+
+/**
+ * La présentation sur la page (Greg, 17 novembre 2026 : « le texte n'apparaît pas deux fois ») : la première phrase va
+ * dans la carte des prestations, la suite dans « À propos ». Une seule phrase : pas de carte, tout dans « À propos ».
+ */
+export function decouperPresentation(presentation: string | null | undefined): { carte: string | null; suite: string | null } {
+  const texte = presentation?.trim();
+  if (!texte) return { carte: null, suite: null };
+  const m = /^([\s\S]*?[.!?…])(\s+)([\s\S]*\S[\s\S]*)$/.exec(texte);
+  if (!m || !m[3]!.trim()) return { carte: null, suite: texte };
+  return { carte: m[1]!.trim(), suite: m[3]!.trim() };
 }
 
 /** Le GRAND TITRE de l'accueil : le métier et la ville (« Couvreur à Lannion ») ; le nom de l'entreprise vient dessous. */
@@ -172,8 +204,10 @@ export function teinteDe(c: Pick<ContenuPage, "couleur" | "metierPrincipal">): s
 }
 
 /** La photo d'accueil : la couverture choisie, sinon la première photo du premier chantier, sinon aucune. */
-export function photoAccueil(c: Pick<ContenuPage, "couverture" | "realisations">): PhotoPublique | null {
-  return c.couverture ?? c.realisations[0]?.photos[0] ?? null;
+export function photoAccueil(c: Pick<ContenuPage, "couverture" | "realisations"> & Partial<Pick<ContenuPage, "photoDefaut">>): PhotoPublique | null {
+  // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : sans couverture à lui, la photo par défaut de son métier ouvre la page
+  // (avant : la première photo de ses chantiers).
+  return c.couverture ?? c.photoDefaut ?? c.realisations[0]?.photos[0] ?? null;
 }
 
 export const RUBRIQUES = [

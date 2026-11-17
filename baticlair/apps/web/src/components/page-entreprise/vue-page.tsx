@@ -12,6 +12,8 @@ import {
   texteSurCouleur,
   titreAccueil,
   villeDeLaZone,
+  decouperPresentation,
+  zoneLisible,
   type ContenuPage,
 } from "@baticlair/domain/page-entreprise";
 import { EDITEUR, HEBERGEUR } from "@/lib/legal";
@@ -85,11 +87,15 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
   // Le bandeau de garanties de l'accueil : seulement du vrai (preuves déclarées ou vérifiées, la zone écrite).
   const garanties: { texte: string; Icone: LucideIcon }[] = preuves.map((x) => ({ texte: x, Icone: iconeDePreuve(x) }));
   if (garanties.length < 3 && ville) garanties.push({ texte: `${ville} et alentours`, Icone: MapPin });
-  const premierePhrase = c.presentation?.split(/(?<=[.!?])\s+/)[0]?.trim() ?? null;
+  // La présentation n'apparaît jamais deux fois (Greg, 17 novembre 2026) : la première phrase dans la carte, la suite
+  // dans « À propos » ; une seule phrase, pas de carte.
+  const { carte: premierePhrase, suite: suitePresentation } = decouperPresentation(c.presentation);
+  const zone = zoneLisible(c.zone);
   // La barre de confiance sous les prestations : la zone, les horaires et les certifications déclarées (quatre au plus).
   const confiance: { etiquette: string; valeur: string; Icone: LucideIcon }[] = [];
-  if (c.zone) confiance.push({ etiquette: "Zone d'intervention", valeur: `${c.zone} et alentours`, Icone: MapPin });
-  if (c.horaires) confiance.push({ etiquette: "Horaires", valeur: c.horaires, Icone: Clock });
+  if (zone) confiance.push({ etiquette: "Zone d'intervention", valeur: `${zone} et alentours`, Icone: MapPin });
+  // « 8 h à 18 h » : jamais un « h » seul en début de ligne.
+  if (c.horaires) confiance.push({ etiquette: "Horaires", valeur: c.horaires.replace(/(\d) (h|H)\b/g, "$1\u00a0$2"), Icone: Clock });
   for (const x of c.certifications) if (confiance.length < 4) confiance.push({ etiquette: "Certification déclarée", valeur: x, Icone: iconeDePreuve(x) });
   if (confiance.length < 4 && c.creeeEn) confiance.push({ etiquette: "Expérience", valeur: `Depuis ${c.creeeEn}`, Icone: CalendarDays });
   const lien = (href: string) => (apercu ? undefined : href);
@@ -240,8 +246,8 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
                   <h2 id="pe-t-apropos">À propos</h2>
                 </div>
                 <div className="pe-apropos-corps">
-                  {c.presentation
-                    ? c.presentation.split(/\n{2,}/).map((para, i) => (
+                  {suitePresentation
+                    ? suitePresentation.split(/\n{2,}/).map((para, i) => (
                         <p key={i} className="pe-texte">
                           {para}
                         </p>
@@ -277,7 +283,7 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
           <div className="pe-cadre pe-contact-grille">
             <div className="pe-contact-gauche">
               <h2 id="pe-t-contact">Un projet ? Parlons-en</h2>
-              <p className="pe-contact-intro">Devis gratuit. {c.nom} vous répond directement.</p>
+              <p className="pe-contact-intro">{c.nom} vous répond directement.</p>
               {c.telephone ? (
                 <a href={lienAppel(c.telephone)} className="pe-btn pe-btn-appel pe-btn-grand">
                   <Phone size={21} strokeWidth={2.2} aria-hidden="true" /> {c.telephone}
@@ -321,7 +327,7 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
               <p>
                 Page éditée par {c.nom}
                 {c.siret ? ` (SIRET ${c.siret})` : ""}, responsable de son contenu, de ses photos et des informations déclarées.{" "}
-                {c.adressePostale ? `Adresse : ${c.adressePostale}. ` : c.zone ? `Zone : ${c.zone}. ` : ""}Contact : le formulaire de cette page{c.telephone ? ` ou le ${c.telephone}` : ""}. Responsable de la publication : le représentant légal de {c.nom}.
+                {c.adressePostale ? `Adresse : ${c.adressePostale}. ` : zone ? `Zone : ${zone}. ` : ""}Contact : le formulaire de cette page{c.telephone ? ` ou le ${c.telephone}` : ""}. Responsable de la publication : le représentant légal de {c.nom}.
               </p>
               <p>
                 Hébergement : {EDITEUR.nom} ({EDITEUR.produit}), {EDITEUR.forme}, {EDITEUR.adresse}, {EDITEUR.contact} ; serveurs {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
@@ -337,6 +343,7 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
             <span className="pe-pied-sep" aria-hidden="true">|</span>
             <SignalerPage adresse={c.adresse} apercu={apercu} />
           </div>
+          {c.creditPhoto ? <p className="pe-credit-photo">Photo d&apos;accueil : {c.creditPhoto}</p> : null}
           <a href={lien("/")} className="pe-mobiiz">
             Créé avec <strong>MOBIIZ</strong> <Heart size={15} strokeWidth={0} fill="currentColor" className="pe-coeur" aria-hidden="true" />
           </a>

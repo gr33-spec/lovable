@@ -1774,3 +1774,169 @@ body:has(.pe:not(.pe-apercu)) {
     background: linear-gradient(180deg, rgba(10, 10, 11, 0.1) 0%, rgba(10, 10, 11, 0.55) 45%, rgba(10, 10, 11, 0.92) 100%);
   }
 }
+
+/* =====================================================================================================================
+ * FINITIONS TÉLÉPHONE (Greg, 17 novembre 2026, vues sur son iPhone ; points 10 à 16). Dernier bloc : il l'emporte.
+ * ================================================================================================================== */
+/* 10. Barre du haut blanche et OPAQUE (rien ne transparaît) ; le nom et le métier en entier, sur deux lignes s'il le faut. */
+.pe .pe-entete {
+  background: #fff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.pe .pe-entete-ligne {
+  height: auto;
+  min-height: var(--entete);
+  padding-top: 8px;
+  padding-bottom: 8px;
+  gap: 10px;
+}
+.pe .pe-marque {
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+}
+.pe .pe-marque-nom {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: normal;
+  font-size: 15px;
+  line-height: 1.2;
+}
+.pe .pe-marque-activite {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: 12px;
+  line-height: 1.25;
+}
+/* Sur téléphone, « Appeler » devient un rond (le numéro est dans l'accueil et la barre du bas) : la place va au nom. */
+@container pe (max-width: 639px) {
+  .pe .pe-entete-appel {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    flex-shrink: 0;
+    border-radius: 999px;
+  }
+  .pe .pe-entete-appel-court,
+  .pe .pe-entete-appel-long {
+    display: none;
+  }
+  .pe .pe-menu-bouton {
+    flex-shrink: 0;
+  }
+}
+/* Le nom en capitales espacées de l'accueil : moins espacé sur téléphone, jamais coupé dans un mot. */
+.pe .pe-accueil-nom {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+@container pe (max-width: 639px) {
+  .pe .pe-accueil-nom {
+    letter-spacing: 0.16em;
+  }
+}
+
+/* 12. Cartes de prestations : une par ligne sur téléphone, aucun texte ne déborde ; icônes toutes de la même couleur. */
+.pe .pe-prestations h3 {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+}
+.pe .pe-prestations li > div {
+  min-width: 0;
+}
+.pe .pe-prestation-icone,
+.pe .pe-prestation-icone :is(path, rect, circle, line, polyline, ellipse, polygon) {
+  color: var(--encre);
+  stroke: currentColor;
+}
+@container pe (max-width: 479px) {
+  .pe .pe-prestations {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .pe .pe-prestations li {
+    min-height: 0;
+    align-items: flex-start;
+    padding: 14px 16px;
+  }
+  .pe .pe-prestation-texte {
+    display: block;
+    margin-top: 2px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--doux);
+  }
+}
+
+/* 13. Barre de confiance : une ligne par information sur téléphone, toute la largeur, jamais un mot coupé. */
+.pe .pe-confiance-valeur {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+@container pe (max-width: 479px) {
+  .pe .pe-confiance {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 4px 6px;
+  }
+  .pe .pe-confiance li {
+    padding: 12px 10px;
+  }
+  .pe .pe-confiance li + li {
+    border-top: 1px solid rgba(21, 18, 14, 0.08);
+  }
+}
+/* Moins de vide entre les sections sur téléphone (« supprime le grand vide »). */
+@container pe (max-width: 639px) {
+  .pe .pe-section {
+    padding-top: 36px;
+    padding-bottom: 36px;
+  }
+  .pe .pe-section-prestations {
+    padding-top: 28px;
+    padding-bottom: 12px;
+  }
+  .pe .pe-section-realisations {
+    padding-top: 24px;
+    padding-bottom: 12px;
+  }
+}
+
+/* 16. Pied de page : sur téléphone, les liens l'un sous l'autre, sans barres verticales orphelines. */
+@container pe (max-width: 639px) {
+  .pe .pe-pied-sep {
+    display: none;
+  }
+  .pe .pe-pied-liens {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  /* En colonne, « flex-basis: 100% » voudrait dire toute la HAUTEUR : le formulaire ouvert recouvrirait les liens. */
+  .pe .pe-pied-liens > details,
+  .pe .pe-pied-liens > details[open] {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
+/* Crédit d'une photo par défaut, quand sa licence le demande : discret, en bas. */
+.pe .pe-credit-photo {
+  font-size: 12px;
+  color: var(--doux);
+}
+/* Rien n'est coupé par « … » : le nom de l'entreprise, la phrase de la carte « À propos » et les phrases des prestations
+   s'affichent en entier (Greg, 17 novembre 2026). */
+.pe .pe-marque-nom,
+.pe .pe-carte-apropos-phrase {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+.pe .pe-prestation-texte {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
