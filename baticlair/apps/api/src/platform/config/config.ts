@@ -143,6 +143,12 @@ const envSchema = z
      * À ne changer qu'après le jeu de test : la qualité de la lecture passe avant la vitesse.
      */
     AI_EXTRACTION_REFLEXION: z.enum(["auto", "minimale"]).default("auto"),
+    /**
+     * `on` : la lecture d'un devis part avec le métier du compte EN MÊME TEMPS que le repérage des métiers (2 à 4 secondes
+     * gagnées). Quand le repérage trouve un autre métier ou plusieurs lots, cette lecture est écartée et refaite : elle
+     * coûte alors une lecture de plus. Éteint par défaut.
+     */
+    LECTURE_ET_REPERAGE_ENSEMBLE: z.enum(["on", "off"]).default("off"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     MICROSOFT_CLIENT_ID: z.string().min(1).optional(),
@@ -515,6 +521,8 @@ export interface AppConfig {
     effort: "low" | "medium" | "high" | "xhigh" | "max";
     /** `minimale` : la lecture s'écrit sans réflexion préalable du modèle (`AI_EXTRACTION_REFLEXION`). */
     reflexion: "auto" | "minimale";
+    /** La lecture part en même temps que le repérage des métiers (`LECTURE_ET_REPERAGE_ENSEMBLE`). */
+    lectureEtReperageEnsemble: boolean;
     /** Délai de réponse d'une lecture avant de passer en arrière-plan (ms). */
     answerWithinMs: number;
   };
@@ -717,6 +725,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       assistantPlafond: { microUsd: Math.round(e.ASSISTANT_IA_PLAFOND_USD * 1_000_000), appels: e.ASSISTANT_IA_PLAFOND_APPELS },
       effort: e.AI_EXTRACTION_EFFORT,
       reflexion: e.AI_EXTRACTION_REFLEXION,
+      lectureEtReperageEnsemble: e.LECTURE_ET_REPERAGE_ENSEMBLE === "on",
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },
   };
