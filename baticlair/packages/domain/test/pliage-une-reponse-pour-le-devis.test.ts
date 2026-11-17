@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { choixParPiece, lignesDeLecture, planDeLecture, ROOFING_REFERENTIAL, type QuoteLineReading } from "../src/index.js";
+import { choixParPiece, ecranDeLecture, lignesDeLecture, planDeLecture, ROOFING_REFERENTIAL, type QuoteLineReading } from "../src/index.js";
 import { HABITUDES_BANC } from "./support/habitudes.js";
 import { lectureEnregistree } from "./support/lectures.js";
 import { ARDOISES_LUCARNES_LINES } from "./devis-reels/ardoises-lucarnes.js";
@@ -105,6 +105,27 @@ describe("le pliage : une seule réponse pour tout le devis", () => {
     const rive = plie.find((c) => /rive/.test(c.piece))!;
     const change = choixParPiece(ROOFING_REFERENTIAL, plan, { [PLIAGE]: { value: "1", unit: "u" }, [rive.key]: { value: "2", unit: "u" } });
     expect(change.map((c) => c.value)).toEqual(["1", "1", "2", "1"]);
+  });
+
+  it("recette en ligne du 17 novembre 2026 : UNE question de façonnage du modèle, sans ligne, devient les deux questions du calcul (les bacs, les pièces pliées)", () => {
+    const LIGNES: QuoteLineInput[] = [
+      { ref: "1", designation: "Couverture zinc joint debout gris quartz", quantity: "91", unit: "m2" },
+      { ref: "2", designation: "Voliges sapin 18 mm traité", quantity: "96", unit: "m2" },
+      { ref: "3", designation: "Gouttière zinc demi-ronde dév. 25", quantity: "13", unit: "ml" },
+      { ref: "4", designation: "Bande de ventilation en Z en zinc quartz", quantity: "13", unit: "ml" },
+      { ref: "5", designation: "Bande de rive zinc quartz dév. 200", quantity: "14", unit: "ml" },
+    ];
+    const l = lectureEnregistree(ROOFING_REFERENTIAL, LIGNES, [], HABITUDES_BANC);
+    const uneSeule = { cle: "faconnage", texte: "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", boutons: [{ label: "Je façonne", valeur: "1" }, { label: "Je commande façonné", valeur: "2" }], unite: null, donnee: "façonnage", ligne: null };
+    const lecture = { ...l, questions: [uneSeule, ...l.questions.filter((q) => q.cle !== "faconnage")] };
+    const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers: {}, preferences: {} });
+    const cles = e.questions.filter((q) => /^param:faconnage/.test(q.key)).map((q) => q.key);
+    // Jamais la clé commune « param:faconnage », qui vaudrait pour les bacs ET pour les pièces.
+    expect(cles).toEqual(["param:faconnage@couverture-zinc-joint-debout", "param:faconnage@pieces-pliees"]);
+    // « tout fait » pour les bacs, « je plie » pour les pièces : la rive part en feuilles, les bacs commandés façonnés.
+    const apres = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers: { "param:faconnage@couverture-zinc-joint-debout": { value: "2", unit: "u" }, "param:faconnage@pieces-pliees": { value: "1", unit: "u" } }, preferences: {} });
+    expect(apres.questions.filter((q) => /^param:faconnage/.test(q.key))).toEqual([]);
+    expect(apres.purchase.toBuy.some((b) => /^Feuilles .*rive/i.test(b.label)), apres.purchase.toBuy.map((b) => b.label).join(" | ")).toBe(true);
   });
 
   it("D-2026-018 : aucune question pour une pièce dont le devis dit le façonnage (« pliées en Z », « comprend le pliage »)", () => {
