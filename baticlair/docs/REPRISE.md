@@ -34,6 +34,10 @@ complètes seulement avant un déploiement important, et en le disant.
 
 ## En cours
 
+MA PAGE MOBIIZ (16 novembre 2026, session parallèle au « quantitatif IA ») : page publique `/e/<adresse>` de chaque
+entreprise, sur la branche `claude/company-public-page-htnc6f`. Point de reprise précis : `docs/ma-page-mobiiz.md`. Rien sur
+la branche de test sans l'accord de Greg (migration additive, store Vercel Blob à créer).
+
 SUIVI 197 (11 novembre 2026) : candidat unique (démonstration publique retirée, « Voir Mobiiz en images », bref indépendant
 de l'ordre des lignes, téléphone de l'image d'ouverture). Pousser seulement après des suites vertes ; aucune production.
 

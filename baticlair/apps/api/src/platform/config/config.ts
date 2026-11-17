@@ -169,6 +169,14 @@ const envSchema = z
      */
     MISSIONS_V1: z.enum(["on", "off"]).default("off"),
     /**
+     * MA PAGE MOBIIZ (Greg, 16 novembre 2026) : où vont les photos des pages publiques. `blob` : Vercel Blob (CDN,
+     * `BLOB_READ_WRITE_TOKEN`) ; `local` : un dossier du serveur (développement et tests, servi par l'API) ; `off` : pas de
+     * photos. Par défaut : `blob` si le jeton est posé, sinon `local` hors production et `off` en production. Jamais en base.
+     */
+    STOCKAGE_PHOTOS: z.enum(["blob", "local", "off"]).optional(),
+    BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
+    STOCKAGE_PHOTOS_DOSSIER: z.string().min(1).optional(),
+    /**
      * DÉCISIONS MVP (Greg, 12 novembre 2026, dossier de corrections UX, points 10 et 11) : « Mémoire de Mobiiz » et
      * « Brancher ton logiciel de devis » sortent de l'interface. Rien n'est supprimé (code, routes, données) : `on` les
      * remet à l'écran. La remise à zéro de ce que Mobiiz a retenu reste toujours dans « Données et confidentialité ».
@@ -436,6 +444,8 @@ export interface AppConfig {
   demoPublique: boolean;
   achatsGroupesV1: boolean;
   missionsV1: boolean;
+  /** Ma page Mobiiz : le stockage des photos (jamais la base). */
+  pagesEntreprises: { stockage: "blob" | "local" | "off"; blobToken: string | null; dossierLocal: string };
   /** Rubriques sorties de l'interface du MVP, réactivables (`MEMOIRE_VISIBLE`, `CONNEXIONS_LOGICIEL`). */
   memoireVisible: boolean;
   connexionsLogiciel: boolean;
@@ -603,6 +613,11 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     demoPublique: e.ACCES_DEMO === "on" && e.DEMO_PUBLIQUE === "on",
     achatsGroupesV1: e.ACHATS_GROUPES_V1 === "on",
     missionsV1: e.MISSIONS_V1 === "on",
+    pagesEntreprises: {
+      stockage: e.STOCKAGE_PHOTOS ?? (e.BLOB_READ_WRITE_TOKEN ? "blob" : e.NODE_ENV === "production" ? "off" : "local"),
+      blobToken: e.BLOB_READ_WRITE_TOKEN ?? null,
+      dossierLocal: e.STOCKAGE_PHOTOS_DOSSIER ?? `${process.env.TMPDIR ?? "/tmp"}/mobiiz-pages`,
+    },
     memoireVisible: e.MEMOIRE_VISIBLE === "on",
     connexionsLogiciel: e.CONNEXIONS_LOGICIEL === "on",
     chantierFictif: e.CHANTIER_FICTIF === "on",

@@ -76,6 +76,15 @@ function Contenu({ id }: { id: Exclude<RubriqueProfil, "apparence"> }) {
           <CarteSiretAchatGroupe />
           {editeur && company ? <TradesCard initial={company.trades} /> : null}
           <MetiersCard />
+          <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <span>
+              <span className="block text-[16px] font-bold">Mon site</span>
+              <span className="block text-[14px] text-muted">Ton site à partager se règle dans l&apos;onglet « Mon site ».</span>
+            </span>
+            <ButtonLink href="/mon-site" variant="secondary">
+              Ouvrir Mon site
+            </ButtonLink>
+          </Card>
         </>
       );
     case "profil-public":

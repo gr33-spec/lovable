@@ -150,6 +150,14 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Les besoins déjà publiés avant ce changement restent anonymes ; seuls les nouveaux montrent le nom de l'entreprise. « +N depuis ta publication » ne dit une quantité qu'à partir de deux nouvelles entreprises.
 - Peinture en achat groupé : deux produits, « Peinture murs et plafonds » et « Peinture façade », tirés du catalogue, sans marque. Comptés en litres ; le pot de 15 L est proposé, l'artisan le confirme. Seuil « recommandé » posé à 150 L : à valider par Greg.
 
+## Décisions du 16 novembre 2026 (soir) : « Mon site » et « Entre pros »
+
+- Rendu du site d'artisan validé par Greg. Onglet « Mon site » dans la navigation principale (5e onglet) ; on dit « Mon site » partout dans l'app. Règle changée : avant, Profil › Ma page (entrée retirée, ancienne adresse redirigée).
+- Une page, deux niveaux. Règle changée : avant, la disponibilité Mission était sur la page publique. Maintenant un visiteur ne voit que le site ; une entreprise connectée voit en plus « Entre pros » (disponibilités, compétences, « Proposer une mission »). Dans Mission, le profil d'une entreprise ouvre son site.
+- CV, diplômes, attestations : ni affichés ni obligatoires ; envoyés seulement par l'artisan dans une discussion de Mission. Règle changée : avant, un document coché « sur mon profil public » s'y montrait.
+- Mission sur le site de test : à ouvrir par Greg dans Admin › Réglages › Missions ; reste coupée en production tant que les CGU ne sont pas relues.
+- Site d'artisan d'après la maquette de Greg (17 novembre 2026) : barre du haut noire (nom, métier, menu, « Demander un devis » jaune), accueil sombre sur la photo (« Couvreur » en blanc, « à Lannion » en jaune, l'accroche, « Demander un devis » et le numéro), prestations en cartes avec une icône jaune choisie par le code d'après le titre, trois chantiers puis « Voir plus de réalisations », bande noire (zone, horaires), pied de page « Créé avec MOBIIZ ». Règle changée : avant, page claire de bout en bout, sans pictogramme. Pas d'« Avis clients » : la règle « ni avis, ni note » reste. À valider par Greg avant la branche de test.
+
 ## Mission de fond : le quantitatif par l'IA (Greg, 16 novembre 2026)
 
 - La solution retenue tient en une page : `baticlair/docs/quantitatif-ia.md`. Les mesures : `baticlair/docs/quantitatif-ia-mesures.md`.

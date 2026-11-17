@@ -1,0 +1,1391 @@
+/*
+ * MA PAGE MOBIIZ (refonte du 16 novembre 2026) : le site vitrine d'une page d'un artisan. Les jetons de la landing de
+ * Mobiiz (`app/(public)/decouvrir/premium.css`) : ivoire #FBF8F3, encre #15120E, jaune #FED206, titres très gras et serrés,
+ * boutons en pilule de 56 à 64 px. Fond clair seulement. Rayons : pilule pour ce qui se touche, 20 px pour les photos,
+ * 14 px pour les champs. Ni cadre, ni carte, ni bordure autour des rubriques : de l'espace et de vraies photos.
+ * Mise en page par requêtes de CONTENEUR (`@container pe`) : l'aperçu de l'éditeur se dessine comme le vrai écran.
+ */
+.pe {
+  --ivoire: #fbf8f3;
+  --os: #efeae2;
+  --encre: #15120e;
+  --doux: #5e554a;
+  --clair: #c4bdb4;
+  --jaune: #fed206;
+  --jaune2: #ffe151;
+  --trait: rgba(21, 18, 14, 0.12);
+  --entete: 68px;
+  container: pe / inline-size;
+  position: relative;
+  min-height: 100%;
+  background: var(--ivoire);
+  color: var(--encre);
+  font: 400 17px/1.6 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+.pe *,
+.pe *::before,
+.pe *::after {
+  box-sizing: border-box;
+}
+.pe a {
+  color: inherit;
+  text-decoration: none;
+}
+.pe h1,
+.pe h2,
+.pe h3,
+.pe p,
+.pe ul,
+.pe figure {
+  margin: 0;
+}
+.pe ul {
+  padding: 0;
+  list-style: none;
+}
+.pe img {
+  display: block;
+  max-width: 100%;
+}
+.pe :focus-visible {
+  outline: 3px solid var(--jaune);
+  outline-offset: 3px;
+}
+.pe section[id] {
+  scroll-margin-top: var(--entete);
+}
+.pe-cadre {
+  width: min(1180px, calc(100% - 40px));
+  margin-inline: auto;
+}
+.pe h2 {
+  font-size: clamp(34px, 7cqi, 58px);
+  font-weight: 870;
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+  margin-bottom: 36px;
+}
+
+/* ------------------------------------------------------------------------------------------------ Boutons */
+.pe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 28px;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  font-size: 16px;
+  font-weight: 850;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.pe-btn:hover {
+  transform: translateY(-2px);
+}
+.pe-btn:active {
+  transform: scale(0.98);
+}
+.pe-btn-appel {
+  background: var(--jaune);
+  color: var(--encre) !important;
+  box-shadow: 0 12px 30px rgba(254, 210, 6, 0.24);
+}
+.pe-btn-appel:hover {
+  background: var(--jaune2);
+}
+.pe-btn-second {
+  border-color: var(--encre);
+  color: var(--encre);
+}
+.pe-btn-grand {
+  min-height: 64px;
+  padding: 0 32px;
+  font-size: 19px;
+}
+.pe-btn[disabled] {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+/* ------------------------------------------------------------------------------------------------ Barre du haut */
+.pe-entete {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(251, 248, 243, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--trait);
+}
+.pe-entete-ligne {
+  height: var(--entete);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pe-marque {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+.pe-logo,
+.pe-initiales {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 11px;
+}
+.pe-logo {
+  object-fit: contain;
+  background: #fff;
+}
+.pe-initiales {
+  display: grid;
+  place-items: center;
+  background: var(--pe-teinte);
+  color: #fff;
+  font-weight: 850;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+.pe-marque-nom {
+  font-weight: 850;
+  font-size: 17px;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pe-nav {
+  display: none;
+}
+.pe-entete-appel {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 15px;
+  gap: 8px;
+  box-shadow: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.pe-entete-appel-long {
+  display: none;
+}
+.pe[data-defile] .pe-entete-appel {
+  opacity: 0;
+  pointer-events: none;
+}
+.pe-menu-bouton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1.5px solid var(--trait);
+  background: transparent;
+  color: var(--encre);
+  cursor: pointer;
+}
+.pe-menu-tel {
+  display: grid;
+  padding: 8px 20px 20px;
+  background: var(--ivoire);
+  border-bottom: 1px solid var(--trait);
+}
+.pe-menu-tel a {
+  padding: 14px 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* ------------------------------------------------------------------------------------------------ Accueil */
+.pe-accueil {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  padding: 72px 0 48px;
+}
+.pe-avec-photo .pe-accueil {
+  min-height: max(560px, min(calc(100svh - var(--entete)), 880px));
+  color: #fff;
+}
+.pe-accueil-photo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #2a2520;
+}
+.pe-accueil-photo picture,
+.pe-accueil-photo img {
+  width: 100%;
+  height: 100%;
+}
+.pe-accueil-photo img {
+  object-fit: cover;
+}
+.pe-accueil-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12, 10, 8, 0.82) 0%, rgba(12, 10, 8, 0.45) 42%, rgba(12, 10, 8, 0.08) 78%);
+}
+.pe-accueil h1 {
+  font-size: clamp(44px, 13cqi, 104px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+  max-width: 13ch;
+  text-wrap: balance;
+}
+.pe-accueil-nom {
+  margin-top: 16px;
+  font-size: clamp(20px, 3.4cqi, 26px);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+.pe-preuves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 18px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.pe-preuves li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.pe-preuves svg {
+  color: var(--jaune);
+}
+.pe:not(.pe-avec-photo) .pe-preuves svg {
+  color: var(--pe-teinte);
+}
+.pe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+.pe-avec-photo .pe-accueil .pe-btn-second {
+  border-color: rgba(255, 255, 255, 0.85);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+/* ------------------------------------------------------------------------------------------------ Rubriques */
+.pe-section {
+  padding: 80px 0;
+}
+.pe-section-os {
+  background: var(--os);
+}
+.pe-prestations {
+  display: grid;
+  gap: 36px 48px;
+}
+.pe-prestations li::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--pe-teinte);
+  margin-bottom: 18px;
+}
+.pe-prestations h3 {
+  font-size: 23px;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+.pe-prestations p {
+  margin-top: 10px;
+  color: var(--doux);
+  max-width: 38ch;
+}
+
+.pe-chantiers {
+  display: grid;
+  gap: 20px;
+}
+.pe-chantier {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #2a2520;
+  cursor: zoom-in;
+  text-align: left;
+  font: inherit;
+  color: #fff;
+}
+.pe-chantier img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pe-chantier:hover img {
+  transform: scale(1.03);
+}
+.pe-chantier-legende {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 72px 22px 20px;
+  background: linear-gradient(to top, rgba(12, 10, 8, 0.78), rgba(12, 10, 8, 0));
+}
+.pe-chantier-titre {
+  font-size: clamp(20px, 3.6cqi, 26px);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+.pe-chantier-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 750;
+  opacity: 0.92;
+}
+
+.pe-apropos {
+  display: grid;
+  gap: 36px;
+}
+.pe-apropos-image img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: cover;
+  border-radius: 20px;
+}
+.pe-apropos-texte {
+  max-width: 680px;
+}
+.pe-chapeau {
+  font-size: clamp(22px, 3.6cqi, 28px);
+  font-weight: 750;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+  margin-bottom: 18px !important;
+}
+.pe-texte {
+  color: var(--doux);
+  font-size: 18px;
+  line-height: 1.7;
+}
+.pe-texte + .pe-texte {
+  margin-top: 14px;
+}
+.pe-qualifs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 26px;
+  margin-top: 28px;
+  font-weight: 750;
+}
+.pe-qualifs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.pe-qualifs svg {
+  color: var(--pe-teinte);
+}
+.pe-note {
+  margin-top: 14px !important;
+  font-size: 14px;
+  color: var(--doux);
+}
+
+.pe-zone {
+  padding-top: 0;
+}
+.pe-zone h2 {
+  margin-bottom: 20px;
+}
+.pe-zone-ville {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(24px, 4.4cqi, 34px);
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+.pe-zone-ville svg {
+  flex-shrink: 0;
+  color: var(--pe-teinte);
+}
+.pe-zone .pe-texte {
+  margin-top: 10px;
+}
+
+/* ------------------------------------------------------------------------------------------------ Contact */
+.pe-contact {
+  background: var(--encre);
+  color: var(--ivoire);
+  padding: 80px 0;
+}
+.pe-contact-grille {
+  display: grid;
+  gap: 44px;
+}
+.pe-contact h2 {
+  color: var(--ivoire);
+  margin-bottom: 16px;
+}
+.pe-contact-intro {
+  color: var(--clair);
+  font-size: 19px;
+  margin-bottom: 28px !important;
+}
+.pe-contact-ligne {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 22px !important;
+  color: var(--clair);
+}
+.pe-contact-ligne svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: var(--jaune);
+}
+.pe-contact-ligne a {
+  color: var(--jaune);
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pe-form {
+  display: grid;
+  gap: 16px;
+}
+.pe-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 750;
+}
+.pe-form input,
+.pe-form textarea,
+.pe-signaler textarea {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1.5px solid transparent;
+  background: var(--ivoire);
+  color: var(--encre);
+  font: inherit;
+  font-size: 16px;
+}
+.pe-form input:focus,
+.pe-form textarea:focus {
+  outline: none;
+  border-color: var(--jaune);
+  box-shadow: 0 0 0 3px rgba(254, 210, 6, 0.35);
+}
+.pe-form textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+.pe-form-deux {
+  display: grid;
+  gap: 16px;
+}
+.pe-form .pe-btn {
+  justify-self: start;
+  background: var(--ivoire);
+  color: var(--encre) !important;
+}
+.pe-form .pe-note {
+  color: var(--clair);
+}
+.pe-form .pe-note a {
+  text-decoration: underline;
+}
+.pe-erreur {
+  color: #ffb4a8;
+  font-weight: 700;
+}
+.pe-merci {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--jaune);
+}
+
+/* ------------------------------------------------------------------------------------------------ Pied de page */
+.pe-pied {
+  padding: 48px 0 calc(48px + 76px);
+  font-size: 15px;
+  color: var(--doux);
+}
+.pe-pied-grille {
+  display: grid;
+  gap: 24px;
+}
+.pe-pied-nom {
+  font-size: 19px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: var(--encre);
+  margin-bottom: 4px !important;
+}
+.pe-pied-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-weight: 750;
+  color: var(--encre);
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+.pe-pied-droite {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.pe-mentions summary,
+.pe-signaler summary {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-weight: 700;
+}
+.pe-mentions p {
+  max-width: 560px;
+  margin-top: 8px !important;
+  font-size: 14px;
+}
+.pe-mentions a {
+  text-decoration: underline;
+}
+.pe-signaler form {
+  display: grid;
+  gap: 10px;
+  max-width: 420px;
+  margin-top: 10px;
+  color: var(--encre);
+}
+.pe-signaler fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.pe-signaler textarea {
+  border-color: var(--trait);
+  background: #fff;
+}
+.pe-signaler .pe-btn {
+  justify-self: start;
+  min-height: 46px;
+  border-color: var(--encre);
+}
+.pe-signaler .pe-erreur {
+  color: #b42318;
+}
+.pe-radio {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.pe-mobiiz {
+  font-size: 13px;
+  color: var(--doux);
+}
+
+/* Le bouton « Appeler » fixé en bas sur téléphone, une fois l'accueil passé. */
+.pe-barre-appel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: rgba(251, 248, 243, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--trait);
+  transform: translateY(110%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pe[data-defile] .pe-barre-appel {
+  transform: none;
+}
+.pe-barre-appel .pe-btn {
+  width: 100%;
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------------------------------------------ Visionneuse */
+.pe-visionneuse {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(12, 10, 8, 0.97);
+  color: #fff;
+}
+.pe-visionneuse-haut,
+.pe-visionneuse-bas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+}
+.pe-visionneuse-haut p {
+  font-weight: 800;
+  font-size: 18px;
+}
+.pe-visionneuse-bas {
+  justify-content: center;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+.pe-visionneuse-bande {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.pe-visionneuse-bande figure {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 0 12px;
+}
+.pe-visionneuse-bande picture,
+.pe-visionneuse-bande img {
+  max-height: calc(100dvh - 170px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+.pe-visionneuse-bande figcaption {
+  color: var(--clair);
+  font-size: 15px;
+}
+.pe-rond {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------------------------------------------ Tablette et ordinateur */
+@container pe (min-width: 640px) {
+  .pe-prestations {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pe-form-deux {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@container pe (min-width: 760px) {
+  .pe-chantiers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+  .pe-pied-grille {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+  .pe-pied-droite {
+    justify-items: end;
+    text-align: right;
+  }
+}
+@container pe (min-width: 960px) {
+  .pe {
+    --entete: 76px;
+  }
+  .pe-cadre {
+    width: min(1180px, calc(100% - 96px));
+  }
+  .pe-nav {
+    display: flex;
+    gap: 30px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .pe-nav a:hover {
+    color: var(--doux);
+  }
+  .pe-entete-ligne {
+    gap: 30px;
+  }
+  .pe-menu-bouton,
+  .pe-menu-tel {
+    display: none;
+  }
+  .pe-entete-appel {
+    min-height: 46px;
+    padding: 0 20px;
+  }
+  .pe-entete-appel-court {
+    display: none;
+  }
+  .pe-entete-appel-long {
+    display: inline;
+  }
+  .pe[data-defile] .pe-entete-appel {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .pe-barre-appel {
+    display: none;
+  }
+  .pe-accueil {
+    padding: 96px 0 80px;
+  }
+  .pe-section {
+    padding: 112px 0;
+  }
+  .pe-zone {
+    padding-top: 0;
+  }
+  .pe-prestations {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 56px 64px;
+  }
+  .pe-apropos-photo {
+    grid-template-columns: 5fr 6fr;
+    gap: 72px;
+    align-items: center;
+  }
+  .pe-apropos-image img {
+    aspect-ratio: 4 / 5;
+  }
+  .pe-contact {
+    padding: 112px 0;
+  }
+  .pe-contact-grille {
+    grid-template-columns: 5fr 6fr;
+    gap: 80px;
+  }
+  .pe-pied {
+    padding-bottom: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pe,
+  .pe * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
+/* La zone suit d'ordinaire « À propos » (même fond) ; après les réalisations (fond os), elle reprend son espace. */
+.pe-section-os + .pe-zone {
+  padding-top: 80px;
+}
+@container pe (min-width: 960px) {
+  .pe-section-os + .pe-zone {
+    padding-top: 112px;
+  }
+}
+
+/* La page publique est toujours claire : le thème sombre de l'application ne déborde jamais autour d'elle. */
+html:has(.pe:not(.pe-apercu)),
+body:has(.pe:not(.pe-apercu)) {
+  background: #fbf8f3;
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------------------------------------------ Retouches (relecture des captures) */
+.pe-accueil h1 {
+  letter-spacing: -0.045em;
+  word-spacing: 0.06em;
+}
+.pe h2 {
+  letter-spacing: -0.045em;
+  word-spacing: 0.05em;
+}
+/* Le nom de l'entreprise sur deux lignes au plus, jamais coupé par « … » au milieu d'un mot. */
+.pe-marque-nom {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.15;
+  font-size: 16px;
+}
+/* Téléphone : les deux boutons de l'accueil pleine largeur, l'un sous l'autre. */
+.pe-accueil .pe-actions .pe-btn {
+  flex: 1 1 100%;
+}
+@container pe (min-width: 560px) {
+  .pe-accueil .pe-actions .pe-btn {
+    flex: 0 0 auto;
+  }
+}
+@container pe (min-width: 960px) {
+  .pe-marque-nom {
+    font-size: 17px;
+  }
+  /* Quatre prestations : deux colonnes (jamais une orpheline sous trois). */
+  .pe-prestations:has(> li:nth-child(4):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 920px;
+  }
+  /* « À propos » sans photo : le titre et le chapeau à gauche, le texte et les garanties à droite. */
+  .pe-apropos:not(.pe-apropos-photo) {
+    grid-template-columns: 5fr 7fr;
+    gap: 72px;
+    align-items: start;
+  }
+  .pe-apropos:not(.pe-apropos-photo) .pe-apropos-texte {
+    display: contents;
+  }
+  .pe-apropos:not(.pe-apropos-photo) .pe-apropos-tete {
+    grid-column: 1;
+  }
+  .pe-apropos:not(.pe-apropos-photo) .pe-apropos-corps {
+    grid-column: 2;
+  }
+}
+/* Un nombre impair de chantiers : le premier en grand sur toute la largeur. */
+@container pe (min-width: 760px) {
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) {
+    grid-column: 1 / -1;
+  }
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) img {
+    aspect-ratio: 16 / 8;
+  }
+}
+/* Barre du haut et visionneuse opaques : rien ne transparaît dessous. */
+.pe-entete {
+  background: var(--ivoire);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.pe-visionneuse {
+  background: #0c0a08;
+}
+
+/* ------------------------------------------------------------------------------------------------ Entre pros */
+/* Greg, 16 novembre 2026 : le niveau « pros » du site, seulement pour une entreprise connectée (îlot client). */
+.pe-entre-pros {
+  padding: 48px 0 8px;
+}
+.pe-ep-carte {
+  border: 2px solid var(--encre);
+  border-radius: 20px;
+  background: #fff;
+  padding: 24px 20px;
+  display: grid;
+  gap: 14px;
+}
+.pe-ep-etiquette {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--jaune);
+  color: var(--encre);
+  padding: 4px 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.pe .pe-entre-pros h2 {
+  font-size: 26px;
+  margin: 0;
+}
+.pe-ep-note {
+  color: var(--doux);
+  font-size: 15px;
+}
+.pe-ep-grille {
+  display: grid;
+  gap: 18px;
+}
+.pe-ep-grille h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.pe-ep-competences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+.pe-ep-competences li {
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.pe-ep-services {
+  margin-top: 8px;
+  white-space: pre-line;
+}
+.pe-ep-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@container pe (min-width: 760px) {
+  .pe-ep-carte {
+    padding: 32px;
+  }
+  .pe-ep-grille {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ================================================================================================================
+ * MAQUETTE DE GREG (17 novembre 2026, « inspire-toi de ça pour les sites artisans ») : barre du haut noire (nom, métier,
+ * menu, « Demander un devis » jaune), accueil sombre sur la photo (le métier en blanc, « à Ville » en jaune, l'accroche,
+ * « Demander un devis » et le numéro), prestations en cartes avec une icône jaune, trois chantiers sur une ligne et
+ * « Voir plus de réalisations », une bande noire (zone d'intervention, horaires), pied de page clair « Créé avec MOBIIZ ».
+ * RÈGLE CHANGÉE : avant, une page claire de bout en bout, sans pictogramme. Le fond de la page reste ivoire.
+ * ============================================================================================================== */
+.pe {
+  --nuit: #141414;
+  font-family: var(--font-jakarta), Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.pe h2 {
+  font-size: clamp(28px, 5cqi, 40px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  word-spacing: 0;
+  margin-bottom: 26px;
+}
+
+/* Barre du haut */
+.pe-entete {
+  background: var(--nuit);
+  color: #fff;
+  border-bottom: 0;
+}
+.pe-marque-texte {
+  display: grid;
+  min-width: 0;
+}
+.pe-marque-activite {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pe-entete .pe-initiales {
+  background: transparent;
+  border: 2px solid var(--jaune);
+  color: var(--jaune);
+}
+.pe-menu-bouton {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+.pe-menu-tel {
+  background: var(--nuit);
+  border-bottom: 0;
+  color: #fff;
+}
+.pe-entete-devis {
+  display: none;
+}
+
+/* Accueil */
+.pe-accueil {
+  background: var(--nuit);
+  color: #fff;
+  align-items: center;
+  min-height: 520px;
+  padding: 64px 0 56px;
+}
+.pe-avec-photo .pe-accueil {
+  min-height: 600px;
+}
+.pe-accueil-photo {
+  background: var(--nuit);
+}
+.pe-accueil-photo::after {
+  background: linear-gradient(180deg, rgba(14, 14, 14, 0.4) 0%, rgba(14, 14, 14, 0.62) 45%, rgba(14, 14, 14, 0.9) 100%);
+}
+.pe-accueil-nom {
+  margin: 0 0 14px !important;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+.pe-accueil h1 {
+  font-size: clamp(38px, 8cqi, 66px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  word-spacing: 0;
+  max-width: 15ch;
+}
+.pe-accueil-ville {
+  display: block;
+  color: var(--jaune);
+}
+.pe-accueil-accroche {
+  margin-top: 18px !important;
+  max-width: 36ch;
+  font-size: 18px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+.pe-accueil .pe-actions {
+  margin-top: 28px;
+}
+.pe-accueil .pe-btn {
+  min-height: 54px;
+}
+.pe-accueil .pe-btn-second {
+  border-color: rgba(255, 255, 255, 0.85);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+.pe-preuves {
+  margin-top: 22px;
+  color: rgba(255, 255, 255, 0.88);
+}
+.pe-preuves svg,
+.pe:not(.pe-avec-photo) .pe-preuves svg {
+  color: var(--jaune);
+}
+
+/* Prestations : des cartes, une icône jaune */
+.pe-section {
+  padding: 64px 0;
+}
+.pe-prestations {
+  gap: 14px;
+}
+.pe-prestations li {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 22px 20px;
+  background: #fff;
+  border: 1px solid var(--trait);
+  border-radius: 14px;
+}
+.pe-prestations li::before {
+  content: none;
+}
+.pe-prestation-icone {
+  flex-shrink: 0;
+  color: #f2c200;
+}
+.pe-prestations h3 {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.pe-prestations p {
+  margin-top: 6px;
+  font-size: 15.5px;
+  line-height: 1.5;
+}
+
+/* Réalisations : trois sur une ligne, « Voir plus » */
+.pe-section + .pe-section-realisations {
+  padding-top: 8px;
+}
+.pe-section-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 20px;
+  margin-bottom: 22px;
+}
+.pe .pe-section-tete h2 {
+  margin: 0;
+}
+.pe-voir-plus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--encre);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pe-voir-plus:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pe-chantiers {
+  gap: 16px;
+}
+.pe-chantier {
+  border-radius: 12px;
+}
+.pe-chantier-legende {
+  padding: 48px 16px 14px;
+}
+.pe-chantier-titre {
+  font-size: 17px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+/* La bande noire : zone d'intervention et horaires */
+.pe-bande {
+  background: var(--nuit);
+  color: #fff;
+  padding: 36px 0;
+}
+.pe-bande-grille {
+  display: grid;
+  gap: 26px;
+}
+.pe-bande-bloc {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.pe-bande-bloc > svg {
+  flex-shrink: 0;
+  color: var(--jaune);
+}
+.pe .pe-bande-etiquette {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.75);
+}
+.pe-bande-valeur {
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+.pe-bande-horaires {
+  font-size: 19px;
+}
+.pe-bande-detail {
+  margin-top: 4px !important;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Pied de page */
+.pe-pied {
+  border-top: 1px solid var(--trait);
+  padding-top: 28px;
+  font-size: 14px;
+}
+.pe-pied-grille {
+  gap: 20px;
+}
+.pe-pied-marque {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.pe-pied .pe-initiales {
+  background: var(--nuit);
+  color: var(--jaune);
+}
+.pe-pied-nom {
+  font-size: 16px;
+  margin-bottom: 0 !important;
+}
+.pe-pied-activite {
+  font-size: 13px;
+  color: var(--doux);
+  margin-bottom: 4px !important;
+}
+.pe-pied-liens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.pe-pied-liens > details[open] {
+  flex-basis: 100%;
+}
+.pe-pied-lien {
+  font-weight: 700;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+}
+.pe-pied-sep {
+  color: var(--clair);
+}
+.pe-mobiiz {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: var(--encre);
+}
+.pe-mobiiz strong {
+  font-weight: 850;
+  letter-spacing: 0.01em;
+}
+.pe-coeur {
+  color: #f2c200;
+}
+
+@container pe (min-width: 640px) {
+  .pe-chantiers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pe-bande-grille {
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  }
+  .pe-bande-bloc + .pe-bande-bloc {
+    border-left: 1px solid rgba(255, 255, 255, 0.28);
+    padding-left: 32px;
+  }
+}
+@container pe (min-width: 960px) {
+  .pe-entete-devis {
+    display: inline-flex;
+    min-height: 44px;
+    padding: 0 20px;
+    font-size: 14.5px;
+    gap: 8px;
+    box-shadow: none;
+  }
+  .pe-entete .pe-entete-appel {
+    background: transparent;
+    color: #fff !important;
+    padding: 0 6px;
+  }
+  .pe-entete .pe-entete-appel:hover {
+    background: transparent;
+    color: var(--jaune) !important;
+  }
+  .pe-nav {
+    font-weight: 600;
+  }
+  .pe-nav a:hover {
+    color: var(--jaune);
+  }
+  .pe-accueil {
+    min-height: 520px;
+    padding: 88px 0;
+  }
+  .pe-avec-photo .pe-accueil {
+    min-height: 560px;
+  }
+  .pe-accueil-photo::after {
+    background: linear-gradient(90deg, rgba(14, 14, 14, 0.94) 0%, rgba(14, 14, 14, 0.78) 34%, rgba(14, 14, 14, 0.22) 62%, rgba(14, 14, 14, 0.05) 100%);
+  }
+  .pe-section {
+    padding: 80px 0;
+  }
+  .pe-prestations {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  /* Quatre prestations : deux par ligne, jamais une orpheline sous trois. */
+  .pe-prestations:has(> li:nth-child(4):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: none;
+  }
+  .pe-prestations li {
+    padding: 26px 24px;
+  }
+  .pe-chantiers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) {
+    grid-column: auto;
+  }
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) img {
+    aspect-ratio: 4 / 3;
+  }
+  .pe-bande {
+    padding: 40px 0;
+  }
+  .pe-pied {
+    padding: 24px 0;
+  }
+  .pe-pied-grille {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 32px;
+  }
+  .pe-pied-liens {
+    justify-content: center;
+  }
+  .pe-pied-marque {
+    align-items: center;
+  }
+}
+/* Les garanties sous les boutons de l'accueil, avec de l'air ; le bloc contact du même noir que la barre et la bande. */
+.pe .pe-preuves {
+  margin-top: 22px;
+}
+.pe-contact {
+  background: var(--nuit);
+}

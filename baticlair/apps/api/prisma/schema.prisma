@@ -232,6 +232,13 @@ model Company {
   reglageAlertes            ReglageAlertes?
   profilPublic              ProfilPublic?
   lecturesBoite             LectureBoite[]
+  // Ma page Mobiiz (16 novembre 2026)
+  pageEntreprise            PageEntreprise?
+  photosPage                PhotoPage[]
+  realisationsPage          RealisationPage[]
+  anciennesAdressesPage     AncienneAdressePage[]
+  signalementsPage          SignalementPage[]
+  contactsPage              ContactPage[]
 
   @@map("company")
 }
@@ -3048,4 +3055,131 @@ model Signalement {
 
   @@index([statut, createdAt])
   @@map("signalement")
+}
+
+/// MA PAGE MOBIIZ (Greg, 16 novembre 2026) : la page publique d'une entreprise (`mobiiz.fr/e/<adresse>`). Privée par défaut.
+/// Un champ nul = la valeur du profil (synchronisée : téléphone, zone) ou du thème du métier principal (couleur, fond) ;
+/// une valeur = ce que l'artisan a choisi lui-même, gardée quand le métier change.
+model PageEntreprise {
+  companyId        String    @id @map("company_id") @db.Uuid
+  /// L'adresse courante ; les anciennes sont dans `ancienne_adresse_page` et redirigent ici.
+  adresse          String    @unique
+  /// L'artisan a déjà changé son adresse (une seule fois permise).
+  adresseChangeeLe DateTime? @map("adresse_changee_le") @db.Timestamptz(3)
+  visible          Boolean   @default(false)
+  /// Masquée par l'admin (modération) : plus visible, quel que soit le choix de l'artisan.
+  masqueeLe        DateTime? @map("masquee_le") @db.Timestamptz(3)
+  masqueeMotif     String?   @map("masquee_motif")
+  /// Une des quatre teintes (`TEINTES`), sinon nul : celle du métier.
+  couleur          String?
+  accroche         String?
+  presentation     String?
+  telephone        String?
+  zone             String?
+  horaires         String?
+  siteWeb          String?   @map("site_web")
+  creeeEn          Int?      @map("creee_en")
+  certifications   String[]  @default([])
+  /// Les prestations ({ titre, texte }[], 6 au plus), proposées d'après le métier à la création de la page.
+  prestations      Json      @default("[]")
+  /// Choix EXPLICITE de l'artisan : montrer l'adresse postale de l'entreprise (jamais par défaut).
+  afficherAdresse  Boolean   @default(false) @map("afficher_adresse")
+  /// Relecture du juriste : « J'ai pris ces photos ou j'ai le droit de les utiliser… », coché avant la première photo.
+  photosAccordLe   DateTime? @map("photos_accord_le") @db.Timestamptz(3)
+  couvertureId     String?   @map("couverture_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([visible, masqueeLe])
+  @@map("page_entreprise")
+}
+
+/// Une photo de la page (galerie ou couverture). Les fichiers vivent dans le stockage objet (jamais en base) : `variantes`
+/// garde leurs adresses ({ largeur, avif, webp }[]) et `cles` leurs noms, pour les supprimer proprement.
+model PhotoPage {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  companyId  String   @map("company_id") @db.Uuid
+  /// galerie | couverture | equipe (la photo de l'artisan ou de l'équipe, « À propos »)
+  role       String   @default("galerie")
+  /// Le chantier de la photo (galerie) ; nul : une photo seule, montrée comme un chantier à elle seule.
+  realisationId String? @map("realisation_id") @db.Uuid
+  ordre      Int      @default(0)
+  legende    String?
+  /// traitement | prete | erreur
+  statut     String   @default("traitement")
+  largeur    Int      @default(0)
+  hauteur    Int      @default(0)
+  octets     Int      @default(0)
+  variantes  Json     @default("[]")
+  partage    String?
+  cles       String[] @default([])
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  realisation RealisationPage? @relation(fields: [realisationId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, role, ordre])
+  @@index([realisationId])
+  @@map("photo_page")
+}
+
+/// Un chantier réalisé de la page (« Toiture ardoise · Paimpol ») : ses photos, la première en grand.
+model RealisationPage {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  titre     String
+  ordre     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  photos  PhotoPage[]
+
+  @@index([companyId, ordre])
+  @@map("realisation_page")
+}
+
+/// Une ancienne adresse de page : jamais réattribuée, elle redirige vers l'adresse courante de son entreprise.
+model AncienneAdressePage {
+  adresse   String   @id
+  companyId String   @map("company_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@map("ancienne_adresse_page")
+}
+
+/// « Signaler cette page » : lu par l'admin seul, jamais montré à l'entreprise. L'IP n'est gardée que hachée.
+model SignalementPage {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  companyId String    @map("company_id") @db.Uuid
+  motif     String
+  precision String?
+  ipHash    String?   @map("ip_hash")
+  traiteLe  DateTime? @map("traite_le") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([traiteLe, createdAt])
+  @@index([companyId])
+  @@map("signalement_page")
+}
+
+/// Un message envoyé par le formulaire de contact d'une page : on ne garde que la trace (pour les limites anti-abus),
+/// jamais le texte ni les coordonnées du visiteur (ils partent par e-mail à l'entreprise).
+model ContactPage {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  ipHash    String?  @map("ip_hash")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt])
+  @@index([ipHash, createdAt])
+  @@map("contact_page")
 }

@@ -133,6 +133,9 @@ describe("isolation entre entreprises, toutes les routes", () => {
       fichierPro: "",
       alerte: "",
       signalement: "",
+      photoPage: "",
+      signalementPage: "",
+      realisationPage: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
     const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });
@@ -189,6 +192,11 @@ describe("isolation entre entreprises, toutes les routes", () => {
     ids.alerte = (await ctx.prisma.alerteCourte.create({ data: { companyId, categorie: "missions", genre: "action", titre: "Nouveau message", detail: "Toitures A", action: "Ouvrir", href: "/messages", cle: "isolation-alerte" } })).id;
     // Signalement de bugs : celui de A (avec sa capture) ; la liste et la capture sont réservées aux admins (B : 403).
     ids.signalement = (await ctx.prisma.signalement.create({ data: { origine: "artisan", page: "/chantiers/nouveau", message: "Signalement de Toitures A", email: "a@example.com", companyId, capture: Buffer.from("capture-de-a"), captureType: "image/png" } })).id;
+    // Ma page Mobiiz (16 novembre 2026) : la page PRIVÉE de A (un visiteur ne la voit pas), une photo, un signalement.
+    const pageA = await ctx.prisma.pageEntreprise.create({ data: { companyId, adresse: "page-de-toitures-a", accroche: "Accroche de Toitures A" } });
+    ids.photoPage = (await ctx.prisma.photoPage.create({ data: { companyId, legende: "Photo de Toitures A", statut: "prete" } })).id;
+    ids.realisationPage = (await ctx.prisma.realisationPage.create({ data: { companyId, titre: "Chantier de Toitures A" } })).id;
+    ids.signalementPage = (await ctx.prisma.signalementPage.create({ data: { companyId, motif: "autre", precision: "Signalement de la page de Toitures A" } })).id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -272,6 +280,14 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/profil-public$/, companyId],
         [/\/alertes$/, ids.alerte],
         [/\/admin\/signalements$/, ids.signalement],
+        [/\/ma-page\/photos$/, ids.photoPage],
+        [/\/ma-page\/realisations$/, ids.realisationPage],
+        [/\/public\/pages$/, pageA.adresse],
+        // « Entre pros » (16 novembre 2026) : le bloc pros et l'adresse du site de A (page privée : rien).
+        [/\/pages-entreprises$/, pageA.adresse],
+        [/\/pages-entreprises\/entreprise$/, companyId],
+        [/\/admin\/pages-publiques$/, pageA.adresse],
+        [/\/admin\/pages-publiques\/signalements$/, ids.signalementPage],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

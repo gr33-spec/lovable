@@ -41,7 +41,7 @@ export const GROUPES_PROFIL: { titre: string; lignes: LigneProfil[] }[] = [
     lignes: [
       { id: "entreprise", titre: "Mon entreprise", sousTitre: "Coordonnées, SIRET, métiers et zones", icone: Building2 },
       { id: "profil-public", titre: "Profil public et missions", sousTitre: "Présentation, services et disponibilités", icone: UserRound, missions: true },
-      { id: "documents", titre: "Documents et qualifications", sousTitre: "Dossier, assurances, CV et références", icone: FolderOpen, missions: true },
+      { id: "documents", titre: "Documents et qualifications", sousTitre: "Facultatif : CV, assurances, diplômes, jamais affichés", icone: FolderOpen, missions: true },
     ],
   },
   {

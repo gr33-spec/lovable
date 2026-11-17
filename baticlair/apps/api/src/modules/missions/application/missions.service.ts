@@ -663,8 +663,8 @@ export class MissionsService {
   /**
    * QUI PEUT OUVRIR UN FICHIER : son propriétaire ; pour une pièce d'annonce, une entreprise qui peut lire l'annonce ; pour
    * une pièce de message, les deux entreprises de la conversation ; pour un document du dossier, l'auteur d'une mission à
-   * laquelle le propriétaire a répondu EN LE PARTAGEANT, ou toute entreprise vérifiée si le propriétaire l'a mis sur son
-   * profil public visible. Rien d'autre, et jamais une entreprise bloquée.
+   * laquelle le propriétaire a répondu EN LE PARTAGEANT (plus jamais par le profil public, Greg, 16 novembre 2026). Rien
+   * d'autre, et jamais une entreprise bloquée.
    */
   private async peutOuvrir(t: TenantContext, f: { id: string; companyId: string; portee: string; annonceId: string | null; messageId: string | null; surProfil: boolean }): Promise<boolean> {
     if (f.companyId === t.companyId) return true;
@@ -673,7 +673,6 @@ export class MissionsService {
     if (f.portee === "message" && f.messageId) return (await this.prisma.messageMission.count({ where: { id: f.messageId, conversation: { bloqueeLe: null, OR: [{ annonceurId: t.companyId }, { autreId: t.companyId }] } } })) > 0;
     if (f.portee === "dossier") {
       if ((await this.prisma.reponseMission.count({ where: { companyId: f.companyId, statut: "envoyee", documentIds: { has: f.id }, annonce: { companyId: t.companyId } } })) > 0) return true;
-      if (f.surProfil && (await this.verifiee(t.companyId))) return (await this.prisma.profilPublic.count({ where: { companyId: f.companyId, visible: true } })) > 0;
     }
     return false;
   }
@@ -741,11 +740,13 @@ export class MissionsService {
       (await this.prisma.reponseMission.count({ where: { companyId, statut: "envoyee", annonce: { companyId: t.companyId } } })) +
       (await this.prisma.annonceMission.count({ where: { companyId, statut: "publiee" } }));
     if (!p?.visible && !lie) throw notFound("Profil");
-    const [e, dispo, realisations] = await Promise.all([
+    // Greg, 16 novembre 2026 : aucun document du dossier (CV, diplômes, attestations) ne se montre sur un profil ; ils ne
+    // partent que dans une discussion, envoyés par l'entreprise elle-même. `realisations` reste vide pour les écrans d'avant.
+    const [e, dispo] = await Promise.all([
       this.entreprise(companyId),
       this.prisma.annonceMission.findFirst({ where: { companyId, type: "disponibilite", statut: "publiee" }, orderBy: { createdAt: "desc" } }),
-      p?.visible ? this.prisma.fichierPro.findMany({ where: { companyId, portee: "dossier", surProfil: true }, select: { id: true, categorie: true, titre: true, nom: true, type: true, taille: true }, take: 24 }) : [],
     ]);
+    const realisations: { id: string; categorie: string | null; titre: string | null; nom: string; type: string; taille: number }[] = [];
     const autre = companyId !== t.companyId;
     return { entreprise: e, visible: p?.visible ?? false, presentation: p?.visible ? masquerSi(companyId !== t.companyId, p.presentation) : null, metiers: p?.visible ? (autre ? p.metiers.map((m) => masquerCoordonnees(m)) : p.metiers) : [], services: p?.visible ? masquerSi(autre, p.services) : null, equipe: p?.visible ? (typeof p.equipe === "string" ? masquerSi(autre, p.equipe) : p.equipe) : null, ville: p?.visible ? masquerSi(autre, p.ville) : null, disponibilite: dispo ? this.vueAnnonce(dispo, e, t.companyId) : null, realisations: autre ? realisations.map((d) => masquerChamps(d, ["titre", "nom"])) : realisations };
   }
