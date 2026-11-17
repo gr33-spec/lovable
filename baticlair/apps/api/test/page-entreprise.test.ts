@@ -67,7 +67,7 @@ describe("Ma page : réglages", () => {
     expect(p.choix.theme.nom).toBe("Couvreur");
     // La page se fabrique toute seule : les prestations du métier sont proposées, modifiables.
     expect(p.reglages.prestations.map((x: { titre: string }) => x.titre)).toEqual(["Couverture ardoise et tuile", "Zinguerie", "Réparation de toiture", "Entretien et démoussage"]);
-    expect(p.choix.teintes.map((x: { nom: string }) => x.nom)).toEqual(["Ardoise", "Anthracite", "Bleu nuit", "Vert sapin"]);
+    expect(p.choix.teintes.map((x: { nom: string }) => x.nom)).toEqual(["Ardoise", "Anthracite", "Bleu nuit", "Vert sapin", "Bleu roi", "Pétrole", "Bordeaux", "Rouge brique", "Prune"]);
     // Privée : un visiteur ne la voit pas (404, comme une page qui n'existe pas).
     await anon().get("/v1/public/pages/toits-martin").expect(404);
     // Une deuxième entreprise au même nom prend une autre adresse.
