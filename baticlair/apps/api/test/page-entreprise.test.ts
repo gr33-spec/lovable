@@ -79,7 +79,10 @@ describe("Ma page : réglages", () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
     await rendrePublique(a.agent);
     await a.agent.patch("/v1/company/profile").send({ phone: "0611111111" }).expect(200);
-    expect((await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu.telephone).toBe("06 11 11 11 11");
+    const lu = await anon().get("/v1/public/pages/toits-martin").expect(200);
+    expect(lu.body.contenu.telephone).toBe("06 11 11 11 11");
+    // Jamais gardée par le réseau de l'hébergeur : le site la vide lui-même à chaque changement.
+    expect(lu.headers["cache-control"]).toBe("no-store");
     await a.agent.patch("/v1/company/profile").send({ phone: "0622222222" }).expect(200);
     expect((await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu.telephone).toBe("06 22 22 22 22");
     // Le métier principal change : l'ambiance suit (métier), la couleur choisie reste.
