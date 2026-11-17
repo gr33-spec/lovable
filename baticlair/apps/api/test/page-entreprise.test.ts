@@ -94,6 +94,42 @@ describe("Ma page : réglages", () => {
     expect((await anon().get("/v1/public/pages/toits-martin")).body.contenu.telephone).toBe("06 22 22 22 22");
   });
 
+  it("PHOTO PAR DÉFAUT : celle du métier, qui suit le métier ; la galerie la remplace ; crédit en pied de page ; la photo de l'artisan passe devant", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
+    await rendrePublique(a.agent);
+    const lire = async () => (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
+    let c = await lire();
+    expect(c.photoDefaut.id).toBe("defaut:roofing");
+    expect(c.photoDefaut.variantes[0]).toMatchObject({ largeur: 800, webp: "/site/photos/roofing-800.webp", avif: "/site/photos/roofing-800.avif" });
+    expect(c.creditPhoto).toMatch(/Hauserphoton, CC BY-SA 3\.0/);
+    // Le métier change : la photo suit.
+    await a.agent.patch("/v1/company/trades").send({ trades: ["electrical"] }).expect(200);
+    expect((await lire()).photoDefaut.id).toBe("defaut:electrical");
+    // Plusieurs métiers : la photo neutre du bâtiment.
+    await a.agent.patch("/v1/company/trades").send({ trades: ["electrical", "plumbing"] }).expect(200);
+    expect((await lire()).photoDefaut.id).toBe("defaut:neutre-1");
+    // La galerie : un tap, et la photo choisie ne suit plus le métier ; CC0 : pas de crédit.
+    const p = (await a.agent.get("/v1/ma-page").expect(200)).body;
+    expect(p.choix.photosDefaut.length).toBeGreaterThanOrEqual(20);
+    expect(p.choix.photosDefaut[0]).toMatchObject({ id: "neutre-1", metier: null, vignette: "/site/photos/neutre-1-800.webp" });
+    await a.agent.patch("/v1/ma-page").send({ photoDefaut: "neutre-4" }).expect(200);
+    await a.agent.patch("/v1/company/trades").send({ trades: ["painting"] }).expect(200);
+    c = await lire();
+    expect(c.photoDefaut.id).toBe("defaut:neutre-4");
+    expect(c.creditPhoto).toBeNull();
+    expect((await a.agent.patch("/v1/ma-page").send({ photoDefaut: "inventee" }).expect(400)).body.error.details).toMatchObject({ phrase: "Choisis une des photos de la galerie." });
+    // Revenir à « selon mon métier ».
+    await a.agent.patch("/v1/ma-page").send({ photoDefaut: null }).expect(200);
+    expect((await lire()).photoDefaut.id).toBe("defaut:painting");
+    // Sa propre photo passe devant, et le crédit tombe.
+    await a.agent.post("/v1/ma-page/accord-photos").expect(200);
+    await a.agent.post("/v1/ma-page/photos").field("role", "couverture").attach("file", await photoDeTelephone(2000, 1200), "c.jpg").expect(202);
+    await service.traitementsTermines();
+    c = await lire();
+    expect(c.couverture).not.toBeNull();
+    expect(c.creditPhoto).toBeNull();
+  });
+
   it("chaque champ validé, refus en une phrase ; certifications sans doublon, plafonnées", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
     const refus = async (corps: object) => (await a.agent.patch("/v1/ma-page").send(corps).expect(400)).body.error.details;

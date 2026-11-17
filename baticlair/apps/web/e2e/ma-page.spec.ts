@@ -241,6 +241,37 @@ test("Ma page : deux comptes, chacun ne voit et ne règle que la sienne", async 
   await ctxB.close();
 });
 
+test("Mon site : la photo par défaut du métier, remplacée d'un tap depuis la galerie (Greg, 17 novembre 2026)", async ({ page }) => {
+  test.setTimeout(150_000);
+  await inscrire(page, `Élec Martin ${unique()}`, "Électricité");
+  await page.goto("/mon-site");
+  const couverture = apercu(page).locator(".pe-accueil-photo img");
+  // Sans photo à lui, l'électricien a la photo de son métier, jamais un chantier qu'il n'a pas fait.
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/electrical/);
+  await expect(couverture).toHaveAttribute("alt", "Photo d'illustration du métier");
+  await expect(apercu(page).locator(".pe-credit-photo")).toContainText("Santeri Viinamäki");
+  await onglet(page, "Photos");
+  await expect(page.getByText("Photo de la galerie")).toBeVisible();
+  await toucher(page.getByRole("button", { name: /Choisir dans la galerie/ }));
+  const galerie = page.getByRole("radiogroup", { name: "Galerie de photos" });
+  await expect(galerie.getByRole("radio", { name: "Selon mon métier" })).toHaveAttribute("aria-checked", "true");
+  await toucher(galerie.getByRole("radio", { name: "Maisons neuves terminées" }));
+  await enregistre(page);
+  await expect(galerie.getByRole("radio", { name: "Maisons neuves terminées" })).toHaveAttribute("aria-checked", "true");
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/neutre-4/);
+  // CC0 : pas de crédit.
+  await expect(apercu(page).locator(".pe-credit-photo")).toHaveCount(0);
+  // Rechargé : le choix est gardé ; « Selon mon métier » le rend.
+  await page.reload();
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/neutre-4/);
+  await onglet(page, "Photos");
+  await toucher(page.getByRole("button", { name: /Choisir dans la galerie/ }));
+  await toucher(page.getByRole("radiogroup", { name: "Galerie de photos" }).getByRole("radio", { name: "Selon mon métier" }));
+  await enregistre(page);
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/electrical/);
+  await sansDefilementHorizontal(page);
+});
+
 test("Ma page : l'éditeur dans les thèmes clair et sombre de l'application, sans défilement horizontal", async ({ page }) => {
   test.setTimeout(120_000);
   await inscrire(page, `Toits Martin ${unique()}`);

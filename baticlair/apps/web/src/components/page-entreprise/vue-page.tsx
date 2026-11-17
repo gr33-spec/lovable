@@ -110,7 +110,7 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
         <section id="accueil" className="pe-accueil" aria-labelledby="pe-titre">
           {accueil ? (
             <div className="pe-accueil-photo">
-              <Photo photo={accueil} alt={`Chantier réalisé par ${c.nom}`} sizes="100vw" prioritaire />
+              <Photo photo={accueil} alt={accueil.id.startsWith("defaut:") ? "Photo d'illustration du métier" : `Chantier réalisé par ${c.nom}`} sizes="100vw" prioritaire />
             </div>
           ) : null}
           <div className="pe-cadre pe-accueil-texte">
