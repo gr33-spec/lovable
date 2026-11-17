@@ -7,10 +7,10 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Plâtrerie, isolation | 2 | 2 | 0 | 1 |
+| Plâtrerie, isolation | 1 | 2 | 0 | 1 |
 | Carrelage | 0 | 5 | 0 | 0 |
 | Peinture | 0 | 5 | 0 | 0 |
-| Maçonnerie | 0 | 6 | 0 | 1 |
+| Maçonnerie | 0 | 5 | 0 | 1 |
 
 ## Plâtrerie, isolation
 
@@ -23,7 +23,7 @@ Devis de test :
 | 3 | Plafond suspendu BA13 sur fourrures F530 | 60 m² |
 | 4 | Isolation combles perdus laine soufflée R7 | 80 m² |
 
-**À l'ouverture : 2 vertes · 2 orange · 0 grise.**
+**À l'ouverture : 1 verte · 2 orange · 0 grise.**
 
 Questions du comptoir :
 - Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
@@ -37,8 +37,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Plaques BA13 1,20 × 2,50 | 30 plaques |  | chiffrable |
-| Plaques BA13 1,20 × 2,50 | 21 plaques |  | chiffrable |
+| Plaques BA13 1,20 × 2,50 | 51 plaques |  | chiffrable |
 | Complexes de doublage BA13 + isolant | 20 complexes | longueur à la hauteur sous plafond | chiffrable |
 | Laine de verre à souffler (type Comblissimo), sac de 17,3 kg, R 7 | 19 sacs de 17,3 kg |  | chiffrable |
 | Vis à plaque 25 mm | 2 100 vis |  | chiffrable |
@@ -127,7 +126,7 @@ Devis de test :
 | 5 | Enduit monocouche gratté | 60 m² |
 | 6 | Semelle filante 50x25 | 28 ml |
 
-**À l'ouverture : 0 verte · 6 orange · 0 grise.**
+**À l'ouverture : 0 verte · 5 orange · 0 grise.**
 
 Questions du comptoir :
 - Parpaings de 20, de 15 ou de 10 ? (Blocs béton creux de 20 (50×20) / Blocs béton creux de 15 (50×20) / Blocs béton creux de 10 (50×20))
@@ -136,8 +135,7 @@ Questions du comptoir :
 | --- | --- | --- |
 | Mur porteur en parpaings, garage blocs béton | — | Parpaings à préciser |
 | Briques rectifiées R20 | 252 briques | Quantité à confirmer |
-| Béton C25/30 (toupie) | 6 m³ | Valeur par défaut à confirmer |
-| Béton C25/30 (toupie) | 4 m³ | Valeur par défaut à confirmer |
+| Béton C25/30 (toupie) | 10 m³ | Valeur par défaut à confirmer |
 | Mortier de chape, sac 25 kg | 154 sacs de 25 kg | Valeur par défaut à confirmer |
 | Enduit monocouche OC2, sac 25 kg | 59 sacs de 25 kg | Quantité à confirmer : enduit +10 % |
 
@@ -147,8 +145,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Blocs béton creux de 20 (50×20) | 504 blocs (≈ 8 palettes de 70) | palettes avec blocs d'angle et de coupe | chiffrable |
 | Briques rectifiées R20 | 252 briques (≈ 5 palettes de 60) |  | chiffrable |
-| Béton C25/30 (toupie) | 6 m³ | livré toupie | chiffrable |
-| Béton C25/30 (toupie) | 4 m³ | livré toupie | chiffrable |
+| Béton C25/30 (toupie) | 10 m³ | livré toupie | chiffrable |
 | Mortier de chape, sac 25 kg | 154 sacs de 25 kg (3 850 kg) |  | chiffrable |
 | Enduit monocouche OC2, sac 25 kg | 59 sacs de 25 kg | teinte à préciser | chiffrable |
 

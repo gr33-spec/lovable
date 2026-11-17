@@ -14,6 +14,9 @@ export function mailEnHtml(texte: string, lien: string | null): string {
       // une solution secondaire, donc un bouton discret (contour), pas le bouton jaune.
       const s = lien ? /^(Vous pouvez aussi chiffrer|Tu peux aussi chiffrer) en ligne, sans inscription : (\S+)$/.exec(l) : null;
       if (s) return `${echapper(s[1]!)} en ligne, sans inscription :<br><a href="${echapper(s[2]!)}" style="display:inline-block;margin:6px 0 10px;padding:10px 20px;border-radius:999px;border:2px solid #130901;color:#130901;font-weight:700;text-decoration:none">Chiffrer en ligne</a>`;
+      // Greg, 17 novembre 2026 (e-mail court) : le lien de chiffrage, seul sur sa ligne, devient le bouton « Chiffrer en ligne ».
+      const u = lien ? /^(https?:\/\/\S+\/chiffrer\/\S+)$/.exec(l) : null;
+      if (u) return `<a href="${echapper(u[1]!)}" style="display:inline-block;margin:6px 0 10px;padding:10px 20px;border-radius:999px;border:2px solid #130901;color:#130901;font-weight:700;text-decoration:none">Chiffrer en ligne</a>`;
       return echapper(l);
     });
     return `<p style="margin:0 0 14px">${lignes.join("<br>")}</p>`;

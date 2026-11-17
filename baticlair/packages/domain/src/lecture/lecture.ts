@@ -275,6 +275,21 @@ function produitDe(ref: Referential, slot: Slot, named: string): { id: string } 
 }
 
 /**
+ * Le format écrit dans le NOM de la fourniture (« Ardoises naturelles 32×22 ») désigne son produit quand le modèle ne l'a
+ * pas nommé à part : un seul produit de l'emplacement dont le FORMAT (un de ses `aliases` en « 32x22 », jamais un nom de
+ * modèle : un mot qui ressemble à un article ne le remplace pas) est écrit dans le nom. Deux
+ * produits possibles : aucun (jamais deviner). Retour de Greg, 17 novembre 2026 : « 48 m² d'ardoises 32×22 et crochets de 11
+ * finissaient dans "À préciser" ».
+ */
+function produitDansLeNom(ref: Referential, slot: Slot, nom: string): { id: string } | undefined {
+  // Un emplacement qui a déjà son article courant (les liteaux 18×40) garde son hypothèse, dite et modifiable.
+  if (slot.usual) return undefined;
+  const texte = ` ${normalizeText(nom)} `;
+  const hits = ref.products.filter((p) => p.family === slot.family && p.aliases.some((a) => /\d\s*x\s*\d/.test(normalizeText(a)) && texte.includes(` ${normalizeText(a)} `)));
+  return hits.length === 1 ? hits[0] : undefined;
+}
+
+/**
  * Le plan du calcul à partir de la lecture : chaque fourniture rattachée à son ouvrage et son emplacement, ses données
  * en faits du chantier, un ouvrage écrit sur plusieurs lignes pris ligne par ligne (une instance par ligne, §48.6).
  * Aucune règle de mots : l'ouvrage, l'emplacement et les données viennent du modèle, qui a lu le devis entier.
@@ -359,7 +374,7 @@ export function planDeLecture(ref: Referential, lecture: LectureDevis, lignes: r
       }
     }
     // Le produit du référentiel que la ligne nomme (« produit » : son identifiant, ou son nom tel que l'export le donne).
-    const produit = f.donnees.produit ? produitDe(ref, slot, f.donnees.produit) : undefined;
+    const produit = (f.donnees.produit ? produitDe(ref, slot, f.donnees.produit) : undefined) ?? produitDansLeNom(ref, slot, f.nom);
     if (produit) input.products[slot.key] = { productId: produit.id, origin: "devis" };
     // Les données écrites sur la ligne, telles que le modèle les a lues (« taille_fenetre » : « 114x118 »).
     for (const [key, raw] of Object.entries(f.donnees)) {
@@ -380,7 +395,7 @@ export function planDeLecture(ref: Referential, lecture: LectureDevis, lignes: r
       if (!cs || cw.id !== work.id) continue;
       mentions.push(cs.key);
       if (!input.mentioned.includes(cs.key)) input.mentioned.push(cs.key);
-      const cp = c.donnees.produit ? produitDe(ref, cs, c.donnees.produit) : undefined;
+      const cp = (c.donnees.produit ? produitDe(ref, cs, c.donnees.produit) : undefined) ?? produitDansLeNom(ref, cs, c.nom);
       if (cp) input.products[cs.key] = { productId: cp.id, origin: "devis" };
     }
     inputs.set(wid, input);
@@ -395,7 +410,7 @@ export function planDeLecture(ref: Referential, lecture: LectureDevis, lignes: r
   // Et l'hypothèse par défaut ne vaut plus pour elle (§47.8, « askInstead ») : le calcul attend la réponse.
   for (const input of inputs.values()) {
     const work = ref.workItems.find((w) => w.id === baseOf(input.workItemId));
-    const keys = lecture.questions.filter((q) => asked.has(q.cle) || plans.some((p) => p.status === "planned" && p.workItemId === input.workItemId && (p.ref === q.ligne || p.ref.startsWith(`${q.ligne}.`)))).map((q) => q.cle).filter((cle) => work?.params.some((p) => p.key === cle) && !input.params[cle]);
+    const keys = lecture.questions.filter((q) => asked.has(q.cle) || plans.some((p) => p.status === "planned" && p.workItemId === input.workItemId && (p.ref === q.ligne || p.ref.startsWith(`${q.ligne}.`)))).map((q) => q.cle).filter((cle) => work?.params.some((p) => p.key === cle && !p.neverAsk) && !input.params[cle]);
     if (keys.length > 0) input.askInstead = [...new Set([...(input.askInstead ?? []), ...keys])];
   }
   const context: ChantierContext = { facts };
@@ -689,7 +704,10 @@ export function ecranDeLecture(input: {
   const options: EngineOptions = { ...(input.options ?? {}), quantityOnly: true, blankUnknown: true };
   const engine = plan.inputs.length > 0 ? computeWithAnswers(ref, plan, answers, input.preferences ?? {}, options, given) : { needs: [], questions: [], declined: [], checks: [], unknowns: [], customProducts: {} };
   // §51.2 : les questions sont celles du modèle, et seulement elles (le moteur ne demande rien de lui-même).
-  const asked: Asked[] = lecture.questions.flatMap((q0) => {
+  // Une donnée que la fiche du métier interdit de demander (`neverAsk` : le pureau) n'est jamais une question, même quand
+  // le modèle la pose : elle se calcule, et ce qu'il lui faut (le format, la taille des crochets) se demande à sa place.
+  const interdites = new Set(ref.workItems.flatMap((w) => w.params.filter((p) => p.neverAsk).map((p) => p.key)));
+  const asked: Asked[] = lecture.questions.filter((q) => !interdites.has(q.cle)).flatMap((q0) => {
     const q = rattacherQuestion(ref, plan, q0, lignes);
     const question = questionDeLecture(ref, plan, q, lignes);
     // L'habitude de l'entreprise (« je façonne », apprise sur deux chantiers) répond d'avance à la question du modèle :

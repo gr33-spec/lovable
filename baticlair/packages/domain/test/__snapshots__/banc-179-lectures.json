@@ -331,14 +331,7 @@
    },
    {
     "designation": "Béton C25/30 (toupie)",
-    "quantite": "6 m³",
-    "unite": "m³",
-    "etat": "ok",
-    "raison": null
-   },
-   {
-    "designation": "Béton C25/30 (toupie)",
-    "quantite": "4 m³",
+    "quantite": "10 m³",
     "unite": "m³",
     "etat": "ok",
     "raison": null
@@ -587,14 +580,7 @@
   "lignes": [
    {
     "designation": "Plaques BA13 1,20 × 2,50",
-    "quantite": "30 plaques",
-    "unite": "plaques",
-    "etat": "ok",
-    "raison": null
-   },
-   {
-    "designation": "Plaques BA13 1,20 × 2,50",
-    "quantite": "21 plaques",
+    "quantite": "51 plaques",
     "unite": "plaques",
     "etat": "ok",
     "raison": null
@@ -1133,7 +1119,7 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm",
     "quantite": "2 pièces",
     "unite": "pièces",
     "etat": "ok",
@@ -1869,7 +1855,7 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm",
     "quantite": "2 pièces",
     "unite": "pièces",
     "etat": "ok",
@@ -2343,7 +2329,7 @@
     "raison": null
    },
    {
-    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
     "quantite": "1 pièce",
     "unite": "pièce",
     "etat": "ok",
@@ -2364,7 +2350,7 @@
     "raison": "Façonnage à préciser"
    },
    {
-    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "designation": "Mortier de ciment pour solin",
     "quantite": "1 sac de 25 kg",
     "unite": "sac de 25 kg",
     "etat": "ok",
@@ -2441,7 +2427,7 @@
     "raison": null
    },
    {
-    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
     "quantite": "1 pièce",
     "unite": "pièce",
     "etat": "ok",
@@ -2462,7 +2448,7 @@
     "raison": "Façonnage à préciser"
    },
    {
-    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "designation": "Mortier de ciment pour solin",
     "quantite": "1 sac de 25 kg",
     "unite": "sac de 25 kg",
     "etat": "ok",
@@ -2970,7 +2956,7 @@
     "raison": null
    },
    {
-    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
     "quantite": "1 pièce",
     "unite": "pièce",
     "etat": "ok",
@@ -2991,7 +2977,7 @@
     "raison": "Façonnage à préciser"
    },
    {
-    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "designation": "Mortier de ciment pour solin",
     "quantite": "1 sac de 25 kg",
     "unite": "sac de 25 kg",
     "etat": "ok",
@@ -3084,7 +3070,7 @@
     "raison": null
    },
    {
-    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
     "quantite": "1 pièce",
     "unite": "pièce",
     "etat": "ok",
@@ -3105,7 +3091,7 @@
     "raison": "Façonnage à préciser"
    },
    {
-    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "designation": "Mortier de ciment pour solin",
     "quantite": "1 sac de 25 kg",
     "unite": "sac de 25 kg",
     "etat": "ok",
@@ -4323,7 +4309,7 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm",
     "quantite": "2 pièces",
     "unite": "pièces",
     "etat": "ok",
@@ -4423,7 +4409,7 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm",
     "quantite": "2 pièces",
     "unite": "pièces",
     "etat": "ok",
@@ -5009,8 +4995,8 @@
   "lignes": [
    {
     "designation": "Ardoises fibres-ciment 40×24",
-    "quantite": null,
-    "unite": null,
+    "quantite": "2 336 pièces",
+    "unite": "pièces",
     "etat": "check",
     "raison": "Teinte à préciser"
    }
@@ -5061,7 +5047,7 @@
     "raison": null
    },
    {
-    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
     "quantite": "1 pièce",
     "unite": "pièce",
     "etat": "ok",
@@ -5082,7 +5068,7 @@
     "raison": "Façonnage à préciser"
    },
    {
-    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "designation": "Mortier de ciment pour solin",
     "quantite": "1 sac de 25 kg",
     "unite": "sac de 25 kg",
     "etat": "ok",
@@ -5191,7 +5177,7 @@
     "raison": null
    },
    {
-    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
     "quantite": "1 pièce",
     "unite": "pièce",
     "etat": "ok",
@@ -5212,7 +5198,7 @@
     "raison": "Façonnage à préciser"
    },
    {
-    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "designation": "Mortier de ciment pour solin",
     "quantite": "1 sac de 25 kg",
     "unite": "sac de 25 kg",
     "etat": "ok",
@@ -5354,7 +5340,7 @@
     "raison": null
    },
    {
-    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
     "quantite": "1 pièce",
     "unite": "pièce",
     "etat": "ok",
@@ -5375,7 +5361,7 @@
     "raison": "Façonnage à préciser"
    },
    {
-    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "designation": "Mortier de ciment pour solin",
     "quantite": "1 sac de 25 kg",
     "unite": "sac de 25 kg",
     "etat": "ok",
@@ -5473,7 +5459,7 @@
     "raison": null
    },
    {
-    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
     "quantite": "1 pièce",
     "unite": "pièce",
     "etat": "ok",
@@ -5494,7 +5480,7 @@
     "raison": "Façonnage à préciser"
    },
    {
-    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "designation": "Mortier de ciment pour solin",
     "quantite": "1 sac de 25 kg",
     "unite": "sac de 25 kg",
     "etat": "ok",
@@ -5633,7 +5619,7 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm",
     "quantite": "2 pièces",
     "unite": "pièces",
     "etat": "ok",
@@ -5893,7 +5879,7 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm",
     "quantite": "2 pièces",
     "unite": "pièces",
     "etat": "ok",

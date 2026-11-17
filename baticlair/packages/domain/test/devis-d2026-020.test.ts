@@ -107,10 +107,12 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
       ["Gouttière zinc Havraise", "3 longueurs de 4 m"],
       ["Naissances Ø80", "2 pièces"],
       ["Crochets de gouttière Havraise", "20 pièces"],
-      ["Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)", "1 pièce"],
+      // Le nom des feuilles ne dit plus leur usage (Greg, 17 novembre 2026) : il est dans le détail de la ligne.
+      ["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "1 pièce"],
       ["Faîtage en bande zinc, dév. 25 cm", "8 ml"],
       ["Bande porte-solin zinc", "4 ml"],
-      ["Mortier d'étanchéité pour solin, sac 25 kg", "1 sac de 25 kg"],
+      // Le mortier n'est plus renommé « mortier d'étanchéité » (Greg, 17 novembre 2026 : « ne transforme pas mes mots »).
+      ["Mortier de ciment pour solin", "1 sac de 25 kg"],
       ["Tuyau de descente zinc diam. 80mm", "2 tubes de 3 m"],
       ["Coude zinc diam. 80mm", "4 pièces"],
       ["Colliers de descente Ø80", "6 pièces"],
@@ -150,22 +152,22 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(plan.inputs.find((i) => i.workItemId === "bandes-zinc")?.params.faconnage?.value).toBe("1");
   });
 
-  it("faîtage dév. 25 cm et porte-solin : la même question de pliage pour les deux (Greg, 17 novembre 2026) ; pliés, des feuilles chacun (jamais fusionnées)", () => {
+  it("faîtage dév. 25 cm et porte-solin : la même question de pliage pour les deux (Greg, 17 novembre 2026) ; pliés, leurs feuilles rejoignent celles de la rive sur UNE ligne, avec le total", () => {
     expect(row(v.toBuy[6]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@pieces-pliees" });
     expect(row(v.toBuy[7]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@pieces-pliees" });
-    expect(repondu.toBuy.filter((b) => b.label.startsWith("Feuilles")).map((b) => [b.lineIds, b.quantity, b.precision?.split(" :")[0]])).toEqual([
-      [["6"], "1 pièce", "pour 4 ml de bande"],
-      [["8"], "1 pièce", "pour 8 ml de faîtage"],
-      [["10"], "1 pièce", "pour 4 ml de porte-solin"],
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : une seule ligne par article identique, avec le total (1 + 1 + 1 feuille,
+    // chaque pièce comptée à part, chutes non réemployées). Avant : trois lignes de feuilles, une par pièce.
+    expect(repondu.toBuy.filter((b) => b.label.startsWith("Feuilles")).map((b) => [b.lineIds, b.quantity, b.precision])).toEqual([
+      [["6", "8", "10"], "3 pièces", "pour 4 ml de bande, développé 25 cm ; pour 8 ml de faîtage, développé 25 cm ; pour 4 ml de porte-solin, développé 25 cm"],
     ]);
     // Commandé tout fait : des longueurs, pas des feuilles.
     const achete = read({ ...REPONSES, "param:faconnage@faitage-zinc": u("2") });
     expect(achete.toBuy.find((b) => b.lineIds.includes("8"))?.label).toMatch(/^Faîtage zinc naturel 0,65 mm, bande dév\. 25 cm/);
   });
 
-  it("§49.7 mortier du porte-solin : mortier d'étanchéité, 4 ml × 2 kg/ml = 8 kg ⇒ 1 sac de 25 kg, vert ; tuyau Ø80 en 2 tubes de 3 m ; 4 coudes ; colliers Ø80 orange (fixation non chiffrée)", () => {
+  it("§49.7 mortier du porte-solin : au nom du devis (« mortier de ciment », jamais renommé : Greg, 17 novembre 2026), 4 ml × 2 kg/ml = 8 kg ⇒ 1 sac de 25 kg, vert ; tuyau Ø80 en 2 tubes de 3 m ; 4 coudes ; colliers Ø80 orange (fixation non chiffrée)", () => {
     const mortier = v.toBuy[8]!;
-    expect(mortier).toMatchObject({ label: "Mortier d'étanchéité pour solin, sac 25 kg", quantity: "1 sac de 25 kg", precision: "4 ml × 2 kg/ml", lineIds: ["10"] });
+    expect(mortier).toMatchObject({ label: "Mortier de ciment pour solin", quantity: "1 sac de 25 kg", precision: "4 ml × 2 kg/ml", lineIds: ["10"] });
     expect(row(mortier.key)?.status).toBe("ok");
     for (const b of [v.toBuy[9]!, v.toBuy[10]!]) expect(row(b.key)?.status).toBe("ok");
     expect(v.toBuy[9]!.order).toEqual({ count: "2", unit: "tubes de 3 m" });

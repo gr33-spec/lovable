@@ -244,6 +244,11 @@ export interface ParamDef {
    */
   choices?: { label: string; value: string; dit?: string[] }[];
   /**
+   * Une donnée qui ne se DEMANDE JAMAIS à l'artisan (Greg, 17 novembre 2026 : « ne me demande jamais le pureau ») : elle
+   * se calcule (`default`) d'après d'autres données, qui se demandent, elles. Une question du modèle sur elle est écartée.
+   */
+  neverAsk?: true;
+  /**
    * Valeur approchée faute de table officielle (la région ardoise prise égale à la zone climatique
    * du département) : dite « estimation » à l'artisan, avec cette raison.
    */

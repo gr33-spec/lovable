@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.17-53",
+  "version": "roofing-2026.11.17-54",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -3900,8 +3900,8 @@
     {
       "id": "mortier-solin-25",
       "family": "solin_mortar",
-      "label": "Mortier d'étanchéité pour solin, prêt à gâcher, sac de 25 kg",
-      "shortLabel": "Mortier d'étanchéité pour solin, sac 25 kg",
+      "label": "Mortier pour solin",
+      "shortLabel": "Mortier pour solin",
       "aliases": [],
       "generic": true,
       "attributes": {},
@@ -5939,6 +5939,7 @@
           "textLabels": [
             "pureau"
           ],
+          "neverAsk": true,
           "default": {
             "formula": "(ardoise.longueur - recouvrement) / 2",
             "whenGiven": {
@@ -8956,7 +8957,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
-          "precision": "pour {longueur_faitage|ml} de faîtage : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          "precision": "pour {longueur_faitage|ml} de faîtage, développé {developpe|cm}",
           "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
@@ -9646,7 +9647,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
-          "precision": "pour {longueur_noue|ml} de noue : estimation d'après un développé de {developpe_noue|cm}, ajuste selon ton façonnage",
+          "precision": "pour {longueur_noue|ml} de noue, développé {developpe_noue|cm}",
           "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
@@ -10809,7 +10810,7 @@
             "mortier"
           ],
           "usual": {
-            "text": "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).",
+            "text": "Mortier pour solin, en sacs de 25 kg (§49.7).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "mortier-solin-25"
           }
@@ -11151,9 +11152,9 @@
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
-          "precision": "pour {longueur_bande|ml} de bande : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          "precision": "pour {longueur_bande|ml} de bande, développé {developpe|cm}",
           "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
-          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm, pour {piece_min}",
+          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
             "aspect_zinc"
           ],
@@ -11207,7 +11208,6 @@
           "unit": "kg",
           "core": false,
           "exclusions": "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
-          "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
           "precision": "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
@@ -11559,7 +11559,7 @@
             "mortier"
           ],
           "usual": {
-            "text": "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).",
+            "text": "Mortier pour solin, en sacs de 25 kg (§49.7).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "mortier-solin-25"
           }
@@ -11856,7 +11856,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
-          "precision": "pour {longueur_bande|ml} de porte-solin : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          "precision": "pour {longueur_bande|ml} de porte-solin, développé {developpe|cm}",
           "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
@@ -11878,7 +11878,6 @@
           "unit": "kg",
           "core": false,
           "exclusions": "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
-          "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
           "precision": "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {

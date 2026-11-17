@@ -43,7 +43,9 @@ describe("le PDF « Demande de prix — Matériaux » en trois modèles", () => 
       expect(t, modele).toContain("Ardoise naturelle 32×22");
       expect(t, modele).toContain("1 200");
       expect(t, modele).toContain("pièces");
-      expect(t, modele).toContain("à préciser");
+      // Règle changée (Greg, 17 novembre 2026) : une ligne sans quantité n'est plus dans le tableau avec « à préciser » ;
+      // elle est dans le bloc « À préciser », qui n'existe que s'il n'est pas vide.
+      expect(t.join(" "), modele).toMatch(/À préciser.*Crochet ardoise inox/);
       expect(t.join(" "), modele).not.toMatch(/proposition commerciale/);
       expect(t, modele).toContain("Unité");
     }
@@ -58,7 +60,7 @@ describe("le PDF « Demande de prix — Matériaux » en trois modèles", () => 
     const detaille = await items(await packetPdf(PACKET, [], { modele: "detaille" }));
     expect(detaille).toContain("Description du chantier");
     expect(detaille).toContain("N°");
-    expect(detaille).toContain("3");
+    expect(detaille).toContain("2");
   });
 
   it("le bloc de réponse : la phrase du brief, l'adresse donnée, les conditions (texte de Greg)", async () => {

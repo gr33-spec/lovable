@@ -54,14 +54,20 @@ describe("le pliage : une seule réponse pour tout le devis", () => {
     expect(v.questions.some((d) => /developpe@bandes-zinc__(1|3)$/.test(d.key))).toBe(false);
   });
 
-  it("« je plie » : chaque pièce sort en feuilles 2 × 1 m, jamais fusionnées ; plus aucune question de pliage", () => {
+  it("« je plie » : toutes les pièces sortent en feuilles 2 × 1 m, réunies par article identique ; plus aucune question de pliage", () => {
     // La bande de ventilation n'écrit pas son développé : sa réponse est donnée ici pour que ses feuilles se comptent.
     const v = readQuote(SEVERAL_PIECES, { [PLIAGE]: { value: "1", unit: "u" }, "param:developpe@bandes-zinc__2": { value: "100", unit: "mm" } });
     expect(faconnage(v)).toEqual([]);
-    const labels = v.toBuy.map((b) => b.label);
-    for (const piece of [/solin/i, /ventilation/i, /rive/i]) expect(labels.some((l) => /^Feuilles .*2 × 1 m/.test(l) && piece.test(l)), `${piece} : ${labels.join(" | ")}`).toBe(true);
-    // Le solin, la ventilation, la rive et le faîtage : quatre lignes de feuilles.
-    expect(labels.filter((l) => /^Feuilles .*2 × 1 m/.test(l))).toHaveLength(4);
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026, « droit au but ») : une seule ligne par article identique, avec le total. Les
+    // feuilles du solin, de la rive et du faîtage (zinc naturel) font UNE ligne ; celles de la ventilation, d'un autre zinc
+    // (quartz), la leur. Le nom ne dit plus l'usage : il est dans le détail (la précision), pièce par pièce.
+    // Avant : quatre lignes de feuilles, une par pièce, chacune « pour … ».
+    const feuilles = v.toBuy.filter((b) => /^Feuilles .*2 × 1 m/.test(b.label));
+    expect(feuilles.map((b) => b.label).sort()).toEqual(["Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", "Feuilles zinc naturel 2 × 1 m, 0,65 mm"]);
+    const naturel = feuilles.find((b) => /zinc naturel/.test(b.label))!;
+    // Compté pièce par pièce, puis additionné (chutes non réemployées) : solin 5 ml dév. 25 → 1 ; rive 14 ml dév. 33 → 3 ; faîtage 8 ml dév. 33 → 2.
+    expect(naturel.quantity).toBe("6 pièces");
+    for (const usage of [/5 ml de bande, développé 25 cm/, /14 ml de bande, développé 33 cm/, /8 ml de faîtage, développé 33 cm/]) expect(naturel.precision, naturel.precision).toMatch(usage);
   });
 
   it("« tout fait » : chaque pièce sort en longueurs façonnées, aucune feuille", () => {
@@ -85,9 +91,11 @@ describe("le pliage : une seule réponse pour tout le devis", () => {
     const v = readQuote(SEVERAL_PIECES, { [PLIAGE]: { value: "1", unit: "u" }, "param:faconnage@bandes-zinc__3": { value: "2", unit: "u" } });
     expect(faconnage(v)).toEqual([]);
     const labels = v.toBuy.map((b) => b.label);
-    expect(labels.some((l) => /^Feuilles .*rive/i.test(l)), labels.join(" | ")).toBe(false);
+    const feuilles = v.toBuy.filter((b) => /^Feuilles .*2 × 1 m/.test(b.label));
+    // La rive n'est plus dans les feuilles (son usage n'y est pas) : elle part en longueurs toutes faites ; le solin reste plié.
+    expect(feuilles.some((b) => /14 ml de bande/.test(b.precision ?? "")), feuilles.map((b) => b.precision).join(" | ")).toBe(false);
     expect(labels.some((l) => /^Bande de rive/i.test(l)), labels.join(" | ")).toBe(true);
-    expect(labels.some((l) => /^Feuilles .*solin/i.test(l)), labels.join(" | ")).toBe(true);
+    expect(feuilles.some((b) => /5 ml de bande/.test(b.precision ?? "")), feuilles.map((b) => b.precision).join(" | ")).toBe(true);
   });
 
   it("au récapitulatif : chaque pièce avec son choix, modifiable pour elle seule", () => {
@@ -127,7 +135,7 @@ describe("le pliage : une seule réponse pour tout le devis", () => {
     // « tout fait » pour les bacs, « je plie » pour les pièces : la rive part en feuilles, les bacs commandés façonnés.
     const apres = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers: { "param:faconnage@couverture-zinc-joint-debout": { value: "2", unit: "u" }, "param:faconnage@pieces-pliees": { value: "1", unit: "u" } }, preferences: {} });
     expect(apres.questions.filter((q) => /^param:faconnage/.test(q.key))).toEqual([]);
-    expect(apres.purchase.toBuy.some((b) => /^Feuilles .*rive/i.test(b.label)), apres.purchase.toBuy.map((b) => b.label).join(" | ")).toBe(true);
+    expect(apres.purchase.toBuy.some((b) => /^Feuilles .*2 × 1 m/i.test(b.label)), apres.purchase.toBuy.map((b) => b.label).join(" | ")).toBe(true);
   });
 
   it("D-2026-018 : aucune question pour une pièce dont le devis dit le façonnage (« pliées en Z », « comprend le pliage »)", () => {
