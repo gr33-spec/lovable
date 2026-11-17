@@ -184,12 +184,14 @@ test("lot final, points 1 à 4 : « Avant d'envoyer » une seule fois, l'aperçu
   const recoit = page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" });
   const mail = recoit.getByLabel("Le mail à ton négoce");
   await expect(mail).toContainText(`Objet : ${entreprise} : demande de prix`);
-  await expect(mail).toContainText("Bonjour Paul,");
-  // Greg, 12 novembre 2026 : cordial, sans pression ; répondre à l'e-mail d'abord, le lien en ligne ensuite.
-  await expect(mail).toContainText("Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec votre devis en pièce jointe.");
-  await expect(mail).toContainText("La liste des fournitures à chiffrer est en pièce jointe (PDF).");
-  await expect(mail).toContainText("Une question ? Appelez-moi au 06 12 34 56 78.");
-  await expect(mail).toContainText("Demande de prix envoyée avec Mobiiz.");
+  await expect(mail).toContainText("Bonjour,");
+  // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : e-mail court et neutre, « Bonjour, » sans prénom, sans pied « envoyé avec ».
+  // Avant : « Bonjour Paul, », un texte plus long, « Demande de prix envoyée avec Mobiiz. ».
+  await expect(mail).toContainText("Pour répondre : répondez simplement à cet e-mail avec votre devis");
+  await expect(mail).toContainText("liste en pièce jointe");
+  await expect(mail).toContainText("Une question ? 06 12 34 56 78.");
+  await expect(mail).not.toContainText("envoyée avec Mobiiz");
+  await expect(mail).not.toContainText("Paul");
   await expect(mail).not.toContainText("plusieurs fournisseurs");
   await expect(mail).not.toContainText("achètent ensemble");
   // Point 4 : seul le texte libre se modifie ; « Le tutoyer » ; un seul bouton principal.
@@ -198,9 +200,9 @@ test("lot final, points 1 à 4 : « Avant d'envoyer » une seule fois, l'aperçu
   await recoit.getByRole("button", { name: "Garder ce message" }).click();
   await expect(mail).toContainText("Pouvez-vous me chiffrer ces chatières pour vendredi ?");
   await recoit.getByRole("button", { name: "Le tutoyer" }).click();
-  await expect(mail).toContainText("Salut Paul,");
+  await expect(mail).toContainText("réponds simplement à cet e-mail avec ton devis");
   await recoit.getByRole("button", { name: "Le vouvoyer" }).click();
-  await expect(mail).toContainText("Bonjour Paul,");
+  await expect(mail).toContainText("Bonjour,");
   await recoit.getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("region", { name: "Fournisseurs" })).toBeVisible();
   // Point 3 et 5 : expéditeur « Entreprise via Mobiiz », le texte et le HTML, le message gardé.
@@ -227,11 +229,11 @@ test("brouillon de l'envoi aux négoces (correction du 30 octobre, point 2) : qu
   await page.goto(`/chantiers/${q.body.projetId}`);
   await page.getByRole("button", { name: "Demander les prix à mes négoces" }).first().click();
   await page.getByRole("dialog", { name: "À qui j'envoie ?" }).getByRole("button", { name: "Continuer" }).click();
-  await expect(page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByLabel("Le mail à ton négoce")).toContainText("Bonjour Paul,");
+  await expect(page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByLabel("Le mail à ton négoce")).toContainText("Bonjour,");
   // L'app fermée puis rouverte (la feuille d'envoi est en plein écran) : la demande reprend sur l'aperçu.
   await page.waitForTimeout(800);
   await page.reload();
-  await expect(page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByLabel("Le mail à ton négoce")).toContainText("Bonjour Paul,");
+  await expect(page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByLabel("Le mail à ton négoce")).toContainText("Bonjour,");
   // Et l'accueil la propose (1er novembre 2026) : « À faire maintenant », « Terminer ta demande de prix », « Continuer ».
   await page.goto("/");
   const afaire = page.getByRole("region", { name: "À faire maintenant", exact: true });

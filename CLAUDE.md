@@ -186,6 +186,21 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Chaque ligne dit son origine quand la liste mêle les deux : « Dit par toi », « Calculé », « À vérifier ».
 - Admin › « Corrections les plus fréquentes » : la ligne proposée et la ligne corrigée, sur 90 jours, sans nom d'entreprise ni de chantier.
 
+## Décisions du 17 novembre 2026 (soir) : « droit au but », après le test du chantier ardoise de Greg
+
+- Principe (tous métiers) : le négoce reçoit une commande claire, rien d'autre. L'usage des articles, le détail par pièce et les calculs restent dans l'app.
+- Règle changée : une seule ligne par article identique, avec le total (toutes les feuilles de zinc réunies ; comptées pièce par pièce, puis additionnées). Avant : une ligne par ouvrage, avec son usage.
+- Document envoyé : jamais de « ? », d'hypothèse, de note pour l'artisan ni de « au choix du fournisseur ». Une ligne sans quantité n'est pas dans le tableau : elle est dans « À préciser », qui n'existe que s'il n'est pas vide.
+- Les mots de l'artisan ne sont pas transformés (« mortier de ciment » reste « mortier de ciment »). Une équivalence se demande.
+- Unité de vente identique dans l'app et le PDF (« 2 tubes de 3 m ») ; plus de « (10 ml à couvrir) » ni de doublon « Ø 80 (Ø80) ».
+- Le PDF reflète exactement la liste de l'app : test permanent `apps/api/test/commande-claire-negoce.test.ts` (le chantier de Greg, lecture réelle enregistrée, repère « JEU-D2026-020 »).
+- PDF allégé : en-tête, deux lignes de description au plus, le tableau, « À préciser » si besoin, le bloc de réponse (adresse Mobiiz du chantier et texte de Greg du 31 octobre). Plus de section « Informations complémentaires ». Logo de l'entreprise ou ses initiales. Règle changée : jamais l'e-mail personnel de l'artisan (avant : il servait de repli pour l'adresse de réponse et figurait dans l'en-tête).
+- E-mail au négoce : court et neutre, « Bonjour, » sans prénom, le chantier et le nombre d'articles, comment répondre, le portable, la signature. Règle changée : plus de ligne « créer votre accès » dans l'e-mail (elle reste sur la page de chiffrage, après la réponse), plus de pied « envoyé avec Mobiiz ».
+- Ardoises : le pureau ne se demande jamais (`neverAsk`). Format de l'ardoise et taille des crochets → pureau, ardoises au m², crochets, liteaux. Tableau à valider par Greg : `baticlair/docs/tableau-ardoises.md` (généré par le code).
+- Feuilles de zinc : règle validée par Greg pour démarrer (feuille de 2 × 1 m, chutes non réutilisées). C'est une estimation : le nombre de feuilles doit s'ajuster d'un toucher dans la liste (à faire).
+- Vitesse : pas de découpage en trois pour l'instant, la qualité passe avant. À la place : les lignes affichées une par une pendant la lecture, et les gains sans risque au début et à la fin (à faire).
+- À faire, décidé par Greg : étape « Suggestions » après la lecture (cases à cocher, règles de la fiche métier, cinq au plus, aucune = pas d'étape) ; angles, talons et naissances de gouttière seulement en suggestion ; coût et temps d'une analyse (petit, moyen, gros devis) ; puis la fiche Peinture au niveau de la Couverture.
+
 ## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg
 
 - Stripe (test) : les quatre prix sont créés et posés sur la branche de test (`STRIPE_PRIX_PRO`, `_PROMAX`, `_PRO_ANNUEL`, `_PROMAX_ANNUEL`).
