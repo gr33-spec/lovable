@@ -199,6 +199,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Ardoises : le pureau ne se demande jamais (`neverAsk`). Format de l'ardoise et taille des crochets → pureau, ardoises au m², crochets, liteaux. Tableau à valider par Greg : `baticlair/docs/tableau-ardoises.md` (généré par le code).
 - Feuilles de zinc : règle validée par Greg pour démarrer (feuille de 2 × 1 m, chutes non réutilisées). C'est une estimation : le nombre de feuilles doit s'ajuster d'un toucher dans la liste (à faire).
 - Vitesse : pas de découpage en trois pour l'instant, la qualité passe avant. À la place : les lignes affichées une par une pendant la lecture, et les gains sans risque au début et à la fin (à faire).
+- Lecture d'un devis : le nom d'une fourniture ne dit que les mots du devis (jamais une alternative, une matière ou une dimension qu'il ne donne pas), prompt `lecture_devis` version 8.
 - À faire, décidé par Greg : étape « Suggestions » après la lecture (cases à cocher, règles de la fiche métier, cinq au plus, aucune = pas d'étape) ; angles, talons et naissances de gouttière seulement en suggestion ; coût et temps d'une analyse (petit, moyen, gros devis) ; puis la fiche Peinture au niveau de la Couverture.
 
 ## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg

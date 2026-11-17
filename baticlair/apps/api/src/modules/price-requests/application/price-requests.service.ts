@@ -78,6 +78,7 @@ export function buildPacket(
       .replace(/\s+,/g, ",")
       .trim();
   // §45.3 bloc 2 : désignation · quantité dans l'unité de vente (et la longueur à couvrir quand elle diffère) · précision.
+  const memes = (designation: string) => purchase.toBuy.filter((b) => b.kind === "direct" && takeoff.lines.some((t) => b.lineIds.includes(t.id) && t.designation === designation)).length;
   const dansLOrdre: (PacketSupply & { at: number })[] = [
     ...purchase.toBuy
       .filter((b) => b.kind === "computed")
@@ -99,7 +100,8 @@ export function buildPacket(
         at: item ? Math.min(...item.lineIds.map((id) => takeoff.lines.findIndex((t) => t.id === id)).filter((x) => x >= 0), Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER,
         designation: net(`${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""}`),
         // La même unité que dans l'app (« 2 tubes de 3 m », pas « 6 m ») : celle de la ligne de la liste, sinon celle du devis.
-        quantite: item?.quantity ?? requestedQuantityText(l),
+        // Des lignes identiques réunies (« Prise 2P+T » 3 + 2) gardent leur total : la quantité d'UNE ligne de la liste ne vaut pas pour elles.
+        quantite: (memes(l.designation) === 1 ? item?.quantity : null) ?? requestedQuantityText(l),
         precision: precision(supplierLineLabel(l.designation), item),
         ...(item ? { cle: item.key } : {}),
       };

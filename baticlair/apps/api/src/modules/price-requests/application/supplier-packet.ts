@@ -1,4 +1,4 @@
-import { priceLeak, NEW_PROJECT_NAME } from "@baticlair/domain";
+import { MENTION_RATIOS, priceLeak, NEW_PROJECT_NAME } from "@baticlair/domain";
 import { NOM_APP, CONDITIONS_PDF, hexCouleurPdf, MODELE_PDF_DEFAUT, PHRASE_REPONSE_PDF, quantiteEtUnite, TITRE_PDF, type ModelePdf } from "@baticlair/domain";
 // Le test du prix (§42.2, §43.5) vit dans le domaine, à côté du bref (§50.7) qui s'en sert aussi.
 export { priceLeak };
@@ -210,7 +210,7 @@ export const TITRE_COMPLEMENTS = "Informations complémentaires sur le chantier"
  * DROIT AU BUT (Greg, 17 novembre 2026) : « le négoce reçoit une commande claire, rien d'autre ». Le document allégé :
  * l'en-tête (l'entreprise, l'adresse de réponse Mobiiz, le nom du chantier, la date, la référence), deux lignes de
  * description au plus, le tableau, et « À préciser » seulement si elle n'est pas vide. RÈGLES CHANGÉES : avant, une
- * section 3 « Informations complémentaires sur le chantier », la mention « Ratios en cours de validation », l'e-mail
+ * section 3 « Informations complémentaires sur le chantier », l'e-mail
  * personnel de l'artisan dans l'en-tête et le pied. Maintenant : jamais l'e-mail personnel (la réponse revient à l'adresse
  * Mobiiz du chantier, dans le bloc de réponse, qui garde le texte de Greg), aucune note destinée à l'artisan, aucun
  * « ? » ; une ligne sans quantité n'est pas dans le tableau, elle est « À préciser ».
@@ -237,7 +237,7 @@ export function packetDocument(p: SupplierPacket, options: { destinataire?: stri
   if (aPreciser.length > 0) blocs.push({ numero: ++n, titre: "À préciser", kind: "list", lignes: aPreciser });
   const tel = s?.telephone?.trim();
   return {
-    entete: { entreprise: p.entreprise, coordonnees, titre: TITRE_PDF, chantier: chantierLabel(p.chantier), ville: p.commune, date: dateFr(p.date), reference: p.reference ?? null, mention: null },
+    entete: { entreprise: p.entreprise, coordonnees, titre: TITRE_PDF, chantier: chantierLabel(p.chantier), ville: p.commune, date: dateFr(p.date), reference: p.reference ?? null, mention: p.ratios_en_validation ? MENTION_RATIOS : null },
     destinataire: options.destinataire ?? null,
     blocs,
     croquis: (p.croquis ?? []).map((c) => ({ article: c.article, nom: c.nom, commentaire: c.commentaire })),
