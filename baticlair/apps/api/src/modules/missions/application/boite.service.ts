@@ -22,7 +22,7 @@ export class BoiteService {
 
   async boite(t: TenantContext): Promise<{ items: ElementBoite[]; missions: boolean }> {
     const missions = await this.missionsActives();
-    const [conversations, emails, reponses, lues, alertes] = await Promise.all([
+    const [conversations, emails, reponses, lues, alertes, site] = await Promise.all([
       missions ? this.missions.conversations(t, "toutes").then((r) => r.items) : [],
       this.prisma.emailRecuArtisan.findMany({
         where: { companyId: t.companyId },
@@ -41,6 +41,8 @@ export class BoiteService {
       // le MÊME état lu que la cloche (`lu_le`). Les alertes « prix » et « missions » n'y sont pas : leur réponse ou leur
       // conversation y figure déjà, on ne la montre pas deux fois.
       this.prisma.alerteCourte.findMany({ where: { companyId: t.companyId, supprimeeLe: null, categorie: { in: ["groupe", "conseils"] } }, orderBy: { createdAt: "desc" }, take: 60 }),
+      // Greg, 17 novembre 2026 : les demandes de devis reçues sur « Mon site ».
+      this.prisma.messageSite.findMany({ where: { companyId: t.companyId }, orderBy: { createdAt: "desc" }, take: 100, select: { id: true, nom: true, commune: true, message: true, createdAt: true, luLe: true } }),
     ]);
     const dejaLues = new Set(lues.map((l) => l.cle));
     const items: ElementBoite[] = [
@@ -71,6 +73,16 @@ export class BoiteService {
         nonLu: !dejaLues.has(`reponse:${r.id}`),
         href: `/chantiers/${r.priceRequest.projectId}#fournisseurs`,
       })),
+      ...site.map((m) => ({
+        cle: `site:${m.id}`,
+        sorte: "site" as const,
+        titre: m.nom,
+        sujet: m.commune ? `Demande de devis · ${m.commune}` : "Demande de devis",
+        extrait: m.message.replace(/\s+/g, " ").trim().slice(0, 120),
+        le: m.createdAt.toISOString(),
+        nonLu: !m.luLe,
+        href: `/messages/site/${m.id}`,
+      })),
       ...alertes.map((a) => ({ cle: `alerte:${a.id}`, sorte: "mobiiz" as const, titre: "Mobiiz", sujet: a.titre, extrait: a.detail, le: a.createdAt.toISOString(), nonLu: !a.luLe, href: a.href })),
     ];
     return { items, missions };
@@ -86,11 +98,23 @@ export class BoiteService {
     } else if (sorte === "reponse") {
       if (!(await this.prisma.priceRequestRecipient.count({ where: { id, priceRequest: { companyId: t.companyId } } }))) throw notFound("Élément");
       await this.prisma.lectureBoite.createMany({ data: [{ companyId: t.companyId, cle }], skipDuplicates: true });
+    } else if (sorte === "site") {
+      const r = await this.prisma.messageSite.updateMany({ where: { id, companyId: t.companyId, luLe: null }, data: { luLe: new Date() } });
+      if (r.count === 0 && !(await this.prisma.messageSite.count({ where: { id, companyId: t.companyId } }))) throw notFound("Élément");
     } else if (sorte === "alerte") {
       const r = await this.prisma.alerteCourte.updateMany({ where: { id, companyId: t.companyId, luLe: null }, data: { luLe: new Date() } });
       if (r.count === 0 && !(await this.prisma.alerteCourte.count({ where: { id, companyId: t.companyId } }))) throw notFound("Élément");
     } else throw notFound("Élément");
     return { lu: true };
+  }
+
+  /** Une demande de devis reçue sur « Mon site » : le message entier et les coordonnées du client ; l'ouvrir la marque lue. */
+  async messageSite(t: TenantContext, id: string) {
+    if (!isUuid(id)) throw notFound("Message");
+    const m = await this.prisma.messageSite.findFirst({ where: { id, companyId: t.companyId }, select: { id: true, nom: true, telephone: true, email: true, commune: true, message: true, createdAt: true, luLe: true } });
+    if (!m) throw notFound("Message");
+    if (!m.luLe) await this.prisma.messageSite.update({ where: { id }, data: { luLe: new Date() } });
+    return { id: m.id, nom: m.nom, telephone: m.telephone, email: m.email, commune: m.commune, message: m.message, le: m.createdAt.toISOString() };
   }
 
   /* --------------------------------------------------------------------------------------------- La cloche */

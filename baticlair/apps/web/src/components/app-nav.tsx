@@ -96,7 +96,9 @@ export function AppNav() {
           ) : null}
         </span>
         {/* Cinq onglets (16 novembre 2026) : sur un très petit écran (moins de 360 px), un rien plus serré pour que rien ne déborde. */}
-        <span className="text-center leading-[1.1] text-balance max-lg:text-[11px] max-[359px]:text-[10px] max-[359px]:tracking-[-0.02em] lg:whitespace-nowrap">{item.label}</span>
+        {/* Greg, 17 novembre 2026 : chaque libellé sur UNE ligne (« Achats groupés » ne passe plus à la ligne) ; les colonnes
+            prennent la largeur de leur libellé, les icônes restent alignées. */}
+        <span className="text-center leading-[1.1] whitespace-nowrap max-lg:text-[11px] max-[389px]:text-[10.5px] max-[389px]:tracking-[-0.015em] max-[359px]:text-[9.5px] max-[359px]:tracking-[-0.025em]">{item.label}</span>
         {item === missionsItem && missionsBientot ? (
           <span aria-hidden="true" className="ml-auto hidden rounded-full bg-accent px-2 text-[11px] leading-5 font-extrabold text-on-accent lg:inline">
             Bientôt
@@ -114,7 +116,7 @@ export function AppNav() {
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
           colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}
-      <div className={`mx-2.5 max-[359px]:mx-1.5 max-[359px]:px-0.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-5" : "grid-cols-4"} rounded-[26px] bg-glass px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
+      <div className={`mx-2.5 max-[359px]:mx-1.5 max-[359px]:px-0.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[repeat(5,auto)]" : "grid-cols-[repeat(4,auto)]"} justify-between rounded-[26px] bg-glass px-2 max-[359px]:px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
         <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
           <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
         </span>

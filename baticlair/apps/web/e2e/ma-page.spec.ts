@@ -38,6 +38,15 @@ async function toucher(l: Locator) {
   await l.click();
 }
 
+/** Ouvre un onglet des réglages de « Mon site » (Greg, 17 novembre 2026) ; déjà ouvert, on n'y touche pas. */
+async function onglet(page: Page, nom: string) {
+  const t = page.getByRole("tab", { name: nom, exact: true });
+  // Le clavier se referme d'abord (la barre des onglets se cache pendant la saisie, comme le menu de l'app).
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  if ((await t.getAttribute("aria-selected")) !== "true") await toucher(t);
+  await expect(page.getByRole("tabpanel", { name: nom })).toBeVisible();
+}
+
 const enregistre = (page: Page) => expect(page.getByText("Enregistré : ton site est à jour.")).toBeVisible();
 const apercu = (page: Page) => page.locator("[data-testid=apercu-page]:visible").first();
 
@@ -59,6 +68,7 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Mon site" }).click();
   await expect(page).toHaveURL(/\/mon-site$/);
   await expect(page.getByRole("heading", { name: "Mon site", level: 1 })).toBeVisible();
+  await onglet(page, "Publier");
   await expect(page.getByRole("switch", { name: /Page visible/ })).toHaveAttribute("aria-checked", "false");
   // L'aperçu est déjà là, prérempli depuis le profil : le grand titre est le métier, le nom dessous ; les prestations du
   // métier sont proposées.
@@ -74,6 +84,7 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await expect(v.getByRole("heading", { name: "Page introuvable" })).toBeVisible();
 
   // Un seul modèle ; une des quatre teintes.
+  await onglet(page, "Couleurs");
   await expect(page.getByRole("radio", { name: "Classique en colonnes" })).toHaveCount(0);
   await expect(page.getByRole("radio", { name: "Fond sombre" })).toHaveCount(0);
   await page.getByRole("radio", { name: "Bleu nuit" }).click();
@@ -86,23 +97,28 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await page.getByRole("radiogroup", { name: "Couleur des boutons" }).getByRole("radio", { name: "Jaune Mobiiz" }).click();
   await enregistre(page);
   // Une prestation se retire.
+  await onglet(page, "Prestations");
   await page.getByRole("button", { name: "Retirer la prestation Entretien et démoussage" }).click();
   await enregistre(page);
   // Textes, téléphone, zone, certification.
+  await onglet(page, "À propos");
   await page.getByRole("textbox", { name: /^Accroche/ }).fill("Ardoise, zinc et tuile autour de Lannion");
   await page.getByRole("textbox", { name: /^Présentation/ }).fill("Couvreur depuis 15 ans, nous refaisons vos toitures avec soin.");
+  await toucher(page.getByRole("button", { name: "Assurance décennale" }));
+  await onglet(page, "Contact");
   await page.getByRole("textbox", { name: /^Téléphone/ }).fill("02 96 11 22 33");
   await page.getByRole("textbox", { name: /^Zone d'intervention/ }).fill("Lannion");
-  await page.getByRole("button", { name: "Assurance décennale" }).click();
   await enregistre(page);
   await expect(apercu(page).locator("h1")).toHaveText("Couvreur à Lannion");
   await expect(apercu(page).getByText("Ardoise, zinc et tuile autour de Lannion")).toBeVisible();
   // « Mobiiz m'aide à l'écrire » propose, rien n'est remplacé sans l'artisan.
-  await page.getByRole("button", { name: "Mobiiz m'aide à l'écrire" }).click();
+  await onglet(page, "À propos");
+  await toucher(page.getByRole("button", { name: "Mobiiz m'aide à l'écrire" }));
   await expect(page.getByTestId("proposition")).toBeVisible();
   await page.getByRole("button", { name: "Garder les miens" }).click();
   await expect(page.getByRole("textbox", { name: /^Accroche/ })).toHaveValue("Ardoise, zinc et tuile autour de Lannion");
   // Un chantier et sa photo : envoyée telle quelle, préparée par Mobiiz en arrière-plan.
+  await onglet(page, "Chantiers");
   await page.getByRole("checkbox", { name: /J'ai pris ces photos ou j'ai le droit de les utiliser/ }).check();
   await page.getByRole("textbox", { name: "Titre du nouveau chantier" }).fill("Toiture ardoise · Paimpol");
   await page.getByRole("button", { name: "Nouveau chantier" }).click();
@@ -110,6 +126,7 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await page.locator('input[type=file][multiple]').first().setInputFiles(PHOTO);
   await expect(page.getByRole("list", { name: "Photos du chantier" }).locator("img")).toHaveCount(1, { timeout: 30_000 });
   // Publier.
+  await onglet(page, "Publier");
   await toucher(page.getByRole("switch", { name: /Page visible/ }));
   await enregistre(page);
   await expect(page.getByRole("link", { name: "Ouvrir en ligne" })).toHaveAttribute("href", `/e/${adresse}?depuis=mon-site`);
@@ -126,7 +143,7 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await toucher(page.getByRole("button", { name: "Partager" }));
   await expect(page.getByRole("dialog", { name: "Partager mon site" }).getByRole("img", { name: /QR code/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", /wa\.me/);
-  await page.getByRole("button", { name: "Fermer" }).click();
+  await page.getByRole("dialog", { name: "Partager mon site" }).getByRole("button", { name: "Fermer", exact: true }).click();
 
   // Le visiteur : la page tout de suite à jour (cache régénéré), rien d'autre de Mobiiz.
   await v.goto(`/e/${adresse}`);
@@ -174,12 +191,22 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await v.getByLabel("Téléphone").fill("06 00 00 00 00");
   await v.getByLabel("Votre projet").fill("Bonjour, j'ai une fuite sur ma toiture.");
   await v.getByRole("button", { name: "Envoyer ma demande" }).click();
-  await expect(v.getByRole("status").filter({ hasText: "Message envoyé" })).toBeVisible();
+  await expect(v.getByRole("status").filter({ hasText: "votre demande est bien partie" })).toBeVisible();
   // Signaler cette page.
   await v.getByText("Signaler cette page").click();
   await v.getByRole("radio", { name: "Cette page usurpe une entreprise" }).check();
   await v.getByRole("button", { name: "Envoyer le signalement" }).click();
   await expect(v.getByText("Merci, l'équipe Mobiiz va regarder cette page.")).toBeVisible();
+
+  // Greg, 17 novembre 2026 : la demande arrive aussi dans « Messages et réponses », avec le téléphone du client.
+  await page.goto("/messages");
+  await page.getByRole("link", { name: /^Mon site, Paul Client, non lu/ }).click();
+  await expect(page.getByRole("heading", { name: "Paul Client", level: 1 })).toBeVisible();
+  await expect(page.getByText("Bonjour, j'ai une fuite sur ma toiture.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Appeler Paul Client" })).toHaveAttribute("href", "tel:0600000000");
+  await page.goto("/mon-site");
+  await expect(page.getByRole("heading", { name: "Mon site", level: 1 })).toBeVisible();
+  await onglet(page, "Publier");
 
   // Repasser en privée : la page disparaît tout de suite pour le visiteur.
   await toucher(page.getByRole("switch", { name: /Page visible/ }));
@@ -194,6 +221,7 @@ test("Ma page : deux comptes, chacun ne voit et ne règle que la sienne", async 
   const a = `Toits Martin ${unique()}`;
   await inscrire(page, a);
   await page.goto("/mon-site");
+  await onglet(page, "À propos");
   await page.getByRole("textbox", { name: /^Accroche/ }).fill("Accroche privée de A");
   await enregistre(page);
   const ctxB = await browser.newContext({ baseURL: "http://localhost:3000", viewport: page.viewportSize()! });
@@ -213,6 +241,37 @@ test("Ma page : deux comptes, chacun ne voit et ne règle que la sienne", async 
   await ctxB.close();
 });
 
+test("Mon site : la photo par défaut du métier, remplacée d'un tap depuis la galerie (Greg, 17 novembre 2026)", async ({ page }) => {
+  test.setTimeout(150_000);
+  await inscrire(page, `Plâtrerie Martin ${unique()}`, "Plâtrerie, isolation");
+  await page.goto("/mon-site");
+  const couverture = apercu(page).locator(".pe-accueil-photo img");
+  // Sans photo à lui, le plaquiste a la photo de son métier, jamais un chantier qu'il n'a pas fait.
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/drywall/);
+  await expect(couverture).toHaveAttribute("alt", "Photo d'illustration du métier");
+  await expect(apercu(page).locator(".pe-credit-photo")).toContainText("Asurnipal");
+  await onglet(page, "Photos");
+  await expect(page.getByText("Photo de la galerie")).toBeVisible();
+  await toucher(page.getByRole("button", { name: /Choisir dans la galerie/ }));
+  const galerie = page.getByRole("radiogroup", { name: "Galerie de photos" });
+  await expect(galerie.getByRole("radio", { name: "Selon mon métier" })).toHaveAttribute("aria-checked", "true");
+  await toucher(galerie.getByRole("radio", { name: "Maisons neuves terminées" }));
+  await enregistre(page);
+  await expect(galerie.getByRole("radio", { name: "Maisons neuves terminées" })).toHaveAttribute("aria-checked", "true");
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/neutre-4/);
+  // CC0 : pas de crédit.
+  await expect(apercu(page).locator(".pe-credit-photo")).toHaveCount(0);
+  // Rechargé : le choix est gardé ; « Selon mon métier » le rend.
+  await page.reload();
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/neutre-4/);
+  await onglet(page, "Photos");
+  await toucher(page.getByRole("button", { name: /Choisir dans la galerie/ }));
+  await toucher(page.getByRole("radiogroup", { name: "Galerie de photos" }).getByRole("radio", { name: "Selon mon métier" }));
+  await enregistre(page);
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/drywall/);
+  await sansDefilementHorizontal(page);
+});
+
 test("Ma page : l'éditeur dans les thèmes clair et sombre de l'application, sans défilement horizontal", async ({ page }) => {
   test.setTimeout(120_000);
   await inscrire(page, `Toits Martin ${unique()}`);
@@ -221,6 +280,7 @@ test("Ma page : l'éditeur dans les thèmes clair et sombre de l'application, sa
     await page.goto("/mon-site");
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     await expect(page.getByRole("heading", { name: "Mon site", level: 1 })).toBeVisible();
+    await onglet(page, "À propos");
     await expect(page.getByRole("button", { name: "Mobiiz m'aide à l'écrire" })).toBeVisible();
     await sansDefilementHorizontal(page);
   }
@@ -308,7 +368,7 @@ test.describe("captures du rapport", () => {
       await p.reload();
       await expect(p.getByRole("button", { name: "Voir mon site" })).toBeVisible();
       await p.screenshot({ path: `${dossier}/telephone-editeur-flottant.png` });
-      await p.getByRole("heading", { name: "Teinte" }).scrollIntoViewIfNeeded();
+      await onglet(p, "Couleurs");
       await p.screenshot({ path: `${dossier}/telephone-nuancier.png` });
       await p.getByRole("button", { name: "Voir mon site" }).click();
       const plein = p.getByRole("dialog", { name: "Aperçu de mon site" });
@@ -326,7 +386,7 @@ test.describe("captures du rapport", () => {
         await p.screenshot({ path: `${dossier}/telephone-boutons-${id}.png` });
       }
       await p.getByRole("button", { name: "Retour" }).click();
-      await p.getByRole("heading", { name: "Couleur des boutons" }).scrollIntoViewIfNeeded();
+      await onglet(p, "Couleurs");
       await p.screenshot({ path: `${dossier}/telephone-couleur-boutons.png` });
     }
     await ctx.close();
@@ -362,26 +422,33 @@ test("Mon site : cinq onglets tiennent sur un petit iPhone, sans texte coupé ; 
     for (const m of mesures) {
       expect(m.gauche, m.nom).toBeGreaterThanOrEqual(-0.5);
       expect(m.droite, m.nom).toBeGreaterThanOrEqual(-0.5);
-      expect(m.lignes, m.nom).toBeLessThanOrEqual(2);
-      // 11 px dès 375 px (iPhone SE, mini) ; 10 px sur un écran de 320 px.
-      expect(m.taille, m.nom).toBeGreaterThanOrEqual(largeur >= 360 ? 11 : 10);
+      // Greg, 17 novembre 2026 : chaque libellé sur UNE ligne (« Achats groupés » compris), lisible.
+      expect(m.lignes, m.nom).toBe(1);
+      expect(m.taille, m.nom).toBeGreaterThanOrEqual(largeur >= 360 ? 10.5 : 9.5);
       expect(m.x, m.nom).toBeGreaterThanOrEqual(0);
       expect(m.fin, m.nom).toBeLessThanOrEqual(largeur);
     }
     await p.screenshot({ path: `test-results/mon-site-onglets-${largeur}.png` });
-    // L'onglet ouvre l'éditeur : l'aperçu d'abord, puis Teinte, Prestations, Chantiers, À propos, la visibilité et le partage.
+    // L'onglet ouvre l'éditeur (Greg, 17 novembre 2026, « style Lovable ») : le site en haut, toujours visible ; en bas,
+    // les sept onglets des réglages ; un onglet ouvre son tiroir sous le site.
     await nav.getByRole("link", { name: "Mon site" }).click();
     await expect(nav.getByRole("link", { name: "Mon site" })).toHaveAttribute("aria-current", "page");
+    await expect(p.getByRole("tablist", { name: "Réglages du site" }).getByRole("tab")).toHaveText(["Couleurs", "Photos", "Prestations", "Chantiers", "À propos", "Contact", "Publier"]);
+    await expect(apercu(p)).toBeVisible();
+    await onglet(p, "Couleurs");
     await expect(p.getByRole("heading", { name: "Teinte" })).toBeVisible();
-    // Les titres de l'éditeur seulement (l'aperçu, lui, a ses propres rubriques).
-    const titres = await p.evaluate(() => [...document.querySelectorAll("h2")].filter((h) => !h.closest(".pe") && h.getClientRects().length).map((h) => h.textContent?.trim() ?? ""));
-    const ordre = ["Teinte", "Prestations", "Chantiers", "À propos"].map((t) => titres.indexOf(t));
-    expect(ordre.every((i, k) => i >= 0 && (k === 0 || i > ordre[k - 1]!))).toBe(true);
-    const yApercu = (await apercu(p).boundingBox())!.y;
-    expect(yApercu).toBeLessThan((await p.getByRole("heading", { name: "Teinte" }).boundingBox())!.y);
-    expect((await p.getByRole("switch", { name: /Page visible/ }).boundingBox())!.y).toBeGreaterThan((await p.getByRole("heading", { name: "À propos" }).boundingBox())!.y);
+    expect((await apercu(p).boundingBox())!.y).toBeLessThan((await p.getByRole("tabpanel", { name: "Couleurs" }).boundingBox())!.y);
+    // Une couleur touchée change le site aussitôt, sans rien faire d'autre.
+    await toucher(p.getByRole("radiogroup", { name: "Couleur des boutons" }).getByRole("radio", { name: "Rouge" }));
+    await expect(apercu(p).locator(".pe-accueil .pe-btn-appel").first()).toHaveCSS("background-color", "rgb(224, 49, 49)");
+    // « Voir mon site » et l'état « Enregistré » ne recouvrent jamais un champ : ils vivent au-dessus du site.
+    await onglet(p, "À propos");
+    const champ = (await p.getByRole("textbox", { name: /^Accroche/ }).boundingBox())!;
+    const bouton = (await p.getByRole("button", { name: "Voir mon site" }).boundingBox())!;
+    expect(bouton.y + bouton.height <= champ.y || bouton.y >= champ.y + champ.height).toBe(true);
+    await onglet(p, "Publier");
+    await expect(p.getByRole("switch", { name: /Page visible/ })).toBeVisible();
     await expect(p.getByRole("button", { name: "Partager" })).toBeVisible();
-    await expect(p.getByRole("button", { name: "Voir mon site" })).toBeVisible();
     await sansDefilementHorizontal(p);
     // Un seul chemin : plus d'entrée « Ma page » au Profil ; l'ancienne adresse mène à l'onglet.
     await p.goto("/compte");

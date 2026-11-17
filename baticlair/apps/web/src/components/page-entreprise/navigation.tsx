@@ -73,7 +73,7 @@ export function EnTeteSite({ nom, activite, logo, initiales, telephone, menu }: 
           ))}
         </nav>
         {telephone ? (
-          <a href={lienAppel(telephone)} className="pe-btn pe-btn-appel pe-entete-appel">
+          <a href={lienAppel(telephone)} className="pe-btn pe-btn-appel pe-entete-appel" aria-label={`Appeler le ${telephone}`}>
             <Phone size={17} strokeWidth={2.4} aria-hidden="true" />
             <span className="pe-entete-appel-court">Appeler</span>
             <span className="pe-entete-appel-long">{telephone}</span>

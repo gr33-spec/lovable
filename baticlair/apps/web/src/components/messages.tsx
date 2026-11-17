@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUp, Bell, Briefcase, CreditCard, FileText, MoreHorizontal, Paperclip } from "lucide-react";
+import { ArrowUp, Bell, Briefcase, CreditCard, FileText, Globe, Mail, MoreHorizontal, Paperclip, Phone } from "lucide-react";
 import { AvatarEntreprise } from "./image-profil";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -71,8 +71,8 @@ export function Boite() {
         </>
       ) : items.length === 0 ? (
         <div className={`flex flex-col gap-1 p-5 ${CARTE}`}>
-          <p className="text-[16px] font-extrabold">{q.trim() ? "Aucun résultat pour cette recherche" : filtre === "non-lus" ? "Tout est lu" : filtre === "missions" ? "Aucune conversation Missions" : "Aucune réponse de négoce"}</p>
-          <p className="text-[14px] text-[#5c5648]">{filtre === "negoces" ? "Les réponses arrivent ici dès qu'un négoce répond à une demande de prix." : filtre === "missions" ? "Une conversation s'ouvre après une réponse à une mission." : "Change de filtre pour voir le reste."}</p>
+          <p className="text-[16px] font-extrabold">{q.trim() ? "Aucun résultat pour cette recherche" : filtre === "non-lus" ? "Tout est lu" : filtre === "missions" ? "Aucune conversation Missions" : filtre === "site" ? "Aucune demande reçue sur ton site" : "Aucune réponse de négoce"}</p>
+          <p className="text-[14px] text-[#5c5648]">{filtre === "negoces" ? "Les réponses arrivent ici dès qu'un négoce répond à une demande de prix." : filtre === "missions" ? "Une conversation s'ouvre après une réponse à une mission." : filtre === "site" ? "Quand un visiteur clique sur « Demander un devis » sur ton site, son message arrive ici et par e-mail." : "Change de filtre pour voir le reste."}</p>
         </div>
       ) : (
         groupesBoite(items, maintenant).map((g) => (
@@ -81,12 +81,12 @@ export function Boite() {
             <ul className="flex flex-col gap-3">
               {g.items.map((i) => (
                 <li key={i.cle}>
-                  <Link href={i.href} onClick={() => marquer(i)} aria-label={`${i.sorte === "mission" ? "Mission" : i.sorte === "mobiiz" ? "Mobiiz" : "Négoce"}, ${i.titre}${i.sorte === "negoce" ? (i.aClasser ? ", à classer" : ", classée dans son quantitatif") : ""}${i.nonLu ? ", non lu" : ""}`} className={`pressable flex items-start gap-3 p-4 ${CARTE}`}>
+                  <Link href={i.href} onClick={() => marquer(i)} aria-label={`${i.sorte === "mission" ? "Mission" : i.sorte === "mobiiz" ? "Mobiiz" : i.sorte === "site" ? "Mon site" : "Négoce"}, ${i.titre}${i.sorte === "negoce" ? (i.aClasser ? ", à classer" : ", classée dans son quantitatif") : ""}${i.nonLu ? ", non lu" : ""}`} className={`pressable flex items-start gap-3 p-4 ${CARTE}`}>
                     <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#efece6]">
-                      {i.sorte === "mission" ? <Briefcase size={20} /> : i.sorte === "mobiiz" ? <Bell size={20} /> : <CreditCard size={20} />}
+                      {i.sorte === "mission" ? <Briefcase size={20} /> : i.sorte === "mobiiz" ? <Bell size={20} /> : i.sorte === "site" ? <Globe size={20} /> : <CreditCard size={20} />}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <Etiquette ton={i.sorte === "mobiiz" ? "gris" : i.sorte === "mission" || i.aClasser ? "jaune" : "vert"}>{i.sorte === "mission" ? "Mission" : i.sorte === "mobiiz" ? "Mobiiz" : i.aClasser ? "Négoce · à classer" : "Négoce · classée"}</Etiquette>
+                      <Etiquette ton={i.sorte === "mobiiz" ? "gris" : i.sorte === "mission" || i.sorte === "site" || i.aClasser ? "jaune" : "vert"}>{i.sorte === "mission" ? "Mission" : i.sorte === "mobiiz" ? "Mobiiz" : i.sorte === "site" ? "Mon site" : i.aClasser ? "Négoce · à classer" : "Négoce · classée"}</Etiquette>
                       <span className="truncate text-[17px] font-extrabold">{i.titre}</span>
                       {i.sujet ? <span className="truncate text-[13px] font-extrabold text-[#6b5300]">{i.sujet}</span> : null}
                       <span className="truncate text-[13px] text-[#5c5648]">{i.extrait}</span>
@@ -394,6 +394,58 @@ export function ReponseNegoce({ id }: { id: string }) {
         Répondre au négoce
       </a>
       <p className="text-center text-[13px] text-muted">Le message original et ses pièces jointes restent conservés{e.demande ? " dans la demande" : ""}.</p>
+    </>
+  );
+}
+
+/** Une demande de devis reçue sur « Mon site » (Greg, 17 novembre 2026) : le message entier, appeler ou répondre d'un tap. */
+export function MessageDuSite({ id }: { id: string }) {
+  const fetcher = useCallback((signal: AbortSignal) => api<{ id: string; nom: string; telephone: string | null; email: string | null; commune: string | null; message: string; le: string }>(`/v1/boite/site/${id}`, { signal }), [id]);
+  const { data: m, error, reload } = useResource(fetcher);
+  if (!m) {
+    return (
+      <>
+        <EcranTitre titre="Demande de devis" retour="/messages" />
+        <EtatEcran erreur={error} onReessayer={reload} retour={{ href: "/messages", libelle: "Revenir aux messages" }} />
+      </>
+    );
+  }
+  const quand = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }).format(new Date(m.le));
+  return (
+    <>
+      <EcranTitre titre="Demande de devis" retour="/messages" />
+      <header className="flex flex-col gap-1">
+        <Etiquette ton="jaune">Mon site</Etiquette>
+        <h1 className="font-display text-[26px] leading-[1.1] font-extrabold tracking-[-0.02em] break-words">{m.nom}</h1>
+        <p className="text-[14px] text-muted">
+          Reçue le {quand}
+          {m.commune ? ` · chantier à ${m.commune}` : ""}
+        </p>
+      </header>
+      <section aria-label="Message du client" className={`flex flex-col gap-2 p-4 ${CARTE}`}>
+        <h2 className="text-[16px] font-extrabold">Son message</h2>
+        <p className="text-[15px] leading-snug break-words whitespace-pre-line">{m.message}</p>
+      </section>
+      <section aria-label="Coordonnées du client" className={`flex flex-col gap-2 p-4 ${CARTE}`}>
+        <h2 className="text-[16px] font-extrabold">Pour lui répondre</h2>
+        {m.telephone ? (
+          <p className="flex items-center gap-2 text-[15px] break-all">
+            <Phone size={16} aria-hidden="true" className="shrink-0" /> {m.telephone}
+          </p>
+        ) : null}
+        {m.email ? (
+          <p className="flex items-center gap-2 text-[15px] break-all">
+            <Mail size={16} aria-hidden="true" className="shrink-0" /> {m.email}
+          </p>
+        ) : null}
+      </section>
+      {m.telephone ? <LienJaune href={`tel:${m.telephone.replace(/[^+\d]/g, "")}`}>Appeler {m.nom}</LienJaune> : null}
+      {m.email ? (
+        <a href={`mailto:${m.email}?subject=${encodeURIComponent("Votre demande de devis")}`} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-[18px] border-2 border-accent px-5 text-center text-[15px] font-extrabold text-accent-text">
+          Répondre par e-mail
+        </a>
+      ) : null}
+      <p className="text-center text-[13px] text-muted">Ce message est gardé 12 mois dans Mobiiz, puis supprimé.</p>
     </>
   );
 }

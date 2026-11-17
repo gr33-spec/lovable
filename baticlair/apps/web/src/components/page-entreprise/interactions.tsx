@@ -29,7 +29,7 @@ export function ContactPage({ adresse, nom, apercu = false }: { adresse: string;
   if (etat === "envoye") {
     return (
       <p className="pe-merci" role="status">
-        <Check size={20} aria-hidden="true" /> Message envoyé à {nom}. Vous serez recontacté directement.
+        <Check size={20} aria-hidden="true" /> Merci, votre demande est bien partie chez {nom}. Vous serez recontacté directement.
       </p>
     );
   }
@@ -86,8 +86,13 @@ export function ContactPage({ adresse, nom, apercu = false }: { adresse: string;
       <button type="submit" className="pe-btn pe-btn-plein" disabled={etat === "envoi" || apercu} aria-busy={etat === "envoi" || undefined}>
         <Send size={18} aria-hidden="true" /> {etat === "envoi" ? "Envoi…" : "Envoyer ma demande"}
       </button>
+      {apercu ? (
+        <p className="pe-note pe-note-apercu" role="note">
+          Dans l&apos;aperçu, rien ne part. Pour essayer le formulaire, publie ton site et ouvre-le en ligne.
+        </p>
+      ) : null}
       <p className="pe-note">
-        Votre message et vos coordonnées sont envoyés par e-mail à {nom} seulement, pour vous répondre. Mobiiz ne les garde pas ; notre prestataire d&apos;e-mails en garde une copie technique quelques jours. Pour bloquer les abus, nous gardons 30 jours l&apos;heure de l&apos;envoi et une empreinte chiffrée de votre adresse IP.{" "}
+        Votre message et vos coordonnées sont envoyés à {nom} seulement, pour vous répondre : par e-mail et dans son espace Mobiiz, où ils sont gardés 12 mois. Pour bloquer les abus, nous gardons 30 jours l&apos;heure de l&apos;envoi et une empreinte chiffrée de votre adresse IP.{" "}
         {apercu ? "En savoir plus" : <a href="/confidentialite">En savoir plus</a>}.
       </p>
     </form>
