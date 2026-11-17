@@ -3070,8 +3070,10 @@ model PageEntreprise {
   /// Masquée par l'admin (modération) : plus visible, quel que soit le choix de l'artisan.
   masqueeLe        DateTime? @map("masquee_le") @db.Timestamptz(3)
   masqueeMotif     String?   @map("masquee_motif")
-  /// Une des quatre teintes (`TEINTES`), sinon nul : celle du métier.
+  /// Une des teintes (`TEINTES`), sinon nul : celle du métier.
   couleur          String?
+  /// La couleur des boutons (`COULEURS_BOUTONS`, Greg, 17 novembre 2026), sinon nul : le jaune Mobiiz.
+  couleurBoutons   String?   @map("couleur_boutons")
   accroche         String?
   presentation     String?
   telephone        String?

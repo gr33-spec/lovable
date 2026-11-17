@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, ChevronLeft, ChevronRight, Images, Mail, Menu, Phone, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Images, Mail, Menu, Phone, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { lienAppel, type RealisationPublique } from "@baticlair/domain/page-entreprise";
 import { Photo } from "./photo";
@@ -25,6 +25,25 @@ export function SuiviDefilement() {
     return () => io.disconnect();
   }, []);
   return <span ref={repere} hidden />;
+}
+
+/**
+ * « Retour à Mon site » (Greg, 17 novembre 2026 : « une fois sur le site, un bouton pour revenir en arrière ») : seulement
+ * quand l'artisan ouvre sa page depuis l'onglet « Mon site » (`?depuis=mon-site`) ; un visiteur ne le voit jamais.
+ */
+export function RetourMonSite() {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    // Lu après l'affichage : la page est rendue par le serveur, le paramètre ne change rien pour un visiteur.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVisible(new URLSearchParams(window.location.search).get("depuis") === "mon-site");
+  }, []);
+  if (!visible) return null;
+  return (
+    <a href="/mon-site" className="pe-retour-app">
+      <ArrowLeft size={18} strokeWidth={2.4} aria-hidden="true" /> Retour à Mon site
+    </a>
+  );
 }
 
 export function EnTeteSite({ nom, activite, logo, initiales, telephone, menu }: { nom: string; activite: string | null; logo: string | null; initiales: string; telephone: string | null; menu: { id: string; libelle: string }[] }) {
@@ -156,10 +175,10 @@ export function ChantierRealise({ realisation: r, nom }: { realisation: Realisat
 }
 
 /**
- * Les chantiers (maquette de Greg, 17 novembre 2026) : trois sur une ligne, puis « Voir plus de réalisations » quand il y
+ * Les chantiers (modèle de Greg, 17 novembre 2026) : quatre sur une ligne, puis « Voir toutes nos réalisations » quand il y
  * en a davantage ; le bouton n'existe que s'il montre vraiment quelque chose de plus.
  */
-export const CHANTIERS_VISIBLES = 3;
+export const CHANTIERS_VISIBLES = 4;
 export function ListeChantiers({ realisations, nom, titre }: { realisations: RealisationPublique[]; nom: string; titre: React.ReactNode }) {
   const [tout, setTout] = useState(false);
   const montres = tout ? realisations : realisations.slice(0, CHANTIERS_VISIBLES);
@@ -170,7 +189,7 @@ export function ListeChantiers({ realisations, nom, titre }: { realisations: Rea
         {titre}
         {reste > 0 && !tout ? (
           <button type="button" className="pe-voir-plus" onClick={() => setTout(true)}>
-            Voir plus de réalisations <ArrowRight size={17} strokeWidth={2.4} aria-hidden="true" />
+            Voir toutes nos réalisations <ArrowRight size={17} strokeWidth={2.4} aria-hidden="true" />
           </button>
         ) : null}
       </div>

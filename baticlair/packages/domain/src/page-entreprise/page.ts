@@ -110,6 +110,8 @@ export interface ContenuPage {
   siret: string | null;
   /** La teinte choisie (une des quatre), sinon null : celle du métier. */
   couleur: string | null;
+  /** La couleur des boutons choisie (une de `COULEURS_BOUTONS`), sinon null : le jaune Mobiiz. */
+  couleurBoutons: string | null;
   logo: string | null;
   couverture: PhotoPublique | null;
   prestations: Prestation[];
@@ -123,7 +125,24 @@ export interface ContenuPage {
 /** La ville de la zone (« Lannion, Perros-Guirec et le Trégor » → « Lannion »). */
 export function villeDeLaZone(zone: string | null | undefined): string | null {
   const v = zone?.split(/[,;/(]| et | - /)[0]?.trim();
-  return v ? v : null;
+  return v ? villeLisible(v) : null;
+}
+
+const PETITS_MOTS = new Set(["en", "sur", "sous", "de", "du", "des", "la", "le", "les", "lès", "lez", "d", "l", "aux", "au"]);
+
+/**
+ * Une ville écrite tout en capitales (« PLOUBAZLANEC », « SAINT-QUAY-PORTRIEUX », souvent celle du registre) se lit
+ * « Ploubazlanec », « Saint-Quay-Portrieux », « Bourg-en-Bresse » (retour de Greg, 17 novembre 2026 : le grand titre criait).
+ * Une ville déjà écrite avec des minuscules reste telle quelle.
+ */
+export function villeLisible(ville: string): string {
+  if (ville !== ville.toUpperCase() || !/[A-ZÀ-Ý]/.test(ville)) return ville;
+  let premier = true;
+  return ville.toLowerCase().replace(/[a-zà-ÿœæ]+/g, (mot) => {
+    const garder = !premier && PETITS_MOTS.has(mot);
+    premier = false;
+    return garder ? mot : mot[0]!.toUpperCase() + mot.slice(1);
+  });
 }
 
 /** Le GRAND TITRE de l'accueil : le métier et la ville (« Couvreur à Lannion ») ; le nom de l'entreprise vient dessous. */

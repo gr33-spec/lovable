@@ -990,170 +990,414 @@ body:has(.pe:not(.pe-apercu)) {
   }
 }
 
+
 /* ================================================================================================================
- * MAQUETTE DE GREG (17 novembre 2026, « inspire-toi de ça pour les sites artisans ») : barre du haut noire (nom, métier,
- * menu, « Demander un devis » jaune), accueil sombre sur la photo (le métier en blanc, « à Ville » en jaune, l'accroche,
- * « Demander un devis » et le numéro), prestations en cartes avec une icône jaune, trois chantiers sur une ligne et
- * « Voir plus de réalisations », une bande noire (zone d'intervention, horaires), pied de page clair « Créé avec MOBIIZ ».
- * RÈGLE CHANGÉE : avant, une page claire de bout en bout, sans pictogramme. Le fond de la page reste ivoire.
+ * MODÈLE PRO (Greg, 17 novembre 2026 : « pars sur ce genre de modèle, je veux quelque chose de pro », deux maquettes).
+ * RÈGLE CHANGÉE : avant, barre noire, accueil sombre, prestations en grandes cartes, trois chantiers. Maintenant : barre
+ * blanche (logo, menu souligné, « Appeler » de la couleur des boutons, « Demander un devis » noir), grande photo d'accueil
+ * avec un voile sombre et un bord arrondi, le petit trait et le nom en capitales espacées, la ville de la couleur des
+ * boutons, un bandeau vitré de garanties ; prestations en petites cartes à icône, carte « À propos » ; une barre de
+ * confiance (zone, horaires, certifications) ; quatre chantiers sur une ligne. LA COULEUR DES BOUTONS est réglable
+ * (`--jaune` = la couleur choisie, `--sur-jaune` = son texte, `--jaune-sombre` = sa version lisible sur la photo).
+ * Ni avis ni note (règle gardée), aucun texte inventé : tout vient de ce que l'artisan a écrit ou déclaré.
  * ============================================================================================================== */
 .pe {
-  --nuit: #141414;
+  --nuit: color-mix(in srgb, var(--pe-teinte) 45%, #0a0a0b);
+  --blanc: #ffffff;
+  --carte-ombre: 0 1px 2px rgba(21, 18, 14, 0.05), 0 10px 30px -14px rgba(21, 18, 14, 0.16);
   font-family: var(--font-jakarta), Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 .pe h2 {
-  font-size: clamp(28px, 5cqi, 40px);
+  font-size: clamp(30px, 5.4cqi, 44px);
   font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  word-spacing: 0;
-  margin-bottom: 26px;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  margin-bottom: 28px;
+}
+.pe-section h2::before,
+.pe-contact h2::before {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 5px;
+  margin-bottom: 18px;
+  border-radius: 5px;
+  background: var(--jaune);
+}
+.pe-btn-appel {
+  background: var(--jaune);
+  color: var(--sur-jaune) !important;
+  box-shadow: 0 12px 28px -12px color-mix(in srgb, var(--jaune) 80%, transparent);
+}
+.pe-btn-appel:hover {
+  background: var(--jaune2);
+}
+.pe :focus-visible {
+  outline-color: var(--jaune);
 }
 
-/* Barre du haut */
+/* --------------------------------------------------------------------- Barre du haut : blanche, nette */
 .pe-entete {
-  background: var(--nuit);
-  color: #fff;
-  border-bottom: 0;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid rgba(21, 18, 14, 0.06);
+  box-shadow: 0 6px 24px -18px rgba(21, 18, 14, 0.35);
 }
 .pe-marque-texte {
   display: grid;
   min-width: 0;
 }
+.pe-marque-nom {
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1.15;
+}
 .pe-marque-activite {
+  display: block;
   font-size: 12.5px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.72);
+  font-weight: 600;
+  color: var(--doux);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .pe-entete .pe-initiales {
-  background: transparent;
-  border: 2px solid var(--jaune);
-  color: var(--jaune);
-}
-.pe-menu-bouton {
-  border-color: rgba(255, 255, 255, 0.28);
-  color: #fff;
-}
-.pe-menu-tel {
   background: var(--nuit);
-  border-bottom: 0;
-  color: #fff;
+  color: var(--jaune-sombre);
+  border-radius: 12px;
+}
+.pe-entete-appel {
+  min-height: 46px;
+  padding: 0 18px;
+  font-size: 15.5px;
+  box-shadow: none;
 }
 .pe-entete-devis {
   display: none;
 }
+.pe-menu-bouton {
+  border: 1px solid rgba(21, 18, 14, 0.1);
+  background: #fff;
+  box-shadow: 0 4px 14px -8px rgba(21, 18, 14, 0.3);
+}
+.pe-menu-tel {
+  background: #fff;
+}
 
-/* Accueil */
+/* --------------------------------------------------------------------- Accueil : la photo, un voile, un bord arrondi */
 .pe-accueil {
-  background: var(--nuit);
-  color: #fff;
+  overflow: clip;
   align-items: center;
-  min-height: 520px;
-  padding: 64px 0 56px;
+  min-height: 0;
+  padding: 56px 0 84px;
+  color: #fff;
+  background:
+    radial-gradient(100% 70% at 100% 0%, color-mix(in srgb, var(--pe-teinte) 70%, transparent) 0%, transparent 65%),
+    var(--nuit);
 }
 .pe-avec-photo .pe-accueil {
-  min-height: 600px;
+  min-height: max(600px, min(calc(100svh - var(--entete)), 760px));
+}
+.pe-accueil::after {
+  /* Le bord bas arrondi de l'accueil (maquette de Greg). */
+  content: "";
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  bottom: -1px;
+  height: 42px;
+  background: var(--ivoire);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  z-index: 1;
+}
+.pe-accueil-texte {
+  position: relative;
+  z-index: 2;
 }
 .pe-accueil-photo {
   background: var(--nuit);
 }
 .pe-accueil-photo::after {
-  background: linear-gradient(180deg, rgba(14, 14, 14, 0.4) 0%, rgba(14, 14, 14, 0.62) 45%, rgba(14, 14, 14, 0.9) 100%);
+  --voile: color-mix(in srgb, var(--nuit) 60%, #000);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--voile) 35%, transparent) 0%, color-mix(in srgb, var(--voile) 72%, transparent) 55%, color-mix(in srgb, var(--voile) 92%, transparent) 100%);
 }
-.pe-accueil-nom {
-  margin: 0 0 14px !important;
-  font-size: 15px;
+.pe .pe-accueil-nom {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 14px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0;
-  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+}
+.pe-accueil-nom::before {
+  content: "";
+  flex-shrink: 0;
+  width: 44px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--jaune);
 }
 .pe-accueil h1 {
-  font-size: clamp(38px, 8cqi, 66px);
+  font-size: clamp(40px, 11cqi, 84px);
   font-weight: 800;
-  line-height: 1.04;
-  letter-spacing: -0.035em;
-  word-spacing: 0;
-  max-width: 15ch;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  max-width: 14ch;
+  overflow-wrap: break-word;
 }
 .pe-accueil-ville {
-  display: block;
-  color: var(--jaune);
+  color: var(--jaune-sombre);
 }
-.pe-accueil-accroche {
-  margin-top: 18px !important;
-  max-width: 36ch;
-  font-size: 18px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.9);
+.pe .pe-accueil-accroche {
+  margin-top: 16px;
+  max-width: 34ch;
+  font-size: clamp(18px, 2.6cqi, 23px);
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.94);
 }
 .pe-accueil .pe-actions {
-  margin-top: 28px;
+  margin-top: 26px;
 }
 .pe-accueil .pe-btn {
-  min-height: 54px;
+  min-height: 56px;
+  padding: 0 26px;
 }
-.pe-accueil .pe-btn-second {
-  border-color: rgba(255, 255, 255, 0.85);
+.pe-accueil .pe-btn-second,
+.pe-avec-photo .pe-accueil .pe-btn-second {
+  border-color: rgba(255, 255, 255, 0.75);
   color: #fff;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(10, 10, 11, 0.28);
+  backdrop-filter: blur(6px);
 }
-.pe-preuves {
-  margin-top: 22px;
-  color: rgba(255, 255, 255, 0.88);
+/* Le bandeau vitré des garanties */
+.pe .pe-preuves {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 26px;
+  padding: 12px 6px;
+  border-radius: 20px;
+  background: rgba(16, 16, 18, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.3;
 }
-.pe-preuves svg,
-.pe:not(.pe-avec-photo) .pe-preuves svg {
-  color: var(--jaune);
+.pe .pe-preuves li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  min-width: 0;
+}
+.pe .pe-preuves li + li {
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+.pe-preuve-icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--jaune) 18%, transparent);
+  color: var(--jaune-sombre);
+}
+.pe .pe-preuves svg {
+  color: var(--jaune-sombre);
 }
 
-/* Prestations : des cartes, une icône jaune */
+/* --------------------------------------------------------------------- Prestations : petites cartes, carte « À propos » */
 .pe-section {
-  padding: 64px 0;
+  padding: 56px 0;
+}
+.pe-section-prestations {
+  position: relative;
+  padding-top: 40px;
+}
+.pe-prestations-grille {
+  display: grid;
+  gap: 18px;
+}
+.pe-prestations-tete h2 {
+  margin-bottom: 8px;
+}
+.pe-sous-titre {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--doux);
+  max-width: 34ch;
 }
 .pe-prestations {
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 6px;
 }
 .pe-prestations li {
   display: flex;
-  align-items: flex-start;
-  gap: 18px;
-  padding: 22px 20px;
-  background: #fff;
-  border: 1px solid var(--trait);
-  border-radius: 14px;
+  align-items: center;
+  gap: 12px;
+  min-height: 84px;
+  padding: 14px;
+  background: var(--blanc);
+  border-radius: 18px;
+  box-shadow: var(--carte-ombre);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .pe-prestations li::before {
   content: none;
 }
+.pe-prestations li:hover {
+  transform: translateY(-2px);
+}
 .pe-prestation-icone {
   flex-shrink: 0;
-  color: #f2c200;
+  color: var(--encre);
+}
+.pe-prestation-icone :is(path, rect, circle, line, polyline):nth-child(2) {
+  color: var(--jaune);
+  stroke: color-mix(in srgb, var(--jaune) 85%, var(--encre));
 }
 .pe-prestations h3 {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-.pe-prestations p {
-  margin-top: 6px;
   font-size: 15.5px;
-  line-height: 1.5;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.pe-prestation-texte {
+  display: none;
+}
+/* La carte « À propos » : la photo, le nom, la première phrase de l'artisan */
+.pe-carte-apropos {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  border-radius: 22px;
+  min-height: 180px;
+  background: color-mix(in srgb, var(--jaune) 16%, #fff);
+  color: var(--encre);
+  box-shadow: var(--carte-ombre);
+}
+.pe-carte-apropos-image {
+  position: absolute;
+  inset: 0;
+}
+.pe-carte-apropos-image picture,
+.pe-carte-apropos-image img {
+  width: 100%;
+  height: 100%;
+}
+.pe-carte-apropos-image img {
+  object-fit: cover;
+}
+.pe-carte-apropos-photo {
+  color: #fff;
+  background: var(--nuit);
+}
+.pe-carte-apropos-photo .pe-carte-apropos-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, rgba(10, 10, 11, 0.86) 0%, rgba(10, 10, 11, 0.55) 55%, rgba(10, 10, 11, 0.15) 100%);
+}
+.pe-carte-apropos-texte {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: 24px;
+}
+.pe-carte-apropos-texte::before {
+  content: "";
+  width: 44px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--jaune);
+}
+.pe-carte-apropos-titre {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+.pe-carte-apropos-phrase {
+  max-width: 36ch;
+  font-size: 15px;
+  line-height: 1.45;
+  opacity: 0.9;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pe-carte-apropos-lien {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--jaune);
+  font-size: 14px;
+  font-weight: 800;
+}
+/* La barre de confiance */
+.pe-confiance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 22px;
+  padding: 8px;
+  border-radius: 20px;
+  background: var(--blanc);
+  box-shadow: var(--carte-ombre);
+  scroll-margin-top: calc(var(--entete) + 16px);
+}
+.pe-confiance li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  min-width: 0;
+}
+.pe-confiance svg {
+  flex-shrink: 0;
+  color: var(--encre);
+}
+.pe-confiance-etiquette {
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--doux);
+}
+.pe-confiance-valeur {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 750;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
-/* Réalisations : trois sur une ligne, « Voir plus » */
-.pe-section + .pe-section-realisations {
-  padding-top: 8px;
+/* --------------------------------------------------------------------- Réalisations : quatre sur une ligne */
+.pe-section-realisations {
+  padding-top: 24px;
 }
 .pe-section-tete {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 4px 20px;
-  margin-bottom: 22px;
+  gap: 10px 20px;
+  margin-bottom: 20px;
 }
 .pe .pe-section-tete h2 {
   margin: 0;
@@ -1161,81 +1405,69 @@ body:has(.pe:not(.pe-apercu)) {
 .pe-voir-plus {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: none;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(21, 18, 14, 0.18);
+  background: var(--blanc);
   color: var(--encre);
   font: inherit;
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 750;
   cursor: pointer;
 }
 .pe-voir-plus:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  border-color: var(--encre);
 }
 .pe-chantiers {
-  gap: 16px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 78%;
+  grid-template-columns: none;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin-inline: -20px;
+  padding: 4px 20px 12px;
+}
+.pe-chantiers::-webkit-scrollbar {
+  display: none;
+}
+.pe-chantiers > li {
+  scroll-snap-align: start;
 }
 .pe-chantier {
-  border-radius: 12px;
+  border-radius: 18px;
+  box-shadow: 0 14px 30px -18px rgba(21, 18, 14, 0.5);
+}
+.pe-chantier img {
+  aspect-ratio: 4 / 3;
 }
 .pe-chantier-legende {
   padding: 48px 16px 14px;
 }
 .pe-chantier-titre {
-  font-size: 17px;
+  font-size: 16.5px;
   font-weight: 750;
   letter-spacing: -0.01em;
 }
 
-/* La bande noire : zone d'intervention et horaires */
-.pe-bande {
-  background: var(--nuit);
-  color: #fff;
-  padding: 36px 0;
+/* --------------------------------------------------------------------- À propos, contact, pied */
+.pe-qualifs svg,
+.pe-zone-ville svg {
+  color: var(--encre);
 }
-.pe-bande-grille {
-  display: grid;
-  gap: 26px;
+.pe-apropos-image img {
+  border-radius: 22px;
 }
-.pe-bande-bloc {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
+.pe-contact {
+  background:
+    radial-gradient(80% 100% at 100% 0%, color-mix(in srgb, var(--pe-teinte) 55%, transparent) 0%, transparent 70%),
+    var(--nuit);
 }
-.pe-bande-bloc > svg {
-  flex-shrink: 0;
-  color: var(--jaune);
-}
-.pe .pe-bande-etiquette {
-  margin: 0 0 2px;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0;
-  color: rgba(255, 255, 255, 0.75);
-}
-.pe-bande-valeur {
-  font-size: 23px;
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-}
-.pe-bande-horaires {
-  font-size: 19px;
-}
-.pe-bande-detail {
-  margin-top: 4px !important;
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-/* Pied de page */
 .pe-pied {
-  border-top: 1px solid var(--trait);
   padding-top: 28px;
   font-size: 14px;
 }
@@ -1249,16 +1481,15 @@ body:has(.pe:not(.pe-apercu)) {
 }
 .pe-pied .pe-initiales {
   background: var(--nuit);
-  color: var(--jaune);
+  color: var(--jaune-sombre);
 }
 .pe-pied-nom {
   font-size: 16px;
-  margin-bottom: 0 !important;
+  font-weight: 800;
 }
 .pe-pied-activite {
   font-size: 13px;
   color: var(--doux);
-  margin-bottom: 4px !important;
 }
 .pe-pied-liens {
   display: flex;
@@ -1283,89 +1514,162 @@ body:has(.pe:not(.pe-apercu)) {
   align-items: center;
   gap: 5px;
   font-size: 14px;
-  color: var(--encre);
 }
 .pe-mobiiz strong {
   font-weight: 850;
-  letter-spacing: 0.01em;
 }
 .pe-coeur {
-  color: #f2c200;
+  color: var(--jaune);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pe-prestations li {
+    transition: none;
+  }
+  .pe-prestations li:hover {
+    transform: none;
+  }
 }
 
 @container pe (min-width: 640px) {
-  .pe-chantiers {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .pe-prestations {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .pe-bande-grille {
+  .pe-confiance {
     grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    padding: 10px 6px;
   }
-  .pe-bande-bloc + .pe-bande-bloc {
-    border-left: 1px solid rgba(255, 255, 255, 0.28);
-    padding-left: 32px;
+  .pe-confiance li + li {
+    border-left: 1px solid rgba(21, 18, 14, 0.1);
+  }
+  .pe-chantiers {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-columns: auto;
+    overflow: visible;
+    margin-inline: 0;
+    padding: 0;
+  }
+  .pe .pe-preuves {
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: auto;
+    grid-template-columns: none;
+    padding: 10px 8px;
+    font-size: 14.5px;
+  }
+  .pe .pe-preuves li {
+    padding: 4px 18px;
   }
 }
+
 @container pe (min-width: 960px) {
+  .pe-entete-ligne {
+    gap: 18px;
+  }
   .pe-entete-devis {
     display: inline-flex;
-    min-height: 44px;
+    min-height: 46px;
     padding: 0 20px;
     font-size: 14.5px;
     gap: 8px;
+    background: var(--encre);
+    color: #fff !important;
     box-shadow: none;
   }
-  .pe-entete .pe-entete-appel {
-    background: transparent;
-    color: #fff !important;
-    padding: 0 6px;
-  }
-  .pe-entete .pe-entete-appel:hover {
-    background: transparent;
-    color: var(--jaune) !important;
+  .pe-entete-devis:hover {
+    background: #000;
   }
   .pe-nav {
-    font-weight: 600;
+    font-weight: 650;
   }
-  .pe-nav a:hover {
-    color: var(--jaune);
+  .pe-nav a {
+    position: relative;
+  }
+  .pe-nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -8px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--jaune);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+  }
+  .pe-nav a:hover::after {
+    transform: scaleX(1);
   }
   .pe-accueil {
-    min-height: 520px;
-    padding: 88px 0;
+    padding: 96px 0 120px;
   }
   .pe-avec-photo .pe-accueil {
-    min-height: 560px;
+    min-height: 640px;
+  }
+  .pe-accueil::after {
+    height: 64px;
   }
   .pe-accueil-photo::after {
-    background: linear-gradient(90deg, rgba(14, 14, 14, 0.94) 0%, rgba(14, 14, 14, 0.78) 34%, rgba(14, 14, 14, 0.22) 62%, rgba(14, 14, 14, 0.05) 100%);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--voile) 92%, transparent) 0%, color-mix(in srgb, var(--voile) 72%, transparent) 38%, color-mix(in srgb, var(--voile) 20%, transparent) 66%, transparent 100%);
   }
   .pe-section {
-    padding: 80px 0;
+    padding: 72px 0;
+  }
+  .pe-section-prestations {
+    padding-top: 48px;
+  }
+  .pe-prestations-grille {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 2fr) minmax(0, 0.95fr);
+    align-items: start;
+    gap: 22px;
   }
   .pe-prestations {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-  }
-  /* Quatre prestations : deux par ligne, jamais une orpheline sous trois. */
-  .pe-prestations:has(> li:nth-child(4):last-child) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: none;
+    margin-top: 0;
+    gap: 14px;
   }
   .pe-prestations li {
-    padding: 26px 24px;
+    align-items: flex-start;
+    min-height: 0;
+    padding: 18px;
+  }
+  .pe-prestation-texte {
+    display: -webkit-box;
+    margin-top: 4px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--doux);
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pe-carte-apropos {
+    min-height: 100%;
   }
   .pe-chantiers {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
+    grid-template-columns: 1.5fr 1fr 1.2fr 1fr;
+    gap: 14px;
   }
   .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) {
     grid-column: auto;
   }
+  .pe-chantier img,
   .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) img {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: auto;
+    height: 260px;
   }
-  .pe-bande {
-    padding: 40px 0;
+  /* Les traits jaunes du coin (maquette de Greg), sur grand écran seulement. */
+  .pe-section-prestations::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, transparent 0 46%, var(--jaune) 46% 58%, transparent 58% 66%, var(--jaune) 66% 100%);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    opacity: 0.9;
+    pointer-events: none;
   }
   .pe-pied {
     padding: 24px 0;
@@ -1378,14 +1682,95 @@ body:has(.pe:not(.pe-apercu)) {
   .pe-pied-liens {
     justify-content: center;
   }
-  .pe-pied-marque {
-    align-items: center;
+}
+
+/* Le retour vers « Mon site » quand l'artisan ouvre sa page depuis l'app */
+.pe-retour-app {
+  position: fixed;
+  left: 12px;
+  top: calc(var(--entete) + 12px);
+  z-index: 35;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 46px;
+  padding: 0 16px 0 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #141414;
+  font-weight: 800;
+  font-size: 15px;
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.45);
+  text-decoration: none;
+}
+
+/* Réglages après la première capture du modèle pro (17 novembre 2026). */
+.pe .pe-marque-nom {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pe-avec-photo .pe-accueil {
+  align-items: flex-end;
+  min-height: max(560px, min(calc(100svh - var(--entete) - 40px), 720px));
+}
+/* Téléphone : chaque garantie en colonne, l'icône au-dessus, rien ne se chevauche. */
+.pe .pe-preuves li {
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 4px 6px;
+  text-align: center;
+  font-size: 12.5px;
+}
+.pe .pe-carte-apropos-photo {
+  color: #fff;
+}
+.pe-carte-apropos-photo .pe-carte-apropos-image::after {
+  background: linear-gradient(180deg, rgba(10, 10, 11, 0.55) 0%, rgba(10, 10, 11, 0.88) 100%);
+}
+.pe-carte-apropos-photo .pe-carte-apropos-lien {
+  color: #fff;
+}
+@container pe (min-width: 640px) {
+  .pe .pe-preuves li {
+    flex-direction: row;
+    text-align: left;
+    gap: 10px;
+    padding: 4px 18px;
+    font-size: 14.5px;
   }
 }
-/* Les garanties sous les boutons de l'accueil, avec de l'air ; le bloc contact du même noir que la barre et la bande. */
-.pe .pe-preuves {
+@container pe (min-width: 960px) {
+  .pe-avec-photo .pe-accueil {
+    align-items: center;
+    min-height: 640px;
+  }
+  .pe-chantiers:has(> li:nth-child(3):last-child) {
+    grid-template-columns: 1.4fr 1fr 1.2fr;
+  }
+  .pe-chantiers:has(> li:nth-child(2):last-child) {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pe-chantiers:has(> li:only-child) {
+    grid-template-columns: minmax(0, 720px);
+  }
+  .pe-carte-apropos-photo .pe-carte-apropos-image::after {
+    background: linear-gradient(180deg, rgba(10, 10, 11, 0.45) 0%, rgba(10, 10, 11, 0.9) 100%);
+  }
+  .pe-carte-apropos-texte {
+    align-content: end;
+  }
+}
+/* `.pe ul { margin: 0 }` l'emporterait sans le préfixe : la barre de confiance garde son air. */
+.pe .pe-confiance {
   margin-top: 22px;
 }
-.pe-contact {
-  background: var(--nuit);
+@container pe (min-width: 960px) {
+  .pe .pe-confiance {
+    margin-top: 26px;
+  }
+  .pe-carte-apropos-photo .pe-carte-apropos-image::after {
+    background: linear-gradient(180deg, rgba(10, 10, 11, 0.1) 0%, rgba(10, 10, 11, 0.55) 45%, rgba(10, 10, 11, 0.92) 100%);
+  }
 }

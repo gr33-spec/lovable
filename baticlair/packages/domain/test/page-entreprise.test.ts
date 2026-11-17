@@ -54,6 +54,7 @@ function contenu(partiel: Partial<ContenuPage> = {}): ContenuPage {
     verifiee: false,
     siret: null,
     couleur: null,
+    couleurBoutons: null,
     logo: null,
     couverture: null,
     prestations: [],
@@ -81,8 +82,10 @@ describe("thèmes par métier (un seul modèle, quatre teintes, prestations prop
     }
   });
 
-  it("quatre teintes sobres, toutes lisibles en texte blanc et sur l'ivoire ; « Appeler » jaune à texte noir", () => {
-    expect(TEINTES.map((t) => t.nom)).toEqual(["Ardoise", "Anthracite", "Bleu nuit", "Vert sapin"]);
+  it("neuf teintes bien différentes, toutes lisibles en texte blanc et sur l'ivoire ; « Appeler » jaune à texte noir", () => {
+    expect(TEINTES.map((t) => t.nom)).toEqual(["Ardoise", "Anthracite", "Bleu nuit", "Vert sapin", "Bleu roi", "Pétrole", "Bordeaux", "Rouge brique", "Prune"]);
+    // Bien différentes (Greg, 17 novembre 2026) : jamais deux teintes du même code.
+    expect(new Set(TEINTES.map((t) => t.hex.toLowerCase())).size).toBe(TEINTES.length);
     for (const t of TEINTES) {
       expect(contraste("#FFFFFF", t.hex), t.nom).toBeGreaterThanOrEqual(7);
       expect(contraste(t.hex, COULEURS_PAGE.ivoire), t.nom).toBeGreaterThanOrEqual(7);
@@ -212,5 +215,32 @@ describe("champs et textes", () => {
     expect(p.presentation).toContain("Toits Martin intervient en couverture, charpente, zinguerie à Lannion");
     expect(p.presentation).toContain("2008");
     expect(p.presentation).not.toMatch(/\d{2} \d{2} \d{2}|@/);
+  });
+});
+
+describe("la ville du grand titre se lit (Greg, 17 novembre 2026 : « PLOUBAZLANEC » criait)", () => {
+  it("une ville en capitales passe en minuscules avec ses majuscules ; une ville déjà écrite reste telle quelle", async () => {
+    const { villeLisible, titreAccueil } = await import("../src/page-entreprise/page.js");
+    expect(villeLisible("PLOUBAZLANEC")).toBe("Ploubazlanec");
+    expect(villeLisible("SAINT-QUAY-PORTRIEUX")).toBe("Saint-Quay-Portrieux");
+    expect(villeLisible("BOURG-EN-BRESSE")).toBe("Bourg-en-Bresse");
+    expect(villeLisible("LE MANS")).toBe("Le Mans");
+    expect(villeLisible("Perros-Guirec")).toBe("Perros-Guirec");
+    expect(titreAccueil({ metierPrincipal: "roofing", zone: "PLOUBAZLANEC" })).toBe("Couvreur à Ploubazlanec");
+  });
+});
+
+describe("la couleur des boutons (Greg, 17 novembre 2026 : « pouvoir changer la couleur des boutons »)", () => {
+  it("le jaune Mobiiz par défaut ; chaque couleur garde un texte lisible et une ville lisible sur la photo", async () => {
+    const { COULEURS_BOUTONS, couleurBoutonsDe, texteSurCouleur, couleurSurSombre, contraste } = await import("../src/page-entreprise/index.js");
+    expect(couleurBoutonsDe(null).hex).toBe("#FED206");
+    expect(couleurBoutonsDe("#ff00ff").hex).toBe("#FED206");
+    expect(couleurBoutonsDe("#1971c2").nom).toBe("Bleu");
+    expect(new Set(COULEURS_BOUTONS.map((c) => c.hex)).size).toBe(COULEURS_BOUTONS.length);
+    expect(texteSurCouleur("#FED206")).toBe("#15120E");
+    for (const c of COULEURS_BOUTONS) {
+      expect(contraste(c.hex, texteSurCouleur(c.hex)), c.nom).toBeGreaterThanOrEqual(4.5);
+      expect(contraste(couleurSurSombre(c.hex), "#141414"), c.nom).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });

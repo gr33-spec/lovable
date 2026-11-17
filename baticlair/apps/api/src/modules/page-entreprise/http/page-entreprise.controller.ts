@@ -26,6 +26,7 @@ const texte = (max: number) => z.string().max(max * 2).nullable().optional();
 const corpsReglages = z.object({
   visible: z.boolean().optional(),
   couleur: z.string().max(20).nullable().optional(),
+  couleurBoutons: z.string().max(20).nullable().optional(),
   prestations: z.array(z.object({ titre: z.string().max(200), texte: z.string().max(600).nullish() })).max(12).optional(),
   accroche: texte(90),
   presentation: texte(900),
@@ -73,6 +74,7 @@ export class MaPageController {
     return this.pages.modifier(t, {
       ...(b.visible !== undefined ? { visible: b.visible } : {}),
       ...(b.couleur !== undefined ? { couleur: b.couleur } : {}),
+      ...(b.couleurBoutons !== undefined ? { couleurBoutons: b.couleurBoutons } : {}),
       ...(b.prestations !== undefined ? { prestations: b.prestations.map((x) => ({ titre: x.titre, texte: x.texte ?? "" })) } : {}),
       ...(b.accroche !== undefined ? { accroche: b.accroche } : {}),
       ...(b.presentation !== undefined ? { presentation: b.presentation } : {}),

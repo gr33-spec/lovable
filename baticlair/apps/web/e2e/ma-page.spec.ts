@@ -78,6 +78,13 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await expect(page.getByRole("radio", { name: "Fond sombre" })).toHaveCount(0);
   await page.getByRole("radio", { name: "Bleu nuit" }).click();
   await enregistre(page);
+  // La couleur des boutons se choisit (Greg, 17 novembre 2026) ; le texte du bouton reste lisible.
+  await page.getByRole("radiogroup", { name: "Couleur des boutons" }).getByRole("radio", { name: "Bleu", exact: true }).click();
+  await enregistre(page);
+  await expect(apercu(page).locator(".pe-accueil .pe-btn-appel").first()).toHaveCSS("background-color", "rgb(25, 113, 194)");
+  await expect(apercu(page).locator(".pe-accueil .pe-btn-appel").first()).toHaveCSS("color", "rgb(255, 255, 255)");
+  await page.getByRole("radiogroup", { name: "Couleur des boutons" }).getByRole("radio", { name: "Jaune Mobiiz" }).click();
+  await enregistre(page);
   // Une prestation se retire.
   await page.getByRole("button", { name: "Retirer la prestation Entretien et démoussage" }).click();
   await enregistre(page);
@@ -105,7 +112,17 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   // Publier.
   await toucher(page.getByRole("switch", { name: /Page visible/ }));
   await enregistre(page);
-  await expect(page.getByRole("link", { name: "Voir mon site" })).toHaveAttribute("href", `/e/${adresse}`);
+  await expect(page.getByRole("link", { name: "Ouvrir en ligne" })).toHaveAttribute("href", `/e/${adresse}?depuis=mon-site`);
+  // « Voir mon site » flottant (Greg, 17 novembre 2026) : le site en plein écran, qui défile, et « Retour » en haut.
+  await toucher(page.getByRole("button", { name: "Voir mon site" }));
+  const plein = page.getByRole("dialog", { name: "Aperçu de mon site" });
+  await expect(plein).toBeVisible();
+  const cadre = plein.getByTestId("apercu-page");
+  await cadre.hover();
+  await page.mouse.wheel(0, 900);
+  await expect.poll(() => cadre.evaluate((el) => el.scrollTop)).toBeGreaterThan(200);
+  await toucher(plein.getByRole("button", { name: "Retour" }));
+  await expect(plein).toHaveCount(0);
   await toucher(page.getByRole("button", { name: "Partager" }));
   await expect(page.getByRole("dialog", { name: "Partager mon site" }).getByRole("img", { name: /QR code/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "Envoyer sur WhatsApp" })).toHaveAttribute("href", /wa\.me/);
@@ -120,6 +137,11 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await expect(v.getByText("Décennale", { exact: true })).toBeVisible();
   await expect(v.getByRole("navigation", { name: "Navigation principale" })).toHaveCount(0);
   await expect(v).toHaveTitle(`Couvreur à Lannion – ${nom}`);
+  // « Retour à Mon site » seulement quand l'artisan vient de l'app, jamais pour un visiteur.
+  await expect(v.getByRole("link", { name: "Retour à Mon site" })).toHaveCount(0);
+  await v.goto(`/e/${adresse}?depuis=mon-site`);
+  await expect(v.getByRole("link", { name: "Retour à Mon site" })).toHaveAttribute("href", "/mon-site");
+  await v.goto(`/e/${adresse}`);
   const ld = JSON.parse((await v.locator('script[type="application/ld+json"]').textContent())!);
   expect(ld).toMatchObject({ "@type": "RoofingContractor", name: nom, telephone: "02 96 11 22 33", areaServed: "Lannion" });
   expect(ld).not.toHaveProperty("address");
@@ -278,7 +300,35 @@ test.describe("captures du rapport", () => {
       }
       await vctx.close();
     }
-    if (dossier) await p.screenshot({ path: `${dossier}/telephone-editeur.png` });
+    if (dossier) {
+      await p.screenshot({ path: `${dossier}/telephone-editeur.png` });
+      // Retour de Greg (17 novembre 2026) : une ville en capitales, une teinte bien visible, « Voir mon site » flottant,
+      // le site en plein écran qui défile, le nuancier.
+      await appel("patch", "/v1/ma-page", { zone: "PLOUBAZLANEC", couleur: "#1F4D3A" });
+      await p.reload();
+      await expect(p.getByRole("button", { name: "Voir mon site" })).toBeVisible();
+      await p.screenshot({ path: `${dossier}/telephone-editeur-flottant.png` });
+      await p.getByRole("heading", { name: "Teinte" }).scrollIntoViewIfNeeded();
+      await p.screenshot({ path: `${dossier}/telephone-nuancier.png` });
+      await p.getByRole("button", { name: "Voir mon site" }).click();
+      const plein = p.getByRole("dialog", { name: "Aperçu de mon site" });
+      await expect(plein.locator("h1")).toHaveText("Couvreur à Ploubazlanec");
+      await p.waitForTimeout(600);
+      await p.screenshot({ path: `${dossier}/telephone-apercu-plein.png` });
+      await plein.getByTestId("apercu-page").evaluate((el) => el.scrollTo(0, 900));
+      await p.waitForTimeout(600);
+      await p.screenshot({ path: `${dossier}/telephone-apercu-defile.png` });
+      for (const [id, hex] of [["bleu", "#1971C2"], ["orange", "#F7931E"]] as const) {
+        await appel("patch", "/v1/ma-page", { couleurBoutons: hex });
+        await p.reload();
+        await p.getByRole("button", { name: "Voir mon site" }).click();
+        await p.waitForTimeout(600);
+        await p.screenshot({ path: `${dossier}/telephone-boutons-${id}.png` });
+      }
+      await p.getByRole("button", { name: "Retour" }).click();
+      await p.getByRole("heading", { name: "Couleur des boutons" }).scrollIntoViewIfNeeded();
+      await p.screenshot({ path: `${dossier}/telephone-couleur-boutons.png` });
+    }
     await ctx.close();
   });
 });
