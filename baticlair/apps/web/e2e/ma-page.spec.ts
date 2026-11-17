@@ -243,13 +243,13 @@ test("Ma page : deux comptes, chacun ne voit et ne règle que la sienne", async 
 
 test("Mon site : la photo par défaut du métier, remplacée d'un tap depuis la galerie (Greg, 17 novembre 2026)", async ({ page }) => {
   test.setTimeout(150_000);
-  await inscrire(page, `Élec Martin ${unique()}`, "Électricité");
+  await inscrire(page, `Plâtrerie Martin ${unique()}`, "Plâtrerie, isolation");
   await page.goto("/mon-site");
   const couverture = apercu(page).locator(".pe-accueil-photo img");
-  // Sans photo à lui, l'électricien a la photo de son métier, jamais un chantier qu'il n'a pas fait.
-  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/electrical/);
+  // Sans photo à lui, le plaquiste a la photo de son métier, jamais un chantier qu'il n'a pas fait.
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/drywall/);
   await expect(couverture).toHaveAttribute("alt", "Photo d'illustration du métier");
-  await expect(apercu(page).locator(".pe-credit-photo")).toContainText("Santeri Viinamäki");
+  await expect(apercu(page).locator(".pe-credit-photo")).toContainText("Asurnipal");
   await onglet(page, "Photos");
   await expect(page.getByText("Photo de la galerie")).toBeVisible();
   await toucher(page.getByRole("button", { name: /Choisir dans la galerie/ }));
@@ -268,7 +268,7 @@ test("Mon site : la photo par défaut du métier, remplacée d'un tap depuis la 
   await toucher(page.getByRole("button", { name: /Choisir dans la galerie/ }));
   await toucher(page.getByRole("radiogroup", { name: "Galerie de photos" }).getByRole("radio", { name: "Selon mon métier" }));
   await enregistre(page);
-  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/electrical/);
+  await expect(couverture).toHaveAttribute("src", /\/site\/photos\/drywall/);
   await sansDefilementHorizontal(page);
 });
 
