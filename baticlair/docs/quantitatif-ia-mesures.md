@@ -237,3 +237,20 @@ qualité de la lecture passe avant la vitesse) :
    la fiche et le bref de l'autre). Le temps devient celui de la plus longue, environ 6 à 8 secondes.
 2. Montrer la première question dès qu'elle est écrite, pendant que le reste de la lecture se termine.
 3. Lancer le repérage des métiers en même temps que la lecture, au lieu d'avant.
+
+## Passe 7 : les deux réglages allumés en ligne (17 novembre 2026, commit 2dc78660)
+
+Site de test, devis zinc, Sonnet 5.5 effort moyen, `AI_EXTRACTION_REFLEXION=minimale` et
+`LECTURE_ET_REPERAGE_ENSEMBLE=on` (variables de la branche de test), du clic « Analyser » à la première question :
+
+| Essai | Total | Envoi | Repérage | Lecture | Mots-jetons écrits | Coût de la lecture |
+|---|---|---|---|---|---|---|
+| 1 (rien en mémoire chez le fournisseur) | 27,8 s | 2,8 s | 3,0 s | 18,6 s | 2 899 | 0,117 $ |
+| 2 (prompt déjà en mémoire) | 18,8 s | 2,8 s | 2,2 s | 13,9 s | 2 538 | 0,030 $ |
+
+- Le repérage ne s'ajoute plus : il part avec la lecture. Gain : 2 à 3 secondes.
+- « Écrire sans réfléchir d'abord » ne change presque rien au nombre de mots écrits (2 500 à 2 900, comme avant).
+- Le cas de Greg, rejoué sur ce commit : six réponses sur six, « Noté : Je commande façonné (bacs), Je façonne
+  (feuilles ou bobineau), 1, Bord de mer, 0,65 mm, Sur les chevrons. »
+- Toujours au-dessus de 10 secondes : le plancher reste le temps d'écriture d'une seule lecture (14 secondes ici).
+  La suite est le point 1 ci-dessus : couper la lecture en deux appels simultanés.
