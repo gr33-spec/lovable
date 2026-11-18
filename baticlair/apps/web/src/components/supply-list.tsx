@@ -971,6 +971,13 @@ function Row({
           <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
         )}
       </div>
+      {/* Greg, 17 novembre 2026 : le nombre de feuilles de zinc est une estimation, il s'ajuste d'un toucher dans la liste,
+          sans ouvrir la ligne. Vaut pour toute quantité que la fiche du métier marque comme une estimation. */}
+      {!open && stepper && item?.estimation ? (
+        <div className="pb-2 pl-5">
+          <Stepper label={label} value={stepper.value} unit={stepper.unit} pending={pending} onChange={(n) => onEdit(item, { libelle: item.label, quantite: String(n), unite: stepper.unit || null })} />
+        </div>
+      ) : null}
       {open ? (
         <div role="group" aria-label={`Ligne ouverte : ${label}`} className="flex flex-col gap-2 pb-2 pl-5">
           {/* Retour du fondateur (2026-10-10) : « quand je clique sur un bouton, rien ne se passe ». Un geste refusé se dit ici. */}

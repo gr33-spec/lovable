@@ -75,6 +75,14 @@ describe("ce qui part chez le négoce : une commande claire, rien d'autre", () =
       ["Coudes zinc Ø 80", "4 pièces"],
     ]);
     expect(q.a_chiffrer).toEqual([]);
+    // Greg, 17 novembre 2026 : le nombre de feuilles est une estimation, il s'ajuste d'un toucher. L'écran reçoit le repère
+    // « estimation » pour cette ligne seulement, et une quantité ajustée reste dans la liste.
+    const ecran = async () => ((await agent.get(`/v1/quantitatifs/${id}?ecran=1`)).body.ecran.purchase.toBuy as { key: string; label: string; quantity: string | null; estimation: boolean }[]);
+    const estimees = (await ecran()).filter((i) => i.estimation);
+    expect(estimees.map((i) => i.label)).toEqual(["Feuilles zinc naturel 2 × 1 m, 0,65 mm"]);
+    expect((await agent.post(`/v1/quantitatifs/${id}/corrections`).send({ action: "fixer_quantite", id: estimees[0]!.key, quantite: "4", unite: "pièces" })).status).toBeLessThan(300);
+    expect((await ecran()).find((i) => i.estimation)?.quantity).toBe("4 pièces");
+    expect((await agent.post(`/v1/quantitatifs/${id}/corrections`).send({ action: "fixer_quantite", id: estimees[0]!.key, quantite: "3", unite: "pièces" })).status).toBeLessThan(300);
     expect((await agent.post(`/v1/quantitatifs/${id}/validation`)).status).toBe(200);
     const supplier = (await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr", contactName: "Paul" })).body;
     const res = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplier.id] });

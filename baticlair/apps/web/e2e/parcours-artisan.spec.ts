@@ -1547,6 +1547,32 @@ test("zinguerie : une seule question de pliage pour le devis, une pièce se chan
   expect((await bar.boundingBox())!.height).toBeLessThan(64);
 });
 
+test("feuilles de zinc : le nombre, une estimation, s'ajuste d'un toucher dans la liste, sans ouvrir la ligne", async ({ page }) => {
+  // Greg, 17 novembre 2026 : « feuille de 2 × 1 m, chutes non réutilisées : c'est une estimation, le nombre de feuilles doit
+  // s'ajuster d'un toucher dans la liste ». Avant : il fallait ouvrir la ligne pour trouver « − / + ».
+  await signUp(page);
+  await createProject(page, "Toiture Le Goff", "M. Le Goff", "4 rue du Port, Paimpol");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
+  await passQuestions(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list).toBeVisible({ timeout: 60_000 });
+  // Sur la ligne fermée des feuilles : « − », le nombre, « + ». Les autres lignes n'ont pas ces boutons tant qu'elles sont fermées.
+  const reglage = list.getByRole("group", { name: /^Quantité : Feuilles/ }).first();
+  await expect(reglage).toBeVisible();
+  await expect(list.getByRole("group", { name: /^Ligne ouverte/ })).toHaveCount(0);
+  expect(await list.getByRole("group", { name: /^Quantité : / }).count()).toBe(await list.getByRole("group", { name: /^Quantité : Feuilles/ }).count());
+  const nombre = reglage.locator("[aria-live]");
+  const avant = Number((await nombre.innerText()).trim());
+  expect(avant).toBeGreaterThan(0);
+  // Un toucher : une feuille de plus, gardée par le serveur (elle est encore là après avoir rechargé la page).
+  const garde = page.waitForResponse((r) => /\/v1\/quantitatifs\/[^/]+\/corrections/.test(r.url()) && r.request().method() === "POST");
+  await reglage.getByRole("button", { name: /^Plus : Feuilles/ }).click();
+  await expect(nombre).toHaveText(String(avant + 1));
+  expect((await garde).status()).toBeLessThan(300);
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("group", { name: /^Quantité : Feuilles/ }).first().locator("[aria-live]")).toHaveText(String(avant + 1), { timeout: 30_000 });
+});
+
 test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases avant les questions ; coché, l'article entre dans la liste ; le reste n'existe pas", async ({ page }) => {
   // Le chantier ardoise et zinguerie de Greg (D-2026-020, anonymisé) : la gouttière a ses crochets écrits, pas ses naissances.
   await signUp(page);
