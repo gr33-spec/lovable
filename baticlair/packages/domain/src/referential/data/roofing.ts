@@ -399,6 +399,27 @@ const RAMPANT_BACS_PARAM: ParamDef = {
   question: "Longueur des bacs (le rampant, de l'égout au faîtage) ?",
   textLabels: ["rampant", "longueur des bacs", "longueur de bac", "longueur bac", "bac"],
 };
+/** Réponses du fondateur du 2026-11-18 (couverture zinc à tasseaux). */
+const FR_REPLY_TASSEAUX = "fondateur-reponses-2026-11-18";
+const FOUNDER_REPLY_TASSEAUX = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur)" } as const;
+/**
+ * Zinc à tasseaux : la largeur de la bobine. Greg, 18 novembre 2026 : « En général : bobine de 65 cm de largeur […] Parfois
+ * les bacs sont faits dans des bobines de 50 cm de large ». La valeur courante est dite (hypothèse modifiable), jamais
+ * demandée ; écrite au devis, elle est prise.
+ */
+const LARGEUR_BOBINE_TASSEAUX_PARAM: ParamDef = {
+  key: "largeur_bobine_tasseaux",
+  label: "Largeur de la bobine",
+  unit: "mm",
+  kind: "artisan_preference",
+  question: "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+  textLabels: ["largeur de bobine", "largeur bobine", "bobine", "largeur developpee", "developpe des bacs"],
+  default: { value: "650", source: FR_REPLY_TASSEAUX, verification: FOUNDER_REPLY_TASSEAUX, version: 1, note: "bobine de 65 cm en général ; parfois 50 cm" },
+  choices: [
+    { label: "Bobine de 650 mm", value: "650" },
+    { label: "Bobine de 500 mm", value: "500" },
+  ],
+};
 /**
  * Métal façonné (§40.2, §41.2) : « tu façonnes toi-même ou tu commandes façonné ? ». La réponse change
  * tout : bobines au mètre linéaire d'un côté, pièces aux dimensions de l'autre. Pas de défaut : on demande.
@@ -1133,7 +1154,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.18-56",
+  version: "roofing-2026.11.18-57",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1217,6 +1238,23 @@ export const ROOFING_REFERENTIAL: Referential = {
       note: "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80.",
     },
     {
+      id: "fondateur-reponses-2026-11-18",
+      kind: "trade_practice",
+      title: "Réponses du fondateur (couvreur) : couverture zinc à tasseaux",
+      documentRef: "Message du fondateur dans la conversation de travail, 2026-11-18, après son devis D-2026-024",
+      retrievedAt: "2026-11-18",
+      note: "« En général : bobine de 65 cm de largeur, hauteur de tasseau 50 mm, entraxe 62, les pattes sont souvent faites avec des chutes de zinc (4 cm par 15 cm environ). Parfois les bacs sont faits dans des bobines de 50 cm de large. »",
+    },
+    {
+      id: "vmzinc-tasseaux",
+      kind: "manufacturer",
+      title: "VMZINC, « Couverture à tasseaux », descriptif type (DTU 40.41)",
+      publisher: "VMZINC",
+      url: "https://www.vmzinc.com/getmedia/53fd3606-92a5-440e-9110-1377f96be36e/couv-tasseau-14-03-2022.doc",
+      retrievedAt: "2026-11-18",
+      note: "Largeur développée 650 mm : entraxe des tasseaux 630 mm (tasseaux de 40) ou 620 mm (tasseaux de 50) ; 500 mm : 480 ou 470 mm, imposée en région 3 site exposé et en région 4. Tasseaux de 40 mm si la projection horizontale du rampant est inférieure à 8 m, de 50 mm sinon. Reliefs latéraux 35 / 45 mm. Pattes à tasseaux en zinc de 40 mm de large, tous les 50 cm. Couvre-joints en éléments de 1 m, recouvrement de 50 mm au moins. Pointes Ø 3,4 ou vis Ø 4, longueur 70 mm (tasseaux de 40) ou 80 mm (tasseaux de 50).",
+    },
+    {
       id: "fondateur-reponses-2026-10-05",
       kind: "trade_practice",
       title: "Réponses du fondateur (couvreur) aux partiels du référentiel",
@@ -1288,6 +1326,11 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "clip_fixing", label: "Fixation de patte", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["pointe annelee", "pointes annelees", "vis de patte", "fixation de patte"], consumable: true },
     // Joint debout (§7, §36) : la ligne du devis est une SURFACE ; ce qui se commande, ce sont des bobines (au mètre linéaire) ou des bacs.
     { code: "standing_seam", label: "Couverture zinc joint debout", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["joint debout", "couverture zinc", "zinc a joint debout", "jdb"] },
+    // Zinc à tasseaux (Greg, 18 novembre 2026 ; VMZINC) : la ligne du devis est une SURFACE ; ce qui se commande, c'est de la
+    // bobine au mètre linéaire, et, quand le devis les écrit, les tasseaux de bois et les couvre-joints.
+    { code: "batten_seam", label: "Couverture zinc à tasseaux", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["zinc a tasseaux", "couverture a tasseaux", "zinc sur tasseaux", "a tasseaux", "sur tasseaux"] },
+    { code: "zinc_batten", label: "Tasseau bois pour couverture zinc", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["tasseau trapezoidal", "tasseaux trapezoidaux", "tasseau zinc", "tasseaux bois"] },
+    { code: "batten_cap", label: "Couvre-joint zinc de tasseau", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["couvre-joint de tasseau", "couvre-joints de tasseaux", "couvre joint tasseau"] },
     { code: "zinc_coil", label: "Bobine de zinc", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["bobine de zinc", "bobine zinc", "zinc en bobine"] },
     { code: "zinc_panel", label: "Bac joint debout", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bac joint debout", "bac zinc", "bacs zinc"] },
     // Bandes zinc au ml (§7, §36.4) : solin, rive, égout, ventilation, couvre-joint. Jamais commandées en « ml de zinc » nu.
@@ -1857,6 +1900,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: packaging("1", "m", "definition", { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "BatiClair (définition)" }), primary: true }],
       }),
     ),
+    generic("tasseau-zinc-50", "zinc_batten", "Tasseau bois trapézoïdal de 50 mm pour couverture zinc, au mètre linéaire", "Tasseaux bois trapézoïdaux de 50 mm", {
+      sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
+    }),
+    generic("couvre-joint-tasseau-zinc", "batten_cap", "Couvre-joint zinc pour tasseau de 50 mm, au mètre linéaire (aspect et épaisseur du chantier)", "Couvre-joints zinc de tasseaux", {
+      sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
+    }),
     generic("bac-joint-debout-standard", "zinc_panel", "Bac joint debout zinc naturel, façonné à la longueur du rampant (largeur utile 430 ou 580 mm)", "Bacs joint debout zinc", {
       // §50.7 : « 31 bacs », la longueur dans le nom (« longueur 7,15 m »).
       sellingUnits: [{ id: "bac", label: { one: "bac", many: "bacs" }, contains: ONE_PIECE, primary: true }],
@@ -3224,6 +3273,83 @@ export const ROOFING_REFERENTIAL: Referential = {
           precisionRequires: ["diametre_sortie"],
           source: FR_REPLY,
           verification: FOUNDER_REPLY,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // Greg, 18 novembre 2026 (devis D-2026-024) : « Tu dois TOUT connaître sur la couverture ». Le zinc à tasseaux manquait :
+      // 32 m² de couverture sortaient sans aucune fourniture. Ses chiffres (bobine de 650, tasseaux de 50, entraxe 62) sont
+      // ceux du descriptif VMZINC. Les pattes sont faites dans les chutes : aucune ligne à commander.
+      id: "couverture-zinc-tasseaux",
+      trade: "roofing",
+      section: "principal",
+      label: "Couverture zinc à tasseaux",
+      triggers: ["batten_seam"],
+      params: [SURFACE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_BACS_PARAM, LARGEUR_BOBINE_TASSEAUX_PARAM],
+      slots: [
+        { key: "couverture", family: "batten_seam", label: "Couverture zinc à tasseaux", measureOnly: true },
+        { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc en bobine de 650 mm (500 mm parfois), commandé au mètre linéaire.", source: FR_REPLY_TASSEAUX, productId: "bobine-zinc-standard" }, formOf: "couverture" },
+        { key: "tasseau", family: "zinc_batten", label: "Tasseaux bois", keywords: ["tasseau", "tasseaux"], usual: { text: "Tasseaux de bois trapézoïdaux de 50 mm, un rang entre deux bacs.", source: FR_REPLY_TASSEAUX, productId: "tasseau-zinc-50" } },
+        { key: "couvre_joint", family: "batten_cap", label: "Couvre-joints zinc", keywords: ["couvre-joint", "couvre-joints", "couvre joint", "couvre joints"], usual: { text: "Un couvre-joint zinc sur chaque rang de tasseaux, en éléments de 1 m (VMZINC).", source: "vmzinc-tasseaux", productId: "couvre-joint-tasseau-zinc" } },
+      ],
+      constants: {
+        largeur_etroite: condition("500", "mm", "vmzinc-tasseaux", FOUNDER_REPLY_TASSEAUX, "Bobine de 500 : « parfois » (Greg) ; imposée en région 3 site exposé et en région 4 (VMZINC)."),
+        entraxe_650: condition("620", "mm", FR_REPLY_TASSEAUX, FOUNDER_REPLY_TASSEAUX, "« entraxe 62 » (Greg) ; VMZINC : 620 mm pour une bobine de 650 et des tasseaux de 50."),
+        entraxe_500: condition("470", "mm", "vmzinc-tasseaux", FOUNDER_REPLY_TASSEAUX, "VMZINC : 470 mm pour une bobine de 500 et des tasseaux de 50."),
+        seuil_070: ZINC_PLAT_CONSTANTS.seuil_070,
+        surlongueur_bac: condition("0.15", "m", FR_REPLY, FOUNDER_REPLY, "Comme le joint debout : « 15 cm par bac (10 en égout, 5 en faîtage) » (réponse du fondateur, 2026-10-04)."),
+      },
+      derived: [
+        { key: "entraxe_tasseaux", label: "Entraxe des tasseaux", unit: "mm", formula: "si(largeur_bobine_tasseaux <= regle.largeur_etroite, regle.entraxe_500, regle.entraxe_650)", shown: true, source: "vmzinc-tasseaux", verification: FOUNDER_REPLY_TASSEAUX, version: 1 },
+        { key: "largeur_pan", label: "Largeur du pan", unit: "m", formula: "surface / longueur_rampant", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        { key: "nb_bacs", label: "Nombre de bacs", unit: "u", formula: "arrondi_sup(largeur_pan / entraxe_tasseaux)", source: "vmzinc-tasseaux", verification: FOUNDER_REPLY_TASSEAUX, version: 1 },
+        { key: "longueur_bac", label: "Longueur de bobine par bac", unit: "m", formula: "longueur_rampant + regle.surlongueur_bac", source: FR_REPLY, verification: FOUNDER_REPLY, version: 1 },
+        // Un rang de tasseaux de chaque côté de chaque bac : un de plus que de bacs. À CONFIRMER par le fondateur (finition des
+        // rives) : tant que ce n'est pas fait, tasseaux et couvre-joints restent « à chiffrer », sans quantité.
+        { key: "nb_rangs", label: "Rangs de tasseaux", unit: "u", formula: "nb_bacs + 1", source: "definition", verification: DRAFT, version: 1 },
+      ],
+      needs: [
+        {
+          id: "zinc-bobine-tasseaux",
+          slot: "bobine",
+          // Une bande de bobine par bac : nombre de bacs (largeur du pan ÷ entraxe des tasseaux) × (rampant + 15 cm).
+          // L'épaisseur ne change pas la longueur mais l'article : le facteur 1 la garde dans le calcul (comme le joint debout).
+          formula: "nb_bacs * longueur_bac * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          unit: "m",
+          core: true,
+          exclusions: "Une longueur de rampant par bac plus 15 cm de surlongueur ; hors couvre-joints, bandes d'égout, de rive et de faîtage, comptés à part. Les pattes à tasseaux se font dans les chutes.",
+          precision: "{nb_bacs} bacs × {longueur_bac|m}",
+          designation: "Bobine {aspect_zinc} {epaisseur_zinc} mm, largeur {largeur_bobine_tasseaux|mm}",
+          precisionRequires: ["aspect_zinc"],
+          source: FR_REPLY_TASSEAUX,
+          verification: FOUNDER_REPLY_TASSEAUX,
+          version: 1,
+        },
+        {
+          id: "tasseaux-zinc",
+          slot: "tasseau",
+          formula: "nb_rangs * longueur_rampant",
+          unit: "m",
+          core: true,
+          exclusions: "Un rang de tasseaux de chaque côté de chaque bac, sur la longueur du rampant. Pointes ou vis de 80 mm à part.",
+          precision: "{nb_rangs} rangs × {longueur_rampant|m}",
+          source: "definition",
+          verification: DRAFT,
+          version: 1,
+        },
+        {
+          id: "couvre-joints-tasseaux",
+          slot: "couvre_joint",
+          formula: "nb_rangs * longueur_rampant",
+          unit: "m",
+          core: true,
+          exclusions: "Un couvre-joint par rang de tasseaux ; le recouvrement de 5 cm entre éléments de 1 m n'est pas ajouté.",
+          precision: "{nb_rangs} rangs × {longueur_rampant|m}",
+          designation: "Couvre-joints {aspect_zinc} {epaisseur_zinc} mm pour tasseaux de 50 mm",
+          precisionRequires: ["aspect_zinc"],
+          source: "definition",
+          verification: DRAFT,
           version: 1,
         },
       ],
