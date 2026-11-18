@@ -2010,6 +2010,33 @@ test.describe("lecture suivie ligne par ligne", () => {
     await expect(lecture.getByRole("heading")).toHaveCount(1);
     await expect(lecture.getByRole("button", { name: "Revenir à mes listes" })).toBeVisible();
   });
+
+  test("un serveur lent à dire que la lecture est finie ne laisse jamais l'écran sur « Lecture… »", async ({ page }) => {
+    // Recette en ligne du 18 novembre 2026 : la lecture était finie sur le serveur, l'écran restait sur « Lecture… » sans fin.
+    // Il regardait l'état chaque seconde en ANNULANT le coup d'œil précédent : dès que le serveur mettait plus d'une seconde
+    // à répondre, aucune réponse n'arrivait jamais. Ici : la lecture part « en cours », puis chaque coup d'œil met 1,5 s.
+    test.setTimeout(90_000);
+    await signUp(page);
+    await page.route(/\/v1\/quantitatifs(\?|$)/, async (route) => {
+      try {
+        const res = await route.fetch();
+        if (route.request().method() === "POST") {
+          const body = (await res.json()) as Record<string, unknown>;
+          await route.fulfill({ response: res, status: 202, json: { ...body, etat: "en_cours", ecran: null } });
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 1500));
+        await route.fulfill({ response: res });
+      } catch {
+        // Requête annulée par l'application : rien à répondre.
+      }
+    });
+    await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+    await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+    const suite = page.getByRole("region", { name: "Les questions" }).or(page.getByRole("region", { name: "Page des fournitures" })).or(page.getByRole("button", { name: "Voir ma liste", exact: true }));
+    await expect(suite.first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("region", { name: "Analyse du devis" })).toHaveCount(0);
+  });
 });
 
 test("§50.1 : passé 30 s, « Gros devis, j'y suis encore… » (une seule phrase)", async ({ page }) => {
