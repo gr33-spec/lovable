@@ -17,7 +17,8 @@ beforeEach(async () => {
   await resetDatabase(ctx.prisma);
 });
 
-const JOINT_DEBOUT = { lignes: [{ libelle: "Couverture zinc joint debout", quantite: "91", unite: "m²" }] };
+// Règle changée le 18 novembre 2026 : le rampant des bacs est écrit au devis (ou demandé), plus jamais supposé à 5,5 m.
+const JOINT_DEBOUT = { lignes: [{ libelle: "Couverture zinc joint debout, rampant de 5,5 m", quantite: "91", unite: "m²" }] };
 type Q = { id: string; questions: { id: string }[]; lignes: { libelle: string; quantite: number | null; unite: string | null; explication: { morceaux: { cle?: string; confiance: string }[] } }[] };
 
 describe("« je façonne » : apprise à la deuxième confirmation, plus jamais demandée ensuite", () => {

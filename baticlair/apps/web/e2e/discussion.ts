@@ -30,7 +30,7 @@ export async function passerLesSuggestions(page: Page, cocher: readonly (string 
   for (const nom of cocher) {
     // Comme l'artisan : on touche la ligne (large), pas la case elle-même.
     const c = carte.getByRole("checkbox", { name: nom });
-    if ((await c.count()) > 0 && !(await c.first().isChecked())) await carte.locator("label").filter({ has: c.first() }).click();
+    if ((await c.count()) > 0 && !(await c.first().isChecked())) await carte.locator("label").filter({ hasText: nom }).first().click();
   }
   await carte.getByRole("button", { name: "Continuer", exact: true }).click();
   await expect(carte).toBeHidden({ timeout: 15_000 });
