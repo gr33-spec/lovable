@@ -237,3 +237,21 @@ couvert ici, demander au fondateur plutôt que deviner.
 - Unité inconnue (ex. : clous d'ardoise, liteaux) : on la demande à
   l'artisan, puis on la retient pour ses prochains devis (pré-remplie,
   modifiable).
+
+## Oublis probables (écran Suggestions)
+
+- Toutes les cases sont décochées au départ, sans limite de nombre.
+- Contenu = tout ce que ce skill classe « en Suggestion » quand ce n'est ni
+  demandé ni au devis :
+  - Ardoise : clous galva.
+  - Liteaux, voliges : pointes.
+  - Tuile : tuiles de rive (puis on demande le type de rive), chatières
+    (puis on demande le nombre), fixation des tuiles (puis ratio fabricant).
+  - Zinguerie : étain, soudure, pattes, clous, mastic.
+  - Gouttières : fonds et naissances (puis on demande le nombre), dauphin,
+    cuvette, jonctions.
+  - Velux : kit d'isolation (BDX), pare-vapeur (BBX), volet roulant, store,
+    habillage intérieur.
+  - Visserie et chevilles (puis description + nombre).
+  - Solins et abergements (cheminée, mur contre le toit).
+- Le fondateur ne voit pas d'oubli « typique » en plus : ne pas en inventer.
