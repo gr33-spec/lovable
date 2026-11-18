@@ -309,8 +309,10 @@ function TelephoneEntier({ contenu, testid, clic, defile, cible }: { contenu: Co
       {echelle ? (
         <div className="overflow-hidden rounded-[26px] bg-black shadow-card" style={{ padding: bord, width: TEL_L * echelle + 2 * bord, height: hauteurEcran + 2 * bord }}>
           <div className="overflow-hidden rounded-[20px] bg-white" style={{ width: TEL_L * echelle, height: hauteurEcran }}>
-            {/* Le `transform` fait du cadre le repère de la barre d'appel (position fixe) : elle reste dans le téléphone. */}
-            <div ref={defile} data-testid={testid} onClickCapture={clic} className="overscroll-contain overflow-y-auto bg-white [scrollbar-width:none]" style={{ width: TEL_L, height: hauteurEcran / echelle, transform: `scale(${echelle})`, transformOrigin: "top left", WebkitOverflowScrolling: "touch" }}>
+            {/* Réduit par `zoom`, jamais par `transform` (Greg, 18 novembre 2026 : sur iPhone, la barre « Appeler » restait
+                figée au milieu du petit téléphone) : Safari colle mal une barre `sticky` dans un cadre transformé. Avec
+                `zoom`, la barre se colle au bas du cadre qui défile, comme sur la vraie page. */}
+            <div ref={defile} data-testid={testid} onClickCapture={clic} className="overscroll-contain overflow-y-auto bg-white [scrollbar-width:none]" style={{ width: TEL_L, height: hauteurEcran / echelle, zoom: echelle, WebkitOverflowScrolling: "touch" }}>
               <div inert aria-hidden>
                 <VuePage contenu={contenu} apercu />
               </div>

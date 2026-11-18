@@ -117,7 +117,7 @@ export function AppNav() {
     >
       {/* Téléphone : une capsule en verre, à 16 px des bords et 12 px du bas (zone du geste comprise). Ordinateur : une
           colonne sombre pleine hauteur, filet à droite, le bouton jaune « Nouveau » en tête. */}
-      <div className={`mx-2.5 max-[359px]:mx-1.5 max-[359px]:px-0.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[repeat(5,auto)]" : "grid-cols-[repeat(4,auto)]"} justify-between rounded-[26px] bg-glass px-2 max-[359px]:px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
+      <div className={`mx-2.5 max-[359px]:mx-1.5 max-[359px]:px-0.5 mb-[var(--nav-gap)] grid h-[var(--nav-height)] grid-flow-col items-center ${groupe ? "grid-cols-[repeat(4,auto)]" : "grid-cols-[repeat(3,auto)]"} justify-between rounded-[26px] bg-glass px-2 max-[359px]:px-1 shadow-float ring-1 ring-ink/5 lg:mx-0 lg:mb-0 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-1 lg:rounded-none lg:border-r lg:border-line lg:bg-(--menu-fond) lg:bg-none lg:px-4 lg:pt-6 lg:pb-5 lg:shadow-none lg:ring-0`}>
         <span className="hidden px-2 pb-6 lg:order-[-2] lg:block">
           <Logo fond={theme === "clair" ? "clair" : "sombre"} hauteur={30} />
         </span>
@@ -139,7 +139,9 @@ export function AppNav() {
         {groupe ? link(groupeItem) : null}
         {/* Prompt maître (Greg, 10 novembre 2026) : quatre entrées fixes, Accueil, Quantitatifs, Achats groupés, Missions. */}
         {link(missionsItem)}
-        {link(siteItem)}
+        {/* « Mon site » (Greg, 18 novembre 2026, RÈGLE CHANGÉE : avant, cinquième onglet de la barre du bas) : sur téléphone,
+            le globe de l'en-tête (`MenuArtisan`) ; sur ordinateur, il reste ici, dans la colonne, où il y a la place. */}
+        {link(siteItem, true)}
         {link(negocesItem, true)}
         <span aria-hidden="true" className="hidden grow lg:block" />
         {link(profilItem, true)}

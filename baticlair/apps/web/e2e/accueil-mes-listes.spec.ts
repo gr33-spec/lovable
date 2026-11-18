@@ -346,7 +346,7 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   // Le menu du bas : libellés à 12 px, sans déborder.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  for (const nom of ["Accueil", "Quantitatifs", "Achats groupés", "Mon site"]) {
+  for (const nom of ["Accueil", "Quantitatifs", "Achats groupés"]) {
     const lien = nav.getByRole("link", { name: nom });
     expect(await lien.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
     const b = (await lien.boundingBox())!;

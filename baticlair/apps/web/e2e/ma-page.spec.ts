@@ -75,8 +75,9 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   test.setTimeout(240_000);
   const nom = `Toits Martin ${unique()}`;
   await inscrire(page, nom);
-  // Onglet « Mon site » de la navigation principale (Greg, 16 novembre 2026) ; plus d'entrée « Ma page » dans le Profil.
-  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Mon site" }).click();
+  // « Mon site » : la colonne sur ordinateur, le globe de l'en-tête sur téléphone (Greg, 18 novembre 2026) ; plus
+  // d'entrée « Ma page » dans le Profil.
+  await (info.project.name === "telephone" ? page.getByRole("main").getByRole("link", { name: "Mon site" }) : page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Mon site" })).click();
   await expect(page).toHaveURL(/\/mon-site$/);
   await expect(page.getByRole("heading", { name: "Mon site", level: 1 })).toBeVisible();
   await onglet(page, "Publier");
@@ -352,6 +353,18 @@ test("Mon site : dans l'aperçu Téléphone, la barre « Appeler » reste collé
   }
   await tel.evaluate((d) => d.scrollTo(0, 0));
   await expect.poll(sousLeBas).toBeGreaterThanOrEqual(0);
+  // Le petit téléphone est réduit par `zoom`, jamais par `transform` (Safari colle mal une barre dans un cadre transformé).
+  expect(await tel.evaluate((d) => getComputedStyle(d).transform)).toBe("none");
+  // Même règle dans l'aperçu plein écran « Téléphone ».
+  await page.getByRole("button", { name: "Voir mon site" }).click();
+  const plein = page.getByRole("dialog", { name: "Aperçu de mon site" }).getByTestId("apercu-page");
+  const barrePlein = plein.locator(".pe-barre-appel");
+  const ecartPlein = () => barrePlein.evaluate((b) => Math.round(b.closest("[data-testid=apercu-page]")!.getBoundingClientRect().bottom - b.getBoundingClientRect().bottom));
+  await expect.poll(() => barrePlein.evaluate((b) => Math.round(b.getBoundingClientRect().top - b.closest("[data-testid=apercu-page]")!.getBoundingClientRect().bottom))).toBeGreaterThanOrEqual(0);
+  for (const y of [900, 1500, 99999]) {
+    await plein.evaluate((d, y) => d.scrollTo(0, y), y);
+    await expect.poll(ecartPlein).toBe(0);
+  }
 });
 
 test("Ma page : l'éditeur dans les thèmes clair et sombre de l'application, sans défilement horizontal", async ({ page }) => {
@@ -475,7 +488,7 @@ test.describe("captures du rapport", () => {
   });
 });
 
-test("Mon site : cinq onglets tiennent sur un petit iPhone, sans texte coupé ; un seul chemin vers l'éditeur", async ({ browser }) => {
+test("Mon site : quatre onglets en bas et le globe dans l'en-tête tiennent sur un petit iPhone, sans texte coupé ; un seul chemin vers l'éditeur", async ({ browser }) => {
   test.setTimeout(120_000);
   for (const largeur of [375, 320]) {
     const ctx = await browser.newContext({ baseURL: "http://localhost:3000", viewport: { width: largeur, height: 667 }, isMobile: true, hasTouch: true });
@@ -485,7 +498,24 @@ test("Mon site : cinq onglets tiennent sur un petit iPhone, sans texte coupé ; 
     });
     await inscrire(p, `Toits Martin ${unique()}`);
     const nav = p.getByRole("navigation", { name: "Navigation principale" });
-    await expect(nav.getByRole("link")).toHaveText(["Accueil", "Quantitatifs", "Achats groupés", /Missions/, "Mon site"]);
+    // Greg, 18 novembre 2026 : la barre du bas revient à quatre onglets ; « Mon site » est le globe de l'en-tête.
+    await expect(nav.getByRole("link")).toHaveText(["Accueil", "Quantitatifs", "Achats groupés", /Missions/]);
+    // L'en-tête tient sur la largeur : nom (coupé proprement), globe, jour/nuit, cloche, profil, sans déborder.
+    const globe = p.getByRole("main").getByRole("link", { name: "Mon site" });
+    const enTete = await p.evaluate(() => {
+      const nom = document.querySelector("main span.truncate.uppercase") as HTMLElement;
+      const boutons = [...document.querySelectorAll<HTMLElement>('main a[aria-label="Mon site"], main button[aria-label^="Apparence"], main [aria-label="Mon menu"]')];
+      const r = (e: HTMLElement) => e.getBoundingClientRect();
+      return { nomFin: r(nom).right, boutons: boutons.map((b) => [r(b).left, r(b).right, r(b).top]), largeur: innerWidth, deborde: document.documentElement.scrollWidth - innerWidth };
+    });
+    expect(enTete.deborde).toBeLessThanOrEqual(0);
+    expect(enTete.boutons).toHaveLength(3);
+    for (const [g, d] of enTete.boutons) {
+      expect(g).toBeGreaterThanOrEqual(enTete.nomFin - 0.5);
+      expect(d).toBeLessThanOrEqual(enTete.largeur);
+    }
+    // Globe à gauche du jour/nuit.
+    expect(enTete.boutons[0]![1]!).toBeLessThanOrEqual(enTete.boutons[1]![0]!);
     // Chaque libellé tient dans son onglet : rien ne dépasse, rien n'est rogné, au plus deux lignes, assez grand. Les lettres
     // elles-mêmes sont mesurées (une plage sur le texte) ; moins d'un demi-pixel (arrondi du rendu) ne se voit pas.
     const mesures = await nav.evaluate((n) =>
@@ -500,7 +530,7 @@ test("Mon site : cinq onglets tiennent sur un petit iPhone, sans texte coupé ; 
           return { nom: texte.textContent ?? "", gauche: t.left - r.left, droite: r.right - t.right, lignes: plage.getClientRects().length, taille: parseFloat(getComputedStyle(texte).fontSize), x: r.left, fin: r.right };
         }),
     );
-    expect(mesures.map((m) => m.nom)).toEqual(["Accueil", "Quantitatifs", "Achats groupés", "Missions", "Mon site"]);
+    expect(mesures.map((m) => m.nom)).toEqual(["Accueil", "Quantitatifs", "Achats groupés", "Missions"]);
     for (const m of mesures) {
       expect(m.gauche, m.nom).toBeGreaterThanOrEqual(-0.5);
       expect(m.droite, m.nom).toBeGreaterThanOrEqual(-0.5);
@@ -513,8 +543,8 @@ test("Mon site : cinq onglets tiennent sur un petit iPhone, sans texte coupé ; 
     await p.screenshot({ path: `test-results/mon-site-onglets-${largeur}.png` });
     // L'onglet ouvre l'éditeur (Greg, 17 novembre 2026, « style Lovable ») : le site en haut, toujours visible ; en bas,
     // les sept onglets des réglages ; un onglet ouvre son tiroir sous le site.
-    await nav.getByRole("link", { name: "Mon site" }).click();
-    await expect(nav.getByRole("link", { name: "Mon site" })).toHaveAttribute("aria-current", "page");
+    await globe.click();
+    await expect(globe).toHaveAttribute("aria-current", "page");
     await expect(p.getByRole("tablist", { name: "Réglages du site" }).getByRole("tab")).toHaveText(["Couleurs", "Photos", "Prestations", "Chantiers", "À propos", "Contact", "Publier"]);
     await expect(apercu(p)).toBeVisible();
     await onglet(p, "Couleurs");

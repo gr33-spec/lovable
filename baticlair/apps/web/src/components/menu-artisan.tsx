@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { BoutonTheme } from "@/components/bouton-theme";
 import { SignalerProbleme, type SignalementHandle } from "@/components/signaler-probleme";
-import { useRouter } from "next/navigation";
-import { ChevronRight, CreditCard, LayoutGrid, LifeBuoy, Sparkles, UserRound, X, type LucideIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ChevronRight, CreditCard, Globe, LayoutGrid, LifeBuoy, Sparkles, UserRound, X, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -30,6 +30,7 @@ export function initials(name: string): string {
 export function MenuArtisan() {
   const { me, company } = useSession();
   const router = useRouter();
+  const surMonSite = usePathname().startsWith("/mon-site");
   const [open, setOpen] = useState(false);
   const signalement = useRef<SignalementHandle>(null);
   const [leaving, setLeaving] = useState(false);
@@ -85,9 +86,14 @@ export function MenuArtisan() {
   );
   return (
     <div className="relative flex items-center justify-between">
-      <span className="truncate text-[16px] font-extrabold tracking-[0.01em] uppercase">{company?.name}</span>
-      <span className="ml-auto flex items-center gap-2 pl-2">
+      <span className="min-w-0 truncate text-[16px] font-extrabold tracking-[0.01em] uppercase">{company?.name}</span>
+      <span className="ml-auto flex shrink-0 items-center gap-2 pl-2 max-[389px]:gap-1.5">
         <PastilleEssai />
+        {/* « Mon site » (Greg, 18 novembre 2026) : sur téléphone, le globe de l'en-tête, à gauche du jour/nuit, sur tous les
+            écrans (la barre du bas revient à quatre onglets) ; sur ordinateur, il reste dans la colonne de gauche. */}
+        <Link href="/mon-site" aria-label="Mon site" aria-current={surMonSite ? "page" : undefined} className={`pressable bouton-nuit flex size-11 shrink-0 items-center justify-center rounded-full lg:hidden ${surMonSite ? "ring-2 ring-accent" : ""}`}>
+          <Globe size={19} aria-hidden="true" />
+        </Link>
         <BoutonTheme />
         <Cloche />
       </span>
