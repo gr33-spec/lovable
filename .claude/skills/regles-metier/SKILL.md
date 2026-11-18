@@ -171,5 +171,22 @@ couvert ici, demander au fondateur plutôt que deviner.
 
 ## Gouttières et descentes
 
+### Gouttière
+- Si ce n'est pas au devis, on demande : matière (zinc, PVC, alu…), modèle
+  (demi-ronde, nantaise…), développé (25, 33…) et longueur en ml.
+- Arrondi aux longueurs de vente de 4 m.
+- Crochets de gouttière : d'office, 1 tous les 50 cm, au même développé que
+  la gouttière (on ne demande pas le type).
 - Angles et talons de gouttière : lignes à part, avec la question « Tu les
   fabriques toi-même ou je te les commande ? ».
+- Fonds et naissances : en Suggestion. Si l'artisan coche, on demande le
+  nombre.
+- Dauphin, cuvette (boîte à eau), jonctions : en Suggestion.
+
+### Descente
+- Si ce n'est pas au devis, on demande : matière, diamètre (80, 100…),
+  nombre de descentes, hauteur (ml).
+- Arrondi aux longueurs de vente de 2 m.
+- Colliers : d'office, 1 tous les 2 m + 1 pour le premier morceau, par
+  descente.
+- Coudes : on demande le nombre.
