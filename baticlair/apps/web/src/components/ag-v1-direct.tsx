@@ -135,7 +135,9 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
   const verrouille = !!params.get("achat") && !!produit && produit.caracteristiques.every((c) => c.importance === "recommandee" || attributs[c.attribut]);
   // Le besoin dit dans la conversation Mobiiz arrive prérempli (quantité, unité, réception, date) ; tout reste modifiable.
   const uniteDite = params.get("unite");
-  const [unite, setUnite] = useState<string>(() => (uniteDite && produit && [produit.unite.code, ...produit.conditionnements.map((c) => c.unite.code)].includes(uniteDite) ? uniteDite : (produit?.conditionnements[0]?.unite.code ?? produit?.unite.code ?? "")));
+  // Rejoindre un achat ouvert (recette du 18 novembre 2026) : l'unité proposée est celle du total affiché (les pièces), pour
+  // que « 1000 » veuille dire la même chose pour tous ; la palette reste au choix. Avant : la palette d'office.
+  const [unite, setUnite] = useState<string>(() => (uniteDite && produit && [produit.unite.code, ...produit.conditionnements.map((c) => c.unite.code)].includes(uniteDite) ? uniteDite : verrouille ? (produit?.unite.code ?? "") : (produit?.conditionnements[0]?.unite.code ?? produit?.unite.code ?? "")));
   const [parUnite, setParUnite] = useState<number | null>(() => produit?.conditionnements[0]?.parDefaut ?? null);
   const [conversionConfirmee, setConversionConfirmee] = useState(false);
   const [quantite, setQuantite] = useState(() => params.get("quantite") ?? "");

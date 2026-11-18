@@ -250,6 +250,9 @@ describe("isolation entre entreprises", () => {
     expect(alertes).toHaveLength(1);
     expect(alertes[0]).toMatchObject({ titre: "Une entreprise vient de rejoindre ton besoin", href: `/achats-groupes/besoins/${premier.id}`, categorie: "groupe" });
     expect(alertes[0]!.detail).not.toMatch(/Toitures E/);
+    // Recette du 18 novembre 2026 (bloquant) : écrite à 2 entreprises, l'alerte ne dit aucun volume (sinon le créateur
+    // déduirait la quantité de l'autre).
+    expect(alertes[0]!.detail).toMatch(/ · 2 entreprises · en cours de regroupement$/);
     // Lot G : le message de Mobiiz est aussi dans la boîte unique ; le lire là le marque lu dans la cloche (un seul état).
     const boite = (await agents[0]!.agent.get("/v1/boite").expect(200)).body.items as { cle: string; sorte: string; titre: string; sujet: string; nonLu: boolean; href: string }[];
     const message = boite.find((i) => i.sorte === "mobiiz")!;

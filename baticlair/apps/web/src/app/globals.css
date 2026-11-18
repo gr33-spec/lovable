@@ -528,3 +528,10 @@ html[data-theme="clair"] {
     animation: none;
   }
 }
+
+/* Recette du 18 novembre 2026 : faire défiler jusqu'à un élément le laisse au-dessus de la barre du bas et du ＋. */
+@media (max-width: 1023px) {
+  html {
+    scroll-padding-bottom: var(--nav-space);
+  }
+}

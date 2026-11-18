@@ -93,10 +93,10 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
       {mesBesoins.length ? (
         <Link href="/demandes?type=groupees" className={`pressable flex min-h-13 items-center gap-3 px-4 py-2.5 ${CARTE}`}>
           <span className="min-w-0 flex-1 text-[15px] font-semibold">
-            Tes besoins groupés : {mesBesoins.length} en cours
+            {mesBesoins.length} besoin{mesBesoins.length > 1 ? "s" : ""} groupé{mesBesoins.length > 1 ? "s" : ""} en cours
           </span>
           <span className="flex shrink-0 items-center gap-0.5 text-[14px] font-extrabold">
-            Voir dans Demandes
+            Voir
             <ChevronRight size={16} aria-hidden="true" />
           </span>
         </Link>
@@ -120,7 +120,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         <label className="flex min-h-12 items-center gap-3 rounded-xl border border-line bg-surface px-4 focus-within:border-accent">
           <Search size={20} aria-hidden="true" className="shrink-0 text-muted" />
           <span className="sr-only">Chercher un matériau</span>
-          <input type="search" enterKeyHint="search" value={cherche} onChange={(e) => setCherche(e.target.value)} placeholder="Chercher un matériau (ardoise, liteau…)" className="min-h-11 min-w-0 grow bg-transparent text-[16px] outline-none placeholder:text-muted" />
+          <input type="search" enterKeyHint="search" value={cherche} onChange={(e) => setCherche(e.target.value)} placeholder="Chercher un matériau" className="min-h-11 min-w-0 grow bg-transparent text-[16px] outline-none placeholder:text-muted" />
         </label>
         {/* Le secteur : un regroupement se fait par département (on ne rejoint que ceux du sien). */}
         {etat.zone ? <p className="text-[13px] text-muted">Secteur : {zoneLisible(etat.zone)}. Pour en changer, change l&apos;adresse de ton entreprise dans Profil.</p> : null}

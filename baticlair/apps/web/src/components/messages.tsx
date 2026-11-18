@@ -39,7 +39,7 @@ export function Boite() {
         <EcranTitre titre="Messages et réponses" retour="/" />
       </div>
       <GrandTitre sous={tous.length ? "Négoces, Missions, demandes reçues sur ton site et messages de Mobiiz." : "Tes échanges apparaîtront ici."}>{data && tous.length === 0 ? "Aucun message pour le moment" : "Messages"}</GrandTitre>
-      {tous.length > 0 ? <Recherche valeur={q} onChange={setQ} placeholder="Rechercher un message ou une demande" /> : null}
+      {tous.length > 0 ? <Recherche valeur={q} onChange={setQ} placeholder="Rechercher" /> : null}
       <Puces label="Filtrer la boîte" choix={FILTRES_BOITE} valeur={filtre} onChange={setFiltre} />
       {/* Greg, 12 novembre 2026 : ce qui demande une action se lit d'abord ; le reste est déjà dans son quantitatif. */}
       {aClasser > 0 ? (

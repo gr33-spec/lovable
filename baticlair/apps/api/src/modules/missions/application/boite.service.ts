@@ -34,7 +34,7 @@ export class BoiteService {
         where: { priceRequest: { companyId: t.companyId }, reponduLe: { not: null } },
         orderBy: { reponduLe: "desc" },
         take: 100,
-        select: { id: true, reponduLe: true, supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } },
+        select: { id: true, reponduLe: true, commandeLe: true, supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } },
       }),
       this.prisma.lectureBoite.findMany({ where: { companyId: t.companyId }, select: { cle: true } }),
       // Lot G (Greg, 15 novembre 2026) : les messages de Mobiiz (achats groupés, conseils) entrent dans la même boîte, avec
@@ -70,7 +70,8 @@ export class BoiteService {
         sujet: `Prix saisis en ligne · ${r.priceRequest.project.name}`,
         extrait: "Réponse chiffrée ligne par ligne, à comparer dans le quantitatif.",
         le: r.reponduLe!.toISOString(),
-        nonLu: !dejaLues.has(`reponse:${r.id}`),
+        // Recette du 18 novembre 2026 : une réponse dont l'artisan a ouvert la demande, ou chez qui il a commandé, est lue.
+        nonLu: !dejaLues.has(`reponse:${r.id}`) && !r.commandeLe,
         href: `/chantiers/${r.priceRequest.projectId}#fournisseurs`,
       })),
       ...site.map((m) => ({

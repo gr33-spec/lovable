@@ -32,7 +32,8 @@ function Demandes() {
     <div className="flex flex-col gap-4">
       <span className="flex flex-col gap-1">
         <PageTitle>Demandes</PageTitle>
-        <span className="text-[14px] text-muted">Tout ce que tu as lancé : tes demandes de prix et tes besoins groupés.</span>
+        {/* Sur un très petit écran, la phrase laisse la place à la première demande (recette du 18 novembre 2026). */}
+        <span className="text-[14px] text-muted max-[400px]:hidden">Tout ce que tu as lancé : tes demandes de prix et tes besoins groupés.</span>
       </span>
       <div role="tablist" aria-label="Sorte de demandes" className="grid grid-cols-2 gap-1 rounded-full bg-(--voile-1) p-1 ring-1 ring-line">
         {SORTES.map((s) => (

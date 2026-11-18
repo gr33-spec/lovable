@@ -35,13 +35,15 @@ const sansOrigine = (l: LigneSaisie): LigneSaisie => {
   return reste;
 };
 
-export function boutonSaisie(n: number): string {
+export function boutonSaisie(n: number, pourGroupe = false): string {
+  // Recette du 18 novembre 2026 : sur le chemin « Besoin groupé », on ne crée pas une liste, on continue vers la publication.
+  if (pourGroupe) return n === 0 ? "Ajoute un matériau pour continuer" : `Continuer · ${n} matériau${n > 1 ? "x" : ""}`;
   // Greg, 1er novembre 2026 : « Créer ma liste avec N matériaux » (le bouton crée la liste et ouvre l'éditeur).
   // Direction A (Greg, 12 novembre 2026) : le quantitatif est le document, la liste est son contenu.
   return n === 0 ? "Ajoute un matériau pour créer le quantitatif" : n === 1 ? "Créer le quantitatif · 1 matériau" : `Créer le quantitatif · ${n} matériaux`;
 }
 
-export function SaisirMaListe({ onFermer, versListe = (id) => `/chantiers/${id}` }: { onFermer: () => void; /** Où mène la liste une fois créée (par défaut, sa fiche). */ versListe?: (projetId: string) => string }) {
+export function SaisirMaListe({ onFermer, versListe = (id) => `/chantiers/${id}`, pourGroupe = false }: { onFermer: () => void; /** Où mène la liste une fois créée (par défaut, sa fiche). */ versListe?: (projetId: string) => string; /** Le chemin « Publier un besoin groupé ». */ pourGroupe?: boolean }) {
   const router = useRouter();
   const b = useBrouillon<{ lignes: LigneSaisie[] }>(
     "liste:saisie",
@@ -215,7 +217,7 @@ export function SaisirMaListe({ onFermer, versListe = (id) => `/chantiers/${id}`
         </div>
         <div className="shrink-0 border-t border-line px-6 py-3">
           <button type="button" disabled={lignes.length === 0 || pending} onClick={() => void creer()} className="pressable flex min-h-13 w-full items-center justify-center rounded-full bg-accent px-5 text-[16px] font-bold text-on-accent disabled:bg-line disabled:text-muted">
-            {pending ? "Je crée ton quantitatif…" : boutonSaisie(lignes.length)}
+            {pending ? "Je crée ton quantitatif…" : boutonSaisie(lignes.length, pourGroupe)}
           </button>
         </div>
       </aside>
@@ -228,7 +230,7 @@ export function SaisirMaListe({ onFermer, versListe = (id) => `/chantiers/${id}`
           onClick={() => void creer()}
           className="pressable mx-auto flex min-h-13 w-full max-w-2xl items-center justify-center rounded-full bg-accent px-5 text-[16px] font-bold text-on-accent disabled:bg-line disabled:text-muted"
         >
-          {pending ? "Je crée ton quantitatif…" : boutonSaisie(lignes.length)}
+          {pending ? "Je crée ton quantitatif…" : boutonSaisie(lignes.length, pourGroupe)}
         </button>
       </div>
       {aide ? (

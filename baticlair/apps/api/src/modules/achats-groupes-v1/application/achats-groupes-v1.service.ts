@@ -925,7 +925,9 @@ export class AchatsGroupesV1Service {
           categorie: "groupe",
           genre: "information",
           titre: "Une entreprise vient de rejoindre ton besoin",
-          detail: `${nv.achat.nom} · ${v.entreprises} entreprises · ${quantiteLisible(v.confirmes, p.unite)}`.slice(0, 120),
+          // Sous 3 entreprises, jamais de volume (sinon chacun déduit la quantité de l'autre) : « en cours de regroupement »
+          // (recette du 18 novembre 2026, bloquant).
+          detail: `${nv.achat.nom} · ${v.entreprises} entreprises · ${v.visibles ? quantiteLisible(v.confirmes, p.unite) : "en cours de regroupement"}`.slice(0, 120),
           action: "Voir mon besoin",
           href: `/achats-groupes/besoins/${b.id}`,
           cle: `ag-rejoint:${nv.achatId}:${tranche}`,

@@ -341,7 +341,7 @@ test("« Saisir un nouveau besoin » (Greg, 16 novembre 2026) : le même outil q
   const maListe = ecran.getByRole("region", { name: "Ma liste en cours" });
   await maListe.getByLabel("Quantité de Ardoise naturelle 32x22 Espagne 1er choix 5 mm").fill("10");
   await maListe.getByLabel("Unité de Ardoise naturelle 32x22 Espagne 1er choix 5 mm").selectOption("palettes");
-  await page.getByRole("button", { name: /^Créer le quantitatif · 1 matériau$/ }).filter({ visible: true }).click();
+  await page.getByRole("button", { name: /^Continuer · 1 matériau$/ }).filter({ visible: true }).click();
   // La liste créée mène à l'écran où l'on coche ce que l'on groupe (et elle existe comme un quantitatif normal).
   await expect(page).toHaveURL(/\/achats-groupes\/quantitatif\/[0-9a-f-]{36}$/);
   await expect(page.getByRole("heading", { name: "Quels articles grouper ?" })).toBeVisible();

@@ -301,7 +301,10 @@ function TelephoneEntier({ contenu, testid, clic, defile, cible }: { contenu: Co
     const el = cible === "haut" ? null : d.querySelector<HTMLElement>(cible);
     // La barre du haut du site reste collée en haut : on s'arrête juste sous elle.
     const barre = d.querySelector<HTMLElement>(".pe-entete")?.offsetHeight ?? 0;
-    const haut = el ? (el.getBoundingClientRect().top - d.getBoundingClientRect().top) / echelle + d.scrollTop - barre - 16 : 0;
+    // La position dans le site, en pixels du site (sans la réduction par `zoom`) : on remonte les parents positionnés.
+    let y = 0;
+    for (let n: HTMLElement | null = el; n && n !== d; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
+    const haut = el ? y - barre - 16 : 0;
     d.scrollTo({ top: Math.max(0, haut), behavior: "smooth" });
   }, [cible, echelle, defile]);
   return (
@@ -312,7 +315,7 @@ function TelephoneEntier({ contenu, testid, clic, defile, cible }: { contenu: Co
             {/* Réduit par `zoom`, jamais par `transform` (Greg, 18 novembre 2026 : sur iPhone, la barre « Appeler » restait
                 figée au milieu du petit téléphone) : Safari colle mal une barre `sticky` dans un cadre transformé. Avec
                 `zoom`, la barre se colle au bas du cadre qui défile, comme sur la vraie page. */}
-            <div ref={defile} data-testid={testid} onClickCapture={clic} className="overscroll-contain overflow-y-auto bg-white [scrollbar-width:none]" style={{ width: TEL_L, height: hauteurEcran / echelle, zoom: echelle, WebkitOverflowScrolling: "touch" }}>
+            <div ref={defile} data-testid={testid} onClickCapture={clic} className="relative overscroll-contain overflow-y-auto bg-white [scrollbar-width:none]" style={{ width: TEL_L, height: hauteurEcran / echelle, zoom: echelle, WebkitOverflowScrolling: "touch" }}>
               <div inert aria-hidden>
                 <VuePage contenu={contenu} apercu />
               </div>
@@ -352,7 +355,7 @@ function CoucheTelephone({ basse, children }: { basse: boolean; children: React.
     <>
       <div ref={cale} aria-hidden="true" style={{ height: `calc(100dvh - ${haut ?? 0}px - var(--nav-space))` }} />
       {haut === null ? null : (
-        <div className="fixed left-0 right-0 z-20 flex gap-2 pr-3" style={{ top: haut, bottom: basse ? 8 : "calc(var(--nav-height) + var(--nav-gap) + 8px)" }}>
+        <div className="fixed left-0 right-0 z-20 flex gap-2 pr-3" style={{ top: haut, bottom: basse ? 8 : "calc(var(--nav-height) + var(--nav-gap) + 2px)" }}>
           {children}
         </div>
       )}
