@@ -180,8 +180,9 @@ describe("demandes de prix", () => {
       dueDate: "2099-10-15",
     });
     expect(created.status).toBe(201);
-    // Les six lignes du devis, plus les naissances que la gouttière à 2 descentes appelle (§49.1, point 3).
-    expect(created.body.lines).toHaveLength(7);
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026, étape « Suggestions ») : les six lignes du devis, et rien d'autre. Les
+    // naissances de la gouttière ne sont plus ajoutées d'office : elles se cochent dans les suggestions. Avant : 7 lignes.
+    expect(created.body.lines).toHaveLength(6);
     expect(created.body.recipients).toHaveLength(2);
     const first = created.body.recipients[0];
     expect(first).toMatchObject({

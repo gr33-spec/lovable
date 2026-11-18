@@ -846,8 +846,21 @@ export function ecranDeLecture(input: {
       fallback.push({ key: `param:${key}`, kind: "param", text: def.question, unit: def.unit, ...(def.choices ? { options: def.choices } : {}), ...(def.named ? { named: true } : {}) });
     }
   }
+  // Point 16 : un article coché à l'étape « Suggestions » vaut un article écrit ; ce que son calcul demande (le nombre de
+  // descentes d'une naissance, le nombre d'angles) se pose avec les premières questions, sans attendre une autre réponse.
+  const choisies = suggestionsChoisies(answers[SUGGESTIONS_KEY]);
+  const pourCochees = new Set<string>();
+  for (const work of ref.workItems) {
+    for (const rule of work.needs) {
+      if (!choisies.has(`${work.id}/${rule.slot}`)) continue;
+      // Ce qui compte la quantité ; une précision de désignation (le Ø) vient ensuite, comme pour un article écrit.
+      const texte = [rule.formula, rule.when ?? "", ...(rule.requires ?? [])].join(" ");
+      for (const p of work.params) if (new RegExp(`\\b${p.key}\\b`).test(texte)) pourCochees.add(p.key);
+    }
+  }
   for (const q of fallback) {
-    if (!hasAnswers || asked.some((a) => a.key === q.key) || !q.key.startsWith("param:")) continue;
+    const donnee = scopedParam(q.key)?.name ?? q.key.replace(/^param:/, "");
+    if ((!hasAnswers && !pourCochees.has(donnee)) || asked.some((a) => a.key === q.key) || !q.key.startsWith("param:")) continue;
     const m = /^param:([a-z0-9_]+)(?:@([a-z0-9_-]+))?$/.exec(q.key) ?? /^product:([a-z0-9_]+)$/.exec(q.key);
     const cle = m ? (q.key.startsWith("product:") ? `produit_${m[1]!}` : m[1]!) : q.key.replace(/[^a-z0-9_]/g, "_");
     const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === cle);

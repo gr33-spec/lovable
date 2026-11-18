@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { cocherLesNaissances } from "./support/suggestions.js";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { initiales, packetDocument, packetDocumentLines, packetPdf, type SupplierPacket } from "../src/modules/price-requests/application/supplier-packet.js";
 import { D2026_020_PDF } from "./support/d2026-020-pdf.js";
@@ -35,6 +36,7 @@ async function chantierDeGreg(agent: Agent) {
   const res = await agent.post("/v1/quantitatifs").field("reference", "Extension ardoise").field("adresse", "3 rue du Port, 22620 Ploubazlanec").attach("file", Buffer.from(await D2026_020_PDF()), { filename: "devis.pdf", contentType: "application/pdf" });
   expect(res.status).toBe(201);
   const id = res.body.id as string;
+  await cocherLesNaissances(agent, id);
   let current = (await agent.get(`/v1/quantitatifs/${id}`)).body as { questions: Question[]; projetId: string };
   const posees: string[] = [];
   if (!Array.isArray(current.questions)) console.log("ETAT0", JSON.stringify(current).slice(0, 600));

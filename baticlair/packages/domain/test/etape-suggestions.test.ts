@@ -41,6 +41,8 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     expect(e.suggestions).toEqual([]);
     expect(noms(e).join(" | ")).toMatch(/Naissances/);
     expect(noms(e).join(" | ")).not.toMatch(/talon/i);
+    // Point 16 : ce que le calcul d'un article coché demande se pose tout de suite, avec les premières questions.
+    expect(cles(e)).toContain("param:nb_angles");
     // Point 16 : la question des angles ne se pose que parce qu'ils sont cochés ; répondue, la ligne est comptée.
     const apres = ecran({ ...choix, "param:nb_angles": { value: "2", unit: "u" }, "param:nb_descentes": { value: "1", unit: "u" }, "param:developpe_gouttiere": { value: "25", unit: "cm" } });
     const angles = apres.purchase.toBuy.find((b) => /^Angles de gouttière/.test(b.label));
