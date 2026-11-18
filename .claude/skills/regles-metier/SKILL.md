@@ -137,6 +137,18 @@ couvert ici, demander au fondateur plutôt que deviner.
   (voir Tuile).
 - About de rive : on demande.
 
+## Noues
+
+- Le type dépend du chantier (zinc, alu ou préfabriquée, ardoisée…). S'il
+  n'est pas au devis, on le demande.
+- Longueur prise sur le devis, sinon on la demande. Perte : + 5 % sur les ml.
+- Les coupes d'ardoise ou de tuile le long de la noue sont dans la perte du
+  toit (10 % toit compliqué) : rien en plus.
+- Accessoires de noue (pattes, volige de noue, mousse, clous…) : jamais
+  proposés.
+- Noue en zinc : la règle Zinguerie s'applique (pliée par l'artisan →
+  feuilles ; sinon longueurs façonnées).
+
 ## Zinguerie
 
 - Si l'artisan plie lui-même → feuilles de zinc regroupées en une seule ligne.
