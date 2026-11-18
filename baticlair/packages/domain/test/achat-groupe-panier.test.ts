@@ -48,22 +48,30 @@ describe("A. un achat groupé = un métier + une zone + une période, un panier"
     expect(lignesPourNegoce(panier, { generaliste: true, familles: ["couverture"] })).toHaveLength(3);
     expect(lignesPourNegoce(panier, { generaliste: false, familles: null })).toHaveLength(3);
   });
-  it("la demande (lot final, point 3) : l'objet au nom de l'entreprise, le volume, les règles, les faits ; jamais de commission", () => {
+  it("la demande au négoce (Greg, 17 novembre 2026) : le même e-mail court que pour un chantier, avec la phrase « demande groupée »", () => {
     const d = demandeNegocePanier({ clients: ["Toitures A", "Toitures B"], metier: "couverture", secteur: "Paimpol", prenomCommercial: "Paul", signataires: [{ prenom: "Jean", entreprise: "Toitures A", portable: "06 12 34 56 78" }, { prenom: null, entreprise: "Toitures B", portable: null }], artisans: 2, seuilAnonymat: 3, lignes: cumulerPanier([A3222, LITEAU]), livraisons: [{ commune: "Paimpol", date: new Date("2026-11-30") }], reponseAvantLe: new Date("2026-11-19T10:00:00Z"), lien: "https://x/achat-groupe/j", commissionPct: 2 });
     expect(d.objet).toBe("Toitures A : achat groupé couverture, secteur Paimpol");
-    expect(d.texte.startsWith("Bonjour Paul,\n\nNous participons à un achat groupé avec d'autres artisans du secteur via Mobiiz. Pouvez-vous chiffrer ce volume ?")).toBe(true);
-    expect(d.texte).toMatch(/Volume total engagé :\n- Ardoise 32×22 Espagne 1er choix : 1\s800 pièces/);
+    expect(d.texte).toBe(
+      [
+        "Bonjour,",
+        "Voici une demande de prix pour un achat groupé de couverture, secteur Paimpol (liste en pièce jointe, 2 articles).",
+        "C'est une demande groupée : plusieurs artisans du secteur achètent ensemble.",
+        "Réponse attendue avant le 19 novembre.",
+        "Pour répondre : répondez simplement à cet e-mail avec votre devis, ou chiffrez en ligne en 2 minutes :",
+        "https://x/achat-groupe/j",
+        "Une question ? 06 12 34 56 78.",
+        "Merci d'avance,",
+        "Jean, Toitures A",
+        "Toitures B",
+      ].join("\n"),
+    );
+    // Plus de prénom du commercial, de volume ligne par ligne, de pression ni de pied ; jamais de commission ni d'e-mail.
+    expect(d.texte).not.toMatch(/Paul|Volume total|sans vous|D'autres négoces|mieux placé|achètent ensemble\.\n?$|commission|inscri(vez|ption gratuite)|@/i);
     expect(d.texte).not.toContain("2 artisans");
-    expect(d.texte).toContain("Les règles : une seule offre, ferme, livraison comprise.");
-    expect(d.texte).toContain("D'autres négoces du secteur sont consultés sur ce même volume.\nRéponse attendue avant le 19 novembre. Passé ce délai, la commande se fera sans vous.\nLe mieux placé remporte la commande.");
-    expect(d.texte).toContain("Répondre en ligne, sans inscription : https://x/achat-groupe/j");
-    expect(d.texte).toContain("Un doute ? Appelez-nous au 06 12 34 56 78.");
-    expect(d.texte).toContain("Jean, Toitures A\nToitures B");
-    expect(d.texte.endsWith("--\nMobiiz, des artisans qui achètent ensemble.")).toBe(true);
-    expect(d.texte).not.toMatch(/commission|inscri(vez|ption gratuite)|@/i);
-    const seul = demandeNegocePanier({ clients: ["A"], metier: "couverture", artisans: 4, seuilAnonymat: 3, lignes: [A3222], livraisons: [], reponseAvantLe: new Date(), lien: "l", commissionPct: 0 });
-    expect(seul.texte).toContain("Je participe à un achat groupé");
-    expect(seul.texte).toContain("Volume total engagé par 4 artisans du secteur :");
+    // Le nombre d'artisans ne se dit qu'à partir du seuil d'anonymat.
+    const seul = demandeNegocePanier({ clients: ["A"], metier: "couverture", artisans: 4, seuilAnonymat: 3, lignes: [A3222, LITEAU], livraisons: [], reponseAvantLe: new Date(), lien: "l", commissionPct: 0 });
+    expect(seul.texte).toContain("C'est une demande groupée : 4 artisans du secteur achètent ensemble.");
+    expect(seul.texte).toContain("(liste en pièce jointe, 2 articles)");
   });
 });
 

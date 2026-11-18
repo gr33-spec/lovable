@@ -148,23 +148,25 @@ describe("achat groupé par métier", { timeout: 240_000 }, () => {
     expect((await tache(new Date(achat.clotureLe!.getTime() + 3_600_000).toISOString())).body.consultes).toBe(1);
     const [x] = mailsVers(ctx, "x@negoce.fr");
     const [y] = mailsVers(ctx, "y@negoce.fr");
-    const [gm] = mailsVers(ctx, "g@negoce.fr");
     // Le spécialiste ne reçoit que ses familles ; les quantités sont cumulées ; aucune commission à 0.
     // Lot final, point 3 : l'objet au nom de l'entreprise et du secteur, le mail dans l'ordre de Greg, signé par son client.
     expect(x!.subject).toBe("Toitures 1 : achat groupé couverture, secteur Lannion");
-    expect(x!.text).toMatch(/^Bonjour,\n\nJe participe à un achat groupé avec d'autres artisans du secteur via Mobiiz\. Pouvez-vous chiffrer ce volume \?/);
-    expect(x!.text).toContain("D'autres négoces du secteur sont consultés sur ce même volume.");
-    expect(x!.text).toMatch(/Réponse attendue avant le \d+(er)? \S+\. Passé ce délai, la commande se fera sans vous\./);
-    expect(x!.text).toContain("Toitures 1\n\n--\nMobiiz, des artisans qui achètent ensemble.");
-    expect(x!.html).toContain(">Répondre en ligne</a>");
-    expect(x!.text).toMatch(/- Ardoise 32×22 Espagne 1er choix : 2\s700 pièces/);
-    expect(x!.text).not.toContain("Bois de charpente");
-    expect(x!.text).not.toMatch(/commission/i);
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : le même e-mail court que pour un chantier, avec la phrase « demande groupée ».
+    expect(x!.text).toMatch(/^Bonjour,\nVoici une demande de prix pour un achat groupé de couverture, secteur Lannion \(liste en pièce jointe, \d+ articles?\)\.\nC'est une demande groupée : plusieurs artisans du secteur achètent ensemble\.\nRéponse attendue avant le \d+(er)? \S+\.\nPour répondre : répondez simplement à cet e-mail avec votre devis, ou chiffrez en ligne en 2 minutes :\nhttp\S+\/achat-groupe\/\S+\n/);
+    expect(x!.text).toMatch(/\nMerci d'avance,\n(\S+, )?Toitures 1$/);
+    expect(x!.text).not.toMatch(/sans vous|D'autres négoces|mieux placé|achètent ensemble\.$|commission/i);
+    expect(x!.html).toContain(">Chiffrer en ligne</a>");
+    // Le volume n'est plus dans le texte : il est dans la demande jointe et sur la page. Le spécialiste ne reçoit que ses
+    // familles ; les quantités sont cumulées.
+    const lignesDe = async (email: string) => ((await ctx.prisma.consultationAchatGroupe.findFirstOrThrow({ where: { regroupementId: la.achatId, email } })).lignes as { libelle: string; quantite: number }[]).map((l) => `${l.libelle} : ${l.quantite}`);
+    expect(await lignesDe("x@negoce.fr")).toContain("Ardoise 32×22 Espagne 1er choix : 2700");
+    expect((await lignesDe("x@negoce.fr")).join(" ")).not.toContain("Bois de charpente");
+    expect(x!.attachments?.map((a) => a.filename)).toEqual(expect.arrayContaining(["demande-mobiiz.pdf"]));
     expect(y!.subject).toBe("Toitures 2 : achat groupé couverture, secteur Lannion");
-    expect(y!.text).toContain("Toitures 2\n\n--");
+    expect(y!.text).toMatch(/\nMerci d'avance,\n(\S+, )?Toitures 2$/);
     expect(y!.text).not.toContain("Toitures 1");
     // Un panier de deux métiers part aussi chez le généraliste inscrit du secteur.
-    expect(gm!.text).toContain("Bois de charpente");
+    expect((await lignesDe("g@negoce.fr")).join(" ")).toContain("Bois de charpente");
     expect((await b.agent.post(`/v1/achats-groupes/${lb.besoinId}/retirer`).expect(409)).body.error.details.reason).toBe("cloture_passee");
 
     // X répond ligne par ligne : chaque ligne a un prix ou « je ne fournis pas » ; ses conditions d'ouverture.

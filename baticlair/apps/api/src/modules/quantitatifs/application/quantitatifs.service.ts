@@ -227,7 +227,9 @@ export class QuantitatifsService {
     }
     const reading = row.documentId ? await this.takeoffs.readingStateOf(tenant, row.documentId) : null;
     if (reading?.status === "failed") return { ...base, etat: "erreur" as const, erreur: { raison: reading.reason ?? "analysis_failed" } };
-    return { ...base, etat: "en_cours" as const };
+    // Les lignes une par une (Greg, 17 novembre 2026) : pour l'écran de l'appli seulement, ce que la lecture a déjà lu.
+    const lues = rendu.ecran && reading?.status === "reading" && reading.total ? { lecture: { lignes: reading.lignes ?? [], total: reading.total } } : {};
+    return { ...base, etat: "en_cours" as const, ...lues };
   }
 
   /**

@@ -1970,6 +1970,46 @@ test("§50.1 : « Je lis ton devis » prend tout l'écran, avec le retour pour n
   await expect(lecture.getByRole("button", { name: "Revenir à mes listes" })).toBeVisible();
 });
 
+// Le service worker de l'app relit lui-même les données (réseau d'abord) : ses requêtes échappent à l'interception du
+// test. Ce parcours suit plusieurs relectures de suite, il se joue donc sans lui.
+test.describe("lecture suivie ligne par ligne", () => {
+  test.use({ serviceWorkers: "block" });
+  test("pendant la lecture, les lignes déjà lues s'affichent une par une sous « Lecture… »", async ({ page }) => {
+    // Greg, 17 novembre 2026 : « affiche les lignes une par une dès qu'elles sont lues, pour que l'attente se voie comme une
+    // liste qui se construit ». La lecture simulée est instantanée : ici l'API répond « en cours », d'abord sans ligne, puis
+    // avec ce que le serveur a déjà lu, comme pendant une vraie lecture.
+    await signUp(page);
+    let lues: { lignes: string[]; total: number } | null = null;
+    const reading = (q: Record<string, unknown>) => ({ ...q, etat: "en_cours", ecran: null, ...(lues ? { lecture: lues } : {}) });
+    await page.route(/\/v1\/quantitatifs(\?|$)/, async (route) => {
+      try {
+        const res = await route.fetch();
+        const body = (await res.json()) as { items?: Record<string, unknown>[] } & Record<string, unknown>;
+        await route.fulfill({ response: res, json: body.items ? { ...body, items: body.items.map(reading) } : reading(body) });
+      } catch {
+        // Requête annulée par l'application (elle relit l'état) : rien à répondre.
+      }
+    });
+    await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+    await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+    const lecture = page.getByRole("region", { name: "Analyse du devis" });
+    await expect(lecture.getByRole("heading", { name: "Je lis ton devis" })).toBeVisible();
+    const dejaLu = lecture.getByRole("group", { name: "Lignes déjà lues" });
+    // Rien de lu : aucun bloc, jamais « 0 ligne ».
+    await expect(dejaLu).toHaveCount(0);
+    lues = { lignes: ["Ardoises naturelles 32 x 22"], total: 1 };
+    await expect(dejaLu.getByText("1 ligne lue", { exact: true })).toBeVisible();
+    await expect(dejaLu.getByRole("listitem")).toHaveText(["Ardoises naturelles 32 x 22"]);
+    lues = { lignes: ["Ardoises naturelles 32 x 22", "Gouttière zinc demi-ronde"], total: 3 };
+    // Une ligne comptée sans ses mots (une page en photo) : le nombre la compte, la liste ne montre que ce qui est retrouvé.
+    await expect(dejaLu.getByText("3 lignes lues", { exact: true })).toBeVisible();
+    await expect(dejaLu.getByRole("listitem")).toHaveText(["Ardoises naturelles 32 x 22", "Gouttière zinc demi-ronde"]);
+    // Toujours une seule phrase en titre (§50.1), et le retour.
+    await expect(lecture.getByRole("heading")).toHaveCount(1);
+    await expect(lecture.getByRole("button", { name: "Revenir à mes listes" })).toBeVisible();
+  });
+});
+
 test("§50.1 : passé 30 s, « Gros devis, j'y suis encore… » (une seule phrase)", async ({ page }) => {
   // Décision du fondateur (2026-10-13) : une lecture longue ne laisse plus croire que plus rien ne se passe.
   await page.clock.install();

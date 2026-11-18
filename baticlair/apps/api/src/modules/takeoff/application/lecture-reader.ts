@@ -242,6 +242,54 @@ export interface LectureRequest {
    * entier, sans ligne. Absent : la lecture complète d'un appel.
    */
   etape?: "lignes" | "synthese";
+  /** Les lignes du devis déjà lues par cet appel, à mesure qu'il les écrit (`lignesEnCours`). Jamais appelé par un lecteur simulé. */
+  surLignes?: (lues: LignesEnCours) => void;
+}
+
+/** Ce qu'un appel a déjà lu, pendant qu'il lit : les lignes à montrer (les mots du devis) et leur nombre. */
+export interface LignesEnCours {
+  lignes: string[];
+  total: number;
+}
+
+const CHAINE_JSON = String.raw`"(?:[^"\\]|\\.)*"`;
+/** Une ligne dont le début est écrit en entier : sa désignation, sa quantité, son unité et son rôle. */
+const LIGNE_ECRITE = new RegExp(`"designation"\\s*:\\s*(${CHAINE_JSON})\\s*,\\s*"quantite"\\s*:\\s*${CHAINE_JSON}\\s*,\\s*"unite"\\s*:\\s*${CHAINE_JSON}\\s*,\\s*"role"\\s*:\\s*"([a-z_]+)"`, "g");
+const sansForme = (t: string) => t.normalize("NFD").replace(/[^a-zA-Z0-9]+/g, "").toLowerCase();
+const LIGNES_MONTREES_MAX = 200;
+
+/**
+ * LES LIGNES UNE PAR UNE (Greg, 17 novembre 2026 : « affiche les lignes dès qu'elles sont lues, pour que l'attente se
+ * voie comme une liste qui se construit »). Dans la réponse en train de s'écrire, les lignes du devis déjà écrites, dans
+ * l'ordre. Rien du modèle n'est montré tel quel : une ligne ne s'affiche que par les mots que le code retrouve dans le
+ * texte du devis (le plus long début de sa désignation qui y est écrit) ; une ligne qu'il ne retrouve pas (photo, scan)
+ * est seulement comptée. Les lignes hors quantitatif (main-d'œuvre, déplacement) ne sont ni montrées ni comptées.
+ */
+export function lignesEnCours(partiel: string, texteDuDevis: string): LignesEnCours {
+  const devis = sansForme(texteDuDevis.replace(/^\[[^\]\n]{1,12}\] /gm, ""));
+  const lignes: string[] = [];
+  let total = 0;
+  for (const m of partiel.matchAll(LIGNE_ECRITE)) {
+    if (m[2] === "hors_quantitatif") continue;
+    total += 1;
+    let designation: string;
+    try {
+      designation = String(JSON.parse(m[1]!)).replace(/\s+/g, " ").trim();
+    } catch {
+      continue;
+    }
+    const mots = designation.split(" ");
+    let garde = "";
+    for (let n = mots.length; n > 0; n -= 1) {
+      const debut = mots.slice(0, n).join(" ");
+      if (devis.includes(sansForme(debut))) {
+        garde = debut;
+        break;
+      }
+    }
+    if (sansForme(garde).length >= 8 && lignes.length < LIGNES_MONTREES_MAX) lignes.push(garde.slice(0, 120));
+  }
+  return { lignes, total };
 }
 
 /**

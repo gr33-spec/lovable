@@ -273,3 +273,33 @@ Du clic « Analyser » à la première question, appel par appel (devis zinc, de
 - Sous 10 secondes, il faut trois appels simultanés (lignes, questions, fiche), un contrôle par le code que chaque clé
   attendue a bien sa question, et l'envoi du PDF dès qu'il est choisi. Le coût d'une lecture à froid passe alors
   d'environ 0,12 $ à 0,25 $ (le référentiel est lu trois fois). À décider par Greg, et à juger sur ses vrais devis.
+
+## Passe 9 : coût et temps d'une analyse, petit, moyen et gros devis (18 novembre 2026, site de test)
+
+Demande de Greg (17 novembre 2026, points 18 et 19). Mesuré en ligne, avec la lecture réelle (Sonnet 5.5, effort
+moyen, les réglages de la branche de test), du dépôt du PDF à la première question.
+
+| Devis | Lignes | Temps | Coût | Remarque |
+|---|---|---|---|---|
+| Petit (le chantier ardoise de Greg) | 14 | 24 à 27 s | environ 0,14 $ (0,05 $ quand le référentiel est déjà en cache) | une lecture |
+| Moyen | 27 | environ 55 s | 0,26 $ | deux lectures : plusieurs métiers repérés |
+| Gros (fabriqué pour le test) | 63 écrites, comptées 163 | appels : environ 2 min 30 | 0,82 $ | onze parties ; l'écran restait sur « Lecture… » à 4 min 40 |
+
+- Le gros devis est un document fabriqué : une de ses parties a dépassé le délai, et l'écran n'a pas rendu la main.
+  À rejouer sur un vrai gros devis de Greg avant de conclure (c'est peut-être un défaut du document de test).
+- Le coût suit le nombre de lectures : chaque lecture relit le référentiel du métier (c'est lui qui pèse, pas le devis).
+- Le temps reste celui des mots que le modèle écrit (passes 6 et 8).
+
+## Passe 10 : les lignes une par une pendant la lecture (18 novembre 2026)
+
+Demande de Greg (17 novembre 2026) : « affiche les lignes une par une dès qu'elles sont lues, pour que l'attente se
+voie comme une liste qui se construit ».
+
+- La lecture est maintenant reçue au fil de l'eau. Le serveur note une fois par seconde les lignes déjà lues ; l'écran,
+  qui regarde chaque seconde, les affiche sous « Lecture… » (« 5 lignes lues », puis les lignes).
+- Rien du modèle n'est montré tel quel : une ligne ne s'affiche que par les mots que le code retrouve dans le texte du
+  devis. Une photo ou un scan : seulement le nombre de lignes lues.
+- Ce n'est pas encore la liste de matériaux : elle vient après les questions et le calcul.
+- Limite connue : le modèle écrit d'abord la fiche, le bref et les questions, puis les lignes. Les lignes commencent
+  donc à s'afficher vers le milieu de la lecture. Les faire écrire en premier change l'ordre de travail du modèle : à
+  mesurer sur le jeu de test avant de décider (aucun changement de prompt dans ce lot).

@@ -73,7 +73,7 @@ import { imageMimeType, looksLikePdf, type DocumentAiInput, type DocumentReposit
 import type { CompanyMemory, CorrectionJournal, HabitudesService } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
-import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader } from "./lecture-reader.js";
+import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader, type LignesEnCours } from "./lecture-reader.js";
 import { lireLotParLot } from "./lecture-par-lots.js";
 import { LISTE_PROMPT, type ListeLigne, type ListeReader } from "./liste-reader.js";
 import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
@@ -218,6 +218,79 @@ export interface ReadingState {
   status: "reading" | "failed";
   /** Raison de l'échec (« interrupted », « abnormal_size »…), ou null. */
   reason: string | null;
+  /** Pendant la lecture : les lignes du devis déjà lues (ses propres mots) et leur nombre. Absent tant que rien n'est lu. */
+  lignes?: string[];
+  total?: number;
+}
+
+/** Les lignes déjà lues, notées avec l'analyse en cours (`suiviDesLignes`) ; rien si la note n'a pas cette forme. */
+function lignesNotees(readingStats: unknown): { lignes: string[]; total: number } | null {
+  const enCours = (readingStats as { enCours?: { lignes?: unknown; total?: unknown } } | null | undefined)?.enCours;
+  if (!enCours || !Array.isArray(enCours.lignes) || typeof enCours.total !== "number" || enCours.total <= 0) return null;
+  return { lignes: enCours.lignes.filter((l): l is string => typeof l === "string").slice(0, 200), total: enCours.total };
+}
+
+/** Écart minimal entre deux notes du suivi d'une lecture : l'écran regarde chaque seconde. */
+const SUIVI_PAS_MS = 900;
+
+/**
+ * LES LIGNES UNE PAR UNE (Greg, 17 novembre 2026). Chaque appel de lecture dit ce qu'il a déjà lu ; le suivi réunit les
+ * appels (dans l'ordre où ils sont partis) et le note, une fois par seconde au plus. Des appels simultanés (un par métier,
+ * un par tranche) s'ajoutent ; un appel qui part seul après les autres (une relecture) repart de zéro. Les notes
+ * s'écrivent l'une après l'autre, et `fin` attend la dernière puis l'efface : les mesures de la lecture, écrites ensuite,
+ * ne sont jamais recouvertes, et les mots d'un devis ne restent pas avec une lecture finie.
+ */
+export function suiviDesLignes(noter: (lues: LignesEnCours) => Promise<void>, pasMs = SUIVI_PAS_MS, maintenant: () => number = Date.now) {
+  let appels: LignesEnCours[] = [];
+  let enVol = 0;
+  let fini = false;
+  let note = false;
+  let dernier = 0;
+  let dernierTotal = -1;
+  let file: Promise<void> = Promise.resolve();
+  const ecrire = (lues: LignesEnCours) => {
+    file = file.then(() => noter(lues)).catch(() => undefined);
+  };
+  const dire = () => {
+    if (fini) return;
+    const lues = { lignes: appels.flatMap((a) => a.lignes).slice(0, 200), total: appels.reduce((t, a) => t + a.total, 0) };
+    if (lues.total === dernierTotal || maintenant() - dernier < pasMs) return;
+    dernier = maintenant();
+    dernierTotal = lues.total;
+    note = true;
+    ecrire(lues);
+  };
+  return {
+    lecteur(lecteur: LectureReader): LectureReader {
+      return {
+        provider: lecteur.provider,
+        ...(lecteur.reperer ? { reperer: (texte: string) => lecteur.reperer!(texte) } : {}),
+        lire: (request) => {
+          if (enVol === 0) appels = [];
+          const rang = appels.push({ lignes: [], total: 0 }) - 1;
+          const cetAppel = appels;
+          enVol += 1;
+          return lecteur
+            .lire({
+              ...request,
+              surLignes: (lues) => {
+                if (cetAppel !== appels) return;
+                appels[rang] = lues;
+                dire();
+              },
+            })
+            .finally(() => {
+              enVol -= 1;
+            });
+        },
+      };
+    },
+    async fin(): Promise<void> {
+      fini = true;
+      if (note) ecrire({ lignes: [], total: 0 });
+      await file;
+    },
+  };
 }
 
 export type StartResult = { state: "ready"; result: ReviewedTakeoff } | { state: "reading" };
@@ -444,7 +517,7 @@ export class TakeoffService {
   async readingStateOf(tenant: TenantContext, documentId: string): Promise<ReadingState | null> {
     const analysis = await this.meter.current(tenant.companyId, documentId);
     if (!analysis || analysis.status === "completed") return null;
-    if (analysis.status === "started") return this.stale(analysis.startedAt) ? { status: "failed", reason: "interrupted" } : { status: "reading", reason: null };
+    if (analysis.status === "started") return this.stale(analysis.startedAt) ? { status: "failed", reason: "interrupted" } : { status: "reading", reason: null, ...(lignesNotees(analysis.readingStats) ?? {}) };
     // Le motif enregistré avec la lecture (« nothing_read » : rien trouvé dans le devis), sinon l'échec générique.
     const failure = (analysis.readingStats as { failure?: unknown } | null | undefined)?.failure;
     return { status: "failed", reason: failure === "nothing_read" ? "nothing_read" : "analysis_failed" };
@@ -654,10 +727,12 @@ export class TakeoffService {
     const document = { numberedText: prepared.input.numberedText, imagePdf: prepared.input.imagePdf, imagePages: pages };
     const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
     let cost = 0;
-    const lu = await this.lireLeDevis(lecteur, document, trade, siteNotes, async (n, r, prompt) => {
+    // Les lignes une par une (Greg, 17 novembre 2026) : ce que chaque appel a déjà lu est noté avec l'analyse, pour l'écran.
+    const suivi = suiviDesLignes((lues) => this.meter.recordReading(analysisId, { enCours: lues }));
+    const lu = await this.lireLeDevis(suivi.lecteur(lecteur), document, trade, siteNotes, async (n, r, prompt) => {
       // La lecture simulée du chantier fictif ne coûte rien : rien n'est compté comme un appel au modèle.
       if (!demo) cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, n, r, prompt);
-    });
+    }).finally(() => suivi.fin());
     if (lu === null) return null;
     const result = lu.result;
     trade = lu.trade;

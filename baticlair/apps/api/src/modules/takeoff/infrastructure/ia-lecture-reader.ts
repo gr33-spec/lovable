@@ -1,5 +1,5 @@
 import type { FabriqueIa, LecteurIa } from "../../../platform/ai/lecteur-ia.js";
-import { decodeLecture, decodeLignes, decodeReperage, decodeSynthese, lignesWireSchema, syntheseWireSchema, LECTURE_PROMPT, lectureSystemPrompt, lectureWireSchema, REPERAGE_PROMPT, type Reperage, reperageSystemPrompt, reperageWireSchema, type LectureReader, type LectureRequest } from "../application/lecture-reader.js";
+import { decodeLecture, decodeLignes, lignesEnCours, decodeReperage, decodeSynthese, lignesWireSchema, syntheseWireSchema, LECTURE_PROMPT, lectureSystemPrompt, lectureWireSchema, REPERAGE_PROMPT, type Reperage, reperageSystemPrompt, reperageWireSchema, type LectureReader, type LectureRequest } from "../application/lecture-reader.js";
 import { siteNotesInstruction } from "../application/prompt.js";
 import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { LectureDevis } from "@baticlair/domain";
@@ -45,6 +45,8 @@ export class IaLectureReader implements LectureReader {
       documentName: "devis",
       ...(extra ? { extra } : {}),
       tag: `${LECTURE_PROMPT.id}-v${LECTURE_PROMPT.version}${request.etape ? `-${request.etape}` : ""}`,
+      // Les lignes une par une : seulement quand l'écran les attend, et jamais pour la synthèse (elle n'écrit aucune ligne).
+      ...(request.surLignes && request.etape !== "synthese" ? { surTexte: (texte: string) => request.surLignes!(lignesEnCours(texte, request.document.numberedText)) } : {}),
     };
     const fin = <T>(attempt: ReadAttempt<T>, decode: (w: T) => LectureDevis | null): ReadAttempt<LectureDevis> => {
       const output = attempt.output ? decode(attempt.output) : null;
