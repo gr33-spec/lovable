@@ -232,9 +232,9 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(b.page.getByRole("combobox")).toHaveCount(0);
   await expect(b.page.getByRole("definition").filter({ hasText: "32 × 22" })).toBeVisible();
   await capture(b.page, "08c-produit-verrouille");
-  await b.page.getByRole("button", { name: "Confirmer 480 pièces par palette" }).click();
+  // Recette du 18 novembre 2026 : rejoindre propose l'unité du total (les pièces), plus la palette d'office.
   await b.page.getByRole("button", { name: "Continuer" }).click();
-  await b.page.getByLabel("Quantité (palettes)").fill("4");
+  await b.page.getByLabel("Quantité (pièces)").fill("1920");
   await b.page.getByText("Retrait au dépôt").click();
   await b.page.getByText("Livraison sur chantier").click();
   await b.page.getByLabel("Lieu de livraison (privé)").fill("Perros-Guirec");
