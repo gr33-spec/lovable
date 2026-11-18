@@ -73,12 +73,13 @@ couvert ici, demander au fondateur plutôt que deviner.
 ### Calcul et vente
 - Le type de tuile dépend de la région : pas de type par défaut.
 - Vente à la pièce.
-- Tuiles de rive : longueur de rive ÷ pureau, en 2 lignes séparées (rive
+- Tuiles de rive : (longueur de rive + 5 %) ÷ pureau, en 2 lignes séparées (rive
   gauche et rive droite, ce ne sont pas les mêmes pièces).
 
 ### Jamais d'office
 - Rien qui ne soit ni demandé ni au devis. Tuiles de rive et chatières
-  passent en Suggestion si elles ne sont pas au devis.
+  passent en Suggestion si elles ne sont pas au devis (pour les rives, on
+  demande ensuite le type : voir Faîtage et rives).
 
 ### Points ouverts
 - Tuile canal (courant et couvert : une ou deux lignes, quel ratio) : le
@@ -115,6 +116,26 @@ couvert ici, demander au fondateur plutôt que deviner.
 - On ne demande pas la référence : on garde le mot de l'artisan (« écran »).
 - Accessoires d'écran (adhésif, bande d'égout, closoir…) : jamais proposés.
 - Contre-liteaux d'office avec l'écran (voir Liteaux et voliges).
+
+## Faîtage et rives
+
+### Faîtage
+- Le type (à sec, scellé, zinc, lignolet…) dépend du chantier : s'il n'est pas
+  au devis, on le demande.
+- Sur la liste : en ml, + 5 % (pas de conversion en nombre de faîtières).
+- Abouts de faîtage : on demande.
+- Faîtage scellé : le mortier, on le demande.
+- Faîtage à sec : closoir d'office, en ml de faîtage + 5 %.
+- Supports de panne faîtière (rehausses) et agrafes de faîtière : jamais
+  proposés.
+
+### Rives
+- Rive absente du devis : d'abord en Suggestion. Si l'artisan coche, on
+  demande le type (tuile de rive, zinc, scellée…).
+- Perte : + 5 % sur les ml de rive.
+- Tuiles de rive : (ml de rive + 5 %) ÷ pureau, en 2 lignes gauche/droite
+  (voir Tuile).
+- About de rive : on demande.
 
 ## Zinguerie
 
