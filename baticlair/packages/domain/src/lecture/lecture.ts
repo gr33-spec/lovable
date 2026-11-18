@@ -651,6 +651,8 @@ const unitWord = (unit: string | null) => (unit === "u" ? "pièces" : unit === "
  * Cinq au plus ; aucune : pas d'étape. La réponse : les clés cochées séparées par des virgules, ou « aucune ».
  * RÈGLE CHANGÉE : §49.1 point 5 et point 3. Avant : aucune suggestion, et la naissance d'une gouttière ajoutée d'office.
  */
+/** La raison dite sur une ligne de fourniture que la lecture n'a pas su traduire en articles. */
+export const LIGNE_NON_CHIFFREE = "Je n'ai pas su en tirer les articles : ajoute ce qu'il te faut, ou retire la ligne.";
 export const SUGGESTIONS_KEY = "suggestions:choisies";
 export const SUGGESTIONS_AUCUNE = "aucune";
 export const SUGGESTIONS_MAX = 5;
@@ -933,8 +935,19 @@ export function ecranDeLecture(input: {
     return [...parNom].map(([label, cles]) => ({ key: cles.join("+"), label }));
   };
   const suggestions = answers[SUGGESTIONS_KEY] === undefined ? [...suggestionsDuPlan(ref, plan), ...consommables()].slice(0, SUGGESTIONS_MAX) : [];
-  const sansFourniture = lignes.filter((l) => !l.fourniture).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ") || null }));
-  return { plan, validation, roles, view, purchase: final, questions, lignes, sansFourniture, suggestions };
+  // UN ARTICLE ÉCRIT NE DISPARAÎT JAMAIS (§49.1 ; retour de Greg du 18 novembre 2026, D-2026-024 : « tout ce qui fait partie
+  // du devis doit être pris en considération, l'analyse doit être complète »). Une ligne que le devis dit « fourniture »
+  // (ou « fourniture et pose ») et dont la lecture n'a tiré aucun article n'est pas une ligne « sans fourniture » : elle
+  // reste dans la liste, « à chiffrer », avec ses mots et sa mesure. Avant : rangée avec la pose et la main-d'œuvre, repliée
+  // sous « N lignes sans fourniture », donc oubliée.
+  const mesureDe = (l: (typeof lignes)[number]) => [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ");
+  // Une ligne qui commence par « Pose », « Dépose », « Main-d'œuvre »… n'achète rien, même si le modèle l'a mal rangée.
+  const SANS_ACHAT = /^(?:pose|repose|depose|demontage|main d ?oeuvre|installation|location|evacuation|nettoyage|echafaudage|transport|deplacement)\b/;
+  const oubliees = lignes.filter((l) => !l.fourniture && (l.ligne.role === "fourniture" || l.ligne.role === "fourniture_et_pose") && !SANS_ACHAT.test(normalizeText(l.designation)) && !final.toQuote.some((t) => t.lineIds.includes(l.id)) && !final.toBuy.some((b) => b.lineIds.includes(l.id)));
+  const complet = oubliees.length === 0 ? final : { ...final, toQuote: [...final.toQuote, ...oubliees.map((l) => ({ key: `line:${l.id}`, label: l.designation.trim(), measure: mesureDe(l), reason: LIGNE_NON_CHIFFREE, lineIds: [l.id] }))] };
+  const dites = new Set(oubliees.map((l) => l.id));
+  const sansFourniture = lignes.filter((l) => !l.fourniture && !dites.has(l.id)).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: mesureDe(l) || null }));
+  return { plan, validation, roles, view, purchase: complet, questions, lignes, sansFourniture, suggestions };
 }
 
 interface Asked {

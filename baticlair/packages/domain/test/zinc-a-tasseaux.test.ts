@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ecranDeLecture, exportPourLecture, ROOFING_REFERENTIAL, type EngineAnswer, type LectureDevis } from "../src/index.js";
+import { ecranDeLecture, exportPourLecture, LIGNE_NON_CHIFFREE, ROOFING_REFERENTIAL, type EngineAnswer, type LectureDevis } from "../src/index.js";
 
 /**
  * COUVERTURE ZINC À TASSEAUX (Greg, 18 novembre 2026, devis D-2026-024). Le zinc à tasseaux n'était pas dans la fiche
@@ -66,5 +66,29 @@ describe("couverture zinc à tasseaux : de la bobine au mètre, d'après l'entra
     const texte = exportPourLecture(ROOFING_REFERENTIAL);
     expect(texte).toContain("OUVRAGE couverture-zinc-tasseaux : Couverture zinc à tasseaux");
     expect(texte).toMatch(/longueur_rampant \(Longueur du rampant\) : .*le devis peut la dire : « rampant », « longueur des bacs »/);
+  });
+});
+
+describe("un article écrit ne disparaît jamais : une ligne de fourniture dont la lecture ne tire rien reste dans la liste", () => {
+  // Comme sur le site de test le 18 novembre 2026 : le modèle n'a rattaché ni la couverture ni les porte-solin à un ouvrage.
+  const sansOuvrage = {
+    ...lecture(),
+    fiche: { donnees: [] },
+    lignes: [
+      { ref: "1", role: "fourniture_et_pose", unite: "m²", quantite: "32", designation: "Fourniture et pose couverture en lauzes de pays", fournitures: [] },
+      { ref: "2", role: "fourniture_et_pose", unite: "unités", quantite: "2", designation: "Fourniture et pose bandes porte-solin cheminées", fournitures: [] },
+      { ref: "3", role: "pose", unite: "m²", quantite: "32", designation: "Dépose ancienne couverture", fournitures: [] },
+      // Une ligne de pose que le modèle aurait rangée « fourniture » : ses mots disent qu'elle n'achète rien.
+      { ref: "4", role: "fourniture", unite: "unité", quantite: "1", designation: "Installation et location échafaudage", fournitures: [] },
+    ],
+  } as unknown as LectureDevis;
+
+  it("« fourniture et pose » sans article : « à chiffrer », avec ses mots et sa mesure ; la pose et l'échafaudage restent sans fourniture", () => {
+    const e = ecran(sansOuvrage);
+    expect(e.purchase.toQuote.map((t) => [t.label, t.measure, t.reason])).toEqual([
+      ["Fourniture et pose couverture en lauzes de pays", "32 m²", LIGNE_NON_CHIFFREE],
+      ["Fourniture et pose bandes porte-solin cheminées", "2 unités", LIGNE_NON_CHIFFREE],
+    ]);
+    expect(e.sansFourniture.map((l) => l.label)).toEqual(["Dépose ancienne couverture", "Installation et location échafaudage"]);
   });
 });

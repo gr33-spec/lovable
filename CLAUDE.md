@@ -237,6 +237,18 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Recette en ligne : le devis de démonstration du chantier ardoise doit garder la colonne d'unité et les descriptions du vrai devis ; sans elles, la lecture est plus pauvre (pièces pliées en double, descente en « 6 m »). À traiter : un devis sans unité doit poser la question « mètres ou pièces ? ».
 - Fait : lignes une par une, feuilles ajustables, coût et temps (passe 9), phrase « demande groupée ». Reste, dans l'ordre de Greg : la fiche Peinture au niveau de la Couverture.
 
+## Décisions du 18 novembre 2026 (soir) : « l'analyse doit être complète », après le devis D-2026-024 de Greg (zinc à tasseaux)
+
+- Greg : « Tu dois TOUT connaître sur la couverture ! C'est TOI le pro capable de faire les quantitatifs. » Pour la technique, chercher chez les fabricants et dans les règles de pose (et citer la source) au lieu de lui demander ; ne lui demander que ses habitudes, ou une règle introuvable.
+- Greg : ne pas tenir compte de ses essais d'avant le 18 novembre au soir (faits vite, pour tester les boutons) ; ses prochains tests sont sérieux.
+- Règle changée : l'étape « Suggestions » arrive À LA FIN, après la dernière question et juste avant le quantitatif (dans la discussion ; sans aucune question, la carte seule avant la liste). Avant : après la lecture, avant les questions.
+- Une information écrite au devis n'est jamais demandée, même dite avec un autre mot (« bacs de 4 m » = la longueur du rampant). Les mots sont dans la fiche du métier (`textLabels`), valent pour les lignes, la fiche lue et les questions du modèle, et sont donnés au modèle. Une question que le modèle pose sous son mot est LA question de la donnée : une seule, fermée par la réponse. Test `packages/domain/test/info-ecrite-jamais-demandee.test.ts`.
+- Règle changée : le rampant d'une couverture en bacs (joint debout, tasseaux) n'est plus supposé à 5,5 m ; écrit au devis, sinon demandé en mètres. L'ardoise garde son défaut.
+- Nouvel ouvrage « couverture zinc à tasseaux » dans la fiche Couverture (version `roofing-2026.11.18-57`) : bobine de 650 (500 au choix), tasseaux de 50, entraxe 620 (470), longueur d'un bac = rampant + 15 cm ; pattes dans les chutes (aucune ligne). Chiffres de Greg, retrouvés dans le descriptif VMZINC. Tasseaux et couvre-joints : seulement s'ils sont écrits, « à chiffrer » tant que Greg n'a pas validé le nombre de rangs (bacs + 1). Test `zinc-a-tasseaux.test.ts`.
+- Une ligne « fourniture » (ou « fourniture et pose ») dont la lecture ne tire aucun article reste dans la liste, « à chiffrer », avec ses mots. Avant : repliée sous « N lignes sans fourniture ».
+- Une bande de zinc qui attend sa réponse (pliage, développé) ne sort plus en plus comme une question « Interdit : métal au mètre… ».
+- Constat du 18 novembre : trois lectures du même devis donnent trois listes différentes. À faire : D-2026-024 au jeu de test, puis stabiliser (prompt, clés de la fiche).
+
 ## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg
 
 - Stripe (test) : les quatre prix sont créés et posés sur la branche de test (`STRIPE_PRIX_PRO`, `_PROMAX`, `_PRO_ANNUEL`, `_PROMAX_ANNUEL`).

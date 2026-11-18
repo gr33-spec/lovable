@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ecranDeLecture, paramOfDonnee, ROOFING_REFERENTIAL, type EngineAnswer, type LectureDevis } from "../src/index.js";
+import { ecranDeLecture, forbiddenFlags, paramOfDonnee, ROOFING_REFERENTIAL, type EngineAnswer, type LectureDevis, type PurchaseView } from "../src/index.js";
 
 /**
  * UNE INFORMATION ÉCRITE AU DEVIS N'EST JAMAIS DEMANDÉE ; UNE RÉPONSE DONNÉE N'EST JAMAIS REDEMANDÉE.
@@ -87,5 +87,14 @@ describe("s'il y a un doute, la question se pose UNE fois ; la réponse la ferme
       expect(posees(e).join(" "), JSON.stringify(v)).not.toMatch(/rampant|bacs/);
       expect(largeurDuPan(e)).toBe("8");
     }
+  });
+});
+
+describe("une ligne qui attend sa réponse n'est pas, en plus, une question « Interdit… »", () => {
+  const ligne = (extra: object) => ({ toBuy: [{ key: "line:1", label: "Bandes de rive zinc anthracite", quantity: "8 ml", order: { count: "8", unit: "ml" }, approx: null, kind: "direct", needIds: [], lineIds: ["1"], state: "ready", assumptionKeys: [], ...extra }] }) as unknown as PurchaseView;
+  it("la bande de zinc au mètre dont le pliage ou le développé est demandé : aucun « interdit » ; sans question en cours, elle reste signalée", () => {
+    expect(forbiddenFlags(ligne({ key: "manque:line:1", waitsOn: ["param:faconnage@pieces-pliees"] }))).toEqual([]);
+    expect(forbiddenFlags(ligne({ waitsOn: ["param:developpe"] }))).toEqual([]);
+    expect(forbiddenFlags(ligne({})).map((f) => f.key)).toEqual(["interdit:metal-ml:line:1"]);
   });
 });

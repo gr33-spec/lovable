@@ -8,7 +8,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
 import { useGroupe, useGroupeFerme } from "@/components/groupe";
-import { AnalysisScreen, CalculScreen, CLE_SUGGESTIONS, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, RecapScreen, SuggestionsCard, suggestionsAProposer, type CounterAnswers } from "@/components/journey";
+import { AnalysisScreen, CalculScreen, CLE_SUGGESTIONS, counterQuestions, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, RecapScreen, SuggestionsCard, suggestionsAProposer, type CounterAnswers } from "@/components/journey";
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
 import { RechercheRapprochement } from "@/components/rapprochement";
 import { ListePrete } from "@/components/liste-prete";
@@ -268,11 +268,14 @@ export function ProjectTakeoff({
       setRecap(true);
       marquerAssistantOuvert(projectId);
     });
-  // Étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cases, « Continuer », dès qu'il y a une suggestion,
-  // avant les questions de précision et même s'il n'en reste aucune (alors avant la liste). Un devis de plusieurs lots
+  // Étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cases, « Continuer », dès qu'il y a une suggestion.
+  // Règle changée (Greg, 18 novembre 2026, soir) : elle arrive À LA FIN, après les questions et juste avant le quantitatif.
+  // Avant : après la lecture, avant les questions. Tant qu'une question reste à poser, la discussion la pose et montre les
+  // cases après la dernière réponse ; sans aucune question, la carte seule, avant la liste. Un devis de plusieurs lots
   // passe d'abord par sa carte « Parties du devis ».
   const suggestions = takeoff.status === "draft" && !archived && phase !== "calcul" && !lotsAConfirmer(takeoff) ? suggestionsAProposer(takeoff) : null;
-  if (suggestions) return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
+  const questionsAPoser = phase === "questions" && counterQuestions(takeoff).some((q) => !(q.kind === "habit" && q.usual !== null));
+  if (suggestions && !questionsAPoser) return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
   if (phase === "questions" && takeoff.status === "draft" && !archived) {
     // §52 : un devis de plus d'un lot passe d'abord par la carte « Lots repérés » ; « C'est bon » ouvre les questions.
     if (lotsAConfirmer(takeoff)) {

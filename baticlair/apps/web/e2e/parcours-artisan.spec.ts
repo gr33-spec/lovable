@@ -1573,13 +1573,20 @@ test("feuilles de zinc : le nombre, une estimation, s'ajuste d'un toucher dans l
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("group", { name: /^Quantité : Feuilles/ }).first().locator("[aria-live]")).toHaveText(String(avant + 1), { timeout: 30_000 });
 });
 
-test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases avant les questions ; coché, l'article entre dans la liste ; le reste n'existe pas", async ({ page }) => {
+test("étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cases APRÈS les questions, juste avant le quantitatif ; coché, l'article entre dans la liste ; le reste n'existe pas", async ({ page }) => {
   // Le chantier ardoise et zinguerie de Greg (D-2026-020, anonymisé) : la gouttière a ses crochets écrits, pas ses naissances.
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-ardoise-zinguerie.pdf"));
   const carte = carteSuggestions(page);
-  await expect(carte).toBeVisible({ timeout: 60_000 });
+  // Règle changée (Greg, 18 novembre 2026) : « J'aimerais que les suggestions arrivent à la fin, avant le quantitatif ».
+  // Les questions d'abord : la carte n'est pas là tant qu'il en reste une ; ni « Calculer ma liste » avant elle.
+  await expect(boutonsDeLaQuestion(page)).toBeVisible({ timeout: 60_000 });
+  await expect(carte).toHaveCount(0);
+  const avant = await repondreAuxQuestions(page, () => null, true);
+  expect(avant.length).toBeGreaterThan(0);
+  expect(avant.join(" | ")).not.toMatch(/angle|talon|consommable/i);
+  await expect(carte).toBeVisible();
   // Points 14 et 15 : une seule étape, les mots de Greg, des cases tirées de la fiche ; les crochets, écrits, ne sont pas proposés.
   await expect(carte.getByText("Coche ce qu'il te faut, on l'ajoute à ta liste.")).toBeVisible();
   const cases = carte.getByRole("checkbox");
@@ -1591,7 +1598,7 @@ test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases ava
   await expect(carte.getByRole("checkbox", { name: "Talons de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Angles de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: /crochet/i })).toHaveCount(0);
-  // Aucune question de précision tant que l'étape est ouverte.
+  // Tant que l'étape est ouverte : aucune question, et « Calculer ma liste » n'est pas encore proposé.
   await expect(boutonsDeLaQuestion(page)).toHaveCount(0);
   await expect(calculerMaListe(page)).toHaveCount(0);
   // Point 17 : des cases larges (48 px au moins), dans l'écran, sans défilement horizontal.
@@ -1608,8 +1615,10 @@ test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases ava
   await expect(carte.getByText("1 article sera ajouté à ta liste.")).toBeVisible();
   await carte.getByRole("button", { name: "Continuer", exact: true }).click();
   await expect(carte).toBeHidden({ timeout: 15_000 });
-  // Point 16 : les questions ne portent que sur la liste ; les angles, non cochés, ne se demandent pas.
+  // Point 16 : après « Continuer », seulement ce qu'une case cochée demande (rien pour les angles, non cochés), puis
+  // « Calculer ma liste ».
   const posees = await repondreAuxQuestions(page);
+  await expect(calculerMaListe(page)).toBeVisible();
   expect(posees.join(" | ")).not.toMatch(/angle|talon|consommable/i);
   await calculerEtVoirMaListe(page);
   for (let i = 0; i < 3 && (await boutonsDeLaQuestion(page).count()) > 0; i++) {
