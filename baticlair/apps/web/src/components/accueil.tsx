@@ -18,6 +18,7 @@ import type { Brouillon } from "@/lib/brouillon";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import type { CarteAchat, MesAchats } from "@/lib/achat-groupe";
+import { moisAbrege } from "@/lib/titres";
 
 /**
  * L'ACCUEIL EN TABLEAU DE BORD (Greg, 15 novembre 2026, lot UX mobile ; RÈGLE CHANGÉE pour les trois grandes cartes du
@@ -321,7 +322,7 @@ interface Demande {
 
 /** Une carte de « À faire » : son état en étiquette, ce qu'il y a à faire, de quoi il s'agit ; entièrement cliquable. */
 function CarteAction({ a }: { a: Action }) {
-  return <CarteLien href={a.href} titre={a.titre} sous={a.sousTitre} etiquette={<Etiquette>{a.statut}</Etiquette>} label={`${a.titre} : ${a.sousTitre} (${a.statut})`} />;
+  return <CarteLien href={a.href} titre={a.titre} sous={moisAbrege(a.sousTitre)} etiquette={<Etiquette>{a.statut}</Etiquette>} label={`${a.titre} : ${a.sousTitre} (${a.statut})`} />;
 }
 
 /** Une section du tableau de bord : son titre, « Voir tout » à droite (44 px), ses cartes. Elle n'existe que remplie. */

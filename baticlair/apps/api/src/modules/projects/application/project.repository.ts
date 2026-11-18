@@ -11,6 +11,8 @@ export interface NewProject {
   demo?: boolean;
   /** Métier du chantier, ou null : celui de l'entreprise. */
   trade?: string | null;
+  /** « achat-groupe » : liste faite pour un besoin groupé (Greg, 19 novembre 2026). */
+  origine?: string | null;
 }
 
 export type ProjectPatch = Partial<Omit<NewProject, "demo"> & { status: ProjectStatus }>;
@@ -33,6 +35,12 @@ export interface ProjectListQuery {
   search?: string[];
   limit: number;
   cursor?: ProjectCursor;
+  /**
+   * Greg, 19 novembre 2026 : une liste faite pour un besoin groupé, jamais partie chez un négoce, vit dans Demandes ›
+   * Groupées. « sans » (par défaut) l'écarte ; « a-finir » ne rend qu'elles, et seulement celles qui n'ont encore aucun
+   * besoin publié ; « toutes » ne filtre rien.
+   */
+  groupe?: "sans" | "a-finir" | "toutes";
 }
 
 /** Position dans la liste triée par dernière activité. */

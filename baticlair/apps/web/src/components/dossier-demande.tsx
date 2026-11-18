@@ -291,9 +291,12 @@ function LigneSuiviNegoce({ l, onRepondu }: { l: LigneNegoce; onRepondu: () => v
 export function OngletOffres({
   projectId,
   onComparer,
+  onCommander,
 }: {
   projectId: string;
   onComparer: () => void;
+  /** Greg, 19 novembre 2026 : « Commander » sur chaque offre ouvre la confirmation du parcours de commande existant. */
+  onCommander?: (recipientId: string) => void;
 }) {
   const { data, error, reload } = useDossier(projectId);
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
@@ -306,6 +309,17 @@ export function OngletOffres({
   );
   // « Le moins cher » ne se dit que s'il y a au moins deux offres à comparer dans la même demande.
   // Recette n° 2 du 14 novembre 2026 : et ces deux offres doivent être comparables (complètes, encore valables).
+  // Une offre se commande tant que sa demande n'a encore rien commandé (une commande par demande).
+  const commandable = (recipientId: string) => {
+    const d = data.demandes.find((x) => x.recipients.some((r) => r.id === recipientId));
+    return Boolean(onCommander) && Boolean(d) && d!.retainedSupplierIds.length === 0 && !d!.recipients.some((r) => r.commandeLe);
+  };
+  const boutonCommander = (recipientId: string, nom: string) =>
+    commandable(recipientId) ? (
+      <Button variant="ink" aria-label={`Commander chez ${nom}`} onClick={() => onCommander?.(recipientId)}>
+        Commander
+      </Button>
+    ) : null;
   const prix = [...data.perso, ...data.chiffrees].flatMap((d) => d.offres.map((o) => ({ ...o, seule: d.offres.filter((x) => x.complete && x.valide).length < 2 })));
   if (pdfs.length === 0 && prix.length === 0) {
     const parti =
@@ -348,6 +362,7 @@ export function OngletOffres({
                 : ""}
               {o.valide ? "" : " · offre échue"}
             </p>
+            {boutonCommander(o.recipientId, o.nom)}
           </Card>
         ))}
       {pdfs.map((p) => (
@@ -368,6 +383,7 @@ export function OngletOffres({
           >
             Ouvrir le devis (PDF)
           </Button>
+          {prix.some((o) => o.recipientId === p.id) ? null : boutonCommander(p.id, p.nom)}
         </Card>
       ))}
       <Button variant="ink" onClick={onComparer}>

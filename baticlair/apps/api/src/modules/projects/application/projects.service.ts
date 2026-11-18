@@ -20,6 +20,8 @@ export interface UpdateProjectInput {
   /** La note chantier, telle que tapée (null pour l'effacer) ; 4 000 caractères au plus. */
   siteNotes?: string | null | undefined;
   status?: ProjectStatus | undefined;
+  /** Posée une fois, par l'écran du chemin « Besoin groupé » ; jamais retirée par l'artisan. */
+  origine?: "achat-groupe" | undefined;
 }
 
 export class ProjectsService {
@@ -59,6 +61,7 @@ export class ProjectsService {
     if (input.address !== undefined) patch.address = normalizeOptionalText(input.address, "address");
     if (input.siteNotes !== undefined) patch.siteNotes = input.siteNotes?.trim() ? input.siteNotes.trim().slice(0, 4000) : null;
     if (input.status !== undefined) patch.status = input.status;
+    if (input.origine === "achat-groupe") patch.origine = "achat-groupe";
     const project = await this.projects.update(tenant, id, patch);
     if (!project) throw notFound("Project");
     return project;

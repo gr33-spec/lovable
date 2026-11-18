@@ -27,6 +27,7 @@ const updateBody = z
     address: z.string().nullable(),
     siteNotes: z.string().max(4000).nullable(),
     status: z.enum(["active", "archived"]),
+    origine: z.literal("achat-groupe"),
   })
   .partial()
   .strict();
@@ -42,6 +43,8 @@ const listQuery = z.object({
   cursor: z.string().max(200).optional(),
   /** « Mes listes » et l'accueil (1er novembre 2026) : le résumé de chaque liste (lignes, origine, statut, demande, supprimable). */
   resume: z.enum(["1"]).optional(),
+  /** Greg, 19 novembre 2026 : les listes faites pour un besoin groupé (voir `ProjectListQuery.groupe`). */
+  groupe: z.enum(["sans", "a-finir", "toutes"]).optional(),
 });
 
 /** Curseur opaque pour le client : base64url de « date|id ». */
@@ -100,6 +103,7 @@ export class ProjectsController {
       ...(query.etape ? { etape: query.etape } : {}),
       ...(search.length > 0 ? { search } : {}),
       ...(query.cursor ? { cursor: decodeCursor(query.cursor) } : {}),
+      groupe: query.groupe ?? "sans",
     });
     const resumes = query.resume ? await this.listes.resumes(tenant.companyId, page.items) : null;
     return { items: page.items.map((p) => (resumes ? { ...toDto(p), resume: resumes.get(p.id) ?? null } : toDto(p))), nextCursor: page.nextCursor ? encodeCursor(page.nextCursor) : null };

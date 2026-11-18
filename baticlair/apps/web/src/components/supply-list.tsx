@@ -393,7 +393,7 @@ export function SupplyList({
           bas ; les liens suivent la liste, jamais par-dessus. */}
       {groupe && !selecting ? groupe.mode === "mois" ? <MesLignesDuMois groupe={groupe} /> : <GroupeSection groupe={groupe} /> : null}
       {selecting && pourGroupe && groupe && groupe.mode === "mois" ? (
-        <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
+        <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-(--nav-space) pb-3 lg:bottom-0 lg:pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <CommandeDuMoisBar
             count={checked.size}
             de={groupe.mois?.prochaine?.de ?? "en cours"}
@@ -409,7 +409,7 @@ export function SupplyList({
           />
         </div>
       ) : selecting && pourGroupe && groupe ? (
-        <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
+        <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-(--nav-space) pb-3 lg:bottom-0 lg:pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <GroupeBar
             count={checked.size}
             onCancel={stopSelecting}
@@ -422,7 +422,7 @@ export function SupplyList({
           />
         </div>
       ) : selecting && selection ? (
-        <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
+        <div className={`sticky z-10 mt-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-(--nav-space) pb-3 lg:bottom-0 lg:pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <SelectionBar
             count={checked.size}
             alreadyServed={selection.parts.map((p) => p.supplierId)}
@@ -444,7 +444,7 @@ export function SupplyList({
             <div
               role="group"
               aria-label="Envoyer la liste"
-              className={`sticky z-10 mt-2 flex flex-wrap gap-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}
+              className={`sticky z-10 mt-2 flex flex-wrap gap-2 fade-ground pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-(--nav-space) pb-2 lg:bottom-0 lg:pb-[max(8px,env(safe-area-inset-bottom))]"}`}
             >
               {onPreview ? (
                 // Sur un iPhone étroit, « Aperçu » garde son œil seul : « Demander les prix à mes négoces » tient sur une ligne.

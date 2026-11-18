@@ -52,6 +52,10 @@ function useOnglet(): [OngletDossier, (o: OngletDossier) => void] {
 function Chantier() {
   const { id } = useParams<{ id: string }>();
   const [onglet, choisirOnglet] = useOnglet();
+  const routeur = useRouter();
+  // « Commander » depuis l'onglet Offres : la confirmation de commande du suivi (le même parcours), Annuler ramène ici.
+  const commanderDepuisOffres = (recipientId: string) =>
+    routeur.replace(`/chantiers/${encodeURIComponent(id)}?commander=${encodeURIComponent(recipientId)}&t=${Date.now()}`, { scroll: false });
   const fetchProject = useCallback((signal: AbortSignal) => api<Project>(`/v1/projects/${encodeURIComponent(id)}`, { signal }), [id]);
   const { data: project, setData: setProject, error, reload } = useResource(fetchProject);
   const [editing, setEditing] = useState(false);
@@ -89,7 +93,7 @@ function Chantier() {
       <BarreOnglets projectId={project.id} onglet={onglet} onChoisir={choisirOnglet} />
       {onglet !== "suivi" ? (
         <div role="tabpanel" aria-label={onglet === "offres" ? "Offres" : "Documents"} className="flex flex-col gap-3">
-          {onglet === "offres" ? <OngletOffres projectId={project.id} onComparer={() => choisirOnglet("suivi")} /> : <OngletDocuments projectId={project.id} />}
+          {onglet === "offres" ? <OngletOffres projectId={project.id} onComparer={() => choisirOnglet("suivi")} onCommander={commanderDepuisOffres} /> : <OngletDocuments projectId={project.id} />}
         </div>
       ) : null}
       {/* Le résumé reste monté (liste, envoi, lecture en cours) : changer d'onglet ne perd rien. */}

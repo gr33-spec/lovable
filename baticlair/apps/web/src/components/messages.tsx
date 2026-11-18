@@ -11,6 +11,7 @@ import { cleEnvoi, ouvrirFichierPro, phraseErreur, tailleLisible, type Conversat
 import { openFile } from "@/lib/open-document";
 import { useResource } from "@/lib/use-resource";
 import { BoutonContour, BoutonJaune, CARTE, ChampChoix, ChampLong, Coche, EcranTitre, Encart, EtatEcran, Etiquette, GrandTitre, LienContour, LienJaune, Puces, Recherche, Refus, TitreSection } from "./ux-kit";
+import { coupeAuMot, titreCourt } from "@/lib/titres";
 
 /**
  * « MESSAGES ET RÉPONSES » (Greg, 10 novembre 2026, captures 22, 23, 47, 11, 12, 46) et la cloche (26). L'interface est
@@ -89,10 +90,10 @@ export function Boite() {
                       {i.sorte === "mission" ? <Briefcase size={20} /> : i.sorte === "mobiiz" ? <Bell size={20} /> : i.sorte === "site" ? <Globe size={20} /> : <CreditCard size={20} />}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <Etiquette ton={i.sorte === "mobiiz" ? "gris" : i.sorte === "mission" || i.sorte === "site" || i.aClasser ? "jaune" : "vert"}>{i.sorte === "mission" ? "Mission" : i.sorte === "mobiiz" ? "Mobiiz" : i.sorte === "site" ? "Mon site" : i.aClasser ? "Négoce · à classer" : "Négoce · classée"}</Etiquette>
-                      <span className="truncate text-[17px] font-extrabold">{i.titre}</span>
-                      {i.sujet ? <span className="truncate text-[13px] font-extrabold text-[#6b5300]">{i.sujet}</span> : null}
-                      <span className="truncate text-[13px] text-[#5c5648]">{i.extrait}</span>
+                      <Etiquette ton={i.sorte === "mobiiz" ? "gris" : i.sorte === "mission" || i.sorte === "site" || i.aClasser ? "jaune" : "vert"}>{i.sorte === "mission" ? "Mission" : i.sorte === "mobiiz" ? "Mobiiz" : i.sorte === "site" ? "Mon site" : i.aClasser ? "À classer" : "Classée"}</Etiquette>
+                      <span className="text-[17px] font-extrabold break-words">{titreCourt(i.titre, 56)}</span>
+                      {i.sujet ? <span className="text-[13px] font-extrabold break-words text-[#6b5300]">{titreCourt(i.sujet, 64)}</span> : null}
+                      <span className="text-[13px] break-words text-[#5c5648]">{coupeAuMot(i.extrait, 70)}</span>
                     </span>
                     <span className="flex shrink-0 flex-col items-end gap-3">
                       <span className="text-[12px] text-[#6b6557]">{quandBoite(i.le, maintenant)}</span>
