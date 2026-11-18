@@ -262,7 +262,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     const b = await nouvelArtisan(browser, dep, "Paul");
     // Greg, 6 novembre 2026 : « Groupes » dans le menu, vue « Découvrir » (son secteur d'office).
     await b.page.goto("/");
-    await b.page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés" }).click();
+    await b.page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: /^(Achats groupés|Groupés)$/ }).click();
     await b.page.waitForURL(/\/achats-groupes/);
     const ouverts = b.page.getByRole("tabpanel", { name: "Découvrir" });
     await b.page.getByRole("tab", { name: "Découvrir" }).click();
