@@ -1079,9 +1079,10 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(questions.getByRole("listitem")).toHaveCount(0);
   await expect(page.getByText(/Tout se règle ici|allers-retours|renseignée|avec les numéros/)).toHaveCount(0);
   await expect(calculerMaListe(page)).toHaveCount(0);
-  // §49.4 : les consommables ne sont jamais une liste d'articles proposés, seulement UNE question oui / non ; ici, non.
-  const posees = await repondreAuxQuestions(page, (q) => (/^Consommables de pose/.test(q) ? "Non" : /ardoise/i.test(q) ? "Espagne 1er choix" : /façonn/i.test(q) ? /Je commande façonné/ : null));
-  expect(posees.filter((q) => /^Consommables de pose/.test(q))).toHaveLength(1);
+  // RÈGLE CHANGÉE (Greg, 18 novembre 2026) : plus de question oui / non sur les consommables ; ils se cochent à l'étape
+  // « Suggestions » (jamais d'office). Avant : UNE question oui / non.
+  const posees = await repondreAuxQuestions(page, (q) => (/ardoise/i.test(q) ? "Espagne 1er choix" : /façonn/i.test(q) ? /Je commande façonné/ : null));
+  expect(posees.filter((q) => /^Consommables de pose/.test(q))).toHaveLength(0);
   // Jamais deux fois la même question.
   expect(new Set(posees).size).toBe(posees.length);
   await calculerEtVoirMaListe(page);
