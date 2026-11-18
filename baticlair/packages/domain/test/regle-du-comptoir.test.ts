@@ -106,6 +106,8 @@ describe("la règle du comptoir (§47.8)", () => {
       "param:developpe_gouttiere": u("33", "cm"),
       "param:fixation_crochet": u("2"),
       "param:diametre_descente": u("80", "mm"),
+      // La fiche complète compte aussi les angles de la gouttière (étape « Suggestions », 18 novembre 2026) : aucun ici.
+      "param:nb_angles": u("0"),
     });
     expect(v.questions).toEqual([]);
     // §49.1 : dans l'ordre du devis ; les consommables (pointes) ferment la liste.
@@ -118,6 +120,7 @@ describe("la règle du comptoir (§47.8)", () => {
       "Gouttière zinc demi-ronde dév. 33",
       "Crochets de gouttière bandeau dév. 33",
       "Naissances dév. 33 Ø80",
+      "Talons de gouttière dév. 33", // la fiche complète (tous les articles) : deux talons par ligne droite (§15) ; pour un artisan, proposés à l'étape « Suggestions »
       "Pointes annelées 2,5 × 28 mm",
     ]);
     for (const b of v.toBuy) expect(supplierTest(b.label, b.order?.unit ?? null)).toBeNull();

@@ -7,6 +7,7 @@
  *  - une réponse (développé 25) passe la gouttière au vert ; le raccord tranché (ZWC) passe les raccords au vert.
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { cocherLesNaissances } from "./support/suggestions.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 import { DE00000071_PDF } from "./support/de00000071-pdf.js";
 
@@ -29,6 +30,7 @@ type Ecran = { view: { decisions: Decision[] }; purchase: { toBuy: Item[]; scree
 async function depose(agent: Agent): Promise<{ id: string; projetId: string }> {
   const res = await agent.post("/v1/quantitatifs").field("reference", "DE00000071").field("adresse", "22620 Ploubazlanec").attach("file", Buffer.from(await DE00000071_PDF()), { filename: "devis.pdf", contentType: "application/pdf" });
   expect(res.status, JSON.stringify(res.body)).toBe(201);
+  await cocherLesNaissances(agent, res.body.id as string);
   return { id: res.body.id as string, projetId: res.body.projetId as string };
 }
 

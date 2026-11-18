@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { SUGGESTIONS_KEY } from "../src/index.js";
+import { SUGGESTIONS_DU_BANC } from "./support/read-quote.js";
 import { choixParPiece, ecranDeLecture, lignesDeLecture, planDeLecture, ROOFING_REFERENTIAL, type QuoteLineReading } from "../src/index.js";
 import { HABITUDES_BANC } from "./support/habitudes.js";
 import { lectureEnregistree } from "./support/lectures.js";
@@ -128,12 +130,12 @@ describe("le pliage : une seule réponse pour tout le devis", () => {
     const l = lectureEnregistree(ROOFING_REFERENTIAL, LIGNES, [], HABITUDES_BANC);
     const uneSeule = { cle: "faconnage", texte: "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", boutons: [{ label: "Je façonne", valeur: "1" }, { label: "Je commande façonné", valeur: "2" }], unite: null, donnee: "façonnage", ligne: null };
     const lecture = { ...l, questions: [uneSeule, ...l.questions.filter((q) => q.cle !== "faconnage")] };
-    const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers: {}, preferences: {} });
+    const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC }, preferences: {} });
     const cles = e.questions.filter((q) => /^param:faconnage/.test(q.key)).map((q) => q.key);
     // Jamais la clé commune « param:faconnage », qui vaudrait pour les bacs ET pour les pièces.
     expect(cles).toEqual(["param:faconnage@couverture-zinc-joint-debout", "param:faconnage@pieces-pliees"]);
     // « tout fait » pour les bacs, « je plie » pour les pièces : la rive part en feuilles, les bacs commandés façonnés.
-    const apres = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers: { "param:faconnage@couverture-zinc-joint-debout": { value: "2", unit: "u" }, "param:faconnage@pieces-pliees": { value: "1", unit: "u" } }, preferences: {} });
+    const apres = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC, "param:faconnage@couverture-zinc-joint-debout": { value: "2", unit: "u" }, "param:faconnage@pieces-pliees": { value: "1", unit: "u" } }, preferences: {} });
     expect(apres.questions.filter((q) => /^param:faconnage/.test(q.key))).toEqual([]);
     expect(apres.purchase.toBuy.some((b) => /^Feuilles .*2 × 1 m/i.test(b.label)), apres.purchase.toBuy.map((b) => b.label).join(" | ")).toBe(true);
   });

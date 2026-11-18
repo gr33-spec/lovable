@@ -47,6 +47,8 @@ import {
   ecranDeLecture,
   ecranParLots,
   LOTS_KEY,
+  SUGGESTIONS_AUCUNE,
+  SUGGESTIONS_KEY,
   exportPourLecture,
   ficheAvecBref,
   lectureDepuisLignes,
@@ -323,6 +325,8 @@ export interface ReviewedTakeoff {
   dicibles?: DonneeDicible[];
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation) : hors de la liste, repliées à part. */
   withoutSupply?: { lineId: string; label: string; measure: string | null }[];
+  /** Étape « Suggestions » : les oublis probables à proposer en cases (fiche du métier), tant que l'artisan n'a pas répondu. */
+  suggestions?: { key: string; label: string }[];
   /** La note de l'artisan sur le chantier (§44), pour le bref de l'écran et de l'envoi (§50.7). */
   siteNotes?: string | null;
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché, hors de la liste. */
@@ -1239,6 +1243,8 @@ export class TakeoffService {
     }
     // §52, la carte « Lots repérés » : au moins un lot, chacun un métier (« electrical,plumbing »).
     if (key === LOTS_KEY && (typeof value !== "string" || !/^[a-z0-9_-]{1,40}(,[a-z0-9_-]{1,40})*$/.test(value))) throw validationFailed("Answer the kept lots", { reason: "invalid_answer" });
+    // Étape « Suggestions » : « aucune », ou des cases « ouvrage/emplacement » séparées par des virgules.
+    if (key === SUGGESTIONS_KEY && (typeof value !== "string" || !(value === SUGGESTIONS_AUCUNE || /^[a-z0-9_-]{1,60}\/[a-z0-9_-]{1,40}(,[a-z0-9_-]{1,60}\/[a-z0-9_-]{1,40}){0,4}$/.test(value)))) throw validationFailed("Answer the ticked suggestions", { reason: "invalid_answer" });
     await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
     // Mémoire de l'entreprise : un produit choisi, ou une réponse d'habitude (« je façonne », épaisseur du zinc),
     // compte pour SON entreprise ; établie au deuxième chantier différent, elle n'est plus demandée (dite, modifiable).
@@ -1551,6 +1557,7 @@ export class TakeoffService {
       dicibles: donneesDicibles(ref, e.plan, takeoff.answers, [...purchase.questions.map((q) => q.question?.key ?? q.key), ...habits.map((h) => h.key)]),
       aiSuggestions: [],
       withoutSupply: e.sansFourniture,
+      suggestions: e.suggestions,
       siteNotes: notes,
     };
   }

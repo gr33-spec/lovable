@@ -8,7 +8,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
 import { useGroupe, useGroupeFerme } from "@/components/groupe";
-import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, RecapScreen, type CounterAnswers } from "@/components/journey";
+import { AnalysisScreen, CalculScreen, CLE_SUGGESTIONS, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, RecapScreen, SuggestionsCard, suggestionsAProposer, type CounterAnswers } from "@/components/journey";
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
 import { RechercheRapprochement } from "@/components/rapprochement";
 import { ListePrete } from "@/components/liste-prete";
@@ -277,6 +277,9 @@ export function ProjectTakeoff({
         );
       return <LotsCard takeoff={takeoff} pending={pending} error={actionError} onConfirm={(m) => void confirmLots(m)} />;
     }
+    // Étape « Suggestions » (Greg, 17 novembre 2026) : avant les questions de précision, une carte à cases, « Continuer ».
+    const suggestions = suggestionsAProposer(takeoff);
+    if (suggestions) return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
     return <QuestionsStep takeoff={takeoff} pending={pending} error={actionError} onSubmit={calculate} onReponses={(r) => void repondre(r)} />;
   }
   if (phase === "calcul") return <CalculScreen />;

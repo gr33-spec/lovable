@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { cocherLesNaissances } from "./support/suggestions.js";
 import { PdfJsPdfReader } from "../src/modules/documents/infrastructure/pdfjs-pdf-reader.js";
 import { forbiddenWord, priceLeak } from "../src/modules/price-requests/application/supplier-packet.js";
 import { createTestApp, resetDatabase, signUp, type Agent, type TestContext } from "./support/test-app.js";
@@ -59,6 +60,7 @@ export async function compteBatiInvest(): Promise<Agent> {
 
 async function chantierTest(agent: Agent, reponses: Record<string, string> = REPONSES) {
   const q = (await agent.post("/v1/quantitatifs").send({ reference: "Test", adresse: "18 rue de Siam, 29200 Brest", lignes: CHANTIER_TEST })).body;
+  await cocherLesNaissances(agent, q.id);
   await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(reponses).map(([question, valeur]) => ({ question, valeur })) });
   let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
   for (let i = 0; i < 10 && current.questions.length > 0; i++) {
@@ -163,6 +165,7 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const sans = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
     expect(sans.document.blocs.map((b: { titre: string }) => b.titre)).toEqual(["Le chantier en bref", "Fournitures à chiffrer"]);
     const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "m²" }] })).body;
+    await cocherLesNaissances(agent, q.id);
     await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
     let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
     for (let i = 0; i < 10 && current.questions.length > 0; i++) {
@@ -217,6 +220,7 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
 /** Le chantier Test avant validation (réponses données), avec son quantitatif côté écran. */
 async function chantierOuvert(agent: Agent, reference = "Test") {
   const q = (await agent.post("/v1/quantitatifs").send({ reference, adresse: "18 rue de Siam, 29200 Brest", lignes: CHANTIER_TEST })).body;
+  await cocherLesNaissances(agent, q.id);
   await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
   const takeoff = (await agent.get(`/v1/projects/${q.projetId}/takeoff`)).body.takeoff;
   return { quantitatifId: q.id as string, projectId: q.projetId as string, takeoff };
@@ -250,6 +254,7 @@ describe("§45.6 — journal des corrections", () => {
   it("une ligne tombée en « à préciser avec vous » est journalisée avec sa raison ; l'export mensuel par règle est réservé au fondateur", async () => {
     const agent = await compteBatiInvest();
     const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "m²" }] })).body;
+    await cocherLesNaissances(agent, q.id);
     await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
     let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
     for (let i = 0; i < 10 && current.questions.length > 0; i++) {

@@ -819,13 +819,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Bande de ventilation en Z en zinc quartz",
     "quantite": "13 ml",
     "unite": "ml",
@@ -985,13 +978,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -1258,13 +1244,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -1319,13 +1298,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -1386,13 +1358,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -1923,13 +1888,6 @@
     "raison": "Pose, développé à préciser"
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Réfection de chéneau en membrane EPDM ou PVC",
     "quantite": "11,7 ml",
     "unite": "ml",
@@ -2000,13 +1958,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances PVC grise de 25 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "ok",
-    "raison": null
-   },
-   {
     "designation": "Tubes de descente PVC gris Ø80, longueur 4 m",
     "quantite": "4 pièces",
     "unite": "pièces",
@@ -2027,13 +1978,6 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -2051,13 +1995,6 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -2114,13 +2051,6 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances PVC sable de 25",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Diamètre, pose, angles à préciser"
    }
   ],
   "questions": [
@@ -2138,13 +2068,6 @@
     "designation": "Gouttière zinc demi-ronde dév. 25",
     "quantite": "6 longueurs de 4 m",
     "unite": "longueurs de 4 m",
-    "etat": "ok",
-    "raison": null
-   },
-   {
-    "designation": "Naissances dév. 25 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
     "etat": "ok",
     "raison": null
    },
@@ -2315,13 +2238,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -2409,13 +2325,6 @@
     "designation": "Gouttière zinc Havraise",
     "quantite": "3 longueurs de 4 m",
     "unite": "longueurs de 4 m",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
     "etat": "check",
     "raison": "Développé à préciser"
    },
@@ -2588,13 +2497,6 @@
     "raison": "Pose, développé à préciser"
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Réfection de chéneau en membrane EPDM ou PVC",
     "quantite": "11,7 ml",
     "unite": "ml",
@@ -2678,13 +2580,6 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances PVC blanche de 33",
-    "quantite": "1 pièce",
-    "unite": "pièce",
-    "etat": "check",
-    "raison": "Diamètre, pose à préciser"
    }
   ],
   "questions": [
@@ -2724,13 +2619,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    },
    {
     "designation": "Chatière de ventilation",
@@ -2858,13 +2746,6 @@
     "unite": "pièces",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances dév. 33 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "ok",
-    "raison": null
    }
   ],
   "questions": [],
@@ -2938,13 +2819,6 @@
     "designation": "Gouttière zinc Havraise",
     "quantite": "3 longueurs de 4 m",
     "unite": "longueurs de 4 m",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
     "etat": "check",
     "raison": "Développé à préciser"
    },
@@ -3052,13 +2926,6 @@
     "designation": "Gouttière zinc Havraise",
     "quantite": "3 longueurs de 4 m",
     "unite": "longueurs de 4 m",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
     "etat": "check",
     "raison": "Développé à préciser"
    },
@@ -3264,13 +3131,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -3357,13 +3217,6 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    },
    {
     "designation": "Faîtage en bande zinc",
@@ -3486,13 +3339,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Teinte à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -3528,13 +3374,6 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -3791,13 +3630,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Jouées de lucarnes",
     "quantite": "2 pièces",
     "unite": "pièces",
@@ -3833,13 +3665,6 @@
     "unite": "pièces",
     "etat": "check",
     "raison": "Pose, développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    },
    {
     "designation": "Réfection de chéneau en membrane EPDM ou PVC",
@@ -3917,13 +3742,6 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -4232,13 +4050,6 @@
     "designation": "Gouttière alu anthracite de",
     "quantite": "3 longueurs de 4 m",
     "unite": "longueurs de 4 m",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances alu anthracite de Ø80",
-    "quantite": "1 pièce",
-    "unite": "pièce",
     "etat": "check",
     "raison": "Développé à préciser"
    },
@@ -4585,13 +4396,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -4663,13 +4467,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Liteaux 27x40",
     "quantite": null,
     "unite": null,
@@ -4716,13 +4513,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
@@ -4873,13 +4663,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances dév. 25 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "ok",
-    "raison": null
-   },
-   {
     "designation": "Tuyau de descente zinc diam. 80mm, 2 descentes de 3 m",
     "quantite": "2 tubes de 3 m",
     "unite": "tubes de 3 m",
@@ -4928,13 +4711,6 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    },
    {
     "designation": "Mastic colle polyuréthane 310 ml",
@@ -5029,13 +4805,6 @@
     "designation": "Gouttière zinc Havraise",
     "quantite": "3 longueurs de 4 m",
     "unite": "longueurs de 4 m",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
     "etat": "check",
     "raison": "Développé à préciser"
    },
@@ -5159,13 +4928,6 @@
     "designation": "Gouttière zinc Havraise",
     "quantite": "3 longueurs de 4 m",
     "unite": "longueurs de 4 m",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
     "etat": "check",
     "raison": "Développé à préciser"
    },
@@ -5326,13 +5088,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -5441,13 +5196,6 @@
     "designation": "Gouttière zinc Havraise",
     "quantite": "3 longueurs de 4 m",
     "unite": "longueurs de 4 m",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
     "etat": "check",
     "raison": "Développé à préciser"
    },
@@ -5911,13 +5659,6 @@
     "designation": "Gouttière zinc demi-ronde dév. 33",
     "quantite": "6 longueurs de 4 m",
     "unite": "longueurs de 4 m",
-    "etat": "ok",
-    "raison": null
-   },
-   {
-    "designation": "Naissances dév. 33 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
     "etat": "ok",
     "raison": null
    },

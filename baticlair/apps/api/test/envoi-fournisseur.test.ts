@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { cocherLesNaissances } from "./support/suggestions.js";
 import { pdfPageCount } from "../src/modules/documents/index.js";
 import { packetDocument, packetDocumentLines, packetMail, packetPdf, priceLeak, type SupplierPacket } from "../src/modules/price-requests/application/supplier-packet.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
@@ -33,6 +34,7 @@ async function chantierPret(agent: Agent) {
       ],
     })
   ).body;
+  await cocherLesNaissances(agent, q.id);
   await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "engine:param:nb_descentes", valeur: "2" }] });
   let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
   for (let i = 0; i < 10 && current.questions.length > 0; i++) {

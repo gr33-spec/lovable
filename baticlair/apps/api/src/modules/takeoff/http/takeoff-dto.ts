@@ -111,7 +111,7 @@ function viewDto(view: ArtisanView) {
   };
 }
 
-export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, choixPieces, dicibles, aiSuggestions, withoutSupply, brief, siteNotes, fiche, ajustements }: ReviewedTakeoff) {
+export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, choixPieces, dicibles, aiSuggestions, withoutSupply, suggestions, brief, siteNotes, fiche, ajustements }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
@@ -149,6 +149,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // §52, la carte « Lots repérés » (directive du fondateur, 2026-10-13) : les lots que la lecture a repérés, ceux que
     // l'artisan a gardés ou ajoutés (null tant qu'il n'a pas dit « C'est bon »), et les métiers qu'il peut ajouter.
     lots: (takeoff.lecture?.lots ?? []).filter((l) => l.lignes.length > 0).map((l) => ({ metier: l.metier, libelle: l.libelle, lignes: l.lignes.length })),
+    /** Étape « Suggestions » : les cases à proposer avant les questions (brouillon seulement) ; vide : pas d'étape. */
+    suggestions: takeoff.status === "draft" ? (suggestions ?? []) : [],
     lotsConfirmes: typeof takeoff.answers[LOTS_KEY] === "string" ? (takeoff.answers[LOTS_KEY] as string).split(",").filter(Boolean) : null,
     // Lecture lot par lot (décision du fondateur, 24 octobre 2026) : un lot dont la lecture a échoué, dit en une phrase.
     lotsNonLus: (takeoff.lecture?.lotsNonLus ?? []).map((l) => phraseLotNonLu(l.libelle)),
