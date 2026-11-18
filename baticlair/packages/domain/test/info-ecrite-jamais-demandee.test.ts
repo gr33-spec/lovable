@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ecranDeLecture, forbiddenFlags, paramOfDonnee, ROOFING_REFERENTIAL, type EngineAnswer, type LectureDevis, type PurchaseView } from "../src/index.js";
+import { D2026_020_LECTURE, ecranDeLecture, forbiddenFlags, paramOfDonnee, ROOFING_REFERENTIAL, type EngineAnswer, type LectureDevis, type PurchaseView } from "../src/index.js";
 
 /**
  * UNE INFORMATION ÉCRITE AU DEVIS N'EST JAMAIS DEMANDÉE ; UNE RÉPONSE DONNÉE N'EST JAMAIS REDEMANDÉE.
@@ -96,5 +96,30 @@ describe("une ligne qui attend sa réponse n'est pas, en plus, une question « I
     expect(forbiddenFlags(ligne({ key: "manque:line:1", waitsOn: ["param:faconnage@pieces-pliees"] }))).toEqual([]);
     expect(forbiddenFlags(ligne({ waitsOn: ["param:developpe"] }))).toEqual([]);
     expect(forbiddenFlags(ligne({})).map((f) => f.key)).toEqual(["interdit:metal-ml:line:1"]);
+  });
+});
+
+describe("« Je ne sais pas » à la longueur des bacs ne bloque pas un autre ouvrage", () => {
+  // Le chantier ardoise de Greg (D-2026-020), avec en plus un joint debout dont le devis ne dit pas le rampant : la
+  // question se pose pour tout le toit (sans ligne), comme le fait la lecture.
+  const mixte = {
+    ...D2026_020_LECTURE,
+    lignes: [...D2026_020_LECTURE.lignes, { ...lecture({}).lignes[0]!, ref: "99" }],
+    questions: [...D2026_020_LECTURE.questions, { cle: "longueur_rampant", ligne: null, texte: "Longueur du rampant ?", unite: "m", donnee: "longueur du rampant", boutons: [] }],
+  } as LectureDevis;
+  const voir = (answers: Record<string, EngineAnswer>) => ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: mixte, answers: { "param:faconnage@pieces-pliees": { value: "1", unit: "u" }, ...JE_PLIE, ...answers }, preferences: {} });
+  const ardoises = (e: ReturnType<typeof voir>) => e.purchase.toBuy.find((b) => /^Ardoises/.test(b.label));
+
+  it("les ardoises reprennent leur rampant courant (il ne règle que leur recouvrement) et sont chiffrées ; les bacs restent à préciser", () => {
+    const e = voir({ "param:longueur_rampant": null });
+    expect(ardoises(e)?.quantity).toBe("2 052 pièces");
+    expect((ardoises(e)?.waitsOn ?? []).join(" ")).not.toMatch(/rampant/);
+    expect(e.purchase.toBuy.filter((b) => /^Bobine/.test(b.label) && b.quantity)).toEqual([]);
+  });
+
+  it("répondue (4 m) : les deux ouvrages la prennent", () => {
+    const e = voir({ "param:longueur_rampant": { value: "4", unit: "m" } });
+    expect(ardoises(e)?.quantity).toBeTruthy();
+    expect(e.purchase.toBuy.some((b) => /^Bobine/.test(b.label) && b.quantity)).toBe(true);
   });
 });

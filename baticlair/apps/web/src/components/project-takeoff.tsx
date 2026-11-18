@@ -8,7 +8,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
 import { useGroupe, useGroupeFerme } from "@/components/groupe";
-import { AnalysisScreen, CalculScreen, CLE_SUGGESTIONS, counterQuestions, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, RecapScreen, SuggestionsCard, suggestionsAProposer, type CounterAnswers } from "@/components/journey";
+import { AnalysisScreen, CalculScreen, CLE_SUGGESTIONS, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, RecapScreen, SuggestionsCard, suggestionsAProposer, type CounterAnswers } from "@/components/journey";
 import { DemandesPerso, TenterPrixDeGroupe } from "@/components/demande-perso";
 import { RechercheRapprochement } from "@/components/rapprochement";
 import { ListePrete } from "@/components/liste-prete";
@@ -274,8 +274,9 @@ export function ProjectTakeoff({
   // cases après la dernière réponse ; sans aucune question, la carte seule, avant la liste. Un devis de plusieurs lots
   // passe d'abord par sa carte « Parties du devis ».
   const suggestions = takeoff.status === "draft" && !archived && phase !== "calcul" && !lotsAConfirmer(takeoff) ? suggestionsAProposer(takeoff) : null;
-  const questionsAPoser = phase === "questions" && counterQuestions(takeoff).some((q) => !(q.kind === "habit" && q.usual !== null));
-  if (suggestions && !questionsAPoser) return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
+  // Pendant les questions, c'est la discussion qui montre les cases (sans jamais se fermer) ; ici, seulement une liste déjà
+  // calculée dont l'étape n'est pas passée.
+  if (suggestions && phase !== "questions") return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
   if (phase === "questions" && takeoff.status === "draft" && !archived) {
     // §52 : un devis de plus d'un lot passe d'abord par la carte « Lots repérés » ; « C'est bon » ouvre les questions.
     if (lotsAConfirmer(takeoff)) {

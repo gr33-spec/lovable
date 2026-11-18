@@ -1430,7 +1430,12 @@ test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamai
   await page.route(/\/v1\/quantitatifs\/[^/]+\/(reponses|corrections)/, (route) =>
     route.fulfill({ status: 409, contentType: "application/json", body: JSON.stringify({ error: { code: "conflict", message: "Cette liste a changé, recharge la page.", retryable: false } }) }),
   );
-  await card.getByRole("button").first().click();
+  // La première ligne orange est celle des bacs : leur longueur se saisit en mètres (18 novembre 2026), puis « OK ».
+  const champ = card.locator("input").first();
+  if ((await champ.count()) > 0) {
+    await champ.fill("5");
+    await card.getByRole("button", { name: "OK", exact: true }).click();
+  } else await card.getByRole("button").first().click();
   await expect(orange.getByRole("alert")).toBeVisible();
 });
 
@@ -1463,7 +1468,13 @@ test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par lig
     const asks = card.getByRole("group");
     // Un choix à faire : un tap sur un bouton, la ligne se recalcule. Plusieurs valeurs par défaut : « C'est bon » les
     // confirme d'un coup. Un écart : « Garder ».
-    if ((await asks.count()) === 1) {
+    const champ = card.locator("input");
+    if ((await champ.count()) > 0 && (await card.getByRole("button", { name: "OK", exact: true }).count()) > 0) {
+      // Une donnée qui s'écrit (la longueur des bacs, en mètres, 18 novembre 2026) : un nombre, « OK ».
+      await champ.first().fill("5");
+      await card.getByRole("button", { name: "OK", exact: true }).click();
+      choices++;
+    } else if ((await asks.count()) === 1) {
       await asks.getByRole("button").first().click();
       choices++;
     } else await card.getByRole("button", { name: /^(Garder|C'est bon|Oui)/ }).first().click();

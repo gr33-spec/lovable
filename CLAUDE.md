@@ -251,6 +251,9 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Nouvel ouvrage « couverture zinc à tasseaux » dans la fiche Couverture (version `roofing-2026.11.18-57`) : bobine de 650 (500 au choix), tasseaux de 50, entraxe 620 (470), longueur d'un bac = rampant + 15 cm ; pattes dans les chutes (aucune ligne). Chiffres de Greg, retrouvés dans le descriptif VMZINC. Tasseaux et couvre-joints : seulement s'ils sont écrits, « à chiffrer » tant que Greg n'a pas validé le nombre de rangs (bacs + 1). Test `zinc-a-tasseaux.test.ts`.
 - Une ligne « fourniture » (ou « fourniture et pose ») dont la lecture ne tire aucun article reste dans la liste, « à chiffrer », avec ses mots. Avant : repliée sous « N lignes sans fourniture ».
 - Une bande de zinc qui attend sa réponse (pliage, développé) ne sort plus en plus comme une question « Interdit : métal au mètre… ».
+- « Je ne sais pas » à la longueur des bacs : l'ouvrage qui a une valeur courante pour le rampant (les ardoises, dont il ne règle que le recouvrement) la reprend et reste chiffré ; les bacs restent à préciser dans la liste. Test `apps/api/test/je-ne-sais-pas-aux-bacs.test.ts`.
+- Une qualité qui se nomme (« Ardoise d'Angers ») est acceptée même quand sa question n'est plus ouverte au moment où les réponses arrivent d'un coup (avant : refusée « pas un nombre », puis reposée).
+- La discussion des questions n'est jamais fermée en route : les cases « Suggestions » s'affichent dans son fil.
 - Constat du 18 novembre : trois lectures du même devis donnent trois listes différentes. À faire : D-2026-024 au jeu de test, puis stabiliser (prompt, clés de la fiche).
 
 ## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg

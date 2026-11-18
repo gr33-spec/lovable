@@ -743,6 +743,14 @@ export function ecranDeLecture(input: {
   const consoEnAttente = conso === null && (tous.some(estConso) || (fiche !== null && lignesPoint.some((l) => fiche.ratios.some((r) => r.ouvrage === l.fourniture?.ouvrage && consoDeLaFiche.has(r.fourniture)))));
   const points = tous.filter((a) => !estConso(a) || Number(conso) >= 1);
   const plan = planDeLecture(ref, lecture, generiques(), input.extraFacts, suggestionsChoisies(answers[SUGGESTIONS_KEY]));
+  // « JE NE SAIS PAS » À UNE DONNÉE DU TOIT (18 novembre 2026) : l'ouvrage qui a une valeur courante pour elle la reprend (le
+  // rampant d'une couverture en ardoises, qui ne règle que son recouvrement) ; celui qui n'en a pas reste à préciser (la
+  // longueur des bacs d'un joint debout). Avant : la question, posée pour les bacs, bloquait aussi les ardoises.
+  for (const i of plan.inputs) {
+    const work = ref.workItems.find((w) => w.id === baseOf(i.workItemId));
+    const rendues = (i.askInstead ?? []).filter((cle) => answers[`param:${cle}`] === null && work?.params.find((p) => p.key === cle)?.default !== undefined);
+    if (rendues.length > 0) i.askInstead = i.askInstead!.filter((cle) => !rendues.includes(cle));
+  }
   const validation = validationDeLecture(ref.trade, generiques(), plan, new Set([...(input.lines ?? new Map())].filter(([, v]) => v.confirmed).map(([k]) => k)));
   const roles = new Map<string, RoleProposal>();
   for (const l of lignes) {
@@ -1129,6 +1137,16 @@ function finishPurchase(
     const value = typeof v === "string" ? v : v.value;
     return a.q.boutons.find((b) => b.valeur === value)?.label ?? value;
   };
+  // Une donnée du toit que CET article prend par défaut (le rampant d'une couverture en ardoises, qui ne règle que son
+  // recouvrement) et qui n'est demandée que parce qu'un AUTRE ouvrage ne peut pas s'en passer (la longueur des bacs d'un
+  // joint debout, 18 novembre 2026) : l'article ne l'attend pas. « Je ne sais pas » aux bacs ne bloque pas les ardoises.
+  const demandeePourUnAutre = (item: PurchaseItem, cle: string) => {
+    const mine = new Set(ctx.engine.filter((n) => item.needIds.includes(n.needId)).map((n) => baseOf(n.workItemId)));
+    const defautIci = mine.size > 0 && [...mine].every((id) => ctx.ref.workItems.find((w) => w.id === id)?.params.find((p) => p.key === cle)?.default !== undefined);
+    // Un autre ouvrage du devis porte cette donnée SANS valeur courante : c'est pour lui que la question est posée.
+    const ailleurs = new Set(ctx.plan.lines.flatMap((l) => (l.status === "planned" && !mine.has(baseOf(l.workItemId)) ? [baseOf(l.workItemId)] : [])));
+    return defautIci && [...ailleurs].some((id) => ctx.ref.workItems.find((w) => w.id === id)?.params.some((p) => p.key === cle && p.default === undefined));
+  };
   const reasons = new Map<string, string>();
   const decisions: Decision[] = [];
   const toBuy: PurchaseItem[] = raw.toBuy.map((item) => {
@@ -1144,7 +1162,7 @@ function finishPurchase(
       const works = [...new Set(own.map((n) => baseOf(n.workItemId)))];
       const named = !estimated && /\?/.test(item.label) ? asked.filter((a) => unresolved(a) && ctx.ref.workItems.some((w) => works.includes(w.id) && w.params.some((p) => p.key === a.q.cle))).map((a) => a.q.cle) : [];
       // Une donnée prise par défaut (la pente à 45°) que le modèle demande encore : la quantité attend la réponse.
-      const assumed = estimated ? [] : asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`)).map((a) => a.q.cle);
+      const assumed = estimated ? [] : asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`) && !demandeePourUnAutre(item, a.q.cle)).map((a) => a.q.cle);
       // Ce que le calcul attend pour compter l'article (le nombre de descentes d'une naissance) a aussi ses boutons sur la
       // ligne : la question posée, même laissée sans réponse (« je ne sais pas »), jamais une ligne orange sans réglage.
       const duCalcul = (item.waitsOn ?? []).map((k) => asked.find((a) => a.key === k && unresolved(a))).filter((a): a is Asked => !!a);
@@ -1153,7 +1171,7 @@ function finishPurchase(
       if (waits.length > 0) reasons.set(item.key, raisonCourte(waits.map((a) => a.q.donnee)));
       // §51.6 : un article que le calcul tire d'une ligne (la bobine des bacs) porte aussi les réponses de cette ligne.
       const source = item.lineIds.map((id) => byLine.get(id)).find((l): l is LigneLecture => !!l?.fourniture);
-      const nomCalcule = item.label.replace(/\s*(?:d[ée]v\.\s*)?\S*\?\S*/g, "").replace(/\s{2,}/g, " ").trim() || item.label;
+      const nomCalcule = item.label.replace(/\s*(?:d[ée]v\.\s*)?\S*\?\S*/g, "").replace(/\s{2,}/g, " ").trim().replace(/\s+(?:à|de|du|en)$/i, "") || item.label;
       const lues = source ? reponsesDeLaLigne(ctx.posees, ctx.answers, source, source.fourniture!, lignes).filter((r) => source.fourniture!.aPreciser.some((t) => tranche(r.a, t)) && !normalizeText(`${nomCalcule} ${item.precision ?? ""}`).includes(normalizeText(r.valeur))).map((r) => reponseLue(r.a.q.donnee, r.valeur)) : [];
       return {
         ...item,
@@ -1164,7 +1182,7 @@ function finishPurchase(
     }
     const estimated = (item.rules ?? []).some((r) => r.key.startsWith("estimation:"));
     const strictWaits = ctx.engine.filter((n) => item.needIds.includes(n.needId)).map((n) => ctx.precisionWaits.get(`${n.workItemId}/${n.needId}`)).filter((c): c is string => !!c);
-    const assumed = asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`)).map((a) => a.q.cle);
+    const assumed = asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`) && !demandeePourUnAutre(item, a.q.cle)).map((a) => a.q.cle);
     // Retour du fondateur (2026-10-12) : « Crochets de gouttière ? dév. ? » ne sort jamais vert ; une donnée restée en « ? »
     // dans l'article calculé attend la question du modèle sur cette donnée, comme la ligne qui l'écrit (§49.2).
     const blanked = /\?/.test(item.label) ? ctx.engine.filter((n) => item.needIds.includes(n.needId)).flatMap((n) => n.unknownParams ?? []) : [];

@@ -1098,14 +1098,22 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
 /** L'étape des questions : sans aucune question à poser, le calcul part tout seul (rien à valider pour rien). */
 export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
   // Décidé à l'ouverture : une discussion commencée reste ouverte quand ses réponses, enregistrées, ne laissent plus de
-  // question (« Calculer ma liste » y est proposé, jamais lancé tout seul).
-  const [none] = useState(() => counterQuestions(takeoff).length === 0);
+  // question (« Calculer ma liste » y est proposé, jamais lancé tout seul). Elle n'est jamais démontée en route : ses
+  // réponses écrites et ses « Je ne sais pas » vivent en elle jusqu'au calcul.
+  const [commencee, setCommencee] = useState(() => counterQuestions(takeoff).length > 0);
+  // Une question née après coup (une case cochée dans les suggestions qui demande une précision) ouvre la discussion.
+  if (!commencee && counterQuestions(takeoff).length > 0) setCommencee(true);
+  // Sans aucune question : les suggestions d'abord (Greg, 18 novembre 2026 : à la fin, avant le quantitatif), puis le calcul.
+  const aSuggerer = onReponses ? suggestionsAProposer(takeoff) : null;
   const started = useRef(false);
   useEffect(() => {
-    if (!none || started.current) return;
+    if (commencee || aSuggerer || started.current) return;
     started.current = true;
     onSubmit({ reponses: [], ajouts: [], retraits: [] });
-  }, [none, onSubmit]);
-  if (none) return error ? <ErrorNotice error={error} /> : <CalculScreen />;
+  }, [commencee, aSuggerer, onSubmit]);
+  if (!commencee) {
+    if (aSuggerer && onReponses) return <SuggestionsCard options={aSuggerer} pending={pending} error={error} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />;
+    return error ? <ErrorNotice error={error} /> : <CalculScreen />;
+  }
   return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} {...(onReponses ? { onReponses } : {})} />;
 }
