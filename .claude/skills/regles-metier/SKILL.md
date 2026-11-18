@@ -25,10 +25,41 @@ couvert ici, demander au fondateur plutôt que deviner.
 
 ## Ardoise
 
-- On demande seulement le format d'ardoise et la taille des crochets. On ne
-  demande jamais le pureau.
-- Le pureau est interne : table format + crochet → pureau, calculée d'après
-  les abaques fabricants. Cette table doit être validée par le fondateur.
+### Ce qu'on demande à l'artisan
+- Le format d'ardoise et la taille des crochets. Jamais le pureau.
+- Le type de crochet : à pointe ou à agrafe (pas de défaut).
+- Naturelle ou fibre-ciment : seulement si ce n'est pas déjà écrit dans le
+  devis ou la liste. Règle générale : on ne redemande jamais ce qui est déjà
+  noté.
+- « Toit simple ou compliqué ? » en proposant les pourcentages de perte
+  (5 % simple, 10 % compliqué). On ne le déduit pas seul.
+
+### Repères terrain
+- Formats les plus posés : 32×22 et 30×20.
+- Crochets courants : 90, 100, 110. Le choix dépend de la pente et du format.
+
+### Calcul (interne)
+- Pureau = (longueur de l'ardoise − taille du crochet) ÷ 2 + 2,5 mm.
+  Exemple : 32×22, crochet de 90 → (320 − 90) ÷ 2 + 2,5 = 117,5 mm.
+  Validé pour tous les formats et toutes les tailles de crochet.
+- En plus de la surface : 1 rang à l'égout (doublis) et 1 rang au faîtage,
+  sur leur longueur.
+- Rives : pas d'ardoise spéciale, on coupe dans les normales (c'est dans la
+  perte).
+- Perte : 5 % toit simple, 10 % toit compliqué (croupes, noues, lucarnes).
+- Arrondi à l'ardoise près (unité supérieure). Vente à la pièce.
+
+### Crochets
+- 1 crochet par ardoise, partout (rives, égout et faîtage compris).
+- Inox brut par défaut. Vente en boîte de 500.
+- À VÉRIFIER (abaques fabricants, à valider par le fondateur) : avec du
+  crochet à agrafe, il faut toujours un peu de crochet à pointe au droit des
+  chevrons. Proportion à établir avant de coder.
+
+### Clous (en Suggestion, jamais d'office)
+- Galva (90 % des cas).
+- 1 clou par ardoise au faîtage, 2 à l'égout, au doublis et à la rive.
+- Unité de vente : inconnue (le fondateur ne sait pas), à confirmer.
 
 ## Liteaux et voliges
 
