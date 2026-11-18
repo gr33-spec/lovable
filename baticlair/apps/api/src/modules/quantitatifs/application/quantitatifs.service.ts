@@ -357,7 +357,11 @@ export class QuantitatifsService {
           (r.unite || undefined) ??
           q?.unit ??
           reviewed.purchase.assumptions.find((a) => a.key === key)?.unit ??
-          reviewed.purchase.questions.find((d) => d.question?.key.startsWith(`${key}@`))?.question?.unit;
+          reviewed.purchase.questions.find((d) => d.question?.key.startsWith(`${key}@`))?.question?.unit ??
+          // Recette en ligne du 18 novembre 2026 : l'écran envoie ses réponses d'un coup. Une donnée du métier dont la
+          // question n'est plus ouverte (déjà prise par un envoi précédent, ou réglée par une autre réponse) garde l'unité
+          // de sa fiche : la réponse est prise, jamais refusée « sans unité » puis reposée sans fin.
+          uniteDeLaFiche(reviewed.takeoff.trade, key);
         if (!unit) throw validationFailed("Missing unit", [{ path: `reponses.${i}.unite`, message: r.question }]);
         if (!/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) throw validationFailed("Not a number", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         value = { value: r.valeur.trim().replace(",", "."), unit };
@@ -621,4 +625,11 @@ export class QuantitatifsService {
     if (line) await this.projects.update(tenant, projectId, { siteNotes: [project.siteNotes?.trim(), line].filter(Boolean).join("\n") });
     return { id: doc.id, nom: doc.originalName };
   }
+}
+
+/** L'unité qu'une donnée (« param:nb_descentes », « param:faconnage@noue ») porte dans la fiche de son métier, ou d'un autre. */
+function uniteDeLaFiche(trade: string, key: string): string | undefined {
+  const name = key.replace(/^param:/, "").split("@")[0]!;
+  const own = referentialFor(trade);
+  return [...(own ? [own] : []), ...REFERENTIALS].flatMap((r) => r.workItems.flatMap((w) => w.params)).find((d) => d.key === name)?.unit || undefined;
 }
