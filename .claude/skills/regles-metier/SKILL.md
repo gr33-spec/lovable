@@ -190,3 +190,15 @@ couvert ici, demander au fondateur plutôt que deviner.
 - Colliers : d'office, 1 tous les 2 m + 1 pour le premier morceau, par
   descente.
 - Coudes : on demande le nombre.
+
+## Velux (fenêtres de toit)
+
+- On garde le mot de l'artisan (« Velux » = fenêtre de toit), sans demander
+  la marque.
+- Si ce n'est pas au devis, on demande : dimension (CK02, MK04…), ouverture
+  (rotation, projection), type de couverture, nombre.
+- Raccord d'étanchéité : d'office avec le Velux, choisi selon la couverture.
+- En Suggestion : kit d'isolation (BDX), pare-vapeur (BBX), volet roulant,
+  store, habillage intérieur.
+- On retire toujours la surface du Velux de la surface d'ardoise ou de tuile.
+  Les coupes autour sont dans la perte du toit.
