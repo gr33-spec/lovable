@@ -100,8 +100,11 @@ describe("la demande perso", () => {
     await publique().post(`/v1/public/chiffrer/${jetonPour("c@negoce.fr")}`).send({ prix: { [cles[0]!]: 1.05, [cles[1]!]: 1 }, livraisonHt: 0, delaiJours: 2, validiteJours: 14 }).expect(200);
     await publique().post(`/v1/public/chiffrer/${jetonPour("d@negoce.fr")}`).send({ prix: { [cles[0]!]: 0.5 }, livraisonHt: 0, delaiJours: null, validiteJours: 7 }).expect(200);
     await publique().post(`/v1/public/chiffrer/${jetonPour("e@negoce.fr")}/refuser`).expect(200);
-    // L'artisan est prévenu.
+    // L'artisan est prévenu, par e-mail ET dans la cloche (Greg, 18 novembre 2026), une alerte par négoce qui chiffre.
     expect(mailsVers(ctx, "a@toitures.fr").some((m) => /a chiffré ta demande/.test(m.subject))).toBe(true);
+    const cloche = (await a.agent.get("/v1/alertes").expect(200)).body.items as { titre: string; detail: string; href: string }[];
+    expect(cloche.filter((x) => x.titre === "Un négoce a chiffré ta demande").map((x) => x.detail.split(" · ")[0]).sort()).toEqual(["Négoce B", "Négoce C", "Négoce D"]);
+    expect(cloche.find((x) => x.titre === "Un négoce a chiffré ta demande")!.href).toBe(`/chantiers/${a.projectId}`);
 
     const vue = (await a.agent.get(`/v1/demandes-perso/${envoi.id}`).expect(200)).body;
     expect(vue.offres.map((o: { nom: string; totalLivreHt: number; ecartHt: number | null; complete: boolean }) => [o.nom, o.totalLivreHt, o.ecartHt, o.complete])).toEqual([

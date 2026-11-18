@@ -1231,7 +1231,8 @@ export function EditeurMaPage() {
           <nav aria-label="Onglets des réglages" className="w-[66px] shrink-0 rounded-r-[20px] bg-surface p-1 shadow-card ring-1 ring-ink/5">
             {barreOnglets}
           </nav>
-          <div data-colonne-apercu className="flex min-w-0 flex-1 flex-col gap-2">
+          {/* Le ＋ de la barre du bas dépasse au milieu : la colonne de droite s'arrête au-dessus de lui. */}
+          <div data-colonne-apercu className="flex min-w-0 flex-1 flex-col gap-2 pb-6">
             <h1 className="sr-only">Mon site</h1>
             <section className="flex min-h-0 flex-1 flex-col gap-1.5" aria-label="Aperçu de mon site">
               {/* Une seule ligne : l'état (ou « le rendre visible ») à gauche, « Voir mon site » en petit à droite. */}

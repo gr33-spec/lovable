@@ -34,8 +34,11 @@ export function Boite() {
   };
   return (
     <>
-      <EcranTitre titre="Messages et réponses" retour="/" />
-      <GrandTitre sous={tous.length ? "Réponses des négoces, messages Mobiiz et conversations Missions." : "Tes échanges apparaîtront ici."}>{data && tous.length === 0 ? "Aucun message pour le moment" : "Tout retrouver au même endroit"}</GrandTitre>
+      {/* Onglet « Messages » du téléphone (Greg, 18 novembre 2026) : un onglet n'a pas de flèche retour ; l'ordinateur la garde. */}
+      <div className="hidden lg:block">
+        <EcranTitre titre="Messages et réponses" retour="/" />
+      </div>
+      <GrandTitre sous={tous.length ? "Négoces, Missions, demandes reçues sur ton site et messages de Mobiiz." : "Tes échanges apparaîtront ici."}>{data && tous.length === 0 ? "Aucun message pour le moment" : "Messages"}</GrandTitre>
       {tous.length > 0 ? <Recherche valeur={q} onChange={setQ} placeholder="Rechercher un message ou une demande" /> : null}
       <Puces label="Filtrer la boîte" choix={FILTRES_BOITE} valeur={filtre} onChange={setFiltre} />
       {/* Greg, 12 novembre 2026 : ce qui demande une action se lit d'abord ; le reste est déjà dans son quantitatif. */}
@@ -60,14 +63,14 @@ export function Boite() {
             </span>
             <p className="text-[20px] font-extrabold">Tu retrouveras ici</p>
             <p className="text-[14px] text-[#5c5648]">
-              les réponses de tes négoces
+              les réponses de tes négoces, tes conversations Missions,
               <br />
-              et tes conversations Missions.
+              les demandes reçues sur ton site et les messages de Mobiiz.
             </p>
             <p className="pt-2 text-[12px] text-[#6b6557]">La cloche reste réservée aux alertes courtes.</p>
           </div>
           {data.missions ? <LienJaune href="/missions">Découvrir les missions</LienJaune> : null}
-          <LienContour href="/chantiers?vue=suivi">Voir mes quantitatifs envoyés</LienContour>
+          <LienContour href="/demandes">Voir mes demandes</LienContour>
         </>
       ) : items.length === 0 ? (
         <div className={`flex flex-col gap-1 p-5 ${CARTE}`}>

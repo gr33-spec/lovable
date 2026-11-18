@@ -65,6 +65,8 @@ export interface AchatV1 {
   urgent?: string | null;
   /** Les caractéristiques recommandées laissées « à préciser » (jamais bloquantes). */
   aPreciser?: string[];
+  /** Mon besoin dans cet achat, si j'y suis déjà (onglet « Groupés » : « Voir » au lieu de « Rejoindre »). */
+  monBesoinId?: string | null;
 }
 export interface OffreVueV1 {
   fournisseur: string | null;

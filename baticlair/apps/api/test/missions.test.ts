@@ -386,7 +386,7 @@ describe("« Messages et réponses » et la cloche : deux circuits séparés", (
 
   it("réglages : la catégorie Missions coupée, plus d'e-mail ; l'alerte reste dans la cloche", async () => {
     const { a, b, convId } = await scenario();
-    expect((await b.agent.get("/v1/alertes/reglages").expect(200)).body).toEqual({ prix: true, groupe: true, missions: true, conseils: false, email: true, push: true });
+    expect((await b.agent.get("/v1/alertes/reglages").expect(200)).body).toEqual({ prix: true, site: true, groupe: true, missions: true, conseils: false, email: true, push: true });
     await b.agent.put("/v1/alertes/reglages").send({ prix: true, groupe: true, missions: false, conseils: false, email: true, push: true }).expect(200);
     ctx.emails.clear();
     await ecrire(a.agent, convId, "Bonjour").expect(201);

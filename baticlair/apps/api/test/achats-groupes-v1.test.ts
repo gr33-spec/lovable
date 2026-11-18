@@ -521,6 +521,24 @@ describe("l'offre, jusqu'à « Offre à examiner »", () => {
     return { artisans, besoins, achatId, g };
   }
 
+  it("la cloche à chaque étape d'un regroupement (Greg, 18 novembre 2026) : reconfirmer, clos, offre reçue ; réglage « Achats groupés » coupé, plus d'e-mail", async () => {
+    const { artisans, besoins, g } = await offreAExaminer(["a@toitures.fr", "b@toitures.fr"]);
+    const titres = async (x: (typeof artisans)[number]) => ((await x.agent.get("/v1/alertes").expect(200)).body.items as { titre: string; href: string }[]).map((i) => i.titre);
+    for (const x of artisans) expect(await titres(x)).toEqual(expect.arrayContaining(["Reconfirme ta quantité", "Regroupement clos : Mobiiz consulte les négoces", "Offre reçue : commander ?"]));
+    // Un regroupement annulé : chaque participant le lit, et l'e-mail suit ses réglages.
+    const c = await entreprise("c@toitures.fr", "Toitures C");
+    const d = await entreprise("d@toitures.fr", "Toitures D");
+    const bc = (await confirmer(c.agent, [besoin()]).expect(201)).body.besoins[0];
+    await confirmer(d.agent, [besoin({ achatId: bc.achat.id })]).expect(201);
+    await d.agent.put("/v1/alertes/reglages").send({ prix: true, site: true, groupe: false, missions: true, conseils: false, email: true, push: true }).expect(200);
+    ctx.emails.sent.length = 0;
+    await g.post(`/v1/admin/ag/achats/${bc.achat.id}/annulation`).expect(200);
+    expect(await titres(c)).toContain("Regroupement annulé");
+    expect(await titres(d)).toContain("Regroupement annulé");
+    expect(ctx.emails.sent.filter((m) => /Regroupement annulé/.test(m.subject)).map((m) => m.to)).toEqual(["c@toitures.fr"]);
+    expect(besoins).toHaveLength(2);
+  });
+
   it("l'offre arrive : chaque artisan reçoit son e-mail aussitôt ; « Commander à ce prix » envoie le bon au fournisseur, une seule fois", async () => {
     const { artisans, besoins } = await offreAExaminer(["a@toitures.fr"]);
     const a = artisans[0]!;

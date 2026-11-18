@@ -30,6 +30,7 @@ import type { TransactionalEmailSender } from "../../../platform/email/email.por
 import { DomainError, notFound } from "../../../platform/errors/domain-error.js";
 import type { AppLogger } from "../../../platform/logging/logger.js";
 import { isUuid } from "../../../platform/validation/ids.js";
+import { ecrireAlerte } from "../../../platform/notifications/alertes.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import type { StockagePhotos } from "./stockage.port.js";
 import { controlerPhoto, produireVariantes } from "./photos.js";
@@ -629,7 +630,12 @@ export class PageEntrepriseService {
     // Greg, 17 novembre 2026 : la copie du message va dans « Messages et réponses » AVANT l'e-mail ; un e-mail en panne ne
     // perd donc jamais la demande (elle reste dans l'app).
     const copie = await this.prisma.messageSite.create({ data: { companyId: p.companyId, nom: m.nom, telephone: m.telephone, email: m.email, commune: m.commune, message: m.message } });
-    await this.emails.send({
+    // Greg, 18 novembre 2026 : la demande arrive aussi dans la cloche (rubrique « Mon site »), et l'e-mail suit les réglages
+    // de l'entreprise (rubrique « Mon site », e-mails, opposition en un clic). Avant : l'e-mail seul, toujours envoyé.
+    await ecrireAlerte(this.prisma, p.companyId, { categorie: "site", genre: "action", titre: "Nouvelle demande depuis ton site", detail: [m.nom, m.commune].filter(Boolean).join(" · ").slice(0, 120), action: "Lire la demande", href: `/messages/site/${copie.id}`, cle: `site:${copie.id}` }).catch(() => false);
+    const reglage = await this.prisma.reglageAlertes.findUnique({ where: { companyId: p.companyId } }).catch(() => null);
+    const coupe = (await this.prisma.company.findUnique({ where: { id: p.companyId }, select: { emailsCoupesLe: true } }))?.emailsCoupesLe;
+    if (!coupe && !(reglage && (!reglage.site || !reglage.email))) await this.emails.send({
       to: dest,
       subject: `Nouveau message depuis votre page Mobiiz : ${m.nom}`,
       text: [

@@ -264,7 +264,15 @@ export class AchatsGroupesV1Service {
     if (!zone) return { zone: null, achats: [] };
     const achats = await this.prisma.achatGroupeV1.findMany({ where: { departement: zone.code, statut: "ouvert", ouvertJusquau: { gt: this.now() }, ...(lot && estLotV1(lot) ? { lot: { in: lotsComprisV1(lot) } } : {}) }, orderBy: { ouvertJusquau: "asc" }, take: 50 });
     // « Tous » ne montre que les achats des métiers ouverts ; un métier « Bientôt » n'a pas de contenu à l'écran.
-    return { zone, achats: await Promise.all(achats.filter((a) => this.lotOuvert(a.lot)).map((a) => this.vuePublique(this.prisma, a))) };
+    const visibles = achats.filter((a) => this.lotOuvert(a.lot));
+    // Onglet « Groupés » (Greg, 18 novembre 2026) : un seul bouton par carte, « Rejoindre » ou « Voir » ; « Voir » mène à
+    // MON besoin dans cet achat. Seulement l'identifiant de mon propre besoin, jamais celui d'une autre entreprise.
+    const miens = visibles.length
+      ? await this.prisma.besoinGroupeV1.findMany({ where: { companyId: tenant.companyId, achatId: { in: visibles.map((a) => a.id) } }, select: { id: true, achatId: true }, orderBy: { createdAt: "desc" } })
+      : [];
+    const monBesoin = new Map<string, string>();
+    for (const m of miens) if (m.achatId && !monBesoin.has(m.achatId)) monBesoin.set(m.achatId, m.id);
+    return { zone, achats: await Promise.all(visibles.map(async (a) => ({ ...(await this.vuePublique(this.prisma, a)), monBesoinId: monBesoin.get(a.id) ?? null }))) };
   }
 
   /* ------------------------------------------------------------------------- la compatibilité */
@@ -602,6 +610,7 @@ export class AchatsGroupesV1Service {
     const fait = await this.prisma.besoinGroupeV1.updateMany({ where: { id: b.id, companyId: tenant.companyId, offreDecision: null }, data: { offreDecision: "commandee", offreDecideeLe: maintenant } });
     if (fait.count > 0) await this.prisma.historiqueBesoinGroupeV1.create({ data: { besoinId: b.id, companyId: tenant.companyId, type: "offre_commandee", detail: { fournisseur: o.fournisseur, totalHt: vue.calcul.ht } } });
     // La copie pour l'artisan : complémentaire, jamais bloquante.
+    await this.alerter(tenant.companyId, { titre: "Commande envoyée au négoce", detail: `${b.designation} · ${o.fournisseur}`, action: "Voir ma commande", href: `/achats-groupes/besoins/${b.id}`, cle: `ag-commande:${b.id}` });
     await this.envoyer(tenant.companyId, `Ta commande groupée : ${b.designation}`, [`C'est commandé chez ${o.fournisseur} : ${nombre} ${unite}, ${euros(vue.calcul.ht)} HT.`, `Le bon de commande est parti à ${o.fournisseurEmail}.`, "La facturation et le paiement se font directement entre vous."]);
     return this.vueBesoin(tenant, id);
   }
@@ -802,8 +811,10 @@ export class AchatsGroupesV1Service {
     await this.prisma.achatGroupeV1.update({ where: { id: a.id }, data: { statut: "preparation", reconfirmerAvant: p.reconfirmerAvant, rappelLe: p.rappelLe } });
     // Prévenir chaque entreprise (e-mail complémentaire ; l'action est déjà dans « À faire »).
     const besoins = await this.prisma.besoinGroupeV1.findMany({ where: { achatId: a.id, statut: { in: ["confirme", "indicatif"] } }, select: { companyId: true } });
-    for (const companyId of new Set(besoins.map((b) => b.companyId)))
+    for (const companyId of new Set(besoins.map((b) => b.companyId))) {
+      await this.alerter(companyId, { genre: "action", titre: "Reconfirme ta quantité", detail: `${a.nom} · avant le ${heureLisible(p.reconfirmerAvant)}`, action: "Reconfirmer", href: "/achats-groupes/mes-besoins", cle: `ag-preparer:${a.id}` });
       await this.envoyer(companyId, `Reconfirme ta quantité : ${a.nom}`, [`Mobiiz est prêt à consulter les négoces pour « ${a.nom} ».`, `Reconfirme ta quantité avant le ${heureLisible(p.reconfirmerAvant)}. Sans reconfirmation, ton besoin reste indicatif et n'est pas transmis.`, "", `${this.options.webAppUrl}/achats-groupes/mes-besoins`]).catch(() => undefined);
+    }
     return { id: a.id, statut: "preparation", reconfirmerAvant: p.reconfirmerAvant.toISOString() };
   }
 
@@ -814,7 +825,8 @@ export class AchatsGroupesV1Service {
   async cloturer(id: string, options: { avantLHeure?: boolean } = {}) {
     this.exigerActif();
     const maintenant = this.now();
-    return this.prisma.$transaction(async (tx) => {
+    const prevenir: { companyId: string; besoinId: string; transmis: boolean; nom: string }[] = [];
+    const r = await this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`ag-achat-id:${id}`}))`;
       const a = await this.transition(tx, id, "consultation");
       const avant = options.avantLHeure === true && this.options.env !== "production";
@@ -830,8 +842,13 @@ export class AchatsGroupesV1Service {
       const transmis = besoins.filter((b) => b.statut === "reconfirme").reduce((t, b) => t + Number(b.quantite), 0);
       await tx.achatGroupeV1.update({ where: { id: a.id }, data: { statut: "consultation", consultationLe: maintenant, volumeTransmis: transmis } });
       for (const b of besoins.filter((x) => x.statut === "reconfirme")) await tx.historiqueBesoinGroupeV1.create({ data: { besoinId: b.id, companyId: b.companyId, type: "transmis", transmis: true, detail: { quantite: Number(b.quantite) } } });
+      for (const b of besoins) if (b.statut === "reconfirme" || apresCloture(b.statut as EtatBesoinV1) === "indicatif") prevenir.push({ companyId: b.companyId, besoinId: b.id, transmis: b.statut === "reconfirme", nom: a.nom });
       return { id: a.id, statut: "consultation", volumeTransmis: transmis };
     });
+    // Après la transaction : la clôture est faite, chaque participant le lit dans sa cloche.
+    for (const x of prevenir)
+      await this.alerter(x.companyId, x.transmis ? { titre: "Regroupement clos : Mobiiz consulte les négoces", detail: x.nom, action: "Voir mon besoin", href: `/achats-groupes/besoins/${x.besoinId}`, cle: `ag-clos:${x.besoinId}` } : { titre: "Regroupement clos sans ta reconfirmation", detail: `${x.nom} · ton besoin reste indicatif`, action: "Voir mon besoin", href: `/achats-groupes/besoins/${x.besoinId}`, cle: `ag-clos:${x.besoinId}` });
+    return r;
   }
 
   /** L'offre saisie par Mobiiz : complète → « Offre à examiner » (72 h) ; incomplète → « Offre reçue — vérification en cours ». */
@@ -872,6 +889,15 @@ export class AchatsGroupesV1Service {
     this.exigerActif();
     const a = await this.transition(this.prisma, id, "annule");
     await this.prisma.achatGroupeV1.update({ where: { id: a.id }, data: { statut: "annule", annuleLe: this.now() } });
+    // Greg, 18 novembre 2026 : un regroupement annulé se dit à chaque participant (avant : personne n'était prévenu).
+    const besoins = await this.prisma.besoinGroupeV1.findMany({ where: { achatId: a.id }, select: { id: true, companyId: true } });
+    const vus = new Set<string>();
+    for (const b of besoins) {
+      if (vus.has(b.companyId)) continue;
+      vus.add(b.companyId);
+      await this.alerter(b.companyId, { titre: "Regroupement annulé", detail: a.nom, action: "Voir mon besoin", href: `/achats-groupes/besoins/${b.id}`, cle: `ag-annule:${a.id}` });
+      await this.envoyer(b.companyId, `Regroupement annulé : ${a.nom}`, [`Le regroupement « ${a.nom} » est annulé. Rien n'est commandé.`, "Ton article reste dans ton quantitatif : tu peux le demander à tes négoces.", "", `${this.options.webAppUrl}/achats-groupes/besoins/${b.id}`]).catch(() => undefined);
+    }
     return { id: a.id, statut: "annule" };
   }
 
@@ -965,6 +991,7 @@ export class AchatsGroupesV1Service {
     let echecs = 0;
     const aSignaler = await this.prisma.besoinGroupeV1.findMany({ where: { statut: "reconfirme", offreSignaleeLe: null, achat: { statut: "offre_a_examiner" } }, include: { achat: true } });
     for (const b of aSignaler) {
+      await this.alerter(b.companyId, { genre: "action", titre: "Offre reçue : commander ?", detail: b.designation, action: "Voir l'offre", href: `/achats-groupes/besoins/${b.id}`, cle: `ag-offre:${b.id}` });
       const ok = await this.envoyer(b.companyId, `Offre à examiner : ${b.designation}`, [
         `Une offre complète est arrivée pour « ${b.designation} ».`,
         b.achat.offreAvant ? `Tu as jusqu'au ${heureLisible(b.achat.offreAvant)} pour commander à ce prix, ou dire non merci. Tu n'es jamais obligé de commander.` : "",
@@ -980,7 +1007,19 @@ export class AchatsGroupesV1Service {
   }
 
   /** Un e-mail à l'entreprise ; false s'il n'est pas parti (jamais une exception qui casserait le parcours). */
+  /**
+   * LA CLOCHE À CHAQUE ÉTAPE (Greg, 18 novembre 2026 : « alerté à chaque étape d'un regroupement que j'ai rejoint ») :
+   * reconfirmation, clôture, offre reçue, commande, annulation. Une alerte par fait (`cle`), jamais un nom d'entreprise.
+   */
+  private async alerter(companyId: string, a: { titre: string; detail: string; action: string; href: string; cle: string; genre?: "action" | "information" }) {
+    await ecrireAlerte(this.prisma, companyId, { categorie: "groupe", genre: a.genre ?? "information", titre: a.titre, detail: a.detail.slice(0, 120), action: a.action, href: a.href, cle: a.cle }).catch(() => false);
+  }
+
   private async envoyer(companyId: string, objet: string, lignes: string[]): Promise<boolean> {
+    // Réglages de notification (Greg, 18 novembre 2026) : « Achats groupés » ou les e-mails coupés, rien ne part (et rien
+    // n'est à réessayer : vrai). Avant : seule l'opposition en un clic était lue.
+    const reglage = await this.prisma.reglageAlertes.findUnique({ where: { companyId } }).catch(() => null);
+    if (reglage && (!reglage.groupe || !reglage.email)) return true;
     const c = await this.prisma.company.findUnique({ where: { id: companyId }, select: { emailsCoupesLe: true, contactEmail: true, memberships: { take: 1, orderBy: { createdAt: "asc" }, select: { user: { select: { email: true } } } } } });
     if (!c || c.emailsCoupesLe) return false;
     const to = c.contactEmail ?? c.memberships[0]?.user.email;

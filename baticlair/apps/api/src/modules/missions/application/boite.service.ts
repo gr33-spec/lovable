@@ -165,7 +165,7 @@ export class BoiteService {
 
   async reglages(t: TenantContext): Promise<ReglagesAlertes> {
     const r = await this.prisma.reglageAlertes.findUnique({ where: { companyId: t.companyId } });
-    return r ? { prix: r.prix, groupe: r.groupe, missions: r.missions, conseils: r.conseils, email: r.email, push: r.push } : REGLAGES_ALERTES_DEFAUT;
+    return r ? { prix: r.prix, site: r.site, groupe: r.groupe, missions: r.missions, conseils: r.conseils, email: r.email, push: r.push } : REGLAGES_ALERTES_DEFAUT;
   }
 
   async reglerAlertes(t: TenantContext, r: ReglagesAlertes): Promise<ReglagesAlertes> {

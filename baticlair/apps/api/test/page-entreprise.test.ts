@@ -387,6 +387,9 @@ describe("Ma page : visiteurs", () => {
     expect(mail.subject).toContain("Paul Client");
     expect(mail.text).toContain("une fuite sur mon toit");
     expect(mail.text).toContain("Perros");
+    // Greg, 18 novembre 2026 : la demande est aussi dans la cloche, rubrique « Mon site ».
+    const cloche = (await a.agent.get("/v1/alertes").expect(200)).body.items as { titre: string; detail: string; href: string; categorie: string }[];
+    expect(cloche.find((x) => x.titre === "Nouvelle demande depuis ton site")).toMatchObject({ categorie: "site", detail: "Paul Client · Perros", href: expect.stringMatching(/^\/messages\/site\//) });
     // La trace anti-abus ne garde ni le texte ni les coordonnées du visiteur.
     expect(JSON.stringify(await ctx.prisma.contactPage.findMany())).not.toMatch(/Paul|fuite|client\.fr/);
     // Greg, 17 novembre 2026 : la copie du message est dans « Messages et réponses » (RÈGLE CHANGÉE : avant, rien n'était gardé).
@@ -405,6 +408,13 @@ describe("Ma page : visiteurs", () => {
     for (let i = 1; i < LIMITES_CONTACT.parIpParHeure; i++) await anon().post("/v1/public/pages/toits-martin/contact").send({ nom: "Paul", telephone: "0600000000", message: `Message ${i} pour vous` }).expect(200);
     expect(await ctx.prisma.messageSite.count({ where: { companyId: a.companyId } })).toBe(LIMITES_CONTACT.parIpParHeure);
     expect((await anon().post("/v1/public/pages/toits-martin/contact").send({ nom: "Robot", telephone: "0600000000", message: "Encore un message" }).expect(429)).body.error.details.reason).toBe("trop_de_messages");
+    // Rubrique « Mon site » coupée dans les réglages : plus d'e-mail, la demande reste dans l'app et dans la cloche.
+    await a.agent.put("/v1/alertes/reglages").send({ prix: true, site: false, groupe: true, missions: true, conseils: false, email: true, push: true }).expect(200);
+    await ctx.prisma.contactPage.deleteMany();
+    const avant = ctx.emails.sent.length;
+    await anon().post("/v1/public/pages/toits-martin/contact").send({ nom: "Jeanne", telephone: "0600000001", message: "Une gouttière à refaire" }).expect(200);
+    expect(ctx.emails.sent.length).toBe(avant);
+    expect(await ctx.prisma.messageSite.count({ where: { companyId: a.companyId, nom: "Jeanne" } })).toBe(1);
     // Page privée ou masquée : pas de contact.
     await a.agent.patch("/v1/ma-page").send({ visible: false }).expect(200);
     await ctx.prisma.contactPage.deleteMany();
