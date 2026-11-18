@@ -27,8 +27,8 @@ const jetonDe = async (page: Page, to: string) => {
   return /\/chiffrer\/([A-Za-z0-9_-]+)/.exec(mails.at(-1)!.text)![1]!;
 };
 
-test("deux réponses par le lien : « Comparer », du moins cher au plus cher, puis « Commander »", async ({ page }) => {
-  test.setTimeout(120_000);
+/** Une liste validée, partie chez deux négoces qui ont chiffré par le lien (Cyan, le moins cher, et Bleu). */
+async function deuxReponses(page: Page): Promise<string> {
   await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
     await page.getByRole("button", { name: "Passer le guide" }).click();
   });
@@ -68,6 +68,12 @@ test("deux réponses par le lien : « Comparer », du moins cher au plus cher, p
     expect((await apiJson(page, "POST", `/v1/public/chiffrer/${jeton}`, { prix: Object.fromEntries(cles.map((k) => [k, pu])), livraisonHt: livraison, delaiJours: 3, validiteJours: 14 })).status).toBe(200);
   }
 
+  return projectId;
+}
+
+test("deux réponses par le lien : « Comparer », du moins cher au plus cher, puis « Commander »", async ({ page }) => {
+  test.setTimeout(120_000);
+  const projectId = await deuxReponses(page);
   await page.goto(`/chantiers/${projectId}`);
   await page.getByRole("button", { name: "Comparer", exact: true }).click();
   const feuille = page.getByRole("dialog", { name: "Devis reçus" });
@@ -259,4 +265,56 @@ test("rappel de suivi à 7 jours : « Où en es-tu avec cette demande ? » sur l
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
   await expect(page.getByText("Où en es-tu avec cette demande ?")).toHaveCount(0);
+});
+
+/**
+ * GREG, 19 NOVEMBRE 2026 : sur la fiche d'une demande, la barre du bas reste visible (on n'est jamais coincé) et ne cache
+ * rien ; dans l'onglet « Offres », chaque offre a « Commander », qui ouvre la MÊME confirmation que « Voir le devis reçu »
+ * (négoce, total, date de livraison souhaitée, « Confirmer la commande » / « Annuler »), puis le parcours habituel :
+ * bon de commande au négoce, et « Prévenir les autres négoces consultés ? ».
+ */
+test("onglet Offres : « Commander » sur chaque offre, la confirmation habituelle, puis le bon de commande ; la barre du bas reste sur la fiche", async ({ page }) => {
+  test.setTimeout(120_000);
+  const projectId = await deuxReponses(page);
+  const telephone = test.info().project.name !== "ordinateur";
+  await page.goto(`/chantiers/${projectId}`);
+  const nav = page.getByRole("navigation", { name: "Navigation principale" });
+  if (telephone) {
+    // La barre est là, et le bas de la fiche passe au-dessus d'elle (rien de caché derrière).
+    await expect(nav.getByRole("link", { name: "Demandes" })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Demandes" })).toHaveAttribute("aria-current", "page");
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const barre = (await nav.locator(":scope > div").boundingBox())!;
+    const plus = (await nav.getByRole("button", { name: "Créer" }).boundingBox())!;
+    for (const b of await page.getByRole("main").getByRole("button").filter({ visible: true }).all()) {
+      const r = await b.boundingBox();
+      if (!r || r.y > page.viewportSize()!.height) continue;
+      // Un bouton visible à l'écran finit au-dessus de la barre et du ＋.
+      expect(r.y + r.height, (await b.textContent()) ?? "").toBeLessThanOrEqual(Math.min(barre.y, plus.y) + 1);
+    }
+  }
+  await page.getByRole("tab", { name: "Offres" }).click();
+  const offres = page.getByRole("tabpanel", { name: "Offres" });
+  await expect(offres.getByRole("button", { name: /^Commander chez/ })).toHaveCount(2);
+  // « Annuler » : rien ne part, retour à l'onglet Offres.
+  await offres.getByRole("button", { name: "Commander chez Négoce Cyan" }).click();
+  const confirmation = page.getByRole("dialog", { name: "Confirmer la commande" });
+  await expect(confirmation).toContainText("Tu commandes chez Négoce Cyan.");
+  await expect(confirmation).toContainText("HT livré");
+  await expect(confirmation.getByLabel("Date de livraison souhaitée")).toBeVisible();
+  await confirmation.getByRole("button", { name: "Annuler" }).click();
+  await expect(confirmation).toHaveCount(0);
+  await expect(page).toHaveURL(/onglet=offres/);
+  await expect(offres.getByRole("button", { name: /^Commander chez/ })).toHaveCount(2);
+  // Puis pour de bon : le bon de commande part au négoce, comme depuis « Voir le devis reçu ».
+  await offres.getByRole("button", { name: "Commander chez Négoce Cyan" }).click();
+  await expect(confirmation.getByRole("button", { name: "Confirmer la commande" })).toBeDisabled();
+  await confirmation.getByLabel("Date de livraison souhaitée").fill(new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10));
+  await confirmation.getByRole("button", { name: "Confirmer la commande" }).click();
+  await expect(page.getByRole("status", { name: "Commandé" })).toContainText("Commandé chez Négoce Cyan.");
+  await expect(page.getByRole("group", { name: "Prévenir les autres négoces consultés ?" })).toBeVisible();
+  // Une commande par demande : plus de « Commander » dans les offres.
+  await page.getByRole("tab", { name: "Offres" }).click();
+  await expect(offres.getByLabel("Offre de Négoce Cyan")).toBeVisible();
+  await expect(offres.getByRole("button", { name: /^Commander chez/ })).toHaveCount(0);
 });

@@ -83,9 +83,13 @@ function CarteBesoin({ b }: { b: BesoinV1 }) {
 export function MesBesoinsV1({ integre = false }: { integre?: boolean } = {}) {
   const params = useSearchParams();
   const { data, error } = useResource(useCallback((s: AbortSignal) => api<{ aFaire: BesoinV1[]; enCours: BesoinV1[]; termines: BesoinV1[] }>("/v1/ag/besoins", { signal: s }), []));
+  // Greg, 19 novembre 2026 : une liste commencée par « Besoin groupé » et pas encore publiée se reprend ICI (Demandes ›
+  // Groupées), jamais dans « À faire : Vérifier ta liste » ni dans Demandes › Négoces.
+  const { data: aFinir } = useResource(useCallback((s: AbortSignal) => (integre ? api<{ items: { id: string; name: string }[] }>("/v1/projects?groupe=a-finir&limit=10", { signal: s }).catch(() => ({ items: [] })) : Promise.resolve({ items: [] })), [integre]));
   if (error) return <p role="alert" className="text-[16px] font-semibold text-danger">{messageErreur(error)}</p>;
   if (!data) return <Skeleton card="h-32" lines={2} label="Chargement de tes besoins…" />;
-  const vide = !data.aFaire.length && !data.enCours.length && !data.termines.length;
+  const listes = aFinir?.items ?? [];
+  const vide = !data.aFaire.length && !data.enCours.length && !data.termines.length && listes.length === 0;
   return (
     <div className="flex flex-col gap-5 lg:mx-auto lg:w-full lg:max-w-[44rem]">
       {integre ? null : <PageTitle>Mes besoins groupés</PageTitle>}
@@ -106,6 +110,24 @@ export function MesBesoinsV1({ integre = false }: { integre?: boolean } = {}) {
             {integre ? "Rejoindre un regroupement près de toi" : "Voir les achats groupés"}
           </Link>
         </div>
+      ) : null}
+      {listes.length ? (
+        <section aria-label="Listes à finir" className="flex flex-col gap-2">
+          <h2 className="text-[20px] font-extrabold">Listes à finir</h2>
+          <ul className={`${CARTE} flex flex-col`}>
+            {listes.map((p) => (
+              <li key={p.id} className="border-b border-line last:border-b-0">
+                <Link href={`/achats-groupes/quantitatif/${p.id}`} className="flex min-h-13 items-center gap-3 px-4 py-2">
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-[16px] font-semibold break-words">{p.name}</span>
+                    <span className="text-[14px] text-muted">Coche ce que tu veux grouper</span>
+                  </span>
+                  <span className="text-[15px] font-bold text-accent-text">Continuer</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
       {(
         [

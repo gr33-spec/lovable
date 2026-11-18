@@ -278,6 +278,10 @@ model Project {
   siteNotes      String?
   /// Métier du chantier, choisi à la création quand le devis ne le dit pas (« roofing », « tiling »…) ; null = celui de l'entreprise.
   trade          String?
+  /// « achat-groupe » : liste créée par le chemin « Besoin groupé » (Greg, 19 novembre 2026). Elle vit dans Demandes ›
+  /// Groupées, jamais dans « À faire : Vérifier ta liste » ni dans Demandes › Négoces, tant qu'elle n'est pas partie
+  /// chez un négoce. Null : une liste ordinaire.
+  origine        String?
   status         ProjectStatus @default(active)
   /// Chantier de démonstration : ne compte jamais dans la formule.
   demo           Boolean       @default(false)

@@ -13,7 +13,9 @@ export class PrismaNextActionsQuery {
 
   async list(tenant: TenantContext, limit = 30): Promise<ProjectNextAction[]> {
     const projects = await this.prisma.project.findMany({
-      where: { companyId: tenant.companyId, status: "active" },
+      // Greg, 19 novembre 2026 : une liste faite pour un besoin groupé, jamais partie chez un négoce, n'est pas une
+      // « liste à vérifier » ici : elle vit dans Demandes › Groupées.
+      where: { companyId: tenant.companyId, status: "active", OR: [{ origine: null }, { priceRequests: { some: { recipients: { some: { OR: [{ status: { not: "to_send" } }, { sentAt: { not: null } }] } } } } }] },
       orderBy: { lastActivityAt: "desc" },
       take: limit,
       select: {

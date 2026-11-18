@@ -67,7 +67,7 @@ export class BoiteService {
         cle: `reponse:${r.id}`,
         sorte: "negoce" as const,
         titre: r.supplier.name,
-        sujet: `Prix saisis en ligne · ${r.priceRequest.project.name}`,
+        sujet: `Prix donnés par le négoce · ${r.priceRequest.project.name}`,
         extrait: "Réponse chiffrée ligne par ligne, à comparer dans le quantitatif.",
         le: r.reponduLe!.toISOString(),
         // Recette du 18 novembre 2026 : une réponse dont l'artisan a ouvert la demande, ou chez qui il a commandé, est lue.

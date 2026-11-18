@@ -102,11 +102,12 @@ export function AppNav() {
   // Greg, 16 novembre 2026 : l'onglet Missions reste toujours là ; tant que l'admin n'a pas ouvert les missions, il porte
   // « Bientôt » et mène à l'écran qui explique le principe.
   const missionsBientot = useMissionsActif() === false;
-  // Le chat d'un chantier se lit en plein écran sur téléphone (référentiel §21) : le menu laisse la place à la barre de message.
-  const inChat = /^\/chantiers\/(?!nouveau$)[^/]+$/.test(pathname);
   // Profil, Apparence (Greg, 1er novembre 2026) : un écran d'édition, l'aperçu du PDF et « Enregistrer » ont besoin de la
-  // place ; la flèche retour ramène à Profil et paramètres.
-  const pleinEcran = inChat || pathname === "/compte/apparence";
+  // place ; la flèche retour ramène à Profil et paramètres. RÈGLE CHANGÉE (Greg, 19 novembre 2026 : « l'artisan ne doit
+  // jamais être coincé dans un écran ») : avant, la fiche d'un chantier (/chantiers/<id>) cachait aussi la barre ; elle
+  // la garde maintenant, ses boutons collés en bas se posent au-dessus (`--nav-space`). La discussion des questions et la
+  // lecture restent en plein écran : elles passent PAR-DESSUS la barre.
+  const pleinEcran = pathname === "/compte/apparence";
   // La barre se cache pendant la saisie (`useTyping`). Elle n'est JAMAIS recalée en JavaScript (retour du fondateur,
   // 2026-10-12 : sur iPhone, l'ancien recalage sur visualViewport la plaçait au milieu de l'accueil) : `position: fixed;
   // bottom: 0`, la zone du geste en marge intérieure.

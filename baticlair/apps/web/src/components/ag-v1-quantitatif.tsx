@@ -78,6 +78,14 @@ interface LigneChoisie {
 export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; projectId: string }) {
   const router = useRouter();
   const [etat, setEtat] = useState(etat0);
+  // Greg, 19 novembre 2026 : une liste qui vient d'être créée par le chemin « Besoin groupé » porte son origine ; elle
+  // vit dans Demandes › Groupées, jamais dans « À faire : Vérifier ta liste » ni dans Demandes › Négoces.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("nouvelle") !== "1") return;
+    void api(`/v1/projects/${encodeURIComponent(projectId)}`, { method: "PATCH", body: { origine: "achat-groupe" } })
+      .catch(() => undefined)
+      .finally(() => router.replace(`/achats-groupes/quantitatif/${encodeURIComponent(projectId)}`, { scroll: false }));
+  }, [projectId, router]);
   const fetcher = useCallback((s: AbortSignal) => api<{ nom: string; lignes: LigneQuantitatifV1[] }>(`/v1/ag/projects/${projectId}/lignes`, { signal: s }), [projectId]);
   const { data, setData, error } = useResource(fetcher);
   const [coches, setCoches] = useState<Set<string>>(new Set());

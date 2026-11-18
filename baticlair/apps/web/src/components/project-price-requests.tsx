@@ -3,6 +3,7 @@
 import { ConflitGroupe, conflitGroupe } from "@/components/conflit-groupe";
 import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
 import { NotificationsPrompt } from "@/components/notifications-prompt";
@@ -217,6 +218,21 @@ function SuiviDemande({
   const chiffrages = useResource(fetchChiffrages).data ?? [];
   // Point 8 (Greg, 28 octobre 2026) : un seul bouton principal par étape ; le reste dans le menu « ··· » du chantier.
   const [feuille, setFeuille] = useState(false);
+  // « Commander » depuis l'onglet Offres (Greg, 19 novembre 2026) : `?commander=<destinataire>` ouvre la MÊME confirmation
+  // que « Voir le devis reçu » (négoce, total, date de livraison souhaitée, « Confirmer la commande » / « Annuler ») ;
+  // ensuite le parcours de commande habituel. « Annuler » ramène à l'onglet Offres.
+  const params = useSearchParams();
+  const routeur = useRouter();
+  const chemin = usePathname();
+  const aCommander = params.get("commander");
+  const [direct, setDirect] = useState<string | null>(null);
+  const oublierCommander = (onglet: "offres" | null) => {
+    const suite = new URLSearchParams(params.toString());
+    suite.delete("commander");
+    if (onglet) suite.set("onglet", onglet);
+    const q = suite.toString();
+    routeur.replace(q ? `${chemin}?${q}` : chemin, { scroll: false });
+  };
   const [ajout, setAjout] = useState(false);
   const [renvoi, setRenvoi] = useState(false);
   const [suppression, setSuppression] = useState(false);
@@ -382,6 +398,10 @@ function SuiviDemande({
   const retenus = request.recipients.filter((r) => request.retainedSupplierIds.includes(r.supplier.id));
   const aEnvoyer = request.recipients.filter((r) => r.status === "to_send");
   const hasOffers = (offers.data?.items.length ?? 0) > 0;
+  if (aCommander && direct !== aCommander && request.retainedSupplierIds.length === 0 && repondus.some((r) => r.id === aCommander)) {
+    setDirect(aCommander);
+    setFeuille(true);
+  }
 
   return (
     <section {...(premier ? { id: "fournisseurs" } : {})} aria-label={titre ?? "Fournisseurs"} className="flex scroll-mt-4 flex-col gap-3">
@@ -515,7 +535,25 @@ function SuiviDemande({
         ))}
       </ul>
       {partsBlock}
-      {feuille ? <DevisRecus request={request} repondus={repondus} emailDe={emailDe} offreDe={offreDe} onCommander={commander} onFermer={() => setFeuille(false)} /> : null}
+      {feuille ? (
+        <DevisRecus
+          request={request}
+          repondus={repondus}
+          emailDe={emailDe}
+          offreDe={offreDe}
+          initial={direct ? (repondus.find((r) => r.id === direct) ?? null) : null}
+          onCommander={(id, date) =>
+            commander(id, date).then((e) => {
+              if (!e && direct) (setDirect(null), oublierCommander(null));
+              return e;
+            })
+          }
+          onFermer={() => {
+            setFeuille(false);
+            if (direct) (setDirect(null), oublierCommander("offres"));
+          }}
+        />
+      ) : null}
     </section>
   );
 }
@@ -621,9 +659,12 @@ function DevisRecus({
   repondus,
   emailDe,
   offreDe,
+  initial = null,
   onCommander,
   onFermer,
 }: {
+  /** Ouverte depuis l'onglet Offres : la confirmation de ce négoce d'emblée, et « Annuler » referme tout. */
+  initial?: PriceRequestRecipient | null;
   request: PriceRequest;
   repondus: PriceRequestRecipient[];
   emailDe: (id: string) => EmailRecu | null;
@@ -633,7 +674,8 @@ function DevisRecus({
   onFermer: () => void;
 }) {
   // « Commander » ouvre d'abord la confirmation : rien ne part sur un seul appui.
-  const [choisi, setChoisi] = useState<PriceRequestRecipient | null>(null);
+  const [choisi, setChoisi] = useState<PriceRequestRecipient | null>(initial);
+  const annuler = () => (initial ? onFermer() : (setChoisi(null), setErreur(null)));
   // Greg, 16 novembre 2026 : l'artisan choisit une date de livraison souhaitée ; elle part dans le mail et sur le bon.
   const [livraison, setLivraison] = useState("");
   const aujourdhui = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
@@ -653,7 +695,7 @@ function DevisRecus({
       <div role="dialog" aria-modal="true" aria-label="Confirmer la commande" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
         <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
           <h2 className="font-display text-[20px] font-extrabold">Confirmer la commande</h2>
-          <button type="button" onClick={() => (setChoisi(null), setErreur(null))} aria-label="Revenir aux devis" className="inline-flex size-11 items-center justify-center rounded-xl">
+          <button type="button" onClick={annuler} aria-label={initial ? "Annuler la commande" : "Revenir aux devis"} className="inline-flex size-11 items-center justify-center rounded-xl">
             <X size={20} aria-hidden="true" />
           </button>
         </div>
@@ -707,7 +749,7 @@ function DevisRecus({
           >
             Confirmer la commande
           </Button>
-          <Button variant="secondary" disabled={envoi} onClick={() => (setChoisi(null), setErreur(null))}>
+          <Button variant="secondary" disabled={envoi} onClick={annuler}>
             Annuler
           </Button>
         </div>

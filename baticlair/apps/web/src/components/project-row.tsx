@@ -8,6 +8,7 @@ import { useOrdinateur } from "@/lib/ordinateur";
 import { useResource } from "@/lib/use-resource";
 import { fr } from "@/lib/fr";
 import { Badge } from "./ui";
+import { titreCourt } from "@/lib/titres";
 
 /** Largeur du bouton révélé par le glissement (px). */
 const ACTION_W = 104;
@@ -95,8 +96,8 @@ export function ProjectRow({ project, onToggle, detail = false }: { project: Pro
       >
         <Link href={`/chantiers/${project.id}`} draggable={false} className="flex min-h-16 items-center gap-3 px-4 py-3 transition-[background-color] duration-150 hover:bg-ground/60 active:bg-ground">
           <span className="flex min-w-0 grow flex-col gap-0.5">
-            <span className="truncate text-[16px] font-semibold">{project.name}</span>
-            {subtitle ? <span className="truncate text-[14px] text-muted">{subtitle}</span> : null}
+            <span className="text-[16px] font-semibold break-words">{titreCourt(project.name, 64)}</span>
+            {subtitle ? <span className="text-[14px] break-words text-muted">{subtitle}</span> : null}
           </span>
           <ResumeOrdinateur project={project} detail={detail} />
           {done ? <Badge tone="ok">{fr.status.archived}</Badge> : null}

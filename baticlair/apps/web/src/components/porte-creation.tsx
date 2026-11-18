@@ -30,7 +30,8 @@ export function PorteCreation({ pour = null }: { pour?: "achat-groupe" | null })
   }, [ancienne, mode, router]);
   if (ancienne) return null;
   const retour = pour ? PUBLIER_BESOIN : "/chantiers/nouveau";
-  const versListe = pour ? (id: string) => `/achats-groupes/quantitatif/${id}` : undefined;
+  // Greg, 19 novembre 2026 : `nouvelle=1` fait marquer la liste « achat-groupe » (elle vit dans Demandes › Groupées).
+  const versListe = pour ? (id: string) => `/achats-groupes/quantitatif/${id}?nouvelle=1` : undefined;
   if (mode === "manuel") return <SaisirMaListe onFermer={() => router.push(retour)} versListe={versListe} pourGroupe={pour === "achat-groupe"} />;
   if (mode === "assistant") return <NouveauQuantitatif onFermer={() => router.push(retour)} versListe={versListe} />;
   return <ChoixCreation pour={pour} />;
