@@ -278,7 +278,8 @@ test("Mon site : engagements cochés et « Voir nos avis Google » (Greg, 18 nov
   test.setTimeout(150_000);
   await inscrire(page, `Toits Martin ${unique()}`);
   await page.goto("/mon-site");
-  const garanties = apercu(page).getByRole("list", { name: "Garanties" });
+  // L'aperçu est caché aux lecteurs d'écran (aria-hidden) : on le lit par sa classe.
+  const garanties = apercu(page).locator(".pe-preuves");
   // Rien de coché : aucun engagement ni bouton Google.
   await expect(apercu(page).getByText("Devis gratuit")).toHaveCount(0);
   await expect(apercu(page).getByText("Voir nos avis Google")).toHaveCount(0);
