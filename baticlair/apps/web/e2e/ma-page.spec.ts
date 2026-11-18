@@ -280,6 +280,9 @@ test("Mon site : engagements cochés et « Voir nos avis Google » (Greg, 18 nov
   await page.goto("/mon-site");
   // L'aperçu est caché aux lecteurs d'écran (aria-hidden) : on le lit par sa classe.
   const garanties = apercu(page).locator(".pe-preuves");
+  // Sans logo envoyé : les initiales de l'entreprise, jamais le logo Mobiiz (Greg, 18 novembre 2026).
+  await expect(apercu(page).locator(".pe-entete .pe-initiales")).toHaveText("TM");
+  await expect(apercu(page).locator(".pe-entete img")).toHaveCount(0);
   // Rien de coché : aucun engagement ni bouton Google.
   await expect(apercu(page).getByText("Devis gratuit")).toHaveCount(0);
   await expect(apercu(page).getByText("Voir nos avis Google")).toHaveCount(0);

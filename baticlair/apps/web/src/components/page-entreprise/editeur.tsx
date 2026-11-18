@@ -44,9 +44,11 @@ import { LIBELLES, VuePage, initiales } from "./vue-page";
  * « plus intuitif, style Lovable ») : avant, une longue colonne de cartes et l'aperçu à côté ; maintenant le site est
  * TOUJOURS visible et se met à jour à chaque changement, les réglages sont rangés en sept onglets (Couleurs, Photos,
  * Prestations, Chantiers, À propos, Contact, Publier). Ordinateur : le panneau des réglages à gauche (un quart de la
- * largeur), le site en grand à droite. Téléphone : le site en haut (réduit, « Voir mon site » l'agrandit), la barre des
- * onglets en bas, qui ouvre le tiroir des réglages. Rien ne recouvre un champ : l'état « Enregistré » vit au-dessus du
- * site, jamais par-dessus le texte. Chaque changement s'enregistre tout seul.
+ * largeur), le site en grand à droite. Téléphone, RÈGLE CHANGÉE (Greg, 18 novembre 2026) : avant, le site en haut et une
+ * barre d'onglets flottante en bas, qui recouvrait les couleurs ; maintenant une colonne d'onglets collée à gauche (en L
+ * avec le menu de l'app), le téléphone en entier à droite, et le tiroir des réglages qui monte du bas sous lui (la moitié
+ * de l'écran au plus). Rien ne recouvre rien : l'état « Enregistré » vit au-dessus du site. Chaque changement
+ * s'enregistre tout seul.
  */
 interface Reglages {
   visible: boolean;
@@ -109,6 +111,9 @@ const ONGLETS: { id: Onglet; libelle: string; Icone: LucideIcon }[] = [
   { id: "contact", libelle: "Contact", Icone: Phone },
   { id: "publier", libelle: "Publier", Icone: Send },
 ];
+
+/** La partie du site que règle chaque onglet : le téléphone y défile quand l'onglet s'ouvre. */
+const CIBLE_APERCU: Record<Onglet, string> = { couleurs: ".pe-actions", photos: "haut", prestations: "#prestations", chantiers: "#realisations", apropos: "#a-propos", contact: "#contact", publier: "haut" };
 
 /** Écran d'ordinateur (1024 px et plus) : le panneau à gauche, le site en grand à droite. */
 function useOrdinateur(): boolean {
@@ -223,7 +228,7 @@ function BoutonFichier({ libelle, actif, onFichier, multiple = false }: { libell
 }
 
 /** Le site dans son cadre : il défile au doigt, il se dessine à la taille choisie (téléphone ou ordinateur). */
-function CadreApercu({ contenu, ecran, hauteur, interactif = false, testid = "apercu-page" }: { contenu: ContenuPage; ecran: "telephone" | "ordinateur"; hauteur: string; interactif?: boolean; testid?: string }) {
+function CadreApercu({ contenu, ecran, hauteur = "100%", interactif = false, testid = "apercu-page", ajuste = false, cible = null }: { contenu: ContenuPage; ecran: "telephone" | "ordinateur"; hauteur?: string; interactif?: boolean; testid?: string; ajuste?: boolean; cible?: string | null }) {
   const cadre = useRef<HTMLDivElement>(null);
   const defile = useRef<HTMLDivElement>(null);
   const [largeur, setLargeur] = useState(360);
@@ -244,6 +249,7 @@ function CadreApercu({ contenu, ecran, hauteur, interactif = false, testid = "ap
     const cible = a.getAttribute("href");
     if (cible?.startsWith("#") && cible.length > 1) defile.current?.querySelector(cible)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+  if (ajuste) return <TelephoneEntier contenu={contenu} testid={testid} clic={clic} defile={defile} cible={cible} />;
   return (
     <div ref={cadre} className={`mx-auto w-full overflow-hidden rounded-[22px] border-[5px] border-black/85 bg-black/85 ${ordinateur ? "" : "max-w-[430px]"}`}>
       {/* Le `transform` fait du cadre le repère de la barre d'appel (position fixe) : elle reste dans l'aperçu. Le défilement
@@ -254,6 +260,97 @@ function CadreApercu({ contenu, ecran, hauteur, interactif = false, testid = "ap
         </div>
       </div>
     </div>
+  );
+}
+
+/** Largeur et hauteur d'un téléphone de référence : le site s'y dessine à sa vraie taille, puis le tout est réduit. */
+const TEL_L = 390;
+const TEL_H = 844;
+
+/**
+ * Le téléphone EN ENTIER, de haut en bas (Greg, 18 novembre 2026) : le site se dessine sur un écran de 390 px, puis le
+ * téléphone est réduit pour tenir dans la place qui reste (largeur et hauteur). Il défile au doigt comme le vrai site.
+ */
+function TelephoneEntier({ contenu, testid, clic, defile, cible }: { contenu: ContenuPage; testid: string; clic: (e: React.MouseEvent) => void; defile: React.RefObject<HTMLDivElement | null>; cible: string | null }) {
+  const zone = useRef<HTMLDivElement>(null);
+  const [place, setPlace] = useState({ l: 0, h: 0, pleine: 0 });
+  useEffect(() => {
+    const el = zone.current;
+    // La hauteur « pleine » est celle du téléphone tiroir fermé : tiroir ouvert, il garde sa taille (lisible) et on voit
+    // son haut au-dessus du tiroir, au lieu d'un téléphone devenu minuscule.
+    const colonne = el?.closest<HTMLElement>("[data-colonne-apercu]");
+    if (!el || !colonne) return;
+    const mesurer = () => setPlace({ l: el.clientWidth, h: el.clientHeight, pleine: colonne.clientHeight - el.offsetTop + colonne.offsetTop });
+    const ro = new ResizeObserver(mesurer);
+    ro.observe(el);
+    ro.observe(colonne);
+    return () => ro.disconnect();
+  }, []);
+  const bord = 6;
+  // La plus grande taille qui tient en largeur ET dans la hauteur pleine, sans jamais agrandir le site.
+  const echelle = place.l && place.pleine ? Math.min(1, (place.l - 2 * bord) / TEL_L, (place.pleine - 2 * bord) / TEL_H) : 0;
+  const hauteurEcran = Math.min(TEL_H * echelle, Math.max(0, place.h - 2 * bord));
+  // Un onglet ouvert : le téléphone défile jusqu'à la partie du site qu'il règle (les boutons pour Couleurs…).
+  useEffect(() => {
+    const d = defile.current;
+    if (!d || !cible || !echelle) return;
+    const el = cible === "haut" ? null : d.querySelector<HTMLElement>(cible);
+    // La barre du haut du site reste collée en haut : on s'arrête juste sous elle.
+    const barre = d.querySelector<HTMLElement>(".pe-entete")?.offsetHeight ?? 0;
+    const haut = el ? (el.getBoundingClientRect().top - d.getBoundingClientRect().top) / echelle + d.scrollTop - barre - 16 : 0;
+    d.scrollTo({ top: Math.max(0, haut), behavior: "smooth" });
+  }, [cible, echelle, defile]);
+  return (
+    <div ref={zone} className="flex h-full min-h-0 w-full items-start justify-center">
+      {echelle ? (
+        <div className="overflow-hidden rounded-[26px] bg-black shadow-card" style={{ padding: bord, width: TEL_L * echelle + 2 * bord, height: hauteurEcran + 2 * bord }}>
+          <div className="overflow-hidden rounded-[20px] bg-white" style={{ width: TEL_L * echelle, height: hauteurEcran }}>
+            {/* Le `transform` fait du cadre le repère de la barre d'appel (position fixe) : elle reste dans le téléphone. */}
+            <div ref={defile} data-testid={testid} onClickCapture={clic} className="overscroll-contain overflow-y-auto bg-white [scrollbar-width:none]" style={{ width: TEL_L, height: hauteurEcran / echelle, transform: `scale(${echelle})`, transformOrigin: "top left", WebkitOverflowScrolling: "touch" }}>
+              <div inert aria-hidden>
+                <VuePage contenu={contenu} apercu />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * L'éditeur sur téléphone occupe l'écran entre l'en-tête de l'app et son menu du bas, sans défilement de la page : la
+ * couche est fixe, posée là où commence la page ; une cale garde sa place dans le flux. Clavier ouvert (menu caché), elle
+ * descend jusqu'en bas.
+ */
+function CoucheTelephone({ basse, children }: { basse: boolean; children: React.ReactNode }) {
+  const cale = useRef<HTMLDivElement>(null);
+  const [haut, setHaut] = useState<number | null>(null);
+  useEffect(() => {
+    const mesurer = () => {
+      const el = cale.current;
+      if (el) setHaut(Math.max(0, el.getBoundingClientRect().top + window.scrollY));
+    };
+    mesurer();
+    // Un bandeau de l'app qui apparaît ou disparaît au-dessus déplace le début de la page.
+    const ro = new ResizeObserver(mesurer);
+    const main = cale.current?.closest("main");
+    if (main) ro.observe(main);
+    window.addEventListener("resize", mesurer);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", mesurer);
+    };
+  }, []);
+  return (
+    <>
+      <div ref={cale} aria-hidden="true" style={{ height: `calc(100dvh - ${haut ?? 0}px - var(--nav-space))` }} />
+      {haut === null ? null : (
+        <div className="fixed left-0 right-0 z-20 flex gap-2 pr-3" style={{ top: haut, bottom: basse ? 8 : "calc(var(--nav-height) + var(--nav-gap) + 8px)" }}>
+          {children}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -298,7 +395,7 @@ function ApercuPlein({ contenu, onFermer }: { contenu: ContenuPage; onFermer: ()
 }
 
 /** « Enregistrement… » / « Enregistré » : au-dessus du site, jamais par-dessus un champ ou un texte. */
-function Statut({ etat, erreur }: { etat: Etat; erreur: string | null }) {
+function Statut({ etat, erreur, compact = false }: { etat: Etat; erreur: string | null; compact?: boolean }) {
   return (
     <div className="min-w-0 flex-1" aria-live="polite">
       {erreur ? (
@@ -310,7 +407,7 @@ function Statut({ etat, erreur }: { etat: Etat; erreur: string | null }) {
           {etat === "enregistrement" ? <Loader2 size={14} className="shrink-0 motion-safe:animate-spin" aria-hidden="true" /> : <Check size={14} className="shrink-0 text-ok" aria-hidden="true" />}
           {etat === "enregistrement" ? "Enregistrement…" : "Enregistré : ton site est à jour."}
         </p>
-      ) : (
+      ) : compact ? null : (
         <p className="text-[13px] leading-tight text-muted">Chaque changement s&apos;enregistre tout seul.</p>
       )}
     </div>
@@ -557,7 +654,6 @@ export function EditeurMaPage() {
   const typing = useTyping();
   const enAttente = useRef<Partial<Reglages>>({});
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const tiroir = useRef<HTMLElement>(null);
 
   const charger = useCallback(async () => {
     try {
@@ -656,7 +752,6 @@ export function EditeurMaPage() {
     // Téléphone : toucher l'onglet ouvert referme le tiroir.
     setOnglet((avant) => (!ordinateur && avant === o ? null : o));
     setGalerie(false);
-    if (!ordinateur) requestAnimationFrame(() => tiroir.current?.scrollIntoView({ block: "start" }));
   };
 
   if (chargement && !data) return <p className="text-[15px] text-muted">Ton site ne s&apos;est pas chargé. Vérifie ta connexion et réessaie.</p>;
@@ -1055,7 +1150,7 @@ export function EditeurMaPage() {
 
   const libelleActif = ONGLETS.find((o) => o.id === actif)?.libelle ?? "";
   const barreOnglets = (
-    <div role="tablist" aria-label="Réglages du site" className={ordinateur ? "grid grid-cols-4 gap-1.5" : "flex snap-x gap-0.5 overflow-x-auto pr-8 pl-1 [mask-image:linear-gradient(90deg,#000_88%,transparent)] [scrollbar-width:none]"}>
+    <div role="tablist" aria-label="Réglages du site" aria-orientation={ordinateur ? "horizontal" : "vertical"} className={ordinateur ? "grid grid-cols-4 gap-1.5" : "flex h-full flex-col gap-0.5"}>
       {ONGLETS.map(({ id, libelle, Icone }) => {
         const choisi = actif === id;
         return (
@@ -1065,17 +1160,15 @@ export function EditeurMaPage() {
             role="tab"
             aria-selected={choisi}
             aria-controls="reglages-site"
-            onClick={(e) => {
-              ouvrir(id);
-              e.currentTarget.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
-            }}
+            onClick={() => ouvrir(id)}
             className={
               ordinateur
                 ? `pressable flex min-h-15 flex-col items-center justify-center gap-1 rounded-2xl text-[12.5px] font-bold ${choisi ? "bg-ink text-ground" : "bg-black/5 hover:bg-black/10"}`
-                : `pressable flex min-h-14 min-w-[62px] flex-1 snap-start flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-[11px] font-bold whitespace-nowrap ${choisi ? "bg-ink text-ground" : "text-muted"}`
+                : // Téléphone (Greg, 18 novembre 2026) : une colonne collée à gauche ; l'onglet ouvert en noir, un trait jaune au bord.
+                  `pressable relative flex max-h-[76px] min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-[10px] leading-none font-bold whitespace-nowrap ${choisi ? "bg-ink text-ground before:absolute before:inset-y-2 before:-left-1 before:w-1 before:rounded-r-full before:bg-accent" : "text-muted"}`
             }
           >
-            <Icone size={ordinateur ? 19 : 20} aria-hidden="true" strokeWidth={choisi ? 2.4 : 2} />
+            <Icone size={ordinateur ? 19 : 21} aria-hidden="true" strokeWidth={choisi ? 2.4 : 2} />
             {libelle}
           </button>
         );
@@ -1083,17 +1176,23 @@ export function EditeurMaPage() {
     </div>
   );
   const reglages = actif ? (
-    <section ref={tiroir} id="reglages-site" role="tabpanel" aria-label={libelleActif} className={`grid grid-cols-[minmax(0,1fr)] gap-6 ${ordinateur ? "" : "scroll-mt-[calc(36dvh+84px)] rounded-[24px] bg-surface p-4 shadow-card"}`}>
-      {ordinateur ? null : (
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-[20px] font-extrabold">{libelleActif}</h2>
+    ordinateur ? (
+      <section id="reglages-site" role="tabpanel" aria-label={libelleActif} className="grid grid-cols-[minmax(0,1fr)] gap-6">
+        {panneaux[actif]}
+      </section>
+    ) : (
+      // Téléphone (Greg, 18 novembre 2026) : un tiroir qui monte du bas, la moitié de l'écran au plus ; le téléphone reste
+      // visible au-dessus, en entier, et change en direct. Il ne recouvre rien : il prend sa place sous l'aperçu.
+      <section key={actif} id="reglages-site" role="tabpanel" aria-label={libelleActif} className="flex max-h-[50dvh] min-h-0 shrink-0 animate-rise flex-col overflow-hidden rounded-[22px] bg-surface shadow-float ring-1 ring-ink/5">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-line py-1.5 pr-1.5 pl-4">
+          <h2 className="text-[17px] font-extrabold">{libelleActif}</h2>
           <button type="button" onClick={() => setOnglet(null)} aria-label={`Fermer les réglages ${libelleActif}`} className="pressable flex min-h-11 items-center gap-1 rounded-full bg-black/5 px-3 text-[14px] font-bold">
             <ChevronDown size={18} aria-hidden="true" /> Fermer
           </button>
         </div>
-      )}
-      {panneaux[actif]}
-    </section>
+        <div className="grid min-h-0 grid-cols-[minmax(0,1fr)] gap-6 overflow-y-auto overscroll-contain px-3 pt-3 pb-4">{panneaux[actif]}</div>
+      </section>
+    )
   ) : null;
 
   return (
@@ -1120,30 +1219,35 @@ export function EditeurMaPage() {
           </section>
         </div>
       ) : (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 pb-[76px]">
-          <h1 className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">Mon site</h1>
-          {!r.visible && actif !== "publier" ? (
-            <button type="button" onClick={() => ouvrir("publier")} className="justify-self-start text-left text-[14px] font-bold underline">
-              Ton site est privé pour l&apos;instant : le rendre visible
-            </button>
-          ) : null}
-          {/* Le site toujours visible en haut (Greg, 17 novembre 2026) : réduit quand le tiroir est ouvert, plus petit encore
-              pendant la saisie ; « Voir mon site » l'agrandit en plein écran. L'état d'enregistrement est AU-DESSUS du site. */}
-          <section className="sticky top-0 z-20 -mx-4 grid grid-cols-[minmax(0,1fr)] gap-1.5 bg-ground px-4 pt-2 pb-2" aria-label="Aperçu de mon site">
-            <div className="flex min-h-10 items-center gap-2">
-              <Statut etat={etat} erreur={erreur} />
-              <button type="button" onClick={() => setApercuPlein(true)} className="pressable flex min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-accent px-3.5 text-[14px] font-extrabold text-on-accent">
-                <Eye size={17} aria-hidden="true" /> Voir mon site
-              </button>
-            </div>
-            <CadreApercu contenu={contenu} ecran="telephone" hauteur={actif ? (typing ? "22dvh" : "36dvh") : "calc(100dvh - var(--nav-space) - 320px)"} />
-          </section>
-          {reglages ?? <p className="text-center text-[14px] text-muted">Touche un onglet en bas pour changer tes couleurs, tes photos, tes textes…</p>}
-          {/* La barre des onglets, juste au-dessus du menu de l'app ; cachée pendant la saisie (clavier ouvert). */}
-          <nav aria-label="Onglets des réglages" className={`fixed inset-x-0 z-30 px-2.5 transition-[translate,opacity] duration-200 ${typing ? "pointer-events-none translate-y-4 opacity-0" : ""}`} style={{ bottom: "calc(var(--nav-space) - 8px)" }}>
-            <div className="mx-auto max-w-2xl rounded-[22px] bg-surface p-1 shadow-float ring-1 ring-ink/5">{barreOnglets}</div>
+        <CoucheTelephone basse={typing}>
+          {/* Une colonne d'onglets collée à gauche, qui fait un L avec le menu de l'app ; à droite, le téléphone en entier ; le
+              tiroir des réglages sous lui. Rien ne recouvre rien (Greg, 18 novembre 2026). */}
+          <nav aria-label="Onglets des réglages" className="w-[66px] shrink-0 rounded-r-[20px] bg-surface p-1 shadow-card ring-1 ring-ink/5">
+            {barreOnglets}
           </nav>
-        </div>
+          <div data-colonne-apercu className="flex min-w-0 flex-1 flex-col gap-2">
+            <h1 className="sr-only">Mon site</h1>
+            <section className="flex min-h-0 flex-1 flex-col gap-1.5" aria-label="Aperçu de mon site">
+              {/* Une seule ligne : l'état (ou « le rendre visible ») à gauche, « Voir mon site » en petit à droite. */}
+              <div className="flex min-h-8 shrink-0 items-center gap-2">
+                {etat === "pret" && !erreur && !r.visible && actif !== "publier" ? (
+                  <button type="button" onClick={() => ouvrir("publier")} className="min-w-0 flex-1 text-left text-[12.5px] leading-tight font-bold underline">
+                    Site privé : le rendre visible
+                  </button>
+                ) : (
+                  <Statut etat={etat} erreur={erreur} compact />
+                )}
+                <button type="button" onClick={() => setApercuPlein(true)} className="pressable flex min-h-8 shrink-0 items-center gap-1 rounded-full bg-accent px-2.5 text-[12.5px] font-extrabold text-on-accent">
+                  <Eye size={14} aria-hidden="true" /> Voir mon site
+                </button>
+              </div>
+              <div className="min-h-0 flex-1">
+                <CadreApercu contenu={contenu} ecran="telephone" ajuste cible={actif ? CIBLE_APERCU[actif] : null} />
+              </div>
+            </section>
+            {reglages}
+          </div>
+        </CoucheTelephone>
       )}
       {apercuPlein ? <ApercuPlein contenu={contenu} onFermer={fermerApercu} /> : null}
       {partage ? <Partager url={url} nom={data.profil.nom} onFermer={() => setPartage(false)} /> : null}

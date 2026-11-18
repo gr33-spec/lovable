@@ -201,6 +201,8 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Règle changée : « Devis gratuit » était retiré comme texte inventé → l'artisan coche lui-même « Devis gratuit », « Déplacement gratuit », « Intervention rapide » ; seules les cases cochées s'affichent dans le bandeau de garanties.
 - La page publique de l'API n'est plus gardée en cache (avant : 60 secondes) : un site modifié se voit tout de suite.
 - « Messages et réponses » n'allume plus l'onglet Missions tant que Mission est « Bientôt ».
+- Éditeur « Mon site » sur téléphone (Greg, 18 novembre 2026). Règle changée : avant, le site en haut et une barre d'onglets flottante en bas, qui cachait les couleurs → une colonne d'onglets collée à gauche (en L avec le menu de l'app), le téléphone en entier à droite, réduit pour tenir, qui défile ; un onglet ouvre un tiroir sous lui (la moitié de l'écran au plus, « Fermer ») et le téléphone, à taille lisible, montre la partie réglée. Ordinateur inchangé.
+- Logo du site : seulement celui que l'entreprise a envoyé dans son profil ; sinon ses initiales. Le code n'a aucun logo Mobiiz de repli (vérifié par un test).
 
 ## Décisions du 17 novembre 2026 (soir) : « droit au but », après le test du chantier ardoise de Greg
 
