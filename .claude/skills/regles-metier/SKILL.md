@@ -108,6 +108,14 @@ couvert ici, demander au fondateur plutôt que deviner.
 ### Pointes
 - Pointes pour liteaux, contre-liteaux et voliges : en Suggestion.
 
+## Écran sous-toiture
+
+- Seulement s'il est demandé ou au devis. Jamais en Suggestion.
+- Quantité : surface + 10 %, affichée en m² (pas de conversion en rouleaux).
+- On ne demande pas la référence : on garde le mot de l'artisan (« écran »).
+- Accessoires d'écran (adhésif, bande d'égout, closoir…) : jamais proposés.
+- Contre-liteaux d'office avec l'écran (voir Liteaux et voliges).
+
 ## Zinguerie
 
 - Si l'artisan plie lui-même → feuilles de zinc regroupées en une seule ligne.
