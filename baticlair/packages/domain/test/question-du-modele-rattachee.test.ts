@@ -6,6 +6,8 @@
  * ouvrage du devis est cette donnée, pour cet ouvrage. Sa réponse va au calcul : la question ne se pose qu'une fois (§49.4).
  */
 import { describe, expect, it } from "vitest";
+import { SUGGESTIONS_KEY } from "../src/index.js";
+import { SUGGESTIONS_DU_BANC } from "./support/read-quote.js";
 import { ecranDeLecture, lignesDeLecture, planDeLecture, rattacherQuestion, ROOFING_REFERENTIAL, type EngineAnswer, type LectureDevis, type LectureQuestion } from "../src/index.js";
 import { D2026_018_LINES } from "./devis-reels/d2026-018.js";
 import { HABITUDES_BANC } from "./support/habitudes.js";
@@ -31,7 +33,7 @@ const lecture = (): LectureDevis => {
   const ligne = jointDebout?.ref.split(".")[0];
   return { ...l, questions: [duModele, ...l.questions.filter((q) => !(q.cle === "faconnage" && (q.ligne === null || q.ligne === ligne)))] };
 };
-const ecran = (answers: Record<string, EngineAnswer> = {}) => ecranDeLecture({ ref, lecture: lecture(), answers, preferences: {} });
+const ecran = (answers: Record<string, EngineAnswer> = {}) => ecranDeLecture({ ref, lecture: lecture(), answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC, ...answers }, preferences: {} });
 
 describe("une question du modèle qui prolonge une donnée du référentiel est cette donnée", () => {
   it("« faconnage_joint_debout » est le façonnage de la couverture zinc à joint debout, avec les valeurs du référentiel", () => {
@@ -73,13 +75,13 @@ describe("une question du modèle qui prolonge une donnée du référentiel est 
     expect(rattacherQuestion(ref, plan, { ...rive, ligne: null }).cle).toBe("faconnage_rive");
     expect(rattacherQuestion(ref, plan, { ...rive, ligne: "9:999" }).cle).toBe("faconnage_rive");
     const avec = { ...l, questions: [rive, ...l.questions.filter((q) => !(q.cle === "faconnage" && q.ligne === ligne))] };
-    const e0 = ecranDeLecture({ ref, lecture: avec, answers: {}, preferences: {} });
+    const e0 = ecranDeLecture({ ref, lecture: avec, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC }, preferences: {} });
     // Une seule réponse pour tout le devis (Greg, 17 novembre 2026) : la question de la rive est celle du groupe, avec ses mots.
     expect(e0.questions.some((x) => x.text === rive.texte)).toBe(false);
     const q = e0.questions.find((x) => x.key === "param:faconnage@pieces-pliees")!;
     expect(q.text).toMatch(/^Tes pièces pliées/);
     expect(e0.questions.filter((x) => /^param:faconnage@bandes-zinc__/.test(x.key))).toEqual([]);
-    const e1 = ecranDeLecture({ ref, lecture: avec, answers: { [q.key]: { value: "1", unit: "u" } }, preferences: {} });
+    const e1 = ecranDeLecture({ ref, lecture: avec, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC, [q.key]: { value: "1", unit: "u" } }, preferences: {} });
     expect(e1.questions.filter((x) => x.key === q.key || x.key === "fiche:faconnage_rive")).toEqual([]);
   });
 });

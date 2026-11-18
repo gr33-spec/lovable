@@ -881,6 +881,92 @@ export function EditableName({ name, onSave, className = "" }: { name: string; o
   );
 }
 
+
+/** La clé de l'étape « Suggestions » (la même que le serveur) et sa réponse quand rien n'est coché. */
+export const CLE_SUGGESTIONS = "suggestions:choisies";
+const AUCUNE_SUGGESTION = "aucune";
+
+/** Les propositions de l'étape « Suggestions », quand le serveur l'ouvre (elle passe avant toute autre question). */
+export function suggestionsAProposer(takeoff: Takeoff): { label: string; value: string }[] | null {
+  const q = takeoff.view.decisions.find((d) => d.question?.key === CLE_SUGGESTIONS)?.question;
+  return q && q.options.length > 0 ? q.options : null;
+}
+
+/**
+ * ÉTAPE « SUGGESTIONS » (Greg, 17 novembre 2026, points 14 à 17) : après la lecture et avant les questions de précision,
+ * une seule étape dans la discussion. Des cases larges, faciles à toucher, un seul bouton « Continuer ». Ce qui est coché
+ * s'ajoute à la liste, le reste est ignoré, sans autre question. Les propositions viennent de la fiche du métier (le
+ * serveur), cinq au plus ; aucune proposition : pas d'étape.
+ */
+export function SuggestionsCard({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
+  const router = useRouter();
+  const [cochees, setCochees] = useState<ReadonlySet<string>>(() => new Set());
+  const basculer = (v: string) =>
+    setCochees((prev) => {
+      const next = new Set(prev);
+      if (next.has(v)) next.delete(v);
+      else next.add(v);
+      return next;
+    });
+  const n = cochees.size;
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Questions de Mobiiz" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+      <EnTeteChat onFermer={() => router.push("/chantiers")} />
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
+        <section aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
+          <Bulle de="mobiiz" label="Message de MOBIIZ">
+            <TexteMobiiz>J&apos;ai lu ton devis. Avant mes questions, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
+          </Bulle>
+          <fieldset aria-label="Suggestions" disabled={pending} className="ml-10 flex flex-col gap-3 rounded-[22px] border p-4" style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: COULEURS_CHAT.bulle }}>
+            <legend className="sr-only">Suggestions</legend>
+            <div className="flex flex-col gap-0.5">
+              <p className="text-[18px] leading-tight font-extrabold tracking-[-0.01em]">Suggestions</p>
+              <p className="text-[15px] leading-snug text-[var(--chat-texte)]/75">Coche ce qu&apos;il te faut, on l&apos;ajoute à ta liste.</p>
+            </div>
+            <ul className="flex flex-col gap-2">
+              {options.map((o) => {
+                const on = cochees.has(o.value);
+                return (
+                  <li key={o.value}>
+                    <label
+                      className="pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-3.5 py-2.5 text-[16px] leading-snug font-semibold"
+                      style={{ borderColor: on ? COULEURS_CHAT.jaune : COULEURS_CHAT.trait, backgroundColor: on ? "color-mix(in srgb, #FED206 14%, transparent)" : "var(--chat-voile)" }}
+                    >
+                      <input type="checkbox" checked={on} onChange={() => basculer(o.value)} className="peer sr-only" />
+                      <span
+                        aria-hidden="true"
+                        className="flex size-7 shrink-0 items-center justify-center rounded-lg border-2 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2"
+                        style={{ borderColor: on ? COULEURS_CHAT.jaune : "color-mix(in srgb, var(--chat-texte) 45%, transparent)", backgroundColor: on ? COULEURS_CHAT.jaune : "transparent" }}
+                      >
+                        {on ? <Check size={18} strokeWidth={3} className="text-[#111111]" /> : null}
+                      </span>
+                      <span className="min-w-0 grow break-words">{o.label}</span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+            <p aria-live="polite" className="text-[13px] text-[var(--chat-texte)]/70">
+              {n === 0 ? "Rien de coché : ta liste reste telle que ton devis la dit." : n === 1 ? "1 article sera ajouté à ta liste." : `${n} articles seront ajoutés à ta liste.`}
+            </p>
+            {error ? <ErrorNotice error={error} /> : null}
+            <button
+              type="button"
+              onClick={() => onContinuer(n > 0 ? options.filter((o) => cochees.has(o.value)).map((o) => o.value).join(",") : AUCUNE_SUGGESTION)}
+              disabled={pending}
+              className="pressable flex min-h-13 w-full items-center justify-center gap-2 rounded-full px-5 text-[17px] font-extrabold text-[#111111] disabled:opacity-60"
+              style={{ backgroundColor: COULEURS_CHAT.jaune }}
+            >
+              {pending ? <Loader2 size={18} aria-hidden="true" className="animate-spin" /> : null}
+              Continuer
+            </button>
+          </fieldset>
+        </section>
+      </div>
+    </div>
+  );
+}
+
 /** La carte « Lots repérés » ne se montre que pour un devis de plus d'un lot, tant que l'artisan n'a pas dit « C'est bon ». */
 export function lotsAConfirmer(takeoff: Takeoff): boolean {
   return (takeoff.lots?.length ?? 0) > 1 && !takeoff.lotsConfirmes;

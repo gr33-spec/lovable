@@ -1,5 +1,13 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.18-55 — L'étape « Suggestions » (Greg, 2026-11-17, points 13 à 17)
+
+- **§49.1 point 5, Règle changée** : après la lecture et avant les questions de précision, une étape « Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste. » : des cases à cocher et « Continuer ». Les propositions viennent de la fiche (`suggested` sur un emplacement), jamais de l'IA ; cinq au plus ; aucune : pas d'étape. Un article coché vaut un article écrit (ses questions se posent ensuite) ; non coché, il n'existe pas. Avant : aucun bloc « Suggestions ».
+- **§49.1 point 3, Règle changée** : la naissance d'une gouttière n'est plus ajoutée d'office (`indissociable`) : elle est proposée dans les suggestions. Avant : ajoutée dès qu'une gouttière était écrite. Cela vaut pour la lecture d'un devis (la discussion) ; l'ancien calcul sans étape « Suggestions » garde la naissance d'office.
+- **§15 Gouttière zinc** : talons (2 pour une ligne droite) et angles (un par angle, « Combien d'angles sur cette gouttière ? ») deviennent des lignes à part, proposées seulement dans les suggestions (« si tu ne les fabriques pas »). Avant : absents de la gouttière zinc. Les crochets non écrits sont proposés aussi.
+- **§15 Gouttière PVC ou alu** : talons, angles et naissances non écrits sont proposés dans les suggestions (mêmes ratios).
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
 ## roofing-2026.11.17-54 — Droit au but : une commande claire (Greg, 2026-11-17, après son test du D-2026-020)
 
 - **§49.5 Règle changée** : une seule ligne par article identique, avec le total (toutes les feuilles de zinc réunies, comptées pièce par pièce puis additionnées). Avant : le même article sorti par deux ouvrages écrits restait une ligne par ouvrage. Le nom des feuilles ne dit plus leur usage (« Feuilles zinc naturel 2 × 1 m, 0,65 mm », sans « pour bandes de rive… ») ; l'usage reste dans le détail de l'app.

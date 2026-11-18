@@ -377,6 +377,12 @@ export interface Slot {
    */
   indissociable?: true;
   /**
+   * Étape « Suggestions » (Greg, 17 novembre 2026, points 13 à 17) : un oubli probable. Quand un autre article de
+   * l'ouvrage est écrit et que celui-ci ne l'est pas, il est PROPOSÉ une fois, dans une carte à cases, avec ces mots ;
+   * coché, il vaut un article écrit (ses questions se posent alors) ; non coché, il n'existe pas. Jamais ajouté d'office.
+   */
+  suggested?: { label: string };
+  /**
    * La ligne écrite en mètres se commande en pièces : « 2 descentes de 3 m » = 2 tubes de 3 m (D-2026-020, §49.2.3).
    * `piece` : le nom de la pièce au comptoir (« tube »), « longueur » sinon.
    */

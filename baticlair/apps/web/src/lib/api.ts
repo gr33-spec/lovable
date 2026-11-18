@@ -547,6 +547,8 @@ export interface TakeoffDecision {
     impact: string | null;
     /** Une qualité qui se nomme (l'ardoise, une teinte) : « Autre » laisse l'écrire. */
     named?: boolean;
+    /** Étape « Suggestions » : des cases à cocher (plusieurs réponses, ou aucune). */
+    multiple?: boolean;
   } | null;
 }
 

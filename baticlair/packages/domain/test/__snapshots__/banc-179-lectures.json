@@ -819,13 +819,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Bande de ventilation en Z en zinc quartz",
     "quantite": "13 ml",
     "unite": "ml",
@@ -841,13 +834,7 @@
    }
   ],
   "questions": [
-   "param:surface",
-   "param:nb_descentes",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout",
-   "param:developpe@bandes-zinc__4"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -985,19 +972,10 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -1134,11 +1112,7 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -1258,23 +1232,10 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:fixation_crochet",
-   "param:nb_descentes",
-   "param:developpe",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -1319,21 +1280,10 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:faconnage",
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
-   "param:diametre_descente",
-   "param:consommables"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -1386,23 +1336,10 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
-   "param:developpe",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -1870,11 +1807,7 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -1923,13 +1856,6 @@
     "raison": "Pose, développé à préciser"
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Réfection de chéneau en membrane EPDM ou PVC",
     "quantite": "11,7 ml",
     "unite": "ml",
@@ -1959,10 +1885,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2000,13 +1923,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances PVC grise de 25 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "ok",
-    "raison": null
-   },
-   {
     "designation": "Tubes de descente PVC gris Ø80, longueur 4 m",
     "quantite": "4 pièces",
     "unite": "pièces",
@@ -2014,7 +1930,9 @@
     "raison": null
    }
   ],
-  "questions": [],
+  "questions": [
+   "suggestions:choisies"
+  ],
   "aChiffrer": []
  },
  {
@@ -2027,17 +1945,10 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2051,19 +1962,10 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2114,19 +2016,10 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances PVC sable de 25",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Diamètre, pose, angles à préciser"
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:nb_angles",
-   "param:diametre_descente"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2142,13 +2035,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances dév. 25 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "ok",
-    "raison": null
-   },
-   {
     "designation": "Descente d'eau pluviale, diamètre descentes 80 mm",
     "quantite": "2 pièces",
     "unite": "pièces",
@@ -2157,7 +2043,7 @@
    }
   ],
   "questions": [
-   "param:hauteur_descente"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2315,13 +2201,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -2379,11 +2258,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:developpe",
-   "param:faconnage@pieces-pliees",
-   "param:consommables",
-   "fiche:marque_des_ardoises"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2413,13 +2288,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -2477,10 +2345,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:developpe",
-   "param:faconnage@pieces-pliees",
-   "param:consommables"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2588,13 +2453,6 @@
     "raison": "Pose, développé à préciser"
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Réfection de chéneau en membrane EPDM ou PVC",
     "quantite": "11,7 ml",
     "unite": "ml",
@@ -2624,10 +2482,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2678,18 +2533,10 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances PVC blanche de 33",
-    "quantite": "1 pièce",
-    "unite": "pièce",
-    "etat": "check",
-    "raison": "Diamètre, pose à préciser"
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:diametre_descente"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2726,13 +2573,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Chatière de ventilation",
     "quantite": "4 pièces",
     "unite": "pièces",
@@ -2741,13 +2581,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
-   "param:developpe",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -2858,16 +2692,11 @@
     "unite": "pièces",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances dév. 33 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "ok",
-    "raison": null
    }
   ],
-  "questions": [],
+  "questions": [
+   "suggestions:choisies"
+  ],
   "aChiffrer": []
  },
  {
@@ -2942,13 +2771,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -3006,10 +2828,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:developpe",
-   "param:faconnage@pieces-pliees",
-   "param:consommables"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -3056,13 +2875,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -3120,10 +2932,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:developpe",
-   "param:faconnage@pieces-pliees",
-   "param:consommables"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -3264,21 +3073,10 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:faconnage",
-   "param:developpe_gouttiere",
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -3359,13 +3157,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Faîtage en bande zinc",
     "quantite": "17 ml",
     "unite": "ml",
@@ -3402,12 +3193,7 @@
    }
   ],
   "questions": [
-   "param:perimetre_cheminee",
-   "param:nb_descentes",
-   "param:developpe",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
-   "param:consommables"
+   "suggestions:choisies"
   ],
   "aChiffrer": [
    "Ardoises (Ardoises naturelles Espagne 1er choix 30×22)"
@@ -3486,21 +3272,10 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Teinte à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:teinte_gouttiere",
-   "param:fixation_crochet",
-   "param:nb_angles",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -3528,19 +3303,10 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:qualite_ardoise",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -3695,10 +3461,7 @@
    }
   ],
   "questions": [
-   "param:diametre_sortie",
-   "param:fixation_crochet",
-   "param:usage_sortie",
-   "product:tuile"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -3791,13 +3554,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Jouées de lucarnes",
     "quantite": "2 pièces",
     "unite": "pièces",
@@ -3806,13 +3562,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
-   "param:developpe",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -3833,13 +3583,6 @@
     "unite": "pièces",
     "etat": "check",
     "raison": "Pose, développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    },
    {
     "designation": "Réfection de chéneau en membrane EPDM ou PVC",
@@ -3871,10 +3614,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -3917,20 +3657,10 @@
     "unite": "longueurs de 4 m",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:qualite_ardoise",
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -4236,13 +3966,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances alu anthracite de Ø80",
-    "quantite": "1 pièce",
-    "unite": "pièce",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Tubes de descente alu Ø80, longueur 4 m",
     "quantite": "2 pièces",
     "unite": "pièces",
@@ -4251,7 +3974,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -4324,12 +4047,7 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:nb_descentes",
-   "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -4424,11 +4142,7 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -4585,23 +4299,10 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
-   "param:developpe",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -4663,13 +4364,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Liteaux 27x40",
     "quantite": null,
     "unite": null,
@@ -4678,8 +4372,7 @@
    }
   ],
   "questions": [
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "suggestions:choisies"
   ],
   "aChiffrer": [
    "Liteaux 27x40"
@@ -4716,23 +4409,10 @@
     "unite": "longueurs de 4 m",
     "etat": "check",
     "raison": "Développé à préciser"
-   },
-   {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
-   "param:developpe",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -4873,13 +4553,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances dév. 25 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "ok",
-    "raison": null
-   },
-   {
     "designation": "Tuyau de descente zinc diam. 80mm, 2 descentes de 3 m",
     "quantite": "2 tubes de 3 m",
     "unite": "tubes de 3 m",
@@ -4894,7 +4567,9 @@
     "raison": null
    }
   ],
-  "questions": [],
+  "questions": [
+   "suggestions:choisies"
+  ],
   "aChiffrer": []
  },
  {
@@ -4930,13 +4605,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances",
-    "quantite": null,
-    "unite": null,
-    "etat": "check",
-    "raison": "Descentes à préciser"
-   },
-   {
     "designation": "Mastic colle polyuréthane 310 ml",
     "quantite": "2 pièces",
     "unite": "pièces",
@@ -4945,13 +4613,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
-   "param:developpe",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -5033,13 +4695,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -5097,11 +4752,7 @@
    }
   ],
   "questions": [
-   "param:qualite_ardoise",
-   "param:developpe_gouttiere",
-   "param:developpe",
-   "param:faconnage@pieces-pliees",
-   "param:consommables"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -5163,13 +4814,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -5227,10 +4871,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:developpe",
-   "param:faconnage@pieces-pliees",
-   "param:consommables"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -5326,13 +4967,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -5390,10 +5024,7 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:developpe",
-   "param:faconnage@pieces-pliees",
-   "param:consommables"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -5445,13 +5076,6 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Naissances Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Développé à préciser"
-   },
-   {
     "designation": "Crochets de gouttière Havraise",
     "quantite": "20 pièces",
     "unite": "pièces",
@@ -5509,11 +5133,7 @@
    }
   ],
   "questions": [
-   "param:qualite_ardoise",
-   "param:developpe_gouttiere",
-   "param:developpe",
-   "param:faconnage@pieces-pliees",
-   "param:consommables"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -5634,12 +5254,7 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:nb_descentes",
-   "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -5894,12 +5509,7 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:nb_descentes",
-   "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:consommables",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "suggestions:choisies"
   ],
   "aChiffrer": []
  },
@@ -5915,13 +5525,6 @@
     "raison": null
    },
    {
-    "designation": "Naissances dév. 33 Ø80",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "ok",
-    "raison": null
-   },
-   {
     "designation": "Tubes de descente zinc Ø80, longueur 4 m",
     "quantite": "2 pièces",
     "unite": "pièces",
@@ -5929,7 +5532,9 @@
     "raison": null
    }
   ],
-  "questions": [],
+  "questions": [
+   "suggestions:choisies"
+  ],
   "aChiffrer": []
  },
  {

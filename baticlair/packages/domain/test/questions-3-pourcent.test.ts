@@ -46,14 +46,16 @@ describe("une question dont toutes les réponses donnent la même commande (à 3
 
   it("« serrage » (1 % d'écart) : pas de question, la première réponse vaut hypothèse dite ; « descentes » (naissances 1 à 4) : question", () => {
     const plan = planOf(REF, lines);
-    const r = computeWithAnswers(REF, plan, { "param:nb_descentes": { value: "2", unit: "u" } });
+    // La fiche complète (tous les articles) compte aussi les angles de la gouttière (étape « Suggestions », 18 novembre 2026) : aucun ici.
+    const r = computeWithAnswers(REF, plan, { "param:nb_descentes": { value: "2", unit: "u" }, "param:nb_angles": { value: "0", unit: "u" } });
     expect(r.questions).toEqual([]);
     const crochets = r.needs.find((n) => n.needId === "crochets")!;
     expect(crochets.status).toBe("calculated");
     expect(crochets.assumptions).toContainEqual(expect.objectContaining({ key: "param:serrage", label: "Serrage des crochets", value: "Normal" }));
     // Sans la réponse « descentes » : une seule question, celle qui change vraiment la commande.
     const open = computeWithAnswers(REF, plan, {});
-    expect(open.questions.map((q) => q.key)).toEqual(["param:nb_descentes"]);
+    // (La fiche complète demande aussi les angles : un par angle, §15.)
+    expect(open.questions.map((q) => q.key).filter((k) => k !== "param:nb_angles")).toEqual(["param:nb_descentes"]);
     expect(gouttiere.params.some((p) => p.key === "serrage")).toBe(false);
   });
 });

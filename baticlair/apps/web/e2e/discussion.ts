@@ -14,12 +14,34 @@ export const calculerMaListe = (page: Page) => page.getByRole("button", { name: 
 /** Le nom du bouton à toucher ; `true` : la fonction a répondu elle-même (au clavier) ; rien : le choix par défaut. */
 type Choix = string | RegExp | Locator | true | null | undefined;
 
+/** L'étape « Suggestions » (Greg, 17 novembre 2026) : la carte à cases qui passe avant les questions. */
+export const carteSuggestions = (page: Page) => page.getByRole("group", { name: "Suggestions", exact: true });
+
+/**
+ * Passe l'étape « Suggestions » quand elle est là : coche les cases voulues (par défaut les naissances de la gouttière, ce
+ * que la liste ajoutait d'office avant l'étape), puis « Continuer ».
+ */
+export async function passerLesSuggestions(page: Page, cocher: readonly (string | RegExp)[] = [/^Naissances de gouttière/]) {
+  const carte = carteSuggestions(page);
+  if (!(await carte.isVisible())) return;
+  for (const nom of cocher) {
+    const c = carte.getByRole("checkbox", { name: nom });
+    if ((await c.count()) > 0) await c.first().check({ force: true });
+  }
+  await carte.getByRole("button", { name: "Continuer", exact: true }).click();
+  await expect(carte).toBeHidden({ timeout: 15_000 });
+}
+
 export async function repondreAuxQuestions(page: Page, choisir: (question: string, boutons: Locator) => Choix | Promise<Choix> = () => null): Promise<string[]> {
   const boutons = boutonsDeLaQuestion(page);
   const calculer = calculerMaListe(page);
   const posees: string[] = [];
   for (let i = 0; i < 60; i++) {
-    await expect(calculer.or(boutons).first()).toBeVisible({ timeout: 15_000 });
+    await expect(calculer.or(boutons).or(carteSuggestions(page)).first()).toBeVisible({ timeout: 15_000 });
+    if (await carteSuggestions(page).isVisible()) {
+      await passerLesSuggestions(page);
+      continue;
+    }
     if (await calculer.isVisible()) return posees;
     const question = (await boutons.getAttribute("aria-label")) ?? "";
     posees.push(question);

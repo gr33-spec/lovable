@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, ecrireDansLaDiscussion, repondreAuxQuestions, voirMaListe, zoneDesQuestions } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, repondreAuxQuestions, voirMaListe, zoneDesQuestions } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -1539,6 +1539,53 @@ test("zinguerie : une seule question de pliage pour le devis, une pièce se chan
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
   await expect.poll(async () => (await bar.boundingBox())?.y ?? 999).toBeLessThan(40);
   expect((await bar.boundingBox())!.height).toBeLessThan(64);
+});
+
+test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases avant les questions ; coché, l'article entre dans la liste ; le reste n'existe pas", async ({ page }) => {
+  // Le chantier ardoise et zinguerie de Greg (D-2026-020, anonymisé) : la gouttière a ses crochets écrits, pas ses naissances.
+  await signUp(page);
+  await page.goto("/chantiers/nouveau?mode=assistant");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-ardoise-zinguerie.pdf"));
+  const carte = carteSuggestions(page);
+  await expect(carte).toBeVisible({ timeout: 60_000 });
+  // Points 14 et 15 : une seule étape, les mots de Greg, des cases tirées de la fiche ; les crochets, écrits, ne sont pas proposés.
+  await expect(carte.getByText("Coche ce qu'il te faut, on l'ajoute à ta liste.")).toBeVisible();
+  const cases = carte.getByRole("checkbox");
+  await expect(cases).toHaveCount(3);
+  await expect(carte.getByRole("checkbox", { name: "Naissances de gouttière" })).not.toBeChecked();
+  await expect(carte.getByRole("checkbox", { name: "Talons de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
+  await expect(carte.getByRole("checkbox", { name: "Angles de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
+  await expect(carte.getByRole("checkbox", { name: /crochet/i })).toHaveCount(0);
+  // Aucune question de précision tant que l'étape est ouverte.
+  await expect(boutonsDeLaQuestion(page)).toHaveCount(0);
+  await expect(calculerMaListe(page)).toHaveCount(0);
+  // Point 17 : des cases larges (48 px au moins), dans l'écran, sans défilement horizontal.
+  const lignes = carte.locator("label");
+  for (let i = 0; i < (await lignes.count()); i++) {
+    const b = (await lignes.nth(i).boundingBox())!;
+    expect(b.height).toBeGreaterThanOrEqual(48);
+    expect(b.x + b.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await expect(carte.getByText("Rien de coché : ta liste reste telle que ton devis la dit.")).toBeVisible();
+  await lignes.filter({ hasText: "Naissances de gouttière" }).click();
+  await expect(carte.getByRole("checkbox", { name: "Naissances de gouttière" })).toBeChecked();
+  await expect(carte.getByText("1 article sera ajouté à ta liste.")).toBeVisible();
+  await carte.getByRole("button", { name: "Continuer", exact: true }).click();
+  await expect(carte).toBeHidden({ timeout: 15_000 });
+  // Point 16 : les questions ne portent que sur la liste ; les angles, non cochés, ne se demandent pas.
+  const posees = await repondreAuxQuestions(page);
+  expect(posees.join(" | ")).not.toMatch(/angle|talon/i);
+  await calculerEtVoirMaListe(page);
+  for (let i = 0; i < 3 && (await boutonsDeLaQuestion(page).count()) > 0; i++) {
+    posees.push(...(await repondreAuxQuestions(page)));
+    await calculerEtVoirMaListe(page);
+  }
+  expect(posees.join(" | ")).not.toMatch(/angle|talon/i);
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste).toBeVisible({ timeout: 60_000 });
+  await expect(liste.getByText(/^Naissances/).first()).toBeVisible();
+  await expect(liste.getByText(/Talons de gouttière|Angles de gouttière/)).toHaveCount(0);
 });
 
 test("rien ne part vide : un devis où je ne lis aucune ligne se dit en une phrase, avec « Réessayer », jamais un bouton d'envoi", async ({ page }) => {

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { SUGGESTIONS_KEY } from "../src/index.js";
+import { SUGGESTIONS_DU_BANC } from "./support/read-quote.js";
 import { briefTexte, DE00000071_LECTURE, ecranDeLecture, ROOFING_REFERENTIAL } from "../src/index.js";
 import { DE00000071_LINES } from "./devis-reels/de00000071.js";
 
@@ -24,7 +26,7 @@ const ref = ROOFING_REFERENTIAL;
 
 /** Les trois écrans, tels que les voit l'artisan : le bref (§50.8), les questions (§51.2) et la liste (§49), depuis la lecture. */
 function ecran(answers: Record<string, unknown> = {}) {
-  const e = ecranDeLecture({ ref, lecture: DE00000071_LECTURE, answers: answers as never });
+  const e = ecranDeLecture({ ref, lecture: DE00000071_LECTURE, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC, ...answers } as never });
   const bref = briefTexte(DE00000071_LECTURE.bref.map((texte, i) => ({ cle: `fiche-bref-${i + 1}`, texte })));
   // L'écran des questions montre les questions du modèle ; un « C'est bon » de ligne (à préciser) se règle sur la liste.
   const questions = e.purchase.questions.filter((d) => d.question).map((d) => ({ key: d.question!.key, text: d.question!.text, options: (d.question!.options ?? []).map((o) => o.label) }));

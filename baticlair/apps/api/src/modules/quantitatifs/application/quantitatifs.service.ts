@@ -1,4 +1,4 @@
-import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { normalizeText } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -305,6 +305,17 @@ export class QuantitatifsService {
           throw validationFailed("This question takes « ok »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         }
         reviewed = await this.takeoffs.decide(tenant, reviewed.takeoff.id, { action: decision.primary.action, lineIds: decision.lineIds, pieceLineIds: decision.pieceLineIds ?? [] });
+        continue;
+      }
+      // Étape « Suggestions » (Greg, 17 novembre 2026) : les cases cochées, parmi celles proposées, ou « aucune ».
+      // Une seule réponse possible, tant que l'étape est ouverte : jamais un article qui n'a pas été proposé.
+      if (r.question === SUGGESTIONS_KEY) {
+        const proposees = new Set((q?.options ?? []).map((o) => o.value));
+        const cochees = r.valeur === null || r.valeur.trim() === SUGGESTIONS_AUCUNE ? [] : [...new Set(r.valeur.split(",").map((x) => x.trim()).filter(Boolean))];
+        if (!q || (r.valeur !== null && r.valeur.trim() !== SUGGESTIONS_AUCUNE && cochees.length === 0) || cochees.some((c) => !proposees.has(c))) {
+          throw validationFailed("Unknown suggestion", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        }
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, SUGGESTIONS_KEY, cochees.length > 0 ? cochees.join(",") : SUGGESTIONS_AUCUNE);
         continue;
       }
       const key = q?.key ?? r.question.replace(/^engine:/, "");

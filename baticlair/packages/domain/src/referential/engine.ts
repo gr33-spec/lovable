@@ -94,6 +94,11 @@ export interface WorkItemInput {
   products: Record<string, SlotChoice>;
   /** Emplacements que le devis cite explicitement (« liteaux » écrits sur le devis). */
   mentioned: string[];
+  /**
+   * Le chemin de la lecture a l'étape « Suggestions » (Greg, 17 novembre 2026) : un emplacement `suggested` n'y est jamais
+   * ajouté d'office, même indissociable (la naissance) : il est proposé, et n'existe que coché (alors écrit).
+   */
+  suggestions?: true;
   preferences?: CompanyPreferences;
   /** Emplacements où l'artisan a dit « aucun de ces modèles » : ni produit lu, ni produit par défaut. */
   declined?: string[];
@@ -163,6 +168,8 @@ export interface Question {
   named?: boolean;
   /** Pourquoi elle compte : « De 1 191 à 1 445 pièces selon la réponse ». */
   impact?: string;
+  /** Étape « Suggestions » : des cases à cocher, plusieurs réponses possibles (ou aucune). */
+  multiple?: true;
 }
 
 /**
@@ -428,7 +435,7 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   // §49.1 : vaut pour TOUS les tiroirs, tous les métiers ; seule la validation du référentiel voit tous les articles.
   const writtenSlot = (key: string): boolean => {
     const slot = work.slots.find((s) => s.key === key);
-    return !!slot && (input.mentioned.includes(slot.key) || slot.indissociable === true || (slot.formOf !== undefined && input.mentioned.includes(slot.formOf)));
+    return !!slot && (input.mentioned.includes(slot.key) || (slot.indissociable === true && !(input.suggestions && slot.suggested)) || (slot.formOf !== undefined && input.mentioned.includes(slot.formOf)));
   };
   const citedSlot = (key: string) => input.cited?.find((c) => c.slot === key && !input.mentioned.includes(key));
   // Consommables de pose (§49.1 point 4) : seulement sur le « oui » de l'artisan, et liés à une ligne écrite.

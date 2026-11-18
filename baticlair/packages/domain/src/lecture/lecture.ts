@@ -294,7 +294,14 @@ function produitDansLeNom(ref: Referential, slot: Slot, nom: string): { id: stri
  * en faits du chantier, un ouvrage écrit sur plusieurs lignes pris ligne par ligne (une instance par ligne, §48.6).
  * Aucune règle de mots : l'ouvrage, l'emplacement et les données viennent du modèle, qui a lu le devis entier.
  */
-export function planDeLecture(ref: Referential, lecture: LectureDevis, lignes: readonly LigneLecture[], extraFacts: readonly SiteFact[] = []): QuotePlan {
+export function planDeLecture(
+  ref: Referential,
+  lecture: LectureDevis,
+  lignes: readonly LigneLecture[],
+  extraFacts: readonly SiteFact[] = [],
+  /** Étape « Suggestions » : les articles cochés par l'artisan (« ouvrage/emplacement »), qui valent des articles écrits. */
+  choisies: ReadonlySet<string> = new Set(),
+): QuotePlan {
   // Un ouvrage écrit sur plusieurs lignes POUR LE MÊME EMPLACEMENT (deux fenêtres, deux gouttières) se prend ligne par
   // ligne ; ses autres emplacements (le raccord de la fenêtre) suivent la ligne du devis qui les écrit. Une gouttière et
   // ses crochets sur deux lignes restent un seul ouvrage.
@@ -400,6 +407,12 @@ export function planDeLecture(ref: Referential, lecture: LectureDevis, lignes: r
     }
     inputs.set(wid, input);
     plans.push({ ref: l.id, status: "planned", workItemId: wid, slot: slot.key, mentions, characteristics: [], ...(measures ? { measures: true as const } : {}) });
+  }
+  // Étape « Suggestions » (Greg, 17 novembre 2026) : un article coché vaut un article écrit de son ouvrage.
+  for (const input of inputs.values()) {
+    const work = ref.workItems.find((w) => w.id === baseOf(input.workItemId));
+    input.suggestions = true;
+    for (const slot of work?.slots ?? []) if (slot.suggested && choisies.has(`${work!.id}/${slot.key}`) && !input.mentioned.includes(slot.key)) input.mentioned.push(slot.key);
   }
   // Les faits du chantier (fiche, réponses, code postal) et ce que les autres ouvrages du devis ont lu (« 2 descentes de 3 m »
   // sur le tuyau sert à la naissance de la gouttière ; l'aspect du zinc d'une bande ne fait pas celui de la couverture)
@@ -624,6 +637,40 @@ const UNITES: readonly { label: string; value: string }[] = [
 const unitWord = (unit: string | null) => (unit === "u" ? "pièces" : unit === "m2" ? "m²" : unit);
 
 /**
+ * ÉTAPE « SUGGESTIONS » (Greg, 17 novembre 2026, points 13 à 17). Après la lecture et avant les questions de précision :
+ * « Coche ce qu'il te faut, on l'ajoute à ta liste. » Les propositions viennent de la fiche du métier (`suggested` sur un
+ * emplacement), jamais de l'IA : un article que le devis ne dit pas alors qu'un autre article de son ouvrage est écrit.
+ * Cinq au plus ; aucune : pas d'étape. La réponse : les clés cochées séparées par des virgules, ou « aucune ».
+ * RÈGLE CHANGÉE : §49.1 point 5 et point 3. Avant : aucune suggestion, et la naissance d'une gouttière ajoutée d'office.
+ */
+export const SUGGESTIONS_KEY = "suggestions:choisies";
+export const SUGGESTIONS_AUCUNE = "aucune";
+export const SUGGESTIONS_MAX = 5;
+export const SUGGESTIONS_TEXTE = "Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.";
+
+/** Les articles cochés, lus dans la réponse (« gouttiere/naissance,gouttiere/talon ») ; « aucune » ou rien : aucun. */
+export function suggestionsChoisies(reponse: unknown): ReadonlySet<string> {
+  if (typeof reponse !== "string" || reponse === SUGGESTIONS_AUCUNE) return new Set();
+  return new Set(reponse.split(",").map((x) => x.trim()).filter(Boolean));
+}
+
+/** Les oublis probables d'un devis, d'après la fiche : dans l'ordre des ouvrages du devis, sans doublon, cinq au plus. */
+export function suggestionsDuPlan(ref: Referential, plan: QuotePlan): { key: string; label: string }[] {
+  const out: { key: string; label: string }[] = [];
+  for (const input of plan.inputs) {
+    const work = ref.workItems.find((w) => w.id === baseOf(input.workItemId));
+    // Seulement autour d'un article ÉCRIT : un ouvrage seulement cité par une ligne de pose ne propose rien.
+    if (!work || input.mentioned.length === 0) continue;
+    for (const slot of work.slots) {
+      const key = `${work.id}/${slot.key}`;
+      if (!slot.suggested || input.mentioned.includes(slot.key) || out.some((o) => o.key === key || o.label === slot.suggested!.label)) continue;
+      out.push({ key, label: slot.suggested.label });
+    }
+  }
+  return out.slice(0, SUGGESTIONS_MAX);
+}
+
+/**
  * LES TROIS ÉCRANS À PARTIR DE LA LECTURE : le calcul (ratios et conversions, §51.3), puis la liste dans l'ordre du devis,
  * chaque fourniture sous le nom que le modèle lui donne, orange quand elle attend une réponse ou une précision du
  * fournisseur ; les questions sont celles du modèle, et seulement elles (§51.2, §51.5).
@@ -684,7 +731,7 @@ export function ecranDeLecture(input: {
   const consoDeLaFiche = new Set((fiche?.conditionnements ?? []).filter((c) => c.consommable).map((c) => c.fourniture));
   const consoEnAttente = conso === null && (tous.some(estConso) || (fiche !== null && lignesPoint.some((l) => fiche.ratios.some((r) => r.ouvrage === l.fourniture?.ouvrage && consoDeLaFiche.has(r.fourniture)))));
   const points = tous.filter((a) => !estConso(a) || Number(conso) >= 1);
-  const plan = planDeLecture(ref, lecture, generiques(), input.extraFacts);
+  const plan = planDeLecture(ref, lecture, generiques(), input.extraFacts, suggestionsChoisies(answers[SUGGESTIONS_KEY]));
   const validation = validationDeLecture(ref.trade, generiques(), plan, new Set([...(input.lines ?? new Map())].filter(([, v]) => v.confirmed).map(([k]) => k)));
   const roles = new Map<string, RoleProposal>();
   for (const l of lignes) {
@@ -775,7 +822,8 @@ export function ecranDeLecture(input: {
   // La lecture est faite ; le calcul demande ce qui lui manque encore (voir plus bas, le filet de sécurité).
   // Filet de sécurité : une donnée que le calcul réclame et que le modèle n'a pas demandée (une question que révèle une
   // réponse : les bacs d'un rampant de 12 m) se pose quand même, avec les mots du référentiel ; jamais une donnée écrite.
-  const hasAnswers = Object.keys(answers).length > 0;
+  // Avoir répondu à l'étape « Suggestions » n'est pas avoir répondu à une question de précision.
+  const hasAnswers = Object.keys(answers).some((k) => k !== SUGGESTIONS_KEY);
   // Le calcul strict dit aussi la donnée d'ARTICLE qu'il attend encore (le développé d'une bande commandée façonnée, le
   // diamètre d'une sortie de toit) : la ligne l'attend, orange, tant que le modèle ou l'artisan ne l'a pas donnée.
   const strict = plan.inputs.length > 0 ? computeWithAnswers(ref, plan, answers, input.preferences ?? {}, input.options ?? {}, given) : { needs: [], questions: [] };
@@ -827,6 +875,15 @@ export function ecranDeLecture(input: {
   const kept = purchase.questions.filter((d) => !(d.question && answers[d.question.key] === null && !waited.has(d.question.key)));
   const canValidate = purchase.toBuy.length + purchase.toQuote.length > 0 && kept.every((q) => q.lineIds.length === 0 && !q.question) && purchase.toBuy.every((b) => b.state === "ready");
   const final = kept.length === purchase.questions.length ? purchase : { ...purchase, questions: kept, canValidate };
+  // Étape « Suggestions » : tant que l'artisan n'a pas répondu, elle passe avant toute autre question, seule (point 14) ;
+  // les questions de précision ne portent ensuite que sur la liste, cases cochées comprises (point 16).
+  const aProposer = answers[SUGGESTIONS_KEY] === undefined ? suggestionsDuPlan(ref, plan) : [];
+  if (aProposer.length > 0) {
+    const question: Question = { key: SUGGESTIONS_KEY, kind: "choose", text: SUGGESTIONS_TEXTE, options: aProposer.map((x) => ({ label: x.label, value: x.key })), multiple: true };
+    const etape: PurchaseView["questions"][number] = { key: SUGGESTIONS_KEY, state: "missing", title: "Suggestions", text: SUGGESTIONS_TEXTE, lineIds: [], primary: null, secondary: [], question };
+    const sansFournitureS = lignes.filter((l) => !l.fourniture).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ") || null }));
+    return { plan, validation, roles, view, purchase: { ...final, questions: [etape], canValidate: false }, questions: [question], lignes, sansFourniture: sansFournitureS };
+  }
   const sansFourniture = lignes.filter((l) => !l.fourniture).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ") || null }));
   return { plan, validation, roles, view, purchase: final, questions, lignes, sansFourniture };
 }
