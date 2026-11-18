@@ -302,7 +302,7 @@ test("onglet Offres : « Commander » sur chaque offre, la confirmation habituel
   await expect(confirmation).toContainText("Tu commandes chez Négoce Cyan.");
   await expect(confirmation).toContainText("HT livré");
   await expect(confirmation.getByLabel("Date de livraison souhaitée")).toBeVisible();
-  await confirmation.getByRole("button", { name: "Annuler" }).click();
+  await confirmation.getByRole("button", { name: "Annuler", exact: true }).click();
   await expect(confirmation).toHaveCount(0);
   await expect(page).toHaveURL(/onglet=offres/);
   await expect(offres.getByRole("button", { name: /^Commander chez/ })).toHaveCount(2);

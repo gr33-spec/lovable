@@ -55,7 +55,7 @@ function Chantier() {
   const routeur = useRouter();
   // « Commander » depuis l'onglet Offres : la confirmation de commande du suivi (le même parcours), Annuler ramène ici.
   const commanderDepuisOffres = (recipientId: string) =>
-    routeur.replace(`/chantiers/${encodeURIComponent(id)}?commander=${encodeURIComponent(recipientId)}`, { scroll: false });
+    routeur.replace(`/chantiers/${encodeURIComponent(id)}?commander=${encodeURIComponent(recipientId)}&t=${Date.now()}`, { scroll: false });
   const fetchProject = useCallback((signal: AbortSignal) => api<Project>(`/v1/projects/${encodeURIComponent(id)}`, { signal }), [id]);
   const { data: project, setData: setProject, error, reload } = useResource(fetchProject);
   const [editing, setEditing] = useState(false);

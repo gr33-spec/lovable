@@ -225,10 +225,15 @@ function SuiviDemande({
   const routeur = useRouter();
   const chemin = usePathname();
   const aCommander = params.get("commander");
+  // Chaque appui sur « Commander » porte son repère (`t`) : la confirmation s'ouvre une fois par appui, jamais rouverte
+  // pendant que la page se recharge après la commande.
+  const appui = aCommander ? `${aCommander}:${params.get("t") ?? ""}` : null;
+  const [traite, setTraite] = useState<string | null>(null);
   const [direct, setDirect] = useState<string | null>(null);
   const oublierCommander = (onglet: "offres" | null) => {
     const suite = new URLSearchParams(params.toString());
     suite.delete("commander");
+    suite.delete("t");
     if (onglet) suite.set("onglet", onglet);
     const q = suite.toString();
     routeur.replace(q ? `${chemin}?${q}` : chemin, { scroll: false });
@@ -398,7 +403,8 @@ function SuiviDemande({
   const retenus = request.recipients.filter((r) => request.retainedSupplierIds.includes(r.supplier.id));
   const aEnvoyer = request.recipients.filter((r) => r.status === "to_send");
   const hasOffers = (offers.data?.items.length ?? 0) > 0;
-  if (aCommander && direct !== aCommander && request.retainedSupplierIds.length === 0 && repondus.some((r) => r.id === aCommander)) {
+  if (aCommander && appui !== traite && request.retainedSupplierIds.length === 0 && repondus.some((r) => r.id === aCommander)) {
+    setTraite(appui);
     setDirect(aCommander);
     setFeuille(true);
   }
