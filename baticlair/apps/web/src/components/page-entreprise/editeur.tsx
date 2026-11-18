@@ -255,7 +255,11 @@ function CadreApercu({ contenu, ecran, hauteur = "100%", interactif = false, tes
       {/* Le `transform` fait du cadre le repère de la barre d'appel (position fixe) : elle reste dans l'aperçu. Le défilement
           est sur ce cadre, jamais rendu inerte : le doigt fait défiler le site (Greg, 17 novembre 2026). */}
       <div ref={defile} className="overscroll-contain overflow-y-auto bg-white" style={{ height: hauteur, transform: "translateZ(0)", WebkitOverflowScrolling: "touch" }} data-testid={testid} onClickCapture={clic}>
-        <div style={ordinateur ? { width: 1200, transform: `scale(${echelle})`, transformOrigin: "top left", height: `${100 / echelle}%` } : undefined} {...(interactif ? {} : { inert: true, "aria-hidden": true })}>
+        {/* Ordinateur : le site se dessine sur 1200 px puis se RÉDUIT par `zoom` (Greg, 18 novembre 2026 : sur iPhone, l'aperçu
+            « Ordinateur » restait blanc un long moment). Avant : `transform: scale`, qui faisait de la page entière une
+            image géante que Safari met du temps à peindre ; `zoom` se dessine comme une page normale, et le défilement
+            suit la vraie hauteur. */}
+        <div style={ordinateur ? { width: 1200, zoom: echelle } : undefined} {...(interactif ? {} : { inert: true, "aria-hidden": true })}>
           <VuePage contenu={contenu} apercu />
         </div>
       </div>

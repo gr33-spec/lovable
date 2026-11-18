@@ -16,11 +16,20 @@ export function SuiviDefilement() {
     const racine = repere.current?.closest<HTMLElement>(".pe");
     const accueil = racine?.querySelector("#accueil");
     if (!racine || !accueil || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(([e]) => {
-      if (!e) return;
-      if (!e.isIntersecting && e.boundingClientRect.top < 0) racine.dataset.defile = "1";
-      else delete racine.dataset.defile;
-    });
+    // Le cadre qui défile : l'écran sur la vraie page, le téléphone dans l'aperçu de « Mon site » (Greg, 18 novembre 2026 :
+    // dans l'aperçu, la barre « Appeler » ne suivait pas son cadre). Sans lui, l'accueil se mesurait contre l'écran entier.
+    let cadre: HTMLElement | null = racine.parentElement;
+    while (cadre && !/(auto|scroll)/.test(getComputedStyle(cadre).overflowY)) cadre = cadre.parentElement;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e) return;
+        const haut = e.rootBounds?.top ?? 0;
+        if (!e.isIntersecting && e.boundingClientRect.top < haut) racine.dataset.defile = "1";
+        else delete racine.dataset.defile;
+      },
+      // La barre du haut du site recouvre le bas de l'accueil : caché sous elle, l'accueil est déjà passé.
+      { root: cadre, rootMargin: `-${racine.querySelector<HTMLElement>(".pe-entete")?.offsetHeight ?? 0}px 0px 0px 0px` },
+    );
     io.observe(accueil);
     return () => io.disconnect();
   }, []);
