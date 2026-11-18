@@ -255,3 +255,24 @@ couvert ici, demander au fondateur plutôt que deviner.
   - Visserie et chevilles (puis description + nombre).
   - Solins et abergements (cheminée, mur contre le toit).
 - Le fondateur ne voit pas d'oubli « typique » en plus : ne pas en inventer.
+
+## Pièges des devis
+
+- Les m² du devis sont des m² en rampant : on ne demande pas la pente pour
+  convertir.
+- Ligne floue de zinguerie (« zinguerie diverse ») : on pose la question
+  zinc (« Tu plies toi-même ou je te commande les pièces façonnées ? »), puis
+  le détail.
+- Toute autre ligne floue (« fournitures diverses ») : on demande le détail.
+- Main-d'œuvre, dépose, échafaudage, benne : ignorés (pas de matériel à
+  commander).
+- Même élément écrit deux fois : on demande « c'est le même ou deux
+  différents ? ». On n'additionne pas et on ne supprime pas tout seul.
+
+## Points ouverts (à faire valider par le fondateur avant de coder)
+
+- Proportion de crochets à pointe à prévoir avec du crochet à agrafe
+  (ardoise).
+- Ratio ml de liteau au m² : recouper 1 ÷ pureau avec les fiches fabricants.
+- Tuile canal : courant et couvert, une ou deux lignes, quel ratio.
+- Fixation des tuiles : comment obtenir la zone de vent et la pente.
