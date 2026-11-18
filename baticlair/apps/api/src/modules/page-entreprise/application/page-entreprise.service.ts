@@ -12,6 +12,9 @@ import {
   photoPubliqueDefaut,
   vignetteDefaut,
   siteWebPropre,
+  lienGooglePropre,
+  engagementsPropres,
+  ENGAGEMENTS,
   telephonePropre,
   THEMES_METIER,
   themeDuMetier,
@@ -63,6 +66,8 @@ export interface ModificationPage {
   zone?: string | null;
   horaires?: string | null;
   siteWeb?: string | null;
+  lienGoogle?: string | null;
+  engagements?: string[];
   creeeEn?: number | null;
   certifications?: string[];
   afficherAdresse?: boolean;
@@ -188,6 +193,8 @@ export class PageEntrepriseService {
       horaires: page.horaires,
       telephone: telephonePropre(page.telephone ?? e.phone),
       siteWeb: page.siteWeb,
+      lienGoogle: page.lienGoogle,
+      engagements: engagementsPropres(page.engagements),
       adressePostale: page.afficherAdresse ? (e.address?.trim() || null) : null,
       creeeEn: page.creeeEn,
       certifications: page.certifications,
@@ -234,6 +241,8 @@ export class PageEntrepriseService {
         zone: page.zone,
         horaires: page.horaires,
         siteWeb: page.siteWeb,
+        lienGoogle: page.lienGoogle,
+        engagements: engagementsPropres(page.engagements),
         creeeEn: page.creeeEn,
         certifications: page.certifications,
         afficherAdresse: page.afficherAdresse,
@@ -249,6 +258,7 @@ export class PageEntrepriseService {
         couleursBoutons: COULEURS_BOUTONS,
         photosDefaut: PHOTOS_DEFAUT.map((p) => ({ id: p.id, nom: p.nom, metier: p.metier, vignette: vignetteDefaut(p) })),
         certifications: CERTIFICATIONS_SUGGEREES,
+        engagements: ENGAGEMENTS,
         theme: themeDuMetier(contenu.metierPrincipal),
         limites: LIMITES_PAGE,
         stockagePhotos: this.stockage.actif,
@@ -295,6 +305,11 @@ export class PageEntrepriseService {
       if (m.siteWeb && !siteWebPropre(m.siteWeb)) throw refus("site_web", "Cette adresse de site n'est pas valable.", "siteWeb");
       d.siteWeb = siteWebPropre(m.siteWeb);
     }
+    if (m.lienGoogle !== undefined) {
+      if (m.lienGoogle && !lienGooglePropre(m.lienGoogle)) throw refus("lien_google", "Colle le lien de ta fiche Google (il commence par google.com, g.page ou maps.app.goo.gl).", "lienGoogle");
+      d.lienGoogle = lienGooglePropre(m.lienGoogle);
+    }
+    if (m.engagements !== undefined) d.engagements = engagementsPropres(m.engagements);
     if (m.creeeEn !== undefined) {
       const annee = this.now().getFullYear();
       if (m.creeeEn !== null && (!Number.isInteger(m.creeeEn) || m.creeeEn < LIMITES_PAGE.creeeEn.min || m.creeeEn > annee)) throw refus("creee_en", `Année entre ${LIMITES_PAGE.creeeEn.min} et ${annee}.`, "creeeEn");

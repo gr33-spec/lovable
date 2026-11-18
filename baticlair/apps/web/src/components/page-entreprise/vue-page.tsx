@@ -1,4 +1,4 @@
-import { ArrowRight, Award, BadgeCheck, CalendarDays, Clock, Globe, Heart, Leaf, Mail, MapPin, Phone, ShieldCheck, type LucideIcon } from "lucide-react";
+import { ArrowRight, Award, BadgeCheck, CalendarDays, Car, Clock, FileCheck, Globe, Heart, Leaf, Mail, MapPin, Phone, ShieldCheck, Star, Zap, type LucideIcon } from "lucide-react";
 import {
   lienAppel,
   menuDeLaPage,
@@ -36,6 +36,9 @@ import "./page-entreprise.css";
  * l'aperçu de l'éditeur se dessine comme un vrai téléphone, même sur un ordinateur.
  */
 /** L'icône d'une garantie, d'après ses mots (jamais un label inventé). */
+/** Les engagements cochés par l'artisan (Greg, 18 novembre 2026) : une icône chacun. */
+const ICONES_ENGAGEMENT: Record<string, LucideIcon> = { "Devis gratuit": FileCheck, "Déplacement gratuit": Car, "Intervention rapide": Zap };
+
 function iconeDePreuve(texte: string): LucideIcon {
   if (/v[ée]rifi/i.test(texte)) return BadgeCheck;
   if (/d[ée]cennale|assurance|garantie/i.test(texte)) return ShieldCheck;
@@ -85,7 +88,11 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
   } as React.CSSProperties;
   const ville = villeDeLaZone(c.zone);
   // Le bandeau de garanties de l'accueil : seulement du vrai (preuves déclarées ou vérifiées, la zone écrite).
-  const garanties: { texte: string; Icone: LucideIcon }[] = preuves.map((x) => ({ texte: x, Icone: iconeDePreuve(x) }));
+  // Les engagements COCHÉS par l'artisan d'abord (Greg, 18 novembre 2026), puis les preuves ; jamais un texte de Mobiiz.
+  const garanties: { texte: string; Icone: LucideIcon }[] = [
+    ...(c.engagements ?? []).map((x) => ({ texte: x, Icone: ICONES_ENGAGEMENT[x] ?? Award })),
+    ...preuves.map((x) => ({ texte: x, Icone: iconeDePreuve(x) })),
+  ];
   if (garanties.length < 3 && ville) garanties.push({ texte: `${ville} et alentours`, Icone: MapPin });
   // La présentation n'apparaît jamais deux fois (Greg, 17 novembre 2026) : la première phrase dans la carte, la suite
   // dans « À propos » ; une seule phrase, pas de carte.
@@ -135,6 +142,11 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
                 </a>
               ) : null}
             </div>
+            {c.lienGoogle ? (
+              <a href={lien(c.lienGoogle)} rel="noopener nofollow" target="_blank" className="pe-lien-google">
+                <Star size={17} strokeWidth={2.2} aria-hidden="true" /> Voir nos avis Google
+              </a>
+            ) : null}
             {garanties.length ? (
               <ul className="pe-preuves" aria-label="Garanties">
                 {garanties.map(({ texte, Icone }) => (

@@ -20,6 +20,8 @@ import {
   refusAdresse,
   rubriquesVisibles,
   siteWebPropre,
+  lienGooglePropre,
+  engagementsPropres,
   teinteDe,
   TEINTES,
   telephonePropre,
@@ -48,6 +50,8 @@ function contenu(partiel: Partial<ContenuPage> = {}): ContenuPage {
     horaires: null,
     telephone: null,
     siteWeb: null,
+    lienGoogle: null,
+    engagements: [],
     adressePostale: null,
     creeeEn: null,
     certifications: [],
@@ -263,5 +267,24 @@ describe("finitions téléphone (Greg, 17 novembre 2026)", () => {
     expect(decouperPresentation("Couvreur depuis 2011.")).toEqual({ carte: null, suite: "Couvreur depuis 2011." });
     expect(decouperPresentation("Couvreur depuis 2011")).toEqual({ carte: null, suite: "Couvreur depuis 2011" });
     expect(decouperPresentation(null)).toEqual({ carte: null, suite: null });
+  });
+});
+
+describe("fiche Google et engagements cochés (Greg, 18 novembre 2026)", () => {
+  it("le lien n'est gardé que s'il mène chez Google ; http devient https", () => {
+    expect(lienGooglePropre("https://maps.app.goo.gl/AbCd123")).toBe("https://maps.app.goo.gl/AbCd123");
+    expect(lienGooglePropre("g.page/r/xyz/review")).toBe("https://g.page/r/xyz/review");
+    expect(lienGooglePropre("http://www.google.com/maps/place/Toits+Martin")).toBe("https://www.google.com/maps/place/Toits+Martin");
+    expect(lienGooglePropre("https://www.google.fr/search?q=toits")).toBe("https://www.google.fr/search?q=toits");
+    expect(lienGooglePropre("https://share.google/abc")).toBe("https://share.google/abc");
+    expect(lienGooglePropre("https://google.com.evil.fr/x")).toBeNull();
+    expect(lienGooglePropre("https://google.ab.cd/x")).toBeNull();
+    expect(lienGooglePropre("https://avis-pas-chers.fr")).toBeNull();
+    expect(lienGooglePropre("javascript:alert(1)")).toBeNull();
+    expect(lienGooglePropre("")).toBeNull();
+  });
+  it("seuls les trois engagements connus, dans leur ordre, sans doublon", () => {
+    expect(engagementsPropres(["Intervention rapide", "Devis gratuit", "Devis gratuit", "Travaux garantis"])).toEqual(["Devis gratuit", "Intervention rapide"]);
+    expect(engagementsPropres(null)).toEqual([]);
   });
 });

@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { photoDefautDe, photoPubliqueDefaut, texteSurCouleur, type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
+import { lienGooglePropre, photoDefautDe, photoPubliqueDefaut, texteSurCouleur, type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
 import { Button, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useTyping } from "@/lib/typing";
@@ -63,6 +63,8 @@ interface Reglages {
   zone: string | null;
   horaires: string | null;
   siteWeb: string | null;
+  lienGoogle: string | null;
+  engagements: string[];
   creeeEn: number | null;
   certifications: string[];
   afficherAdresse: boolean;
@@ -86,6 +88,7 @@ interface MaPage {
     couleursBoutons: readonly { id: string; nom: string; hex: string }[];
     photosDefaut: readonly PhotoGalerie[];
     certifications: readonly string[];
+    engagements: readonly string[];
     theme: { nom: string; teinte: string; accroche: string; presentation: string; prestations: Prestation[] };
     limites: { accroche: number; presentation: number; photos: number; prestations: number };
     stockagePhotos: boolean;
@@ -94,7 +97,7 @@ interface MaPage {
 }
 
 type Etat = "pret" | "enregistrement" | "enregistre" | "erreur";
-const CHAMPS_TEXTE = new Set<keyof Reglages>(["accroche", "presentation", "telephone", "zone", "horaires", "siteWeb", "prestations"]);
+const CHAMPS_TEXTE = new Set<keyof Reglages>(["accroche", "presentation", "telephone", "zone", "horaires", "siteWeb", "lienGoogle", "prestations"]);
 
 type Onglet = "couleurs" | "photos" | "prestations" | "chantiers" | "apropos" | "contact" | "publier";
 const ONGLETS: { id: Onglet; libelle: string; Icone: LucideIcon }[] = [
@@ -638,6 +641,9 @@ export function EditeurMaPage() {
       zone: vide(r.zone) ?? data.profil.zone,
       horaires: vide(r.horaires),
       siteWeb: vide(r.siteWeb),
+      // L'aperçu ne montre le bouton que pour un lien que le serveur acceptera.
+      lienGoogle: lienGooglePropre(r.lienGoogle),
+      engagements: r.engagements,
       creeeEn: r.creeeEn,
       certifications: r.certifications,
       adressePostale: r.afficherAdresse ? data.profil.adressePostale : null,
@@ -916,6 +922,19 @@ export function EditeurMaPage() {
         </Bloc>
         <PhotoEquipe data={data} actif={photosOk} onErreur={setErreur} recharger={charger} />
         <Bloc titre="Tes garanties">
+          <span className="text-[14px] font-bold">Tes engagements</span>
+          <div className="flex flex-wrap gap-2">
+            {data.choix.engagements.map((c) => {
+              const coche = r.engagements.includes(c);
+              return (
+                <button key={c} type="button" aria-pressed={coche} onClick={() => changer("engagements", coche ? r.engagements.filter((x) => x !== c) : [...r.engagements, c])} className={`pressable min-h-11 rounded-full border-2 px-3 text-[14px] font-bold ${coche ? "border-accent bg-accent/20" : "border-line"}`}>
+                  {coche ? "✓ " : ""}
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+          <span className="text-[13px] text-muted">Coche seulement ce que tu fais vraiment : ils s&apos;affichent en haut de ton site.</span>
           <AnneeChamp valeur={r.creeeEn} onChange={(n) => changer("creeeEn", n)} />
           <span className="text-[14px] font-bold">Certifications et assurances</span>
           <div className="flex flex-wrap gap-2">
@@ -959,6 +978,7 @@ export function EditeurMaPage() {
         <Champ label="Téléphone" type="tel" inputMode="tel" valeur={r.telephone ?? ""} onChange={(v) => changer("telephone", v || null)} max={25} placeholder={data.profil.telephone ?? "06 12 34 56 78"} aide={data.profil.telephone ? "Vide : celui de ton profil, mis à jour tout seul." : "Le bouton « Appeler » apparaît avec un numéro."} />
         <Champ label="Zone d'intervention" valeur={r.zone ?? ""} onChange={(v) => changer("zone", v || null)} max={120} placeholder={data.profil.zone ?? "Lannion, Perros-Guirec, Trégor"} aide={data.profil.zone ? `Vide : ${data.profil.zone}, d'après ton profil.` : undefined} />
         <Champ label="Horaires" valeur={r.horaires ?? ""} onChange={(v) => changer("horaires", v || null)} max={200} placeholder="Du lundi au vendredi, 8 h – 18 h" />
+        <Champ label="Lien de ma fiche Google" type="url" inputMode="url" valeur={r.lienGoogle ?? ""} onChange={(v) => changer("lienGoogle", v || null)} max={500} placeholder="https://maps.app.goo.gl/…" aide="Dans Google Maps, ouvre ta fiche, touche « Partager » et colle le lien ici : un bouton « Voir nos avis Google » apparaît sur ton site." />
         <Champ label="Ton autre site internet" type="url" inputMode="url" valeur={r.siteWeb ?? ""} onChange={(v) => changer("siteWeb", v || null)} max={200} placeholder="www.mon-entreprise.fr" aide="Si tu en as déjà un : un lien « Voir mon site » apparaît en bas de ton site Mobiiz." />
         {data.profil.adressePostale ? <Interrupteur actif={r.afficherAdresse} onChange={(v) => changer("afficherAdresse", v)} label="Afficher mon adresse" aide={`${data.profil.adressePostale}. Désactivé : seule ta zone s'affiche.`} /> : null}
         <p className="text-[13px] text-muted">« Demander un devis » : le message du client t&apos;arrive par e-mail et dans « Messages et réponses ». Ton e-mail n&apos;est jamais montré.</p>

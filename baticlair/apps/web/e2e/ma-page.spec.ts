@@ -272,6 +272,40 @@ test("Mon site : la photo par défaut du métier, remplacée d'un tap depuis la 
   await sansDefilementHorizontal(page);
 });
 
+test("Mon site : engagements cochés et « Voir nos avis Google » (Greg, 18 novembre 2026)", async ({ page, browser }, info) => {
+  test.setTimeout(150_000);
+  await inscrire(page, `Toits Martin ${unique()}`);
+  await page.goto("/mon-site");
+  const garanties = apercu(page).getByRole("list", { name: "Garanties" });
+  // Rien de coché : aucun engagement ni bouton Google.
+  await expect(apercu(page).getByText("Devis gratuit")).toHaveCount(0);
+  await expect(apercu(page).getByText("Voir nos avis Google")).toHaveCount(0);
+  await onglet(page, "À propos");
+  await toucher(page.getByRole("button", { name: "Devis gratuit" }));
+  await toucher(page.getByRole("button", { name: "Intervention rapide" }));
+  await enregistre(page);
+  await expect(garanties.getByText("Devis gratuit")).toBeVisible();
+  await expect(garanties.getByText("Intervention rapide")).toBeVisible();
+  await expect(garanties.getByText("Déplacement gratuit")).toHaveCount(0);
+  await onglet(page, "Contact");
+  const champ = page.getByRole("textbox", { name: /^Lien de ma fiche Google/ });
+  await champ.fill("https://avis-pas-chers.fr/x");
+  await expect(page.getByText(/Colle le lien de ta fiche Google/)).toBeVisible();
+  await champ.fill("https://maps.app.goo.gl/AbCd123");
+  await enregistre(page);
+  await expect(apercu(page).getByText("Voir nos avis Google")).toBeVisible();
+  // En ligne : le bouton mène à la fiche, dans un autre onglet.
+  await onglet(page, "Publier");
+  await page.getByRole("switch", { name: /Page visible/ }).click();
+  await enregistre(page);
+  const adresse = ((await page.getByText(/\/e\/[a-z0-9-]+$/).first().textContent()) ?? "").split("/e/")[1]!.trim();
+  const v = await visiteur(browser, { viewport: page.viewportSize()!, isMobile: info.project.name === "telephone", hasTouch: info.project.name === "telephone" });
+  await v.goto(`/e/${adresse}`);
+  await expect(v.getByRole("link", { name: "Voir nos avis Google" })).toHaveAttribute("href", "https://maps.app.goo.gl/AbCd123");
+  await expect(v.getByRole("list", { name: "Garanties" }).getByText("Devis gratuit")).toBeVisible();
+  await v.context().close();
+});
+
 test("Ma page : l'éditeur dans les thèmes clair et sombre de l'application, sans défilement horizontal", async ({ page }) => {
   test.setTimeout(120_000);
   await inscrire(page, `Toits Martin ${unique()}`);

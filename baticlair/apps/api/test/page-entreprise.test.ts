@@ -133,6 +133,20 @@ describe("Ma page : réglages", () => {
     expect(c.creditPhoto).toBeNull();
   });
 
+  it("FICHE GOOGLE ET ENGAGEMENTS : un lien Google seulement ; seuls les engagements cochés, connus, s'affichent", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
+    await rendrePublique(a.agent);
+    const lire = async () => (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
+    expect(await lire()).toMatchObject({ lienGoogle: null, engagements: [] });
+    const p = (await a.agent.get("/v1/ma-page").expect(200)).body;
+    expect(p.choix.engagements).toEqual(["Devis gratuit", "Déplacement gratuit", "Intervention rapide"]);
+    expect((await a.agent.patch("/v1/ma-page").send({ lienGoogle: "https://avis-pas-chers.fr/toits" }).expect(400)).body.error.details).toMatchObject({ reason: "lien_google" });
+    await a.agent.patch("/v1/ma-page").send({ lienGoogle: "maps.app.goo.gl/AbCd123", engagements: ["Intervention rapide", "Devis gratuit", "Travaux garantis"] }).expect(200);
+    expect(await lire()).toMatchObject({ lienGoogle: "https://maps.app.goo.gl/AbCd123", engagements: ["Devis gratuit", "Intervention rapide"] });
+    await a.agent.patch("/v1/ma-page").send({ lienGoogle: null, engagements: [] }).expect(200);
+    expect(await lire()).toMatchObject({ lienGoogle: null, engagements: [] });
+  });
+
   it("chaque champ validé, refus en une phrase ; certifications sans doublon, plafonnées", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin");
     const refus = async (corps: object) => (await a.agent.patch("/v1/ma-page").send(corps).expect(400)).body.error.details;
