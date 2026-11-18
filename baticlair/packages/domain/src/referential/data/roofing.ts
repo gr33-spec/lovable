@@ -384,6 +384,22 @@ const RAMPANT_PARAM: ParamDef = {
   ],
 };
 /**
+ * Le rampant d'une couverture en bacs de zinc (joint debout, tasseaux) : un bac va de l'égout au faîtage, sa longueur EST
+ * celle du rampant (« Bacs façonnés à la longueur du rampant », §7). Retour de Greg du 18 novembre 2026 (D-2026-024) : le
+ * devis disait « bacs de 4 m » et la longueur du rampant était demandée quand même. Les mots du devis sont ici.
+ */
+// Règle changée (18 novembre 2026) : avant, 5,5 m supposés en silence quand le devis ne disait rien. Pour des bacs, la
+// longueur commandée EST le rampant : une supposition donne une mauvaise commande. Écrite au devis, elle est prise ; sinon
+// elle se demande, en mètres (plus de boutons « jusqu'à 5,5 m », qui ne disent pas une longueur de bac).
+const RAMPANT_BACS_PARAM: ParamDef = {
+  key: RAMPANT_PARAM.key,
+  label: RAMPANT_PARAM.label,
+  unit: "m",
+  kind: "site_data",
+  question: "Longueur des bacs (le rampant, de l'égout au faîtage) ?",
+  textLabels: ["rampant", "longueur des bacs", "longueur de bac", "longueur bac", "bac"],
+};
+/**
  * Métal façonné (§40.2, §41.2) : « tu façonnes toi-même ou tu commandes façonné ? ». La réponse change
  * tout : bobines au mètre linéaire d'un côté, pièces aux dimensions de l'autre. Pas de défaut : on demande.
  */
@@ -3218,7 +3234,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       section: "principal",
       label: "Couverture zinc à joint debout",
       triggers: ["standing_seam"],
-      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
+      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_BACS_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
       slots: [
         { key: "couverture", family: "standing_seam", label: "Couverture zinc joint debout", measureOnly: true },
         { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc en bobine largeur 650 mm (naturel ou prépatiné selon le devis), commandé au mètre linéaire.", source: "vmzinc-joint-debout", productId: "bobine-zinc-standard" }, formOf: "couverture" },

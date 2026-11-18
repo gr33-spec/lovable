@@ -55,7 +55,8 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     // façonnée se fabrique à son développé ; façonnée sur place au-delà de 6 ml, un bobineau de 500 mm suffit et la
     // réponse est simplement ignorée), et ce que le comptoir demande pour la gouttière (§47.8). Plus « égout et
     // faîtage ? » (proposés dans « On ajoute ? »). Le voligeage est reconnu (§7), plus « article inconnu ».
-    expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["param:developpe", "param:developpe_gouttiere", "param:diametre_descente", "param:faconnage@couverture-zinc-joint-debout", "param:faconnage@pieces-pliees"]);
+    // Règle changée le 18 novembre 2026 : le rampant des bacs (non écrit ici) se demande, il n'est plus supposé à 5,5 m.
+    expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["param:developpe", "param:developpe_gouttiere", "param:diametre_descente", "param:faconnage@couverture-zinc-joint-debout", "param:faconnage@pieces-pliees", "param:longueur_rampant"]);
     // La réponse de pliage vaut pour les pièces pliées, pas pour les bacs : le joint debout reste à demander.
     const parPiece = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage@pieces-pliees": { value: "1", unit: "u" } });
     const restantes = parPiece.questions.map((q) => q.question?.key ?? q.key);
@@ -74,7 +75,7 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     // L'aspect se lit sur sa ligne (la bande « en zinc quartz ») ; une bande ne fait pas l'aspect de la couverture.
     // Je façonne 13 ml : des FEUILLES 2 × 1 m (§48.6), jamais du zinc au kg ni un bobineau : développé 10 cm, 10 bandes de
     // 2 m par feuille → 1 feuille. Le joint debout, lui, part en bobine au mètre linéaire, largeur écrite (jamais au kg).
-    const surPlace = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
+    const surPlace = readQuote(ZINC_QUOTE, { "param:longueur_rampant": { value: "5.5", unit: "m" }, "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
     expect(surPlace.toBuy.find((b) => b.needIds.includes("feuilles-bandes"))).toMatchObject({ label: "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", quantity: "1 pièce" });
     expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.label).toBe("Bobine zinc naturel 0,65 mm, largeur 500 mm");
     expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.order?.unit).toBe("ml");

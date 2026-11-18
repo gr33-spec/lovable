@@ -2,7 +2,7 @@ import { Decimal } from "../shared/decimal.js";
 import { parseUnit, type UnitCode } from "../quantity/unit.js";
 import { paramsFromContext, type ChantierContext, type SiteFact } from "../referential/context.js";
 import { CONSUMABLES_KEY, CONSUMABLES_QUESTION, type CompanyPreferences, type EngineOptions, type ParamValue, type Question, type WorkItemInput } from "../referential/engine.js";
-import { FICHE_PARAMS_CHANTIER, ficheFacts, parseFiche, parseFicheEnregistree, type FicheChantier } from "../referential/fiche.js";
+import { FICHE_PARAMS_CHANTIER, ficheFacts, paramOfDonnee, paramParNom, parseFiche, parseFicheEnregistree, type FicheChantier } from "../referential/fiche.js";
 import type { LineRole, RoleProposal } from "../referential/line-roles.js";
 import { baseOf, INSTANCE_SEP, type Referential, type Slot, type WorkItemType } from "../referential/model.js";
 import { readDimension, type LinePlan, type QuotePlan } from "../referential/plan.js";
@@ -386,13 +386,14 @@ export function planDeLecture(
     // Les données écrites sur la ligne, telles que le modèle les a lues (« taille_fenetre » : « 114x118 »).
     for (const [key, raw] of Object.entries(f.donnees)) {
       if (key === "produit") continue;
-      const def = work.params.find((p) => p.key === key);
+      // La clé de la fiche, ou le mot du devis qui la nomme (« longueur_bac » : la longueur du rampant d'un joint debout).
+      const def = work.params.find((p) => p.key === key) ?? paramParNom(work.params, key);
       if (!def) continue;
       const found = readValue(def, raw);
       if (!found) continue;
       const value: ParamValue = { value: found.value, unit: found.unit, origin: "devis", evidence: `Devis, ${l.id} (« ${raw} »)` };
-      input.params[key] = value;
-      if (!facts.some((x) => x.key === key && x.workItemId === wid)) facts.push({ key, value: found.value, unit: found.unit, evidence: value.evidence!, origin: "devis", workItemId: wid });
+      input.params[def.key] = value;
+      if (!facts.some((x) => x.key === def.key && x.workItemId === wid)) facts.push({ key: def.key, value: found.value, unit: found.unit, evidence: value.evidence!, origin: "devis", workItemId: wid });
     }
     // Les fournitures citées sur la même ligne : des emplacements de plus que le calcul compte (les crochets des ardoises).
     const mentions: string[] = [];
@@ -451,6 +452,11 @@ export function planDeLecture(
  */
 export function rattacherQuestion(ref: Referential, plan: QuotePlan, q: LectureQuestion, lignes?: readonly LigneLecture[]): LectureQuestion {
   if (q.cle.startsWith("produit_") || q.cle === CONSUMABLES_KEY || ref.workItems.some((w) => w.params.some((p) => p.key === q.cle))) return q;
+  // Retour de Greg du 18 novembre 2026 : le modèle a demandé « rampant » (son mot) ; la réponse allait à la donnée du calcul
+  // (« longueur_rampant ») et sa question restait ouverte, reposée sans fin. Une donnée DU TOIT nommée par un de ses mots
+  // (la clé du modèle, ou le nom qu'il donne à la donnée) EST cette donnée : une seule question, une seule réponse.
+  const duToit = paramOfDonnee(ref, q.cle) ?? (q.donnee ? paramOfDonnee(ref, q.donnee) : null);
+  if (duToit) return { ...q, cle: duToit.key };
   const param = [...new Set(ref.workItems.flatMap((w) => w.params.filter((p) => (p.choices?.length ?? 0) > 0 && q.cle.startsWith(`${p.key}_`)).map((p) => p.key)))].sort((a, b) => b.length - a.length)[0];
   if (!param) return q;
   const suite = q.cle.slice(param.length + 1).replace(/_/g, "-");
