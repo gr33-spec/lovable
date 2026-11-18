@@ -4,7 +4,7 @@ import { MoreHorizontal, Plus } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
-import { CARTE, CaseAnonyme, Note, PastilleStatut, Volumes } from "@/components/ag-v1-commun";
+import { CARTE, CaseAnonyme, ligneRegroupement, Note, PastilleStatut, Volumes } from "@/components/ag-v1-commun";
 import { Button, ButtonLink, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, messageErreur, newActionKey } from "@/lib/api";
 import { dateCourte, dateLongue, heureCourte, jourDans, zoneLisible, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
@@ -66,6 +66,8 @@ function CarteBesoin({ b }: { b: BesoinV1 }) {
       <Link href={href} className="flex flex-col">
         <span className="text-[16px] font-bold break-words">{b.nom}</span>
         <span className="text-[15px]">{b.quantite.lisible}</span>
+        {/* Où en est le regroupement, en une phrase (Greg, 18 novembre 2026) : le total, jamais la part d'une autre entreprise. */}
+        {b.achat.resume && b.achat.resume.entreprises > 0 ? <span className="text-[14px] font-semibold">{ligneRegroupement(b.achat.resume)}</span> : null}
         {e ? <span className="text-[14px] text-muted">{e}</span> : null}
       </Link>
       {bouton ? (
@@ -78,7 +80,7 @@ function CarteBesoin({ b }: { b: BesoinV1 }) {
 }
 
 /** MES BESOINS GROUPÉS (V5.2, écran 10) : les cartes qui demandent une action d'abord ; statuts aux noms complets. */
-export function MesBesoinsV1() {
+export function MesBesoinsV1({ integre = false }: { integre?: boolean } = {}) {
   const params = useSearchParams();
   const { data, error } = useResource(useCallback((s: AbortSignal) => api<{ aFaire: BesoinV1[]; enCours: BesoinV1[]; termines: BesoinV1[] }>("/v1/ag/besoins", { signal: s }), []));
   if (error) return <p role="alert" className="text-[16px] font-semibold text-danger">{messageErreur(error)}</p>;
@@ -86,8 +88,8 @@ export function MesBesoinsV1() {
   const vide = !data.aFaire.length && !data.enCours.length && !data.termines.length;
   return (
     <div className="flex flex-col gap-5 lg:mx-auto lg:w-full lg:max-w-[44rem]">
-      <PageTitle>Mes besoins groupés</PageTitle>
-      {params.get("nouveaux") ? (
+      {integre ? null : <PageTitle>Mes besoins groupés</PageTitle>}
+      {params.get("nouveaux") || params.get("ajoutes") ? (
         <p role="status" className="rounded-xl bg-ok-bg p-3 text-[15px] font-semibold text-ok">
           Tes besoins sont confirmés. Ce n&apos;est pas encore une commande : tu décideras après réception d&apos;une offre complète.
         </p>
@@ -98,10 +100,10 @@ export function MesBesoinsV1() {
           <p className="text-[15px] text-muted">Les premiers achats groupés se forment avec les premiers besoins ouverts.</p>
           {/* Revue UX (8 novembre 2026) : un écran vide propose l'action qui le remplit. */}
           <Link href="/achats-groupes/publier" className="pressable inline-flex min-h-12 items-center gap-2 self-start rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent shadow-card">
-            <Plus size={20} aria-hidden="true" /> Saisir un nouveau besoin
+            <Plus size={20} aria-hidden="true" /> {integre ? "Publier un besoin groupé" : "Saisir un nouveau besoin"}
           </Link>
           <Link href="/achats-groupes" className="min-h-11 py-2 text-[15px] font-semibold underline underline-offset-4">
-            Voir les achats groupés
+            {integre ? "Rejoindre un regroupement près de toi" : "Voir les achats groupés"}
           </Link>
         </div>
       ) : null}

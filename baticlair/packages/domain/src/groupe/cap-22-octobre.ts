@@ -177,7 +177,7 @@ export function suiviDuChantier(e: EtatDuChantier): Suivi {
   if (etape === 1) return { etape, etapes, phrase: `Demande envoyée à ${pluriel(e.demandes, "négoce", "négoces")}. Tu seras prévenu à chaque réponse.`, aFaire: null };
   if (etape === 2) {
     const meilleur = e.meilleur ? ` Meilleur prix : ${e.meilleur}.` : "";
-    return { etape, etapes, phrase: `${pluriel(e.devis, "devis reçu", "devis reçus")} sur ${pluriel(e.demandes, "demande", "demandes")}.${meilleur}`, aFaire: "Ouvre les devis et retiens le négoce de ton choix." };
+    return { etape, etapes, phrase: `${pluriel(e.devis, "devis reçu", "devis reçus")} sur ${pluriel(e.demandes, "demande", "demandes")}.${meilleur}`, aFaire: "Ouvre les devis et choisis chez qui commander." };
   }
   return { etape, etapes, phrase: "C'est commandé.", aFaire: "Dis « Livré » quand c'est arrivé." };
 }

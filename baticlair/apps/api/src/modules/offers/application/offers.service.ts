@@ -33,7 +33,7 @@ export interface ComparisonView {
   result: ComparisonResult;
 }
 
-export const PHRASE_LECTURE_RETIREE = "Mobiiz ne lit plus les devis de tes négoces : ouvre le devis, puis retiens le négoce de ton choix.";
+export const PHRASE_LECTURE_RETIREE = "Mobiiz ne lit plus les devis de tes négoces : ouvre le devis, puis commande chez le négoce de ton choix.";
 
 /**
  * Devis des fournisseurs : les lectures déjà faites (IA, jusqu'au 28 octobre 2026) restent comparées par le code ;

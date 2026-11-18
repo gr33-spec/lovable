@@ -198,7 +198,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     await expect(page.getByRole("main").getByRole("link", { name: /^Ajouter un matériau|^Depuis un quantitatif|^Mes besoins groupés/ })).toHaveCount(0);
     const vide = page.getByRole("main");
     await expect(vide.getByRole("link", { name: /^Créer un quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
-    await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés" })).toHaveAttribute("href", "/achats-groupes");
+    await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: /^(Achats groupés|Groupés)$/ })).toHaveAttribute("href", "/achats-groupes");
     await expect(page.getByRole("link", { name: /Essai gratuit/ })).toHaveCount(0);
     await capture(page, projet, "1-compte-vide");
 
@@ -262,7 +262,7 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     const b = await nouvelArtisan(browser, dep, "Paul");
     // Greg, 6 novembre 2026 : « Groupes » dans le menu, vue « Découvrir » (son secteur d'office).
     await b.page.goto("/");
-    await b.page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés" }).click();
+    await b.page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: /^(Achats groupés|Groupés)$/ }).click();
     await b.page.waitForURL(/\/achats-groupes/);
     const ouverts = b.page.getByRole("tabpanel", { name: "Découvrir" });
     await b.page.getByRole("tab", { name: "Découvrir" }).click();
@@ -439,8 +439,10 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     const nav = page.getByRole("navigation", { name: "Navigation principale" });
     // Le clavier refermé (sur téléphone, la barre du menu se cache pendant la frappe).
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-    await nav.getByRole("link", { name: "Quantitatifs", exact: true }).click();
-    await page.waitForURL(/\/chantiers$/);
+    // Greg, 18 novembre 2026 : sur téléphone, « Demandes » ; sur ordinateur, « Quantitatifs ».
+    const telephone = (page.viewportSize()?.width ?? 0) < 1024;
+    await nav.getByRole("link", { name: telephone ? "Demandes" : "Quantitatifs", exact: true }).click();
+    await page.waitForURL(telephone ? /\/demandes$/ : /\/chantiers$/);
     await nav.getByRole("link", { name: "Accueil", exact: true }).click();
     await page.waitForURL(/\/$/);
     // L'accueil (1er novembre 2026) : le parcours quitté est « À faire maintenant », sa carte le reprend tel quel.

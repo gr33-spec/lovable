@@ -85,61 +85,59 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+/** « Publier un besoin groupé » : le ＋ de la barre du bas sur téléphone (Greg, 18 novembre 2026), l'en-tête sur ordinateur. */
+async function ouvrirPublier(page: Page) {
+  if ((page.viewportSize()?.width ?? 0) < 1024) {
+    await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("button", { name: "Créer" }).click();
+    await page.getByRole("dialog", { name: "Créer" }).getByRole("button", { name: /^Besoin groupé/ }).click();
+  } else {
+    await page.getByRole("button", { name: "Publier un besoin" }).click();
+    const ajout = page.getByRole("dialog", { name: "Publier un besoin" });
+    for (const nom of [/^Choisir une liste/, /^Créer mon besoin/]) await expect(ajout.getByRole("link", { name: nom })).toBeVisible();
+    await expect(ajout.getByRole("link")).toHaveCount(2);
+    await ajout.getByRole("link", { name: /^Créer mon besoin/ }).click();
+  }
+}
+
 test("entrée directe : produit précis, quantité, aucun achat compatible, entreprise, confirmer ; une autre entreprise rejoint ; modifier, reconfirmer, offre à examiner, retirer", async ({ page, browser }) => {
   test.setTimeout(240_000);
   await inscrire(page);
   // Accueil des achats groupés.
   await page.goto("/achats-groupes");
   await expect(page.getByRole("heading", { name: "Achats groupés" })).toBeVisible();
-  await expect(page.getByText("Achète avec d'autres artisans de ton secteur")).toBeVisible();
-  // UX simplifiée (Greg, 8 novembre 2026) : l'onglet montre « Mes besoins » puis « Achats ouverts ».
-  await expect(page.getByRole("heading", { name: "Mes besoins", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Achats ouverts", exact: true })).toBeVisible();
+  await expect(page.getByText("Les regroupements ouverts près de toi")).toBeVisible();
+  // Onglet « Groupés » (Greg, 18 novembre 2026) : ce qui se passe autour de moi, « Regroupements ouverts » ; mes besoins
+  // vivent dans Demandes › Groupées (RÈGLE CHANGÉE : avant, « Mes besoins » puis « Achats ouverts »).
+  await expect(page.getByRole("heading", { name: "Mes besoins", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Regroupements ouverts", exact: true })).toBeVisible();
   await expect(page.getByText(zone().nom)).toBeVisible();
-  // Greg, 8 novembre 2026 : un seul filtre (« Métier »), aucune rangée de boutons.
+  // Greg, 8 novembre 2026 : un seul filtre (« Métier »), aucune rangée de boutons ; 18 novembre : la recherche d'un matériau.
   await expect(page.getByRole("combobox", { name: "Filtrer par métier" })).toBeVisible();
+  await expect(page.getByRole("searchbox")).toBeVisible();
   for (const f of ["Couverture", "Zinguerie", "Isolation", "Bois", "Électricité"]) await expect(page.getByRole("button", { name: f, exact: true })).toHaveCount(0);
   await expect(page.getByText("Mobiiz. Plus on est, moins on paie.")).toBeVisible();
-  // PUBLIER UN BESOIN (Greg, 15 novembre 2026 ; RÈGLE CHANGÉE : avant, un lien discret « Ajouter un matériau sans
-  // quantitatif ») : UN bouton visible (flottant au-dessus de la barre du bas sur téléphone, dans l'en-tête sur ordinateur),
-  // qui ne recouvre ni la barre ni la dernière ligne ; deux chemins.
-  const publier = page.getByRole("button", { name: "Publier un besoin" });
-  await expect(publier).toHaveCount(1);
+  // PUBLIER UN BESOIN : sur téléphone, le ＋ de la barre du bas, « Besoin groupé » (RÈGLE CHANGÉE le 18 novembre 2026 :
+  // avant, un bouton flottant) ; sur ordinateur, le bouton de l'en-tête et ses deux chemins.
+  const telephone = (page.viewportSize()?.width ?? 0) < 1024;
+  await expect(page.getByRole("button", { name: "Publier un besoin" }).filter({ visible: true })).toHaveCount(telephone ? 0 : 1);
   await expect(page.getByRole("button", { name: "Ajouter un matériau sans quantitatif" })).toHaveCount(0);
-  const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  if ((page.viewportSize()?.width ?? 0) < 1024) {
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    const [b, n, fin] = [await publier.boundingBox(), await nav.boundingBox(), await page.getByText("Mobiiz. Plus on est, moins on paie.").boundingBox()];
-    // Juste au-dessus de la barre du bas, dans l'écran, sans masquer la fin de la page.
-    expect(b!.y + b!.height).toBeLessThanOrEqual(n!.y);
-    expect(b!.x + b!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
-    expect(fin!.y + fin!.height).toBeLessThanOrEqual(b!.y);
-    await page.evaluate(() => window.scrollTo(0, 0));
-  }
   const brouillonsAvant = await page.evaluate(async () => (await (await fetch("/v1/brouillons", { headers: { "x-company-id": localStorage.getItem("baticlair.companyId") ?? "" } })).text()));
-  await publier.click();
-  const ajout = page.getByRole("dialog", { name: "Publier un besoin" });
-  for (const nom of [/^Choisir une liste/, /^Créer mon besoin/]) await expect(ajout.getByRole("link", { name: nom })).toBeVisible();
-  await expect(ajout.getByRole("link")).toHaveCount(2);
-  // Ouvrir la saisie puis revenir sans rien confirmer : aucun brouillon fantôme, aucun besoin créé.
-  await ajout.getByRole("link", { name: /^Créer mon besoin/ }).click();
+  await ouvrirPublier(page);
   // UN SEUL OUTIL (Greg, 16 novembre 2026) : le même écran que « Nouveau quantitatif », ses deux mêmes choix. Lot E (15
   // novembre 2026) : il vit sous « Achats groupés » : son adresse, son titre et l'onglet allumé le disent.
   await expect(page).toHaveURL(/\/achats-groupes\/publier$/);
   await expect(page.getByRole("heading", { name: "Publier un besoin groupé", level: 1 })).toBeVisible();
   await expect(page.getByText("Prépare les matériaux que tu souhaites acheter avec d'autres artisans. Tu vérifieras tout avant la publication.")).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Achats groupés", exact: true })).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Quantitatifs", exact: true })).not.toHaveAttribute("aria-current", "page");
+  const nav = page.getByRole("navigation", { name: "Navigation principale" });
+  await expect(nav.getByRole("link", { name: telephone ? "Groupés" : "Achats groupés", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: telephone ? "Demandes" : "Quantitatifs", exact: true })).not.toHaveAttribute("aria-current", "page");
   for (const nom of [/^Je saisis ma liste/, /^Mobiiz m'aide/]) await expect(page.getByRole("main").getByRole("link", { name: nom })).toBeVisible();
   await page.goBack();
   await expect(page.getByRole("heading", { name: "Achats groupés", level: 1 })).toBeVisible();
   expect(await page.evaluate(async () => (await (await fetch("/v1/brouillons", { headers: { "x-company-id": localStorage.getItem("baticlair.companyId") ?? "" } })).text()))).toBe(brouillonsAvant);
-  await publier.click();
-  await capture(page, "01b-ajouter-un-materiau");
-  await ajout.getByRole("button", { name: "Fermer" }).click();
   const menu = page.getByRole("navigation", { name: "Navigation principale" });
-  await expect(menu.getByRole("link", { name: "Achats groupés" })).toBeVisible();
-  // Revue UX (8 novembre 2026) : sur téléphone, plus aucun bouton de création dans la barre (un seul jaune à l'écran).
+  await expect(menu.getByRole("link", { name: telephone ? "Groupés" : "Achats groupés", exact: true })).toBeVisible();
+  // Sur téléphone, la création passe par le ＋ (Greg, 18 novembre 2026) ; sur ordinateur, « Créer un quantitatif » en tête.
   if (test.info().project.name === "ordinateur") await expect(menu.getByRole("link", { name: "Créer un quantitatif" })).toBeVisible();
   else await expect(menu.getByRole("link", { name: "Créer un quantitatif" })).toHaveCount(0);
   for (const lien of await page.getByRole("link").all()) expect((await lien.innerText()).trim()).not.toBe("+");
@@ -223,8 +221,9 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(idees.getByRole("link", { name: "Voir tous les achats groupés" })).toHaveAttribute("href", "/achats-groupes");
   expect(await b.page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await b.page.goto("/achats-groupes");
-  // Greg, 8 novembre 2026 : une ligne par achat, le nom du produit et le temps qui reste, rien d'autre.
-  await expect(b.page.getByRole("list", { name: "Achats groupés ouverts" }).getByText(/^Se termine dans \d+ jours$/).first()).toBeVisible();
+  // Greg, 18 novembre 2026 : une carte par achat, le nom du produit, UNE phrase (entreprises, volume, clôture) et UN bouton.
+  await expect(b.page.getByRole("list", { name: "Achats groupés ouverts" }).getByText(/^\d+ entreprises? · .+ · clôture dans \d+ jours$/).first()).toBeVisible();
+  await expect(b.page.getByRole("list", { name: "Achats groupés ouverts" }).getByRole("link").first()).toHaveAccessibleName(/, (Rejoindre|Voir)$/);
   await capture(b.page, "08b-liste-compacte");
   await b.page.getByRole("link", { name: /Ardoise naturelle 32 × 22 · Espagne · 1er choix · 5 mm/ }).click();
   // Greg, 8 novembre 2026 : le produit d'un achat ouvert par d'autres ne se modifie pas ; on ajoute sa quantité.
@@ -233,9 +232,9 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(b.page.getByRole("combobox")).toHaveCount(0);
   await expect(b.page.getByRole("definition").filter({ hasText: "32 × 22" })).toBeVisible();
   await capture(b.page, "08c-produit-verrouille");
-  await b.page.getByRole("button", { name: "Confirmer 480 pièces par palette" }).click();
+  // Recette du 18 novembre 2026 : rejoindre propose l'unité du total (les pièces), plus la palette d'office.
   await b.page.getByRole("button", { name: "Continuer" }).click();
-  await b.page.getByLabel("Quantité (palettes)").fill("4");
+  await b.page.getByLabel("Quantité (pièces)").fill("1920");
   await b.page.getByText("Retrait au dépôt").click();
   await b.page.getByText("Livraison sur chantier").click();
   await b.page.getByLabel("Lieu de livraison (privé)").fill("Perros-Guirec");
@@ -329,8 +328,7 @@ test("« Saisir un nouveau besoin » (Greg, 16 novembre 2026) : le même outil q
   await inscrire(page);
   await apiJson(page, "POST", "/v1/me/guide/vu");
   await page.goto("/achats-groupes");
-  await page.getByRole("button", { name: "Publier un besoin" }).click();
-  await page.getByRole("dialog", { name: "Publier un besoin" }).getByRole("link", { name: /^Créer mon besoin/ }).click();
+  await ouvrirPublier(page);
   await expect(page.getByRole("heading", { name: "Publier un besoin groupé", level: 1 })).toBeVisible();
   await capture(page, "22-meme-outil");
   // « Je saisis ma liste » : l'écran de saisie habituel, rien de propre aux achats groupés.
@@ -343,7 +341,7 @@ test("« Saisir un nouveau besoin » (Greg, 16 novembre 2026) : le même outil q
   const maListe = ecran.getByRole("region", { name: "Ma liste en cours" });
   await maListe.getByLabel("Quantité de Ardoise naturelle 32x22 Espagne 1er choix 5 mm").fill("10");
   await maListe.getByLabel("Unité de Ardoise naturelle 32x22 Espagne 1er choix 5 mm").selectOption("palettes");
-  await page.getByRole("button", { name: /^Créer le quantitatif · 1 matériau$/ }).filter({ visible: true }).click();
+  await page.getByRole("button", { name: /^Continuer · 1 matériau$/ }).filter({ visible: true }).click();
   // La liste créée mène à l'écran où l'on coche ce que l'on groupe (et elle existe comme un quantitatif normal).
   await expect(page).toHaveURL(/\/achats-groupes\/quantitatif\/[0-9a-f-]{36}$/);
   await expect(page.getByRole("heading", { name: "Quels articles grouper ?" })).toBeVisible();
@@ -470,10 +468,10 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   await page.getByRole("checkbox", { name: /Je confirme qu'il s'agit de besoins réels de mon entreprise/ }).check();
   await capture(page, "20-confirmer-2-besoins");
   await page.getByRole("button", { name: "Publier mes 2 articles" }).click();
-  // Retour à l'onglet : « C'est fait », puis « Mes besoins ».
-  await expect(page).toHaveURL(/\/achats-groupes\?ajoutes=2/);
-  await expect(page.getByRole("status").filter({ hasText: "2 besoins publiés" })).toBeVisible();
-  await expect(page.getByRole("list", { name: "Mes besoins" }).getByText(/Besoin confirmé/)).toHaveCount(2);
+  // Greg, 18 novembre 2026 : ce que j'ai lancé se retrouve dans Demandes › Groupées, avec la confirmation.
+  await expect(page).toHaveURL(/\/demandes\?type=groupees&ajoutes=2/);
+  await expect(page.getByRole("status").filter({ hasText: "Tes besoins sont confirmés" })).toBeVisible();
+  await expect(page.getByRole("tabpanel", { name: "Groupées" }).getByText(/Besoin confirmé/)).toHaveCount(2);
   await capture(page, "21-mes-besoins-2");
   // La fiche le dit : ces articles ne partent pas chez les négoces.
   await page.goto(`/chantiers/${q.body.projetId}`);
@@ -536,7 +534,7 @@ test("article déjà envoyé aux négoces (Greg, 16 novembre 2026) : il reste co
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("checkbox", { name: /Je confirme/ }).check();
   await page.getByRole("button", { name: "Publier mon besoin", exact: true }).click();
-  await expect(page).toHaveURL(/\/achats-groupes\?ajoutes=1$/);
+  await expect(page).toHaveURL(/\/demandes\?type=groupees&ajoutes=1$/);
   // La ligne reste dans sa demande individuelle (toujours envoyée), et elle est dans le besoin groupé.
   const apres = (await apiJson<{ lignes: { texte: string }[] }>(page, "GET", `/v1/ag/projects/${q.body.projetId}/lignes`)).body.lignes;
   expect(apres[0]!.texte).toBe("Déjà dans un achat groupé");

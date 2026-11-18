@@ -77,7 +77,7 @@ const profilBody = z.object({ visible: z.boolean(), presentation: court(1500).nu
 const luBody = z.object({ cle: z.string().min(8).max(80) });
 const toutLireBody = z.object({ avant: z.iso.datetime() });
 const aFaireBody = z.object({ cles: z.array(z.string().min(1).max(300)).min(1).max(60), geste: z.enum(["vu", "masquer", "restaurer"]) });
-const reglagesBody = z.object({ prix: z.boolean(), groupe: z.boolean(), missions: z.boolean(), conseils: z.boolean(), email: z.boolean(), push: z.boolean() });
+const reglagesBody = z.object({ prix: z.boolean(), site: z.boolean().optional(), groupe: z.boolean(), missions: z.boolean(), conseils: z.boolean(), email: z.boolean(), push: z.boolean() });
 
 type Televerse = { buffer: Buffer; originalname: string; mimetype: string } | undefined;
 const TELEVERSEMENT_IMAGE = FileInterceptor("file", { storage: memoryStorage(), limits: { fileSize: IMAGE_PROFIL_MAX_OCTETS + 1, files: 1 } });
@@ -392,7 +392,8 @@ export class BoiteController {
 
   @Put("alertes/reglages")
   regler(@Tenant() t: TenantContext, @Body(new ZodPipe(reglagesBody)) b: z.infer<typeof reglagesBody>) {
-    return this.b.reglerAlertes(t, b);
+    // Une ancienne application qui n'envoie pas « site » le laisse allumé.
+    return this.b.reglerAlertes(t, { prix: b.prix, site: b.site ?? true, groupe: b.groupe, missions: b.missions, conseils: b.conseils, email: b.email, push: b.push });
   }
 }
 

@@ -2965,6 +2965,8 @@ model EtatAFaire {
 model ReglageAlertes {
   companyId String   @id @map("company_id") @db.Uuid
   prix      Boolean  @default(true)
+  /// Greg, 18 novembre 2026 : les demandes reçues depuis « Mon site ».
+  site      Boolean  @default(true)
   groupe    Boolean  @default(true)
   missions  Boolean  @default(true)
   conseils  Boolean  @default(false)

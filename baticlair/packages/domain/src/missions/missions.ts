@@ -456,16 +456,18 @@ export const CATEGORIES_DOCUMENT: { id: CategorieDocument; libelle: string; grou
 
 /* ------------------------------------------------------------------------------------------------ Cloche et boîte */
 
-export type CategorieAlerte = "prix" | "groupe" | "missions" | "conseils";
+export type CategorieAlerte = "prix" | "site" | "groupe" | "missions" | "conseils";
 export type GenreAlerte = "action" | "information";
 export const CATEGORIES_ALERTE: { id: CategorieAlerte; titre: string; detail: string }[] = [
   { id: "prix", titre: "Demandes de prix", detail: "Réponses et relances des négoces" },
+  // Greg, 18 novembre 2026 : les demandes reçues depuis « Mon site » ont leur rubrique (cloche et e-mail).
+  { id: "site", titre: "Mon site", detail: "Demandes de devis de tes visiteurs" },
   { id: "groupe", titre: "Achats groupés", detail: "Reconfirmation, offre et échéances" },
   { id: "missions", titre: "Missions", detail: "Réponses, messages et changements" },
   { id: "conseils", titre: "Conseils Mobiiz", detail: "Astuces utiles, jamais obligatoires" },
 ];
-export interface ReglagesAlertes { prix: boolean; groupe: boolean; missions: boolean; conseils: boolean; email: boolean; push: boolean }
-export const REGLAGES_ALERTES_DEFAUT: ReglagesAlertes = { prix: true, groupe: true, missions: true, conseils: false, email: true, push: true };
+export interface ReglagesAlertes { prix: boolean; site: boolean; groupe: boolean; missions: boolean; conseils: boolean; email: boolean; push: boolean }
+export const REGLAGES_ALERTES_DEFAUT: ReglagesAlertes = { prix: true, site: true, groupe: true, missions: true, conseils: false, email: true, push: true };
 
 export interface AlerteCourte {
   categorie: CategorieAlerte;
@@ -546,6 +548,7 @@ export function quandBoite(iso: string, maintenant: Date): string {
 
 /** La catégorie d'une notification d'après l'écran qu'elle ouvre (réglages de la cloche, de l'e-mail et du push). */
 export function categorieDuLien(url: string): CategorieAlerte | null {
+  if (/^\/messages\/site/.test(url)) return "site";
   if (/^\/(missions|messages(?!\/negoce))/.test(url)) return "missions";
   if (/^\/(achats-groupes|regroupements|groupe)/.test(url)) return "groupe";
   if (/^\/(chantiers|recus|messages\/negoce|fournisseurs)/.test(url)) return "prix";

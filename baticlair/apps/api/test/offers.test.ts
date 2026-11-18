@@ -76,7 +76,7 @@ describe("devis reçus des négoces de l'artisan : plus de lecture IA (Greg, 28 
     const utilisees = (await agent.get("/v1/ai-usage")).body.analyses.used;
 
     const un = await agent.post(`/v1/price-request-recipients/${ra}/analysis`).expect(409);
-    expect(un.body.error.details).toMatchObject({ reason: "lecture_devis_negoce_retiree", message: "Mobiiz ne lit plus les devis de tes négoces : ouvre le devis, puis retiens le négoce de ton choix." });
+    expect(un.body.error.details).toMatchObject({ reason: "lecture_devis_negoce_retiree", message: "Mobiiz ne lit plus les devis de tes négoces : ouvre le devis, puis commande chez le négoce de ton choix." });
     expect((await agent.post(`/v1/price-requests/${requestId}/analysis`).expect(409)).body.error.details.reason).toBe("lecture_devis_negoce_retiree");
     expect(await ctx.prisma.aiExecution.count({ where: { task: "offer_extraction" } })).toBe(appels);
     expect((await agent.get("/v1/ai-usage")).body.analyses.used).toBe(utilisees);

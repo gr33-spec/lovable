@@ -31,7 +31,7 @@ export function PorteCreation({ pour = null }: { pour?: "achat-groupe" | null })
   if (ancienne) return null;
   const retour = pour ? PUBLIER_BESOIN : "/chantiers/nouveau";
   const versListe = pour ? (id: string) => `/achats-groupes/quantitatif/${id}` : undefined;
-  if (mode === "manuel") return <SaisirMaListe onFermer={() => router.push(retour)} versListe={versListe} />;
+  if (mode === "manuel") return <SaisirMaListe onFermer={() => router.push(retour)} versListe={versListe} pourGroupe={pour === "achat-groupe"} />;
   if (mode === "assistant") return <NouveauQuantitatif onFermer={() => router.push(retour)} versListe={versListe} />;
   return <ChoixCreation pour={pour} />;
 }

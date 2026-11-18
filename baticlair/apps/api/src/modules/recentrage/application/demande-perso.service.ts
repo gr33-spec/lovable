@@ -40,6 +40,7 @@ import {
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import { signalerException } from "../../../platform/supervision/exceptions.js";
+import { ecrireAlerte } from "../../../platform/notifications/alertes.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { mailEnHtml } from "../../../platform/email/mail-html.js";
 import type { PriceRequestsService } from "../../price-requests/index.js";
@@ -494,7 +495,7 @@ export class DemandePersoService {
     if (typeof jeton !== "string" || jeton.length < 20 || jeton.length > 100) throw notFound("Link");
     const r = await this.prisma.priceRequestRecipient.findUnique({
       where: { tokenHash: hacher(jeton) },
-      include: { supplier: { select: { name: true, email: true } }, priceRequest: { include: { company: { select: { id: true, name: true, address: true } }, project: { select: { address: true } } } } },
+      include: { supplier: { select: { name: true, email: true } }, priceRequest: { include: { company: { select: { id: true, name: true, address: true } }, project: { select: { address: true, name: true } } } } },
     });
     if (!r) throw notFound("Link");
     return r;
@@ -638,8 +639,12 @@ export class DemandePersoService {
           .map((l) => ({ designation: l.designation, unite: l.unite, quantite: l.quantite || null, prixHt: prix[l.cle]! })),
       })
       .catch(() => undefined);
-    // L'artisan est prévenu (tutoiement) ; un e-mail, jamais le prix d'un autre négoce.
-    const emailArtisan = await this.emailDe(d.company.id);
+    // L'artisan est prévenu (tutoiement) ; un e-mail, jamais le prix d'un autre négoce. Greg, 18 novembre 2026 : aussi dans
+    // la cloche (avant : l'e-mail seul), et l'e-mail suit ses réglages (« Prix et négoces », e-mails, opposition en un clic).
+    await ecrireAlerte(this.prisma, d.company.id, { categorie: "prix", genre: "action", titre: "Un négoce a chiffré ta demande", detail: `${r.supplier.name}${d.project.name ? ` · ${d.project.name}` : ""}`.slice(0, 120), action: "Comparer les offres", href: `/chantiers/${d.projectId}`, cle: `chiffrage:${r.id}` }).catch(() => false);
+    const reglage = await this.prisma.reglageAlertes.findUnique({ where: { companyId: d.company.id } }).catch(() => null);
+    const coupe = (await this.prisma.company.findUnique({ where: { id: d.company.id }, select: { emailsCoupesLe: true } }))?.emailsCoupesLe;
+    const emailArtisan = coupe || (reglage && (!reglage.prix || !reglage.email)) ? null : await this.emailDe(d.company.id);
     if (emailArtisan)
       await this.mailer.send({
         to: emailArtisan,

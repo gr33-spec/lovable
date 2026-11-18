@@ -122,6 +122,10 @@ export function ProjectPriceRequests({
   useEffect(() => {
     if (data) onSentChange?.(sent);
   }, [data, sent, onSentChange]);
+  // Ouvrir la demande, c'est lire ses réponses (recette du 18 novembre 2026 : la pastille de Messages restait allumée).
+  useEffect(() => {
+    for (const d of data?.items ?? []) for (const r of d.recipients) if (r.status === "received") void api("/v1/boite/lu", { method: "POST", body: { cle: `reponse:${r.id}` } }).catch(() => undefined);
+  }, [data]);
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
   const commun = { projectId, archived, canCreate, quantitatifId: quantitatifId ?? null, openSignal, data, setData, reload, principales, ...(onPreviewClosed ? { onPreviewClosed } : {}) };

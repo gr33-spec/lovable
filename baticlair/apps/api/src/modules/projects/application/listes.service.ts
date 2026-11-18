@@ -102,7 +102,7 @@ export class ListesService {
         p.status === "archived"
           ? "Terminée"
           : demande?.choisi
-            ? "Négoce retenu"
+            ? "Commandé" // Recette du 18 novembre 2026 : « Je retiens ce négoce » n'existe plus, on commande.
             : demande?.regle
               ? "Réglée"
               : demande && demande.reponses > 0

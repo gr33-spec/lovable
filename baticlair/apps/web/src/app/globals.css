@@ -101,7 +101,7 @@
   /* La barre flottante (verre) : 66 px, posée à 12 px du bas (ou la zone du geste), 16 px de marge dessous. */
   --nav-height: 66px;
   --nav-gap: max(12px, env(safe-area-inset-bottom));
-  --nav-space: calc(var(--nav-height) + var(--nav-gap) + 16px);
+  --nav-space: calc(var(--nav-height) + var(--nav-gap) + 30px);
   /* « Calculer ma liste », figé en bas de l'écran des questions : bouton (52 px), fondu au-dessus (24 px), zone du geste. */
   --calc-space: calc(52px + 24px + max(14px, env(safe-area-inset-bottom)) + 8px);
 }
@@ -507,4 +507,31 @@ html[data-theme="clair"] {
   --chat-trait-fort: rgba(19, 9, 1, 0.32);
   --chat-voile: rgba(19, 9, 1, 0.05);
   --chat-jaune-texte: #130901;
+}
+
+/* La carte du ＋ (Greg, 18 novembre 2026) : elle monte en douceur ; sans animation quand on les a coupées. */
+@keyframes carte-creer-monte {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.carte-creer-monte {
+  animation: carte-creer-monte 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .carte-creer-monte {
+    animation: none;
+  }
+}
+
+/* Recette du 18 novembre 2026 : faire défiler jusqu'à un élément le laisse au-dessus de la barre du bas et du ＋. */
+@media (max-width: 1023px) {
+  html {
+    scroll-padding-bottom: var(--nav-space);
+  }
 }

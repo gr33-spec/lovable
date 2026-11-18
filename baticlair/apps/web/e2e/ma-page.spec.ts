@@ -488,7 +488,7 @@ test.describe("captures du rapport", () => {
   });
 });
 
-test("Mon site : quatre onglets en bas et le globe dans l'en-tête tiennent sur un petit iPhone, sans texte coupé ; un seul chemin vers l'éditeur", async ({ browser }) => {
+test("Mon site : la barre du bas (Accueil · Demandes · ＋ · Groupés · Messages) et le globe dans l'en-tête tiennent sur un petit iPhone, sans texte coupé ; un seul chemin vers l'éditeur", async ({ browser }) => {
   test.setTimeout(120_000);
   for (const largeur of [375, 320]) {
     const ctx = await browser.newContext({ baseURL: "http://localhost:3000", viewport: { width: largeur, height: 667 }, isMobile: true, hasTouch: true });
@@ -498,8 +498,9 @@ test("Mon site : quatre onglets en bas et le globe dans l'en-tête tiennent sur 
     });
     await inscrire(p, `Toits Martin ${unique()}`);
     const nav = p.getByRole("navigation", { name: "Navigation principale" });
-    // Greg, 18 novembre 2026 : la barre du bas revient à quatre onglets ; « Mon site » est le globe de l'en-tête.
-    await expect(nav.getByRole("link")).toHaveText(["Accueil", "Quantitatifs", "Achats groupés", /Missions/]);
+    // Greg, 18 novembre 2026 : navigation définitive, Accueil · Demandes · ＋ · Groupés · Messages ; « Mon site » est le
+    // globe de l'en-tête.
+    await expect(nav.getByRole("link")).toHaveText(["Accueil", "Demandes", "Groupés", "Messages"]);
     // L'en-tête tient sur la largeur : nom (coupé proprement), globe, jour/nuit, cloche, profil, sans déborder.
     const globe = p.getByRole("main").getByRole("link", { name: "Mon site" });
     const enTete = await p.evaluate(() => {
@@ -530,7 +531,7 @@ test("Mon site : quatre onglets en bas et le globe dans l'en-tête tiennent sur 
           return { nom: texte.textContent ?? "", gauche: t.left - r.left, droite: r.right - t.right, lignes: plage.getClientRects().length, taille: parseFloat(getComputedStyle(texte).fontSize), x: r.left, fin: r.right };
         }),
     );
-    expect(mesures.map((m) => m.nom)).toEqual(["Accueil", "Quantitatifs", "Achats groupés", "Missions"]);
+    expect(mesures.map((m) => m.nom)).toEqual(["Accueil", "Demandes", "Groupés", "Messages"]);
     for (const m of mesures) {
       expect(m.gauche, m.nom).toBeGreaterThanOrEqual(-0.5);
       expect(m.droite, m.nom).toBeGreaterThanOrEqual(-0.5);
