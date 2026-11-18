@@ -197,7 +197,9 @@ export class PagesPubliquesController {
   @Public()
   @Get("pages/:adresse")
   async page(@Param("adresse") adresse: string, @Res({ passthrough: true }) res: Response) {
-    res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=300");
+    // Jamais gardée par le réseau de l'hébergeur : le site la garde lui-même et la vide à chaque changement (`rafraichir`).
+    // Avant : 60 s de cache ici, et le site relisait l'ancienne version juste après un changement (17 novembre 2026).
+    res.setHeader("Cache-Control", "no-store");
     return this.pages.publique(adresse);
   }
 

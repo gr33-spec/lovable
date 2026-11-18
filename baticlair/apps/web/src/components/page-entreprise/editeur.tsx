@@ -394,7 +394,7 @@ function GalerieDefaut({ photos, choisie, onChoisir, metierPhoto }: { photos: re
               </span>
             ) : null}
           </span>
-          <span className="px-1 pb-0.5 text-[12.5px] leading-tight font-bold">{libelle}</span>
+          <span className="px-1 pb-0.5 text-[12.5px] leading-tight font-bold text-ink">{libelle}</span>
         </button>
       </li>
     );
@@ -750,7 +750,7 @@ export function EditeurMaPage() {
               <Images size={18} aria-hidden="true" /> Choisir dans la galerie <ChevronDown size={16} aria-hidden="true" className={galerie ? "rotate-180" : ""} />
             </button>
           </div>
-          {!data.choix.stockagePhotos ? <p className="rounded-xl bg-accent/15 px-3 py-2 text-[13px]">{PHRASE_STOCKAGE}</p> : data.choix.stockagePhotos && !data.reglages.photosAccord ? <p className="text-[13px] text-muted">Coche la case ci-dessus pour envoyer tes photos.</p> : null}
+          {!data.choix.stockagePhotos ? <p className="rounded-xl border border-accent/60 bg-surface px-3 py-2 text-[13.5px] font-semibold text-ink">{PHRASE_STOCKAGE}</p> : data.choix.stockagePhotos && !data.reglages.photosAccord ? <p className="text-[13px] text-muted">Coche la case ci-dessus pour envoyer tes photos.</p> : null}
           {galerie ? <GalerieDefaut photos={data.choix.photosDefaut} choisie={couverture ? "__aucune__" : r.photoDefaut} metierPhoto={photoMetier} onChoisir={(id) => void choisirPhotoDefaut(id)} /> : null}
           {couverture ? (
             <button
@@ -1116,7 +1116,7 @@ export function EditeurMaPage() {
                 <Eye size={17} aria-hidden="true" /> Voir mon site
               </button>
             </div>
-            <CadreApercu contenu={contenu} ecran="telephone" hauteur={actif ? (typing ? "22dvh" : "36dvh") : "calc(100dvh - var(--nav-space) - 230px)"} />
+            <CadreApercu contenu={contenu} ecran="telephone" hauteur={actif ? (typing ? "22dvh" : "36dvh") : "calc(100dvh - var(--nav-space) - 320px)"} />
           </section>
           {reglages ?? <p className="text-center text-[14px] text-muted">Touche un onglet en bas pour changer tes couleurs, tes photos, tes textes…</p>}
           {/* La barre des onglets, juste au-dessus du menu de l'app ; cachée pendant la saisie (clavier ouvert). */}
