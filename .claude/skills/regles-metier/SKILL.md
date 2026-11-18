@@ -151,8 +151,23 @@ couvert ici, demander au fondateur plutôt que deviner.
 
 ## Zinguerie
 
-- Si l'artisan plie lui-même → feuilles de zinc regroupées en une seule ligne.
-- Sinon → longueurs des pièces façonnées.
+- Si ce n'est pas au devis, on demande : « Tu plies toi-même ou je te
+  commande les pièces façonnées ? ».
+
+### Zinc plié par l'artisan
+- Feuilles regroupées en une seule ligne.
+- On demande la finition (naturel, prépatiné…) et le nombre de feuilles.
+  L'artisan donne toujours le nombre : on ne le calcule pas.
+- Épaisseur 0,65 par défaut (pas demandée).
+
+### Zinc façonné (tout prêt)
+- Une ligne par pièce, avec les mots de l'artisan. On demande seulement la
+  longueur en ml (ni développé ni finition).
+- Arrondi aux longueurs de vente de 2 m. Rien en plus pour les
+  recouvrements : l'arrondi suffit.
+
+### Accessoires
+- Étain, soudure, pattes, clous, mastic : en Suggestion.
 
 ## Gouttières et descentes
 
