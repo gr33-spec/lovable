@@ -51,7 +51,8 @@ couvert ici, demander au fondateur plutôt que deviner.
 
 ### Crochets
 - 1 crochet par ardoise, partout (rives, égout et faîtage compris).
-- Inox brut par défaut. Vente en boîte de 500.
+- Inox brut par défaut. Vendus en boîte de 500, mais on affiche le nombre
+  exact (pas d'arrondi à la boîte : voir Unités de vente).
 - À VÉRIFIER (abaques fabricants, à valider par le fondateur) : avec du
   crochet à agrafe, il faut toujours un peu de crochet à pointe au droit des
   chevrons. Proportion à établir avant de coder.
@@ -59,7 +60,7 @@ couvert ici, demander au fondateur plutôt que deviner.
 ### Clous (en Suggestion, jamais d'office)
 - Galva (90 % des cas).
 - 1 clou par ardoise au faîtage, 2 à l'égout, au doublis et à la rive.
-- Unité de vente : inconnue (le fondateur ne sait pas), à confirmer.
+- Unité de vente : on la demande à l'artisan (voir Unités de vente).
 
 ## Tuile
 
@@ -224,3 +225,15 @@ couvert ici, demander au fondateur plutôt que deviner.
 - Taux de référence : ardoise 5 % (toit simple) / 10 % (toit compliqué) ;
   faîtage, rives, noues, closoir 5 % ; écran 10 %. Tuile, liteau, volige :
   demandés à l'artisan.
+
+## Unités de vente et conditionnements
+
+- Ligne finale = quantité + mots de l'artisan (ex. : « 1230 crochets inox
+  90 »).
+- Petites pièces vendues en boîte (crochets, clous…) : nombre exact, pas
+  d'arrondi à la boîte.
+- Pièces vendues en longueur : arrondi au nombre de longueurs (gouttière 4 m,
+  zinc façonné 2 m, descente 2 m).
+- Unité inconnue (ex. : clous d'ardoise, liteaux) : on la demande à
+  l'artisan, puis on la retient pour ses prochains devis (pré-remplie,
+  modifiable).
