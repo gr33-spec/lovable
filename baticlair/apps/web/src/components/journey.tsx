@@ -888,8 +888,8 @@ const AUCUNE_SUGGESTION = "aucune";
 
 /** Les propositions de l'étape « Suggestions », quand le serveur l'ouvre (elle passe avant toute autre question). */
 export function suggestionsAProposer(takeoff: Takeoff): { label: string; value: string }[] | null {
-  const q = takeoff.view.decisions.find((d) => d.question?.key === CLE_SUGGESTIONS)?.question;
-  return q && q.options.length > 0 ? q.options : null;
+  const s = takeoff.suggestions ?? [];
+  return s.length > 0 ? s.map((x) => ({ label: x.label, value: x.key })) : null;
 }
 
 /**

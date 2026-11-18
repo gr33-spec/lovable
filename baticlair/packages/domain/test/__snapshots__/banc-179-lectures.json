@@ -834,7 +834,13 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:surface",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:faconnage@pieces-pliees",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout",
+   "param:developpe@bandes-zinc__4"
   ],
   "aChiffrer": []
  },
@@ -975,7 +981,9 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -1112,7 +1120,11 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -1235,7 +1247,13 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@pieces-pliees",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -1283,7 +1301,11 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:faconnage",
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:consommables"
   ],
   "aChiffrer": []
  },
@@ -1339,7 +1361,13 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@pieces-pliees",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -1807,7 +1835,11 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -1885,7 +1917,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -1930,9 +1965,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "suggestions:choisies"
-  ],
+  "questions": [],
   "aChiffrer": []
  },
  {
@@ -1948,7 +1981,7 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -1965,7 +1998,9 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -2019,7 +2054,9 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:fixation_crochet",
+   "param:nb_angles",
+   "param:diametre_descente"
   ],
   "aChiffrer": []
  },
@@ -2043,7 +2080,7 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:hauteur_descente"
   ],
   "aChiffrer": []
  },
@@ -2258,7 +2295,11 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:consommables",
+   "fiche:marque_des_ardoises"
   ],
   "aChiffrer": []
  },
@@ -2345,7 +2386,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:consommables"
   ],
   "aChiffrer": []
  },
@@ -2482,7 +2526,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -2536,7 +2583,8 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:fixation_crochet",
+   "param:diametre_descente"
   ],
   "aChiffrer": []
  },
@@ -2581,7 +2629,13 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@pieces-pliees",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -2694,9 +2748,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "suggestions:choisies"
-  ],
+  "questions": [],
   "aChiffrer": []
  },
  {
@@ -2828,7 +2880,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:consommables"
   ],
   "aChiffrer": []
  },
@@ -2932,7 +2987,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:consommables"
   ],
   "aChiffrer": []
  },
@@ -3076,7 +3134,11 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:faconnage",
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -3193,7 +3255,12 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:perimetre_cheminee",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@pieces-pliees",
+   "param:consommables"
   ],
   "aChiffrer": [
    "Ardoises (Ardoises naturelles Espagne 1er choix 30×22)"
@@ -3275,7 +3342,11 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:teinte_gouttiere",
+   "param:fixation_crochet",
+   "param:nb_angles",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -3306,7 +3377,9 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:qualite_ardoise",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -3461,7 +3534,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:diametre_sortie",
+   "param:fixation_crochet",
+   "param:usage_sortie",
+   "product:tuile"
   ],
   "aChiffrer": []
  },
@@ -3562,7 +3638,13 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@pieces-pliees",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -3614,7 +3696,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -3660,7 +3745,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:qualite_ardoise",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -3974,7 +4062,7 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -4047,7 +4135,12 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:fixation_crochet",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -4142,7 +4235,11 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -4302,7 +4399,13 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@pieces-pliees",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -4372,7 +4475,8 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": [
    "Liteaux 27x40"
@@ -4412,7 +4516,13 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@pieces-pliees",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -4567,9 +4677,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "suggestions:choisies"
-  ],
+  "questions": [],
   "aChiffrer": []
  },
  {
@@ -4613,7 +4721,13 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@pieces-pliees",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -4752,7 +4866,11 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:qualite_ardoise",
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:consommables"
   ],
   "aChiffrer": []
  },
@@ -4871,7 +4989,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:consommables"
   ],
   "aChiffrer": []
  },
@@ -5024,7 +5145,10 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:consommables"
   ],
   "aChiffrer": []
  },
@@ -5133,7 +5257,11 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:qualite_ardoise",
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:consommables"
   ],
   "aChiffrer": []
  },
@@ -5254,7 +5382,12 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:fixation_crochet",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -5509,7 +5642,12 @@
    }
   ],
   "questions": [
-   "suggestions:choisies"
+   "param:fixation_crochet",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
   ],
   "aChiffrer": []
  },
@@ -5532,9 +5670,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "suggestions:choisies"
-  ],
+  "questions": [],
   "aChiffrer": []
  },
  {

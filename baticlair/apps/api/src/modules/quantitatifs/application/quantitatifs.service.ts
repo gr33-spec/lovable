@@ -256,6 +256,18 @@ export class QuantitatifsService {
     for (const [i, envoyee] of reponses.entries()) {
       let r = envoyee;
       if (done.has(r.question)) continue;
+      // Étape « Suggestions » (Greg, 17 novembre 2026) : les cases cochées, parmi celles proposées, ou « aucune ».
+      // Jamais un article qui n'a pas été proposé ; une fois répondue, l'étape est close.
+      if (r.question === SUGGESTIONS_KEY) {
+        const proposees = new Set((reviewed.suggestions ?? []).map((o) => o.key));
+        const aucune = r.valeur === null || r.valeur.trim() === SUGGESTIONS_AUCUNE;
+        const cochees = aucune ? [] : [...new Set(r.valeur!.split(",").map((x) => x.trim()).filter(Boolean))];
+        if (proposees.size === 0 || (!aucune && cochees.length === 0) || cochees.some((c) => !proposees.has(c))) {
+          throw validationFailed("Unknown suggestion", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        }
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, SUGGESTIONS_KEY, cochees.length > 0 ? cochees.join(",") : SUGGESTIONS_AUCUNE);
+        continue;
+      }
       const decision = reviewed.purchase.questions.find((d) => d.key === r.question);
       const q = decision?.question;
       // §47.3 : « C'est bon » sur une quantité calculée avec une règle « à vérifier ».
@@ -305,17 +317,6 @@ export class QuantitatifsService {
           throw validationFailed("This question takes « ok »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         }
         reviewed = await this.takeoffs.decide(tenant, reviewed.takeoff.id, { action: decision.primary.action, lineIds: decision.lineIds, pieceLineIds: decision.pieceLineIds ?? [] });
-        continue;
-      }
-      // Étape « Suggestions » (Greg, 17 novembre 2026) : les cases cochées, parmi celles proposées, ou « aucune ».
-      // Une seule réponse possible, tant que l'étape est ouverte : jamais un article qui n'a pas été proposé.
-      if (r.question === SUGGESTIONS_KEY) {
-        const proposees = new Set((q?.options ?? []).map((o) => o.value));
-        const cochees = r.valeur === null || r.valeur.trim() === SUGGESTIONS_AUCUNE ? [] : [...new Set(r.valeur.split(",").map((x) => x.trim()).filter(Boolean))];
-        if (!q || (r.valeur !== null && r.valeur.trim() !== SUGGESTIONS_AUCUNE && cochees.length === 0) || cochees.some((c) => !proposees.has(c))) {
-          throw validationFailed("Unknown suggestion", [{ path: `reponses.${i}.valeur`, message: r.question }]);
-        }
-        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, SUGGESTIONS_KEY, cochees.length > 0 ? cochees.join(",") : SUGGESTIONS_AUCUNE);
         continue;
       }
       const key = q?.key ?? r.question.replace(/^engine:/, "");

@@ -385,6 +385,8 @@ export interface Takeoff {
   /** §52, la carte « Lots repérés » : les lots lus, ceux gardés ou ajoutés (null avant « C'est bon »), les métiers à ajouter. */
   lots?: { metier: string; libelle: string; lignes: number }[];
   lotsConfirmes?: string[] | null;
+  /** Étape « Suggestions » : les cases à proposer avant les questions ; vide ou absent : pas d'étape. */
+  suggestions?: { key: string; label: string }[];
   metiersAjoutables?: { metier: string; libelle: string }[];
   /** Lecture lot par lot : « Je n'ai pas pu lire la partie …, ajoute-la à la main ou renvoie-la. » (un lot en échec). */
   lotsNonLus?: string[];
@@ -547,8 +549,6 @@ export interface TakeoffDecision {
     impact: string | null;
     /** Une qualité qui se nomme (l'ardoise, une teinte) : « Autre » laisse l'écrire. */
     named?: boolean;
-    /** Étape « Suggestions » : des cases à cocher (plusieurs réponses, ou aucune). */
-    multiple?: boolean;
   } | null;
 }
 

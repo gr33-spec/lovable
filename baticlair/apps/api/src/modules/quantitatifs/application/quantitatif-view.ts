@@ -128,8 +128,6 @@ export function quantitatifView(
       je_ne_sais_pas: Boolean(q && q.kind === "param"),
       ...(q?.unit ? { unite: q.unit } : {}),
       saisie_libre: Boolean(q && ((q.kind === "param" && !q.options?.length) || q.key.startsWith("fiche:"))),
-      /** Étape « Suggestions » : des cases à cocher (plusieurs réponses, ou aucune), puis « Continuer ». */
-      ...(q?.multiple ? { plusieurs: true as const } : {}),
     };
   });
   const etat: Etat = questions.length > 0 ? "questions" : "pret";

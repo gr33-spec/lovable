@@ -168,8 +168,6 @@ export interface Question {
   named?: boolean;
   /** Pourquoi elle compte : « De 1 191 à 1 445 pièces selon la réponse ». */
   impact?: string;
-  /** Étape « Suggestions » : des cases à cocher, plusieurs réponses possibles (ou aucune). */
-  multiple?: true;
 }
 
 /**

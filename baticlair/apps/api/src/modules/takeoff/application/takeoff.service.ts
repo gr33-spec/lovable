@@ -323,6 +323,8 @@ export interface ReviewedTakeoff {
   dicibles?: DonneeDicible[];
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation) : hors de la liste, repliées à part. */
   withoutSupply?: { lineId: string; label: string; measure: string | null }[];
+  /** Étape « Suggestions » : les oublis probables à proposer en cases (fiche du métier), tant que l'artisan n'a pas répondu. */
+  suggestions?: { key: string; label: string }[];
   /** La note de l'artisan sur le chantier (§44), pour le bref de l'écran et de l'envoi (§50.7). */
   siteNotes?: string | null;
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché, hors de la liste. */
@@ -1551,6 +1553,7 @@ export class TakeoffService {
       dicibles: donneesDicibles(ref, e.plan, takeoff.answers, [...purchase.questions.map((q) => q.question?.key ?? q.key), ...habits.map((h) => h.key)]),
       aiSuggestions: [],
       withoutSupply: e.sansFourniture,
+      suggestions: e.suggestions,
       siteNotes: notes,
     };
   }

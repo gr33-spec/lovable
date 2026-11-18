@@ -16,21 +16,20 @@ const cles = (e: ReturnType<typeof ecran>) => e.purchase.questions.map((d) => d.
 const noms = (e: ReturnType<typeof ecran>) => e.purchase.toBuy.map((b) => b.label);
 
 describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, avant les questions", () => {
-  it("à l'ouverture : l'étape, seule ; elle propose naissances, talons et angles, jamais les crochets déjà écrits ; rien n'est ajouté", () => {
+  it("à l'ouverture : l'étape propose naissances, talons et angles, jamais les crochets déjà écrits ; rien n'est ajouté", () => {
     const e = ecran();
-    expect(cles(e)).toEqual([SUGGESTIONS_KEY]);
-    const q = e.purchase.questions[0]!.question!;
-    expect(q.text).toBe(SUGGESTIONS_TEXTE);
-    expect(q.multiple).toBe(true);
-    expect(q.options!.map((o) => o.label)).toEqual(["Naissances de gouttière", "Talons de gouttière (si tu ne les fabriques pas)", "Angles de gouttière (si tu ne les fabriques pas)"]);
-    expect(q.options!.length).toBeLessThanOrEqual(SUGGESTIONS_MAX);
+    expect(e.suggestions.map((o) => o.label)).toEqual(["Naissances de gouttière", "Talons de gouttière (si tu ne les fabriques pas)", "Angles de gouttière (si tu ne les fabriques pas)"]);
+    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle"]);
+    expect(e.suggestions.length).toBeLessThanOrEqual(SUGGESTIONS_MAX);
+    expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle/i);
-    expect(e.purchase.canValidate).toBe(false);
+    // L'étape n'est pas une question de précision : elle ne s'y mêle pas.
+    expect(cles(e)).not.toContain(SUGGESTIONS_KEY);
   });
 
   it("rien de coché : aucun article ajouté, aucune question sur eux ; les questions de précision arrivent", () => {
     const e = ecran({ [SUGGESTIONS_KEY]: SUGGESTIONS_AUCUNE });
-    expect(cles(e)).not.toContain(SUGGESTIONS_KEY);
+    expect(e.suggestions).toEqual([]);
     expect(cles(e).length).toBeGreaterThan(0);
     expect(cles(e).join(" ")).not.toMatch(/nb_angles/);
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle/i);
@@ -39,7 +38,7 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
   it("naissances et angles cochés : ils entrent dans la liste comme des articles écrits ; les talons, non cochés, n'existent pas", () => {
     const choix = { [SUGGESTIONS_KEY]: "gouttiere/naissance,gouttiere/angle" };
     const e = ecran(choix);
-    expect(cles(e)).not.toContain(SUGGESTIONS_KEY);
+    expect(e.suggestions).toEqual([]);
     expect(noms(e).join(" | ")).toMatch(/Naissances/);
     expect(noms(e).join(" | ")).not.toMatch(/talon/i);
     // Point 16 : la question des angles ne se pose que parce qu'ils sont cochés ; répondue, la ligne est comptée.
@@ -52,7 +51,7 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     const sansGouttiere = { ...D2026_020_LECTURE, lignes: D2026_020_LECTURE.lignes.filter((l) => !/goutti/i.test(l.designation)), questions: D2026_020_LECTURE.questions.filter((q) => !/goutti|descente/i.test(q.texte)) };
     const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: sansGouttiere, answers: {}, preferences: {} });
     expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([]);
-    expect(cles(e)).not.toContain(SUGGESTIONS_KEY);
+    expect(e.suggestions).toEqual([]);
   });
 
   it("toute suggestion de la fiche couverture a ses mots, et ne dit jamais un article ajouté d'office dans la lecture", () => {

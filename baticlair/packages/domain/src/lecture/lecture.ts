@@ -581,6 +581,8 @@ export interface EcranDeLecture {
   lignes: LigneLecture[];
   /** §49.9 : les lignes sans fourniture, dans l'ordre du devis. */
   sansFourniture: { lineId: string; label: string; measure: string | null }[];
+  /** Étape « Suggestions » : les oublis probables à proposer en cases, tant que l'artisan n'y a pas répondu ; vide : pas d'étape. */
+  suggestions: { key: string; label: string }[];
 }
 
 /** La validation d'une ligne issue de la lecture : rien à relire, le modèle a lu le devis entier. */
@@ -875,17 +877,12 @@ export function ecranDeLecture(input: {
   const kept = purchase.questions.filter((d) => !(d.question && answers[d.question.key] === null && !waited.has(d.question.key)));
   const canValidate = purchase.toBuy.length + purchase.toQuote.length > 0 && kept.every((q) => q.lineIds.length === 0 && !q.question) && purchase.toBuy.every((b) => b.state === "ready");
   const final = kept.length === purchase.questions.length ? purchase : { ...purchase, questions: kept, canValidate };
-  // Étape « Suggestions » : tant que l'artisan n'a pas répondu, elle passe avant toute autre question, seule (point 14) ;
-  // les questions de précision ne portent ensuite que sur la liste, cases cochées comprises (point 16).
-  const aProposer = answers[SUGGESTIONS_KEY] === undefined ? suggestionsDuPlan(ref, plan) : [];
-  if (aProposer.length > 0) {
-    const question: Question = { key: SUGGESTIONS_KEY, kind: "choose", text: SUGGESTIONS_TEXTE, options: aProposer.map((x) => ({ label: x.label, value: x.key })), multiple: true };
-    const etape: PurchaseView["questions"][number] = { key: SUGGESTIONS_KEY, state: "missing", title: "Suggestions", text: SUGGESTIONS_TEXTE, lineIds: [], primary: null, secondary: [], question };
-    const sansFournitureS = lignes.filter((l) => !l.fourniture).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ") || null }));
-    return { plan, validation, roles, view, purchase: { ...final, questions: [etape], canValidate: false }, questions: [question], lignes, sansFourniture: sansFournitureS };
-  }
+  // Étape « Suggestions » : tant que l'artisan n'a pas répondu, l'écran la montre avant les questions de précision (point 14),
+  // qui ne portent ensuite que sur la liste, cases cochées comprises (point 16). Elle ne bloque rien : sans réponse, rien
+  // n'est ajouté (« ce qui est coché s'ajoute, le reste est ignoré »).
+  const suggestions = answers[SUGGESTIONS_KEY] === undefined ? suggestionsDuPlan(ref, plan) : [];
   const sansFourniture = lignes.filter((l) => !l.fourniture).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ") || null }));
-  return { plan, validation, roles, view, purchase: final, questions, lignes, sansFourniture };
+  return { plan, validation, roles, view, purchase: final, questions, lignes, sansFourniture, suggestions };
 }
 
 interface Asked {
