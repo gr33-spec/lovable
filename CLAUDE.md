@@ -194,6 +194,16 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Chaque ligne dit son origine quand la liste mêle les deux : « Dit par toi », « Calculé », « À vérifier ».
 - Admin › « Corrections les plus fréquentes » : la ligne proposée et la ligne corrigée, sur 90 jours, sans nom d'entreprise ni de chantier.
 
+## Décisions du 18 novembre 2026 : stockage des photos, fiche Google, engagements
+
+- Stockage Vercel Blob « mobiiz-photos-test » (Paris, offre Hobby gratuite) créé et relié au projet baticlair-api en Preview ; `PHOTOS_BLOB_URL` posée sur le site (Preview). Envoi de photos testé en ligne (couverture et chantiers). Rien en production.
+- « Mon site » : champ « Lien de ma fiche Google » (seulement une adresse Google : google.com, g.page, maps.app.goo.gl…) qui affiche « Voir nos avis Google ». Toujours ni avis ni note dans Mobiiz.
+- Règle changée : « Devis gratuit » était retiré comme texte inventé → l'artisan coche lui-même « Devis gratuit », « Déplacement gratuit », « Intervention rapide » ; seules les cases cochées s'affichent dans le bandeau de garanties.
+- La page publique de l'API n'est plus gardée en cache (avant : 60 secondes) : un site modifié se voit tout de suite.
+- « Messages et réponses » n'allume plus l'onglet Missions tant que Mission est « Bientôt ».
+- Éditeur « Mon site » sur téléphone (Greg, 18 novembre 2026). Règle changée : avant, le site en haut et une barre d'onglets flottante en bas, qui cachait les couleurs → une colonne d'onglets collée à gauche (en L avec le menu de l'app), le téléphone en entier à droite, réduit pour tenir, qui défile ; un onglet ouvre un tiroir sous lui (la moitié de l'écran au plus, « Fermer ») et le téléphone, à taille lisible, montre la partie réglée. Ordinateur inchangé.
+- Logo du site : seulement celui que l'entreprise a envoyé dans son profil ; sinon ses initiales. Le code n'a aucun logo Mobiiz de repli (vérifié par un test).
+
 ## Décisions du 17 novembre 2026 (soir) : « droit au but », après le test du chantier ardoise de Greg
 
 - Principe (tous métiers) : le négoce reçoit une commande claire, rien d'autre. L'usage des articles, le détail par pièce et les calculs restent dans l'app.

@@ -3083,6 +3083,10 @@ model PageEntreprise {
   zone             String?
   horaires         String?
   siteWeb          String?   @map("site_web")
+  /// Le lien de la fiche Google (bouton « Voir nos avis Google ») ; jamais une note recopiée (Greg, 18 novembre 2026).
+  lienGoogle       String?   @map("lien_google")
+  /// Les engagements cochés par l'artisan (« Devis gratuit », « Déplacement gratuit », « Intervention rapide »).
+  engagements      String[]  @default([])
   creeeEn          Int?      @map("creee_en")
   certifications   String[]  @default([])
   /// Les prestations ({ titre, texte }[], 6 au plus), proposées d'après le métier à la création de la page.

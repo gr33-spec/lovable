@@ -101,6 +101,10 @@ export interface ContenuPage {
   horaires: string | null;
   telephone: string | null;
   siteWeb: string | null;
+  /** Le lien de la fiche Google de l'entreprise (bouton « Voir nos avis Google ») ; jamais une note recopiée. */
+  lienGoogle: string | null;
+  /** Les engagements que l'artisan coche lui-même (`ENGAGEMENTS`), affichés dans le bandeau de garanties. */
+  engagements: string[];
   /** L'adresse postale : seulement si l'artisan a coché « Afficher mon adresse ». */
   adressePostale: string | null;
   creeeEn: number | null;
@@ -297,6 +301,26 @@ export function siteWebPropre(v: string | null | undefined): string | null {
   const m = /^(https?):\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)+)(:\d{1,5})?(\/[^\s]*)?$/i.exec(avec);
   if (!m) return null;
   return `${m[1]!.toLowerCase()}://${m[2]!.toLowerCase()}${m[3] ?? ""}${m[4] ?? ""}`.replace(/\/$/, "");
+}
+
+/**
+ * LES ENGAGEMENTS COCHÉS PAR L'ARTISAN (Greg, 18 novembre 2026) : jamais écrits par Mobiiz, seulement ce qu'il coche.
+ * RÈGLE CHANGÉE : avant, « Devis gratuit » était retiré comme texte inventé ; maintenant il s'affiche s'il le coche.
+ */
+export const ENGAGEMENTS = ["Devis gratuit", "Déplacement gratuit", "Intervention rapide"] as const;
+
+/** Les engagements reconnus, dans l'ordre de la liste, sans doublon. */
+export const engagementsPropres = (v: readonly string[] | null | undefined): string[] => ENGAGEMENTS.filter((e) => v?.includes(e));
+
+/** Les adresses de fiche Google acceptées (Google Maps, fiche d'établissement, liens courts de partage). */
+const HOTES_GOOGLE = /^(?:(?:www|maps|business|search)\.)?google\.(?:com|fr|be|ch|lu|ca|de|es|it|co\.uk)$|^(?:maps\.app\.)?goo\.gl$|^g\.page$|^g\.co$|^share\.google$/;
+
+/** Le lien de la fiche Google, propre, ou null s'il ne mène pas chez Google (« Voir nos avis Google »). */
+export function lienGooglePropre(v: string | null | undefined): string | null {
+  const propre = siteWebPropre(v);
+  if (!propre || !propre.startsWith("https://")) return propre && /^http:\/\//.test(propre) ? lienGooglePropre(propre.replace(/^http:/, "https:")) : null;
+  const hote = /^https:\/\/([^/:]+)/.exec(propre)![1]!;
+  return HOTES_GOOGLE.test(hote) ? propre : null;
 }
 
 /** Un numéro de téléphone français ou international lisible, ou null. Garde le « + », retire le reste. */

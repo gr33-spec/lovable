@@ -35,9 +35,9 @@ const listesItem: NavItem = {
 };
 const groupeItem: NavItem = { href: "/achats-groupes", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/achats-groupes") || p.startsWith("/regroupements") || p.startsWith("/groupe") };
 /** Missions entre entreprises (Greg, 10 novembre 2026) : le quatrième onglet, toujours présent ; les messages y vivent quand les missions sont ouvertes. */
-const missionsItem: NavItem = { href: "/missions", label: fr.nav.missions, icon: Briefcase, match: (p: string) => p.startsWith("/missions") || (p.startsWith("/messages") && !p.startsWith("/messages/negoce")) };
+const missionsItem: NavItem = { href: "/missions", label: fr.nav.missions, icon: Briefcase, match: (p: string) => p.startsWith("/missions") || (p.startsWith("/messages") && !p.startsWith("/messages/negoce") && !p.startsWith("/messages/site")) };
 /** « Mon site » (Greg, 16 novembre 2026) : le site de l'entreprise, cinquième onglet ; seul chemin vers son éditeur. */
-const siteItem: NavItem = { href: "/mon-site", label: "Mon site", icon: Globe, match: (p: string) => p.startsWith("/mon-site") };
+const siteItem: NavItem = { href: "/mon-site", label: "Mon site", icon: Globe, match: (p: string) => p.startsWith("/mon-site") || p.startsWith("/messages/site") };
 /** Ordinateur seulement (Greg, 31 octobre 2026, soir : « on a de la place sur l'écran ») : « Mes négoces » à portée de clic. */
 const negocesItem: NavItem = { href: "/fournisseurs", label: "Mes négoces", icon: Truck, match: (p: string) => p.startsWith("/fournisseurs") };
 const profilItem: NavItem = { href: "/compte", label: fr.nav.profil, icon: UserRound, match: (p: string) => p.startsWith("/compte") || p.startsWith("/abonnement") || p.startsWith("/fournisseurs") || p.startsWith("/mes-prix") };
@@ -75,7 +75,8 @@ export function AppNav() {
    * l'élément actif sur un verre clair avec l'icône jaune ; « Profil » ne s'allume plus sur « Mes négoces », qui a son lien.
    */
   const link = (item: NavItem, ordinateurSeulement = false) => {
-    const active = item.match(pathname);
+    // Missions coupées (« Bientôt ») : « Messages et réponses » n'allume pas l'onglet Missions (Greg, 18 novembre 2026).
+    const active = item.match(pathname) && !(item === missionsItem && missionsBientot && pathname.startsWith("/messages"));
     const activeOrdinateur = active && !(item === profilItem && negocesItem.match(pathname));
     const Icon = item.icon;
     return (

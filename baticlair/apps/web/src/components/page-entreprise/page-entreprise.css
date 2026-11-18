@@ -1940,3 +1940,27 @@ body:has(.pe:not(.pe-apercu)) {
   -webkit-line-clamp: unset;
   overflow: visible;
 }
+
+/* « Voir nos avis Google » (Greg, 18 novembre 2026) : un lien sobre sous les boutons, vers la fiche de l'artisan. */
+.pe .pe-lien-google {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.45);
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+}
+.pe .pe-lien-google svg {
+  color: var(--jaune-sombre);
+}
+.pe .pe-lien-google:hover {
+  background: rgb(255 255 255 / 0.2);
+}
