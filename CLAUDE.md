@@ -203,6 +203,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - « Messages et réponses » n'allume plus l'onglet Missions tant que Mission est « Bientôt ».
 - Éditeur « Mon site » sur téléphone (Greg, 18 novembre 2026). Règle changée : avant, le site en haut et une barre d'onglets flottante en bas, qui cachait les couleurs → une colonne d'onglets collée à gauche (en L avec le menu de l'app), le téléphone en entier à droite, réduit pour tenir, qui défile ; un onglet ouvre un tiroir sous lui (la moitié de l'écran au plus, « Fermer ») et le téléphone, à taille lisible, montre la partie réglée. Ordinateur inchangé.
 - Aperçu « Ordinateur » de « Mon site » : réduit par `zoom` au lieu de `transform: scale` (sur iPhone, il restait blanc un long moment).
+- Barre « Appeler » du site sur téléphone (Greg, 18 novembre 2026). Règle changée : avant, `position: fixed`, qui flottait au milieu de l'aperçu, et le rond « Appeler » de la barre du haut restait dans l'accueil (trois boutons d'appel) → collée en bas du cadre qui défile (l'écran, ou le téléphone de l'aperçu), visible seulement une fois l'accueil passé ; sur téléphone, plus de rond dans la barre du haut : l'accueil a « Demander un devis » et le numéro, puis la barre du bas.
 - Logo du site : seulement celui que l'entreprise a envoyé dans son profil ; sinon ses initiales. Le code n'a aucun logo Mobiiz de repli (vérifié par un test).
 
 ## Décisions du 17 novembre 2026 (soir) : « droit au but », après le test du chantier ardoise de Greg

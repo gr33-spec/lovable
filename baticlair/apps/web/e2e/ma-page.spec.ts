@@ -52,6 +52,15 @@ async function onglet(page: Page, nom: string) {
 const enregistre = (page: Page) => expect(page.getByText("Enregistré : ton site est à jour.")).toBeVisible();
 const apercu = (page: Page) => page.locator("[data-testid=apercu-page]:visible").first();
 
+/** Les liens d'appel réellement visibles à l'écran (Greg, 18 novembre 2026 : jamais trois à la fois). */
+const appelsVisibles = (page: Page) =>
+  page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('a[href^="tel:"]')].filter((a) => {
+      const r = a.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight && getComputedStyle(a).visibility !== "hidden";
+    }).length,
+  );
+
 async function sansDefilementHorizontal(page: Page) {
   const deborde = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(deborde).toBeLessThanOrEqual(1);
@@ -173,14 +182,23 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await expect(v.locator(".pe svg[viewBox='0 0 800 600']")).toHaveCount(0);
   expect(await v.locator(".pe").evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(251, 248, 243)");
   if (info.project.name === "telephone") {
-    // « Appeler » dans la barre du haut ; une fois l'accueil passé, le bouton fixé en bas prend le relais (pas en double).
+    // Greg, 18 novembre 2026 : dans l'accueil, « Demander un devis » et le numéro (jamais le rond du haut en plus) ; une
+    // fois l'accueil passé, la barre « Appeler » collée TOUT EN BAS de l'écran ; revenu en haut, elle disparaît.
     await v.evaluate(() => window.scrollTo(0, 0));
-    await expect(v.locator(".pe-entete-appel")).toBeVisible();
+    await expect(v.locator(".pe-entete-appel")).toBeHidden();
+    await expect(v.locator(".pe-accueil").getByRole("link", { name: /02 96 11 22 33/ })).toBeVisible();
     await expect(v.locator(".pe-barre-appel")).not.toBeInViewport();
-    await v.locator("#contact").scrollIntoViewIfNeeded();
+    expect(await appelsVisibles(v)).toBeLessThanOrEqual(2);
+    // Les prestations à l'écran : un seul bouton d'appel, la barre du bas (le formulaire de contact a son propre numéro).
+    await v.evaluate(() => document.querySelector("#prestations")!.scrollIntoView({ block: "start" }));
     await expect(v.locator(".pe-barre-appel a")).toBeInViewport();
     await expect(v.locator(".pe-barre-appel a")).toHaveAttribute("href", "tel:0296112233");
-    await expect(v.locator(".pe-entete-appel")).toHaveCSS("opacity", "0");
+    await expect.poll(() => v.locator(".pe-barre-appel").evaluate((b) => Math.round(innerHeight - b.getBoundingClientRect().bottom))).toBe(0);
+    expect(await appelsVisibles(v)).toBe(1);
+    await v.locator("#contact").scrollIntoViewIfNeeded();
+    await expect.poll(() => v.locator(".pe-barre-appel").evaluate((b) => Math.round(innerHeight - b.getBoundingClientRect().bottom))).toBe(0);
+    await v.evaluate(() => window.scrollTo(0, 0));
+    await expect(v.locator(".pe-barre-appel")).not.toBeInViewport();
   } else {
     await expect(v.locator(".pe-entete-appel")).toContainText("02 96 11 22 33");
     await expect(v.locator(".pe-barre-appel")).toBeHidden();
@@ -310,6 +328,30 @@ test("Mon site : engagements cochés et « Voir nos avis Google » (Greg, 18 nov
   await expect(v.getByRole("link", { name: "Voir nos avis Google" })).toHaveAttribute("href", "https://maps.app.goo.gl/AbCd123");
   await expect(v.getByRole("list", { name: "Garanties" }).getByText("Devis gratuit")).toBeVisible();
   await v.context().close();
+});
+
+test("Mon site : dans l'aperçu Téléphone, la barre « Appeler » reste collée en bas du téléphone (Greg, 18 novembre 2026)", async ({ page }, info) => {
+  test.skip(info.project.name !== "telephone", "l'aperçu téléphone de l'éditeur");
+  test.setTimeout(120_000);
+  await inscrire(page, `Toits Martin ${unique()}`);
+  await page.goto("/mon-site");
+  await onglet(page, "Contact");
+  await page.getByRole("textbox", { name: /^Téléphone/ }).fill("06 47 10 04 99");
+  await enregistre(page);
+  await page.getByRole("button", { name: /^Fermer les réglages/ }).click();
+  const tel = apercu(page);
+  const barre = tel.locator(".pe-barre-appel");
+  // En haut (l'onglet Contact avait fait défiler l'aperçu jusqu'au formulaire) : la barre est cachée sous le bas du téléphone.
+  await tel.evaluate((d) => d.scrollTo(0, 0));
+  const sousLeBas = () => barre.evaluate((b) => Math.round(b.getBoundingClientRect().top - b.closest("[data-testid=apercu-page]")!.getBoundingClientRect().bottom));
+  await expect.poll(sousLeBas).toBeGreaterThanOrEqual(0);
+  // Après l'accueil : collée tout en bas du téléphone, jamais au milieu, à chaque hauteur de défilement.
+  for (const y of [900, 1500, 99999]) {
+    await tel.evaluate((d, y) => d.scrollTo(0, y), y);
+    await expect.poll(() => barre.evaluate((b) => Math.round(b.closest("[data-testid=apercu-page]")!.getBoundingClientRect().bottom - b.getBoundingClientRect().bottom))).toBe(0);
+  }
+  await tel.evaluate((d) => d.scrollTo(0, 0));
+  await expect.poll(sousLeBas).toBeGreaterThanOrEqual(0);
 });
 
 test("Ma page : l'éditeur dans les thèmes clair et sombre de l'application, sans défilement horizontal", async ({ page }) => {
