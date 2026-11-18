@@ -30,7 +30,7 @@ const ecran = async (agent: Agent, projetId: string) => (await agent.get(`/v1/pr
 const repondre = (agent: Agent, id: string, valeur: string) => agent.post(`/v1/quantitatifs/${id}/reponses`).send({ reponses: [{ question: "suggestions:choisies", valeur }] });
 
 describe("l'étape « Suggestions » : proposée par la fiche, répondue une fois", () => {
-  it("après la lecture : naissances, talons et angles sont proposés (pas les crochets, écrits) ; rien n'est dans la liste", async () => {
+  it("après la lecture : naissances, talons, angles et consommables sont proposés (pas les crochets, écrits) ; cinq au plus ; rien n'est dans la liste", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
     const { projetId } = await chantier(agent);
     const e = await ecran(agent, projetId);
@@ -38,8 +38,14 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
       { key: "gouttiere/naissance", label: "Naissances de gouttière" },
       { key: "gouttiere/talon", label: "Talons de gouttière (si tu ne les fabriques pas)" },
       { key: "gouttiere/angle", label: "Angles de gouttière (si tu ne les fabriques pas)" },
+      // Greg, 18 novembre 2026 : les consommables en cases (plus jamais d'office, plus de question oui / non).
+      { key: "bandes-zinc/mastic+bande-porte-solin/mastic", label: "Cartouches de silicone zinc" },
+      { key: "bandes-zinc/vis", label: "Vis inox 4 × 40" },
     ]);
-    expect(e.purchase.toBuy.map((b) => b.label).join(" | ")).not.toMatch(/naissance|talon|angle/i);
+    expect(e.purchase.toBuy.map((b) => b.label).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
+    // Plus de question oui / non sur les consommables.
+    const q = (await agent.get(`/v1/quantitatifs/${(await chantier(agent)).id}`)).body as { questions: { id: string; texte: string }[] };
+    expect(q.questions.map((x) => `${x.id} ${x.texte}`).join(" | ")).not.toMatch(/consommables/i);
   });
 
   it("une case qui n'a pas été proposée est refusée ; rien ne change", async () => {
@@ -47,7 +53,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const { id, projetId } = await chantier(agent);
     expect((await repondre(agent, id, "gouttiere/etain")).status).toBe(400);
     expect((await repondre(agent, id, "couverture-ardoise/liteau")).status).toBe(400);
-    expect((await ecran(agent, projetId)).suggestions).toHaveLength(3);
+    expect((await ecran(agent, projetId)).suggestions).toHaveLength(5);
   });
 
   it("naissances cochées : elles entrent dans la liste, l'étape est close ; talons et angles n'existent pas", async () => {
@@ -61,6 +67,18 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     expect(noms).not.toMatch(/talon|angle/i);
     // Répondue une fois : l'étape ne se rouvre pas.
     expect((await repondre(agent, id, "gouttiere/talon")).status).toBe(400);
+  });
+
+  it("le silicone coché (une case pour deux pièces) entre dans la liste, sur une ligne ; les vis, non cochées, n'existent pas", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
+    const { id, projetId } = await chantier(agent);
+    expect((await repondre(agent, id, "gouttiere/naissance,bandes-zinc/mastic+bande-porte-solin/mastic")).status).toBeLessThan(300);
+    const e = await ecran(agent, projetId);
+    expect(e.suggestions).toEqual([]);
+    const noms = e.purchase.toBuy.map((b) => b.label);
+    expect(noms.filter((n) => /silicone/i.test(n))).toHaveLength(1);
+    expect(noms.join(" | ")).toMatch(/Naissances/);
+    expect(noms.join(" | ")).not.toMatch(/vis inox|pattes/i);
   });
 
   it("« aucune » : la liste reste telle que le devis la dit, et l'étape est close", async () => {

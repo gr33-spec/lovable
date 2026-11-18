@@ -1117,7 +1117,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.18-55",
+  version: "roofing-2026.11.18-56",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -3950,7 +3950,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "tube",
           formula: "nb_descentes * arrondi_sup(hauteur_descente / longueur_tube)",
           unit: "u",
-          precision: "{nb_descentes} descentes × {hauteur_descente|m}",
+          precision: "{nb_descentes|pluriel:descente:descentes} × {hauteur_descente|m}",
+          pieceUnit: { one: "tube de {longueur_tube|m}", many: "tubes de {longueur_tube|m}" },
           designation: "Tubes de descente {devis} Ø{diametre_descente|mm#}, longueur {longueur_tube|m}",
           precisionRequires: ["diametre_descente"],
           core: true,

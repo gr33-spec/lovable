@@ -175,8 +175,8 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(row(v.toBuy[11]!.key)).toMatchObject({ status: "check", reason: "Le devis parle de colliers sans les chiffrer : quantité calculée, à vérifier" });
   });
 
-  it("consommables : seulement si l'artisan dit oui, liés aux lignes écrites, orange et en fin de liste ; non : rien", () => {
-    expect(keys()).toContain("engine:param:consommables");
+  it("consommables : jamais d'office ni de question oui / non (Greg, 18 novembre 2026 : ils se cochent) ; un « oui » déjà donné les garde, liés aux lignes écrites, orange et en fin de liste", () => {
+    expect(keys()).not.toContain("engine:param:consommables");
     expect(repondu.toBuy.filter((b) => b.consumable)).toEqual([]);
     const oui = read({ ...REPONSES, "param:consommables": u("1") });
     const consommables = oui.toBuy.filter((b) => b.consumable);

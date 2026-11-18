@@ -97,7 +97,9 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     expect(email.body).toBe(
       [
         "Bonjour,",
-        "Voici une demande de prix pour un chantier de couverture zinc à joint debout à Brest (liste en pièce jointe, 7 articles).",
+        // RÈGLE CHANGÉE (Greg, 18 novembre 2026) : 5 articles, ceux du devis. Avant : 7, avec deux consommables ajoutés sur un
+        // « oui » à la question des consommables ; ils se cochent maintenant à l'étape « Suggestions ».
+        "Voici une demande de prix pour un chantier de couverture zinc à joint debout à Brest (liste en pièce jointe, 5 articles).",
         "Pour répondre : répondez simplement à cet e-mail avec votre devis, ou chiffrez en ligne en 2 minutes :\n(votre lien personnel)",
         "Une question ? 06 12 34 56 78.",
         "Merci d'avance,\nGreg, Bati invest",

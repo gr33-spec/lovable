@@ -915,7 +915,7 @@ export function SuggestionsCard({ options, pending, error, onContinuer }: { opti
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <section aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
           <Bulle de="mobiiz" label="Message de MOBIIZ">
-            <TexteMobiiz>J&apos;ai lu ton devis. Avant mes questions, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
+            <TexteMobiiz>J&apos;ai lu ton devis. Un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
           </Bulle>
           <fieldset aria-label="Suggestions" disabled={pending} className="ml-10 flex flex-col gap-3 rounded-[22px] border p-4" style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: COULEURS_CHAT.bulle }}>
             <legend className="sr-only">Suggestions</legend>

@@ -1554,7 +1554,10 @@ test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases ava
   // Points 14 et 15 : une seule étape, les mots de Greg, des cases tirées de la fiche ; les crochets, écrits, ne sont pas proposés.
   await expect(carte.getByText("Coche ce qu'il te faut, on l'ajoute à ta liste.")).toBeVisible();
   const cases = carte.getByRole("checkbox");
-  await expect(cases).toHaveCount(3);
+  // Greg, 18 novembre 2026 : les consommables sont des cases aussi (plus jamais d'office, plus de question oui / non) ; cinq au plus.
+  await expect(cases).toHaveCount(5);
+  await expect(carte.getByRole("checkbox", { name: "Cartouches de silicone zinc" })).not.toBeChecked();
+  await expect(carte.getByRole("checkbox", { name: "Vis inox 4 × 40" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Naissances de gouttière" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Talons de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Angles de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
@@ -1578,7 +1581,7 @@ test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases ava
   await expect(carte).toBeHidden({ timeout: 15_000 });
   // Point 16 : les questions ne portent que sur la liste ; les angles, non cochés, ne se demandent pas.
   const posees = await repondreAuxQuestions(page);
-  expect(posees.join(" | ")).not.toMatch(/angle|talon/i);
+  expect(posees.join(" | ")).not.toMatch(/angle|talon|consommable/i);
   await calculerEtVoirMaListe(page);
   for (let i = 0; i < 3 && (await boutonsDeLaQuestion(page).count()) > 0; i++) {
     posees.push(...(await repondreAuxQuestions(page)));
@@ -1588,7 +1591,41 @@ test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases ava
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste).toBeVisible({ timeout: 60_000 });
   await expect(liste.getByText(/^Naissances/).first()).toBeVisible();
-  await expect(liste.getByText(/Talons de gouttière|Angles de gouttière/)).toHaveCount(0);
+  await expect(liste.getByText(/Talons de gouttière|Angles de gouttière|silicone|Vis inox|Pattes de fixation/)).toHaveCount(0);
+  // Plus jamais « développé ? » dans une ligne.
+  await expect(liste.getByText(/développé \?/)).toHaveCount(0);
+});
+
+test("étape « Suggestions » sans question à poser (Greg, 18 novembre 2026) : la carte s'affiche quand même, avant la liste ; « Continuer » sans rien cocher laisse la liste telle quelle", async ({ page }) => {
+  await signUp(page);
+  // Une gouttière entièrement décrite : toutes les questions sont répondues d'avance, par le serveur.
+  const q = await apiJson<{ id: string; projetId: string; questions: { id: string; boutons: { valeur: string }[] }[] }>(page, "POST", "/v1/quantitatifs", {
+    reference: "Maison Le Roux",
+    adresse: "29200 Brest",
+    lignes: [{ libelle: "Gouttière zinc demi-ronde de 25, crochets bandeau", quantite: "12", unite: "ml" }],
+  });
+  expect(q.status).toBe(201);
+  let courant = q.body;
+  for (let i = 0; i < 10 && courant.questions.length > 0; i++) {
+    const question = courant.questions[0]!;
+    courant = (await apiJson<typeof courant>(page, "POST", `/v1/quantitatifs/${q.body.id}/reponses`, { reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
+  }
+  expect(courant.questions).toEqual([]);
+  await page.goto(`/chantiers/${q.body.projetId}`);
+  // Aucune question, mais des oublis probables : la carte passe avant la liste.
+  const carte = carteSuggestions(page);
+  await expect(carte).toBeVisible({ timeout: 30_000 });
+  await expect(carte.getByRole("checkbox", { name: "Naissances de gouttière" })).toBeVisible();
+  await expect(boutonsDeLaQuestion(page)).toHaveCount(0);
+  await carte.getByRole("button", { name: "Continuer", exact: true }).click();
+  await expect(carte).toBeHidden({ timeout: 15_000 });
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste).toBeVisible({ timeout: 30_000 });
+  await expect(liste.getByText(/^Naissances/)).toHaveCount(0);
+  // Répondue une fois : en revenant sur le chantier, la carte ne revient pas.
+  await page.reload();
+  await expect(liste).toBeVisible({ timeout: 30_000 });
+  await expect(carte).toHaveCount(0);
 });
 
 test("rien ne part vide : un devis où je ne lis aucune ligne se dit en une phrase, avec « Réessayer », jamais un bouton d'envoi", async ({ page }) => {

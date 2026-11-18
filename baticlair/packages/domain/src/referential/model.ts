@@ -433,6 +433,11 @@ export interface NeedRule extends Provenance {
    * Une ligne dont on ne sait pas à quoi elle sert porte son usage ici (§45.5).
    */
   precision?: string;
+  /**
+   * L'unité de vente d'une pièce dont la longueur est une donnée du chantier (Greg, 18 novembre 2026 : « 2 tubes de 3 m »,
+   * jamais « 2 pièces ») : deux gabarits, au singulier et au pluriel (« tube de {longueur_tube|m} »).
+   */
+  pieceUnit?: { one: string; many: string };
   /** Comment la quantité se compte, dit seulement quand le devis écrit une autre quantité (« pour 10 ml, un tous les 50 cm »). */
   basis?: string;
   /**

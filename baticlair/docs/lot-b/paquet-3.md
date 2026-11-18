@@ -7,9 +7,9 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Charpente | 0 | 2 | 0 | 2 |
+| Charpente | 0 | 2 | 0 | 1 |
 | Étanchéité | 0 | 1 | 0 | 0 |
-| Bardage | 0 | 1 | 0 | 2 |
+| Bardage | 0 | 1 | 0 | 1 |
 | Façade | 0 | 2 | 0 | 0 |
 
 ## Charpente
@@ -25,7 +25,6 @@ Devis de test :
 
 Questions du comptoir :
 - Chevrons : en quelle longueur (rampant + débord) ? (4 m / 4,5 m / 5 m / 6 m)
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -38,7 +37,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Chevrons sapin-épicéa traité classe 2 63×75, L 4 m | 42 chevrons |  | chiffrable |
 | Planches de rive 22×200, L 4 m | 7 planches |  | chiffrable |
-| Pointes torsadées 3,4 × 90 | 252 pièces |  | chiffrable |
 
 ## Étanchéité
 
@@ -74,7 +72,6 @@ Devis de test :
 
 Questions du comptoir :
 - Bardage : douglas ou mélèze ? (Bardage douglas 21×132, L 4 m / Bardage mélèze 21×132, L 4 m)
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -85,7 +82,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
 | Bardage douglas 21×132, L 4 m | 27 bottes de 5 lames |  | chiffrable |
-| Pointes inox bardage 2,5 × 50 | 1 600 pièces |  | chiffrable |
 
 ## Façade
 

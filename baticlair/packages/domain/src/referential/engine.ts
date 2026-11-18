@@ -437,7 +437,10 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   };
   const citedSlot = (key: string) => input.cited?.find((c) => c.slot === key && !input.mentioned.includes(key));
   // Consommables de pose (§49.1 point 4) : seulement sur le « oui » de l'artisan, et liés à une ligne écrite.
-  const consumables = input.params[CONSUMABLES_KEY]?.value ?? input.preferences?.params?.[CONSUMABLES_KEY];
+  // RÈGLE CHANGÉE (Greg, 18 novembre 2026) : sur le chemin de la lecture (étape « Suggestions »), plus de question
+  // oui / non et plus d'habitude : un consommable n'existe que coché (alors écrit). Seule une réponse « oui » déjà
+  // donnée sur un ancien chantier garde ses consommables. Avant : la question « je les ajoute à la liste ? ».
+  const consumables = input.suggestions ? (input.params[CONSUMABLES_KEY]?.value ?? "0") : (input.params[CONSUMABLES_KEY]?.value ?? input.preferences?.params?.[CONSUMABLES_KEY]);
   const consumableOf = (rule: NeedRule) => !writtenSlot(rule.slot) && isConsumableNeed(ref, work, rule);
   const everything = options.everyArticle === true || ref.writtenOnly === false;
   const written = (rule: NeedRule): boolean => {
@@ -1108,6 +1111,11 @@ function computeNeed(
           const written = input.params[name]?.text;
           if (written) return written;
           const v = valueOf(name);
+          // « {nb_descentes|pluriel:descente:descentes} » : le nombre et son nom accordé (« 1 descente », « 2 descentes »).
+          if (unitSpec?.startsWith("pluriel:")) {
+            const [, one, many] = unitSpec.split(":");
+            return isPoint(v) && v.lo.isFinite() ? `${fr(v.lo)} ${v.lo.equals(1) ? one : many}` : `? ${many}`;
+          }
           // §49.2.5 : la donnée qui manque reste un « ? » dans la désignation (« dév. ? »), jamais une valeur devinée.
           if (blank && (!isPoint(v) || !v.lo.isFinite())) {
             if (!sentence) blanked.push(name);
@@ -1136,7 +1144,8 @@ function computeNeed(
     if (rule.estimate && !options.everyArticle && ref.writtenOnly !== false) toConfirm.push({ key: `estimation:${work.id}/${rule.id}`, text: rule.estimate, local: true, said: true });
     // Une précision s'écrit dès que SES valeurs sont connues et sûres (jamais une fourchette).
     // Une donnée inconnue sans effet sur la commande (le développé des feuilles) reste un « ? » dans la phrase (§49.2.5).
-    const precision = rule.precision ? render(rule.precision, unknownParams.length > 0, true) : undefined;
+    // Greg, 18 novembre 2026 : jamais « développé ? » dans une ligne ; la donnée qui manque se demande, elle ne s'écrit pas.
+    const precision = rule.precision ? render(rule.precision, unknownParams.length > 0, true)?.replace(/,\s*[^,;]*\s\?(?=\s*(?:;|$))/g, "") : undefined;
     const basis = rule.basis ? render(rule.basis, false, true) : undefined;
     // Une désignation calculée (« Bobineau 500 × 17 m, 0,65 ») remplace le nom du produit générique.
     // Elle s'écrit dès que SES données sont connues (le développé inconnu ne change pas un bobineau de 500 mm).
@@ -1145,6 +1154,10 @@ function computeNeed(
     // Retour du fondateur (2026-10-12) : un article dont la désignation garde un « ? » n'est jamais vert ; il attend la même
     // question que l'ouvrage (le développé de la gouttière pour ses crochets), et une réponse règle toutes ses lignes.
     for (const name of blanked) if (!unknownParams.includes(name)) unknownParams.push(name);
+    // L'unité de vente d'une pièce dont la longueur est une donnée du chantier (« 2 tubes de 4 m », jamais « 2 pièces ») :
+    // dite seulement quand le compte est exact et que la longueur est connue.
+    const pieceUnit = !purchase && rule.pieceUnit && exact ? { one: render(rule.pieceUnit.one, true, true), many: render(rule.pieceUnit.many, true, true) } : null;
+    const enPieces = pieceUnit?.one && pieceUnit.many && !/\?/.test(`${pieceUnit.one}${pieceUnit.many}`) ? { order: { count: need.lo.toDecimalPlaces(6).ceil().toFixed(), unit: { one: pieceUnit.one, many: pieceUnit.many } }, approx: [] } : null;
     return {
       ...base,
       ...(designation !== undefined ? { label: withoutDevisMark(designation) } : {}),
@@ -1157,6 +1170,7 @@ function computeNeed(
         ? { quantity: { value: need.lo.toDecimalPlaces(2).toFixed(), unit: rule.unit } }
         : { quantityRange: { min: need.lo.toDecimalPlaces(2).toFixed(), max: need.hi.toDecimalPlaces(2).toFixed(), unit: rule.unit } }),
       ...(purchase ? { purchase: { order: { count: purchase.orderLo.toFixed(), unit: purchase.unit }, approx: purchase.approx } } : {}),
+      ...(enPieces ? { purchase: enPieces } : {}),
       ...(purchaseUnavailable ? { purchaseUnavailable } : {}),
       ...(purchaseMissing ? { missing: purchaseMissing } : {}),
       provisional,

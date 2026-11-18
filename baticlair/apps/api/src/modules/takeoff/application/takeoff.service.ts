@@ -1244,7 +1244,7 @@ export class TakeoffService {
     // §52, la carte « Lots repérés » : au moins un lot, chacun un métier (« electrical,plumbing »).
     if (key === LOTS_KEY && (typeof value !== "string" || !/^[a-z0-9_-]{1,40}(,[a-z0-9_-]{1,40})*$/.test(value))) throw validationFailed("Answer the kept lots", { reason: "invalid_answer" });
     // Étape « Suggestions » : « aucune », ou des cases « ouvrage/emplacement » séparées par des virgules.
-    if (key === SUGGESTIONS_KEY && (typeof value !== "string" || !(value === SUGGESTIONS_AUCUNE || /^[a-z0-9_-]{1,60}\/[a-z0-9_-]{1,40}(,[a-z0-9_-]{1,60}\/[a-z0-9_-]{1,40}){0,4}$/.test(value)))) throw validationFailed("Answer the ticked suggestions", { reason: "invalid_answer" });
+    if (key === SUGGESTIONS_KEY && (typeof value !== "string" || !(value === SUGGESTIONS_AUCUNE || /^[a-z0-9_/+-]{3,400}(,[a-z0-9_/+-]{3,400}){0,4}$/.test(value)))) throw validationFailed("Answer the ticked suggestions", { reason: "invalid_answer" });
     await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
     // Mémoire de l'entreprise : un produit choisi, ou une réponse d'habitude (« je façonne », épaisseur du zinc),
     // compte pour SON entreprise ; établie au deuxième chantier différent, elle n'est plus demandée (dite, modifiable).

@@ -30,7 +30,7 @@ const PAQUET: Metier[] = [
       { ref: "2", designation: "Évacuations PVC Ø40 des appareils", quantity: "5", unit: "u" },
       { ref: "3", designation: "Plancher chauffant hydraulique rez-de-chaussée", quantity: "85", unit: "m²" },
     ],
-    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: [],
     couleurs: { vert: 0, orange: 3, gris: 0 },
   },
   {
@@ -43,7 +43,7 @@ const PAQUET: Metier[] = [
       { ref: "3", designation: "Parquet flottant stratifié chêne naturel", quantity: "38", unit: "m²" },
       { ref: "4", designation: "Plinthes MDF blanches", quantity: "32", unit: "ml" },
     ],
-    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: [],
     couleurs: { vert: 2, orange: 2, gris: 0 },
   },
   {
@@ -54,7 +54,7 @@ const PAQUET: Metier[] = [
       { ref: "1", designation: "VMC simple flux hygroréglable, cuisine + 2 sanitaires", quantity: "1", unit: "u" },
       { ref: "2", designation: "Climatiseur mural monosplit 3,5 kW Daikin Perfera", quantity: "2", unit: "u" },
     ],
-    questions: ["VMC : autoréglable, hygro A ou hygro B ?", "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: ["VMC : autoréglable, hygro A ou hygro B ?"],
     couleurs: { vert: 1, orange: 1, gris: 0 },
   },
 ];
