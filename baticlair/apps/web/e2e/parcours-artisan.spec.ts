@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, repondreAuxQuestions, voirMaListe, zoneDesQuestions } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, repondreAuxQuestions, voirMaListe, zoneDesQuestions } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -1074,6 +1074,7 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   // une question à la fois dans une bulle, ses boutons dessous, et la barre du bas pour répondre au clavier ou à la voix.
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   await expect(page.getByRole("textbox")).toHaveCount(1);
   await expect(questions.getByRole("listitem")).toHaveCount(0);
   await expect(page.getByText(/Tout se règle ici|allers-retours|renseignée|avec les numéros/)).toHaveCount(0);
@@ -1393,6 +1394,7 @@ test("§49.8 : une info qui manque se demande en clair sur la ligne qu'elle conc
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-canal-manque.pdf"));
   // Les questions au premier bouton, sauf le traitement des liteaux : laissé sans réponse, il revient sur la ligne, orange.
   await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   await repondreAuxQuestions(page, (q, boutons) => (/traitement/i.test(q) ? "Je ne sais pas" : boutons.getByRole("button").first()));
   await calculerEtVoirMaListe(page);
   await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible({ timeout: 60_000 });
@@ -1499,6 +1501,7 @@ test("zinguerie : une seule question de pliage pour le devis, une pièce se chan
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   // §49.4 : le façonnage de chaque pièce est obligatoire ; tant qu'une question est posée, pas de « Calculer ma liste »,
   // et un façonnage n'a pas de « Je ne sais pas » (jamais une pièce sans réponse dans la liste).
   await expect(calculerMaListe(page)).toHaveCount(0);
@@ -1621,6 +1624,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   // 2. Les questions : une discussion, une question à la fois avec ses boutons, puis « Calculer ma liste » dans le fil.
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   await clean();
   // Une seule case : la barre du bas de la discussion.
   await expect(page.getByRole("textbox")).toHaveCount(1);
@@ -1709,6 +1713,7 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   await repondreAuxQuestions(page, (q) => (/façonn/i.test(q) ? /^Je commande façonné/ : null));
   await calculerEtVoirMaListe(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -1743,6 +1748,7 @@ test("la discussion des questions tient dans l'écran (Greg, 16 novembre 2026) :
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   const dialogue = page.getByRole("dialog", { name: "Questions de Mobiiz" });
   const hauteur = page.viewportSize()!.height;
   const barre = (await dialogue.getByRole("textbox").boundingBox())!;
@@ -1771,6 +1777,7 @@ test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit 
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   await repondreAuxQuestions(page, async (q, boutons) => {
     // Retour du fondateur (2026-10-10) : une valeur à boutons a aussi « Autre », qui laisse écrire.
     if (q === "Pente du toit ?") {
@@ -1806,6 +1813,7 @@ test("retour du fondateur (2026-10-12) : un refus du serveur se dit dans la disc
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   // Depuis le 16 novembre 2026, les réponses partent dès que tout est répondu : c'est là que le serveur refuse (une fois).
   let refuse = false;
   await page.route("**/reponses?**", async (route) => {
@@ -1841,6 +1849,7 @@ test("« Je ne sais pas » (RÈGLE CHANGÉE le 16 novembre 2026, avant : la poub
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   let reprise = false;
   await repondreAuxQuestions(page, async (q, boutons) => {
     if (/façonnes|plies/i.test(q)) {
@@ -1872,6 +1881,7 @@ test("temps deux (2026-10-12) : « Autre » partout où il y a des boutons, cons
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   let avecBoutons = 0;
   await repondreAuxQuestions(page, async (_q, boutons) => {
     const reponses = boutons.getByRole("button").filter({ hasNotText: /^(Autre|Je ne sais pas)$/ });
@@ -4204,6 +4214,7 @@ test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèl
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-tuile-modele.pdf"));
   await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   // Mobiiz ne choisit pas le modèle : il le demande ; l'artisan tape « H14 » dans la barre, le catalogue propose la référence.
   const dialogue = page.getByRole("dialog", { name: "Questions de Mobiiz" });
   await repondreAuxQuestions(page, async (q) => {
@@ -4231,6 +4242,7 @@ test("la discussion (Greg, 16 novembre 2026) : une question à la fois, une rép
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   const questions = zoneDesQuestions(page);
   await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
   // Une seule question posée, dans une bulle, avec ses boutons ; plus jamais « réponds avec les numéros ».
   await expect(questions.getByRole("group", { name: "Question de MOBIIZ" })).toHaveCount(1);
   await expect(boutonsDeLaQuestion(page)).toHaveCount(1);

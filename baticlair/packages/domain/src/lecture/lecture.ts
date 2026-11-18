@@ -849,14 +849,22 @@ export function ecranDeLecture(input: {
   // Point 16 : un article coché à l'étape « Suggestions » vaut un article écrit ; ce que son calcul demande (le nombre de
   // descentes d'une naissance, le nombre d'angles) se pose avec les premières questions, sans attendre une autre réponse.
   const choisies = suggestionsChoisies(answers[SUGGESTIONS_KEY]);
-  const pourCochees = new Set<string>();
+  const pourCochees = new Map<string, string>();
   for (const work of ref.workItems) {
     for (const rule of work.needs) {
       if (!choisies.has(`${work.id}/${rule.slot}`)) continue;
       // Ce qui compte la quantité ; une précision de désignation (le Ø) vient ensuite, comme pour un article écrit.
       const texte = [rule.formula, rule.when ?? "", ...(rule.requires ?? [])].join(" ");
-      for (const p of work.params) if (new RegExp(`\\b${p.key}\\b`).test(texte)) pourCochees.add(p.key);
+      for (const p of work.params) if (new RegExp(`\\b${p.key}\\b`).test(texte)) pourCochees.set(p.key, work.id);
     }
+  }
+  // « Je ne sais pas » à la question d'un article coché : le calcul ne la repose plus, mais l'article l'attend toujours ;
+  // elle reste, pour se régler sur sa ligne avec ses boutons (§51.6).
+  for (const [cle, wid] of pourCochees) {
+    const key = `param:${cle}`;
+    const def = ref.workItems.find((w) => w.id === wid)?.params.find((p) => p.key === cle);
+    if (answers[key] !== null || !def || fallback.some((q) => q.key === key)) continue;
+    fallback.push({ key, kind: "param", text: def.question, unit: def.unit, ...(def.choices ? { options: def.choices } : {}), ...(def.named ? { named: true } : {}) });
   }
   for (const q of fallback) {
     const donnee = scopedParam(q.key)?.name ?? q.key.replace(/^param:/, "");
@@ -864,7 +872,14 @@ export function ecranDeLecture(input: {
     const m = /^param:([a-z0-9_]+)(?:@([a-z0-9_-]+))?$/.exec(q.key) ?? /^product:([a-z0-9_]+)$/.exec(q.key);
     const cle = m ? (q.key.startsWith("product:") ? `produit_${m[1]!}` : m[1]!) : q.key.replace(/[^a-z0-9_]/g, "_");
     const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === cle);
-    const ligne = m?.[2] ? (plan.lines.find((l) => l.status === "planned" && l.workItemId === m[2])?.ref.split(".")[0] ?? null) : null;
+    // La question d'un article coché se range sur la ligne écrite de son ouvrage (la gouttière), comme celle du modèle :
+    // laissée sans réponse, elle reste réglable sur la ligne, avec ses boutons (§51.6).
+    const ouvrageCoche = !m?.[2] ? pourCochees.get(cle) : undefined;
+    const ligne = m?.[2]
+      ? (plan.lines.find((l) => l.status === "planned" && l.workItemId === m[2])?.ref.split(".")[0] ?? null)
+      : ouvrageCoche
+        ? (plan.lines.find((l) => l.status === "planned" && baseOf(l.workItemId) === ouvrageCoche)?.ref.split(".")[0] ?? null)
+        : null;
     asked.push({ q: { cle, texte: q.text, boutons: (q.options ?? []).map((o) => ({ label: o.label, valeur: o.value })), unite: q.unit ?? null, donnee: def?.label.toLowerCase() ?? cle.replace(/_/g, " "), ligne }, key: q.key, question: q });
   }
   // Une réponse sans sa pièce (« param:faconnage » pour toutes les pièces) vaut pour chaque question de pièce (comme le calcul la lit).
@@ -1093,7 +1108,10 @@ function finishPurchase(
       const named = !estimated && /\?/.test(item.label) ? asked.filter((a) => unresolved(a) && ctx.ref.workItems.some((w) => works.includes(w.id) && w.params.some((p) => p.key === a.q.cle))).map((a) => a.q.cle) : [];
       // Une donnée prise par défaut (la pente à 45°) que le modèle demande encore : la quantité attend la réponse.
       const assumed = estimated ? [] : asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`)).map((a) => a.q.cle);
-      const waits = [...new Set([...unknown, ...named, ...assumed])].map((cle) => open(cle)).filter((a): a is Asked => !!a);
+      // Ce que le calcul attend pour compter l'article (le nombre de descentes d'une naissance) a aussi ses boutons sur la
+      // ligne : la question posée, même laissée sans réponse (« je ne sais pas »), jamais une ligne orange sans réglage.
+      const duCalcul = (item.waitsOn ?? []).map((k) => asked.find((a) => a.key === k && unresolved(a))).filter((a): a is Asked => !!a);
+      const waits = [...new Set([...[...new Set([...unknown, ...named, ...assumed])].map((cle) => open(cle)).filter((a): a is Asked => !!a), ...duCalcul])];
       const pending = [...new Set([...(item.waitsOn ?? []), ...waits.map((a) => a.key)])];
       if (waits.length > 0) reasons.set(item.key, raisonCourte(waits.map((a) => a.q.donnee)));
       // §51.6 : un article que le calcul tire d'une ligne (la bobine des bacs) porte aussi les réponses de cette ligne.

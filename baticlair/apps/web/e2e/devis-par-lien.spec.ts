@@ -108,12 +108,14 @@ test("envoi trié par métier : les offres de chaque demande se comparent, « Co
   await expect(page.getByRole("heading", { name: /^Bonjour Jean/ }).or(page.getByRole("dialog", { name: "Guide" })).first()).toBeVisible();
   expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: entreprise, address: "3 rue de la Gare, 22300 Lannion", siret: "73282932000074", phone: null, email: null })).status).toBe(200);
 
-  const q = await apiJson<{ projetId: string }>(page, "POST", "/v1/quantitatifs", {
+  const q = await apiJson<{ id: string; projetId: string }>(page, "POST", "/v1/quantitatifs", {
     lignes: [
       { libelle: "Ardoise naturelle 32×22", quantite: "1000", unite: "pièces" },
       { libelle: "Gouttière zinc demi-ronde de 25", quantite: "24", unite: "m" },
     ],
   });
+  // Étape « Suggestions » (Greg, 17 novembre 2026) : la naissance n'est plus ajoutée d'office, l'artisan la coche.
+  expect((await apiJson(page, "POST", `/v1/quantitatifs/${q.body.id}/reponses`, { reponses: [{ question: "suggestions:choisies", valeur: "gouttiere/naissance" }] })).status).toBeLessThan(300);
   const projectId = q.body.projetId;
   const tag = unique();
   const fiches = [
@@ -140,7 +142,7 @@ test("envoi trié par métier : les offres de chaque demande se comparent, « Co
   ] as const) {
     const jeton = await jetonDe(page, email);
     const cles = (await apiJson<{ lignes: { cle: string }[] }>(page, "GET", `/v1/public/chiffrer/${jeton}`)).body.lignes.map((l) => l.cle);
-    // La gouttière et sa naissance (indissociable) : le zingueur ne reçoit que ses lignes, jamais l'ardoise.
+    // La gouttière et sa naissance (cochée dans les suggestions) : le zingueur ne reçoit que ses lignes, jamais l'ardoise.
     expect(cles).toHaveLength(2);
     expect((await apiJson(page, "POST", `/v1/public/chiffrer/${jeton}`, { prix: Object.fromEntries(cles.map((k) => [k, pu])), livraisonHt: 0, delaiJours: 3, validiteJours: 14 })).status).toBe(200);
   }

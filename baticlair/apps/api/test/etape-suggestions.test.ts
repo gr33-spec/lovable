@@ -72,6 +72,21 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     expect(e.purchase.toBuy.map((b) => b.label).join(" | ")).not.toMatch(/naissance|talon|angle/i);
   });
 
+  it("naissance cochée, puis « je ne sais pas » au nombre de descentes : la ligne garde ses boutons, jamais orange sans réglage (§51.6)", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const q = (await agent.post("/v1/quantitatifs").send({ reference: "Maison", adresse: "29200 Brest", lignes: [{ libelle: "Couverture ardoise naturelle 32x22", quantite: "120", unite: "m²" }, { libelle: "Gouttière zinc demi-ronde", quantite: "18", unite: "ml" }] })).body as { id: string; projetId: string };
+    expect((await repondre(agent, q.id, "gouttiere/naissance")).status).toBeLessThan(300);
+    // Point 16 : la question de l'article coché se pose avec les premières.
+    const avant = (await agent.get(`/v1/quantitatifs/${q.id}`)).body as { questions: { id: string }[] };
+    expect(avant.questions.map((x) => x.id)).toContain("engine:param:nb_descentes");
+    expect((await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "engine:param:nb_descentes", valeur: null }] })).status).toBeLessThan(300);
+    const t = (await agent.get(`/v1/projects/${q.projetId}/takeoff`).expect(200)).body.takeoff as { purchase: { toBuy: { label: string; asks?: { key: string; options: unknown[] }[] }[] } };
+    const naissances = t.purchase.toBuy.find((b) => /^Naissances/.test(b.label))!;
+    expect(naissances).toBeDefined();
+    expect((naissances.asks ?? []).map((a) => a.key)).toContain("param:nb_descentes");
+    expect(naissances.asks![0]!.options.length).toBeGreaterThan(0);
+  });
+
   it("une autre entreprise ne répond pas à la place : introuvable", async () => {
     const a = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
     const b = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures Martin");
