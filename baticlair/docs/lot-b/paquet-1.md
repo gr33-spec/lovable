@@ -7,7 +7,7 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Plâtrerie, isolation | 1 | 2 | 0 | 1 |
+| Plâtrerie, isolation | 1 | 2 | 0 | 0 |
 | Carrelage | 0 | 5 | 0 | 0 |
 | Peinture | 0 | 5 | 0 | 0 |
 | Maçonnerie | 0 | 5 | 0 | 1 |
@@ -25,8 +25,7 @@ Devis de test :
 
 **À l'ouverture : 1 verte · 2 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -40,9 +39,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Plaques BA13 1,20 × 2,50 | 51 plaques |  | chiffrable |
 | Complexes de doublage BA13 + isolant | 20 complexes | longueur à la hauteur sous plafond | chiffrable |
 | Laine de verre à souffler (type Comblissimo), sac de 17,3 kg, R 7 | 19 sacs de 17,3 kg |  | chiffrable |
-| Vis à plaque 25 mm | 2 100 vis |  | chiffrable |
-| Bande à joint | 332 ml |  | chiffrable |
-| Enduit à joint | 74 kg |  | chiffrable |
 
 ## Carrelage
 

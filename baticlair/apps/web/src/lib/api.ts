@@ -341,6 +341,9 @@ export interface TakeoffLine {
 export interface ReadingState {
   status: "reading" | "failed";
   reason: string | null;
+  /** Pendant la lecture : les lignes du devis déjà lues (ses propres mots) et leur nombre. */
+  lignes?: string[];
+  total?: number;
 }
 
 /**
@@ -354,6 +357,8 @@ export interface Quantitatif {
   /** Parcours §48 : questions de comptoir (avant le calcul), calcul en cours, ou liste prête. */
   phase?: "questions" | "calcul" | "resultat";
   erreur?: { raison: string };
+  /** Pendant la lecture (`en_cours`) : les lignes du devis déjà lues (ses propres mots) et leur nombre. */
+  lecture?: { lignes: string[]; total: number };
   valide?: boolean;
   /** Infos chantier facultatives qui ont servi au calcul : la note, et les croquis déposés. */
   infos?: { texte: string | null; croquis: ItemSketch[] };

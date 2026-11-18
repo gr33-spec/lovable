@@ -16,15 +16,34 @@ const cles = (e: ReturnType<typeof ecran>) => e.purchase.questions.map((d) => d.
 const noms = (e: ReturnType<typeof ecran>) => e.purchase.toBuy.map((b) => b.label);
 
 describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, avant les questions", () => {
-  it("à l'ouverture : l'étape propose naissances, talons et angles, jamais les crochets déjà écrits ; rien n'est ajouté", () => {
+  it("à l'ouverture : naissances, talons, angles, puis les consommables (silicone, vis) ; jamais les crochets déjà écrits ; cinq au plus ; rien n'est ajouté", () => {
     const e = ecran();
-    expect(e.suggestions.map((o) => o.label)).toEqual(["Naissances de gouttière", "Talons de gouttière (si tu ne les fabriques pas)", "Angles de gouttière (si tu ne les fabriques pas)"]);
-    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle"]);
-    expect(e.suggestions.length).toBeLessThanOrEqual(SUGGESTIONS_MAX);
+    expect(e.suggestions.map((o) => o.label)).toEqual([
+      "Naissances de gouttière",
+      "Talons de gouttière (si tu ne les fabriques pas)",
+      "Angles de gouttière (si tu ne les fabriques pas)",
+      "Cartouches de silicone zinc",
+      "Vis inox 4 × 40",
+    ]);
+    // Le silicone de deux pièces (la rive, le porte-solin) : une seule case, qui vaut pour les deux.
+    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis"]);
+    expect(e.suggestions.length).toBe(SUGGESTIONS_MAX);
     expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
-    expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle/i);
-    // L'étape n'est pas une question de précision : elle ne s'y mêle pas.
+    expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
+    // L'étape n'est pas une question de précision : elle ne s'y mêle pas ; et plus de question oui / non sur les consommables.
     expect(cles(e)).not.toContain(SUGGESTIONS_KEY);
+    expect(cles(e).join(" ")).not.toMatch(/consommables/);
+  });
+
+  it("consommables (Greg, 18 novembre 2026) : jamais d'office, jamais de question ; cochés, ils entrent dans la liste ; les autres n'existent pas", () => {
+    const rien = ecran({ [SUGGESTIONS_KEY]: SUGGESTIONS_AUCUNE, "param:faconnage@pieces-pliees": { value: "1", unit: "u" } });
+    expect(noms(rien).join(" | ")).not.toMatch(/silicone|vis inox|pattes|étain|décapant/i);
+    expect(cles(rien).join(" ")).not.toMatch(/consommables/);
+    const coche = ecran({ [SUGGESTIONS_KEY]: "bandes-zinc/mastic+bande-porte-solin/mastic", "param:faconnage@pieces-pliees": { value: "1", unit: "u" } });
+    const silicone = coche.purchase.toBuy.filter((b) => /silicone/i.test(b.label));
+    // Une seule ligne, le total des deux pièces (une ligne par article identique).
+    expect(silicone.map((b) => [b.label, b.quantity])).toEqual([["Cartouches de silicone zinc", "2 cartouches"]]);
+    expect(noms(coche).join(" | ")).not.toMatch(/vis inox|pattes|étain|décapant/i);
   });
 
   it("rien de coché : aucun article ajouté, aucune question sur eux ; les questions de précision arrivent", () => {
@@ -50,8 +69,8 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
   });
 
   it("un devis sans oubli probable n'a pas d'étape : aucune suggestion, pas de carte", () => {
-    const sansGouttiere = { ...D2026_020_LECTURE, lignes: D2026_020_LECTURE.lignes.filter((l) => !/goutti/i.test(l.designation)), questions: D2026_020_LECTURE.questions.filter((q) => !/goutti|descente/i.test(q.texte)) };
-    const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: sansGouttiere, answers: {}, preferences: {} });
+    const ardoisesSeules = { ...D2026_020_LECTURE, lignes: D2026_020_LECTURE.lignes.filter((l) => /ardoise/i.test(l.designation)), questions: [] };
+    const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: ardoisesSeules, answers: {}, preferences: {} });
     expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([]);
     expect(e.suggestions).toEqual([]);
   });

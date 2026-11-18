@@ -39,7 +39,7 @@ const PAQUET: Metier[] = [
         unit: "m²",
       },
     ],
-    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: [],
     couleurs: { vert: 1, orange: 2, gris: 0 },
   },
   {

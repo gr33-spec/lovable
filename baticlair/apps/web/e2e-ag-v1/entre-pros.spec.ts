@@ -24,8 +24,10 @@ async function apiJson<T = unknown>(page: Page, method: string, url: string, bod
 async function nouvelArtisan(browser: Browser, prenom: string, entreprise: string) {
   const ctx = await browser.newContext({ ...(test.info().project.use as object) });
   const page = await ctx.newPage();
+  // Le guide du premier passage peut s'ouvrir au moment où la page change (le profil ouvre le site) : son bouton n'existe
+  // alors plus. On n'attend pas un bouton disparu, sinon la vérification en cours reste bloquée (cause trouvée le 18 novembre 2026).
   await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
-    await page.getByRole("button", { name: "Passer le guide" }).click();
+    await page.getByRole("button", { name: "Passer le guide" }).click({ timeout: 2_000 }).catch(() => undefined);
   });
   const email = `artisan-${unique()}@example.fr`;
   const nom = `${entreprise} ${unique().slice(-5)}`;
@@ -70,7 +72,7 @@ test("Entre pros : le profil Mission ouvre le site ; une entreprise connectée v
   await expect(bloc.getByRole("heading", { name: "Compétences" })).toBeVisible();
   await expect(bloc.getByText("Zinc joint debout")).toBeVisible();
   await expect(bloc.getByRole("link", { name: "Proposer une mission" })).toHaveAttribute("href", `/missions/${dispo.body.id}`);
-  await expect(b.page.getByText(/CV|diplôme/i)).toHaveCount(0);
+  await expect(b.page.getByText(/\bCV\b|diplôme/i)).toHaveCount(0);
   const deborde = await b.page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(deborde).toBeLessThanOrEqual(0);
   await bloc.scrollIntoViewIfNeeded();

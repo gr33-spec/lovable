@@ -7,7 +7,7 @@ import { interpreterReponsesNumerotees, phraseNotee, type ReponseInterpretee } f
 import { questionEnMotsSimples } from "../../../../packages/domain/src/assistant/questions-simples";
 import { Check, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
 import type { ApiError, Takeoff } from "@/lib/api";
@@ -125,7 +125,7 @@ export function DropZone({
  * vraies phases du serveur (la lecture, puis le calcul), jamais une barre qui ferait semblant d'avancer. Plein écran,
  * par-dessus le menu ; le retour laisse le travail continuer (le serveur prévient quand c'est prêt).
  */
-function DiscussionEnCours({ region, phrase, etape, detail }: { region: string; phrase: string; etape: string; detail: string }) {
+function DiscussionEnCours({ region, phrase, etape, detail, children }: { region: string; phrase: string; etape: string; detail: string; children?: ReactNode }) {
   const router = useRouter();
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -144,6 +144,7 @@ function DiscussionEnCours({ region, phrase, etape, detail }: { region: string; 
           </h2>
         </Bulle>
         <EtapesIa etapes={[{ cle: etape, titre: etape, detail }]} fini={false} />
+        {children}
       </div>
     </section>
   );
@@ -152,7 +153,39 @@ function DiscussionEnCours({ region, phrase, etape, detail }: { region: string; 
 /** Au-delà, « Je lis ton devis » devient « Gros devis, j'y suis encore… » (décision du fondateur, 2026-10-13). */
 export const LECTURE_LONGUE_MS = 30_000;
 
-export function AnalysisScreen() {
+/**
+ * LES LIGNES UNE PAR UNE (Greg, 17 novembre 2026 : « affiche les lignes dès qu'elles sont lues, pour que l'attente se voie
+ * comme une liste qui se construit »). Sous l'étape « Lecture… », les lignes du devis déjà lues, dans l'ordre, avec les
+ * mots du devis (le serveur ne donne que ce qu'il y retrouve). Une photo ou un scan : seulement leur nombre. Ce n'est pas
+ * encore la liste de matériaux : elle vient après les questions et le calcul.
+ */
+function LignesLues({ lignes, total }: { lignes: readonly string[]; total: number }) {
+  const fin = useRef<HTMLLIElement | null>(null);
+  useEffect(() => {
+    fin.current?.scrollIntoView({ block: "nearest" });
+  }, [lignes.length]);
+  if (total <= 0) return null;
+  const titre = `${total} ligne${total > 1 ? "s" : ""} lue${total > 1 ? "s" : ""}`;
+  return (
+    <div role="group" aria-label="Lignes déjà lues" className="ml-10 rounded-2xl border border-[var(--chat-trait)] px-4 py-3">
+      <p aria-live="polite" className="text-[13px] font-semibold text-[var(--chat-texte)] opacity-70">
+        {titre}
+      </p>
+      {lignes.length > 0 ? (
+        <ul className="mt-2 flex flex-col gap-1.5">
+          {lignes.map((ligne, i) => (
+            <li key={`${i}-${ligne}`} ref={i === lignes.length - 1 ? fin : null} className="flex items-start gap-2 text-[14px] leading-snug text-[var(--chat-texte)]">
+              <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#FED206]" />
+              <span className="min-w-0 break-words">{ligne}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+export function AnalysisScreen({ lignes = [], total = 0 }: { lignes?: readonly string[]; total?: number } = {}) {
   // Décision du fondateur (2026-10-13, « Je lis ton devis » longtemps, « plus rien ne se passe ») : passé 30 s, la phrase
   // dit que la lecture continue ; toujours une seule phrase (§50.1).
   const [longue, setLongue] = useState(false);
@@ -160,7 +193,11 @@ export function AnalysisScreen() {
     const t = setTimeout(() => setLongue(true), LECTURE_LONGUE_MS);
     return () => clearTimeout(t);
   }, []);
-  return <DiscussionEnCours region="Analyse du devis" phrase={longue ? "Gros devis, j'y suis encore…" : "Je lis ton devis"} etape="Lecture…" detail="Je lis ton document ligne par ligne. Tu peux revenir à tes listes : je te préviens quand c'est prêt." />;
+  return (
+    <DiscussionEnCours region="Analyse du devis" phrase={longue ? "Gros devis, j'y suis encore…" : "Je lis ton devis"} etape="Lecture…" detail="Je lis ton document ligne par ligne. Tu peux revenir à tes listes : je te préviens quand c'est prêt.">
+      <LignesLues lignes={lignes} total={total} />
+    </DiscussionEnCours>
+  );
 }
 
 // ——— Prévenir l'artisan quand c'est prêt ———
@@ -915,7 +952,7 @@ export function SuggestionsCard({ options, pending, error, onContinuer }: { opti
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <section aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
           <Bulle de="mobiiz" label="Message de MOBIIZ">
-            <TexteMobiiz>J&apos;ai lu ton devis. Avant mes questions, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
+            <TexteMobiiz>J&apos;ai lu ton devis. Un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
           </Bulle>
           <fieldset aria-label="Suggestions" disabled={pending} className="ml-10 flex flex-col gap-3 rounded-[22px] border p-4" style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: COULEURS_CHAT.bulle }}>
             <legend className="sr-only">Suggestions</legend>

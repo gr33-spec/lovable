@@ -43,7 +43,11 @@ export async function repondreAuxQuestions(page: Page, choisir: (question: strin
       continue;
     }
     if (await calculer.isVisible()) return posees;
-    const question = (await boutons.getAttribute("aria-label")) ?? "";
+    // Entre deux états (la dernière réponse part, « Calculer ma liste » arrive) il n'y a plus de question à lire : on
+    // regarde à nouveau l'écran au lieu d'attendre une question qui ne viendra pas (cause trouvée le 18 novembre 2026).
+    const lue = await boutons.getAttribute("aria-label", { timeout: 2_000 }).catch(() => null);
+    if (lue === null) continue;
+    const question = lue;
     posees.push(question);
     const reponses = zoneDesQuestions(page).getByRole("button", { name: /^Modifier ma réponse/ });
     const avant = await reponses.count();

@@ -82,7 +82,7 @@ export function ProjectTakeoff({
   const data = useMemo(() => {
     if (!raw) return null;
     const q = raw.items[0];
-    const reading: ReadingState | null = q?.etat === "en_cours" ? { status: "reading", reason: null } : q?.etat === "erreur" ? { status: "failed", reason: q.erreur?.raison ?? null } : null;
+    const reading: ReadingState | null = q?.etat === "en_cours" ? { status: "reading", reason: null, ...(q.lecture ?? {}) } : q?.etat === "erreur" ? { status: "failed", reason: q.erreur?.raison ?? null } : null;
     return { takeoff: q?.ecran ?? null, aiAvailable: raw.ia_disponible, reading };
   }, [raw]);
   const [pending, setPending] = useState(false);
@@ -232,7 +232,7 @@ export function ProjectTakeoff({
     const refused = actionError !== null && data.reading?.status !== "reading";
     const lost = error !== null && data.reading?.status === "reading";
     const failed = (data.reading?.status === "failed" || refused || lost) && !pending;
-    if (!failed) return <AnalysisScreen />;
+    if (!failed) return <AnalysisScreen lignes={data.reading?.lignes ?? []} total={data.reading?.total ?? 0} />;
     const shown = refused ? actionError : lost ? error : actionError;
     if (refused && actionError?.reason === "gros_devis") return <GrosDevis phrase={actionError.phrase ?? "Ce devis fait plus de 150 lignes : il compte pour 2 analyses."} pending={pending} disabled={archived} onLancer={() => prepare(true)} onAnnuler={onRedeposit} />;
     // §50.1 : en cas d'échec, la raison en une phrase et « Réessayer ». RIEN NE PART VIDE : une lecture qui n'a trouvé aucune
@@ -267,6 +267,11 @@ export function ProjectTakeoff({
       setRecap(true);
       marquerAssistantOuvert(projectId);
     });
+  // Étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cases, « Continuer », dès qu'il y a une suggestion,
+  // avant les questions de précision et même s'il n'en reste aucune (alors avant la liste). Un devis de plusieurs lots
+  // passe d'abord par sa carte « Parties du devis ».
+  const suggestions = takeoff.status === "draft" && !archived && phase !== "calcul" && !lotsAConfirmer(takeoff) ? suggestionsAProposer(takeoff) : null;
+  if (suggestions) return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
   if (phase === "questions" && takeoff.status === "draft" && !archived) {
     // §52 : un devis de plus d'un lot passe d'abord par la carte « Lots repérés » ; « C'est bon » ouvre les questions.
     if (lotsAConfirmer(takeoff)) {
@@ -277,9 +282,6 @@ export function ProjectTakeoff({
         );
       return <LotsCard takeoff={takeoff} pending={pending} error={actionError} onConfirm={(m) => void confirmLots(m)} />;
     }
-    // Étape « Suggestions » (Greg, 17 novembre 2026) : avant les questions de précision, une carte à cases, « Continuer ».
-    const suggestions = suggestionsAProposer(takeoff);
-    if (suggestions) return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
     return <QuestionsStep takeoff={takeoff} pending={pending} error={actionError} onSubmit={calculate} onReponses={(r) => void repondre(r)} />;
   }
   if (phase === "calcul") return <CalculScreen />;

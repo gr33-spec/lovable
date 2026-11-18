@@ -621,7 +621,8 @@ export function computeWithAnswers(
     const usualConsumables = preferences.params?.[CONSUMABLES_KEY];
     if (consumables && typeof consumables !== "string") params[CONSUMABLES_KEY] = { ...consumables, origin: "artisan" };
     else if (typeof consumables === "string" && consumables !== "") params[CONSUMABLES_KEY] = { value: consumables, unit: "u", origin: "artisan" };
-    else if (consumables === undefined && usualConsumables !== undefined) params[CONSUMABLES_KEY] = { value: usualConsumables, unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" };
+    // Avec l'étape « Suggestions » (Greg, 18 novembre 2026), les consommables se cochent : l'habitude ne les ajoute plus.
+    else if (consumables === undefined && usualConsumables !== undefined && !input.suggestions) params[CONSUMABLES_KEY] = { value: usualConsumables, unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" };
     return { ...input, products, params, preferences: prefs, ...(declinedSlots.length > 0 ? { declined: declinedSlots } : {}) };
   });
   // Les données demandées pièce par pièce : seulement quand plusieurs ouvrages du devis en dépendent (sinon une question).

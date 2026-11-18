@@ -24,6 +24,12 @@ export interface ReadRequest<S extends z.ZodType> {
   extra?: string;
   /** Étiquette « prompt-vN » (suivi, et clé des réponses enregistrées). */
   tag: string;
+  /**
+   * Greg, 17 novembre 2026 (« les lignes une par une pendant la lecture ») : reçoit le texte de la réponse au fur et à
+   * mesure qu'il s'écrit (tout le texte déjà reçu, à chaque fois). Sans effet sur la réponse rendue ; un lecteur qui ne
+   * sait pas écrire au fil de l'eau ne l'appelle jamais.
+   */
+  surTexte?: (texte: string) => void;
 }
 
 export type EffortIa = "low" | "medium" | "high" | "xhigh" | "max";

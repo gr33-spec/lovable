@@ -48,7 +48,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Tubes de descente PVC gris Ø80, longueur 2 m | 3 pièces | 1 descentes × 4,5 m | chiffrable |
+| Tubes de descente PVC gris Ø80, longueur 2 m | 3 pièces | 1 descente × 4,5 m | chiffrable |
 | Dauphins Ø80, 1 m | 1 pièce |  | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé

@@ -8,8 +8,8 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
 | Plafonds suspendus | 0 | 1 | 0 | 0 |
-| Menuiserie intérieure | 1 | 2 | 0 | 1 |
-| Cuisine | 2 | 0 | 0 | 1 |
+| Menuiserie intérieure | 1 | 2 | 0 | 0 |
+| Cuisine | 2 | 0 | 0 | 0 |
 | Photovoltaïque | 1 | 0 | 0 | 0 |
 
 ## Plafonds suspendus
@@ -46,8 +46,7 @@ Devis de test :
 
 **À l'ouverture : 1 verte · 2 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -61,9 +60,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Bloc-porte isoplane 83x204 huisserie 72, poussant droit | 5 pièces |  | chiffrable |
 | Plinthes MDF 10×70, barre 2,40 m | 22 barres |  | chiffrable |
 | Lambris sapin, paquet 2,5 m² | 7 paquets de 2,5 m² (15,4 m²) |  | chiffrable |
-| Mastic-colle plinthes 310 ml | 4 cartouches de 310 ml (48 m à couvrir) |  | chiffrable |
-| Clips lambris, boîte de 100 | 1 boîte de 100 |  | chiffrable |
-| Vis d'huisserie 6 × 100 + chevilles | 30 pièces |  | chiffrable |
 
 ## Cuisine
 
@@ -76,8 +72,7 @@ Devis de test :
 
 **À l'ouverture : 2 vertes · 0 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -85,7 +80,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Meubles bas Delinia ID façades Ruxe blanc mat | 6 pièces |  | chiffrable |
 | Plan de travail stratifié 38 mm chêne | 3,6 ml |  | chiffrable |
-| Kit de finition de plan de travail | 1 kit |  | chiffrable |
 
 ## Photovoltaïque
 

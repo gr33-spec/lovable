@@ -412,7 +412,7 @@ export function planDeLecture(
   for (const input of inputs.values()) {
     const work = ref.workItems.find((w) => w.id === baseOf(input.workItemId));
     input.suggestions = true;
-    for (const slot of work?.slots ?? []) if (slot.suggested && choisies.has(`${work!.id}/${slot.key}`) && !input.mentioned.includes(slot.key)) input.mentioned.push(slot.key);
+    for (const slot of work?.slots ?? []) if (choisies.has(`${work!.id}/${slot.key}`) && !input.mentioned.includes(slot.key)) input.mentioned.push(slot.key);
   }
   // Les faits du chantier (fiche, réponses, code postal) et ce que les autres ouvrages du devis ont lu (« 2 descentes de 3 m »
   // sur le tuyau sert à la naissance de la gouttière ; l'aspect du zinc d'une bande ne fait pas celui de la couverture)
@@ -653,7 +653,8 @@ export const SUGGESTIONS_TEXTE = "Suggestions. Coche ce qu'il te faut, on l'ajou
 /** Les articles cochés, lus dans la réponse (« gouttiere/naissance,gouttiere/talon ») ; « aucune » ou rien : aucun. */
 export function suggestionsChoisies(reponse: unknown): ReadonlySet<string> {
   if (typeof reponse !== "string" || reponse === SUGGESTIONS_AUCUNE) return new Set();
-  return new Set(reponse.split(",").map((x) => x.trim()).filter(Boolean));
+  // Une case peut valoir plusieurs emplacements (le silicone de deux pièces) : ils sont joints par « + ».
+  return new Set(reponse.split(/[,+]/).map((x) => x.trim()).filter(Boolean));
 }
 
 /** Les oublis probables d'un devis, d'après la fiche : dans l'ordre des ouvrages du devis, sans doublon, cinq au plus. */
@@ -756,7 +757,8 @@ export function ecranDeLecture(input: {
   // Une donnée que la fiche du métier interdit de demander (`neverAsk` : le pureau) n'est jamais une question, même quand
   // le modèle la pose : elle se calcule, et ce qu'il lui faut (le format, la taille des crochets) se demande à sa place.
   const interdites = new Set(ref.workItems.flatMap((w) => w.params.filter((p) => p.neverAsk).map((p) => p.key)));
-  const asked: Asked[] = lecture.questions.filter((q) => !interdites.has(q.cle)).flatMap((q0) => {
+  // Les consommables se cochent à l'étape « Suggestions » : la question oui / non du modèle n'est plus posée.
+  const asked: Asked[] = lecture.questions.filter((q) => !interdites.has(q.cle) && !(q.cle === CONSUMABLES_KEY && !fiche)).flatMap((q0) => {
     const q = rattacherQuestion(ref, plan, q0, lignes);
     const question = questionDeLecture(ref, plan, q, lignes);
     // L'habitude de l'entreprise (« je façonne », apprise sur deux chantiers) répond d'avance à la question du modèle :
@@ -836,7 +838,9 @@ export function ecranDeLecture(input: {
   }
   const fallback: Question[] = [...engine.questions, ...strict.questions.filter((q) => !engine.questions.some((x) => x.key === q.key))];
   for (const n of [...engine.needs, ...(engine.unknowns ?? [])]) {
-    // Une estimation (des feuilles d'après un développé supposé) ne demande rien : elle s'ajuste.
+    // Une estimation (des feuilles d'après un développé supposé) ne demande rien : elle s'ajuste (fondateur, 2026-10-10 :
+    // « on s'en fout du développé, l'utilisateur veut juste un nombre de feuilles »). Et « développé ? » ne s'écrit plus
+    // nulle part (Greg, 18 novembre 2026) : la précision de la ligne ne dit que ce qui est connu.
     if ((n.toConfirm ?? []).some((r) => r.key.startsWith("estimation:"))) continue;
     for (const key of n.unknownParams ?? []) {
       const work = ref.workItems.find((w) => w.id === baseOf(n.workItemId));
@@ -908,7 +912,21 @@ export function ecranDeLecture(input: {
   // Étape « Suggestions » : tant que l'artisan n'a pas répondu, l'écran la montre avant les questions de précision (point 14),
   // qui ne portent ensuite que sur la liste, cases cochées comprises (point 16). Elle ne bloque rien : sans réponse, rien
   // n'est ajouté (« ce qui est coché s'ajoute, le reste est ignoré »).
-  const suggestions = answers[SUGGESTIONS_KEY] === undefined ? suggestionsDuPlan(ref, plan) : [];
+  // Les consommables de pose liés à un article écrit (silicone, vis, pattes) : ceux que le calcul compterait sur un
+  // « oui », proposés en cases, une case par article (le silicone de deux pièces : une seule case).
+  const consommables = (): { key: string; label: string }[] => {
+    if (fiche || plan.inputs.length === 0 || answers[`param:${CONSUMABLES_KEY}`] !== undefined) return [];
+    const avec = computeWithAnswers(ref, plan, { ...answers, [`param:${CONSUMABLES_KEY}`]: { value: "1", unit: "u" } }, input.preferences ?? {}, options, given);
+    const parNom = new Map<string, string[]>();
+    for (const n of avec.needs) {
+      if (!n.consumable) continue;
+      const cle = `${baseOf(n.workItemId)}/${n.slot}`;
+      const nom = n.label.replace(/\s*\?.*$/, "").trim() || n.slotLabel;
+      if (!parNom.get(nom)?.includes(cle)) parNom.set(nom, [...(parNom.get(nom) ?? []), cle]);
+    }
+    return [...parNom].map(([label, cles]) => ({ key: cles.join("+"), label }));
+  };
+  const suggestions = answers[SUGGESTIONS_KEY] === undefined ? [...suggestionsDuPlan(ref, plan), ...consommables()].slice(0, SUGGESTIONS_MAX) : [];
   const sansFourniture = lignes.filter((l) => !l.fourniture).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ") || null }));
   return { plan, validation, roles, view, purchase: final, questions, lignes, sansFourniture, suggestions };
 }

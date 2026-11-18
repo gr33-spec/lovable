@@ -1081,9 +1081,10 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(questions.getByRole("listitem")).toHaveCount(0);
   await expect(page.getByText(/Tout se règle ici|allers-retours|renseignée|avec les numéros/)).toHaveCount(0);
   await expect(calculerMaListe(page)).toHaveCount(0);
-  // §49.4 : les consommables ne sont jamais une liste d'articles proposés, seulement UNE question oui / non ; ici, non.
-  const posees = await repondreAuxQuestions(page, (q) => (/^Consommables de pose/.test(q) ? "Non" : /ardoise/i.test(q) ? "Espagne 1er choix" : /façonn/i.test(q) ? /Je commande façonné/ : null));
-  expect(posees.filter((q) => /^Consommables de pose/.test(q))).toHaveLength(1);
+  // RÈGLE CHANGÉE (Greg, 18 novembre 2026) : plus de question oui / non sur les consommables ; ils se cochent à l'étape
+  // « Suggestions » (jamais d'office). Avant : UNE question oui / non.
+  const posees = await repondreAuxQuestions(page, (q) => (/ardoise/i.test(q) ? "Espagne 1er choix" : /façonn/i.test(q) ? /Je commande façonné/ : null));
+  expect(posees.filter((q) => /^Consommables de pose/.test(q))).toHaveLength(0);
   // Jamais deux fois la même question.
   expect(new Set(posees).size).toBe(posees.length);
   await calculerEtVoirMaListe(page);
@@ -1556,7 +1557,10 @@ test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases ava
   // Points 14 et 15 : une seule étape, les mots de Greg, des cases tirées de la fiche ; les crochets, écrits, ne sont pas proposés.
   await expect(carte.getByText("Coche ce qu'il te faut, on l'ajoute à ta liste.")).toBeVisible();
   const cases = carte.getByRole("checkbox");
-  await expect(cases).toHaveCount(3);
+  // Greg, 18 novembre 2026 : les consommables sont des cases aussi (plus jamais d'office, plus de question oui / non) ; cinq au plus.
+  await expect(cases).toHaveCount(5);
+  await expect(carte.getByRole("checkbox", { name: "Cartouches de silicone zinc" })).not.toBeChecked();
+  await expect(carte.getByRole("checkbox", { name: "Vis inox 4 × 40" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Naissances de gouttière" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Talons de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Angles de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
@@ -1580,7 +1584,7 @@ test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases ava
   await expect(carte).toBeHidden({ timeout: 15_000 });
   // Point 16 : les questions ne portent que sur la liste ; les angles, non cochés, ne se demandent pas.
   const posees = await repondreAuxQuestions(page);
-  expect(posees.join(" | ")).not.toMatch(/angle|talon/i);
+  expect(posees.join(" | ")).not.toMatch(/angle|talon|consommable/i);
   await calculerEtVoirMaListe(page);
   for (let i = 0; i < 3 && (await boutonsDeLaQuestion(page).count()) > 0; i++) {
     posees.push(...(await repondreAuxQuestions(page)));
@@ -1590,7 +1594,41 @@ test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases ava
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste).toBeVisible({ timeout: 60_000 });
   await expect(liste.getByText(/^Naissances/).first()).toBeVisible();
-  await expect(liste.getByText(/Talons de gouttière|Angles de gouttière/)).toHaveCount(0);
+  await expect(liste.getByText(/Talons de gouttière|Angles de gouttière|silicone|Vis inox|Pattes de fixation/)).toHaveCount(0);
+  // Plus jamais « développé ? » dans une ligne.
+  await expect(liste.getByText(/développé \?/)).toHaveCount(0);
+});
+
+test("étape « Suggestions » sans question à poser (Greg, 18 novembre 2026) : la carte s'affiche quand même, avant la liste ; « Continuer » sans rien cocher laisse la liste telle quelle", async ({ page }) => {
+  await signUp(page);
+  // Une gouttière entièrement décrite : toutes les questions sont répondues d'avance, par le serveur.
+  const q = await apiJson<{ id: string; projetId: string; questions: { id: string; boutons: { valeur: string }[] }[] }>(page, "POST", "/v1/quantitatifs", {
+    reference: "Maison Le Roux",
+    adresse: "29200 Brest",
+    lignes: [{ libelle: "Gouttière zinc demi-ronde de 25, crochets bandeau", quantite: "12", unite: "ml" }],
+  });
+  expect(q.status).toBe(201);
+  let courant = q.body;
+  for (let i = 0; i < 10 && courant.questions.length > 0; i++) {
+    const question = courant.questions[0]!;
+    courant = (await apiJson<typeof courant>(page, "POST", `/v1/quantitatifs/${q.body.id}/reponses`, { reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
+  }
+  expect(courant.questions).toEqual([]);
+  await page.goto(`/chantiers/${q.body.projetId}`);
+  // Aucune question, mais des oublis probables : la carte passe avant la liste.
+  const carte = carteSuggestions(page);
+  await expect(carte).toBeVisible({ timeout: 30_000 });
+  await expect(carte.getByRole("checkbox", { name: "Naissances de gouttière" })).toBeVisible();
+  await expect(boutonsDeLaQuestion(page)).toHaveCount(0);
+  await carte.getByRole("button", { name: "Continuer", exact: true }).click();
+  await expect(carte).toBeHidden({ timeout: 15_000 });
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste).toBeVisible({ timeout: 30_000 });
+  await expect(liste.getByText(/^Naissances/)).toHaveCount(0);
+  // Répondue une fois : en revenant sur le chantier, la carte ne revient pas.
+  await page.reload();
+  await expect(liste).toBeVisible({ timeout: 30_000 });
+  await expect(carte).toHaveCount(0);
 });
 
 test("rien ne part vide : un devis où je ne lis aucune ligne se dit en une phrase, avec « Réessayer », jamais un bouton d'envoi", async ({ page }) => {
@@ -1932,6 +1970,46 @@ test("§50.1 : « Je lis ton devis » prend tout l'écran, avec le retour pour n
   // Une seule phrase (§50.1) ; et un retour : la lecture continue, l'artisan est prévenu quand c'est prêt.
   await expect(lecture.getByRole("heading")).toHaveCount(1);
   await expect(lecture.getByRole("button", { name: "Revenir à mes listes" })).toBeVisible();
+});
+
+// Le service worker de l'app relit lui-même les données (réseau d'abord) : ses requêtes échappent à l'interception du
+// test. Ce parcours suit plusieurs relectures de suite, il se joue donc sans lui.
+test.describe("lecture suivie ligne par ligne", () => {
+  test.use({ serviceWorkers: "block" });
+  test("pendant la lecture, les lignes déjà lues s'affichent une par une sous « Lecture… »", async ({ page }) => {
+    // Greg, 17 novembre 2026 : « affiche les lignes une par une dès qu'elles sont lues, pour que l'attente se voie comme une
+    // liste qui se construit ». La lecture simulée est instantanée : ici l'API répond « en cours », d'abord sans ligne, puis
+    // avec ce que le serveur a déjà lu, comme pendant une vraie lecture.
+    await signUp(page);
+    let lues: { lignes: string[]; total: number } | null = null;
+    const reading = (q: Record<string, unknown>) => ({ ...q, etat: "en_cours", ecran: null, ...(lues ? { lecture: lues } : {}) });
+    await page.route(/\/v1\/quantitatifs(\?|$)/, async (route) => {
+      try {
+        const res = await route.fetch();
+        const body = (await res.json()) as { items?: Record<string, unknown>[] } & Record<string, unknown>;
+        await route.fulfill({ response: res, json: body.items ? { ...body, items: body.items.map(reading) } : reading(body) });
+      } catch {
+        // Requête annulée par l'application (elle relit l'état) : rien à répondre.
+      }
+    });
+    await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+    await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+    const lecture = page.getByRole("region", { name: "Analyse du devis" });
+    await expect(lecture.getByRole("heading", { name: "Je lis ton devis" })).toBeVisible();
+    const dejaLu = lecture.getByRole("group", { name: "Lignes déjà lues" });
+    // Rien de lu : aucun bloc, jamais « 0 ligne ».
+    await expect(dejaLu).toHaveCount(0);
+    lues = { lignes: ["Ardoises naturelles 32 x 22"], total: 1 };
+    await expect(dejaLu.getByText("1 ligne lue", { exact: true })).toBeVisible();
+    await expect(dejaLu.getByRole("listitem")).toHaveText(["Ardoises naturelles 32 x 22"]);
+    lues = { lignes: ["Ardoises naturelles 32 x 22", "Gouttière zinc demi-ronde"], total: 3 };
+    // Une ligne comptée sans ses mots (une page en photo) : le nombre la compte, la liste ne montre que ce qui est retrouvé.
+    await expect(dejaLu.getByText("3 lignes lues", { exact: true })).toBeVisible();
+    await expect(dejaLu.getByRole("listitem")).toHaveText(["Ardoises naturelles 32 x 22", "Gouttière zinc demi-ronde"]);
+    // Toujours une seule phrase en titre (§50.1), et le retour.
+    await expect(lecture.getByRole("heading")).toHaveCount(1);
+    await expect(lecture.getByRole("button", { name: "Revenir à mes listes" })).toBeVisible();
+  });
 });
 
 test("§50.1 : passé 30 s, « Gros devis, j'y suis encore… » (une seule phrase)", async ({ page }) => {

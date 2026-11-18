@@ -222,7 +222,14 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             // et revalidé par le schéma (un instantané abîmé ne sert jamais : on retombe sur le référentiel du jour).
             referentials: {
               ensure: async (ref) => {
-                await prisma.referentialSnapshot.upsert({ where: { version: ref.version }, create: { trade: ref.trade, version: ref.version, data: ref as unknown as Prisma.InputJsonValue }, update: {} });
+                // Deux lectures en même temps, juste après un changement de fiche : la seconde trouve l'instantané déjà
+                // écrit par la première (clé unique). Ce n'est pas une erreur : il est là, on continue (18 novembre 2026 ;
+                // avant : « Un problème est survenu de notre côté » pour le second artisan).
+                await prisma.referentialSnapshot
+                  .upsert({ where: { version: ref.version }, create: { trade: ref.trade, version: ref.version, data: ref as unknown as Prisma.InputJsonValue }, update: {} })
+                  .catch((error: unknown) => {
+                    if ((error as { code?: string }).code !== "P2002") throw error;
+                  });
               },
               load: async (version) => {
                 const row = await prisma.referentialSnapshot.findUnique({ where: { version } });

@@ -1,5 +1,12 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.18-56 — Consommables en cases, unité de vente des tubes, plus de « développé ? » (Greg, 2026-11-18)
+
+- **§49.1 point 4, Règle changée** : les consommables de pose (silicone, vis, pattes, étain, décapant…) ne sont plus jamais ajoutés d'office et la question « Consommables de pose : je les ajoute à la liste ? » n'est plus posée. Ils sont proposés en cases à l'étape « Suggestions », une case par article (le silicone de deux pièces : une seule case) ; cochés, ils valent des articles écrits. L'habitude de l'entreprise ne les ajoute plus. Un « oui » déjà donné sur un ancien chantier garde ses consommables. Vaut pour tous les métiers calculés par un tiroir. Avant : question oui / non, ou habitude.
+- La limite de cinq suggestions vaut pour l'ensemble : d'abord les articles de la fiche (naissances, talons, angles, crochets), puis les consommables. Au-delà de cinq, les derniers ne sont pas proposés (sur le D-2026-020 : les pattes de fixation).
+- **§15 Descentes** : les tubes se disent dans leur unité de vente (« 2 tubes de 4 m », jamais « 2 pièces ») ; la précision s'accorde (« 1 descente × 6 m »). Le calcul ne change pas.
+- **§48.6 Feuilles de zinc** : « développé ? » ne s'écrit plus dans la précision d'une ligne ; seul ce qui est connu est dit (« pour 4 ml de bande »). Le développé n'est toujours pas demandé pour des feuilles (fondateur, 2026-10-10) ; il se demande, avec ses boutons, pour une pièce commandée toute faite (inchangé).
+
 ## roofing-2026.11.18-55 — L'étape « Suggestions » (Greg, 2026-11-17, points 13 à 17)
 
 - **§49.1 point 5, Règle changée** : après la lecture et avant les questions de précision, une étape « Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste. » : des cases à cocher et « Continuer ». Les propositions viennent de la fiche (`suggested` sur un emplacement), jamais de l'IA ; cinq au plus ; aucune : pas d'étape. Un article coché vaut un article écrit (ses questions se posent ensuite) ; non coché, il n'existe pas. Avant : aucun bloc « Suggestions ».

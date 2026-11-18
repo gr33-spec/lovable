@@ -52,7 +52,7 @@ export class AnthropicDocumentReader implements LecteurIa {
     /** Tests uniquement : remplace l'accès réseau. */
     fetchImpl?: typeof fetch,
     /** Délai maximal d'une lecture (`AI_TIMEOUT_MS`). */
-    timeoutMs = 170_000,
+    private readonly timeoutMs = 170_000,
     /** `minimale` : le modèle écrit sa réponse sans réfléchir d'abord, quand il le permet (voir `sansReflexion`). */
     private readonly reflexion: "auto" | "minimale" = "auto",
   ) {
@@ -86,7 +86,7 @@ export class AnthropicDocumentReader implements LecteurIa {
     try {
       // `create` (et non `parse`) : une réponse illisible doit rester une tentative
       // mesurée (jetons consommés), pas une exception qui ferait perdre l'usage.
-      const response = await this.client.messages.create({
+      const response = await this.envoyer(request.surTexte, {
         model: this.model,
         max_tokens: 16000,
         system: [{ type: "text", text: request.system, cache_control: { type: "ephemeral" } }],
@@ -118,7 +118,7 @@ export class AnthropicDocumentReader implements LecteurIa {
       return { ...attempt, status: "success", output: parsed.data as z.infer<S>, errorCode: null };
     } catch (error) {
       const durationMs = Date.now() - started;
-      if (error instanceof APIConnectionTimeoutError) {
+      if (error instanceof APIConnectionTimeoutError || error instanceof LectureTropLongue) {
         return { ...base, usage: NO_USAGE, status: "timeout", output: null, errorCode: "timeout", durationMs };
       }
       if (error instanceof APIError) {
@@ -130,7 +130,41 @@ export class AnthropicDocumentReader implements LecteurIa {
       throw error;
     }
   }
+
+  /**
+   * L'appel au modèle. Sans `surTexte` : une réponse d'un bloc, comme toujours. Avec : la même demande, lue au fil de
+   * l'eau (le texte déjà écrit est donné à `surTexte`), puis le même message complet à la fin. Le délai du SDK ne couvre
+   * que le début d'une réponse au fil de l'eau : le code arrête lui-même une lecture qui dépasse le délai.
+   */
+  private async envoyer(surTexte: ((texte: string) => void) | undefined, params: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message> {
+    if (!surTexte) return this.client.messages.create(params);
+    const flux = this.client.messages.stream(params);
+    let depasse = false;
+    const delai = setTimeout(() => {
+      depasse = true;
+      flux.abort();
+    }, this.timeoutMs);
+    flux.on("text", (_morceau, texte) => {
+      // Un suivi en panne ne casse jamais la lecture.
+      try {
+        surTexte(texte);
+      } catch {
+        /* rien : la lecture continue */
+      }
+    });
+    try {
+      return await flux.finalMessage();
+    } catch (error) {
+      if (depasse) throw new LectureTropLongue();
+      throw error;
+    } finally {
+      clearTimeout(delai);
+    }
+  }
 }
+
+/** Une lecture au fil de l'eau qui dépasse le délai : arrêtée par le code, comptée comme un délai dépassé. */
+class LectureTropLongue extends Error {}
 
 /** « : invalid_request_error, Your credit balance is too low… » : le type et le message d'une erreur d'Anthropic, 160 caractères au plus. */
 export function motifAnthropic(error: { error?: unknown }): string {

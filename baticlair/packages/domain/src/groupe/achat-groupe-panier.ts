@@ -254,49 +254,32 @@ export interface DemandeNegocePanier {
 }
 
 /**
- * LE MAIL D'ACHAT GROUPÉ AU NÉGOCE (Greg, lot final, point 3), au nom de l'artisan (« Entreprise Dupont via Mobiiz ») et
- * dans l'ordre : la demande, le volume total engagé (le nombre d'artisans seulement à partir du seuil), les règles en
- * clair, le rapport de force dit froidement par des faits, « Répondre en ligne » (PDF et Excel joints), « vous pouvez
- * aussi répondre à ce mail », le portable (jamais l'e-mail personnel), la signature, un pied discret. Vouvoiement ; ni
- * invitation à s'inscrire, ni commission.
+ * LE MAIL D'ACHAT GROUPÉ AU NÉGOCE. RÈGLE CHANGÉE (Greg, 17 novembre 2026 : « Pour un achat groupé, une phrase en plus
+ * qui dit que c'est une demande groupée de plusieurs artisans de la zone ») : le même e-mail court et neutre que la
+ * demande de prix d'un chantier (« Bonjour, » sans prénom, la demande et son nombre d'articles, comment répondre, le
+ * portable, la signature), avec cette phrase en plus. Avant (lot final, point 3) : le prénom du commercial, le volume
+ * ligne par ligne, les règles, « D'autres négoces du secteur sont consultés », « Passé ce délai, la commande se fera sans
+ * vous », un pied « des artisans qui achètent ensemble ». Le volume, les livraisons et les règles sont dans le PDF et
+ * l'Excel joints. Le nombre d'artisans ne se dit qu'à partir du seuil d'anonymat. Vouvoiement ; ni invitation à
+ * s'inscrire, ni commission, jamais l'e-mail personnel d'un artisan.
  */
 export function demandeNegocePanier(d: DemandeNegocePanier): { objet: string; texte: string } {
   const noms = [...new Set(d.clients.map((c) => c.trim()).filter(Boolean))];
-  const fmt = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 3 }).replace(/ /g, " ");
   const metier = libelleMetier(d.metier).toLowerCase();
-  const plusieurs = noms.length > 1;
   const objet = `${noms[0] ?? NOM_APP} : achat groupé ${metier}${d.secteur ? `, secteur ${d.secteur}` : ""}`;
   const signataires = d.signataires?.length ? d.signataires : noms.map((n) => ({ prenom: null, entreprise: n, portable: null }));
   const portable = signataires.find((x) => x.portable)?.portable ?? null;
-  const nombre = d.artisans !== undefined && d.seuilAnonymat !== undefined && d.artisans >= d.seuilAnonymat ? ` par ${d.artisans} artisans du secteur` : "";
+  const n = d.lignes.length;
+  const combien = d.artisans !== undefined && d.seuilAnonymat !== undefined && d.artisans >= d.seuilAnonymat ? `${d.artisans} artisans` : "plusieurs artisans";
   const texte = [
-    `Bonjour${d.prenomCommercial?.trim() ? ` ${d.prenomCommercial.trim()}` : ""},`,
-    "",
-    plusieurs
-      ? `Nous participons à un achat groupé avec d'autres artisans du secteur via ${NOM_APP}. Pouvez-vous chiffrer ce volume ?`
-      : `Je participe à un achat groupé avec d'autres artisans du secteur via ${NOM_APP}. Pouvez-vous chiffrer ce volume ?`,
-    "",
-    `Volume total engagé${nombre} :`,
-    ...d.lignes.map((l) => `- ${l.libelle} : ${fmt(l.quantite)} ${l.unite}`),
-    "",
-    "Livraisons :",
-    ...d.livraisons.map((l) => `- ${l.commune}, avant le ${jourFr(l.date)}`),
-    "",
-    "Les règles : une seule offre, ferme, livraison comprise. Un prix unitaire HT par ligne, ou « je ne fournis pas ».",
-    "",
-    "D'autres négoces du secteur sont consultés sur ce même volume.",
-    `Réponse attendue avant le ${jourFr(d.reponseAvantLe)}. Passé ce délai, la commande se fera sans vous.`,
-    "Le mieux placé remporte la commande.",
-    "",
-    `Répondre en ligne, sans inscription : ${d.lien}`,
-    "La demande est jointe en PDF et en Excel.",
-    `Vous pouvez aussi répondre directement à ce mail, ${plusieurs ? "il nous arrive" : "il m'arrive"}.`,
-    ...(portable ? [`Un doute ? ${plusieurs ? "Appelez-nous" : "Appelez-moi"} au ${portable}.`] : []),
-    "",
-    ...signataires.map((x) => [x.prenom, x.entreprise].filter(Boolean).join(", ")),
-    "",
-    "--",
-    `${NOM_APP}, des artisans qui achètent ensemble.`,
+    "Bonjour,",
+    `Voici une demande de prix pour un achat groupé de ${metier}${d.secteur ? `, secteur ${d.secteur}` : ""} (liste en pièce jointe, ${n} article${n > 1 ? "s" : ""}).`,
+    `C'est une demande groupée : ${combien} du secteur achètent ensemble.`,
+    `Réponse attendue avant le ${jourFr(d.reponseAvantLe)}.`,
+    // Le lien est seul sur sa ligne, sans point derrière : un point collé à une adresse la casse dans certaines messageries.
+    `Pour répondre : répondez simplement à cet e-mail avec votre devis, ou chiffrez en ligne en 2 minutes :\n${d.lien}`,
+    ...(portable ? [`Une question ? ${portable}.`] : []),
+    `Merci d'avance,\n${signataires.map((x) => [x.prenom, x.entreprise].filter(Boolean).join(", ")).join("\n")}`,
   ].join("\n");
   return { objet, texte };
 }
