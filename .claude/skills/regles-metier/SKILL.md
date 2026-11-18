@@ -87,7 +87,26 @@ couvert ici, demander au fondateur plutôt que deviner.
 
 ## Liteaux et voliges
 
-- Liteau : sapin par défaut, l'essence est facultative (ne pas la demander).
+### Liteaux
+- Sapin par défaut, l'essence est facultative (ne pas la demander).
+- Section : elle dépend de la couverture (repères : tuile HP10 → 27×40,
+  ardoise → 18×38, ou volige). Elle est souvent au devis ; sinon on la
+  demande, sans proposer de défaut.
+- Compter en ml, avec un ratio ml/m² (= 1 ÷ pureau ; à recouper avec les
+  fiches fabricants).
+- On demande la perte et l'unité de vente (barres, bottes, ml…) à l'artisan.
+
+### Contre-liteaux
+- D'office dès qu'il y a un écran sous-toiture.
+- Entraxe de 50 cm par défaut : (longueur du pan ÷ 0,50) rangs × longueur du
+  rampant.
+
+### Voliges
+- Au m² (surface du toit) + perte.
+- On demande la perte et l'épaisseur.
+
+### Pointes
+- Pointes pour liteaux, contre-liteaux et voliges : en Suggestion.
 
 ## Zinguerie
 
