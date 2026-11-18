@@ -96,23 +96,32 @@ test("passe mobile : Quantitatifs à deux choix, tableau de bord, Publier un bes
   for (const lien of await page.getByRole("main").getByRole("link").all()) expect((await lien.boundingBox())!.height, "cible de 44 px sur l'accueil").toBeGreaterThanOrEqual(44);
   await tientSurLEcran(page, "Accueil");
 
-  // 2. « Publier un besoin » : flottant au-dessus du menu sur téléphone, dans l'en-tête sur ordinateur ; deux chemins.
+  // 2. « Publier un besoin » : sur téléphone, le ＋ de la barre du bas (Greg, 18 novembre 2026 ; RÈGLE CHANGÉE : avant, un
+  // bouton flottant au-dessus du menu) ; dans l'en-tête sur ordinateur, avec ses deux chemins.
   await page.goto("/achats-groupes");
+  // La liste arrive après l'en-tête : on mesure la page une fois remplie (sinon elle grandit après la mesure).
+  await expect(page.getByRole("list", { name: "Achats groupés ouverts" }).or(page.getByText(/^Aucun regroupement ouvert/)).first()).toBeVisible();
   const publier = page.getByRole("button", { name: /Publier un besoin/ }).filter({ visible: true });
-  await expect(publier).toHaveCount(1);
-  if (telephone()) {
-    const [b, n] = [await publier.boundingBox(), await page.getByRole("navigation", { name: "Navigation principale" }).boundingBox()];
-    expect(b!.y + b!.height).toBeLessThanOrEqual(n!.y);
-    expect(b!.height).toBeGreaterThanOrEqual(44);
-  }
+  await expect(publier).toHaveCount(telephone() ? 0 : 1);
   await tientSurLEcran(page, "Achats groupés");
-  await publier.focus();
-  await page.keyboard.press("Enter");
-  const feuille = page.getByRole("dialog", { name: "Publier un besoin" });
-  await expect(feuille.getByRole("link", { name: /Choisir une liste/ })).toHaveAttribute("href", "/achats-groupes/quantitatif");
-  await expect(feuille.getByRole("link", { name: /Créer mon besoin/ })).toHaveAttribute("href", "/achats-groupes/publier");
-  await page.keyboard.press("Escape");
-  await expect(feuille).toHaveCount(0);
+  if (telephone()) {
+    const plus = page.getByRole("navigation", { name: "Navigation principale" }).getByRole("button", { name: "Créer" });
+    expect((await plus.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await plus.focus();
+    await page.keyboard.press("Enter");
+    const carte = page.getByRole("dialog", { name: "Créer" });
+    await expect(carte.getByRole("button", { name: /^Besoin groupé/ })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(carte).toHaveCount(0);
+  } else {
+    await publier.focus();
+    await page.keyboard.press("Enter");
+    const feuille = page.getByRole("dialog", { name: "Publier un besoin" });
+    await expect(feuille.getByRole("link", { name: /Choisir une liste/ })).toHaveAttribute("href", "/achats-groupes/quantitatif");
+    await expect(feuille.getByRole("link", { name: /Créer mon besoin/ })).toHaveAttribute("href", "/achats-groupes/publier");
+    await page.keyboard.press("Escape");
+    await expect(feuille).toHaveCount(0);
+  }
 
   // 3. Missions : recherche, trois filtres sans défilement horizontal, deux actions compactes, puis les résultats.
   await page.goto("/missions");

@@ -235,7 +235,8 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
         },
       });
       // UX simplifiée (Greg, 8 novembre 2026) : retour à l'onglet « Achats groupés », les besoins en tête.
-      router.push(`/achats-groupes?ajoutes=${r.besoins.length}`);
+      // Greg, 18 novembre 2026 : ce que j'ai lancé se retrouve dans Demandes › Groupées (avant : l'onglet des achats groupés).
+      router.push(`/demandes?type=groupees&ajoutes=${r.besoins.length}`);
     } catch (e) {
       setErreur(messageErreur(e, e instanceof ApiError && e.reason === "besoin_identique" ? { besoin_identique: "Un achat groupé identique vient de s'ouvrir : vérifie à nouveau, chaque ligne le rejoindra." } : {}));
       if (e instanceof ApiError && e.reason === "besoin_identique") setCompat({});

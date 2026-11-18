@@ -148,11 +148,12 @@ test("un besoin groupé publié : la date réagit tout de suite, puis l'accueil 
   await expect(publier).toBeEnabled();
   const clic = Date.now();
   await publier.click();
-  await expect(page).toHaveURL(/\/achats-groupes\?ajoutes=1/);
-  await expect(page.getByRole("status").filter({ hasText: "Besoin publié" })).toBeVisible();
+  // Greg, 18 novembre 2026 : le besoin publié se retrouve dans Demandes › Groupées, avec la confirmation.
+  await expect(page).toHaveURL(/\/demandes\?type=groupees&ajoutes=1/);
+  await expect(page.getByRole("status").filter({ hasText: "Tes besoins sont confirmés" })).toBeVisible();
   test.info().annotations.push({ type: "latence-publication-ms", description: String(Date.now() - clic) });
-  // « Mes besoins » : le nombre d'entreprises, créateur compris ; le volume à partir de 3 (Greg, 16 novembre 2026).
-  await expect(page.getByRole("list", { name: "Mes besoins" }).getByText(/^\d+ entreprises? · (en cours de regroupement|[\d\s]+ pièces)/)).toBeVisible();
+  // Le nombre d'entreprises, créateur compris ; le volume à partir de 3 (Greg, 16 novembre 2026).
+  await expect(page.getByRole("tabpanel", { name: "Groupées" }).getByText(/^\d+ entreprises? · (en cours de regroupement|[\d\s]+ pièces)/)).toBeVisible();
   // L'accueil : le besoin y est aussitôt, avec son type écrit ; jamais le nom d'une entreprise.
   await page.goto("/");
   const demandes = page.getByRole("region", { name: "Mes demandes en cours" });

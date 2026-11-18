@@ -65,7 +65,8 @@ test("téléphone : Accueil · Demandes · ＋ · Groupés · Messages ; la cart
   // La carte : trois tuiles ; la croix, Échap, le voile et le retour la ferment, sans quitter l'écran.
   const carte = page.getByRole("dialog", { name: "Créer" });
   await plus.click();
-  await expect(carte.getByRole("button")).toHaveText(["Fermer", /^Nouveau quantitatif/, /^Besoin groupé/, /^Mission/]);
+  await expect(carte.getByRole("button", { name: "Fermer" })).toBeVisible();
+  await expect(carte.getByRole("button").filter({ hasText: /\S/ })).toHaveText([/^Nouveau quantitatif/, /^Besoin groupé/, /^Mission/]);
   await expect(nav.getByRole("button", { name: "Fermer" })).toHaveAttribute("aria-expanded", "true");
   await carte.getByRole("button", { name: "Fermer" }).click();
   await expect(carte).toHaveCount(0);

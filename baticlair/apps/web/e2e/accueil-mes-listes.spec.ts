@@ -346,7 +346,7 @@ test("Audit UX (1er novembre 2026) : sur un iPhone SE, « Sélectionner » ne ch
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   // Le menu du bas : libellés à 12 px, sans déborder.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  for (const nom of ["Accueil", "Quantitatifs", "Achats groupés"]) {
+  for (const nom of ["Accueil", "Demandes", "Groupés", "Messages"]) {
     const lien = nav.getByRole("link", { name: nom });
     expect(await lien.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
     const b = (await lien.boundingBox())!;
@@ -437,7 +437,13 @@ test("Missions coupées : l'onglet reste dans le menu, l'écran dit « Bientôt 
   // Greg, 16 novembre 2026 : « affiche "Bientôt" avec une courte explication du concept […]. Fonctions désactivées. »
   await inscrire(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  await nav.getByRole("link", { name: "Missions", exact: true }).click();
+  // Greg, 18 novembre 2026 : sur téléphone, Missions passe par le ＋, tuile grisée « Bientôt » ; l'ordinateur garde l'entrée.
+  if ((page.viewportSize()?.width ?? 0) < 1024) {
+    await nav.getByRole("button", { name: "Créer" }).click();
+    const tuile = page.getByRole("dialog", { name: "Créer" }).getByRole("button", { name: /^Mission/ });
+    await expect(tuile).toContainText("Bientôt");
+    await tuile.click();
+  } else await nav.getByRole("link", { name: "Missions", exact: true }).click();
   await expect(page).toHaveURL(/\/missions$/);
   const bientot = page.getByRole("region", { name: "Missions : bientôt" });
   await expect(bientot.getByText("Bientôt", { exact: true })).toBeVisible();

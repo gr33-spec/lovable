@@ -4,7 +4,7 @@ import { MoreHorizontal, Plus } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
-import { CARTE, CaseAnonyme, Note, PastilleStatut, Volumes } from "@/components/ag-v1-commun";
+import { CARTE, CaseAnonyme, ligneRegroupement, Note, PastilleStatut, Volumes } from "@/components/ag-v1-commun";
 import { Button, ButtonLink, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, messageErreur, newActionKey } from "@/lib/api";
 import { dateCourte, dateLongue, heureCourte, jourDans, zoneLisible, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
@@ -66,6 +66,8 @@ function CarteBesoin({ b }: { b: BesoinV1 }) {
       <Link href={href} className="flex flex-col">
         <span className="text-[16px] font-bold break-words">{b.nom}</span>
         <span className="text-[15px]">{b.quantite.lisible}</span>
+        {/* Où en est le regroupement, en une phrase (Greg, 18 novembre 2026) : le total, jamais la part d'une autre entreprise. */}
+        {b.achat.resume && b.achat.resume.entreprises > 0 ? <span className="text-[14px] font-semibold">{ligneRegroupement(b.achat.resume)}</span> : null}
         {e ? <span className="text-[14px] text-muted">{e}</span> : null}
       </Link>
       {bouton ? (
@@ -87,7 +89,7 @@ export function MesBesoinsV1({ integre = false }: { integre?: boolean } = {}) {
   return (
     <div className="flex flex-col gap-5 lg:mx-auto lg:w-full lg:max-w-[44rem]">
       {integre ? null : <PageTitle>Mes besoins groupés</PageTitle>}
-      {params.get("nouveaux") ? (
+      {params.get("nouveaux") || params.get("ajoutes") ? (
         <p role="status" className="rounded-xl bg-ok-bg p-3 text-[15px] font-semibold text-ok">
           Tes besoins sont confirmés. Ce n&apos;est pas encore une commande : tu décideras après réception d&apos;une offre complète.
         </p>

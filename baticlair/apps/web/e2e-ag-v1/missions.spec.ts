@@ -82,11 +82,17 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
   await expect(page.getByRole("main").getByRole("link", { name: /^Voir les achats groupés|^Missions entre entreprises/ })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Activité récente" })).toHaveCount(0);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  for (const onglet of ["Accueil", "Quantitatifs", "Achats groupés", "Missions"]) await expect(nav.getByRole("link", { name: onglet, exact: true })).toBeVisible();
+  // Greg, 18 novembre 2026 : sur téléphone, Accueil · Demandes · ＋ · Groupés · Messages, et Missions passe par le ＋ ;
+  // l'ordinateur garde sa colonne.
+  const telephone = (page.viewportSize()?.width ?? 0) < 1024;
+  for (const onglet of telephone ? ["Accueil", "Demandes", "Groupés", "Messages"] : ["Accueil", "Quantitatifs", "Achats groupés", "Missions"]) await expect(nav.getByRole("link", { name: onglet, exact: true })).toBeVisible();
   await capture(page, "01-accueil");
 
   // MISSIONS (capture 06), puis « Je propose une mission » (captures 07, 13, 49, aperçu).
-  await nav.getByRole("link", { name: "Missions", exact: true }).click();
+  if (telephone) {
+    await nav.getByRole("button", { name: "Créer" }).click();
+    await page.getByRole("dialog", { name: "Créer" }).getByRole("button", { name: /^Mission/ }).click();
+  } else await nav.getByRole("link", { name: "Missions", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Missions", exact: true })).toBeVisible();
   await expect(page.getByText("Mise en relation entre entreprises du bâtiment.")).toBeVisible();
   await capture(page, "06-missions");
@@ -225,7 +231,7 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
 
   // B : la boîte « Messages et réponses » (22), non lu, filtres ; la conversation (12) ; le numéro est masqué.
   await b.page.goto("/messages");
-  await expect(b.page.getByRole("heading", { name: "Tout retrouver au même endroit" })).toBeVisible();
+  await expect(b.page.getByRole("heading", { name: "Messages", exact: true })).toBeVisible();
   const filtres = b.page.getByRole("group", { name: "Filtrer la boîte" });
   for (const f of ["Tous", "Missions", "Négoces", "Non lus"]) await expect(filtres.getByRole("button", { name: f, exact: true })).toBeVisible();
   const element = b.page.getByRole("link", { name: new RegExp(`^Mission, ${a.nom}, non lu`) });
@@ -490,7 +496,12 @@ test("guide d'accueil, missions ouvertes : trois écrans, un par usage (négoces
   await guide.getByRole("link", { name: "Accéder à Mobiiz" }).click();
   await expect(guide).toHaveCount(0);
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Missions" })).toBeVisible();
+  // Sur téléphone, Missions passe par le ＋ (Greg, 18 novembre 2026) ; sur ordinateur, l'entrée de la colonne.
+  const nav = page.getByRole("navigation", { name: "Navigation principale" });
+  if ((page.viewportSize()?.width ?? 0) < 1024) {
+    await nav.getByRole("button", { name: "Créer" }).click();
+    await expect(page.getByRole("dialog", { name: "Créer" }).getByRole("button", { name: /^Mission/ })).toBeVisible();
+  } else await expect(nav.getByRole("link", { name: "Missions" })).toBeVisible();
 });
 
 test("« Voir Mobiiz en images », missions ouvertes : quatre écrans, le quatrième pour les missions ; rien n'est écrit", async ({ page, context }, info) => {
