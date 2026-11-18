@@ -1547,6 +1547,32 @@ test("zinguerie : une seule question de pliage pour le devis, une pièce se chan
   expect((await bar.boundingBox())!.height).toBeLessThan(64);
 });
 
+test("feuilles de zinc : le nombre, une estimation, s'ajuste d'un toucher dans la liste, sans ouvrir la ligne", async ({ page }) => {
+  // Greg, 17 novembre 2026 : « feuille de 2 × 1 m, chutes non réutilisées : c'est une estimation, le nombre de feuilles doit
+  // s'ajuster d'un toucher dans la liste ». Avant : il fallait ouvrir la ligne pour trouver « − / + ».
+  await signUp(page);
+  await createProject(page, "Toiture Le Goff", "M. Le Goff", "4 rue du Port, Paimpol");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
+  await passQuestions(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list).toBeVisible({ timeout: 60_000 });
+  // Sur la ligne fermée des feuilles : « − », le nombre, « + ». Les autres lignes n'ont pas ces boutons tant qu'elles sont fermées.
+  const reglage = list.getByRole("group", { name: /^Quantité : Feuilles/ }).first();
+  await expect(reglage).toBeVisible();
+  await expect(list.getByRole("group", { name: /^Ligne ouverte/ })).toHaveCount(0);
+  expect(await list.getByRole("group", { name: /^Quantité : / }).count()).toBe(await list.getByRole("group", { name: /^Quantité : Feuilles/ }).count());
+  const nombre = reglage.locator("[aria-live]");
+  const avant = Number((await nombre.innerText()).trim());
+  expect(avant).toBeGreaterThan(0);
+  // Un toucher : une feuille de plus, gardée par le serveur (elle est encore là après avoir rechargé la page).
+  const garde = page.waitForResponse((r) => /\/v1\/quantitatifs\/[^/]+\/corrections/.test(r.url()) && r.request().method() === "POST");
+  await reglage.getByRole("button", { name: /^Plus : Feuilles/ }).click();
+  await expect(nombre).toHaveText(String(avant + 1));
+  expect((await garde).status()).toBeLessThan(300);
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("group", { name: /^Quantité : Feuilles/ }).first().locator("[aria-live]")).toHaveText(String(avant + 1), { timeout: 30_000 });
+});
+
 test("étape « Suggestions » (Greg, 17 novembre 2026) : une carte à cases avant les questions ; coché, l'article entre dans la liste ; le reste n'existe pas", async ({ page }) => {
   // Le chantier ardoise et zinguerie de Greg (D-2026-020, anonymisé) : la gouttière a ses crochets écrits, pas ses naissances.
   await signUp(page);
@@ -2009,6 +2035,33 @@ test.describe("lecture suivie ligne par ligne", () => {
     // Toujours une seule phrase en titre (§50.1), et le retour.
     await expect(lecture.getByRole("heading")).toHaveCount(1);
     await expect(lecture.getByRole("button", { name: "Revenir à mes listes" })).toBeVisible();
+  });
+
+  test("un serveur lent à dire que la lecture est finie ne laisse jamais l'écran sur « Lecture… »", async ({ page }) => {
+    // Recette en ligne du 18 novembre 2026 : la lecture était finie sur le serveur, l'écran restait sur « Lecture… » sans fin.
+    // Il regardait l'état chaque seconde en ANNULANT le coup d'œil précédent : dès que le serveur mettait plus d'une seconde
+    // à répondre, aucune réponse n'arrivait jamais. Ici : la lecture part « en cours », puis chaque coup d'œil met 1,5 s.
+    test.setTimeout(90_000);
+    await signUp(page);
+    await page.route(/\/v1\/quantitatifs(\?|$)/, async (route) => {
+      try {
+        const res = await route.fetch();
+        if (route.request().method() === "POST") {
+          const body = (await res.json()) as Record<string, unknown>;
+          await route.fulfill({ response: res, status: 202, json: { ...body, etat: "en_cours", ecran: null } });
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 1500));
+        await route.fulfill({ response: res });
+      } catch {
+        // Requête annulée par l'application : rien à répondre.
+      }
+    });
+    await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+    await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+    const suite = page.getByRole("region", { name: "Les questions" }).or(page.getByRole("region", { name: "Page des fournitures" })).or(page.getByRole("button", { name: "Voir ma liste", exact: true }));
+    await expect(suite.first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("region", { name: "Analyse du devis" })).toHaveCount(0);
   });
 });
 

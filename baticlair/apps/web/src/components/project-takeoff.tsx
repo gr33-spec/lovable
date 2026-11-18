@@ -71,7 +71,7 @@ export function ProjectTakeoff({
     (signal: AbortSignal) => api<{ items: Quantitatif[]; ia_disponible: boolean }>(`/v1/quantitatifs?projetId=${encodeURIComponent(projectId)}&ecran=1`, { signal }),
     [projectId],
   );
-  const { data: raw, setData, error, reload } = useResource(fetchQuantitatif);
+  const { data: raw, setData, error, reload, refresh } = useResource(fetchQuantitatif);
   // Le regroupement choisi dans « Ton quantitatif est prêt », lancé par « Demander les prix à mes négoces ».
   const avantEnvoiRef = useRef<(() => Promise<void>) | null>(null);
   const brancherLancement = useCallback((lancer: (() => Promise<void>) | null) => {
@@ -167,18 +167,19 @@ export function ProjectTakeoff({
   const readingNow = data?.takeoff === null && data.reading?.status === "reading";
   useEffect(() => {
     if (!readingNow) return;
-    const t = setInterval(reload, 1000);
+    // `refresh`, pas `reload` : une réponse lente du serveur n'est jamais annulée par le coup d'œil suivant.
+    const t = setInterval(refresh, 1000);
     return () => clearInterval(t);
-  }, [readingNow, reload]);
+  }, [readingNow, refresh]);
 
   // §48 : le calcul (appel IA n° 2) tourne sur le serveur : on regarde chaque seconde s'il a fini (avant : toutes les 3).
   const phase = quantitatif?.phase ?? "resultat";
   const calculating = Boolean(data?.takeoff) && phase === "calcul";
   useEffect(() => {
     if (!calculating) return;
-    const t = setInterval(reload, 1000);
+    const t = setInterval(refresh, 1000);
     return () => clearInterval(t);
-  }, [calculating, reload]);
+  }, [calculating, refresh]);
   // Les étapes qui finissent pendant que l'artisan est ailleurs : on le prévient (et le nom lu du devis s'affiche).
   const step = !data ? null : !data.takeoff ? "lecture" : phase;
   const lastStep = useRef<string | null>(null);

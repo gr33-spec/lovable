@@ -455,6 +455,8 @@ export interface PurchaseItem {
   asks?: { key: string; text: string; unit: string | null; options: { label: string; value: string }[] }[];
   /** §49.8 : un écart devis / calcul, « Garder 20 » / « Mettre 21 ». */
   gap?: { written: string; computed: string; unit: string } | null;
+  /** Une quantité estimée (les feuilles de zinc) : « − / + » sur la ligne, sans l'ouvrir. */
+  estimation?: boolean;
   /** Nouveau cap (22 octobre) : ce qui manque pour se grouper (format, origine, choix, marque), en boutons ; vide : précise. */
   aPreciserPourGroupe?: { cle: string; question: string; options: string[] }[];
 }

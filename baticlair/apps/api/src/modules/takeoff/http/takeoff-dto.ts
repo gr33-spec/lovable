@@ -26,6 +26,11 @@ function item(b: PurchaseView["toBuy"][number]) {
     asks: b.asks ?? [],
     gap: b.gap ?? null,
     /**
+     * Une quantité estimée (les feuilles de zinc, Greg, 17 novembre 2026 : « c'est une estimation, le nombre de feuilles doit
+     * s'ajuster d'un toucher ») : l'écran montre « − / + » sur la ligne, sans l'ouvrir.
+     */
+    estimation: (b.rules ?? []).some((r) => r.key.startsWith("estimation:")),
+    /**
      * Nouveau cap (22 octobre) : ce qui manque à la ligne pour se grouper avec les autres (format, origine, choix, marque…),
      * en boutons ; vide quand elle est précise. Ne bloque jamais l'envoi à son négoce.
      */
