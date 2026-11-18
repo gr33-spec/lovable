@@ -84,7 +84,7 @@ couvert ici, demander au fondateur plutôt que deviner.
 ### Points ouverts
 - Tuile canal (courant et couvert : une ou deux lignes, quel ratio) : le
   fondateur ne sait pas, à vérifier chez les fabricants puis à faire valider.
-- Fixation des tuiles : voir le thème Fixations.
+- Fixation des tuiles : voir Fixations.
 
 ## Liteaux et voliges
 
@@ -202,3 +202,14 @@ couvert ici, demander au fondateur plutôt que deviner.
   store, habillage intérieur.
 - On retire toujours la surface du Velux de la surface d'ardoise ou de tuile.
   Les coupes autour sont dans la perte du toit.
+
+## Fixations
+
+- Fixation des tuiles (crochets, clous, vis de tuile) : en Suggestion. Si
+  l'artisan coche → ratio de la fiche fabricant.
+  Point ouvert : le ratio dépend de la zone de vent et de la pente. Comment
+  les obtenir (demander ou déduire) reste à décider avec le fondateur.
+- Vis, chevilles et visserie (liteaux, voliges, crochets de gouttière,
+  colliers…) : en Suggestion. Si l'artisan coche → deux cases : sa
+  description, puis le nombre. On ne calcule rien.
+- Clous d'ardoise et pointes : voir Ardoise et Liteaux (en Suggestion).
