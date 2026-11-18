@@ -131,35 +131,36 @@ export const LIEN_APERCU = "(votre lien personnel)";
 export const LIEN_ACCES_APERCU = "(son lien pour créer son accès)";
 
 /**
- * LE MAIL AU NÉGOCE (lot final, point 3, puis Greg, 12 novembre 2026, dossier de corrections UX, point 5) : cordial et
- * professionnel, vouvoiement par défaut, adressé au prénom du commercial s'il est connu. Le texte libre de l'artisan
- * (modifiable) demande une proposition de prix. Jamais de pression : le nombre de négoces consultés n'est JAMAIS dit, et
- * la date n'apparaît que si l'artisan en a choisi une, comme un souhait. Pour répondre : d'abord répondre à l'e-mail avec
- * le devis ; le lien en ligne vient ensuite. Le portable (jamais l'e-mail personnel), la signature, un pied discret.
- * Aucune commission. RÈGLE CHANGÉE (Greg, 15 novembre 2026 : « Un négoce reçoit un seul e-mail, avec la demande et le lien
- * pour créer son accès ») : avant, aucune invitation ici et un second e-mail « créez votre accès » après la réponse ;
- * maintenant, une ligne facultative en fin de message, et plus de second e-mail.
+ * LE MAIL AU NÉGOCE. RÈGLE CHANGÉE (Greg, 17 novembre 2026) : court et neutre, « Bonjour, » sans prénom, une phrase qui dit
+ * le chantier et le nombre d'articles, comment répondre (répondre à l'e-mail, ou chiffrer en ligne), le portable, la
+ * signature. Plus de paragraphe sur la création d'un compte (elle se propose en bas de la page de chiffrage), plus de
+ * pied « envoyé avec ». Avant : le prénom du commercial, un texte libre plus long, l'invitation à créer son accès.
+ * Ce qui ne change pas : jamais de pression, jamais le nombre de négoces consultés, jamais l'e-mail personnel de
+ * l'artisan ; la date n'apparaît que si l'artisan en a choisi une.
  */
 export function packetMail(p: SupplierPacket, o: { prenomCommercial?: string | null; lien?: string | null; acces?: string | null } = {}): string {
   const tu = !!p.tutoie;
-  const prenom = o.prenomCommercial?.trim();
   const tel = p.expediteur?.telephone?.trim();
+  const n = (p.fournitures ?? p.articles).length;
+  const metier = p.famille?.trim().toLowerCase();
+  // « un chantier de couverture ardoise à Ploubazlanec » : le chantier tel que le bref le nomme, sans ses mesures ; sinon
+  // le métier et la commune.
+  const nomme = /\bpour (un chantier[^:.]*)/.exec(p.phrase ?? "")?.[1]?.trim();
+  const chantier = nomme ?? `un chantier${metier ? ` de ${metier}` : ""}${p.commune ? ` à ${p.commune}` : ""}`;
+  const voici = `Voici une demande de prix pour ${chantier} (liste en pièce jointe, ${n} article${n > 1 ? "s" : ""}).`;
   return [
-    `${tu ? "Salut" : "Bonjour"}${prenom ? ` ${prenom}` : ""},`,
-    p.message?.trim() || texteLibreParDefaut(p),
-    ...(p.echeance ? [tu ? `Si c'est possible pour toi, j'aimerais recevoir ta proposition avant le ${p.echeance}.` : `Dans la mesure du possible, je souhaiterais recevoir votre proposition avant le ${p.echeance}.`] : []),
-    [
-      tu ? "Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec ton devis en pièce jointe." : "Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec votre devis en pièce jointe.",
-      ...(o.lien ? [`${tu ? "Tu peux aussi chiffrer" : "Vous pouvez aussi chiffrer"} en ligne, sans inscription : ${o.lien}`] : []),
-      "La liste des fournitures à chiffrer est en pièce jointe (PDF).",
-      ...(tel ? [`Une question ? ${tu ? "Appelle-moi" : "Appelez-moi"} au ${tel}.`] : []),
-    ].join("\n"),
-    ...(o.acces ? [`${tu ? "Tu peux aussi créer ton" : "Vous pouvez aussi créer votre"} accès négoce, gratuit et sans engagement, pour retrouver ${tu ? "tes" : "vos"} demandes au même endroit : ${o.acces}`] : []),
-    `${tu ? "Merci d'avance," : "Je vous remercie par avance."}\n${packetSignature(p)}`,
-    `--\n${PIED_MAIL_NEGOCE}`,
-  ].join("\n\n");
+    "Bonjour,",
+    // Le texte que l'artisan a écrit lui-même dans l'aperçu remplace la phrase d'ouverture ; sinon la phrase neutre.
+    ...(p.message?.trim() ? [p.message.trim(), `La liste est en pièce jointe (${n} article${n > 1 ? "s" : ""}).`] : [voici]),
+    ...(p.echeance ? [tu ? `Si possible, réponse souhaitée avant le ${p.echeance}.` : `Si possible, réponse souhaitée avant le ${p.echeance}.`] : []),
+    // Le lien est seul sur sa ligne, sans point derrière : un point collé à une adresse la casse dans certaines messageries.
+    `Pour répondre : ${tu ? "réponds" : "répondez"} simplement à cet e-mail avec ${tu ? "ton" : "votre"} devis${o.lien ? `, ou ${tu ? "chiffre" : "chiffrez"} en ligne en 2 minutes :\n${o.lien}` : "."}`,
+    ...(tel ? [`Une question ? ${tel}.`] : []),
+    `Merci d'avance,\n${packetSignature(p)}`,
+  ].join("\n");
 }
 
+/** Mise en forme HTML (texte et HTML, pour la délivrabilité). */
 export { mailEnHtml } from "../../../platform/email/mail-html.js";
 
 /** Les demandes d'avant le §45 : « Ardoises : 9 200 pièces » → une ligne du tableau. */
@@ -205,46 +206,45 @@ export interface PacketDocument {
 const BREF = "Le chantier en bref";
 /** Le titre de la section de contexte (elle s'appelait « Détail du devis » et répétait le tableau). */
 export const TITRE_COMPLEMENTS = "Informations complémentaires sur le chantier";
-const cleLigne = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[×x]/g, "x").replace(/[^a-z0-9]+/g, " ").replace(/(\d) x (?=\d)/g, "$1x").trim();
-/** Deux textes qui désignent la même ligne : identiques une fois normalisés, ou l'un contenu dans l'autre. */
-function memeLigne(a: string, b: string): boolean {
-  const x = cleLigne(a);
-  const y = cleLigne(b);
-  return x.length > 0 && y.length > 0 && (x === y || x.includes(y) || y.includes(x));
-}
-
+/**
+ * DROIT AU BUT (Greg, 17 novembre 2026) : « le négoce reçoit une commande claire, rien d'autre ». Le document allégé :
+ * l'en-tête (l'entreprise, l'adresse de réponse Mobiiz, le nom du chantier, la date, la référence), deux lignes de
+ * description au plus, le tableau, et « À préciser » seulement si elle n'est pas vide. RÈGLES CHANGÉES : avant, une
+ * section 3 « Informations complémentaires sur le chantier », l'e-mail
+ * personnel de l'artisan dans l'en-tête et le pied. Maintenant : jamais l'e-mail personnel (la réponse revient à l'adresse
+ * Mobiiz du chantier, dans le bloc de réponse, qui garde le texte de Greg), aucune note destinée à l'artisan, aucun
+ * « ? » ; une ligne sans quantité n'est pas dans le tableau, elle est « À préciser ».
+ */
 export function packetDocument(p: SupplierPacket, options: { destinataire?: string | null; reponse?: string | null } = {}): PacketDocument {
   const s = p.expediteur;
-  const coordonnees = [s?.adresse, s?.siret ? `SIRET ${s.siret}` : null, [s?.telephone, s?.email].filter(Boolean).join(" · ") || null].filter((x): x is string => !!x);
+  const reponse = options.reponse?.trim() || null;
+  // Jamais l'e-mail personnel de l'artisan : la réponse revient à l'adresse Mobiiz du chantier, dite dans le bloc de réponse.
+  const coordonnees = [s?.adresse, s?.siret ? `SIRET ${s.siret}` : null, s?.telephone?.trim() || null].filter((x): x is string => !!x);
   const blocs: PacketDocument["blocs"] = [];
   let n = 0;
-  // Les blocs vides disparaissent, jamais de « néant » (§45.5).
-  const resume = p.resume;
-  // Le bref, en petit dans un cadre et sans numéro : la liste des fournitures est ce qu'on met en avant (retour du
-  // fondateur, 2026-10-11).
-  if (resume.length > 0) blocs.push({ numero: 0, titre: BREF, kind: "list", lignes: resume });
+  // Deux lignes de description, pas plus : le bref de l'écran, coupé en phrases.
+  const phrases = p.resume.flatMap((t) => t.split(/(?<=[.!?])\s+/)).map((t) => t.trim()).filter(Boolean);
+  if (phrases.length > 0) blocs.push({ numero: 0, titre: BREF, kind: "list", lignes: phrases.slice(0, 2) });
   // Du gros au petit, matériau principal en premier, consommables en dernier (§45.3).
   // Retour du fondateur (2026-10-12) : « 222 ml : écris 222 m » ; un mètre linéaire se dit « m » dans le document.
   const metres = (t: string) => t.replace(/(\d)\s*ml\b/g, "$1 m");
-  const rows = supplies(p).map((r) => ({ ...r, quantite: metres(r.quantite), ...(r.precision ? { precision: metres(r.precision) } : {}) }));
-  const ordered = [...rows.filter((r) => !r.consommable), ...rows.filter((r) => r.consommable)];
+  const propre = (t: string) => t.replace(/\s*[;,]?\s*[^;,]*au choix du fournisseur/gi, "").replace(/\s*\([^)]*\?[^)]*\)/g, "").trim();
+  const rows = supplies(p).map((r) => ({ ...r, designation: propre(r.designation), quantite: metres(r.quantite), precision: r.precision ? propre(metres(r.precision)) || null : null }));
+  const chiffrees = rows.filter((r) => r.quantite.trim() && !/\?|à préciser/i.test(r.quantite));
+  const ordered = [...chiffrees.filter((r) => !r.consommable), ...chiffrees.filter((r) => r.consommable)];
   if (ordered.length > 0) blocs.push({ numero: ++n, titre: "Fournitures à chiffrer", kind: "table", colonnes: ["Désignation", "Quantité", "Précision"], lignes: ordered });
-  if (p.a_chiffrer.length > 0) blocs.push({ numero: ++n, titre: "À préciser avec vous", kind: "list", lignes: p.a_chiffrer });
-  // Greg, 12 novembre 2026 (dossier de corrections UX, point 6) : cette section ne recopie JAMAIS le tableau. Une ligne
-  // qui redit une fourniture à chiffrer (même désignation) est retirée ; s'il ne reste rien, la section disparaît. Ce qui
-  // reste est du contexte fourni ou validé par l'artisan (l'ouvrage, sa mesure, ses précisions), jamais une invention.
-  const complements = p.joindre_detail ? p.detail.filter((d) => !ordered.some((r) => memeLigne(r.designation, d.libelle))) : [];
-  if (complements.length > 0)
-    blocs.push({ numero: ++n, titre: TITRE_COMPLEMENTS, kind: "list", lignes: complements.map((d) => [d.libelle, ...(d.mesure ? [d.mesure] : []), ...d.precisions].join(" · ")) });
-  const contact = [s?.telephone, s?.email].filter(Boolean).join(" · ");
+  const aPreciser = [...rows.filter((r) => !chiffrees.includes(r)).map((r) => r.designation), ...p.a_chiffrer.map(propre)].filter((t, i, all) => t && all.indexOf(t) === i);
+  if (aPreciser.length > 0) blocs.push({ numero: ++n, titre: "À préciser", kind: "list", lignes: aPreciser });
+  const tel = s?.telephone?.trim();
   return {
     entete: { entreprise: p.entreprise, coordonnees, titre: TITRE_PDF, chantier: chantierLabel(p.chantier), ville: p.commune, date: dateFr(p.date), reference: p.reference ?? null, mention: p.ratios_en_validation ? MENTION_RATIOS : null },
     destinataire: options.destinataire ?? null,
     blocs,
     croquis: (p.croquis ?? []).map((c) => ({ article: c.article, nom: c.nom, commentaire: c.commentaire })),
     chantierInfos: [p.adresse_chantier?.trim() ? `Adresse du chantier : ${p.adresse_chantier.trim()}` : null, p.livraison?.trim() ? `Livraison : ${p.livraison.trim()}` : null].filter((x): x is string => !!x),
-    reponse: options.reponse?.trim() ? { phrase: PHRASE_REPONSE_PDF, adresse: options.reponse.trim(), conditions: CONDITIONS_PDF } : null,
-    pied: { question: contact ? `Une question sur ce chantier ? ${contact}` : p.question_lien ? `Une question sur ce chantier ? ${p.question_lien}` : null, mention: `Généré avec ${NOM_APP}` },
+    // Le bloc de réponse (texte de Greg, 31 octobre 2026, mot pour mot) : l'adresse où répondre, puis ce qu'on attend du négoce.
+    reponse: reponse ? { phrase: PHRASE_REPONSE_PDF, adresse: reponse, conditions: CONDITIONS_PDF } : null,
+    pied: { question: tel ? `Une question sur ce chantier ? ${tel}` : null, mention: `Généré avec ${NOM_APP}` },
   };
 }
 
@@ -272,6 +272,12 @@ export function forbiddenWord(text: string): string | null {
 }
 
 /** Les caractères que la police standard du PDF ne sait pas écrire (WinAnsi) : remplacés, jamais une erreur. */
+/** Les initiales de l'entreprise (« BATI INVEST » → « BI », « Couverture Le Goff » → « CL ») : deux lettres au plus. */
+export function initiales(nom: string): string {
+  const mots = nom.trim().split(/[\s'’-]+/).filter((m) => /^[\p{L}\d]/u.test(m) && !/^(?:de|du|des|la|le|les|et|sarl|sas|sasu|eurl|ei|sa)$/i.test(m));
+  return mots.slice(0, 2).map((m) => m[0]!.toUpperCase()).join("");
+}
+
 function pdfSafe(text: string): string {
   return text
     .replace(/≈/g, "env.")
@@ -385,9 +391,16 @@ export async function packetPdf(p: SupplierPacket, sketches: readonly SketchFile
       page.drawText(pdfSafe(d.entete.entreprise), { x: margin, y: left - 9, size: 9.5, font: bold, color: INK });
       left -= 12;
     } else {
-      for (const l of wrap(d.entete.entreprise, bold, 17, width * 0.5)) {
-        page.drawText(l, { x: margin, y: left - 17, size: 17, font: bold, color: INK });
-        left -= 21;
+      // Greg, 17 novembre 2026 : « Logo de l'entreprise ou initiales, jamais le logo Mobiiz. »
+      const ini = pdfSafe(initiales(d.entete.entreprise));
+      if (ini) {
+        page.drawRectangle({ x: margin, y: top - 40, width: 40, height: 40, color: modele === "essentiel" ? INK : accentTrait });
+        page.drawText(ini, { x: margin + (40 - bold.widthOfTextAtSize(ini, 16)) / 2, y: top - 26, size: 16, font: bold, color: modele === "essentiel" || !couleur.claire ? BLANC : INK });
+        left = top - 46;
+      }
+      for (const l of wrap(d.entete.entreprise, bold, 13, width * 0.5)) {
+        page.drawText(l, { x: margin, y: left - 13, size: 13, font: bold, color: INK });
+        left -= 17;
       }
     }
     for (const c of d.entete.coordonnees) {
@@ -443,8 +456,17 @@ export async function packetPdf(p: SupplierPacket, sketches: readonly SketchFile
   }
   const numerote = modele === "detaille";
   // Désignation · caractéristiques · quantité · unité (point 9) ; Essentiel : les caractéristiques sous la désignation.
-  const cols = modele === "essentiel" ? [width * 0.62, width * 0.14, width * 0.24] : numerote ? [width * 0.06, width * 0.36, width * 0.28, width * 0.12, width * 0.18] : [width * 0.4, width * 0.3, width * 0.12, width * 0.18];
-  const entetes = modele === "essentiel" ? ["Désignation", "Quantité", "Unité"] : numerote ? ["N°", "Désignation", "Caractéristiques", "Quantité", "Unité"] : ["Désignation", "Caractéristiques", "Quantité", "Unité"];
+  // Droit au but (Greg, 17 novembre 2026) : la colonne « Caractéristiques » ne se montre que si une ligne en a (ce que
+  // l'artisan a écrit lui-même, un croquis joint) ; vide, elle laisse sa place à la désignation.
+  const avecPrecisions = d.blocs.some((b) => b.kind === "table" && b.lignes.some((r) => !!r.precision));
+  const precisionCol = avecPrecisions ? "Caractéristiques" : "";
+  const cols =
+    modele === "essentiel"
+      ? [width * 0.62, width * 0.14, width * 0.24]
+      : numerote
+        ? avecPrecisions ? [width * 0.06, width * 0.36, width * 0.28, width * 0.12, width * 0.18] : [width * 0.06, width * 0.62, width * 0.02, width * 0.12, width * 0.18]
+        : avecPrecisions ? [width * 0.4, width * 0.3, width * 0.12, width * 0.18] : [width * 0.68, width * 0.02, width * 0.12, width * 0.18];
+  const entetes = modele === "essentiel" ? ["Désignation", "Quantité", "Unité"] : numerote ? ["N°", "Désignation", precisionCol, "Quantité", "Unité"] : ["Désignation", precisionCol, "Quantité", "Unité"];
   let numero = 0;
   for (const b of d.blocs) {
     if (b.kind === "list" && b.numero === 0) {

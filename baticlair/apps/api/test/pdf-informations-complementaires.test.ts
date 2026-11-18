@@ -41,7 +41,9 @@ describe("PDF de demande de prix : pas de redite du tableau", () => {
     expect(await pdfPageCount(Buffer.from(await packetPdf(p)))).toBe(1);
   });
 
-  it("du vrai contexte : seule la ligne de contexte reste, sous son nouveau titre ; rien n'est inventé", () => {
+  // RÈGLE CHANGÉE (Greg, 17 novembre 2026, « droit au but ») : « Supprime la section 3. » Le document s'arrête au tableau
+  // (et à « À préciser » si elle n'est pas vide). Avant : le contexte du devis restait sous « Informations complémentaires ».
+  it("même avec du vrai contexte : plus de section « Informations complémentaires sur le chantier »", () => {
     const p: SupplierPacket = {
       ...base,
       detail: [
@@ -50,9 +52,8 @@ describe("PDF de demande de prix : pas de redite du tableau", () => {
       ],
     };
     const doc = packetDocument(p);
-    expect(doc.blocs.map((b) => b.titre)).toEqual(["Fournitures à chiffrer", TITRE_COMPLEMENTS]);
-    const bloc = doc.blocs.find((b) => b.titre === TITRE_COMPLEMENTS)!;
-    expect(bloc.kind === "list" ? bloc.lignes : []).toEqual(["Réfection de la couverture d'une maison en bord de mer · 120 m² · pente 45° · accès par échafaudage"]);
+    expect(doc.blocs.map((b) => b.titre)).toEqual(["Fournitures à chiffrer"]);
+    expect(JSON.stringify(doc)).not.toMatch(/Réfection de la couverture|pente 45°/);
   });
 
   it("case décochée ou aucun détail : pas de section", () => {
@@ -60,15 +61,15 @@ describe("PDF de demande de prix : pas de redite du tableau", () => {
     expect(titres(base)).toEqual(["Fournitures à chiffrer"]);
   });
 
-  it("PDF sur plusieurs pages : chaque fourniture une seule fois, le contexte une seule fois", async () => {
+  it("PDF sur plusieurs pages : chaque fourniture une seule fois, jamais le contexte du devis", async () => {
     const fournitures = Array.from({ length: 90 }, (_, i) => ({ designation: `Fourniture numéro ${i + 1} du chantier`, quantite: `${i + 1} u`, precision: null }));
     const p: SupplierPacket = { ...base, fournitures, detail: [...fournitures.slice(0, 40).map((f) => ({ libelle: f.designation, mesure: f.quantite, precisions: [] })), { libelle: "Rénovation complète d'une longère", mesure: null, precisions: ["accès étroit"] }] };
     const pdf = Buffer.from(await packetPdf(p));
     expect(await pdfPageCount(pdf)).toBeGreaterThan(1);
     const texte = await pdfText(pdf);
     expect(texte.match(/Fourniture numéro 7 du chantier/g)).toHaveLength(1);
-    expect(texte.match(/Rénovation complète d'une longère/g)).toHaveLength(1);
-    expect(texte).toContain(TITRE_COMPLEMENTS);
+    expect(texte).not.toMatch(/Rénovation complète d'une longère/);
+    expect(texte).not.toContain(TITRE_COMPLEMENTS);
     expect(texte).not.toContain("Détail du devis");
   });
 

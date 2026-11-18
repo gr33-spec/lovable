@@ -61,36 +61,63 @@ export function buildPacket(
   for (const b of purchase.toBuy) keyed.set(b.key, b.kind === "computed" ? b.label : supplierLineLabel(takeoff.lines.find((l) => b.lineIds.includes(l.id))?.designation ?? b.label));
   const croquis = sketches.filter((s) => keyed.has(s.itemKey)).map((s) => ({ article: keyed.get(s.itemKey)!, id: s.id, nom: s.nom, commentaire: s.note }));
   const withSketch = new Set(croquis.map((c) => c.article));
-  const precision = (label: string, own?: string | null) => [own, withSketch.has(label) ? "croquis joint" : null].filter(Boolean).join(" ; ") || null;
+  // DROIT AU BUT (Greg, 17 novembre 2026) : « le négoce reçoit une commande claire, rien d'autre. Il n'a pas à savoir à quoi
+  // servent les articles. » La précision ne porte que ce que l'ARTISAN a écrit lui-même sur la ligne, et « croquis joint ».
+  // L'usage (« pour 8 ml de faîtage »), le calcul (« 4 ml × 2 kg/ml ») et les notes pour l'artisan restent dans l'app.
+  // Avant (§45.3) : la précision du calcul et celle du modèle partaient dans la colonne « Précision ».
+  const precision = (label: string, item?: { precision?: string; edited?: readonly string[] } | null) =>
+    [item?.edited?.includes("precision") ? item.precision : null, withSketch.has(label) ? "croquis joint" : null].filter(Boolean).join(" ; ") || null;
+  // Jamais un « ? » ni un mot d'hypothèse dans une désignation envoyée : la donnée inconnue tombe du nom.
+  // Jamais deux fois la même chose : « Ø 80 (Ø80) » → « Ø 80 » (la parenthèse qui redit un mot du nom tombe).
+  const serre = (t: string) => t.toLowerCase().replace(/[\s.]/g, "");
+  const net = (t: string) =>
+    t
+      .replace(/\s*(?:d[ée]v\.\s*|Ø\s*)?\S*\?\S*/g, "")
+      .replace(/\s*\(([^)]*)\)/g, (tout: string, dedans: string, at: number, entier: string) => (dedans.trim() && serre(entier.slice(0, at)).includes(serre(dedans)) ? "" : tout))
+      .replace(/\s{2,}/g, " ")
+      .replace(/\s+,/g, ",")
+      .trim();
   // §45.3 bloc 2 : désignation · quantité dans l'unité de vente (et la longueur à couvrir quand elle diffère) · précision.
-  const fournitures: PacketSupply[] = [
+  const memes = (designation: string) => purchase.toBuy.filter((b) => b.kind === "direct" && takeoff.lines.some((t) => b.lineIds.includes(t.id) && t.designation === designation)).length;
+  const dansLOrdre: (PacketSupply & { at: number })[] = [
     ...purchase.toBuy
       .filter((b) => b.kind === "computed")
       // Le matériau principal d'abord : dans l'ordre des lignes du devis d'où viennent les articles (§45.3).
       .map((b, i) => ({ b, i, at: Math.min(...b.lineIds.map((id) => takeoff.lines.findIndex((l) => l.id === id)).filter((x) => x >= 0), Number.MAX_SAFE_INTEGER) }))
       .sort((x, y) => x.at - y.at || x.i - y.i)
-      .map(({ b }) => ({
-        designation: b.label,
-        quantite: `${b.quantity ?? "quantité à préciser"}${b.approx ? ` (${b.approx})` : ""}`,
-        precision: precision(b.label, b.precision),
+      .map(({ b, at }) => ({
+        at,
+        designation: net(b.label),
+        // La quantité dans l'unité de vente, telle que l'app la montre : jamais « (10 ml à couvrir) », jamais une hypothèse.
+        quantite: b.quantity ?? "",
+        precision: precision(b.label, b),
         ...(b.consumable ? { consommable: true } : {}),
         cle: b.key,
       })),
     ...direct.map((l) => {
       const item = purchase.toBuy.find((b) => b.kind === "direct" && takeoff.lines.some((t) => b.lineIds.includes(t.id) && t.designation === l.designation));
       return {
-        designation: `${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""}`,
-        quantite: requestedQuantityText(l),
-        precision: precision(supplierLineLabel(l.designation), item?.precision),
+        at: item ? Math.min(...item.lineIds.map((id) => takeoff.lines.findIndex((t) => t.id === id)).filter((x) => x >= 0), Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER,
+        designation: net(`${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""}`),
+        // La même unité que dans l'app (« 2 tubes de 3 m », pas « 6 m ») : celle de la ligne de la liste, sinon celle du devis.
+        // Des lignes identiques réunies (« Prise 2P+T » 3 + 2) gardent leur total : la quantité d'UNE ligne de la liste ne vaut pas pour elles.
+        quantite: (memes(l.designation) === 1 ? item?.quantity : null) ?? requestedQuantityText(l),
+        precision: precision(supplierLineLabel(l.designation), item),
         ...(item ? { cle: item.key } : {}),
       };
     }),
   ];
+  // Le document suit l'ordre de la liste de l'app (celui du devis), que la ligne soit calculée ou reprise telle quelle.
+  const fournitures: PacketSupply[] = dansLOrdre.map((f, i) => ({ f, i })).sort((x, y) => x.f.at - y.f.at || x.i - y.i).map(({ f }) => {
+    const { at, ...sans } = f;
+    void at;
+    return sans;
+  });
   const articles = fournitures.map((f) => `${f.designation} : ${f.quantite}${f.precision ? ` (${f.precision})` : ""}`);
   // §45.3 bloc 3 : la ligne du devis avec sa mesure, et une demande simple. Jamais la cuisine interne.
   const a_chiffrer = purchase.toQuote.map((q) => {
     const line = q.lineIds[0] ? takeoff.lines.find((l) => l.id === q.lineIds[0]) : undefined;
-    return `${supplierLineLabel(line?.designation ?? q.label)}${q.measure ? ` · ${q.measure}` : ""} : merci de proposer ce que vous avez`;
+    return `${net(supplierLineLabel(line?.designation ?? q.label))}${q.measure ? ` · ${q.measure}` : ""}`;
   });
   // §45.3 bloc 1 : 5 à 8 faits confirmés (jamais une hypothèse de l'app tant que l'artisan ne l'a pas confirmée).
   const brief = { ...reviewed.brief, ville: reviewed.brief.ville ?? communeOf(sender.projectAddress) };
@@ -241,7 +268,11 @@ export class PriceRequestsService {
   private async optionsPdf(tenant: TenantContext, packet: SupplierPacket, etiquette: string | null): Promise<{ modele: ModelePdf; couleur: CouleurPdf; reponse: string | null }> {
     const r = await this.settings(tenant);
     const mobiiz = await this.adresseReponse(tenant.companyId, etiquette).catch(() => null);
-    return { modele: r.modelePdf, couleur: r.couleurPdf, reponse: mobiiz ?? packet.expediteur?.email ?? null };
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026 : « jamais mon e-mail personnel ») : le document ne porte que l'adresse de
+    // réponse Mobiiz du chantier. Sans elle, pas de bloc de réponse (le négoce répond à l'e-mail). Avant : l'e-mail du
+    // compte servait de repli.
+    void packet;
+    return { modele: r.modelePdf, couleur: r.couleurPdf, reponse: mobiiz ?? null };
   }
 
   /**

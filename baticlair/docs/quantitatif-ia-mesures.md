@@ -254,3 +254,22 @@ Site de test, devis zinc, Sonnet 5.5 effort moyen, `AI_EXTRACTION_REFLEXION=mini
   (feuilles ou bobineau), 1, Bord de mer, 0,65 mm, Sur les chevrons. »
 - Toujours au-dessus de 10 secondes : le plancher reste le temps d'écriture d'une seule lecture (14 secondes ici).
   La suite est le point 1 ci-dessus : couper la lecture en deux appels simultanés.
+
+## Passe 8 : la trace complète d'une lecture en ligne (17 novembre 2026, commit 042d31cd)
+
+Du clic « Analyser » à la première question, appel par appel (devis zinc, deux essais : 20,3 s et 24,3 s) :
+
+| Moment | Ce qui se passe | Durée |
+|---|---|---|
+| 0 à 3 s | création du chantier (0,4 s), envoi du PDF (0,9 s), ouverture de l'écran du chantier (une vingtaine d'appels) | 3 s |
+| 3 à 18-19 s | le modèle écrit sa lecture (2 900 à 3 100 mots-jetons) ; le repérage tourne en même temps | 15 à 16 s |
+| ensuite | enregistrement, puis l'écran reçoit le quantitatif (0,9 s quand le serveur est chaud, jusqu'à 5 s sinon) | 2 à 5 s |
+
+- La demande de lecture ne répond qu'au bout de 8 secondes (elle attend la liste, c'est voulu) ; pendant ce temps
+  l'écran ne reçoit pas les étapes du serveur.
+- Le temps qui compte reste l'écriture du modèle. Couper en deux (lignes et questions d'un côté, fiche et bref de
+  l'autre) ne ferait gagner que 4 à 5 secondes : les questions et les lignes doivent rester ensemble, parce qu'une ligne
+  attend sa question par sa clé, et une clé différente laisserait une ligne verte alors qu'il lui manque une donnée.
+- Sous 10 secondes, il faut trois appels simultanés (lignes, questions, fiche), un contrôle par le code que chaque clé
+  attendue a bien sa question, et l'envoi du PDF dès qu'il est choisi. Le coût d'une lecture à froid passe alors
+  d'environ 0,12 $ à 0,25 $ (le référentiel est lu trois fois). À décider par Greg, et à juger sur ses vrais devis.

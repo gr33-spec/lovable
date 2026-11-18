@@ -69,6 +69,7 @@ const param = z.object({
   estimate: z.string().optional(),
   display: z.record(str, str).optional(),
   withinChoices: z.boolean().optional(),
+  neverAsk: z.literal(true).optional(),
   textValues: z.array(z.object({ value: str, keywords: z.array(str).min(1) })).optional(),
   fromWorks: z.array(z.object({ value: str, workItems: z.array(str).min(1) })).optional(),
   onlyFromPrincipal: z.literal(true).optional(),

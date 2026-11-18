@@ -754,12 +754,14 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   const recoit = page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" });
   const mail = recoit.getByLabel("Le mail à ton négoce");
   await expect(mail).toContainText(/Objet : .+ : demande de prix/);
-  await expect(mail).toContainText("Bonjour Paul,");
-  // Greg, 12 novembre 2026 : cordial, sans pression ; répondre à l'e-mail d'abord, le lien en ligne ensuite.
-  await expect(mail).toContainText("Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec votre devis en pièce jointe.");
-  await expect(mail).toContainText("La liste des fournitures à chiffrer est en pièce jointe (PDF).");
-  await expect(mail).toContainText("Une question ? Appelez-moi au 06 12 34 56 78.");
-  await expect(mail).toContainText("Demande de prix envoyée avec Mobiiz.");
+  await expect(mail).toContainText("Bonjour,");
+  // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : e-mail court et neutre, « Bonjour, » sans prénom, sans pied « envoyé avec ».
+  // Avant : « Bonjour Paul, », un texte plus long, « Demande de prix envoyée avec Mobiiz. ».
+  await expect(mail).toContainText("Pour répondre : répondez simplement à cet e-mail avec votre devis");
+  await expect(mail).toContainText("liste en pièce jointe");
+  await expect(mail).toContainText("Une question ? 06 12 34 56 78.");
+  await expect(mail).not.toContainText("envoyée avec Mobiiz");
+  await expect(mail).not.toContainText("Paul");
   await expect(mail).not.toContainText("plusieurs fournisseurs");
   await expect(mail).not.toContainText("achètent ensemble");
   await recoit.getByRole("button", { name: "Modifier le message" }).click();
@@ -767,9 +769,9 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   await recoit.getByRole("button", { name: "Garder ce message" }).click();
   await expect(mail).toContainText("Pouvez-vous me chiffrer cette liste pour la semaine prochaine ?");
   await recoit.getByRole("button", { name: "Le tutoyer" }).click();
-  await expect(mail).toContainText("Salut Paul,");
+  await expect(mail).toContainText("réponds simplement à cet e-mail avec ton devis");
   await recoit.getByRole("button", { name: "Le vouvoyer" }).click();
-  await expect(mail).toContainText("Bonjour Paul,");
+  await expect(mail).toContainText("Bonjour,");
   await recoit.getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
   // § 43.4 : juste après le premier envoi, et jamais avant, l'écran des notifications ; « Plus tard » le referme.
@@ -799,7 +801,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", { 
   // L'e-mail se relit mot pour mot : le contenu en trois blocs, sans un prix.
   await menu(pointp, "Voir l'e-mail");
   await expect(pointp.getByText("Objet :")).toBeVisible();
-  await expect(pointp.getByText(/^Bonjour Paul,/)).toBeVisible();
+  await expect(pointp.getByText(/^Bonjour,/)).toBeVisible();
   await expect(pointp.getByText(/command/i)).toHaveCount(0);
   await expect(pointp.getByText(/€/)).toHaveCount(0);
   // Point 8 (Greg, 28 octobre 2026) : en attente, pas de bouton principal, seulement l'état.

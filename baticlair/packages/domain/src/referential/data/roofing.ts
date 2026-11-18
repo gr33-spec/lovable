@@ -1117,7 +1117,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.17-53",
+  version: "roofing-2026.11.17-54",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1769,8 +1769,10 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bobine-cuivre", "copper_coil", "Cuivre en bobine, au mètre linéaire (largeur et épaisseur du chantier)", "Cuivre en bobine", {
       sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
     }),
-    // §49.7 : un mortier d'étanchéité spécial solin, prêt à gâcher, en sac de 25 kg (jamais « ciment + sable »).
-    generic("mortier-solin-25", "solin_mortar", "Mortier d'étanchéité pour solin, prêt à gâcher, sac de 25 kg", "Mortier d'étanchéité pour solin, sac 25 kg", {
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026 : « Ne transforme pas mes mots : "mortier de ciment" est devenu "mortier
+    // d'étanchéité" ») : le mortier garde le nom que le devis lui donne ; le code ne compte que les sacs de 25 kg.
+    // Avant (§49.7) : « Mortier d'étanchéité pour solin, prêt à gâcher ».
+    generic("mortier-solin-25", "solin_mortar", "Mortier pour solin", "Mortier pour solin", {
       sellingUnits: [{ id: "sac", label: { one: "sac de 25 kg", many: "sacs de 25 kg" }, contains: packaging("25", "kg", F, FOUNDER_DOC, "« sac de 25 kg » (§49.7)."), primary: true }],
     }),
     generic("jonction-gouttiere", "gutter_joint", "Jonction de gouttière (système de la gouttière)", "Jonctions de gouttière"),
@@ -2064,8 +2066,12 @@ export const ROOFING_REFERENTIAL: Referential = {
           question: "À quel pureau posez-vous ces ardoises ?",
           hint: "Il change le nombre d'ardoises, de crochets et de liteaux.",
           textLabels: ["pureau"],
-          // Pose au crochet, double recouvrement : pureau = (hauteur − recouvrement) / 2 (référentiel du fondateur). Des crochets
-          // écrits au devis disent le recouvrement de l'artisan : crochet − 1 cm (Cupa, §34), jamais contredits (D-2026-020).
+          // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : « Ne me demande jamais le pureau : demande seulement le format de
+          // l'ardoise et la taille des crochets. » Le pureau se CALCULE toujours : (hauteur de l'ardoise − recouvrement) ÷ 2.
+          // Des crochets écrits au devis disent le recouvrement de l'artisan : crochet − 1 cm (Cupa, §34), jamais contredits
+          // (D-2026-020) ; sans crochets écrits, le recouvrement vient de la table pente × région (§3). Avant : le pureau
+          // pouvait se demander (une question du modèle suspendait le calcul).
+          neverAsk: true,
           default: {
             formula: "(ardoise.longueur - recouvrement) / 2",
             whenGiven: { param: "longueur_crochet", formula: "(ardoise.longueur - (longueur_crochet - regle.marge_crochet)) / 2", note: "recouvrement des crochets du devis (crochet − 1 cm)" },
@@ -2440,7 +2446,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
-          precision: "pour {longueur_faitage|ml} de faîtage : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_faitage|ml} de faîtage, développé {developpe|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
@@ -2515,7 +2521,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
-          precision: "pour {longueur_noue|ml} de noue : estimation d'après un développé de {developpe_noue|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_noue|ml} de noue, développé {developpe_noue|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
@@ -2682,7 +2688,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml de bande (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" }, formOf: "bande" },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
         { key: "vis", family: "strip_screw", label: "Vis de bandes", usual: { text: "Vis inox 4 × 40, 4 par mètre (§25.5).", source: F, productId: "vis-inox-4x40" } },
-        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
+        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier pour solin, en sacs de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
       ],
       constants: {
         ...ZINC_PLAT_CONSTANTS,
@@ -2724,9 +2730,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           // §45.5 : une feuille dont on ne sait pas à quoi elle sert n'a rien à faire dans la liste.
-          precision: "pour {longueur_bande|ml} de bande : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_bande|ml} de bande, développé {developpe|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
-          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm, pour {piece_min}",
+          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
@@ -2766,7 +2772,6 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "kg",
           core: false,
           exclusions: "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
-          designation: "Mortier d'étanchéité pour solin, sac 25 kg",
           precision: "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           source: F,
           verification: FOUNDER_DOC,
@@ -2791,7 +2796,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", usual: { text: "Bande porte-solin, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" }, formOf: "porte_solin" },
-        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
+        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier pour solin, en sacs de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
       ],
       constants: {
@@ -2824,7 +2829,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
-          precision: "pour {longueur_bande|ml} de porte-solin : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_bande|ml} de porte-solin, développé {developpe|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
@@ -2840,7 +2845,6 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "kg",
           core: false,
           exclusions: "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
-          designation: "Mortier d'étanchéité pour solin, sac 25 kg",
           precision: "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           source: F,
           verification: FOUNDER_DOC,

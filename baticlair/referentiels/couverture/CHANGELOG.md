@@ -1,5 +1,13 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.17-54 — Droit au but : une commande claire (Greg, 2026-11-17, après son test du D-2026-020)
+
+- **§49.5 Règle changée** : une seule ligne par article identique, avec le total (toutes les feuilles de zinc réunies, comptées pièce par pièce puis additionnées). Avant : le même article sorti par deux ouvrages écrits restait une ligne par ouvrage. Le nom des feuilles ne dit plus leur usage (« Feuilles zinc naturel 2 × 1 m, 0,65 mm », sans « pour bandes de rive… ») ; l'usage reste dans le détail de l'app.
+- **§49.6 Règle changée** : la précision des feuilles dit la longueur et le développé (« pour 8 ml de faîtage, développé 25 cm »), plus « estimation… ajuste selon ton façonnage ». La ligne reste une estimation, que l'artisan ajuste.
+- **§49.7 Règle changée** : le mortier du solin garde le nom que le devis lui donne (« mortier de ciment ») ; le code ne compte que les sacs de 25 kg (2 kg par mètre, inchangé). Avant : renommé « Mortier d'étanchéité pour solin ».
+- **§34 Règle changée** : le pureau ne se demande JAMAIS (`neverAsk`). Il se calcule : (hauteur de l'ardoise − recouvrement) ÷ 2 ; le recouvrement est celui des crochets écrits (crochet − 1 cm), sinon celui de la table pente × région (§3). Une question du modèle sur le pureau est écartée et ne suspend plus le calcul. Avant : « 48 m² d'ardoises 32×22 et crochets de 11 » restaient « À préciser » quand le modèle demandait le pureau.
+- Le format écrit dans le nom de la fourniture (« Ardoises naturelles 32×22 ») désigne l'ardoise quand la lecture ne l'a pas nommée à part (un seul format possible, jamais un nom de modèle).
+
 ## roofing-2026.11.17-53 — Le pliage : une seule réponse pour tout le devis (Greg, 2026-11-17)
 
 - **§48.6 Règle changée** : « Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ? » se pose UNE fois pour tout le devis (`groupe` « pieces-pliees » : bandes zinc, abergement, porte-solin, noue, faîtage zinc, bandes cuivre). Avant : une question par pièce de zinguerie écrite au devis (retour du 2026-10-07).

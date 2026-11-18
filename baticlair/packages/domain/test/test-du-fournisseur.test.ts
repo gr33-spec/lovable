@@ -75,7 +75,7 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     // Je façonne 13 ml : des FEUILLES 2 × 1 m (§48.6), jamais du zinc au kg ni un bobineau : développé 10 cm, 10 bandes de
     // 2 m par feuille → 1 feuille. Le joint debout, lui, part en bobine au mètre linéaire, largeur écrite (jamais au kg).
     const surPlace = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
-    expect(surPlace.toBuy.find((b) => b.needIds.includes("feuilles-bandes"))).toMatchObject({ label: expect.stringMatching(/^Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour /), quantity: "1 pièce" });
+    expect(surPlace.toBuy.find((b) => b.needIds.includes("feuilles-bandes"))).toMatchObject({ label: "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", quantity: "1 pièce" });
     expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.label).toBe("Bobine zinc naturel 0,65 mm, largeur 500 mm");
     expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.order?.unit).toBe("ml");
   });

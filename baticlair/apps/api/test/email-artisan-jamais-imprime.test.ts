@@ -60,10 +60,12 @@ describe("l'e-mail de connexion de l'artisan n'est jamais imprimé", { timeout: 
     expect(toutDuMail(bon)).not.toContain(CONNEXION);
   });
 
-  it("l'e-mail de contact que l'artisan a rempli pour son entreprise, lui, figure sur ses documents", async () => {
+  // RÈGLE CHANGÉE (Greg, 17 novembre 2026 : « jamais mon e-mail personnel ») : l'e-mail de contact du compte ne figure plus
+  // sur la demande de prix non plus ; le négoce répond à l'adresse Mobiiz du chantier, ou appelle. Avant : il y figurait.
+  it("l'e-mail de contact que l'artisan a rempli pour son entreprise ne figure plus sur la demande de prix", async () => {
     const { a, d } = await demandeEnvoyee("contact@toitures-martin.example");
     const relu = (await a.agent.get(`/v1/projects/${a.projectId}/price-requests`).expect(200)).body.items[0] as { document: unknown };
-    expect(JSON.stringify(relu.document)).toContain("contact@toitures-martin.example");
+    expect(JSON.stringify(relu.document)).not.toContain("contact@toitures-martin.example");
     expect(JSON.stringify(relu.document)).not.toContain(CONNEXION);
     expect(d.id).toBeTruthy();
   });

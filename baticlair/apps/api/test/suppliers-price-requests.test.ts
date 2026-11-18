@@ -191,12 +191,14 @@ describe("demandes de prix", () => {
     // §45.2 : une demande de devis, un mail court ; la liste est dans le PDF joint.
     // Lot final, point 3 : « Entreprise : demande de prix [famille], [commune] ».
     expect(first.email.subject).toBe("Toitures Martin : demande de prix couverture, Vannes");
-    // Au prénom du commercial ; le message de l'artisan remplace la phrase par défaut (lot final, point 4).
-    expect(first.email.body).toMatch(/^Bonjour Paul,\n\nLivraison sur chantier possible \?\n\nDans la mesure du possible, je souhaiterais recevoir votre proposition avant le 15 octobre\./);
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : « Bonjour, » sans prénom, e-mail court. Le message de l'artisan remplace la
+    // phrase d'ouverture ; la pièce jointe et la date souhaitée restent dites.
+    expect(first.email.body).toMatch(/^Bonjour,\nLivraison sur chantier possible \?\nLa liste est en pièce jointe \(\d+ articles?\)\.\nSi possible, réponse souhaitée avant le 15 octobre\./);
     // Greg, 12 novembre 2026 : jamais de pression, le nombre de négoces consultés n'est pas dit.
     expect(first.email.body).not.toMatch(/plusieurs (fournisseurs|négoces)/i);
     // §51.5 : la ligne part sous la désignation lue par le modèle, sans la référence d'article du devis.
-    expect(created.body.packet.articles).toContain("Tuile romane canal rouge 12,5 u/m² : 1 250 u");
+    // (L'unité est celle de la liste de l'app, « pièces », la même dans le document : Greg, 17 novembre 2026.)
+    expect(created.body.packet.articles).toContain("Tuile romane canal rouge 12,5 u/m² : 1 250 pièces");
     expect(first.email.body).toContain("Livraison sur chantier possible ?");
 
     const sent = await agent.patch(`/v1/price-request-recipients/${first.id}`).send({ status: "sent" });

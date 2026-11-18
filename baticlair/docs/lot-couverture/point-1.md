@@ -37,7 +37,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Tuiles HP10 | 1 488 pièces (≈ 7 palettes) |  | chiffrable |
 | Arêtiers | 70 pièces |  | chiffrable |
-| Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 8 ml de noue : estimation d'après un développé de 50 cm, ajuste selon ton façonnage | chiffrable |
+| Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 8 ml de noue, développé 50 cm | chiffrable |
 
 ## Ardoises, arêtier zinc et noue de 66
 
@@ -70,7 +70,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Ardoises naturelles Espagne 1er choix 30×22 | 6 953 pièces | 150 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 11 cm | 7 093 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
-| Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 4 ml de noue : estimation d'après un développé de 66 cm, ajuste selon ton façonnage | chiffrable |
+| Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 4 ml de noue, développé 66 cm | chiffrable |
 
 À préciser avec vous :
 - Arêtiers (Arêtier zinc dév. 33) · 10 ml

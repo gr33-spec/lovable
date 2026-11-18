@@ -89,18 +89,19 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     expect(email.subject).toMatch(/^Bati invest : demande de prix( couverture)?, Brest$/);
     // Greg, 12 novembre 2026 (dossier de corrections UX, point 5) : cordial, sans pression. Aucune date n'a été choisie :
     // aucune échéance n'est écrite. D'abord « répondre à cet e-mail avec votre devis », le lien en ligne ensuite.
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026, « droit au but ») : court et neutre, « Bonjour, » sans prénom, le chantier et
+    // le nombre d'articles, comment répondre, le portable, la signature. Plus de paragraphe sur la création d'un accès,
+    // plus de pied « envoyé avec ». Avant : un texte plus long, l'invitation à créer son accès négoce, le pied Mobiiz.
     expect(email.body).toBe(
       [
         "Bonjour,",
-        "Je vous envoie la liste des fournitures pour un chantier de couverture zinc à joint debout à Brest : 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage. Pourriez-vous m'adresser votre proposition tarifaire ?",
-        "Pour me répondre, le plus simple est de répondre directement à cet e-mail, avec votre devis en pièce jointe.\nVous pouvez aussi chiffrer en ligne, sans inscription : (votre lien personnel)\nLa liste des fournitures à chiffrer est en pièce jointe (PDF).\nUne question ? Appelez-moi au 06 12 34 56 78.",
-        // RÈGLE CHANGÉE (Greg, 15 novembre 2026) : le lien pour créer son accès négoce part dans CE mail, en une ligne
-        // facultative ; plus de second e-mail « créez votre accès ». Avant : aucune invitation ici.
-        "Vous pouvez aussi créer votre accès négoce, gratuit et sans engagement, pour retrouver vos demandes au même endroit : (son lien pour créer son accès)",
-        "Je vous remercie par avance.\nGreg, Bati invest",
-        "--\nDemande de prix envoyée avec Mobiiz.",
-      ].join("\n\n"),
+        "Voici une demande de prix pour un chantier de couverture zinc à joint debout à Brest (liste en pièce jointe, 7 articles).",
+        "Pour répondre : répondez simplement à cet e-mail avec votre devis, ou chiffrez en ligne en 2 minutes :\n(votre lien personnel)",
+        "Une question ? 06 12 34 56 78.",
+        "Merci d'avance,\nGreg, Bati invest",
+      ].join("\n"),
     );
+    expect(email.body).not.toMatch(/accès négoce|créer votre accès|envoyée avec/i);
     expect(email.body).not.toMatch(/plusieurs (fournisseurs|négoces)|avant le|rapidement|achètent ensemble|détail du devis/i);
     expect(email.body).not.toContain("greg@batiinvest.fr");
     expect(sansPied(email.body)).not.toMatch(/command|référentiel|BatiClair|Mobiiz|inscri(re|vez)|commission/i);
@@ -120,14 +121,17 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const pdf = (await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf?destinataire=${created.recipients[0].id}`).buffer(true)).body as Buffer;
     const text = await pdfText(pdf);
     if (process.env.SHOW_PDF) console.log(text);
-    const order = ["Demande de prix — Matériaux", "Point.P Brest", "Le chantier en bref", "1. Fournitures à chiffrer", "2. Informations complémentaires sur le chantier"].map((t) => text.indexOf(t));
+    const order = ["Demande de prix — Matériaux", "Point.P Brest", "Le chantier en bref", "1. Fournitures à chiffrer"].map((t) => text.indexOf(t));
     for (const i of order) expect(i).toBeGreaterThanOrEqual(0);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
-    // Rien à préciser sur ce chantier : le bloc « À préciser avec vous » est absent, les suivants se renumérotent.
-    expect(text).not.toMatch(/À préciser avec vous/);
+    // Rien à préciser sur ce chantier : le bloc « À préciser » est absent. RÈGLE CHANGÉE (Greg, 17 novembre 2026) : plus de
+    // section « Informations complémentaires sur le chantier » ; le document s'arrête au tableau.
+    expect(text).not.toMatch(/À préciser|Informations complémentaires/);
     // Coordonnées du compte, en-tête et pied.
-    for (const t of ["Bati invest", "4 rue de Siam, 29200 Brest", "SIRET 12345678900012", "06 12 34 56 78 · greg@batiinvest.fr", "chantier Test", "Brest", "Une question sur ce chantier ? 06 12 34 56 78 · greg@batiinvest.fr", "Page 1 / ", "Généré avec Mobiiz"])
+    for (const t of ["Bati invest", "4 rue de Siam, 29200 Brest", "SIRET 12345678900012", "06 12 34 56 78", "chantier Test", "Brest", "Une question sur ce chantier ? 06 12 34 56 78", "Page 1 / ", "Généré avec Mobiiz"])
       expect(text).toContain(t);
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : jamais l'e-mail personnel de l'artisan dans le document.
+    expect(text).not.toContain("greg@batiinvest.fr");
     expect(text).toMatch(/Réf\. CH-[0-9A-F]{6}/);
     // Le logo est une image dans le PDF.
     expect(pdf.includes(Buffer.from("/Subtype /Image"))).toBe(true);
@@ -141,19 +145,23 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     // Les lignes du chantier Test (§45.5).
     // Retour du fondateur (2026-10-12) : dans le document, un mètre linéaire se dit « m » (« 222 m », pas « 222 ml »).
     // Assistant (31 octobre 2026) : la quantité et l'unité en deux colonnes (« 4 » · « longueurs de 4 m (13 m à couvrir) »).
-    expect(text).toMatch(/Gouttière zinc demi-ronde dév\. 33[\s\S]{0,120}?\b4\s+longueurs\s+de\s+4\s+m\s+\(13\s+m\s+à\s+couvrir\)/);
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : la quantité dans l'unité de vente, rien d'autre (plus « (13 m à couvrir) »).
+    expect(text).toMatch(/Gouttière zinc demi-ronde dév\. 33[\s\S]{0,120}?\b4\s+longueurs\s+de\s+4\s+m/);
+    expect(text).not.toMatch(/à couvrir/);
     // RÈGLE NUMÉRO UN : ni pattes ni pointes, le devis n'en écrit pas. Bande de 13 ml façonnée sur place : des feuilles
     // 2 × 1 m estimées d'après le développé (§48.6), jamais un bobineau.
     expect(text).not.toMatch(/Pattes|Pointes|Bobineau/);
-    // §50.7 : la feuille dit sa pièce (« pour bande zinc d'égout ») ; le nom long passe sur deux lignes du PDF.
-    expect(text).toMatch(/Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour\s+pour 13 m de bande[\s\S]*?\d+\s+pièces?[\s\S]*bande zinc d'égout/);
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : jamais l'usage dans le document (« pour bande zinc d'égout », « pour 13 m
+    // de bande ») : l'article et sa quantité.
+    expect(text).toMatch(/Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm\s+\d+\s+pièces?/);
+    expect(text).not.toMatch(/pour 13 m de bande|bande zinc d'égout|estimation|ajuste/);
   });
 
-  it("3. un chantier sans ligne « à préciser » n'a pas de bloc 3 ; un chantier qui en a une le montre, avec « merci de proposer ce que vous avez »", async () => {
+  it("3. un chantier sans ligne « à préciser » n'a pas de bloc 3 ; un chantier qui en a une le montre, sans phrase ajoutée", async () => {
     const agent = await compteBatiInvest();
     const { projectId } = await chantierTest(agent);
     const sans = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
-    expect(sans.document.blocs.map((b: { titre: string }) => b.titre)).toEqual(["Le chantier en bref", "Fournitures à chiffrer", "Informations complémentaires sur le chantier"]);
+    expect(sans.document.blocs.map((b: { titre: string }) => b.titre)).toEqual(["Le chantier en bref", "Fournitures à chiffrer"]);
     const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "m²" }] })).body;
     await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
     let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
@@ -163,9 +171,10 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     }
     await agent.post(`/v1/quantitatifs/${q.id}/validation`).expect(200);
     const avec = (await agent.post(`/v1/projects/${q.projetId}/price-requests/preview`).send({}).expect(200)).body;
-    const bloc = avec.document.blocs.find((b: { titre: string }) => b.titre === "À préciser avec vous");
+    const bloc = avec.document.blocs.find((b: { titre: string }) => b.titre === "À préciser");
     // Une mesure (m²) sans règle de calcul n'est jamais une quantité à commander (§40) : le fournisseur propose.
-    expect(bloc.lignes).toEqual(["Jouées de lucarnes en zinc · 2 m² : merci de proposer ce que vous avez"]);
+    // Règle changée (Greg, 17 novembre 2026) : la ligne et sa mesure, sans « merci de proposer ce que vous avez ».
+    expect(bloc.lignes).toEqual(["Jouées de lucarnes en zinc · 2 m²"]);
     expect(JSON.stringify(avec.document)).not.toMatch(/Pas encore de règle|BatiClair ne sait|Mobiiz ne sait|référentiel/);
   });
 
@@ -175,18 +184,18 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const { projectId, supplierId } = await chantierTest(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
     expect(created.recipients[0].email.body).not.toMatch(/détail du devis/);
-    expect(created.recipients[0].email.body).toContain("La liste des fournitures à chiffrer est en pièce jointe (PDF).");
+    expect(created.recipients[0].email.body).toContain("liste en pièce jointe");
     const text = await pdfText((await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf`).buffer(true)).body as Buffer);
     expect(text).not.toMatch(/Détail du devis|Informations complémentaires/);
   });
 
-  it("5. gouttière 13 ml : « 4 longueurs de 4 m (13 ml à couvrir) », jamais « soit 13 ml »", async () => {
+  it("5. gouttière 13 ml : « 4 longueurs de 4 m », l'unité de vente et rien d'autre (Greg, 17 novembre 2026 ; avant : « (13 ml à couvrir) »)", async () => {
     const agent = await compteBatiInvest();
     const { projectId, supplierId } = await chantierTest(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
     const gouttiere = created.packet.fournitures.find((f: { designation: string }) => f.designation.startsWith("Gouttière"));
-    expect(gouttiere.quantite).toBe("4 longueurs de 4 m (13 ml à couvrir)");
-    expect(JSON.stringify(created.packet)).not.toMatch(/soit 13 ml/);
+    expect(gouttiere.quantite).toBe("4 longueurs de 4 m");
+    expect(JSON.stringify(created.packet.fournitures)).not.toMatch(/soit 13 ml|à couvrir/);
   });
 
   it("6. une hypothèse non confirmée (descentes absentes du devis) n'est pas dans « Le chantier en bref » ; répondue, elle y est", async () => {
@@ -194,14 +203,14 @@ describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 },
     const { projectId } = await chantierTest(agent);
     const preview = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
     // Greg a répondu « 2 descentes » : c'est un fait. (Sans réponse, la liste ne se valide pas ; le domaine le teste aussi.)
-    // Retour du fondateur (2026-10-11) : le bloc 1 est UN texte descriptif.
-    expect(preview.document.blocs[0].lignes).toHaveLength(1);
-    expect(preview.document.blocs[0].lignes[0]).toMatch(/\b2 descentes\b/);
+    // Règle changée (Greg, 17 novembre 2026) : deux lignes de description au plus (avant : un seul texte, plus long).
+    expect(preview.document.blocs[0].lignes).toHaveLength(2);
+    expect(preview.document.blocs[0].lignes[1]).toMatch(/\b2 descentes\b/);
     // La pente n'est ni dans le devis ni répondue : jamais dans le bloc 1, ni dans le mail.
     expect(preview.document.blocs[0].lignes.join(" ")).not.toMatch(/\bpente \d/);
     expect(preview.mail).not.toMatch(/\bpente \d|45°/);
     // §51.5 : le bref est la fiche lue (ouvrage, surface, données, réponses), puis la ville.
-    expect(preview.document.blocs[0].lignes[0]).toMatch(/^Couverture zinc à joint debout, 91 m²\. .*\b2 descentes\b.* Chantier à Brest, bord de mer\.$/);
+    expect(preview.document.blocs[0].lignes[0]).toBe("Couverture zinc à joint debout, 91 m².");
   });
 });
 

@@ -43,6 +43,8 @@ async function onglet(page: Page, nom: string) {
   const t = page.getByRole("tab", { name: nom, exact: true });
   // Le clavier se referme d'abord (la barre des onglets se cache pendant la saisie, comme le menu de l'app).
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  // Une attente qui laisse le guide du premier passage se fermer (lire un attribut ne le ferme pas).
+  await expect(t).toBeVisible();
   if ((await t.getAttribute("aria-selected")) !== "true") await toucher(t);
   await expect(page.getByRole("tabpanel", { name: nom })).toBeVisible();
 }

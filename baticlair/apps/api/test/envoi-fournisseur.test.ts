@@ -59,7 +59,7 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     expect(packet).toMatchObject({ entreprise: "Toitures Martin", chantier: "Dupont — réfection toiture", joindre_detail: true });
     // Bloc 1 : les lignes prêtes à charger (ardoises, crochets, liteaux, gouttière…), jamais une mesure en m².
     expect(packet.articles).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 9 200 pièces/), expect.stringMatching(/^Crochets d'ardoise inox Ø 2,7, longueur 11 cm : 9 384 pièces/), expect.stringMatching(/^Chatière de ventilation : 4 u/)]),
+      expect.arrayContaining([expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 9 200 pièces/), expect.stringMatching(/^Crochets d'ardoise inox Ø 2,7, longueur 11 cm : 9 384 pièces/), expect.stringMatching(/^Chatière de ventilation : 4 pièces/)]),
     );
     for (const a of packet.articles) expect(a).not.toMatch(/ : [\d\s,.]+ m²/);
     // Le chantier en bref : des faits (8 au plus), les réponses de l'artisan (2 descentes), jamais la pente par défaut.
@@ -72,15 +72,14 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     const email = res.body.recipients[0].email;
     expect(email.subject).toMatch(/^Toitures Martin : demande de prix( [a-zéèêçàâîôû]+)?, Brest$/);
     // Lot final, point 4 : le message de l'artisan remplace le texte libre ; la date et la pièce jointe restent écrites.
-    // Adressé au prénom du commercial (lot final, point 3).
-    expect(email.body).toMatch(/^Bonjour Paul,\n\nLivraison sur chantier possible \?\n\n/);
-    expect(email.body).toContain("Dans la mesure du possible, je souhaiterais recevoir votre proposition avant le 15 octobre.");
-    expect(email.body).toContain("La liste des fournitures à chiffrer est en pièce jointe (PDF).");
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : « Bonjour, » sans prénom (avant : le prénom du commercial), e-mail court.
+    expect(email.body).toMatch(/^Bonjour,\nLivraison sur chantier possible \?\nLa liste est en pièce jointe \(6 articles\)\.\n/);
+    expect(email.body).toContain("Si possible, réponse souhaitée avant le 15 octobre.");
     // Greg, 12 novembre 2026 (dossier de corrections UX, point 5) : ces formulations ne reviennent pas.
     expect(email.body).not.toMatch(/plusieurs (fournisseurs|négoces)|détail du devis sans prix|achètent ensemble|rapidement/i);
     // Sans message, le texte libre par défaut dit le chantier.
     const sans = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({ message: "Je vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest." }).expect(200)).body;
-    expect(sans.mail).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest/);
+    expect(sans.mail).toMatch(/^Bonjour,\nJe vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest/);
     // Le test du §42.2 et du §43.5 : rien du devis chiffré ne passe (85,00 €, 42, 19,90…).
     expect(priceLeak(email.body)).toBeNull();
     expect(email.body).not.toMatch(/85,00|19,90/);
@@ -100,8 +99,9 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     const mail = ctx.emails.lastTo("devis@pointp.fr")!;
     expect(mail.subject).toBe(recipient.email.subject);
     // Le lien de chiffrage est propre au négoce : l'aperçu le montre « …/chiffrer/… » (Greg, 28 octobre 2026, point 7).
-    // Greg, 15 novembre 2026 : le lien pour créer son accès négoce part dans CE mail (plus de second e-mail « créez votre accès »).
-    expect(mail.text).toMatch(/Vous pouvez aussi créer votre accès négoce, gratuit et sans engagement, pour retrouver vos demandes au même endroit : http\S+\/negoce\/rejoindre\/\S+/);
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : plus de paragraphe sur la création d'un accès dans l'e-mail (elle se propose
+    // en bas de la page de chiffrage). Avant (15 novembre) : une ligne « Vous pouvez aussi créer votre accès négoce… ».
+    expect(mail.text).not.toMatch(/créer votre accès|negoce\/rejoindre/);
     expect(mail.text.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)").replace(/https?:\/\/\S+\/negoce\/rejoindre\/\S+/, "(son lien pour créer son accès)")).toBe(recipient.email.body);
     expect(ctx.emails.sent.filter((m) => /créez votre accès/.test(m.subject))).toHaveLength(0);
     // Lot final, point 5 : le texte en clair accompagne le HTML. Greg, 12 novembre 2026 : répondre à l'e-mail vient
@@ -235,7 +235,7 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     };
     // Une demande d'avant le §45 (articles en texte) se rend encore : le tableau se reconstruit.
     expect(packetDocumentLines(packetDocument(packet))).toContain("Ardoises 30×22 | 9 200 pièces, soit ≈ 12 palettes | ");
-    expect(packetMail(packet)).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour le chantier Toiture Dupont à Brest\./);
+    expect(packetMail(packet)).toMatch(/^Bonjour,\nVoici une demande de prix pour un chantier à Brest \(liste en pièce jointe, 2 articles\)\./);
     const pdf = await packetPdf(packet);
     expect(Buffer.from(pdf.subarray(0, 5)).toString()).toBe("%PDF-");
     expect(await pdfPageCount(pdf)).toBe(1);

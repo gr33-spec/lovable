@@ -437,16 +437,9 @@ function aggregate(
     const key = named(n) ? `product:${n.label}` : `${n.workItemId ?? "?"}/${n.slot}`;
     groups.set(key, [...(groups.get(key) ?? []), n]);
   }
-  // §49.5 : deux lignes du devis ne fusionnent jamais. Le même article sorti par deux ouvrages écrits (les feuilles des
-  // bandes de rive, du faîtage et du porte-solin) reste une ligne par ouvrage, chacune avec sa précision.
-  // Retour du fondateur (2026-10-12, §49.9 : « une fourniture = une ligne, additionnée ») : un consommable (silicone, vis,
-  // pointes) n'est pas une ligne du devis ; le même, sorti par deux pièces, fait une seule ligne, besoins additionnés.
-  for (const [key, group] of [...groups]) {
-    const works = [...new Set(group.map((n) => n.workItemId ?? "?"))];
-    if (works.length < 2 || group.every((n) => consumables.has(n.family) || n.consumable)) continue;
-    groups.delete(key);
-    for (const w of works) groups.set(`${key}@${w}`, group.filter((n) => (n.workItemId ?? "?") === w));
-  }
+  // RÈGLE CHANGÉE (Greg, 17 novembre 2026, « droit au but ») : UNE SEULE LIGNE PAR ARTICLE IDENTIQUE, avec le total (toutes
+  // les feuilles de zinc réunies, comptées sur l'ensemble des pièces à plier). Avant (§49.5) : le même article sorti par
+  // deux ouvrages écrits restait une ligne par ouvrage, chacune avec sa précision. L'usage reste dans l'app (`usages`).
   const owner = (n: OwnedNeed) => ouvrages.filter((o) => o.needs.some((x) => x.needId === n.needId)).map((o) => o.lineId);
   const items: PurchaseItem[] = [];
   for (const [key, group] of groups) {

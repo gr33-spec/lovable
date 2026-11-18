@@ -3,6 +3,7 @@ import {
   COMMON_LABOR,
   computeWithAnswers,
   containsKeyword,
+  D2026_020_LECTURE,
   DE00000071_LECTURE,
   ficheDeCalcul,
   FICHE_PARAMS_CHANTIER,
@@ -35,7 +36,11 @@ import type { LectureReader, LectureRequest } from "../application/lecture-reade
  *    avec le vocabulaire du référentiel (mots des emplacements et des familles, noms des données), pour tester tout le
  *    parcours sans appel payant. Ce n'est pas la lecture de l'app : en ligne, seul le modèle lit (§51.5).
  */
-const RECORDED: { marker: RegExp; lecture: LectureDevis }[] = [{ marker: /\bDE0{4,8}71\b/, lecture: DE00000071_LECTURE }];
+const RECORDED: { marker: RegExp; lecture: LectureDevis }[] = [
+  { marker: /\bDE0{4,8}71\b/, lecture: DE00000071_LECTURE },
+  // Le chantier ardoise et zinguerie de Greg (17 novembre 2026), tel que le vrai modèle l'a lu : repère « JEU-D2026-020 ».
+  { marker: /\bJEU-D2026-020\b/, lecture: D2026_020_LECTURE },
+];
 
 export class FakeLectureReader implements LectureReader {
   readonly provider = "fake";
