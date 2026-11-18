@@ -61,6 +61,30 @@ couvert ici, demander au fondateur plutôt que deviner.
 - 1 clou par ardoise au faîtage, 2 à l'égout, au doublis et à la rive.
 - Unité de vente : inconnue (le fondateur ne sait pas), à confirmer.
 
+## Tuile
+
+### Ce qu'on demande à l'artisan
+- La référence exacte du modèle, pour prendre le nombre au m² sur la fiche
+  fabricant. Si on n'a pas la référence, on lui demande son nombre au m².
+- La perte, pour toutes les tuiles (mécanique, plate, canal…) : « Combien de
+  tuiles en plus, ou quel % ? ». On ne fixe pas de % nous-mêmes.
+- Les chatières : le nombre, si ce n'est pas noté.
+
+### Calcul et vente
+- Le type de tuile dépend de la région : pas de type par défaut.
+- Vente à la pièce.
+- Tuiles de rive : longueur de rive ÷ pureau, en 2 lignes séparées (rive
+  gauche et rive droite, ce ne sont pas les mêmes pièces).
+
+### Jamais d'office
+- Rien qui ne soit ni demandé ni au devis. Tuiles de rive et chatières
+  passent en Suggestion si elles ne sont pas au devis.
+
+### Points ouverts
+- Tuile canal (courant et couvert : une ou deux lignes, quel ratio) : le
+  fondateur ne sait pas, à vérifier chez les fabricants puis à faire valider.
+- Fixation des tuiles : voir le thème Fixations.
+
 ## Liteaux et voliges
 
 - Liteau : sapin par défaut, l'essence est facultative (ne pas la demander).
