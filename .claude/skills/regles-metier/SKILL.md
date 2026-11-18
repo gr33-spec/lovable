@@ -213,3 +213,14 @@ couvert ici, demander au fondateur plutôt que deviner.
   colliers…) : en Suggestion. Si l'artisan coche → deux cases : sa
   description, puis le nombre. On ne calcule rien.
 - Clous d'ardoise et pointes : voir Ardoise et Liteaux (en Suggestion).
+
+## Chutes et pertes
+
+- La perte est affichée à l'artisan et modifiable par lui (ex. :
+  « 520 ardoises, dont 5 % de perte »).
+- Pièces vendues en longueur (zinc façonné 2 m, gouttière 4 m, descente
+  2 m) : l'arrondi à la longueur de vente suffit, pas de % en plus.
+- Quantité donnée par l'artisan lui-même : on n'ajoute jamais de perte.
+- Taux de référence : ardoise 5 % (toit simple) / 10 % (toit compliqué) ;
+  faîtage, rives, noues, closoir 5 % ; écran 10 %. Tuile, liteau, volige :
+  demandés à l'artisan.
