@@ -398,7 +398,19 @@ test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche 
           return { nom: (l.textContent ?? "").trim().slice(0, 20), affiche: b.width > 0 && b.height > 0 && getComputedStyle(l).visibility !== "hidden", sansParent: (l as HTMLElement).offsetParent === null };
         }),
       );
-    await expect.poll(async () => (await affiches()).filter((l) => l.affiche).length, { message: `liens du menu : ${JSON.stringify(await affiches())}` }).toBeGreaterThan(2);
+    // Sous charge (série complète, machine lente), le menu a mis plus de 5 s à revenir après le changement de thème :
+    // on lui laisse 20 s, et le message d'échec dit l'état relevé au dernier essai, pas celui d'avant l'attente.
+    let dernier: unknown[] = [];
+    await expect
+      .poll(async () => {
+        const liens = await affiches();
+        dernier = liens;
+        return liens.filter((l) => l.affiche).length;
+      }, { message: "liens du menu", timeout: 20_000 })
+      .toBeGreaterThan(2)
+      .catch((e: unknown) => {
+        throw new Error(`${String(e)}\nliens du menu au dernier essai : ${JSON.stringify(dernier)}`);
+      });
     const ratios = await nav.getByRole("link").evaluateAll((liens) => {
       // N'importe quelle couleur CSS (rgb, oklab, color-mix) ramenée en [r, g, b, a] par un pixel de canevas.
       const toile = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
