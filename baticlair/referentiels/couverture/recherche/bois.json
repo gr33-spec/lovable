@@ -182,7 +182,7 @@
       "regions": [
         "national"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "Greystones Slate (fabricant d'ardoise espagnole), Guide de mise en œuvre France : tableau section des liteaux et des voliges (reprise de l'ancien NF DTU 40.11)",
@@ -197,9 +197,16 @@
           "type": "guide",
           "extrait": "en Bretagne essentiellement, on peut fixer les ardoises avec des crochets sur un voligeage jointif ; liteaux entre 40 x 15 et 50 x 27 mm",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Cupa Pizarras (fabricant d'ardoise), centre de ressources, FAQ « Section des liteaux et des voliges » (sur cupapizarras.com, non datée)",
+          "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/section-liteaux-et-voliges/",
+          "type": "fabricant",
+          "extrait": "Liteaux 18x50 : 0,70 / 0,65 / 0,60 / 0,55 ; voliges 18x100 : 0,90 / 0,85 / 0,75 / 0,70 (80 / 100 / 150 / 200 daN/m²)",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "Tableau d'un fabricant qui reprend l'ancien DTU 40.11 ; les tableaux 1 et 2 de l'édition 2020 n'ont pas pu être lus (images). Le guide Culture confirme seulement la plage 40×15 à 50×27 mm. 18×38/18×40 ne figure pas dans ce tableau : par interpolation de raideur il tiendrait environ 0,50 m entre appuis (calcul BatiClair, non sourcé)."
+      "ecart": "Greystones et Cupa Pizarras, deux fabricants indépendants, publient le même tableau (toutes les cases relues à 150 daN/m², et 15×38 / 18×50 / 25×50 à 80 daN/m²). Aucun des deux ne date l'édition du DTU : c'est le tableau de l'ancien NF DTU 40.11 ; les tableaux 1 et 2 de l'édition 2020 n'ont toujours pas été lus."
     },
     {
       "id": "liteau_18x40_portee_tuile_plate",
@@ -634,7 +641,7 @@
           "consulte": "2026-11-19"
         }
       ],
-      "raison": "Botte non publiée par Quéguiner, Tanguy, Bretagne Matériaux. À demander au comptoir."
+      "raison": "Botte non publiée par Quéguiner, Tanguy, Bretagne Matériaux. À demander au comptoir. Deuxième passe : rien de plus en Bretagne ; en grande surface nationale, le 27×40 de 4 m se vend par paquet de 12 (Mr Bricolage), comme chez Piveteaubois."
     },
     {
       "id": "liteau_ml_par_m2",
@@ -804,7 +811,7 @@
       "regions": [
         "national"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
@@ -819,9 +826,23 @@
           "type": "negoce",
           "extrait": "Chevrons : 63 x 75 - 75 x 75 - 75 x 110 ; Liteaux : 20 x 38 - 27 x 38 - 27 x 32 - 32 x 32 - 38 x 38 ; * sections disponibles suivant régions",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/fiches_technique/siplast/ft_sup_air.pdf",
+          "type": "fabricant",
+          "extrait": "contre-lattage avec des liteaux (épaisseur mini 20 mm)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson, notice de pose écrans HPV R2 et R3 Elos (cite le NF DTU 40.29)",
+          "url": "https://cdn.chausson.fr/catalog-document/275307c5-3c1e-4582-8b26-779c1e457d40/elos-20-20notice-20de-20pose-20-c3-a9crans-20sous-20toitures.pdf",
+          "type": "negoce",
+          "extrait": "La contre-latte est de minimum : 2 cm d'épaisseur, 3,6 cm de largeur",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "20 mm : un fabricant citant le DTU 40.29 ; Chausson donne 27 mm mais pour le sarking."
+      "ecart": "Koramic et Siplast (deux fabricants citant le NF DTU 40.29) : 20 mm minimum ; largeur 36 mm minimum (notice Elos). 27 mm chez Chausson pour le sarking seulement."
     },
     {
       "id": "contre_liteau_au_droit_chevron",
@@ -836,7 +857,7 @@
       "regions": [
         "national"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "NF DTU 40.11 P1-1 (déc. 2020), §4.2.1 (voligeage, liteaunage, sections, appuis), copie en ligne non officielle ; tableaux 1 et 2 en image, non lisibles",
@@ -844,9 +865,23 @@
           "type": "dtu",
           "extrait": "jointif : écartement moyen des voliges entre 5 et 10 mm ; appui mini 35 mm ; tableaux valables pour résineux, pas pour le peuplier",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "pointes ou agrafes disposées dans les zones destinées à être recouvertes par les contre-lattes qui, elles, assureront la fixation définitive",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "La fixation définitive de l'écran sera assurée par un contre-lattage",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "Texte DTU (copie non officielle) ; aucune autre source lue ne le formule."
+      "ecart": "« Une file par chevron » : DTU 40.11 (copie) + guide Edilians. « Largeur du contre-liteau = largeur du chevron sous volige » : DTU seul."
     },
     {
       "id": "contre_liteau_sections_bretagne",
@@ -1227,7 +1262,7 @@
       "regions": [
         "national"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "Greystones Slate (fabricant d'ardoise espagnole), Guide de mise en œuvre France : tableau section des liteaux et des voliges (reprise de l'ancien NF DTU 40.11)",
@@ -1235,9 +1270,16 @@
           "type": "fabricant",
           "extrait": "Entraxe maximal des appuis (m) suivant la charge totale 80/100/150/200 daN/m² : 18x50 0.70 0.65 0.60 0.55 ; 18x100 (volige) 0.90 0.85 0.75 0.70",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Cupa Pizarras (fabricant d'ardoise), centre de ressources, FAQ « Section des liteaux et des voliges » (sur cupapizarras.com, non datée)",
+          "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/section-liteaux-et-voliges/",
+          "type": "fabricant",
+          "extrait": "Liteaux 18x50 : 0,70 / 0,65 / 0,60 / 0,55 ; voliges 18x100 : 0,90 / 0,85 / 0,75 / 0,70 (80 / 100 / 150 / 200 daN/m²)",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "Ancienne édition reprise par un fabricant ; édition 2020 non lue. Des blogs disent 22 mm dès 60 cm, sans source sérieuse."
+      "ecart": "Même tableau chez Greystones et Cupa Pizarras (toutes les valeurs à 150 et 200 daN/m² identiques). Édition du DTU non précisée par les deux ; édition 2020 non lue. Des blogs disent 22 mm dès 60 cm, sans source sérieuse."
     },
     {
       "id": "volige_clouage_ardoise",
@@ -1345,7 +1387,7 @@
       "regions": [
         "national"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "Larivière (spécialiste couverture, Angers, agences dans l'Ouest), Catalogue général 2010 p. 166, bois de couverture",
@@ -1353,8 +1395,16 @@
           "type": "negoce",
           "extrait": "Tous nos liteaux sont traités classe 2 ; Toutes nos voliges sont traitées au minimum classe 2 ; pin : 2, 2,40 et 3 ml",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "BRANZ (centre de recherche du bâtiment, Nouvelle-Zélande), « Why timber eats metal »",
+          "url": "https://www.branz.co.nz/design-build/articles/why-timber-eats-metal",
+          "type": "guide",
+          "extrait": "western red cedar and new oak can also emit acidic vapours that attack metals ; pH : red cedar 3,5, douglas 3,5-4,2, châtaignier et chêne 3,4-3,9",
+          "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "ecart": "Red cedar, douglas, chêne et châtaignier : deux sources (Larivière, BRANZ). Mélèze : Larivière seul. Pas de fiche VMZINC trouvée qui liste les essences."
     },
     {
       "id": "volige_traitement",
@@ -1838,6 +1888,37 @@
         }
       ],
       "ecart": "3,00 et 4,20 m sont confirmés (voliges, chevrons, liteaux 4,20). 3,70 m ne se trouve nulle part : la longueur du Nord voisine est 3,60 m. Les liteaux bretons sont surtout en 4,00 m."
+    },
+    {
+      "id": "planche_rive_bretagne",
+      "famille": "bois_couverture",
+      "sous_famille": "planche de rive",
+      "marque": null,
+      "modele": "sapin blanc du Nord (Silverwood, Protac)",
+      "attribut": "sections et longueurs vendues en Bretagne",
+      "valeur": [
+        "3,90",
+        "4,20",
+        "4,50",
+        "4,80",
+        "5,10"
+      ],
+      "unite": "m",
+      "condition": "20 × 145, 20 × 170, 20 × 220 mm ; bord droit ou 1 congé 1 rainure ; brut, non traité ou traité classe 3",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux, bandeaux et planches de rive bois (titres des fiches, lus via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/planche-de-rive-sapin-blanc-du-nord-brut-1-conge-rainure-traite-classe-3-vert-20x220mm-longueur-4-80m-ref-165184-A7103091",
+          "type": "negoce",
+          "extrait": "PLANCHE DE RIVE Sapin blanc du Nord brut 1 congé rainuré traité classe 3 vert 20x220mm longueur 4,80m - SILVERWOOD ; 20x145mm longueur 4,20 mètres - PROTAC",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Un seul négoce breton (deux fabricants) ; série du Nord au pas de 0,30 m. Les « 4 ou 5 m » du §6 ne sont pas vus en Bretagne."
     }
   ],
   "verdict_ratios": [
@@ -2227,9 +2308,17 @@
       "origine": "referentiel-couverture.md §6 ; charpente.md S6 (4 m)",
       "valeur_actuelle": "4 ou 5 m",
       "verdict": "a_confirmer",
-      "bonne_valeur": "",
-      "sources": [],
-      "explication": "Pas étudié dans cette recherche, faute de temps : à traiter."
+      "bonne_valeur": "Bretagne : 4,20 / 4,50 / 4,80 / 5,10 m (3,90 m existe), 20 × 145 à 20 × 220 mm, sapin du Nord",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux, bandeaux et planches de rive bois (titres des fiches, lus via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/planche-de-rive-sapin-blanc-du-nord-brut-1-conge-rainure-traite-classe-3-vert-20x220mm-longueur-4-80m-ref-165184-A7103091",
+          "type": "negoce",
+          "extrait": "PLANCHE DE RIVE Sapin blanc du Nord brut 1 congé rainuré traité classe 3 vert 20x220mm longueur 4,80m - SILVERWOOD ; 20x145mm longueur 4,20 mètres - PROTAC",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Une seule enseigne bretonne lue (Bretagne Matériaux) : les longueurs suivent la série du Nord, pas 4 / 5 m. À confirmer par un second comptoir."
     },
     {
       "ratio": "Section de liteau selon entraxe : 27×38 jusqu'à 60 cm, 27×50 à 90 cm, 38×38 au-delà",

@@ -52,11 +52,11 @@
       "attribut": "développé 28 (285 mm)",
       "valeur": 285,
       "unite": "mm",
-      "condition": "285 mm existe en moulurée (NedZink) et en PVC (Nicoll Ovation LG28) ; pas trouvé en demi-ronde zinc VMZINC France",
+      "condition": "demi-ronde de 28 : 280 mm (RHEINZINK, longueur standard 3 m) ou 285 mm (NedZink, catalogue belge) ; aussi en moulurée NedZink et en PVC (Nicoll LG28)",
       "regions": [
         "France"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "NedZink, catalogue France (feuilles, bobines, gouttières)",
@@ -64,9 +64,23 @@
           "type": "fabricant",
           "extrait": "NedZink NATUREL DVPT 285 … DVPT 333 (gouttière moulurée, angles, sorties)",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK, page produit gouttière demi-ronde (site du fabricant)",
+          "url": "https://www.rheinzink.com/products/roof-drainage/half-round-gutter/",
+          "type": "fabricant",
+          "extrait": "Standard nominal gutter sizes 250 / 280 / 333 / 400 / 500 ; Standard length 3.0 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NedZink, catalogue Belgique-France 2025, gouttières et accessoires (½ ronde)",
+          "url": "https://www.nedzink.com/wp-content/uploads/2026/02/catalogus-2025-befr_gouttieres-accessoires.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttière ½ ronde : Dvpt. 285, type 285, code GR2880",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "VMZINC France ne liste en demi-ronde que 160/250/330/400 ; le « 28 » est surtout une moulurée ou un PVC."
+      "ecart": "Le 28 existe en demi-ronde chez deux fabricants (280 RHEINZINK, 285 NedZink), surtout pour les marchés allemand et belge. Il n'est pas dans la gamme VMZINC France (160 / 250 / 330 / 400) ni dans les rayons des négoces bretons consultés (Quéguiner : T25, T33, T40). En Bretagne, 28 n'est pas un défaut : à garder seulement si le devis l'écrit."
     },
     {
       "id": "gouttiere_zinc_developpe_20",
@@ -368,7 +382,7 @@
         "Pays de la Loire",
         "France"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
@@ -397,9 +411,30 @@
           "type": "negoce",
           "extrait": "Naissance nantaise en zinc pour relier une gouttière de 33 à une descente de 100 (titre)",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Finistère), rayon gouttières zinc (liste des articles, pages 1 à 3)",
+          "url": "https://www.queguiner.fr/toiture/couverture/gouttieres/gouttieres-zinc",
+          "type": "negoce",
+          "extrait": "Gouttière zinc Nantaise Rheinzink - Naturel - ép. 0,65 mm - 4 ml - T33 ; Nantaise relevé de 8 Rheinzink - ép. 0,80 mm - 4 ml - T40",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux (Finistère), VMZ gouttière nantaise zinc naturel 333 × 0,65 R8 à pince 4m00",
+          "url": "https://www.tanguy.fr/couverture-etancheite/evacuation-pluviale/gouttiere-zinc/vmz-gouttiere-nantaise-zinc-naturel-333x065-r8-a-pince-4m00",
+          "type": "negoce",
+          "extrait": "VMZ GOUTTIERE NANTAISE ZINC NATUREL 333X0.65 R8 A PINCE 4M00 (titre de la fiche)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux, gouttière nantaise/laval de 33 avec pince, quartz-zinc, L. 4,00 m, H. 80 mm, ép. 0,65 mm, VMZINC (titre de la fiche, lu via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/gouttiere-nantaise-laval-dev-33-avec-pince-quartz-zinc-releve-A1120731",
+          "type": "negoce",
+          "extrait": "Gouttière nantaise/laval de 33 avec pince - quartz-zinc - L. 4,00 m - H. 80 mm - ép. 0,65 mm - VMZINC",
+          "consulte": "2026-11-19"
         }
       ],
-      "ecart": "Le même guide VMZINC donne 250/330 en en-tête et 333/400 dans le tableau des cotes : la gamme exacte est à faire dire par le négoce."
+      "ecart": "33 et 40 : deux fabricants (VMZINC, RHEINZINK) et trois négoces bretons (Tanguy, Quéguiner, Bretagne Matériaux), en 4 m. 25 : VMZINC seul, non vu en rayon en Bretagne."
     },
     {
       "id": "gouttiere_nantaise_33_longueur",
@@ -454,7 +489,7 @@
         "Pays de la Loire",
         "France"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
@@ -469,8 +504,30 @@
           "type": "fabricant",
           "extrait": "80 mm avec pince, 80 mm sans pince, 100 mm avec pince",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux (Finistère), VMZ gouttière nantaise zinc naturel 333 × 0,65 R8 à pince 4m00",
+          "url": "https://www.tanguy.fr/couverture-etancheite/evacuation-pluviale/gouttiere-zinc/vmz-gouttiere-nantaise-zinc-naturel-333x065-r8-a-pince-4m00",
+          "type": "negoce",
+          "extrait": "VMZ GOUTTIERE NANTAISE ZINC NATUREL 333X0.65 R8 A PINCE 4M00 (titre de la fiche)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Finistère), rayon gouttières zinc (liste des articles, pages 1 à 3)",
+          "url": "https://www.queguiner.fr/toiture/couverture/gouttieres/gouttieres-zinc",
+          "type": "negoce",
+          "extrait": "Gouttière zinc Nantaise Rheinzink - Naturel - ép. 0,65 mm - 4 ml - T33 ; Nantaise relevé de 8 Rheinzink - ép. 0,80 mm - 4 ml - T40",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux, gouttière nantaise/laval de 33 avec pince, quartz-zinc, L. 4,00 m, H. 80 mm, ép. 0,65 mm, VMZINC (titre de la fiche, lu via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/gouttiere-nantaise-laval-dev-33-avec-pince-quartz-zinc-releve-A1120731",
+          "type": "negoce",
+          "extrait": "Gouttière nantaise/laval de 33 avec pince - quartz-zinc - L. 4,00 m - H. 80 mm - ép. 0,65 mm - VMZINC",
+          "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "ecart": "80 mm : VMZINC et RHEINZINK, vendu en Bretagne (Tanguy « R8 », Quéguiner « relevé de 8 », Bretagne Matériaux « H. 80 mm »). 100 mm : VMZINC seul, non vu en rayon en Bretagne."
     },
     {
       "id": "gouttiere_nantaise_surface_selon_pente",
@@ -560,7 +617,7 @@
         "Normandie",
         "Pays de la Loire"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
@@ -568,9 +625,23 @@
           "type": "fabricant",
           "extrait": "Réalisation des doublis (parfois appelés bande à ourlet ou sous-goutte) … longueur … 2 m maximum … développé de 400 mm",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Finistère), rayon gouttières zinc (liste des articles, pages 1 à 3)",
+          "url": "https://www.queguiner.fr/toiture/couverture/gouttieres/gouttieres-zinc",
+          "type": "negoce",
+          "extrait": "Bande de doublis zinc - ép. 0,65 mm - dév 166 / 200 / 250 / 333 mm - 2 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux (Finistère), bandes de doublis zinc elZinc 166 / 200 / 250 / 330 × 0,65 et VMZ BO 180 / 250, toutes en 2,00 m",
+          "url": "https://www.tanguy.fr/couverture-etancheite/couverture-bardage-metallique/doublis-zinc/elzinc-bande-doublis-zinc-naturel-250x065-2m00",
+          "type": "negoce",
+          "extrait": "ELZINC BANDE DOUBLIS ZINC NATUREL 250X0,65 2M00 (titre de la fiche)",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "une seule source ; à faire valider par le fondateur (le doublis est-il toujours écrit au devis en Bretagne ?)"
+      "ecart": "Doublis vendu en 2 m dans les deux négoces bretons consultés (Quéguiner, Tanguy ; marques elZinc, VMZINC, RHEINZINK, Edilians). Reste au fondateur : le doublis est-il toujours écrit au devis en Bretagne ? (sinon, en Suggestion)."
     },
     {
       "id": "gouttiere_quimper",
@@ -582,7 +653,7 @@
       "regions": [
         "Bretagne"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
@@ -590,25 +661,41 @@
           "type": "fabricant",
           "extrait": "Gouttières Quimper VMZINC® : proche de celui de la gouttière nantaise, leur profil permet d'intégrer une planche en façade",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (même fiche chez Point.P), gouttière Quimper VMZINC zinc naturel (titre de la fiche, lu via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/gouttiere-quimper-zinc-naturel-0-65x400mm-longueur-4m-um-220021971-A6205849",
+          "type": "negoce",
+          "extrait": "Gouttière Quimper - zinc naturel - L. 4,00 m - H. 95 mm - ép. 0,65 mm VMZINC (réf. 0,65x400mm UM 220021971)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux, crochet équerre Quimper Frénéhard (titre de la fiche, lu via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/crochet-equerre-quimper-pour-gouttiere-nantaise-de-33-acier-gaf-feuillard-27x2-5mm-releve-8mm-A1714099",
+          "type": "negoce",
+          "extrait": "Crochet équerre Quimper pour gouttière nantaise de 33 - acier GAF - feuillard 27x2,5 mm - relevé 8 mm - FRENEHARD",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "développé et longueurs non trouvés ; existe en zinc naturel seulement (tableau gamme VMZINC)"
+      "condition": "VMZINC zinc naturel, ép. 0,65 mm, développé 400 mm, hauteur 95 mm, longueur 4 m ; crochet équerre propre (Frénéhard) ; se pose sur une bande de doublis",
+      "ecart": "Existence, zinc naturel et longueur 4 m : guide VMZINC + négoces bretons. Le développé 400 et la hauteur 95 mm ne sont lus que dans le titre de la fiche négoce de la référence VMZINC UM 220021971 (une seule source pour ces cotes)."
     },
     {
       "id": "gouttiere_bretagne_usage",
       "famille": "zinguerie",
       "sous_famille": "gouttière zinc",
-      "attribut": "profils courants en Bretagne",
+      "attribut": "profils vendus en Bretagne",
       "valeur": [
         "demi-ronde pendante 25 / 33",
-        "nantaise 33 (rampante)",
-        "Quimper"
+        "nantaise 33 / 40 (rampante, relevé 80)",
+        "Quimper",
+        "carrée 33"
       ],
       "unite": "liste",
       "regions": [
         "Bretagne"
       ],
-      "statut": "a_confirmer",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
@@ -623,9 +710,37 @@
           "type": "autre",
           "extrait": "crochets de la gouttière nantaise au-dessus des deux premiers rangs d'ardoise (résumé)",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Finistère), rayon gouttières zinc (liste des articles, pages 1 à 3)",
+          "url": "https://www.queguiner.fr/toiture/couverture/gouttieres/gouttieres-zinc",
+          "type": "negoce",
+          "extrait": "Gouttière zinc Nantaise Rheinzink - Naturel - ép. 0,65 mm - 4 ml - T33 ; Nantaise relevé de 8 Rheinzink - ép. 0,80 mm - 4 ml - T40",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux (Finistère), VMZ gouttière nantaise zinc naturel 333 × 0,65 R8 à pince 4m00",
+          "url": "https://www.tanguy.fr/couverture-etancheite/evacuation-pluviale/gouttiere-zinc/vmz-gouttiere-nantaise-zinc-naturel-333x065-r8-a-pince-4m00",
+          "type": "negoce",
+          "extrait": "VMZ GOUTTIERE NANTAISE ZINC NATUREL 333X0.65 R8 A PINCE 4M00 (titre de la fiche)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (même fiche chez Point.P), gouttière Quimper VMZINC zinc naturel (titre de la fiche, lu via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/gouttiere-quimper-zinc-naturel-0-65x400mm-longueur-4m-um-220021971-A6205849",
+          "type": "negoce",
+          "extrait": "Gouttière Quimper - zinc naturel - L. 4,00 m - H. 95 mm - ép. 0,65 mm VMZINC (réf. 0,65x400mm UM 220021971)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux, gouttières demi-rondes de 33 VMZINC, Amelux, HILD, L. 4 m (titres des fiches, lus via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/gouttiere-1-2-ronde-de-33-sans-pince-zinc-naturel-l-4-m-ep-0-80-mm-A1120706",
+          "type": "negoce",
+          "extrait": "Gouttière demi- ronde dev 33 zinc naturel longueur 4m épaisseur 0,80mm boud.14 sans pince - VMZINC",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "aucun négoce breton (Point P, Larivière, Réseau Pro…) n'a publié de gamme ou de longueurs en ligne ; à confirmer auprès du fondateur et d'un comptoir breton."
+      "ecart": "Les trois négoces bretons consultés vendent ces profils en 4 m. Ce qu'on vend ne dit pas ce qui est le plus posé : l'habitude locale reste à faire dire au fondateur ; le devis prime."
     },
     {
       "id": "crochet_gouttiere_pendante_entraxe_max",
@@ -728,7 +843,7 @@
         }
       ],
       "ecart": "VMZINC Belgique : 450 mm maximum (règles belges) ; Nicoll PVC : 0,60 m maximum (ATec) ; First Plast PVC : 50 cm.",
-      "raison": "le DTU 40.5 lie la réduction aux charges climatiques (neige surtout) sans chiffre public ; aucune source ne dit « 40 cm en bord de mer ». Les 2,5/m VMZINC valent pour le crochet discret PLUVIAZINC."
+      "raison": "le DTU 40.5 lie la réduction aux charges climatiques (neige surtout) sans chiffre public ; aucune source ne dit « 40 cm en bord de mer ». Les 2,5/m VMZINC valent pour le crochet discret PLUVIAZINC. Deuxième passe : aucune fiche fabricant ni guide ne donne 35 ou 40 cm pour la neige ou le bord de mer ; les fiches Frénéhard demandent un raidisseur ou un tirant neige pour les crochets légers, sans entraxe."
     },
     {
       "id": "crochet_gouttiere_pvc_entraxe",
@@ -1942,7 +2057,11 @@
           "consulte": "2026-11-19"
         }
       ],
-      "raison": "un seul fabricant (RHEINZINK) : 54 feuilles en 0,65 par palette de 500 kg, 87 feuilles en 0,80 par palette de 1 t ; 107 en 0,65 par tonne n'est qu'un calcul (1000 / 9,36)"
+      "raison": "un seul fabricant (RHEINZINK) : 54 feuilles en 0,65 par palette de 500 kg, 87 feuilles en 0,80 par palette de 1 t ; 107 en 0,65 par tonne n'est qu'un calcul (1000 / 9,36)",
+      "controle": [
+        "poids : 54 feuilles × 9,36 kg (0,65 mm) = 505 kg pour une palette annoncée de 500 kg ; 87 × 11,52 kg (0,80 mm) = 1 002 kg pour 1 t : cohérent",
+        "confirme_fabricant refusé : fiches RHEINZINK lues chez Samse et Richardson, pas sur le domaine du fabricant"
+      ]
     },
     {
       "id": "bandes_par_feuille",
@@ -2151,6 +2270,9 @@
           "extrait": "Longueur maxi (m) 12 m pour les chéneaux, 4 m pour les autres profils ; Développé maxi 1000 ; livraison sous 5 jours",
           "consulte": "2026-11-19"
         }
+      ],
+      "controle": [
+        "fiche sur vmzinc.com, mais brochure non datée : confirme_fabricant refusé (règle du fondateur : fiche officielle datée)"
       ]
     },
     {
@@ -2195,14 +2317,14 @@
       "famille": "zinguerie",
       "sous_famille": "étain à souder",
       "attribut": "baguette 33 % étain",
-      "valeur": 250,
+      "valeur": "200 à 250",
       "unite": "g",
       "condition": "facturé au kg en négoce (Nevax : unité de facturation kilogramme)",
       "regions": [
         "Bretagne",
         "France"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "Guilbert Express, fiche « Métaux d'apport, flux et accessoires pour la couverture » (diffusée par Descours & Cabaud)",
@@ -2217,9 +2339,23 @@
           "type": "fabricant",
           "extrait": "BAGUETTES D'ÉTAIN plomb demi-ronde 10x4mm / Longueur 0,45 m … 33%",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Metaconcept, fiche technique baguette META 33 (Sn33-Pb67)",
+          "url": "https://res.cloudinary.com/afdb/raw/upload/s--GF_vp9Kh--/v1/documents/162454_baguette_soudure_meta.pdf",
+          "type": "fabricant",
+          "extrait": "FE054994 Baguette META 33 Sn33 - Pb67 450 x 10 x 4 x 7 mm 10,01 183° - 243° 220 g",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Castolin / Nevax, fiche « Baguettes et targettes d'étain » (diffusée par Richardson), mention de poids",
+          "url": "https://www.richardson.fr/files/richardson/technical_document/f10/761178_t96555.pdf",
+          "type": "fabricant",
+          "extrait": "1 targette ~ 550 g - 1 baguette ~ 200 g ; dimensions et poids individuels non garantis",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "le titre 33 % et la forme baguette sont confirmés par deux fabricants ; le poids de 250 g n'est écrit que par Guilbert Express (Nevax donne la section 10 × 4 mm et la longueur 0,45 m, pas le poids)"
+      "ecart": "Guilbert Express ≈ 250 g, Metaconcept 220 g (450 × 10 × 4 mm), Nevax ≈ 200 g : même baguette demi-ronde de 0,45 m, poids indicatif. Vendue au kg ; Bretagne Matériaux affiche la META 33 de 220 g (résultat de recherche). La targette varie davantage : 550 g (Nevax), 780 à 800 g (Guilbert Express)."
     },
     {
       "id": "etain_targette",
@@ -2303,7 +2439,7 @@
       ],
       "statut": "a_confirmer",
       "sources": [],
-      "raison": "aucune source fabricant ou guide trouvée pour les 15 g par jonction ni les 60-80 g/ml du doc §25.3"
+      "raison": "aucune source fabricant ou guide trouvée pour les 15 g par jonction ni les 60-80 g/ml du doc §25.3 Deuxième passe : rien trouvé non plus chez Guilbert Express, Metaconcept, Nevax ni DALEP (seulement « consommation faible »)."
     },
     {
       "id": "decapant_zinc",
@@ -2320,7 +2456,7 @@
       "regions": [
         "France"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "Guilbert Express, fiche « Métaux d'apport, flux et accessoires pour la couverture » (diffusée par Descours & Cabaud)",
@@ -2328,9 +2464,79 @@
           "type": "fabricant",
           "extrait": "Flux pour métaux de couverture 320 ml ; 1 L ; 250 ml (2 passages sur Zinc-Quartz et Zinc-Prépatiné)",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "DALEP, fiche technique S39 Universel (flux décapant sans acide), v1.3 du 30/09/2024",
+          "url": "https://dalep.net/wp-content/uploads/produits_ft/ft-s-39-universel.pdf",
+          "type": "fabricant",
+          "extrait": "Soudure du Zinc, du Cuivre… ; Réf 1.04.0054.12 : Flacon de 320 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "elZinc, décapant pré-soudo-brasage pour elZinc Rainbow (fiche Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/decapant-pre-soudo-brasage-pour-surfaces-zinc-av-p127642755.html",
+          "type": "fabricant",
+          "extrait": "flacon de 320 ml (d'après la fiche, lue via moteur de recherche)",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "une seule source chiffrée ; la consommation (1 flacon pour 40 ml) n'a aucune source"
+      "ecart": "Formats confirmés par trois fabricants : 250 ml et 320 ml courants, 1 L chez Guilbert Express. La consommation (1 flacon pour combien de jonctions) n'a toujours aucune source."
+    },
+    {
+      "id": "zinguerie_longueurs_bretagne",
+      "famille": "zinguerie",
+      "sous_famille": "longueurs vendues",
+      "attribut": "longueurs vendues en Bretagne",
+      "valeur": {
+        "gouttiere": 4,
+        "tuyau_descente": 2,
+        "tuyau_descente_variante": 3,
+        "bandes_doublis_rive_egout_noue_faitage": 2
+      },
+      "unite": "m",
+      "condition": "zinc 0,65 mm (0,80 en nantaise de 40) ; naturel, quartz, anthra, Granum ; descentes Ø 60 / 80 / 100 et carrées 80 × 80",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Quéguiner Matériaux (Finistère), rayon gouttières zinc (liste des articles, pages 1 à 3)",
+          "url": "https://www.queguiner.fr/toiture/couverture/gouttieres/gouttieres-zinc",
+          "type": "negoce",
+          "extrait": "gouttières 4 ml ; tuyau de descente Ø 60 / 80 / 100 - 2 ml (Ø 80 aussi en 3 ml) ; bandes de doublis, rive, égout, noue - 2 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux (Finistère), VMZ gouttière nantaise zinc naturel 333 × 0,65 R8 à pince 4m00",
+          "url": "https://www.tanguy.fr/couverture-etancheite/evacuation-pluviale/gouttiere-zinc/vmz-gouttiere-nantaise-zinc-naturel-333x065-r8-a-pince-4m00",
+          "type": "negoce",
+          "extrait": "VMZ GOUTTIERE NANTAISE ZINC NATUREL 333X0.65 R8 A PINCE 4M00 (titre de la fiche)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux (Finistère), bandes de doublis zinc elZinc 166 / 200 / 250 / 330 × 0,65 et VMZ BO 180 / 250, toutes en 2,00 m",
+          "url": "https://www.tanguy.fr/couverture-etancheite/couverture-bardage-metallique/doublis-zinc/elzinc-bande-doublis-zinc-naturel-250x065-2m00",
+          "type": "negoce",
+          "extrait": "ELZINC BANDE DOUBLIS ZINC NATUREL 250X0,65 2M00 (titre de la fiche)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux, faîtages simples à ourlets VMZINC et RHEINZINK dév. 333 / 400, L. 2 m (titres des fiches, lus via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/faitage-simple-a-ourlet-de-14-zinc-naturel-devt-400mm-epaiss-0-65mm-long-2m-rz-1139089-A1121869",
+          "type": "negoce",
+          "extrait": "Faîtage simple à ourlet de 14 zinc naturel devt 400mm épaiss 0,65mm long 2m Réf. 11010207 - RHEINZINK",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux, gouttière nantaise/laval de 33 avec pince, quartz-zinc, L. 4,00 m, H. 80 mm, ép. 0,65 mm, VMZINC (titre de la fiche, lu via moteur de recherche)",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/gouttiere-nantaise-laval-dev-33-avec-pince-quartz-zinc-releve-A1120731",
+          "type": "negoce",
+          "extrait": "Gouttière nantaise/laval de 33 avec pince - quartz-zinc - L. 4,00 m - H. 80 mm - ép. 0,65 mm - VMZINC",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux), plusieurs marques (VMZINC, RHEINZINK, elZinc, Edilians, Amelux, HILD) : mêmes longueurs que la gamme nationale. Pas de pièce de 3 m vue en faîtage ni en bande. Comptoirs non consultés en ligne : Le Comptoir des Fers, Gédimat Bretagne, Asturienne (pas de catalogue lisible)."
     }
   ],
   "verdict_ratios": [
@@ -2866,7 +3072,7 @@
       "origine": "roofing.ts:3558 flacons_decapant ; §25.3",
       "valeur_actuelle": "1 flacon 250 ml",
       "verdict": "a_confirmer",
-      "bonne_valeur": "flacons 250 ml, 320 ml, 1 L existent ; consommation inconnue",
+      "bonne_valeur": "flacons de 250 ou 320 ml (1 L existe) : confirmé ; consommation inconnue",
       "sources": [
         {
           "titre": "Guilbert Express, fiche « Métaux d'apport, flux et accessoires pour la couverture » (diffusée par Descours & Cabaud)",
@@ -2874,9 +3080,16 @@
           "type": "fabricant",
           "extrait": "250 ml ; 320 ml ; 1 L",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "DALEP, fiche technique S39 Universel (flux décapant sans acide), v1.3 du 30/09/2024",
+          "url": "https://dalep.net/wp-content/uploads/produits_ft/ft-s-39-universel.pdf",
+          "type": "fabricant",
+          "extrait": "Soudure du Zinc, du Cuivre… ; Réf 1.04.0054.12 : Flacon de 320 ml",
+          "consulte": "2026-11-19"
         }
       ],
-      "explication": "Le format est confirmé par une source, la consommation par aucune."
+      "explication": "Format confirmé par trois fabricants (Guilbert Express, DALEP, elZinc) ; la consommation par aucune : à demander ou à laisser au choix de l'artisan."
     },
     {
       "ratio": "Joint de dilatation PVC tous les 12 m de ligne droite",
@@ -3013,7 +3226,7 @@
       "origine": "roofing.ts:476 DEVELOPPE_GOUTTIERE_PARAM",
       "valeur_actuelle": "25, 28, 33, 40",
       "verdict": "a_confirmer",
-      "bonne_valeur": "16, 25, 33, 40 confirmés ; 28 seulement moulurée / PVC",
+      "bonne_valeur": "16, 25, 33, 40 confirmés ; 28 existe en demi-ronde chez RHEINZINK (280) et NedZink (285), pas chez VMZINC France ni en rayon en Bretagne",
       "sources": [
         {
           "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
@@ -3028,9 +3241,23 @@
           "type": "fabricant",
           "extrait": "DVPT 285",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK, page produit gouttière demi-ronde (site du fabricant)",
+          "url": "https://www.rheinzink.com/products/roof-drainage/half-round-gutter/",
+          "type": "fabricant",
+          "extrait": "Standard nominal gutter sizes 250 / 280 / 333 / 400 / 500 ; Standard length 3.0 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NedZink, catalogue Belgique-France 2025, gouttières et accessoires (½ ronde)",
+          "url": "https://www.nedzink.com/wp-content/uploads/2026/02/catalogus-2025-befr_gouttieres-accessoires.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttière ½ ronde : Dvpt. 285, type 285, code GR2880",
+          "consulte": "2026-11-19"
         }
       ],
-      "explication": "Ajouter 16 ? garder 28 pour le PVC et la moulurée."
+      "explication": "Garder 28 dans la question seulement comme choix possible (devis), pas comme défaut ; en Bretagne, 25 et 33."
     },
     {
       "ratio": "Dauphin : 1 par descente, 1 m",

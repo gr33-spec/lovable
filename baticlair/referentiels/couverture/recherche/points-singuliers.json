@@ -805,8 +805,16 @@
       "unite": "kg/ml",
       "condition": "rive scellée, arêtier scellé, ruellée",
       "statut": "a_confirmer",
-      "sources": [],
-      "raison": "Aucune fiche ne donne une consommation propre aux rives ou aux arêtiers (seulement « au ml de faîtage »). Les 2-3 kg/ml (rive) et 6-10 kg/ml (arêtier) du référentiel §25.4 restent des valeurs du fondateur.",
+      "sources": [
+        {
+          "titre": "PRB, fiche technique Mortier bâtard du 18/04/2024",
+          "url": "https://pim.prb.fr/PRB/Fiches%20Techniques/fr/%281%29ft_prb_mortier_batard_fr_18_04_2024.pdf",
+          "type": "fabricant",
+          "extrait": "Scellement de tuiles faîtières et de rives ; Scellement de tuile : 12 à 25 kg/ml",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Deuxième passe : PRB donne 12 à 25 kg/ml pour le « scellement de tuile » (faîtières et rives, sans les séparer) ; Weber 5 à 10 kg/ml « de faîtage » pour le même usage. Aucune fiche ne chiffre la rive ou l'arêtier seuls, et les deux fabricants divergent du simple au double. Les 2-3 kg/ml (rive) et 6-10 kg/ml (arêtier) du §25.4 restent des valeurs du fondateur.",
       "famille": "points_singuliers",
       "regions": [
         "France"
@@ -919,8 +927,16 @@
       "unite": "u/ml",
       "condition": "pattes ou clous de faîtage zinc",
       "statut": "a_confirmer",
-      "sources": [],
-      "raison": "Aucune fiche fabricant ni guide trouvé ne donne un nombre de pattes au ml pour un faîtage ou une rive zinc (renvoi au DTU 40.41 sans valeur). Valeur du fondateur.",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §4.3.3, 4.5.3, 4.7.1",
+          "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf",
+          "type": "guide",
+          "extrait": "Le faîtage est façonné par éléments de 1 m […] À chaque jonction, des pattes soudées en sous-face et clouées dans le support assurent la fixation",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Le guide Culture (faîtage façonné en éléments de 1 m) met des pattes à chaque jonction et des crochets ou pattes sur les rives basses, sans nombre au ml. Aucune fiche fabricant ne chiffre les pattes au ml (renvoi au DTU 40.41). Valeur du fondateur.",
       "famille": "points_singuliers",
       "regions": [
         "France"
@@ -970,8 +986,16 @@
         "Bretagne"
       ],
       "statut": "a_confirmer",
-      "sources": [],
-      "raison": "Aucune source ne chiffre les ardoises d'un lignolet (rangs de rencontre doublés + rang débordant). À faire valider par un couvreur breton.",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §4.3.3, 4.5.3, 4.7.1",
+          "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf",
+          "type": "guide",
+          "extrait": "terminer la couverture de chaque versant par un rang constitué d'une ardoise entière et d'une ardoise de tête, l'un des rangs dépassant l'autre de 50 à 60 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Le guide Culture décrit le lignolet (sur chaque versant, un rang d'ardoises entières plus un rang d'ardoises de tête, deux clous par ardoise sur les deux derniers rangs) mais ne donne aucun nombre au ml. Par le calcul, ce serait environ 2 ardoises par largeur d'ardoise et par versant en plus des rangs courants, à faire valider par un couvreur breton : la règle « ml ÷ L × 1,2 » du §3 n'a aucune source.",
       "famille": "points_singuliers"
     },
     {
@@ -1229,7 +1253,7 @@
         "Bretagne",
         "France"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "CAPEB Hérault, calepin Couverture ardoises (illustrations NF DTU 40.11)",
@@ -1237,10 +1261,16 @@
           "type": "guide",
           "extrait": "Noue métallique ouverte … 6 cm minimum de recouvrement … Noue fermée à noquets … 1 noquet tous les 2 pureaux … pente minimale … 40 %",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §4.3.3, 4.5.3, 4.7.1",
+          "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf",
+          "type": "guide",
+          "extrait": "Les noquets sont placés tous les rangs si la pente est faible […] Ils sont placés tous les deux rangs si la pente est plus forte",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "Guide CAPEB illustrant le DTU 40.11 (texte DTU non consulté).",
-      "ecart": "Le §25.1 dit « 1 noquet par rang » ; la CAPEB dit 1 noquet tous les 2 pureaux en noue fermée : à trancher.",
+      "ecart": "Noquets : la CAPEB écrit 1 tous les 2 pureaux (cas général) ; le guide Culture précise : tous les deux rangs si la pente est forte ou la noue reçoit peu d'eau, tous les rangs si la pente est faible ou la noue reçoit beaucoup d'eau (limite indicative : 100 %, soit 45°). Le « 1 par rang » du §25.1 n'est donc que le cas faible pente.",
       "famille": "points_singuliers"
     },
     {
@@ -1283,7 +1313,7 @@
       "valeur": "zinc 0,6 mm, longueur 2 m, développé 166 mm",
       "unite": "",
       "condition": "évacuation de l'écran de sous-toiture à l'égout (DTU 40.29)",
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
@@ -1291,13 +1321,20 @@
           "type": "fabricant",
           "extrait": "Larmier Zinc 0,6 mm - Longueur 2 m Développé 166 mm … Conforme DTU 40.29",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Larmier : disponible en développé 166 mm, longueur 2 ml",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "Une seule fiche.",
       "famille": "points_singuliers",
       "regions": [
         "France"
-      ]
+      ],
+      "ecart": "Même larmier chez Terreal et Edilians : développé 166 mm, 2 m."
     },
     {
       "id": "bande_egout_doublis_zinc",
@@ -1372,7 +1409,7 @@
       "valeur": "tuiles, comble perdu sans écran : 1/5000 ; comble aménagé sans écran : 1/3000 ; avec écran ventilé en sous-face : 1/5000 au-dessus + 1/3000 sous l'écran ; ardoise comble perdu 1/5000, aménagé 1/3000",
       "unite": "de la surface projetée (tuiles)",
       "condition": "moitié en partie basse, moitié en partie haute ; DTU série 40.1 / 40.2 cités par la FFB",
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "FFB, dossier « La ventilation des couvertures en petits éléments »",
@@ -1380,10 +1417,16 @@
           "type": "guide",
           "extrait": "(résumé de la page, lue via un outil de synthèse) moitié à l'égout, moitié près du faîtage ; 1/5000 comble perdu, 1/3000 rampant isolé, + 1/3000 sous écran ventilé ; tuiles : surface projetée",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (diffusé par BigMat), calcul du nombre de chatières p. 29-31",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "Cas général (tuiles, ardoises) : V : 2 cm2 / m2 ; V1 : 2 cm2 / m2 ; V2 : 3.3 cm2 / m2 (surface projetée)",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "Guide FFB seul (texte DTU non consulté) ; les fiches closoirs renvoient aux « DTU de la série 40 » sans valeur.",
-      "ecart": "Le §28.5 ne retient que 1/3000 : c'est le cas comble aménagé ; en comble perdu le DTU demande 1/5000.",
+      "ecart": "Ubbink exprime les mêmes valeurs en cm² par m² de surface projetée : 2 cm²/m² = 1/5000 (comble perdu, ou au-dessus de l'écran), 3,3 cm²/m² = 1/3000 (sous rampant sans écran, ou sous l'écran). Le §28.5 ne retient que 1/3000.",
       "famille": "points_singuliers",
       "regions": [
         "France"
@@ -1699,8 +1742,16 @@
       "valeur_actuelle": "2-3 / 6-10 kg/ml",
       "verdict": "a_confirmer",
       "bonne_valeur": "aucune valeur publiée",
-      "sources": [],
-      "explication": "Les fiches ne chiffrent que le faîtage."
+      "sources": [
+        {
+          "titre": "PRB, fiche technique Mortier bâtard du 18/04/2024",
+          "url": "https://pim.prb.fr/PRB/Fiches%20Techniques/fr/%281%29ft_prb_mortier_batard_fr_18_04_2024.pdf",
+          "type": "fabricant",
+          "extrait": "Scellement de tuiles faîtières et de rives ; Scellement de tuile : 12 à 25 kg/ml",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Deuxième passe : PRB 12 à 25 kg/ml de scellement de tuile (faîtière ou rive), Weber 5 à 10 kg/ml de faîtage ; aucune valeur propre à la rive ou à l'arêtier."
     },
     {
       "ratio": "Noue façonnée en éléments de 2 m, longueur utile 1,85 m (recouvrement 15 cm)",
@@ -1979,18 +2030,25 @@
       "ratio": "Noquets : 1 par rang (noue, arêtier à noquets)",
       "origine": "referentiel-couverture.md §25.1",
       "valeur_actuelle": "1 par rang",
-      "verdict": "a_confirmer",
-      "bonne_valeur": "CAPEB : noue fermée à noquets, 1 noquet tous les 2 pureaux",
+      "verdict": "corrige",
+      "bonne_valeur": "1 tous les 2 rangs par défaut ; 1 par rang si la pente est faible (moins de 45° environ) ou si la noue reçoit beaucoup d'eau",
       "sources": [
         {
-          "titre": "CAPEB Hérault, calepin Couverture ardoises (illustrations NF DTU 40.11)",
+          "titre": "CAPEB Hérault, calepin de chantier Couvertures en ardoises (se réfère au NF DTU 40.11)",
           "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
           "type": "guide",
-          "extrait": "1 noquet tous les 2 pureaux",
+          "extrait": "Le noquet se place généralement tous les 2 rangs sous la demi-ardoise ; noue fermée : 1 noquet tous les 2 pureaux",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §4.3.3, 4.5.3, 4.7.1",
+          "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf",
+          "type": "guide",
+          "extrait": "Les noquets sont placés tous les rangs si la pente est faible […] Ils sont placés tous les deux rangs si la pente est plus forte",
           "consulte": "2026-11-19"
         }
       ],
-      "explication": "Les deux sources ne disent pas la même chose ; à faire trancher par un couvreur ardoisier."
+      "explication": "Deux guides concordent : le cas courant est un noquet tous les deux rangs. Le « 1 par rang » ne vaut qu'en faible pente ou en noue très chargée : à demander si la pente est sous 45°."
     },
     {
       "ratio": "Pattes de fixation de faîtage / arêtier zinc : 3/ml ; clous calotins bandes de rive 4/ml",

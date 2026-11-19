@@ -1,7 +1,7 @@
 # Bois de couverture : liteaux, contre-liteaux, voliges, chevrons
 
-Recherche du 19 novembre 2026. Les données sont dans `bois.json` : 42 entrées, 27 verdicts, 4 fiches de comptoir et la règle d'arrondi. Bretagne d'abord.
-Statuts des entrées : 29 `confirme`, 9 `une_source`, 4 `a_confirmer`.
+Recherche du 19 novembre 2026. Les données sont dans `bois.json` : 43 entrées, 27 verdicts, 4 fiches de comptoir et la règle d'arrondi. Bretagne d'abord.
+Statuts des entrées après la deuxième passe : 34 `confirme`, 5 `une_source`, 4 `a_confirmer` (avant : 29 / 9 / 4).
 
 Négoces bretons lus : **Bretagne Matériaux** (Saint-Gobain, même catalogue que Point.P), **Tanguy Matériaux** (Pleuven, 29),
 **Quéguiner Matériaux** (Finistère). Pour le reste de la France : Chausson (national), BigMat / Siat (national, scierie alsacienne), Houdard
@@ -100,7 +100,7 @@ Cette formule est une proposition BatiClair, à valider :
 | §6 : liteaux en botte de 50 ml, barres de 4 m | referentiel §6 | **corrige** | ml ; longueurs selon la région |
 | §6 : contre-liteaux 1,7 à 2,2 ml/m² | referentiel §6 | confirme | 1 / entraxe |
 | §6 : volige 15 ou 18 mm ; claire-voie × 0,6 | referentiel §6 | a_confirmer | 18 / 25 mm en Bretagne ; 0,6 non sourcé |
-| §6 et charpente.md : planche de rive en 4 ou 5 m | referentiel §6, S6 | a_confirmer | non étudié |
+| §6 et charpente.md : planche de rive en 4 ou 5 m | referentiel §6, S6 | a_confirmer | Bretagne Matériaux : 20 × 145 à 20 × 220, en 4,20 / 4,50 / 4,80 / 5,10 m (3,90 existe) ; une seule enseigne |
 | §28.6 : 27×38 jusqu'à 60 cm, 27×50 à 90 cm, 38×38 au-delà | referentiel §28.6 | **corrige** | tuile : 25×38 jusqu'à 60–70 cm ; à 90 cm, 32×38 ou 38×38 ; au-delà, calcul |
 | §28.6 : longueurs standard 3, 4, 5 m | referentiel §28.6 | **corrige** | séries France ou Nord selon la région |
 | §28.6 : ml = rangs × longueur | referentiel §28.6 | confirme | équivaut à surface / pureau |
@@ -122,12 +122,12 @@ Cette formule est une proposition BatiClair, à valider :
 
 ## 7. À confirmer
 
-- Les tableaux 1 et 2 du **NF DTU 40.11 (2020)**, sections de liteaux et de voliges d'ardoise : non lus (images). On a seulement l'ancien tableau
-  repris par Greystones. Avec ce tableau, un 18×38 est limite pour des chevrons à 60 cm (environ 0,50 m entre appuis, calcul non sourcé) et un
+- Les tableaux 1 et 2 du **NF DTU 40.11 (2020)**, sections de liteaux et de voliges d'ardoise : non lus (images). L'ancien tableau est
+  maintenant confirmé par deux fabricants (Greystones et Cupa Pizarras, mêmes valeurs), sans édition datée. Avec ce tableau, un 18×38 est limite pour des chevrons à 60 cm (environ 0,50 m entre appuis, calcul non sourcé) et un
   18×50 convient.
 - La botte en Bretagne, à demander au comptoir de Tanguy, de Quéguiner ou de Bretagne Matériaux.
 - Les longueurs en Champagne-Ardenne, Normandie, Pays de la Loire et Sud-Est : aucun négoce régional lisible.
-- Les pertes de 5 % (liteaux, voliges), le ratio claire-voie de 0,6, la largeur utile d'une volige mi-bois et la longueur des planches de rive.
+- Les pertes de 5 % (liteaux, voliges), le ratio claire-voie de 0,6 et la largeur utile d'une volige mi-bois (aucune source sérieuse en deuxième passe).
 - La section 60×80 en chevron : introuvable.
 
 ## 8. Décisions à trancher par le fondateur
@@ -140,3 +140,14 @@ Cette formule est une proposition BatiClair, à valider :
 4. Faut-il adopter la règle d'arrondi « longueur utile = multiple de l'entraxe » pour choisir la longueur proposée ?
 5. Ardoise en Bretagne : faut-il poser une question « sur liteaux ou sur volige jointive ? » quand le devis ne le dit pas ? La volige change
    toute la liste.
+
+## 9. Deuxième passe (19 novembre 2026)
+
+- **Confirmés en plus (5)** : tableaux de l'ancien DTU 40.11 pour liteaux et voliges (Greystones + Cupa Pizarras) ; contre-liteau de
+  20 mm minimum (Koramic + Siplast, NF DTU 40.29) ; une file de contre-liteaux par chevron (DTU + Edilians) ; essences à éviter sous
+  le zinc (Larivière + BRANZ ; le mélèze reste à une source).
+- **Nouveau** : planches de rive en Bretagne (une enseigne, `une_source`).
+- **Reste** : botte en Bretagne (aucun négoce ne la publie ; en grande surface, 27 × 40 de 4 m par paquet de 12) ; pertes de 5 % ;
+  longueurs de Champagne-Ardenne, Normandie, Pays de la Loire et Sud-Est (aucun négoce régional lisible en ligne) ; chevron 60 × 80
+  (introuvable) ; claire-voie × 0,6 ; portée du 18 × 40 sous tuile plate (Koramic seul) ; volige de 22-27 mm pour l'ardoise au clou
+  (guide Culture seul) ; chevrons du Nord (Quéguiner seul).

@@ -2,7 +2,8 @@
 
 Données complètes, sources et extraits dans `ecrans-etancheite.json`. Ce fichier n'est pas lu par le moteur.
 
-**42 entrées** (23 écrans, 19 étanchéité) : 24 confirmées (57 %), 13 à une source, 5 à confirmer.
+**42 entrées** (23 écrans, 19 étanchéité) : après la deuxième passe, 26 confirmées, 12 à une source, 4 à confirmer
+(avant : 24 / 13 / 5).
 **33 verdicts** sur les ratios existants : 13 confirmés, 9 corrigés, 11 à confirmer. **10 fiches comptoir.**
 
 Les textes des NF DTU n'ont pas été lus. Leurs valeurs sont prises dans des guides et des fiches qui les citent
@@ -17,7 +18,7 @@ Les textes des NF DTU n'ont pas été lus. Leurs valeurs sont prises dans des gu
 | Écran à bandes adhésives intégrées | 10 cm à toutes les pentes | confirmé |
 | About de lé (au droit d'un chevron) | 10 cm | confirmé |
 | Retournement au faîtage | 20 cm (≤ 30 %), 30 cm (> 30 %) chez Edilians ; 20 cm chez Siplast | une source, écart |
-| **Consommation d'écran** | **1,10 à 1,20 m²/m² selon la pente** | une source (deux fiches Siplast), recoupée par le calcul |
+| **Consommation d'écran** | **1,10 à 1,20 m²/m² selon la pente** | une source (deux fiches Siplast), recoupée par le calcul ; aucune autre marque ne publie de consommation (Edilians, Dörken, Ubbink, Tyvek, Monier cherchés) |
 | Rouleau | 1,50 × 50 m = 75 m² (toutes les marques pro) ; 1,50 × 100 m (Monier) ; 30 m² en GSB | confirmé |
 | HPV | Sd ≤ 0,18 m ; au contact de l'isolant : Sd1 (≤ 0,10 m) | confirmé |
 | Classe mécanique | TR1 45 cm, R2 60 cm, R3 90 cm d'entraxe | confirmé |
@@ -25,7 +26,8 @@ Les textes des NF DTU n'ont pas été lus. Leurs valeurs sont prises dans des gu
 | Pose | tendue, avec contre-lattage obligatoire ; la pose en auget est interdite | confirmé |
 | Contre-liteau | au moins 20 × 36 mm, traité classe 2, un par chevron | confirmé |
 | Adhésif | 60 mm × 25 m (Dörken Multi-Band) ; ≈ 0,71 ml/m² (> 30 %), 0,77 (≤ 30 %) | rouleau confirmé, ratio calculé |
-| Pare-vapeur | Sd ≥ 18 m ; 1,50 × 50 m ou 3 × 25 m | Sd confirmé, format à une source |
+| Pare-vapeur | Sd ≥ 18 m ; 1,50 × 50 m = 75 m² (Dörken, Edilians Vapeo Stop) ; 3 × 25 m (Dörken), 2,80 × 50 m (Edilians) | confirmé |
+| Larmier d'égout | zinc, développé 166 mm, 2 m (Edilians, Terreal) | confirmé |
 
 **Le calcul, tranché par les sources.** Le code compte seulement le recouvrement entre lés :
 1,50 ÷ 1,40 = ×1,071, et 1,50 ÷ 1,30 = ×1,154. Il oublie trois choses : le retournement au faîtage (20 à 30 cm par
@@ -51,7 +53,8 @@ Ils sont trop courts à 30 % et moins (tuile canal, faible pente), où il faut e
 | Équerre de renfort | 0,25 m, rouleau de 10 m (33 cm si l'isolant dépasse 130 mm) | confirmé |
 | Recouvrements seuls (calcul) | ×1,08 sur la partie courante, hors chutes et relevés | calculé |
 | Gravillons | 4 cm | une source |
-| EPDM, PVC, pare-vapeur V-Gard, évacuations (EEP) | voir le JSON | à confirmer |
+| PVC Soprema Flagon SV | 2,10 × 20 m = 42 m² (extrait de la fiche Soprema, serveur en 503 : non lue) | une source |
+| EPDM, pare-vapeur V-Gard, évacuations (EEP) | voir le JSON | à confirmer |
 
 ## 3. Verdicts sur l'existant (les principaux)
 
@@ -103,3 +106,13 @@ Ils sont trop courts à 30 % et moins (tuile canal, faible pente), où il faut e
 4. **Tiroir étanchéité.** Quel format par défaut pour la sous-couche (7 m² ou 7,5 m²) ? Le format de l'isolant
    devient-il une question du comptoir ?
 5. **Relevés.** Les compter à part (ml × développé) au lieu de les mettre dans le ×1,12.
+
+## 6. Deuxième passe (19 novembre 2026) : ce qui reste
+
+- **Consommation d'écran 1,10-1,20 m²/m²** : toujours Siplast seul. Les autres fabricants donnent les recouvrements, pas une
+  consommation. Le calcul sur les recouvrements DTU confirmés retrouve la plage.
+- **À confirmer (4)** : about de lé soudé ; V-Gard (surface ambiguë) ; EPDM (formats selon le pays, colle de 2,35 à 12 m²/l) ;
+  évacuations EEP (tableau FFB réservé, DTU non lu).
+- **Sans source** (verdicts) : bouteille de gaz par m², perte isolant 3 %, pare-vapeur × 1,15.
+- **Une source, fabricant seul** : formats Siplast et Soprema lus chez des négoces (Samse, Quincaillerie Angles) ; le
+  `confirme_fabricant` demande la fiche datée sur le domaine du fabricant, non retrouvée (siplast.fr, lotus.soprema.fr en 503).

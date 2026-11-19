@@ -1,7 +1,8 @@
 # Zinguerie et évacuation des eaux pluviales : résumé de la recherche (19 novembre 2026)
 
-Données complètes et sources : `zinguerie.json` (66 entrées, 33 verdicts, 17 fiches comptoir).
-Statuts : 44 confirmées (au moins deux sources indépendantes), 18 à une seule source, 4 à confirmer.
+Données complètes et sources : `zinguerie.json` (67 entrées, 33 verdicts, 17 fiches comptoir).
+Statuts après la deuxième passe : 53 confirmées (au moins deux sources indépendantes), 11 à une seule source, 3 à confirmer
+(avant : 44 / 18 / 4).
 
 Sources principales : guide et dossier technique VMZINC « Collecte des eaux pluviales », catalogue VMZINC
 2022-2023 (PLUVIAZINC), fiches RHEINZINK (diffusées par Samse et Richardson), catalogue NedZink, elZinc joint
@@ -17,7 +18,10 @@ Metaconcept. Les textes AFNOR n'ont pas été lus : les valeurs DTU viennent des
 | Longueur gouttière (zinc, PVC) | 4 m ; 2 m et 6 m existent | confirmé |
 | Épaisseur | 0,65 mm (0,80 existe) | confirmé |
 | Finitions zinc | naturel, Quartz-Zinc, Anthra-Zinc, Pigmento, bilaqué (PLUVIAZINC : Quartz-Zinc seulement) | confirmé |
-| Nantaise de 33 | longueur 4 m, relevé 80 ou 100 mm | confirmé (relevé : une source) |
+| Nantaise de 33 et de 40 | longueur 4 m, relevé 80 mm (VMZINC, RHEINZINK, vendue chez Tanguy, Quéguiner, Bretagne Matériaux) ; relevé 100 mm chez VMZINC seul | confirmé |
+| Quimper | VMZINC zinc naturel, 0,65 mm, développé 400, hauteur 95 mm, 4 m (cotes lues sur une seule fiche négoce) | confirmé |
+| Développé 28 en demi-ronde | existe chez RHEINZINK (280) et NedZink (285), pas chez VMZINC France ni en rayon en Bretagne | confirmé |
+| Doublis (bande à ourlet) | 2 m, développés 166 à 333 (Quéguiner, Tanguy ; elZinc, VMZINC, RHEINZINK) | confirmé |
 | Crochets, gouttière pendante | 0,50 m maximum (DTU 40.5), à réduire selon les charges climatiques ; 0,40 m pour une gouttière à l'anglaise | confirmé |
 | Dilatation, gouttière zinc | 12 m maximum sans dispositif (DTU 40.5) | confirmé |
 | Dilatation, gouttière PVC | 12 m maximum par naissance ou entre deux dispositifs | confirmé |
@@ -35,7 +39,8 @@ Metaconcept. Les textes AFNOR n'ont pas été lus : les valeurs DTU viennent des
 | Bobineau | 500 / 650 / 1 000 mm × 17 / 21 / 31 m | confirmé (40 m en 500 : à confirmer) |
 | Bobine joint debout | 500 → entraxe 430 ; 650 → 580 ; 3 pattes par mètre de joint | confirmé |
 | Bandes façonnées et faîtage zinc | longueurs de **2 m** (VMZINC plie jusqu'à 4 m sur mesure) | confirmé |
-| Étain | 33 % pour le zinc ; baguette d'environ 250 g (une source), targette 800 g, vendu au kg, carton de 25 kg | confirmé |
+| Étain | 33 % pour le zinc ; baguette de 200 à 250 g (Guilbert Express, Metaconcept, Nevax), targette 550 à 800 g, vendu au kg, carton de 25 kg | confirmé |
+| Décapant | flacons de 250 ou 320 ml, 1 L existe (Guilbert Express, DALEP, elZinc) ; consommation sans source | confirmé (format) |
 
 ## Verdict sur les ratios existants
 
@@ -56,16 +61,19 @@ angles, naissances, jonctions ; coudes 72° / 67°.
 - Gouttière zinc sans dilatation dans le code : 12 m maximum (DTU) ; à proposer en Suggestion seulement.
 
 **À confirmer (7).** 40 cm en bord de mer (aucune source ne le lie au littoral ; le DTU parle des charges
-climatiques, surtout la neige) ; 2,5 crochets/m (gamme PLUVIAZINC seulement) ; pattes 3/m pour les bandes (2 à 4/m
-selon les sources) ; 15 g d'étain par jonction ; 1 flacon de décapant ; développé 28 (moulurée ou PVC, pas en
-demi-ronde zinc VMZINC) ; marge × 1,05 alors que le skill dit « l'arrondi suffit ».
+climatiques, surtout la neige ; deuxième passe : toujours rien) ; 2,5 crochets/m (gamme PLUVIAZINC seulement) ; pattes 3/m
+pour les bandes (2 à 4/m selon les sources ; le guide Culture met des pattes à chaque jonction, sans nombre au ml) ;
+15 g d'étain par jonction (aucune source) ; 1 flacon de décapant (format confirmé, consommation sans source) ; développé 28
+(existe en demi-ronde RHEINZINK 280 et NedZink 285, mais ni chez VMZINC France ni en Bretagne : pas un défaut) ;
+marge × 1,05 alors que le skill dit « l'arrondi suffit » (aucune source externe : décision du fondateur).
 
 ## Bretagne
 
 - La demi-ronde pendante de 25 et 33 est le profil courant (VMZINC : « idéales en région de plaine ou bord de mer »).
 - Nantaise de 33 (rampante, sur ardoise) : sa capacité baisse fortement avec la pente du toit (relevé 80 mm : 35 m² à 27°, 15 m² à 45°). Elle demande une **bande de doublis** (2 m maximum), et le couvreur façonne talons et retours.
-- VMZINC fait aussi une gouttière **Quimper**, en zinc naturel, proche de la nantaise (développé non trouvé).
-- Aucun négoce breton (Point P, Larivière, Réseau Pro…) ne publie sa gamme en ligne : les longueurs vendues en Bretagne restent à faire confirmer par un comptoir.
+- VMZINC fait aussi une gouttière **Quimper**, en zinc naturel, proche de la nantaise : développé 400, hauteur 95 mm, 4 m (Bretagne Matériaux, Point.P), avec son crochet équerre (Frénéhard).
+- **Longueurs vendues en Bretagne** (Quéguiner, Tanguy, Bretagne Matériaux, lus en ligne) : gouttières en 4 m, tuyaux de descente en 2 m (3 m existe en Ø 80), bandes (doublis, rive, égout, noue, faîtage) en 2 m. Aucune pièce de 3 m vue en faîtage ni en bande. Profils en rayon : demi-ronde 25 et 33, nantaise 33 (0,65) et 40 (0,80), Quimper, carrée.
+- Non consultés (pas de catalogue lisible en ligne) : Le Comptoir des Fers, Gédimat Bretagne, Asturienne. Ce qu'on vend ne dit pas ce qui est le plus posé : l'habitude locale reste à faire dire au fondateur.
 
 ## Ce que le vendeur demande (résumé)
 
@@ -88,3 +96,12 @@ demi-ronde zinc VMZINC) ; marge × 1,05 alors que le skill dit « l'arrondi suff
 7. Ajouter le développé 16 ; garder 28 seulement pour le PVC et la moulurée ?
 8. Nantaise : la bande de doublis est-elle toujours écrite au devis en Bretagne ? (sinon, en Suggestion)
 9. Dilatation de la gouttière zinc au-delà de 12 m : en Suggestion ?
+
+## Deuxième passe (19 novembre 2026) : ce qui reste
+
+- **À confirmer (3)** : gouttière de 20 (aucune fiche) ; 40 cm de crochets en bord de mer ou en neige (aucune valeur chiffrée
+  publiée) ; consommation d'étain par jonction.
+- **Une source (11)** : surfaces desservies par la nantaise selon la pente, havraise, talons façonnés (guide VMZINC seul) ;
+  premier crochet PVC (deux fabricants, deux valeurs différentes) ; gouttière PVC Nicoll ; aluminium DAL'ALU (continue 15 m,
+  crochets) ; acier galva ; autres formats de feuille ; palette RHEINZINK (cohérente par le calcul, mais fiche lue chez un
+  négoce : pas de `confirme_fabricant`) ; pliage VMZINC 4 m (fiche sur vmzinc.com mais non datée : pas de `confirme_fabricant`).

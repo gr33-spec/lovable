@@ -1,7 +1,7 @@
 # Points singuliers : faîtage, arêtier, rives, égout, noues, ventilation
 
 Recherche du 19 novembre 2026. Les données sont dans `points-singuliers.json` : 47 entrées, 25 verdicts, 14 fiches comptoir.
-Statuts des entrées : 30 `confirme`, 13 `une_source`, 4 `a_confirmer`.
+Statuts des entrées après la deuxième passe : 33 `confirme`, 10 `une_source`, 4 `a_confirmer` (avant : 30 / 13 / 4).
 Le moteur ne lit rien de ce dossier. Tout passe par la validation du fondateur.
 
 Sources principales : BMI Monier (closoirs Metalroll, Figaroll Plus, Dryroll), Ubbink (catalogue ventilation, Airtec), Terreal
@@ -19,13 +19,15 @@ viennent de ces guides.
   (Edilians, VMZINC). Je n'ai trouvé de pièce de 3 m pour le faîtage chez aucun fabricant.
 - **Faîtière Armor.** Elle mesure 37 cm d'après le titre d'une fiche de négoce. Le nombre au ml n'est publié nulle part : il faut
   le demander à Edilians.
-- **Lignolet.** Le nombre d'ardoises au ml n'est sourcé nulle part. La règle « ml ÷ L × 1,2 » du §3 est `a_confirmer`.
+- **Lignolet.** Le guide Culture le décrit (sur chaque versant, un rang d'ardoises entières et un rang d'ardoises de tête, l'un
+  dépassant l'autre de 50 à 60 mm) sans donner de nombre au ml. La règle « ml ÷ L × 1,2 » du §3 reste `a_confirmer`.
 - **Rive.** On pose un rang d'ardoises entières alterné de demi-ardoises, sur un chevron de rive en saillie. La demi-ardoise
   prend 1 clou de tête et 1 clou de milieu, l'entière 1 clou de tête et 1 crochet (CAPEB). L'expression « rive à approche » ne
   figure dans aucune source écrite que j'ai consultée. La bande de rive zinc existe en plusieurs profils (biseau, à cheval,
   astragale, à pli, lyonnaise), en longueurs de 2 m.
 - **Noues.** Trois types : noue métallique ouverte (sur voligeage, recouvrement de l'ardoise d'au moins 6 cm), noue fermée à
-  noquets (pente d'au moins 40 %, 1 noquet tous les 2 pureaux) et noue ronde en ardoise. Edilians vend une noue à pinces en
+  noquets (pente d'au moins 40 %) et noue ronde en ardoise (CAPEB et guide Culture : confirmé). **Noquets** : 1 tous les 2 rangs
+  dans le cas courant ; 1 par rang si la pente est faible (sous 45° environ) ou si la noue reçoit beaucoup d'eau (guide Culture). Edilians vend une noue à pinces en
   développé 250, 333 ou 400, en 2 ou 3 m.
 - **Chatière ardoise.** Ubbink VEPAC : 70 ou 140 cm².
 
@@ -45,17 +47,19 @@ viennent de ces guides.
 | Rencontre 3 ou 4 branches | 1 par jonction entre le faîtage et les arêtiers | confirme |
 | Tuile de rive | 1 ÷ pureau : 2,6 à 2,8/ml en grand moule, 4,6 à 5/ml en tuile plate, une ligne gauche et une ligne droite | confirme / une_source |
 | Mortier de faîtage scellé | 5 à 10 kg/ml (Weber, VPI) ; PRB jusqu'à 20 kg/ml ; sac de 25 kg, palette de 48 sacs (56 chez VPI) | confirme |
-| Mortier de rive ou d'arêtier | aucune valeur publiée | a_confirmer |
+| Mortier de rive ou d'arêtier | PRB : 12 à 25 kg/ml de « scellement de tuile » (faîtière ou rive) ; Weber : 5 à 10 kg/ml de faîtage ; rien de propre à la rive | a_confirmer |
 | Mortier de solin | 1,5 à 2 kg/ml (Technichem seulement, solin mur-sol) | une_source |
 | Noue préformée | 400 ou 500 mm, en 2 m (et 3 m en zinc naturel chez VMZINC) ; NOOK : recouvrement de 15 cm, donc 1,85 m utiles | confirme / une_source |
 | Peigne ou closoir d'égout | barres de 1 m | confirme |
 | Doublis, bande d'égout, larmier | pièces de 2 m, développé de 100 à 400 mm | confirme |
-| Ventilation | 1/5000 en comble perdu, 1/3000 en comble aménagé, plus 1/3000 sous un écran ventilé ; moitié en bas, moitié en haut | une_source (FFB) |
+| Ventilation | 1/5000 en comble perdu, 1/3000 en comble aménagé, plus 1/3000 sous un écran ventilé ; moitié en bas, moitié en haut | confirme (FFB, Ubbink : 2 et 3,3 cm²/m²) |
+| Larmier sous écran | zinc, développé 166 mm, 2 m | confirme (Terreal, Edilians) |
 | Tuile chatière | 13 à 55 cm² selon le modèle | confirme |
 
 ## Verdicts sur les ratios existants
 
-- **Corrigés (10).**
+- **Corrigés (11).**
+  - Noquets « 1 par rang » : 1 tous les 2 rangs par défaut, 1 par rang seulement en faible pente ou en noue très chargée (CAPEB, guide Culture).
   - Faîtière à 2,9/ml : passer à 3/ml par défaut, ou à la valeur du modèle.
   - Abouts à 2 par faîtage : 1 par pignon.
   - Closoir d'arêtier de 23 cm : c'est le même closoir que le faîtage, choisi selon le galbe.
@@ -70,7 +74,7 @@ viennent de ces guides.
 - **Confirmés (7).** Closoir en rouleau de 5 m (bon défaut, d'autres longueurs existent) ; 1 clip par faîtière ; mortier de
   faîtage de 5 à 10 kg/ml (8 par défaut) ; noue NOOK de 1,85 m utiles ; peigne en barres de 1 m ; palette de 48 sacs ; jamais
   de mortier et de closoir ensemble sur le même faîtage.
-- **À confirmer (8).**
+- **À confirmer (7).**
   - Mortier de solin à 2 kg/ml : une seule source, et le chiffre Remmers à 1,7 kg/ml n'a pas été retrouvé.
   - Mortier de rive et d'arêtier.
   - Noue de 50 par défaut : sur ardoise, le catalogue propose 250, 333 ou 400 ; le bouton « de 66 » ne correspond à aucune
@@ -78,7 +82,6 @@ viennent de ces guides.
   - Les + 5 % du skill sur le closoir, les rives et les noues : aucune source, et risque de double compte avec la longueur
     utile de 1,85 m.
   - Coupes comptées dans la perte du toit ou en plus-values (§25.1).
-  - Noquets : 1 par rang ou 1 tous les 2 pureaux.
   - Pattes et clous de zinc : 3 et 4 au ml.
 
 ## Décisions à trancher par le fondateur
@@ -106,3 +109,13 @@ viennent de ces guides.
 - **Mortier.** La teinte et le nombre de sacs de 25 kg.
 - **Peigne d'égout.** La hauteur et la couleur, en barres de 1 m.
 - **Chatière et tuile à douille.** Le modèle de tuile, le diamètre et la teinte.
+
+## Deuxième passe (19 novembre 2026) : ce qui reste
+
+- **À confirmer (4)** : nombre de faîtières Armor au ml (aucune fiche Edilians ne le publie) ; mortier de rive et d'arêtier
+  (deux fabricants divergents, aucun chiffre propre à la rive) ; pattes de faîtage zinc au ml (le guide Culture dit « à chaque
+  jonction » sans nombre) ; ardoises du lignolet au ml.
+- **Une source (10)** : faîtière demi-ronde de 50 à 2/ml (toujours Monier seul, fiches lues chez des négoces) ; closoir rigide
+  Terreal ; conditionnement des supports de lisse ; abouts (déduit des gammes) ; mortier de solin ; rive de tuile plate ;
+  recouvrement NOOK 15 cm ; noue à pinces Edilians ; ventilation linéaire Ubbink ; chatière ardoise VEPAC.
+- Les + 5 % sur closoir, rives et noues : toujours aucune source.

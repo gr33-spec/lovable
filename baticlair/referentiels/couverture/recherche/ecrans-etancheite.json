@@ -237,7 +237,7 @@
         }
       ],
       "ecart": "Deux fiches du même fabricant (une seule source). Recoupement géométrique (calcul BatiClair sur les recouvrements DTU confirmés) : lé 1,50 m − 10 cm → 1,50/1,40 = 1,071 ; − 20 cm → 1,50/1,30 = 1,154 ; + retournement au faîtage 20-30 cm par versant, débord à l'égout, abouts 10 cm tous les 50 m : on retrouve 1,10 (forte pente) à 1,20 (faible pente).",
-      "raison": "Pas de seconde source indépendante qui chiffre la consommation au m²."
+      "raison": "Pas de seconde source indépendante qui chiffre la consommation au m². Deuxième passe : rien trouvé chez Edilians (Apneo 3, Aero 2), Dörken, Ubbink, Tyvek (brochures), Rockwool ni Chausson ; ces fiches donnent les recouvrements, pas une consommation au m². Le recoupement reste le calcul."
     },
     {
       "id": "ecran_rouleau_150x50",
@@ -639,7 +639,7 @@
       "regions": [
         "France"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
@@ -647,9 +647,16 @@
           "type": "fabricant",
           "extrait": "Larmier : disponible en développé 166 mm, longueur 2 ml",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal (diffusée par Chausson), accessoires",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Larmier Zinc 0,6 mm - Longueur 2 m Développé 166 mm … Conforme DTU 40.29",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "Format d'un seul fabricant ; l'obligation d'une bande rigide est citée par Edilians d'après le DTU 40.29."
+      "ecart": "Même larmier chez Edilians et Terreal : développé 166 mm, 2 m."
     },
     {
       "id": "adhesif_ecran_rouleau",
@@ -747,11 +754,11 @@
       "attribut": "format de rouleau",
       "valeur": 75,
       "unite": "m²",
-      "condition": "1,50 × 50 m ; aussi 3,00 × 25 m",
+      "condition": "1,50 × 50 m = 75 m² (Dörken, Edilians) ; aussi 3,00 × 25 m (Dörken) et 2,80 × 50 m (Edilians)",
       "regions": [
         "France"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "Dörken, fiches DELTA-REFLEX / REFLEX PLUS (diffusées par Samse, n° 72813)",
@@ -759,9 +766,16 @@
           "type": "fabricant",
           "extrait": "1,50 m x 50 m ( sans mandrin ) ; 3,00 m x 25 m ( avec mandrin )",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique VAPEO STOP (mise en page 05-2024), sur edilians.com",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_vapeo_stop.pdf",
+          "type": "fabricant",
+          "extrait": "VAPEO STOP 078834 1,5 × 50 m, 7 kg, 75 m² ; VAPEO STOP 2,8 : 2,8 × 50 m, 140 m² ; 24 rouleaux par palette",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "Un seul fabricant consulté pour le pare-vapeur de toiture en pente."
+      "ecart": "Deux fabricants indépendants donnent le même rouleau de 75 m² ; le grand format change selon la marque."
     },
     {
       "id": "bitume_recouvrement_longitudinal",
@@ -1315,7 +1329,7 @@
       "regions": [
         "France"
       ],
-      "statut": "a_confirmer",
+      "statut": "une_source",
       "sources": [
         {
           "titre": "docs/referentiels/etancheur.md (référentiel interne, non revérifié)",
@@ -1323,9 +1337,19 @@
           "type": "autre",
           "extrait": "20 × 2,10 m (utile 2,05) … 5 cm long. et transv.",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche technique BETF WPSIT0056.b FLAGON SV (lotus.soprema.fr, domaine du fabricant)",
+          "url": "https://lotus.soprema.fr/www/reftechsop.nsf/($AllByUNID)/BB8DE0D8C0BB4384C1258382002D9EC6/$File/BETF-WPSIT0056.b-EN%20FLAGON%20SV.pdf",
+          "type": "fabricant",
+          "extrait": "Length of the roll (m) 20 (25) 20 20 20 ; Width of the roll (m) 2,10 (extrait de recherche ; serveur en erreur 503 à la lecture)",
+          "consulte": "2026-11-19"
         }
       ],
-      "raison": "Repris d'etancheur.md (fiches WPSIT0056 / 0051) sans revérification dans cette mission."
+      "raison": "Format 2,10 × 20 m = 42 m² (14 rouleaux par palette) vu dans l'extrait de la fiche Soprema et dans une fiche Soprema suisse (42 m² par rouleau), deux documents du même fabricant, non téléchargés (503) : une seule source, et confirme_fabricant impossible sans lire la fiche datée.",
+      "controle": [
+        "calcul : 2,10 × 20 = 42 m² ; fiche non lue directement (serveur Soprema en 503), donc pas de confirme_fabricant"
+      ]
     },
     {
       "id": "bitume_conso_geometrique",
