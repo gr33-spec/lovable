@@ -155,122 +155,137 @@ def classe_cote(x, y):
     return "nord"              # Atlantique jusqu'à Lorient, Manche, mer du Nord
 
 
-def charge_cote(base_tch, base_ltm, pas=100.0):
-    """Trait de côte Histolitt découpé aux limites transversales de la mer (SHOM).
-
-    Renvoie (points mer par classe, points d'estuaire, anneaux d'îles)."""
-    recs, geoms = read_dbf(base_tch + ".dbf"), read_shp(base_tch + ".shp")
-    key = lambda p: (round(p[0]), round(p[1]))
+def _composantes(edges):
     parent = {}
 
     def find(a):
+        if a not in parent:
+            return None
         while parent[a] != a:
             parent[a] = parent[parent[a]]
             a = parent[a]
         return a
+    for a, b in edges:
+        parent.setdefault(a, a); parent.setdefault(b, b)
+    for a, b in edges:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+    return find
+
+
+def _echantillonne(a, b, pas):
+    L = math.hypot(a[0] - b[0], a[1] - b[1])
+    n = max(1, int(L // pas))
+    return [(a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n) for k in range(n)]
+
+
+def charge_rives(base_tch, pas=100.0):
+    """Trait de côte Histolitt (SHOM/IGN), estuaires et rias compris : toutes les rives salées.
+
+    Sert à la situation exposée (littoral sur 5 km, estuaires, îles). Renvoie (points, îles)."""
+    key = lambda p: (round(p[0]), round(p[1]))
+    edges = [(key(part[i]), key(part[i + 1])) for g in read_shp(base_tch + ".shp")
+             for part in g for i in range(len(part) - 1)]
+    find = _composantes(edges)
+    length, deg, comp_edges = collections.Counter(), collections.Counter(), collections.defaultdict(list)
+    for a, b in edges:
+        c = find(a)
+        length[c] += math.hypot(a[0] - b[0], a[1] - b[1])
+        deg[a] += 1; deg[b] += 1
+        comp_edges[c].append((a, b))
+    iles = []   # anneaux fermés de moins de 300 km = îles
+    for c, es in comp_edges.items():
+        if length[c] > 300000 or length[c] < 300:
+            continue
+        nodes = {p for e in es for p in e}
+        if not all(deg[p] == 2 for p in nodes):
+            continue
+        adj = collections.defaultdict(list)
+        for a, b in es:
+            adj[a].append(b); adj[b].append(a)
+        start = es[0][0]; ring = [start]; prev, cur = None, start
+        while len(ring) <= len(nodes) + 2:
+            nx = adj[cur][0] if adj[cur][0] != prev else adj[cur][1]
+            prev, cur = cur, nx
+            ring.append(cur)
+            if cur == start:
+                break
+        xs = [p[0] for p in ring]; ys = [p[1] for p in ring]
+        iles.append(((min(xs), min(ys), max(xs), max(ys)), ring))
+    pts = [p for a, b in edges for p in _echantillonne(a, b, pas)]
+    return pts, iles
+
+
+def charge_cote_generale(base_ne, base_ltm, mairies, pas=250.0):
+    """Côte générale Natural Earth 1:10 M, à l'échelle de la carte du DTU, coupée à l'entrée des
+    estuaires par les limites transversales de la mer (arcs du SHOM).
+
+    Le côté amont d'une coupure est celui qui a le plus de mairies à moins de 15 km (la terre) ;
+    les morceaux de côte de ce côté sont des rives d'estuaire, pas « la côte ».
+    Renvoie (points mer par classe nord / sud / med, points d'estuaire, nombre de coupures utiles)."""
+    key = lambda p: (round(p[0]), round(p[1]))
     edges = []
-    for g in geoms:
+    for g in read_shp(base_ne + ".shp"):
         for part in g:
-            for i in range(len(part) - 1):
-                edges.append((key(part[i]), key(part[i + 1])))
-    # coupures : arcs LTM (segments) et points LTM (disque de rayon adapté)
+            pts = [key(l93(lon, lat)) for lon, lat in part if -6.5 <= lon <= 10.5 and 41.0 <= lat <= 51.6]
+            edges += [(a, b) for a, b in zip(pts, pts[1:]) if math.hypot(a[0] - b[0], a[1] - b[1]) < 50000]
     cuts = []
     for g in read_shp(base_ltm + "_arc.shp"):
         for part in g:
-            for i in range(len(part) - 1):
-                (x1, y1), (x2, y2) = part[i], part[i + 1]
-                dx, dy = x2 - x1, y2 - y1
-                L = math.hypot(dx, dy) or 1
-                ext = 30.0 / L      # prolonge de 30 m pour toucher les deux rives
-                cuts.append(("seg", (x1 - dx * ext, y1 - dy * ext), (x2 + dx * ext, y2 + dy * ext)))
-    allv = list({p for e in edges for p in e})
-    gv = Grid(allv, 2000.0)
-    for g in read_shp(base_ltm + "_point.shp"):
-        x, y = g[0][0]
-        d, _ = gv.nearest(x, y, 3000)
-        if d is not None:
-            cuts.append(("disk", (x, y), min(1500.0, 2.0 * d + 60.0)))
-    # index des coupures par case
-    cutgrid = collections.defaultdict(list)
-    for ci, c in enumerate(cuts):
-        if c[0] == "seg":
-            xs, ys = (c[1][0], c[2][0]), (c[1][1], c[2][1])
-            r = 0
-        else:
-            xs, ys, r = (c[1][0],), (c[1][1],), c[2]
-        for i in range(int((min(xs) - r) // 2000), int((max(xs) + r) // 2000) + 1):
-            for j in range(int((min(ys) - r) // 2000), int((max(ys) + r) // 2000) + 1):
-                cutgrid[(i, j)].append(ci)
+            (x1, y1), (x2, y2) = part[0], part[-1]
+            dx, dy = x2 - x1, y2 - y1
+            L = math.hypot(dx, dy) or 1.0
+            ext = (1500.0 if L > 1000 else 600.0) / L   # la côte générale peut s'écarter d'un km
+            cuts.append(((x1 - dx * ext, y1 - dy * ext), (x2 + dx * ext, y2 + dy * ext)))
     kept, touch = [], collections.defaultdict(set)
     for a, b in edges:
-        cand = set(cutgrid.get((int(a[0] // 2000), int(a[1] // 2000)), ())) | set(
-            cutgrid.get((int(b[0] // 2000), int(b[1] // 2000)), ()))
         hit = None
-        for ci in cand:
-            c = cuts[ci]
-            if c[0] == "seg" and seg_inter(a, b, c[1], c[2]):
-                hit = ci; break
-            if c[0] == "disk" and dist_seg(c[1], a, b) <= c[2]:
+        for ci, (p, q) in enumerate(cuts):
+            if max(a[0], b[0]) < min(p[0], q[0]) or min(a[0], b[0]) > max(p[0], q[0]) or \
+               max(a[1], b[1]) < min(p[1], q[1]) or min(a[1], b[1]) > max(p[1], q[1]):
+                continue
+            if seg_inter(a, b, p, q):
                 hit = ci; break
         if hit is None:
             kept.append((a, b))
         else:
             touch[hit].update((a, b))
+    find = _composantes(kept)
+    comp_v = collections.defaultdict(list)
     for a, b in kept:
-        parent.setdefault(a, a); parent.setdefault(b, b)
-    for p in allv:
-        parent.setdefault(p, p)
-    for a, b in kept:
-        ra, rb = find(a), find(b)
-        if ra != rb:
-            parent[ra] = rb
-    length, deg = collections.Counter(), collections.Counter()
-    for a, b in kept:
-        length[find(a)] += math.hypot(a[0] - b[0], a[1] - b[1])
-        deg[a] += 1; deg[b] += 1
-    estuaire = set()
+        comp_v[find(a)].append(a)
+    mg = Grid(mairies, 5000.0)
+    estuaire, utiles = set(), 0
     for ci, pts in touch.items():
-        comps = {find(p) for p in pts}
+        (p, q) = cuts[ci]
+        mx, my = (p[0] + q[0]) / 2, (p[1] + q[1]) / 2
+        nx, ny = -(q[1] - p[1]), q[0] - p[0]
+        nl = math.hypot(nx, ny) or 1.0
+        side = lambda v: ((v[0] - mx) * nx + (v[1] - my) * ny) / nl
+        plus = moins = 0
+        for i in range(int((mx - 15000) // 5000), int((mx + 15000) // 5000) + 1):
+            for j in range(int((my - 15000) // 5000), int((my + 15000) // 5000) + 1):
+                for v in mg.g.get((i, j), ()):
+                    if math.hypot(v[0] - mx, v[1] - my) <= 15000 and abs(side(v)) > 300:
+                        plus += side(v) > 0; moins += side(v) < 0
+        amont = 1 if plus > moins else -1
+        comps = {c for c in (find(v) for v in pts) if c is not None and comp_v.get(c)}
         if len(comps) < 2:
             continue
-        mer = max(comps, key=lambda c: length[c])
-        estuaire.update(c for c in comps if c != mer)
-    # Une composante d'estuaire très longue serait une erreur de topologie : on la garde en mer.
-    estuaire = {c for c in estuaire if length[c] < 400000}
-    # anneaux fermés courts = îles (pour la situation « île »)
-    comp_pts = collections.defaultdict(list)
-    for a, b in kept:
-        comp_pts[find(a)].append((a, b))
-    iles = []
-    for c, es in comp_pts.items():
-        if c in estuaire or length[c] > 300000 or length[c] < 300:
-            continue
-        nodes = {p for e in es for p in e}
-        if all(deg[p] == 2 for p in nodes):
-            adj = collections.defaultdict(list)
-            for a, b in es:
-                adj[a].append(b); adj[b].append(a)
-            start = es[0][0]; ring = [start]; prev, cur = None, start
-            while True:
-                nx = adj[cur][0] if adj[cur][0] != prev else adj[cur][1]
-                prev, cur = cur, nx
-                ring.append(cur)
-                if cur == start or len(ring) > len(nodes) + 2:
-                    break
-            xs = [p[0] for p in ring]; ys = [p[1] for p in ring]
-            iles.append(((min(xs), min(ys), max(xs), max(ys)), ring, length[c]))
-    # points échantillonnés tous les `pas` mètres
+        utiles += 1
+        for c in comps:
+            proches = [v for v in comp_v[c] if math.hypot(v[0] - mx, v[1] - my) < 6000] or comp_v[c]
+            moy = sum(side(v) for v in proches) / len(proches)
+            if moy * amont > 0:
+                estuaire.add(c)
     mer = {"nord": [], "sud": [], "med": []}
-    est_pts = []
+    est = []
     for a, b in kept:
-        c = find(a)
-        L = math.hypot(a[0] - b[0], a[1] - b[1])
-        n = max(1, int(L // pas))
-        for k in range(n):
-            t = k / n
-            p = (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
-            (est_pts if c in estuaire else mer[classe_cote(*p)]).append(p)
-    return mer, est_pts, iles, len(cuts)
+        e = find(a) in estuaire
+        for v in _echantillonne(a, b, pas):
+            (est if e else mer[classe_cote(*v)]).append(v)
+    return mer, est, utiles
 
 
 # ---------------------------------------------------------------- vent / neige
@@ -344,7 +359,7 @@ def zone_alti(z):
 
 def main():
     ap = argparse.ArgumentParser()
-    for a in ("communes", "trait-cote", "ltm", "alti-ign", "regions", "sortie"):
+    for a in ("communes", "trait-cote", "cote-generale", "ltm", "alti-ign", "regions", "sortie"):
         ap.add_argument("--" + a, required=True)
     for a in ("polygones", "littoral-bzh", "cog-2011", "mvt", "departements"):
         ap.add_argument("--" + a)
@@ -359,11 +374,15 @@ def main():
     regions = json.load(open(o.regions, encoding="utf-8"))
     print("communes", len(rows), file=sys.stderr)
 
-    mer, est, iles, ncuts = charge_cote(o.trait_cote, o.ltm)
+    toutes = [r for r in csv.DictReader(open(o.communes, encoding="utf-8")) if r["latitude_mairie"]]
+    mairies = [l93(float(r["longitude_mairie"]), float(r["latitude_mairie"])) for r in toutes]
+    mer, est, ncuts = charge_cote_generale(o.cote_generale, o.ltm, mairies)
     gm = {k: Grid(v) for k, v in mer.items()}
     ge = Grid(est)
-    print("côte", {k: len(v) for k, v in mer.items()}, "estuaire", len(est), "îles", len(iles),
-          "coupures LTM", ncuts, file=sys.stderr)
+    rives, iles = charge_rives(o.trait_cote)
+    gr = Grid(rives, 2000.0)
+    print("côte générale", {k: len(v) for k, v in mer.items()}, "estuaires", len(est), "îles", len(iles),
+          "coupures LTM utiles", ncuts, file=sys.stderr)
 
     polys = {}
     if o.polygones:
@@ -400,9 +419,10 @@ def main():
         dn, _ = gm["nord"].nearest(x, y)
         ds, _ = gm["sud"].nearest(x, y)
         dmed, _ = gm["med"].nearest(x, y)
-        de, _ = ge.nearest(x, y, 20000)
+        de, _ = ge.nearest(x, y, 30000)
+        dr, _ = gr.nearest(x, y, 30000)
         km = lambda d: None if d is None else round(d / 1000, 1)
-        dn, ds, dmed, de = km(dn), km(ds), km(dmed), km(de)
+        dn, ds, dmed, de, dr = km(dn), km(ds), km(dmed), km(de), km(dr)
         dmer = min([d for d in (dn, ds, dmed) if d is not None], default=None)
         # distance minimale du territoire communal (pour repérer les communes à cheval)
         dn_min = ds_min = None
@@ -417,12 +437,19 @@ def main():
             dn_min = km(bn) if bn < float("inf") else None
             ds_min = km(bs) if bs < float("inf") else None
         z_ign = alti.get(c)
+        if z_ign is not None and z_ign < -50:   # valeur hors grille renvoyée par le service
+            z_ign = None
         f2 = lambda v: float(v) if v not in ("", None) else None
         zmoy, zmin, zmax = f2(r["altitude_moyenne"]), f2(r["altitude_minimale"]), f2(r["altitude_maximale"])
         z = z_ign if z_ign is not None else zmoy
         flags, statut = [], "calcule"
 
         zc, rc = zone_cote(dn, ds)
+        for d, seuil in ((dn, 20), (dn, 40), (ds, 20)):
+            if d is not None and abs(d - seuil) <= 2:
+                flags.append("à %.1f km de la côte, à moins de 2 km de la limite des %d km (côte générale au 1:10 M)" % (d, seuil))
+                statut = "limite"
+                break
         za, ra = zone_alti(z)
         zt = max(zc, za or 1)
         regle_t = [rc, ra + (" (mairie, IGN RGE ALTI)" if z_ign is not None else " (moyenne communale)")]
@@ -469,14 +496,14 @@ def main():
 
         # situation exposée probable
         expo = []
-        if dmer is not None and dmer <= 5:
-            expo.append("littoral à %.1f km (<= 5 km)" % dmer)
-        for (bx0, by0, bx1, by1), ring, L in iles:
+        if dmer is not None and dmer <= 5 and dr is not None and dr <= 5:
+            expo.append("littoral à %.1f km (<= 5 km)" % dr)
+        for (bx0, by0, bx1, by1), ring in iles:
             if bx0 <= x <= bx1 and by0 <= y <= by1 and point_in_ring(x, y, ring):
                 expo.append("île")
                 break
-        if de is not None and de <= 5:
-            expo.append("estuaire à %.1f km (amont de la limite transversale de la mer)" % de)
+        if de is not None and dr is not None and dr <= 3 and (dmer is None or dmer > 5) and de <= 25:
+            expo.append("rive d'estuaire ou de ria à %.1f km (en amont de la limite transversale de la mer)" % dr)
         lit = litt.get(c)
 
         # vent
@@ -518,8 +545,8 @@ def main():
                          "retenue_m": z, "source": "mairie : IGN RGE ALTI (service data.geopf.fr) ; min/moy/max : data.gouv « communes-france-2026 »"},
             "distance_mer_km": {"cote_nord": dn, "cote_sud": ds, "mediterranee": dmed, "plus_proche": dmer,
                                 "cote_nord_territoire_min": dn_min, "cote_sud_territoire_min": ds_min,
-                                "estuaire": de,
-                                "source": "mairie -> trait de côte Histolitt (SHOM/IGN) coupé aux limites transversales de la mer (SHOM)"},
+                                "rive_salee_histolitt": dr, "estuaire": de,
+                                "source": "mairie -> côte générale Natural Earth 1:10 M coupée aux limites transversales de la mer (SHOM) pour les bandes de 20 / 40 km ; rive salée : trait de côte Histolitt (SHOM/IGN), estuaires compris, pour la situation exposée"},
             "littoral": {"riveraine_mer_ou_estuaire": lit if lit else ("non" if o.littoral_bzh and dep in ("22", "29", "35", "56") else None),
                          "source": "DREAL Bretagne, communes littorales au titre de la loi Littoral" if dep in ("22", "29", "35", "56") else None,
                          "littoral_5km": dmer is not None and dmer <= 5},
