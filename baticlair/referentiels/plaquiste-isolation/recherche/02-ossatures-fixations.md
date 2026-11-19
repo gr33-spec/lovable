@@ -12,6 +12,105 @@ Abréviations : [S1], [S2]… renvoient à la liste « Sources » en fin de fich
 
 ---
 
+## A. Profilés : dimensions, épaisseurs, longueurs commerciales, unités de vente
+
+Lecture clé pour le moteur : chez Placo (la marque la plus courante en négoce), le montant est vendu en
+« bot10L » = botte de 10 longueurs ; la longueur du nom (« M 48/259 ») est en cm et vaut hauteur − 1 cm
+(2,49 / 2,59 / 2,69 / 2,79 / 2,99 …), d'où le choix « plus petite longueur ≥ hauteur sous plafond − 1 cm ».
+Les longueurs « rondes » 2,50 / 2,60 / 2,70 / 2,80 / 3,00 m existent surtout en marques négoce / GSB (lots de 10).
+Plusieurs négoces (Chausson) affichent un prix au mètre linéaire avec équivalent à la pièce : la commande
+se passe toujours en pièces (ou bottes) d'une longueur donnée.
+
+### A.1 Placo (Saint-Gobain), gamme Stil — fiches produit Placo « mise à jour le 18/12/23 » ou « 24/09/24 »
+
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+|---|---|---|---|---|---|---|
+| Rail Stil R 48 : épaisseur acier | 0,53 | mm | fiche Placo R 48 (18/12/23) hébergée par Samse [S10] et Matériaux Naturels [S11], c. 19/11/2026 | La Plateforme réf. 8224 [S12] (0,53) ; extrait moteur Placo | confirmé (2 sources) | |
+| Rail Stil R 48 : longueur commerciale | 3,00 (stock J+2) ; 2,60 et 0,96 sur demande | m | [S10] | Point.P « Rail Stil R 48 L. 3 m » [S13] ; Dispano [S13] | confirmé (2 sources) | pas de rail 4 m chez Placo |
+| Rail R 48 : conditionnement | botte de 10 (bot10L) ; palette 480 pièces | — | [S10] | piste interne (botte de 10 ; palette 480) ; GSB « lot de 10 rails R48 3 m » [S14] | confirmé (2 sources) | |
+| Rail R 48 : poids | 1,31 kg la barre de 3 m (0,43 kg/ml) | kg | [S10] | La Plateforme [S12] 1,31 kg | confirmé (2 sources) | |
+| Rail Stil R 62 : épaisseur / longueur / botte | 0,53 mm ; 3,00 m ; bot10L | — | extrait moteur fiche Placo R 62 (MAJ 19/06/26) [S15] | — | 1 source | |
+| Rail Stil R 70, R 90, R 100 : longueur | 3,00 | m | Point.P / BigMat / SFIC « Rail Stil R 90 – L. 3 m », « R 100 – L. 3 m » [S16] | extrait placo.fr R 100 « bot10L », palette 320 [S16] | confirmé (2 sources) | épaisseur R 70/90/100 : à confirmer (fiche non lue ; 0,53 probable) |
+| Montant Stil M 48 : épaisseur | 0,59 | mm | fiche Placo M 48 (18/12/23) [S17] | Chausson M48 (0,59 mm) [S18] | confirmé (2 sources) | âme 46,5 mm, ailes 35 mm |
+| Montant Stil M 48 : poids | 0,57 | kg/ml | [S17] | Chausson : 1,93 kg en 3,39 m (=0,57) [S18] | confirmé (2 sources) | |
+| Montant Stil M 48 : longueurs (stock J+2) | 2,49 – 2,59 – 2,69 – 2,79 – 2,99 – 3,19 – 3,59 – 3,99 | m | [S17] | Chausson (2,99/3,19/3,39/3,59/3,99) [S18] ; SFIC 2,69 et 2,99 [S19] ; Point.P 2,49 [S19] | confirmé (2 sources) | 3,39 m en J+5/6 ; 4,99 m sur demande. PAS de 2,50 / 2,60 / 2,70 / 2,80 / 3,00 chez Placo |
+| Montant M 48 : conditionnement | botte de 10 (bot10L) ; palette 480 | — | [S17] | piste interne (botte de 10) ; GSB lots de 10 [S14] | confirmé (2 sources) | |
+| Montant Stil M 70 : épaisseur / poids | 0,59 mm ; 0,73 kg/ml | — | fiche Placo M 70 (24/09/24) via Samse [S20] | — | 1 source | |
+| Montant Stil M 70 : longueurs | 2,49 – 2,59 – 2,79 – 2,99 – 3,59 – 3,99 (J+2) ; 2,40 et 4,99 sur demande | m | [S20] | SFIC « Stil M 70 2,99 m » [S21] | confirmé (2 sources) | M 70 n'a pas de 2,69 ni 3,19 au tarif |
+| Montant M 70 : conditionnement | bot10L ; palette 250 | — | [S20] | — | 1 source | |
+| Montant Stil M 90, M 100 : longueurs | 3,99 (M 90) ; 2,59 et 3,99 (M 100) relevées en négoce | m | SFIC catégorie rails et montants [S21] | — | à confirmer (fiche Placo non lue) | |
+| Montant ML 48-50 (ailes 50) : longueurs | 2,99 – 3,59 – 3,99 ; bot10L ; palette 360 | m | extrait moteur fiche Placo ML 48-50 [S22] | — | 1 source | « montant renforcé » pour hauteurs plus grandes |
+| Fourrure Stil F 530 : section, épaisseur | 45 × 18 mm, ailes 6,1 ; 0,59 mm ; 0,43 kg/ml | — | fiche Placo F 530 (18/12/23) [S23] | fiche Placo 2017 et 2021 hébergée par Dispano/Gedimat [S24] ; Chausson [S25] | confirmé (2 sources) | |
+| Fourrure F 530 : longueurs | 3,00 et 5,30 (stock) ; 2,69 (anciennes fiches) | m | [S23] | Chausson (3,00 / 5,30) [S25] ; [S24] | confirmé (2 sources) | **pas de 4,00 m chez Placo** (4,00 m existe chez Knauf F47 selon knauf.com DZ, non relevé en France) |
+| Fourrure F 530 : conditionnement | botte de 10 (bot10L) ; palette 480 | — | [S23] | [S24] (« botte de 10 pièces » pour la 3,00 m) | confirmé (2 sources) | |
+| Rail Stil F 530 (rail de doublage / périphérie) | 2,35 m ; 0,53 mm ; 0,25 kg/ml ; botte de 20 (bot20L), palette 400 | — | fiche Placo Rail F 530 (18/12/23) [S26] | piste interne « rail F530 » (longueur 3 m supposée : FAUX) | 1 source | **attention : le rail F 530 fait 2,35 m, pas 3 m** |
+| Cornière Stil CR2 : longueur, conditionnement | 3,00 m ; botte de 30 (bot30L) | — | extrait moteur fiche Placo CR2 [S27] | Bricomarché « Cornière Stil CR2 3 m » [S27] | confirmé (2 sources) pour 3 m ; 1 source pour botte de 30 | une autre fiche Placo cite une palette de 1350 |
+| Éclisse Stil F 530 (raccord de fourrures) | 90 mm, 0,5 mm ; boîte de 50 (bte50P) | — | fiche Placo Éclisse F 530 (18/12/23) [S28] | SNIP [S1] (éclisse de renfort à l'aboutage) | confirmé (2 sources) pour l'usage ; 1 source pour la boîte de 50 | |
+| Suspente longue 171 Stil F 530 | boîte de 100 (bte100P), plénum 20–150 mm | — | extrait moteur fiche Placo (MAJ 31/03/26 ; 18/12/23) [S29] | ManoMano « set of 100 long Stil F 530 171 mm » [S29] ; piste interne | confirmé (2 sources) | la 240 mm a une autre référence (boîte non relevée) |
+| Suspente sécable Stil F 530 | charge 55 kg ; plénum 80–580 mm (Intégrale) | — | Intégrale Placo Plafonds 04/2023 [S2] p.101 | extrait fiche Placo sécable [S29] (55 kg) | confirmé (2 sources) | boîte de 50 (piste interne) : à confirmer |
+| Suspente Maxi Stil F 530 | 40 kg ; boîte de 12 en GSB | — | extrait moteur [S29] | Bricomarché « Maxi Stil F 530 – 12 pièces » | à confirmer (conditionnement pro) | |
+| Attache Stil F 530 / Attache SM 8 | boîte de 100 | — | Bricomarché (Placo) [S30] | — | 1 source | |
+| Appui intermédiaire : Optima2 (Isover) | boîtes de 50 (75 mm, 140 mm, 15-45) ; 40 (75-160) | — | Bricomarché / Leroy Merlin / Brico Dépôt (Isover) [S31] | Easyfix (autre fabricant, mêmes conditionnements 50/40) [S32] | confirmé (2 sources) | |
+
+### A.2 Knauf (France)
+
+| Donnée | Valeur | Unité | Source 1 | Source 2 | Statut | Note |
+|---|---|---|---|---|---|---|
+| Fourrure F47 : section, épaisseur | 47 × 17,5 mm ; épaisseur nominale 0,6 (cœur nu mini 0,54) | mm | fiche technique Knauf France F47, 29/09/2020 [S33] | knauf.com fiche F47 47/17/0.6 [S34] | confirmé (2 sources) | |
+| Fourrure F47 : longueurs France | 2,70 – 3,00 – 5,30 | m | [S33] | Bricomarché lot 10 F47 3 m / 5,30 m (Isolpro, marque négoce) [S35] | confirmé (2 sources) | 4,00 m seulement sur pages Knauf hors France |
+| Fourrure F47 : conditionnement | paquet de 10 | — | [S33] | Brico Dépôt « lot de 10 fourrures F47 3 m » [S35] | confirmé (2 sources) | |
+| Montant Knauf 48/35 : épaisseur | 0,6 | mm | knauf.com DZ/MA (0,6) [S36] | — | 1 source | fiche France oct. 2020 citée mais non lue |
+| Montant Knauf 48/35 : longueurs | 2,59 / 3,00 / 3,99 relevées ; 10 pièces par paquet ; 480 par palette | — | extrait knauf.com [S36] | — | à confirmer (pages hors France) | gamme France : M36/40, M48/35, M48/50, M62/40, M70/40, M90/40, M100/40, M125/50, M150/50 [S37] |
+| Suspente clipsable F47 / à ressort F47 | 30 daN / 45 daN | daN | extrait knauf.com [S34] | — | 1 source | |
+
+### A.3 Siniat (Prégymétal) et marques négoce
+
+| Donnée | Valeur | Unité | Source 1 | Source 2 | Statut | Note |
+|---|---|---|---|---|---|---|
+| Profilés Siniat Prégymétal M48-35 / M48-50 / R48 | rail R48 48 × 28 ; montant « Ultra WAB » 48-35 : 3 m, 0,62 mm, bottes de 13 | — | extrait fiches Siniat (print2pdf) [S38] | — | à confirmer | gamme Siniat France peu lisible en ligne ; à faire valider en négoce |
+| Marques négoce / GSB (NF) : longueurs | montants M48 « 2,49 m », « 2,50 m », « 2,99 m », « 3 m » ; rails 3 m ; lots de 10 | — | Brico Dépôt [S14] | Bricomarché (Isolpro, Pladur, Ega Perfil) [S35] | confirmé (2 sources) | chez ces marques, 2,50 et 3,00 m existent |
+| Lisse clip Ega Perfil (périphérie plafond) | 3,00 m ; 0,55 mm ; paquet de 10 | — | fiche Ega Perfil hébergée par Matériaux Naturels [S11b] | — | 1 source | |
+
+---
+
+## B. Règles d'entraxe et de fixation de l'ossature
+
+NF DTU 25.41 : le texte n'est pas en accès libre (AFNOR) ; les valeurs viennent des guides fabricants
+qui l'appliquent (Siniat « carnet de pose DTU », Placo Intégrale 2023 « mise en œuvre selon le DTU 25.41 »).
+Placo signale une « nouveauté DTU 25.41 » pour la fixation des rails de rive (60 cm maxi) : l'édition prise en
+compte par Placo 2023 est donc la révision la plus récente du DTU ; numéro d'édition exact : à confirmer.
+
+| Donnée | Valeur | Unité | Source 1 | Source 2 | Statut | Note |
+|---|---|---|---|---|---|---|
+| Entraxe des montants (cloison, contre-cloison) | 0,60 ou 0,40 | m | Siniat carnet de pose DTU [S5b], c. 19/11/2026 | SNIP [S1] (tableaux à 0,60 / 0,40) | confirmé (2 sources) | 0,40 imposé en parement simple ≤ 15 mm selon certaines fiches (extrait Placo) ; hauteur décide (tableau B.1) |
+| Entraxe montants, plaques largeur 900 | 0,45 ou 0,90 | m | SNIP [S1] | — | 1 source | |
+| Montants coupés à | hauteur sol-plafond − 1 cm | — | Siniat [S5b] | piste interne + longueurs Placo « −1 cm » [S17] | confirmé (2 sources) | |
+| Fixation des rails (sol, plafond) | tous les 0,60 m maxi | m | Siniat [S5b] (« tous les 60 cm et à plus de 5 cm du bord de la dalle ») | Placo Intégrale Plafonds 2023 [S2] (rail de rive tous les 60 cm maxi) ; extraits Placo/Samse « fixation mécanique au pas de 60 cm » | confirmé (2 sources) | |
+| Distance d'une fixation au bord de dalle | > 5 cm | cm | Siniat [S5b] | — | 1 source | |
+| Fixation à ≤ 10 cm des extrémités du rail | — | — | aucune source lue | — | à confirmer (non trouvé) | usage courant de chantier ; aucune fiche lue ne le chiffre |
+| Premier montant contre mur | fixé tous les 0,60 m maxi | m | Siniat [S5b] | — | 1 source | |
+| Hauteurs limites 72/48 (M48-35), entraxe 0,60 simple / doublé | 2,50* / 3,05 | m | Siniat [S5b] | piste interne (Placo fiche système 72/48, même ordre) | confirmé (2 sources) pour 2,50 | *2,50 m mesurée sol fini ; habitation uniquement |
+| Hauteurs limites 72/48, entraxe 0,40 simple / doublé | 2,80 / 3,40 | m | Siniat [S5b] | — | 1 source | |
+| Hauteurs limites 98/48, 0,60 simple / doublé | 3,00 / 3,75 | m | Siniat [S5b] | — | 1 source | 0,40 : 3,40 / 4,15 |
+| Hauteurs limites 95/70 (M70-35), 0,60 simple / doublé | 3,25 / 4,05 | m | Siniat [S5b] | — | 1 source | 120/70 (2 BA13) : 3,85 / 4,90 |
+| Hauteurs limites 115/90, 125/100 (0,60 simple) | 3,90 ; 4,45 | m | Siniat [S5b] | — | 1 source | |
+| Plafond : entraxe des fourrures F 530 | 0,60 si isolant < 6 kg/m² ; 0,50 si 6–10 kg/m² ; 0,40 si 10–15 kg/m² | m | Placo Intégrale Plafonds 04/2023 p.101 [S2] | SNIP [S1] (0,50 / 0,60) ; piste interne (0,60) | confirmé (2 sources) | l'isolant posé sur le plafond compte depuis la mise à jour du DTU |
+| Plafond : pose parallèle ou plaques hydro | entraxe réduit à 0,40 | m | [S2] p.104 | piste interne (DTU 25.41) | confirmé (2 sources) | |
+| Distance entre suspentes le long d'une fourrure | 1,20 | m | [S2] p.101 (« Distance entre suspentes 1,2 ») | SNIP [S1] (« portée 1,20 m ») | confirmé (2 sources) | 2 m sur montants doubles (SNIP) |
+| Charge admissible par suspente (bois) | courte/longue 38 kg ; sécable 47 ; Cliplaine 34 ; cavalier 55 | kg | [S2] p.101 | — | 1 source | |
+| Fixation suspente sur bois | 2 vis TTPC 35 par suspente | u | [S2] p.101 | piste interne (2 TTPC 35) | confirmé (2 sources) | articulée SA : 2 × 4 TTPC 35 ou 2 tire-fond 6 × 30 |
+| Fixation sur dalle béton | cheville métallique pour tige filetée Ø 6 + suspente HL ou cavalier | — | [S2] p.102 | Knauf « clou cheville 6 × 40 pour suspensions dans le béton » [S39] | confirmé (2 sources) | |
+| Fixation sur hourdis | suspente H / HL enfoncée en force entre poutrelle et hourdis | — | [S2] p.102 | — | 1 source | pas de cheville dans le hourdis |
+| Plafond : fixation rail/cornière de rive | tous les 0,60 m maxi | m | [S2] p.103 | Siniat [S5b] | confirmé (2 sources) | |
+| Aboutage fourrures | éclisse, décalé d'une ligne à l'autre | — | [S2] p.103 | SNIP [S1] | confirmé (2 sources) | |
+| Doublage sur appuis : 1re ligne d'appuis | à 1,35 m du sol pour un doublage ≤ 2,70 m | m | extrait guide Isover Optima2 15-45 [S31b] | SNIP (lignes tous les 1,25 m) [S1] | contradiction (détail) | 1,35 (Isover, une seule ligne jusqu'à 2,70 m) vs 1,25 (SNIP, hypothèse de calcul) ; Placo : entre appuis 1,15 à 1,80 m selon la plaque / la configuration (extrait Intégrale 2021-22) |
+| Doublage : écart entre appuis sur une ligne | 0,60 (= entraxe des fourrures) | m | [S31b] | SNIP [S1] | confirmé (2 sources) | |
+| Appui Rénovation Stil F 530 | doublage ≤ 5,30 m ; épaisseur 80–200 mm | — | extrait fiche Placo (MAJ 03/2026) | — | 1 source | |
+| Fourrures de doublage près des menuiseries | ≤ 10 cm des tableaux | cm | extrait Intégrale Placo 2021-22 doublage F 530 | — | 1 source | |
+| Joints de fractionnement plafond | tous les 300 m² ou 25 ml | — | [S2] p.105 | — | 1 source | |
+
+---
+
 ## D. Quantités au m² par système (traité en premier : source complète obtenue)
 
 Source principale : SNIP, Fiche conseil n° 18 « Ouvrages en plaques de plâtre : quantitatifs estimés de produits »,
@@ -80,13 +179,14 @@ Cloisons : longueur 4 m, hauteur 2,50 à 2,70 m (72/48) ou 3 m (98/48). Plafonds
 
 | Donnée | Valeur | Unité | Source 1 | Source 2 | Statut | Note |
 |---|---|---|---|---|---|---|
-| Fourrures, entraxe 0,60 | 1,79 | ml/m² | [S1] p.15 | Placo solution plancher bois (piste interne, page placo.fr citée) 1,79 | confirmé (2 sources) | |
-| Fourrures, entraxe 0,50 | 2,10 | ml/m² | [S1] | — | 1 source | |
-| Suspentes, fourrures 0,60 | 1,56 | u/m² | [S1] p.15 | Placo solution plancher bois 1,56 (piste interne) | confirmé (2 sources) | portée (entraxe suspentes) 1,20 m ; piste interne « 1,8/m² » = ratio simplifié |
-| Suspentes, fourrures 0,50 | 1,84 | u/m² | [S1] | — | 1 source | |
+| Fourrures, entraxe 0,60 | 1,79 (SNIP, solution Placo plancher bois) ; 2 (Intégrale Placo 2023, arrondi) | ml/m² | [S1] p.15 | [S2] p.105 « quantités indicatives » : 2 ; piste interne 1,79 | confirmé (2 sources), écart d'arrondi | retenir 1,79 × 1,05 ou 2 ; même ordre |
+| Fourrures, entraxe 0,50 | 2,10 (SNIP) ; 2,2 (Placo) | ml/m² | [S1] | [S2] | confirmé (2 sources) | |
+| Fourrures, entraxe 0,40 | 3 | ml/m² | [S2] | — | 1 source | |
+| Suspentes, fourrures 0,60 | 1,56 (SNIP) ; 1,8 (Intégrale Placo 2023) | u/m² | [S1] p.15 | [S2] p.105 | contradiction (détail) | SNIP calcule sur un plafond 8 × 10 m (géométrie exacte 1/(0,60×1,20)=1,39 + rives) ; Placo arrondit vers le haut (inclut petites pièces). Pour une pièce de maison, 1,8 est plus sûr ; la boîte de 100 couvre ≈ 55 m² |
+| Suspentes, fourrures 0,50 / 0,40 | 1,84 (SNIP) ; 2,2 / 2,7 (Placo) | u/m² | [S1] | [S2] | contradiction (détail) | même raison |
 | Cornière ou lisse périphérique | 0,47 | ml/m² | [S1] p.15 | Placo (piste interne) 0,47 | confirmé (2 sources) | pour 8 × 10 m : petite pièce = beaucoup plus (périmètre / surface) → calculer au périmètre |
 | Éclisses de renfort (aboutage fourrures) | 0,21 (0,60) / 0,25 (0,50) | u/m² | [S1] | — | 1 source | |
-| Vis TTPC 25 (1 peau) | 12 (0,60) / 14 (0,50) | u/m² | [S1] | piste interne Placo « 15 » | contradiction (détail) | SNIP : vis à 30 cm sur fourrure ; Placo : 15 avec vis plus rapprochées en rive ; ordre de grandeur 12–15 |
+| Vis TTPC 25 (1 peau) | 12 (0,60) / 14 (0,50) | u/m² | [S1] | Intégrale Placo 2023 [S2] : 10 (0,60), 12 (0,50), 15 (0,40) ; Gypso [S40] « plafond BA13 : 14/m² en moyenne » | confirmé (2 sources), fourchette 10–14 à 0,60 | la piste interne « 15 » correspond à l'entraxe 0,40 de Placo |
 | Vis TRPF | 4 (0,60) / 5 (0,50) | u/m² | [S1] | — | 1 source | fixation suspente-fourrure (clipsée en Stil : à confirmer si TRPF utile) |
 | 2 BA13 : TTPC int. / ext. | 8 / 12 (0,60) | u/m² | [S1] | — | 1 source | 1re peau vissée à 60 cm |
 
