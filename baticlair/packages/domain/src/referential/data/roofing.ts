@@ -413,6 +413,9 @@ const LARGEUR_BOBINE_TASSEAUX_PARAM: ParamDef = {
   unit: "mm",
   kind: "artisan_preference",
   question: "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+  // Recette en ligne du 19 novembre 2026 : le modèle posait cette question et la couverture restait en attente. Greg : « en
+  // général 65 cm » : la valeur courante est dite et se change dans la liste, elle ne se demande jamais.
+  neverAsk: true,
   textLabels: ["largeur de bobine", "largeur bobine", "bobine", "largeur developpee", "developpe des bacs"],
   default: { value: "650", source: FR_REPLY_TASSEAUX, verification: FOUNDER_REPLY_TASSEAUX, version: 1, note: "bobine de 65 cm en général ; parfois 50 cm" },
   choices: [
@@ -1154,7 +1157,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.18-57",
+  version: "roofing-2026.11.19-58",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],

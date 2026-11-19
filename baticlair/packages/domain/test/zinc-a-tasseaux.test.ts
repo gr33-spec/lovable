@@ -52,6 +52,18 @@ describe("couverture zinc à tasseaux : de la bobine au mètre, d'après l'entra
     expect(liste(e)).toEqual([["Bobine Anthra-Zinc 0,65 mm, largeur 500 mm", "75 ml", "18 bacs × 4,15 m"]]);
   });
 
+  it("la largeur de bobine ne se demande jamais : une question du modèle sur elle (sous sa clé ou sous ses mots) est écartée, la bobine de 650 reste, la couverture est chiffrée", () => {
+    // Recette en ligne du 19 novembre 2026 : deux lectures sur trois posaient « bobine de 650 ou de 500 ? » ; la couverture
+    // restait en attente et sortait « je n'ai pas su en tirer les articles ».
+    for (const cle of ["largeur_bobine_tasseaux", "largeur_de_bobine"]) {
+      const l = { ...lecture(), questions: [{ cle, ligne: "1", texte: "Tes bacs : dans de la bobine de 650 ou de 500 ?", unite: "mm", donnee: "largeur de bobine", boutons: [] }] } as unknown as LectureDevis;
+      const e = ecran(l);
+      expect(e.purchase.questions.map((d) => d.question?.key ?? d.key).join(" "), cle).not.toMatch(/bobine/);
+      expect(liste(e), cle).toEqual([["Bobine Anthra-Zinc 0,65 mm, largeur 650 mm", "54 ml", "13 bacs × 4,15 m"]]);
+      expect(e.purchase.toQuote, cle).toEqual([]);
+    }
+  });
+
   it("règle numéro un : tasseaux et couvre-joints seulement si le devis les écrit ; leur nombre de rangs n'est pas encore validé, ils restent « à chiffrer », jamais avec une quantité inventée", () => {
     expect(ecran(lecture()).purchase.toQuote).toEqual([]);
     const e = ecran(lecture(["tasseau", "couvre_joint"]));

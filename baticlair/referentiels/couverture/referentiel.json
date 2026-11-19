@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.18-57",
+  "version": "roofing-2026.11.19-58",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -13875,6 +13875,7 @@
           "unit": "mm",
           "kind": "artisan_preference",
           "question": "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+          "neverAsk": true,
           "textLabels": [
             "largeur de bobine",
             "largeur bobine",

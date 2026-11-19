@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-58 — Zinc à tasseaux : la largeur de bobine ne se demande jamais (recette en ligne, 2026-11-19)
+
+- **Zinc à tasseaux** : la largeur de la bobine (`largeur_bobine_tasseaux`) est `neverAsk`. Sur le site de test, deux lectures sur trois du devis D-2026-024 posaient « bobine de 650 ou de 500 ? » ; la couverture restait en attente. La valeur courante de Greg (650 mm) est dite et se change dans la liste ; écrite au devis, elle est prise.
+- Une question que le modèle pose avec ses mots sur la donnée d'un ouvrage (« largeur de bobine », sur la ligne de la couverture) est cette donnée : écartée comme elle quand elle ne se demande jamais.
+- Une ligne dont un article a été lu et attend seulement une réponse n'est plus dite « je n'ai pas su en tirer les articles ».
+
 ## roofing-2026.11.18-57 — Zinc à tasseaux ; une information écrite n'est jamais demandée (Greg, 2026-11-18, devis D-2026-024)
 
 - **Nouvel ouvrage « Couverture zinc à tasseaux »** (`couverture-zinc-tasseaux`). Avant : absent de la fiche ; « couverture zinc à tasseaux, 32 m² » sortait sans aucune fourniture, ou était prise pour du joint debout. Maintenant : de la bobine au mètre linéaire, nombre de bacs = largeur du pan ÷ entraxe des tasseaux, longueur d'un bac = rampant + 15 cm (comme le joint debout, réponse du 2026-10-04).

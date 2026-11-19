@@ -457,6 +457,15 @@ export function rattacherQuestion(ref: Referential, plan: QuotePlan, q: LectureQ
   // (la clé du modèle, ou le nom qu'il donne à la donnée) EST cette donnée : une seule question, une seule réponse.
   const duToit = paramOfDonnee(ref, q.cle) ?? (q.donnee ? paramOfDonnee(ref, q.donnee) : null);
   if (duToit) return { ...q, cle: duToit.key };
+  // Et une donnée de l'OUVRAGE de la ligne visée, nommée par un de ses mots (« largeur de bobine » sur la ligne d'une
+  // couverture à tasseaux, 19 novembre 2026) : quand la ligne n'a qu'un ouvrage, c'est sa donnée.
+  if (q.ligne) {
+    const ids = [q.ligne, ...(lignes ?? []).filter((l) => l.ligne.ref === q.ligne).map((l) => l.id)];
+    const ouvragesDeLaLigne = [...new Set(plan.lines.flatMap((l) => (l.status === "planned" && ids.some((id) => l.ref === id || l.ref.startsWith(`${id}.`)) ? [baseOf(l.workItemId)] : [])))];
+    const work = ouvragesDeLaLigne.length === 1 ? ref.workItems.find((w) => w.id === ouvragesDeLaLigne[0]) : undefined;
+    const sienne = work ? (paramParNom(work.params, q.cle) ?? (q.donnee ? paramParNom(work.params, q.donnee) : null)) : null;
+    if (sienne) return { ...q, cle: sienne.key };
+  }
   const param = [...new Set(ref.workItems.flatMap((w) => w.params.filter((p) => (p.choices?.length ?? 0) > 0 && q.cle.startsWith(`${p.key}_`)).map((p) => p.key)))].sort((a, b) => b.length - a.length)[0];
   if (!param) return q;
   const suite = q.cle.slice(param.length + 1).replace(/_/g, "-");
@@ -776,6 +785,8 @@ export function ecranDeLecture(input: {
   // Les consommables se cochent à l'étape « Suggestions » : la question oui / non du modèle n'est plus posée.
   const asked: Asked[] = lecture.questions.filter((q) => !interdites.has(q.cle) && !(q.cle === CONSUMABLES_KEY && !fiche)).flatMap((q0) => {
     const q = rattacherQuestion(ref, plan, q0, lignes);
+    // Posée sous un mot du modèle (« largeur de bobine »), c'est la même donnée interdite : écartée aussi.
+    if (interdites.has(q.cle)) return [];
     const question = questionDeLecture(ref, plan, q, lignes);
     // L'habitude de l'entreprise (« je façonne », apprise sur deux chantiers) répond d'avance à la question du modèle :
     // elle ne se pose plus, la réponse est dite dans le calcul et reste modifiable d'un tap.
@@ -951,7 +962,9 @@ export function ecranDeLecture(input: {
   const mesureDe = (l: (typeof lignes)[number]) => [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ");
   // Une ligne qui commence par « Pose », « Dépose », « Main-d'œuvre »… n'achète rien, même si le modèle l'a mal rangée.
   const SANS_ACHAT = /^(?:pose|repose|depose|demontage|main d ?oeuvre|installation|location|evacuation|nettoyage|echafaudage|transport|deplacement)\b/;
-  const oubliees = lignes.filter((l) => !l.fourniture && (l.ligne.role === "fourniture" || l.ligne.role === "fourniture_et_pose") && !SANS_ACHAT.test(normalizeText(l.designation)) && !final.toQuote.some((t) => t.lineIds.includes(l.id)) && !final.toBuy.some((b) => b.lineIds.includes(l.id)));
+  // Ni une ligne dont un article a bien été lu et attend seulement une réponse (recette en ligne du 19 novembre 2026).
+  const aUnArticle = (l: (typeof lignes)[number]) => lignes.some((o) => o.fourniture && o.ligne.ref === l.ligne.ref);
+  const oubliees = lignes.filter((l) => !l.fourniture && !aUnArticle(l) && (l.ligne.role === "fourniture" || l.ligne.role === "fourniture_et_pose") && !SANS_ACHAT.test(normalizeText(l.designation)) && !final.toQuote.some((t) => t.lineIds.includes(l.id)) && !final.toBuy.some((b) => b.lineIds.includes(l.id)));
   const complet = oubliees.length === 0 ? final : { ...final, toQuote: [...final.toQuote, ...oubliees.map((l) => ({ key: `line:${l.id}`, label: l.designation.trim(), measure: mesureDe(l), reason: LIGNE_NON_CHIFFREE, lineIds: [l.id] }))] };
   const dites = new Set(oubliees.map((l) => l.id));
   const sansFourniture = lignes.filter((l) => !l.fourniture && !dites.has(l.id)).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: mesureDe(l) || null }));
