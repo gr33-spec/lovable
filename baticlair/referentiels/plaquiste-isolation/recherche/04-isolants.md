@@ -34,7 +34,7 @@ Largeur 1,20 m, 1 rouleau par colis. Usage : doublage de murs (Optima), cloisons
 | 140 mm | R 4,35 ; 2,70 m ; 3,24 m² ; 24/pal | | [S1] | [S2] | confirmé (2 sources) | |
 | 160 mm | R 5,00 ; 2,70 m ; 3,24 m² ; 24/pal | | [S1] | [S2] | confirmé (2 sources) | |
 
-Les deux éditions (2024 et 2026) sont identiques : valeurs stables.
+Les deux éditions (2024 et 2026) sont identiques : valeurs stables. Les R sont en outre ceux du certificat ACERMI **02/018/100/35** (16/05/2025 ; GR 32 Revêtu Kraft, Roulé Revêtu Kraft, Roulé Kraft Alu ; 45 à 180 mm ; 45 mm = R 1,40, 180 mm = R 5,60) [S64] — 3e source indépendante.
 
 #### A1.2 GR 32 panneaux (nu / revêtu kraft) — 1,35 × 0,60 m, λ 0,032
 
@@ -42,10 +42,10 @@ Usage : cloisons et doublages ; le **GR 32 nu 45 mm** est l'isolant type de la c
 
 | Donnée | Valeur | Unité | Source 1 | Source 2 | Statut | Note |
 |---|---|---|---|---|---|---|
-| GR 32 Nu 45 mm | R 1,45 ; 15 pan/paquet = 12,15 m² ; 20 paq/pal (243 m²) | | [S6] fiche Isover GR 32 Nu (copie Chausson, date non lisible) | — | 1 source | dispo B (sur fabrication). R calculé 0,045/0,032 = 1,41 → ACERMI arrondit 1,45 ? incohérent : **à confirmer** (R imprimé 1,45 > e/λ ; possible λ certifié plus bas sur 45 mm) |
-| GR 32 Nu 60 mm | R 1,85 ; 12 pan/paq = 9,72 m² ; 16 paq/pal | | [S6] | — | 1 source | |
-| GR 32 Nu 100 mm | R 3,15 ; 8 pan/paq = 6,48 m² | | [S6] | — | 1 source | |
-| GR 32 Nu 120 / 140 / 160 mm | R 3,75 / 4,35 / 5,00 ; 5 pan/paq = 4,05 m² | | [S6] | — | 1 source | |
+| GR 32 Nu 45 mm | **R 1,40** ; 15 pan/paquet = 12,15 m² ; 20 paq/pal (243 m²) | | [S6] fiche Isover GR 32 Nu (copie Chausson, non datée) : imprime R 1,45 | [S63] ACERMI 02/018/098/27 (16/05/2025, GR 32 Nu / GR 32 Roulé Nu / Cladipan 32 Nu) : **45 mm = R 1,40** | contradiction (résolue) | La fiche (ancienne) dit 1,45, le certificat en vigueur et e/λ (1,41) disent 1,40 : **retenir 1,40**. Colisage : 1 source ; dispo B (sur fabrication). |
+| GR 32 Nu 60 mm | R 1,85 ; 12 pan/paq = 9,72 m² ; 16 paq/pal | | [S6] | [S63] R 1,85 | confirmé (2 sources) pour R ; colisage 1 source | |
+| GR 32 Nu 100 mm | R 3,15 ; 8 pan/paq = 6,48 m² | | [S6] | [S63] R 3,15 | confirmé (2 sources) pour R | |
+| GR 32 Nu 120 / 140 / 160 mm | R 3,75 / 4,35 / 5,00 ; 5 pan/paq = 4,05 m² | | [S6] | [S63] | confirmé (2 sources) pour R | |
 | GR 32 Revêtu Kraft panneau 60→160 mm | 60 : R 1,85, 12 pan (9,72 m²) ; 75 : R 2,35, 10 pan (8,1 m²) ; 85 : R 2,65, 9 pan (7,29) ; 100 : R 3,15, 8 pan (6,48) ; 120/140/160 : R 3,75/4,35/5,00, 5 pan (4,05) | | [S7] fiche Isover GR 32 Revêtu Kraft (copie Chausson, date non lisible) | [S8] Castorama « GR32 kraft 1,35 × 0,6 m ép. 75 » (format seul) | confirmé (2 sources) pour le format ; 1 source pour le colisage | pas de 45 mm en kraft |
 
 #### A1.3 Isoconfort 35 Revêtu Kraft — combles aménagés / rampants, λ 0,035, ACERMI 05/018/408
@@ -63,6 +63,8 @@ Largeur 1,20 m (certaines épaisseurs en 0,60 m, 2 rouleaux/colis). Fiche Isover
 | 260 | 7,40 | 2,40 m | 2,88 | 24 | [S9] | — | 1 source |
 | 280 | 8,00 | 2,00 m | 2,40 | 24 | [S9] | — | 1 source |
 | 300 | 8,55 | 2,00 m | 2,40 | 24 | [S9] | [S12] Batiproduits « Isoconfort 35 Kraft 300 mm » (existence) | 1 source pour les chiffres |
+
+R certifiés : ACERMI **05/018/408/35** (16/07/2025 ; Isoconfort 35 Revêtu Kraft ; 45 à 300 mm ; 160 = 4,55 ; 200 = 5,70 ; 220 = 6,25 ; 260 = 7,40 ; 300 = 8,55) [S68] → **tous les R du tableau : confirmé (2 sources)** ; les longueurs 2026 restent 1 source.
 
 Usage : 2e couche sous chevrons sur suspentes Intégra 2, ou monocouche ; en rampants, R ≥ 6 pour les aides → **220 mm minimum** (R 6,25).
 
@@ -82,8 +84,9 @@ Usage : 2e couche sous chevrons sur suspentes Intégra 2, ou monocouche ; en ram
 
 | Donnée | Valeur | Source 1 | Source 2 | Statut | Note |
 |---|---|---|---|---|---|
-| 200 mm kraft | R 6,25 (aides rampants en une couche) | [S13] extrait fiche Isover MAJ 24/03/26 | [S14] EPD One Click LCA « Isoconfort 32 Revêtu Kraft 200 mm » (existence) | confirmé (2 sources) pour R | |
-| 45 mm (cloison) | **non trouvé** dans les extraits | — | — | à confirmer (fiche isover.fr 403 ; aucun négoce n'affiche 45 mm) | L'existence d'un Isoconfort 32 en 45 mm n'est pas démontrée : pour 72/48, le produit vérifié est le **GR 32 Nu 45 mm** (A1.2) |
+| 200 mm kraft | R 6,25 (aides rampants en une couche) | [S13] extrait fiche Isover MAJ 24/03/26 | [S65] ACERMI 13/018/808/12 | confirmé (2 sources) | format : `isolation-des-combles.md` cite 1,20 × 2,20 m, 2,64 m², 24/pal (non relu ici → à confirmer) |
+| Isoconfort 32 Nu | 60 : 1,85 ; 80 : 2,50 ; 100 : 3,10 ; 120 : 3,75 ; 140 : 4,35 ; 160 : 5,00 | [S66] ACERMI | — | 1 source officielle | longueurs non lues |
+| 45 mm (cloison) | **n'existe pas** : le certificat Isoconfort 32 Revêtu Kraft ne couvre que 200 mm, celui de l'Isoconfort 32 Nu commence à 60 mm | [S65] ACERMI 13/018/808/12 (16/05/2025 : 200 mm R 6,25 seul) | [S66] ACERMI 08/018/540/19 (29/01/2026 : nu 60 → 160 mm) | confirmé (2 sources) | Un devis « Isoconfort 32 45 mm » est une erreur de désignation : proposer GR 32 Nu 45 (R 1,40) |
 | Tableau longueurs | non lu | — | — | à confirmer | fiche isover.fr / placo.fr inaccessible |
 
 #### A1.6 IBR Revêtu Kraft — combles perdus, plafonds, λ 0,040, ACERMI 02/018/052
@@ -102,6 +105,8 @@ Largeur 1,20 m. Fiche Isover « MAJ 23/04/26 » vue en extrait de moteur (« jus
 | 320 | 8,00 | 2,4 m | 2,88 | [S22] fiche Isover 08/12/2017 | Edibatec : fin de dispo 04/01/2018 | **contradiction** : référence peut-être arrêtée |
 | 400 | 10,0 | 2,0 m | 2,40 | [S15] (R) | [S3b] Brico Dépôt « 400 mm R 10 2 × 1,2 m » | confirmé (2 sources) |
 | Rouleaux/palette | 24 (300) d'après fiche 2017 ; autres non lus | | | [S22] | — | à confirmer |
+
+**R certifiés** : tout le tableau R ci-dessus est confirmé par le certificat ACERMI **02/018/052/29** (16/05/2025 ; IBR Revêtu Kraft, IBR Contact, IBR Phonic ; λD 0,040 ; 45 à 400 mm, ex. 100 = 2,50, 140 = 3,50, 260 = 6,50, 300 = 7,50, 320 = 8,00, 400 = 10,00) [S67] → R : confirmé (2 sources) ; les longueurs restent celles des négoces.
 
 R ≥ 7 en combles perdus pour les aides : **300 mm** (R 7,5) en une couche, ou deux couches croisées (ex. 100 + 200 = R 7,5).
 
@@ -141,7 +146,7 @@ Masse volumique 40 kg/m³ (40 mm), 32 kg/m³ (45-140) [S26]. Rw cloison 72/48 BA
 | Donnée | Valeur | Source 1 | Source 2 | Statut | Note |
 |---|---|---|---|---|---|
 | Épaisseurs / R | 40 : 1,10 ; 50 : 1,40 ; 60 : 1,70 ; 80 : 2,25 | [S30] fiche Rockwool Rockcalm (copie Ciffreo Bona, éd. 2011) | [S31] fiche Rockcalm (copie Samse 7932, éd. 2015 : 40 mm R 1,10) | confirmé (2 sources) pour 40 mm ; 1 source au-delà | **documents anciens (2011-2015)** ; fiche 2026 non trouvée → statut produit « à confirmer (toujours au catalogue ?) » |
-| Rockcalm 45 mm | **n'existe pas** dans les sources | [S30] | recherche moteur | confirmé (2 sources) | pour 72/48 en Rockcalm : 40 mm |
+| Rockcalm 45 mm | **certifié** R 1,25 (certificat Rockcalm 20 → 150 mm, λD 0,035) | [S69] ACERMI 04/015/301/14 (16/05/2025) | — | 1 source officielle | les fiches anciennes ne listent que 40/50/60/80 ; disponibilité réelle du 45 au négoce : **à confirmer** |
 | Rw 72/48 BA13 + Rockcalm 40 | 42 (-3 ; -9) dB | [S30] | [S31] | confirmé (2 sources) | |
 | Colisage | non lu | — | — | à confirmer | |
 
@@ -219,11 +224,12 @@ Le site knauf.com renvoie 403 ; aucune fiche FR lisible obtenue. Ce qui est éta
 
 | Donnée | Valeur | Source 1 | Source 2 | Statut | Note |
 |---|---|---|---|---|---|
-| Ultracoustic 45 mm (cloison) | R 1,20 ; λ 0,037 ; rouleau 600 × 8000 mm ; 4 rlx/paquet (19,2 m²) ; 24 paq/pal | extrait moteur page Knauf fr-FR/fr-MA « Ultracoustic » | — | 1 source (extrait) | à confirmer sur fiche FR |
+| Ultracoustic **P** (panneau) 45 mm | R 1,20 ; λ 0,037 ; 600 × 1350 mm, 16 pan/paquet = 12,96 m², 20 paq/pal (aussi 600 × 1200 : 11,52 m²) ; 30 mm R 0,80 ; 60 mm R 1,60 (12 pan, 9,72 m²) | [S70] fiche Knauf Insulation FR « Cloisons – Ultracoustic P » (knauf-batiment, ACERMI 08/016/506 ; fiche ancienne ≈ 2012) | [S71] ACERMI **08/016/506/14** (16/05/2025) : 45 mm = R 1,20 | confirmé (2 sources) pour R ; colisage 1 source ancienne | produit Knauf FR type pour 72/48 |
+| Ultracoustic (rouleau) 45 mm | R 1,20 ; rouleau 600 × 8000 mm ; 4 rlx/paquet (19,2 m²) ; 24 paq/pal | extrait moteur page Knauf « Ultracoustic » | — | 1 source (extrait) | à confirmer sur fiche FR |
 | Acoustifit 45 mm | R 1,20 ; panneau 600 × 1350 ; 16 pan/paquet = 12,96 m² | extrait moteur page Knauf **fr-BE** | — | 1 source, **Belgique** | produit belge : à confirmer pour la France |
 | Panneau Knauf λ 0,035, 45 mm | R 1,25 ; 600 × 1200 ; 16 pan = 11,52 m² ; 28 paq/pal | [S39] fiche Knauf Insulation **Belgique 12/2017** (« Cloisons de séparation ») | — | 1 source, ancienne, BE | ne pas utiliser pour la France |
 | Acoustilaine 035 (kraft, roulé) | épaisseurs 75 à 280 mm, longueurs 2,1 à 8,1 m | Batiproduits (extrait) | — | 1 source | tableau à confirmer |
-| Naturoll 035 (nu) | 120 à 220 mm, largeur 575-600, longueur 2,7-5,3 m | Batiproduits (extrait) | — | 1 source | tableau à confirmer |
+| Naturoll 035 (nu, rouleaux par 2) | 100 : R 2,85, 575 × 6300, 7,25 m²/colis ; 120 : 3,40, 575 × 5300, 6,10 m² ; 140 : 4,00, 575 × 4500, 5,18 m² ; 160 : 4,55, 575 × 4000, 4,60 m² ; 180 : 5,10, 575 × 3500, 4,03 m² ; 200 : 5,70, 575 × 3200, 3,68 m² ; 220 : 6,25, 575 × 3300, 3,80 m² ; 24 colis/pal (220 : 18) | [S72] fiche Knauf Naturoll 035 **10/2015** (copie Gobert) | [S73] ACERMI **02/016/144/21** (16/05/2025 ; Naturoll 035, Comble 035, KI Fit 035, Expert LRR 035…) : mêmes R (100 = 2,85 … 220 = 6,25 ; 300 = 8,55) | R : confirmé (2 sources) ; longueurs : 1 source **de 2015** → à confirmer | rouleaux nus 575/600 mm pour pose entre chevrons/montants |
 | « TP 138 », « Absolute », « Acoustiroll » | **non trouvés** pour la France 2026 | — | — | à confirmer (noms anciens ou étrangers) | |
 
 ### A5. Isolant de cloison acoustique 72/48 — synthèse pour le comptoir
@@ -232,12 +238,13 @@ Règle de pose (Rockwool, guide cloisons 12/2023 [S40], reprenant NF DTU 25.41 f
 
 | Produit vérifié | Épaisseur | R | Format | m²/colis | Statut |
 |---|---|---|---|---|---|
-| Isover GR 32 Nu | 45 | 1,45 | 1,35 × 0,60 | 12,15 (15 pan) | 1 source ; dispo sur fabrication |
+| Isover GR 32 Nu | 45 | 1,40 (ACERMI ; la fiche ancienne dit 1,45) | 1,35 × 0,60 | 12,15 (15 pan) | R confirmé (2 sources) ; colisage 1 source ; dispo sur fabrication |
 | URSA PRK 32 | 45 | 1,40 | 1,35 × 0,60 | 10,53 (13 pan) | confirmé (2 sources) pour R/format |
 | Rockwool Rockmur nu / kraft | 40 (45 retiré en 2026) | 1,10 | 1,35 × 0,60 | 9,72 nu (12) / 11,34 kraft (14) | confirmé (2 sources) |
-| Rockwool Rockcalm | 40 | 1,10 | 1,35 × 0,60 | à confirmer | 2 sources anciennes |
-| Knauf Ultracoustic | 45 | 1,20 | rouleau 0,60 × 8 m | 19,2 (4 rlx) | 1 source (extrait) |
-| Isover Isoconfort 32 45 mm | — | — | — | — | **non trouvé** : ne pas proposer sans fiche |
+| Rockwool Rockcalm | 40 (45 certifié R 1,25) | 1,10 | 1,35 × 0,60 | à confirmer | R : ACERMI 2025 + fiches anciennes |
+| Knauf Ultracoustic P | 45 | 1,20 | 1,35 × 0,60 | 12,96 (16 pan) | R confirmé (2 sources) ; colisage 1 source ancienne |
+| Steico Flex 036 / Métisse RT / Biofib'Trio | 45 | 1,25 / 1,15 / 1,15 | voir A6 | voir A6 | R : ACERMI |
+| Isover Isoconfort 32 45 mm | — | — | — | — | **n'existe pas** (ACERMI) : erreur de désignation fréquente → GR 32 Nu 45 |
 
 Pour le calcul : surface de cloison (une seule couche d'isolant, pas deux faces) × (1 + chute) ; arrondi au colis.
 
