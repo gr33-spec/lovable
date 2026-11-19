@@ -145,6 +145,22 @@
    ],
    "avant": "2,9 au ml (« ml ÷ 0,35 »)",
    "statut": "confirme"
+  },
+  {
+   "cle": "evacuation.longueur_tube_descente",
+   "famille": "zinguerie",
+   "libelle": "Tube de descente : longueurs de 2 m par défaut",
+   "valeur": "2",
+   "unite": "m",
+   "regle": "tubes = descentes × arrondi au-dessus (hauteur ÷ 2 m)",
+   "decision": "Règle du fondateur (« descente en longueurs de 2 m », 18/11/2026). Recherche du 19/11/2026 : le tube de 2 m existe en zinc (VMZinc, Rheinzink, NedZink ; 2 m standard en Bretagne) et en PVC (Nicoll, First Plast : 4, 3, 2, 1 m). Le 4 m reste au choix (PVC, zinc Ø 100).",
+   "preuves": [
+    "descente_zinc_longueur",
+    "descente_pvc_longueur",
+    "zinguerie_longueurs_bretagne"
+   ],
+   "avant": "4 m",
+   "statut": "confirme"
   }
  ],
  "tables": [

@@ -24,13 +24,13 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Tubes de descente zinc Ø100, longueur 4 m | 4 pièces | Valeur par défaut à confirmer |
+| Tubes de descente zinc Ø100, longueur 2 m | 6 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Tubes de descente zinc Ø100, longueur 4 m | 4 pièces | 2 descentes × 5 m | chiffrable |
+| Tubes de descente zinc Ø100, longueur 2 m | 6 pièces | 2 descentes × 5 m | chiffrable |
 
 ## Une descente PVC en longueurs de 2 m, avec dauphin
 

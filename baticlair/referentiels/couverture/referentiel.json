@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.19-56",
+  "version": "roofing-2026.11.19-57",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -15559,7 +15559,7 @@
           "unit": "mm",
           "kind": "site_data",
           "question": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
-          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m², Ø 120 au-delà.",
+          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m².",
           "choices": [
             {
               "label": "Ø 80",
@@ -16363,7 +16363,7 @@
           "unit": "mm",
           "kind": "site_data",
           "question": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
-          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m², Ø 120 au-delà.",
+          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m².",
           "choices": [
             {
               "label": "Ø 80",
@@ -16763,7 +16763,7 @@
           "unit": "mm",
           "kind": "site_data",
           "question": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
-          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m², Ø 120 au-delà.",
+          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m².",
           "choices": [
             {
               "label": "Ø 80",
@@ -16837,26 +16837,26 @@
           "label": "Longueur des tubes",
           "unit": "m",
           "kind": "site_data",
-          "question": "Tubes de descente en longueurs de 4 m ou de 2 m ?",
+          "question": "Tubes de descente en longueurs de 2 m ou de 4 m ?",
           "default": {
-            "value": "4",
-            "source": "fondateur-reponses-2026-10-05",
+            "value": "2",
+            "source": "fiche-couverture",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-05",
-              "verifiedBy": "Fondateur (couvreur)"
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
             },
-            "version": 1,
-            "note": "longueurs de 4 m"
+            "version": 2,
+            "note": "longueurs de 2 m (zinc et PVC)"
           },
           "choices": [
             {
-              "label": "4 m",
-              "value": "4"
-            },
-            {
               "label": "2 m",
               "value": "2"
+            },
+            {
+              "label": "4 m",
+              "value": "4"
             }
           ],
           "textValues": [
@@ -16869,6 +16869,17 @@
                 "tubes de 2 m",
                 "en 2 m",
                 "barres de 2 m"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "longueur de 4 m",
+                "longueurs de 4 m",
+                "tube de 4 m",
+                "tubes de 4 m",
+                "en 4 m",
+                "barres de 4 m"
               ]
             }
           ]

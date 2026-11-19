@@ -25,7 +25,7 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Tubes de descente PVC gris Ø80, longueur 4 m | 4 pièces | Valeur par défaut à confirmer |
+| Tubes de descente PVC gris Ø80, longueur 2 m | 6 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -33,7 +33,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Gouttière PVC demi-ronde grise de 25 | 5 longueurs de 4 m (18 ml à couvrir) |  | chiffrable |
 | Naissances PVC grise de 25 Ø80 | 2 pièces |  | chiffrable |
-| Tubes de descente PVC gris Ø80, longueur 4 m | 4 pièces | 2 descentes × 5 m | chiffrable |
+| Tubes de descente PVC gris Ø80, longueur 2 m | 6 pièces | 2 descentes × 5 m | chiffrable |
 
 ## Gouttière alu anthracite sans développé
 
@@ -53,7 +53,7 @@ Questions du comptoir :
 | --- | --- | --- |
 | Gouttière alu anthracite de | 3 longueurs de 4 m | Développé à préciser |
 | Naissances alu anthracite de Ø80 | 1 pièce | Développé à préciser |
-| Tubes de descente alu Ø80, longueur 4 m | 2 pièces | Valeur par défaut à confirmer |
+| Tubes de descente alu Ø80, longueur 2 m | 3 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -61,7 +61,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Gouttière alu anthracite de 25 | 3 longueurs de 4 m (11 ml à couvrir) |  | chiffrable |
 | Naissances alu anthracite de 25 Ø80 | 1 pièce |  | chiffrable |
-| Tubes de descente alu Ø80, longueur 4 m | 2 pièces | 1 descentes × 5 m | chiffrable |
+| Tubes de descente alu Ø80, longueur 2 m | 3 pièces | 1 descentes × 5 m | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
 

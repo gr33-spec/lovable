@@ -549,14 +549,14 @@ const FIXATION_CROCHET_PARAM: ParamDef = {
   ],
   display: { "1": "sur chevron", "2": "bandeau" },
 };
-/** Diamètre des descentes : Ø 80 jusqu'à ≈ 70 m² de toit par descente, Ø 100 jusqu'à ≈ 130 m² (§11). */
+/** Diamètre des descentes : Ø 80 jusqu'à ≈ 70 m² de toit par descente, Ø 100 jusqu'à ≈ 113 m² (NF DTU 40.5 via VMZinc, fiche couverture). */
 const DIAMETRE_DESCENTE_PARAM: ParamDef = {
   key: "diametre_descente",
   label: "Diamètre des descentes",
   unit: "mm",
   kind: "site_data",
   question: "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
-  hint: "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m², Ø 120 au-delà.",
+  hint: "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m².",
   choices: [
     { label: "Ø 80", value: "80" },
     { label: "Ø 100", value: "100" },
@@ -1151,7 +1151,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.19-56",
+  version: "roofing-2026.11.19-57",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -3901,13 +3901,17 @@ export const ROOFING_REFERENTIAL: Referential = {
           label: "Longueur des tubes",
           unit: "m",
           kind: "site_data",
-          question: "Tubes de descente en longueurs de 4 m ou de 2 m ?",
-          default: { value: "4", source: FR_REPLY_DESCENTES, verification: FOUNDER_REPLY_DESCENTES, version: 1, note: "longueurs de 4 m" },
+          question: "Tubes de descente en longueurs de 2 m ou de 4 m ?",
+          // Fiche couverture (2026-11-19) : 2 m, ta règle, vendu en zinc comme en PVC (avant 4 m).
+          default: { value: constanteFiche("evacuation.longueur_tube_descente").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 2, note: "longueurs de 2 m (zinc et PVC)" },
           choices: [
-            { label: "4 m", value: "4" },
             { label: "2 m", value: "2" },
+            { label: "4 m", value: "4" },
           ],
-          textValues: [{ value: "2", keywords: ["longueur de 2 m", "longueurs de 2 m", "tube de 2 m", "tubes de 2 m", "en 2 m", "barres de 2 m"] }],
+          textValues: [
+            { value: "2", keywords: ["longueur de 2 m", "longueurs de 2 m", "tube de 2 m", "tubes de 2 m", "en 2 m", "barres de 2 m"] },
+            { value: "4", keywords: ["longueur de 4 m", "longueurs de 4 m", "tube de 4 m", "tubes de 4 m", "en 4 m", "barres de 4 m"] },
+          ],
         },
         {
           key: "dauphin",

@@ -1,5 +1,14 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-57 — Tubes de descente en longueurs de 2 m par défaut
+
+- **§7 / §15 Tubes de descente** : longueurs de 2 m par défaut, lues dans la fiche (`evacuation.longueur_tube_descente`).
+  Règle du fondateur, et la recherche confirme que le 2 m existe en zinc (VMZinc, Rheinzink, NedZink ; standard en
+  Bretagne) comme en PVC (Nicoll, First Plast : 4, 3, 2, 1 m). « En longueurs de 4 m » écrit au devis donne du 4 m.
+  Avant : 4 m. Exemple : 2 descentes de 5 m → 6 tubes de 2 m (avant 4 tubes de 4 m).
+- Aide de la question du diamètre : Ø 100 jusqu'à 113 m² de toit (avant 130), Ø 120 jusqu'à 160 m² (NF DTU 40.5 via
+  VMZinc, fiche couverture).
+
 ## roofing-2026.11.19-56 — Faîtières et arêtiers sans modèle : 3 au ml
 
 - **§5 Faîtière et arêtier courants (40 à 42 cm), modèle non écrit au devis** : 3 au ml, lu dans la fiche
