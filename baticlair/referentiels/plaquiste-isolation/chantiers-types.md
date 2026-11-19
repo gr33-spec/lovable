@@ -1,7 +1,7 @@
 # Chantiers types plaquiste-isolation (jeu de test pour l'ouverture du métier)
 
 Calculés par le moteur de Mobiiz (`packages/domain`, `computeWorkItem` puis `purchaseList`) avec `referentiel.json`
-(version `plaquiste-isolation-2026.11.20-1`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
+(version `plaquiste-isolation-2026.11.20-2`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
 Écrit par `outils/calculer_chantiers.mjs` : ne pas modifier à la main, relancer l'outil.
 
 Lecture : « Lu au devis » = données que le modèle de lecture doit trouver dans la ligne ; « Questions » = ce que le moteur

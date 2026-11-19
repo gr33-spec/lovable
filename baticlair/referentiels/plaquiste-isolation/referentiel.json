@@ -1,6 +1,6 @@
 {
   "id": "plaquiste-isolation",
-  "version": "plaquiste-isolation-2026.11.20-1",
+  "version": "plaquiste-isolation-2026.11.20-2",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -9901,7 +9901,7 @@
           "source": "isover-vario",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : 1,10 m² de membrane par m² (rendement Isover cité ; calcul : lé 1,50 m, recouvrement 10 cm → +7 %, plus relevés en rive)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 1,10 m² de membrane par m² : rendement Isover et calcul (lé 1,50 m, recouvrement 10 cm → +7 %, plus relevés), confirmé en 3e passe (recherche/07)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -9913,7 +9913,7 @@
           "source": "isover-vario",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Lé de 1,50 m moins 10 cm de recouvrement : recouvrement usuel non lu dans la notice."
+            "note": "Recherche du 2026-11-19 — 2 sources : Recouvrement de 10 cm au moins entre lés : Knauf, Rockwool (11/2024), Soprema, Isover (recherche/07)."
           },
           "version": 1,
           "kind": "installation_condition",

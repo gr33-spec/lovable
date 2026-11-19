@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | État | **Recherche, NON BRANCHÉE.** Le métier reste fermé dans l'application ; aucun code ne lit ce dossier. |
-| Version | `plaquiste-isolation-2026.11.20-1` (fichier machine `referentiel.json`) |
+| Version | `plaquiste-isolation-2026.11.20-2` (fichier machine `referentiel.json`) |
 | Rédaction | Mission de nuit du 19-20 novembre 2026 (Claude), sept chercheurs et deux contre-vérifications. |
 | À faire avant ouverture | Relecture par un plaquiste (section 16), branchement (section 17). |
 
@@ -408,7 +408,7 @@ Pas d'ouvrage « coffrage » dans `referentiel.json` : la ligne part telle qu'é
 | Classement | EA ; EB ; EB+ privatifs ; EB+ collectifs ; EC (hors DTU 25.41) — Cahier CSTB 3567_V2 | ✔ | [R03-S3 p. 18] |
 | Plaque H1 | exigée en EB+ privatifs et collectifs | ✔✔ | [R03-S3 ; S6, S7] |
 | SPEC sous carrelage | EB+ collectifs : sur 2 m de haut au moins, plus des bandes de renfort sol / mur ; EB+ privatifs : dispensable si enduits et mortier de rebouchage sont hydrofugés | ✔ | [R03-S3 p. 17] |
-| Entraxe des montants sous carrelage | resserré selon le format des carreaux (§ 6.3.2.1) | ? (valeur et seuil non lus : 0,40 m probable) | [R03 §8] |
+| Entraxe des montants sous carrelage | en parement simple (BA13, BA15), carreaux de **plus de 1 600 cm²** en pièce humide privative : montants à **0,40 m** | ✔✔ (AQC, FAQ Knauf, guide DTU 2022) | [R07] |
 | Plafond en plaques hydro | entraxe des fourrures 0,40 (Placo) | ≠ (Siniat : 0,50 au-delà de 80 % d'humidité) | [R03 §8] |
 | Rampants en EB+ | plaques H1 jusqu'à 1,80 m du sol fini | ✔ | [R03-S3] |
 
@@ -469,7 +469,11 @@ Fiche environnementale Placo 2026 du BA13, pour 1 m² posé : 12 vis, 1,23 m de 
 | Rockwool Rockcalm, Rockplus Premium, Roulrock | voir R04 A2 | — | — | ✔ à ✔✔ | [R04 A2] |
 | Knauf Ultracoustic P 45 | — | 45 → 1,20 | 12,96 m² (16 panneaux) | ✔✔ R ; ✔ colis | [R04 A5] |
 | Laine de bois Steico Flex 036, Gutex Thermoflex, Pavaflex ; coton Métisse RT ; Biofib'Trio | 0,036 à 0,039 | tableaux ACERMI 2025-2026 | — | ✔ (ACERMI) | [R04 A6] |
-| PSE, XPS, polyuréthane, isolants minces | — | — | — | ? (recherche web épuisée ; troisième passe [R07]) | [R04 A7] |
+| PSE sous chape Knauf Therm Chape Th38 | — | 20 mm → R 0,50 … 200 mm → R 5,25 | 2,50 × 1,20 m ; 1,05 m² par m² traité | ✔✔ | [R07] |
+| XPS Styrodur 3035 CS (diffusé par Placo) ; Ravatherm XPS 300 ST | 0,029 (Ravatherm) | 30 à 120 mm ; R du Styrodur ? (fiche BASF injoignable) | 1,25 × 0,60 à feuillure, 7 à 14 panneaux par colis | ✔ / ? | [R07] |
+| Efigreen (polyuréthane) | — | — | toiture-terrasse en 0,60 × 0,60 : hors métier plaquiste | ✔✔ | [R07] |
+| Isolants minces | — | « en observation » à la commission prévention produits de l'AQC (C2P) ; R mesuré selon NF EN ISO 22097. Afficher le R de l'isolant seul, jamais « avec lame d'air ». Hybris 31 n'est pas un mince (λ 0,031, 1,20 × 2,70 / 2,80) | — | ✔✔ | [R07] |
+| URSA XPS, polyuréthane nu, Actis Triso | — | — | — | ? (quota de recherche) | [R07] |
 
 **Au comptoir, pour un isolant**, il faut [R04 F ; R06 B.1] :
 - la famille et la marque (ou « équivalent ») ;
@@ -508,10 +512,14 @@ Accessoires du soufflage, **seulement s'ils sont écrits** :
 
 | Article | Valeur | Conditionnement | État | Sources |
 |---|---|---|---|---|
-| Isover Vario Xtra (hygro-régulante, Sd 0,4 à 25 m) | 1 m² isolé → **1,10 m²** de membrane (lé de 1,50 m, recouvrement de 10 cm, relevés) | rouleau 1,50 × 40 m = **60 m²** | ✔✔ rouleau ; ✔ majoration ; ? recouvrement de 10 cm | [R04 D] |
+| Isover Vario Xtra (hygro-régulante, Sd 0,4 à 25 m) | 1 m² isolé → **1,10 m²** de membrane (lé de 1,50 m, recouvrement de **10 cm minimum**, relevés) | rouleau 1,50 × 40 m = **60 m²** | ✔✔ (rouleau, majoration, recouvrement : Knauf, Rockwool 11/2024, Soprema, Isover) | [R04 D ; R07] |
 | Adhésif Vario KB1 (Vario Multitape, Fast Tape) | ml = surface ÷ 1,40 (un joint tous les 1,40 m) + rives ; la fiche prend +30 % pour les rives ? | rouleau 60 mm × 40 m ; carton de 8 | ✔✔ rouleau ; ? ratio (aucun ratio fabricant) | [R04 D] |
 | Mastic Vario DoubleFit | 310 000 ÷ section du cordon | cartouche de 310 ml | ✔✔ | [R04 D ; R05 E] |
-| Placo / Isover Stopvap, Knauf LDS, Siga Majrex, Pro Clima Intello | « 1,50 × 50 m = 75 m² » souvent cité de mémoire | — | ? (aucune fiche lue ; troisième passe [R07]) | [R04 D] |
+| Pro Clima Intello / Intello Plus ; Siga Majrex | — | 1,50 × 50 m = **75 m²** (fiche 01/2026) | ✔✔ (Intello) ; ✔ (Majrex) | [R07] |
+| Knauf LDS 100 | — | **2 × 50 m = 100 m²** (et non 1,5 × 50) | ✔ | [R07] |
+| Adhésifs Pro Clima Tescon Vana, Siga Rissan | — | 60 mm × 30 m ; 60 mm × 25 m | ✔ | [R07] |
+| Placo / Isover Stopvap | — | dimensions ? (isover.fr 403) | ? | [R07] |
+| Suspentes Isover Intégra 2 (rampants, la membrane passe entre suspente et fourrure) | une tous les 0,60 × 1,20 m, soit 1,5 à 3 par m² | boîte de 50 ; 160 / 200 / 240 / 280 mm | ✔ | [R07] |
 | Position | côté chaud, entre isolant et plaque ; en deux couches, règle 2/3-1/3 (3/4-1/4 en zone très froide) | — | ✔✔ | [R04 C] |
 | Le kraft n'est pas un pare-vapeur | membrane et adhésifs en rampants même avec un isolant kraft | — | ✔ (Isover) | [R04 C] |
 | Boîtiers électriques étanches à l'air | Legrand Eco Batibox étanche, 1 poste, profondeur 40 mm (090508L) ou 50 mm ; perçage Ø 67 | lot de 100 | ✔✔ | [R05 E] |
@@ -522,7 +530,8 @@ Accessoires du soufflage, **seulement s'ils sont écrits** :
 |---|---|---|---|
 | DTU | NF DTU 45.10 (rouleaux et panneaux en combles), NF DTU 45.11 (soufflage) ; pas de « 45.12 » | ✔✔ intitulés ; ? éditions en vigueur (textes AFNOR non lus) | [R04 C] |
 | MaPrimeRénov' 2026 | **plus aucun geste d'isolation seul éligible en métropole** ; l'isolation n'est aidée que dans la « Rénovation d'ampleur » | ✔ (service-public.gouv.fr F35083, officiel) | [R04-S76] |
-| Seuils R des aides (CEE) | combles perdus R ≥ 7 ; rampants R ≥ 6 ; murs R ≥ 3,7 ; planchers bas R ≥ 3 | ? (fiches CEE 2026 non relues) | [R04 C] |
+| Seuils R des aides (CEE) | BAR-EN-101 : combles perdus R ≥ 7, rampants R ≥ 6 ; BAR-EN-102 : murs R ≥ 3,7 ; en vigueur en 2026, abrogées au 1er mai 2027 | ✔✔ | [R07] |
+| Rénovation « élément par élément » (valeurs depuis 2023) | murs R 3,2 ; combles perdus R 5,2 ; rampants R 5,2 / 4,5 / 4 ; plancher bas R 3 | ✔ (une source officielle ; Légifrance répond 403) | [R07] |
 | RE2020 (neuf) | pas de R minimal par paroi : exigences globales (Bbio, Cep, Ic, DH) | ? (texte non relu) | [R04 C] |
 
 La fiche **ne déduit jamais un R** des aides : le R se lit au devis, ou se demande.
@@ -763,10 +772,10 @@ Ils sont classés par effet sur une commande, le plus gros d'abord. Le détail e
 5. **Quantitatifs SAA / SAD** : déduits de la constitution, aucun quantitatif fabricant lu.
 6. **Périmètre des plafonds** (cornière de rive) : estimé pour une pièce carrée ; le devis donne rarement le périmètre.
 7. **Fixation de bout de rail** (non chiffrée) ; nombre de tirs par cartouche de gaz.
-8. **Recouvrement des membranes** (10 cm), **ratio d'adhésif**, rouleaux des membranes autres qu'Isover.
-9. **PSE, XPS, polyuréthane, isolants minces** : 1re passe vide (troisième passe [R07]).
-10. **Suspentes Intégra 2** (rampants) : densité et boîte.
-11. **Entraxe sous carrelage** en pièce humide (0,40 m ? à partir de quel format de carreau).
+8. **Ratio d'adhésif** de membrane (rives) ; dimensions de Stopvap. Le recouvrement de 10 cm et les rouleaux Intello, Majrex et LDS sont levés en 3e passe.
+9. **R du Styrodur, URSA XPS, polyuréthane nu, Actis Triso** (la 3e passe a couvert le PSE sous chape, le XPS Ravatherm et le statut des isolants minces).
+10. **Suspentes Intégra 2** : boîte de 50 et densité de 1,5 à 3 par m² ✔ (1 source) ; pas encore un ouvrage de la fiche.
+11. ~~Entraxe sous carrelage~~ : levé en 3e passe (0,40 m au-delà de carreaux de 1 600 cm², ✔✔ [R07]). Reste à le lire au devis (format des carreaux), la fiche lit seulement « sous faïence » ou « sous carrelage ».
 12. **Plafond vissé directement sous solives** (DTU 2022 : ossatures bois supprimées).
 13. **Knauf France** (montants, rails, KF 13 en 2,80 / 3,00, charge du Diamant), **gamme Siniat Prégymétal**, M 90 / M 100 / R 100 Placo.
 14. **Placo BA 15 et BA 18 standard** en 1,20 m (fiches France absentes) ; Habito Hydro (formats) ; Glasroc H Ocean ; palettes Fermacell (tarif 2010 seul).

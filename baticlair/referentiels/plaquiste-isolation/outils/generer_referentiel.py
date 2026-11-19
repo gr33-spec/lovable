@@ -21,7 +21,7 @@ import os
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SORTIE = os.path.join(ICI, "..", "referentiel.json")
-VERSION = "plaquiste-isolation-2026.11.20-1"
+VERSION = "plaquiste-isolation-2026.11.20-2"
 TRADE = "drywall"
 DATE = "2026-11-19"
 
@@ -913,8 +913,8 @@ def soufflage():
 # OUVRAGE 10 : MEMBRANE PARE-VAPEUR
 # ---------------------------------------------------------------------------------------------------------------
 def pare_vapeur():
-    c = {"majoration": regle("1.10", "u", "isover-vario", UNE("1,10 m² de membrane par m² (rendement Isover cité ; calcul : lé 1,50 m, recouvrement 10 cm → +7 %, plus relevés en rive)."), label="membrane + {v}"),
-         "largeur_utile": regle("1.40", "m", "isover-vario", DOUTE("Lé de 1,50 m moins 10 cm de recouvrement : recouvrement usuel non lu dans la notice."), label="un joint tous les {v}"),
+    c = {"majoration": regle("1.10", "u", "isover-vario", OK2("1,10 m² de membrane par m² : rendement Isover et calcul (lé 1,50 m, recouvrement 10 cm → +7 %, plus relevés), confirmé en 3e passe (recherche/07)."), label="membrane + {v}"),
+         "largeur_utile": regle("1.40", "m", "isover-vario", OK2("Recouvrement de 10 cm au moins entre lés : Knauf, Rockwool (11/2024), Soprema, Isover (recherche/07)."), label="un joint tous les {v}"),
          "majoration_adhesif": regle("1.3", "u", "isover-vario", DOUTE("Joints entre lés + raccords en rive : aucun ratio fabricant ; 30 % pour les rives, à confirmer."), label="adhésif + {v}")}
     params = [surface("Surface de membrane", "Surface à couvrir ?")]
     needs = [besoin("membrane", "membrane", "surface * regle.majoration", "m2", "isover-vario", UNE("Surface × 1,10."), short="membrane"),
