@@ -89,14 +89,197 @@ Abréviations des sources : voir la liste numérotée « Sources » en fin de fi
 | UV trappe de visite | à l'unité, par dimension de **réservation** (60 × 60, 40 × 40, 30 × 30…) et par type (standard, hydro, coupe-feu EI60) | pièce | [S45] Chausson : Gypso hydro 590 × 590, Knauf PLP « passage 595 × 595 », alu « plaque 12,5 mm 60 x 60 » | [S45] Gedimat « Trappe de visite métal-plâtre CF60 pose en intégrée - 600x600mm » | confirmé (2 sources) | La désignation mêle **passage** et **réservation** selon marque : le comptoir demande « la découpe ? et c'est en plafond ou en cloison ? hydro, coupe-feu ? ». |
 | UV boîte d'encastrement cloison sèche | à l'unité (Debflex, Ø 67 × 40 ou 50) ; lot de taille non précisée chez Tout Faire | pièce | [S46] Chausson « Boite d'appareillage cloisons sèches Stop air - 67 mm - 50 mm » (conditionnement 1) | [S46] Gedimat « Boite d'encastrement cloison sèche 1 poste D67mm P50mm » (réf. 24270861) | confirmé (2 sources) à l'unité ; lot/sachet : à confirmer | Rayon électricité du négoce, pas plâtrerie. Normalement fourni par l'électricien : à ne mettre dans la liste que si le devis plaquiste l'écrit. |
 
-## B. Le comptoir
 
-(en cours)
+### A.9 Ce que la section A change pour Mobiiz
+
+1. **L'unité de commande des profilés est la pièce, pas la botte.** Tous les négoces pro lus (Chausson, Gedimat, BigMat, Tout Faire) vendent rails, montants, fourrures et cornières à la pièce ; la botte de 10 (30 pour la CR2) est le conditionnement usine. Exception : Quéguiner (Bretagne) affiche l'unité en **ml** avec un minimum égal à une barre (voir C.4). La liste doit dire « 23 montants M48 de 2,49 m » ; « soit 3 bottes » n'est qu'une information.
+2. **Les longueurs Placo de montants finissent en 9** (2,49 / 2,59 / 2,69 / 2,79 / 2,99 / 3,19 / 3,39 / 3,59 / 3,99). Écrire « montant de 2,50 » au négoce est compris, mais la désignation exacte est « M48 2,49 m ».
+3. **Le nombre de vis par boîte dépend de la marque** (Placo : 500 / 1 500 ; marques de négoce : 1 000). La ligne doit nommer la vis et la boîte (« vis TTPC 25, 1 boîte ») et laisser la contenance au fournisseur, ou calculer en vis et arrondir à la boîte que le négoce annonce.
+4. **Suspentes : 50 ou 100 par boîte selon le modèle et la marque** (voir la contradiction longue 240).
+5. **Le R d'un complexe de doublage ne se déduit pas de « 10+80 » ou « 13+80 »** : 2,15 / 2,55 / 2,75 selon le PSE (blanc, graphité) ; il se lit sur la fiche.
+
+## B. Le comptoir : ce que le vendeur demande, ce qu'il ne demande jamais, comment il nomme les articles
+
+Les questions ci-dessous viennent des guides de choix publiés par les négoces (Samse, Chausson, Point.P), des fiches qui déterminent le choix d'un article (l'appui Optima suit l'épaisseur d'isolant, le clou suit le cloueur) et des désignations négoce. Ce qui relève de la seule pratique du comptoir, sans écrit trouvé, est marqué « à confirmer (pratique, non documentée) ».
+
+### B.1 Ce que le vendeur demande pour pouvoir chiffrer
+
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| Longueur de plaque | « Quelle hauteur sous plafond ? » : la plaque doit être un peu plus longue que la hauteur à couvrir, pour ne pas rajouter de bande en hauteur | — | [S48] Samse, guide « Comment choisir ses plaques de plâtre », 19/11/2026 (extrait moteur) | [S1] fiche Placo : longueurs de 2,00 à 3,60 m ; [S49] Siniat : longueur sur mesure J+10 dans la limite de la longueur maxi du catalogue moins 10 cm (extrait moteur d'un document Siniat) | confirmé (2 sources) | La question n° 1 du comptoir. Elle donne aussi la longueur des montants (hauteur − 1 cm → M48 2,49 pour 2,50 m). |
+| Type de plaque | standard / hydro (H1, verte) / feu (rose) / phonique (bleue) / haute dureté | — | [S48] Samse, guides plaques hydro, feu, standard | [S50] Chausson « Comment choisir vos plaques de plâtre » : « hydrofugée H1 conseillée (plaque standard admise) » ; Castorama : H1 « obligatoire » en locaux humides privatifs | contradiction (H1 « obligatoire » chez Castorama, « conseillée, standard admise » chez Chausson) | La différence tient au classement du local (EA/EB/EB+, DTU 25.41) : le vendeur pose la question « c'est pour une salle de bains ? douche ? », pas « quel classement ? ». |
+| Épaisseur de plaque | BA13 par défaut ; BA15/BA18 en collectif ; BA10 en cintré | mm | [S48] Samse | [S50] Chausson (BA10 cintré, BA15 résistance mécanique) | confirmé (2 sources) | Si le devis dit « BA13 », la question ne se pose pas. |
+| Marque ou équivalent | le négoce sert la marque qu'il référence (Placo, Knauf, Siniat, Pladur, marque propre) | — | [S50] Chausson, catégorie plaques : Siniat, Knauf, Placo, Pladur | [S51] Quéguiner : Placo et Knauf, pas de Siniat vu | confirmé (2 sources) que l'offre de marques varie par négoce | « Placo ou équivalent ? » : à confirmer (pratique) ; la règle Placo « 100 % système Placo » [S47] (garantie des PV seulement avec tous les composants Placo) est l'argument qui fait demander la marque pour un ouvrage feu ou acoustique. |
+| Épaisseur / R de l'isolant | sert à choisir le rouleau (GR 32 100, 120…) et **l'appui** (Optima 75, 100, 120, 140 selon la laine) | mm, R | [S28] fiches Gedimat Optima 2 (75 → laine 60-85 ; 120 → 100-120…) | [S27] Chausson Optima 2 par longueur | confirmé (2 sources) | Kraft ou nu : la désignation négoce le dit toujours (« revêtu kraft »), donc la question existe quand le devis ne le dit pas : à confirmer (pratique). |
+| Plénum d'un plafond | sert à choisir la suspente (courte 81 : 20-60 mm ; longue 171 : 20-150 ; longue 240 : 20-220 ; maxi 300 : 20-280 ; maxi 400 : 20-380) | mm | [S47] Offre Placo 2024, tableau de choix des suspentes | [S23] Chausson (plénum 150 pour la longue 171, 60 pour la courte, 280 pour la maxi 300) | confirmé (2 sources) | Et le support : bois (suspentes), béton (H/HL, pivot sur tige filetée). |
+| Cloueur utilisé | les clous à gaz sont propres à un cloueur (Spit Pulsa, etc.) | — | [S34] Chausson / Samse (clous « pour Pulsa 800 ») | [S34] BigMat (clous compatibles « Powers C3, Pulsa 1000, C40G1 ») | confirmé (2 sources) | Sinon chevilles à frapper 6 × 40 en boîte de 100. |
+| Trappe : dimension et usage | réservation (60 × 60…), plafond ou cloison, hydro, coupe-feu | — | [S45] Chausson (trappes Gypso hydro, Knauf PLP) | [S45] Gedimat (CF60 600 × 600) | confirmé (2 sources) | — |
+| Livraison | adresse précise, contact sur chantier, accès (grue, étage), autorisations de voirie | — | [S47] Offre Placo 2024 « Livraisons chantiers » | [S52] Samse services livraison (autorisations de voirie au client) ; [S49] Siniat (adresse, plan d'accès) | confirmé (2 sources) | Voir E. |
+
+### B.2 Ce que le vendeur ne demande jamais
+
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| Entraxe des montants, nombre de vis par m², ratio d'enduit | jamais demandé : c'est le métier du plaquiste, le négoce vend les pièces qu'on lui dicte | — | — | — | à confirmer (pratique, non documentée) | Cohérent avec la « règle du comptoir » de Mobiiz (CLAUDE.md §47.8) : ce que le vendeur ne demande pas reste une hypothèse dite. Aucun guide négoce consulté ne pose ces questions au client. |
+| Surface en m² de cloison ou de doublage | le négoce ne vend pas des m² d'ouvrage ; seul Chausson/Quéguiner acceptent une **saisie** en m² de plaque, convertie en plaques | — | [S4] Chausson (m² ou unité) | [S51] Quéguiner (UV m², 1 unité = 3 m²) | confirmé (2 sources) | Le m² du devis doit être converti en plaques avant d'être envoyé. |
+| Zone climatique, DTU, classement EA/EB | jamais demandé sous ce nom | — | — | — | à confirmer (pratique) | Le vendeur traduit en question d'usage (« salle de bains ? »). |
+
+### B.3 Le vocabulaire du comptoir
+
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| « placo » | nom commun pour « plaque de plâtre », toutes marques ; Placoplatre est une marque déposée (Saint-Gobain) | — | [S53] Futura-Sciences, « Placoplatre : qu'est-ce que c'est ? » | [S53] Techno-Science « Plaque de plâtre » (première fabrication à Vaujours en 1947) | confirmé (2 sources) | « Du placo » au comptoir ≠ « de la marque Placo ». L'app ne doit pas en déduire la marque. |
+| « BA13 » | plaque à bords amincis de 12,5 mm (épaisseur arrondie 13) | — | [S1] fiche Placo (« Epaisseur arrondie 13 mm, réelle 12,5 mm ») | [S4] Chausson « … BA13 … ép. 12,5 MM » | confirmé (2 sources) | Idem BA10, BA15, BA18 ; « BD » = bords droits. |
+| « rail de 48 », « montant de 48 en 2,50 » | rail R48 (3 m) ; montant M48 de la longueur dite (2,49 réel chez Placo) | — | [S8] fiche Placo M48 (« Montant Stil® M 48/249 bot10L ») | [S54] Quéguiner « Rail pour plaque de plâtre - R48/28 - 3,00 ml », « Montant … M48 … » ; Samse « Montant métal STIL 48/35 2,50m » | confirmé (2 sources) | « 48/35 » = largeur d'âme / aile ; « R48/28 » = largeur / hauteur d'aile. « 72/48 » au devis = cloison de 72 mm sur ossature de 48 (2 BA13 + 48 − arrondi). |
+| « F530 », « fourrure » | fourrure Stil F530 (Placo), 18 × 45 mm ; le nom Placo sert de nom commun | — | [S14] Gedimat « Fourrure STIL F530 » | [S12] Samse « Fourrure métal 18/45 STIL F530 » | confirmé (2 sources) | Knauf nomme sa fourrure F47 (suspente pivot Knauf « sur F47 » [S25]) : un « F530 » demandé chez un négoce Knauf sera servi en F47 équivalente : à confirmer. |
+| « suspentes pivot » | suspente sur tige filetée (Placo SP, Knauf pivot) | — | [S47] Placo « Suspente pivot Stil SP » | [S25] Knauf « Suspente pivot » | confirmé (2 sources) | — |
+| « vis 25 », « vis 35 », « TTPC », « TRPF » | TTPC 25 = 1 plaque de 13 sur ossature ; TTPC 35 = 2 plaques ou BA18 ; TRPF 13 = montant-rail (métal-métal) | — | [S47] Offre Placo 2024 : « Longueur vis = 13 mm + 10 mm → vis TTPC 25 », « 13 mm + 20 mm → TTPC 35 », « Vis TRPF 13, 25 » | [S30] Gedimat (gamme TTPC 25 à 90) ; [S54] Quéguiner « Vis TRPF - longueur 13 mm - boîte 1000 unités » | confirmé (2 sources) | — |
+| « Placomur 10+80 », « doublage 13+80 » | complexe plaque + PSE, épaisseurs en mm ; Placo écrit « Placomur® 2.55 - 13+80 » | — | [S47] Offre Placo 2024 | [S39] Tout Faire « Doublage isolant PlacomurE 2.15 10 ET 80 270 » | confirmé (2 sources) | « 10+80 » est l'ancienne/la gamme Essentiel (plaque 10 mm), « 13+80 » la gamme BA13 : deux produits différents. |
+| « bande et enduit » | bande papier (rouleau 150 m) + enduit (sac 25 kg poudre ou seau 25 kg prêt à l'emploi) | — | [S35] Gedimat bandes 150 m | [S36]/[S37] Gedimat PR4 sac 25 kg, Placomix seau 25 kg | confirmé (2 sources) | La question qui suit au comptoir : « poudre ou prêt à l'emploi ? » (à confirmer, pratique). |
+| « MAP » | mortier adhésif Placo (MAP Formule+), employé comme nom commun du mortier de collage | — | [S38] Chausson, Samse, Tout Faire (« MAP® Placo Formule+ ») | [S54] Quéguiner vend « Mortier adhésif - Indidoublage - sac 25 kg » sous la même catégorie | 1 source pour l'usage générique (déduit) | Comme « placo », « MAP » ne garantit pas la marque Placo. |
+| Codes article « bot10L », « bot30L », « P40 » | suffixes Placo de conditionnement (botte de 10 / 30 longueurs, pile de 40) repris tels quels dans les désignations négoce | — | [S8], [S15], [S1] fiches Placo | [S16] Tout Faire « Cornière Stil CR2 -bot30L » | confirmé (2 sources) | Utile pour lire un devis négoce ; ne pas l'interpréter comme une quantité commandée. |
 
 ## C. Différences régionales
 
-(en cours)
+### C.1 Présence des marques de plaques (usines et réseaux)
+
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| Placo : présence | nationale ; usines de plaques citées : Vaujours (93), Chambéry (73), Val de Cognac (16) ; plâtres et carreaux : Cormeilles (95), Vaujours, Pouillon (40) ; Laragne (05) cité pour le plâtre en PACA | — | [S47] Offre Placo 2024 (« usine Placo de Chambéry » ; colonnes de délai Cormeilles / Vaujours / Pouillon pour les carreaux) | [S55] extraits Saint-Gobain (communiqué « usine Placo de Val de Cognac », 11/2024) et Parc du Verdon 2024 (Laragne) | confirmé (2 sources) | Aucune usine Placo en Bretagne : l'Ouest est livré depuis Cognac ou l'Île-de-France (déduction, à confirmer). |
+| Knauf : présence | usines de plaques à Saint-Soupplets (77) et Fos-sur-Mer (13, ouverte récemment, 30 M m²/an annoncés) | — | [S56] knauf.com « Knauf Plâtres Fos, une nouvelle usine de plaques de plâtre » | [S56] Batiweb / Gomet (création et inauguration de Fos) | confirmé (2 sources) | Knauf est vu en Bretagne chez Quéguiner (« Knauf KH BA13 hydro », « Knauf KS BA13 ») [S51]. |
+| Siniat (Etex) : présence | Auneuil (60, plus gros site), Ottmarsheim (68), Carpentras (84, ligne pilote), Saint-Loubès (33), Mazan (84 selon PNR Verdon) ; « 14 sites de production en France » | — | [S57] Siniat, dossier de presse Auneuil juin 2023 et documentation éco Plâtre (extraits) | [S57] Géorisques, inspection Ottmarsheim 2023 ; Batiweb (Recyplac, Pureplac) | confirmé (2 sources) | Pas de Siniat vu chez Quéguiner (Bretagne) ; présent chez Chausson et Gedimat (Prégymax, bande Siniat). |
+| Pladur (Espagne) : présence | vendu par Chausson ; en GSB (Castorama, Brico Dépôt) avec la mention « zone Sud » : magasins **au sud du Mans**, hors Kingersheim, Colmar, Angers, Saint-Nazaire, Nantes | — | [S58] Castorama, fiches Pladur « zone Sud » | [S58] Brico Dépôt « BA 13 multi H1 » Pladur (même périmètre) ; [S50] Chausson (Pladur dans la catégorie plaques) | confirmé (2 sources) | Seule **différence régionale de marque documentée** : une plaque espagnole servie au sud d'une ligne Le Mans. |
+| Fermacell (fibres-gypse) | référencé chez Chausson (2,50 et 2,60 × 1,20, BA et BD), Samse, Tout Faire ; stock selon agence | — | [S59] Chausson fiches Fermacell | [S59] Samse « Plaque fibres-gypse FERMACELL BD 12,5mm 250x120cm » | confirmé (2 sources) qu'il est au catalogue ; disponibilité régionale non documentée | Produit « sur commande » dans la plupart des agences (Tout Faire affiche des ruptures) : à confirmer. |
+| Délai Placo selon la région | les doublages Placomur ont deux colonnes de délai : « Est et Méd. » / « Ouest et Paris Nord et Sud » (ex. J+5 / J+10) | jours | [S47] Offre Placo 2024, tableau Placomur | — | 1 source | Signe d'une production régionalisée des complexes PSE. Le délai de l'Ouest (dont la Bretagne) peut être plus long : à confirmer pour 2026. |
+
+### C.2 Négoces par région (maillage)
+
+Source principale : Prospérences, « Comment les négoces de matériaux ont-ils maillé le territoire ? », étude annuelle **2021** [S60] (part des artisans et salariés du bâtiment situés à moins de 20 minutes d'une agence). Le document a 5 ans : les classements ont pu bouger (rachats), et c'est la seule source chiffrée trouvée.
+
+| Région | Top 5 (part du marché couvert) | Source 2 | Statut | Note |
+| --- | --- | --- | --- | --- |
+| **Bretagne** | Point.P 80 % ; Tout Faire 69 % ; Starmat 67 % ; Quéguiner 64 % (centrale MCD) ; Réseau Pro 63 % (groupe Chausson) ; puis Tanguy Matériaux 60 % | Le Journal des Entreprises : Quéguiner 41 agences en Bretagne historique après le rachat de 6 agences Sanséau (ex-BigMat) [S61] ; Tanguy 62 agences Bretagne et Pays de la Loire, adhérent Altéral [S62] | confirmé (2 sources) pour la présence ; pourcentages 1 source (2021) | Point.P est implanté dans chaque arrondissement ; son enseigne sœur **Bretagne Matériaux** (Saint-Gobain, > 20 points de vente) n'est pas comptée dans les 80 %. Dans le Finistère : Point.P 82 %, Quéguiner 78 %, Tanguy 68 %. |
+| Auvergne-Rhône-Alpes | Point.P 66 % ; Gedimat 57 % ; France Matériaux 56 % ; Samse 55 % | — | 1 source | Samse est un acteur alpin. |
+| Bourgogne-Franche-Comté | Doras 57 % (groupe Samse) ; Point.P 48 % ; Gedimat 34 % ; BigMat 32 % | — | 1 source | Doras est le négoce régional de l'Est-Centre. |
+| Nouvelle-Aquitaine | Point.P 72 % ; Chausson 64 % ; Tout Faire 60 % ; Gedimat 46 % ; Partedis 43 % | — | 1 source | — |
+| Occitanie | Chausson 77 % ; Point.P 75 % ; Tout Faire 56 % | — | 1 source | Chausson (Toulouse) devant Point.P. |
+| Grand Est | Point.P 59 % ; Les Matériaux (Comafranc) 55 % ; Gedimat 44 % ; BigMat 40 % ; Tout Faire 38 % | — | 1 source | — |
+| PACA | Point.P 80 % ; Ciffréo Bona 79 % ; Tout Faire 56 % ; Starmat 54 % ; Gedimat 43 % | — | 1 source | — |
+| Hauts-de-France, Normandie, Île-de-France, Pays de la Loire, Centre | Point.P en tête partout (76 à 96 %) ; Starmat, Matnor, Tout Faire, VM selon région | — | 1 source | — |
+
+**Samse en Bretagne** : absent du classement breton et de tout autre écrit trouvé : confirmé absent (cohérent avec la consigne).
+**SFIC** (Saint-Gobain, spécialiste plâtrerie-plafonds, 36 agences « dans les grandes métropoles ») : aucune agence bretonne trouvée ; la seule implantation Ouest repérée est une ouverture « près de Nantes » (Batiweb) [S63] : à confirmer.
+**Sofrapa** : **aucune trace trouvée** (ni distributeur, ni plâtrier) sous ce nom. À vérifier auprès de Mobiiz (nom exact ?).
+**Spécialistes plâtrerie bretons** : Quéguiner Rennes est présenté (2016) comme « négoce multispécialisé » dont le pôle plâtrerie-isolation fait la moitié du chiffre de l'agence [S61] ; Denis Matériaux (30 agences Bretagne et ouest Normandie) [S63].
+
+### C.3 Habitudes de pose régionales
+
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| Doublage collé vs sur ossature, Nord / Sud | **rien de documenté** sur une différence régionale | — | recherche infructueuse (forums, FFB, bruit.fr : seulement des comparaisons techniques) | — | à confirmer (non documenté) | Ne pas coder de règle régionale ; garder la question « collé ou sur ossature ? » quand le devis ne le dit pas. |
+| Carreaux de plâtre dans le Sud-Est | **pas de statistique régionale** ; Placo produit ses carreaux à Cormeilles (95), Vaujours (93) et **Pouillon (40, Sud-Ouest)** ; La Maison Saint-Gobain : la plaque est la cloison « la plus répandue », le carreau « matériau traditionnel des cloisons humides » | — | [S47] Offre Placo 2024 (sites carreaux) | [S64] La Maison Saint-Gobain, guide cloisons | à confirmer (non documenté par région) | Le fichier tiroir dit « Sud-Est, Rhône-Alpes, Sud-Ouest » : aucune source ne le chiffre. |
+| Laine de bois dans l'Est | usines : Pavatex/Soprema à **Golbey et Chavelot (Vosges)**, présentée comme la plus grande d'Europe ; Steico à **Casteljaloux (47)** ; Isonat/Isover à **Mably (42)** | — | [S65] Batiweb et Le Journal des Entreprises (Pavatex Golbey) | [S65] DREAL / Usine Nouvelle (Steico Casteljaloux) | confirmé (2 sources) pour les usines ; part de marché régionale **non documentée** | Production dans l'Est et le Sud-Ouest ; pas de chiffre d'usage par région trouvé. |
+| Ouate de cellulose en Bretagne / Ouest | un fabricant breton : **Cellaouate** (Saint-Martin-des-Champs, près de Morlaix, depuis 2010, ≈ 5 000 t/an, sacs de 10 kg, balles de 350-400 kg depuis 2023, partenaire Isocell) ; « sept fabricants de ouate en France dont un en Bretagne » (Fédération bretonne des filières biosourcées) | — | [S66] Batiweb « La ouate de cellulose fait son petit chemin en Bretagne » (2011) | [S66] Le Journal des Entreprises (investissement Cellaouate) ; Novabuild fiches matériaux biosourcés (2026) | confirmé (2 sources) pour le fabricant ; part de marché régionale **non documentée** | National : ouate ≈ 20 % des combles perdus (ECIMA, cité par Batiweb). **Sac de 10 kg chez Cellaouate** contre 12,5 kg (Univercell, Ouatéco) : le poids du sac de ouate dépend de la marque, donc de la région. |
+| Longueurs vendues localement | rien de documenté au-delà des listes de stock par négoce (Tout Faire, Chausson, Quéguiner n'ont pas les mêmes longueurs en ligne) | — | [S3], [S4], [S51] | — | à confirmer | Quéguiner (Bretagne) affiche BA13 Placo en 2,40 / 2,50 / 2,60 / 2,65 / 2,70 m et montants M48 en 2,49 / 2,59 / 2,69 / 2,79 / 2,99 / 3,59 m. |
+
+### C.4 Bretagne : ce qu'il faut retenir pour Mobiiz
+
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| Négoces à viser | Point.P / Bretagne Matériaux (Saint-Gobain), Quéguiner, Tanguy, Tout Faire, Starmat, Réseau Pro, Gedimat, BigMat ; Denis Matériaux | — | [S60] Prospérences 2021 | [S61] [S62] Le Journal des Entreprises (Quéguiner, Tanguy) | confirmé (2 sources) | **Dispano** (Saint-Gobain, bois-panneaux) : présence bretonne non vérifiée (site en 403). **Samse** : absent. **Sofrapa** : introuvable. |
+| Marques de plaques chez Quéguiner | Placo (Placoplatre, Placomarine) et Knauf (KS, KH) ; pas de Siniat vu | — | [S51] Quéguiner, fiche BA13 2,50 × 1,20 | [S51] recherche sur queguiner.fr (Knauf KH BA13 hydro 250 × 120) | confirmé (2 sources, même négoce) | Marques dominantes en Bretagne au-delà de Quéguiner : non documenté. |
+| Unité de vente Quéguiner | plaques **au m²**, minimum 3 m² (1 plaque), palette = 150 m² ; rails et montants **au ml**, minimum 1 barre (3 ml pour le R48) ; vis TRPF en boîte de 1 000, **minimum 12 boîtes (1 carton)** en ligne | — | [S51] fiche BA13 (UV m², 1 unité = 3 m²) | [S54] fiches R48, M48, TRPF | 1 source (un seul négoce) | Le minimum de 12 boîtes vaut pour la vente en ligne ; au comptoir, à confirmer. Un fichier envoyé à Quéguiner peut dire « 30 m² de BA13 2,50 × 1,20 » : il le convertira en 10 plaques. |
+| Code produit Quéguiner | code article interne (115897 pour BA13 2,50) + **référence fabricant** (P01302500) + EAN | — | [S51] | [S54] (R48 : réf. 106303 et H84003000) | confirmé (2 sources) | Le code fabricant Placo (P…, H…, E…, A…) est la clé commune entre négoces ; Mobiiz peut s'en servir pour l'équivalence. |
 
 ## E. Livraison
 
-(en cours)
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| Camion-grue du négoce | oui, usage courant : Gedimat (« la plupart de nos magasins disposent de camions-grues… même en cas d'accès complexe »), Chausson (« déchargement sécurisé au plus près de votre zone de stockage »), Samse (camions-grues propres) | — | [S67] Gedimat FAQ, 19/11/2026 | [S50] Chausson, catégorie plaques BA13 ; [S52] Samse services livraison | confirmé (2 sources) | — |
+| Rayon et conditions | chaque magasin fixe ses conditions et ses frais (Gedimat) ; Samse ≈ 50 km à vol d'oiseau ; Point.P (offre en ligne particuliers) : 48 h ouvrées, 8 t de charge utile, 30 km | km | [S67] Gedimat FAQ | [S52] Samse ; Point.P (extrait moteur, page « commandez vos matériaux en ligne ») | 1 source par négoce | Les autorisations de voirie sont à la charge du client (Samse). |
+| Quantité minimale de livraison chez le négoce | **non documentée** pour les plaques | — | — | — | à confirmer (non documenté) | Seul minimum trouvé : Quéguiner en ligne (minimum = 1 plaque, 1 barre, 12 boîtes de vis). |
+| Livraison usine (Placo direct, comptes pros et dépôts) | camion complet (29 t ou 80 m³) ou demi-camion (12 à 14 t ou 40 m³) ; commande avant 14 h pour J+2 ; livraison mixte Placo + jusqu'à 3 palettes Isover ; grue embarquée, city grue, chariot embarqué, maxi grue (< R+2, R+3 à R+5, > R+5) ; seuil de franco exprimé en euros (montant non noté) | t, m³ | [S47] Offre Placo 2024, pages « Livraisons dépôts et chantiers » | [S7] PSI : « franco 6 tonnes » pour plaques couplées aux ossatures | confirmé (2 sources) que la livraison usine se raisonne en tonnes / camion | Concerne surtout les gros chantiers et les dépôts ; un artisan breton passe par le négoce. |
+| Unité de livraison des plaques | la pile (50 plaques jusqu'à 3,00 m, 40 au-delà) ou la palette filmée (PSI : 50 plaques, 150 m² en 2,50 m) | plaques | [S1] Placo | [S7] PSI ; [S51] Quéguiner « 1 palette = 150 m² » | confirmé (2 sources) | Info seulement : « 1 pile = 50 plaques ». |
+
+## Bilan
+
+**Faits relevés : 89 lignes de tableau** (une ligne = un fait ou un groupe de chiffres d'un même article ; chaque classement régional compte pour une ligne).
+- **Statut « confirmé (2 sources) » : 64** (≈ 72 %), dont 2 lignes qui portent en plus une contradiction partielle.
+- **1 source : 16** (dont 7 classements régionaux Prospérences hors Bretagne, la fourrure F530 bottes/palettes, les appuis et éclisses Placo, le délai Placomur par région, les minimums Quéguiner).
+- **Contradiction : 2 lignes**, plus 2 contradictions notées dans des lignes confirmées (4 en tout, liste ci-dessous).
+- **À confirmer : 7 lignes** (liste ci-dessous, avec les points non documentés).
+- **Contradictions : 4** : R de « Prégymax 13+80 » (2,75 vs 2,55) ; suspente longue 240 (boîte de 50 chez Placo 2024, 100 chez Gedimat) ; plaque H1 « obligatoire » (Castorama) vs « conseillée, standard admise » (Chausson) ; désignation montants Samse en longueurs rondes (2,50 / 3,00) vs Placo en « 9 ».
+- **Liste des « à confirmer » et non documentés** : pratiques du comptoir non écrites (« Placo ou équivalent ? », « kraft ou nu ? », « poudre ou prêt à l'emploi ? », entraxe jamais demandé) ; doublage collé vs ossature selon la région ; carreaux de plâtre Sud-Est ; part régionale de la laine de bois et de la ouate ; quantité minimale de livraison des plaques ; Dispano en Bretagne ; Sofrapa (introuvable) ; la boîte de 1 000 Placo (fiche 2026 seulement) ; palette de 36 sacs de Comblissimo ; catalogue Placo 2026 (placo.fr en 403, l'édition 2024 a servi).
+
+**Corrections à reporter dans le fichier tiroir** (`docs/referentiels/platrerie-isolation.md`) : vis Placo TTPC en 500 / 1 500 (pas 1 000) ; marques de négoce en 1 000 ; PR4 5 kg existe (Placo), MAP 10 kg palette de 40 confirmé ; « suspente pivot » existe chez Placo (boîte de 50) ; profilés vendus à la pièce, pas à la botte.
+
+## Sources
+
+Toutes consultées le 19/11/2026.
+
+1. [S1] Placo, fiche produit « Placoplatre® BA 13 », mise à jour 18/12/2023, PDF hébergé par Gedimat : https://uploads.gedimat.fr/DOCUMENT/TYPE1/0000124548090.pdf
+2. [S3] Tout Faire, « Plaque de plâtre Placoplatre BA13 NF 2,50 x 1,20 m » : https://www.toutfaire.fr/plaque-de-platre-placoplatre-ba13-nf-long-2-50m.html
+3. [S4] Chausson Matériaux, « Plaque de Placoplatre BA13 standard - 2,50 m x 1,20 m » (154956-2) : https://www.chausson.fr/materiaux/plaque-de-platre-placoplatre-ba13-standard-1-2mx2-5m-ep-12-5mm-dim-2-50-x-1-20-m-ep-13-mm-p-154956-2
+4. [S5] BigMat, « Plaque de plâtre BA13 L. 2,50 x l. 1,20 m » : https://www.bigmat.fr/produits/isolation-cloison-platre/cloison-plaque-de-platre/plaques-standards/3496250048324/plaque-de-platre-ba13-l-250-m-x-l-120-m
+5. [S6] Brico Dépôt, plaques BA13 2,50 × 1,20 (appoint) : https://www.bricodepot.fr/p/3334160144715/plaque-de-platre-ba-13-nf-l-2-50-x-l-1-20-m-x-ep-13-mm
+6. [S7] PSI (Prégyplac/IP), « Fiche produit BA13 STD », PDF via Gedimat : https://uploads.gedimat.fr/DOCUMENT/TYPE1/0000130540637.pdf
+7. [S8] Placo, fiche « Montant Stil® M 48 », 11/01/2021, PDF via Gedimat : https://uploads.gedimat.fr/DOCUMENT/TYPE1/0000124592482.pdf
+8. [S9] Brico Dépôt / Castorama, lots de 10 montants et rails M48/R48 (appoint) : https://www.bricodepot.fr/p/3760424120049/lot-de-10-montants-m48-2-49-m-nf-1 ; https://www.castorama.fr/rail-metallique-vendu-par-10-type-r48-acier-galvanise-3-m/3454976951120_CAFR.prd
+9. [S10] BigMat, « Montant STIL® M48 » (2,49 à 3,99 m) : https://www.bigmat.fr/produits/isolation-cloison-platre/profile-et-ossature-plaque-de-platre/rails-montants-fourrures-et-accessoires/3496250053618/montant-stil-m48-l-2-49-m
+10. [S11] Chausson, « Montant … Placo Stil M48 … 3,39 M » (201256-12) : https://www.chausson.fr/materiaux/montant-ossature-metallique-placo-stil-m48-cloison-plaque-platre-p-201256-12
+11. [S12] Samse, « Montant métal STIL 48/35 2,50m », « Fourrure métal 18/45 STIL F530 5,30m » (extraits moteur) : https://www.samse.fr/32864-montant-metal-stil-48-35-2-50m.html ; https://www.samse.fr/7977-fourrure-metal-18-45-stil-f530-5-30m.html
+12. [S13] Gedimat, « Rail R48 NF - 3 m » (24656948) : https://www.gedimat.fr/rail-r48-nf-3m-,1025244,3,21,86.htm
+13. [S14] Gedimat, « Fourrure STIL F530 - 5,30m » (24603911) : https://www.gedimat.fr/fourrure-stil-f530-5-30m-placo,1398397,3,21,86.htm
+14. [S15] Placo, fiche « Rail Stil® R 48 », mise à jour 18/12/2023, PDF via Gedimat : https://uploads.gedimat.fr/DOCUMENT/TYPE1/0000124592406.pdf
+15. [S16] Tout Faire, « Rail Stil R 48-300 », « Cornière Stil CR2 -bot30L » : https://www.toutfaire.fr/rail-stil-r-48-300.html ; https://www.toutfaire.fr/corniere-stil-cr2-bot30l.html
+16. [S17] BigMat, rayon rails R48 (Placo, Knauf, Semin, PSP, Joris Ide, Isolpro) et fourrures Hydrostil+ : https://www.bigmat.fr/produits/isolation-cloison-platre/profile-et-ossature-plaque-de-platre/rails-montants-fourrures-et-accessoires/3496250071520/rail-stil-r-48-l-3-m
+17. [S18] Chausson, « Rail Placo Stil R48 … long. 3,00 M » : https://www.chausson.fr/materiaux/rail-ossature-metallique-placo-stil-p-201255-1
+18. [S19] Placo, fiche « Fourrure Stil® F 530 », 11/01/2021, PDF via Gedimat : https://uploads.gedimat.fr/DOCUMENT/TYPE1/0000124593069.pdf
+19. [S20] Chausson, « Fourrure … Placo Stil F530 … 5,30 M » (201254-1) : https://www.chausson.fr/materiaux/fourrure-placo-stil-f530-plafond-doublage-p-201254-1
+20. [S21] Placo, fiche « Cornière Stil CR2 » (extrait moteur) : https://particuliers.placo.fr/documents/fiche-produit/ficheproduit-cornire-stil-cr2.pdf
+21. [S22] Gedimat, « Rail STIL F530 - 2,35m » : https://www.gedimat.fr/rail-stil-f530-2-35m-placo,1725242,3,21,86.htm
+22. [S23] Chausson, suspentes Stil F530 boîte de 100 : https://www.chausson.fr/materiaux/suspente-pour-plafond-suspente-stil-f530-p-155171-1
+23. [S24] Gedimat / BigMat, suspentes Stil F530 : https://www.gedimat.fr/suspente-longue-240-stil-f530-boite-de-100-pieces-placo,1559438,3,21,87.htm ; https://www.bigmat.fr/produits/isolation-cloison-platre/plafond/accessoires-ossature/3496250213692/suspente-hl-stil-f-530-boite-de-100-pieces
+24. [S25] Knauf, « Suspente pivot » : https://knauf.com/fr-TN/p/produit/suspente-pivot-10468_4070
+25. [S26] Leroy Merlin, cavalier pivot Semin boîte de 100 (appoint) : https://www.leroymerlin.fr/produits/bride-de-fourrure-cavalier-pivot-semin-pour-plafond-suspendu-boite-de-100-lot-de-3-89742306.html
+26. [S27] Chausson, « Appui Optima 2 » (boîtes de 50 et 40) : https://www.chausson.fr/materiaux/appui-optima2-fourrure-45mm-p-402155-1
+27. [S28] Gedimat, Samse, Tout Faire, « Appui OPTIMA 2 » : https://www.gedimat.fr/appui-optima-2-120mm-boite-de-50-pieces-isover,1837882,3,21,87.htm ; https://www.samse.fr/643078-appui-intermediaire-pour-fourrure-optima-2-75-160-boite-40.html
+28. [S29] Placo, fiche « Vis TTPC 25 », mise à jour 23/07/2026 (extrait moteur, placo.fr en 403) : https://www.placo.fr/documents/fiche-technique/ficheproduit-vis-ttpc-25.pdf
+29. [S30] Gedimat, « Vis TTPC 25 - boite de 500 pièces » (Placo) et gamme : https://www.gedimat.fr/vis-ttpc-25-boite-de-500-pieces-placo,1559348,3,21,87.htm
+30. [S31] Chausson, « Vis TTPC Gypso … 3,5 x 25 - boîte de 1000 » : https://www.chausson.fr/materiaux/vis-ttpc-gypso-fixation-plaques-platre-p-104712-1
+31. [S32] BigMat, « Vis TTPC … 3,5 x 25 mm - Boîte de 1000 - PAI » : https://www.bigmat.fr/produits/isolation-cloison-platre/profile-et-ossature-plaque-de-platre/rails-montants-fourrures-et-accessoires/3601590000264/vis-ttpc-pour-plaque-de-platre-diam-35-x-l-25-mm-boite-de-1000-pieces
+32. [S33] Gedimat / BigMat / Tout Faire / Samse, chevilles à frapper 6 × 40 boîte de 100 : https://www.gedimat.fr/cheville-a-frapper-nylon-avec-clou-en-acier-6x40mm-boite-de-100-pieces-,1838633,3,21,87.htm ; https://www.bigmat.fr/produits/quincaillerie/fixation/chevilles/3154551535140/cheville-a-frapper-diam-6-x-l-40-mm-boite-de-100-pieces
+33. [S34] Chausson / Samse / BigMat, clous + gaz : https://www.chausson.fr/quincaillerie/clous-pointes-clou-tampons-hc6-gaz-p-648167-1 ; https://www.samse.fr/766899-tampons-gaz-acier-c6-20-cloueur-gaz-pulsa-800-20mm-boite-500.html
+34. [S35] Gedimat / Tout Faire / Chausson / BigMat, bandes à joint 150 m : https://www.gedimat.fr/bande-pp-grand-rouleau-rouleau-de-150m-placo,1559483,3,21,87.htm ; https://www.toutfaire.fr/bande-joint-papier-pour-plaque-de-platre-long-150m-x-larg-50mm.html
+35. [S36] Gedimat / BigMat / Chausson / Samse / Tout Faire, Placojoint PR4 sac 25 kg : https://www.gedimat.fr/enduit-joint-placojoint-pr4-sac-de-25kg-placo,1215806,3,21,85.htm
+36. [S37] Gedimat / BigMat / Samse / Tout Faire, Placomix seau 25 kg : https://www.gedimat.fr/enduit-joint-placomix-seau-de-25kg-placo,1724697,3,21,85.htm
+37. [S38] Chausson / Samse / Tout Faire, MAP Formule+ : https://www.chausson.fr/materiaux/mortier-adhesif-plaques-platre-isolants-map-formule-p-480845-1 ; https://www.samse.fr/672457-mortier-adhesif-map-sac-25kg.html
+38. [S39] Gedimat / Tout Faire / Chausson, Placomur : https://www.gedimat.fr/doublage-polystyrene-expanse-placomur-e-13-80-2-50x1-20m-r-2-15m-k-w-placo,1726044,3,17,70.htm ; https://www.toutfaire.fr/doublage-isolant-placomure-2-15-10-et-80-270.html
+39. [S40] Gedimat / Chausson, Prégymax et Polyplac : https://www.gedimat.fr/doublage-thermo-acoustique-pregymax-ba13-80-2-50x1-20m-r-2-75m-k-w-siniat,1726291,3,17,70.htm ; https://www.chausson.fr/materiaux/doublage-pregymax-ba13-80-dim-260x120-cm-ep-13-80-mm-r-2-55-p-170641-2
+40. [S41] Gedimat / Chausson / Tout Faire / BigMat, GR 32 kraft : https://www.gedimat.fr/laine-de-verre-gr-32-roule-revetue-kraft-2-70-x-1-20-m-ep-120-mm-r-3-75m-k-w-isover,904911,3,17,70.htm
+41. [S42] Gedimat / Samse / Tout Faire / Chausson, Comblissimo : https://www.gedimat.fr/laine-de-verre-a-souffler-comblissimo-sac-de-17-3kg-isover,1837610,3,17,69.htm
+42. [S43] Samse / BigMat / Chausson, ouate de cellulose 12,5 kg : https://www.bigmat.fr/produits/isolation-cloison-platre/isolation-interieure-murs-et-combles/isolants-divers-et-accessoires/3434550346535/ouate-de-cellulose-univercell-sac-de-125-kg ; https://www.chausson.fr/materiaux/ouate-de-cellulose-ouateco-nature-sac-de-12-5-kg-sac-de-12-5-kg-p-662781-1
+43. [S44] Gedimat / Chausson / Samse / BigMat, Vario Xtra et KB1 : https://www.gedimat.fr/membrane-d-etancheite-a-l-air-vario-xtra-rouleau-de-40x1-50m-isover,1401834,2,12,1721.htm ; https://www.gedimat.fr/adhesif-vario-kb1-rouleau-de-40mx60mm-isover,1867391,3,21,961.htm
+44. [S45] Chausson / Gedimat, trappes de visite : https://www.chausson.fr/materiaux/trappe-visite-knauf-plp-avec-plaque-platre-hydrofugee-p-134269-1 ; https://www.gedimat.fr/trappe-de-visite-metal-platre-cf60-pose-en-integree-600x600mm-,1838706,3,21,87.htm
+45. [S46] Chausson / Gedimat, boîtes d'encastrement cloison sèche : https://www.chausson.fr/quincaillerie/boite-dappareillage-cloisons-seches-stop-air-diametre-67mm-profondeur-50mm-gris-bleu-p-776857-1 ; https://www.gedimat.fr/boite-d-encastrement-cloison-seche-1-poste-d67mm-p50mm-debflex,1575064,10,64,263.htm
+46. [S47] Placo (Placoplatre SA), « Offre Placo® 2024 », catalogue tarifé, PDF hébergé par la CAPEB (texte extrait localement ; aucun prix repris) : https://www.capeb.fr/www/capeb/media/document/loffre-placo-reg-2024-1-.pdf . L'édition 2026 existe (https://www.placo.fr/documents/catalogue/z260091-placo-offre-2026-web-pap.pdf) mais renvoie 403 : les conditionnements 2024 n'ont pu être vérifiés sur 2026 que pour la vis TTPC 25 (fiche 2026), d'où les mentions « à confirmer ».
+47. [S48] Samse, guide « Comment choisir ses plaques de plâtre » et pages plaques hydro / feu (extraits moteur) : https://www.samse.fr/guides/comment-choisir-ses-plaques-de-platre.html
+48. [S49] Siniat, conditions de commande (longueur sur mesure, informations de livraison), extrait moteur d'un document Siniat cité dans la recherche « vendeur comptoir » (URL exacte non retrouvée) : à reconfirmer.
+49. [S50] Chausson, « Comment choisir vos plaques de plâtre » et catégorie « Plaques standards BA13 » : https://www.chausson.fr/pages/je-realise-mes-travaux/comment-choisir-plaque-platre ; https://www.chausson.fr/materiaux/plaques-standards-ba13-c-3687a
+50. [S51] Quéguiner Matériaux, « Plaque de plâtre - Placoplatre BA13 standard - 250 X 120 cm » (115897) et catalogue plâtrerie : https://www.queguiner.fr/platrerie-isolation-plafond/platrerie/plaques-de-platre-standard/plaques-de-platre-standard-8
+51. [S52] Samse, « Services de livraison et retrait » (extrait moteur) : https://www.samse.fr/services-livraison
+52. [S53] Futura-Sciences, « Placoplatre : qu'est-ce que c'est ? » ; Techno-Science, « Plaque de plâtre » : https://www.futura-sciences.com/maison/definitions/maison-placoplatre-10837/ ; https://www.techno-science.net/fr/definitions/plaque-de-platre
+53. [S54] Quéguiner, fiches « Rail … R48/28 - 3,00 ml », « Montant - M48 ID4 57-60 Eclisse », « Vis TRPF - 13 mm - boîte 1000 », « Mortier adhésif - Indidoublage » : https://www.queguiner.fr/platrerie-isolation-plafond/platrerie/ossatures-metallique/rails-plaques-de-platre/rail-pour-plaque ; https://www.queguiner.fr/platrerie-isolation-plafond/platrerie/ossatures-metallique/montants-plaques-de-platre/vis-trpf
+54. [S55] Saint-Gobain, communiqué « Inauguration du nouveau sécheur dans l'usine Placo de Val de Cognac », 11/2024 (extrait moteur, PDF en 403) ; PNR du Verdon, « Étude plâtre, état des lieux », 2024 (extrait) : https://www.parcduverdon.fr/sites/default/files/pnrverdon/pdf/2024_pnrverdon_etude_platre_etat_lieux.pdf
+55. [S56] Knauf, « Knauf Plâtres Fos, une nouvelle usine de plaques de plâtre » ; Batiweb « Knauf annonce la création d'une nouvelle usine à Fos-sur-Mer » : https://knauf.com/fr-FR/actualites/knauf/knauf-platres-fos-nouvelle-usine-de-plaques-de-platre
+56. [S57] Siniat, dossier de presse Auneuil (06/2023) et documentation éco Plâtre ; Géorisques, inspection Ottmarsheim (2023) (extraits) : https://media.siniat.fr/pi674856/original/983830177/dp-siniat-auneuil---juin-2023.pdf
+57. [S58] Castorama, plaques Pladur « zone Sud » ; Brico Dépôt, Pladur BA 13 multi H1 (appoint) : https://www.castorama.fr/plaque-de-platre-standard-ba13-pladur-260-x-120-cm-ep-12-5-mm-vendue-a-la-plaque-zone-sud-/8435028308296_CAFR.prd
+58. [S59] Chausson / Samse, Fermacell : https://www.chausson.fr/materiaux/plaque-fibres-gypse-fermacell-bd125-250mx120m-p-83326-1 ; https://www.samse.fr/18088-plaque-fibres-gypse-fermacell-bd-12-5mm-250x120cm.html
+59. [S60] Prospérences, « Comment les négoces de matériaux ont-ils maillé le territoire ? », étude annuelle 2021 (texte extrait localement) : https://prosperences.squarespace.com/s/Panorama-negoces_VF.pdf
+60. [S61] Le Journal des Entreprises, « Bretagne : Quéguiner s'offre six agences de Sanséau Matériaux » ; Batidistribution (Baselo Presse), « Groupe Quéguiner » (2016) : https://www.lejournaldesentreprises.com/article/bretagne-queguiner-soffre-six-agences-de-sanseau-materiaux-102986
+61. [S62] Le Journal des Entreprises, « 100 ans : Tanguy Matériaux mise sur la croissance externe » : https://www.lejournaldesentreprises.com/article/100-ans-tanguy-materiaux-mise-sur-la-croissance-externe-pour-continuer-davancer-2110013
+62. [S63] Batiweb, « SFIC ouvre une nouvelle agence près de Nantes » ; Batidistribution, « Denis Matériaux » (extraits) : https://www.batiweb.com/actualites/distribution/sfic-ouvre-une-nouvelle-agence-pres-de-nantes-45373
+63. [S64] La Maison Saint-Gobain, « Cloisons intérieures de distribution : bien choisir » (extrait) : https://www.lamaisonsaintgobain.fr/guides-travaux/amenagement-interieur/cloisons-interieures-de-distribution-comment-faire-le-bon-choix
+64. [S65] Batiweb, « Golbey (88) : l'usine Pavatex France… » ; Usine Nouvelle, « Steico Casteljaloux » (extraits) : https://www.batiweb.com/actualites/vie-des-societes/golbey-88-l-usine-pavatex-france-plus-que-jamais-engagee-dans-une-demarche-ecoresponsable-30479
+65. [S66] Batiweb, « La ouate de cellulose fait son petit chemin en Bretagne » (2011) ; Le Journal des Entreprises, « Cellaouate investit… » ; Novabuild, fiches matériaux biosourcés (2026) : https://www.batiweb.com/actualites/vie-des-societes/la-ouate-de-cellulose-fait-son-petit-chemin-en-bretagne-18859
+66. [S67] Gedimat, « Questions fréquentes » (livraison) : https://www.gedimat.fr/article-foire-aux-questions-71.htm

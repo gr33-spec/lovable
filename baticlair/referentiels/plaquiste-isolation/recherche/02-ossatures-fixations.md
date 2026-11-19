@@ -264,3 +264,140 @@ Cloisons : longueur 4 m, hauteur 2,50 à 2,70 m (72/48) ou 3 m (98/48). Plafonds
 | Rail | 0,40–0,57 | ml/m² | [S1] | — | 1 source | |
 | Vis TTPC / TRPF (0,60 simples) | 13 / 5 | u/m² | [S1] | — | 1 source | |
 
+
+### D.7 Ce que le moteur devrait calculer plutôt que d'appliquer un ratio fixe
+
+Les ratios SNIP / Placo sont établis pour une géométrie donnée (cloison 4 m × 2,50 m ; plafond 8 × 10 m).
+Pour les pièces longues, le calcul au métré est plus juste que le ratio :
+
+| Article | Formule proposée | Base | Statut |
+|---|---|---|---|
+| Rails (cloison, contre-cloison) | 2 × longueur de l'ouvrage × 1,05 → barres de 3,00 m | SNIP 0,84 ml/m² à H 2,50 = 2/2,50 × 1,05 [S1] | confirmé (2 sources : SNIP + Batiland/Placo ≈ 0,9) |
+| Montants | (longueur / entraxe + 1) × 1,05, longueur ≥ H − 1 cm | SNIP 2,10 ml/m² à 0,60 [S1] ; Placo M 48 « −1 cm » [S17] | confirmé (2 sources) |
+| Cornière / rail de rive plafond | périmètre de la pièce × 1,05 → barres de 3,00 m (CR2) ou 2,35 m (rail F 530) | SNIP 0,47 ml/m² pour 8 × 10 m [S1] ; Placo rail F 530 = 2,35 m [S26] | 1 source pour la formule (déduite) ; à confirmer |
+| Suspentes | (nombre de lignes de fourrures) × (portée / 1,20 + 1) | distance 1,20 m [S2][S1] | confirmé (2 sources) pour 1,20 m |
+| Fixations de rail | ⌈ longueur de rail / 0,60 ⌉ + 1 par tronçon | 0,60 m [S5b][S2] | à confirmer (règle d'extrémité non sourcée) |
+| Vis TTPC | ratio SNIP (inclut les vis de rail), arrondi à la boîte | [S1] | voir D.1 (contradiction 22/30 tranchée pour 30) |
+
+---
+
+## E. Ce que le négoce exige pour chaque article (désignation commandable)
+
+Modèle de désignation relevé sur les fiches Placo et les catalogues négoce (Point.P, Chausson, SFIC, Dispano) :
+« [Marque] [gamme] [type] [largeur]/[longueur en cm] [conditionnement] », ex. « Montant Stil® M 48/259 bot10L »,
+« Rail Stil® R 48/300 bot10L », « Fourrure Stil® F 530/300 bot10L », « Eclisse Stil® F 530/bte50P »,
+« Suspente Longue 171 Stil® F 530/bte100P » [S17][S10][S23][S28][S29].
+
+| Article | Ce qu'il faut dire au comptoir | Unité de vente | Sources | Statut |
+|---|---|---|---|---|
+| Rail | type (R 48 / R 62 / R 70 / R 90 / R 100, ou rail F 530), longueur (3,00 m ; F 530 : 2,35 m), marque | barre ; botte de 10 (R) ou 20 (rail F 530) | [S10][S26][S13] | confirmé (2 sources) pour R 48 |
+| Montant | type (M 48 / M 70 / M 90 / M 100 ; 48-35 ou 48-50), longueur exacte (2,49 / 2,59 / 2,69 / 2,79 / 2,99 / 3,19 / 3,59 / 3,99 chez Placo) | barre ; botte de 10 | [S17][S18][S20] | confirmé (2 sources) |
+| Fourrure | type (F 530 Placo / F 47 Knauf / F 45 négoce), longueur (3,00 ou 5,30 ; Knauf aussi 2,70) | barre ; botte de 10 | [S23][S33] | confirmé (2 sources) |
+| Cornière de rive | CR2, 3,00 m | barre ; botte de 30 (Placo) | [S27] | 1 source pour la botte |
+| Suspente | type (courte / longue 171 / longue 240 / sécable / Maxi / H, HL pour hourdis / articulée + tige filetée), selon support et plénum | boîte de 100 (longue 171) ; 50 (sécable, à confirmer) ; 12 en GSB (Maxi) | [S2][S29] | confirmé (2 sources) pour la longue 171 |
+| Éclisse | F 530 | boîte de 50 | [S28] | 1 source |
+| Appui intermédiaire | marque (Optima2 Isover, Easyfix…), plage d'épaisseur d'isolant (15-45, 75, 75-160, 100, 120, 140, 200) | boîte de 50 (40 pour les grands) | [S31][S32] | confirmé (2 sources) |
+| Vis TTPC | longueur (25 / 35 / 45 / 55 / 70 / 90), vrac ou en bande | boîte (1000 Gypso ; 500 / 1500 Placo ; 500 pour 55-70 ; 250 pour 90), seau 10 000 | [S40][S41] | confirmé (2 sources) pour 25/35 |
+| Vis TRPF | longueur (13 ; 25 pour M 100) | boîte de 500 ou 1000 selon marque | [S2][S41] | à confirmer |
+| Cheville à frapper | diamètre × longueur (6 × 40) | sachet de 50, seau de 800 | [S42] | confirmé (2 sources) |
+| Clous de cloueur gaz | marque de l'outil (Spit P40/P800 ≠ Hilti), type (C6 béton, HC6 acier/béton dur, CW6 bois), longueur | boîte de 500 + 1 gaz, ou 1500 + 3 gaz | [S43] | 1 source |
+
+Règle pour le moteur : jamais « ml de rail » ni « m² d'ossature » en sortie ; toujours un nombre de barres
+d'une longueur donnée (arrondi supérieur), éventuellement ramené en bottes si le nombre est un multiple de 10.
+Un négoce comme Chausson affiche un prix au mètre mais vend la barre entière [S18][S25].
+
+---
+
+## F. Différences régionales
+
+Aucune différence régionale documentée pour les ossatures métalliques et la visserie : les fiches Placo, Knauf
+et Siniat sont nationales (la fiche Knauf F47 précise « limitée à une application en France métropolitaine » [S33]).
+Ce qui varie, et qui n'est pas régional mais propre au négoce : la marque tenue en stock (Placo, Knauf, Siniat,
+ou marque négoce / GSB : Isolpro, Ega Perfil, Pladur, Mafer) et donc les longueurs disponibles (Placo 2,49 / 2,59…
+contre 2,50 / 3,00 en marque négoce). Hypothèse non documentée : Knauf (siège en Alsace) plus présent dans l'Est —
+à confirmer, aucune source lue. Les zones ventées sous rampants peuvent demander des butées néoprène sur les
+suspentes (Placo [S2] p.101) : c'est la seule nuance « géographique » relevée.
+
+---
+
+## Bilan
+
+Décompte des lignes de tableau de ce fichier (sections A à E, compté par script sur la colonne Statut ;
+une ligne peut porter plusieurs chiffres) :
+
+| Statut | Nombre |
+|---|---|
+| Lignes chiffrées au total | 164 |
+| confirmé (2 sources) (y compris « écart d'arrondi » et lignes partiellement confirmées) | 75 |
+| 1 source | 62 |
+| à confirmer | 14 |
+| contradiction (détail) | 13 |
+
+Taux de confirmation à 2 sources ≈ 46 %. Beaucoup de « 1 source » viennent du seul quantitatif SNIP (décembre
+2024) qui est le document de la profession entière : fiable, mais sans second document lisible (placo.fr et
+knauf.com répondent 403).
+
+Principaux « à confirmer » :
+1. Vis TTPC en 2e peau de 2 BA13 : 35 (usage) ou 45 (règle +10 mm) ; fiche système Placo 98/48 non lue.
+2. Vis par m² en cloison 72/48 : 22 (Placo ancien) contre 30 (SNIP 2024, vis des rails comprises) — trancher
+   avec un plaquiste ; Gypso donne 25.
+3. Suspentes au m² : 1,56 (SNIP) contre 1,8 (Placo Intégrale 2023) à 0,60 m ; dépend de la taille de la pièce.
+4. Appuis intermédiaires au m² et hauteur de ligne : 1,25 m (SNIP) contre 1,35 m (Isover, ≤ 2,70 m) ; ratio Placo
+   « 2 appuis/m² » de la piste interne non retrouvé.
+5. Fixation des rails à ≤ 10 cm des extrémités : aucune source lue ne le chiffre.
+6. Épaisseurs et longueurs Placo M 90, M 100, R 70/R 90/R 100 (fiches non lues) ; gamme Siniat France ; gamme
+   Knauf France (longueurs des montants).
+7. Conditionnements : suspente sécable (50 ?), TRPF (500 ou 1000), TTPC 45 (500 ou 1000 selon marque),
+   cornière CR2 (botte de 30 sur 1 source).
+8. Vis Habito (HD), vis Fermacell, cloueurs Hilti : non vérifiés (quota de recherche web épuisé).
+9. Édition exacte du NF DTU 25.41 prise en compte par Placo 2023 (« nouveauté DTU » sur les rails de rive).
+10. Le « rail F 530 » de la piste interne en barres de 3 m est FAUX : 2,35 m, botte de 20 (fiche Placo 18/12/23).
+
+---
+
+## Sources
+
+Consultées le 19 novembre 2026. « via » = PDF du fabricant hébergé chez un négoce (placo.fr et knauf.com renvoient 403).
+
+1. [S1] SNIP (Syndicat national des industries du plâtre), Fiche conseil n° 18 « Ouvrages en plaques de plâtre : quantitatifs estimés de produits », décembre 2024 (PDF modifié 13/02/2025) — https://www.lesindustriesduplatre.org/wp-content/uploads/2025/03/SNIP-FICHE-CONSEIL-18-VERSIONS-2025_V6-13fevrier.pdf (lu en entier).
+2. [S2] Placo (Saint-Gobain), L'Intégrale Placo Second Œuvre, chapitre Plafonds, 04/2023 (64 p.) — https://dam.pim-cps.saint-gobain.com/MAM/assets/1/C1A269993195482DA567890D5C26E716/doc/CEDB5A77BEAE4BDA8E2753C0A9B3A813/SO03-Intgrale_Placo_Second_Oeuvre_04.2023_-_Plafonds.pdf (lu : p.98-109).
+3. [S3] Batiland, fiche conseil cloison BA13 (chiffres attribués à Placo) — https://www.batiland.fr/pa14158/fiche-conseil?conseilID=39 (extrait moteur).
+4. [S4] BatiUnit, calculateur cloison — https://batiunit.fr/calculateurs/cloisons-isolation/placo-mur (extrait moteur ; source secondaire).
+5. [S5] Murmurapp, « métré de cloison » (reprend SNIP n° 18) — https://www.murmurapp.fr/blog/comment-calculer-ses-rails-et-montants-de-placo-sans-erreur (extrait moteur ; secondaire).
+6. [S5b] Siniat, Siniathèque « Comment réaliser une cloison en plaques de plâtre » (carnet de pose DTU) — https://www.siniat.fr/fr-fr/siniatheque/carnet-de-pose-dtu/comment-realiser-une-cloison-en-plaques-de-platre/ (lu ; date de page non affichée).
+7. [S10] Placo, fiche produit Rail Stil® R 48, MAJ 18/12/2023, via Samse — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_7972.pdf (lu).
+8. [S11] Même fiche R 48 via Matériaux Naturels — https://www.materiaux-naturels.fr/doc/product/n_1964.pdf (lu). [S11b] Ega Perfil, fiche Lisse clip 3.0 — https://www.materiaux-naturels.fr/doc/product/n_2009.pdf (lu).
+9. [S12] La Plateforme, réf. 8224 Rail NF Stil R48 — https://www.laplateforme.com/catalogue/produit/8224/rail-metallique-nf-stil-r-r48-l-3000-x-l-28-x-ep-0-53-mm-fixation-chevillage-ou-vissage (piste interne + extrait moteur).
+10. [S13] Point.P « Rail Stil R 48 – L. 3 m » https://www.pointp.fr/p/platre-isolation-ite/rail-placo-stil-r-48-l-3-m-A6414686 ; Dispano https://www.dispano.fr/p/platrerie-isolation/rail-placo-stil-r-48-l-3-m-A6414686 (extraits moteur).
+11. [S14] Brico Dépôt, lots de 10 montants M48 (2,49 / 2,50 / 2,99 / 3 m) et rails R48 3 m — https://www.bricodepot.fr/p/3334160525552/lot-de-10-montants-metalliques-en-acier-galvanise-m48-2-50m ; https://www.bricodepot.fr/p/3760424120063/lot-de-10-rails-r48-3-m-nf-1 (extraits moteur).
+12. [S15] Placo, fiche technique Rail Stil R 62 (MAJ 19/06/2026) — https://www.placo.fr/documents/fiche-technique/fichetechnique-rail-stil-r-62.pdf (extrait moteur, 403 en direct).
+13. [S16] Point.P Rail Stil R 90 / R 100 L. 3 m — https://www.pointp.fr/p/platre-isolation-ite/rail-placo-stil-r-90-l-3-m-A6414690 ; https://www.pointp.fr/p/platre-isolation-ite/rail-placo-stil-r-100-3m-A6414729 ; placo.fr R 100 https://www.placo.fr/Produits/profiles/rail-stil-r-100 (extraits moteur).
+14. [S17] Placo, fiche produit Montant Stil® M 48, MAJ 18/12/2023, via Matériaux Naturels — https://www.materiaux-naturels.fr/doc/product/n_1963.pdf (lu).
+15. [S18] Chausson, Montant Placo Stil M48 (H84303390) — https://www.chausson.fr/materiaux/montant-ossature-metallique-placo-stil-m48-cloison-plaque-platre-p-201256-12 (lu).
+16. [S19] SFIC Montant Stil M 48 2,69 / 2,99 m — https://www.sfic.com/p/plafonds-cloisons-isolation/montant-placo-stil-m-48-2-69m-A6414724 ; Point.P 2,49 m https://www.pointp.fr/p/platre-isolation-ite/montant-metallique-pour-plaque-de-platre-placo-stil-m-48-l-2-49-m-A6414695 (extraits moteur).
+17. [S20] Placo, fiche produit Montant Stil® M 70, MAJ 24/09/2024, via Samse — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_36322.pdf (lu).
+18. [S21] SFIC, catégorie rails et montants Placo — https://www.sfic.com/c/rails-et-montants-placo (extrait moteur).
+19. [S22] Placo, fiche Montant Stil ML 48-50 — https://www.placo.fr/documents/fiche-technique/ficheproduit-montant-stil-ml-48-50.pdf (extrait moteur).
+20. [S23] Placo, fiche produit Fourrure Stil® F 530, MAJ 18/12/2023, via Matériaux Naturels — https://www.materiaux-naturels.fr/doc/product/n_1965.pdf (lu).
+21. [S24] Placo, fiches Fourrure F 530 du 04/07/2017 (via Dispano https://www.dispano.fr/asset/49/62/AST2174962.pdf) et du 11/01/2021 (via Gedimat https://uploads.gedimat.fr/DOCUMENT/TYPE1/0000124593069.pdf) (lues ; anciennes éditions, utilisées seulement pour recouper : mêmes section, épaisseur, longueurs que 2023).
+22. [S25] Chausson, Fourrure Placo Stil F530 3,00 m — https://www.chausson.fr/materiaux/fourrure-placo-stil-f530-plafond-doublage-p-201253-1 (lu).
+23. [S26] Placo, fiche produit Rail Stil® F 530, MAJ 18/12/2023, via Matériaux Naturels — https://www.materiaux-naturels.fr/doc/product/n_1967.pdf (lu).
+24. [S27] Placo, fiche Cornière Stil CR2 — https://www.placo.fr/documents/fiche-produit/ficheproduit-cornire-stil-cr2.pdf (extrait moteur) ; Bricomarché https://www.bricomarche.com/p/corniere-stilr-cr2-3m/3496250009646.
+25. [S28] Placo, fiche produit Éclisse Stil® F 530, MAJ 18/12/2023, via Matériaux Naturels — https://www.materiaux-naturels.fr/doc/product/n_1968.pdf (lu).
+26. [S29] Placo, fiches suspentes Stil F 530 (longue, sécable, Maxi) — https://www.placo.fr/documents/fiche-technique/fichetechnique-suspente-longue-stil-f-530.pdf ; https://www.placo.fr/documents/fiche-produit/ficheproduit-suspente-scable-stil-f-530.pdf (extraits moteur, MAJ 31/03/2026 et 18/12/2023) ; ManoMano https://www.manomano.fr/p/set-of-100-long-stil-f-530-171-mm-placo-wood-framing-hangers-94487328.
+27. [S30] Bricomarché, Attache Stil F 530 boîte de 100 — https://www.bricomarche.com/p/attache-placor-stilr-f-530-boite-de-100-pieces/3496250212534 (extrait moteur).
+28. [S31] Isover Optima2 en négoce/GSB : https://www.bricomarche.com/p/appuis-intermediaires-optima2-75mm-50-pieces/3596265085892 ; https://www.bricodepot.fr/p/3596265161541/40-appuis-intermediaires-optima-2-pour-laine-de-verre-ep-75-160-mm ; https://www.leroymerlin.fr/produits/boite-de-50-appuis-optima2-75mm-pour-isolation-des-murs-isover-66535791.html (extraits moteur). [S31b] Isover, notice Optima2 15-45 (« à 1,35 m du sol pour un doublage jusqu'à 2,7 m ») — https://www.castorama.fr/appuis-de-maintien-d-isolant-15-a-45mm-isover-optima2-x-50-/3596265182508_CAFR.prd (extrait moteur) ; guide Optima https://www.isover.fr/sites/mac3.isover.fr/files/2023-11/guide_optima.pdf (403).
+29. [S32] Easyfix (fabricant français d'ossatures), fiches appuis intermédiaires — https://www.materiaux-naturels.fr/doc/product/n_1961.pdf ; n_1940.pdf (lues).
+30. [S33] Knauf, Fiche technique produit Fourrure F47, 29/09/2020 (V0 10.20), via Chausson — https://cdn.chausson.fr/catalog-document/a291cd4f-efcc-4469-a515-b8906526ee66/ftprod-knauf-fourrure-f47-28853.pdf (lue).
+31. [S34] Knauf, pages produit F47 et suspentes F47 — https://knauf.com/fr-FR/p/produit/fourrure-f47-20976_4091 ; https://knauf.com/fr-FR/p/produit/suspente-a-ressort-f47-10314_4091 (extraits moteur, 403 en direct).
+32. [S35] Bricomarché / Brico Dépôt, fourrures F47 / F45 marques négoce (Isolpro, Mafer) — https://www.bricomarche.com/p/fourrure-de-47-en-5.30ml/3700597250099 ; https://www.bricodepot.fr/p/3334160284862/catalog/product/view/id/263435/s/media.bricodepot.fr (extraits moteur).
+33. [S36] Knauf, Montant 48/35 — https://knauf.com/fr-FR/p/produit/montant-48-35-22807_4091 ; https://knauf.com/fr-DZ/p/produit/montant-48-35-22807_4068 (extraits moteur).
+34. [S37] Knauf Bâtiment, page « Montants » générée le 21/03/2016, via Samse — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_4824.pdf (lue ; ancienne, utilisée seulement pour la liste des types, non pour des cotes de vente).
+35. [S38] Siniat, fiches Prégymétal (print2pdf) — https://www.siniat.fr/-/print2pdf/product/pi174099/siniat-fiche-produit/fr-fr/eclistar-pregymetal-s47-ultra-wab-3334160337780.pdf ; https://www.siniat.fr/-/print2pdf/product/pi173902/siniat-fiche-produit/fr-fr/fourrure-pregymetal-cd60-27-6-3334160476199.pdf (extraits moteur).
+36. [S39] Knauf, Clou cheville 6 × 40 mm — https://knauf.com/fr-LU/p/produit/clou-cheville-6x40-mm-30175_0217 (extrait moteur).
+37. [S40] Gypso (marque Chausson), fiche Vis TTPC, 08/10/2020 — https://www.chausson.fr/media/article-document/273453 (lue).
+38. [S41] Klimas Wkręt-met, fiches vis KGM (plaque/acier) et TEX 3,5 × 9,5, MAJ 08/07/2019, via Matériaux Naturels — https://www.materiaux-naturels.fr/doc/product/n_1966.pdf ; n_1969.pdf (lues).
+39. [S42] Brico Dépôt, seau de 800 chevilles à frapper 6 × 40 (Fischer) — https://www.bricodepot.fr/p/4048962529753/seau-de-800-chevilles-tp-a-frapper-6x40-avec-foret-offert (lu) ; sachet de 50 https://www.bricodepot.fr/p/4006209434598/chevilles-a-frapper-n-6x40-en-nylon-fixation-sure-pour-beton-et-briques-50-pieces (extrait moteur).
+40. [S43] Spit, fiche Pulsa 40P+ (consommables) — https://res.cloudinary.com/afdb/raw/upload/s---T1ANmIa--/v1/documents/3153992_cloueur_a_gaz_spit_p.pdf (lue ; date non imprimée).
+41. [S44] Placo / Isover, « Destination rénovation » 2021 (CAPEB) — https://www.capeb.fr/www/capeb/media/document/placo-guidereno-2021-2-bdf-pap.pdf (lu, passage Habito).
+42. Pistes internes revérifiées (non comptées comme sources) : baticlair/docs/referentiels/platrerie-isolation.md (sections 2, 4, 5).
