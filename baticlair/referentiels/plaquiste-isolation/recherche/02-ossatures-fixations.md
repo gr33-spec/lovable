@@ -111,6 +111,70 @@ compte par Placo 2023 est donc la révision la plus récente du DTU ; numéro d'
 
 ---
 
+## C. Vis, chevilles, clous : choix, entraxe, conditionnement
+
+Note : le quota de recherches web de la session a été épuisé pendant cette section ; les vis HD (Habito),
+les vis Fermacell, les vis TRPF Placo (fiche) et les cloueurs Hilti n'ont pas pu être vérifiés. Ils restent
+« à confirmer » et c'est dit ligne par ligne.
+
+### C.1 Choix de la longueur de vis TTPC
+
+| Donnée | Valeur | Unité | Source 1 | Source 2 | Statut | Note |
+|---|---|---|---|---|---|---|
+| Règle sur ossature métal | longueur ≥ épaisseur totale des plaques + 10 mm | mm | Placo Intégrale Plafonds 2023 [S2] p.105 (« supérieure de 10 mm à l'épaisseur ») | Siniat [S5b] (« pénétrer au minimum de 10 mm dans l'acier ») ; Gypso [S40] | confirmé (2 sources) | profilés 6/10e |
+| Règle sur ossature bois | épaisseur + 20 mm | mm | Siniat [S5b] | Gypso [S40] (BA13 sur bois → TTPC 35) | confirmé (2 sources) | |
+| 1 BA13 (12,5 mm) sur métal | TTPC 25 | — | Gypso [S40] (exemple) | Batiland / chiffres Placo [S3] (« vis TTPC 25 ») | confirmé (2 sources) | |
+| 1 BA15 (15 mm) | TTPC 25 | — | règle +10 mm [S2][S40] | — | à confirmer (calcul) | 15 + 10 = 25 : juste à la limite |
+| 1 BA18 (18 mm) | TTPC 35 | — | règle +10 mm | — | à confirmer (calcul) | |
+| 2 BA13 : 1re peau / 2e peau | TTPC 25 / TTPC 45 | — | règle +10 mm (26 + 10 = 36 → 45) | piste interne (TTPC 25 + TTPC 45 en parement double) | à confirmer (raison : beaucoup de poseurs mettent des TTPC 35 en 2e peau ; la règle stricte donne 45 ; fiche système Placo 98/48 non lue, 403) | |
+| 3 BA13 (39 mm) | TTPC 55 | — | règle +10 mm | — | à confirmer (calcul) | |
+| Gamme TTPC (longueurs, diamètres) | 25, 35, 45, 55 (Ø 3,5) ; 70 (Ø 4,2) ; 90 (Ø 4,8) | mm | Gypso / Chausson [S40] | Klimas (fabricant, vendu par Matériaux Naturels) [S41] : 3,5 × 25/35/45/55, 4,2 × 70/90 | confirmé (2 sources) | Placo vend aussi TTPC 70 et 110 (fiches citées par le moteur, non lues) |
+| Vis métal-métal TRPF | TRPF 13 (rail/montant, montants doublés, suspentes MS) ; TRPF 25 pour M 100 / M 150 | — | Placo Intégrale Plafonds 2023 [S2] p.109 | SNIP [S1] (« vis autoperceuse à tête ronde ») | confirmé (2 sources) pour l'usage | dimension 3,5 × 9,5 (TEX Klimas [S41]) ou 13 mm : à confirmer selon marque |
+| Vis Habito (HD), vis Fermacell | — | — | non vérifié (quota de recherche épuisé) | — | à confirmer | Fermacell se visse avec ses propres vis (fiche Fermacell à lire) |
+
+### C.2 Entraxe de vissage (par plaque et par peau)
+
+| Donnée | Valeur | Unité | Source 1 | Source 2 | Statut | Note |
+|---|---|---|---|---|---|---|
+| Cloison, plaques 1200, sur montants | 30 cm | cm | Siniat [S5b] | SNIP [S1] | confirmé (2 sources) | |
+| Cloison, plaques 900 | 25 cm | cm | Siniat [S5b] | SNIP [S1] | confirmé (2 sources) | |
+| Sur les rails haut et bas | tous les 30 cm (Siniat) ; 6 vis par plaque = 5 vis/ml (SNIP) | — | [S5b] | [S1] | confirmé (2 sources) | c'est ce qui fait 30 vis/m² au lieu de 22 |
+| Distance au bord de plaque | ≥ 1 cm | cm | Siniat [S5b] | Gypso [S40] (« au moins à 10 mm de tous les bords ») ; Placo Intégrale [S2] p.104 | confirmé (2 sources) | |
+| 1re peau d'un parement double | ≈ 60 cm | cm | Siniat [S5b] | SNIP [S1] (plafond : 60 cm peau intérieure) ; Placo Intégrale [S2] p.109 | confirmé (2 sources) | |
+| Plafond, peau visible | 30 cm (15 cm en montage feu / PRF) | cm | Placo Intégrale [S2] p.104 et p.109 | SNIP [S1] (30 cm peau extérieure et périphérie) | confirmé (2 sources) | la piste « 20 cm en plafond » n'est confirmée par aucune source lue : 30 cm |
+| Montage feu cloison | 15 cm | cm | extrait moteur (fiches Placo/Samse) | Placo Intégrale [S2] (15 cm plafond feu) | 1 source pour la cloison | |
+| Montants doublés (plafond) | 1 TRPF 13 tous les 40 cm | — | [S2] p.109 | — | 1 source | |
+| Liaison rail-montant | vissage ou sertissage haut et bas de chaque montant | — | [S2] p.109 | SNIP [S1] | confirmé (2 sources) | sertissage = 0 vis TRPF |
+
+### C.3 Conditionnement des vis
+
+| Donnée | Valeur | Unité | Source 1 | Source 2 | Statut | Note |
+|---|---|---|---|---|---|---|
+| TTPC 25 / 35 / 45 | boîte de 1000 | u | Gypso / Chausson [S40] | Klimas [S41] (boîte 1000 pour 25 et 35 ; 500 pour 45) ; Bricomarché Isolpro TTPC 45 boîte 1000 | confirmé (2 sources) pour 25 et 35 ; contradiction pour 45 (1000 Gypso / 500 Klimas) | dépend de la marque |
+| TTPC Placo | boîtes de 500 et de 1500 (« bte1500P ») | u | Brico Dépôt / Bricomarché (Placo, EAN 3496250…) | Castorama (1500 TTPC 25 Placo) | confirmé (2 sources) | ce sont les conditionnements Placo en vente ; boîte 1000 Placo non relevée |
+| TTPC 25 en seau | seau de 10 000 | u | Gypso [S40] | — | 1 source | |
+| TTPC en bande (visseuse automatique) | boîte de 1000 (25, 35, 45) | u | Gypso [S40] | — | 1 source | |
+| TTPC 55 / 70 | boîte de 500 (Gypso) ; 300 (Placo, GSB) | u | [S40] | Bricomarché « TTPC 70 Placo boîte de 300 » | contradiction (détail) | dépend de la marque ; préciser au négoce |
+| TTPC 90 | boîte de 250 | u | [S40] | Klimas [S41] (250 en 4,2 × 90) | confirmé (2 sources) | |
+| TRPF 13 | boîte de 500 (Placo, GSB) | u | extrait Bricomarché | — | 1 source | TEX 3,5 × 9,5 Klimas : boîte 1000 [S41] |
+
+### C.4 Fixation des rails, cornières et suspentes au support
+
+| Donnée | Valeur | Unité | Source 1 | Source 2 | Statut | Note |
+|---|---|---|---|---|---|---|
+| Nombre de fixations par rail de 3 m | 6 (une tous les 0,60 m : 3,00 / 0,60 = 5 intervalles + 1) | u | règle B (0,60 m) [S5b][S2] | — | à confirmer (calcul) | soit ≈ 2 fixations par ml de rail ; si l'on exige une fixation à chaque extrémité de chaque barre, 6 par barre |
+| Cheville à frapper | 6 × 40 (clou prémonté) ; seau de 800 (Fischer) ; sachet de 50 | — | Brico Dépôt « seau de 800 chevilles TP à frapper 6×40 » [S42] | Brico Dépôt sachets 50 (6 × 40 nylon) [S42] | confirmé (2 sources) pour le format | usage rail placo : non écrit sur la fiche (pratique courante) |
+| Clou-cheville 6 × 40 pour suspension dans le béton | Knauf | — | extrait knauf.com LU [S39] | Placo Intégrale [S2] : « cheville métallique pour tige filetée Ø 6 » sous dalle béton | confirmé (2 sources) | |
+| Cloueur gaz Spit Pulsa 40P+ (plaquiste) | rails métalliques, semelles bois, rails Optima, cornières de rive, suspentes (clous CW6) | — | fiche Spit Pulsa 40P+ [S43] | — | 1 source | |
+| Clous Spit C6 (béton) : longueurs | 20, 25, 30, 35, 40 mm | mm | [S43] | — | 1 source | HC6 (acier, béton dur) : 15, 17, 22, 27, 32 |
+| Clous Spit : conditionnement | boîte de 500 clous + 1 cartouche gaz ; boîte de 1500 + 3 cartouches (C6 20, C6 40, HC6 15) | u | [S43] | extrait moteur « Spit C6 20 mm, 1500 pièces + 3 cartouches » | confirmé (2 sources) | une cartouche de gaz ≈ 500 tirs (déduit du conditionnement : à confirmer) |
+| Clous CW6 25 pour suspentes sur bois | boîte de 500 + gaz | u | [S43] | — | 1 source | |
+| Hilti GX 3 / GX-IE | — | — | non vérifié (quota) | — | à confirmer | |
+| Fixation suspente sur bois | 2 vis TTPC 35 par suspente | u | [S2] | piste interne | confirmé (2 sources) | vis à bois 5 × 40 : non retenue par Placo |
+| Charges lourdes sur plaque | cheville métallique à expansion (type Molly) pour vis Ø 6 : jusqu'à 60 kg par point sur Habito | kg | Placo « Destination rénovation » 2021 (CAPEB) [S44] | — | 1 source | ce n'est pas de l'ossature : seulement si le devis cite des charges |
+
+---
+
 ## D. Quantités au m² par système (traité en premier : source complète obtenue)
 
 Source principale : SNIP, Fiche conseil n° 18 « Ouvrages en plaques de plâtre : quantitatifs estimés de produits »,
@@ -130,7 +194,7 @@ Cloisons : longueur 4 m, hauteur 2,50 à 2,70 m (72/48) ou 3 m (98/48). Plafonds
 | Montants, doubles 0,60 | 3,68 | ml/m² | [S1] p.5 | — | 1 source | |
 | Montants, doubles 0,40 | 5,25 | ml/m² | [S1] p.5 | — | 1 source | |
 | Rails | 0,84 | ml/m² | [S1] p.5 | [S3] 0,9 ml (ancienne fiche Placo) ; [S4] 0,80 | confirmé (2 sources), écart 0,80–0,90 | 2 rails / hauteur 2,50 m × 1,05 = 0,84 ; l'écart vient de la hauteur prise (2,50 vs 2,30) et des chutes |
-| Vis TTPC (plaque), simples 0,60 | 30 | u/m² | [S1] p.5 | — | contradiction (détail) | Placo (via Batiland [S3] et l'ancienne piste interne) dit 22 TTPC 25 à 0,60 et 30 à 0,40. Le SNIP 2024 compte en plus 5 vis/ml sur les rails haut et bas (6 vis par plaque) : d'où 30. Retenir 30 (document le plus récent, NF DTU 25.41) et dire que 22 sous-estime |
+| Vis TTPC (plaque), simples 0,60 | 30 | u/m² | [S1] p.5 | Gypso (fiche vis TTPC 2020) [S40] « cloison de distribution : 25/m² en moyenne » | contradiction (détail) | Placo (via Batiland [S3] et l'ancienne piste interne) dit 22 TTPC 25 à 0,60 et 30 à 0,40. Le SNIP 2024 compte en plus 5 vis/ml sur les rails haut et bas (6 vis par plaque) : d'où 30. Retenir 30 (document le plus récent, NF DTU 25.41) et dire que 22 sous-estime |
 | Vis TTPC, simples 0,40 | 37 | u/m² | [S1] p.5 | — | 1 source | Placo ancien : 30 |
 | Vis TTPC, doubles 0,60 / 0,40 | 35 / 47 | u/m² | [S1] p.5 | — | 1 source | |
 | Vis TRPF (métal-métal), simples 0,60 / 0,40 | 2 / 3 | u/m² | [S1] p.5 | piste interne platrerie-isolation.md (Placo : 2 simples) | confirmé (2 sources) pour 2 ; 1 source pour 3 | piste interne : à revérifier, Intégrale Placo inaccessible (403) |
@@ -171,7 +235,7 @@ Cloisons : longueur 4 m, hauteur 2,50 à 2,70 m (72/48) ou 3 m (98/48). Plafonds
 | Montants simples 0,60 / 0,40 | 2,10 / 2,89 | ml/m² | [S1] p.13 | piste interne Placo « 2,1 × S/H » | confirmé (2 sources) pour 0,60 | |
 | Montants doubles 0,60 / 0,40 | 3,68 / 5,25 | ml/m² | [S1] | — | 1 source | |
 | Rails | 0,84 | ml/m² | [S1] | piste interne Placo « 1 ml/m² » | contradiction (détail) | écart 0,84 / 1 : hauteur et chutes ; la règle 2L/H×1,05 vaut mieux qu'un ratio |
-| Vis TTPC 25 simples 0,60 / 0,40 | 15 / 19 | u/m² | [S1] | piste interne Placo « 11 » | contradiction (détail) | idem D.1 |
+| Vis TTPC 25 simples 0,60 / 0,40 | 15 / 19 | u/m² | [S1] | Gypso [S40] « contre-cloison : 12/m² en moyenne » ; piste interne Placo « 11 » | contradiction (détail) | fourchette 11–15 ; SNIP compte les vis dans les rails haut/bas (5/ml) |
 | Vis TRPF simples / doubles 0,60 | 2 / 5 | u/m² | [S1] | piste interne Placo « 5 si doublés » | confirmé (2 sources) pour 5 | |
 | 2 BA13 : TTPC int. / ext. simples 0,60 | 6 / 15 | u/m² | [S1] | — | 1 source | |
 

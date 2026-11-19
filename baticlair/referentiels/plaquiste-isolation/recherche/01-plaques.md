@@ -5,7 +5,7 @@ Méthode : fiches produits fabricants (placo.fr, knauf.fr, siniat.fr, fermacell.
 
 Abréviation : « ext. » = valeur lue dans l'extrait du moteur de recherche, page non ouverte.
 
-(Sections remplies au fur et à mesure.)
+Toutes les sections sont remplies ; « Bilan » et « Sources » en fin de fichier.
 
 ## 0. Repères communs (classements, domaine d'emploi)
 
@@ -181,3 +181,115 @@ Rappel de lecture : « 10+80 » = plaque 10 mm + isolant 80 mm ; R en m².K/W ; 
 | Fermacell | pas d'usine française trouvée (production Allemagne / Espagne) ; distribué en négoce (Chausson, Tout Faire, BigMat) et GSB | — | WebSearch : aucune usine France (recherche négative) | Tout Faire / Bricomarché vendent Fermacell (ext.) | à confirmer (raison : recherche négative) | |
 | Pladur (Espagne) | marque « outsider » en France, vendue surtout en GSB (Brico Dépôt, marque Plural chez Bricomarché) | — | batiweb 2017 « Pladur, outsider en France » (titre) | Bricomarché Plural « développée par Pladur » (ext.) | confirmé (2 sources) | Pas un produit de négoce pro habituel. |
 | Préférence régionale par négoce | non documentée (aucune source publique ne dit « tel négoce de telle région vend surtout telle marque ») | — | — | — | à confirmer (raison : rien de documenté) | Les formats étant identiques (1,20 m, mêmes longueurs), l'app peut écrire « ou équivalent » et laisser le négoce choisir la marque. |
+
+## Points clés pour le moteur (synthèse, sans chiffre nouveau)
+
+1. Largeur 1,20 m partout pour les plaques de cloison et de doublage ; 0,60 m existe en BA13 standard et H1 (Placo, Siniat, Knauf GSB) ; 0,90 m pour les plaques « mono-parement » (BA 18S, BA 25).
+2. Longueurs communes aux trois grands (Placo, Siniat, Knauf) : 2,50 / 2,60 / 2,70 / 2,80 / 3,00 m pour le BA13 standard ; 2,00 / 2,40 / 3,20 / 3,60 existent en standard ; les plaques techniques (feu, phonique, H1, haute dureté) ont souvent moins de longueurs (2,50 / 2,60 / 2,80 / 3,00 ; parfois sans 2,70). L'app doit donc vérifier la longueur demandée dans la famille choisie, pas seulement en BA13 standard.
+3. Pile / palette dépend de la famille : 50 (BA13 Placo ≤ 3,00 m), 40 (3,20 / 3,60 m et Prégywab), 36 (Habito, BA 25), 34 (BA 18), 60 ou 66 (BA 6, BA 10). Ne jamais déduire la palette d'une plaque technique de celle du BA13.
+4. Poids au m² : 9 (BA13 std) ; 10 à 10,3 (H1, feu) ; 11,2 à 12 (phonique) ; 11,5 à 12,2 (haute / très haute dureté) ; 15 (Fermacell 12,5) ; 12,5 à 13,5 (ciment). Utile pour le transport et la manutention, pas pour la commande.
+5. EC : seules des plaques sous Avis Technique (Prégywab, Glasroc H Ocean, Aquapanel, Aquaroc / Powerpanel à confirmer) ; jamais un BA13 H1 « vert ».
+6. Doublages : vendus au panneau, 1,20 × 2,50 à 3,00 m ; le « 10+80 » / « 13+100 » écrit au devis désigne le complexe, la R dépend de la marque et de l'isolant (PSE, PSE graphité, laine de verre).
+
+## Bilan
+
+- Lignes de données : environ 103 (chaque ligne regroupe souvent plusieurs chiffres d'une même fiche ; on compte donc environ 450 valeurs numériques).
+- Statut des lignes : 36 « confirmé (2 sources) » pleinement ; 14 confirmées en partie (une partie des chiffres de la ligne a 2 sources) ; 13 « 1 source » ; 22 « à confirmer » ; 4 « contradiction » ; le reste renvoie à une autre section. Taux de lignes pleinement confirmées : environ 35 % ; en comptant les confirmations partielles : environ 50 %.
+- Limite de méthode : placo.fr, knauf.com et la plupart des pages négoces renvoient 403 ; les fiches ont été lues par copies déposées chez des négoces (Chausson, Samse, BigMat, Envain, Leroy Merlin) et par les fiches Siniat (siniat.fr/print2pdf, lisibles, datées 2026). Pour Knauf, presque tout vient d'extraits de moteur (« ext. »). Plusieurs confirmations reposent sur deux documents du même fabricant (fiche + fiche technique) ou sur un extrait de moteur : elles sont plus faibles qu'une vraie source indépendante.
+- Fiches anciennes utilisées (pas de version récente lisible) : Placo BA 10, Placodur BA 13, Placo Phonique BA 13, BA 25 Std (2012) ; BA 18, BA 6 (2016) ; Placomarine BA 13 (2020) ; Knauf Diamant (2016) ; Calibel (2009) ; Fermacell tarif (2010). Pour chacune, le statut le dit ; la valeur n'a pas pu être vérifiée inchangée.
+
+**À confirmer (liste)**
+1. Knauf KS 13 (France) : longueurs et plaques par palette (seule la 2,00 m est lisible sur la page France).
+2. Knauf KF 13 (feu) : longueurs et palette France.
+3. Poids au m² Placoplatre BA 13 : 9,0 (fiche 2023) contre 10,2 (batiproduits).
+4. Poids Prégydro BA13 : 8,9 contre 9,5 kg/m².
+5. Placoplatre BA 15 et BA 18 (1,20) : fiche France actuelle ; poids BA 18 (12,2 / 14 / 14,3 kg/m²).
+6. Placo Phonique BA 13 : fiche actuelle (celle de 2012 a des poids faux).
+7. BA 10 Placo : existence et formats actuels.
+8. Siniat : nombre de plaques par palette (non publié sur les fiches 2026, sauf Prégywab = 40 et libellés « ×50 »).
+9. Habito Hydro 13 : formats et palette ; charges Habito confirmées seulement par Placo.
+10. Knauf Diamant : charge par point (55 kg, 2020) et vis / cheville préconisées ; fiche 2026.
+11. H1 + feu dans une même plaque : aucune référence dédiée trouvée.
+12. Fermacell : palettes (tarif 2010) ; formats 1,249 × 2,54 et 1,20 × 2,75 non trouvés en France ; norme EN 15283-2 non citée sur les fiches lues.
+13. Powerpanel H2O : largeur 1 200 ou 1 250 mm ; Aquapanel Indoor : poids et palette France ; Glasroc H Ocean et Aquaroc : formats.
+14. Règle EC du DTU 25.41 : non lue dans le texte (déduite des fiches fabricants).
+15. Placo 4BA (SP 13), Placoflex, Glasroc F Riviera : non trouvés ; Siniat Weather Defence / AquaBead : non trouvés.
+16. Complexes : R du Calibel 10+80 (2,35 / 2,40), Placomur Essentiel 10+80 (palette), Polyplac (extraits seulement), « Knauf Th38 ».
+17. Comptoir : prix au m² ou à la plaque en négoce pro (seules les GSB ont été lues) ; questions du vendeur à faire valider par un vendeur.
+18. Régional : préférence de marque par région non documentée ; Ottmarsheim (Siniat) une seule source.
+
+## Sources
+
+Dates de consultation : toutes le 19/11/2026.
+
+1. [S1] Placo, fiche produit Placoplatre BA 13, mise à jour 18/12/2023 — https://dam.pim-cps.saint-gobain.com/MAM/assets/1/24488582A82047B4AABC2702AAA50B43/doc/75E9518A9102420D8DF25213571AE220/ficheproduit_Placoplatre_BA_13.pdf
+2. [S2] Siniat, fiche produit Prégyplac Std BA13, 01/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174032/siniat-fiche-produit/fr-fr.pdf
+3. [S3] Siniat, fiche produit Prégydro BA13, 01/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi173998/siniat-fiche-produit/fr-fr.pdf
+4. [S4] Placo, fiche Placodur BA 13, 31/05/2012 (copie Chausson) — https://www.chausson.fr/media/article-document/203318
+5. [S5] Placo, fiche produit Habito 13, mise à jour 12/12/2024 (copie BigMat) — https://medias.bigmat.fr/data_medias/medias_finaux/documents/3496250341111-DcsLzwneoC.pdf
+6. [S6] Placo, fiche produit Placomarine BA 13, 09/12/2020 (copie Chausson) — https://www.chausson.fr/media/article-document/203305
+7. [S7] Placo, fiche Placoflam BA 13, datée 25-07-14 (copie Chausson) — https://www.chausson.fr/media/article-document/210415
+8. [S8] Lafarge Plâtres (Siniat), fiche Prégydro BA15, 26/10/2011 (copie Chausson) — https://www.chausson.fr/media/article-document/202616
+9. [S8b] Lafarge Plâtres (Siniat), fiche Prégyplac Std BA18, 23/06/2009 (copie Chausson) — https://www.chausson.fr/media/article-document/202178
+10. [S9] Placo, fiche Gyproc A BA 13, 04/05/2015 (copie Chausson) — https://www.chausson.fr/media/article-document/215017
+11. [S10] Placo, fiche Placoplatre BA 10, 30/05/2012 (copie Chausson) — https://www.chausson.fr/media/article-document/203293
+12. [S11] Placo, fiche Placoplatre BA 25 Activ'Air, 28/12/2016 (copie Chausson) — https://www.chausson.fr/media/article-document/240429
+13. [S12] Placo, fiche Placoplatre BA 25 Standard 90, 30/05/2012 (copie Chausson) — https://www.chausson.fr/media/article-document/203310
+14. [S13] Siniat, fiche Prégyplac Std BA15, 05/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174004/siniat-fiche-produit/fr-fr.pdf
+15. [S14] Isolava, fiche plaque standard BA10 (non datée, copie Envain) — https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_PLAQUE-STANDARD-BA10.pdf
+16. [S15] Placo, fiche produit Placoplatre BA 18S, 27/08/2025 (copie Samse) — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1095889.pdf
+17. [S16] Placo Espagne, fiche Habito 13 1200 (FR), 05/11/2025 — https://www.placo.es/documents/fichas-tecnicas/ft-habito-13-1200-fr.pdf (non exploitée : marché espagnol)
+18. [S17] Siniat, fiche Prégymax R2,75 Hydro Déco BA13+80, 06/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174206/siniat-fiche-produit/fr-fr.pdf
+19. [S18] Placo, fiche Placoplatre BA 18, 10/03/2016 — https://documentacion.generadordeprecios.info/documentaciontecnica/placo-fr/placo_ba_18.pdf
+20. [S19] Siniat, fiche Prégyplac Std BA18, 01/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174005/siniat-fiche-produit/fr-fr.pdf
+21. [S20] Placo, fiche Placoplatre 600 BA 13, 21/10/2021 (copie ADEO) — https://media.adeo.com/media/4350893/media.pdf
+22. [S21] Siniat, fiche Prégyplac Std 600 BA13, 08/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174007/siniat-fiche-produit/fr-fr.pdf
+23. [S22] Siniat, fiche Prégywab BA13, 01/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174021/siniat-fiche-produit/fr-fr.pdf
+24. [S23] Siniat, fiche technique Prégywab BA13, téléchargée 30/07/2025 (copie Envain) — https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT-pregy-wab-BA13.pdf
+25. [S24] Siniat, fiche Prégyflam Std BA13, 03/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174043/siniat-fiche-produit/fr-fr.pdf
+26. [S25] Siniat, fiche Prégyflam A1 BA13, 02/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi173994/siniat-fiche-produit/fr-fr.pdf
+27. [S26] Siniat, fiche Prégyplac A1 BA13, 02/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174002/siniat-fiche-produit/fr-fr.pdf
+28. [S27] Placo, fiche Placo Phonique BA 13 120, 31/05/2012 (copie Chausson) — https://www.chausson.fr/media/article-document/203333
+29. [S28] Siniat, fiche Prégyplac dB BA13, 04/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174044/siniat-fiche-produit/fr-fr.pdf ; [S28b] copie Chausson — https://www.chausson.fr/media/article-document/273106
+30. [S29] Placo, fiche Optimax Habito (copie Samse) — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1091785.pdf
+31. [S30] Siniat, fiche Prégydur Std BA13, 04/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi173991/siniat-fiche-produit/fr-fr.pdf
+32. [S31] Placo, fiche Placoplatre BA 6, 10/03/2016 — https://documentacion.generadordeprecios.info/documentaciontecnica/placo-fr/placo_ba_6.pdf
+33. [S32] Siniat, fiche Synia Déco 4BA13, 04/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174009/siniat-fiche-produit/fr-fr.pdf
+34. [S33] Placo, fiche Glasroc F 13, 04/06/2012 (copie Chausson) — https://www.chausson.fr/media/article-document/203355
+35. [S34] Placo, fiche Doublissimo P 3.40 13+100, 13/10/2023 (copie Envain) — https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT-Doublissimo-P-340-13100.pdf
+36. [S35] Siniat, fiche Prégytherm R0,60 BA10+20, 30/01/2026 — https://www.siniat.fr/-/print2pdf/product/pi174187/siniat-fiche-produit/fr-fr.pdf
+37. [S36] Siniat, fiche Prégytherm PSE Hydro, juillet 2020 (copie Chausson) — https://www.chausson.fr/media/article-document/269817
+38. [S37] Siniat, fiche Prégymax R3,80 Hydro BA13+120, 03/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174155/siniat-fiche-produit/fr-fr.pdf
+39. [S38] Siniat, fiche Prégymax R2,75 Dur BA13+80, 07/09/2026 — https://www.siniat.fr/-/print2pdf/product/pi174162/siniat-fiche-produit/fr-fr.pdf
+40. [K1] Knauf, page Knauf Standard KS 13 (France) — https://knauf.com/fr-FR/p/produit/knauf-standard-ks-13-10003_4091 (403 en direct ; extrait moteur) ; [K1b] Knauf Tunisie KS BA 13 — https://knauf.com/fr-TN/p/produit/plaque-de-platre-standard-ks-ba-13-10003_4070
+41. [K2] Knauf, page Knauf Hydro KH 13 — https://knauf.com/fr-FR/p/produit/knauf-hydro-kh-13-10004_4091 (extrait) ; [K2b] batiweb — https://www.batiweb.com/produit-btp/plaque-de-platre-ba13-knauf-hydro-kh13-349437
+42. [K3] Knauf, page KS 15 — https://knauf.com/fr-FR/p/produit/knauf-standard-ks-15-12584_4091 (extrait)
+43. [K4] Knauf, fiche technique KHA BA13 Phonik, 2020-05 (copie Chausson) — https://cdn.chausson.fr/catalog-document/fd4bc34f-ee93-4a44-aa08-6de7ca790f3b/ficheproduitcaractristiquesgnrales-444304.pdf
+44. [K5] Knauf, page Knauf Feu KF 13 — https://knauf.com/fr-FR/p/produit/knauf-feu-kf-13-18608_4091 (extrait)
+45. [K6] Knauf, page Fireboard 13 — https://knauf.com/fr-FR/p/produit/knauf-fireboard-13-10082_4091 (extrait) ; [K6b] Knauf Belgique Fireboard 13 VK — https://knauf.com/fr-BE/p/produit/fireboard-13-vk-10082_0217
+46. [K7] Knauf, page KA 13 Phonik — https://knauf.com/fr-FR/p/produit/knauf-acoustique-ka-13-phonik-22618_4091 (extrait)
+47. [K8] Knauf, page KHD 13 — https://knauf.com/fr-FR/p/produit/knauf-haute-durete-khd-13-22682_4091 (extrait)
+48. [K9] Knauf, fiche Diamant 13 Cleaneo C, générée 16/08/2016 (copie Chausson) — https://www.chausson.fr/media/article-document/234246
+49. [K10] Knauf, fiche système Aquapanel Indoor plafonds (2012, copie Chausson) — https://www.chausson.fr/media/article-document/203419 ; page France — https://knauf.com/fr-FR/p/produit/knauf-aquapanel-r-indoor-11076_4091 (extrait)
+50. [K11] Knauf, page Techniform — https://knauf.com/fr-FR/p/produit/knauf-techniform-10036_4091 (extrait) ; Knauf Belgique Flexboard — https://knauf.com/fr-BE/p/produit/flexboard-6-5-ak-10036_0217
+51. [K12] Knauf, pages Polyplac — https://knauf.com/fr-FR/p/produit/polyplac-r-e-23247_4091 , https://knauf.com/fr-FR/p/produit/polyplac-r-d-23246_4091 (extraits)
+52. [F1] Fermacell, guide de prescription et de mise en œuvre, PDF du 10/03/2022 (copie Chausson) — https://cdn.chausson.fr/catalog-document/02550c9b-d95f-48e4-a3d6-ac1949526784/guide-de-prescription-et-mise-en-oeuvre-plaque-fermacell-fibres-gypse.pdf
+53. [F2] Fermacell, gamme complète / tarif, 2010 (copie Ciffréo Bona) — https://www.ciffreobona.fr/userfiles/file/PDF/15/41/165/8857/fermacell_gamme_complete.pdf
+54. [F3] Fermacell, fiche technique plaque bords droits (copie Chausson) — https://cdn.chausson.fr/catalog-document/816ff644-ace1-49cf-9ae1-da3674a1c9db/fiche-technique-20-20-plaque-fibres-gypse-fermacell-bd.pdf
+55. [F4] Fermacell, fiche technique plaque bords amincis (copie Chausson) — https://cdn.chausson.fr/catalog-document/16cbbd22-8aeb-412f-a3ac-54e8512e1f2b/fiche-technique-20-20-plaque-fibres-gypse-fermacell-ba.pdf
+56. [I1] Isover, fiche Calibel FP 0309, mars 2009 (copie Samse) — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1148.pdf
+57. [B1] batiproduits, Placoplatre BA13 — https://www.batiproduits.com/fiche/produits/plaque-de-platre-cartonnee-m1-p68904883.html (extrait)
+58. [B2] batiproduits, Placoflam — https://www.batiproduits.com/fiche/produits/plaque-de-platre-resistante-au-feu-p68904843.html (extrait)
+59. [B3] batiproduits, plaque 4 bords amincis — https://www.batiproduits.com/fiche/produits/plaque-de-platre-a-quatre-bords-amincis-p68905073.html (extrait)
+60. [E1] Envain, fiche Placoflam BA13 — https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT-Placoflam-BA13.pdf (extrait)
+61. [M1] Mr Bricolage, plaque KS BA13 2500×600 — https://www.mr-bricolage.fr/plaque-ks-ba13-nf-2500x600-mm.html (titre)
+62. [A1] Archiexpo, Placoplatre BA 15 — https://www.archiexpo.com/prod/placoplatre/product-62387-942316.html (titre)
+63. Brico Dépôt, BA13 NF 2,50 × 1,20 (prix m² et pièce) — https://www.bricodepot.fr/p/3334160144715/plaque-de-platre-ba-13-nf-l-2-50-x-l-1-20-m-x-ep-13-mm (extrait)
+64. La Maison Saint-Gobain, Placo Multiconforts / Activ'Air (vendu par Point.P) — https://www.lamaisonsaintgobain.fr/innovation-produit/plaque-de-platre-ba13-placor-multiconforts-2600-x-1200-mm ; https://www.lamaisonsaintgobain.fr/innovation-produit/tous-les-produits/plaque-de-platre-depolluante-placor-activ-airr (extraits)
+65. batiweb, Knauf Diamant « 55 kg par point », 18/02/2020 — https://www.batiweb.com/actualites/publi-redactionnels/besoin-d-une-plaque-de-platre-haute-resistance-2020-02-18-36000 (extrait)
+66. Siniat, dossier de presse Saint-Loubès, 11/2023 — https://media.siniat.fr/pi698303/original/544155720/dp---saint-loubes---recycler-leau-pour-fabriquer-des-plaques-de-platre.pdf ; Le Journal des Entreprises — https://www.lejournaldesentreprises.com/article/lusine-girondine-siniat-reutilise-les-eaux-usees-pour-fabriquer-ses-plaques-de-platre-2109662 ; batiweb Auneuil — https://www.batiweb.com/actualites/nouveaux-produits-du-btp/a-auneuil-siniat-cree-un-lieu-d-accueil-pour-ses-clients-et-prescripteurs-33388 (extraits)
+67. Placo / Saint-Gobain, usines : batiweb 2019 (marquage Placo Recycling, Vaujours, Chambéry, Cognac) — https://www.batiweb.com/actualites/vie-des-societes/les-plaques-de-platre-placo-arborent-une-nouvelle-mention-35062 ; CP Val-de-Cognac 11/2024 — https://www.saint-gobain.com/sites/saint-gobain.com/files/media/document/PLACO%20-%20CP%20INAUGURATION%20DU%20NOUVEAU%20SECHEUR%20DANS%20L%27USINE%20PLACO%20DE%20VAL%20DE%20COGNAC_VF_11%202024.pdf (extraits)
+68. Knauf, Knauf Plâtres Fos — https://knauf.com/fr-FR/actualites/knauf/knauf-platres-fos-nouvelle-usine-de-plaques-de-platre ; batiweb — https://www.batiweb.com/actualites/vie-des-societes/knauf-annonce-la-creation-d-une-nouvelle-usine-a-fos-sur-mer-13-36792 (extraits)
+69. batiweb, Pladur outsider en France, 06/04/2017 — https://www.batiweb.com/actualites/vie-des-societes/dans-les-coulisses-de-lusine-de-pladur-specialiste-du-platre-espagnol-et-outsider-en-france-2017-04-06-30226 (titre)
+70. Placo, brochure Glasroc H Ocean 03/2024 et fiches système (Avis Technique 9/16-1032) — https://www.placo.fr/documents/brochures/2024-03-brochure-glasroc-h-ocean-f4514-1.pdf (403 ; extrait)
+71. Placo, fiche Aquaroc 13 (Placo Espagne, FR) — https://www.placo.es/documents/fichas-tecnicas/ft-aquaroc-13-1200-fr.pdf ; Tout Faire Aquaroc — https://www.toutfaire.fr/plaque-ciment-aquaroc-13mm-120-300-cm.html (extraits)

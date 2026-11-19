@@ -343,3 +343,57 @@ Statut : 1 source officielle (ACERMI). Ouate Breizhouate = produit breton (repè
 | Machine | location au négoce avec les sacs (pratique Point.P / Gedimat « prêt de machine ») | — | — | à confirmer | |
 
 Calcul : sacs = ⌈ S × N₁₀₀(R) / 100 ⌉ (S = surface au sol des combles, N₁₀₀ du certificat du produit). Pas de majoration pour tassement (déjà incluse). Majoration pour pertes : **aucune valeur sourcée** → à confirmer (proposer +0 et laisser l'artisan ajuster, ou arrondi au sac supérieur seulement).
+
+### A6. Isolants biosourcés (fibre de bois, coton recyclé, chanvre)
+
+Source primaire du R : certificat ACERMI (acermi.com, lisible) ; format et colisage : fiche fabricant.
+
+#### A6.1 Steico Flex 036 (aussi Xylo Flex 036) — fibre de bois semi-rigide, λD 0,036, ACERMI **20/134/1455/4** (créé 07/07/2026) [S51]
+
+Format **1220 × 575 mm (0,7015 m²)** ; fiche Steico FR [S52] (copie Samse 1217262, PDF 2016 — colisage identique à `isolation.md`).
+
+| Épaisseur | R (ACERMI) | Pan/paquet | m²/paquet (calc.) | Paquets/pal | kg/m² | Statut |
+|---|---|---|---|---|---|---|
+| 40 | 1,10 | 10 | 7,02 | 12 | 2,40 | confirmé (2 sources) : R ACERMI, colisage fiche ; R calculé 40/36 = 1,11 cohérent |
+| 45 | 1,25 | — | — | — | — | 1 source (ACERMI ; absent de la fiche 2016) |
+| 50 | 1,35 | 9 | 6,31 | 10 | 3,00 | confirmé (2 sources) |
+| 60 | 1,65 | 8 | 5,61 | 10 | 3,60 | confirmé (2 sources) |
+| 80 | 2,20 | 6 | 4,21 | 10 | 4,80 | confirmé (2 sources) |
+| 100 | 2,75 | 4 | 2,81 | 12 | 6,00 | confirmé (2 sources) |
+| 120 | 3,30 | 4 | 2,81 | 10 | 7,20 | confirmé (2 sources) |
+| 140 | 3,85 | 4 | 2,81 | 8 | 8,40 | confirmé (2 sources) |
+| 145 | 4,00 | 4 | 2,81 | 8 | 8,70 | confirmé (2 sources) |
+| 160 | 4,40 | 3 | 2,10 | 10 | 9,60 | confirmé (2 sources) |
+| 180 | 5,00 | 3 | 2,10 | 8 | 10,80 | confirmé (2 sources) |
+| 200 | 5,55 | 2 | 1,40 | 12 | 12,00 | confirmé (2 sources) |
+| 220 | 6,10 | 2 | 1,40 | 10 | 13,20 | confirmé (2 sources) |
+| 240 | — (calc. 6,65) | 2 | 1,40 | 10 | 14,40 | R : à confirmer (absent du certificat lu) |
+
+« Steico Flex 038 » (λ 0,038, STEICOflex F 038) : certificat dans la liste ACERMI (Steico Brumath), tableau non lu → à confirmer.
+Pose : largeur d'encastrement recommandée par Steico (entraxe) : 40 mm → 450 mm … 100 mm → 600 mm … 240 mm → 950 mm [S52] (le panneau doit être comprimé d'env. 1 cm entre montants).
+
+#### A6.2 Gutex Thermoflex — fibre de bois, λD 0,036, ACERMI **17/127/1193/10** (16/05/2025) [S53]
+
+R certifiés : 40 : 1,10 ; 50 : 1,35 ; 60 : 1,65 ; 80 : 2,20 ; 100 : 2,75 ; 120 : 3,30 ; 140 : 3,85 ; 145 : 4,00 ; 160 : 4,40 ; 180 : 5,00 ; 200 : 5,55 ; 220 : 6,10 ; 240 : 6,65.
+Format **1350 × 575 mm (0,77 m²)** (et 1350 × 600 pour 40/60/145) ; pan/paquet : 30 : 12 ; 40 : 8 ; 50 : 9 ; 60 : 8 ; 80 : 6 ; 100 : 4 ; 160 : 3 ; 240 : 2 [S54] fiche Gutex FR (copie Domomat) + [S55] Hornbach CH (160 : 3, 240 : 2). Statut : R confirmé 1 source officielle + recoupement e/λ ; format confirmé (2 sources) ; colisage intermédiaire (120-220) **à confirmer** (mise en page de la fiche ambiguë).
+
+#### A6.3 Pavatex (Soprema) Pavaflex — fibre de bois, 1220 × 575 mm
+
+| Donnée | Valeur | Source | Statut |
+|---|---|---|---|
+| Pavaflex (λ 0,038) | 40 : R 1,05, 10 pan/paq ; 50 : 1,30, 9 ; 60 : 1,55, 8 ; 80 : 2,10, 6 ; 100 : 2,60, 4 ; 120 : 3,15, 4 ; 140 : 3,65, 4 ; 160 : 4,20, 3 ; 180 : 4,70, 3 ; 200 : 5,25, 2 ; 220 : 5,75, 2 ; 240 : 6,30, 2 | [S56] fiche Soprema Pavaflex (copie Gobert, Word 14/09/2018) | 1 source, **ancienne** |
+| Gamme actuelle | « Pavaflex Confort » (λ 0,038) et « Pavaflex Confort 36 » (λ 0,036), Avis techniques façades, cloisons, combles | [S57] brochure Soprema/Pavatex DC-21/036 déc. 2021 (copie BigMat) | 1 source ; tableaux à confirmer |
+| Pavaflex Plus | fiche Soprema TDS-NE-INSEU0032 existe (serveur 503 au moment de la lecture) | — | à confirmer |
+
+#### A6.4 Isonat (Saint-Gobain Isover, fibre de bois) — Isonat Flex 40 / Flex 55 / Flex 55 SV : listés sous Saint-Gobain Isover dans la liste ACERMI [S58] ; tableaux non lus → à confirmer.
+
+#### A6.5 Métisse RT (coton recyclé, Le Relais) — λD 0,039, ACERMI **14/179/918/9** (16/05/2025) [S59]
+
+R : 45 : 1,15 ; 50 : 1,25 ; 60 : 1,50 ; 80 : 2,05 ; 100 : 2,55 ; 120 : 3,05 ; 145 : 3,70 ; 160 : 4,10 ; 180 : 4,60 ; 200 : 5,10.
+Format panneau 1,20 × 0,60 m (et rouleaux) : [S60] Castorama « Métisse 0,6 × 1,2 m ép. 200 mm R 5,1 » → R 200 mm confirmé (2 sources) ; colisage non lu → à confirmer.
+
+#### A6.6 Biofib'Trio (chanvre-lin-coton, Cavac) — λD 0,038, ACERMI **14/130/962/11** (22/07/2025) [S61]
+
+R : 45 : 1,15 ; 50 : 1,30 ; 60 : 1,55 ; 80 : 2,10 ; 100 : 2,60 ; 120 : 3,15 ; 145 : 3,80 ; 160 : 4,20 ; 200 : 5,25 ; 220 : 5,75 (tous les 5 mm de 45 à 200).
+Format : **contradiction** — fiche distributeur 1,20 × 0,60 m (0,72 m²) vs Avis technique murs 1250 × 600 (et 1250 × 585 sur demande) [S62]. Colisage : à confirmer. R 80 mm 2,10 recoupé par FDES 80 mm (λ 0,038) : confirmé (2 sources).
+Utilisé aussi en cloison (système Prégyroc Air + Biofib Trio, Batiproduits) — 45 mm possible en 72/48.
